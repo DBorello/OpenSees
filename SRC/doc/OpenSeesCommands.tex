@@ -268,8 +268,11 @@ degrees of freedom per node in the model.
 
 The uniaxialMaterial command is used to construct a UniaxialMaterial object. 
 UniaxialMaterial objects represent uniaxial stress-strain (or force-deformation)
-relationships. The command has at least one argument, the string materialType, which
-identifies the type of material being constructed. The commands for specifying each
+relationships. The command has at least two arguments, the string
+materialType and the material tag. The argument 
+{\tt tag} uniquely identifies this UniaxialMaterial object among 
+UniaxialMaterial objects in the BasicBuilder object.
+The commands for specifying each
 type of uniaxial material are as outlined below.
 
 The valid queries to any uniaxial material when creating an ElementRecorder
@@ -278,173 +281,190 @@ are 'strain', 'stress', and 'tangent'.
 \subsubsection{Elastic Material}
 {\sf\small
 \begin{verbatim}
-   uniaxialMaterial Elastic matTag? E? <eta?>
+   uniaxialMaterial Elastic tag? E? <eta?>
 \end{verbatim}
 }
 
-\noindent To construct an elastic uniaxial material with a tangent of E
-and optional damping tangent of eta. The argument matTag is used to
-uniquely identify this UniaxialMaterial object among UniaxialMaterial objects
-in the BasicBuilder object.
-
-\subsubsection{Elastic-Perfectly Plastic Material}
-{\sf\small
-\begin{verbatim}
-   uniaxialMaterial ElasticPP matTag? E? epsyP? <epsyN? epsZero?>
-\end{verbatim}
-}
-
-\noindent To construct an elastic perfectly plastic uniaxial material
-with an elastic tangent of E which
-reaches the plastic state at a strain of epsyP. There are two optional
-arguments for this material. First, epsyN is the yield strain in compression.
-If not specified, the yield strain in compression is assumed to be the same
-as in tension. Second, epsZero is an initial strain, which is assumed to
-be zero if not specified.
-The argument matTag is used to
-uniquely identify this UniaxialMaterial object among UniaxialMaterial objects
-in the BasicBuilder object.
-
-\subsubsection{Elastic-Perfectly Plastic Gap Material}
-{\sf\small
-\begin{verbatim}
-   uniaxialMaterial ElasticPPGap matTag? E? fy? gap?
-\end{verbatim}
-}
-
-\noindent To construct an elastic perfectly plastic gap uniaxial material
-with an elastic tangent of E, which reaches the plastic state at a stress 
-of fy. The initial gap of the model is given by the argument gap. The argument
-matTag is used to uniquely identify this UniaxialMaterial object among
-UniaxialMaterial objects in the BasicBuilder object.
-
-\subsubsection{Parallel Material}
-{\sf\small
-\begin{verbatim}
-   uniaxialMaterial Parallel matTag? tag1? tag2? ... <-min min?> <-max max?>
-\end{verbatim}
-}
-
-\noindent To construct a parallel material model made up of an
-arbitrary number of previously constructed UniaxialMaterial objects, 
-which are identified by the tags tag1 tag2 ... . In a parallel model,
-strains are equal and stresses and tangents are additive. Specification of
-minimum and maximum failure strains through the -min and -max switches
-is optional. The argument matTag is used to
-uniquely identify this UniaxialMaterial object among UniaxialMaterial objects
-in the BasicBuilder object.
-
-\subsubsection{Series Material}
-{\sf\small
-\begin{verbatim}
-   uniaxialMaterial Series matTag? tag1? tag2? ... 
-\end{verbatim}
-}
-
-\noindent To construct a series material model made up of an
-arbitrary number of previously constructed UniaxialMaterial objects, 
-which are identified by the tags tag1 tag2 ... . In a series model,
-stresses are equal and strains and flexibilities are additive. The argument matTag 
-is used to uniquely identify this UniaxialMaterial object among UniaxialMaterial objects
-in the BasicBuilder object.
-
-\subsubsection{Hardening Material}
-{\sf\small
-\begin{verbatim}
-   uniaxialMaterial Hardening matTag? E? sigmaY? H_iso? H_kin?
-\end{verbatim}
-}
-
-\noindent To construct a uniaxial material model with combined linear kinematic
-and isotropic hardening. The model contains a yield stress of sigmaY, an
-elastic modulus of E, an isotropic hardening modulus of H\_iso, and a
-kinematic hardening modulus of H\_kin. The argument matTag is used to 
-uniquely identify this UniaxialMaterial object among UniaxialMaterial objects
-in the BasicBuilder object.
-
-\subsubsection{Steel01 Material}
-{\sf\small
-\begin{verbatim}
-   uniaxialMaterial Steel01 matTag? fy? E0? b? <a1? a2? a3? a4?>
-\end{verbatim}
-}
-
-\noindent To construct a uniaxial bilinear steel model with kinematic
-hardening and optional isotropic hardening described by a non-linear
-evolution equation. The model contains a yield strength of fy, an
-initial elastic tangent of E0, and a hardening ratio of b. Isotropic hardening is
-controlled by the parameters a1, a2, a3, and a4. For no isotropic hardening, a1 and
-a3 should be set to zero, while a2 and a4 should be anything non-zero.
-The argument matTag is used to uniquely identify this
-UniaxialMaterial object among UniaxialMaterial objects in the
-BasicBuilder object. 
-
-\subsubsection{Concrete01 Material}
-{\sf\small
-\begin{verbatim}
-   uniaxialMaterial Concrete01 matTag? fpc? epsc0? fpcu? epscu?
-\end{verbatim}
-}
-
-\noindent To construct a uniaxial Kent-Scott-Park concrete model with degraded 
-linear unloading/reloading stiffness according to the work of Karsan-Jirsa and no
-strength in tension. The model contains a compressive strength of fpc,
-a strain at the compressive strength of epsc0, a crushing strength of
-fpcu, and a strain at the crushing strength of epscu. The initial slope
-for this model is ($2f'_c/\varepsilon_{c0}$). Compressive
-concrete parameters should be input as negative values for
-this model. The argument 
-matTag is used to uniquely identify this UniaxialMaterial object among 
-UniaxialMaterial objects in the BasicBuilder object.
+\noindent To construct an elastic uniaxial material with a tangent of {\tt E}
+and optional damping tangent of {\tt eta}.
 
 \subsubsection{Elastic-No Tension Material}
 {\sf\small
 \begin{verbatim}
-   uniaxialMaterial ENT matTag? E?
+   uniaxialMaterial ENT tag? E?
 \end{verbatim}
 }
 
 \noindent To construct a uniaxial elastic-no tension material model.
-The model takes a single parameter, E, the elastic modulus in compression.
-In tension, there is zero stress. The argument 
-matTag is used to uniquely identify this UniaxialMaterial object among 
-UniaxialMaterial objects in the BasicBuilder object.
+The model takes a single parameter, {\tt E}, the elastic modulus in
+compression.
+In tension, there is zero stress and zero tangent.
+
+\subsubsection{Elastic-Perfectly Plastic Material}
+{\sf\small
+\begin{verbatim}
+   uniaxialMaterial ElasticPP tag? E? epsyP? <epsyN? epsZero?>
+\end{verbatim}
+}
+
+\noindent To construct an elastic perfectly plastic uniaxial material
+with an elastic tangent of {\tt E} which
+reaches the plastic state at a strain of {\tt epsyP}. There are two optional
+arguments for this material. First, {\tt epsyN} is the yield strain in
+compression.
+If not specified, the yield strain in compression is assumed to be the same
+as in tension ({\tt epsyP}). Second, {\tt epsZero} is an initial strain,
+which is assumed to
+be zero if not specified.
+
+\subsubsection{Elastic-Perfectly Plastic Gap Material}
+{\sf\small
+\begin{verbatim}
+   uniaxialMaterial ElasticPPGap tag? E? fy? gap?
+\end{verbatim}
+}
+
+\noindent To construct an elastic perfectly plastic gap uniaxial material
+with an elastic modulus of {\tt E}, which reaches the plastic state at a
+stress of {\tt fy}. The initial gap of the model is given by the argument
+{\tt gap}.
+
+\subsubsection{Hardening Material}
+{\sf\small
+\begin{verbatim}
+   uniaxialMaterial Hardening tag? E? sigmaY? Hiso? Hkin? <eta?>
+\end{verbatim}
+}
+
+\noindent To construct a uniaxial material model with combined linear kinematic
+and isotropic hardening. The model contains a yield stress of {\tt sigmaY}, an
+elastic modulus of {\tt E}, an isotropic hardening modulus of {\tt Hiso},
+and a kinematic hardening modulus of {\tt Hkin}. The material viscosity,
+{\tt eta}, is optional (default is 0.0), for which a linear Perzyna
+viscoplastic formulation is used.
 
 \subsubsection{Hysteretic Material}
 {\sf\small
 \begin{verbatim}
-   uniaxialMaterial Hysteretic matTag? s1p? e1p? s2p? e2p? <s3p? e3p?>
-       s1n? e1n? s2n? e2n? <s3n? e3n?> pinchX? pinchY? damage1? damage2? <beta?>
+   uniaxialMaterial Hysteretic tag? s1p? e1p? s2p? e2p? <s3p? e3p?>
+           s1n? e1n? s2n? e2n? <s3n? e3n?> pinchX? pinchY? d1? d2? <beta?>
 \end{verbatim}
 }
 
 \noindent To construct a bilinear hysteretic model with pinching of force and
 deformation, damage due to ductility and energy, and degraded unloading 
 stiffness based on ductility. Points on the backbone are specifed by the
-arguments s1p, e1p, etc., where s indicates force, e indicates deformation,
-1 is the first point on the backbone (yield), 2 the second point, and 3 indicates
-an optional third point for a trilinear backbone. p indicates positive backbone
-points, and n negative backbone points. Note that negative backbone points
-should be entered as negative numeric values. The pinching factors pinchX and
-pinchY indicate the amount of pinching of deformation and force, respectively,
-during reloading. The factors damage1 and damage2 are for damage due 
-to ductility, $D_1(\mu-1)$, and energy, $D_2(\frac{E_i}{E_{ult}})$, respectively. 
-The optional parameter beta is a power used to determine degraded
+arguments {\tt s1p}, {\tt e1p}, etc.,
+where {\tt s} indicates force, {\tt e} indicates deformation,
+{\tt 1} is the first point on the backbone (yield), {\tt 2} the second
+point, and {\tt 3} indicates
+an optional third point for a trilinear backbone. {\tt p} indicates
+positive backbone
+points, and {\tt n} negative backbone points.
+Note that negative backbone points should be entered as negative numeric
+values. The pinching factors {\tt pinchX} and
+{\tt pinchY} indicate the amount of pinching of deformation and force,
+respectively, during reloading. The factors {\tt d1} and {\tt d2}
+are for damage due to ductility, $D_1(\mu-1)$, and energy,
+$D_2(\frac{E_i}{E_{ult}})$, respectively. 
+The optional parameter {\tt beta} is a power used to determine degraded
 unloading stiffness based on ductility, $\mu^{-\beta}$.
+
+\subsubsection{Steel01 Material}
+{\sf\small
+\begin{verbatim}
+   uniaxialMaterial Steel01 tag? fy? E? b? <a1? a2? a3? a4?>
+\end{verbatim}
+}
+
+\noindent To construct a uniaxial bilinear steel model with kinematic
+hardening and optional isotropic hardening described by a non-linear
+evolution equation. The model contains a yield strength of {\tt fy}, an
+elastic modulus of {\tt E}, and a hardening ratio of {\tt b}.
+Isotropic hardening is controlled by the optional parameters
+{\tt a1}, {\tt a2}, {\tt a3}, and {\tt a4}. By default there is no
+isotropic hardening.
+
+\subsubsection{Concrete01 Material}
+{\sf\small
+\begin{verbatim}
+   uniaxialMaterial Concrete01 tag? fpc? epsc0? fpcu? epscu?
+\end{verbatim}
+}
+
+\noindent To construct a uniaxial Kent-Scott-Park concrete model with degraded 
+linear unloading/reloading stiffness according to the work of Karsan-Jirsa and no
+strength in tension. The model contains a compressive strength of {\tt fpc},
+a strain at the compressive strength of {\tt epsc0}, a crushing strength of
+{\tt fpcu}, and a strain at the crushing strength of {\tt epscu}.
+The initial slope
+for this model is ($2f'_c/\varepsilon_{c0}$). Compressive
+concrete parameters should be input as negative values for
+this model.
 
 \subsubsection{Viscous Material}
 {\sf\small
 \begin{verbatim}
-   uniaxialMaterial Viscous matTag? C? alpha?
+   uniaxialMaterial Viscous tag? C? alpha?
 \end{verbatim}
 }
 
 \noindent To construct a uniaxial material model with a non-linear elastic
-stress-strain rate relation given by $\sigma = C\dot{\varepsilon}^\alpha$, where $C$
-and $\alpha$ are constant.
-The argument matTag is used to uniquely identify this UniaxialMaterial object 
-among UniaxialMaterial objects in the BasicBuilder object.
+stress-strain rate relation given by $\sigma = C\dot{\varepsilon}^\alpha$,
+where $C$ and $\alpha$ are constant. The input parameters are
+{\tt C} and {\tt alpha}.
 
+\subsubsection{Parallel Material}
+{\sf\small
+\begin{verbatim}
+   uniaxialMaterial Parallel tag? matTag1? matTag2? ...
+\end{verbatim}
+}
+
+\noindent To construct a parallel material model made up of an
+arbitrary number of previously constructed UniaxialMaterial objects, 
+which are identified by the tags {\tt matTag1 matTag2 ...} .
+In a parallel model,
+strains are equal and stresses and tangents are additive.
+
+\subsubsection{Series Material}
+{\sf\small
+\begin{verbatim}
+   uniaxialMaterial Series tag? matTag1? matTag2? ... 
+\end{verbatim}
+}
+
+\noindent To construct a series material model made up of an
+arbitrary number of previously constructed UniaxialMaterial objects, 
+which are identified by the tags {\tt matTag1 matTag2 ...} .
+In a series model,
+stresses are equal and strains and flexibilities are additive.
+
+\subsubsection{MinMax Material}
+{\sf\small
+\begin{verbatim}
+   uniaxialMaterial MinMax tag? matTag? <-min epsMin?> <-max epsMax?>
+\end{verbatim}
+}
+
+\noindent To construct a min-max material model which imposes strain
+limits on a previously defined UniaxialMaterial object identified by the
+argument {\tt matTag}. The optional arguments {\tt epsMin} and
+{\tt epsMax} denote
+the minimum and maximum strains for the material. When the material strain
+exceeds either of these values, the material is assumed to have failed, i.e.,
+zero stress and tangent after exceedance.
+
+\subsubsection{PathIndependent Material}
+{\sf\small
+\begin{verbatim}
+   uniaxialMaterial PathIndependent tag? matTag?
+\end{verbatim}
+}
+
+\noindent To construct a path-independent material model from a
+previously defined UniaxialMaterial object identified by the argument
+{\tt matTag}.
 
 \subsubsection{FEDEAS Materials}
 This section lists the uniaxial material models available from the FEDEAS ML1D
@@ -456,213 +476,194 @@ library developed by F.C. Filippou. For more information see the FEDEAS material
 \end{verbatim}
 }
 
-\noindent Further information on the Concrete01 and Steel01 materials described earlier
-in this section can also be found at this webpage. Currently, each of the following
-FEDEAS materials are only available with the Win32 version of OpenSees.
+\noindent Further information on the Concrete01 and Steel01 materials
+described earlier in this section can also be found at this webpage.
+Currently, each of the following FEDEAS materials are only available with
+the Win32 version of OpenSees.
 
 \paragraph{Concrete02 Material}
 {\sf\small
 \begin{verbatim}
-   uniaxialMaterial Concrete02 matTag? fpc? epsc0? fpcu? epscu? ratio? ft? Ets?
+   uniaxialMaterial Concrete02 tag? fpc? epsc0? fpcu? epscu? ratio? ft? Ets?
 \end{verbatim}
 }
 
-To construct a uniaxial concrete model with tensile strength and linear tension
-softening. The compressive envelope is defined by the compressive strength, fpc,
-cracking strain epsc0, crushing strength, fpcu, and strain at fpcu of epscu. The
-parameter ratio is the ratio between unloading slope at epscu and original slope
-($2f'_c/\varepsilon_{c0}$). Concrete tensile strength is given by ft, and Ets
-is the slope of the linear tension softening branch. The argument 
-matTag is used to uniquely identify this UniaxialMaterial object among 
-UniaxialMaterial objects in the BasicBuilder object.
-
+To construct a uniaxial concrete model with tensile strength and linear
+tension softening. The compressive envelope is defined by the compressive
+strength, {\tt fpc},
+strain at the compressive strength {\tt epsc0}, crushing strength, {\tt fpcu},
+and strain at the crushing strength {\tt epscu}. The
+parameter {\tt ratio} is the ratio between unloading slope at {\tt epscu}
+and initial slope
+($2f'_c/\varepsilon_{c0}$). Concrete tensile strength is given by {\tt ft},
+and {\tt Ets}
+is the slope of the linear tension softening branch. 
 
 \paragraph{Concrete03 Material}
 {\sf\small
 \begin{verbatim}
-   uniaxialMaterial Concrete03 matTag? fpc? epsc0? fpcu? epscu? ratio? ft?
+   uniaxialMaterial Concrete03 tag? fpc? epsc0? fpcu? epscu? ratio? ft?
                                     epst0? ft0? beta? epstu?
 \end{verbatim}
 }
 
-To construct a uniaxial concrete model with tensile strength and nonlinear tension
-softening. The compressive envelope is defined by the compressive strength, fpc,
-cracking strain epsc0, crushing strength, fpcu, and strain at fpcu of epscu. The
-parameter ratio is the ratio between unloading slope at epscu and original slope
-($2f'_c/\varepsilon_{c0}$). Concrete tensile strength is given by ft. epst0 is the
-tensile strain at the transition from nonlinear to linear softening, and ft0 is the
-stress at this transition. The exponent of the tension softening curve is beta and
-epstu is the ultimate tensile strain. The argument 
-matTag is used to uniquely identify this UniaxialMaterial object among 
-UniaxialMaterial objects in the BasicBuilder object.
-
+To construct a uniaxial concrete model with tensile strength and nonlinear
+tension softening. The compressive envelope is defined by the compressive
+strength, {\tt fpc}, strain at the compressive strength {\tt epsc0},
+crushing strength, {\tt fpcu}, and strain at the crushing strength
+{\tt epscu}. The parameter {\tt ratio} is the ratio between unloading slope
+at {\tt epscu} and original slope ($2f'_c/\varepsilon_{c0}$). Concrete
+tensile strength is given by {\tt ft}. {\tt epst0} is the tensile strain at
+the transition from nonlinear to linear softening, and {\tt ft0} is the
+stress at this transition. The exponent of the tension softening curve is
+{\tt beta} and
+{\tt epstu} is the ultimate tensile strain.
 
 \paragraph{Steel02 Material}
 {\sf\small
 \begin{verbatim}
-   uniaxialMaterial Steel02 matTag? fy? E? b? R0? cR1? cR2? a1? a2? a3? a4?
+   uniaxialMaterial Steel02 tag? fy? E? b? <R0? cR1? cR2? <a1? a2? a3? a4?> >
 \end{verbatim}
 }
 
-To construct a uniaxial Menegotto-Pinto steel model with isotropic strain hardening.
-The yield stress is given by fy, the elastic modulus, E, and strain hardening ratio b.
-The factors R0, cR1, and cR2 control the transition from elastic to plastic branches.
-Reasonable values are R0 = 18.5, cR1 = 0.925, and cR2 = 0.15. Isotropic hardening is
-controlled by the parameters a1, a2, a3, and a4. For no isotropic hardening, a1 and
-a3 should be set to zero, while a2 and a4 should be anything non-zero. The argument 
-matTag is used to uniquely identify this UniaxialMaterial object among 
-UniaxialMaterial objects in the BasicBuilder object.
-
+To construct a uniaxial Menegotto-Pinto steel model with isotropic strain
+hardening. The yield stress is given by {\tt fy}, the elastic modulus,
+{\tt E}, and strain hardening ratio {\tt b}.
+The optional factors {\tt R0}, {\tt cR1}, and {\tt cR2} control the
+transition from elastic to plastic branches. Reasonable default values are
+provided. Isotropic hardening is controlled by the optional parameters
+{\tt a1}, {\tt a2}, {\tt a3}, and {\tt a4}. By default
+there is no isotropic hardening.
 
 \paragraph{Bond01 Material}
 {\sf\small
 \begin{verbatim}
-   uniaxialMaterial Bond01 matTag? u1p? q1p? u2p? u3p? q3p?
-                                   u1n? q1n? u2n? u3n? q3n? s0? bb?
+   uniaxialMaterial Bond01 tag? u1p? q1p? u2p? u3p? q3p?
+                                u1n? q1n? u2n? u3n? q3n? s0? bb?
 \end{verbatim}  
 }
 
-To construct an Eligehausen bond model without damage. The tensile bond-slip backbone
-parameters are given by u1p (slip at first detachment), q1p (bond at first
-detachment), u2p (slip at start of degradation), u3p (slip at ultimate), and
-q3p (bond at ultimate). The corresponding compressive bond-slip backbone parameters are
-indicated with a suffix of n (u1n, q1n, u2n, u3n, q3n).  The unloading stiffness
-is given by s0, and the exponent for the first branch of the backbone (prior
-to first detachment) is given by bb, i.e., $q = u^{bb}$. The argument 
-matTag is used to uniquely identify this UniaxialMaterial object among 
-UniaxialMaterial objects in the BasicBuilder object.
-
+To construct an Eligehausen bond model without damage. The tensile
+bond-slip backbone parameters are given by {\tt u1p} (slip at first
+detachment), {\tt q1p} (bond at first detachment), {\tt u2p} (slip at
+start of degradation), {\tt u3p} (slip at ultimate), and
+{\tt q3p} (bond at ultimate). The corresponding compressive bond-slip backbone parameters are indicated with a suffix of {\tt n}.  The unloading stiffness
+is given by {\tt s0}, and the exponent for the first branch of the backbone
+(prior to first detachment) is given by {\tt bb}, i.e., $q = u^{bb}$.
 
 \paragraph{Bond02 Material}
 {\sf\small
 \begin{verbatim}
-   uniaxialMaterial Bond02 matTag? u1p? q1p? u2p? u3p? q3p?
-                                   u1n? q1n? u2n? u3n? q3n? s0? bb? alp? aln?
+   uniaxialMaterial Bond02 tag? u1p? q1p? u2p? u3p? q3p?
+                                u1n? q1n? u2n? u3n? q3n? s0? bb? alp? aln?
 \end{verbatim}
 }
 
-To construct an Eligehausen bond model with damage. The tensile bond-slip backbone
-parameters are given by u1p (slip at first detachment), q1p (bond at first
-detachment), u2p (slip at start of degradation), u3p (slip at ultimate), and
-q3p (bond at ultimate). The corresponding compressive bond-slip backbone parameters are
-indicated with a suffix of n (u1n, q1n, u2n, u3n, q3n).  The unloading stiffness
-is given by s0, and the exponent for the first branch of the backbone (prior
-to first detachment) is given by bb, i.e., $q = u^{bb}$. The arguments
-alp and aln are the damage factors in the positive and negative quadrants,
-respectively. The argument 
-matTag is used to uniquely identify this UniaxialMaterial object among 
-UniaxialMaterial objects in the BasicBuilder object.
-
+To construct an Eligehausen bond model with damage. The tensile bond-slip
+backbone parameters are given by {\tt u1p} (slip at first detachment),
+{\tt q1p} (bond at first detachment), {\tt u2p} (slip at start of
+degradation), {\tt u3p} (slip at ultimate), and {\tt q3p} (bond at ultimate).
+The corresponding compressive bond-slip backbone parameters are
+indicated with a suffix of {\tt n}.  The unloading stiffness
+is given by {\tt s0}, and the exponent for the first branch of the backbone
+(prior to first detachment) is given by {\tt bb}, i.e., $q = u^{bb}$.
+The arguments {\tt alp} and {\tt aln} are the damage factors in the positive
+and negative quadrants, respectively.
 
 \subsection{The nDMaterial Command}
 {\sf\small
 \begin{verbatim}
-   nDMaterial materialType <specific material args>
+   nDMaterial materialType tag? <specific material args>
 \end{verbatim}
 }
 
 The nDMaterial command is used to construct an NDMaterial object. NDMaterial
 objects represent stress-strain relationships at the integration points of
 continuum and force-deformation elements. The command has at least one
-argument, the material type. The commands for specifying
+argument, the material type and tag. The argument {\tt tag} uniquely
+identifies the NDMaterial object among NDMaterials in the BasicBuilder
+object. The commands for specifying
 each type of material are as outlined below.  
 
-The valid queries to any ND material when creating an ElementRecorder
+The valid queries to any NDMaterial when creating an ElementRecorder
 are 'strain', 'stress', and 'tangent'.
 
 \subsubsection{Elastic Isotropic Material}
 {\sf\small
 \begin{verbatim}
-   nDMaterial ElasticIsotropic matTag? E? v?
+   nDMaterial ElasticIsotropic tag? E? nu? <rho?>
 \end{verbatim}
 }
 
 To construct an ElasticIsotropic material object with elastic modulus
-E and Poisson ratio v. The argument matTag is used to
-uniquely identify this NDMaterial object among NDMaterial objects
-in the BasicBuilder object.
+{\tt E} and Poisson ratio {\tt nu}. The material mass density per unit
+volume, {\tt rho}, is optional (default is 0.0).
 
-The material formulations for the ElasticIsotropic object are ``ThreeDimensional'',
-``PlaneStrain'', ``PlaneStress'', ``AxiSymmetric'', and ``PlateFiber''. These are
-the valid strings that can be passed to the continuum elements for the type
-parameter. 
+The material formulations for the ElasticIsotropic object are
+``ThreeDimensional'', ``PlaneStrain'', ``PlaneStress'', ``AxiSymmetric'',
+and ``PlateFiber''. These are the valid strings that can be passed to the
+continuum elements for the type parameter. 
 
 \subsubsection{J2 Plasticity Material}
 {\sf\small
 \begin{verbatim}
-   nDMaterial J2Plasticity matTag? K? G? sig0? sigInf? delta? H?
+   nDMaterial J2Plasticity tag? K? G? sig0? sigInf? delta? H? <eta?>
 \end{verbatim}
 }
 
 To construct a J2Plasticity material object with a bulk modulus
-K, shear modulus G, initial yield stress sig0, final saturation yield
-stress sigInf, exponential hardening parameter delta and the linear
-hardening parameter H. The argument matTag is used to uniquely
-identify this NDMaterial object among NDMaterial objects in the
-BasicBuilder object. 
+{\tt K}, shear modulus {\tt G}, initial yield stress {\tt sig0}, final
+saturation yield stress {\tt sigInf}, exponential hardening parameter
+{\tt delta} and the linear hardening parameter {\tt H}. The material
+viscosity, {\tt eta}, is optional (default is 0.0), for which a linear
+Perzyna viscoplastic formulation is used.
 
-The material formulations for the J2Plasticity object are ``ThreeDimensional'',
-``PlaneStrain'', ``PlaneStress'', ``AxiSymmetric'', and ``PlateFiber''.  These are
-the valid strings that can be passed to the continuum elements for the type
-parameter. 
+The material formulations for the J2Plasticity object are
+``ThreeDimensional'', ``PlaneStrain'', ``PlaneStress'', ``AxiSymmetric'',
+and ``PlateFiber''. These are the valid strings that can be passed to the
+continuum elements for the type parameter. 
 
 
 \subsubsection{Plane Stress Material}
-The plane stress material wrapper converts any three dimensional 
-material into a plane stress material via static condensation.
-The syntax is
 {\sf\small
 \begin{verbatim}
-   nDMaterial PlaneStress matTag? threeDTag? 
+   nDMaterial PlaneStress tag? matTag? 
 \end{verbatim}
 }
-In the above, matTag is the material tag for the plane stress material 
-being constructed and threeDTag is the material tag for a three 
-dimensional material assumed to have been previously defined.
+The plane stress material wrapper converts any three dimensional 
+material into a plane stress material via static condensation.
+The argument {\tt matTag} is the material tag for a three 
+dimensional material model assumed to have been previously defined.
 
 
 \subsubsection{Plate Fiber Material}
+{\sf\small
+\begin{verbatim}
+   nDMaterial PlateFiber tag? matTag? 
+\end{verbatim}
+}
 The plate fiber material wrapper converts any three dimensional 
 material into a plate fiber material (by static condensation) appropiate
 for shell analysis.
-The syntax is
-{\sf\small
-\begin{verbatim}
-   nDMaterial PlateFiber matTag? threeDTag? 
-\end{verbatim}
-}
-In the above, matTag is the material tag for the plate fiber material 
-being constructed and threeDTag is the material tag for a three 
-dimensional material assumed to have been previously defined.
+The argument {\tt matTag} is the material tag for a three 
+dimensional material model  assumed to have been previously defined.
 
-
-\subsubsection{Bidirectional Material}
-{\sf\small
-\begin{verbatim}
-   nDMaterial Bidirectional matTag? E? sigY? Hiso? Hkin?
-\end{verbatim}
-}
-
-To construct a Bidirectional material object with an elastic modulus
-E, yield stress sigY, isotropic hardening modulus Hiso, and kinematic
-hardening modulus Hkin. A Bidirectional material object is the two
-dimensional generalization of a one dimensional elastoplasitc model
-with linear hardening.
-The argument matTag is used to
-uniquely identify this NDMaterial object among NDMaterial objects
-in the BasicBuilder object.
 
 \subsection{The section Command}
 {\sf\small
 \begin{verbatim}
-   section sectionType <specific section args>
+   section sectionType tag? <specific section args>
 \end{verbatim}
 }
 
 The section command is used to construct a SectionForceDeformation object.
-SectionForceDeformation objects, hereto referred to as Section, represent force-deformation
-(resultant stress-strain) relationships at beam-column and plate sample points. The
-command has at least one argument, the section type. The
+SectionForceDeformation objects, hereto referred to as Section, represent force-deformation (resultant stress-strain) relationships at beam-column and
+plate sample points, as well as for zero length elements. The
+command has at least two arguments, the section type and tag.
+The argument {\tt tag}
+uniquely identifies the 
+Section object among Section objects in the BasicBuilder object.
+The
 commands for specifying each type of section are as outlined below.
 
 The valid queries to any section when creating an ElementRecorder
@@ -671,31 +672,33 @@ are 'force' and 'deformation'.
 \subsubsection{Elastic Section}
 {\sf\small
 \begin{verbatim}
-   section Elastic secTag? E? A? Iz? <Iy? G? J?>
+   section Elastic tag? E? A? Iz? <Iy? G? J?>
 \end{verbatim}
 }
 
-To construct an ElasticSection object with axial stiffness EA and 
-bending stiffness EIz about the section local z-axis. The values 
-for EIy and GJ, the bending stiffness about the section local
-y-axis and the section torsional stiffness, respectively, are optional
-as needed. The argument secTag is used to uniquely identify this 
-Section object among Section objects in the BasicBuilder object.
+To construct an ElasticSection object appropriate for beam analysis.
+The arguments are the elastic modulus {\tt E},
+cross-section area {\tt A}, and second moment of area about the local
+z-axis {\tt Iz}. Optional arguments can be specified for three-dimensional
+analysis. These arguments are the second moment of area about the local
+y-axis {\tt Iy}, shear modulus {\tt G}, and second polar moment of area
+{\tt J}.
 
-\subsubsection{Generic1d Section}
+\subsubsection{Uniaxial Section}
 {\sf\small
 \begin{verbatim}
-   section Generic1d secTag? matTag? code
+   section Uniaxial  tag? matTag? code
+   section Generic1d tag? matTag? code
 \end{verbatim}
 }
 
-To construct a GenericSection1d object which uses a previously defined
-UniaxialMaterial object, identifed by the argument matTag, to represent
-a single section force-deformation response quantity. The argument code indicates
+To construct a UniaxialSection (formerly GenericSection1d) object which
+uses a previously defined
+UniaxialMaterial object, identifed by the argument {\tt matTag}, to represent
+a single section force-deformation response quantity.
+The argument {\tt code} indicates
 the force-deformation quantity to be modeled by this section object.
-Values for code are given in the figure 2. The 
-argument secTag is used to uniquely identify this Section object among 
-Section objects in the BasicBuilder object. 
+Values for {\tt code} are given in Figure 2.
 
 \begin{figure}[htpb]
 \begin{center}
@@ -712,48 +715,44 @@ Section objects in the BasicBuilder object.
 \end{center}
 \end{figure}
 
-\subsubsection{GenericNd Section}
-{\sf\small
-\begin{verbatim}
-   section GenericNd secTag? NDTag? code1 code2 ...
-\end{verbatim}
-}
+%\subsubsection{GenericNd Section}
+%{\sf\small
+%\begin{verbatim}
+%   section GenericNd tag? NDTag? code1 code2 ...
+%\end{verbatim}
+%}
 
-To construct a GenericSectionNd object which uses a previously defined
-NDMaterial object, identifed by the argument NDTag, to represent
-a coupled section force-deformation response quantities. The arguments code1, 
-code2, ... indicate the force-deformation quantities to be modeled by
-this section object. The number of code arguments must match the order
-of the NDMaterial object. code1 is mapped to the first stress-strain
-relation of the NDMaterial, code2 to the second, etc. Values for code
-are given in Figure~\ref{sectionCodes}. The argument secTag is used to
-uniquely identify this Section object among Section objects in the
-BasicBuilder object. 
+%To construct a GenericSectionNd object which uses a previously defined
+%NDMaterial object, identifed by the argument NDTag, to represent
+%a coupled section force-deformation response quantities. The arguments code1, 
+%code2, ... indicate the force-deformation quantities to be modeled by
+%this section object. The number of code arguments must match the order
+%of the NDMaterial object. code1 is mapped to the first stress-strain
+%relation of the NDMaterial, code2 to the second, etc. Values for code
+%are given in Figure~\ref{sectionCodes}. 
 
 \subsubsection{Section Aggregator}
 {\sf\small
 \begin{verbatim}
-   section Aggregator secTag? matTag1? code1 matTag2? code2 ... <-section sectionTag?>
+   section Aggregator tag? matTag1? code1 matTag2? code2 ... <-section secTag?>
 \end{verbatim}
 }
 
 To construct a SectionAggregator object which groups
 previously defined UniaxialMaterial objects, represented by the
-arguments matTag1 code1 matTag2 code2 ..., into a single section
-force-deformation model. The optional -section switch is used to
+arguments {\tt matTag1 code1 matTag2 code2 ...} , into a single section
+force-deformation model. The optional {\tt -section} switch is used to
 specify a previously defined Section object, identified by the
-argument sectionTag, to which these UniaxialMaterial objects may be
+argument {\tt secTag}, to which these UniaxialMaterial objects may be
 added to recursively define a new Section object. The UniaxialMaterial
 objects aggregated in this Section object are uncoupled from each
-other as well as from the Section object represented by sectionTag, if
-present. Values for code are given in Figure~\ref{sectionCodes}. The
-argument secTag is used to uniquely identify this Section object among
-Section objects in the BasicBuilder object. 
+other as well as from the Section object represented by {\tt secTag}, if
+present. Values for {\tt code} are given in Figure~\ref{sectionCodes}.
 
 \subsubsection{Fiber Section}
 {\sf\small
 \begin{verbatim}
-   section Fiber secTag? {
+   section Fiber tag? {
       fiber <fiber arguments>
       patch <patch arguments>
       layer <layer arguments>
@@ -764,13 +763,12 @@ Section objects in the BasicBuilder object.
 
 \noindent To construct a FiberSection object composed of Fiber objects.
 The available Fiber objects are UniaxialFiber2d/3d, which enforce the
-Bernoulli beam assumption. The secTag is used to uniquely identify the 
-section object among section objects in the BasicBuilder object. A fiber 
+Bernoulli beam assumption. A fiber 
 section has a general geometric configuration formed by subregions
 of simpler, regular shapes (e.g. quadrilateral, circular and triangular
 regions) called patches. In addition, layers of reinforcement bars 
-can also be specified. The subcommands patch and layer are used to
-define the discretization of the section into
+can also be specified. The subcommands {\tt fiber}, {\tt patch}, and
+{\tt layer} define the discretization of the section into
 fibers, and are described below. In these subcommands, the geometric
 parameters are defined with respect to a planar local coordinate system (y,z). 
 See figures 3 and 7.
@@ -779,26 +777,28 @@ See figures 3 and 7.
 
 {\sf\small
 \begin{verbatim}
-   fiber yLoc? zLOc? area? matTag?
+   fiber yLoc? zLoc? area? matTag?
 \end{verbatim}
 }
 
-The fiber command is used to construct a fiber object and add it to
+The fiber command constructs a fiber object and adds it to
 the section. The arguments consist of the y,z coordinates of the fiber
-in the section, the area of the fiber and the material tag of the
-unixial fiber which is used to represent the stress-strain for the
-area of the fiber.
+({\tt yLoc} and {\tt zLoc}) in the section, the {\tt area} of the
+fiber and the material tag ({\tt matTag}) of the unixial material
+which represents the fiber stress-strain behavior.
 
 \paragraph{The patch Command}
 
 {\sf\small
 \begin{verbatim}
-   patch patchType <specific patch args>
+   patch patchType matTag? <specific patch args>
 \end{verbatim}
 }
 
-The patch command is used to construct a Patch object. 
-The command has at least one argument, the patch type. The fibers
+The patch command constructs a Patch object which is added to the section.
+The command has at least two arguments, the patch type and
+tag ({\tt matTag}) of the uniaxial material which defines the
+stress-strain response of each fiber in the patch. The fibers
 generated by the patch commands are UniaxialFiber2d/3d, depending on
 the dimension of the problem. The commands
 for specifying each type are described below:
@@ -811,18 +811,16 @@ for specifying each type are described below:
 \end{verbatim}
 }
 
-\noindent To construct a patch with a quadrilateral shape. The
-argument matTag is an integer used to identify the associated
-UniaxialMaterial (which must be defined previously). The geometry of 
+\noindent To construct a patch with a quadrilateral shape. The geometry of 
 the patch is defined by four vertices I, J, K and L, as illustrated
-in figure~\ref{quadPatch}. The arguments numSubdivIJ and numSubdivJK are integers
+in figure~\ref{quadPatch}.
+The arguments {\tt numSubdivIJ} and {\tt numSubdivJK} are integers
 that specify the number of subdivisions (fibers) along the IJ and JK 
-directions, respectively. The last arguments yVertI, zVertI, yVertJ,
-zVertJ, yVertK, zVertK, yVertL, and zVertL
-are the coordinates y and z of each of the four vertices specified in sequence
-(counter-clockwise).
+directions, respectively. The last arguments {\tt yVertI}, {\tt zVertI},
+{\tt yVertJ}, {\tt zVertJ}, {\tt yVertK}, {\tt zVertK}, {\tt yVertL}, and
+{\tt zVertL} are the coordinates y and z of each of the four vertices
+specified in sequence (counter-clockwise).
  
-
 
 \begin{figure}[htpb]
 \begin{center}
@@ -844,17 +842,14 @@ are the coordinates y and z of each of the four vertices specified in sequence
 \end{verbatim}
 }
 
-\noindent To construct a patch with a circular shape. The
-argument matTag is an integer used to identify the associated
-UniaxialMaterial (which must be defined previously). 
-The arguments numSubdivCirc and numSubdivRad are integers
+\noindent To construct a patch with a circular shape.
+The arguments {\tt numSubdivCirc} and {\tt numSubdivRad} are integers
 that specify the number of subdivisions (fibers) along the
 circumferential and radial directions, respectively. 
 The geometry of the patch is defined by its center position
-(yCenter and zCenter), the internal and external radius 
-(intRad and extRad), and the starting and ending angle (startAng 
-and endAng), according to figure~\ref{circPatch}. 
-
+({\tt yCenter} and {\tt zCenter}), the internal and external radius 
+({\tt intRad} and {\tt extRad}), and the starting and ending angles
+({\tt startAng} and {\tt endAng}), according to figure~\ref{circPatch}. 
 
 
 \begin{figure}[htpb]
@@ -873,12 +868,14 @@ and endAng), according to figure~\ref{circPatch}.
 
 {\sf\small
 \begin{verbatim}
-   layer layerType <specific patch args>
+   layer layerType matTag? <specific layer args>
 \end{verbatim}
 }
 
-The layer command is used to construct a Layer object. 
-The command has at least one argument, the layer type. The fibers
+The layer command constructs a Layer object which is added to the section.
+The command has at least two arguments, the layer type and tag
+({\tt matTag}) of the uniaxialMaterial which defines the stress-strain
+response of each fiber in the layer. The fibers
 generated by the layer commands are UniaxialFiber2d/3d, depending on
 the dimension of the problem. The commands
 for specifying each type are described below:
@@ -890,13 +887,11 @@ for specifying each type are described below:
 \end{verbatim}
 }
 
-\noindent To construct a straight layer of reinforcing bars. The
-argument matTag is an integer used to identify the associated
-UniaxialMaterial (which must be defined previously). The argument 
-numReinfBars is an integer that specifies the number of reinforcing 
-bars, with area reinfBarArea, along the layer. The last arguments 
-yStartPt, zStartPt, yEndPt and zEndPt are the coordinates y and z of 
-the starting and ending points of the
+\noindent To construct a straight layer of reinforcing bars. The argument 
+{\tt numReinfBars} is an integer that specifies the number of reinforcing 
+bars, each with area {\tt reinfBarArea}. The last arguments 
+{\tt yStartPt}, {\tt zStartPt}, {\tt yEndPt} and {\tt zEndPt} are the
+coordinates y and z of the starting and ending points of the
 reinforcing layer, as represented in figure~\ref{straightLayer}.
 
 
@@ -913,8 +908,6 @@ reinforcing layer, as represented in figure~\ref{straightLayer}.
 \end{figure}
 
 
-
-
 {\sf\small
 \begin{verbatim}
    layer circ matTag? numReinfBars? reinfBarArea? 
@@ -922,16 +915,14 @@ reinforcing layer, as represented in figure~\ref{straightLayer}.
 \end{verbatim}
 }
 
-\noindent To construct a layer with a circular shape. The
-argument matTag is an integer used to identify the associated
-material (which must be defined previously). The argument 
-numReinfBars is an integer that specifies the number of reinforcing 
-bars, with area reinfBarArea, along the layer. 
+\noindent To construct a layer with a circular shape. The argument 
+{\tt numReinfBars} is an integer that specifies the number of reinforcing 
+bars, each of area {\tt reinfBarArea}. 
 The geometry of the patch is defined by its center position
-(yCenter and zCenter), its radius, and the optional starting and ending angle 
-(startAng and endAng), as shown in figure~\ref{circLayer}. If
-the starting and ending angles are not specified, a full circle
-is assumed.
+({\tt yCenter} and {\tt zCenter}), its {\tt radius}, and the optional
+starting and ending angles ({\tt startAng} and {\tt endAng}), as shown in
+figure~\ref{circLayer}. If the starting and ending angles are not specified,
+a full circle is assumed with the first bar at zero degrees.
 
 
 \begin{figure}[htpb]
@@ -948,48 +939,60 @@ is assumed.
 
 
 \subsubsection{Elastic Membrane Plate Section}
-The ElasticMembranePlateSection
-is an isotropic section appropriate for plate and shell analysis.
-The syntax is
 {\sf\small
 \begin{verbatim}
-  section ElasticMembranePlateSection  secTag?   E?  nu?  h?  rho?
+   section ElasticMembranePlateSection tag? E? nu? h? <rho?>
 \end{verbatim}
 }
-In the above, secTag is the section tag for the plate section 
-being constructed. Also, 
-$E$ is the elastic modulus, $nu$ is Poisson's ratio, 
-$h$ is the thickness of the plate section and
-$rho$ is the mass density per unit {\em volume} of the material.
+The ElasticMembranePlateSection
+is an isotropic section appropriate for plate and shell analysis.
+{\tt E} is the elastic modulus, {\tt nu} is Poisson's ratio, 
+{\tt h} is the thickness of the plate section and
+{\tt rho} is the mass density per unit {\em volume} of the material,
+which is optional (default is 0.0).
 
 
 \subsubsection{Plate Fiber Section}
-The plate fiber section takes any plate fiber material and by 
-thickness integration creates a plate section appropiate for shell analysis.
-The syntax is
 {\sf\small
 \begin{verbatim}
-   section PlateFiber secTag?  fiberTag?  h?
+   section PlateFiber tag? matTag? h?
 \end{verbatim}
 }
-In the above, secTag is the section tag for the plate section 
-being constructed and fiberTag is the material tag for a plate
+The plate fiber section takes any plate fiber material and by 
+thickness integration creates a plate section appropiate for shell analysis.
+The argument {\tt matTag} is the material tag for a plate
 fiber material assumed to have been previously defined. Finally,
-$h$ is the thickness of the plate section.
+{\tt h} is the thickness of the plate section. Integration through the
+thickness is done by a five point Gauss-Lobatto rule.
 
+\subsubsection{Bidirectional Section}
+{\sf\small
+\begin{verbatim}
+   section Bidirectional tag? E? sigY? Hiso? Hkin?
+\end{verbatim}
+}
+
+To construct a Bidirectional material object with an elastic modulus
+{\tt E}, yield stress {\tt sigY}, isotropic hardening modulus {\tt Hiso},
+and kinematic hardening modulus {\tt Hkin}. A Bidirectional material
+object is the two dimensional generalization of a one dimensional
+elastoplasitc model with linear hardening. The yield surface is circular,
+making this model suitable for modeling base isolation bearings.
 
 \subsection{The geomTransf Command}
 {\sf\small
 \begin{verbatim}
-   geomTransf transfType <specific transf args>
+   geomTransf transfType transfTag? <specific transf args>
 \end{verbatim}
 }
 
 The geomTransf command is used to construct a CrdTransf object. A CrdTransf
 object transforms beam element stiffness and resisting force from the 
-basic system to the global coordinate system. The command has at least one 
-argument, the transformation type. The commands for specifying each 
-type are as outlined below: 
+basic system to the global coordinate system. The command has at least two 
+arguments, the transformation type and tag ({\tt transfTag}), which uniquely
+identifies this CrdTransf object among CrdTransf objects in the
+BasicBuilder object. The commands for specifying each type are as
+outlined below: 
 
 \subsubsection{The Linear Transformation}
 {\sf\small
@@ -1004,19 +1007,19 @@ To construct a LinearCrdTransf object which performs a linear geometric
 transformation of beam stiffness and resisting force from the basic system
 to the global coordinate system. For the three dimensional problem,
 additional arguments need to be specified. Optional rigid joint
-offsets can be specified with the -jntOffset switch. The joint offset
-values dXi, dYi, dZi and dXj, dYj, dZj are absolute offsets with
+offsets can be specified with the {\tt -jntOffset} switch. The joint offset
+values {\tt dXi}, {\tt dYi}, {\tt dZi} and {\tt dXj}, {\tt dYj},
+{\tt dZj} are absolute offsets with
 respect to the global coordinate system from element end nodes I and
 J, respectively. The rigid joint offset arguments depend on the
-dimension of the current model. The argument transfTag is used to
-uniquely identify this CrdTransf object among CrdTransf objects in the
-BasicBuilder object. 
+dimension of the current model.
 
 The element coordinate system is specified, according to
 figure~\ref{localAxis}, as follows: the x axis is the axis connecting
 the two element nodes; the y and z axis are then defined using a
 vector that lies on the local xz plane (the components of this vector,
-vecxzX, vecxzY, vecxzZ are specified with respect to the global
+{\tt vecxzX}, {\tt vecxzY}, {\tt vecxzZ} are specified with respect to
+the global
 coordinate system X,Y,Z). The section is attached to the element such
 that the (y,z) coordinate system used to specify the section
 corresponds to the (y,z) axes of the element. 
@@ -1034,15 +1037,10 @@ corresponds to the (y,z) axes of the element.
 
 To construct a PDeltaCrdTransf object which performs a linear geometric
 transformation of beam stiffness and resisting force from the basic system
-to the global coordinate system considering second order P-Delta
-effects. The arguments vecxzX, vecxzY, and vecxzZ are as defined for
-the Linear transformation above. Optional rigid joint offsets can be
-specified with the -jntOffset switch. The joint offset values dXi,
-dYi, dZi and dXj, dYj, dZj are absolute offsets with respect to the
-global coordinate system from element end  nodes I and J,
-respectively. The rigid joint offset arguments depend on the dimension
-of the current model. The argument transfTag is used to uniquely
-identify this CrdTransf object among CrdTransf objects in the BasicBuilder object.
+to the global coordinate system considering only P-$\Delta$
+(``leaning column'') geometric effects.
+The arguments {\tt vecxzX}, {\tt vecxzY}, and {\tt vecxzZ} are as defined for
+the Linear transformation above, as are the joint offset parameters.
 
 
 \subsubsection{The Corotational Transformation}
@@ -1056,14 +1054,9 @@ identify this CrdTransf object among CrdTransf objects in the BasicBuilder objec
 
 To construct a CorotCrdTransf object which performs an exact geometric
 transformation of beam stiffness and resisting force from the basic system
-to the global coordinate system. The arguments vecxzX, vecxzY, and vecxzZ are as defined for
-the Linear transformation above. Optional rigid joint offsets can be
-specified with the -jntOffset switch. The joint offset values dXi,
-dYi, dZi and dXj, dYj, dZj are absolute offsets with respect to the
-global coordinate system from element end nodes I and J,
-respectively. The rigid joint offset arguments depend on the dimension
-of the current model. The argument transfTag is used to uniquely
-identify this CrdTransf object among CrdTransf objects in the BasicBuilder object.
+to the global coordinate system. The arguments {\tt vecxzX}, {\tt vecxzY},
+and {\tt vecxzZ} are as defined for
+the Linear transformation above, as are the joint offset parameters.
 
 NOTE: The Corotational transformation is only available with the Win32 version
 of OpenSees.
@@ -1083,32 +1076,36 @@ of OpenSees.
 \subsection{The element Command}
 {\sf\small
 \begin{verbatim}
-   element eleType <specific element type args>
+   element eleType tag? <specific element type args>
 \end{verbatim}
 }
 
 The element command is used to construct an Element object. The
-command has at least one argument, the element type. The commands for
-specifying each type of element are as outlined below:  
+command has at least two arguments, the element type and {\tt tag},
+which uniquely
+identifies this Element object among Elements in the domain.
+The commands for specifying each type of element are outlined below:  
 
 \subsubsection{The Truss Element}
 {\sf\small
 \begin{verbatim}
-   element truss eleTag? iNode? jNode? A? matTag?
-   element truss eleTag? iNode? jNode? secTag?
+   element truss tag? iNode? jNode? A? matTag?
+   element truss tag? iNode? jNode? secTag?
 \end{verbatim}
 }
 
-\noindent There are two ways to construct a truss object. One way is
+\noindent Constructs a truss object, which can be done in one of two ways.
+One way is
 to specify an area and a UniaxialMaterial identifier, the other to specify a
-Section identifier. To construct a Truss object with an area and a
-UniaxialMaterial, the analyst specifies the eleTag, which uniquely defines
-this truss element among all other elements in the domain, the two end
-nodes, iNode and jNode, the truss bar area A and the tag of the
-associated UniaxialMaterial, matTag. Note that the material must have already
+Section identifier. The end nodes of the truss element are identified
+by the arguments {\tt iNode} and {\tt jNode}.
+To construct a Truss object with an area and a
+UniaxialMaterial, the analyst specifies the truss section area {\tt A} and 
+tag of the associated UniaxialMaterial, {\tt matTag}.
+Note that the material must have already
 been added to the BasicBuilder object. To construct a Truss object
-with a Section, the analyst specifies the trussTag, the two end nodes,
-and the Section tag, secTag. When constructed with a UniaxialMaterial object,
+with a Section, the analyst only specifies the Section tag, {\tt secTag}.
+When constructed with a UniaxialMaterial object,
 the truss element considers strain rate effects and is thus suitable for
 use as a damping element.
 
@@ -1120,54 +1117,54 @@ for the methods involved have been further developed.
 \subsubsection{The Corotational Truss Element}
 {\sf\small
 \begin{verbatim}
-   element corotTruss eleTag? iNode? jNode? A? matTag?
-   element corotTruss eleTag? iNode? jNode? secTag?
+   element corotTruss tag? iNode? jNode? A? matTag?
+   element corotTruss tag? iNode? jNode? secTag?
 \end{verbatim}
 }
 
 \noindent Constructs a corotational truss object, which takes into account
 an exact geometric transformation between local and global frames of reference.
-There are two ways to construct a corotational truss object.
-One way is to specify an area and a UniaxialMaterial identifier, the other to specify a
-Section identifier. To construct a CorotTruss object with an area and a
-UniaxialMaterial, the analyst specifies the eleTag, which uniquely defines
-this truss element among all other elements in the domain, the two end
-nodes, iNode and jNode, the truss bar area A and the tag of the
-associated UniaxialMaterial, matTag. Note that the material must have already
-been added to the BasicBuilder object. To construct a CorotTruss object
-with a Section, the analyst specifies the trussTag, the two end nodes,
-and the Section tag, secTag. 
+The input arguments for the corotational truss are exactly the same as
+those for the standard truss element described above. However, the
+corotational element does not take into account rate effects when
+constructed with a UniaxialMaterial object.
 
-The valid queries to a truss element when creating an ElementRecorder
-are 'axialForce', 'stiff', 'material matArg1 matArg2 ..., 'section sectArg1
-sectArg2 ...'.
+The valid queries to a corotational truss element when creating an
+ElementRecorder are 'axialForce', 'stiff', 'material matArg1 matArg2 ...,
+'section sectArg1 sectArg2 ...'.
 
 \subsubsection{The Elastic Beam Column Element}
 {\sf\small
 \begin{verbatim}
-   element elasticBeamColumn eleTag? iNode? jNode? A? E? I? transfTag?
-   element elasticBeamColumn eleTag? iNode? jNode? A? E? G? Jx? Iy? Iz? transfTag?
+   element elasticBeamColumn tag? iNode? jNode? A? E? Iz? transfTag?
+   element elasticBeamColumn tag? iNode? jNode? A? E? Iz? Iy? G? J? transfTag?
 \end{verbatim}
 }
 
 \noindent The arguments to construct an elastic beam-column element depend on
-the dimension of the problem, ndm. For a two dimensional problem the
-analyst specifies the eleTag, the two end nodes, the section area,
-Young's modulus and second moment of section area. For the three dimensional
-problem the analyst specifies additional material and
-section properties G, Jx, Iy and Iz. Note that Iz (Iy) is the second
-moment of area about the beam section local z-axis (y-axis)
-(Figure~\ref{localAxis}). For both two and three dimensional problems,
-the final argument to the elasticBeamColumn command is a transfTag,
+the dimension of the problem, ndm. The element orientation is defined by
+the two end nodes {\tt iNode} and {\tt jNode}. For a two dimensional problem,
+the analyst specifies the section area {\tt A},
+elastic modulus {\tt E} and second moment of section area {\tt Iz} about the
+section z-axis (figure~\ref{localAxis}).
+For a three dimensional problem, the analyst specifies additional
+material and section properties {\tt Iy}, {\tt G}, and {\tt J}.
+{\tt Iy} is the second moment of area about the section y-axis, {\tt G}
+is the shear modulus, and {\tt J} is the second polar moment of section area.
+For both two and three dimensional problems,
+the final argument to the elasticBeamColumn command is {\tt transfTag},
 which identifies a previously defined CrdTransf object. 
 
 The valid queries to an elastic beam column element when creating an
 ElementRecorder are 'stiffness' and 'force'.
 
+{\bf NOTE}: The sequence of input arguments in the three-dimensional case
+have changed since version 1.2.
+
 \subsubsection{The Nonlinear Beam Column Element}
 {\sf\small
 \begin{verbatim}
-   element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag?
+   element nonlinearBeamColumn tag? iNode? jNode? nIP? secTag? transfTag?
                                <-mass massDens> <-iter maxIters tol> 
 \end{verbatim}
 }
@@ -1175,20 +1172,22 @@ ElementRecorder are 'stiffness' and 'force'.
 \noindent The nonlinearBeamColumn element is based on the
 non-iterative force formulation, and considers the spread of
 plasticity along the element. The arguments to construct the element
-are its tag, eleTag, the two end nodes, iNode and jNode, the number of
-integration points along the element, numIntgrPts, the section tag,
-secTag (must be pre-defined), and the geometric transformation tag,
-transfTag (pre-defined). The integration along the element is based on
+are its two end nodes, {\tt iNode} and {\tt jNode}, the number of
+integration points along the element, {\tt nIP}, the section tag,
+{\tt secTag} (must be pre-defined), and the geometric transformation tag,
+{\tt transfTag} (pre-defined). The integration along the element is
+based on the
 Gauss-Lobatto quadrature rule (two integration points at the element
-ends). The element is prismatic, i.e. the beam is represented by the
-section  model identified by secTag at each integration point. An
-element mass density per unit length, massDens, from which a lumped
-mass matrix is formed, is specified via the -mass switch. An option is
-also provided for the iterative form of the flexibility formulation by
-the -iter switch. The arguments for the iterative form are maxIters,
-the maximum number of iterations to undertake to satisfy element
-compatibility; and tol, the tolerance for satisfaction of element
-compatibility. Note that the iterative form can improve the rate of
+ends). The element is prismatic, i.e., the beam is represented by the
+section model identified by {\tt secTag} at each integration point. An
+element mass density per unit length, {\tt massDens}, from which a lumped
+mass matrix is formed, is specified via the {\tt -mass} switch. An option is
+also provided for the iterative form of the force formulation by
+the {\tt -iter} switch. The arguments for the iterative form are
+{\tt maxIters}, the maximum number of iterations to undertake to
+satisfy element compatibility; and {\tt tol}, the energy tolerance for
+satisfaction of element compatibility.
+Note that the iterative form can improve the rate of
 global convergence at the expense of more local element computation. 
 
 The valid queries to a nonlinearBeamColumn element when creating an
@@ -1197,71 +1196,79 @@ ElementRecorder are 'force', 'stiffness', or 'section secNum secArg1 secArg2 ...
 \subsubsection{The Beam With Hinges Element}
 {\sf\small
 \begin{verbatim}
-   element beamWithHinges eleTag? iNode? jNode? secTagI? ratioI? secTagJ? ratioJ?
-                          E? A? I? transfTag? <-mass massDens> <-iter maxIters tol> 
-   element beamWithHinges eleTag? iNode? jNode? secTagI? ratioI? secTagJ? ratioJ?
+   element beamWithHinges tag? iNode? jNode? secTagI? lpI? secTagJ? lpJ?
+                          E? A? Iz? transfTag? <-mass massDens> <-iter maxIters tol> 
+   element beamWithHinges tag? iNode? jNode? secTagI? lpI? secTagJ? lpJ?
                           E? A? Iz? Iy? G? J? transfTag? <-mass massDens>
                           <-iter maxIters tol> 
 \end{verbatim}
 }
 
-\noindent The beamWithHinges element is based on the non-iterative flexibility
+\noindent The beamWithHinges element is based on the non-iterative force
 formulation, and considers plasticity to be concentrated over
-specified hinge lengths at the element ends. Note that forces and deformations
-are sampled at the hinge midpoints. The remaining beam
-interior is considered to be linear elastic. The arguments to
-construct the element are its tag, eleTag, the two end nodes, iNode
-and jNode, the section at node I, secTagI (pre-defined), the ratio of
-hinge length I to total element length, ratioI, the section at node J,
-secTagJ (pre-defined), the ratio of hinge length J to total element
-length, ratioJ, elastic axial stiffness, EA, elastic bending
-stiffness, EI, and the geometric transformation tag, transfTag
-(pre-defined). For three-dimensional problems EIz (EIy) is the bending
-stiffness about the section local z-axis (y-axis) and GJ is the
-torsional stiffness (Figure~\ref{localAxis}). Note that these elastic
-properties are only integrated over the beam interior. The integration
-over the hinge lengths is mid-point integration. An element mass
-density per unit length, massDens, from which a lumped mass matrix 
-is formed, is specified via the -mass switch. An option is also
-provided for the iterative form of the flexibility formulation by the
--iter switch. The arguments for the iterative form are maxIters, the
-maximum number of iterations to undertake to satisfy element
-compatibility; and tol, the tolerance for satisfaction of element
-compatibility. Note that the iterative form can improve the rate of
-global convergence at the expense of more local element computation. 
+specified hinge lengths at the element ends. The remaining beam
+interior is assumed linear elastic. The arguments to
+construct the element are its two end nodes, {\tt iNode}
+and {\tt jNode}, the section at node I, {\tt secTagI} (pre-defined),
+and its corresponding plastic hinge length {\tt lpI}, the section at node J,
+{\tt secTagJ} (pre-defined), and plastic hinge length {\tt lpJ}.
+The elastic properties of the beam interior are specified by the
+arguments {\tt E}, {\tt A}, and {\tt Iz}; and the geometric transformation
+for the element is identified by {\tt transfTag}.
+For three-dimensional problems additional elastic properties {\tt Iy},
+{\tt G}, and {\tt J} must be specified for the beam interior.
+An element mass density per unit length, {\tt massDens}, from which a
+lumped mass matrix 
+is formed, is specified via the {\tt -mass} switch. An option is also
+provided for the iterative form of the force formulation by the
+{\tt -iter} switch. The arguments for the iterative form are the same as
+those for the nonlinearBeamColumn element.
+
+Hinge integration is done via the midpoint rule, whereby section forces
+and deformations are sampled at the middle of the hinge. With midpoint
+integration, the section moment is not the maximum moment in the element;
+and there is an integration error in representing linear curvature
+distributions.
 
 The valid queries to a beamWithHinges element when creating an
 ElementRecorder are 'force', 'stiffness', 'rotation' (hinge rotation),
 or 'section secNum secArg1 secArg2 ...'. 
 
+{\bf NOTE}: The plastic hinge length input is the actual length, rather
+than a ratio to total element length, as was the case in version 1.2.
+
 \subsubsection{The Displacement Based Beam Column Element}
 {\sf\small
 \begin{verbatim}
-   element dispBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag?
-                               <-mass massDens>
+   element dispBeamColumn tag? iNode? jNode? nIP? secTag? transfTag?
+                          <-mass massDens>
 \end{verbatim}
 }
 
 \noindent The dispBeamColumn element is a distributed plasticity, displacement
-based beam-column element. The arguments to construct the element
-are its tag, eleTag, the two end nodes, iNode and jNode, the number of
-integration points along the element, numIntgrPts, the section tag,
-secTag (must be pre-defined), and the geometric transformation tag,
-transfTag (pre-defined). The integration along the element is based on
-Gauss-Legendre quadrature rule. The element is prismatic, i.e. the beam is
+based beam-column element. The assumed displacement field over the element
+length leads to constant axial strain and linear curvature distributions.
+The arguments to construct the element
+are its end nodes {\tt iNode} and {\tt jNode}, the number of
+integration points along the element, {\tt nIP}, the section tag,
+{\tt secTag} (must be pre-defined), and the geometric transformation tag,
+{\tt transfTag} (pre-defined). The integration along the element is based on
+Gauss-Legendre quadrature rule. The element is prismatic, i.e., the beam is
 represented by the
-section  model identified by secTag at each integration point. An
-element mass density per unit length, massDens, from which a lumped
-mass matrix is formed, is specified via the -mass switch.
+section  model identified by {\tt secTag} at each integration point. An
+element mass density per unit length, {\tt massDens}, from which a lumped
+mass matrix is formed, is specified via the {\tt -mass} switch.
 
 The valid queries to a dispBeamColumn element when creating an
-ElementRecorder are 'force', 'stiffness', or 'section secNum secArg1 secArg2 ...'.
+ElementRecorder are 'force', 'stiffness', or 'section secNum
+secArg1 secArg2 ...'.
 
 \subsubsection{The Zero Length Element}
 {\sf\small
 \begin{verbatim}
-   element zeroLength eleTag? iNode? jNode? -mat matTag1? matTag2? ...
-                      -dir dir1? dir2? ... <-orient x1? x2? x3? yp1? yp2? yp3?>
+   element zeroLength tag? iNode? jNode? -mat matTag1? matTag2? ...
+                                         -dir dir1? dir2? ...
+                                         <-orient x1? x2? x3? yp1? yp2? yp3?>
 \end{verbatim}
 }
 
@@ -1269,15 +1276,15 @@ ElementRecorder are 'force', 'stiffness', or 'section secNum secArg1 secArg2 ...
 same geometric location. The nodes are connected by multiple
 UniaxialMaterial objects to represent the force-deformation
 relationship for the element. The zero length element is identified
-by its tag, eleTag, nodes iNode and jNode, UniaxialMaterial objects
-(previously defined) identified by matTag1 matTag2 ..., and material
-directions dir1 dir2 ... . Two optional orientation vectors can be
-specified for the element. The vector x defines the local x-axis for
-the element and the vector yp lies in the local x-y plane for the
-element. The local z-axis is the cross product between x and yp, and
-the local y-axis is the cross product between the local z-axis and x.
-If these orientation vectors are not specified, the local element axes
-coincide with the global axes. The values for dir are 1 through 6,
+by its nodes {\tt iNode} and {\tt jNode}, UniaxialMaterial objects
+(previously defined) identified by {\tt matTag1 matTag2 ...}, and material
+directions {\tt dir1 dir2 ...} . Two optional orientation vectors can be
+specified for the element. The vector {\tt x} defines the local x-axis for
+the element and the vector {\tt yp} lies in the local x-y plane for the
+element. The local z-axis is the cross product between {\tt x} and {\tt yp},
+and the local y-axis is the cross product between the local z-axis and
+{\tt x}. If these orientation vectors are not specified, the local element
+axes coincide with the global axes. The values for {\tt dir} are 1 through 6,
 where 1,2,3 indicate translation along the local x,y,z axes
 respectively; while 4,5,6 indicate rotation about the local x,y,z axes
 respectively. 
@@ -1288,97 +1295,98 @@ are 'force', 'deformation', 'stiff', or 'material matNum matArg1 matArg2 ...'.
 \subsubsection{The Zero Length Section Element}
 {\sf\small
 \begin{verbatim}
-   element zeroLengthSection eleTag? iNode? jNode? secTag?
-                      <-orient x1? x2? x3? yp1? yp2? yp3?>
+   element zeroLengthSection tag? iNode? jNode? secTag?
+                             <-orient x1? x2? x3? yp1? yp2? yp3?>
 \end{verbatim}
 }
 
 \noindent Constructs a ZeroLengthSection element defined by two nodes at the
 same geometric location. The nodes are connected by a single
-SectionForceDeformation object to represent the force-deformation
+Section object to represent the force-deformation
 relationship for the element. The ZeroLengthSection element is identified
-by its tag, eleTag, nodes iNode and jNode, and SectionForceDeformation object
-(previously defined) identified by secTag. Two optional orientation vectors can be
-specified for the element. The vector x defines the local x-axis for
-the element and the vector yp lies in the local x-y plane for the
-element. The local z-axis is the cross product between x and yp, and
-the local y-axis is the cross product between the local z-axis and x.
+by its two nodes {\tt iNode} and {\tt jNode}, and Section object
+(previously defined) identified by {\tt secTag}. Two optional orientation
+vectors can be
+specified for the element. The vector {\tt x} defines the local x-axis for
+the element and the vector {\tt yp} lies in the local x-y plane for the
+element. The local z-axis is the cross product between {\tt x} and {\tt yp},
+and the local y-axis is the cross product between the local z-axis and {\tt x}.
 If these orientation vectors are not specified, the local element axes
 coincide with the global axes. The section force-deformation response
 represented by section code P acts along the element local x-axis, and
 the response for code Vy along the local y-axis. The other modes of
 section response follow from this orientation.
 
-The valid queries to a ZeroLengthSection element when creating an ElementRecorder
-are 'force', 'deformation', 'stiff', or 'section secArg1 secArg2 ...'.
+The valid queries to a ZeroLengthSection element when creating an
+ElementRecorder are 'force', 'deformation', 'stiff', or 'section
+secArg1 secArg2 ...'.
 
-\subsubsection{The Zero Length ND Element}
-{\sf\small
-\begin{verbatim}
-   element zeroLengthND eleTag? iNode? jNode? matTag? <uniTag?>
-                      <-orient x1? x2? x3? yp1? yp2? yp3?>
-\end{verbatim}
-}
-
-\noindent Constructs a ZeroLengthND element defined by two nodes at the
-same geometric location. The nodes are connected by a single
-NDMaterial object to represent the force-deformation
-relationship for the element.
-The ZeroLengthND element is identified
-by its tag, eleTag, nodes iNode and jNode, and NDMaterial object
-(previously defined) identified by matTag. Two optional orientation vectors can be
-specified for the element. The vector x defines the local x-axis for
-the element and the vector yp lies in the local x-y plane for the
-element. The local z-axis is the cross product between x and yp, and
-the local y-axis is the cross product between the local z-axis and x.
-If these orientation vectors are not specified, the local element axes
-coincide with the global axes.
-If the NDMaterial object is of order two, the response lies in the
-element local x-y plane, and an optional UniaxialMaterial, represented
-by the argument uniTag, may be used
-to represent uncoupled behavior orthogonal to this plane, i.e., along the local
-z-axis. If the NDMaterial is order three, the response is along
-each of the element local axes. Note that the ZeroLengthND element
-only represents translational response between its nodes.
-
-
-The valid queries to a ZeroLengthND element when creating an ElementRecorder
-are 'force', 'deformation', 'stiff', or 'material matArg1 matArg2 ...'.
+%\subsubsection{The Zero Length ND Element}
+%{\sf\small
+%\begin{verbatim}
+%   element zeroLengthND tag? iNode? jNode? matTag? <uniTag?>
+%                        <-orient x1? x2? x3? yp1? yp2? yp3?>
+%\end{verbatim}
+%}
+%
+%\noindent Constructs a ZeroLengthND element defined by two nodes at the
+%same geometric location. The nodes are connected by a single
+%NDMaterial object to represent the force-deformation
+%relationship for the element.
+%The ZeroLengthND element is identified
+%by its tag, eleTag, nodes iNode and jNode, and NDMaterial object
+%(previously defined) identified by matTag. Two optional orientation vectors can be
+%specified for the element. The vector x defines the local x-axis for
+%the element and the vector yp lies in the local x-y plane for the
+%element. The local z-axis is the cross product between x and yp, and
+%the local y-axis is the cross product between the local z-axis and x.
+%If these orientation vectors are not specified, the local element axes
+%coincide with the global axes.
+%If the NDMaterial object is of order two, the response lies in the
+%element local x-y plane, and an optional UniaxialMaterial, represented
+%by the argument uniTag, may be used
+%to represent uncoupled behavior orthogonal to this plane, i.e., along the local
+%z-axis. If the NDMaterial is order three, the response is along
+%each of the element local axes. Note that the ZeroLengthND element
+%only represents translational response between its nodes.
+%
+%The valid queries to a ZeroLengthND element when creating an ElementRecorder
+%are 'force', 'deformation', 'stiff', or 'material matArg1 matArg2 ...'.
 
 \subsubsection{The Quad Element}
 {\sf\small
 \begin{verbatim}
-   element quad eleTag? iNode? jNode? kNode? lNode? thick? type matTag? 
+   element quad tag? iNode? jNode? kNode? lNode? thick? type matTag? 
                 <pressure? rho? b1? b2?>
 \end{verbatim}
 }
 
 \noindent Constructs a FourNodeQuad element which uses the bilinear
-isoparametric formulation. The quad element is identified by its tag,
-eleTag, the four nodes iNode, jNode, kNode, and lNode, the element
-thickness (constant), a string representing the material behavior,
-type, and an NDMaterial object identified by matTag (previously
-defined). Valid options for the parameter type depend on the
-NDMaterial object and its available material formulations. The type parameter
-can be either ``PlaneStrain'' or ``PlaneStress''. A uniform element
-normal traction can be specified by the pressure argument. Constant
-body forces b1 and b2, defined in the isoparametric domain, can be
+isoparametric formulation. The element is identified by its four nodes
+{\tt iNode}, {\tt jNode}, {\tt kNode}, and {\tt lNode}, the element
+{\tt thickness} (constant), a string representing the material behavior,
+{\tt type}, and an NDMaterial object identified by {\tt matTag} (previously
+defined). Valid options for the parameter {\tt type} depend on the
+NDMaterial object and its available material formulations. The {\tt type}
+parameter can be either ``PlaneStrain'' or ``PlaneStress''. A uniform element
+normal traction can be specified by the {\tt pressure} argument. Constant
+body forces {\tt b1} and {\tt b2}, defined in the isoparametric domain, can be
 specified as well and are optional, as is the element mass density per
-unit volume rho, for which a lumped element mass matrix is
+unit volume {\tt rho}, for which a lumped element mass matrix is
 computed. Consistent nodal loads are computed for the pressure and
 body forces. The four nodes i through l must be input in
 counter-clockwise order around the element.
 
 The valid queries to a quad element when creating an ElementRecorder
-are 'force', 'stiffness', or 'material matNum matArg1 matArg2 ...',  where matNum
-represents the material object at the integration point corresponding to the node numbers
-in the isoparametric domain.
+are 'force', 'stiffness', or 'material matNum matArg1 matArg2 ...',  where
+matNum represents the material object at the integration point
+corresponding to the node numbers in the isoparametric domain.
 
 
 \subsubsection{The Shell Element}
 {\sf\small
 \begin{verbatim}
-   element ShellMITC4  eleTag? iNode? jNode? kNode? lNode? matTag? 
+   element ShellMITC4 tag? iNode? jNode? kNode? lNode? secTag? 
 \end{verbatim}
 }
 
@@ -1386,36 +1394,33 @@ in the isoparametric domain.
 Constructs a shell element which uses a bilinear
 isoparametric formulation in combination with a modified shear
 interpolation to improve thin plate bending performance. 
-The shell element is identified by its tag,
-eleTag, the four nodes iNode, jNode, kNode, and lNode 
-and a SectionForceDeformation object identified by matTag (previously
-defined). 
-Typically the shell element matTag corresponds to some PlateFiberSection,
-elastic or otherwise.
+The shell element is identified by its four nodes
+{\tt iNode}, {\tt jNode}, {\tt kNode}, and {\tt lNode} 
+and a Section object identified by {\tt secTag} (previously defined). 
 Should the element be required to compute a mass matrix, a consistent 
-translational element mass matrix is computed.  Rotational inertia terms 
-are ignored.
-The four nodes i through l must be input in
+translational element mass matrix is computed from the material mass
+density defined for the section.  Rotational inertia terms 
+are ignored. The four nodes i through l must be input in
 counter-clockwise order around the element.
 
 
 \subsubsection{The Bbar Plane Strain Quadrilateral Element}
 {\sf\small
 \begin{verbatim}
-   element bbarQuad  eleTag? iNode? jNode? kNode? lNode? matTag? 
+   element bbarQuad tag? iNode? jNode? kNode? lNode? matTag? 
 \end{verbatim}
 }
 
 \noindent Constructs a four node quad
 element which uses a bilinear isoparametric formulation along with
 a mixed volume/pressure B-bar assumption.
-The bbarQuad element is identified by its tag,
-eleTag, 
-the four nodes iNode, jNode, kNode, and lNode
-and an NDMaterial object identified by matTag (previously
+The bbarQuad element is identified by its four nodes
+{\tt iNode}, {\tt jNode}, {\tt kNode}, and {\tt lNode}
+and an NDMaterial object identified by {\tt matTag} (previously
 defined). 
 Should the element be required to compute a mass matrix, a consistent 
-translational element mass matrix is computed.
+translational element mass matrix is computed from the material
+mass density.
 The four nodes i through l must be input in
 counter-clockwise order around the element.
 This element is for {\em plane strain} problems {\em only}.
@@ -1424,49 +1429,46 @@ This element is for {\em plane strain} problems {\em only}.
 \subsubsection{The Enhanced Stain Quadrilateral Element}
 {\sf\small
 \begin{verbatim}
-   element enhancedQuad  eleTag? iNode? jNode? kNode? lNode? type matTag? 
+   element enhancedQuad tag? iNode? jNode? kNode? lNode? type matTag? 
 \end{verbatim}
 }
 
 \noindent Constructs a four node quad element which uses a bilinear
 isoparametric formulation with enhanced strain modes.
-The enhancedQuad element is identified by its tag,
-eleTag, the four nodes iNode, jNode, kNode, and lNode, 
-a string representing the material behavior 
-and an NDMaterial object identified by matTag (previously
+The enhancedQuad element is identified by its four nodes
+{\tt iNode}, {\tt jNode}, {\tt kNode}, and {\tt lNode}, 
+a string representing the material behavior
+and an NDMaterial object identified by {\tt matTag} (previously
 defined). 
-Valid options for the parameter type depend on the
-NDMaterial object and its available material formulations. See the
-NDMaterial object documentation for valid types. 
-Typically type is ``PlaneStress'' or ``PlaneStrain'' .
+Valid options for the parameter {\tt type} depend on the
+NDMaterial object and its available material formulations.
+Typically {\tt type} is either ``PlaneStress'' or ``PlaneStrain''.
 Should the element be required to compute a mass matrix, a consistent 
-translational element mass matrix is computed.
-The four nodes i through l must be input in
+translational element mass matrix is computed from the material
+mass density. The four nodes i through l must be input in
 counter-clockwise order around the element.
-
 
 
 \subsubsection{The Standard Brick Element}
 {\sf\small
 \begin{verbatim}
-   element stdBrick eleTag? iNode? jNode? kNode? lNode? 
-                            mNode? nNode? pNode? qNode? 
-                            matTag? 
+   element stdBrick tag? iNode? jNode? kNode? lNode? 
+                         mNode? nNode? pNode? qNode? matTag?
 \end{verbatim}
 }
 
 \noindent Constructs an eight node brick element which uses a trilinear
 isoparametric formulation. 
-The stdBrick element is identified by its tag,
-eleTag, 
-the eight nodes iNode, jNode, kNode, lNode,
-mNode, nNode, pNode, and qNode
-and an NDMaterial object identified by matTag (previously
+The stdBrick element is identified by its eight nodes
+{\tt iNode}, {\tt jNode}, {\tt kNode}, {\tt lNode},
+{\tt mNode}, {\tt nNode}, {\tt pNode}, and {\tt qNode},
+and an NDMaterial object identified by {\tt matTag} (previously
 defined). 
 Should the element be required to compute a mass matrix, a consistent 
-translational element mass matrix is computed.
-The eight nodes i through q must be input as in
+translational element mass matrix is computed from the material mass
+density. The eight nodes i through q must be input as in
 Figure~\ref{bricknodenumbering}.
+
 \begin{figure}[htpb]
 \begin{center}
 %\leavevmode
@@ -1483,23 +1485,22 @@ Figure~\ref{bricknodenumbering}.
 \subsubsection{The Bbar Brick Element}
 {\sf\small
 \begin{verbatim}
-   element bbarBrick eleTag? iNode? jNode? kNode? lNode? 
-                             mNode? nNode? pNode? qNode?
-                             matTag? 
+   element bbarBrick tag? iNode? jNode? kNode? lNode? 
+                          mNode? nNode? pNode? qNode? matTag? 
 \end{verbatim}
 }
 
 \noindent Constructs an eight node 
 mixed volume/pressure brick element which uses a trilinear
 isoparametric formulation. 
-The bbarBrick element is identified by its tag,
-eleTag, 
-the eight nodes iNode, jNode, kNode, lNode,
-mNode, nNode, pNode, and qNode
-and an NDMaterial object identified by matTag (previously
+The bbarBrick element is identified by its eight nodes
+{\tt iNode}, {\tt jNode}, {\tt kNode}, {\tt lNode},
+{\tt mNode}, {\tt nNode}, {\tt pNode}, and {\tt qNode},
+and an NDMaterial object identified by {\tt matTag} (previously
 defined). 
 Should the element be required to compute a mass matrix, a consistent 
-translational element mass matrix is computed.
+translational element mass matrix is computed from the material
+mass density.
 The eight nodes i through q must be input as in
 Figure~\ref{bricknodenumbering}.
 
@@ -1517,16 +1518,16 @@ The ``block2D'' command syntax is as follows :
 {\sf\small
 \begin{verbatim}
 
-block2D nx ny   e1  n1  element  elementArgs {
-    1   x1  y1  <z1>
-    2   x2  y2  <z2>
-    3   x3  y3  <z3>
-    4   x4  y4  <z4>
-    <5>   <x5>  <y5>  <z5>
-    <6>   <x6>  <y6>  <z6>
-    <7>   <x7>  <y7>  <z7>
-    <8>   <x8>  <y8>  <z8>
-    <9>   <x9>  <y9>  <z9>
+block2D nx ny e1 n1 element elementArgs {
+     1    x1    y1   <z1>
+     2    x2    y2   <z2>
+     3    x3    y3   <z3>
+     4    x4    y4   <z4>
+    <5>  <x5>  <y5>  <z5>
+    <6>  <x6>  <y6>  <z6>
+    <7>  <x7>  <y7>  <z7>
+    <8>  <x8>  <y8>  <z8>
+    <9>  <x9>  <y9>  <z9>
 }
 \end{verbatim}
 
@@ -1566,18 +1567,18 @@ The ``block3D'' command syntax is as follows :
 {\sf\small
 \begin{verbatim}
 
-block3D nx ny nz  e1  n1  element  elementArgs {
-    1   x1    y1    z1 
-    2   x2    y2    z2 
-    3   x3    y3    z3 
-    4   x4    y4    z4 
-    5   x5    y5    z5 
-    6   x6    y6    z6 
-    7   x7    y7    z7 
-    8   x8    y8    z8 
-   <9> <x9>  <y9>  <z9>   
-   <.>  <.>   <.>   <.>
-   <.>  <.>   <.>   <.>
+block3D nx ny nz e1 n1 element elementArgs {
+    1     x1    y1    z1 
+    2     x2    y2    z2 
+    3     x3    y3    z3 
+    4     x4    y4    z4 
+    5     x5    y5    z5 
+    6     x6    y6    z6 
+    7     x7    y7    z7 
+    8     x8    y8    z8 
+   <9>   <x9>  <y9>  <z9>   
+   <.>    <.>   <.>   <.>
+   <.>    <.>   <.>   <.>
    <27> <x27> <y27> <z27>
 }
 \end{verbatim}
@@ -1623,12 +1624,12 @@ left unconstrained.
 \subsection{The fixX Command}
 {\sf\small
 \begin{verbatim}
-   fixX xCoordinate (ndf values?) <-tol tol?>
+   fixX xCoordinate? (ndf values?) <-tol tol?>
 \end{verbatim}
 }
 
 To construct multiple homogeneous single-point boundary constraints for 
-all nodes whose x-coordintae lies within tol of the specified xCoordinate.
+all nodes whose x-coordinate lies within tol of the specified xCoordinate.
 The user specifies the xCoordinate of the nodes to be constrained and ndf (0,1)
 values. A $1$ specified for the i'th value indicates that the dof for
 the i'th degree-of-freedom is to be constrained, a $0$ that it is to be
@@ -1638,12 +1639,12 @@ tolerence, a default of 1e-10 is used.
 \subsection{The fixY Command}
 {\sf\small
 \begin{verbatim}
-   fixY yCoordinate (ndf values?) <-tol tol?>
+   fixY yCoordinate? (ndf values?) <-tol tol?>
 \end{verbatim}
 }
 
 To construct multiple homogeneous single-point boundary constraints for 
-all nodes whose y-coordintae lies within tol of the specified yCoordinate.
+all nodes whose y-coordinate lies within tol of the specified yCoordinate.
 The user specifies the yCoordinate of the nodes to be constrained and ndf (0,1)
 values. A $1$ specified for the i'th value indicates that the dof for
 the i'th degree-of-freedom is to be constrained, a $0$ that it is to be
@@ -1653,12 +1654,12 @@ tolerence, a default of 1e-10 is used.
 \subsection{The fixZ Command}
 {\sf\small
 \begin{verbatim}
-   fixZ zCoordinate (ndf values?) <-tol tol?>
+   fixZ zCoordinate? (ndf values?) <-tol tol?>
 \end{verbatim}
 }
 
 To construct multiple homogeneous single-point boundary constraints for 
-all nodes whose z-coordintae lies within tol of the specified zCoordinate.
+all nodes whose z-coordinate lies within tol of the specified zCoordinate.
 The user specifies the zCoordinate of the nodes to be constrained and ndf (0,1)
 values. A $1$ specified for the i'th value indicates that the dof for
 the i'th degree-of-freedom is to be constrained, a $0$ that it is to be
@@ -2172,7 +2173,7 @@ analysis: Newmark, Newmark1, HHT, and HHT1
 
 {\sf\small
 \begin{verbatim}
-   integrator LoadControl dlambda1? Jd? minLambda? maxLambda?
+   integrator LoadControl dlambda1? <Jd? minLambda? maxLambda?>
 \end{verbatim}
 }
 
@@ -2189,7 +2190,7 @@ maxLambda are used to bound the increment.
 
 {\sf\small
 \begin{verbatim}
-   integrator  DisplacementControl nodeTag? dofTag? dU1? Jd? minDU? maxDU?
+   integrator  DisplacementControl nodeTag? dofTag? dU1? <Jd? minDU? maxDU?>
 \end{verbatim}
 }
 
@@ -2209,7 +2210,7 @@ increment.
 
 {\sf\small
 \begin{verbatim}
-   integrator MinUnbalDispNorm dlambda11? Jd? minLambda? maxLambda?
+   integrator MinUnbalDispNorm dlambda11? <Jd? minLambda? maxLambda?>
 \end{verbatim}
 }
 
@@ -2226,7 +2227,7 @@ arguments minLambda and maxLambda are used to bound the increment.
 
 {\sf\small
 \begin{verbatim}
-   integrator ArcLength arclength? alpha?
+   integrator ArcLength  arclength? alpha?
    integrator ArcLength1 arclength? alpha?
 \end{verbatim}
 }
@@ -2239,7 +2240,7 @@ defining the two arc length parameters to be used.
 
 {\sf\small
 \begin{verbatim}
-   integrator Newmark gamma? beta? <alphaM? betaK? betaKinit? betaKcomm?> 
+   integrator Newmark  gamma? beta? <alphaM? betaK? betaKinit? betaKcomm?> 
    integrator Newmark1 gamma? beta? <alphaM? betaK? betaKinit? betaKcomm?> 
 \end{verbatim}
 }
@@ -2257,7 +2258,7 @@ KlastCommit + betaKinit * Kinit.
 
 {\sf\small
 \begin{verbatim}
-   integrator HHT alpha? <alphaM? betaK? betaKinit? betaKcomm?> 
+   integrator HHT  alpha? <alphaM? betaK? betaKinit? betaKcomm?> 
    integrator HHT1 alpha? <alphaM? betaK? betaKinit? betaKcomm?> 
 \end{verbatim}
 }
@@ -2318,7 +2319,7 @@ To construct a NewtonLineSearch algorithm object which uses the Newton-Raphson
 method with line search to advance to the next time step. If the
 ratio between the residuals before and after the incremental update
 is greater than that specified by ratio, which should be betweeen 0.5
-and 0.8, the line search algorithm ala Crissfield is employed to try
+and 0.8, the line search algorithm ala Crisfield is employed to try
 to improve the convergence. 
 
 \subsection {Modified Newton Algorithm}
@@ -2631,7 +2632,7 @@ second column as the y-axis.
 \section {The analyze Command}
 {\sf\small
 \begin{verbatim}
-   analyze numIncr? <dt?> <dtMin?> <dtMax?> <Jd>
+   analyze numIncr? <dt?> <dtMin? dtMax? Jd?>
 \end{verbatim}
 }
 
