@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.47 $
-// $Date: 2003-04-10 00:54:15 $
+// $Revision: 1.48 $
+// $Date: 2003-06-11 17:50:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -99,6 +99,8 @@
 #define MAT_TAG_Penalty					15
 #define MAT_TAG_MinMax					16
 #define MAT_TAG_BoucWen					17
+#define MAT_TAG_Pinching4					18
+#define MAT_TAG_BarSlip					19
 
 //B Jeremic
 #define MAT_TAG_PySimple1        205
@@ -272,6 +274,8 @@
 #define ELE_TAG_TwoPointHingedBeam3d     9875
 #define ELE_TAG_OnePointHingedBeam2d     9876
 #define ELE_TAG_OnePointHingedBeam3d     9877
+#define ELE_TAG_BeamColumnJoint2d 4444
+#define ELE_TAG_BeamColumnJoint3d 4445
 
 #define ELE_TAG_ForceBeamColumn2d 9878
 #define ELE_TAG_ForceBeamColumn3d 9879
