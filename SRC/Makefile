@@ -88,7 +88,6 @@ FMK_LIBS = $(FE)/database/FE_Datastore.o
 # the files that make up the FE_LIBRARY
 GLF_LIBS = $(FE)/element/zeroLength/ZeroLength.o \
 	$(FE)/element/zeroLength/ZeroLengthSection.o \
-	$(FE)/element/zeroLength/ZeroLengthND.o \
 	$(FE)/element/zeroLength/TclZeroLength.o
 
 
