@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:58 $
+// $Revision: 1.5 $
+// $Date: 2003-02-18 23:38:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/X11Renderer.h,v $
                                                                         
                                                                         
@@ -40,7 +40,6 @@
 
 #include <Renderer.h>
 
-
 class View;
 class Projection;
 class Clipping;
@@ -48,6 +47,9 @@ class Viewport;
 class ScanLineConverter;
 class Device;
 class FACE;
+
+#include <fstream>
+using std::ofstream;
 
 class X11Renderer : public Renderer
 {
@@ -118,7 +120,7 @@ class X11Renderer : public Renderer
 
   private:
     int aFile;                              // int flag indicating if data to be sent to file or not
-    char theFileName[MAX_FILENAMELENGTH];   // file name  
+    char *theFileName;                      // file name  
     ofstream theFile; 	                    // output stream    
 };
 

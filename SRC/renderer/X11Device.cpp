@@ -18,13 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:58 $
+// $Revision: 1.4 $
+// $Date: 2003-02-18 23:38:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/X11Device.cpp,v $
                                                                         
                                                                         
 #include "X11Device.h"
-#include <iOPS_Stream.h>
+#include <OPS_Globals.h>
 #include <stdlib.h>
 
 

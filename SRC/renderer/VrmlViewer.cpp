@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:58 $
+// $Revision: 1.3 $
+// $Date: 2003-02-18 23:38:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/VrmlViewer.cpp,v $
                                                                         
                                                                         
@@ -37,9 +37,12 @@
 #include <VrmlViewer.h>
 #include <ColorMap.h>
 
-#include <iOPS_Stream.h>
-#include <fstream.h>
-#include <string.h>
+#include <OPS_Globals.h>
+#include <iomanip>
+using std::ios;
+
+#include <string>
+
 #include <stdlib.h>
 #include <stdio.h>
 

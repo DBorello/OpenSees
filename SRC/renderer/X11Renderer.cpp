@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:58 $
+// $Revision: 1.6 $
+// $Date: 2003-02-18 23:38:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/X11Renderer.cpp,v $
                                                                         
                                                                         
@@ -49,6 +49,9 @@
 #include <WindowDevice.h>
 #include <Scan.h>
 
+#include <iomanip>
+using std::ios;
+
 #define WIRE_MODE 1
 #define FILL_MODE 0
 //#define PARALLEL_MODE 0
@@ -56,7 +59,7 @@
 
 X11Renderer::X11Renderer(char *title, int xLoc, int yLoc, int width, int height,
 			 ColorMap &_theMap)
-  :Renderer(_theMap)
+  :Renderer(_theMap), theFileName(0)
 {
     theView = new View;
     theProjection = new Projection;
@@ -97,14 +100,15 @@ X11Renderer::X11Renderer(char *title, int xLoc, int yLoc, int width, int height,
 
     // if file is specified, copy name and open the file
     if (fileName != 0) {
-      if (strlen(fileName) > MAX_FILENAMELENGTH) 
-	g3ErrorHandler->warning("WARNING - X11Renderer::X11Renderer() - fileName %s too long, max %d\n",
-			      fileName, MAX_FILENAMELENGTH);
-      else {
+      theFileName = new char[strlen(fileName)+1]; 
+      if (theFileName == 0) {
+	opserr <<"WARNING - X11Renderer::X11Renderer() - out of memory ccopying file name: " << *fileName << endln;
+	exit(-1);
+      } else {
 	strcpy(theFileName, fileName);    
 	theFile.open(fileName, ios::out);
 	if (!theFile) {
-	  g3ErrorHandler->warning("WARNING - X11Renderer::X11Renderer() - could not open file %s\n",fileName);	  
+	  opserr <<"WARNING - X11Renderer::X11Renderer() - could not open file: " << fileName << endln;;	  
 	  aFile = 0;
 	} else {
 	  aFile = 1;
@@ -126,6 +130,9 @@ X11Renderer::~X11Renderer()
     
     if (aFile == 1)
       theFile.close();
+    
+    if (theFileName != 0)
+      delete [] theFileName;
 }
 
 
@@ -381,11 +388,11 @@ X11Renderer::drawPolygon(const Matrix &pos, const Vector &data)
 {
 #ifdef _G3DEBUG
   if (pos.noCols() != 3) {
-    g3ErrorHandler->warning("X11Renderer::drawPolygon - matrix needs 3 cols\n");
+    opserr <<"X11Renderer::drawPolygon - matrix needs 3 cols\n";
     return -1;
   }
   if (pos.noRows() != data.Size()) {
-    g3ErrorHandler->warning("X11Renderer::drawPolygon - matrix & vector incompatable\n");
+    opserr <<"X11Renderer::drawPolygon - matrix & vector incompatable\n";
     return -1;
   }
 #endif
@@ -440,11 +447,11 @@ X11Renderer::drawPolygon(const Matrix &pos, const Matrix &data)
 {
 #ifdef _G3DEBUG
   if (pos.noCols() != 3 || data.noCols() != 3) {
-    g3ErrorHandler->warning("X11Renderer::drawPolygon - matrix needs 3 cols\n");
+    opserr <<"X11Renderer::drawPolygon - matrix needs 3 cols\n";
     return -1;
   }
   if (pos.noRows() != data.noRows()) {
-    g3ErrorHandler->warning("X11Renderer::drawPolygon - matrix & vector incompatable\n");
+    opserr <<"X11Renderer::drawPolygon - matrix & vector incompatable\n";
     return -1;
   }
 #endif

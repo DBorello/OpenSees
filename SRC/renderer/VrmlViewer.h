@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:27 $
+// $Revision: 1.2 $
+// $Date: 2003-02-18 23:38:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/VrmlViewer.h,v $
                                                                         
                                                                         
@@ -39,10 +39,11 @@
 #define VrmlViewer_h
 
 #include <Renderer.h>
+#include <fstream>
+using std::fstream;
 
 class ColorMap;
 class Domain;
-class fstream;
 
 class VrmlViewer : public Renderer
 {
