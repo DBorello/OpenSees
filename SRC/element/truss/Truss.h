@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2003-03-04 00:48:15 $
+// $Revision: 1.13 $
+// $Date: 2003-03-17 19:19:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.h,v $
                                                                         
                                                                         
@@ -122,11 +122,11 @@ class Truss : public Element
     Matrix *theMatrix; // pointer to objects matrix (a class wide Matrix)
     Vector *theVector; // pointer to objects vector (a clas wide Vector)
 
-    Matrix *t;    // hold the transformation matrix, could use a Vector
-
     double L;	    // length of truss based on undeformed configuration
     double A; 	    // area of truss
-    double M; 	    // rho and M*A*L/2 after setDomain()
+    double rho; 	// rho: mass density per unit length
+
+    double cosX[3]; // direction cosines
 
     Node *theNodes[2];
 	
