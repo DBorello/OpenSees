@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2002-04-29 20:57:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/LoadControl.cpp,v $
                                                                         
                                                                         
@@ -38,6 +38,7 @@
 
 #include <LoadControl.h>
 #include <AnalysisModel.h>
+#include <LinearSOE.h>
 #include <iostream.h>
 #include <Vector.h>
 #include <Channel.h>
@@ -95,14 +96,18 @@ int
 LoadControl::update(const Vector &deltaU)
 {
     AnalysisModel *myModel = this->getAnalysisModelPtr();
-    if (myModel == 0) {
+    LinearSOE *theSOE = this->getLinearSOEPtr();
+    if (myModel == 0 || theSOE == 0) {
 	cerr << "WARNING LoadControl::update() ";
-	cerr << "No AnalysisModel has been set\n";
+	cerr << "No AnalysisModel or LinearSOE has been set\n";
 	return -1;
     }
 
     myModel->incrDisp(deltaU);    
     myModel->updateDomain();
+
+    // Set deltaU for the convergence test
+    theSOE->setX(deltaU);
 
     numIncrLastStep++;
 
