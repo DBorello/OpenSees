@@ -3,8 +3,8 @@
 #
 # purpose: example1 in OpenSeesIntro.tex
 #
-# $Revision: 1.2 $
-# $Date: 2000-12-16 06:24:06 $
+# $Revision: 1.3 $
+# $Date: 2002-02-26 06:35:04 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExampleScripts/example1.tcl,v $
 
 
@@ -54,7 +54,7 @@ numberer RCM
 analysis Static 
 
 # create a Recorder object for the nodal displacements at node 4
-recorder Node example.out disp -load -nodes 4 -dof 1 2
+recorder Node example.out  -load -nodes 4 -dof 1 2
 
 # perform the analysis
 analyze 1
