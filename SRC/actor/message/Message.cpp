@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:00:40 $
+// $Revision: 1.6 $
+// $Date: 2004-11-25 00:54:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/message/Message.cpp,v $
                                                                         
                                                                         
@@ -64,6 +64,8 @@ Message::~Message()
 
 #ifdef _WIN32
 extern "C" void bcopy(const char *scource, char *dest, int length);
+#include <winsock.h>
+#define bcopy(s,d,l) memmove(d,s,l)
 #endif
 
 int
