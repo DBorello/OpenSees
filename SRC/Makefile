@@ -31,7 +31,7 @@ all:
 	$(MATERIAL_LIBS) $(HYSTERETIC_LIBS) $(SECTION_LIBS) $(DATABASE_LIBS) \
 	$(FEDEAS_LIBS) $(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)\
 	$(MATMOD_BJ_LIBS) $(NDARRAY_BJ_LIBS) $(ELEMENT_BJ_LIBS) \
-	$(FINITE_DEFORMATION_BJ_LIBS) $(PY_RWB_BJ_LIBS) \
+	$(FINITE_DEFORMATION_BJ_LIBS) $(PY_SJB_RWB_BJ_LIBS) \
 	$(ANALYSIS_LIBS) $(SysOfEqn_LIBS) $(GRAPH_LIBS) $(TAGGED_LIBS) \
 	$(UTILITY_LIBS) $(ACTOR_LIBS) $(RECORDER_LIBS) $(LAW_LIBS) $(GGD_LIBS)\
 	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ZHY_LIBS) $(ERRORHANDLER_LIBS) \
@@ -66,7 +66,7 @@ all:
 	$(MATERIAL_LIBS) $(HYSTERETIC_LIBS) $(SECTION_LIBS) $(DATABASE_LIBS) \
 	$(FEDEAS_LIBS) $(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)\
 	$(MATMOD_BJ_LIBS) $(NDARRAY_BJ_LIBS) $(ELEMENT_BJ_LIBS) \
-	$(FINITE_DEFORMATION_BJ_LIBS) $(PY_RWB_BJ_LIBS) \
+	$(FINITE_DEFORMATION_BJ_LIBS) $(PY_SJB_RWB_BJ_LIBS) \
 	$(ANALYSIS_LIBS) $(SysOfEqn_LIBS) $(GRAPH_LIBS) $(TAGGED_LIBS) \
 	$(UTILITY_LIBS) $(ACTOR_LIBS) $(RECORDER_LIBS) $(LAW_LIBS) $(GGD_LIBS) \
 	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ZHY_LIBS) $(ERRORHANDLER_LIBS) \
@@ -282,12 +282,14 @@ FINITE_DEFORMATION_BJ_LIBS = $(FE)/material/nD/FiniteDeformation/NeoHookeanWEner
 
 
 
-PY_RWB_BJ_LIBS = $(FE)/material/uniaxial/PY/PySimple1.o \
-                 $(FE)/material/uniaxial/PY/QzSimple1.o \
-                 $(FE)/material/uniaxial/PY/TzSimple1.o \
-                 $(FE)/material/uniaxial/PY/PyLiq1.o \
-                 $(FE)/material/uniaxial/PY/TzLiq1.o \
-                 $(FE)/material/uniaxial/PY/TclPyTzQzMaterialCommand.o
+PY_SJB_RWB_BJ_LIBS = $(FE)/material/uniaxial/PY/PySimple1.o \
+                     $(FE)/material/uniaxial/PY/QzSimple1.o \
+                     $(FE)/material/uniaxial/PY/TzSimple1.o \
+                     $(FE)/material/uniaxial/PY/PyLiq1.o \
+                     $(FE)/material/uniaxial/PY/TzLiq1.o \
+                     $(FE)/material/uniaxial/PY/TclPyTzQzMaterialCommand.o \
+                     $(FE)/material/uniaxial/PY/PySimple1Gen.o \
+                     $(FE)/material/uniaxial/PY/TzSimple1Gen.o
 
 
 
