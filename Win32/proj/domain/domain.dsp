@@ -383,6 +383,14 @@ SOURCE=..\..\..\SRC\domain\pattern\MultiSupportPattern.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\domain\pattern\PBowlLoading.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\pattern\PBowlLoading.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\domain\pattern\TclPatternCommand.cpp
 # End Source File
 # Begin Source File
