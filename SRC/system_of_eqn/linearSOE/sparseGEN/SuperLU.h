@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:30 $
+// $Revision: 1.2 $
+// $Date: 2002-01-25 20:27:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/SuperLU.h,v $
                                                                         
                                                                         
@@ -30,7 +30,6 @@
 //
 // Written: fmk 
 // Created: 11/96
-// Revision: A
 //
 // Description: This file contains the class definition for SuperLU.
 // A SuperLU object can be constructed to solve a SparseGenColLinSOE
@@ -46,7 +45,7 @@
 // What: "@(#) SuperLU.h, revA"
 
 #include <SparseGenColLinSolver.h>
-#include "SuperLU_supermatrix.h"
+#include <supermatrix.h>
 
 class SuperLU : public SparseGenColLinSolver
 {

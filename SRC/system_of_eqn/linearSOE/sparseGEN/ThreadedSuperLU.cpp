@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:30 $
+// $Revision: 1.2 $
+// $Date: 2002-01-25 20:27:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/ThreadedSuperLU.cpp,v $
                                                                         
                                                                         
@@ -50,7 +50,7 @@ ThreadedSuperLU(int numT, int perm, int relx,
  etree(0), sizePerm(0),
  relax(relx), permSpec(perm), panelSize(panel),
  thresh(thrsh), numThreads(numT), 
- refact(NO), fact(DOFACT), usepr(NO), work(NULL), lwork(0)
+ refact(NO), usepr(NO), fact(DOFACT), work(NULL), lwork(0)
 {
   refact = NO;
   fact = DOFACT;

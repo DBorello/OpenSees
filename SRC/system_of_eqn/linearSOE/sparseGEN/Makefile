@@ -5,8 +5,15 @@ include ../../../../Makefile.def
 
 PROGRAM         = test
 
+ifeq ($(PROGRAMMING_MODE), THREADS)
+
+OBJS       = SparseGenColLinSOE.o SparseGenColLinSolver.o ThreadedSuperLU.o
+
+else
+
 OBJS       = SparseGenColLinSOE.o SparseGenColLinSolver.o SuperLU.o
 
+endif
 
 all:         $(OBJS)
 

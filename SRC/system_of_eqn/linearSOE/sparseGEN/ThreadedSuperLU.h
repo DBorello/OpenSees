@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:30 $
+// $Revision: 1.2 $
+// $Date: 2002-01-25 20:27:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/ThreadedSuperLU.h,v $
                                                                         
                                                                         
@@ -38,15 +38,16 @@
 // What: "@(#) ThreadedSuperLU.h, revA"
 
 #include <SparseGenColLinSolver.h>
-#include "SuperLU_MT_supermatrix.h"
-#include "SuperLU_MT_pdsp_defs.h"
+#include <supermatrix.h>
+#include <pdsp_defs.h>
 
 class ThreadedSuperLU : public SparseGenColLinSolver
 {
   public:
     ThreadedSuperLU(int numThreads = 2,
-				 int permSpec = 0, int panelSize = 6, 
-				 int relax = 6, double thresh = 0.0);     
+		    int permSpec = 0, int panelSize = 6, 
+		    int relax = 6, double thresh = 0.0);     
+
     ~ThreadedSuperLU();
 
     int solve(void);
