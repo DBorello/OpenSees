@@ -25,7 +25,7 @@ all:
 	@$(CD) $(FE)/coordTransformation; $(MAKE);
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATRIX_LIBS) $(ELE_LIBS)\
 	$(MATERIAL_LIBS) $(HYSTERETIC_LIBS) $(SECTION_LIBS) $(DATABASE_LIBS) \
-	$(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)  $(JEREMIC_LIBS)\
+	$(FEDEAS_LIBS) $(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)  $(JEREMIC_LIBS)\
 	$(ANALYSIS_LIBS) $(SysOfEqn_LIBS) $(GRAPH_LIBS) $(TAGGED_LIBS) \
 	$(UTILITY_LIBS) $(ACTOR_LIBS) $(RECORDER_LIBS) $(LAW_LIBS) \
 	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ZHY_LIBS) $(ERRORHANDLER_LIBS)
@@ -264,6 +264,7 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.o \
 	$(FE)/material/nD/TclModelBuilderNDMaterialCommand.o 
 
+FEDEAS_LIBS = $(FE)/material/uniaxial/FedeasMaterial.o \
 
 SECTION_LIBS = $(FE)/material/section/SectionForceDeformation.o \
 	$(FE)/material/section/ElasticSection2d.o \

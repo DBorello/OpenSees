@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2001-07-21 20:20:01 $
+// $Revision: 1.14 $
+// $Date: 2001-07-29 22:59:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -89,7 +89,19 @@
 #define MAT_TAG_Clough2	202
 #define MAT_TAG_Pinch1	203
 #define MAT_TAG_BiLinear	204
+
 #define MAT_TAG_FedeasMaterial         1000
+#define MAT_TAG_FedeasBond1       1001
+#define MAT_TAG_FedeasBond2       1002
+#define MAT_TAG_FedeasConcrete1       1003
+#define MAT_TAG_FedeasConcrete2       1004
+#define MAT_TAG_FedeasConcrete3       1005
+#define MAT_TAG_FedeasHardening       1006
+#define MAT_TAG_FedeasHysteretic1       1007
+#define MAT_TAG_FedeasHysteretic2       1008
+#define MAT_TAG_FedeasSteel1       1009
+#define MAT_TAG_FedeasSteel2       1010
+
 #define MAT_TAG_DrainMaterial          2000
 
 

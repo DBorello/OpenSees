@@ -6,6 +6,8 @@ FE_INCLUDES        = -I$(FE)/matrix \
 		  -I$(FE)/tcl \
 		  -I$(FE)/material \
 		  -I$(FE)/material/uniaxial \
+		  -I$(FE)/material/uniaxial/fedeas \
+		  -I$(FE)/material/uniaxial/drain \
 		-I$(FE)/material/backbone \
 		-I$(FE)/material/state \
 		-I$(FE)/material/state/stiffness \
