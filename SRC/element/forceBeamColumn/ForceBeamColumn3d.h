@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2003-02-25 23:32:52 $
+// $Revision: 1.5 $
+// $Date: 2003-02-27 17:15:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.h,v $
 
 #ifndef ForceBeamColumn3d_h
@@ -45,7 +45,7 @@ class ForceBeamColumn3d: public Element
 		    int numSections, SectionForceDeformation **sec,
 		    BeamIntegration &beamIntegr,
 		    CrdTransf3d &coordTransf, double rho = 0.0, 
-		    int maxNumIters = 1, double tolerance = 1e-10);
+		    int maxNumIters = 10, double tolerance = 1.0e-12);
   
   virtual ~ForceBeamColumn3d();
   

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2003-02-25 23:32:59 $
+// $Revision: 1.15 $
+// $Date: 2003-02-27 17:15:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.h,v $
                                                                         
                                                                         
@@ -61,7 +61,7 @@ class NLBeamColumn3d: public Element
     NLBeamColumn3d (int tag, int nodeI, int nodeJ,  
                     int numSections, SectionForceDeformation *sectionPtrs[], 
                     CrdTransf3d &coordTransf, double massDensPerUnitLength = 0.0, 
-		    int maxNumIters = 1, double tolerance = 1e-10);
+		    int maxNumIters = 10, double tolerance = 1e-12);
     
     ~NLBeamColumn3d();
 
