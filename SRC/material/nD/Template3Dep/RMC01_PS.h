@@ -53,7 +53,7 @@ class RMC01PotentialSurface : public PotentialSurface
   
   public:
     RMC01PotentialSurface( ){ };   // Default constructor
-    virtual ~RMC01PotentialSurface() { }; //Not all virtual functions  redefined
+    ~RMC01PotentialSurface() { }; //Not all virtual functions  redefined
     PotentialSurface *newObj(); //create a colne of itself
 
     tensor dQods(const EPState *EPS  ) const;

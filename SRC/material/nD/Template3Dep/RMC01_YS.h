@@ -55,7 +55,7 @@ class RMC01YieldSurface : public YieldSurface
     YieldSurface *newObj();  //create a clone of itself
     
     RMC01YieldSurface ( ) {}    // Default constructor
-    virtual ~RMC01YieldSurface ( );     // Destructor
+    virtual ~RMC01YieldSurface() {};     // Destructor
 
     double f(const EPState *EPS) const;
     tensor dFods(const EPState *EPS) const;
