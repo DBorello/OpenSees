@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-10-19 23:09:44 $
+// $Revision: 1.6 $
+// $Date: 2001-10-20 23:16:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -270,8 +270,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    flags = 1;
 	}
 
-	cerr << theNodes;
-	cerr << theDofs;
+	//cerr << theNodes;
+	//cerr << theDofs;
 
 	(*theRecorder) = new NodeRecorder(theDofs, theNodes, 
 					  theDomain,
