@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2001-07-18 16:24:10 $
+// $Revision: 1.2 $
+// $Date: 2001-07-28 22:33:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/KrylovNewton.cpp,v $
 
 // Written: MHS
@@ -69,11 +69,8 @@ KrylovNewton::KrylovNewton(ConvergenceTest &theT, int theTangentToUse)
 // Destructor
 KrylovNewton::~KrylovNewton()
 {
-  if (r != 0) {
-    for (int i = 0; i < numTests; i++)
-      delete r[i];
-    delete [] r;
-  }
+  if (r != 0)
+    delete r;
 
   if (v != 0) {
     for (int i = 0; i < numTests; i++)
@@ -113,11 +110,8 @@ KrylovNewton::solveCurrentStep(void)
   numTests = 2 + theTest->getMaxNumTests();
   numEqns  = theSOE->getNumEqn();
   
-  if (r == 0) {
-    r = new Vector*[numTests];
-    for (int i = 0; i < numTests; i++)
-      r[i] = new Vector(numEqns);
-  }
+  if (r == 0)
+    r = new Vector(numEqns);
 
   if (v == 0) {
     v = new Vector*[numTests];
@@ -162,10 +156,10 @@ KrylovNewton::solveCurrentStep(void)
 
   // Update y ... y_1 = y_0 + v_1 --> (y_0 is zero) --> y_1 = v_1
   // --> (v_1 = f(y_0)) --> y_1 = f(y_0)
-  *(r[0]) = theSOE->getX();
+  *r = theSOE->getX();
 
   // Store first update v_1 = r_0
-  *(v[1]) = *(r[0]);
+  *(v[1]) = *r;
 
   int result = -1;
   int k = 1;
@@ -193,13 +187,11 @@ KrylovNewton::solveCurrentStep(void)
       return -3;
     }
 
-    // Store residual r_k \equiv f(y_k)
-    *(r[k]) = theSOE->getX();
-
     // Compute Av_k = f(y_{k-1}) - f(y_k) = r_{k-1} - r_k
     // NOTE: Not using Av[0] so that notation follows paper
-    *(Av[k]) = *(r[k-1]);
-    Av[k]->addVector(1.0, *(r[k]), -1.0);
+    *(Av[k]) = *r;
+    *r = theSOE->getX();
+    Av[k]->addVector(1.0, *r, -1.0);
 
     // Solve least squares A w_{k+1} = r_k
     if (this->leastSquares(k) < 0) {
@@ -277,7 +269,7 @@ KrylovNewton::leastSquares(int k)
   for (i = 1; i <= k; i++) {
     for (j = 1; j <= k; j++)
       A(i-1,j-1) = *(Av[i]) ^ *(Av[j]);
-    b(i-1) = *(Av[i]) ^ *(r[k]);
+    b(i-1) = *(Av[i]) ^ *r;
   }
 
   // Solve normal equations
@@ -288,7 +280,7 @@ KrylovNewton::leastSquares(int k)
   }
 
   // v_{k+1} = w_{k+1} + q_{k+1}
-  *(v[k+1]) = *(r[k]);
+  *(v[k+1]) = *r;
 
   double cj;
   for (j = 1; j <= k; j++) {

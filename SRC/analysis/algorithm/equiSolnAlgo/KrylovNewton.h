@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-18 16:24:10 $
+// $Revision: 1.2 $
+// $Date: 2001-07-28 22:33:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/KrylovNewton.h,v $
                                                                         
 #ifndef KrylovNewton_h
@@ -60,7 +60,7 @@ class KrylovNewton: public EquiSolnAlgo
   private:
     ConvergenceTest *theTest;
     int tangent;
-    Vector **r;
+    Vector *r;
     Vector **v;
     Vector **Av;
 
