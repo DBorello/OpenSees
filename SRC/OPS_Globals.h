@@ -21,8 +21,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-04-02 22:02:32 $
+// $Revision: 1.4 $
+// $Date: 2004-02-18 23:05:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/OPS_Globals.h,v $
                                                                         
 // Written: fmk 
@@ -46,11 +46,11 @@ extern OPS_Stream &opserr;
 
 #define _stdcall BLAH
 
-#ifdef _TCL84
-#define TCL_Char const char
-#else
-#define TCL_Char char
-#endif
+ifdef _TCL84
+define TCL_Char const char
+else
+define TCL_Char char
+endif
 
 
 class Domain;
