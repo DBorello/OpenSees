@@ -51,8 +51,6 @@ all:
 	@$(CD) $(FE)/modelbuilder/tcl;  $(MAKE) tcl;
 
 
-g3: doit
-
 doit:
 	@$(ECHO) Building g3 Program ..;
 	@$(CD) $(FE)/tcl;  $(MAKE) tcl;
