@@ -27,7 +27,7 @@ all:
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATRIX_LIBS) $(ELE_LIBS)\
 	$(MATERIAL_LIBS) $(HYSTERETIC_LIBS) $(SECTION_LIBS) $(DATABASE_LIBS) \
 	$(FEDEAS_LIBS) $(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)\
-	$(MATMOD_BJ_LIBS) $(NDARRAY_BJ_LIBS) \
+	$(MATMOD_BJ_LIBS) $(NDARRAY_BJ_LIBS) $(ELEMENT_BJ_LIBS) \
 	$(ANALYSIS_LIBS) $(SysOfEqn_LIBS) $(GRAPH_LIBS) $(TAGGED_LIBS) \
 	$(UTILITY_LIBS) $(ACTOR_LIBS) $(RECORDER_LIBS) $(LAW_LIBS) \
 	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ZHY_LIBS) $(ERRORHANDLER_LIBS) \
@@ -127,6 +127,9 @@ MATMOD_BJ_LIBS = 	$(FE)/material/nD/ElasticIsotropic3D.o  \
 	$(FE)/material/nD/Template3Dep/EL_LEeq.o  \
 	$(FE)/material/nD/Template3Dep/EL_NLEij.o \
 	$(FE)/material/nD/Template3Dep/EL_LEij.o
+
+ELEMENT_BJ_LIBS = $(FE)/element/8nbrick/EightNodeBrick.o \
+                  $(FE)/element/8nbrick/TclEightNodeBrickCommand.o
 
 
 ZHY_LIBS =	$(FE)/material/nD/soil/FluidSolidPorousMaterial.o \
@@ -294,7 +297,9 @@ FEDEAS_LIBS = $(FE)/material/uniaxial/FedeasMaterial.o \
 	$(FE)/material/uniaxial/fedeas/FedeasHyster1Material.o \
 	$(FE)/material/uniaxial/fedeas/FedeasHyster2Material.o \
 	$(FE)/material/uniaxial/fedeas/FedeasSteel1Material.o \
-	$(FE)/material/uniaxial/fedeas/FedeasSteel2Material.o 
+	$(FE)/material/uniaxial/fedeas/FedeasSteel2Material.o \
+	$(FE)/material/uniaxial/fedeas/TclFedeasMaterialCommand.o
+
 
 DRAIN_LIBS = $(FE)/material/uniaxial/DrainMaterial.o \
 	$(FE)/material/uniaxial/drain/DrainHardeningMaterial.o \
