@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2003-08-21 00:34:18 $
+// $Revision: 1.30 $
+// $Date: 2003-08-29 00:29:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -188,6 +188,11 @@ extern int
 TclModelBuilder_addElement2dYS(ClientData, Tcl_Interp *, int, TCL_Char **,
 			       Domain *,TclModelBuilder *);
 
+// Zhaohui Yang
+extern int 
+TclModelBuilder_addFourNodeQuadUP(ClientData, Tcl_Interp *, int, char **,
+				Domain*, TclModelBuilder *);
+
 
 int
 TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
@@ -261,6 +266,10 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 						      theTclDomain, 
 						      theTclBuilder);
     return result;
+  } else if (strcmp(argv[1],"quadUP") == 0) {
+          int result = TclModelBuilder_addFourNodeQuadUP(clientData, interp, argc, argv,
+						       theTclDomain, theTclBuilder);
+	  return result;
   } else if ((strcmp(argv[1],"shell") == 0) || (strcmp(argv[1],"shellMITC4") == 0) ||
 	     (strcmp(argv[1],"Shell") == 0) || (strcmp(argv[1],"ShellMITC4") == 0)) {
 
