@@ -1,5 +1,5 @@
-// $Revision: 1.4 $
-// $Date: 2004-06-01 21:19:12 $
+// $Revision: 1.5 $
+// $Date: 2004-07-20 22:44:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/nDarray/nDarray.cpp,v $
                                                                         
                                                                         
@@ -77,6 +77,8 @@
 //#                                   this->pc_nDarray_rep->total_numb--;        #
 //#                                   inststead of                               #
 //#                                   this->pc_nDarray_rep->n--;                 #
+//#                    28June2004     added val4 for efficiency still            #
+//#                                   to be worked on                            #
 //#                                                                              #
 //#                                                                              #
 //################################################################################
@@ -659,6 +661,50 @@ double & nDarray::val(int subscript, ...)
 // ..JB..  }
 // ..JB..
 // ..JB..
+
+
+
+//##############################################################################
+// another overloading of operator() . . .  // overloaded for FOUR arguments
+double & nDarray::val4(int first, int second,
+                      int third, int fourth)
+  {
+//JB//JB    long int where = (((first-1)*pc_nDarray_rep->dim[1]+second-1)*pc_nDarray_rep->dim[2]+third-1)*pc_nDarray_rep->dim[3]+fourth-1;
+//JB    double *p_value = pc_nDarray_rep->pd_nDdata + (size_t)where;
+//JB// ..JB..    double *p_value = pc_nDarray_rep->pd_nDdata + (size_t)where;
+//JB    return (*p_value);
+//JB//    return (*pc_nDarray_rep->pd_nDdata + (size_t)(((first-1)*pc_nDarray_rep->dim[1]+second-1)*pc_nDarray_rep->dim[2]+third-1)*pc_nDarray_rep->dim[3]+fourth-1);
+
+
+    if(pc_nDarray_rep->nDarray_rank==0) return (*pc_nDarray_rep->pd_nDdata);
+
+    long int where = first - 1;
+
+    if(pc_nDarray_rep->nDarray_rank==2)
+      {
+         where = where*pc_nDarray_rep->dim[1]+second - 1;
+      }
+
+    if(pc_nDarray_rep->nDarray_rank==3)
+      {
+        where = where*pc_nDarray_rep->dim[2]+third  - 1;
+      }
+
+    if(pc_nDarray_rep->nDarray_rank==4)
+      {
+        where = where*pc_nDarray_rep->dim[3]+fourth - 1;
+      }
+
+//::printf(" w=%ld ",where);
+    double *p_value = pc_nDarray_rep->pd_nDdata + (size_t)where;
+    return (*p_value);
+
+
+
+  }
+
+
+
 
 //..//##############################################################################
 //..// another overloading of operator() . . .

@@ -53,7 +53,8 @@
 //#                                   this->pc_nDarray_rep->total_numb--;        #
 //#                                   inststead of                               #
 //#                                   this->pc_nDarray_rep->n--;                 #
-//#                                                                              #
+//#                    28June2004     added val4 for efficiency still            #
+//#                                   to be worked on                            #
 //#                                                                              #
 //#                                                                              #
 //#                                                                              #
@@ -200,6 +201,8 @@ class nDarray
 
 //    BJtensor & operator()(char *indices_from_user);// to be defined in BJtensor class
     double & val(int subscript, ...);
+    double & val4(int first, int second, int third, int fourth);  // overloaded for FOUR arguments for operator * for two tensors
+
 // ..JB..     double & val(int first);  // overloaded for ONE argument
 // ..JB..     double & val(int first,
 // ..JB..                  int second); // overloaded for TWO arguments

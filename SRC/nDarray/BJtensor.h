@@ -1,6 +1,6 @@
 
-// $Revision: 1.2 $                                                              
-// $Date: 2002-01-15 20:56:50 $                                                                  
+// $Revision: 1.3 $                                                              
+// $Date: 2004-07-20 22:44:18 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/nDarray/BJtensor.h,v $                                                                
 
 //#############################################################################
@@ -64,6 +64,8 @@
 //#                                    ( the same as transpose0110 and           #
 //#                                    transpose0101) but just to make it        #
 //#                                    easier to work with Runesson's notation   #
+//#                    28June2004     added val4 for efficiency still            #
+//#                                   to be worked on                            #
 //#                                                                              #
 //#                                                                              #
 //################################################################################

@@ -640,10 +640,10 @@ void straintensor::reportshort(char * msg) const
 
 OPS_Stream& operator<< (OPS_Stream& os, const straintensor & rhs)
 {
-  opserr << "straintensor: I1 = " << rhs.Iinvariant1() << ", I2 = " << rhs.Iinvariant2() << ", I3 = " << 
+  os << "straintensor: I1 = " << rhs.Iinvariant1() << ", I2 = " << rhs.Iinvariant2() << ", I3 = " << 
     rhs.Iinvariant3() << endln;
 
-  opserr << "st_trace = " << rhs.trace() << ", mean pressure p = " << rhs.trace()/3.0 << endln;
+  os << "st_trace = " << rhs.trace() << ", mean pressure p = " << rhs.trace()/3.0 << endln;
 
   /*
     tensor I2("I", 2, def_dim_2);
