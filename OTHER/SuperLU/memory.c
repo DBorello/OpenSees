@@ -1,5 +1,5 @@
 /*
- * -- SuperLU routine (version 1.1) --
+ * -- SuperLU routine (version 2.0) --
  * Univ. of California Berkeley, Xerox Palo Alto Research Center,
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
@@ -8,12 +8,7 @@
 /** Precision-independent memory-related routines.
     (Shared by [sdcz]memory.c) **/
 
-#include <stdio.h>
-#include <malloc.h>
 #include "util.h"
-#include "dsp_defs.h"
-
-extern void ifill(int *a, int alen, int ival);
 
 /*
  * Set up pointers for integer working arrays.
@@ -30,17 +25,17 @@ SetIWork(int m, int n, int panel_size, int *iworkptr, int **segrep,
     *panel_lsub = *repfnz + panel_size * m;
     *xprune = *panel_lsub + panel_size * m;
     *marker = *xprune + n;
-    ifill (*repfnz, n * panel_size, EMPTY);
+    ifill (*repfnz, m * panel_size, EMPTY);
     ifill (*panel_lsub, m * panel_size, EMPTY);
 }
 
 
 void
-copy_mem_int(int howmany, void *old, void *newData)
+copy_mem_int(int howmany, void *old, void *new)
 {
     register int i;
-    int *iold = (int *)old;
-    int *inew = (int *)newData;
+    int *iold = old;
+    int *inew = new;
     for (i = 0; i < howmany; i++) inew[i] = iold[i];
 }
 

@@ -1,7 +1,7 @@
 
 
 /*
- * -- SuperLU routine (version 1.1) --
+ * -- SuperLU routine (version 2.0) --
  * Univ. of California Berkeley, Xerox Palo Alto Research Center,
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
@@ -69,7 +69,7 @@ dgssvx(char *fact, char *trans, char *refact,
  *           that it solves the original system before equilibration.
  *
  *   2. If A is stored row-wise (A->Stype = NR), apply the above algorithm
- *      to the tranpose of A:
+ *      to the transpose of A:
  *
  *      2.1. If fact = 'E', scaling factors are computed to equilibrate the
  *           system:
@@ -143,7 +143,8 @@ dgssvx(char *fact, char *trans, char *refact,
  *                matrix A with perm_r and etree as inputs. Use
  *                the same storage for the L\U factors previously allocated,
  *                expand it if necessary. User should insure to use the same
- *                memory model.
+ *                memory model.  In this case, perm_r may be modified due to
+ *                different pivoting determined by diagonal threshold.
  *         If fact = 'F', then refact is not accessed.
  *
  * A       (input/output) SuperMatrix*
@@ -203,7 +204,7 @@ dgssvx(char *fact, char *trans, char *refact,
  *         is already in postorder.
  *
  *         If A->Stype = NR, column permutation vector of size A->nrow,
- *         which describes permutation of columns of tranpose(A) 
+ *         which describes permutation of columns of transpose(A) 
  *         (rows of A) as described above.
  * 
  * perm_r  (input/output) int*
@@ -385,10 +386,10 @@ dgssvx(char *fact, char *trans, char *refact,
     extern double dlangs(char *, SuperMatrix *);
     extern double dlamch_(char *);
 
-    Bstore = (DNformat *)B->Store;
-    Xstore = (DNformat *)X->Store;
-    Bmat   = (double *)Bstore->nzval;
-    Xmat   = (double *)Xstore->nzval;
+    Bstore = B->Store;
+    Xstore = X->Store;
+    Bmat   = Bstore->nzval;
+    Xmat   = Xstore->nzval;
     ldb    = Bstore->lda;
     ldx    = Xstore->lda;
     nrhs   = B->ncol;
@@ -486,10 +487,10 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
     
     /* Convert A to NC format when necessary. */
     if ( A->Stype == NR ) {
-	NRformat *Astore = (NRformat *)A->Store;
+	NRformat *Astore = A->Store;
 	AA = (SuperMatrix *) SUPERLU_MALLOC( sizeof(SuperMatrix) );
 	dCreate_CompCol_Matrix(AA, A->ncol, A->nrow, Astore->nnz, 
-			       (double *)Astore->nzval, Astore->colind, Astore->rowptr,
+			       Astore->nzval, Astore->colind, Astore->rowptr,
 			       NC, A->Dtype, A->Mtype);
 	if ( notran ) { /* Reverse the transpose argument. */
 	    *trant = 'T';

@@ -1,19 +1,51 @@
 /*
- * -- SuperLU routine (version 1.1) --
+ * -- SuperLU routine (version 2.0) --
  * Univ. of California Berkeley, Xerox Palo Alto Research Center,
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
  *
  */
-
 #include "supermatrix.h"
 #include "util.h"
-#include "dsp_defs.h"
+#include "colamd.h"
 
-int genmmd_(int *neqns, int *xadj, int *adjncy, 
-	    int *invp, int *perm, int *delta, int *dhead, 
-	    int *qsize, int *llist, int *marker, int *maxint, 
-	    int *nofsub);
+extern int  genmmd_(int *, int *, int *, int *, int *, int *, int *, 
+		    int *, int *, int *, int *, int *);
+
+void
+get_colamd(
+	   const int m,  /* number of rows in matrix A. */
+	   const int n,  /* number of columns in matrix A. */
+	   const int nnz,/* number of nonzeros in matrix A. */
+	   int *colptr,  /* column pointer of size n+1 for matrix A. */
+	   int *rowind,  /* row indices of size nz for matrix A. */
+	   int *perm_c   /* out - the column permutation vector. */
+	   )
+{
+    int Alen, *A, i, info, *p;
+    double *knobs;
+
+    Alen = colamd_recommended(nnz, m, n);
+
+    if ( !(knobs = (double *) SUPERLU_MALLOC(COLAMD_KNOBS * sizeof(double))) )
+        ABORT("Malloc fails for knobs");
+    colamd_set_defaults(knobs);
+
+    if (!(A = (int *) SUPERLU_MALLOC(Alen * sizeof(int))) )
+        ABORT("Malloc fails for A[]");
+    if (!(p = (int *) SUPERLU_MALLOC((n+1) * sizeof(int))) )
+        ABORT("Malloc fails for p[]");
+    for (i = 0; i <= n; ++i) p[i] = colptr[i];
+    for (i = 0; i < nnz; ++i) A[i] = rowind[i];
+    info = colamd(m, n, Alen, A, p, knobs);
+    if ( info == FALSE ) ABORT("COLAMD failed");
+
+    for (i = 0; i < n; ++i) perm_c[p[i]] = i;
+
+    SUPERLU_FREE(knobs);
+    SUPERLU_FREE(A);
+    SUPERLU_FREE(p);
+}
 
 void
 getata(
@@ -169,6 +201,16 @@ a_plus_at(
 	  int **b_rowind    /* out - size *bnz */
 	  )
 {
+/*
+ * Purpose
+ * =======
+ *
+ * Form the structure of A'+A. A is an n-by-n matrix in column oriented
+ * format represented by (colptr, rowind). The output A'+A is in column
+ * oriented format (symmetrically, also row oriented), represented by
+ * (b_colptr, b_rowind).
+ *
+ */
     register int i, j, k, col, num_nz;
     int *t_colptr, *t_rowind; /* a column oriented form of T = A' */
     int *marker;
@@ -242,8 +284,10 @@ a_plus_at(
     /* Allocate storage for A+A' */
     if ( !(*b_colptr = (int*) SUPERLU_MALLOC( (n+1) * sizeof(int)) ) )
 	ABORT("SUPERLU_MALLOC fails for b_colptr[]");
-    if ( !(*b_rowind = (int*) SUPERLU_MALLOC( *bnz * sizeof(int)) ) )
+    if ( *bnz) {
+      if ( !(*b_rowind = (int*) SUPERLU_MALLOC( *bnz * sizeof(int)) ) )
 	ABORT("SUPERLU_MALLOC fails for b_rowind[]");
+    }
     
     /* Zero the diagonal flag */
     for (i = 0; i < n; ++i) marker[i] = -1;
@@ -289,6 +333,7 @@ get_perm_c(int ispec, SuperMatrix *A, int *perm_c)
  *
  * GET_PERM_C obtains a permutation matrix Pc, by applying the multiple
  * minimum degree ordering code by Joseph Liu to matrix A'*A or A+A'.
+ * or using approximate minimum degree column ordering by Davis et. al.
  * The LU factorization of A*Pc tends to have less fill than the LU 
  * factorization of A.
  *
@@ -296,9 +341,10 @@ get_perm_c(int ispec, SuperMatrix *A, int *perm_c)
  * =========
  *
  * ispec   (input) int
- *         Specifies the matrix structure to be used as input to GENMMD.
- *         = 1: Use the structure of A^T * A.
- *         = 2: Use the structure of A^T + A.
+ *         Specifies the type of column ordering to reduce fill:
+ *         = 1: minimum degree on the structure of A^T * A
+ *         = 2: minimum degree on the structure of A^T + A
+ *         = 3: approximate minimum degree for unsymmetric matrices
  *         If ispec == 0, the natural ordering (i.e., Pc = I) is returned.
  * 
  * A       (input) SuperMatrix*
@@ -314,7 +360,7 @@ get_perm_c(int ispec, SuperMatrix *A, int *perm_c)
  *
  */
 {
-    NCformat *Astore = (NCformat *)A->Store;
+    NCformat *Astore = A->Store;
     int m, n, bnz, *b_colptr, i;
     int delta, maxint, nofsub, *invp;
     int *b_rowind, *dhead, *qsize, *llist, *marker;
@@ -327,12 +373,12 @@ get_perm_c(int ispec, SuperMatrix *A, int *perm_c)
     switch ( ispec ) {
         case 0: /* Natural ordering */
 	      for (i = 0; i < n; ++i) perm_c[i] = i;
-	      /* printf("Use natural column ordering.\n"); */
+	      printf("Use natural column ordering.\n");
 	      return;
         case 1: /* Minimum degree ordering on A'*A */
 	      getata(m, n, Astore->nnz, Astore->colptr, Astore->rowind,
 		     &bnz, &b_colptr, &b_rowind);
-	      /* printf("Use minimum degree ordering on A'*A.\n"); */
+	      printf("Use minimum degree ordering on A'*A.\n");
 	      t = SuperLU_timer_() - t;
 	      /*printf("Form A'*A time = %8.3f\n", t);*/
 	      break;
@@ -340,10 +386,15 @@ get_perm_c(int ispec, SuperMatrix *A, int *perm_c)
 	      if ( m != n ) ABORT("Matrix is not square");
 	      a_plus_at(n, Astore->nnz, Astore->colptr, Astore->rowind,
 			&bnz, &b_colptr, &b_rowind);
-	      /* printf("Use minimum degree ordering on A'+A.\n"); */
+	      printf("Use minimum degree ordering on A'+A.\n");
 	      t = SuperLU_timer_() - t;
 	      /*printf("Form A'+A time = %8.3f\n", t);*/
 	      break;
+        case 3: /* Approximate minimum degree column ordering. */
+	      get_colamd(m, n, Astore->nnz, Astore->colptr, Astore->rowind,
+			 perm_c);
+	      printf(".. Use approximate minimum degree column ordering.\n");
+	      return; 
         default:
 	      ABORT("Invalid ISPEC");
     }

@@ -1,7 +1,7 @@
 
 
 /*
- * -- SuperLU routine (version 1.1) --
+ * -- SuperLU routine (version 2.0) --
  * Univ. of California Berkeley, Xerox Palo Alto Research Center,
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
@@ -16,12 +16,6 @@
 #include "util.h"
 
 
-int dcopy_(int *n, double *dx, int *incx, 
-	   double *dy, int *incy);
-
-int dtrsv_(char *uplo, char *trans, char *diag, int *n, 
-	   double *a, int *lda, double *x, int *incx);
-
 /* 
  * Function prototypes 
  */
@@ -29,6 +23,8 @@ void dusolve(int, int, double*, double*);
 void dlsolve(int, int, double*, double*);
 void dmatvec(int, int, int, double*, double*, double*);
 
+int dtrsv_(char *uplo, char *trans, char *diag, int *n, 
+	   double *a, int *lda, double *x, int *incx);
 
 int
 sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L, 
@@ -116,10 +112,10 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 	return 0;
     }
 
-    Lstore = (SCformat *)L->Store;
-    Lval = (double *)Lstore->nzval;
-    Ustore = (NCformat *)U->Store;
-    Uval = (double *)Ustore->nzval;
+    Lstore = L->Store;
+    Lval = Lstore->nzval;
+    Ustore = U->Store;
+    Uval = Ustore->nzval;
     solve_ops = 0;
 
     if ( !(work = doubleCalloc(L->nrow)) )
@@ -303,6 +299,7 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 
     SuperLUStat.ops[SOLVE] += solve_ops;
     SUPERLU_FREE(work);
+    return 0;
 }
 
 
@@ -379,8 +376,8 @@ sp_dgemv(char *trans, double alpha, SuperMatrix *A, double *x,
     int notran;
 
     notran = lsame_(trans, "N");
-    Astore = (NCformat *)A->Store;
-    Aval = (double *)Astore->nzval;
+    Astore = A->Store;
+    Aval = Astore->nzval;
     
     /* Test the input parameters */
     info = 0;
@@ -471,7 +468,7 @@ sp_dgemv(char *trans, double alpha, SuperMatrix *A, double *x,
 	    ABORT("Not implemented.");
 	}
     }
-    
+    return 0;
 } /* sp_dgemv */
 
 

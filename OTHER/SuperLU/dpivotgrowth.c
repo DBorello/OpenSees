@@ -1,15 +1,15 @@
 
 
 /*
- * -- SuperLU routine (version 1.1) --
+ * -- SuperLU routine (version 2.0) --
  * Univ. of California Berkeley, Xerox Palo Alto Research Center,
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
  *
  */
 #include <math.h>
-#include "util.h"
 #include "dsp_defs.h"
+#include "util.h"
 
 double
 dPivotGrowth(int ncols, SuperMatrix *A, int *perm_c, 
@@ -21,7 +21,7 @@ dPivotGrowth(int ncols, SuperMatrix *A, int *perm_c,
  *
  * Compute the reciprocal pivot growth factor of the leading ncols columns
  * of the matrix, using the formula:
- *     max_j ( max_i(abs(A_ij)) / max_i(abs(U_ij)) )
+ *     min_j ( max_i(abs(A_ij)) / max_i(abs(U_ij)) )
  *
  * Arguments
  * =========
@@ -61,12 +61,12 @@ dPivotGrowth(int ncols, SuperMatrix *A, int *perm_c,
     smlnum = dlamch_("S");
     rpg = 1. / smlnum;
 
-    Astore = (NCformat *)A->Store;
-    Lstore = (SCformat *)L->Store;
-    Ustore = (NCformat *)U->Store;
-    Aval = (double *)Astore->nzval;
-    Lval = (double *)Lstore->nzval;
-    Uval = (double *)Ustore->nzval;
+    Astore = A->Store;
+    Lstore = L->Store;
+    Ustore = U->Store;
+    Aval = Astore->nzval;
+    Lval = Lstore->nzval;
+    Uval = Ustore->nzval;
     
     inv_perm_c = (int *) SUPERLU_MALLOC(A->ncol*sizeof(int));
     for (j = 0; j < A->ncol; ++j) inv_perm_c[perm_c[j]] = j;

@@ -1,7 +1,7 @@
 
 
 /*
- * -- SuperLU routine (version 1.1) --
+ * -- SuperLU routine (version 2.0) --
  * Univ. of California Berkeley, Xerox Palo Alto Research Center,
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
@@ -38,7 +38,7 @@ dCreate_CompCol_Matrix(SuperMatrix *A, int m, int n, int nnz,
     A->ncol = n;
     A->Store = (void *) SUPERLU_MALLOC( sizeof(NCformat) );
     if ( !(A->Store) ) ABORT("SUPERLU_MALLOC fails for A->Store");
-    Astore = (NCformat *)A->Store;
+    Astore = A->Store;
     Astore->nnz = nnz;
     Astore->nzval = nzval;
     Astore->rowind = rowind;
@@ -59,7 +59,7 @@ dCreate_CompRow_Matrix(SuperMatrix *A, int m, int n, int nnz,
     A->ncol = n;
     A->Store = (void *) SUPERLU_MALLOC( sizeof(NRformat) );
     if ( !(A->Store) ) ABORT("SUPERLU_MALLOC fails for A->Store");
-    Astore = (NRformat *)A->Store;
+    Astore = A->Store;
     Astore->nnz = nnz;
     Astore->nzval = nzval;
     Astore->colind = colind;
@@ -139,7 +139,7 @@ dCreate_SuperNode_Matrix(SuperMatrix *L, int m, int n, int nnz,
     L->ncol = n;
     L->Store = (void *) SUPERLU_MALLOC( sizeof(SCformat) );
     if ( !(L->Store) ) ABORT("SUPERLU_MALLOC fails for L->Store");
-    Lstore = (SCformat *)L->Store;
+    Lstore = L->Store;
     Lstore->nnz = nnz;
     Lstore->nsuper = col_to_sup[n];
     Lstore->nzval = nzval;
@@ -172,10 +172,10 @@ dCompRow_to_CompCol(int m, int n, int nnz,
     /* Get counts of each column of A, and set up column pointers */
     for (i = 0; i < m; ++i)
 	for (j = rowptr[i]; j < rowptr[i+1]; ++j) ++marker[colind[j]];
-    *colptr[0] = 0;
+    (*colptr)[0] = 0;
     for (j = 0; j < n; ++j) {
-	*colptr[j+1] = *colptr[j] + marker[j];
-	marker[j] = *colptr[j];
+	(*colptr)[j+1] = (*colptr)[j] + marker[j];
+	marker[j] = (*colptr)[j];
     }
 
     /* Transfer the matrix into the compressed column storage. */
@@ -183,8 +183,8 @@ dCompRow_to_CompCol(int m, int n, int nnz,
 	for (j = rowptr[i]; j < rowptr[i+1]; ++j) {
 	    col = colind[j];
 	    relpos = marker[col];
-	    *rowind[relpos] = i;
-	    *at[relpos] = a[j];
+	    (*rowind)[relpos] = i;
+	    (*at)[relpos] = a[j];
 	    ++marker[col];
 	}
     }
@@ -220,18 +220,35 @@ void
 dPrint_SuperNode_Matrix(char *what, SuperMatrix *A)
 {
     SCformat     *Astore;
-    register int i,n;
+    register int i, j, k, c, d, n, nsup;
     double       *dp;
+    int *col_to_sup, *sup_to_col, *rowind, *rowind_colptr;
     
     printf("\nSuperNode matrix %s:\n", what);
     printf("Stype %d, Dtype %d, Mtype %d\n", A->Stype,A->Dtype,A->Mtype);
     n = A->ncol;
     Astore = (SCformat *) A->Store;
     dp = (double *) Astore->nzval;
+    col_to_sup = Astore->col_to_sup;
+    sup_to_col = Astore->sup_to_col;
+    rowind_colptr = Astore->rowind_colptr;
+    rowind = Astore->rowind;
     printf("nrow %d, ncol %d, nnz %d, nsuper %d\n", 
 	   A->nrow,A->ncol,Astore->nnz,Astore->nsuper);
-    printf("nzval: ");
+    printf("nzval:\n");
+    for (k = 0; k <= Astore->nsuper+1; ++k) {
+      c = sup_to_col[k];
+      nsup = sup_to_col[k+1] - c;
+      for (j = c; j < c + nsup; ++j) {
+	d = Astore->nzval_colptr[j];
+	for (i = rowind_colptr[c]; i < rowind_colptr[c+1]; ++i) {
+	  printf("%d\t%d\t%e\n", rowind[i], j, dp[d++]);
+	}
+      }
+    }
+#if 0
     for (i = 0; i < Astore->nzval_colptr[n]; ++i) printf("%f  ", dp[i]);
+#endif
     printf("\nnzval_colptr: ");
     for (i = 0; i <= n; ++i) printf("%d  ", Astore->nzval_colptr[i]);
     printf("\nrowind: ");
@@ -240,10 +257,10 @@ dPrint_SuperNode_Matrix(char *what, SuperMatrix *A)
     printf("\nrowind_colptr: ");
     for (i = 0; i <= n; ++i) printf("%d  ", Astore->rowind_colptr[i]);
     printf("\ncol_to_sup: ");
-    for (i = 0; i < n; ++i) printf("%d  ", Astore->col_to_sup[i]);
+    for (i = 0; i < n; ++i) printf("%d  ", col_to_sup[i]);
     printf("\nsup_to_col: ");
     for (i = 0; i <= Astore->nsuper+1; ++i) 
-        printf("%d  ", Astore->sup_to_col[i]);
+        printf("%d  ", sup_to_col[i]);
     printf("\n");
     fflush(stdout);
 }
@@ -352,10 +369,10 @@ dFillRHS(char *trans, int nrhs, double *x, int ldx,
     double zero = 0.0;
     int      ldc;
 
-    Astore = (NCformat *)A->Store;
+    Astore = A->Store;
     Aval   = (double *) Astore->nzval;
-    Bstore = (DNformat *)B->Store;
-    rhs    = (double *)Bstore->nzval;
+    Bstore = B->Store;
+    rhs    = Bstore->nzval;
     ldc    = Bstore->lda;
     
     sp_dgemm(trans, "N", A->nrow, nrhs, A->ncol, one, A,
@@ -385,8 +402,8 @@ void dinf_norm_error(int nrhs, SuperMatrix *X, double *xtrue)
     double *Xmat, *soln_work;
     int i, j;
 
-    Xstore = (DNformat *)X->Store;
-    Xmat = (double *)Xstore->nzval;
+    Xstore = X->Store;
+    Xmat = Xstore->nzval;
 
     for (j = 0; j < nrhs; j++) {
       soln_work = &Xmat[j*Xstore->lda];
@@ -450,7 +467,7 @@ dPrintPerf(SuperMatrix *L, SuperMatrix *U, mem_usage_t *mem_usage,
 
 
 
-int print_double_vec(char *what, int n, double *vec)
+print_double_vec(char *what, int n, double *vec)
 {
     int i;
     printf("%s: n %d\n", what, n);

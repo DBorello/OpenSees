@@ -1,7 +1,7 @@
 
 
 /*
- * -- SuperLU routine (version 1.1) --
+ * -- SuperLU routine (version 2.0) --
  * Univ. of California Berkeley, Xerox Palo Alto Research Center,
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
@@ -87,8 +87,8 @@ dpanel_dfs (
     int       *lsub, *xlsub;
 
     /* Initialize pointers */
-    Astore     = (NCPformat *)A->Store;
-    a          = (double *)Astore->nzval;
+    Astore     = A->Store;
+    a          = Astore->nzval;
     asub       = Astore->rowind;
     xa_begin   = Astore->colbeg;
     xa_end     = Astore->colend;

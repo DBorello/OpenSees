@@ -22,9 +22,8 @@ double SuperLU_timer_() {
 
 #elif _WIN32
 
-
 double SuperLU_timer_() {
-    return (0.0);
+    return 0.0;
 }
 
 #else
@@ -49,5 +48,4 @@ double SuperLU_timer_()
 }
 
 #endif
-
 

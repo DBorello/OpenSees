@@ -1,7 +1,7 @@
 
 
 /*
- * -- SuperLU routine (version 1.1) --
+ * -- SuperLU routine (version 2.0) --
  * Univ. of California Berkeley, Xerox Palo Alto Research Center,
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
@@ -14,14 +14,6 @@
 #include <math.h>
 #include "dsp_defs.h"
 #include "util.h"
-
-int dcopy_(int *n, double *dx, int *incx, 
-	   double *dy, int *incy);
-
-int daxpy_(int *n, double *da, double *dx, 
-	   int *incx, double *dy, int *incy);
-
-
 
 void
 dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
@@ -154,15 +146,21 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
     double   *rwork;
     int      *iwork;
     extern double dlamch_(char *);
-
     extern int dlacon_(int *, double *, double *, int *, double *, int *);
+#ifdef _CRAY
+    extern int SCOPY(int *, double *, int *, double *, int *);
+    extern int SSAXPY(int *, double *, double *, int *, double *, int *);
+#else
+    extern int dcopy_(int *, double *, int *, double *, int *);
+    extern int daxpy_(int *, double *, double *, int *, double *, int *);
+#endif
 
-    Astore = (NCformat *)A->Store;
-    Aval   = (double *)Astore->nzval;
-    Bstore = (DNformat *)B->Store;
-    Xstore = (DNformat *)X->Store;
-    Bmat   = (double *)Bstore->nzval;
-    Xmat   = (double *)Xstore->nzval;
+    Astore = A->Store;
+    Aval   = Astore->nzval;
+    Bstore = B->Store;
+    Xstore = X->Store;
+    Bmat   = Bstore->nzval;
+    Xmat   = Xstore->nzval;
     ldb    = Bstore->lda;
     ldx    = Xstore->lda;
     nrhs   = B->ncol;
@@ -243,7 +241,7 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
     Bjcol.ncol  = 1;
     Bjcol.Store = (void *) SUPERLU_MALLOC( sizeof(DNformat) );
     if ( !Bjcol.Store ) ABORT("SUPERLU_MALLOC fails for Bjcol.Store");
-    Bjcol_store = (DNformat *)Bjcol.Store;
+    Bjcol_store = Bjcol.Store;
     Bjcol_store->lda = ldb;
     Bjcol_store->nzval = work; /* address aliasing */
 	
@@ -394,7 +392,7 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 		/* Multiply by (diag(C) or diag(R))*inv(op(A))*diag(W). */
 		for (i = 0; i < A->nrow; ++i) work[i] *= rwork[i];
 		
-		dgstrs (transt, L, U, perm_r, perm_c, &Bjcol, info);
+		dgstrs (trans, L, U, perm_r, perm_c, &Bjcol, info);
 		
 		if ( notran && colequ )
 		    for (i = 0; i < A->ncol; ++i) work[i] *= C[i];

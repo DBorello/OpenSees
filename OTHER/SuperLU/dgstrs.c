@@ -1,7 +1,7 @@
 
 
 /*
- * -- SuperLU routine (version 1.1) --
+ * -- SuperLU routine (version 2.0) --
  * Univ. of California Berkeley, Xerox Palo Alto Research Center,
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
@@ -104,7 +104,7 @@ dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U,
 
     /* Test input parameters ... */
     *info = 0;
-    Bstore = (DNformat *)B->Store;
+    Bstore = B->Store;
     ldb = Bstore->lda;
     nrhs = B->ncol;
     notran = lsame_(trans, "N");
@@ -130,11 +130,11 @@ dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U,
     soln = doubleMalloc(n);
     if ( !soln ) ABORT("Malloc fails for local soln[].");
 
-    Bmat = (double *)Bstore->nzval;
-    Lstore = (SCformat *)L->Store;
-    Lval = (double *)Lstore->nzval;
-    Ustore = (NCformat *)U->Store;
-    Uval = (double *)Ustore->nzval;
+    Bmat = Bstore->nzval;
+    Lstore = L->Store;
+    Lval = Lstore->nzval;
+    Ustore = U->Store;
+    Uval = Ustore->nzval;
     solve_ops = 0;
     
     if ( notran ) {

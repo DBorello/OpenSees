@@ -1,7 +1,7 @@
 
 
 /*
- * -- SuperLU routine (version 1.1) --
+ * -- SuperLU routine (version 2.0) --
  * Univ. of California Berkeley, Xerox Palo Alto Research Center,
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
@@ -92,8 +92,8 @@ dlaqgs(SuperMatrix *A, double *r, double *c,
 	return;
     }
 
-    Astore = (NCformat *)A->Store;
-    Aval = (double *)Astore->nzval;
+    Astore = A->Store;
+    Aval = Astore->nzval;
     
     /* Initialize LARGE and SMALL. */
     small = dlamch_("Safe minimum") / dlamch_("Precision");

@@ -1,7 +1,7 @@
 
 
 /*
- * -- SuperLU routine (version 1.1) --
+ * -- SuperLU routine (version 2.0) --
  * Univ. of California Berkeley, Xerox Palo Alto Research Center,
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
@@ -12,8 +12,8 @@
  * History:     Modified from lapack routine DLANGE
  */
 #include <math.h>
-#include "util.h"
 #include "dsp_defs.h"
+#include "util.h"
 
 double dlangs(char *norm, SuperMatrix *A)
 {
@@ -61,8 +61,8 @@ double dlangs(char *norm, SuperMatrix *A)
     double   value, sum;
     double   *rwork;
 
-    Astore = (NCformat *)A->Store;
-    Aval   = (double *)Astore->nzval;
+    Astore = A->Store;
+    Aval   = Astore->nzval;
     
     if ( MIN(A->nrow, A->ncol) == 0) {
 	value = 0.;

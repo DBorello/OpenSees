@@ -5,7 +5,6 @@
 #include <malloc.h>
 #include <stdlib.h>
 #include "util.h"
-#include "dsp_defs.h"
 
 /* 
  *  Implementation of disjoint set union routines.
@@ -184,7 +183,7 @@ sp_coletree(
 	SUPERLU_FREE (root);
 	SUPERLU_FREE (firstcol);
 	finalize_disjoint_sets ();
-	
+	return 0;
 }
 
 /*

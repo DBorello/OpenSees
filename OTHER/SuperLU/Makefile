@@ -1,9 +1,25 @@
+############################################################################
+#
+#  Program:         SuperLU
+#
+#  Module:          Makefile
+#
+#  Purpose:         Top-level Makefile
+#
+#  Creation date:   October 2, 1995
+#
+#  Modified:        February 4, 1997  Version 1.0
+#		    November 15, 1997 Version 1.1
+#		    September 1, 1999 Version 2.0
+#
+############################################################################
 # makefile for sparse supernodal LU, implemented in ANSI C
+
 include ../../Makefile.def
 
 ALLAUX = superlu_timer.o lsame.o util.o memory.o get_perm_c.o mmd.o \
 	 sp_coletree.o sp_preorder.o sp_ienv.o relax_snode.o \
-	 xerbla.o
+	 xerbla.o colamd.o
 
 DZLAUX = dlamch.o
 

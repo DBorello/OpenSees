@@ -1,14 +1,12 @@
 
 
 /*
- * -- SuperLU routine (version 1.1) --
+ * -- SuperLU routine (version 2.0) --
  * Univ. of California Berkeley, Xerox Palo Alto Research Center,
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
  *
  */
-#include <stdio.h>
-#include <malloc.h>
 #include "dsp_defs.h"
 #include "util.h"
 
@@ -27,8 +25,6 @@ void  dStackCompress (GlobalLU_t *);
 void  dSetupSpace (void *, int, LU_space_t *);
 void  *duser_malloc (int, int);
 void  duser_free (int, int);
-int dmemory_usage(const int nzlmax, const int nzumax, 
-		  const int nzlumax, const int n);
 
 /* External prototypes (in memory.c - prec-indep) */
 extern void    copy_mem_int    (int, void *, void *);
@@ -49,7 +45,7 @@ typedef struct {
 } LU_stack_t;
 
 /* Variables local to this file */
-static ExpHeader *expanders; /* Array of pointers to 4 types of memory */
+static ExpHeader *expanders = 0; /* Array of pointers to 4 types of memory */
 static LU_stack_t stack;
 static int no_expand;
 
@@ -57,8 +53,8 @@ static int no_expand;
 #define StackFull(x)         ( x + stack.used >= stack.size )
 #define NotDoubleAlign(addr) ( (long int)addr & 7 )
 #define DoubleAlign(addr)    ( ((long int)addr + 7) & ~7L )
-#define TempSpace(n, w)      ( (2*w + 4 + NO_MARKER)*m*sizeof(int) + \
-			      (w + 1)*n*sizeof(double) )
+#define TempSpace(m, w)      ( (2*w + 4 + NO_MARKER) * m * sizeof(int) + \
+			      (w + 1) * m * sizeof(double) )
 #define Reduce(alpha)        ((alpha + 1) / 2)  /* i.e. (alpha-1)/2 + 1 */
 
 
@@ -132,8 +128,8 @@ int dQuerySpace(SuperMatrix *L, SuperMatrix *U, int panel_size,
     NCformat *Ustore;
     register int n, iword, dword;
 
-    Lstore = (SCformat *)L->Store;
-    Ustore = (NCformat *)U->Store;
+    Lstore = L->Store;
+    Ustore = U->Store;
     n = L->ncol;
     iword = sizeof(int);
     dword = sizeof(double);
@@ -184,7 +180,8 @@ dLUMemInit(char *refact, void *work, int lwork, int m, int n, int annz,
     iword     = sizeof(int);
     dword     = sizeof(double);
 
-    expanders = (ExpHeader *) SUPERLU_MALLOC( NO_MEMTYPE * sizeof(ExpHeader) );
+    if ( !expanders )	
+        expanders = (ExpHeader*)SUPERLU_MALLOC(NO_MEMTYPE * sizeof(ExpHeader));
     if ( !expanders ) ABORT("SUPERLU_MALLOC fails for expanders");
     
     if ( lsame_(refact, "N") ) {
@@ -248,8 +245,8 @@ dLUMemInit(char *refact, void *work, int lwork, int m, int n, int annz,
 	
     } else {
 	/* refact == 'Y' */
-	Lstore   = (SCformat *)L->Store;
-	Ustore   = (NCformat *)U->Store;
+	Lstore   = L->Store;
+	Ustore   = U->Store;
 	xsup     = Lstore->sup_to_col;
 	supno    = Lstore->col_to_sup;
 	xlsub    = Lstore->rowind_colptr;
@@ -269,18 +266,11 @@ dLUMemInit(char *refact, void *work, int lwork, int m, int n, int annz,
 	    stack.top2 = (lwork/4)*4; /* must be word-addressable */
 	    stack.size = stack.top2;
 	}
-	expanders[LSUB].mem  = Lstore->rowind;
-	lsub  = (int *)expanders[LSUB].mem;
 	
-	expanders[LUSUP].mem = Lstore->nzval;
-	lusup = (double *)expanders[LUSUP].mem;
-	
-	expanders[USUB].mem  = Ustore->rowind;
-	usub  = (int *)expanders[USUB].mem;
-	
-	expanders[UCOL].mem  = Ustore->nzval;;
-	ucol  = (double *)expanders[UCOL].mem;
-	
+	lsub  = expanders[LSUB].mem  = Lstore->rowind;
+	lusup = expanders[LUSUP].mem = Lstore->nzval;
+	usub  = expanders[USUB].mem  = Ustore->rowind;
+	ucol  = expanders[UCOL].mem  = Ustore->nzval;;
 	expanders[LSUB].size         = nzlmax;
 	expanders[LUSUP].size        = nzlumax;
 	expanders[USUB].size         = nzumax;
@@ -389,7 +379,8 @@ void dLUWorkFree(int *iwork, double *dwork, GlobalLU_t *Glu)
 /*	dStackCompress(Glu);  */
     }
     
-    SUPERLU_FREE (expanders);
+    SUPERLU_FREE (expanders);	
+    expanders = 0;
 }
 
 /* Expand the data structures for L and U during the factorization.
@@ -450,11 +441,11 @@ dLUMemXpand(int jcol,
 
 
 void
-copy_mem_double(int howmany, void *old, void *newData)
+copy_mem_double(int howmany, void *old, void *new)
 {
     register int i;
-    double *dold = (double *)old;
-    double *dnew = (double *)newData;
+    double *dold = old;
+    double *dnew = new;
     for (i = 0; i < howmany; i++) dnew[i] = dold[i];
 }
 
@@ -546,19 +537,19 @@ void
 		new_mem = (void*)((char*)expanders[type + 1].mem + extra);
 		bytes_to_copy = (char*)stack.array + stack.top1
 		    - (char*)expanders[type + 1].mem;
-		user_bcopy((char *)expanders[type+1].mem, (char *)new_mem, bytes_to_copy);
+		user_bcopy(expanders[type+1].mem, new_mem, bytes_to_copy);
 
 		if ( type < USUB ) {
-		  expanders[USUB].mem = (void*)((char*)expanders[USUB].mem + extra);
-		  Glu->usub = (int *)expanders[USUB].mem;
+		    Glu->usub = expanders[USUB].mem =
+			(void*)((char*)expanders[USUB].mem + extra);
 		}
 		if ( type < LSUB ) {
-		  expanders[LSUB].mem = (void*)((char*)expanders[LSUB].mem + extra);
-		  Glu->lsub = (int *)expanders[LSUB].mem;
+		    Glu->lsub = expanders[LSUB].mem =
+			(void*)((char*)expanders[LSUB].mem + extra);
 		}
 		if ( type < UCOL ) {
-		  expanders[UCOL].mem = (void*)((char*)expanders[UCOL].mem + extra);
-		  Glu->ucol = (double *)expanders[UCOL].mem;
+		    Glu->ucol = expanders[UCOL].mem =
+			(void*)((char*)expanders[UCOL].mem + extra);
 		}
 		stack.top1 += extra;
 		stack.used += extra;
