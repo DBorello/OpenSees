@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-05-16 00:07:38 $
+// $Revision: 1.6 $
+// $Date: 2002-05-25 00:25:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges3d.h,v $
 
 #ifndef BeamWithHinges3d_h
@@ -96,7 +96,7 @@ class BeamWithHinges3d: public Element
   void getDistrLoadInterpMatrix(Matrix &bp, double x, const ID &c);
   
   double E, A, Iz, Iy, G, J;
-  double lp1, lp2;
+  double beta1, beta2;
   double rho;
   SectionForceDeformation *section[2];
   CrdTransf3d *theCoordTransf;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-05-24 02:05:09 $
+// $Revision: 1.10 $
+// $Date: 2002-05-25 00:25:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges3d.cpp,v $
 
 #include <BeamWithHinges3d.h>
@@ -51,7 +51,7 @@ double BeamWithHinges3d::workArea[200];
 BeamWithHinges3d::BeamWithHinges3d(void)
   :Element(0, ELE_TAG_BeamWithHinges3d),
    E(0.0), A(0.0), Iz(0.0), Iy(0.0), G(0.0), J(0.0),
-   lp1(0.0), lp2(0.0), rho(0.0),
+   beta1(0.0), beta2(0.0), rho(0.0),
    theCoordTransf(0),
    connectedExternalNodes(2),
    node1Ptr(0), node2Ptr(0),
@@ -72,7 +72,7 @@ BeamWithHinges3d::BeamWithHinges3d(int tag, int nodeI, int nodeJ,
 				   double r, int max, double tol)
   :Element(tag, ELE_TAG_BeamWithHinges3d),
    E(e), A(a), Iz(iz), Iy(iy), G(g), J(j),
-   lp1(lpi), lp2(lpj), rho(r),
+   beta1(lpi), beta2(lpj), rho(r),
    theCoordTransf(0),
    connectedExternalNodes(2),
    node1Ptr(0), node2Ptr(0),
@@ -429,13 +429,13 @@ BeamWithHinges3d::Print(ostream &s, int flag)
   
   if (section[0] != 0) {
     s << "Hinge 1, section tag: " << section[0]->getTag() << 
-      ", length: " << lp1 << endl;
+      ", length: " << beta1*L << endl;
     section[0]->Print(s,flag);
   }
   
   if (section[1] != 0) {
     s << "Hinge 2, section tag: " << section[2]->getTag() << 
-      ", length: " << lp2 << endl;
+      ", length: " << beta2*L << endl;
     section[1]->Print(s,flag);
   }
 }
@@ -489,8 +489,8 @@ BeamWithHinges3d::update(void)
   // and their integration weights
   double lp[2];
   
-  lp[0] = lp1*L;
-  lp[1] = lp2*L;
+  lp[0] = beta1*L;
+  lp[1] = beta2*L;
 
   xi[0] = 0.5*lp[0];
   xi[1] = L-0.5*lp[1];
@@ -505,7 +505,7 @@ BeamWithHinges3d::update(void)
     Iden(i,i) = 1.0;
 
   // Length of elastic interior
-  double Le = L-lp1-lp2;
+  double Le = L-lp[0]-lp[1];
   double LoverEA   = Le/(E*A);
   double Lover3EIz = Le/(3*E*Iz);
   double Lover6EIz = 0.5*Lover3EIz;
@@ -522,8 +522,6 @@ BeamWithHinges3d::update(void)
   
   // Equilibrium transformation matrix
   static Matrix B(4,4);
-  double beta1 = lp1*oneOverL;
-  double beta2 = lp2*oneOverL;
   B(0,0) = B(2,2) = 1.0 - beta1;
   B(1,1) = B(3,3) = 1.0 - beta2;
   B(0,1) = B(2,3) = -beta1;
@@ -659,7 +657,8 @@ BeamWithHinges3d::update(void)
 	  break;
 	case SECTION_RESPONSE_VY:
 	  for (jj = 0; jj < order; jj++) {
-	    tmp = oneOverL*fSec(jj,ii)*lp[i];
+	    //tmp = oneOverL*fSec(jj,ii)*lp[i]*L/lp[i];
+	    tmp = fSec(jj,ii);
 	    fb(jj,1) += tmp;
 	    fb(jj,2) += tmp;
 	  }
@@ -673,7 +672,8 @@ BeamWithHinges3d::update(void)
 	  break;
 	case SECTION_RESPONSE_VZ:
 	  for (jj = 0; jj < order; jj++) {
-	    tmp = oneOverL*fSec(jj,ii)*lp[i];
+	    //tmp = oneOverL*fSec(jj,ii)*lp[i]*L/lp[i];
+	    tmp = fSec(jj,ii);
 	    fb(jj,3) += tmp;
 	    fb(jj,4) += tmp;
 	  }
@@ -735,24 +735,26 @@ BeamWithHinges3d::update(void)
       // vr += (b^ (e+de)) * lp[i];
       de.addVector(1.0, e[i], 1.0);
       //vr.addMatrixTransposeVector(1.0, b, de, lp[i]);
-      double dei;
       for (ii = 0; ii < order; ii++) {
-	dei = de(ii)*lp[i];
 	switch(code(ii)) {
 	case SECTION_RESPONSE_P:
-	  vr(0) += dei; break;
+	  vr(0) += de(ii)*lp[i]; break;
 	case SECTION_RESPONSE_MZ:
-	  vr(1) += xL1*dei; vr(2) += xL*dei; break;
+	  tmp = de(ii)*lp[i];
+	  vr(1) += xL1*tmp; vr(2) += xL*tmp; break;
 	case SECTION_RESPONSE_VY:
-	  tmp = oneOverL*dei;
+	  //tmp = oneOverL*de(ii)*lp[i]*L/lp[i];
+	  tmp = de(ii);
 	  vr(1) += tmp; vr(2) += tmp; break;
 	case SECTION_RESPONSE_MY:
-	  vr(3) += xL1*dei; vr(4) += xL*dei; break;
+	  tmp = de(ii)*lp[i];
+	  vr(3) += xL1*tmp; vr(4) += xL*tmp; break;
 	case SECTION_RESPONSE_VZ:
-	  tmp = oneOverL*dei;
+	  //tmp = oneOverL*de(ii)*lp[i]*L/lp[i];
+	  tmp = de(ii);
 	  vr(3) += tmp; vr(4) += tmp; break;
 	case SECTION_RESPONSE_T:
-	  vr(5) += dei; break;
+	  vr(5) += de(ii)*lp[i]; break;
 	default:
 	  break;
 	}
