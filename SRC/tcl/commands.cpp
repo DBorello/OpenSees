@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2001-09-12 21:39:46 $
+// $Revision: 1.16 $
+// $Date: 2001-09-22 02:02:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -2179,6 +2179,7 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
       Tcl_SetResult(interp, resDataPtr, TCL_STATIC);
     }
 
+	delete theEigenSolver;
     delete theEigenAnalysis;
     theEigenAnalysis = 0;
 
