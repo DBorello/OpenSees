@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2003-02-25 23:32:43 $
+// $Revision: 1.26 $
+// $Date: 2003-04-03 23:37:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -199,8 +199,7 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
   // check at least two arguments so don't segemnt fault on strcmp  
   if (argc < 2) {
     opserr << "WARNING need to specify an element type\n";
-    opserr << "Want: element eleType <specific element args>\n";
-    opserr << "Valid types: truss, elasticBeamColumn, nonlinearBeamColumn\n";
+    opserr << "Want: element eleType <specific element args> .. see manual for valid eleTypes & arguments\n";
     return TCL_ERROR;
   }
 
@@ -212,24 +211,24 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
   } else if (strcmp(argv[1],"truss") == 0 || strcmp(argv[1],"corotTruss") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addTruss(clientData, interp, argc, argv,
-					      theTclDomain, theTclBuilder, eleArgStart);
+					  theTclDomain, theTclBuilder, eleArgStart);
     return result;
   } else if (strcmp(argv[1],"elasticBeamColumn") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addElasticBeam(clientData, interp, argc, argv,
-					      theTclDomain, theTclBuilder, eleArgStart);    
+						theTclDomain, theTclBuilder, eleArgStart);    
     return result;
   } else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
-          int result = TclModelBuilder_addNLBeamColumn(clientData, interp, argc, argv,
-						 theTclDomain, theTclBuilder);
+    int result = TclModelBuilder_addForceBeamColumn(clientData, interp, argc, argv,
+						    theTclDomain, theTclBuilder);
     return result;
   } else if (strcmp(argv[1],"dispBeamColumn") == 0) {
-          int result = TclModelBuilder_addDispBeamColumn(clientData, interp, argc, argv,
-						 theTclDomain, theTclBuilder);
+    int result = TclModelBuilder_addDispBeamColumn(clientData, interp, argc, argv,
+						   theTclDomain, theTclBuilder);
     return result;
   } else if (strcmp(argv[1],"forceBeamColumn") == 0) {
-          int result = TclModelBuilder_addForceBeamColumn(clientData, interp, argc, argv,
-						 theTclDomain, theTclBuilder);
+    int result = TclModelBuilder_addForceBeamColumn(clientData, interp, argc, argv,
+						    theTclDomain, theTclBuilder);
     return result;
   } else if (strcmp(argv[1],"beamWithHinges") == 0 ||
 	     strcmp(argv[1],"beamWithHinges2") == 0 ||
@@ -238,8 +237,8 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 						 theTclDomain, theTclBuilder);
     return result;
   } else if (strcmp(argv[1],"quad") == 0) {
-          int result = TclModelBuilder_addFourNodeQuad(clientData, interp, argc, argv,
-						       theTclDomain, theTclBuilder);
+    int result = TclModelBuilder_addFourNodeQuad(clientData, interp, argc, argv,
+						 theTclDomain, theTclBuilder);
 	  return result;
   } else if (strcmp(argv[1],"enhancedQuad") == 0) {
     int result = TclModelBuilder_addEnhancedQuad(clientData, interp, argc, argv,
