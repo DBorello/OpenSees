@@ -158,54 +158,6 @@ SOURCE=..\..\..\SRC\element\truss\TrussSection.cpp
 SOURCE=..\..\..\SRC\element\truss\TrussSection.h
 # End Source File
 # End Group
-# Begin Group "beam2d"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\..\SRC\element\beam2d\beam2d02.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\element\beam2d\beam2d02.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\element\beam2d\beam2d03.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\element\beam2d\beam2d03.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\element\beam2d\beam2d04.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\element\beam2d\beam2d04.h
-# End Source File
-# End Group
-# Begin Group "beam3d"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\..\SRC\element\beam3d\beam3d01.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\element\beam3d\beam3d01.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\element\beam3d\beam3d02.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\element\beam3d\beam3d02.h
-# End Source File
-# End Group
 # Begin Group "feap"
 
 # PROP Default_Filter ""
