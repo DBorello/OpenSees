@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2002-11-01 01:17:52 $
+// $Revision: 1.11 $
+// $Date: 2002-11-01 01:21:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/ConstantPressureVolumeQuad.cpp,v $
 
 // Ed "C++" Love
@@ -533,7 +533,7 @@ const Matrix& ConstantPressureVolumeQuad :: getInitialTangent( )
   for ( i = 0; i < 4; i++ ) {
 
     //stress for equilibrium
-    dd = materialPointers[i]->getInitialTangent( ) ;
+    // comment out to get to compile: dd = materialPointers[i]->getTangent( ) ;
 	
     dd *= dvol[i] ;
         
