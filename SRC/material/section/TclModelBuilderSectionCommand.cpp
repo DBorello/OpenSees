@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2001-09-06 00:23:51 $
+// $Revision: 1.10 $
+// $Date: 2001-09-06 02:22:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -992,7 +992,7 @@ TclModelBuilder_addFiber(ClientData clientData, Tcl_Interp *interp, int argc,
 	    return TCL_ERROR;
 	}   
 
-	theFiber = new UniaxialFiber2d(numFibers, *material, area, zLoc);
+	theFiber = new UniaxialFiber2d(numFibers, *material, area, yLoc);
 	if (theFiber == 0) {
 	    interp->result = "WARNING unable to allocate fiber ";
 	    return TCL_ERROR;
