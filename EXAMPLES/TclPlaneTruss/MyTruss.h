@@ -18,22 +18,22 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-03 06:58:55 $
+// $Revision: 1.3 $
+// $Date: 2001-07-04 01:11:52 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/TclPlaneTruss/MyTruss.h,v $
                                                                         
                                                                         
 #ifndef MyTruss_h
 #define MyTruss_h
 
-// File: ~/examples/tcl/MyTruss.h
-// 
 // Written: fmk 
 // Created: 02/99
-// Revision: A
 //
-// Description: This file contains the interface for the MyClass class.
-// It defines the class interface and the class attributes.
+// Description: This file contains the interface for the MyTruss class.
+// It defines the class interface and the class attributes. MyTruss 
+// provides the abstraction of a simple truss element for 2-d problems.
+// The stress-strain relationship for the truss being performed in the
+// associated UniaxialMaterial object.
 //
 // What: "@(#) MyTruss.h, revA"
 
@@ -72,6 +72,7 @@ class MyTruss : public Element
     int commitState(void);
     int revertToLastCommit(void);        
     int revertToStart(void);        
+    int update(void);
 
     // public methods to obtain stiffness, mass, damping and residual information    
     const Matrix &getTangentStiff(void);
@@ -100,17 +101,17 @@ class MyTruss : public Element
     double computeCurrentStrain(void) const;
     
     // private attributes - a copy for each object of the class
-    UniaxialMaterial *theMaterial;  // pointer to a material
+    UniaxialMaterial *theMaterial;       // pointer to a material
     ID  externalNodes;          	 // contains the id's of end nodes
     Matrix *t;          // hold the transformation matrix, could use a Vector
 	                // if ever bother to change the Vector interface for
 			// x-product.
 
-    double L;		// length of MyTruss based on undeformed configuration
-    double A; 		// area of MyTruss
-    double M; 		// mass per unit volume of MyTruss
-    Node *end1Ptr, *end2Ptr; // two pointers to the trusses nodes.
-   
+    double L;		// length of truss (undeformed configuration) - set in setDomain()
+    double A; 		// area of truss
+    double M; 		// mass per unit volume of truss
+    Node *end1Ptr, *end2Ptr; // two pointers to the nodes - these are set in setDomain()
+
     Vector load;
 
     // static data - single copy for all objects of the class

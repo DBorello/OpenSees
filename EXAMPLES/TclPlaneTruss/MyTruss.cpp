@@ -18,18 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-03 06:58:54 $
+// $Revision: 1.3 $
+// $Date: 2001-07-04 01:11:52 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/TclPlaneTruss/MyTruss.cpp,v $                                                                        
                                                                         
-// File: ~/example/tcl/MyTruss.C
-// 
 // Written: fmk 
 // Created: 02/99
-// Revision: A
 //
 // Description: This file contains the implementation for the MyTruss class.
-//
 //
 // What: "@(#) MyTruss.C, revA"
 
@@ -70,17 +66,17 @@ MyTruss::MyTruss(int tag,
  externalNodes(2),
  t(0), L(0.0), A(a), M(m), end1Ptr(0), end2Ptr(0), load(4)
 {	
-    // get a copy of the material object for our own use
-    theMaterial = theMat.getCopy();
-    if (theMaterial == 0) 
-      g3ErrorHandler->fatal("FATAL MyTruss::MyTruss() - out of memory, could not get a copy of the Material\n");
+  // get a copy of the material object for our own use
+  theMaterial = theMat.getCopy();
+  if (theMaterial == 0) 
+    g3ErrorHandler->fatal("FATAL MyTruss::MyTruss() - out of memory, could not get a copy of the Material\n");
     
-    // fill in the ID containing external node info with node id's    
-    if (externalNodes.Size() != 2)
-      g3ErrorHandler->fatal("FATAL MyTruss::MyTruss() - out of memory, could not create an ID of size 2\n");
+  // fill in the ID containing external node info with node id's    
+  if (externalNodes.Size() != 2)
+    g3ErrorHandler->fatal("FATAL MyTruss::MyTruss() - out of memory, could not create an ID of size 2\n");
 
-    externalNodes(0) = Nd1;
-    externalNodes(1) = Nd2;        
+  externalNodes(0) = Nd1;
+  externalNodes(1) = Nd2;        
 }
 
 // constructor which should be invoked by an FE_ObjectBroker only
@@ -118,7 +114,7 @@ MyTruss::getNumExternalNodes(void) const
 const ID &
 MyTruss::getExternalNodes(void) 
 {
-    return externalNodes;
+  return externalNodes;
 }
 
 int
@@ -135,9 +131,6 @@ MyTruss::setDomain(Domain *theDomain)
 {
     // check Domain is not null - invoked when object removed from a domain
     if (theDomain == 0) {
-	end1Ptr = 0;
-	end2Ptr = 0;
-	L = 0.0;
 	return;
     }
     
@@ -149,13 +142,11 @@ MyTruss::setDomain(Domain *theDomain)
     if (end1Ptr == 0) {
         g3ErrorHandler->warning("WARNING Truss::setDomain() - at truss %d node %d does not exist in domain\n",
 				this->getTag(), Nd1);
-	L = 0.0;
 	return;  // don't go any further - otherwise segemntation fault
     }
     if (end2Ptr == 0) {        
         g3ErrorHandler->warning("WARNING Truss::setDomain() - at truss %d node %d does not exist in domain\n",
 				this->getTag(), Nd1);
-	L = 0.0;
 	return;  // don't go any further - otherwise segemntation fault
     }	
     
@@ -175,7 +166,6 @@ MyTruss::setDomain(Domain *theDomain)
 
     if ((t == 0) || ( t->noCols() != 4)) {
       g3ErrorHandler->warning("WARNING MyTruss::setDomain() - out of memory creating transformation matrix\n");
-      L = 0.0;
       return;  // don't go any further - otherwise segemntation fault
     }
     
@@ -201,6 +191,9 @@ MyTruss::setDomain(Domain *theDomain)
     trans(0,1) = sn;    
     trans(0,2) = -cs;
     trans(0,3) = -sn;
+
+    // determine the nodal mass for lumped mass approach
+    M = M * A * L/2;
 }   	 
 
 
@@ -222,6 +215,18 @@ MyTruss::revertToStart()
     return theMaterial->revertToStart();
 }
 
+int
+MyTruss::update()
+{
+  // determine the current strain given trial displacements at nodes
+  double strain = this->computeCurrentStrain();
+
+  // set the strain in the materials
+  theMaterial->setTrialStrain(strain);
+
+  return 0;
+}
+
 
 const Matrix &
 MyTruss::getTangentStiff(void)
@@ -231,11 +236,7 @@ MyTruss::getTangentStiff(void)
 	return trussK;
     }
 
-    // determine the current strain given trial displacements at nodes
-    double strain = this->computeCurrentStrain();
-
-    // get the current E from the material for this strain
-    theMaterial->setTrialStrain(strain);
+    // get the current E from the material for the last updated strain
     double E = theMaterial->getTangent();
 
     // form the tangent stiffness matrix
@@ -256,11 +257,8 @@ MyTruss::getSecantStiff(void)
 	return trussK;
     }
     
-    // determine the current strain given trial displacements at nodes
+    // get the current stress from the material for the last updated strain
     double strain = this->computeCurrentStrain();
-
-    // get the current E from the material for this strain
-    theMaterial->setTrialStrain(strain);
     double stress = theMaterial->getStress();    
     double E = stress/strain;
 
@@ -316,17 +314,16 @@ MyTruss::getResistingForce()
 	trussR.Zero();
 	return trussR;
     }
-    
-    // determine the current strain
-    double strain = this->computeCurrentStrain();
 
-    // get the current E from the material for this strain
-    theMaterial->setTrialStrain(strain);
+    // R = Ku - Pext    
 
     // force = F * transformation 
     double force = A*theMaterial->getStress();
     for (int i=0; i<4; i++)
 	trussR(i) = (*t)(0,i)*force;
+
+    // subtract external load:  Ku - P
+    trussR -= load;
 
     return trussR;
 }
@@ -341,14 +338,15 @@ MyTruss::getResistingForceIncInertia()
     
     // now include the mass portion
     if (L != 0.0 && M != 0.0) {
-	double nodeMass = M * A * L/2;
 	
 	const Vector &accel1 = end1Ptr->getTrialAccel();
 	const Vector &accel2 = end2Ptr->getTrialAccel();	
+
+	// remember we set M = M*A*L/2 in setDoamin()
 	
 	for (int i=0; i<2; i++) {
-	    trussR(i) = trussR(i) - nodeMass*accel1(i);
-	    trussR(i+2) = trussR(i+2) - nodeMass*accel2(i);	    
+	    trussR(i) = trussR(i) + M*accel1(i);
+	    trussR(i+2) = trussR(i+2) + M*accel2(i);	    
 	}
     }
 
@@ -481,13 +479,16 @@ MyTruss::displaySelf(Renderer &theViewer, int displayMode, float fact)
     }
 
     // compute the strain and axial force in the member
-    double strain, force;
+    double strain, stress, force;
     strain = this->computeCurrentStrain();
     theMaterial->setTrialStrain(strain);
-    force = A*theMaterial->getStress();    
+    stress = theMaterial->getStress();    
+    force = A * stress;    
     
-    if (displayMode == 2) // use the strain as the drawing measure
+    if (displayMode == 3) // use the strain as the drawing measure
       return theViewer.drawLine(v1, v2, strain, strain);	
+    else if (displayMode == 2) // use the strain as the drawing measure
+      return theViewer.drawLine(v1, v2, stress, stress);	
     else { // otherwise use the axial force as measure
       return theViewer.drawLine(v1,v2, force, force);
     }
