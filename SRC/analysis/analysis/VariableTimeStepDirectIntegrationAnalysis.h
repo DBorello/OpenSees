@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-12-13 04:44:25 $
+// $Revision: 1.2 $
+// $Date: 2001-08-29 00:25:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/VariableTimeStepDirectIntegrationAnalysis.h,v $
                                                                         
                                                                         
@@ -61,10 +61,10 @@ class VariableTimeStepDirectIntegrationAnalysis: public DirectIntegrationAnalysi
 					      TransientIntegrator &theIntegrator);
     virtual ~VariableTimeStepDirectIntegrationAnalysis();
 
-    int analyze(int numSteps, double dT, double dtMin, double dtMax, double perCent);
+    int analyze(int numSteps, double dT, double dtMin, double dtMax, int Jd);
 
   protected:
-    virtual double determineDt(double dT, double dtMin, double dtMax, double perCent,
+    virtual double determineDt(double dT, double dtMin, double dtMax, int Jd,
 			       ConvergenceTest *theTest);
 
   private:

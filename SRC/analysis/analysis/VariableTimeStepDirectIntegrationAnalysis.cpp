@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-12-13 04:44:25 $
+// $Revision: 1.2 $
+// $Date: 2001-08-29 00:25:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/VariableTimeStepDirectIntegrationAnalysis.cpp,v $
                                                                         
                                                                         
@@ -64,7 +64,7 @@ VariableTimeStepDirectIntegrationAnalysis::~VariableTimeStepDirectIntegrationAna
 
 
 int 
-VariableTimeStepDirectIntegrationAnalysis::analyze(int numSteps, double dT, double dtMin, double dtMax, double perCent)
+VariableTimeStepDirectIntegrationAnalysis::analyze(int numSteps, double dT, double dtMin, double dtMax, int Jd)
 {
   // get some pointers
   Domain *theDom = this->getDomainPtr();
@@ -133,7 +133,7 @@ VariableTimeStepDirectIntegrationAnalysis::analyze(int numSteps, double dT, doub
     }
 
     // now we determine a new delta T for next loop
-    currentDt = this->determineDt(currentDt, dtMin, dtMax, perCent, theTest);
+    currentDt = this->determineDt(currentDt, dtMin, dtMax, Jd, theTest);
   }
 
   return 0;
@@ -147,19 +147,19 @@ double
 VariableTimeStepDirectIntegrationAnalysis::determineDt(double dT, 
 						       double dtMin, 
 						       double dtMax, 
-						       double perCent,
+						       int Jd,
 						       ConvergenceTest *theTest)
 {
   double newDt = dT;
     
   // get the number of trial steps in the last solveCurrentStep()
-  double algoPercent = 1.0;
+  double numLastIter = 1.0;
   if (theTest != 0)
-    algoPercent = theTest->getRatioNumToMax();
+    numLastIter = theTest->getNumTests();
   
   
   // determine new dT based on last dT and Jd and #iter of last step
-  double factor = perCent/algoPercent;
+  double factor = Jd/numLastIter;
   newDt *= factor;
   
   // ensure: dtMin <~~ dT <= dtMax
