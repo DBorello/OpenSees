@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 06:19:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/EquiSolnAlgo.h,v $
                                                                         
                                                                         
@@ -59,10 +59,10 @@ class EquiSolnAlgo: public SolutionAlgorithm
 		  IncrementalIntegrator &theIntegrator,
 		  LinearSOE &theSOE);
     
-    // pure virtual functions
-
-    virtual void setTest(ConvergenceTest &theNewTest) =0;    
+    // virtual functions
     virtual int solveCurrentStep(void) =0;
+    virtual void setTest(ConvergenceTest &theNewTest) =0;    
+    virtual ConvergenceTest *getTest(void);     
     virtual void Print(ostream &s, int flag =0) =0;    
 
     // the following are not protected as convergence test

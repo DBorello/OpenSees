@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 06:19:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/ModifiedNewton.h,v $
                                                                         
                                                                         
@@ -53,6 +53,7 @@ class ModifiedNewton: public EquiSolnAlgo
     ~ModifiedNewton();
 
     int solveCurrentStep(void);    
+    ConvergenceTest *getTest(void);         
     void setTest(ConvergenceTest &theNewTest);
 
     virtual int sendSelf(int commitTag, Channel &theChannel);

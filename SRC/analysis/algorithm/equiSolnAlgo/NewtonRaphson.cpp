@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 06:19:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/NewtonRaphson.cpp,v $
                                                                         
                                                                         
@@ -148,7 +148,15 @@ NewtonRaphson::solveCurrentStep(void)
       return -3;
     }
 
+    // note - if postive result we are returning what the convergence test returned
+    // which should be the number of iterations
     return result;
+}
+
+ConvergenceTest *
+NewtonRaphson::getTest(void)
+{
+  return theTest;
 }
 
 int
