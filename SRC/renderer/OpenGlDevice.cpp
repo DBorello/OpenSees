@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-14 23:01:57 $
+// $Revision: 1.9 $
+// $Date: 2003-02-15 19:25:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.cpp,v $
                                                                         
                                                                         
@@ -969,8 +969,7 @@ OpenGlDevice::saveBmpImage(void)
 	{
     // write the header to the file
 //    if (fwrite(&header, 1, sizeof(BITMAPFILEHEADER), fp) < sizeof(BITMAPFILEHEADER)) {
-	    opserr << "OpenGLDevice::saveBmpImage() - %s\n",
-				    "failed to write BITMAPHEADER");
+	    opserr << "OpenGLDevice::saveBmpImage() - failed to write BITMAPHEADER" << endln;
 	    fclose(fp);
 	    return -4;
 	}
@@ -978,8 +977,7 @@ OpenGlDevice::saveBmpImage(void)
         {
     // write the bit map information to the file
 //    if (fwrite(&info, 1, sizeof(BITMAPINFOHEADER), fp) < sizeof(BITMAPINFOHEADER)) {
-	    opserr << "OpenGLDevice::saveBmpImage() - %s\n",
-				    "failed to write BITMAPINFOHEADER");
+	    opserr << "OpenGLDevice::saveBmpImage() - failed to write BITMAPINFOHEADER" << endln;
 	    fclose(fp);
 	    return -5;	    
 	}    
@@ -987,8 +985,7 @@ OpenGlDevice::saveBmpImage(void)
         {
     // now we write the bits
     //if (fwrite(bits, 1, currentBitSize, fp) < currentBitSize) {
-	opserr << "OpenGLDevice::saveBmpImage() - %s\n",
-				    "failed to write BITMAPINFOHEADER");
+	opserr << "OpenGLDevice::saveBmpImage() - failed to write BITMAPINFOHEADER" << endln;
 	fclose(fp);
 	return -6;	
     }        
