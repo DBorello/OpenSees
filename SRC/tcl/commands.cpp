@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.59 $
-// $Date: 2005-01-27 22:32:57 $
+// $Revision: 1.60 $
+// $Date: 2005-01-31 22:19:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -2673,13 +2673,14 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 
     // create the algorithm
     if (typeAlgo == 0) 
-	theEigenAlgo = new FrequencyAlgo();
+      theEigenAlgo = new FrequencyAlgo();
     else if (typeAlgo == 1) {
-	theEigenAlgo = new StandardEigenAlgo();
+      theEigenAlgo = new StandardEigenAlgo();
 
-	// temporarily will place here .. only solver that will work with standard
-	SymBandEigenSolver *theEigenSolver = new SymBandEigenSolver(); 
-	theEigenSOE = new SymBandEigenSOE(*theEigenSolver, *theEigenModel);    
+      // temporarily will place here .. only solver that will work with standard
+      SymBandEigenSolver *theEigenSolver = new SymBandEigenSolver(); 
+      theEigenSOE = new SymBandEigenSOE(*theEigenSolver, *theEigenModel);    
+
     }
 
     // again temporary until i rewrite these solvers.
@@ -2697,12 +2698,12 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	theEigenSOE = new BandArpackSOE(*theEigenSolver, *theEigenModel);    
       }      
     }
-
     // create the rest of components of an eigen analysis
     EigenIntegrator  *theEigenIntegrator = new EigenIntegrator();    
     RCM *theRCM = new RCM();	
     DOF_Numberer *theEigenNumberer = new DOF_Numberer(*theRCM);    	
     ConstraintHandler *theEigenHandler = new TransformationConstraintHandler();
+
 
     // create the eigen analysis
     theEigenAnalysis = new EigenAnalysis(theDomain,
@@ -2715,15 +2716,18 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 
     int requiredDataSize = 20*numEigen;
     if (requiredDataSize > resDataSize) {
-      if (resDataPtr != 0)
+      if (resDataPtr != 0) {
 	delete [] resDataPtr;
-      
+      }
       resDataPtr = new char[requiredDataSize];
+      resDataSize = requiredDataSize;
     }
+
     for (int i=0; i<requiredDataSize; i++)
       resDataPtr[i] = '\n';
 
     // perfrom the eigen analysis & store the results with the interpreter
+
     if (theEigenAnalysis->analyze(numEigen) == 0) {
       //      char *eigenvalueS = new char[15 * numEigen];    
       const Vector &eigenvalues = theDomain.getEigenvalues();
@@ -2735,9 +2739,10 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
       
       Tcl_SetResult(interp, resDataPtr, TCL_STATIC);
     }
-      
+
     // finally invoke the destructor on the eigen analysis
     delete theEigenAnalysis;
+
     theEigenAnalysis = 0;
     
     return TCL_OK;
