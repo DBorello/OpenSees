@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-03 06:14:16 $
+// $Revision: 1.4 $
+// $Date: 2001-09-25 17:36:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.cpp,v $
                                                                         
                                                                         
@@ -309,7 +309,8 @@ TransformationDOF_Group::getTangent(Integrator *theIntegrator)
     const Matrix &unmodTangent = this->DOF_Group::getTangent(theIntegrator);
     Matrix *T = this->getT();
     if (T != 0) {
-	*modTangent = (*T) ^ unmodTangent * (*T);
+	// *modTangent = (*T) ^ unmodTangent * (*T);
+	modTangent->addMatrixTripleProduct(0.0, *T, unmodTangent, 1.0);
 	return *modTangent;
 	
     } else
@@ -324,7 +325,8 @@ TransformationDOF_Group::getUnbalance(Integrator *theIntegrator)
 
     Matrix *T = this->getT();
     if (T != 0) {
-	*modUnbalance = (*T) ^ unmodUnbalance;
+	// *modUnbalance = (*T) ^ unmodUnbalance;
+	modUnbalance->addMatrixTransposeVector(0.0, *T, unmodUnbalance, 1.0);
 	return *modUnbalance;    
     } else
 	return unmodUnbalance;
@@ -456,7 +458,8 @@ TransformationDOF_Group::setNodeDisp(const Vector &u)
     }    
     Matrix *T = this->getT();
     if (T != 0) {
-	*unbalance = (*T) * (*modUnbalance);
+	// *unbalance = (*T) * (*modUnbalance);
+	unbalance->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
 	myNode->setTrialDisp(*unbalance);
     } else
 	myNode->setTrialDisp(*modUnbalance);
@@ -482,7 +485,8 @@ TransformationDOF_Group::setNodeVel(const Vector &u)
     }    
     Matrix *T = this->getT();
     if (T != 0) {
-	*unbalance = (*T) * (*modUnbalance);
+	// *unbalance = (*T) * (*modUnbalance);
+	unbalance->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
 	myNode->setTrialVel(*unbalance);
     } else
 	myNode->setTrialVel(*modUnbalance);
@@ -509,7 +513,8 @@ TransformationDOF_Group::setNodeAccel(const Vector &u)
     }    
     Matrix *T = this->getT();
     if (T != 0) {
-	*unbalance = (*T) * (*modUnbalance);
+	// *unbalance = (*T) * (*modUnbalance);
+	unbalance->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
 	myNode->setTrialAccel(*unbalance);
     } else
 	myNode->setTrialAccel(*modUnbalance);
@@ -541,7 +546,8 @@ TransformationDOF_Group::incrNodeDisp(const Vector &u)
 
     Matrix *T = this->getT();
     if (T != 0) {
-	*unbalance = (*T) * (*modUnbalance);
+	// *unbalance = (*T) * (*modUnbalance);
+	unbalance->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
 	myNode->incrTrialDisp(*unbalance);
     } else 
 	myNode->incrTrialDisp(*modUnbalance);
@@ -567,7 +573,8 @@ TransformationDOF_Group::incrNodeVel(const Vector &u)
     }    
     Matrix *T = this->getT();
     if (T != 0) {
-	*unbalance = (*T) * (*modUnbalance);
+	// *unbalance = (*T) * (*modUnbalance);
+	unbalance->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
 	myNode->incrTrialVel(*unbalance);
     } else
 	myNode->incrTrialVel(*modUnbalance);
@@ -593,7 +600,8 @@ TransformationDOF_Group::incrNodeAccel(const Vector &u)
     }    
     Matrix *T = this->getT();
     if (T != 0) {
-	*unbalance = (*T) * (*modUnbalance);
+	// *unbalance = (*T) * (*modUnbalance);
+	unbalance->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
 	myNode->incrTrialAccel(*unbalance);
     } else
 	myNode->incrTrialAccel(*modUnbalance);
@@ -618,7 +626,8 @@ TransformationDOF_Group::setEigenvector(int mode, const Vector &u)
     }    
     Matrix *T = this->getT();
     if (T != 0) {
-	*unbalance = (*T) * (*modUnbalance);
+	// *unbalance = (*T) * (*modUnbalance);
+	unbalance->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
 	myNode->setEigenvector(mode, *unbalance);
     } else
 	myNode->setEigenvector(mode, *modUnbalance);
@@ -794,6 +803,7 @@ TransformationDOF_Group::addM_Force(const Vector &Udotdot, double fact)
     }    
 
     Vector unmod(Trans->noRows());
-    unmod = (*Trans) * (*modUnbalance);
+    //unmod = (*Trans) * (*modUnbalance);
+	unmod.addMatrixVector(0.0, *Trans, *modUnbalance, 1.0);
     this->addLocalM_Force(unmod,fact);
 }
