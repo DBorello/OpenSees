@@ -13,6 +13,7 @@ all:         $(OBJS)
 	@$(CD) $(FE)/system_of_eqn/linearSOE/umfGEN; $(MAKE);
 	@$(CD) $(FE)/system_of_eqn/linearSOE/cg; $(MAKE);
 	@$(CD) $(FE)/system_of_eqn/linearSOE/BJsolvers; $(MAKE);
+	@$(CD) $(FE)/system_of_eqn/linearSOE/diagonal; $(MAKE);
 
 
 # Miscellaneous
@@ -32,6 +33,7 @@ spotless: clean
 	@$(CD) $(FE)/system_of_eqn/linearSOE/umfGEN; $(MAKE) wipe;
 	@$(CD) $(FE)/system_of_eqn/linearSOE/cg; $(MAKE) wipe;
 	@$(CD) $(FE)/system_of_eqn/linearSOE/BJsolvers; $(MAKE) wipe;
+	@$(CD) $(FE)/system_of_eqn/linearSOE/diagonal; $(MAKE) wipe;
 
 wipe: spotless
 
