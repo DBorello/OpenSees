@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2002-12-05 22:20:43 $
+// $Revision: 1.27 $
+// $Date: 2002-12-10 20:59:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -473,10 +473,6 @@ NLBeamColumn2d::getInitialStiff(void)
   if (Ki != 0)
     return *Ki;
 
-  // get basic displacements and increments
-  static Vector v(NEBD);
-  static Vector dv(NEBD);
-     
   const Matrix &xi_pt  = quadRule.getIntegrPointCoords(nSections);
   const Vector &weight = quadRule.getIntegrPointWeights(nSections);
   
@@ -499,11 +495,7 @@ NLBeamColumn2d::getInitialStiff(void)
     int order      = sections[i]->getOrder();
     const ID &code = sections[i]->getType();
     
-    Vector Ss(workArea, order);
-    Vector dSs(&workArea[order], order);
-    Vector dvs(&workArea[2*order], order);
-    
-    Matrix fb(&workArea[3*order], order, NEBD);
+    Matrix fb(workArea, order, NEBD);
     
     double xL  = xi_pt(i,0);
     double xL1 = xL-1.0;
@@ -574,7 +566,7 @@ NLBeamColumn2d::getInitialStiff(void)
   static Matrix kvInit(NEBD, NEBD);
   if (f.Solve(I, kvInit) < 0)
     g3ErrorHandler->warning("%s -- could not invert flexibility",
-			    "NLBeamColumn2d::update()");
+			    "NLBeamColumn2d::getInitialStiff()");
 
   Ki = new Matrix(crdTransf->getInitialGlobalStiffMatrix(kvInit));
   
@@ -626,15 +618,15 @@ int NLBeamColumn2d::update()
   crdTransf->update();
        
   // get basic displacements and increments
-  static Vector v(NEBD);
+  const Vector &v = crdTransf->getBasicTrialDisp();    
   static Vector dv(NEBD);
-  static Vector vin(NEBD);
-     
-  v = crdTransf->getBasicTrialDisp();    
   dv = crdTransf->getBasicIncrDeltaDisp();    
-  vin = v - dv;
 
-  if (initialFlag != 0 && dv.Norm() <= DBL_EPSILON)
+  static Vector vin(NEBD);
+  vin = v;
+  vin -= dv;
+
+  if (initialFlag != 0 && dv.Norm() <= DBL_EPSILON && sp == 0)
     return 0;
 
   const Matrix &xi_pt  = quadRule.getIntegrPointCoords(nSections);
