@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-08-20 00:37:29 $
+// $Revision: 1.7 $
+// $Date: 2001-11-28 00:33:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
                                                                         
@@ -147,7 +147,11 @@ sensitivityIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, char 
 
 
 
+int 
+startTimer(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
 
+int 
+stopTimer(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
 
 
 

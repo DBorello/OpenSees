@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2001-11-27 23:07:15 $
+// $Revision: 1.24 $
+// $Date: 2001-11-28 00:33:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -204,6 +204,7 @@ static EigenAnalysis *theEigenAnalysis = 0;
 static char *resDataPtr = 0;
 static int resDataSize = 0;
 
+static Timer *theTimer = 0;
 
 ErrorHandler *g3ErrorHandler =0;
 TclVideoPlayer *theTclVideoPlayer =0;
@@ -276,7 +277,10 @@ int g3AppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "nodeDisp", &nodeDisp, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
-
+    Tcl_CreateCommand(interp, "start", &startTimer, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
+    Tcl_CreateCommand(interp, "stop", &stopTimer, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
 #ifdef _RELIABILITY
     Tcl_CreateCommand(interp, "reliability", &reliability, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
@@ -294,6 +298,7 @@ int g3AppInit(Tcl_Interp *interp) {
 	theSensitivityAlgorithm =0;
 	theSensitivityIntegrator =0;
 // AddingSensitivity:END //////////////////////////////////
+
 #endif
 
     theAlgorithm =0;
@@ -546,6 +551,7 @@ setLoadConst(ClientData clientData, Tcl_Interp *interp, int argc,
 	  
   return TCL_OK;
 }
+
 
 int 
 setTime(ClientData clientData, Tcl_Interp *interp, int argc, 
@@ -2533,3 +2539,28 @@ computeGradients(ClientData clientData, Tcl_Interp *interp, int argc, char **arg
     return TCL_OK;
 }
 // AddingSensitivity:END //////////////////////////////////////
+
+
+int 
+startTimer(ClientData clientData, Tcl_Interp *interp, int argc, 
+	   char **argv)
+{
+  if (theTimer == 0)
+    theTimer = new Timer();
+  
+  theTimer->start();
+  return TCL_OK;
+}
+
+int 
+stopTimer(ClientData clientData, Tcl_Interp *interp, int argc, 
+	  char **argv)
+{
+  if (theTimer == 0)
+    return TCL_OK;
+  
+  theTimer->pause();
+  cerr << *theTimer;
+  return TCL_OK;
+}
+
