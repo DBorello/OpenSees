@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:25 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 08:20:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -78,7 +78,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
     if (strcmp(argv[1],"Element") == 0) {
       int eleID;
 	if (argc < 4) {
-	    cerr << "WARNING recorder Element eleID? <-time> "
+	    cerr << "WARNING recorder Element eleID1? eleID2? ...  <-time> "
 		<< "<-file fileName?> parameters";
 	    return TCL_ERROR;
 	}    
@@ -88,12 +88,18 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  endEleIDs++;
 	}
 
-	ID eleIDs(endEleIDs-2); 
-	for (int i=2; i<endEleIDs; i++) {
+        if ((endEleIDs-2) == 0) {
+	    cerr << "WARNING recorder Element eleID1? eleID2? .. <-time> "
+		<< "<-file fileName?> parameters";	    
+	    return TCL_ERROR;
+	}	    	    
+
+        ID eleIDs(endEleIDs-2); 
+        for (int i=2; i<endEleIDs; i++) {
 	  if (Tcl_GetInt(interp, argv[i], &eleID) != TCL_OK)	
-	    return TCL_ERROR;	
+	      return TCL_ERROR;	
 	  eleIDs[i-2] = eleID;	  
-	}
+        }
 
 	bool echoTime = false;
 	char *fileName = 0;
