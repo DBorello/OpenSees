@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2001-10-26 18:06:25 $
+// $Revision: 1.9 $
+// $Date: 2001-10-26 18:54:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -157,14 +157,10 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    endMarker++;
 	  }
 	  else {
-	    // if first unknown string then it is assumed to be element response requested
-	    if (eleData == 0) {
-	      eleData = endMarker;
-	      endMarker++;
-	    }
-	    // otherwise assume a comment or garbage
-	    else
-	      flags = 1;
+	    // first unknown string then is assumed to start 
+	    // element response request starts
+	    eleData = endMarker;
+	    flags = 1;
 	  }
 	}
 	
