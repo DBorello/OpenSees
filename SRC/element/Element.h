@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:31:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.h,v $
                                                                         
                                                                         
@@ -52,6 +52,7 @@ class Vector;
 class Renderer;
 class Info;
 class Information;
+class Response;
 
 class Element : public DomainComponent
 {
@@ -86,7 +87,7 @@ class Element : public DomainComponent
     virtual const Vector &getResistingForceIncInertia(void) =0;        
 
     // method for obtaining information specific to an element
-    virtual int setResponse(char **argv, int argc, Information &eleInformation);
+    virtual Response *setResponse(char **argv, int argc, Information &eleInformation);
     virtual int getResponse(int responseID, Information &eleInformation);
 	
   protected:
