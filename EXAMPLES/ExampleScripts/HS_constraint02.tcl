@@ -47,7 +47,7 @@ fix 4 0 0 1
 #     var   Manzari-Dafalias Yield Surface
 set DPys "-MD"
 #     var   Manzari-Dafalias Potential Surfac
-set DPps "-MD"
+set DPps "-MD 0.2"
 #     var Scalar hardening law for m
 set ES1  "-Leq  0.0"
 #     var bounding_surface hardening rule for back-stress alpha_ij
