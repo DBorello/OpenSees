@@ -18,15 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-08-29 07:16:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/machineBroker/MachineBroker.h,v $
                                                                         
                                                                         
-// File: ~/actor/broker/MachineBroker.h
-//
 // Written: fmk
-// Created: 11/96
 // Revision: A
 //
 // Purpose: This file contains the class definition for MachineBroker.
@@ -40,21 +37,45 @@
 #define MachineBroker_h
 
 class Channel;
+class FEM_ObjectBroker;
+class ID;
 
 class MachineBroker
 {
   public:
-    MachineBroker() {};
-    virtual ~MachineBroker() {};
+    MachineBroker(FEM_ObjectBroker *theObjectBroker);
+    virtual ~MachineBroker();
 
+    // methods to return info about local process id and num processes
+    virtual int getPID(void) = 0;
+    virtual int getNP(void)  = 0;
+
+    // methods to get and free Actors
+    virtual int shutdown(void);    
+    virtual int runActors(void);
+    virtual Channel *startActor(int actorType, int compDemand = 0);
+    virtual int finishedWithActor(Channel *);
+
+    // methods to get and free Channels (processes)
+    virtual Channel *getMyChannel(void)        =0;
+    virtual Channel *getRemoteProcess(void)    =0;
+    virtual int freeProcess(Channel *)         =0;
+
+    /* ************ THE OLD INTERFACE ***************
     virtual int startActor(char *actorProgram, 
 			   Channel &theChannel,
 			   int compDemand =0) =0;
+    ********************************************** */
 
   protected:
     
   private:
+    FEM_ObjectBroker *theObjectBroker;
 
+    Channel **actorChannels; // channels owned with running actor processes
+    int numActorChannels;
+    int numActiveChannels;
+    ID *activeChannels;
 };
 
 #endif
