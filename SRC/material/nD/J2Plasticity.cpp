@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-12-17 23:38:40 $
+// $Revision: 1.5 $
+// $Date: 2002-01-06 19:55:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2Plasticity.cpp,v $
 
 // Written: Ed "C++" Love
@@ -226,16 +226,16 @@ int J2Plasticity :: revertToStart( )
 //print out material data
 void J2Plasticity :: Print( ostream &s, int flag )
 {
-  s << '\n' ;
+  s << endl ;
   s << "J2-Plasticity : " ; 
-  s << this->getType( ) << '\n' ;
-  s << "Bulk Modulus =   " << bulk        << '\n' ;
-  s << "Shear Modulus =  " << shear       << '\n' ;
-  s << "Sigma_0 =        " << sigma_0     << '\n' ;
-  s << "Sigma_infty =    " << sigma_infty << '\n' ;
-  s << "Delta =          " << delta       << '\n' ;
-  s << "H =              " << Hard        << '\n' ;
-  s << "Eta =            " << eta         << '\n' ;
+  s << this->getType( ) << endl ;
+  s << "Bulk Modulus =   " << bulk        << endl ;
+  s << "Shear Modulus =  " << shear       << endl ;
+  s << "Sigma_0 =        " << sigma_0     << endl ;
+  s << "Sigma_infty =    " << sigma_infty << endl ;
+  s << "Delta =          " << delta       << endl ;
+  s << "H =              " << Hard        << endl ;
+  s << "Eta =            " << eta         << endl ;
   s << endl ;
 }
 
