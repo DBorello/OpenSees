@@ -305,6 +305,10 @@ $m add command -label Concrete01 -command "SetConcrete01 .concrete01"
 proc SetConcrete01 {w} {
     global matID
 
+    # Turn off all buttons & create a top level window
+    disable_buttons
+    toplevel $w
+
     set count 0
     foreach field {materialId fc ec fu eu} {
 	label $w.l$field -text $field
@@ -345,8 +349,6 @@ proc doneConcrete01 { } {
 # Define the data structures & procedures for ElasticPPGap
 # ##############################################################
 
-frame .elasticPPGap
-
 set elasticPPGap(materialID) 0
 set elasticPPGap(E) 0
 set elasticPPGap(yieldStrain) 0    
@@ -354,7 +356,6 @@ set elasticPPGap(gap) 0
 
 # add elasticPPGap the materials menu
 $m add command -label ElasticPPGap -command "SetElasticPPGap .elasticPPGap"
-
 
 proc SetElasticPPGap {w} {
     global matID
