@@ -435,6 +435,14 @@ SOURCE=..\..\..\SRC\analysis\integrator\HHT1.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\analysis\integrator\HSConstraint.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\integrator\HSConstraint.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\analysis\integrator\IncrementalIntegrator.cpp
 # End Source File
 # Begin Source File
