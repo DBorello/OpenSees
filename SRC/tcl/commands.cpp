@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.47 $
-// $Date: 2003-03-04 18:49:16 $
+// $Revision: 1.48 $
+// $Date: 2003-03-14 23:37:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -127,6 +127,9 @@ OPS_Stream &opserr = sserr;
 #include <LoadControl.h>
 #include <ArcLength.h>
 #include <ArcLength1.h>
+/******************************/
+#include <HSConstraint.h>
+/******************************/
 #include <MinUnbalDispNorm.h>
 #include <DisplacementControl.h>
 #include <Newmark.h>
@@ -1947,7 +1950,42 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
   if (theStaticAnalysis != 0)
     theStaticAnalysis->setIntegrator(*theStaticIntegrator);
   }
-
+  /************************added for HSConstraint*************************************/
+  
+  else if (strcmp(argv[1],"HSConstraint") == 0) {
+      double arcLength;
+      double psi_u;
+      double psi_f;
+      double u_ref;
+      if (argc < 3) {
+	opserr << "WARNING integrator HSConstraint <arcLength> <psi_u> <psi_f> <u_ref> \n";
+	return TCL_ERROR;
+      }    
+      if (argc >= 3 && Tcl_GetDouble(interp, argv[2], &arcLength) != TCL_OK)	
+	return TCL_ERROR;	
+      if (argc>=4 && Tcl_GetDouble(interp, argv[3], &psi_u) != TCL_OK)	
+	return TCL_ERROR;	
+      if (argc>=5 && Tcl_GetDouble(interp, argv[4], &psi_f) != TCL_OK)	
+	return TCL_ERROR;	
+      if (argc==6 && Tcl_GetDouble(interp, argv[5], &u_ref) != TCL_OK)	
+	return TCL_ERROR;	
+	switch(argc)
+	{
+		case 3:
+		    	theStaticIntegrator = new HSConstraint(arcLength);       
+		case 4:
+		      	theStaticIntegrator = new HSConstraint(arcLength, psi_u);       
+		case 5:
+		      	theStaticIntegrator = new HSConstraint(arcLength, psi_u, psi_f);       
+		case 6:
+		      	theStaticIntegrator = new HSConstraint(arcLength, psi_u, psi_f, u_ref);       
+	}
+    // if the analysis exists - we want to change the Integrator
+    if (theStaticAnalysis != 0)
+    	theStaticAnalysis->setIntegrator(*theStaticIntegrator);
+  }
+  /*********************************************************************************/
+  
   else if (strcmp(argv[1],"MinUnbalDispNorm") == 0) {
       double lambda11, minlambda, maxlambda;
       int numIter;
