@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:30 $
+// $Revision: 1.3 $
+// $Date: 2003-02-25 23:33:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/feap/TclFeapMaterialCommand.cpp,v $
 
 #include <FeapMaterial01.h>
@@ -30,7 +30,7 @@
 #include <Vector.h>
 #include <string.h>
 
-static void printCommand(int argc, char **argv)
+static void printCommand(int argc, TCL_Char **argv)
 {
     opserr << "Input command: ";
     for (int i=0; i<argc; i++)
@@ -40,7 +40,7 @@ static void printCommand(int argc, char **argv)
 
 NDMaterial *
 TclModelBuilder_addFeapMaterial(ClientData clientData, Tcl_Interp *interp,
-				int argc, char **argv,
+				int argc, TCL_Char **argv,
 				TclModelBuilder *theTclBuilder)
 {
   if (argc < 3) {

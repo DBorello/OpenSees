@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2003-02-14 23:01:07 $
+// $Revision: 1.17 $
+// $Date: 2003-02-25 23:32:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.cpp,v $
 
 // Written: MHS
@@ -1061,7 +1061,7 @@ DispBeamColumn3d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-DispBeamColumn3d::setResponse(char **argv, int argc, Information &eleInfo)
+DispBeamColumn3d::setResponse(const char **argv, int argc, Information &eleInfo)
 {
     // global force - 
     if (strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"force") == 0

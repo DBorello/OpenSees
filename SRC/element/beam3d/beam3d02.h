@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:05 $
+// $Revision: 1.6 $
+// $Date: 2003-02-25 23:32:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam3d/beam3d02.h,v $
                                                                         
                                                                         
-// File: ~/model/beam3d02.h
-//
 // Written: fmk 11/95
 // Revised:
 //

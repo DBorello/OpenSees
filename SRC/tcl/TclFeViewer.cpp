@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:02:10 $
+// $Revision: 1.7 $
+// $Date: 2003-02-25 23:34:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclFeViewer.cpp,v $
                                                                         
                                                                         
@@ -67,43 +67,43 @@ static TclFeViewer *theTclFeViewer = 0;
 
 int
 TclFeViewer_setVRP(ClientData clientData, Tcl_Interp *interp, int argc, 
-		   char **argv);
+		   TCL_Char **argv);
 int
 TclFeViewer_setVPN(ClientData clientData, Tcl_Interp *interp, int argc, 
-		   char **argv);		   
+		   TCL_Char **argv);		   
 int
 TclFeViewer_setVUP(ClientData clientData, Tcl_Interp *interp, int argc, 
-		   char **argv);
+		   TCL_Char **argv);
 int
 TclFeViewer_setViewWindow(ClientData clientData, Tcl_Interp *interp, int argc, 
-		   char **argv);
+		   TCL_Char **argv);
 int
 TclFeViewer_setPlaneDist(ClientData clientData, Tcl_Interp *interp, int argc, 
-			 char **argv);		   
+			 TCL_Char **argv);		   
 int
 TclFeViewer_setProjectionMode(ClientData clientData, Tcl_Interp *interp, int argc, 
-			      char **argv);		   			 
+			      TCL_Char **argv);		   			 
 int
 TclFeViewer_setFillMode(ClientData clientData, Tcl_Interp *interp, int argc, 
-			char **argv);		   			 			      
+			TCL_Char **argv);		   			 			      
 int
 TclFeViewer_setPRP(ClientData clientData, Tcl_Interp *interp, int argc, 
-		   char **argv);		   
+		   TCL_Char **argv);		   
 int
 TclFeViewer_setPortWindow(ClientData clientData, Tcl_Interp *interp, int argc, 
-			  char **argv);		   			 
+			  TCL_Char **argv);		   			 
 int
 TclFeViewer_displayModel(ClientData clientData, Tcl_Interp *interp, int argc, 
-			  char **argv);		   			 
+			  TCL_Char **argv);		   			 
 			  
 int
 TclFeViewer_clearImage(ClientData clientData, Tcl_Interp *interp, int argc, 
-		  char **argv);		 
+		  TCL_Char **argv);		 
 //
 // the class constructor, destructor and methods
 //
 
-TclFeViewer::TclFeViewer(char *title, int xLoc, int yLoc, int width, int height,
+TclFeViewer::TclFeViewer(const char *title, int xLoc, int yLoc, int width, int height,
 			 Domain &_theDomain, int WipeFlag,
 			 Tcl_Interp *interp)
   :theMap(0),theRenderer(0), theDomain(&_theDomain), 
@@ -161,8 +161,8 @@ TclFeViewer::TclFeViewer(char *title, int xLoc, int yLoc, int width, int height,
 
 
 
-TclFeViewer::TclFeViewer(char *title, int xLoc, int yLoc, int width, int height, 
-			 char *fileName,
+TclFeViewer::TclFeViewer(const char *title, int xLoc, int yLoc, int width, int height, 
+			 const char *fileName,
 			 Domain &_theDomain,
 			 Tcl_Interp *interp)
   :theMap(0),theRenderer(0), theDomain(&_theDomain),
@@ -358,13 +358,13 @@ TclFeViewer::setPlaneDist(float anear, float afar)
 }            
 
 int
-TclFeViewer::setProjectionMode(char *mode)
+TclFeViewer::setProjectionMode(const char *mode)
 {
     return theRenderer->setProjectionMode(mode);
 }                
 
 int
-TclFeViewer::setFillMode(char *mode)
+TclFeViewer::setFillMode(const char *mode)
 {
   return theRenderer->setFillMode(mode);
 }                
@@ -403,7 +403,7 @@ TclFeViewer::clearImage(void)
 
 int
 TclFeViewer_setVRP(ClientData clientData, Tcl_Interp *interp, int argc, 
-		   char **argv)
+		   TCL_Char **argv)
 {
   // check destructor has not been called
   if (theTclFeViewer == 0)
@@ -436,7 +436,7 @@ TclFeViewer_setVRP(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int
 TclFeViewer_setVPN(ClientData clientData, Tcl_Interp *interp, int argc, 
-		   char **argv)
+		   TCL_Char **argv)
 {  
   // check destructor has not been called
   if (theTclFeViewer == 0)
@@ -469,7 +469,7 @@ TclFeViewer_setVPN(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int
 TclFeViewer_setVUP(ClientData clientData, Tcl_Interp *interp, int argc, 
-		   char **argv)
+		   TCL_Char **argv)
 {  
   // check destructor has not been called
   if (theTclFeViewer == 0)
@@ -502,7 +502,7 @@ TclFeViewer_setVUP(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int
 TclFeViewer_setViewWindow(ClientData clientData, Tcl_Interp *interp, int argc, 
-		   char **argv)
+		   TCL_Char **argv)
 {  
   // check destructor has not been called
   if (theTclFeViewer == 0)
@@ -537,7 +537,7 @@ TclFeViewer_setViewWindow(ClientData clientData, Tcl_Interp *interp, int argc,
 }
 int
 TclFeViewer_setPlaneDist(ClientData clientData, Tcl_Interp *interp, int argc, 
-			 char **argv)
+			 TCL_Char **argv)
 {
   // check destructor has not been called
   if (theTclFeViewer == 0)
@@ -565,7 +565,7 @@ TclFeViewer_setPlaneDist(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int
 TclFeViewer_setProjectionMode(ClientData clientData, Tcl_Interp *interp, int argc, 
-			      char **argv)
+			      TCL_Char **argv)
 {
   // check destructor has not been called
   if (theTclFeViewer == 0)
@@ -584,7 +584,7 @@ TclFeViewer_setProjectionMode(ClientData clientData, Tcl_Interp *interp, int arg
 
 int
 TclFeViewer_setFillMode(ClientData clientData, Tcl_Interp *interp, int argc, 
-			char **argv)
+			TCL_Char **argv)
 {
   // check destructor has not been called
   if (theTclFeViewer == 0)
@@ -603,7 +603,7 @@ TclFeViewer_setFillMode(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int
 TclFeViewer_setPRP(ClientData clientData, Tcl_Interp *interp, int argc, 
-		   char **argv)
+		   TCL_Char **argv)
 {
   // check destructor has not been called
   if (theTclFeViewer == 0)
@@ -636,7 +636,7 @@ TclFeViewer_setPRP(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int
 TclFeViewer_setPortWindow(ClientData clientData, Tcl_Interp *interp, int argc, 
-			  char **argv)
+			  TCL_Char **argv)
 {
   // check destructor has not been called
   if (theTclFeViewer == 0)
@@ -672,7 +672,7 @@ TclFeViewer_setPortWindow(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int
 TclFeViewer_displayModel(ClientData clientData, Tcl_Interp *interp, int argc, 
-			  char **argv)
+			  TCL_Char **argv)
 {
   // check destructor has not been called
   if (theTclFeViewer == 0)
@@ -724,7 +724,7 @@ TclFeViewer_displayModel(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int
 TclFeViewer_clearImage(ClientData clientData, Tcl_Interp *interp, int argc, 
-			  char **argv)
+			  TCL_Char **argv)
 {
   // check destructor has not been called
   if (theTclFeViewer == 0)

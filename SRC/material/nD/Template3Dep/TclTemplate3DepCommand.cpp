@@ -60,23 +60,24 @@
 
 
 // the functions to create the component objects (defined at eof)
-YieldSurface     *EvaluateYieldSurfaceArgs(ClientData, Tcl_Interp *, char *tclString);
-PotentialSurface *EvaluatePotentialSurfaceArgs(ClientData, Tcl_Interp *, char *tclString);
-EPState          *EvaluateEPStateArgs(ClientData, Tcl_Interp *, char *tclString);
-EvolutionLaw_S   *EvaluateEvolutionLawSArgs(ClientData, Tcl_Interp *, char *tclString);
-EvolutionLaw_T   *EvaluateEvolutionLawTArgs(ClientData, Tcl_Interp *, char *tclString);
+YieldSurface     *EvaluateYieldSurfaceArgs(ClientData, Tcl_Interp *, TCL_Char *tclString);
+PotentialSurface *EvaluatePotentialSurfaceArgs(ClientData, Tcl_Interp *, TCL_Char *tclString);
+EPState          *EvaluateEPStateArgs(ClientData, Tcl_Interp *, TCL_Char *tclString);
+EvolutionLaw_S   *EvaluateEvolutionLawSArgs(ClientData, Tcl_Interp *, TCL_Char *tclString);
+EvolutionLaw_T   *EvaluateEvolutionLawTArgs(ClientData, Tcl_Interp *, TCL_Char *tclString);
 
 
 // little function to free memory after invoke Tcl_SplitList
 //   note Tcl_Split list stores the array of pointers and the strings in 
 //   one array, which is why Tcl_Free needs only be called on the array.
-static void cleanup(char **argv) {
-    Tcl_Free((char *) argv);
+
+static void cleanup(TCL_Char **argv) {
+	  Tcl_Free((char *) argv);
 }
 
 Template3Dep *
 TclModelBuilder_addTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  int argc, 
-          char **argv, TclModelBuilder *theTclBuilder, int eleArgStart)
+				  TCL_Char **argv, TclModelBuilder *theTclBuilder, int eleArgStart)
 {
   // create some empty pointers which we fill in as parse the command line
   int tag =0;
@@ -250,10 +251,10 @@ TclModelBuilder_addTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  int 
 
 
 // Function - to create a YieldSurface
-YieldSurface *EvaluateYieldSurfaceArgs(ClientData clientData, Tcl_Interp *interp, char *tclString)
+YieldSurface *EvaluateYieldSurfaceArgs(ClientData clientData, Tcl_Interp *interp, TCL_Char *tclString)
 {
   int argc;
-  char **argv;
+  TCL_Char **argv;
   
   // split the list
   if (Tcl_SplitList(interp, tclString, &argc, &argv) != TCL_OK) {
@@ -306,10 +307,10 @@ YieldSurface *EvaluateYieldSurfaceArgs(ClientData clientData, Tcl_Interp *interp
 }
 
 // Function - to create a PotentialSurface object
-PotentialSurface *EvaluatePotentialSurfaceArgs(ClientData clientData, Tcl_Interp *interp, char *tclString)
+PotentialSurface *EvaluatePotentialSurfaceArgs(ClientData clientData, Tcl_Interp *interp, TCL_Char *tclString)
 {
   int argc;
-  char **argv;
+  TCL_Char **argv;
 
   // split the list
   if (Tcl_SplitList(interp, tclString, &argc, &argv) != TCL_OK) {
@@ -367,19 +368,18 @@ PotentialSurface *EvaluatePotentialSurfaceArgs(ClientData clientData, Tcl_Interp
 }
 
 // Function - to read in a stress tensor
-int EvaluateStressTensor(ClientData clientData, Tcl_Interp *interp, char *tclString,
-       stresstensor &stress)
+
+int EvaluateStressTensor(ClientData clientData, Tcl_Interp *interp, TCL_Char *tclString,
+			 stresstensor &stress)
 {
   int argc;
-  char **argv;
+  TCL_Char **argv;
     
   // split the list
   if (Tcl_SplitList(interp, tclString, &argc, &argv) != TCL_OK) {
     return 0;
   }
     
-  cout << " argc " << argc << "  argv: " << *argv << endln;
-  
   //Found a bug here!! Joey May 15, 2001
   //argc = 1 and only one value is passed in. 
   //But we need 9 values to initialze a tensor
@@ -420,11 +420,11 @@ int EvaluateStressTensor(ClientData clientData, Tcl_Interp *interp, char *tclStr
 }
 
 // Function - to read in a strain tensor
-int EvaluateStrainTensor(ClientData clientData, Tcl_Interp *interp, char *tclString,
-       straintensor &strain)
+int EvaluateStrainTensor(ClientData clientData, Tcl_Interp *interp, TCL_Char *tclString,
+			 straintensor &strain)
 {
   int argc;
-  char **argv;
+  TCL_Char **argv;
 
   // split the list
   if (Tcl_SplitList(interp, tclString, &argc, &argv) != TCL_OK) {
@@ -455,10 +455,10 @@ int EvaluateStrainTensor(ClientData clientData, Tcl_Interp *interp, char *tclStr
 }
 
 // Function - to create an EPState object
-EPState *EvaluateEPStateArgs(ClientData clientData, Tcl_Interp *interp, char *tclString)
+EPState *EvaluateEPStateArgs(ClientData clientData, Tcl_Interp *interp, TCL_Char *tclString)
 {
   int argc;
-  char **argv;
+  TCL_Char **argv;
 
   // split the list
   if (Tcl_SplitList(interp, tclString, &argc, &argv) != TCL_OK) {
@@ -652,10 +652,10 @@ EPState *EvaluateEPStateArgs(ClientData clientData, Tcl_Interp *interp, char *tc
 
 
 // Function - to create an EvolutionLaw_S object
-EvolutionLaw_S *EvaluateEvolutionLawSArgs(ClientData clientData, Tcl_Interp *interp, char *tclString)
+EvolutionLaw_S *EvaluateEvolutionLawSArgs(ClientData clientData, Tcl_Interp *interp, TCL_Char *tclString)
 {
   int argc;
-  char **argv;
+  TCL_Char **argv;
 
   // split the list
   if (Tcl_SplitList(interp, tclString, &argc, &argv) != TCL_OK) {
@@ -708,10 +708,10 @@ EvolutionLaw_S *EvaluateEvolutionLawSArgs(ClientData clientData, Tcl_Interp *int
 }
 
 // Function - to create an EvolutionLaw_T object
-EvolutionLaw_T *EvaluateEvolutionLawTArgs(ClientData clientData, Tcl_Interp *interp, char *tclString)
+EvolutionLaw_T *EvaluateEvolutionLawTArgs(ClientData clientData, Tcl_Interp *interp, TCL_Char *tclString)
 {
   int argc;
-  char **argv;
+  TCL_Char **argv;
 
   // split the list
   if (Tcl_SplitList(interp, tclString, &argc, &argv) != TCL_OK) {

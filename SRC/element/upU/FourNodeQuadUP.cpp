@@ -9,8 +9,8 @@
 // based on FourNodeQuad element by Michael Scott		  	     //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:20 $
+// $Revision: 1.6 $
+// $Date: 2003-02-25 23:33:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/upU/FourNodeQuadUP.cpp,v $
 
 #include <FourNodeQuadUP.h>
@@ -932,7 +932,7 @@ FourNodeQuadUP::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-FourNodeQuadUP::setResponse(char **argv, int argc, Information &eleInfo)
+FourNodeQuadUP::setResponse(const char **argv, int argc, Information &eleInfo)
 {
     if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
 		return new ElementResponse(this, 1, P);
@@ -970,7 +970,7 @@ FourNodeQuadUP::getResponse(int responseID, Information &eleInfo)
 }
 
 int
-FourNodeQuadUP::setParameter(char **argv, int argc, Information &info)
+FourNodeQuadUP::setParameter(const char **argv, int argc, Information &info)
 {
 	// quad mass density per unit volume
 	if (strcmp(argv[0],"rho") == 0) {

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:02 $
+// $Revision: 1.5 $
+// $Date: 2003-02-25 23:32:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/region/TclRegionCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -44,7 +44,7 @@
 
 int
 TclAddMeshRegion(ClientData clientData, Tcl_Interp *interp, int argc, 
-	     char **argv, Domain &theDomain)
+		 TCL_Char **argv, Domain &theDomain)
 {
   int loc = 1;
   int tag;

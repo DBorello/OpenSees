@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-14 23:01:04 $
+// $Revision: 1.8 $
+// $Date: 2003-02-25 23:32:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/8nbrick/TclEightNodeBrickCommand.cpp,v $
                                                                         
                                                                         
@@ -43,11 +43,11 @@
 #include <EightNodeBrick.h>
 #include <TclModelBuilder.h>
 
-extern void printCommand(int argc, char **argv);
+extern void printCommand(int argc, TCL_Char **argv);
 
 int
 TclModelBuilder_addEightNodeBrick(ClientData clientData, Tcl_Interp *interp,  int argc, 
-				  char **argv, Domain*theTclDomain,
+				  TCL_Char **argv, Domain*theTclDomain,
 				  TclModelBuilder *theTclBuilder, int eleArgStart)
 {
   // ensure the destructor has not been called - 

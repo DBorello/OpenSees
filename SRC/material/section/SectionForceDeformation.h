@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-10-03 18:01:44 $
+// $Revision: 1.8 $
+// $Date: 2003-02-25 23:33:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionForceDeformation.h,v $
                                                                         
                                                                         
@@ -82,7 +82,7 @@ class SectionForceDeformation : public Material
 		virtual const ID &getType (void) = 0;
 		virtual int getOrder (void) const = 0;
 
-		virtual Response *setResponse(char **argv, int argc, Information &info);
+		virtual Response *setResponse(const char **argv, int argc, Information &info);
 		virtual int getResponse(int responseID, Information &info);
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:38 $
+// $Revision: 1.7 $
+// $Date: 2003-02-25 23:33:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.h,v $
                                                                         
                                                                         
@@ -69,7 +69,7 @@ class Concrete01 : public UniaxialMaterial
     
       void Print(OPS_Stream &s, int flag =0);
 
-      int setParameter(char **argv, int argc, Information &info);
+      int setParameter(const char **argv, int argc, Information &info);
       int updateParameter(int parameterID, Information &info);
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2003-02-14 23:01:06 $
+// $Revision: 1.15 $
+// $Date: 2003-02-25 23:32:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.cpp,v $
 
 // Ed "C++" Love
@@ -1294,7 +1294,7 @@ BbarBrick::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-BbarBrick::setResponse(char **argv, int argc, Information &eleInfo)
+BbarBrick::setResponse(const char **argv, int argc, Information &eleInfo)
 {
   if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
     return new ElementResponse(this, 1, resid);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.31 $
-// $Date: 2003-02-14 23:01:16 $
+// $Revision: 1.32 $
+// $Date: 2003-02-25 23:32:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -1930,7 +1930,7 @@ NLBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-NLBeamColumn2d::setResponse(char **argv, int argc, Information &eleInformation)
+NLBeamColumn2d::setResponse(const char **argv, int argc, Information &eleInformation)
 {
     //
     // we compare argv[0] for known response types 
@@ -1986,7 +1986,7 @@ NLBeamColumn2d::getResponse(int responseID, Information &eleInfo)
 }
 
 int
-NLBeamColumn2d::setParameter (char **argv, int argc, Information &info)
+NLBeamColumn2d::setParameter (const char **argv, int argc, Information &info)
 {
 	//
 	// From the parameterID value it should be possible to extract

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 07:30:53 $
+// $Revision: 1.3 $
+// $Date: 2003-02-25 23:32:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/groundMotion/GroundMotionRecord.h,v $
                                                                         
                                                                         
@@ -46,9 +46,9 @@ class GroundMotionRecord : public GroundMotion
 {
   public:
     GroundMotionRecord();
-    GroundMotionRecord(char *fileNameAccel, double timeStep,
+    GroundMotionRecord(const char *fileNameAccel, double timeStep,
 		       double fact = 1.0, double dTintegration = 0.01);
-    GroundMotionRecord(char *fileNameAccel, char *fileNameTime,
+    GroundMotionRecord(const char *fileNameAccel, const char *fileNameTime,
 		       double fact = 1.0, double dTintegration = 0.01);
     // ADD CONSTRUCTORS FOR OTHER INPUT FORMATS
 

@@ -11,7 +11,7 @@
 
 #include <TclModelBuilder.h>
 
-extern void printCommand(int argc, char **argv);
+extern void printCommand(int argc, TCL_Char **argv);
 
 /*  *****************************************************************************
     
@@ -22,7 +22,7 @@ extern void printCommand(int argc, char **argv);
 int
 TclModelBuilder_addFourNodeQuadUP(ClientData clientData, Tcl_Interp *interp,  
 				int argc, 
-				char **argv, 
+				TCL_Char **argv, 
 				Domain*theTclDomain,
 				TclModelBuilder *theTclBuilder)
 {
@@ -56,7 +56,7 @@ TclModelBuilder_addFourNodeQuadUP(ClientData clientData, Tcl_Interp *interp,
 	double dM = 0.0;
 	double dK = 0.0;
 
-  char *type;
+  TCL_Char *type;
   if (Tcl_GetInt(interp, argv[argStart], &FourNodeQuadUPId) != TCL_OK) {
     opserr << "WARNING invalid FourNodeQuadUP eleTag" << endln;
     return TCL_ERROR;

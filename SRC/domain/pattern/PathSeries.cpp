@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:00 $
+// $Revision: 1.5 $
+// $Date: 2003-02-25 23:32:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathSeries.cpp,v $
                                                                         
                                                                         
@@ -76,7 +76,7 @@ PathSeries::PathSeries(const Vector &theLoadPath,
 }
 
 
-PathSeries::PathSeries(char *fileName, 
+PathSeries::PathSeries(const char *fileName, 
 		       double theTimeIncr, 
 		       double theFactor)
   :TimeSeries(TSERIES_TAG_PathSeries),

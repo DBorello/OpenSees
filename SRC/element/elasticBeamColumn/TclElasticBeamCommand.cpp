@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:08 $
+// $Revision: 1.4 $
+// $Date: 2003-02-25 23:32:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/TclElasticBeamCommand.cpp,v $
                                                                         
 // Written: fmk 
@@ -42,11 +42,11 @@
 
 #include <TclModelBuilder.h>
 
-extern void printCommand(int argc, char **argv);
+extern void printCommand(int argc, TCL_Char **argv);
 
 int
 TclModelBuilder_addElasticBeam(ClientData clientData, Tcl_Interp *interp, int argc, 
-			       char **argv, Domain *theTclDomain, TclModelBuilder *theTclBuilder,
+			       TCL_Char **argv, Domain *theTclDomain, TclModelBuilder *theTclBuilder,
 			       int eleArgStart)
 {
   // ensure the destructor has not been called - 

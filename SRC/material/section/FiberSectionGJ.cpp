@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-17 21:16:21 $
+// $Revision: 1.4 $
+// $Date: 2003-02-25 23:33:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSectionGJ.cpp,v $
                                                                         
 // Written: fmk
@@ -710,7 +710,7 @@ FiberSectionGJ::Print(OPS_Stream &s, int flag)
 }
 
 Response*
-FiberSectionGJ::setResponse(char **argv, int argc, Information &sectInfo)
+FiberSectionGJ::setResponse(const char **argv, int argc, Information &sectInfo)
 {
   // See if the response is one of the defaults
   Response *res = SectionForceDeformation::setResponse(argv, argc, sectInfo);
@@ -812,7 +812,7 @@ FiberSectionGJ::getResponse(int responseID, Information &sectInfo)
 }
 
 int
-FiberSectionGJ::setParameter (char **argv, int argc, Information &info)
+FiberSectionGJ::setParameter (const char **argv, int argc, Information &info)
 {
 	// Initial declarations
 	int ok = -1;

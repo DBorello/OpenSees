@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:39 $
+// $Revision: 1.5 $
+// $Date: 2003-02-25 23:33:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ParallelMaterial.h,v $
                                                                         
                                                                         
@@ -69,7 +69,7 @@ class ParallelMaterial : public UniaxialMaterial
     
     void Print(OPS_Stream &s, int flag =0);
 
-    Response *setResponse(char **argv, int argc,
+    Response *setResponse(const char **argv, int argc,
 			  Information &matInformation);
     int getResponse(int responseID, Information &matInformation);
 

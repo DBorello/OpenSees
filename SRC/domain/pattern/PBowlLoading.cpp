@@ -60,9 +60,9 @@ Udd(0)
 }
 
 PBowlLoading::PBowlLoading(int tag,
-                           char *PBEfName,
-                           char *DispfName,
-                           char *AccefName,
+                           const char *PBEfName,
+                           const char *DispfName,
+                           const char *AccefName,
                            double theTimeIncr,
                            double theFactor,
                            double xplus,

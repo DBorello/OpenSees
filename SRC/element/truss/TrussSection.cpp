@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-02-14 23:01:19 $
+// $Revision: 1.10 $
+// $Date: 2003-02-25 23:33:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -879,7 +879,7 @@ TrussSection::computeCurrentStrain(void) const
 }
 
 Response*
-TrussSection::setResponse(char **argv, int argc, Information &eleInformation)
+TrussSection::setResponse(const char **argv, int argc, Information &eleInformation)
 {
   //
   // we compare argv[0] for known response types for the Truss
@@ -1013,7 +1013,7 @@ TrussSection::getResponse(int responseID, Information &eleInformation)
 }
 
 int
-TrussSection::setParameter (char **argv, int argc, Information &info)
+TrussSection::setParameter (const char **argv, int argc, Information &info)
 {
     // a material parameter
     if (strcmp(argv[0],"section") == 0) {

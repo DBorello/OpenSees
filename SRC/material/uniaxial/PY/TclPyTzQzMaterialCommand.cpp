@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:41 $
+// $Revision: 1.3 $
+// $Date: 2003-02-25 23:34:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PY/TclPyTzQzMaterialCommand.cpp,v $
 
 //temp out BJ #include <Domain.h>     // RWB bringing in Domain for PyLiq
@@ -38,7 +38,7 @@
 #include <Vector.h>
 #include <string.h>
 
-static void printCommand(int argc, char **argv)
+static void printCommand(int argc, TCL_Char **argv)
 {
     opserr << "Input command: ";
     for (int i=0; i<argc; i++)
@@ -48,10 +48,10 @@ static void printCommand(int argc, char **argv)
 
 UniaxialMaterial *
 TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
-				char **argv, TclModelBuilder *theTclBuilder)
-//temp out BJ					char **argv, Domain *theDomain, TclModelBuilder *theTclBuilder)
-//temp out BJ // !!!!!!!!!!!!! IFF to be discussed and changed, this theDomain argument, ROss needs
-//temp out BJ // that to make PYliq working...
+				  TCL_Char **argv, TclModelBuilder *theTclBuilder)
+  //temp out BJ					char **argv, Domain *theDomain, TclModelBuilder *theTclBuilder)
+  //temp out BJ // !!!!!!!!!!!!! IFF to be discussed and changed, this theDomain argument, ROss needs
+  //temp out BJ // that to make PYliq working...
 {
 	if (argc < 3) {
 		opserr << "WARNING insufficient number of arguments\n";

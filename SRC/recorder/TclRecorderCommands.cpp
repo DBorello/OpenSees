@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2003-02-20 08:00:23 $
+// $Revision: 1.17 $
+// $Date: 2003-02-25 23:34:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
-// File: ~/recorders/TclRecordersCommand.C
-// 
 // Written: fmk 
 // Created: 04/98
 // Revision: A
@@ -67,7 +65,7 @@ static EquiSolnAlgo *theAlgorithm =0;
 
 int 
 TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc, 
-		  char **argv, Domain &theDomain, Recorder **theRecorder)
+		  TCL_Char **argv, Domain &theDomain, Recorder **theRecorder)
 {
     // make sure at least one other argument to contain integrator
     if (argc < 2) {
@@ -133,7 +131,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 
 	double dT = 0.0;
 	bool echoTime = false;
-	char *fileName = 0;
+	TCL_Char *fileName = 0;
 	int loc = endEleIDs;
 	int flags = 0;
 	int eleData = 0;
@@ -261,14 +259,22 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    eleIDs[numEle++] = theEle->getTag();
 	}
 
+	const char **data = new (const char *)[argc-eleData];
+
+	int i,j;
+	for (i=eleData, j=0; i<argc; i++, j++)
+	  data[j] = argv[i];
+
 	// now construct the recorder
 	if (strcmp(argv[1],"Element") == 0) 
-	  (*theRecorder) = new ElementRecorder(eleIDs, theDomain, &argv[eleData], 
+	  (*theRecorder) = new ElementRecorder(eleIDs, theDomain, data, 
 					       argc-eleData, echoTime, dT, fileName);
 	else
 
-	  (*theRecorder) = new EnvelopeElementRecorder(eleIDs, theDomain, &argv[eleData], 
+	  (*theRecorder) = new EnvelopeElementRecorder(eleIDs, theDomain, data, 
 						       argc-eleData, dT, fileName);
+
+	delete [] data;
     }
     
     // create a recorder to write nodal displacement quantities to a file
@@ -281,8 +287,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    return TCL_ERROR;
 	}    
 
-      char *responseID = 0;
-      char *fileName = 0;
+      TCL_Char *responseID = 0;
+      TCL_Char *fileName = 0;
 
       int pos = 2;
 
@@ -601,7 +607,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	if (Tcl_GetInt(interp, argv[6], &height) != TCL_OK)	
 	    return TCL_ERROR;	      
 
-	char *fileName = 0;
+	TCL_Char *fileName = 0;
 	bool displayRecord = false;
 	int loc = 7;
 	while (loc < argc) {
@@ -635,7 +641,17 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  opserr << "WARNING recorder GSA -file fileName? -dT deltaT? - not enough arguments\n";
 	  return TCL_ERROR;
 	}    
-	char *fileName = 0;
+	TCL_Char *fileName = 0;
+	TCL_Char *title1 =0;
+	TCL_Char *title2 =0;
+	TCL_Char *title3 =0;
+	TCL_Char *jobno =0;
+	TCL_Char *initials =0;
+	TCL_Char *spec =0;
+	TCL_Char *currency =0;
+	TCL_Char *length =0;
+	TCL_Char *force =0;
+	TCL_Char *temp =0;
 	double dT = 0.0;
 	int loc = 2;
 
@@ -643,6 +659,46 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  if ((strcmp(argv[loc],"-file") == 0) ||
 	      (strcmp(argv[loc],"-file") == 0)) {
 	    fileName = argv[loc+1];
+	    loc += 2;
+	  } else if ((strcmp(argv[loc],"-title1") == 0) ||
+	      (strcmp(argv[loc],"-Title1e") == 0)) {
+	    title1 = argv[loc+1];
+	    loc += 2;
+	  } else if ((strcmp(argv[loc],"-title2") == 0) ||
+	      (strcmp(argv[loc],"-Title2e") == 0)) {
+	    title2 = argv[loc+1];
+	    loc += 2;
+	  } else if ((strcmp(argv[loc],"-title3") == 0) ||
+	      (strcmp(argv[loc],"-Title3e") == 0)) {
+	    title3 = argv[loc+1];
+	    loc += 2;
+	  } else if ((strcmp(argv[loc],"-jobno") == 0) ||
+	      (strcmp(argv[loc],"-JobNo") == 0)) {
+	    jobno = argv[loc+1];
+	    loc += 2;
+	  } else if ((strcmp(argv[loc],"-initials") == 0) ||
+	      (strcmp(argv[loc],"-Initials") == 0)) {
+	    initials = argv[loc+1];
+	    loc += 2;
+	  } else if ((strcmp(argv[loc],"-spec") == 0) ||
+	      (strcmp(argv[loc],"-Spec") == 0)) {
+	    spec = argv[loc+1];
+	    loc += 2;
+	  } else if ((strcmp(argv[loc],"-currency") == 0) ||
+	      (strcmp(argv[loc],"-Currency") == 0)) {
+	    currency = argv[loc+1];
+	    loc += 2;
+	  } else if ((strcmp(argv[loc],"-length") == 0) ||
+	      (strcmp(argv[loc],"-Length") == 0)) {
+	    length = argv[loc+1];
+	    loc += 2;
+	  } else if ((strcmp(argv[loc],"-force") == 0) ||
+	      (strcmp(argv[loc],"-Force") == 0)) {
+	    force = argv[loc+1];
+	    loc += 2;
+	  } else if ((strcmp(argv[loc],"-temp") == 0) ||
+	      (strcmp(argv[loc],"-Temp") == 0)) {
+	    temp = argv[loc+1];
 	    loc += 2;
 	  }
 	  else if (strcmp(argv[loc],"-dT") == 0) {
@@ -654,7 +710,9 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    loc++;
 	}
 
-	GSA_Recorder *theR = new GSA_Recorder(theDomain, fileName, dT);
+	GSA_Recorder *theR = new GSA_Recorder(theDomain, fileName, title1, title2, title3,
+					      jobno, initials, spec, currency, length, force,
+					      temp, dT);
 	(*theRecorder) = theR;
     }
 
@@ -679,7 +737,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int 
 TclAddRecorder(ClientData clientData, Tcl_Interp *interp, int argc, 
-	       char **argv, Domain &theDomain)
+	       TCL_Char **argv, Domain &theDomain)
 {
 	Recorder *theRecorder;
 	TclCreateRecorder(clientData, interp, argc, argv, theDomain, &theRecorder);
@@ -699,7 +757,7 @@ TclAddRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int 
 TclAddAlgorithmRecorder(ClientData clientData, Tcl_Interp *interp, int argc, 
-	       char **argv, Domain &theDomain, EquiSolnAlgo *theAlgo)
+			TCL_Char **argv, Domain &theDomain, EquiSolnAlgo *theAlgo)
 {
 	Recorder *theRecorder = 0;
 	theAlgorithm = theAlgo;

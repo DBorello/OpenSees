@@ -18,9 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-25 23:32:59 $
-// $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/TclNLBeamColumnCommand.cpp,v $
+// $Revision: 1.13 $
+// $Date: 2003-02-25 23:33:00 $
+// $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/tcl/TclElmtBuilder.cpp,v $
                                                                                                                                  
 // Written: Remo M. de Souza (rmsouza@ce.berkeley.edu)
 // Created: 08/99
@@ -33,6 +33,7 @@
 
 #include <Domain.h>
 #include <Node.h>
+#include <ArrayOfTaggedObjects.h>
 #include <Matrix.h>
 
 #include <SectionForceDeformation.h>
@@ -56,7 +57,7 @@ static TclModelBuilder *theTclModelBuilder =0;
 // to create a NL frame element and add to the domain
 //
 int
-TclModelBuilder_addNLBeamColumn(ClientData clientData, Tcl_Interp *interp,
+TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
 				int inArgc, TCL_Char **inArgv,
 				Domain *theDomain,
 				TclModelBuilder *theBuilder)

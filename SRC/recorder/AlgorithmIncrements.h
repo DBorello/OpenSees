@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:49 $
+// $Revision: 1.4 $
+// $Date: 2003-02-25 23:34:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/AlgorithmIncrements.h,v $
                                                                         
                                                                         
-// File: ~/recorder/tcl/AlgorithmIncrements.h.h
-// 
 // Written: fmk 
 // Created: 01/01
 // Revision: A
@@ -54,10 +52,10 @@ class AlgorithmIncrements : public Recorder
 {
   public:
     AlgorithmIncrements(EquiSolnAlgo *theAlgo,
-			char *windowTitle, 
+			const char *windowTitle, 
 			int xLoc, int yLoc, int width, int height,
 			bool displayRecord = false,
-			char *fileName = 0);
+			const char *fileName = 0);
     
     ~AlgorithmIncrements();    
 

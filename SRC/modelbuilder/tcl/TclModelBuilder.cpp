@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2003-02-14 23:01:47 $
+// $Revision: 1.18 $
+// $Date: 2003-02-25 23:34:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -97,160 +97,152 @@ static int eleLoadTag = 0;
 
 int
 TclModelBuilder_addNode(ClientData clientData, Tcl_Interp *interp, int argc, 
-			char **argv);
+			TCL_Char **argv);
 
 int
 TclModelBuilder_addElement(ClientData clientData, Tcl_Interp *interp,  int argc, 
-			   char **argv);
+			   TCL_Char **argv);
 
 int
 TclModelBuilder_addUniaxialMaterial(ClientData clientData, Tcl_Interp *interp, int argc,   
-				    char **argv);
+				    TCL_Char **argv);
 
 int
 TclModelBuilder_addNDMaterial(ClientData clientData, Tcl_Interp *interp, int argc,   
-			    char **argv);
+			    TCL_Char **argv);
 
 int
 TclModelBuilder_addSection(ClientData clientData, Tcl_Interp *interp, int argc,   
-			   char **argv);
+			   TCL_Char **argv);
 
 int
 TclModelBuilder_addYieldSurface_BC(ClientData clientData, Tcl_Interp *interp,
-				    int argc, char **argv);
+				    int argc, TCL_Char **argv);
 
 int
 TclModelBuilder_addYS_EvolutionModel(ClientData clientData, Tcl_Interp *interp,
-				    int argc, char **argv);
+				    int argc, TCL_Char **argv);
 
 int
 TclModelBuilder_addYS_PlasticMaterial(ClientData clientData, Tcl_Interp *interp,
-				    int argc, char **argv);
+				    int argc, TCL_Char **argv);
 			    
 int
 TclModelBuilder_addPattern(ClientData clientData, Tcl_Interp *interp, int argc,   
-			   char **argv);
+			   TCL_Char **argv);
 
 int
 TclModelBuilder_addSeries(ClientData clientData, Tcl_Interp *interp, int argc,   
-			  char **argv);
+			  TCL_Char **argv);
 
 int
 TclModelBuilder_addHomogeneousBC(ClientData clientData, Tcl_Interp *interp, int argc,
-				 char **argv);
+				 TCL_Char **argv);
 int
 TclModelBuilder_addHomogeneousBC_X(ClientData clientData, Tcl_Interp *interp, int argc,
-				   char **argv);
+				   TCL_Char **argv);
 int
 TclModelBuilder_addHomogeneousBC_Y(ClientData clientData, Tcl_Interp *interp, int argc,
-				   char **argv);
+				   TCL_Char **argv);
 int
 TclModelBuilder_addHomogeneousBC_Z(ClientData clientData, Tcl_Interp *interp, int argc,
-				   char **argv);
+				   TCL_Char **argv);
 int
 TclModelBuilder_addEqualDOF_MP (ClientData clientData, Tcl_Interp *interp,
-                                int argc, char **argv);
+                                int argc, TCL_Char **argv);
 
 int
 TclModelBuilder_addMP(ClientData clientData, Tcl_Interp *interp, int argc,   
-		      char **argv);
+		      TCL_Char **argv);
 
 int
 TclModelBuilder_addNodalLoad(ClientData clientData, Tcl_Interp *interp, int argc,   
-			     char **argv);
+			     TCL_Char **argv);
 
 int
 TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int argc,   
-				 char **argv);
+				 TCL_Char **argv);
 
 int
 TclModelBuilder_addNodalMass(ClientData clientData, Tcl_Interp *interp, int argc,   
-			     char **argv);
+			     TCL_Char **argv);
 int
 TclModelBuilder_addSP(ClientData clientData, Tcl_Interp *interp, int argc,   
-		      char **argv);
+		      TCL_Char **argv);
 
 int
 TclModelBuilder_addImposedMotionSP(ClientData clientData, 
 				   Tcl_Interp *interp, 
 				   int argc,    
-				   char **argv);	
-
-
-
+				   TCL_Char **argv);	
 int
 TclModelBuilder_doBlock2D(ClientData clientData, Tcl_Interp *interp, int argc, 
-			  char **argv);
+			  TCL_Char **argv);
 
 int
 TclModelBuilder_doBlock3D(ClientData clientData, Tcl_Interp *interp, int argc, 
-			  char **argv);
-
+			  TCL_Char **argv);
 
 int
 TclModelBuilder_addRemoPatch(ClientData clientData, 
 			     Tcl_Interp *interp, 
 			     int argc,   
-			     char **argv);  
+			     TCL_Char **argv);  
 
 int
 TclModelBuilder_addRemoLayer(ClientData clientData, 
 			     Tcl_Interp *interp, 
 			     int argc,   
-			     char **argv);   
+			     TCL_Char **argv);   
 			       
 int
 TclModelBuilder_addRemoFiber(ClientData clientData, 
 			     Tcl_Interp *interp, 
 			     int argc,    
-			     char **argv);   
+			     TCL_Char **argv);   
 
 int
 TclModelBuilder_addRemoGeomTransf(ClientData clientData, 
 				  Tcl_Interp *interp, 
 				  int argc,   
-				  char **argv); 
-
-				  
+				  TCL_Char **argv); 
 
 int
 TclModelBuilder_addGroundMotion(ClientData clientData, 
 				Tcl_Interp *interp, 
 				int argc,    
-				char **argv);
+				TCL_Char **argv);
 
 /// added by ZHY
 int
 TclModelBuilder_UpdateMaterialStage(ClientData clientData, 
 				    Tcl_Interp *interp,  
 				    int argc,
-				    char **argv);
+				    TCL_Char **argv);
 			   
 // REMO
 extern int
 TclModelBuilder_addPatch (ClientData clientData, Tcl_Interp *interp,
-			  int argc, char **argv,
+			  int argc, TCL_Char **argv,
 			  TclModelBuilder *theTclBuilder);
 
 			  
 extern int
 TclModelBuilder_addFiber (ClientData clientData, Tcl_Interp *interp,
-			  int argc, char **argv,
+			  int argc, TCL_Char **argv,
 			  TclModelBuilder *theTclBuilder);
 			  
 
 extern int
 TclModelBuilder_addReinfLayer (ClientData clientData, Tcl_Interp *interp,
-			       int argc, char **argv,
+			       int argc, TCL_Char **argv,
 			       TclModelBuilder *theTclBuilder);
 
 
 extern int
-TclModelBuilder_addGeomTransf(ClientData, Tcl_Interp *, int, char **,
+TclModelBuilder_addGeomTransf(ClientData, Tcl_Interp *, int, TCL_Char **,
 			      Domain*, TclModelBuilder *);   
 	
-					 
-					 
 //
 // CLASS CONSTRUCTOR & DESTRUCTOR
 //
@@ -688,7 +680,7 @@ TclModelBuilder::getCrdTransf3d(int tag)
 // THE FUNCTIONS INVOKED BY THE INTERPRETER
 //
 
-void printCommand(int argc, char **argv)
+void printCommand(int argc, TCL_Char **argv)
 {
   opserr << "Input command: ";
   for (int i=0; i<argc; i++)
@@ -698,7 +690,7 @@ void printCommand(int argc, char **argv)
 
 int
 TclModelBuilder_addNode(ClientData clientData, Tcl_Interp *interp, int argc, 
-                        char **argv)
+                        TCL_Char **argv)
 {
 
   // ensure the destructor has not been called - 
@@ -830,11 +822,11 @@ TclModelBuilder_addNode(ClientData clientData, Tcl_Interp *interp, int argc,
 extern int 
 TclModelBuilderElementCommand(ClientData clientData, 
 			      Tcl_Interp *interp, int argc,    
-			      char **argv, 
+			      TCL_Char **argv, 
 			      Domain *theDomain, TclModelBuilder *theTclBuilder);
 int
 TclModelBuilder_addElement(ClientData clientData, Tcl_Interp *interp, 
-			   int argc,    char **argv)
+			   int argc,    TCL_Char **argv)
                           
 {
   return TclModelBuilderElementCommand(clientData, interp, 
@@ -844,11 +836,11 @@ TclModelBuilder_addElement(ClientData clientData, Tcl_Interp *interp,
 
 extern int
 TclModelBuilderUniaxialMaterialCommand (ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theTclBuilder);
+				 TCL_Char **argv, TclModelBuilder *theTclBuilder);
 
 int
 TclModelBuilder_addUniaxialMaterial(ClientData clientData, Tcl_Interp *interp, 
-				    int argc, char **argv)
+				    int argc, TCL_Char **argv)
                           
 {
   return TclModelBuilderUniaxialMaterialCommand(clientData, interp, 
@@ -857,11 +849,11 @@ TclModelBuilder_addUniaxialMaterial(ClientData clientData, Tcl_Interp *interp,
 
 extern int
 TclModelBuilderNDMaterialCommand (ClientData clienData, Tcl_Interp *interp, int argc,
-				  char **argv, TclModelBuilder *theTclBuilder);
+				  TCL_Char **argv, TclModelBuilder *theTclBuilder);
 
 int
 TclModelBuilder_addNDMaterial(ClientData clientData, Tcl_Interp *interp, 
-			    int argc,    char **argv)
+			    int argc,    TCL_Char **argv)
                           
 {
   return TclModelBuilderNDMaterialCommand(clientData, interp, 
@@ -870,11 +862,11 @@ TclModelBuilder_addNDMaterial(ClientData clientData, Tcl_Interp *interp,
 
 extern int
 TclModelBuilderSectionCommand (ClientData clienData, Tcl_Interp *interp, int argc,
-				  char **argv, TclModelBuilder *theTclBuilder);
+				  TCL_Char **argv, TclModelBuilder *theTclBuilder);
 
 int
 TclModelBuilder_addSection(ClientData clientData, Tcl_Interp *interp, 
-			    int argc,    char **argv)
+			    int argc,    TCL_Char **argv)
                           
 {
   return TclModelBuilderSectionCommand(clientData, interp, 
@@ -885,11 +877,11 @@ TclModelBuilder_addSection(ClientData clientData, Tcl_Interp *interp,
 
 extern int
 TclModelBuilderYieldSurface_BCCommand (ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theTclBuilder);
+				 TCL_Char **argv, TclModelBuilder *theTclBuilder);
 
 int
 TclModelBuilder_addYieldSurface_BC(ClientData clientData, Tcl_Interp *interp,
-				    int argc, char **argv)
+				    int argc, TCL_Char **argv)
 
 {
   return TclModelBuilderYieldSurface_BCCommand(clientData, interp,
@@ -898,11 +890,11 @@ TclModelBuilder_addYieldSurface_BC(ClientData clientData, Tcl_Interp *interp,
 
 extern int
 TclModelBuilderYS_EvolutionModelCommand (ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theTclBuilder);
+				 TCL_Char **argv, TclModelBuilder *theTclBuilder);
 
 int
 TclModelBuilder_addYS_EvolutionModel(ClientData clientData, Tcl_Interp *interp,
-				    int argc, char **argv)
+				    int argc, TCL_Char **argv)
 
 {
   return TclModelBuilderYS_EvolutionModelCommand(clientData, interp,
@@ -911,11 +903,11 @@ TclModelBuilder_addYS_EvolutionModel(ClientData clientData, Tcl_Interp *interp,
 
 extern int
 TclModelBuilderPlasticMaterialCommand (ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theTclBuilder);
+				 TCL_Char **argv, TclModelBuilder *theTclBuilder);
 
 int
 TclModelBuilder_addYS_PlasticMaterial(ClientData clientData, Tcl_Interp *interp,
-				    int argc, char **argv)
+				    int argc, TCL_Char **argv)
 
 {
   return TclModelBuilderPlasticMaterialCommand(clientData, interp,
@@ -924,11 +916,11 @@ TclModelBuilder_addYS_PlasticMaterial(ClientData clientData, Tcl_Interp *interp,
 
 extern int
 TclPatternCommand(ClientData clientData, Tcl_Interp *interp, 
-			   int argc, char **argv, Domain *theDomain);
+			   int argc, TCL_Char **argv, Domain *theDomain);
 			   
 int
 TclModelBuilder_addPattern(ClientData clientData, Tcl_Interp *interp, 
-			   int argc, char **argv)
+			   int argc, TCL_Char **argv)
 			  
 {
   return TclPatternCommand(clientData, interp, argc, argv, theTclDomain);
@@ -941,12 +933,12 @@ extern int
 TclGroundMotionCommand(ClientData clientData, 
 		       Tcl_Interp *interp, 
 		       int argc,    
-		       char **argv,
+		       TCL_Char **argv,
 		       MultiSupportPattern *thePattern);
 
 int
 TclModelBuilder_addGroundMotion(ClientData clientData, Tcl_Interp *interp, 
-			   int argc, char **argv)
+			   int argc, TCL_Char **argv)
 			  
 {
   return TclGroundMotionCommand(clientData, interp, argc, argv, 
@@ -956,7 +948,7 @@ TclModelBuilder_addGroundMotion(ClientData clientData, Tcl_Interp *interp,
 
 int
 TclModelBuilder_addNodalLoad(ClientData clientData, Tcl_Interp *interp, int argc,   
-			 char **argv)
+			 TCL_Char **argv)
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
@@ -1053,7 +1045,7 @@ TclModelBuilder_addNodalLoad(ClientData clientData, Tcl_Interp *interp, int argc
 
 int
 TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int argc,   
-			 char **argv)
+			 TCL_Char **argv)
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
@@ -1316,7 +1308,7 @@ TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int 
 
 int
 TclModelBuilder_addNodalMass(ClientData clientData, Tcl_Interp *interp, int argc, 
-                        char **argv)
+                        TCL_Char **argv)
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
@@ -1377,7 +1369,7 @@ TclModelBuilder_addNodalMass(ClientData clientData, Tcl_Interp *interp, int argc
 
 int
 TclModelBuilder_addHomogeneousBC(ClientData clientData, Tcl_Interp *interp, int argc,   
-				 char **argv)
+				 TCL_Char **argv)
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
@@ -1435,7 +1427,7 @@ TclModelBuilder_addHomogeneousBC(ClientData clientData, Tcl_Interp *interp, int 
 
 int
 TclModelBuilder_addHomogeneousBC_X(ClientData clientData, Tcl_Interp *interp, 
-				   int argc, char **argv)
+				   int argc, TCL_Char **argv)
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
@@ -1529,7 +1521,7 @@ TclModelBuilder_addHomogeneousBC_X(ClientData clientData, Tcl_Interp *interp,
 
 int
 TclModelBuilder_addHomogeneousBC_Y(ClientData clientData, Tcl_Interp *interp, 
-				   int argc, char **argv)
+				   int argc, TCL_Char **argv)
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
@@ -1625,7 +1617,7 @@ TclModelBuilder_addHomogeneousBC_Y(ClientData clientData, Tcl_Interp *interp,
 
 int
 TclModelBuilder_addHomogeneousBC_Z(ClientData clientData, Tcl_Interp *interp, 
-				   int argc, char **argv)
+				   int argc, TCL_Char **argv)
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
@@ -1723,7 +1715,7 @@ TclModelBuilder_addHomogeneousBC_Z(ClientData clientData, Tcl_Interp *interp,
 
 int
 TclModelBuilder_addSP(ClientData clientData, Tcl_Interp *interp, int argc,   
-		      char **argv)
+		      TCL_Char **argv)
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
@@ -1827,7 +1819,7 @@ int
 TclModelBuilder_addImposedMotionSP(ClientData clientData, 
 				   Tcl_Interp *interp, 
 				   int argc,   
-				   char **argv)
+				   TCL_Char **argv)
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
@@ -1922,7 +1914,7 @@ TclModelBuilder_addImposedMotionSP(ClientData clientData,
 
 int
 TclModelBuilder_addEqualDOF_MP (ClientData clientData, Tcl_Interp *interp,
-                                int argc, char **argv)
+                                int argc, TCL_Char **argv)
 {
         // Ensure the destructor has not been called
         if (theTclBuilder == 0) {
@@ -2000,7 +1992,7 @@ TclModelBuilder_addEqualDOF_MP (ClientData clientData, Tcl_Interp *interp,
 
 int
 TclModelBuilder_addMP(ClientData clientData, Tcl_Interp *interp, int argc,   
-			   char **argv)
+			   TCL_Char **argv)
 {
   opserr << "WARNING - TclModelBuilder_addMP() not yet implemented\n";
   return TCL_OK;
@@ -2008,7 +2000,7 @@ TclModelBuilder_addMP(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int
 TclModelBuilder_doBlock2D(ClientData clientData, Tcl_Interp *interp, int argc,   
-			  char **argv)
+			  TCL_Char **argv)
 {
 
   int ndm = theTclBuilder->getNDM();
@@ -2074,16 +2066,18 @@ TclModelBuilder_doBlock2D(ClientData clientData, Tcl_Interp *interp, int argc,
   }
 
 
-  char *nodalInfo;
+  //  char *nodalInfo;
+  int nodalInfo = 9;
   if (numNodes == 4)
-    nodalInfo = argv[7];
-  else
-    nodalInfo = argv[9];
+    //nodalInfo = argv[7];
+    nodalInfo=7;
+  //  else
+  //nodalInfo = argv[9];
 
-  char **argvNodes;
+  TCL_Char **argvNodes;
   int  argcNodes;
   
-  Tcl_SplitList(interp, nodalInfo, &argcNodes, &argvNodes);
+  Tcl_SplitList(interp, argv[nodalInfo], &argcNodes, &argvNodes);
 
   int ndf = theTclBuilder->getNDF();
   
@@ -2161,8 +2155,8 @@ TclModelBuilder_doBlock2D(ClientData clientData, Tcl_Interp *interp, int argc,
     
   // create the elements: numX*numY elements to be created if 4 node elements
   //                      numX/2 * numY /2 nodes to be v=created if 9 node elements
-  char *eleType = argv[5];
-  char *additionalEleArgs = argv[6];
+  TCL_Char *eleType = argv[5];
+  TCL_Char *additionalEleArgs = argv[6];
   //  const ID &nodeTags = theBlock.getElementNodes(0,0);  
   //  int numNodes = nodeTags.Size();
 
@@ -2210,7 +2204,7 @@ TclModelBuilder_doBlock2D(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int
 TclModelBuilder_doBlock3D(ClientData clientData, Tcl_Interp *interp, int argc,   
-			  char **argv)
+			  TCL_Char **argv)
 {
 
   int ndm = theTclBuilder->getNDM();
@@ -2252,8 +2246,8 @@ TclModelBuilder_doBlock3D(ClientData clientData, Tcl_Interp *interp, int argc,
   Coordinates.Zero();
   for (int k=0; k<27; k++) haveNode(k) = -1;
 
-  char *nodalInfo = argv[8];
-  char **argvNodes;
+  TCL_Char *nodalInfo = argv[8];
+  TCL_Char **argvNodes;
   int  argcNodes;
   
   Tcl_SplitList(interp, nodalInfo, &argcNodes, &argvNodes);
@@ -2331,8 +2325,8 @@ TclModelBuilder_doBlock3D(ClientData clientData, Tcl_Interp *interp, int argc,
   }
     
   // create the elements: numX*numY elements to be created
-  char *eleType = argv[6];
-  char *additionalEleArgs = argv[7];
+  TCL_Char *eleType = argv[6];
+  TCL_Char *additionalEleArgs = argv[7];
   const ID &nodeTags = theBlock.getElementNodes(0,0,0);  
   int numNodes = nodeTags.Size();
 
@@ -2378,7 +2372,7 @@ TclModelBuilder_doBlock3D(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int
 TclModelBuilder_addRemoPatch(ClientData clientData, Tcl_Interp *interp, int argc,   
-			   char **argv)
+			   TCL_Char **argv)
 {
   return TclModelBuilder_addPatch(clientData, interp, argc,argv,
 				    theTclBuilder);
@@ -2386,7 +2380,7 @@ TclModelBuilder_addRemoPatch(ClientData clientData, Tcl_Interp *interp, int argc
 
 int
 TclModelBuilder_addRemoFiber(ClientData clientData, Tcl_Interp *interp, int argc,   
-			   char **argv)
+			   TCL_Char **argv)
 {
   return TclModelBuilder_addFiber(clientData, interp, argc,argv,
 				  theTclBuilder);
@@ -2394,7 +2388,7 @@ TclModelBuilder_addRemoFiber(ClientData clientData, Tcl_Interp *interp, int argc
 
 int
 TclModelBuilder_addRemoLayer(ClientData clientData, Tcl_Interp *interp, int argc,   
-			   char **argv)
+			   TCL_Char **argv)
 {
   return TclModelBuilder_addReinfLayer(clientData, interp, argc,argv,
 				       theTclBuilder);
@@ -2404,7 +2398,7 @@ TclModelBuilder_addRemoLayer(ClientData clientData, Tcl_Interp *interp, int argc
 					 
 int
 TclModelBuilder_addRemoGeomTransf(ClientData clientData, Tcl_Interp *interp, int argc,   
-			   char **argv)
+			   TCL_Char **argv)
 {
   return TclModelBuilder_addGeomTransf(clientData, interp, argc,argv,
 				       theTclDomain,
@@ -2417,13 +2411,13 @@ extern int
 TclModelBuilderUpdateMaterialStageCommand(ClientData clientData, 
 					  Tcl_Interp *interp, 
 					  int argc, 
-					  char **argv, 
+					  TCL_Char **argv, 
 					  TclModelBuilder *theTclBuilder);
 int
 TclModelBuilder_UpdateMaterialStage(ClientData clientData, 
 				    Tcl_Interp *interp,  
 				    int argc, 
-				    char **argv)
+				    TCL_Char **argv)
 {
   return TclModelBuilderUpdateMaterialStageCommand(clientData, interp, 
 				       argc, argv, theTclBuilder);

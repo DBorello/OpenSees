@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.42 $
-// $Date: 2003-02-14 23:02:11 $
+// $Revision: 1.43 $
+// $Date: 2003-02-25 23:34:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
-// File: ~/tcl/commands.C
-// 
 // Written: fmk 
 // Created: 04/98
 //
@@ -209,7 +207,7 @@ OPS_Stream &opserr = sserr;
 // AddingSensitivity:END /////////////////////////////////////////////////
 #include <TclReliabilityBuilder.h>
 static TclReliabilityBuilder *theReliabilityBuilder = 0;
-int reliability(ClientData, Tcl_Interp *, int, char **);
+int reliability(ClientData, Tcl_Interp *, int, TCL_Char **);
 #endif
 
 ModelBuilder *theBuilder =0;
@@ -259,7 +257,7 @@ TclVideoPlayer *theTclVideoPlayer =0;
 // commands defined in this file are registered with the interpreter.
 
 int 
-logFile(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+logFile(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 extern int myCommands(Tcl_Interp *interp);
 
@@ -379,7 +377,7 @@ int g3AppInit(Tcl_Interp *interp) {
 #ifdef _RELIABILITY
 
 int 
-reliability(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+reliability(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   if (theReliabilityBuilder == 0) {
 
@@ -398,7 +396,7 @@ reliability(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
 }
 // AddingSensitivity:BEGIN /////////////////////////////////////////////////
 int 
-sensitivityAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+sensitivityAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 	if (theReliabilityBuilder == 0) {
 		opserr << "The command 'reliability' needs to be issued before " << endln
@@ -436,7 +434,7 @@ sensitivityAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, char *
 	}
 }
 int 
-sensitivityIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+sensitivityIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 	if (strcmp(argv[1],"Static") == 0) {
 
@@ -457,8 +455,7 @@ sensitivityIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, char 
 #endif
 
 int 
-wipeModel(ClientData clientData, Tcl_Interp *interp, int argc, 
-	   char **argv)
+wipeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   // to build the model make sure the ModelBuilder has been constructed
   // and that the model has not already been constructed
@@ -528,8 +525,7 @@ wipeModel(ClientData clientData, Tcl_Interp *interp, int argc,
 }
 
 int 
-wipeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, 
-	   char **argv)
+wipeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 
 
@@ -573,16 +569,14 @@ wipeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 
 
 int 
-resetModel(ClientData clientData, Tcl_Interp *interp, int argc, 
-	   char **argv)
+resetModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   theDomain.revertToStart();
   return TCL_OK;
 }
 
 int
-initializeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, 
-	   char **argv)
+initializeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   if (theTransientAnalysis != 0)
     theTransientAnalysis->initialize();
@@ -596,8 +590,7 @@ initializeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 
 
 int 
-setLoadConst(ClientData clientData, Tcl_Interp *interp, int argc, 
-	   char **argv)
+setLoadConst(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   theDomain.setLoadConstant();
   if (argc == 3) {
@@ -617,8 +610,7 @@ setLoadConst(ClientData clientData, Tcl_Interp *interp, int argc,
 
 
 int 
-setTime(ClientData clientData, Tcl_Interp *interp, int argc, 
-	   char **argv)
+setTime(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   if (argc < 2) {
       opserr << "WARNING illegal command - time pseudoTime? \n";
@@ -634,8 +626,7 @@ setTime(ClientData clientData, Tcl_Interp *interp, int argc,
 }
 
 int 
-getTime(ClientData clientData, Tcl_Interp *interp, int argc, 
-	   char **argv)
+getTime(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   double time = theDomain.getCurrentTime();
   // now we copy the value to the tcl string that is returned
@@ -647,8 +638,7 @@ getTime(ClientData clientData, Tcl_Interp *interp, int argc,
 // command invoked to build the model, i.e. to invoke buildFE_Model() 
 // on the ModelBuilder
 int 
-buildModel(ClientData clientData, Tcl_Interp *interp, int argc, 
-	   char **argv)
+buildModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
     // to build the model make sure the ModelBuilder has been constructed
   // and that the model has not already been constructed
@@ -671,8 +661,7 @@ buildModel(ClientData clientData, Tcl_Interp *interp, int argc,
 // on the Analysis object
 //
 int 
-analyzeModel(ClientData clientData, Tcl_Interp *interp, int argc, 
-	     char **argv)
+analyzeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   int result = 0;
 
@@ -739,25 +728,24 @@ analyzeModel(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int 
 printElement(ClientData clientData, Tcl_Interp *interp, int argc, 
-	  char **argv, int nodeArg, OPS_Stream &output);
+	     TCL_Char **argv, int nodeArg, OPS_Stream &output);
 
 
 int 
 printNode(ClientData clientData, Tcl_Interp *interp, int argc, 
-	  char **argv, int nodeArg, OPS_Stream &output);
+	  TCL_Char **argv, int nodeArg, OPS_Stream &output);
 	  
 int 
 printIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, 
-		char **argv, int nodeArg, OPS_Stream &output);	  
+		TCL_Char **argv, int nodeArg, OPS_Stream &output);	  
 		
 int 
 printAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, 
-		char **argv, int nodeArg, OPS_Stream &output);	  		
+	       TCL_Char **argv, int nodeArg, OPS_Stream &output);	  		
 
 
 int 
-printModel(ClientData clientData, Tcl_Interp *interp, int argc, 
-			 char **argv)
+printModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   // if just 'print' then print out the entire domain
   if (argc == 1) {
@@ -849,7 +837,7 @@ printModel(ClientData clientData, Tcl_Interp *interp, int argc,
 // 
 int 
 printNode(ClientData clientData, Tcl_Interp *interp, int argc, 
-	  char **argv, int nodeArg, OPS_Stream &output)
+	  TCL_Char **argv, int nodeArg, OPS_Stream &output)
 {
   int flag = 0; // default flag sent to a nodes Print() method
 
@@ -907,7 +895,7 @@ printNode(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int 
 printElement(ClientData clientData, Tcl_Interp *interp, int argc, 
-	  char **argv, int eleArg, OPS_Stream &output)
+	  TCL_Char **argv, int eleArg, OPS_Stream &output)
 {
   int flag = 0; // default flag sent to a nodes Print() method
 
@@ -964,7 +952,7 @@ printElement(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int 
 printAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, 
-	       char **argv, int eleArg, OPS_Stream &output)
+	       TCL_Char **argv, int eleArg, OPS_Stream &output)
 {
 
   if (theAlgorithm == 0)
@@ -990,7 +978,7 @@ printAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int 
 printIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, 
-	       char **argv, int eleArg, OPS_Stream &output)
+		TCL_Char **argv, int eleArg, OPS_Stream &output)
 {
 
   if (theStaticIntegrator == 0 && theTransientIntegrator == 0)
@@ -1025,7 +1013,7 @@ printIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 //
 int 
 specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, 
-		char **argv)
+		TCL_Char **argv)
 {
     // make sure at least one other argument to contain type of system
     if (argc < 2) {
@@ -1208,8 +1196,7 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 // command invoked to allow the SystemOfEqn and Solver objects to be built
 //
 int 
-specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, 
-		    char **argv)
+specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   // make sure at least one other argument to contain type of system
   if (argc < 2) {
@@ -1388,8 +1375,7 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc,
 // command invoked to allow the Numberer objects to be built
 //
 int 
-specifyNumberer(ClientData clientData, Tcl_Interp *interp, int argc, 
-		      char **argv)
+specifyNumberer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   // make sure at least one other argument to contain numberer
   if (argc < 2) {
@@ -1419,7 +1405,7 @@ specifyNumberer(ClientData clientData, Tcl_Interp *interp, int argc,
 //
 int 
 specifyConstraintHandler(ClientData clientData, Tcl_Interp *interp, int argc, 
-		      char **argv)
+			 TCL_Char **argv)
 {
   // make sure at least one other argument to contain numberer
   if (argc < 2) {
@@ -1489,7 +1475,7 @@ specifyConstraintHandler(ClientData clientData, Tcl_Interp *interp, int argc,
 //
 int
 specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, 
-		      char **argv)
+		 TCL_Char **argv)
 {
   // make sure at least one other argument to contain numberer
   if (argc < 2) {
@@ -1731,7 +1717,7 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
 //
 int
 specifyCTest(ClientData clientData, Tcl_Interp *interp, int argc, 
-		      char **argv)
+	     TCL_Char **argv)
 {
   // make sure at least one other argument to contain numberer
   if (argc < 2) {
@@ -1804,7 +1790,7 @@ specifyCTest(ClientData clientData, Tcl_Interp *interp, int argc,
 //
 int 
 specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, 
-		      char **argv)
+		  TCL_Char **argv)
 {
   // make sure at least one other argument to contain integrator
   if (argc < 2) {
@@ -2187,22 +2173,21 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 
 extern int
 TclAddRecorder(ClientData clientData, Tcl_Interp *interp, int argc, 
-	       char **argv, Domain &theDomain);
+	       TCL_Char **argv, Domain &theDomain);
 
 int 
 addRecorder(ClientData clientData, Tcl_Interp *interp, int argc, 
-	    char **argv)
+	    TCL_Char **argv)
 {
     return TclAddRecorder(clientData, interp, argc, argv, theDomain);
 }
 
 extern int
 TclAddAlgorithmRecorder(ClientData clientData, Tcl_Interp *interp, int argc, 
-			char **argv, Domain &theDomain, EquiSolnAlgo *theAlgorithm);
+			TCL_Char **argv, Domain &theDomain, EquiSolnAlgo *theAlgorithm);
 
 int 
-addAlgoRecorder(ClientData clientData, Tcl_Interp *interp, int argc, 
-	    char **argv)
+addAlgoRecorder(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 	if (theAlgorithm != 0)
 		return TclAddAlgorithmRecorder(clientData, interp, argc, argv,
@@ -2213,12 +2198,12 @@ addAlgoRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 }
 
 extern int
-TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc, char **argv, 
+TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv, 
 	       Domain &theDomain, 
 	       FEM_ObjectBroker &theBroker);
 
 int 
-addDatabase(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+addDatabase(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   return TclAddDatabase(clientData, interp, argc, argv, theDomain, theBroker);
 }
@@ -2226,7 +2211,7 @@ addDatabase(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
 
 int 
 playbackRecorders(ClientData clientData, Tcl_Interp *interp, int argc, 
-		  char **argv)
+		  TCL_Char **argv)
 {
   // make sure at least one other argument to contain integrator
   if (argc < 2) {
@@ -2246,7 +2231,7 @@ playbackRecorders(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int 
 playbackAlgorithmRecorders(ClientData clientData, Tcl_Interp *interp, int argc, 
-			   char **argv)
+			   TCL_Char **argv)
 {
   // make sure at least one other argument to contain integrator
   if (argc < 2) {
@@ -2269,7 +2254,7 @@ playbackAlgorithmRecorders(ClientData clientData, Tcl_Interp *interp, int argc,
 /*
 int 
 groundExcitation(ClientData clientData, Tcl_Interp *interp, int argc, 
-		  char **argv)
+		  TCL_Char **argv)
 {
   // make sure at least one other argument to contain integrator
   if (argc < 2) {
@@ -2315,7 +2300,7 @@ groundExcitation(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int 
 rigidLink(ClientData clientData, Tcl_Interp *interp, int argc, 
-	  char **argv)
+	  TCL_Char **argv)
 {
   if (argc < 4) {
       opserr << "WARNING rigidLink linkType? rNode? cNode?\n";
@@ -2350,7 +2335,7 @@ rigidLink(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int 
 rigidDiaphragm(ClientData clientData, Tcl_Interp *interp, int argc, 
-	   char **argv)
+	   TCL_Char **argv)
 {
   if (argc < 3) {
       opserr << "WARNING rigidLink perpDirn? rNode? <cNodes?>\n";
@@ -2389,7 +2374,7 @@ rigidDiaphragm(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int 
 eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, 
-		char **argv)
+	      TCL_Char **argv)
 {
      // make sure at least one other argument to contain type of system
     if (argc < 2) {
@@ -2523,7 +2508,7 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int 
 videoPlayer(ClientData clientData, Tcl_Interp *interp, int argc, 
-	    char **argv)
+	    TCL_Char **argv)
 {
     // make sure at least one other argument to contain type of system
     if (argc < 5) {
@@ -2531,10 +2516,10 @@ videoPlayer(ClientData clientData, Tcl_Interp *interp, int argc,
 	return TCL_ERROR;
     }    
 
-    char *wTitle =0;
-    char *fName = 0;
-    char *imageName = 0;
-    char *offsetName = 0;
+    TCL_Char *wTitle =0;
+    TCL_Char *fName = 0;
+    TCL_Char *imageName = 0;
+    TCL_Char *offsetName = 0;
 
     int endMarker = 1;
     while (endMarker < (argc-1)) {
@@ -2577,7 +2562,7 @@ videoPlayer(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int 
 removeObject(ClientData clientData, Tcl_Interp *interp, int argc, 
-	     char **argv)
+	     TCL_Char **argv)
 {
 
     // make sure at least one other argument to contain type of system
@@ -2688,7 +2673,7 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
 
 
 int 
-nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
     
     // make sure at least one other argument to contain type of system
@@ -2727,7 +2712,7 @@ nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
 
 // AddingSensitivity:BEGIN ////////////////////////////////////
 int 
-sensNodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+sensNodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
     int tag, dof, gradNum;
 
@@ -2756,7 +2741,7 @@ sensNodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
 
 
 int 
-computeGradients(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+computeGradients(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 	// Comment to the developer:
 	// This Tcl command is meant to be called only for
@@ -2781,7 +2766,7 @@ computeGradients(ClientData clientData, Tcl_Interp *interp, int argc, char **arg
 
 
 int 
-startTimer(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+startTimer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   if (theTimer == 0)
     theTimer = new Timer();
@@ -2791,7 +2776,7 @@ startTimer(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
 }
 
 int 
-stopTimer(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+stopTimer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   if (theTimer == 0)
     return TCL_OK;
@@ -2802,7 +2787,7 @@ stopTimer(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
 }
 
 int 
-rayleighDamping(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+rayleighDamping(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   int flag = 0; // default flag sent to a nodes Print() method
 
@@ -2835,16 +2820,16 @@ rayleighDamping(ClientData clientData, Tcl_Interp *interp, int argc, char **argv
 
 extern int
 TclAddMeshRegion(ClientData clientData, Tcl_Interp *interp, int argc, 
-	     char **argv, Domain &theDomain);
+	     TCL_Char **argv, Domain &theDomain);
 
 int 
-addRegion(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+addRegion(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   return TclAddMeshRegion(clientData, interp, argc, argv, theDomain);
 }
 
 int 
-logFile(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+logFile(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 
   if (argc < 2) { 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.8 $
-// $Date: 2003-02-14 23:01:00 $
+// $Revision: 1.9 $
+// $Date: 2003-02-25 23:32:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclPatternCommand.cpp,v $
 
 // File: ~/domain/pattern/TclPatternComand.C
@@ -67,15 +67,15 @@ MultiSupportPattern *theTclMultiSupportPattern =0;
 
 
 extern TimeSeriesIntegrator *
-TclSeriesIntegratorCommand(ClientData clientData, Tcl_Interp *interp, char *arg);
+TclSeriesIntegratorCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg);
 
 extern TimeSeries *
-TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg);
+TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg);
 
 
 int
 TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
-			      int argc, char **argv, Domain *theDomain)
+			      int argc, TCL_Char **argv, Domain *theDomain)
 {
   LoadPattern *thePattern = 0;
 
@@ -271,7 +271,7 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
 
   // First search for file name and time step
   int numInputs = argc;
-  char *accelFileName = 0;
+  TCL_Char *accelFileName = 0;
   double dt = 0.0;
   for (int i = 5; i < argc; i++)
   {
@@ -388,9 +388,10 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
   else if (strcmp(argv[1],"PBowlLoading") == 0) {
 
       // First search for file name and time step
-      char *PBEleFileName = 0;
-      char *accelFileName = 0;
-      char *displFileName = 0;
+      TCL_Char * PBEleFileName = 0;
+      TCL_Char * accelFileName = 0;
+      TCL_Char * displFileName = 0;
+
       double dt = 0.02;
       double cf = 1.00;
       double xp = 0.0;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:38 $
+// $Revision: 1.7 $
+// $Date: 2003-02-25 23:33:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/CableMaterial.cpp,v $
                                                                         
 // Written: Charles Chadwell 
@@ -261,7 +261,7 @@ CableMaterial::Print(OPS_Stream &s, int flag)
 }
 
 //int
-//CableMaterial::setParameter(char **argv, int argc, Information &info)
+//CableMaterial::setParameter(const char **argv, int argc, Information &info)
 //{
 //	if (strcmp(argv[0],"E") == 0) {
 //		info.theType = DoubleType;

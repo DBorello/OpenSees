@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2003-02-25 01:01:52 $
+// $Revision: 1.24 $
+// $Date: 2003-02-25 23:32:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -1801,7 +1801,7 @@ NLBeamColumn3d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response* 
-NLBeamColumn3d::setResponse(char **argv, int argc, Information &eleInformation)
+NLBeamColumn3d::setResponse(const char **argv, int argc, Information &eleInformation)
 {
     //
     // we compare argv[0] for known response types 
@@ -1897,7 +1897,7 @@ NLBeamColumn3d::getResponse(int responseID, Information &eleInfo)
 }
 
 int
-NLBeamColumn3d::setParameter (char **argv, int argc, Information &info)
+NLBeamColumn3d::setParameter (const char **argv, int argc, Information &info)
 {
 	int ok = -1;
 

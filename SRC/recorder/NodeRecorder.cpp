@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.12 $
-// $Date: 2003-02-14 23:01:49 $
+// $Revision: 1.13 $
+// $Date: 2003-02-25 23:34:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 
@@ -54,8 +54,8 @@ using std::ios;
 NodeRecorder::NodeRecorder(const ID &dofs, 
 			   const ID &nodes, 
 			   Domain &theDom,
-			   char *theFileName,
-			   char *dataToStore,
+			   const char *theFileName,
+			   const char *dataToStore,
 			   double dT,
 			   int startFlag)
 :theDofs(0), theNodes(0), disp(1 + nodes.Size()*dofs.Size()), 
@@ -144,8 +144,8 @@ NodeRecorder::NodeRecorder(const ID &dofs,
 			   const ID &nodes, 
 			   Domain &theDom,
 			   FE_Datastore *database,
-			   char *dbTable,
-			   char *dataToStore,
+			   const char *dbTable,
+			   const char *dataToStore,
 			   double dT,
 			   int startFlag)
 :theDofs(0), theNodes(0), disp(1 + nodes.Size()*dofs.Size()), 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:47 $
+// $Revision: 1.5 $
+// $Date: 2003-02-25 23:34:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclUniaxialMaterialTester.cpp,v $
                                                                         
 // File: ~/modelbuilder/tcl/TclUniaxialMaterialTester.C
@@ -50,17 +50,17 @@ static UniaxialMaterial *theTestingUniaxialMaterial =0;
 //
 
 int  TclUniaxialMaterialTester_setUniaxialMaterial(ClientData clientData, Tcl_Interp *interp, 
-						   int argc,   char **argv);
+						   int argc,   TCL_Char **argv);
 				    
 int  TclUniaxialMaterialTester_setStrainUniaxialMaterial(ClientData clientData, Tcl_Interp *interp,
-							 int argc,   char **argv);
+							 int argc,   TCL_Char **argv);
 
 int  TclUniaxialMaterialTester_getStressUniaxialMaterial(ClientData clientData, Tcl_Interp *interp,
-							 int argc,   char **argv);
+							 int argc,   TCL_Char **argv);
 
 
 int  TclUniaxialMaterialTester_getTangUniaxialMaterial(ClientData clientData, Tcl_Interp *interp,
-						       int argc,   char **argv);
+						       int argc,   TCL_Char **argv);
 
 //
 // CLASS CONSTRUCTOR & DESTRUCTOR
@@ -109,7 +109,7 @@ TclUniaxialMaterialTester::~TclUniaxialMaterialTester()
 
 int
 TclUniaxialMaterialTester_setUniaxialMaterial(ClientData clientData, Tcl_Interp *interp, int argc,   
-					      char **argv)
+					      TCL_Char **argv)
 {
   count = 1;
   // ensure the destructor has not been called - 
@@ -153,7 +153,7 @@ TclUniaxialMaterialTester_setUniaxialMaterial(ClientData clientData, Tcl_Interp 
 
 int  
 TclUniaxialMaterialTester_setStrainUniaxialMaterial(ClientData clientData, Tcl_Interp *interp,
-						    int argc,   char **argv)
+						    int argc,   TCL_Char **argv)
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
@@ -188,7 +188,7 @@ TclUniaxialMaterialTester_setStrainUniaxialMaterial(ClientData clientData, Tcl_I
 
 
 int  TclUniaxialMaterialTester_getStressUniaxialMaterial(ClientData clientData, Tcl_Interp *interp,
-							 int argc,   char **argv)
+							 int argc,   TCL_Char **argv)
 {
   double stress = 0.0;
 
@@ -204,7 +204,7 @@ int  TclUniaxialMaterialTester_getStressUniaxialMaterial(ClientData clientData, 
 }
 
 int  TclUniaxialMaterialTester_getTangUniaxialMaterial(ClientData clientData, Tcl_Interp *interp,
-						       int argc,   char **argv)
+						       int argc,   TCL_Char **argv)
 {
   double tangent = 0.0;
 

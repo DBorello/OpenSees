@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:21 $
+// $Revision: 1.5 $
+// $Date: 2003-02-25 23:33:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/TclZeroLength.cpp,v $
                                                                         
                                                                         
@@ -47,7 +47,7 @@
 
 int
 TclModelBuilder_addZeroLength(ClientData clientData, Tcl_Interp *interp,
-			      int argc, char **argv,
+			      int argc, TCL_Char **argv,
 			      Domain *theDomain,
 			      TclModelBuilder *theBuilder) {
 
@@ -298,7 +298,7 @@ TclModelBuilder_addZeroLength(ClientData clientData, Tcl_Interp *interp,
 
 int
 TclModelBuilder_addZeroLengthSection(ClientData clientData, Tcl_Interp *interp,
-			      int argc, char **argv,
+			      int argc, TCL_Char **argv,
 			      Domain *theDomain,
 			      TclModelBuilder *theBuilder) {
 
@@ -430,7 +430,7 @@ TclModelBuilder_addZeroLengthSection(ClientData clientData, Tcl_Interp *interp,
 /*
 int
 TclModelBuilder_addZeroLengthND(ClientData clientData, Tcl_Interp *interp,
-			      int argc, char **argv,
+			      int argc, TCL_Char **argv,
 			      Domain *theDomain,
 			      TclModelBuilder *theBuilder) {
 

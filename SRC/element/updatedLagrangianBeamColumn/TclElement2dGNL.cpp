@@ -14,7 +14,7 @@
 
 int
 TclModelBuilder_addElastic2dGNL (ClientData clientData, Tcl_Interp *interp,
-				 int argc, char **argv,
+				 int argc, TCL_Char **argv,
 				 Domain *theDomain, TclModelBuilder *theBuilder)
 {
 	//opserr << "Press key to continue...\n";

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:57 $
+// $Revision: 1.7 $
+// $Date: 2003-02-25 23:34:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGLRenderer.h,v $
                                                                         
                                                                         
@@ -62,10 +62,10 @@ using std::ofstream;
 class OpenGLRenderer : public Renderer
 {
  public:
-    OpenGLRenderer(char *title, int xLoc, int yLoc, int width, int height,
+    OpenGLRenderer(const char *title, int xLoc, int yLoc, int width, int height,
 		   ColorMap &theMap);
-    OpenGLRenderer(char *title, int xLoc, int yLoc, int width, int height,
-		   ColorMap &theMap, char *texFileName, char *bmpFileName);	
+    OpenGLRenderer(const char *title, int xLoc, int yLoc, int width, int height,
+		   ColorMap &theMap, const char *texFileName, const char *bmpFileName);	
 
     virtual ~OpenGLRenderer();
 
@@ -104,8 +104,8 @@ class OpenGLRenderer : public Renderer
     virtual int setPlaneDist(float, float); // location of
                                // near and far clipping planes
 
-    virtual int setProjectionMode(char *mode); // parallel or perspective
-    virtual int setFillMode(char *mode);    // wire or  fill
+    virtual int setProjectionMode(const char *mode); // parallel or perspective
+    virtual int setFillMode(const char *mode);    // wire or  fill
     
     virtual int setPRP(float u, float v, float n); // eye location if 
 	                         // perspective, dirn to +ViewPlane if parallel

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:49 $
+// $Revision: 1.3 $
+// $Date: 2003-02-25 23:34:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.h,v $
                                                                         
 #ifndef EnvelopeElementRecorder_h
@@ -51,17 +51,17 @@ class EnvelopeElementRecorder: public Recorder
   public:
     EnvelopeElementRecorder(const ID &eleID, 
 			    Domain &theDomain, 
-			    char **argv, 
+			    const char **argv, 
 			    int argc,
 			    double deltaT = 0.0, 
-			    char *fileName =0);
+			    const char *fileName =0);
 
     EnvelopeElementRecorder(const ID &eleID, 
 			    Domain &theDomain, 
-			    char **argv, 
+			    const char **argv, 
 			    int argc,
 			    FE_Datastore *db, 
-			    char *tableName, 
+			    const char *tableName, 
 			    double deltaT = 0.0);
 
     ~EnvelopeElementRecorder();

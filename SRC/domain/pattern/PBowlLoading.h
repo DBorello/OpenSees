@@ -63,9 +63,9 @@ class PBowlLoading : public LoadPattern
   public:
     PBowlLoading();
     PBowlLoading(int tag,
-                 char *PBEfName,
-                 char *DispfName,
-                 char *AccefName,
+                 const char *PBEfName,
+                 const char *DispfName,
+                 const char *AccefName,
                  double theTimeIncr=1.0,
                  double theFactor=1.0,
 // coordinates of "b" nodes for cubic plastic bowl

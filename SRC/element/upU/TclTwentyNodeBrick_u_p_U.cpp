@@ -35,11 +35,11 @@
 #include <TwentyNodeBrick_u_p_U.h>
 #include <TclModelBuilder.h>
 
-extern void printCommand(int argc, char **argv);
+extern void printCommand(int argc, TCL_Char **argv);
 
 int
 TclModelBuilder_addTwentyNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *interp,  int argc, 
-				  char **argv, Domain *theTclDomain,
+				  TCL_Char **argv, Domain *theTclDomain,
 				  TclModelBuilder *theTclBuilder, int eleArgStart)
 {
   // ensure the destructor has not been called - 

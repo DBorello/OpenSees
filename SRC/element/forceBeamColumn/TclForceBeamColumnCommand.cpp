@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-21 22:27:48 $
+// $Revision: 1.6 $
+// $Date: 2003-02-25 23:32:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/TclForceBeamColumnCommand.cpp,v $
                                                                         
 // Written: MHS
@@ -47,12 +47,12 @@
 #include <UserDefinedHingeIntegration2d.h>
 #include <UserDefinedHingeIntegration3d.h>
 
-extern void printCommand(int argc, char **argv);
+extern void printCommand(int argc, TCL_Char **argv);
 
 int
 TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,  
 				   int argc, 
-				   char **argv, 
+				   TCL_Char **argv, 
 				   Domain*theTclDomain,
 				   TclModelBuilder *theTclBuilder)
 {

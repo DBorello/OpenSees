@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:49 $
+// $Revision: 1.3 $
+// $Date: 2003-02-25 23:34:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -44,8 +44,8 @@
 using std::ios;
 
 EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom, 
-						 char **argv, int argc,
-						 double dT, char *theFileName)
+						 const char **argv, int argc,
+						 double dT, const char *theFileName)
 :numEle(eleID.Size()), responseID(eleID.Size()), theDomain(&theDom),
  fileName(0), deltaT(dT), nextTimeStampToRecord(0.0), 
  db(0), dbColumns(0), numDbColumns(0), 
@@ -98,9 +98,9 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
 
 
 EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom, 
-						 char **argv, int argc,
+						 const char **argv, int argc,
 						 FE_Datastore *database, 
-						 char *tableName, 
+						 const char *tableName, 
 						 double dT)
   :numEle(eleID.Size()), responseID(eleID.Size()), theDomain(&theDom),
    fileName(0), deltaT(dT), nextTimeStampToRecord(0.0), 
@@ -153,7 +153,7 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
   char aColumn[256]; // assumes a column name will not be longer than 256 characters
   
   int counter = 0;
-  char *dataToStore = argv[argc-1];
+  const char *dataToStore = argv[argc-1];
 
   for (i=0; i<eleID.Size(); i++) {
     int eleTag = eleID(i);

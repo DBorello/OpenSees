@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2003-02-14 23:01:06 $
+// $Revision: 1.20 $
+// $Date: 2003-02-25 23:32:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges2d.cpp,v $
 
 #include <BeamWithHinges2d.h>
@@ -1419,7 +1419,7 @@ BeamWithHinges2d::getDistrLoadInterpMatrix(Matrix &bp, double x, const ID & code
 }
 
 Response*
-BeamWithHinges2d::setResponse(char **argv, int argc, Information &info)
+BeamWithHinges2d::setResponse(const char **argv, int argc, Information &info)
 {
   // hinge rotations
   if (strcmp(argv[0],"plasticDeformation") == 0 ||
@@ -1524,7 +1524,7 @@ BeamWithHinges2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 int
-BeamWithHinges2d::setParameter(char **argv, int argc, Information &info)
+BeamWithHinges2d::setParameter(const char **argv, int argc, Information &info)
 {
   // E of the beam interior
   if (strcmp(argv[0],"E") == 0) {

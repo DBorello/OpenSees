@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2003-02-20 07:56:59 $
+// $Revision: 1.13 $
+// $Date: 2003-02-25 23:34:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
                                                                         
-// File: ~/recorder/ElementRecorder.C
-//
 // Written: fmk 
 // Created: 09/99
 // Revision: A
@@ -49,8 +47,8 @@
 using std::ios;
 
 ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom, 
-				 char **argv, int argc,
-				 bool echoTime, double dT, char *theFileName)
+				 const char **argv, int argc,
+				 bool echoTime, double dT, const char *theFileName)
 :numEle(eleID.Size()), responseID(eleID.Size()), theDomain(&theDom),
  echoTimeFlag(echoTime), deltaT(dT), nextTimeStampToRecord(0.0), 
  db(0), dbColumns(0), numDbColumns(0), data(0)
@@ -102,10 +100,10 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
 
 
 ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom, 
-				 char **argv, int argc,
+				 const char **argv, int argc,
 				 bool echoTime, 
 				 FE_Datastore *database, 
-				 char *tableName, 
+				 const char *tableName, 
 				 double dT)
 :numEle(eleID.Size()), responseID(eleID.Size()), theDomain(&theDom),
  echoTimeFlag(echoTime), deltaT(dT), nextTimeStampToRecord(0.0), 
@@ -161,7 +159,7 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
   sprintf(newColumn, "%s","time");  
   dbColumns[0] = newColumn;
   
-  char *dataToStore = argv[argc-1];
+  const char *dataToStore = argv[argc-1];
 
   int counter = 1;
   for (i=0; i<eleID.Size(); i++) {

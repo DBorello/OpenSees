@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2003-02-14 23:01:26 $
+// $Revision: 1.27 $
+// $Date: 2003-02-25 23:33:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                       
@@ -49,15 +49,15 @@
 
 Template3Dep *
 TclModelBuilder_addTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  int argc, 
-				char **argv, TclModelBuilder *theTclBuilder, int eleArgStart);
+				TCL_Char **argv, TclModelBuilder *theTclBuilder, int eleArgStart);
 
 NDMaterial *
 TclModelBuilder_addFeapMaterial(ClientData clientData, Tcl_Interp *interp,
-				int argc, char **argv,
+				int argc, TCL_Char **argv,
 				TclModelBuilder *theTclBuilder);
 
 
-static void printCommand(int argc, char **argv)
+static void printCommand(int argc, TCL_Char **argv)
 {
     opserr << "Input command: ";
     for (int i=0; i<argc; i++)
@@ -67,7 +67,7 @@ static void printCommand(int argc, char **argv)
 
 int
 TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int argc,
-				  char **argv, TclModelBuilder *theTclBuilder)
+				  TCL_Char **argv, TclModelBuilder *theTclBuilder)
 {
     // Make sure there is a minimum number of arguments
     if (argc < 3) {
@@ -478,7 +478,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 					  param[9], param[10], param[11], 
 					  param[12], param[13], param[14], 
 					  param[15], gredu, param[16], param[17], 
-						param[18], param[19], param[20], param[21]);
+					  param[18], param[19], param[20], param[21]);
 					  
 	   theMaterial = temp;	
 	   if (gredu != 0) delete [] gredu;
@@ -631,8 +631,11 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
     }
 
     else {
-      theMaterial = TclModelBuilder_addFeapMaterial(clientData, interp,
-						    argc, argv, theTclBuilder);
+      theMaterial = TclModelBuilder_addFeapMaterial(clientData, 
+						    interp,
+						    argc, 
+						    argv, 
+						    theTclBuilder);
     }
 
     if (theMaterial == 0) {

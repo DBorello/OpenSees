@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-31 22:11:34 $
+// $Revision: 1.3 $
+// $Date: 2003-02-25 23:32:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/DomainComponent.cpp,v $
                                                                         
                                                                         
@@ -76,7 +76,7 @@ DomainComponent::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 int
-DomainComponent::setParameter(char **argv, int argc, Information &eleInformation)
+DomainComponent::setParameter(const char **argv, int argc, Information &eleInformation)
 {
     return -1;
 }

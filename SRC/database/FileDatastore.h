@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:00:54 $
+// $Revision: 1.6 $
+// $Date: 2003-02-25 23:32:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.h,v $
                                                                         
                                                                         
@@ -97,7 +97,7 @@ struct MaxFileDbTag{
 class FileDatastore: public FE_Datastore
 {
   public:
-    FileDatastore(char *dataBase,
+    FileDatastore(const char *dataBase,
 		  Domain &theDomain, 
 		  FEM_ObjectBroker &theBroker);    
     
@@ -148,7 +148,7 @@ class FileDatastore: public FE_Datastore
     // private attributes
     int dbTag;
     //    int maxDbTag;
-    char dataBase[50];
+    char *dataBase;
     fstream **ids, **vects, **mats;
     int lastDomainChangeStamp;
 

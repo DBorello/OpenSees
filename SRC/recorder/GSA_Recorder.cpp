@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.1 $
-// $Date: 2003-02-14 23:01:49 $
+// $Revision: 1.2 $
+// $Date: 2003-02-25 23:34:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/GSA_Recorder.cpp,v $
 
 // Written: fmk 
@@ -41,16 +41,43 @@
 #include <ID.h>
 #include <Matrix.h>
 
-GSA_Recorder::GSA_Recorder(Domain &theDom, char *fileName, double dT)
+GSA_Recorder::GSA_Recorder(Domain &theDom, 
+			   const char *fileName, 
+			   const char *title1,
+			   const char *title2,
+			   const char *title3,
+			   const char *jobno,
+			   const char *initials,
+			   const char *spec,
+			   const char *currency,
+			   const char *length,
+			   const char *force,
+			   const char *temp,
+			   double dT)
 : theDomain(&theDom), ndm(3), ndf(6), counter(0), deltaT(dT), nextTimeStampToRecord(0.0)
 {
+  // open file 
   if (theFile.setFile(fileName, OVERWRITE) < 0) {
     opserr << "WARNING - GSA_Recorder::GSA_Recorder()";
     opserr << " - could not open file " << fileName << endln;
     exit(-1);
   } 
 
-  // open file and spit out the initial data
+  // spit out header data
+  if (title1 != 0)
+    theFile << "TITLE\t" << title1;
+  else
+    theFile << "TITLE\t" << "No Title";
+  theFile << "\t" << title2;
+  theFile << "\t" << title3;
+  theFile << "\t" << jobno << "\t" << initials << endln;
+  theFile << "SPEC\t" << spec << endln;
+  theFile << "CURRENCY\t" << currency << endln;
+  theFile << "UNIT_DATA\tLENGTH\t" << length << endln; 
+  theFile << "UNIT_DATA\tFORCE\t" << force << endln;
+  theFile << "UNIT_DATA\tTEMP\t" << temp << endln;
+
+  // spit out nodal data
   NodeIter &theNodes = theDomain->getNodes();
   Node *theNode;
   while ((theNode=theNodes()) != 0) {
@@ -123,6 +150,9 @@ GSA_Recorder::record(int commitTag, double timeStamp)
       nextTimeStampToRecord = timeStamp + deltaT;
 
     counter++;
+
+    theFile << "ANAL_CASE\t" << counter << "\tStep" << counter << "\tL" << counter << 
+      "\tGSS\tSTATIC\tPOST\t" << counter << "\topensees\t" << "20030204165318	0" << endln;
 
     theFile << "!\n!RESULTS FOR ANALYSIS CASE\t" << counter << "\n!\n";
 

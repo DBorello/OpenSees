@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:00:53 $
+// $Revision: 1.5 $
+// $Date: 2003-02-25 23:32:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.cpp,v $
                                                                         
                                                                         
@@ -54,12 +54,13 @@ using std::ios;
 
 //void itoa(int x, char *str);
 
-FileDatastore::FileDatastore(char *dataBaseName,
+FileDatastore::FileDatastore(const char *dataBaseName,
 			     Domain &theDomain, 
 			     FEM_ObjectBroker &theObjBroker) 
   :FE_Datastore(theDomain, theObjBroker), dbTag(0),
    ids(0), vects(0), mats(0)
 {
+  dataBase = new char [strlen(dataBaseName)+1];
   strcpy(dataBase, dataBaseName);
 
   ids = (fstream **)malloc(maxIDsize*sizeof(fstream *));
@@ -107,6 +108,9 @@ FileDatastore::~FileDatastore()
   free ((void *) ids);
   free ((void *) vects);
   free ((void *) mats);
+
+  if (dataBase != 0)
+    delete [] dataBase;
 }
 
 int
@@ -181,7 +185,7 @@ FileDatastore::sendMatrix(int dataTag, int commitTag,
 
   // open a file if not already opened
   if (mats[matSize] == 0) {
-    char fileName[70];
+    char fileName[strlen(dataBase)+21];
     char intName[10];
     strcpy(fileName, dataBase);
 	sprintf(intName,"%d",matSize);

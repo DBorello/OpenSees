@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-02-15 19:25:58 $
+// $Revision: 1.10 $
+// $Date: 2003-02-25 23:34:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.cpp,v $
                                                                         
                                                                         
@@ -384,7 +384,7 @@ OpenGlDevice::~OpenGlDevice()
 }
 
 void
-OpenGlDevice::WINOPEN(char *_title, int _xLoc, int _yLoc, int _width, int _height)
+OpenGlDevice::WINOPEN(const char *_title, int _xLoc, int _yLoc, int _width, int _height)
 {
   if (windowTitle != 0)
     delete [] windowTitle;
@@ -538,9 +538,9 @@ OpenGlDevice::WINOPEN(char *_title, int _xLoc, int _yLoc, int _width, int _heigh
 
 
 void
-OpenGlDevice::BITMAPOPEN(char *_title, int _xLoc, int _yLoc, 
+OpenGlDevice::BITMAPOPEN(const char *_title, int _xLoc, int _yLoc, 
 			 int _width, int _height, 
-			 char *bitmapFileName)
+			 const char *bitmapFileName)
 {
   if (windowTitle != 0)
     delete [] windowTitle;
@@ -848,8 +848,6 @@ OpenGlDevice::drawText(float x, float y, float z, char *text, int length,
 int 
 OpenGlDevice::saveBmpImage(void)
 {
-    long i,j, width;
-
     /*
     // get dimensions of the window
     glGetIntegerv(GL_VIEWPORT, viewport);

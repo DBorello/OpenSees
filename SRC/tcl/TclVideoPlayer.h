@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:02:11 $
+// $Revision: 1.4 $
+// $Date: 2003-02-25 23:34:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclVideoPlayer.h,v $
                                                                         
                                                                         
@@ -51,8 +51,8 @@ extern "C" {
 class TclVideoPlayer
 {
   public:
-    TclVideoPlayer(char *title, char *fileName, char *imageName,
-		   Tcl_Interp *interp, char *offsetFileName = 0, double factor = 1.0);
+    TclVideoPlayer(const char *title, const char *fileName, const char *imageName,
+		   Tcl_Interp *interp, const char *offsetFileName = 0, double factor = 1.0);
 
     ~TclVideoPlayer();    
 

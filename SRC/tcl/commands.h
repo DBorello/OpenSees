@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-12-09 22:00:40 $
+// $Revision: 1.10 $
+// $Date: 2003-02-25 23:34:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
-                                                                        
-// File: ~/tcl/commands.h
-// 
 // Written: fmk 
 // Created: 04/98
 // Revision: A
@@ -35,129 +32,123 @@
 //
 // What: "@(#) commands.C, revA"
 
+#include <OPS_Globals.h>
+
 int
 g3AppInit(Tcl_Interp *interp);
 
 int 
-wipeModel(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+wipeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-wipeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+wipeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-resetModel(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+resetModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-initializeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+initializeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-setLoadConst(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+setLoadConst(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-setTime(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+setTime(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-getTime(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+getTime(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-buildModel(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+buildModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-analyzeModel(ClientData clientData, Tcl_Interp *interp, int argc, 
-	     char **argv);
+analyzeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+	     
+int 
+printModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-printModel(ClientData clientData, Tcl_Interp *interp, int argc, 
-	   char **argv);
+specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+		
 int 
-specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, 
-		char **argv);
+specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+	   
 int 
-specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, 
-	   char **argv);
-
+specifyNumberer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+		
 int 
-specifyNumberer(ClientData clientData, Tcl_Interp *interp, int argc, 
-		char **argv);
-int 
-specifyConstraintHandler(ClientData clientData, Tcl_Interp *interp, int argc, 
-			 char **argv);
+specifyConstraintHandler(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+			 
 int
-specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, 
-		 char **argv);
-
+specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+		 
 int
-specifyCTest(ClientData clientData, Tcl_Interp *interp, int argc, 
-	     char **argv);
+specifyCTest(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+	     
+int 
+specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+		  
+int 
+addRecorder(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+	    
+int 
+addAlgoRecorder(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, 
-		  char **argv);
-int 
-addRecorder(ClientData clientData, Tcl_Interp *interp, int argc, 
-	    char **argv);
-int 
-addAlgoRecorder(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+addDatabase(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-addDatabase(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+playbackRecorders(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+		  
+int 
+playbackAlgorithmRecorders(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-playbackRecorders(ClientData clientData, Tcl_Interp *interp, int argc, 
-		  char **argv);
+groundExcitation(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-playbackAlgorithmRecorders(ClientData clientData, Tcl_Interp *interp, int argc, 
-			   char **argv);
+rigidLink(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-groundExcitation(ClientData clientData, Tcl_Interp *interp, int argc, 
-		 char **argv);
-int 
-rigidLink(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+rigidDiaphragm(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-rigidDiaphragm(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+videoPlayer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-videoPlayer(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+removeObject(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-removeObject(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
-
-int 
-nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 // AddingSensitivity:BEGIN /////////////////////////////////////////////////
 int 
-computeGradients(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+computeGradients(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-sensNodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+sensNodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-sensitivityAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+sensitivityAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-sensitivityIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+sensitivityIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 // AddingSensitivity:END ///////////////////////////////////////////////////
 
-
+int 
+startTimer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-startTimer(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+stopTimer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-stopTimer(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+rayleighDamping(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-rayleighDamping(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
-
-int 
-addRegion(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+addRegion(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 
 

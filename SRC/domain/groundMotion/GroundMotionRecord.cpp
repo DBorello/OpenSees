@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:00:57 $
+// $Revision: 1.5 $
+// $Date: 2003-02-25 23:32:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/groundMotion/GroundMotionRecord.cpp,v $
                                                                         
                                                                         
@@ -53,7 +53,7 @@ GroundMotionRecord::GroundMotionRecord()
 
 }
 
-GroundMotionRecord::GroundMotionRecord(char *fileNameAccel,
+GroundMotionRecord::GroundMotionRecord(const char *fileNameAccel,
 				       double timeStep,
 				       double theFactor,
 				       double dT)
@@ -70,8 +70,8 @@ GroundMotionRecord::GroundMotionRecord(char *fileNameAccel,
 
 }
 
-GroundMotionRecord::GroundMotionRecord(char *fileNameAccel,
-				       char *fileNameTime,
+GroundMotionRecord::GroundMotionRecord(const char *fileNameAccel,
+				       const char *fileNameTime,
 				       double theFactor,
 				       double dT)
   :GroundMotion(GROUND_MOTION_TAG_GroundMotionRecord),

@@ -14,7 +14,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkMain.cpp,v 1.7 2003-02-14 23:02:11 fmk Exp $
+ * RCS: @(#) $Id: tkMain.cpp,v 1.8 2003-02-25 23:34:47 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -76,9 +76,11 @@ extern "C" int		isatty _ANSI_ARGS_((int fd));
 extern "C" char *	strrchr _ANSI_ARGS_((CONST char *string, int c));
 #endif
 
-
-extern "C" void		TkpDisplayWarning _ANSI_ARGS_((char *msg,
-						       char *title));
+#ifdef _TCL84
+extern "C" void  TkpDisplayWarning _ANSI_ARGS_((const char *msg, char *title));
+#else
+extern "C" void  TkpDisplayWarning _ANSI_ARGS_((char *msg, char *title));
+#endif
 
 /*
  * Forward declarations for procedures defined later in this file.
@@ -256,11 +258,9 @@ Tk_MainOpenSees(int argc, char **argv, Tcl_AppInitProc *appInitProc, Tcl_Interp 
     /*
      * Invoke application-specific initialization.
      */
-
-    if ((*appInitProc)(interp) != TCL_OK) {
-	TkpDisplayWarning(Tcl_GetStringResult(interp),
-		"Application initialization failed");
-    }
+    if ((*appInitProc)(interp) != TCL_OK) 
+      TkpDisplayWarning(Tcl_GetStringResult(interp), 
+      	"Application initialization failed");
 
     /*
      * Invoke the script specified on the command line, if any.
@@ -277,7 +277,7 @@ Tk_MainOpenSees(int argc, char **argv, Tcl_AppInitProc *appInitProc, Tcl_Interp 
 
 	    Tcl_AddErrorInfo(interp, "");
 	    TkpDisplayWarning(Tcl_GetVar(interp, "errorInfo",
-		    TCL_GLOBAL_ONLY), "Error in startup script");
+					 TCL_GLOBAL_ONLY), "Error in startup script");
 	    Tcl_DeleteInterp(interp);
 	    Tcl_Exit(1);
 	}
@@ -437,52 +437,57 @@ StdinProc(ClientData clientData, int mask)
 static void
 Prompt(Tcl_Interp *interp, int partial)
 {
-    char *promptCmd;
-    int code;
-    Tcl_Channel outChannel, errChannel;
 
-    char one[12] = "tcl_prompt1";
-    char two[12] = "tcl_prompt2";
-    promptCmd = Tcl_GetVar(interp, partial ? two : one, TCL_GLOBAL_ONLY);
+#ifdef _TCL84
+  const char *promptCmd;
+#else
+  char *promptCmd;
+#endif
+  int code;
+  Tcl_Channel outChannel, errChannel;
+
+  const char one[12] = "tcl_prompt1";
+  const char two[12] = "tcl_prompt2";
+  promptCmd = Tcl_GetVar(interp, partial ? two : one, TCL_GLOBAL_ONLY);
 			   
-    if (promptCmd == NULL) {
-defaultPrompt:
+  if (promptCmd == NULL) {
+  defaultPrompt:
 	if (!partial) {
-
-            /*
-             * We must check that outChannel is a real channel - it
-             * is possible that someone has transferred stdout out of
-             * this interpreter with "interp transfer".
-             */
-
-	    outChannel = Tcl_GetChannel(interp, "stdout", NULL);
-            if (outChannel != (Tcl_Channel) NULL) {
-                Tcl_WriteChars(outChannel, "OpenSees > ", 11);
-            }
+	  
+	  /*
+	   * We must check that outChannel is a real channel - it
+	   * is possible that someone has transferred stdout out of
+	   * this interpreter with "interp transfer".
+	   */
+	  
+	  outChannel = Tcl_GetChannel(interp, "stdout", NULL);
+	  if (outChannel != (Tcl_Channel) NULL) {
+	    Tcl_WriteChars(outChannel, "OpenSees > ", 11);
+	  }
 	}
     } else {
-	code = Tcl_Eval(interp, promptCmd);
-	if (code != TCL_OK) {
-	    Tcl_AddErrorInfo(interp,
-		    "\n    (script that generates prompt)");
-            /*
-             * We must check that errChannel is a real channel - it
-             * is possible that someone has transferred stderr out of
-             * this interpreter with "interp transfer".
-             */
-            
-	    errChannel = Tcl_GetChannel(interp, "stderr", NULL);
-            if (errChannel != (Tcl_Channel) NULL) {
-                Tcl_WriteObj(errChannel, Tcl_GetObjResult(interp));
-                Tcl_WriteChars(errChannel, "\n", 1);
-            }
-	    goto defaultPrompt;
+      code = Tcl_Eval(interp, promptCmd);
+      if (code != TCL_OK) {
+	Tcl_AddErrorInfo(interp,
+			 "\n    (script that generates prompt)");
+	/*
+	 * We must check that errChannel is a real channel - it
+	 * is possible that someone has transferred stderr out of
+	 * this interpreter with "interp transfer".
+	 */
+	
+	errChannel = Tcl_GetChannel(interp, "stderr", NULL);
+	if (errChannel != (Tcl_Channel) NULL) {
+	  Tcl_WriteObj(errChannel, Tcl_GetObjResult(interp));
+	  Tcl_WriteChars(errChannel, "\n", 1);
 	}
+	goto defaultPrompt;
+      }
     }
-    outChannel = Tcl_GetChannel(interp, "stdout", NULL);
-    if (outChannel != (Tcl_Channel) NULL) {
-        Tcl_Flush(outChannel);
-    }
+  outChannel = Tcl_GetChannel(interp, "stdout", NULL);
+  if (outChannel != (Tcl_Channel) NULL) {
+    Tcl_Flush(outChannel);
+  }
 }
 
 

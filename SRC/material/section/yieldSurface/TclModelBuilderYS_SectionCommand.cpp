@@ -9,7 +9,7 @@
 #include <YS_Section2D01.h>
 #include <YS_Section2D02.h>
 
-static void printCommand(int argc, char **argv)
+static void printCommand(int argc, TCL_Char **argv)
 {
   opserr << "Input command: ";
   for (int i=0; i<argc; i++)
@@ -19,7 +19,7 @@ static void printCommand(int argc, char **argv)
 
 SectionForceDeformation*
 TclModelBuilderYS_SectionCommand(ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theBuilder)
+				 TCL_Char **argv, TclModelBuilder *theBuilder)
 {
   if (argc < 3) {
     opserr << "WARNING insufficient number of arguments\n";

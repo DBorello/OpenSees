@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-02-14 23:01:57 $
+// $Revision: 1.12 $
+// $Date: 2003-02-25 23:34:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlRenderer.cpp,v $
                                                                         
                                                                         
@@ -63,7 +63,7 @@ using std::ios;
 #include <db.H>
 #include <Vector.h>
 
-OpenGLRenderer::OpenGLRenderer(char *_title, int _xLoc, int _yLoc, 
+OpenGLRenderer::OpenGLRenderer(const char *_title, int _xLoc, int _yLoc, 
 			       int _width, int _height, 
 			       ColorMap &_theMap)
   :Renderer(_theMap),  
@@ -100,11 +100,11 @@ OpenGLRenderer::OpenGLRenderer(char *_title, int _xLoc, int _yLoc,
 
 
 
-OpenGLRenderer::OpenGLRenderer(char *_title, int _xLoc, int _yLoc, 
+OpenGLRenderer::OpenGLRenderer(const char *_title, int _xLoc, int _yLoc, 
 			       int _width, int _height,	
 			       ColorMap &_theMap, 
-			       char *outputFileName, 
-			       char *bitmapFileName)
+			       const char *outputFileName, 
+			       const char *bitmapFileName)
   :Renderer(_theMap),  
   windowTitle(0), height(_height), width(_width), xLoc(_xLoc), yLoc(_yLoc),
   count(-1), theFile(0), theOutputFileName(0), 
@@ -706,7 +706,7 @@ OpenGLRenderer::setPlaneDist(float anear, float afar)
 }
 
 int 
-OpenGLRenderer::setProjectionMode(char *newMode)
+OpenGLRenderer::setProjectionMode(const char *newMode)
 {
   if ((strcmp(newMode, "parallel") == 0) || (strcmp(newMode, "Parallel") == 0))
     projectionMode = PARALLEL_MODE;
@@ -716,7 +716,7 @@ OpenGLRenderer::setProjectionMode(char *newMode)
 }
 
 int 
-OpenGLRenderer::setFillMode(char *newMode)
+OpenGLRenderer::setFillMode(const char *newMode)
 {
   if ((strcmp(newMode, "wire") == 0) || (strcmp(newMode, "Wire") == 0))
     fillMode = WIRE_MODE;

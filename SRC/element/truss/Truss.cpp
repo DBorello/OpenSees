@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2003-02-14 23:01:18 $
+// $Revision: 1.16 $
+// $Date: 2003-02-25 23:33:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -848,8 +848,9 @@ Truss::computeCurrentStrainRate(void) const
 }
 
 Response*
-Truss::setResponse(char **argv, int argc, Information &eleInfo)
+Truss::setResponse(const char **argv, int argc, Information &eleInfo)
 {
+  
   //
   // we compare argv[0] for known response types for the Truss
   //
@@ -893,7 +894,7 @@ Truss::getResponse(int responseID, Information &eleInfo)
 
 
 int
-Truss::setParameter (char **argv, int argc, Information &info)
+Truss::setParameter (const char **argv, int argc, Information &info)
 {
     if (argc < 1)
         return -1;

@@ -18,16 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2003-02-14 23:01:34 $
+// $Revision: 1.21 $
+// $Date: 2003-02-25 23:33:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
-// File: ~/material/section/TclModelBuilderSectionCommand.C
-// 
 // Written: rms, MHS 
 // Created: 07/99
-// Revision: A
 //
 // Description: This file contains the function invoked when the user invokes
 // the section command in the interpreter.
@@ -70,7 +67,7 @@ using std::ifstream;
 #include <iostream>
 using std::ios;
 
-static void printCommand(int argc, char **argv)
+static void printCommand(int argc, TCL_Char **argv)
 {
     opserr << "Input command: \n";
     for (int i=0; i<argc; i++)
@@ -80,20 +77,20 @@ static void printCommand(int argc, char **argv)
 
 int
 TclModelBuilder_addFiberSection (ClientData clientData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theBuilder);
+				 TCL_Char **argv, TclModelBuilder *theBuilder);
 
 int
 TclModelBuilder_addUCFiberSection (ClientData clientData, Tcl_Interp *interp, int argc,
-				   char **argv, TclModelBuilder *theBuilder);
+				   TCL_Char **argv, TclModelBuilder *theBuilder);
 
 
 SectionForceDeformation *
 TclModelBuilderYS_SectionCommand(ClientData clientData, Tcl_Interp *interp, int argc, 
-				 char **argv, TclModelBuilder *theTclBuilder);
+				 TCL_Char **argv, TclModelBuilder *theTclBuilder);
 
 int
 TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int argc,
-			       char **argv, TclModelBuilder *theTclBuilder)
+			       TCL_Char **argv, TclModelBuilder *theTclBuilder)
 {
     // Pointer to a section that will be added to the model builder
     SectionForceDeformation *theSection = 0;
@@ -586,7 +583,7 @@ buildSection(Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder,
 
 int
 TclModelBuilder_addFiberSection (ClientData clientData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theTclModelBuilder)
+				 TCL_Char **argv, TclModelBuilder *theTclModelBuilder)
 {
     int secTag;
     int maxNumPatches = 30; 
@@ -652,7 +649,7 @@ TclModelBuilder_addFiberSection (ClientData clientData, Tcl_Interp *interp, int 
 // add patch to fiber section
 int
 TclModelBuilder_addPatch(ClientData clientData, Tcl_Interp *interp, int argc, 
-			     char **argv, TclModelBuilder *theTclModelBuilder)
+			     TCL_Char **argv, TclModelBuilder *theTclModelBuilder)
 {
     // check if a section is being processed
     if (currentSectionTag == 0) {
@@ -997,7 +994,7 @@ TclModelBuilder_addPatch(ClientData clientData, Tcl_Interp *interp, int argc,
 // add patch to fiber section
 int
 TclModelBuilder_addFiber(ClientData clientData, Tcl_Interp *interp, int argc, 
-			 char **argv, TclModelBuilder *theTclModelBuilder)
+			 TCL_Char **argv, TclModelBuilder *theTclModelBuilder)
 {
     // check if a section is being processed
     if (currentSectionTag == 0) {
@@ -1106,7 +1103,7 @@ TclModelBuilder_addFiber(ClientData clientData, Tcl_Interp *interp, int argc,
           
 int
 TclModelBuilder_addReinfLayer(ClientData clientData, Tcl_Interp *interp, int argc, 
-				  char **argv, TclModelBuilder *theTclModelBuilder)
+				  TCL_Char **argv, TclModelBuilder *theTclModelBuilder)
 {
    //opserr << "\nreading layer:\n";
 
@@ -1638,7 +1635,7 @@ buildSection(Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder,
 
 int
 TclModelBuilder_addUCFiberSection (ClientData clientData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theTclModelBuilder)
+				   TCL_Char **argv, TclModelBuilder *theTclModelBuilder)
 {
     int secTag;
     
@@ -1678,7 +1675,7 @@ TclModelBuilder_addUCFiberSection (ClientData clientData, Tcl_Interp *interp, in
     //
 
     // open the file
-    char *fileName = argv[3];
+    TCL_Char *fileName = argv[3];
     ifstream theFile;
     theFile.open(fileName, ios::in);
     if (!theFile) {

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:14 $
+// $Revision: 1.6 $
+// $Date: 2003-02-25 23:32:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/SimpleJoint2D.cpp,v $
 
 // Written: AAA 03/02
@@ -485,7 +485,7 @@ int SimpleJoint2D::displaySelf(Renderer &theViewer, int displayMode, float fact)
 
 
 //most-probably requires to be overridden
-Response* SimpleJoint2D::setResponse(char **argv, int argc, Information &eleInformation)
+Response* SimpleJoint2D::setResponse(const char **argv, int argc, Information &eleInformation)
 {
 //
 

@@ -33,12 +33,12 @@
 #include <EightNodeBrick_u_p_U.h>
 #include <TclModelBuilder.h>
 
-extern void printCommand(int argc, char **argv);
+extern void printCommand(int argc, TCL_Char **argv);
 
 int
 TclModelBuilder_addEightNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *interp,  int argc, 
-				  char **argv, Domain *theTclDomain,
-				  TclModelBuilder *theTclBuilder, int eleArgStart)
+					TCL_Char **argv, Domain *theTclDomain,
+					TclModelBuilder *theTclBuilder, int eleArgStart)
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {

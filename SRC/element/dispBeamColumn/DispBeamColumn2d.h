@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2003-02-14 23:01:07 $
+// $Revision: 1.13 $
+// $Date: 2003-02-25 23:32:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.h,v $
 
 // Written: MHS
@@ -88,10 +88,10 @@ class DispBeamColumn2d : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
     void Print(OPS_Stream &s, int flag =0);
 
-    Response *setResponse(char **argv, int argc, Information &eleInfo);
+    Response *setResponse(const char **argv, int argc, Information &eleInfo);
     int getResponse(int responseID, Information &eleInfo);
 
-    int setParameter(char **argv, int argc, Information &info);
+    int setParameter(const char **argv, int argc, Information &info);
     int updateParameter(int parameterID, Information &info);
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////

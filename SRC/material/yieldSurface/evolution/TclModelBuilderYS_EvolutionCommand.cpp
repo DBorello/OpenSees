@@ -20,65 +20,61 @@
 
 int addTclYS_Evolution(TclModelBuilder *theBuilder, YS_Evolution *theModel)
 {
-	if(theModel ==0)
-		return TCL_ERROR;
+  if(theModel ==0)
+    return TCL_ERROR;
 
-	if(!theModel)
-	{
-	 	opserr << "Model not created\n";
-	    return TCL_ERROR;
-	}
+  if(!theModel) {
+    opserr << "Model not created\n";
+    return TCL_ERROR;
+  }
 
-	if (theBuilder->addYS_EvolutionModel(*theModel) < 0)
-	{
-		opserr << "WARNING could not add hardening model to the domain\n";
-		opserr << *theModel << endln;
-		delete theModel; // invoke the material objects destructor, otherwise mem leak
-		return TCL_ERROR;
-	}
-
-	return TCL_OK;
-
+  if (theBuilder->addYS_EvolutionModel(*theModel) < 0) {
+    opserr << "WARNING could not add hardening model to the domain\n";
+    opserr << *theModel << endln;
+    delete theModel; // invoke the material objects destructor, otherwise mem leak
+    return TCL_ERROR;
+  }
+  
+  return TCL_OK;
 }
 
-PlasticHardeningMaterial * getTclPlasticMaterial(Tcl_Interp *interp, char *arg, TclModelBuilder *theBuilder)
+PlasticHardeningMaterial * 
+getTclPlasticMaterial(Tcl_Interp *interp, TCL_Char *arg, TclModelBuilder *theBuilder)
 {
-int id;
-	if (Tcl_GetInt(interp, arg, &id) != TCL_OK)
-	{
-		opserr << "WARNING: TclModelYS_EvolutionCommand - Invalid plastic material tag \n";
-		return 0;
-	}
+  int id;
+  if (Tcl_GetInt(interp, arg, &id) != TCL_OK) {
+    opserr << "WARNING: TclModelYS_EvolutionCommand - Invalid plastic material tag \n";
+    return 0;
+  }
 
-	PlasticHardeningMaterial *theMat = theBuilder->getPlasticMaterial(id);
-	if(theMat == 0)
-	{
-		opserr << "WARNING: TclModelYS_EvolutionCommand - no PlasticHardeningMaterial with id = "
-			 << id << " exists\n";
-		return 0;
-	}
-	else
-		return theMat;
+  PlasticHardeningMaterial *theMat = theBuilder->getPlasticMaterial(id);
+  if(theMat == 0) {
+    opserr << "WARNING: TclModelYS_EvolutionCommand - no PlasticHardeningMaterial with id = "
+	   << id << " exists\n";
+    return 0;
+  }
+  
+  else
+    return theMat;
 }
 
-YieldSurface_BC * getTclYieldSurface_BC(Tcl_Interp *interp, char *arg, TclModelBuilder *theBuilder)
+YieldSurface_BC * 
+getTclYieldSurface_BC(Tcl_Interp *interp, TCL_Char *arg, TclModelBuilder *theBuilder)
 {
 int id;
-	if (Tcl_GetInt(interp, arg, &id) != TCL_OK)
-	{
-		opserr << "WARNING: TclModelYS_EvolutionCommand - Invalid YieldSurface_BC tag \n";
-		return 0;
-	}
+ if (Tcl_GetInt(interp, arg, &id) != TCL_OK) {
+   opserr << "WARNING: TclModelYS_EvolutionCommand - Invalid YieldSurface_BC tag \n";
+   return 0;
+ }
 
-	YieldSurface_BC *theYS = theBuilder->getYieldSurface_BC(id);
-	if(theYS == 0)
-	{
-		opserr << "WARNING: TclModelYS_EvolutionCommand - no YieldSurface_BC with id = "
-			 << id << " exists\n";
-		return 0;
-	}
-	else
-		return theYS;
+ YieldSurface_BC *theYS = theBuilder->getYieldSurface_BC(id);
+ if(theYS == 0) {
+   opserr << "WARNING: TclModelYS_EvolutionCommand - no YieldSurface_BC with id = "
+	  << id << " exists\n";
+   return 0;
+ }
+ else
+   return theYS;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,117 +82,116 @@ int id;
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 int TclNullEvolutionCommand(ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theBuilder)
+			    TCL_Char **argv, TclModelBuilder *theBuilder)
 {
-YS_Evolution *theModel = 0;
-		int tag;
-		double isox;
-		double isoy;
-		double isoz;
-		int dim=0;
+  YS_Evolution *theModel = 0;
+  int tag;
+  double isox;
+  double isoy;
+  double isoz;
+  int dim=0;
+  
+  if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
+    return TCL_ERROR;
 
-		if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
-			return TCL_ERROR;
-
-		if(argc > 3)
-		{
-			if (Tcl_GetDouble(interp, argv[3], &isox) != TCL_OK)
-				return TCL_ERROR;
-			dim++;
-		}
-		if(argc > 4)
-		{
-			if (Tcl_GetDouble(interp, argv[4], &isoy) != TCL_OK)
-				return TCL_ERROR;
-			dim++;
-		}
-		if(argc > 5)
-		{
-			if (Tcl_GetDouble(interp, argv[5], &isoz) != TCL_OK)
-				return TCL_ERROR;
-			dim++;
-		}
-
-//		cout << "Dim = " << dim << endln;
-//		cin.get();
-		
-		// Parsing was successful, allocate the material
-		if(dim==1)
-			theModel = new NullEvolution(tag, isox);
-		else if(dim == 2)
-			theModel = new NullEvolution(tag, isox, isoy);
-		else if(dim == 3)
-			theModel = new NullEvolution(tag, isox, isoy, isoz);
-		else
-			theModel = 0;
-
-return addTclYS_Evolution(theBuilder, theModel);
+  if(argc > 3) {
+    if (Tcl_GetDouble(interp, argv[3], &isox) != TCL_OK)
+      return TCL_ERROR;
+    dim++;
+  }
+  
+  if(argc > 4) {
+    if (Tcl_GetDouble(interp, argv[4], &isoy) != TCL_OK)
+      return TCL_ERROR;
+    dim++;
+  }
+  
+  if(argc > 5) {
+    if (Tcl_GetDouble(interp, argv[5], &isoz) != TCL_OK)
+      return TCL_ERROR;
+    dim++;
+  }
+  
+  //		cout << "Dim = " << dim << endln;
+  //		cin.get();
+  
+  // Parsing was successful, allocate the material
+  if(dim==1)
+    theModel = new NullEvolution(tag, isox);
+  else if(dim == 2)
+    theModel = new NullEvolution(tag, isox, isoy);
+  else if(dim == 3)
+    theModel = new NullEvolution(tag, isox, isoy, isoz);
+  else
+    theModel = 0;
+  
+  return addTclYS_Evolution(theBuilder, theModel);
 }
 
 int TclKinematic2D01Command(ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theBuilder)
+				 TCL_Char **argv, TclModelBuilder *theBuilder)
 {
-YS_Evolution *theModel = 0;
-		int tag;
-		double minIsoFactor;
+  YS_Evolution *theModel = 0;
+  int tag;
+  double minIsoFactor;
+  
+  if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
+    return TCL_ERROR;
+  
+  if (Tcl_GetDouble(interp, argv[3], &minIsoFactor) != TCL_OK)
+    return TCL_ERROR;
+  
+  PlasticHardeningMaterial *theMatX = getTclPlasticMaterial(interp, argv[4], theBuilder);
+  if(theMatX == 0)
+    return TCL_ERROR;
+  
+  PlasticHardeningMaterial *theMatY = getTclPlasticMaterial(interp, argv[5], theBuilder);
+  if(theMatY == 0)
+    return TCL_ERROR;
+  
+  double dir;
+  if (Tcl_GetDouble(interp, argv[6], &dir) != TCL_OK)
+    return TCL_ERROR;
+  
+  // Parsing was successful, allocate the material
+  theModel = new Kinematic2D01(tag, minIsoFactor, *theMatX, *theMatY, dir);
+  
 
-		if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
-			return TCL_ERROR;
-
-		if (Tcl_GetDouble(interp, argv[3], &minIsoFactor) != TCL_OK)
-			return TCL_ERROR;
-
-		PlasticHardeningMaterial *theMatX = getTclPlasticMaterial(interp, argv[4], theBuilder);
-		if(theMatX == 0)
-			return TCL_ERROR;
-
-		PlasticHardeningMaterial *theMatY = getTclPlasticMaterial(interp, argv[5], theBuilder);
-		if(theMatY == 0)
-			return TCL_ERROR;
-
-double dir;
-		if (Tcl_GetDouble(interp, argv[6], &dir) != TCL_OK)
-			return TCL_ERROR;
-
-		// Parsing was successful, allocate the material
-		theModel = new Kinematic2D01(tag, minIsoFactor, *theMatX, *theMatY, dir);
-
-
-return addTclYS_Evolution(theBuilder, theModel);
+  return addTclYS_Evolution(theBuilder, theModel);
 }
 
 
 int TclIsotropic2D01Command(ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theBuilder)
+				 TCL_Char **argv, TclModelBuilder *theBuilder)
 {
-YS_Evolution *theModel = 0;
-
-		int tag;
-		double minIsoFactor;
-
-		if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
-			return TCL_ERROR;
-
-		if (Tcl_GetDouble(interp, argv[3], &minIsoFactor) != TCL_OK)
-			return TCL_ERROR;
-
-		PlasticHardeningMaterial *theMatX = getTclPlasticMaterial(interp, argv[4], theBuilder);
-		if(theMatX == 0)
-			return TCL_ERROR;
-
-		PlasticHardeningMaterial *theMatY = getTclPlasticMaterial(interp, argv[5], theBuilder);
-		if(theMatY == 0)
-			return TCL_ERROR;
-
-		// Parsing was successful, allocate the material
-		theModel = new Isotropic2D01(tag, minIsoFactor, *theMatX, *theMatY);
-
-return addTclYS_Evolution(theBuilder, theModel);
+  YS_Evolution *theModel = 0;
+  
+  int tag;
+  double minIsoFactor;
+  
+  if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
+    return TCL_ERROR;
+  
+  if (Tcl_GetDouble(interp, argv[3], &minIsoFactor) != TCL_OK)
+    return TCL_ERROR;
+  
+  PlasticHardeningMaterial *theMatX = getTclPlasticMaterial(interp, argv[4], theBuilder);
+  if(theMatX == 0)
+    return TCL_ERROR;
+  
+  PlasticHardeningMaterial *theMatY = getTclPlasticMaterial(interp, argv[5], theBuilder);
+  if(theMatY == 0)
+    return TCL_ERROR;
+  
+  // Parsing was successful, allocate the material
+  theModel = new Isotropic2D01(tag, minIsoFactor, *theMatX, *theMatY);
+  
+  return addTclYS_Evolution(theBuilder, theModel);
 }
 
 
 int TclPeakOriented2D01Command(ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theBuilder)
+				 TCL_Char **argv, TclModelBuilder *theBuilder)
 {
 YS_Evolution *theModel = 0;
 		int tag;
@@ -227,7 +222,7 @@ return addTclYS_Evolution(theBuilder, theModel);
 
 
 int TclCombinedIsoKin2D01Command(ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theBuilder)
+				 TCL_Char **argv, TclModelBuilder *theBuilder)
 {
 YS_Evolution *theModel = 0;
 
@@ -287,7 +282,7 @@ return addTclYS_Evolution(theBuilder, theModel);
 
 ////////////////////////////////////////////////////////////////////////////////////////
 int TclKinematic2D02Command(ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theBuilder)
+				 TCL_Char **argv, TclModelBuilder *theBuilder)
 {
 YS_Evolution *theModel = 0;
 int tag;
@@ -336,12 +331,12 @@ return addTclYS_Evolution(theBuilder, theModel);
 
 
 int TclPeakOriented2D02Command(ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theBuilder)
+				 TCL_Char **argv, TclModelBuilder *theBuilder)
 {
 YS_Evolution *theModel = 0;
 
-int tag;
-double minIsoFactor;
+ int tag;
+ double minIsoFactor;
 
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
 		return TCL_ERROR;
@@ -368,7 +363,7 @@ double minIsoFactor;
 	PlasticHardeningMaterial *isoY = getTclPlasticMaterial(interp, argv[8], theBuilder);
 	if(isoY == 0)
 		return TCL_ERROR;
-int algo;
+	int algo;
 	if (Tcl_GetInt(interp, argv[9], &algo) != TCL_OK)
 		return TCL_ERROR;
 
@@ -380,13 +375,13 @@ return addTclYS_Evolution(theBuilder, theModel);
 
 
 int TclCombinedIsoKin2D02Command(ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theBuilder)
+				 TCL_Char **argv, TclModelBuilder *theBuilder)
 {
-YS_Evolution *theModel = 0;
-int tag, deformable;
-bool deform = false;
-double minIsoFactor, isoRatio, kinRatio;
-
+  YS_Evolution *theModel = 0;
+  int tag, deformable;
+  bool deform = false;
+  double minIsoFactor, isoRatio, kinRatio;
+  
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
 		return TCL_ERROR;
 
@@ -432,11 +427,11 @@ double minIsoFactor, isoRatio, kinRatio;
 
 	if(deformable == 1)
 		deform = true;
-int algo;
+	int algo;
 	if (Tcl_GetInt(interp, argv[14], &algo) != TCL_OK)
 		return TCL_ERROR;
-
-double resfact, appfact, dir;
+	
+	double resfact, appfact, dir;
 
 	if (Tcl_GetDouble(interp, argv[15], &resfact) != TCL_OK)
 		return TCL_ERROR;
@@ -450,10 +445,10 @@ double resfact, appfact, dir;
 		
 	// Parsing was successful, allocate the material
 	theModel = new CombinedIsoKin2D02(tag, minIsoFactor, isoRatio, kinRatio, *ys, *kinX, *kinY,
-										*isoXPos, *isoXNeg, *isoYPos, *isoYNeg,
-										deform, algo, resfact, appfact, dir);
-
-return addTclYS_Evolution(theBuilder, theModel);
+					  *isoXPos, *isoXNeg, *isoYPos, *isoYNeg,
+					  deform, algo, resfact, appfact, dir);
+	
+	return addTclYS_Evolution(theBuilder, theModel);
 }
 
 
@@ -461,48 +456,44 @@ return addTclYS_Evolution(theBuilder, theModel);
 
 int
 TclModelBuilderYS_EvolutionModelCommand (ClientData clientData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theBuilder)
+					 TCL_Char **argv, TclModelBuilder *theBuilder)
 {
-    if (strcmp(argv[1],"null") == 0)
-	{
-		return TclNullEvolutionCommand(clientData, interp, argc, argv, theBuilder);
-	}
-	else if (strcmp(argv[1],"kinematic2D01") == 0)
-	{
-		return TclKinematic2D01Command(clientData, interp, argc, argv, theBuilder);
-	}
-	else if (strcmp(argv[1],"isotropic2D01") == 0)
-	{
-		return TclIsotropic2D01Command(clientData, interp, argc, argv, theBuilder);
-	}
-	else if (strcmp(argv[1],"peakOriented2D01") == 0)
-	{
-		return TclPeakOriented2D01Command(clientData, interp, argc, argv, theBuilder);
-	}
-	else if (strcmp(argv[1],"combinedIsoKin2D01") == 0)
-	{
-		return TclCombinedIsoKin2D01Command(clientData, interp, argc, argv, theBuilder);
-	}
+  if (strcmp(argv[1],"null") == 0) {
+    return TclNullEvolutionCommand(clientData, interp, argc, argv, theBuilder);
+  } 
 
-	else if (strcmp(argv[1],"kinematic2D02") == 0)
-	{
-		return TclKinematic2D02Command(clientData, interp, argc, argv, theBuilder);
-	}
-	else if (strcmp(argv[1],"peakOriented2D02") == 0)
-	{
-		return TclPeakOriented2D02Command(clientData, interp, argc, argv, theBuilder);
-	}
-	else if (strcmp(argv[1],"combinedIsoKin2D02") == 0)
-	{
-		return TclCombinedIsoKin2D02Command(clientData, interp, argc, argv, theBuilder);
-	}
-	else
-	{
-		opserr << "Unkown YS_Evolution type: " << argv[1] << endln;
-		return TCL_ERROR;
-	}
+  else if (strcmp(argv[1],"kinematic2D01") == 0) {
+    return TclKinematic2D01Command(clientData, interp, argc, argv, theBuilder);
+  }
 
+  else if (strcmp(argv[1],"isotropic2D01") == 0) {
+    return TclIsotropic2D01Command(clientData, interp, argc, argv, theBuilder);
+  }
+	
+  else if (strcmp(argv[1],"peakOriented2D01") == 0) {
+    return TclPeakOriented2D01Command(clientData, interp, argc, argv, theBuilder);
+  }
+  
+  else if (strcmp(argv[1],"combinedIsoKin2D01") == 0) {
+    return TclCombinedIsoKin2D01Command(clientData, interp, argc, argv, theBuilder);
+  }
 
+  else if (strcmp(argv[1],"kinematic2D02") == 0) {
+    return TclKinematic2D02Command(clientData, interp, argc, argv, theBuilder);
+  }
+  
+  else if (strcmp(argv[1],"peakOriented2D02") == 0) {
+    return TclPeakOriented2D02Command(clientData, interp, argc, argv, theBuilder);
+  }
+	
+  else if (strcmp(argv[1],"combinedIsoKin2D02") == 0) {
+    return TclCombinedIsoKin2D02Command(clientData, interp, argc, argv, theBuilder);
+  }
+	
+  else {
+    opserr << "Unkown YS_Evolution type: " << argv[1] << endln;
+    return TCL_ERROR;
+  }
 }
 
 ///

@@ -1,5 +1,5 @@
-// $Revision: 1.12 $
-// $Date: 2003-02-14 23:01:32 $
+// $Revision: 1.13 $
+// $Date: 2003-02-25 23:33:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.h,v $
                                                                         
 // Written: ZHY
@@ -95,7 +95,7 @@ public:
      int recvSelf(int commitTag, Channel &theChannel, 
 		  FEM_ObjectBroker &theBroker);    
 
-     Response *setResponse (char **argv, int argc, Information &matInfo);
+     Response *setResponse (const char **argv, int argc, Information &matInfo);
      int getResponse (int responseID, Information &matInformation);
      void Print(OPS_Stream &s, int flag =0);
 

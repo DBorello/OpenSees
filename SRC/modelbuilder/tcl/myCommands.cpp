@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:48 $
+// $Revision: 1.6 $
+// $Date: 2003-02-25 23:34:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/myCommands.cpp,v $
                                                                         
                                                                         
@@ -50,8 +50,7 @@ extern ModelBuilder *theBuilder;
 extern Domain theDomain;
 
 int
-specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc, 
-		    char **argv);
+specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int myCommands(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "model", specifyModelBuilder,
@@ -60,8 +59,7 @@ int myCommands(Tcl_Interp *interp) {
 }
 
 int
-specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc, 
-			 char **argv)
+specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
     // make sure at least one other argument to contain model builder type given
     if (argc < 2) {

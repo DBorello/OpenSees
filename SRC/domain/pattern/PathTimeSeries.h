@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:00 $
+// $Revision: 1.5 $
+// $Date: 2003-02-25 23:32:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathTimeSeries.h,v $
                                                                         
                                                                         
@@ -51,10 +51,12 @@ class PathTimeSeries : public TimeSeries
     PathTimeSeries(const Vector &thePath, 
 		   const Vector &theTime, 
 		   double cfactor = 1.0);
-    PathTimeSeries(char *fileNamePath, 
-		   char *fileNameTime, 
+
+    PathTimeSeries(const char *fileNamePath, 
+		   const char *fileNameTime, 
 		   double cfactor = 1.0);    
-    PathTimeSeries(char *fileName,
+
+    PathTimeSeries(const char *fileName,
 		   double cfactor = 1.0);
     PathTimeSeries();    
     

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-14 23:01:34 $
+// $Revision: 1.8 $
+// $Date: 2003-02-25 23:33:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionForceDeformation.cpp,v $
                                                                         
                                                                         
@@ -134,7 +134,7 @@ SectionForceDeformation::getRho(void)
 
 /*
 int 
-SectionForceDeformation::setResponse(char **argv, int argc, Information &sectInfo)
+SectionForceDeformation::setResponse(const char **argv, int argc, Information &sectInfo)
 {
     // deformations
     if ((strcmp(argv[0],"deformations") ==0) || 
@@ -185,7 +185,7 @@ SectionForceDeformation::setResponse(char **argv, int argc, Information &sectInf
 */
 
 Response*
-SectionForceDeformation::setResponse(char **argv, int argc, Information &sectInfo)
+SectionForceDeformation::setResponse(const char **argv, int argc, Information &sectInfo)
 {
     // deformations
     if (strcmp(argv[0],"deformations") == 0 || strcmp(argv[0],"deformation") == 0)

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:42 $
+// $Revision: 1.5 $
+// $Date: 2003-02-25 23:34:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/TclFedeasMaterialCommand.cpp,v $
 
 // Written: MHS
@@ -43,7 +43,7 @@
 #include <Vector.h>
 #include <string.h>
 
-static void printCommand(int argc, char **argv)
+static void printCommand(int argc, TCL_Char **argv)
 {
     opserr << "Input command: ";
     for (int i=0; i<argc; i++)
@@ -53,7 +53,7 @@ static void printCommand(int argc, char **argv)
 
 UniaxialMaterial *
 TclModelBuilder_addFedeasMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
-				char **argv, TclModelBuilder *theTclBuilder)
+				  TCL_Char **argv, TclModelBuilder *theTclBuilder)
 {
 	if (argc < 3) {
 		opserr << "WARNING insufficient number of arguments\n";

@@ -18,16 +18,15 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:49 $
+// $Revision: 1.7 $
+// $Date: 2003-02-25 23:34:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.h,v $
                                                                         
                                                                         
 #ifndef ElementRecorder_h
 #define ElementRecorder_h
 
-// File: ~/recorder/ElementRecorder.h
-//
+
 // Written: fmk 
 // Created: 09/99
 // Revision: A
@@ -56,11 +55,11 @@ class FE_Datastore;
 class ElementRecorder: public Recorder
 {
   public:
-    ElementRecorder(const ID &eleID, Domain &theDomain, char **argv, int argc,
-		    bool echoTime, double deltaT = 0.0, char *fileName =0);
+    ElementRecorder(const ID &eleID, Domain &theDomain, const char **argv, int argc,
+		    bool echoTime, double deltaT = 0.0, const char *fileName =0);
 
-    ElementRecorder(const ID &eleID, Domain &theDomain, char **argv, int argc,
-		    bool echoTime, FE_Datastore *db, char *tableName, double deltaT = 0.0);
+    ElementRecorder(const ID &eleID, Domain &theDomain, const char **argv, int argc,
+		    bool echoTime, FE_Datastore *db, const char *tableName, double deltaT = 0.0);
 
     ~ElementRecorder();
     int record(int commitTag, double timeStamp);

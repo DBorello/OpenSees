@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-18 23:38:04 $
+// $Revision: 1.7 $
+// $Date: 2003-02-25 23:34:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/X11Renderer.cpp,v $
                                                                         
                                                                         
@@ -657,7 +657,7 @@ X11Renderer::setPlaneDist(float anear, float afar)
 }
 
 int 
-X11Renderer::setProjectionMode(char *newMode)
+X11Renderer::setProjectionMode(const char *newMode)
 {
   int projectionMode = 0;
   if ((strcmp(newMode, "parallel") == 0) || (strcmp(newMode, "Parallel") == 0))
@@ -669,7 +669,7 @@ X11Renderer::setProjectionMode(char *newMode)
 }
 
 int 
-X11Renderer::setFillMode(char *newMode)
+X11Renderer::setFillMode(const char *newMode)
 {
   int fillMode = 0;
   if ((strcmp(newMode, "wire") == 0) || (strcmp(newMode, "Wire") == 0))

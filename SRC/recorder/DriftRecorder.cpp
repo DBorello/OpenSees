@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:49 $
+// $Revision: 1.4 $
+// $Date: 2003-02-25 23:34:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DriftRecorder.cpp,v $
 
 // Written: MHS
@@ -40,13 +40,14 @@ using std::ios;
 #include <string.h>
 
 DriftRecorder::DriftRecorder(int ni, int nj, int df, int dirn,
-			     Domain &theDom, char *fileName, int sflag)
+			     Domain &theDom, const char *fileName, int sflag)
   :ndI(ni), ndJ(nj), dof(df), perpDirn(dirn), oneOverL(0.0),
    theDomain(&theDom), flag(sflag)
  
 {
-  if (strlen(fileName) > MAX_FILENAMELENGTH) {
-    opserr << "DriftRecorder::DriftRecorder -- fileName too long " << MAX_FILENAMELENGTH << endln;
+  theFileName = new char[strlen(fileName)+1];
+  if (theFileName == 0) {
+    opserr << "DriftRecorder::DriftRecorder -- out of memory copying fileName " << endln;
     exit(-1);
   }
   
@@ -66,8 +67,6 @@ DriftRecorder::DriftRecorder(int ni, int nj, int df, int dirn,
 
   if (crdI(dirn) == crdJ(dirn)) {
     opserr << "DriftRecorder::DriftRecorder-- Nodal projection has zero component along chosen direction\n";
-			    
-
     oneOverL = 0.0;
   }
   else 
@@ -78,6 +77,8 @@ DriftRecorder::~DriftRecorder()
 {
   if (!theFile)
     theFile.close();
+  if (theFileName != 0)
+    delete [] theFileName;
 }
 
 int 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2003-02-14 23:01:07 $
+// $Revision: 1.18 $
+// $Date: 2003-02-25 23:32:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -966,7 +966,7 @@ DispBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-DispBeamColumn2d::setResponse(char **argv, int argc, Information &eleInfo)
+DispBeamColumn2d::setResponse(const char **argv, int argc, Information &eleInfo)
 {
     // global force - 
     if (strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"force") == 0
@@ -1044,7 +1044,7 @@ DispBeamColumn2d::getResponse(int responseID, Information &eleInfo)
 
 
 int
-DispBeamColumn2d::setParameter (char **argv, int argc, Information &info)
+DispBeamColumn2d::setParameter (const char **argv, int argc, Information &info)
 {
 	//
 	// From the parameterID value it should be possible to extract

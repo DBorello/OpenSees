@@ -35,12 +35,12 @@
 #include <Joint2D.h>
 #include <TclModelBuilder.h>
 
-extern void printCommand(int argc, char **argv);
+extern void printCommand(int argc, TCL_Char **argv);
 
 int
 TclModelBuilder_addJoint2D(ClientData clientData, Tcl_Interp *interp,  
 				int argc, 
-				char **argv, 
+				TCL_Char **argv, 
 				Domain *theTclDomain,
 				TclModelBuilder *theTclBuilder)
 {

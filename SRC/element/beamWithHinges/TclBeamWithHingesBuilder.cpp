@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:06 $
+// $Revision: 1.7 $
+// $Date: 2003-02-25 23:32:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/TclBeamWithHingesBuilder.cpp,v $
                                                                         
                                                                         
@@ -58,7 +58,7 @@
 
 #include <TclModelBuilder.h>
 
-static void printCommand(int argc, char **argv)
+static void printCommand(int argc, TCL_Char **argv)
 {
     opserr << "Input command: ";
     for (int i=0; i<argc; i++)
@@ -68,7 +68,7 @@ static void printCommand(int argc, char **argv)
 
 int
 TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
-				   int argc, char **argv,
+				   int argc, TCL_Char **argv,
 				   Domain *theDomain, TclModelBuilder *theBuilder)		
 {
     int NDM = theBuilder->getNDM();

@@ -18,12 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:57 $
+// $Revision: 1.3 $
+// $Date: 2003-02-25 23:32:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/groundMotion/TclGroundMotionCommand.cpp,v $
 
-// File: ~/domain/groundMotion/TclGroundMotionComand.C
-// 
 // Written: fmk 
 // Created: 11/00
 // Revision: A
@@ -47,14 +45,14 @@
 
 
 extern TimeSeries *
-TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg);
+TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg);
 
 extern TimeSeriesIntegrator *
-TclSeriesIntegratorCommand(ClientData clientData, Tcl_Interp *interp, char *arg);
+TclSeriesIntegratorCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg);
 
 int
 TclGroundMotionCommand(ClientData clientData, Tcl_Interp *interp, 
-		       int argc, char **argv, MultiSupportPattern *thePattern)
+		       int argc, TCL_Char **argv, MultiSupportPattern *thePattern)
 {
   GroundMotion *theMotion = 0;
   int gMotionTag;

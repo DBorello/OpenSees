@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:53 $
+// $Revision: 1.3 $
+// $Date: 2003-02-25 23:32:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/TclGeomTransfCommand.cpp,v $
 
 #include <TclModelBuilder.h>
@@ -39,7 +39,7 @@ static TclModelBuilder *theTclModelBuilder = 0;
 //
 int
 TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
-			      int argc, char **argv,
+			      int argc, TCL_Char **argv,
 			      Domain *theDomain,
 			      TclModelBuilder *theBuilder)
   

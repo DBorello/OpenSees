@@ -18,10 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:39 $
+// $Revision: 1.5 $
+// $Date: 2003-02-25 23:33:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ElasticPPMaterial.h,v $
-                                                                        
                                                                         
 #ifndef ElasticPPMaterial_h
 #define ElasticPPMaterial_h

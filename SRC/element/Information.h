@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:03 $
+// $Revision: 1.6 $
+// $Date: 2003-02-25 23:32:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Information.h,v $
                                                                         
                                                                         
-// File: ~/element/Information.h
-//
 // Written: fmk 
 // Created: 10/99
 // Revision: A

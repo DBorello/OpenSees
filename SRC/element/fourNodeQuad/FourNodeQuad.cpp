@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2003-02-14 23:01:11 $
+// $Revision: 1.23 $
+// $Date: 2003-02-25 23:32:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -852,7 +852,7 @@ FourNodeQuad::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-FourNodeQuad::setResponse(char **argv, int argc, Information &eleInfo)
+FourNodeQuad::setResponse(const char **argv, int argc, Information &eleInfo)
 {
     if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
       return new ElementResponse(this, 1, P);
@@ -906,7 +906,7 @@ FourNodeQuad::getResponse(int responseID, Information &eleInfo)
 }
 
 int
-FourNodeQuad::setParameter(char **argv, int argc, Information &info)
+FourNodeQuad::setParameter(const char **argv, int argc, Information &info)
 {
 	// quad mass density per unit volume
 	if (strcmp(argv[0],"rho") == 0) {

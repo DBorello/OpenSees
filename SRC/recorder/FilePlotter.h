@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:49 $
+// $Revision: 1.5 $
+// $Date: 2003-02-25 23:34:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/FilePlotter.h,v $
                                                                         
                                                                         
@@ -47,8 +47,8 @@ class ID;
 class FilePlotter : public Recorder
 {
   public:
-    FilePlotter(char *fileName,
-		char *windowTitle, 
+    FilePlotter(const char *fileName,
+		const char *windowTitle, 
 		int xLoc, int yLoc, int width, int height, double dT);
     
     ~FilePlotter();    
@@ -68,7 +68,7 @@ class FilePlotter : public Recorder
     ColorMap *theMap;
     Renderer *theRenderer;
     ID *cols;
-    char fileName[MAX_FILENAMELENGTH];
+    char *fileName;
     
     double deltaT;
     double nextTimeStampToRecord;    

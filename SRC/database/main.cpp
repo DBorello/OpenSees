@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:54 $
+// $Revision: 1.3 $
+// $Date: 2003-02-25 23:32:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/main.cpp,v $
                                                                         
                                                                         
@@ -34,9 +34,8 @@
 //
 
 #include <stdlib.h>
-#include <iOPS_Stream.h>
-#include <ConsoleErrorHandler.h>
 
+#include <OPS_Globals.h>
 #include <Timer.h>
 #include <FileDatastore.h>
 #include <Quick2dFrame.h>
@@ -51,11 +50,12 @@
 #include <Matrix.h>
 #include <FEM_ObjectBroker.h>
 
-ErrorHandler *g3ErrorHandler = 0;
+#include <StandardStream.h>
+StandardStream sserr;
+OPS_Stream &opserr = sserr;
 
 int main(int argc, char **argv)
 {
-  g3ErrorHandler = new ConsoleErrorHandler();
 
     //
     //	now create a domain and a modelbuilder

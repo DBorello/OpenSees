@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:00:54 $
+// $Revision: 1.5 $
+// $Date: 2003-02-25 23:32:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/TclDatabaseCommands.cpp,v $
                                                                         
                                                                         
-// File: ~/recorders/TclRecordersCommand.C
-// 
 // Written: fmk 
 // Created: 03/00
 // Revision: A
@@ -61,15 +59,15 @@
 static bool createdDatabaseCommands = false;
 
 int 
-save(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+save(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
-restore(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+restore(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 extern FE_Datastore *theDatabase;
 
 int
-TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc, char **argv, 
+TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv, 
 	       Domain &theDomain, 
 	       FEM_ObjectBroker &theBroker)
 {
@@ -163,8 +161,7 @@ TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc, char **argv,
 
 
 int 
-save(ClientData clientData, Tcl_Interp *interp, int argc, 
-     char **argv)
+save(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 
   if (theDatabase == 0) {
@@ -195,8 +192,7 @@ save(ClientData clientData, Tcl_Interp *interp, int argc,
 
 
 int 
-restore(ClientData clientData, Tcl_Interp *interp, int argc, 
-	char **argv)
+restore(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 
   if (theDatabase == 0) {

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-26 01:08:46 $
+// $Revision: 1.4 $
+// $Date: 2003-02-25 23:34:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.h,v $
                                                                         
                                                                         
@@ -68,9 +68,9 @@ class OpenGlDevice
   virtual void ENDIMAGE();
 
   // Opens a window of the specified width & height.
-  virtual void WINOPEN(char *title, int xLoc, int yLoc, int width, int height);
-  virtual void BITMAPOPEN(char *title, int xLoc, int yLoc, int width, int height,
-			  char *bitmapFile);
+  virtual void WINOPEN(const char *title, int xLoc, int yLoc, int width, int height);
+  virtual void BITMAPOPEN(const char *title, int xLoc, int yLoc, int width, int height,
+			  const char *bitmapFile);
 
   // Clears the currently opened window
   virtual void CLEAR();

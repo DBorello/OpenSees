@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2003-02-14 23:01:16 $
+// $Revision: 1.14 $
+// $Date: 2003-02-25 23:32:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.h,v $
                                                                         
                                                                         
@@ -96,11 +96,11 @@ class NLBeamColumn3d: public Element
     friend OPS_Stream &operator<<(OPS_Stream &s, NLBeamColumn3d &E);        
     void Print(OPS_Stream &s, int flag =0);    
 
-    Response *setResponse(char **argv, int argc, Information &eleInformation);
+    Response *setResponse(const char **argv, int argc, Information &eleInformation);
     int getResponse(int responseID, Information &eleInformation);
     
-	int setParameter(char **argv, int argc, Information &info);
-	int updateParameter(int parameterID, Information &info);
+    int setParameter(const char **argv, int argc, Information &info);
+    int updateParameter(int parameterID, Information &info);
 
   private:
     void getGlobalDispls(Vector &dg) const;

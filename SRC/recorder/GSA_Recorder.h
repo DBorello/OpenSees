@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-02-14 23:01:49 $
+// $Revision: 1.2 $
+// $Date: 2003-02-25 23:34:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/GSA_Recorder.h,v $
                                                                         
 #ifndef GSA_Recorder_h
@@ -47,7 +47,19 @@ class FE_Datastore;
 class GSA_Recorder: public Recorder
 {
   public:
-    GSA_Recorder(Domain &theDomain, char *fileName, double deltaT = 0.0); 
+    GSA_Recorder(Domain &theDomain, 
+		 const char *fileName, 
+		 const char *title1,
+		 const char *title2,
+		 const char *title3,
+		 const char *jobno,
+		 const char *initials,
+		 const char *spec,
+		 const char *currency,
+		 const char *length,
+		 const char *force,
+		 const char *temp,
+		 double deltaT = 0.0); 
 
     ~GSA_Recorder();
     int record(int commitTag, double timeStamp);

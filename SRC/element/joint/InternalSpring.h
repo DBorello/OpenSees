@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:14 $
+// $Revision: 1.5 $
+// $Date: 2003-02-25 23:32:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/InternalSpring.h,v $
                                                                         
 // Written: AAA 03/02
@@ -73,11 +73,11 @@ class InternalSpring : public Element
 
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(OPS_Stream &s, int flag =0);
-	Response *setResponse(char **argv, int argc, Information &eleInformation);
-	int getResponse(int responseID, Information &eleInformation);
+    Response *setResponse(const char **argv, int argc, Information &eleInformation);
+    int getResponse(int responseID, Information &eleInformation);
 	
     
-	private:
+  private:
     const Matrix &getStiff(void);    
     
     // private attributes - a copy for each object of the class        

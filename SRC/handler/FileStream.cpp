@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-15 00:56:44 $
+// $Revision: 1.3 $
+// $Date: 2003-02-25 23:33:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/FileStream.cpp,v $
 
 
@@ -41,7 +41,7 @@ FileStream::~FileStream()
 }
 
 int 
-FileStream::setFile(char *fileName, openMode mode)
+FileStream::setFile(const char *fileName, openMode mode)
 {
   if (fileOpen == 1) {
     theFile.close();

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-20 00:45:04 $
+// $Revision: 1.5 $
+// $Date: 2003-02-25 23:32:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/TclDispBeamColumnCommand.cpp,v $
                                                                         
 // Written: MHS
@@ -36,12 +36,12 @@
 #include <DispBeamColumn3d.h>
 #include <TclModelBuilder.h>
 
-extern void printCommand(int argc, char **argv);
+extern void printCommand(int argc, TCL_Char **argv);
 
 int
 TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,  
 				int argc, 
-				char **argv, 
+				TCL_Char **argv, 
 				Domain*theTclDomain,
 				TclModelBuilder *theTclBuilder)
 {

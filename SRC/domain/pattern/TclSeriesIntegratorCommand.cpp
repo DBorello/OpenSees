@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:01 $
+// $Revision: 1.4 $
+// $Date: 2003-02-25 23:32:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclSeriesIntegratorCommand.cpp,v $
 
 // Written: fmk 
@@ -41,15 +41,15 @@
 // little function to free memory after invoke Tcl_SplitList
 //   note Tcl_Split list stores the array of pointers and the strings in 
 //   one array, which is why Tcl_Free needs only be called on the array.
-static void cleanup(char **argv) {
+static void cleanup(TCL_Char **argv) {
 	  Tcl_Free((char *) argv);
 }
 
 TimeSeriesIntegrator *
-TclSeriesIntegratorCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
+TclSeriesIntegratorCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
 {
   int argc;
-  char **argv;
+  TCL_Char **argv;
 
   // split the list
   if (Tcl_SplitList(interp, arg, &argc, &argv) != TCL_OK) {

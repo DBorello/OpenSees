@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:02:11 $
+// $Revision: 1.6 $
+// $Date: 2003-02-25 23:34:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclVideoPlayer.cpp,v $
                                                                         
                                                                         
@@ -65,14 +65,14 @@ extern TclVideoPlayer *theTclVideoPlayer;
 
 int
 TclVideoPlayer_play(ClientData clientData, Tcl_Interp *interp, int argc, 
-		    char **argv);
+		    TCL_Char **argv);
 
 //
 // the class constructor, destructor and methods
 //
 
-TclVideoPlayer::TclVideoPlayer(char *title, char *fileName, char *imageName,
-			       Tcl_Interp *interp, char *offsetFileName, double fact)
+TclVideoPlayer::TclVideoPlayer(const char *title, const char *fileName, const char *imageName,
+			       Tcl_Interp *interp, const char *offsetFileName, double fact)
   :theMap(0), theRenderer(0), theOffsetFileName(0), factor(fact)
 {
     // open the file
@@ -268,7 +268,7 @@ TclVideoPlayer::play(void)
 
 int
 TclVideoPlayer_play(ClientData clientData, Tcl_Interp *interp, int argc, 
-			  char **argv)
+		    TCL_Char **argv)
 {
   if (theTclVideoPlayer != 0)
 	theTclVideoPlayer->play();

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-02-14 23:01:03 $
+// $Revision: 1.11 $
+// $Date: 2003-02-25 23:32:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
@@ -378,7 +378,7 @@ Element::isSubdomain(void)
 }
 
 Response*
-Element::setResponse(char **argv, int argc, Information &eleInfo)
+Element::setResponse(const char **argv, int argc, Information &eleInfo)
 {
 	return 0;
 }

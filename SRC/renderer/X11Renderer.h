@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-18 23:38:04 $
+// $Revision: 1.6 $
+// $Date: 2003-02-25 23:34:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/X11Renderer.h,v $
                                                                         
                                                                         
@@ -54,10 +54,10 @@ using std::ofstream;
 class X11Renderer : public Renderer
 {
  public:
-    X11Renderer(char *title, int xLoc, int yLoc, int width, int height,
+    X11Renderer(const char *title, int xLoc, int yLoc, int width, int height,
 		ColorMap &theMap);
-    X11Renderer(char *title, int xLoc, int yLoc, int width, int height,
-		ColorMap &theMap, char *fileName);
+    X11Renderer(const char *title, int xLoc, int yLoc, int width, int height,
+		ColorMap &theMap, const char *fileName);
 
     virtual ~X11Renderer();
 
@@ -94,8 +94,8 @@ class X11Renderer : public Renderer
     virtual int setPlaneDist(float, float); // location of
                                // near and far clipping planes
 
-    virtual int setProjectionMode(char *mode); // 
-    virtual int setFillMode(char *);    // 1 = wire, otherwise fill
+    virtual int setProjectionMode(const char *mode); // 
+    virtual int setFillMode(const char *);    // 1 = wire, otherwise fill
     
     virtual int setPRP(float u, float v, float n); // eye location if 
 	                         // perspective, dirn to +ViewPlane if parallel

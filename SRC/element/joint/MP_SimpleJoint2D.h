@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:14 $
+// $Revision: 1.4 $
+// $Date: 2003-02-25 23:32:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/MP_SimpleJoint2D.h,v $
                                                                         
 #ifndef MP_SimpleJoint2D_h
@@ -69,9 +69,9 @@ class MP_SimpleJoint2D : public MP_Constraint
     // methods for output
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, 
-			 FEM_ObjectBroker &theBroker);
+		 FEM_ObjectBroker &theBroker);
     
-	void Print(OPS_Stream &s, int flag =0);
+    void Print(OPS_Stream &s, int flag =0);
 
   protected:
     

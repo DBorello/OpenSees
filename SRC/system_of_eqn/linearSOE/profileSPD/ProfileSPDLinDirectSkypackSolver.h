@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:29 $
+// $Revision: 1.2 $
+// $Date: 2003-02-25 23:34:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinDirectSkypackSolver.h,v $
                                                                         
                                                                         
@@ -61,11 +61,11 @@ class ProfileSPDLinDirectSkypackSolver : public ProfileSPDLinSolver
   protected:
 
   private:
-    int size;
     int mCols, mRows;
     double *rw; // work array of dimension mRows*mCols
     double *tw; // work array of dimension mRows*mRows
     int *index; // integer array of dimension max(mRows,mCols)		     
+    int size;
     
     double *invD;
     int block[3];

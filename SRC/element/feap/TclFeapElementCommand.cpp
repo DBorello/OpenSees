@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:08 $
+// $Revision: 1.3 $
+// $Date: 2003-02-25 23:32:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/feap/TclFeapElementCommand.cpp,v $
                                                                         
                                                                         
@@ -42,11 +42,11 @@
 #include <fElmt02.h>
 #include <TclModelBuilder.h>
 
-extern void printCommand(int argc, char **argv);
+extern void printCommand(int argc, TCL_Char **argv);
 
 int
 TclModelBuilder_addFeapTruss(ClientData clientData, Tcl_Interp *interp, int argc, 
-			     char **argv, Domain *theTclDomain, TclModelBuilder *theTclBuilder,
+			     TCL_Char **argv, Domain *theTclDomain, TclModelBuilder *theTclBuilder,
 			     int eleArgStart)
 {
   // ensure the destructor has not been called - 

@@ -5921,7 +5921,7 @@ void TwentyNodeBrick_u_p_U::Print(OPS_Stream &s, int flag)
 }
 
 //=============================================================================
-Response * TwentyNodeBrick_u_p_U::setResponse (char **argv, int argc, Information &eleInformation) 
+Response * TwentyNodeBrick_u_p_U::setResponse (const char **argv, int argc, Information &eleInformation) 
 {
     if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
 		return new ElementResponse(this, 1, p);

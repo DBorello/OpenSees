@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-12-16 21:07:45 $
+// $Revision: 1.8 $
+// $Date: 2003-02-25 23:32:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.h,v $
                                                                         
                                                                         
-// File: ~/element/Element.h
-//
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -93,7 +91,7 @@ class Element : public DomainComponent
     virtual const Vector &getResistingForceIncInertia(void);        
 
     // method for obtaining information specific to an element
-    virtual Response *setResponse(char **argv, int argc, Information &eleInformation);
+    virtual Response *setResponse(const char **argv, int argc, Information &eleInformation);
     virtual int getResponse(int responseID, Information &eleInformation);
 	
   protected:

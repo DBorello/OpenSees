@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:34:31 $
+// $Revision: 1.3 $
+// $Date: 2003-02-25 23:33:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/Fiber.cpp,v $
                                                                         
                                                                         
@@ -52,7 +52,7 @@ Fiber::~Fiber()
 }
 
 Response*
-Fiber::setResponse(char **argv, int argc, Information &info)
+Fiber::setResponse(const char **argv, int argc, Information &info)
 {
 	return 0;
 }

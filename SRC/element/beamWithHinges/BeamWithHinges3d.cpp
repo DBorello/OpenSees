@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2003-02-14 23:01:06 $
+// $Revision: 1.18 $
+// $Date: 2003-02-25 23:32:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges3d.cpp,v $
 
 #include <BeamWithHinges3d.h>
@@ -1661,7 +1661,7 @@ BeamWithHinges3d::getDistrLoadInterpMatrix(Matrix &bp, double x, const ID & code
 }
 
 Response*
-BeamWithHinges3d::setResponse(char **argv, int argc, Information &info)
+BeamWithHinges3d::setResponse(const char **argv, int argc, Information &info)
 {
   // hinge rotations
   if (strcmp(argv[0],"plasticDeformation") == 0 ||
@@ -1792,7 +1792,7 @@ BeamWithHinges3d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 int
-BeamWithHinges3d::setParameter(char **argv, int argc, Information &info)
+BeamWithHinges3d::setParameter(const char **argv, int argc, Information &info)
 {
   // E of the beam interior
   if (strcmp(argv[0],"E") == 0) {

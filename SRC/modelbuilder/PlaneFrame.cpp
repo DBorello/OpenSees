@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:47 $
+// $Revision: 1.3 $
+// $Date: 2003-02-25 23:34:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/PlaneFrame.cpp,v $
                                                                         
                                                                         
@@ -49,7 +49,6 @@ using std::ios;
 
 #include <ElasticBeam2d.h>
 #include <LinearCrdTransf2d.h>
-#include <beam2d03.h>
 #include <NodalLoad.h>
 #include <Node.h>
 #include <SP_Constraint.h>
@@ -138,19 +137,10 @@ PlaneFrame::buildFE_Model(void)
 
     Element *elePtr;
     double A,E,I;
-    int nd1, nd2, type;
+    int nd1, nd2;
     for (i=0; i<numEle; i++) {
-	inputFile >> type >> tag >> A >> E >> I >> nd1 >> nd2;
-	if (type == 2) {
-	    elePtr = new ElasticBeam2d(tag,A,E,I,nd1,nd2,*theTransf);
-	} else if (type == 3) {
-	    elePtr = new beam2d03(tag,A,E,I,nd1,nd2);
-	} else {
-            res =-1;
-	    opserr << "ERROR PlaneFrame::PlaneFrame - Invalid element type: ";
-	    opserr << type << endln;
-	    return -1;
-	}
+	inputFile >> tag >> A >> E >> I >> nd1 >> nd2;
+	elePtr = new ElasticBeam2d(tag,A,E,I,nd1,nd2,*theTransf);
 	result = theDomain->addElement(elePtr);
         if (result == false) {
                 res =-1;

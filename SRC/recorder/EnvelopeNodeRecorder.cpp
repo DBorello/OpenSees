@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:49 $
+// $Revision: 1.4 $
+// $Date: 2003-02-25 23:34:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -48,8 +48,8 @@ using std::ios;
 EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID &dofs, 
 			   const ID &nodes, 
 			   Domain &theDom,
-			   char *theFileName,
-			   char *dataToStore,
+			   const char *theFileName,
+			   const char *dataToStore,
 			   double dT,
 			   int startFlag)
 :theDofs(0), theNodes(0), 
@@ -139,8 +139,8 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID &dofs,
 			   const ID &nodes, 
 			   Domain &theDom,
 			   FE_Datastore *database,
-			   char *dbTable,
-			   char *dataToStore,
+			   const char *dbTable,
+			   const char *dataToStore,
 			   double dT,
 			   int startFlag)
 :theDofs(0), theNodes(0),

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $                                                              
-// $Date: 2003-02-25 22:45:39 $                                                                  
+// $Revision: 1.12 $                                                              
+// $Date: 2003-02-25 23:33:23 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C
@@ -213,7 +213,7 @@ const straintensor NDMaterial::getPlasticStrainTensor(void)
 //}
 
 Response*
-NDMaterial::setResponse (char **argv, int argc, Information &matInfo)
+NDMaterial::setResponse (const char **argv, int argc, Information &matInfo)
 {
     if (strcmp(argv[0],"stress") == 0 || strcmp(argv[0],"stresses") == 0)
 		return new MaterialResponse(this, 1, this->getStress());

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:03 $
+// $Revision: 1.4 $
+// $Date: 2003-02-25 23:32:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/20nbrick/TclTwentyNodeBrickCommand.cpp,v $
                                                                         
                                                                         
@@ -44,11 +44,11 @@
 #include <TwentyNodeBrick.h>
 #include <TclModelBuilder.h>
 
-extern void printCommand(int argc, char **argv);
+extern void printCommand(int argc, TCL_Char **argv);
 
 int
 TclModelBuilder_addTwentyNodeBrick(ClientData clientData, Tcl_Interp *interp,  int argc, 
-				  char **argv, Domain*theTclDomain,
+				  TCL_Char **argv, Domain*theTclDomain,
 				  TclModelBuilder *theTclBuilder, int eleArgStart)
 {
   // ensure the destructor has not been called - 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2003-02-14 23:01:21 $
+// $Revision: 1.16 $
+// $Date: 2003-02-25 23:33:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
                                                                         
                                                                         
@@ -821,7 +821,7 @@ ZeroLength::Print(OPS_Stream &s, int flag)
 }
 
 Response*
-ZeroLength::setResponse(char **argv, int argc, Information &eleInformation)
+ZeroLength::setResponse(const char **argv, int argc, Information &eleInformation)
 {
     if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
 		return new ElementResponse(this, 1, Vector(numMaterials1d));

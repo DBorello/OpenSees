@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:18 $
+// $Revision: 1.5 $
+// $Date: 2003-02-25 23:33:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/TclShellCommand.cpp,v $
                                                                         
 // Written: fmk 
@@ -34,11 +34,11 @@
 #include <ShellMITC4.h>
 #include <TclModelBuilder.h>
 
-extern void printCommand(int argc, char **argv);
+extern void printCommand(int argc, TCL_Char **argv);
 
 int
 TclModelBuilder_addShellMITC4(ClientData clientData, Tcl_Interp *interp,  int argc, 
-			 char **argv, Domain*theTclDomain,
+			 TCL_Char **argv, Domain*theTclDomain,
 			 TclModelBuilder *theTclBuilder, int eleArgStart)
 {
   // ensure the destructor has not been called - 

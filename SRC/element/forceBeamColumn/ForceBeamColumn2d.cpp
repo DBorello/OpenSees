@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-21 22:27:47 $
+// $Revision: 1.8 $
+// $Date: 2003-02-25 23:32:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 #include <math.h>
@@ -1535,7 +1535,7 @@ ForceBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-ForceBeamColumn2d::setResponse(char **argv, int argc, Information &eleInformation)
+ForceBeamColumn2d::setResponse(const char **argv, int argc, Information &eleInformation)
 {
   //
   // we compare argv[0] for known response types 
@@ -1614,7 +1614,7 @@ ForceBeamColumn2d::getResponse(int responseID, Information &eleInfo)
 }
 
 int
-ForceBeamColumn2d::setParameter (char **argv, int argc, Information &info)
+ForceBeamColumn2d::setParameter (const char **argv, int argc, Information &info)
 {
   //
   // From the parameterID value it should be possible to extract

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-10-19 23:47:25 $
+// $Revision: 1.5 $
+// $Date: 2003-02-25 23:34:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclFeViewer.h,v $
                                                                         
                                                                         
@@ -49,11 +49,11 @@ extern "C" {
 class TclFeViewer : public Recorder
 {
   public:
-    TclFeViewer(char *title, int xLoc, int yLoc, int width, int height,
+    TclFeViewer(const char *title, int xLoc, int yLoc, int width, int height,
 		Domain &theDomain, int wipeFlag, 
 		Tcl_Interp *interp);
 
-    TclFeViewer(char *title, int xLoc, int yLoc, int width, int height, char *fileName,
+    TclFeViewer(const char *title, int xLoc, int yLoc, int width, int height, const char *fileName,
 		Domain &theDomain, 
 		Tcl_Interp *interp);
     
@@ -75,8 +75,8 @@ class TclFeViewer : public Recorder
     int setPlaneDist(float, float); // location of
                                // near, view & far clipping planes
 
-    int setProjectionMode(char *); // 
-    int setFillMode(char *);    // 1 = wire, otherwise fill
+    int setProjectionMode(const char *); // 
+    int setFillMode(const char *);    // 1 = wire, otherwise fill
     
     int setPRP(float, float, float); // eye location, global coords
 

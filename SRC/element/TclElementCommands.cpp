@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2003-02-21 23:11:29 $
+// $Revision: 1.25 $
+// $Date: 2003-02-25 23:32:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -56,7 +56,7 @@
 // SOME STATIC POINTERS USED IN THE FUNCTIONS INVOKED BY THE INTERPRETER
 //
 
-extern void printCommand(int argc, char **argv);
+extern void printCommand(int argc, TCL_Char **argv);
 
 // 
 // THE PROTOTYPES OF THE FUNCTIONS INVOKED BY THE INTERPRETER
@@ -64,81 +64,81 @@ extern void printCommand(int argc, char **argv);
 
 extern int
 TclModelBuilder_addFeapTruss(ClientData clientData, Tcl_Interp *interp,  int argc, 
-			     char **argv, Domain*, TclModelBuilder *, int argStart);
+			     TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
 
 extern int
 TclModelBuilder_addTruss(ClientData clientData, Tcl_Interp *interp,  int argc, 
-			 char **argv, Domain*, TclModelBuilder *, int argStart); 
+			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
 
 extern int
 TclModelBuilder_addElasticBeam(ClientData clientData, Tcl_Interp *interp,  int argc, 
-			       char **argv, Domain*, TclModelBuilder *, int argStart);
+			       TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
 
 extern int
 TclModelBuilder_addBrick(ClientData clientData, Tcl_Interp *interp,
-			 int argc, char **argv, Domain*, 
+			 int argc, TCL_Char **argv, Domain*, 
 			 TclModelBuilder *, int argStart);
 
 extern int
 TclModelBuilder_addBBarBrick(ClientData clientData, Tcl_Interp *interp,
-			     int argc, char **argv, Domain*, 
+			     int argc, TCL_Char **argv, Domain*, 
 			     TclModelBuilder *, int argStart);
 
 extern int
 TclModelBuilder_addShellMITC4(ClientData clientData, Tcl_Interp *interp,
-			      int argc, char **argv, Domain*, 
+			      int argc, TCL_Char **argv, Domain*, 
 			      TclModelBuilder *, int argStart);
 
 extern int 
-TclModelBuilder_addConstantPressureVolumeQuad(ClientData, Tcl_Interp *, int, char **,
+TclModelBuilder_addConstantPressureVolumeQuad(ClientData, Tcl_Interp *, int, TCL_Char **,
 					      Domain*, TclModelBuilder *);
 
 extern int 
-TclModelBuilder_addJoint2D(ClientData, Tcl_Interp *, int, char **,
-				 Domain*, TclModelBuilder *);
+TclModelBuilder_addJoint2D(ClientData, Tcl_Interp *, int, TCL_Char **,
+			   Domain*, TclModelBuilder *);
 
 extern int 
-TclModelBuilder_addEnhancedQuad(ClientData, Tcl_Interp *, int, char **,
+TclModelBuilder_addEnhancedQuad(ClientData, Tcl_Interp *, int, TCL_Char **,
 				Domain*, TclModelBuilder *);
 
 extern int 
-TclModelBuilder_addNineNodeMixedQuad(ClientData, Tcl_Interp *, int, char **,
+TclModelBuilder_addNineNodeMixedQuad(ClientData, Tcl_Interp *, int, TCL_Char **,
 				     Domain*, TclModelBuilder *);
 
 
 // GLF			       
 extern int 
-TclModelBuilder_addZeroLength(ClientData, Tcl_Interp *, int, char **,
+TclModelBuilder_addZeroLength(ClientData, Tcl_Interp *, int, TCL_Char **,
 			      Domain*, TclModelBuilder *);
 
 // MHS			       
 extern int 
-TclModelBuilder_addZeroLengthSection(ClientData, Tcl_Interp *, int, char **,
-			      Domain*, TclModelBuilder *);
+TclModelBuilder_addZeroLengthSection(ClientData, Tcl_Interp *, int, TCL_Char **,
+				     Domain*, TclModelBuilder *);
 
 // MHS
 extern int 
-TclModelBuilder_addZeroLengthND(ClientData, Tcl_Interp *, int, char **,
-			      Domain*, TclModelBuilder *);
+TclModelBuilder_addZeroLengthND(ClientData, Tcl_Interp *, int, TCL_Char **,
+				Domain*, TclModelBuilder *);
 
 
 // REMO
 extern int 
-TclModelBuilder_addNLBeamColumn(ClientData, Tcl_Interp *, int, char **,
+TclModelBuilder_addNLBeamColumn(ClientData, Tcl_Interp *, int, TCL_Char **,
 				Domain*, TclModelBuilder *);
 			
 // MHS
 extern int 
-TclModelBuilder_addBeamWithHinges(ClientData, Tcl_Interp *, int, char **,
+TclModelBuilder_addBeamWithHinges(ClientData, Tcl_Interp *, int, TCL_Char **,
 				  Domain*, TclModelBuilder *);
 extern int 
-TclModelBuilder_addFourNodeQuad(ClientData, Tcl_Interp *, int, char **,
+TclModelBuilder_addFourNodeQuad(ClientData, Tcl_Interp *, int, TCL_Char **,
 				Domain*, TclModelBuilder *);
 extern int 
-TclModelBuilder_addDispBeamColumn(ClientData, Tcl_Interp *, int, char **,
+TclModelBuilder_addDispBeamColumn(ClientData, Tcl_Interp *, int, TCL_Char **,
 				  Domain*, TclModelBuilder *);
 extern int 
-TclModelBuilder_addForceBeamColumn(ClientData, Tcl_Interp *, int, char **,
+TclModelBuilder_addForceBeamColumn(ClientData, Tcl_Interp *, int, TCL_Char **,
 				   Domain*, TclModelBuilder *);
 		   
 
@@ -146,7 +146,7 @@ TclModelBuilder_addForceBeamColumn(ClientData, Tcl_Interp *, int, char **,
 extern int TclModelBuilder_addEightNodeBrick(ClientData, 
                                              Tcl_Interp *,  
 					     int, 
-					     char **,
+					     TCL_Char **,
 					     Domain*, 
 					     TclModelBuilder *, 
 					     int);
@@ -154,7 +154,7 @@ extern int TclModelBuilder_addEightNodeBrick(ClientData,
 extern int TclModelBuilder_addTwentyNodeBrick(ClientData, 
                                               Tcl_Interp *,  
 					      int, 
-					      char **,
+					      TCL_Char **,
 					      Domain*, 
 					      TclModelBuilder *, 
 					      int);
@@ -163,7 +163,7 @@ extern int TclModelBuilder_addTwentyNodeBrick(ClientData,
 extern int TclModelBuilder_addEightNodeBrick_u_p_U(ClientData, 
                                                    Tcl_Interp *,  
 						   int, 
-						   char **,
+						   TCL_Char **,
 						   Domain*, 
 						   TclModelBuilder *, 
 						   int);
@@ -171,23 +171,23 @@ extern int TclModelBuilder_addEightNodeBrick_u_p_U(ClientData,
 extern int TclModelBuilder_addTwentyNodeBrick_u_p_U(ClientData, 
                                                     Tcl_Interp *,  
 						    int, 
-						    char **,
+						    TCL_Char **,
 						    Domain*, 
 						    TclModelBuilder *, 
 						    int);
 
 //Rohit Kraul
 extern int
-TclModelBuilder_addElastic2dGNL(ClientData, Tcl_Interp *, int, char **,
-                Domain *,TclModelBuilder *);
+TclModelBuilder_addElastic2dGNL(ClientData, Tcl_Interp *, int, TCL_Char **,
+				Domain *,TclModelBuilder *);
 extern int
-TclModelBuilder_addElement2dYS(ClientData, Tcl_Interp *, int, char **,
-                Domain *,TclModelBuilder *);
+TclModelBuilder_addElement2dYS(ClientData, Tcl_Interp *, int, TCL_Char **,
+			       Domain *,TclModelBuilder *);
 
 
 int
 TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
-			      int argc, char **argv, 
+			      int argc, TCL_Char **argv, 
 			      Domain *theTclDomain, TclModelBuilder *theTclBuilder)
 {
   // ensure the destructor has not been called - 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2003-02-25 01:08:21 $
+// $Revision: 1.14 $
+// $Date: 2003-02-25 23:32:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.cpp,v $
                                                                         
                                                                         
@@ -586,6 +586,7 @@ ElasticBeam2d::Print(OPS_Stream &s, int flag)
     s << 0 << "\t" << 0 << "\t" << connectedExternalNodes(0) << "\t" << connectedExternalNodes(1) ;
     s << "0\t0.0000000\n";
   } else {
+    this->getResistingForce();
     s << "\nElasticBeam2d: " << this->getTag() << endln;
     s << "\tConnected Nodes: " << connectedExternalNodes ;
     s << "\tCoordTransf: " << theCoordTransf->getTag() << endln;

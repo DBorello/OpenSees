@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:49 $
+// $Revision: 1.6 $
+// $Date: 2003-02-25 23:34:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.h,v $
                                                                         
 #ifndef NodeRecorder_h
@@ -54,8 +54,8 @@ class NodeRecorder: public Recorder
     NodeRecorder(const ID &theDof, 
 		 const ID &theNodes, 
 		 Domain &theDomain,
-		 char *fileName,
-		 char *dataToStore,
+		 const char *fileName,
+		 const char *dataToStore,
 		 double deltaT = 0.0,
 		 int startFlag = 0); 
 
@@ -63,8 +63,8 @@ class NodeRecorder: public Recorder
 		 const ID &theNodes, 
 		 Domain &theDomain,
 		 FE_Datastore *database,
-		 char *dbTable,
-		 char *dataToStore,
+		 const char *dbTable,
+		 const char *dataToStore,
 		 double deltaT = 0.0,
 		 int startFlag = 0); 
     

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:33 $
+// $Revision: 1.5 $
+// $Date: 2003-02-25 23:33:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/Bidirectional.h,v $
                                                                         
                                                                         
@@ -67,7 +67,7 @@ class Bidirectional : public SectionForceDeformation
     int recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker);
 
-	void Print(OPS_Stream &s, int flag = 0);
+    void Print(OPS_Stream &s, int flag = 0);
 
   protected:
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:48 $
+// $Revision: 1.6 $
+// $Date: 2003-02-25 23:34:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/AlgorithmIncrements.cpp,v $
                                                                         
                                                                         
@@ -63,9 +63,9 @@ using std::ios;
 
 
 AlgorithmIncrements::AlgorithmIncrements(EquiSolnAlgo *theEquiAlgo,
-					 char *windowTitle, 
+					 const char *windowTitle, 
 					 int xLoc, int yLoc, int width, int height,
-					 bool displayOnRecord, char *theFileName)
+					 bool displayOnRecord, const char *theFileName)
   :theMap(0), theRenderer(0), numRecord(0), displayRecord(displayOnRecord), fileName(0)
 {
   
@@ -104,7 +104,9 @@ AlgorithmIncrements::~AlgorithmIncrements()
   
   if (theFile)
     theFile.close();
-
+  if (fileName != 0) 
+    delete [] fileName;
+    
 }
     
 int 

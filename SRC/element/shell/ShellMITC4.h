@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-14 23:01:18 $
+// $Revision: 1.9 $
+// $Date: 2003-02-25 23:33:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.h,v $
 
 // Ed "C++" Love
@@ -41,28 +41,28 @@
 
 class ShellMITC4 : public Element {
 
-  public :
-    
-    //null constructor
-    ShellMITC4( ) ;
+ public:
   
-    //full constructor
-    ShellMITC4( int tag, 
-			int node1,
-			int node2,
-		        int node3,
-			int node4,
-			SectionForceDeformation &theMaterial ) ;
+  //null constructor
+  ShellMITC4();
+  
+  //full constructor
+  ShellMITC4(int tag, 
+	     int node1,
+	     int node2,
+	     int node3,
+	     int node4,
+	     SectionForceDeformation &theMaterial ) ;
+  
+  //destructor 
+  virtual ~ShellMITC4( ) ;
 
-    //destructor 
-    virtual ~ShellMITC4( ) ;
-
-    //set domain because frank is a dumb ass 
-    void setDomain( Domain *theDomain ) ;
-
-    //get the number of external nodes
-    int getNumExternalNodes( ) const ;
- 
+  //set domain because frank is a dumb ass 
+  void setDomain( Domain *theDomain ) ;
+  
+  //get the number of external nodes
+  int getNumExternalNodes( ) const ;
+    
     //return connected external nodes
     const ID &getExternalNodes( ) ;
     Node **getNodePtrs();

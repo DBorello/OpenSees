@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-14 23:01:49 $
+// $Revision: 1.8 $
+// $Date: 2003-02-25 23:34:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/FilePlotter.cpp,v $
                                                                         
                                                                         
@@ -59,8 +59,8 @@ using std::ios;
 
 #include "FilePlotter.h"
 
-FilePlotter::FilePlotter(char *_fileName, 
-			 char *windowTitle, 
+FilePlotter::FilePlotter(const char *_fileName, 
+			 const char *windowTitle, 
 			 int xLoc, int yLoc, int width, int height, double dT)
   :theMap(0), theRenderer(0), cols(0), deltaT(dT), nextTimeStampToRecord(0.0)
 {
@@ -85,6 +85,11 @@ FilePlotter::FilePlotter(char *_fileName,
   theRenderer->setPortWindow(-1.0, 1.0, -1.0, 1.0);  // use the whole window
 
   // copy the file name
+  fileName = new char[strlen(_fileName)+1];
+  if (fileName == 0) {
+    opserr << "FilePlotter::FilePlotter -- out of memory copying fileName " << endln;
+    exit(-1);
+  }
   strcpy(fileName, _fileName);    
 
 }
@@ -99,6 +104,9 @@ FilePlotter::~FilePlotter()
 
   if (cols != 0)
     delete cols;
+
+  if (fileName != 0)
+    delete [] fileName;
 }
     
 int 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-14 23:01:18 $
+// $Revision: 1.8 $
+// $Date: 2003-02-25 23:33:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.cpp,v $
                                                                         
 // Written: MHS 
@@ -685,7 +685,7 @@ CorotTruss::Print(OPS_Stream &s, int flag)
 }
 
 Response*
-CorotTruss::setResponse(char **argv, int argc, Information &eleInfo)
+CorotTruss::setResponse(const char **argv, int argc, Information &eleInfo)
 {
     // force (axialForce)
     if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"axialForce") == 0)

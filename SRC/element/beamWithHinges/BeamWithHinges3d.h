@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-02-14 23:01:06 $
+// $Revision: 1.11 $
+// $Date: 2003-02-25 23:32:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges3d.h,v $
 
 #ifndef BeamWithHinges3d_h
@@ -78,10 +78,10 @@ class BeamWithHinges3d: public Element
   int recvSelf(int commitTag, Channel &theChannel, 
 	       FEM_ObjectBroker &theBroker);
   
-  Response *setResponse(char **argv, int argc, Information &info);
+  Response *setResponse(const char **argv, int argc, Information &info);
   int getResponse(int responseID, Information &info);
   
-  int setParameter(char **argv, int argc, Information &info);
+  int setParameter(const char **argv, int argc, Information &info);
   int updateParameter(int parameterID, Information &info);
   
   void Print(OPS_Stream &s, int flag = 0);

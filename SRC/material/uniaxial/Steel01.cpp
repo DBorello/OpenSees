@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-14 23:01:39 $
+// $Revision: 1.9 $
+// $Date: 2003-02-25 23:33:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.cpp,v $
                                                                         
                                                                         
@@ -457,7 +457,7 @@ void Steel01::Print (OPS_Stream& s, int flag)
 }
 
 int
-Steel01::setParameter(char **argv, int argc, Information &info)
+Steel01::setParameter(const char **argv, int argc, Information &info)
 {
 	if (argc < 1)
 		return -1;

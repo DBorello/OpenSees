@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:01 $
+// $Revision: 1.7 $
+// $Date: 2003-02-25 23:32:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclSeriesCommand.cpp,v $
 
 // Written: fmk 
@@ -47,17 +47,17 @@
 // little function to free memory after invoke Tcl_SplitList
 //   note Tcl_Split list stores the array of pointers and the strings in 
 //   one array, which is why Tcl_Free needs only be called on the array.
-static void cleanup(char **argv) {
+static void cleanup(TCL_Char **argv) {
 	  Tcl_Free((char *) argv);
 }
 
 
 TimeSeries *
-TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
+TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
 {
 
   int argc;
-  char **argv;
+  TCL_Char **argv;
 
   // split the list
   if (Tcl_SplitList(interp, arg, &argc, &argv) != TCL_OK) {
@@ -237,9 +237,9 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
     double timeIncr = 0.0;
     int endMarker =  1;
     bool done = false;
-	char *fileName = 0;
-    char *fileTimeName = 0;
-    char *filePathName = 0;
+    int fileName = 0;
+    int fileTimeName = 0;
+    int filePathName = 0;
     Vector *dataPath = 0;
     Vector *dataTime = 0;
 
@@ -275,7 +275,7 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
 	// allow user to specify the file name containg time and data points
 	endMarker++;
 	if (endMarker != argc) {
-	  fileName = argv[endMarker];
+	  fileName = endMarker; // argv[endMarker];
 	}
       }
 
@@ -283,7 +283,7 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
 	// allow user to specify the file name containg the data points
 	endMarker++;
 	if (endMarker != argc) {
-	  filePathName = argv[endMarker];
+	  filePathName = endMarker; // argv[endMarker];
 	}
       }
 
@@ -291,7 +291,7 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
 	// allow user to specify the file name containg the data points
 	endMarker++;
 	if (endMarker != argc) {
-	  fileTimeName = argv[endMarker];
+	  fileTimeName = endMarker; // argv[endMarker];
 	}
       }
 
@@ -300,7 +300,7 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
 	endMarker++;
 	if (endMarker != argc) {
 	  int pathSize;
-	  char **pathStrings;
+	  TCL_Char **pathStrings;
 	  
 	  if (Tcl_SplitList(interp, argv[endMarker], 
 			    &pathSize, &pathStrings) != TCL_OK) {
@@ -333,7 +333,7 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
 	endMarker++;
 	if (endMarker != argc) {
 	  int pathSize;
-	  char **pathStrings;
+	  TCL_Char **pathStrings;
 	  
 	  if (Tcl_SplitList(interp, argv[endMarker], 
 			    &pathSize, &pathStrings) != TCL_OK) {
@@ -366,19 +366,25 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
     }
     
 
-    if (filePathName != 0 && fileTimeName == 0 && timeIncr != 0.0)
-      theSeries = new PathSeries(filePathName, timeIncr, cFactor);
-	else if (fileName != 0)
-		theSeries = new PathTimeSeries(fileName, cFactor);
-    else if (filePathName != 0 && fileTimeName != 0)
-      theSeries = new PathTimeSeries(filePathName, fileTimeName, cFactor); 
+    if (filePathName != 0 && fileTimeName == 0 && timeIncr != 0.0) {
+      theSeries = new PathSeries(argv[filePathName], timeIncr, cFactor);
+    }
+
+    else if (fileName != 0) {
+      theSeries = new PathTimeSeries(argv[fileName], cFactor);
+
+    } else if (filePathName != 0 && fileTimeName != 0)
+      theSeries = new PathTimeSeries(argv[filePathName], argv[fileTimeName], cFactor); 
+
     else if (dataPath != 0 && dataTime == 0 && timeIncr != 0.0) {
       theSeries = new PathSeries(*dataPath, timeIncr, cFactor); 
       delete dataPath;
+
     } else if (dataPath != 0 && dataTime != 0) {
       theSeries = new PathTimeSeries(*dataPath, *dataTime, cFactor);  
       delete dataPath;      
       delete dataTime;      
+
     } else {
       opserr << "WARNING choice of options for Path Series invalid - valid options for ";
       opserr << " Path are\n";

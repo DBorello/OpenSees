@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-14 23:01:38 $
+// $Revision: 1.8 $
+// $Date: 2003-02-25 23:33:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.cpp,v $
                                                                         
                                                                         
@@ -477,7 +477,7 @@ void Concrete01::Print (OPS_Stream& s, int flag)
 }
 
 int
-Concrete01::setParameter(char **argv, int argc, Information &info)
+Concrete01::setParameter(const char **argv, int argc, Information &info)
 {
 	if (strcmp(argv[0],"fc") == 0) {// Compressive strength
 		info.theType = DoubleType;

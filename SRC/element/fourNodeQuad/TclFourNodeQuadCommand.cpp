@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:12 $
+// $Revision: 1.5 $
+// $Date: 2003-02-25 23:32:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/TclFourNodeQuadCommand.cpp,v $
                                                                         
 // File: ~/element/TclFourNodeQuadCommand.C
@@ -44,7 +44,7 @@
 
 #include <TclModelBuilder.h>
 
-extern void printCommand(int argc, char **argv);
+extern void printCommand(int argc, TCL_Char **argv);
 
 /*  *****************************************************************************
     
@@ -55,7 +55,7 @@ extern void printCommand(int argc, char **argv);
 int
 TclModelBuilder_addFourNodeQuad(ClientData clientData, Tcl_Interp *interp,  
 				int argc, 
-				char **argv, 
+				TCL_Char **argv, 
 				Domain*theTclDomain,
 				TclModelBuilder *theTclBuilder)
 {
@@ -87,7 +87,7 @@ TclModelBuilder_addFourNodeQuad(ClientData clientData, Tcl_Interp *interp,
 	double r = 0.0;		// mass density
 	double b1 = 0.0;
 	double b2 = 0.0;
-  char *type;
+
   if (Tcl_GetInt(interp, argv[argStart], &FourNodeQuadId) != TCL_OK) {
     opserr << "WARNING invalid FourNodeQuad eleTag" << endln;
     return TCL_ERROR;
@@ -122,7 +122,7 @@ TclModelBuilder_addFourNodeQuad(ClientData clientData, Tcl_Interp *interp,
      return TCL_ERROR;
   }  
   
-  type = argv[6+argStart];
+  TCL_Char *type = argv[6+argStart];
   
   if (Tcl_GetInt(interp, argv[7+argStart], &matID) != TCL_OK) {
      opserr << "WARNING invalid matID\n";
@@ -195,7 +195,7 @@ TclModelBuilder_addFourNodeQuad(ClientData clientData, Tcl_Interp *interp,
 int
 TclModelBuilder_addConstantPressureVolumeQuad(ClientData clientData, Tcl_Interp *interp,  
 				int argc, 
-				char **argv, 
+				TCL_Char **argv, 
 				Domain*theTclDomain,
 				TclModelBuilder *theTclBuilder)
 {
@@ -297,7 +297,7 @@ TclModelBuilder_addConstantPressureVolumeQuad(ClientData clientData, Tcl_Interp 
 int
 TclModelBuilder_addEnhancedQuad(ClientData clientData, Tcl_Interp *interp,  
 				int argc, 
-				char **argv, 
+				TCL_Char **argv, 
 				Domain*theTclDomain,
 				TclModelBuilder *theTclBuilder)
 {
@@ -324,7 +324,6 @@ TclModelBuilder_addEnhancedQuad(ClientData clientData, Tcl_Interp *interp,
 
   // get the id and end nodes 
   int EnhancedQuadId, iNode, jNode, kNode, lNode, matID;
-  char *type;
   if (Tcl_GetInt(interp, argv[argStart], &EnhancedQuadId) != TCL_OK) {
     opserr << "WARNING invalid EnhancedQuad eleTag" << endln;
     return TCL_ERROR;
@@ -354,7 +353,7 @@ TclModelBuilder_addEnhancedQuad(ClientData clientData, Tcl_Interp *interp,
   }  
 
   
-  type = argv[5+argStart];
+  TCL_Char *type = argv[5+argStart];
 
   
   if (Tcl_GetInt(interp, argv[6+argStart], &matID) != TCL_OK) {
@@ -405,7 +404,7 @@ TclModelBuilder_addEnhancedQuad(ClientData clientData, Tcl_Interp *interp,
 int
 TclModelBuilder_addNineNodeMixedQuad(ClientData clientData, Tcl_Interp *interp,  
 				     int argc, 
-				     char **argv, 
+				     TCL_Char **argv, 
 				     Domain*theTclDomain,
 				     TclModelBuilder *theTclBuilder)
 {

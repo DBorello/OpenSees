@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:49 $
+// $Revision: 1.4 $
+// $Date: 2003-02-25 23:34:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DriftRecorder.h,v $
                                                                         
 #ifndef DriftRecorder_h
@@ -42,7 +42,7 @@ class DriftRecorder: public Recorder
 {
  public:
   DriftRecorder(int ndI, int ndJ, int dof, int perpDirn,
-		Domain &theDomain, char *fileName, int startFlag = 0); 
+		Domain &theDomain, const char *fileName, int startFlag = 0); 
   
   ~DriftRecorder();
   int record(int commitTag, double timeStamp);
@@ -60,7 +60,7 @@ class DriftRecorder: public Recorder
   Domain *theDomain;
   int flag;   // flag indicating whether time, load factor or nothing printed
   // at start of each line in file
-  char theFileName[MAX_FILENAMELENGTH];    
+  char *theFileName;
   ofstream theFile;     
 };
 

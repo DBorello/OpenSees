@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-31 22:11:34 $
+// $Revision: 1.3 $
+// $Date: 2003-02-25 23:32:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/DomainComponent.h,v $
                                                                         
                                                                         
@@ -62,7 +62,7 @@ class DomainComponent: public TaggedObject, public MovableObject
     virtual int displaySelf(Renderer &, int displayMode, float fact);
 
     // methods for sensitivity studies
-    virtual int setParameter(char **argv, int argc, Information &eleInformation);
+    virtual int setParameter(const char **argv, int argc, Information &eleInformation);
     virtual int updateParameter(int responseID, Information &eleInformation);	
 // AddingSensitivity:BEGIN //////////////////////////////////////////
 	virtual const Vector &gradient(bool compute, int identifier);

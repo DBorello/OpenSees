@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-19 15:43:25 $
+// $Revision: 1.5 $
+// $Date: 2003-02-25 23:34:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/Renderer.h,v $
                                                                         
                                                                         
@@ -95,8 +95,8 @@ class Renderer
     virtual int setPlaneDist(float, float) =0; // location of
                                // near and far clipping planes from view plane
 
-    virtual int setProjectionMode(char *mode) =0; //parallel or perspective
-    virtual int setFillMode(char *mode) =0;    // wire or fill
+    virtual int setProjectionMode(const char *mode) =0; //parallel or perspective
+    virtual int setFillMode(const char *mode) =0;    // wire or fill
     
     virtual int setPRP(float u, float v, float n) =0; // eye location if 
 	                       // perspective, dirn to +ViewPlane if parallel

@@ -1,5 +1,5 @@
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:32 $
+// $Revision: 1.6 $
+// $Date: 2003-02-25 23:33:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/TclUpdateMaterialStageCommand.cpp,v $
                                                                         
 // Written: ZHY
@@ -18,7 +18,7 @@ int
 TclModelBuilderUpdateMaterialStageCommand(ClientData clientData, 
 					  Tcl_Interp *interp, 
 					  int argc,
-					  char **argv, 
+					  TCL_Char **argv, 
 					  TclModelBuilder *theTclBuilder)
 {
   if (argc < 5) {

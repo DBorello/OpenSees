@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:32:44 $
+// $Revision: 1.3 $
+// $Date: 2003-02-25 23:33:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/Material.h,v $
                                                                         
                                                                         
@@ -55,10 +55,10 @@ class Material : public TaggedObject, public MovableObject
     virtual int getVariable(int variableID, double &info);
 
     // methods for sensitivity studies
-    virtual int setParameter(char **argv, int argc, Information &eleInformation);
+    virtual int setParameter(const char **argv, int argc, Information &eleInformation);
     virtual int updateParameter(int responseID, Information &eleInformation);	
 
-    virtual Response *setResponse(char **argv, int argc, Information &info);
+    virtual Response *setResponse(const char **argv, int argc, Information &info);
     virtual int getResponse(int responseID, Information &info);
 
     // method for this material to update itself according to its new parameters
