@@ -1,6 +1,6 @@
 include ../../../Makefile.def
 
-OBJS       = 	beam3d01.o beam3d02.o ElasticBeam3d.o 
+OBJS       = 	beam3d01.o beam3d02.o 
 
 # Compilation control
 

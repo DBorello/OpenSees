@@ -18,9 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-06-14 05:59:35 $
-// $Source: /usr/local/cvs/OpenSees/SRC/element/beam2d/ElasticBeam2d.h,v $
+// $Revision: 1.1 $
+// $Date: 2001-08-31 17:18:51 $
+// $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.h,v $
                                                                         
                                                                         
 // File: ~/model/ElasticBeam2d.h
@@ -50,7 +50,7 @@ class ElasticBeam2d : public Element
   public:
     ElasticBeam2d();        
     ElasticBeam2d(int tag, double A, double E, double I, 
-	     int Nd1, int Nd2, CrdTransf2d &theTransf, double rho = 0.0);
+		  int Nd1, int Nd2, CrdTransf2d &theTransf, double rho = 0.0);
     ~ElasticBeam2d();
 
     int getNumExternalNodes(void) const;
@@ -69,7 +69,7 @@ class ElasticBeam2d : public Element
 
     void zeroLoad(void);	
     int addLoad(const Vector &load);  
-	int addInertiaLoadToUnbalance(const Vector &accel);
+    int addInertiaLoadToUnbalance(const Vector &accel);
 
     const Vector &getResistingForce(void);
     const Vector &getResistingForceIncInertia(void);            
@@ -80,7 +80,7 @@ class ElasticBeam2d : public Element
     void Print(ostream &s, int flag = 0);    
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
 
-	Response *setResponse (char **argv, int argc, Information &info);
+    Response *setResponse (char **argv, int argc, Information &info);
     int getResponse (int responseID, Information &info);
  
     int setParameter (char **argv, int argc, Information &info);
@@ -92,9 +92,9 @@ class ElasticBeam2d : public Element
 
     double rho;
     
-	static Matrix K;
+    static Matrix K;
     static Vector P;
-	Vector Q;
+    Vector Q;
     
     static Matrix kb;
     Vector q;

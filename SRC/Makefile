@@ -208,10 +208,8 @@ GRAPH_LIBS = $(FE)/graph/graph/DOF_Graph.o \
 
 ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/Information.o \
-	$(FE)/element/beam2d/ElasticBeam2d.o \
 	$(FE)/element/beam2d/beam2d03.o \
 	$(FE)/element/beam2d/beam2d04.o \
-	$(FE)/element/beam3d/ElasticBeam3d.o \
 	$(FE)/element/beam3d/beam3d01.o \
 	$(FE)/element/beam3d/beam3d02.o \
 	$(FE)/element/truss/Truss.o \
@@ -240,10 +238,14 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/dispBeamColumn/DispBeamColumn2d.o \
 	$(FE)/element/dispBeamColumn/DispBeamColumn3d.o \
 	$(FE)/element/dispBeamColumn/TclDispBeamColumnCommand.o \
+	$(FE)/element/elasticBeamColumn/ElasticBeam2d.o \
+	$(FE)/element/elasticBeamColumn/ElasticBeam3d.o \
+	$(FE)/element/elasticBeamColumn/TclElasticBeamCommand.o \
 	$(FE)/element/fourNodeQuad/TclFourNodeQuadCommand.o \
 	$(FE)/element/fourNodeQuad/FourNodeQuad.o \
 	$(FE)/element/fourNodeQuad/ConstantPressureVolumeQuad.o \
 	$(FE)/element/fourNodeQuad/EnhancedQuad.o \
+	$(FE)/element/fourNodeQuad/NineNodeMixedQuad.o \
 	$(FE)/element/shell/ShellMITC4.o \
 	$(FE)/element/shell/R3vectors.o \
 	$(FE)/element/shell/TclShellCommand.o \
