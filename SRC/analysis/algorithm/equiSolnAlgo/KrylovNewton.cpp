@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.8 $
-// $Date: 2003-04-02 22:02:33 $
+// $Revision: 1.9 $
+// $Date: 2003-05-27 19:41:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/KrylovNewton.cpp,v $
 
 // Written: MHS
@@ -265,9 +265,9 @@ KrylovNewton::Print(OPS_Stream &s, int flag)
 
 #ifdef _WIN32
 
-extern "C" int  DGELS(char *T, unsigned int *SZ, int *M, int *N, int *NRHS,
-			      double *A, int *LDA, double *B, int *LDB,
-			      double *WORK, int *LWORK, int *INFO);
+extern "C" int  DGELS(char *T, int *M, int *N, int *NRHS,
+		      double *A, int *LDA, double *B, int *LDB,
+		      double *WORK, int *LWORK, int *INFO);
 
 #else
 
@@ -322,8 +322,7 @@ KrylovNewton::leastSquares(int k)
 
   // Call the LAPACK least squares subroutine
 #ifdef _WIN32
-  unsigned int sizeC = 1;
-  DGELS(trans, &sizeC, &numEqns, &k, &nrhs, AvData, &numEqns, rData, &ldb, work, &lwork, &info);
+  DGELS(trans, &numEqns, &k, &nrhs, AvData, &numEqns, rData, &ldb, work, &lwork, &info);
 #else
   dgels_(trans, &numEqns, &k, &nrhs, AvData, &numEqns, rData, &ldb, work, &lwork, &info);
 #endif
