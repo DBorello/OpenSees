@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2000-12-14 09:33:50 $
+// $Revision: 1.6 $
+// $Date: 2000-12-16 09:19:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -52,7 +52,8 @@ double FourNodeQuad::wts[4];
 FourNodeQuad::FourNodeQuad(int tag, int nd1, int nd2, int nd3, int nd4,
 	NDMaterial &m, const char *type, double t,
 	double p, double r, double b1, double b2)
-:Element (tag, ELE_TAG_FourNodeQuad), thickness(t), rho(r),
+:Element (tag, ELE_TAG_FourNodeQuad), 
+ pressureLoad(8), thickness(t), rho(r),
  Q(8), pressure(p), connectedExternalNodes(4), theMaterial(0)
 {
 	pts[0][0] = -0.5773502691896258;
@@ -98,9 +99,10 @@ FourNodeQuad::FourNodeQuad(int tag, int nd1, int nd2, int nd3, int nd4,
     connectedExternalNodes(3) = nd4;
 }
 
-FourNodeQuad::FourNodeQuad():Element (0,ELE_TAG_FourNodeQuad),
-thickness(0.0), rho(0.0), Q(8), pressure(0.0),
-connectedExternalNodes(4), theMaterial(0)
+FourNodeQuad::FourNodeQuad()
+:Element (0,ELE_TAG_FourNodeQuad),
+ pressureLoad(8), thickness(0.0), rho(0.0), Q(8), pressure(0.0),
+ connectedExternalNodes(4), theMaterial(0)
 {
 	pts[0][0] = -0.577350269189626;
 	pts[0][1] = -0.577350269189626;
@@ -803,7 +805,7 @@ FourNodeQuad::setResponse(char **argv, int argc, Information &eleInformation)
  
     // otherwise response quantity is unknown for the quad class
     else
-		return -1;
+	return -1;
 }
 
 int 
@@ -972,7 +974,7 @@ double FourNodeQuad::shapeFunction(double xi, double eta)
 void 
 FourNodeQuad::setPressureLoadAtNodes(void)
 {
-	pressureLoad.Zero();
+        pressureLoad.Zero();
 
 	if (pressure == 0.0)
 		return;
