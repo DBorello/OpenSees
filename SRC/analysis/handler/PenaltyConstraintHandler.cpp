@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 04:24:01 $
+// $Revision: 1.3 $
+// $Date: 2002-10-04 19:55:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/PenaltyConstraintHandler.cpp,v $
                                                                         
                                                                         
@@ -65,18 +65,20 @@ PenaltyConstraintHandler::PenaltyConstraintHandler(double sp, double mp)
 
 PenaltyConstraintHandler::~PenaltyConstraintHandler()
 {
-    // delete the FE_Element and DOF_Group objects
+  // delete the FE_Element and DOF_Group objects
+  if (theFEs != 0) {
     for (int i=0; i<numFE; i++)
-	if (theFEs[i] != 0)
-	    delete theFEs[i];
-
+      if (theFEs[i] != 0) 
+        delete theFEs[i];
+    delete [] theFEs;
+  }
+	    
+  if (theDOFs != 0) {
     for (int j=0; j<numDOF; j++)
       if (theDOFs[j] != 0) 
-	    delete theDOFs[j];
-    
-    // delete the arrays
-    if (theFEs != 0) delete [] theFEs;
-    if (theDOFs != 0) delete [] theDOFs;
+        delete theDOFs[j];
+    delete [] theDOFs;
+  }
 }
 
 int

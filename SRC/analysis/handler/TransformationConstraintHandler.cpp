@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-09-17 22:41:32 $
+// $Revision: 1.4 $
+// $Date: 2002-10-04 19:55:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/TransformationConstraintHandler.cpp,v $
                                                                         
                                                                         
@@ -64,18 +64,20 @@ TransformationConstraintHandler::TransformationConstraintHandler()
 
 TransformationConstraintHandler::~TransformationConstraintHandler()
 {
-    // delete the FE_Element and DOF_Group objects
+  // delete the FE_Element and DOF_Group objects
+  if (theFEs != 0) {
     for (int i=0; i<numFE; i++)
-	if (theFEs[i] != 0)
-	  delete theFEs[i];
-
+      if (theFEs[i] != 0) 
+        delete theFEs[i];
+    delete [] theFEs;
+  }
+	    
+  if (theDOFs != 0) {
     for (int j=0; j<numDOF; j++)
-	if (theDOFs[j] != 0)
-	  delete theDOFs[j];
-    
-    // delete the arrays
-    if (theFEs != 0) delete [] theFEs;
-    if (theDOFs != 0) delete [] theDOFs;
+      if (theDOFs[j] != 0) 
+        delete theDOFs[j];
+    delete [] theDOFs;
+  }
 }
 
 int

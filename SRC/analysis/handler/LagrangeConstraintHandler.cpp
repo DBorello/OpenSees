@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2002-10-04 19:55:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/LagrangeConstraintHandler.cpp,v $
                                                                         
                                                                         
@@ -66,17 +66,20 @@ LagrangeConstraintHandler::LagrangeConstraintHandler(double sp, double mp)
 
 LagrangeConstraintHandler::~LagrangeConstraintHandler()
 {
+  // delete the FE_Element and DOF_Group objects
+  if (theFEs != 0) {
     for (int i=0; i<numFE; i++)
-	if (theFEs[i] != 0)
-	    delete theFEs[i];
-
+      if (theFEs[i] != 0) 
+        delete theFEs[i];
+    delete [] theFEs;
+  }
+	    
+  if (theDOFs != 0) {
     for (int j=0; j<numDOF; j++)
-	if (theDOFs[j] != 0)
-	    delete theDOFs[j];
-    
-    // delete the arrays
-    if (theFEs != 0) delete [] theFEs;
-    if (theDOFs != 0) delete [] theDOFs;
+      if (theDOFs[j] != 0) 
+        delete theDOFs[j];
+    delete [] theDOFs;
+  }
 }
 
 int
