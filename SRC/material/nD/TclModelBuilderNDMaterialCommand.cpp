@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2000-12-16 06:28:01 $
+// $Revision: 1.4 $
+// $Date: 2000-12-18 09:51:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -37,8 +37,8 @@
 #include <TclModelBuilder.h>
 
 #include <ElasticIsotropicMaterial.h>
-#include <J2PlaneStrain.h>
-#include <J2PlaneStress.h>
+#include <J2Plasticity.h>
+#include <BidirectionalMaterial.h>
 
 #include <string.h>
 
@@ -100,7 +100,50 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	    theMaterial = temp->getCopy(argv[5]);
 	else
 	    theMaterial = temp;
-    }
+	}	
+    
+    else if (strcmp(argv[1],"Bidirectional") == 0) {
+	if (argc < 7) {
+	    cerr << "WARNING insufficient arguments\n";
+	    printCommand(argc,argv);
+	    cerr << "Want: nDMaterial Bidirectional tag? E? sigY? Hiso? Hkin?" << endl;
+	    return TCL_ERROR;
+	}    
+
+	int tag;
+	double E, sigY, Hi, Hk;
+	
+	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	    cerr << "WARNING invalid Bidirectional tag" << endl;
+	    return TCL_ERROR;		
+	}
+
+	if (Tcl_GetDouble(interp, argv[3], &E) != TCL_OK) {
+	    cerr << "WARNING invalid E\n";
+	    cerr << "nDMaterial Bidirectional: " << tag << endl;
+	    return TCL_ERROR;	
+	}
+
+	if (Tcl_GetDouble(interp, argv[4], &sigY) != TCL_OK) {
+	    cerr << "WARNING invalid sigY\n";
+	    cerr << "nDMaterial Bidirectional: " << tag << endl;
+	    return TCL_ERROR;	
+	}
+
+	if (Tcl_GetDouble(interp, argv[5], &Hi) != TCL_OK) {
+	    cerr << "WARNING invalid Hiso\n";
+	    cerr << "nDMaterial Bidirectional: " << tag << endl;
+	    return TCL_ERROR;	
+	}
+
+	if (Tcl_GetDouble(interp, argv[6], &Hk) != TCL_OK) {
+	    cerr << "WARNING invalid Hkin\n";
+	    cerr << "nDMaterial Bidirectional: " << tag << endl;
+	    return TCL_ERROR;	
+	}
+
+	theMaterial = new BidirectionalMaterial (tag, E, sigY, Hi, Hk);
+	}
 
     // Check argv[1] for J2PlaneStrain material type
     else if ((strcmp(argv[1],"J2Plasticity") == 0)  ||
@@ -161,7 +204,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
     
     else {
 	cerr << "WARNING unknown type of nDMaterial: " << argv[1];
-	cerr << "\nValid types: ElasticIsotropic, J2Plasticity\n";
+	cerr << "\nValid types: ElasticIsotropic, J2Plasticity, Bidirectional\n";
 	return TCL_ERROR;
     }
 
