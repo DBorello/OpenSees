@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2001-07-12 21:54:57 $
+// $Revision: 1.8 $
+// $Date: 2001-07-31 01:34:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -1544,4 +1544,86 @@ NLBeamColumn3d::getResponse(int responseID, Information &eleInfo)
   }
 }
 
+int
+NLBeamColumn3d::setParameter (char **argv, int argc, Information &info)
+{
+	int ok = -1;
 
+	// If the parameter belongs to the element itself
+	if (strcmp(argv[0],"rho") == 0) {
+		info.theType = DoubleType;
+		return 1;
+	}
+
+	// If the parameter is belonging to a section or lower
+	if (strcmp(argv[0],"section") == 0) {
+
+		// For now, no parameters of the section itself:
+		if (argc<5) {
+			cerr << "For now: cannot handle parameters of the section itself." << endl;
+			return -1;
+		}
+
+		// Reveal section and material tag numbers
+		int paramSectionTag = atoi(argv[1]);
+		int paramMatTag     = atoi(argv[3]);
+
+		// Store section and material tag in theInfo
+		ID *theID = new ID(2);
+		(*theID)(0) = paramSectionTag;
+		(*theID)(1) = paramMatTag;
+		info.theID = theID;
+                
+		// Find the right section and call its setParameter method
+		for (int i=0; i<nSections; i++) {
+			if (paramSectionTag == sections[i]->getTag()) {
+				ok = sections[i]->setParameter(&argv[2], argc-2, info);
+			}
+		}
+		
+		if (ok < 0) {
+			cerr << "NLBeamColumn2d::setParameter() - could not set parameter. " << endl;
+			return -1;
+		}
+		else {
+			return ok + 100;
+		}
+	}
+    
+	// otherwise parameter is unknown for the NLBeamColumn2d class
+	else
+		return -1;
+}
+
+int
+NLBeamColumn3d::updateParameter (int parameterID, Information &info)
+{
+	ID *paramIDPtr;
+	int ok = -1;
+
+	switch (parameterID) {
+	case 1:
+		this->rho = info.theDouble;
+		return 0;
+	default:
+		if (parameterID >= 100) {
+			paramIDPtr = info.theID;
+			ID paramID = (*paramIDPtr);
+			int paramSectionTag = paramID(0);
+			for (int i=0; i<nSections; i++) {
+				if (paramSectionTag == sections[i]->getTag()) {
+					ok = sections[i]->updateParameter(parameterID-100, info);
+				}
+			}
+			if (ok < 0) {
+				cerr << "NLBeamColumn2d::updateParameter() - could not update parameter. " << endl;
+				return ok;
+			}
+			else {
+				return ok;
+			}
+		}
+		else
+			return -1;
+	}       
+}

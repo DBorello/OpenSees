@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-03 06:38:16 $
+// $Revision: 1.3 $
+// $Date: 2001-07-31 01:34:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.cpp,v $
                                                                         
                                                                         
@@ -38,6 +38,7 @@
 #include <Concrete01.h>
 #include <Vector.h>
 #include <Channel.h>
+#include <Information.h>
 #include <math.h>
 #include <float.h>
 
@@ -465,3 +466,73 @@ void Concrete01::Print (ostream& s, int flag)
    s << "  fpcu: " << fpcu << endl;
    s << "  epscu: " << epscu << endl;
 }
+
+int
+Concrete01::setParameter(char **argv, int argc, Information &info)
+{
+	if (strcmp(argv[0],"fc") == 0) {// Compressive strength
+		info.theType = DoubleType;
+		return 1;
+	}
+	if (strcmp(argv[0],"epsco") == 0) {// Strain at compressive strength
+		info.theType = DoubleType;
+		return 2;
+	}
+	if (strcmp(argv[0],"fcu") == 0) {// Crushing strength
+		info.theType = DoubleType;
+		return 3;
+	}
+	if (strcmp(argv[0],"epscu") == 0) {// Strain at crushing strength
+		info.theType = DoubleType;
+		return 4;
+	}
+	else {
+		cerr << "WARNING: Could not set parameter in Concrete01! " << endl;
+		return -1;
+	}
+}
+    
+                            
+
+int
+Concrete01::updateParameter(int parameterID, Information &info)
+{
+	switch (parameterID) {
+	case 1:
+		this->fpc = info.theDouble;
+		break;
+	case 2:
+		this->epsc0 = info.theDouble;
+		break;
+	case 3:
+		this->fpcu = info.theDouble;
+		break;
+	case 4:
+		this->epscu = info.theDouble;
+		break;
+	default:
+		break;
+	}
+        
+	// Make all concrete parameters negative
+	if (fpc > 0.0)
+		fpc = -fpc;
+
+	if (epsc0 > 0.0)
+		epsc0 = -epsc0;
+
+	if (fpcu > 0.0)
+		fpcu = -fpcu;
+
+	if (epscu > 0.0)
+		epscu = -epscu;
+
+	// Initial tangent
+	Ec0 = 2*fpc/epsc0;
+	Ctangent = Ec0;
+	CunloadSlope = Ec0;
+	Ttangent = Ec0;
+
+	return 0;
+}
+

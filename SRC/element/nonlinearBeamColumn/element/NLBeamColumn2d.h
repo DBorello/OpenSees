@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-03-29 03:56:11 $
+// $Revision: 1.4 $
+// $Date: 2001-07-31 01:34:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.h,v $
                                                                         
                                                                         
@@ -100,6 +100,9 @@ class NLBeamColumn2d: public Element
     Response *setResponse(char **argv, int argc, Information &eleInformation);
     int getResponse(int responseID, Information &eleInformation);
     
+	int setParameter(char **argv, int argc, Information &info);
+	int updateParameter(int parameterID, Information &info);
+
   private:
     void getGlobalDispls(Vector &dg) const;
     void getGlobalAccels(Vector &ag) const;      

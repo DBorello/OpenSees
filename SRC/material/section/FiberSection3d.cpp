@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-22 07:33:23 $
+// $Revision: 1.4 $
+// $Date: 2001-07-31 01:34:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -675,3 +675,65 @@ FiberSection3d::getResponse(int responseID, Information &sectInfo)
   return SectionForceDeformation::getResponse(responseID, sectInfo);
 }
 
+int
+FiberSection3d::setParameter (char **argv, int argc, Information &info)
+{
+	// Initial declarations
+	int ok = -1;
+
+	// A material parameter
+	if (strcmp(argv[0],"material") == 0) {
+
+		// Get the tag of the material
+		int paramMatTag = atoi(argv[1]);
+
+		// Loop over fibers to find the right material(s)
+		for (int i=0; i<numFibers; i++) {
+			if (paramMatTag == theMaterials[i]->getTag()) {
+				ok = theMaterials[i]->setParameter(&argv[2], argc-2, info);
+			}
+		}
+		if (ok<0) {
+			cerr << "FiberSection3d::setParameter() - could not set parameter. " << endl;
+			return -1;
+		}
+		else {
+			return ok + 100;
+		}
+	} 
+	else
+		return -1;
+}
+
+int
+FiberSection3d::updateParameter (int parameterID, Information &info)
+{
+	int ok = -1;
+
+	switch (parameterID) {
+	case 1:
+		return -1;
+	default:
+		if (parameterID >= 100) {
+			ID *paramIDPtr;
+			paramIDPtr = info.theID;
+			ID paramID = (*paramIDPtr);
+			int paramMatrTag = paramID(1);
+
+			for (int i=0; i<numFibers; i++) {
+				if (paramMatrTag == theMaterials[i]->getTag()) {
+					ok =theMaterials[i]->updateParameter(parameterID-100, info);
+				}
+			}
+			if (ok < 0) {
+				cerr << "FiberSection3d::updateParameter() - could not update parameter. " << endl;
+				return ok;
+			}
+			else {
+				return ok;
+			}
+		}
+		else
+			return -1;
+	}
+}
