@@ -218,6 +218,14 @@ SOURCE=..\..\..\Src\domain\load\Beam2dPointLoad.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\Src\domain\load\Beam2dTempLoad.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\domain\load\Beam2dTempLoad.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\Src\domain\load\Beam2dUniformLoad.cpp
 # End Source File
 # Begin Source File
