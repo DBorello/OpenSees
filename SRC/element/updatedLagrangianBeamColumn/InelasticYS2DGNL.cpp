@@ -7,7 +7,11 @@
 //#include <Renderer.h>
 #include <math.h>
 #include <stdlib.h>
-//tempout#include <OpenGLRenderer.h>
+
+#ifdef _GLX    // Boris Jeremic added 23Oct2002 
+#include <OpenGLRenderer.h>
+#endif         // Boris Jeremic added 23Oct2002 
+
 #include "InelasticYS2DGNL.h"
 #include <Renderer.h>
 //#include <WindowManager.h>
@@ -1598,34 +1602,37 @@ void InelasticYS2DGNL::createView(char *title, double scale, int x, int y, int c
 {
 	displayType = displaytype;
 
-//tempout	theMap = new PlainMap();
-//tempout	pView =  new OpenGLRenderer(title, x, y, cx, cy, *theMap);
-//tempout	
-//tempout	if(pView)
-//tempout	{
-//tempout	pView->setVRP(0.0, 0.0, 0.0);
-//tempout	pView->setVPN(0.0, 0.0, 1.0);
-//tempout	pView->setVUP(0.0, 1.0, 0.0);
-//tempout	pView->setFillMode("wire");             // wire mode
-//tempout	pView->setPlaneDist(1.0, -1.0);
-//tempout	pView->setPRP(0.0, 0.0, 10.0);
-//tempout	pView->setPortWindow(-1, 1, -1, 1);  // use the whole window
-//tempout
-//tempout	pView->setViewWindow(-scale, scale, -scale, scale);
-//tempout
-//tempout	pView->clearImage();
-//tempout	pView->startImage();
-//tempout	
-//tempout
-//tempout	ys1->setView(pView);
-//tempout	ys2->setView(pView);
-//tempout	
-//tempout	ys1->displaySelf(*pView, 10, 1);
-//tempout	ys2->displaySelf(*pView, 10, 1);
-//tempout	pView->doneImage();
-//tempout	}
-//tempout	else
+#ifdef _GLX // Boris Jeremic added 23Oct2002
+theMap = new PlainMap();
+pView =  new OpenGLRenderer(title, x, y, cx, cy, *theMap);
+
+if(pView)
+{
+pView->setVRP(0.0, 0.0, 0.0);
+pView->setVPN(0.0, 0.0, 1.0);
+pView->setVUP(0.0, 1.0, 0.0);
+pView->setFillMode("wire");             // wire mode
+pView->setPlaneDist(1.0, -1.0);
+pView->setPRP(0.0, 0.0, 10.0);
+pView->setPortWindow(-1, 1, -1, 1);  // use the whole window
+
+pView->setViewWindow(-scale, scale, -scale, scale);
+
+pView->clearImage();
+pView->startImage();
+
+
+ys1->setView(pView);
+ys2->setView(pView);
+
+ys1->displaySelf(*pView, 10, 1);
+ys2->displaySelf(*pView, 10, 1);
+pView->doneImage();
+}
+else
 		cerr << "WARNING: InelasticYS2DGNL::createView - Renderer not available\n";
+#endif   // Boris Jeremic added 23Oct2002 
+
 }
 
 
