@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-03-12 03:40:02 $
+// $Revision: 1.12 $
+// $Date: 2003-03-12 19:20:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -66,12 +66,12 @@ TrussSection::TrussSection(int tag,
 			   int dim,
 			   int Nd1, int Nd2, 
 			   SectionForceDeformation &theSect,
-			   double rho)
+			   double r)
 :Element(tag,ELE_TAG_TrussSection),     
   connectedExternalNodes(2),
   dimension(dim), numDOF(0), theLoad(0), 
   theMatrix(0), theVector(0), t(0),
-  L(0.0), M(rho), theSection(0)
+  L(0.0), rho(r), theSection(0)
 {
     // get a copy of the material and check we obtained a valid copy
     theSection = theSect.getCopy();
@@ -113,7 +113,7 @@ TrussSection::TrussSection()
  connectedExternalNodes(2),
   dimension(0), numDOF(0), theLoad(0),
  theMatrix(0), theVector(0), t(0), 
- L(0.0), M(0.0), theSection(0)
+ L(0.0), rho(0.0), theSection(0)
 {
     // ensure the connectedExternalNode ID is of correct size 
   if (connectedExternalNodes.Size() != 2) {
@@ -363,10 +363,6 @@ TrussSection::setDomain(Domain *theDomain)
       return;
     }          
     
-    // determine the nodal mass for lumped mass approach
-    //    double A = theSection->getA();
-    M = M * L/2;
-
     this->update();
 }   	 
 
@@ -487,10 +483,11 @@ TrussSection::getMass(void)
     theMatrix->Zero();    
   
     // check for quick return
-    if (L == 0.0 || M == 0.0) { // - problem in setDomain() no further warnings
+    if (L == 0.0 || rho == 0.0) { // - problem in setDomain() no further warnings
 	return *theMatrix;
     }    
 
+    double M = 0.5*rho*L;
     Matrix &mass = *theMatrix;
     if (dimension == 1 && numDOF == 2) {
 	mass(0,0) = M; 
@@ -557,7 +554,7 @@ int
 TrussSection::addInertiaLoadToUnbalance(const Vector &accel)
 {
     // check for a quick return
-    if (L == 0.0 || M == 0.0) 
+    if (L == 0.0 || rho == 0.0) 
 	return 0;
 
     // get R * accel from the nodes
@@ -574,6 +571,7 @@ TrussSection::addInertiaLoadToUnbalance(const Vector &accel)
     }
 #endif
     
+    double M = 0.5*rho*L;
     // want to add ( - fact * M R * accel ) to unbalance
     for (int i=0; i<dimension; i++) {
 	double val1 = Raccel1(i);
@@ -627,12 +625,12 @@ TrussSection::getResistingForceIncInertia()
     this->getResistingForce();
     
     // now include the mass portion
-    if (L != 0.0 && M != 0.0) {
+    if (L != 0.0 && rho != 0.0) {
 	
-	// remember we set M = M*A*L/2 in setDoamin()
 	const Vector &accel1 = theNodes[0]->getTrialAccel();
 	const Vector &accel2 = theNodes[1]->getTrialAccel();	
 	
+	double M = 0.5*rho*L;
 	int dof = dimension;
 	int start = numDOF/2;
 	for (int i=0; i<dof; i++) {
@@ -666,10 +664,7 @@ TrussSection::sendSelf(int commitTag, Channel &theChannel)
   data(0) = this->getTag();
   data(1) = dimension;
   data(2) = numDOF;
-  if (L != 0)
-      data(3) = M * 2 / (L);
-  else
-      data(3) = M;
+  data(3) = rho;
   data(4) = theSection->getClassTag();
   int matDbTag = theSection->getDbTag();
 
@@ -727,7 +722,7 @@ TrussSection::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &the
   this->setTag((int)data(0));
   dimension = (int)data(1);
   numDOF = (int)data(2);
-  M = data(3);
+  rho = data(3);
 
   // truss now receives the tags of it's two external nodes
   res = theChannel.recvID(dataTag, commitTag, connectedExternalNodes);
@@ -868,7 +863,7 @@ TrussSection::Print(OPS_Stream &s, int flag)
 	s << "Element: " << this->getTag(); 
 	s << " type: TrussSection  iNode: " << connectedExternalNodes(0);
 	s << " jNode: " << connectedExternalNodes(1);
-	s << " Total Mass: " << M*2;
+	s << " Mass density/length: " << rho;
 	
 	s << " \n\t strain: " << strain;
 	s << " axial load: " << force;
@@ -1038,7 +1033,7 @@ int
 TrussSection::setParameter (const char **argv, int argc, Information &info)
 {
     // a material parameter
-    if (strcmp(argv[0],"section") == 0) {
+    if (strcmp(argv[0],"section") == 0 || strcmp(argv[0],"-section") == 0) {
 		int ok = theSection->setParameter(&argv[1], argc-1, info);
 		if (ok < 0)
 			return -1;

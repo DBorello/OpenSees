@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-25 23:33:02 $
+// $Revision: 1.7 $
+// $Date: 2003-03-12 19:20:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTrussSection.cpp,v $
                                                                         
 // Written: MHS 
@@ -59,11 +59,11 @@ Vector CorotTrussSection::V12(12);
 CorotTrussSection::CorotTrussSection(int tag, int dim,
 			   int Nd1, int Nd2, 
 			   SectionForceDeformation &theSec,
-			   double rho)
+			   double r)
   :Element(tag,ELE_TAG_CorotTrussSection),     
   theSection(0), connectedExternalNodes(2),
   numDOF(0), numDIM(dim),
-  Lo(0.0), Ln(0.0), M(rho), R(3,3),
+  Lo(0.0), Ln(0.0), rho(r), R(3,3),
   theMatrix(0), theVector(0)
 {
   // get a copy of the material and check we obtained a valid copy
@@ -96,7 +96,7 @@ CorotTrussSection::CorotTrussSection()
   :Element(0,ELE_TAG_CorotTrussSection),     
   theSection(0),connectedExternalNodes(2),
   numDOF(0), numDIM(0),
-  Lo(0.0), Ln(0.0), M(0.0), R(3,3),
+  Lo(0.0), Ln(0.0), rho(0.0), R(3,3),
   theMatrix(0), theVector(0)
 {
   // set node pointers to NULL
@@ -294,9 +294,6 @@ CorotTrussSection::setDomain(Domain *theDomain)
 		R(i,1) /= norm;
 		R(i,2) /= norm;
 	}
-
-	// Set lumped mass
-	M = M*Lo/2;
 }
 
 int
@@ -483,6 +480,11 @@ CorotTrussSection::getMass(void)
     Matrix &Mass = *theMatrix;
     Mass.Zero();
 
+    // check for quick return
+    if (Lo == 0.0 || rho == 0.0)
+	return Mass;
+
+    double M = 0.5*rho*Lo;
     int numDOF2 = numDOF/2;
     for (int i = 0; i < numDIM; i++) {
         Mass(i,i)                 = M;
@@ -557,16 +559,17 @@ CorotTrussSection::getResistingForceIncInertia()
     Vector &P = *theVector;
     P = this->getResistingForce();
     
-    if (M != 0.0) {
+    if (rho != 0.0) {
 	
-	    const Vector &accel1 = theNodes[0]->getTrialAccel();
-	    const Vector &accel2 = theNodes[1]->getTrialAccel();	
-	
-        int numDOF2 = numDOF/2;
-	    for (int i = 0; i < numDIM; i++) {
-	        P(i)         += M*accel1(i);
-	        P(i+numDOF2) += M*accel2(i);
-	    }
+      const Vector &accel1 = theNodes[0]->getTrialAccel();
+      const Vector &accel2 = theNodes[1]->getTrialAccel();	
+      
+      double M = 0.5*rho*Lo;
+      int numDOF2 = numDOF/2;
+      for (int i = 0; i < numDIM; i++) {
+	P(i)         += M*accel1(i);
+	P(i+numDOF2) += M*accel2(i);
+      }
     }
 
     // add the damping forces if rayleigh damping
@@ -620,6 +623,7 @@ CorotTrussSection::Print(OPS_Stream &s, int flag)
 	s << "\tConnected Nodes: " << connectedExternalNodes;
 	s << "\tUndeformed Length: " << Lo << endln;
 	s << "\tCurrent Length: " << Ln << endln;
+	s << "\tMass Density/Length: " << rho << endln;
 	s << "\tRotation matrix: " << endln;
 
 	if (theSection) {

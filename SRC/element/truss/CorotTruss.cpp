@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-03-12 03:40:02 $
+// $Revision: 1.11 $
+// $Date: 2003-03-12 19:20:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.cpp,v $
                                                                         
 // Written: MHS 
@@ -59,12 +59,12 @@ Vector CorotTruss::V12(12);
 CorotTruss::CorotTruss(int tag, int dim,
 			   int Nd1, int Nd2, 
 			   UniaxialMaterial &theMat,
-			   double a, double rho)
+			   double a, double r)
   :Element(tag,ELE_TAG_CorotTruss),     
   theMaterial(0), connectedExternalNodes(2),
   numDOF(0), numDIM(dim),
   Lo(0.0), Ln(0.0), 
-  A(a), M(rho), R(3,3),
+  A(a), rho(r), R(3,3),
   theMatrix(0), theVector(0)
 {
   // get a copy of the material and check we obtained a valid copy
@@ -98,7 +98,7 @@ CorotTruss::CorotTruss()
   theMaterial(0),connectedExternalNodes(2),
   numDOF(0), numDIM(0),
   Lo(0.0), Ln(0.0), 
-  A(0.0), M(0.0), R(3,3),
+  A(0.0), rho(0.0), R(3,3),
   theMatrix(0), theVector(0)
 {
   // ensure the connectedExternalNode ID is of correct size 
@@ -295,9 +295,6 @@ CorotTruss::setDomain(Domain *theDomain)
 		R(i,1) /= norm;
 		R(i,2) /= norm;
 	}
-
-	// Set lumped mass
-	M = M*Lo/2;
 }
 
 int
@@ -443,6 +440,11 @@ CorotTruss::getMass(void)
     Matrix &Mass = *theMatrix;
     Mass.Zero();
 
+    // check for quick return
+    if (Lo == 0.0 || rho == 0.0)
+	return Mass;
+
+    double M = 0.5*rho*Lo;
     int numDOF2 = numDOF/2;
     for (int i = 0; i < numDIM; i++) {
         Mass(i,i)                 = M;
@@ -511,11 +513,12 @@ CorotTruss::getResistingForceIncInertia()
     Vector &P = *theVector;
     P = this->getResistingForce();
     
-    if (M != 0.0) {
+    if (rho != 0.0) {
 	
       const Vector &accel1 = theNodes[0]->getTrialAccel();
       const Vector &accel2 = theNodes[1]->getTrialAccel();	
       
+      double M = 0.5*rho*Lo;
       int numDOF2 = numDOF/2;
       for (int i = 0; i < numDIM; i++) {
 	P(i)        += M*accel1(i);
@@ -548,10 +551,7 @@ CorotTruss::sendSelf(int commitTag, Channel &theChannel)
   data(1) = numDIM;
   data(2) = numDOF;
   data(3) = A;
-  if (Lo != 0)
-      data(6) = M * 2 / (Lo*A);
-  else
-      data(6) = M;
+  data(6) = rho;
   
   data(4) = theMaterial->getClassTag();
   int matDbTag = theMaterial->getDbTag();
@@ -609,7 +609,7 @@ CorotTruss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBr
   numDIM = (int)data(1);
   numDOF = (int)data(2);
   A = data(3);
-  M = data(6);
+  rho = data(6);
   
   // truss now receives the tags of it's two external nodes
   res = theChannel.recvID(dataTag, commitTag, connectedExternalNodes);
@@ -683,6 +683,7 @@ CorotTruss::Print(OPS_Stream &s, int flag)
 	s << "\tSection Area: " << A << endln;
 	s << "\tUndeformed Length: " << Lo << endln;
 	s << "\tCurrent Length: " << Ln << endln;
+	s << "\tMass Density/Length: " << rho << endln;
 	s << "\tRotation matrix: " << endln;
 
 	if (theMaterial) {

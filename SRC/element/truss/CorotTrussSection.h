@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:33:02 $
+// $Revision: 1.6 $
+// $Date: 2003-03-12 19:20:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTrussSection.h,v $
 
 #ifndef CorotTrussSection_h
@@ -101,7 +101,7 @@ class CorotTrussSection : public Element
     double Lo;	    // initial length of truss
     double Ln;		// current length of truss
     double d21[3];	// current displacement offsets in basic system
-    double M; 	    // rho and M*A*L/2 after setDomain()
+    double rho; 	    // mass density per unit length
 
     Node *theNodes[2];
 

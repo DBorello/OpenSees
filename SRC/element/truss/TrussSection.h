@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-25 23:33:02 $
+// $Revision: 1.8 $
+// $Date: 2003-03-12 19:20:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.h,v $
                                                                         
                                                                         
@@ -113,7 +113,7 @@ class TrussSection : public Element
     Matrix *t;        // hold the transformation matrix, could use a Vector
 
     double L;		// length of truss based on undeformed configuration
-    double M; 		// rho and M*A*L/2 after setDomain()
+    double rho; 		// mass density per unit length
 
     Node *theNodes[2];
 

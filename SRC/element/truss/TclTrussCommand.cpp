@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:33:02 $
+// $Revision: 1.6 $
+// $Date: 2003-03-12 19:20:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TclTrussCommand.cpp,v $
                                                                         
                                                                         
@@ -72,6 +72,7 @@ TclModelBuilder_addTruss(ClientData clientData, Tcl_Interp *interp,  int argc,
   // get the id and end nodes 
   int trussId, iNode, jNode, matID;
   double A;
+  double rho = 0.0;
   if (Tcl_GetInt(interp, argv[1+eleArgStart], &trussId) != TCL_OK) {
     opserr << "WARNING invalid truss eleTag" << endln;
     return TCL_ERROR;
@@ -85,6 +86,18 @@ TclModelBuilder_addTruss(ClientData clientData, Tcl_Interp *interp,  int argc,
      opserr << "WARNING invalid jNode\n";
      opserr << "truss element: " << trussId << endln;
      return TCL_ERROR;
+  }
+
+  for (int i = 4+eleArgStart; i < argc; i++) {
+    if (i+1 < argc && strcmp(argv[i], "-rho") == 0) {
+      if (Tcl_GetDouble(interp, argv[i+1], &rho) != TCL_OK) {
+	opserr << "WARNING invalid rho\n";
+	opserr << "truss element: " << trussId << endln;
+	return TCL_ERROR;
+      }
+      argc -= 2;
+      break;
+    }
   }
 
   if ((argc-eleArgStart) == 6) {  
@@ -112,9 +125,9 @@ TclModelBuilder_addTruss(ClientData clientData, Tcl_Interp *interp,  int argc,
       // now create the truss and add it to the Domain
       Element *theTruss = 0;
       if (strcmp(argv[eleArgStart],"corotTruss") == 0)
-          theTruss = new CorotTruss(trussId,ndm,iNode,jNode,*theMaterial,A);
+          theTruss = new CorotTruss(trussId,ndm,iNode,jNode,*theMaterial,A,rho);
       else
-          theTruss = new Truss(trussId,ndm,iNode,jNode,*theMaterial,A);
+          theTruss = new Truss(trussId,ndm,iNode,jNode,*theMaterial,A,rho);
 
       if (theTruss == 0) {
 	  opserr << "WARNING ran out of memory creating element\n";
@@ -148,9 +161,9 @@ TclModelBuilder_addTruss(ClientData clientData, Tcl_Interp *interp,  int argc,
       // now create the truss and add it to the Domain
       Element *theTruss = 0;
       if (strcmp(argv[eleArgStart],"corotTruss") == 0)
-          theTruss = new CorotTrussSection(trussId,ndm,iNode,jNode,*theSection);
+          theTruss = new CorotTrussSection(trussId,ndm,iNode,jNode,*theSection,rho);
       else
-          theTruss = new TrussSection(trussId,ndm,iNode,jNode,*theSection);
+          theTruss = new TrussSection(trussId,ndm,iNode,jNode,*theSection,rho);
       
       if (theTruss == 0) {
 	  opserr << "WARNING ran out of memory creating element\n";
