@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2002-04-02 19:19:59 $
+// $Revision: 1.31 $
+// $Date: 2002-04-12 23:00:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -67,6 +67,7 @@ extern "C" {
 #include <LoadPatternIter.h>
 #include <ElementalLoad.h>
 #include <ElementalLoadIter.h>
+#include <SP_Constraint.h> //Joey UC Davis
 
 
 // analysis model
@@ -2565,6 +2566,23 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
       theDomain.removeRecorders();
     }
 
+    //Boris Jeremic and Joey Yang -- UC Davis
+    else if (strcmp(argv[1],"SPconstraint") == 0) {
+      if (argc < 3) {
+      	interp->result = "WARNING want - remove loadPattern patternTag?\n";
+      	return TCL_ERROR;
+      }    
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+      	cerr << "WARNING remove loadPattern tag? failed to read tag: " << argv[2] << endl;
+      	return TCL_ERROR;
+      }      
+      
+      SP_Constraint *theSPconstraint = theDomain.removeSP_Constraint(tag);
+      if (theSPconstraint != 0) {
+	delete theSPconstraint;
+      }
+    }
+    
 #ifdef _RELIABILITY
 // AddingSensitivity:BEGIN ///////////////////////////////////////
     else if (strcmp(argv[1],"randomVariablePositioner") == 0) {
