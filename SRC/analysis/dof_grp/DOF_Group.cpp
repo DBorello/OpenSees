@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 04:25:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.cpp,v $
                                                                         
                                                                         
@@ -474,6 +474,7 @@ DOF_Group::setNodeDisp(const Vector &u)
     }
     
     Vector &disp = *unbalance;
+    disp = myNode->getTrialDisp();
     int i;
     
     // get disp for my dof out of vector u
@@ -481,8 +482,6 @@ DOF_Group::setNodeDisp(const Vector &u)
 	int loc = myID(i);
 	if (loc >= 0)
 	    disp(i) = u(loc);  
-	else 
-	    disp(i) = 0.0;  
     }
 
     myNode->setTrialDisp(disp);
@@ -503,6 +502,7 @@ DOF_Group::setNodeVel(const Vector &udot)
     }
     
     Vector &vel = *unbalance;
+    vel = myNode->getTrialVel();
     int i;
     
     // get vel for my dof out of vector udot
@@ -510,7 +510,6 @@ DOF_Group::setNodeVel(const Vector &udot)
 	int loc = myID(i);	    	
 	if (loc >= 0) 
 	    vel(i) = udot(loc);  
-	else  vel(i) = 0.0;
     }
 
     myNode->setTrialVel(vel);
@@ -533,6 +532,7 @@ DOF_Group::setNodeAccel(const Vector &udotdot)
     }
 
     Vector &accel = *unbalance;;
+    accel = myNode->getTrialAccel();
     int i;
     
     // get disp for the unconstrained dof
@@ -540,7 +540,6 @@ DOF_Group::setNodeAccel(const Vector &udotdot)
 	int loc = myID(i);	    		
 	if (loc >= 0)
 	    accel(i) = udotdot(loc); 
-	else accel(i) = 0.0;
     }
 
     myNode->setTrialAccel(accel);
