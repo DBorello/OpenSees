@@ -463,7 +463,7 @@ int EvolutionLaw_NL_EijMD::updateEeDm(EPState *EPS, double st_vol, double dLamda
        
        // Restrictions 
        if ( xi > 0.0 && dn < 0.0) {
-         opserr << "Restriction !\n ";
+         opserr << "Restriction !";
          dn = 0.0;
        }
        
