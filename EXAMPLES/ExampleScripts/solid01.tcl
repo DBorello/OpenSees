@@ -65,22 +65,22 @@ nDMaterial ElasticIsotropic3D 1 70000 0.3
 element brick  1  5 6 7 8 1 2 3 4   1      0.0     0.0    -9.81    1.8
     
 
-set Series "Path -filePath tabasFN.txt -dt 0.02 -factor $g"
+set Series "Path -filePath NR228.txt -dt 0.02 -factor $g"
 
 pattern UniformExcitation  1   2  -accel $Series 
 
 # create the recorder
 #recorder Node Node.out disp -time -node  1 2 3 4 5 6 7 8 -dof 1 2 3
 recorder Node node.out disp -time -node 5 -dof 1 2 3
-recorder plot node.out HelloJoey 10 10 300 300 -columns 2 1
-recorder plot node.out HelloJoey 10 10 300 300 -columns 3 1
+#recorder plot node.out "PEER solid01.tcl: Top_of_soil"  10 10 300 300 -columns 1 2 
+recorder plot node.out "PEER solid01.tcl: Top_of_soil"  0 0 500 150 -columns 1 3
 
 # ################################
 # create the analysis
 # #################################
 
 integrator Newmark  0.5  0.25
-numberer Plain
+numberer RCM
 #constraints Plain
 constraints Penalty 1e12 1e12
 #constraints Transformation    
