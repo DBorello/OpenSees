@@ -17,7 +17,7 @@ class YsVisual : public Recorder
 public:
 	virtual ~YsVisual();
 
-	YsVisual(Element* theEle, char *title, double scale,
+	YsVisual(Element* theEle, const char *title, double scale,
 	         int xLoc, int yLoc, int width, int height);
 	
 

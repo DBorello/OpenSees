@@ -18,7 +18,7 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-YsVisual::YsVisual(Element *theEle, char *title, double scale,
+YsVisual::YsVisual(Element *theEle, const char *title, double scale,
                    int xLoc, int yLoc, int width, int height):
 				   pView(0), theMap(0), displayMode(0)
 {
