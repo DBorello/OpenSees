@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-20 01:38:13 $
+// $Revision: 1.2 $
+// $Date: 2001-07-20 19:27:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.cpp,v $
                                                                         
 // Written: MHS 
@@ -477,7 +477,7 @@ CorotTruss::getResistingForceIncInertia()
         int numDOF2 = numDOF/2;
 	    for (int i = 0; i < numDIM; i++) {
 	        P(i)        += M*accel1(i);
-	        P(i+numDOF) += M*accel2(i);
+	        P(i+numDOF2) += M*accel2(i);
 	    }
     }
 
