@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-19 06:20:17 $
+// $Revision: 1.4 $
+// $Date: 2001-06-16 04:45:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticMembranePlateSection.cpp,v $
 
 // Ed "C++" Love
@@ -53,13 +53,15 @@ ElasticMembranePlateSection::ElasticMembranePlateSection(
                                            int    tag, 
                                            double young,
                                            double poisson,
-                                           double thickness ) :
+                                           double thickness,
+					   double r ) :
 SectionForceDeformation( tag, SEC_TAG_ElasticMembranePlateSection ),
 strain(8)
 {
   this->E  = young ;
   this->nu = poisson ;
   this->h  = thickness ;
+  this->rhoH = r*thickness ;
 }
 
 
@@ -79,15 +81,21 @@ SectionForceDeformation*  ElasticMembranePlateSection::getCopy( )
 
   clone = new ElasticMembranePlateSection( ) ; //new instance of this class
 
-  //  *clone = *this ; //assignment to make copy
-  clone->E = this->E;
-  clone->nu = this->nu;
-  clone->h = this->h;
-  clone->strain = this->strain;
+    *clone = *this ; //assignment to make copy
+  //clone->E = this->E;
+  // clone->nu = this->nu;
+  //clone->h = this->h;
+  //clone->strain = this->strain;
 
   return clone ;
 }
 
+//density per unit area
+double
+ElasticMembranePlateSection::getRho( )
+{
+  return rhoH ;
+}
 
 
 //send back order of strain in vector form
@@ -239,6 +247,7 @@ void  ElasticMembranePlateSection::Print( ostream &s, int flag )
   s <<  "  Young's Modulus E = "  <<  E  <<  '\n' ;
   s <<  "  Poisson's Ratio nu = " <<  nu <<  '\n' ;
   s <<  "  Thickness h = "        <<  h  <<  '\n' ;
+  s <<  "  Density rho = "        <<  (rhoH/h)  <<  '\n' ;
 
   return ;
 }

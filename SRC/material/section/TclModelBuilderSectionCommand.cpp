@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-05-19 06:26:17 $
+// $Revision: 1.6 $
+// $Date: 2001-06-16 04:45:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -415,12 +415,13 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	if (argc < 5) {
 	    cerr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: section ElasticMembranePlateSection tag? E? nu? h? " << endl;
+	    cerr << "Want: section ElasticMembranePlateSection tag? E? nu? h? <rho?>" << endl;
 	    return TCL_ERROR;
 	}
 	
 	int tag;
 	double E, nu, h;
+	double rho = 0.0;
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
 	    cerr << "WARNING invalid section ElasticMembranePlateSection tag" << endl;
@@ -445,7 +446,13 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	    return TCL_ERROR;
 	}	
 
-	theSection = new ElasticMembranePlateSection (tag, E, nu, h);
+	if (argc > 6 && Tcl_GetDouble (interp, argv[6], &rho) != TCL_OK) {
+	    cerr << "WARNING invalid rho" << endl;
+	    cerr << "ElasticMembranePlateSection section: " << tag << endl;	    	    
+	    return TCL_ERROR;
+	}
+
+	theSection = new ElasticMembranePlateSection (tag, E, nu, h, rho);
     }	
 
     else if (strcmp(argv[1],"PlateFiber") == 0) {

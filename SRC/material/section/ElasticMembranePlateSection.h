@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-19 06:20:17 $
+// $Revision: 1.4 $
+// $Date: 2001-06-16 04:45:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticMembranePlateSection.h,v $
 
 // Ed "C++" Love
@@ -55,7 +55,8 @@ class ElasticMembranePlateSection : public SectionForceDeformation{
     ElasticMembranePlateSection(   int    tag, 
                            double E,
                            double nu,
-                           double h = 1.0 ) ;
+                           double h = 1.0,
+			   double rho = 0.0 ) ;
 
 
 
@@ -96,6 +97,9 @@ class ElasticMembranePlateSection : public SectionForceDeformation{
     //print out data
     void Print( ostream &s, int flag ) ;
 
+    //density per unit area
+    double getRho() ;
+
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
 
@@ -105,6 +109,7 @@ class ElasticMembranePlateSection : public SectionForceDeformation{
     double E ;  // elastic modulus
     double nu ; // poisson ratio
     double h  ; // MembranePlate thickness
+    double rhoH ; //mass per unit 2D area
 
     static const double five6 ; // =5/6 = shear correction factor
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-05-19 06:20:18 $
+// $Revision: 1.2 $
+// $Date: 2001-06-16 04:45:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/MembranePlateFiberSection.h,v $
 
 // Ed "C++" Love
@@ -64,6 +64,8 @@ class MembranePlateFiberSection : public SectionForceDeformation{
     //make a clone of this material
     SectionForceDeformation *getCopy( ) ;
 
+    //mass per unit area
+    double getRho() ;
 
     //send back order of strain in vector form
     int getOrder( ) const ;
@@ -106,7 +108,7 @@ class MembranePlateFiberSection : public SectionForceDeformation{
     static const double wg[5] ;
 
     double h ; //plate thickness
-  
+
     NDMaterial *theFibers[5] ;  //pointers to five materials (fibers)
 
     static const double root56 ; // =sqrt(5/6) 

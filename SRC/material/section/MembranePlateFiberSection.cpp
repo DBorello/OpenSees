@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-05-19 06:20:18 $
+// $Revision: 1.2 $
+// $Date: 2001-06-16 04:45:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/MembranePlateFiberSection.cpp,v $
 
 // Ed "C++" Love
@@ -169,6 +169,28 @@ int MembranePlateFiberSection::revertToStart( )
     success += theFibers[i]->revertToStart( ) ;
 
   return success ;
+}
+
+
+//mass per unit area
+double
+MembranePlateFiberSection::getRho( )
+{
+
+  double weight ;
+
+  double rhoH = 0.0 ;
+
+  for ( int i = 0; i < 5; i++ ) {
+    
+    weight = ( 0.5*h ) * wg[i] ;
+
+    rhoH += ( theFibers[i]->getRho() ) * weight ;
+
+  }
+
+  return rhoH ;
+
 }
 
 
