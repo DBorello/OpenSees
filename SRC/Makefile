@@ -34,7 +34,7 @@ all:
 	$(ANALYSIS_LIBS) $(SysOfEqn_LIBS) $(GRAPH_LIBS) $(TAGGED_LIBS) \
 	$(UTILITY_LIBS) $(ACTOR_LIBS) $(RECORDER_LIBS) $(LAW_LIBS) $(GGD_LIBS) \
 	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ZHY_LIBS) $(ERRORHANDLER_LIBS) \
-	$(DRAIN_LIBS) $(FMK_LIBS)
+	$(DRAIN_LIBS) 
 	@$(RANLIB) $(FE_LIBRARY)
 
 else
@@ -68,7 +68,7 @@ all:
 	$(ANALYSIS_LIBS) $(SysOfEqn_LIBS) $(GRAPH_LIBS) $(TAGGED_LIBS) \
 	$(UTILITY_LIBS) $(ACTOR_LIBS) $(RECORDER_LIBS) $(LAW_LIBS) $(GGD_LIBS) \
 	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ZHY_LIBS) $(ERRORHANDLER_LIBS) \
-	$(DRAIN_LIBS) $(FMK_LIBS)
+	$(DRAIN_LIBS) 
 	@$(RANLIB) $(FE_LIBRARY)
 
 endif
@@ -86,7 +86,6 @@ FMK_LIBS = $(FE)/database/FE_Datastore.o \
 	$(FE)/database/BerkeleyDbDatastore.o \
 	$(FE)/coordTransformation/CorotCrdTransf2d.o \
 	$(FE)/coordTransformation/CorotCrdTransf3d.o 
-
 
 
 # the files that make up the FE_LIBRARY
