@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2001-05-03 06:18:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/DOF_Graph.cpp,v $
                                                                         
                                                                         
@@ -48,11 +48,9 @@
 // assumes eqn numbers are numbered continuously from START_EQN_NUM
 
 DOF_Graph::DOF_Graph(AnalysisModel &theModel)
-:Graph(theModel.getNumEqn()+START_VERTEX_NUM+10), 
+:Graph(theModel.getNumEqn()), 
  myModel(theModel)
 {
-    // Timer theTimer; theTimer.start();
-
     int numVertex = myModel.getNumEqn();
 
     if (numVertex <= 0) {
@@ -107,7 +105,6 @@ DOF_Graph::DOF_Graph(AnalysisModel &theModel)
          // theTimer.pause(); cout <<  "DOF_Graph::two " << theTimer.getReal() << theTimer.getCPU() << endl;
          // theTimer.start();    
     }
-
 }
 
 DOF_Graph::~DOF_Graph()
