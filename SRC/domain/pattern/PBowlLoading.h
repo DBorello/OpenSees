@@ -1,15 +1,14 @@
 //===============================================================================
-//# COPYRIGHT (C): Woody's license (by BJ):                 
-//                 ``This    source  code is Copyrighted in 
-//                 U.S.,   by   the   The  Regents  of  the 
-//                 University   of   California,   for   an 
-//                 indefinite  period,  and  anybody caught 
-//                 using it without our permission, will be 
-//                 mighty  good  friends  of ourn, cause we 
-//                 don't  give a darn. Hack it. Compile it. 
-//                 Debug it. Run it. Yodel it. Enjoy it. We 
-//                 wrote  it, that's all we wanted to do.'' 
-//     
+//# COPYRIGHT (C): Woody's (Guthrie) like license:
+//                 ``This    source  code is Copyrighted in  
+//                 U.S.,  for  an  indefinite  period,  and  
+//                 anybody  caught  using  it  without  our  
+//                 permission,  will be mighty good friends  
+//                 of  ourn,  cause  we  don't give a darn.  
+//                 Hack  it.  Compile it. Debug it. Run it.  
+//                 Yodel  it. Enjoy it. We wrote it, that's  
+//                 all we wanted to do.''                    
+//
 //# PROJECT:           Object Oriented Finite Element Program
 //# PURPOSE:           Plastic Bowl (aka Domain Reduction) implementation:
 //#                    This file contains the class definition for PBowlLoading.
@@ -17,8 +16,6 @@
 //#                    which implements the plastic bowl loading 
 //#                    (aka Domain Reduction Method) as described 
 //#                    by Jacobo Bielak et al.
-
-
 //# CLASS:             PBowlLoading
 //#
 //# VERSION:           0.61803398874989 (golden section)
@@ -29,11 +26,7 @@
 //#
 //#
 //# DATE:              21Oct2002
-//# UPDATE HISTORY:
-//#
-//#
-//#
-//#
+//# UPDATE HISTORY:    31Oct2002 some memory leaks fixed...
 //#
 //===============================================================================
 
@@ -41,7 +34,9 @@
 #define PBowlLoading_h
 
 // Purpose: 
+#include <LoadPattern.h>
 
+#include <Matrix.h>
 #include <Domain.h>
 #include <NodeIter.h>
 #include <Node.h>
@@ -54,8 +49,6 @@
 #include <fstream.h>
 #include <iostream.h>
 
-#include <LoadPattern.h>
-#include <Matrix.h>
 
 class Vector;
 class Matrix;
