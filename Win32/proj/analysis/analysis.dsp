@@ -357,6 +357,14 @@ SOURCE=..\..\..\SRC\analysis\algorithm\SolutionAlgorithm.cpp
 
 SOURCE=..\..\..\SRC\analysis\algorithm\SolutionAlgorithm.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\algorithm\eigenAlgo\StandardEigenAlgo.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\algorithm\eigenAlgo\StandardEigenAlgo.h
+# End Source File
 # End Group
 # Begin Group "integrator"
 

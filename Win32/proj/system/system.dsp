@@ -418,5 +418,25 @@ SOURCE=..\..\..\SRC\system_of_eqn\eigenSOE\SymArpackSolver.cpp
 SOURCE=..\..\..\SRC\system_of_eqn\eigenSOE\SymArpackSolver.h
 # End Source File
 # End Group
+# Begin Group "symBandEigen"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\SRC\system_of_eqn\eigenSOE\SymBandEigenSOE.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\system_of_eqn\eigenSOE\SymBandEigenSOE.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\system_of_eqn\eigenSOE\SymBandEigenSolver.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\system_of_eqn\eigenSOE\SymBandEigenSolver.h
+# End Source File
+# End Group
 # End Target
 # End Project
