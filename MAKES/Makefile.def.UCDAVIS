@@ -439,7 +439,7 @@ MACHINE_NUMERICAL_LIBS  = -lm \
 ifeq ($(PROGRAMMING_MODE), THREADS)
 MACHINE_SPECIFIC_LIBS = -lpthread
 else
-MACHINE_SPECIFIC_LIBS = 
+MACHINE_SPECIFIC_LIBS = -ldl  -lieee -lm -lc -lg2c -Wl,-rpath,/usr/local/lib
 endif
 
 
