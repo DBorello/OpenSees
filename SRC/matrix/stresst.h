@@ -49,8 +49,8 @@ class stresstensor : public BJtensor
     stresstensor(const BJtensor & x); // copy-initializer
     stresstensor(const nDarray & x); // copy-initializer
 
-    //....     ~stresstensor( );
-
+    //~stresstensor( );
+    
 
     stresstensor operator=(const stresstensor & rval);// stresstensor assignment
     stresstensor operator=(const BJtensor & rval);// tensor assignment to stresstensor
