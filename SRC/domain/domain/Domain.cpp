@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2003-02-15 02:35:27 $
+// $Revision: 1.23 $
+// $Date: 2003-10-30 22:49:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -1338,6 +1338,12 @@ Domain::revertToStart(void)
     while ((elePtr = theElements()) != 0) {
 	elePtr->revertToStart();
     }
+
+// ADDED BY TERJE //////////////////////////////////
+    // invoke 'restart' on all recorders
+    for (int i=0; i<numRecorders; i++) 
+		theRecorders[i]->restart();
+/////////////////////////////////////////////////////
 
     // set the current time and load factor in the domain to last committed
     committedTime = 0;
