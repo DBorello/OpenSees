@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-16 22:14:57 $
+// $Revision: 1.4 $
+// $Date: 2001-08-06 23:12:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicPlateFiber.cpp,v $
                                                                         
                                                                         
@@ -95,7 +95,7 @@ ElasticIsotropicPlateFiber::getTangent (void)
 	D(0,0) = D(1,1) = d00;
 	D(0,1) = D(1,0) = d01;
 	D(2,2) = d22;
-    D(2,3) = d22;
+    D(3,3) = d22;
     D(4,4) = d22;
 
 	return D;
