@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-05-03 06:32:07 $
+// $Revision: 1.2 $
+// $Date: 2001-05-19 06:49:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -121,11 +121,11 @@ FiberSection3d::addFiber(Fiber &newFiber)
 {
   // need to create a larger array
   int newSize = numFibers+1;
-  
+
   UniaxialMaterial **newArray = new UniaxialMaterial *[newSize]; 
   double *newMatData = new double [3 * newSize];
   
-  if (newArray == 0 || newMatData) {
+  if (newArray == 0 || newMatData == 0) {
     g3ErrorHandler->fatal("%s -- failed to allocate Fiber pointers",
 			  "FiberSection3d::addFiber");
     return -1;
