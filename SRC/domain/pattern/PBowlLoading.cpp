@@ -371,7 +371,8 @@ PBowlLoading::applyLoad(double time)
 
   //Apply loads on each boundary bowl nodes
   Node *theNode;
-  for (int i=0; i<numBnodes; i++) {
+  int i;
+  for (i=0; i<numBnodes; i++) {
     Vector load=this->getNodalLoad((*BoundaryNodes)[i], time);
     //Take care of the minus sign in the effective seismic force for boundary nodes
     load = load*(-1.0);
@@ -380,7 +381,7 @@ PBowlLoading::applyLoad(double time)
   }
 
   //Apply loads on each exterior bowl nodes
-  for (int i=0; i<numEnodes; i++) {
+  for (i=0; i<numEnodes; i++) {
     const Vector &load=this->getNodalLoad((*ExteriorNodes)[i], time);
     theNode = theDomain->getNode( (*ExteriorNodes)[i] );
     theNode->addUnbalancedLoad(load);
@@ -820,7 +821,8 @@ PBowlLoading::CompPBLoads()
 
    //cout << " ...Me before  " << Me;
    //Zero out the diagonal block of Boundary nodes
-   for (int m = 0; m < nB; m++)
+   int m;
+   for (m = 0; m < nB; m++)
      for (int n = 0; n < nB; n++)
       for (int d = 0; d < NDOF; d++)
         for (int e= 0; e < NDOF; e++) {
@@ -829,7 +831,7 @@ PBowlLoading::CompPBLoads()
         }
 
    //Zero out the diagonal block of Exterior nodes
-   for (int m = 0; m < nE; m++)
+   for (m = 0; m < nE; m++)
      for (int n = 0; n < nE; n++)
       for (int d = 0; d < NDOF; d++)
         for (int e= 0; e < NDOF; e++) {
