@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2001-07-31 22:11:38 $
+// $Revision: 1.10 $
+// $Date: 2001-07-31 23:54:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -185,8 +185,10 @@ static StaticAnalysis *theStaticAnalysis = 0;
 static DirectIntegrationAnalysis *theTransientAnalysis = 0;
 static VariableTimeStepDirectIntegrationAnalysis *theVariableTimeStepTransientAnalysis = 0;
 // AddingSensitivity:BEGIN /////////////////////////////////////////////
+#ifdef _RELIABILITY
 static SensitivityAlgorithm *theSensitivityAlgorithm = 0;
 static SensitivityIntegrator *theSensitivityIntegrator = 0;
+#endif
 // AddingSensitivity:END ///////////////////////////////////////////////
 static StaticIntegrator *theStaticIntegrator =0;
 static TransientIntegrator *theTransientIntegrator =0;
@@ -426,8 +428,10 @@ wipeModel(ClientData clientData, Tcl_Interp *interp, int argc,
   theVariableTimeStepTransientAnalysis =0;    
   theTest = 0;
 // AddingSensitivity:BEGIN /////////////////////////////////////////////////
+#ifdef _RELIABILITY
   theSensitivityAlgorithm =0;
   theSensitivityIntegrator =0;
+#endif
 // AddingSensitivity:END /////////////////////////////////////////////////
   // the domain deletes the record objects, 
   // just have to delete the private array
@@ -468,8 +472,10 @@ wipeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
   theVariableTimeStepTransientAnalysis =0;    
   theTest = 0;
 // AddingSensitivity:BEGIN /////////////////////////////////////////////////
+#ifdef _RELIABILITY
   theSensitivityAlgorithm =0;
   theSensitivityIntegrator =0;
+#endif
 // AddingSensitivity:END /////////////////////////////////////////////////
   // the domain deletes the record objects, 
   // just have to delete the private array
@@ -982,9 +988,11 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 					       *theSOE,
 					       *theStaticIntegrator);
 // AddingSensitivity:BEGIN ///////////////////////////////
+#ifdef _RELIABILITY
 	if (theSensitivityAlgorithm != 0) {
 		theStaticAnalysis->setSensitivityAlgorithm(theSensitivityAlgorithm);
 	}
+#endif
 // AddingSensitivity:END /////////////////////////////////
 
     } else if (strcmp(argv[1],"Transient") == 0) {
@@ -2308,7 +2316,3 @@ sensNodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
     return TCL_OK;
 }
 // AddingSensitivity:END //////////////////////////////////////
-
-
-
-

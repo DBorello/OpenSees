@@ -50,12 +50,17 @@ RELIABILITY_OBJS = $(FE)/reliability/analysis/analysis/FORMAnalysis.o \
 		$(FE)/reliability/domain/distributions/NormalRV.o \
 		$(FE)/reliability/domain/distributions/ShiftedRayleighRV.o \
 		$(FE)/reliability/domain/distributions/Type3SmallestValueRV.o \
+		$(FE)/reliability/FEsensitivity/SensitivityAlgorithm.o \
+		$(FE)/reliability/FEsensitivity/PathDepSensitivityAlgorithm.o \
+		$(FE)/reliability/FEsensitivity/SensitivityIntegrator.o \
+		$(FE)/reliability/FEsensitivity/StaticSensitivityIntegrator.o \
 		$(FE)/reliability/tcl/TclReliabilityBuilder.o
 
 # Compilation control
 all:         
 	     @$(CD) $(FE)/reliability/analysis; $(MAKE);
 	     @$(CD) $(FE)/reliability/domain; $(MAKE);
+	     @$(CD) $(FE)/reliability/FEsensitivity; $(MAKE);
 	     @$(CD) $(FE)/reliability/tcl; $(MAKE);
 
 libReliability: all
@@ -73,6 +78,7 @@ spotless: clean
 wipe: spotless
 	     @$(CD) $(FE)/reliability/analysis; $(MAKE) wipe;
 	     @$(CD) $(FE)/reliability/domain; $(MAKE) wipe;
+	     @$(CD) $(FE)/reliability/FEsensitivity; $(MAKE) wipe;
 	     @$(CD) $(FE)/reliability/tcl; $(MAKE) wipe;
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.

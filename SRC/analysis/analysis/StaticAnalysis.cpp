@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-07-31 22:11:32 $
+// $Revision: 1.5 $
+// $Date: 2001-07-31 23:54:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.cpp,v $
                                                                         
                                                                         
@@ -43,7 +43,9 @@
 #include <Domain.h>
 #include <Timer.h>
 // AddingSensitivity:BEGIN //////////////////////////////////
+#ifdef _RELIABILITY
 #include <SensitivityAlgorithm.h>
+#endif
 // AddingSensitivity:END ////////////////////////////////////
 #include <FE_Element.h>
 #include <DOF_Group.h>
@@ -78,7 +80,9 @@ StaticAnalysis::StaticAnalysis(Domain &the_Domain,
     theIntegrator->setLinks(theModel,theLinSOE);
     theAlgorithm->setLinks(theModel,theStaticIntegrator,theLinSOE);
 // AddingSensitivity:BEGIN ////////////////////////////////////
+#ifdef _RELIABILITY
 	theSensitivityAlgorithm = 0;
+#endif
 // AddingSensitivity:END //////////////////////////////////////
 }    
 
@@ -99,7 +103,9 @@ StaticAnalysis::clearAll(void)
     delete theAlgorithm;
     delete theSOE;
 // AddingSensitivity:BEGIN ////////////////////////////////////
+#ifdef _RELIABILITY
 	delete theSensitivityAlgorithm;
+#endif
 // AddingSensitivity:END //////////////////////////////////////
 }    
 
@@ -148,6 +154,7 @@ StaticAnalysis::analyze(int numSteps)
 	}    
 
 // AddingSensitivity:BEGIN ////////////////////////////////////
+#ifdef _RELIABILITY
 	if (theSensitivityAlgorithm != 0) {
 		result = theSensitivityAlgorithm->computeGradients();
 		if (result < 0) {
@@ -159,6 +166,7 @@ StaticAnalysis::analyze(int numSteps)
 			return -5;
 		}    
 	}
+#endif
 // AddingSensitivity:END //////////////////////////////////////
 
 	result = theIntegrator->commit();
@@ -272,6 +280,7 @@ StaticAnalysis::domainChanged(void)
 }    
 
 // AddingSensitivity:BEGIN //////////////////////////////
+#ifdef _RELIABILITY
 int 
 StaticAnalysis::setSensitivityAlgorithm(SensitivityAlgorithm *passedSensitivityAlgorithm)
 {
@@ -286,6 +295,7 @@ StaticAnalysis::setSensitivityAlgorithm(SensitivityAlgorithm *passedSensitivityA
 
 	return 0;
 }
+#endif
 // AddingSensitivity:END ///////////////////////////////
 
 

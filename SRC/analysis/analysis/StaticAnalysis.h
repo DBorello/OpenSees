@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-31 22:11:32 $
+// $Revision: 1.4 $
+// $Date: 2001-07-31 23:54:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.h,v $
                                                                         
                                                                         
@@ -40,7 +40,9 @@
 
 #include <Analysis.h>
 // AddingSensitivity:BEGIN //////////////////////////////////
+#ifdef _RELIABILITY
 #include <SensitivityAlgorithm.h>
+#endif
 // AddingSensitivity:END ////////////////////////////////////
 class ConstraintHandler;
 class DOF_Numberer;
@@ -72,7 +74,9 @@ class StaticAnalysis: public Analysis
     int setIntegrator(StaticIntegrator &theIntegrator);
     int setLinearSOE(LinearSOE &theSOE);
 // AddingSensitivity:BEGIN ///////////////////////////////
+#ifdef _RELIABILITY
 	int setSensitivityAlgorithm(SensitivityAlgorithm *theSensitivityAlgorithm);
+#endif
 // AddingSensitivity:END /////////////////////////////////
     
   protected: 
@@ -86,7 +90,9 @@ class StaticAnalysis: public Analysis
     StaticIntegrator    *theIntegrator;
     int domainStamp;
 // AddingSensitivity:BEGIN ///////////////////////////////
+#ifdef _RELIABILITY
 	SensitivityAlgorithm *theSensitivityAlgorithm;
+#endif
 // AddingSensitivity:END ///////////////////////////////
 };
 

@@ -11,7 +11,7 @@ FE_INCLUDES        = -I$(FE)/matrix \
 		-I$(FE)/material/backbone \
 		-I$(FE)/material/state \
 		-I$(FE)/material/state/stiffness \
-		-I$(FE)/material/state/deformation \
+		-I$(FE)/material/state/unloading \
 		-I$(FE)/material/state/strength \
 		  -I$(FE)/material/nD \
 		  -I$(FE)/material/nD/soil \
@@ -112,6 +112,22 @@ FE_INCLUDES        = -I$(FE)/matrix \
 		  -I$(FE)/element/nonlinearBeamColumn/matrixutil \
 		  -I$(FE)/element/nonlinearBeamColumn/quadrule \
 		  -I$(FE)/coordTransformation \
+		-I$(FE)/reliability/analysis \
+		-I$(FE)/reliability/analysis/analysis \
+		-I$(FE)/reliability/analysis/curvature \
+		-I$(FE)/reliability/analysis/designPoint \
+		-I$(FE)/reliability/analysis/direction \
+		-I$(FE)/reliability/analysis/gFunction \
+		-I$(FE)/reliability/analysis/misc \
+		-I$(FE)/reliability/analysis/randomNumber \
+		-I$(FE)/reliability/analysis/sensitivity \
+		-I$(FE)/reliability/analysis/stepSize \
+		-I$(FE)/reliability/analysis/transformation \
+		-I$(FE)/reliability/domain \
+		-I$(FE)/reliability/domain/components \
+		-I$(FE)/reliability/domain/distributions \
+		-I$(FE)/reliability/FEsensitivity \
+		-I$(FE)/reliability/tcl \
 		  -I$(FE) 
 
 
