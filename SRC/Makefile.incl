@@ -12,6 +12,7 @@ FE_INCLUDES        = -I$(FE)/matrix \
 		-I$(FE)/material/state/deformation \
 		-I$(FE)/material/state/strength \
 		  -I$(FE)/material/nD \
+		  -I$(FE)/material/nD/soil \
 		  -I$(FE)/material/nD/Template3Dep \
 		  -I$(FE)/material/section \
 		  -I$(FE)/material/section/repres/cell \
