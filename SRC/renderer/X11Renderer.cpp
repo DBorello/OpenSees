@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 07:11:52 $
+// $Revision: 1.3 $
+// $Date: 2001-05-03 06:45:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/X11Renderer.cpp,v $
                                                                         
                                                                         
@@ -377,9 +377,6 @@ X11Renderer::drawPolygon(const Matrix &pos, const Vector &data)
     
     theFace->AddPoint(*point);
   }
-
-    
-  theFace->AddPoint(*point);
 
   // display the face
   FACE &res1 = theView->transform(*theFace);
