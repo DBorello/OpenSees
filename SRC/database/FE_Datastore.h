@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-02-12 20:13:32 $
+// $Revision: 1.3 $
+// $Date: 2002-04-02 18:47:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FE_Datastore.h,v $
                                                                         
                                                                         
@@ -67,13 +67,19 @@ class FE_Datastore: public Channel
 		ChannelAddress *theAddress =0);
 		
     // pure virtual functions in addition to those defined
-    // in the ModelBuilder and Channel classes
+    // in the ModelBuilder and Channel classes for database applications
 
     virtual int getDbTag(void) =0;
 
     virtual int commitState(int commitTag);    
     virtual int restoreState(int commitTag);        
-    
+
+    virtual int createTable(const char *tableName, int numColumns, char *columns[]);
+    virtual int insertData(const char *tableName, char *columns[], 
+			   int commitTag, const Vector &data);
+    virtual int getData(const char *tableName, char *columns[], 
+			int commitTag, Vector &data);
+			
   protected:
     FEM_ObjectBroker *getObjectBroker(void);
     

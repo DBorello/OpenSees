@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-02-12 20:13:32 $
+// $Revision: 1.3 $
+// $Date: 2002-04-02 18:47:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FE_Datastore.cpp,v $
                                                                         
                                                                         
@@ -152,3 +152,26 @@ FE_Datastore::restoreState(int commitTag)
 
 
 
+int 
+FE_Datastore::createTable(const char*table, int numColumns, char *columns[])
+{
+  g3ErrorHandler->warning("FE_Datastore::createTable - not yet implemented\n");
+  return -1;
+}
+
+
+int 
+FE_Datastore::insertData(const char *tableName, char *columns[], 
+			int commitTag, const Vector &data)
+{
+  g3ErrorHandler->warning("FE_Datastore::insertData - not yet implemented\n");
+  return -1;
+}
+
+
+int 
+FE_Datastore::getData(const char *table, char *column[], int commitTag, Vector &data)
+{
+  g3ErrorHandler->warning("FE_Datastore::getData - not yet implemented\n");
+  return -1;
+}

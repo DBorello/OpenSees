@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-03-19 00:21:04 $
+// $Revision: 1.3 $
+// $Date: 2002-04-02 18:47:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/MySqlDatastore.cpp,v $
 
 #include <MySqlDatastore.h>
@@ -27,13 +27,18 @@
 #include <Matrix.h>
 #include <ID.h>
 
+// #include <mysqld_error.h> .. use the following #define instead
+#define ER_TABLE_EXISTS_ERROR 1050
+
+
 #define MAX_BLOB_SIZE 16777215
 
 MySqlDatastore::MySqlDatastore(const char *projectName,
 			       Domain &theDomain,
-			       FEM_ObjectBroker &theObjectBroker)
-  :FE_Datastore(theDomain, theObjectBroker), dbTag(0),
-  connection(true), query(0), sizeQuery(0)
+			       FEM_ObjectBroker &theObjectBroker,
+			       int run)
+  :FE_Datastore(theDomain, theObjectBroker), dbTag(0), dbRun(run), 
+   connection(true), query(0), sizeQuery(0), sizeColumnString(0)
 {
   // initialise the mysql structure
   mysql_init(&mysql);
@@ -531,6 +536,184 @@ MySqlDatastore::recvID(int dbTag, int commitTag,
 
 
 
+
+int 
+MySqlDatastore::createTable(const char *tableName, int numColumns, char *columns[])
+{
+  // check that we have a connection
+  if (connection == false)
+    return -1;
+
+  // check that the query string can old the actual query, if not enlarge the string
+  int requiredSize = 100 + strlen(tableName); // create table blah blah blah
+  int sizeColumn = 0;
+  for (int i=0; i<numColumns; i++) {
+    sizeColumn += strlen(columns[i]) + 2;
+  }
+  
+  if (sizeColumnString < sizeColumn)
+    sizeColumnString = sizeColumn;
+
+  requiredSize += sizeColumn + 18*numColumns;
+
+  if (query == 0 || sizeQuery < requiredSize) {
+    if (query != 0)
+      delete [] query;
+    query = new char[requiredSize];
+    sizeQuery = requiredSize;
+  }
+
+  // create the sql query
+  char *p = query;
+  int numChar = sprintf(query, "CREATE TABLE %s (dbRun INT NOT NULL, commitTag INT NOT NULL, ", tableName);
+  p += numChar;
+  for (int j=0; j<numColumns; j++) {
+    numChar = sprintf(p, "%s DOUBLE NOT NULL, ", columns[j]);
+    p += numChar;
+  }
+  
+  sprintf(p, "PRIMARY KEY (dbRun, commitTag) )");
+
+  // execute the query
+  if (mysql_query(&mysql, query) != 0) {
+    if (mysql_errno(&mysql) != ER_TABLE_EXISTS_ERROR) {
+      cerr << "MySqlDatastore::createTable() - failed to create the table in the database";
+      cerr << endl << mysql_error(&mysql) << endl;          
+      cerr << "SQL query: " << query << endl;          
+      return -3;
+    }
+  } 
+
+  return 0;
+}
+
+int 
+MySqlDatastore::insertData(const char *tableName, char *columns[], int commitTag, const Vector &data)
+{
+  // check that we have a connection
+  if (connection == false)
+    return -1;
+
+  // check that query string is big enough to hold the data, if not enlarge
+  int sizeData = 128 + strlen(tableName);
+  if ((query == 0) || (sizeData > sizeQuery)) { // *2 for extra space mysql needs
+    if (query != 0)
+      delete [] query;
+    sizeQuery = sizeData; // 256 for the SLECECT data FROM ... blah blah
+    query = new char [sizeQuery];
+    if (query == 0) {
+      cerr << "MySqlDatastore::getData - out of memory creating query of size";
+      cerr << sizeQuery << endl;
+      return -2;
+    }
+  }
+
+  // form the insert query
+  sprintf(query, "INSERT INTO %s VALUES (%d, %d ", tableName, dbRun, commitTag);  
+  char *p = query + strlen(query);
+  for (int i=0; i<data.Size(); i++)
+    p += sprintf(p, ", %f ", data(i));  
+  strcpy(p, ")");
+
+  // execute the query
+  if (mysql_query(&mysql, query) != 0) {
+    cerr << "MySqlDatastore::insertData() - failed to insert the data";
+    cerr << endl << mysql_error(&mysql) << endl;          
+    cerr << "SQL query: " << query << endl;          
+    return -3;
+  } 
+
+  return 0;
+}
+
+int 
+MySqlDatastore::getData(const char *tableName, char *columns[], int commitTag, Vector &data)
+{
+  // check that we have a connection
+  if (connection == false)
+    return -1;
+
+  // check that query string is big enough to hold the data, if not enlarge
+  int sizeData = 128 + strlen(tableName);
+  if ((query == 0) || (sizeData > sizeQuery)) { // *2 for extra space mysql needs
+    if (query != 0)
+      delete [] query;
+    sizeQuery = sizeData; // 256 for the SLECECT data FROM ... blah blah
+    query = new char [sizeQuery];
+    if (query == 0) {
+      cerr << "MySqlDatastore::getData - out of memory creating query of size";
+      cerr << sizeQuery << endl;
+      return -2;
+    }
+  }
+
+  // to receive the data the database we do the following:
+  // 1. use SELECT to receive the data from the database
+  // 2. fetch the results from the server and copy to the Vectors data area
+  // 3. clean up the MYSQL_RES datastructure 
+  //
+  // NOTE: probably using a malloc() and free() under the covers for this, could be 
+  // very expensive .. IS THERE ANOTHER WAY TO DO THIS, i.e. SAVE A MYSQL_RES FOR
+  // NUMEROUS USES??
+
+  // form the SELECT query
+  sprintf(query, "Select * FROM %s WHERE dbRun=%d AND commitTag=%d", 
+	  tableName, dbRun, commitTag);  
+
+  // execute the SELECT query
+  if (mysql_query(&mysql, query) != 0) {
+    cerr << "MySqlDatastore::getData() - failed to receive vector from MySQL database";
+    cerr << endl << mysql_error(&mysql) << endl;          
+    return -3;
+  } 
+
+  // fetch the results from the database
+  MYSQL_RES *results;
+  MYSQL_ROW row;
+  results = mysql_store_result(&mysql);
+  if (results == NULL) {
+    // no vector stored in db with these keys
+    cerr << "MySqlDatastore::getData - no data in database for Vector with dbTag, cTag: ";
+    cerr << dbTag << ", " << commitTag << endl;
+    return -4;
+  }
+  row = mysql_fetch_row(results);
+  if (row == NULL) {
+    // no vector stored in db with these keys
+    cerr << "MySqlDatastore::getData - no data in database for Vector with dbTag, cTag: ";
+    cerr << dbTag << ", " << commitTag << endl;
+    mysql_free_result(results);
+    return -5;
+  }
+
+  // place the results into the vectors double array
+  char *dataRes;
+  for (int i=0; i<data.sz; i++) {
+    dataRes = row[i+2];
+    data.theData[i] = atof(dataRes);
+  }
+
+  // free the MYSQL_RES structure
+  mysql_free_result(results);
+
+  return 0;
+}
+
+
+int 
+MySqlDatastore::setDbRun(int run)
+{
+  dbRun = run;
+  return dbRun;
+}
+
+int 
+MySqlDatastore::getDbRun(void)
+{
+  return dbRun;
+}
+
+
 int
 MySqlDatastore::createOpenSeesDatabase(const char *projectName) 
 {
@@ -540,11 +723,7 @@ MySqlDatastore::createOpenSeesDatabase(const char *projectName)
   }
 
   // create the database
-  cerr << projectName;
-
   sprintf(query, "CREATE DATABASE %s", projectName);
-  cerr << query;
-
   if (this->execute(query) != 0) {
     cerr << "MySqlDatastore::createOpenSeesDatabase() - could not create the database\n";
     return -1;

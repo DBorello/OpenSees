@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-02-12 20:12:20 $
+// $Revision: 1.2 $
+// $Date: 2002-04-02 18:47:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/MySqlDatastore.h,v $
 
 #ifndef MySqlDatastore_h
@@ -46,7 +46,9 @@ class MySqlDatastore: public FE_Datastore
  public:
   MySqlDatastore(const char *projectName,
 		 Domain &theDomain, 
-		 FEM_ObjectBroker &theBroker);    
+		 FEM_ObjectBroker &theBroker,
+		 int dbRun = 0);    
+  
   ~MySqlDatastore();
 
   // method to get a database tag
@@ -80,19 +82,28 @@ class MySqlDatastore: public FE_Datastore
   int recvID(int dbTag, int commitTag, 
 	     ID &theID, 
 	     ChannelAddress *theAddress =0);    
-    
+
+  int createTable(const char *tableName, int numColumns, char *columns[]);
+  int insertData(const char *tableName, char *columns[], int commitTag, const Vector &data);
+  int getData(const char *tableName, char *columns[], int commitTag, Vector &data);
+
+  int setDbRun(int run);
+  int getDbRun(void);
+
  protected:
   int createOpenSeesDatabase(const char *projectName);
   int execute(const char *query);
 
  private:
   int dbTag;
-
+  int dbRun;
+  
   bool connection;
   MYSQL mysql;
 
   char *query;
   int sizeQuery;
+  int sizeColumnString;
 };
 
 #endif

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2002-04-02 18:47:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/TclDatabaseCommands.cpp,v $
                                                                         
                                                                         
@@ -50,11 +50,11 @@
 
 // databases
 #include <FileDatastore.h>
+#include <MySqlDatastore.h>
+#include <BerkeleyDbDatastore.h>
 #include <FEM_ObjectBroker.h>
 
 static bool createdDatabaseCommands = false;
-static FE_Datastore *theDatabase = 0;
-static FEM_ObjectBroker *theBroker = 0;
 
 int 
 save(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
@@ -62,15 +62,14 @@ save(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
 int 
 restore(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
 
+extern FE_Datastore *theDatabase;
 
 int
-TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc, 
-	       char **argv, Domain &theDomain)
+TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc, char **argv, 
+	       Domain &theDomain, 
+	       FEM_ObjectBroker &theBroker)
 {
   if (createdDatabaseCommands == false) {
-
-    // create the object broker
-    theBroker = new FEM_ObjectBroker;
 
     // create the commands to commit and reset
     Tcl_CreateCommand(interp, "save", save,
@@ -83,7 +82,7 @@ TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc,
 
   // make sure at least one other argument to contain integrator
   if (argc < 2) {
-    interp->result = "WARNING need to specify a Database type ";
+    interp->result = "WARNING need to specify a Database type; valid type File, MySQL, BerkeleyDB ";
     return TCL_ERROR;
   }    
 
@@ -92,7 +91,7 @@ TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc,
   // needed for the type of Database, create the object and add to Domain
   //
 
-  // a FileDatabase
+  // a File Database
   if (strcmp(argv[1],"File") == 0) {
     if (argc < 3) {
       cerr << "WARNING database File fileName? ";
@@ -103,17 +102,46 @@ TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc,
     if (theDatabase != 0)
       delete theDatabase;
 
-    theDatabase = new FileDatastore(argv[2], theDomain, *theBroker);
+    theDatabase = new FileDatastore(argv[2], theDomain, theBroker);
   }
-  
+
+  // a MySQL Database
+  else if (strcmp(argv[1],"MySQL") == 0) {
+    if (argc < 3) {
+      cerr << "WARNING database MySql fileName? ";
+      return TCL_ERROR;
+    }    
+
+    // delete the old database
+    if (theDatabase != 0)
+      delete theDatabase;
+
+    theDatabase = new MySqlDatastore(argv[2], theDomain, theBroker);
+  }
+
+  // a BerkeleyDB database
+  else  if (strcmp(argv[1],"BerkeleyDB") == 0) {
+    if (argc < 3) {
+      cerr << "WARNING database BerkeleyDB fileName? ";
+      return TCL_ERROR;
+    }    
+
+
+    // delete the old database 
+    if (theDatabase != 0) 
+      delete theDatabase;
+
+    theDatabase = new BerkeleyDbDatastore(argv[2], theDomain, theBroker);
+  }
+
   // no recorder type specified yet exists
   else {
     cerr << "WARNING No database type exists ";
-    cerr << "for database of type:" << argv[1];
+    cerr << "for database of type:" << argv[1] << "valid database types File, BerkeleyDB and MySQL\n";
     return TCL_ERROR;
   }    
 
-  // check we instantiated a recorder .. if not ran out of memory
+  // check we instantiated a database .. if not ran out of memory
   if (theDatabase == 0) {
     cerr << "WARNING ran out of memory - database " << argv[1]<< endl;
     return TCL_ERROR;
