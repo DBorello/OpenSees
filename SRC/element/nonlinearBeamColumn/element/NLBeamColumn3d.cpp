@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-01-23 09:37:45 $
+// $Revision: 1.4 $
+// $Date: 2001-01-31 05:03:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -1342,7 +1342,6 @@ NLBeamColumn3d::Print(ostream &s, int flag)
 
        s << "\tStiffness Matrix:\n" << kv;
        s << "\tResisting Force: " << Se;
-	   sections[0]->Print(s,flag);
    }
    else
    {
@@ -1442,9 +1441,14 @@ NLBeamColumn3d::setResponse(char **argv, int argc, Information &eleInformation)
     // we compare argv[0] for known response types 
     //
 
-    // force - 
-    if (strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"force") == 0)
+    // global force - 
+    if (strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"force") == 0
+	|| strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0)
 		return new ElementResponse(this, 1, P);
+
+    // local force -
+    else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
+		return new ElementResponse(this, 2, P);
 
     // section response -
     else if (strcmp(argv[0],"section") ==0) {
@@ -1465,9 +1469,36 @@ NLBeamColumn3d::setResponse(char **argv, int argc, Information &eleInformation)
 int 
 NLBeamColumn3d::getResponse(int responseID, Information &eleInfo)
 {
+  static Vector force(12);
+  double V;
+
   switch (responseID) {      
     case 1:  // forces
 		return eleInfo.setVector(P);
+    case 2:
+		// Axial
+		force(6) = Se(0);
+		force(0) = -Se(0);
+
+		// Torsion
+		force(11) = Se(5);
+		force(5)  = -Se(5);
+
+		// Moments about z and shears along y
+		force(2) = Se(1);
+		force(8) = Se(2);
+		V = (Se(1)+Se(2))/L;
+		force(1) = V;
+		force(7) = -V;
+
+		// Moments about y and shears along z
+		force(4)  = Se(3);
+		force(10) = Se(4);
+		V = (Se(3)+Se(4))/L;
+		force(3) = -V;
+		force(9) = V;
+
+		return eleInfo.setVector(force);
 
     default: 
 	  return -1;
