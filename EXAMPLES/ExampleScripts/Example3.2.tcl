@@ -102,12 +102,40 @@ recorder Element 1 2 -time -file ele32.out force
 # ------------------------------
 
 # Set some parameters
-set maxU 6.0;	        # Max displacement
+set maxU 15.0;	        # Max displacement
 set numSteps [expr int($maxU/$dU)]
 
 # Perform the analysis
-analyze $numSteps
-puts "Pushover analysis completed"
+set ok [analyze $numSteps]
+
+if {$ok != 0} {
+
+    set currentDisp [nodeDisp 3 1]
+    set ok 0
+    while {$ok == 0 && $currentDisp < $maxU} {
+
+	set ok [analyze 1]
+
+	# if the analysis fails try initial tangent iteration
+	if {$ok != 0} {
+	    puts "regular newton failed .. lets try an initail stiffness for this step"
+	    test NormDispIncr 1.0e-12  1000 0
+	    algorithm Newton -initial
+	    set ok [analyze 1]
+	    if {$ok == 0} {puts "that worked .. back to regular newton"}
+	    test NormDispIncr 1.0e-12  10 
+	    algorithm Newton
+	}
+
+	set currentDisp [nodeDisp 3 1]
+    }
+}
+
+if {$ok == 0} {
+   puts "Pushover analysis completed succesfully";
+} else {
+   puts "Pushover analysis failed to complete";    
+}
 
 # Print the state at node 3
 print node 3
