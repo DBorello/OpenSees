@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-09-01 03:54:28 $
+// $Revision: 1.2 $
+// $Date: 2004-09-03 15:07:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/damage/TclModelBuilderDamageModelCommand.cpp,v $                                                                        
 // Written: Arash Altoontash, Gregory Deierlein
 // Created: 08/02
@@ -42,7 +42,7 @@
 #include <Vector.h>
 #include <string.h>
 
-static void printCommand(int argc, const char **argv)
+static void printCommand(int argc, TCL_Char **argv)
 {
   opserr << "Input command: ";
   for (int i=0; i<argc; i++)
