@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2002-06-07 18:03:51 $
+// $Revision: 1.12 $
+// $Date: 2002-06-07 21:50:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges3d.cpp,v $
 
 #include <BeamWithHinges3d.h>
@@ -240,6 +240,9 @@ BeamWithHinges3d::commitState(void)
   
   kbCommit = kb;
   qCommit = q;
+
+  eCommit[0] = e[0];
+  eCommit[1] = e[1];
   
   //initialFlag = 0;
   
@@ -256,7 +259,9 @@ BeamWithHinges3d::revertToLastCommit(void)
   for (int i = 0; i < 2; i++) {
     if (section[i] != 0) {
       err += section[i]->revertToLastCommit();
-      e[i] = section[i]->getSectionDeformation();
+      section[i]->setTrialSectionDeformation(eCommit[i]);
+
+      e[i] = eCommit[i];
       sr[i] = section[i]->getStressResultant();
       fs[i] = section[i]->getSectionFlexibility();
     }
@@ -269,7 +274,6 @@ BeamWithHinges3d::revertToLastCommit(void)
   q = qCommit;
   
   initialFlag = 0;
-  this->update();
 
   return err;
 }
@@ -285,6 +289,7 @@ BeamWithHinges3d::revertToStart(void)
       fs[i].Zero();
       e[i].Zero();
       sr[i].Zero();
+      eCommit[i].Zero();
     }
   }
   
@@ -676,16 +681,269 @@ BeamWithHinges3d::getResistingForceIncInertia(void)
 int
 BeamWithHinges3d::sendSelf(int commitTag, Channel &theChannel)
 {
-  return -1;
+  // place the integer data into an ID
+  int dbTag = this->getDbTag();
+  int i, j , k;
+  int loc = 0;
+  
+  static ID idData(11);  
+  idData(0) = this->getTag();
+  idData(1) = connectedExternalNodes(0);
+  idData(2) = connectedExternalNodes(1);
+  idData(3) = theCoordTransf->getClassTag();
+  int theCoordTransfDbTag  = theCoordTransf->getDbTag();
+  if (theCoordTransfDbTag  == 0) {
+    theCoordTransfDbTag = theChannel.getDbTag();
+    if (theCoordTransfDbTag  != 0) 
+      theCoordTransf->setDbTag(theCoordTransfDbTag);
+  }
+  idData(4) = theCoordTransfDbTag;
+
+  idData(5) = initialFlag;
+  idData(6) = maxIter;
+
+  loc = 7;
+  for (i = 0; i<2; i++) {
+    int sectClassTag = section[i]->getClassTag();
+    int sectDbTag = section[i]->getDbTag();
+    if (sectDbTag == 0) {
+      sectDbTag = theChannel.getDbTag();
+      section[i]->setDbTag(sectDbTag);
+    }
+
+    idData(loc) = sectClassTag;
+    idData(loc+1) = sectDbTag;
+    loc += 2;
+  }  
+
+  if (theChannel.sendID(dbTag, commitTag, idData) < 0) {
+    g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
+			    "failed to send ID data");
+    return -1;
+  }    
+
+  // send the coordinate transformation
+  
+  if (theCoordTransf->sendSelf(commitTag, theChannel) < 0) {
+    g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
+			    "failed to send crdTranf");
+    return -1;
+  }      
+
+  //
+  // send the sections
+  //
+  
+  for (j = 0; j<2; j++) {
+    if (section[j]->sendSelf(commitTag, theChannel) < 0) {
+      g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - section %d %s\n",
+			      j,"failed to send itself");
+      return -1;
+    }
+  }
+  
+  // into a vector place distrLoadCommit, rho, UeCommit, Secommit and kvcommit
+  int secDefSize = 0;
+  for (i = 0; i < 2; i++) {
+     int size = section[i]->getOrder();
+     secDefSize   += size;
+  }
+
+  Vector dData(10+6+36+secDefSize); 
+  loc = 0;
+
+  // place double variables into Vector
+  dData(loc++) = E;
+  dData(loc++) = A;
+  dData(loc++) = Iz;
+  dData(loc++) = Iy;
+  dData(loc++) = G;
+  dData(loc++) = J;
+  dData(loc++) = beta1;
+  dData(loc++) = beta2;
+  dData(loc++) = rho;
+  dData(loc++) = tolerance;
+  
+  // place kvcommit into vector
+  for (i=0; i<6; i++) 
+    dData(loc++) = qCommit(i);
+
+  // place kvcommit into vector
+  for (i=0; i<6; i++) 
+     for (j=0; j<6; j++)
+        dData(loc++) = kbCommit(i,j);
+
+  // place vscommit into vector
+  for (k=0; k<2; k++)
+    for (i=0; i<section[k]->getOrder(); i++) 
+	dData(loc++) = (eCommit[k])(i);
+
+  if (theChannel.sendVector(dbTag, commitTag, dData) < 0) {
+     g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
+	 		     "failed to send Vector data");
+     return -1;
+  }    
+
+  return 0;
 }
 
 int 
 BeamWithHinges3d::recvSelf(int commitTag, Channel &theChannel,
 			       FEM_ObjectBroker &theBroker)
 {
+  // place the integer data into an ID
+  int dbTag = this->getDbTag();
+  int i, j , k;
+  int loc = 0;
+  
+  static ID idData(11);  
+
+  if (theChannel.recvID(dbTag, commitTag, idData) < 0)  {
+    g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - %s\n",
+			    "failed to recv ID data");
+    return -1;
+  }    
+
+  this->setTag(idData(0));
+  connectedExternalNodes(0) = idData(1);
+  connectedExternalNodes(1) = idData(2);
+
+  maxIter = idData(5);
+  initialFlag = idData(6);
+  
+  int crdTransfClassTag = idData(3);
+  int crdTransfDbTag = idData(4);
+
+  // create a new crdTransf object if one needed
+  if (theCoordTransf == 0 || theCoordTransf->getClassTag() != crdTransfClassTag) {
+      if (theCoordTransf != 0)
+	  delete theCoordTransf;
+
+      theCoordTransf = theBroker.getNewCrdTransf3d(crdTransfClassTag);
+
+      if (theCoordTransf == 0) {
+	  g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - %s %d\n",
+				  "failed to obtain a CrdTrans object with classTag",
+				  crdTransfClassTag);
+	  return -2;	  
+      }
+  }
+
+  theCoordTransf->setDbTag(crdTransfDbTag);
+
+  // invoke recvSelf on the crdTransf obkject
+  if (theCoordTransf->recvSelf(commitTag, theChannel, theBroker) < 0)  
+  {
+     g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
+	     		     "failed to recv crdTranf");
+     return -3;
+  }      
+
+  //
+  // receive the sections
+  //
+
+  loc = 7;
+  if (section[0] == 0) {
+
+    // if no sections yet created, we create new ones and then do a recvSelf
+    for (i=0; i<2; i++) {
+      int sectClassTag = idData(loc);
+      int sectDbTag = idData(loc+1);
+      loc += 2;
+      section[i] = theBroker.getNewSection(sectClassTag);
+      if (section[i] == 0) {
+	g3ErrorHandler->fatal("NLBeamColumn3d::recvSelf() - %s %d\n",
+			      "Broker could not create Section of class type",sectClassTag);
+	return -1;
+      }
+      section[i]->setDbTag(sectDbTag);
+      if (section[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
+	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - section %d %s\n",
+				i,"failed to recv itself");
+	return -1;
+      }     
+    }
+
+    this->setHinges();
+
+  } else {
+
+    // if sections exist, we ensure of correct type and then do a recvSelf
+    for (i=0; i<2; i++) {
+
+      int sectClassTag = idData(loc);
+      int sectDbTag = idData(loc+1);
+      loc += 2;
+
+      // check of correct type
+      if (section[i]->getClassTag() !=  sectClassTag) {
+	// delete the old section[i] and create a new one
+	delete section[i];
+	section[i] = theBroker.getNewSection(sectClassTag);
+	if (section[i] == 0) {
+	  g3ErrorHandler->fatal("NLBeamColumn3d::recvSelf() - %s %d\n",
+				"Broker could not create Section of class type",sectClassTag);
+	  return -1;
+	}
+      }
+
+      // recvvSelf on it
+      section[i]->setDbTag(sectDbTag);
+      if (section[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
+	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - section %d %s\n",
+				i,"failed to recv itself");
+	return -1;
+      }     
+    }
+  }
+
+
+  // into a vector place distrLoadCommit, rho, UeCommit, Secommit and kvcommit
+  int secDefSize = 0;
+  for (i = 0; i < 2; i++) {
+     int size = section[i]->getOrder();
+     secDefSize   += size;
+  }
+
+  Vector dData(10+6+36+secDefSize); 
+  loc = 0;
+
+  if (theChannel.recvVector(dbTag, commitTag, dData) < 0) {
+     g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
+	 		     "failed to send Vector data");
+     return -1;
+  }    
+
+  // place double variables into Vector
+   E = dData(loc++);
+   A = dData(loc++);
+   Iz = dData(loc++);
+   Iy = dData(loc++);
+   G = dData(loc++);
+   J = dData(loc++);
+   beta1 = dData(loc++);
+   beta2 = dData(loc++);
+   rho = dData(loc++);
+   tolerance = dData(loc++);
+  
+  // place kvcommit into vector
+  for (i=0; i<6; i++) 
+    qCommit(i) = dData(loc++);
+
+  // place kvcommit into vector
+  for (i=0; i<6; i++) 
+     for (j=0; j<6; j++)
+        kbCommit(i,j) = dData(loc++);;
+
+  // place vscommit into vector
+  for (k=0; k<2; k++) 
+    for (i=0; i<section[k]->getOrder(); i++) 
+       (eCommit[k])(i) = dData(loc++);
+
   initialFlag = 2;
 
-  return -1;
+  return 0;
 }
 
 void 
@@ -762,6 +1020,11 @@ BeamWithHinges3d::setNodePtrs(Domain *theDomain)
 int
 BeamWithHinges3d::update(void)
 {
+  // if have completed a recvSelf() - do a revertToLastCommit
+  // to get e, kb, etc. set correctly
+  if (initialFlag == 2)
+    this->revertToLastCommit();
+
   // Update the coordinate transformation
   theCoordTransf->update();
   
@@ -1128,6 +1391,7 @@ BeamWithHinges3d::setHinges(void)
     fs[i] = Matrix(order,order);
     e[i]  = Vector(order);
     sr[i] = Vector(order);
+    eCommit[i] = Vector(order);    
   }
 }
 

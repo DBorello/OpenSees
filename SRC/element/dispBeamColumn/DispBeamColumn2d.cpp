@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2002-06-06 18:43:33 $
+// $Revision: 1.11 $
+// $Date: 2002-06-07 21:51:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -603,14 +603,228 @@ DispBeamColumn2d::getResistingForceIncInertia()
 int
 DispBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
 {
-  return -1;
+  // place the integer data into an ID
+
+  int dbTag = this->getDbTag();
+  int i, j;
+  int loc = 0;
+  
+  static ID idData(7);  // one bigger than needed so no clash later
+  idData(0) = this->getTag();
+  idData(1) = connectedExternalNodes(0);
+  idData(2) = connectedExternalNodes(1);
+  idData(3) = numSections;
+  idData(4) = crdTransf->getClassTag();
+  int crdTransfDbTag  = crdTransf->getDbTag();
+  if (crdTransfDbTag  == 0) {
+    crdTransfDbTag = theChannel.getDbTag();
+    if (crdTransfDbTag  != 0) 
+      crdTransf->setDbTag(crdTransfDbTag);
+  }
+  idData(5) = crdTransfDbTag;
+  
+  if (theChannel.sendID(dbTag, commitTag, idData) < 0) {
+    g3ErrorHandler->warning("DispBeamColumn2d::sendSelf() - %s\n",
+	     		     "failed to send ID data");
+     return -1;
+  }    
+
+  // send the coordinate transformation
+  
+  if (crdTransf->sendSelf(commitTag, theChannel) < 0) {
+     g3ErrorHandler->warning("DispBeamColumn2d::sendSelf() - %s\n",
+	     		     "failed to send crdTranf");
+     return -1;
+  }      
+
+  
+  //
+  // send an ID for the sections containing each sections dbTag and classTag
+  // if section ha no dbTag get one and assign it
+  //
+
+  ID idSections(2*numSections);
+  loc = 0;
+  for (i = 0; i<numSections; i++) {
+    int sectClassTag = theSections[i]->getClassTag();
+    int sectDbTag = theSections[i]->getDbTag();
+    if (sectDbTag == 0) {
+      sectDbTag = theChannel.getDbTag();
+      theSections[i]->setDbTag(sectDbTag);
+    }
+
+    idSections(loc) = sectClassTag;
+    idSections(loc+1) = sectDbTag;
+    loc += 2;
+  }
+
+  if (theChannel.sendID(dbTag, commitTag, idSections) < 0)  {
+    g3ErrorHandler->warning("DispBeamColumn2d::sendSelf() - %s\n",
+			    "failed to send ID data");
+    return -1;
+  }    
+
+  //
+  // send the sections
+  //
+  
+  for (j = 0; j<numSections; j++) {
+    if (theSections[j]->sendSelf(commitTag, theChannel) < 0) {
+      g3ErrorHandler->warning("DispBeamColumn2d::sendSelf() - section %d %s\n",
+			      j,"failed to send itself");
+      return -1;
+    }
+  }
+
+  return 0;
 }
 
 int
 DispBeamColumn2d::recvSelf(int commitTag, Channel &theChannel,
 			   FEM_ObjectBroker &theBroker)
 {
-  return -1;
+  //
+  // receive the integer data containing tag, numSections and coord transformation info
+  //
+  int dbTag = this->getDbTag();
+  int i;
+  
+  static ID idData(7); // one bigger than needed so no clash with section ID
+
+  if (theChannel.recvID(dbTag, commitTag, idData) < 0)  {
+    g3ErrorHandler->warning("DispBeamColumn2d::recvSelf() - %s\n",
+			    "failed to recv ID data");
+    return -1;
+  }    
+
+  this->setTag(idData(0));
+  connectedExternalNodes(0) = idData(1);
+  connectedExternalNodes(1) = idData(2);
+  
+  int crdTransfClassTag = idData(4);
+  int crdTransfDbTag = idData(5);
+
+  // create a new crdTransf object if one needed
+  if (crdTransf == 0 || crdTransf->getClassTag() != crdTransfClassTag) {
+      if (crdTransf != 0)
+	  delete crdTransf;
+
+      crdTransf = theBroker.getNewCrdTransf2d(crdTransfClassTag);
+
+      if (crdTransf == 0) {
+	  g3ErrorHandler->warning("DispBeamColumn2d::recvSelf() - %s %d\n",
+				  "failed to obtain a CrdTrans object with classTag",
+				  crdTransfClassTag);
+	  return -2;	  
+      }
+  }
+
+  crdTransf->setDbTag(crdTransfDbTag);
+
+  // invoke recvSelf on the crdTransf object
+  if (crdTransf->recvSelf(commitTag, theChannel, theBroker) < 0) {
+    g3ErrorHandler->warning("DispBeamColumn2d::sendSelf() - %s\n",
+			    "failed to recv crdTranf");
+    return -3;
+  }      
+  
+  //
+  // recv an ID for the sections containing each sections dbTag and classTag
+  //
+
+  ID idSections(2*idData(3));
+  int loc = 0;
+
+  if (theChannel.recvID(dbTag, commitTag, idSections) < 0)  {
+    g3ErrorHandler->warning("DispBeamColumn2d::recvSelf() - %s\n",
+			    "failed to recv ID data");
+    return -1;
+  }    
+
+  //
+  // now receive the sections
+  //
+  
+  if (numSections != idData(3)) {
+
+    //
+    // we do not have correct number of sections, must delete the old and create
+    // new ones before can recvSelf on the sections
+    //
+
+    // delete the old
+    if (numSections != 0) {
+      for (int i=0; i<numSections; i++)
+	delete theSections[i];
+      delete [] theSections;
+    }
+
+    // create a new array to hold pointers
+    theSections = new SectionForceDeformation *[idData(3)];
+    if (theSections == 0) {
+      g3ErrorHandler->fatal("DispBeamColumn2d::recvSelf() - %s %d\n",
+			      "out of memory creating sections array of size",idData(3));
+      return -1;
+    }    
+
+    // create a section and recvSelf on it
+    numSections = idData(3);
+    loc = 0;
+    
+    for (i=0; i<numSections; i++) {
+      int sectClassTag = idSections(loc);
+      int sectDbTag = idSections(loc+1);
+      loc += 2;
+      theSections[i] = theBroker.getNewSection(sectClassTag);
+      if (theSections[i] == 0) {
+	g3ErrorHandler->fatal("DispBeamColumn2d::recvSelf() - %s %d\n",
+			      "Broker could not create Section of class type",sectClassTag);
+	return -1;
+      }
+      theSections[i]->setDbTag(sectDbTag);
+      if (theSections[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
+	g3ErrorHandler->warning("DispBeamColumn2d::recvSelf() - section %d %s\n",
+				i,"failed to recv itself");
+	return -1;
+      }     
+    }
+
+  } else {
+
+    // 
+    // for each existing section, check it is of correct type
+    // (if not delete old & create a new one) then recvSelf on it
+    //
+    
+    loc = 0;
+    for (i=0; i<numSections; i++) {
+      int sectClassTag = idSections(loc);
+      int sectDbTag = idSections(loc+1);
+      loc += 2;
+
+      // check of correct type
+      if (theSections[i]->getClassTag() !=  sectClassTag) {
+	// delete the old section[i] and create a new one
+	delete theSections[i];
+	theSections[i] = theBroker.getNewSection(sectClassTag);
+	if (theSections[i] == 0) {
+	  g3ErrorHandler->fatal("DispBeamColumn2d::recvSelf() - %s %d\n",
+				"Broker could not create Section of class type",sectClassTag);
+	  return -1;
+	}
+      }
+
+      // recvSelf on it
+      theSections[i]->setDbTag(sectDbTag);
+      if (theSections[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
+	g3ErrorHandler->warning("DispBeamColumn2d::recvSelf() - section %d %s\n",
+				i,"failed to recv itself");
+	return -1;
+      }     
+    }
+  }
+
+  return 0;
 }
 
 void

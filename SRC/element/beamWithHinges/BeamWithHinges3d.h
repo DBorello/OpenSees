@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-06-07 18:03:51 $
+// $Revision: 1.8 $
+// $Date: 2002-06-07 21:50:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges3d.h,v $
 
 #ifndef BeamWithHinges3d_h
@@ -114,7 +114,8 @@ class BeamWithHinges3d: public Element
   
   Matrix kbCommit;
   Vector qCommit;
-  
+  Vector eCommit[2];  
+
   int initialFlag;
   
   int maxIter;
