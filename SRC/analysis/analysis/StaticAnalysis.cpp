@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 04:49:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.cpp,v $
                                                                         
                                                                         
@@ -124,6 +124,7 @@ StaticAnalysis::analyze(int numSteps)
 	    cerr << " at iteration: " << i << " with domain at load factor ";
 	    cerr << the_Domain->getCurrentTime() << endl;
 	    the_Domain->revertToLastCommit();
+
 	    return -2;
 	}
 
@@ -133,6 +134,8 @@ StaticAnalysis::analyze(int numSteps)
 	    cerr << " at iteration: " << i << " with domain at load factor ";
 	    cerr << the_Domain->getCurrentTime() << endl;
 	    the_Domain->revertToLastCommit();	    
+	    theIntegrator->revertToLastStep();
+
 	    return -3;
 	}    
 
@@ -143,6 +146,8 @@ StaticAnalysis::analyze(int numSteps)
 	    cerr << " at iteration: " << i << " with domain at load factor ";
 	    cerr << the_Domain->getCurrentTime() << endl;
 	    the_Domain->revertToLastCommit();	    
+	    theIntegrator->revertToLastStep();
+
 	    return -4;
 	}    	
     }
