@@ -63,11 +63,8 @@ class EvolutionLaw_S
     // Overloaded Insertion Operator
     // prints an Evolution Law_S's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const EvolutionLaw_S & EL)
-    {
-       os << "Scalar Evolution Law's Parameters: " << endln;
-       return os;
-    }
+    friend ostream& operator<< (ostream& os, const EvolutionLaw_S & EL);
+
 };
 
 

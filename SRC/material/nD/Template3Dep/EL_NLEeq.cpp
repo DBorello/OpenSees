@@ -49,9 +49,9 @@ EvolutionLaw_NL_Eeq::EvolutionLaw_NL_Eeq(const EvolutionLaw_NL_Eeq &NLE ) {
 //================================================================================
 //  Create a clone of itself 
 //================================================================================
-EvolutionLaw_S * EvolutionLaw_NL_Eeq::newObj() {
+EvolutionLaw_S* EvolutionLaw_NL_Eeq::newObj() {
     
-    EvolutionLaw_NL_Eeq *newEL = new EvolutionLaw_NL_Eeq( *this );
+    EvolutionLaw_S *newEL = new EvolutionLaw_NL_Eeq( *this );
     
     return newEL;
 
@@ -226,6 +226,24 @@ double EvolutionLaw_NL_Eeq::getd() const
     return d;
 }
 
+//================================================================================
+ostream& operator<< (ostream& os, const EvolutionLaw_NL_Eeq & NLEL)
+{
+    os.unsetf( ios::scientific );
+    os.precision(5);
+
+    //os.width(10);       
+    os << endln << "Nonlinear Evolution(plastic equivalent strain ) Law's parameters:" << endln;
+    os << "eeqEtaPeak = " << NLEL.geteeqEtaPeak() << "; ";
+    os << "etaResidual = " << NLEL.getetaResidual() << "; " << endln;
+    os << "etaStart = " << NLEL.getetaStart() << "; ";
+    os << "etaPeak = " << NLEL.getetaPeak() << "; ";
+    os << "e = " << NLEL.gete() << "; ";
+    os << "d = " << NLEL.getd() << "; " << endln;
+    //os.width(10);       
+           
+    return os;
+}  
 
 #endif
 

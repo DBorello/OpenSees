@@ -77,18 +77,7 @@ class EvolutionLaw_NL_Eij : public EvolutionLaw_T
     // Overloaded Insertion Operator	  Zhaohui Added Aug. 13, 2000
     // prints Linear EvolutionLaw's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const EvolutionLaw_NL_Eij & LEL)
-    {
-        os.unsetf( ios::scientific );
-        os.precision(5);
-
-        os.width(10);       
-        os << endln << "NonLinear Tensorial Evolution Law's parameters:" << endln;
-	os << "ha = " << LEL.getha() << "; ";
-	os << "Cr = " << LEL.getCr() << endln;
-               
-        return os;
-    }  
+    friend ostream& operator<< (ostream& os, const EvolutionLaw_NL_Eij & LEL);
 
     
 };

@@ -2,8 +2,8 @@
 //================================================================================
 //# COPYRIGHT (C):     :-))                                                      #
 //# PROJECT:           Object Oriented Finite Element Program                    #
-//# PURPOSE:           Mazari - Dafalias  potential criterion                    #
-//# CLASS:             MDPotentialSurface                                        #
+//# PURPOSE:           Manzari-Dafalias potential criterion 01 (with Pc)         #
+//# CLASS:             MDPotentialSurface01                                      #
 //#                                                                              #
 //# VERSION:                                                                     #
 //# LANGUAGE:          C++.ver >= 2.0 ( Borland C++ ver=3.00, SUN C++ ver=2.1 )  #
@@ -12,7 +12,7 @@
 //#                                                                              #
 //#                                                                              #
 //# DATE:              August 08 '00                                             #
-//# UPDATE HISTORY:                                                              #
+//# UPDATE HISTORY:    December 13 '00                                           #
 //#                                                                              #
 //#                                                                              #
 //#                                                                              #
@@ -31,20 +31,22 @@
 //================================================================================
 //
 
-#ifndef MD_PS_H    
-#define MD_PS_H
+#ifndef MD_PS01_H    
+#define MD_PS01_H
 
 #include "EPState.h"
 #include "PS.h"
 #include <BJtensor.h>
 
 
-class MDPotentialSurface : public PotentialSurface
+class MDPotentialSurface01 : public PotentialSurface
 {
+  private:
+    double Pc;
 
   public:
     PotentialSurface *newObj();  //create a colne of itself
-    MDPotentialSurface();          // Default constructor
+    MDPotentialSurface01(double pc);        // Default constructor
 
     tensor dQods(const EPState *EPS) const; 
     tensor d2Qods2(const EPState *EPS) const ;   
@@ -61,11 +63,8 @@ class MDPotentialSurface : public PotentialSurface
     // Overloaded Insertion Operator
     // prints an PotentialSurface's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const MDPotentialSurface &PS)
-    {
-       os << "Manzari-Dafalias Potential Surface Parameters: " << endln;
-       return os;
-    }
+    friend ostream& operator<< (ostream& os, const MDPotentialSurface01 &PS);
+
 };
 
 #endif

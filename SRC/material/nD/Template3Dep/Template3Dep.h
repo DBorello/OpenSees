@@ -41,8 +41,8 @@
 #include <straint.h>
 #include <BJtensor.h>
 
-#include <MD_YS.h>
-#include <MD_PS.h>
+//#include <MD_YS.h>
+//#include <MD_PS.h>
 #include <EL_S.h>
 #include <EL_T.h>
 #include <EPState.h>
@@ -143,7 +143,7 @@ class Template3Dep : public NDMaterial
     const Tensor &getStrainTensor(void) ;
 
     EPState * getEPS() const;
-    void setEPS( const EPState &eps);
+    void setEPS( EPState &eps);
 
     int commitState(void) ;
     int revertToLastCommit(void) ;
@@ -164,16 +164,17 @@ class Template3Dep : public NDMaterial
     void Print(ostream &s, int flag =0);
 
     //Private Utility method
-  private:
+//  private:
     
      //These are from formerly CDriver
      EPState ForwardEulerEPState( straintensor &strain_increment);
      
      EPState SemiBackwardEulerEPState( const straintensor &strain_increment);
      
-     EPState FESubIncrementation( straintensor &strain_increment,
+     EPState FESubIncrementation( const straintensor &strain_increment,
                                   int number_of_subincrements);
 
+  private:
      EPState BackwardEulerEPState( const straintensor &strain_increment);
 
      EPState BESubIncrementation( const straintensor & strain_increment,
@@ -215,7 +216,7 @@ class Template3Dep : public NDMaterial
     tensor ElasticComplianceTensor(void) const;
     tensor ElasticStiffnessTensor(void) const;
 
-    // private:  fmk - COMMENTED OUT THIS LINE 
+   private:
     YieldSurface * getYS() const;
     PotentialSurface * getPS() const;
 

@@ -34,7 +34,9 @@
 //================================================================================
 // Default constructor
 //================================================================================
-//EvolutionLaw_L_Eij::EvolutionLaw_L_Eij( double ad = 10.0) : a(ad) {}     
+EvolutionLaw_L_Eij::EvolutionLaw_L_Eij( double ad) 
+: a(ad)
+{}     
 
 //================================================================================
 // Copy constructor
@@ -51,7 +53,7 @@ EvolutionLaw_L_Eij::EvolutionLaw_L_Eij(const EvolutionLaw_L_Eij &LE ) {
 //================================================================================
 EvolutionLaw_T * EvolutionLaw_L_Eij::newObj() {
     
-    EvolutionLaw_L_Eij *newEL = new EvolutionLaw_L_Eij( *this );
+    EvolutionLaw_T *newEL = new EvolutionLaw_L_Eij( *this );
     
     return newEL;
 
@@ -84,31 +86,9 @@ EvolutionLaw_T * EvolutionLaw_L_Eij::newObj() {
 //
 //}   
 
-////================================================================================
-////  Updating corresponding internal variable           MOVED to CDriver.cpp       
-////================================================================================
-//
-//void EvolutionLaw_L_Eij::UpdateVar( EPState *EPS, int WhichOne) {
-//   
-//    //=========================================================================
-//    // Updating alfa1 by dalfa1 = a* de_eq
-//    
-//    // Calculate  e_eq = sqrt( 2.0 * epsilon_ij * epsilon_ij / 3.0)
-//    straintensor pstrain =  EPS->getdPlasticStrain(); 
-//    double e_eq  = pstrain.equivalent();
-//    //cout << "e_eq = " << e_eq << endln;
-//
-//    double dS =  e_eq * geta();
-//    double S  = EPS->getScalarVar( WhichOne );
-//
-//    EPS->setScalarVar(WhichOne, S + dS);
-//
-//}
-
-
  
 //================================================================================
-// Evaluating h_s = pow( 2.0*Rij_dev * Rij_dev/3.0, 0.5) (For the evaluation of Kp)
+// Evaluating h_s = a * dSodeij = a*Rij (For the evaluation of Kp)
 //================================================================================
 
 tensor EvolutionLaw_L_Eij::h_t( EPState *EPS, PotentialSurface *PS){
@@ -145,6 +125,18 @@ double EvolutionLaw_L_Eij::geta() const
     return a;
 }
 
+//================================================================================
+ostream& operator<< (ostream& os, const EvolutionLaw_L_Eij & LEL)
+{
+    os.unsetf( ios::scientific );
+    os.precision(5);
+
+    os.width(10);       
+    os << endln << "Linear Tensorial Evolution Law's parameters:" << endln;
+    os << "a = " << LEL.geta() << "; " << endln;
+           
+    return os;
+}  
 
 #endif
 

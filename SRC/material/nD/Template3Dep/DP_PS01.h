@@ -2,8 +2,8 @@
 //================================================================================
 //# COPYRIGHT (C):     :-))                                                      #
 //# PROJECT:           Object Oriented Finite Element Program                    #
-//# PURPOSE:           Mazari - Dafalias  potential criterion                    #
-//# CLASS:             MDPotentialSurface                                        #
+//# PURPOSE:           Manzari-Dafalias potential criterion(with Pc)             #
+//# CLASS:             DPPotentialSurface01                                      #
 //#                                                                              #
 //# VERSION:                                                                     #
 //# LANGUAGE:          C++.ver >= 2.0 ( Borland C++ ver=3.00, SUN C++ ver=2.1 )  #
@@ -12,7 +12,7 @@
 //#                                                                              #
 //#                                                                              #
 //# DATE:              August 08 '00                                             #
-//# UPDATE HISTORY:                                                              #
+//# UPDATE HISTORY:    December 13 '00                                           #
 //#                                                                              #
 //#                                                                              #
 //#                                                                              #
@@ -31,8 +31,8 @@
 //================================================================================
 //
 
-#ifndef MD_PS_H    
-#define MD_PS_H
+#ifndef DP_PS01_H    
+#define DP_PS01_H
 
 #include "EPState.h"
 #include "PS.h"
@@ -44,7 +44,7 @@ class MDPotentialSurface : public PotentialSurface
 
   public:
     PotentialSurface *newObj();  //create a colne of itself
-    MDPotentialSurface();          // Default constructor
+    MDPotentialSurface();        // Default constructor
 
     tensor dQods(const EPState *EPS) const; 
     tensor d2Qods2(const EPState *EPS) const ;   
@@ -53,7 +53,7 @@ class MDPotentialSurface : public PotentialSurface
     tensor dnods(const EPState *EPS) const;
     tensor dthetaoverds(const EPState *EPS) const;
     double dgoverdt(double theta, double c) const;
-    tensor apqdnods(const EPState *EPS) const;
+    tensor dpqdnods(const EPState *EPS) const;
     
     void print() { cout << *this; };
 

@@ -41,7 +41,7 @@
 
 PotentialSurface * VMPotentialSurface::newObj() {  
 
-     VMPotentialSurface  *new_YS = new VMPotentialSurface();
+     PotentialSurface  *new_YS = new VMPotentialSurface();
      return new_YS;
 
 }

@@ -30,7 +30,7 @@
 
 #define ITMAX 30
 #define MAX_STEP_COUNT 30
-
+#define	NUM_OF_SUB_INCR 10
 //#include <string.h>
 
 #include "Template3Dep.h"
@@ -123,6 +123,10 @@ Template3Dep::Template3Dep( int tag                       ,
        ELT4 = ELT4_->newObj();
     else
        ELT4 = 0;
+
+    //Initialze Eep using E-elastic
+    tensor E  = ElasticStiffnessTensor();
+    EPS->setEep( E );
 
 }
 
@@ -477,7 +481,40 @@ Template3Dep::Template3Dep()
 //================================================================================
 
 Template3Dep::~Template3Dep()
-{
+{   /*
+    if (YS) 
+       delete YS;
+
+    if (PS) 
+       delete PS;
+
+     if (EPS) 
+       delete EPS;
+
+     if (ELS1) 
+       delete ELS1;
+
+     if (ELS2) 
+       delete ELS2;
+     
+     if (ELS3) 
+       delete ELS3;
+     
+     if (ELS4) 
+       delete ELS4;
+
+     if (ELT1) 
+       delete ELT1;
+
+     if (ELT2) 
+       delete ELT2;
+     
+     if (ELT3) 
+       delete ELT3;
+     
+     if (ELT4) 
+       delete ELT4;
+     */
 
 }
 
@@ -544,13 +581,25 @@ tensor Template3Dep::ElasticComplianceTensor(void) const
   {
     tensor ret( 4, def_dim_4, 0.0 );
 
-    double Ey = this->EPS->getE();
+    double Ey = this->EPS->getEo();
+    //cerr << " Eo= " << Ey;
     if (Ey == 0) {
       cout << endln << "Ey = 0! Can't give you D!!" << endln;
       exit(1);
     }
     double nuP =this->EPS->getnu();
     
+    //Update E 
+    stresstensor stc = (this->EPS)->getStress();
+    double p = stc.p_hydrostatic();
+    //cerr << " p = " <<  p;
+
+    double po = 100.0; //kPa
+    if (p <= 0.5) 
+      p = 0.5;
+    Ey = Ey * pow(p/po, 0.6);
+    //cerr << " Ec = " << Ey << endln;
+
     // Kronecker delta tensor
     tensor I2("I", 2, def_dim_2);
 
@@ -573,9 +622,22 @@ tensor Template3Dep::ElasticComplianceTensor(void) const
 tensor Template3Dep::ElasticStiffnessTensor(void) const
   {
     tensor ret( 4, def_dim_4, 0.0 );
-
-    double E = this->EPS->getE();
+	         	           
+    double Ey = this->EPS->getEo();
     double nu =this->EPS->getnu();
+    
+    //Update E 
+    stresstensor stc = (this->EPS)->getStress();
+    double p = stc.p_hydrostatic();
+    //cerr << " p = " <<  p;
+
+    double po = 100.0; //kPa
+    if (p <= 0.5) 
+      p = 0.5;
+    double E = Ey * pow(p/po, 0.6);
+    //cerr << " Eo = " << Ey ;
+    //cerr << " Ec = " << E << endln;
+
     				       
     // Kronecker delta tensor
     tensor I2("I", 2, def_dim_2);
@@ -656,7 +718,7 @@ const Vector& Template3Dep::getStrain(void)
 }
 
 //================================================================================
-//??????????? what is the trial strain? Initial strain?
+// what is the trial strain? Initial strain?
 int Template3Dep::setTrialStrain(const Tensor &v)
 {
     EPS->setStrain(v);
@@ -675,25 +737,31 @@ int Template3Dep::setTrialStrain(const Tensor &v, const Tensor &r)
 
 int Template3Dep::setTrialStrainIncr(const Tensor &v)
 {
-    //Need to refine!  xxxxxxxxxxxxx
+    //Need refining
+    
     EPState tmp_EPS = BackwardEulerEPState(v);
     if ( tmp_EPS.getConverged() ) {
          //setTrialEPS( tmp_EPS );
          setEPS( tmp_EPS );
-         return 1;
+         return 0;
     }
     
-    int number_of_subincrements = 5;
-    tmp_EPS = BESubIncrementation(v, number_of_subincrements);
+    //int number_of_subincrements = 5;
+    tmp_EPS = BESubIncrementation(v, NUM_OF_SUB_INCR);
     if ( tmp_EPS.getConverged() ) {
          //setTrialEPS( tmp_EPS );
          setEPS( tmp_EPS );
-         return 1;
+         return 0;
     }
     else {
-         //setTrialEPS( tmp_EPS );
-	 return 0;
+         setEPS( tmp_EPS );
+    	 return 1;
     }
+    
+    //// for testing MD model only for no BE
+    //EPState tmp_EPS = FESubIncrementation(v, NUM_OF_SUB_INCR);
+    //setEPS( tmp_EPS );
+    return 1;
 }
 
 //================================================================================
@@ -713,6 +781,13 @@ const tensor& Template3Dep::getTangentTensor(void)
 //================================================================================
 const Tensor& Template3Dep::getStressTensor(void)
 {
+    //cout << *EPS;
+    //stresstensor tmp;
+    //tmp =  EPS->getStress();
+    //cout << "EPS->getStress() " << EPS->getStress() << endln;
+    
+    //Something funny!!! happened here when returning EPS->getStress()
+    // This function will return wrong Stress.
     return EPS->getStress();
 }
 
@@ -725,21 +800,24 @@ const Tensor& Template3Dep::getStrainTensor(void)
 //================================================================================
 int Template3Dep::commitState(void)
 {
-	// Nothing to commit
-	return 0;
+	int err;
+	err = getEPS()->commitState();
+	return err;
 }
 
 //================================================================================
 int Template3Dep::revertToLastCommit(void)
 {
-	// Nothing to commit
-	return 0;
+	int err;
+	err = EPS->revertToLastCommit();
+	return err;
 }
 //================================================================================
 int Template3Dep::revertToStart(void)
 {
-	// Nothing to commit
-	return 0;
+	int err;
+	err = EPS->revertToStart();
+	return err;
 }
 
 ////================================================================================
@@ -810,11 +888,11 @@ const char *Template3Dep::getType(void) const
 }
 
 //================================================================================
-//??What is the Order? might be the
+//??What is the Order????????? might be the
 
 int Template3Dep::getOrder(void) const
 {
-    return 9;
+    return 6;
 }
 
 //================================================================================
@@ -845,11 +923,91 @@ Template3Dep::Print(ostream &s, int flag)
 //================================================================================
 // Set new EPState
 //================================================================================
-void Template3Dep::setEPS(const  EPState & rval) {   
-          
-     EPState eps = rval;
-     EPS = eps.newObj();
+
+void Template3Dep::setEPS( EPState & rval) 
+{   
+    //EPState eps = rval; older buggy one
+    //EPS = rval.newObj();
+/*
+//EPS->setEo(rval.getEo());	                
+EPS->setE(rval.getE());                 	 
+//EPS->setnu(getnu());                 	 
+//EPS->setrho(getrho());                	 
+EPS->setStress(rval.getStress());             	 
+EPS->setStrain(rval.getStrain());             	 
+EPS->setElasticStrain(rval.getElasticStrain());      	 
+EPS->setPlasticStrain(rval.getPlasticStrain());      	 
+EPS->setdElasticStrain(rval.getdElasticStrain());     	 
+EPS->setdPlasticStrain(rval.getdPlasticStrain());     	 
+//EPS->setNScalarVar(rval.getNScalarVar());         	 
+for (int i = 0; i <rval.getNScalarVar(); i++)
+  EPS->setScalarVar(i, rval.getScalarVar(i));
+
+
+//EPS->setNTensorVar(rval.getNTensorVar());         	 
+EPS->setTensorVar(rval.getTensorVar());          	 
+EPS->setEep(rval.getEep());           	 
+EPS->Stress_commit=(rval.getStress_commit());      	 
+EPS->Strain_commit=(rval.getStrain_commit());      	 
+
+for (int i = 0; i <rval.getNScalarVar(); i++)
+  EPS->ScalarVar_commit[i] = rval.getScalarVar_commit()[i];   	 
+
+for (int i = 0; i <rval.getNTensorVar(); i++)
+   EPS->TensorVar_commit[i] = (rval.getTensorVar_commit()[i]);   	 
+
+EPS->Eep_commit = (rval.getEep_commit());         	 
+//EPS->setStress_init(getStress_init());        	 
+//EPS->setStrain_init(getStrain_init());        	 
+//EPS->setScalarVar_init(getScalarVar_init());     	 
+//EPS->setTensorVar_init(getTensorVar_init());     	 
+//EPS->setEep_init(getEep_init());           	 
+EPS->setConverged(rval.getConverged());           	 
+
+*/   
+    
+    EPS->setEo(rval.getEo());
+    EPS->setE(rval.getE());
+    EPS->setStress(rval.getStress());
+    EPS->setStrain(rval.getStrain());
+    EPS->setElasticStrain(rval.getElasticStrain());
+    EPS->setPlasticStrain(rval.getPlasticStrain());
+    EPS->setdElasticStrain(rval.getdElasticStrain());
+    EPS->setdPlasticStrain(rval.getdPlasticStrain());
+    EPS->setNScalarVar( rval.getNScalarVar() );
+
+    for (int i = 0; i <rval.getNScalarVar(); i++)
+      EPS->setScalarVar(i+1, rval.getScalarVar(i+1));
+    
+    
+    EPS->setNTensorVar( rval.getNTensorVar() );
+    EPS->setTensorVar(rval.getTensorVar());          	 
+    EPS->setEep(rval.getEep());           	 
+    EPS->setStress_commit(rval.getStress_commit());      	 
+    EPS->setStrain_commit(rval.getStrain_commit());      	 
+    
+    for (int i = 0; i <rval.getNScalarVar(); i++)
+      EPS->setScalarVar_commit(i+1, rval.getScalarVar_commit(i+1));   	 
+    
+    for (int i = 0; i <rval.getNTensorVar(); i++)
+       EPS->setTensorVar_commit(i+1, rval.getTensorVar_commit(i+1));   	 
+    
+    EPS->Eep_commit = (rval.getEep_commit());
+    EPS->Stress_init = rval.getStress_init();
+    EPS->Strain_init = rval.getStrain_init();
+
+    for (int i = 0; i <rval.getNScalarVar(); i++)
+       EPS->setScalarVar_init(i+1, rval.getScalarVar_init(i+1));
+
+    for (int i = 0; i <rval.getNTensorVar(); i++)
+       EPS->setTensorVar_init(i+1, rval.getTensorVar_init(i+1));
+
+    EPS->Eep_init = rval.getEep_init();
+    EPS->setConverged(rval.getConverged());    
+   
+   
 }    	   
+
 
 
 //================================================================================
@@ -964,14 +1122,18 @@ EPState Template3Dep::PredictorEPState(straintensor & strain_increment)
 //================================================================================
 EPState Template3Dep::ForwardEulerEPState( straintensor &strain_increment)
 {
+    // Volumetric strain
+    double st_vol = strain_increment.p_hydrostatic();
+
     //EPState forwardEPS( *(material_point->getEPS()) ); 
     EPState forwardEPS( *(this->getEPS()) ); 
     //cout <<"start eps: " <<   forwardEPS;
-    //cout << "strain_increment " << strain_increment << endln;
+    cout << "\nForwardEulerEPState  strain_increment " << strain_increment << endln;
     
     // Building elasticity tensor
-    tensor Eep  = ElasticStiffnessTensor();
     tensor E    = ElasticStiffnessTensor();
+    //tensor Eep  = ElasticStiffnessTensor();
+    tensor Eep  = E;
     tensor D    = ElasticComplianceTensor();
     E.null_indices();
     D.null_indices();
@@ -1001,17 +1163,17 @@ EPState Template3Dep::ForwardEulerEPState( straintensor &strain_increment)
     
     f_start = this->getYS()->f( &startEPS );  
     //::printf("\n##############  f_start = %.10e  ",f_start);
-    //cout << "\n#######  f_start = " << f_start;
+    cout << "\n#######  f_start = " << f_start;
     
     f_pred =  this->getYS()->f( &ElasticPredictorEPS );
     //::printf("##############  f_pred = %.10e\n\n",f_pred);
-    //cout << "  #######  f_pred = " << f_pred << "\n";
+    cout << "  #######  f_pred = " << f_pred << "\n";
     
     stresstensor intersection_stress = start_stress; // added 20april2000 for forward euler
     stresstensor elpl_start_stress = start_stress;
     stresstensor true_stress_increment = stress_increment;
     
-    if ( f_start <= 0 && f_pred <= 0 )
+    if ( f_start <= 0 && f_pred <= 0 || f_start > f_pred )
       {
         //Updating elastic strain increment
         straintensor estrain = ElasticPredictorEPS.getElasticStrain();
@@ -1021,10 +1183,13 @@ EPState Template3Dep::ForwardEulerEPState( straintensor &strain_increment)
         ElasticPredictorEPS.setElasticStrain( estrain );
         ElasticPredictorEPS.setStrain( tstrain );
         ElasticPredictorEPS.setdElasticStrain( strain_increment );
-    
-        //Evolve parameters like void ratio (e) according to elastic strain
+        
+        //Evolve parameters like void ratio (e) according to elastic strain and elastic stress--for MD model especially
         //double Delta_lambda = 0.0;
         //material_point.EL->UpdateVar( &ElasticPredictorEPS, 1);
+        // Update E_Young and e according to current stress state before evaluate ElasticStiffnessTensor
+        if ( getELT1() ) 
+	    getELT1()->updateEeDm(&ElasticPredictorEPS, st_vol, 0.0);
         
         //cout <<" strain_increment.Iinvariant1() " << strain_increment.Iinvariant1() << endln;
 
@@ -1036,7 +1201,7 @@ EPState Template3Dep::ForwardEulerEPState( straintensor &strain_increment)
       {
         intersection_stress =
            yield_surface_cross( start_stress, elastic_predictor_stress);
-        //cout  << "    start_stress: " <<  start_stress << endln;
+        cout  << "    start_stress: " <<  start_stress << endln;
         //cout  << "    Intersection_stress: " <<  intersection_stress << endln;
     
         IntersectionEPS.setStress( intersection_stress );
@@ -1047,6 +1212,9 @@ EPState Template3Dep::ForwardEulerEPState( straintensor &strain_increment)
       
         true_stress_increment = elastic_predictor_stress - elpl_start_stress;
         //true_stress_increment.null_indices();
+ 
+        if ( getELT1() ) 
+	    getELT1()->updateEeDm(&ElasticPredictorEPS, st_vol, 0.0);
     
       }
     
@@ -1054,7 +1222,7 @@ EPState Template3Dep::ForwardEulerEPState( straintensor &strain_increment)
     forwardEPS.setStress( elpl_start_stress );
     
     //cout <<"elpl start eps: " <<   forwardEPS;
-    //double f_cross =  material_point.YS->f( &forwardEPS );
+    //double f_cross =  this->getYS()->f( &forwardEPS );
     //cout << " #######  f_cross = " << f_cross << "\n";
     
     //set the initial value of D once the current stress hits the y.s. for Manzari-Dafalias Model
@@ -1320,7 +1488,7 @@ EPState Template3Dep::ForwardEulerEPState( straintensor &strain_increment)
         Eep =  Eep - Ep; 
 
      	//cout <<" after calculation---Eep.rank()= " << Eep.rank() <<endln;
-	//Eep.printshort(" IN ConDriver ");
+	//Eep.printshort(" IN template ");
          
         //--// before the surface is been updated !
         //--//        f_Final = Criterion.f(elastic_plastic_stress);
@@ -1383,6 +1551,11 @@ EPState Template3Dep::ForwardEulerEPState( straintensor &strain_increment)
               forwardEPS.setTensorVar(ii, new_T );
         }
        
+        // Update E_Young and e according to current stress state before evaluate ElasticStiffnessTensor
+        int err = 0;
+	if ( getELT1() ) 
+	    err = getELT1()->updateEeDm(&forwardEPS, st_vol, Delta_lambda);
+           
         //tensor tempx  = plastic_strain("ij") * plastic_strain("ij");
         //double tempxd = tempx.trace();
         //double e_eq  = pow( 2.0 * tempxd / 3.0, 0.5 );
@@ -1630,6 +1803,9 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
   // Temp matertial point
   //NDMaterial MP( material_point );
   //NDMaterial *MP = this->getCopy();
+
+  // Volumetric strain
+  double st_vol = strain_increment.p_hydrostatic();
   
   //EPState to be returned, it can be elastic or elastic-plastic EPState
   EPState backwardEPS( * (this->getEPS()) ); 
@@ -1640,11 +1816,11 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
   //Output for plotting
   cout.precision(5); 
   cout.width(10);
-  cout << " " << start_stress.p_hydrostatic() << " ";
+  //cout << " strain_increment " << strain_increment << "\n";
   
   cout.precision(5); 
   cout.width(10);
-  cout << start_stress.q_deviatoric() << endln;
+  //cout << "start_stress " <<  start_stress;
       
   // Pulling out some tensor and double definitions
   tensor I2("I", 2, def_dim_2);
@@ -1720,8 +1896,13 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
 
   EPState ElasticPredictorEPS( startEPS );
   stresstensor elastic_predictor_stress = start_stress + stress_increment;
+
   ElasticPredictorEPS.setStress( elastic_predictor_stress );
   //  elastic_predictor_stress.reportshortpqtheta("\n . . . .  ELASTIC PREDICTOR stress");
+
+  cout.precision(5); 
+  cout.width(10);
+  //cout << "elastic predictor " <<  elastic_predictor_stress << endln;
 
   stresstensor elastic_plastic_predictor_stress;
   EPState EP_PredictorEPS( startEPS );
@@ -1732,7 +1913,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
   // f_pred = Criterion.f(elastic_predictor_stress);
   //::fprintf(stdout,"tst##############  f_pred = %.10e\n",f_pred);
   double f_pred =  getYS()->f( &ElasticPredictorEPS );
-  //cout << "*************** f_pred = " << f_pred << endln;
+  //cout << "  **** f_pred **** " << f_pred << endln;
   //int region = 5;
 
   //double h_s      = 0.0;
@@ -1767,9 +1948,13 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
       ElasticPredictorEPS.setStrain( tstrain );
       ElasticPredictorEPS.setdElasticStrain( strain_increment );
       
+      //if ( getELT1() ) 
+      //   getELT1()->updateEeDm(&ElasticPredictorEPS, st_vol, 0.0);
+
       //Set Elasto-Plastic stiffness tensor
       ElasticPredictorEPS.setEep(E);
       ElasticPredictorEPS.setConverged(TRUE);
+      //E.printshort(" BE -- Eep ");
        
       backwardEPS = ElasticPredictorEPS;
       return backwardEPS;
@@ -1853,12 +2038,12 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
         ////::printf("  Delta_lambda = Felplpredictor/lower =%.8e \n", Delta_lambda);
 
 	// Original segment
-        elastic_plastic_predictor_stress = elastic_predictor_stress - E("ijkl")*aC("kl")*Delta_lambda;
-        EP_PredictorEPS.setStress( elastic_plastic_predictor_stress );
+        //elastic_plastic_predictor_stress = elastic_predictor_stress - E("ijkl")*aC("kl")*Delta_lambda;
+        //EP_PredictorEPS.setStress( elastic_plastic_predictor_stress );
 
 	//Zhaohui modified, sometimes give much better convergence rate
-        //elastic_plastic_predictor_stress = EP_PredictorEPS.getStress();
-	//cout << "elastic_plastic_predictor_stress" << elastic_plastic_predictor_stress;
+        elastic_plastic_predictor_stress = EP_PredictorEPS.getStress();
+	cout << "elastic_plastic_predictor_stress" << elastic_plastic_predictor_stress;
 	
         cout.precision(5); 
         cout.width(10);
@@ -2086,8 +2271,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
              T  = EP_PredictorEPS.getTensorVar(ii);     // Get the old value of the tensor internal var
              new_T = T + dT;
              EP_PredictorEPS.setTensorVar(ii, new_T );	// Update tensorial scalar var
-          }
-	      
+          }	      
  	  
 	  //=======          Dq_ast = Delta_lambda * h_ * just_this_PP;
           //q_ast = q_ast_entry + Dq_ast;
@@ -2106,7 +2290,9 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
           //sigmaBack.deviator().reportshort("\n after ======== SigmaBack");
           //sigmaBack.reportshortpqtheta("\n after ======== SigmaBack");
 	  
-
+	  //temp trick
+       if  (sigmaBack.p_hydrostatic() > 0)
+       {
           //======          sigmaBack = elastic_predictor_stress + Dsigma;
           //sigmaBack.reportshortpqtheta("BE................  NR sigmaBack   ");
           //sigmaBack.reportAnim();
@@ -2122,6 +2308,15 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
           //::printf("  F_bE=%.10e (%.10e)\n", Felplpredictor,Ftolerance);
 	  Felplpredictor = getYS()->f( &EP_PredictorEPS );
           //::printf("                    F_bE = %.10e (%.10e)\n", Felplpredictor, Ftolerance);
+       }
+       else
+       {   
+          sigmaBack= sigmaBack.pqtheta2stress(0.1, 0.0, 0.0);
+          Felplpredictor = 0;
+          backwardEPS.setStress(sigmaBack);
+          backwardEPS.setConverged(TRUE);
+          return backwardEPS;
+       }
 
           //double tempkappa1 = kappa_cone_get();
           //double tempdFodeta = dFoverdeta(sigmaBack);
@@ -2139,28 +2334,46 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
 	  cout.precision(5); 
           cout.width(10);
           cout << " " << sigmaBack.p_hydrostatic() << " ";
+          //cerr << " " << sigmaBack.p_hydrostatic() << " ";
 	  
 	  cout.precision(5); 
           cout.width(10);
           cout << sigmaBack.q_deviatoric() << " ";
+          //cerr << sigmaBack.q_deviatoric() << " ";
+	    
+	  cout.precision(5); 
+          cout.width(10);
+          cout << " Felpl " << Felplpredictor;
+          //cerr << " Felpl " << Felplpredictor;
 
 	  cout.precision(5); 
           cout.width(10);
-          cout << Delta_lambda << endln;
+          cout << " tol " << Ftolerance << endln;
+          //cerr << " tol " << Ftolerance << " " << step_counter << endln;
 
 	  //::printf("         ...........................  end of step %d\n", step_counter);// getchar();
           step_counter++;
         }
-          //out07may97      while ( absFelplpredictor > Ftolerance &&
-          //out07may97              step_counter <= MAX_STEP_COUNT  ); // if more iterations than prescribed
+        //cerr << " " << sigmaBack.p_hydrostatic() << " ";
+        //cerr << sigmaBack.q_deviatoric() << " ";
+        //cerr << " Felpl " << Felplpredictor;
+        //cerr << " tol " << Ftolerance << " " << step_counter << endln;
+    
+        // Update E_Young and e according to current stress state before evaluate ElasticStiffnessTensor
+        int err = 0;
+        if ( getELT1() ) 
+           err = getELT1()->updateEeDm(&EP_PredictorEPS, st_vol, Delta_lambda);
+	
+	//out07may97      while ( absFelplpredictor > Ftolerance &&
+        //out07may97              step_counter <= MAX_STEP_COUNT  ); // if more iterations than prescribed
      
-          //**********
-          //**********
-          //**********
-          //**********
+        //**********
+        //**********
+        //**********
+        //**********
         if ( step_counter >= MAX_STEP_COUNT  )
         {
-           g3ErrorHandler->warning("Template3Dep::BackwardEulerEPState   Step_counter > MAX_STEP_COUNT %d iterations", MAX_STEP_COUNT );
+           //g3ErrorHandler->warning("Template3Dep::BackwardEulerEPState   Step_counter > MAX_STEP_COUNT %d iterations", MAX_STEP_COUNT );
        	   EP_PredictorEPS.setConverged( false );
 	   //::exit(1);
         }
@@ -2304,7 +2517,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
 //================================================================================
 // New EPState using Forward Euler Subincrement Euler Algorithm
 //================================================================================
-EPState Template3Dep::FESubIncrementation( straintensor & strain_increment,
+EPState Template3Dep::FESubIncrementation( const straintensor & strain_increment,
                                            int number_of_subincrements)                                                 
 {
     
@@ -2322,9 +2535,12 @@ EPState Template3Dep::FESubIncrementation( straintensor & strain_increment,
     double sub = 1./( (double) number_of_subincrements );
     //stresstensor elastic_subincremental_stress = stress_increment * sub;
 
-    straintensor elastic_subincremental_strain = strain_increment * sub;
+    straintensor tempp = strain_increment;
+    straintensor elastic_subincremental_strain = tempp * sub;
     straintensor total_strain = elastic_subincremental_strain;
     //elastic_subincremental_stress.reportshort("SUB INCREMENT in stresses\n");
+    cout << "INCREMENT strain " << strain_increment << endln ;
+    cout << "SUB INCREMENT strain " << elastic_subincremental_strain << endln ;
    
     for( int steps=0 ; steps < number_of_subincrements ; steps++ ){
 
@@ -2346,6 +2562,8 @@ EPState Template3Dep::FESubIncrementation( straintensor & strain_increment,
 	cout << "p " << back_stress.p_hydrostatic() << "  "; 
 	cout << setw(7);
 	cout << "q " << back_stress.q_deviatoric() << "  "; 
+	cout << setw(7);
+	cout << " theta " << back_stress.theta() << "  "; 
 	cout << setw(7);
 	cout << "alfa1 " << FESI_EPS.getScalarVar(1) << "  "; 
 	cout << setw(7);
@@ -2393,12 +2611,14 @@ EPState Template3Dep::BESubIncrementation( const straintensor & strain_increment
 
         //start_stress.reportshort("START stress\n");
         BESI_EPS = BackwardEulerEPState( elastic_subincremental_strain);
-        if ( BESI_EPS.getConverged() )
+        //if ( !BESI_EPS.getConverged() )
       	    this->setEPS( BESI_EPS );
-	else {
-            g3ErrorHandler->fatal("Template3Dep::BESubIncrementation  failed to converge using %d step sub-BackwardEuler Algor.", number_of_subincrements );
-	    exit(1);
-	}     
+	//else {
+            //g3ErrorHandler->warning("Template3Dep::BESubIncrementation  failed to converge using %d step sub-BackwardEuler Algor.", number_of_subincrements );
+	    //exit(1);
+            //g3ErrorHandler->fatal("Template3Dep::BESubIncrementation  failed to converge using %d step sub-BackwardEuler Algor.", number_of_subincrements );
+	    //exit(1);
+	//}     
 	                      
         //back_stress = BESI_EPS.getStress();
 	//cout.unsetf(ios::showpos);
@@ -2652,41 +2872,41 @@ ostream& operator<< (ostream& os, const Template3Dep & MP)
 
     cout << endln << "Scalar Evolution Laws: " << endln; 
     if ( MP.ELS1 ){
-       cout << "\nFor 1st scalar var:";
+       os << "\nFor 1st scalar var:\n";
        MP.ELS1->print();
     }
     
     if ( MP.ELS2 ){
-       cout << "\nFor 2nd scalar var:";
+       os << "\nFor 2nd scalar var:\n";
        MP.ELS2->print();
     }
     
     if ( MP.ELS3 ){
-       cout << "\nFor 3rd scalar var:";
+       os << "\nFor 3rd scalar var:\n";
        MP.ELS3->print();
     }
     
     if ( MP.ELS4 ){
-       cout << "\nFor 4th scalar var:";
+       os << "\nFor 4th scalar var:\n";
        MP.ELS4->print();
     }
     
 
     cout << endln << "Tensorial Evolution Laws: " << endln; 
     if ( MP.ELT1 ){
-       cout << "\nFor 1st tensorial var:";
+       os << "\nFor 1st tensorial var:\n";
        MP.ELT1->print();
     }
     if ( MP.ELT2 ){
-       cout << "\nFor 2nd tensorial var:";
+       os << "\nFor 2nd tensorial var:\n";
        MP.ELT2->print();
     }
     if ( MP.ELT3 ){
-       cout << "\nFor 3rd tensorial var:";
+       os << "\nFor 3rd tensorial var:\n";
        MP.ELT3->print();
     }
     if ( MP.ELT4 ){
-       cout << "\nFor 4th tensorial var:";
+       os << "\nFor 4th tensorial var:\n";
        MP.ELT4->print();
     }
 

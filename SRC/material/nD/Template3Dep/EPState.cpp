@@ -274,8 +274,8 @@ EPState::EPState(double             Eod,
 
 EPState::EPState( ) {
 
-      Eo               = 80000.0;
-      E_Young          = 80000.0;
+      Eo               = 3000.0;
+      E_Young          = 3000.0;
       nu_Poisson       = 0.3;	     
       rho_mass_density = 0.0; 
       Eep = tensor( 4, def_dim_4, 0.0 );
@@ -385,6 +385,28 @@ EPState::EPState( const EPState &rhs ) {
       Converged  =  rhs.getConverged();
      
 }      				 
+
+//================================================================================
+// Copy constructor
+//================================================================================
+EPState::~EPState() {         
+    
+    //if ( ScalarVar )
+    //  delete [] ScalarVar;
+    //if ( TensorVar )
+    //  delete TensorVar; 
+
+    //if ( ScalarVar_commit )
+    //  delete ScalarVar_commit;
+    //if ( TensorVar_commit )  
+    //  delete TensorVar_commit; 
+
+    //if ( ScalarVar_init )
+    //  delete ScalarVar_init;
+    //if ( TensorVar_init )
+    //  delete TensorVar_init; 
+
+}
 
 
 //================================================================================
@@ -587,6 +609,12 @@ tensor EPState::getEep_init() const {
 
 
 //================================================================================
+void EPState::setEo( double Eod ) { 
+      Eo = Eod; 
+}
+
+
+//================================================================================
 void EPState::setE( double Ey ) { 
       E_Young = Ey; 
 }
@@ -607,6 +635,30 @@ void EPState::setIterativeStress(const stresstensor &newstress ) {
 void EPState::setStrain(const straintensor &newstrain ) {
 
       CurrentStrain = newstrain; 
+
+}
+
+//================================================================================
+void EPState::setStress_commit(const stresstensor &newstress ) { 
+      Stress_commit = newstress; 
+}
+	       
+//================================================================================
+void EPState::setStrain_commit(const straintensor &newstrain ) {
+
+      Strain_commit = newstrain; 
+
+}
+
+//================================================================================
+void EPState::setStress_init(const stresstensor &newstress ) { 
+      Stress_init = newstress; 
+}
+	       
+//================================================================================
+void EPState::setStrain_init(const straintensor &newstrain ) {
+
+      Strain_init = newstrain; 
 
 }
 
@@ -662,8 +714,11 @@ double EPState::getScalarVar( int WhichOne) const {
       else 
       {
          g3ErrorHandler->fatal("EPState::getScalarVar Out of ScalarVar's range %d!", getNScalarVar() );
+         return 0.0;
 	 exit(1);
       }
+      
+      return 0.0;
 
 }
 
@@ -673,6 +728,8 @@ double EPState::getScalarVar( int WhichOne) const {
 //================================================================================
 stresstensor EPState::getTensorVar(int WhichOne) const { 
 
+      stresstensor st;
+      
       if ( WhichOne <= getNTensorVar() )  
          return TensorVar[ WhichOne - 1 ]; 
       else 
@@ -681,6 +738,7 @@ stresstensor EPState::getTensorVar(int WhichOne) const {
 	 exit(1);
       }
 
+      return st;
 
 }
 
@@ -694,9 +752,31 @@ double * EPState::getScalarVar() {
 }
 
 //================================================================================
-double * EPState::getScalarVar_commit() {
+void EPState::setNScalarVar(int rval) {
+      
+      NScalarVar = rval; 
+      
+}
+
+//================================================================================
+void EPState::setNTensorVar(int rval) {
+      
+      NTensorVar = rval; 
+      
+}
+
+
+//================================================================================
+double * EPState::getScalarVar_commit( ) {
       
       return ScalarVar_commit; 
+      
+}
+
+//================================================================================
+double EPState::getScalarVar_commit( int i) {
+      
+      return ScalarVar_commit[i-1]; 
       
 }
 
@@ -704,6 +784,13 @@ double * EPState::getScalarVar_commit() {
 double * EPState::getScalarVar_init() {
       
       return ScalarVar_init; 
+      
+}
+
+//================================================================================
+double EPState::getScalarVar_init(int i) {
+      
+      return ScalarVar_init[i]; 
       
 }
 
@@ -720,6 +807,20 @@ stresstensor * EPState::getTensorVar() {
 stresstensor * EPState::getTensorVar_commit() { 
     
       return TensorVar_commit; 
+
+}
+
+//================================================================================
+stresstensor EPState::getTensorVar_commit(int i) { 
+    
+      return TensorVar_commit[i-1]; 
+
+}
+
+//================================================================================
+stresstensor EPState::getTensorVar_init(int i) { 
+    
+      return TensorVar_init[i-1]; 
 
 }
 
@@ -743,9 +844,31 @@ void EPState::setScalarVar(int WhichOne, double rval) {
          //cout << " Out of ScalarVar's range!";	  
 	 exit(1);
       }
-      
-      
 }
+void EPState::setScalarVar_commit(int WhichOne, double rval) { 
+
+      if ( WhichOne <= getNScalarVar() )  
+         ScalarVar_commit[ WhichOne - 1 ] = rval; 
+      else 
+      {
+         g3ErrorHandler->fatal("EPState::setScalarVar Out of ScalarVar's range %d!", getNScalarVar() );
+         //cout << " Out of ScalarVar's range!";	  
+	 exit(1);
+      }
+}
+
+void EPState::setScalarVar_init(int WhichOne, double rval) { 
+
+      if ( WhichOne <= getNScalarVar() )  
+         ScalarVar_init[ WhichOne - 1 ] = rval; 
+      else 
+      {
+         g3ErrorHandler->fatal("EPState::setScalarVar Out of ScalarVar's range %d!", getNScalarVar() );
+         //cout << " Out of ScalarVar's range!";	  
+	 exit(1);
+      }
+}
+
 
 //================================================================================
 // set nth Tensor Var.... Starting from 1!!
@@ -761,6 +884,32 @@ void EPState::setTensorVar(int WhichOne, const stresstensor &rval) {
       }
 
 }
+//================================================================================
+void EPState::setTensorVar_commit(int WhichOne, const stresstensor &rval) { 
+
+      if ( WhichOne <= getNTensorVar() )  
+         TensorVar_commit[ WhichOne - 1 ] = rval;
+      else 
+      {
+         g3ErrorHandler->fatal("EPState::setTensorVar Out of Tensor Var's range %d!", getNTensorVar() );	  
+	 exit(1);
+      }
+
+}
+//================================================================================
+void EPState::setTensorVar_init(int WhichOne, const stresstensor &rval) { 
+
+      if ( WhichOne <= getNTensorVar() )  
+         TensorVar_init[ WhichOne - 1 ] = rval;
+      else 
+      {
+         g3ErrorHandler->fatal("EPState::setTensorVar Out of Tensor Var's range %d!", getNTensorVar() );	  
+	 exit(1);
+      }
+
+}
+
+
 //================================================================================
 // set all Scalar Vars ..No boundary checking!
 //================================================================================
@@ -838,9 +987,9 @@ int EPState::commitState () {
 
       int err = 0;
       // commit the variables state
-      CurrentStress   = Stress_init;
-      CurrentStrain   = Strain_init;
-      Eep = Eep_init;
+      //CurrentStress   = Stress_init;
+      //CurrentStrain   = Strain_init;
+      //Eep = Eep_init;
 
       Stress_commit   = CurrentStress;
       Strain_commit   = CurrentStrain;

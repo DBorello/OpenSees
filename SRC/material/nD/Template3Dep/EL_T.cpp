@@ -43,17 +43,27 @@ EvolutionLaw_T * EvolutionLaw_T::newObj() {
 
 }
 
-
 //================================================================================
 // Evaluating h_ ( for the evaluation of Kp )
 //================================================================================
 
-tensor EvolutionLaw_T::h_t( EPState *EPS, PotentialSurface *PS){
-
+tensor EvolutionLaw_T::h_t( EPState *EPS, PotentialSurface *PS)
+{
+    // Return zero valued tensor
     stresstensor temp;
     return temp;
-
 }
+
+//================================================================================
+// updating E, e D and m for Manzari-Dafalias model
+//================================================================================
+
+int EvolutionLaw_T::updateEeDm( EPState *EPS, double st_vol, double dLamda)
+{
+   // do nothing
+   return 0;
+}  
+
 
 
 //================================================================================
@@ -62,6 +72,16 @@ tensor EvolutionLaw_T::h_t( EPState *EPS, PotentialSurface *PS){
 void EvolutionLaw_T::print()
 {
     cout << (*this);
+}
+
+//================================================================================
+// Overloaded Insertion Operator
+// prints base Evolution Law_T's contents 
+//================================================================================
+ostream& operator<< (ostream& os, const EvolutionLaw_T & EL)
+{
+   os << "Base of Tensorial Evolution Law's Parameters: Nothing" << endln;
+   return os;
 }
 
 

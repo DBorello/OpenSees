@@ -21,8 +21,8 @@
 #                                                                                #
 # SHORT EXPLANATION: This is a nonlinear evolution law for the evoltion of a     #
 #                    tensorial variable alpha which depends on plastic strain    #
-#                    i.e. dalpha = 2/3*ha*dE_ij -Cr*de_eq*alpha_ij(Amstrong-     #
-//                   Frederick Model                                             #
+#                    i.e. dalpha_ij = 2/3*ha*dE_ij -Cr*de_eq*alpha_ij( Amstrong- #
+//                   Frederick Model)                                            #
 //================================================================================
 */
 
@@ -49,7 +49,7 @@ EvolutionLaw_NL_Eij::EvolutionLaw_NL_Eij(const EvolutionLaw_NL_Eij &LE ) {
 //================================================================================
 EvolutionLaw_T * EvolutionLaw_NL_Eij::newObj() {
     
-    EvolutionLaw_NL_Eij *newEL = new EvolutionLaw_NL_Eij( *this );
+    EvolutionLaw_T *newEL = new EvolutionLaw_NL_Eij( *this );
     
     return newEL;
 
@@ -106,7 +106,7 @@ EvolutionLaw_T * EvolutionLaw_NL_Eij::newObj() {
 
  
 //================================================================================
-// Evaluating h_s = pow( 2.0*Rij_dev * Rij_dev/3.0, 0.5) (For the evaluation of Kp)
+// Evaluating h_s = 2*ha*Rij/3 - Cr*pow( 2.0*Rij_dev * Rij_dev/3.0, 0.5) (For the evaluation of Kp)
 //================================================================================
 
 tensor EvolutionLaw_NL_Eij::h_t( EPState *EPS, PotentialSurface *PS){
@@ -126,7 +126,7 @@ tensor EvolutionLaw_NL_Eij::h_t( EPState *EPS, PotentialSurface *PS){
     double Cr = getCr();
     tensor alpha = EPS->getTensorVar(1);
     		     
-    tensor h = (2.0/3.0) * ha * dQods + Cr * temp2 * alpha;
+    tensor h = (2.0/3.0) * ha * dQods - Cr * temp2 * alpha;
 
     return h;
 
@@ -153,6 +153,20 @@ double EvolutionLaw_NL_Eij::getCr() const
 {       
     return Cr;
 }
+
+//================================================================================
+ostream& operator<< (ostream& os, const EvolutionLaw_NL_Eij & LEL)
+{
+    os.unsetf( ios::scientific );
+    os.precision(5);
+
+    os.width(10);       
+    os << endln << "NonLinear Tensorial Evolution Law(A-F model)'s parameters:" << endln;
+    os << "ha = " << LEL.getha() << "; ";
+    os << "Cr = " << LEL.getCr() << endln;
+           
+    return os;
+}  
 
 #endif
 

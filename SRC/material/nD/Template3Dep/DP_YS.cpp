@@ -34,6 +34,14 @@
 //DPYieldSurface::DPYieldSurface( double a1d = 0.5) : alfa1(a1d) { } 
 
 //================================================================================
+// Normal constructor
+//================================================================================
+
+DPYieldSurface::~DPYieldSurface( )
+{
+} 
+
+//================================================================================
 // Copy constrstructor
 //================================================================================
 //
@@ -45,9 +53,12 @@
 //create a colne of itself
 //================================================================================
 
+//alpha machines complains on this
+//DPYieldSurface * DPYieldSurface::newObj() {  
+
 YieldSurface * DPYieldSurface::newObj() {  
 
-     DPYieldSurface  *new_YS = new DPYieldSurface();
+     YieldSurface  *new_YS = new DPYieldSurface();
      return new_YS;
 
 }
@@ -109,7 +120,7 @@ double DPYieldSurface::xi_s1( const EPState *EPS ) const {
 }
 
 //================================================================================
-// double xi_s2 = dF/dS2 = dF/k = -1.0  Derivative in terms of first scalar var 
+// double xi_s2 = dF/dS2 = dF/k = -1.0  Derivative in terms of second scalar var 
 //================================================================================
 
 double DPYieldSurface::xi_s2( const EPState *EPS ) const {
@@ -121,6 +132,7 @@ double DPYieldSurface::xi_s2( const EPState *EPS ) const {
 
 //================================================================================
 // double xi_t1 = dF/dt1 = dF/dalpha  Derivative in terms of first tensorial var 
+// Need more work
 //================================================================================
 
 tensor DPYieldSurface::xi_t1( const EPState *EPS) const {
@@ -128,6 +140,14 @@ tensor DPYieldSurface::xi_t1( const EPState *EPS) const {
     return xi;
 }
 
+//================================================================================
+ostream& operator<< (ostream& os, const DPYieldSurface & YS)
+{
+   os << "Drucker-Prager Yield Surface Parameters: " << endln;
+   setprecision(4);
+   //os << "alfa1 = " << YS.getalfa1() << endln;
+   return os;
+}
 
 #endif
 

@@ -2,8 +2,8 @@
 //================================================================================
 //# COPYRIGHT (C):     :-))                                                      #
 //# PROJECT:           Object Oriented Finite Element Program                    #
-//# PURPOSE:           Mazari - Dafalias  yield criterion                        #
-//# CLASS:             MDYieldSurface                                            #
+//# PURPOSE:           Drucker-Prager yield criterion 01(with Pc)                #
+//# CLASS:             DPYieldSurface01                                          #
 //#                                                                              #
 //# VERSION:                                                                     #
 //# LANGUAGE:          C++.ver >= 2.0 ( Borland C++ ver=3.00, SUN C++ ver=2.1 )  #
@@ -11,8 +11,8 @@
 //# PROGRAMMER(S):     Boris Jeremic, ZHaohui Yang                               #
 //#                                                                              #
 //#                                                                              #
-//# DATE:              August 03 '93                                             #
-//# UPDATE HISTORY:    August 08 '00                                             #
+//# DATE:              August 03 '00                                             #
+//# UPDATE HISTORY:    December 13, 00                                           #
 //#                                                                              #
 //#                                                                              #
 //#                                                                              #
@@ -23,8 +23,8 @@
 //================================================================================
 //*/
 
-#ifndef MD_YS_H
-#define MD_YS_H
+#ifndef DP_YS01_H
+#define DP_YS01_H
 
 #include <stresst.h>
 #include "EPState.h"
@@ -32,14 +32,16 @@
 #include <BJtensor.h>
 
 
-class MDYieldSurface : public YieldSurface
+class DPYieldSurface01 : public YieldSurface
 {
-  private:		  // Private vars to define the Mazari-Dafalias Yield Surface
+  // Private vars to define the Mazari-Dafalias Yield Surface
+  private:
+    double Pc;
 
   public:
     YieldSurface *newObj();                  //create a colne of itself
-    MDYieldSurface();                          // Default constructor
-    //MDYieldSurface(const MDYieldSurface &);  // Default constructor
+    DPYieldSurface01(double pc);             // Default constructor
+    //DPYieldSurface01(const DPYieldSurface01 &);  // Default constructor
 
     double f(const EPState *EPS) const;
     tensor dFods(const EPState *EPS) const;
@@ -55,7 +57,7 @@ class MDYieldSurface : public YieldSurface
   
     //================================================================================
     // Overloaded Insertion Operator
-    friend ostream& operator<< (ostream& os, const MDYieldSurface & YS);
+    friend ostream& operator<< (ostream& os, const DPYieldSurface01 & YS);
 
 };
 

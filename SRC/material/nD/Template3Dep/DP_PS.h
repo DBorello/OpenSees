@@ -64,12 +64,7 @@ class DPPotentialSurface : public PotentialSurface
     // Overloaded Insertion Operator
     // prints an DP-PotentialSurface's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const DPPotentialSurface &PS)
-    {
-       os << "Drucker-Prager Potential Surface Parameters: " << endln;
-       os << "alfa2 = " << PS.getalfa2() << endln;
-       return os;
-    }
+    friend ostream& operator<< (ostream& os, const DPPotentialSurface &PS);
 
 };
 

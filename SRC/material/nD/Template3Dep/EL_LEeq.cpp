@@ -34,14 +34,16 @@
 //================================================================================
 // Default constructor
 //================================================================================
-//EvolutionLaw_L_Eeq::EvolutionLaw_L_Eeq( double ad = 10.0) : a(ad) {}     
+EvolutionLaw_L_Eeq::EvolutionLaw_L_Eeq( double ad ) 
+:a(ad)
+{}     
 
 //================================================================================
 // Copy constructor
 //================================================================================
 
-EvolutionLaw_L_Eeq::EvolutionLaw_L_Eeq(const EvolutionLaw_L_Eeq &LE ) {
-
+EvolutionLaw_L_Eeq::EvolutionLaw_L_Eeq(const EvolutionLaw_L_Eeq &LE ) 
+{
     this->a = LE.geta();
 }
 
@@ -49,12 +51,13 @@ EvolutionLaw_L_Eeq::EvolutionLaw_L_Eeq(const EvolutionLaw_L_Eeq &LE ) {
 //================================================================================
 //  Create a clone of itself 
 //================================================================================
-EvolutionLaw_S * EvolutionLaw_L_Eeq::newObj() {
-    
-    EvolutionLaw_L_Eeq *newEL = new EvolutionLaw_L_Eeq( *this );
+// Alpha machine has problem on this
+//EvolutionLaw_L_Eeq * EvolutionLaw_L_Eeq::newObj() {
+EvolutionLaw_S * EvolutionLaw_L_Eeq::newObj() 
+{    
+    EvolutionLaw_S *newEL = new EvolutionLaw_L_Eeq( *this );
     
     return newEL;
-
 }
 
 ////================================================================================
@@ -75,40 +78,16 @@ EvolutionLaw_S * EvolutionLaw_L_Eeq::newObj() {
 
 //================================================================================
 //  Set initial value of D once the current stress hit the yield surface     	
-//  for L model only    						       	
-//							       		        
-//							       	                
+//  for MD model only    						       	
 //================================================================================
 //
 //void EvolutionLaw_L_Eeq::setInitD(EPState  *EPS) {
 //
 //}   
-
-////================================================================================
-////  Updating corresponding internal variable           MOVED to CDriver.cpp       
-////================================================================================
-//
-//void EvolutionLaw_L_Eeq::UpdateVar( EPState *EPS, int WhichOne) {
-//   
-//    //=========================================================================
-//    // Updating alfa1 by dalfa1 = a* de_eq
-//    
-//    // Calculate  e_eq = sqrt( 2.0 * epsilon_ij * epsilon_ij / 3.0)
-//    straintensor pstrain =  EPS->getdPlasticStrain(); 
-//    double e_eq  = pstrain.equivalent();
-//    //cout << "e_eq = " << e_eq << endln;
-//
-//    double dS =  e_eq * geta();
-//    double S  = EPS->getScalarVar( WhichOne );
-//
-//    EPS->setScalarVar(WhichOne, S + dS);
-//
-//}
-
-
+	  	  
  
 //================================================================================
-// Evaluating h_s = pow( 2.0*Rij_dev * Rij_dev/3.0, 0.5) (For the evaluation of Kp)
+// Evaluating h_s = a * pow( 2.0*Rij_dev * Rij_dev/3.0, 0.5) (For the evaluation of Kp)
 //================================================================================
 
 double EvolutionLaw_L_Eeq::h_s( EPState *EPS, PotentialSurface *PS){
@@ -151,6 +130,18 @@ double EvolutionLaw_L_Eeq::geta() const
     return a;
 }
 
+//================================================================================
+ostream& operator<< (ostream& os, const EvolutionLaw_L_Eeq & LEL)
+{
+    os.unsetf( ios::scientific );
+    os.precision(5);
+
+    os.width(10);       
+    os << endln << "Linear Scalar Evolution Law's parameters:" << endln;
+    os << "a = " << LEL.geta() << "; " << endln;
+           
+    return os;
+}  
 
 #endif
 

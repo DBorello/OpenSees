@@ -2,9 +2,9 @@
 //================================================================================
 //# COPYRIGHT (C):     :-))                                                      #
 //# PROJECT:           Object Oriented Finite Element Program                    #
-//# PURPOSE:           Manzari-Dafalias  potential surface                       #
+//# PURPOSE:           Manzari-Dafalias  potential surface 01(with Pc)           #
 //#                    (Ref. Geotechnique v.47 No.2 255-272, 1997)               #
-//# CLASS:             MDPotentialSurface                                        #
+//# CLASS:             MDPotentialSurface01                                      #
 //#                                                                              #
 //# VERSION:                                                                     #
 //# LANGUAGE:          C++.ver >= 2.0 ( Borland C++ ver=3.00, SUN C++ ver=2.1 )  #
@@ -22,10 +22,10 @@
 //================================================================================
 
 
-#ifndef MD_PS_CPP
-#define MD_PS_CPP
+#ifndef MD_PS01_CPP
+#define MD_PS01_CPP
 
-#include "MD_PS.h"
+#include "MD_PS01.h"
 #include <basics.h>
 #include <math.h>
 
@@ -35,16 +35,19 @@
 // Normal constructor
 //================================================================================
 
-MDPotentialSurface::MDPotentialSurface( ) { } 
+MDPotentialSurface01::MDPotentialSurface01(double pc ) 
+{
+  Pc = pc;
+} 
 
 
 //================================================================================
 //create a colne of itself
 //================================================================================
 
-PotentialSurface * MDPotentialSurface::newObj() {  
+PotentialSurface * MDPotentialSurface01::newObj() {  
 
-     PotentialSurface  *new_PS = new MDPotentialSurface();
+     PotentialSurface  *new_PS = new MDPotentialSurface01(Pc);
      return new_PS;
 
 }
@@ -53,14 +56,15 @@ PotentialSurface * MDPotentialSurface::newObj() {
 //  tensor dQ/dsigma_ij: the normal to the potential surface
 //================================================================================
 
-tensor MDPotentialSurface::dQods(const EPState *EPS) const { 
+tensor MDPotentialSurface01::dQods(const EPState *EPS) const { 
 
   tensor dQoverds( 2, def_dim_2, 0.0);
   tensor I2("I", 2, def_dim_2);
 
   tensor S = EPS->getStress().deviator();
   double p = EPS->getStress().p_hydrostatic();
-  
+  p = p -  Pc;
+
   tensor alpha = EPS->getTensorVar( 1 ); //the first tensor hardening var is alpha_ij
 
   //double m = EPS->getScalarVar( 1 );	 //the first scalar hardening var is m
@@ -77,7 +81,7 @@ tensor MDPotentialSurface::dQods(const EPState *EPS) const {
     n = temp_f1 * (1.0 / temp_f3 );
   }
   else {
-    g3ErrorHandler->fatal("MDPotentialSurface::dQods  |n_ij| = 0, divide by zero! Program exits.");
+    g3ErrorHandler->fatal("MDPotentialSurface01::dQods  |n_ij| = 0, divide by zero! Program exits.");
     exit(-1);
     //::printf(" \n\n n_ij not defined!!!! Program exits\n");
     //exit(1);
@@ -93,7 +97,7 @@ tensor MDPotentialSurface::dQods(const EPState *EPS) const {
 // tensor d2Q/dsigma_ij2: the second derivatives to the potential surface
 //================================================================================
 
-tensor MDPotentialSurface::d2Qods2(const EPState *EPS) const 
+tensor MDPotentialSurface01::d2Qods2(const EPState *EPS) const 
 {
 
   tensor d2Qoverds2;
@@ -107,6 +111,8 @@ tensor MDPotentialSurface::d2Qods2(const EPState *EPS) const
 
   tensor S = stress.deviator();
   double p = stress.p_hydrostatic();
+  p = p -  Pc;
+  cerr << " p = " << p << endln;
   
   tensor alpha = EPS->getTensorVar( 1 ); //the first tensor hardening var is alpha_ij
 	   
@@ -120,7 +126,7 @@ tensor MDPotentialSurface::d2Qods2(const EPState *EPS) const
     n = temp_f1 * (1.0 / temp_f3 );
   }
   else {
-    g3ErrorHandler->fatal("MDPotentialSurface::dQods  |n_ij| = 0, divide by zero! Program exits.");
+    g3ErrorHandler->fatal("MDPotentialSurface01::dQods  |n_ij| = 0, divide by zero! Program exits.");
     exit(-1);
     //::printf(" \n\n n_ij not defined!!!! Program exits\n");
     //exit(1);
@@ -132,13 +138,12 @@ tensor MDPotentialSurface::d2Qods2(const EPState *EPS) const
   double A = 2.64;
   double Mc = 1.14;
   double kcd = 4.2;
-  //double m = EPS->getScalarVar( 1 );
+
   if (p < 0.0)
   {
-     g3ErrorHandler->fatal("MDPotentialSurface::d2Qods2  p < 0, Program exits.");
+     g3ErrorHandler->fatal("MDPotentialSurface01::d2Qods2  p < 0, Program exits.");
      exit(-1);
   }
-
   double ec = 0.80 - 0.025 * log( p / 160 );
 
   double e = EPS->getScalarVar(3);
@@ -159,7 +164,7 @@ tensor MDPotentialSurface::d2Qods2(const EPState *EPS) const
   tensor dDds = dDds1 - dDds2;
   dDds.null_indices(); 
    
-  d2Qoverds2 = dnds + dDds("mn")*I2("pq")*0.33333333;
+  d2Qoverds2 = dnds + I2("pq")*dDds("mn")*(0.33333333);
   d2Qoverds2.null_indices();
 
   return d2Qoverds2;
@@ -168,29 +173,8 @@ tensor MDPotentialSurface::d2Qods2(const EPState *EPS) const
 //================================================================================
 // tensor dn_pq/dsigma_mn
 //================================================================================
-tensor MDPotentialSurface::dnods(const EPState *EPS) const
+tensor MDPotentialSurface01::dnods(const EPState *EPS) const
 {
-  /*
-  tensor dnods( 2, def_dim_2, 0.0);
-  tensor I2("I", 2, def_dim_2);
-
-  stresstensor S = EPS->getStress().deviator();
-  //S.reportshort("S");
-
-  double p = EPS->getStress().p_hydrostatic();
-  //printf("Here we go!  p %f\n", p);
-  double m = EPS->getScalarVar( 1 );
-
-  double fac = 1.0/(sqrt(2.0/3.0)*m);
-
-  tensor Ipmnq = I2("pm") * I2("nq");
-  tensor Imnpq = I2("mn") * I2("pq");
-  tensor Spqmn = S("pq") * I2("mn");
-  tensor temp  = Ipmnq - (1.0/3.0)*Imnpq;
-  
-  dnods = fac/p*(temp - 1.0/(p*3.0)*Spqmn);
-  return  dnods;
-  */
   tensor dnods( 2, def_dim_2, 0.0);
   tensor I2("I", 2, def_dim_2);
 
@@ -199,7 +183,7 @@ tensor MDPotentialSurface::dnods(const EPState *EPS) const
   stresstensor alpha = EPS->getTensorVar( 1 );
 
   double p = EPS->getStress().p_hydrostatic();
-  //p = p -  Pc;
+  p = p -  Pc;
 
   //double m = EPS->getScalarVar( 1 );
   //double fac = 1.0/(sqrt(2.0/3.0)*m);
@@ -228,16 +212,13 @@ tensor MDPotentialSurface::dnods(const EPState *EPS) const
   dnods = ( X - 2.0 * tmp)*(1.0/norm);
   
   return  dnods;
-
-
 }
 
 //================================================================================
 // tensor alpha_pq*dnods
 //================================================================================
-tensor MDPotentialSurface::apqdnods(const EPState *EPS) const
+tensor MDPotentialSurface01::apqdnods(const EPState *EPS) const
 {
-  /* old fomulation, not correct
   tensor ddnods( 2, def_dim_2, 0.0);
   tensor I2("I", 2, def_dim_2);
 
@@ -245,34 +226,7 @@ tensor MDPotentialSurface::apqdnods(const EPState *EPS) const
   //S.reportshort("S");
 
   double p = EPS->getStress().p_hydrostatic();
-  //printf("Here we go!  p %f\n", p);
-  double m = EPS->getScalarVar( 1 );
-
-  double fac = 1.0/(sqrt(2.0/3.0)*m);
-
-  stresstensor d = EPS->getTensorVar( 3 );   // getting  d_ij from EPState
-  tensor dkk = d("ij") * I2("ij");
-  double dkkd =dkk.trace();
-  tensor dkkImn = dkkd * I2;
-
-  tensor Spqdpq = S("pq") * d("pq");
-  double Sqpdpqd =Spqdpq.trace();
-  tensor dSI = Sqpdpqd*I2;
-     
-  tensor temp  = d  - (1.0/3.0)*dkkImn;
-  
-  ddnods = fac/p*(temp - 1.0/(p*3.0)*dSI);
-  return  ddnods;
-  */
-
-  tensor ddnods( 2, def_dim_2, 0.0);
-  tensor I2("I", 2, def_dim_2);
-
-  stresstensor S = EPS->getStress().deviator();
-  //S.reportshort("S");
-
-  double p = EPS->getStress().p_hydrostatic();
-  //p = p -  Pc;
+  p = p -  Pc;
 
   //printf("Here we go!  p %f\n", p);
 	      
@@ -307,14 +261,13 @@ tensor MDPotentialSurface::apqdnods(const EPState *EPS) const
 	   	     
   ddnods = (aX - Y*2.0*as_bard)*(1.0/norm);
   return  ddnods;
-
 }
 
 
 //================================================================================
 // tensor dg(theta, c)/dsigma_mn
 //================================================================================
-double MDPotentialSurface::dgoverdt(double theta, double c) const
+double MDPotentialSurface01::dgoverdt(double theta, double c) const
 {
    //stresstensor stress = EPS->getStress();
   
@@ -329,7 +282,7 @@ double MDPotentialSurface::dgoverdt(double theta, double c) const
 //================================================================================
 // tensor dtheta/dsigma_pq
 //================================================================================
-tensor MDPotentialSurface::dthetaoverds(const EPState *EPS) const
+tensor MDPotentialSurface01::dthetaoverds(const EPState *EPS) const
 {
    tensor ret(2, def_dim_2, 0.0);
    stresstensor s( 0.0);
@@ -376,6 +329,12 @@ tensor MDPotentialSurface::dthetaoverds(const EPState *EPS) const
    return ret;
 }
 
+ostream& operator<< (ostream& os, const MDPotentialSurface01 &PS)
+{
+   os << "Manzari-Dafalias Potential Surface 01( with Pc) Parameters: " << endln;
+   os << "Pc = " << PS.Pc << endln;
+   return os;
+}
 
 
 

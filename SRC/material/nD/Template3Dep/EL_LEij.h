@@ -40,13 +40,13 @@
 class EvolutionLaw_L_Eij : public EvolutionLaw_T
 {
   // Private vars to define the evolution law
-
+  private:
     double  a;  //coefficient to define the linear hardening rule of a scalar hardening var
 
   public:
     //EvolutionLaw_L_Eij( );    // default constructor---no parameters
     
-    EvolutionLaw_L_Eij( double ad = 10.0) : a(ad) {}
+    EvolutionLaw_L_Eij( double ad = 10.0);
                          
     EvolutionLaw_L_Eij(const EvolutionLaw_L_Eij &LEL );   // Copy constructor
     
@@ -66,25 +66,16 @@ class EvolutionLaw_L_Eij : public EvolutionLaw_T
 
     void print();
 
+  private:
     // some accessor functions
     double geta() const;      // Linear coefficient used to evolve internal var
-    void   seta( double ad);
+    void   seta(double ad);
 
     //================================================================================
     // Overloaded Insertion Operator	  Zhaohui Added Aug. 13, 2000
     // prints Linear EvolutionLaw's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const EvolutionLaw_L_Eij & LEL)
-    {
-        os.unsetf( ios::scientific );
-        os.precision(5);
-
-        os.width(10);       
-        os << endln << "Linear Tensorial Evolution Law's parameters:" << endln;
-	os << "a = " << LEL.geta() << "; " << endln;
-               
-        return os;
-    }  
+    friend ostream& operator<< (ostream& os, const EvolutionLaw_L_Eij & LEL);
 
     
 };

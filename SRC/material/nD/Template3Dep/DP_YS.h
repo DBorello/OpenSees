@@ -52,18 +52,22 @@ class DPYieldSurface : public YieldSurface
     //double alfa1;	  // Cone orientation angle now in EPState's first scalar var 
   
   public:
-    YieldSurface *newObj();  //create a colne of itself
-    DPYieldSurface ( ) {}   // Default constructor
+    //alpha machines complains on this
+    //DPYieldSurface *newObj();  //create a clone of itself  
+    YieldSurface *newObj();  //create a clone of itself
+    
+    DPYieldSurface ( ) {}    // Default constructor
+    virtual ~DPYieldSurface ( );     // Destructor
     //DPYieldSurface (const DPYieldSurface & );   // copy constructor
 
     double f(const EPState *EPS) const;
     tensor dFods(const EPState *EPS) const;
 
-    // Redefine 1st derivative of F over first scalar internal variable
+    // Redefine 1st derivative of F over scalar internal variables
     double xi_s1( const EPState *EPS ) const;
     double xi_s2( const EPState *EPS ) const;
 
-    // Redefine 1st derivative of F over first tensorial internal variable
+    // Redefine 1st derivative of F over tensorial internal variables
     tensor xi_t1(const EPState *EPS) const;
 
     void print() { cout << *this; }; 
@@ -72,13 +76,7 @@ class DPYieldSurface : public YieldSurface
     // Overloaded Insertion Operator
     // prints an DP YieldSurface's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const DPYieldSurface & YS)
-    {
-       os << "Drucker-Prager Yield Surface Parameters: " << endln;
-       setprecision(4);
-       //os << "alfa1 = " << YS.getalfa1() << endln;
-       return os;
-    }
+    friend ostream& operator<< (ostream& os, const DPYieldSurface & YS);
 
 };
 

@@ -66,11 +66,7 @@ class VMYieldSurface : public YieldSurface
     // Overloaded Insertion Operator
     // prints an VM YieldSurface's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const VMYieldSurface & YS)
-    {
-       os << "Von Mises Yield Surface Parameters: " << endln;
-       return os;
-    }
+    friend ostream& operator<< (ostream& os, const VMYieldSurface & YS);
 
 };
 

@@ -2,10 +2,10 @@
 //================================================================================
 //# COPYRIGHT (C):     :-))                                                      #
 //# PROJECT:           Object Oriented Finite Element Program                    #
-//# PURPOSE:           Mazari-Dafalias  yield criterion                          #
+//# PURPOSE:           Drucker-Prager yield criterion 01 (with Pc)	         #
 //#                      (Ref. Geotechnique                    			 #
 //#                      V.47 No.2 255-272, 1997)                                #
-//# CLASS:             MDYieldSurface01                                          #
+//# CLASS:             DPYieldSurface01                                          #
 //#                                                                              #
 //# VERSION:                                                                     #
 //# LANGUAGE:          C++.ver >= 2.0 ( Borland C++ ver=3.00, SUN C++ ver=2.1 )  #
@@ -23,10 +23,10 @@
 //================================================================================
 
 
-#ifndef MD_YS_CPP
-#define MD_YS_CPP
+#ifndef DP_YS01_CPP
+#define DP_YS01_CPP
 
-#include "MD_YS.h"
+#include "DP_YS01.h"
 #include <basics.h>
 
 #include <G3Globals.h>
@@ -35,16 +35,19 @@
 // Normal constructor
 //================================================================================
 
-MDYieldSurface::MDYieldSurface( )  { } 
+DPYieldSurface01::DPYieldSurface01(double pc)  
+{ 
+     Pc = pc;
+} 
 
 
 //================================================================================
 //create a colne of itself
 //================================================================================
 
-YieldSurface * MDYieldSurface::newObj() {  
+YieldSurface * DPYieldSurface01::newObj() {  
 
-     YieldSurface  *new_YS = new MDYieldSurface();
+     YieldSurface  *new_YS = new DPYieldSurface01( Pc );
      return new_YS;
 
 }
@@ -53,7 +56,7 @@ YieldSurface * MDYieldSurface::newObj() {
 // Copy constrstructor
 //================================================================================
 //
-//MDYieldSurface::MDYieldSurface(MDYieldSurface &MDYS ) { }
+//DPYieldSurface01::DPYieldSurface01(DPYieldSurface01 &MDYS ) { }
 //
 
 
@@ -61,21 +64,27 @@ YieldSurface * MDYieldSurface::newObj() {
 //  Yield criterion evaluation function F(EPState)
 //================================================================================
 
-double MDYieldSurface::f(const EPState *EPS) const
+double DPYieldSurface01::f(const EPState *EPS) const
 {
   stresstensor S = EPS->getStress().deviator();
   //cout << "s " << S;
+  //S.print("sigma", "S");
 
   double p =EPS->getStress().p_hydrostatic();
-  //cout << "p " << p;
+  p = p - Pc;
+  cout << "p " << p;
 
   stresstensor alpha = EPS->getTensorVar( 1 );
+  //alpha.print("alpha", " alpha");
   //cout << "alpha " << alpha;
   
   double m = EPS->getScalarVar(1);
 
-  stresstensor temp1 = S - p*alpha;
+  //stresstensor temp1 = S - p*alpha;
+  stresstensor temp1 = S - p*alpha; // S +p * alpha
   temp1.null_indices();
+  //temp1.print("temp1 ", " temp1");
+
   stresstensor temp2 = temp1("ij") * temp1("ij");  
 
   double temp3 = sqrt( temp2.trace() );
@@ -91,7 +100,7 @@ double MDYieldSurface::f(const EPState *EPS) const
 // tensor dF/dsigma_ij
 //================================================================================
 
-tensor MDYieldSurface::dFods(const EPState *EPS) const {
+tensor DPYieldSurface01::dFods(const EPState *EPS) const {
   
   tensor dFoverds( 2, def_dim_2, 0.0);
   tensor I2("I", 2, def_dim_2);
@@ -100,6 +109,7 @@ tensor MDYieldSurface::dFods(const EPState *EPS) const {
   //S.reportshort("S");
 
   double p = EPS->getStress().p_hydrostatic();
+  p = p - Pc;
   //printf("Here we go!  p %f\n", p);
   	    
   stresstensor alpha = EPS->getTensorVar( 1 ); // getting alpha_ij from EPState
@@ -121,10 +131,10 @@ tensor MDYieldSurface::dFods(const EPState *EPS) const {
 
     stresstensor n;
     if ( norm >= d_macheps() ){ 
-      n = r_bar *(1.0 / norm );
+      n =  r_bar*(1.0 / norm );
     }
     else {
-      g3ErrorHandler->fatal("MDYieldSurface::dFods  |n_ij| = 0, divide by zero! Program exits.");
+      g3ErrorHandler->fatal("DPYieldSurface01::dFods  |n_ij| = 0, divide by zero! Program exits.");
       exit(-1);
     }
     //EPS->setTensorVar( 3, n); //update n_ij//
@@ -155,10 +165,11 @@ tensor MDYieldSurface::dFods(const EPState *EPS) const {
 // double xi_s1 = dF/dm = -(2/3)^0.5 p  Derivative in terms of first scalar var 
 //================================================================================
 
-double MDYieldSurface::xi_s1( const EPState *EPS ) const {
+double DPYieldSurface01::xi_s1( const EPState *EPS ) const {
 
-    //double p = EPS->getStress().Iinvariant1()/3.0;
     double p = EPS->getStress().p_hydrostatic();
+    //double p = EPS->getStress().Iinvariant1()/3.0;
+    p = p - Pc;
     return -1.0*sqrt(2.0/3.0) * p;
 
 }
@@ -167,37 +178,39 @@ double MDYieldSurface::xi_s1( const EPState *EPS ) const {
 // double xi_t1 = dF/dt1 = dF/dalpha= -p*n  Derivative in terms of first tensorial var 
 //================================================================================
 
-tensor MDYieldSurface::xi_t1( const EPState *EPS) const {
-  tensor dFoverds( 2, def_dim_2, 0.0);
-  tensor I2("I", 2, def_dim_2);
+tensor DPYieldSurface01::xi_t1( const EPState *EPS) const {
+    tensor dFoverds( 2, def_dim_2, 0.0);
+    tensor I2("I", 2, def_dim_2);
 
-  stresstensor S = EPS->getStress().deviator();
-
-  double p = EPS->getStress().p_hydrostatic();
-  	    
-  stresstensor alpha = EPS->getTensorVar( 1 ); // getting alpha_ij from EPState
-  
-  stresstensor r = S * (1.0 / p);
-  stresstensor r_bar = r - alpha;
-  stresstensor norm2 = r_bar("ij") * r_bar("ij");
-  double norm = sqrt( norm2.trace() );
-
-  stresstensor n;
-  if ( norm >= d_macheps() ){ 
-    n = r_bar *(1.0 / norm );
-  }
-  else {
-    g3ErrorHandler->fatal("MDYieldSurface::dFods  |n_ij| = 0, divide by zero! Program exits.");
-    exit(-1);
-  }
+    stresstensor S = EPS->getStress().deviator();
     
-  return (-1.0) * n * p;
+    double p = EPS->getStress().p_hydrostatic();
+    p = p - Pc;
+    	    
+    stresstensor alpha = EPS->getTensorVar( 1 ); // getting alpha_ij from EPState
+    
+    stresstensor r = S * (1.0 / p); //for p = sig_kk/3
+    stresstensor r_bar = r - alpha;
+    stresstensor norm2 = r_bar("ij") * r_bar("ij");
+    double norm = sqrt( norm2.trace() );
+    
+    stresstensor n;
+    if ( norm >= d_macheps() ){ 
+      n = r_bar *(1.0 / norm );
+    }
+    else {
+      g3ErrorHandler->fatal("DPYieldSurface01::dFods  |n_ij| = 0, divide by zero! Program exits.");
+      exit(-1);
+    }
+      
+    return (-1.0) * n * p;
 }
 
 
-ostream& operator<< (ostream& os, const MDYieldSurface & YS)
+ostream& operator<< (ostream& os, const DPYieldSurface01 & YS)
 {
-   os << "Manzari-Dafalias Yield Surface Parameters: " << endln;
+   os << "Drucker-Prager Yield Surface 01 Parameters: " << endln;
+   os << "Pc = " << YS.Pc << endln;
    return os;
 }
 

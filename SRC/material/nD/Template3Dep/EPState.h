@@ -85,6 +85,7 @@ class EPState
   public:
     //Normal Constructor--no parameters
     EPState();                         
+    ~EPState();                         
     
     //Normal Constructor1
     EPState(double              Eod,    
@@ -163,21 +164,33 @@ class EPState
     //Get commited state vars
     stresstensor getStress_commit() const;
     straintensor getStrain_commit() const;
-    double *getScalarVar_commit();
-    stresstensor *getTensorVar_commit();
+    double * getScalarVar_commit();
+    double getScalarVar_commit(int i);
+    stresstensor * getTensorVar_commit();
+    stresstensor getTensorVar_commit(int i);
     tensor getEep_commit() const;
 
     //Get initial state vars
     stresstensor getStress_init() const;
     straintensor getStrain_init() const;
-    double *getScalarVar_init();
-    stresstensor *getTensorVar_init();
+    double * getScalarVar_init();
+    double getScalarVar_init(int i);
+    stresstensor * getTensorVar_init();
+    stresstensor getTensorVar_init(int i);
     tensor getEep_init() const;
 
+    void setEo( double Eod );
     void setE( double Ey );
     void setStress( const stresstensor &newstress );
     void setIterativeStress( const stresstensor &newstress );
     void setStrain( const straintensor &newstrain );
+
+    void setStress_commit( const stresstensor &newstress );
+    void setStrain_commit( const straintensor &newstrain );
+
+    void setStress_init( const stresstensor &newstress );
+    void setStrain_init( const straintensor &newstrain );
+
     void setElasticStrain( const straintensor &newstrain );
     void setPlasticStrain( const straintensor &newstrain );
     void setdElasticStrain( const straintensor &newstrain );
@@ -194,8 +207,16 @@ class EPState
     stresstensor *getTensorVar();
 
     // WhichOne starts from 1 and ends up to NTensorVar
+    void setNScalarVar(int rval);
     void setScalarVar(int WhichOne, double rval);
+    void setScalarVar_commit(int WhichOne, double rval);
+    void setScalarVar_init(int WhichOne, double rval);
+
+    void setNTensorVar(int rval);
     void setTensorVar(int WhichOne, const stresstensor &rval);
+    void setTensorVar_commit(int WhichOne, const stresstensor &rval);
+    void setTensorVar_init(int WhichOne, const stresstensor &rval);
+
     void setScalarVar(double *rval);
     void setTensorVar(const stresstensor *rval);
     void setInit();

@@ -45,7 +45,7 @@ EvolutionLaw_S * EvolutionLaw_S::newObj() {
 
 
 //================================================================================
-// Evaluating h_s ( for the evaluation of Kp )
+// Evaluating scalar hardening function h_s ( for the evaluation of Kp )
 //================================================================================
 
 double EvolutionLaw_S::h_s( EPState *EPS, PotentialSurface *PS){
@@ -56,13 +56,22 @@ double EvolutionLaw_S::h_s( EPState *EPS, PotentialSurface *PS){
 
 
 //================================================================================
-//  Print content of the base class, will be overwritten! 
+//  Print content of the base class, might be overwritten! 
 //================================================================================
 void EvolutionLaw_S::print()
 {
     cout << (*this);
 }
 
+//================================================================================
+// Overloaded Insertion Operator
+// prints an Evolution Law_S's contents 
+//================================================================================
+ostream& operator<< (ostream& os, const EvolutionLaw_S & EL)
+{
+   os << "Scalar Evolution Law's Parameters: " << endln;
+   return os;
+}
 
 
 

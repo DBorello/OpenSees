@@ -55,7 +55,7 @@ DPPotentialSurface::DPPotentialSurface(const DPPotentialSurface &DPPS ) {
 
 PotentialSurface * DPPotentialSurface::newObj() {  
 
-     DPPotentialSurface  *new_PS = new DPPotentialSurface( this->getalfa2() );
+     PotentialSurface  *new_PS = new DPPotentialSurface( this->getalfa2() );
      return new_PS;
 
 }
@@ -76,8 +76,11 @@ tensor DPPotentialSurface::dQods(const EPState *EPS) const {
     stresstensor s = EPS->getStress().deviator();
     s.null_indices();
     // Tensor dQ/dsigma_ij  ( eq. 5.207 in Chen )
+    
+    //Zhaohui Testing associated flow
     tensor dQods = KroneckerI * getalfa2();
     //tensor dQods = KroneckerI * EPS->getScalarVar(1);
+    
     dQods.null_indices();
     if ( stressJ2 > 0.0 )
       {
@@ -124,6 +127,14 @@ double DPPotentialSurface::getalfa2() const {
 
     return alfa2; 
 
+}
+
+//================================================================================
+ostream& operator<< (ostream& os, const DPPotentialSurface &PS)
+{
+   os << "Drucker-Prager Potential Surface Parameters: " << endln;
+   os << "alfa2 = " << PS.getalfa2() << endln;
+   return os;
 }
 
 

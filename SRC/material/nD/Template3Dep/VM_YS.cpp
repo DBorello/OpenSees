@@ -41,7 +41,7 @@
 
 YieldSurface * VMYieldSurface::newObj() {  
 
-     VMYieldSurface  *new_YS = new VMYieldSurface();
+     YieldSurface  *new_YS = new VMYieldSurface();
      return new_YS;
 
 }
@@ -115,6 +115,13 @@ tensor VMYieldSurface::xi_t1(const EPState *EPS) const {
     tensor xi = -3.0 * s_bar;
     
     return xi;
+}
+
+//================================================================================
+ostream& operator<< (ostream& os, const VMYieldSurface & YS)
+{
+   os << "Von Mises Yield Surface Parameters: " << endln;
+   return os;
 }
 
 

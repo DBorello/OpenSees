@@ -41,34 +41,35 @@ class EvolutionLaw_T
 {
  public:
     
-    EvolutionLaw_T() {};			 //Normal Constructor
+    // Constructor
+    EvolutionLaw_T() {};			 
 
-    virtual EvolutionLaw_T *newObj();  //create a colne of itself
+    //create a colne of itself
+    virtual EvolutionLaw_T *newObj();  
 
     // Not necessary since the increment of internal var can be evalulated in constitutive driver!
     //virtual void UpdateVar( EPState *EPS, double dlamda ) = 0; // Evolve only one internal variable
     
-    virtual void print(); 	//Print the contents of the evolution law
+    //Print the contents of the evolution law
+    virtual void print(); 	
     
-    //virtual void InitVars( EPState *EPS) = 0;  // Initializing eo and E for Manzari-Dafalias model, 
-    //                                  // other model might not need it!
+    // updating E, e, D and m for Manzari-Dafalias model, 
+    virtual int updateEeDm( EPState *EPS, double st_vol, double dLamda);  
 
     //virtual void setInitD( EPState *EPS) = 0;  // Initializing D once current st hits the y.s. for Manzari-Dafalias model , 
     //                                  // other model might not need it
     
     //Why can't i put const before EPState???????????????????????? Aug. 16, 2000
     //virtual double h( EPState *EPS, double d ) = 0;    // Evaluating hardening function h
-    virtual tensor h_t( EPState *EPS, PotentialSurface *PS);    // Evaluating hardening function h
+    // Evaluating hardening function h_t
+    virtual tensor h_t( EPState *EPS, PotentialSurface *PS);    
 
     //================================================================================
     // Overloaded Insertion Operator
     // prints an Evolution Law_T's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const EvolutionLaw_T & EL)
-    {
-       os << "Base of Tensorial Evolution Law's Parameters: Nothing" << endln;
-       return os;
-    }
+    friend ostream& operator<< (ostream& os, const EvolutionLaw_T & EL);
+
 };
 
 

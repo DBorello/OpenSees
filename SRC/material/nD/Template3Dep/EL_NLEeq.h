@@ -81,26 +81,10 @@ class EvolutionLaw_NL_Eeq : public EvolutionLaw_S
     double getd() const;
 
     //================================================================================
-    // Overloaded Insertion Operator	  Zhaohui Added Aug. 13, 2000
+    // Overloaded Insertion Operator	 
     // prints nonlinear EvolutionLaw's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const EvolutionLaw_NL_Eeq & NLEL)
-    {
-        os.unsetf( ios::scientific );
-        os.precision(5);
-    
-        //os.width(10);       
-        os << endln << "Nonlinear Evolution(plastic equivalent strain ) Law's parameters:" << endln;
-        os << "eeqEtaPeak = " << NLEL.geteeqEtaPeak() << "; ";
-        os << "etaResidual = " << NLEL.getetaResidual() << "; " << endln;
-        os << "etaStart = " << NLEL.getetaStart() << "; ";
-        os << "etaPeak = " << NLEL.getetaPeak() << "; ";
-        os << "e = " << NLEL.gete() << "; ";
-        os << "d = " << NLEL.getd() << "; " << endln;
-        //os.width(10);       
-               
-        return os;
-    }  
+    friend ostream& operator<< (ostream& os, const EvolutionLaw_NL_Eeq & NLEL);
 
     
 };
