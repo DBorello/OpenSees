@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2002-03-12 19:21:51 $
+// $Revision: 1.6 $
+// $Date: 2002-04-02 23:12:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HardeningMaterial.cpp,v $
 
 // Written: MHS
@@ -33,6 +33,7 @@
 #include <Vector.h>
 #include <Channel.h>
 #include <math.h>
+#include <float.h>
 
 HardeningMaterial::HardeningMaterial(int tag, double e, double s,
 				     double hi, double hk, double n)
@@ -72,7 +73,7 @@ HardeningMaterial::setTrialStrain (double strain, double strainRate)
     double f = fabs(xsi) - (sigmaY + Hiso*Chardening);
     
     // Elastic step ... no updates required
-    if (f <= 0.0)
+    if (f <= -DBL_EPSILON * E)
     {
 	// Set trial tangent
 	Ttangent = E;
