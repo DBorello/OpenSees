@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2000-12-18 10:40:50 $
+// $Revision: 1.4 $
+// $Date: 2001-01-23 08:04:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
                                                                         
                                                                         
@@ -804,46 +804,16 @@ ZeroLength::Print(ostream &s, int flag)
 Response*
 ZeroLength::setResponse(char **argv, int argc, Information &eleInformation)
 {
-    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0) {
-		Vector *newVector = new Vector(numMaterials1d);
-		if (newVector == 0) {
-			g3ErrorHandler->warning("WARNING ZeroLength::setResponse() - %d out of memory creating matrix\n",
-				  this->getTag());
-			return 0;
-		}
-		eleInformation.theType = VectorType;
-		eleInformation.theVector = newVector;
-
-		return new ElementResponse(this, 1);
-    }
+    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
+		return new ElementResponse(this, 1, Vector(numMaterials1d));
     
     else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
-		strcmp(argv[0],"deformation") == 0) {
-		Vector *newVector = new Vector(numMaterials1d);
-		if (newVector == 0) {
-			g3ErrorHandler->warning("WARNING ZeroLength::setResponse() - %d out of memory creating matrix\n",
-				  this->getTag());
-			return 0;
-		}
-		eleInformation.theType = VectorType;
-		eleInformation.theVector = newVector;
-
-		return new ElementResponse(this, 2);
-     }     
+		strcmp(argv[0],"deformation") == 0)
+		return new ElementResponse(this, 2, Vector(numMaterials1d));
 
     // tangent stiffness matrix
-    else if (strcmp(argv[0],"stiff") == 0) {
-		Matrix *newMatrix = new Matrix(*theMatrix);
-		if (newMatrix == 0) {
-			g3ErrorHandler->warning("WARNING ZeroLength::setResponse() - %d out of memory creating matrix\n",
-				  this->getTag());
-			return 0;
-		}
-		eleInformation.theMatrix = newMatrix;
-		eleInformation.theType = MatrixType;
-		
-		return new ElementResponse(this, 3);
-    } 
+    else if (strcmp(argv[0],"stiff") == 0)
+		return new ElementResponse(this, 3, Matrix(numMaterials1d,numMaterials1d));
 
 	else if (strcmp(argv[0],"material") == 0) {
 		if (argc <= 2)
@@ -881,13 +851,15 @@ ZeroLength::getResponse(int responseID, Information &eleInformation)
     case 2:
 		if (eleInformation.theVector != 0) {
 			for (int i = 0; i < numMaterials1d; i++)
-				(*(eleInformation.theVector))(i) = this->computeCurrentStrain1d(i,diff);
+				(*(eleInformation.theVector))(i) = theMaterial1d[i]->getStrain();
 		}
       return 0;      
       
     case 3:
-      if (eleInformation.theMatrix != 0)
-	  *(eleInformation.theMatrix) = this->getTangentStiff();
+		if (eleInformation.theMatrix != 0) {
+			for (int i = 0; i < numMaterials1d; i++)
+				(*(eleInformation.theMatrix))(i,i) = theMaterial1d[i]->getTangent();
+		}
       return 0;      
 
     default:
