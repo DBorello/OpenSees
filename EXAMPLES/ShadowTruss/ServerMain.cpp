@@ -18,16 +18,15 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-08-29 09:24:04 $
+// $Revision: 1.2 $
+// $Date: 2003-10-15 00:38:07 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/ShadowTruss/ServerMain.cpp,v $
 
 
-// Written: fmk 08/99
+// Written: fmk 10/03
 //
-// Purpose: this file contains a C++ main procedure to perform the analysis
-// of example1 (found in most documents). One of the elements does it's 
-// processing remotely. This is the Client program.
+// Purpose: this file contains a C++ main procedure for running the
+// actor truss required for element 3.
 
 #include <stdlib.h>
 
@@ -46,20 +45,28 @@ double        ops_Dt = 0;
 Domain       *ops_TheActiveDomain = 0;
 Element      *ops_TheActiveElement = 0;
 
-
-
 // main routine
 int main(int argc, char **argv)
 {
-    TCP_Socket *theChannel = new TCP_Socket(atoi(argv[1]));
-    FEM_ObjectBroker *theBroker = new FEM_ObjectBroker();
+  if (argc != 2) {
+    opserr << "invalid usage - require \"serverTruss portNumber?\"\n";
+    exit(-1);
+  }
 
-    // create the actor & run it
-    
-    Actor *truss3 = new ActorTruss(*theChannel, *theBroker);        
-    truss3->run();
-    delete truss3;
+  TCP_Socket *theChannel = new TCP_Socket(atoi(argv[1]));
+  FEM_ObjectBroker *theBroker = new FEM_ObjectBroker();
+  
+  
+  // create the actor & run it
+  Actor *truss3 = new ActorTruss(*theChannel, *theBroker);        
+  truss3->run();
 
-    exit(0);
+  // when done clean up the memory
+  delete truss3;
+  delete theChannel;
+  delete theBroker;
+
+  // exit
+  exit(0);
 }	
 	

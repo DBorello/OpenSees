@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-08-29 08:10:37 $
+// $Revision: 1.3 $
+// $Date: 2003-10-15 00:38:07 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/ShadowTruss/ShadowTruss.h,v $
                                                                         
 #ifndef ShadowTruss_h
@@ -53,17 +53,8 @@ class ShadowTruss : public Element, public Shadow
 		UniaxialMaterial &theMaterial,
 		double A, 
 		double M, 
-		MachineBroker &theMachineBroker,
-		FEM_ObjectBroker &theObjectBroker);
-
-    ShadowTruss(int tag, 
-		int Nd1, int Nd2, 
-		UniaxialMaterial &theMaterial,
-		double A, 
-		double M, 
 		Channel &theChannel,
 		FEM_ObjectBroker &theObjectBroker);
-
 
     // destructor
     ~ShadowTruss();

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-08-28 21:53:46 $
+// $Revision: 1.2 $
+// $Date: 2003-10-15 00:38:07 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/ShadowTruss/ActorTruss.h,v $
                                                                         
 #ifndef ActorTruss_h
@@ -32,13 +32,12 @@
 //
 // What: "@(#) ActorTruss.h, revA"
 
+#include <Actor.h>
 #include <Element.h>
 #include <Matrix.h>
 #include <Vector.h>
-#include <Actor.h>
 
 class Node;
-class Channel;
 class UniaxialMaterial;
 class ElementalLoad;
 

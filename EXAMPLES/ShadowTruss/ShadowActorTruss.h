@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-08-28 21:53:47 $
+// $Revision: 1.2 $
+// $Date: 2003-10-15 00:38:07 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/ShadowTruss/ShadowActorTruss.h,v $
 
 // Written: fmk

@@ -18,16 +18,16 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-08-29 09:24:04 $
+// $Revision: 1.2 $
+// $Date: 2003-10-15 00:38:07 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/ShadowTruss/ClientMain.cpp,v $
 
 
-// Written: fmk 08/99
+// Written: fmk 10/03
 //
 // Purpose: this file contains a C++ main procedure to perform the analysis
-// of example1 (found in most documents). One of the elements does it's 
-// processing remotely. This is the Client program.
+// of example1 (found in most documents). One of the elements (element 3) 
+// does it's processing remotely. This is the Client program.
 
 #include <stdlib.h>
 
@@ -74,6 +74,11 @@ Element      *ops_TheActiveElement = 0;
 // main routine
 int main(int argc, char **argv)
 {
+  if (argc != 3) {
+    opserr << "invalid usage - require \"example1 portNumber? machineInetAddress?\"\n";
+    exit(-1);
+  }
+
     TCP_Socket *theChannel = new TCP_Socket(atoi(argv[1]), argv[2]);
     FEM_ObjectBroker *theBroker = new FEM_ObjectBroker();
 
@@ -96,7 +101,7 @@ int main(int argc, char **argv)
     theDomain->addNode(node2);
     theDomain->addNode(node3);
     theDomain->addNode(node4);
-    
+
     // create an elastic material using constriuctor:  
     //		ElasticMaterialModel(tag, E)
 
@@ -108,12 +113,19 @@ int main(int argc, char **argv)
     
     Truss *truss1 = new Truss(1, 2, 1, 4, *theMaterial, 10.0);
     Truss *truss2 = new Truss(2, 2, 2, 4, *theMaterial,  5.0);    
+
+    // NOTE:
+    // for element 3 we use a ShadowTruss object instead of a regular truss.
+    // THIS IS THE ONLY DIFFERENCE BETWEEN THIS .exe AND THE ONE IN OpenSees/Example1
+
+    // so instead of this line:
     //    Truss *truss3 = new Truss(3, 2, 3, 4, *theMaterial,  5.0);        
+    // we have this line:
     ShadowTruss *truss3 = new ShadowTruss(3, 3, 4, *theMaterial,  5.0, 0.0, *theChannel, *theBroker);        
     theDomain->addElement(truss1);
     theDomain->addElement(truss2);
     theDomain->addElement(truss3);    
-    
+
     // create the single-point constraint objects using constructor:
     //		SP_Constraint(tag, nodeTag, dofID, value)
     // and then add them to the domain
@@ -139,11 +151,11 @@ int main(int argc, char **argv)
     // construct a load pattren using constructor:
     //		LoadPattern(tag)
     // and then set it's TimeSeries and add it to the domain
-    
+
     LoadPattern *theLoadPattern = new LoadPattern(1);
     theLoadPattern->setTimeSeries(theSeries);
     theDomain->addLoadPattern(theLoadPattern);
-    
+
     // construct a nodal load using constructor:
     //		NodalLoad(tag, nodeID, Vector &)
     // first construct a Vector of size 2 and set the values NOTE C INDEXING
@@ -189,6 +201,12 @@ int main(int argc, char **argv)
 
     theDomain->clearAll();
 
+    // when done clean up the memory
+    delete theChannel;
+    delete theBroker;    
+    delete theDomain;
+
+    // exit
     exit(0);
 }	
 	

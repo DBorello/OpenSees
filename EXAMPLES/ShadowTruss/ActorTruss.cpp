@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-08-28 21:53:46 $
+// $Revision: 1.2 $
+// $Date: 2003-10-15 00:38:07 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/ShadowTruss/ActorTruss.cpp,v $
                                                                         
 // Written: fmk 
@@ -67,7 +67,8 @@ ActorTruss::ActorTruss(Channel &theChannel,
 //  destructor - provided to clean up any memory
 ActorTruss::~ActorTruss()
 {
-
+  if (theMaterial != 0)
+    delete theMaterial;
 }
 
 int

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-08-29 08:10:37 $
+// $Revision: 1.3 $
+// $Date: 2003-10-15 00:38:07 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/ShadowTruss/ShadowTruss.cpp,v $
                                                                         
 // Written: fmk 
@@ -49,7 +49,7 @@
 #include <UniaxialMaterial.h>
 #include <Renderer.h>
 #include <ElementResponse.h>
-
+#include <Response.h>
 
 
 // initialise the class wide variables
@@ -64,7 +64,7 @@ ShadowTruss::ShadowTruss(int tag,
 			 UniaxialMaterial &theMat,
 			 double a, 
 			 double m,
-			 Channel &theChannel,
+			 Channel &theChannel, 
 			 FEM_ObjectBroker &theObjectBroker)
 :Element(tag, ELE_TAG_ShadowTruss),     
  Shadow(theChannel, theObjectBroker),
@@ -84,44 +84,18 @@ ShadowTruss::ShadowTruss(int tag,
   msgData(1) = theMat.getClassTag();
   this->sendID(msgData);
   static Vector data(1);
-  data(1) = A;
+  data(0) = A;
   this->sendVector(data);
   this->sendObject(theMat);
-}
 
-ShadowTruss::ShadowTruss(int tag, 
-			 int Nd1, int Nd2, 
-			 UniaxialMaterial &theMat,
-			 double a, 
-			 double m,
-			 MachineBroker &theMachineBroker,
-			 FEM_ObjectBroker &theObjectBroker)
-:Element(tag, ELE_TAG_ShadowTruss),     
- Shadow(ELE_TAG_ShadowTruss, theObjectBroker, theMachineBroker, 0),
- msgData(2),
- externalNodes(2),
- trans(1, 4), L(0.0), A(a), M(m), end1Ptr(0), end2Ptr(0), theLoad(0)
-{	
-  // fill in the ID containing external node info with node id's    
-  if (externalNodes.Size() != 2)
-    opserr << "FATAL ShadowTruss::ShadowTruss() - out of memory, could not create an ID of size 2\n";
-
-  externalNodes(0) = Nd1;
-  externalNodes(1) = Nd2;        
-
-  // send area & material to remote
-  msgData(0) = ShadowActorTruss_setMaterial;
-  msgData(1) = theMat.getClassTag();
-  this->sendID(msgData);
-  static Vector data(1);
-  data(1) = A;
-  this->sendVector(data);
-  this->sendObject(theMat);
 }
 
 //  destructor - provided to clean up any memory
 ShadowTruss::~ShadowTruss()
 {
+  msgData(0) = ShadowActorTruss_DIE;
+  this->sendID(msgData);
+
   if (theLoad != 0)
     delete theLoad;
 }
@@ -419,12 +393,14 @@ ShadowTruss::displaySelf(Renderer &theViewer, int displayMode, float fact)
 void
 ShadowTruss::Print(OPS_Stream &s, int flag)
 {
+    if (flag == 0) { // print everything
       s << "Element: " << this->getTag(); 
       s << " type: ShadowTruss  iNode: " << externalNodes(0);
       s << " jNode: " << externalNodes(1);
       s << " Area: " << A;
       if (M != 0) s << " Mass (PerUnitVolume): " << M;	
       s << endln;
+    }
 }
 
 
