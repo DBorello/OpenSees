@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-04 01:11:52 $
+// $Revision: 1.4 $
+// $Date: 2003-02-19 21:48:31 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/TclPlaneTruss/MyTruss.h,v $
                                                                         
                                                                         
@@ -44,6 +44,7 @@
 class Node;
 class Channel;
 class UniaxialMaterial;
+class ElementalLoad;
 
 #define ELE_TAG_MyTruss 4002
 
@@ -60,11 +61,11 @@ class MyTruss : public Element
     
     // destructor
     ~MyTruss();
-
     
     // public methods to obtain inforrmation about dof & connectivity
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
+    Node **getNodePtrs(void);
     int getNumDOF(void);
     void setDomain(Domain *theDomain);
 
@@ -76,20 +77,19 @@ class MyTruss : public Element
 
     // public methods to obtain stiffness, mass, damping and residual information    
     const Matrix &getTangentStiff(void);
-    const Matrix &getSecantStiff(void);    
-    const Matrix &getDamp(void);    
+    const Matrix &getInitialStiff(void);
     const Matrix &getMass(void);    
 
     void zeroLoad(void);	
-    int addLoad(const Vector &load);	    
+    int addLoad(ElementalLoad *theLoad, double loadFactor);
+    int addInertiaLoadToUnbalance(const Vector &accel);
     const Vector &getResistingForce(void);
-    const Vector &getResistingForceIncInertia(void);            
 
     // public methods for output    
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
-    void Print(ostream &s, int flag =0);    
+    void Print(OPS_Stream &s, int flag =0);    
 
     Response *setResponse(char **argv, int argc, Information &eleInfo);
     int getResponse(int responseID, Information &eleInformation);
@@ -103,7 +103,7 @@ class MyTruss : public Element
     // private attributes - a copy for each object of the class
     UniaxialMaterial *theMaterial;       // pointer to a material
     ID  externalNodes;          	 // contains the id's of end nodes
-    Matrix *t;          // hold the transformation matrix, could use a Vector
+    Matrix trans;       // hold the transformation matrix, could use a Vector
 	                // if ever bother to change the Vector interface for
 			// x-product.
 
@@ -112,13 +112,13 @@ class MyTruss : public Element
     double M; 		// mass per unit volume of truss
     Node *end1Ptr, *end2Ptr; // two pointers to the nodes - these are set in setDomain()
 
-    Vector load;
+    Vector *theLoad;     // pointer to the load vector P
 
     // static data - single copy for all objects of the class
     static Matrix trussK;   // class wide matrix for returning stiffness
-    static Matrix trussD;   // class wide matrix for returning damping
     static Matrix trussM;   // class wide matrix for returning mass 
     static Vector trussR;   // class wide vector for returning residual
+    static Node *theNodes[2];
 };
 #endif
 

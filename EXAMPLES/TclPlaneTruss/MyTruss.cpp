@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-04 01:11:52 $
+// $Revision: 1.4 $
+// $Date: 2003-02-19 21:48:31 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/TclPlaneTruss/MyTruss.cpp,v $                                                                        
                                                                         
 // Written: fmk 
@@ -31,11 +31,15 @@
 
 
 // we specify what header files we need
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <OPS_Globals.h>
+
 #include "MyTruss.h"
 
-#include <G3Globals.h>
 #include <Information.h>
-
 #include <Domain.h>
 #include <Node.h>
 #include <Channel.h>
@@ -45,15 +49,13 @@
 #include <Renderer.h>
 #include <ElementResponse.h>
 
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
+
 
 // initialise the class wide variables
 Matrix MyTruss::trussK(4,4);
 Matrix MyTruss::trussM(4,4);
-Matrix MyTruss::trussD(4,4);
 Vector MyTruss::trussR(4);
+Node * MyTruss::theNodes[2];
 
 // typical constructor
 MyTruss::MyTruss(int tag, 
@@ -64,16 +66,16 @@ MyTruss::MyTruss(int tag,
 
 :Element(tag,ELE_TAG_MyTruss),     
  externalNodes(2),
- t(0), L(0.0), A(a), M(m), end1Ptr(0), end2Ptr(0), load(4)
+ trans(1,4), L(0.0), A(a), M(m), end1Ptr(0), end2Ptr(0), theLoad(0)
 {	
   // get a copy of the material object for our own use
   theMaterial = theMat.getCopy();
   if (theMaterial == 0) 
-    g3ErrorHandler->fatal("FATAL MyTruss::MyTruss() - out of memory, could not get a copy of the Material\n");
+    opserr << "FATAL MyTruss::MyTruss() - out of memory, could not get a copy of the Material\n";
     
   // fill in the ID containing external node info with node id's    
   if (externalNodes.Size() != 2)
-    g3ErrorHandler->fatal("FATAL MyTruss::MyTruss() - out of memory, could not create an ID of size 2\n");
+    opserr << "FATAL MyTruss::MyTruss() - out of memory, could not create an ID of size 2\n";
 
   externalNodes(0) = Nd1;
   externalNodes(1) = Nd2;        
@@ -84,25 +86,24 @@ MyTruss::MyTruss()
 :Element(0,ELE_TAG_MyTruss),     
  theMaterial(0),
  externalNodes(2),
- t(0), L(0.0), A(0.0), M(0.0), end1Ptr(0), end2Ptr(0)
+ trans(1,4), L(0.0), A(0.0), M(0.0), end1Ptr(0), end2Ptr(0), theLoad(0)
 {
   if (externalNodes.Size() != 2)
-    g3ErrorHandler->fatal("FATAL MyTruss::MyTruss() - out of memory, could not create an ID of size 2\n");
+    opserr << "FATAL MyTruss::MyTruss() - out of memory, could not create an ID of size 2\n";
 }
 
 //  destructor - provided to clean up any memory
 MyTruss::~MyTruss()
 {
     // clean up the memory associated with the element, this is
-    // memory the MyTruss objects allocates in it's constructor, e.g.
-    // the t matrix, and memory allocated by other objects that the 
-    // MyTruss object is responsible for cleaning up, i.e. the MaterialObject.
+    // memory the MyTruss objects allocates and memory allocated 
+    // by other objects that the MyTruss object is responsible for 
+    // cleaning up, i.e. the MaterialObject.
 
-    if (t != 0)
-	delete t;
-    
     if (theMaterial != 0)
 	delete theMaterial;    
+    if (theLoad != 0)
+      delete theLoad;
 }
 
 int
@@ -115,6 +116,16 @@ const ID &
 MyTruss::getExternalNodes(void) 
 {
   return externalNodes;
+}
+
+
+Node **
+MyTruss::getNodePtrs(void) 
+{
+  theNodes[0] = end1Ptr;
+  theNodes[1] = end2Ptr;
+
+  return theNodes;
 }
 
 int
@@ -140,14 +151,16 @@ MyTruss::setDomain(Domain *theDomain)
     end1Ptr = theDomain->getNode(Nd1);
     end2Ptr = theDomain->getNode(Nd2);	
     if (end1Ptr == 0) {
-        g3ErrorHandler->warning("WARNING Truss::setDomain() - at truss %d node %d does not exist in domain\n",
-				this->getTag(), Nd1);
-	return;  // don't go any further - otherwise segemntation fault
+      opserr << "WARNING Truss::setDomain() - at truss " << this->getTag() << " node " <<
+	Nd1 << " does not exist in domain\n";
+				
+      return;  // don't go any further - otherwise segemntation fault
     }
     if (end2Ptr == 0) {        
-        g3ErrorHandler->warning("WARNING Truss::setDomain() - at truss %d node %d does not exist in domain\n",
-				this->getTag(), Nd1);
-	return;  // don't go any further - otherwise segemntation fault
+      opserr << "WARNING Truss::setDomain() - at truss " << this->getTag() << " node " <<
+	Nd2 << " does not exist in domain\n";
+
+      return;
     }	
     
     // call the DomainComponent class method THIS IS VERY IMPORTANT
@@ -157,18 +170,11 @@ MyTruss::setDomain(Domain *theDomain)
     int dofNd1 = end1Ptr->getNumberDOF();
     int dofNd2 = end2Ptr->getNumberDOF();	
     if ((dofNd1 != 2) || (dofNd2 != 2)) {
-      g3ErrorHandler->warning("MyTruss::setDomain(): 2 dof required at nodes, %d and %d provided\n",
-			      dofNd1, dofNd2);
+      opserr << "MyTruss::setDomain(): 2 dof required at nodes, " << dofNd1 << " and "
+	     <<  dofNd2 << " provided\n";
+      
     }	
 
-    // create the transformation matrix and ensure we obtained it
-    t = new Matrix(1,4);
-
-    if ((t == 0) || ( t->noCols() != 4)) {
-      g3ErrorHandler->warning("WARNING MyTruss::setDomain() - out of memory creating transformation matrix\n");
-      return;  // don't go any further - otherwise segemntation fault
-    }
-    
     // now determine the length & transformation matrix
     const Vector &end1Crd = end1Ptr->getCrds();
     const Vector &end2Crd = end2Ptr->getCrds();	
@@ -179,21 +185,23 @@ MyTruss::setDomain(Domain *theDomain)
     L = sqrt(dx*dx + dy*dy);
     
     if (L == 0.0) {
-      g3ErrorHandler->warning("WARNING MyTruss::setDomain() - MyTruss %d has zero length\n", this->getTag());
+      opserr << "WARNING MyTruss::setDomain() - MyTruss " << this->getTag()<< " has zero length\n";
       return;  // don't go any further - otherwise divide by 0 error
     }
 	
     double cs = dx/L;
     double sn = dy/L;
 
-    Matrix &trans = *t;
-    trans(0,0) = cs;
-    trans(0,1) = sn;    
-    trans(0,2) = -cs;
-    trans(0,3) = -sn;
+    trans(0,0) = -cs;
+    trans(0,1) = -sn;    
+    trans(0,2) = cs;
+    trans(0,3) = sn;
 
     // determine the nodal mass for lumped mass approach
     M = M * A * L/2;
+
+    // create a vector to hop applied loads
+    theLoad = new Vector(4);
 }   	 
 
 
@@ -240,8 +248,6 @@ MyTruss::getTangentStiff(void)
     double E = theMaterial->getTangent();
 
     // form the tangent stiffness matrix
-    Matrix &trans = *t;
-
     trussK = trans^trans;
     trussK *= A*E/L;  
 
@@ -250,35 +256,25 @@ MyTruss::getTangentStiff(void)
 }
 
 const Matrix &
-MyTruss::getSecantStiff(void)
+MyTruss::getInitialStiff(void)
 {
-    if (L == 0.0) { // length = zero - problem in setDomain()
+    if (L == 0.0) { // length = zero - problem in setDomain() warning message already printed
 	trussK.Zero();
 	return trussK;
     }
-    
-    // get the current stress from the material for the last updated strain
-    double strain = this->computeCurrentStrain();
-    double stress = theMaterial->getStress();    
-    double E = stress/strain;
+
+    // get the current E from the material for the last updated strain
+    double E = theMaterial->getInitialTangent();
 
     // form the tangent stiffness matrix
-    Matrix &trans = *t;
-
     trussK = trans^trans;
     trussK *= A*E/L;  
 
     // return the matrix
     return trussK;
 }
+
     
-const Matrix &
-MyTruss::getDamp(void)
-{
-  return trussD;
-}
-
-
 const Matrix &
 MyTruss::getMass(void)
 { 
@@ -297,13 +293,51 @@ MyTruss::getMass(void)
 void 
 MyTruss::zeroLoad(void)
 {
-    load.Zero();
+  // does nothing - no elemental loads
 }
 
 int
-MyTruss::addLoad(const Vector &addLoad)
+MyTruss::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-    load += addLoad;
+  // does nothing - no elemental loads
+  return 0;
+}
+
+
+int 
+MyTruss::addInertiaLoadToUnbalance(const Vector &accel)
+{
+    // check for a quick return
+    if (L == 0.0 || M == 0.0) 
+	return 0;
+
+  // get R * accel from the nodes
+  const Vector &Raccel1 = end1Ptr->getRV(accel);
+  const Vector &Raccel2 = end2Ptr->getRV(accel);    
+
+  int nodalDOF = 2;
+    
+#ifdef _G3DEBUG    
+  if (nodalDOF != Raccel1.Size() || nodalDOF != Raccel2.Size()) {
+    opserr <<"Truss::addInertiaLoadToUnbalance " <<
+      "matrix and vector sizes are incompatable\n";
+    return -1;
+  }
+#endif
+    
+    // want to add ( - fact * M R * accel ) to unbalance
+    for (int i=0; i<2; i++) {
+	double val1 = Raccel1(i);
+	double val2 = Raccel2(i);	
+	
+	// perform - fact * M*(R * accel) // remember M a diagonal matrix
+	val1 *= -M;
+	val2 *= -M;
+	
+	(*theLoad)(i) += val1;
+	(*theLoad)(i+nodalDOF) += val2;
+    }	
+
     return 0;
 }
 
@@ -315,40 +349,12 @@ MyTruss::getResistingForce()
 	return trussR;
     }
 
-    // R = Ku - Pext    
+    // want: R = Ku - Pext
 
     // force = F * transformation 
     double force = A*theMaterial->getStress();
     for (int i=0; i<4; i++)
-	trussR(i) = (*t)(0,i)*force;
-
-    // subtract external load:  Ku - P
-    trussR -= load;
-
-    return trussR;
-}
-
-
-
-const Vector &
-MyTruss::getResistingForceIncInertia()
-{	
-    // detrmine the resisting force sans mass
-    this->getResistingForce();
-    
-    // now include the mass portion
-    if (L != 0.0 && M != 0.0) {
-	
-	const Vector &accel1 = end1Ptr->getTrialAccel();
-	const Vector &accel2 = end2Ptr->getTrialAccel();	
-
-	// remember we set M = M*A*L/2 in setDoamin()
-	
-	for (int i=0; i<2; i++) {
-	    trussR(i) = trussR(i) + M*accel1(i);
-	    trussR(i+2) = trussR(i+2) + M*accel2(i);	    
-	}
-    }
+	trussR(i) = trans(0,i)*force;
 
     return trussR;
 }
@@ -385,21 +391,21 @@ MyTruss::sendSelf(int commitTag, Channel &theChannel)
 
     res = theChannel.sendVector(dataTag, commitTag, data);
     if (res < 0) {
-      g3ErrorHandler->warning("WARNING MyTruss::sendSelf() - failed to send Vector\n");
+      opserr << "WARNING MyTruss::sendSelf() - failed to send Vector\n";
       return -1;
     }	      
 
     // MyTruss then sends the tags of it's two end nodes
     res = theChannel.sendID(dataTag, commitTag, externalNodes);
     if (res < 0) {
-      g3ErrorHandler->warning("WARNING MyTruss::sendSelf() - failed to send ID\n");
+      opserr << "WARNING MyTruss::sendSelf() - failed to send ID\n";
       return -2;
     }
 
     // finally MyTruss asks it's material object to send itself
     res = theMaterial->sendSelf(commitTag, theChannel);
     if (res < 0) {
-      g3ErrorHandler->warning("WARNING MyTruss::sendSelf() - failed to send the Material\n");
+      opserr << "WARNING MyTruss::sendSelf() - failed to send the Material\n";
       return -3;
     }
 
@@ -418,7 +424,7 @@ MyTruss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroke
     Vector data(5);
     res = theChannel.recvVector(dataTag, commitTag, data);
     if (res < 0) {
-      g3ErrorHandler->warning("WARNING MyTruss::recvSelf() - failed to receive Vector\n");
+      opserr << "WARNING MyTruss::recvSelf() - failed to receive Vector\n";
       return -1;
     }	      
 
@@ -429,7 +435,7 @@ MyTruss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroke
     // MyTruss now receives the tags of it's two external nodes
     res = theChannel.recvID(dataTag, commitTag, externalNodes);
     if (res < 0) {
-      g3ErrorHandler->warning("WARNING MyTruss::recvSelf() - failed to receive ID\n");
+      opserr << "WARNING MyTruss::recvSelf() - failed to receive ID\n";
       return -2;
     }
 
@@ -440,7 +446,7 @@ MyTruss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroke
 
     theMaterial = theBroker.getNewUniaxialMaterial(matClass);
     if (theMaterial == 0) {
-      g3ErrorHandler->warning("WARNING MyTruss::recvSelf() - failed to create a Material\n");
+      opserr << "WARNING MyTruss::recvSelf() - failed to create a Material\n";
       return -3;
     }
 
@@ -448,7 +454,7 @@ MyTruss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroke
     theMaterial->setDbTag(matDb); 
     res = theMaterial->recvSelf(commitTag, theChannel, theBroker);
     if (res < 0) {
-      g3ErrorHandler->warning("WARNING MyTruss::recvSelf() - failed to receive the Material\n");
+      opserr << "WARNING MyTruss::recvSelf() - failed to receive the Material\n";
       return -3;
     }
 
@@ -478,25 +484,21 @@ MyTruss::displaySelf(Renderer &theViewer, int displayMode, float fact)
       v2(i) = end2Crd(i)+end2Disp(i)*fact;    
     }
 
-    // compute the strain and axial force in the member
-    double strain, stress, force;
-    strain = this->computeCurrentStrain();
-    theMaterial->setTrialStrain(strain);
-    stress = theMaterial->getStress();    
-    force = A * stress;    
-    
-    if (displayMode == 3) // use the strain as the drawing measure
-      return theViewer.drawLine(v1, v2, strain, strain);	
-    else if (displayMode == 2) // use the strain as the drawing measure
-      return theViewer.drawLine(v1, v2, stress, stress);	
-    else { // otherwise use the axial force as measure
-      return theViewer.drawLine(v1,v2, force, force);
+    if (displayMode == 3) { // use the strain as the drawing measure
+	double strain = theMaterial->getStrain();
+        return theViewer.drawLine(v1, v2, strain, strain);	
+    } else if (displayMode == 2) { // otherwise use the material stress
+        double stress = A*theMaterial->getStress();
+        return theViewer.drawLine(v1,v2, stress, stress);
+    } else { // use the axial force
+        double force = A * theMaterial->getStress();
+        return theViewer.drawLine(v1,v2, force, force);
     }
 }
 
 
 void
-MyTruss::Print(ostream &s, int flag)
+MyTruss::Print(OPS_Stream &s, int flag)
 {
     // compute the strain and axial force in the member
     double strain, force;
@@ -504,13 +506,12 @@ MyTruss::Print(ostream &s, int flag)
       strain = 0;
       force = 0.0;
     } else {
-      strain = this->computeCurrentStrain();
-      theMaterial->setTrialStrain(strain);
-      force = A*theMaterial->getStress();    
+      strain = theMaterial->getStrain();
+      force = A * theMaterial->getStress();    
     }
 
     for (int i=0; i<4; i++)
-      trussR(i) = (*t)(0,i)*force;
+      trussR(i) = trans(0,i)*force;
 
     if (flag == 0) { // print everything
       s << "Element: " << this->getTag(); 
@@ -523,9 +524,9 @@ MyTruss::Print(ostream &s, int flag)
       s << " axial load: " <<  force;
       s << " \n\t unbalanced load: " << trussR;
       s << " \t Material: " << *theMaterial;
-      s << endl;
+      s << endln;
     } else if (flag == 1) { // just print ele id, strain and force
-      s << this->getTag() << "  " << strain << "  " << force << endl;
+      s << this->getTag() << "  " << strain << "  " << force << endln;
     }
 }
 
@@ -581,7 +582,7 @@ MyTruss::computeCurrentStrain(void) const
 
     double dLength = 0.0;
     for (int i=0; i<2; i++){
-      dLength += (disp2(i)-disp1(i))* (*t)(0,i);
+      dLength -= (disp2(i)-disp1(i)) * trans(0,i);
     }
     
     double strain = dLength/L;
