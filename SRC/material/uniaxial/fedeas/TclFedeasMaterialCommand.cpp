@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2001-08-18 21:45:42 $
+// $Revision: 1.2 $
+// $Date: 2001-08-19 21:56:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/TclFedeasMaterialCommand.cpp,v $
 
 // Written: MHS
@@ -183,16 +183,16 @@ TclModelBuilder_addFedeasMaterial(ClientData clientData, Tcl_Interp *interp, int
 	}
 
 	else if (strcmp(argv[1],"Bond2") == 0 || strcmp(argv[1],"Bond02") == 0) {
-		if (argc < 18) {
+		if (argc < 17) {
 			cerr << "WARNING invalid number of arguments\n";
 			printCommand(argc,argv);
-			cerr << "Want: uniaxialMaterial Bond02 tag? u1p? q1p? u2p? u3p? q3p? u1n? q1n? u2n? u3n? q3n? s0? bb? alp? aln? En0?" << endl;
+			cerr << "Want: uniaxialMaterial Bond02 tag? u1p? q1p? u2p? u3p? q3p? u1n? q1n? u2n? u3n? q3n? s0? bb? alp? aln?" << endl;
 			return 0;
 		}
 
 		double u1p, q1p, u2p, u3p, q3p;
 		double u1n, q1n, u2n, u3n, q3n;
-		double s0, bb, alp, aln, En0;
+		double s0, bb, alp, aln;
 
 		if (Tcl_GetDouble(interp, argv[3], &u1p) != TCL_OK) {
 			cerr << "WARNING invalid u1p\n";
@@ -266,13 +266,8 @@ TclModelBuilder_addFedeasMaterial(ClientData clientData, Tcl_Interp *interp, int
 			printCommand(argc, argv);
 			return 0;	
 		}
-		if (Tcl_GetDouble(interp, argv[17], &En0) != TCL_OK) {
-			cerr << "WARNING invalid En0\n";
-			printCommand(argc, argv);
-			return 0;	
-		}
 
-		theMaterial = new FedeasBond2Material(tag, u1p, q1p, u2p, u3p, q3p,	u1n, q1n, u2n, u3n, q3n, s0, bb, alp, aln, En0);
+		theMaterial = new FedeasBond2Material(tag, u1p, q1p, u2p, u3p, q3p,	u1n, q1n, u2n, u3n, q3n, s0, bb, alp, aln);
 	}
 
 	else if (strcmp(argv[1],"Concrete1") == 0 || strcmp(argv[1],"Concrete01") == 0) {

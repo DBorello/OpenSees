@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-17 16:28:57 $
+// $Revision: 1.2 $
+// $Date: 2001-08-19 21:56:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasBond2Material.cpp,v $
                                                                       
 // Written: MHS
@@ -34,7 +34,7 @@
 FedeasBond2Material::FedeasBond2Material(int tag,
 	double u1p, double q1p, double u2p, double u3p, double q3p,
 	double u1n, double q1n, double u2n, double u3n, double q3n,
-	double s0, double bb, double alp, double aln, double En0):
+	double s0, double bb, double alp, double aln):
 // 27 history variables and 15 material parameters
 FedeasMaterial(tag, MAT_TAG_FedeasBond2, 27, 15)
 {
@@ -52,7 +52,11 @@ FedeasMaterial(tag, MAT_TAG_FedeasBond2, 27, 15)
 	data[11] = bb;
 	data[12] = alp;
 	data[13] = aln;
-	data[14] = En0;
+
+	double E0p = q1p*u1p/(1.0+bb) + q1p*(u2p-u1p) + 0.5*(q1p+q3p)*(u3p-u2p);
+	double E0n = q1n*u1n/(1.0+bb) + q1n*(u2n-u1n) + 0.5*(q1n+q3n)*(u3n-u2n);
+
+	data[14] = (E0p > E0n) ? E0p : E0n;
 }
 
 FedeasBond2Material::FedeasBond2Material(void):
