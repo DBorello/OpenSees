@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2002-04-29 00:04:51 $
+// $Revision: 1.11 $
+// $Date: 2002-05-07 16:36:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -46,6 +46,7 @@
 #include <EPPGapMaterial.h>		// Mackie
 #include <ViscousMaterial.h>	// Sasani
 #include <PathIndependentMaterial.h>	// MHS
+#include <MinMaxMaterial.h>	// MHS
 #include <SeriesMaterial.h>		// MHS
 #include <ENTMaterial.h>		// MHS
 #include <CableMaterial.h>	// CC
@@ -812,6 +813,64 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 		theMaterial = new PathIndependentMaterial (tag, *material);
 	}
 
+    else if (strcmp(argv[1],"MinMax") == 0) {
+      if (argc < 4) {
+	cerr << "WARNING insufficient arguments\n";
+	printCommand(argc,argv);
+	cerr << "Want: uniaxialMaterial MinMax tag? matTag?";
+	cerr << " <-min min?> <-max max?>" << endl;
+	return TCL_ERROR;
+      }
+      
+      int tag, matTag;
+      
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	cerr << "WARNING invalid uniaxialMaterial MinMax tag" << endl;
+	return TCL_ERROR;		
+      }
+
+      if (Tcl_GetInt(interp, argv[3], &matTag) != TCL_OK) {
+	cerr << "WARNING invalid component tag\n";
+	cerr << "uniaxialMaterial MinMax: " << tag << endl;
+	return TCL_ERROR;
+      }
+
+      // Search for min and max strains
+      double epsmin = NEG_INF_STRAIN;
+      double epsmax = POS_INF_STRAIN;
+	
+      for (int j = 4; j < argc; j++) {
+	if (strcmp(argv[j],"-min") == 0) {
+	  if ((j+1) >= argc || Tcl_GetDouble (interp, argv[j+1], &epsmin) != TCL_OK) {
+	    cerr << "WARNING invalid min\n";
+	    cerr << "uniaxialMaterial MinMax: " << tag << endl;
+	    return TCL_ERROR;
+	  }
+	  j++;
+	}
+	if (strcmp(argv[j],"-max") == 0) {
+	  if ((j+1) >= argc || Tcl_GetDouble (interp, argv[j+1], &epsmax) != TCL_OK) {
+	    cerr << "WARNING invalid max\n";
+	    cerr << "uniaxialMaterial MinMax: " << tag << endl;
+	    return TCL_ERROR;
+	  }
+	  j++;
+	}
+      }
+	
+      UniaxialMaterial *theMat = theTclBuilder->getUniaxialMaterial(matTag);
+	    
+      if (theMat == 0) {
+	cerr << "WARNING component material does not exist\n";
+	cerr << "Component material: " << matTag; 
+	cerr << "\nuniaxialMaterial MinMax: " << tag << endl;
+	return TCL_ERROR;
+      }
+	
+      // Parsing was successful, allocate the material
+      theMaterial = new MinMaxMaterial(tag, *theMat, epsmin, epsmax);
+      
+    }
 	else if (strcmp(argv[1],"Cable") == 0) 
 	{
 		if (argc != 7) {
