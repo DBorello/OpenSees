@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-01-30 04:45:50 $
+// $Revision: 1.4 $
+// $Date: 2001-08-09 23:03:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/8nbrick/TclEightNodeBrickCommand.cpp,v $
                                                                         
                                                                         
@@ -79,8 +79,7 @@ TclModelBuilder_addEightNodeBrick(ClientData clientData, Tcl_Interp *interp,  in
   }
   
   // read the 8 node tags
-  int i;
-  for (i=0; i<8; i++) {
+  for (int i=0; i<8; i++) {
       if (Tcl_GetInt(interp, argv[2+i+eleArgStart], &nodes[i]) != TCL_OK) {
 	  g3ErrorHandler->warning("command: element brick %d - invalid integer tag %s",      
 				  eleID, argv[2+i+eleArgStart]);
@@ -106,7 +105,7 @@ TclModelBuilder_addEightNodeBrick(ClientData clientData, Tcl_Interp *interp,  in
   //type = argv[11+eleArgStart];
 
   // read the 3 bodyforce accel's 
-  for (i=0; i<3; i++) {
+  for (int i=0; i<3; i++) {
       if (Tcl_GetDouble(interp, argv[11+i+eleArgStart], &bodyforces[i]) != TCL_OK) {
 	  g3ErrorHandler->warning("command: element brick %d - invalid bodyforces tag %s",      
 				  eleID, argv[11+i+eleArgStart]);
@@ -122,21 +121,9 @@ TclModelBuilder_addEightNodeBrick(ClientData clientData, Tcl_Interp *interp,  in
   }  
   
   // now create the EightNodeBrick and add it to the Domain
-  EightNodeBrick *theEle = new EightNodeBrick(eleID,
-	                                             nodes[0], 
-	                                             nodes[1], 
-																																													 nodes[2], 
-																																													 nodes[3], 
-																																													 nodes[4],
-                                              nodes[5],
-																																													 nodes[6], 
-																																													 nodes[7], 
-																																													 theMaterial, 
-                                   					      bodyforces[0], 
-																																													 bodyforces[1],
-																																													 bodyforces[2], 
-																																													 massDensity, 
-																																													 0.0);
+  EightNodeBrick *theEle = new EightNodeBrick(eleID,nodes[0], nodes[1], nodes[2], nodes[3], nodes[4],
+                                              nodes[5],nodes[6], nodes[7], theMaterial, 
+					      bodyforces[0], bodyforces[1], bodyforces[2], massDensity, 0.0);
 					      
   if (theEle == 0) {
       g3ErrorHandler->warning("command: element brick %d - out of memory", eleID);      
@@ -150,7 +137,7 @@ TclModelBuilder_addEightNodeBrick(ClientData clientData, Tcl_Interp *interp,  in
       return TCL_ERROR;
   }
 
-  // if get here we have sucessfully created the element and added it to the domain
+  // if get here we have sucessfully created the node and added it to the domain
   return TCL_OK;
 }
 
