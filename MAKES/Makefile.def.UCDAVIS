@@ -42,6 +42,7 @@ PROGRAMMING_MODE = SEQUENTIAL
 #COMPILER = GCC, KAI 
 COMPILER = GCC
 
+
 #DEBUG_MODE = DEBUG, NO_DEBUG
 DEBUG_MODE = DEBUG
 
@@ -249,25 +250,69 @@ RELIABILITY_FLAG =
 endif
 
 
-
-## optimize a bit
-#C++FLAGS        =  -O2 -D_LINUX -D_UNIX  -Wall $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(PROGRAMMING_FLAG) 
-#CFLAGS          =  -O2
-#FFLAGS          =  -O2
-#LINKFLAGS       =  
-
-## optimize a LOT
-#C++FLAGS        =  -O2 -fomit-frame-pointer -fno-strength-reduce -Winline   -m486 -malign-loops=2 -malign-jumps=2 -malign-functions=2 -D_LINUX -D_UNIX  -Wall $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(PROGRAMMING_FLAG) 
-#CFLAGS          =  -O2
-#FFLAGS          =  -O2
-#LINKFLAGS       =  
-
-
 # debug
 C++FLAGS        =  -g -D_LINUX -D_UNIX  -Wall $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG) 
 CFLAGS          =  -g -Wall $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG) 
-FFLAGS          =  -Wall -O
+FFLAGS          =  -Wall -g
 LINKFLAGS       =  -g
+#OpenSees_PROGRAM = $(HOME)/bin/OpenSees.debug
+OpenSees_PROGRAM = $(HOME)/bin/OpenSees.debug
+
+
+
+# # optimize a bit
+# DEBUG_MODE      =   NO_DEBUG
+# C++FLAGS        =  -O2 -D_LINUX -D_UNIX  -Wall $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(PROGRAMMING_FLAG) 
+# CFLAGS          =  -O2
+# FFLAGS          =  -O2
+# LINKFLAGS       =  
+# #OpenSees_PROGRAM = $(HOME)/bin/OpenSees.optimized.a.bit
+# OpenSees_PROGRAM = $(HOME)/bin/OpenSees
+
+
+# # optimize a LOT
+# #C++FLAGS        =  -O2 -fomit-frame-pointer -fno-strength-reduce -Winline   -m486 -malign-loops=2 -malign-jumps=2 -malign-functions=2 -D_LINUX -D_UNIX  -Wall $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(PROGRAMMING_FLAG) 
+# C++FLAGS         = -Wall -D_LINUX -D_UNIX -Wall\
+#                     $(GRAPHIC_FLAG) \
+#                     $(RELIABILITY_FLAG) \
+#                     $(DEBUG_FLAG) \
+#                     $(PROGRAMMING_FLAG) \
+#                    -funroll-loops \
+#                    -fcse-follow-jumps \
+#                    -fthread-jumps  \
+#                    -fcse-skip-blocks  \
+#                    -frerun-cse-after-loop \
+#                    -felide-constructors \
+#                    -fcaller-saves  \
+#                    -ffloat-store \
+#                    -fforce-addr \
+#                    -fschedule-insns  \
+#                    -fschedule-insns2 \
+#                    -D_LINUX  \
+#                    -D_UNIX \
+#                    -fexpensive-optimizations \
+#                    -fforce-addr  \
+#                    -fforce-mem  \
+#                    -finline-functions \
+#                    -fkeep-inline-functions \
+#                    -fno-function-cse \
+#                    -fno-inline \
+#                    -fno-peephole \
+#                    -fomit-frame-pointer \
+#                    -fschedule-insns \
+#                    -fschedule-insns2 \
+#                    -fstrength-reduce \
+#                    -fthread-jumps 
+# 
+# 
+#CFLAGS          =  -O2
+#FFLAGS          =  -O2
+#LINKFLAGS       =  
+#DEBUG_MODE      =  NO_DEBUG
+##OpenSees_PROGRAM = $(HOME)/bin/OpenSees.optimized.a.lot
+#OpenSees_PROGRAM = $(HOME)/bin/OpenSees
+
+
 
 
 
@@ -429,9 +474,9 @@ MACHINE_NUMERICAL_LIBS  = -lm \
   $(BLAS_LIBRARY) \
   $(CBLAS_LIBRARY) \
   $(GRAPHIC_LIBRARY)\
-  $(RELIABILITY_LIBRARY)\
   $(FEDEAS_LIBRARY)\
-  -lg2c -ldl
+  $(RELIABILITY_LIBRARY)\
+ -lg2c -ldl
 #  $(FEDEAS_LIBRARY)\
 #  $(MPI_LIB_DIR) \ # BJ_UCD
 
