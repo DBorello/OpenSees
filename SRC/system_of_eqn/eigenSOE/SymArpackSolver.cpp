@@ -79,6 +79,9 @@ SymArpackSolver::~SymArpackSolver()
 
     if (vector !=0)
         delete [] vector;
+
+    if (eigenV !=0)
+        delete eigenV;
 }
 
 

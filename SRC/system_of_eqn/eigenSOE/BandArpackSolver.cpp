@@ -36,6 +36,8 @@ BandArpackSolver::~BandArpackSolver()
         delete [] value;
     if (eigenvector !=0)
         delete [] eigenvector;
+    if (eigenV !=0)
+        delete eigenV;
 }
 
 #ifdef _WIN32
