@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2002-02-12 20:13:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FE_Datastore.h,v $
                                                                         
                                                                         
@@ -50,10 +50,27 @@ class FE_Datastore: public Channel
     FE_Datastore(Domain &theDomain, FEM_ObjectBroker &theBroker);    
     virtual ~FE_Datastore();
 
+    // methods defined in the Channel class interface which mean nothing for a Datastore
+    char *addToProgram(void);
+    int setUpShadow(void);
+    int setUpActor(void);
+    int setNextAddress(const ChannelAddress &otherChannelAddress);
+    ChannelAddress *getLastSendersAddress(void);
+
+    // methods defined in the Channel class interface which can be implemented here    
+    int sendObj(int commitTag,
+		MovableObject &theObject, 
+		ChannelAddress *theAddress =0);
+    int recvObj(int commitTag,
+		MovableObject &theObject, 
+		FEM_ObjectBroker &theBroker,
+		ChannelAddress *theAddress =0);
+		
     // pure virtual functions in addition to those defined
     // in the ModelBuilder and Channel classes
 
     virtual int getDbTag(void) =0;
+
     virtual int commitState(int commitTag);    
     virtual int restoreState(int commitTag);        
     

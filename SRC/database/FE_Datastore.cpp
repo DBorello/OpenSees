@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2002-02-12 20:13:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FE_Datastore.cpp,v $
                                                                         
                                                                         
@@ -38,6 +38,7 @@
 
 #include "FE_Datastore.h"
 #include <FEM_ObjectBroker.h>
+#include <MovableObject.h>
 #include <Domain.h>
 #include <G3Globals.h>
 
@@ -60,6 +61,60 @@ FE_Datastore::~FE_Datastore()
 }
 
 
+/********************************************************************
+ *                   CHANNEL METHODS  THAT DO NOTHING               *
+ ********************************************************************/
+
+char *
+FE_Datastore::addToProgram(void)
+{
+  return 0;
+}
+
+int 
+FE_Datastore::setUpShadow(void)
+{
+  return 0;
+}
+
+int 
+FE_Datastore::setUpActor(void)
+{
+  return 0;
+}
+
+int 
+FE_Datastore::setNextAddress(const ChannelAddress &otherChannelAddress)
+{
+  return 0;
+}
+
+
+ChannelAddress *
+FE_Datastore::getLastSendersAddress(void)
+{
+  return 0;
+}
+
+
+int 
+FE_Datastore::sendObj(int commitTag,
+		      MovableObject &theObject, 
+		      ChannelAddress *theAddress)
+{
+  return theObject.sendSelf(commitTag, *this);
+}
+
+int 
+FE_Datastore::recvObj(int commitTag,
+		      MovableObject &theObject, 
+		      FEM_ObjectBroker &theNewBroker,
+		      ChannelAddress *theAddress)
+{
+  return theObject.recvSelf(commitTag, *this, theNewBroker);
+}
+
+		
 
 
 int

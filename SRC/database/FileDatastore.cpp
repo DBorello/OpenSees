@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2002-02-12 20:13:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.cpp,v $
                                                                         
                                                                         
@@ -45,7 +45,6 @@
 #include <stdio.h>
 #include <bool.h>
 
-#include <MovableObject.h>
 #include <FEM_ObjectBroker.h>
 #include <Domain.h>
 #include <ID.h>
@@ -116,42 +115,6 @@ FileDatastore::getDbTag(void)
   return dbTag;
 }
 
-/********************************************************************
- *                   CHANNEL METHODS  THAT DO NOTHING               *
- ********************************************************************/
-
-char *
-FileDatastore::addToProgram(void)
-{
-  return 0;
-}
-
-int 
-FileDatastore::setUpShadow(void)
-{
-  return 0;
-}
-
-int 
-FileDatastore::setUpActor(void)
-{
-  return 0;
-}
-
-int 
-FileDatastore::setNextAddress(const ChannelAddress &otherChannelAddress)
-{
-  return 0;
-}
-
-
-ChannelAddress *
-FileDatastore::getLastSendersAddress(void)
-{
-  return 0;
-}
-
-
 int 
 FileDatastore::commitState(int commitTag)
 {
@@ -179,24 +142,6 @@ FileDatastore::commitState(int commitTag)
     return result;
 }
 
-int 
-FileDatastore::sendObj(int commitTag,
-		       MovableObject &theObject, 
-		       ChannelAddress *theAddress)
-{
-  return theObject.sendSelf(commitTag, *this);
-}
-
-int 
-FileDatastore::recvObj(int commitTag,
-		       MovableObject &theObject, 
-		       FEM_ObjectBroker &theNewBroker,
-		       ChannelAddress *theAddress)
-{
-  return theObject.recvSelf(commitTag, *this, theNewBroker);
-}
-
-		
 int 
 FileDatastore::sendMsg(int dataTag, int commitTag, 
 		       const Message &, 
