@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2000-10-28 05:50:01 $
+// $Revision: 1.4 $
+// $Date: 2000-12-13 08:30:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -57,7 +57,11 @@
 
 #define GRND_TAG_ElCentroGroundMotion            1
 #define GROUND_MOTION_TAG_GroundMotionRecord     2
-#define GROUND_MOTION_INTEGRATOR_TAG_Trapezoidal 1
+#define GROUND_MOTION_TAG_InterpolatedGroundMotion    3
+#define GROUND_MOTION_TAG_GroundMotion     4
+
+
+#define TIMESERIES_INTEGRATOR_TAG_Trapezoidal 1
 
 #define SECT_TAG_Section         1
 
@@ -98,7 +102,11 @@
 #define ND_TAG_ElasticIsotropicPlaneStress2d	12
 #define ND_TAG_ElasticIsotropic3D               21
 #define ND_TAG_Template3Dep 			31
-
+#define ND_TAG_J2PlaneStrain                  3005 
+#define ND_TAG_J2PlaneStress                  3006 
+#define ND_TAG_J2AxiSymm                      3007 
+#define ND_TAG_J2ThreeDimensional             3009 
+#define MAT_TAG_FluidSolidPorousMaterial       102
 
 #define FIBER_TAG_Uniaxial2d	1
 #define FIBER_TAG_Uniaxial3d	2
@@ -123,6 +131,7 @@
 #define DEG_TAG_STRENGTH_Stanford	4
 
 #define PATTERN_TAG_LoadPattern		  1
+#define PATTERN_TAG_MultiSupportPattern	  3
 #define LOAD_TAG_UniformExcitation        2
 
 #define MAT_TAG_IsotropicLinElastic         1001
@@ -173,6 +182,8 @@
 
 #define CNSTRNT_TAG_SP_Constraint 	1
 #define CNSTRNT_TAG_MP_Constraint 	2
+#define CNSTRNT_TAG_ImposedMotionSP	3
+#define CNSTRNT_TAG_ImposedMotionSP1	4
 
 #define MATRIX_TAG_Matrix 	1
 
