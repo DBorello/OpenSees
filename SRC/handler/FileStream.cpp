@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2004-11-13 00:53:14 $
+// $Revision: 1.6 $
+// $Date: 2004-11-24 22:37:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/FileStream.cpp,v $
 
 
@@ -53,7 +53,7 @@ FileStream::setFile(const char *name, openMode mode)
   if (fileName != 0) {
     if (strcmp(fileName, name) != 0)
       delete [] fileName;
-    fileName == 0;
+    fileName = 0;
   }
   if (fileName == 0) {
     fileName = new char[strlen(name)+1];
@@ -239,16 +239,17 @@ FileStream::operator<<(const signed char *s)
 OPS_Stream& 
 FileStream::operator<<(const void *p)
 {
+/*
   if (fileOpen != 0)
     theFile << p;
-
+*/
   return *this;
 }
 OPS_Stream& 
 FileStream::operator<<(int n)
 {
   if (fileOpen != 0)
-    theFile << n;
+    theFile << 1.0*n;
 
   return *this;
 }
@@ -256,48 +257,53 @@ OPS_Stream&
 FileStream::operator<<(unsigned int n)
 {
   if (fileOpen != 0)
-    theFile << n;
+    theFile << 1.0*n;
 
   return *this;
 }
 OPS_Stream& 
 FileStream::operator<<(long n)
 {
+/*
   if (fileOpen != 0)
     theFile << n;
-
+*/
   return *this;
 }
 OPS_Stream& 
 FileStream::operator<<(unsigned long n)
 {
+/*
   if (fileOpen != 0)
     theFile << n;
-
+*/
   return *this;
 }
 OPS_Stream& 
 FileStream::operator<<(short n)
 {
+/*
   if (fileOpen != 0)
     theFile << n;
-
+*/
   return *this;
 }
 OPS_Stream& 
 FileStream::operator<<(unsigned short n)
 {
+/*
   if (fileOpen != 0)
     theFile << n;
-
+*/
   return *this;
 }
 OPS_Stream& 
 FileStream::operator<<(bool b)
 {
+/*
   if (fileOpen != 0)
     theFile << b;
-
+*/
   return *this;
 }
 OPS_Stream& 

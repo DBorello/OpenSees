@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-03-04 23:12:58 $
+// $Revision: 1.5 $
+// $Date: 2004-11-24 22:37:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/StandardStream.cpp,v $
 
 #include <StandardStream.h>
@@ -102,12 +102,12 @@ StandardStream::write(const char *s,int n)
 
   if (fileOpen != 0)
     theFile.write(s, n);
-
+  
   return *this;
 }
 
 OPS_Stream& 
-StandardStream::write(const unsigned char*s,int n)
+StandardStream::write(const unsigned char*s, int n)
 {
   cerr.write((const char *) s, n);
 
@@ -117,7 +117,7 @@ StandardStream::write(const unsigned char*s,int n)
   return *this;
 }
 OPS_Stream& 
-StandardStream::write(const signed char*s,int n)
+StandardStream::write(const signed char*s, int n)
 {
   cerr.write((const char *)s, n);
 
@@ -132,7 +132,7 @@ StandardStream::write(const void *s, int n)
   cerr.write((const char *)s, n);
 
   if (fileOpen != 0)
-    theFile.write((const char *) s, n);
+   theFile.write((const char *) s, n);
 
   return *this;
 }
@@ -144,7 +144,7 @@ StandardStream::operator<<(char c)
   if (fileOpen != 0)
     theFile << c;
 
-  return *this;
+ return *this;
 }
 OPS_Stream& 
 StandardStream::operator<<(unsigned char c)
@@ -154,11 +154,12 @@ StandardStream::operator<<(unsigned char c)
   if (fileOpen != 0)
     theFile << c;
 
-  return *this;
+ return *this;
 }
 OPS_Stream& 
 StandardStream::operator<<(signed char c)
 {
+
   cerr << c;
 
   if (fileOpen != 0)
@@ -181,6 +182,7 @@ StandardStream::operator<<(const char *s)
 
   return *this;
 }
+
 OPS_Stream& 
 StandardStream::operator<<(const unsigned char *s)
 {
@@ -204,82 +206,90 @@ StandardStream::operator<<(const signed char *s)
 OPS_Stream& 
 StandardStream::operator<<(const void *p)
 {
-  cerr << p;
+/*
+//  cerr << p;
 
   if (fileOpen != 0)
     theFile << p;
-
+*/
   return *this;
 }
 OPS_Stream& 
 StandardStream::operator<<(int n)
 {
-  cerr << n;
+  cerr <<  1.0*n;
 
   if (fileOpen != 0)
-    theFile << n;
+    theFile << 1.0*n;
 
   return *this;
 }
+
 OPS_Stream& 
 StandardStream::operator<<(unsigned int n)
 {
-  cerr << n;
+  cerr << 1.0*n;
 
   if (fileOpen != 0)
-    theFile << n;
+    theFile << 1.0*n;
 
   return *this;
 }
 OPS_Stream& 
 StandardStream::operator<<(long n)
 {
-  cerr << n;
+/*
+cerr << n;
 
-  if (fileOpen != 0)
-    theFile << n;
-
+if (fileOpen != 0)
+  theFile << n;
+*/
   return *this;
 }
 OPS_Stream& 
 StandardStream::operator<<(unsigned long n)
 {
+/*
   cerr << n;
 
   if (fileOpen != 0)
     theFile << n;
-
+*/
   return *this;
 }
 OPS_Stream& 
 StandardStream::operator<<(short n)
 {
+/*
   cerr << n;
 
   if (fileOpen != 0)
     theFile << n;
-
+*/
   return *this;
 }
 OPS_Stream& 
 StandardStream::operator<<(unsigned short n)
 {
+/*
   cerr << n;
 
   if (fileOpen != 0)
     theFile << n;
-
-  return *this;
+*/
+return *this;
 }
+
 OPS_Stream& 
 StandardStream::operator<<(bool b)
 {
+/*
   cerr << b;
 
   if (fileOpen != 0)
     theFile << b;
-
-  return *this;
+*/
+ return *this;
 }
 OPS_Stream& 
 StandardStream::operator<<(double n)
@@ -289,7 +299,7 @@ StandardStream::operator<<(double n)
   if (fileOpen != 0)
     theFile << n;
 
-  return *this;
+ return *this;
 }
 OPS_Stream& 
 StandardStream::operator<<(float n)
@@ -299,5 +309,5 @@ StandardStream::operator<<(float n)
   if (fileOpen != 0)
     theFile << n;
 
-  return *this;
+ return *this;
 }
