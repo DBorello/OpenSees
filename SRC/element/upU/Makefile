@@ -2,9 +2,11 @@ include ../../../Makefile.def
 
 OBJS       = TwentyNodeBrick_u_p_U.o  TclTwentyNodeBrick_u_p_U.o \
 	EightNodeBrick_u_p_U.o   TclEightNodeBrick_u_p_U.o \
-	FourNodeQuadUP.o TclFourNodeQuadUPCommand.o
-
-            #Tclu_p_UCommand.o
+	FourNodeQuadUP.o TclFourNodeQuadUPCommand.o \
+	BrickUP.o \
+	Nine_Four_Node_QuadUP.o \
+	Twenty_Eight_Node_BrickUP.o \
+	shp3dv.o
 
 all:         $(OBJS)
 

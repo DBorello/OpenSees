@@ -1,19 +1,21 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Description: This file contains the class declaration for FourNodeQuadUP. //
-// FourNodeQuadUP is a 4-node plane strain element for solid-fluid fully     //
-// coupled analysis. This implementation is a simplified u-p formulation     //
-// of Biot theory (u - solid displacement, p - fluid pressure). Each element //
-// node has two DOFs for u and 1 DOF for p.                                  //
-// Written by Zhaohui Yang	(May 2002)                                   //
-// based on FourNodeQuad element by Michael Scott                            //
+// Description: This file contains the class declaration for                 //
+// NineFourNodeQuadUP, a 9-4-node (9 node for solid and 4 node for fluid) //
+// plane strain element for solid-fluid fully coupled analysis. This         //
+// implementation is a simplified u-p formulation of Biot theory             //
+// (u - solid displacement, p - fluid pressure). Each element node has two   //
+// DOFs for u and 1 DOF for p.                                               //
+//                                                                           //
+// Written by Zhaohui Yang	(March 2004)                                     //
+//                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.7 $
+// $Revision: 1.1 $
 // $Date: 2004-06-15 18:44:07 $
-// $Source: /usr/local/cvs/OpenSees/SRC/element/upU/FourNodeQuadUP.h,v $
+// $Source: /usr/local/cvs/OpenSees/SRC/element/upU/Nine_Four_Node_QuadUP.h,v $
 
-#ifndef FourNodeQuadUP_h
-#define FourNodeQuadUP_h
+#ifndef NineFourNodeQuadUP_h
+#define NineFourNodeQuadUP_h
 
 #ifndef _bool_h
 #include "bool.h"
@@ -28,16 +30,17 @@ class Node;
 class NDMaterial;
 class Response;
 
-class FourNodeQuadUP : public Element
+class NineFourNodeQuadUP : public Element
 {
   public:
-    FourNodeQuadUP(int tag, int nd1, int nd2, int nd3, int nd4,
+    NineFourNodeQuadUP(int tag, int nd1, int nd2, int nd3, int nd4,
+		  int nd5, int nd6, int nd7, int nd8, int nd9,
 		  NDMaterial &m, const char *type,
 		  double t, double bulk, double rhof, double perm1, double perm2,
-		   double b1 = 0.0, double b2 = 0.0, double p = 0.0);
+		   double b1 = 0.0, double b2 = 0.0);
 
-    FourNodeQuadUP();
-    virtual ~FourNodeQuadUP();
+    NineFourNodeQuadUP();
+    virtual ~NineFourNodeQuadUP();
 
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
@@ -77,7 +80,6 @@ class FourNodeQuadUP : public Element
     int setParameter(const char **argv, int argc, Information &info);
     int updateParameter(int parameterID, Information &info);
 
-
     // RWB; PyLiq1 & TzLiq1 need to see the excess pore pressure and initial stresses.
     friend class PyLiq1;
     friend class TzLiq1;
@@ -92,37 +94,38 @@ class FourNodeQuadUP : public Element
 
     ID connectedExternalNodes; // Tags of quad nodes
 
-    Node *nd1Ptr;		// Pointers to quad nodes
-    Node *nd2Ptr;
-    Node *nd3Ptr;
-    Node *nd4Ptr;
-
     static Matrix K;		// Element stiffness, damping, and mass Matrix
     static Vector P;		// Element resisting force vector
     Vector Q;		// Applied nodal loads
     double b[2];		// Body forces
-    Vector pressureLoad;	// Pressure load at nodes
+    Matrix *Ki;
+    Node *theNodes[9];
 
     double thickness;	// Element thickness
     double rho;			// Fluid mass per unit volume
     double kc;   // combined bulk modulus
-    double pressure;	// Normal surface traction (pressure) over entire element
-    // Note: positive for outward normal
     double perm[2];  // lateral/vertical permeability
+    static const int nintu;
+    static const int nintp;
+    static const int nenu;
+    static const int nenp;
 
-    static double shp[3][4][4];	// Stores shape functions and derivatives (overwritten)
-    static double pts[4][2];	// Stores quadrature points
-    static double wts[4];		// Stores quadrature weights
-    static double dvol[4];  // Stores detJacobian (overwritten)
-    static double shpBar[3][4]; // Stores averaged shap functions (overwritten)
+    static double shgu[3][9][9];	// Stores shape functions and derivatives (overwritten)
+    static double shgp[3][4][4];	// Stores shape functions and derivatives (overwritten)
+    static double shgq[3][9][4];	// Stores shape functions and derivatives (overwritten)
+    static double shlu[3][9][9];	// Stores shape functions and derivatives
+    static double shlp[3][4][4];	// Stores shape functions and derivatives
+    static double shlq[3][9][4];	// Stores shape functions and derivatives
+    static double wu[9];		// Stores quadrature weights
+    static double wp[4];		// Stores quadrature weights
+    static double dvolu[9];  // Stores detJacobian (overwritten)
+    static double dvolp[4];  // Stores detJacobian (overwritten)
+    static double dvolq[4];  // Stores detJacobian (overwritten)
 
     // private member functions - only objects of this class can call these
     double mixtureRho(int ipt);  // Mixture mass density at integration point i
-    void shapeFunction(void);
-    void setPressureLoadAtNodes(void);
-
-    Matrix *Ki;
-    static Node *theNodes[4];
+    void shapeFunction(double *w, int nint, int nen, int mode);
+    void globalShapeFunction(double *dvol, double *w, int nint, int nen, int mode);
 };
 
 #endif
