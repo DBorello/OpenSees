@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.55 $
-// $Date: 2004-08-31 22:27:37 $
+// $Revision: 1.56 $
+// $Date: 2004-10-05 00:18:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -2713,9 +2713,8 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 
       // create the eigen system and solver
       if (typeSolver == 0) {
-	opserr << "WARNING - cannot yet use SymBandLapackEigenSolver in generalized eigen value problem\n";
-	BandArpackSolver *theEigenSolver = new BandArpackSolver(numEigen); 
-	theEigenSOE = new BandArpackSOE(*theEigenSolver, *theEigenModel);    
+	SymBandEigenSolver *theEigenSolver = new SymBandEigenSolver(); 
+	theEigenSOE = new SymBandEigenSOE(*theEigenSolver, *theEigenModel);    
       } else if (typeSolver == 1) {
 	SymArpackSolver *theEigenSolver = new SymArpackSolver(numEigen); 
 	theEigenSOE = new SymArpackSOE(*theEigenSolver, *theEigenModel);    
