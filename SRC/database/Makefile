@@ -4,7 +4,7 @@
 include ../../Makefile.def
 
 OBJS       = FE_Datastore.o FileDatastore.o TclDatabaseCommands.o MySqlDatastore.o \
-	BerkeleyDbDatastore.o
+	BerkeleyDbDatastore.o OracleDatastore.o
 
 # Compilation control
 
