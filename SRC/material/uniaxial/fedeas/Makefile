@@ -1,6 +1,6 @@
 include ../../../../Makefile.def
 
-OBJS       = 
+OBJS       = FedeasHardeningMaterial.o Hard1.o
 
 all:         $(OBJS)
 
