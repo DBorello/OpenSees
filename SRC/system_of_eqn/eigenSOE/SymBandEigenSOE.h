@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-11-19 22:44:00 $
+// $Revision: 1.2 $
+// $Date: 2004-10-05 00:17:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/SymBandEigenSOE.h,v $
 
 // Written: MHS
@@ -69,6 +69,9 @@ class SymBandEigenSOE : public EigenSOE
     int Asize;
     bool factored;
     AnalysisModel *theModel;    
+
+    double *M;  // handles diagonal mass matrix
+    int Msize;
 };
 
 #endif

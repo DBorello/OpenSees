@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-04-02 22:02:51 $
+// $Revision: 1.5 $
+// $Date: 2004-10-05 00:17:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/SymBandEigenSolver.cpp,v $
 
 // Written: MHS
@@ -161,6 +161,41 @@ SymBandEigenSolver::solve(int nModes)
   // Not used ... I think!
   double abstol = -1.0;
 
+
+  // if Mass matrix we make modifications to A:
+  //         A -> M^(-1/2) A M^(-1/2)
+  double *M = theSOE->M;
+  double *A = theSOE->A;
+  int numSuperD = theSOE->numSuperD;
+  int size = n;
+  if (M != 0) {
+    int i,j;
+    bool singular = false;
+    // form M^(-1/2) and check for singular mass matrix
+    for (int i=0; i<size; i++) {
+      if (M[i] == 0.0) {
+	singular = true;
+	// alternative is to set as a small no ~ 1e-10 times smallest m(i,i) != 0.0
+	opserr << "SymBandEigenSolver::solve() - M matrix singular\n";
+	return -1;
+      } else {
+	M[i] = 1.0/sqrt(M[i]);
+      }
+    }
+
+    // make modifications to A
+    //   Aij -> Mi Aij Mj  (based on new M)
+    for (i=0; i<size; i++) {
+      double *AijPtr = A +(i+1)*(numSuperD+1) - 1;
+      int minColRow = i - numSuperD;
+      if (minColRow < 0) minColRow = 0;
+      for (j=i; j>=minColRow; j--) {
+	*AijPtr *= M[j]*M[i];
+	AijPtr--;
+      }
+    }
+  }
+
   // Call the LAPACK eigenvalue subroutine
 #ifdef _WIN32
   unsigned int sizeC = 1;
@@ -196,6 +231,16 @@ SymBandEigenSolver::solve(int nModes)
   }
 
   theSOE->factored = true;
+
+  // make modifications to the eigenvectors
+  //   Eij -> Mi Eij  (based on new M)
+
+  for (int j=0; j<numModes; j++) {
+    double *eigVectJptr = &eigenvector[j*ldz];
+    double *MPtr = M;
+    for (int i=0; i<size; i++) 
+      *eigVectJptr++ *= *MPtr++;
+  }
 
   return 0;
 }
