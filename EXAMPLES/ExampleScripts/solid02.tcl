@@ -158,9 +158,9 @@ pattern UniformExcitation  1   2  -accel $Series
 #recorder Node Node.out disp -time -node  1 2 3 4 5 6 7 8 -dof 1 2 3
 recorder Node -file node1.out -time -node 14 23 30 -dof 2 disp
 
-recorder plot node.out Middel_of_soil 10 10 300 300 -columns 2 1
-recorder plot node1.out "PEER workshop, solid02.tcl: Top_of_soil" 0 0 500 100 -columns 1 3
-recorder plot node1.out "PEER workshop, solid02.tcl: Superstructure" 0 130 500 100 -columns 1 4
+#recorder plot node.out Middel_of_soil 10 10 300 300 -columns 2 1
+#recorder plot node1.out "PEER workshop, solid02.tcl: Top_of_soil" 0 0 500 100 -columns 1 3
+#recorder plot node1.out "PEER workshop, solid02.tcl: Superstructure" 0 130 500 100 -columns 1 4
 
 # #################################
 # create the transient analysis
