@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.27 $
-// $Date: 2002-04-07 18:14:30 $
+// $Revision: 1.28 $
+// $Date: 2002-04-09 05:41:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -141,6 +141,7 @@
 #define SEC_TAG_ElasticPlateSection	12
 #define SEC_TAG_ElasticMembranePlateSection	13
 #define SEC_TAG_MembranePlateFiberSection	14 
+#define SEC_TAG_Bidirectional	15 
 
 #define ND_TAG_ElasticIsotropic					10
 #define ND_TAG_ElasticIsotropicPlaneStrain2d	11
@@ -160,7 +161,6 @@
 #define ND_TAG_FluidSolidPorousMaterial        100
 #define ND_TAG_PressureDependMultiYield		101
 #define ND_TAG_PressureIndependMultiYield		102
-#define ND_TAG_Bidirectional                1234
 #define ND_TAG_FeapMaterial                 1000
 #define ND_TAG_FeapMaterial01                 1001
 #define ND_TAG_FeapMaterial02                 1002
@@ -304,7 +304,11 @@
 #define EquiALGORITHM_TAGS_SplitNewton 		6
 #define EquiALGORITHM_TAGS_KrylovNewton         7
 #define EquiALGORITHM_TAGS_NewtonLineSearch     8
+#define EquiALGORITHM_TAGS_RestartNewton         9
+#define EquiALGORITHM_TAGS_SecantNewton         10
 
+#define ACCELERATOR_TAGS_Krylov		1
+#define ACCELERATOR_TAGS_Secant		2
 
 #define LINESEARCH_TAGS_InitialInterpolatedLineSearch 1
 #define LINESEARCH_TAGS_BisectionLineSearch           2
