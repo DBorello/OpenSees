@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2004-11-24 22:45:28 $
+// $Revision: 1.8 $
+// $Date: 2005-03-18 22:10:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/FilePlotter.h,v $
                                                                         
-                                                                        
-// File: ~/recorder/tcl/FilePlotter.h.h
-// 
 // Written: fmk 
 // Created: 11/99
 // Revision: A
@@ -50,10 +47,16 @@ class FilePlotter : public Recorder
     FilePlotter(const char *fileName,
 		const char *windowTitle, 
 		int xLoc, int yLoc, int width, int height, double dT);
+
+    FilePlotter(const char *fileName1,
+		const char *fileName2,
+		const char *windowTitle, 
+		int xLoc, int yLoc, int width, int height, double dT);
     
     ~FilePlotter();    
 
     int plotFile();
+    int plotFiles();
 
     int record(int commitTag, double timeStamp);
     int playback(int commitTag);
@@ -68,10 +71,16 @@ class FilePlotter : public Recorder
     ColorMap *theMap;
     Renderer *theRenderer;
     ID *cols;
-    char *fileName;
+    char *fileName1;
+    char *fileName2;
     
     double deltaT;
     double nextTimeStampToRecord;    
+
+    Vector *data1a;
+    Vector *data1b;
+    Vector *data2a;
+    Vector *data2b;
 };
 
 #endif
