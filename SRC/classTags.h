@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.46 $
-// $Date: 2003-03-14 23:36:40 $
+// $Revision: 1.47 $
+// $Date: 2003-04-10 00:54:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -161,6 +161,7 @@
 #define ND_TAG_ElasticIsotropicPlateFiber		14
 #define ND_TAG_ElasticIsotropicBeamFiber		15 
 #define ND_TAG_ElasticIsotropic3D               16
+#define ND_TAG_ElasticCrossAnisotropic3D        17
 #define ND_TAG_J2PlaneStrain                  3005 
 #define ND_TAG_J2PlaneStress                  3006 
 #define ND_TAG_J2AxiSymm                      3007 
