@@ -39,6 +39,8 @@ fix 4   0 1 1
 #fix 7 1 0 1
 #fix 8 1 0 1
 
+
+
 #Elastic-plastic model
 #================================================================
 # von Mises model
@@ -93,21 +95,21 @@ constraints Penalty 1e9 1e9
 # set lf1 0.02
 # integrator LoadControl $lf1 
 # 
-# 
-set dU 0.001
-integrator DisplacementControl  5   3   $dU 
+# # 
+# set dU 0.001
+# integrator DisplacementControl  5   3   $dU 
 # 
 
 # set delta_l 0.0075
 # integrator ArcLength delta_l 1.0
 
 
-# set Arclength 0.000001
-# set psi_u 1
-# set psi_f 1
-# set u_ref 1
-# integrator HSConstraint $Arclength $psi_u $psi_f $u_ref
-# 
+set Arclength 0.000001
+set psi_u 1
+set psi_f 1
+set u_ref 1
+integrator HSConstraint $Arclength $psi_u $psi_f $u_ref
+
 
 
 
