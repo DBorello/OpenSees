@@ -1,16 +1,17 @@
 include ../../../Makefile.def
 
 OBJS       = EightNodeBrick.o
-#OBJS       = brick3d.o 
 
 all:         $(OBJS)
 
 # Miscellaneous
 tidy:	
-	@$(RM) $(RMFLAGS) Makefile.bak *~ #*# core
+	@$(RM) $(RMFLAGS) Makefile.bak 
 
 clean: tidy
 	@$(RM) $(RMFLAGS) $(OBJS) *.o
+	@$(RM) $(RMFLAGS) .inslog*
+	@$(RM) $(RMFLAGS) tca.map
 
 spotless: clean					   
 
