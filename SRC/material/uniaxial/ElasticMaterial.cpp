@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-10 22:57:40 $
+// $Revision: 1.3 $
+// $Date: 2002-06-11 02:13:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ElasticMaterial.cpp,v $
                                                                         
                                                                         
@@ -70,7 +70,7 @@ ElasticMaterial::setTrialStrain(double strain, double strainRate)
 
 
 int 
-ElasticMaterial::setTrial(double strain, double &stress, double &tangent, double strainRate = 0.0)
+ElasticMaterial::setTrial(double strain, double &stress, double &tangent, double strainRate)
 {
     trialStrain     = strain;
     trialStrainRate = strainRate;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-10 22:24:08 $
+// $Revision: 1.3 $
+// $Date: 2002-06-11 02:13:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/PlateFiberMaterial.cpp,v $
 
 //
@@ -307,7 +307,7 @@ PlateFiberMaterial::getTangent()
   
   dd22(0,0) = threeDtangentCopy(5,5);
 
-  for (int i=0; i<5; i++) {
+  for (i=0; i<5; i++) {
 
     dd12(i,0) = threeDtangentCopy(i,5);
     dd21(0,i) = threeDtangentCopy(5,i);
