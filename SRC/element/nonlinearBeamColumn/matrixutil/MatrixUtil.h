@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2003-04-04 16:55:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/matrixutil/MatrixUtil.h,v $
                                                                         
                                                                         
@@ -32,5 +32,6 @@ double invert2by2Matrix(const Matrix &a, Matrix &b);
 double invert3by3Matrix(const Matrix &a, Matrix &b);
 void   invertMatrix(int n, const Matrix &a, Matrix &b);
 void   getCBDIinfluenceMatrix(int nIntegrPts, const Matrix &xi_pt, double L, Matrix &ls);
+void   getCBDIinfluenceMatrix(int nIntegrPts, double *pts, double L, Matrix &ls);
 
 #endif
