@@ -22,8 +22,8 @@
 # NOTE: to RUN this example, run the g3 interpreter and 
 #       type the command: source RCFrame4.tcl
 #
-# $Revision: 1.3 $
-# $Date: 2000-12-19 03:57:15 $
+# $Revision: 1.4 $
+# $Date: 2001-01-19 07:13:45 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExampleScripts/RCFrame4.tcl,v $
 
 
@@ -38,7 +38,7 @@ set displayMode "displayOFF"
 set g 386.4
 set P 192
 set m [expr $P/$g]
-set mR 1.0e6
+set mR 0
 
 #    tag  X   Y              massX massY rotZ
 node  1   0   0
