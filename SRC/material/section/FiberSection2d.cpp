@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2002-09-23 22:00:16 $
+// $Revision: 1.11 $
+// $Date: 2003-02-14 22:37:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.cpp,v $
                                                                         
 // Written: fmk
@@ -651,22 +651,42 @@ FiberSection2d::setResponse(char **argv, int argc, Information &sectInfo)
   
   // Check if fiber response is requested
   else if (strcmp(argv[0],"fiber") == 0) {
-    int key = 0;
+    int key = numFibers;
     int passarg = 2;
     
     if (argc <= 2)          // not enough data input
       return 0;
-    else if (argc <= 3)		// fiber number was input directly
+
+    if (argc <= 3)		  // fiber number was input directly
       key = atoi(argv[1]);
+
+    if (argc > 4) {         // find fiber closest to coord. with mat tag
+      int matTag = atoi(argv[3]);
+      double yCoord = atof(argv[1]);
+      double closestDist = 987654321.0;
+      double ySearch, dy;
+      double distance;
+      for (int j = 0; j < numFibers; j++) {
+	ySearch = -matData[2*j];
+	dy = ySearch-yCoord;
+	distance = dy*dy;
+	if (matTag == theMaterials[j]->getTag() && distance < closestDist) {
+	  closestDist = distance;
+	  key = j;
+	}
+      }
+      passarg = 4;
+    }
+
     else {                  // fiber near-to coordinate specified
       double yCoord = atof(argv[1]);
-      double zCoord = atof(argv[2]);
-      double ySearch = -matData[0];
-      double closestDist = fabs(ySearch-yCoord);
+      double closestDist = 987654321.0;
+      double ySearch, dy;
       double distance;
       for (int j = 1; j < numFibers; j++) {
 	ySearch = -matData[2*j];
-	distance = fabs(ySearch-yCoord);
+	dy = ySearch-yCoord;
+	distance = dy*dy;
 	if (distance < closestDist) {
 	  closestDist = distance;
 	  key = j;
