@@ -1,15 +1,15 @@
-// File: ~/system_of_eqn/linearSOE/symLinSolver/SymSparseLinSOE.C
+// File: ~/system_of_eqn/linearSOE/symLinSolver/SymSparseLinSOE.CPP
 //
 // Written: Jun Peng  (junpeng@stanford.edu)
-//          Prof. Kincho H. Law
+//          Advisor: Prof. Kincho H. Law
 //          Stanford University
-// Created: 12/98
-// Revision: A
+// Created: 12/1998
+// Revised: 12/2001
 //
 // Description: This file contains the class definition for 
-// LawSparseinSolver. It solves the SymSparseLinSOEobject by calling
-// some "C" functions. The solver used here is generalized sparse
-// solver. The user can choose three different ordering schema.
+// SymSparseinSolver. It solves the SymSparseLinSOEobject by calling
+// some "C" functions. The solver used here is a symmtric generalized sparse
+// solver. The user can choose three different ordering scheme.
 //
 // What: "@(#) SymSparseLinSOE.C, revA"
 
@@ -27,9 +27,6 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
-extern "C" {
-   #include "FeStructs.h"
-}
 
 SymSparseLinSOE::SymSparseLinSOE(SymSparseLinSolver &the_Solver, int lSparse)
 :LinearSOE(the_Solver, LinSOE_TAGS_SymSparseLinSOE),
@@ -44,12 +41,15 @@ SymSparseLinSOE::SymSparseLinSOE(SymSparseLinSolver &the_Solver, int lSparse)
 }
 
 
+/* A destructor for cleanning memory.
+ * For diag and penv, it is rather straightforward to clean.
+ * For row segments, since the memory of nz is allocated for each
+ * row, the deallocated needs some special care.
+ */
 SymSparseLinSOE::~SymSparseLinSOE()
 {
-
     int lastRow;
     if (diag != 0) free(diag);
-
 
     if (penv != 0) {
         free(penv[0]);
@@ -60,39 +60,41 @@ SymSparseLinSOE::~SymSparseLinSOE()
     OFFDBLK *tempBlk = first;
     OFFDBLK *nzBlk = 0;
 
+    // clean the first row segement.
     if (first->next != 0) {
        blkPtr = first->next;
        if (tempBlk != 0) {
-	   if (tempBlk->nz != 0)  free (tempBlk->nz);
-	   free (tempBlk);
+	   if (tempBlk->nz != 0)  free(tempBlk->nz);
+	   free(tempBlk);
        }
     }
 
     lastRow = blkPtr->row;
 
-
     while (1) {
+       // the last row segment is reached
        if (blkPtr->beg == size) {
-	 if (blkPtr != 0)  free(blkPtr);
+	   if (blkPtr != 0)  free (blkPtr);
 	   break;
        }
        tempBlk = blkPtr;
        blkPtr = blkPtr->next;
 
+       // free the beginning row segment of each row.
        if (nzBlk != 0) {
-	 if (nzBlk->nz != 0)  free(nzBlk->nz);
+	   if (nzBlk->nz != 0)  free(nzBlk->nz);
 	   free(nzBlk);
 	   nzBlk = 0;
        }
-       
-       if (blkPtr->row == lastRow) {
-	 //if (tempBlk != 0)  free (tempBlk);
-	   tempBlk = 0;
-       } 
-       else {
+
+       // find the beginning row segment of each row, use nzBlk to point to it.       
+       if (blkPtr->row != lastRow) {
 	   lastRow = blkPtr->row;
 	   nzBlk = blkPtr;
        }
+
+       if (tempBlk != 0)  free(tempBlk);
+       tempBlk = 0;
     }
 
 
@@ -106,32 +108,35 @@ SymSparseLinSOE::~SymSparseLinSOE()
     if (vectB != 0) delete vectB;
     if (rowStartA != 0) delete [] rowStartA;
     if (colA != 0) delete [] colA;
-
 }
 
 
-int
-SymSparseLinSOE::getNumEqn(void) const
+int SymSparseLinSOE::getNumEqn(void) const
 {
     return size;
 }
 
 
+/* the symbolic factorization method defined in <symbolic.c>
+ */
 extern "C" int symFactorization(int *fxadj, int *adjncy, int neq, int LSPARSE, 
 				int **xblkMY, int **invpMY, int **rowblksMY, 
 				OFFDBLK ***begblkMY, OFFDBLK **firstMY, 
 				double ***penvMY, double **diagMY);
 
 
-int 
-SymSparseLinSOE::setSize(Graph &theGraph)
+/* Based on the graph (the entries in A), set up the pair (rowStartA, colA).
+ * It is the same as the pair (ADJNCY, XADJ).
+ * Then perform the symbolic factorization by calling symFactorization().
+ */
+int SymSparseLinSOE::setSize(Graph &theGraph)
 {
 
     int result = 0;
     int oldSize = size;
     size = theGraph.getNumVertex();
 
-    // fist itearte through the vertices of the graph to get nnz
+    // first itearte through the vertices of the graph to get nnz
     Vertex *theVertex;
     int newNNZ = 0;
     VertexIter &theVertices = theGraph.getVertices();
@@ -237,9 +242,7 @@ SymSparseLinSOE::setSize(Graph &theGraph)
 	}
     }
     
-    // begin to choose different ordering schema.
-   
-    // call "C" function to form elimination tree and do the symbolic factorization.
+    // call "C" function to form elimination tree and to do the symbolic factorization.
     nblks = symFactorization(rowStartA, colA, size, this->LSPARSE,
 			     &xblk, &invp, &rowblks, &begblk, &first, &penv, &diag);
 
@@ -247,36 +250,70 @@ SymSparseLinSOE::setSize(Graph &theGraph)
 }
 
 
-int 
-SymSparseLinSOE::addA(const Matrix &m, const ID &id, double fact)
+/* Perform the element stiffness assembly here.
+ */
+int SymSparseLinSOE::addA(const Matrix &in_m, const ID &in_id, double fact)
 {
-    // check for a quick return
-    if (fact == 0.0)  
-    return 0;
+   // check for a quick return
+   if (fact == 0.0)  
+       return 0;
 
-    int idSize = id.Size();
-    
-    // check that m and id are of similar size
-    if (idSize != m.noRows() && idSize != m.noCols()) {
-	cerr << "SymSparseLinSOE::addA() ";
-	cerr << " - Matrix and ID not of similar sizes\n";
-	return -1;
-    }
-    
-    int *newID = new int[idSize];
-    int *isort = new int[idSize];
-    if (newID == 0 || isort ==0) {
-        cerr << "WARNING SymSparseLinSOE::SymSparseLinSOE :";
-        cerr << " ran out of memory for vectors (newID, isort)";
-        return -1;
-    }
+   int idSize = in_id.Size();
+   if (idSize == 0)  return 0;
 
-    for (int ii=0; ii<idSize; ii++) {
-        newID[ii] = id(ii);
-        if (newID[ii] >= 0)
-             newID[ii] = invp[newID[ii]];
-    }
-       
+   // check that m and id are of similar size
+   if (idSize != in_m.noRows() && idSize != in_m.noCols()) {
+       cerr << "SymSparseLinSOE::addA() ";
+       cerr << " - Matrix and ID not of similar sizes\n";
+       return -1;
+   }
+
+   // construct m and id based on non-negative id values.
+   int newPt = 0;
+   int *id = new int[idSize];
+   
+   for (int ii = 0; ii < idSize; ii++) {
+       if (in_id(ii) >= 0 && in_id(ii) < size) {
+	   id[newPt] = in_id(ii);
+	   newPt++;
+       }
+   }
+
+   idSize = newPt;
+   if (idSize == 0)  return 0;
+   double *m = new double[idSize*idSize];
+
+   int newII = 0;
+   for (int ii = 0; ii < in_id.Size(); ii++) {
+       if (in_id(ii) >= 0 && in_id(ii) < size) {
+
+	   int newJJ = 0;
+	   for (int jj = 0; jj < in_id.Size(); jj++) {
+	       if (in_id(jj) >= 0 && in_id(jj) < size) {
+		   m[newII*idSize + newJJ] = in_m(ii, jj);
+		   newJJ++;
+	       }
+	   }
+	   newII++;
+       }
+   }
+
+   // forming the new id based on invp.
+
+   int *newID = new int[idSize];
+   int *isort = new int[idSize];
+   if (newID == 0 || isort ==0) {
+       cerr << "WARNING SymSparseLinSOE::SymSparseLinSOE :";
+       cerr << " ran out of memory for vectors (newID, isort)";
+       return -1;
+   }
+
+   for (int ii=0; ii<idSize; ii++) {
+       newID[ii] = id[ii];
+       if (newID[ii] >= 0)
+	   newID[ii] = invp[newID[ii]];
+   }
+   
    long int  i_eq, j_eq;
    int  i, j, nee, lnee;
    int  k, ipos, jpos;
@@ -300,6 +337,7 @@ SymSparseLinSOE::addA(const Matrix &m, const ID &id, double fact)
       
    lnee = k;
 
+   /* perform the sorting of isort here */
    i = k - 1;
    do
    {
@@ -321,6 +359,7 @@ SymSparseLinSOE::addA(const Matrix &m, const ID &id, double fact)
       k = rowblks[newID[ipos]] ;
       saveblk  = begblk[k] ;
 
+      /* iterate through the element stiffness matrix, assemble each entry */
       for (i=0; i<lnee; i++)
       { 
 	 ipos = isort[i] ;
@@ -344,42 +383,61 @@ SymSparseLinSOE::addA(const Matrix &m, const ID &id, double fact)
 		jt = jpos;
 	    }
 
-	    if (j_eq >= xblk[iblk]) /* diagonal block */
+	    if (j_eq >= xblk[iblk]) /* diagonal block (profile) */
 	    {  
 	        loc = iloc + j_eq ;
-		*loc += m(it,jt) * fact;
+		*loc += m[it*idSize + jt] * fact;
             } 
 	    else /* row segment */
 	    { 
 	        while((j_eq >= (ptr->next)->beg) && ((ptr->next)->row == i_eq))
 		    ptr = ptr->next ;
 		fpt = ptr->nz ;
-		fpt[j_eq - ptr->beg] += m(it,jt) * fact;
+		fpt[j_eq - ptr->beg] += m[it*idSize + jt] * fact;
             }
          }
-	 diag[i_eq] += m(ipos,ipos) * fact;
+	 diag[i_eq] += m[ipos*idSize + ipos] * fact; /* diagonal element */
       }
   	  
     delete [] newID;
     delete [] isort;
+    delete [] m;
+    delete [] id;
 
     return 0;
 }
 
     
-int 
-SymSparseLinSOE::addB(const Vector &v, const ID &id, double fact)
+/* assemble the force vector B (A*X = B).
+ */
+int SymSparseLinSOE::addB(const Vector &in_v, const ID &in_id, double fact)
 {
     // check for a quick return 
     if (fact == 0.0)  return 0;
 
-    int idSize = id.Size();    
+    int idSize = in_id.Size();    
     // check that m and id are of similar size
-    if (idSize != v.Size() ) {
+    if (idSize != in_v.Size() ) {
 	cerr << "SymSparseLinSOE::addB() ";
 	cerr << " - Vector and ID not of similar sizes\n";
 	return -1;
-    }    
+    } 
+
+   // construct v and id based on non-negative id values.
+   int newPt = 0;
+   int *id = new int[idSize];
+   double *v = new double[idSize];
+
+   for (int ii = 0; ii < idSize; ii++) {
+       if (in_id(ii) >= 0 && in_id(ii) < size) {
+	   id[newPt] = in_id(ii);
+	   v[newPt] = in_v(ii);
+	   newPt++;
+       }
+   }
+
+   idSize = newPt;
+   if (idSize == 0)  return 0;
 
     int *newID = new int[idSize];
     if (newID == 0) {
@@ -389,7 +447,7 @@ SymSparseLinSOE::addB(const Vector &v, const ID &id, double fact)
     }
 
     for (int i=0; i<idSize; i++) {
-       newID[i] = id(i);
+       newID[i] = id[i];
 	if (newID[i] >= 0)
 	    newID[i] = invp[newID[i]];
     }
@@ -398,23 +456,26 @@ SymSparseLinSOE::addB(const Vector &v, const ID &id, double fact)
 	for (int i=0; i<idSize; i++) {
 	    int pos = newID[i];
 	    if (pos <size && pos >= 0)
-		B[pos] += v(i);
+		B[pos] += v[i];
 	}
     } else if (fact == -1.0) { // do not need to multiply if fact == -1.0
 	for (int i=0; i<idSize; i++) {
 	    int pos = newID[i];
 	    if (pos <size && pos >= 0)
-		B[pos] -= v(i);
+		B[pos] -= v[i];
 	}
     } else {
 	for (int i=0; i<idSize; i++) {
 	    int pos = newID[i];
 	    if (pos <size && pos >= 0)
-		B[pos] += v(i) * fact;
+		B[pos] += v[i] * fact;  // assemble
 	}
     }	
 
     delete [] newID;
+    delete [] v;
+    delete [] id;
+
     return 0;
 }
 
@@ -448,8 +509,12 @@ SymSparseLinSOE::setB(const Vector &v, double fact)
 }
 
 
-void 
-SymSparseLinSOE::zeroA(void)
+/* It is used to set all the entries of A to be zero.
+ * This method will be called if the structure of A stays the same while the
+ * value of A needs to be changed.  e.g. if Newton-Raphson method is used
+ * for analysis, after each iteration, the A matrix needs to be updated.
+ */
+void SymSparseLinSOE::zeroA(void)
 {
     memset(diag, 0, size*sizeof(double));
 
@@ -484,13 +549,12 @@ SymSparseLinSOE::setX(int loc, double value)
 	X[loc] = value;
 }
 
-void 
+void
 SymSparseLinSOE::setX(const Vector &x)
 {
-  if (x.Size() == size && vectX != 0)
-    *vectX = x;
+    if (x.Size() == size && vectX != 0) 
+        *vectX = x;
 }
-
 
 
 const Vector &
@@ -525,8 +589,9 @@ SymSparseLinSOE::normRHS(void)
 }    
 
 
-int
-SymSparseLinSOE::setSymSparseLinSolver(SymSparseLinSolver &newSolver)
+/* Create a linkage between SOE and Solver.
+ */
+int SymSparseLinSOE::setSymSparseLinSolver(SymSparseLinSolver &newSolver)
 {
     newSolver.setLinearSOE(*this);
     
@@ -546,6 +611,7 @@ SymSparseLinSOE::setSymSparseLinSolver(SymSparseLinSolver &newSolver)
 int 
 SymSparseLinSOE::sendSelf(int cTag, Channel &theChannel)
 {
+    // not implemented.
     return 0;
 }
 
@@ -554,6 +620,7 @@ int
 SymSparseLinSOE::recvSelf(int cTag, 
 			  Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
+    // not implemented.
     return 0;
 }
 
