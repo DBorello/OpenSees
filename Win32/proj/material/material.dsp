@@ -434,6 +434,14 @@ SOURCE=..\..\..\SRC\material\uniaxial\ViscousMaterial.h
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\..\..\Src\material\nD\ElasticCrossAnisotropic.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\material\nD\ElasticCrossAnisotropic.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\material\nD\ElasticIsotropic3D.cpp
 # End Source File
 # Begin Source File
