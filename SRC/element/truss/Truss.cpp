@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2003-03-04 00:48:15 $
+// $Revision: 1.18 $
+// $Date: 2003-03-04 19:04:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -605,99 +605,92 @@ int
 Truss::addInertiaLoadSensitivityToUnbalance(const Vector &accel, bool somethingRandomInMotions)
 {
 
-	if (theLoadSens == 0) {
-		theLoadSens = new Vector(numDOF);
-	}
-	else {
-		theLoadSens->Zero();
-	}
-
-
-	if (somethingRandomInMotions) {
-
-
-						// check for a quick return
-						if (L == 0.0 || M == 0.0) 
-						return 0;
-
-					  // get R * accel from the nodes
-					  const Vector &Raccel1 = theNodes[0]->getRV(accel);
-					  const Vector &Raccel2 = theNodes[1]->getRV(accel);    
-
-					  int nodalDOF = numDOF/2;
+  if (theLoadSens == 0) {
+    theLoadSens = new Vector(numDOF);
+  }
+  else {
+    theLoadSens->Zero();
+  }
+  
+  
+  if (somethingRandomInMotions) {
     
-					#ifdef _G3DEBUG    
-					  if (nodalDOF != Raccel1.Size() || nodalDOF != Raccel2.Size()) {
-						g3ErrorHandler->warning("Truss::addInertiaLoadToUnbalance %s\n",
-									"matrix and vector sizes are incompatable");
-						return -1;
-					  }
-					#endif
     
-						// want to add ( - fact * M R * accel ) to unbalance
-						for (int i=0; i<dimension; i++) {
-						double val1 = Raccel1(i);
-						double val2 = Raccel2(i);	
-						
-						// perform - fact * M*(R * accel) // remember M a diagonal matrix
-						val1 *= M;
-						val2 *= M;
-						
-						(*theLoadSens)(i) = val1;
-						(*theLoadSens)(i+nodalDOF) = val2;
-						}	
-	}
-	else {
-
-
-
-
-
-
-
-
-						// check for a quick return
-						if (L == 0.0 || M == 0.0) 
-						return 0;
-
-					  // get R * accel from the nodes
-					  const Vector &Raccel1 = theNodes[0]->getRV(accel);
-					  const Vector &Raccel2 = theNodes[1]->getRV(accel);    
-
-					  int nodalDOF = numDOF/2;
+    // check for a quick return
+    if (L == 0.0 || M == 0.0) 
+      return 0;
     
-					#ifdef _G3DEBUG    
-					  if (nodalDOF != Raccel1.Size() || nodalDOF != Raccel2.Size()) {
-						g3ErrorHandler->warning("Truss::addInertiaLoadToUnbalance %s\n",
-									"matrix and vector sizes are incompatable");
-						return -1;
-					  }
-					#endif
+    // get R * accel from the nodes
+    const Vector &Raccel1 = theNodes[0]->getRV(accel);
+    const Vector &Raccel2 = theNodes[1]->getRV(accel);    
     
-						// want to add ( - fact * M R * accel ) to unbalance
-						for (int i=0; i<dimension; i++) {
-							double val1 = Raccel1(i);
-							double val2 = Raccel2(i);	
-							
-							// perform - fact * M*(R * accel) // remember M a diagonal matrix
-							
-							double massDerivative = 0.0;
-							if (parameterID == 1) {
-								double rho = M*2.0/(A*L);
-								massDerivative = rho*1.0*L/2.0;
-							}
-							else if (parameterID == 2) {
-								massDerivative = 1.0*A*L/2.0;
-							}
-							
-							val1 *= massDerivative;
-							val2 *= massDerivative;
-							
-							(*theLoadSens)(i) = val1;
-							(*theLoadSens)(i+nodalDOF) = val2;
-						}	
-	}
-    return 0;
+    int nodalDOF = numDOF/2;
+    
+#ifdef _G3DEBUG    
+    if (nodalDOF != Raccel1.Size() || nodalDOF != Raccel2.Size()) {
+      opserr << "Truss::addInertiaLoadToUnbalance " <<
+	"matrix and vector sizes are incompatable\n";
+      return -1;
+    }
+#endif
+    
+    // want to add ( - fact * M R * accel ) to unbalance
+    for (int i=0; i<dimension; i++) {
+      double val1 = Raccel1(i);
+      double val2 = Raccel2(i);	
+      
+      // perform - fact * M*(R * accel) // remember M a diagonal matrix
+      val1 *= M;
+      val2 *= M;
+      
+      (*theLoadSens)(i) = val1;
+      (*theLoadSens)(i+nodalDOF) = val2;
+    }	
+  }
+  else {
+    
+    // check for a quick return
+    if (L == 0.0 || M == 0.0) 
+      return 0;
+    
+    // get R * accel from the nodes
+    const Vector &Raccel1 = theNodes[0]->getRV(accel);
+    const Vector &Raccel2 = theNodes[1]->getRV(accel);    
+    
+    int nodalDOF = numDOF/2;
+    
+#ifdef _G3DEBUG    
+    if (nodalDOF != Raccel1.Size() || nodalDOF != Raccel2.Size()) {
+      opserr << "Truss::addInertiaLoadToUnbalance " <<
+	"matrix and vector sizes are incompatable\n";
+      return -1;
+    }
+#endif
+    
+    // want to add ( - fact * M R * accel ) to unbalance
+    for (int i=0; i<dimension; i++) {
+      double val1 = Raccel1(i);
+      double val2 = Raccel2(i);	
+      
+      // perform - fact * M*(R * accel) // remember M a diagonal matrix
+      
+      double massDerivative = 0.0;
+      if (parameterID == 1) {
+	double rho = M*2.0/(A*L);
+	massDerivative = rho*1.0*L/2.0;
+      }
+      else if (parameterID == 2) {
+	massDerivative = 1.0*A*L/2.0;
+      }
+      
+      val1 *= massDerivative;
+      val2 *= massDerivative;
+      
+      (*theLoadSens)(i) = val1;
+      (*theLoadSens)(i+nodalDOF) = val2;
+    }	
+  }
+  return 0;
 }
 
 const Vector &
@@ -717,13 +710,7 @@ Truss::getResistingForce()
     // subtract external load:  Ku - P
     (*theVector) -= *theLoad;
 
-    
 
-
-
-
-
-// ***1
 /*
 ofstream outputFile1( "tmatrix_p.out", ios::out );
 char mystring[100] = "";
@@ -748,12 +735,6 @@ outputFile3 << mystring << endl;
 outputFile3.close();
 
 */
-
-
-
-
-
-
 
     return *theVector;
 }
@@ -1423,7 +1404,6 @@ Truss::getResistingForceSensitivity(int gradNumber)
 		dLength -= (disp2(i)-disp1(i))* (*t)(0,i);
 	}
 	double rate = this->computeCurrentStrainRate();
-
 
 	// Make sure the material is up to date
 	strain = dLength/L;
