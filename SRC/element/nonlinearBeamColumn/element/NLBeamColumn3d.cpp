@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2001-10-02 20:20:12 $
+// $Revision: 1.11 $
+// $Date: 2001-10-27 01:16:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -74,9 +74,9 @@ NLBeamColumn3d::NLBeamColumn3d():
 Element(0,ELE_TAG_NLBeamColumn3d), connectedExternalNodes(2), 
 nSections(0), sections(0), crdTransf(0), node1Ptr(0), node2Ptr(0),
 rho(0), maxIters(0), tol(0), initialFlag(0), prevDistrLoad(NL),
-K(NEGD,NEGD), m(NEGD,NEGD), d(NEGD,NEGD), P(NEGD), Pinert(NEGD), load(NEGD), Uepr(NEGD),
+K(NEGD,NEGD), m(NEGD,NEGD), d(NEGD,NEGD), P(NEGD), Pinert(NEGD), load(NEGD),
 kv(NEBD,NEBD), Se(NEBD), 
-distrLoadcommit(NL), Uecommit(NEGD), kvcommit(NEBD,NEBD), Secommit(NEBD), b(0), bp(0),
+distrLoadcommit(NL), kvcommit(NEBD,NEBD), Secommit(NEBD), b(0), bp(0),
 fs(0), vs(0), Ssr(0), vscommit(0), isTorsion(false)
 {
 
@@ -95,8 +95,8 @@ nSections(numSections), node1Ptr(0), node2Ptr(0),
 rho(massDensPerUnitLength), maxIters(maxNumIters), tol(tolerance), 
 initialFlag(0), prevDistrLoad(NL), 
 K(NEGD,NEGD), m(NEGD,NEGD), d(NEGD,NEGD), P(NEGD), Pinert(NEGD), load(NEGD), 
-Uepr(NEGD), kv(NEBD,NEBD), Se(NEBD),  
-distrLoadcommit(NL), Uecommit(NEGD), kvcommit(NEBD,NEBD), Secommit(NEBD), b(0), bp(0),
+kv(NEBD,NEBD), Se(NEBD),  
+distrLoadcommit(NL), kvcommit(NEBD,NEBD), Secommit(NEBD), b(0), bp(0),
 fs(0), vs(0), Ssr(0), vscommit(0), isTorsion(false)
 {
    connectedExternalNodes(0) = nodeI;
@@ -336,6 +336,7 @@ NLBeamColumn3d::setDomain(Domain *theDomain)
 int
 NLBeamColumn3d::commitState()
 {
+
    int err = 0;
    int i = 0;
 
@@ -355,7 +356,6 @@ NLBeamColumn3d::commitState()
    // commit the element variables state
 
    distrLoadcommit = prevDistrLoad;
-   Uecommit = Uepr;
    kvcommit = kv;
    Secommit = Se;
 
@@ -390,7 +390,6 @@ NLBeamColumn3d::revertToLastCommit()
      
    // revert the element state to last commit
    prevDistrLoad = distrLoadcommit;
-   Uepr = Uecommit;
    Se   = Secommit;
    kv   = kvcommit;
    
@@ -432,12 +431,10 @@ NLBeamColumn3d::revertToStart()
   
    // revert the element state to start
    distrLoadcommit.Zero();
-   Uecommit.Zero();
    Secommit.Zero();
    kvcommit.Zero();
 
    prevDistrLoad.Zero();
-   Uepr.Zero();
    Se.Zero();
    kv.Zero();
 
@@ -509,15 +506,7 @@ NLBeamColumn3d::update(void)
   // get element global end displacements
   static Vector Ue(NEGD);
   this->getGlobalDispls(Ue);
- 
-  // compute global end displacement increments
-  static Vector dUe(NEGD);
-  // dUe = Ue - Uepr
-  dUe = Ue;
-  dUe.addVector(1.0, Uepr,-1.0);
-  
-  if (dUe.Norm() != 0.0  || initialFlag == 0) 
-  {
+
     // compute distributed loads and increments
     static Vector currDistrLoad(NL);
     static Vector distrLoadIncr(NL); 
@@ -525,9 +514,6 @@ NLBeamColumn3d::update(void)
     currDistrLoad.Zero();  // SPECIFY LOAD HERE!!!!!!!!! 
     distrLoadIncr = currDistrLoad - prevDistrLoad;
     prevDistrLoad = currDistrLoad;
-
-    // update the end displacements
-    Uepr = Ue;
 
     // update the transformation
     crdTransf->update();
@@ -651,11 +637,8 @@ NLBeamColumn3d::update(void)
 
     initialFlag = 1;
 
-    return 1;
-  }
-  
-  else
     return 0;
+
 }
 
 
@@ -804,6 +787,7 @@ NLBeamColumn3d::addLoad(const Vector &moreLoad)
 const Vector &
 NLBeamColumn3d::getResistingForceIncInertia()
 {	
+
     static Vector f(NEGD);
     static Vector ag(NEGD);
     
@@ -814,7 +798,7 @@ NLBeamColumn3d::getResistingForceIncInertia()
     // Pinert = f + m * ag;
     Pinert = f;
     Pinert.addMatrixVector(1.0, m, ag, 1.0);
-   
+
     return Pinert;
 }
 
@@ -920,7 +904,7 @@ NLBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
 
   
   
-  static Vector dData(1+1+NL+NEGD+NEBD+NEBD*NEBD+secDefSize); 
+  static Vector dData(1+1+NL+NEBD+NEBD*NEBD+secDefSize); 
   loc = 0;
 
   // place double variables into Vector
@@ -933,10 +917,6 @@ NLBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
     dData(loc) = distrLoadcommit(i);
     loc++;
   }
-
-  // place UeCommit into Vector
-  for (i=0; i<NEGD; i++)
-    dData(loc++) = Uecommit(i);
 
   // place kvcommit into vector
   for (i=0; i<NEBD; i++) 
@@ -1122,7 +1102,7 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
      secDefSize   += size;
   }
   
-  Vector dData(1+1+NL+NEGD+NEBD+NEBD*NEBD+secDefSize);   
+  Vector dData(1+1+NL+NEBD+NEBD*NEBD+secDefSize);   
   
   if (theChannel.recvVector(dbTag, commitTag, dData) < 0)  {
     g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
@@ -1140,10 +1120,6 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   for (i=0; i<NL; i++) 
     distrLoadcommit(i) = dData(loc++);
 
-  // place UeCommit into Vector
-  for (i=0; i<NEGD; i++)
-    Uecommit(i) = dData(loc++);
-
   // place kvcommit into vector
   for (i=0; i<NEBD; i++) 
     Secommit(i) = dData(loc++);
@@ -1154,7 +1130,6 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
         kvcommit(i,j) = dData(loc++);
 
 	prevDistrLoad = distrLoadcommit;
-	Uepr = Uecommit;
 	kv   = kvcommit;
 	Se   = Secommit;
 
@@ -1476,22 +1451,22 @@ NLBeamColumn3d::setResponse(char **argv, int argc, Information &eleInformation)
     else if ((strcmp(argv[0],"defoANDforce") == 0) ||
 	     (strcmp(argv[0],"deformationANDforce") == 0) ||
 	     (strcmp(argv[0],"deformationsANDforces") == 0))
-		return new ElementResponse(this, 4, Vector(24));
+      return new ElementResponse(this, 4, Vector(24));
 
     // section response -
     else if (strcmp(argv[0],"section") ==0) {
-		if (argc <= 2)
-			return 0;
+      if (argc <= 2)
+	return 0;
 	
-		int sectionNum = atoi(argv[1]);
-		if (sectionNum > 0 && sectionNum <= nSections)
-			return sections[sectionNum-1]->setResponse(&argv[2], argc-2, eleInformation);
-		else
-			return 0;
+      int sectionNum = atoi(argv[1]);
+      if (sectionNum > 0 && sectionNum <= nSections)
+	return sections[sectionNum-1]->setResponse(&argv[2], argc-2, eleInformation);
+      else
+	return 0;
     }
     
-	else
-		return 0;
+    else
+      return 0;
 }
 
 int 
@@ -1504,42 +1479,44 @@ NLBeamColumn3d::getResponse(int responseID, Information &eleInfo)
 
   switch (responseID) {      
     case 1:  // forces
-		return eleInfo.setVector(P);
+      return eleInfo.setVector(P);
+
 
     case 4:
+      this->getGlobalDispls(force);
       for (i = 0; i < 12; i++) {
-	defoAndForce(i) = Uecommit(i);
+	defoAndForce(i) = force(i);
 	defoAndForce(i+12) = P(i);
       }
       return eleInfo.setVector(defoAndForce);
 
     case 2:
-		// Axial
-		force(6) = Se(0);
-		force(0) = -Se(0);
+      // Axial
+      force(6) = Se(0);
+      force(0) = -Se(0);
 
-		// Torsion
-		force(11) = Se(5);
-		force(5)  = -Se(5);
+      // Torsion
+      force(11) = Se(5);
+      force(5)  = -Se(5);
+      
+      // Moments about z and shears along y
+      force(2) = Se(1);
+      force(8) = Se(2);
+      V = (Se(1)+Se(2))/L;
+      force(1) = V;
+      force(7) = -V;
 
-		// Moments about z and shears along y
-		force(2) = Se(1);
-		force(8) = Se(2);
-		V = (Se(1)+Se(2))/L;
-		force(1) = V;
-		force(7) = -V;
-
-		// Moments about y and shears along z
-		force(4)  = Se(3);
-		force(10) = Se(4);
-		V = (Se(3)+Se(4))/L;
-		force(3) = -V;
-		force(9) = V;
-
-		return eleInfo.setVector(force);
+      // Moments about y and shears along z
+      force(4)  = Se(3);
+      force(10) = Se(4);
+      V = (Se(3)+Se(4))/L;
+      force(3) = -V;
+      force(9) = V;
+      
+      return eleInfo.setVector(force);
 
     default: 
-	  return -1;
+      return -1;
   }
 }
 

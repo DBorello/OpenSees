@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-10-02 20:20:12 $
+// $Revision: 1.7 $
+// $Date: 2001-10-27 01:16:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.h,v $
                                                                         
                                                                         
@@ -139,12 +139,10 @@ class NLBeamColumn3d: public Element
     Vector load;                   // equivalent nodal loads ????
 
     Vector prevDistrLoad;          // previous distributed loads
-    Vector Uepr;                   // previous global trial displacements
     Matrix kv;                     // stiffness matrix in the basic system 
     Vector Se;                     // element resisting forces in the basic system
 
     Vector distrLoadcommit;        // commited distributed loads
-    Vector Uecommit;               // commited element global displacements
     Matrix kvcommit;               // commited stiffness matrix in the basic system
     Vector Secommit;               // commited element end forces in the basic system
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2001-10-23 14:52:37 $
+// $Revision: 1.19 $
+// $Date: 2001-10-27 01:16:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -77,8 +77,8 @@ Element(0,ELE_TAG_NLBeamColumn2d), connectedExternalNodes(2),
 nSections(0), sections(0), crdTransf(0), node1Ptr(0), node2Ptr(0),
 rho(0), maxIters(0), tol(0), initialFlag(0),
 load(NEGD), 
-Uepr(NEGD), kv(NEBD,NEBD), Se(NEBD),
-Uecommit(NEGD), kvcommit(NEBD,NEBD), Secommit(NEBD), b(0),
+kv(NEBD,NEBD), Se(NEBD),
+kvcommit(NEBD,NEBD), Secommit(NEBD), b(0),
 fs(0), vs(0), Ssr(0), vscommit(0)
 {
 }
@@ -97,8 +97,8 @@ nSections(numSections), sections(sectionPtrs),
 rho(massDensPerUnitLength),maxIters(maxNumIters), tol(tolerance), 
 initialFlag(0),
 load(NEGD), 
-Uepr(NEGD), kv(NEBD,NEBD), Se(NEBD), 
-Uecommit(NEGD), kvcommit(NEBD,NEBD), Secommit(NEBD), b(0),
+kv(NEBD,NEBD), Se(NEBD), 
+kvcommit(NEBD,NEBD), Secommit(NEBD), b(0),
 fs(0), vs(0),Ssr(0), vscommit(0)
 {
    connectedExternalNodes(0) = nodeI;
@@ -335,11 +335,9 @@ NLBeamColumn2d::commitState()
       return err;
       
    // commit the element variables state
-   Uecommit = Uepr;
    kvcommit = kv;
    Secommit = Se;
 
-   
    //   initialFlag = 0;  fmk - commented out, see what happens to Example3.1.tcl if uncommented
    //                         - i have not a clue why, ask remo if he ever gets in contact with us again!
 
@@ -372,7 +370,6 @@ int NLBeamColumn2d::revertToLastCommit()
       return err;
      
    // revert the element state to last commit
-   Uepr = Uecommit;
    Se   = Secommit;
    kv   = kvcommit;
    
@@ -406,11 +403,9 @@ int NLBeamColumn2d::revertToStart()
       return err;
   
    // revert the element state to start
-   Uecommit.Zero();
    Secommit.Zero();
    kvcommit.Zero();
 
-   Uepr.Zero();
    Se.Zero();
    kv.Zero();
 
@@ -478,21 +473,10 @@ NLBeamColumn2d::setSectionInterpolation (void)
 
 int NLBeamColumn2d::update()
 {
+
   // get element global end displacements
   static Vector Ue(NEGD);
   this->getGlobalDispls(Ue);
- 
-  // compute global end displacement increments
-  static Vector dUe(NEGD);
-  // dUe = Ue - Uepr
-
-  dUe = Ue;
-  dUe.addVector(1.0, Uepr,-1.0);
-
-  if (dUe.Norm() != 0.0  || initialFlag == 0) {
-
-    // update the end displacements
-    Uepr = Ue;
 
     // update the transformation
     crdTransf->update();
@@ -558,8 +542,8 @@ int NLBeamColumn2d::update()
 	      
 	  // set section deformations
 	  if (initialFlag != 0)
-          vs[i] += dvs;
-	
+	    vs[i] += dvs;
+	  
 	  sections[i]->setTrialSectionDeformation(vs[i]);
 	  
 	  // get section resisting forces
@@ -610,10 +594,6 @@ int NLBeamColumn2d::update()
 
     initialFlag = 1;
 
-    return 1;
-  }
-  
-  else
     return 0;
 }
 
@@ -874,7 +854,7 @@ NLBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
 
   
   
-  static Vector dData(1+1+NL+NEGD+NEBD+NEBD*NEBD+secDefSize+secFlexSize); 
+  static Vector dData(1+1+NL+NEBD+NEBD*NEBD+secDefSize+secFlexSize); 
   loc = 0;
 
   // place double variables into Vector
@@ -885,10 +865,6 @@ NLBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   for (i=0; i<NL; i++) 
     //dData(loc++) = distrLoadcommit(i);
 	dData(loc++) = 0.0;
-
-  // place UeCommit into Vector
-  for (i=0; i<NEGD; i++)
-    dData(loc++) = Uecommit(i);
 
   // place kvcommit into vector
   for (i=0; i<NEBD; i++) 
@@ -1073,7 +1049,7 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
      secFlexSize  += size*size;
   }
   
-  static Vector dData(1+1+NL+NEGD+NEBD+NEBD*NEBD+secDefSize+secFlexSize);   
+  static Vector dData(1+1+NL+NEBD+NEBD*NEBD+secDefSize+secFlexSize);   
   
   if (theChannel.recvVector(dbTag, commitTag, dData) < 0)  {
     g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - %s\n",
@@ -1091,10 +1067,6 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   //for (i=0; i<NL; i++) 
   //  distrLoadcommit(i) = dData(loc++);
 
-  // place UeCommit into Vector
-  for (i=0; i<NEGD; i++)
-    Uecommit(i) = dData(loc++);
-
   // place kvcommit into vector
   for (i=0; i<NEBD; i++) 
     Secommit(i) = dData(loc++);
@@ -1104,7 +1076,6 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
      for (j=0; j<NEBD; j++)
         kvcommit(i,j) = dData(loc++);
 
-  Uepr = Uecommit;
   kv   = kvcommit;
   Se   = Secommit;
 
@@ -1409,158 +1380,14 @@ NLBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
        error = theViewer.drawLine(v1, v2, 1.0, 1.0);
 
        delete [] displs;
+       delete [] coords;
 
        if (error)
 	  return error;
    } 
    
-   else if (displayMode == 2) 
-   {
-/*
-       v1(2) = 0.0;
-       v2(2) = 0.0;
+  else if (displayMode == 3) {
 
-       // get element length and orientation
-       this->getElementLengthAndOrientation();
-
-       // get element global end displacements
-       Vector Ue(6);
-       this->getGlobalDispls(Ue);
-       
-       // get matrix that transforms displacements from global to 
-       // local coordinates
-       Matrix Tgl(6,6);
-       this->getTransfMatrixLocalGlobal(Tgl);
-
-       // transform global end displacements to  local coordinates
-       Vector u(6);
-       u = Tgl *  Ue;
-
-       double u1, u2, u4, u5;
-       u1 = u(0);
-       u2 = u(1);
-       u4 = u(3);
-       u5 = u(4);
-
-       // subdivide element into smaller parts to draw the deformed shape
-       double x_i, y_i, xg_xi0, yg_xi0, xi, ul_xi, wl_xi;
-       x_i = node1Crd(0);
-       y_i = node1Crd(1);
-             
-       // determine displaced position of node i      
-       xg_xi0 = x_i + Ue(0) * fact;
-       yg_xi0 = y_i + Ue(1) * fact;
-
-       // get integration point positions and weights
-       const Matrix &xi_pt = quadRule.getIntegrPointCoords(nSections);
-       const Vector &weight = quadRule.getIntegrPointWeights(nSections);
-
-       // setup Vandermode and CBDI influence matrices
-       int i, j, k, i0, j0;
-       Matrix G(nSections, nSections);
-       Matrix invG(nSections, nSections);
-    
-       for (i = 1; i <= nSections; i++)
-	   for (j = 1; j <= nSections; j++)
-	   {
-	       i0 = i - 1;
-	       j0 = j - 1;
-	       xi = xi_pt(i0,0);
-	       G(i0,j0) =  pow(xi,j-1);
-	   }
-       invertMatrix(nSections, G, invG);
-        
-       // get section curvatures
-       Vector kappa(nSections);  // curvature
-       Vector vs;              // section deformations 
-       for (i=0; i<nSections; i++)
-       {
-	   // THIS IS VERY INEFFICIENT ... CAN CHANGE IF RUNS TOO SLOW
-	   int sectionKey = 0;
-	   const ID &code = sections[i]->getType();
-	   int ii;
-	   for (ii = 0; ii < code.Size(); ii++)
-	       if (code(ii) == SECTION_RESPONSE_MZ)
-	       {
-		   sectionKey = ii;
-		   break;
-	       }
-	   
-	   if (ii == code.Size())
-	       g3ErrorHandler->fatal("FATAL NLBeamColumn2d::displaySelf - section does not provide Mz response\n");
-	   
-	   // get section deformations
-	   vs = sections[i]->getSectionDeformation();
-	   kappa(i) = vs(sectionKey);
-       }
-
-       //cerr << "kappa: " << kappa;
-
-       int ns = 20;    
-
-       Vector lbar(nSections);
-       Vector ls(nSections);
-       double xl_xi, yl_xi, xg_xi, yg_xi;
-       double lskappa = 0;
-       int error;
-     
-       for (i = 1; i<= ns; i++)
-       {
-           xi = ((double) i)/ns;
-	       
-	   // evaluate CBDI matrix
-           for (j = 1; j<= nSections; j++)
-	      lbar(j-1) = (pow(xi,j+1) - xi)/(j*(j+1));
-	       
-           for (k = 0; k < nSections; k++)
-           {
-              ls(k) = 0;
-              for (j = 0; j < nSections; j++)
-		 ls(k) += (L*L) * lbar(j) * invG(j,k);
-           }
-
-	   lskappa = 0;
-	   for (j = 0; j < nSections; j++)
-	      lskappa += ls(j) * kappa(j);
-	      
-           // calculate displacements of the point xi in local coordinates
-	   wl_xi = lskappa  + (1-xi)*u2 + xi*u5;
-           ul_xi =  (1-xi)*u1 + xi*u4; // consider linear variation$
-	                                   // CHANGE LATER!!!!!!!!!!
-	       
-           // determine displaced local coordinates of the point xi
-           xl_xi = L * xi + ul_xi * fact;
-           yl_xi =          wl_xi * fact;
-    
-	   // rotate to global coordinates
-	   xg_xi = cosTheta * xl_xi - sinTheta * yl_xi;
-	   yg_xi = sinTheta * xl_xi + cosTheta * yl_xi;
-	       
-	   // translate to global coordinates
-	   xg_xi = xg_xi + x_i;
-	   yg_xi = yg_xi + y_i;
-      
-           // draw the displaced position of this line segment
-           v1(0) = xg_xi0;
-           v1(1) = yg_xi0;
-	       
-           v2(0) = xg_xi;
-           v2(1) = yg_xi;
-  
-           error =  theViewer.drawLine(v1, v2, 1.0, 1.0);	
-	       
-	   if (error)
-	       return error;
-	       
-	   xg_xi0 = xg_xi;
-	   yg_xi0 = yg_xi;
-       }
-              
-       return error;
-  */ 
-    } 
-    else if (displayMode == 3)
-    {  
 	
        // plot the curvatures
        // first determine the two end points of the element based on
@@ -1681,18 +1508,18 @@ NLBeamColumn2d::setResponse(char **argv, int argc, Information &eleInformation)
     
     // section response -
     else if (strcmp(argv[0],"section") ==0) {
-		if (argc <= 2)
-			return 0;
+      if (argc <= 2)
+	return 0;
 	
-		int sectionNum = atoi(argv[1]);
-		if (sectionNum > 0 && sectionNum <= nSections)
-			return sections[sectionNum-1]->setResponse(&argv[2], argc-2, eleInformation);
-		else
-			return 0;
-	}
+      int sectionNum = atoi(argv[1]);
+      if (sectionNum > 0 && sectionNum <= nSections)
+	return sections[sectionNum-1]->setResponse(&argv[2], argc-2, eleInformation);
+      else
+	return 0;
+    }
     
-	else
-		return 0;
+    else
+      return 0;
 }
 
 int 
