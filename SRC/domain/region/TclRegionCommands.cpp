@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:32:43 $
+// $Revision: 1.6 $
+// $Date: 2005-01-24 18:59:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/region/TclRegionCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -241,6 +241,12 @@ TclAddMeshRegion(ClientData clientData, Tcl_Interp *interp, int argc,
   // if damping has been specified set the damping factors
   if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
     theRegion->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
+
+  if (theElements != 0)
+    delete theElements;
+
+  if (theNodes != 0)
+    delete theNodes;
 
   return TCL_OK;
 }
