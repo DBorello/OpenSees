@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-06-10 22:57:40 $
+// $Revision: 1.6 $
+// $Date: 2002-09-12 19:28:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.cpp,v $
                                                                         
                                                                         
@@ -46,8 +46,8 @@ Concrete01::Concrete01
 (int tag, double FPC, double EPSC0, double FPCU, double EPSCU)
   :UniaxialMaterial(tag, MAT_TAG_Concrete01),
    fpc(FPC), epsc0(EPSC0), fpcu(FPCU), epscu(EPSCU), 
-   Cstrain(0.0), Cstress(0.0), 
-   CminStrain(0.0), CendStrain(0.0)
+   CminStrain(0.0), CendStrain(0.0),
+   Cstrain(0.0), Cstress(0.0) 
 {
 	// Make all concrete parameters negative
 	if (fpc > 0.0)
@@ -78,8 +78,8 @@ Concrete01::Concrete01
 
 Concrete01::Concrete01():UniaxialMaterial(0, MAT_TAG_Concrete01),
  fpc(0.0), epsc0(0.0), fpcu(0.0), epscu(0.0),
- Cstrain(0.0), Cstress(0.0), CminStrain(0.0), CunloadSlope(0.0),
- CendStrain(0.0)
+ CminStrain(0.0), CunloadSlope(0.0), CendStrain(0.0),
+ Cstrain(0.0), Cstress(0.0)
 {
 	// Set trial values
 	this->revertToLastCommit();

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-06-27 00:03:20 $
+// $Revision: 1.8 $
+// $Date: 2002-09-12 19:28:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HystereticMaterial.cpp,v $
 
 // Written: MHS
@@ -43,9 +43,9 @@ HystereticMaterial::HystereticMaterial(int tag,
 			double m1n, double r1n, double m2n, double r2n, double m3n, double r3n,
 			double px, double py, double d1, double d2, double b):
 UniaxialMaterial(tag, MAT_TAG_Hysteretic),
+pinchX(px), pinchY(py), damfc1(d1), damfc2(d2), beta(b),
 mom1p(m1p), rot1p(r1p), mom2p(m2p), rot2p(r2p), mom3p(m3p), rot3p(r3p),
-mom1n(m1n), rot1n(r1n), mom2n(m2n), rot2n(r2n), mom3n(m3n), rot3n(r3n),
-pinchX(px), pinchY(py), damfc1(d1), damfc2(d2), beta(b)
+mom1n(m1n), rot1n(r1n), mom2n(m2n), rot2n(r2n), mom3n(m3n), rot3n(r3n)
 {
 	bool error = false;
 	
@@ -89,9 +89,9 @@ HystereticMaterial::HystereticMaterial(int tag,
 			double m1n, double r1n, double m2n, double r2n,
 			double px, double py, double d1, double d2, double b):
 UniaxialMaterial(tag, MAT_TAG_Hysteretic),
+pinchX(px), pinchY(py), damfc1(d1), damfc2(d2), beta(b),
 mom1p(m1p), rot1p(r1p), mom3p(m2p), rot3p(r2p),
-mom1n(m1n), rot1n(r1n), mom3n(m2n), rot3n(r2n),
-pinchX(px), pinchY(py), damfc1(d1), damfc2(d2), beta(b)
+mom1n(m1n), rot1n(r1n), mom3n(m2n), rot3n(r2n)
 {
 	bool error = false;
 	
@@ -132,9 +132,9 @@ pinchX(px), pinchY(py), damfc1(d1), damfc2(d2), beta(b)
 
 HystereticMaterial::HystereticMaterial():
 UniaxialMaterial(0, MAT_TAG_Hysteretic),
+pinchX(0.0), pinchY(0.0), damfc1(0.0), damfc2(0.0), beta(0.0),
 mom1p(0.0), rot1p(0.0), mom2p(0.0), rot2p(0.0), mom3p(0.0), rot3p(0.0),
-mom1n(0.0), rot1n(0.0), mom2n(0.0), rot2n(0.0), mom3n(0.0), rot3n(0.0),
-pinchX(0.0), pinchY(0.0), damfc1(0.0), damfc2(0.0), beta(0.0)
+mom1n(0.0), rot1n(0.0), mom2n(0.0), rot2n(0.0), mom3n(0.0), rot3n(0.0)
 {
 
 }
@@ -522,7 +522,7 @@ HystereticMaterial::recvSelf(int commitTag, Channel &theChannel,
     CrotPu = data(20);
     CrotNu = data(21);
     CenergyD = data(22);
-    CloadIndicator = data(23);
+    CloadIndicator = int(data(23));
     Cstress = data(24);
     Cstrain = data(25);
     Ttangent = data(26);

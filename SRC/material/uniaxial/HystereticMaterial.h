@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-10 23:03:58 $
+// $Revision: 1.5 $
+// $Date: 2002-09-12 19:28:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HystereticMaterial.h,v $
 
 // Written: MHS
@@ -115,15 +115,16 @@ class HystereticMaterial : public UniaxialMaterial
 		double Cstrain;
 
 		// Backbone parameters
+		double mom1p, rot1p;
+		double mom2p, rot2p;
+		double mom3p, rot3p;
+		double mom1n, rot1n;
+		double mom2n, rot2n;
+		double mom3n, rot3n;
+
 		double E1p, E1n;
-		double mom1p, mom1n;
-		double rot1p, rot1n;
 		double E2p, E2n;
-		double mom2p, mom2n;
-		double rot2p, rot2n;
 		double E3p, E3n;
-		double mom3p, mom3n;
-		double rot3p, rot3n;
 
 		double energyA;
 
