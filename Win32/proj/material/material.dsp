@@ -738,6 +738,30 @@ SOURCE=..\..\..\SRC\material\nD\Template3Dep\MD_YS.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\RMC01.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\RMC01.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\RMC01_PS.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\RMC01_PS.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\RMC01_YS.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\RMC01_YS.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\material\nD\Template3Dep\TclTemplate3DepCommand.cpp
 # End Source File
 # Begin Source File
