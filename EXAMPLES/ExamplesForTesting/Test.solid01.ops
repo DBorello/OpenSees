@@ -99,7 +99,7 @@ analysis Transient
 # perform the analysis
 # #################################
 
-analyze 50 0.02
+analyze 10 0.02
 
 
 	wipe
