@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-05-30 07:14:38 $
+// $Revision: 1.2 $
+// $Date: 2001-09-18 22:55:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf2d.cpp,v $
                                                                         
                                                                         
@@ -455,8 +455,6 @@ PDeltaCrdTransf2d::getGlobalStiffMatrix (const Matrix &kb, const Vector &pb)
 	static double tmp[6][6];
 
 	double oneOverL = 1.0/L;
-	double sl = sinTheta*oneOverL;
-	double cl = cosTheta*oneOverL;
 
 	// Basic stiffness
 	double kb00, kb01, kb02, kb10, kb11, kb12, kb20, kb21, kb22;

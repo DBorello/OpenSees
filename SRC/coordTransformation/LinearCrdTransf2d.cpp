@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-30 07:14:37 $
+// $Revision: 1.3 $
+// $Date: 2001-09-18 22:55:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf2d.cpp,v $
                                                                         
                                                                         
@@ -429,7 +429,6 @@ LinearCrdTransf2d::getGlobalStiffMatrix (const Matrix &kb, const Vector &pb)
 {
 	static Matrix kg(6,6);
 	static double tmp [6][6];
-	static double tmp2[6][6];
 
 	double oneOverL = 1.0/L;
 
