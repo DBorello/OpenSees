@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-14 23:01:25 $
+// $Revision: 1.9 $
+// $Date: 2005-03-25 00:32:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2Plasticity.cpp,v $
 
 // Written: Ed "C++" Love
@@ -598,6 +598,7 @@ void J2Plasticity :: doInitialTangent( )
           initialTangent[i][j][k][l]  = bulk * IbunI[i][j][k][l] ;
           initialTangent[i][j][k][l] += (2.0*shear) * IIdev[i][j][k][l] ;
 
+          //minor symmetries 
           //minor symmetries 
           initialTangent [j][i][k][l] = initialTangent[i][j][k][l] ;
           initialTangent [i][j][l][k] = initialTangent[i][j][k][l] ;

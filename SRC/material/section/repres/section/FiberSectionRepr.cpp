@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:37 $
+// $Revision: 1.6 $
+// $Date: 2005-03-25 00:32:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/section/FiberSectionRepr.cpp,v $
                                                                         
                                                                         
@@ -43,8 +43,8 @@
 FiberSectionRepr::FiberSectionRepr(int sectionID, int maxNumPatches, int maxNumReinfLayers)
   :SectionRepres(sectionID), 
   sectID(sectionID), 
-  maxNPatches (maxNumPatches),
-  maxNReinfLayers (maxNumReinfLayers),
+  maxNPatches(maxNumPatches),
+  maxNReinfLayers(maxNumReinfLayers),
   patch(0), 
   reinfLayer(0), 
   nPatches(0), 
@@ -72,7 +72,7 @@ FiberSectionRepr::FiberSectionRepr(int sectionID, int maxNumPatches, int maxNumR
    
    for (i=0; i< maxNumPatches; i++)
        patch[i] = 0;
-      
+
    reinfLayer = new ReinfLayer*[maxNumReinfLayers];
    if (!reinfLayer)
    {
@@ -125,7 +125,7 @@ FiberSectionRepr::~FiberSectionRepr(void)
    if (patch)
    {
       for (i = 0; i < maxNPatches; i++)
-         if (patch[i])
+         if (patch[i] != 0)
               delete patch[i];
 
       delete [] patch;
@@ -134,9 +134,9 @@ FiberSectionRepr::~FiberSectionRepr(void)
    if (reinfLayer)
    { 
       for (i = 0; i < maxNReinfLayers; i++)
-         if (reinfLayer[i])
+	if (reinfLayer[i] != 0) 
             delete reinfLayer[i];
-      
+
       delete [] reinfLayer;
    } 
    
@@ -191,6 +191,8 @@ int FiberSectionRepr::addPatch (const Patch & aPatch)
      }
      for (int i=0; i<nPatches; i++)
        patches[i] = patch[i];
+     for (int j=nPatches; j<maxNPatches; j++)
+       patches[j] = 0;
      
      delete [] patch;
      patch = patches;
@@ -218,6 +220,8 @@ int FiberSectionRepr::addReinfLayer (const ReinfLayer & aReinfLayer)
      }
      for (int i=0; i<nReinfLayers; i++)
        reinfLayers[i] = reinfLayer[i];
+     for (int j=nReinfLayers; j<maxNReinfLayers; j++)
+       reinfLayers[j] = 0;
 
      delete [] reinfLayer;
      reinfLayer = reinfLayers;
