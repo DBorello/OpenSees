@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-03-05 00:53:21 $
+// $Revision: 1.11 $
+// $Date: 2003-03-05 01:02:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.h,v $
                                                                         
                                                                         
@@ -63,7 +63,6 @@ class Steel01 : public UniaxialMaterial
     double getStress(void);
     double getTangent(void);
     double getInitialTangent(void) {return E0;};
-	double getRho(void);
 
     int commitState(void);
     int revertToLastCommit(void);    

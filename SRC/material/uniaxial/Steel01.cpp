@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-03-05 00:53:21 $
+// $Revision: 1.12 $
+// $Date: 2003-03-05 01:02:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.cpp,v $
                                                                         
                                                                         
@@ -257,11 +257,6 @@ double Steel01::getStress ()
 double Steel01::getTangent ()
 {
    return Ttangent;
-}
-
-double Steel01::getRho()
-{
-   return 0.0;
 }
 
 int Steel01::commitState ()
