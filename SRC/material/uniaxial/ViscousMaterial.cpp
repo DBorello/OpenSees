@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2001-07-11 18:22:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ViscousMaterial.cpp,v $
                                                                         
 // Written: Mehrdad Sasani 
@@ -33,16 +33,20 @@
 #include <Vector.h>
 #include <Channel.h>
 
-ViscousMaterial::ViscousMaterial(int tag, double c, double alpha)
+ViscousMaterial::ViscousMaterial(int tag, double c, double a)
 :UniaxialMaterial(tag,MAT_TAG_Viscous),
- commitStrain(0.0), trialStrain(0.0), C(c), Alpha(alpha)
+ trialRate(0.0), C(c), Alpha(a)
 {
-
+    if (Alpha < 0.0) {
+        g3ErrorHandler->warning("%s -- Alpha < 0.0, setting to 1.0",
+            "ViscousMaterial::ViscousMaterial");
+        Alpha = 1.0;
+    }
 }
 
 ViscousMaterial::ViscousMaterial()
 :UniaxialMaterial(0,MAT_TAG_Viscous),
- commitStrain(0.0), C(0.0), Alpha(0.0)
+ trialRate(0.0), C(0.0), Alpha(0.0)
 {
 
 }
@@ -50,13 +54,12 @@ ViscousMaterial::ViscousMaterial()
 ViscousMaterial::~ViscousMaterial()
 {
   // does nothing
-
 }
 
 int 
-ViscousMaterial::setTrialStrain(double velocity, double velocityRate)
+ViscousMaterial::setTrialStrain(double strain, double strainRate)
 {
-    trialStrain = velocity;
+    trialRate = strainRate;
 
     return 0;
 }
@@ -64,48 +67,37 @@ ViscousMaterial::setTrialStrain(double velocity, double velocityRate)
 double 
 ViscousMaterial::getStress(void)
 {
-	int sgn = (trialStrain < 0.0) ? -1 : 1;
+    double stress = C*pow(fabs(trialRate),Alpha);
 
-	double minvel = 1.e-11;
-
-	if (fabs(trialStrain)<minvel) {
-		// return Alpha*C*pow((10e-12),(Alpha-1));
-	    return C*trialStrain/minvel*C*pow(minvel,Alpha);
-	}
-     
-	return C*sgn*pow(fabs(trialStrain),Alpha);
+    if (trialRate < 0.0)
+        return -stress;
+    else
+        return  stress;
 }
 
 double 
 ViscousMaterial::getTangent(void)
 {
-	int sgn = (trialStrain < 0.0) ? -1 : 1;
-
-	double minvel = 1.e-11;
-
-    if (fabs(trialStrain)<minvel)
-		return Alpha*C*pow((10e-12),(Alpha-1));
-	else
-		return Alpha*C*pow(fabs(trialStrain),(Alpha-1));
+    return 0.0;
 }
 
 double
 ViscousMaterial::getDampTangent(void)
 {
-	return this->getTangent();
+	static const double minvel = 1.e-11;
+
+    double absRate = fabs(trialRate);
+
+    if (absRate < minvel)
+		return Alpha*C*pow(minvel,Alpha-1.0);
+	else
+		return Alpha*C*pow(absRate,Alpha-1.0);	
 }
 
 double 
 ViscousMaterial::getSecant(void)
 {
-	int sgn = (trialStrain < 0.0) ? -1 : 1;
-
-	double minvel = 1.e-11;
-
-    if (fabs(trialStrain)<minvel)
-	    return C*pow(minvel,(Alpha-1));
-	else
-		return C*pow(fabs(trialStrain),(Alpha-1));
+    return 0.0;
 }
 
 double 
@@ -117,28 +109,26 @@ ViscousMaterial::getStrain(void)
 double 
 ViscousMaterial::getStrainRate(void)
 {
-    return trialStrain;
+    return trialRate;
 }
 
 int 
 ViscousMaterial::commitState(void)
 {
-    commitStrain = trialStrain;
     return 0;
 }
 
 int 
 ViscousMaterial::revertToLastCommit(void)
 {
-    trialStrain = commitStrain;
     return 0;
 }
 
 int 
 ViscousMaterial::revertToStart(void)
 {
-    commitStrain = 0.0;
-    trialStrain = 0.0;
+    trialRate = 0.0;
+
     return 0;
 }
 
@@ -146,10 +136,11 @@ UniaxialMaterial *
 ViscousMaterial::getCopy(void)
 {
     ViscousMaterial *theCopy = new ViscousMaterial(this->getTag(),C,Alpha);
-    theCopy->commitStrain = commitStrain;
+
+    theCopy->trialRate = trialRate;
+
     return theCopy;
 }
-
 
 int 
 ViscousMaterial::sendSelf(int cTag, Channel &theChannel)
@@ -159,7 +150,7 @@ ViscousMaterial::sendSelf(int cTag, Channel &theChannel)
   data(0) = this->getTag();
   data(1) = C;
   data(2) = Alpha;
-  data(3) = commitStrain;
+  data(3) = trialRate;
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
     cerr << "ViscousMaterial::sendSelf() - failed to send data\n";
@@ -184,8 +175,7 @@ ViscousMaterial::recvSelf(int cTag, Channel &theChannel,
     this->setTag((int)data(0));
     C = data(1);
 	Alpha = data(2);
-    commitStrain = data(3);
-    trialStrain = commitStrain;
+    trialRate = data(3);
   }
     
   return res;
