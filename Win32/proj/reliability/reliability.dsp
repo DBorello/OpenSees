@@ -332,6 +332,14 @@ SOURCE=..\..\..\SRC\reliability\analysis\analysis\FORMAnalysis.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\reliability\analysis\analysis\FOSMAnalysis.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\reliability\analysis\analysis\FOSMAnalysis.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\reliability\analysis\analysis\FragilityAnalysis.cpp
 # End Source File
 # Begin Source File
@@ -348,19 +356,19 @@ SOURCE=..\..\..\SRC\reliability\analysis\analysis\GFunVisualizationAnalysis.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\reliability\analysis\analysis\MVFOSMAnalysis.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\reliability\analysis\analysis\MVFOSMAnalysis.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\SRC\reliability\analysis\analysis\OutCrossingAnalysis.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\SRC\reliability\analysis\analysis\OutCrossingAnalysis.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\reliability\analysis\analysis\ParametricReliabilityAnalysis.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\reliability\analysis\analysis\ParametricReliabilityAnalysis.h
 # End Source File
 # Begin Source File
 
@@ -688,6 +696,14 @@ SOURCE=..\..\..\SRC\reliability\domain\distributions\UniformRV.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\reliability\domain\distributions\UserDefinedRV.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\reliability\domain\distributions\UserDefinedRV.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\reliability\domain\distributions\WeibullRV.cpp
 # End Source File
 # Begin Source File
@@ -705,6 +721,14 @@ SOURCE=..\..\..\SRC\reliability\domain\filter\Filter.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\reliability\domain\filter\Filter.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\reliability\domain\filter\KooFilter.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\reliability\domain\filter\KooFilter.h
 # End Source File
 # Begin Source File
 
@@ -785,6 +809,14 @@ SOURCE=..\..\..\SRC\reliability\domain\modulatingFunction\GammaModulatingFunctio
 # Begin Source File
 
 SOURCE=..\..\..\SRC\reliability\domain\modulatingFunction\GammaModulatingFunction.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\reliability\domain\modulatingFunction\KooModulatingFunction.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\reliability\domain\modulatingFunction\KooModulatingFunction.h
 # End Source File
 # Begin Source File
 
