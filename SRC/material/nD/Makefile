@@ -43,6 +43,7 @@ TEMPLATE_OBJS =              \
                 VM_PS.o \
                 VM_YS.o \
                 YS.o \
+                PS.o \
                 RMC01.o \
                 RMC01_YS.o \
                 RMC01_PS.o
