@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-03-04 00:46:03 $
+// $Revision: 1.11 $
+// $Date: 2003-03-06 17:08:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -1746,9 +1746,9 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 	}
 	
 
-	const char **data = new const char *[argc-argvCounter];
+	const char **data = new const char *[argc-argvCounter-2];
 	int ii,jj;
-	for (ii=argvCounter, jj=0; ii<argc; ii++, jj++)
+	for (ii=argvCounter+2, jj=0; ii<argc; ii++, jj++)
 	  data[jj] = argv[ii];
 
 	// IF UNCERTAIN *ELEMENT* PROPERTY
