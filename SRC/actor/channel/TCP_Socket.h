@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-10-10 23:30:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.h,v $
                                                                         
                                                                         
@@ -43,7 +43,6 @@
 #include <Socket.h>
 #include <Channel.h>
 #include <SocketAddress.h>
-
 
 class TCP_Socket : public Channel
 {
@@ -103,11 +102,8 @@ class TCP_Socket : public Channel
     int sockfd;
     struct sockaddr_in  my_Addr, other_Addr;
     struct sockaddr myAddr, otherAddr;
-#ifdef HOLDEN    
-    int addrLength;
-#else
-    unsigned int addrLength;
-#endif
+    socklen_t addrLength;
+
     unsigned int myPort;
     char add[40];
 };

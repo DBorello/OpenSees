@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-10-10 23:30:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/UDP_Socket.h,v $
                                                                         
                                                                         
-// File: ~/actor/channel/UDP_Socket.h
-//
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -99,7 +97,7 @@ class UDP_Socket : public Channel
   private:
     int sockfd;
     struct sockaddr_in  my_Addr, last_Addr;
-    int addrLength;
+    socklen_t addrLength;
     char *shadow_inetAddr;
     unsigned int shadow_port;
     unsigned int myPort;    

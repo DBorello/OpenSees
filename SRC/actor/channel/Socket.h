@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-08-29 09:20:57 $
+// $Revision: 1.4 $
+// $Date: 2003-10-10 23:30:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/Socket.h,v $
                                                                         
-                                                                        
-// File: ~/actor/Socket.h
-//
 // Written: fmk 11/95
 // Revised:
 //
@@ -53,15 +50,11 @@ extern "C" {
 #define MAX_UDP_DATAGRAM 9126
 #define MAX_INET_ADDR 28
 
-#ifdef _ALPHA
-extern "C" int gethostname (char *name, int namelen);
-#else
 extern "C" int gethostname (char *name, unsigned int namelen);
-#endif
 
 extern "C" int INET_getsockname(int socket, 
 				struct sockaddr_in *address, 
-				int *address_len );
+				socklen_t *address_len );
 
 extern "C" int INET_sendto (int socket,
 			    char *message_addr,
@@ -75,10 +68,11 @@ extern "C" int INET_recvfrom(int socket,
 			     int length,
 			     int flags,
 			     struct sockaddr_in *address,
-			     int *address_len) ;
+			     socklen_t *address_len) ;
+
 extern "C" int INET_bind (int socket,
 			  struct sockaddr_in *address,
-			  int address_len );
+			  socklen_t address_len );
 
 
 
