@@ -41,7 +41,7 @@ int addTclYS_Evolution(TclModelBuilder *theBuilder, YS_Evolution *theModel)
 
 }
 
-PlasticHardeningMaterial * getTclPlasticMaterial(Tcl_Interp *interp, char *arg, TclModelBuilder *theBuilder)
+PlasticHardeningMaterial * getTclPlasticMaterial(Tcl_Interp *interp, TCL_Char *arg, TclModelBuilder *theBuilder)
 {
 int id;
 	if (Tcl_GetInt(interp, arg, &id) != TCL_OK)
@@ -61,7 +61,7 @@ int id;
 		return theMat;
 }
 
-YieldSurface_BC * getTclYieldSurface_BC(Tcl_Interp *interp, char *arg, TclModelBuilder *theBuilder)
+YieldSurface_BC * getTclYieldSurface_BC(Tcl_Interp *interp, TCL_Char *arg, TclModelBuilder *theBuilder)
 {
 int id;
 	if (Tcl_GetInt(interp, arg, &id) != TCL_OK)
@@ -86,7 +86,7 @@ int id;
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 int TclNullEvolutionCommand(ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theBuilder)
+				 TCL_Char **argv, TclModelBuilder *theBuilder)
 {
 YS_Evolution *theModel = 0;
 		int tag;
@@ -134,7 +134,7 @@ return addTclYS_Evolution(theBuilder, theModel);
 }
 
 int TclKinematic2D01Command(ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theBuilder)
+				 TCL_Char **argv, TclModelBuilder *theBuilder)
 {
 YS_Evolution *theModel = 0;
 		int tag;
@@ -167,7 +167,7 @@ return addTclYS_Evolution(theBuilder, theModel);
 
 
 int TclIsotropic2D01Command(ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theBuilder)
+				 TCL_Char **argv, TclModelBuilder *theBuilder)
 {
 YS_Evolution *theModel = 0;
 
@@ -196,7 +196,7 @@ return addTclYS_Evolution(theBuilder, theModel);
 
 
 int TclPeakOriented2D01Command(ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theBuilder)
+				 TCL_Char **argv, TclModelBuilder *theBuilder)
 {
 YS_Evolution *theModel = 0;
 		int tag;
@@ -227,7 +227,7 @@ return addTclYS_Evolution(theBuilder, theModel);
 
 
 int TclCombinedIsoKin2D01Command(ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theBuilder)
+				 TCL_Char **argv, TclModelBuilder *theBuilder)
 {
 YS_Evolution *theModel = 0;
 
@@ -287,7 +287,7 @@ return addTclYS_Evolution(theBuilder, theModel);
 
 ////////////////////////////////////////////////////////////////////////////////////////
 int TclKinematic2D02Command(ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theBuilder)
+				 TCL_Char **argv, TclModelBuilder *theBuilder)
 {
 YS_Evolution *theModel = 0;
 int tag;
@@ -336,7 +336,7 @@ return addTclYS_Evolution(theBuilder, theModel);
 
 
 int TclPeakOriented2D02Command(ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theBuilder)
+				 TCL_Char **argv, TclModelBuilder *theBuilder)
 {
 YS_Evolution *theModel = 0;
 
@@ -380,7 +380,7 @@ return addTclYS_Evolution(theBuilder, theModel);
 
 
 int TclCombinedIsoKin2D02Command(ClientData clienData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theBuilder)
+				 TCL_Char **argv, TclModelBuilder *theBuilder)
 {
 YS_Evolution *theModel = 0;
 int tag, deformable;
@@ -461,7 +461,7 @@ return addTclYS_Evolution(theBuilder, theModel);
 
 int
 TclModelBuilderYS_EvolutionModelCommand (ClientData clientData, Tcl_Interp *interp, int argc,
-				 char **argv, TclModelBuilder *theBuilder)
+				 TCL_Char **argv, TclModelBuilder *theBuilder)
 {
     if (strcmp(argv[1],"null") == 0)
 	{
