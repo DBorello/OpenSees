@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2001-08-17 23:59:29 $
+// $Revision: 1.2 $
+// $Date: 2001-08-20 03:45:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/NewUniaxialMaterial.cpp,v $
 
 // Written: MHS
@@ -97,7 +97,9 @@ NewUniaxialMaterial::revertToStart(void)
 UniaxialMaterial *
 NewUniaxialMaterial::getCopy(void)
 {
-  return 0;
+  NewUniaxialMaterial *theCopy = new NewUniaxialMaterial(this->getTag());
+
+  return theCopy;
 }
 
 int 
