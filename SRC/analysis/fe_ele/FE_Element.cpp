@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-06-24 21:54:35 $
+// $Revision: 1.12 $
+// $Date: 2003-10-30 22:34:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.cpp,v $
                                                                         
                                                                         
@@ -633,7 +633,7 @@ FE_Element::addD_Force(const Vector &accel, double fact)
 	    }	  
 		
 	    if (theResidual->addMatrixVector(1.0, myEle->getDamp(), tmp, fact) < 0){
-		opserr << "WARNING FE_Element::addM_Force() - ";
+		opserr << "WARNING FE_Element::addD_Force() - ";
 		opserr << "- addMatrixVector returned error\n";		 
 	    }		
 	}
@@ -735,8 +735,47 @@ FE_Element::addM_ForceSensitivity(int gradNumber, const Vector &vect, double fac
 void  
 FE_Element::addD_ForceSensitivity(int gradNumber, const Vector &vect, double fact)
 {
+    if (myEle != 0) {    
+
+	// check for a quick return
+	if (fact == 0.0) 
+	    return;
+	if (myEle->isSubdomain() == false) {
+	    // get the components we need out of the vector
+	    // and place in a temporary vector
+	    Vector tmp(numDOF);
+	    for (int i=0; i<numDOF; i++) {
+		int loc = myID(i);
+		if (loc >= 0)
+		    tmp(i) = vect(loc);
+		else
+		    tmp(i) = 0.0;		
+	    }	
+	    if (theResidual->addMatrixVector(1.0, myEle->getDampSensitivity(gradNumber), tmp, fact) < 0){
+		opserr << "WARNING FE_Element::addD_ForceSensitivity() - ";
+		opserr << "- addMatrixVector returned error\n";		 
+	    }		
+	}
+	else {
+	    opserr << "WARNING FE_Element::addD_ForceSensitivity() - ";
+	    opserr << "- this should not be called on a Subdomain!\n";
+	}    	    	    				
+    }
+    else {
+	opserr << "WARNING FE_Element::addD_ForceSensitivity() - no Element *given ";
+	opserr << "- subclasses must provide implementation\n";
+    }    	            
 }
 
+int  
+FE_Element::commitSensitivity(int gradNum, int numGrads)
+{
+	myEle->commitSensitivity(gradNum, numGrads);
+
+	return 0;
+}
+
+/*
 void  
 FE_Element::addKiForceSensitivity(int gradNumber, const Vector &vect, double fact)
 {
@@ -759,14 +798,7 @@ FE_Element::addKiForceSensitivity(int gradNumber, const Vector &vect, double fac
 	}
 
 }
-
-int  
-FE_Element::commitSensitivity(int gradNum, int numGrads)
-{
-	myEle->commitSensitivity(gradNum, numGrads);
-
-	return 0;
-}
+*/
 // AddingSensitivity:END ////////////////////////////////////
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-03-11 20:22:29 $
+// $Revision: 1.11 $
+// $Date: 2003-10-30 22:34:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.h,v $
                                                                         
                                                                         
@@ -100,7 +100,8 @@ class Element : public DomainComponent
     virtual int updateParameter(int parameterID, Information &info);
     virtual int activateParameter(int parameterID);
     virtual const Vector & getResistingForceSensitivity(int gradNumber);
-    virtual const Matrix & getKiSensitivity(int gradNumber);
+    virtual const Matrix & getInitialStiffSensitivity(int gradNumber);
+	virtual const Matrix & getDampSensitivity(int gradNumber);
     virtual const Matrix & getMassSensitivity(int gradNumber);
     virtual int   commitSensitivity(int gradNumber, int numGrads);
 // AddingSensitivity:END ///////////////////////////////////////////

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-03-11 21:17:04 $
+// $Revision: 1.8 $
+// $Date: 2003-10-30 22:34:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.h,v $
                                                                         
                                                                         
@@ -85,7 +85,7 @@ class FE_Element
 // AddingSensitivity:BEGIN ////////////////////////////////////
 	virtual void addResistingForceSensitivity(int gradNumber, double fact = 1.0);
 	virtual void addM_ForceSensitivity       (int gradNumber, const Vector &vect, double fact = 1.0);
-	virtual void addKiForceSensitivity       (int gradNumber, const Vector &vect, double fact = 1.0);
+//	virtual void addKiForceSensitivity       (int gradNumber, const Vector &vect, double fact = 1.0);
 	virtual void addD_ForceSensitivity       (int gradNumber, const Vector &vect, double fact = 1.0);
 	virtual int	 commitSensitivity           (int gradNum, int numGrads);
 // AddingSensitivity:END //////////////////////////////////////
