@@ -18,19 +18,16 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-25 23:32:39 $
+// $Revision: 1.7 $
+// $Date: 2004-01-23 21:23:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.h,v $
                                                                         
                                                                         
 #ifndef FileDatastore_h
 #define FileDatastore_h
 
-// File: ~/database/FileDatastore.h
-//
 // Written: fmk 
 // Created: 10/98
-// Revision: A
 //
 // Description: This file contains the class definition for FileDatastore.
 // FileDatastore is a concrete subclas of FE_Datastore. A FileDatastore 
@@ -70,15 +67,15 @@ struct MatrixData{
 };
 
 struct FileEnds{
-  int ids[maxIDsize];
-  int vects[maxVectSize];
-  int mats[maxMatSize];
+  long int ids[maxIDsize];
+  long int vects[maxVectSize];
+  long int mats[maxMatSize];
 };
 
 struct CurrentFilePos{
-  int ids[maxIDsize];
-  int vects[maxVectSize];
-  int mats[maxMatSize];
+  long int ids[maxIDsize];
+  long int vects[maxVectSize];
+  long int mats[maxMatSize];
 };
 
 struct CurrentFileCommitTag{

@@ -18,14 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-10-10 21:37:13 $
+// $Revision: 1.8 $
+// $Date: 2004-01-23 21:23:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.cpp,v $
                                                                         
                                                                         
 // Written: fmk 
 // Created: 10/98
-// Revision: A
 //
 // Description: This file contains the class implementation for FileDatastore.
 // FileDatastore is a concrete subclas of FE_Datastore. A FileDatastore 
@@ -195,11 +194,11 @@ FileDatastore::sendMatrix(int dataTag, int commitTag,
       return -1;
     }
     
-    int loc = mats[matSize]->tellg();
+    long int loc = mats[matSize]->tellg();
     if (loc == -1) 
       loc = 0;
     else {
-      int pos = 0;
+      long int pos = 0;
       int stepSize = 2*sizeof(int) + matSize*sizeof(double);
       fstream *theStream = mats[matSize];
       theStream->seekg(0);
@@ -232,7 +231,7 @@ FileDatastore::sendMatrix(int dataTag, int commitTag,
   //
 
   bool found = false;  
-  int pos = 0;
+  long int pos = 0;
   
   // we first check if the data can go at the end of the file
   // true if commitTag larger than any we have encountered so far
@@ -282,7 +281,7 @@ FileDatastore::sendMatrix(int dataTag, int commitTag,
 
 
   // we now write the data
-  if (found == true && filePos.mats[matSize] != pos)
+  //if (found == true && filePos.mats[matSize] != pos)
     theStream->seekp(pos);
 
   theStream->write((char *)&matBuffer, stepSize);
@@ -329,11 +328,11 @@ FileDatastore::recvMatrix(int dataTag, int commitTag,
       opserr << "FileDatastore::recvMatrix() - could not open file\n";
       return -1;
     }
-    int loc = mats[matSize]->tellg();
+    long int loc = mats[matSize]->tellg();
     if (loc == -1) 
       loc = 0;
     else {
-      int pos = 0;
+      long int pos = 0;
       int stepSize = 2*sizeof(int) + matSize*sizeof(double);
       fstream *theStream = mats[matSize];
       theStream->seekg(0);
@@ -361,7 +360,7 @@ FileDatastore::recvMatrix(int dataTag, int commitTag,
   fstream *theStream = mats[matSize];
 
   int fileEnd = fileEnds.mats[matSize];  
-  int pos = filePos.mats[matSize];
+  long int pos = filePos.mats[matSize];
   bool found = false;
   
   // we try the current file position first
@@ -434,11 +433,11 @@ FileDatastore::sendVector(int dataTag, int commitTag,
       opserr << "FileDatastore::sendVector() - could not open file\n";
       return -1;
     }
-    int loc = vects[vectSize]->tellg();
+    long int loc = vects[vectSize]->tellg();
     if (loc == -1) 
       loc = 0;
     else {
-      int pos = 0;
+      long int pos = 0;
       int stepSize = 2*sizeof(int) + vectSize*sizeof(double);
       fstream *theStream = vects[vectSize];
       theStream->seekg(0);
@@ -469,7 +468,7 @@ FileDatastore::sendVector(int dataTag, int commitTag,
   //
 
   bool found = false;  
-  int pos = 0;
+  long int pos = 0;
   
   // we first check if the data can go at the end of the file
   // true if commitTag larger than any we have encountered so far
@@ -515,7 +514,7 @@ FileDatastore::sendVector(int dataTag, int commitTag,
     vectBuffer.data[i] = theVector(i);
 
   // we now write the data
-  if (found == true && pos != filePos.vects[vectSize])
+  // if (found == true && pos != filePos.vects[vectSize])
     theStream->seekp(pos);
 
   theStream->write((char *)&vectBuffer, stepSize);
@@ -556,11 +555,11 @@ FileDatastore::recvVector(int dataTag, int commitTag,
       opserr << "FileDatastore::recvVector() - could not open file\n";
       return -1;
     }
-    int loc = vects[vectSize]->tellg();
+    long int loc = vects[vectSize]->tellg();
     if (loc == -1) 
       loc = 0;
     else {
-      int pos = 0;
+      long int pos = 0;
       int stepSize = 2*sizeof(int) + vectSize*sizeof(double);
       fstream *theStream = vects[vectSize];
       theStream->seekg(0);  
@@ -587,7 +586,7 @@ FileDatastore::recvVector(int dataTag, int commitTag,
   fstream *theStream = vects[vectSize];
 
   int fileEnd = fileEnds.vects[vectSize];  
-  int pos = filePos.vects[vectSize];
+  long int pos = filePos.vects[vectSize];
   bool found = false;
 
   // we try the current file position first
@@ -657,11 +656,11 @@ FileDatastore::sendID(int dataTag, int commitTag,
       return -1;
     }
 	
-    int loc = ids[idSize]->tellg();
+    long int loc = ids[idSize]->tellg();
     if (loc == -1) 
       loc = 0;
     else {
-      int pos = 0;
+      long int pos = 0;
       int stepSize = (2 + idSize)*sizeof(int);
       fstream *theStream = ids[idSize];
       theStream->seekg(0);  
@@ -686,7 +685,7 @@ FileDatastore::sendID(int dataTag, int commitTag,
 
   // we now found the location in the file to write the data
   fstream *theStream = ids[idSize];
-  int fileEnd = fileEnds.ids[idSize];
+  long int fileEnd = fileEnds.ids[idSize];
   int stepSize = (2 + idSize)*sizeof(int);
 
   //
@@ -740,7 +739,7 @@ FileDatastore::sendID(int dataTag, int commitTag,
   for (int i=0; i<idSize; i++)
     idBuffer.data[i] = theID(i);
   // we now write the data
-  if (found == true && pos != filePos.ids[idSize]) 
+  //if (found == true && pos != filePos.ids[idSize]) 
     theStream->seekp(pos);
 
   theStream->write((char *)&idBuffer, stepSize);
@@ -782,11 +781,11 @@ FileDatastore::recvID(int dataTag, int commitTag,
       return -1;
     }
 
-    int loc = ids[idSize]->tellg();
+    long int loc = ids[idSize]->tellg();
     if (loc == -1) 
       loc = 0;
     else {
-      int pos = 0;
+      long int pos = 0;
       int stepSize = (2 + idSize)*sizeof(int);
       fstream *theStream = ids[idSize];
       theStream->seekg(0);  
@@ -812,8 +811,8 @@ FileDatastore::recvID(int dataTag, int commitTag,
   // we now set some parameters before we go looking for the data
   int stepSize = (2 + idSize)*sizeof(int);
   fstream *theStream = ids[idSize];
-  int fileEnd = fileEnds.ids[idSize];  
-  int pos = filePos.ids[idSize];
+  long int fileEnd = fileEnds.ids[idSize];  
+  long int pos = filePos.ids[idSize];
   bool found = false;
 
   // we try the current file position first
