@@ -1,6 +1,7 @@
 include ../../../Makefile.def
 
-OBJS       = TwentyNodeBrick.o TclTwentyNodeBrickCommand.o
+OBJS       = TwentyNodeBrick.o TclTwentyNodeBrickCommand.o \
+	Twenty_Node_Brick.o TclTwenty_Node_BrickCommand.o
 
 all:         $(OBJS)
 
