@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2003-12-12 18:40:03 $
+// $Revision: 1.17 $
+// $Date: 2004-01-16 22:07:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 #include <math.h>
@@ -82,7 +82,7 @@ ForceBeamColumn3d::ForceBeamColumn3d():
 
   if (vsSubdivide == 0)
     vsSubdivide  = new Vector [maxNumSections];
-  if (fsSubdivide == 0)
+  if (fsSubdivide == 0) 
     fsSubdivide  = new Matrix [maxNumSections];
   if (SsrSubdivide == 0)
     SsrSubdivide  = new Vector [maxNumSections];
@@ -108,9 +108,6 @@ ForceBeamColumn3d::ForceBeamColumn3d (int tag, int nodeI, int nodeJ,
   kvcommit(NEBD,NEBD), Secommit(NEBD),
   fs(0), vs(0),Ssr(0), vscommit(0), sp(0), Ki(0), isTorsion(false)
 {
-  maxIters = 10;
-  tol = 1.0e-12;
-
   theNodes[0] = 0;
   theNodes[1] = 0;
 
@@ -497,8 +494,9 @@ ForceBeamColumn3d::update()
   dvTrial = dvToDo;
 
   static double factor = 10;
+  double dW0 = 0.0;
 
-  maxSubdivisions = 10;
+  maxSubdivisions = 2;
 
   // fmk - modification to get compatable ele forces and deformations 
   //   for a change in deformation dV we try first a newton iteration, if
@@ -513,8 +511,8 @@ ForceBeamColumn3d::update()
   while (converged == false && numSubdivide <= maxSubdivisions) {
 
     // try regular newton (if l==0), or
-    // initial tangent on first iteration then regular newton (if l==1), or 
-    // initial tangent iterations (if l==2)
+    // initial tangent iterations (if l==1), or
+    // initial tangent on first iteration then regular newton (if l==2)
 
     for (int l=0; l<3; l++) {
 
@@ -646,6 +644,7 @@ ForceBeamColumn3d::update()
 	      //    vs += fs * dSs;     
 
 	      dvs.addMatrixVector(0.0, fsSubdivide[i], dSs, 1.0);
+
 	    } else if (l == 2) {
 
 	      //  newton with initial tangent if first iteration
@@ -679,8 +678,18 @@ ForceBeamColumn3d::update()
 	    SsrSubdivide[i] = sections[i]->getStressResultant();
 	    
 	    // get section flexibility matrix
+	    // FRANK 
 	    fsSubdivide[i] = sections[i]->getSectionFlexibility();
 	    
+	    /*
+	    const Matrix &sectionStiff = sections[i]->getSectionTangent();
+	    int n = sectionStiff.noRows();
+	    Matrix I(n,n); I.Zero(); for (int l=0; l<n; l++) I(l,l) = 1.0;
+	    Matrix sectionFlex(n,n);
+	    sectionStiff.SolveSVD(I, sectionFlex, 1.0e-6);
+	    fsSubdivide[i] = sectionFlex;	    
+	    */
+
 	    // calculate section residual deformations
 	    // dvs = fs * (Ss - Ssr);
 	    dSs = Ss;
@@ -822,6 +831,8 @@ ForceBeamColumn3d::update()
 
 	  // calculate element stiffness matrix
 	  // invert3by3Matrix(f, kv);	  
+	  // FRANK
+	  //	  if (f.SolveSVD(I, kvTrial, 1.0e-12) < 0)
 	  if (f.Solve(I, kvTrial) < 0)
 	    opserr << "%s -- could not invert flexibility",
 				    "ForceBeamColumn3d::update()\n";
@@ -837,7 +848,9 @@ ForceBeamColumn3d::update()
 	  dSe.addMatrixVector(0.0, kvTrial, dv, 1.0);
 
 	  dW = dv ^ dSe; 
-	  
+	  if (dW0 == 0.0) 
+	    dW0 = dW;
+
 	  SeTrial += dSe;
 	  
 	  // check for convergence of this interval
@@ -876,7 +889,6 @@ ForceBeamColumn3d::update()
 
 	    // if we have failed to convrege for all of our newton schemes
 	    // - reduce step size by the factor specified
-
 	    if (j == (numIters-1) && (l == 2)) {
 	      dvTrial /= factor;
 	      numSubdivide++;
@@ -893,10 +905,21 @@ ForceBeamColumn3d::update()
   if (converged == false) {
     opserr << "WARNING - ForceBeamColumn3d::update - failed to get compatible ";
     opserr << "element forces & deformations for element: ";
-    opserr << this->getTag() << "(dW: << " << dW << ")\n";
+    opserr << this->getTag() << "(dW: << " << dW << ", dW0: " << dW0 << ")\n";
+
+    /*
+    opserr << "Section Tangent Condition Numbers: ";
+    for (int i=0; i<numSections; i++) {
+      const Matrix &sectionStiff = sections[i]->getSectionTangent();
+      double conditionNumber = sectionStiff.conditionNumber();
+      opserr << conditionNumber << " ";
+    }
+    opserr << endln;
+    */
+
     return -1;
   }
-
+  
   initialFlag = 1;
 
   return 0;
