@@ -84,10 +84,13 @@ LAW_LIBS = $(FE)/system_of_eqn/linearSOE/sparseSYM/SymSparseLinSOE.o \
 	$(FE)/system_of_eqn/eigenSOE/BandArpackSolver.o \
 	$(FE)/system_of_eqn/eigenSOE/SymArpackSOE.o \
 	$(FE)/system_of_eqn/eigenSOE/SymArpackSolver.o \
+	$(FE)/system_of_eqn/eigenSOE/SymBandEigenSOE.o \
+	$(FE)/system_of_eqn/eigenSOE/SymBandEigenSolver.o \
 	$(FE)/analysis/analysis/EigenAnalysis.o \
 	$(FE)/analysis/integrator/EigenIntegrator.o \
 	$(FE)/analysis/algorithm/eigenAlgo/EigenAlgorithm.o \
-	$(FE)/analysis/algorithm/eigenAlgo/FrequencyAlgo.o 
+	$(FE)/analysis/algorithm/eigenAlgo/FrequencyAlgo.o \
+	$(FE)/analysis/algorithm/eigenAlgo/StandardEigenAlgo.o 
 
 
 ERRORHANDLER_LIBS = $(FE)/handler/ErrorHandler.o \

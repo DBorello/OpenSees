@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2001-11-09 01:23:31 $
+// $Revision: 1.22 $
+// $Date: 2001-11-20 01:55:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -83,6 +83,7 @@ extern "C" {
 #include <NewtonLineSearch.h>
 #include <ModifiedNewton.h>
 #include <FrequencyAlgo.h>
+#include <StandardEigenAlgo.h>
 #include <Broyden.h>
 #include <BFGS.h>
 #include <KrylovNewton.h>
@@ -151,6 +152,8 @@ extern "C" {
 #include <SymArpackSolver.h>
 #include <BandArpackSOE.h>
 #include <BandArpackSolver.h>
+#include <SymBandEigenSOE.h>
+#include <SymBandEigenSolver.h>
 
 // graph
 #include <RCM.h>
@@ -2119,79 +2122,162 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 {
      // make sure at least one other argument to contain type of system
     if (argc < 2) {
-	interp->result = "WARNING want - eigen #eigenValues?";
+	interp->result = "WARNING want - eigen <type> numModes?";
 	return TCL_ERROR;
     }    
 
-    // check argv[1] for type of SOE and create it
+    int type = 0; // 0 - frequency (default), 1 - standard, 2 - buckling
+    int loc = 1;
+
+    // Check type of eigenvalue analysis
+    if (argc == 3) {
+      loc = 2;
+      if (strcmp(argv[1],"frequency") == 0)
+	type = 0;
+      if (strcmp(argv[1],"standard") == 0)
+	type = 1;
+      if (strcmp(argv[1],"buckling") == 0)
+	type = 2;
+    }
+
+    // check argv[loc] for number of modes
     int numEigen;
-    if ((Tcl_GetInt(interp, argv[1], &numEigen) != TCL_OK) || numEigen < 0) {
-	interp->result = "WARNING analysis Static numIncr  - illegal numIncr";    
-	return TCL_ERROR;	
-    }	
-
-	BandArpackSolver *theEigenSolver = 0;
-
-    if (theEigenAnalysis == 0) {
-      EigenAlgorithm *theEigenAlgo = new FrequencyAlgo();
-      EigenIntegrator  *theEigenIntegrator = new EigenIntegrator();    
-      AnalysisModel *theEigenModel = new AnalysisModel();
-
-      /*
-      SymArpackSOE *theEigenSOE;
-      SymArpackSolver *theEigenSolver;
-      theEigenSolver = new SymArpackSolver(numEigen); 
-      theEigenSOE = new SymArpackSOE(*theEigenSolver, *theEigenModel);    
-      */
-
-      BandArpackSOE *theEigenSOE;
-      theEigenSolver = new BandArpackSolver(numEigen); 
-      theEigenSOE = new BandArpackSOE(*theEigenSolver, *theEigenModel);    
-
-      RCM *theRCM = new RCM();	
-      DOF_Numberer *theEigenNumberer = new DOF_Numberer(*theRCM);    	
-
-      // ConstraintHandler *theEigenHandler = new PlainHandler();
-      ConstraintHandler *theEigenHandler = new TransformationConstraintHandler();
-      theEigenAnalysis = new EigenAnalysis(theDomain,
-					   *theEigenHandler,
-					   *theEigenNumberer,
-      					   *theEigenModel,
-					   *theEigenAlgo,
-					   *theEigenSOE,
-					   *theEigenIntegrator);
-
-    }    
-
-    int requiredDataSize = 20*numEigen;
-    if (requiredDataSize > resDataSize) {
-      if (resDataPtr != 0)
-	delete [] resDataPtr;
-
-      resDataPtr = new char[requiredDataSize];
+    if ((Tcl_GetInt(interp, argv[loc], &numEigen) != TCL_OK) || numEigen < 0) {
+      interp->result = "WARNING eigen numModes?  - illegal numModes";    
+      return TCL_ERROR;	
     }
-    for (int i=0; i<requiredDataSize; i++)
-      resDataPtr[i] = '\n';
 
-    if (theEigenAnalysis->analyze(numEigen) == 0) {
-      //      char *eigenvalueS = new char[15 * numEigen];    
-      const Vector &eigenvalues = theDomain.getEigenvalues();
-      int cnt = 0;
-
-      for (int i=0; i<numEigen; i++) {
-	cnt += sprintf(&resDataPtr[cnt], "%.6e  ", eigenvalues[i]);
+    // FREQUENCY EIGENVALUES
+    if (type == 0) {
+      BandArpackSolver *theEigenSolver = 0;
+      
+      if (theEigenAnalysis == 0) {
+	EigenAlgorithm *theEigenAlgo = new FrequencyAlgo();
+	EigenIntegrator  *theEigenIntegrator = new EigenIntegrator();    
+	AnalysisModel *theEigenModel = new AnalysisModel();
+	
+	/*
+	  SymArpackSOE *theEigenSOE;
+	  SymArpackSolver *theEigenSolver;
+	  theEigenSolver = new SymArpackSolver(numEigen); 
+	  theEigenSOE = new SymArpackSOE(*theEigenSolver, *theEigenModel);    
+	*/
+	
+	BandArpackSOE *theEigenSOE;
+	theEigenSolver = new BandArpackSolver(numEigen); 
+	theEigenSOE = new BandArpackSOE(*theEigenSolver, *theEigenModel);    
+	
+	RCM *theRCM = new RCM();	
+	DOF_Numberer *theEigenNumberer = new DOF_Numberer(*theRCM);    	
+	
+	// ConstraintHandler *theEigenHandler = new PlainHandler();
+	ConstraintHandler *theEigenHandler = new TransformationConstraintHandler();
+	theEigenAnalysis = new EigenAnalysis(theDomain,
+					     *theEigenHandler,
+					     *theEigenNumberer,
+					     *theEigenModel,
+					     *theEigenAlgo,
+					     *theEigenSOE,
+					     *theEigenIntegrator);
+	
+      }    
+      
+      int requiredDataSize = 20*numEigen;
+      if (requiredDataSize > resDataSize) {
+	if (resDataPtr != 0)
+	  delete [] resDataPtr;
+	
+	resDataPtr = new char[requiredDataSize];
       }
-
-      Tcl_SetResult(interp, resDataPtr, TCL_STATIC);
+      for (int i=0; i<requiredDataSize; i++)
+	resDataPtr[i] = '\n';
+      
+      if (theEigenAnalysis->analyze(numEigen) == 0) {
+	//      char *eigenvalueS = new char[15 * numEigen];    
+	const Vector &eigenvalues = theDomain.getEigenvalues();
+	int cnt = 0;
+	
+	for (int i=0; i<numEigen; i++) {
+	  cnt += sprintf(&resDataPtr[cnt], "%.6e  ", eigenvalues[i]);
+	}
+	
+	Tcl_SetResult(interp, resDataPtr, TCL_STATIC);
+      }
+      
+      if (theEigenSolver != 0)
+	delete theEigenSolver;
+      delete theEigenAnalysis;
+      theEigenAnalysis = 0;
+    
+      return TCL_OK;
     }
 
-	if (theEigenSolver != 0)
-		delete theEigenSolver;
-    delete theEigenAnalysis;
-    theEigenAnalysis = 0;
+    // STANDARD EIGENVALUES
+    else if (type == 1) {
+      SymBandEigenSolver *theEigenSolver = 0;
+      
+      if (theEigenAnalysis == 0) {
+	EigenAlgorithm *theEigenAlgo = new StandardEigenAlgo();
+	EigenIntegrator  *theEigenIntegrator = new EigenIntegrator();    
+	AnalysisModel *theEigenModel = new AnalysisModel();
+	
+	SymBandEigenSOE *theEigenSOE;
+	theEigenSolver = new SymBandEigenSolver(); 
+	theEigenSOE = new SymBandEigenSOE(*theEigenSolver, *theEigenModel);    
+	
+	RCM *theRCM = new RCM();	
+	DOF_Numberer *theEigenNumberer = new DOF_Numberer(*theRCM);    	
+	
+	ConstraintHandler *theEigenHandler = new TransformationConstraintHandler();
+	theEigenAnalysis = new EigenAnalysis(theDomain,
+					     *theEigenHandler,
+					     *theEigenNumberer,
+					     *theEigenModel,
+					     *theEigenAlgo,
+					     *theEigenSOE,
+					     *theEigenIntegrator);
+	
+      }    
+      
+      int requiredDataSize = 20*numEigen;
+      if (requiredDataSize > resDataSize) {
+	if (resDataPtr != 0)
+	  delete [] resDataPtr;
+	
+	resDataPtr = new char[requiredDataSize];
+      }
+      for (int i=0; i<requiredDataSize; i++)
+	resDataPtr[i] = '\n';
+      
+      if (theEigenAnalysis->analyze(numEigen) == 0) {
+	//      char *eigenvalueS = new char[15 * numEigen];    
+	const Vector &eigenvalues = theDomain.getEigenvalues();
+	int cnt = 0;
+	
+	for (int i=0; i<numEigen; i++) {
+	  cnt += sprintf(&resDataPtr[cnt], "%.6e  ", eigenvalues[i]);
+	}
+	
+	Tcl_SetResult(interp, resDataPtr, TCL_STATIC);
+      }
+      
+      if (theEigenSolver != 0)
+	delete theEigenSolver;
+      delete theEigenAnalysis;
+      theEigenAnalysis = 0;
+    
+      return TCL_OK;
+    }
 
-    return TCL_OK;
-
+    // BUCKLING EIGENVALUES
+    else if (type == 2) {
+      interp->result = "Eigenvalue buckling analysis not supported yet!";
+      return TCL_ERROR;
+    }
+    else {
+      interp->result = "Unknown type of eigenvalue analysis";
+      return TCL_ERROR;
+    }
 }
 
 
