@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-03-04 00:48:12 $
+// $Revision: 1.8 $
+// $Date: 2003-06-18 21:11:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.cpp,v $
                                                                         
                                                                         
@@ -366,6 +366,14 @@ LoadPattern::setLoadConstant(void)
   isConstant = 0;
 }
 
+double
+LoadPattern::getLoadFactor(void)
+{
+  if (theSeries != 0)
+    return loadFactor;
+  else
+    return 0.0;
+}
 
 int
 LoadPattern::sendSelf(int cTag, Channel &theChannel)

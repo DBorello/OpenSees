@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-03-04 00:48:12 $
+// $Revision: 1.8 $
+// $Date: 2003-06-18 21:11:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.h,v $
                                                                         
                                                                         
@@ -81,6 +81,8 @@ class LoadPattern : public DomainComponent
     // methods to apply loads
     virtual void applyLoad(double pseudoTime = 0.0);
     virtual void setLoadConstant(void);
+
+    virtual double getLoadFactor(void);
 
     // methods for o/p
     virtual int sendSelf(int commitTag, Channel &theChannel);
