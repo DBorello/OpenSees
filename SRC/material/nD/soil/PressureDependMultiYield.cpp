@@ -1,5 +1,5 @@
-// $Revision: 1.16 $
-// $Date: 2001-10-16 22:34:27 $
+// $Revision: 1.17 $
+// $Date: 2001-12-07 01:05:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -480,6 +480,8 @@ int PressureDependMultiYield::commitState (void)
   tmp = currentStrain.t2Vector();
   tmp += strainRate.t2Vector();
   currentStrain.setData(tmp);
+  tmp.Zero();
+  strainRate.setData(tmp);
 
   if (loadStage) {
     committedActiveSurf = activeSurfaceNum;
@@ -497,7 +499,7 @@ int PressureDependMultiYield::commitState (void)
     PPZCenterCommitted = PPZCenter;
     lockStressCommitted = lockStress;
   }
-
+ 
   return 0;
 }
 
@@ -910,6 +912,7 @@ double PressureDependMultiYield::getPlasticPotential(const T2Vector & contactStr
   double volume = contactStress.volume();
   contractRule = factorPT*contractParam1*exp(contractParam2*volume/AtmoPress);
   if (contractRule > 0.) contractRule = -contractRule;
+	if (contractRule<-5.0e4) contractRule = -5.0e4;
   temp = currentStress.volume() - pressureD;
   if (temp >= 0.) unloadRule = 0.;
   else {
@@ -949,6 +952,7 @@ double PressureDependMultiYield::getPlasticPotential(const T2Vector & contactStr
 	dilateRule = 0;
       else
         dilateRule = factorPT*dilateParam1*exp(dilateParam2*cumuDilateStrainOcta);
+			if (dilateRule>5.0e4) dilateRule = 5.0e4;
       return dilateRule;
     }
     else if (pressureD == 0.) plasticPotential = contractRule;

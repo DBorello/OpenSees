@@ -1,5 +1,5 @@
-// $Revision: 1.13 $
-// $Date: 2001-10-16 22:34:29 $
+// $Revision: 1.14 $
+// $Date: 2001-12-07 01:05:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -372,6 +372,8 @@ int PressureIndependMultiYield::commitState (void)
   temp = currentStrain.t2Vector();
   temp += strainRate.t2Vector();
   currentStrain.setData(temp);
+  temp.Zero();
+  strainRate.setData(temp);
   
   if (loadStage) {
     committedActiveSurf = activeSurfaceNum;
@@ -828,6 +830,7 @@ void PressureIndependMultiYield::updateActiveSurface(void)
 	if (fabs(B) < LOW_LIMIT) B = 0.; 
 	C = (t1 && t1) - 2./3.* size * size;
 	if ( fabs(C) < LOW_LIMIT || fabs(C)/(t1 && t1) < LOW_LIMIT ) return;
+
 	if (B > 0. || C < 0.) {
 	  cerr << "FATAL:PressureIndependMultiYield::updateActiveSurface(): error in surface motion.\n" 
 	       << "A= " <<A <<" B= " <<B <<" C= "<<C <<" (t1&&t1)= "<<(t1&&t1) <<endl; 
