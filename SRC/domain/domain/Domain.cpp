@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-10-13 05:11:59 $
+// $Revision: 1.3 $
+// $Date: 2001-02-17 06:47:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -307,6 +307,17 @@ Domain::~Domain()
 
     if (theEigenvalues != 0)
       delete theEigenvalues;
+
+    for (int i=0; i<numRecorders; i++)  
+      delete theRecorders[i];
+    
+    if (theRecorders != 0) {
+	free((void *)theRecorders);
+	theRecorders = 0;
+    }
+  
+    theRecorders = 0;
+    numRecorders = 0;
 }
 
 
@@ -1444,6 +1455,24 @@ Domain::addRecorder(Recorder &theRecorder)
     
     theRecorders = newRecorders;
     numRecorders++;
+    return 0;
+}
+
+
+
+int
+Domain::removeRecorders(void)
+{
+    for (int i=0; i<numRecorders; i++)  
+      delete theRecorders[i];
+    
+    if (theRecorders != 0) {
+	free((void *)theRecorders);
+	theRecorders = 0;
+    }
+  
+    theRecorders = 0;
+    numRecorders = 0;
     return 0;
 }
 

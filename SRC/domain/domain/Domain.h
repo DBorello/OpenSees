@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:18 $
+// $Revision: 1.2 $
+// $Date: 2001-02-17 06:47:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
                                                                         
@@ -168,6 +168,8 @@ class Domain
     // methods for output
     virtual int  addRecorder(Recorder &theRecorder);    	
     virtual int  playback(int cTag);    	    
+    virtual int  removeRecorders(void);
+
     virtual void Print(ostream &s, int flag =0);
     friend ostream &operator<<(ostream &s, Domain &M);    
 
