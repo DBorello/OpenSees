@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-03-29 04:00:33 $
+// $Revision: 1.4 $
+// $Date: 2001-12-07 00:43:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
                                                                         
@@ -155,6 +155,7 @@ class Domain
     virtual  int  revertToLastCommit(void);
     virtual  int  revertToStart(void);    
     virtual  int  update(void);
+    virtual  int  update(double newTime, double dT);
 
     
     // methods for eigenvalue analysis

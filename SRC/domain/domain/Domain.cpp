@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2001-11-26 23:01:09 $
+// $Revision: 1.10 $
+// $Date: 2001-12-07 00:43:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -1353,6 +1353,15 @@ Domain::update(void)
 	theEle->update();
 
     return 0;
+}
+
+
+int
+Domain::update(double newTime, double dT)
+{
+  this->applyLoad(newTime);
+  this->update();
+  return 0;
 }
 
 int
