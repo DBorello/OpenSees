@@ -202,6 +202,14 @@ SOURCE=..\..\..\SRC\material\nD\ElasticIsotropic3D.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\nD\ElasticIsotropicAxiSymm.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\ElasticIsotropicAxiSymm.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\material\nD\ElasticIsotropicMaterial.cpp
 # End Source File
 # Begin Source File
