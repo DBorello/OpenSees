@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-25 23:32:47 $
+// $Revision: 1.8 $
+// $Date: 2003-02-26 22:36:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/TclBeamWithHingesBuilder.cpp,v $
                                                                         
                                                                         
@@ -87,7 +87,7 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	int tag, ndI, ndJ, secTagI, secTagJ, transfTag;
 	double lenI, lenJ, E, A, I;
 	double massDens = 0.0;
-	int numIters = 1;
+	int numIters = 10;
 	double tol = 1.0e-10;
 	double shearLength = 1.0;
     
@@ -181,12 +181,12 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 				return TCL_ERROR;
 		    }
 			if (Tcl_GetDouble(interp, argv[++i], &tol) != TCL_OK) {
-				opserr << "WARNING invalid tolerance\n";
-				opserr << "BeamWithHinges: " << tag << endln;
-				return TCL_ERROR;
-		    }
-	    }
+			  opserr << "WARNING invalid tolerance\n";
+			  opserr << "BeamWithHinges: " << tag << endln;
+			  return TCL_ERROR;
+			}
 		}
+	    }
 	}	
 	
 	// Retrieve section I from the model builder	
@@ -246,7 +246,7 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	  
 	  theElement = new ForceBeamColumn2d(tag, ndI, ndJ, 2,
 					     sections, beamIntegr,
-					     *theTransf);
+					     *theTransf, massDens, numIters, tol);
 	}
 	else if (strcmp(argv[1],"beamWithHinges2") == 0) {
 	  HingeRadauTwoBeamIntegration2d beamIntegr(E, A, I, lenI, lenJ);
@@ -259,7 +259,7 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	  
 	  theElement = new ForceBeamColumn2d(tag, ndI, ndJ, 4,
 					     sections, beamIntegr,
-					     *theTransf);
+					     *theTransf, massDens, numIters, tol);
 	}
 	else {
 	  HingeRadauBeamIntegration2d beamIntegr(E, A, I, lenI, lenJ);
@@ -270,7 +270,7 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	  
 	  theElement = new ForceBeamColumn2d(tag, ndI, ndJ, 2,
 					     sections, beamIntegr,
-					     *theTransf);
+					     *theTransf, massDens, numIters, tol);
 	}
 
 	// Ensure we have created the element, out of memory if got here and no element
@@ -299,7 +299,7 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	int tag, ndI, ndJ, secTagI, secTagJ, transfTag;
 	double lenI, lenJ, E, A, Iz, Iy, G, J;
 	double massDens = 0.0;
-	int numIters = 1;
+	int numIters = 10;
 	double tol = 1.0e-10;
 	double shearLength = 1.0;
     
@@ -474,7 +474,7 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	  
 	  theElement = new ForceBeamColumn3d(tag, ndI, ndJ, 2,
 					     sections, beamIntegr,
-					     *theTransf);
+					     *theTransf, massDens, numIters, tol);
 	}
 	else if (strcmp(argv[1],"beamWithHinges2") == 0) {
 	  HingeRadauTwoBeamIntegration3d beamIntegr(E, A, Iz, Iy, G, J, lenI, lenJ);
@@ -487,7 +487,7 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	  
 	  theElement = new ForceBeamColumn3d(tag, ndI, ndJ, 4,
 					     sections, beamIntegr,
-					     *theTransf);
+					     *theTransf, massDens, numIters, tol);
 	}
 	else {
 	  HingeRadauBeamIntegration3d beamIntegr(E, A, Iz, Iy, G, J, lenI, lenJ);
@@ -498,7 +498,7 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	  
 	  theElement = new ForceBeamColumn3d(tag, ndI, ndJ, 2,
 					     sections, beamIntegr,
-					     *theTransf);
+					     *theTransf, massDens, numIters, tol);
 	}
 
 	// Ensure we have created the element, out of memory if got here and no element
