@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-30 21:47:42 $
+// $Revision: 1.2 $
+// $Date: 2001-08-31 03:47:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/NineNodeMixedQuad.h,v $
 
 // Ed "C++" Love
@@ -152,7 +152,7 @@ class NineNodeMixedQuad : public Element {
     const Matrix& computeBbar( int node, 
 			       const double natCoor[2], 
 			       const double shp[3][9], 
-			       const double shpBar[3][9][3] ) ;
+			       double shpBar[3][9][3] ) ;
 
     //shape function routine for four node quads
     void shape2dNine( double coor[2], 

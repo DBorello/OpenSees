@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-30 21:47:42 $
+// $Revision: 1.2 $
+// $Date: 2001-08-31 03:47:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/NineNodeMixedQuad.cpp,v $
 
 // Ed "C++" Love
@@ -745,7 +745,7 @@ const Matrix&
 NineNodeMixedQuad::computeBbar( int node, 
 			    const double natCoor[2],
 			    const double shp[3][9], 
-			    const double shpBar[3][9][3] )
+			    double shpBar[3][9][3] )
 {
 
   static Matrix Bbar(4,2) ;
