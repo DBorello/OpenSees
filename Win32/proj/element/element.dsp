@@ -507,6 +507,22 @@ SOURCE=..\..\..\Src\element\upU\TwentyNodeBrick_u_p_U.h
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\..\..\SRC\element\joint\BeamColumnJoint2d.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\joint\BeamColumnJoint2d.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\joint\BeamColumnJoint3d.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\joint\BeamColumnJoint3d.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\Src\element\joint\Joint2D.cpp
 # End Source File
 # Begin Source File
@@ -520,6 +536,10 @@ SOURCE=..\..\..\Src\element\joint\MP_Joint2D.cpp
 # Begin Source File
 
 SOURCE=..\..\..\Src\element\joint\MP_Joint2D.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\joint\TclBeamColumnJointCommand.cpp
 # End Source File
 # Begin Source File
 

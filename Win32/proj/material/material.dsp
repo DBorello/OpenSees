@@ -271,6 +271,14 @@ SOURCE=..\..\..\SRC\material\uniaxial\snap\TclSnapMaterialCommand.cpp
 # End Group
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\uniaxial\BarSlipMaterial.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\BarSlipMaterial.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\material\uniaxial\BoucWenMaterial.cpp
 # End Source File
 # Begin Source File
@@ -388,6 +396,14 @@ SOURCE=..\..\..\SRC\material\uniaxial\PathIndependentMaterial.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\uniaxial\PathIndependentMaterial.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\Pinching4Material.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\Pinching4Material.h
 # End Source File
 # Begin Source File
 
