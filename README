@@ -2,6 +2,22 @@ OpenSees - Release 1
 This is the first release of the OpenSees framework. Feedback and
 comments would be greatly appreciated.
 
+INSTALLATION INSTRUCTIONS:
+
+UNIX: You need to create a Makefile.def for your system. We have no automatic
+configuration at this time. You should copy one of existing Makefile.def.* in 
+the directory MAKES to this directory and rename it Makefile.def. Then 
+typically all you need to do is modify the $HOME variable. Then type 'make'.
+
+Note: Depending on your system you may need to install some additional 
+packages, i.e. tcl/tk and mysql.
+
+WINDOWS: go the Win32 and open up the vc++ project. then do a build once loaded.
+Note: You do need to have installed tcl/tk.
+
+
+FRAMEWORK CONTENTS:
+
 This directory contains the following:
 	COPYRIGHT a file containing the copyright information on the
 	code that has so far been developed.
