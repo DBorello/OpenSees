@@ -46,7 +46,7 @@ spotless: clean
 	@$(CD) $(FE)/element/joint; $(MAKE) wipe;
 	@$(CD) $(FE)/element/dispBeamColumn; $(MAKE) wipe;
 	@$(CD) $(FE)/element/elasticBeamColumn; $(MAKE) wipe;
-	@$(CD) $(FE)/element/updatedLagrangianBeamColumn wipe; $(MAKE);
+	@$(CD) $(FE)/element/updatedLagrangianBeamColumn wipe; $(MAKE) wipe;
 
 wipe: spotless
 
