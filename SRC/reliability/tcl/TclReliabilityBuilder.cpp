@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2003-10-27 23:05:17 $
+// $Revision: 1.14 $
+// $Date: 2004-08-27 17:46:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -1540,7 +1540,7 @@ TclReliabilityModelBuilder_correlationStructure(ClientData clientData, Tcl_Inter
 	if (strcmp(argv[1],"homogeneous1") == 0) {
 		for (int i=firstRV; i<=lastRV; i++) {
 			for (int j=i+1; j<=lastRV; j++) {
-				correlationValue = exp(-fabs(i-j)/theta);
+				correlationValue = exp(-abs(i-j)/theta);
 				sprintf(theCorrelateCommand,"correlate %d %d %10.5f",i,j,correlationValue);
 				Tcl_Eval(interp, theCorrelateCommand );
 			}
@@ -1567,8 +1567,8 @@ TclReliabilityModelBuilder_correlationStructure(ClientData clientData, Tcl_Inter
 	else if (strcmp(argv[1],"homogeneous4") == 0) {
 		for (int i=firstRV; i<=lastRV; i++) {
 			for (int j=i+1; j<=lastRV; j++) {
-				if (fabs(i-j)<theta) {
-					correlationValue = 1.0-(fabs(i-j)/theta);
+				if (abs(i-j)<theta) {
+					correlationValue = 1.0-(abs(i-j)/theta);
 					sprintf(theCorrelateCommand,"correlate %d %d %10.5f",i,j,correlationValue);
 					Tcl_Eval(interp, theCorrelateCommand );
 				}
@@ -4973,7 +4973,7 @@ TclReliabilityModelBuilder_runGFunVisualizationAnalysis(ClientData clientData, T
 			}
 
 			// Check that the number of points are ok
-			if (fmod(numEntries,numRVs)!=0.0) {
+			if (numEntries % numRVs) !=0.0) {
 				opserr << "ERROR: Wrong number of entries in the the file " << argv[argvCounter] << endln;
 				return TCL_ERROR;
 			}
