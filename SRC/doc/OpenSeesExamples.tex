@@ -173,37 +173,45 @@ commands are given.
 # Start of model generation
 # ------------------------------
 
+# ------------------------------
+# Start of model generation
+# ------------------------------
+
 # Create ModelBuilder (with two-dimensions and 2 DOF/node)
 model BasicBuilder -ndm 2 -ndf 2
 
 # Create nodes
 # ------------
 
-# Create nodes - command: node nodeId xCrd yCrd
+# Create nodes & add to Domain - command: node nodeId xCrd yCrd
 node 1   0.0  0.0
 node 2 144.0  0.0
 node 3 168.0  0.0
 node 4  72.0 96.0
 
-# Set the boundary conditions - command: fix nodeID xFix? yFix?
+# Set the boundary conditions - command: fix nodeID xResrnt? yRestrnt?
 fix 1 1 1 
 fix 2 1 1
 fix 3 1 1
 
+
+
+
 # Define materials for truss elements
 # -----------------------------------
 
-# Create Elastic material - command: uniaxialMaterial Elastic matID E
+# Create Elastic material prototype - command: uniaxialMaterial Elastic matID E
 uniaxialMaterial Elastic 1 3000
-
 
 # Define elements
 # ---------------
 
+
 # Create truss elements - command: element truss trussID node1 node2 A matID
 element truss 1 1 4 10.0 1
-element truss 2 2 4 5.0  1
-element truss 3 3 4 5.0  1
+element truss 2 2 4 5.0 1
+element truss 3 3 4 5.0 1
+
 
 # Define loads
 # ------------
@@ -219,15 +227,10 @@ pattern Plain 1 "Linear" {
 # End of model generation
 # ------------------------------
 
+
 # ------------------------------
 # Start of analysis generation
 # ------------------------------
-
-# Create the solution algorithm, a Linear algorithm is created
-algorithm Linear
-
-# Create the integration scheme, LoadControl using steps of 1.0
-integrator LoadControl 1.0 1 1.0 1.0
 
 # Create the system of equation, a SPD using a band storage scheme
 system BandSPD
@@ -235,26 +238,47 @@ system BandSPD
 # Create the DOF numberer, the reverse Cuthill-McKee algorithm
 numberer RCM
 
-# Create the constraint handler, a Plain handler for homogeneous constraints
+# Create the constraint handler, a Plain handler is used as homo constraints
 constraints Plain
+
+# Create the integration scheme, the LoadControl scheme using steps of 1.0
+integrator LoadControl 1.0
+
+# Create the solution algorithm, a Linear algorithm is created
+algorithm Linear
 
 # create the analysis object 
 analysis Static 
+
 
 # ------------------------------
 # End of analysis generation
 # ------------------------------
 
+
+# ------------------------------
+# Start of recorder generation
+# ------------------------------
+
+# create a Recorder object for the nodal displacements at node 4
+recorder Node -file example.out -load -node 4 -dof 1 2 disp
+
+# --------------------------------
+# End of recorder generation
+# ---------------------------------
+
+
 # ------------------------------
 # Finally perform the analysis
 # ------------------------------
 
-# Perform the analysis for 1 load step
+# Perform the analysis
 analyze 1
 
 # Print the current state at node 4 and at all elements
 print node 4
-print element
+print ele
+
 
 \end{verbatim}
 }
@@ -294,7 +318,20 @@ elements, the axial strain and force are provided along with the
 resisting forces in the global coordinate system.
 
 
+The file {\bf example.out}, specified in the recorder command, provides the nodal 
+displacements for the x and y directions of node 4. The file consists of a single line of code:
+\vspace{0.2in} \noindent{\bf Results}
 
+{\sf\small
+\begin{verbatim}
+1.0 0.530093 -0.177894 
+\end{verbatim}
+}
+
+The $1.0$ corresponds to the load factor (pseudo time) in the model at which point 
+the recorder was invoked. The $0.530093$ and $-0.177894$ correspond to the response
+at node $4$ for the 1 and 2 degree-of-freedom. Note that if more analysis steps had been 
+peformed, the line would contain a line for every analysis step that completed successfully.
 
 \pagebreak
 \section{EXAMPLE 2 - Moment-Curvature Analysis of a \\ 
@@ -375,81 +412,6 @@ figure~\ref{rcsection4}.
 \label{rcsection0}
 \end{figure}
 
-
-%The first patch command in the fiber section definition generates a
-%rectangular patch of concrete fibers over the confined region of the
-%section. The concrete model used for this
-%patch is given by the previously defined UniaxialMaterial with tag 1.
-%The corner points of this patch are (-10.5, -6) and (10.5, 6) and
-%there are 10 fibers along the y-direction and one fiber along the
-%z-direction as bending is only about the z-axis. This confined region
-%patch is shown in figure~\ref{rcsection1}.
-
-%\begin{figure}[h]
-%\begin{center}
-%\leavevmode
-%\hbox{%
-%\epsfxsize=5.5in
-%%\epsfysize=4.2in
-%\epsffile{./fig_files/RCsection1.eps}}
-%\end{center}
-%\caption{Fiber discretization of confined region}
-%\label{rcsection1}
-%\end{figure}
-
-%The next two commands in the section definition create patches over
-%portions of the unconfined region. These patches cover the unconfined
-%regions at the boundaries of the section width (top and botton).
-%Each patch contains
-%10 fibers along the y-direction and one fiber along the z-direction.
-%The UniaxialMaterial with tag 2 is associated with these fibers.
-%The points (-12, 6), (12, 7.5) and (-12, -7.5), (12,-6) are the
-%corners of each patch. These patches are shown in figure~\ref{rcsection2}.
-
-%\begin{figure}[h]
-%\begin{center}
-%\leavevmode
-%\hbox{%
-%\epsfxsize=5.5in
-%%\epsfysize=4.2in
-%\epsffile{./fig_files/RCsection2.eps}}
-%\end{center}
-%\caption{Fiber discretization of unconfined region: top and bottom}
-%\label{rcsection2}
-%\end{figure}
-
-%To finish the discretization of the unconfined region, two patches
-%at the boundaries of the section depth (left and right) are added.
-%Each patch contains
-%two fibers, for which the UniaxialMaterial is given by tag 2.
-%The patch corners are (-12, -6), (-10.5, 6) and (10.5, -6), (12, 6).
-%These patches are shown in figure~\ref{rcsection3}.
-
-%\begin{figure}[h]
-%\begin{center}
-%\leavevmode
-%\hbox{%
-%\epsfxsize=5.5in
-%%\epsfysize=4.2in
-%\epsffile{./fig_files/RCsection3.eps}}
-%\end{center}
-%\caption{Fiber discretization of unconfined region: left and right}
-%\label{rcsection3}
-%\end{figure}
-
-%The last step in the definition of the fiber section is to create
-%the steel reinforcing layers. To this end, three layers are generated.
-%Each layer is straight, defined by two points and a number of fibers.
-%The UniaxialMaterial with tag 3 is associated with each fiber in
-%all three layers, and the area of each fiber is given by the variable
-%\$As. Each layer is defined along constant values of y.
-%The first layer contains three fibers and is defined by the points
-%(10.5, 6) and (10.5, -6). The second layer contains only two fibers
-%defined at (0, 6) and (0,-6). The third layer contains three fibers
-%which span from (-10.5, 6) to (-10.5, -6). These layers are shown
-%in figure~\ref{rcsection4}. For planar problems where these is a
-%single axis of bending, each layer may be lumped into a single
-%fiber; one fiber for each distinct value of y.
 
 \begin{figure}[h]
 \begin{center}
@@ -626,7 +588,7 @@ proc MomentCurvature {secTag axialLoad maxK {numIncr 100} } {
    element zeroLengthSection  1   1   2  $secTag
 
    # Create recorder
-   recorder Node section$secTag.out disp -time -node 2 -dof 3
+   recorder Node -file section$secTag.out -time -node 2 -dof 3 disp
 
    # Define constant axial load
    pattern Plain 1 "Constant" {
@@ -769,6 +731,7 @@ element 1 is also output.
 #
 # Units: kips, in, sec
 
+
 # ------------------------------
 # Start of model generation
 # ------------------------------
@@ -789,6 +752,7 @@ node  1       0.0     0.0
 node  2    $width     0.0 
 node  3       0.0 $height
 node  4    $width $height
+
 
 # Fix supports at base of columns
 #    tag   DX   DY   RZ
@@ -814,7 +778,7 @@ uniaxialMaterial Steel01  3  $fy $E 0.01
 # Define cross-section for nonlinear columns
 # ------------------------------------------
 
-# set some parameters
+# set some paramaters
 set colWidth 15
 set colDepth 24 
 
@@ -828,28 +792,21 @@ set z1 [expr $colWidth/2.0]
 section Fiber 1 {
 
     # Create the concrete core fibers
-    patch rect 1 10 1 [expr $cover-$y1] [expr $cover-$z1] 
-                      [expr $y1-$cover] [expr $z1-$cover]
+    patch rect 1 10 1 [expr $cover-$y1] [expr $cover-$z1] [expr $y1-$cover] [expr $z1-$cover]
 
     # Create the concrete cover fibers (top, bottom, left, right)
-    patch rect 2 10 1  [expr -$y1] [expr $z1-$cover] 
-                               $y1               $z1
-    patch rect 2 10 1  [expr -$y1]       [expr -$z1] 
-                               $y1 [expr $cover-$z1]
-    patch rect 2  2 1  [expr -$y1] [expr $cover-$z1] 
-                       [expr $cover-$y1] [expr $z1-$cover]
-    patch rect 2  2 1  [expr $y1-$cover] [expr $cover-$z1] 
-                                     $y1 [expr $z1-$cover]
+    patch rect 2 10 1  [expr -$y1] [expr $z1-$cover] $y1 $z1
+    patch rect 2 10 1  [expr -$y1] [expr -$z1] $y1 [expr $cover-$z1]
+    patch rect 2  2 1  [expr -$y1] [expr $cover-$z1] [expr $cover-$y1] [expr $z1-$cover]
+    patch rect 2  2 1  [expr $y1-$cover] [expr $cover-$z1] $y1 [expr $z1-$cover]
 
     # Create the reinforcing fibers (left, middle, right)
-    layer straight 3 3 $As [expr $y1-$cover] [expr $z1-$cover] 
-                           [expr $y1-$cover] [expr $cover-$z1]
-    layer straight 3 2 $As               0.0 [expr $z1-$cover] 
-                                         0.0 [expr $cover-$z1]
-    layer straight 3 3 $As [expr $cover-$y1] [expr $z1-$cover] 
-                           [expr $cover-$y1] [expr $cover-$z1]
+    layer straight 3 3 $As [expr $y1-$cover] [expr $z1-$cover] [expr $y1-$cover] [expr $cover-$z1]
+    layer straight 3 2 $As 0.0 [expr $z1-$cover] 0.0 [expr $cover-$z1]
+    layer straight 3 3 $As [expr $cover-$y1] [expr $z1-$cover] [expr $cover-$y1] [expr $cover-$z1]
 
 }    
+
 
 # Define column elements
 # ----------------------
@@ -863,8 +820,8 @@ set np 5
 
 # Create the coulumns using Beam-column elements
 #                           tag ndI ndJ nsecs secID transfTag
-element nonlinearBeamColumn  1   1   3   $np    1       1
-element nonlinearBeamColumn  2   2   4   $np    1       1
+element nonlinearBeamColumn  1   1   3   $np    1       1 
+element nonlinearBeamColumn  2   2   4   $np    1       1 
 
 # Define beam elment
 # -----------------------------
@@ -877,10 +834,11 @@ geomTransf Linear 2
 #                          tag ndI ndJ     A       E    Iz   transfTag
 element elasticBeamColumn   3   3   4    360    4030  8640    2
 
+
 # Define gravity loads
 # --------------------
 
-# Set some parameter
+# Set a parameter for the axial load
 set P 180;                # 10% of axial capacity of columns
 
 # Create a Plain load pattern with a Linear TimeSeries
@@ -896,18 +854,17 @@ pattern Plain 1 "Linear" {
 # End of model generation
 # ------------------------------
 
-
 # ------------------------------
 # Start of analysis generation
 # ------------------------------
 
-# Create the system of equation, a banded general system
+# Create the system of equation, a sparse solver with partial pivoting
 system BandGeneral
 
 # Create the constraint handler, the transformation method
 constraints Transformation
 
-# Create the DOF numberer, a plain numbering scheme
+# Create the DOF numberer, the reverse Cuthill-McKee algorithm
 numberer RCM
 
 # Create the convergence test, the norm of the residual with a tolerance of 
@@ -918,31 +875,46 @@ test NormDispIncr 1.0e-12  10 3
 algorithm Newton
 
 # Create the integration scheme, the LoadControl scheme using steps of 0.1 
-integrator LoadControl 0.1 1 0.1 0.1
+integrator LoadControl 0.1
 
 # Create the analysis object
 analysis Static
+
+# initialize in case we need to do an initial stiffness iteration
+initialize
 
 # ------------------------------
 # End of analysis generation
 # ------------------------------
 
 
+
+# ------------------------------
+# Start of recorder generation
+# ------------------------------
+
+# Create a recorder to monitor nodal displacements
+recorder Node -file nodeGravity.out -time -node 3 4 -dof 1 2 3 disp
+
+# --------------------------------
+# End of recorder generation
+# ---------------------------------
+
+
 # ------------------------------
 # Finally perform the analysis
 # ------------------------------
 
-# initialize in case we need to do an initial stiffness iteration
-initialize
-
-# Perform the gravity load analysis, requires 10 steps to reach the load level
+# perform the gravity load analysis, requires 10 steps to reach the load level
 analyze 10
+
 
 # Print out the state of nodes 3 and 4
 print node 3 4
 
+
 # Print out the state of element 1
-print element 1
+print ele 1 2
 \end{verbatim}
 }
 
@@ -950,29 +922,40 @@ print element 1
 
 {\sf\small
 \begin{verbatim}
+
  Node: 3
-        Coordinates  : 0 144 
-        commitDisps: -4.10875e-18 -0.0183736 4.97076e-20 
-        unbalanced Load: 0 -180 0 
+	Coordinates  : 0 144 
+	commitDisps: 1.7109e-18 -0.0183736 -2.81893e-20 
+	 unbalanced Load: 0 -180 0 
+	ID : 3 4 5 
 
  Node: 4
-        Coordinates  : 360 144 
-        commitDisps: -4.10842e-18 -0.0183736 4.92006e-20 
-        unbalanced Load: 0 -180 0 
+	Coordinates  : 360 144 
+	commitDisps: 1.71095e-18 -0.0183736 -2.79765e-20 
+	 unbalanced Load: 0 -180 0 
+	ID : 0 1 2 
 
- Element: 1 Type: NLBeamColumn2d         Connected Nodes: 1 3 
-        Number of Sections: 5   Mass density: 0
-        End 1 Forces (P V M): 180 -1.75302e-31 4.9738e-14
-        End 2 Forces (P V M): -180 1.75302e-31 -4.9738e-14
-        Resisting Force: 1.47911e-31 180 4.9738e-14 -1.47911e-31 -180 -4.9738e-14 
+Element: 1 Type: NLBeamColumn2d 	Connected Nodes: 1 3 
+	Number of Sections: 5	Mass density: 0
+	End 1 Forces (P V M): 180 7.0121e-31 -8.88178e-16
+	End 2 Forces (P V M): -180 -7.0121e-31 8.88178e-16
 
+Element: 2 Type: NLBeamColumn2d 	Connected Nodes: 2 4 
+	Number of Sections: 5	Mass density: 0
+	End 1 Forces (P V M): 180 0 -8.88178e-16
+	End 2 Forces (P V M): -180 0 8.88178e-16
 \end{verbatim}
 }
 
 For the two nodes, displacements and loads are given. For the
-nonlinear beam-column element, the element end forces in the local
-system are provided along with the resisting forces in the global
-coordinate system.
+beam-column elements, the element end forces in the local
+system are provided.
+
+The nodeGravity.out file contains ten lines, each line containing 7 entries. The first entry is 
+time in the domain at end of the load step. The next 3 entries are the displacements at node 3,
+and the final 3 entries the displacements at node 4.
+
+
 
 \pagebreak
 \subsection{Example 3.2}
@@ -1078,10 +1061,10 @@ integrator DisplacementControl  3   1   $dU  1 $dU $dU
 # ------------------------------
 
 # Create a recorder to monitor nodal displacements
-recorder Node node32.out disp -time -node 3 4 -dof 1 2 3
+recorder Node -file node32.out -time -node 3 4 -dof 1 2 3 disp
 
 # Create a recorder to monitor element forces in columns
-recorder Element 1 2 -time -file ele32.out localForce
+recorder Element -file ele32.out -time -ele 1 2 localForce
 
 # --------------------------------
 # End of recorder generation
@@ -1253,9 +1236,13 @@ source ReadSMDFile.tcl
 #              inFile     outFile dt
 ReadSMDFile ARL360.at2   $outFile dt
 
+
 # Create UniformExcitation load pattern
 #                         tag dir 
 pattern UniformExcitation  2   1  -accel $accelSeries
+
+# set the rayleigh damping factors for nodes & elements
+rayleigh 0.0 0.0 0.0 0.000625
 
 # ----------------------------------------------------
 # End of additional modeling for dynamic loads
@@ -1276,7 +1263,7 @@ test NormDispIncr 1.0e-12  10
 algorithm Newton
 
 # Create the integration scheme, Newmark with gamma = 0.5 and beta =  0.25
-integrator Newmark  0.5  0.25 0.0 0.0 0.0 0.000625
+integrator Newmark  0.5  0.25 
 
 # Create the system of equation, a banded general storage scheme
 system BandGeneral
@@ -1299,12 +1286,12 @@ analysis Transient
 # ------------------------------
 
 # Create a recorder to monitor nodal displacements
-recorder Node nodeTransient.out disp -time -node 3 -dof 1 2 3
+recorder Node -time -file node33.out -node 3 4 -dof 1 2 3 disp
 
 # Create recorders to monitor section forces and deformations
 # at the base of the left column
-recorder Element 1 -time -file ele1secForce.out section 1 force
-recorder Element 1 -time -file ele1secDef.out   section 1 deformation
+recorder Element -time -file ele1secForce.out -ele 1 section 1 force
+recorder Element -time -file ele1secDef.out   -ele 1 section 1 deformation
 
 # --------------------------------
 # End of recorder generation
@@ -1315,48 +1302,42 @@ recorder Element 1 -time -file ele1secDef.out   section 1 deformation
 # ------------------------------
 
 # Perform an eigenvalue analysis
-puts [eigen 2]
+puts "eigen values at start of transient: [eigen 2]"
+
+# set some variables
+set tFinal [expr 2000 * 0.01]
+set tCurrent [getTime]
+set ok 0
 
 # Perform the transient analysis
-#         N   dt
-set ok [analyze 2000 0.01]
-
-# if the analysis fails at a step we try an
-# initial stiffness iteration for that step
-# and then go back to the current stifness for the rest
-
-if {$ok != 0} {
-    set tFinal [expr 2000 * 0.01]
-    set tCurrent [getTime]
-    set ok 0
-    while {$ok == 0 && $tCurrent < $tFinal} {
-
+while {$ok == 0 && $tCurrent < $tFinal} {
+    
+    set ok [analyze 1 .01]
+    
+    # if the analysis fails try initial tangent iteration
+    if {$ok != 0} {
+       puts "regular newton failed .. lets try an initail stiffness for this step"
+        test NormDispIncr 1.0e-12  100 0
+        algorithm ModifiedNewton -initial
         set ok [analyze 1 .01]
-
-        # if the analysis fails try initial tangent iteration
-        if {$ok != 0} {
-            puts "regular newton failed .. lets try an initail stiffness for this step"
-            test NormDispIncr 1.0e-12  100 1
-            algorithm Newton -initial
-            set ok [analyze 1 .01]
-            if {$ok == 0} {puts "that worked .. back to regular newton"}
-            test NormDispIncr 1.0e-12  10 
-            algorithm Newton
-        }
-        
-        set tCurrent [getTime]
-
+        if {$ok == 0} {puts "that worked .. back to regular newton"}
+        test NormDispIncr 1.0e-12  10 
+        algorithm Newton
     }
+    
+    set tCurrent [getTime]
 }
 
+# Print a message to indicate if analysis succesfull or not
 if {$ok == 0} {
-   puts "Transient analysis completed succesfully";
+   puts "Transient analysis completed SUCCESSFULLY";
 } else {
-   puts "Transient analysis completed failed";    
+   puts "Transient analysis completed FAILED";    
 }
 
 # Perform an eigenvalue analysis
-puts [eigen 2]
+puts "eigen values at end of transient: [eigen 2]"
+
 
 # Print state of node 3
 print node 3
@@ -1368,31 +1349,25 @@ print node 3
 {\sf\small
 \begin{verbatim}
 Gravity load analysis completed
-Setting time in domain to be : 0.0
-Eigenvalues: 269.542 17507.1 
-
-regular newton failed .. lets try an initail stiffness for this step
-
-that worked .. back to regular newton
-
-Transient analysis completed succesfully
-1.669721e+02  1.734707e+04  
+eigen values at start of transient: 2.695422e+02  1.750711e+04  
+Transient analysis completed SUCCESSFULLY
+eigen values at start of transient: 1.578616e+02  1.658481e+04  
 
  Node: 3
-	Coordinates  : 0 144 
-	commitDisps: -0.101087 -0.0220163 0.000563238 
-	Velocities   : -1.5214 0.022985 0.00963654 
-	commitAccels: 4.11459 0.263923 -97.8123 
-	 unbalanced Load: -3.9475 -180 0 
-	Mass : 
-0.465839 0 0 
-0 0.465839 0 
-0 0 0 
+     Coordinates  : 0 144 
+     commitDisps: -0.0464287 -0.0246641 0.000196066 
+     Velocities   : -0.733071 1.86329e-05 0.00467983 
+     commitAccels: -9.13525 0.277302 38.2972 
+     unbalanced Load: -3.9475 -180 0 
+     Mass : 
+       0.465839 0 0 
+       0 0.465839 0 
+       0 0 0 
 
-	 Eigenvectors: 
--1.03582 -0.979573 
-0.0130843 0.299073 
-0.00666293 0.00498144 
+     Eigenvectors: 
+       -1.03587 -0.0482103 
+       -0.00179081 0.00612275 
+       0.00663473 3.21404e-05 
 
 \end{verbatim}
 }
@@ -1784,7 +1759,7 @@ pattern Plain 2 Linear {
 
 # Create a recorder which writes to Node.out and prints
 # the current load factor (pseudo-time) and dof 1 displacements at node 2 & 3
-recorder Node Node41.out disp -time -node 2 3 -dof 1
+recorder Node -file Node41.out -time -node 2 3 -dof 1 disp
 
 # Source in some commands to display the model
 # comment out one of lines
@@ -1793,13 +1768,12 @@ set displayMode "displayON"
 
 if {$displayMode == "displayON"} {
     # a window to plot the nodal displacements versus load for node 3
-    recorder plot Node41.out Node3Xdisp 10 340 300 300 -columns 3 1
+    recorder plot Node41.out Node_3_Xdisp 10 340 300 300 -columns 3 1 -dT 0.1
 }
 
 # ------------------------------
 # End of recorder generation
 # ------------------------------
-
 
 # ------------------------------
 # Start of lateral load analysis
@@ -1812,7 +1786,7 @@ integrator LoadControl 1.0 4 0.02 2.0
 
 # Perform the pushover analysis
 # Set some parameters
-set maxU 15.0;	        # Max displacement
+set maxU 10.0;	        # Max displacement
 set controlDisp 0.0;
 set ok 0;
 
@@ -1821,30 +1795,12 @@ while {$controlDisp < $maxU && $ok == 0} {
     set controlDisp [nodeDisp 3 1]
 
     if {$ok != 0} {
-	puts "... trying an initial tangent iteration with Newton"
-	test NormDispIncr 1.0e-8  4000 0
- 	algorithm Newton -initial
-	set ok [analyze 1]
-	test NormDispIncr 1.0e-8  10 0
-	algorithm Newton
-    }
-
-    if {$ok != 0} {
-	puts "... that failed .. trying Broyden"
-	test NormDispIncr 1.0e-8  10 1
- 	algorithm Broyden 
-	set ok [analyze 1]
-	test NormDispIncr 1.0e-8  10 0
-	algorithm Newton
-    }
-
-    if {$ok != 0} {
-	puts "... that failed .. trying an initial tangent with Broyden"
-	test NormDispIncr 1.0e-8  10 1
- 	algorithm Broyden 20 -initial
-	set ok [analyze 1]
-	test NormDispIncr 1.0e-8  10 0
-	algorithm Newton
+        puts "... trying an initial tangent iteration with Newton"
+        test NormDispIncr 1.0e-8  4000 0
+        algorithm ModifiedNewton -initial
+        set ok [analyze 1]
+        test NormDispIncr 1.0e-8  10 0
+        algorithm Newton
     }
 }
 
@@ -2210,7 +2166,7 @@ analysis Transient
 # ----------------------------
 
 # Record DOF 1 and 2 displacements at nodes 9, 14, and 19
-recorder Node node51.out disp -time -node 9 14 19 -dof 1 2
+recorder Node -file node51.out -time -node 9 14 19 -dof 1 2 disp
 
 # --------------------------
 # End of recorder generation
@@ -2417,11 +2373,11 @@ analyze   10
 # ----------------------------
 
 
-recorder Node Node.out  disp -time -node $l1 -dof 2
+recorder Node -file Node.out -time -node $l1 -dof 2 disp
 recorder plot Node.out CenterNodeDisp 625 10 625 450 -columns 1 2
 
 # create the display
-recorder display g3 10 10 800 200 -wipe
+recorder display SimplySupportedBaam 10 10 800 200 -wipe
 prp 20 5.0 100.0
 vup 0 1 0
 viewWindow -30 30 -10 10
@@ -2449,7 +2405,6 @@ algorithm Newton
 numberer RCM
 constraints Plain 
 integrator Newmark 0.5 0.25
-#integrator GeneralizedMidpoint 0.50
 analysis Transient
 
 # Perform the transient analysis (50 sec)
@@ -2642,8 +2597,10 @@ analyze 5
 # Start of recorder generation
 # ----------------------------
 
-recorder Node Node.out  disp -time -node $mid -dof 2
+recorder Node -file Node.out -time -node $mid -dof 2 disp
+
 recorder plot Node.out CenterNodeDisp 625 10 625 450 -columns 1 2
+
 recorder display shellDynamics 10 10 600 600 -wipe
 prp -100 20 30
 vup 0 1 0 
@@ -2863,7 +2820,7 @@ analyze 5
 # Start of recorder generation
 # ----------------------------
 
-recorder Node Node.out  disp -time -node $nn -dof 1
+recorder Node -file Node.out -time -node $nn -dof 1 disp
 recorder plot Node.out CenterNodeDisp 625 10 625 450 -columns 1 2
 
 recorder display ShakingBeam 0 0 300 300 -wipe
@@ -2887,13 +2844,15 @@ setTime 0.0
 # Now remove the loads and let the beam vibrate
 remove loadPattern 1
 
+# add some mass proportional damping
+rayleigh 0.01 0.0 0.0 0.0
+
 # Create the transient analysis
 test EnergyIncr     1.0e-10    20         1
 algorithm Newton
 numberer RCM
 constraints Plain 
 integrator Newmark 0.5 0.25
-#integrator GeneralizedMidpoint 0.50
 analysis Transient
 
 
@@ -2911,7 +2870,10 @@ The results consist of the file cantilever.out, which contains a line for
 every time step. 
 Each line contains the time and the horizontal
 displacement  at the upper right corner the beam.
-The time history is shown in
+The time history is as plotted on the screen.
+
+\end{document}
+
 figure~\ref{cantileverdisp}. 
 
 \begin{figure}[h]
@@ -2931,6 +2893,4 @@ figure~\ref{cantileverdisp}.
 
 
 
-
-\end{document}
 
