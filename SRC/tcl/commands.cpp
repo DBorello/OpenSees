@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-02-17 06:40:17 $
+// $Revision: 1.5 $
+// $Date: 2001-05-18 04:49:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -194,7 +194,9 @@ int g3AppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);        
     Tcl_CreateCommand(interp, "loadConst", setLoadConst,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);            
-    Tcl_CreateCommand(interp, "time", setTime,
+    Tcl_CreateCommand(interp, "setTime", setTime,
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);     
+    Tcl_CreateCommand(interp, "getTime", getTime,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);     
     Tcl_CreateCommand(interp, "build", buildModel,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
@@ -373,6 +375,10 @@ initializeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 {
   if (theTransientAnalysis != 0)
     theTransientAnalysis->initialize();
+  else if (theStaticAnalysis != 0)
+    theStaticAnalysis->initialize();
+  
+  theDomain.initialize();
 
   return TCL_OK;
 }
@@ -390,7 +396,6 @@ setLoadConst(ClientData clientData, Tcl_Interp *interp, int argc,
 	      cerr << "WARNING readingvalue - loadConst -time value ";
 	      return TCL_ERROR;
 	  } else {
-	      cerr << "Setting time in domain to be : " <<  newTime << endl;
 	      theDomain.setCurrentTime(newTime);
 	  }
       }    	  
@@ -403,9 +408,8 @@ int
 setTime(ClientData clientData, Tcl_Interp *interp, int argc, 
 	   char **argv)
 {
-  theDomain.setLoadConstant();
   if (argc < 2) {
-      cerr << "WARNING illegal command - time pseudoTime? ";
+      cerr << "WARNING illegal command - time pseudoTime? \n";
       return TCL_ERROR;
   }
   double newTime;
@@ -414,6 +418,16 @@ setTime(ClientData clientData, Tcl_Interp *interp, int argc,
       return TCL_ERROR;
   } else
       theDomain.setCurrentTime(newTime);
+  return TCL_OK;
+}
+
+int 
+getTime(ClientData clientData, Tcl_Interp *interp, int argc, 
+	   char **argv)
+{
+  double time = theDomain.getCurrentTime();
+  // now we copy the value to the tcl string that is returned
+  sprintf(interp->result,"%f",time);
   return TCL_OK;
 }
 
@@ -1184,26 +1198,44 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
       interp->result = "WARNING need to specify an Algorithm type ";
       return TCL_ERROR;
   }    
+  EquiSolnAlgo *theNewAlgo = 0;
 
   // check argv[1] for type of Algorithm and create the object
   if (strcmp(argv[1],"Linear") == 0) 
-    theAlgorithm = new Linear();       
+    theNewAlgo = new Linear();       
 
   else if (strcmp(argv[1],"Newton") == 0) {
-      if (theTest == 0) {
-	  interp->result = "ERROR: No ConvergenceTest yet specified\n";
-	  return TCL_ERROR;	  
+    int formTangent = CURRENT_TANGENT;
+    if (argc > 2) {
+      if (strcmp(argv[2],"-secant") == 0) {
+	formTangent = CURRENT_SECANT;
+      } else if (strcmp(argv[2],"-initial") == 0) {
+	formTangent = INITIAL_TANGENT;
       }
-      theAlgorithm = new NewtonRaphson(*theTest); 
+    }
+
+    if (theTest == 0) {
+      interp->result = "ERROR: No ConvergenceTest yet specified\n";
+      return TCL_ERROR;	  
+    }
+    theNewAlgo = new NewtonRaphson(*theTest, formTangent); 
   }
   
   else if (strcmp(argv[1],"ModifiedNewton") == 0) {
-      if (theTest == 0) {
-	  interp->result = "ERROR: No ConvergenceTest yet specified\n";
-	  return TCL_ERROR;	  
+    int formTangent = CURRENT_TANGENT;
+    if (argc > 2) {
+      if (strcmp(argv[2],"-secant") == 0) {
+	formTangent = CURRENT_SECANT;
+      } else if (strcmp(argv[2],"-initial") == 0) {
+	formTangent = INITIAL_TANGENT;
       }
+    }
+    if (theTest == 0) {
+      interp->result = "ERROR: No ConvergenceTest yet specified\n";
+      return TCL_ERROR;	  
+    }
       
-      theAlgorithm = new ModifiedNewton(*theTest); 
+    theNewAlgo = new ModifiedNewton(*theTest); 
   }  
   
   else if (strcmp(argv[1],"NewtonLineSearch") == 0) {
@@ -1214,7 +1246,7 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
       double alpha;
       if (Tcl_GetDouble(interp, argv[2], &alpha) != TCL_OK)	
 	return TCL_ERROR;	      
-      theAlgorithm = new NewtonLineSearch(*theTest, alpha); 
+      theNewAlgo = new NewtonLineSearch(*theTest, alpha); 
   }    
 
   else {
@@ -1222,12 +1254,17 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
       return TCL_ERROR;
   }    
 
-  // if the analysis exists - we want to change the SOE
-  if (theStaticAnalysis != 0)
-    theStaticAnalysis->setAlgorithm(*theAlgorithm);
-  else if (theTransientAnalysis != 0)
-    theTransientAnalysis->setAlgorithm(*theAlgorithm);  
-  
+
+  if (theNewAlgo != 0) {
+      theAlgorithm = theNewAlgo;
+
+    // if the analysis exists - we want to change the SOE
+    if (theStaticAnalysis != 0)
+      theStaticAnalysis->setAlgorithm(*theAlgorithm);
+    else if (theTransientAnalysis != 0)
+      theTransientAnalysis->setAlgorithm(*theAlgorithm);  
+  }
+
   return TCL_OK;
 }
 
@@ -1270,6 +1307,11 @@ specifyCTest(ClientData clientData, Tcl_Interp *interp, int argc,
      tol = 1.0e-6;
      numIter = 25;      
   }
+
+  if (theTest != 0) {
+    delete theTest;
+    theTest = 0;
+  }
       
   if (strcmp(argv[1],"NormUnbalance") == 0) 
     theTest = new CTestNormUnbalance(tol,numIter,printIt);       
@@ -1283,8 +1325,9 @@ specifyCTest(ClientData clientData, Tcl_Interp *interp, int argc,
   }    
 
   // if the algorithm exists - we want to change the test
-//  if (theAlgorithm != 0)
-//    theAlgorithm->setTest(*theTest);  
+  if (theAlgorithm != 0)
+     theAlgorithm->setTest(*theTest);  
+
   return TCL_OK;
 }
 
@@ -1850,10 +1893,20 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 					   *theEigenIntegrator);
 
     }    
-    
+
+
     if (theEigenAnalysis->analyze(numEigen) == 0) {
+      char *eigenvalueS = new char[15 * numEigen];    
       const Vector &eigenvalues = theDomain.getEigenvalues();
-      cerr << "EigenValues: " << eigenvalues;
+      int cnt = 0;
+
+      for (int i=0; i<numEigen; i++) {
+	double eigenvalue = eigenvalues[i];
+	cnt += sprintf(&eigenvalueS[cnt], "%.6e  ", eigenvalues[i]);
+      }
+
+      Tcl_SetResult(interp, eigenvalueS, TCL_VOLATILE);
+      delete [] eigenvalueS;
     }
 
     delete theEigenAnalysis;
@@ -1869,7 +1922,6 @@ int
 videoPlayer(ClientData clientData, Tcl_Interp *interp, int argc, 
 	    char **argv)
 {
-    
     // make sure at least one other argument to contain type of system
     if (argc < 5) {
 	interp->result = "WARNING want - video -window windowTitle? -file fileName?\n";
@@ -1878,7 +1930,9 @@ videoPlayer(ClientData clientData, Tcl_Interp *interp, int argc,
 
     char *wTitle =0;
     char *fName = 0;
-	char *imageName = 0;
+    char *imageName = 0;
+    char *offsetName = 0;
+
     int endMarker = 1;
     while (endMarker < (argc-1)) {
       if (strcmp(argv[endMarker],"-window") == 0) {
@@ -1890,7 +1944,10 @@ videoPlayer(ClientData clientData, Tcl_Interp *interp, int argc,
       } else if (strcmp(argv[endMarker],"-image") == 0) {
 	imageName = argv[endMarker+1];
 	endMarker += 2;
-	  }
+      } else if (strcmp(argv[endMarker],"-offset") == 0) {
+	offsetName = argv[endMarker+1];
+	endMarker += 2;
+      }
       else {
 	g3ErrorHandler->warning("WARNING unknown %s want - video -window windowTitle? -file fileName?\n", 
 				argv[endMarker]);
@@ -1904,7 +1961,7 @@ videoPlayer(ClientData clientData, Tcl_Interp *interp, int argc,
 	delete theTclVideoPlayer;
 
       // create a new player
-      theTclVideoPlayer = new TclVideoPlayer(wTitle, fName, imageName, interp);
+      theTclVideoPlayer = new TclVideoPlayer(wTitle, fName, imageName, interp, offsetName);
     }
     else
       return TCL_ERROR;
