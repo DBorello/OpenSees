@@ -1,6 +1,6 @@
 include ../../../Makefile.def
 
-OBJS       = EarthquakePattern.o LinearSeries.o \
+OBJS       = EarthquakePattern.o PBowlLoading.o LinearSeries.o \
 	LoadPattern.o LoadPatternIter.o PathSeries.o PathTimeSeries.o \
 	RectangularSeries.o TimeSeries.o TclPatternCommand.o \
 	TrigSeries.o ConstantSeries.o UniformExcitation.o \

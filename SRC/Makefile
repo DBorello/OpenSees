@@ -542,7 +542,8 @@ DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/groundMotion/TclGroundMotionCommand.o \
 	$(FE)/domain/subdomain/Subdomain.o \
 	$(FE)/domain/subdomain/SubdomainNodIter.o \
-	$(FE)/analysis/analysis/DomainUser.o 
+	$(FE)/analysis/analysis/DomainUser.o \
+	$(FE)/domain/pattern/PBowlLoading.o
 
 
 ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.34 $
-// $Date: 2002-07-18 21:52:19 $
+// $Revision: 1.35 $
+// $Date: 2002-10-22 22:37:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -208,6 +208,7 @@
 #define LOAD_TAG_Beam3dPointLoad          6
 #define LOAD_TAG_BrickSelfWeight          7
 #define LOAD_TAG_Beam2dTempLoad           8
+#define PATTERN_TAG_PBowlLoading	  10
 
 
 #define MAT_TAG_IsotropicLinElastic         1001
