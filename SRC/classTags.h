@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.37 $
-// $Date: 2002-12-05 23:08:14 $
+// $Revision: 1.38 $
+// $Date: 2002-12-06 02:11:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -129,7 +129,8 @@
 #define MAT_TAG_SnapBilinear		3001
 #define MAT_TAG_SnapClough		3002
 #define MAT_TAG_SnapPinch		3003
-#define MAT_TAG_Pinching		3004
+//Boris Jeremic took out: double definition?
+//#define MAT_TAG_Pinching		3004
 
 #define MAT_TAG_Clough1	201
 #define MAT_TAG_Clough2	202
