@@ -24,7 +24,7 @@ all:
 	@$(CD) $(FE)/machine; $(MAKE);
 	@$(CD) $(FE)/element; $(MAKE);
 	@$(CD) $(FE)/coordTransformation; $(MAKE);
-	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATRIX_LIBS) $(ELE_LIBS)\
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATRIX_LIBS) $(ELE_LIBS) \
 	$(MATERIAL_LIBS) $(HYSTERETIC_LIBS) $(SECTION_LIBS) $(DATABASE_LIBS) \
 	$(FEDEAS_LIBS) $(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)\
 	$(MATMOD_BJ_LIBS) $(NDARRAY_BJ_LIBS) $(ELEMENT_BJ_LIBS) \
@@ -96,40 +96,43 @@ ERRORHANDLER_LIBS = $(FE)/handler/ErrorHandler.o \
 
 
 NDARRAY_BJ_LIBS = $(FE)/nDarray/basics.o \
-	$(FE)/nDarray/nDarray.o \
-	$(FE)/nDarray/BJmatrix.o \
-	$(FE)/nDarray/BJvector.o \
-	$(FE)/nDarray/BJtensor.o \
-	$(FE)/nDarray/straint.o  \
-	$(FE)/nDarray/stresst.o 
+                  $(FE)/nDarray/nDarray.o \
+                  $(FE)/nDarray/BJmatrix.o \
+                  $(FE)/nDarray/BJvector.o \
+                  $(FE)/nDarray/BJtensor.o \
+                  $(FE)/nDarray/straint.o  \
+                  $(FE)/nDarray/stresst.o 
 
 
-MATMOD_BJ_LIBS = 	$(FE)/material/nD/ElasticIsotropic3D.o  \
-	$(FE)/material/nD/PressureDependentElastic3D.o \
-	$(FE)/material/nD/Template3Dep/MatPoint3D.o \
-	$(FE)/material/nD/Template3Dep/TclTemplate3DepCommand.o \
-	$(FE)/material/nD/Template3Dep/Template3Dep.o \
-	$(FE)/material/nD/Template3Dep/EPState.o \
-	$(FE)/material/nD/Template3Dep/YS.o  \
-	$(FE)/material/nD/Template3Dep/CAM_YS.o  \
-	$(FE)/material/nD/Template3Dep/CAM_PS.o \
-	$(FE)/material/nD/Template3Dep/DP_YS.o  \
-	$(FE)/material/nD/Template3Dep/DP_PS.o \
-	$(FE)/material/nD/Template3Dep/VM_YS.o  \
-	$(FE)/material/nD/Template3Dep/VM_PS.o  \
-	$(FE)/material/nD/Template3Dep/EL_T.o   \
-	$(FE)/material/nD/Template3Dep/EL_S.o   \
-	$(FE)/material/nD/Template3Dep/EL_NLEijMD.o \
-	$(FE)/material/nD/Template3Dep/EL_NLEp.o  \
-	$(FE)/material/nD/Template3Dep/EL_NLEeq.o  \
-	$(FE)/material/nD/Template3Dep/EL_LEeq.o  \
-	$(FE)/material/nD/Template3Dep/EL_NLEij.o \
-	$(FE)/material/nD/Template3Dep/EL_LEij.o
+MATMOD_BJ_LIBS = $(FE)/material/nD/ElasticIsotropic3D.o  \
+                 $(FE)/element/upU/TwentyNodeBrickCommand.o \
+                 $$(FE)/material/nD/PressureDependentElastic3D.o \
+                 $$(FE)/material/nD/Template3Dep/MatPoint3D.o \
+                 $$(FE)/material/nD/Template3Dep/TclTemplate3DepCommand.o \
+                 $$(FE)/material/nD/Template3Dep/Template3Dep.o \
+                 $$(FE)/material/nD/Template3Dep/EPState.o \
+                 $$(FE)/material/nD/Template3Dep/YS.o \
+                 $$(FE)/material/nD/Template3Dep/CAM_YS.o  \
+                 $$(FE)/material/nD/Template3Dep/CAM_PS.o \
+                 $$(FE)/material/nD/Template3Dep/DP_YS.o  \
+                 $$(FE)/material/nD/Template3Dep/DP_PS.o \
+                 $$(FE)/material/nD/Template3Dep/VM_YS.o  \
+                 $$(FE)/material/nD/Template3Dep/VM_PS.o  \
+                 $$(FE)/material/nD/Template3Dep/EL_T.o   \
+                 $$(FE)/material/nD/Template3Dep/EL_S.o   \
+                 $$(FE)/material/nD/Template3Dep/EL_NLEijMD.o \
+                 $$(FE)/material/nD/Template3Dep/EL_NLEp.o  \
+                 $$(FE)/material/nD/Template3Dep/EL_NLEeq.o  \
+                 $$(FE)/material/nD/Template3Dep/EL_LEeq.o  \
+                 $$(FE)/material/nD/Template3Dep/EL_NLEij.o \
+                 $$(FE)/material/nD/Template3Dep/EL_LEij.o
 
 ELEMENT_BJ_LIBS = $(FE)/element/8nbrick/EightNodeBrick.o \
                   $(FE)/element/8nbrick/TclEightNodeBrickCommand.o \
                   $(FE)/element/20nbrick/TwentyNodeBrick.o \
-                  $(FE)/element/20nbrick/TclTwentyNodeBrickCommand.o 
+                  $(FE)/element/20nbrick/TclTwentyNodeBrickCommand.o \
+                  $(FE)/element/upU/EightNodeBrickCommand.o \
+                  $(FE)/element/upU/TwentyNodeBrickCommand.o 
 
 
 ZHY_LIBS =	$(FE)/material/nD/soil/FluidSolidPorousMaterial.o \
