@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2004-07-13 23:14:41 $
+// $Revision: 1.3 $
+// $Date: 2004-08-26 23:14:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/NEESData.cpp,v $
                                                                         
 // Written: fmk 
@@ -181,24 +181,41 @@ NEESData::createTable(const char *tableName, int numColumns, char *columns[])
 {
   // create a copy of the data file name
   int res = 0;
-  char *fileName = new char[strlen(tableName) + 5];
-  if (fileName == 0) {
+  int tableNameLength = strlen(tableName);
+  char *copyTableName = new char[tableNameLength + 5];
+  char *fileName = new char[tableNameLength + 5];
+
+  bool hasOutExtension = false;
+
+  if (fileName == 0 || copyTableName == 0) {
     opserr << "NEESData::insertData - out of memory creating copy of string " << fileName << endln;
     return -1;
+  }
+  
+
+  strcpy(copyTableName, tableName);
+  if (tableNameLength > 4 && strcmp(".out", &tableName[tableNameLength-4]) == 0) {
+    copyTableName[tableNameLength-4] = '\0';
+    hasOutExtension = true;
   }
 
   // first ensure createTable has not already been called with this table name
   Table *t = tables;
   for (int i=0; i<numTables; i++) {
     if (strcmp(t->name, tableName) == 0) {
-      opserr << "WARNING: NEESData::createTable - table already exists: " << tableName << endln;
+      opserr << "WARNING: NEESData::createTable - table already exists: " << copyTableName << endln;
       return -1;
     } 
     t = t->next;
   }
 
+  strcpy(fileName, copyTableName);
+  strcat(fileName,".out");
+
   if (numColumns <= 0) {
-    opserr << "WARNING: NEESData::createTable - number of data columns < 0 for table name: " << tableName << endln;
+    opserr << "WARNING: NEESData::createTable - number of data columns < 0 for table name: " << copyTableName << endln;
+    delete [] fileName;
+    delete [] copyTableName;
     return -1;
   }
 
@@ -206,7 +223,7 @@ NEESData::createTable(const char *tableName, int numColumns, char *columns[])
   // test opening the data file
   // 
 
-  strcpy(fileName, tableName);    
+  strcpy(fileName, copyTableName);    
   strcat(fileName,".out");
 
   ofstream dataFile;
@@ -214,6 +231,8 @@ NEESData::createTable(const char *tableName, int numColumns, char *columns[])
 
   if (!dataFile.is_open()) {
     opserr << "NEESData::createTable - failed to open file: " << fileName << endln;
+    delete [] fileName;
+    delete [] copyTableName;
     return -1;
   }
 
@@ -221,7 +240,7 @@ NEESData::createTable(const char *tableName, int numColumns, char *columns[])
   // now open the xml file & write the data to it
   // 
 
-  strcpy(fileName, tableName);    
+  strcpy(fileName, copyTableName);    
   strcat(fileName,".xml");
 
   ofstream xmlFile;
@@ -232,7 +251,7 @@ NEESData::createTable(const char *tableName, int numColumns, char *columns[])
     xmlFile << "<?xml version=\"1.0\"?>\n";
     xmlFile << "<NumericalFileDataDescription>\n";
     xmlFile << "\t<DataFile>\n";
-    xmlFile << "\t\t<DataFileName> " << tableName << ".out </DataFileName>\n";
+    xmlFile << "\t\t<DataFileName> " << copyTableName << ".out </DataFileName>\n";
     xmlFile << "\t\t<NumberDataColumns> " << numColumns << "</NumberDataColumns>\n";
     xmlFile << "\t</DataFile>\n";
     for (int i=0; i<numColumns; i++) {
@@ -245,16 +264,20 @@ NEESData::createTable(const char *tableName, int numColumns, char *columns[])
     xmlFile.close();
     
   } else {
-    opserr << "NEESData::createData - failed to open file: " << tableName << endln;
+    opserr << "NEESData::createData - failed to open file: " << copyTableName << endln;
+    delete [] fileName;
+    delete [] copyTableName;
     res = -1;
   }
 
+  // no longer need copyTableName
+  delete [] copyTableName;
 
   // if we can get here we can open the data and have written to the xml file
   // now add a new struct to our list of tables
   Table *nextTable = new Table;
   if (nextTable == 0) {
-    opserr << "NEESData::createData - out of memory creating Table structure for table: " << tableName << endln;
+    opserr << "NEESData::createData - out of memory creating Table structure for table: " << copyTableName << endln;
     res = -1;
   }    
   strcpy(fileName, tableName);
@@ -262,15 +285,16 @@ NEESData::createTable(const char *tableName, int numColumns, char *columns[])
   nextTable->name = fileName;
   nextTable->numColumns = numColumns;
   nextTable->columns = new char *[numColumns];
+  nextTable->hasOutExtension = hasOutExtension;
   if (nextTable->columns == 0) {
-    opserr << "NEESData::createData - out of memory creating Table structure for table: " << tableName << endln;
+    opserr << "NEESData::createData - out of memory creating Table structure for table: " << copyTableName << endln;
     delete nextTable;
     res = -1;
   }
   for (int k=0; k<numColumns; k++) {
     nextTable->columns[k] = new char [strlen(columns[k])];
     if (nextTable->columns[k] == 0) {
-      opserr << "NEESData::createData - out of memory creating Table structure for table: " << tableName << endln;
+      opserr << "NEESData::createData - out of memory creating Table structure for table: " << copyTableName << endln;
       for (int l=0; l<k-1; l++)
 	delete nextTable->columns[k];
       delete nextTable;
@@ -309,7 +333,8 @@ NEESData::insertData(const char *tableName, char *columns[],
   }
 
   char *fileName = t->name;
-  strcat(fileName,".out");
+  if (t->hasOutExtension == false)
+    strcat(fileName,".out");
 
   ofstream table;
   table.open(fileName, ios::app); 

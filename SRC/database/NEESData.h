@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-05-11 00:01:26 $
+// $Revision: 1.2 $
+// $Date: 2004-08-26 23:14:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/NEESData.h,v $
                                                                         
                                                                         
@@ -48,6 +48,7 @@ class Table
   char    **columns;
   int       numColumns;
   Table    *next;
+  bool      hasOutExtension;
 };
 
 
@@ -56,6 +57,14 @@ class FEM_ObjectBroker;
 class NEESData: public FE_Datastore
 {
   public:
+  /** @brief
+   *
+   * @param database name
+   * @param domain
+   * @param object broker
+   *
+   * @author fmk
+   */
     NEESData(const char *dataBase,
 	     Domain &theDomain, 
 	     FEM_ObjectBroker &theBroker);    
@@ -97,6 +106,7 @@ class NEESData: public FE_Datastore
     int createTable(const char *tableName, int numColumns, char *columns[]);
     int insertData(const char *tableName, char *columns[], 
 		   int commitTag, const Vector &data);
+
     int getData(const char *tableName, char *columns[], int commitTag, Vector &data);
 
     // the commitState method
@@ -109,7 +119,6 @@ class NEESData: public FE_Datastore
     Table        *tables;
     int          numTables;
 };
-
 
 
 
