@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2003-03-04 00:48:16 $
+// $Revision: 1.17 $
+// $Date: 2003-03-11 03:07:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.cpp,v $
                                                                         
 // Written: fmk
@@ -739,7 +739,7 @@ FiberSection2d::setParameter (const char **argv, int argc, Information &info)
 	int parameterID;
 
 	// Check if the parameter belongs to the material (only option for now)
-	if (strcmp(argv[0],"-material") == 0) {
+	if (strcmp(argv[0],"-material") == 0 || strcmp(argv[0],"material") == 0) {
 
 		// Get the tag of the material
 		int materialTag = atoi(argv[1]);
