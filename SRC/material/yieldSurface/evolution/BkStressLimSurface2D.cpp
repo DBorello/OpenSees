@@ -314,7 +314,7 @@ int BkStressLimSurface2D::displaySelf(Renderer &theViewer, int displayMode, floa
 	return  0;
 }
 
-void BkStressLimSurface2D::Print(ostream &s, int flag =0)
+void BkStressLimSurface2D::Print(ostream &s, int flag)
 {
 	s << "BkStressLimSurface2D \n";
 	s << "iso_Ratio = " << isotropicRatio << "\n";

@@ -80,6 +80,7 @@ int YS_Evolution::revertToLastCommit(void)
 {
 	isotropicFactor   =  isotropicFactor_hist;
 	translate         =  translate_hist;
+	return 0;
 }
 
 void  YS_Evolution::toDeformedCoord(Vector &coord)

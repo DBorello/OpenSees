@@ -333,7 +333,8 @@ rgb(0) = 0.1; rgb(1) = 0.5; rgb(2) = 0.5;
  	
  	double err = 0.01;
  	// quad 1 and 4
-    for(double yc = yNegCap/capY; yc <= yPosCap/capY + err; yc = yc+incr)
+	double yc;
+    for(yc = yNegCap/capY; yc <= yPosCap/capY + err; yc = yc+incr)
     //int iter = 0;
     //while(1)
 	{
@@ -399,7 +400,7 @@ rgb(0) = 0.1; rgb(1) = 0.5; rgb(2) = 0.5;
 	// xNegBal itself is < 0
 	// quad 2 and 3
 	//iter = 0;
-    for(double yc = yNegCap/capY; yc <= yPosCap/capY + err; yc = yc+incr)
+    for(yc = yNegCap/capY; yc <= yPosCap/capY + err; yc = yc+incr)
     //while(1)
 	{
 		/*switch (iter)

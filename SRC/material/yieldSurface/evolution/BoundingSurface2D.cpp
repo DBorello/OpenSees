@@ -84,7 +84,7 @@ Vector& BoundingSurface2D::getEvolDirection(Vector &f_new)
 }
 
 
-void BoundingSurface2D::Print(ostream &s, int flag =0)
+void BoundingSurface2D::Print(ostream &s, int flag)
 {
 	s << "BoundingSurface2D \n";
 	s << "iso_Ratio = " << isotropicRatio << "\n";

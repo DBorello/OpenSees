@@ -707,7 +707,7 @@ int YieldSurface_BC::displaySelf(Renderer &theViewer, int displayMode, float fac
 	return -1;
 }
 
-int	YieldSurface_BC::displayForcePoint(Vector &force, int color = 4)
+int	YieldSurface_BC::displayForcePoint(Vector &force, int color)
 {
 	return -1;
 }
@@ -717,7 +717,7 @@ int YieldSurface_BC::update(int flag)
 	return 0;
 }
 
-void YieldSurface_BC::Print(ostream &s, int flag =0)
+void YieldSurface_BC::Print(ostream &s, int flag)
 {
 	s << "YieldSurface_BC - tag = " << this->getTag() << endl;
 	s << "Element Info:\n";

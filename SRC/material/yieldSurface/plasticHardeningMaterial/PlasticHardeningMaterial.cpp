@@ -73,7 +73,7 @@ int PlasticHardeningMaterial::getResponse (int responseID, Information &matInfor
 	return -1;
 }
 
-void PlasticHardeningMaterial::Print(ostream &s, int flag =0)
+void PlasticHardeningMaterial::Print(ostream &s, int flag)
 {
 	return;
 }

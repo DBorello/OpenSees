@@ -247,7 +247,7 @@ Vector& PlasticHardening2D::getEvolDirection(Vector &f_new)
 	return v2;
 }
 
-void PlasticHardening2D::Print(ostream &s, int flag =0)
+void PlasticHardening2D::Print(ostream &s, int flag)
 {
 	s << "PlasticHardening2D \n";
 	s << "iso_Ratio = " << isotropicRatio << "\n";

@@ -254,7 +254,7 @@ Vector& YieldSurface_BC2D::translationTo(Vector &f_new, Vector &f_dir)
 // return value >  0 --> surface is expanding
 // return value == 0 --> surface unchanged
 // return value <  0 --> surface is shrinking
-int YieldSurface_BC2D::modifySurface(double magPlasticDefo, Vector &Fsurface, Matrix &G, int flag=0)
+int YieldSurface_BC2D::modifySurface(double magPlasticDefo, Vector &Fsurface, Matrix &G, int flag)
 {
 
 // check 1

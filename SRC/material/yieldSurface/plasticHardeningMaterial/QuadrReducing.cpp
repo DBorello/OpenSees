@@ -33,7 +33,7 @@ double QuadrReducing::getTrialPlasticStiffness()
 }
 
 
-void QuadrReducing::Print(ostream &s, int flag =0)
+void QuadrReducing::Print(ostream &s, int flag)
 {
 	s << "QuadrReducing, Tag = " << getTag() << endl;
 	s << "Kp0 = " << Kp0 << endl;

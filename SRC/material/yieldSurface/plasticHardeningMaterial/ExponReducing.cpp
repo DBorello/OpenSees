@@ -60,7 +60,7 @@ double ExponReducing::getTrialPlasticStiffness()
 }
 
 
-void ExponReducing::Print(ostream &s, int flag =0)
+void ExponReducing::Print(ostream &s, int flag)
 {
 	s << "MultiLinear, Tag = " << getTag() << endl;
 	s << "Kp0 = " << Kp0 << endl;

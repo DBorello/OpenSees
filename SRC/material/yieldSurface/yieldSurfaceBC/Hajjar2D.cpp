@@ -60,10 +60,10 @@ double xn = num/denom;
 	centroidY = centroidY/capY;
 
 //!!	translateY = translateY_hist = centroidY;
-    Vector t(2);
-	t(0) = 0;
-	t(1) = centroidY;
-	hModel->setInitTranslation(t);
+    Vector tt(2);
+	tt(0) = 0;
+	tt(1) = centroidY;
+	hModel->setInitTranslation(tt);
 
 	if (coefDebug)
 	{

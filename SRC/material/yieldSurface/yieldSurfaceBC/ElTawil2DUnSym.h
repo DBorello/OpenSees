@@ -15,7 +15,7 @@ public:
 				double ypos, double yneg,
 				YS_Evolution &model,
 				double czPos=1.6, double tyPos=1.9,
-				double czPos=1.6, double tyPos=1.9);
+				double czNeg=1.6, double tyNeg=1.9);
 
 	virtual ~ElTawil2DUnSym();
 

@@ -1658,7 +1658,7 @@ void InelasticYS2DGNL::createView(char *title, WindowManager *theWM, char displa
 }
 */
 
-void InelasticYS2DGNL::Print(ostream &s, int flag =0)
+void InelasticYS2DGNL::Print(ostream &s, int flag)
 {
     s << "\nElement No: " << this->getTag();
     s << " type: InelasticYS2DGNL  iNode: " << connectedExternalNodes(0);

@@ -90,7 +90,7 @@ double sumDisp = val_trial;
 }
 
 
-void MultiLinearKp::Print(ostream &s, int flag =0)
+void MultiLinearKp::Print(ostream &s, int flag)
 {
 	s << "MultiLinear, Tag = " << getTag() << endl;
 	s << "SumPlasDefo Vector = " <<  sumPlasDefo;

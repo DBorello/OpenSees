@@ -36,7 +36,7 @@ YS_Evolution *PeakOriented2D01::getCopy(void)
 	return theCopy;
 }
 
-void PeakOriented2D01::Print(ostream &s, int flag =0)
+void PeakOriented2D01::Print(ostream &s, int flag)
 {
 	s << "PeakOriented2D \n";
 	s << "iso_Ratio = " << isotropicRatio << "\n";

@@ -49,7 +49,7 @@ YS_Evolution *theCopy = new Kinematic2D02(getTag(), minIsoFactor,
 	return  0;
 }
 */
-void Kinematic2D02::Print(ostream &s, int flag =0)
+void Kinematic2D02::Print(ostream &s, int flag)
 {
 	s << "Kinematic2D02 \n";
 	s << "iso_Ratio = " << isotropicRatio << "\n";
