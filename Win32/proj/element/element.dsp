@@ -131,6 +131,14 @@ SOURCE=..\..\..\SRC\element\truss\CorotTruss.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\Src\element\truss\CorotTrussSection.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\element\truss\CorotTrussSection.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\element\truss\TclTrussCommand.cpp
 # End Source File
 # Begin Source File
