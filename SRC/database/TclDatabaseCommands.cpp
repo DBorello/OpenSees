@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-04-02 18:47:50 $
+// $Revision: 1.3 $
+// $Date: 2002-04-02 20:05:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/TclDatabaseCommands.cpp,v $
                                                                         
                                                                         
@@ -50,8 +50,13 @@
 
 // databases
 #include <FileDatastore.h>
+
+#ifdef _MYSQL
 #include <MySqlDatastore.h>
+#endif
+#ifdef _BERKELEYDB
 #include <BerkeleyDbDatastore.h>
+#endif
 #include <FEM_ObjectBroker.h>
 
 static bool createdDatabaseCommands = false;
@@ -105,6 +110,7 @@ TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc, char **argv,
     theDatabase = new FileDatastore(argv[2], theDomain, theBroker);
   }
 
+#ifdef _MYSQL
   // a MySQL Database
   else if (strcmp(argv[1],"MySQL") == 0) {
     if (argc < 3) {
@@ -118,7 +124,9 @@ TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc, char **argv,
 
     theDatabase = new MySqlDatastore(argv[2], theDomain, theBroker);
   }
+#endif
 
+#ifdef _BERKELEYDB
   // a BerkeleyDB database
   else  if (strcmp(argv[1],"BerkeleyDB") == 0) {
     if (argc < 3) {
@@ -133,6 +141,7 @@ TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc, char **argv,
 
     theDatabase = new BerkeleyDbDatastore(argv[2], theDomain, theBroker);
   }
+#endif
 
   // no recorder type specified yet exists
   else {
