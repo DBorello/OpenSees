@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-01-31 10:41:02 $
+// $Revision: 1.4 $
+// $Date: 2001-07-13 23:03:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam3d/ElasticBeam3d.cpp,v $
                                                                         
                                                                         
@@ -136,13 +136,6 @@ ElasticBeam3d::setDomain(Domain *theDomain)
 
     if (L == 0.0)
 	g3ErrorHandler->fatal("ElasticBeam3d::setDomain -- Element has zero length");
-    
-    EAoverL = E*A/L;
-    EIzoverL4 = 4*E*Iz/L;
-    EIzoverL2 = 2*E*Iz/L;
-    EIyoverL4 = 4*E*Iy/L;
-    EIyoverL2 = 2*E*Iy/L;
-    GJoverL = G*Jx/L;
 }
 
 int
@@ -170,6 +163,15 @@ ElasticBeam3d::getTangentStiff(void)
     
     const Vector &v = theCoordTransf->getBasicTrialDisp();
     
+    double oneOverL = 1.0/L;
+	double EoverL   = E*oneOverL;
+	double EAoverL  = A*EoverL;			// EA/L
+	double EIzoverL2 = 2.0*Iz*EoverL;		// 2EIz/L
+	double EIzoverL4 = 2.0*EIzoverL2;		// 4EIz/L
+	double EIyoverL2 = 2.0*Iy*EoverL;		// 2EIy/L
+	double EIyoverL4 = 2.0*EIyoverL2;		// 4EIy/L
+    double GJoverL = G*Jx*oneOverL;         // GJ/L
+
     q(0) = EAoverL*v(0);
     q(1) = EIzoverL4*v(1) + EIzoverL2*v(2);
     q(2) = EIzoverL2*v(1) + EIzoverL4*v(2);
@@ -303,6 +305,15 @@ ElasticBeam3d::getResistingForce()
 
     const Vector &v = theCoordTransf->getBasicTrialDisp();
     
+    double oneOverL = 1.0/L;
+	double EoverL   = E*oneOverL;
+	double EAoverL  = A*EoverL;			// EA/L
+	double EIzoverL2 = 2.0*Iz*EoverL;		// 2EIz/L
+	double EIzoverL4 = 2.0*EIzoverL2;		// 4EIz/L
+	double EIyoverL2 = 2.0*Iy*EoverL;		// 2EIy/L
+	double EIyoverL4 = 2.0*EIyoverL2;		// 4EIy/L
+    double GJoverL = G*Jx*oneOverL;         // GJ/L
+
     q(0) = EAoverL*v(0);
     q(1) = EIzoverL4*v(1) + EIzoverL2*v(2);
     q(2) = EIzoverL2*v(1) + EIzoverL4*v(2);

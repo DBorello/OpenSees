@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-01-31 10:41:02 $
+// $Revision: 1.4 $
+// $Date: 2001-07-13 23:03:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam3d/ElasticBeam3d.h,v $
                                                                         
                                                                         
@@ -86,13 +86,6 @@ class ElasticBeam3d : public Element
   private:
     double A,E,G,Jx,Iy,Iz;
     double L;
-
-	double EAoverL;
-	double EIzoverL4;
-	double EIzoverL2;
-	double EIyoverL4;
-	double EIyoverL2;
-	double GJoverL;
 
     double rho;
     
