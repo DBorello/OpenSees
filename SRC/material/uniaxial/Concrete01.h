@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2001-05-03 06:38:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.h,v $
                                                                         
                                                                         
@@ -45,13 +45,13 @@
 
 class Concrete01 : public UniaxialMaterial
 {
-   public:
-      Concrete01 (int tag, double fpc, double eco, double fpcu, double ecu,
-                  double epsmin=NEG_INF_STRAIN, double epsmax=POS_INF_STRAIN);
-		Concrete01 ();
-      ~Concrete01();
+ public:
+  Concrete01 (int tag, double fpc, double eco, double fpcu, double ecu);
+  Concrete01 ();
+  ~Concrete01();
 
       int setTrialStrain(double strain, double strainRate = 0.0); 
+      int setTrial (double strain, double &stress, double &tangent, double strainRate = 0.0);
       double getStrain(void);      
       double getStress(void);
       double getTangent(void);
@@ -78,26 +78,22 @@ class Concrete01 : public UniaxialMaterial
 	  double Ec0;
       double fpcu;   // Crushing strength
       double epscu;  // Strain at crushing strength
-      double epsmin; // Strain at compressive failure
-      double epsmax; // Strain at tensile failure
 
       /*** CONVERGED History Variables ***/
       double CminStrain;   // Smallest previous concrete strain (compression)
       double CunloadSlope; // Unloading (reloading) slope from CminStrain
       double CendStrain;   // Strain at the end of unloading from CminStrain
-      int Cfailed;         // Flag indicating compressive failure
 
       /*** CONVERGED State Variables ***/
       double Cstrain;
       double Cstress;   
-	  double Ctangent;	// Don't need Ctangent other than for revert and sendSelf/recvSelf
+      double Ctangent;	// Don't need Ctangent other than for revert and sendSelf/recvSelf
 						// Storing it is better than recomputing it!!!
 
       /*** TRIAL History Variables ***/
       double TminStrain;
       double TunloadSlope;
       double TendStrain;
-      int Tfailed;
 
       /*** TRIAL State Variables ***/
       double Tstrain;

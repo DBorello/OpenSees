@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:43:01 $
+// $Revision: 1.3 $
+// $Date: 2001-05-03 06:37:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.cpp,v $
                                                                         
                                                                         
@@ -50,12 +50,25 @@ UniaxialMaterial::~UniaxialMaterial()
   // does nothing
 }
 
+int
+UniaxialMaterial::setTrial(double strain, double &stress, double &tangent, double strainRate)
+{
+  int res = this->setTrialStrain(strain, strainRate);
+  if (res == 0) {
+    stress = this->getStress();
+    tangent = this->getTangent();
+  }
+  return res;
+}
+
 // default operation for strain rate is zero
 double
 UniaxialMaterial::getStrainRate(void)
 {
     return 0.0;
 }
+
+
 
 // default operation for damping tangent is zero
 double

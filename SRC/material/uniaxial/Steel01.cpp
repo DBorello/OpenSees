@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 05:40:16 $
+// $Revision: 1.3 $
+// $Date: 2001-05-03 06:37:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.cpp,v $
                                                                         
                                                                         
@@ -94,8 +94,29 @@ int Steel01::setTrialStrain (double strain, double strainRate)
    double dStrain = Tstrain - Cstrain;
 
    // Calculate the trial state given the trial strain
-   //if (fabs(dStrain) > DBL_EPSILON)   
+   if (fabs(dStrain) > DBL_EPSILON)   
       determineTrialState (dStrain);
+
+   return 0;
+}
+
+int Steel01::setTrial (double strain, double &stress, double &tangent, double strainRate)
+{
+   // Reset history variables to last converged state
+   setHistoryVariables ();
+
+   // Set trial strain
+   Tstrain = strain;
+
+   // Determine change in strain from last converged state
+   double dStrain = Tstrain - Cstrain;
+
+   // Calculate the trial state given the trial strain
+   if (fabs(dStrain) > DBL_EPSILON)   
+      determineTrialState (dStrain);
+
+   stress = Tstress;
+   tangent = Ttangent;
 
    return 0;
 }
@@ -196,7 +217,7 @@ double Steel01::getSecant ()
 	if (fabs(Tstrain) > DBL_EPSILON)
 		return Tstress/Tstrain;
 	else
-		return Tstress/DBL_EPSILON; // This probably isn't a good idea
+		return Ttangent; 
 }
 
 int Steel01::commitState ()
@@ -290,7 +311,7 @@ UniaxialMaterial* Steel01::getCopy ()
 int Steel01::sendSelf (int commitTag, Channel& theChannel)
 {
    int res = 0;
-   static Vector data(18);
+   static Vector data(19);
    data(0) = this->getTag();
 
    // Material properties

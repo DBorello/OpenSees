@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:43:02 $
+// $Revision: 1.3 $
+// $Date: 2001-05-03 06:37:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.h,v $
                                                                         
                                                                         
@@ -58,6 +58,7 @@ class UniaxialMaterial : public Material
     virtual ~UniaxialMaterial();
 
     virtual int setTrialStrain (double strain, double strainRate = 0.0) = 0;
+    virtual int setTrial (double strain, double &stress, double &tangent, double strainRate = 0.0);
     virtual double getStrain (void) = 0;
     virtual double getStrainRate (void);
     virtual double getStress (void) = 0;

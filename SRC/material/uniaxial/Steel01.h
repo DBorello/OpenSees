@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2001-05-03 06:37:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.h,v $
                                                                         
                                                                         
@@ -59,6 +59,7 @@ class Steel01 : public UniaxialMaterial
     ~Steel01();
 
     int setTrialStrain(double strain, double strainRate = 0.0); 
+    int setTrial (double strain, double &stress, double &tangent, double strainRate = 0.0);
     double getStrain(void);              
     double getStress(void);
     double getTangent(void);
