@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-06-11 18:20:11 $
+// $Revision: 1.2 $
+// $Date: 2004-06-07 23:19:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/BeamColumnJoint2d.cpp,v $
                                                                         
 // Written: NM (nmitra@u.washington.edu)
@@ -832,7 +832,7 @@ double BeamColumnJoint2d::getStepSize(double G0,double G,Vector uExt,Vector duEx
 	Vector kSprng(13);
 	Vector intEq(4);
 
-	int count;
+	int count =0;
 	int smax = 10;
 	int sb = 0;
 	int sa = 1;
@@ -873,7 +873,7 @@ double BeamColumnJoint2d::getStepSize(double G0,double G,Vector uExt,Vector duEx
 	double step = static_cast<double>(sa);
 	G = Ga;
 
-	while ((Ga*Gb < 0) && ((fabs(G) > tol*fabs(G0)) || (fabs(sb-sa) > tol*0.5*(sa+sb))) && count<20)
+	while ((Ga*Gb < 0) && ((fabs(G) > tol*fabs(G0)) || (abs(sb-sa) > tol*0.5*(sa+sb))) && count<20)
 	{
 		count++;
 		step = sa - Ga*(sa-sb)/(Ga-Gb);
