@@ -12,7 +12,7 @@
 //#                                                                              #
 //#                                                                              #
 //# DATE:              August 08 '00                                             #
-//# UPDATE HISTORY:                                                              #
+//# UPDATE HISTORY:    20Aug2004 ZC added kinematic hardening part               #
 //#                                                                              #
 //#                                                                              #
 //#                                                                              #
@@ -65,46 +65,66 @@ YieldSurface * DPYieldSurface::newObj() {
 
 //================================================================================
 //  Yield criterion evaluation function F(EPState)
+//  f = a*I1 + 0.5*sqrt(2.0)*||s_ij-alpha_ij|| - k =0
 //================================================================================
 
 double DPYieldSurface::f(const EPState *EPS) const {
     double temp1 = EPS->getStress().Iinvariant1();
     double temp2 = temp1 * EPS->getScalarVar(1);
-    double temp3 = EPS->CurrentStress.Jinvariant2();
-    double eps = pow( d_macheps(), (1./2.) );
-    if ( temp3 < 0.0 && fabs(temp3) < eps )
-      {
-        temp3 = 0.0;
-      }
-    double temp4 = sqrt(temp3);
+
+    stresstensor alpha;
+    stresstensor sigma = EPS->getStress();
+    double halfRt2 = 0.5 * sqrt(2.0);
+    int nod = EPS->getNTensorVar();
+    if ( nod >=1 )  { //May not have kinematic hardening
+      alpha = EPS->getTensorVar(1); 
+    }
+    stresstensor sigma_bar = sigma - alpha;   
+    stresstensor s_bar = sigma_bar.deviator();
+    stresstensor temp3 = s_bar("ij") * s_bar("ij");
+    temp3.null_indices();
+    double temp4 = temp3.trace();
+    temp4 = sqrt(temp4);
+    double temp5 = halfRt2 * temp4;  
+    
     double k = EPS->getScalarVar(2);
-    double f   = temp2 + temp4 - k;
+    
+    double f   = temp2 + temp5 - k;
 
     return f;
 }
 
 //================================================================================
-// tensor dF/dsigma_ij  ( eq. 5.206 in Chen )
+// tensor dF/dsigma_ij = a*delta_ij + 0.5*sqrt(2.0)*(s_ij-alpha_ij)/|s_ij-alpha_ij|
 //================================================================================
 
 tensor DPYieldSurface::dFods(const EPState *EPS) const {
-    tensor KroneckerI("I", 2, def_dim_2);
+    stresstensor dFods;
     
-    // Second invariant of deviatoric stress tensor
-    double stressJ2 = EPS->CurrentStress.Jinvariant2();
+	tensor KroneckerI("I", 2, def_dim_2);
+    double temp1 =  EPS->getScalarVar(1);    
     
-    // Deviatoric stress tensor
-    stresstensor s = EPS->CurrentStress.deviator();
-    s.null_indices();
-    
-    // Tensor dF/dsigma_ij  ( eq. 5.206 in Chen )
-    tensor dFods = KroneckerI * EPS->getScalarVar(1);
-    dFods.null_indices();
-    
-    if ( stressJ2 > 0.0 )
-      {
-        dFods = dFods + s * ( 1.0 / (2.0 * sqrt(stressJ2) ) );
-      }
+    stresstensor alpha;
+    stresstensor Tnsr0;
+    stresstensor sigma = EPS->getStress();
+    double halfRt2 = 0.5 * sqrt(2.0);
+    int nod = EPS->getNTensorVar();
+    if ( nod >=1 )  { //May not have kinematic hardening
+      alpha = EPS->getTensorVar(1); 
+    }
+    stresstensor sigma_bar = sigma - alpha;   
+    stresstensor s_bar = sigma_bar.deviator();
+    stresstensor temp3 = s_bar("ij") * s_bar("ij");
+    temp3.null_indices();
+    double temp4 = temp3.trace();
+    temp4 = sqrt(temp4);
+    double eps = pow( d_macheps(), 0.5 );
+    if ( fabs(temp4) > eps )  {
+      Tnsr0 = s_bar * (1.0/temp4);
+    }
+    	    
+    dFods = KroneckerI*temp1 + Tnsr0*halfRt2; 
+        
     return dFods;
 }
 
@@ -131,12 +151,30 @@ double DPYieldSurface::xi_s2( const EPState *EPS ) const {
 
 
 //================================================================================
-// double xi_t1 = dF/dt1 = dF/dalpha  Derivative in terms of first tensorial var 
-// Need more work
+// double xi_t1 = dF/dt1 = dF/dalpha = -0.5*sqrt(2.0)*(s_ij-alpha_ij)/|s_ij-alpha_ij|
 //================================================================================
 
 tensor DPYieldSurface::xi_t1( const EPState *EPS) const {
     stresstensor xi;
+    
+    stresstensor alpha;
+    stresstensor sigma = EPS->getStress();
+    double halfRt2 = 0.5 * sqrt(2.0);
+    int nod = EPS->getNTensorVar();
+    if ( nod >=1 )  { //May not have kinematic hardening
+      alpha = EPS->getTensorVar(1); 
+    }
+    stresstensor sigma_bar = sigma - alpha;   
+    stresstensor s_bar = sigma_bar.deviator();
+    stresstensor temp3 = s_bar("ij") * s_bar("ij");
+    temp3.null_indices();
+    double temp4 = temp3.trace();
+    temp4 = sqrt(temp4);
+    double eps = pow( d_macheps(), 0.5 );
+    if ( fabs(temp4) > eps )  {
+      xi = s_bar * (-0.5 * sqrt(2.0)/temp4); //Note the Negative 1 here
+    }
+        
     return xi;
 }
 

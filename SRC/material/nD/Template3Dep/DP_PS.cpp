@@ -13,6 +13,7 @@
 //#                                                                              #
 //# DATE:              August 03 '93                                             #
 //# UPDATE HISTORY:    August 08 '00                                             #
+//# UPDATE HISTORY:    20Aug2004 ZC added kinematic hardening part               #
 //#                                                                              #
 //#                                                                              #
 //#                                                                              #
@@ -63,60 +64,74 @@ PotentialSurface * DPPotentialSurface::newObj() {
 
 
 //================================================================================
-// tensor dQ/dsigma_ij  ( eq. 5.206 in Chen )
+// tensor dQ/dsigma_ij = a*delta_ij + 0.5*sqrt(2.0)*(s_ij-alpha_ij)/|s_ij-alpha_ij|
 //================================================================================
 
 tensor DPPotentialSurface::dQods(const EPState *EPS) const {
-
-    tensor KroneckerI("I", 2, def_dim_2);
+    stresstensor dQods;
     
-    // Second invariant of deviatoric stress tensor
-    double stressJ2 = EPS->getStress().Jinvariant2();
-    // Deviatoric stress tensor
-    stresstensor s = EPS->getStress().deviator();
-    s.null_indices();
-    // Tensor dQ/dsigma_ij  ( eq. 5.207 in Chen )
+	tensor KroneckerI("I", 2, def_dim_2);
+    //double temp1 =  EPS->getScalarVar(1);    
+    double temp1 = getalfa2();
     
-    //Zhaohui Testing associated flow
-    tensor dQods = KroneckerI * getalfa2();
-    //tensor dQods = KroneckerI * EPS->getScalarVar(1);
-    
-    dQods.null_indices();
-    if ( stressJ2 > 0.0 )
-      {
-        dQods = dQods + s*(1.0/(2.0*sqrt(stressJ2)));
-      }
+    stresstensor alpha;
+    stresstensor Tnsr0;
+    stresstensor sigma = EPS->getStress();
+    double halfRt2 = 0.5 * sqrt(2.0);
+    int nod = EPS->getNTensorVar();
+    if ( nod >=1 )  { //May not have kinematic hardening
+      alpha = EPS->getTensorVar(1); 
+    }
+    stresstensor sigma_bar = sigma - alpha;   
+    stresstensor s_bar = sigma_bar.deviator();
+    stresstensor temp3 = s_bar("ij") * s_bar("ij");
+    temp3.null_indices();
+    double temp4 = temp3.trace();
+    temp4 = sqrt(temp4);
+    double eps = pow( d_macheps(), 0.5 );
+    if ( fabs(temp4) > eps )  {
+      Tnsr0 = s_bar * (1.0/temp4);
+    }
+    	    
+    dQods = KroneckerI*temp1 + Tnsr0*halfRt2; 
+        
     return dQods;
 }
 
 
 //================================================================================
-// tensor d2Q/dsigma_ij_2  ( eq. 5.206 in Chen )
+// tensor d2Q/dsigma_ij_2
 //================================================================================
 
 tensor DPPotentialSurface::d2Qods2(const EPState *EPS) const {
-
-    double stressJ2 = EPS->getStress().Jinvariant2();
-    double stressJ2sqrt =pow( stressJ2, 0.5);
-
-    tensor I("I", 2, def_dim_2);
-    tensor temp1 = I("im") * I("jn");
-    temp1.null_indices();
-
-    tensor I2("I", 2, def_dim_2);
-    tensor temp2 = I2("mn") * I2("ij") * (1.0/3.0);
-    temp2.null_indices();
-
-    tensor temp3 = temp1 - temp2;
+    tensor d2Qods2(4, def_dim_4, 0.0);
+    
+	tensor KroneckerI("I", 2, def_dim_2);
+	tensor T1 = KroneckerI("ij")*KroneckerI("mn");
+	T1.null_indices();
+	tensor T2 = (T1.transpose0110()+T1.transpose0111())*0.5 - T1*(1.0/3.0);
+	
+    //double temp1 =  EPS->getScalarVar(1);    
+    double temp1 = getalfa2();
+    
+    stresstensor alpha;
+    stresstensor sigma = EPS->getStress();
+    double halfRt2 = 0.5 * sqrt(2.0);
+    int nod = EPS->getNTensorVar();
+    if ( nod >=1 )  { //May not have kinematic hardening
+      alpha = EPS->getTensorVar(1); 
+    }
+    stresstensor sigma_bar = sigma - alpha;   
+    stresstensor s_bar = sigma_bar.deviator();
+    stresstensor temp3 = s_bar("ij") * s_bar("ij");
     temp3.null_indices();
-
-    stresstensor s = EPS->getStress().deviator();
-    s.null_indices();
-
-    tensor temp4 = s("ij") * s("mn");
-    temp4.null_indices();
-
-    tensor d2Qods2 = temp3* (1.0/2.0/stressJ2sqrt) - temp4 * (1.0/4.0/stressJ2/stressJ2sqrt);
+    double temp4 = temp3.trace();
+    temp4 = sqrt(temp4);
+    tensor temp5 = s_bar("ij")*s_bar("mn");
+    double eps = pow( d_macheps(), 0.5 );
+    if ( fabs(temp4) > eps )  {
+      d2Qods2 =T1 * (1.0/temp4) - temp5*(1.0/(temp4*temp4*temp4));
+    }
 
     return d2Qods2;
 }
