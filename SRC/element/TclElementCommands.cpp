@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2003-08-29 00:29:26 $
+// $Revision: 1.31 $
+// $Date: 2003-08-29 19:57:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -190,7 +190,7 @@ TclModelBuilder_addElement2dYS(ClientData, Tcl_Interp *, int, TCL_Char **,
 
 // Zhaohui Yang
 extern int 
-TclModelBuilder_addFourNodeQuadUP(ClientData, Tcl_Interp *, int, char **,
+TclModelBuilder_addFourNodeQuadUP(ClientData, Tcl_Interp *, int, TCL_Char **,
 				Domain*, TclModelBuilder *);
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2003-08-29 00:31:31 $
+// $Revision: 1.21 $
+// $Date: 2003-08-29 19:57:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -231,7 +231,7 @@ int
 TclModelBuilder_UpdateParameter(ClientData clientData, 
 				    Tcl_Interp *interp,  
 				    int argc, 
-				    char **argv);
+				    TCL_Char **argv);
 
 // REMO
 extern int
@@ -2491,13 +2491,13 @@ extern int
 TclModelBuilderUpdateParameterCommand(ClientData clientData, 
 					  Tcl_Interp *interp, 
 					  int argc, 
-					  char **argv, 
+					  TCL_Char **argv, 
 					  TclModelBuilder *theTclBuilder);
 int
 TclModelBuilder_UpdateParameter(ClientData clientData, 
 				    Tcl_Interp *interp,  
 				    int argc, 
-				    char **argv)
+				    TCL_Char **argv)
 {
   return TclModelBuilderUpdateParameterCommand(clientData, interp, 
 				       argc, argv, theTclBuilder);
