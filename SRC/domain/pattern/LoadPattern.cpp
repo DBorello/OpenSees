@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 06:21:41 $
+// $Revision: 1.3 $
+// $Date: 2001-08-20 00:37:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.cpp,v $
                                                                         
                                                                         
@@ -75,7 +75,10 @@ LoadPattern::LoadPattern(int tag, int clasTag)
     if (theEleIter == 0 || theNodIter == 0 || theSpIter == 0) {
 	cerr << " LoadPattern::LoadPattern() - ran out of memory\n";
 	exit(-1);
-    }    
+    }  
+// AddingSensitivity:BEGIN /////////////////////////////
+	randomLoads = 0;
+// AddingSensitivity:END ///////////////////////////////
 }
 
 
@@ -105,6 +108,9 @@ LoadPattern::LoadPattern()
 	cerr << " LoadPattern::LoadPattern() - ran out of memory\n";
 	exit(-1);
     }
+// AddingSensitivity:BEGIN /////////////////////////////
+	randomLoads = 0;
+// AddingSensitivity:END ///////////////////////////////
 }
 
 
@@ -134,6 +140,9 @@ LoadPattern::LoadPattern(int tag)
 	cerr << " LoadPattern::LoadPattern() - ran out of memory\n";
 	exit(-1);
     }
+// AddingSensitivity:BEGIN /////////////////////////////
+	randomLoads = 0;
+// AddingSensitivity:END ///////////////////////////////
 }
 
     
@@ -162,6 +171,11 @@ LoadPattern::~LoadPattern()
 
     if (theSpIter != 0)
       delete theSpIter;
+
+// AddingSensitivity:BEGIN /////////////////////////////
+	if (randomLoads != 0)
+		delete randomLoads;
+// AddingSensitivity:END ///////////////////////////////
 }
 
 
@@ -910,3 +924,123 @@ LoadPattern::updateParameter(int parameterID, Information &info)
 			return -1;
     }
 }
+
+// AddingSensitivity:BEGIN ////////////////////////////////////
+const Vector &
+LoadPattern::gradient(bool compute, int identifier)
+{
+	// If compute==true: return the randomLoads vector, 
+	// if not: just set the gradientIdentifier of
+	// the nodal loads of this pattern. 
+
+	// For the purpose of setting flags, the identifier
+	// will either be 0 (nothing random) or parameterID. 
+	// For the purpose of computing gradients the
+	// identifier has no use. 
+
+
+	// Initial declarations
+	Vector tempRandomLoads(1);
+	int sizeRandomLoads;
+
+	// Start with a fresh return vector
+	if (randomLoads == 0) {
+		randomLoads = new Vector(1);
+	}
+	else {
+		delete randomLoads;
+		randomLoads = new Vector(1);
+	}
+	
+	// Prepare the vector identifying which loads are random. 
+	if (compute) { 
+
+		NodalLoad *theNodalLoad = 0;
+		NodalLoadIter &theNodalIter = this->getNodalLoads();
+		int i;
+
+		// Loop through the nodal loads to pick up possible contributions
+		int nodeNumber;
+		int dofNumber;
+		while ((theNodalLoad = theNodalIter()) != 0)  {
+			const Vector &gradientVector = theNodalLoad->gradient(true,0);
+			if (gradientVector(0) != 0.0 ) {
+
+				// Found a random load! Get nodeNumber and dofNumber
+				nodeNumber = theNodalLoad->getNodeTag();
+				dofNumber = (int)gradientVector(0);
+				
+				// Update the randomLoads vector
+				sizeRandomLoads = randomLoads->Size();
+				if (sizeRandomLoads == 1) {
+					delete randomLoads;
+					randomLoads = new Vector(2);
+					(*randomLoads)(0) = (double)nodeNumber;
+					(*randomLoads)(1) = (double)dofNumber;
+				}
+				else {
+					tempRandomLoads = (*randomLoads);
+					delete randomLoads;
+					randomLoads = new Vector(sizeRandomLoads+2);
+					for (i=0; i<sizeRandomLoads; i++) {
+						(*randomLoads)(i) = tempRandomLoads(i);
+					}
+					(*randomLoads)(sizeRandomLoads) = nodeNumber;
+					(*randomLoads)(sizeRandomLoads+1) = dofNumber;
+				}
+			}	
+		}
+	}
+	else {
+		
+		// Don't set flag here in the load pattern itself.
+		// (Assume there always may be random loads)
+
+		NodalLoad *theNodalLoad = 0;
+		NodalLoadIter &theNodalIter = this->getNodalLoads();
+
+		if (identifier == 0) {
+
+			// Go through all nodal loads and zero out gradientIdentifier
+			// (Remember: the identifier is only zero if we are in 
+			// the process of zeroing out all sensitivity flags).
+			while ((theNodalLoad = theNodalIter()) != 0)  {
+				theNodalLoad->gradient(false,0);
+			}
+
+		}
+		else {
+
+			// Find the right nodal load and set the flag
+			if (identifier > 1000  &&  identifier < 2000)  {
+				int nodeNumber = identifier-1000;
+				while ((theNodalLoad = theNodalIter()) != 0)  {
+					if ( nodeNumber == theNodalLoad->getNodeTag() )  {
+						theNodalLoad->gradient(false,1);
+					}
+				}
+			}
+			else if (identifier > 2000  &&  identifier < 3000)  {
+				int nodeNumber = identifier-2000;
+				while ((theNodalLoad = theNodalIter()) != 0)  {
+					if ( nodeNumber == theNodalLoad->getNodeTag() )  {
+						theNodalLoad->gradient(false,2);
+					}
+				}
+			}
+			else if (identifier > 3000  &&  identifier < 4000)  {
+				int nodeNumber = identifier-3000;
+				while ((theNodalLoad = theNodalIter()) != 0)  {
+					if ( nodeNumber == theNodalLoad->getNodeTag() )  {
+						theNodalLoad->gradient(false,3);
+					}
+				}
+			}
+			else {
+				cerr << "LoadPattern::gradient() -- error in identifier. " << endl;
+			}
+		}
+	}
+	return (*randomLoads);
+}
+// AddingSensitivity:END //////////////////////////////////////

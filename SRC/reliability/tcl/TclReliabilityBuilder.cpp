@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2001-08-08 20:21:53 $
+// $Revision: 1.8 $
+// $Date: 2001-08-20 00:37:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -34,6 +34,7 @@
 //			haukaas 06/22/01 ('numIter' taken away from OpenSeesGFunEvaluator)
 //			haukaas 06/22/01 (updated destructor)
 //			haukaas 08/08/01 (delete Tcl commands in destructor)
+//			haukaas 08/19/01 (modifications for Release 1.2 of OpenSees)
 //
 
 #include <stdlib.h>
@@ -1301,7 +1302,7 @@ int
 TclReliabilityModelBuilder_addRandomNumberGenerator(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
 {
   // GET INPUT PARAMETER (string) AND CREATE THE OBJECT
-  if (strcmp(argv[1],"CStdLibRandGenerator") == 0) {
+  if (strcmp(argv[1],"CStdLib") == 0) {
 	  theRandomNumberGenerator = new CStdLibRandGenerator();
   }
   else {
@@ -1323,7 +1324,7 @@ int
 TclReliabilityModelBuilder_addXuTransformation(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
 {
   // GET INPUT PARAMETER (string) AND CREATE THE OBJECT
-  if (strcmp(argv[1],"NatafXuTransformation") == 0) {
+  if (strcmp(argv[1],"Nataf") == 0) {
 	  theXuTransformation = new NatafXuTransformation(theReliabilityDomain);
   }
   else {
@@ -1346,7 +1347,7 @@ int
 TclReliabilityModelBuilder_addSearchDirection(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
 {
 	// GET INPUT PARAMETER (string) AND CREATE THE OBJECT
-	if (strcmp(argv[1],"HLRFSearchDirection") == 0) {
+	if (strcmp(argv[1],"HLRF") == 0) {
 		theSearchDirection = new HLRFSearchDirection();
 	}
 	else {
@@ -1368,7 +1369,12 @@ int
 TclReliabilityModelBuilder_addStepSizeRule(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
 {
 	// GET INPUT PARAMETER (string) AND CREATE THE OBJECT
-	if (strcmp(argv[1],"ArmijoRule") == 0) {
+	if (strcmp(argv[1],"Armijo") == 0) {
+
+		if (argc < 4) {
+			cerr << "ERROR: Not enough parameters for the Armijo rule! " << endl;
+		}
+
 		// Check that the necessary ingredients are present
 		if (theGFunEvaluator == 0 ) {
 			cerr << "Need theGFunEvaluator before a ArmijoRule can be created" << endl;
@@ -1379,9 +1385,24 @@ TclReliabilityModelBuilder_addStepSizeRule(ClientData clientData, Tcl_Interp *in
 			return TCL_ERROR;
 		}
 
-		theStepSizeRule = new ArmijoRule(theGFunEvaluator,theXuTransformation);
+		// Get max number of reductions
+		int maxNumReductions;
+		if (Tcl_GetInt(interp, argv[2], &maxNumReductions) != TCL_OK) {
+			cerr << "WARNING invalid input: maxNumReductions \n";
+			return TCL_ERROR;
+		}
+
+		// Get the first trial step size
+		double firstTrialStep;
+		if (Tcl_GetDouble(interp, argv[3], &firstTrialStep) != TCL_OK) {
+			cerr << "WARNING invalid input: firstTrialStep \n";
+			return TCL_ERROR;
+		}
+
+		theStepSizeRule = new ArmijoRule(theGFunEvaluator,theXuTransformation,
+			maxNumReductions,firstTrialStep);
 	}
-	else if (strcmp(argv[1],"FixedStepSizeRule") == 0) {
+	else if (strcmp(argv[1],"Fixed") == 0) {
 
 		double stepSize;
 
@@ -1412,11 +1433,11 @@ int
 TclReliabilityModelBuilder_addgFunEvaluator(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
 {
 	// GET INPUT PARAMETER (string) AND CREATE THE OBJECT
-	if (strcmp(argv[1],"OpenSeesGFunEvaluator") == 0) {
+	if (strcmp(argv[1],"OpenSees") == 0) {
 
-		theGFunEvaluator = new OpenSeesGFunEvaluator(interp, theReliabilityDomain);
+		theGFunEvaluator = new OpenSeesGFunEvaluator(interp, theReliabilityDomain, argv[2]);
 	}
-	else if (strcmp(argv[1],"BasicGFunEvaluator") == 0) {
+	else if (strcmp(argv[1],"Basic") == 0) {
 		theGFunEvaluator = new BasicGFunEvaluator(interp, theReliabilityDomain);
 	}
 	else {
@@ -1440,7 +1461,7 @@ int
 TclReliabilityModelBuilder_addSensitivityEvaluator(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
 {
 	// GET INPUT PARAMETER (string) AND CREATE THE OBJECT
-	if (strcmp(argv[1],"SensitivityByFiniteDifference") == 0) {
+	if (strcmp(argv[1],"FiniteDifference") == 0) {
 
 		// Check that the necessary ingredients are present
 		if (theGFunEvaluator == 0 ) {
@@ -1450,7 +1471,7 @@ TclReliabilityModelBuilder_addSensitivityEvaluator(ClientData clientData, Tcl_In
 
 		theSensitivityEvaluator = new SensitivityByFiniteDifference(theGFunEvaluator, theReliabilityDomain);
 	}
-	else if (strcmp(argv[1],"OpenSeesSensitivityEvaluator") == 0) {
+	else if (strcmp(argv[1],"OpenSees") == 0) {
 
 		theSensitivityEvaluator = new OpenSeesSensitivityEvaluator(interp, theReliabilityDomain);
 	}

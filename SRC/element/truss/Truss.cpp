@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2001-07-31 22:11:35 $
+// $Revision: 1.8 $
+// $Date: 2001-08-20 00:37:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -1028,7 +1028,18 @@ Truss::gradient(bool compute, int identifier)
 	
 // DO NOT COMPUTE GRADIENTS, JUST SET FLAG
 	else {
-		if ( (gradientIdentifier=identifier) > 100) {
+
+		// Set gradient identifier
+		gradientIdentifier = identifier;
+
+		// The identifier needs to be passed "downwards" also when it's zero
+		if (identifier == 0 ) {
+			double dummy=0;
+			theMaterial->gradient(false, identifier,dummy);
+		}
+
+		// If the identifier is non-zero and the parameter belongs to the material
+		else if ( identifier > 100) {
 			double dummy=0;
 			theMaterial->gradient(false, identifier-100,dummy);
 		}

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-31 01:34:05 $
+// $Revision: 1.3 $
+// $Date: 2001-08-20 00:37:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.h,v $
                                                                         
 // Written: fmk
@@ -76,6 +76,10 @@ class FiberSection2d : public SectionForceDeformation
 	int setParameter(char **argv, int argc, Information &info);
 	int updateParameter(int parameterID, Information &info);
 
+// AddingSensitivity:BEGIN //////////////////////////////////////////
+	int gradient(bool compute, int identifier, Vector & gradient);
+// AddingSensitivity:END ///////////////////////////////////////////
+
   protected:
     
   private:
@@ -91,6 +95,11 @@ class FiberSection2d : public SectionForceDeformation
     Vector eCommit;    // committed section deformations 
     Vector *s;         // section resisting forces  (axial force, bending moment)
     Matrix *ks;        // section stiffness
+
+// AddingSensitivity:BEGIN //////////////////////////////////////////
+    int gradientIdentifier;
+	int gradientMaterialTag;
+// AddingSensitivity:END ///////////////////////////////////////////
 };
 
 #endif

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-01 18:06:56 $
+// $Revision: 1.4 $
+// $Date: 2001-08-20 00:37:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafXuTransformation.cpp,v $
 
 
@@ -31,6 +31,7 @@
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
 // Revised: haukaas 06/00 (core code)
 //			haukaas 06/01 (made part of official OpenSees)
+//			haukaas 08/19/01 (modifications for Release 1.2 of OpenSees)
 //
 
 #include <XuTransformation.h>
@@ -162,7 +163,6 @@ NatafXuTransformation::transform_u_to_x_andComputeJacobian()
 		return -1;
 	}
 	(*jacobian_x_u) = theMatrixOperations->getInverse();
-
 	return 0;
 }
 
@@ -223,6 +223,10 @@ NatafXuTransformation::getJacobian_z_x(Vector x, Vector z)
 		}
 		else if (strcmp(theRV->getType(),"LOGNORMAL")==0) {
 			double zeta = theRV->getParameter2();
+			if (x(i) == 0.0) {
+				cerr << "NatafXuTransformation::getJacobian_z_x() -- Error: value " << endl
+				    << "of lognormal random variable is zero in original space. " << endl;
+			}
 			jacobianMatrix_z_x(i,i) = 1.0 / ( zeta * x(i)  );
 		}
 		else {

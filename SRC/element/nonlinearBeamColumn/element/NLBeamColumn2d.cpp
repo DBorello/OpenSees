@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2001-07-31 01:34:05 $
+// $Revision: 1.13 $
+// $Date: 2001-08-20 00:37:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -1781,7 +1781,27 @@ NLBeamColumn2d::getResponse(int responseID, Information &eleInfo)
 int
 NLBeamColumn2d::setParameter (char **argv, int argc, Information &info)
 {
-	int ok = -1;
+	//
+	// From the parameterID value it should be possible to extract
+	// information about:
+	//  1) Which parameter is in question. The parameter could
+	//     be at element, section, or material level. 
+	//  2) Which section and material number (tag) it belongs to. 
+	//
+	// To accomplish this the parameterID is given the following value:
+	//     parameterID = type + 1000*matrTag + 100000*sectionTag
+	// ...where 'type' is an integer in the range (1-99) and added 100
+	// for each level (from material to section to element). 
+	//
+	// Example:
+	//    If 'E0' (case 2) is random in material #3 of section #5
+	//    the value of the parameterID at this (element) level would be:
+	//    parameterID = 2 + 1000*3 + 100000*5 = 503002
+	//    As seen, all given information can be extracted from this number. 
+	//
+
+	// Initial declarations
+	int parameterID;
 
 	// If the parameter belongs to the element itself
 	if (strcmp(argv[0],"rho") == 0) {
@@ -1790,7 +1810,7 @@ NLBeamColumn2d::setParameter (char **argv, int argc, Information &info)
 	}
 
 	// If the parameter is belonging to a section or lower
-	if (strcmp(argv[0],"section") == 0) {
+	else if (strcmp(argv[0],"section") == 0) {
 
 		// For now, no parameters of the section itself:
 		if (argc<5) {
@@ -1798,66 +1818,67 @@ NLBeamColumn2d::setParameter (char **argv, int argc, Information &info)
 			return -1;
 		}
 
-		// Reveal section and material tag numbers
+		// Get section and material tag numbers from user input
 		int paramSectionTag = atoi(argv[1]);
-		int paramMatTag     = atoi(argv[3]);
 
-		// Store section and material tag in theInfo
-		ID *theID = new ID(2);
-		(*theID)(0) = paramSectionTag;
-		(*theID)(1) = paramMatTag;
-		info.theID = theID;
-                
 		// Find the right section and call its setParameter method
 		for (int i=0; i<nSections; i++) {
 			if (paramSectionTag == sections[i]->getTag()) {
-				ok = sections[i]->setParameter(&argv[2], argc-2, info);
+				parameterID = sections[i]->setParameter(&argv[2], argc-2, info);
 			}
 		}
 		
-		if (ok < 0) {
+		// Check if the parameterID is valid
+		if (parameterID < 0) {
 			cerr << "NLBeamColumn2d::setParameter() - could not set parameter. " << endl;
 			return -1;
 		}
 		else {
-			return ok + 100;
+			// Return the parameterID value (according to the above comments)
+			return parameterID;
 		}
 	}
     
-	// otherwise parameter is unknown for the NLBeamColumn2d class
-	else
+	// Otherwise parameter is unknown for this class
+	else {
 		return -1;
+	}
 }
 
 int
 NLBeamColumn2d::updateParameter (int parameterID, Information &info)
 {
-	ID *paramIDPtr;
-	int ok = -1;
+	// If the parameterID value is not equal to 1 it belongs 
+	// to section or material further down in the hierarchy. 
 
-	switch (parameterID) {
-	case 1:
+	if (parameterID == 1) {
+
 		this->rho = info.theDouble;
 		return 0;
-	default:
-		if (parameterID >= 100) {
-			paramIDPtr = info.theID;
-			ID paramID = (*paramIDPtr);
-			int paramSectionTag = paramID(0);
-			for (int i=0; i<nSections; i++) {
-				if (paramSectionTag == sections[i]->getTag()) {
-					ok = sections[i]->updateParameter(parameterID-100, info);
-				}
-			}
-			if (ok < 0) {
-				cerr << "NLBeamColumn2d::updateParameter() - could not update parameter. " << endl;
-				return ok;
-			}
-			else {
-				return ok;
+
+	}
+	else if (parameterID > 0 ) {
+
+		// Extract the section number
+		int sectionNumber = (int)( floor((double)parameterID) / (100000) );
+
+		int ok = -1;
+		for (int i=0; i<nSections; i++) {
+			if (sectionNumber == sections[i]->getTag()) {
+				ok = sections[i]->updateParameter(parameterID, info);
 			}
 		}
-		else
-			return -1;
+
+		if (ok < 0) {
+			cerr << "NLBeamColumn2d::updateParameter() - could not update parameter. " << endl;
+			return ok;
+		}
+		else {
+			return ok;
+		}
+	}
+	else {
+		cerr << "NLBeamColumn2d::updateParameter() - could not update parameter. " << endl;
+		return -1;
 	}       
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-13 21:11:27 $
+// $Revision: 1.2 $
+// $Date: 2001-08-20 00:37:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.h,v $
 
 // Written: MHS
@@ -88,6 +88,13 @@ class DispBeamColumn2d : public Element
 	Response *setResponse(char **argv, int argc, Information &eleInfo);
     int getResponse(int responseID, Information &eleInfo);
 
+	int setParameter(char **argv, int argc, Information &info);
+	int updateParameter(int parameterID, Information &info);
+
+// AddingSensitivity:BEGIN //////////////////////////////////////////
+	const Vector & gradient(bool compute, int identifier);
+// AddingSensitivity:END ///////////////////////////////////////////
+
   protected:
     
   private:
@@ -108,6 +115,12 @@ class DispBeamColumn2d : public Element
     double rho;			// Mass density per unit length
 
 	static double workArea[];
+
+// AddingSensitivity:BEGIN //////////////////////////////////////////
+    int gradientIdentifier;
+	int gradientSectionTag;
+	int gradientMaterialTag;
+// AddingSensitivity:END ///////////////////////////////////////////
 };
 
 #endif

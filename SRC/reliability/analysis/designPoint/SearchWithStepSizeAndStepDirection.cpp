@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-31 22:11:37 $
+// $Revision: 1.4 $
+// $Date: 2001-08-20 00:37:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.cpp,v $
 
 
@@ -31,6 +31,7 @@
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
 // Revised: haukaas 06/00 (core code)
 //			haukaas 06/01 (made part of official OpenSees)
+//			haukaas 08/19/01 (modifications for Release 1.2 of OpenSees)
 //
 
 #include <SearchWithStepSizeAndStepDirection.h>
@@ -153,6 +154,8 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 	Vector u_minus_alpha_u_alpha;
 	double alpha_times_u;
 	double NormOf_u_minus_alpha_u_alpha;
+	double possibleNewGFunValue;
+	double criterion1, criterion2;
 
 
 	// Get starting point
@@ -190,7 +193,6 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 			return -1;
 		}
 
-
 		result = theXuTransformation->transform_u_to_x_andComputeJacobian();
 		if (result < 0) {
 			cerr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endl
@@ -201,14 +203,28 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 		jacobian_x_u = theXuTransformation->getJacobian_x_u();
 
 
-		// Evaluate limit-state function
-		result = theGFunEvaluator->evaluate_g(x);
-		if (result < 0) {
-			cerr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endl
-				<< " could not evaluate limit-state function. " << endl;
-			return -1;
+		// Evaluate limit-state function unless it has been done in 
+		// a trial step by the "stepSizeAlgorithm"
+		if (possibleNewGFunValue == gFunctionValue || i==1) {
+			result = theGFunEvaluator->evaluate_g(x);
+			if (result < 0) {
+				cerr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endl
+					<< " could not evaluate limit-state function. " << endl;
+				return -1;
+			}
+			gFunctionValue = theGFunEvaluator->get_g();
 		}
-		gFunctionValue = theGFunEvaluator->get_g();
+		else {
+			gFunctionValue = possibleNewGFunValue;
+		}
+
+
+		// Provide user with information about the limit-state function value
+		// (only in step one)
+		cerr << " ITERATION #" << i;
+		if (i==1) {
+			cerr << ", limit-state function value: " << gFunctionValue << endl;
+		}
 
 
 		// Gradient in original space
@@ -262,19 +278,25 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 		alpha = gradientInStandardNormalSpace *  ( (-1) / normOfGradient );
 
 
-		// Provide user with information about the current step
-		cerr << " Iteration #" << i << ", limit-state function value: " 
-			<< gFunctionValue << endl;
-
-
 		// Check convergence
 		alpha_times_u = alpha ^ u;
 		u_minus_alpha_u_alpha = u - alpha * alpha_times_u;
 		NormOf_u_minus_alpha_u_alpha = u_minus_alpha_u_alpha.Norm();
-		if ( ( fabs(gFunctionValue / Go) < convergenceCriterionE1 ) & 
-			( NormOf_u_minus_alpha_u_alpha < convergenceCriterionE2 ) ) 
+		criterion1 = fabs(gFunctionValue / Go);
+		criterion2 = NormOf_u_minus_alpha_u_alpha;
+
+
+		// Inform user about convergence status 
+		if (i != 1) {
+			cerr << ", convergence checks: (" << criterion1 << ") (" << criterion2 << ")" << endl;
+		}
+
+
+		// Postprocessing if the analysis converged
+		if ( ( criterion1 < convergenceCriterionE1 ) & 
+			( criterion2 < convergenceCriterionE2 ) ) 
 		{
-			// Compute the gamma vector if the analysis converged
+			// Compute the gamma vector
 			MatrixOperations theMatrixOperations(jacobian_x_u);
 
 
@@ -341,6 +363,11 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 			return -1;
 		}
 		stepSize = theStepSizeRule->getStepSize();
+
+
+		// For efficiency: get g-function value from the step size algorithm.
+		// If it is different from the original then a trial step was actually performed. 
+		possibleNewGFunValue = theStepSizeRule->getGFunValue();
 
 
 		// Determine new iteration point (take the step)

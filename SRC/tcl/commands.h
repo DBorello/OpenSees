@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-07-31 22:11:40 $
+// $Revision: 1.6 $
+// $Date: 2001-08-20 00:37:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
                                                                         
@@ -132,6 +132,9 @@ int
 nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
 
 // AddingSensitivity:BEGIN /////////////////////////////////////////////////
+int 
+computeGradients(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+
 int 
 sensNodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 06:21:41 $
+// $Revision: 1.3 $
+// $Date: 2001-08-20 00:37:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/NodalLoad.cpp,v $
                                                                         
                                                                         
@@ -37,17 +37,27 @@
 #include <Channel.h>
 #include <Information.h>
 
+// AddingSensitivity:BEGIN /////////////////////////////////////
+Vector NodalLoad::gradientVector(1);
+// AddingSensitivity:END ///////////////////////////////////////
+
 NodalLoad::NodalLoad(int theClasTag)
 :Load(0,theClasTag), 
  myNode(0), myNodePtr(0), load(0), konstant(false)
 {
     // constructor for a FEM_ObjectBroker
+// AddingSensitivity:BEGIN /////////////////////////////////////
+	gradientIdentifier = 0;
+// AddingSensitivity:END ///////////////////////////////////////
 }
 
 NodalLoad::NodalLoad(int tag, int node, int theClassTag)
 :Load(tag,theClassTag), 
  myNode(node), myNodePtr(0), load(0), konstant(false)
 {
+// AddingSensitivity:BEGIN /////////////////////////////////////
+	gradientIdentifier = 0;
+// AddingSensitivity:END ///////////////////////////////////////
 }
 
 NodalLoad::NodalLoad(int tag, int node, const Vector &theLoad, bool isLoadConstant)
@@ -61,6 +71,9 @@ NodalLoad::NodalLoad(int tag, int node, const Vector &theLoad, bool isLoadConsta
 	cerr << " ran out of memory for load on Node " << node << endl;
 	exit(-1);
     }
+// AddingSensitivity:BEGIN /////////////////////////////////////
+	gradientIdentifier = 0;
+// AddingSensitivity:END ///////////////////////////////////////
 }
 
 
@@ -224,3 +237,25 @@ NodalLoad::updateParameter(int parameterID, Information &info)
 		return -1;
 	}
 }
+
+// AddingSensitivity:BEGIN /////////////////////////////////////
+const Vector &
+NodalLoad::gradient(bool compute, int identifier)
+{
+	///////////////////////////////////
+	gradientVector(1) = 0.0;
+
+	///////////////////////////////////
+	if (compute) {
+
+		gradientVector(0) = (double)gradientIdentifier;
+	}
+	else {
+
+		gradientIdentifier = identifier;
+	}
+
+	return gradientVector;
+}
+// AddingSensitivity:END //////////////////////////////////////
+

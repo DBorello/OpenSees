@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-13 21:11:24 $
+// $Revision: 1.2 $
+// $Date: 2001-08-20 00:37:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -83,6 +83,12 @@ DispBeamColumn2d::DispBeamColumn2d(int tag, int nd1, int nd2,
 	// Set connected external node IDs
     connectedExternalNodes(0) = nd1;
     connectedExternalNodes(1) = nd2;
+
+// AddingSensitivity:BEGIN /////////////////////////////////////
+	gradientIdentifier = 0;
+	gradientSectionTag = 0;
+	gradientMaterialTag = 0;
+// AddingSensitivity:END //////////////////////////////////////
 }
 
 DispBeamColumn2d::DispBeamColumn2d()
@@ -90,7 +96,11 @@ DispBeamColumn2d::DispBeamColumn2d()
  Q(6), q(3), connectedExternalNodes(2), L(0.0),
  numSections(0), theSections(0), crdTransf(0)
 {
-
+// AddingSensitivity:BEGIN /////////////////////////////////////
+	gradientIdentifier = 0;
+	gradientSectionTag = 0;
+	gradientMaterialTag = 0;
+// AddingSensitivity:END //////////////////////////////////////
 }
 
 DispBeamColumn2d::~DispBeamColumn2d()
@@ -103,6 +113,7 @@ DispBeamColumn2d::~DispBeamColumn2d()
     // Delete the array of pointers to SectionForceDeformation pointer arrays
     if (theSections)
 		delete [] theSections;
+
 }
 
 int
@@ -619,3 +630,233 @@ DispBeamColumn2d::getResponse(int responseID, Information &eleInfo)
 	  return -1;
   }
 }
+
+
+
+int
+DispBeamColumn2d::setParameter (char **argv, int argc, Information &info)
+{
+	//
+	// From the parameterID value it should be possible to extract
+	// information about:
+	//  1) Which parameter is in question. The parameter could
+	//     be at element, section, or material level. 
+	//  2) Which section and material number (tag) it belongs to. 
+	//
+	// To accomplish this the parameterID is given the following value:
+	//     parameterID = type + 1000*matrTag + 100000*sectionTag
+	// ...where 'type' is an integer in the range (1-99) and added 100
+	// for each level (from material to section to element). 
+	//
+	// Example:
+	//    If 'E0' (case 2) is random in material #3 of section #5
+	//    the value of the parameterID at this (element) level would be:
+	//    parameterID = 2 + 1000*3 + 100000*5 = 503002
+	//    As seen, all given information can be extracted from this number. 
+	//
+
+	// Initial declarations
+	int parameterID;
+
+	// If the parameter belongs to the element itself
+	if (strcmp(argv[0],"rho") == 0) {
+		info.theType = DoubleType;
+		return 1;
+	}
+
+	// If the parameter is belonging to a section or lower
+	else if (strcmp(argv[0],"section") == 0) {
+
+		// For now, no parameters of the section itself:
+		if (argc<5) {
+			cerr << "For now: cannot handle parameters of the section itself." << endl;
+			return -1;
+		}
+
+		// Get section and material tag numbers from user input
+		int paramSectionTag = atoi(argv[1]);
+
+		// Find the right section and call its setParameter method
+		for (int i=0; i<numSections; i++) {
+			if (paramSectionTag == theSections[i]->getTag()) {
+				parameterID = theSections[i]->setParameter(&argv[2], argc-2, info);
+			}
+		}
+		
+		// Check if the parameterID is valid
+		if (parameterID < 0) {
+			cerr << "DispBeamColumn2d::setParameter() - could not set parameter. " << endl;
+			return -1;
+		}
+		else {
+			// Return the parameterID value (according to the above comments)
+			return parameterID;
+		}
+	}
+    
+	// Otherwise parameter is unknown for this class
+	else {
+		return -1;
+	}
+}
+
+int
+DispBeamColumn2d::updateParameter (int parameterID, Information &info)
+{
+	// If the parameterID value is not equal to 1 it belongs 
+	// to section or material further down in the hierarchy. 
+
+	if (parameterID == 1) {
+
+		this->rho = info.theDouble;
+		return 0;
+
+	}
+	else if (parameterID > 0 ) {
+
+		// Extract the section number
+		int sectionNumber = (int)( floor((double)parameterID) / (100000) );
+
+		int ok = -1;
+		for (int i=0; i<numSections; i++) {
+			if (sectionNumber == theSections[i]->getTag()) {
+				ok = theSections[i]->updateParameter(parameterID, info);
+			}
+		}
+
+		if (ok < 0) {
+			cerr << "DispBeamColumn2d::updateParameter() - could not update parameter. " << endl;
+			return ok;
+		}
+		else {
+			return ok;
+		}
+	}
+	else {
+		cerr << "DispBeamColumn2d::updateParameter() - could not update parameter. " << endl;
+		return -1;
+	}       
+}
+
+// AddingSensitivity:BEGIN ///////////////////////////////////
+const Vector &
+DispBeamColumn2d::gradient(bool compute, int identifier)
+{
+/*	The gradient method can be called with four different purposes:
+	1) To clear the sensitivity flag so that the object does not contribute:
+			gradient(false, 0)
+	2) To set the sensitivity flag so that the object contributes
+	   (the sensitivity flag is stored as the value of parameterID):
+			gradient(false, parameterID)
+	3) To obtain the gradient vector from the object (like for the residual):
+			gradient(true, 0)
+	4) To commit unconditional sensitivities for path-dependent problems:
+			gradient(true, gradNumber)
+*/
+
+	if (compute) { // If yes: compute or commit gradients
+
+		if ( gradientIdentifier != 0 ) { // Check if this element contributes has a parameter
+			
+			if (identifier == 0) { // "Phase 1": return gradient vector
+
+				GaussQuadRule1d01 quadrat(numSections);
+				const Matrix &pts = quadrat.getIntegrPointCoords();
+				const Vector &wts = quadrat.getIntegrPointWeights();
+
+				// Assuming member is prismatic ... have to move inside
+				// the loop if it is not prismatic
+				int order = theSections[0]->getOrder();
+				const ID &code = theSections[0]->getType();
+
+				// Zero for integration
+				q.Zero();
+
+				// Loop over the integration points
+				for (int i = 0; i < numSections; i++) {
+
+					double xi6 = 6.0*pts(i,0);
+
+					// Get section stress resultant gradient
+					Vector s(order);
+					int ok = theSections[i]->gradient(true,identifier,s);
+
+					// Perform numerical integration on internal force gradient
+					//q.addMatrixTransposeVector(1.0, *B, s, wts(i));
+
+					double si;
+					for (int j = 0; j < order; j++) {
+						si = s(j)*wts(i);
+						switch(code(j)) {
+						case SECTION_RESPONSE_P:
+							q(0) += si; break;
+						case SECTION_RESPONSE_MZ:
+							q(1) += (xi6-4.0)*si; q(2) += (xi6-2.0)*si; break;
+						default:
+							break;
+						}
+					}
+
+				}
+
+				// Transform forces
+				static Vector dummy(2);		// No distributed loads
+				P = crdTransf->getGlobalResistingForce(q,dummy);
+
+			}
+
+			else { // "Phase 2": commit unconditional sensitivities
+
+				// Path-dependent problems: Not treated here yet
+			}
+
+		}
+
+		else {
+
+			// Return zero if gradientIdentifier is zero
+			P.Zero();
+		}
+	}
+	
+	else { // Just set private data flags
+
+		// Set gradient flag
+		gradientIdentifier = identifier;
+
+		if (identifier == 0 ) {
+
+			// "Zero out" all flags downwards through sections/materials 
+			Vector dummy(2);
+			int ok = -1;
+			for (int i=0; i<numSections; i++) {
+				ok = theSections[i]->gradient(false, identifier, dummy);
+			}
+		}
+
+		else if (gradientIdentifier == 1) {
+			// Don't treat the 'rho' for now
+		}
+
+		else {
+
+			// Extract section and material tags
+			gradientSectionTag = (int)( floor((double)identifier) / (100000) );
+			int tempIdentifier = identifier - gradientSectionTag*100000;
+			gradientMaterialTag = (int)( floor((double)tempIdentifier) / (1000) );
+
+			// Go down to the sections and set appropriate flags
+			Vector dummy(2);
+			int ok = -1;
+			for (int i=0; i<numSections; i++) {
+				if (gradientSectionTag == theSections[i]->getTag()) {
+					ok = theSections[i]->gradient(false, identifier, dummy);
+				}
+			}
+		}
+	}
+
+	return P;
+}
+// AddingSensitivity:END /////////////////////////////////////////////
+

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-02 18:15:35 $
+// $Revision: 1.4 $
+// $Date: 2001-08-20 00:37:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/OpenSeesSensitivityEvaluator.cpp,v $
 
 
@@ -31,6 +31,7 @@
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
 // Revised: haukaas 06/00 (core code)
 //			haukaas 06/01 (made part of official OpenSees)
+//			haukaas 08/19/01 (modifications for Release 1.2 of OpenSees)
 //
 
 #include <OpenSeesSensitivityEvaluator.h>
@@ -85,6 +86,16 @@ OpenSeesSensitivityEvaluator::evaluate_grad_g(double gFunValue, Vector passed_x)
 	// m: number of random variables x(i)
 	// n: number of response quantities u(i)
 	////////////////////////////////////
+
+
+	
+// AddingSensitivity:BEGIN ////////////////////////////////////////
+	// Compute gradients if this is a path-INdependent analysis
+	char theSensitivityCommand[30];
+	sprintf(theSensitivityCommand,"computeGradients");
+	Tcl_Eval( theTclInterp, theSensitivityCommand );
+// AddingSensitivity:END //////////////////////////////////////////
+
 
 	// Some initial declaractions
 	char tclAssignment[500];

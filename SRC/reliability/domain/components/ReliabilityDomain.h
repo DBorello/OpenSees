@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:03 $
+// $Revision: 1.3 $
+// $Date: 2001-08-20 00:37:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.h,v $
 
 
@@ -31,6 +31,7 @@
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
 // Revised: haukaas 06/00 (core code)
 //			haukaas 06/01 (made part of official OpenSees)
+//			haukaas 08/19/01 (modifications for Release 1.2 of OpenSees)
 //
 
 #ifndef ReliabilityDomain_h
@@ -71,6 +72,9 @@ public:
 	// Member functions to set/get active limit-state function
 	int getTagOfActiveLimitStateFunction(void);
 	void setTagOfActiveLimitStateFunction(int tag);
+
+	// Member functions to remove single components from the domain
+	int removeRandomVariablePositioner(int tag);
 
 protected:
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-06-16 04:45:33 $
+// $Revision: 1.4 $
+// $Date: 2001-08-20 00:37:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionForceDeformation.cpp,v $
                                                                         
                                                                         
@@ -185,3 +185,13 @@ SectionForceDeformation::getResponse(int responseID, Information &secInfo)
       return -1;
   }
 }
+
+// AddingSensitivities:BEGIN ////////////////////////////////////
+int 
+SectionForceDeformation::gradient(bool compute, int identifier, Vector & gradient)
+{
+	gradient.Zero();
+
+	return -1;
+}
+// AddingSensitivities:END //////////////////////////////////////

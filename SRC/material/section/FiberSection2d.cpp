@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-08-10 17:57:39 $
+// $Revision: 1.6 $
+// $Date: 2001-08-20 00:37:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.cpp,v $
                                                                         
 // Written: fmk
@@ -92,6 +92,12 @@ FiberSection2d::FiberSection2d(int tag, int num, Fiber **fibers):
 
   code(0) = SECTION_RESPONSE_P;
   code(1) = SECTION_RESPONSE_MZ;
+
+// AddingSensitivity:BEGIN ////////////////////////////////////
+	gradientIdentifier = 0;
+	gradientMaterialTag = 0;
+// AddingSensitivity:END //////////////////////////////////////
+
 }
 
 // constructor for blank object that recvSelf needs to be invoked upon
@@ -112,6 +118,11 @@ FiberSection2d::FiberSection2d():
 
   code(0) = SECTION_RESPONSE_P;
   code(1) = SECTION_RESPONSE_MZ;
+
+// AddingSensitivity:BEGIN ////////////////////////////////////
+	gradientIdentifier = 0;
+	gradientMaterialTag = 0;
+// AddingSensitivity:END //////////////////////////////////////
 }
 
 int
@@ -624,66 +635,195 @@ FiberSection2d::getResponse(int responseID, Information &sectInfo)
   return SectionForceDeformation::getResponse(responseID, sectInfo);
 }
 
+
 int
 FiberSection2d::setParameter (char **argv, int argc, Information &info)
 {
 	// Initial declarations
-	int ok = -1;
+	int parameterID;
 
-	// A material parameter
+	// Check if the parameter belongs to the material (only option for now)
 	if (strcmp(argv[0],"material") == 0) {
 
 		// Get the tag of the material
-		int paramMatTag = atoi(argv[1]);
+		int materialTag = atoi(argv[1]);
 
-		// Loop over fibers to find the right material(s)
+		// Loop over fibers to find the right material
 		for (int i=0; i<numFibers; i++) {
-			if (paramMatTag == theMaterials[i]->getTag()) {
-				ok = theMaterials[i]->setParameter(&argv[2], argc-2, info);
+			if (materialTag == theMaterials[i]->getTag()) {
+				parameterID = theMaterials[i]->setParameter(&argv[2], argc-2, info);
 			}
 		}
-		if (ok<0) {
+
+		// Check that the parameterID is valid
+		if (parameterID < 0) {
 			cerr << "FiberSection2d::setParameter() - could not set parameter. " << endl;
 			return -1;
 		}
+		
 		else {
-			return ok + 100;
+			return (parameterID + 100000*this->getTag() + 1000*materialTag);
 		}
 	} 
-	else
+
+	else {
+		cerr << "FiberSection2d::setParameter() - could not set parameter. " << endl;
 		return -1;
+	}
 }
 
 int
 FiberSection2d::updateParameter (int parameterID, Information &info)
 {
-	int ok = -1;
 
-	switch (parameterID) {
-	case 1:
-		return -1;
-	default:
-		if (parameterID >= 100) {
-			ID *paramIDPtr;
-			paramIDPtr = info.theID;
-			ID paramID = (*paramIDPtr);
-			int paramMatrTag = paramID(1);
+	// Check if it is a material parameter (only option for now)
+	if (parameterID > 1000) {
 
-			for (int i=0; i<numFibers; i++) {
-				if (paramMatrTag == theMaterials[i]->getTag()) {
-					ok =theMaterials[i]->updateParameter(parameterID-100, info);
-				}
-			}
-			if (ok < 0) {
-				cerr << "FiberSection2d::updateParameter() - could not update parameter. " << endl;
-				return ok;
-			}
-			else {
-				return ok;
+		// Get section number and material number
+		int sectionTag = this->getTag();
+		parameterID = parameterID - sectionTag*100000;
+		int materialTag = (int)( floor((double)parameterID) / (1000) );
+		parameterID = parameterID - materialTag*1000;
+
+		int ok = -1;
+		for (int i=0; i<numFibers; i++) {
+			if (materialTag == theMaterials[i]->getTag()) {
+				ok = theMaterials[i]->updateParameter(parameterID, info);
 			}
 		}
-		else
-			return -1;
+
+		if (ok < 0) {
+			cerr << "FiberSection2d::updateParameter() - could not update parameter. " << endl;
+			return ok;
+		}
+
+		else {
+			return ok;
+		}
 	}
+	else {
+		cerr << "FiberSection2d::updateParameter() - could not update parameter. " << endl;
+		return -1;
+	}
+}
+
+
+int
+FiberSection2d::gradient(bool compute, int identifier, Vector & gradient)
+{
+
+/*	The gradient method can be called with four different purposes:
+	1) To clear the sensitivity flag so that the object does not contribute:
+			gradient(false, 0)
+	2) To set the sensitivity flag so that the object contributes
+	   (the sensitivity flag is stored as the value of parameterID):
+			gradient(false, parameterID)
+	3) To obtain the gradient vector from the object (like for the residual):
+			gradient(true, 0)
+	4) To commit unconditional sensitivities for path-dependent problems:
+			gradient(true, gradNumber)
+*/
+
+
+	
+	if (compute) { // If yes: compute or commit gradients
+
+		if ( gradientIdentifier != 0 ) { // Check if this element contributes has a parameter
+			
+			if (identifier == 0) { // "Phase 1": return gradient vector
+
+				static Vector ds(2);
+    
+				ds.Zero();
+
+				double y, A, stressGradient;
+				int loc = 0;
+
+				for (int i = 0; i < numFibers; i++) {
+					y = matData[loc++];
+					A = matData[loc++];
+
+					stressGradient = 0.0;
+					theMaterials[i]->gradient(true,identifier,stressGradient);
+					stressGradient = stressGradient * A;
+					ds(0) += stressGradient;
+					ds(1) += stressGradient * y;
+				}
+
+				gradient = ds;
+
+			}
+
+			else { // "Phase 2": commit unconditional sensitivities
+
+/*
+Do not treat this case for now. 
+Here is the code from Michael. 
+
+				int res = 0;
+				int loc = 0;
+				double depsilondh;
+
+				for (int i = 0; i < numFibers; i++) {
+					UniaxialMaterial *theMat = theMaterials[i];
+					double y = matData[loc++];
+					loc++;
+
+					// determine material strain and set it
+					depsilondh = dedh(0) + y*dedh(1);
+
+					res += theMat->setStrainGradient(id, depsilondh);
+				}
+				return res;
+*/
+			}
+
+		}
+
+		else {
+			// Do nothing if gradientIdentifier is zero
+		}
+	}
+	
+	else { // Just set private data flags
+
+		// Set gradient flag
+		gradientIdentifier = identifier;
+
+		if (identifier == 0 ) {
+
+			// "Zero out" the identifier in all materials
+			double dummy = 0.0;
+			int ok = -1;
+			for (int i=0; i<numFibers; i++) {
+				ok =theMaterials[i]->gradient(false,identifier,dummy);
+			}
+		}
+
+		else if (gradientIdentifier == 1) {
+			// Don't treat the 'rho' for now
+		}
+
+		else {
+
+			// Extract section and material tags
+			int gradientSectionTag = (int)( floor((double)identifier) / (100000) );
+			identifier = identifier - gradientSectionTag*100000;
+			gradientMaterialTag = (int)( floor((double)identifier) / (1000) );
+			identifier = identifier - gradientMaterialTag*1000;
+
+			// Go down to the sections and set appropriate flags
+			double dummy = 0.0;
+			int ok = -1;
+			for (int i=0; i<numFibers; i++) {
+				if (gradientMaterialTag == theMaterials[i]->getTag()) {
+					ok =theMaterials[i]->gradient(false,identifier,dummy);
+				}
+			}
+		}
+		
+	}
+
+	return 0;
 }
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-31 01:30:02 $
+// $Revision: 1.4 $
+// $Date: 2001-08-20 00:37:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.h,v $
 
 
@@ -32,6 +32,7 @@
 // Revised: haukaas 06/00 (core code)
 //			haukaas 06/01 (made part of official OpenSees)
 //			haukaas 06/22/01 (analysis commands batch read from file)
+//			haukaas 08/19/01 (modifications for Release 1.2 of OpenSees)
 //
 
 #ifndef OpenSeesGFunEvaluator_h
@@ -49,7 +50,8 @@ class OpenSeesGFunEvaluator : public GFunEvaluator
 
 public:
 	OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
-						ReliabilityDomain *passedReliabilityDomain);
+						ReliabilityDomain *passedReliabilityDomain,
+						char *fileName);
 	~OpenSeesGFunEvaluator();
 
 	int		evaluate_g(Vector passed_x);
@@ -61,6 +63,7 @@ private:
 	double g;
 	Tcl_Interp *theTclInterp;
 	ReliabilityDomain *theReliabilityDomain;
+	char fileName[256];
 
 };
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:03 $
+// $Revision: 1.3 $
+// $Date: 2001-08-20 00:37:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.cpp,v $
 
 
@@ -31,6 +31,7 @@
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
 // Revised: haukaas 06/00 (core code)
 //			haukaas 06/01 (made part of official OpenSees)
+//			haukaas 08/19/01 (modifications for Release 1.2 of OpenSees)
 //
 
 #include <ReliabilityDomain.h>
@@ -137,6 +138,15 @@ ReliabilityDomain::getRandomVariablePositionerPtr(int tag)
 //		return 0;
 	RandomVariablePositioner *result = (RandomVariablePositioner *) theComponent;
 	return result;
+}
+
+
+int
+ReliabilityDomain::removeRandomVariablePositioner(int tag)
+{
+	theRandomVariablePositionersPtr->removeComponent(tag);
+
+	return 0;
 }
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 06:21:41 $
+// $Revision: 1.3 $
+// $Date: 2001-08-20 00:37:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/NodalLoad.h,v $
                                                                         
                                                                         
@@ -59,7 +59,9 @@ class NodalLoad : public Load
     
     int setParameter (char **argv, int argc, Information &info);
     int updateParameter (int parameterID, Information &info);
-
+// AddingSensitivity:BEGIN //////////////////////////////////
+	const Vector & gradient(bool compute, int identifier);
+// AddingSensitivity:END ///////////////////////////////////
   protected:
 
   private:
@@ -67,6 +69,10 @@ class NodalLoad : public Load
     Node *myNodePtr;    // pointer to Node object on which load acts
     Vector *load;       // the reference load - pointer to new copy or 0
     bool  konstant;     // true if load is load factor independent
+// AddingSensitivity:BEGIN /////////////////////////////////////
+	int gradientIdentifier;
+	static Vector gradientVector;
+// AddingSensitivity:END ///////////////////////////////////////
 
 };
 

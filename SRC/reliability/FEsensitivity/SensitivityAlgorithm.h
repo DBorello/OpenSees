@@ -22,31 +22,42 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-31 23:37:25 $
+// $Revision: 1.3 $
+// $Date: 2001-08-20 00:37:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/SensitivityAlgorithm.h,v $
 
 
 //
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu), July 2001
-// Revised: 
+// Revised: haukaas 08/19/01 (modifications for Release 1.2 of OpenSees)
 //
 
 #ifndef SensitivityAlgorithm_h
 #define SensitivityAlgorithm_h
 
+#include <ReliabilityDomain.h>
+#include <EquiSolnAlgo.h>
+#include <SensitivityIntegrator.h>
+
+
 class SensitivityAlgorithm
 {
-public:
-
-	SensitivityAlgorithm();
-    virtual ~SensitivityAlgorithm();
-	virtual int computeGradients(void) = 0;
+  public:
+	SensitivityAlgorithm::SensitivityAlgorithm(ReliabilityDomain *passedReliabilityDomain,
+										   EquiSolnAlgo *passedAlgorithm,
+										   SensitivityIntegrator *passedSensitivityIntegrator,
+										   bool passedTrueIfPathDependent);
+    ~SensitivityAlgorithm();
+	int computeGradients(void);
+	bool isPathDependent(void);
     
-protected:
+  protected:
     
-private:
-
+  private:
+    ReliabilityDomain *theReliabilityDomain;
+	EquiSolnAlgo *theAlgorithm;
+	SensitivityIntegrator *theSensitivityIntegrator;
+	bool trueIfPathDependent;
 };
 
 #endif

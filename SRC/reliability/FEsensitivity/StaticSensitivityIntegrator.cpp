@@ -22,14 +22,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-31 22:11:36 $
+// $Revision: 1.2 $
+// $Date: 2001-08-20 00:37:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/StaticSensitivityIntegrator.cpp,v $
 
 
 //
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu), July 2001
-// Revised: 
+// Revised: haukaas 08/19/01 (modifications for Release 1.2 of OpenSees)
 //
 
 #include <SensitivityIntegrator.h>
@@ -41,6 +41,12 @@
 #include <DOF_Group.h>
 #include <FE_EleIter.h>
 #include <DOF_GrpIter.h>
+#include <LoadPattern.h>
+#include <LoadPatternIter.h>
+#include <Domain.h>
+#include <Node.h>
+#include <DOF_Group.h>
+
 
 StaticSensitivityIntegrator::StaticSensitivityIntegrator(AnalysisModel *theModel, LinearSOE *theLinSOE)
 :SensitivityIntegrator()
@@ -84,10 +90,42 @@ StaticSensitivityIntegrator::formRightHandSide(void)
 		theSOE->addB( (-1)*elePtr->gradient(0),  elePtr->getID());
 	}
 
-	// For now, the dPext/dh term is not included. Coming soon. 
+
+	// Loop through the loadPatterns and add the dPext/dh contributions
+	Vector oneDimVectorWithOne(1);
+	oneDimVectorWithOne(0) = 1.0;
+	ID oneDimID(1);
+	Node *aNode;
+	DOF_Group *aDofGroup;
+	int nodeNumber, dofNumber, relevantID, i, sizeRandomLoads, numRandomLoads;
+	/////////////////////////////////////////////////
+	LoadPattern *loadPatternPtr;
+	Domain *theDomain = theAnalysisModel->getDomainPtr();
+	LoadPatternIter &thePatterns = theDomain->getLoadPatterns();
+    while((loadPatternPtr = thePatterns()) != 0) {
+
+		const Vector &randomLoads = loadPatternPtr->gradient(true,0);
+		sizeRandomLoads = randomLoads.Size();
+		if (sizeRandomLoads == 1) {
+			// No random loads in this load pattern
+		}
+		else {
+			// Random loads: add contributions to the 'B' vector
+			numRandomLoads = (int)(sizeRandomLoads/2);
+			for (i=0; i<numRandomLoads*2; i=i+2) {
+				nodeNumber = (int)randomLoads(i);
+				dofNumber = (int)randomLoads(i+1);
+				aNode = theDomain->getNode(nodeNumber);
+				aDofGroup = aNode->getDOF_GroupPtr();
+				const ID &anID = aDofGroup->getID();
+				relevantID = anID(dofNumber-1);
+				oneDimID(0) = relevantID;
+				theSOE->addB(oneDimVectorWithOne, oneDimID);
+			}
+		}
+	}
 
 	return 0;
-
 }
 
 
@@ -102,7 +140,6 @@ StaticSensitivityIntegrator::saveGradient(const Vector &v, int gradNum, int numG
 		dofPtr->setGradient(v,gradNum,numGrads);
 	}
     
-
     return 0;
 }
 

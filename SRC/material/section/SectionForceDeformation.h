@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-06-16 04:45:33 $
+// $Revision: 1.4 $
+// $Date: 2001-08-20 00:37:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionForceDeformation.h,v $
                                                                         
                                                                         
@@ -82,6 +82,10 @@ class SectionForceDeformation : public Material
 
 		virtual Response *setResponse(char **argv, int argc, Information &info);
 		virtual int getResponse(int responseID, Information &info);
+
+// AddingSensitivity:BEGIN //////////////////////////////////////////
+	virtual int gradient(bool compute, int identifier, Vector & gradient);
+// AddingSensitivity:END ///////////////////////////////////////////
 
 	protected:
 		Matrix *fDefault;	// Default flexibility matrix

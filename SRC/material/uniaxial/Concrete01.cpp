@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-31 01:34:06 $
+// $Revision: 1.4 $
+// $Date: 2001-08-20 00:37:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.cpp,v $
                                                                         
                                                                         
@@ -70,6 +70,10 @@ Concrete01::Concrete01
 
 	// Set trial values
 	this->revertToLastCommit();
+
+// AddingSensitivity:BEGIN /////////////////////////////////////
+	gradientIdentifier = 0;
+// AddingSensitivity:END //////////////////////////////////////
 }
 
 Concrete01::Concrete01():UniaxialMaterial(0, MAT_TAG_Concrete01),
@@ -79,6 +83,10 @@ Concrete01::Concrete01():UniaxialMaterial(0, MAT_TAG_Concrete01),
 {
 	// Set trial values
 	this->revertToLastCommit();
+
+// AddingSensitivity:BEGIN /////////////////////////////////////
+	gradientIdentifier = 0;
+// AddingSensitivity:END //////////////////////////////////////
 }
 
 Concrete01::~Concrete01 ()
@@ -536,3 +544,111 @@ Concrete01::updateParameter(int parameterID, Information &info)
 	return 0;
 }
 
+
+// AddingSensitivity:BEGIN ///////////////////////////////////
+int
+Concrete01::gradient(bool compute, int identifier, double & gradient)
+{
+/*	The gradient method can be called with four different purposes:
+	1) To clear the sensitivity flag so that the object does not contribute:
+			gradient(false, 0)
+	2) To set the sensitivity flag so that the object contributes
+	   (the sensitivity flag is stored as the value of parameterID):
+			gradient(false, parameterID)
+	3) To obtain the gradient vector from the object (like for the residual):
+			gradient(true, 0)
+	4) To commit unconditional sensitivities for path-dependent problems:
+			gradient(true, gradNumber)
+*/
+
+// COMPUTE GRADIENTS
+	if (compute) {
+
+// IF "PHASE 1" IN THE GRADIENT COMPUTATIONS (RETURN GRADIENT VECTOR)
+		if (identifier == 0) {
+
+			// For now, simply return the derivatives of these equations:
+			// sigma = E0 * epsilon                 for abs(epsilon) < fy/E0
+			// sigma = fy + (epsilon-fy/E0)*b*E0    for abs(epsilon) > fy/E0
+			// (That is, this method only works for path-independent problems for now.)
+
+			if ( gradientIdentifier == 0 ) {
+				gradient = 0.0;
+			}
+			else if (Tstrain > 0.0 ) {
+				gradient = 0.0;
+			}
+			else if (Tstrain > epsc0) {					// IN PARABOLIC AREA
+
+				if ( gradientIdentifier == 1 ) {		// d{sigma}d{fpc}
+					gradient = 2.0*Tstrain/epsc0-Tstrain*Tstrain/(epsc0*epsc0);
+				}
+				else if ( gradientIdentifier == 2  ) {	// d{sigma}d{epsc0}
+					gradient = 2.0*fpc/(epsc0*epsc0)*(Tstrain*Tstrain/epsc0-Tstrain);
+				}
+				else if ( gradientIdentifier == 3  ) {	// d{sigma}d{fpcu}
+					gradient = 0.0;
+				}
+				else if ( gradientIdentifier == 4  ) {	// d{sigma}d{epscu}
+					gradient = 0.0;
+				}
+				else {
+					gradient = 0.0;
+				}
+			}
+			else if (Tstrain > epscu) {					// IN LINEAR AREA
+
+				if ( gradientIdentifier == 1 ) {		// d{sigma}d{fpc}
+					gradient = (epscu-Tstrain)/(epscu-epsc0);
+				}
+				else if ( gradientIdentifier == 2  ) {	// d{sigma}d{epsc0}
+					gradient = (fpc-fpcu)*(epscu-Tstrain)/((epscu-epsc0)*(epscu-epsc0));
+				}
+				else if ( gradientIdentifier == 3  ) {	// d{sigma}d{fpcu}
+					gradient = (Tstrain-epsc0)/(epscu-epsc0);
+				}
+				else if ( gradientIdentifier == 4  ) {	// d{sigma}d{epscu}
+					gradient = (Tstrain-epsc0)*(fpc-fpcu)/((epsc0-epscu)*(epsc0-epscu));
+				}
+				else {
+					gradient = 0.0;
+				}
+			}
+			else {										// IN ZERO STIFFNESS AREA
+
+				if ( gradientIdentifier == 1 ) {		// d{sigma}d{fpc}
+					gradient = 0.0;
+				}
+				else if ( gradientIdentifier == 2  ) {	// d{sigma}d{epsc0}
+					gradient = 0.0;
+				}
+				else if ( gradientIdentifier == 3  ) {	// d{sigma}d{fpcu}
+					gradient = 1.0;
+				}
+				else if ( gradientIdentifier == 4  ) {	// d{sigma}d{epscu}
+					gradient = 0.0;
+				}
+				else {
+					gradient = 0.0;
+				}
+			}
+
+			gradient = (-1) * gradient;
+
+		}
+
+// IF "PHASE 2" IN THE GRADIENT COMPUTATIONS (COMMIT UNCONDITIONAL GRADIENT)
+		else {
+			// Not treated yet. 
+		}
+	}
+	
+// DO NOT COMPUTE GRADIENTS, JUST SET FLAG
+	else {
+		gradientIdentifier = identifier;
+	}
+
+	return 0;
+}
+
+// AddingSensitivity:END /////////////////////////////////////////////

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-02 18:13:29 $
+// $Revision: 1.5 $
+// $Date: 2001-08-20 00:37:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.cpp,v $
 
 
@@ -32,6 +32,7 @@
 // Revised: haukaas 06/00 (core code)
 //			haukaas 06/01 (made part of official OpenSees)
 //			haukaas 06/22/01 (analysis commands batch read from file)
+//			haukaas 08/19/01 (modifications for Release 1.2 of OpenSees)
 //
 
 #include <fstream.h>
@@ -48,11 +49,14 @@
 
 
 OpenSeesGFunEvaluator::OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
-					ReliabilityDomain *passedReliabilityDomain)
+					ReliabilityDomain *passedReliabilityDomain,
+					char *passedFileName)
 :GFunEvaluator()
 {
 	theTclInterp			= passedTclInterp;
 	theReliabilityDomain	= passedReliabilityDomain;
+	strcpy(fileName,passedFileName);
+
 }
 
 OpenSeesGFunEvaluator::~OpenSeesGFunEvaluator()
@@ -82,14 +86,14 @@ OpenSeesGFunEvaluator::evaluate_g(Vector passed_x)
 
 	// Set a default value of the wait flag
 	char theSetFlagCommand[30];
-	sprintf(theSetFlagCommand,"set waitFlag 1");
+	sprintf(theSetFlagCommand,"set waitFlag 0");
 	Tcl_Eval( theTclInterp, theSetFlagCommand );
 
 
 	// Run the structural analysis by reading from "analysiscommands.tcl"
 	// (the user may change the value of the waitFlag)
 	char theAnalyzeCommand[30];
-	sprintf(theAnalyzeCommand,"source feanalysiscommands.tcl");
+	sprintf(theAnalyzeCommand,"source %s",fileName);
 	Tcl_Eval( theTclInterp, theAnalyzeCommand );
 
 

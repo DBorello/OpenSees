@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 06:21:41 $
+// $Revision: 1.3 $
+// $Date: 2001-08-20 00:37:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.h,v $
                                                                         
                                                                         
@@ -95,7 +95,9 @@ class LoadPattern : public DomainComponent
 
     int setParameter (char **argv, int argc, Information &info);
     int updateParameter (int parameterID, Information &info);
-
+// AddingSensitivity:BEGIN //////////////////////////////
+	const Vector & gradient(bool compute, int identifier);
+// AddingSensitivity:END ////////////////////////////////
   protected:
 	
   private:
@@ -117,6 +119,9 @@ class LoadPattern : public DomainComponent
     NodalLoadIter       *theNodIter;
     ElementalLoadIter   *theEleIter;
     SingleDomSP_Iter    *theSpIter;    
+// AddingSensitivity:BEGIN //////////////////////////////////////
+	Vector *randomLoads;
+// AddingSensitivity:END ////////////////////////////////////////
 };
 
 #endif

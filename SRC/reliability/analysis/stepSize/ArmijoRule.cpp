@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-06-16 01:23:59 $
+// $Revision: 1.4 $
+// $Date: 2001-08-20 00:37:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/ArmijoRule.cpp,v $
 
 
@@ -32,6 +32,7 @@
 // Revised: haukaas 06/00 (core code)
 //			haukaas 06/01 (made part of official OpenSees)
 //          haukaas 06/15/01 (notify the user if the step size is reduced)
+//			haukaas 08/19/01 (modifications for Release 1.2 of OpenSees)
 //
 
 #include <ArmijoRule.h>
@@ -41,13 +42,17 @@
 #include <Vector.h>
 
 
-ArmijoRule::ArmijoRule(GFunEvaluator *passedGFunEvaluator,
-											   XuTransformation *passedXuTransformation)
+ArmijoRule::ArmijoRule(	GFunEvaluator *passedGFunEvaluator,
+						XuTransformation *passedXuTransformation,
+						int passedMaxNumReductions,
+						double passedFirstTrialStep)
 :StepSizeRule()
 {
 	theGFunEvaluator = passedGFunEvaluator;
 	theXuTransformation = passedXuTransformation;
-
+	firstTrialStep = passedFirstTrialStep;
+	maxNumReductions = passedMaxNumReductions;
+	gFunValue = 0;
 }
 
 ArmijoRule::~ArmijoRule()
@@ -60,6 +65,14 @@ double
 ArmijoRule::getStepSize()
 {
 	return stepSize;
+}
+
+
+
+double 
+ArmijoRule::getGFunValue()
+{
+	return gFunValue;
 }
 
 
@@ -87,8 +100,8 @@ ArmijoRule::computeStepSize(Vector u,
 	double merit = 0.5 * u.Norm() * u.Norm() + c * fabs(G);
 
 	
-	// Set the first trial step size to '1.0'
-	double trial_step_size = 1.0;
+	// Set the first trial step size
+	double trial_step_size = firstTrialStep;
 	
 
 	// Take a trial step in standard normal space
@@ -128,11 +141,11 @@ ArmijoRule::computeStepSize(Vector u,
 	// If the merit function did not decrease, we try to 
 	// repeatedly reduce the step size until it does. 
 	int i = 1;
-	while ( (merit_new > merit) && (i<6) ) {
+	while ( (merit_new > merit) && (i<(maxNumReductions+1)) ) {
 
 		
 		// Notify user that step sizes are being reduced
-		cerr << "ArmijoRule::computeStepSize() - the step size is being reduced. " << endl;
+		cerr << "... the step size is being reduced by the Armijo rule ..." << endl;
 
 		// Update merit function value
 		merit = merit_new;
@@ -172,19 +185,21 @@ ArmijoRule::computeStepSize(Vector u,
 		// Compute merit function again, based on the new limit-state function value
 		merit_new = 0.5 * trial_u.Norm() * trial_u.Norm() + c * fabs(trial_G);
 
+
+		// Report to user if the step reduction was not successful
+		if ( (i==5) && (merit_new > merit) ) {
+			cerr << "... tried to half step size " << maxNumReductions 
+				<< " times before continuing ..." << endl;
+		}
+
 		
 		// Increment counter
 		i++;
-
-
-		// Report to user if the step reduction was not successful
-		if (i==5 && merit_new > merit ) {
-			cerr << "ArmijoRule::computeStepSize() - tried to half step size 5 times." << endl;
-		}
  	
 	}
 
 	stepSize = trial_step_size;
+	gFunValue = trial_G;
 
 	return 0;
 

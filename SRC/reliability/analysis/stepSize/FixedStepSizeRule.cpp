@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:02 $
+// $Revision: 1.3 $
+// $Date: 2001-08-20 00:37:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/FixedStepSizeRule.cpp,v $
 
 
@@ -31,6 +31,7 @@
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
 // Revised: haukaas 06/00 (core code)
 //			haukaas 06/01 (made part of official OpenSees)
+//			haukaas 08/19/01 (modifications for Release 1.2 of OpenSees)
 //
 
 #include <FixedStepSizeRule.h>
@@ -44,6 +45,7 @@ FixedStepSizeRule::FixedStepSizeRule(double passedStepSize)
 :StepSizeRule()
 {
 	stepSize = passedStepSize;
+	gFunValue = -1;
 }
 
 FixedStepSizeRule::~FixedStepSizeRule()
@@ -62,6 +64,8 @@ FixedStepSizeRule::computeStepSize(Vector u,
 	// for the fixed step size rule. The 
 	// user has already given the step size. 
 
+	gFunValue = G;
+
 	return 0;  
 
 }
@@ -74,3 +78,8 @@ FixedStepSizeRule::getStepSize()
 
 }
 
+double
+FixedStepSizeRule::getGFunValue()
+{
+	return gFunValue;
+}

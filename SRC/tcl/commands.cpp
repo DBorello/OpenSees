@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2001-07-31 23:54:57 $
+// $Revision: 1.11 $
+// $Date: 2001-08-20 00:37:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -166,8 +166,8 @@ extern "C" {
 #include <ReliabilityDomain.h>
 #include <SensitivityAlgorithm.h>
 #include <SensitivityIntegrator.h>
-#include <PathDepSensitivityAlgorithm.h>
 #include <StaticSensitivityIntegrator.h>
+#include <RandomVariablePositioner.h>
 // AddingSensitivity:END /////////////////////////////////////////////////
 #include <TclReliabilityBuilder.h>
 static TclReliabilityBuilder *theReliabilityBuilder = 0;
@@ -273,6 +273,8 @@ int g3AppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
     theReliabilityBuilder = 0;
 // AddingSensitivity:BEGIN //////////////////////////////////
+    Tcl_CreateCommand(interp, "computeGradients", computeGradients, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "sensitivityAlgorithm", sensitivityAlgorithm, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "sensitivityIntegrator", sensitivityIntegrator, 
@@ -335,9 +337,19 @@ sensitivityAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, char *
 		if (strcmp(argv[1],"PathDep") == 0) {
 			ReliabilityDomain *theReliabilityDomain;
 			theReliabilityDomain = theReliabilityBuilder->getReliabilityDomain();
-			theSensitivityAlgorithm = new PathDepSensitivityAlgorithm(theReliabilityDomain,
+			theSensitivityAlgorithm = new SensitivityAlgorithm(theReliabilityDomain,
 										theAlgorithm,
-										theSensitivityIntegrator);
+										theSensitivityIntegrator,
+										true);
+		return TCL_OK;
+		}
+		else if (strcmp(argv[1],"PathIndep") == 0) {
+			ReliabilityDomain *theReliabilityDomain;
+			theReliabilityDomain = theReliabilityBuilder->getReliabilityDomain();
+			theSensitivityAlgorithm = new SensitivityAlgorithm(theReliabilityDomain,
+										theAlgorithm,
+										theSensitivityIntegrator,
+										false);
 		return TCL_OK;
 		}
 		else {
@@ -989,7 +1001,7 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 					       *theStaticIntegrator);
 // AddingSensitivity:BEGIN ///////////////////////////////
 #ifdef _RELIABILITY
-	if (theSensitivityAlgorithm != 0) {
+	if (theSensitivityAlgorithm->isPathDependent()) {
 		theStaticAnalysis->setSensitivityAlgorithm(theSensitivityAlgorithm);
 	}
 #endif
@@ -2178,7 +2190,7 @@ int
 removeObject(ClientData clientData, Tcl_Interp *interp, int argc, 
 	     char **argv)
 {
-    
+
     // make sure at least one other argument to contain type of system
       if (argc < 2) {
 	interp->result = "WARNING want - remove objectType?\n";
@@ -2243,6 +2255,18 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
     else if (strcmp(argv[1],"recorders") == 0) {
       theDomain.removeRecorders();
     }
+
+// AddingSensitivity:BEGIN ///////////////////////////////////////
+    else if (strcmp(argv[1],"randomVariablePositioner") == 0) {
+		int rvPosTag;
+		if (Tcl_GetInt(interp, argv[2], &rvPosTag) != TCL_OK) {
+			cerr << "WARNING invalid input: rvPositionerTag \n";
+			return TCL_ERROR;
+		}
+		ReliabilityDomain *theReliabilityDomain = theReliabilityBuilder->getReliabilityDomain();
+		theReliabilityDomain->removeRandomVariablePositioner(rvPosTag);
+	}
+// AddingSensitivity:END ///////////////////////////////////////
 
     else
       cerr << "WARNING remove element, loadPattern - only commands  available at the moment: " << endl;
@@ -2313,6 +2337,30 @@ sensNodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
     // copy the value to the tcl string that is returned
     sprintf(interp->result,"%35.20f",value);
 	
+    return TCL_OK;
+}
+
+
+
+int 
+computeGradients(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+{
+	// Comment to the developer:
+	// This Tcl command is meant to be called only for
+	// path-independent problems.  In such cases the 
+	// gradients can be computed AFTER the complete
+	// structural analysis is completed.
+	// No error messages is returned if the user tries to invoke this command
+	// during a path-dependent analysis.  The reason is that the reliability
+	// analysis will call this method BOTH for path dependent and independent problems. 
+
+	if (theSensitivityAlgorithm->isPathDependent()) {
+	}
+	else {
+
+		theSensitivityAlgorithm->computeGradients();
+	}
+
     return TCL_OK;
 }
 // AddingSensitivity:END //////////////////////////////////////
