@@ -20,26 +20,13 @@
 //#
 //#
 //# DATE:              Sept2003
-//# UPDATE HISTORY:
+//# UPDATE HISTORY:    28May2004, Zhao put all Ks & Rs in the integration cycle and
+//#                          and use minor symmetries to make concise and efficient
 //#
 //#
 //===============================================================================
 #ifndef TOTALLAGRANGIANFD20NODEBRICK_CPP
 #define TOTALLAGRANGIANFD20NODEBRICK_CPP
-
-//#include <FiniteDeformationElastic3D.h>
-#include <Matrix.h>
-#include <Vector.h>
-#include <ID.h>
-#include <Renderer.h>
-#include <Domain.h>
-#include <string.h>
-#include <Information.h>
-#include <Channel.h>
-#include <FEM_ObjectBroker.h>
-#include <ErrorHandler.h>
-#include <ElementResponse.h>
-#include <ElementalLoad.h>
 
 #include <TotalLagrangianFD20NodeBrick.h>
 
@@ -337,6 +324,7 @@ int TotalLagrangianFD20NodeBrick::update ()
 {
     int ret = 0;
     tensor dh;
+    tensor dH_dX;
     int where;
     double r = 0.0;
     double s = 0.0;
@@ -347,7 +335,6 @@ int TotalLagrangianFD20NodeBrick::update ()
 
     tensor InitialNodesCrds = this->getNodesCrds();
     tensor CurrentNodesDisp = this->getNodesDisp();
-//    CurrentNodesDisp.print("U","\n");
 
     for( short GP_c_r = 0 ; GP_c_r < NumIntegrationPts ; GP_c_r++ )
       {
@@ -360,12 +347,10 @@ int TotalLagrangianFD20NodeBrick::update ()
                 t = pts[GP_c_t ];
                         where =(GP_c_r * NumIntegrationPts + GP_c_s) * NumIntegrationPts + GP_c_t;
                         dh = shapeFunctionDerivative(r,s,t);
-      tensor dH_dX = this->dh_Global(dh);
-      tensor currentF = CurrentNodesDisp("Ia") * dH_dX("Ib");
-      currentF.null_indices(); CurrentNodesDisp.null_indices(); dH_dX.null_indices();
-      updatedF = currentF + I_ij;
-//      if (where == 1) 
-//       updatedF.print("F","\n");
+                        dH_dX = this->dh_Global(dh);
+                        currentF = CurrentNodesDisp("Ia") * dH_dX("Ib");
+                          currentF.null_indices(); //CurrentNodesDisp.null_indices(); dH_dX.null_indices();
+                        updatedF = currentF + I_ij;
                         ret += theMaterial[where]->setTrialF(updatedF);
         }
     }
@@ -378,7 +363,7 @@ tensor TotalLagrangianFD20NodeBrick::Jacobian_3D(tensor dh)
   {
      tensor N_C = this->getNodesCrds();
      tensor J3D = dh("ij") * N_C("ik");
-     J3D.null_indices(); dh.null_indices(); N_C.null_indices();
+       J3D.null_indices(); //dh.null_indices(); N_C.null_indices();
      return J3D;
   }
 
@@ -387,7 +372,7 @@ tensor TotalLagrangianFD20NodeBrick::Jacobian_3Dinv(tensor dh)
   {
      tensor N_C = this->getNodesCrds();
      tensor J3D = dh("ij") * N_C("ik");
-     J3D.null_indices(); dh.null_indices(); N_C.null_indices();
+       J3D.null_indices(); //dh.null_indices(); N_C.null_indices();
      tensor J3Dinv = J3D.inverse();
      return J3Dinv;
   }
@@ -397,14 +382,16 @@ tensor TotalLagrangianFD20NodeBrick::dh_Global(tensor dh)
   {
      tensor  JacobianINV0 = this->Jacobian_3Dinv(dh);
      tensor  dhGlobal_0 = dh("ij") * JacobianINV0("kj");
-     dhGlobal_0.null_indices(); dh.null_indices(); JacobianINV0.null_indices();
+       dhGlobal_0.null_indices(); //dh.null_indices(); JacobianINV0.null_indices();
      return dhGlobal_0;
   }
 
 //======================================================================
-tensor TotalLagrangianFD20NodeBrick::getStiffnessTensor01(void)
+tensor TotalLagrangianFD20NodeBrick::getStiffnessTensor(void)
   {
-    int K_dim[] = {NumNodes,NumDof,NumDof,NumNodes};
+    tensor tI2("I", 2, def_dim_2);
+	  
+	int K_dim[] = {NumNodes,NumDof,NumDof,NumNodes};
     tensor Kk(4,K_dim,0.0);
 
     double r  = 0.0;
@@ -419,151 +406,19 @@ tensor TotalLagrangianFD20NodeBrick::getStiffnessTensor01(void)
 
     int dh_dim[] = {NumNodes,NumDof};
     tensor dh(2, dh_dim, 0.0);
-
-    tensor L2;
-
-    double det_of_Jacobian = 0.0;
-
-    tensor Jacobian;
-    tensor JacobianINV;
-    tensor dhGlobal;
-    tensor currentF;
-    tensor temp01;
-    tensor temp02;
-
-    for( short GP_c_r = 0 ; GP_c_r < NumIntegrationPts ; GP_c_r++ )
-      {
-        r = pts[GP_c_r ];
-        rw = wts[GP_c_r ];
-        for( short GP_c_s = 0 ; GP_c_s < NumIntegrationPts ; GP_c_s++ )
-          {
-            s = pts[GP_c_s ];
-            sw = wts[GP_c_s ];
-            for( short GP_c_t = 0 ; GP_c_t < NumIntegrationPts ; GP_c_t++ )
-              {
-                t = pts[GP_c_t ];
-                tw = wts[GP_c_t ];
-                        where =(GP_c_r * NumIntegrationPts + GP_c_s) * NumIntegrationPts + GP_c_t;
-                        dh = shapeFunctionDerivative(r,s,t);
-                        Jacobian = this->Jacobian_3D(dh);
-                        det_of_Jacobian  = Jacobian.determinant();
-                        dhGlobal = this->dh_Global(dh);
-                        weight = rw * sw * tw * det_of_Jacobian;
-                        L2 = theMaterial[where]->getTangentTensor();
-//      if (where==1)
-//            L2.print("L2","\n");
-                        temp01 = dhGlobal("Pj") * L2("ijkl");
-                        temp01.null_indices(); dhGlobal.null_indices(); L2.null_indices();
-                        temp02 = temp01("Pikl") * dhGlobal("Qk") * weight;
-                        temp02.null_indices(); dhGlobal.null_indices(); temp01.null_indices();
-                        Kk += temp02;
-              }
-          }
-      }
-//    exit (-1);
-    return Kk;
-  }
-
-//======================================================================
-tensor TotalLagrangianFD20NodeBrick::getStiffnessTensor02(void)
-  {
-    int K_dim[] = {NumNodes,NumDof,NumDof,NumNodes};
-    tensor Kk(4,K_dim,0.0);
-
-    double r  = 0.0;
-    double rw = 0.0;
-    double s  = 0.0;
-    double sw = 0.0;
-    double t  = 0.0;
-    double tw = 0.0;
-
-    short where = 0;
-    double weight = 0.0;
-
-    int dh_dim[] = {NumNodes,NumDof};
-    tensor dh(2, dh_dim, 0.0);
-
+    stresstensor PK2Stress;
     tensor L2;
 
     double det_of_Jacobian = 0.0;
 
     tensor Jacobian;
     tensor dhGlobal;
-    tensor currentF;
     tensor nodesDisp;
-    tensor temp01;
+    tensor F;
+    //tensor temp01;
     tensor temp02;
     tensor temp03;
-    tensor temp04;
-
-    nodesDisp = this->getNodesDisp( );
-//    nodesDisp.print("U1","\n");
-
-    for( short GP_c_r = 0 ; GP_c_r < NumIntegrationPts ; GP_c_r++ )
-      {
-        r = pts[GP_c_r ];
-        rw = wts[GP_c_r ];
-        for( short GP_c_s = 0 ; GP_c_s < NumIntegrationPts ; GP_c_s++ )
-          {
-            s = pts[GP_c_s ];
-            sw = wts[GP_c_s ];
-            for( short GP_c_t = 0 ; GP_c_t < NumIntegrationPts ; GP_c_t++ )
-              {
-                t = pts[GP_c_t ];
-                tw = wts[GP_c_t ];
-                        where =(GP_c_r * NumIntegrationPts + GP_c_s) * NumIntegrationPts + GP_c_t;
-                        dh = shapeFunctionDerivative(r,s,t);
-                        Jacobian = this->Jacobian_3D(dh);
-                        det_of_Jacobian  = Jacobian.determinant();
-                        dhGlobal = this->dh_Global(dh) ; 
-                        temp01 = dhGlobal("nk") * nodesDisp("nm");
-                        temp01.null_indices(); dhGlobal.null_indices(); nodesDisp.null_indices();
-                        temp02 = temp01("km") * dhGlobal("Qm");
-                        temp02.null_indices(); dhGlobal.null_indices(); temp01.null_indices();
-                        weight = rw * sw * tw * det_of_Jacobian;
-                        L2 = theMaterial[where]->getTangentTensor();
-                        temp03 = dhGlobal("Pj") * L2("ijkl");
-                        temp03.null_indices(); dhGlobal.null_indices(); L2.null_indices();
-                        temp04 = temp03("Pikl") * temp02("kQ") * weight;
-                        temp04.null_indices(); temp03.null_indices(); temp02.null_indices();
-                        Kk += temp04;
-              }
-          }
-      }
-    return Kk;
-  }
-
-//======================================================================
-tensor TotalLagrangianFD20NodeBrick::getStiffnessTensor03(void)
-  {
-    int K_dim[] = {NumNodes,NumDof,NumDof,NumNodes};
-    tensor Kk(4,K_dim,0.0);
-
-    double r  = 0.0;
-    double rw = 0.0;
-    double s  = 0.0;
-    double sw = 0.0;
-    double t  = 0.0;
-    double tw = 0.0;
-
-    short where = 0;
-    double weight = 0.0;
-
-    int dh_dim[] = {NumNodes,NumDof};
-    tensor dh(2, dh_dim, 0.0);
-
-    tensor L2;
-
-    double det_of_Jacobian = 0.0;
-
-    tensor Jacobian;
-    tensor dhGlobal;
-    tensor currentF;
-    tensor nodesDisp;
-    tensor temp01;
-    tensor temp02;
-    tensor temp03;
-    tensor temp04;
+    tensor temp04; 
     tensor temp05;
     tensor temp06;
 
@@ -586,307 +441,101 @@ tensor TotalLagrangianFD20NodeBrick::getStiffnessTensor03(void)
                         Jacobian = this->Jacobian_3D(dh);
                         det_of_Jacobian  = Jacobian.determinant();
                         dhGlobal = this->dh_Global(dh);
-                        temp01 = dhGlobal("mk") * nodesDisp("mx");
-                        temp01.null_indices( ); dhGlobal.null_indices( ); nodesDisp.null_indices( );
-                        temp02 = temp01("kx") * dhGlobal("Qx");
-                        temp02.null_indices( ); dhGlobal.null_indices( ); temp01.null_indices( );
-                        temp03 = dhGlobal("nk") * nodesDisp("ny");
-                        temp03.null_indices( ); dhGlobal.null_indices( ); nodesDisp.null_indices( );
-                        temp04 = dhGlobal("Py") * temp03("jy");
-                        temp04.null_indices( ); temp03.null_indices( ); dhGlobal.null_indices( );
                         weight = rw * sw * tw * det_of_Jacobian;
+                        PK2Stress = theMaterial[where]->getStressTensor();
                         L2 = theMaterial[where]->getTangentTensor();
-                        temp05 = temp04("Pj") * L2("ijkl");
-                        temp05.null_indices( ); temp02.null_indices( ); L2.null_indices( );
-                        temp06 = temp05("Pikl") * temp02("kQ") * weight;
-                        temp06.null_indices( ); temp05.null_indices( ); temp04.null_indices( );
+                        F = theMaterial[where]->getF();
+                        
+           //K1
+                        temp04 = dhGlobal("Pb") * tI2("mn");
+                          temp04.null_indices(); //dhGlobal.null_indices(); tI2.null_indices();
+                        temp02 = PK2Stress("bd") * dhGlobal("Qd");   
+                          temp02.null_indices(); //dhGlobal.null_indices(); PK2Stress.null_indices();
+                        temp06 = temp04("Pbmn") * temp02("bQ") * weight;
+                          temp06.null_indices(); //temp04.null_indices(); temp02.null_indices();
                         Kk += temp06;
-              }
-          }
-      }
-    return Kk;
-  }
+                        
+           //K2
+                        temp03 =  dhGlobal("Pb") * F("ma");
+                          temp03.null_indices(); //dhGlobal.null_indices(); F.null_indices();
+                        temp04 = F("nc") * L2("abcd");
+                          temp04.null_indices(); //F.null_indices(); L2.null_indices();
+                        temp05 = temp04("nabd") * dhGlobal("Qd"); 
+                          temp05.null_indices(); //temp04.null_indices(); dhGlobal.null_indices();
+                        temp06 = temp03("Pbma") * temp05("nabQ") * weight;
+                          temp06.null_indices(); //temp03.null_indices(); temp05.null_indices();
+                        Kk += temp06;
+                                                                    
+                        
+///*
+//			// K1
+//                        temp01 = dhGlobal("Pj") * L2("ijkl");
+//                        temp01.null_indices(); dhGlobal.null_indices(); L2.null_indices();
+//                        temp05 = temp01("Pikl") * dhGlobal("Qk") * weight;
+//                        temp05.null_indices(); dhGlobal.null_indices(); temp01.null_indices();
+//                        Kk += temp05;
+//
+//			// K2
+//                        temp01 = dhGlobal("nk") * nodesDisp("nm");
+//                        temp01.null_indices(); dhGlobal.null_indices(); nodesDisp.null_indices();
+//                        temp02 = temp01("km") * dhGlobal("Qm");
+//                        temp02.null_indices(); dhGlobal.null_indices(); temp01.null_indices();
+//                        temp05 = dhGlobal("Pj") * L2("ijkl");
+//                        temp05.null_indices(); dhGlobal.null_indices(); L2.null_indices();
+//                        temp06 = temp05("Pikl") * temp02("kQ") * weight;
+//                        temp06.null_indices(); temp05.null_indices(); temp02.null_indices();
+//                        Kk += temp06;
+//
+//
+//			// K3
+//                        temp01 = dhGlobal("mk") * nodesDisp("mx");
+//                        temp01.null_indices( ); dhGlobal.null_indices( ); nodesDisp.null_indices( );
+//                        temp02 = temp01("kx") * dhGlobal("Qx");
+//                        temp02.null_indices( ); dhGlobal.null_indices( ); temp01.null_indices( );
+//                        temp03 = dhGlobal("nk") * nodesDisp("ny");
+//                        temp03.null_indices( ); dhGlobal.null_indices( ); nodesDisp.null_indices( );
+//                        temp04 = dhGlobal("Py") * temp03("jy");
+//                        temp04.null_indices( ); temp03.null_indices( ); dhGlobal.null_indices( );
+//                        temp05 = temp04("Pj") * L2("ijkl");
+//                        temp05.null_indices( ); temp04.null_indices( ); L2.null_indices( );
+//                        temp06 = temp05("Pikl") * temp02("kQ") * weight;
+//                        temp06.null_indices( ); temp05.null_indices( ); temp05.null_indices( );
+//                        Kk += temp06;
+//
+//			// K4
+//                        temp01 = dhGlobal("mj") * nodesDisp("mx");
+//                        temp01.null_indices(); dhGlobal.null_indices(); nodesDisp.null_indices();
+//                        temp02 =  dhGlobal("Px") * temp01("jx");
+//                        temp02.null_indices(); dhGlobal.null_indices(); temp01.null_indices();
+//                        temp05 = temp02("Pj") * L2("ijkl");
+//                        temp05.null_indices(); temp02.null_indices(); L2.null_indices();
+//                        temp06 = temp05("Pikl") * dhGlobal("Qk") * weight;
+//                        temp06.null_indices(); dhGlobal.null_indices(); temp05.null_indices();
+//                        Kk += temp06;
+//
+//			// K5
+//                        temp01 =  dhGlobal("Qj") * PK2Stress("ij");
+//                        temp01.null_indices(); dhGlobal.null_indices(); PK2Stress.null_indices();
+//                        temp05 = dhGlobal("Pl") * temp01("Qi") * weight;
+//                        temp05.null_indices( ); dhGlobal.null_indices(); temp01.null_indices();
+//                        for ( int i=1 ; i<=NumNodes ; i++ ) {
+//                           for ( int j=1 ; j<=NumNodes ; j++ ) {
+//                              for ( int k=1 ; k<=NumDof ; k++ ) {
+//                                 for ( int l=1 ; l<=NumDof ; l++ ) {
+//                                    temp06.val(i,k,l,j) = temp05.cval(i,l,j,k); 
+//                                 }
+//                              }
+//                           }
+//                        }
+//			Kk += temp06;
+//*/			            
 
-//======================================================================
-tensor TotalLagrangianFD20NodeBrick::getStiffnessTensor04(void)
-  {
-    int K_dim[] = {NumNodes,NumDof,NumDof,NumNodes};
-    tensor Kk(4,K_dim,0.0);
-
-    double r  = 0.0;
-    double rw = 0.0;
-    double s  = 0.0;
-    double sw = 0.0;
-    double t  = 0.0;
-    double tw = 0.0;
-
-    short where = 0;
-    double weight = 0.0;
-
-    int dh_dim[] = {NumNodes,NumDof};
-    tensor dh(2, dh_dim, 0.0);
-
-    tensor L2;
-
-    double det_of_Jacobian = 0.0;
-
-    tensor Jacobian;
-    tensor dhGlobal;
-    tensor currentF;
-    tensor nodesDisp;
-    tensor temp01;
-    tensor temp02;
-    tensor temp03;
-    tensor temp04;
-
-    nodesDisp = this->getNodesDisp( );
-
-    for( short GP_c_r = 0 ; GP_c_r < NumIntegrationPts ; GP_c_r++ )
-      {
-        r = pts[GP_c_r ];
-        rw = wts[GP_c_r ];
-        for( short GP_c_s = 0 ; GP_c_s < NumIntegrationPts ; GP_c_s++ )
-          {
-            s = pts[GP_c_s ];
-            sw = wts[GP_c_s ];
-            for( short GP_c_t = 0 ; GP_c_t < NumIntegrationPts ; GP_c_t++ )
-              {
-                t = pts[GP_c_t ];
-                tw = wts[GP_c_t ];
-                        where =(GP_c_r * NumIntegrationPts + GP_c_s) * NumIntegrationPts + GP_c_t;
-                        dh = shapeFunctionDerivative(r,s,t);
-                        Jacobian = this->Jacobian_3D(dh);
-                        det_of_Jacobian  = Jacobian.determinant();
-                        dhGlobal = this->dh_Global(dh);
-                        temp01 = dhGlobal("mj") * nodesDisp("mx");
-                        temp01.null_indices(); dhGlobal.null_indices(); nodesDisp.null_indices();
-                        temp02 =  dhGlobal("Px") * temp01("jx");
-                        temp02.null_indices(); dhGlobal.null_indices(); temp01.null_indices();
-                        weight = rw * sw * tw * det_of_Jacobian;
-                        L2 = theMaterial[where]->getTangentTensor();
-                        temp03 = temp02("Pj") * L2("ijkl");
-                        temp03.null_indices(); temp02.null_indices(); L2.null_indices();
-                        temp04 = temp03("Pikl") * dhGlobal("Qk") * weight;
-                        temp04.null_indices(); dhGlobal.null_indices(); temp03.null_indices();
-                        Kk += temp04;
-              }
-          }
-      }
-    return Kk;
-  }
-
-//======================================================================
-tensor TotalLagrangianFD20NodeBrick::getStiffnessTensor05(void)
-  {
-    int K_dim[] = {NumNodes,NumDof,NumDof,NumNodes};
-    tensor Kk(4,K_dim,0.0);
-
-    double r  = 0.0;
-    double rw = 0.0;
-    double s  = 0.0;
-    double sw = 0.0;
-    double t  = 0.0;
-    double tw = 0.0;
-
-    short where = 0;
-    double weight = 0.0;
-
-    int dh_dim[] = {NumNodes,NumDof};
-    tensor dh(2, dh_dim, 0.0);
-
-    double det_of_Jacobian = 0.0;
-
-    tensor Jacobian;
-    tensor dhGlobal;
-    tensor currentF;
-    stresstensor PK2Stress;
-    tensor temp01;
-    tensor temp02;
-    int T3_dim[] = {NumNodes,NumDof,NumNodes,NumDof};
-    tensor temp03(4,T3_dim,0.0);
-
-    for( short GP_c_r = 0 ; GP_c_r < NumIntegrationPts ; GP_c_r++ )
-      {
-        r = pts[GP_c_r ];
-        rw = wts[GP_c_r ];
-        for( short GP_c_s = 0 ; GP_c_s < NumIntegrationPts ; GP_c_s++ )
-          {
-            s = pts[GP_c_s ];
-            sw = wts[GP_c_s ];
-            for( short GP_c_t = 0 ; GP_c_t < NumIntegrationPts ; GP_c_t++ )
-              {
-                t = pts[GP_c_t ];
-                tw = wts[GP_c_t ];
-                        where =(GP_c_r * NumIntegrationPts + GP_c_s) * NumIntegrationPts + GP_c_t;
-                        dh = shapeFunctionDerivative(r,s,t);
-                        Jacobian = this->Jacobian_3D(dh);
-                        det_of_Jacobian  = Jacobian.determinant();
-                        dhGlobal = this->dh_Global(dh);
-                        weight = rw * sw * tw * det_of_Jacobian;
-                        PK2Stress = theMaterial[where]->getStressTensor();
-//      if (where==1)
-//            PK2Stress.print("S2","\n");
-                        temp01 =  dhGlobal("Qj") * PK2Stress("ij");
-                        temp01.null_indices(); dhGlobal.null_indices(); PK2Stress.null_indices();
-                        temp02 = dhGlobal("Pl") * temp01("Qi") * weight;
-                        temp02.null_indices( ); dhGlobal.null_indices(); temp01.null_indices();
-                        temp03 += temp02;
               }
           }
       }
 
-     for ( int i=1 ; i<=NumNodes ; i++ )
-     {
-        for ( int j=1 ; j<=NumNodes ; j++ )
-        {
-           for ( int k=1 ; k<=NumDof ; k++ )
-           {
-              for ( int l=1 ; l<=NumDof ; l++ )
-              {
-                 Kk.val(i,k,l,j) = temp03.cval(i,l,j,k); 
-              }
-           }
-        }
-     }
 
     return Kk;
-  }
-
-//======================================================================
-tensor TotalLagrangianFD20NodeBrick::getStiffnessTensor(void)
-  {
-    int K_dim[] = {NumNodes,NumDof,NumDof,NumNodes};
-    tensor Kk(4,K_dim,0.0);
-
-    Kk = this->getStiffnessTensor05( ) +
-         this->getStiffnessTensor04( ) +
-         this->getStiffnessTensor03( ) +
-         this->getStiffnessTensor02( ) +
-         this->getStiffnessTensor01( );
-
-//    Kk.print();
-    return Kk;
-  }
-
-//======================================================================
-tensor TotalLagrangianFD20NodeBrick::getRtensor01(void)
-  {
-    int T_dim[] = {NumNodes,NumDof};
-    tensor Tt(2,T_dim,0.0);
-
-    double r  = 0.0;
-    double rw = 0.0;
-    double s  = 0.0;
-    double sw = 0.0;
-    double t  = 0.0;
-    double tw = 0.0;
-
-    short where = 0;
-    double weight = 0.0;
-
-    int dh_dim[] = {NumNodes,NumDof};
-    tensor dh(2, dh_dim, 0.0);
-
-    double det_of_Jacobian = 0.0;
-
-    tensor Jacobian;
-    tensor JacobianINV;
-    tensor dhGlobal;
-    tensor currentF;
-    stresstensor PK2Stress;
-    tensor temp01;
-
-    for( short GP_c_r = 0 ; GP_c_r < NumIntegrationPts ; GP_c_r++ )
-      {
-        r = pts[GP_c_r ];
-        rw = wts[GP_c_r ];
-        for( short GP_c_s = 0 ; GP_c_s < NumIntegrationPts ; GP_c_s++ )
-          {
-            s = pts[GP_c_s ];
-            sw = wts[GP_c_s ];
-            for( short GP_c_t = 0 ; GP_c_t < NumIntegrationPts ; GP_c_t++ )
-              {
-                t = pts[GP_c_t ];
-                tw = wts[GP_c_t ];
-                        where =(GP_c_r * NumIntegrationPts + GP_c_s) * NumIntegrationPts + GP_c_t;
-                        dh = shapeFunctionDerivative(r,s,t);
-                        Jacobian = this->Jacobian_3D(dh);
-                        det_of_Jacobian  = Jacobian.determinant();
-                        dhGlobal = this->dh_Global(dh);
-                        weight = rw * sw * tw * det_of_Jacobian;
-                        PK2Stress = theMaterial[where]->getStressTensor();
-                        temp01 = dhGlobal("Pj") * PK2Stress("ij") * weight;
-                        temp01.null_indices(); dhGlobal.null_indices(); PK2Stress.null_indices();
-                        Tt += temp01;
-              }
-          }
-      }
-    return Tt;
-  }
-
-//======================================================================
-tensor TotalLagrangianFD20NodeBrick::getRtensor02(void)
-  {
-    int T_dim[] = {NumNodes,NumDof};
-    tensor Tt(2,T_dim,0.0);
-
-    double r  = 0.0;
-    double rw = 0.0;
-    double s  = 0.0;
-    double sw = 0.0;
-    double t  = 0.0;
-    double tw = 0.0;
-
-    short where = 0;
-    double weight = 0.0;
-
-    int dh_dim[] = {NumNodes,NumDof};
-    tensor dh(2, dh_dim, 0.0);
-
-    double det_of_Jacobian = 0.0;
-
-    tensor Jacobian;
-    tensor JacobianINV;
-    tensor dhGlobal;
-    tensor currentF;
-    tensor nodesDisp;
-    stresstensor PK2Stress;
-    tensor temp01;
-    tensor temp02;
-    tensor temp03;
-
-    nodesDisp = this->getNodesDisp( );
-
-    for( short GP_c_r = 0 ; GP_c_r < NumIntegrationPts ; GP_c_r++ )
-      {
-        r = pts[GP_c_r ];
-        rw = wts[GP_c_r ];
-        for( short GP_c_s = 0 ; GP_c_s < NumIntegrationPts ; GP_c_s++ )
-          {
-            s = pts[GP_c_s ];
-            sw = wts[GP_c_s ];
-            for( short GP_c_t = 0 ; GP_c_t < NumIntegrationPts ; GP_c_t++ )
-              {
-                t = pts[GP_c_t ];
-                tw = wts[GP_c_t ];
-                        where =(GP_c_r * NumIntegrationPts + GP_c_s) * NumIntegrationPts + GP_c_t;
-                        dh = shapeFunctionDerivative(r,s,t);
-                        Jacobian = this->Jacobian_3D(dh);
-                        det_of_Jacobian  = Jacobian.determinant();
-                        dhGlobal = this->dh_Global(dh);
-                        weight = rw * sw * tw * det_of_Jacobian;
-                        PK2Stress = theMaterial[where]->getStressTensor();
-                        temp01 = dhGlobal("Bm") * nodesDisp("Bn");
-                        temp01.null_indices(); dhGlobal.null_indices(); nodesDisp.null_indices();
-                        temp02 = dhGlobal("Pn") * temp01("mn");
-                        temp02.null_indices(); dhGlobal.null_indices(); temp01.null_indices();
-                        temp03 = temp02("Pm") * PK2Stress("im") * weight;
-                        temp03.null_indices(); temp02.null_indices(); PK2Stress.null_indices();
-                        Tt += temp03;
-              }
-          }
-      }
-    return Tt;
   }
 
 //======================================================================
@@ -895,7 +544,80 @@ tensor TotalLagrangianFD20NodeBrick::getRtensor(void)
     int R_dim[] = {NumNodes,NumDof};
     tensor Rr(2,R_dim,0.0);
 
-    Rr = this->getRtensor01( ) + this->getRtensor02( );
+    double r  = 0.0;
+    double rw = 0.0;
+    double s  = 0.0;
+    double sw = 0.0;
+    double t  = 0.0;
+    double tw = 0.0;
+
+    short where = 0;
+    double weight = 0.0;
+
+    int dh_dim[] = {NumNodes,NumDof};
+    tensor dh(2, dh_dim, 0.0);
+
+    double det_of_Jacobian = 0.0;
+
+    tensor Jacobian;
+    tensor JacobianINV;
+    tensor dhGlobal;
+    tensor currentF;
+    tensor nodesDisp;
+    stresstensor PK2Stress;
+    tensor temp01;
+    tensor temp02;
+    //tensor temp03;
+    tensor F;
+
+    nodesDisp = this->getNodesDisp( );
+
+    for( short GP_c_r = 0 ; GP_c_r < NumIntegrationPts ; GP_c_r++ )
+      {
+        r = pts[GP_c_r ];
+        rw = wts[GP_c_r ];
+        for( short GP_c_s = 0 ; GP_c_s < NumIntegrationPts ; GP_c_s++ )
+          {
+            s = pts[GP_c_s ];
+            sw = wts[GP_c_s ];
+            for( short GP_c_t = 0 ; GP_c_t < NumIntegrationPts ; GP_c_t++ )
+              {
+                t = pts[GP_c_t ];
+                tw = wts[GP_c_t ];
+                        where =(GP_c_r * NumIntegrationPts + GP_c_s) * NumIntegrationPts + GP_c_t;
+                        dh = shapeFunctionDerivative(r,s,t);
+                        Jacobian = this->Jacobian_3D(dh);
+                        det_of_Jacobian  = Jacobian.determinant();
+                        dhGlobal = this->dh_Global(dh);
+                        weight = rw * sw * tw * det_of_Jacobian;
+                        PK2Stress = theMaterial[where]->getStressTensor();
+                        F = theMaterial[where]->getF();                        
+                        
+                        temp01 = PK2Stress("ik") * F("jk");
+                          temp01.null_indices(); //PK2Stress.null_indices(); F.null_indices();
+                        temp02 = dhGlobal("Pj") * temp01("ij") * weight;
+                          temp02.null_indices(); //dhGlobal.null_indices(); temp01.null_indices();
+                        Rr += temp02; 
+                        
+///*                                              
+//		// R1
+//			temp01 = dhGlobal("Pj") * PK2Stress("ij") * weight;
+//                        temp01.null_indices(); dhGlobal.null_indices(); PK2Stress.null_indices();
+//                        Rr += temp01;			
+//			
+//		// R2
+//                        temp01 = dhGlobal("Bm") * nodesDisp("Bn");
+//                        temp01.null_indices(); dhGlobal.null_indices(); nodesDisp.null_indices();
+//                        temp02 = dhGlobal("Pn") * temp01("mn");
+//                        temp02.null_indices(); dhGlobal.null_indices(); temp01.null_indices();
+//                        temp03 = temp02("Pm") * PK2Stress("im") * weight;
+//                        temp03.null_indices(); temp02.null_indices(); PK2Stress.null_indices();
+//                        Rr += temp03;
+//*/                        
+
+              }
+          }
+      }
 
     return Rr;
   }
@@ -951,7 +673,7 @@ tensor TotalLagrangianFD20NodeBrick::getBodyForce(void)
                         det_of_Jacobian  = Jacobian.determinant();
                         weight = rw * sw * tw * det_of_Jacobian;
                         Bb = Bb +  h("P") * bodyforce("i") * rho *weight;
-                        Bb.null_indices();
+                          Bb.null_indices();
               }
           }
       }
@@ -989,14 +711,10 @@ const Matrix &TotalLagrangianFD20NodeBrick::getTangentStiff ()
      int kki=0;
      int kkj=0;
 
-     for ( int i=1 ; i<=NumNodes ; i++ )
-     {
-        for ( int j=1 ; j<=NumNodes ; j++ )
-        {
-           for ( int k=1 ; k<=NumDof ; k++ )
-           {
-              for ( int l=1 ; l<=NumDof ; l++ )
-              {
+     for ( int i=1 ; i<=NumNodes ; i++ ) {
+        for ( int j=1 ; j<=NumNodes ; j++ ) {
+           for ( int k=1 ; k<=NumDof ; k++ ) {
+              for ( int l=1 ; l<=NumDof ; l++ ) {
                  kki = k+NumDof*(i-1);
                  kkj = l+NumDof*(j-1);
                  K( kki-1 , kkj-1 ) = stifftensor.cval(i,k,l,j); 
@@ -1025,9 +743,9 @@ const Matrix &TotalLagrangianFD20NodeBrick::getInitialStiff ()
 //=============================================================================
 const Matrix &TotalLagrangianFD20NodeBrick::getMass ()
 {
-  // Need Work Here
-  M.Zero();
-  return M;
+    // Need Work Here
+    M.Zero();
+    return M;
 }
 
 //======================================================================
@@ -1227,17 +945,18 @@ int TotalLagrangianFD20NodeBrick::addInertiaLoadToUnbalance(const Vector &accel)
 //=============================================================================
 const Vector &TotalLagrangianFD20NodeBrick::getResistingForce ()
 {
-    P.Zero(); 
     int f_dim[] = {NumNodes,NumDof};
-    tensor NodalForces_in(2,f_dim,0.0);
+    tensor NodalForces_in(2, f_dim, 0.0);
     NodalForces_in = this->getRtensor() - this->getForces();
-    for (int i = 0; i< NumNodes; i++)
-      for (int j = 0; j < NumDof; j++) 
-       {
-    P(i *3 + j) = NodalForces_in.cval(i+1, j+1);
-  }
-
-    P.addVector(1.0,Q,-1.0);
+    
+    for (int i = 0; i < NumNodes; i++) {
+      for (int j = 0; j < NumDof; j++) {
+         P(i *3 + j) = NodalForces_in.cval(i+1, j+1);
+      }
+    }
+    
+    P.addVector(1.0, Q,-1.0);
+    
     return P;
 }
 
@@ -1404,16 +1123,16 @@ void TotalLagrangianFD20NodeBrick::Print(OPS_Stream &s, int flag)
     
     for (int i=0; i<NumTotalGaussPts; i++)
     {
-  sigma = theMaterial[i]->getCauchyStressTensor();
-  P00(0) = sigma.val(1,1);
-  P00(1) = sigma.val(2,2);
-  P00(2) = sigma.val(3,3);
-  P00(3) = sigma.val(2,3);
-  P00(4) = sigma.val(3,1);
-  P00(5) = sigma.val(1,2);
+      sigma = theMaterial[i]->getCauchyStressTensor();
+      P00(0) = sigma.val(1,1);
+      P00(1) = sigma.val(2,2);
+      P00(2) = sigma.val(3,3);
+      P00(3) = sigma.val(2,3);
+      P00(4) = sigma.val(3,1);
+      P00(5) = sigma.val(1,2);
 
-  s << "\n where = " << i << endln;
-  s << " Stress (Cauchy): xx yy zz yz zx xy) " << P00 << endln;
+      s << "\n where = " << i << endln;
+      s << " Stress (Cauchy): xx yy zz yz zx xy) " << P00 << endln;
     }
 
 }
@@ -1422,12 +1141,15 @@ void TotalLagrangianFD20NodeBrick::Print(OPS_Stream &s, int flag)
 Response * TotalLagrangianFD20NodeBrick::setResponse (const char **argv, int argc, Information &eleInfo)
 {
     if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
-      return new ElementResponse(this, 1, P);
+      return new ElementResponse(this, 1, Vector(NumElemDof));
+    
     else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
-      return new ElementResponse(this, 2, K);
+      return new ElementResponse(this, 2, Matrix(matrixData, NumElemDof, NumElemDof));
+    
     else if (strcmp(argv[0],"CauchyStress") == 0 || strcmp(argv[0],"stress") == 0)
       return new ElementResponse(this, 3, Vector(NumTotalGaussPts*6));
-    else if (strcmp(argv[0],"PK2Stress") == 0 || strcmp(argv[0],"2PKstress") == 0)
+    
+    else if (strcmp(argv[0],"PK2Stress") == 0 || strcmp(argv[0],"PK2stress") == 0)
       return new ElementResponse(this, 4, Vector(NumTotalGaussPts*6));
 
     else
@@ -1439,52 +1161,48 @@ int TotalLagrangianFD20NodeBrick::getResponse (int responseID, Information &eleI
 {
      static Vector P0(NumTotalGaussPts*6);
      
-     switch (responseID)
-   {
+     switch (responseID) {
+     
      case 1:
-          return eleInfo.setVector( this->getResistingForce() );
+          return eleInfo.setVector(this->getResistingForce() );
 
      case 2:
           return eleInfo.setMatrix(this->getTangentStiff() );
 
-     case 3:
-       { 
-    Vector P0(NumTotalGaussPts*6);
-    tensor sigma; 
-    for (int i=0; i<NumTotalGaussPts; i++)
-       {
-        sigma = theMaterial[i]->getCauchyStressTensor();
-        P0( i*6+0 ) = sigma.val(1,1);
-        P0( i*6+1 ) = sigma.val(2,2);
-        P0( i*6+2 ) = sigma.val(3,3);
-        P0( i*6+3 ) = sigma.val(2,3);
-        P0( i*6+4 ) = sigma.val(3,1);
-        P0( i*6+5 ) = sigma.val(1,2);
-       }
-          return eleInfo.setVector(P0);
-       }
-     case 4:
-       { 
-    Vector P0(NumTotalGaussPts*6);
-    tensor sigma; 
-    for (int i=0; i<NumTotalGaussPts; i++)
-       {
-        sigma = theMaterial[i]->getStressTensor();
-        P0( i*6+0 ) = sigma.val(1,1);
-        P0( i*6+1 ) = sigma.val(2,2);
-        P0( i*6+2 ) = sigma.val(3,3);
-        P0( i*6+3 ) = sigma.val(2,3);
-        P0( i*6+4 ) = sigma.val(3,1);
-        P0( i*6+5 ) = sigma.val(1,2);
-       }
-          return eleInfo.setVector(P0);
-       }
+     case 3: { 
+        Vector P0(NumTotalGaussPts*6);
+        tensor sigma; 
+        for (int i=0; i<NumTotalGaussPts; i++) {
+          sigma = theMaterial[i]->getCauchyStressTensor();
+          P0( i*6+0 ) = sigma.val(1,1);
+          P0( i*6+1 ) = sigma.val(2,2);
+          P0( i*6+2 ) = sigma.val(3,3);
+          P0( i*6+3 ) = sigma.val(2,3);
+          P0( i*6+4 ) = sigma.val(3,1);
+          P0( i*6+5 ) = sigma.val(1,2);
+        }
+        return eleInfo.setVector(P0);
+     }
+
+     case 4: { 
+        Vector P0(NumTotalGaussPts*6);
+        tensor sigma; 
+        for (int i=0; i<NumTotalGaussPts; i++) {
+          sigma = theMaterial[i]->getStressTensor();
+          P0( i*6+0 ) = sigma.val(1,1);
+          P0( i*6+1 ) = sigma.val(2,2);
+          P0( i*6+2 ) = sigma.val(3,3);
+          P0( i*6+3 ) = sigma.val(2,3);
+          P0( i*6+4 ) = sigma.val(3,1);
+          P0( i*6+5 ) = sigma.val(1,2);
+        }
+        return eleInfo.setVector(P0);
+     }
     
      default:
-          return -1;
+        return -1;
 
-   }
-    
+     }    
 }
 
 

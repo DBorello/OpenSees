@@ -20,7 +20,7 @@
 //#
 //#
 //# DATE:              Sept2003
-//# UPDATE HISTORY:
+//# UPDATE HISTORY:    28May2004, Zhao Optimized the Stiffness Tensor
 //#
 //#
 //===============================================================================
@@ -39,8 +39,6 @@
 
 #include <string.h>
 
-#include <GaussQuadRule1d.h>
-
 #include <OPS_Globals.h>
 
 #include <basics.h>
@@ -48,7 +46,6 @@
 #include <Vector.h>
 #include <Matrix.h>
 #include <BJtensor.h>
-
 #include <stresst.h>
 #include <straint.h>
 
@@ -60,7 +57,7 @@
 #include <ElementResponse.h>
 #include <ElementalLoad.h>
 
-class Node;
+#include <FiniteDeformationElastic3D.h>
 
 class TotalLagrangianFD20NodeBrick: public Element
 {
@@ -126,8 +123,8 @@ class TotalLagrangianFD20NodeBrick: public Element
     static Matrix M;    // Element mass matrix
     static Vector P;    // Element resisting force vector
     static double pts[3];   // Stores quadrature points
-    static double wts[3];     // Stores quadrature weights
-    Vector Q;    // Applied nodal loads
+    static double wts[3];   // Stores quadrature weights
+    Vector Q;     // Applied nodal loads
     Vector bf;    // Body forces
 
     double rho;    // Mass per unit volume
@@ -148,14 +145,14 @@ class TotalLagrangianFD20NodeBrick: public Element
     tensor getNodesCrds(void);
     tensor getNodesDisp(void);
 
-    tensor getStiffnessTensor01(void);
-    tensor getStiffnessTensor02(void);
-    tensor getStiffnessTensor03(void);
-    tensor getStiffnessTensor04(void);
-    tensor getStiffnessTensor05(void);
+//    tensor getStiffnessTensor01(void);
+//    tensor getStiffnessTensor02(void);
+//    tensor getStiffnessTensor03(void);
+//    tensor getStiffnessTensor04(void);
+//    tensor getStiffnessTensor05(void);
     tensor getStiffnessTensor(void);
-    tensor getRtensor01(void);
-    tensor getRtensor02(void);
+//    tensor getRtensor01(void);
+//    tensor getRtensor02(void);
     tensor getRtensor(void);
     tensor getBodyForce(void);
     tensor getSurfaceForce(void);
