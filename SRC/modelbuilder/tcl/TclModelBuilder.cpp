@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 08:23:22 $
+// $Revision: 1.3 $
+// $Date: 2000-12-19 04:03:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -171,7 +171,14 @@ TclModelBuilder_addGroundMotion(ClientData clientData,
 				Tcl_Interp *interp, 
 				int argc,    
 				char **argv);
-				
+
+/// added by ZHY
+int
+TclModelBuilder_UpdateMaterialStage(ClientData clientData, 
+				    Tcl_Interp *interp,  
+				    int argc,
+				    char **argv);
+			   
 // REMO
 extern int
 TclModelBuilder_addPatch (ClientData clientData, Tcl_Interp *interp,
@@ -269,6 +276,12 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   Tcl_CreateCommand(interp, "geomTransf", TclModelBuilder_addRemoGeomTransf,
 		    (ClientData)NULL, NULL);    
 
+  
+  ///new command for elast2plast in Multi-yield plasticity, by ZHY
+  Tcl_CreateCommand(interp, "updateMaterialStage", 
+		    TclModelBuilder_UpdateMaterialStage,
+		    (ClientData)NULL, NULL);
+  
   // set the static pointers in this file
   theTclBuilder = this;
   theTclDomain = &theDomain;
@@ -1256,4 +1269,22 @@ TclModelBuilder_addRemoGeomTransf(ClientData clientData, Tcl_Interp *interp, int
   return TclModelBuilder_addGeomTransf(clientData, interp, argc,argv,
 				       theTclDomain,
 				       theTclBuilder);
+}
+
+
+/// added by ZHY
+extern int 
+TclModelBuilderUpdateMaterialStageCommand(ClientData clientData, 
+					  Tcl_Interp *interp, 
+					  int argc, 
+					  char **argv, 
+					  TclModelBuilder *theTclBuilder);
+int
+TclModelBuilder_UpdateMaterialStage(ClientData clientData, 
+				    Tcl_Interp *interp,  
+				    int argc, 
+				    char **argv)
+{
+  return TclModelBuilderUpdateMaterialStageCommand(clientData, interp, 
+				       argc, argv, theTclBuilder);
 }
