@@ -167,7 +167,7 @@ class Template3Dep : public NDMaterial
     void Print(ostream &s, int flag =0);
 
     //Private Utility method
-//  private:
+  private:
     
      //These are from formerly CDriver
      EPState ForwardEulerEPState( straintensor &strain_increment);
@@ -177,7 +177,7 @@ class Template3Dep : public NDMaterial
      EPState FESubIncrementation( const straintensor &strain_increment,
                                   int number_of_subincrements);
 
-  private:
+//  private:
      EPState BackwardEulerEPState( const straintensor &strain_increment);
 
      EPState BESubIncrementation( const straintensor & strain_increment,

@@ -126,6 +126,8 @@ class MatPoint3D
     double getrho() const;
     const stresstensor getStressTensor() const;
     const straintensor getStrainTensor() const;
+    //Added Aug. 13, 2001 Joey
+    const straintensor getPlasticStrainTensor() const;
     
     int commitState(void) ;
     int revertToLastCommit(void) ;

@@ -257,6 +257,12 @@ const straintensor MatPoint3D::getStrainTensor() const {
     return matmodel->getStrainTensor();
 }
 
+//=============================================================================
+const straintensor MatPoint3D::getPlasticStrainTensor() const {
+
+    return matmodel->getPlasticStrainTensor();
+}
+
 
 
 //================================================================================
