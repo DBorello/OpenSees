@@ -20,7 +20,7 @@ set p   5.0
 set np -5.0
 set ld -8.0 
 set lf1 0.005
-set NN1 200
+set NN1 10
 # ################################
 # build the model
 # #################################
@@ -95,7 +95,7 @@ load 8 $np $p  $np -pattern 2
 
 #Set up recorder
 recorder Node node_iso.out disp -time -node 5 -dof 3
-recorder plot node_iso.out "disp load"  10 10 300 300 -columns 2 1
+#recorder plot node_iso.out "disp load"  10 10 300 300 -columns 2 1
 #stress recorder
 #recorder Element all -time -file SigmaIso.out stress
 #recorder plot SigmaIso.out "Load factor vs. Normal stress"  10 400 300 300 -columns 1 3
