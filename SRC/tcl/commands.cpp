@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.46 $
-// $Date: 2003-03-04 00:48:19 $
+// $Revision: 1.47 $
+// $Date: 2003-03-04 18:49:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -407,7 +407,7 @@ wipeReliability(ClientData clientData, Tcl_Interp *interp, int argc, char **argv
   return TCL_OK;
 
 }
-// AddingSensitivity:BEGIN /////////////////////////////////////////////////
+
 int 
 sensitivityAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
@@ -2070,7 +2070,9 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	  if (theTransientAnalysis != 0)
 		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
   }  
-  
+
+
+#ifdef _RELIABILITY
   else if (strcmp(argv[1],"NewmarkWithSensitivity") == 0) {
 	  int assemblyFlag = 0;
       double gamma;
@@ -2148,18 +2150,20 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	  }
 
       if (argc == 4 || argc == 6) {
-		theNSI = new NewmarkSensitivityIntegrator(assemblyFlag, gamma,beta);       
-	  }
+	theNSI = new NewmarkSensitivityIntegrator(assemblyFlag, gamma,beta);       
+      }
       else {
-		theNSI = new NewmarkSensitivityIntegrator(assemblyFlag, gamma,beta,alphaM,betaK,betaKi,betaKc);
-	  }
-	  theTransientIntegrator = theNSI;
+	theNSI = new NewmarkSensitivityIntegrator(assemblyFlag, gamma,beta,alphaM,betaK,betaKi,betaKc);
+      }
+      theTransientIntegrator = theNSI;
 
 
       // if the analysis exists - we want to change the Integrator
 	  if (theTransientAnalysis != 0)
 		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
   }  
+
+#endif
   
   else if (strcmp(argv[1],"HHT") == 0) {
       double alpha;
@@ -3092,8 +3096,6 @@ stopTimer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 int 
 rayleighDamping(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
-  int flag = 0; // default flag sent to a nodes Print() method
-
   if (argc < 5) { 
     opserr << "WARNING rayleigh alphaM? betaK? betaK0? betaKc? - not enough arguments to command\n";
     return TCL_ERROR;
