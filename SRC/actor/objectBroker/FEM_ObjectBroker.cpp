@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-07-18 22:03:18 $
+// $Revision: 1.6 $
+// $Date: 2001-08-27 00:20:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -61,6 +61,23 @@
 #include <PathIndependentMaterial.h>
 #include <SeriesMaterial.h>
 #include <CableMaterial.h>
+#include <ENTMaterial.h>
+
+#include <FedeasBond1Material.h>
+#include <FedeasBond2Material.h>
+#include <FedeasConcr1Material.h>
+#include <FedeasConcr2Material.h>
+#include <FedeasConcr3Material.h>
+#include <FedeasHardeningMaterial.h>
+#include <FedeasHyster1Material.h>
+#include <FedeasHyster2Material.h>
+#include <FedeasSteel1Material.h>
+#include <FedeasSteel2Material.h>
+
+#include <DrainBilinearMaterial.h>
+#include <DrainClough1Material.h>
+#include <DrainClough2Material.h>
+#include <DrainPinch1Material.h>
 
 // Sections
 #include <ElasticSection2d.h>
@@ -71,10 +88,24 @@
 #include <FiberSection.h>
 #include <FiberSection2d.h>
 #include <FiberSection3d.h>
+#include <ElasticPlateSection.h>
+#include <ElasticMembranePlateSection.h>
+#include <MembranePlateFiberSection.h>
 
 // NDMaterials
 #include <ElasticIsotropicPlaneStrain2D.h>
 #include <ElasticIsotropicPlaneStress2D.h>
+#include <ElasticIsotropicPlateFiber.h>
+#include <ElasticIsotropicAxiSymm.h>
+#include <ElasticIsotropic3D.h>
+#include <J2PlaneStrain.h>
+#include <J2PlaneStress.h>
+#include <J2PlateFiber.h>
+#include <J2AxiSymm.h>
+#include <J2ThreeDimensional.h>
+#include <BidirectionalMaterial.h>
+#include <PlaneStressMaterial.h>
+#include <PlateFiberMaterial.h>
 
 // Fibers
 #include <UniaxialFiber2d.h>
@@ -89,20 +120,30 @@
 #include <beam3d02.h>
 #include <Truss.h>
 #include <TrussSection.h>
+#include <CorotTruss.h>
+#include <CorotTrussSection.h>
 #include <ZeroLength.h>
 #include <ZeroLengthSection.h>
 #include <ZeroLengthND.h>
 #include <FourNodeQuad.h>
+#include <EnhancedQuad.h>
+#include <ConstantPressureVolumeQuad.h>
 #include <ElasticBeam2d.h>
 #include <ElasticBeam3d.h>
 #include <BeamWithHinges2d.h>
 #include <BeamWithHinges3d.h>
 #include <NLBeamColumn2d.h>
 #include <NLBeamColumn3d.h>
+#include <DispBeamColumn2d.h>
+#include <DispBeamColumn3d.h>
+#include <ShellMITC4.h>
+#include <Brick.h>
+#include <BbarBrick.h>
 
 #include <LinearCrdTransf2d.h>
-#include <PDeltaCrdTransf2d.h>
 #include <LinearCrdTransf3d.h>
+#include <PDeltaCrdTransf2d.h>
+#include <PDeltaCrdTransf3d.h>
 
 // node header files
 #include <Node.h>
@@ -264,6 +305,12 @@ FEM_ObjectBroker::getNewElement(int classTag)
 	case ELE_TAG_TrussSection:  
 	     return new TrussSection(); 	     
 	     
+	case ELE_TAG_CorotTruss:  
+	     return new CorotTruss(); 
+	     
+	case ELE_TAG_CorotTrussSection:  
+	     return new CorotTrussSection(); 	     
+
 	case ELE_TAG_ZeroLength:  
 	     return new ZeroLength(); 	     
 
@@ -294,6 +341,24 @@ FEM_ObjectBroker::getNewElement(int classTag)
 	case ELE_TAG_NLBeamColumn3d:  
 	     return new NLBeamColumn3d();  
 				
+	case ELE_TAG_DispBeamColumn2d:  
+	     return new DispBeamColumn2d();					     
+
+	case ELE_TAG_DispBeamColumn3d:  
+	     return new DispBeamColumn3d(); 
+		 
+	case ELE_TAG_EnhancedQuad:
+		return new EnhancedQuad();
+
+	case ELE_TAG_ConstantPressureVolumeQuad:
+		return new ConstantPressureVolumeQuad();
+
+	case ELE_TAG_Brick:
+		return new Brick();
+
+	case ELE_TAG_BbarBrick:
+		return new BbarBrick();
+
 	default:
 	     cerr << "FEM_ObjectBroker::getNewElement - ";
 	     cerr << " - no Element type exists for class tag " ;
@@ -406,6 +471,8 @@ FEM_ObjectBroker::getNewCrdTransf3d(int classTag)
 	switch(classTag) {
 	case CRDTR_TAG_LinearCrdTransf3d:
 		return new LinearCrdTransf3d();
+	case CRDTR_TAG_PDeltaCrdTransf3d:
+		return new PDeltaCrdTransf3d();
 	//case CRDTR_TAG_CorotCrdTransf3d :
 	//	return new CorotCrdTransf3d();
 	default:
@@ -457,6 +524,51 @@ FEM_ObjectBroker::getNewUniaxialMaterial(int classTag)
 	case MAT_TAG_CableMaterial:
 		return new CableMaterial();
 	     
+	case MAT_TAG_ENTMaterial:
+		return new ENTMaterial();
+
+	case MAT_TAG_FedeasBond1:
+		return new FedeasBond1Material();
+
+	case MAT_TAG_FedeasBond2:
+		return new FedeasBond2Material();
+
+	case MAT_TAG_FedeasConcrete1:
+		return new FedeasConcr1Material();
+
+	case MAT_TAG_FedeasConcrete2:
+		return new FedeasConcr2Material();
+
+	case MAT_TAG_FedeasConcrete3:
+		return new FedeasConcr3Material();
+
+	case MAT_TAG_FedeasHardening:
+		return new FedeasHardeningMaterial();
+
+	case MAT_TAG_FedeasHysteretic1:
+		return new FedeasHyster1Material();
+
+	case MAT_TAG_FedeasHysteretic2:
+		return new FedeasHyster2Material();
+
+	case MAT_TAG_FedeasSteel1:
+		return new FedeasSteel1Material();
+
+	case MAT_TAG_FedeasSteel2:
+		return new FedeasSteel2Material();
+
+	case MAT_TAG_DrainBilinear:
+		return new DrainBilinearMaterial();
+
+	case MAT_TAG_DrainClough1:
+		return new DrainClough1Material();
+
+	case MAT_TAG_DrainClough2:
+		return new DrainClough2Material();
+
+	case MAT_TAG_DrainPinch1:
+		return new DrainPinch1Material();
+
 	default:
 	     cerr << "FEM_ObjectBroker::getPtrNewUniaxialMaterial - ";
 	     cerr << " - no UniaxialMaterial type exists for class tag ";
@@ -486,13 +598,22 @@ FEM_ObjectBroker::getNewSection(int classTag)
 	     return new SectionAggregator();
 
 	case SEC_TAG_Fiber:
-	  return new FiberSection();
-
-        case SEC_TAG_FiberSection2d:
-	  return new FiberSection2d();
+		return new FiberSection();
+	
+	case SEC_TAG_FiberSection2d:
+		return new FiberSection2d();
       
-        case SEC_TAG_FiberSection3d:
-	  return new FiberSection3d();
+	case SEC_TAG_FiberSection3d:
+		return new FiberSection3d();
+
+	case SEC_TAG_ElasticPlateSection:
+		return new ElasticPlateSection();
+
+	case SEC_TAG_ElasticMembranePlateSection:
+		return new ElasticMembranePlateSection();
+
+	case SEC_TAG_MembranePlateFiberSection:
+		return new MembranePlateFiberSection();
 
 	default:
 	     cerr << "FEM_ObjectBroker::getNewSection - ";
@@ -513,6 +634,39 @@ FEM_ObjectBroker::getNewNDMaterial(int classTag)
 		case ND_TAG_ElasticIsotropicPlaneStress2d:
 			return new ElasticIsotropicPlaneStress2D();
 		
+		case ND_TAG_ElasticIsotropicAxiSymm:
+			return new ElasticIsotropicAxiSymm();
+
+		case ND_TAG_ElasticIsotropicPlateFiber:
+			return new ElasticIsotropicPlateFiber();
+
+		case ND_TAG_ElasticIsotropic3D:
+			return new ElasticIsotropic3D();
+
+		case ND_TAG_J2PlaneStrain:
+			return new J2PlaneStrain();
+		
+		case ND_TAG_J2PlaneStress:
+			return new J2PlaneStress();
+		
+		case ND_TAG_J2AxiSymm:
+			return new J2AxiSymm();
+
+		case ND_TAG_J2PlateFiber:
+			return new J2PlateFiber();
+
+		case ND_TAG_J2ThreeDimensional:
+			return new J2ThreeDimensional();
+
+		case ND_TAG_Bidirectional:
+			return new BidirectionalMaterial();
+
+		case ND_TAG_PlaneStressMaterial:
+			return new PlaneStressMaterial();
+
+		case ND_TAG_PlateFiberMaterial:
+			return new PlateFiberMaterial();
+
 		default:
 			cerr << "FEM_ObjectBroker::getNewNDMaterial - ";
 			cerr << " - no NDMaterial type exists for class tag ";
