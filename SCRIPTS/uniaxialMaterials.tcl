@@ -32,6 +32,10 @@ $m add command -label Concrete01 -command "SetConcrete01 .concrete01"
 proc SetConcrete01 {w} {
     global matID
 
+    # Turn off all buttons & create a top level window
+    disable_buttons
+    toplevel $w
+
     set count 0
     foreach field {materialId fc ec fu eu} {
 	label $w.l$field -text $field
@@ -564,3 +568,65 @@ proc doneSeries { } {
     SetValues
     Reset
 }
+
+
+
+# ##############################################################
+# Define the data structures & procedures for Steel01
+# ##############################################################
+
+set Steel01(materialId) 0
+set Steel01(fy) 0
+set Steel01(E) 0
+set Steel01(b) 0
+set Steel01(a1) 0
+set Steel01(a2) 55
+set Steel01(a3) 0
+set Steel01(a4) 55
+
+# add Steel01 to the materials menu
+$m add command -label Steel01 -command "SetSteel01 .steel01"
+
+proc SetSteel01 {w} {
+    global matID
+
+    # Turn off all buttons & create a top level window
+    disable_buttons
+    toplevel $w
+
+    set count 0
+    foreach field {materialId fy E b a1 a2 a3 a4} {
+	label $w.l$field -text $field
+	entry $w.e$field -textvariable Steel01($field) -relief sunken 
+	grid $w.l$field -row $count -column 0 -sticky e
+	grid $w.e$field -row $count -column 1 -sticky ew
+	incr count
+    }
+
+    button $w.ok -text OK -command "doneSteel01; destroy $w; enable_buttons;"
+    grid $w.ok -row 0 -rowspan 3 -column 2 -sticky nsew
+
+    $w.ematerialId config -state normal
+    set Steel01(materialId) [expr $matID + 1]
+    $w.ematerialId delete 0 end
+    $w.ematerialId insert 0 $Steel01(materialId)
+    $w.ematerialId config -state disabled
+}
+
+
+proc doneSteel01 { } {
+    global matID
+    global Steel01
+
+    set matID $Steel01(materialId)
+    uniaxialMaterial Steel01 $matID $Steel01(fy) $Steel01(E) $Steel01(b) $Steel01(a1) $Steel01(a2) $Steel01(a3) $Steel01(a4)
+    eval uniaxialTest $matID
+    set matID $Steel01(materialId)
+
+    SetValues
+    Reset
+}
+
+
+
+
