@@ -1,6 +1,6 @@
 include ../../../../Makefile.def
 
-OBJS       = NLBeamColumn2d.o  NLBeamColumn3d.o LargeDispBeamColumn3d.o
+OBJS       = NLBeamColumn2d.o  NLBeamColumn3d.o 
 
 # Compilation control
 
