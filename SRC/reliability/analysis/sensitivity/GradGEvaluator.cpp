@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:36 $
+// $Revision: 1.2 $
+// $Date: 2003-03-06 18:11:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/GradGEvaluator.cpp,v $
 
 
@@ -96,11 +96,12 @@ GradGEvaluator::computeParameterDerivatives(double g)
 
 	while ( tokenPtr != NULL ) {
 
-		if ( strcmp(tokenPtr, "par") == 0) {
+		if ( strncmp(tokenPtr, "par", 3) == 0) {
 	
-			tokenPtr = strtok( NULL, separators); 
-			int parameterNumber = atoi( tokenPtr );
-			
+			// Get parameter number
+			int parameterNumber;
+			sscanf(tokenPtr,"par_%i",&parameterNumber);
+
 			// Store the original parameter value
 			double originalValue;
 			sprintf(tclAssignment , "($par_%d)",parameterNumber);
@@ -109,11 +110,15 @@ GradGEvaluator::computeParameterDerivatives(double g)
 			// Assign a perturbed value
 			sprintf(tclAssignment,"set par_%d [ expr ($par_%d*1.001) ]",parameterNumber,parameterNumber);
 			Tcl_Eval( theTclInterp, tclAssignment);
-			
+
+			// Evaluate limit-state function again
+			double g_perturbed;
+			char *theTokenizedExpression = theLimitStateFunction->getTokenizedExpression();
+			Tcl_ExprDouble( theTclInterp, theTokenizedExpression, &g_perturbed );
+
 			// Compute the gradient 'dgdpar' by finite difference
-			sprintf(tclAssignment , "($lsfperturbed-$lsfvalue)/([expr $par_%d*0.001])",parameterNumber);
-			Tcl_ExprDouble( theTclInterp, tclAssignment, &onedgdpar );
-			
+			onedgdpar = (g_perturbed-g)/(originalValue*0.001);
+
 			// Make assignment back to its original value
 			sprintf(tclAssignment,"set par_%d %35.20f",parameterNumber,originalValue);
 			Tcl_Eval( theTclInterp, tclAssignment);
