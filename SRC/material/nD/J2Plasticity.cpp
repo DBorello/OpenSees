@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-16 22:19:33 $
+// $Revision: 1.4 $
+// $Date: 2001-12-17 23:38:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2Plasticity.cpp,v $
 
 // Written: Ed "C++" Love
@@ -247,7 +247,7 @@ void J2Plasticity :: plastic_integrator( )
 {
   const double tolerance = (1.0e-12)*sigma_0 ;
 
-  const double dt = 1.0 ; //time step = 1 for now
+  const double dt = ops_Dt ; //time step
 
   static Matrix dev_strain(3,3) ; //deviatoric strain
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2001-10-03 18:07:50 $
+// $Revision: 1.15 $
+// $Date: 2001-12-17 23:38:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                       
@@ -312,12 +312,13 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	if (argc < 9) {
 	    cerr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: nDMaterial J2Plasticity tag? K? G? sig0? sigInf? delta? H?" << endl;
+	    cerr << "Want: nDMaterial J2Plasticity tag? K? G? sig0? sigInf? delta? H? <eta?>" << endl;
 	    return TCL_ERROR;
 	}    
 
 	int tag;
 	double K, G, sig0, sigInf, delta, H;
+	double eta = 0.0;
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
 	    cerr << "WARNING invalid J2Plasticity tag" << endl;
@@ -358,9 +359,14 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
 	    return TCL_ERROR;	
 	}			
+	if (argc > 9 && Tcl_GetDouble(interp, argv[9], &eta) != TCL_OK) {
+	    cerr << "WARNING invalid eta\n";
+	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
+	    return TCL_ERROR;	
+	}			
 
 	theMaterial = new J2Plasticity (tag, 0, K, G, sig0, sigInf, 
-					delta, H);
+					delta, H, eta);
     }	
     
     // Pressure Independend Multi-yield, by ZHY
