@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2001-11-26 23:10:16 $
+// $Revision: 1.24 $
+// $Date: 2001-12-07 01:03:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -289,6 +289,14 @@
 #define EquiALGORITHM_TAGS_BFGS 		5
 #define EquiALGORITHM_TAGS_SplitNewton 		6
 #define EquiALGORITHM_TAGS_KrylovNewton         7
+#define EquiALGORITHM_TAGS_NewtonLineSearch     8
+
+
+#define LINESEARCH_TAGS_InitialInterpolatedLineSearch 1
+#define LINESEARCH_TAGS_BisectionLineSearch           2
+#define LINESEARCH_TAGS_RegulaFalsiLineSearch         3
+#define LINESEARCH_TAGS_SecantLineSearch              4
+
 
 #define INTEGRATOR_TAGS_Newmark          	2
 #define INTEGRATOR_TAGS_HHT 	          	3

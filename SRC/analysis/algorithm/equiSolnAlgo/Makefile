@@ -2,7 +2,8 @@ include ../../../../Makefile.def
 
 OBJS       = EquiSolnAlgo.o Linear.o NewtonRaphson.o \
 	ModifiedNewton.o NewtonLineSearch.o Broyden.o BFGS.o \
-	KrylovNewton.o
+	KrylovNewton.o LineSearch.o InitialInterpolatedLineSearch.o \
+	SecantLineSearch.o RegulaFalsiLineSearch.o BisectionLineSearch.o
 
 # Compilation control
 
