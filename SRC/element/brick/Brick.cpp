@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-04-23 21:43:13 $
+// $Revision: 1.10 $
+// $Date: 2002-04-29 22:09:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.cpp,v $
 
 // Ed "C++" Love
@@ -320,7 +320,7 @@ Brick::addInertiaLoadToUnbalance(const Vector &accel)
   for (i=0; i<numberNodes; i++) {
     const Vector &Raccel = nodePointers[i]->getRV(accel);
     for (int j=0; j<ndf; j++)
-      resid(count++) = Raccel(i);
+      resid(count++) = Raccel(j);
   }
 
   // create the load vector if one does not exist
