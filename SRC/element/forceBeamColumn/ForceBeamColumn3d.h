@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2003-02-27 17:15:15 $
+// $Revision: 1.6 $
+// $Date: 2003-06-17 23:51:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.h,v $
 
 #ifndef ForceBeamColumn3d_h
@@ -129,6 +129,8 @@ class ForceBeamColumn3d: public Element
   double v0[5]; // Initial deformations due to element loads
 
   Matrix *Ki;
+
+  bool isTorsion;
   
   static Matrix theMatrix;
   static Vector theVector;

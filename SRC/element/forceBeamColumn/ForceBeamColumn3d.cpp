@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-06-10 00:36:09 $
+// $Revision: 1.11 $
+// $Date: 2003-06-17 23:51:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 #include <math.h>
@@ -44,6 +44,8 @@
 #define  NEGD  12        // number of element global dof's
 #define  NEBD  6         // number of element dof's in the basic system
 
+#define DefaultLoverGJ 1.0e-10
+
 Matrix ForceBeamColumn3d::theMatrix(12,12);
 Vector ForceBeamColumn3d::theVector(12);
 double ForceBeamColumn3d::workArea[200];
@@ -61,7 +63,7 @@ ForceBeamColumn3d::ForceBeamColumn3d():
   initialFlag(0),
   kv(NEBD,NEBD), Se(NEBD),
   kvcommit(NEBD,NEBD), Secommit(NEBD),
-  fs(0), vs(0), Ssr(0), vscommit(0), sp(0), Ki(0)
+  fs(0), vs(0), Ssr(0), vscommit(0), sp(0), Ki(0), isTorsion(false)
 {
   theNodes[0] = 0;  
   theNodes[1] = 0;
@@ -104,7 +106,7 @@ ForceBeamColumn3d::ForceBeamColumn3d (int tag, int nodeI, int nodeJ,
   initialFlag(0),
   kv(NEBD,NEBD), Se(NEBD), 
   kvcommit(NEBD,NEBD), Secommit(NEBD),
-  fs(0), vs(0),Ssr(0), vscommit(0), sp(0), Ki(0)
+  fs(0), vs(0),Ssr(0), vscommit(0), sp(0), Ki(0), isTorsion(false)
 {
   maxIters = 10;
   tol = 1.0e-12;
@@ -813,7 +815,12 @@ ForceBeamColumn3d::update()
 	      }
 	    }
 	  }
-	  
+
+	  if (!isTorsion) {
+	    f(5,5) = DefaultLoverGJ;
+	    vr(5) = SeTrial(5)*DefaultLoverGJ;
+	  }
+
 	  // calculate element stiffness matrix
 	  // invert3by3Matrix(f, kv);	  
 	  if (f.Solve(I, kvTrial) < 0)
@@ -1640,11 +1647,16 @@ ForceBeamColumn3d::getInitialFlexibility(Matrix &fe)
       }
     }
   }
+
+  if (!isTorsion)
+    fe(5,5) = DefaultLoverGJ;
   
   return 0;
 }
 
-void ForceBeamColumn3d::compSectionDisplacements(Vector sectionCoords[], Vector sectionDispls[]) const
+void
+ForceBeamColumn3d::compSectionDisplacements(Vector sectionCoords[],
+					    Vector sectionDispls[]) const
 {
    // get basic displacements and increments
    static Vector ub(NEBD);
@@ -2261,8 +2273,19 @@ ForceBeamColumn3d::setSectionPointers(int numSec, SectionForceDeformation **secP
     if (sections[i] == 0) {
       opserr << "Error: ForceBeamColumn3d::setSectionPointers -- could not create copy of section " << i << endln;
     }
+
+    int order = sections[i]->getOrder();
+    const ID &code = sections[i]->getType();
+    for (int j = 0; j < order; j++) {
+      if (code(j) == SECTION_RESPONSE_T)
+	isTorsion = true;
+    }
   }
   
+  if (!isTorsion)
+    opserr << "ForceBeamColumn3d::ForceBeamColumn3d -- no torsion detected in sections, " <<
+      "continuing with element torsional stiffness GJ/L = " << 1.0/DefaultLoverGJ;
+
   // allocate section flexibility matrices and section deformation vectors
   fs  = new Matrix [numSections];
   if (fs == 0) {
