@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2003-02-25 23:32:47 $
+// $Revision: 1.21 $
+// $Date: 2004-06-07 23:20:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges2d.cpp,v $
 
 #include <BeamWithHinges2d.h>
@@ -545,8 +545,8 @@ BeamWithHinges2d::addLoad(ElementalLoad *theLoad, double loadFactor)
 
     // Two point Gauss for bending ... will not be exact when
     // hinge lengths are not equal, but this is not a big deal!!!
-    double x1 = lp1 + 0.5*Le*(1.0-1/sqrt(3));
-    double x2 = lp1 + 0.5*Le*(1.0+1/sqrt(3));
+    double x1 = lp1 + 0.5*Le*(1.0-1.0/sqrt(3.0));
+    double x2 = lp1 + 0.5*Le*(1.0+1.0/sqrt(3.0));
 
     double M1 = 0.5*wy*x1*(x1-L);
     double M2 = 0.5*wy*x2*(x2-L);

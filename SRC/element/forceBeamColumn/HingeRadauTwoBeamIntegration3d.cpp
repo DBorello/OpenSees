@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.7 $
-// $Date: 2003-06-10 00:36:09 $
+// $Revision: 1.8 $
+// $Date: 2004-06-07 23:21:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/HingeRadauTwoBeamIntegration3d.cpp,v $
 
 #include <HingeRadauTwoBeamIntegration3d.h>
@@ -161,8 +161,8 @@ HingeRadauTwoBeamIntegration3d::addElasticDeformations(ElementalLoad *theLoad,
 
     // Two point Gauss for bending ... will not be exact when
     // hinge lengths are not equal, but this is not a big deal!!!
-    double x1 = lpI + 0.5*Le*(1.0-1/sqrt(3));
-    double x2 = lpI + 0.5*Le*(1.0+1/sqrt(3));
+    double x1 = lpI + 0.5*Le*(1.0-1.0/sqrt(3.0));
+    double x2 = lpI + 0.5*Le*(1.0+1.0/sqrt(3.0));
 
     double Mz1 = 0.5*wy*x1*(x1-L);
     double Mz2 = 0.5*wy*x2*(x2-L);
