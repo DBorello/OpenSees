@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.10 $
-// $Date: 2003-03-05 00:53:21 $
+// $Revision: 1.11 $
+// $Date: 2003-03-11 03:49:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HardeningMaterial.cpp,v $
 
 // Written: MHS
@@ -289,12 +289,12 @@ HardeningMaterial::Print(OPS_Stream &s, int flag)
 
 // AddingSensitivity:BEGIN ///////////////////////////////////
 int
-HardeningMaterial::setParameter(char **argv, int argc, Information &info)
+HardeningMaterial::setParameter(const char **argv, int argc, Information &info)
 {
 	if (argc < 1)
 		return -1;
 
-	if (strcmp(argv[0],"sigmaY") == 0) {
+	if (strcmp(argv[0],"sigmaY") == 0 || strcmp(argv[0],"fy") == 0) {
 		info.theType = DoubleType;
 		return 1;
 	}
