@@ -2823,12 +2823,12 @@ void TwentyNodeBrick_u_p_U::setDomain (Domain *theDomain)
       int dofNd19 = nd19Ptr->getNumberDOF();
       int dofNd20 = nd20Ptr->getNumberDOF();
 
-      if (dofNd1  != 3 || dofNd2  != 3 || dofNd3  != 3 || dofNd4  != 3 ||  
-          dofNd5  != 3 || dofNd6  != 3 || dofNd7  != 3 || dofNd8  != 3 ||
-          dofNd9  != 3 || dofNd10 != 3 || dofNd11 != 3 || dofNd12 != 3 ||
-          dofNd13 != 3 || dofNd14 != 3 || dofNd15 != 3 || dofNd16 != 3 ||
-          dofNd17 != 3 || dofNd18 != 3 || dofNd19 != 3 || dofNd20 != 3 ) {
-      	g3ErrorHandler->fatal("FATAL ERROR TwentyNodeBrick (tag: %d), has differing number of DOFs at its nodes",
+      if (dofNd1  != 7 || dofNd2  != 7 || dofNd3  != 7 || dofNd4  != 7 ||  
+          dofNd5  != 7 || dofNd6  != 7 || dofNd7  != 7 || dofNd8  != 7 ||
+          dofNd9  != 7 || dofNd10 != 7 || dofNd11 != 7 || dofNd12 != 7 ||
+          dofNd13 != 7 || dofNd14 != 7 || dofNd15 != 7 || dofNd16 != 7 ||
+          dofNd17 != 7 || dofNd18 != 7 || dofNd19 != 7 || dofNd20 != 7 ) {
+      	g3ErrorHandler->fatal("FATAL ERROR TwentyNodeBrick_u_p_U (tag: %d), has differing number of DOFs at its nodes",
       		this->getTag());
 
       	return;

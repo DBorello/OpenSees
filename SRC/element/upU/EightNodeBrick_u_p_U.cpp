@@ -2679,8 +2679,8 @@ void EightNodeBrick_u_p_U::setDomain (Domain *theDomain)
       int dofNd7 = nd7Ptr->getNumberDOF();
       int dofNd8 = nd8Ptr->getNumberDOF();
       								      
-      if (dofNd1 != 3 || dofNd2 != 3 || dofNd3 != 3 || dofNd4 != 3 ||  // Changed 2 to 3 Xiaoyan
-          dofNd5 != 3 || dofNd6 != 3 || dofNd7 != 3 || dofNd8 != 3 ) {
+      if (dofNd1 != 7 || dofNd2 != 7 || dofNd3 != 7 || dofNd4 != 7 ||  // Changed 2 to 3 Xiaoyan
+          dofNd5 != 7 || dofNd6 != 7 || dofNd7 != 7 || dofNd8 != 7 ) {
       	g3ErrorHandler->fatal("FATAL ERROR EightNodeBrick_u_p_U (tag: %d), has differing number of DOFs at its nodes",
       		this->getTag());
       	
