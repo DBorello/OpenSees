@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-12-07 00:53:57 $
+// $Revision: 1.3 $
+// $Date: 2003-08-29 08:02:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DomainDecompositionAnalysis.h,v $
                                                                         
                                                                         
@@ -58,6 +58,7 @@ class DomainSolver;
 class DomainDecompAlgo;
 class Subdomain;
 class Vector;
+class EquiSolnAlgo;
 
 class DomainDecompositionAnalysis: public Analysis, public MovableObject
 {
@@ -68,20 +69,26 @@ class DomainDecompositionAnalysis: public Analysis, public MovableObject
 				Subdomain &theDomain);    
     
     DomainDecompositionAnalysis(Subdomain &theDomain,
-		   ConstraintHandler &theHandler,
-		   DOF_Numberer &theNumberer,
-		   AnalysisModel &theModel,
-		   DomainDecompAlgo &theSolnAlgo,		   
-		   IncrementalIntegrator &theIntegrator,	
-		   LinearSOE &theSOE,
-		   DomainSolver &theSolver);
+				ConstraintHandler &theHandler,
+				DOF_Numberer &theNumberer,
+				AnalysisModel &theModel,
+				DomainDecompAlgo &theSolnAlgo,		   
+				IncrementalIntegrator &theIntegrator,	
+				LinearSOE &theSOE,
+				DomainSolver &theSolver);
 
 
     virtual ~DomainDecompositionAnalysis();
-    
-    virtual int  analyze(void);
+    virtual void clearAll(void);	    
+    virtual int initialize(void);
     virtual int domainChanged(void);
 
+    // methods for non standard domain deomposition analysis
+    virtual bool doesIndependentAnalysis(void);    
+    virtual int analyze(double dT);
+
+    // methods for standard domain deomposition analysis
+    // that do some form of condensation to the tangent
     virtual int  getNumExternalEqn(void);
     virtual int  getNumInternalEqn(void);
     virtual int  newStep(double dT);
@@ -96,6 +103,11 @@ class DomainDecompositionAnalysis: public Analysis, public MovableObject
     virtual int sendSelf(int commitTag, Channel &theChannel);
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker);
+
+    // methods to change the analysis aggregates
+    virtual int setAlgorithm(EquiSolnAlgo &theAlgorithm);
+    virtual int setIntegrator(IncrementalIntegrator &theIntegrator);
+    virtual int setLinearSOE(LinearSOE &theSOE);
     
   protected: 
     Subdomain		*getSubdomainPtr(void) const;

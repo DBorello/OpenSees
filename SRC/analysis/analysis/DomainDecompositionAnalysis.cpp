@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:00:44 $
+// $Revision: 1.4 $
+// $Date: 2003-08-29 08:02:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DomainDecompositionAnalysis.cpp,v $
                                                                         
                                                                         
@@ -92,7 +92,7 @@ DomainDecompositionAnalysis::DomainDecompositionAnalysis(int clsTag,
  theResidual(0),numEqn(0),numExtEqn(0),tangFormed(false),tangFormedCount(0),
  domainStamp(0)
 {
-    theSubdomain->setDomainDecompAnalysis(*this);
+
 }
 
 DomainDecompositionAnalysis::DomainDecompositionAnalysis(Subdomain &the_Domain,
@@ -131,15 +131,47 @@ DomainDecompositionAnalysis::DomainDecompositionAnalysis(Subdomain &the_Domain,
 
 DomainDecompositionAnalysis::~DomainDecompositionAnalysis()
 {
+  if (theResidual != 0)
+    delete theResidual;
+}    
 
+void
+DomainDecompositionAnalysis::clearAll(void)
+{
+    // invoke the destructor on all the objects in the aggregation
+    delete theModel;
+    delete theHandler;
+    delete theNumberer;
+    delete theIntegrator;
+    delete theAlgorithm;
+    delete theSOE;
+
+    // now set the pointers to NULL
+    theModel =0;
+    theHandler =0;
+    theNumberer =0;
+    theIntegrator =0;
+    theAlgorithm =0;
+    theSOE =0;
 }    
 
 int 
-DomainDecompositionAnalysis::analyze(void)
+DomainDecompositionAnalysis::analyze(double dT)
 {
-    opserr << "DomainDecompositionAnalysis::analyze(void)";
-    opserr << "does nothing and should not have been called\n";
-    return -1;
+    return 0;
+}
+
+int 
+DomainDecompositionAnalysis::initialize(void)
+{
+    return 0;
+}
+
+
+bool
+DomainDecompositionAnalysis::doesIndependentAnalysis(void)
+{
+    return false;
 }
 
 int
@@ -580,8 +612,6 @@ DomainDecompositionAnalysis::recvSelf(int commitTag,
     }        
 
 
-
-
     theAlgorithm = theBroker.getNewDomainDecompAlgo(data(3));
     if (theAlgorithm != 0) {
 	theAlgorithm->setDbTag(data(10));
@@ -633,5 +663,26 @@ DomainDecompositionAnalysis::recvSelf(int commitTag,
 }
 
 
+int 
+DomainDecompositionAnalysis::setAlgorithm(EquiSolnAlgo &theAlgorithm)
+{
+  opserr << "DomainDecompositionAnalysis::setAlgorithm() - not implemented\n";
+  return -1;
+}
+
+int 
+DomainDecompositionAnalysis::setIntegrator(IncrementalIntegrator &theIntegrator) 
+{
+  opserr << "DomainDecompositionAnalysis::setIntegrator() - not implemented\n";
+  return -1;
+}
+
+
+int 
+DomainDecompositionAnalysis::setLinearSOE(LinearSOE &theSOE)
+{
+  opserr << "DomainDecompositionAnalysis::setLinearSOE() - not implemented\n";
+  return -1;
+}
 
 
