@@ -22,33 +22,41 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-03-04 00:32:48 $
-// $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SORMAnalysis.h,v $
+// $Revision: 1.1 $
+// $Date: 2003-03-04 00:32:47 $
+// $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FragilityAnalysis.h,v $
 
 
 //
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
-#ifndef SORMAnalysis_h
-#define SORMAnalysis_h
+#ifndef FragilityAnalysis_h
+#define FragilityAnalysis_h
 
 #include <ReliabilityAnalysis.h>
 #include <ReliabilityDomain.h>
-#include <FindCurvatures.h>
+#include <FindDesignPointAlgorithm.h>
+#include <GradGEvaluator.h>
+#include <tcl.h>
 
 #include <fstream>
 using std::ofstream;
 
-class SORMAnalysis : public ReliabilityAnalysis
+class FragilityAnalysis : public ReliabilityAnalysis
 {
 
 public:
-	SORMAnalysis(	ReliabilityDomain *passedReliabilityDomain,
-					FindCurvatures *passedCurvaturesAlgorithm,
-					char *fileName);
-	~SORMAnalysis();
+	FragilityAnalysis(ReliabilityDomain *theReliabilityDomain,
+					  FindDesignPointAlgorithm *theFindDesignPointAlgorithm,
+					  GradGEvaluator *theGradGEvaluator,
+					  int parameterNumber,
+					  double first,
+					  double last,
+					  int numIntervals,
+					  char *fileName,
+					  Tcl_Interp *theTclInterp);
+	virtual ~FragilityAnalysis();
 
 	int analyze(void);
 
@@ -56,8 +64,12 @@ protected:
 
 private:
 	ReliabilityDomain *theReliabilityDomain;
-	FindCurvatures *theCurvaturesAlgorithm;
+	FindDesignPointAlgorithm *theFindDesignPointAlgorithm;
+	GradGEvaluator *theGradGEvaluator;
 	char *fileName;
+	double first, last;
+	int parameterNumber, numIntervals;
+	Tcl_Interp *theTclInterp;
 };
 
 #endif

@@ -22,15 +22,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:50 $
+// $Revision: 1.4 $
+// $Date: 2003-03-04 00:32:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SORMAnalysis.cpp,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 #include <SORMAnalysis.h>
@@ -42,17 +40,32 @@
 #include <math.h>
 #include <Vector.h>
 
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+using std::ifstream;
+using std::ios;
+using std::setw;
+using std::setprecision;
+using std::setiosflags;
+
+
 SORMAnalysis::SORMAnalysis(	ReliabilityDomain *passedReliabilityDomain,
-							FindCurvatures *passedCurvaturesAlgorithm)
+							FindCurvatures *passedCurvaturesAlgorithm,
+						    char *passedFileName)
 :ReliabilityAnalysis()
 {
 	theReliabilityDomain = passedReliabilityDomain;
 	theCurvaturesAlgorithm = passedCurvaturesAlgorithm;
+	fileName = new char[256];
+	strcpy(fileName,passedFileName);
 }
 
 
 SORMAnalysis::~SORMAnalysis()
 {
+	if (fileName != 0)
+		delete [] fileName;
 }
 
 
@@ -88,6 +101,10 @@ SORMAnalysis::analyze(void)
 
 	// Number of limit-state functions
 	int numLsf = theReliabilityDomain->getNumberOfLimitStateFunctions();
+
+
+	// Open output file
+	ofstream outputFile( fileName, ios::out );
 
 
 	// Loop over number of limit-state functions
@@ -151,12 +168,36 @@ SORMAnalysis::analyze(void)
 
 
 		// Put results into reliability domain
-		theLimitStateFunction->CurvaturesFromSearchAlgorithmSORMAnalysisPerformed = true;
 		theLimitStateFunction->numberOfCurvatauresUsed = numberOfCurvatures;
 		theLimitStateFunction->SORMUsingSearchPf2Breitung = pf2Breitung;
 		theLimitStateFunction->SORMUsingSearchBetaBreitung = betaBreitung;
+
+
+		// Print SORM results to the output file
+		outputFile << "#######################################################################" << endln;
+		outputFile << "#  SORM ANALYSIS RESULTS, LIMIT-STATE FUNCTION NUMBER "
+			<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<lsf <<"            #" << endln;
+		outputFile << "#  (Curvatures found from search algorithm.)                          #" << endln;
+		outputFile << "#                                                                     #" << endln;
+		outputFile << "#  Number of principal curvatures used: ............... " 
+			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<numberOfCurvatures
+			<< "  #" << endln;
+		outputFile << "#  Reliability index beta (impr. Breitung's formula):.. " 
+			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<betaBreitung 
+			<< "  #" << endln;
+		outputFile << "#  Corresponding estimated probability of failure pf2:.." 
+			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<pf2Breitung 
+			<< "  #" << endln;
+		outputFile << "#                                                                     #" << endln;
+		outputFile << "#######################################################################" << endln << endln << endln;
 	}
 
+
+	// Inform user on screen
+	opserr << "SORM analysis completed. " << endln;
+
+	// Clean up
+	outputFile.close();
 	delete aStdNormRV;
 
 	return 0;

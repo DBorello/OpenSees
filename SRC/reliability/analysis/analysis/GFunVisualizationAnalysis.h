@@ -22,47 +22,104 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
+// $Revision: 1.1 $
 // $Date: 2003-03-04 00:32:47 $
-// $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FORMAnalysis.h,v $
+// $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/GFunVisualizationAnalysis.h,v $
 
 
 //
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
-#ifndef FORMAnalysis_h
-#define FORMAnalysis_h
+#ifndef GFunVisualizationAnalysis_h
+#define GFunVisualizationAnalysis_h
 
 #include <ReliabilityAnalysis.h>
+#include <GFunEvaluator.h>
 #include <FindDesignPointAlgorithm.h>
 #include <ProbabilityTransformation.h>
 #include <ReliabilityDomain.h>
+#include <GradGEvaluator.h>
+#include <MeritFunctionCheck.h>
+#include <ReliabilityConvergenceCheck.h>
+#include <RootFinding.h>
 
-#include <fstream>
-using std::ofstream;
 
-class FORMAnalysis : public ReliabilityAnalysis
+class GFunVisualizationAnalysis : public ReliabilityAnalysis
 {
 
 public:
-	FORMAnalysis(ReliabilityDomain *passedReliabilityDomain,
-				 FindDesignPointAlgorithm *passedFindDesignPointAlgorithm,
-				 ProbabilityTransformation *passedProbabilityTransformation,
-				 char *fileName,
-				 int relSensTag);
-	virtual ~FORMAnalysis();
+	GFunVisualizationAnalysis(
+					ReliabilityDomain *theReliabilityDomain,
+					GFunEvaluator *theGFunEvaluator,
+					ProbabilityTransformation *theProbabilityTransformation,
+					char *outputFileName,
+					char *convFileName,
+					int convResults,
+					int space,
+					int funSurf,
+					int axes,
+					int dir);
+	virtual ~GFunVisualizationAnalysis();
 
 	int analyze(void);
+
+	int setDirection(int rvDir);
+	int setDirection(Vector theDirectionVector);
+	
+	int setAxes(Vector axesVector);
+	int setAxes(Matrix theMatrix);
+	int setNumLinePts(int numLinePts);
+	
+	int setRootFindingAlgorithm(RootFinding *theRootFinder);
+	int setStartPoint(Vector *theStartPoint);
+	int setGradGEvaluator(GradGEvaluator *theGradGEvaluator);
+	int setMeritFunctionCheck(MeritFunctionCheck *theMeritFunctionCheck);
+	int setReliabilityConvergenceCheck(ReliabilityConvergenceCheck *theReliabilityConvergenceCheck);
+
 
 protected:
 
 private:
+
+	Vector getCurrentAxes12Point(int i, int j);
+	Vector getCurrentAxes3Point(int i, int j);
+	double findGSurface(Vector thePoint);
+	double evaluateGFunction(Vector thePoint, bool printDivision);
+
+
+
+
+
 	ReliabilityDomain *theReliabilityDomain;
-	FindDesignPointAlgorithm *theFindDesignPointAlgorithm;
+	GFunEvaluator *theGFunEvaluator;
 	ProbabilityTransformation *theProbabilityTransformation;
-	char *fileName;
-	int relSensTag;
+	MeritFunctionCheck *theMeritFunctionCheck;
+	GradGEvaluator *theGradGEvaluator;
+	ReliabilityConvergenceCheck *theReliabilityConvergenceCheck;
+	Vector *theStartPoint;
+	RootFinding *theRootFindingAlgorithm;
+
+	char *outputFileName;
+	char *convFileName;
+	int convResults;
+	int space;
+	int funSurf;
+	int axes;
+	int dir;
+
+	int rvDir;
+	Vector theDirectionVector;
+	int rv1, rv2;
+	double from1, interval1;
+	double from2, interval2;
+	int numPts1, numPts2;
+	Matrix theMatrix;
+	int numLinePts;
+
+	int nrv;
+
+	double scaleValue;
 };
 
 #endif

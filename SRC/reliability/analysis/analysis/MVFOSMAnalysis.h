@@ -22,33 +22,39 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-03-04 00:32:48 $
-// $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SORMAnalysis.h,v $
+// $Revision: 1.1 $
+// $Date: 2003-03-04 00:32:47 $
+// $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/MVFOSMAnalysis.h,v $
 
 
 //
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
-#ifndef SORMAnalysis_h
-#define SORMAnalysis_h
+#ifndef MVFOSMAnalysis_h
+#define MVFOSMAnalysis_h
 
 #include <ReliabilityAnalysis.h>
 #include <ReliabilityDomain.h>
-#include <FindCurvatures.h>
+#include <GFunEvaluator.h>
+#include <GradGEvaluator.h>
+#include <Matrix.h>
+#include <Vector.h>
+#include <tcl.h>
 
 #include <fstream>
 using std::ofstream;
 
-class SORMAnalysis : public ReliabilityAnalysis
+class MVFOSMAnalysis : public ReliabilityAnalysis
 {
 
 public:
-	SORMAnalysis(	ReliabilityDomain *passedReliabilityDomain,
-					FindCurvatures *passedCurvaturesAlgorithm,
-					char *fileName);
-	~SORMAnalysis();
+	MVFOSMAnalysis(ReliabilityDomain *theReliabilityDomain,
+				   GFunEvaluator *theGFunEvaluator,
+				   GradGEvaluator *theGradGEvaluator,
+				   Tcl_Interp *theTclInterp,
+				   char *fileName);
+	~MVFOSMAnalysis();
 
 	int analyze(void);
 
@@ -56,7 +62,9 @@ protected:
 
 private:
 	ReliabilityDomain *theReliabilityDomain;
-	FindCurvatures *theCurvaturesAlgorithm;
+	GFunEvaluator *theGFunEvaluator;
+	GradGEvaluator *theGradGEvaluator;
+	Tcl_Interp *theTclInterp;
 	char *fileName;
 };
 

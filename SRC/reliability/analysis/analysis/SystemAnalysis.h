@@ -22,15 +22,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:01 $
+// $Revision: 1.3 $
+// $Date: 2003-03-04 00:32:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.h,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 #ifndef SystemAnalysis_h
@@ -39,11 +37,15 @@
 #include <ReliabilityAnalysis.h>
 #include <ReliabilityDomain.h>
 
+#include <fstream>
+using std::ofstream;
+
 class SystemAnalysis : public ReliabilityAnalysis
 {
 
 public:
-	SystemAnalysis(	ReliabilityDomain *passedReliabilityDomain);
+	SystemAnalysis(ReliabilityDomain *passedReliabilityDomain,
+				   char *fileName);
 	~SystemAnalysis();
 
 	int		analyze(void);
@@ -53,10 +55,14 @@ public:
 protected:
 
 private:
-	double lowerBound;
-	double upperBound;
-	ReliabilityDomain *theReliabilityDomain;
 	double functionToIntegrate(double rho, double beta1, double beta2);
+	int factorial(int num);
+	Vector arrange(int num);
+
+	double minLowerBound;
+	double maxUpperBound;
+	ReliabilityDomain *theReliabilityDomain;
+	char *fileName;
 };
 
 #endif

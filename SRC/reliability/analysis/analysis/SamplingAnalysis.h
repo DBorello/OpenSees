@@ -22,38 +22,44 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:01 $
-// $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SimulationAnalysis.h,v $
+// $Revision: 1.1 $
+// $Date: 2003-03-04 00:32:48 $
+// $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SamplingAnalysis.h,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
-#ifndef SimulationAnalysis_h
-#define SimulationAnalysis_h
+#ifndef SamplingAnalysis_h
+#define SamplingAnalysis_h
 
 #include <ReliabilityAnalysis.h>
 #include <ReliabilityDomain.h>
-#include <XuTransformation.h>
+#include <ProbabilityTransformation.h>
 #include <RandomNumberGenerator.h>
 #include <GFunEvaluator.h>
 
-class SimulationAnalysis : public ReliabilityAnalysis
+#include <fstream>
+using std::ofstream;
+
+class SamplingAnalysis : public ReliabilityAnalysis
 {
 
 public:
-	SimulationAnalysis(	ReliabilityDomain *passedReliabilityDomain,
-						XuTransformation *passedXuTransformation,
+	SamplingAnalysis(	ReliabilityDomain *passedReliabilityDomain,
+						ProbabilityTransformation *passedProbabilityTransformation,
 						GFunEvaluator *passedGFunEvaluator,
 						RandomNumberGenerator *passedRandomNumberGenerator,
-						char *passedPointToSampleAround,
 						int passedNumberOfSimulations,
-						double passedTargetCOV);
-	~SimulationAnalysis();
+						double passedTargetCOV,
+						double samplingVariance,
+						int printFlag,
+						char *fileName,
+						Vector *startPoint,
+						int analysisTypeTag);
+
+	~SamplingAnalysis();
 
 	int analyze(void);
 
@@ -61,13 +67,16 @@ protected:
 	
 private:
 	ReliabilityDomain *theReliabilityDomain;
-	XuTransformation *theXuTransformation;
+	ProbabilityTransformation *theProbabilityTransformation;
 	GFunEvaluator *theGFunEvaluator;
 	RandomNumberGenerator *theRandomNumberGenerator;
-	char *pointToSampleAround;
 	int numberOfSimulations;
 	double targetCOV;
-
+	double samplingVariance;
+	int printFlag;
+	char *fileName;
+	Vector *startPoint;
+	int analysisTypeTag;
 };
 
 #endif

@@ -1,8 +1,14 @@
 include ../../../../Makefile.def
 
-OBJS       = 	FORMAnalysis.o  ReliabilityAnalysis.o \
-		SimulationAnalysis.o  SORMAnalysis.o \
-		SystemAnalysis.o
+OBJS       = 	FORMAnalysis.o\
+	FragilityAnalysis.o \
+	GFunVisualizationAnalysis.o \
+	MVFOSMAnalysis.o \
+	OutCrossingAnalysis.o \
+	SamplingAnalysis.o \
+	ReliabilityAnalysis.o \
+	SORMAnalysis.o \
+	SystemAnalysis.o
 
 
 # Compilation control

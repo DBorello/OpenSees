@@ -22,42 +22,59 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
+// $Revision: 1.1 $
 // $Date: 2003-03-04 00:32:48 $
-// $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SORMAnalysis.h,v $
-
+// $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/OutCrossingAnalysis.h,v $
 
 //
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
-#ifndef SORMAnalysis_h
-#define SORMAnalysis_h
+#ifndef OutCrossingAnalysis_h
+#define OutCrossingAnalysis_h
 
-#include <ReliabilityAnalysis.h>
 #include <ReliabilityDomain.h>
-#include <FindCurvatures.h>
+#include <GFunEvaluator.h>
+#include <GradGEvaluator.h>
+#include <FindDesignPointAlgorithm.h>
+#include <ReliabilityAnalysis.h>
+#include <tcl.h>
 
 #include <fstream>
 using std::ofstream;
 
-class SORMAnalysis : public ReliabilityAnalysis
+class OutCrossingAnalysis : public ReliabilityAnalysis
 {
 
 public:
-	SORMAnalysis(	ReliabilityDomain *passedReliabilityDomain,
-					FindCurvatures *passedCurvaturesAlgorithm,
-					char *fileName);
-	~SORMAnalysis();
+	OutCrossingAnalysis(
+				ReliabilityDomain *theRelDom,
+				GFunEvaluator *theGFunEval,
+				GradGEvaluator *theSensEval,
+				FindDesignPointAlgorithm *theFindDesPt,
+				int analysisType,
+				int p_sampleFreq,
+				double p_littleDeltaT,
+				char *fileName);
+	~OutCrossingAnalysis();
 
 	int analyze(void);
 
 protected:
-
+	
 private:
 	ReliabilityDomain *theReliabilityDomain;
-	FindCurvatures *theCurvaturesAlgorithm;
+	GFunEvaluator *theGFunEvaluator;
+	GradGEvaluator *theGradGEvaluator;
+	FindDesignPointAlgorithm *theFindDesignPointAlgorithm;
+	int analysisType;
+	int sampleFreq;
+	double littleDeltaT;
 	char *fileName;
+
+	// A private method:
+	double functionToIntegrate(double rho, double beta1, double beta2);
+
 };
 
 #endif
