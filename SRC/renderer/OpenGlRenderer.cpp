@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2003-05-15 22:29:00 $
+// $Revision: 1.16 $
+// $Date: 2003-06-30 21:29:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlRenderer.cpp,v $
                                                                         
                                                                         
@@ -181,8 +181,12 @@ OpenGLRenderer::clearImage(void)
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  
-  glFlush(); 
+  glFlush();
+ 
+#ifdef _UNIX
   theDevice->ENDIMAGE();
+#endif
+
   return 0;
 }
 
