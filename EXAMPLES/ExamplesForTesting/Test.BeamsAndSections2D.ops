@@ -2,14 +2,20 @@ proc printEigenvalues {E A I L} {
 
     # Compute element eigenvalues
     set eigenValues [eigen standard 6]
-    
+
+    set e1 [expr 2*$E*$A/$L]
+    set e2 [expr 2*$E*$I/$L]
+    set e3 [expr 6*$E*$I/$L + 2*12*$E*$I/($L*$L*$L)]
+
+    set exact "$e1 $e2 $e3"
+    set exact [lsort -real $exact]
+
     puts "Eigenvalues"
     puts "Computed      Exact"
-    puts "[lindex $eigenValues 3]  [expr 2*$E*$A/$L]"
-    puts "[lindex $eigenValues 4]  [expr 2*$E*$I/$L]"
-    puts "[lindex $eigenValues 5]  [expr 6*$E*$I/$L + 2*12*$E*$I/($L*$L*$L)]"
+    for {set i 0} {$i < 3} {incr i} {
+	puts "[lindex $eigenValues [expr $i+3]]  [lindex $exact $i]"
+    }
 }
-
 proc printDisplacements {E A I L P H M} {
 
     puts "Nodal Displacements"
