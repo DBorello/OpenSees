@@ -1,5 +1,5 @@
-// $Revision: 1.1 $
-// $Date: 2000-12-19 03:35:02 $
+// $Revision: 1.2 $
+// $Date: 2001-06-12 01:28:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/TclUpdateMaterialStageCommand.cpp,v $
                                                                         
 // Written: ZHY
@@ -27,8 +27,8 @@ TclModelBuilderUpdateMaterialStageCommand(ClientData clientData,
       return TCL_ERROR;
   }
 
-  if (strcmp(argv[1],"material") != 0) {
-      cerr << "WARNING UpdateMaterialStage: Only accept parameter 'material' for now" << endl;
+  if (strcmp(argv[1],"-material") != 0) {
+      cerr << "WARNING UpdateMaterialStage: Only accept parameter '-material' for now" << endl;
       return TCL_ERROR;		
   }		
 
@@ -45,8 +45,8 @@ TclModelBuilderUpdateMaterialStageCommand(ClientData clientData,
       return TCL_ERROR;		
   }
 
-  if (strcmp(argv[3],"stage") != 0) {
-      cerr << "WARNING UpdateMaterialStage: Only accept parameter 'stage' for now" << endl;
+  if (strcmp(argv[3],"-stage") != 0) {
+      cerr << "WARNING UpdateMaterialStage: Only accept parameter '-stage' for now" << endl;
       return TCL_ERROR;		
   }		
 

@@ -1,5 +1,5 @@
-// $Revision: 1.2 $
-// $Date: 2001-05-22 05:04:06 $
+// $Revision: 1.3 $
+// $Date: 2001-06-12 01:27:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -29,28 +29,28 @@ const Vector zeroVector(6);
 const	double pi = 3.14159265358979;
 
 PressureDependMultiYield::PressureDependMultiYield (int tag, int nd, 
-						    double refShearModul,
-						    double refBulkModul, double frictionAng,
-						    double peakShearStra, double refPress, 
-						    double cohesi, 	double pressDependCoe,
-						    int numberOfYieldSurf, 
-						    double phaseTransformAng, 
-						    double contractionParam1,
-						    double contractionParam2,
-						    double dilationParam1,
-						    double dilationParam2,
-						    double volLimit,
-						    double liquefactionParam1,
-						    double liquefactionParam2,
-						    double liquefactionParam3,
-						    double liquefactionParam4,
-						    double atm)
+															double refShearModul,
+    			  		              double refBulkModul, double frictionAng,
+								              double peakShearStra, double refPress, 
+															double cohesi, 	double pressDependCoe,
+															int numberOfYieldSurf, 
+															double phaseTransformAng, 
+                              double contractionParam1,
+                              double contractionParam2,
+                              double dilationParam1,
+                              double dilationParam2,
+															double volLimit,
+                              double liquefactionParam1,
+                              double liquefactionParam2,
+                              double liquefactionParam3,
+                              double liquefactionParam4,
+															double atm)
  : NDMaterial(tag,MAT_TAG_PressureDependMultiYield), currentStress(zeroVector),
    trialStress(zeroVector), currentStrain(zeroVector), strainRate(zeroVector),
    reversalStress(zeroVector), PPZPivot(zeroVector), PPZCenter(zeroVector), 
-   lockStress(zeroVector), reversalStressCommitted(zeroVector), 
-   PPZPivotCommitted(zeroVector), PPZCenterCommitted(zeroVector),
-   lockStressCommitted(zeroVector)
+	 lockStress(zeroVector), reversalStressCommitted(zeroVector), 
+	 PPZPivotCommitted(zeroVector), PPZCenterCommitted(zeroVector),
+	 lockStressCommitted(zeroVector)
 {
 	if (nd !=2 && nd !=3) {
 		cerr << "FATAL:PressureDependMultiYield:: dimension error" << endl;
@@ -236,7 +236,6 @@ PressureDependMultiYield::PressureDependMultiYield (const PressureDependMultiYie
     committedSurfaces[i] = a.committedSurfaces[i];  
     theSurfaces[i] = a.theSurfaces[i];  
 	}
-
 }
 
 
@@ -253,7 +252,7 @@ void PressureDependMultiYield::elast2Plast(void)
 	e2p = 1;
 
 	if (currentStress.volume() > 0.) {
-  	cerr << "WARNING:PressureDependMultiYield::elast2Plast(): material in tension." << endl;
+  	//cerr << "WARNING:PressureDependMultiYield::elast2Plast(): material in tension." << endl;
     currentStress = T2Vector(currentStress.deviator(),0);
 	}
   // Active surface is 0, return
@@ -262,33 +261,28 @@ void PressureDependMultiYield::elast2Plast(void)
   // Find active surface
   while (yieldFunc(currentStress, committedSurfaces, ++committedActiveSurf) > 0) {
      if (committedActiveSurf == numOfSurfaces) {
-        cerr <<"WARNING:PressureDependMultiYield::elast2Plast(): stress out of failure surface"<<endl;
+        //cerr <<"WARNING:PressureDependMultiYield::elast2Plast(): stress out of failure surface"<<endl;
 				deviatorScaling(currentStress, committedSurfaces, numOfSurfaces);
         initSurfaceUpdate();
-				//initStrainUpdate();
 				return;
      }
   } 
 
   committedActiveSurf--;
 	initSurfaceUpdate();
-	//initStrainUpdate();
 }
 
 
 int PressureDependMultiYield::setTrialStrain (const Vector &strain)
 {
-	static Vector temp(6);
+	Vector temp(6);
 	if (ndm==3 && strain.Size()==6) 
 		temp = strain;
 	else if (ndm==2 && strain.Size()==3) {
 	  temp[0] = strain[0];
 	  temp[1] = strain[1];
 	  temp[3] = strain[2];
-	  temp[2] = 0.0;
-	  temp[4] = 0.0;
-	  temp[5] = 0.0;
-	}
+  }
 	else {
 		cerr << "Fatal:PressureDependMultiYield:: Material dimension is: " << ndm << endl;
 		cerr << "But strain vector size is: " << strain.Size() << endl;
@@ -308,25 +302,21 @@ int PressureDependMultiYield::setTrialStrain (const Vector &strain, const Vector
 
 int PressureDependMultiYield::setTrialStrainIncr (const Vector &strain)
 {
-	static Vector temp(6);
+	Vector temp(6);
 	if (ndm==3 && strain.Size()==6) 
 		temp = strain;
 	else if (ndm==2 && strain.Size()==3) {
 	  temp[0] = strain[0];
 	  temp[1] = strain[1];
 	  temp[3] = strain[2];
-	  temp[2] = 0.0;
-	  temp[4] = 0.0;
-	  temp[5] = 0.0;
-	}
+  }
 	else {
 		cerr << "Fatal:PressureDependMultiYield:: Material dimension is: " << ndm << endl;
 		cerr << "But strain vector size is: " << strain.Size() << endl;
 		g3ErrorHandler->fatal("");
 	}
 
-	strainRate = T2Vector(temp);
-
+  strainRate = T2Vector(temp);
 	return 0;
 }
 
@@ -351,7 +341,7 @@ const Matrix & PressureDependMultiYield::getTangent (void)
 	}
 	else {
 	  double coeff1, coeff2;
-  	static Vector devia(6);
+  	Vector devia(6);
   	double factor = getModulusFactor(currentStress);
   	double shearModulus = factor*refShearModulus;
   	double bulkModulus = factor*refBulkModulus;		
@@ -376,6 +366,7 @@ const Matrix & PressureDependMultiYield::getTangent (void)
 			}
   }
 
+
 	if (ndm==3) 
 		return theTangent;
 	else {
@@ -388,7 +379,6 @@ const Matrix & PressureDependMultiYield::getTangent (void)
 	  workM(2,0) = 0.;//theTangent(3,0);
 	  workM(2,1) = 0.;//theTangent(3,1);
 	  workM(2,2) = theTangent(3,3);
-	
   	return workM;
 	}
 }
@@ -432,8 +422,7 @@ const Vector & PressureDependMultiYield::getStress (void)
     int numSubIncre = setSubStrainRate();
 
     for (i=0; i<numSubIncre; i++) {
-      if (i==0)  
-	setTrialStress(currentStress);
+      if (i==0)  setTrialStress(currentStress);
       else setTrialStress(trialStress); 
       if (activeSurfaceNum==0 && !isCrossingNextSurface()) continue;
       if (activeSurfaceNum==0) activeSurfaceNum++;
@@ -1085,10 +1074,14 @@ void PressureDependMultiYield::updateActiveSurface(void)
   B = 2. * (t1 && t2);
   C = (t2 && t2) - 2./3.* outsize * outsize * conHeig * conHeig;
   X = secondOrderEqn(A,B,C,0);
-
+  if ( fabs(X-1.) < 1.e14 ) X = 1.;
   if (X < 1.-LOW_LIMIT){
+		t2 = trialStress.deviator() - outcenter*conHeig;
+		double xx1 = (t2 && t2) - 2./3.* outsize * outsize * conHeig * conHeig;
+    double xx2 = (t1 && t1) - 2./3.* size * size * conHeig * conHeig;
     cerr << "FATAL:PressureDependMultiYield::updateActiveSurface(): error in Direction of surface motion.\n" 
-			   << "X-1= " << X-1 <<" A= "<<A<<" B= "<<B<<" C= "<<C<<endl; 
+			   << "X-1= " << X-1 <<" A= "<<A<<" B= "<<B<<" C= "<<C <<" M= "<<activeSurfaceNum<<"\n"
+				 << "diff1= "<<xx1 <<" diff2= "<<xx2 <<" p= "<<conHeig<<" size= "<<size<<" outs= "<<outsize<<endl; 
     g3ErrorHandler->fatal("");
   }
 
@@ -1103,9 +1096,10 @@ void PressureDependMultiYield::updateActiveSurface(void)
   A = conHeig * conHeig;
   B = 2 * conHeig * (t1 && temp);
   C = (t1 && t1) - 2./3.* size * size * conHeig * conHeig;
-	if (C < 1.e-13) C = 0.;
+	if ( fabs(C) < 2.e-11 ) C = 0.;
 	if (C < 0.) {
-    cerr << "FATAL:PressureDependMultiYield::updateActiveSurface(): error in surface motion." << endl; 
+    cerr << "FATAL:PressureDependMultiYield::updateActiveSurface(): error in surface motion.\n" 
+			   << "A= " <<A <<"B= " <<B <<"C= "<<C <<endl; 
     g3ErrorHandler->fatal("");
 	}
   X = secondOrderEqn(A,B,C,1);  

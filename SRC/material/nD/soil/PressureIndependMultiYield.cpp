@@ -1,5 +1,5 @@
-// $Revision: 1.2 $
-// $Date: 2001-05-22 05:04:06 $
+// $Revision: 1.3 $
+// $Date: 2001-06-12 01:27:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -166,7 +166,7 @@ void PressureIndependMultiYield::elast2Plast(void)
 	e2p = 1;
 
 	if (currentStress.volume() > 0. && frictionAngle > 0.) {
-  	cerr << "WARNING:PressureIndependMultiYield::elast2Plast(): material in tension." << endl;
+  	//cerr << "WARNING:PressureIndependMultiYield::elast2Plast(): material in tension." << endl;
     currentStress = T2Vector(currentStress.deviator(),0);
 	}
 
@@ -178,7 +178,7 @@ void PressureIndependMultiYield::elast2Plast(void)
   // Find active surface
   while (yieldFunc(currentStress, committedSurfaces, ++committedActiveSurf) > 0) {
      if (committedActiveSurf == numOfSurfaces) {
-        cerr <<"WARNING:PressureIndependMultiYield::elast2Plast(): stress out of failure surface"<<endl;
+        //cerr <<"WARNING:PressureIndependMultiYield::elast2Plast(): stress out of failure surface"<<endl;
 				deviatorScaling(currentStress, committedSurfaces, numOfSurfaces);
         initSurfaceUpdate();
 				return;
@@ -191,24 +191,21 @@ void PressureIndependMultiYield::elast2Plast(void)
 
 int PressureIndependMultiYield::setTrialStrain (const Vector &strain)
 {
-	static Vector temp(6);
+	Vector temp(6);
 	if (ndm==3 && strain.Size()==6) 
 		temp = strain;
 	else if (ndm==2 && strain.Size()==3) {
 	  temp[0] = strain[0];
 	  temp[1] = strain[1];
 	  temp[3] = strain[2];
-	  temp[4] = 0.0;
-	  temp[5] = 0.0;
-	  temp[2] = 0.0;
-	}
+  }
 	else {
 		cerr << "Fatal:D2PressDepMYS:: Material dimension is: " << ndm << endl;
 		cerr << "But strain vector size is: " << strain.Size() << endl;
 		g3ErrorHandler->fatal("");
 	}
 
-	strainRate = T2Vector(temp-currentStrain.t2Vector());
+  strainRate = T2Vector(temp-currentStrain.t2Vector());
 
 	return 0;
 }
@@ -222,16 +219,13 @@ int PressureIndependMultiYield::setTrialStrain (const Vector &strain, const Vect
 
 int PressureIndependMultiYield::setTrialStrainIncr (const Vector &strain)
 {
-	static Vector temp(6);
+	Vector temp(6);
 	if (ndm==3 && strain.Size()==6) 
 		temp = strain;
 	else if (ndm==2 && strain.Size()==3) {
 	  temp[0] = strain[0];
 	  temp[1] = strain[1];
 	  temp[3] = strain[2];
-	  temp[4] = 0.0;
-	  temp[5] = 0.0;
-	  temp[2] = 0.0;
   }
 	else {
 		cerr << "Fatal:D2PressDepMYS:: Material dimension is: " << ndm << endl;
@@ -239,7 +233,7 @@ int PressureIndependMultiYield::setTrialStrainIncr (const Vector &strain)
 		g3ErrorHandler->fatal("");
 	}
 
-	strainRate = T2Vector(temp);
+  strainRate = T2Vector(temp);
 	return 0;
 }
 
@@ -364,7 +358,7 @@ int PressureIndependMultiYield::commitState (void)
 
 	return 0;
 }
-
+ 
 
 int PressureIndependMultiYield::revertToLastCommit (void)
 {
@@ -722,7 +716,7 @@ void PressureIndependMultiYield::updateActiveSurface(void)
   B = 2. * (t1 && t2);
   C = (t2 && t2) - 2./3.* outsize * outsize;
   X = secondOrderEqn(A,B,C,0);
-
+  if ( fabs(X-1.) < 1.e14 ) X = 1.;
   if (X < 1. - LOW_LIMIT){
     cerr << "FATAL:PressureIndependMultiYield::updateActiveSurface(): error in Direction of surface motion." 
 			   << endl; 
@@ -739,9 +733,10 @@ void PressureIndependMultiYield::updateActiveSurface(void)
   A = 1.;
   B = - 2 * (t1 && temp);
   C = (t1 && t1) - 2./3.* size * size;
-	if (fabs(C) < LOW_LIMIT) C = 0.;
+	if (fabs(C) < 2.e-11) C = 0.;
 	if (C < 0.) {
-    cerr << "FATAL:PressureIndependMultiYield::updateActiveSurface(): error in surface motion." << endl; 
+    cerr << "FATAL:PressureIndependMultiYield::updateActiveSurface(): error in surface motion.\n" 
+				 << "A= " <<A <<"B= " <<B <<"C= "<<C << endl; 
     g3ErrorHandler->fatal("");
 	}
   X = secondOrderEqn(A,B,C,1);  
