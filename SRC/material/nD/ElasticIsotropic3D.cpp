@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $                                                              
-// $Date: 2001-05-26 05:33:05 $                                                                  
+// $Revision: 1.8 $                                                              
+// $Date: 2001-07-13 22:09:24 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.cpp,v $                                                                
 
 //Boris Jeremic and Zhaohui Yang ___ 02-10-2000
@@ -349,7 +349,11 @@ void ElasticIsotropic3D::setInitElasticStiffness(void)
     //double po = 100.0; //kPa
     if (po <= 0.5) 
       po = 0.5;
-    double Eo = E * pow(po/p_ref, exp);
+    double Eo;
+    if (p_ref != 0.0)
+        Eo = E * pow(po/p_ref, exp);
+    else
+        Eo = E;
 
     //cerr << " E@ref = " << E << " Eo = " << Eo << endln;
 
