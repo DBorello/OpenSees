@@ -18,20 +18,21 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-06-11 18:19:44 $
+// $Revision: 1.2 $
+// $Date: 2004-10-06 19:21:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Pinching4Material.h,v $
                                                                         
                                                                         
 // Written: NM (nmitra@u.washington.edu) 
 // Created: December 2001
+// Updated: September 2004
 //
 // Description: This file contains the class defination for 
 // Pinching material which is defined by 4 points on the positive and 
 // negative envelopes and a bunch of damage parameters. The material accounts for
 // 3 types of damage rules : Strength degradation, Stiffness degradation, 
-// unloading stiffness degradation. This is a modified implementation of 
-// matlab files materialPinch.m written by Prof. Lowes
+// unloading stiffness degradation. 
+// Updates: damage calculations and several bug fixes
 
 
 #ifndef Pinching4Material_h
@@ -40,6 +41,7 @@
 #include <UniaxialMaterial.h>
 #include <FileStream.h>
 #include <OPS_Stream.h>
+#include <Vector.h>
 
 class Pinching4Material : public UniaxialMaterial
 {
@@ -56,7 +58,7 @@ public :
 		double gammaD1, double gammaD2, double gammaD3,
 		double gammaD4, double gammaDLimit,
 		double gammaF1, double gammaF2, double gammaF3,
-		double gammaF4, double gammaFLimit, double gammaE);
+		double gammaF4, double gammaFLimit, double gammaE, int DmgCyc);
 
 	Pinching4Material(int tag,
 		double stress1p, double strain1p, double stress2p, double strain2p,
@@ -67,7 +69,7 @@ public :
 		double gammaD1, double gammaD2, double gammaD3,
 		double gammaD4, double gammaDLimit,
 		double gammaF1, double gammaF2, double gammaF3,
-		double gammaF4, double gammaFLimit, double gammaE);
+		double gammaF4, double gammaFLimit, double gammaE, int DmgCyc);
 
 	Pinching4Material();
 	~Pinching4Material();
@@ -98,8 +100,10 @@ private:
 		double stress3p; double strain3p; double stress4p; double strain4p;
 		double stress1n; double strain1n; double stress2n; double strain2n;
 		double stress3n; double strain3n; double stress4n; double strain4n;
-		double envlpPosStress[6]; double envlpPosStrain[6]; 
-		double envlpNegStress[6]; double envlpNegStrain[6];
+		Vector envlpPosStress; Vector envlpPosStrain; 
+		Vector envlpNegStress; Vector envlpNegStrain;
+
+		int tagMat;  // material tag
 
 	// Damage parameters
 
@@ -107,11 +111,16 @@ private:
 	double gammaD1; double gammaD2; double gammaD3; double gammaD4; double gammaDLimit;
 	double gammaF1; double gammaF2; double gammaF3; double gammaF4; double gammaFLimit;
 	double gammaE;
-
+	double TnCycle, CnCycle; // number of cycles contributing to damage calculation
+	int DmgCyc; // flag for indicating whether no. of cycles are to be used for damage calculation
 
 	// unloading-reloading parameters
 	double rDispP; double rForceP; double uForceP;
 	double rDispN; double rForceN; double uForceN;
+
+	Vector state3Stress; Vector state3Strain; Vector state4Stress; Vector state4Strain;
+
+	Vector envlpPosDamgdStress; Vector envlpNegDamgdStress;
 
 	// Trial State Variables
 	double Tstress;
@@ -158,18 +167,12 @@ private:
 	double kElasticNegDamgd;
 	double uMaxDamgd;
 	double uMinDamgd;
-	double envlpPosDamgdStress[6];
-	double envlpNegDamgdStress[6];
 
-	double kunload;
-	double state3Strain[4];
-	double state3Stress[4];
-	double state4Strain[4];
-	double state4Stress[4];
 
 	// energy parameters
-	double elasticStrainEnergy;
 	double energyCapacity;
+	double kunload;
+	double elasticStrainEnergy;
 
 	void SetEnvelope(void);
 	void getstate(double, double);
@@ -177,14 +180,13 @@ private:
 	double posEnvlpTangent(double);
 	double negEnvlpStress(double);
 	double negEnvlpTangent(double);
-	void getState3(double* , double* , double);
-	void getState4(double* , double* , double);
-	double Envlp3Tangent(double* , double* , double);
-	double Envlp3Stress(double* , double* , double);
-	double Envlp4Tangent(double* , double* , double);
-	double Envlp4Stress(double* , double* , double);
-	void updateDmg(double);
+	void getState3(Vector& , Vector& , double);
+	void getState4(Vector& , Vector& , double);
+	double Envlp3Tangent(Vector , Vector , double);
+	double Envlp3Stress(Vector , Vector , double);
+	double Envlp4Tangent(Vector , Vector , double);
+	double Envlp4Stress(Vector , Vector , double);
+	void updateDmg(double, double);
 
-//	FileStream* fn;
 };
 #endif

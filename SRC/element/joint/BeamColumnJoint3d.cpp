@@ -18,12 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2004-06-07 23:19:09 $
+// $Revision: 1.3 $
+// $Date: 2004-10-06 19:21:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/BeamColumnJoint3d.cpp,v $
                                                                         
 // Written: NM (nmitra@u.washington.edu)
-// Created: Feb 2003
+// Created: February 2003
+// Revised: September 2004
 //
 // Description: This file contains the class implementation for beam-column joint.
 // This element is a 4 noded 24 dof (6 dof at each node) finite area super-element, being a slight
@@ -47,7 +48,6 @@
 Matrix BeamColumnJoint3d::Transf(12,24);
 Matrix BeamColumnJoint3d::Tran(3,6);
 
-
 // full constructors:
 BeamColumnJoint3d::BeamColumnJoint3d(int tag,int Nd1, int Nd2, int Nd3, int Nd4,
 				     UniaxialMaterial& theMat1,
@@ -64,11 +64,11 @@ BeamColumnJoint3d::BeamColumnJoint3d(int tag,int Nd1, int Nd2, int Nd3, int Nd4,
 				     UniaxialMaterial& theMat12,
 				     UniaxialMaterial& theMat13):
   Element(tag,ELE_TAG_BeamColumnJoint3d),
-  connectedExternalNodes(4), elemWidth(0), elemHeight(0),
+  connectedExternalNodes(4), elemActHeight(0.0), elemActWidth(0.0), 
+  elemWidth(0.0), elemHeight(0.0), HgtFac(1.0), WdtFac(1.0),
   Uecommit(24), UeIntcommit(4), UeprCommit(24), UeprIntCommit(4),
-  BCJoint(13,16), dg_df(4,13), dDef_du(13,4), K(24,24), R(24)
-{
-  
+  BCJoint(13,16), dg_df(4,13), dDef_du(13,4), K(24,24), R(24), Node1(3), Node2(3), Node3(3), Node4(3)
+{  
 // ensure the connectedExternalNode ID is of correct size & set values
     if (connectedExternalNodes.Size() != 4)
          opserr << "ERROR : BeamColumnJoint::BeamColumnJoint - " << tag << "failed to create an ID of size 4" << endln;
@@ -78,7 +78,24 @@ BeamColumnJoint3d::BeamColumnJoint3d(int tag,int Nd1, int Nd2, int Nd3, int Nd4,
     connectedExternalNodes(2) = Nd3 ;
     connectedExternalNodes(3) = Nd4 ;
 
-// get a copy of the material and check we obtained a valid copy
+	MaterialPtr = new UniaxialMaterial*[13];
+	for (int x = 0; x <13; x++)
+	{	MaterialPtr[x] = 0; }
+
+	Uecommit.Zero();
+	UeIntcommit.Zero();
+	UeprCommit.Zero();
+	UeprIntCommit.Zero();
+
+	BCJoint.Zero(); dg_df.Zero(); dDef_du.Zero();
+	K.Zero();
+	R.Zero();
+	Node1.Zero(); Node2.Zero(); Node3.Zero(); Node4.Zero();
+
+	nodePtr[0] = 0;
+	nodePtr[1] = 0;
+
+	// get a copy of the material and check we obtained a valid copy
     MaterialPtr[0] = theMat1.getCopy();
     if (!MaterialPtr[0]){
 		opserr << "ERROR : BeamColumnJoint::Constructor failed to get a copy of material 1" << endln;}
@@ -119,23 +136,113 @@ BeamColumnJoint3d::BeamColumnJoint3d(int tag,int Nd1, int Nd2, int Nd3, int Nd4,
 	if (!MaterialPtr[12]){
 		opserr << "ERROR : BeamColumnJoint::Constructor failed to get a copy of material 13" << endln;}	
 
-	// initialize the stiffness and residual matrices
-	K.Zero();
-	R.Zero();
 }
 
-/********************************************************************************************/
+// full constructors:
+BeamColumnJoint3d::BeamColumnJoint3d(int tag,int Nd1, int Nd2, int Nd3, int Nd4,
+				     UniaxialMaterial& theMat1,
+				     UniaxialMaterial& theMat2,
+				     UniaxialMaterial& theMat3,
+				     UniaxialMaterial& theMat4,
+				     UniaxialMaterial& theMat5,
+				     UniaxialMaterial& theMat6,
+				     UniaxialMaterial& theMat7,
+				     UniaxialMaterial& theMat8,
+				     UniaxialMaterial& theMat9,
+				     UniaxialMaterial& theMat10,
+				     UniaxialMaterial& theMat11,
+				     UniaxialMaterial& theMat12,
+				     UniaxialMaterial& theMat13,
+					 double elHgtFac, double elWdtFac):
+  Element(tag,ELE_TAG_BeamColumnJoint3d),
+  connectedExternalNodes(4), elemActHeight(0.0), elemActWidth(0.0), 
+  elemWidth(0), elemHeight(0), HgtFac(elHgtFac), WdtFac(elWdtFac),
+  Uecommit(24), UeIntcommit(4), UeprCommit(24), UeprIntCommit(4),
+  BCJoint(13,16), dg_df(4,13), dDef_du(13,4), K(24,24), R(24), Node1(3), Node2(3), Node3(3), Node4(3)
+{  
+// ensure the connectedExternalNode ID is of correct size & set values
+    if (connectedExternalNodes.Size() != 4)
+         opserr << "ERROR : BeamColumnJoint::BeamColumnJoint - " << tag << "failed to create an ID of size 4" << endln;
+
+	connectedExternalNodes(0) = Nd1 ;
+    connectedExternalNodes(1) = Nd2 ;
+    connectedExternalNodes(2) = Nd3 ;
+    connectedExternalNodes(3) = Nd4 ;
+
+	MaterialPtr = new UniaxialMaterial*[13];
+	for (int x = 0; x <13; x++)
+	{	MaterialPtr[x] = 0; }
+
+	Uecommit.Zero();
+	UeIntcommit.Zero();
+	UeprCommit.Zero();
+	UeprIntCommit.Zero();
+
+	BCJoint.Zero(); dg_df.Zero(); dDef_du.Zero();
+	K.Zero();
+	R.Zero();
+	Node1.Zero(); Node2.Zero(); Node3.Zero(); Node4.Zero();
+
+	nodePtr[0] = 0;
+	nodePtr[1] = 0;
+
+	// get a copy of the material and check we obtained a valid copy
+    MaterialPtr[0] = theMat1.getCopy();
+    if (!MaterialPtr[0]){
+		opserr << "ERROR : BeamColumnJoint::Constructor failed to get a copy of material 1" << endln;}
+    MaterialPtr[1] = theMat2.getCopy();
+    if (!MaterialPtr[1]){
+		opserr << "ERROR : BeamColumnJoint::Constructor failed to get a copy of material 2" << endln;}
+    MaterialPtr[2] = theMat3.getCopy();
+    if (!MaterialPtr[2]){
+		opserr << "ERROR : BeamColumnJoint::Constructor failed to get a copy of material 3" << endln;}
+	MaterialPtr[3] = theMat4.getCopy();
+	if (!MaterialPtr[3]){
+		opserr << "ERROR : BeamColumnJoint::Constructor failed to get a copy of material 4" << endln;}
+	MaterialPtr[4] = theMat5.getCopy();
+	if (!MaterialPtr[4]){
+		opserr << "ERROR : BeamColumnJoint::Constructor failed to get a copy of material 5" << endln;}
+	MaterialPtr[5] = theMat6.getCopy();
+	if (!MaterialPtr[5]){
+		opserr << "ERROR : BeamColumnJoint::Constructor failed to get a copy of material 6" << endln;}
+	MaterialPtr[6] = theMat7.getCopy();
+	if (!MaterialPtr[6]){
+		opserr << "ERROR : BeamColumnJoint::Constructor failed to get a copy of material 7" << endln;}
+	MaterialPtr[7] = theMat8.getCopy();
+	if (!MaterialPtr[7]){
+		opserr << "ERROR : BeamColumnJoint::Constructor failed to get a copy of material 8" << endln;}
+	MaterialPtr[8] = theMat9.getCopy();
+	if (!MaterialPtr[8]){
+		opserr << "ERROR : BeamColumnJoint::Constructor failed to get a copy of material 9" << endln;}
+	MaterialPtr[9] = theMat10.getCopy();
+	if (!MaterialPtr[9]){
+		opserr << "ERROR : BeamColumnJoint::Constructor failed to get a copy of material 10" << endln;}
+	MaterialPtr[10] = theMat11.getCopy();
+	if (!MaterialPtr[10]){
+		opserr << "ERROR : BeamColumnJoint::Constructor failed to get a copy of material 11" << endln;}
+	MaterialPtr[11] = theMat12.getCopy();
+	if (!MaterialPtr[11]){
+		opserr << "ERROR : BeamColumnJoint::Constructor failed to get a copy of material 12" << endln;}
+	MaterialPtr[12] = theMat13.getCopy();
+	if (!MaterialPtr[12]){
+		opserr << "ERROR : BeamColumnJoint::Constructor failed to get a copy of material 13" << endln;}	
+
+}
 
 // default constructor:
 BeamColumnJoint3d::BeamColumnJoint3d():
   Element(0,ELE_TAG_BeamColumnJoint3d),
-  connectedExternalNodes(4), elemWidth(0), elemHeight(0),
+  connectedExternalNodes(4), elemActHeight(0.0), elemActWidth(0.0), 
+  elemWidth(0), elemHeight(0), HgtFac(1.0), WdtFac(1.0),
   Uecommit(24), UeIntcommit(4), UeprCommit(24), UeprIntCommit(4),
-  BCJoint(13,16), dg_df(4,13), dDef_du(13,4), K(24,24), R(24)
+  BCJoint(13,16), dg_df(4,13), dDef_du(13,4), K(24,24), R(24), Node1(3), Node2(3), Node3(3), Node4(3)
 {
+    nodePtr[0] = 0;
+	nodePtr[1] = 0;
+	for (int x = 0; x <13; x++)
+	{	MaterialPtr[x] = 0; }
    // does nothing (invoked by FEM_ObjectBroker)
 }
-/********************************************************************************************/
 
 //  destructor:
 BeamColumnJoint3d::~BeamColumnJoint3d()
@@ -146,14 +253,9 @@ BeamColumnJoint3d::~BeamColumnJoint3d()
 			delete MaterialPtr[i];
 	}
 
-	for (int ia = 0 ;  ia < 4; ia++ )
-	{
-		if (nodePtr[ia] != 0)
-			delete nodePtr[ia];
-	}
-
+	 if (MaterialPtr)
+		 delete [] MaterialPtr;
 }
-/********************************************************************************************/
 
 // public methods
 
@@ -162,47 +264,48 @@ BeamColumnJoint3d::getNumExternalNodes(void) const
 {
     return 4;
 }
-/********************************************************************************************/
 
 const ID &
 BeamColumnJoint3d::getExternalNodes(void) 
 {
     return connectedExternalNodes;
 }
-/********************************************************************************************/
+
 Node **BeamColumnJoint3d::getNodePtrs(void)
 {
 	return nodePtr;
 }
-
-/********************************************************************************************/
 
 int
 BeamColumnJoint3d::getNumDOF(void) 
 {
     return 24;
 }
-/********************************************************************************************/
 
 void
 BeamColumnJoint3d::setDomain(Domain *theDomain)
 {
     if (theDomain == 0)
 	opserr << "ERROR : BeamColumnJoint::setDomain -- Domain is null" << endln;
-	
+
+	// Check Domain is not null - invoked when object removed from a domain
+    if (theDomain == 0) {
+	nodePtr[0] = 0;
+	nodePtr[1] = 0;
+    }
+
   //node pointers set
     for (int i = 0; i < 4; i++ ) {
 		nodePtr[i] = theDomain->getNode( connectedExternalNodes(i) ) ;
 		if (nodePtr[i] == 0)
 		{
 			opserr << "ERROR : BeamColumnJoint::setDomain -- node pointer is null" << endln;
-			return; // donot go any further - otherwise segmentation fault
+			exit(-1); // donot go any further - otherwise segmentation fault
 		}
 	}
 
     // call the base class method
     this->DomainComponent::setDomain(theDomain);
-    this->revertToStart();
 
 	// ensure connected nodes have correct dof's
 	int dofNd1 = nodePtr[0]->getNumberDOF();
@@ -214,9 +317,8 @@ BeamColumnJoint3d::setDomain(Domain *theDomain)
 	if ((dofNd1 != 6) || (dofNd2 != 6) || (dofNd3 != 6) || (dofNd4 != 6))
 	{
 		opserr << "ERROR : BeamColumnJoint::setDomain -- number of DOF associated with the node incorrect" << endln;
-		return; // donot go any further - otherwise segmentation fault
+		exit(-1); // donot go any further - otherwise segmentation fault
 	}
-
 
     // obtain the nodal coordinates    
 	const Vector &end1Crd = nodePtr[0]->getCrds();
@@ -224,41 +326,36 @@ BeamColumnJoint3d::setDomain(Domain *theDomain)
 	const Vector &end3Crd = nodePtr[2]->getCrds();
 	const Vector &end4Crd = nodePtr[3]->getCrds();
 
-
-	nodeCrd[0][0] = end1Crd(0);
-	nodeCrd[0][1] = end1Crd(1);
-	nodeCrd[0][2] = end1Crd(2);
-	nodeCrd[1][0] = end2Crd(0);
-	nodeCrd[1][1] = end2Crd(1);
-	nodeCrd[1][2] = end2Crd(2);
-	nodeCrd[2][0] = end3Crd(0);
-	nodeCrd[2][1] = end3Crd(1);
-	nodeCrd[2][2] = end3Crd(2);
-	nodeCrd[3][0] = end4Crd(0);
-	nodeCrd[3][1] = end4Crd(1);
-	nodeCrd[3][2] = end4Crd(2);
-
-
-	// detremine the element width and the element height. It should be noted that the element width is determined by nodal coordinates 2 and 4
+	// determine the element width and the element height. It should be noted that the element width is determined by nodal coordinates 2 and 4
 	// whereas the element height is determined by the nodal coordinates 1 and 3
 	// general order anticlockwise arrangement , but can be clockwise too. 
-	elemWidth = fabs(pow(pow((nodeCrd[3][0] - nodeCrd[1][0]),2)+pow((nodeCrd[3][1] - nodeCrd[1][1]),2)+pow((nodeCrd[3][2] - nodeCrd[1][2]),2),0.5));
-	elemHeight = fabs(pow(pow((nodeCrd[2][0] - nodeCrd[0][0]),2)+pow((nodeCrd[2][1] - nodeCrd[0][1]),2)+pow((nodeCrd[2][2] - nodeCrd[0][2]),2),0.5));
+	Node1 = end1Crd;
+	Node2 = end2Crd;
+	Node3 = end3Crd;
+	Node4 = end4Crd;
+	
+	Node3 = Node3 - Node1;
+	Node2 = Node2 - Node4;
 
-	if ((elemHeight == 0) || (elemWidth == 0))
+	double beam = 1.0; //HgtFac;
+	double col = 1.0; //WdtFac;
+
+	elemActHeight = fabs(Node3.Norm());
+	elemActWidth = fabs(Node2.Norm());
+	elemHeight = beam*elemActHeight;
+	elemWidth = col*elemActWidth;
+
+	if ((elemHeight <= 1e-12) || (elemWidth <= 1e-12))
 	{
-			opserr << "ERROR : BeamColumnJoint::setDomain -- height or width not correct, division by zero occurs" << endln;
-			return; // donot go any further - otherwise segmentation fault
+			opserr << "ERROR : BeamColumnJoint::setDomain -- length or width not correct, division by zero occurs"<< endln;
+			exit(-1); // donot go any further - otherwise segmentation fault
 	}
-
 
 	getBCJoint();
 	getdg_df();
 	getdDef_du();
 	formTransfMat();
-
 }   
-/********************************************************************************************/
 
 int
 BeamColumnJoint3d::commitState()
@@ -269,52 +366,46 @@ BeamColumnJoint3d::commitState()
   UeIntcommit = UeprIntCommit;
 
   // store material history data.
-  int mcs;
+  int mcs = 0;
 	for (int j=0; j<13; j++)
 	{
-		mcs = MaterialPtr[j]->commitState();
+			if (MaterialPtr[j] != 0) mcs = MaterialPtr[j]->commitState();
+			if (mcs != 0) break;
 	}
     
-
-  return 0;
+  return mcs;
 }
-/********************************************************************************************/
 
 int
 BeamColumnJoint3d::revertToLastCommit()
 {
 
-	int mcs;
+	int mcs = 0;
 	for (int j=0; j<13; j++)
 	{
-		mcs = MaterialPtr[j]->revertToLastCommit();
+		if (MaterialPtr[j] != 0) mcs = MaterialPtr[j]->revertToLastCommit();
+		if (mcs != 0) break;
 	}
 	UeprCommit = Uecommit;
 	UeprIntCommit = UeIntcommit;   
 	
 	this->update();
 
-  return 0;
+  return mcs;
 }
-/********************************************************************************************/
 
 int
 BeamColumnJoint3d::revertToStart()
 {
-	int mcs;
+	int mcs = 0;
 	for (int j=0; j<13; j++)
 	{
-		mcs = MaterialPtr[j]->revertToStart();
+		if (MaterialPtr[j] != 0) mcs = MaterialPtr[j]->revertToStart();
+		if (mcs != 0) break;
 	}
 	
-	Uecommit.Zero();
-	UeIntcommit.Zero();
-	UeprCommit.Zero();
-	UeprIntCommit.Zero();
-
-	return 0;
+	return mcs;
 }
-/********************************************************************************************/
 
 int
 BeamColumnJoint3d::update()
@@ -334,7 +425,6 @@ BeamColumnJoint3d::update()
 
 	return 0;
 }
-/********************************************************************************************/
 
 
 const Matrix &
@@ -342,7 +432,6 @@ BeamColumnJoint3d::getTangentStiff(void)
 {
 	return K;
 }
-/********************************************************************************************/
 
 const Matrix &
 BeamColumnJoint3d::getInitialStiff(void)
@@ -350,15 +439,12 @@ BeamColumnJoint3d::getInitialStiff(void)
 	return getTangentStiff();
 }
 
-/********************************************************************************************/
-
 const Vector &
 BeamColumnJoint3d::getResistingForce()
 {
   return R;
 }
 
-/*************************************************************************************************************************/
 void BeamColumnJoint3d::getGlobalDispls(Vector &dg) 
 {
 	// local variables that will be used in this method
@@ -374,19 +460,19 @@ void BeamColumnJoint3d::getGlobalDispls(Vector &dg)
 	double dLoadStep = 1.0;
 	double stepSize;
 
-	Vector uExt(12);
-	Vector duExt(12);
-	Vector uIntOld(4);
-	Vector uInt(4);
-	Vector duInt(4);
-	Vector duIntTemp(4);
-	Vector intEq(4);
-	Vector intEqLast(4);
-	Vector UeprInt(4);
-	Vector Ut(24);
-	Vector uExtOld(24);
-	Vector Uepr(24);
-	Vector duExtTemp(24);
+	Vector uExtOld(24);       uExtOld.Zero();
+	Vector uExt(12);          uExt.Zero();
+	Vector duExt(12);         duExt.Zero();
+	Vector uIntOld(4);        uIntOld.Zero();
+	Vector uInt(4);           uInt.Zero();
+	Vector duInt(4);          duInt.Zero();
+	Vector duIntTemp(4);      duIntTemp.Zero();
+	Vector intEq(4);          intEq.Zero();
+	Vector intEqLast(4);      intEqLast.Zero();
+	Vector Uepr(24);          Uepr.Zero();
+	Vector UeprInt(4);        UeprInt.Zero();
+	Vector Ut(24);            Ut.Zero();
+	Vector duExtTemp(24);     duExtTemp.Zero();
 
     Vector disp1 = nodePtr[0]->getTrialDisp(); 
     Vector disp2 = nodePtr[1]->getTrialDisp();
@@ -413,8 +499,6 @@ void BeamColumnJoint3d::getGlobalDispls(Vector &dg)
 
 	uIntOld = UeprInt;
 	uInt = uIntOld;
-	duInt.Zero();
-
 
 	double tol = 1e-12;
 	double tolIntEq = tol;
@@ -425,21 +509,17 @@ void BeamColumnJoint3d::getGlobalDispls(Vector &dg)
 	double normDuInt = toluInt;
 	double normIntEq = tolIntEq;
 	double normIntEqdU = tolIntEqdU;
-	
-	intEq.Zero();
-	intEqLast.Zero();
-    
-	Vector u(16);
-	u.Zero();
+	    
+	Vector u(16);   u.Zero();
 
-	double engrLast;
-	double engr;
+	double engrLast = 0.0;
+	double engr = 0.0;
 
-	Vector fSpring(13);
-	Vector kSpring(13);
-    Matrix dintEq_du(4,4);
-    Matrix df_dDef(13,13);
-    Matrix tempintEq_du (4,13);
+	Vector fSpring(13);          fSpring.Zero();
+	Vector kSpring(13);          kSpring.Zero();
+	Matrix dintEq_du(4,4);       dintEq_du.Zero();
+	Matrix df_dDef(13,13);       df_dDef.Zero();
+	Matrix tempintEq_du (4,13);  tempintEq_du.Zero();
 
 
 	while ((loadStep < 1.0) && (totalCount < maxTotalCount))
@@ -457,37 +537,29 @@ void BeamColumnJoint3d::getGlobalDispls(Vector &dg)
 			count ++;
 			
 			for (int ic = 0; ic < 12; ic++ ) {
-				u[ic] = uExt[ic] + duExt[ic];
+				u(ic) = uExt(ic) + duExt(ic);
 			}
-			u[12] = uInt[0];
-			u[13] = uInt[1];
-			u[14] = uInt[2];
-			u[15] = uInt[3];
+			u(12) = uInt(0);
+			u(13) = uInt(1);
+			u(14) = uInt(2);
+			u(15) = uInt(3);
 
-
-		getMatResponse(u,fSpring,kSpring);
+			getMatResponse(u,fSpring,kSpring);
 		
 
 		// performs internal equilibrium 
 
-		intEq[0] = -fSpring[2]-fSpring[3]+fSpring[9] -fSpring[12]/elemHeight; 
-		intEq[1] =  fSpring[1]-fSpring[5]-fSpring[7] +fSpring[12]/elemWidth; 
-		intEq[2] = -fSpring[4]-fSpring[8]+fSpring[10]+fSpring[12]/elemHeight; 
-		intEq[3] =  fSpring[0]-fSpring[6]-fSpring[11]-fSpring[12]/elemWidth; 
-
-
-		df_dDef.Zero();               // the diagonal stiffness matrix for the element
+		intEq(0) = -fSpring(2)-fSpring(3)+fSpring(9)-fSpring(12)/elemHeight; 
+		intEq(1) = fSpring(1)-fSpring(5)-fSpring(7)+fSpring(12)/elemWidth; 
+		intEq(2) = -fSpring(4)-fSpring(8)+fSpring(10)+fSpring(12)/elemHeight; 
+		intEq(3) = fSpring(0)-fSpring(6)-fSpring(11)-fSpring(12)/elemWidth; 
 
 		matDiag(kSpring, df_dDef);
 
 		//////////////////////// dintEq_du = dg_df*df_dDef*dDef_du
-		tempintEq_du.Zero();
-		dintEq_du.Zero();
 		tempintEq_du.addMatrixProduct(0.0,dg_df,df_dDef,1.0);
 		dintEq_du.addMatrixProduct(0.0,tempintEq_du,dDef_du,1.0);
 		normIntEq = intEq.Norm();
-
-
 		normIntEqdU = 0.0;
 		for (int jc = 0; jc<4 ; jc++)
 		{
@@ -525,7 +597,6 @@ void BeamColumnJoint3d::getGlobalDispls(Vector &dg)
 			{
 				loadStep = 1.0;
 			}
-
 		}
 		else
 		{
@@ -575,8 +646,7 @@ void BeamColumnJoint3d::getGlobalDispls(Vector &dg)
 	}
 
 		if (!converge && loadStep < 1.0)
-		{
-	
+		{	
 			incCount = 0;
 			maxCount = 25;
 			if (!linesearch)
@@ -589,16 +659,9 @@ void BeamColumnJoint3d::getGlobalDispls(Vector &dg)
 			{
 				opserr << "WARNING : BeamColumnJoint::getGlobalDispls() - convergence problem in state determination" << endln;
 
-				for (int je = 0; je<4 ; je++)
-				{
-					uInt[je] = uIntOld[je];
-					duInt[je] = 0;
-				}
-
-				for (int jee = 0; jee<12; jee++)
-				{
-					duExt[jee] = 0.1*duExt[jee];
-				}
+				uInt = uIntOld;
+				duInt.Zero();
+				duExt = duExt*0.1;
 
 				dLoadStep = dLoadStep*0.1;
 			}
@@ -608,18 +671,12 @@ void BeamColumnJoint3d::getGlobalDispls(Vector &dg)
 			maxCount = 10;
 			incCount ++;
 			normDuInt = toluInt;
-			if ((incCount < 10) || dtConverge)
+			if ((incCount < maxCount) || dtConverge)
 			{
-				for (int jf = 0; jf<12 ; jf++)
-				{
-					uExt[jf] = uExt[jf] + duExt[jf];
-				}
+				uExt = uExt + duExt;
 				if (loadStep + dLoadStep > 1.0)
 				{
-					for (int jg = 0; jg<12 ; jg++)
-					{
-						duExt[jg] = duExt[jg]*(1.0 - loadStep)/dLoadStep;
-					}
+					duExt = duExt*(1.0 - loadStep)/dLoadStep;
 					dLoadStep = 1.0 - loadStep;
 					incCount = 9;
 				}
@@ -627,17 +684,11 @@ void BeamColumnJoint3d::getGlobalDispls(Vector &dg)
 			else
 			{
 				incCount = 0;
-				for (int jh = 0; jh<12 ; jh++)
-				{
-					uExt[jh] = uExt[jh] + duExt[jh];
-				}
+				uExt = uExt + duExt;
 				dLoadStep = dLoadStep*10;
 				if (loadStep + dLoadStep > 1.0)
 				{
-					for (int ji = 0; ji<12 ; ji++)
-					{
-						uExt[ji] = uExt[ji] + duExt[ji]*(1.0 - loadStep)/dLoadStep;
-					}
+					uExt = uExt + duExt*(1.0 - loadStep)/dLoadStep;
 					dLoadStep = 1.0 - loadStep;
 					incCount = 9;
 				}
@@ -652,34 +703,45 @@ void BeamColumnJoint3d::getGlobalDispls(Vector &dg)
 
 	formK(kSpring);
 
-
 	for (int ig = 0; ig < 25; ig++ ) {
 		if (ig<24)
 		{
-			dg[ig] = Ut[ig];
+			dg(ig) = Ut(ig);
 		}
 	}
 
 
-	dg[24] = uInt[0];
-	dg[25] = uInt[1];
-	dg[26] = uInt[2];
-	dg[27] = uInt[3];
-
+	dg(24) = uInt(0);
+	dg(25) = uInt(1);
+	dg(26) = uInt(2);
+	dg(27) = uInt(3);
 
 }
 
-/*************************************************************************************************************************/
 void BeamColumnJoint3d::getMatResponse(Vector U, Vector &fS, Vector &kS)
 {
+	double jh = HgtFac;            // factor for beams
+	double jw = WdtFac;            // factor for column
+
 	// obtains the material response from the material class
 	Vector defSpring(13);
 	defSpring.Zero();
 	fS.Zero();
 	kS.Zero();
 
-
 	defSpring.addMatrixVector(0.0, BCJoint, U, 1.0);
+
+	// slip @ bar = slip @ spring * tc couple
+
+	defSpring(0) = defSpring(0)*jw;                   // new model applied on 
+	defSpring(1) = defSpring(1)*jw;                   // 4th June 2004
+	defSpring(6) = defSpring(6)*jw;                   // h, h_bar distinction was
+	defSpring(7) = defSpring(7)*jw;                   // removed from the previous model
+
+	defSpring(3)  = defSpring(3)*jh;                  // by making h = h_bar
+	defSpring(4)  = defSpring(4)*jh;                  // similar case done for width
+	defSpring(9) = defSpring(9)*jh;
+	defSpring(10) = defSpring(10)*jh;
 
 	for (int j=0; j<13; j++)
 	{
@@ -688,14 +750,36 @@ void BeamColumnJoint3d::getMatResponse(Vector U, Vector &fS, Vector &kS)
 		fS[j] = MaterialPtr[j]->getStress();
 	}
 
+	// force @ spring = force @ bar * tc couple
+
+	fS(0) = fS(0)*jw;
+	fS(1) = fS(1)*jw;
+	fS(6) = fS(6)*jw;
+	fS(7) = fS(7)*jw;
+
+	fS(3) = fS(3)*jh;
+	fS(4) = fS(4)*jh;
+	fS(9) = fS(9)*jh;
+	fS(10) = fS(10)*jh;
+
+	// stiffness @ spring = stiffness @ bar * (tc couple)^2
+
+	kS(0) = kS(0)*jw*jw;
+	kS(1) = kS(1)*jw*jw;
+	kS(6) = kS(6)*jw*jw;
+	kS(7) = kS(7)*jw*jw;
+
+	kS(3) = kS(3)*jh*jh;
+	kS(4) = kS(4)*jh*jh;
+	kS(9) = kS(9)*jh*jh;
+	kS(10) = kS(10)*jh*jh;
 }
 
-/*************************************************************************************************************************/
+
 void BeamColumnJoint3d::getdDef_du()
 {
 	
-	dDef_du.Zero();
-	
+	dDef_du.Zero();	
 	for (int jb=0; jb<13; jb++)
 	{
 		dDef_du(jb,0) = BCJoint(jb,12);
@@ -704,17 +788,18 @@ void BeamColumnJoint3d::getdDef_du()
 		dDef_du(jb,3) = BCJoint(jb,15);
 	}
 }
-/*************************************************************************************************************************/
-void BeamColumnJoint3d::matDiag(Vector k,Matrix &df)
+
+void BeamColumnJoint3d::matDiag(Vector k,Matrix &dfd)
 {
+	dfd.Zero();
 	// takes in a vector and converts it to a diagonal matrix (could have been placed as a method in matrix class)
 	for (int ja=0; ja<13; ja++)
 	{
-		df(ja,ja) = k(ja);
+		dfd(ja,ja) = k(ja);
 	}
 
 }
-/*************************************************************************************************************************/
+
 void BeamColumnJoint3d::formR(Vector f)
 {
 	
@@ -728,7 +813,7 @@ void BeamColumnJoint3d::formR(Vector f)
 
 	R.addMatrixTransposeVector(0.0,Transf,Rtempo,1.0);    // R = Transf'*Rtempo
 }
-/*************************************************************************************************************************/
+
 void BeamColumnJoint3d::formK(Vector k)
 {
     // develops the element stiffness matrix
@@ -768,38 +853,55 @@ void BeamColumnJoint3d::formK(Vector k)
 	kRFT2.Solve(I,kRSTinv);
 	
 	K2Temp.addMatrixProduct(0.0,kRFT3,kRSTinv,1.0);
+
+	// done for some idiotic reason
+	for(int i = 0; i < 12; ++i)
+	{	
+		for(int j = 0; j < 4; ++j)
+		{
+			if(fabs(K2Temp(i,j)) < 1e-15)
+				K2Temp(i,j) = 0.;
+		}
+	}
+
 	K2.addMatrixProduct(0.0,K2Temp,kRFT1,1.0);      // K2 = kRFT3*kRSTinv*kRFT1 
 
+    // done for some idiotic reason
+	for(int i1 = 0; i1 < 12; ++i1)
+	{	
+		for(int j1 = 0; j1 < 12; ++j1)
+		{
+			if(fabs(K2(i1,j1)) < 1e-15)
+				K2(i1,j1) = 0.;
+		}
+	}
 
 	kRF.addMatrix(1.0,K2,-1.0);                     // kRF = kRF - K2
 
 	K.addMatrixTripleProduct(0.0,Transf,kRF,1.0);   // K = Transf'*kRF*Transf
 }
-/*************************************************************************************************************************/
+
 void BeamColumnJoint3d::formTransfMat()
 {
 	Transf.Zero();
 	Tran.Zero();
-
 	
-	double Crd24 = fabs(sqrt(pow((nodeCrd[1][0] - nodeCrd[3][0]),2.0) + pow((nodeCrd[1][1] - nodeCrd[3][1]),2.0) + pow((nodeCrd[1][2] - nodeCrd[3][2]),2.0)));
-	double Crd31 = fabs(sqrt(pow((nodeCrd[2][0] - nodeCrd[0][0]),2.0) + pow((nodeCrd[2][1] - nodeCrd[0][1]),2.0) + pow((nodeCrd[2][2] - nodeCrd[0][2]),2.0)));
+	double Crd24 = fabs(sqrt((Node2(0)*Node2(0)) + (Node2(1)*Node2(1)) + (Node2(2)*Node2(2))));
+	double Crd31 = fabs(sqrt((Node3(0)*Node3(0)) + (Node3(1)*Node3(1)) + (Node3(2)*Node3(2))));
 
-	double a24 = (nodeCrd[1][0] - nodeCrd[3][0])/Crd24; double b24 = (nodeCrd[1][1] - nodeCrd[3][1])/Crd24; double c24 = (nodeCrd[1][2] - nodeCrd[3][2])/Crd24; 
-    double a31 = (nodeCrd[2][0] - nodeCrd[0][0])/Crd31; double b31 = (nodeCrd[2][1] - nodeCrd[0][1])/Crd31; double c31 = (nodeCrd[2][2] - nodeCrd[0][2])/Crd31; 
+	double a24 = Node2(0)/Crd24; double b24 = Node2(1)/Crd24; double c24 = Node2(2)/Crd24; 
+    double a31 = Node3(0)/Crd31; double b31 = Node3(1)/Crd31; double c31 = Node3(2)/Crd31; 
 
 	Tran(0,0) = a24; Tran(0,1) =  b24; Tran(0,2) = c24;
 	Tran(1,0) = a31; Tran(1,1) =  b31; Tran(1,2) = c31;
 	Tran(2,3) = b24*c31 - b31*c24; Tran(2,4) = -a24*c31 + c24*a31; Tran(2,5) = a24*b31 - b24*a31;
   
-
 	Transf.Assemble(Tran,0,0,1.0);
 	Transf.Assemble(Tran,3,6,1.0);
 	Transf.Assemble(Tran,6,12,1.0);
 	Transf.Assemble(Tran,9,18,1.0);
 
 }
-/*************************************************************************************************************************/
 
 void BeamColumnJoint3d::getdg_df()
 {
@@ -822,7 +924,6 @@ void BeamColumnJoint3d::getdg_df()
 		dg_df(3,12) = -1/elemWidth;
 
 }
-/*************************************************************************************************************************/
 
 void BeamColumnJoint3d::getBCJoint() 
 {
@@ -864,104 +965,133 @@ void BeamColumnJoint3d::getBCJoint()
 	BCJoint(12,14) = 1/elemHeight;
 	BCJoint(12,15) = -1/elemWidth;
 
+	// based upon the new formulation 
+	BCJoint(2,2) = -(elemActHeight - elemHeight)/2;
+	BCJoint(5,5) = -(elemActWidth - elemWidth)/2;
+	BCJoint(8,8) = (elemActHeight - elemHeight)/2;;
+	BCJoint(11,11) = (elemActWidth - elemWidth)/2;;
+
 }
 
-/*************************************************************************************************************************/
-double BeamColumnJoint3d::getStepSize(double G0,double G,Vector uExt,Vector duExt,Vector uInt,Vector duInt,double tol)
+double BeamColumnJoint3d::getStepSize(double s0,double s1,Vector uExt,Vector duExt,Vector uInt,Vector duInt,double tol)
 {
 	// finds out the factor to be used for linesearch method
-	Vector u(16);
-	Vector fSprng(13);
-	Vector kSprng(13);
-	Vector intEq(4);
+	Vector u(16);    u.Zero();
+	Vector fSpr(13); fSpr.Zero();
+	Vector kSpr(13); kSpr.Zero();
+	Vector intEq(4); intEq.Zero();
 
-	int count =0;
-	int smax = 10;
-	int sb = 0;
-	int sa = 1;
-	double Gb = G0;
-	double Ga = G;
+	double r0 = 0.0;            // tolerance chcek for line-search
+	double tolerance = 0.8;     // slack region tolerance set for line-search
+    
+	if (s0 != 0.0)
+		r0 = fabs(s1/s0);
 
+	if (r0 <= tolerance)
+		return 1.0;   // Linsearch Not required residual decrease less than tolerance
 
-	while ((Ga*Gb > 0) && (sa<smax))
-	{
-		sb = sa;
-		sa *= 2;
-		Gb = Ga;
+	if (s1 == s0)
+		return 1.0;   // Bisection would have divide by zero error if continued
 
-		for (int i = 0; i < 12; i++ ) {
-			u[i] = uExt[i] + duExt[i];
-			}
-		u[12] = uInt[0] - sa*duInt[0];
-		u[13] = uInt[1] - sa*duInt[1];
-		u[14] = uInt[2] - sa*duInt[2];
-		u[15] = uInt[3] - sa*duInt[3];
+	// set some variables
+	double etaR;
+	double eta = 1.0;
+	double s = s1;
+	double etaU = 1.0;
+	double etaL = 0.0;
+	double sU = s1;
+	double sL = s0;
+	double r = r0;
+	double etaJ = 1.0;
 
-		getMatResponse(u,fSprng,kSprng);
-		
-		// performs internal equilibrium 
+	double minEta = 0.1;
+	double maxEta = 10.0;
+	int maxIter = 20;
 
-		intEq[0] = -fSprng[2]-fSprng[3]+fSprng[9]-fSprng[12]/elemHeight; 
-		intEq[1] = fSprng[1]-fSprng[5]-fSprng[7]+fSprng[12]/elemWidth; 
-		intEq[2] = -fSprng[4]-fSprng[8]+fSprng[10]+fSprng[12]/elemHeight; 
-		intEq[3] = fSprng[0]-fSprng[6]-fSprng[11]-fSprng[12]/elemWidth; 
+	// bracket the region
+	int count = 0;
+	while ((sU*sL > 0.0) && (etaU < maxEta)) {
+		count ++;
+		etaU *= 2.0;
+		etaR = etaU - etaJ;
 
-		Ga = 0.0;
-		for (int ia=0; ia<4; ia++)
-		{
-			Ga += duInt[ia]*intEq[ia];
+		for (int i = 0; i < 12; i++) {
+			u(i) = uExt(i) + duExt(i);
 		}
+		u(12) = uInt(0) - etaR*duInt(0);
+		u(13) = uInt(1) - etaR*duInt(1);
+		u(14) = uInt(2) - etaR*duInt(2);
+		u(15) = uInt(3) - etaR*duInt(3);
+
+		getMatResponse(u,fSpr,kSpr);
+
+		intEq(0) = -fSpr(2) - fSpr(3) + fSpr(9) - fSpr(12)/elemHeight;
+		intEq(1) = fSpr(1) - fSpr(5) - fSpr(7) + fSpr(12)/elemWidth;
+		intEq(2) = -fSpr(4) - fSpr(8) + fSpr(10) + fSpr(12)/elemHeight;
+		intEq(3) = fSpr(0) - fSpr(6) - fSpr(11) - fSpr(12)/elemWidth;
+
+		sU = duInt^intEq;
+
+		// check if we are happy with the solution
+		r = fabs(sU/s0);
+		if (r < tolerance)
+			return etaU;
+
+		etaJ = etaU;
 	}
 
-	double step = static_cast<double>(sa);
-	G = Ga;
+	if (sU*sL > 0.0)   // no bracketing could be done
+		return 1.0;
 
-	while ((Ga*Gb < 0) && ((fabs(G) > tol*fabs(G0)) || (abs(sb-sa) > tol*0.5*(sa+sb))) && count<20)
-	{
-		count++;
-		step = sa - Ga*(sa-sb)/(Ga-Gb);
+	count = 0;
+	while (r > tolerance && count < maxIter) {
+		count ++;
+		eta = (etaU + etaL)/2.0;
 
-		for (int ib = 0; ib < 12; ib++ ) {
-			u[ib] = uExt[ib] + duExt[ib]; }
+		if (r > r0) eta = 1.0;
 
-		u[12] = uInt[0] - sa*duInt[0];
-		u[13] = uInt[1] - sa*duInt[1];
-		u[14] = uInt[2] - sa*duInt[2];
-		u[15] = uInt[3] - sa*duInt[3];
+		etaR = eta - etaJ;
+
+		for (int i = 0; i < 12; i++) {
+			u(i) = uExt(i) + duExt(i);
+		}
+		u(12) = uInt(0) - etaR*duInt(0);
+		u(13) = uInt(1) - etaR*duInt(1);
+		u(14) = uInt(2) - etaR*duInt(2);
+		u(15) = uInt(3) - etaR*duInt(3);
+
+		getMatResponse(u,fSpr,kSpr);
+
+		intEq(0) = -fSpr(2) - fSpr(3) + fSpr(9) - fSpr(12)/elemHeight;
+		intEq(1) = fSpr(1) - fSpr(5) - fSpr(7) + fSpr(12)/elemWidth;
+		intEq(2) = -fSpr(4) - fSpr(8) + fSpr(10) + fSpr(12)/elemHeight;
+		intEq(3) = fSpr(0) - fSpr(6) - fSpr(11) - fSpr(12)/elemWidth;
+
+		s = duInt^intEq;
+
+		// check if we are happy with the solution
+		r = fabs(s/s0);
+
+		// set variables for next iteration 
+		etaJ = eta;
 		
-	
-		getMatResponse(u,fSprng,kSprng);
-		
-		// performs internal equilibrium
+		if (s*sU < 0.0) {
+			etaL = eta;
+			sL = s;
+		} else if (s*sU == 0.0) {
+			count = maxIter;
+		} else {
+			etaU = eta;
+			sU = s;
+		}
 
-		intEq[0] = -fSprng[2]-fSprng[3]+fSprng[9]-fSprng[12]/elemHeight; 
-		intEq[1] = fSprng[1]-fSprng[5]-fSprng[7]+fSprng[12]/elemWidth; 
-		intEq[2] = -fSprng[4]-fSprng[8]+fSprng[10]+fSprng[12]/elemHeight; 
-		intEq[3] = fSprng[0]-fSprng[6]-fSprng[11]-fSprng[12]/elemWidth; 
+		if (sL == sU)
+			count = maxIter;
 
-		G = 0.0;
-		for (int ic=0; ic<4; ic++)
-		{
-			G += duInt[ic]*intEq[ic];
-		}
-		if (G*Ga > 0)
-		{
-			Gb = 0.5*Gb;
-		}
-		else
-		{
-			sb = sa;
-			Gb = Ga;
-		}
-		sa = static_cast<int>(step);
-		Ga = G;
 	}
 
-	double stepSize = (step<1.0)? step:1.0;
-	return stepSize;
-
+	return eta;
 }
-/********************************************************************************************/
     
 const Matrix &
 BeamColumnJoint3d::getDamp(void)
@@ -969,8 +1099,6 @@ BeamColumnJoint3d::getDamp(void)
 	// yet to do (stiffness being returned)
 	return K;
 }
-/********************************************************************************************/
-
 
 const Matrix &
 BeamColumnJoint3d::getMass(void)
@@ -978,21 +1106,18 @@ BeamColumnJoint3d::getMass(void)
 	// yet to do (stiffness being returned)
 	return K;
 }
-/********************************************************************************************/
 
 void 
 BeamColumnJoint3d::zeroLoad(void)
 {
   return;
 }
-/********************************************************************************************/
 
 int 
 BeamColumnJoint3d::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
   return 0;
 }
-/********************************************************************************************/
 
 int 
 BeamColumnJoint3d::addInertiaLoadToUnbalance(const Vector &accel)
@@ -1000,7 +1125,6 @@ BeamColumnJoint3d::addInertiaLoadToUnbalance(const Vector &accel)
   return 0;
 }
 
-/********************************************************************************************/
 
 const Vector &
 BeamColumnJoint3d::getResistingForceIncInertia()
@@ -1008,28 +1132,24 @@ BeamColumnJoint3d::getResistingForceIncInertia()
   //yet to do  (residual being returned)
 	return R;
 }
-/********************************************************************************************/
 
 int
 BeamColumnJoint3d::sendSelf(int commitTag, Channel &theChannel)
 {
   return -1;
 }
-/********************************************************************************************/
 
 int
 BeamColumnJoint3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
   return -1;
 }
-/********************************************************************************************/
 
 int
 BeamColumnJoint3d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 {
-  return -1;
+  return -1; // yet to do
 }
-/********************************************************************************************/
 
 void
 BeamColumnJoint3d::Print(OPS_Stream &s, int flag)
@@ -1043,47 +1163,46 @@ BeamColumnJoint3d::Print(OPS_Stream &s, int flag)
 	s << "\nResisting Forces :" <<this->getResistingForce();
 	return;
 }
-/********************************************************************************************/
 
 Response*
 BeamColumnJoint3d::setResponse(const char **argv, int argc, Information &eleInfo)
 {
 	// we will compare argv[0] to determine the type of response required
     
-	if (strcmp(argv[0],"columnbar1") == 0 || strcmp(argv[0],"columnBar1") ==0 )
+	if (strcmp(argv[0],"node1BarSlipL") == 0 || strcmp(argv[0],"node1BarslipL") ==0 || strcmp(argv[0],"Node1BarSlipL") == 0)
 		return MaterialPtr[0]->setResponse(&argv[1], argc-1, eleInfo);
 
-	else if (strcmp(argv[0],"columnbar2") == 0 || strcmp(argv[0],"columnBar2") ==0 )
+	else if (strcmp(argv[0],"node1BarSlipR") == 0 || strcmp(argv[0],"node1BarslipR") ==0 || strcmp(argv[0],"Node1BarSlipR") == 0)
 		return MaterialPtr[1]->setResponse(&argv[1], argc-1, eleInfo);
 
-	else if (strcmp(argv[0],"columnbar3") == 0 || strcmp(argv[0],"columnBar3") ==0 )
+	else if (strcmp(argv[0],"node1InterfaceShear") == 0 || strcmp(argv[0],"node1Interfaceshear") ==0 || strcmp(argv[0],"Node1InterfaceShear") ==0 )
 		return MaterialPtr[2]->setResponse(&argv[1], argc-1, eleInfo);
 
-	else if (strcmp(argv[0],"beambottombar1") == 0 || strcmp(argv[0],"beambottomBar1") ==0 || strcmp(argv[0],"beamBottomBar1") == 0)
+	else if (strcmp(argv[0],"node2BarSlipB") == 0 || strcmp(argv[0],"node2BarslipB") ==0 || strcmp(argv[0],"Node2BarSlipB") == 0)
 		return MaterialPtr[3]->setResponse(&argv[1], argc-1, eleInfo);
 
-	else if (strcmp(argv[0],"beamtopbar1") == 0 || strcmp(argv[0],"beamtopBar1") ==0 || strcmp(argv[0],"beamTopBar1") == 0)
+	else if (strcmp(argv[0],"node2BarSlipT") == 0 || strcmp(argv[0],"node2BarslipT") ==0 || strcmp(argv[0],"Node2BarSlipT") == 0)
 		return MaterialPtr[4]->setResponse(&argv[1], argc-1, eleInfo);
 
-	else if (strcmp(argv[0],"beammiddlebar1") == 0 || strcmp(argv[0],"beammiddleBar1") ==0 || strcmp(argv[0],"beamMiddleBar1") == 0)
+	else if (strcmp(argv[0],"node2InterfaceShear") == 0 || strcmp(argv[0],"node2Interfaceshear") ==0 || strcmp(argv[0],"Node2InterfaceShear") ==0 )
 		return MaterialPtr[5]->setResponse(&argv[1], argc-1, eleInfo);
 
-	else if (strcmp(argv[0],"columnbar4") == 0 || strcmp(argv[0],"columnBar4") ==0 )
+	else if (strcmp(argv[0],"node3BarSlipL") == 0 || strcmp(argv[0],"node3BarslipL") ==0 || strcmp(argv[0],"Node3BarSlipL") == 0)
 		return MaterialPtr[6]->setResponse(&argv[1], argc-1, eleInfo);
 
-	else if (strcmp(argv[0],"columnbar5") == 0 || strcmp(argv[0],"columnBar5") ==0 )
+	else if (strcmp(argv[0],"node3BarSlipR") == 0 || strcmp(argv[0],"node3BarslipR") ==0 || strcmp(argv[0],"Node3BarSlipR") == 0)
 		return MaterialPtr[7]->setResponse(&argv[1], argc-1, eleInfo);
 
-	else if (strcmp(argv[0],"columnbar6") == 0 || strcmp(argv[0],"columnBar6") ==0 )
+	else if (strcmp(argv[0],"node3InterfaceShear") == 0 || strcmp(argv[0],"node3Interfaceshear") ==0 || strcmp(argv[0],"Node3InterfaceShear") ==0 )
 		return MaterialPtr[8]->setResponse(&argv[1], argc-1, eleInfo);
 
-	else if (strcmp(argv[0],"beambottombar2") == 0 || strcmp(argv[0],"beambottomBar2") ==0 || strcmp(argv[0],"beamBottomBar2") == 0)
+	else if (strcmp(argv[0],"node4BarSlipB") == 0 || strcmp(argv[0],"node4BarslipB") ==0 || strcmp(argv[0],"Node4BarSlipB") == 0)
 		return MaterialPtr[9]->setResponse(&argv[1], argc-1, eleInfo);
 
-	else if (strcmp(argv[0],"beamtopbar2") == 0 || strcmp(argv[0],"beamtopBar2") ==0 || strcmp(argv[0],"beamTopBar2") == 0)
+	else if (strcmp(argv[0],"node4BarSlipT") == 0 || strcmp(argv[0],"node4BarslipT") ==0 || strcmp(argv[0],"Node4BarSlipT") == 0)
 		return MaterialPtr[10]->setResponse(&argv[1], argc-1, eleInfo);
 
-	else if (strcmp(argv[0],"beammiddlebar2") == 0 || strcmp(argv[0],"beammiddleBar2") ==0 || strcmp(argv[0],"beamMiddleBar2") == 0)
+	else if (strcmp(argv[0],"node4InterfaceShear") == 0 || strcmp(argv[0],"node4Interfaceshear") ==0 || strcmp(argv[0],"Node4InterfaceShear") ==0 )
 		return MaterialPtr[11]->setResponse(&argv[1], argc-1, eleInfo);
 
 	else if (strcmp(argv[0],"shearpanel") == 0 || strcmp(argv[0],"shearPanel") ==0)
@@ -1091,7 +1210,7 @@ BeamColumnJoint3d::setResponse(const char **argv, int argc, Information &eleInfo
 	
 
 	else if (strcmp(argv[0],"externalDisplacement") == 0 || strcmp(argv[0],"externaldisplacement") == 0)
-		return new ElementResponse(this,1,Vector(24));
+		return new ElementResponse(this,1,Vector(12));
     
 	else if (strcmp(argv[0],"internalDisplacement") == 0 || strcmp(argv[0],"internaldisplacement") == 0)
 		return new ElementResponse(this,2,Vector(4));
@@ -1102,7 +1221,6 @@ BeamColumnJoint3d::setResponse(const char **argv, int argc, Information &eleInfo
 	else
 		return 0;
 }
-/********************************************************************************************/
 
 int 
 BeamColumnJoint3d::getResponse(int responseID, Information &eleInfo)
@@ -1188,14 +1306,12 @@ BeamColumnJoint3d::getResponse(int responseID, Information &eleInfo)
 		return -1;
 	}
 }
-/********************************************************************************************/
 
 int
 BeamColumnJoint3d::setParameter (char **argv, int argc, Information &info)
 {
   return -1;
 }
-/********************************************************************************************/
     
 int
 BeamColumnJoint3d::updateParameter (int parameterID, Information &info)

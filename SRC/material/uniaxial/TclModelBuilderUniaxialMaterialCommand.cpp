@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2003-10-07 22:16:32 $
+// $Revision: 1.23 $
+// $Date: 2004-10-06 19:21:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -1018,17 +1018,17 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
     }
 
 	else if (strcmp(argv[1],"Pinching4") == 0) {
-		if (argc != 41 && argc != 30 ) {
+		if (argc != 42 && argc != 31 ) {
 			opserr << "WARNING insufficient arguments\n";
 			printCommand(argc,argv);
 			opserr << "Want: uniaxialMaterial Pinching4 tag? stress1p? strain1p? stress2p? strain2p? stress3p? strain3p? stress4p? strain4p? "
-				<< "\nstress1n? strain1n? stress2n? strain2n? stress3n? strain3n? stress4n? strain4n? rDispP? rForceP? uForceP? "
-				<< "\nrDispN? rForceN? uForceN? gammaK1? gammaK2? gammaK3? gammaK4? gammaKLimit? gammaD1? gammaD2? gammaD3? gammaD4? "
-				<< "\ngammaDLimit? gammaF1? gammaF2? gammaF3? gammaF4? gammaFLimit? gammaE? ";
+				<< "\n<stress1n? strain1n? stress2n? strain2n? stress3n? strain3n? stress4n? strain4n?> rDispP? rForceP? uForceP? "
+				<< "\n<rDispN? rForceN? uForceN?> gammaK1? gammaK2? gammaK3? gammaK4? gammaKLimit? gammaD1? gammaD2? gammaD3? gammaD4? "
+				<< "\ngammaDLimit? gammaF1? gammaF2? gammaF3? gammaF4? gammaFLimit? gammaE? CycleOrEnergyDamage? ";
 			return TCL_ERROR;
 		}
 
-		int tag;
+		int tag, tDmg;
 		double stress1p, stress2p, stress3p, stress4p;
 		double strain1p, strain2p, strain3p, strain4p;
 		double stress1n, stress2n, stress3n, stress4n;
@@ -1094,7 +1094,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 			return TCL_ERROR;
 		}
 
-		if (argc == 41) {
+		if (argc == 42) {
 			if (Tcl_GetDouble(interp, argv[i++], &stress1n) != TCL_OK) {
 				opserr << "WARNING invalid stress1n\n";
 				opserr << "Pinching4 material: " << tag << endln;
@@ -1164,7 +1164,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 			return TCL_ERROR;
 		}
 
-		if (argc == 41) {
+		if (argc == 42) {
 			if (Tcl_GetDouble(interp, argv[i++], &rDispN) != TCL_OK) {
 				opserr << "WARNING invalid rDispN\n";
 				opserr << "Pinching4 material: " << tag << endln;
@@ -1266,38 +1266,52 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 			return TCL_ERROR;
 		}
 
+		int y; 
+		y = i;
+
+		if ((strcmp(argv[y],"cycle") == 0) || (strcmp(argv[y],"Cycle") == 0) || (strcmp(argv[y],"DamageCycle") == 0) || (strcmp(argv[y],"damageCycle") == 0))
+		{ tDmg = 1; }
+		else if ((strcmp(argv[y],"energy") == 0) || (strcmp(argv[y],"Energy") == 0) || (strcmp(argv[y],"DamageEnergy") == 0) || (strcmp(argv[y],"damageEnergy") == 0))
+		{ tDmg = 0; }
+		else
+		{
+			opserr << "WARNING invalid type of damage calculation specified\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+
 	// allocate the pinching material
-		if (argc == 41) {
+		if (argc == 42) {
 		theMaterial = new Pinching4Material (tag,
 			stress1p, strain1p, stress2p, strain2p, stress3p, strain3p, stress4p, strain4p,
 			stress1n, strain1n, stress2n, strain2n, stress3n, strain3n, stress4n, strain4n,
 			rDispP, rForceP, uForceP, rDispN, rForceN, uForceN, 
 			gammaK1, gammaK2, gammaK3, gammaK4, gammaKLimit,
 			gammaD1, gammaD2, gammaD3, gammaD4, gammaDLimit,
-			gammaF1, gammaF2, gammaF3, gammaF4, gammaFLimit, gammaE);
+			gammaF1, gammaF2, gammaF3, gammaF4, gammaFLimit, gammaE, tDmg);
 		}
-		if (argc == 30) {
+		if (argc == 31) {
 		theMaterial = new Pinching4Material (tag,
 			stress1p, strain1p, stress2p, strain2p, stress3p, strain3p, stress4p, strain4p,
 			rDispP, rForceP, uForceP,  
 			gammaK1, gammaK2, gammaK3, gammaK4, gammaKLimit,
 			gammaD1, gammaD2, gammaD3, gammaD4, gammaDLimit,
-			gammaF1, gammaF2, gammaF3, gammaF4, gammaFLimit, gammaE);		
+			gammaF1, gammaF2, gammaF3, gammaF4, gammaFLimit, gammaE, tDmg);		
 		}
    }
    
   else if (strcmp(argv[1],"BarSlip") == 0)
    {
 		
-	   if (argc != 15 && argc != 37)
+	   if (argc != 17 && argc != 15)
 	   {
 		   opserr << "WARNING insufficient arguments\n";
 		   printCommand(argc,argv);
-		   opserr << "Want: uniaxialMaterial BarSlip tag? fc? fy? Es? fu? Eh? db? ld? nb? width? depth? bsflag? type?"  << endln;
+		   opserr << "Want: uniaxialMaterial BarSlip tag? fc? fy? Es? fu? Eh? db? ld? nb? width? depth? bsflag? type? <damage? unit?>"  << endln;
 		   return TCL_ERROR;
 	   }
 
-	   int tag, nb, bsf, typ;
+	   int tag, nb, bsf, typ, dmg, unt;
 	   double fc, fy, Es, fu, Eh, ld, width, depth, db;
 
 	   int argStart = 2;
@@ -1372,134 +1386,6 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	   int y;
 	   y = argStart;
 
-	   double rDispP, rForceP, uForceP, rDispN, rForceN, uForceN;
-	   double gammaK1, gammaK2, gammaK3, gammaK4, gammaKLimit;
-	   double gammaD1, gammaD2, gammaD3, gammaD4, gammaDLimit;
-	   double gammaF1, gammaF2, gammaF3, gammaF4, gammaFLimit;
-	   double gammaE;
-
-	   if (argc == 37) {
-
-
-		   if (Tcl_GetDouble(interp, argv[y++], &rDispP) != TCL_OK) {
-				opserr << "WARNING invalid rDispP\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-
-			if (Tcl_GetDouble(interp, argv[y++], &rForceP) != TCL_OK) {
-				opserr << "WARNING invalid rForceP\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-	
-			if (Tcl_GetDouble(interp, argv[y++], &uForceP) != TCL_OK) {
-				opserr << "WARNING invalid uForceP\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-
-			if (Tcl_GetDouble(interp, argv[y++], &rDispN) != TCL_OK) {
-				opserr << "WARNING invalid rDispN\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-
-			if (Tcl_GetDouble(interp, argv[y++], &rForceN) != TCL_OK) {
-				opserr << "WARNING invalid rForceN\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-
-			if (Tcl_GetDouble(interp, argv[y++], &uForceN) != TCL_OK) {
-				opserr << "WARNING invalid uForceN\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-
-		   if (Tcl_GetDouble(interp, argv[y++], &gammaK1) != TCL_OK) {
-				opserr << "WARNING invalid gammaK1\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-			if (Tcl_GetDouble(interp, argv[y++], &gammaK2) != TCL_OK) {
-				opserr << "WARNING invalid gammaK2\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-			if (Tcl_GetDouble(interp, argv[y++], &gammaK3) != TCL_OK) {
-				opserr << "WARNING invalid gammaK3\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-			if (Tcl_GetDouble(interp, argv[y++], &gammaK4) != TCL_OK) {
-				opserr << "WARNING invalid gammaK4\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-			if (Tcl_GetDouble(interp, argv[y++], &gammaKLimit) != TCL_OK) {
-				opserr << "WARNING invalid gammaKLimit\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-			if (Tcl_GetDouble(interp, argv[y++], &gammaD1) != TCL_OK) {
-				opserr << "WARNING invalid gammaD1\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}										   
-			if (Tcl_GetDouble(interp, argv[y++], &gammaD2) != TCL_OK) {
-				opserr << "WARNING invalid gammaD2\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-			if (Tcl_GetDouble(interp, argv[y++], &gammaD3) != TCL_OK) {
-				opserr << "WARNING invalid gammaD3\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-			if (Tcl_GetDouble(interp, argv[y++], &gammaD4) != TCL_OK) {
-				opserr << "WARNING invalid gammaD4\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-			if (Tcl_GetDouble(interp, argv[y++], &gammaDLimit) != TCL_OK) {
-				opserr << "WARNING invalid gammaDLimit\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-			if (Tcl_GetDouble(interp, argv[y++], &gammaF1) != TCL_OK) {
-				opserr << "WARNING invalid gammaF1\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-			if (Tcl_GetDouble(interp, argv[y++], &gammaF2) != TCL_OK) {
-				opserr << "WARNING invalid gammaF2\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-			if (Tcl_GetDouble(interp, argv[y++], &gammaF3) != TCL_OK) {
-				opserr << "WARNING invalid gammaF3\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-			if (Tcl_GetDouble(interp, argv[y++], &gammaF4) != TCL_OK) {
-				opserr << "WARNING invalid gammaF4\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-			if (Tcl_GetDouble(interp, argv[y++], &gammaFLimit) != TCL_OK) {
-				opserr << "WARNING invalid gammaFLimit\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-
-			if (Tcl_GetDouble(interp, argv[y++], &gammaE) != TCL_OK) {
-				opserr << "WARNING invalid gammaE\n";
-				opserr << "bar-Slip material: " << tag << endln;
-				return TCL_ERROR;
-			}
-
-	   }
 
 	   if ((strcmp(argv[y],"strong") == 0) || (strcmp(argv[y],"Strong") == 0) || (strcmp(argv[y],"weak") == 0) || (strcmp(argv[y],"Weak") == 0))
 	   {
@@ -1523,9 +1409,9 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 
 	   if ((strcmp(argv[y],"beamtop") == 0) || (strcmp(argv[y],"beamTop") == 0) || 
 		   (strcmp(argv[y],"beambot") == 0) || (strcmp(argv[y],"beamBot") == 0) || (strcmp(argv[y],"beambottom") == 0) || (strcmp(argv[y],"beamBottom") == 0) ||
-		   (strcmp(argv[y],"column") == 0))
+		   (strcmp(argv[y],"beam") == 0) || (strcmp(argv[y],"Beam") == 0) || (strcmp(argv[y],"Column") == 0) || (strcmp(argv[y],"column") == 0))
 	   {
-		   if ((strcmp(argv[y],"beamtop") == 0) || (strcmp(argv[y],"beamTop") == 0))
+		   if ((strcmp(argv[y],"beamtop") == 0) || (strcmp(argv[y],"beamTop") == 0) || (strcmp(argv[y],"beam") == 0) || (strcmp(argv[y],"Beam") == 0))
 		   {
 			   typ = 0;
 		   }
@@ -1535,7 +1421,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 			   typ = 1;
 		   }
 
-		   if ((strcmp(argv[y],"column") == 0))
+		   if ((strcmp(argv[y],"column") == 0) || (strcmp(argv[y],"Column") == 0))
 		   {
 			   typ = 2;
 		   }
@@ -1546,18 +1432,81 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 		   opserr << "BarSlip: " << tag << endln;
 		   return TCL_ERROR;
 	   }
+	   if (argc == 17) {
+	   y ++;
+
+	   if ((strcmp(argv[y],"damage1") == 0) || (strcmp(argv[y],"Damage1") == 0) || (strcmp(argv[y],"damage2") == 0) || (strcmp(argv[y],"Damage2") == 0) || 
+		   (strcmp(argv[y],"nodamage") == 0) || (strcmp(argv[y],"Nodamage") == 0) || (strcmp(argv[y],"NoDamage") == 0) || (strcmp(argv[y],"noDamage") == 0))
+	   {
+		   if ((strcmp(argv[y],"damage1") == 0) || (strcmp(argv[y],"Damage1") == 0))
+		   {
+			   dmg = 1;
+		   }
+		   else if ((strcmp(argv[y],"damage2") == 0) || (strcmp(argv[y],"Damage2") == 0))
+		   {
+			   dmg = 2;
+		   }
+		   else if ((strcmp(argv[y],"nodamage") == 0) || (strcmp(argv[y],"Nodamage") == 0) || (strcmp(argv[y],"NoDamage") == 0) || (strcmp(argv[y],"noDamage") == 0))
+		   {
+			   dmg = 0;
+		   }
+
+	   }
+	   else
+	   {
+		   opserr << "WARNING invalid damage specified\n";
+		   opserr << "BarSlip: " << tag << endln;
+		   return TCL_ERROR;
+	   }
+
+	   y ++;
+
+	   if ((strcmp(argv[y],"mpa") == 0) || (strcmp(argv[y],"MPa") == 0) || (strcmp(argv[y],"mPa") == 0) || (strcmp(argv[y],"Mpa") == 0) ||
+		   (strcmp(argv[y],"psi") == 0) || (strcmp(argv[y],"Psi") == 0) || (strcmp(argv[y],"PSI") == 0) || (strcmp(argv[y],"Pa") == 0) ||
+		   (strcmp(argv[y],"pa") == 0) ||  (strcmp(argv[y],"psf") == 0) || (strcmp(argv[y],"Psf") == 0) || (strcmp(argv[y],"PSF") == 0) ||
+		   (strcmp(argv[y],"ksi") == 0) || (strcmp(argv[y],"Ksi") == 0) || (strcmp(argv[y],"KSI") == 0) || (strcmp(argv[y],"ksf") == 0) ||
+		   (strcmp(argv[y],"Ksf") == 0) || (strcmp(argv[y],"KSF") == 0))
+	   {
+		   if ((strcmp(argv[y],"mpa") == 0) || (strcmp(argv[y],"MPa") == 0) || (strcmp(argv[y],"mPa") == 0) || (strcmp(argv[y],"Mpa") == 0))
+		   {
+			   unt = 1;
+		   }
+		   else if ((strcmp(argv[y],"psi") == 0) || (strcmp(argv[y],"Psi") == 0) || (strcmp(argv[y],"PSI") == 0))
+		   {
+			   unt = 2;
+		   }
+		   else if ((strcmp(argv[y],"Pa") == 0) || (strcmp(argv[y],"pa") == 0))
+		   {
+			   unt = 3;
+		   }
+		   else if ((strcmp(argv[y],"psf") == 0) || (strcmp(argv[y],"Psf") == 0) || (strcmp(argv[y],"PSF") == 0))
+		   {
+			   unt = 4;
+		   }
+		   else if ((strcmp(argv[y],"ksi") == 0) || (strcmp(argv[y],"Ksi") == 0) || (strcmp(argv[y],"KSI") == 0))
+		   {
+			   unt = 5;
+		   }
+		   else if ((strcmp(argv[y],"ksf") == 0) || (strcmp(argv[y],"Ksf") == 0) || (strcmp(argv[y],"KSF") == 0))
+		   {
+			   unt = 6;
+		   }
+	   }
+	   else
+	   {
+		   opserr << "WARNING invalid unit specified\n";
+		   opserr << "BarSlip: " << tag << endln;
+		   return TCL_ERROR;
+	   }
+	   }
 
 	   // allocate the material
 	   if (argc == 15 ) {
 		   theMaterial = new BarSlipMaterial (tag, fc, fy, Es, fu, Eh, db, ld, nb, width, depth, bsf, typ);
 	   }
 
-	   if (argc == 37) {
-		   theMaterial = new BarSlipMaterial (tag, fc, fy, Es, fu, Eh, db, ld, nb, width, depth, 
-			rDispP, rForceP, uForceP, rDispN, rForceN, uForceN, 
-			gammaK1, gammaK2, gammaK3, gammaK4, gammaKLimit,
-			gammaD1, gammaD2, gammaD3, gammaD4, gammaDLimit,
-			gammaF1, gammaF2, gammaF3, gammaF4, gammaFLimit, gammaE, bsf, typ);
+	   if (argc == 17) {
+		   theMaterial = new BarSlipMaterial (tag, fc, fy, Es, fu, Eh, db, ld, nb, width, depth, bsf, typ, dmg, unt);
 	   }
 
    }
