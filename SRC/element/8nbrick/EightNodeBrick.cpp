@@ -32,20 +32,7 @@
 #ifndef EIGHTNODEBRICK_CPP
 #define EIGHTNODEBRICK_CPP
 
-#include <NDMaterial.h>
-#include <Matrix.h>
-#include <Vector.h>
-#include <ID.h>
-#include <Renderer.h>
-#include <Domain.h>
-#include <string.h>
-#include <Information.h>
-#include <Channel.h>
-#include <FEM_ObjectBroker.h>
-#include <ElementResponse.h>
-
 #include <EightNodeBrick.h>
-#include <ElementalLoad.h>
 #define FixedOrder 2
 
 Matrix EightNodeBrick::K(24, 24);      
@@ -3348,14 +3335,15 @@ Response * EightNodeBrick::setResponse (const char **argv, int argc, Information
 //=============================================================================
 int EightNodeBrick::getResponse (int responseID, Information &eleInfo)
 {
-       switch (responseID) {
+       switch (responseID) 
+        {
       
-     case 1:
-       return eleInfo.setVector(this->getResistingForce());
+       case 1:
+         return eleInfo.setVector(this->getResistingForce());
       
-     case 2:
-       return eleInfo.setMatrix(this->getTangentStiff());
-     case 3:
+       case 2:
+         return eleInfo.setMatrix(this->getTangentStiff());
+       case 3:
                {
     //checking if element plastified
                  int count  = r_integration_order* s_integration_order * t_integration_order;

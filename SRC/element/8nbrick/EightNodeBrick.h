@@ -70,6 +70,21 @@
 #include <NDMaterial.h>
 #include <Template3Dep.h>
 
+#include <NDMaterial.h>
+#include <Matrix.h>
+#include <Vector.h>
+#include <ID.h>
+#include <Renderer.h>
+#include <Domain.h>
+#include <string.h>
+#include <Information.h>
+#include <Channel.h>
+#include <FEM_ObjectBroker.h>
+#include <ElementResponse.h>
+
+#include <ElementalLoad.h>
+
+
 
 class Node;
 //class NDMaterial;
