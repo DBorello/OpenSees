@@ -38,6 +38,8 @@
 #include "bool.h"
 #endif
 
+#include <fstream>	  // add for the output of stiffness matrix K  03/22/2002
+
 #include <Element.h>
 #include <Node.h> 
 #include <NDMaterial.h>
@@ -131,13 +133,19 @@ class EightNodeBrick_u_p_U: public Element
     tensor Jacobian_3Dinv(tensor dh);
     tensor Nodal_Coordinates();
 
-    tensor incr_disp();
-    tensor total_disp();
+    tensor incr_dispDu();
+    tensor incr_dispDU();
+    tensor total_dispDu();
+    tensor total_dispDU();
 
-    tensor total_disp(FILE *fp, double * u);
+    tensor total_dispDu(FILE *fp, double * u);
+    tensor total_dispDU(FILE *fp, double * u);
 
-    void incremental_Update();
-    void set_strain_stress_tensor(FILE *fp, double * u);
+    void incremental_UpdateDu();
+    void incremental_UpdateDU();
+
+    void set_strain_stress_tensorDu(FILE *fp, double * u);
+    void set_strain_stress_tensorDU(FILE *fp, double * u);
     EightNodeBrick_u_p_U & operator[](int subscript);
 
     // public methods to set the state of the element    
@@ -179,9 +187,12 @@ class EightNodeBrick_u_p_U: public Element
     int * get_LM();
 
     // returns nodal forces for given stress field in an element
+    tensor nodal_forcesFu();
+    tensor nodal_forcesFU();
     tensor nodal_forces();
     // returns nodal forces for ITERATIVE stress field in an element
-    tensor iterative_nodal_forces();
+     tensor iterative_nodal_forcesFu();
+     tensor iterative_nodal_forcesFU();
     // returns nodal forces for given constant stress field in the element
     tensor nodal_forces_from_stress(stresstensor & );
     // returns nodal forces for given incremental strain field in an element
@@ -251,7 +262,7 @@ class EightNodeBrick_u_p_U: public Element
 //    matrix Ms;		// Element solid mass matrix (24*24) // wxy added 08/27/2001
 //    matrix Mf;		// Element fluid mass matrix (24*24)  // wxy added 08/27/2001
 
-    static Vector p;		// Element resisting force vector (24). 
+    static Vector p;		// Element resisting force vector (56). 
                         // I changed P to p. P for the matrix. Xiaoyan 09/24/2001
     Vector Q;		// Applied nodal loads
     Vector bf;  	// Body forces

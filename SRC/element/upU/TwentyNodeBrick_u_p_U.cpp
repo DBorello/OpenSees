@@ -34,7 +34,6 @@
 #ifndef TWENTYNODEBRICK_U_P_U_CPP
 #define TWENTYNODEBRICK_U_P_U_CPP
 
-#include <fstream.h>
 #include <TwentyNodeBrick_u_p_U.h>
 #define FixedOrder 3
 
@@ -113,17 +112,20 @@ TwentyNodeBrick_u_p_U::TwentyNodeBrick_u_p_U(int element_number,
 
     short where = 0;
 
-    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+			 short GP_c_r;
+    for( GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
       {
         double r = get_Gauss_p_c( r_integration_order, GP_c_r );
         double rw = get_Gauss_p_w( r_integration_order, GP_c_r );
 
-        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+							 short GP_c_s;
+        for( GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
           {
             double s = get_Gauss_p_c( s_integration_order, GP_c_s );
             double sw = get_Gauss_p_w( s_integration_order, GP_c_s );
 
-            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+											 short GP_c_t;
+            for( GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
               {
                 double t = get_Gauss_p_c( t_integration_order, GP_c_t );
                 double tw = get_Gauss_p_w( t_integration_order, GP_c_t );
@@ -203,7 +205,8 @@ TwentyNodeBrick_u_p_U::~TwentyNodeBrick_u_p_U ()
     
     int total_number_of_Gauss_points = r_integration_order*s_integration_order*t_integration_order;
     
-    for (int i = 0; i < total_number_of_Gauss_points; i++) 
+			 int i;
+    for (i = 0; i < total_number_of_Gauss_points; i++) 
     {
 	// Delete the NDMaterials at each integration point
 	if (matpoint[i])
@@ -696,15 +699,20 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorKep()
     tensor dhGlobal;
 
 
-    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+			 short GP_c_r;
+    for( GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
       {
         r = get_Gauss_p_c( r_integration_order, GP_c_r );
         rw = get_Gauss_p_w( r_integration_order, GP_c_r );
-        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+        
+							 short GP_c_s;
+							 for( GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
           {
             s = get_Gauss_p_c( s_integration_order, GP_c_s );
             sw = get_Gauss_p_w( s_integration_order, GP_c_s );
-            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+
+											 short GP_c_t;
+            for( GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
               {
                 t = get_Gauss_p_c( t_integration_order, GP_c_t );
                 tw = get_Gauss_p_w( t_integration_order, GP_c_t );
@@ -801,15 +809,20 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorG1()  //(double rho_s, double n,
     double N=n;
     double ALPHA=alpha;
 
-    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+    short GP_c_r;
+			 for( GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
       {
         r = get_Gauss_p_c( r_integration_order, GP_c_r );
         rw = get_Gauss_p_w( r_integration_order, GP_c_r );
-        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+        
+							 short GP_c_s;
+							 for( GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
           {
             s = get_Gauss_p_c( s_integration_order, GP_c_s );
             sw = get_Gauss_p_w( s_integration_order, GP_c_s );
-            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+            
+											 short GP_c_t;
+											 for( GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
               {
                 t = get_Gauss_p_c( t_integration_order, GP_c_t );
                 tw = get_Gauss_p_w( t_integration_order, GP_c_t );
@@ -896,15 +909,20 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorG2()  //(double rho_s, double n,
     double N=n;
 //    double ALPHA=alpha;
 
-    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+			 short GP_c_r;
+    for( GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
       {
         r = get_Gauss_p_c( r_integration_order, GP_c_r );
         rw = get_Gauss_p_w( r_integration_order, GP_c_r );
-        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+        
+							 short GP_c_s;
+							 for( GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
           {
             s = get_Gauss_p_c( s_integration_order, GP_c_s );
             sw = get_Gauss_p_w( s_integration_order, GP_c_s );
-            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+            
+											 short GP_c_t;
+											 for( GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
               {
                 t = get_Gauss_p_c( t_integration_order, GP_c_t );
                 tw = get_Gauss_p_w( t_integration_order, GP_c_t );
@@ -994,15 +1012,20 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorP()
     double KF=kf;
     double QQ= N/KF+(ALPHA-N)/KS;
 
-    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+			 short GP_c_r;
+    for( GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
       {
         r = get_Gauss_p_c( r_integration_order, GP_c_r );
         rw = get_Gauss_p_w( r_integration_order, GP_c_r );
-        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+        
+							 short GP_c_s;
+							 for( GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
           {
             s = get_Gauss_p_c( s_integration_order, GP_c_s );
             sw = get_Gauss_p_w( s_integration_order, GP_c_s );
-            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+            
+											 short GP_c_t;
+											 for( GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
               {
                 t = get_Gauss_p_c( t_integration_order, GP_c_t );
                 tw = get_Gauss_p_w( t_integration_order, GP_c_t );
@@ -1012,7 +1035,7 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorP()
                 ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
                 // derivatives of local coordinates with respect to local coordinates
                 dhU = dh_drst_at(r,s,t);  // Assume  the shape function of u and U are same. Xiaoyan 09/20/01
-		              hp= interp_poli_at(r,s,t); // Assume  the shape function of p is same as the u's. Xiaoyan 09/20/01
+                hp= interp_poli_at(r,s,t); // Assume  the shape function of p is same as the u's. Xiaoyan 09/20/01
                 // Jacobian tensor ( matrix )
                 Jacobian = Jacobian_3D(dhU);
                 // 		Jacobian.print("J","Jacobian");
@@ -1083,15 +1106,20 @@ tensor TwentyNodeBrick_u_p_U::getMassTensorMs()  //(double rho_s, double n,)
     double RHO_S=rho_s;
     double N=n;
 
-    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+			 short GP_c_r;
+    for( GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
       {
         r = get_Gauss_p_c( r_integration_order, GP_c_r );
         rw = get_Gauss_p_w( r_integration_order, GP_c_r );
-        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+        
+							 short GP_c_s;
+							 for( GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
           {
             s = get_Gauss_p_c( s_integration_order, GP_c_s );
             sw = get_Gauss_p_w( s_integration_order, GP_c_s );
-            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+            
+											 short GP_c_t;
+											 for( GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
               {
                 t = get_Gauss_p_c( t_integration_order, GP_c_t );
                 tw = get_Gauss_p_w( t_integration_order, GP_c_t );
@@ -1168,7 +1196,7 @@ tensor TwentyNodeBrick_u_p_U::getMassTensorMf()  //(double rho_s, double n,)
 
     int h_dim[] = {20};	
     tensor H(1, h_dim, 0.0);	 // Shape fun. of u
-    tensor HU(2, h_dim, 0.0);	 // Shape fun. of U
+    tensor HU(1, h_dim, 0.0);	 // Shape fun. of U
 
     double det_of_Jacobian = 0.0;
 
@@ -1182,15 +1210,20 @@ tensor TwentyNodeBrick_u_p_U::getMassTensorMf()  //(double rho_s, double n,)
     double N=n;
 
 
-    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+			 short GP_c_r;
+    for( GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
       {
         r = get_Gauss_p_c( r_integration_order, GP_c_r );
         rw = get_Gauss_p_w( r_integration_order, GP_c_r );
-        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+        
+							 short GP_c_s;
+							 for( GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
           {
             s = get_Gauss_p_c( s_integration_order, GP_c_s );
             sw = get_Gauss_p_w( s_integration_order, GP_c_s );
-            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+            
+											 short GP_c_t;
+											 for( GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
               {
                 t = get_Gauss_p_c( t_integration_order, GP_c_t );
                 tw = get_Gauss_p_w( t_integration_order, GP_c_t );
@@ -1276,15 +1309,21 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC1()  //(double rho_s, double n,)
 
     double N=n;
 
-    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+    
+			 short GP_c_r;
+			 for( GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
       {
         r = get_Gauss_p_c( r_integration_order, GP_c_r );
         rw = get_Gauss_p_w( r_integration_order, GP_c_r );
-        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+        
+							 short GP_c_s;
+							 for( GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
           {
             s = get_Gauss_p_c( s_integration_order, GP_c_s );
             sw = get_Gauss_p_w( s_integration_order, GP_c_s );
-            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+            
+											 short GP_c_t;
+											 for( GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
               {
                 t = get_Gauss_p_c( t_integration_order, GP_c_t );
                 tw = get_Gauss_p_w( t_integration_order, GP_c_t );
@@ -1378,15 +1417,20 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC2()  //(double rho_s, double n,)
     double N=n;
 
 
-     for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+			 short GP_c_r;
+     for( GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
       {
         r = get_Gauss_p_c( r_integration_order, GP_c_r );
         rw = get_Gauss_p_w( r_integration_order, GP_c_r );
-        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+        
+							 short GP_c_s;
+							 for( GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
           {
             s = get_Gauss_p_c( s_integration_order, GP_c_s );
             sw = get_Gauss_p_w( s_integration_order, GP_c_s );
-            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+            
+											 short GP_c_t;
+											 for( GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
               {
                 t = get_Gauss_p_c( t_integration_order, GP_c_t );
                 tw = get_Gauss_p_w( t_integration_order, GP_c_t );
@@ -1479,15 +1523,20 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC3()  //(double rho_s, double n,)
     double N=n;
 
 
-     for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+			  short GP_c_r;
+     for( GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
       {
         r = get_Gauss_p_c( r_integration_order, GP_c_r );
         rw = get_Gauss_p_w( r_integration_order, GP_c_r );
-        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+        
+							 short GP_c_s;
+							 for( GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
           {
             s = get_Gauss_p_c( s_integration_order, GP_c_s );
             sw = get_Gauss_p_w( s_integration_order, GP_c_s );
-            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+            
+											 short GP_c_t;
+											 for( GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
               {
                 t = get_Gauss_p_c( t_integration_order, GP_c_t );
                 tw = get_Gauss_p_w( t_integration_order, GP_c_t );
@@ -1557,13 +1606,18 @@ matrix TwentyNodeBrick_u_p_U::stiffness_matrixKep(const tensor  Kep)
     int Ki=0;
     int Kj=0;
 
-    for ( int i=1 ; i<=20 ; i++ )  // i<=20 for 20 nodes
+    int i;
+			 for ( i=1 ; i<=20 ; i++ )  // i<=20 for 20 nodes
       {
-        for ( int j=1 ; j<=20 ; j++ )  // i<=20 for 20 nodes
+        
+							 int j;
+							 for ( j=1 ; j<=20 ; j++ )  // i<=20 for 20 nodes
           {
-            for ( int k=1 ; k<=3 ; k++ )
+            int k;
+											 for ( k=1 ; k<=3 ; k++ )
               {
-                for ( int l=1 ; l<=3 ; l++ )
+                int l;
+															 for ( l=1 ; l<=3 ; l++ )
                   {
                     Ki = k+3*(i-1);
                     Kj = l+3*(j-1);
@@ -1591,11 +1645,14 @@ matrix TwentyNodeBrick_u_p_U::stiffness_matrixG1(const tensor  G1)
     int Ki=0;
     int Kj=0;
 
-    for ( int i=1 ; i<=20 ; i++ )  
+    int i;
+			 for ( i=1 ; i<=20 ; i++ )  
       {
-        for ( int k=1 ; k<=3 ; k++ )
+        int k;
+							 for ( k=1 ; k<=3 ; k++ )
           {
-            for ( int l=1 ; l<=20 ; l++ )
+            int l;
+											 for ( l=1 ; l<=20 ; l++ )
               {
                 Ki = k+3*(i-1);
                 Kj = l;
@@ -1623,11 +1680,14 @@ matrix TwentyNodeBrick_u_p_U::stiffness_matrixG2(const tensor  G2)
     int Ki=0;
     int Kj=0;
 
-    for ( int i=1 ; i<=20 ; i++ )  // i<=20 for 20 nodes
+    int i;
+			 for ( i=1 ; i<=20 ; i++ )  // i<=20 for 20 nodes
       {
-        for ( int k=1 ; k<=3 ; k++ )
+        int k;
+							 for ( k=1 ; k<=3 ; k++ )
           {
-            for ( int l=1 ; l<=20 ; l++ )
+            int l;
+											 for ( l=1 ; l<=20 ; l++ )
               {
                 Ki = k+3*(i-1);
                 Kj = l;
@@ -1650,9 +1710,11 @@ matrix TwentyNodeBrick_u_p_U::stiffness_matrixP(const tensor P)
   {						  
     static matrix    Pmatrix(20,20,0.0);	  
 
-    for ( int i=1 ; i<=20 ; i++ )  // i<=20 for 20 nodes
+    int i;
+			 for ( i=1 ; i<=20 ; i++ )  // i<=20 for 20 nodes
       {
-        for ( int j=1 ; j<=20 ; j++ )
+        int j;
+							 for ( j=1 ; j<=20 ; j++ )
           {
              Pmatrix.val( i , j ) = P.cval(i,j);
             
@@ -1677,82 +1739,94 @@ const Matrix &TwentyNodeBrick_u_p_U::getTangentStiff()
     matrix G2  = stiffness_matrixG2(tG2);
     matrix P   = stiffness_matrixP(tP);
 
-    Kep.write_standard("Kupu.dat", "stiffness part of KupU");
-    G1.write_standard("G1upu.dat", "stiffness part of G1upU");
-    G2.write_standard("G2upu.dat", "stiffness part of G2upU");
-    P.write_standard("Pupu.dat", "stiffness part of PupU");
+//    Kep.write_standard("Kep_20upu.dat", "stiffness part of KupU");
+//    G1.write_standard("G1_20upu.dat", "stiffness part of G1upU");
+//    G2.write_standard("G2_20upu.dat", "stiffness part of G2upU");
+//    P.write_standard("P_20upu.dat", "stiffness part of PupU");
     matrix G1t=G1.transpose();
     matrix G2t=G2.transpose();
 //    G1t.write_standard("G1t.dat", "stiffness part of G1upU");
 //    G2t.write_standard("G2t.dat", "stiffness part of G1upU");
 
-	int i;
-    for ( i=0 ; i<20 ; i++ )  		
+    int i;
+			 for ( i=0 ; i<20 ; i++ )  		
       {
-        for ( int j=0 ; j<20 ; j++ )
+        int j;
+							 for ( j=0 ; j<20 ; j++ )
           {
-	    for(int n=0; n<3; n++)
-	      {
-	        for(int m=0; m<3; m++)
-		  {
- 		    K(i*7+n ,  j*7+m)=Kep.val(3*i+n+1, 3*j+1+m);     // Add Kep to K
-		  }
-	      }
-	  }
+	           int n;
+       				 for( n=0; n<3; n++)
+	             {
+	                int m;
+																 for(m=0; m<3; m++)
+               		  {
+                 		    K(i*7+n ,  j*7+m)=Kep.val(3*i+n+1, 3*j+1+m);     // Add Kep to K
+               		  }
+        	     }
+      	   }
       }
 
-    for ( i=0 ; i<20 ; i++ )  		
+			 for ( i=0 ; i<20 ; i++ )  		
       {
-        for(int n=0; n<3; n++)
+        int n;
+							 for( i=0; n<3; n++)
           {
-            for ( int j=0 ; j<20 ; j++ )
-	      {
-	         K(i*7+n ,  j*7+3)=-G1.val(3*i+n+1, j+1);     // Add -G1 to K
-	      }
-	  }
+            int j;
+											 for ( j=0 ; j<20 ; j++ )
+       	      {
+	                K(i*7+n ,  j*7+3)=-G1.val(3*i+n+1, j+1);     // Add -G1 to K
+       	      }
+        	  }
       }
 
-    for ( i=0 ; i<20 ; i++ )  		
+			 for ( i=0 ; i<20 ; i++ )  		
       {
-        for ( int j=0 ; j<20 ; j++ )
-           {
-              for(int n=0; n<3; n++)
-   	      {
-   	         K(i*7+3 ,  j*7+n)=-G1t.val(i+1, 3*j+1+n);     // Add -G1T to K
-	      }
-	  }
-      }
-
-
-    for ( i=0 ; i<20 ; i++ )  		
-      {
-        for ( int j=0 ; j<20 ; j++ )
-	  {
-	     K(i*7+3 ,  j*7+3)=-P.val(i+1, j+1);     // Add -P to K
-	  }
-      }
-
-
-    for ( i=0 ; i<20 ; i++ )  		
-      {
-        for ( int j=0 ; j<20 ; j++ )
-           {
-              for(int n=0; n<3; n++)
-   	      {
-   	         K(i*7+3 ,  j*7+n+4)=-G2t.val(i+1, 3*j+1+n);     // Add -G2T to K
-	      }
-	  }
-      }
-
-    for ( i=0 ; i<20 ; i++ )  		
-      {
-        for(int n=0; n<3; n++)
+        int j;
+							 for ( j=0 ; j<20 ; j++ )
           {
-            for ( int j=0 ; j<20 ; j++ )
-	      {
-	         K(i*7+n+4 ,  j*7+3)=-G2.val(3*i+n+1, j+1);     // Add -G2 to K
-	      }
-	  }
+             int n;
+												 for( i=0; n<3; n++)
+   	           {
+   	             K(i*7+3 ,  j*7+n)=-G1t.val(i+1, 3*j+1+n);     // Add -G1T to K
+	              }
+   	       }
+      }
+
+
+			 for ( i=0 ; i<20 ; i++ )  		
+      {
+        int j;
+							 for ( j=0 ; j<20 ; j++ )
+	         {
+	            K(i*7+3 ,  j*7+3)=-P.val(i+1, j+1);     // Add -P to K
+       	  }
+      }
+
+
+			 for ( i=0 ; i<20 ; i++ )  		
+      {
+        int j;
+							 for ( j=0 ; j<20 ; j++ )
+          {
+             int n;
+												 for ( n=0; n<3; n++)
+   	           {
+   	              K(i*7+3 ,  j*7+n+4)=-G2t.val(i+1, 3*j+1+n);     // Add -G2T to K
+               }
+           }
+      }
+
+			 for ( i=0 ; i<20 ; i++ )  		
+      {
+        int n;
+							 for ( n=0; n<3; n++)
+          {
+            int j;
+											 for ( j=0 ; j<20 ; j++ )
+	             {
+      	         K(i*7+n+4 ,  j*7+3)=-G2.val(3*i+n+1, j+1);     // Add -G2 to K
+	             }
+       	  }
       }
 
      ofstream outK("K.dat");	// want to check the whole K
@@ -1776,13 +1850,17 @@ matrix TwentyNodeBrick_u_p_U::damping_matrixC1(const tensor  C1)
     int Ki=0;
     int Kj=0;
 
-    for ( int i=1 ; i<=20 ; i++ )  //  i<=20 for 20 nodes
+    int i;
+			 for ( i=1 ; i<=20 ; i++ )  //  i<=20 for 20 nodes
       {
-        for ( int j=1 ; j<=20 ; j++ )  //  i<=20 for 20 nodes
+        int j;
+							 for ( j=1 ; j<=20 ; j++ )  //  i<=20 for 20 nodes
           {
-            for ( int k=1 ; k<=3 ; k++ )
+            int k;
+											 for ( k=1 ; k<=3 ; k++ )
               {
-                for ( int l=1 ; l<=3 ; l++ )
+                int l;
+															 for ( l=1 ; l<=3 ; l++ )
                   {
                     Ki = k+3*(i-1);
                     Kj = l+3*(j-1);
@@ -1810,13 +1888,17 @@ matrix TwentyNodeBrick_u_p_U::damping_matrixC2(const tensor  C2)
     int Ki=0;
     int Kj=0;
 
-    for ( int i=1 ; i<=20 ; i++ )  //  i<=20 for 20 nodes
+    int i;
+			 for ( i=1 ; i<=20 ; i++ )  //  i<=20 for 20 nodes
       {
-        for ( int j=1 ; j<=20 ; j++ )  //  i<=20 for 20 nodes
+        int j;
+							 for ( j=1 ; j<=20 ; j++ )  //  i<=20 for 20 nodes
           {
-            for ( int k=1 ; k<=3 ; k++ )
+            int k;
+											 for ( k=1 ; k<=3 ; k++ )
               {
-                for ( int l=1 ; l<=3 ; l++ )
+                int l;
+															 for ( l=1 ; l<=3 ; l++ )
                   {
                     Ki = k+3*(i-1);
                     Kj = l+3*(j-1);
@@ -1843,13 +1925,17 @@ matrix TwentyNodeBrick_u_p_U::damping_matrixC3(const tensor  C3)
     int Ki=0;
     int Kj=0;
 
-    for ( int i=1 ; i<=20 ; i++ )  //  i<=20 for 20 nodes
+    int i;
+			 for ( i=1 ; i<=20 ; i++ )  //  i<=20 for 20 nodes
       {
-        for ( int j=1 ; j<=20 ; j++ )  //  i<=20 for 20 nodes
+        int j;
+							 for ( j=1 ; j<=20 ; j++ )  //  i<=20 for 20 nodes
           {
-            for ( int k=1 ; k<=3 ; k++ )
+            int k;
+											 for ( k=1 ; k<=3 ; k++ )
               {
-                for ( int l=1 ; l<=3 ; l++ )
+                int l;
+															 for ( l=1 ; l<=3 ; l++ )
                   {
                     Ki = k+3*(i-1);
                     Kj = l+3*(j-1);
@@ -1883,61 +1969,73 @@ const Matrix &TwentyNodeBrick_u_p_U::getDamp()
     matrix C2t=C2.transpose();
 //    C2t.write_standard("C2t.dat", "Damping matrix");
 
-	int i;
-    for ( i=0 ; i<20 ; i++ )  		
+    int i;
+			 for ( i=0 ; i<20 ; i++ )  		
       {
-        for ( int j=0 ; j<20 ; j++ )
+        int j;
+							 for ( j=0 ; j<20 ; j++ )
           {
-	    for(int n=0; n<3; n++)
-	      {
-	        for(int m=0; m<3; m++)
-		  {
- 		    C(i*7+n ,  j*7+m)=C1.val(3*i+n+1, 3*j+1+m);     // Add C1 to C
-		  }
-	      }
-	  }
+	           int n;
+											 for ( n=0; n<3; n++)
+	             {
+	               int m;
+															 for ( m=0; m<3; m++)
+		                {
+               		    C(i*7+n ,  j*7+m)=C1.val(3*i+n+1, 3*j+1+m);     // Add C1 to C
+              		  }
+       	      }
+   	      }
       }
 
-     for ( i=0 ; i<20 ; i++ )  		
+				 for ( i=0 ; i<20 ; i++ )  		
       {
-        for ( int j=0 ; j<20 ; j++ )
+        int j;
+							 for ( j=0 ; j<20 ; j++ )
           {
-	    for(int n=0; n<3; n++)
-	      {
-	        for(int m=0; m<3; m++)
-		  {
- 		    C(i*7+n ,  j*7+m+4)=-C2.val(3*i+n+1, 3*j+1+m);     // Add -C2 to C
-		  }
-	      }
-	  }
+	           int n;
+											 for ( n=0; n<3; n++)
+	             {
+        	       int m;
+															 for ( m=0; m<3; m++)
+	                 {
+               	    C(i*7+n ,  j*7+m+4)=-C2.val(3*i+n+1, 3*j+1+m);     // Add -C2 to C
+               	  }
+       	      }
+        	 }
       }
 
-    for ( i=0 ; i<20 ; i++ )  		
+			 for ( i=0 ; i<20 ; i++ )  		
       {
-        for ( int j=0 ; j<20 ; j++ )
+        int j;
+							 for ( j=0 ; j<20 ; j++ )
           {
-	    for(int n=0; n<3; n++)
-	      {
-	        for(int m=0; m<3; m++)
-		  {
- 		    C(i*7+n+4 ,  j*7+m)=-C2t.val(3*i+n+1, 3*j+1+m);     // Add -C2t to C
-		  }
-	      }
-	  }
+	           int n;
+											 for ( n=0; n<3; n++)
+       	      {
+       	        int m;
+															 for ( m=0; m<3; m++)
+              		  {
+              		    C(i*7+n+4 ,  j*7+m)=-C2t.val(3*i+n+1, 3*j+1+m);     // Add -C2t to C
+              		  }
+        	     }
+       	  }
       }
 
-    for ( i=0 ; i<20 ; i++ )  		
+			 for ( i=0 ; i<20 ; i++ )  		
       {
-        for ( int j=0 ; j<20 ; j++ )
+        int j;
+							 for ( j=0 ; j<20 ; j++ )
           {
-	    for(int n=0; n<3; n++)
-	      {
-	        for(int m=0; m<3; m++)
-		  {
- 		    C(i*7+n+4,  j*7+m+4)=C3.val(3*i+n+1, 3*j+1+m);     // Add C3 to C
-		  }
-	      }
-	  }
+	           int n;
+											 for ( n=0; n<3; n++)
+       	      {
+       	        int m;
+															 for ( m=0; m<3; m++)
+              		  {
+              		    C(i*7+n+4,  j*7+m+4)=C3.val(3*i+n+1, 3*j+1+m);     // Add C3 to C
+              		  }
+       	      }
+       	  }
       }
 
     return C;
@@ -1953,13 +2051,17 @@ matrix TwentyNodeBrick_u_p_U::mass_matrixMs(const tensor  Ms)
     int Ki=0;
     int Kj=0;
 
-    for ( int i=1 ; i<=20 ; i++ )  //  i<=20 for 20 nodes
+    int i;
+			 for ( i=1 ; i<=20 ; i++ )  //  i<=20 for 20 nodes
       {
-        for ( int j=1 ; j<=20 ; j++ )  // i<=20 for 20 nodes
+        int j;
+							 for ( j=1 ; j<=20 ; j++ )  // i<=20 for 20 nodes
           {
-            for ( int k=1 ; k<=3 ; k++ )
+            int k;
+											 for ( k=1 ; k<=3 ; k++ )
               {
-                for ( int l=1 ; l<=3 ; l++ )
+                int l;
+															 for ( l=1 ; l<=3 ; l++ )
                   {
                     Ki = k+3*(i-1);
                     Kj = l+3*(j-1);
@@ -1984,13 +2086,17 @@ matrix TwentyNodeBrick_u_p_U::mass_matrixMf(const tensor  Mf)
     int Ki=0;
     int Kj=0;
 
-    for ( int i=1 ; i<=20 ; i++ )  // i<=20 for 20 nodes
+    int i;
+			 for ( i=1 ; i<=20 ; i++ )  // i<=20 for 20 nodes
       {
-        for ( int j=1 ; j<=20 ; j++ )  //  i<=20 for 20 nodes
+        int j;
+							 for ( j=1 ; j<=20 ; j++ )  //  i<=20 for 20 nodes
           {
-            for ( int k=1 ; k<=3 ; k++ )
+            int k;
+											 for ( k=1 ; k<=3 ; k++ )
               {
-                for ( int l=1 ; l<=3 ; l++ )
+                int l;
+															 for ( l=1 ; l<=3 ; l++ )
                   {
                     Ki = k+3*(i-1);
                     Kj = l+3*(j-1);
@@ -2019,35 +2125,42 @@ const Matrix &TwentyNodeBrick_u_p_U::getMass()
 //    Ms.write_standard("Ms.dat", "Mass matrix");
 //    Mf.write_standard("Mf.dat", "Mass matrix");
 
-	int i;
-    for ( i=0 ; i<20 ; i++ )  		
+    int i;
+			 for ( i=0 ; i<20 ; i++ )  		
       {
-        for ( int j=0 ; j<20 ; j++ )
+        int j;
+							 for ( j=0 ; j<20 ; j++ )
           {
-	    for(int n=0; n<3; n++)
-	      {
-	        for(int m=0; m<3; m++)
-		  {
- 		    M(i*7+n ,  j*7+m)=Ms.val(3*i+n+1, 3*j+1+m);     // Add Ms to M
-		  }
-	      }
-	  }
+	           int n;
+											 for ( n=0; n<3; n++)
+       	      {
+       	        int m;
+															 for ( m=0; m<3; m++)
+              		  {
+              		    M(i*7+n ,  j*7+m)=Ms.val(3*i+n+1, 3*j+1+m);     // Add Ms to M
+              		  }
+       	      }
+        	 }
       }
-    for ( i=0 ; i<20 ; i++ )  		
+    
+			 for ( i=0 ; i<20 ; i++ )  		
       {
-        for ( int j=0 ; j<20 ; j++ )
+        int j;
+							 for ( j=0 ; j<20 ; j++ )
           {
-	    for(int n=0; n<3; n++)
-	      {
-	        for(int m=0; m<3; m++)
-		  {
- 		    M(i*7+n+4 ,  j*7+m+4)=Mf.val(3*i+n+1, 3*j+1+m);     // Add Mf to M
-		  }
-	      }
-	  }
+	           int n;
+											 for ( n=0; n<3; n++)
+       	      {
+       	        int m;
+															 for ( m=0; m<3; m++)
+              		  {
+              		    M(i*7+n+4 ,  j*7+m+4)=Mf.val(3*i+n+1, 3*j+1+m);     // Add Mf to M
+              		  }
+       	      }
+       	  }
       }
 
-     ofstream outM("M.dat");	// want to check the whole M
+     ofstream outM("M20.dat");	// want to check the whole M
      M.Output(outM);
 
      return M;
@@ -3855,7 +3968,7 @@ void TwentyNodeBrick_u_p_U::setDomain (Domain *theDomain)
 { 
      cout<<"stiffness matrix\n\n";
      for (int i=0;i<60;i++)
-       for(int j=0;j<60;j++)
+       for ( int j=0;j<60;j++)
         cout<<K(i,j);
      cout<<endl;
       
@@ -4094,13 +4207,11 @@ int TwentyNodeBrick_u_p_U::addInertiaLoadToUnbalance(const Vector &accel)
 	ra(137) = Raccel20(4);
 	ra(138) = Raccel20(5);
 	ra(139) = Raccel20(6);
-
-	int i;
-      for(i=0; i<140; i++)
+      int i;
+					 for ( i=0; i<140; i++)
        {
-         if(i%10==0)
-	   cout<<endl;
-	   cout<<" "<<ra(i);
+         if(i%10==0) cout<<endl;
+     	   cout<<" "<<ra(i);
        }     // added to check the value of ra      02/18/2002
 
     // Want to add ( - fact * M R * accel ) to unbalance
@@ -4114,10 +4225,10 @@ int TwentyNodeBrick_u_p_U::addInertiaLoadToUnbalance(const Vector &accel)
 
     //cerr << " addInerti... column_mass " << column_mass << endln;
 
-    for (i = 0; i < nodes_in_brick*7; i++)
-	   {
-		Q(i)    += -M(i,i)*ra(i);
-	   }
+    for ( i = 0; i < nodes_in_brick*7; i++)
+  	   {
+      		Q(i)    += -M(i,i)*ra(i);
+  	   }
     return 0;
 }
 
@@ -4368,7 +4479,7 @@ const Vector &TwentyNodeBrick_u_p_U::getResistingForce ()
 						     // nodalforces--tensor start 1
     //cerr << "p" << p;
     //cerr << "Q" << Q;
-   // for(int i=0; i<140; i++)
+   // for ( int i=0; i<140; i++)
    // {
    //   printf("p(%d) = %lf    ",i, p(i));
    //   printf("Q(%d) = %lf    ",i, Q(i));
@@ -4378,7 +4489,7 @@ const Vector &TwentyNodeBrick_u_p_U::getResistingForce ()
    //
    // }
     p = p - Q;
-  //  for(int i=0; i<140; i++)
+  //  for ( int i=0; i<140; i++)
   //    printf("p(%d) = %lf   ",i, p(i));   // check
   //  //cerr << "p-Q" << p;
   //  fflush(stdout);
@@ -5000,9 +5111,9 @@ tensor TwentyNodeBrick_u_p_U::nodal_forces()
 	  // part for p
           nodal_FORCES.val(i,4) = 0.0;
 	  // part for U
-          nodal_FORCES.val(i,5) = nodalForceFU.val(i,5);
-          nodal_FORCES.val(i,6) = nodalForceFU.val(i,6);
-          nodal_FORCES.val(i,7) = nodalForceFU.val(i,7);
+          nodal_FORCES.val(i,5) = nodalForceFU.val(i,1);
+          nodal_FORCES.val(i,6) = nodalForceFU.val(i,2);
+          nodal_FORCES.val(i,7) = nodalForceFU.val(i,3);
       }
      return nodal_FORCES;
   }

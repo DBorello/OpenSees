@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-03-23 00:32:18 $
+// $Revision: 1.5 $
+// $Date: 2002-04-12 22:48:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/upU/TclTwentyNodeBrick_u_p_U.cpp,v $
                                                                         
                                                                         

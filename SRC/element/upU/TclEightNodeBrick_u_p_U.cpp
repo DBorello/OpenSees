@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-01-25 19:12:44 $
+// $Revision: 1.4 $
+// $Date: 2002-04-12 22:48:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/upU/TclEightNodeBrick_u_p_U.cpp,v $
                                                                         
                                                                         
@@ -59,16 +59,20 @@ TclModelBuilder_addEightNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *inter
 
   // check the number of arguments is correct
  
-  //  element  Brick20N_u_p_U eleTag?  node1? node2? .. node20?  matTag?   bforce1?  bforce2?  bforce3?\n
-  //  argv[0]	argv[1]	      argv[2] argv[3]			 argv[11]  argv[12]  argv[13]  argv[14]
-  //  porosity?  alpha?  solidDensity? fluidDensity? 
-  //  argv[15]  argv[16]   argv[17]	 argv[18]    
+  //  element  Brick20N_u_p_U eleTag?  node1? node2? .. node8?  matTag?   bforce1?  bforce2?  bforce3?\n
+  //  argv[0]	argv[1]	      argv[2] argv[3]		       argv[11]  argv[12]  argv[13]  argv[14]
+  //  porosity?  alpha?  solidDensity? fluidDensity?  x_permeability? y_permeability? z_permeability? 
+  //  argv[15]  argv[16]   argv[17]	 argv[18]        argv[19]          argv[20]      argv[21]     
+  //  solid_bulk_modulus? fluid_bulk_modulus?   pressure?
+  //       argv[22]            argv[23]     	 argv[24] 
   // Xiaoyan added this comments. 01/07/2002
 
   if ((argc-eleArgStart) < 23) {
       g3ErrorHandler->warning("command: element Brick8_u_p_U - insufficient args - want %s",
           "element Brick8_u_p_U eleTag? node1? node2? ... node8? matTag? bforce1? bforce2? bforce3? \n"
-	  " porosity? alpha? solidDensity? fluidDensity? fluid_bulk_modulus? solid_bulk_modulus? pressure?\n");
+	  " porosity? alpha? solidDensity? fluidDensity? \n"
+ 	  "permeability_in_x_dir? permeability_in_y_dir? permeability_in_z_dir?"
+	  "solid_bulk_modulus? fluid_bulk_modulus? pressure?\n");
       return TCL_ERROR;
   }    
 
@@ -154,32 +158,32 @@ TclModelBuilder_addEightNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *inter
 
   
   // now get the permeability in x direction
-     if (Tcl_GetDouble(interp, argv[18+eleArgStart], &fluidDensity) != TCL_OK) {        // wxy added 01/07/2002
+     if (Tcl_GetDouble(interp, argv[18+eleArgStart], &perm_x) != TCL_OK) {        // wxy added 01/07/2002
       g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid permeability in x direction %s",      
     			  eleID, argv[18+eleArgStart]);      
       return TCL_ERROR;
   }  
   // now get the permeability in y direction
-     if (Tcl_GetDouble(interp, argv[19+eleArgStart], &fluidDensity) != TCL_OK) {        // wxy added 01/07/2002
+     if (Tcl_GetDouble(interp, argv[19+eleArgStart], &perm_y) != TCL_OK) {        // wxy added 01/07/2002
       g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid permeability in y direction %s",      
     			  eleID, argv[19+eleArgStart]);      
       return TCL_ERROR;
   }  
   // now get the permeability in z direction
-     if (Tcl_GetDouble(interp, argv[20+eleArgStart], &fluidDensity) != TCL_OK) {        // wxy added 01/07/2002
+     if (Tcl_GetDouble(interp, argv[20+eleArgStart], &perm_z) != TCL_OK) {        // wxy added 01/07/2002
       g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid permeability in z direction %s",      
     			  eleID, argv[20+eleArgStart]);      
       return TCL_ERROR;
   }  
  
   // now get the bulk modulus of solid
-     if (Tcl_GetDouble(interp, argv[21+eleArgStart], &fluidDensity) != TCL_OK) {        // wxy added 01/07/2002
+     if (Tcl_GetDouble(interp, argv[21+eleArgStart], &kks) != TCL_OK) {        // wxy added 01/07/2002
       g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid bulk modulus of solid %s",      
     			  eleID, argv[21+eleArgStart]);      
       return TCL_ERROR;
   }  
   // now get the bulk modulus of fluid
-     if (Tcl_GetDouble(interp, argv[22+eleArgStart], &fluidDensity) != TCL_OK) {        // wxy added 01/07/2002
+     if (Tcl_GetDouble(interp, argv[22+eleArgStart], &kkf) != TCL_OK) {        // wxy added 01/07/2002
       g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid bulk modulus of fluid %s",      
     			  eleID, argv[22+eleArgStart]);      
       return TCL_ERROR;

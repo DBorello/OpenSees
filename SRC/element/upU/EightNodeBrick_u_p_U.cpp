@@ -18,7 +18,7 @@
 // DATE:              Aug. 2001
 // UPDATE HISTORY:    Modified from EightNodeBrick.cpp  reorganized a lot by Xiaoyan
 //		      01/24/2002    Xiaoyan
-//		      Add the permeability tensor and ks, kf to the constructor  Xiaoyan 
+//		      Add the permeability tensor and ks, kf to the constructor  Xiaoyan
 //
 //  "Coupled system": Solid and fluid coexist.
 //                    u-- Solid displacement
@@ -41,7 +41,7 @@
 Matrix EightNodeBrick_u_p_U::K(56, 56);      
 Matrix EightNodeBrick_u_p_U::C(56, 56);      
 Matrix EightNodeBrick_u_p_U::M(56, 56);      
-Vector EightNodeBrick_u_p_U::p(24);	   
+Vector EightNodeBrick_u_p_U::p(56);	   
 tensor EightNodeBrick_u_p_U::k(2,def_dim_2,0.0);
 
 //=========================================================================
@@ -62,7 +62,7 @@ EightNodeBrick_u_p_U::EightNodeBrick_u_p_U(int element_number,
 			       //tensor * IN_tangent_E,  //stresstensor * INstress, //stresstensor * INiterative_stress, //double * IN_q_ast_iterative, //straintensor * INstrain):  __ZHaohui 09-29-2000
 		               
   :Element(element_number, ELE_TAG_EightNodeBrick_u_p_U ),
-  connectedExternalNodes(8), Q(24), bf(3), 
+  connectedExternalNodes(8), Q(56), bf(3), 
   n(nn), alpha(alf), rho_s(rs), rho_f(rf),ks(kks), kf(kkf), pressure(pp)
   {
     //elem_numb = element_number;
@@ -166,7 +166,7 @@ EightNodeBrick_u_p_U::EightNodeBrick_u_p_U(int element_number,
 //=========================================================================
 
 EightNodeBrick_u_p_U::EightNodeBrick_u_p_U ():Element(0, ELE_TAG_EightNodeBrick_u_p_U ),
-connectedExternalNodes(8), Q(24), bf(3), 
+connectedExternalNodes(8), Q(56), bf(3), 
 n(0), alpha(1), rho_s(0.0),rho_f(0.0), ks(0.0), kf(0.0), pressure(0.0), mmodel(0)
 {
      matpoint = 0;
@@ -1026,7 +1026,7 @@ tensor EightNodeBrick_u_p_U::getStiffnessTensorP()
                 where =
                 ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
                 // derivatives of local coordinates with respect to local coordinates
-                // dhU = dh_drst_at(r,s,t);  // Assume  the shape function of u and U are same. Xiaoyan 09/20/01
+                dhU = dh_drst_at(r,s,t);  // Assume  the shape function of u and U are same. Xiaoyan 09/20/01
 		hp= interp_poli_at(r,s,t); // Assume  the shape function of p is same as the u's. Xiaoyan 09/20/01
                 // Jacobian tensor ( matrix )
                 Jacobian = Jacobian_3D(dhU);
@@ -1182,7 +1182,7 @@ tensor EightNodeBrick_u_p_U::getMassTensorMf()  //(double rho_s, double n,)
 
     int h_dim[] = {8};	
     tensor H(1, h_dim, 0.0);	 // Shape fun. of u
-    tensor HU(2, h_dim, 0.0);	 // Shape fun. of U
+    tensor HU(1, h_dim, 0.0);	 // Shape fun. of U
 
     double det_of_Jacobian = 0.0;
 
@@ -1569,13 +1569,17 @@ matrix EightNodeBrick_u_p_U::stiffness_matrixKep(const tensor  Kep)
     int Ki=0;
     int Kj=0;
 
-    for ( int i=1 ; i<=8 ; i++ )  // i<=8 for 8 nodes
+    int i;
+			 for ( i=1 ; i<=8 ; i++ )  // i<=8 for 8 nodes
       {
-        for ( int j=1 ; j<=8 ; j++ )  // i<=8 for 8 nodes
+        int j;
+							 for ( j=1 ; j<=8 ; j++ )  // i<=8 for 8 nodes
           {
-            for ( int k=1 ; k<=3 ; k++ )
+            int k;
+											 for ( k=1 ; k<=3 ; k++ )
               {
-                for ( int l=1 ; l<=3 ; l++ )
+                int l;
+															 for ( l=1 ; l<=3 ; l++ )
                   {
                     Ki = k+3*(i-1);
                     Kj = l+3*(j-1);
@@ -1673,9 +1677,9 @@ matrix EightNodeBrick_u_p_U::stiffness_matrixP(const tensor P)
     return Pmatrix;
   }
 
-//=========================================================================
-// Constructing the whole system K (including Kep G1 and G2 56*56)   Wxy 09/26/2001
-//=========================================================================
+//=====================================================================================
+// Constructing the whole system K (including Kep, G1, G2 and P 56*56)   Wxy 09/26/2001
+//=====================================================================================
 
 const Matrix &EightNodeBrick_u_p_U::getTangentStiff () 
 						       
@@ -1686,45 +1690,86 @@ const Matrix &EightNodeBrick_u_p_U::getTangentStiff ()
     tensor tP   = getStiffnessTensorP();
     matrix Kep = stiffness_matrixKep(tKep);
     matrix G1  = stiffness_matrixG1(tG1);
-    matrix G2  = stiffness_matrixG1(tG2);
+    matrix G2  = stiffness_matrixG2(tG2);
     matrix P   = stiffness_matrixP(tP);
     matrix G1t=G1.transpose();
     matrix G2t=G2.transpose();
+//    Kep.write_standard("Kep_8upu.dat", "stiffness part of KupU");
+//    G1.write_standard("G1_8upu.dat", "stiffness part of G1upU");
+//    G2.write_standard("G2_8upu.dat", "stiffness part of G2upU");
+//    P.write_standard("P_8upu.dat", "stiffness part of PupU");
 
-	int i;
-    for ( i=1 ; i<=24 ; i++ )  		
+    int i;
+			 for ( i=0 ; i<8 ; i++ )  		
       {
-        for ( int j=1 ; j<=24 ; j++ )
+        for ( int j=0 ; j<8 ; j++ )
           {
-	    K(i-1,j-1)=Kep.val(i,j);	    // Add Kep to K
+	    for(int n=0; n<3; n++)
+	      {
+	        for(int m=0; m<3; m++)
+		  {
+ 		    K(i*7+n ,  j*7+m)=Kep.val(3*i+n+1, 3*j+1+m);     // Add Kep to K
+		  }
+	      }
 	  }
       }
 
-    for ( i=1 ; i<=24 ; i++ )		
+    for ( i=0 ; i<8 ; i++ )  		
       {
-        for ( int j=1 ; j<=8 ; j++ )
+        for(int n=0; n<3; n++)
           {
-	    K(32+i-1,24+j-1)=-G2.val(i,j);     // Add -G1 to K
-	    K(   i-1,24+j-1)=-G1.val(i,j);     // Add -G2 to K
+            for ( int j=0 ; j<8 ; j++ )
+	      {
+	         K(i*7+n ,  j*7+3)=-G1.val(3*i+n+1, j+1);     // Add -G1 to K
+	      }
 	  }
       }
 
-    for ( i=1 ; i<=8 ; i++ )	      
+    for ( i=0 ; i<8 ; i++ )  		
       {
-        for ( int j=1 ; j<=24 ; j++ )
-          {
-	    K(24+i-1,   j-1)=G1t.val(i,j);     // Add G1^T to K
-	    K(24+i-1,32+j-1)=G2t.val(i,j);     // Add G2^T to K
+        for ( int j=0 ; j<8 ; j++ )
+           {
+              for(int n=0; n<3; n++)
+   	      {
+   	         K(i*7+3 ,  j*7+n)=-G1t.val(i+1, 3*j+1+n);     // Add -G1T to K
+	      }
 	  }
       }
 
-    for ( i=1 ; i<=8 ; i++ )	      
+
+    for ( i=0 ; i<8 ; i++ )  		
       {
-        for ( int j=1 ; j<=8 ; j++ )
-          {
-	    K(24+i-1,24+j-1)=P.val(i,j);	     // Add P (pore pressure) to K
+        for ( int j=0 ; j<8 ; j++ )
+	  {
+	     K(i*7+3 ,  j*7+3)=-P.val(i+1, j+1);     // Add -P to K
 	  }
       }
+
+
+    for ( int i=0 ; i<8 ; i++ )  		
+      {
+        for ( int j=0 ; j<8 ; j++ )
+           {
+              for(int n=0; n<3; n++)
+   	      {
+   	         K(i*7+3 ,  j*7+n+4)=-G2t.val(i+1, 3*j+1+n);     // Add -G2T to K
+	      }
+	  }
+      }
+
+    for ( i=0 ; i<8 ; i++ )  		
+      {
+        for(int n=0; n<3; n++)
+          {
+            for ( int j=0 ; j<8 ; j++ )
+	      {
+	         K(i*7+n+4 ,  j*7+3)=-G2.val(3*i+n+1, j+1);     // Add -G2 to K
+	      }
+	  }
+      }
+
+     ofstream outK("K8.dat");	// want to check the whole K
+     K.Output(outK);
 
      return K;
   }
@@ -1847,14 +1892,60 @@ const Matrix &EightNodeBrick_u_p_U::getDamp ()
 
     matrix C2t=C2.transpose();
 
-    for ( int i=1 ; i<=24 ; i++ )  		
+    int i;
+			 for ( i=0 ; i<8 ; i++ )  		
       {
-        for ( int j=1 ; j<=24 ; j++ )
+        for ( int j=0 ; j<8 ; j++ )
           {
-	    C(   i-1,   j-1)= C1.val(i,j);    // Add  C1  to C
-	    C(   i-1,32+j-1)=-C2.val(i,j);    // Add -C2  to C
- 	    C(32+i-1,   j-1)=-C2t.val(i,j);   // Add -C2t to C
- 	    C(32+i-1,32+j-1)= C3.val(i,j);    // Add  C3  to C
+	    for(int n=0; n<3; n++)
+	      {
+	        for(int m=0; m<3; m++)
+		  {
+ 		    C(i*7+n ,  j*7+m)=C1.val(3*i+n+1, 3*j+1+m);     // Add C1 to C
+		  }
+	      }
+	  }
+      }
+
+     for ( i=0 ; i<8 ; i++ )  		
+      {
+        for ( int j=0 ; j<8 ; j++ )
+          {
+	    for(int n=0; n<3; n++)
+	      {
+	        for(int m=0; m<3; m++)
+		  {
+ 		    C(i*7+n ,  j*7+m+4)=-C2.val(3*i+n+1, 3*j+1+m);     // Add -C2 to C
+		  }
+	      }
+	  }
+      }
+
+    for ( i=0 ; i<8 ; i++ )  		
+      {
+        for ( int j=0 ; j<8 ; j++ )
+          {
+	    for(int n=0; n<3; n++)
+	      {
+	        for(int m=0; m<3; m++)
+		  {
+ 		    C(i*7+n+4 ,  j*7+m)=-C2t.val(3*i+n+1, 3*j+1+m);     // Add -C2t to C
+		  }
+	      }
+	  }
+      }
+
+    for ( i=0 ; i<8 ; i++ )  		
+      {
+        for ( int j=0 ; j<8 ; j++ )
+          {
+	    for(int n=0; n<3; n++)
+	      {
+	        for(int m=0; m<3; m++)
+		  {
+ 		    C(i*7+n+4,  j*7+m+4)=C3.val(3*i+n+1, 3*j+1+m);     // Add C3 to C
+		  }
+	      }
 	  }
       }
 
@@ -1935,14 +2026,36 @@ const Matrix &EightNodeBrick_u_p_U::getMass ()
     matrix  Ms =  mass_matrixMs(tMs);
     matrix  Mf =  mass_matrixMf(tMf);
 
-    for ( int i=1 ; i<=24 ; i++ )  		
+    int i;
+			 for ( i=0 ; i<8 ; i++ )  		
       {
-        for ( int j=1 ; j<=24 ; j++ )
+        for ( int j=0 ; j<8 ; j++ )
           {
-	    M(   i-1,   j-1)=Ms.val(i,j);	   // Add Ms to M
-	    M(32+i-1,32+j-1)=Mf.val(i,j);	   // Add Mf to M
+	    for(int n=0; n<3; n++)
+	      {
+	        for(int m=0; m<3; m++)
+		  {
+ 		    M(i*7+n ,  j*7+m)=Ms.val(3*i+n+1, 3*j+1+m);     // Add Ms to M
+		  }
+	      }
 	  }
       }
+    for ( i=0 ; i<8 ; i++ )  		
+      {
+        for ( int j=0 ; j<8 ; j++ )
+          {
+	    for(int n=0; n<3; n++)
+	      {
+	        for(int m=0; m<3; m++)
+		  {
+ 		    M(i*7+n+4 ,  j*7+m+4)=Mf.val(3*i+n+1, 3*j+1+m);     // Add Mf to M
+		  }
+	      }
+	  }
+      }
+
+     ofstream outM("M8.dat");	// want to check the whole M
+     M.Output(outM);
 
      return M;
   }
@@ -2016,10 +2129,10 @@ tensor EightNodeBrick_u_p_U::Nodal_Coordinates()
   }
 
 ////#############################################################################
-tensor EightNodeBrick_u_p_U::incr_disp()
+tensor EightNodeBrick_u_p_U::incr_dispDu()
   {
     const int dimensions[] = {8,3};  // Xiaoyan changed from {20,3} to {8,3} for 8 nodes
-    tensor increment_disp(2, dimensions, 0.0);
+    tensor increment_dispDu(2, dimensions, 0.0);
 
     //for ( int i=0 ; i<8 ; i++ )	 // Xiaoyan changed from 20 to 8 for 8 nodes
     //
@@ -2070,60 +2183,201 @@ tensor EightNodeBrick_u_p_U::incr_disp()
     //cerr << " incr del node " << nd8Ptr->getTag() << " x " << IncrDis8(0) <<" y "<< IncrDis8(1) << " z "<< IncrDis8(2) << endln;
     //}
 
-    increment_disp.val(1,1)=IncrDis1(0); increment_disp.val(1,2)=IncrDis1(1);increment_disp.val(1,3)=IncrDis1(2);
-    increment_disp.val(2,1)=IncrDis2(0); increment_disp.val(2,2)=IncrDis2(1);increment_disp.val(2,3)=IncrDis2(2);
-    increment_disp.val(3,1)=IncrDis3(0); increment_disp.val(3,2)=IncrDis3(1);increment_disp.val(3,3)=IncrDis3(2);
-    increment_disp.val(4,1)=IncrDis4(0); increment_disp.val(4,2)=IncrDis4(1);increment_disp.val(4,3)=IncrDis4(2);
-    increment_disp.val(5,1)=IncrDis5(0); increment_disp.val(5,2)=IncrDis5(1);increment_disp.val(5,3)=IncrDis5(2);
-    increment_disp.val(6,1)=IncrDis6(0); increment_disp.val(6,2)=IncrDis6(1);increment_disp.val(6,3)=IncrDis6(2);
-    increment_disp.val(7,1)=IncrDis7(0); increment_disp.val(7,2)=IncrDis7(1);increment_disp.val(7,3)=IncrDis7(2);
-    increment_disp.val(8,1)=IncrDis8(0); increment_disp.val(8,2)=IncrDis8(1);increment_disp.val(8,3)=IncrDis8(2);
+    increment_dispDu.val(1,1)=IncrDis1(0); increment_dispDu.val(1,2)=IncrDis1(1);increment_dispDu.val(1,3)=IncrDis1(2);
+    increment_dispDu.val(2,1)=IncrDis2(0); increment_dispDu.val(2,2)=IncrDis2(1);increment_dispDu.val(2,3)=IncrDis2(2);
+    increment_dispDu.val(3,1)=IncrDis3(0); increment_dispDu.val(3,2)=IncrDis3(1);increment_dispDu.val(3,3)=IncrDis3(2);
+    increment_dispDu.val(4,1)=IncrDis4(0); increment_dispDu.val(4,2)=IncrDis4(1);increment_dispDu.val(4,3)=IncrDis4(2);
+    increment_dispDu.val(5,1)=IncrDis5(0); increment_dispDu.val(5,2)=IncrDis5(1);increment_dispDu.val(5,3)=IncrDis5(2);
+    increment_dispDu.val(6,1)=IncrDis6(0); increment_dispDu.val(6,2)=IncrDis6(1);increment_dispDu.val(6,3)=IncrDis6(2);
+    increment_dispDu.val(7,1)=IncrDis7(0); increment_dispDu.val(7,2)=IncrDis7(1);increment_dispDu.val(7,3)=IncrDis7(2);
+    increment_dispDu.val(8,1)=IncrDis8(0); increment_dispDu.val(8,2)=IncrDis8(1);increment_dispDu.val(8,3)=IncrDis8(2);
     
-    return increment_disp;
+    return increment_dispDu;
   }
 
 ////#############################################################################
-tensor EightNodeBrick_u_p_U::total_disp()
+//=========================================================================
+// Incremental displacement of fluid part-- U     02/10/2002
+//=========================================================================
+tensor EightNodeBrick_u_p_U::incr_dispDU()
   {
-    const int dimensions[] = {8,3};  // Xiaoyan changed from {20,3} to {8,3} for 8 nodes
-    tensor total_disp(2, dimensions, 0.0);
+    const int dimensions[] = {8,3};  
+    tensor increment_dispDU(2, dimensions, 0.0);
+
+     
+    const Vector &IncrDis1 = nd1Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis2 = nd2Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis3 = nd3Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis4 = nd4Ptr->getIncrDeltaDisp();
+
+    const Vector &IncrDis5 = nd5Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis6 = nd6Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis7 = nd7Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis8 = nd8Ptr->getIncrDeltaDisp();
+
+ // Get the Last three incremental displacement for fluid part. Xiaoyan 02/08/2002
+ 
+    increment_dispDU.val(1,1)=IncrDis1(4);increment_dispDU.val(1,2)=IncrDis1(5); 
+    increment_dispDU.val(1,3)=IncrDis1(6);
+
+    increment_dispDU.val(2,1)=IncrDis2(4);increment_dispDU.val(2,2)=IncrDis2(5); 
+    increment_dispDU.val(2,3)=IncrDis2(6);
+
+    increment_dispDU.val(3,1)=IncrDis3(4);increment_dispDU.val(3,2)=IncrDis3(5); 
+    increment_dispDU.val(3,3)=IncrDis3(6);
+
+    increment_dispDU.val(4,1)=IncrDis4(4);increment_dispDU.val(4,2)=IncrDis4(5); 
+    increment_dispDU.val(4,3)=IncrDis4(6);
+ 
+    increment_dispDU.val(5,1)=IncrDis5(4);increment_dispDU.val(5,2)=IncrDis5(5); 
+    increment_dispDU.val(5,3)=IncrDis5(6);
+ 
+    increment_dispDU.val(6,1)=IncrDis6(4);increment_dispDU.val(4,2)=IncrDis6(5); 
+    increment_dispDU.val(6,3)=IncrDis6(6);
+ 
+    increment_dispDU.val(7,1)=IncrDis7(4);increment_dispDU.val(7,2)=IncrDis7(5); 
+    increment_dispDU.val(7,3)=IncrDis7(6);
+ 
+    increment_dispDU.val(8,1)=IncrDis8(4);increment_dispDU.val(8,2)=IncrDis8(5); 
+    increment_dispDU.val(8,3)=IncrDis8(6);
+
+    return increment_dispDU;
+  }
+//=========================================================================
+// Total displacement of solid part --u    03/22/2002
+//=========================================================================
+tensor EightNodeBrick_u_p_U::total_dispDu()
+  {
+    const int dimensions[] = {8,3};  
+    tensor total_dispDu(2, dimensions, 0.0);
+      
+    // Get first three total displacement for solid part. Xiaoyan 03/22/2002
+    const Vector &TotDis1 = nd1Ptr->getTrialDisp();
+    cout<<"\ntot node " << nd1Ptr->getTag() <<" ux "<< TotDis1(0) <<" uy "<< TotDis1(1) << " uz "<< TotDis1(2) 
+                        << endln;
+
+    const Vector &TotDis2 = nd2Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd2Ptr->getTag() << " ux " << TotDis2(0) <<" uy "<< TotDis2(1) << " uz "<< TotDis2(2) 
+                        << endln;
+
+    const Vector &TotDis3 = nd3Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd3Ptr->getTag() << " ux " << TotDis3(0) <<" uy "<< TotDis3(1) << " uz "<< TotDis3(2) 
+                        << endln;
+
+    const Vector &TotDis4 = nd4Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd4Ptr->getTag() << " ux " << TotDis4(0) <<"uy "<< TotDis4(1) << " uz "<< TotDis4(2)
+                        << endln;
+
+    const Vector &TotDis5 = nd5Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd5Ptr->getTag() << " ux " << TotDis5(0) <<" uy "<< TotDis5(1) << " uz "<< TotDis5(2) 
+                        << endln;
+
+    const Vector &TotDis6 = nd6Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd6Ptr->getTag() << " ux " << TotDis6(0) <<" uy "<< TotDis6(1) << " uz "<< TotDis6(2) 
+                        << endln;
+
+    const Vector &TotDis7 = nd7Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd7Ptr->getTag() << " ux " << TotDis7(0) <<" uy "<< TotDis7(1) << " uz "<< TotDis7(2) 
+                        << endln;
+
+    const Vector &TotDis8 = nd8Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd8Ptr->getTag() << " ux " << TotDis8(0) <<" uy "<< TotDis8(1) << " uz "<< TotDis8(2) 
+                        << endln;
+ 
+    total_dispDu.val(1,1)=TotDis1(0); total_dispDu.val(1,2)=TotDis1(1);total_dispDu.val(1,3)=TotDis1(2);
+    total_dispDu.val(2,1)=TotDis2(0); total_dispDu.val(2,2)=TotDis2(1);total_dispDu.val(2,3)=TotDis2(2);
+    total_dispDu.val(3,1)=TotDis3(0); total_dispDu.val(3,2)=TotDis3(1);total_dispDu.val(3,3)=TotDis3(2);
+    total_dispDu.val(4,1)=TotDis4(0); total_dispDu.val(4,2)=TotDis4(1);total_dispDu.val(4,3)=TotDis4(2);
+    total_dispDu.val(5,1)=TotDis5(0); total_dispDu.val(5,2)=TotDis5(1);total_dispDu.val(5,3)=TotDis5(2);
+    total_dispDu.val(6,1)=TotDis6(0); total_dispDu.val(6,2)=TotDis6(1);total_dispDu.val(6,3)=TotDis6(2);
+    total_dispDu.val(7,1)=TotDis7(0); total_dispDu.val(7,2)=TotDis7(1);total_dispDu.val(7,3)=TotDis7(2);
+    total_dispDu.val(8,1)=TotDis8(0); total_dispDu.val(8,2)=TotDis8(1);total_dispDu.val(8,3)=TotDis8(2);
+
+    return total_dispDu;
+  }
+
+////#############################################################################
+//=========================================================================
+// Total displacement of fluid part--U     03/22/2002
+//=========================================================================
+tensor EightNodeBrick_u_p_U::total_dispDU()
+  {
+    const int dimensions[] = {8,3};  
+    tensor total_dispDU(2, dimensions, 0.0);
       
     //Zhaohui using node pointers, which come from the Domain
     const Vector &TotDis1 = nd1Ptr->getTrialDisp();
-    cout<<"\ntot node " << nd1Ptr->getTag() <<" x "<< TotDis1(0) <<" y "<< TotDis1(1) << " z "<< TotDis1(2) << endln;
-    const Vector &TotDis2 = nd2Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd2Ptr->getTag() << " x " << TotDis2(0) <<" y "<< TotDis2(1) << " z "<< TotDis2(2) << endln;
-    const Vector &TotDis3 = nd3Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd3Ptr->getTag() << " x " << TotDis3(0) <<" y "<< TotDis3(1) << " z "<< TotDis3(2) << endln;
-    const Vector &TotDis4 = nd4Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd4Ptr->getTag() << " x " << TotDis4(0) <<" y "<< TotDis4(1) << " z "<< TotDis4(2) << endln;
-    const Vector &TotDis5 = nd5Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd5Ptr->getTag() << " x " << TotDis5(0) <<" y "<< TotDis5(1) << " z "<< TotDis5(2) << endln;
-    const Vector &TotDis6 = nd6Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd6Ptr->getTag() << " x " << TotDis6(0) <<" y "<< TotDis6(1) << " z "<< TotDis6(2) << endln;
-    const Vector &TotDis7 = nd7Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd7Ptr->getTag() << " x " << TotDis7(0) <<" y "<< TotDis7(1) << " z "<< TotDis7(2) << endln;
-    const Vector &TotDis8 = nd8Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd8Ptr->getTag() << " x " << TotDis8(0) <<" y "<< TotDis8(1) << " z "<< TotDis8(2) << endln;
-    
-    total_disp.val(1,1)=TotDis1(0); total_disp.val(1,2)=TotDis1(1);total_disp.val(1,3)=TotDis1(2);
-    total_disp.val(2,1)=TotDis2(0); total_disp.val(2,2)=TotDis2(1);total_disp.val(2,3)=TotDis2(2);
-    total_disp.val(3,1)=TotDis3(0); total_disp.val(3,2)=TotDis3(1);total_disp.val(3,3)=TotDis3(2);
-    total_disp.val(4,1)=TotDis4(0); total_disp.val(4,2)=TotDis4(1);total_disp.val(4,3)=TotDis4(2);
-    total_disp.val(5,1)=TotDis5(0); total_disp.val(5,2)=TotDis5(1);total_disp.val(5,3)=TotDis5(2);
-    total_disp.val(6,1)=TotDis6(0); total_disp.val(6,2)=TotDis6(1);total_disp.val(6,3)=TotDis6(2);
-    total_disp.val(7,1)=TotDis7(0); total_disp.val(7,2)=TotDis7(1);total_disp.val(7,3)=TotDis7(2);
-    total_disp.val(8,1)=TotDis8(0); total_disp.val(8,2)=TotDis8(1);total_disp.val(8,3)=TotDis8(2);
+    cout<<"\ntot node " << nd1Ptr->getTag() 
+			<<" Ux "<< TotDis1(4) << " Uy "<< TotDis1(5)<< " Uz "<< TotDis1(6)<< endln;
 
-    return total_disp;
+    const Vector &TotDis2 = nd2Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd2Ptr->getTag() 
+    			<<" Ux "<< TotDis2(4) << " Uy "<< TotDis2(5)<< " Uz "<< TotDis2(6)<< endln;
+
+    const Vector &TotDis3 = nd3Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd3Ptr->getTag()  
+			<<" Ux "<< TotDis3(4) << " Uy "<< TotDis3(5)<< " Uz "<< TotDis3(6)<< endln;
+
+    const Vector &TotDis4 = nd4Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd4Ptr->getTag() 
+			<<" Ux "<< TotDis4(4) << " Uy "<< TotDis4(5)<< " Uz "<< TotDis4(6)<< endln;
+
+    const Vector &TotDis5 = nd5Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd5Ptr->getTag()  
+			<<" Ux "<< TotDis5(4) << " Uy "<< TotDis5(5)<< " Uz "<< TotDis5(6)<< endln;
+
+    const Vector &TotDis6 = nd6Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd6Ptr->getTag()  
+			<<" Ux "<< TotDis6(4) << " Uy "<< TotDis6(5)<< " Uz "<< TotDis6(6)<< endln;
+
+    const Vector &TotDis7 = nd7Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd7Ptr->getTag() 
+			<<" Ux "<< TotDis7(4) << " Uy "<< TotDis7(5)<< " Uz "<< TotDis7(6)<< endln;
+
+    const Vector &TotDis8 = nd8Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd8Ptr->getTag() 
+			<<" Ux "<< TotDis8(4) << " Uy "<< TotDis8(5)<< " Uz "<< TotDis8(6)<< endln;
+
+
+    total_dispDU.val(1,1)=TotDis1(4);total_dispDU.val(1,2)=TotDis1(5);
+    total_dispDU.val(1,3)=TotDis1(6);
+
+    total_dispDU.val(2,1)=TotDis2(4);total_dispDU.val(2,2)=TotDis2(5);
+    total_dispDU.val(2,3)=TotDis2(6);
+
+    total_dispDU.val(3,1)=TotDis3(4);total_dispDU.val(3,2)=TotDis3(5);
+    total_dispDU.val(3,3)=TotDis3(6);
+
+    total_dispDU.val(4,1)=TotDis4(4);total_dispDU.val(4,2)=TotDis4(5);
+    total_dispDU.val(4,3)=TotDis4(6);
+
+    total_dispDU.val(5,1)=TotDis5(4);total_dispDU.val(5,2)=TotDis5(5);
+    total_dispDU.val(5,3)=TotDis5(6);
+
+    total_dispDU.val(6,1)=TotDis6(4);total_dispDU.val(6,2)=TotDis6(5);
+    total_dispDU.val(6,3)=TotDis6(6);
+
+    total_dispDU.val(7,1)=TotDis7(4);total_dispDU.val(7,2)=TotDis7(5);
+    total_dispDU.val(7,3)=TotDis7(6);
+
+    total_dispDU.val(8,1)=TotDis8(4);total_dispDU.val(8,2)=TotDis8(5);
+    total_dispDU.val(8,3)=TotDis8(6);
+
+
+ 
+    return total_dispDU;
   }
 
 
 ////#############################################################################
-tensor EightNodeBrick_u_p_U::total_disp(FILE *fp, double * u)
+
+
+
+////#############################################################################
+tensor EightNodeBrick_u_p_U::total_dispDu(FILE *fp, double * u)
   {
-    const int dimensions[] = {8,3};  // Xiaoyan changed from {20,3} to {8,3} for 8 nodes
-    tensor total_disp(2, dimensions, 0.0);
+    const int dimensions[] = {8,3};  
+    tensor total_dispDu(2, dimensions, 0.0);
     //    double totalx, totaly, totalz;
     //    totalx=0;
     //    totaly=0;
@@ -2154,19 +2408,65 @@ tensor EightNodeBrick_u_p_U::total_disp(FILE *fp, double * u)
     const Vector &TotDis7 = nd7Ptr->getTrialDisp();
     const Vector &TotDis8 = nd8Ptr->getTrialDisp();
     
-    total_disp.val(1,1)=TotDis1(0); total_disp.val(1,2)=TotDis1(1);total_disp.val(1,3)=TotDis1(2);
-    total_disp.val(2,1)=TotDis2(0); total_disp.val(2,2)=TotDis2(1);total_disp.val(2,3)=TotDis2(2);
-    total_disp.val(3,1)=TotDis3(0); total_disp.val(3,2)=TotDis3(1);total_disp.val(3,3)=TotDis3(2);
-    total_disp.val(4,1)=TotDis4(0); total_disp.val(4,2)=TotDis4(1);total_disp.val(4,3)=TotDis4(2);
-    total_disp.val(5,1)=TotDis5(0); total_disp.val(5,2)=TotDis5(1);total_disp.val(5,3)=TotDis5(2);
-    total_disp.val(6,1)=TotDis6(0); total_disp.val(6,2)=TotDis6(1);total_disp.val(6,3)=TotDis6(2);
-    total_disp.val(7,1)=TotDis7(0); total_disp.val(7,2)=TotDis7(1);total_disp.val(7,3)=TotDis7(2);
-    total_disp.val(8,1)=TotDis8(0); total_disp.val(8,2)=TotDis8(1);total_disp.val(8,3)=TotDis8(2);
+    total_dispDu.val(1,1)=TotDis1(0); total_dispDu.val(1,2)=TotDis1(1);total_dispDu.val(1,3)=TotDis1(2);
+    total_dispDu.val(2,1)=TotDis2(0); total_dispDu.val(2,2)=TotDis2(1);total_dispDu.val(2,3)=TotDis2(2);
+    total_dispDu.val(3,1)=TotDis3(0); total_dispDu.val(3,2)=TotDis3(1);total_dispDu.val(3,3)=TotDis3(2);
+    total_dispDu.val(4,1)=TotDis4(0); total_dispDu.val(4,2)=TotDis4(1);total_dispDu.val(4,3)=TotDis4(2);
+    total_dispDu.val(5,1)=TotDis5(0); total_dispDu.val(5,2)=TotDis5(1);total_dispDu.val(5,3)=TotDis5(2);
+    total_dispDu.val(6,1)=TotDis6(0); total_dispDu.val(6,2)=TotDis6(1);total_dispDu.val(6,3)=TotDis6(2);
+    total_dispDu.val(7,1)=TotDis7(0); total_dispDu.val(7,2)=TotDis7(1);total_dispDu.val(7,3)=TotDis7(2);
+    total_dispDu.val(8,1)=TotDis8(0); total_dispDu.val(8,2)=TotDis8(1);total_dispDu.val(8,3)=TotDis8(2);
 
-    return total_disp;
+    return total_dispDu;
   }
 //====================================================================
-void EightNodeBrick_u_p_U::incremental_Update()
+////#############################################################################
+
+tensor EightNodeBrick_u_p_U::total_dispDU(FILE *fp, double * u)
+  {
+    const int dimensions[] = {8,3};  
+    tensor total_dispDU(2, dimensions, 0.0);
+  
+    const Vector &TotDis1  = nd1Ptr->getTrialDisp();
+    const Vector &TotDis2  = nd2Ptr->getTrialDisp();
+    const Vector &TotDis3  = nd3Ptr->getTrialDisp();
+    const Vector &TotDis4  = nd4Ptr->getTrialDisp();
+    const Vector &TotDis5  = nd5Ptr->getTrialDisp();
+    const Vector &TotDis6  = nd6Ptr->getTrialDisp();
+    const Vector &TotDis7  = nd7Ptr->getTrialDisp();
+    const Vector &TotDis8  = nd8Ptr->getTrialDisp();
+
+//  Get last three total displacement for fluid part.
+    total_dispDU.val(1,1)=TotDis1(4);total_dispDU.val(1,2)=TotDis1(5);
+    total_dispDU.val(1,3)=TotDis1(6);
+
+    total_dispDU.val(2,1)=TotDis2(4);total_dispDU.val(2,2)=TotDis2(5);
+    total_dispDU.val(2,3)=TotDis2(6);
+
+    total_dispDU.val(3,1)=TotDis3(4);total_dispDU.val(3,2)=TotDis3(5);
+    total_dispDU.val(3,3)=TotDis3(6);
+
+    total_dispDU.val(4,1)=TotDis4(4);total_dispDU.val(4,2)=TotDis4(5);
+    total_dispDU.val(4,3)=TotDis4(6);
+
+    total_dispDU.val(5,1)=TotDis5(4);total_dispDU.val(5,2)=TotDis5(5);
+    total_dispDU.val(5,3)=TotDis5(6);
+
+    total_dispDU.val(6,1)=TotDis6(4);total_dispDU.val(6,2)=TotDis6(5);
+    total_dispDU.val(6,3)=TotDis6(6);
+
+    total_dispDU.val(7,1)=TotDis7(4);total_dispDU.val(7,2)=TotDis7(5);
+    total_dispDU.val(7,3)=TotDis7(6);
+
+    total_dispDU.val(8,1)=TotDis8(4);total_dispDU.val(8,2)=TotDis8(5);
+    total_dispDU.val(8,3)=TotDis8(6);
+
+    return total_dispDU;
+}
+//====================================================================
+
+
+void EightNodeBrick_u_p_U::incremental_UpdateDu()
   {
     double r  = 0.0;
     // double rw = 0.0;
@@ -2205,7 +2505,169 @@ void EightNodeBrick_u_p_U::incremental_Update()
     
     ///    stresstensor incremental_stress;
     // tensor of incremental displacements taken from node objects
-    incremental_displacements = incr_disp();
+    incremental_displacements = incr_dispDu();
+
+    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+      {
+        r = get_Gauss_p_c( r_integration_order, GP_c_r );
+        //--        rw = get_Gauss_p_w( r_integration_order, GP_c_r );
+        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+          {
+            s = get_Gauss_p_c( s_integration_order, GP_c_s );
+            //--            sw = get_Gauss_p_w( s_integration_order, GP_c_s );
+            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+            {
+                t = get_Gauss_p_c( t_integration_order, GP_c_t );
+                //--                tw = get_Gauss_p_w( t_integration_order, GP_c_t );
+                // this short routine is supposed to calculate position of
+                // Gauss point from 3D array of short's
+                where =
+                   ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
+                // derivatives of local coordiantes with respect to local coordiantes
+                dh = dh_drst_at(r,s,t);
+                // Jacobian tensor ( matrix )
+                Jacobian = Jacobian_3D(dh);
+                //....                Jacobian.print("J");
+                // Inverse of Jacobian tensor ( matrix )
+                JacobianINV = Jacobian_3Dinv(dh);
+                //....                JacobianINV.print("JINV");
+                // determinant of Jacobian tensor ( matrix )
+                //--                det_of_Jacobian  = Jacobian.determinant();
+                //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
+                // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
+                dhGlobal = dh("ij") * JacobianINV("jk");
+                //....                dhGlobal.print("dh","dhGlobal");
+                //weight
+                //                weight = rw * sw * tw * det_of_Jacobian;
+                //::::::   ::printf("\n\nIN THE STIFFNESS TENSOR INTEGRATOR ----**************** where = %d \n", where);
+                //::::::   ::printf(" void EightNodeBrick_u_p_U::incremental_Update()\n");
+                //::::::   ::printf(" GP_c_r = %d,  GP_c_s = %d,  GP_c_t = %d    --->>>  where = %d \n",
+                //::::::                      GP_c_r,GP_c_s,GP_c_t,where);
+                //::::::   ::printf("WEIGHT = %f", weight);
+                //::::::   ::printf("determinant of Jacobian = %f", determinant_of_Jacobian);
+                //::::::   matpoint[where].report("Gauss Point\n");
+                // incremental straines at this Gauss point
+                // now in Update we know the incremental displacements so let's find
+                // the incremental strain
+                incremental_strain =
+                    (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
+                incremental_strain.null_indices();
+                //incremental_strain.reportshort("\n incremental_strain tensor at GAUSS point\n");
+
+                // here comes the final_stress calculation actually on only needs to copy stresses
+                // from the iterative data . . .
+                //(GPstress+where)->reportshortpqtheta("\n stress START GAUSS \n");
+
+		// Getting final_stress_after_integration is  Done inside CDriver on EPState____ZHaohui 
+		//final_stress_after_integration = GPiterative_stress[where];
+		//(matpoint)->operator[](where).kappa_set(final_stress_after_integration,
+                //                                 GPq_ast_iterative[where]);
+                
+		//....         final_stress_after_integration =
+                //....           (matpoint)->operator[](where).FinalStress(*(GPstress+where),
+                //....                                                     incremental_strain,
+                //....                                                     (matpoint)->operator[](where),
+                //....                                                     number_of_subincrements,
+                //....                                                     this_one_PP);
+                //....//final_stress_after_integration.reportshortpqtheta("\n final_stress_after_integration GAUSS \n");
+                // calculate the constitutive tensor
+
+                // We do not need: final_stress_after_integration
+
+	        
+	        //Constitutive =
+                //  (matpoint)->operator[](where).ConstitutiveTensor(final_stress_after_integration,
+                //                                                   *(GPstress+where),
+                //                                                   incremental_strain,
+                //                                                   (matpoint)->operator[](where),
+                //                                                   this_one_PP);
+	        
+		// ZHaohui modified __09-29-2000
+			      		
+	        // Now no EPState  but NDMaterial for each MatPoint
+		//EPState *tmp_eps = (matpoint[where]).getEPS();
+	        //NDMaterial *tmp_ndm = (matpoint[where]).getNDMat();
+
+		//if ( tmp_eps ) { //if there is an EPState for the MatPoint3D
+		//  mmodel->setEPS( *tmp_eps );
+		
+		if ( ! ( (matpoint[where]->matmodel)->setTrialStrainIncr( incremental_strain)) )
+               	   g3ErrorHandler->warning("EightNodeBrick_u_p_U::incremental_Update (tag: %d), not converged",
+		 		 this->getTag());
+		//matpoint[where].setEPS( mmodel->getEPS() );
+		//}
+		
+		//else if ( tmp_ndm ) 
+		//  (matpoint[where].p_matmodel)->setTrialStrainIncr( incremental_strain );
+		//else {
+               	//   g3ErrorHandler->fatal("EightNodeBrick_u_p_U::incremental_Update (tag: %d), no strain or stress state vars", this->getTag());
+		//   exit(1);
+		//}
+		   	        
+		//Constitutive = trialEPS.getEep();	        
+	        
+		//::::::                   Constitutive.print("C","\n\n C tensor \n");
+	        // this is update of constitutive tensor at this Gauss point
+                
+		// All done in EPState when calling setTrialStrainIncr and converged
+		//GPtangent_E[where].Initialize(Constitutive);
+	        //GPtangent_E[where].print("\n tangent E at GAUSS point \n");
+	        
+                //total_strain_at_GP.Initialize(*(GPstrain+where));
+                //total_strain_at_GP.reportshort("\n total_strain tensor at GAUSS point \n");
+                //total_strain_at_GP = total_strain_at_GP + incremental_strain;
+                //total_strain_at_GP.reportshort("\n total_strain tensor at GAUSS point AFTER\n");
+                //GPstress[where].Initialize(final_stress_after_integration);
+                //GPstress[where].reportshortpqtheta("\n stress at GAUSS point \n");
+                
+		//GPstrain[where].Initialize(total_strain_at_GP);
+                
+		//GPstrain[where].reportshort("\n strain at GAUSS point \n");
+            }
+          }
+      }
+  }
+//============================================================================
+void EightNodeBrick_u_p_U::incremental_UpdateDU()
+  {
+    double r  = 0.0;
+    // double rw = 0.0;
+    double s  = 0.0;
+    // double sw = 0.0;
+    double t  = 0.0;
+    // double tw = 0.0;
+
+    short where = 0;
+    //,,,,,    double weight = 0.0;
+    
+    //double this_one_PP = (matpoint)->operator[](where).IS_Perfect_Plastic();
+
+    int dh_dim[] = {8,3};   
+    tensor dh(2, dh_dim, 0.0);
+
+//    tensor Constitutive( 4, def_dim_4, 0.0);
+
+    //    double det_of_Jacobian = 0.0;
+
+    static int disp_dim[] = {8,3}; 
+    tensor incremental_displacements(2,disp_dim,0.0);
+
+    straintensor incremental_strain;
+//    straintensor total_strain_at_GP;
+
+    tensor Jacobian;
+    tensor JacobianINV;
+    tensor dhGlobal;
+
+    //....    int number_of_subincrements = 1;
+    //....    double this_one_PP = 1.0; // if set to 0.0 -> perfectly plastic
+    //....                              // if set to 1.0 -> elasto plastic
+
+//    stresstensor final_stress_after_integration;
+    
+    ///    stresstensor incremental_stress;
+    // tensor of incremental displacements taken from node objects
+    incremental_displacements = incr_dispDU();
 
     for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
       {
@@ -2328,8 +2790,11 @@ void EightNodeBrick_u_p_U::incremental_Update()
       }
   }
 
+
 //#############################################################################
-void EightNodeBrick_u_p_U::set_strain_stress_tensor(FILE *fp, double * u)
+
+//#############################################################################
+void EightNodeBrick_u_p_U::set_strain_stress_tensorDu(FILE *fp, double * u)
   {
     int dh_dim[] = {8,3};   // Xiaoyan changed from {20,3} to {8,3}
     tensor dh(2, dh_dim, 0.0);
@@ -2354,7 +2819,7 @@ void EightNodeBrick_u_p_U::set_strain_stress_tensor(FILE *fp, double * u)
     static int disp_dim[] = {8,3};    // Xiaoyan changed from {20,3} to {8,3}
     tensor total_displacements(2,disp_dim,0.0); //
 
-    total_displacements = total_disp(fp, u);
+    total_displacements = total_dispDu(fp, u);
 
     ::printf("\n  displacement(x-y-z) at GAUSS pt %d \n\n", where+1);
     for (int ii=1; ii<=8;ii++)
@@ -2418,6 +2883,96 @@ void EightNodeBrick_u_p_U::set_strain_stress_tensor(FILE *fp, double * u)
 
 ////#############################################################################
 
+//#############################################################################
+// This function is not called now. Keep here for future use.  Xiaoyan 02/108/2002
+void EightNodeBrick_u_p_U::set_strain_stress_tensorDU(FILE *fp, double * u)
+  {
+    int dh_dim[] = {8,3};   
+    tensor dh(2, dh_dim, 0.0);
+
+//    tensor Constitutive( 4, def_dim_4, 0.0);
+    tensor Constitutive;
+    double r  = 0.0;
+    double s  = 0.0;
+    double t  = 0.0;
+    int where = 0;
+
+    double det_of_Jacobian;
+
+    straintensor strain;
+    stresstensor stress;
+
+    tensor Jacobian;
+    tensor JacobianINV;
+    tensor dhGlobal;
+
+
+    static int disp_dim[] = {8,3};    
+    tensor total_displacements(2,disp_dim,0.0); //
+
+    total_displacements = total_dispDU(fp, u);
+
+    ::printf("\n  displacement(x-y-z) at GAUSS pt %d \n\n", where+1);
+    for (int ii=1; ii<=8;ii++)
+     {
+      ::printf("Global# %d Local#%d  %+0.5e %+0.5e %+0.5e\n",
+                     //G_N_numbs[ii-1], 
+		     connectedExternalNodes(ii-1),
+		     ii,total_displacements.val(ii,1),
+        	     total_displacements.val(ii,2),
+		     total_displacements.val(ii,3));
+     }							     		 
+    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+      {
+        r = get_Gauss_p_c( r_integration_order, GP_c_r );
+        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+          {
+            s = get_Gauss_p_c( s_integration_order, GP_c_s );
+            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+              {
+                t = get_Gauss_p_c( t_integration_order, GP_c_t );
+                // this short routine is supposed to calculate position of
+                // Gauss point from 3D array of short's
+                where =
+                ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
+                // derivatives of local coordinates with respect to local coordinates
+                dh = dh_drst_at(r,s,t);
+                // Jacobian tensor ( matrix )
+                Jacobian = Jacobian_3D(dh);
+                // Inverse of Jacobian tensor ( matrix )
+                JacobianINV = Jacobian_3Dinv(dh);
+                // determinant of Jacobian tensor ( matrix )
+                det_of_Jacobian  = Jacobian.determinant();
+                // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
+                dhGlobal = dh("ij") * JacobianINV("jk");
+                //weight
+                // straines at this Gauss point from displacement
+                strain = (dhGlobal("ib")*total_displacements("ia")).symmetrize11();
+                strain.null_indices();
+                // here comes the final_stress calculation
+                // at this Gauss point.
+
+                //Constitutive =  GPtangent_E[where];
+                //Constitutive =  (matpoint->getEPS() )->getEep();
+                // if set total displ, then it should be elstic material
+		Constitutive =  ( matpoint[where]->matmodel)->getTangentTensor();
+
+       		stress = Constitutive("ijkl") * strain("kl");   //<<<<<<<<<<<<<<<
+                stress.null_indices();
+
+                ::printf("\n  strain tensor at GAUSS point %d \n", where+1);
+                strain.reportshort("");
+                ::printf("\n  stress tensor at GAUSS point %d \n", where+1);
+                stress.reportshort("");
+                
+															 
+              }
+          }
+      }
+  }
+
+
+////#############################################################################
 
 ////#############################################################################
 EightNodeBrick_u_p_U & EightNodeBrick_u_p_U::operator[](int subscript)
@@ -2698,7 +3253,7 @@ void EightNodeBrick_u_p_U::setDomain (Domain *theDomain)
       int dofNd7 = nd7Ptr->getNumberDOF();
       int dofNd8 = nd8Ptr->getNumberDOF();
       								      
-      if (dofNd1 != 7 || dofNd2 != 7 || dofNd3 != 7 || dofNd4 != 7 ||  // Changed 2 to 3 Xiaoyan
+      if (dofNd1 != 7 || dofNd2 != 7 || dofNd3 != 7 || dofNd4 != 7 ||  // Changed 3 to 7 Xiaoyan
           dofNd5 != 7 || dofNd6 != 7 || dofNd7 != 7 || dofNd8 != 7 ) {
       	g3ErrorHandler->fatal("FATAL ERROR EightNodeBrick_u_p_U (tag: %d), has differing number of DOFs at its nodes",
       		this->getTag());
@@ -2749,43 +3304,79 @@ int EightNodeBrick_u_p_U::addInertiaLoadToUnbalance(const Vector &accel)
 	const Vector &Raccel7 = nd7Ptr->getRV(accel);
 	const Vector &Raccel8 = nd8Ptr->getRV(accel);
 
-    if (3 != Raccel1.Size() || 3 != Raccel2.Size() || 3 != Raccel3.Size() ||
-       	3 != Raccel4.Size() || 3 != Raccel5.Size() || 3 != Raccel6.Size() || 
-	3 != Raccel7.Size() || 3 != Raccel8.Size()  ){	
-	// Xiaoyan changed 2 to 3 and added Racce15-18  09/27/00
+    if (7 != Raccel1.Size() || 7 != Raccel2.Size() || 7 != Raccel3.Size() ||
+       	7 != Raccel4.Size() || 7 != Raccel5.Size() || 7 != Raccel6.Size() || 
+	7 != Raccel7.Size() || 7 != Raccel8.Size()  ){	
 		g3ErrorHandler->warning("EightNodeBrick_u_p_U::addInertiaLoadToUnbalance %s\n",
 				"matrix and vector sizes are incompatable");
 		return -1;
     }
 
-	static Vector ra(24);  // Changed form 8 to 24(3*8)  Xiaoyan 09/27/00
+	static Vector ra(56);  // Changed form 24 to 56  Xiaoyan 03/22/2002
 
-	ra(0) =  Raccel1(0);
-	ra(1) =  Raccel1(1);
-	ra(2) =  Raccel1(2);
-	ra(3) =  Raccel2(0);
-	ra(4) =  Raccel2(1);
-	ra(5) =  Raccel2(2);
-	ra(6) =  Raccel3(0);
-	ra(7) =  Raccel3(1);
-	ra(8) =  Raccel3(2);
-	ra(9) =  Raccel4(0);
-	ra(10) = Raccel4(1);
-	ra(11) = Raccel4(2);
-    	// Xiaoyan added the following 09/27/00
-    	ra(12) = Raccel5(0);
-	ra(13) = Raccel5(1);
-	ra(14) = Raccel5(2);
-	ra(15) = Raccel6(0);
-	ra(16) = Raccel6(1);
-	ra(17) = Raccel6(2);
-	ra(18) = Raccel7(0);
-	ra(19) = Raccel7(1);
-	ra(20) = Raccel7(2);
-	ra(21) = Raccel8(0);
-	ra(22) = Raccel8(1);
-	ra(23) = Raccel8(2);
+	ra( 0) = Raccel1(0);
+	ra( 1) = Raccel1(1);
+	ra( 2) = Raccel1(2);
+	ra( 3) = 0.0;
+	ra( 4) = Raccel1(4);
+	ra( 5) = Raccel1(5);
+	ra( 6) = Raccel1(6);
 
+	ra( 7) = Raccel2(0);
+	ra( 8) = Raccel2(1);
+	ra( 9) = Raccel2(2);
+	ra( 10) = 0.0;
+	ra( 11) = Raccel2(4);
+	ra( 12) = Raccel2(5);
+	ra( 13) = Raccel2(6);
+
+	ra(14) = Raccel3(0);
+	ra(15) = Raccel3(1);
+	ra(16) = Raccel3(2);
+ ra(17) = 0.0;
+	ra(18) = Raccel3(4);
+	ra(19) = Raccel3(5);
+	ra(20) = Raccel3(6);
+
+	ra(21) = Raccel4(0);
+	ra(22) = Raccel4(1);
+	ra(23) = Raccel4(2);
+	ra(24) = 0.0;
+ ra(25) = Raccel4(4);
+	ra(26) = Raccel4(5);
+	ra(27) = Raccel4(6);
+
+	ra(28) = Raccel5(0);
+	ra(29) = Raccel5(1);
+	ra(30) = Raccel5(2);
+	ra(31) = 0.0;
+	ra(32) = Raccel5(4);
+	ra(33) = Raccel5(5);
+	ra(34) = Raccel5(6);
+
+	ra(35) = Raccel6(0);
+	ra(36) = Raccel6(1);
+	ra(37) = Raccel6(2);
+	ra(38) = 0.0;
+	ra(39) = Raccel6(4);
+	ra(40) = Raccel6(5);
+	ra(41) = Raccel6(6);
+
+	ra(42) = Raccel7(0);
+	ra(43) = Raccel7(1);
+	ra(44) = Raccel7(2);
+	ra(45) = 0.0;
+	ra(46) = Raccel7(4);
+	ra(47) = Raccel7(5);
+	ra(48) = Raccel7(6);
+
+	ra(49) = Raccel8(0);
+	ra(50) = Raccel8(1);
+	ra(51) = Raccel8(2);
+	ra(52) = 0.0;
+	ra(53) = Raccel8(4);
+	ra(54) = Raccel8(5);
+	ra(55) = Raccel8(6);
 
     // Want to add ( - fact * M R * accel ) to unbalance
     // Take advantage of lumped mass matrix
@@ -2798,8 +3389,8 @@ int EightNodeBrick_u_p_U::addInertiaLoadToUnbalance(const Vector &accel)
 
     //cerr << " addInerti... column_mass " << column_mass << endln;
 
-    for (int i = 0; i < 24; i++)   
-		Q(i) += -M(i,i)*ra(i);
+    for (int i = 0; i < 56; i++)   
+	    	Q(i) += -M(i,i)*ra(i);
 
     return 0;
 }
@@ -2807,39 +3398,80 @@ int EightNodeBrick_u_p_U::addInertiaLoadToUnbalance(const Vector &accel)
 //=============================================================================
 const Vector EightNodeBrick_u_p_U::FormEquiBodyForce()
 {
-    Vector bforce(24);  
+    Vector bforce(56);  
 
     // Check for a quick return
     //cerr << "rho " << rho << endln;
     if (rho == 0.0) 
     	return bforce;
 
-    Vector ba(24);  
+    Vector ba(56);  
 
-    ba(0) =  bf(0);
-    ba(1) =  bf(1);
-    ba(2) =  bf(2);
-    ba(3) =  bf(0);
-    ba(4) =  bf(1);
-    ba(5) =  bf(2);
-    ba(6) =  bf(0);
-    ba(7) =  bf(1);
-    ba(8) =  bf(2);
-    ba(9) =  bf(0);
-    ba(10) = bf(1);
-    ba(11) = bf(2);
-    ba(12) = bf(0);
-    ba(13) = bf(1);
-    ba(14) = bf(2);
-    ba(15) = bf(0);
-    ba(16) = bf(1);
-    ba(17) = bf(2);
-    ba(18) = bf(0);
-    ba(19) = bf(1);
-    ba(20) = bf(2);
-    ba(21) = bf(0);
-    ba(22) = bf(1);
-    ba(23) = bf(2);
+// The body force(gravity g) are same for solid part and fluid part
+//     Solid part         Fluid part 
+    ba( 0) = bf(0);    
+    ba( 1) = bf(1);    
+    ba( 2) = bf(2);
+    ba( 3)=  0.0;
+    ba( 4) = bf(0);    
+    ba( 5) = bf(1);    
+    ba( 6) = bf(2);    
+
+    ba( 7) = bf(0);    
+    ba( 8) = bf(1);    
+    ba( 9) = bf(2);    
+    ba(10) = 0.0;    
+    ba(11) = bf(0);    
+    ba(15) = bf(1);    
+    ba(13) = bf(2); 
+       
+    ba(14) = bf(0);    
+    ba(15) = bf(1);    
+    ba(16) = bf(2);    
+    ba(17) = 0.0;      
+    ba(18) = bf(0);    
+    ba(19) = bf(1);    
+    ba(20) = bf(2);    
+
+    ba(21) = bf(0);    
+    ba(22) = bf(1);    
+    ba(23) = bf(2);    
+    ba(24) = 0.0;      
+    ba(25) = bf(0);    
+    ba(26) = bf(1);    
+    ba(27) = bf(2);    
+
+    ba(28) = bf(0);    
+    ba(29) = bf(1);    
+    ba(30) = bf(2);    
+    ba(31) = 0.0;      
+    ba(32) = bf(0);    
+    ba(33) = bf(1);    
+    ba(34) = bf(2);    
+
+    ba(35) = bf(0);    
+    ba(36) = bf(1);    
+    ba(37) = bf(2);    
+    ba(38) = 0.0;      
+    ba(39) = bf(0);    
+    ba(40) = bf(1);    
+    ba(41) = bf(2);    
+
+    ba(42) = bf(0);    
+    ba(43) = bf(1);    
+    ba(44) = bf(2);    
+    ba(45) = 0.0;      
+    ba(46) = bf(0);    
+    ba(47) = bf(1);    
+    ba(48) = bf(2);    
+
+    ba(49) = bf(0);    
+    ba(50) = bf(1);    
+    ba(51) = bf(2);    
+    ba(52) = 0.0;      
+    ba(53) = bf(0);    
+    ba(54) = bf(1);    
+    ba(55) = bf(2);
 
     //Form equivalent body force
     bforce.addMatrixVector(0.0, M, ba, 1.0);
@@ -2902,15 +3534,15 @@ const Vector EightNodeBrick_u_p_U::FormEquiBodyForce()
 //=============================================================================
 const Vector &EightNodeBrick_u_p_U::getResistingForce () 
 {     
-    int force_dim[] = {8,3}; 
+    int force_dim[] = {8,7}; 
     tensor nodalforces(2,force_dim,0.0);
      
     nodalforces = nodal_forces();
 
     //converting nodalforce tensor to vector
     for (int i = 0; i< 8; i++)
-      for (int j = 0; j < 3; j++)
-	p(i *3 + j) = nodalforces.cval(i+1, j+1);
+      for (int j = 0; j < 7; j++)
+	p(i *7 + j) = nodalforces.cval(i+1, j+1);
 
     //cerr << "p" << p;
     //cerr << "Q" << Q;
@@ -2955,34 +3587,73 @@ const Vector &EightNodeBrick_u_p_U::getResistingForceIncInertia ()
 	const Vector &accel8 = nd8Ptr->getTrialAccel();	               		    
         //cout << "node accel " << nd8Ptr->getTag() << " x " << accel8(0) <<" y "<< accel8(1) << " z "<< accel8(2) << endln;
 	
-	static Vector a(24);  // originally 8
+	static Vector a(56);  // originally 8
 
-	a(0) =  accel1(0);
-	a(1) =  accel1(1);
-	a(2) =  accel1(2);
-	a(3) =  accel2(0);
-	a(4) =  accel2(1);
-	a(5) =  accel2(2);
-	a(6) =  accel3(0);
-	a(7) =  accel3(1);
-	a(8) =  accel3(2);
-	a(9) =  accel4(0);
-	a(10) = accel4(1);
-	a(11) = accel4(2);
-    	// Xiaoyn added the following 09/27/00
-    	a(12) = accel5(0);
-	a(13) = accel5(1);
-	a(14) = accel5(2);
-	a(15) = accel6(0);
-	a(16) = accel6(1);
-	a(17) = accel6(2);
-	a(18) = accel7(0);
-	a(19) = accel7(1);
-	a(20) = accel7(2);
-	a(21) = accel8(0);
-	a(22) = accel8(1);
-	a(23) = accel8(2);
-		   		   
+// Modified to 3-solid 1-p 3-fluid        Xioayan 03/14/2002
+	a( 0) = accel1(0);
+	a( 1) = accel1(1);
+	a( 2) = accel1(2);
+	a( 3) = 0.0;
+	a( 4) = accel1(4);
+	a( 5) = accel1(5);
+	a( 6) = accel1(6);
+
+	a( 7) = accel2(0);
+	a( 8) = accel2(1);
+	a( 9) = accel2(2);
+	a(10) = 0.0;
+	a(11) = accel2(4);
+ a(15) = accel2(5);
+	a(13) = accel2(6);
+
+	a(14) = accel3(0);
+	a(15) = accel3(1);
+	a(16) = accel3(2);
+	a(17) = 0.0;
+	a(18) = accel3(4);
+	a(19) = accel3(5);
+	a(20) = accel3(6);
+
+	a(21) = accel4(0);
+	a(22) = accel4(1);
+	a(23) = accel4(2);
+	a(24) = 0.0;
+ a(25) = accel4(4);
+	a(26) = accel4(5);
+	a(27) = accel4(6);
+
+	a(28) = accel5(0);
+	a(29) = accel5(1);
+	a(30) = accel5(2);
+	a(31) = 0.0;    
+	a(32) = accel5(4);
+	a(33) = accel5(5);
+	a(34) = accel5(6);
+
+	a(35) = accel6(0);
+	a(36) = accel6(1);
+	a(37) = accel6(2);
+	a(38) = 0.0;    
+	a(39) = accel6(4);
+	a(40) = accel6(5);
+	a(41) = accel6(6);
+
+	a(42) = accel7(0);
+	a(43) = accel7(1);
+	a(44) = accel7(2);
+	a(45) = 0.0;   
+	a(46) = accel7(4);
+	a(47) = accel7(5);
+	a(48) = accel7(6);
+
+	a(49) = accel8(0);
+	a(50) = accel8(1);
+	a(51) = accel8(2);
+	a(52) = 0.0;   
+	a(53) = accel8(4);
+	a(54) = accel8(5);
+	a(55) = accel8(6);
+   
 	// Compute the current resisting force
 	this->getResistingForce();
 
@@ -2995,7 +3666,7 @@ const Vector &EightNodeBrick_u_p_U::getResistingForceIncInertia ()
         //   column_mass += M(1,i);
         //column_mass = column_mass/3.0;
 
-	for (int i = 0; i < 24; i++)
+	for (int i = 0; i < 56; i++)
 	{   
 	   p(i) += M(i,i)*a(i);
 	   //cout << " " << M(i, i);
@@ -3121,11 +3792,11 @@ int * EightNodeBrick_u_p_U::get_LM()
 
 ////#############################################################################
 // returns nodal forces for given stress field in an element
-tensor EightNodeBrick_u_p_U::nodal_forces()
+tensor EightNodeBrick_u_p_U::nodal_forcesFu()
   {
-    int force_dim[] = {8,3};  // Xiaoyan changed from {20,3 to {8,3} for 8 nodes
+    int force_dim[] = {8,3};  
 
-    tensor nodal_forces(2,force_dim,0.0);
+    tensor nodal_forcesFu(2,force_dim,0.0);
 
     double r  = 0.0;
     double rw = 0.0;
@@ -3137,7 +3808,7 @@ tensor EightNodeBrick_u_p_U::nodal_forces()
     short where = 0;
     double weight = 0.0;
 
-    int dh_dim[] = {8,3};  // Xiaoyan changed from {20,3 to {8,3} for 8 nodes
+    int dh_dim[] = {8,3};  
 
     tensor dh(2, dh_dim, 0.0);
 
@@ -3150,7 +3821,7 @@ tensor EightNodeBrick_u_p_U::nodal_forces()
     static int disp_dim[] = {8,3};   // Xiaoyan changed from {20,3} to {8,3}
     tensor incremental_displacements(2,disp_dim,0.0); // \Delta u
 
-    incremental_displacements = incr_disp();
+    incremental_displacements = incr_dispDu();
 
     tensor Jacobian;
     tensor JacobianINV;
@@ -3196,63 +3867,7 @@ tensor EightNodeBrick_u_p_U::nodal_forces()
 
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;
-                //..::printf("\n\nIN THE nodal forces ----**************** where = %d \n", where);
-                //..::printf("                    GP_c_r = %d,  GP_c_s = %d,  GP_c_t = %d\n",
-                //..                           GP_c_r,GP_c_s,GP_c_t);
-                //..::printf("WEIGHT = %f", weight);
-                //..::printf("determinant of Jacobian = %f", det_of_Jacobian);
-                //..matpoint[where].report("Gauss Point\n");
-
-                //..   // samo jos odredi ovaj tensor E i to za svaku gauss tacku drugaciji !!!!!!!!!!!!
-                //..   ovde negde bi trebalo da se na osnovu inkrementalnih pomeranja
-                //..   nadje inkrementalna deformacija ( strain_increment ) pa sa njom dalje:
-                //..
-                //// tensor of incremental displacements taken from node objects
-                //                incremental_displacements = incr_disp();
-                //
-                //// incremental straines at this Gauss point
-                //                incremental_strain =
-                //                  (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
-                //
-                //                incremental_strain.null_indices();
-                ////incremental_strain.reportshort("\n incremental_strain tensor at GAUSS point\n");
-                //
-                ////                integr_type = (matpoint)->operator[](where).integration_type();
-                ////                if ( !strcmp(integr_type,"BakcwardEuler")
-
-                //..   dakle ovde posalji strain_increment jer se stari stress cuva u okviru svake
-                //..   Gauss tacke a samo saljes strain_increment koji ce da se prenese
-                //..   u integracionu rutinu pa ce ta da vrati krajnji napon i onda moze da
-                //..   se pravi ConstitutiveStiffnessTensor.
-                //.. Ustvari posalji sve sto imas ( incremental_strain, start_stress,
-                //.. number_of_subincrements . . . u ovu Constitutive_tensor funkciju
-                //.. pa ona nek ide, u zavisnosti od modela koji se koristi i neka
-                //.. onda tamo u svakoj posebnoj modelskoj funkciji vrati sta treba
-                //.. ( recimo Elastic odmah vraca Eelastic a recimo MRS_Lade prvo
-                //.. pita koji nacin integracije da koristi pa onda u zvisnosti od toga
-                //.. zove funkcuju koja integrali za taj algoritam ( ForwardEuler, BakcwardEuler,
-                //.. SemiBackwardEuler, . . . ) i onda kada funkcija vrati napon onda
-                //.. se opet pita koji je tip integracije bio u pitanju pa pravi odgovarajuci
-                //.. ConstitutiveTensor i vraca ga nazad!
-
-                //                   stress_at_GP = (GPstress)->operator[](where);
-                //stress_at_GP = GPstress[where];
-
-	        //EPState *tmp_eps = (matpoint[where]->matmodel)->getEPS();
-		//stress_at_GP = tmp_eps->getStress();
-		//cout << "tmp_eps" << (*tmp_eps);
-
-	        //NDMaterial *tmp_ndm = (matpoint[where]).getNDMat();
-		
-		//if ( tmp_eps ) {     //Elasto-plastic case
- 		
-		//stress_at_GP = (matpoint[where].matmodel->getEPS())->getStress();
-		
-		//   EPState *tmp_eps = (matpoint[where]->matmodel)->getEPS();
-		//   stress_at_GP = tmp_eps->getStress();
-
-		
-		
+ 
 		incremental_strain =
                      (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
 //		if (where == 0)
@@ -3271,40 +3886,12 @@ tensor EightNodeBrick_u_p_U::nodal_forces()
 //		if (strcmp(matpoint[where]->matmodel->getType(),"Template3Dep") != 0)
 		   stress_at_GP = matpoint[where]->getStressTensor();
 
-//				 stress_at_GP.report("PROBLEM");
-//				 getchar();
-
-//		else
-//		{
-//	           //Some thing funny happened when getting stress directly from matpoint[where], i have to do it this way!
-//		   EPState *tmp_eps = ((Template3Dep *)(matpoint[where]->matmodel))->getEPS();
-//		   stress_at_GP = tmp_eps->getStress();
-//		   //delete tmp_eps;
-//	       	}
-		
-           	//double  p = stress_at_GP.p_hydrostatic();
-                //if ( p < 0.0 ) 
-	        //{
-	        //  cerr << getTag();
-	        //  cerr << " ***p  =    " << p << endln;
-	        //}
-
-		//cerr << " nodal_force ::: stress_at_GP " << stress_at_GP << endln;
-		
-		//}
-		//else if ( tmp_ndm ) { //Elastic case
-             	//    stress_at_GP = (matpoint[where].getNDMat())->getStressTensor();
-		//}
-		//else {
-               	//   g3ErrorHandler->fatal("EightNodeBrick_u_p_U::nodal_forces (tag: %d), could not getStress", this->getTag());
-		//   exit(1);
-		//}
 
                 //stress_at_GP.report("\n stress_at_GPtensor at GAUSS point for nodal forces \n");
 
                 // nodal forces See Zienkievicz part 1 pp 108
-                nodal_forces =
-                     nodal_forces + dhGlobal("ib")*stress_at_GP("ab")*weight;
+                nodal_forcesFu =
+                     nodal_forcesFu + dhGlobal("ib")*stress_at_GP("ab")*weight;
                 //nodal_forces.print("nf","\n\n Nodal Forces \n");
  
               }
@@ -3313,17 +3900,17 @@ tensor EightNodeBrick_u_p_U::nodal_forces()
 
     //cout << "\n element no. " << getTag() << endln;
     //nodal_forces.print("nf","\n Nodal Forces \n");
-    return nodal_forces;
+    return nodal_forcesFu;
 
   }
-
 ////#############################################################################
-// returns nodal forces for given ITERATIVE stress field in an element
-tensor EightNodeBrick_u_p_U::iterative_nodal_forces()
+// returns nodal forces of fluid part in an element
+tensor EightNodeBrick_u_p_U::nodal_forcesFU()
   {
-    int force_dim[] = {8,3}; // Xiaoyan changed from {20,3 to {8,3} for 8 nodes
+ // This is a function for a generelized force for the fluid component...  
+    int force_dim[] = {8,3};  
 
-    tensor nodal_forces(2,force_dim,0.0);
+    tensor nodal_forcesFU(2,force_dim,0.0);
 
     double r  = 0.0;
     double rw = 0.0;
@@ -3335,7 +3922,149 @@ tensor EightNodeBrick_u_p_U::iterative_nodal_forces()
     short where = 0;
     double weight = 0.0;
 
-    int dh_dim[] = {8,3};   // Xiaoyan changed from {20,3 to {8,3} for 8 nodes
+    int dh_dim[] = {8,3};  
+
+    tensor dh(2, dh_dim, 0.0);
+
+    stresstensor stress_at_GP(0.0);
+
+    double det_of_Jacobian = 0.0;
+
+    straintensor incremental_strain;
+
+    static int disp_dim[] = {8,3};   
+    tensor incremental_displacements(2,disp_dim,0.0); // \Delta U
+
+    incremental_displacements = incr_dispDU();
+
+    tensor Jacobian;
+    tensor JacobianINV;
+    tensor dhGlobal;
+
+    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+      {
+        r = get_Gauss_p_c( r_integration_order, GP_c_r );
+        rw = get_Gauss_p_w( r_integration_order, GP_c_r );
+
+        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+          {
+            s = get_Gauss_p_c( s_integration_order, GP_c_s );
+            sw = get_Gauss_p_w( s_integration_order, GP_c_s );
+
+            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+              {
+                t = get_Gauss_p_c( t_integration_order, GP_c_t );
+                tw = get_Gauss_p_w( t_integration_order, GP_c_t );
+
+                // this short routine is supposed to calculate position of
+                // Gauss point from 3D array of short's
+                where =
+                ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
+
+                // derivatives of local coordiantes with respect to local coordiantes
+                dh = dh_drst_at(r,s,t);
+
+                // Jacobian tensor ( matrix )
+                Jacobian = Jacobian_3D(dh);
+                //....                Jacobian.print("J");
+
+                // Inverse of Jacobian tensor ( matrix )
+                JacobianINV = Jacobian_3Dinv(dh);
+                //....                JacobianINV.print("JINV");
+
+                // determinant of Jacobian tensor ( matrix )
+                det_of_Jacobian  = Jacobian.determinant();
+                //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
+
+                // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
+                dhGlobal = dh("ij") * JacobianINV("jk");
+
+                //weight
+                weight = rw * sw * tw * det_of_Jacobian;
+                
+		incremental_strain =
+                     (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
+//		if (where == 0)
+//   		//cout << " In nodal_force delta_incremental_strain tag "<< getTag() <<"  " <<incremental_strain << endln;
+////		cout << " el tag = "<< getTag();
+//		
+		int err = ( matpoint[where]->matmodel )->setTrialStrainIncr( incremental_strain);
+		if ( err)
+               	   g3ErrorHandler->warning("EightNodeBrick_u_p_U::getStiffnessTensor (tag: %d), not converged",
+		    		 this->getTag());
+
+
+
+		//char *test = matpoint[where]->matmodel->getType();
+		// fmk - changing if so if into else block must be Template3Dep
+//		if (strcmp(matpoint[where]->matmodel->getType(),"Template3Dep") != 0)
+		   stress_at_GP = matpoint[where]->getStressTensor();
+
+
+                // nodal forces See Zienkievicz part 1 pp 108
+                nodal_forcesFU =
+                     nodal_forcesFU + dhGlobal("ib")*stress_at_GP("ab")*weight;
+                //nodal_forces.print("nf","\n\n Nodal Forces \n");
+ 
+              }
+          }
+      }
+
+    //cout << "\n element no. " << getTag() << endln;
+    //nodal_forces.print("nf","\n Nodal Forces \n");
+    return nodal_forcesFU;
+
+  }
+////#############################################################################
+////#############################################################################
+// returns nodal forces for given stress field in an element
+tensor EightNodeBrick_u_p_U::nodal_forces()
+  {
+    int force_dim[] = {8,7};  
+
+    tensor nodalForceFu = nodal_forcesFu();
+    tensor nodalForceFU = nodal_forcesFU();
+
+    tensor nodal_FORCES(2,force_dim,0.0);
+
+    for( int i=1; i<=8; i++)
+      {
+	  // part for u
+          nodal_FORCES.val(i,1) = nodalForceFu.val(i,1);
+          nodal_FORCES.val(i,2) = nodalForceFu.val(i,2);
+          nodal_FORCES.val(i,3) = nodalForceFu.val(i,3);
+	  // part for p
+          nodal_FORCES.val(i,4) = 0.0;
+	  // part for U
+          nodal_FORCES.val(i,5) = nodalForceFU.val(i,1);
+          nodal_FORCES.val(i,6) = nodalForceFU.val(i,2);
+          nodal_FORCES.val(i,7) = nodalForceFU.val(i,3);
+      }
+     return nodal_FORCES;
+  }
+
+
+////#############################################################################
+////#############################################################################
+// returns nodal forces for given ITERATIVE stress field in an element
+// Solid part  Xiaoyan 02/08/2002
+tensor EightNodeBrick_u_p_U::iterative_nodal_forcesFu()
+  {
+    int force_dim[] = {8,3}; 
+
+    tensor nodal_forcesFu(2,force_dim,0.0);
+
+    double r  = 0.0;
+    double rw = 0.0;
+    double s  = 0.0;
+    double sw = 0.0;
+    double t  = 0.0;
+    double tw = 0.0;
+
+    short where = 0;
+    double weight = 0.0;
+
+    int dh_dim[] = {8,3};   
 
     tensor dh(2, dh_dim, 0.0);
 
@@ -3400,8 +4129,8 @@ tensor EightNodeBrick_u_p_U::iterative_nodal_forces()
                 stress_at_GP.reportshortpqtheta("\n iterative_stress at GAUSS point in iterative_nodal_force\n");
 
                 // nodal forces See Zienkievicz part 1 pp 108
-                nodal_forces =
-                  nodal_forces + dhGlobal("ib")*stress_at_GP("ab")*weight;
+                nodal_forcesFu =
+                  nodal_forcesFu + dhGlobal("ib")*stress_at_GP("ab")*weight;
                 //nodal_forces.print("nf","\n EightNodeBrick_u_p_U::iterative_nodal_forces Nodal Forces ~~~~\n");
 
               }
@@ -3409,7 +4138,103 @@ tensor EightNodeBrick_u_p_U::iterative_nodal_forces()
       }
 
 
-    return nodal_forces;
+    return nodal_forcesFu;
+
+  }
+////#############################################################################
+// returns nodal forces for given ITERATIVE stress field in an element
+// Fluid part  Xiaoyan 02/08/2002
+tensor EightNodeBrick_u_p_U::iterative_nodal_forcesFU()
+  {
+    int force_dim[] = {8,3}; 
+
+    tensor nodal_forcesFU(2,force_dim,0.0);
+
+    double r  = 0.0;
+    double rw = 0.0;
+    double s  = 0.0;
+    double sw = 0.0;
+    double t  = 0.0;
+    double tw = 0.0;
+
+    short where = 0;
+    double weight = 0.0;
+
+    int dh_dim[] = {8,3};   
+
+    tensor dh(2, dh_dim, 0.0);
+
+    stresstensor stress_at_GP(0.0);
+
+    double det_of_Jacobian = 0.0;
+
+    tensor Jacobian;
+    tensor JacobianINV;
+    tensor dhGlobal;
+
+    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+      {
+        r = get_Gauss_p_c( r_integration_order, GP_c_r );
+        rw = get_Gauss_p_w( r_integration_order, GP_c_r );
+
+        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+          {
+            s = get_Gauss_p_c( s_integration_order, GP_c_s );
+            sw = get_Gauss_p_w( s_integration_order, GP_c_s );
+
+            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+              {
+                t = get_Gauss_p_c( t_integration_order, GP_c_t );
+                tw = get_Gauss_p_w( t_integration_order, GP_c_t );
+
+                // this short routine is supposed to calculate position of
+                // Gauss point from 3D array of short's
+                where =
+                ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
+                //.....
+                //.....::printf("EightNodeBrick_u_p_U::iterative_nodal_forces()  ----**************** where = %d \n", where);
+                //.....::printf("UPDATE ");
+                //.....::printf("   GP_c_r = %d,  GP_c_s = %d,  GP_c_t = %d\n",
+                //.....                           GP_c_r,GP_c_s,GP_c_t);
+                // derivatives of local coordiantes with respect to local coordiantes
+                dh = dh_drst_at(r,s,t);
+
+                // Jacobian tensor ( matrix )
+                Jacobian = Jacobian_3D(dh);
+                //....                Jacobian.print("J");
+
+                // Inverse of Jacobian tensor ( matrix )
+                JacobianINV = Jacobian_3Dinv(dh);
+                //....                JacobianINV.print("JINV");
+
+                // determinant of Jacobian tensor ( matrix )
+                det_of_Jacobian  = Jacobian.determinant();
+                //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
+	  
+                // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
+                dhGlobal = dh("ij") * JacobianINV("jk");
+
+                //weight
+                weight = rw * sw * tw * det_of_Jacobian;
+
+                //                   stress_at_GP = (GPstress)->operator[](where);
+                //stress_at_GP = GPiterative_stress[where];
+                
+		//stress_at_GP = ( matpoint[where].getTrialEPS() )->getStress();
+                stress_at_GP = matpoint[where]->getStressTensor();
+                stress_at_GP.reportshortpqtheta("\n iterative_stress at GAUSS point in iterative_nodal_force\n");
+
+                // nodal forces See Zienkievicz part 1 pp 108
+                nodal_forcesFU =
+                  nodal_forcesFU + dhGlobal("ib")*stress_at_GP("ab")*weight;
+                //nodal_forces.print("nf","\n EightNodeBrick_u_p_U::iterative_nodal_forces Nodal Forces ~~~~\n");
+
+              }
+          }
+      }
+
+
+    return nodal_forcesFU;
 
   }
 
@@ -3543,7 +4368,7 @@ tensor EightNodeBrick_u_p_U::linearized_nodal_forces()
     stresstensor final_linearized_stress;
     //    stresstensor incremental_stress;
     // tensor of incremental displacements taken from node objects for this element !
-    incremental_displacements = incr_disp();
+    incremental_displacements = incr_dispDu();
     //incremental_displacements.print("disp","\n incremental_displacements tensor at GAUSS point in iterative_Update\n");
 
     for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
