@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: winMain.cpp,v 1.2 2001-08-18 00:35:28 fmk Exp $
+ * RCS: @(#) $Id: winMain.cpp,v 1.3 2004-07-21 00:01:23 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -28,7 +28,7 @@ extern "C" {
 #include <locale.h>
 }
 
-#include "tkInt.h"
+#include <tk.h>
 #include <commands.h>
 
 
@@ -45,10 +45,12 @@ void Tk_MainOpenSees(int argc, char **argv,Tcl_AppInitProc *appInitProc,
 /*
  * Forward declarations for procedures defined later in this file:
  */
-
 static void		setargv _ANSI_ARGS_((int *argcPtr, char ***argvPtr));
+#ifdef _TCL84
+static Tcl_PanicProc WishPanic;
+#else
 static void		WishPanic _ANSI_ARGS_(TCL_VARARGS(char *,format));
-
+#endif
 
 #ifdef TK_TEST
 extern int		Tktest_Init(Tcl_Interp *interp);
@@ -252,6 +254,26 @@ error:
  *----------------------------------------------------------------------
  */
 
+#ifdef _TCL84
+void
+WishPanic TCL_VARARGS_DEF(CONST char *,arg1)
+{
+    va_list argList;
+    char buf[1024];
+    CONST char *format;
+    
+    format = TCL_VARARGS_START(CONST char *,arg1,argList);
+    vsprintf(buf, format, argList);
+
+    MessageBeep(MB_ICONEXCLAMATION);
+    MessageBox(NULL, buf, "Fatal Error in Wish",
+	    MB_ICONSTOP | MB_OK | MB_TASKMODAL | MB_SETFOREGROUND);
+#ifdef _MSC_VER
+    DebugBreak();
+#endif
+    ExitProcess(1);
+}
+#else
 void
 WishPanic TCL_VARARGS_DEF(char *,arg1)
 {
@@ -270,6 +292,7 @@ WishPanic TCL_VARARGS_DEF(char *,arg1)
 #endif
     ExitProcess(1);
 }
+#endif
 /*
  *-------------------------------------------------------------------------
  *

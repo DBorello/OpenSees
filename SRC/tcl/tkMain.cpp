@@ -14,7 +14,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkMain.cpp,v 1.10 2004-07-16 21:57:33 fmk Exp $
+ * RCS: @(#) $Id: tkMain.cpp,v 1.11 2004-07-21 00:01:23 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -29,9 +29,7 @@ extern "C" {
 #include <stdio.h>
 #include <string.h>
 #include <tcl.h>
-  // #include <tclInt.h>
 #include <tk.h>
-//#include "tkInt.h"
 #ifdef NO_STDLIB_H
 #   include "../compat/stdlib.h"
 #else
@@ -39,7 +37,7 @@ extern "C" {
 #endif
 }
 #ifdef __WIN32__
-#include "tkWinInt.h"
+#include <tkWin.h>
 #endif
 
 
@@ -258,10 +256,10 @@ Tk_MainOpenSees(int argc, char **argv, Tcl_AppInitProc *appInitProc, Tcl_Interp 
     /*
      * Invoke application-specific initialization.
      */
-    if ((*appInitProc)(interp) != TCL_OK) 
+	if ((*appInitProc)(interp) != TCL_OK) {
       TkpDisplayWarning(Tcl_GetStringResult(interp), 
-      	"Application initialization failed");
-
+    	"Application initialization failed");
+	}
     /*
      * Invoke the script specified on the command line, if any.
      */
