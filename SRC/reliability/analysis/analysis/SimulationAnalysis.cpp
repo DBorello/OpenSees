@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:00 $
+// $Revision: 1.3 $
+// $Date: 2001-08-02 18:09:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SimulationAnalysis.cpp,v $
 
 
@@ -75,6 +75,8 @@ SimulationAnalysis::SimulationAnalysis(	ReliabilityDomain *passedReliabilityDoma
 
 SimulationAnalysis::~SimulationAnalysis()
 {
+	if (pointToSampleAround != 0)
+		delete [] pointToSampleAround;
 }
 
 
@@ -352,6 +354,7 @@ SimulationAnalysis::analyze(void)
 		theLimitStateFunction->NumberOfSimulations=k;
 	}
 
+	delete theMatrixOperations;
 	delete aStdNormRV;
 
 	return 0;
