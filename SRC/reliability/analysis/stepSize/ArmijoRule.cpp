@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:02 $
+// $Revision: 1.3 $
+// $Date: 2001-06-16 01:23:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/ArmijoRule.cpp,v $
 
 
@@ -31,6 +31,7 @@
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
 // Revised: haukaas 06/00 (core code)
 //			haukaas 06/01 (made part of official OpenSees)
+//          haukaas 06/15/01 (notify the user if the step size is reduced)
 //
 
 #include <ArmijoRule.h>
@@ -128,6 +129,10 @@ ArmijoRule::computeStepSize(Vector u,
 	// repeatedly reduce the step size until it does. 
 	int i = 1;
 	while ( (merit_new > merit) && (i<6) ) {
+
+		
+		// Notify user that step sizes are being reduced
+		cerr << "ArmijoRule::computeStepSize() - the step size is being reduced. " << endl;
 
 		// Update merit function value
 		merit = merit_new;
