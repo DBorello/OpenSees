@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-09-16 05:48:56 $
+// $Revision: 1.3 $
+// $Date: 2000-11-02 08:24:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges2d.cpp,v $
                                                                         
                                                                         
@@ -789,9 +789,11 @@ BeamWithHinges2d::Print(ostream &s, int flag)
 		sectionI->Print(s,flag);
 	}
 
-	if (sectionJ)
+	if (sectionJ) {
 		s << "\tHinge J, section tag: " << sectionJ->getTag() << 
 			", length: " << hingeJlen << endl;
+		sectionJ->Print(s,flag);
+	}
 }
 
 //////////////////////////////
@@ -1044,6 +1046,7 @@ BeamWithHinges2d::setStiffMatrix(void)
 				if (codeI(i) == SECTION_RESPONSE_VY) {
 					fs1(i,i) *= shearWeight;
 					e1(i) *= shearWeight;
+					de1(i) *= shearWeight;
 				}
 			}
 		}
@@ -1051,11 +1054,12 @@ BeamWithHinges2d::setStiffMatrix(void)
 		if (hingeJlen > 0.0) {
 			int orderJ = sectionJ->getOrder();
 			const ID &codeJ = sectionJ->getType();
-			shearWeight = shearLength/hingeIlen;
+			shearWeight = shearLength/hingeJlen;
 			for (int i = 0; i < orderJ; i++) {
 				if (codeJ(i) == SECTION_RESPONSE_VY) {
 					fs3(i,i) *= shearWeight;
 					e3(i) *= shearWeight;
+					de3(i) *= shearWeight;
 				}
 			}
 		}
@@ -1090,6 +1094,7 @@ BeamWithHinges2d::setStiffMatrix(void)
 				if (codeI(i) == SECTION_RESPONSE_VY) {
 					fs1(i,i) /= shearWeight;
 					e1(i) /= shearWeight;
+					de1(i) /= shearWeight;
 				}
 			}
 		}
@@ -1097,11 +1102,12 @@ BeamWithHinges2d::setStiffMatrix(void)
 		if (hingeJlen > 0.0) {
 			int orderJ = sectionJ->getOrder();
 			const ID &codeJ = sectionJ->getType();
-			shearWeight = shearLength/hingeIlen;
+			shearWeight = shearLength/hingeJlen;
 			for (int i = 0; i < orderJ; i++) {
 				if (codeJ(i) == SECTION_RESPONSE_VY) {
 					fs3(i,i) /= shearWeight;
 					e3(i) /= shearWeight;
+					de3(i) /= shearWeight;
 				}
 			}
 		}
@@ -1119,7 +1125,7 @@ BeamWithHinges2d::setStiffMatrix(void)
 	
 	    double dW = dv^ dq;
 
-	    if (dW < tolerance)
+	    if (fabs(dW) < tolerance)
 			break;
 	}	
     
