@@ -98,7 +98,6 @@ equalDOF 23 29 1 2 3
 
 # elastic material
 nDMaterial ElasticIsotropic3D 1 $Es 0.3
-
 # the template material of yours
 #sset YS {DruckerPrager }
 #set PS {DruckerPrager 0.05}
@@ -160,19 +159,19 @@ recorder Node node1.out disp -time -node 14 23 30 -dof 2
 #recorder plot node.out HelloJoey 10 10 300 300 -columns 2 1
 
 #recorder plot node.out Middel_of_soil 10 10 300 300 -columns 2 1
-recorder plot node1.out Top_of_soil 10 10 300 300 -columns 3 1
-recorder plot node1.out Superstructure 10 10 300 300 -columns 4 1
+recorder plot node1.out "PEER workshop, solid02.tcl: Top_of_soil" 0 0 500 100 -columns 1 3 
+recorder plot node1.out "PEER workshop, solid02.tcl: Superstructure" 0 130 500 100 -columns 1 4 
 
 # #################################
 # create the transient analysis
 # #################################
 
 integrator Newmark  0.55  0.2756
-numberer Plain
+numberer RCM
 #constraints Plain
 constraints Penalty 1e12 1e12
 #constraints Transformation    
-test NormDispIncr 2.0e-5 20 1
+test NormDispIncr 2.0e-5 20 0
 
 #constraints Lagrange 1.0 1.0
 #test NormDispIncr 1.0e-10 10 1
