@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-05-15 21:42:43 $
+// $Revision: 1.5 $
+// $Date: 2003-05-15 22:27:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/Renderer.cpp,v $
                                                                         
                                                                         
@@ -41,8 +41,8 @@
 
 
 int        Renderer::numRenderers(0);
-char     **Renderer::theTitles(0);
-Renderer **Renderer::theRenderers(0);
+char     **Renderer::theTitles =0;
+Renderer **Renderer::theRenderers =0;
 
 Renderer::Renderer(ColorMap &_theMap)
   :theMap(&_theMap)
