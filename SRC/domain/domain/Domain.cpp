@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.27 $
-// $Date: 2005-01-08 00:33:08 $
+// $Revision: 1.28 $
+// $Date: 2005-02-17 22:26:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -281,9 +281,14 @@ Domain::Domain(TaggedObjectStorage &theStorage)
 
 Domain::~Domain()
 {
+
+  // delete the objects in the domain
+  this->clearAll();
+
     // delete all the storage objects
     // SEGMENT FAULT WILL OCCUR IF THESE OBJECTS WERE NOT CONSTRUCTED
     // USING NEW
+
     if (theElements != 0)
 	delete theElements;    
 
@@ -304,7 +309,7 @@ Domain::~Domain()
     
     if (theNodIter != 0)
 	delete theNodIter;
-    
+
     if (theSP_Iter != 0)
 	delete theSP_Iter;
     
@@ -703,10 +708,10 @@ Domain::clearAll(void) {
     theLoadPatterns->clearAll();
 
     // remove the recorders
-	int i;
+    int i;
     for (i=0; i<numRecorders; i++)
 	delete theRecorders[i];
-    numRecorders = 0;
+    numRecorders = 0; 
     
     if (theRecorders != 0) {
       delete [] theRecorders;
@@ -2442,3 +2447,19 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
   return 0;
 }
 
+
+int
+Domain::calculateNodalReactions(bool inclInertia)
+{
+  Node *theNode;
+  Element *theElement;
+
+  NodeIter &theNodes = this->getNodes();
+  while ((theNode = theNodes()) != 0) {
+    theNode->resetReactionForce(inclInertia);
+  }
+
+  ElementIter &theElements = this->getElements();
+  while ((theElement = theElements()) != 0)
+    theElement->addResistingForceToNodalReaction(inclInertia);
+}

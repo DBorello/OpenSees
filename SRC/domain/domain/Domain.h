@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2004-11-24 22:49:16 $
+// $Revision: 1.13 $
+// $Date: 2005-02-17 22:26:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
 // Written: fmk 
@@ -182,6 +182,8 @@ class Domain
     virtual int sendSelf(int commitTag, Channel &theChannel);  
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker);    
+
+    virtual int calculateNodalReactions(bool inclInertia);
 
   protected:    
     virtual int buildEleGraph(Graph *theEleGraph);
