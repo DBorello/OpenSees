@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2001-10-16 22:43:31 $
+// $Revision: 1.10 $
+// $Date: 2002-05-25 17:15:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -170,7 +170,7 @@ Node::Node(const Node *otherNode)
 	    cerr << " FATAL Node::Node(node *) - ran out of memory for displacement\n";
 	    exit(-1);
 	}
-	for (int i=0; i<3*numberDOF; i++)
+	for (int i=0; i<4*numberDOF; i++)
 	    disp[i] = otherNode->disp[i];
     }    
     
