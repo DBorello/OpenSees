@@ -1,27 +1,13 @@
 #  Written: fmk 
 #  Created: 10/97
+# updated Boris Jeremic@ucdavis.edu Aug2001
 
 include ../../Makefile.def
 
-NDARRAY  = BJtensor.o \
-           BJmatrix.o \
-	   BJvector.o \
-	   nDarray.o  \
-	   basics.o   \
-	   stresst.o  \
-	   straint.o  
-
-
-OBJS       = Vector.o ID.o Matrix.o  $(NDARRAY)
+OBJS       = Vector.o ID.o Matrix.o
 
 ################### TARGETS ########################
-all: $(OBJS) $(NDARRAY)
-	@$(RM) $(RMFLAGS) $(NDARRAY_LIBRARY);
-	$(AR) $(ARFLAGS) $(NDARRAY_LIBRARY) $(NDARRAY)
-
-libndarray.a: $(NDARRAY)
-	$(AR) $(ARFLAGS) $(NDARRAY_LIBRARY) $(NDARRAY)
-
+all: $(OBJS) 
 
 test: $(OBJS) main.o
 	$(LINKER) main.o $(OBJS) $(MACHINE_LINKLIBS) \
@@ -31,21 +17,12 @@ test: $(OBJS) main.o
 
 ndarray: libndarray.a
 
-math_tst: $(NDARRAY) math_tst.o
-	$(LINKER) math_tst.o $(NDARRAY) -o math_tst
-
-elast_tst: $(NDARRAY) elast_tst.o
-	$(LINKER) elast_tst.o $(NDARRAY) -o elast_tst
-
 # Miscellaneous
 tidy:	
 	@$(RM) $(RMFLAGS) Makefile.bak *~ #*# core test
-	@$(RM) $(RMFLAGS) math_tst elast_tst 
 
 clean: tidy
 	@$(RM) $(RMFLAGS) $(OBJS) *.o core test
-	@$(RM) $(RMFLAGS) math_tst  
-	@$(RM) $(RMFLAGS) elast_tst 
 	@$(RM) $(RMFLAGS) test.\$\$\$ 
 	@$(RM) $(RMFLAGS) *.ti 
 	@$(RM) $(RMFLAGS) tca.map 
