@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2000-12-12 06:20:53 $
+// $Revision: 1.2 $
+// $Date: 2000-12-14 08:39:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/NewtonLineSearch.cpp,v $
 
 // Written: fmk 
@@ -217,15 +217,16 @@ NewtonLineSearch::solveCurrentStep(void)
 	    r = fabs( s / s0 ) ;
 	
 	r0 = r ;
-	
+
+	/******************************************
 	if  ( r <= tolerance )
-	    cerr << "Line Search Not Required : Residual Decrease Less Than Tolerance" 
-		 << endl ; 
+	    cerr << "Line Search Not Required : ";
+	    cerr << "Residual Decrease Less Than Tolerance" << endl;
         else
 	    cerr << "Line Search, Iteration " << 0 
-		 << " : Ratio |s/s0| = " << r 
-		 << endl ;
-	
+	         << " : Ratio |s/s0| = " << r 
+	         << endl ;
+	***************************************/
 	
 	double eta = 1.0 ; //initial value of line search parameter
 
