@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:34:41 $
+// $Revision: 1.6 $
+// $Date: 2003-05-15 21:42:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/Renderer.h,v $
                                                                         
                                                                         
@@ -48,6 +48,7 @@ class Renderer
 {
   public:
     Renderer(ColorMap &theMap);    
+    Renderer(const char *title, ColorMap &theMap);    
     virtual ~Renderer();
 
     // method to set the color map
@@ -55,6 +56,8 @@ class Renderer
 
     // method to clear the current image
     virtual int clearImage(void) =0;    
+    virtual int saveImage(const char *imageName);
+    int saveImage(const char *title, const char *imageName);
 
     // methods to be invoked when image processing is to start or is finished
     virtual int startImage(void) =0;    
@@ -110,6 +113,9 @@ class Renderer
     ColorMap *theMap;
     
   private:
+    static int numRenderers;
+    static char **theTitles;
+    static Renderer **theRenderers;
 };
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-25 23:34:40 $
+// $Revision: 1.5 $
+// $Date: 2003-05-15 21:42:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.h,v $
                                                                         
                                                                         
@@ -78,10 +78,15 @@ class OpenGlDevice
   virtual void drawText(float x, float y, float z, char *text, int length, 
 			char horizontalJustify, char verticalJustify); 
 
+  // to save the current image to a file of a specific type
+  int saveImage(const char *fileName, int type);  
 
  private:
   void initWindow(void); // procedure called on construction of 1st Window
-  int saveBmpImage(void);  // to save the current image into a .BMP file
+  
+  // save image methods for specific file formats
+  int saveImageAsBMP(const char *fileName);  
+  int saveImageAsPNG(const char *fileName);  
 
 #ifdef _GLX
 
@@ -124,9 +129,7 @@ class OpenGlDevice
   static int numWindows;
   int winOpen;
   int width, height;		// Width and height of our window
-  int count;
   char *windowTitle;
-  char *bitmapFile;
 };
 
 #endif

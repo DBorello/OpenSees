@@ -16,6 +16,7 @@ endif
 # Compilation control
 all:         $(OBJS)
 
+
 test:  main.o $(OBJS)
 	$(LINKER) $(LINKFLAGS) main.o $(OBJS) $(FE_LIBRARY) \
 	$(MACHINE_LINKLIBS) $(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY) \
@@ -25,6 +26,11 @@ triangle:  mainTriangle.o $(OBJS)
 	$(LINKER) $(LINKFLAGS) mainTriangle.o $(OBJS) $(FE_LIBRARY) \
 	$(MACHINE_LINKLIBS) $(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY) \
 	$(MACHINE_SPECIFIC_LIBS) -o go
+
+index:  index.o 
+	$(LINKER) $(LINKFLAGS) index.o $(OBJS) $(FE_LIBRARY) \
+	$(MACHINE_LINKLIBS) $(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY) \
+	$(MACHINE_SPECIFIC_LIBS) $(FE_INCLUDES) -lglut -lpng -o go
 
 
 # Miscellaneous

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-02-26 21:36:16 $
+// $Revision: 1.12 $
+// $Date: 2003-05-15 21:42:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.cpp,v $
                                                                         
                                                                         
@@ -28,6 +28,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+
+#ifdef _GLX
+#define _PNG
+#include <png.h>
+#endif
+
+
 
 int OpenGlDevice::numWindows(0);
 // GLuint OpenGlDevice::FontBase(0);
@@ -318,10 +325,8 @@ static const char *FontName = "fixed";
 
 
 
-
-
 OpenGlDevice::OpenGlDevice()
-  :FontBase(0), winOpen(1), width(0), height(0), count(-1), windowTitle(0), bitmapFile(0)
+  :FontBase(0), winOpen(1), width(0), height(0), windowTitle(0)
 {
 
 #ifdef _WGL
@@ -730,7 +735,6 @@ OpenGlDevice::CLEAR()
 
 #elif _GLX
     glXMakeCurrent(theDisplay, theWindow, cx);
-
 #else
 
 #endif
@@ -789,7 +793,6 @@ OpenGlDevice::initWindow(void) {
 
 #else
 
-
 #endif
 }    
 	
@@ -845,29 +848,47 @@ OpenGlDevice::drawText(float x, float y, float z, char *text, int length,
 #endif
 }
 
+
 int 
-OpenGlDevice::saveBmpImage(void)
+OpenGlDevice::saveImage(const char *fileName, int type)
 {
-    /*
-    // get dimensions of the window
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    */  
+  // make the context current
+#ifdef _WGL
+  return this->saveImageAsBMP(fileName);
+#elif _GLX
+  return this->saveImageAsPNG(fileName);
+#else
+
+#endif
+
+  return 0;
+}
+
+int 
+OpenGlDevice::saveImageAsBMP(const char *fileName)
+{
+  // make the context current
+#ifdef _WGL
+    wglMakeCurrent(theHDC, theHRC);
+#elif _GLX
+    glXMakeCurrent(theDisplay, theWindow, cx);
+#else
+
+#endif
 
     // create the file name 'bmpFileName$count.BMP'
-    char *fileName = new char[strlen(bitmapFile)+15];
-    char intName[10];
-	
-    strcpy(fileName, bitmapFile);
-    sprintf(intName,"%d",count);
-
-    strcat(fileName,&intName[1]);        
-    strcat(fileName,".BMP");
+    char *newFileName = new char[strlen(fileName)+4];
+    if (newFileName == 0) {
+      opserr << "OpenGlDevice::saveImageAsBMP() failed to open file: " << fileName << endln;
+      return -1;
+    }	
+    strcpy(newFileName, fileName);
+    strcat(newFileName,".BMP");
 
     // open the file
     FILE *fp;
-    if ((fp = fopen(fileName,"wb")) == NULL) {
-      opserr << "OpenGLDevice::saveBmpImage() - could not open file named" <<  fileName << endln;
-	count = -1;
+    if ((fp = fopen(newFileName,"wb")) == NULL) {
+      opserr << "OpenGLDevice::saveBmpImage() - could not open file named" <<  newFileName << endln;
 	return -1;
     }	
 
@@ -989,7 +1010,191 @@ OpenGlDevice::saveBmpImage(void)
     }        
     // if get here we are done .. close file and return ok
 #endif
-
+    
+    delete [] newFileName;
     fclose(fp);
     return 0;
 }
+
+
+
+int 
+OpenGlDevice::saveImageAsPNG(const char *fileName)
+{
+
+  // make the context current
+#ifdef _WGL
+    wglMakeCurrent(theHDC, theHRC);
+#elif _GLX
+    glXMakeCurrent(theDisplay, theWindow, cx);
+#else
+
+#endif
+
+  //
+  // first we read the image from the buffer
+  //
+
+  // create some memory to store the image
+  char *image;
+  image = new char[3*width*height];
+  if (image == 0) {
+    opserr << "OpenGlDevice::failed to allocate memory for image\n";
+    return(-1);
+  }
+  
+  // read into the buffer
+  glReadBuffer(GL_BACK_LEFT);
+  glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, image);
+
+
+  //
+  // now we write the file to a png
+  //   .. code for this from Greg Roelofs book: PNG: The Definitive Guide published by O'Reilly.
+  // 
+
+  // open the file
+  FILE *fp;
+  char *newFileName = new char (strlen(fileName+4));
+  if (newFileName == 0) {
+    opserr << "OpenGlDevice::saveImageAsPNG() failed to open file: " << fileName << endln;
+    delete [] image;
+    return -1;
+  }
+    
+  strcpy(newFileName, fileName);
+  strcat(newFileName, ".png");
+
+  if((fp = fopen(newFileName, "wb"))==NULL) {
+    opserr << "OpenGlDevice::saveImageAsPNG() failed to open file: " << fileName << endln;
+    delete [] image;
+    return -1;
+  }
+
+#ifdef _PNG  
+  // Allocate write & info structures
+  png_structp png_ptr = png_create_write_struct
+    (PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  if(!png_ptr) {
+    delete [] image;
+    fclose(fp);
+    opserr << "OpenGlDevice::saveImageAsPNG() - out of memery creating write structure\n";
+    return -1;
+  }
+  
+  png_infop info_ptr = png_create_info_struct(png_ptr);
+  if(!info_ptr) {
+    png_destroy_write_struct(&png_ptr,
+			     (png_infopp)NULL);
+    delete [] image;
+    fclose(fp);
+    opserr << "OpenGlDevice::saveImageAsPNG() - out of memery creating info structure\n";
+
+    return -1;
+  }
+
+  // setjmp() must be called in every function that calls a PNG-writing
+  // libpng function, unless an alternate error handler was installed--
+  // but compatible error handlers must either use longjmp() themselves
+  // (as in this program) or exit immediately, so here we go: */
+
+  if(setjmp(png_jmpbuf(png_ptr))) {
+    png_destroy_write_struct(&png_ptr, &info_ptr);
+    fclose(fp);
+    opserr << "OpenGlDevice::saveImageAsPNG() - setjmp problem\n";
+    return 2;
+  }
+
+  // make sure outfile is (re)opened in BINARY mode 
+  png_init_io(png_ptr, fp);
+
+  // set the compression levels--in general, always want to leave filtering
+  // turned on (except for palette images) and allow all of the filters,
+  // which is the default; want 32K zlib window, unless entire image buffer
+  // is 16K or smaller (unknown here)--also the default; usually want max
+  // compression (NOT the default); and remaining compression flags should
+  // be left alone
+
+  png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
+  //
+  // this is default for no filtering; Z_FILTERED is default otherwise:
+  // png_set_compression_strategy(png_ptr, Z_DEFAULT_STRATEGY);
+  //  these are all defaults:
+  //   png_set_compression_mem_level(png_ptr, 8);
+  //   png_set_compression_window_bits(png_ptr, 15);
+  //   png_set_compression_method(png_ptr, 8);
+
+
+  // Set some options: color_type, interlace_type
+  int color_type, interlace_type, numChannels;
+
+  //  color_type = PNG_COLOR_TYPE_GRAY;
+  //  color_type = PNG_COLOR_TYPE_GRAY_ALPHA;
+  color_type = PNG_COLOR_TYPE_RGB; numChannels = 3;
+  // color_type = PNG_COLOR_TYPE_RGB_ALPHA;
+
+  interlace_type =  PNG_INTERLACE_NONE;
+  // interlace_type = PNG_INTERLACE_ADAM7;
+  
+
+  int bit_depth = 8;
+  png_set_IHDR(png_ptr, info_ptr, width, height, bit_depth, 
+	       color_type,
+	       interlace_type,
+	       PNG_COMPRESSION_TYPE_BASE, 
+	       PNG_FILTER_TYPE_BASE);
+  
+  // Optional gamma chunk is strongly suggested if you have any guess
+  // as to the correct gamma of the image. (we don't have a guess)
+  //
+  // png_set_gAMA(png_ptr, info_ptr, image_gamma);
+  
+  // write all chunks up to (but not including) first IDAT 
+  png_write_info(png_ptr, info_ptr);
+  
+
+  // set up the row pointers for the image so we can use png_write_image
+
+  png_bytep* row_pointers = new png_bytep[height];
+  if (row_pointers == 0) {
+    png_destroy_write_struct(&png_ptr, &info_ptr);
+    delete [] image;
+    fclose(fp);
+    opserr << "OpenGlDevice::failed to allocate memory for row pointers\n";
+    return(-1);
+  }
+
+  unsigned int row_stride = width*numChannels;
+  unsigned char *rowptr = (unsigned char*) image;
+  for (int row = height-1; row >=0 ; row--) {
+    row_pointers[row] = rowptr;
+    rowptr += row_stride;
+  }
+
+  // now we just write the whole image; libpng takes care of interlacing for us
+  png_write_image(png_ptr, row_pointers);
+  
+  // since that's it, we also close out the end of the PNG file now--if we
+  // had any text or time info to write after the IDATs, second argument
+  // would be info_ptr, but we optimize slightly by sending NULL pointer: */
+
+  png_write_end(png_ptr, info_ptr);
+  
+  //
+  // clean up after the write
+  //    free any memory allocated & close the file
+  //
+  png_destroy_write_struct(&png_ptr, &info_ptr);
+
+#endif
+
+  delete [] image;
+  delete [] row_pointers;
+  delete [] newFileName;
+  fclose(fp);
+  
+  return 0;
+}
+
+
+

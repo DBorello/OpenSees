@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-25 23:34:39 $
+// $Revision: 1.8 $
+// $Date: 2003-05-15 21:42:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGLRenderer.h,v $
                                                                         
                                                                         
-// File: ~/renderer/OpenGLRenderer.h
-//
 // Written: fmk 
 // Created: 10/98
 // Revision: A
@@ -70,6 +68,7 @@ class OpenGLRenderer : public Renderer
     virtual ~OpenGLRenderer();
 
     virtual int clearImage(void);    
+    virtual int saveImage(const char *imageName);    
     virtual int startImage(void);
     virtual int doneImage(void);
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:58 $
+// $Revision: 1.4 $
+// $Date: 2003-05-15 21:42:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/Renderer.cpp,v $
                                                                         
                                                                         
@@ -40,57 +40,87 @@
 #include <Domain.h>
 
 
+int        Renderer::numRenderers(0);
+char     **Renderer::theTitles(0);
+Renderer **Renderer::theRenderers(0);
+
 Renderer::Renderer(ColorMap &_theMap)
   :theMap(&_theMap)
 {
 
 }
 
+
+Renderer::Renderer(const char *title, ColorMap &_theMap)
+  :theMap(&_theMap)
+{
+  int loc = -1;
+
+  // look for an empty slot
+  for (int i=0; i<numRenderers; i++)
+    if (theRenderers[i] == 0) {
+      loc = i;
+      i = numRenderers;
+    }
+
+  // if no space or not already there add
+  if (loc == -1) {
+    Renderer **theNewRenderers = new Renderer *[numRenderers+1];
+    char **theNewTitles = new char *[numRenderers+1];
+
+    for (int i=0; i<numRenderers; i++) {
+      theNewRenderers[i] = theRenderers[i];
+      theNewTitles[i] = theTitles[i];
+    }
+
+    loc = numRenderers;
+    numRenderers++;
+    
+    if (theRenderers != 0) 
+      delete [] theRenderers;
+    if (theTitles != 0)
+      delete [] theTitles;
+
+    theRenderers = theNewRenderers;
+    theTitles = theNewTitles;
+  }
+
+  // set this in current slot
+  theRenderers[loc] = this;
+  char *titleCopy = new char [strlen(title+1)];
+  strcpy(titleCopy, title);
+  theTitles[loc] = titleCopy;
+}
+
 Renderer::~Renderer()
 {
-
+  for (int i=0; i<numRenderers; i++)
+    if (theRenderers[i] == this) {
+      theRenderers[i] = 0;
+      delete [] (theTitles[i]);
+      theTitles[i] = 0;
+    }
 }
 
-/*
-int 
-Renderer::displayModel(int eleFlag, int nodeFlag, 
-		       float fact)
+int
+Renderer::saveImage(const char *fileName)
 {
-  // loop over the elements getting each to display itself
-  // using this and displayTag as arguments.
-  // first clear the image
-  this->startImage();
-  int res = 0;
-
-  if (eleFlag >= 0) {
-      ElementIter &theElements = theDomain->getElements();
-      Element *theEle;
-      while ((theEle = theElements()) != 0) {
-	  res = theEle->displaySelf(*this, eleFlag, fact);
-	  if (res < 0) {
-	      opserr << "Renderer::displayModel() - Element: ";
-	      opserr << theEle->getTag() << " failed to display itself\n";
-	  }
-      }
-  }
-  
-  if (nodeFlag >= 0) {
-      NodeIter &theNodes = theDomain->getNodes();
-      Node *theNode;
-      while ((theNode = theNodes()) != 0) {
-	  res = theNode->displaySelf(*this, nodeFlag, fact);
-	  if (res < 0) {
-	      opserr << "Renderer::displayModel() - Node: ";
-	      opserr << theNode->getTag() << " failed to display itself\n";
-	  }
-      }
-  }  
-
-  // now mark the image has having been completed
-  this->doneImage();
-  return res;
+  opserr << "Renderer::saveImage - no default implementation provided\n";
+  return 0;
 }
-*/
+
+
+int
+Renderer::saveImage(const char *rendererTitle, const char *fileName)
+{
+  for (int i=0; i<numRenderers; i++)
+    if (theRenderers[i] != 0) 
+      if (strcmp(rendererTitle, theTitles[i]) == 0)
+	return theRenderers[i]->saveImage(fileName);
+
+  opserr << "Renderer::saveImage - no renderer with title: " << rendererTitle << " found\n";
+  return 0;
+}
 
 int
 Renderer::drawVector(const Vector &position, const Vector &value, double factor)

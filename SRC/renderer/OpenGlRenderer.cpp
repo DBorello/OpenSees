@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2003-04-02 22:02:50 $
+// $Revision: 1.14 $
+// $Date: 2003-05-15 21:42:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlRenderer.cpp,v $
                                                                         
                                                                         
@@ -66,7 +66,7 @@ using std::ios;
 OpenGLRenderer::OpenGLRenderer(const char *_title, int _xLoc, int _yLoc, 
 			       int _width, int _height, 
 			       ColorMap &_theMap)
-  :Renderer(_theMap),  
+  :Renderer(_title, _theMap),  
   windowTitle(0), height(_height), width(_width), xLoc(_xLoc), yLoc(_yLoc),
   count(-1), theOutputFileName(0), 
   theDevice(0),
@@ -105,7 +105,7 @@ OpenGLRenderer::OpenGLRenderer(const char *_title, int _xLoc, int _yLoc,
 			       ColorMap &_theMap, 
 			       const char *outputFileName, 
 			       const char *bitmapFileName)
-  :Renderer(_theMap),  
+  :Renderer(_title, _theMap),  
   windowTitle(0), height(_height), width(_width), xLoc(_xLoc), yLoc(_yLoc),
   count(-1), theOutputFileName(0), 
   theDevice(0),
@@ -138,8 +138,7 @@ OpenGLRenderer::OpenGLRenderer(const char *_title, int _xLoc, int _yLoc,
 
     strcpy(windowTitle, _title);
     strcpy(theOutputFileName, outputFileName);
-
-    theFile.open(outputFileName, ios::out);
+    theFile.open(theOutputFileName, ios::out);
     if (theFile.bad()) {
       opserr << "WARNING - OpenGLRenderer::OpenGLRenderer() - could not open file: " << outputFileName << endln;
       theOutputFileName = 0;
@@ -164,8 +163,13 @@ OpenGLRenderer::~OpenGLRenderer()
   if (theDevice != 0)
     delete theDevice;
 
-  if (theOutputFileName != 0)
+  if (windowTitle != 0)
+    delete [] windowTitle;
+
+  if (theOutputFileName != 0) {
     theFile.close();
+    delete [] theOutputFileName;
+  }
 }
 
 
@@ -181,6 +185,13 @@ OpenGLRenderer::clearImage(void)
   theDevice->ENDIMAGE();
   return 0;
 }
+
+int 
+OpenGLRenderer::saveImage(const char *imageName)
+{
+  return theDevice->saveImage(imageName, 0);
+}
+
 
 int 
 OpenGLRenderer::startImage(void)
