@@ -1,0 +1,103 @@
+model basic -ndm 3 -ndf 6
+
+set startEle 2
+set numEle 5
+
+set L 100.0
+
+node 0 0.0 0.0 0.0
+for {set i $startEle} {$i <= $numEle} {incr i} {
+	node                $i $L 0.0 0.0
+	node [expr $i+$numEle] $L 0.0 0.0
+}
+
+fix 0 1 1 1 1 1 1
+
+set E 30000.0
+set A 20.0
+set I 1400.0
+set G 18000.0
+set J 1.0e5
+
+section Elastic 1 $E $A $I $I $G $J
+
+uniaxialMaterial Elastic 1 [expr $E*$A]
+uniaxialMaterial Elastic 2 [expr $E*$I]
+uniaxialMaterial Elastic 3 [expr $E*$I]
+uniaxialMaterial Elastic 4 [expr $G*$J]
+section Aggregator 2 2 Mz 1 P 3 My 4 T
+
+# Just some garbage for the hingedBeam element
+section Generic1d 3 4 T
+
+geomTransf Linear 1 0 0 1
+geomTransf PDelta 2 0 0 1
+
+set sec 1
+set lp 0.1
+
+if {$startEle == 1} {
+	#                     tag ndI ndJ secI lpI  secJ lpJ  secL   E  A Iz Iy  G  J  transf
+	element hingedBeam     1   0   1  $sec $lp  $sec $lp    3   $E $A $I $I $G $J  1
+	element hingedBeam     6   0   6  $sec $lp  $sec $lp    3   $E $A $I $I $G $J  2
+}
+
+#                     tag ndI ndJ secI lpI  secJ lpJ   E  A Iz Iy  G  J transf
+element beamWithHinges 2   0   2  $sec $lp  $sec $lp  $E $A $I $I $G $J   1
+element beamWithHinges 7   0   7  $sec $lp  $sec $lp  $E $A $I $I $G $J   2
+
+#                        tag ndI ndJ  A  E  G  J Iz Iy transf
+element elasticBeamColumn 3   0   3  $A $E $G $J $I $I   1
+element elasticBeamColumn 8   0   8  $A $E $G $J $I $I   2
+
+set sec 2
+
+#                          tag ndI ndJ np  sec transf
+element nonlinearBeamColumn 4   0   4   3 $sec    1
+element nonlinearBeamColumn 9   0   9   3 $sec    2
+
+#                      tag ndI ndJ np  sec transf
+element dispBeamColumn  5   0   5   2 $sec    1
+element dispBeamColumn 10   0  10   2 $sec    2
+
+set M 10.0		;# End moment
+set H 1.0		;# Transverse load
+set P -100.0	;# Axial load
+
+pattern Plain 1 Linear {
+	for {set i $startEle} {$i <= $numEle} {incr i} {
+		load                $i $P $H $H $M $M $M
+		load [expr $i+$numEle] $P $H $H $M $M $M
+	}
+}
+
+test NormUnbalance 1.0e-12 10 1
+algorithm BFGS
+integrator LoadControl 1 1 1 1
+constraints Plain
+system ProfileSPD
+numberer Plain
+analysis Static
+
+analyze 1
+
+##### Output results #####
+
+set transf {Linear PDelta}
+set beams {hingedBeam beamWithHinges elasticBeamColumn nonlinearBeamColumn dispBeamColumn}
+
+for {set i [expr $startEle-1]} {$i < $numEle} {incr i} {
+	puts stderr "\nElement: [lindex $beams $i]"
+	puts stderr "Transformation: [lindex $transf 0]"
+	print node [expr $i+1]
+	puts stderr "Transformation: [lindex $transf 1]"
+	print node [expr $i+1+$numEle]
+}
+
+puts stderr "Exact elastic solution (linear geometry)"
+puts stderr "\tAxial displacement: [expr $P*$L/($E*$A)]"
+puts stderr "\tEnd displacement (Y): [expr $H*pow($L,3)/(3*$E*$I) + $M*pow($L,2)/(2*$E*$I)]"
+puts stderr "\tEnd displacement (Z): [expr $H*pow($L,3)/(3*$E*$I) - $M*pow($L,2)/(2*$E*$I)]"
+puts stderr "\tEnd twist: [expr $M*$L/($G*$J)]"
+puts stderr "\tEnd rotation (Y): [expr -$H*pow($L,2)/(2*$E*$I) + $M*$L/($E*$I)]"
+puts stderr "\tEnd rotation (Z): [expr  $H*pow($L,2)/(2*$E*$I) + $M*$L/($E*$I)]"
