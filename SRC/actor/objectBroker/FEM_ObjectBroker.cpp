@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2003-10-07 22:39:19 $
+// $Revision: 1.26 $
+// $Date: 2004-11-25 00:00:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -178,6 +178,16 @@
 // node header files
 #include <Node.h>
 
+
+#include <DataOutputStreamHandler.h>
+#include <DataOutputFileHandler.h>
+#include <DataOutputDatabaseHandler.h>
+
+#include <NodeRecorder.h>
+#include <ElementRecorder.h>
+#include <EnvelopeNodeRecorder.h>
+#include <EnvelopeElementRecorder.h>
+
 // mp_constraint header files
 #include <MP_Constraint.h>
 #include <MP_Joint2D.h>
@@ -209,6 +219,7 @@
 #include <PlainHandler.h>
 #include <PenaltyConstraintHandler.h>
 #include <LagrangeConstraintHandler.h>
+#include <TransformationConstraintHandler.h>
 
 // dof numberer header files
 #include <DOF_Numberer.h>   
@@ -231,6 +242,8 @@
 #include <ArcLength.h>
 #include <TransientIntegrator.h>
 #include <Newmark.h>
+#include <DisplacementControl.h>
+#include <DistributedDisplacementControl.h>
 
 // system of eqn header files
 #include <LinearSOE.h>
@@ -1041,6 +1054,59 @@ FEM_ObjectBroker::getPtrNewID(int classTag, int size)
 	 }        
 }
 
+/*****************************************
+ *
+ * METHODS TO GET NEW OUTPUT CLASS OBJECTS
+ *
+ *****************************************/
+
+DataOutputHandler *
+FEM_ObjectBroker::getPtrNewDataOutputHandler(int classTag)
+{
+    switch(classTag) {
+	case DATAHANDLER_TAGS_DataOutputStreamHandler:  
+	     return new DataOutputStreamHandler();
+
+	case DATAHANDLER_TAGS_DataOutputFileHandler:  
+	     return new DataOutputFileHandler();
+
+	case DATAHANDLER_TAGS_DataOutputDatabaseHandler:  
+	     return new DataOutputDatabaseHandler();
+	     
+	default:
+	     opserr << "FEM_ObjectBroker::getPtrNewDataOutputHandler - ";
+	     opserr << " - no DataOutputHandler type exists for class tag ";
+	     opserr << classTag << endln;
+	     return 0;
+	     
+	 }        
+}
+
+Recorder *
+FEM_ObjectBroker::getPtrNewRecorder(int classTag)
+{
+    switch(classTag) {
+	case RECORDER_TAGS_ElementRecorder:  
+	     return new ElementRecorder();
+
+	case RECORDER_TAGS_NodeRecorder:  
+	     return new NodeRecorder();
+
+	case RECORDER_TAGS_EnvelopeNodeRecorder:  
+	     return new EnvelopeNodeRecorder();
+
+	case RECORDER_TAGS_EnvelopeElementRecorder:  
+	     return new EnvelopeElementRecorder();
+	     
+	default:
+	     opserr << "FEM_ObjectBroker::getNewConstraintHandler - ";
+	     opserr << " - no ConstraintHandler type exists for class tag ";
+	     opserr << classTag << endln;
+	     return 0;
+	     
+	 }        
+}
+
 
 
 /*****************************************
@@ -1061,6 +1127,9 @@ FEM_ObjectBroker::getNewConstraintHandler(int classTag)
 
 	case HANDLER_TAG_LagrangeConstraintHandler:  
 	     return new LagrangeConstraintHandler(1.0, 1.0);
+
+	case HANDLER_TAG_TransformationConstraintHandler:  
+	     return new TransformationConstraintHandler();
 	     
 	default:
 	     opserr << "FEM_ObjectBroker::getNewConstraintHandler - ";
@@ -1166,6 +1235,9 @@ FEM_ObjectBroker::getNewStaticIntegrator(int classTag)
     switch(classTag) {
 	case INTEGRATOR_TAGS_LoadControl:  
 	     return new LoadControl(1.0,1,1.0,.10); // must recvSelf
+
+	case INTEGRATOR_TAGS_DistributedDisplacementControl:  
+	     return new DistributedDisplacementControl(); // must recvSelf
 	     
 	     
 	case INTEGRATOR_TAGS_ArcLength:  
@@ -1215,6 +1287,9 @@ FEM_ObjectBroker::getNewIncrementalIntegrator(int classTag)
 	case INTEGRATOR_TAGS_Newmark:  
 	     return new Newmark();
 	     
+	case INTEGRATOR_TAGS_DistributedDisplacementControl:  
+	     return new DistributedDisplacementControl(); // must recvSelf
+
 	     
 	default:
 	     opserr << "FEM_ObjectBroker::getNewIncrementalIntegrator - ";
@@ -1354,7 +1429,7 @@ FEM_ObjectBroker::getNewLinearSOE(int classTagSOE,
 	      return theSOE;
 	  } else {
 	      opserr << "FEM_ObjectBroker::getNewLinearSOE - ";
-	      opserr << " - no BandGenLinSolver type exists for class tag ";
+	      opserr << " - no DistributedBandGenLinSolver type exists for class tag ";
 	      opserr << classTagSolver << endln;
 	      return 0;
 	  }		     
@@ -1368,7 +1443,7 @@ FEM_ObjectBroker::getNewLinearSOE(int classTagSOE,
 	      return theSOE;
 	  } else {
 	      opserr << "FEM_ObjectBroker::getNewLinearSOE - ";
-	      opserr << " - no BandSPDLinSolver type exists for class tag ";
+	      opserr << " - no DistributedBandSPDLinSolver type exists for class tag ";
 	      opserr << classTagSolver << endln;
 	      return 0;
 	  }		     

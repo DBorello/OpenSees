@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-08-29 07:37:42 $
+// $Revision: 1.4 $
+// $Date: 2004-11-25 00:00:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.h,v $
                                                                         
                                                                         
@@ -80,6 +80,9 @@ class ConvergenceTest;
 class SectionForceDeformation;
 class GroundMotion;
 
+class DataOutputHandler;
+class Recorder;
+
 class Actor;
 
 class FEM_ObjectBroker
@@ -88,10 +91,8 @@ class FEM_ObjectBroker
     FEM_ObjectBroker();
     virtual ~FEM_ObjectBroker();
 
-    
-
     virtual Actor*getNewActor(int classTag, Channel *theChannel);
-
+    
     virtual PartitionedModelBuilder *
       getPtrNewPartitionedModelBuilder(Subdomain &theSub,
 				       int classTag);
@@ -105,7 +106,7 @@ class FEM_ObjectBroker
     virtual SP_Constraint *getNewSP(int classTag);
     virtual NodalLoad     *getNewNodalLoad(int classTag);
     virtual ElementalLoad *getNewElementalLoad(int classTag);
-
+    
     virtual CrdTransf2d *getNewCrdTransf2d(int classTag);
     virtual CrdTransf3d *getNewCrdTransf3d(int classTag);
 
@@ -126,6 +127,11 @@ class FEM_ObjectBroker
     virtual Matrix	  *getPtrNewMatrix(int classTag, int noRows, int noCols);
     virtual Vector	  *getPtrNewVector(int classTag, int size);
     virtual ID	          *getPtrNewID(int classTag, int size);
+
+    // methods for ouput objects
+    virtual DataOutputHandler *getPtrNewDataOutputHandler(int classTag);
+    virtual Recorder *getPtrNewRecorder(int classTag);
+    
     
     // methods to get new analysis objects
     virtual ConstraintHandler   *getNewConstraintHandler(int classTag);
@@ -147,7 +153,7 @@ class FEM_ObjectBroker
     virtual DomainDecompositionAnalysis *
       getNewDomainDecompAnalysis(int classTag, Subdomain &theDomain);
 
-    virtual Subdomain 	  *getSubdomainPtr(int classTag);
+    virtual Subdomain  *getSubdomainPtr(int classTag);
     
   protected:
     
