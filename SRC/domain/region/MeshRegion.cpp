@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-12-10 03:20:02 $
+// $Revision: 1.3 $
+// $Date: 2002-12-16 21:12:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/region/MeshRegion.cpp,v $
                                                                         
                                                                         
@@ -50,7 +50,7 @@
 
 MeshRegion::MeshRegion(int tag) 
   :DomainComponent(tag, REGION_TAG_MeshRegion), 
-  alphaM(0), betaK(0), betaK0(0), 
+  alphaM(0), betaK(0), betaK0(0), betaKc(0),
   theNodes(0), theElements(0),
   currentGeoTag(0), lastGeoSendTag(-1), dbNod(0), dbEle(0)
 {
@@ -58,7 +58,7 @@ MeshRegion::MeshRegion(int tag)
 }
 
 MeshRegion::MeshRegion(int tag, int cTag) 
-  :DomainComponent(tag, cTag), alphaM(0), betaK(0), betaK0(0), 
+  :DomainComponent(tag, cTag), alphaM(0), betaK(0), betaK0(0), betaKc(0),
   theNodes(0), theElements(0),
   currentGeoTag(0), lastGeoSendTag(-1), dbNod(0), dbEle(0)
 {
@@ -142,7 +142,7 @@ MeshRegion::setNodes(const ID &theNods)
     if (in == true) 
       (*theElements)[loc++] = eleTag;
   }
-  
+
   return 0;
 }
 
@@ -224,11 +224,12 @@ MeshRegion::getElements(void)
 
 
 int
-MeshRegion::setRayleighDampingFactors(double alpham, double betak, double betak0)
+MeshRegion::setRayleighDampingFactors(double alpham, double betak, double betak0, double betakc)
 {
   alphaM = alpham;
   betaK  = betak;
   betaK0 = betak0;
+  betaKc = betakc;
 
   // now set the damping factors at the nodes & elements
   Domain *theDomain = this->getDomain();
@@ -241,7 +242,7 @@ MeshRegion::setRayleighDampingFactors(double alpham, double betak, double betak0
       int eleTag = (*theElements)(i);
       Element *theEle = theDomain->getElement(eleTag);
       if (theEle != 0)
-	theEle->setRayleighDampingFactors(alphaM, betaK, betaK0);
+	theEle->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
     }
   }
 
@@ -287,7 +288,8 @@ MeshRegion::sendSelf(int commitTag, Channel &theChannel)
     g3ErrorHandler->warning("MeshRegion::sendSelf - channel failed to send the initial ID");
     return -1;
   }    
-  
+
+
   // now check if data defining the objects in the LoadPAttern needs to be sent 
   // NOTE THIS APPROACH MAY NEED TO CHANGE FOR VERY LARGE PROBLEMS IF CHANNEL CANNOT
   // HANDLE VERY LARGE ID OBJECTS.
@@ -303,9 +305,22 @@ MeshRegion::sendSelf(int commitTag, Channel &theChannel)
 	return -1;
       }
 
+    Vector dData(4);
+    dData(0) = alphaM;
+    dData(1) = betaK;
+    dData(2) = betaK0;
+    dData(3) = betaKc;
+
+    if (theChannel.sendVector(dbEle, currentGeoTag, dData) < 0) {
+      g3ErrorHandler->warning("MeshRegion::sendSelf - channel failed to send the elements");
+      return -1;
+    }  
+
     // set the lst send db tag so we don't have to send them again unless they change
     lastGeoSendTag = currentGeoTag;
   }    
+
+
   
   return 0;
 }
@@ -358,8 +373,21 @@ MeshRegion::recvSelf(int commitTag, Channel &theChannel,
 	g3ErrorHandler->warning("MeshRegion::sendSelf - channel failed to recv the elements");
 	return -1;
       }
+
+    Vector dData(4);
+
+    if (theChannel.sendVector(dbEle, currentGeoTag, dData) < 0) {
+      g3ErrorHandler->warning("MeshRegion::sendSelf - channel failed to send the elements");
+      return -1;
+    }  
+    alphaM = dData(0);
+    betaK  = dData(1);
+    betaK0 = dData(2);
+    betaKc = dData(3);
   }
-  
+
+
+  this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
   return 0;
 }
 

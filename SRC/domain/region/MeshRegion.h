@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-12-09 21:49:57 $
+// $Revision: 1.2 $
+// $Date: 2002-12-16 21:12:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/region/MeshRegion.h,v $
                                                                         
                                                                         
@@ -60,7 +60,8 @@ class MeshRegion : public DomainComponent
     // methods dealing with setting parameters in the region
     virtual int setRayleighDampingFactors(double alphaM, 
 					  double betaK, 
-					  double betaK0);
+					  double betaK0,
+					  double betaKc);
 
     // methods to send & recv data for database/parallel applications
     virtual int sendSelf(int commitTag, Channel &theChannel);
@@ -71,7 +72,7 @@ class MeshRegion : public DomainComponent
   protected:
     
   private:
-    double alphaM, betaK, betaK0;
+    double alphaM, betaK, betaK0, betaKc;
 
     ID *theNodes;
     ID *theElements;

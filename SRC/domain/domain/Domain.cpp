@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2002-12-10 03:20:02 $
+// $Revision: 1.20 $
+// $Date: 2002-12-16 21:12:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -1287,13 +1287,13 @@ Domain::initialize(void)
 
 
 int
-Domain::setRayleighDampingFactors(double alphaM, double betaK, double betaK0)
+Domain::setRayleighDampingFactors(double alphaM, double betaK, double betaK0, double betaKc)
 {
   int result = 0;
   Element *elePtr;
   ElementIter &theElemIter = this->getElements();    
   while ((elePtr = theElemIter()) != 0) 
-    result += elePtr->setRayleighDampingFactors(alphaM, betaK, betaK0);
+    result += elePtr->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
 
   Node *nodePtr;
   NodeIter &theNodeIter = this->getNodes();

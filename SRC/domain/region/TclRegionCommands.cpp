@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-12-13 21:26:05 $
+// $Revision: 1.3 $
+// $Date: 2002-12-16 21:12:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/region/TclRegionCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -53,6 +53,7 @@ TclAddMeshRegion(ClientData clientData, Tcl_Interp *interp, int argc,
   double alphaM = 0.0;
   double betaK  = 0.0;
   double betaK0 = 0.0;
+  double betaKc = 0.0;
 
   ID *theNodes = 0;
   ID *theElements = 0;
@@ -188,7 +189,7 @@ TclAddMeshRegion(ClientData clientData, Tcl_Interp *interp, int argc,
     } else if (strcmp(argv[loc],"-rayleigh") == 0) {
 
       // ensure no segmentation fault if user messes up
-      if (argc < loc+4) {
+      if (argc < loc+5) {
 	cerr << "WARNING region tag? .. -rayleigh aM? bK? bK0?  .. - not enough factors\n";
 	return TCL_ERROR;
       }
@@ -206,7 +207,11 @@ TclAddMeshRegion(ClientData clientData, Tcl_Interp *interp, int argc,
 	cerr << "WARNING region tag? .. -rayleigh aM bK bK0 - invalid bK0 " << argv[loc+3] << endl;
 	return TCL_ERROR;
       }      
-      loc += 4;
+      if (Tcl_GetDouble(interp, argv[loc+4], &betaKc) != TCL_OK) {
+	cerr << "WARNING region tag? .. -rayleigh aM bK bK0 - invalid bKc " << argv[loc+4] << endl;
+	return TCL_ERROR;
+      }      
+      loc += 5;
 
     } else
       loc++;
@@ -236,8 +241,8 @@ TclAddMeshRegion(ClientData clientData, Tcl_Interp *interp, int argc,
   }
 
   // if damping has been specified set the damping factors
-  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
-    theRegion->setRayleighDampingFactors(alphaM, betaK, betaK0);
+  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
+    theRegion->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
 
   return TCL_OK;
 }
