@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-24 18:28:31 $
+// $Revision: 1.3 $
+// $Date: 2002-10-22 19:52:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.h,v $
                                                                         
                                                                         
@@ -49,6 +49,9 @@ class SectionRepres;
 class UniaxialMaterial;
 class NDMaterial;
 class TaggedObjectStorage;
+class YieldSurface_BC;
+class YS_Evolution;
+class PlasticHardeningMaterial;
 
 class CrdTransf2d;
 class CrdTransf3d;
@@ -71,9 +74,9 @@ class TclModelBuilder : public ModelBuilder
     int addUniaxialMaterial(UniaxialMaterial &theMaterial);
     UniaxialMaterial *getUniaxialMaterial(int tag);
 
-	// methods needed for the continuum elements and generic section
-	// models to add/get ND material models
-	int addNDMaterial(NDMaterial &theMaterial);
+    // methods needed for the continuum elements and generic section
+    // models to add/get ND material models
+    int addNDMaterial(NDMaterial &theMaterial);
     NDMaterial *getNDMaterial(int tag);
     
     // methods needed for the nonlinear beam column elements to
@@ -90,6 +93,14 @@ class TclModelBuilder : public ModelBuilder
     CrdTransf2d *getCrdTransf2d(int tag);    
     CrdTransf3d *getCrdTransf3d(int tag);    
 
+    // methods needed for the yield surfaces
+    int addYieldSurface_BC(YieldSurface_BC &theYS);
+    YieldSurface_BC *getYieldSurface_BC(int tag);
+    int addYS_EvolutionModel(YS_Evolution &theModel);
+    YS_Evolution *getYS_EvolutionModel(int tag);
+    int addPlasticMaterial(PlasticHardeningMaterial &theMaterial);
+    PlasticHardeningMaterial *getPlasticMaterial(int tag);
+
   protected:
 
   private:
@@ -102,6 +113,9 @@ class TclModelBuilder : public ModelBuilder
     TaggedObjectStorage *theSectionRepresents;
     TaggedObjectStorage *the2dGeomTransfs;
     TaggedObjectStorage *the3dGeomTransfs;
+    TaggedObjectStorage *theYieldSurface_BCs;
+    TaggedObjectStorage *thePlasticMaterials;
+    TaggedObjectStorage *theYS_EvolutionModels;
 
     Tcl_Interp *theInterp;
 };

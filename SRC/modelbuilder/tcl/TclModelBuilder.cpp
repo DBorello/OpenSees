@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2002-07-18 22:13:13 $
+// $Revision: 1.16 $
+// $Date: 2002-10-22 19:52:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -77,6 +77,10 @@
 #include <Block2D.h>
 #include <Block3D.h>
 
+#include <YieldSurface_BC.h>
+#include <YS_Evolution.h>
+#include <PlasticHardeningMaterial.h>
+
 //
 // SOME STATIC POINTERS USED IN THE FUNCTIONS INVOKED BY THE INTERPRETER
 //
@@ -111,6 +115,18 @@ TclModelBuilder_addNDMaterial(ClientData clientData, Tcl_Interp *interp, int arg
 int
 TclModelBuilder_addSection(ClientData clientData, Tcl_Interp *interp, int argc,   
 			   char **argv);
+
+int
+TclModelBuilder_addYieldSurface_BC(ClientData clientData, Tcl_Interp *interp,
+				    int argc, char **argv);
+
+int
+TclModelBuilder_addYS_EvolutionModel(ClientData clientData, Tcl_Interp *interp,
+				    int argc, char **argv);
+
+int
+TclModelBuilder_addYS_PlasticMaterial(ClientData clientData, Tcl_Interp *interp,
+				    int argc, char **argv);
 			    
 int
 TclModelBuilder_addPattern(ClientData clientData, Tcl_Interp *interp, int argc,   
@@ -250,6 +266,9 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   theSectionRepresents = new ArrayOfTaggedObjects(32);  
   the2dGeomTransfs = new ArrayOfTaggedObjects(32);  
   the3dGeomTransfs = new ArrayOfTaggedObjects(32);  
+  theYieldSurface_BCs = new ArrayOfTaggedObjects(32);
+  theYS_EvolutionModels = new ArrayOfTaggedObjects(32);
+  thePlasticMaterials = new ArrayOfTaggedObjects(32);
 
   // call Tcl_CreateCommand for class specific commands
   Tcl_CreateCommand(interp, "node", TclModelBuilder_addNode,
@@ -265,6 +284,15 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
 		    (ClientData)NULL, NULL);
 
   Tcl_CreateCommand(interp, "section", TclModelBuilder_addSection,
+		    (ClientData)NULL, NULL);
+
+  Tcl_CreateCommand(interp, "yieldSurface_BC", TclModelBuilder_addYieldSurface_BC,
+		    (ClientData)NULL, NULL);
+
+  Tcl_CreateCommand(interp, "ysEvolutionModel", TclModelBuilder_addYS_EvolutionModel,
+		    (ClientData)NULL, NULL);
+
+  Tcl_CreateCommand(interp, "plasticMaterial", TclModelBuilder_addYS_PlasticMaterial,
 		    (ClientData)NULL, NULL);
 
   Tcl_CreateCommand(interp, "pattern", TclModelBuilder_addPattern,
@@ -350,6 +378,9 @@ TclModelBuilder::~TclModelBuilder()
   theSectionRepresents->clearAll();
   the2dGeomTransfs->clearAll();
   the3dGeomTransfs->clearAll();
+  theYieldSurface_BCs->clearAll();
+  theYS_EvolutionModels->clearAll();
+  thePlasticMaterials->clearAll();
 
   // free up memory allocated in the constructor
   delete theUniaxialMaterials;
@@ -358,6 +389,9 @@ TclModelBuilder::~TclModelBuilder()
   delete theSectionRepresents;
   delete the2dGeomTransfs;
   delete the3dGeomTransfs;
+  delete theYieldSurface_BCs;
+  delete theYS_EvolutionModels;
+  delete thePlasticMaterials;
 
   // set the pointers to 0 
   theTclDomain =0;
@@ -492,7 +526,83 @@ TclModelBuilder::getSection(int tag)
   return result;
 }
 
+int
+TclModelBuilder::addYS_EvolutionModel(YS_Evolution &theModel)
+{
+  bool result = theYS_EvolutionModels->addComponent(&theModel);
+  if (result == true)
+    return 0;
+  else {
+    cerr << "TclModelBuilder::addYS_EvolutionModel() - failed to add model " << theModel;
+    return -1;
+  }
+}
 
+
+YS_Evolution *
+TclModelBuilder::getYS_EvolutionModel(int tag)
+{
+  TaggedObject *mc = theYS_EvolutionModels->getComponentPtr(tag);
+  if (mc == 0)
+    return 0;
+
+  // otherweise we do a cast and return
+  YS_Evolution *result = (YS_Evolution *)mc;
+  return result;
+}
+
+int
+TclModelBuilder::addYieldSurface_BC(YieldSurface_BC &theYS)
+{
+//	TaggedObject *mc = &theYS;
+
+  bool result = theYieldSurface_BCs->addComponent(&theYS);
+  if (result == true)
+    return 0;
+  else {
+    cerr << "TclModelBuilder::addYieldSurfaceBC() - failed to add YS: " << theYS;
+    return -1;
+  }
+}
+
+YieldSurface_BC *
+TclModelBuilder::getYieldSurface_BC(int tag)
+{
+  TaggedObject *mc = theYieldSurface_BCs->getComponentPtr(tag);
+  if (mc == 0)
+    return 0;
+
+  // otherweise we do a cast and return
+  YieldSurface_BC *result = (YieldSurface_BC *)mc;
+  return result;
+}
+
+
+int
+TclModelBuilder::addPlasticMaterial(PlasticHardeningMaterial &theMat)
+{
+//	TaggedObject *mc = &theYS;
+
+  bool result = thePlasticMaterials->addComponent(&theMat);
+  if (result == true)
+    return 0;
+  else {
+    cerr << "TclModelBuilder::addPlasticMaterial() - failed to add Material: " << theMat;
+    return -1;
+  }
+}
+
+PlasticHardeningMaterial *
+TclModelBuilder::getPlasticMaterial(int tag)
+{
+  TaggedObject *mc = thePlasticMaterials->getComponentPtr(tag);
+  if (mc == 0)
+    return 0;
+
+  // otherweise we do a cast and return
+  PlasticHardeningMaterial *result = (PlasticHardeningMaterial *)mc;
+  return result;
+}
 
 int 
 TclModelBuilder::addSectionRepres(SectionRepres &theSectionRepres)
@@ -769,6 +879,45 @@ TclModelBuilder_addSection(ClientData clientData, Tcl_Interp *interp,
 }
 
 
+
+extern int
+TclModelBuilderYieldSurface_BCCommand (ClientData clienData, Tcl_Interp *interp, int argc,
+				 char **argv, TclModelBuilder *theTclBuilder);
+
+int
+TclModelBuilder_addYieldSurface_BC(ClientData clientData, Tcl_Interp *interp,
+				    int argc, char **argv)
+
+{
+  return TclModelBuilderYieldSurface_BCCommand(clientData, interp,
+						argc, argv, theTclBuilder);
+}
+
+extern int
+TclModelBuilderYS_EvolutionModelCommand (ClientData clienData, Tcl_Interp *interp, int argc,
+				 char **argv, TclModelBuilder *theTclBuilder);
+
+int
+TclModelBuilder_addYS_EvolutionModel(ClientData clientData, Tcl_Interp *interp,
+				    int argc, char **argv)
+
+{
+  return TclModelBuilderYS_EvolutionModelCommand(clientData, interp,
+						argc, argv, theTclBuilder);
+}
+
+extern int
+TclModelBuilderPlasticMaterialCommand (ClientData clienData, Tcl_Interp *interp, int argc,
+				 char **argv, TclModelBuilder *theTclBuilder);
+
+int
+TclModelBuilder_addYS_PlasticMaterial(ClientData clientData, Tcl_Interp *interp,
+				    int argc, char **argv)
+
+{
+  return TclModelBuilderPlasticMaterialCommand(clientData, interp,
+						argc, argv, theTclBuilder);
+}
 
 extern int
 TclPatternCommand(ClientData clientData, Tcl_Interp *interp, 
