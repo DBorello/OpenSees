@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2001-12-07 00:43:36 $
+// $Revision: 1.11 $
+// $Date: 2002-02-26 06:30:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -674,15 +674,15 @@ bool
 Domain::addElementalLoad(ElementalLoad *load, int pattern)
 {
 #ifdef _G3DEBUG
-    int eleTag = load->getElementTag();
-    Element *res = this->getElement(eleTag);
-    if (res == 0) {	
-	g3ErrorHandler->warning("Domain::addElementalLoad() - %s %d %s\n",
-				"no element with tag",
-				eleTag,
-				"in  the model, not adding the nodal load");	
-	return false;
-    }
+//    int eleTag = load->getElementTag();
+//    Element *res = this->getElement(eleTag);
+//    if (res == 0) {	
+//	g3ErrorHandler->warning("Domain::addElementalLoad() - %s %d %s\n",
+//				"no element with tag",
+//				eleTag,
+//				"in  the model, not adding the nodal load");	
+//	return false;
+//    }
 #endif
 
     // now add it to the pattern
