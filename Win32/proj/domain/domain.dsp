@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\..\obj\domain\release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MLd /W3 /GX /O2 /I "c:\Program Files\tcl\include" /I "..\..\..\src\handler" /I "..\..\..\src\domain\groundMotion" /I "..\..\..\src\analysis\fe_ele" /I "..\..\..\src\utility" /I "..\..\..\src\domain\subdomain" /I "..\..\..\src\database" /I "..\..\..\src\analysis\analysis" /I "..\..\..\src\recorder" /I "..\..\..\src\graph\graph" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\domain\single" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\tagged\storage" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\domain\pattern" /I "..\..\..\src\matrix" /I "..\..\..\src\analysis\dof_grp" /I "..\..\..\src\domain\domain" /I "..\..\..\src\actor\channel" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\tagged" /I "..\..\..\src\domain\component" /I "..\..\..\src\domain\load" /I "..\..\..\src\domain\node" /I "..\..\..\src\element" /I "..\..\..\src\renderer" /I "..\..\..\src\nDarray" /I "..\..\..\src\domain\region" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
+# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\src\reliability\domain\component" /I "c:\Program Files\tcl\include" /I "..\..\..\src\handler" /I "..\..\..\src\domain\groundMotion" /I "..\..\..\src\analysis\fe_ele" /I "..\..\..\src\utility" /I "..\..\..\src\domain\subdomain" /I "..\..\..\src\database" /I "..\..\..\src\analysis\analysis" /I "..\..\..\src\recorder" /I "..\..\..\src\graph\graph" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\domain\single" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\tagged\storage" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\domain\pattern" /I "..\..\..\src\matrix" /I "..\..\..\src\analysis\dof_grp" /I "..\..\..\src\domain\domain" /I "..\..\..\src\actor\channel" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\tagged" /I "..\..\..\src\domain\component" /I "..\..\..\src\domain\load" /I "..\..\..\src\domain\node" /I "..\..\..\src\element" /I "..\..\..\src\renderer" /I "..\..\..\src\nDarray" /I "..\..\..\src\domain\region" /I "..\..\..\src\reliability\domain\modulatingFunction" /I "..\..\..\src\reliability\domain\components" /I "..\..\..\src\reliability\domain\spectrum" /I "..\..\..\src\reliability\analysis\randomNumber" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
 # SUBTRACT CPP /Fr /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -65,7 +65,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\..\obj\domain\debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /GX /ZI /Od /I "c:\Program Files\tcl\include" /I "..\..\..\src\handler" /I "..\..\..\src\domain\groundMotion" /I "..\..\..\src\analysis\fe_ele" /I "..\..\..\src\utility" /I "..\..\..\src\domain\subdomain" /I "..\..\..\src\database" /I "..\..\..\src\analysis\analysis" /I "..\..\..\src\recorder" /I "..\..\..\src\graph\graph" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\domain\single" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\tagged\storage" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\domain\pattern" /I "..\..\..\src\matrix" /I "..\..\..\src\analysis\dof_grp" /I "..\..\..\src\domain\domain" /I "..\..\..\src\actor\channel" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\tagged" /I "..\..\..\src\domain\component" /I "..\..\..\src\domain\load" /I "..\..\..\src\domain\node" /I "..\..\..\src\element" /I "..\..\..\src\renderer" /I "..\..\..\src\nDarray" /I "..\..\..\src\domain\region" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FR /FD /GZ /c
+# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\reliability\domain\filter" /I "c:\Program Files\tcl\include" /I "..\..\..\src\handler" /I "..\..\..\src\domain\groundMotion" /I "..\..\..\src\analysis\fe_ele" /I "..\..\..\src\utility" /I "..\..\..\src\domain\subdomain" /I "..\..\..\src\database" /I "..\..\..\src\analysis\analysis" /I "..\..\..\src\recorder" /I "..\..\..\src\graph\graph" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\domain\single" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\tagged\storage" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\domain\pattern" /I "..\..\..\src\matrix" /I "..\..\..\src\analysis\dof_grp" /I "..\..\..\src\domain\domain" /I "..\..\..\src\actor\channel" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\tagged" /I "..\..\..\src\domain\component" /I "..\..\..\src\domain\load" /I "..\..\..\src\domain\node" /I "..\..\..\src\element" /I "..\..\..\src\renderer" /I "..\..\..\src\nDarray" /I "..\..\..\src\domain\region" /I "..\..\..\src\reliability\domain\modulatingFunction" /I "..\..\..\src\reliability\domain\components" /I "..\..\..\src\reliability\domain\spectrum" /I "..\..\..\src\reliability\analysis\randomNumber" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
@@ -447,6 +447,14 @@ SOURCE=..\..\..\SRC\domain\pattern\ConstantSeries.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\domain\pattern\DiscretizedRandomProcessSeries.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\pattern\DiscretizedRandomProcessSeries.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\domain\pattern\LinearSeries.cpp
 # End Source File
 # Begin Source File
@@ -476,6 +484,14 @@ SOURCE=..\..\..\SRC\domain\pattern\RectangularSeries.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\domain\pattern\RectangularSeries.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\pattern\SimulatedRandomProcessSeries.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\pattern\SimulatedRandomProcessSeries.h
 # End Source File
 # Begin Source File
 
