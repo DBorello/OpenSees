@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2001-08-10 18:00:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/reinfLayer/StraightReinfLayer.h,v $
                                                                         
                                                                         
@@ -60,7 +60,7 @@ class StraightReinfLayer : public ReinfLayer
 
     int           getNumReinfBars     (void) const;
     int           getMaterialID       (void) const;
-    int           getReinfBarDiameter (void) const;
+    double        getReinfBarDiameter (void) const;
     double        getReinfBarArea     (void) const;
     ReinfBar     *getReinfBars        (void) const;
 

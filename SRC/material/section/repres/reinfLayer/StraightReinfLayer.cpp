@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2001-08-10 18:00:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/reinfLayer/StraightReinfLayer.cpp,v $
                                                                         
                                                                         
@@ -105,7 +105,7 @@ int StraightReinfLayer::getMaterialID (void) const
    return matID;
 }
 
-int StraightReinfLayer::getReinfBarDiameter (void) const
+double StraightReinfLayer::getReinfBarDiameter (void) const
 {
    return barDiam;
 }

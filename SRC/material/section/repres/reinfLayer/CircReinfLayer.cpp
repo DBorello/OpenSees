@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2001-08-10 18:00:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/reinfLayer/CircReinfLayer.cpp,v $
                                                                         
                                                                         
@@ -56,6 +56,17 @@ CircReinfLayer::CircReinfLayer(int materialID, int numReinfBars,
 {
 }
 
+CircReinfLayer::CircReinfLayer(int materialID, int numReinfBars, double  reinfBarArea,
+							   const Vector &centerPosition, double radius):
+nReinfBars(numReinfBars), matID(materialID), area(reinfBarArea),
+barDiam(0.0), centerPosit(centerPosition), arcRad(radius),
+initAng(0.0), finalAng(0.0)
+{
+	// Figure out final angle so that complete circle does not put
+	// two bars at the same location
+	if (nReinfBars > 0)
+		finalAng = 360.0 - 360.0/nReinfBars;
+}
 
 CircReinfLayer::~CircReinfLayer()
 {
@@ -96,7 +107,7 @@ int CircReinfLayer::getMaterialID (void) const
    return matID;
 }
 
-int CircReinfLayer::getReinfBarDiameter (void) const
+double CircReinfLayer::getReinfBarDiameter (void) const
 {
    return barDiam;
 }

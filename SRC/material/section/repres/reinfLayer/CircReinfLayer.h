@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2001-08-10 18:00:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/reinfLayer/CircReinfLayer.h,v $
                                                                         
                                                                         
@@ -40,9 +40,13 @@ class CircReinfLayer : public ReinfLayer
   public:
 
     CircReinfLayer();
+	// Constructor for an arc
     CircReinfLayer(int materialID, int numReinfBars, double  reinfBarArea,
                    const Vector &centerPosition, double arcRadius, double
                    initialAngle, double finalAngle);
+    // Constructor for full circle
+	CircReinfLayer(int materialID, int numReinfBars, double  reinfBarArea,
+                   const Vector &centerPosition, double radius);
 
     ~CircReinfLayer();
     
@@ -62,7 +66,7 @@ class CircReinfLayer : public ReinfLayer
 
     int           getNumReinfBars     (void) const;
     int           getMaterialID       (void) const;
-    int           getReinfBarDiameter (void) const;
+    double        getReinfBarDiameter (void) const;
     double        getReinfBarArea     (void) const;
     ReinfBar     *getReinfBars        (void) const;
 
