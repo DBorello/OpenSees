@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2001-05-30 07:15:39 $
+// $Revision: 1.8 $
+// $Date: 2001-06-14 05:20:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -222,6 +222,7 @@
 #define EquiALGORITHM_TAGS_ModifiedNewton 	3
 #define EquiALGORITHM_TAGS_BFGS 		4
 #define EquiALGORITHM_TAGS_SplitNewton 		5
+#define EquiALGORITHM_TAGS_Broyden 		6
 
 #define INTEGRATOR_TAGS_Newmark          	2
 #define INTEGRATOR_TAGS_HHT 	          	3
