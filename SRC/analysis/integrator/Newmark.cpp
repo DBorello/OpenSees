@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-10-15 07:33:21 $
+// $Revision: 1.3 $
+// $Date: 2000-12-13 08:27:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark.cpp,v $
                                                                         
                                                                         
@@ -282,6 +282,21 @@ Newmark::newStep(double deltaT)
   
   return 0;
 }
+
+
+
+int
+Newmark::revertToLastStep()
+{
+  // set response at t+delta t to be that at t .. for next newStep
+  if (U != 0) {
+    (*U) = *Ut;        
+    (*Udot) = *Utdot;  
+    (*Udotdot) = *Utdotdot;  
+  }
+  return 0;
+}
+
 
 int
 Newmark::formEleTangent(FE_Element *theEle)

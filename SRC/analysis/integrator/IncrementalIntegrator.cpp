@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 08:27:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/IncrementalIntegrator.cpp,v $
                                                                         
                                                                         
@@ -161,6 +161,14 @@ IncrementalIntegrator::commit(void)
     return theAnalysisModel->commitDomain();
 }   
 
+
+int
+IncrementalIntegrator::revertToLastStep(void) 
+{
+  return 0;
+}   
+
+
 LinearSOE *
 IncrementalIntegrator::getLinearSOEPtr(void) const
 {
@@ -200,12 +208,13 @@ IncrementalIntegrator::formElementResidual(void)
     int res = 0;    
 
     FE_EleIter &theEles2 = theAnalysisModel->getFEs();    
-    while((elePtr = theEles2()) != 0) 
+    while((elePtr = theEles2()) != 0) {
 	if (theSOE->addB(elePtr->getResidual(this),elePtr->getID()) <0) {
 	    cerr << "WARNING IncrementalIntegrator::formElementResidual -";
 	    cerr << " failed in addB for ID " << elePtr->getID();
 	    res = -2;
 	}
+    }
 
     return res;	    
 }

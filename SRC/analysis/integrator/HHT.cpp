@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 08:27:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHT.cpp,v $
                                                                         
                                                                         
@@ -214,6 +214,19 @@ HHT::newStep(double deltaT)
 
   theModel->updateDomain();
 
+  return 0;
+}
+
+
+int
+HHT::revertToLastStep()
+{
+  // set response at t+delta t to be that at t .. for next newStep
+  if (U != 0) {
+    (*U) = *Ut;        
+    (*Udot) = *Utdot;  
+    (*Udotdot) = *Utdotdot;  
+  }
   return 0;
 }
 

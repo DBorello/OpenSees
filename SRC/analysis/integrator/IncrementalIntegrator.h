@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 08:27:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/IncrementalIntegrator.h,v $
                                                                         
                                                                         
@@ -73,6 +73,7 @@ class IncrementalIntegrator : public Integrator
     // methods to update the domain
     virtual int update(const Vector &deltaU) =0;
     virtual int commit(void);
+    virtual int revertToLastStep(void);
     
     // method introduced for domain decomposition
     virtual int getLastResponse(Vector &result, const ID &id);

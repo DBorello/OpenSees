@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 08:27:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark1.cpp,v $
                                                                         
                                                                         
@@ -203,6 +203,11 @@ Newmark1::newStep(double deltaT)
   theModel->updateDomain();
   
   return 0;
+}
+
+int
+Newmark1::revertToLastStep() {
+  return this->domainChanged();
 }
 
 int

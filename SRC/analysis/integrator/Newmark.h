@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 08:27:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark.h,v $
                                                                         
                                                                         
@@ -65,6 +65,7 @@ class Newmark : public TransientIntegrator
     int domainChanged(void);    
     int initialize(void);
     int newStep(double deltaT);    
+    int revertToLastStep(void);        
     int update(const Vector &deltaU);
 
     virtual int sendSelf(int commitTag, Channel &theChannel);
