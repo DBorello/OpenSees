@@ -856,7 +856,7 @@ NDMaterial * Template3Dep::getCopy(const char *code)
 {
     if (strcmp(code,"Template3Dep") == 0)
     {
-       NDMaterial * tmp = 
+       Template3Dep * tmp = 
             new Template3Dep( this->getTag()  ,
 			      this->getYS()   ,
 			      this->getPS()   ,

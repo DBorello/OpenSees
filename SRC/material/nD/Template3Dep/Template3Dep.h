@@ -48,6 +48,8 @@
 #include <EPState.h>
 //#include <CDriver.h>
 
+class YieldSurface;
+
 class Template3Dep : public NDMaterial
 {
  public:
