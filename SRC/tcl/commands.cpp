@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.31 $
-// $Date: 2002-04-12 23:00:46 $
+// $Revision: 1.32 $
+// $Date: 2002-05-02 21:45:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -1736,19 +1736,25 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
       double dLambda;
       double minIncr, maxIncr;
       int numIter;
-      if (argc < 6) {
-	cerr << argc; for (int j=0; j<argc; j++) cerr << argv[j] << endl;
-	interp->result = "WARNING incorrect # args - integrator LoadControl alpha Jd minAlpha maxAlpha";
+      if (argc < 3) {
+	interp->result = "WARNING incorrect # args - integrator LoadControl dlam <Jd dlamMin dlamMax>";
 	return TCL_ERROR;
       }    
       if (Tcl_GetDouble(interp, argv[2], &dLambda) != TCL_OK)	
 	return TCL_ERROR;	
-      if (Tcl_GetInt(interp, argv[3], &numIter) != TCL_OK)	
-	return TCL_ERROR;	
-      if (Tcl_GetDouble(interp, argv[4], &minIncr) != TCL_OK)	
-	return TCL_ERROR;	
-      if (Tcl_GetDouble(interp, argv[5], &maxIncr) != TCL_OK)	
-	return TCL_ERROR;	      
+      if (argc > 5) {
+	if (Tcl_GetInt(interp, argv[3], &numIter) != TCL_OK)	
+	  return TCL_ERROR;	
+	if (Tcl_GetDouble(interp, argv[4], &minIncr) != TCL_OK)	
+	  return TCL_ERROR;	
+	if (Tcl_GetDouble(interp, argv[5], &maxIncr) != TCL_OK)	
+	  return TCL_ERROR;	  
+      }
+      else {
+	minIncr = dLambda;
+	maxIncr = dLambda;
+	numIter = 1;
+      }
       theStaticIntegrator = new LoadControl(dLambda, numIter, minIncr, maxIncr);       
   }
 
@@ -1784,23 +1790,31 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
   else if (strcmp(argv[1],"MinUnbalDispNorm") == 0) {
       double lambda11, minlambda, maxlambda;
       int numIter;
-      if (argc < 6) {
-	cerr << "WARNING integrator MinUnbalDispNorm lambda11 Jd minLambda1j maxLambda1j\n";
+      if (argc < 3) {
+	cerr << "WARNING integrator MinUnbalDispNorm lambda11 <Jd minLambda1j maxLambda1j>\n";
 	return TCL_ERROR;
       }    
       if (Tcl_GetDouble(interp, argv[2], &lambda11) != TCL_OK)	
 	return TCL_ERROR;	
-      if (Tcl_GetInt(interp, argv[3], &numIter) != TCL_OK)	
-	return TCL_ERROR;	
-      if (Tcl_GetDouble(interp, argv[4], &minlambda) != TCL_OK)	
-	return TCL_ERROR;	
-      if (Tcl_GetDouble(interp, argv[5], &maxlambda) != TCL_OK)	
-	return TCL_ERROR;	
+      if (argc > 5) {
+	if (Tcl_GetInt(interp, argv[3], &numIter) != TCL_OK)	
+	  return TCL_ERROR;	
+	if (Tcl_GetDouble(interp, argv[4], &minlambda) != TCL_OK)	
+	  return TCL_ERROR;	
+	if (Tcl_GetDouble(interp, argv[5], &maxlambda) != TCL_OK)	
+	  return TCL_ERROR;	
+      }
+      else {
+	minlambda = lambda11;
+	maxlambda = lambda11;
+	numIter = 1;
+	argc += 3;
+      }
 
       int signFirstStepMethod = SIGN_LAST_STEP;
       if (argc == 7)
-	if ((strcmp(argv[6],"-determinant") == 0) ||
-	    (strcmp(argv[6],"-det") == 0))
+	if ((strcmp(argv[argc-1],"-determinant") == 0) ||
+	    (strcmp(argv[argc-1],"-det") == 0))
 	    signFirstStepMethod = CHANGE_DETERMINANT;	    
 
       theStaticIntegrator = new MinUnbalDispNorm(lambda11,numIter,minlambda,maxlambda,signFirstStepMethod);
@@ -1811,9 +1825,9 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
       int dof;
       double increment, minIncr, maxIncr;
       int numIter;
-      if (argc != 8) {
+      if (argc < 5) {
 	cerr << "WARNING integrator DisplacementControl node dof dU ";
-	cerr << "Jd minIncrement maxIncrement\n";
+	cerr << "<Jd minIncrement maxIncrement>\n";
 	return TCL_ERROR;
       }    
       if (Tcl_GetInt(interp, argv[2], &node) != TCL_OK)	
@@ -1822,12 +1836,19 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	return TCL_ERROR;	
       if (Tcl_GetDouble(interp, argv[4], &increment) != TCL_OK)	
 	return TCL_ERROR;	      
-      if (Tcl_GetInt(interp, argv[5], &numIter) != TCL_OK)	
-	return TCL_ERROR;	
-      if (Tcl_GetDouble(interp, argv[6], &minIncr) != TCL_OK)	
-	return TCL_ERROR;	
-      if (Tcl_GetDouble(interp, argv[7], &maxIncr) != TCL_OK)	
-	return TCL_ERROR;	      
+      if (argc > 7) {
+	if (Tcl_GetInt(interp, argv[5], &numIter) != TCL_OK)	
+	  return TCL_ERROR;	
+	if (Tcl_GetDouble(interp, argv[6], &minIncr) != TCL_OK)	
+	  return TCL_ERROR;	
+	if (Tcl_GetDouble(interp, argv[7], &maxIncr) != TCL_OK)	
+	  return TCL_ERROR;	  
+      }
+      else {
+	minIncr = increment;
+	maxIncr = increment;
+	numIter = 1;
+      }
 
 
       theStaticIntegrator = new DisplacementControl(node,dof-1,increment, &theDomain,
