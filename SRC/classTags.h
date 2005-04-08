@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.65 $
-// $Date: 2005-02-22 22:22:32 $
+// $Revision: 1.66 $
+// $Date: 2005-04-08 02:43:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -436,6 +436,7 @@
 #define LinSOE_TAGS_DistributedProfileSPDLinSOE		17
 #define LinSOE_TAGS_DistributedSparseGenColLinSOE       18
 #define LinSOE_TAGS_DiagonalSOE       19
+#define LinSOE_TAGS_SparseGenRowLinSOE		20
 
 #define SOLVER_TAGS_FullGenLinLapackSolver  	1
 #define SOLVER_TAGS_BandGenLinLapackSolver  	2
@@ -457,6 +458,9 @@
 #define SOLVER_TAGS_ProfileSPDLinSolverGather  	18
 #define SOLVER_TAGS_DistributedSuperLU		      	19
 #define SOLVER_TAGS_DiagonalDirectSolver 20
+#define SOLVER_TAGS_PetscSparseSeqSolver 21
+
+
 
 #define RECORDER_TAGS_ElementRecorder		1
 #define RECORDER_TAGS_NodeRecorder		2
