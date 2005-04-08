@@ -11,7 +11,7 @@ OBJS       = SparseGenColLinSOE.o SparseGenColLinSolver.o ThreadedSuperLU.o
 
 else
 
-OBJS       = SparseGenColLinSOE.o SparseGenColLinSolver.o SuperLU.o
+OBJS       = SparseGenColLinSOE.o SparseGenColLinSolver.o SparseGenRowLinSOE.o SparseGenRowLinSolver.o SuperLU.o
 
 endif
 
