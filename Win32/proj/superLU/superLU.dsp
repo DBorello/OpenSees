@@ -26,6 +26,7 @@ CFG=superLU - Win32 Debug
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
+F90=df.exe
 RSC=rc.exe
 
 !IF  "$(CFG)" == "superLU - Win32 Release"
@@ -41,7 +42,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\..\obj\superLU\release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\other\superLU" /I "c:\Program Files\tcl" /D "WIN32" /D "NDEBUG" /D "_LIB" /D "_MBCS" /D "_TCL84" /FD /c
+# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\other\superLU_3.0\SRC" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "NDEBUG" /D "NO_TIMER" /D "WIN32" /D "_LIB" /D "_MBCS" /D "_TCL84" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -65,7 +66,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\..\obj\superLU\debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\other\superLU" /I "c:\Program Files\tcl" /D "WIN32" /D "_DEBUG" /D "_LIB" /D "WINDOWS" /D "_MBCS" /D "_TCL84" /FR /FD /GZ /c
+# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\other\superLU_3.0\SRC" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "_DEBUG" /D "WINDOWS" /D "WIN32" /D "_LIB" /D "_MBCS" /D "_TCL84" /D "NO_TIMER" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
@@ -87,180 +88,176 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\colamd.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\colamd.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dcolumn_bmod.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dcolumn_bmod.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dcolumn_dfs.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dcolumn_dfs.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dcopy_to_ucol.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dcopy_to_ucol.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dgscon.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dGetDiagU.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dgsequ.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dgscon.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dgsrfs.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dgsequ.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dgssv.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dgsrfs.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dgssvx.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dgssv.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dgstrf.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dgssvx.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dgstrs.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dgstrf.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dlacon.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dgstrs.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dlamch.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dgstrsL.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dlangs.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dlacon.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dlaqgs.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dlamch.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dmemory.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dlangs.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dpanel_bmod.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dlaqgs.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dpanel_dfs.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dmemory.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dpivotgrowth.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dmyblas2.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dpivotL.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dpanel_bmod.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dpruneL.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dpanel_dfs.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dreadhb.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dpivotgrowth.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dsnode_bmod.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dpivotL.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dsnode_dfs.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dpruneL.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dsp_blas2.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dreadhb.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dsp_blas3.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dsnode_bmod.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\dutil.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dsnode_dfs.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\get_perm_c.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dsp_blas2.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\lsame.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dsp_blas3.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\memory.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\dutil.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\mmd.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\get_perm_c.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\relax_snode.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\heap_relax_snode.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\sp_coletree.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\lsame.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\sp_ienv.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\memory.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\sp_preorder.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\mmd.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\superlu_timer.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\relax_snode.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\util.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\sp_coletree.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\xerbla.c
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\sp_ienv.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\sp_preorder.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\superlu_timer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\util.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\OTHER\SuperLU_3.0\SRC\xerbla.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
-# Begin Source File
-
-SOURCE=..\..\..\OTHER\SuperLU\Cnames.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\OTHER\SuperLU\colamd.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\OTHER\SuperLU\dsp_defs.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\OTHER\SuperLU\supermatrix.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\OTHER\SuperLU\util.h
-# End Source File
 # End Group
 # End Target
 # End Project

@@ -26,6 +26,7 @@ CFG=system - Win32 Debug
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
+F90=df.exe
 RSC=rc.exe
 
 !IF  "$(CFG)" == "system - Win32 Release"
@@ -41,7 +42,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\..\obj\system\release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\src\system_of_eqn\linearSOE" /I "..\..\..\src\system_of_eqn\linearSOE\sparseSYM" /I "..\..\..\src\analysis\integrator" /I "..\..\..\src\analysis\fe_ele" /I "..\..\..\src\analysis\dof_grp" /I "..\..\..\src\system_of_eqn\eigenSOE" /I "..\..\..\src\handler" /I "..\..\..\symSparse" /I "..\..\..\src\analysis\model\simple" /I "..\..\..\src\system_of_eqn\linearSOE\umfGEN" /I "..\..\..\src\system_of_eqn\linearSOE\fullGEN" /I "..\..\..\src\system_of_eqn\linearSOE\sparseGEN" /I "..\..\..\src\system_of_eqn\linearSOE\bandSPD" /I "..\..\..\src\system_of_eqn\linearSOE\bandGEN" /I "..\..\..\src\domain\domain" /I "..\..\..\src\analysis\model" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\actor\channel" /I "..\..\..\src\tagged" /I "..\..\..\src\graph\graph" /I "..\..\..\src\system_of_eqn\linearSOE\profileSPD" /I "..\..\..\src" /I "..\..\..\src\matrix" /I "..\..\..\src\actor\actor" /I "..\..\..\src\system_of_eqn" /I "..\..\..\src\nDarray" /I "..\..\..\src\system_of_eqn\linearSOE\itpack" /I "..\..\..\src\system_of_eqn\linearSOE\cg" /I "..\..\..\other\superlu" /I "c:\Program Files\tcl" /D "WIN32" /D "NDEBUG" /D "_LIB" /D "_MBCS" /D "_TCL84" /FD /c
+# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\src\system_of_eqn\linearSOE\diagonal" /I "..\..\..\src\system_of_eqn\linearSOE" /I "..\..\..\src\system_of_eqn\linearSOE\sparseSYM" /I "..\..\..\src\analysis\integrator" /I "..\..\..\src\analysis\fe_ele" /I "..\..\..\src\analysis\dof_grp" /I "..\..\..\src\system_of_eqn\eigenSOE" /I "..\..\..\src\handler" /I "..\..\..\symSparse" /I "..\..\..\src\analysis\model\simple" /I "..\..\..\src\system_of_eqn\linearSOE\umfGEN" /I "..\..\..\src\system_of_eqn\linearSOE\fullGEN" /I "..\..\..\src\system_of_eqn\linearSOE\sparseGEN" /I "..\..\..\src\system_of_eqn\linearSOE\bandSPD" /I "..\..\..\src\system_of_eqn\linearSOE\bandGEN" /I "..\..\..\src\domain\domain" /I "..\..\..\src\analysis\model" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\actor\channel" /I "..\..\..\src\tagged" /I "..\..\..\src\graph\graph" /I "..\..\..\src\system_of_eqn\linearSOE\profileSPD" /I "..\..\..\src" /I "..\..\..\src\matrix" /I "..\..\..\src\actor\actor" /I "..\..\..\src\system_of_eqn" /I "..\..\..\src\nDarray" /I "..\..\..\src\system_of_eqn\linearSOE\itpack" /I "..\..\..\src\system_of_eqn\linearSOE\cg" /I "..\..\..\other\superlu_3.0\src" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "WIN32" /D "NDEBUG" /D "_LIB" /D "_MBCS" /D "_TCL84" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -65,7 +66,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\..\obj\system\debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\system_of_eqn\linearSOE" /I "..\..\..\src\system_of_eqn\linearSOE\sparseSYM" /I "..\..\..\src\analysis\integrator" /I "..\..\..\src\analysis\fe_ele" /I "..\..\..\src\analysis\dof_grp" /I "..\..\..\src\system_of_eqn\eigenSOE" /I "..\..\..\src\handler" /I "..\..\..\symSparse" /I "..\..\..\src\analysis\model\simple" /I "..\..\..\src\system_of_eqn\linearSOE\umfGEN" /I "..\..\..\src\system_of_eqn\linearSOE\fullGEN" /I "..\..\..\src\system_of_eqn\linearSOE\sparseGEN" /I "..\..\..\src\system_of_eqn\linearSOE\bandSPD" /I "..\..\..\src\system_of_eqn\linearSOE\bandGEN" /I "..\..\..\src\domain\domain" /I "..\..\..\src\analysis\model" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\actor\channel" /I "..\..\..\src\tagged" /I "..\..\..\src\graph\graph" /I "..\..\..\src\system_of_eqn\linearSOE\profileSPD" /I "..\..\..\src" /I "..\..\..\src\matrix" /I "..\..\..\src\actor\actor" /I "..\..\..\src\system_of_eqn" /I "..\..\..\src\nDarray" /I "..\..\..\src\system_of_eqn\linearSOE\itpack" /I "..\..\..\src\system_of_eqn\linearSOE\cg" /I "..\..\..\other\superlu" /I "c:\Program Files\tcl" /D "WIN32" /D "_DEBUG" /D "_LIB" /D "_WIN32" /D "_MBCS" /D "_TCL84" /FR /FD /GZ /c
+# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\system_of_eqn\linearSOE\diagonal" /I "..\..\..\src\system_of_eqn\linearSOE" /I "..\..\..\src\system_of_eqn\linearSOE\sparseSYM" /I "..\..\..\src\analysis\integrator" /I "..\..\..\src\analysis\fe_ele" /I "..\..\..\src\analysis\dof_grp" /I "..\..\..\src\system_of_eqn\eigenSOE" /I "..\..\..\src\handler" /I "..\..\..\symSparse" /I "..\..\..\src\analysis\model\simple" /I "..\..\..\src\system_of_eqn\linearSOE\umfGEN" /I "..\..\..\src\system_of_eqn\linearSOE\fullGEN" /I "..\..\..\src\system_of_eqn\linearSOE\sparseGEN" /I "..\..\..\src\system_of_eqn\linearSOE\bandSPD" /I "..\..\..\src\system_of_eqn\linearSOE\bandGEN" /I "..\..\..\src\domain\domain" /I "..\..\..\src\analysis\model" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\actor\channel" /I "..\..\..\src\tagged" /I "..\..\..\src\graph\graph" /I "..\..\..\src\system_of_eqn\linearSOE\profileSPD" /I "..\..\..\src" /I "..\..\..\src\matrix" /I "..\..\..\src\actor\actor" /I "..\..\..\src\system_of_eqn" /I "..\..\..\src\nDarray" /I "..\..\..\src\system_of_eqn\linearSOE\itpack" /I "..\..\..\src\system_of_eqn\linearSOE\cg" /I "..\..\..\other\superlu_3.0\src" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "WIN32" /D "_DEBUG" /D "_LIB" /D "_WIN32" /D "_MBCS" /D "_TCL84" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
@@ -436,6 +437,34 @@ SOURCE=..\..\..\SRC\system_of_eqn\eigenSOE\SymBandEigenSolver.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\system_of_eqn\eigenSOE\SymBandEigenSolver.h
+# End Source File
+# End Group
+# Begin Group "diagonal"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\SRC\system_of_eqn\linearSOE\diagonal\DiagonalDirectSolver.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\system_of_eqn\linearSOE\diagonal\DiagonalDirectSolver.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\system_of_eqn\linearSOE\diagonal\DiagonalSOE.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\system_of_eqn\linearSOE\diagonal\DiagonalSOE.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\system_of_eqn\linearSOE\diagonal\DiagonalSolver.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\system_of_eqn\linearSOE\diagonal\DiagonalSolver.h
 # End Source File
 # End Group
 # End Target

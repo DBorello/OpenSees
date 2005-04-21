@@ -26,6 +26,7 @@ CFG=damage - Win32 Debug
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
+F90=df.exe
 RSC=rc.exe
 
 !IF  "$(CFG)" == "damage - Win32 Release"
@@ -41,7 +42,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\..\obj\damage\release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /W3 /GX /O2 /I "..\..\..\src\recorder\response" /I "..\..\..\src" /I "..\..\..\src\element" /I "..\..\..\src\domain\component" /I "..\..\..\src\handler" /I "..\..\..\src\damage" /I "..\..\..\src\matrix" /I "..\..\..\src\ndarray" /I "..\..\..\src\tagged" /I "..\..\..\src\actor\actor" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\modelbuilder\tcl" /I "c:\Program Files\Tcl" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "_TCL84" /YX /FD /c
+# ADD CPP /nologo /W3 /GX /O2 /I "..\..\..\src\recorder\response" /I "..\..\..\src" /I "..\..\..\src\element" /I "..\..\..\src\domain\component" /I "..\..\..\src\handler" /I "..\..\..\src\damage" /I "..\..\..\src\matrix" /I "..\..\..\src\ndarray" /I "..\..\..\src\tagged" /I "..\..\..\src\actor\actor" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\modelbuilder\tcl" /I "c:\Program Files\Tcl" /I "c:\Program Files\tcl\include" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "_TCL84" /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -63,8 +64,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "..\..\lib\debug"
 # PROP Intermediate_Dir "..\..\obj\damage\debug"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ  /c
-# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "..\..\..\src\recorder\response" /I "..\..\..\src" /I "..\..\..\src\element" /I "..\..\..\src\domain\component" /I "..\..\..\src\handler" /I "..\..\..\src\damage" /I "..\..\..\src\matrix" /I "..\..\..\src\ndarray" /I "..\..\..\src\tagged" /I "..\..\..\src\actor\actor" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\modelbuilder\tcl" /I "c:\Program Files\Tcl" /D "_DEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "_TCL84" /YX /FD /GZ  /c
+# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
+# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "..\..\..\src\recorder\response" /I "..\..\..\src" /I "..\..\..\src\element" /I "..\..\..\src\domain\component" /I "..\..\..\src\handler" /I "..\..\..\src\damage" /I "..\..\..\src\matrix" /I "..\..\..\src\ndarray" /I "..\..\..\src\tagged" /I "..\..\..\src\actor\actor" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\modelbuilder\tcl" /I "c:\Program Files\Tcl" /I "c:\Program Files\tcl\include" /D "_DEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "_TCL84" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
