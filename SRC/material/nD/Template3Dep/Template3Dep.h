@@ -65,10 +65,10 @@
 //#include <CDriver.h>
 
 //class YieldSurface;
-#define ITMAX 30
-#define MAX_STEP_COUNT 30
-#define NUM_OF_SUB_INCR 30
-#define KK 1000.0  
+//#define ITMAX 30
+//#define MAX_STEP_COUNT 100
+//#define NUM_OF_SUB_INCR 30
+//#define KK 1000.0  
 
 class Template3Dep : public NDMaterial
 {

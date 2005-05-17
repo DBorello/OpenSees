@@ -17,7 +17,7 @@
 # UPDATE HISTORY:    May 2004 Guanzhou changed Commit to be consistent           #
 #                             with theory                                        #
 #		     May 2004, Zhao Cheng splitted the elastic part	         #
-#       MAR2005 Guanzhou adding support for  const straintensor & ElasticStrain_commitp
+#                                                                                #
 #                                                                                #
 #                                                                                #
 # SHORT EXPLANATION: This class is used to hold all state parameters and internal#
@@ -104,6 +104,7 @@ EPState::EPState(
       //E_Young          = Ed;
       //nu_Poisson       = nu;
       //rho_mass_density = rho;
+      Delta_lambda = 0.0;
 
       NScalarVar = NScalarp;
       //ScalarVar = new double[ NScalarVar ];
@@ -193,6 +194,7 @@ CurrentStress  = stressp;
 CurrentStrain  = strainp;
 ElasticStrain  = Estrainp;
 ElasticStrain_commit = Estrainp;//Guanzhou Mar2005
+Delta_lambda = 0.0;
 
 PlasticStrain  = Pstrainp;
 Stress_commit  = stressp;
@@ -324,6 +326,7 @@ EPState::EPState(
 //ZC05/2004po = pop;
 //ZC05/2004e = eop;
 //ZC05/2004a = a;
+      Delta_lambda = 0.0;
 
       e = 0.85;    //ZC
       psi  = 0.05; //ZC
@@ -411,14 +414,21 @@ EPState::EPState( )
       //rho_mass_density = 0.0;
       Eep = tensor( 4, def_dim_4, 0.0 );
       integratorFlag = 0;//ForwardEuler assumed
+      Delta_lambda = 0.0;
 
       NScalarVar = MaxNScalarVar;
-      for (int i =0; i < NScalarVar; i++)
+      for (int i =0; i < NScalarVar; i++) {
+      	 ScalarVar_commit[i] = 0.0;
          ScalarVar[i] = 0.0;
-
+	 ScalarVar_init[i] = 0.0;
+      }
+      
       NTensorVar = MaxNTensorVar;
-      //for (int i =0; i < NTensorVar, i++)
-      //   TensorVar[i] = stresstensor(0.0);
+      for (int i =0; i < NTensorVar; i++) {
+         TensorVar[i] = stresstensor(0.0);
+         TensorVar_commit[i] = stresstensor(0.0);
+         TensorVar_init[i] = stresstensor(0.0);
+      }
 
       //Converged = false;
 
@@ -471,7 +481,8 @@ EPState* EPState::newObj() {
 		 this->getIntegratorFlag()
 //ZC05/2004                 this->geta()
            );
-      return eps;
+     eps->Delta_lambda = this->Delta_lambda;
+     return eps;
 }
 
 
@@ -543,7 +554,9 @@ EPState::EPState( const EPState &rhs ) {
 //ZC05/2004       po        = rhs.getpo();
        e         = rhs.gete();
        psi       = rhs.getpsi();
-       
+
+       Delta_lambda = rhs.Delta_lambda; //Guanzhou
+
        integratorFlag = rhs.getIntegratorFlag();
 //ZC05/2004       a         = rhs.geta();
 
@@ -630,6 +643,7 @@ const EPState & EPState::operator=(const EPState &rhs ) {
 
          Converged = rhs.getConverged();
 	 integratorFlag = rhs.getIntegratorFlag();
+ 	 Delta_lambda = rhs.Delta_lambda;
 
 //ZC05/2004          Elasticflag = rhs.getElasticflag();
 //ZC05/2004          Ev        = rhs.getEv();
@@ -920,6 +934,13 @@ void EPState::setStrain_commit(const straintensor &newstrain ) {
       Strain_commit = newstrain;
 
 }
+
+void EPState::setElasticStrain_commit(const straintensor &newstrain ) {
+
+      ElasticStrain_commit = newstrain;
+
+}
+
 
 //================================================================================
 void EPState::setStress_init(const stresstensor &newstress ) {

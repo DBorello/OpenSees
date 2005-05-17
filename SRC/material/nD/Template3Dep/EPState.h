@@ -16,7 +16,6 @@
 # DATE:              08-03-2000                                                #
 # UPDATE HISTORY:                                                              #
 #		     May 2004, Zhao Cheng spliting the elastic part	                        #
-#       MAR2005 Guanzhou adding support for  const straintensor & ElasticStrain_commitp
 #                                                                              #
 #                                                                              #
 #                                                                              #
@@ -92,6 +91,7 @@ class EPState
     bool Converged;      // Bool to indicate whether this is the converged EPState by current CDriver
     
     int integratorFlag; //Guanzhou Mar2005
+    double Delta_lambda; //Guanzhou Mar2005
 
 //ZC05/2004    // Flag to indicate if elastic portion is pressure dependent isotropic, pressure independent isotropic, pressure 
 //ZC05/2004    // independent cross-anisotropic or pressure dependentcross-anisotropic 
@@ -323,6 +323,7 @@ class EPState
 
     void setStress_commit( const stresstensor &newstress );
     void setStrain_commit( const straintensor &newstrain );
+    void setElasticStrain_commit( const straintensor &newstrain );
 
     void setStress_init( const stresstensor &newstress );
     void setStrain_init( const straintensor &newstrain );
