@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-04-08 02:42:05 $
+// $Revision: 1.2 $
+// $Date: 2005-05-18 19:26:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/PetscSparseSeqSolver.cpp,v $
                                                                         
 // Written: fmk 
@@ -37,7 +37,7 @@
 
 PetscSparseSeqSolver::PetscSparseSeqSolver(KSPType meth, PCType pre)
   :SparseGenRowLinSolver(SOLVER_TAGS_PetscSparseSeqSolver), 
-   rTol(0.0), aTol(0.0), maxIts(0)
+   rTol(PETSC_DEFAULT), aTol(PETSC_DEFAULT), dTol(PETSC_DEFAULT), maxIts(PETSC_DEFAULT)
 {
   PetscInitialize(0, PETSC_NULL, (char *)0, PETSC_NULL);
 
@@ -45,15 +45,16 @@ PetscSparseSeqSolver::PetscSparseSeqSolver(KSPType meth, PCType pre)
   preconditioner = pre;
 }
 
-PetscSparseSeqSolver::PetscSparseSeqSolver(KSPType meth, PCType pre, double relTol, double absTol, int maxIterations)
+PetscSparseSeqSolver::PetscSparseSeqSolver(KSPType meth, PCType pre, double relTol, double absTol, double divTol, int maxIterations)
   :SparseGenRowLinSolver(SOLVER_TAGS_PetscSparseSeqSolver), 
-   rTol(relTol), aTol(absTol), maxIts(maxIterations)
+   rTol(relTol), aTol(absTol), dTol(divTol), maxIts(maxIterations)
 {
   PetscInitialize(0, PETSC_NULL, (char *)0, PETSC_NULL);
 
   method = meth;
   preconditioner = pre;
 }
+
 
 PetscSparseSeqSolver::~PetscSparseSeqSolver()
 {
@@ -69,7 +70,7 @@ int
 PetscSparseSeqSolver::solve(void)
 {
   PetscErrorCode ierr = KSPSolve(ksp, b, x); CHKERRQ(ierr); 
-    
+
   return ierr;
 }
 
@@ -124,12 +125,7 @@ PetscSparseSeqSolver::setSize()
     */
 
    ierr = KSPSetType(ksp, method); CHKERRQ(ierr); 
-
-   if (maxIts != 0) 
-     ierr = KSPSetTolerances(ksp, rTol, aTol,PETSC_DEFAULT, maxIts); 
-   else
-     ierr = KSPSetTolerances(ksp, 1.0e-5, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT); 
-
+   ierr = KSPSetTolerances(ksp, rTol, aTol, dTol, maxIts); 
 
    /* 
     *  Set preconditioning scheme

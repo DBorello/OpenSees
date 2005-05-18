@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-04-08 02:42:05 $
+// $Revision: 1.2 $
+// $Date: 2005-05-18 19:26:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/PetscSparseSeqSolver.h,v $
                                                                         
 // Written: fmk 
@@ -35,8 +35,9 @@
 #define PetscSparseSeqSolver_h
 
 #include <petscksp.h>
-
 #include <SparseGenRowLinSolver.h>
+
+#define PetscMinRelTol 1.0e-6
 
 class SparseGenRowLinSOE;
 
@@ -44,7 +45,7 @@ class PetscSparseSeqSolver : public SparseGenRowLinSolver
 {
   public:
     PetscSparseSeqSolver(KSPType method, PCType preconditioner);    
-    PetscSparseSeqSolver(KSPType method, PCType preconditioner, double rTol, double aTol, int maxIts);    
+    PetscSparseSeqSolver(KSPType method, PCType preconditioner, double rTol, double aTol, double dTol, int maxIts);    
     ~PetscSparseSeqSolver();
 
     int solve(void);
@@ -67,6 +68,7 @@ class PetscSparseSeqSolver : public SparseGenRowLinSolver
     PCType  preconditioner;
     double rTol;
     double aTol;
+    double dTol; 
     int maxIts;
 
     Mat A;
