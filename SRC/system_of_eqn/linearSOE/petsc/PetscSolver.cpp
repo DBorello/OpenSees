@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:02:02 $
+// $Revision: 1.3 $
+// $Date: 2005-05-18 19:25:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/PetscSolver.cpp,v $
                                                                         
-                                                                        
-// File: ~/system_of_eqn/linearSOE/Petsc/PetscSolver.C
-//
 // Written: fmk & om
 // Created: 7/98
 // Revision: A
@@ -42,25 +39,33 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <Timer.h>
+#include <ID.h>
+#include <Vector.h>
 
+PetscSolver::PetscSolver()
+  :LinearSOESolver(SOLVER_TAGS_PetscSolver), 
+   rTol(PETSC_DEFAULT), aTol(PETSC_DEFAULT), dTol(PETSC_DEFAULT), maxIts(PETSC_DEFAULT)
+{
+
+}
 
 PetscSolver::PetscSolver(KSPType meth, PCType pre)
   :LinearSOESolver(SOLVER_TAGS_PetscSolver), method(meth), preconditioner(pre),
-   rTol(0.0), aTol(0.0), maxIts(0)
+   rTol(PETSC_DEFAULT), aTol(PETSC_DEFAULT), dTol(PETSC_DEFAULT), maxIts(PETSC_DEFAULT)
 {
-  int ierr = SLESCreate(PETSC_COMM_WORLD,&sles); CHKERRA(ierr);
+
 }
 
-PetscSolver::PetscSolver(KSPType meth, PCType pre, double relTol, double absTol, int maxIterations)
+PetscSolver::PetscSolver(KSPType meth, PCType pre, double relTol, double absTol, double divTol, int maxIterations)
   :LinearSOESolver(SOLVER_TAGS_PetscSolver), method(meth), preconditioner(pre),
-   rTol(relTol), aTol(absTol), maxIts(maxIterations)
+   rTol(relTol), aTol(absTol), dTol(divTol), maxIts(maxIterations)
 {
-  int ierr = SLESCreate(PETSC_COMM_WORLD,&sles); CHKERRA(ierr);
+
 }
 
 PetscSolver::~PetscSolver()
 {
-
+  
 }
 
 
@@ -68,58 +73,140 @@ PetscSolver::~PetscSolver()
 int
 PetscSolver::solve(void)
 {
- Mat A = theSOE->A;
- Vec b = theSOE->b;
- Vec x = theSOE->x;
- 
- int factored = theSOE->isFactored;
+  int size = theSOE->size;
+  int factored = theSOE->isFactored;
+  
+  int numProcesses = theSOE->numProcesses;
+  int processID = theSOE->processID;
+  
+  int ierr;
+  ierr = MatAssemblyBegin(theSOE->A, MAT_FINAL_ASSEMBLY); CHKERRQ(ierr); 
+  ierr = MatAssemblyEnd(theSOE->A, MAT_FINAL_ASSEMBLY); CHKERRQ(ierr); 
 
- if (factored == 0) {
-   int ierr = SLESSetOperators(sles,A,A,DIFFERENT_NONZERO_PATTERN); 
-   CHKERRA(ierr);
-   
-   ierr = SLESGetKSP(sles,&ksp); CHKERRA(ierr); 
-   ierr = SLESGetPC(sles,&pc); CHKERRA(ierr); 
+  //
+  // if parallel, we must zero X & form the total B: each processor has own contributions
+  //
+  
+  static Vector recvVector(1);
 
-   ierr = KSPSetType(ksp,method); CHKERRA(ierr); 
-   ierr = PCSetType(pc,preconditioner); CHKERRA(ierr); 
-   if (maxIts != 0) 
-     ierr = KSPSetTolerances(ksp,rTol,aTol,PETSC_DEFAULT, maxIts); 
-   else
-     ierr = KSPSetTolerances(ksp, 1.0e-5, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT); 
-     
-   CHKERRA(ierr); 
+  if (numProcesses > 1) {
+    Vector *vectX = theSOE->vectX;
+    Vector *vectB = theSOE->vectB;
 
-   ierr = SLESSetFromOptions(sles); CHKERRA(ierr);
+    // zero X
+    vectX->Zero();
 
-   ierr = MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY); CHKERRA(ierr); 
-   ierr = MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY); CHKERRA(ierr); 
- }
- int ierr;
- ierr = VecAssemblyBegin(b); CHKERRA(ierr); 
- ierr = VecAssemblyEnd(b); CHKERRA(ierr); 
+    //
+    // form B on each
+    //
 
- Timer timer;
- timer.start();
+    int numChannels = theSOE->numChannels;
+    Channel **theChannels = theSOE->theChannels;
+    
+    if (processID != 0) {
+      Channel *theChannel = theChannels[0];
+      
+      theChannel->sendVector(0, 0, *vectB);
+      theChannel->recvVector(0, 0, *vectB);
+      
+    } else {
+      
+      if (recvVector.Size() != size) 
+	recvVector.resize(size);
+      for (int j=0; j<numChannels; j++) {
+	Channel *theChannel = theChannels[j];
+	theChannel->recvVector(0, 0, recvVector);
+	*vectB += recvVector;
+      }
+      for (int j=0; j<numChannels; j++) {
+	Channel *theChannel = theChannels[j];
+	theChannel->sendVector(0, 0, *vectB);
+      }
+    }
+  }
 
- // solve and mark as having been solved
- ierr = SLESSolve(sles,b,x,&its); CHKERRA(ierr); 
- theSOE->isFactored = 1;
+  //
+  // solve and mark as having been solved
+  //
 
- timer.pause();
+  ierr = KSPSolve(ksp, theSOE->b, theSOE->x); CHKERRQ(ierr); 
+  theSOE->isFactored = 1;
 
- opserr << "PetscSolver::solve -real  " << timer.getReal() << "  cpu: " << timer.getCPU() << "  page: " << timer.getNumPageFaults() << endln; 
+  //
+  // if parallel, we must form the total X: each processor has startRow through endRow-1
+  //
 
- opserr << "PetscSolver::solve(void) - number of iterations: " << its << endln;
+  if (numProcesses > 1) {
+    Vector *vectX = theSOE->vectX;
 
- return ierr;
+    int numChannels = theSOE->numChannels;
+    Channel **theChannels = theSOE->theChannels;
+    
+    if (processID != 0) {
+      Channel *theChannel = theChannels[0];
+      
+      theChannel->sendVector(0, 0, *vectX);
+      theChannel->recvVector(0, 0, *vectX);
+      
+    } else {
+      
+      if (recvVector.Size() != size) 
+	recvVector.resize(size);
+
+      for (int j=0; j<numChannels; j++) {
+	Channel *theChannel = theChannels[j];
+	theChannel->recvVector(0, 0, recvVector);
+	*vectX += recvVector;
+      }
+      for (int j=0; j<numChannels; j++) {
+	Channel *theChannel = theChannels[j];
+	theChannel->sendVector(0, 0, *vectX);
+      }
+    }
+  }
+
+  return ierr;
 }
 
 
 int
 PetscSolver::setSize()
 {
-    return 0;
+  /* 
+   * Create linear solver context
+   */
+  
+   KSPCreate(PETSC_COMM_WORLD, &ksp);
+
+   /* 
+    *  Set operators. NOTE: matrix that defines the linear system
+    *  also serves as the preconditioning matrix.
+    */
+
+   KSPSetOperators(ksp, theSOE->A, theSOE->A, DIFFERENT_NONZERO_PATTERN);
+
+   /* 
+    *  Set solution scheme & tolerances
+    */
+   
+   int ierr;
+   ierr = KSPSetType(ksp, method); CHKERRQ(ierr); 
+   ierr = KSPSetTolerances(ksp, rTol, aTol, dTol, maxIts); 
+
+   /* 
+    *  Set preconditioning scheme
+    */
+
+   KSPGetPC(ksp, &pc);
+   ierr = PCSetType(pc,  preconditioner); CHKERRQ(ierr); 
+
+   /* 
+    *  Finally mark so that uses last solution as initial guess in each solution
+    *    NOTE: maybe change this as another user supplied option
+    */
+
+   //   ierr = KSPSetInitialGuessNonzero(ksp, PETSC_TRUE); CHKERRQ(ierr); 
+   return ierr;
 }
 
 
@@ -131,19 +218,97 @@ PetscSolver::setLinearSOE(PetscSOE &theSys)
 }
 
 
-
+int
 PetscSolver::sendSelf(int cTag, Channel &theChannel)
 {
-    // nothing to do
-    return 0;
+  static ID idData(3);
+  idData(0) = maxIts;
+  if (method == KSPCG) 
+    idData(1) = 0;
+  else if (method == KSPBICG) 
+    idData(1) = 1;
+  else if (method == KSPRICHARDSON) 
+    idData(1) = 2;
+  else if (method == KSPCHEBYCHEV) 
+    idData(1) = 3;
+  else if (method == KSPGMRES) 
+    idData(1) = 4;
+  else {
+    opserr << "PetscSolver::sendSelf() - unknown method set\n";
+    return -1;
+  }
+
+  if (preconditioner == PCJACOBI) 
+    idData(2) = 0;
+  else if (preconditioner == PCILU) 
+    idData(2) = 1;
+  else if (preconditioner == PCICC) 
+    idData(2) = 2;
+  else if (preconditioner == PCBJACOBI) 
+    idData(2) = 3;
+  else if (preconditioner == PCNONE) 
+    idData(2) = 4;
+  else {
+    opserr << "PetscSolver::sendSelf() - unknown preconditioner set\n";
+    return -1;
+  }
+
+  theChannel.sendID(0, cTag, idData);
+
+  static Vector data(3);
+  data(0) = rTol;
+  data(1) = aTol;
+  data(2) = dTol;
+
+  theChannel.sendVector(0, cTag, data);
+  return 0;
 }
 
 int
 PetscSolver::recvSelf(int cTag, Channel &theChannel, 
 		      FEM_ObjectBroker &theBroker)
 {
-    // nothing to do
-    return 0;
+  static ID idData(3);
+  theChannel.recvID(0, cTag, idData);
+  maxIts = idData(0);
+  if (idData(1) == 0) 
+    method = KSPCG;
+  else if (idData(1) == 1)
+    method = KSPBICG;
+  else if (idData(1) == 2) 
+    method = KSPRICHARDSON;
+  else if (idData(1) == 3)
+    method = KSPCHEBYCHEV;
+  else if (idData(1) == 4)
+    method = KSPGMRES;
+  else {
+    opserr << "PetscSolver::recvSelf() - unknown method recvd\n";
+    return -1;
+  }
+
+  if (idData(2) == 0)
+    preconditioner = PCJACOBI;
+  else if (idData(2) == 1)
+    preconditioner = PCILU;
+  else if (idData(2) == 2)
+    preconditioner = PCICC;
+  else if (idData(2) == 3)
+    preconditioner = PCBJACOBI;
+  else if (idData(2) == 4)
+    preconditioner = PCNONE;
+  else {
+    opserr << "PetscSolver::sendSelf() - unknown preconditioner set\n";
+    return -1;
+  }
+
+
+  static Vector data(3);
+  theChannel.recvVector(0, cTag, data);
+  rTol = data(0);
+  aTol = data(1);
+  dTol = data(2);
+
+  return 0;
 }
 
 

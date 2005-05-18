@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-12-07 00:17:53 $
+// $Revision: 1.3 $
+// $Date: 2005-05-18 19:24:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/PetscSOE.h,v $
                                                                         
                                                                         
-// File: ~/system_of_eqn/linearSOE/petsc/PetscSOE.h
-//
 // Written: fmk & om
 // Created: 7/98
 // Revision: A
@@ -43,7 +41,7 @@
 #include <Vector.h>
 
 // extern "C" {
-#include <petsc.h>
+#include <petscksp.h>
 // }
 
 class PetscSolver;
@@ -51,18 +49,12 @@ class PetscSolver;
 class PetscSOE : public LinearSOE
 {
   public:
-    PetscSOE(PetscSolver &theSolver, int blockSize);    
+    PetscSOE(PetscSolver &theSolver, int blockSize=1);    
     
     ~PetscSOE();
 
     int getNumEqn(void) const;
     int setSize(Graph &theGraph);
-    int setSizeDirectly(int N);
-    int setSizeParallel(int n, int N, 
-			int d_nz, int *d_nnz,
-			int o_nz, int *o_nnz);
-				
-				
     
     int addA(const Matrix &, const ID &, double fact = 1.0);
     int addB(const Vector &, const ID &, double fact = 1.0);    
@@ -89,18 +81,28 @@ class PetscSOE : public LinearSOE
     friend class ShadowPetscSOE;
     
   protected:
+    int setChannels(int nChannels, Channel **theChannels);
     
   private:
     int isFactored;
     int size;
-    int numProcessors;
+    int processID;
+    int numProcesses;
+
     double *B, *X;
+    int *indices;
     Vector *vectX;
     Vector *vectB;
     Mat A;
     Vec x, b;
     int blockSize;
-    int flg;
+    PetscTruth flg;
+
+    int numChannels;
+    Channel **theChannels;
+    ID **localCol;
+
+    int startRow, endRow;
 };
 
 

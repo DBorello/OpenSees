@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:29 $
+// $Revision: 1.2 $
+// $Date: 2005-05-18 19:25:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/PetscSolver.h,v $
                                                                         
                                                                         
-// File: ~/system_of_eqn/linearSOE/Petsc/PetscSolver.h
-//
 // Written: fmk 
 // Created: Tue Sep 26 16:27:47: 1996
 // Revision: A
@@ -38,19 +36,17 @@
 #ifndef PetscSolver_h
 #define PetscSolver_h
 
+#include <petscksp.h>
 #include <LinearSOESolver.h>
-
-// extern "C" {
-#include <sles.h>
-// }
 
 class PetscSOE;
 
 class PetscSolver : public LinearSOESolver
 {
   public:
+    PetscSolver();    
     PetscSolver(KSPType method, PCType preconditioner);    
-    PetscSolver(KSPType method, PCType preconditioner, double rTol, double aTol, int maxIts);    
+    PetscSolver(KSPType method, PCType preconditioner, double rTol, double aTol, double dTol, int maxIts);    
     ~PetscSolver();
 
     int solve(void);
@@ -61,7 +57,6 @@ class PetscSolver : public LinearSOESolver
     int recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker);    
 
-    friend class PetscSolver;
     friend class ActorPetscSOE;
     friend class ShadowPetscSOE;
     
@@ -69,14 +64,14 @@ class PetscSolver : public LinearSOESolver
     PetscSOE *theSOE;
 
   private:
-    SLES sles;
-    KSP ksp;
+    KSP ksp;                   
     PC pc;
     int its;
     KSPType method;
     PCType preconditioner;
     double rTol;
     double aTol;
+    double dTol; 
     int maxIts;
 };
 

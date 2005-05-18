@@ -18,22 +18,20 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:02:02 $
+// $Revision: 1.4 $
+// $Date: 2005-05-18 19:24:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/PetscSOE.cpp,v $
                                                                         
-                                                                        
-// File: ~/system_of_eqn/linearSOE/petsc/PetscSOE.C
-//
 // Written: fmk & om
 // Created: 7/98
 // Revision: A
 //
-// Description: This file contains the implementation for BandGenLinSOE
+// Description: This file contains the implementation for PetscSOE
 
 
 #include "PetscSOE.h"
 #include "PetscSolver.h"
+#include <petscvec.h>
 #include <Matrix.h>
 #include <Graph.h>
 #include <Vertex.h>
@@ -45,264 +43,229 @@
 
 PetscSOE::PetscSOE(PetscSolver &theSOESolver, int bs)
 :LinearSOE(theSOESolver, LinSOE_TAGS_PetscSOE),
- isFactored(0),size(0), numProcessors(0), B(0), X(0), 
- vectX(0), vectB(0), A(0), x(0), b(0), blockSize(bs)
+ isFactored(0),size(0), processID(0), numProcesses(0), B(0), X(0), 
+ indices(0), vectX(0), vectB(0), A(0), x(0), b(0), blockSize(bs),
+ numChannels(0), theChannels(0), localCol(0)
 {
-    theSOESolver.setLinearSOE(*this);
-    MPI_Comm_size(PETSC_COMM_WORLD, &numProcessors);
+  theSOESolver.setLinearSOE(*this);
 }
 
 
 int
 PetscSOE::getNumEqn(void) const
 {
-    return size;
+  return size;
 }
     
 PetscSOE::~PetscSOE()
 {
-  /*
+  if (theChannels != 0)
+    delete [] theChannels;
+
+  if (localCol != 0)
+    for (int i=0; i<numChannels; i++)
+      if (localCol[i] != 0)
+	delete localCol[i];
+  delete [] localCol;
+  
   if (vectX != 0) delete vectX;  
   if (vectB != 0) delete vectB;  
   if (B != 0) delete [] B;
   if (X != 0) delete [] X;
-
+  
   // invoke the petsc destructors
   if (A != 0) MatDestroy(A);
   if (b != 0) VecDestroy(b);
   if (x != 0) VecDestroy(x);
-  */
+
 }
 
 
 int 
 PetscSOE::setSize(Graph &theGraph)
 {
-    int result = 0;
-    int oldSize = size;
-    size = theGraph.getNumVertex();
-    isFactored = 0;
+  PetscInitialize(0, PETSC_NULL, (char *)0, PETSC_NULL);
+  MPI_Comm_size(PETSC_COMM_WORLD, &numProcesses);
+  MPI_Comm_rank(PETSC_COMM_WORLD, &processID);
+  
+  opserr << "PetscSOE::setSize(Graph &theGraph) - " << processID << endln;
 
+  int result = 0;
+  int ierr = 0;
 
-    // we determine the number of non-zeros & number of nonzero's
-    // in each row of A
-    int *rowA = new int[size];  // will contain no of non-zero entries
-                                // in each row
-    
-    int NNZ = 0;
-    for (int a=0; a<size; a++) {
-      Vertex *theVertex = theGraph.getVertexPtr(a);
-      if (theVertex == 0) {
-	opserr << "WARNING:PetscSOE::setSize :";
-	  opserr << " vertex " << a << " not in graph! - size set to 0\n";
-	  size = 0;
-	  return -1;
+    // 
+    // first determine system size
+    //
+
+    if (numProcesses == 1) {
+      
+      // if single process, the system size is size of graph
+      size = theGraph.getNumVertex();
+      isFactored = 0;
+
+    } else {
+
+      // first determine local max
+      size = 0;
+      isFactored = 0;
+      VertexIter &theVertices = theGraph.getVertices();
+      Vertex *theVertex;
+      while ((theVertex = theVertices()) != 0) {
+	int vertexTag = theVertex->getTag();
+	if (vertexTag > size) 
+	  size = vertexTag;
+      }
+
+      static ID data(1);
+
+      // all local max's sent to P0 which determines the max
+      // and informs all others
+
+      if (processID != 0) {
+	Channel *theChannel = theChannels[0];
+	
+	data(0) = size;
+	theChannel->sendID(0, 0, data);
+	theChannel->recvID(0, 0, data);
+	
+	size = data(0);
+      } else {
+
+	for (int j=0; j<numChannels; j++) {
+	  Channel *theChannel = theChannels[j];
+	  theChannel->recvID(0, 0, data);
+	  if (data(0) > size)
+	    size = data(0);
 	}
-
-	const ID &theAdjacency = theVertex->getAdjacency();
-	int idSize = theAdjacency.Size();
-
-	NNZ += idSize +1;
-	rowA[a] = idSize +1;  // +1 for the diagonal entry
+	data(0) = size;
+	for (int j=0; j<numChannels; j++) {
+	  Channel *theChannel = theChannels[j];
+	  theChannel->sendID(0, 0, data);
+	}
+      }
+      size = size+1; // vertices numbered 0 through n-1
     }
 
+    // invoke the petsc destructors
+    if (A != 0) MatDestroy(A);
+    if (b != 0) VecDestroy(b);
+    if (x != 0) VecDestroy(x);
+    
+    //
+    // now we create the opensees vector objects
+    //
 
     // delete the old vectors
     if (B != 0) delete [] B;
     if (X != 0) delete [] X;
-
-
-    // invoke the petsc destructors
-    if (A != 0) MatDestroy(A);
-    if (b != 0) VecDestroy(b);
-    if (x != 0) VecDestroy(x);
-
+    
     // create the new
     B = new double[size];
     X = new double[size];
-	
+    
     if (B == 0 || X == 0) {
       opserr << "WARNING PetscSOE::PetscSOE :";
       opserr << " ran out of memory for vectors (size) (";
       opserr << size << ") \n";
       size = 0; 
       result = -1;
-    }
-
-    // zero the vectors
-    for (int j=0; j<size; j++) {
-	B[j] = 0;
-	X[j] = 0;
-    }
-
-    if (vectX != 0) 
-      delete vectX;
-
-    if (vectB != 0) 
-      delete vectB;
-		
-    vectX = new Vector(X,size);
-    vectB = new Vector(B,size);
-
-    // invoke the petsc constructors
-    int ierr = OptionsGetInt(PETSC_NULL,"-n",&size,&flg); CHKERRA(ierr);
-    // int nz = NNZ/size + 1;
-
-    if (blockSize == 1) {
-      ierr = MatCreateSeqAIJ(PETSC_COMM_SELF,size,size, 0, rowA, &A); CHKERRA(ierr);
-    } else {
-      ierr = MatCreateSeqBAIJ(PETSC_COMM_SELF, blockSize, size,size, 0, rowA, &A); CHKERRA(ierr);
-    }
-
-    ierr = VecCreateSeq(PETSC_COMM_SELF,size,&x); CHKERRA(ierr); 
-    ierr = VecDuplicate(x,&b); CHKERRA(ierr);  
-    // invoke setSize() on the Solver
-    LinearSOESolver *tSolver = this->getSolver();
-    int solverOK = tSolver->setSize();
-    if (solverOK < 0) {
-	opserr << "WARNING:PetscSOE::setSize :";
-	opserr << " solver failed setSize()\n";
-	return solverOK;
-    }    
-
-    // clear up the memory we used
-    delete [] rowA;
-
-    return result;    
-}
-
-
-int 
-PetscSOE::setSizeDirectly(int newSize)
-{
-    int result = 0;
-    int oldSize = size;
-    size = newSize;
-    isFactored = 0;
-
-    // delete the old	
-    if (B != 0) delete [] B;
-    if (X != 0) delete [] X;
-
-    // invoke the petsc destructors
-    if (A != 0) MatDestroy(A);
-    if (b != 0) VecDestroy(b);
-    if (x != 0) VecDestroy(x);
-
-    // create the new
-    B = new double[size];
-    X = new double[size];
-	
-    if (B == 0 || X == 0) {
-      opserr << "WARNING PetscSOE::PetscSOE :";
-      opserr << " ran out of memory for vectors (size) (";
-      opserr << size << ") \n";
-      size = 0; 
-      result = -1;
-    }
-
-    // zero the vectors
-    for (int j=0; j<size; j++) {
-	B[j] = 0;
-	X[j] = 0;
-    }
-
-    if (vectX != 0) 
-      delete vectX;
-
-    if (vectB != 0) 
-      delete vectB;
-		
-    vectX = new Vector(X,size);
-    vectB = new Vector(B,size);
-
-    // invoke the petsc constructors
-    int ierr = OptionsGetInt(PETSC_NULL,"-n",&size,&flg); CHKERRA(ierr);
-    ierr = MatCreate(PETSC_COMM_WORLD,size,size,&A); CHKERRA(ierr);
-    ierr = VecCreate(PETSC_COMM_WORLD,PETSC_DECIDE,size,&x); CHKERRA(ierr); 
-    ierr = VecDuplicate(x,&b); CHKERRA(ierr);  
-    // invoke setSize() on the Solver
-    LinearSOESolver *tSolver = this->getSolver();
-    int solverOK = tSolver->setSize();
-    if (solverOK < 0) {
-	opserr << "WARNING:PetscSOE::setSize :";
-	opserr << " solver failed setSize()\n";
-	return solverOK;
-    }    
-
-    return result;    
-}
-
-
-int 
-PetscSOE::setSizeParallel(int n, int N, 
-			  int d_nz, int *d_nnz,
-			  int o_nz, int *o_nnz)
-{
-    int result = 0;
-    size = N;
-    isFactored = 0;
-
-    // delete the old	
-    if (B != 0) delete [] B;
-    if (X != 0) delete [] X;
-
-    // invoke the petsc destructors
-    if (A != 0) MatDestroy(A);
-    if (b != 0) VecDestroy(b);
-    if (x != 0) VecDestroy(x);
-
-    // create the new
-    B = new double[size];
-    X = new double[size];
-	
-    if (B == 0 || X == 0) {
-      opserr << "WARNING PetscSOE::PetscSOE :";
-      opserr << " ran out of memory for vectors (size) (";
-      opserr << size << ") \n";
-      size = 0; 
-      result = -1;
-    }
-
-    // zero the vectors
-    for (int j=0; j<size; j++) {
-	B[j] = 0;
-	X[j] = 0;
-    }
-
-    if (vectX != 0) 
-      delete vectX;
-
-    if (vectB != 0) 
-      delete vectB;
-		
-    vectX = new Vector(X,size);
-    vectB = new Vector(B,size);
-
-    // invoke the petsc parallel matrix and vector constructors
-    int ierr = OptionsGetInt(PETSC_NULL,"-n",&size,&flg); CHKERRA(ierr);
-    if (blockSize == 1) {
-      ierr = MatCreateMPIAIJ(PETSC_COMM_WORLD,n,n,N,N,
-			     d_nz,d_nnz,o_nz,o_nnz,&A);   
-      CHKERRA(ierr);
-    } else {
-      ierr = MatCreateMPIBAIJ(PETSC_COMM_WORLD, blockSize, n,n,N,N,
-			     d_nz,d_nnz,o_nz,o_nnz,&A);   
-      CHKERRA(ierr);
     }
     
-    ierr = VecCreateMPI(PETSC_COMM_WORLD,n,N,&x); CHKERRA(ierr); 
-    ierr = VecDuplicate(x,&b); CHKERRA(ierr);  
+    // zero the vectors
+    for (int j=0; j<size; j++) {
+      B[j] = 0;
+      X[j] = 0;
+    }
+    
+    if (vectX != 0) 
+      delete vectX;
+    
+    if (vectB != 0) 
+      delete vectB;
+    
+    vectX = new Vector(X, size);
+    vectB = new Vector(B, size);
 
-    // invoke setSize() on the Solver
+    // 
+    // now create petsc matrix and vector objects
+    //
 
-    LinearSOESolver *tSolver = this->getSolver();
-    int solverOK = tSolver->setSize();
-    if (solverOK < 0) {
+    if (numProcesses == 1) {
+    
+      // we determine the number of non-zeros & number of nonzero's
+      // in each row of A
+      int *rowA = new int[size];  // will contain no of non-zero entries
+      // in each row
+      
+      int NNZ = 0;
+      for (int a=0; a<size; a++) {
+	Vertex *theVertex = theGraph.getVertexPtr(a);
+	if (theVertex == 0) {
+	  opserr << "WARNING:PetscSOE::setSize :";
+	  opserr << " vertex " << a << " not in graph! - size set to 0\n";
+	  size = 0;
+	  return -1;
+	}
+	
+	const ID &theAdjacency = theVertex->getAdjacency();
+	int idSize = theAdjacency.Size();
+	
+	NNZ += idSize +1;
+	rowA[a] = idSize +1;  // +1 for the diagonal entry
+      }
+
+      // 
+      // Call Petsc VecCreate & MatCreate; NOTE: using previously allocated storage for vectors
+      //      
+
+      //      ierr = PetscOptionsGetInt(PETSC_NULL, "-n", &size, &flg); CHKERRQ(ierr);
+      
+      if (blockSize == 1) {
+	ierr = MatCreateSeqAIJ(PETSC_COMM_SELF, size, size, 0, rowA, &A); CHKERRQ(ierr);
+      } else {
+	ierr = MatCreateSeqBAIJ(PETSC_COMM_SELF, blockSize, size,size, 0, rowA, &A); CHKERRQ(ierr);
+      }
+      
+      ierr = VecCreateSeqWithArray(PETSC_COMM_WORLD, size, X, &x); CHKERRQ(ierr); 
+      ierr = VecCreateSeqWithArray(PETSC_COMM_WORLD, size, B, &b); CHKERRQ(ierr); 
+
+      // invoke setSize() on the Solver
+      LinearSOESolver *tSolver = this->getSolver();
+      int solverOK = tSolver->setSize();
+      if (solverOK < 0) {
 	opserr << "WARNING:PetscSOE::setSize :";
 	opserr << " solver failed setSize()\n";
 	return solverOK;
-    }    
+      }    
+      
+      // clear up the memory we used
+      delete [] rowA;
+
+
+    } else {
+
+      // 
+      // Call Petsc VecCreate & MatCreate; NOTE: using previously allocated storage for vectors
+      // 
+      //
+
+      ierr = PetscOptionsGetInt(PETSC_NULL, "-n", &size, &flg); CHKERRQ(ierr);
+      ierr = MatCreate(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE,size, size, &A); CHKERRQ(ierr);
+      ierr = MatSetFromOptions(A);CHKERRQ(ierr);
+      ierr = MatGetOwnershipRange(A, &startRow, &endRow);CHKERRQ(ierr);
+
+      ierr = VecCreateMPIWithArray(PETSC_COMM_WORLD, endRow-startRow, size, &X[startRow],  &x); CHKERRQ(ierr);
+      ierr = VecCreateMPIWithArray(PETSC_COMM_WORLD, endRow-startRow, size, &B[startRow],  &b); CHKERRQ(ierr);
+
+      // invoke setSize() on the Solver
+      LinearSOESolver *tSolver = this->getSolver();
+      int solverOK = tSolver->setSize();
+      if (solverOK < 0) {
+	opserr << "WARNING:PetscSOE::setSize :";
+	opserr << " solver failed setSize()\n";
+	return solverOK;
+      }    
+    }
 
     return result;    
 }
@@ -335,7 +298,9 @@ PetscSOE::addA(const Matrix &m, const ID &id, double fact)
 	  col = id(j);
 	  if (col >= 0) {
 	    value = m(i,j)*fact;
-	    int ierr = MatSetValues(A,1,&row,1,&col,&value,ADD_VALUES); CHKERRA(ierr); 
+	    int ierr = MatSetValues(A,1,&row,1,&col,&value,ADD_VALUES); 
+	    if (ierr) opserr << processID << " " << row << " " << col << endln; 
+	    CHKERRQ(ierr); 
 	  }
 	}
       }
@@ -355,21 +320,29 @@ PetscSOE::addB(const Vector &v, const ID &id, double fact)
     // check that m and id are of similar size
     int idSize = id.Size();        
     if (idSize != v.Size() ) {
-	opserr << "PetscSOE::addB() - Vector and ID not of similar sizes\n";
+	opserr << "BandGenLinSOE::addB()	- Vector and ID not of similar sizes\n";
 	return -1;
     }    
     
-    int n = id.Size();
-    int row;
-    double value;
-    for (int i=0; i<n; i++) {
-      row = id(i);
-      if (row >= 0) {
-	value = v(i) * fact;
-	int ierr = VecSetValues(b,1,&row,&value,ADD_VALUES); CHKERRA(ierr); 
-      }
-    }
-
+    if (fact == 1.0) { // do not need to multiply if fact == 1.0
+	for (int i=0; i<idSize; i++) {
+	    int pos = id(i);
+	    if (pos <size && pos >= 0)
+		B[pos] += v(i);
+	}
+    } else if (fact == -1.0) {
+	for (int i=0; i<idSize; i++) {
+	    int pos = id(i);
+	    if (pos <size && pos >= 0)
+		B[pos] -= v(i);
+	}
+    } else {
+	for (int i=0; i<idSize; i++) {
+	    int pos = id(i);
+	    if (pos <size && pos >= 0)
+		B[pos] += v(i) * fact;
+	}
+    }	
     return 0;
 }
 
@@ -381,21 +354,25 @@ PetscSOE::setB(const Vector &v, double fact)
     if (fact == 0.0)  return 0;
 
 
-    if (size != v.Size() ) {
-	opserr << "PetscSOE::addB() - Vector not of appropriate size\n";
+    if (v.Size() != size) {
+	opserr << "WARNING BandGenLinSOE::setB() -";
+	opserr << " incomptable sizes " << size << " and " << v.Size() << endln;
 	return -1;
-    }    
-    
-    int n = size;
-    int row;
-    double value;
-    for (int i=0; i<n; i++) {
-      value = v(i) * fact;
-      int ierr = VecSetValues(b,1,&i,&value,INSERT_VALUES); CHKERRA(ierr); 
     }
-    int ierr = VecAssemblyBegin(b); CHKERRA(ierr); 
-    ierr = VecAssemblyEnd(b); CHKERRA(ierr); 
-
+    
+    if (fact == 1.0) { // do not need to multiply if fact == 1.0
+	for (int i=0; i<size; i++) {
+	    B[i] = v(i);
+	}
+    } else if (fact == -1.0) {
+	for (int i=0; i<size; i++) {
+	    B[i] = -v(i);
+	}
+    } else {
+	for (int i=0; i<size; i++) {
+	    B[i] = v(i) * fact;
+	}
+    }	
     return 0;
 }
 
@@ -404,49 +381,37 @@ void
 PetscSOE::zeroA(void)
 {
   isFactored = 0;
-  int ierr = MatZeroEntries(A); CHKERRA(ierr);   
+  MatZeroEntries(A);
 }
 	
 void 
 PetscSOE::zeroB(void)
 {
-  double zero = 0.0;
-  VecSet(&zero, b);
+  double *Bptr = B;
+  for (int i=0; i<size; i++)
+    *Bptr++ = 0;
 }
 
 
 const Vector &
 PetscSOE::getX(void)
 {
-    if (vectX == 0) {
-	opserr << "FATAL PetscSOE::getX - vectX == 0!";
-	exit(-1);
-    }    
-    double *theData =0;
-    int ierr = VecGetArray(x, &theData); CHKERRA(ierr);       
-    for (int i=0; i<size; i++)
-      X[i] = theData[i];
-    ierr = VecRestoreArray(x, &theData); CHKERRA(ierr);             
-
-
-    return *vectX;
+  if (vectX == 0) {
+    opserr << "FATAL PetscSOE::getX - vectX == 0!";
+    exit(-1);
+  }  
+  return *vectX;
 }
 
 
 const Vector &
 PetscSOE::getB(void)
 {
-    if (vectB == 0) {
-	opserr << "FATAL PetscSOE::getB - vectB == 0!";
-	exit(-1);
-    }    
-    double *theData =0;
-    int ierr = VecGetArray(b, &theData); CHKERRA(ierr);       
-    for (int i=0; i<size; i++)
-      B[i] = theData[i];
-    ierr = VecRestoreArray(b, &theData); CHKERRA(ierr);             
-
-    return *vectB;
+  if (vectB == 0) {
+    opserr << "FATAL PetscSOE::getB - vectB == 0!";
+    exit(-1);
+  }    
+  return *vectB;
 }
 
 
@@ -467,15 +432,15 @@ PetscSOE::normRHS(void)
 void 
 PetscSOE::setX(int loc, double value)
 {
-  int ierr = VecSetValues(x,1,&loc,&value,INSERT_VALUES); CHKERRA(ierr);   
+  if (loc < size && loc >= 0)
+	X[loc] = value;
 }
 
 void 
-PetscSOE::setX(const Vector &x)
+PetscSOE::setX(const Vector &xData)
 {
-  double value;
-  for (int i=0; i<x.Size(); i++)
-    int ierr = VecSetValues(x,1,&i,&value,INSERT_VALUES); CHKERRA(ierr);   
+  if (xData.Size() == size && vectX != 0)
+    *vectX = xData;
 }
 
 int
@@ -499,9 +464,62 @@ PetscSOE::setSolver(PetscSolver &newSolver)
 int 
 PetscSOE::sendSelf(int cTag, Channel &theChannel)
 {
-    if (size != 0)
-	opserr << "WARNING PetscSOE::sendSelf - does not send itself YET\n";
-    return 0;
+  processID = 0;
+  int sendID =0;
+
+  // if P0 check if already sent. If already sent use old processID; if not allocate a new process 
+  // id for remote part of object, enlarge channel * to hold a channel * for this remote object.
+
+  // if not P0, send current processID
+
+  if (processID == 0) {
+
+    // check if already using this object
+    bool found = false;
+    for (int i=0; i<numChannels; i++)
+      if (theChannels[i] == &theChannel) {
+	sendID = i+1;
+	found = true;
+      }
+
+    // if new object, enlarge Channel pointers to hold new channel * & allocate new ID
+    if (found == false) {
+      int nextNumChannels = numChannels + 1;
+      Channel **nextChannels = new Channel *[nextNumChannels];
+      if (nextNumChannels == 0) {
+	opserr << "DistributedBandGenLinSOE::sendSelf() - failed to allocate channel array of size: " << 
+	  nextNumChannels << endln;
+	return -1;
+      }
+      for (int i=0; i<numChannels; i++)
+	nextChannels[i] = theChannels[i];
+      nextChannels[numChannels] = &theChannel;
+      numChannels = nextNumChannels;
+      
+      if (theChannels != 0)
+	delete [] theChannels;
+      
+      theChannels = nextChannels;
+      
+  if (localCol != 0)
+	delete [] localCol;
+      localCol = new ID *[numChannels];
+      if (localCol == 0) {
+	opserr << "DistributedBandGenLinSOE::sendSelf() - failed to allocate id array of size: " << 
+	  nextNumChannels << endln;
+	return -1;
+      }
+      for (int i=0; i<numChannels; i++)
+	localCol[i] = 0;    
+
+      // allocate new processID for remote object
+      sendID = numChannels;
+    }
+
+  } else 
+    sendID = processID;
+
+  return 0;
 }
 
 
@@ -509,10 +527,33 @@ int
 PetscSOE::recvSelf(int cTag, Channel &theChannel, 
 		   FEM_ObjectBroker &theBroker)
 {
-    return 0;
+  numChannels = 1;
+  theChannels = new Channel *[1];
+  theChannels[0] = &theChannel;
+
+  localCol = new ID *[numChannels];
+  for (int i=0; i<numChannels; i++)
+    localCol[i] = 0;
+
+  return 0;
 }
 
+int
+PetscSOE::setChannels(int nChannels, Channel **theC)
+{
+  numChannels = nChannels;
+
+  if (theChannels != 0)
+    delete [] theChannels;
+
+  theChannels = new Channel *[numChannels];
+  for (int i=0; i<numChannels; i++)
+    theChannels[i] = theC[i];
 
 
+  localCol = new ID *[nChannels];
+  for (int i=0; i<numChannels; i++)
+    localCol[i] = 0;
 
-
+  return 0;
+}
