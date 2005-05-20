@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.9 $
-// $Date: 2003-05-27 19:41:59 $
+// $Revision: 1.10 $
+// $Date: 2005-05-20 21:41:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/KrylovNewton.cpp,v $
 
 // Written: MHS
@@ -147,6 +147,14 @@ KrylovNewton::solveCurrentStep(void)
   if (work == 0)
     work = new double [lwork];
 
+  // Evaluate system residual R(y_0)
+  if (theIntegrator->formUnbalance() < 0) {
+    opserr << "WARNING KrylovNewton::solveCurrentStep() -";
+    opserr << "the Integrator failed in formUnbalance()\n";	
+    return -2;
+  }
+
+
   // set itself as the ConvergenceTest objects EquiSolnAlgo
   theTest->setEquiSolnAlgo(*this);
   if (theTest->start() < 0) {
@@ -155,12 +163,6 @@ KrylovNewton::solveCurrentStep(void)
     return -3;
   }
   
-  // Evaluate system residual R(y_0)
-  if (theIntegrator->formUnbalance() < 0) {
-    opserr << "WARNING KrylovNewton::solveCurrentStep() -";
-    opserr << "the Integrator failed in formUnbalance()\n";	
-    return -2;
-  }
   
   // Evaluate system Jacobian J = R'(y)|y_0
   if (theIntegrator->formTangent(tangent) < 0){
