@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2005-03-07 21:32:29 $
+// $Revision: 1.20 $
+// $Date: 2005-05-20 16:44:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -189,9 +189,9 @@ FiberSection3d::addFiber(Fiber &newFiber)
 
   // Recompute centroid
   for (i = 0; i < numFibers; i++) {
-    yLoc = -matData[2*i];
-    zLoc = matData[2*i+1];
-    Area = matData[2*i+2];
+    yLoc = -matData[3*i];
+    zLoc = matData[3*i+1];
+    Area = matData[3*i+2];
     A  += Area;
     Qz += yLoc*Area;
     Qy += zLoc*Area;
