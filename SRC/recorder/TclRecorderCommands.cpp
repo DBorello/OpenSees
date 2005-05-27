@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.34 $
-// $Date: 2005-03-30 20:12:10 $
+// $Revision: 1.35 $
+// $Date: 2005-05-27 00:12:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -355,7 +355,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 						     argc-eleData, 
 						     theDomain, 
 						     *theDataOutputHandler,
-						     dT);
+						     dT, echoTime);
       
       delete [] data;
     }
@@ -720,7 +720,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 						  responseID, 
 						  theDomain,
 						  *theDataOutputHandler,
-						  dT);
+						  dT, echoTimeFlag);
     }
 
     else if (strcmp(argv[1],"Pattern") == 0) {

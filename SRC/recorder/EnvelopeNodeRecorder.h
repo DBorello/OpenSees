@@ -19,8 +19,8 @@
 ** ****************************************************************** */
                                                                         
 
-// $Revision: 1.6 $
-// $Date: 2004-11-24 22:42:25 $
+// $Revision: 1.7 $
+// $Date: 2005-05-27 00:12:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.h,v $
                                                                         
 
@@ -51,13 +51,14 @@ class Node;
 class EnvelopeNodeRecorder: public Recorder
 {
   public:
-  EnvelopeNodeRecorder();
+    EnvelopeNodeRecorder();
     EnvelopeNodeRecorder(const ID &theDof, 
 			 const ID &theNodes, 
 			 const char *dataToStore,
 			 Domain &theDomain,
 			 DataOutputHandler &theOutputHandler,
-			 double deltaT = 0.0);
+			 double deltaT = 0.0,
+			 bool echoTimeFlag = false); 
     
     ~EnvelopeNodeRecorder();
 
@@ -92,6 +93,8 @@ class EnvelopeNodeRecorder: public Recorder
     bool first;
     bool initializationDone;
     int numValidNodes;
+
+    bool echoTimeFlag;   // flag indicating whether time to be included in o/p
 };
 
 #endif

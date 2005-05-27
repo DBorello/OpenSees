@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2004-11-24 22:42:25 $
+// $Revision: 1.7 $
+// $Date: 2005-05-27 00:12:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.h,v $
                                                                         
 #ifndef EnvelopeElementRecorder_h
@@ -52,7 +52,8 @@ class EnvelopeElementRecorder: public Recorder
 			    int argc,
 			    Domain &theDomain, 
 			    DataOutputHandler &theOutputHandler,
-			    double deltaT = 0.0);
+			    double deltaT = 0.0,
+			    bool echoTimeFlag = true); 
 
 
     ~EnvelopeElementRecorder();
@@ -87,6 +88,8 @@ class EnvelopeElementRecorder: public Recorder
     bool initializationDone;
     char **responseArgs;
     int numArgs;
+
+    bool echoTimeFlag; 
 };
 
 

@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.9 $
-// $Date: 2004-11-25 00:53:12 $
+// $Revision: 1.10 $
+// $Date: 2005-05-27 00:12:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -63,13 +63,13 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID &dofs,
 					   const char *dataToStore,
 					   Domain &theDom,
 					   DataOutputHandler &theOutputHandler,
-					   double dT)
+					   double dT, bool echoTime)
 :Recorder(RECORDER_TAGS_EnvelopeNodeRecorder),
  theDofs(0), theNodalTags(0), theNodes(0),
  currentData(0), data(0), 
  theDomain(&theDom), theHandler(&theOutputHandler),
  deltaT(dT), nextTimeStampToRecord(0.0), 
- first(true), initializationDone(false), numValidNodes(0)
+ first(true), initializationDone(false), numValidNodes(0), echoTimeFlag(echoTime)
 {
   // verify dof are valid 
   int numDOF = dofs.Size();
@@ -190,7 +190,6 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
     }
 
   int numDOF = theDofs->Size();
-  int sizeData = currentData->Size();
   
   if (deltaT == 0.0 || timeStamp >= nextTimeStampToRecord) {
     
@@ -291,30 +290,72 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
   }
     
   // check if currentData modifies the saved data
-  bool writeIt = false;
-  if (first == true) {
-    for (int i=0; i<sizeData; i++) {
-      (*data)(0,i) = (*currentData)(i);
-      (*data)(1,i) = (*currentData)(i);
-      (*data)(2,i) = fabs((*currentData)(i));
-      first = false;
-      writeIt = true;
-    } 
+  int sizeData = currentData->Size();
+  if (echoTimeFlag == false) {
+
+    bool writeIt = false;
+    if (first == true) {
+      for (int i=0; i<sizeData; i++) {
+	(*data)(0,i) = (*currentData)(i);
+	(*data)(1,i) = (*currentData)(i);
+	(*data)(2,i) = fabs((*currentData)(i));
+	first = false;
+	writeIt = true;
+      } 
+    } else {
+      for (int i=0; i<sizeData; i++) {
+	double value = (*currentData)(i);
+	if ((*data)(0,i) > value) {
+	  (*data)(0,i) = value;
+	  double absValue = fabs(value);
+	  if ((*data)(2,i) < absValue) 
+	    (*data)(2,i) = absValue;
+	  writeIt = true;
+	} else if ((*data)(1,i) < value) {
+	  (*data)(1,i) = value;
+	  double absValue = fabs(value);
+	  if ((*data)(2,i) < absValue) 
+	    (*data)(2,i) = absValue;
+	  writeIt = true;
+	}
+      }
+    }
   } else {
-    for (int i=0; i<sizeData; i++) {
-      double value = (*currentData)(i);
-      if ((*data)(0,i) > value) {
-	(*data)(0,i) = value;
-	double absValue = fabs(value);
-	if ((*data)(2,i) < absValue) 
-	  (*data)(2,i) = absValue;
+    sizeData /= 2;
+    bool writeIt = false;
+    if (first == true) {
+      for (int i=0; i<sizeData; i++) {
+	(*data)(0,i*2) = timeStamp;
+	(*data)(1,i*2) = timeStamp;
+	(*data)(2,i*2) = timeStamp;
+	(*data)(0,i*2+1) = (*currentData)(i);
+	(*data)(1,i*2+1) = (*currentData)(i);
+	(*data)(2,i*2+1) = fabs((*currentData)(i));
+	first = false;
 	writeIt = true;
-      } else if ((*data)(1,i) < value) {
-	(*data)(1,i) = value;
-	double absValue = fabs(value);
-	if ((*data)(2,i) < absValue) 
-	  (*data)(2,i) = absValue;
-	writeIt = true;
+      } 
+    } else {
+      for (int i=0; i<sizeData; i++) {
+	double value = (*currentData)(i);
+	if ((*data)(0,2*i+1) > value) {
+	  (*data)(0,i*2) = timeStamp;
+	  (*data)(0,i*2+1) = value;
+	  double absValue = fabs(value);
+	  if ((*data)(2,i*2+1) < absValue) {
+	    (*data)(2,i*2+1) = absValue;
+	    (*data)(2,i*2) = timeStamp;
+	  }
+	  writeIt = true;
+	} else if ((*data)(1,2*i+1) < value) {
+	  (*data)(1,2*i) = timeStamp;
+	  (*data)(1,2*i+1) = value;
+	  double absValue = fabs(value);
+	  if ((*data)(2,2*i+1) < absValue) { 
+	    (*data)(2,2*i) = timeStamp;
+	    (*data)(2,2*i+1) = absValue;
+	  }
+	  writeIt = true;
+	}
       }
     }
   }
@@ -531,6 +572,9 @@ EnvelopeNodeRecorder::initialize(void)
   //
   int numValidResponse = numValidNodes*theDofs->Size();
 
+  if (echoTimeFlag == true)
+    numValidResponse *= 2;
+
   currentData = new Vector(numValidResponse);
   data = new Matrix(3, numValidResponse);
   data->Zero();
@@ -564,6 +608,13 @@ EnvelopeNodeRecorder::initialize(void)
   for (i=0; i<numValidNodes; i++) {
     int nodeTag = theNodes[i]->getTag();
     for (int j=0; j<theDofs->Size(); j++) {
+      if (echoTimeFlag == true) {
+	int lenColumn = strlen("time");
+	char *newColumn = new char[lenColumn+1];
+	strcpy(newColumn, "time");
+	dbColumns[counter] = newColumn;
+	counter++;
+      }
       int dof = (*theDofs)(j);
       sprintf(aColumn, "Node%d_%s_%d", nodeTag, dataToStore, dof+1);
       int lenColumn = strlen(aColumn);

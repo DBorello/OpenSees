@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2005-03-21 22:09:23 $
+// $Revision: 1.11 $
+// $Date: 2005-05-27 00:12:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -49,7 +49,7 @@ EnvelopeElementRecorder::EnvelopeElementRecorder()
  numEle(0), eleID(0), theDomain(0),
  theHandler(0), deltaT(0), nextTimeStampToRecord(0.0), 
  data(0), currentData(0), first(true),
- initializationDone(false), responseArgs(0), numArgs(0)
+ initializationDone(false), responseArgs(0), numArgs(0), echoTimeFlag(false)
 {
 
 }
@@ -60,12 +60,12 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &theEleID,
 						 int argc,
 						 Domain &theDom, 
 						 DataOutputHandler &theOutputHandler,
-						 double dT)
+						 double dT, bool echoTime)
 :Recorder(RECORDER_TAGS_EnvelopeElementRecorder),
  numEle(theEleID.Size()), eleID(theEleID), theDomain(&theDom),
  theHandler(&theOutputHandler), deltaT(dT), nextTimeStampToRecord(0.0), 
  data(0), currentData(0), first(true),
- initializationDone(false), responseArgs(0), numArgs(0)
+ initializationDone(false), responseArgs(0), numArgs(0), echoTimeFlag(echoTime)
 {
   //
   // create a copy of the response request
@@ -172,34 +172,72 @@ EnvelopeElementRecorder::record(int commitTag, double timeStamp)
       }
     }
 
-    // check if max or min
-    // check if currentData modifies the saved data
-    int size = currentData->Size();
-    if (first == true) {
-      for (int i=0; i<size; i++) {
-	(*data)(0,i) = (*currentData)(i);
-	(*data)(1,i) = (*currentData)(i);
-	(*data)(2,i) = fabs((*currentData)(i));
-	first = false;
-      } 
+    if (echoTimeFlag == false) {
+      // check if max or min
+      // check if currentData modifies the saved data
+      int size = currentData->Size();
+      if (first == true) {
+	for (int i=0; i<size; i++) {
+	  (*data)(0,i) = (*currentData)(i);
+	  (*data)(1,i) = (*currentData)(i);
+	  (*data)(2,i) = fabs((*currentData)(i));
+	  first = false;
+	} 
+      } else {
+	for (int i=0; i<size; i++) {
+	  double value = (*currentData)(i);
+	  if ((*data)(0,i) > value) {
+	    (*data)(0,i) = value;
+	    double absValue = fabs(value);
+	    if ((*data)(2,i) < absValue) 
+	      (*data)(2,i) = absValue;
+	  } else if ((*data)(1,i) < value) {
+	    (*data)(1,i) = value;
+	    double absValue = fabs(value);
+	    if ((*data)(2,i) < absValue) 
+	      (*data)(2,i) = absValue;
+	  }
+	}
+      }
     } else {
-      for (int i=0; i<size; i++) {
-	double value = (*currentData)(i);
-	if ((*data)(0,i) > value) {
-	  (*data)(0,i) = value;
-	  double absValue = fabs(value);
-	  if ((*data)(2,i) < absValue) 
-	    (*data)(2,i) = absValue;
-	} else if ((*data)(1,i) < value) {
-	  (*data)(1,i) = value;
-	  double absValue = fabs(value);
-	  if ((*data)(2,i) < absValue) 
-	    (*data)(2,i) = absValue;
+      // check if max or min
+      // check if currentData modifies the saved data
+      int size = currentData->Size();
+      size /= 2;
+      if (first == true) {
+	for (int i=0; i<size; i++) {
+	  (*data)(0,i*2) = timeStamp;
+	  (*data)(1,i*2) = timeStamp;
+	  (*data)(2,i*2) = timeStamp;
+	  (*data)(0,i*2+1) = (*currentData)(i);
+	  (*data)(1,i*2+1) = (*currentData)(i);
+	  (*data)(2,i*2+1) = fabs((*currentData)(i));
+	  first = false;
+	} 
+      } else {
+	for (int i=0; i<size; i++) {
+	  double value = (*currentData)(i);
+	  if ((*data)(0,2*i+1) > value) {
+	    (*data)(0,2*i) = timeStamp;
+	    (*data)(0,2*i+1) = value;
+	    double absValue = fabs(value);
+	    if ((*data)(2,2*i+1) < absValue) {
+	      (*data)(2,2*i) = timeStamp;
+	      (*data)(2,2*i+1) = absValue;
+	    }
+	  } else if ((*data)(1,2*i+1) < value) {
+	    (*data)(1,2*i) = timeStamp;
+	    (*data)(1,2*i+1) = value;
+	    double absValue = fabs(value);
+	    if ((*data)(2,2*i+1) < absValue) {
+	      (*data)(2,2*i) = timeStamp;
+	      (*data)(2,2*i+1) = absValue;
+	    }
+	  }
 	}
       }
     }
-  }    
-
+  }
   // succesfull completion - return 0
   return result;
 }
@@ -460,6 +498,9 @@ EnvelopeElementRecorder::initialize(void)
   // create the matrix & vector that holds the data
   //
 
+  if (echoTimeFlag == true)
+    numDbColumns *= 2;
+
   data = new Matrix(3, numDbColumns);
   currentData = new Vector(numDbColumns);
   if (data == 0 || currentData == 0) {
@@ -500,6 +541,14 @@ EnvelopeElementRecorder::initialize(void)
       
       if (eleInfo.theType == IntType || eleInfo.theType == DoubleType) {
 	// create column heading for single data item for element
+	if (echoTimeFlag == true) {
+	  int lenColumn = strlen("time");
+	  char *newColumn = new char[lenColumn+1];
+	  strcpy(newColumn, "time");
+	  dbColumns[counter] = newColumn;
+	  counter++;
+	}
+
 	numVariables = 0;
 	sprintf(aColumn, "Element%d_%s", eleTag, dataToStore);
 	int lenColumn = strlen(aColumn);
@@ -516,6 +565,13 @@ EnvelopeElementRecorder::initialize(void)
 
       // create the column headings for multiple data for the element
       for (int j=1; j<=numVariables; j++) {
+	if (echoTimeFlag == true) {
+	  int lenColumn = strlen("time");
+	  char *newColumn = new char[lenColumn+1];
+	  strcpy(newColumn, "time");
+	  dbColumns[counter] = newColumn;
+	  counter++;
+	}
 	sprintf(aColumn, "Element%d_%s_%d",eleTag, dataToStore, j);
 	int lenColumn = strlen(aColumn);
 	char *newColumn = new char[lenColumn+1];
