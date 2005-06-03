@@ -48,74 +48,41 @@ SymSparseLinSOE::SymSparseLinSOE(SymSparseLinSolver &the_Solver, int lSparse)
  */
 SymSparseLinSOE::~SymSparseLinSOE()
 {
-
-    int lastRow;
-
     // free the diagonal vector
-    if (diag != 0) free(diag);
+    if (diag != NULL) free(diag);
 
     // free the diagonal blocks
-    if (penv != 0) {
-	if (penv[0] != 0) {
+    if (penv != NULL) {
+	if (penv[0] != NULL) {
 	    free(penv[0]);
 	}
         free(penv);
-    }
+    } 
 
     // free the row segments.
     OFFDBLK *blkPtr = first;
-    OFFDBLK *tempBlk = first;
-    OFFDBLK *nzBlk = 0;
+    OFFDBLK *tempBlk;
+    int curRow = -1;
 
-    if (tempBlk->next == tempBlk) {
-	free (tempBlk);
-	tempBlk = 0;
-	blkPtr = 0;
-	first = 0;
-    } else {
+    while (1) {
+      if (blkPtr->next == blkPtr) {
+	if (blkPtr != NULL) {
+	  free(blkPtr);
+	}     
+	break;
+      }
 
-	lastRow = blkPtr->row;
-
-	// clean the first row segement.
-	if (first->next != 0) {
-	    blkPtr = first->next;
-	    if (tempBlk != 0) {
-		if (tempBlk->nz != 0)  free(tempBlk->nz);
-		free(tempBlk);
-		tempBlk = 0;
-	    }
+      tempBlk = blkPtr->next;
+      if (blkPtr->row != curRow) {
+	if (blkPtr->nz != NULL) {
+	  free(blkPtr->nz);
 	}
-	
-	while (1) {
-	    // the last row segment is reached
-	    if (blkPtr->beg == size && blkPtr->next == blkPtr) {
-		if (blkPtr != 0)  {
-		    free (blkPtr);
-		    blkPtr = 0;
-		}
-		break;
-	    }
-	    tempBlk = blkPtr;
-	    blkPtr = blkPtr->next;
+	curRow = blkPtr->row;
+      }
+      
+      free(blkPtr);
 
-	    // free the beginning row segment of each row.
-	    if (nzBlk != 0) {
-		if (nzBlk->nz != 0)  free(nzBlk->nz);
-		free(nzBlk);
-	        nzBlk = 0;
-	    }
-
-	    // find the beginning row segment of each row, use nzBlk to point to it.       
-	    if (blkPtr->row != lastRow) {
-		lastRow = blkPtr->row;
-		nzBlk = blkPtr;
-	    }
-
-	    if (tempBlk != 0)  { 
-		free(tempBlk);
-		tempBlk = 0;
-	    }
-	}
+      blkPtr = tempBlk;
     }
 
     // free the "C" style vectors.
