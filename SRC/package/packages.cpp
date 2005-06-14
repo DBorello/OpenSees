@@ -14,10 +14,10 @@ int
 getLibraryFunction(const char *libName, const char *funcName, void **libHandle, void **funcHandle) {
 
   int result = 0;
-
+  
   *libHandle = NULL;
   *funcHandle = NULL;
-
+  
 #ifdef _WIN32
   
 #else
@@ -26,24 +26,22 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
   char *localLibName = new char[libNameLength+4];
   strcpy(localLibName, libName);
   strcpy(&localLibName[libNameLength], ".so");
-
+  
   char *error;
   *libHandle = dlopen (localLibName, RTLD_NOW);
   if (*libHandle != NULL) {    
-
+    
     *funcHandle = dlsym(*libHandle, funcName);
     if ((error = dlerror()) != NULL) {
       opserr << *error;
       result = -2;
     } else
-  } else
-    result = -1;
+      result = -1;
+  }
 
   delete [] localLibName;
   
 #endif
-
+  
   return result;
 }
-
-
