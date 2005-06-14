@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2004-10-06 19:21:12 $
+// $Revision: 1.24 $
+// $Date: 2005-06-14 19:01:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -58,8 +58,21 @@
 #include <TzSimple1.h>			// RWB
 #include <TzLiq1.h>			    // RWB
 
+
+
 #include <Vector.h>
 #include <string.h>
+
+#include <packages.h>
+
+typedef struct uniaxialPackageCommand {
+  char *funcName;
+  int (*funcPtr)(ClientData clientData, Tcl_Interp *interp,  int argc, 
+		 TCL_Char **argv, TclModelBuilder *); 
+  struct uniaxialPackageCommand *next;
+} UniaxialPackageCommand;
+
+static UniaxialPackageCommand *theUniaxialPackageCommands = NULL;
 
 static void printCommand(int argc, TCL_Char **argv)
 {
@@ -1511,36 +1524,99 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 
    }
 
-	else {
-		// Fedeas
-		theMaterial = TclModelBuilder_addFedeasMaterial(clientData, interp, argc, argv, theTclBuilder);
-		
-		// Drain
-		if (theMaterial == 0)
-			theMaterial = TclModelBuilder_addDrainMaterial(clientData, interp, argc, argv, theTclBuilder);
 
-		// SNAP
-		if (theMaterial == 0)
-			theMaterial = TclModelBuilder_addSnapMaterial(clientData, interp, argc, argv, theTclBuilder);
-		
-		// Py, Tz, Qz models
-		if (theMaterial == 0)
-			theMaterial = TclModelBuilder_addPyTzQzMaterial(clientData, interp, argc, argv, theTclBuilder, theDomain);
-	}
+    else {
+      // Fedeas
+      theMaterial = TclModelBuilder_addFedeasMaterial(clientData, interp, argc, argv, theTclBuilder);
+      
+      // Drain
+      if (theMaterial == 0)
+	theMaterial = TclModelBuilder_addDrainMaterial(clientData, interp, argc, argv, theTclBuilder);
+      
+      // SNAP
+      if (theMaterial == 0)
+	theMaterial = TclModelBuilder_addSnapMaterial(clientData, interp, argc, argv, theTclBuilder);
+      
+      // Py, Tz, Qz models
+      if (theMaterial == 0)
+	theMaterial = TclModelBuilder_addPyTzQzMaterial(clientData, interp, argc, argv, theTclBuilder, theDomain);
+    }
 
     if (theMaterial == 0) {
-		opserr << "WARNING could not create uniaxialMaterial " << argv[1] << endln;
-		return TCL_ERROR;
+
+      //
+      // maybe element in a package already loaded
+      //  loop through linked list of loaded functions comparing names & if find call it
+      //
+
+      UniaxialPackageCommand *matCommands = theUniaxialPackageCommands;
+      bool found = false;
+      while (matCommands != NULL && found == false) {
+	if (strcmp(argv[1], matCommands->funcName) == 0) {
+
+	  int result = (*(matCommands->funcPtr))(clientData, interp, argc, argv, theTclBuilder);
+	  return result;
+	} else
+	  matCommands = matCommands->next;
+      }
+
+
+      //
+      // maybe element command exists in a dll in library path
+      //  so try loading package of same name as material name containg
+      //  a c function "TclCommand_MatName"
+      //
+      
+      void *libHandle;
+      int (*funcPtr)(ClientData clientData, Tcl_Interp *interp,  int argc, 
+		     TCL_Char **argv, TclModelBuilder *);       
+      int matNameLength = strlen(argv[1]);
+      char *tclFuncName = new char[matNameLength+12];
+      strcpy(tclFuncName, "TclCommand_");
+      strcpy(&tclFuncName[11], argv[1]);    
+      
+      int res = getLibraryFunction(argv[1], tclFuncName, &libHandle, (void **)&funcPtr);
+
+      delete [] tclFuncName;
+      
+      if (res == 0) {
+
+	//
+	// add loaded function to list of functions
+	//
+	
+	char *matName = new char[matNameLength+1];
+	strcpy(matName, argv[1]);
+	UniaxialPackageCommand *theMatCommand = new UniaxialPackageCommand;
+	theMatCommand->funcPtr = funcPtr;
+	theMatCommand->funcName = matName;	
+	theMatCommand->next = theUniaxialPackageCommands;
+	theUniaxialPackageCommands = theMatCommand;
+	
+	int result = (*funcPtr)(clientData, interp,
+				argc, argv,
+				theTclBuilder);	
+
+	return result;
+      }
     }
 
+    //
+    // if still here the element command does not exist
+    //
+    
+    if (theMaterial == 0) {
+      opserr << "WARNING could not create uniaxialMaterial " << argv[1] << endln;
+      return TCL_ERROR;
+    }
+    
     // Now add the material to the modelBuilder
     if (theTclBuilder->addUniaxialMaterial(*theMaterial) < 0) {
-	opserr << "WARNING could not add uniaxialMaterial to the domain\n";
-	opserr << *theMaterial << endln;
-	delete theMaterial; // invoke the material objects destructor, otherwise mem leak
-	return TCL_ERROR;
+      opserr << "WARNING could not add uniaxialMaterial to the domain\n";
+      opserr << *theMaterial << endln;
+      delete theMaterial; // invoke the material objects destructor, otherwise mem leak
+      return TCL_ERROR;
     }
 
-    
     return TCL_OK;
 }
