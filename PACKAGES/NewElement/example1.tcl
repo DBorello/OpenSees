@@ -2,8 +2,8 @@
 #
 # purpose: example1 in the manual with existing truss element
 #
-# $Revision: 1.1 $
-# $Date: 2004-02-10 23:27:15 $
+# $Revision: 1.2 $
+# $Date: 2005-06-14 18:55:39 $
 # $Source: /usr/local/cvs/OpenSees/PACKAGES/NewElement/example1.tcl,v $
 
 #create the ModelBuilder object
@@ -54,5 +54,4 @@ analyze 1
 # print the results at node and at all elements
 print node 4
 print ele
-playback 1
 

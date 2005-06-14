@@ -2,12 +2,10 @@
 #
 # purpose: example1 in the manual with user defined element
 #
-# $Revision: 1.1 $
-# $Date: 2004-02-10 23:27:15 $
+# $Revision: 1.2 $
+# $Date: 2005-06-14 18:55:39 $
 # $Source: /usr/local/cvs/OpenSees/PACKAGES/NewElement/example2.tcl,v $
 
-#use package MyTruss
-load ./MyTruss.so myTruss
 
 #create the ModelBuilder object
 model basic -ndm 2 -ndf 2
@@ -24,9 +22,9 @@ node 4  72.0 96.0
 uniaxialMaterial Elastic 1 3000
 
 # add truss elements - command: truss trussID node1 node2 A matID
-myTruss 1 1 4 10.0 1
-myTruss 2 2 4 5.0 1
-myTruss 3 3 4 5.0 1
+element myTruss 1 1 4 10.0 1
+element myTruss 2 2 4 5.0 1
+element myTruss 3 3 4 5.0 1
 
 # set the boundary conditions - command: fix nodeID xResrnt? yRestrnt?
 fix 1 1 1 
@@ -57,4 +55,3 @@ analyze 1
 # print the results at node and at all elements
 print node 4
 print ele
-playback 1

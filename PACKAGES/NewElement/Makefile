@@ -1,45 +1,26 @@
 include ../../Makefile.def
 
-LIBRARY         = MyTruss.so
+LIBRARY         = myTruss.so
 
-all:    $(LIBRARY)
+all:   $(LIBRARY)
 
-OBJS = MyTruss.o MyTrussPackage.o 
+OBJS = MyTruss.o TclMyTruss.o 
 
 $(LIBRARY): $(OBJS)
-	@$(LINKER) $(LINK_SHARED_FLAGS)  $(OBJS) -o $(LIBRARY)
+	$(CC++) -shared -Wl,-soname,$(LIBRARY) -o $(LIBRARY) $(OBJS) -lc
 
+MyTruss.o: MyTruss.cpp
+	$(CC++) -fPIC $(INCLUDES) -g -c -Wall MyTruss.cpp
 
-.cpp.o:
-	@$(ECHO) Making $@ from $<
-	$(CC++) $(C++SHARED_FLAGS) $(INCLUDES) -c $< -o $@
-
-.C.o:
-	@$(ECHO) Making $@ from $<
-	$(CC++) $(C++SHARED_FLAGS) $(INCLUDES) -c $< -o $@
-
-.c.o:
-	@$(ECHO) Making $@ from $<
-	$(CC) $(C_SHARED_FLAGS) -c $<
-
-.f.o:      
-	@$(ECHO) Making $@ from $<
-	$(FC) $(F_SHARED_FLAGS) -c $< -o $@
-
-.f77.o:      
-	@$(ECHO) Making $@ from $<
-	$(FC) $(F_SHARED_FLAGS) -c $< -o $@
-
-.f90.o:      
-	@$(ECHO) Making $@ from $<
-	$(FC90) $(F_SHARED_FLAGS) -c $< -o $@
+TclMyTruss.o: TclMyTruss.cpp
+	$(CC) -fPIC $(INCLUDES) -g -c -Wall TclMyTruss.cpp
 
 # Miscellaneous
 tidy:
 	@$(RM) $(RMFLAGS) Makefile.bak *~ #*# core
 
 clean:  tidy
-	@$(RM) $(RMFLAGS) $(OBJS) *.o core
+	@$(RM) $(RMFLAGS) $(OBJS) *.o core *.out *.so
 
 spotless: clean
 	@$(RM) $(RMFLAGS) $(PROGRAM) fake core
