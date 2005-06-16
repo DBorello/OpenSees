@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:38 $
+// $Revision: 1.6 $
+// $Date: 2005-06-16 21:41:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/EPPGapMaterial.h,v $
 
 // File: ~/material/EPPGapMaterial.h
@@ -55,7 +55,7 @@
 class EPPGapMaterial : public UniaxialMaterial
 {
   public:
-    EPPGapMaterial(int tag, double E, double fy, double gap, int damage = 0);
+    EPPGapMaterial(int tag, double E, double fy, double gap, double eta, int damage = 0);
     EPPGapMaterial();  
     ~EPPGapMaterial();
 
@@ -85,6 +85,7 @@ class EPPGapMaterial : public UniaxialMaterial
     double E;
     double fy;
     double gap;
+    double eta;
     double maxElasticYieldStrain;
     double minElasticYieldStrain;
     int damage;
