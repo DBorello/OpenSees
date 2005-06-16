@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-10-27 23:45:41 $
+// $Revision: 1.4 $
+// $Date: 2005-06-16 21:57:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SamplingAnalysis.cpp,v $
 
 
@@ -127,7 +127,7 @@ SamplingAnalysis::analyze(void)
 	LimitStateFunction *theLimitStateFunction = 0;
 	NormalRV *aStdNormRV = 0;
 	aStdNormRV = new NormalRV(1,0.0,1.0,0.0);
-	ofstream *outputFile = 0;
+//	ofstream *outputFile = 0;
 	bool failureHasOccured = false;
 	char myString[50];
 
@@ -311,10 +311,9 @@ SamplingAnalysis::analyze(void)
 		}
 		randomArray = theRandomNumberGenerator->getGeneratedNumbers();
 
-
 		// Compute the point in standard normal space
 		u = startPointY + chol_covariance * randomArray;
-
+                
 		// Transform into original space
 		result = theProbabilityTransformation->set_u(u);
 		if (result < 0) {
@@ -331,7 +330,6 @@ SamplingAnalysis::analyze(void)
 			return -1;
 		}
 		x = theProbabilityTransformation->get_x();
-
 
 		// Evaluate limit-state function
 		FEconvergence = true;
@@ -515,16 +513,14 @@ SamplingAnalysis::analyze(void)
 
 		// Print to the restart file, if requested. 
 		if (printFlag == 2) {
-			if (outputFile != 0) {
-				delete outputFile;
-			}
-			outputFile = new ofstream( restartFileName, ios::out );
-			(*outputFile) << k << endln;
-			(*outputFile) << seed << endln;
+			ofstream outputFile( restartFileName, ios::out );
+			outputFile << k << endln;
+			outputFile << seed << endln;
 			for (int lsf=0; lsf<numLsf; lsf++ ) {
 				sprintf(string,"%15.10f  %15.10f",q_bar(lsf),cov_of_q_bar(lsf));
-				(*outputFile) << string << " " << endln;
+				outputFile << string << " " << endln;
 			}
+                        outputFile.close();
 		}
 
 		// Increment k (the simulation number counter)
@@ -536,12 +532,6 @@ SamplingAnalysis::analyze(void)
 	// Step 'k' back a step now that we went out
 	k--;
 	opserr << endln;
-
-
-	// Delete possible 'new' objects
-	if (outputFile != 0) {
-		delete outputFile;
-	}
 
 
 	if (analysisTypeTag != 3) {
