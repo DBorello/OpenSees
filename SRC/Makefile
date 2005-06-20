@@ -27,6 +27,7 @@ all:
 	@$(CD) $(FE)/element; $(MAKE);
 	@$(CD) $(FE)/reliability; $(MAKE);
 	@$(CD) $(FE)/coordTransformation; $(MAKE);
+	@$(CD) $(FE)/package; $(MAKE);
 	@$(CD) $(FE)/damage; $(MAKE);
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATRIX_LIBS) $(ELE_LIBS) \
 	$(MATERIAL_LIBS) $(HYSTERETIC_LIBS) $(SECTION_LIBS) $(DATABASE_LIBS) \
@@ -792,6 +793,7 @@ wipe: spotless
 	@$(CD) $(FE)/coordTransformation; $(MAKE) wipe;
 	@$(CD) $(FE)/element; $(MAKE) wipe;
 	@$(CD) $(FE)/reliability; $(MAKE) wipe;
+	@$(CD) $(FE)/package; $(MAKE) wipe;
 	@$(CD) $(FE)/damage; $(MAKE) wipe;
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
