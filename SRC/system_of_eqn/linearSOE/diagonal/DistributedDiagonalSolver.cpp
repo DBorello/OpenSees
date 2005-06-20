@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-05-25 23:33:25 $
+// $Revision: 1.2 $
+// $Date: 2005-06-20 21:35:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSolver.cpp,v $
 
 // Written: fmk 
@@ -35,7 +35,7 @@ DistributedDiagonalSolver::DistributedDiagonalSolver(int classTag)
 :LinearSOESolver(classTag),
  theSOE(0), minDiagTol(0.0)
 {
-
+  
 }    
 
 DistributedDiagonalSolver::DistributedDiagonalSolver(double tol)
@@ -53,14 +53,15 @@ DistributedDiagonalSolver::~DistributedDiagonalSolver()
 int 
 DistributedDiagonalSolver::setLinearSOE(DistributedDiagonalSOE &theProfileSPDSOE)
 {
-    theSOE = &theProfileSPDSOE;
-    return 0;
+  
+  theSOE = &theProfileSPDSOE;
+  return 0;
 }
 
 int 
 DistributedDiagonalSolver::setSize(void)
 {
-    return 0;
+  return 0;
 }
 
 
@@ -68,8 +69,8 @@ int
 DistributedDiagonalSolver::solve(void)
 {
   int size = theSOE->size;
-
   int processID = theSOE->processID;
+
   Channel **theChannels = theSOE->theChannels;
   int numChannels = theSOE->numChannels;
 
@@ -110,7 +111,9 @@ DistributedDiagonalSolver::solve(void)
       Channel *theChannel = theChannels[0];
       theChannel->sendVector(0, 0, *vectShared);
       theChannel->recvVector(0, 0, *vectShared);
-    } else {
+    } 
+    else {
+
       static Vector otherShared(1);
       otherShared.resize(2*numShared);
       for (int i=0; i<numChannels; i++) {
@@ -129,7 +132,8 @@ DistributedDiagonalSolver::solve(void)
   //
   // set the corresponding A & B entries
   //
-
+  
+  
   for (int i=0; i<numShared; i++) {
     int dof = myDOFsShared(i);
     int loc = myDOFs.getLocation(dof);
@@ -142,9 +146,10 @@ DistributedDiagonalSolver::solve(void)
   //
   // now solve
   //
-
-  for (int i=0; i<size; i++)
+  
+  for (int i=0; i<size; i++) {
     X[i] = B[i]/A[i];
+  }
 
   return 0;
 }
@@ -170,3 +175,4 @@ DistributedDiagonalSolver::recvSelf(int cTag,
   minDiagTol = data(0);
   return 0;
 }
+

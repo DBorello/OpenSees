@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-05-25 23:33:25 $
+// $Revision: 1.2 $
+// $Date: 2005-06-20 21:35:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSOE.cpp,v $
 
 // Written: fmk 
@@ -126,7 +126,7 @@ DistributedDiagonalSOE::setSize(Graph &theGraph)
       // receive remote & check for shared DOFs
       theChannel->recvID(0, 0, otherSize);	
       int numOther = otherSize(0);
-      
+
       if (numOther != 0) {
 	otherDOFS.resize(numOther);
 	theChannel->recvID(0, 0, otherDOFS);
@@ -147,7 +147,8 @@ DistributedDiagonalSOE::setSize(Graph &theGraph)
 
     // recv all shared DOFs
     theChannel->recvID(0, 0, otherSize);	
-    int numShared = otherSize(0);
+    numShared = otherSize(0);
+
     if (numShared != 0) {
       myDOFsShared.resize(numShared);
       theChannel->recvID(0, 0, myDOFsShared);
@@ -228,10 +229,10 @@ DistributedDiagonalSOE::setSize(Graph &theGraph)
       otherSize(0) = numShared;
       theChannel->sendID(0, 0, otherSize);	
       theChannel->sendID(0, 0, myDOFsShared);
-    } 
+    }
   }
 
-    
+
   if (A != 0) delete [] A; A = 0;
   if (B != 0) delete [] B; B = 0;
   if (X != 0) delete [] X; X = 0;
@@ -251,6 +252,7 @@ DistributedDiagonalSOE::setSize(Graph &theGraph)
   if (dataShared != 0)
     vectShared = new Vector(dataShared, 2*numShared);
 
+
   if (A == 0 || B == 0 || X == 0 || vectX == 0 || vectB == 0 || dataShared == 0 || vectShared == 0) {
     opserr << "ERROR DistributedDiagonalSOE::setSize() - ";
     opserr << " ran out of memory for size: " << size << endln;
@@ -269,14 +271,15 @@ DistributedDiagonalSOE::setSize(Graph &theGraph)
     X[l] = 0;
   }
 
-
   //
   // now let's redo the mapping of the dof's .. locally numbered 0 through size
   //
 
+  
   if (theModel == 0) {
     opserr << "WARNING DistributedDiagonalSOE::setSize - no AnalysisModel\n";
-  } else {
+  } 
+  else {
     DOF_GrpIter &theDOFs = theModel->getDOFs();
     DOF_Group *dofPtr;
     
@@ -290,17 +293,21 @@ DistributedDiagonalSOE::setSize(Graph &theGraph)
 	  }
 	}   
     }
-
+    
     // iterate through the FE_Element getting them to set their IDs
     FE_EleIter &theEle = theModel->getFEs();
     FE_Element *elePtr;
     while ((elePtr = theEle()) != 0)
 	elePtr->setID(); 
   }  
-    
+
   // invoke setSize() on the Solver
-  LinearSOESolver *the_Solver = this->getSolver();
+  DistributedDiagonalSolver *the_Solver = (DistributedDiagonalSolver *)this->getSolver();
+  the_Solver->setLinearSOE(*this);
   int solverOK = the_Solver->setSize();
+  
+  int address = (int)the_Solver;
+
   if (solverOK < 0) {
     opserr << "WARNING DistributedDiagonalSOE::setSize :";
     opserr << " solver failed setSize()\n";
