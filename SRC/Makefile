@@ -87,15 +87,14 @@ metis:
 	@$(CD) $(FE)/graph/partitioner/metis-2.0; $(MAKE) lib;
 
 
-FMK_LIBS = $(FE)/database/FE_Datastore.o
+FMK_LIBS = $(FE)/database/FE_Datastore.o \
+	$(FE)/package/packages.o
 
 
 # the files that make up the FE_LIBRARY
 GLF_LIBS = $(FE)/element/zeroLength/ZeroLength.o \
 	$(FE)/element/zeroLength/ZeroLengthSection.o \
 	$(FE)/element/zeroLength/TclZeroLength.o
-
-
 
 REMO_LIBS = $(FE)/element/nonlinearBeamColumn/quadrule/QuadRule.o \
 	$(FE)/element/nonlinearBeamColumn/quadrule/QuadRule1d.o \
