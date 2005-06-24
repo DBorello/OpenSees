@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-05-18 19:25:03 $
+// $Revision: 1.4 $
+// $Date: 2005-06-24 18:19:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/PetscSolver.cpp,v $
                                                                         
 // Written: fmk & om
@@ -223,30 +223,30 @@ PetscSolver::sendSelf(int cTag, Channel &theChannel)
 {
   static ID idData(3);
   idData(0) = maxIts;
-  if (method == KSPCG) 
+  if (strcmp(method, KSPCG) == 0) 
     idData(1) = 0;
-  else if (method == KSPBICG) 
+  else if (strcmp(method, KSPBICG) == 0)
     idData(1) = 1;
-  else if (method == KSPRICHARDSON) 
+  else if (strcmp(method, KSPRICHARDSON) == 0)
     idData(1) = 2;
-  else if (method == KSPCHEBYCHEV) 
+  else if (strcmp(method, KSPCHEBYCHEV) == 0)
     idData(1) = 3;
-  else if (method == KSPGMRES) 
+  else if (strcmp(method, KSPGMRES) ==0) 
     idData(1) = 4;
   else {
     opserr << "PetscSolver::sendSelf() - unknown method set\n";
     return -1;
   }
 
-  if (preconditioner == PCJACOBI) 
+  if (strcmp(preconditioner, PCJACOBI) == 0)
     idData(2) = 0;
-  else if (preconditioner == PCILU) 
+  else if (strcmp(preconditioner, PCILU) == 0)
     idData(2) = 1;
-  else if (preconditioner == PCICC) 
+  else if (strcmp(preconditioner, PCICC) == 0)
     idData(2) = 2;
-  else if (preconditioner == PCBJACOBI) 
+  else if (strcmp(preconditioner, PCBJACOBI) == 0)
     idData(2) = 3;
-  else if (preconditioner == PCNONE) 
+  else if (strcmp(preconditioner, PCNONE) == 0)
     idData(2) = 4;
   else {
     opserr << "PetscSolver::sendSelf() - unknown preconditioner set\n";
