@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.61 $
-// $Date: 2005-02-22 22:23:37 $
+// $Revision: 1.62 $
+// $Date: 2005-07-01 20:33:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -56,7 +56,7 @@ using std::ofstream;
 #include <StandardStream.h>
 #include <FileStream.h>
 StandardStream sserr;
-OPS_Stream &opserr = sserr;
+OPS_Stream *opserrPtr = &sserr;
 
 #endif
 
