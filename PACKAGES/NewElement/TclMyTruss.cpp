@@ -5,8 +5,14 @@
 #include <TclModelBuilder.h>
 #include "MyTruss.h"
 
+#ifdef _USRDLL
+#include <windows.h>
+#define DllExport _declspec(dllexport)
+#else
+#define DllExport
+#endif
 
-extern "C" int
+extern "C" DllExport int
 TclCommand_myTruss(ClientData clientData, Tcl_Interp *interp,  int argc, 
 		   TCL_Char **argv, Domain*theTclDomain,
 		   TclModelBuilder *theTclBuilder)
