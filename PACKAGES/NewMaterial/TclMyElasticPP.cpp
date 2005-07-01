@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-06-14 18:49:58 $
+// $Revision: 1.2 $
+// $Date: 2005-07-01 19:53:43 $
 // $Source: /usr/local/cvs/OpenSees/PACKAGES/NewMaterial/TclMyElasticPP.cpp,v $
                                                                         
 // Written: fmk
@@ -36,14 +36,20 @@
 #include <TclModelBuilder.h>
 #include "MyElasticPP.h"
 
-extern "C" int
+#ifdef _USRDLL
+#define DllExport _declspec(dllexport)
+#else
+#define DllExport
+#endif
+
+extern "C" DllExport int
 TclCommand_MyElasticPP(ClientData clientData, 
 		       Tcl_Interp *interp,  
 		       int argc, 
 		       TCL_Char **argv, 
 		       TclModelBuilder *theTclBuilder)
 {
-  opserr << "TclCommand_myElasticPP -1\n";
+  
   // Pointer to a uniaxial material that will be added to the model builder
   UniaxialMaterial *theMaterial = 0;
 
@@ -60,8 +66,6 @@ TclCommand_MyElasticPP(ClientData clientData,
     opserr << "WARNING invalid uniaxialMaterial ElasticPP tag" << endln;
     return TCL_ERROR;		
   }
-
-  opserr << "TclCommand_myElasticPP -2\n";
   
   if (Tcl_GetDouble(interp, argv[3], &E) != TCL_OK) {
     opserr << "WARNING invalid E\n";
@@ -76,9 +80,7 @@ TclCommand_MyElasticPP(ClientData clientData,
   }
   
   theMaterial = new MyElasticPP(tag, E, ep);       
-  opserr << *theMaterial;
 
-  opserr << "TclCommand_myElasticPP -4\n";
   if (theMaterial == 0) {
     opserr << "WARNING could not create uniaxialMaterial " << argv[1] << endln;
     return TCL_ERROR;
@@ -91,8 +93,7 @@ TclCommand_MyElasticPP(ClientData clientData,
     delete theMaterial; // invoke the material objects destructor, otherwise mem leak
     return TCL_ERROR;
   }
-  
-  
+    
   return TCL_OK;
 }
 
