@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2004-06-07 23:09:32 $
+// $Revision: 1.15 $
+// $Date: 2005-07-05 17:37:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.cpp,v $
                                                                         
                                                                         
@@ -440,10 +440,11 @@ OpenGlDevice::WINOPEN(const char *_title, int _xLoc, int _yLoc, int _width, int 
   }
 
   /* get an appropriate visual*/
-  visual = glXChooseVisual(theDisplay, theScreen, attributeListSgl);
+  visual = glXChooseVisual(theDisplay, theScreen, attributeListDbl);
+  swap_flag = GL_TRUE;
   if (visual == NULL) {
-    visual = glXChooseVisual(theDisplay, theScreen, attributeListDbl);
-    swap_flag = GL_TRUE;
+    visual = glXChooseVisual(theDisplay, theScreen, attributeListSgl);
+    swap_flag = GL_FALSE;
   }
 
   if(visual == NULL) {
