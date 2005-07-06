@@ -21,8 +21,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2005-07-01 20:31:15 $
+// $Revision: 1.7 $
+// $Date: 2005-07-06 16:58:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/OPS_Globals.h,v $
                                                                         
 // Written: fmk 
@@ -34,8 +34,8 @@
 #define _USING_OpenSees_STREAMS
 #include <OPS_Stream.h>
 //extern OPS_Stream &opserr;
-extern OPS_Stream *opserr_ptr;
-#define opserr (*opserr_ptr)
+extern OPS_Stream *opserrPtr;
+#define opserr (*opserrPtr)
 #define endln "\n"
 
 // #define _USING_STL_STREAMS
