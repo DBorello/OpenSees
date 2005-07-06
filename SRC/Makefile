@@ -29,6 +29,7 @@ all:
 	@$(CD) $(FE)/coordTransformation; $(MAKE);
 	@$(CD) $(FE)/package; $(MAKE);
 	@$(CD) $(FE)/damage; $(MAKE);
+	@$(CD) $(FE)/package; $(MAKE);
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATRIX_LIBS) $(ELE_LIBS) \
 	$(MATERIAL_LIBS) $(HYSTERETIC_LIBS) $(SECTION_LIBS) $(DATABASE_LIBS) \
 	$(FEDEAS_LIBS) $(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)\
@@ -65,6 +66,7 @@ all:
 	@$(CD) $(FE)/element; $(MAKE);
 	@$(CD) $(FE)/coordTransformation; $(MAKE);
 	@$(CD) $(FE)/damage; $(MAKE);
+	@$(CD) $(FE)/package; $(MAKE);
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATRIX_LIBS) $(ELE_LIBS) \
 	$(MATERIAL_LIBS) $(HYSTERETIC_LIBS) $(SECTION_LIBS) $(DATABASE_LIBS) \
 	$(FEDEAS_LIBS) $(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)\
@@ -795,6 +797,7 @@ wipe: spotless
 	@$(CD) $(FE)/reliability; $(MAKE) wipe;
 	@$(CD) $(FE)/package; $(MAKE) wipe;
 	@$(CD) $(FE)/damage; $(MAKE) wipe;
+	@$(CD) $(FE)/package; $(MAKE) wipe;
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
