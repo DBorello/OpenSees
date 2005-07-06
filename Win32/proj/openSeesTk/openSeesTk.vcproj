@@ -127,24 +127,6 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
-				RelativePath="..\..\..\SRC\tcl\TclFeViewer.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\modelbuilder\tcl\TclModelBuilder.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\modelbuilder\tcl\TclUniaxialMaterialTester.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\tcl\TclVideoPlayer.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\tcl\commands.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\modelbuilder\tcl\myCommands.cpp">
-			</File>
-			<File
 				RelativePath="..\..\..\SRC\tcl\tkMain.cpp">
 			</File>
 			<File
@@ -155,16 +137,10 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
 			<File
-				RelativePath="..\..\..\SRC\tcl\TclFeViewer.h">
+				RelativePath="..\..\..\SRC\OPS_Globals.h">
 			</File>
 			<File
-				RelativePath="..\..\..\SRC\modelbuilder\tcl\TclModelBuilder.h">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\modelbuilder\tcl\TclUniaxialMaterialTester.h">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\tcl\TclVideoPlayer.h">
+				RelativePath="..\..\..\SRC\classTags.h">
 			</File>
 		</Filter>
 	</Files>

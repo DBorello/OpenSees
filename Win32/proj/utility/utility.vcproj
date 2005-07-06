@@ -107,6 +107,9 @@
 		<File
 			RelativePath="..\..\..\SRC\utility\Timer.h">
 		</File>
+		<File
+			RelativePath="..\..\..\SRC\package\packages.cpp">
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
