@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2005-03-30 03:54:33 $
+// $Revision: 1.23 $
+// $Date: 2005-07-06 22:00:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
                                                                         
@@ -408,8 +408,8 @@ ElementRecorder::initialize(void)
     numDbColumns = 1;  // 1 for the pseudo-time
 
   theResponses = new Response *[numEle];
-  for (int j=0; j<numEle; j++)
-    theResponses[j] = 0;
+  for (int k=0; k<numEle; k++)
+    theResponses[k] = 0;
 
   Information eleInfo(1.0);
   int i;

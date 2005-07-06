@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2005-05-27 00:12:15 $
+// $Revision: 1.12 $
+// $Date: 2005-07-06 22:00:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -473,8 +473,8 @@ EnvelopeElementRecorder::initialize(void)
   //
 
   theResponses = new Response *[numEle];
-  for (int j=0; j<numEle; j++)
-    theResponses[j] = 0;
+  for (int k=0; k<numEle; k++)
+    theResponses[k] = 0;
 
   Information eleInfo(1.0);
   int numDbColumns = 0;
@@ -583,7 +583,7 @@ EnvelopeElementRecorder::initialize(void)
   }
 
   // replace spaces with undescore for tables
-  for (int k=0; k<numDbColumns; k++) {
+  for (int kk=0; kk<numDbColumns; kk++) {
     char *data = dbColumns[k];
     int length = strlen(data);
     for (int j=0; j<length; j++)

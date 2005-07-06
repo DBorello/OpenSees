@@ -424,10 +424,10 @@ EPState::EPState( )
       }
       
       NTensorVar = MaxNTensorVar;
-      for (int i =0; i < NTensorVar; i++) {
-         TensorVar[i] = stresstensor(0.0);
-         TensorVar_commit[i] = stresstensor(0.0);
-         TensorVar_init[i] = stresstensor(0.0);
+      for (int j =0; j < NTensorVar; j++) {
+         TensorVar[j] = stresstensor(0.0);
+         TensorVar_commit[j] = stresstensor(0.0);
+         TensorVar_init[j] = stresstensor(0.0);
       }
 
       //Converged = false;

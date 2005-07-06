@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2004-12-06 23:05:59 $
+// $Revision: 1.7 $
+// $Date: 2005-07-06 22:00:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/SymBandEigenSolver.cpp,v $
 
 // Written: MHS
@@ -172,14 +172,14 @@ SymBandEigenSolver::solve(int nModes)
     int i,j;
     bool singular = false;
     // form M^(-1/2) and check for singular mass matrix
-    for (int i=0; i<size; i++) {
-      if (M[i] == 0.0) {
+    for (int k=0; k<size; k++) {
+      if (M[k] == 0.0) {
 	singular = true;
 	// alternative is to set as a small no ~ 1e-10 times smallest m(i,i) != 0.0
 	opserr << "SymBandEigenSolver::solve() - M matrix singular\n";
 	return -1;
       } else {
-	M[i] = 1.0/sqrt(M[i]);
+	M[k] = 1.0/sqrt(M[k]);
       }
     }
 

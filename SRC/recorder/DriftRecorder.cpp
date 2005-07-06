@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.12 $
-// $Date: 2005-03-31 01:33:42 $
+// $Revision: 1.13 $
+// $Date: 2005-07-06 22:00:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DriftRecorder.cpp,v $
 
 // Written: MHS
@@ -375,9 +375,9 @@ DriftRecorder::initialize(void)
   int counter = 0;
   int counterI = 0;
   int counterJ = 1;
-  for (int i=0; i<ndIsize; i++) {
-    int ni = (*ndI)(i);
-    int nj = (*ndJ)(i);
+  for (int j=0; j<ndIsize; j++) {
+    int ni = (*ndI)(j);
+    int nj = (*ndJ)(j);
     
     Node *nodeI = theDomain->getNode(ni);
     Node *nodeJ = theDomain->getNode(nj);
@@ -413,9 +413,9 @@ DriftRecorder::initialize(void)
     dbColumns[0] = newColumn;
   }
   
-  for (int i=0; i<numNodes; i++) {
-    Node *ndI = theNodes[2*i];
-    Node *ndJ = theNodes[2*i+1];
+  for (int k=0; k<numNodes; k++) {
+    Node *ndI = theNodes[2*k];
+    Node *ndJ = theNodes[2*k+1];
     int ni = ndI->getTag();
     int nj = ndJ->getTag();
     
@@ -423,7 +423,7 @@ DriftRecorder::initialize(void)
     int lenColumn = strlen(aColumn);
     char *newColumn = new char[lenColumn+1];
     strcpy(newColumn, aColumn);
-    dbColumns[i+timeOffset] = newColumn;
+    dbColumns[k+timeOffset] = newColumn;
   }
   
   //

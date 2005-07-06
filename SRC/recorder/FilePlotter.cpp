@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2005-03-18 22:10:19 $
+// $Revision: 1.12 $
+// $Date: 2005-07-06 22:00:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/FilePlotter.cpp,v $
                                                                         
                                                                         
@@ -589,15 +589,15 @@ FilePlotter::plotFiles(void)
       for (int ii=0; ii< numLineEntriesX; ii++)
 	theXfile1 >> (*data1a)(ii);
 
-      for (int ii=0; ii< numLineEntriesY; ii++)
-	theYfile1 >> (*data2a)(ii);
+      for (int jj=0; jj< numLineEntriesY; jj++)
+	theYfile1 >> (*data2a)(jj);
 
       for (int i=1; i<numLinesX; i++) {
 	// read the data
 	for (int ii=0; ii< numLineEntriesX; ii++)
 	  theXfile1 >> (*data1b)(ii);
-	for (int ii=0; ii< numLineEntriesY; ii++)
-	  theYfile1 >> (*data2b)(ii);
+	for (int kk=0; kk< numLineEntriesY; kk++)
+	  theYfile1 >> (*data2b)(kk);
 
 	// plot the lines
 	for (int j=0; j<cols->Size(); j+=2) {

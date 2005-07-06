@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2005-03-30 03:08:47 $
+// $Revision: 1.12 $
+// $Date: 2005-07-06 22:00:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.cpp,v $
                                                                         
 // Written: fmk 
@@ -557,12 +557,12 @@ TransformationFE::getK_Force(const Vector &accel, double fact)
   // get the components we need out of the vector
   // and place in a temporary vector
   Vector tmp(numTransformedDOF);
-  for (int i=0; i<numTransformedDOF; i++) {
-    int dof = (*modID)(i);
+  for (int j=0; j<numTransformedDOF; j++) {
+    int dof = (*modID)(j);
     if (dof >= 0)
-      tmp(i) = accel(dof);
+      tmp(j) = accel(dof);
     else
-      tmp(i) = 0.0;
+      tmp(j) = 0.0;
   }
 
   modResidual->addMatrixVector(0.0, *modTangent, tmp, 1.0);
@@ -669,12 +669,12 @@ TransformationFE::getM_Force(const Vector &accel, double fact)
   // get the components we need out of the vector
   // and place in a temporary vector
   Vector tmp(numTransformedDOF);
-  for (int i=0; i<numTransformedDOF; i++) {
-    int dof = (*modID)(i);
+  for (int j=0; j<numTransformedDOF; j++) {
+    int dof = (*modID)(j);
     if (dof >= 0)
-      tmp(i) = accel(dof);
+      tmp(j) = accel(dof);
     else
-      tmp(i) = 0.0;
+      tmp(j) = 0.0;
   }
 
   modResidual->addMatrixVector(0.0, *modTangent, tmp, 1.0);
@@ -781,12 +781,12 @@ TransformationFE::getC_Force(const Vector &accel, double fact)
   // get the components we need out of the vector
   // and place in a temporary vector
   Vector tmp(numTransformedDOF);
-  for (int i=0; i<numTransformedDOF; i++) {
+  for (int j=0; j<numTransformedDOF; j++) {
     int dof = (*modID)(i);
     if (dof >= 0)
-      tmp(i) = accel(dof);
+      tmp(j) = accel(dof);
     else
-      tmp(i) = 0.0;
+      tmp(j) = 0.0;
   }
 
   modResidual->addMatrixVector(0.0, *modTangent, tmp, 1.0);
