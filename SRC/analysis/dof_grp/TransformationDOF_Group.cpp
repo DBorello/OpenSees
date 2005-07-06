@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2005-07-06 22:00:20 $
+// $Revision: 1.12 $
+// $Date: 2005-07-06 22:32:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.cpp,v $
                                                                         
                                                                         
@@ -974,7 +974,7 @@ TransformationDOF_Group::saveSensitivity(Vector *u,Vector *udot,Vector *udotdot,
     for (int j=0; j<modNumDOF; j++) {
       int loc = theID(j);
       if (loc >= 0)
-	(*modUnbalance)(i) = (*udotdot)(loc);
+	(*modUnbalance)(j) = (*udotdot)(loc);
       // DO THE SP STUFF
     }    
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2005-07-06 22:00:20 $
+// $Revision: 1.13 $
+// $Date: 2005-07-06 22:32:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.cpp,v $
                                                                         
 // Written: fmk 
@@ -782,7 +782,7 @@ TransformationFE::getC_Force(const Vector &accel, double fact)
   // and place in a temporary vector
   Vector tmp(numTransformedDOF);
   for (int j=0; j<numTransformedDOF; j++) {
-    int dof = (*modID)(i);
+    int dof = (*modID)(j);
     if (dof >= 0)
       tmp(j) = accel(dof);
     else

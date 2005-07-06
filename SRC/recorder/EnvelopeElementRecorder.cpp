@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2005-07-06 22:00:20 $
+// $Revision: 1.13 $
+// $Date: 2005-07-06 22:32:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -584,7 +584,7 @@ EnvelopeElementRecorder::initialize(void)
 
   // replace spaces with undescore for tables
   for (int kk=0; kk<numDbColumns; kk++) {
-    char *data = dbColumns[k];
+    char *data = dbColumns[kk];
     int length = strlen(data);
     for (int j=0; j<length; j++)
       if (data[j] == ' ') data[j]='_';
