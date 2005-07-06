@@ -26,7 +26,6 @@ CFG=utility - Win32 Debug
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
-F90=df.exe
 RSC=rc.exe
 
 !IF  "$(CFG)" == "utility - Win32 Release"
@@ -41,8 +40,9 @@ RSC=rc.exe
 # PROP Output_Dir "..\..\lib\release"
 # PROP Intermediate_Dir "..\..\obj\utility\release"
 # PROP Target_Dir ""
+F90=df.exe
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\src\utility" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\domain" /I "..\..\..\src\tagged\storage" /I "..\..\..\src" /I "..\..\..\src\tagged" /I "..\..\..\src\handler" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "WIN32" /D "NDEBUG" /D "_LIB" /D "_MBCS" /D "_TCL84" /FD /c
+# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\src\package" /I "..\..\..\src\utility" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\domain" /I "..\..\..\src\tagged\storage" /I "..\..\..\src" /I "..\..\..\src\tagged" /I "..\..\..\src\handler" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "WIN32" /D "NDEBUG" /D "_LIB" /D "_MBCS" /D "_TCL84" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -65,8 +65,9 @@ LIB32=link.exe -lib
 # PROP Output_Dir "..\..\lib\debug"
 # PROP Intermediate_Dir "..\..\obj\utility\debug"
 # PROP Target_Dir ""
+F90=df.exe
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\utility" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\domain" /I "..\..\..\src\tagged\storage" /I "..\..\..\src" /I "..\..\..\src\tagged" /I "..\..\..\src\handler" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "WIN32" /D "_DEBUG" /D "_LIB" /D "_MBCS" /D "_TCL84" /FR /FD /GZ /c
+# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\package" /I "..\..\..\src\utility" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\domain" /I "..\..\..\src\tagged\storage" /I "..\..\..\src" /I "..\..\..\src\tagged" /I "..\..\..\src\handler" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "WIN32" /D "_DEBUG" /D "_LIB" /D "_MBCS" /D "_TCL84" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
@@ -83,6 +84,10 @@ LIB32=link.exe -lib
 
 # Name "utility - Win32 Release"
 # Name "utility - Win32 Debug"
+# Begin Source File
+
+SOURCE=..\..\..\SRC\package\packages.cpp
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\..\SRC\utility\Timer.cpp
