@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $                                                              
-// $Date: 2003-02-14 23:00:52 $                                                                  
-// $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CorotCrdTransf2d.h,v $                                                                
-                                                                        
-                                                                        
-// File: ~/crdTransf/CorotCrdTransf2d.h
-//
+// $Revision: 1.6 $                                                              
+// $Date: 2005-07-11 22:52:45 $                                                                  
+// $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CorotCrdTransf2d.h,v $ 
+                                        
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
 // Created: 04/2000
 // Revision: A
@@ -109,7 +106,8 @@ class CorotCrdTransf2d: public CrdTransf2d
     static Vector pg;     
     static Vector dub;     
     static Vector Dub;     
-
+    double *nodeIInitialDisp, *nodeJInitialDisp;
+    bool initialDispChecked;
 };
 #endif
 

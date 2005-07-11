@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $                                                              
-// $Date: 2003-04-04 16:53:30 $                                                                  
-// $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CorotCrdTransf3d.h,v $                                                                
-                                                                        
-                                                                        
-// File: ~/crdTransf/CorotCrdTransf3d.h
-//
+// $Revision: 1.7 $                                                              
+// $Date: 2005-07-11 22:52:45 $                                                                  
+// $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CorotCrdTransf3d.h,v $      
+
+
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
 // Created: 04/2000
 // Revision: A
@@ -127,7 +125,8 @@ class CorotCrdTransf3d: public CrdTransf3d
     static Matrix Tp;     // transformation matrix to renumber dofs
     static Matrix T;      // transformation matrix from basic to global system
     static Matrix Lr2, Lr3, A; // auxiliary matrices	
-
+    double *nodeIInitialDisp, *nodeJInitialDisp;
+    bool initialDispChecked;
 };
 #endif
 
