@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.62 $
-// $Date: 2005-07-01 20:33:17 $
+// $Revision: 1.63 $
+// $Date: 2005-07-13 23:47:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -565,7 +565,7 @@ wipeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 
   if (theDatabase != 0)
     delete theDatabase;
-
+  
   theDomain.clearAll();
 
   if (theTest != 0)
@@ -587,6 +587,7 @@ wipeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
   theTransientAnalysis =0;    
   theVariableTimeStepTransientAnalysis =0;    
   theTest = 0;
+  theDatabase = 0;
 // AddingSensitivity:BEGIN /////////////////////////////////////////////////
 #ifdef _RELIABILITY
   theSensitivityAlgorithm =0;
