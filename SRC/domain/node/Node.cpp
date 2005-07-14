@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2005-02-17 22:28:46 $
+// $Revision: 1.18 $
+// $Date: 2005-07-14 18:01:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -931,12 +931,10 @@ Node::getUnbalancedLoadIncInertia(void)
       unbalLoadWithInertia->addMatrixVector(1.0, *mass, theAccel, -1.0);
 
       if (alphaM != 0.0) {
-	const Vector &theVel = this->getTrialVel(); // in case accel not created
+	const Vector &theVel = this->getTrialVel(); // in case vel not created
 	unbalLoadWithInertia->addMatrixVector(1.0, *mass, theVel, -alphaM);
       }
     } 
-
-
 
     return *unbalLoadWithInertia;
 }
@@ -1501,6 +1499,36 @@ Node::recvSelf(int cTag, Channel &theChannel,
 	return res;
       }
     }        
+
+    if (index == -1) {
+      if (numMatrices != 0) {
+	for (int i=0; i<numMatrices; i++)
+	  if (theMatrices[i]->noRows() == numberDOF) {
+	    index = i;
+	    i = numMatrices;
+	  }
+      }
+      if (index == -1) {
+	Matrix **nextMatrices = new Matrix *[numMatrices+1];
+	if (nextMatrices == 0) {
+	  opserr << "Element::getTheMatrix - out of memory\n";
+	  exit(-1);
+	}
+	for (int j=0; j<numMatrices; j++)
+	  nextMatrices[j] = theMatrices[j];
+	Matrix *theMatrix = new Matrix(numberDOF, numberDOF);
+	if (theMatrix == 0) {
+	  opserr << "Element::getTheMatrix - out of memory\n";
+	  exit(-1);
+	}
+	nextMatrices[numMatrices] = theMatrix;
+	if (numMatrices != 0) 
+	  delete [] theMatrices;
+	index = numMatrices;
+	numMatrices++;
+	theMatrices = nextMatrices;
+      }
+    }
 
     return 0;
 }
