@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2004-01-29 22:57:49 $
+// $Revision: 1.10 $
+// $Date: 2005-07-15 00:02:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.cpp,v $
                                                                         
                                                                         
@@ -57,7 +57,7 @@ FileDatastore::FileDatastore(const char *dataBaseName,
 			     Domain &theDomain, 
 			     FEM_ObjectBroker &theObjBroker) 
   :FE_Datastore(theDomain, theObjBroker), dbTag(0),
-   ids(0), vects(0), mats(0)
+   ids(0), vects(0), mats(0), currentCommitTag(-1)
 {
   dataBase = new char [strlen(dataBaseName)+1];
   strcpy(dataBase, dataBaseName);
@@ -122,28 +122,33 @@ FileDatastore::getDbTag(void)
 int 
 FileDatastore::commitState(int commitTag)
 {
-    int result = FE_Datastore::commitState(commitTag);
+  int result = FE_Datastore::commitState(commitTag);
+  if (result == commitTag) 
+    resetFilePointers();
     
-    // if sucessfull, we close the files to flush the buffers
-    if (result == commitTag) {
-	for (int i=0; i<maxIDsize; i++) 
-	    if (ids[i] != 0) {
-	      ids[i]->close(); 
-	      ids[i] = 0;
-	    }
-	for (int j=0; j<maxVectSize; j++)
-	    if (vects[j] != 0) {
-		vects[j]->close();
-		vects[j] = 0;
-	    }
-	for (int k=0; k<maxMatSize; k++)
-	    if (mats[k] != 0) {
-		mats[k]->close();	
-		mats[k] = 0;
-	    }
+  return result;
+}
+
+void
+FileDatastore::resetFilePointers(void) {
+  
+  for (int i=0; i<maxIDsize; i++) 
+    if (ids[i] != 0) {
+      ids[i]->close(); 
+      ids[i] = 0;
+    }
+  for (int j=0; j<maxVectSize; j++)
+    if (vects[j] != 0) {
+      vects[j]->close();
+      vects[j] = 0;
+    }
+  for (int k=0; k<maxMatSize; k++)
+    if (mats[k] != 0) {
+      mats[k]->close();	
+      mats[k] = 0;
     }
 
-    return result;
+  currentCommitTag = -1;
 }
 
 int 
@@ -171,6 +176,10 @@ FileDatastore::sendMatrix(int dataTag, int commitTag,
 		      ChannelAddress *theAddress)
 {
 
+  if (currentCommitTag != commitTag)
+    this->resetFilePointers();
+  currentCommitTag = commitTag;
+
   // we first ensure that the Matrix is not too big
   int noMatCols= theMatrix.noCols();
   int noMatRows = theMatrix.noRows();
@@ -185,11 +194,13 @@ FileDatastore::sendMatrix(int dataTag, int commitTag,
   // open a file if not already opened
   if (mats[matSize] == 0) {
     char *fileName = new char[strlen(dataBase)+21];
-    char intName[10];
+    char intName[20];
     strcpy(fileName, dataBase);
-	sprintf(intName,"%d",matSize);
+    sprintf(intName,"%d.%d",matSize,commitTag);
     strcat(fileName,".Mats.");
     strcat(fileName,intName);
+    
+
     mats[matSize] = this->openFile(fileName);    
     if (mats[matSize] == 0) {
       opserr << "FileDatastore::sendMatrix() - could not open file\n";
@@ -305,6 +316,11 @@ FileDatastore::recvMatrix(int dataTag, int commitTag,
 		      Matrix &theMatrix, 
 		      ChannelAddress *theAddress)    
 {
+
+  if (currentCommitTag != commitTag)
+    this->resetFilePointers();
+  currentCommitTag = commitTag;
+
   // we first check Matrix not too big
   int noMatCols= theMatrix.noCols();
   int noMatRows = theMatrix.noRows();
@@ -318,11 +334,10 @@ FileDatastore::recvMatrix(int dataTag, int commitTag,
 
   // open the file if not already opened
   if (mats[matSize] == 0) {
-    char fileName[70];
-    char intName[10];
+    char *fileName = new char[strlen(dataBase)+21];
+    char intName[20];
     strcpy(fileName, dataBase);
-	sprintf(intName,"%d",matSize);
-    //itoa(matSize, intName);
+    sprintf(intName,"%d.%d",matSize,commitTag);
     strcat(fileName,".Mats.");
     strcat(fileName,intName);
     mats[matSize] = this->openFile(fileName);    
@@ -413,6 +428,9 @@ FileDatastore::sendVector(int dataTag, int commitTag,
 		      const Vector &theVector, 
 		      ChannelAddress *theAddress)
 {
+  if (currentCommitTag != commitTag)
+    this->resetFilePointers();
+  currentCommitTag = commitTag;
 
   // we first ensure that the ID is not too big
   int vectSize = theVector.Size();
@@ -423,11 +441,10 @@ FileDatastore::sendVector(int dataTag, int commitTag,
 
   // open a file if not already opened 
   if (vects[vectSize] == 0) {
-    char fileName[70];
-    char intName[10];
+    char *fileName = new char[strlen(dataBase)+21];
+    char intName[20];
     strcpy(fileName, dataBase);
-	sprintf(intName,"%d",vectSize);
-//    itoa(vectSize, intName);
+    sprintf(intName,"%d.%d",vectSize,commitTag);
     strcat(fileName,".Vects.");
     strcat(fileName,intName);
     vects[vectSize] = this->openFile(fileName);    
@@ -535,6 +552,10 @@ FileDatastore::recvVector(int dataTag, int commitTag,
 		      Vector &theVector, 
 		      ChannelAddress *theAddress)    
 {
+  if (currentCommitTag != commitTag)
+    this->resetFilePointers();
+  currentCommitTag = commitTag;
+
   // we first check ID not too big
   int vectSize = theVector.Size();
   if (vectSize >= maxVectSize) {
@@ -545,11 +566,10 @@ FileDatastore::recvVector(int dataTag, int commitTag,
   
 
   if (vects[vectSize] == 0) {
-    char fileName[70];
-    char intName[10];
+    char *fileName = new char[strlen(dataBase)+21];
+    char intName[20];
     strcpy(fileName, dataBase);
-		sprintf(intName,"%d",vectSize);
- //   itoa(vectSize, intName);
+    sprintf(intName,"%d.%d",vectSize,commitTag);
     strcat(fileName,".Vects.");
     strcat(fileName,intName);
     vects[vectSize] = this->openFile(fileName);    
@@ -635,6 +655,10 @@ FileDatastore::sendID(int dataTag, int commitTag,
 		      const ID &theID, 
 		      ChannelAddress *theAddress)
 {
+  if (currentCommitTag != commitTag)
+    this->resetFilePointers();
+  currentCommitTag = commitTag;
+
   // we first ensure that the ID is not too big
   int idSize = theID.Size();
   if (idSize >= maxIDsize) {
@@ -644,11 +668,10 @@ FileDatastore::sendID(int dataTag, int commitTag,
 
   // open a file if not already opened
   if (ids[idSize] == 0) {
-
-    char fileName[70];
-    char intName[10];
+    char *fileName = new char[strlen(dataBase)+21];
+    char intName[20];
     strcpy(fileName, dataBase);
-    sprintf(intName,"%d",idSize);
+    sprintf(intName,"%d.%d",idSize,commitTag);
     strcat(fileName,".IDs.");
     strcat(fileName,intName);
 
@@ -760,6 +783,10 @@ FileDatastore::recvID(int dataTag, int commitTag,
 		      ID &theID, 
 		      ChannelAddress *theAddress)    
 {
+  if (currentCommitTag != commitTag)
+    this->resetFilePointers();
+  currentCommitTag = commitTag;
+
   // we first check ID not too big
   int idSize = theID.Size();
   if (idSize >= maxIDsize) {
@@ -770,10 +797,10 @@ FileDatastore::recvID(int dataTag, int commitTag,
 
   // open file if not already done so
   if (ids[idSize] == 0) {
-    char fileName[70];
-    char intName[10];
+    char *fileName = new char[strlen(dataBase)+21];
+    char intName[20];
     strcpy(fileName, dataBase);
-    sprintf(intName,"%d",idSize);
+    sprintf(intName,"%d.%d",idSize,commitTag);
     strcat(fileName,".IDs.");
     strcat(fileName,intName);
 
@@ -840,6 +867,7 @@ FileDatastore::recvID(int dataTag, int commitTag,
 
 	      found = true;
 	  }
+
 	  pos += stepSize;
       }
       filePos.ids[idSize] = pos;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2004-01-29 22:57:49 $
+// $Revision: 1.9 $
+// $Date: 2005-07-15 00:02:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.h,v $
                                                                         
                                                                         
@@ -143,7 +143,8 @@ class FileDatastore: public FE_Datastore
   protected:
 
   private:
-    
+    void resetFilePointers(void);
+
     // Private methods
     fstream *openFile(char *fileName);
     
@@ -162,6 +163,8 @@ class FileDatastore: public FE_Datastore
     struct CurrentFilePos filePos;
     struct CurrentFileCommitTag fileCommitTags;
     struct MaxFileDbTag fileDbTags;    
+    
+    int currentCommitTag;
 };
 
 
