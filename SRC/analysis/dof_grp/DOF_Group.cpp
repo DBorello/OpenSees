@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2004-10-12 21:52:25 $
+// $Revision: 1.11 $
+// $Date: 2005-07-20 23:09:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.cpp,v $
                                                                         
                                                                         
@@ -221,14 +221,13 @@ DOF_Group::~DOF_Group()
 {
     numDOFs--;
 
+    int numDOF = unbalance->Size();
+
     // set the pointer in the associated Node to 0, to stop
     // segmentation fault if node tries to use this object after destroyed
-    if (myNode != 0) {
-	myNode->setDOF_GroupPtr(0);
-    }
-    
-    int numDOF = unbalance->Size();
-    
+    if (myNode != 0) 
+      myNode->setDOF_GroupPtr(0);
+
     // delete tangent and residual if created specially
     if (numDOF > MAX_NUM_DOF) {
 	if (tangent != 0) delete tangent;
@@ -950,6 +949,10 @@ DOF_Group::addD_ForceSensitivity(const Vector &Udot, double fact)
 }
 
 // AddingSensitivity:END //////////////////////////////////////////
-
+void
+DOF_Group::resetNodePtr(void)
+{
+  myNode = 0;
+}
 
 

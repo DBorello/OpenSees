@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2005-07-14 18:01:05 $
+// $Revision: 1.19 $
+// $Date: 2005-07-20 23:08:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -407,6 +407,9 @@ Node::~Node()
 
     if (reaction != 0)
       delete reaction;
+
+    if (theDOF_GroupPtr != 0)
+      theDOF_GroupPtr->resetNodePtr();
 }
 
 

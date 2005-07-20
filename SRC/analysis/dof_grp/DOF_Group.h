@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2005-02-05 01:17:26 $
+// $Revision: 1.10 $
+// $Date: 2005-07-20 23:09:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.h,v $
                                                                         
                                                                         
@@ -115,8 +115,10 @@ class DOF_Group
     virtual const Vector & getAccSensitivity(int gradNumber);
     virtual int saveSensitivity(Vector *v,Vector *vdot,Vector *vdotdot,int gradNum,int numGrads);
 // AddingSensitivity:END //////////////////////////////////////
-    
-  protected:
+
+    virtual void resetNodePtr(void);
+  
+   protected:
     void  addLocalM_Force(const Vector &Udotdot, double fact = 1.0);     
 
     // protected variables - a copy for each object of the class            
