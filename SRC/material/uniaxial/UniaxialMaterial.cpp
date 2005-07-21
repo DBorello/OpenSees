@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-05-08 23:03:59 $
+// $Revision: 1.12 $
+// $Date: 2005-07-21 00:22:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.cpp,v $
                                                                         
                                                                         
@@ -60,7 +60,7 @@ UniaxialMaterial::setTrial(double strain, double &stress, double &tangent, doubl
     stress = this->getStress();
     tangent = this->getTangent();
   } else {
-    opserr << "BARF\n";
+    opserr << "UniaxialMaterial::setTrial() - material failed in setTrialStrain()\n"; 
   }
 
   return res;
