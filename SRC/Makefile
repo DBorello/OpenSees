@@ -387,7 +387,6 @@ RECORDER_LIBS = $(FE)/recorder/Recorder.o \
 
 
 DATABASE_LIBS = $(FE)/database/FileDatastore.o \
-	$(FE)/database/MySqlDatastore.o \
 	$(FE)/database/NEESData.o \
 	$(FE)/database/TclDatabaseCommands.o
 
