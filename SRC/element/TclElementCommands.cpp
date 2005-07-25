@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.36 $
-// $Date: 2005-06-14 19:03:28 $
+// $Revision: 1.37 $
+// $Date: 2005-07-25 22:58:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -492,7 +492,6 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
     bool found = false;
     while (eleCommands != NULL && found == false) {
       if (strcmp(argv[1], eleCommands->funcName) == 0) {
-	opserr << "FOUND IT\n";
 	int result = (*(eleCommands->funcPtr))(clientData, interp, argc, argv, theTclDomain, theTclBuilder);
 	return result;
       } else
@@ -500,7 +499,6 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
     }
 
     // load new package
-
     void *libHandle;
     int (*funcPtr)(ClientData clientData, Tcl_Interp *interp,  int argc, 
 		   TCL_Char **argv, Domain*, TclModelBuilder *);       
@@ -510,21 +508,24 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
     strcpy(&tclFuncName[11], argv[1]);    
 
     int res = getLibraryFunction(argv[1], tclFuncName, &libHandle, (void **)&funcPtr);
-    
-    char *eleName = new char[eleNameLength+1];
-    strcpy(eleName, argv[1]);
-    ElementPackageCommand *theEleCommand = new ElementPackageCommand;
-    theEleCommand->funcPtr = funcPtr;
-    theEleCommand->funcName = eleName;	
-    theEleCommand->next = theElementPackageCommands;
-    theElementPackageCommands = theEleCommand;
-    
-    int result = (*funcPtr)(clientData, interp,
-			    argc, argv,
-			    theTclDomain, theTclBuilder);	
-    return result;
 
+    delete [] tclFuncName;
 
+    if (res == 0) {
+
+      char *eleName = new char[eleNameLength+1];
+      strcpy(eleName, argv[1]);
+      ElementPackageCommand *theEleCommand = new ElementPackageCommand;
+      theEleCommand->funcPtr = funcPtr;
+      theEleCommand->funcName = eleName;	
+      theEleCommand->next = theElementPackageCommands;
+      theElementPackageCommands = theEleCommand;
+      
+      int result = (*funcPtr)(clientData, interp,
+			      argc, argv,
+			      theTclDomain, theTclBuilder);	
+      return result;
+    }
 
     // element type not recognized
     opserr << "WARNING unknown element type: " <<  argv[1] << " :check the manual\n";
