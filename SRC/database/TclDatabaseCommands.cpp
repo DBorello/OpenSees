@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2004-06-03 20:02:43 $
+// $Revision: 1.8 $
+// $Date: 2005-07-25 18:05:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/TclDatabaseCommands.cpp,v $
                                                                         
                                                                         
@@ -45,18 +45,31 @@
 #include <Domain.h>
 #include <EquiSolnAlgo.h>
 
-// databases
+// known databases
 #include <FileDatastore.h>
 
-#ifdef _MYSQL
-#include <MySqlDatastore.h>
-#endif
-#ifdef _BERKELEYDB
-#include <BerkeleyDbDatastore.h>
-#endif
-#include <FEM_ObjectBroker.h>
+// linked list of struct for other types of
+// databases that can be added dynamically
 
+#include <packages.h>
+
+typedef struct databasePackageCommand {
+  char *funcName;
+  int (*funcPtr)(ClientData clientData, 
+		 Tcl_Interp *interp,  
+		 int argc, 
+		 TCL_Char **argv, 
+		 Domain*, 
+		 FEM_ObjectBroker *,
+		 FE_Datastore **); 
+  struct databasePackageCommand *next;
+} DatabasePackageCommand;
+
+
+// static variables
+static DatabasePackageCommand *theDatabasePackageCommands = NULL;
 static bool createdDatabaseCommands = false;
+
 
 int 
 save(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
@@ -105,98 +118,66 @@ TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **a
       delete theDatabase;
 
     theDatabase = new FileDatastore(argv[2], theDomain, theBroker);
-  }
-
-#ifdef _MYSQL
-  // a MySQL Database
-  else if (strcmp(argv[1],"MySQL") == 0) {
-    if (argc < 3) {
-      opserr << "WARNING database MySql fileName? ";
+    // check we instantiated a database .. if not ran out of memory
+    if (theDatabase == 0) {
+      opserr << "WARNING ran out of memory - database File " << argv[2] << endln;
       return TCL_ERROR;
-    }    
+    } 
+    
+    return TCL_OK;
+  } else {
 
-    // delete the old database
-    if (theDatabase != 0)
-      delete theDatabase;
+    //
+    // maybe a database package
+    //
+    
+    // try existing loaded packages
+    
+    DatabasePackageCommand *dataCommands = theDatabasePackageCommands;
+    bool found = false;
+    while (dataCommands != NULL && found == false) {
+      if (strcmp(argv[1], dataCommands->funcName) == 0) {
+	int result = (*(dataCommands->funcPtr))(clientData, interp, argc, argv, &theDomain, &theBroker, &theDatabase);
+	return result;
+      } else
+	dataCommands = dataCommands->next;
+    }
+    
+    // load new package
 
-    if (argc == 3)
-      theDatabase = new MySqlDatastore(argv[2], theDomain, theBroker);
-    else {
-      const char *database = argv[2];
-      const char *host = NULL;
-      const char *user = NULL;
-      const char *passwd = NULL;
-      const char *socket = NULL;
-      int port = 0;
-      int clientFlag = 0;
-
-      int counter = 3;
-      while (counter < argc) {
-	if (strcmp(argv[counter],"-host") == 0) {
-	  host = argv[counter + 1];
-	  counter += 2;
-	} else if (strcmp(argv[counter],"-user") == 0) {
-	  user = argv[counter + 1];
-	  counter += 2;
-	} else if (strcmp(argv[counter],"-passwd") == 0) {
-	  passwd = argv[counter + 1];
-	  counter += 2;
-	} else if (strcmp(argv[counter],"-socket") == 0) {
-	  socket = argv[counter + 1];
-	  counter += 2;
-	} else if (strcmp(argv[counter],"-port") == 0) {
-	  if (Tcl_GetInt(interp, argv[counter+1], &port) != TCL_OK)	
-	    return TCL_ERROR;	      
-	  counter += 2;
-	} else if (strcmp(argv[counter],"-clientFlag") == 0) {
-	  if (Tcl_GetInt(interp, argv[counter+1], &clientFlag) != TCL_OK)	
-	    return TCL_ERROR;	      
-	  counter += 2;
-	} else {
-	  counter++;
-	}
-      }
-      theDatabase = new MySqlDatastore(database, host, user, passwd, port, socket, clientFlag, theDomain, theBroker);
+    void *libHandle;
+    int (*funcPtr)(ClientData clientData, Tcl_Interp *interp,  int argc, 
+		   TCL_Char **argv, Domain*, FEM_ObjectBroker *, FE_Datastore **);       
+    int databaseNameLength = strlen(argv[1]);
+    char *tclFuncName = new char[databaseNameLength+12];
+    strcpy(tclFuncName, "TclCommand_");
+    strcpy(&tclFuncName[11], argv[1]);    
+    
+    int res = getLibraryFunction(argv[1], tclFuncName, &libHandle, (void **)&funcPtr);
+    
+    if (res == 0) {
+      char *databaseName = new char[databaseNameLength+1];
+      strcpy(databaseName, argv[1]);
+      DatabasePackageCommand *theDataCommand = new DatabasePackageCommand;
+      theDataCommand->funcPtr = funcPtr;
+      theDataCommand->funcName = databaseName;	
+      theDataCommand->next = theDatabasePackageCommands;
+      theDatabasePackageCommands = theDataCommand;
+      
+      int result = (*funcPtr)(clientData, interp,
+			      argc, 
+			      argv,
+			      &theDomain, 
+			      &theBroker,
+			      &theDatabase);	
+      return result;
     }
   }
-#endif
+  opserr << "WARNING No database type exists ";
+  opserr << "for database of type:" << argv[1] << "valid database type File\n";
 
-#ifdef _BERKELEYDB
-  // a BerkeleyDB database
-  else  if (strcmp(argv[1],"BerkeleyDB") == 0) {
-    if (argc < 3) {
-      opserr << "WARNING database BerkeleyDB fileName? ";
-      return TCL_ERROR;
-    }    
-
-
-    // delete the old database 
-    if (theDatabase != 0) 
-      delete theDatabase;
-
-    theDatabase = new BerkeleyDbDatastore(argv[2], theDomain, theBroker);
-  }
-#endif
-
-  // no recorder type specified yet exists
-  else {
-    opserr << "WARNING No database type exists ";
-    opserr << "for database of type:" << argv[1] << "valid database types File, BerkeleyDB and MySQL\n";
-    return TCL_ERROR;
-  }    
-
-  // check we instantiated a database .. if not ran out of memory
-  if (theDatabase == 0) {
-    opserr << "WARNING ran out of memory - database " << argv[1]<< endln;
-    return TCL_ERROR;
-  } 
-
-  // operation successfull
-  return TCL_OK;
-}
-
-
-
+  return TCL_ERROR;
+}    
 
 int 
 save(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
