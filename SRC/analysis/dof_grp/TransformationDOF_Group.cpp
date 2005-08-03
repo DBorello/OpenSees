@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2005-07-06 22:32:36 $
+// $Revision: 1.13 $
+// $Date: 2005-08-03 19:12:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.cpp,v $
                                                                         
                                                                         
@@ -33,6 +33,8 @@
 // What: "@(#) TransformationDOF_Group.C, revA"
 
 
+
+
 #include <TransformationDOF_Group.h>
 #include <stdlib.h>
 
@@ -44,17 +46,21 @@
 #include <MP_Constraint.h>
 #include <SP_Constraint.h>
 #include <SP_ConstraintIter.h>
+#include <TransformationConstraintHandler.h>
 
 #define MAX_NUM_DOF 16
 
+static int transCounter = 0;
 
 // static variables initialisation
 Matrix **TransformationDOF_Group::modMatrices; 
 Vector **TransformationDOF_Group::modVectors;  
 int TransformationDOF_Group::numTransDOFs(0);     // number of objects
+TransformationConstraintHandler *TransformationDOF_Group::theHandler(0);     // number of objects
 
 TransformationDOF_Group::TransformationDOF_Group(int tag, Node *node, 
-						 MP_Constraint *mp)  
+						 MP_Constraint *mp,
+						 TransformationConstraintHandler *theTHandler)  
 :DOF_Group(tag,node),
  theMP(mp),Trans(0),modTangent(0),modUnbalance(0),modID(0),theSPs(0)
 {
@@ -168,6 +174,7 @@ TransformationDOF_Group::TransformationDOF_Group(int tag, Node *node,
     }
     
     numTransDOFs++;
+    theHandler = theTHandler;
 }
 
 void 
@@ -180,7 +187,9 @@ TransformationDOF_Group::setID(int dof, int value)
 }
 	
 
-TransformationDOF_Group::TransformationDOF_Group(int tag, Node *node)
+TransformationDOF_Group::TransformationDOF_Group(int tag, 
+						 Node *node, 
+						 TransformationConstraintHandler *theTHandler)
 :DOF_Group(tag,node),
  theMP(0),Trans(0),modTangent(0),modUnbalance(0),modID(0),theSPs(0) 
 {
@@ -220,6 +229,7 @@ TransformationDOF_Group::TransformationDOF_Group(int tag, Node *node)
     }    
 
     numTransDOFs++;
+    theHandler = theTHandler;
 }
 
 
@@ -442,18 +452,30 @@ TransformationDOF_Group::getCommittedAccel(void)
 void
 TransformationDOF_Group::setNodeDisp(const Vector &u)
 {
-    // call base class method and return if no MP_Constraint
-    if (theMP == 0) {
-	this->DOF_Group::setNodeDisp(u);
-	return;
-    }
-	
+
+  // DO THE SP STUFF
+  if (transCounter == numTransDOFs) {
+    theHandler->enforceSPs();
+    transCounter = 0;
+  }  else
+    transCounter++;
+
+
+  // call base class method and return if no MP_Constraint
+  if (theMP == 0) {
+    this->DOF_Group::setNodeDisp(u);
+    return;
+  }
+
    const ID &theID = this->getID();
    for (int i=0; i<modNumDOF; i++) {
 	int loc = theID(i);
 	if (loc >= 0)
 	    (*modUnbalance)(i) = u(loc);
-	// DO THE SP STUFF
+	else
+	    (*modUnbalance)(i) = 0.0;
+	  
+
     }    
     Matrix *T = this->getT();
     if (T != 0) {
@@ -775,20 +797,6 @@ TransformationDOF_Group::addSP_Constraint(SP_Constraint &theSP)
 int 
 TransformationDOF_Group::enforceSPs(void)
 {
-  /*
-    Vector trialDisp(myNode->getTrialDisp());
-    int numDof = myNode->getNumberDOF();
-    int haveSPs = 0;
-    for (int i=0; i<numDof; i++)
-	if (theSPs[i] != 0) {
-	    double value = theSPs[i]->getValue();
-	    trialDisp(i) = value;
-	    haveSPs = 1;
-	}
-
-    if (haveSPs != 0)
-      myNode->setTrialDisp(trialDisp);
-  */    
   int numDof = myNode->getNumberDOF();
   for (int i=0; i<numDof; i++)
     if (theSPs[i] != 0) {

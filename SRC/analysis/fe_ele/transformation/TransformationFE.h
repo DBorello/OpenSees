@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2005-02-04 22:57:00 $
+// $Revision: 1.7 $
+// $Date: 2005-08-03 19:12:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.h,v $
                                                                         
                                                                         
@@ -44,9 +44,8 @@ class TransformationConstraintHandler;
 class TransformationFE: public FE_Element
 {
   public:
-    TransformationFE(Element *theElement, 
-		     TransformationConstraintHandler &theHandler);
-    ~TransformationFE();    
+  TransformationFE(Element *theElement);
+  ~TransformationFE();    
 
     // public methods for setting/obtaining mapping information
     virtual const ID &getDOFtags(void) const;
@@ -90,7 +89,6 @@ class TransformationFE: public FE_Element
     int numGroups;
     int numTransformedDOF;
     int numOriginalDOF;
-    TransformationConstraintHandler *theHandler;
     
     // static variables - single copy for all objects of the class	
     static Matrix **modMatrices; // array of pointers to class wide matrices

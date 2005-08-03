@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2005-07-06 22:32:37 $
+// $Revision: 1.14 $
+// $Date: 2005-08-03 19:12:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.cpp,v $
                                                                         
 // Written: fmk 
@@ -58,10 +58,9 @@ int TransformationFE::sizeBuffer(0);
 
 //  TransformationFE(Element *, Integrator *theIntegrator);
 //	construictor that take the corresponding model element.
-TransformationFE::TransformationFE(Element *ele,
-				   TransformationConstraintHandler &theH) 
+TransformationFE::TransformationFE(Element *ele)
 :FE_Element(ele), theDOFs(0), numSPs(0), theSPs(0), modID(0), 
-  modTangent(0), modResidual(0), numGroups(0), numTransformedDOF(0), theHandler(&theH)
+  modTangent(0), modResidual(0), numGroups(0), numTransformedDOF(0)
 {
   // set number of original dof at ele
     numOriginalDOF = ele->getNumDOF();
@@ -76,8 +75,6 @@ TransformationFE::TransformationFE(Element *ele,
 	opserr << "array of size : " << numNodes << " for storage of DOF_Group\n";
 	exit(-1);
     }
-
-
 
     numGroups = numNodes;
 
@@ -117,6 +114,7 @@ TransformationFE::TransformationFE(Element *ele,
     // if this is the first element of this type create the arrays for 
     // modified tangent and residual matrices
     if (numTransFE == 0) {
+
 	modMatrices = new Matrix *[MAX_NUM_DOF+1];
 	modVectors  = new Vector *[MAX_NUM_DOF+1];
 	dataBuffer = new double[MAX_NUM_DOF*MAX_NUM_DOF];
@@ -288,15 +286,6 @@ TransformationFE::setID(void)
 const Matrix &
 TransformationFE::getTangent(Integrator *theNewIntegrator)
 {
-    // impose the SP_Constraints at the nodes
-    if (transCounter == 0) {
-	transCounter++;
-	theHandler->enforceSPs();
-    } else if (transCounter == numTransFE)
-	transCounter = 0;
-    else
-	transCounter++;
-
     if (this->updateElement() < 0) {
       opserr << "WARNING: TransformationFE::getTangent() - failed to update element correctly\n";
     }
@@ -398,19 +387,9 @@ TransformationFE::getTangent(Integrator *theNewIntegrator)
 
 const Vector &
 TransformationFE::getResidual(Integrator *theNewIntegrator)
+
 {
-    // impose the SP_Constraints at the nodes
-    if (transCounter == 0) {
-	transCounter++;
-	theHandler->enforceSPs();
-    } else if (transCounter == numTransFE)
-	transCounter = 0;
-    else
-	transCounter++;
-	    
     const Vector &theResidual = this->FE_Element::getResidual(theNewIntegrator);
-
-
     // DO THE SP STUFF TO THE TANGENT
     
     // perform Tt R  -- as T is block diagonal do T(i)^T R(i)
@@ -419,7 +398,7 @@ TransformationFE::getResidual(Integrator *theNewIntegrator)
     int startRowTransformed = 0;
     int startRowOriginal = 0;
     int numNode = numGroups;
-    
+
     // foreach block row, for each block col do
     for (int i=0; i<numNode; i++) {
 	int noRows = 0;
@@ -428,12 +407,25 @@ TransformationFE::getResidual(Integrator *theNewIntegrator)
 	if (Ti != 0) {
 	  noRows = Ti->noCols(); // T^
 	  noCols = Ti->noRows();
+
+	  /*
+	  Vector orig(noCols);
+	  Vector mod(noRows);
+	  for (int k=startRowOriginal; k<startRowOriginal+noCols; k++)
+	    orig(k-startRowOriginal)= theResidual(k);
+	  mod = (*Ti)^orig;
+	  for (int k=startRowTransformed; k<startRowTransformed+noRows; k++)
+	    (*modResidual)(k) = mod (k-startRowTransformed);
+
+	  */
+
 	  for (int j=0; j<noRows; j++) {
-	    double sum = 0;
+	    double sum = 0.0;
 	    for (int k=0; k<noCols; k++)
 	      sum += (*Ti)(k,j) * theResidual(startRowOriginal + k);
 	    (*modResidual)(startRowTransformed +j) = sum;
 	  }
+
 	} else {
 	  noCols = theDOFs[i]->getNumDOF();
 	  noRows = noCols;

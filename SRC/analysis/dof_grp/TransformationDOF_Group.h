@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-02-04 22:44:34 $
+// $Revision: 1.5 $
+// $Date: 2005-08-03 19:12:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.h,v $
                                                                         
                                                                         
@@ -42,12 +42,13 @@
 
 class MP_Constraint;
 class SP_Constraint;
+class TransformationConstraintHandler;
 
 class TransformationDOF_Group: public DOF_Group
 {
   public:
-    TransformationDOF_Group(int tag, Node *myNode, MP_Constraint *mp);
-    TransformationDOF_Group(int tag, Node *myNode);    
+    TransformationDOF_Group(int tag, Node *myNode, MP_Constraint *mp, TransformationConstraintHandler*);
+    TransformationDOF_Group(int tag, Node *myNode, TransformationConstraintHandler *);    
     ~TransformationDOF_Group();    
     
     // methods dealing with the ID and transformation matrix
@@ -117,6 +118,7 @@ class TransformationDOF_Group: public DOF_Group
     static Matrix **modMatrices; // array of pointers to class wide matrices
     static Vector **modVectors;  // array of pointers to class widde vectors
     static int numTransDOFs;           // number of objects        
+    static TransformationConstraintHandler *theHandler;
 };
 
 #endif

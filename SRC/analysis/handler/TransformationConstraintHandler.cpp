@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2005-03-30 03:04:42 $
+// $Revision: 1.9 $
+// $Date: 2005-08-03 19:12:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/TransformationConstraintHandler.cpp,v $
                                                                         
                                                                         
@@ -203,7 +203,7 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 	    if (loc >= 0) {
 
 		TransformationDOF_Group *tDofPtr = 
-		    new TransformationDOF_Group(numDofGrp++, nodPtr, mps[loc]); 
+		  new TransformationDOF_Group(numDofGrp++, nodPtr, mps[loc], this); 
 								 
 		createdDOF = 1;
 		dofPtr = tDofPtr;
@@ -229,7 +229,7 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 	    loc = constrainedNodesSP->getLocation(nodeTag);
 	    if (loc >= 0) {
 		TransformationDOF_Group *tDofPtr = 
-		    new TransformationDOF_Group(numDofGrp++, nodPtr);
+		    new TransformationDOF_Group(numDofGrp++, nodPtr, this);
 		
 		int numSPs = 1;
 		createdDOF = 1;
@@ -317,7 +317,7 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 		return -5;
 	    }		
 	} else {
-	    if ((fePtr = new TransformationFE(elePtr, *this)) == 0) {		
+	    if ((fePtr = new TransformationFE(elePtr)) == 0) {		
 		opserr << "WARNING TransformationConstraintHandler::handle()";
 		opserr << " - ran out of memory";
 		opserr << " creating TransformationFE " << elePtr->getTag() << endln; 
