@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2005-07-21 00:22:53 $
+// $Revision: 1.27 $
+// $Date: 2005-08-08 21:54:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -38,6 +38,7 @@
 #include <ParallelMaterial.h>	// fmk
 #include <HardeningMaterial.h>	// MHS
 #include <Steel01.h>			// MHS
+#include <Steel03.h>			// KM
 #include <Concrete01.h>			// MHS
 #include <HystereticMaterial.h>	// MHS
 #include <EPPGapMaterial.h>		// Mackie
@@ -598,6 +599,107 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 		// Parsing was successful, allocate the material
 		theMaterial = new Steel01 (tag, fy, E, b);
     }
+
+
+    else if (strcmp(argv[1],"Steel03") == 0) {
+      // Check that there is the minimum number of arguments
+      if (argc < 8) {
+        opserr << "WARNING insufficient arguments\n";
+        printCommand(argc,argv);
+        opserr << "Want: uniaxialMaterial Steel03 tag? fy? E0? b? r? rtype?";
+        opserr << " <a1? a2? a3? a4?>" << endln;    
+        return TCL_ERROR;
+      }
+      
+      int tag;
+      
+      
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+        opserr << "WARNING invalid uniaxialMaterial Steel03 tag" << endln;
+        return TCL_ERROR;
+      }
+      
+      // Read required Steel01 material parameters
+      double fy, E, b, r;
+      int rtype;
+      
+      
+      if (Tcl_GetDouble(interp, argv[3], &fy) != TCL_OK) {
+        opserr << "WARNING invalid fy\n";
+        opserr << "uniaxialMaterial Steel03: " << tag << endln;
+        return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[4], &E) != TCL_OK) {
+        opserr << "WARNING invalid E0\n";
+        opserr << "uniaxialMaterial Steel03: " << tag << endln;
+        return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[5], &b) != TCL_OK) {
+        opserr << "WARNING invalid b\n";
+        opserr << "uniaxialMaterial Steel03: " << tag << endln;
+        return TCL_ERROR;
+      }
+      
+      
+        if (Tcl_GetDouble(interp, argv[6], &r) != TCL_OK) {
+	  opserr << "WARNING invalid r\n";
+	  opserr << "uniaxialMaterial Steel03: " << tag << endln;
+	  return TCL_ERROR;
+	}
+	
+        
+        if (Tcl_GetInt(interp, argv[7], &rtype) != TCL_OK) {
+	  opserr << "WARNING invalid rtype\n";
+	  opserr << "uniaxialMaterial Steel03: " << tag << endln;
+	  return TCL_ERROR;
+	}
+	
+	// Read optional Steel01 material parameters
+	double a1, a2, a3, a4;
+	if (argc > 8) {
+	  if (argc < 12) {
+	    opserr << "WARNING insufficient number of hardening parameters\n";
+	    opserr << "uniaxialMaterial Steel03: " << tag << endln;
+	    return TCL_ERROR;
+	  }
+	  
+	  
+	  if (Tcl_GetDouble(interp, argv[8], &a1) != TCL_OK) {
+	    opserr << "WARNING invalid a1\n";
+	    opserr << "uniaxialMaterial Steel03: " << tag << endln;
+	    return TCL_ERROR;
+	  }
+	  
+        
+	  if (Tcl_GetDouble(interp, argv[9], &a2) != TCL_OK) {
+	    opserr << "WARNING invalid a2\n";
+	    opserr << "uniaxialMaterial Steel03: " << tag << endln;
+	    return TCL_ERROR;
+	  }
+	  
+	  
+	  if (Tcl_GetDouble(interp, argv[10], &a3) != TCL_OK) {
+	    opserr << "WARNING invalid a3\n";
+	    opserr << "uniaxialMaterial Steel03: " << tag << endln;
+	    return TCL_ERROR;
+	  }
+	  
+	  if (Tcl_GetDouble(interp, argv[11], &a4) != TCL_OK) {
+	    opserr << "WARNING invalid a4\n";
+	    opserr << "uniaxialMaterial Steel03: " << tag << endln;
+	    return TCL_ERROR;
+	  }
+	  
+        // Parsing was successful, allocate the material
+	  theMaterial = new Steel03 (tag, fy, E, b, r, rtype, a1, a2, a3, a4);
+	}
+	else
+	  // Parsing was successful, allocate the material
+	  theMaterial = new Steel03 (tag, fy, E, b, r, rtype);
+    }
+    
 
     else if (strcmp(argv[1],"Concrete01") == 0) {
 	if (argc < 7) {
