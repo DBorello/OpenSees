@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2004-08-27 18:36:53 $
+// $Revision: 1.16 $
+// $Date: 2005-08-08 22:22:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -266,53 +266,77 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
 
 TclReliabilityBuilder::~TclReliabilityBuilder()
 {
-	// Delete objects
-	if (theReliabilityDomain != 0)
-		delete theReliabilityDomain;
-	if (theGFunEvaluator != 0) {
-		delete theGFunEvaluator;
-		theGFunEvaluator = 0;
-	}
-	if (theGradGEvaluator != 0)
-		delete theGradGEvaluator;
-	if (theStepSizeRule != 0)
-		delete theStepSizeRule;
-	if (theSearchDirection != 0)
-		delete theSearchDirection;
-	if (theHessianApproximation != 0)
-		delete theHessianApproximation;
-	if (thePolakHeDualPurpose != 0)
-		delete thePolakHeDualPurpose;
-	if (theSQPtriplePurpose != 0)
-		delete theSQPtriplePurpose;
-	if (theMeritFunctionCheck != 0)
-		delete theMeritFunctionCheck;
-	if (theReliabilityConvergenceCheck != 0)
-		delete theReliabilityConvergenceCheck;
-	if (theProbabilityTransformation != 0)
-		delete theProbabilityTransformation;
-	if (theStartPoint != 0)
-		delete theStartPoint;
-	if (theRootFindingAlgorithm != 0)
-		delete theRootFindingAlgorithm;
-	if (theRandomNumberGenerator != 0)
-		delete theRandomNumberGenerator;
-	if (theFindDesignPointAlgorithm != 0)
-		delete theFindDesignPointAlgorithm;
-	if (theFindCurvatures != 0)
-		delete theFindCurvatures;
-	if (theFORMAnalysis != 0)
-		delete theFORMAnalysis;
-	if (theFOSMAnalysis != 0)
-		delete theFOSMAnalysis;
-	if (theParametricReliabilityAnalysis != 0)
-		delete theParametricReliabilityAnalysis;
-	if (theSORMAnalysis != 0)
-		delete theSORMAnalysis;
-	if (theSamplingAnalysis != 0)
-		delete theSamplingAnalysis;
-	if (theSystemAnalysis != 0)
-		delete theSystemAnalysis;
+  // Delete objects
+  if (theReliabilityDomain != 0) 
+    delete theReliabilityDomain;
+  if (theGFunEvaluator != 0)
+    delete theGFunEvaluator;
+  if (theGradGEvaluator != 0)
+    delete theGradGEvaluator;
+  if (theStepSizeRule != 0)
+    delete theStepSizeRule;
+  if (theSearchDirection != 0)
+    delete theSearchDirection;
+  if (theHessianApproximation != 0)
+    delete theHessianApproximation;
+  if (thePolakHeDualPurpose != 0)
+    delete thePolakHeDualPurpose;
+  if (theSQPtriplePurpose != 0)
+    delete theSQPtriplePurpose;
+  if (theMeritFunctionCheck != 0)
+    delete theMeritFunctionCheck;
+  if (theReliabilityConvergenceCheck != 0)
+    delete theReliabilityConvergenceCheck;
+  if (theProbabilityTransformation != 0)
+    delete theProbabilityTransformation;
+  if (theStartPoint != 0)
+    delete theStartPoint;
+  if (theRootFindingAlgorithm != 0)
+    delete theRootFindingAlgorithm;
+  if (theRandomNumberGenerator != 0)
+    delete theRandomNumberGenerator;
+  if (theFindDesignPointAlgorithm != 0)
+    delete theFindDesignPointAlgorithm;
+  if (theFindCurvatures != 0)
+    delete theFindCurvatures;
+  if (theFORMAnalysis != 0)
+    delete theFORMAnalysis;
+  if (theFOSMAnalysis != 0)
+    delete theFOSMAnalysis;
+  if (theParametricReliabilityAnalysis != 0)
+    delete theParametricReliabilityAnalysis;
+  if (theSORMAnalysis != 0)
+    delete theSORMAnalysis;
+  if (theSamplingAnalysis != 0)
+    delete theSamplingAnalysis;
+  if (theSystemAnalysis != 0)
+    delete theSystemAnalysis;
+
+
+  theReliabilityDomain = 0;
+  theReliabilityDomain =0;
+  theGFunEvaluator =0;
+  theGradGEvaluator =0;
+  theStepSizeRule =0;
+  theSearchDirection =0;
+  theHessianApproximation =0;
+  thePolakHeDualPurpose =0;
+  theSQPtriplePurpose =0;
+  theMeritFunctionCheck =0;
+  theReliabilityConvergenceCheck =0;
+  theProbabilityTransformation =0;
+  theStartPoint =0;
+  theRootFindingAlgorithm =0;
+  theRandomNumberGenerator =0;
+  theFindDesignPointAlgorithm =0;
+  theFindCurvatures =0;
+  theFORMAnalysis =0;
+  theFOSMAnalysis =0;
+  theParametricReliabilityAnalysis =0;
+  theSORMAnalysis =0;
+  theSamplingAnalysis =0;
+  theSystemAnalysis =0;
+
 
 	// Delete commands
 	Tcl_DeleteCommand(theInterp, "randomVariable");
