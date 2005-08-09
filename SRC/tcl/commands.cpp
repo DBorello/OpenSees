@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.63 $
-// $Date: 2005-07-13 23:47:03 $
+// $Revision: 1.64 $
+// $Date: 2005-08-09 21:39:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -56,6 +56,7 @@ using std::ofstream;
 #include <StandardStream.h>
 #include <FileStream.h>
 StandardStream sserr;
+//OPS_Stream &opserr = sserr;
 OPS_Stream *opserrPtr = &sserr;
 
 #endif
@@ -63,6 +64,8 @@ OPS_Stream *opserrPtr = &sserr;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <packages.h>
 
 #include <FEM_ObjectBroker.h>
 #include <RigidRod.h>
@@ -145,7 +148,7 @@ OPS_Stream *opserrPtr = &sserr;
 #include <EigenIntegrator.h>
 #include <CentralDifferenceAlternative.h>
 #include <CentralDifferenceNoDamping.h>
-//#include <CentralDifference.h>
+#include <CentralDifference.h>
 
 // analysis
 #include <StaticAnalysis.h>
@@ -189,6 +192,15 @@ OPS_Stream *opserrPtr = &sserr;
 
 #include <UmfpackGenLinSOE.h>
 #include <UmfpackGenLinSolver.h>
+
+
+#ifdef _PETSC
+#include <PetscSOE.h>
+#include <PetscSolver.h>
+#include <SparseGenRowLinSOE.h>
+#include <PetscSparseSeqSolver.h>
+#endif
+
 
 #include <EigenSOE.h>
 #include <EigenSolver.h>
@@ -1297,6 +1309,23 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 //
 // command invoked to allow the SystemOfEqn and Solver objects to be built
 //
+
+
+typedef struct linearSOE_PackageCommand {
+  char *funcName;
+  int (*funcPtr)(ClientData clientData, 
+		 Tcl_Interp *interp,  
+		 int argc, 
+		 TCL_Char **argv, 
+		 FEM_ObjectBroker *,
+		 LinearSOE **); 
+  struct linearSOE_PackageCommand *next;
+} LinearSOE_PackageCommand;
+
+
+// static variables
+static LinearSOE_PackageCommand *theLinearSOE_PackageCommands = NULL;
+
 int 
 specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
@@ -1417,18 +1446,23 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
     theSolver = new ThreadedSuperLU(np, permSpec, panelSize, relax, thresh); 	
 
 #else
-
+    int permSpec = 0;
+    int panelSize = 6;
+    int relax = 6;
     int count = 2;
+    char symmetric = 'N';
     double thresh = 0.0;
+    double drop_tol = 0.0;
+
     while (count < argc) {
-      if (strcmp(argv[count],"p") == 0 || strcmp(argv[count],"piv") ||
-	  strcmp(argv[count],"-piv")) {
-	thresh = 1.0;
+      if (strcmp(argv[count],"s") == 0 || strcmp(argv[count],"symmetric") ||
+	  strcmp(argv[count],"-symm")) {
+	symmetric = 'Y';
       }
       count++;
     }
 
-    theSolver = new SuperLU(0, thresh); 	
+    theSolver = new SuperLU(permSpec, drop_tol, panelSize, relax, symmetric); 	
 
 #endif
 
@@ -1465,15 +1499,68 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
   }
 
   else {
-    opserr << "WARNING No SystemOfEqn type exists) \n";
-    return TCL_ERROR;
+
+    //
+    // maybe a package
+    //
+    
+    // try existing loaded packages
+    
+    LinearSOE_PackageCommand *soeCommands = theLinearSOE_PackageCommands;
+    bool found = false;
+    while (soeCommands != NULL && found == false) {
+      if (strcmp(argv[1], soeCommands->funcName) == 0) {
+	int result = (*(soeCommands->funcPtr))(clientData, interp, argc, argv, &theBroker, &theSOE);
+	found = true;
+      } else
+	soeCommands = soeCommands->next;
+    }
+    
+    if (found == false) {
+      // load new package
+    
+      void *libHandle;
+      int (*funcPtr)(ClientData clientData, Tcl_Interp *interp,  int argc, 
+		     TCL_Char **argv, FEM_ObjectBroker *, LinearSOE **);       
+      int linearSOE_NameLength = strlen(argv[1]);
+      char *tclFuncName = new char[linearSOE_NameLength+12];
+      strcpy(tclFuncName, "TclCommand_");
+      strcpy(&tclFuncName[11], argv[1]);    
+      
+      int res = getLibraryFunction(argv[1], tclFuncName, &libHandle, (void **)&funcPtr);
+      
+      if (res == 0) {
+	char *linearSOE_Name = new char[linearSOE_NameLength+1];
+	strcpy(linearSOE_Name, argv[1]);
+	LinearSOE_PackageCommand *theSOE_Command = new LinearSOE_PackageCommand;
+	theSOE_Command->funcPtr = funcPtr;
+	theSOE_Command->funcName = linearSOE_Name;	
+	theSOE_Command->next = theLinearSOE_PackageCommands;
+	theLinearSOE_PackageCommands = theSOE_Command;
+	
+	int result = (*funcPtr)(clientData, interp,
+				argc, 
+				argv,
+				&theBroker,
+				&theSOE);	
+      }
+    }
+  }
+    
+  // if the analysis exists - we want to change the SOEif
+
+  if (theSOE != 0) {
+    if (theStaticAnalysis != 0)
+      theStaticAnalysis->setLinearSOE(*theSOE);
+    if (theTransientAnalysis != 0)
+      theTransientAnalysis->setLinearSOE(*theSOE);
+    
+    return TCL_OK;
   }
 
-  // if the analysis exists - we want to change the SOE
-  if (theStaticAnalysis != 0)
-    theStaticAnalysis->setLinearSOE(*theSOE);
+  opserr << "WARNING system " << argv[1] << " : no such system found\n";
 
-  return TCL_OK;
+  return TCL_ERROR;
 }
 
 
@@ -2437,6 +2524,13 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	theTransientAnalysis->setIntegrator(*theTransientIntegrator);
   }      
 
+  else if (strcmp(argv[1],"CentralDifference") == 0) {
+    theTransientIntegrator = new CentralDifference();       
+
+    // if the analysis exists - we want to change the Integrator
+    if (theTransientAnalysis != 0)
+      theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+  }      
 
   else if (strcmp(argv[1],"CentralDifferenceAlternative") == 0) {
     theTransientIntegrator = new CentralDifferenceAlternative();       
