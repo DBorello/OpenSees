@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.66 $
-// $Date: 2005-04-08 02:43:01 $
+// $Revision: 1.67 $
+// $Date: 2005-08-17 00:23:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -91,6 +91,7 @@
 #define MAT_TAG_ParallelMaterial		3
 #define MAT_TAG_Concrete01				4
 #define MAT_TAG_Steel01					5
+
 #define MAT_TAG_Hardening				6
 #define MAT_TAG_Hysteretic				7
 #define MAT_TAG_EPPGap					8
@@ -106,6 +107,7 @@
 #define MAT_TAG_Pinching4					18
 #define MAT_TAG_BarSlip					19
 #define MAT_TAG_Fatigue			20
+#define MAT_TAG_Steel03					23
 // Terje:
 #define MAT_TAG_SmoothSteel01			21
 #define MAT_TAG_SmoothConcrete01		22
