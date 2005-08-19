@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:39 $
+// $Revision: 1.4 $
+// $Date: 2005-08-19 19:40:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/NewUniaxialMaterial.h,v $
 
 // Written: MHS
@@ -33,7 +33,7 @@
 
 #include <UniaxialMaterial.h>
 
-#define MAT_TAG_NewUniaxial 1976
+#define MAT_TAG_NewUniaxialMaterial 1976
 
 class NewUniaxialMaterial : public UniaxialMaterial
 {
@@ -63,9 +63,9 @@ class NewUniaxialMaterial : public UniaxialMaterial
  protected:
   
  private:
-  double Tstrain;
-  double Tstress;
-  double Ttangent;
+  double Tstrain;   // trial strain
+  double Tstress;   // trial stress
+  double Ttangent;  // trial tangent
 };
 
 #endif
