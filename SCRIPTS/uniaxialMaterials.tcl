@@ -630,3 +630,55 @@ proc doneSteel01 { } {
 
 
 
+# ##############################################################
+# Define the data structures & procedures for KinematicHardening
+# ##############################################################
+
+set KinematicHardening(materialId) 0
+set KinematicHardening(E) 0
+set KinematicHardening(Ekh) 0
+set KinematicHardening(sigY) 0
+
+# add KinematicHardening to the materials menu
+
+#$m add command -label KinematicHardening -command "SetKinematicHardening .hardening"
+
+proc SetKinematicHardening {w} {
+    global matID
+
+    # Turn off all buttons & create a top level window
+    disable_buttons
+    toplevel $w
+
+    set count 0
+    foreach field {materialId E Ekh sigY} {
+	label .hardening.l$field -text $field
+	entry .hardening.e$field -textvariable KinematicHardening($field) -relief sunken 
+	grid .hardening.l$field -row $count -column 0 -sticky e
+	grid .hardening.e$field -row $count -column 1 -sticky ew
+	incr count
+    }
+
+    button .hardening.ok -text OK -command "doneKinematicHardening; destroy $w; enable_buttons"
+    grid .hardening.ok -row 0 -rowspan 3 -column 2 -sticky nsew
+
+    .hardening.ematerialId config -state normal
+    set KinematicHardening(materialId) [expr $matID + 1]
+    .hardening.ematerialId delete 0 end
+    .hardening.ematerialId insert 0 $KinematicHardening(materialId)
+    .hardening.ematerialId config -state disabled
+}
+
+
+proc doneKinematicHardening { } {
+    global matID
+    global KinematicHardening
+
+    set matID $KinematicHardening(materialId)
+    uniaxialMaterial KinematicHardening $matID $KinematicHardening(E) $KinematicHardening(Ekh) $KinematicHardening(sigY) 
+    eval uniaxialTest $matID
+    set matID $KinematicHardening(materialId)
+
+    SetValues
+    Reset
+}
