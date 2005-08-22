@@ -90,7 +90,6 @@ class EPState
 
     bool Converged;      // Bool to indicate whether this is the converged EPState by current CDriver
     
-    int integratorFlag; //Guanzhou Mar2005
     double Delta_lambda; //Guanzhou Mar2005
 
 //ZC05/2004    // Flag to indicate if elastic portion is pressure dependent isotropic, pressure independent isotropic, pressure 
@@ -113,6 +112,7 @@ class EPState
 //ZC05/2004    double po;           // Reference pressure (100 kPa by default)  Joey 02-11-03
     double e;            // Void ratio  Joey 02-11-03
     double psi;          // State parameter  Joey 02-18-03
+    int integratorFlag; //Guanzhou Mar2005
 //ZC05/2004    double a;            // Exponent in E = Eo (p/p_atm)^a for nonlinear elastic model Joey 02-11-03
     
   public:
