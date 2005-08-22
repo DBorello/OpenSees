@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:39 $
+// $Revision: 1.5 $
+// $Date: 2005-08-22 20:50:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/NewUniaxialMaterial.cpp,v $
 
 // Written: MHS
@@ -32,16 +32,17 @@
 #include <Vector.h>
 #include <Channel.h>
 #include <math.h>
+#include <float.h>
 
 NewUniaxialMaterial::NewUniaxialMaterial(int tag)
-  :UniaxialMaterial(tag,MAT_TAG_NewUniaxial),
+  :UniaxialMaterial(tag,MAT_TAG_NewUniaxialMaterial),
    Tstrain(0.0), Tstress(0.0), Ttangent(0.0)
 {
 
 }
 
 NewUniaxialMaterial::NewUniaxialMaterial()
-  :UniaxialMaterial(0,MAT_TAG_NewUniaxial),
+  :UniaxialMaterial(0,MAT_TAG_NewUniaxialMaterial),
    Tstrain(0.0), Tstress(0.0), Ttangent(0.0)
 {
 
