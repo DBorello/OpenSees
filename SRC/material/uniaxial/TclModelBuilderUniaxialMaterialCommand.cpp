@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.27 $
-// $Date: 2005-08-08 21:54:40 $
+// $Revision: 1.28 $
+// $Date: 2005-08-22 20:52:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -59,8 +59,6 @@
 #include <TzSimple1.h>			// RWB
 #include <TzLiq1.h>			    // RWB
 
-
-
 #include <Vector.h>
 #include <string.h>
 
@@ -83,6 +81,14 @@ static void printCommand(int argc, TCL_Char **argv)
     opserr << endln;
 } 
 
+
+// external functions
+
+int
+TclCommand_ReinforcingSteel(ClientData clientData, Tcl_Interp *interp, int argc, 
+			    TCL_Char **argv, TclModelBuilder *theTclBuilder);
+
+
 UniaxialMaterial *
 TclModelBuilder_addFedeasMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
 				  TCL_Char **argv, TclModelBuilder *theTclBuilder);
@@ -98,6 +104,9 @@ TclModelBuilder_addSnapMaterial(ClientData clientData, Tcl_Interp *interp, int a
 UniaxialMaterial *
 TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
 				  TCL_Char **argv, TclModelBuilder *theTclBuilder, Domain *theDomain);
+int
+TclCommand_KinematicHardening(ClientData clientData, Tcl_Interp *interp, int argc, 
+			      TCL_Char **argv, TclModelBuilder *theTclBuilder);
 
 int
 TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *interp, int argc,
@@ -115,116 +124,119 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 
     // Check argv[2] for uniaxial material type
     if (strcmp(argv[1],"Elastic") == 0) {
-	if (argc < 4 || argc > 5) {
-	    opserr << "WARNING invalid number of arguments\n";
-	    printCommand(argc,argv);
-	    opserr << "Want: uniaxialMaterial Elastic tag? E? <eta?>" << endln;
-	    return TCL_ERROR;
-	}    
-
-	int tag;
-	double E;
-        double eta = 0.0;
-	
-	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    opserr << "WARNING invalid uniaxialMaterial Elastic tag" << endln;
-	    return TCL_ERROR;		
+      if (argc < 4 || argc > 5) {
+	opserr << "WARNING invalid number of arguments\n";
+	printCommand(argc,argv);
+	opserr << "Want: uniaxialMaterial Elastic tag? E? <eta?>" << endln;
+	return TCL_ERROR;
+      }    
+      
+      int tag;
+      double E;
+      double eta = 0.0;
+      
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	opserr << "WARNING invalid uniaxialMaterial Elastic tag" << endln;
+	return TCL_ERROR;		
+      }
+      
+      if (Tcl_GetDouble(interp, argv[3], &E) != TCL_OK) {
+	opserr << "WARNING invalid E\n";
+	opserr << "uniaxiaMaterial Elastic: " << tag << endln;
+	return TCL_ERROR;	
+      }
+      
+      if (argc == 5) {
+	if (Tcl_GetDouble(interp,argv[4], &eta) != TCL_OK) {
+	  opserr << "WARNING invalid eta\n";
+	  opserr << "uniaxialMaterial Elastic: " << tag << endln;
+	  return TCL_ERROR;
 	}
-
-	if (Tcl_GetDouble(interp, argv[3], &E) != TCL_OK) {
-	    opserr << "WARNING invalid E\n";
-	    opserr << "uniaxiaMaterial Elastic: " << tag << endln;
-	    return TCL_ERROR;	
-	}
-
-	if (argc == 5) {
-	    if (Tcl_GetDouble(interp,argv[4], &eta) != TCL_OK) {
-               opserr << "WARNING invalid eta\n";
-               opserr << "uniaxialMaterial Elastic: " << tag << endln;
-               return TCL_ERROR;
-            }
-	}
-
-	// Parsing was successful, allocate the material
-	theMaterial = new ElasticMaterial(tag, E, eta);       
-        //dum << tag " << tag << " E " << E << " eta " << eta <<endln;
+      }
+      
+      // Parsing was successful, allocate the material
+      theMaterial = new ElasticMaterial(tag, E, eta);       
+      //dum << tag " << tag << " E " << E << " eta " << eta <<endln;
+      
+    } else if (strcmp(argv[1], "ReinforcingSteel") == 0) {
+      return TclCommand_ReinforcingSteel(clientData,interp,argc,argv,theTclBuilder);
     }
-
-	else if (strcmp(argv[1],"ENT") == 0) {
-	if (argc < 4) {
-	    opserr << "WARNING invalid number of arguments\n";
-	    printCommand(argc,argv);
-	    opserr << "Want: uniaxialMaterial ENT tag? E?" << endln;
-	    return TCL_ERROR;
-	}    
-
-	int tag;
-	double E;
-	
-	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    opserr << "WARNING invalid uniaxialMaterial ENT tag" << endln;
-	    return TCL_ERROR;		
-	}
-
-	if (Tcl_GetDouble(interp, argv[3], &E) != TCL_OK) {
-	    opserr << "WARNING invalid E\n";
-	    opserr << "uniaxiaMaterial ENT: " << tag << endln;
-	    return TCL_ERROR;	
-	}
-
-	// Parsing was successful, allocate the material
-	theMaterial = new ENTMaterial(tag, E);       
-     
-	}
-
+    
+    else if (strcmp(argv[1],"ENT") == 0) {
+      if (argc < 4) {
+	opserr << "WARNING invalid number of arguments\n";
+	printCommand(argc,argv);
+	opserr << "Want: uniaxialMaterial ENT tag? E?" << endln;
+	return TCL_ERROR;
+      }    
+      
+      int tag;
+      double E;
+      
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	opserr << "WARNING invalid uniaxialMaterial ENT tag" << endln;
+	return TCL_ERROR;		
+      }
+      
+      if (Tcl_GetDouble(interp, argv[3], &E) != TCL_OK) {
+	opserr << "WARNING invalid E\n";
+	opserr << "uniaxiaMaterial ENT: " << tag << endln;
+	return TCL_ERROR;	
+      }
+      
+      // Parsing was successful, allocate the material
+      theMaterial = new ENTMaterial(tag, E);       
+      
+    }
+    
     else if (strcmp(argv[1],"ElasticPP") == 0) {
-	if (argc < 5) {
-	    opserr << "WARNING insufficient arguments\n";
-	    printCommand(argc,argv);
-	    opserr << "Want: uniaxialMaterial ElasticPP tag? E? epsy?" << endln;
-	    return TCL_ERROR;
-	}
-
-	int tag;
-	double E, ep;
-	
-	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    opserr << "WARNING invalid uniaxialMaterial ElasticPP tag" << endln;
-	    return TCL_ERROR;		
-	}
-
-	if (Tcl_GetDouble(interp, argv[3], &E) != TCL_OK) {
-	    opserr << "WARNING invalid E\n";
-	    opserr << "uniaxialMaterial ElasticPP: " << tag << endln;
-	    return TCL_ERROR;	
-	}
-
-	if (Tcl_GetDouble(interp, argv[4], &ep) != TCL_OK) {
-	    opserr << "WARNING invalid epsy\n";
-	    opserr << "uniaxialMaterial ElasticPP: " << tag << endln;
-	    return TCL_ERROR;
-	}
-	
-	// read in additional parameters eyn and ezero
-	if (argc > 6) {
-	    double eyn, ez;
-	    if (Tcl_GetDouble(interp, argv[5], &eyn) != TCL_OK) {
-		opserr << "WARNING invalid eyn\n";
-		opserr << "uniaxialMaterial ElasticPP: " << tag << endln;
-		return TCL_ERROR;
-	    }	    
-	    if (Tcl_GetDouble(interp, argv[6], &ez) != TCL_OK) {
-		opserr << "WARNING invalid ez\n";
-		opserr << "uniaxialMaterial ElasticPP: " << tag << endln;
-		return TCL_ERROR;
-	    }	    	    
-	    theMaterial = new ElasticPPMaterial(tag, E, ep, eyn, ez);
-	} else {
-	    // Parsing was successful, allocate the material
-	    theMaterial = new ElasticPPMaterial(tag, E, ep);       
-	}
+      if (argc < 5) {
+	opserr << "WARNING insufficient arguments\n";
+	printCommand(argc,argv);
+	opserr << "Want: uniaxialMaterial ElasticPP tag? E? epsy?" << endln;
+	return TCL_ERROR;
+      }
+      
+      int tag;
+      double E, ep;
+      
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	opserr << "WARNING invalid uniaxialMaterial ElasticPP tag" << endln;
+	return TCL_ERROR;		
+      }
+      
+      if (Tcl_GetDouble(interp, argv[3], &E) != TCL_OK) {
+	opserr << "WARNING invalid E\n";
+	opserr << "uniaxialMaterial ElasticPP: " << tag << endln;
+	return TCL_ERROR;	
+      }
+      
+      if (Tcl_GetDouble(interp, argv[4], &ep) != TCL_OK) {
+	opserr << "WARNING invalid epsy\n";
+	opserr << "uniaxialMaterial ElasticPP: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      // read in additional parameters eyn and ezero
+      if (argc > 6) {
+	double eyn, ez;
+	if (Tcl_GetDouble(interp, argv[5], &eyn) != TCL_OK) {
+	  opserr << "WARNING invalid eyn\n";
+	  opserr << "uniaxialMaterial ElasticPP: " << tag << endln;
+	  return TCL_ERROR;
+	}	    
+	if (Tcl_GetDouble(interp, argv[6], &ez) != TCL_OK) {
+	  opserr << "WARNING invalid ez\n";
+	  opserr << "uniaxialMaterial ElasticPP: " << tag << endln;
+	  return TCL_ERROR;
+	}	    	    
+	theMaterial = new ElasticPPMaterial(tag, E, ep, eyn, ez);
+      } else {
+	// Parsing was successful, allocate the material
+	theMaterial = new ElasticPPMaterial(tag, E, ep);       
+      }
     }
-
+    
     else if (strcmp(argv[1],"ElasticPPGap") == 0) {
       if (argc < 6) {
         opserr << "WARNING insufficient arguments\n";
@@ -1635,7 +1647,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 		   theMaterial = new BarSlipMaterial (tag, fc, fy, Es, fu, Eh, db, ld, nb, width, depth, bsf, typ, dmg, unt);
 	   }
 
-   }
+   } 
 
 
     else {

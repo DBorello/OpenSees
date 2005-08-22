@@ -10,7 +10,9 @@ include ../../../Makefile.def
 	BoucWenMaterial.o \
 	Pinching4Material.o BarSlipMaterial.o \
 	FatigueMaterial.o \
-	Steel03.o \
+	Steel03.o KinematicHardening.o TclKinematicHardening.o \
+	NewUniaxialMaterial.o TclNewUnixailaMaterial.o \
+	ReinforcingSteel.o TclReinforcingSteel.o\
         TclModelBuilderUniaxialMaterialCommand.o
 
 all:         $(OBJS)
