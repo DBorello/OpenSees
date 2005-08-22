@@ -464,6 +464,8 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/UniaxialMaterial.o \
 	$(FE)/material/uniaxial/ElasticMaterial.o \
+	$(FE)/material/uniaxial/ReinforcingSteel.o \
+	$(FE)/material/uniaxial/TclReinforcingSteel.o \
 	$(FE)/material/uniaxial/ElasticPPMaterial.o \
 	$(FE)/material/uniaxial/HardeningMaterial.o \
 	$(FE)/material/uniaxial/ParallelMaterial.o \
