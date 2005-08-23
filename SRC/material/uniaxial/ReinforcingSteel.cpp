@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2005-08-22 20:50:54 $
+// $Revision: 1.2 $
+// $Date: 2005-08-23 17:20:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ReinforcingSteel.cpp,v $
 
 // Written: Jon Mohle
@@ -39,7 +39,7 @@ ReinforcingSteel::ReinforcingSteel(int tag, double fy, double fsu, double Es, do
   :UniaxialMaterial(tag,MAT_TAG_ReinforcingSteel),
   LDratio(slenderness),alpha_(alpha),fsu_fraction(gama),Fat1(Fatigue1)
 { 
-  if((r<=0.0) & (r<=1.0)) 
+  if((r>=0.0) & (r<=1.0)) 
     reduction=r;
   else
     if(r<=0)
@@ -852,7 +852,7 @@ ReinforcingSteel::Buckled_stress_Gomes(double ess, double fss)
 	double Dft = 0.25;
 		
 	double fs_buck = alpha_*sqrt(32.0/(e_cross-ess))/(9.42477796076938*LDratio);
-	double stress_diff=abs(fs_buck-1.0);
+	double stress_diff=fabs(fs_buck-1.0);
 	if (stress_diff <= Dft)	beta = 1-gama*(Dft-stress_diff)/Dft;
 
 	//double factor = ((1.0>fs_buck)?fs_buck:1.0)*beta + reduction)/(1.0+reduction);

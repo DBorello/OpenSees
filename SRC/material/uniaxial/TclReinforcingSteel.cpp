@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-08-22 20:50:54 $
+// $Revision: 1.2 $
+// $Date: 2005-08-23 17:20:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclReinforcingSteel.cpp,v $
                                                                         
 
@@ -38,19 +38,19 @@ TclCommand_ReinforcingSteel(ClientData clientData, Tcl_Interp *interp, int argc,
 
   if (argc < 10) {
     opserr << "WARNING insufficient arguments\n";
-    opserr << "Want: uniaxialMaterial ReinforcingSteel tag? fy? fu? Es? Esh? esh? eult? slenderness ratio? alpha? r? gama? Fatigue1? Fatigue2? Degrade1?" << endln;
-    return TCL_ERROR;
+    opserr << "Want: uniaxialMaterial ReinforcingSteel tag? fy? fu? Es? Esh? esh? eult? <lsr? <beta? r? gama? <Cf? alpha? Cd?>>>" << endln;
+	return TCL_ERROR;
   }
   
   int tag;
   double fy, fu, Es, Esh, esh, eult;
   double slen = 0.0;
-  double Fat1 = 0.114;
-  double Fat2 = -4.46;
-  double Deg1 = 0.00679;
-  double alpha = 1.0;
-  double r = 1.6;
-  double gama = 0.4;
+  double Cf = 0.0;
+  double alpha = -4.46;
+  double Cd = 0.0;
+  double beta = 1.0;
+  double r = 1.0;
+  double gama = 0.5;
   
   if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
     opserr << "WARNING invalid uniaxialMaterial ReinforcingSteel tag" << endln;
@@ -94,49 +94,59 @@ TclCommand_ReinforcingSteel(ClientData clientData, Tcl_Interp *interp, int argc,
   }
   if (argc > 9) {
     if (Tcl_GetDouble(interp, argv[9], &slen) != TCL_OK) {
-      opserr << "WARNING invalid slenderness ratio\n";
+      opserr << "WARNING invalid lsr\n";
       opserr << "uniaxialMaterial ReinforcingSteel: " << tag << endln;
       return TCL_ERROR;	
     }
   }
   if (argc > 10) {
-    if (Tcl_GetDouble(interp, argv[10], &alpha) != TCL_OK) {
-      opserr << "WARNING invalid alpha factor\n";
+	if (argc < 14) {
+		opserr << "WARNING insufficient optional arguments\n";
+		opserr << "Want: uniaxialMaterial ReinforcingSteel tag? fy? fu? Es? Esh? esh? eult? <lsr? <beta? r? gama? <Cf? alpha? Cd?>>>" << endln;
+		return TCL_ERROR;
+	}
+    if (Tcl_GetDouble(interp, argv[10], &beta) != TCL_OK) {
+      opserr << "WARNING invalid beta\n";
       opserr << "uniaxialMaterial ReinforcingSteel: " << tag << endln;
       return TCL_ERROR;	
     }
     
     if (Tcl_GetDouble(interp, argv[11], &r) != TCL_OK) {
-      opserr << "WARNING invalid r factor\n";
+      opserr << "WARNING invalid r\n";
       opserr << "uniaxialMaterial ReinforcingSteel: " << tag << endln;
       return TCL_ERROR;	
     }
     
     if (Tcl_GetDouble(interp, argv[12], &gama) != TCL_OK) {
-      opserr << "WARNING invalid gama factor\n";
+      opserr << "WARNING invalid gama\n";
       opserr << "uniaxialMaterial ReinforcingSteel: " << tag << endln;
       return TCL_ERROR;	
     }
   }
   if (argc > 13) {
-    if (Tcl_GetDouble(interp, argv[13], &Fat1) != TCL_OK) {
-      opserr << "WARNING invalid Fatigue1\n";
+    if (argc < 17) {
+		opserr << "WARNING insufficient optional arguments\n";
+		opserr << "Want: uniaxialMaterial ReinforcingSteel tag? fy? fu? Es? Esh? esh? eult? <lsr? <beta? r? gama? <Cf? alpha? Cd?>>>" << endln;
+		return TCL_ERROR;
+	}
+    if (Tcl_GetDouble(interp, argv[13], &Cf) != TCL_OK) {
+      opserr << "WARNING invalid Cf\n";
       opserr << "uniaxialMaterial ReinforcingSteel: " << tag << endln;
       return TCL_ERROR;	
     }
-    if (Tcl_GetDouble(interp, argv[14], &Fat2) != TCL_OK) {
-      opserr << "WARNING invalid Fatigue2\n";
+    if (Tcl_GetDouble(interp, argv[14], &alpha) != TCL_OK) {
+      opserr << "WARNING invalid alpha\n";
       opserr << "uniaxialMaterial ReinforcingSteel: " << tag << endln;
       return TCL_ERROR;	
     }
-    if (Tcl_GetDouble(interp, argv[15], &Deg1) != TCL_OK) {
-      opserr << "WARNING invalid Degrade1\n";
+    if (Tcl_GetDouble(interp, argv[15], &Cd) != TCL_OK) {
+      opserr << "WARNING invalid Cd\n";
       opserr << "uniaxialMaterial ReinforcingSteel: " << tag << endln;
       return TCL_ERROR;	
     }
   } 
   // Parsing was successful, allocate the material
-  theMaterial = new ReinforcingSteel(tag, fy, fu, Es, Esh, esh, eult, slen, alpha, r, gama, Fat1, Fat2, Deg1);
+  theMaterial = new ReinforcingSteel(tag, fy, fu, Es, Esh, esh, eult, slen, beta, r, gama, Cf, alpha, Cd);
 
   if (theMaterial != 0) 
     return theTclBuilder->addUniaxialMaterial(*theMaterial);
