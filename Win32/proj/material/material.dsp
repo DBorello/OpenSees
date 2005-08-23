@@ -497,7 +497,19 @@ SOURCE=..\..\..\SRC\material\uniaxial\Steel01.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\uniaxial\Steel03.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\Steel03.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\material\uniaxial\TclModelBuilderUniaxialMaterialCommand.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\TclReinforcingSteel.cpp
 # End Source File
 # Begin Source File
 
@@ -1269,6 +1281,10 @@ SOURCE=..\..\..\SRC\material\section\repres\cell\QuadCell.cpp
 
 SOURCE=..\..\..\SRC\material\section\repres\cell\QuadCell.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\ReinforcingSteel.cpp
+# End Source File
 # End Group
 # Begin Group "patch"
 
@@ -1755,6 +1771,10 @@ SOURCE=..\..\..\SRC\material\Material.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\Material.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\ReinforcingSteel.h
 # End Source File
 # End Target
 # End Project
