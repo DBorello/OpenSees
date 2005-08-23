@@ -1,17 +1,28 @@
+#MAC OS X PANTHER
+# required software that needs to be installed:
+#  1. XCode
+#  2. Fink (for g77 and libpng)
+#  3. g77
+#  4. Tcl8.4.6 (downloaded latest source distribution; cd tcl8.4.6/macosx;
+#     make; su; make install;
+#  5. Tk8.4.6  
+#    4 ND 5 THERE IS ALSO A .DMG AVAILABLE
+#  
+
 ############################################################################
 #
 #  Program:  OpenSees
 #
 #  Purpose:  A Top-level Makefile to create the libraries needed
-#	     to use the OpenSees framework. Works for MacOSX 10.1.3 and 
-#            above, modified to use the OpenGl and X11 libraries.
+#	     to use the OpenSees framework. Works for MacOSX 10.3.4 PANTHER
 #
-#  Written: mackie
-#  Created: 08/2002
+#  Written: fmk
+#  Created: 08/2004
 #
 #  Send bug reports, comments or suggestions to fmckenna@ce.berkeley.edu
 #
 ############################################################################
+
 
 # %---------------------------------%
 # |  SECTION 1: PROGRAM             |
@@ -32,7 +43,7 @@ OpenSees_PROGRAM = $(HOME)/bin/OpenSees
 OPERATING_SYSTEM = -D_MAC
 
 #GRAPHICS = UsingOpenGL, UsingX11
-GRAPHICS = UsingX11
+GRAPHICS = UsingOpenGL
 
 #PROGRAMMING_MODE = SEQUENTIAL, THREADS OR DISTRIBUTED_MPI
 PROGRAMMING_MODE = SEQUENTIAL
@@ -44,7 +55,7 @@ COMPILER = GCC
 DEBUG_MODE = NO_DEBUG
 
 #RELIABILITY = YES_RELIABILITY, NO_RELIABILITY
-RELIABILITY = YES_RELIABILITY
+RELIABILITY = NO_RELIABILITY
 
 #COROT = YES_COROT, NO_COROT
 COROT = NO_COROT
@@ -57,8 +68,8 @@ COROT = NO_COROT
 # any of the libraries already leave the directory location blank AND
 # remove the directory from DIRS.
 
-BASE		= /usr/local
-HOME		= /Users/mackie
+BASE		= /sw
+HOME		= /users/fmk
 FE		= $(HOME)/OpenSees/SRC
 
 BLASdir      = $(HOME)/OpenSees/OTHER/BLAS
@@ -103,8 +114,9 @@ SUPERLU_LIBRARY = $(HOME)/lib/libSuperLU.a
 CBLAS_LIBRARY   = $(HOME)/lib/libCBlas.a
 ARPACK_LIBRARY  = $(HOME)/lib/libArpack.a
 UMFPACK_LIBRARY = $(HOME)/lib/libUmfpack.a
-METIS_LIBRARY   = $(HOME)/lib/libMetis.a
-TCL_LIBRARY     = /usr/local/lib/libtk83.a /usr/local/lib/libtcl83.a
+#METIS_LIBRARY   = $(HOME)/lib/libMetis.a
+METIS_LIBRARY   = 
+TCL_LIBRARY     = -framework Tcl -framework Tk
 BLITZ_LIBRARY   = 
 
 ifeq ($(COROT), YES_COROT)
@@ -116,8 +128,7 @@ endif
 ifeq ($(GRAPHICS), UsingX11)
 GRAPHIC_LIBRARY = /usr/X11R6/lib/libX11.a
 else
-GRAPHIC_LIBRARY = /usr/X11R6/lib/libGL.a /usr/X11R6/lib/libX11.a /usr/X11R6/lib/libXext.a \
-		/usr/X11R6/lib/libGLU.a
+GRAPHIC_LIBRARY = -L/usr/X11R6/lib -lX11 -lGL -lGLU
 endif
 
 ifeq ($(RELIABILITY), YES_RELIABILITY)
@@ -147,9 +158,10 @@ WIPE_LIBS	= $(FE_LIBRARY) \
 # %---------------------------------------------------------%
 
 # Compilers
+#CC++	= /usr/local/gcc3.4.1/bin/g++
 CC++	= g++
 CC      = gcc
-FC	= fort77
+FC	= g77
 
 AR		= ar 
 ARFLAGS		= -cr
@@ -161,6 +173,14 @@ ifeq ($(GRAPHICS), UsingOpenGL)
 GRAPHIC_FLAG = -D_GLX
 else
 GRAPHIC_FLAG = -D_X11
+endif
+
+#INCLUDE_MYSQL = YES_MYSQL, NO_MYSQL
+INCLUDE_MYSQL = NO_MYSQL
+ifeq ($(INCLUDE_MYSQL), YES_MYSQL)
+MYSQL_FLAG = -D_MYSQL
+else
+MYSQL_FLAG = 
 endif
 
 ifeq ($(PROGRAMMING_MODE), THREADS)
@@ -213,7 +233,7 @@ C++FLAGS         = -Wall  -funroll-loops -fcse-follow-jumps \
               -fno-function-cse -fno-inline -fno-peephole \
               -fschedule-insns -fschedule-insns2 \
               -fstrength-reduce -fthread-jumps -g -pg \
-	      -ffloat-store
+	      -ffloat-store -D_MACOSX
 
 CFLAGS          = -Wall -pg $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG)
 FFLAGS          = -Wall 
@@ -227,14 +247,16 @@ else
 # modified as optimizaton currently causing problems with Steel01 code
 C++FLAGS        =  -Wall -O3 -D_UNIX -ftemplate-depth-30 $(OPERATING_SYSTEM) \
 		$(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG) \
-		$(MATLAB_FLAG) $(COROT_FLAG) -ffloat-store -Wno-long-double
+		$(MATLAB_FLAG) $(COROT_FLAG) -ffloat-store  -D_TCL84 -D_MACOSX
 
 CFLAGS          = -Wall -O3 $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG)
 FFLAGS          = -Wall -O
 
 # Linker
 LINKER          = $(CC++)
-LINKFLAGS       = 
+LINKFLAGS       = -framework Tcl  -lobjc
+
+
 
 endif
 
@@ -293,7 +315,7 @@ SHELL           = /bin/sh
 # %---------------------------------------------------------%
 MACHINE_LINKLIBS  = -L$(BASE)/lib \
 		-L$(HOME)/lib \
-		-L/usr/lib
+		-L/usr/lib 
 
 MACHINE_NUMERICAL_LIBS  = -lm \
 		$(ARPACK_LIBRARY) \
@@ -301,7 +323,7 @@ MACHINE_NUMERICAL_LIBS  = -lm \
 		$(UMFPACK_LIBRARY) $(METIS_LIBRARY) \
 	        $(LAPACK_LIBRARY) $(BLAS_LIBRARY) $(CBLAS_LIBRARY) \
 		$(GRAPHIC_LIBRARY) $(RELIABILITY_LIBRARY) \
-                $(COROT_LIBRARY) -lf2c -ldl
+                $(COROT_LIBRARY) -lg2c -ldl -lpng
 
 
 ifeq ($(PROGRAMMING_MODE), THREADS)
@@ -316,22 +338,26 @@ endif
 # | The following macros specify include files needed for   |
 # | compilation.                                            |
 # %---------------------------------------------------------%
-MACHINE_INCLUDES        = -I/usr/include \
+MACHINE_INCLUDES        = -I/usr/X11R6/include \
+			  -I/usr/include \
 			  -I$(BASE)/include \
 			  -I/usr/include/cxx \
-			  -I$(HOME)/include -I$(HOME)/blitz \
-			  -I$(UMFPACKdir) -I$(SUPERLUdir) \
-			  -I/usr/X11R6/include
+			  -I$(HOME)/include \
+			  -I$(UMFPACKdir) -I$(SUPERLUdir)
+
+#
+#			  -framework OpenGL -framework GLUT -framework Foundation \
 
 
 # this file contains all the OpenSees/SRC includes
 include $(FE)/Makefile.incl
 
-TCL_INCLUDES = 	-I/usr/local/include/tcl8.3/generic \
-		-I/usr/local/include/tk8.3/generic \
-		-I/usr/local/include/db3
+TCL_INCLUDES = 	-I/Library/Frameworks/Tcl.framework/Headers -I/Library/Frameworks/Tk.framework/Headers
 
-INCLUDES = $(TCL_INCLUDES) $(FE_INCLUDES) $(MACHINE_INCLUDES)
+#-I/usr/local/tcl8.4.6/Library/Frameworks/Tcl.framework/Headers \
+#		-I/Library/Frameworks/Tk.framework/Headers
+
+INCLUDES = $(FE_INCLUDES) $(MACHINE_INCLUDES) $(TCL_INCLUDES) 
 
 
 
