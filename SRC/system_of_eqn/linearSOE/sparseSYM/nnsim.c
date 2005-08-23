@@ -19,7 +19,8 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include <malloc.h>
+#include <stdlib.h>
+
 #include "FeStructs.h"
 
 #define ABS(x)     (((x) < 0) ? -(x) : (x))
