@@ -18,10 +18,21 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2005-08-23 17:20:15 $
+// $Revision: 1.3 $
+// $Date: 2005-08-24 01:51:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclReinforcingSteel.cpp,v $
-                                                                        
+
+/* ****************************************************************** **
+** THIS FILE WAS DEVELOPED AT UC DAVIS                                **
+**                                                                    **
+** Programmed by: Jon Mohle (jfmohle@ucdavis.edu)                     **
+** Supervisor: Sashi Kunnath (skkunnath@ucdavis.edu)                  **
+**                                                                    **
+********************************************************************* */
+// Written: Jon Mohle
+// Created: August 2005
+
+                                                                       
 
 #include <TclModelBuilder.h>
 #include <ReinforcingSteel.h>   // Jon Mohle
@@ -100,7 +111,7 @@ TclCommand_ReinforcingSteel(ClientData clientData, Tcl_Interp *interp, int argc,
     }
   }
   if (argc > 10) {
-	if (argc < 14) {
+	if (argc < 13) {
 		opserr << "WARNING insufficient optional arguments\n";
 		opserr << "Want: uniaxialMaterial ReinforcingSteel tag? fy? fu? Es? Esh? esh? eult? <lsr? <beta? r? gama? <Cf? alpha? Cd?>>>" << endln;
 		return TCL_ERROR;
@@ -124,7 +135,7 @@ TclCommand_ReinforcingSteel(ClientData clientData, Tcl_Interp *interp, int argc,
     }
   }
   if (argc > 13) {
-    if (argc < 17) {
+    if (argc < 16) {
 		opserr << "WARNING insufficient optional arguments\n";
 		opserr << "Want: uniaxialMaterial ReinforcingSteel tag? fy? fu? Es? Esh? esh? eult? <lsr? <beta? r? gama? <Cf? alpha? Cd?>>>" << endln;
 		return TCL_ERROR;

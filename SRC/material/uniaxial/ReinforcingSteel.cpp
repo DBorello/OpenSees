@@ -18,12 +18,20 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2005-08-23 17:20:15 $
+// $Revision: 1.3 $
+// $Date: 2005-08-24 01:51:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ReinforcingSteel.cpp,v $
 
+/* ****************************************************************** **
+** THIS FILE WAS DEVELOPED AT UC DAVIS                                **
+**                                                                    **
+** Programmed by: Jon Mohle (jfmohle@ucdavis.edu)                     **
+** Supervisor: Sashi Kunnath (skkunnath@ucdavis.edu)                  **
+**                                                                    **
+********************************************************************* */
 // Written: Jon Mohle
 // Created: October 2003
+// Updated: August 2005
 //
 // Description: This file contains the class definition for 
 // ReinforcingSteel
