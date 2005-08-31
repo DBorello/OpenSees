@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2005-08-03 19:12:37 $
+// $Revision: 1.15 $
+// $Date: 2005-08-31 17:36:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.cpp,v $
                                                                         
 // Written: fmk 
@@ -286,10 +286,6 @@ TransformationFE::setID(void)
 const Matrix &
 TransformationFE::getTangent(Integrator *theNewIntegrator)
 {
-    if (this->updateElement() < 0) {
-      opserr << "WARNING: TransformationFE::getTangent() - failed to update element correctly\n";
-    }
-
     const Matrix &theTangent = this->FE_Element::getTangent(theNewIntegrator);
 
     static ID numDOFs(dofData, 1);
