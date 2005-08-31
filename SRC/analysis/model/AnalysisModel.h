@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-12-16 21:17:50 $
+// $Revision: 1.7 $
+// $Date: 2005-08-31 17:38:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.h,v $
                                                                         
                                                                         
@@ -60,6 +60,7 @@ class Vector;
 class DOF_Graph;
 class DOF_GroupGraph;
 class FEM_ObjectBroker;
+class ConstraintHandler;
 
 class AnalysisModel: public MovableObject
 {
@@ -104,7 +105,7 @@ class AnalysisModel: public MovableObject
     virtual void setEigenvalues(const Vector &);    
     
     // methods which trigger operations in the Domain
-    virtual void setLinks(Domain &theDomain);
+    virtual void setLinks(Domain &theDomain, ConstraintHandler &theHandler);
 	
     virtual void applyLoadDomain(double newTime);
     virtual int updateDomain(void);
@@ -129,6 +130,8 @@ class AnalysisModel: public MovableObject
     
   private:
     Domain *myDomain;
+    ConstraintHandler *myHandler;
+
     DOF_Graph *myDOFGraph;
     DOF_GroupGraph *myGroupGraph;    
     

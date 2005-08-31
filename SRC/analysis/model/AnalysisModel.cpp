@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-14 23:00:50 $
+// $Revision: 1.9 $
+// $Date: 2005-08-31 17:38:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.cpp,v $
                                                                         
                                                                         
@@ -49,13 +49,15 @@
 #include <DOF_GroupGraph.h>
 #include <Node.h>
 #include <NodeIter.h>
+#include <ConstraintHandler.h>
 
 //  AnalysisModel();
 //	constructor
 
 AnalysisModel::AnalysisModel(int theClassTag)
 :MovableObject(theClassTag),
- myDomain(0), myDOFGraph(0), myGroupGraph(0),
+ myDomain(0), myHandler(0),
+ myDOFGraph(0), myGroupGraph(0),
  numFE_Ele(0), numDOF_Grp(0), numEqn(0),
  theFEs(0), theDOFs(0),
  theFEiter(*this), theDOFiter(*this)
@@ -65,7 +67,8 @@ AnalysisModel::AnalysisModel(int theClassTag)
 
 AnalysisModel::AnalysisModel()
 :MovableObject(AnaMODEL_TAGS_AnalysisModel),
- myDomain(0), myDOFGraph(0), myGroupGraph(0),
+ myDomain(0), myHandler(0),
+ myDOFGraph(0), myGroupGraph(0),
  numFE_Ele(0), numDOF_Grp(0), numEqn(0),
  theFEs(0), theDOFs(0),
  theFEiter(*this), theDOFiter(*this)
@@ -110,9 +113,10 @@ AnalysisModel::~AnalysisModel()
 }    
 
 void
-AnalysisModel::setLinks(Domain &theDomain)
+AnalysisModel::setLinks(Domain &theDomain, ConstraintHandler &theHandler)
 {
     myDomain = &theDomain;
+    myHandler = &theHandler;
 }
 
 
@@ -428,6 +432,7 @@ AnalysisModel::applyLoadDomain(double pseudoTime)
 
     // invoke the method
     myDomain->applyLoad(pseudoTime);
+    myHandler->applyLoad();
 }
 
 
@@ -442,8 +447,11 @@ AnalysisModel::updateDomain(void)
     }
 
     // invoke the method
-    return myDomain->update();
+    int res = myDomain->update();
+    if (res == 0)
+      return myHandler->update();
 
+    return res;
 }
 
 
@@ -458,8 +466,17 @@ AnalysisModel::updateDomain(double newTime, double dT)
     }
 
     // invoke the method
-    return myDomain->update(newTime, dT);
 
+    int res = 0;
+    myDomain->applyLoad(newTime);
+    if (res == 0)
+      res = myHandler->applyLoad();
+    if (res == 0)
+      res = myDomain->update();
+    if (res == 0)
+      res = myHandler->update();
+
+    return res;
 }
 
 
