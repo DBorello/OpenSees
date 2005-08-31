@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-08-29 08:02:40 $
+// $Revision: 1.5 $
+// $Date: 2005-08-31 17:39:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DomainDecompositionAnalysis.cpp,v $
                                                                         
                                                                         
@@ -117,7 +117,7 @@ DomainDecompositionAnalysis::DomainDecompositionAnalysis(Subdomain &the_Domain,
  theSolver( &theDDSolver),
  theResidual(0),numEqn(0),numExtEqn(0),tangFormed(false),tangFormedCount(0)
 {
-    theModel->setLinks(the_Domain);
+    theModel->setLinks(the_Domain, handler);
     theHandler->setLinks(*theSubdomain,*theModel,*theIntegrator);
     theNumberer->setLinks(*theModel);
     theIntegrator->setLinks(*theModel,*theSOE);
@@ -650,7 +650,7 @@ DomainDecompositionAnalysis::recvSelf(int commitTag,
 
     // set the links in all the objects
 
-    theModel->setLinks(*theSubdomain);
+    theModel->setLinks(*theSubdomain, *theHandler);
     theHandler->setLinks(*theSubdomain,*theModel,*theIntegrator);
     theNumberer->setLinks(*theModel);
     theIntegrator->setLinks(*theModel,*theSOE);

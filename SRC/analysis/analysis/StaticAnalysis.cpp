@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2005-03-30 03:06:02 $
+// $Revision: 1.9 $
+// $Date: 2005-08-31 17:39:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.cpp,v $
                                                                         
                                                                         
@@ -73,7 +73,7 @@ StaticAnalysis::StaticAnalysis(Domain &the_Domain,
 {
     // first we set up the links needed by the elements in the 
     // aggregation
-    theAnalysisModel->setLinks(the_Domain);
+    theAnalysisModel->setLinks(the_Domain, theHandler);
     theConstraintHandler->setLinks(the_Domain,theModel,theStaticIntegrator);
     theDOF_Numberer->setLinks(theModel);
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2005-03-30 03:06:02 $
+// $Revision: 1.7 $
+// $Date: 2005-08-31 17:39:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DirectIntegrationAnalysis.cpp,v $
                                                                         
                                                                         
@@ -80,7 +80,7 @@ DirectIntegrationAnalysis::DirectIntegrationAnalysis(
 {
     // first we set up the links needed by the elements in the 
     // aggregation
-    theAnalysisModel->setLinks(the_Domain);
+    theAnalysisModel->setLinks(the_Domain, theHandler);
     theConstraintHandler->setLinks(the_Domain,theModel,theTransientIntegrator);
     theDOF_Numberer->setLinks(theModel);
     theIntegrator->setLinks(theModel,theLinSOE);

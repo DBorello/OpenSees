@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-03-30 03:06:02 $
+// $Revision: 1.4 $
+// $Date: 2005-08-31 17:39:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/EigenAnalysis.cpp,v $
                                                                         
                                                                         
@@ -68,7 +68,7 @@ EigenAnalysis::EigenAnalysis(Domain &the_Domain,
    theIntegrator(&theEigenIntegrator), domainStamp(0)
 {
   // first set up the links needed by the elements in the aggregation.
-    theAnalysisModel->setLinks(the_Domain);
+    theAnalysisModel->setLinks(the_Domain, *theConstraintHandler);
     theConstraintHandler->setLinks(the_Domain, theModel, theEigenIntegrator);
     theDOF_Numberer->setLinks(theModel);
     theIntegrator->setLinks(theModel, theEigenSOE);
