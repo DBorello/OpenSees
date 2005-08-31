@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2005-03-30 03:04:42 $
+// $Revision: 1.3 $
+// $Date: 2005-08-31 17:28:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/ConstraintHandler.h,v $
                                                                         
                                                                         
@@ -59,6 +59,8 @@ class ConstraintHandler : public MovableObject
 
     // pure virtual functions
     virtual int handle(const ID *nodesNumberedLast =0) =0;
+    virtual int update(void);
+    virtual int applyLoad(void);
     virtual int doneNumberingDOF(void);
     virtual void clearAll(void) =0;    
 

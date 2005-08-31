@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2005-03-30 03:04:42 $
+// $Revision: 1.3 $
+// $Date: 2005-08-31 17:28:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/ConstraintHandler.cpp,v $
                                                                         
                                                                         
@@ -73,6 +73,18 @@ ConstraintHandler::setLinks(Domain &theDomain,
     theIntegratorPtr = &theIntegrator;
 }
 	
+
+int
+ConstraintHandler::update(void)
+{
+  return 0;
+}
+
+int
+ConstraintHandler::applyLoad(void)
+{
+  return 0;
+}
 
 
 Domain *

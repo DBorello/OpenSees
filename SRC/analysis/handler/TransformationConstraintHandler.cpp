@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2005-08-03 19:12:37 $
+// $Revision: 1.10 $
+// $Date: 2005-08-31 17:28:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/TransformationConstraintHandler.cpp,v $
                                                                         
                                                                         
@@ -57,7 +57,8 @@
 
 TransformationConstraintHandler::TransformationConstraintHandler()
 :ConstraintHandler(HANDLER_TAG_TransformationConstraintHandler),
- theFEs(0), theDOFs(0),numFE(0),numDOF(0),numConstrainedNodes(0)
+ theFEs(0), theDOFs(0),numFE(0),numDOF(0),numConstrainedNodes(0),
+ transformedEleLocs(0), numTransformationFEs(0)
 {
 
 }
@@ -78,6 +79,9 @@ TransformationConstraintHandler::~TransformationConstraintHandler()
         delete theDOFs[j];
     delete [] theDOFs;
   }
+
+  if (transformedEleLocs != 0)
+    delete transformedEleLocs;
 }
 
 int
@@ -278,6 +282,10 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
     ElementIter &theEle = theDomain->getElements();
     Element *elePtr;
 
+    transformedEleLocs = new ID(0, 64);
+    numTransformationFEs = 0;
+
+
     int numFeEle = 0;
     FE_Element *fePtr;
     while ((elePtr = theEle()) != 0) {
@@ -327,6 +335,8 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 		if (sps != 0) delete [] sps;
 		return -6;		    
 	    }
+	    (*transformedEleLocs)[numTransformationFEs] = numFeEle;
+	    numTransformationFEs++;
 	}
 	
 	theFEs[numFeEle++] = fePtr;
@@ -394,12 +404,17 @@ TransformationConstraintHandler::clearAll(void)
     // delete the arrays
     if (theFEs != 0) delete [] theFEs;
     if (theDOFs != 0) delete [] theDOFs;
+
+    if (transformedEleLocs != 0) delete transformedEleLocs;
+
     
     // reset the numbers
     numDOF = 0;
     numFE =  0;
     theFEs = 0;
     theDOFs = 0;
+    transformedEleLocs = 0;
+    numTransformationFEs = 0;
 
     // for the nodes reset the DOF_Group pointers to 0
     Domain *theDomain = this->getDomainPtr();
@@ -428,6 +443,12 @@ TransformationConstraintHandler::recvSelf(int cTag,
 
 
 int 
+TransformationConstraintHandler::applyLoad(void)
+{
+    return this->enforceSPs();
+}
+
+int 
 TransformationConstraintHandler::enforceSPs(void)
 {
     AnalysisModel *theModel = this->getAnalysisModelPtr();
@@ -439,7 +460,10 @@ TransformationConstraintHandler::enforceSPs(void)
 	theDof->enforceSPs();
     }
 
-    //    theModel->updateDomain();
+    for (int j=0; j<numTransformationFEs; j++) {
+      FE_Element *theEle = theFEs[(*transformedEleLocs)(j)];
+      theEle->updateElement();
+    }
 
     return 0;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2005-03-30 03:04:42 $
+// $Revision: 1.3 $
+// $Date: 2005-08-31 17:28:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/TransformationConstraintHandler.h,v $
                                                                         
                                                                         
@@ -52,6 +52,7 @@ class TransformationConstraintHandler : public ConstraintHandler
     ~TransformationConstraintHandler();
 
     int handle(const ID *nodesNumberedLast =0);
+    int applyLoad();
     void clearAll(void);    
     int enforceSPs(void);    
     int doneNumberingDOF(void);        
@@ -65,10 +66,14 @@ class TransformationConstraintHandler : public ConstraintHandler
   private:
     FE_Element 	**theFEs;
     DOF_Group 	**theDOFs;
+
     int 	numFE;
     int 	numDOF;
     Domain  *theDomain;
     int numConstrainedNodes;
+
+    ID *transformedEleLocs;
+    int numTransformationFEs;
 };
 
 #endif
