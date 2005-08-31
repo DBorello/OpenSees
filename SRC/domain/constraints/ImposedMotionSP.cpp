@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:00:55 $
+// $Revision: 1.4 $
+// $Date: 2005-08-31 17:26:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/ImposedMotionSP.cpp,v $
                                                                         
                                                                         
@@ -105,10 +105,18 @@ ImposedMotionSP::applyConstraint(double time)
     // now get the response from the ground motion
     theGroundMotionResponse = theGroundMotion->getDispVelAccel(time);
     
+
+    //
     // now set the responses at the node
+    //
+
+    /* ***********************************************************
+     * disp response the responsibility of constraint handler
+
     *theNodeResponse = theNode->getTrialDisp();
     (*theNodeResponse)(dofNumber) = theGroundMotionResponse(0);
     theNode->setTrialDisp(*theNodeResponse);
+    *************************************************************/
 
     *theNodeResponse = theNode->getTrialVel();
     (*theNodeResponse)(dofNumber) = theGroundMotionResponse(1);
