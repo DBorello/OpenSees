@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2004-10-30 00:05:32 $
+// $Revision: 1.18 $
+// $Date: 2005-09-06 13:45:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 #include <math.h>
@@ -1075,7 +1075,7 @@ ForceBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   if (beamIntegrDbTag  == 0) {
     beamIntegrDbTag = theChannel.getDbTag();
     if (beamIntegrDbTag  != 0) 
-      beamIntegr->setDbTag(crdTransfDbTag);
+      beamIntegr->setDbTag(beamIntegrDbTag);
   }
   idData(9) = beamIntegrDbTag;
 
