@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2005-08-03 19:12:26 $
+// $Revision: 1.14 $
+// $Date: 2005-09-09 17:42:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.cpp,v $
                                                                         
                                                                         
@@ -56,7 +56,7 @@ static int transCounter = 0;
 Matrix **TransformationDOF_Group::modMatrices; 
 Vector **TransformationDOF_Group::modVectors;  
 int TransformationDOF_Group::numTransDOFs(0);     // number of objects
-TransformationConstraintHandler *TransformationDOF_Group::theHandler(0);     // number of objects
+TransformationConstraintHandler *TransformationDOF_Group::theHandler = 0;     // number of objects
 
 TransformationDOF_Group::TransformationDOF_Group(int tag, Node *node, 
 						 MP_Constraint *mp,
