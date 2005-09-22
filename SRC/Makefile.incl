@@ -83,6 +83,7 @@ FE_INCLUDES  = -I$(FE)/matrix \
                -I$(FE)/element/20nbrick \
                -I$(FE)/element/27nbrick \
                -I$(FE)/element/upU \
+               -I$(FE)/element/UP-ucsd \
                -I$(FE)/element/TotalLagrangianFD20NodeBrick \
                -I$(FE)/element/brick \
                -I$(FE)/element/shell \
