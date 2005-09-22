@@ -17,6 +17,7 @@ all:         $(OBJS)
 	@$(CD) $(FE)/element/27nbrick; $(MAKE);
 	@$(CD) $(FE)/element/TotalLagrangianFD20NodeBrick; $(MAKE);
 	@$(CD) $(FE)/element/upU; $(MAKE);
+	@$(CD) $(FE)/element/UP-ucsd; $(MAKE);
 	@$(CD) $(FE)/element/shell; $(MAKE);
 	@$(CD) $(FE)/element/brick; $(MAKE);
 	@$(CD) $(FE)/element/joint; $(MAKE);
@@ -46,6 +47,7 @@ spotless: clean
 	@$(CD) $(FE)/element/27nbrick; $(MAKE) wipe;
 	@$(CD) $(FE)/element/TotalLagrangianFD20NodeBrick; $(MAKE) wipe;
 	@$(CD) $(FE)/element/upU; $(MAKE) wipe;
+	@$(CD) $(FE)/element/UP-ucsd; $(MAKE) wipe;
 	@$(CD) $(FE)/element/shell; $(MAKE) wipe;
 	@$(CD) $(FE)/element/brick; $(MAKE) wipe;
 	@$(CD) $(FE)/element/joint; $(MAKE) wipe;
