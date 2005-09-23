@@ -288,17 +288,34 @@ const Matrix &TwentyNodeBrick_u_p_U::getDamp (void)
     //tC.print("C","\n");
     int i, j, m, n;
 
+    double Ctemp = 0.0;
+    tensor CRm;
+    tensor CRk;    
+    if (alphaM != 0.0) 
+      CRm = getMassTensorMsf() *((1.0-poro)*rho_s);
+    if (betaK != 0.0) 
+      CRk = getStiffnessTensorKep();
+    if (betaK0 != 0.0 || betaKc != 0.0) {
+	  opserr << "Warning: EightNodeBrick-u_p_U:: betaK0 or betaKc are not used" << "\n";  
+    }
+
     for ( i=0 ; i<Num_Nodes; i++ ) {
       for ( j=0; j<Num_Nodes; j++ ) {
         for( m=0; m<Num_Dim; m++) {
           for( n=0; n<Num_Dim; n++) {
-            //C1
-            C(i*Num_Dof+m, j*Num_Dof+n) = tC.cval(i+1, m+1, n+1, j+1)*(poro*poro);
+            Ctemp =  tC.cval(i+1, m+1, n+1, j+1);
+	    //C1
+            C(i*Num_Dof+m, j*Num_Dof+n) = Ctemp *(poro*poro);
+            if (alphaM != 0.0)
+	       C(i*Num_Dof+m, j*Num_Dof+n) += CRm.cval(i+1, j+1) * alphaM;
+            if (betaK != 0.0)
+	       C(i*Num_Dof+m, j*Num_Dof+n) += CRk.cval(i+1, m+1, n+1, j+1) * betaK;
+
             //C3
-            C(i*Num_Dof+m+4, j*Num_Dof+n+4) = tC.cval(i+1, m+1, n+1, j+1)*(poro*poro);
+            C(i*Num_Dof+m+4, j*Num_Dof+n+4) = Ctemp *(poro*poro);
             //C2 and C2^T
-            C(i*Num_Dof+m, j*Num_Dof+n+4) = -tC.cval(i+1, m+1, n+1, j+1)*(poro*poro);
-            C(j*Num_Dof+n+4, i*Num_Dof+m) = -tC.cval(i+1, m+1, n+1, j+1)*(poro*poro);
+            C(i*Num_Dof+m, j*Num_Dof+n+4) = -Ctemp *(poro*poro);
+            C(j*Num_Dof+n+4, i*Num_Dof+m) = -Ctemp *(poro*poro);
           }
         }
       }
@@ -315,17 +332,18 @@ const Matrix &TwentyNodeBrick_u_p_U::getMass (void)
     M.Zero();
 
     int i, j;
+    double Mtemp = 0.0;
 
     for ( i=0 ; i<Num_Nodes; i++ ) {
       for ( j=0; j<Num_Nodes; j++ ) {
         //Ms, Note *(1.0-poro)*rho_s here!
-        M(i*Num_Dof+0, j*Num_Dof+0) = tM.cval(i+1, j+1) *(1.0-poro)*rho_s;
-        M(i*Num_Dof+1, j*Num_Dof+1) = tM.cval(i+1, j+1) *(1.0-poro)*rho_s;
-        M(i*Num_Dof+2, j*Num_Dof+2) = tM.cval(i+1, j+1) *(1.0-poro)*rho_s;
+        M(i*Num_Dof+0, j*Num_Dof+0) = Mtemp *(1.0-poro)*rho_s;
+        M(i*Num_Dof+1, j*Num_Dof+1) = Mtemp *(1.0-poro)*rho_s;
+        M(i*Num_Dof+2, j*Num_Dof+2) = Mtemp *(1.0-poro)*rho_s;
         //Mf, Note *poro*rho_f here!
-        M(i*Num_Dof+4, j*Num_Dof+4) = tM.cval(i+1, j+1) *poro*rho_f;
-        M(i*Num_Dof+5, j*Num_Dof+5) = tM.cval(i+1, j+1) *poro*rho_f;
-        M(i*Num_Dof+6, j*Num_Dof+6) = tM.cval(i+1, j+1) *poro*rho_f;
+        M(i*Num_Dof+4, j*Num_Dof+4) = Mtemp *poro*rho_f;
+        M(i*Num_Dof+5, j*Num_Dof+5) = Mtemp *poro*rho_f;
+        M(i*Num_Dof+6, j*Num_Dof+6) = Mtemp *poro*rho_f;
       }
     }
 
@@ -400,7 +418,23 @@ const Vector &TwentyNodeBrick_u_p_U::getResistingForce ()
 {
     P.Zero();
 
-    P = this->getInForceS() + this->getInForceP();
+    int i, j;
+    Vector u(Num_ElemDof);
+        
+    // Using K*u as the internal nodal forces
+    for (i=0; i<Num_Nodes; i++) {      
+      const Vector &disp = theNodes[i]->getTrialDisp();
+      if ( disp.Size() != Num_Dof ) {
+        opserr << "TwentyNode_Brick_u_p_U::getResistingForce(): matrix and vector sizes are incompatable \n";
+        exit(-1);
+      }
+      for (j=0; j<Num_Dof; j++) {
+        u(i*Num_Dof +j) = disp(j);
+      }
+    }
+
+    this->getTangentStiff();
+    P.addMatrixVector(0.0, K, u, 1.0);
 
     if (Q != 0)
       P.addVector(1.0, *Q, -1.0);
@@ -414,52 +448,40 @@ const Vector &TwentyNodeBrick_u_p_U::getResistingForce ()
 //========================================================================
 const Vector &TwentyNodeBrick_u_p_U::getResistingForceIncInertia ()
 {
-    if ( rho_s == 0.0 || rho_f == 0.0)
-      return getResistingForce();
-
     int i, j;
-    static double a[Num_ElemDof];
+    Vector a(Num_ElemDof);
 
     this->getResistingForce();
 
     for (i=0; i<Num_Nodes; i++) {
       const Vector &acc = theNodes[i]->getTrialAccel();
       if ( acc.Size() != Num_Dof ) {
-        opserr << "TwentyNodeBrick_u_p_U::getResistingForceIncInertia matrix and vector sizes are incompatable\n";
+        opserr << "TentyNode_Brick_u_p_U::getResistingForceIncInertia matrix and vector sizes are incompatable \n";
         exit(-1);
       }
       for (j=0; j<Num_Dof; j++) {
-        a[i*Num_Dof+j] = acc(j);
+        a(i*Num_Dof +j) = acc(j);
       }
     }
 
     this->getMass();
-    for (i = 0; i < Num_ElemDof; i++) {
-      for (j = 0; j < Num_ElemDof; j++) {
-        P(i) += M(i,j)*a[j];
-      }
-    }
+    P.addMatrixVector(1.0, M, a, 1.0);
 
     for (i=0; i<Num_Nodes; i++) {
       const Vector &vel = theNodes[i]->getTrialVel();
       if ( vel.Size() != Num_Dof ) {
-        opserr << "TwentyNodeBrick_u_p_U::getResistingForceIncInertia matrix and vector sizes are incompatable\n";
-        exit(-1);
+        opserr << "TwentyNode_Brick_u_p_U::getResistingForceIncInertia matrix and vector sizes are incompatable \n";
+        exit(-1);											       
       }
       for (j=0; j<Num_Dof; j++) {
-        a[i*Num_Dof+j] = vel(j);
+        a(i*Num_Dof +j) = vel(j);
       }
     }
 
     this->getDamp();
-    for (i = 0; i < Num_ElemDof; i++) {
-      for (j = 0; j < Num_ElemDof; j++) {
-        P(i) += C(i,j)*a[j];
-      }
-    }
+    P.addMatrixVector(1.0, C, a, 1.0);
 
     return P;
-
 }
 
 //=============================================================================
@@ -660,125 +682,6 @@ int TwentyNodeBrick_u_p_U::update()
     }
 
   return ret;
-}
-
-//======================================================================
-Vector TwentyNodeBrick_u_p_U::getInForceS ()
-{
-    Vector Pps(Num_Nodes*Num_Dof);
-
-    int P_dim[] = {Num_Nodes,Num_Dim};
-    tensor Pt(2,P_dim,0.0);
-
-    double r  = 0.0;
-    double rw = 0.0;
-    double s  = 0.0;
-    double sw = 0.0;
-    double t  = 0.0;
-    double tw = 0.0;
-    int where = 0;
-    double weight = 0.0;
-    double det_of_Jacobian = 0.0;
-
-    int dh_dim[] = {Num_Nodes,Num_Dim};
-    tensor dh(2, dh_dim, 0.0);
-
-    stresstensor ST;
-
-    tensor Jacobian;
-    tensor dhGlobal;
-
-    int GP_c_r, GP_c_s, GP_c_t;
-
-    for( GP_c_r = 0 ; GP_c_r < Num_IntegrationPts; GP_c_r++ ) {
-      r = pts[GP_c_r];
-      rw = wts[GP_c_r];
-      for( GP_c_s = 0 ; GP_c_s < Num_IntegrationPts; GP_c_s++ ) {
-        s = pts[GP_c_s];
-        sw = wts[GP_c_s];
-        for( GP_c_t = 0 ; GP_c_t < Num_IntegrationPts; GP_c_t++ ) {
-          t = pts[GP_c_t];
-          tw = wts[GP_c_t];
-          where = (GP_c_r*Num_IntegrationPts+GP_c_s)*Num_IntegrationPts+GP_c_t;
-          dh = shapeFunctionDerivative(r,s,t);
-          Jacobian = Jacobian_3D(dh);
-          det_of_Jacobian = Jacobian.determinant();
-          dhGlobal = dh_Global(dh);
-          weight = rw * sw * tw * det_of_Jacobian;
-          ST = theMaterial[where]->getStressTensor();
-          Pt += dhGlobal("ix")*ST("jx")*weight;
-        }
-      }
-    }
-
-    int i,j;
-    for (i=0; i<Num_Nodes; i++) {
-      for (j=0; j<Num_Dim; j++) {
-        Pps(i*Num_Dof+j) = Pt.cval(i+1, j+1);
-      }
-    }
-
-    return Pps;
-
-}
-
-//======================================================================
-Vector TwentyNodeBrick_u_p_U::getInForceP ()
-{
-    Vector Ppp(Num_Nodes*Num_Dof);
-
-    int P_dim[] = {Num_Nodes,Num_Dim};
-    tensor Pt(2,P_dim,0.0);
-
-    double r  = 0.0;
-    double rw = 0.0;
-    double s  = 0.0;
-    double sw = 0.0;
-    double t  = 0.0;
-    double tw = 0.0;
-    double weight = 0.0;
-    double det_of_Jacobian = 0.0;
-
-    int dh_dim[] = {Num_Nodes,Num_Dim};
-    tensor dh(2, dh_dim, 0.0);
-
-    double pp;
-
-    tensor Jacobian;
-    tensor dhGlobal;
-
-    int GP_c_r, GP_c_s, GP_c_t;
-
-    for( GP_c_r = 0 ; GP_c_r < Num_IntegrationPts; GP_c_r++ ) {
-      r = pts[GP_c_r];
-      rw = wts[GP_c_r];
-      for( GP_c_s = 0 ; GP_c_s < Num_IntegrationPts; GP_c_s++ ) {
-        s = pts[GP_c_s];
-        sw = wts[GP_c_s];
-        for( GP_c_t = 0 ; GP_c_t < Num_IntegrationPts; GP_c_t++ ) {
-          t = pts[GP_c_t];
-          tw = wts[GP_c_t];
-          pp = getPorePressure(r,s,t);
-          dh = shapeFunctionDerivative(r,s,t);
-          Jacobian = Jacobian_3D(dh);
-          det_of_Jacobian = Jacobian.determinant();
-          dhGlobal = dh_Global(dh);
-          weight = rw * sw * tw * det_of_Jacobian;
-          Pt += dhGlobal *(pp*weight);
-        }
-      }
-    }
-
-    int i,j;
-    for (i=0; i<Num_Nodes; i++) {
-      for (j=0; j<Num_Dim; j++) {
-        Ppp(i*Num_Dof+j)   = -Pt.cval(i+1,j+1)*(alpha-poro);
-        Ppp(i*Num_Dof+j+4) = -Pt.cval(i+1,j+1)*poro;
-      }
-    }
-
-    return Ppp;
-
 }
 
 //======================================================================

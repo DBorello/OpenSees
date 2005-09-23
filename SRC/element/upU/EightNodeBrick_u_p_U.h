@@ -125,8 +125,6 @@ private:
     tensor getDampTensorC123();
     const Matrix &getStiff(int Ki_flag);
     double getPorePressure(double, double, double);
-    Vector getInForceS();
-    Vector getInForceP();
     Vector getExForceS();
     Vector getExForceF();
 
