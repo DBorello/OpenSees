@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.68 $
-// $Date: 2005-08-22 20:48:21 $
+// $Revision: 1.69 $
+// $Date: 2005-09-23 22:35:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -114,6 +114,8 @@
 #define MAT_TAG_SmoothSteel01			21
 #define MAT_TAG_SmoothConcrete01		22
 
+
+#define MAT_TAG_Concrete04 30
 
 //B Jeremic
 #define MAT_TAG_PySimple1        205
@@ -215,24 +217,31 @@
 #define FIBER_TAG_Uniaxial2d	1
 #define FIBER_TAG_Uniaxial3d	2
 
-#define BACKBONE_TAG_Capped			1
+#define BACKBONE_TAG_Capped		1
 #define BACKBONE_TAG_LinearCapped	2
 #define BACKBONE_TAG_Material		3
-#define BACKBONE_TAG_Petrangeli		4
+#define BACKBONE_TAG_Arctangent		4
 #define BACKBONE_TAG_Trilinear		5
+#define BACKBONE_TAG_Multilinear	6
+#define BACKBONE_TAG_Mander		7
+#define BACKBONE_TAG_KentPark		8
 
 #define DEG_TAG_STIFF_Constant		1
 #define DEG_TAG_STIFF_Ductility		2
-#define DEG_TAG_STIFF_Stanford		3
+#define DEG_TAG_STIFF_Energy		3
+#define DEG_TAG_STIFF_Pincheira		4
 
-#define DEG_TAG_DEF_Constant		1
-#define DEG_TAG_DEF_Ductility		2
-#define DEG_TAG_DEF_Stanford		3
+#define DEG_TAG_UNLOAD_Constant		1
+#define DEG_TAG_UNLOAD_Takeda		2
+#define DEG_TAG_UNLOAD_Energy		3
+#define DEG_TAG_UNLOAD_Karsan		4
 
 #define DEG_TAG_STRENGTH_ACI		1
 #define DEG_TAG_STRENGTH_Constant	2
-#define DEG_TAG_STRENGTH_Petrangeli	3
-#define DEG_TAG_STRENGTH_Stanford	4
+#define DEG_TAG_STRENGTH_Ductility	3
+#define DEG_TAG_STRENGTH_Petrangeli	4
+#define DEG_TAG_STRENGTH_Energy		5
+#define DEG_TAG_STRENGTH_Section	6
 
 #define PATTERN_TAG_LoadPattern		  1
 #define PATTERN_TAG_MultiSupportPattern	  3
@@ -323,15 +332,34 @@
 #define ELE_TAG_FourNodeQuad02  9903
 
 #define BEAM_INTEGRATION_TAG_Lobatto         1
-#define BEAM_INTEGRATION_TAG_UserDefined     2
-#define BEAM_INTEGRATION_TAG_HingeMidpoint2d 3
-#define BEAM_INTEGRATION_TAG_HingeRadau2d    4
-#define BEAM_INTEGRATION_TAG_HingeRadauTwo2d    5
-#define BEAM_INTEGRATION_TAG_UserHinge2d     6
-#define BEAM_INTEGRATION_TAG_HingeMidpoint3d 7
-#define BEAM_INTEGRATION_TAG_HingeRadau3d    8
-#define BEAM_INTEGRATION_TAG_HingeRadauTwo3d    9
-#define BEAM_INTEGRATION_TAG_UserHinge3d     10
+#define BEAM_INTEGRATION_TAG_Legendre        2
+#define BEAM_INTEGRATION_TAG_Radau           3
+#define BEAM_INTEGRATION_TAG_NewtonCotes           4
+#define BEAM_INTEGRATION_TAG_Trapezoidal           5
+#define BEAM_INTEGRATION_TAG_Midpoint           6
+#define BEAM_INTEGRATION_TAG_UserDefined     7
+#define BEAM_INTEGRATION_TAG_FixedLocation     8
+
+#define BEAM_INTEGRATION_TAG_HingeMidpoint 10
+#define BEAM_INTEGRATION_TAG_HingeEndpoint 11
+#define BEAM_INTEGRATION_TAG_HingeRadau    12
+#define BEAM_INTEGRATION_TAG_HingeRadauTwo    13
+#define BEAM_INTEGRATION_TAG_UserHinge     14
+#define BEAM_INTEGRATION_TAG_DistHinge     15
+
+#define BEAM_INTEGRATION_TAG_HingeMidpoint2d 20
+#define BEAM_INTEGRATION_TAG_HingeEndpoint2d 21
+#define BEAM_INTEGRATION_TAG_HingeRadau2d    22
+#define BEAM_INTEGRATION_TAG_HingeRadauTwo2d    23
+#define BEAM_INTEGRATION_TAG_UserHinge2d     24
+#define BEAM_INTEGRATION_TAG_DistHinge2d     25
+
+#define BEAM_INTEGRATION_TAG_HingeMidpoint3d 30
+#define BEAM_INTEGRATION_TAG_HingeEndpoint3d 31
+#define BEAM_INTEGRATION_TAG_HingeRadau3d    32
+#define BEAM_INTEGRATION_TAG_HingeRadauTwo3d    33
+#define BEAM_INTEGRATION_TAG_UserHinge3d     34
+#define BEAM_INTEGRATION_TAG_DistHinge3d     35
 
 #define CRDTR_TAG_LinearCrdTransf2d 1
 #define CRDTR_TAG_PDeltaCrdTransf2d 2
@@ -396,6 +424,11 @@
 
 #define ACCELERATOR_TAGS_Krylov		1
 #define ACCELERATOR_TAGS_Secant		2
+#define ACCELERATOR_TAGS_Miller         3
+#define ACCELERATOR_TAGS_Monitored      4
+#define ACCELERATOR_TAGS_Raphson        5
+#define ACCELERATOR_TAGS_Periodic       6
+#define ACCELERATOR_TAGS_Difference     7
 
 #define LINESEARCH_TAGS_InitialInterpolatedLineSearch 1
 #define LINESEARCH_TAGS_BisectionLineSearch           2
