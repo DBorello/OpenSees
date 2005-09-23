@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2005-08-22 20:52:02 $
+// $Revision: 1.29 $
+// $Date: 2005-09-23 22:49:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -40,6 +40,7 @@
 #include <Steel01.h>			// MHS
 #include <Steel03.h>			// KM
 #include <Concrete01.h>			// MHS
+#include <Concrete04.h>
 #include <HystereticMaterial.h>	// MHS
 #include <EPPGapMaterial.h>		// Mackie
 #include <ViscousMaterial.h>	// Sasani
@@ -906,6 +907,85 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 				mom1n, rot1n, mom2n, rot2n,
 				pinchX, pinchY, damfc1, damfc2, beta);
 	}
+
+     else if (strcmp(argv[1],"Concrete04") == 0) {
+//        opserr << argc << endln;
+     if (argc != 10 && argc != 9 && argc != 7) {
+         opserr << "WARNING insufficient arguments\n";
+         printCommand(argc,argv);
+         opserr << "Want: uniaxialMaterial Concrete04 tag? fpc?  
+epsc0? epscu? Ec0? <ft? etu? <beta?> >" << endln;
+         return TCL_ERROR;
+     }
+
+     int tag;
+
+     if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+         opserr << "WARNING invalid uniaxialMaterial Concrete04 tag"  
+<< endln;
+         return TCL_ERROR;
+     }
+
+     // Read required Concrete04 material parameters
+     double fpc, epsc0, ft, epscu, Ec0, etu, beta;
+
+     if (Tcl_GetDouble(interp, argv[3], &fpc) != TCL_OK) {
+         opserr << "WARNING invalid fpc\n";
+         opserr << "Concrete04 material: " << tag << endln;
+         return TCL_ERROR;
+     }
+
+     if (Tcl_GetDouble(interp, argv[4], &epsc0) != TCL_OK) {
+         opserr << "WARNING invalid epsc0\n";
+         opserr << "Concrete04 material: " << tag << endln;
+         return TCL_ERROR;
+     }
+
+     if (Tcl_GetDouble(interp, argv[5], &epscu) != TCL_OK) {
+         opserr << "WARNING invalid epscu\n";
+         opserr << "Concrete04 material: " << tag << endln;
+         return TCL_ERROR;
+     }
+
+     if (Tcl_GetDouble(interp, argv[6], &Ec0) != TCL_OK) {
+         opserr << "WARNING invalid Ec0\n";
+         opserr << "Concrete04 material: " << tag << endln;
+         return TCL_ERROR;
+     }
+     if (argc == 9 || argc == 10) {
+         if (Tcl_GetDouble(interp, argv[7], &ft) != TCL_OK) {
+             opserr << "WARNING invalid ft\n";
+             opserr << "Concrete04 material: " << tag << endln;
+             return TCL_ERROR;
+         }
+         if (Tcl_GetDouble(interp, argv[8], &etu) != TCL_OK) {
+             opserr << "WARNING invalid etu\n";
+             opserr << "Concrete04 material: " << tag << endln;
+             return TCL_ERROR;
+         }
+     }
+     if (argc == 10) {
+         if (Tcl_GetDouble(interp, argv[9], &beta) != TCL_OK) {
+             opserr << "WARNING invalid beta\n";
+             opserr << "Concrete04 material: " << tag << endln;
+             return TCL_ERROR;
+         }
+     }
+
+
+     // Parsing was successful, allocate the material
+     if (argc == 10) {
+         theMaterial = new Concrete04(tag, fpc, epsc0, epscu, Ec0,  
+ft, etu, beta);
+     }
+     else if (argc == 9) {
+         theMaterial = new Concrete04(tag, fpc, epsc0, epscu, Ec0,  
+ft, etu);
+     }
+     else if (argc == 7) {
+         theMaterial = new Concrete04(tag, fpc, epsc0, epscu, Ec0);
+     }
+   }
 
 	else if (strcmp(argv[1],"Viscous") == 0) {
 		if (argc < 5)
