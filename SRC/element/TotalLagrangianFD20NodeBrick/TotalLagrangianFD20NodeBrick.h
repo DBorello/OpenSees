@@ -116,14 +116,13 @@ class TotalLagrangianFD20NodeBrick: public Element
     ID  connectedExternalNodes; // Tags of TotalLagrangianFD20Brick nodes
     Node *theNodes[20];
 
-    static double matrixData[3600]; //array data for matrix
     static Matrix K;    // Element stiffness Matrix
 //    static Matrix C;    // Element damping matrix
     static Matrix M;    // Element mass matrix
     static Vector P;    // Element resisting force vector
-    static double pts[3];   // Stores quadrature points
-    static double wts[3];   // Stores quadrature weights
-    Vector Q;     // Applied nodal loads
+    static const double pts[3];   // Stores quadrature points
+    static const double wts[3];   // Stores quadrature weights
+    Vector *Q;     // Applied nodal loads
     Vector bf;    // Body forces
 
     double rho;    // Mass per unit volume
@@ -133,25 +132,23 @@ class TotalLagrangianFD20NodeBrick: public Element
     Matrix *Ki;
 
   private:
-
+    
+    static const int  NumIntegrationPts;
+    static const int  NumTotalGaussPts;
+    static const int  NumNodes;
+    static const int  NumDof;
+    static const int  NumElemDof;
+    
     tensor shapeFunction(double , double , double );
     tensor shapeFunctionDerivative(double , double , double );
 
     tensor Jacobian_3D(tensor dh);
     tensor Jacobian_3Dinv(tensor dh);
     tensor dh_Global(tensor dh);
-//    tensor getCurrentF(tensor dh);
     tensor getNodesCrds(void);
     tensor getNodesDisp(void);
 
-//    tensor getStiffnessTensor01(void);
-//    tensor getStiffnessTensor02(void);
-//    tensor getStiffnessTensor03(void);
-//    tensor getStiffnessTensor04(void);
-//    tensor getStiffnessTensor05(void);
     tensor getStiffnessTensor(void);
-//    tensor getRtensor01(void);
-//    tensor getRtensor02(void);
     tensor getRtensor(void);
     tensor getBodyForce(void);
     tensor getSurfaceForce(void);
