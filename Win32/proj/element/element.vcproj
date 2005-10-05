@@ -21,7 +21,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\src\package;&quot;c:\Program Files\tcl\include&quot;;..\..\..\src\damage;..\..\..\src\element\material\nd\template3dep;..\..\..\src\element\TotalLagrangianFD20NodeBrick;..\..\..\src\element\27nbrick;..\..\..\src\element\upU;..\..\..\src\element\dispBeamColumn;..\..\..\src\element\brick;..\..\..\src\element\shell;..\..\..\src\element\8nbrick;..\..\..\src\recorder\response;..\..\..\src\element\nonlinearBeamColumn\quadRule;..\..\..\src\material\nD;..\..\..\src\element\fourNodeQuad;..\..\..\src\element\damper;..\..\..\src\coordTransformation;..\..\..\src\element\beamWithHinges;..\..\..\src\element\nonlinearBeamColumn\matrixutil;..\..\..\src\element\zeroLength;..\..\..\src\modelbuilder;..\..\..\src\modelbuilder\tcl;..\..\..\src\element\feap;..\..\..\src\handler;..\..\..\src\element;..\..\..\src\element\truss;..\..\..\src\material\section;..\..\..\src\element\beam3d;..\..\..\src\element\beam2d;..\..\..\src\material;..\..\..\src\material\uniaxial;..\..\..\src\actor\objectBroker;..\..\..\src\matrix;..\..\..\src\domain\load;..\..\..\src\renderer;..\..\..\src\actor\channel;..\..\..\src\domain\node;..\..\..\src\actor\actor;..\..\..\src\tagged;..\..\..\src\domain\component;..\..\..\src;..\..\..\src\domain\domain;..\..\..\src\material\nd\template3dep;..\..\..\src\nDarray;..\..\..\src\element\20nbrick;..\..\..\src\element\elasticBeamColumn;..\..\..\src\element\joint;..\..\..\src\domain\constraints;..\..\..\src\element\updatedLagrangianBeamColumn;..\..\..\src\material\yieldSurface\yieldSurfaceBC;..\..\..\src\material\yieldSurface\evolution;..\..\..\src\element\forceBeamColumn;..\..\..\src\element\nonlinearBeamColumn\element;..\..\..\src\element\nonlinearBeamColumn\matrixUtil;&quot;c:\program Files\tcl\include&quot;;&quot;c:\Program Files\tcl&quot;"
+				AdditionalIncludeDirectories="&quot;..\..\..\src\element\UP-ucsd&quot;;..\..\..\src\package;&quot;c:\Program Files\tcl\include&quot;;..\..\..\src\damage;..\..\..\src\element\material\nd\template3dep;..\..\..\src\element\TotalLagrangianFD20NodeBrick;..\..\..\src\element\27nbrick;..\..\..\src\element\upU;..\..\..\src\element\dispBeamColumn;..\..\..\src\element\brick;..\..\..\src\element\shell;..\..\..\src\element\8nbrick;..\..\..\src\recorder\response;..\..\..\src\element\nonlinearBeamColumn\quadRule;..\..\..\src\material\nD;..\..\..\src\element\fourNodeQuad;..\..\..\src\element\damper;..\..\..\src\coordTransformation;..\..\..\src\element\beamWithHinges;..\..\..\src\element\nonlinearBeamColumn\matrixutil;..\..\..\src\element\zeroLength;..\..\..\src\modelbuilder;..\..\..\src\modelbuilder\tcl;..\..\..\src\element\feap;..\..\..\src\handler;..\..\..\src\element;..\..\..\src\element\truss;..\..\..\src\material\section;..\..\..\src\element\beam3d;..\..\..\src\element\beam2d;..\..\..\src\material;..\..\..\src\material\uniaxial;..\..\..\src\actor\objectBroker;..\..\..\src\matrix;..\..\..\src\domain\load;..\..\..\src\renderer;..\..\..\src\actor\channel;..\..\..\src\domain\node;..\..\..\src\actor\actor;..\..\..\src\tagged;..\..\..\src\domain\component;..\..\..\src;..\..\..\src\domain\domain;..\..\..\src\material\nd\template3dep;..\..\..\src\nDarray;..\..\..\src\element\20nbrick;..\..\..\src\element\elasticBeamColumn;..\..\..\src\element\joint;..\..\..\src\domain\constraints;..\..\..\src\element\updatedLagrangianBeamColumn;..\..\..\src\material\yieldSurface\yieldSurfaceBC;..\..\..\src\material\yieldSurface\evolution;..\..\..\src\element\forceBeamColumn;..\..\..\src\element\nonlinearBeamColumn\element;..\..\..\src\element\nonlinearBeamColumn\matrixUtil;&quot;c:\program Files\tcl\include&quot;;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="_DEBUG,WIN32,_LIB,_WGL,_COROTATIONAL,_TCL84"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
@@ -66,7 +66,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\SRC\package;&quot;c:\Program Files\tcl\include&quot;;..\..\..\src\damage;..\..\..\src\element\TotalLagrangianFD20NodeBrick;..\..\..\src\element\27nbrick;..\..\..\src\element\upU;..\..\..\src\element\dispBeamColumn;..\..\..\src\element\brick;..\..\..\src\element\shell;..\..\..\src\element\8nbrick;..\..\..\src\recorder\response;..\..\..\src\element\nonlinearBeamColumn\quadRule;..\..\..\src\material\nD;..\..\..\src\element\fourNodeQuad;..\..\..\src\element\damper;..\..\..\src\coordTransformation;..\..\..\src\element\beamWithHinges;..\..\..\src\element\nonlinearBeamColumn\matrixutil;..\..\..\src\element\zeroLength;..\..\..\src\modelbuilder;..\..\..\src\modelbuilder\tcl;..\..\..\src\element\feap;..\..\..\src\handler;..\..\..\src\element;..\..\..\src\element\truss;..\..\..\src\material\section;..\..\..\src\element\beam3d;..\..\..\src\element\beam2d;..\..\..\src\material;..\..\..\src\material\uniaxial;..\..\..\src\actor\objectBroker;..\..\..\src\matrix;..\..\..\src\domain\load;..\..\..\src\renderer;..\..\..\src\actor\channel;..\..\..\src\domain\node;..\..\..\src\actor\actor;..\..\..\src\tagged;..\..\..\src\domain\component;..\..\..\src;..\..\..\src\domain\domain;..\..\..\src\material\nd\template3dep;..\..\..\src\nDarray;..\..\..\src\element\20nbrick;..\..\..\src\element\elasticBeamColumn;..\..\..\src\element\joint;..\..\..\src\domain\constraints;..\..\..\src\element\updatedLagrangianBeamColumn;..\..\..\src\material\yieldSurface\yieldSurfaceBC;..\..\..\src\material\yieldSurface\evolution;..\..\..\src\element\forceBeamColumn;..\..\..\src\element\nonlinearBeamColumn\element;..\..\..\src\element\nonlinearBeamColumn\matrixUtil;&quot;c:\Program Files\tcl\include&quot;;&quot;c:\Program Files\tcl&quot;"
+				AdditionalIncludeDirectories="&quot;..\..\..\src\element\UP-ucsd&quot;;..\..\..\SRC\package;&quot;c:\Program Files\tcl\include&quot;;..\..\..\src\damage;..\..\..\src\element\TotalLagrangianFD20NodeBrick;..\..\..\src\element\27nbrick;..\..\..\src\element\upU;..\..\..\src\element\dispBeamColumn;..\..\..\src\element\brick;..\..\..\src\element\shell;..\..\..\src\element\8nbrick;..\..\..\src\recorder\response;..\..\..\src\element\nonlinearBeamColumn\quadRule;..\..\..\src\material\nD;..\..\..\src\element\fourNodeQuad;..\..\..\src\element\damper;..\..\..\src\coordTransformation;..\..\..\src\element\beamWithHinges;..\..\..\src\element\nonlinearBeamColumn\matrixutil;..\..\..\src\element\zeroLength;..\..\..\src\modelbuilder;..\..\..\src\modelbuilder\tcl;..\..\..\src\element\feap;..\..\..\src\handler;..\..\..\src\element;..\..\..\src\element\truss;..\..\..\src\material\section;..\..\..\src\element\beam3d;..\..\..\src\element\beam2d;..\..\..\src\material;..\..\..\src\material\uniaxial;..\..\..\src\actor\objectBroker;..\..\..\src\matrix;..\..\..\src\domain\load;..\..\..\src\renderer;..\..\..\src\actor\channel;..\..\..\src\domain\node;..\..\..\src\actor\actor;..\..\..\src\tagged;..\..\..\src\domain\component;..\..\..\src;..\..\..\src\domain\domain;..\..\..\src\material\nd\template3dep;..\..\..\src\nDarray;..\..\..\src\element\20nbrick;..\..\..\src\element\elasticBeamColumn;..\..\..\src\element\joint;..\..\..\src\domain\constraints;..\..\..\src\element\updatedLagrangianBeamColumn;..\..\..\src\material\yieldSurface\yieldSurfaceBC;..\..\..\src\material\yieldSurface\evolution;..\..\..\src\element\forceBeamColumn;..\..\..\src\element\nonlinearBeamColumn\element;..\..\..\src\element\nonlinearBeamColumn\matrixUtil;&quot;c:\Program Files\tcl\include&quot;;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="NDEBUG,WIN32,_LIB,_WGL,_COROTATIONAL,_TCL84"
 				StringPooling="TRUE"
 				RuntimeLibrary="5"
@@ -261,9 +261,6 @@
 				RelativePath="..\..\..\SRC\coordTransformation\PDeltaCrdTransf3d.cpp">
 			</File>
 			<File
-				RelativePath="..\..\..\SRC\coordTransformation\PDeltaCrdTransf3d.h">
-			</File>
-			<File
 				RelativePath="..\..\..\SRC\coordTransformation\TclGeomTransfCommand.cpp">
 			</File>
 		</Filter>
@@ -412,34 +409,13 @@
 			Name="upU"
 			Filter="">
 			<File
-				RelativePath="..\..\..\SRC\element\upU\BrickUP.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\upU\BrickUP.h">
-			</File>
-			<File
 				RelativePath="..\..\..\Src\element\upU\EightNodeBrick_u_p_U.cpp">
 			</File>
 			<File
 				RelativePath="..\..\..\Src\element\upU\EightNodeBrick_u_p_U.h">
 			</File>
 			<File
-				RelativePath="..\..\..\Src\element\upU\FourNodeQuadUP.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Src\element\upU\FourNodeQuadUP.h">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\upU\Nine_Four_Node_QuadUP.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\upU\Nine_Four_Node_QuadUP.h">
-			</File>
-			<File
 				RelativePath="..\..\..\SRC\element\upU\TclEightNodeBrick_u_p_U.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\Src\element\upU\TclFourNodeQuadUPCommand.cpp">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\element\upU\TclTwentyNodeBrick_u_p_U.cpp">
@@ -449,18 +425,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\Src\element\upU\TwentyNodeBrick_u_p_U.h">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\upU\Twenty_Eight_Node_BrickUP.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\upU\Twenty_Eight_Node_BrickUP.h">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\upU\shp3dv.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\upU\shp3dv.h">
 			</File>
 		</Filter>
 		<Filter
@@ -764,6 +728,52 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\element\TotalLagrangianFD20NodeBrick\TotalLagrangianFD20NodeBrick.h">
+			</File>
+		</Filter>
+		<Filter
+			Name="up"
+			Filter="">
+			<File
+				RelativePath="..\..\..\SRC\element\UP-ucsd\BrickUP.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\UP-ucsd\BrickUP.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\UP-ucsd\FourNodeQuadUP.cpp">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\UP-ucsd\FourNodeQuadUP.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\UP-ucsd\Nine_Four_Node_QuadUP.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\UP-ucsd\Nine_Four_Node_QuadUP.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\UP-ucsd\TclFourNodeQuadUPCommand.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\UP-ucsd\Twenty_Eight_Node_BrickUP.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\UP-ucsd\shp3dv.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\UP-ucsd\shp3dv.h">
 			</File>
 		</Filter>
 		<File
