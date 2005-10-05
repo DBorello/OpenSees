@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2005-09-23 22:49:54 $
+// $Revision: 1.30 $
+// $Date: 2005-10-05 21:53:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -913,8 +913,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
      if (argc != 10 && argc != 9 && argc != 7) {
          opserr << "WARNING insufficient arguments\n";
          printCommand(argc,argv);
-         opserr << "Want: uniaxialMaterial Concrete04 tag? fpc?  
-epsc0? epscu? Ec0? <ft? etu? <beta?> >" << endln;
+         opserr << "Want: uniaxialMaterial Concrete04 tag? fpc? epsc0? epscu? Ec0? <ft? etu? <beta?> >" << endln;
          return TCL_ERROR;
      }
 
