@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2003-03-28 20:57:13 $
+// $Revision: 1.15 $
+// $Date: 2005-10-07 18:09:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -860,33 +860,15 @@ TrussSection::setResponse(const char **argv, int argc, Information &eleInformati
   //
   // we compare argv[0] for known response types for the Truss
   //
-  
+
   // axial force
   if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 || 
-      strcmp(argv[0],"axialForce") == 0) {
-    eleInformation.theType = DoubleType;
-    return new ElementResponse(this, 1);
-  } 
+      strcmp(argv[0],"axialForce") == 0) 
+    return new ElementResponse(this, 1, 0);
   
   else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
-	   strcmp(argv[0],"deformation") == 0) {
-    eleInformation.theType = DoubleType;
-    return new ElementResponse(this, 2);
-  }     
-  
-  // tangent stiffness matrix
-  else if (strcmp(argv[0],"stiff") ==0) {
-    Matrix *newMatrix = new Matrix(*theMatrix);
-    if (newMatrix == 0) {
-      opserr << "WARNING TrussSection::setResponse() - " << this->getTag() << 
-	" out of memory creating matrix\n";
-      return 0;
-    }
-    
-    eleInformation.theMatrix = newMatrix;
-    eleInformation.theType = MatrixType;
-    return new ElementResponse(this, 3);
-  } 
+	   strcmp(argv[0],"deformation") == 0) 
+    return new ElementResponse(this, 2, 0);
   
   // a section quantity    
   else if (strcmp(argv[0],"section") ==0)
@@ -940,54 +922,6 @@ TrussSection::getResponse(int responseID, Information &eleInformation)
       }
       eleInformation.theDouble = strain*L;    
       return 0;
-      
-    case 3:
-      if (L == 0.0) { // - problem in setDomain() no further warnings
-	  theMatrix->Zero();
-	  *(eleInformation.theMatrix) = *theMatrix;
-	  return 0;
-      } else {
-    
-	  // determine the current strain given trial displacements at nodes
-	  strain = this->computeCurrentStrain();
-
-	int order = theSection->getOrder();
-	const ID &code = theSection->getType();
-	
-	Vector e (order);
-	
-	int i;
-	for (i = 0; i < order; i++) {
-		if (code(i) == SECTION_RESPONSE_P)
-			e(i) = strain;
-	}
-	
-	theSection->setTrialSectionDeformation(e);
-    
-	const Matrix &k = theSection->getSectionTangent();
-	double AE = 0.0;
-	for (i = 0; i < order; i++) {
-		if (code(i) == SECTION_RESPONSE_P)
-			AE += k(i,i);
-	}
-      
-	  // come back later and redo this if too slow
-	  Matrix &stiff = *theMatrix;
-	  int numDOF2 = numDOF/2;
-	  double temp;
-	  AE /= L;
-	  for (i = 0; i < dimension; i++) {
-	    for (int j = 0; j < dimension; j++) {
-	      temp = cosX[i]*cosX[j]*AE;
-	      stiff(i,j) = temp;
-	      stiff(i+numDOF2,j) = -temp;
-	      stiff(i,j+numDOF2) = -temp;
-	      stiff(i+numDOF2,j+numDOF2) = temp;
-	    }
-	  }
-	  *(eleInformation.theMatrix) = stiff;      
-	  return 0;
-      }
       
     default:
       if (responseID >= 100)
