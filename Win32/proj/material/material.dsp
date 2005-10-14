@@ -369,6 +369,14 @@ SOURCE=..\..\..\SRC\material\uniaxial\Concrete01.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\uniaxial\Concrete04.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\Concrete04.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\material\uniaxial\DrainMaterial.cpp
 # End Source File
 # Begin Source File
