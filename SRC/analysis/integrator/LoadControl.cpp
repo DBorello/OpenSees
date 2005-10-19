@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:00:48 $
+// $Revision: 1.5 $
+// $Date: 2005-10-19 21:53:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/LoadControl.cpp,v $
                                                                         
                                                                         
@@ -107,7 +107,6 @@ LoadControl::update(const Vector &deltaU)
       opserr << "LoadControl::update - model failed to update for new dU\n";
       return -1;
     }
-
 
     // Set deltaU for the convergence test
     theSOE->setX(deltaU);

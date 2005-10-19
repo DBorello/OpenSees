@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-02-14 23:00:47 $
+// $Revision: 1.10 $
+// $Date: 2005-10-19 21:53:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/DisplacementControl.cpp,v $
                                                                         
                                                                         
@@ -90,8 +90,6 @@ DisplacementControl::~DisplacementControl()
 int
 DisplacementControl::newStep(void)
 {
-
-
     // get pointers to AnalysisModel and LinearSOE
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     LinearSOE *theLinSOE = this->getLinearSOEPtr();    
@@ -119,7 +117,11 @@ DisplacementControl::newStep(void)
     this->formTangent();
     theLinSOE->setB(*phat);
 
-    theLinSOE->solve();
+    if (theLinSOE->solve() < 0) {
+      opserr << "DisplacementControl::newStep(void) - failed in solver\n";
+      return -1;
+    }
+
     (*deltaUhat) = theLinSOE->getX();
     Vector &dUhat = *deltaUhat;
 

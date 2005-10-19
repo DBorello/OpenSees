@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-14 23:00:48 $
+// $Revision: 1.8 $
+// $Date: 2005-10-19 21:53:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/MinUnbalDispNorm.cpp,v $
                                                                         
                                                                         
@@ -91,7 +91,10 @@ MinUnbalDispNorm::newStep(void)
     // determine dUhat
     this->formTangent();
     theLinSOE->setB(*phat);
-    theLinSOE->solve();
+    if (theLinSOE->solve() < 0) {
+      opserr << "MinUnbalanceDispNorm::newStep(void) - failed in solver\n";
+      return -1;
+    }
     (*deltaUhat) = theLinSOE->getX();
     Vector &dUhat = *deltaUhat;
 

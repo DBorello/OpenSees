@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-10-02 20:56:30 $
+// $Revision: 1.7 $
+// $Date: 2005-10-19 21:53:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/ArcLength.cpp,v $
                                                                         
                                                                         
@@ -94,7 +94,11 @@ ArcLength::newStep(void)
     // determine dUhat
     this->formTangent();
     theLinSOE->setB(*phat);
-    theLinSOE->solve();
+    if (theLinSOE->solve() < 0) {
+      opserr << "ArcLength::newStep(void) - failed in solver\n";
+      return -1;
+    }
+
     (*deltaUhat) = theLinSOE->getX();
     Vector &dUhat = *deltaUhat;
     
@@ -134,6 +138,7 @@ ArcLength::update(const Vector &dU)
     // determine dUhat    
     theLinSOE->setB(*phat);
     theLinSOE->solve();
+
     (*deltaUhat) = theLinSOE->getX();    
 
     // determine the coeeficients of our quadratic equation
