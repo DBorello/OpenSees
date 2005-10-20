@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:32:41 $
+// $Revision: 1.6 $
+// $Date: 2005-10-20 21:58:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathTimeSeries.h,v $
                                                                         
                                                                         
@@ -85,6 +85,8 @@ class PathTimeSeries : public TimeSeries
     double cFactor;       // additional factor on the returned load factor
     int dbTag1, dbTag2;   // additional database tags needed for vector objects
     int lastSendCommitTag;
+
+    Channel *lastChannel;
 };
 
 #endif

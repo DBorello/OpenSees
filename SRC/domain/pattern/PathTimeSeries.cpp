@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2005-03-11 22:08:00 $
+// $Revision: 1.8 $
+// $Date: 2005-10-20 21:58:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathTimeSeries.cpp,v $
                                                                         
                                                                         
@@ -60,7 +60,7 @@ PathTimeSeries::PathTimeSeries(const Vector &theLoadPath,
 			       double theFactor)
   :TimeSeries(TSERIES_TAG_PathTimeSeries),
    thePath(0), time(0), currentTimeLoc(0), 
-   cFactor(theFactor), dbTag1(0), dbTag2(0), lastSendCommitTag(-1)
+   cFactor(theFactor), dbTag1(0), dbTag2(0), lastSendCommitTag(-1), lastChannel(0)
 {
   // check vectors are of same size
   if (theLoadPath.Size() != theTimePath.Size()) {
@@ -93,7 +93,7 @@ PathTimeSeries::PathTimeSeries(const char *filePathName,
 			       double theFactor)
   :TimeSeries(TSERIES_TAG_PathTimeSeries),
    thePath(0), time(0), currentTimeLoc(0), 
-   cFactor(theFactor), dbTag1(0), dbTag2(0), lastSendCommitTag(-1)
+   cFactor(theFactor), dbTag1(0), dbTag2(0), lastSendCommitTag(-1), lastChannel(0)
 {
 
   // determine the number of data points
@@ -200,7 +200,7 @@ PathTimeSeries::PathTimeSeries(const char *fileName,
 			       double theFactor)
   :TimeSeries(TSERIES_TAG_PathTimeSeries),
    thePath(0), time(0), currentTimeLoc(0), 
-   cFactor(theFactor), dbTag1(0), dbTag2(0)
+   cFactor(theFactor), dbTag1(0), dbTag2(0), lastChannel(0)
 {
 
 
@@ -411,7 +411,9 @@ PathTimeSeries::sendSelf(int commitTag, Channel &theChannel)
   // we only send the vector data if this is the first time it is sent to the database
   // or the channel is for sending the data to a remote process
 
-  if ((lastSendCommitTag == commitTag) || (theChannel.isDatastore() == 0)) {  
+  if (lastChannel != &theChannel || (lastSendCommitTag == commitTag) || (theChannel.isDatastore() == 0)) {  
+
+    lastChannel = &theChannel;
 
     if (thePath != 0) {
       result = theChannel.sendVector(dbTag1, commitTag, *thePath);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-11-19 19:16:20 $
+// $Revision: 1.10 $
+// $Date: 2005-10-20 21:58:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.cpp,v $
                                                                         
 // Written: fmk 07/99
@@ -53,7 +53,7 @@ LoadPattern::LoadPattern(int tag, int clasTag)
  theSeries(0), 
  currentGeoTag(0), lastGeoSendTag(-1),
  theNodalLoads(0), theElementalLoads(0), theSPs(0),
- theNodIter(0), theEleIter(0), theSpIter(0)
+ theNodIter(0), theEleIter(0), theSpIter(0), lastChannel(0)
 {
     // constructor for subclass
     theNodalLoads = new ArrayOfTaggedObjects(32);
@@ -86,7 +86,7 @@ LoadPattern::LoadPattern()
  currentGeoTag(0), lastGeoSendTag(-1),
  dbSPs(0), dbNod(0), dbEle(0), 
  theNodalLoads(0), theElementalLoads(0), theSPs(0),
- theNodIter(0), theEleIter(0), theSpIter(0)
+ theNodIter(0), theEleIter(0), theSpIter(0), lastChannel(0)
 {
     theNodalLoads = new ArrayOfTaggedObjects(32);
     theElementalLoads = new ArrayOfTaggedObjects(32);
@@ -118,7 +118,7 @@ LoadPattern::LoadPattern(int tag)
  currentGeoTag(0), lastGeoSendTag(-1),
  dbSPs(0), dbNod(0), dbEle(0), 
  theNodalLoads(0), theElementalLoads(0), theSPs(0),
- theNodIter(0), theEleIter(0), theSpIter(0)
+ theNodIter(0), theEleIter(0), theSpIter(0), lastChannel(0)
 {
     theNodalLoads = new ArrayOfTaggedObjects(32);
     theElementalLoads = new ArrayOfTaggedObjects(32);
@@ -294,6 +294,7 @@ LoadPattern::clearAll(void)
     theNodalLoads->clearAll();
     theSPs->clearAll();
     currentGeoTag++;
+    lastChannel = 0;
 }
 
 NodalLoad *
@@ -444,7 +445,21 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
   // now check if data defining the objects in the LoadPAttern needs to be sent 
   // NOTE THIS APPROACH MAY NEED TO CHANGE FOR VERY LARGE PROBLEMS IF CHANNEL CANNOT
   // HANDLE VERY LARGE ID OBJECTS.
-  if (lastGeoSendTag != currentGeoTag || theChannel.isDatastore() == 0) {
+
+  /*
+  if (theChannel.isDatastore() == 1) {
+    static ID theLastSendTag(1);
+    if (theChannel.recvID(myDbTag,0,theLastSendTag) == 0)
+      lastGeoSendTag = theLastSendTag(0);
+    else
+      lastGeoSendTag = -1;
+  }
+  */
+
+  if (lastChannel != &theChannel || lastGeoSendTag != currentGeoTag || theChannel.isDatastore() == 0) {
+
+
+    lastChannel = &theChannel;
 
     //
     // into an ID we are gonna place the class and db tags for each node so can rebuild
@@ -541,6 +556,11 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
 
     // set the lst send db tag so we don't have to do all that again
     lastGeoSendTag = currentGeoTag;
+    if (theChannel.isDatastore() == 1) {
+      static ID theLastSendTag(1);
+      theLastSendTag(0) = lastGeoSendTag;
+      theChannel.sendID(myDbTag,0, theLastSendTag);
+    }
   }
   
 
@@ -629,6 +649,14 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
       return -3;
     }
   }
+
+  /*
+  if (theChannel.isDatastore() == 1) {
+    static ID theLastSendTag(1);
+    if (theChannel.recvID(myDbTag,0,theLastSendTag) == 0)
+      lastGeoSendTag = theLastSendTag(0);
+  }
+  */
 
   if (currentGeoTag != lpData(0) || theChannel.isDatastore() == 0) {
 

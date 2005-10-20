@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2005-03-30 20:23:15 $
+// $Revision: 1.30 $
+// $Date: 2005-10-20 21:58:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -80,7 +80,7 @@ Domain::Domain()
  eleGraphBuiltFlag(false),  nodeGraphBuiltFlag(false), theNodeGraph(0), 
  theElementGraph(0), 
  theRegions(0), numRegions(0), commitTag(0),
- theBounds(6), theEigenvalues(0), theEigenvalueSetTime(0)
+ theBounds(6), theEigenvalues(0), theEigenvalueSetTime(0), lastChannel(0)
 {
   
     // init the arrays for storing the domain components
@@ -127,7 +127,7 @@ Domain::Domain(int numNodes, int numElements, int numSPs, int numMPs,
  eleGraphBuiltFlag(false), nodeGraphBuiltFlag(false), theNodeGraph(0), 
  theElementGraph(0),
  theRegions(0), numRegions(0), commitTag(0),
- theBounds(6), theEigenvalues(0), theEigenvalueSetTime(0)
+ theBounds(6), theEigenvalues(0), theEigenvalueSetTime(0), lastChannel(0)
 {
     // init the arrays for storing the domain components
     theElements = new ArrayOfTaggedObjects(numElements);
@@ -180,7 +180,7 @@ Domain::Domain(TaggedObjectStorage &theNodesStorage,
  theMPs(&theMPsStorage), 
  theLoadPatterns(&theLoadPatternsStorage),
  theRegions(0), numRegions(0), commitTag(0),
- theBounds(6), theEigenvalues(0), theEigenvalueSetTime(0)
+ theBounds(6), theEigenvalues(0), theEigenvalueSetTime(0), lastChannel(0)
 {
     // init the iters    
     theEleIter = new SingleDomEleIter(theElements);    
@@ -230,7 +230,7 @@ Domain::Domain(TaggedObjectStorage &theStorage)
  eleGraphBuiltFlag(false), nodeGraphBuiltFlag(false), theNodeGraph(0), 
  theElementGraph(0), 
  theRegions(0), numRegions(0), commitTag(0),
- theBounds(6), theEigenvalues(0), theEigenvalueSetTime(0)
+ theBounds(6), theEigenvalues(0), theEigenvalueSetTime(0), lastChannel(0)
 {
     // init the arrays for storing the domain components
     theStorage.clearAll(); // clear the storage just in case populated
@@ -742,6 +742,7 @@ Domain::clearAll(void) {
 
     currentGeoTag = 0;
     lastGeoSendTag = -1;
+    lastChannel = 0;
 
     // rest the flag to be as initial
     hasDomainChangedFlag = false;
@@ -1903,7 +1904,20 @@ Domain::sendSelf(int cTag, Channel &theChannel)
   // now check if data defining the objects in the domain needs to be sent 
   // NOTE THIS APPROACH MAY NEED TO CHANGE FOR VERY LARGE PROBLEMS IF CHANNEL CANNOT
   // HANDLE VERY LARGE ID OBJECTS.
-  if (lastGeoSendTag != currentGeoTag) {
+
+  /*
+  if (theChannel.isDatastore() == 1) {
+    static ID theLastSendTag(1);
+    if (theChannel.recvID(0,0,theLastSendTag) == 0)
+      lastGeoSendTag = theLastSendTag(0);
+    else
+      lastGeoSendTag = -1;
+  }
+  */
+
+  if (lastChannel != &theChannel || lastGeoSendTag != currentGeoTag) {
+
+    lastChannel = &theChannel;
     
     //
     // into an ID we are gonna place the class and db tags for each node so can rebuild
@@ -2061,6 +2075,13 @@ Domain::sendSelf(int cTag, Channel &theChannel)
 
     // now so that we don't do this next time if nothing in the domain has changed
     lastGeoSendTag = currentGeoTag;
+    /*
+    if (theChannel.isDatastore() == 1) {
+      static ID theLastSendTag(1);
+      theLastSendTag(0) = lastGeoSendTag;
+      theChannel.sendID(0,0, theLastSendTag);
+    }
+    */
   }
 
   //
@@ -2151,7 +2172,18 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
   // now if the currentGeoTag does not agree with whats in the domain
   // we must wipe everything in the domain and recreate the domain based on the info from the channel
   //
-  if (currentGeoTag == 0 || domainData(0) != currentGeoTag) {
+
+  /*
+  if (theChannel.isDatastore() == 1) {
+    static ID theLastSendTag(1);
+    if (theChannel.recvID(0,0,theLastSendTag) == 0)
+      lastGeoSendTag = theLastSendTag(0);
+  }
+  */
+
+  if (currentGeoTag == 0 || lastChannel != &theChannel || domainData(0) != currentGeoTag) {
+
+    lastChannel = &theChannel;
     
     // set the currrentGeoTag
     int geoTag = domainData(0);
