@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:05 $
+// $Revision: 1.6 $
+// $Date: 2005-10-20 23:52:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam2d/beam2d03.h,v $
                                                                         
                                                                         
@@ -58,8 +58,6 @@ class beam2d03 : public Element
     
     const Matrix &getTangentStiff(void);
     const Matrix &getInitialStiff(void);
-    const Matrix &getDamp(void);    
-    const Matrix &getMass(void);    
 
     void zeroLoad(void);	
     int addLoad(ElementalLoad *theLoad, double loadFactor);
