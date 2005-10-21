@@ -1,6 +1,6 @@
-
-// $Revision: 1.3 $                                                              
-// $Date: 2004-07-20 22:44:18 $                                                                  
+ 
+// $Revision: 1.4 $                                                              
+// $Date: 2005-10-21 22:02:39 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/nDarray/BJtensor.h,v $                                                                
 
 //#############################################################################
@@ -104,7 +104,8 @@ class BJtensor : public nDarray
     friend BJtensor operator+(const BJtensor & , const BJtensor & ); // BJtensor addition
     friend BJtensor operator-(const BJtensor & , const BJtensor & ); // BJtensor substraction
 
-    BJtensor operator*( const double   rval);       // scalar multiplication
+    BJtensor& operator*=( const double   rval);     // Added Zhao Oct2005
+    BJtensor operator*( const double   rval) const; // scalar multiplication, Added const Zhao Oct2005
     BJtensor operator*( BJtensor & rval);       // inner/outter product
     BJtensor operator/( BJtensor & rval);       // BJtensor division rval MUST BE BJtensor of
                                             // order 0 ( i.e. scalar in BJtensor form )
