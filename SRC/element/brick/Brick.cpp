@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2004-04-14 18:40:03 $
+// $Revision: 1.22 $
+// $Date: 2005-10-25 21:05:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.cpp,v $
 
 // Ed "C++" Love
@@ -65,12 +65,17 @@ const double  Brick::wg[] = { 1.0, 1.0, 1.0, 1.0,
                               1.0, 1.0, 1.0, 1.0  } ;
 
   
+static Matrix B(6,3) ;
+
+
 
 //null constructor
 Brick::Brick( ) :
 Element( 0, ELE_TAG_Brick ),
 connectedExternalNodes(8), load(0), Ki(0)
 { 
+  B.zero();
+
   for (int i=0; i<8; i++ ) {
     materialPointers[i] = 0;
     nodePointers[i] = 0;
@@ -97,6 +102,8 @@ Brick::Brick(  int tag,
 Element( tag, ELE_TAG_Brick ),
 connectedExternalNodes(8) , load(0), Ki(0)
 {
+  B.zero();
+
   connectedExternalNodes(0) = node1 ;
   connectedExternalNodes(1) = node2 ;
   connectedExternalNodes(2) = node3 ;
@@ -825,21 +832,61 @@ Brick::update(void)
     // j-node loop to compute strain 
     for ( j = 0; j < numberNodes; j++ )  {
 
+      /**************** fmk - unwinding for performance
       //compute B matrix 
-
       BJ = computeB( j, shp ) ;
-      
+
       //nodal displacements 
       const Vector &ul = nodePointers[j]->getTrialDisp( ) ;
 
       //compute the strain
       //strain += (BJ*ul) ; 
       strain.addMatrixVector(1.0,  BJ,ul,1.0 ) ;
+      ***************************************************/
+
+
+      //               | N,1      0     0    | 
+      //   B       =   |   0     N,2    0    |
+      //               |   0      0     N,3  |   (6x3)
+      //               | N,2     N,1     0   |
+      //               |   0     N,3    N,2  |
+      //               | N,3      0     N,1  |
+
+      //      B(0,0) = shp[0][node] ;
+      //      B(1,1) = shp[1][node] ;
+      //      B(2,2) = shp[2][node] ;
+      //      B(3,0) = shp[1][node] ;
+      //      B(3,1) = shp[0][node] ;
+      //      B(4,1) = shp[2][node] ;
+      //      B(4,2) = shp[1][node] ;
+      //      B(5,0) = shp[2][node] ;
+      //      B(5,2) = shp[0][node] ;
+
+      double b00 = shp[0][j];
+      double b11 = shp[1][j];
+      double b22 = shp[2][j];
+      double b30 = shp[1][j];
+      double b31 = shp[0][j];
+      double b41 = shp[2][j];
+      double b42 = shp[1][j];
+      double b50 = shp[2][j];
+      double b52 = shp[0][j];
+
+      const Vector &ul = nodePointers[j]->getTrialDisp();
+
+      double ul0 = ul(0);
+      double ul1 = ul(1);
+      double ul2 = ul(2);
+
+      strain(0) += b00 * ul0;
+      strain(1) += b11 * ul1;
+      strain(2) += b22 * ul2;
+      strain(3) += b30 * ul0 + b31 * ul1;
+      strain(4) += b41 * ul1 + b42 * ul2;
+      strain(5) += b50 * ul0 + b52 * ul2;
 
     } // end for j
-  
-
-
+    
     //send the strain to the material 
     success = materialPointers[i]->setTrialStrain( strain ) ;
 
@@ -972,11 +1019,52 @@ void  Brick::formResidAndTangent( int tang_flag )
     } //end if tang_flag
 
 
+    double stress0 = stress(0);
+    double stress1 = stress(1);
+    double stress2 = stress(2);
+    double stress3 = stress(3);
+    double stress4 = stress(4);
+    double stress5 = stress(5);
+
     //residual and tangent calculations node loops
 
     jj = 0 ;
     for ( j = 0; j < numberNodes; j++ ) {
 
+      /* ************** fmk - unwinding for performance 
+      ************************************************* */
+
+      //               | N,1      0     0    | 
+      //   B       =   |   0     N,2    0    |
+      //               |   0      0     N,3  |   (6x3)
+      //               | N,2     N,1     0   |
+      //               |   0     N,3    N,2  |
+      //               | N,3      0     N,1  |
+
+      //      B(0,0) = shp[0][node] ;
+      //      B(1,1) = shp[1][node] ;
+      //      B(2,2) = shp[2][node] ;
+      //      B(3,0) = shp[1][node] ;
+      //      B(3,1) = shp[0][node] ;
+      //      B(4,1) = shp[2][node] ;
+      //      B(4,2) = shp[1][node] ;
+      //      B(5,0) = shp[2][node] ;
+      //      B(5,2) = shp[0][node] ;
+
+      double b00 = shp[0][j];
+      double b11 = shp[1][j];
+      double b22 = shp[2][j];
+      double b30 = shp[1][j];
+      double b31 = shp[0][j];
+      double b41 = shp[2][j];
+      double b42 = shp[1][j];
+      double b50 = shp[2][j];
+      double b52 = shp[0][j];
+
+      residJ(0) = b00 * stress0 + b30 * stress3 + b50 * stress5;
+      residJ(1) = b11 * stress1 + b31 * stress3 + b41 * stress4;
+      residJ(2) = b22 * stress2 + b42 * stress4 + b52 * stress5;
+      
       BJ = computeB( j, shp ) ;
    
       //transpose 
@@ -986,10 +1074,6 @@ void  Brick::formResidAndTangent( int tang_flag )
 	  BJtran(p,q) = BJ(q,p) ;
       }//end for p
 
-
-      //residual
-      //residJ = BJtran * stress ;
-      residJ.addMatrixVector(0.0,  BJtran,stress,1.0);
 
       //residual 
       for ( p = 0; p < ndf; p++ ) {
@@ -1060,8 +1144,6 @@ const Matrix&
 Brick::computeB( int node, const double shp[4][8] )
 {
 
-  static Matrix B(6,3) ;
-
 //---B Matrix in standard {1,2,3} mechanics notation---------
 //
 //                -                   -
@@ -1074,9 +1156,6 @@ Brick::computeB( int node, const double shp[4][8] )
 //                -                   -       
 //
 //-------------------------------------------------------------------
-
-
-  B.Zero( ) ;
 
   B(0,0) = shp[0][node] ;
   B(1,1) = shp[1][node] ;
