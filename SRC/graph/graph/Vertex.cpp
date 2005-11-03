@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:23 $
+// $Revision: 1.3 $
+// $Date: 2005-11-03 23:11:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/Vertex.cpp,v $
                                                                         
-                                                                        
-// File: ~/graph/graph/Vertex.C
-// 
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -35,13 +32,24 @@
 // What: "@(#) Vertex.C, revA"
 
 #include <Vertex.h>
+#include <Channel.h>
+#include <FEM_ObjectBroker.h>
+#include <Vector.h>
 
 Vertex::Vertex(int tag, int ref, double weight, int color)
 :TaggedObject(tag), myRef(ref), myWeight(weight), myColor(color), 
- myDegree(0), myTmp(0), myAdjacency(0,8)
+ myDegree(0), myTmp(0), myAdjacency(0, 8)
 {
 
 }    
+
+
+Vertex::Vertex(const Vertex &other) 
+:TaggedObject(other.getTag()), myRef(other.myRef), myWeight(other.myWeight), myColor(other.myColor), 
+ myDegree(other.myDegree), myTmp(0), myAdjacency(other.myAdjacency)
+{
+
+}
 
 Vertex::~Vertex()
 {
@@ -130,9 +138,89 @@ Vertex::Print(OPS_Stream &s, int flag)
     else if (flag ==2) 
 	s << myColor << " " ;
     else if (flag == 3)
-	s << myWeight << " " << myColor << " " ;    
+        s << myWeight << " " << myColor << " " ;    
+    else if (flag == 4)
+      s << myWeight << " " << myColor << " " << myTmp << " " ;
 
     s << "ADJACENCY: " << myAdjacency;    	
 }
 
 
+int 
+Vertex::sendSelf(int commitTag, Channel &theChannel)
+{
+  // send the tag/ref/color/degree/tmp, an indication if weighted & size of adjacency
+  static ID idData(7);
+  idData(0) = this->getTag();
+  idData(1) = myRef;
+  idData(2) = myColor;
+  idData(3) = myDegree;
+  idData(4) = myTmp;
+  if (myWeight == 0.0)
+    idData(5) = 0;
+  else
+    idData(5) = 1;
+  idData(6) = myAdjacency.Size();
+
+  if (theChannel.sendID(0, commitTag, idData) < 0) {
+    opserr << "Graph::sendSelf() - failed to receive the initial data\n";
+    return -1;
+  }
+
+  // if weighted, send the weight
+  if (myWeight != 0.0) {
+    static Vector vectData(1);
+    vectData(0) = myWeight;
+    if (theChannel.sendVector(0, commitTag, vectData) < 0) {
+      opserr << "Graph::rendSelf() - failed to receive the weight\n";
+      return -2;
+    }
+  }    
+
+  // finally send the adjacency
+  if (theChannel.sendID(0, commitTag, myAdjacency) < 0) {
+    opserr << "Graph::sendSelf() - failed to receive the adjacency data\n";
+    return -1;
+  }  
+
+  return 0;
+}
+
+
+int 
+Vertex::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  // recv the tag/ref/color/degree/tmp, an indication if weighted & size of adjacency
+  static ID idData(7);
+  if (theChannel.recvID(0, commitTag, idData) < 0) {
+    opserr << "Graph::recvSelf() - failed to receive the initial data\n";
+    return -1;
+  }
+  this->setTag(idData(0));
+  myRef = idData(1);
+  myColor = idData(2);
+  myDegree = idData(3);
+  myTmp = idData(4);
+
+  // if weighted, receive the weight
+  if (idData(5) == 1) {
+    static Vector vectData(1);
+    if (theChannel.recvVector(0, commitTag, vectData) < 0) {
+      opserr << "Graph::recvSelf() - failed to receive the weight\n";
+      return -2;
+    }
+    myWeight = vectData(0);
+  }    
+
+  // resize the adjacency & receive it
+  //  myAdjacency[idData(6)-1] = 0;
+  int *adjacencyData;
+  adjacencyData = new int[idData[6]];
+  myAdjacency.setData(adjacencyData, idData[6], true);
+
+  if (theChannel.recvID(0, commitTag, myAdjacency) < 0) {
+    opserr << "Graph::recvSelf() - failed to receive the initial data\n";
+    return -3;
+  }
+  return 0;
+}

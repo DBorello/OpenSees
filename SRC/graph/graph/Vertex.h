@@ -18,18 +18,15 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:23 $
+// $Revision: 1.3 $
+// $Date: 2005-11-03 23:11:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/Vertex.h,v $
                                                                         
                                                                         
 #ifndef Vertex_h
 #define Vertex_h
 
-// File: ~/graph/graph/Vertex.h
-// 
 // Written: fmk 
-// Created: 11/96
 // Revision: A
 //
 // Description: This file contains the class definition for Vertex.
@@ -45,11 +42,15 @@
 #include <ID.h>
 
 #define START_VERTEX_NUM 0
+class Channel;
+class FEM_ObjectBroker;
 
 class Vertex: public TaggedObject
 {
   public:
     Vertex(int tag, int ref, double weight=0, int color =0);
+    Vertex(const Vertex &other);
+
     virtual ~Vertex();
 
     virtual void setWeight(double newWeight);
@@ -66,6 +67,8 @@ class Vertex: public TaggedObject
     virtual const ID &getAdjacency(void) const;
 
     virtual  void Print(OPS_Stream &s, int flag =0);
+    int sendSelf(int commitTag, Channel &theChannel);
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
   
   protected:
     

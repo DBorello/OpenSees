@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:23 $
+// $Revision: 1.3 $
+// $Date: 2005-11-03 23:11:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/Graph.cpp,v $
                                                                         
                                                                         
-// File: ~/graph/graph/Graph.C
-// 
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -37,9 +35,12 @@
 #include <Vertex.h>
 #include <VertexIter.h>
 #include <ArrayOfTaggedObjects.h>
+#include <Channel.h>
+#include <FEM_ObjectBroker.h>
+
 
 Graph::Graph()
-:myVertices(0), theVertexIter(0), numEdge(0)
+  :myVertices(0), theVertexIter(0), numEdge(0), nextFreeTag(START_VERTEX_NUM)
 {
     myVertices = new ArrayOfTaggedObjects(32);
     theVertexIter = new VertexIter(myVertices);
@@ -47,7 +48,7 @@ Graph::Graph()
 
 
 Graph::Graph(int numVertices)
-:myVertices(0), theVertexIter(0), numEdge(0)
+  :myVertices(0), theVertexIter(0), numEdge(0), nextFreeTag(START_VERTEX_NUM)
 {
     myVertices = new ArrayOfTaggedObjects(numVertices);
     theVertexIter = new VertexIter(myVertices);
@@ -55,12 +56,53 @@ Graph::Graph(int numVertices)
 
 
 Graph::Graph(TaggedObjectStorage &theVerticesStorage)
-:myVertices(&theVerticesStorage), theVertexIter(0), numEdge(0)
+  :myVertices(&theVerticesStorage), theVertexIter(0), numEdge(0), nextFreeTag(START_VERTEX_NUM)
 {
-    theVerticesStorage.clearAll();
-    theVertexIter = new VertexIter(myVertices);
+  TaggedObject *theObject;
+  TaggedObjectIter &theObjects = theVerticesStorage.getComponents();
+  while ((theObject = theObjects()) != 0) 
+    if (theObject->getTag() > nextFreeTag)
+      nextFreeTag = theObject->getTag() + 1;
+
+  theVerticesStorage.clearAll();
+  theVertexIter = new VertexIter(myVertices);
 }
     
+
+Graph::Graph(Graph &other) 
+  :myVertices(0), theVertexIter(0), numEdge(0), nextFreeTag(START_VERTEX_NUM)
+{
+  myVertices = new ArrayOfTaggedObjects(other.getNumVertex());
+  theVertexIter = new VertexIter(myVertices);
+
+  VertexIter &otherVertices = other.getVertices();
+  Vertex *vertexPtr;
+
+  // loop through other creating vertices if tag not the same in this
+  while ((vertexPtr = otherVertices()) != 0) {
+    int vertexTag = vertexPtr->getTag();
+    int vertexRef = vertexPtr->getRef();
+    vertexPtr = new Vertex(vertexTag, vertexRef);
+    if (vertexPtr == 0) {
+      opserr << "Graph::Graph - out of memory\n";
+      return;
+    }
+    this->addVertex(vertexPtr, false);
+  }
+
+  // loop through other adding all the edges that exist in other
+  VertexIter &otherVertices2 = other.getVertices();
+  while ((vertexPtr = otherVertices2()) != 0) {
+    int vertexTag = vertexPtr->getTag();
+    const ID &adjacency = vertexPtr->getAdjacency();
+    for (int i=0; i<adjacency.Size(); i++) {
+      if (this->addEdge(vertexTag, adjacency(i)) < 0) {
+	opserr << "Graph::merge - could not add an edge!\n";
+	return;
+      }
+    }
+  }
+}
 
 Graph::~Graph()
 {
@@ -87,7 +129,7 @@ Graph::addVertex(Vertex *vertexPtr, bool checkAdjacency)
 {
     // check the vertex * and its adjacency list
     if (vertexPtr == 0) {
-	opserr << "WARNING ArrayGraph::addVertex";
+	opserr << "WARNING Graph::addVertex";
 	opserr << " - attempting to add a NULL vertex*\n";
 	return false;
     }
@@ -99,7 +141,7 @@ Graph::addVertex(Vertex *vertexPtr, bool checkAdjacency)
 	    for (int i=0; i<size; i++) {
 		Vertex *other = this->getVertexPtr(adjacency(i));
 		if (other == 0) {
-		    opserr << "WARNING ArrayGraph::addVertex";
+		    opserr << "WARNING Graph::addVertex";
 		    opserr << " - vertex with adjacent vertex not in graph\n";
 		    return false;
 		}		
@@ -107,11 +149,20 @@ Graph::addVertex(Vertex *vertexPtr, bool checkAdjacency)
 	}
     }
 
+
     bool result = myVertices->addComponent(vertexPtr);
     if (result == false) {
-	opserr << "WARNING ArrayGraph::addVertex";
+      opserr << *this;
+      opserr << "BAD VERTEX\n: " << *vertexPtr;
+	opserr << "WARNING Graph::addVertex";
 	opserr << " - vertex could not be stored in TaggedObjectStorage object\n";
     }
+
+
+    // check nextFreeTag
+    if (vertexPtr->getTag() >= nextFreeTag)
+      nextFreeTag = vertexPtr->getTag() + 1;
+
     return result;
 }
 
@@ -185,6 +236,12 @@ Graph::getNumEdge(void) const
     return numEdge;
 }
 
+int 
+Graph::getFreeTag(void) 
+{
+  return nextFreeTag;
+}
+
 Vertex *
 Graph::removeVertex(int tag, bool flag)
 {
@@ -201,6 +258,44 @@ Graph::removeVertex(int tag, bool flag)
 }
 
 
+int
+Graph::merge(Graph &other) {
+
+  int result =0;
+  VertexIter &otherVertices = other.getVertices();
+  Vertex *vertexPtrOther;
+
+  // loop through other creating vertices if tag not the same in this
+  while ((vertexPtrOther = otherVertices()) != 0) {
+    int vertexTag = vertexPtrOther->getTag();
+    Vertex *vertexPtr = this->getVertexPtr(vertexTag);
+    if (vertexPtr == 0) {
+      int vertexRef = vertexPtrOther->getRef();
+      vertexPtr = new Vertex(vertexTag, vertexRef);
+      if (vertexPtr == 0) {
+	opserr << "Graph::merge - out of memory\n";
+	return -1;
+      }
+      this->addVertex(vertexPtr, false);
+    }
+  }
+
+
+  // loop through other adding all the edges that exist in other
+  VertexIter &otherVertices2 = other.getVertices();
+  while ((vertexPtrOther = otherVertices2()) != 0) {
+    int vertexTag = vertexPtrOther->getTag();
+    const ID &adjacency = vertexPtrOther->getAdjacency();
+    for (int i=0; i<adjacency.Size(); i++) {
+      if (this->addEdge(vertexTag, adjacency(i)) < 0) {
+	opserr << "Graph::merge - could not add an edge!\n";
+	return -2;	
+      }
+    }
+  }
+  
+  return result;
+}
 
 
 void 
@@ -216,3 +311,80 @@ OPS_Stream &operator<<(OPS_Stream &s, Graph &M)
   return s;
 }
 
+
+int 
+Graph::sendSelf(int commitTag, Channel &theChannel)
+{
+  // check not a datastore .. 
+  if (theChannel.isDatastore() != 0) {
+    opserr << "Graph::sendSelf() - does not at present send to a database\n";
+    return -1;
+  }
+
+  // send numEdge & the number of vertices
+  static ID idData(2);
+  idData(0) = numEdge;
+  idData(1) = this->getNumVertex();
+  if (theChannel.sendID(0, commitTag, idData) < 0) {
+    opserr << "Graph::sendSelf() - failed to send the id\n";
+    return -3;
+  }
+
+  // send each vertex
+  VertexIter &theVertices = this->getVertices();
+  Vertex *vertexPtr;
+  while ((vertexPtr = theVertices()) != 0) {
+    if (vertexPtr->sendSelf(commitTag, theChannel) < 0) {
+      opserr << "Graph::sendSelf() - failed to send a vertex: " << *vertexPtr;
+      return -3;
+    }
+  }
+
+  return 0;
+}
+
+
+int 
+Graph::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker) 
+{
+  // check not from a datastore
+  if (theChannel.isDatastore() != 0) {
+    opserr << "Graph::recvSelf() - at present does not receive from a database\n";
+    return -1;
+  }
+
+  // check blank
+  if (this->getNumVertex() != 0) {
+    opserr << "Graph::recvSelf() - can only receive to an empty graph at present\n";
+
+    numEdge = 0;
+    myVertices->clearAll();
+  }
+
+  // recv numEdge & numVertices
+  static ID idData(2);
+  if (theChannel.recvID(0, commitTag, idData) < 0) {
+    opserr << "Graph::recvSelf() - failed to receive the id\n";
+    return -3;
+  }
+
+  numEdge = idData(0);
+  int numVertex = idData(1);
+
+  // for each vertex to be received, create it, receive it and then add it to the graph
+  for (int i=0; i<numVertex; i++) {
+    Vertex *theVertex = new Vertex(0,0);
+    if (theVertex == 0) {
+      opserr << "Graph::recvSelf() - out of memory\n";
+      return -4;
+    }
+    if (theVertex->recvSelf(commitTag, theChannel, theBroker) < 0) {
+      opserr << "Graph::recvSelf() - vertex failed to receive itself\n";      
+      return -5;
+    }
+
+    this->addVertex(theVertex, false);
+  }
+  
+  return 0;
+}

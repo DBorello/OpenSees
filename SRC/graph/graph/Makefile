@@ -6,6 +6,11 @@ OBJS       = DOF_Graph.o Vertex.o Graph.o \
 
 all:         $(OBJS)
 
+test: $(OBJS) main.o Graph.o Vertex.o
+	$(LINKER) main.o $(OBJS) $(MACHINE_LINKLIBS) \
+	$(MACHINE_NUMERICAL_LIBS) $(FE_LIBRARY) \
+	-o graph_tst
+
 # Miscellaneous
 tidy:	
 	@$(RM) $(RMFLAGS) Makefile.bak *~ #*# core

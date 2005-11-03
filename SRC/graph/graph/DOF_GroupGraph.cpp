@@ -18,15 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:23 $
+// $Revision: 1.3 $
+// $Date: 2005-11-03 23:11:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/DOF_GroupGraph.cpp,v $
                                                                         
                                                                         
-// File: ~/graph/graph/DOF_GroupGraph.C
-// 
 // Written: fmk 
-// Created: Sun Sept 15 11:47:47: 1996
 // Revision: A
 //
 // Description: This file contains the class definition for DOF_GroupGraph.
@@ -58,25 +55,7 @@ DOF_GroupGraph::DOF_GroupGraph(AnalysisModel &theModel)
 	return;
     }	
 	
-    // create another vertices array which aids in adding edges
-    
-    int *theDOF_GroupTagVertices = 0;
-    int maxDofNum = 0;
     DOF_Group *dofPtr;
-    DOF_GrpIter &dofIter = theModel.getDOFs();
-    while ((dofPtr = dofIter()) != 0)
-	if (dofPtr->getTag() > maxDofNum)
-	    maxDofNum = dofPtr->getTag();
-
-    theDOF_GroupTagVertices = new int [maxDofNum+1];
-
-    if (theDOF_GroupTagVertices == 0) {
-	opserr << "WARNING DOF_GroupGraph::DOF_GroupGraph ";
-	opserr << " - Not Enough Memory for DOF_GroupTagVertices\n";
-	return;
-    }
-    
-    for (int j=0; j<=maxDofNum; j++) theDOF_GroupTagVertices[j] = -1;
 
     // now create the vertices with a reference equal to the DOF_Group number.
     // and a tag which ranges from 0 through numVertex-1
@@ -85,19 +64,18 @@ DOF_GroupGraph::DOF_GroupGraph(AnalysisModel &theModel)
     int count = START_VERTEX_NUM;
     while ((dofPtr = dofIter2()) != 0) {
 	int DOF_GroupTag = dofPtr->getTag();
-	Vertex *vertexPtr = new Vertex(count,DOF_GroupTag);
+	int DOF_GroupNodeTag = dofPtr->getNodeTag();
+	int numDOF = dofPtr->getNumFreeDOF();
+	Vertex *vertexPtr = new Vertex(DOF_GroupTag, DOF_GroupNodeTag, 0, numDOF);
 
 	if (vertexPtr == 0) {
 	    opserr << "WARNING DOF_GroupGraph::DOF_GroupGraph";
 	    opserr << " - Not Enough Memory to create ";
 	    opserr << count << "th Vertex\n";
-	    delete [] theDOF_GroupTagVertices;
 	    return;
 	}
 	
 	this->addVertex(vertexPtr);
-	theDOF_GroupTagVertices[DOF_GroupTag] = count++;
-	
     }
 
 
@@ -112,22 +90,13 @@ DOF_GroupGraph::DOF_GroupGraph(AnalysisModel &theModel)
 	int size = id.Size();
 	for (int i=0; i<size; i++) {
 	    int dof1 = id(i);
-	    int vertexTag1 = theDOF_GroupTagVertices[dof1];	    
-
 	    for (int j=0; j<size; j++) 
 		if (i != j) {
-		    
 		    int dof2 = id(j);
-		    int vertexTag2 = theDOF_GroupTagVertices[dof2]; 
-		    
-		    this->addEdge(vertexTag1,vertexTag2);
+		    this->addEdge(dof1,dof2);
 		}
 	}
     }
-
-    // done now delete theDOF_GroupTagVertices
-   
-    delete [] theDOF_GroupTagVertices;
 }
 
 DOF_GroupGraph::~DOF_GroupGraph()

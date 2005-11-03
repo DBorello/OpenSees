@@ -18,18 +18,15 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:23 $
+// $Revision: 1.3 $
+// $Date: 2005-11-03 23:11:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/Graph.h,v $
                                                                         
                                                                         
 #ifndef Graph_h
 #define Graph_h
 
-// File: ~/graph/graph/Graph.h
-// 
 // Written: fmk 
-// Created: 11/96
 // Revision: A
 //
 // Description: This file contains the class definition for Graph.
@@ -49,7 +46,8 @@
 class Vertex;
 class VertexIter;
 class TaggedObjectStorage;
-
+class Channel;
+class FEM_ObjectBroker;
 
 class Graph
 {
@@ -57,6 +55,7 @@ class Graph
     Graph();
     Graph(int numVertices);    
     Graph(TaggedObjectStorage &theVerticesStorage);
+    Graph(Graph &other);
     virtual ~Graph();
 
     virtual bool addVertex(Vertex *vertexPtr, bool checkAdjacency = true);
@@ -66,9 +65,15 @@ class Graph
     virtual VertexIter &getVertices(void);
     virtual int getNumVertex(void) const;
     virtual int getNumEdge(void) const;
+    virtual int getFreeTag(void);
     virtual Vertex *removeVertex(int tag, bool removeEdgeFlag = true);
+
+    virtual int merge(Graph &other);
     
     virtual void Print(OPS_Stream &s, int flag =0);
+    int sendSelf(int commitTag, Channel &theChannel);
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
+
     friend OPS_Stream &operator<<(OPS_Stream &s, Graph &M);    
     
   protected:
@@ -77,6 +82,7 @@ class Graph
     TaggedObjectStorage *myVertices;
     VertexIter *theVertexIter;
     int numEdge;
+    int nextFreeTag;
 };
 
 #endif
