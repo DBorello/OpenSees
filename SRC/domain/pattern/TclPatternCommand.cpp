@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.10 $
-// $Date: 2003-03-04 19:02:50 $
+// $Revision: 1.11 $
+// $Date: 2005-11-04 19:24:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclPatternCommand.cpp,v $
 
 // File: ~/domain/pattern/TclPatternComand.C
@@ -148,8 +148,6 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
       return TCL_ERROR;
       break;
   }
-
-
 
       TimeSeries *accelSeries = 0;
       TimeSeries *velSeries = 0;
@@ -300,25 +298,29 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
     }
 
   int dir;
+  if (Tcl_GetInt(interp, argv[3], &dir) != TCL_OK) {
+
     char inputDir;
     inputDir = argv[3][0];
-  switch (inputDir)
-  {
-    case 'X': case 'x': case '1': // Global X
-      dir = 0;
+    switch (inputDir)
+      {
+      case 'X': case 'x': case '1': // Global X
+	dir = 0;
+	break;
+      case 'Y': case 'y': case '2': // Global Y
+	dir = 1;
+	break;
+      case 'Z': case 'z': case '3': // Global Z
+	dir = 2;
       break;
-    case 'Y': case 'y': case '2': // Global Y
-      dir = 1;
-      break;
-    case 'Z': case 'z': case '3': // Global Z
-      dir = 2;
-      break;
-    default:
-      opserr << "WARNING cannot read direction for excitation \n";
-      opserr << "UniformExcitation " << patternID << " dir factor" << endln;
-      return TCL_ERROR;
-      break;
-  }
+      default:
+	opserr << "WARNING cannot read direction for excitation \n";
+	opserr << "UniformExcitation " << patternID << " dir factor" << endln;
+	return TCL_ERROR;
+	break;
+      }
+  } else
+    dir--;    // change to c++ indexing
 
   double factor;
   if (Tcl_GetDouble(interp, argv[4], &factor) != TCL_OK) {
