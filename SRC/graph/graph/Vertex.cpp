@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-11-03 23:11:55 $
+// $Revision: 1.4 $
+// $Date: 2005-11-04 19:26:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/Vertex.cpp,v $
                                                                         
 // Written: fmk 
@@ -106,9 +106,7 @@ Vertex::addEdge(int otherTag)
       return 0;
 
     // check the otherVertex has not already been added
-    if (myAdjacency.getLocation(otherTag) < 0) {
-	myAdjacency[myDegree]  = otherTag;
-	myDegree++;
+    if (myAdjacency.insert(otherTag) >= 0) {
 	return 0;
     }
     else
