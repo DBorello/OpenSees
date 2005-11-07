@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2005-10-20 21:58:54 $
+// $Revision: 1.11 $
+// $Date: 2005-11-07 21:36:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.cpp,v $
                                                                         
 // Written: fmk 07/99
@@ -418,6 +418,7 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
   } else
     lpData(8) = -1;
 
+
   // see if we can save sending the vector containing just the load factor
   // will happen in parallel if sending the loadPattern .. not in database
 
@@ -456,8 +457,8 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
   }
   */
 
+  lastChannel = 0;
   if (lastChannel != &theChannel || lastGeoSendTag != currentGeoTag || theChannel.isDatastore() == 0) {
-
 
     lastChannel = &theChannel;
 
@@ -562,7 +563,6 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
       theChannel.sendID(myDbTag,0, theLastSendTag);
     }
   }
-  
 
   // now we invoke sendSelf on all the NodalLoads, ElementalLoads and SP_Constraints
   // which have been added to the LoadCase
@@ -658,11 +658,11 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
   }
   */
 
-  if (currentGeoTag != lpData(0) || theChannel.isDatastore() == 0) {
+  if (lastChannel != &theChannel || currentGeoTag != lpData(0) || theChannel.isDatastore() == 0) {
 
     // clear out the all the components in the current load pattern
     this->clearAll();
-
+    lastChannel = &theChannel;
     currentGeoTag = lpData(0);
 
     numNod = lpData(1);
