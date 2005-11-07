@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2005-11-07 21:34:25 $
+// $Revision: 1.11 $
+// $Date: 2005-11-07 23:53:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.h,v $
                                                                         
                                                                         
@@ -146,8 +146,6 @@ class FileDatastore: public FE_Datastore
     fstream *openFile(char *fileName);
     
     // private attributes
-    int dbTag;
-    //    int maxDbTag;
     char *dataBase;
     fstream **ids, **vects, **mats;
     int lastDomainChangeStamp;

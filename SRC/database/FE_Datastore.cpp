@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2005-11-07 21:34:25 $
+// $Revision: 1.8 $
+// $Date: 2005-11-07 23:53:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FE_Datastore.cpp,v $
                                                                         
 // Written: fmk 
@@ -40,6 +40,7 @@
 #include <OPS_Globals.h>
 #include <ID.h>
 
+int FE_Datastore::lastDbTag(0);
 
 // FE_Datastore(int tag, int noExtNodes);
 // 	constructor that takes the FE_Datastore's unique tag and the number
@@ -124,13 +125,13 @@ FE_Datastore::commitState(int commitTag)
       opserr << "FE_Datastore::commitState - domain failed to sendSelf\n";
       return res;
     }
-    ID maxDBTag(1);
-    maxDBTag(0) = dbTag;
-    if (this->sendID(0,0,maxDBTag) < 0) {
-      opserr << "FE_Datastore::commitState - failed to get max dbTag data from database - problems may ariise\n";
+    ID maxlastDbTag(1);
+    maxlastDbTag(0) = lastDbTag;
+    if (this->sendID(0,0,maxlastDbTag) < 0) {
+      opserr << "FE_Datastore::commitState - failed to get max lastDbTag data from database - problems may ariise\n";
     }
   }
-
+  
   return res;
 }
 
@@ -146,11 +147,11 @@ FE_Datastore::restoreState(int commitTag)
     if (res < 0) {
       opserr << "FE_Datastore::restoreState - domain failed to recvSelf\n";
     }
-    ID maxDBTag(1);
-    if (this->recvID(0,0,maxDBTag) < 0) {
-      opserr << "FE_Datastore::restoreState - failed to get max dbTag data from database - problems may ariise\n";
+    ID maxlastDbTag(1);
+    if (this->recvID(0,0,maxlastDbTag) < 0) {
+      opserr << "FE_Datastore::restoreState - failed to get max lastDbTag data from database - problems may ariise\n";
     } else
-      dbTag = maxDBTag(0);
+      lastDbTag = maxlastDbTag(0);
 
   }
     
@@ -187,6 +188,6 @@ FE_Datastore::getData(const char *table, char *column[], int commitTag, Vector &
 int
 FE_Datastore::getDbTag(void)
 {
-  dbTag++;
-  return dbTag;
+  lastDbTag++;
+  return lastDbTag;
 }
