@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.64 $
-// $Date: 2005-08-09 21:39:36 $
+// $Revision: 1.65 $
+// $Date: 2005-11-07 21:41:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -2128,9 +2128,9 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 
       theStaticIntegrator = new MinUnbalDispNorm(lambda11,numIter,minlambda,maxlambda,signFirstStepMethod);
 
-  // if the analysis exists - we want to change the Integrator
-  if (theStaticAnalysis != 0)
-    theStaticAnalysis->setIntegrator(*theStaticIntegrator);
+      // if the analysis exists - we want to change the Integrator
+      if (theStaticAnalysis != 0)
+	theStaticAnalysis->setIntegrator(*theStaticIntegrator);
   }
   
   else if (strcmp(argv[1],"DisplacementControl") == 0) {
@@ -2163,13 +2163,26 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	numIter = 1;
       }
 
+      Node *theNode = theDomain.getNode(node);
+      if (theNode == 0) {
+	opserr << "WARNING integrator DisplacementControl node dof dU : Node does not exist\n";
+	return TCL_ERROR;	  
+      }
 
-      theStaticIntegrator = new DisplacementControl(node,dof-1,increment, &theDomain,
+      int numDOF = theNode->getNumberDOF();
+      if (dof <= 0 || dof > numDOF) {
+	opserr << "WARNING integrator DisplacementControl node dof dU : invalid dof given\n";
+	return TCL_ERROR;	  
+      }
+
+      theStaticIntegrator = new DisplacementControl(node, dof-1, increment, &theDomain,
 						    numIter, minIncr, maxIncr);
 
-  // if the analysis exists - we want to change the Integrator
-  if (theStaticAnalysis != 0)
-    theStaticAnalysis->setIntegrator(*theStaticIntegrator);
+      
+
+      // if the analysis exists - we want to change the Integrator
+      if (theStaticAnalysis != 0)
+	theStaticAnalysis->setIntegrator(*theStaticIntegrator);
   }  
   
   else if (strcmp(argv[1],"Newmark") == 0) {
