@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2004-04-12 19:11:31 $
+// $Revision: 1.8 $
+// $Date: 2005-11-07 21:39:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.cpp,v $
                                                                         
                                                                         
@@ -212,6 +212,31 @@ ID::getLocation(int value) const
   return -1;
 }
 
+
+int
+ID::getLocationOrdered(int value) const
+{
+  int middle = 0;
+  int left = 0;
+  int right = sz-1;
+  if (sz != 0) {
+    while (left <= right) {
+      middle = (left + right)/2;
+      double dataMiddle = data[middle];
+      if (value == dataMiddle)
+	return middle;   // already there
+      else if (value > dataMiddle)
+	left = middle + 1;
+      else 
+	right = middle-1;
+    }
+  }
+
+  // if we get here the value is not in the array
+  return -1;
+}
+
+
 int
 ID::removeValue(int value)
 {
@@ -275,7 +300,8 @@ ID::operator[](int x)
       sz = x+1;
       // release the memory held by the old
       //      free((void *)data);	    
-      delete [] data;
+      if (fromFree == 0)
+	delete [] data;
       data = newData;
       arraySize = newArraySize;
       
@@ -367,4 +393,60 @@ istream &operator>>(istream &s, ID &V)
 
 
 
+int 
+ID::insert(int x) 
+{
+  int middle = 0;
+  int left = 0;
+  int right = sz-1;
+  if (sz != 0) {
+    while (left <= right) {
+      middle = (left + right)/2;
+      double dataMiddle = data[middle];
+      if (x == dataMiddle)
+	return -1-middle;   // already there
+      else if (x > dataMiddle)
+	left = middle + 1;
+      else 
+	right = middle-1;
+    }
+  }
+
+  // we need to enlarge the array .. see if we can do it
+  // without having to go get more space
+
+  middle = left;
+  if (sz < arraySize) {
+
+    sz = sz+1;
+    int i = sz;
+    while (i > middle) {
+      data[i] = data[i-1];
+      i--;
+    }
+    data[i] = x;
+    return i;
+  } else {
+
+    int newArraySize = (arraySize+1) * 2;
+    int *newData = new int[newArraySize];
+    if (newData != 0) {
+      // copy the old
+      for (int i=0; i<middle; i++)
+	newData[i] = data[i];
+      newData[middle] = x;
+      for (int j=middle; j<sz; j++)
+	newData[j+1] = data[j];
+
+      sz++;
+
+      if (data != 0 && fromFree == 0)
+	delete [] data;
+      data = newData;
+      arraySize = newArraySize;
+      
+      return middle;
+    }
+  }
+}
 

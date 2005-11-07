@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2004-04-12 19:11:51 $
+// $Revision: 1.9 $
+// $Date: 2005-11-07 21:39:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.h,v $
                                                                         
                                                                         
@@ -61,8 +61,10 @@ class ID
     int &operator[](int);    	    
     
     ID &operator=(const ID  &V);
-    
+
+    int insert(int value);  // differs from using [] in that inserted in order
     int getLocation(int value) const;
+    int getLocationOrdered(int value) const; // for when insert was used to add elements
     int removeValue(int value);
 
     friend OPS_Stream &operator<<(OPS_Stream &s, const ID &V);
