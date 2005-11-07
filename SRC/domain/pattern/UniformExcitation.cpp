@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-03-04 00:48:12 $
+// $Revision: 1.7 $
+// $Date: 2005-11-07 21:36:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/UniformExcitation.cpp,v $
                                                                         
                                                                         
@@ -217,7 +217,7 @@ UniformExcitation::recvSelf(int commitTag, Channel &theChannel,
 void 
 UniformExcitation::Print(OPS_Stream &s, int flag)
 {
-  s << "UniformExcitation - Need to Print the GroundMotion\n";
+  s << "UniformExcitation  " << this->getTag() << " - Not Printing the GroundMotion\n";
 }
 
 LoadPattern *
