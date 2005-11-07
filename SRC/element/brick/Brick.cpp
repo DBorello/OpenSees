@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2005-10-25 21:05:38 $
+// $Revision: 1.23 $
+// $Date: 2005-11-07 21:58:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.cpp,v $
 
 // Ed "C++" Love
@@ -74,7 +74,7 @@ Brick::Brick( ) :
 Element( 0, ELE_TAG_Brick ),
 connectedExternalNodes(8), load(0), Ki(0)
 { 
-  B.zero();
+  B.Zero();
 
   for (int i=0; i<8; i++ ) {
     materialPointers[i] = 0;
@@ -102,7 +102,7 @@ Brick::Brick(  int tag,
 Element( tag, ELE_TAG_Brick ),
 connectedExternalNodes(8) , load(0), Ki(0)
 {
-  B.zero();
+  B.Zero();
 
   connectedExternalNodes(0) = node1 ;
   connectedExternalNodes(1) = node2 ;
