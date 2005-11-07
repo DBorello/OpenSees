@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2005-11-07 21:36:16 $
+// $Revision: 1.11 $
+// $Date: 2005-11-07 23:53:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.h,v $
                                                                         
                                                                         
@@ -128,7 +128,7 @@ class LoadPattern : public DomainComponent
     bool RVisRandomProcessDiscretizer;
     // AddingSensitivity:END ////////////////////////////////////////
 
-    Channel *lastChannel; 
+    int lastChannel; 
 };
 
 #endif

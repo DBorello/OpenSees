@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2005-10-20 21:58:54 $
+// $Revision: 1.15 $
+// $Date: 2005-11-07 23:53:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
 // Written: fmk 
@@ -231,7 +231,7 @@ class Domain
     Vector *theEigenvalues;
     double theEigenvalueSetTime;
 
-    Channel *lastChannel;
+    int lastChannel;
 };
 
 #endif

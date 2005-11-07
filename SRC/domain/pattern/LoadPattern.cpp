@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2005-11-07 21:36:16 $
+// $Revision: 1.12 $
+// $Date: 2005-11-07 23:53:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.cpp,v $
                                                                         
 // Written: fmk 07/99
@@ -457,10 +457,9 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
   }
   */
 
-  lastChannel = 0;
-  if (lastChannel != &theChannel || lastGeoSendTag != currentGeoTag || theChannel.isDatastore() == 0) {
+  if (lastChannel != theChannel.getTag() || lastGeoSendTag != currentGeoTag || theChannel.isDatastore() == 0) {
 
-    lastChannel = &theChannel;
+    lastChannel = theChannel.getTag();
 
     //
     // into an ID we are gonna place the class and db tags for each node so can rebuild
@@ -658,11 +657,11 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
   }
   */
 
-  if (lastChannel != &theChannel || currentGeoTag != lpData(0) || theChannel.isDatastore() == 0) {
+  if (lastChannel != theChannel.getTag() || currentGeoTag != lpData(0) || theChannel.isDatastore() == 0) {
 
     // clear out the all the components in the current load pattern
     this->clearAll();
-    lastChannel = &theChannel;
+    lastChannel = theChannel.getTag();
     currentGeoTag = lpData(0);
 
     numNod = lpData(1);

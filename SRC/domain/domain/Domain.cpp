@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2005-10-20 21:58:54 $
+// $Revision: 1.31 $
+// $Date: 2005-11-07 23:53:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -1915,9 +1915,9 @@ Domain::sendSelf(int cTag, Channel &theChannel)
   }
   */
 
-  if (lastChannel != &theChannel || lastGeoSendTag != currentGeoTag) {
+  if (lastChannel != theChannel.getTag() || lastGeoSendTag != currentGeoTag) {
 
-    lastChannel = &theChannel;
+    lastChannel = theChannel.getTag();
     
     //
     // into an ID we are gonna place the class and db tags for each node so can rebuild
@@ -2181,9 +2181,9 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
   }
   */
 
-  if (currentGeoTag == 0 || lastChannel != &theChannel || domainData(0) != currentGeoTag) {
+  if (currentGeoTag == 0 || lastChannel != theChannel.getTag() || domainData(0) != currentGeoTag) {
 
-    lastChannel = &theChannel;
+    lastChannel = theChannel.getTag();
     
     // set the currrentGeoTag
     int geoTag = domainData(0);
