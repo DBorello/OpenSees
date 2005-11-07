@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2005-07-15 00:02:55 $
+// $Revision: 1.10 $
+// $Date: 2005-11-07 21:34:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.h,v $
                                                                         
                                                                         
@@ -99,9 +99,6 @@ class FileDatastore: public FE_Datastore
 		  FEM_ObjectBroker &theBroker);    
     
     ~FileDatastore();
-
-    // method to get a database tag
-    int getDbTag(void);
 
     // methods for sending and receiving the data
     int sendMsg(int dbTag, int commitTag, 

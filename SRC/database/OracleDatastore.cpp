@@ -1,5 +1,5 @@
-// $Revision: 1.2 $
-// $Date: 2003-10-15 16:49:02 $
+// $Revision: 1.3 $
+// $Date: 2005-11-07 21:34:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/OracleDatastore.cpp,v $
 
 
@@ -112,13 +112,6 @@ OracleDatastore::searchProjTag(char* projName)
   int projTag = queryTagOnName(projName);
 
   return projTag;
-}
-
-int
-OracleDatastore::getDbTag(void)
-{
-  dbTag++;
-  return dbTag;
 }
 
 /********************************************************************

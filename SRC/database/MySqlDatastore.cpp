@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2004-01-29 23:00:07 $
+// $Revision: 1.7 $
+// $Date: 2005-11-07 21:34:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/MySqlDatastore.cpp,v $
 
 #include <MySqlDatastore.h>
@@ -119,13 +119,6 @@ MySqlDatastore::~MySqlDatastore()
 
   if (query != 0)
     delete [] query;
-}
-
-int
-MySqlDatastore::getDbTag(void)
-{
-  dbTag++;
-  return dbTag;
 }
 
 

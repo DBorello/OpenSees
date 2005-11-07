@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2005-07-15 00:02:55 $
+// $Revision: 1.11 $
+// $Date: 2005-11-07 21:34:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.cpp,v $
                                                                         
                                                                         
@@ -112,12 +112,6 @@ FileDatastore::~FileDatastore()
     delete [] dataBase;
 }
 
-int
-FileDatastore::getDbTag(void)
-{
-  dbTag++;
-  return dbTag;
-}
 
 int 
 FileDatastore::commitState(int commitTag)
@@ -128,6 +122,7 @@ FileDatastore::commitState(int commitTag)
     
   return result;
 }
+
 
 void
 FileDatastore::resetFilePointers(void) {
@@ -175,6 +170,8 @@ FileDatastore::sendMatrix(int dataTag, int commitTag,
 		      const Matrix &theMatrix, 
 		      ChannelAddress *theAddress)
 {
+
+  if (dbTag < dataTag) dbTag = dataTag+1;
 
   if (currentCommitTag != commitTag)
     this->resetFilePointers();
@@ -316,6 +313,7 @@ FileDatastore::recvMatrix(int dataTag, int commitTag,
 		      Matrix &theMatrix, 
 		      ChannelAddress *theAddress)    
 {
+  if (dbTag <= dataTag) dbTag = dataTag+1;
 
   if (currentCommitTag != commitTag)
     this->resetFilePointers();
@@ -428,6 +426,8 @@ FileDatastore::sendVector(int dataTag, int commitTag,
 		      const Vector &theVector, 
 		      ChannelAddress *theAddress)
 {
+  if (dbTag < dataTag) dbTag = dataTag+1;
+
   if (currentCommitTag != commitTag)
     this->resetFilePointers();
   currentCommitTag = commitTag;
@@ -552,6 +552,8 @@ FileDatastore::recvVector(int dataTag, int commitTag,
 		      Vector &theVector, 
 		      ChannelAddress *theAddress)    
 {
+  if (dbTag <= dataTag) dbTag = dataTag+1;
+
   if (currentCommitTag != commitTag)
     this->resetFilePointers();
   currentCommitTag = commitTag;
@@ -655,6 +657,8 @@ FileDatastore::sendID(int dataTag, int commitTag,
 		      const ID &theID, 
 		      ChannelAddress *theAddress)
 {
+  if (dbTag < dataTag) dbTag = dataTag+1;
+
   if (currentCommitTag != commitTag)
     this->resetFilePointers();
   currentCommitTag = commitTag;
@@ -783,6 +787,8 @@ FileDatastore::recvID(int dataTag, int commitTag,
 		      ID &theID, 
 		      ChannelAddress *theAddress)    
 {
+  if (dbTag <= dataTag) dbTag = dataTag+1;
+
   if (currentCommitTag != commitTag)
     this->resetFilePointers();
   currentCommitTag = commitTag;

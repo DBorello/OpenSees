@@ -2,8 +2,8 @@
 #ifndef OracleDatastore_h
 #define OracleDatastore_h
 
-// $Revision: 1.1 $
-// $Date: 2003-07-15 21:20:28 $
+// $Revision: 1.2 $
+// $Date: 2005-11-07 21:34:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/OracleDatastore.h,v $
 
 // Written:  Jun Peng 
@@ -38,9 +38,6 @@ class OracleDatastore: public FE_Datastore
     // method to search for project Tag
     int searchProjTag(char* projName);
 
-    // method to get a database tag
-    int getDbTag(void);
-    
     // methods defined in the Channel class interface which do nothing
     char *addToProgram(void);
     int setUpShadow(void);

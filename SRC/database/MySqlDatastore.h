@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2004-06-03 19:41:29 $
+// $Revision: 1.5 $
+// $Date: 2005-11-07 21:34:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/MySqlDatastore.h,v $
 
 #ifndef MySqlDatastore_h
@@ -60,9 +60,6 @@ class MySqlDatastore: public FE_Datastore
   
   ~MySqlDatastore();
 
-  // method to get a database tag
-  int getDbTag(void);
-  
   // methods for sending and recieving matrices, vectors and id's
   int sendMsg(int dbTag, int commitTag, 
 	      const Message &, 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-10-15 16:49:02 $
+// $Revision: 1.6 $
+// $Date: 2005-11-07 21:34:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FE_Datastore.h,v $
                                                                         
                                                                         
@@ -60,6 +60,7 @@ class FE_Datastore: public Channel
     int sendObj(int commitTag,
 		MovableObject &theObject, 
 		ChannelAddress *theAddress =0);
+
     int recvObj(int commitTag,
 		MovableObject &theObject, 
 		FEM_ObjectBroker &theBroker,
@@ -68,7 +69,7 @@ class FE_Datastore: public Channel
     // pure virtual functions in addition to those defined
     // in the ModelBuilder and Channel classes for database applications
 
-    virtual int getDbTag(void) =0;
+    int getDbTag(void);
     virtual int isDatastore(void);
 
     virtual int commitState(int commitTag);    
@@ -86,6 +87,7 @@ class FE_Datastore: public Channel
   private:
     FEM_ObjectBroker *theObjectBroker;
     Domain *theDomain;
+    int dbTag;
 };
 
 

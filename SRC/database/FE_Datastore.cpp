@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-10-15 16:49:02 $
+// $Revision: 1.7 $
+// $Date: 2005-11-07 21:34:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FE_Datastore.cpp,v $
                                                                         
 // Written: fmk 
@@ -38,7 +38,7 @@
 #include <MovableObject.h>
 #include <Domain.h>
 #include <OPS_Globals.h>
-
+#include <ID.h>
 
 
 // FE_Datastore(int tag, int noExtNodes);
@@ -122,6 +122,12 @@ FE_Datastore::commitState(int commitTag)
     res = theDomain->sendSelf(commitTag, *this);
     if (res < 0) {
       opserr << "FE_Datastore::commitState - domain failed to sendSelf\n";
+      return res;
+    }
+    ID maxDBTag(1);
+    maxDBTag(0) = dbTag;
+    if (this->sendID(0,0,maxDBTag) < 0) {
+      opserr << "FE_Datastore::commitState - failed to get max dbTag data from database - problems may ariise\n";
     }
   }
 
@@ -140,6 +146,12 @@ FE_Datastore::restoreState(int commitTag)
     if (res < 0) {
       opserr << "FE_Datastore::restoreState - domain failed to recvSelf\n";
     }
+    ID maxDBTag(1);
+    if (this->recvID(0,0,maxDBTag) < 0) {
+      opserr << "FE_Datastore::restoreState - failed to get max dbTag data from database - problems may ariise\n";
+    } else
+      dbTag = maxDBTag(0);
+
   }
     
   return res;
@@ -170,4 +182,11 @@ FE_Datastore::getData(const char *table, char *column[], int commitTag, Vector &
 {
   opserr << "FE_Datastore::getData - not yet implemented\n";
   return -1;
+}
+
+int
+FE_Datastore::getDbTag(void)
+{
+  dbTag++;
+  return dbTag;
 }
