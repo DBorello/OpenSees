@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:55 $
+// $Revision: 1.3 $
+// $Date: 2005-11-07 21:37:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/SP_Constraint.cpp,v $
                                                                         
                                                                         
@@ -185,7 +185,7 @@ SP_Constraint::Print(OPS_Stream &s, int flag)
 {
     s << "SP_Constraint: " << this->getTag();
     s << "\t Node: " << nodeTag << " DOF: " << dofNumber;
-    s << " value: " << valueC << endln;
+    s << " ref value: " << valueR << " current value: " << valueC << endln;
 }
 
 
