@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-10-15 00:26:32 $
+// $Revision: 1.4 $
+// $Date: 2005-11-07 23:52:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/Channel.h,v $
                                                                         
                                                                         
@@ -61,6 +61,7 @@ class Channel
 
     virtual int isDatastore(void);
     virtual int getDbTag(void);
+	int getTag(void);
     
     // methods to send/receive messages and objects on channels.
     virtual int sendObj(int commitTag,
@@ -102,6 +103,8 @@ class Channel
   protected:
     
   private:
+	  static int numChannel;
+	  int tag;
 };
 
 #endif

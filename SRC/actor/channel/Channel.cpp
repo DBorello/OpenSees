@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-18 01:05:39 $
+// $Revision: 1.3 $
+// $Date: 2005-11-07 23:52:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/Channel.cpp,v $
                                                                         
                                                                         
@@ -37,10 +37,12 @@
 #include <Message.h>
 #include <MovableObject.h>
 #include <FEM_ObjectBroker.h>
+int Channel::numChannel = 0;
 
 Channel::Channel ()
 {
-
+	numChannel++;
+	tag = numChannel;
 }
 
 Channel::~Channel()
@@ -60,3 +62,8 @@ Channel::getDbTag(void)
   return 0;
 }
 
+int
+Channel::getTag(void)
+{
+		return tag;
+}
