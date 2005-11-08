@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2005-11-07 23:53:45 $
+// $Revision: 1.8 $
+// $Date: 2005-11-08 00:04:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FE_Datastore.h,v $
                                                                         
                                                                         
@@ -86,7 +86,7 @@ class FE_Datastore: public Channel
   private:
     FEM_ObjectBroker *theObjectBroker;
     Domain *theDomain;
-	static lastDbTag;
+    static int lastDbTag;
 
 };
 
