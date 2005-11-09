@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-08-08 21:54:40 $
+// $Revision: 1.2 $
+// $Date: 2005-11-09 00:30:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel03.cpp,v $
                                                                         
 // Written: mackie
@@ -171,9 +171,13 @@ double Steel03::getR (double x_in)
     if (rtype == 2) {
         // Dhakal and Maekawa (see ref above)
         temp_r = r - 18.5*x_in/(0.15+x_in);
+        if (temp_r < 0)
+            temp_r = 1.0e-8;
     } else if (rtype == 3) {
         // Gomes and Appleton (see ref above)
         temp_r = r - 19.0*x_in/(0.3+x_in);
+        if (temp_r < 0)
+            temp_r = 1.0e-8;
     } else {
         // Mackie, rough trilinear fit to the tangent to the x_in-r first 
         // quadrant circle.  Try using with small values of R like 2 and 3
@@ -239,7 +243,7 @@ void Steel03::determineTrialState (double dStrain)
           TrStrain = Cstrain;
           TrStress = Cstress;
           TbStrain = (c2+c)/E0/(b-1)+Tstrain/(1-b);
-          TbStress = b/(b-1)*(c2+c-c1/b)-c2;
+          TbStress = 1/(b-1)*(b*c2+b*c-c1)-c2;
           TcurR = getR((TbStrain-TminStrain)/epsy);
       }
 
@@ -254,7 +258,7 @@ void Steel03::determineTrialState (double dStrain)
           TrStrain = Cstrain;
           TrStress = Cstress;
           TbStrain = (c3-c)/E0/(1-b)+Tstrain/(1-b);
-          TbStress = b/(1-b)*(c3-c+c1/b)+c3;
+          TbStress = 1/(1-b)*(b*c3-b*c+c1)+c3;
           TcurR = getR((TmaxStrain-TbStrain)/epsy);
       }
       
