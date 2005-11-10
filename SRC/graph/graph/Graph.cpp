@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-11-04 19:27:14 $
+// $Revision: 1.5 $
+// $Date: 2005-11-10 01:07:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/Graph.cpp,v $
                                                                         
                                                                         
@@ -189,18 +189,27 @@ Graph::addEdge(int vertexTag, int otherVertexTag)
     }
 
     // add an edge to each vertex
-    int result;
-    if ((result = vertex1->addEdge(otherVertexTag)) == 0) {
-	if ((result = vertex2->addEdge(vertexTag)) == 0) 
-	    numEdge++;
-	else {
-	    opserr << "WARNING Graph::addEdge() - " << vertexTag;
-	    opserr << " has not been added to " << otherVertexTag;
-	    opserr << " adjacency - yet vica-versa ok.\n";
-	    return -2;
+    int result = vertex1->addEdge(otherVertexTag);
+	if (result == 1)
+		return 0;  // already there
+	else if (result == 0) {  // added to vertexTag now add to other
+		if ((result = vertex2->addEdge(vertexTag)) == 0) {
+			numEdge++;
+		}
+		else {
+			opserr << " WARNING Graph::addEdge() - " << vertexTag;
+			opserr << " added to " << otherVertexTag;
+			opserr << " adjacency - but already there in otherVertexTag!.\n";
+			opserr << *this; exit(0);
+			return -2;
+		}
+	} else {
+			opserr << " WARNING Graph::addEdge() - " << vertexTag;
+			opserr << " added to " << otherVertexTag;
+			opserr << " adjacency - but not vica versa!.\n";
+			opserr << *this; exit(0);
+			return -2;
 	}
-    }
-
     return result;
 }
 
