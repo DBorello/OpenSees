@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2005-11-07 21:39:41 $
+// $Revision: 1.9 $
+// $Date: 2005-11-10 01:07:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.cpp,v $
                                                                         
                                                                         
@@ -172,6 +172,7 @@ ID::~ID()
 
 int 
 ID::setData(int *newData, int size, bool cleanIt){
+	
   if (data != 0 && fromFree == 0) 
     //    free((void *)data);
     delete [] data;
@@ -404,7 +405,7 @@ ID::insert(int x)
       middle = (left + right)/2;
       double dataMiddle = data[middle];
       if (x == dataMiddle)
-	return -1-middle;   // already there
+	return 1;   // already there
       else if (x > dataMiddle)
 	left = middle + 1;
       else 
@@ -416,37 +417,49 @@ ID::insert(int x)
   // without having to go get more space
 
   middle = left;
+  /*
+  for (int i=middle; i<sz; i++)
+		(*this)[i+1] = (*this)[i];
+  (*this)[i]=middle;
+  return middle;
+*/
+  
   if (sz < arraySize) {
 
-    sz = sz+1;
     int i = sz;
     while (i > middle) {
       data[i] = data[i-1];
       i--;
     }
+	sz++;
     data[i] = x;
-    return i;
+    return 0;
   } else {
+	int newArraySize = (sz+1) * 2;
+	int *newData = new int[newArraySize];
+	if (newData != 0) {
 
-    int newArraySize = (arraySize+1) * 2;
-    int *newData = new int[newArraySize];
-    if (newData != 0) {
       // copy the old
-      for (int i=0; i<middle; i++)
-	newData[i] = data[i];
-      newData[middle] = x;
-      for (int j=middle; j<sz; j++)
-	newData[j+1] = data[j];
+      for (int ii=0; ii<middle; ii++)
+		newData[ii] = data[ii];
+	  newData[middle] = x;
+
+	  for (int jj=middle; jj<sz; jj++)
+		newData[jj+1] = data[jj];
 
       sz++;
 
-      if (data != 0 && fromFree == 0)
-	delete [] data;
+     if (data != 0 && fromFree == 0)
+	   
+		delete [] data;
       data = newData;
       arraySize = newArraySize;
       
-      return middle;
-    }
+      return 0;
+	  
+	} else
+		return -1;
   }
+ return -1; // should never get here
 }
 
