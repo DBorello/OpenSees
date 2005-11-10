@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2005-08-31 17:38:17 $
+// $Revision: 1.10 $
+// $Date: 2005-11-10 01:24:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.cpp,v $
                                                                         
                                                                         
@@ -303,6 +303,7 @@ AnalysisModel::getDOFGraph(void)
 {
   if (myDOFGraph == 0) 
 	myDOFGraph = new DOF_Graph(*this);
+
   return *myDOFGraph;
 }
 
@@ -312,6 +313,7 @@ AnalysisModel::getDOFGroupGraph(void)
 {
     if (myGroupGraph == 0)
 	myGroupGraph = new DOF_GroupGraph(*this);
+
     return *myGroupGraph;
 }
 
