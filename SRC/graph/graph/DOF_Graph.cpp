@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-11-03 23:11:55 $
+// $Revision: 1.5 $
+// $Date: 2005-11-14 20:47:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/DOF_Graph.cpp,v $
                                                                         
                                                                         
@@ -89,14 +89,17 @@ DOF_Graph::DOF_Graph(AnalysisModel &theModel)
     for (int i=0; i<size; i++) {
       int dofTag = id(i);
       if (dofTag >= START_EQN_NUM) {
-	Vertex *vertexPtr = new Vertex(dofTag, dofTag);      
+	Vertex *vertexPtr = this->getVertexPtr(dofTag);
 	if (vertexPtr == 0) {
-	  opserr << "WARNING DOF_Graph::DOF_Graph";
-	  opserr << " - Not Enough Memory to create " << i+1 << "th Vertex\n";
-	  return;
-	}
-	if (this->addVertex(vertexPtr, false) == false) {
-	  opserr << "WARNING DOF_Graph::DOF_Graph - error adding vertex\n";
+	  Vertex *vertexPtr = new Vertex(dofTag, dofTag);      
+	  if (vertexPtr == 0) {
+	    opserr << "WARNING DOF_Graph::DOF_Graph";
+	    opserr << " - Not Enough Memory to create " << i+1 << "th Vertex\n";
+	    return;
+	  }
+	  if (this->addVertex(vertexPtr, false) == false) {
+	    opserr << "WARNING DOF_Graph::DOF_Graph - error adding vertex\n";
+	  }
 	}
       }
     }
