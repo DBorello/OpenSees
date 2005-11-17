@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-11-10 01:07:59 $
+// $Revision: 1.6 $
+// $Date: 2005-11-17 23:21:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/Graph.cpp,v $
                                                                         
                                                                         
@@ -38,6 +38,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <Vector.h>
+
 
 Graph::Graph()
   :myVertices(0), theVertexIter(0), numEdge(0), nextFreeTag(START_VERTEX_NUM)
@@ -341,7 +342,6 @@ Graph::sendSelf(int commitTag, Channel &theChannel)
     return -3;
   }
 
-
   if (numVertex != 0) {
     int *vertexData = new int[5 * numVertex + 2 * numEdge];
     Vector vertexWeights(numVertex);
@@ -368,6 +368,7 @@ Graph::sendSelf(int commitTag, Channel &theChannel)
 	vertexWeights[weightLoc++] = vertexPtr->getWeight();
 
       }  
+
       ID verticesData(vertexData, adjacencyLocation, true);
       if (theChannel.sendID(0, commitTag, verticesData) < 0) {
 	opserr << "Graph::sendSelf() - failed to send the id\n";
@@ -378,19 +379,17 @@ Graph::sendSelf(int commitTag, Channel &theChannel)
 	return -3;
       }
     }
-
-    /* send each vertex individually
-    VertexIter &theVertices = this->getVertices();
-    Vertex *vertexPtr;
-    while ((vertexPtr = theVertices()) != 0) {
-      if (vertexPtr->sendSelf(commitTag, theChannel) < 0) {
-	opserr << "Graph::sendSelf() - failed to send a vertex: " << *vertexPtr;
-	return -3;
-      }
+  }
+  /* ************ OLD --- SENDING IND VERTICES *********************
+  VertexIter &theVertices = this->getVertices();
+  Vertex *vertexPtr;
+  while ((vertexPtr = theVertices()) != 0) {
+    if (vertexPtr->sendSelf(commitTag, theChannel) < 0) {
+      opserr << "Graph::sendSelf() - failed to send a vertex: " << *vertexPtr;
+      return -3;
     }
-    */
-
-    }
+  }
+  ********************************************************************/
 
   return 0;
 }
@@ -433,10 +432,13 @@ Graph::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 	return -3;
       }
       Vector vertexWeights(numVertex);
-
+      if (theChannel.recvVector(0, commitTag, vertexWeights) < 0) {
+	opserr << "Graph::sendSelf() - failed to send the id\n";
+	return -3;
+      }
+      
       int adjacencyLocation = 5 * numVertex;
       int vertexLocation = 0;
-
       for (int i=0; i<numVertex; i++) {
 	int tag = vertexData[vertexLocation++];
 	int ref = vertexData[vertexLocation++];
@@ -461,24 +463,23 @@ Graph::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
       opserr << "Graph::recvSelf() - out of memory\n";
       return -5;
     }
+  }
+  /* ************ OLD --- RECEIVING IND VERTICES *********************
 
-    /*
-    // for each vertex to be received, create it, receive it and then add it to the graph
-    for (int i=0; i<numVertex; i++) {
-	Vertex *theVertex = new Vertex(0, 0);
-	if (theVertex == 0) {
-	  opserr << "Graph::recvSelf() - out of memory\n";
-	  return -4;
-	}
-	if (theVertex->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	  opserr << "Graph::recvSelf() - vertex failed to receive itself\n";      
-	  return -5;
-	}
-	this->addVertex(theVertex, false);
+  // for each vertex to be received, create it, receive it and then add it to the graph
+  for (int i=0; i<numVertex; i++) {
+    Vertex *theVertex = new Vertex(0, 0);
+    if (theVertex == 0) {
+      opserr << "Graph::recvSelf() - out of memory\n";
+      return -4;
     }
-    */
-
-  }  
+    if (theVertex->recvSelf(commitTag, theChannel, theBroker) < 0) {
+      opserr << "Graph::recvSelf() - vertex failed to receive itself\n";      
+      return -5;
+    }
+    this->addVertex(theVertex, false);
+  }
+  ****************************************************************** */
   return 0;
 
 }
