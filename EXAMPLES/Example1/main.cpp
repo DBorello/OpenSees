@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-19 19:47:01 $
+// $Revision: 1.5 $
+// $Date: 2005-11-18 19:55:56 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/Example1/main.cpp,v $
 
 
@@ -70,7 +70,7 @@
 
 // init the global variabled defined in OPS_Globals.h
 StandardStream sserr;
-OPS_Stream &opserr = sserr;
+OPS_Stream *opserrPtr = &sserr;
 
 double        ops_Dt = 0;
 Domain       *ops_TheActiveDomain = 0;
