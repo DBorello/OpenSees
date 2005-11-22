@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2004-11-25 00:00:55 $
+// $Revision: 1.5 $
+// $Date: 2005-11-22 19:40:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.h,v $
                                                                         
                                                                         
@@ -32,6 +32,10 @@
 // used by programmers when introducing new subclasses of the main objects.
 //
 // What: "@(#) FEM_ObjectBroker.h, revA"
+
+
+
+
 
 #ifndef FEM_ObjectBroker_h
 #define FEM_ObjectBroker_h
@@ -154,6 +158,9 @@ class FEM_ObjectBroker
       getNewDomainDecompAnalysis(int classTag, Subdomain &theDomain);
 
     virtual Subdomain  *getSubdomainPtr(int classTag);
+
+
+    virtual int addUniaxialMaterial(int classTag, const char *lib, const char *funcName, UniaxialMaterial *(*)(void));
     
   protected:
     
@@ -161,6 +168,7 @@ class FEM_ObjectBroker
     LinearSOESolver *lastLinearSolver;
     DomainSolver *lastDomainSolver;
 
+    
 };
 
 #endif

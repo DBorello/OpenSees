@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.27 $
-// $Date: 2004-11-25 00:18:34 $
+// $Revision: 1.28 $
+// $Date: 2005-11-22 19:40:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -32,6 +32,7 @@
 // used by programmers when introducing new subclasses of the main objects.
 //
 // What: "@(#) FEM_ObjectBroker.C, revA"
+
 
 #include <FEM_ObjectBroker.h>
 
@@ -194,6 +195,9 @@
 
 // sp_constraint header files
 #include <SP_Constraint.h>
+#include <SP_Constraint.h>
+#include <ImposedMotionSP.h>
+#include <ImposedMotionSP1.h>
 
 // nodal load header files
 #include <NodalLoad.h>
@@ -268,7 +272,9 @@
 // load patterns
 #include <LoadPattern.h>
 #include <UniformExcitation.h>
+#include <MultiSupportPattern.h>
 #include <GroundMotion.h>
+#include <InterpolatedGroundMotion.h>
 
 // time series
 #include <LinearSeries.h>
@@ -291,6 +297,18 @@
 #include <StaticDomainDecompositionAnalysis.h>
 #include <TransientDomainDecompositionAnalysis.h>
 #endif
+
+#include <packages.h>
+
+typedef struct uniaxialPackage {
+  int classTag;
+  char *libName;
+  char *funcName;
+  UniaxialMaterial *(*funcPtr)(void);
+  struct uniaxialPackage *next;
+} UniaxialPackage;
+
+static UniaxialPackage *theUniaxialPackage = NULL;
 
 
 FEM_ObjectBroker::FEM_ObjectBroker()
@@ -502,7 +520,7 @@ FEM_ObjectBroker::getNewMP(int classTag)
 	
 	default:
 	     opserr << "FEM_ObjectBroker::getNewMP - ";
-	     opserr << " - no SP_Constraint type exists for class tag ";
+	     opserr << " - no MP_Constraint type exists for class tag ";
 	     opserr << classTag << endln;
 	     return 0;
 	     
@@ -516,7 +534,12 @@ FEM_ObjectBroker::getNewSP(int classTag)
     switch(classTag) {
 	case CNSTRNT_TAG_SP_Constraint:  
 	     return new SP_Constraint(classTag);
-	     
+
+	case CNSTRNT_TAG_ImposedMotionSP:  
+	     return new ImposedMotionSP();
+
+	case CNSTRNT_TAG_ImposedMotionSP1:  
+	     return new ImposedMotionSP1();
 	     
 	default:
 	     opserr << "FEM_ObjectBroker::getNewSP - ";
@@ -758,12 +781,23 @@ FEM_ObjectBroker::getNewUniaxialMaterial(int classTag)
 	  return new MinMaxMaterial();
 
 	default:
-	     opserr << "FEM_ObjectBroker::getNewUniaxialMaterial - ";
-	     opserr << " - no UniaxialMaterial type exists for class tag ";
-	     opserr << classTag << endln;
-	     return 0;
-	     
-	 }        
+
+	  UniaxialPackage *matCommands = theUniaxialPackage;
+	  bool found = false;
+	  while (matCommands != NULL && found == false) {
+	    if ((matCommands->classTag == classTag) && (matCommands->funcPtr != 0)){
+	      UniaxialMaterial *result = (*(matCommands->funcPtr))();
+	      return result;
+	    } 
+	    matCommands = matCommands->next;
+	  }	  
+
+	  opserr << "FEM_ObjectBroker::getNewUniaxialMaterial - ";
+	  opserr << " - no UniaxialMaterial type exists for class tag ";
+	  opserr << classTag << endln;
+	  return 0;
+	  
+    }        
 }
 
 SectionForceDeformation *
@@ -927,6 +961,9 @@ FEM_ObjectBroker::getNewLoadPattern(int classTag)
 	case PATTERN_TAG_UniformExcitation:
 	     return new UniformExcitation();
 
+	case PATTERN_TAG_MultiSupportPattern:
+	     return new MultiSupportPattern();
+
 	default:
 	     opserr << "FEM_ObjectBroker::getPtrLoadPattern - ";
 	     opserr << " - no Load type exists for class tag ";
@@ -944,6 +981,9 @@ FEM_ObjectBroker::getNewGroundMotion(int classTag)
 
         case GROUND_MOTION_TAG_GroundMotion:
 	  return new GroundMotion(GROUND_MOTION_TAG_GroundMotion);
+
+        case GROUND_MOTION_TAG_InterpolatedGroundMotion:
+	  return new GroundMotion(GROUND_MOTION_TAG_InterpolatedGroundMotion);
 
 	default:
 	     opserr << "FEM_ObjectBroker::getPtrGroundMotion - ";
@@ -1579,5 +1619,55 @@ FEM_ObjectBroker::getSubdomainPtr(int classTag)
 }
 
 
+int 
+FEM_ObjectBroker::addUniaxialMaterial(int classTag, 
+				      const char *lib, 
+				      const char *funcName, 
+				      UniaxialMaterial *(*funcPtr)(void))
+{
+  // check to see if it's already added
 
+  UniaxialPackage *matCommands = theUniaxialPackage;
+  bool found = false;
+  while (matCommands != NULL && found == false) {
+    if ((strcmp(lib, matCommands->libName) == 0) && (strcmp(funcName, matCommands->funcName) == 0)) {
+      return 0;
+    }
+  }
 
+  //
+  // if funPtr == 0; go get the handle
+  //
+
+  void *libHandle;
+  if (funcPtr == 0) {
+    if (getLibraryFunction(lib, funcName, &libHandle, (void **)&funcPtr) != 0) {
+      opserr << "FEM_ObjectBroker::addUniaxialMaterial - could not find function\n";
+      return -1;
+    }
+  } 
+  
+  //
+  // add the new funcPtr
+  //
+  
+  char *libNameCopy = new char[strlen(lib)+1];
+  char *funcNameCopy = new char[strlen(funcName)+1];
+  UniaxialPackage *theMat = new UniaxialPackage;
+  if (libNameCopy == 0 || funcNameCopy == 0 || theMat == 0) {
+      opserr << "FEM_ObjectBroker::addUniaxialMaterial - could not add lib, out of memory\n";
+      return -1;
+  }
+  strcpy(libNameCopy, lib);
+  strcpy(funcNameCopy, funcName);
+
+  theMat->classTag = classTag;	
+  theMat->funcName = funcNameCopy;	
+  theMat->libName = libNameCopy;	
+  theMat->funcPtr = funcPtr;
+  theMat->next = theUniaxialPackage;
+  theUniaxialPackage = theMat;
+
+  return 0;
+
+}
