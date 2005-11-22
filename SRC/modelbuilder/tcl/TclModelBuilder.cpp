@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.27 $
-// $Date: 2005-01-03 22:32:17 $
+// $Revision: 1.28 $
+// $Date: 2005-11-22 19:45:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -1990,29 +1990,21 @@ TclModelBuilder_addImposedMotionSP(ClientData clientData,
   MultiSupportPattern *thePattern = theTclMultiSupportPattern;
   int loadPatternTag = thePattern->getTag();
   
-  GroundMotion *theGMotion = thePattern->getMotion(gMotionID);
-  if (theGMotion == 0) {
-    opserr << "WARNING no GroundMotion with tag: " << argv[3];
-    opserr << " in current MultipleSupportPattern\n";
-    return TCL_ERROR;      
-  }
-  
   SP_ConstraintIter &theSPs = thePattern->getSPs();
   int numSPs = 0;
   SP_Constraint *theSP2;
   while ((theSP2 = theSPs()) != 0)
       numSPs++;
-  
+
   // create a new ImposedMotionSP
   SP_Constraint *theSP;
   if (alt == true) {
-    theSP = new ImposedMotionSP1(numSPs, nodeId, dofId, 
-				*theGMotion, false);
+    theSP = new ImposedMotionSP1(numSPs, nodeId, dofId, loadPatternTag, gMotionID);
   }
   else {
-    theSP = new ImposedMotionSP(numSPs, nodeId, dofId, 
-				*theGMotion, false);
+    theSP = new ImposedMotionSP(numSPs, nodeId, dofId, loadPatternTag, gMotionID);
   }
+
   if (theSP == 0) {
     opserr << "WARNING ran out of memory for ImposedMotionSP ";
     opserr << " -  imposedMotion ";
