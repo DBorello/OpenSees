@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:55 $
+// $Revision: 1.3 $
+// $Date: 2005-11-22 19:41:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/SP_Constraint.h,v $
                                                                         
                                                                         
 #ifndef SP_Constraint_h
 #define SP_Constraint_h
 
-// File: ~/domain/constraints/SP_Constraint.h
-//
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -75,7 +73,6 @@ class SP_Constraint : public DomainComponent
     double valueR;   // the reference value
     double valueC;   // if constant = the reference value, if not contant =
 	             // the reference value * load factor
-
     bool isConstant; // flag indicating if constant
     int  loadPatternTag;    
 };

@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:00:55 $
+// $Revision: 1.4 $
+// $Date: 2005-11-22 19:41:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/ImposedMotionSP1.cpp,v $
                                                                         
-                                                                        
-// File: ~/domain/constraints/ImposedMotionSP1.C
-//
 // Written: fmk 
 // Created: 11/00
 // Revision: A
@@ -39,6 +36,8 @@
 #include <GroundMotion.h>
 #include <Node.h>
 #include <Domain.h>
+#include <LoadPattern.h>
+#include <ID.h>
 
 // constructor for FEM_ObjectBroker
 ImposedMotionSP1::ImposedMotionSP1()
@@ -49,22 +48,18 @@ ImposedMotionSP1::ImposedMotionSP1()
 }
 
 // constructor for a subclass to use
-ImposedMotionSP1::ImposedMotionSP1(int tag, int node, int ndof, 
-				 GroundMotion &theMotion, bool killMotion)
+ImposedMotionSP1::ImposedMotionSP1(int tag, int node, int ndof, int pattern, int motion)
 :SP_Constraint(tag, node, ndof, CNSTRNT_TAG_ImposedMotionSP1),
- theNode(0), theGroundMotionResponse(3), destroyMotion(0)
+ groundMotionTag(motion), patternTag(pattern),
+ theGroundMotion(0), theNode(0), theGroundMotionResponse(3)
 {
-  theGroundMotion = &theMotion;
-  
-  if (killMotion == true)
-    destroyMotion = 1;
+
 }
 
 
 ImposedMotionSP1::~ImposedMotionSP1()
 {
-  if (destroyMotion == 1)
-    delete theGroundMotion;
+
 }
 
 
@@ -80,15 +75,22 @@ ImposedMotionSP1::getValue(void)
 int
 ImposedMotionSP1::applyConstraint(double time)
 {
-    // on first 
+  // on first 
+  if (theGroundMotion == 0 || theNode == 0) {
+    Domain *theDomain = this->getDomain();
+    
+    theNode = theDomain->getNode(nodeTag);
     if (theNode == 0) {
-	Domain *theDomain = this->getDomain();
-
-	theNode = theDomain->getNode(nodeTag);
-	if (theNode == 0) {
-	    
-	    return -1;
-	}
+      
+      return -1;
+    }
+    LoadPattern *theLoadPattern = theDomain->getLoadPattern(patternTag);
+    if (theLoadPattern == 0)
+      return -3;
+    
+    theGroundMotion = theLoadPattern->getMotion(groundMotionTag);
+    if (theGroundMotion == 0)
+      return -4;
     }
 
     // now get the response from the ground motion
@@ -108,14 +110,46 @@ ImposedMotionSP1::isHomogeneous(void) const
 int 
 ImposedMotionSP1::sendSelf(int cTag, Channel &theChannel)
 {
-  return -1;
+  int dbTag = this->getDbTag();
+  int result = 0;
+  result = this->SP_Constraint::sendSelf(cTag, theChannel);
+  if (result < 0) {
+    opserr << "ImposedMotionSP1::sendSelf() - base SP_Constraint class failed\n";
+    return -1;
+  }
+  
+  static ID myExtraData(2);
+  myExtraData(0) = groundMotionTag;
+  myExtraData(1) = patternTag;
+  if (theChannel.sendID(dbTag, cTag, myExtraData) < 0) {
+    opserr << "ImposedMotionSP1::sendSelf() - failed to send extra data\n";
+    return -1;
+  }
+
+  return 0;
 }
 
 int 
 ImposedMotionSP1::recvSelf(int cTag, Channel &theChannel, 
 			FEM_ObjectBroker &theBroker)
 {
-  return -1;
+  int dbTag = this->getDbTag();
+  int result = 0;
+  result = this->SP_Constraint::recvSelf(cTag, theChannel, theBroker);
+  if (result < 0) {
+    opserr << "ImposedMotionSP1::recvSelf() - base SP_Constraint class failed\n";
+    return -1;
+  }
+  
+  static ID myExtraData(2);
+  if (theChannel.recvID(dbTag, cTag, myExtraData) < 0) {
+    opserr << "ImposedMotionSP::sendSelf() - failed to send extra data\n";
+    return -1;
+  }
+  groundMotionTag = myExtraData(0);
+  patternTag = myExtraData(1);
+
+  return 0;
 }
 
 void

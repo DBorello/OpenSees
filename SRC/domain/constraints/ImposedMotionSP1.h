@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:55 $
+// $Revision: 1.3 $
+// $Date: 2005-11-22 19:41:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/ImposedMotionSP1.h,v $
                                                                         
 #ifndef ImposedMotionSP1_h
@@ -47,8 +47,7 @@ class ImposedMotionSP1 : public SP_Constraint
   public:
     // constructors    
     ImposedMotionSP1();        
-    ImposedMotionSP1(int spTag, int nodeTag, int ndof, 
-		     GroundMotion &theGroundMotion, bool destroyMotion);
+    ImposedMotionSP1(int spTag, int nodeTag, int ndof, int patternTag, int groundMotionTag);
 
     // destructor
     ~ImposedMotionSP1();
@@ -59,13 +58,16 @@ class ImposedMotionSP1 : public SP_Constraint
     
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, 
-			 FEM_ObjectBroker &theBroker);
+		 FEM_ObjectBroker &theBroker);
 
     void Print(OPS_Stream &s, int flag =0);
 
   protected:
     
   private:
+    int groundMotionTag;
+    int patternTag;
+
     GroundMotion *theGroundMotion;  // pointer to ground motion
     Node *theNode;                  // pointer to node being constrained
     Vector theGroundMotionResponse; // the GMotions response

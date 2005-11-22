@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-11-07 21:37:03 $
+// $Revision: 1.4 $
+// $Date: 2005-11-22 19:41:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/SP_Constraint.cpp,v $
                                                                         
                                                                         
@@ -132,7 +132,6 @@ SP_Constraint::sendSelf(int cTag, Channel &theChannel)
 {
     Vector data(7);  // we send as double to avoid having 
                      // to send two messages.
-    
     data(0) = this->getTag(); 
     data(1) = nodeTag;
     data(2) = dofNumber;
@@ -145,10 +144,12 @@ SP_Constraint::sendSelf(int cTag, Channel &theChannel)
     data(6) = this->getLoadPatternTag();
 
     int result = theChannel.sendVector(this->getDbTag(), cTag, data);
-    if (result < 0) 
-	opserr << "WARNING SP_Constraint::sendSelf - error sending Vector data\n";
+    if (result != 0) {
+      opserr << "WARNING SP_Constraint::sendSelf - error sending Vector data\n";
+      return result;
+    }
 
-    return result;
+    return 0;
 }
 
 int 
