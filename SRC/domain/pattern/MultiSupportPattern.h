@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:00 $
+// $Revision: 1.3 $
+// $Date: 2005-11-22 19:44:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/MultiSupportPattern.h,v $
                                                                         
 #ifndef MultiSupportPattern_h
@@ -42,6 +42,7 @@ class MultiSupportPattern : public LoadPattern
   public:
     MultiSupportPattern(int tag, int classTag);
     MultiSupportPattern(int tag);    
+    MultiSupportPattern();    
     virtual ~MultiSupportPattern();
 
     virtual void applyLoad(double time);
@@ -66,6 +67,7 @@ class MultiSupportPattern : public LoadPattern
     GroundMotion **theMotions;
     ID theMotionTags;
     int numMotions;
+    int dbMotions;
 };
 
 #endif

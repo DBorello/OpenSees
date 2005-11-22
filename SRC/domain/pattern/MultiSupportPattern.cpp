@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:00 $
+// $Revision: 1.3 $
+// $Date: 2005-11-22 19:44:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/MultiSupportPattern.cpp,v $
                                                                         
 // Written: fmk 11/00
@@ -31,6 +31,7 @@
 #include <MultiSupportPattern.h>
 #include <GroundMotion.h>
 
+#include <FEM_ObjectBroker.h>
 #include <Domain.h>
 #include <SP_Constraint.h>
 #include <SP_ConstraintIter.h>
@@ -40,7 +41,7 @@
 
 MultiSupportPattern::MultiSupportPattern(int tag, int _classTag)
   :LoadPattern(tag, _classTag), 
-  theMotions(0), theMotionTags(0,16), numMotions(0)
+   theMotions(0), theMotionTags(0,16), numMotions(0), dbMotions(0)
 {
 
 }
@@ -48,11 +49,18 @@ MultiSupportPattern::MultiSupportPattern(int tag, int _classTag)
 
 MultiSupportPattern::MultiSupportPattern(int tag)
   :LoadPattern(tag, PATTERN_TAG_MultiSupportPattern), 
-  theMotions(0), theMotionTags(0,16), numMotions(0)
+   theMotions(0), theMotionTags(0,16), numMotions(0), dbMotions(0)
 {
 
 }
 
+
+MultiSupportPattern::MultiSupportPattern()
+  :LoadPattern(0, PATTERN_TAG_MultiSupportPattern), 
+   theMotions(0), theMotionTags(0,16), numMotions(0), dbMotions(0)
+{
+
+}
 
 MultiSupportPattern::~MultiSupportPattern()
 {
@@ -146,14 +154,141 @@ MultiSupportPattern::addElementalLoad(ElementalLoad *)
 int 
 MultiSupportPattern::sendSelf(int commitTag, Channel &theChannel)
 {
-  return -1;
+
+  // get my current database tag
+
+  // NOTE - dbTag equals 0 if not sending to a database OR has not yet been sent
+  int myDbTag = this->getDbTag();
+
+  if (this->LoadPattern::sendSelf(commitTag, theChannel) < 0) {
+    opserr << "MultiSupportPattern::sendSelf() - LoadPattern class failed in sendSelf()";
+    return -1;
+  }
+
+  /*
+  SP_Constraint *sp;
+  SP_ConstraintIter &theIter = this->getSPs();
+  int numSP = 0;
+  while ((sp = theIter()) != 0)
+    numSP++;
+  */
+
+  static ID myData(3);
+  myData(0) = numMotions;
+  if (dbMotions == 0)
+    dbMotions = theChannel.getDbTag();
+  myData(1) = dbMotions;
+  
+  if (theChannel.sendID(myDbTag, commitTag, myData) < 0) {
+    opserr << "MultiSupportPattern::sendSelf - channel failed to send the initial ID\n";
+    return -1;
+  }    
+
+  // create the ID and get the node iter
+  if (numMotions != 0) {
+    ID motionData(numMotions*2);
+    GroundMotion *theMotion;
+    for (int i=0; i<numMotions; i++) {
+      theMotion = theMotions[i];
+      motionData(i*2) = theMotion->getClassTag();
+      int dbTag = theMotion->getDbTag();
+	
+      // if dbTag still 0 get one from Channel; 
+      // if this tag != 0 set the dbTag in node
+      if (dbTag == 0 && myDbTag != 0) {// go get a new tag and setDbTag in ele if this not 0 
+	dbTag = theChannel.getDbTag();
+	if (dbTag != 0)
+	  theMotion->setDbTag(dbTag);
+      }
+      motionData(i*2+1) = dbTag;
+    }    
+
+    // now send the ID
+    if (theChannel.sendID(dbMotions, commitTag, motionData) < 0) {
+      opserr << "MultiSupportPattern::sendSelf - channel failed to send the NodalLoads ID\n";
+      return -4;
+    }
+
+    
+    for (int i=0; i<numMotions; i++) {
+      theMotion = theMotions[i];
+      if (theMotion->sendSelf(commitTag, theChannel) < 0) {
+	opserr << "MultiSupportPattern::sendSelf - ground motion  failed in sendSelf\n";
+	return -7;
+      }
+    }
+  }
+
+  // if we get here we are successfull
+  return 0;
 }
 
 int 
 MultiSupportPattern::recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker)
 {
-  return -1;
+  // get my current database tag
+  // NOTE - dbTag equals 0 if not sending to a database OR has not yet been sent
+  int myDbTag = this->getDbTag();
+  
+  if (this->LoadPattern::recvSelf(commitTag, theChannel, theBroker) < 0) {
+    opserr << "MultiSupportPattern::recvSelf() - LoadPattern class failed in sendSelf()";
+    return -1;
+  }
+  
+  // clear out the all the components in the current load pattern
+  if (theMotions != 0) {
+    for (int i=0; i<numMotions; i++)
+      if (theMotions[i] != 0)
+	delete theMotions[i];
+    delete [] theMotions;
+    numMotions = 0;
+  }
+
+  // 
+  // now we rebuild the motions
+  //
+
+  static ID myData(3);
+  if (theChannel.recvID(myDbTag, commitTag, myData) < 0) {
+    opserr << "MultiSupportPattern::sendSelf - channel failed to send the initial ID\n";
+    return -1;
+  }    
+
+  int numMotions = myData(0);
+  int dbMotions = myData(1);
+
+  if (numMotions != 0) {
+    ID motionData(numMotions*2);
+
+    // now send the ID
+    if (theChannel.recvID(dbMotions, commitTag, motionData) < 0) {
+      opserr << "MultiSupportPattern::sendSelf - channel failed to send the NodalLoads ID\n";
+      return -4;
+    }
+
+    theMotions = new GroundMotion *[numMotions];
+    if (theMotions == 0) {
+      opserr << "MultiSupportPattern::recvSelf() - out of memory\n";
+      return -1;
+    }
+
+    GroundMotion *theMotion;
+    for (int i=0; i<numMotions; i++) {
+      theMotion = theBroker.getNewGroundMotion(motionData(i*2));
+      if (theMotion == 0) {
+	return -1;
+      }
+
+      theMotion->setDbTag(motionData(i*2+1));
+
+      if (theMotion->recvSelf(commitTag, theChannel, theBroker) < 0) {
+	opserr << "MultiSupportPattern::sendSelf - ground motion failed in sendSelf\n";
+	return -7;
+      }
+    }    
+  }
+  return 0;
 }
 
 void 

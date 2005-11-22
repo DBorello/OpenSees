@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2005-11-07 23:53:00 $
+// $Revision: 1.13 $
+// $Date: 2005-11-22 19:44:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.cpp,v $
                                                                         
 // Written: fmk 07/99
@@ -44,6 +44,7 @@
 #include <SingleDomSP_Iter.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
+#include <GroundMotion.h>
 
 #include <OPS_Globals.h>
 
@@ -578,7 +579,7 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
   ElementalLoadIter &theElements = this->getElementalLoads();
   while ((theEle = theElements()) != 0) {
     if (theEle->sendSelf(cTag, theChannel) < 0) {
-      opserr << "LoadPattern::sendSelf - element with tag " << theNode->getTag() << " failed in sendSelf\n";
+      opserr << "LoadPattern::sendSelf - element with tag " << theEle->getTag() << " failed in sendSelf\n";
       return -8;
     }
   }
@@ -587,7 +588,8 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
   SP_ConstraintIter &theSPs = this->getSPs();
   while ((theSP = theSPs()) != 0) {
     if (theSP->sendSelf(cTag, theChannel) < 0) {
-      opserr << "LoadPattern::sendSelf - SP_Constraint tagged " << theNode->getTag() << " failed sendSelf\n";
+      
+      opserr << "LoadPattern::sendSelf - SP_Constraint: " << *theSP << " failed sendSelf\n";
       return -9;
     }
   }    
@@ -868,6 +870,19 @@ LoadPattern::getCopy(void)
   theCopy->isConstant = isConstant;
   theCopy->theSeries = theSeries;
   return theCopy;
+}
+
+int
+LoadPattern::addMotion(GroundMotion &theMotion, int tag)
+{
+  opserr << "LoadPattern::addMotion() - cannot add GroundMotion - use MultiSupport Pattern instead\n";
+  return -1;
+}
+
+GroundMotion *
+LoadPattern::getMotion(int tag)
+{
+  return 0;
 }
 
 

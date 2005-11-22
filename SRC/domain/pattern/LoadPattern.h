@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2005-11-07 23:53:00 $
+// $Revision: 1.12 $
+// $Date: 2005-11-22 19:44:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.h,v $
                                                                         
                                                                         
@@ -48,6 +48,7 @@ class ElementalLoadIter;
 class SingleDomSP_Iter;
 class SP_ConstraintIter;
 class TaggedObjectStorage;
+class GroundMotion;
 
 class LoadPattern : public DomainComponent    
 {
@@ -92,6 +93,9 @@ class LoadPattern : public DomainComponent
 
     // method to obtain a blank copy of the LoadPattern
     virtual LoadPattern *getCopy(void);
+
+    virtual int addMotion(GroundMotion &theMotion, int tag);    
+    virtual GroundMotion *getMotion(int tag);        
 
     // AddingSensitivity:BEGIN //////////////////////////////////////////
     virtual void applyLoadSensitivity(double pseudoTime = 0.0);
