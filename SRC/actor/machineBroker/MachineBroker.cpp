@@ -18,10 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-08-29 07:17:38 $
+// $Revision: 1.2 $
+// $Date: 2005-11-23 18:33:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/machineBroker/MachineBroker.cpp,v $
-                                                                        
                                                                         
 // Written: fmk
 // Revision: A
@@ -60,8 +59,13 @@ MachineBroker::shutdown(void)
     idData(0) = 0;
     Channel *theChannel = actorChannels[i];
     if (theChannel->sendID(0, 0, idData) < 0) {
-      opserr << "MachineBroker::run(void) - failed to send ID\n";
+      opserr << "MachineBroker::shutdown(void) - failed to send ID\n";
     }
+
+    if (theChannel->recvID(0, 0, idData) < 0) {
+      opserr << "MachineBroker::shutdown(void) - failed to recv ID\n";
+    }
+
     this->freeProcess(theChannel);
   }
 
@@ -87,18 +91,24 @@ MachineBroker::runActors(void)
 
   // loop until recv kill signal
   while (done == 0) {
+
     if (theChannel->recvID(0, 0, idData) < 0) {
-      opserr << "MachineBroker::run(void) - failed to recv ID\n";
+      opserr << "MachineBroker::runActors(void) - failed to recv ID\n";
     }
 
     int actorType = idData(0);
-    opserr << "MachineBroker::runActors() - actorType: " << actorType << endln;;    
     
     // switch on data type
-    if (idData(0) == 0) 
+    if (idData(0) == 0) {
       done = 1;
 
-    else {
+      if (theChannel->sendID(0, 0, idData) < 0) {
+	opserr << "MachineBroker::run(void) - failed to send ID\n";
+      }
+
+      return 0;
+
+    } else {
 
       // create an actor of approriate type
       Actor *theActor = theObjectBroker->getNewActor(actorType, theChannel);
@@ -121,9 +131,8 @@ MachineBroker::runActors(void)
       // destroying theActor
       delete theActor;
     }
+    done = 0;
   }
-
-  opserr << "MachineBroker::runActors() - DONE " << endln;    
 
   return 0;
 }
@@ -205,7 +214,6 @@ MachineBroker::startActor(int actorType, int compDemand)
   return theChannel;
   
 }
-
 
 int
 MachineBroker::finishedWithActor(Channel *theChannel)
