@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2005-02-17 22:28:46 $
+// $Revision: 1.9 $
+// $Date: 2005-11-23 22:48:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.h,v $
                                                                         
                                                                         
@@ -56,7 +56,7 @@ class Node : public DomainComponent
     Node(int tag, int ndof, double Crd1);
     Node(int tag, int ndof, double Crd1, double Crd2);
     Node(int tag, int ndof, double Crd1, double Crd2, double Crd3);
-    Node(const Node *theCopy);        
+    Node(const Node &theCopy, bool copyMass = true);        
     
     // destructor
     virtual ~Node();

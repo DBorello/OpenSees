@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-03-04 00:48:11 $
+// $Revision: 1.6 $
+// $Date: 2005-11-23 22:48:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/NodalLoad.cpp,v $
                                                                         
                                                                         
@@ -93,6 +93,20 @@ NodalLoad::setDomain(Domain *newDomain)
 
   // invoke the ancestor class method
   this->DomainComponent::setDomain(newDomain);    
+
+  /*
+  if (newDomain != 0) {
+    myNodePtr = newDomain->getNode(myNode);
+    if (myNodePtr == 0) {
+      opserr << *newDomain;
+      opserr << "WARNING NodalLoad::setDomain() - No associated Node node " ;
+      opserr << " for NodalLoad " << *this;
+      //	opserr << *newDomain;
+
+      return;
+    }
+  }
+  */
 }
 
 int 
@@ -120,7 +134,8 @@ NodalLoad::applyLoad(double loadFactor)
 	myNodePtr->addUnbalancedLoad(*load,loadFactor);
     else
 	myNodePtr->addUnbalancedLoad(*load,1.0);	
-
+    
+    //    opserr << "loadFactor: " << loadFactor << *myNodePtr;
 } 
 
 

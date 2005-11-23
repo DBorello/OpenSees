@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2005-07-20 23:08:16 $
+// $Revision: 1.20 $
+// $Date: 2005-11-23 22:48:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -259,10 +259,12 @@ Node::Node(int tag, int ndof, double Crd1, double Crd2, double Crd3)
 }
 
 
-
-Node::Node(const Node *otherNode)
-:DomainComponent(otherNode->getTag(),NOD_TAG_Node), 
- numberDOF(otherNode->numberDOF), theDOF_GroupPtr(0),
+// used for domain decomposition & external nodes
+//  copy everything but the mass 
+//  we should really set the mass to 0.0
+Node::Node(const Node &otherNode, bool copyMass)
+:DomainComponent(otherNode.getTag(),NOD_TAG_Node), 
+ numberDOF(otherNode.numberDOF), theDOF_GroupPtr(0),
  Crd(0), commitDisp(0), commitVel(0), commitAccel(0), 
  trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
  incrDeltaDisp(0), 
@@ -276,66 +278,94 @@ Node::Node(const Node *otherNode)
   accSensitivity = 0;
   parameterID = 0;
   // AddingSensitivity:END ///////////////////////////////////////////
+
+  Crd = new Vector(otherNode.getCrds());
+  if (Crd == 0) {
+    opserr << " FATAL Node::Node(node *) - ran out of memory for Crd\n";
+    exit(-1);
+  }
+
+  if (otherNode.commitDisp != 0) {
+    if (this->createDisp() < 0) {
+      opserr << " FATAL Node::Node(node *) - ran out of memory for displacement\n";
+      exit(-1);
+    }
+    for (int i=0; i<4*numberDOF; i++)
+      disp[i] = otherNode.disp[i];
+  }    
   
-  if (otherNode->Crd != 0) {
-    Crd = new Vector(*(otherNode->Crd));
-    if (Crd == 0) {
-      opserr << " FATAL Node::Node(node *) - ran out of memory for Crd\n";
+  if (otherNode.commitVel != 0) {
+    if (this->createVel() < 0) {
+      opserr << " FATAL Node::Node(node *) - ran out of memory for velocity\n";
+      exit(-1);
+    }
+    for (int i=0; i<2*numberDOF; i++)
+      vel[i] = otherNode.vel[i];
+  }    
+  
+  if (otherNode.commitAccel != 0) {
+    if (this->createAccel() < 0) {
+      opserr << " FATAL Node::Node(node *) - ran out of memory for acceleration\n";
+      exit(-1);
+    }
+    for (int i=0; i<2*numberDOF; i++)
+      accel[i] = otherNode.accel[i];
+  }    
+  
+  
+  if (otherNode.unbalLoad != 0){
+    unbalLoad = new Vector(*(otherNode.unbalLoad));    
+    if (unbalLoad == 0) {
+      opserr << " FATAL Node::Node(node *) - ran out of memory for Load\n";
+      exit(-1);
+    }
+    unbalLoad->Zero();
+  }    
+
+  if (otherNode.mass != 0 && copyMass == true) {
+    mass = new Matrix(*(otherNode.mass)) ;
+    if (mass == 0) {
+      opserr << " FATAL Node::Node(node *) - ran out of memory for mass\n";
       exit(-1);
     }
   }
-  
-    if (otherNode->commitDisp != 0) {
-	if (this->createDisp() < 0) {
-	    opserr << " FATAL Node::Node(node *) - ran out of memory for displacement\n";
-	    exit(-1);
-	}
-	for (int i=0; i<4*numberDOF; i++)
-	    disp[i] = otherNode->disp[i];
-    }    
-    
-    if (otherNode->commitVel != 0) {
-	if (this->createVel() < 0) {
-	    opserr << " FATAL Node::Node(node *) - ran out of memory for velocity\n";
-	    exit(-1);
-	}
-	for (int i=0; i<2*numberDOF; i++)
-	    vel[i] = otherNode->vel[i];
-    }    
-    
-    if (otherNode->commitAccel != 0) {
-	if (this->createAccel() < 0) {
-	    opserr << " FATAL Node::Node(node *) - ran out of memory for acceleration\n";
-	    exit(-1);
-	}
-	for (int i=0; i<2*numberDOF; i++)
-	    accel[i] = otherNode->accel[i];
-    }    
 
-    if (otherNode->unbalLoad != 0){
-	unbalLoad = new Vector(*(otherNode->unbalLoad));    
-	if (unbalLoad == 0) {
-	    opserr << " FATAL Node::Node(node *) - ran out of memory for Load\n";
-	    exit(-1);
-	}
-    }    
+  if (otherNode.R != 0) {
+    R = new Matrix(*(otherNode.R));
+    if (R == 0) {
+      opserr << " FATAL Node::Node(node *) - ran out of memory for R\n";
+      exit(-1);
+    }
+  }
 
-    if (otherNode->mass != 0) {
-	mass = new Matrix(*(otherNode->mass)) ;
-	if (mass == 0) {
-	    opserr << " FATAL Node::Node(node *) - ran out of memory for mass\n";
-	    exit(-1);
-	}
+  index = -1;
+  if (numMatrices != 0) {
+    for (int i=0; i<numMatrices; i++)
+      if (theMatrices[i]->noRows() == numberDOF) {
+	index = i;
+	i = numMatrices;
+      }
+  }
+  if (index == -1) {
+    Matrix **nextMatrices = new Matrix *[numMatrices+1];
+    if (nextMatrices == 0) {
+      opserr << "Element::getTheMatrix - out of memory\n";
+      exit(-1);
     }
-    if (otherNode->R != 0) {
-      R = new Matrix(*(otherNode->R));
-	if (R == 0) {
-	    opserr << " FATAL Node::Node(node *) - ran out of memory for R\n";
-	    exit(-1);
-	}
+    for (int j=0; j<numMatrices; j++)
+      nextMatrices[j] = theMatrices[j];
+    Matrix *theMatrix = new Matrix(numberDOF, numberDOF);
+    if (theMatrix == 0) {
+      opserr << "Element::getTheMatrix - out of memory\n";
+      exit(-1);
     }
-    
-    index = otherNode->index;
+    nextMatrices[numMatrices] = theMatrix;
+    if (numMatrices != 0) 
+      delete [] theMatrices;
+    index = numMatrices;
+    numMatrices++;
+    theMatrices = nextMatrices;
+  }  
 }
 
 
@@ -1349,7 +1379,7 @@ Node::sendSelf(int cTag, Channel &theChannel)
 	  return res;
 	}
     }    
-    
+
     if (unbalLoad  != 0) {
 	res = theChannel.sendVector(dbTag4, cTag, *unbalLoad);	
 	if (res < 0) {
@@ -1357,7 +1387,7 @@ Node::sendSelf(int cTag, Channel &theChannel)
 	  return res;
 	}
     }
-    
+
     // if get here succesfull
     return 0;
 }
@@ -1388,8 +1418,9 @@ Node::recvSelf(int cTag, Channel &theChannel,
     
 
     // create a Vector to hold coordinates IF one needed
-    if (Crd == 0)
+    if (Crd == 0) {
       Crd = new Vector(numberCrd);
+    }
 
     // check we did not run out of memory
     if (Crd == 0) {
@@ -1401,7 +1432,7 @@ Node::recvSelf(int cTag, Channel &theChannel,
       opserr << "Node::recvSelf() - failed to receive the Coordinate vector\n";
       return -2;
     }
-	
+
     if (data(2) == 0) {
       // create the disp vectors if node is a total blank
       if (commitDisp == 0)
@@ -1455,7 +1486,7 @@ Node::recvSelf(int cTag, Channel &theChannel,
       for (int i=0; i<numberDOF; i++)
 	accel[i] = accel[i+numberDOF];  // set trial equal commited
     }
-    
+
     if (data(5) == 0) {
       // make some room and read in the vector
       if (mass == 0) {
@@ -1488,6 +1519,7 @@ Node::recvSelf(int cTag, Channel &theChannel,
       }
     }
 
+
     if (data(6) == 0) {
       // create a vector for the load
       if (unbalLoad == 0) {
@@ -1503,37 +1535,37 @@ Node::recvSelf(int cTag, Channel &theChannel,
       }
     }        
 
-    if (index == -1) {
-      if (numMatrices != 0) {
-	for (int i=0; i<numMatrices; i++)
-	  if (theMatrices[i]->noRows() == numberDOF) {
-	    index = i;
-	    i = numMatrices;
-	  }
-      }
-      if (index == -1) {
-	Matrix **nextMatrices = new Matrix *[numMatrices+1];
-	if (nextMatrices == 0) {
-	  opserr << "Element::getTheMatrix - out of memory\n";
-	  exit(-1);
-	}
-	for (int j=0; j<numMatrices; j++)
-	  nextMatrices[j] = theMatrices[j];
-	Matrix *theMatrix = new Matrix(numberDOF, numberDOF);
-	if (theMatrix == 0) {
-	  opserr << "Element::getTheMatrix - out of memory\n";
-	  exit(-1);
-	}
-	nextMatrices[numMatrices] = theMatrix;
-	if (numMatrices != 0) 
-	  delete [] theMatrices;
-	index = numMatrices;
-	numMatrices++;
-	theMatrices = nextMatrices;
-      }
-    }
 
-    return 0;
+  index = -1;
+  if (numMatrices != 0) {
+    for (int i=0; i<numMatrices; i++)
+      if (theMatrices[i]->noRows() == numberDOF) {
+	index = i;
+	i = numMatrices;
+      }
+  }
+  if (index == -1) {
+    Matrix **nextMatrices = new Matrix *[numMatrices+1];
+    if (nextMatrices == 0) {
+      opserr << "Element::getTheMatrix - out of memory\n";
+      exit(-1);
+    }
+    for (int j=0; j<numMatrices; j++)
+      nextMatrices[j] = theMatrices[j];
+    Matrix *theMatrix = new Matrix(numberDOF, numberDOF);
+    if (theMatrix == 0) {
+      opserr << "Element::getTheMatrix - out of memory\n";
+      exit(-1);
+    }
+    nextMatrices[numMatrices] = theMatrix;
+    if (numMatrices != 0) 
+      delete [] theMatrices;
+    index = numMatrices;
+    numMatrices++;
+    theMatrices = nextMatrices;
+  }
+
+  return 0;
 }
 
 
@@ -1738,7 +1770,7 @@ Node::setParameter(const char **argv, int argc, Information &info)
 		return (direction+3);
 	}
 	else
-		opserr << "WARNING: Could not set parameter in Node. " << endln;
+	  opserr << "WARNING: Could not set parameter in Node. " << endln;
                 
 	return -1;
 }
