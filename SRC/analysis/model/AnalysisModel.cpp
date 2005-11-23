@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2005-11-10 01:24:06 $
+// $Revision: 1.11 $
+// $Date: 2005-11-23 22:13:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.cpp,v $
                                                                         
                                                                         
@@ -327,7 +327,7 @@ AnalysisModel::setResponse(const Vector &disp,
 {
     DOF_GrpIter &theDOFGrps = this->getDOFs();
     DOF_Group 	*dofPtr;
-    
+
     while ((dofPtr = theDOFGrps()) != 0) {
 	dofPtr->setNodeDisp(disp);
 	dofPtr->setNodeVel(vel);
@@ -482,6 +482,22 @@ AnalysisModel::updateDomain(double newTime, double dT)
 }
 
 
+int
+AnalysisModel::newStepDomain(double dT)
+{
+    // check to see there is a Domain linked to the Model
+
+    if (myDomain == 0) {
+	opserr << "WARNING: AnalysisModel::newStep. No Domain linked.\n";
+	return -1;
+    }
+
+    // invoke the method
+    return myDomain->newStep(dT);
+
+}
+
+
 
 int
 AnalysisModel::commitDomain(void)
@@ -496,7 +512,7 @@ AnalysisModel::commitDomain(void)
     if (myDomain->commit() < 0) {
 	opserr << "WARNING: AnalysisModel::commitDomain - Domain::commit() failed\n";
 	return -2;
-    }	
+    }
 
     return 0;
 }
