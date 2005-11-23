@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-10-15 00:34:38 $
+// $Revision: 1.4 $
+// $Date: 2005-11-23 18:24:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/actor/Actor.cpp,v $
                                                                         
                                                                         
@@ -47,7 +47,8 @@ Actor::Actor(Channel &theChan,
 	     FEM_ObjectBroker &myBroker,
 	     int numActorMethods)
 :theBroker(&myBroker), theChannel(&theChan),
- numMethods(0), maxNumMethods(numActorMethods), actorMethods(0), theRemoteShadowsAddress(0)
+ numMethods(0), maxNumMethods(numActorMethods), actorMethods(0), 
+ theRemoteShadowsAddress(0), commitTag(0)
 {
   // call setUpActor on the channel and get shadows address
   theChannel->setUpConnection();
@@ -151,9 +152,9 @@ Actor::sendObject(MovableObject &theObject,
 		  ChannelAddress *theAddress )
 {
     if (theAddress == 0)
-	return theChannel->sendObj(0, theObject,theRemoteShadowsAddress);
+	return theChannel->sendObj(commitTag, theObject,theRemoteShadowsAddress);
     else
-	return theChannel->sendObj(0, theObject,theAddress);	
+	return theChannel->sendObj(commitTag, theObject,theAddress);	
 }
 
 int
@@ -161,10 +162,10 @@ Actor::recvObject(MovableObject &theObject,
 		  ChannelAddress *theAddress )
 {
     if (theAddress == 0)
-	return theChannel->recvObj(0, theObject,*theBroker,
+	return theChannel->recvObj(commitTag, theObject,*theBroker,
 				   theRemoteShadowsAddress); 
     else
-	return theChannel->recvObj(0, theObject,*theBroker,theAddress);	
+	return theChannel->recvObj(commitTag, theObject,*theBroker,theAddress);	
 }
 
 
@@ -172,18 +173,18 @@ int
 Actor::recvMessage(Message &theMessage, ChannelAddress *theAddress )
 {
     if (theAddress == 0)
-	return theChannel->recvMsg(0,0, theMessage,theRemoteShadowsAddress);
+	return theChannel->recvMsg(0, commitTag, theMessage,theRemoteShadowsAddress);
     else
-	return theChannel->recvMsg(0,0, theMessage,theAddress);	
+	return theChannel->recvMsg(0, commitTag, theMessage,theAddress);	
 }
 
 int
 Actor::sendMessage(const Message &theMessage, ChannelAddress *theAddress )
 {
     if (theAddress == 0)
-	return theChannel->sendMsg(0,0, theMessage,theRemoteShadowsAddress);
+	return theChannel->sendMsg(0, commitTag, theMessage,theRemoteShadowsAddress);
     else
-	return theChannel->sendMsg(0,0, theMessage,theAddress);	
+	return theChannel->sendMsg(0, commitTag, theMessage,theAddress);	
 }
 
 
@@ -192,54 +193,61 @@ int
 Actor::sendMatrix(const Matrix &theMatrix, ChannelAddress *theAddress )
 {
     if (theAddress == 0)    
-	return theChannel->sendMatrix(0,0, theMatrix,theRemoteShadowsAddress);
+	return theChannel->sendMatrix(0, commitTag, theMatrix,theRemoteShadowsAddress);
     else
-	return theChannel->sendMatrix(0,0, theMatrix,theAddress);	
+	return theChannel->sendMatrix(0, commitTag, theMatrix,theAddress);	
 }
 
 int
 Actor::recvMatrix(Matrix &theMatrix, ChannelAddress *theAddress )
 {
     if (theAddress == 0)
-	return theChannel->recvMatrix(0,0, theMatrix,theRemoteShadowsAddress);
+	return theChannel->recvMatrix(0, commitTag, theMatrix,theRemoteShadowsAddress);
     else
-	return theChannel->recvMatrix(0,0, theMatrix,theAddress);	
+	return theChannel->recvMatrix(0, commitTag, theMatrix,theAddress);	
 }
 
 int
 Actor::sendVector(const Vector &theVector, ChannelAddress *theAddress )
 {
     if (theAddress == 0)
-	return theChannel->sendVector(0,0, theVector,theRemoteShadowsAddress);
+	return theChannel->sendVector(0, commitTag, theVector,theRemoteShadowsAddress);
     else
-	return theChannel->sendVector(0,0, theVector,theAddress);	
+	return theChannel->sendVector(0, commitTag, theVector,theAddress);	
 }
 
 int
 Actor::recvVector(Vector &theVector, ChannelAddress *theAddress )
 {
     if (theAddress == 0)
-	return theChannel->recvVector(0,0, theVector,theRemoteShadowsAddress);
+	return theChannel->recvVector(0, commitTag, theVector,theRemoteShadowsAddress);
     else
-	return theChannel->recvVector(0,0, theVector,theAddress);	
+	return theChannel->recvVector(0, commitTag, theVector,theAddress);	
 }
 
 int
 Actor::sendID(const ID &theID, ChannelAddress *theAddress )
 {
     if (theAddress == 0)
-	return theChannel->sendID(0,0, theID,theRemoteShadowsAddress);
+	return theChannel->sendID(0, commitTag, theID,theRemoteShadowsAddress);
     else
-	return theChannel->sendID(0,0, theID,theAddress);	
+	return theChannel->sendID(0, commitTag, theID,theAddress);	
 }
 
 int
 Actor::recvID(ID &theID, ChannelAddress *theAddress )
 {
     if (theAddress == 0)
-	return theChannel->recvID(0,0, theID,theRemoteShadowsAddress);
+	return theChannel->recvID(0, commitTag, theID,theRemoteShadowsAddress);
     else
-	return theChannel->recvID(0,0, theID,theAddress);	
+	return theChannel->recvID(0, commitTag, theID,theAddress);	
+}
+
+
+void
+Actor::setCommitTag(int tag)
+{
+  commitTag = tag;
 }
 
 
@@ -264,5 +272,17 @@ Actor::getShadowsAddressPtr(void) const
 }
 
 
-
+// barrier check:
+//
+int
+Actor::barrierCheck(int myResult = 0)
+{
+  int result;
+  static ID data(1);
+  data(0) = myResult; 
+  theChannel->sendID(0, commitTag, data); 
+  theChannel->recvID(0, commitTag, data);
+  result = data(0);
+  return result;
+}
 

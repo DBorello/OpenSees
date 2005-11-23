@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-10-15 00:34:38 $
+// $Revision: 1.4 $
+// $Date: 2005-11-23 18:24:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/actor/Actor.h,v $
                                                                         
                                                                         
@@ -96,6 +96,9 @@ class Actor
     FEM_ObjectBroker 	*getObjectBrokerPtr(void) const;    
     ChannelAddress  	*getShadowsAddressPtr(void) const;            
 
+    virtual int barrierCheck(int result);
+    void setCommitTag(int commitTag);
+
   protected:
     FEM_ObjectBroker *theBroker; 
     Channel *theChannel;    
@@ -105,6 +108,7 @@ class Actor
     ActorMethod **actorMethods;
     ChannelAddress *theRemoteShadowsAddress;
 
+    int commitTag;
 };
 
 #endif
