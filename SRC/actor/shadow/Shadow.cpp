@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-10-15 00:35:22 $
+// $Revision: 1.5 $
+// $Date: 2005-11-23 18:25:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/shadow/Shadow.cpp,v $
                                                                         
 
@@ -44,7 +44,7 @@
 
 Shadow::Shadow(Channel &theChan, 
 	       FEM_ObjectBroker &myBroker)
-:theChannel(&theChan), theBroker(&myBroker), theRemoteActorsAddress(0)
+  :theChannel(&theChan), theBroker(&myBroker), theRemoteActorsAddress(0), commitTag(0)
 {
   theChannel->setUpConnection();
 }
@@ -53,7 +53,8 @@ Shadow::Shadow(Channel &theChan,
 Shadow::Shadow(Channel &theChan, 
 	       FEM_ObjectBroker &myBroker,
 	       ChannelAddress &theAddress)
-:theChannel(&theChan), theBroker(&myBroker), theRemoteActorsAddress(&theAddress)
+  :theChannel(&theChan), theBroker(&myBroker), theRemoteActorsAddress(&theAddress),
+   commitTag(0)
 {
   theChannel->setUpConnection();
 }
@@ -62,7 +63,7 @@ Shadow::Shadow(int actorType,
 	       FEM_ObjectBroker &myBroker,	       
 	       MachineBroker &theMachineBroker,
 	       int compDemand)
-  :theBroker(&myBroker), theRemoteActorsAddress(0)
+  :theBroker(&myBroker), theRemoteActorsAddress(0), commitTag(0)
 {
   // start the remote actor process running
   theChannel = theMachineBroker.startActor(actorType, compDemand);
@@ -85,64 +86,69 @@ Shadow::~Shadow()
 int
 Shadow::sendObject(MovableObject &theObject)
 {
-    return theChannel->sendObj(0, theObject, theRemoteActorsAddress);
+    return theChannel->sendObj(commitTag, theObject, theRemoteActorsAddress);
 }
 
 int
 Shadow::recvObject(MovableObject &theObject)
 {
-    return theChannel->recvObj(0, theObject,*theBroker, theRemoteActorsAddress);
+    return theChannel->recvObj(commitTag, theObject,*theBroker, theRemoteActorsAddress);
 }
 
 
 int
 Shadow::recvMessage(Message &theMessage)
 {
-    return theChannel->recvMsg(0, 0, theMessage, theRemoteActorsAddress);
+    return theChannel->recvMsg(0, commitTag, theMessage, theRemoteActorsAddress);
 }
 
 int
 Shadow::sendMessage(const Message &theMessage)
 {
-    return theChannel->sendMsg(0, 0, theMessage, theRemoteActorsAddress);
+    return theChannel->sendMsg(0, commitTag, theMessage, theRemoteActorsAddress);
 }
-
-
 
 int
 Shadow::sendMatrix(const Matrix &theMatrix)
 {
-    return theChannel->sendMatrix(0, 0, theMatrix, theRemoteActorsAddress);
+    return theChannel->sendMatrix(0, commitTag, theMatrix, theRemoteActorsAddress);
 }
 
 int
 Shadow::recvMatrix(Matrix &theMatrix)
 {
-    return theChannel->recvMatrix(0, 0, theMatrix, theRemoteActorsAddress);
+    return theChannel->recvMatrix(0, commitTag, theMatrix, theRemoteActorsAddress);
 }
 
 int
 Shadow::sendVector(const Vector &theVector)
 {
-    return theChannel->sendVector(0, 0, theVector, theRemoteActorsAddress);
+    return theChannel->sendVector(0, commitTag, theVector, theRemoteActorsAddress);
 }
 
 int
 Shadow::recvVector(Vector &theVector)
 {
-    return theChannel->recvVector(0, 0, theVector, theRemoteActorsAddress);
+    return theChannel->recvVector(0, commitTag, theVector, theRemoteActorsAddress);
 }
 
 int
 Shadow::sendID(const ID &theID)
 {
-    return theChannel->sendID(0, 0, theID, theRemoteActorsAddress);
+    return theChannel->sendID(0, commitTag, theID, theRemoteActorsAddress);
 }
 
 int
 Shadow::recvID(ID &theID)
 {
-    return theChannel->recvID(0, 0, theID, theRemoteActorsAddress);
+    return theChannel->recvID(0, commitTag, theID, theRemoteActorsAddress);
+}
+
+
+void
+Shadow::setCommitTag(int tag)
+{
+  commitTag = tag;
 }
 
 

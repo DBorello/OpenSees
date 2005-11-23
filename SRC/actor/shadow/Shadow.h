@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-08-29 07:08:55 $
+// $Revision: 1.3 $
+// $Date: 2005-11-23 18:25:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/shadow/Shadow.h,v $
                                                                         
                                                                         
@@ -75,6 +75,7 @@ class Shadow
     virtual int recvVector(Vector &theVector);      
     virtual int sendID(const ID &theID);  
     virtual int recvID(ID &theID);      
+    void setCommitTag(int commitTag);
 
     Channel 		  *getChannelPtr(void) const;
     FEM_ObjectBroker 	  *getObjectBrokerPtr(void) const;        
@@ -86,6 +87,7 @@ class Shadow
 
   private:
     ChannelAddress 	  *theRemoteActorsAddress;    
+    int commitTag;
 };
 
 #endif
