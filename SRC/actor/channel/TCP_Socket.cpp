@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-10-15 00:31:47 $
+// $Revision: 1.4 $
+// $Date: 2005-11-23 23:43:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.cpp,v $
                                                                         
                                                                         
@@ -33,9 +33,7 @@
 // What: "@(#) TCP_Socket.C, revA"
 
 #include "TCP_Socket.h"
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <strings.h>
+#include <string.h>
 #include <Matrix.h>
 #include <Vector.h>
 #include <ID.h>
@@ -56,8 +54,14 @@ TCP_Socket::TCP_Socket()
     // set up my_Addr 
     bzero((char *) &my_Addr, sizeof(my_Addr));    
     my_Addr.addr_in.sin_family = AF_INET;
-    my_Addr.addr_in.sin_addr.s_addr = htonl(INADDR_ANY);
     my_Addr.addr_in.sin_port = htons(0);
+
+    #ifdef _WIN32
+      my_Addr.addr_in.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
+    #else
+      my_Addr.addr_in.sin_addr.s_addr = htonl(INADDR_ANY);
+    #endif
+
     addrLength = sizeof(my_Addr.addr_in);
     
     // open a socket
@@ -91,8 +95,14 @@ TCP_Socket::TCP_Socket(unsigned int port)
     // set up my_Addr 
     bzero((char *) &my_Addr.addr_in, sizeof(my_Addr.addr_in));
     my_Addr.addr_in.sin_family = AF_INET;
-    my_Addr.addr_in.sin_addr.s_addr = htonl(INADDR_ANY);
     my_Addr.addr_in.sin_port = htons(port);
+
+    #ifdef _WIN32
+      my_Addr.addr_in.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
+    #else
+      my_Addr.addr_in.sin_addr.s_addr = htonl(INADDR_ANY);
+    #endif
+
     addrLength = sizeof(my_Addr.addr_in);
 
     // open a socket
@@ -123,14 +133,25 @@ TCP_Socket::TCP_Socket(unsigned int other_Port, char *other_InetAddr)
     // set up remote address
     bzero((char *) &other_Addr.addr_in, sizeof(other_Addr.addr_in));
     other_Addr.addr_in.sin_family      = AF_INET;
-    other_Addr.addr_in.sin_addr.s_addr = inet_addr(other_InetAddr);
     other_Addr.addr_in.sin_port        = htons(other_Port);
+
+    #ifdef _WIN32
+      other_Addr.addr_in.sin_addr.S_un.S_addr = inet_addr(other_InetAddr);
+    #else
+      other_Addr.addr_in.sin_addr.s_addr = inet_addr(other_InetAddr);
+    #endif
 
     // set up my_Addr.addr_in 
     bzero((char *) &my_Addr.addr_in, sizeof(my_Addr.addr_in));    
     my_Addr.addr_in.sin_family = AF_INET;
-    my_Addr.addr_in.sin_addr.s_addr = htonl(INADDR_ANY);
     my_Addr.addr_in.sin_port = htons(0);
+
+    #ifdef _WIN32
+      my_Addr.addr_in.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
+    #else
+      my_Addr.addr_in.sin_addr.s_addr = htonl(INADDR_ANY);
+    #endif
+
     addrLength = sizeof(my_Addr.addr_in);
     
     // open a socket
@@ -151,7 +172,11 @@ TCP_Socket::TCP_Socket(unsigned int other_Port, char *other_InetAddr)
 
 TCP_Socket::~TCP_Socket()
 {
-  close(sockfd);
+  #ifdef _WIN32
+    closesocket(sockfd);
+  #else
+    close(sockfd);
+  #endif
 }
 
 
@@ -175,7 +200,7 @@ TCP_Socket::setUpConnection(void)
   } else {
     
     // wait for other process to contact me & set up connection
-    int newsockfd;
+    socket_type newsockfd;
     listen(sockfd, 1);    
     newsockfd = accept(sockfd, (struct sockaddr *) &other_Addr.addr_in, &addrLength);
     
@@ -185,8 +210,13 @@ TCP_Socket::setUpConnection(void)
     }    
     
     // close old socket & reset sockfd
-    close(sockfd);  // we can close as we are not 
-                    // going to wait for others to connect
+    // we can close as we are not going to wait for others to connect
+    #ifdef _WIN32
+      closesocket(sockfd);
+    #else
+      close(sockfd);
+    #endif
+
     sockfd = newsockfd;
     
     // get my_address info
@@ -336,7 +366,7 @@ TCP_Socket::recvMsg(int dbTag, int commitTag,
     nleft = msg.length;
 
     while (nleft > 0) {
-	nread = read(sockfd,gMsg,nleft);
+	nread = recv(sockfd,gMsg,nleft,0);
 	nleft -= nread;
 	gMsg +=  nread;
     }
@@ -379,7 +409,7 @@ TCP_Socket::sendMsg(int dbTag, int commitTag,
     nleft = msg.length;
 
     while (nleft > 0) {
-	nwrite = write(sockfd,gMsg,nleft);
+	nwrite = send(sockfd,gMsg,nleft,0);
 	nleft -= nwrite;
 
 	gMsg +=  nwrite;
@@ -422,7 +452,7 @@ TCP_Socket::recvMatrix(int dbTag, int commitTag,
     nleft =  theMatrix.dataSize * sizeof(double);
 
     while (nleft > 0) {
-	nread = read(sockfd,gMsg,nleft);
+	nread = recv(sockfd,gMsg,nleft,0);
 	nleft -= nread;
 	gMsg +=  nread;
     }
@@ -466,7 +496,7 @@ TCP_Socket::sendMatrix(int dbTag, int commitTag,
     nleft =  theMatrix.dataSize * sizeof(double);
 
     while (nleft > 0) {
-	nwrite = write(sockfd,gMsg,nleft);
+	nwrite = send(sockfd,gMsg,nleft,0);
 	nleft -= nwrite;
 	
 	gMsg +=  nwrite;
@@ -514,7 +544,7 @@ TCP_Socket::recvVector(int dbTag, int commitTag,
     nleft =  theVector.sz * sizeof(double);
 
     while (nleft > 0) {
-	nread = read(sockfd,gMsg,nleft);
+	nread = recv(sockfd,gMsg,nleft,0);
 	nleft -= nread;
 	gMsg +=  nread;
     }
@@ -557,7 +587,7 @@ TCP_Socket::sendVector(int dbTag, int commitTag,
     nleft =  theVector.sz * sizeof(double);
     
     while (nleft > 0) {
-	nwrite = write(sockfd,gMsg,nleft);
+	nwrite = send(sockfd,gMsg,nleft,0);
 	nleft -= nwrite;
 	gMsg +=  nwrite;
     }
@@ -600,7 +630,7 @@ TCP_Socket::recvID(int dbTag, int commitTag,
     nleft =  theID.sz * sizeof(int);
 
     while (nleft > 0) {
-	nread = read(sockfd,gMsg,nleft);
+	nread = recv(sockfd,gMsg,nleft,0);
 	nleft -= nread;
 	gMsg +=  nread;
     }
@@ -643,7 +673,7 @@ TCP_Socket::sendID(int dbTag, int commitTag,
     nleft =  theID.sz * sizeof(int);
     
     while (nleft > 0) {
-	nwrite = write(sockfd,gMsg,nleft);
+	nwrite = send(sockfd,gMsg,nleft,0);
 	nleft -= nwrite;
 	gMsg +=  nwrite;
     }

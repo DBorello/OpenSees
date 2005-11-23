@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-10-15 00:31:47 $
+// $Revision: 1.4 $
+// $Date: 2005-11-23 23:43:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.h,v $
                                                                         
                                                                         
@@ -96,18 +96,18 @@ class TCP_Socket : public Channel
     unsigned int getPortNumber(void) const;
     
   private:
-    int sockfd;
+    socket_type sockfd;
 
     union {
-	  struct sockaddr    addr;
-	  struct sockaddr_in addr_in;
+      struct sockaddr    addr;
+      struct sockaddr_in addr_in;
     } my_Addr;
     union {
       struct sockaddr    addr;
       struct sockaddr_in addr_in;
     } other_Addr;
 
-    socklen_t addrLength;
+    socklen_type addrLength;
 
     unsigned int myPort;
     int connectType;

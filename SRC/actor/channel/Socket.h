@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-10-15 00:31:47 $
+// $Revision: 1.6 $
+// $Date: 2005-11-23 23:43:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/Socket.h,v $
                                                                         
 // Written: fmk 11/95
@@ -34,14 +34,19 @@
 extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <string.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#ifdef _WIN32
+  #include <winsock2.h>
+#else
+  #include <sys/socket.h>
+  #include <sys/types.h>
+  #include <netinet/in.h>
+  #include <netinet/tcp.h>
+  #include <arpa/inet.h>
+  #include <netdb.h>
+  #include <unistd.h>
+  #include <strings.h>
+#endif
 }
 
 #include <OPS_Stream.h>
@@ -49,6 +54,33 @@ extern "C" {
 
 #define MAX_UDP_DATAGRAM 9126
 #define MAX_INET_ADDR 28
+
+#ifdef _WIN32
+  typedef SOCKET socket_type;
+  typedef int socklen_type;
+  #define bzero(s,n) memset((s),0,(n))
+  #define bcmp(s1,s2,n) memcmp((s1),(s2),(n))
+#else
+  typedef int socket_type;
+  typedef socklen_t socklen_type;
+#endif
+
+inline bool startup_socket()
+{
+  #ifdef _WIN32
+    WSADATA wsaData;
+    return WSAStartup(0x0002, &wsaData) == 0;
+  #else
+    return true;
+  #endif
+} 
+
+inline void cleanup_socket()
+{
+  #ifdef _WIN32
+    WSACleanup();
+  #endif
+}
 
 #endif 
 
