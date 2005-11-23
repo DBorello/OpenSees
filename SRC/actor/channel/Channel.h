@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-11-07 23:52:13 $
+// $Revision: 1.5 $
+// $Date: 2005-11-23 18:27:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/Channel.h,v $
                                                                         
                                                                         
@@ -67,6 +67,7 @@ class Channel
     virtual int sendObj(int commitTag,
 			MovableObject &theObject, 
 		        ChannelAddress *theAddress =0) =0;
+
     virtual int recvObj(int commitTag,
 			MovableObject &theObject, 
 			FEM_ObjectBroker &theBroker, 
@@ -75,6 +76,7 @@ class Channel
     virtual int sendMsg(int dbTag, int commitTag, 
 			const Message &theMessage, 
 		        ChannelAddress *theAddress =0) =0;  
+
     virtual int recvMsg(int dbTag, int commitTag, 
 			Message &theMessage, 
 			ChannelAddress *theAddress =0) =0;  
@@ -82,6 +84,7 @@ class Channel
     virtual int sendMatrix(int dbTag, int commitTag, 
 			   const Matrix &theMatrix, 
 			   ChannelAddress *theAddress =0) =0;  
+
     virtual int recvMatrix(int dbTag, int commitTag, 
 			   Matrix &theMatrix, 
 			   ChannelAddress *theAddress =0) =0;  
@@ -89,6 +92,7 @@ class Channel
     virtual int sendVector(int dbTag, int commitTag, 
 			   const Vector &theVector, 
 			   ChannelAddress *theAddress =0) =0;  
+
     virtual int recvVector(int dbTag, int commitTag, 
 			   Vector &theVector, 
 			   ChannelAddress *theAddress =0) =0;  
@@ -96,6 +100,7 @@ class Channel
     virtual int sendID(int dbTag, int commitTag, 
 		       const ID &theID, 
 		       ChannelAddress *theAddress =0) =0;  
+
     virtual int recvID(int dbTag, int commitTag, 
 		       ID &theID, 
 		       ChannelAddress *theAddress =0) =0;      

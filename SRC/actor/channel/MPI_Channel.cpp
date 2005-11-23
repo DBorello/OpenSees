@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-10-15 00:26:32 $
+// $Revision: 1.4 $
+// $Date: 2005-11-23 18:27:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/MPI_Channel.cpp,v $
                                                                         
                                                                         
@@ -66,10 +66,10 @@ MPI_Channel::setUpConnection(void)
 ChannelAddress *
 MPI_Channel::getLastSendersAddress(void) 
 {
-    opserr << "MPI_Channel::getLastSendersAddress(void) - ";
-    opserr << " this should not be called - need MPI-2.0 to use\n";
-
-    return 0;
+  opserr << "MPI_Channel::getLastSendersAddress(void) - ";
+  opserr << " this should not be called - need MPI-2.0 to use\n";
+  
+  return 0;
 }    
 
 
@@ -248,7 +248,7 @@ MPI_Channel::recvMatrix(int dbTag, int commitTag, Matrix &theMatrix, ChannelAddr
     MPI_Get_count(&status, MPI_DOUBLE, &count);
     if (count != nleft) {
       opserr << "MPI_Channel::recvMatrix() -";
-      opserr << " incorrect number of entries for Matrix received ";
+      opserr << " incorrect number of entries for Matrix received: " << count << "\n";
       return -1;
     }
     else
@@ -328,7 +328,9 @@ MPI_Channel::recvVector(int dbTag, int commitTag, Vector &theVector, ChannelAddr
     MPI_Get_count(&status, MPI_DOUBLE, &count);
     if (count != nleft) {
       opserr << "MPI_Channel::recvVector() -";
-      opserr << " incorrect number of entries for Vector received ";
+      opserr << " incorrect number of entries for Vector received: " << count << 
+	" expected: " << theVector.sz << "\n";
+
       return -1;
     }
     else
@@ -375,6 +377,7 @@ MPI_Channel::sendVector(int dbTag, int commitTag, const Vector &theVector, Chann
 int 
 MPI_Channel::recvID(int dbTag, int commitTag, ID &theID, ChannelAddress *theAddress)
 {	
+
     // first check address is the only address a MPI_Channel can send to
     MPI_ChannelAddress *theMPI_ChannelAddress = 0;
     if (theAddress != 0) {
@@ -401,9 +404,14 @@ MPI_Channel::recvID(int dbTag, int commitTag, ID &theID, ChannelAddress *theAddr
     MPI_Recv((void *)gMsg, nleft, MPI_INT, otherTag, 0, otherComm, &status);
     int count =0;
     MPI_Get_count(&status, MPI_INT, &count);
+
+    //    int rank;
+    //MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    //opserr << "MPI_Channel::recvID " << rank << " " << otherTag << " " << theID;
+
     if (count != nleft) {
       opserr << "MPI_Channel::recvID() -";
-      opserr << " incorrect number of entries for ID received ";
+      opserr << " incorrect number of entries for ID received: " << count << "\n";
       return -1;
     }
     else
@@ -440,7 +448,11 @@ MPI_Channel::sendID(int dbTag, int commitTag, const ID &theID, ChannelAddress *t
     nleft =  theID.sz;
 
     MPI_Send((void *)gMsg, nleft, MPI_INT, otherTag, 0, otherComm);
-    
+
+    // int rank;
+    // MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    //    opserr << "MPI_Channel::sendID " << rank << " " << otherTag << " " << theID;
+
     return 0;
 }
 
