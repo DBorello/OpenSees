@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2005-11-10 01:07:22 $
+// $Revision: 1.10 $
+// $Date: 2005-11-23 22:37:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.cpp,v $
                                                                         
                                                                         
@@ -319,6 +319,60 @@ ID::operator[](int x)
   return ID_NOT_VALID_ENTRY;	
 }
     
+
+int 
+ID::resize(int newSize){
+
+  // first check that newSize is valid
+  if (newSize <= 0) {
+    opserr << "ID::resize() - size specified " << newSize << " <= 0\n";
+    return -1;
+  } 
+  
+
+  if (sz > newSize) {
+
+    // is size smaller than current, simply reset sz
+    sz = newSize;
+
+  } else if (newSize < arraySize) {
+
+    // see if we can just enlarge the array
+    // without having to go get more space
+    
+    for (int i=sz; i<newSize; i++)
+      data[i] = 0;
+    sz = newSize;
+
+  } else if (newSize > arraySize) {
+
+    // otherwise we go get more space
+    
+    int *newData = new int[newSize];
+    if (newData != 0) {
+      // copy the old
+      for (int i=0; i<sz; i++)
+	newData[i] = data[i];
+      // zero the new
+      for (int j=sz; j<newSize; j++)
+	newData[j] = 0;
+      
+      sz = newSize;
+      // release the memory held by the old
+      //      free((void *)data);	    
+      delete [] data;
+      data = newData;
+      arraySize = newSize;
+
+    } else {
+      opserr << "ID::resize() - out of memory creating ID of size " << newSize << "\n";
+      return -1;      
+    }
+  }
+
+  return 0;
+}
+
 
 
 // ID &operator=(const ID  &V):

@@ -18,18 +18,15 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:02:10 $
+// $Revision: 1.3 $
+// $Date: 2005-11-23 22:37:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tagged/storage/TaggedObjectStorage.h,v $
                                                                         
                                                                         
 #ifndef TaggedObjectStorage_h
 #define TaggedObjectStorage_h
 
-// File: ~/tagged/storage/TaggedObjectStorage.h
-// 
 // Written: fmk 
-// Created: 11/96
 // Revision: A
 //
 // Description: This file contains the class definition for 
