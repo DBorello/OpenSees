@@ -84,8 +84,8 @@ class ElasticIsotropic3D : public ElasticIsotropicMaterial
     static Matrix D;            // Elastic constantsVector sigma;
     Vector epsilon;		// Strain vector
 
-    stresstensor Stress;	// Stress tensor    
-    Tensor Dt;			// Elastic constants tensor
+    static stresstensor Stress;	// Stress tensor    
+    Tensor *Dt;			// Elastic constants tensor
     straintensor Strain;	// Strain tensor    
 };
 

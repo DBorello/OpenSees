@@ -29,30 +29,29 @@
 
 
 Matrix ElasticIsotropic3D::D(6,6);	  // global for ElasticIsotropic3D only
-Vector ElasticIsotropic3D::sigma(6);	 // global for ElasticIsotropic3D only
-
+Vector ElasticIsotropic3D::sigma(6);	 // global for ElasticIsotropic3D onyl
+stresstensor ElasticIsotropic3D::Stress;
 
 ElasticIsotropic3D::ElasticIsotropic3D
 (int tag, double E, double nu, double rho):
  ElasticIsotropicMaterial (tag, ND_TAG_ElasticIsotropic3D, E, nu, rho),
- epsilon(6) 
+ epsilon(6) , Dt(0)
 {
 	// Set up the elastic constant matrix for 3D elastic isotropic 
 	D.Zero();
-        Dt = tensor( 4, def_dim_4, 0.0 ); 
-	setInitElasticStiffness();
 }
 
 ElasticIsotropic3D::ElasticIsotropic3D():
  ElasticIsotropicMaterial (0, ND_TAG_ElasticIsotropic3D, 0.0, 0.0, 0.0),
- epsilon(6)
+ epsilon(6), Dt(0)
 {
-       Dt = tensor( 4, def_dim_4, 0.0 );
+
 }
 
 ElasticIsotropic3D::~ElasticIsotropic3D ()
 {
-
+  if (Dt != 0)
+    delete Dt;
 }
 
 int
@@ -191,14 +190,22 @@ ElasticIsotropic3D::setTrialStrainIncr (const Tensor &v, const Tensor &r)
 const Tensor&
 ElasticIsotropic3D::getTangentTensor (void)
 {
-    return Dt;
+  if (Dt == 0) {
+    Dt = new tensor( 4, def_dim_4, 0.0 ); 
+    setInitElasticStiffness();
+  }
+  return *Dt;
 }
 
 const stresstensor
 ElasticIsotropic3D::getStressTensor (void)
 {
-    Stress = Dt("ijkl") * Strain("kl");
-    return Stress;
+  if (Dt == 0) {
+    Dt = new tensor( 4, def_dim_4, 0.0 ); 
+    setInitElasticStiffness();
+  }
+  Stress = (*Dt)("ijkl") * Strain("kl");
+  return Stress;
 }
 
 const straintensor
@@ -238,12 +245,8 @@ ElasticIsotropic3D::getCopy (void)
 {
 	ElasticIsotropic3D *theCopy =
 		new ElasticIsotropic3D (this->getTag(), E, v, rho);
-	//opserr << "In Get copy" <<  *theCopy << endln;
 	theCopy->epsilon = this->epsilon;
-//	theCopy->sigma = this->sigma;
 	theCopy->Strain = this->Strain;
-	theCopy->Stress = this->Stress;
-	// D and Dt are created in the constructor call
 
 	return theCopy;
 }
@@ -268,7 +271,6 @@ ElasticIsotropic3D::Print(OPS_Stream &s, int flag)
 	s << "\tE: " << E << endln;
 	s << "\tv: " << v << endln;
 	s << "\trho: " << rho << endln;
-	//s << "\tD: " << D << endln;
 }
 
 
@@ -292,7 +294,7 @@ void ElasticIsotropic3D::setInitElasticStiffness(void)
     ret = I_ijkl*( E*v / ( (1.0+v)*(1.0 - 2.0*v) ) ) + I4s*( E / (1.0 + v) );
     
     //ret.print();
-    Dt = ret;
+    *Dt = ret;
 
     return;
 
