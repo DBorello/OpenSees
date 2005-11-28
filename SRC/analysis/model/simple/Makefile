@@ -1,6 +1,6 @@
 include ../../../../Makefile.def
 
-OBJS       = SimpleFE_Iter.o SimpleDOF_Iter.o 
+OBJS       = 
 
 # Compilation control
 

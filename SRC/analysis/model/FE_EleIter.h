@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2005-11-28 21:23:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/FE_EleIter.h,v $
                                                                         
                                                                         
@@ -38,20 +38,25 @@
 #ifndef FE_EleIter_h
 #define FE_EleIter_h
 
+class TaggedObjectIter;
+class TaggedObjectStorage;
+
 class FE_Element;
 
 class FE_EleIter 
 {
   public:
-    FE_EleIter() {};
-    virtual ~FE_EleIter() {};
-    
-    virtual FE_Element *operator()(void) =0;
+    FE_EleIter();
+    FE_EleIter(TaggedObjectStorage *);
+    virtual ~FE_EleIter();
+
+    virtual void reset(void);
+    virtual FE_Element *operator()(void);
 
   protected:
     
   private:
-
+    TaggedObjectIter *myIter;
 };
 
 #endif

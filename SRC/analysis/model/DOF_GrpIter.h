@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2005-11-28 21:23:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/DOF_GrpIter.h,v $
                                                                         
-                                                                        
-// File: ~/analysis/model/DOF_GrpIter.h
-//
 // Written: fmk 
 // Created: Fri Sep 20 15:27:47: 1996
 // Revision: A
@@ -39,19 +36,23 @@
 #define DOF_GrpIter_h
 
 class DOF_Group;
+class TaggedObjectStorage;
+class TaggedObjectIter;
 
 class DOF_GrpIter 
 {
   public:
-    DOF_GrpIter() {};
-    virtual ~DOF_GrpIter() {};
-    
-    virtual DOF_Group *operator()(void) =0;
+    DOF_GrpIter();
+    DOF_GrpIter(TaggedObjectStorage *);
+    virtual ~DOF_GrpIter();
+
+    virtual void reset(void);    
+    virtual DOF_Group *operator()(void);
 
   protected:
     
   private:
-
+    TaggedObjectIter *myIter;
 };
 
 #endif

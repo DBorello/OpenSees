@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2005-11-23 22:13:18 $
+// $Revision: 1.9 $
+// $Date: 2005-11-28 21:23:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.h,v $
                                                                         
                                                                         
 #ifndef AnalysisModel_h
 #define AnalysisModel_h
 
-// File: ~/analysis/model/AnalysisModel.h
-// 
 // Written: fmk 
 // Created: 9/96
 // Revision: A
@@ -45,11 +43,9 @@
 #include <bool.h>
 #endif
     
-#include <SimpleDOF_Iter.h>
-#include <SimpleFE_Iter.h>
-
 #include <MovableObject.h>
 
+class TaggedObjectStorage;
 class Domain;
 class FE_EleIter;
 class DOF_GrpIter;
@@ -67,6 +63,8 @@ class AnalysisModel: public MovableObject
   public:
     AnalysisModel();    
     AnalysisModel(int classTag);
+    AnalysisModel(TaggedObjectStorage &theDofStorage,
+		  TaggedObjectStorage &theFeStorage);
     virtual ~AnalysisModel();    
 
     // methods to populate/depopulate the AnalysisModel
@@ -121,9 +119,6 @@ class AnalysisModel: public MovableObject
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker);
 
-    friend class SimpleFE_Iter;
-    friend class SimpleDOF_Iter;
-
     Domain *getDomainPtr(void) const;
 
   protected:
@@ -140,15 +135,11 @@ class AnalysisModel: public MovableObject
     int numDOF_Grp;            // number of DOF_Group objects added
     int numEqn;                // numEqn set by the ConstraintHandler typically
 
-    int sizeEle;               // size of array for FE_Elements
-    int sizeDOF;               // size of array for DOF_Groups
+    TaggedObjectStorage  *theFEs;
+    TaggedObjectStorage  *theDOFs;
     
-    FE_Element   **theFEs;     // array of pointers to the FE_Elements
-    DOF_Group    **theDOFs;    // array of pointers to the DOF_Groups
-
-    SimpleFE_Iter  theFEiter;     
-    SimpleDOF_Iter theDOFiter;    
-   
+    FE_EleIter    *theFEiter;     
+    DOF_GrpIter   *theDOFiter;    
 };
 
 #endif

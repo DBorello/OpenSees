@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2005-11-23 22:13:18 $
+// $Revision: 1.12 $
+// $Date: 2005-11-28 21:23:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.cpp,v $
                                                                         
                                                                         
@@ -39,6 +39,7 @@
 
 #include <stdlib.h>
 
+#include <ArrayOfTaggedObjects.h>
 #include <AnalysisModel.h>
 #include <Domain.h>
 #include <FE_Element.h>
@@ -58,10 +59,13 @@ AnalysisModel::AnalysisModel(int theClassTag)
 :MovableObject(theClassTag),
  myDomain(0), myHandler(0),
  myDOFGraph(0), myGroupGraph(0),
- numFE_Ele(0), numDOF_Grp(0), numEqn(0),
- theFEs(0), theDOFs(0),
- theFEiter(*this), theDOFiter(*this)
+ numFE_Ele(0), numDOF_Grp(0), numEqn(0)
 {
+    theFEs     = new ArrayOfTaggedObjects(1024);
+    theDOFs    =  new ArrayOfTaggedObjects(1024);
+    theFEiter  = new FE_EleIter(theFEs);
+    theDOFiter = new DOF_GrpIter(theDOFs);
+
     // for subclasses to use - they provide own container stuff
 } 
 
@@ -69,47 +73,50 @@ AnalysisModel::AnalysisModel()
 :MovableObject(AnaMODEL_TAGS_AnalysisModel),
  myDomain(0), myHandler(0),
  myDOFGraph(0), myGroupGraph(0),
- numFE_Ele(0), numDOF_Grp(0), numEqn(0),
- theFEs(0), theDOFs(0),
- theFEiter(*this), theDOFiter(*this)
+ numFE_Ele(0), numDOF_Grp(0), numEqn(0)
 {
-  sizeEle = 256;  // these arrays get enlarged as needed
-  sizeDOF = 256;
+  theFEs     = new ArrayOfTaggedObjects(256);
+  theDOFs    = new ArrayOfTaggedObjects(256);
+  theFEiter  = new FE_EleIter(theFEs);
+  theDOFiter = new DOF_GrpIter(theDOFs);
+} 
 
-  theFEs = new FE_Element *[sizeEle];
-  if (theFEs == 0) {
-      opserr << "FATAL:AnalysisModel::AnalysisModel()";
-      opserr << " ran out of memory creating array for FE_Elements\n";
-      exit(-1);
-  }
-  for (int i=0; i<sizeEle; i++) theFEs[i] = 0;
 
-  theDOFs = new DOF_Group *[sizeDOF];
-  if (theDOFs == 0) {
-      opserr << "FATAL:AnalysisModel::AnalysisModel()";
-      opserr << " ran out of memory creating array for DOF_Groups\n";
-      exit(-1);
-  }
-  for (int j=0; j<sizeDOF; j++) theDOFs[j] = 0;
+AnalysisModel::AnalysisModel(TaggedObjectStorage &theFes, TaggedObjectStorage &theDofs)
+:MovableObject(AnaMODEL_TAGS_AnalysisModel),
+ myDomain(0), myHandler(0),
+ myDOFGraph(0), myGroupGraph(0),
+ numFE_Ele(0), numDOF_Grp(0), numEqn(0)
+{
+  theFEs     = &theFes;
+  theDOFs    = &theDofs;
+  theFEiter  = new FE_EleIter(theFEs);
+  theDOFiter = new DOF_GrpIter(theDOFs);
 } 
 
 
 // ~AnalysisModel();    
 AnalysisModel::~AnalysisModel()
 {
-    if (theFEs != 0)
-	delete [] theFEs;
+  if (theFEs != 0)
+    delete theFEs;
 
-    if (theDOFs != 0)
-	delete [] theDOFs;
+  if (theDOFs != 0)
+    delete theDOFs;
 
-    if (myGroupGraph != 0) {
-	delete myGroupGraph;    
-    }	
+  if (theFEiter != 0)
+    delete theFEiter;
 
-    if (myDOFGraph != 0) {
-	delete myDOFGraph;
-    }
+  if (theDOFiter != 0)
+    delete theDOFiter;
+
+  if (myGroupGraph != 0) {
+    delete myGroupGraph;    
+  }	
+  
+  if (myDOFGraph != 0) {
+    delete myDOFGraph;
+  }
 }    
 
 void
@@ -126,42 +133,30 @@ AnalysisModel::setLinks(Domain &theDomain, ConstraintHandler &theHandler)
 bool
 AnalysisModel::addFE_Element(FE_Element *theElement)
 {
-
   // check we don't add a null pointer or this is a subclass
   // trying to use this method when it should'nt
   if (theElement == 0 || theFEs == 0)
       return false;
-  
-  // see if the current theFEs array is big enough, if not double
-  // it's size by making a new one, copying the pointers and deleting old.
-  if (numFE_Ele == sizeEle) { // we have to expand our componentArray array
-      int newArraySize = 2 * sizeEle;
-      FE_Element **newArray = new FE_Element *[newArraySize];
-      if (newArray == 0) {
-	  opserr << "AnalysisModel::addFE_Element -";
-	  opserr << "could not allocate enough memory for new array\n";
-	  exit(-1);
-      }
-      
-      int i;
-      for (i=0; i<newArraySize; i++)
-	newArray[i] = 0;
 
-      for (i=0; i<sizeEle; i++)
-	newArray[i] = theFEs[i];
-
-      delete  [] theFEs;
-      theFEs = newArray;
-      sizeEle = newArraySize;
+  // check if an Element with a similar tag already exists in the Domain
+  int tag = theElement->getTag();
+  TaggedObject *other = theFEs->getComponentPtr(tag);
+  if (other != 0) {
+    opserr << "AnalysisModel::addFE_Element - element with tag " << tag << "already exists in model\n"; 
+    return false;
   }
 
-  // put the FE_Element into the list
+  // add the element to the container object for the elements
+  bool result = theFEs->addComponent(theElement);
+  if (result == true) {
+    theElement->setAnalysisModel(*this);
+    numFE_Ele++;
+    return true;  // o.k.
+  } else
+    return false;
 
-  theFEs[numFE_Ele] = theElement;
-  theElement->setAnalysisModel(*this);
-  numFE_Ele++;
 
-  return true;  // o.k.
+  return result;
 }
 
 
@@ -171,42 +166,30 @@ AnalysisModel::addFE_Element(FE_Element *theElement)
 //	Method to add an element to the model.
 
 bool
-AnalysisModel::addDOF_Group(DOF_Group *theDOF_Group)
+AnalysisModel::addDOF_Group(DOF_Group *theGroup)
 {
 
   // check we don't add a null pointer or this is a subclass trying
   // to use a method it should'nt be using
-  if (theDOF_Group == 0 || theDOFs == 0)
+  if (theGroup == 0 || theDOFs == 0)
       return false;
   
-  // see if the current theFEs array is big enough, if not double
-  // it's size by making a new one, copying the pointers and deleting old.
 
-  if (numDOF_Grp == sizeDOF) { // we have to expand our componentArray array
-      int newArraySize = 2 * sizeDOF;
-      DOF_Group **newArray = new DOF_Group *[newArraySize];
-      if (newArray == 0) {
-	  opserr << "AnalysisModel::addDOF_Group -";
-	  opserr << "could not allocate enough memory for new array\n";
-	  exit(-1);
-      }      
-      int i;
-      for (i=0; i<newArraySize; i++)
-	newArray[i] = 0;
-
-      for (i=0; i<sizeDOF; i++)
-	newArray[i] = theDOFs[i];
-
-      delete  [] theDOFs;
-      theDOFs = newArray;
-      sizeDOF = newArraySize;
+  // check if an Element with a similar tag already exists in the Domain
+  int tag = theGroup->getTag();
+  TaggedObject *other = theDOFs->getComponentPtr(tag);
+  if (other != 0) {
+    opserr << "AnalysisModel::addDOF_Group - group with tag " << tag << "already exists in model\n"; 
+    return false;
   }
 
-  // put the DOF_Group into the list
-
-  theDOFs[numDOF_Grp] = theDOF_Group;
-  numDOF_Grp++;
-  return true;  // o.k.
+  // add the element to the container object for the elements
+  bool result = theDOFs->addComponent(theGroup);
+  if (result == true) {
+    numDOF_Grp++;
+    return true;  // o.k.
+  } else
+    return false;
 }
 
 void
@@ -219,23 +202,12 @@ AnalysisModel::clearAll(void)
     if (myGroupGraph != 0)
 	delete myGroupGraph;    
 
+    theFEs->clearAll();
+    theDOFs->clearAll();
+
     myDOFGraph = 0;
     myGroupGraph = 0;
     
-    // remove the FE_Elements
-    // they are not deleted as the ConstraintHandler may 
-    // be able to reuse them
-    for (int i=0; i<sizeEle; i++) {
-	theFEs[i] = 0;
-    }
-
-    // remove the DOF_Groups 
-    // they are not deleted as the ConstraintHandler may 
-    // be able to reuse them.    
-    for (int j=0; j<sizeDOF; j++) {
-	theDOFs[j] =0;
-    }
-
     numFE_Ele =0;
     numDOF_Grp = 0;
     numEqn = 0;    
@@ -247,42 +219,34 @@ AnalysisModel::clearAll(void)
 int
 AnalysisModel::getNumDOF_Groups(void) const
 {
-    return numDOF_Grp;
+  return numDOF_Grp;
 }
 
 
 DOF_Group *
 AnalysisModel::getDOF_GroupPtr(int tag)
 {
-    // check to see if in a simple position
-    // this will be the case if DOF_Groups are created and added in order
-    // which will probably be the typical situation (note true if DOF tags 
-    // start from 0)
-    if (tag < numDOF_Grp && tag > 0)
-	if ((theDOFs[tag]->getTag()) == tag)
-	    return theDOFs[tag];
-
-    // else we have to search through and check till we find it
-    for (int i=0; i<numDOF_Grp; i++)
-	if ((theDOFs[i]->getTag()) == tag)
-	    return theDOFs[i];
-    
+  TaggedObject *other = theDOFs->getComponentPtr(tag);
+  if (other == 0) {
     return 0;
+  }
+  DOF_Group *result = (DOF_Group *)other;
+  return result;
 }
 
 
 FE_EleIter &
 AnalysisModel::getFEs()
 {
-    theFEiter.reset();
-    return theFEiter;
+    theFEiter->reset();
+    return *theFEiter;
 }
 
 DOF_GrpIter &
 AnalysisModel::getDOFs()
 {
-    theDOFiter.reset();
-    return theDOFiter;
+    theDOFiter->reset();
+    return *theDOFiter;
 }
 
 void 

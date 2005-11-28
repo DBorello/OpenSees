@@ -1,6 +1,6 @@
 include ../../../Makefile.def
 
-OBJS       = AnalysisModel.o 
+OBJS       = AnalysisModel.o  FE_EleIter.o DOF_GrpIter.o
 
 # Compilation control
 
