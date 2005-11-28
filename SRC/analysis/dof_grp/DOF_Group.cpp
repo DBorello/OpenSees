@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2005-07-20 23:09:00 $
+// $Revision: 1.12 $
+// $Date: 2005-11-28 21:40:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.cpp,v $
                                                                         
                                                                         
@@ -58,8 +58,9 @@ int DOF_Group::numDOFs(0);           // number of objects
 //	construictor that take the corresponding model node.
 
 DOF_Group::DOF_Group(int tag, Node *node)
-:unbalance(0), tangent(0), myNode(node), 
- myTag(tag), myID(node->getNumberDOF()), 
+:TaggedObject(tag),
+ unbalance(0), tangent(0), myNode(node), 
+ myID(node->getNumberDOF()), 
  numDOF(node->getNumberDOF())
 {
     // get number of DOF & verify valid
@@ -137,8 +138,9 @@ DOF_Group::DOF_Group(int tag, Node *node)
 
 
 DOF_Group::DOF_Group(int tag, int ndof)
-:unbalance(0), tangent(0), myNode(0), 
- myTag(tag), myID(ndof), 
+:TaggedObject(tag),
+ unbalance(0), tangent(0), myNode(0), 
+ myID(ndof), 
  numDOF(ndof)
 {
     // get number of DOF & verify valid
@@ -742,13 +744,6 @@ DOF_Group::setEigenvector(int mode, const Vector &theVector)
     myNode->setEigenvector(mode, eigenvector);
 }
 
-
-
-int
-DOF_Group::getTag(void) const
-{
-    return myTag;
-}
 
 Matrix *
 DOF_Group::getT(void)

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2005-07-20 23:09:00 $
+// $Revision: 1.11 $
+// $Date: 2005-11-28 21:40:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.h,v $
                                                                         
                                                                         
@@ -43,6 +43,7 @@
 // What: "@(#) DOF_Group.h, revA"
 
 #include <ID.h>
+#include <TaggedObject.h>
 
 class Node;
 class Vector;
@@ -50,7 +51,7 @@ class Matrix;
 class TransientIntegrator;
 class Integrator;
 
-class DOF_Group
+class DOF_Group: public TaggedObject
 {
   public:
     DOF_Group(int tag, Node *myNode);
@@ -61,7 +62,6 @@ class DOF_Group
     virtual void setID(const ID &values);
     virtual const ID &getID(void) const;
 
-    virtual int getTag(void) const;
     virtual int getNodeTag(void) const;
     virtual int getNumDOF(void) const;    
     virtual int getNumFreeDOF(void) const;
@@ -98,7 +98,6 @@ class DOF_Group
     virtual void incrNodeVel(const Vector &udot);
     virtual void incrNodeAccel(const Vector &udotdot);
 
-
     // methods to set the eigen vectors
     virtual void setEigenvector(int mode, const Vector &eigenvalue);
 	
@@ -115,7 +114,7 @@ class DOF_Group
     virtual const Vector & getAccSensitivity(int gradNumber);
     virtual int saveSensitivity(Vector *v,Vector *vdot,Vector *vdotdot,int gradNum,int numGrads);
 // AddingSensitivity:END //////////////////////////////////////
-
+    virtual void  Print(OPS_Stream&, int = 0) {return;};
     virtual void resetNodePtr(void);
   
    protected:
@@ -128,7 +127,6 @@ class DOF_Group
     
   private:
     // private variables - a copy for each object of the class        
-    int myTag;
     ID 	myID;
     int numDOF;
 
