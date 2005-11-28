@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2004-10-12 21:55:54 $
+// $Revision: 1.4 $
+// $Date: 2005-11-28 21:38:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/lagrange/LagrangeSP_FE.cpp,v $
                                                                         
 // Written: fmk 
@@ -47,9 +47,9 @@
 #include <SP_Constraint.h>
 #include <DOF_Group.h>
 
-LagrangeSP_FE::LagrangeSP_FE(Domain &theDomain, SP_Constraint &TheSP,
+LagrangeSP_FE::LagrangeSP_FE(int tag, Domain &theDomain, SP_Constraint &TheSP,
 			     DOF_Group &theGroup, double Alpha)
-:FE_Element(2,2),
+:FE_Element(tag, 2,2),
  alpha(Alpha), tang(0), resid(0), theSP(&TheSP), theDofGroup(&theGroup)
 {
     // create a Matrix and a Vector for the tangent and residual

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2004-10-12 21:55:54 $
+// $Revision: 1.3 $
+// $Date: 2005-11-28 21:38:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/lagrange/LagrangeSP_FE.h,v $
                                                                         
                                                                         
@@ -52,7 +52,7 @@ class DOF_Group;
 class LagrangeSP_FE: public FE_Element
 {
   public:
-    LagrangeSP_FE(Domain &theDomain, SP_Constraint &theSP, 
+    LagrangeSP_FE(int tag, Domain &theDomain, SP_Constraint &theSP, 
 		  DOF_Group &theDofGrp, double alpha = 1.0);
     virtual ~LagrangeSP_FE();    
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2004-10-12 21:55:54 $
+// $Revision: 1.6 $
+// $Date: 2005-11-28 21:38:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/penalty/PenaltyMP_FE.cpp,v $
                                                                         
                                                                         
@@ -48,9 +48,9 @@
 #include <MP_Constraint.h>
 #include <DOF_Group.h>
 
-PenaltyMP_FE::PenaltyMP_FE(Domain &theDomain, 
+PenaltyMP_FE::PenaltyMP_FE(int tag, Domain &theDomain, 
 			   MP_Constraint &TheMP, double Alpha)
-:FE_Element(2,(TheMP.getConstrainedDOFs()).Size()+
+:FE_Element(tag, 2,(TheMP.getConstrainedDOFs()).Size()+
  (TheMP.getRetainedDOFs()).Size()),
  theMP(&TheMP), theConstrainedNode(0) , theRetainedNode(0),
  tang(0), resid(0), C(0), alpha(Alpha)

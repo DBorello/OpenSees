@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2005-02-05 00:30:58 $
+// $Revision: 1.16 $
+// $Date: 2005-11-28 21:38:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.cpp,v $
                                                                         
                                                                         
@@ -54,8 +54,9 @@ int FE_Element::numFEs(0);           // number of objects
 
 //  FE_Element(Element *, Integrator *theIntegrator);
 //	construictor that take the corresponding model element.
-FE_Element::FE_Element(Element *ele)
-:myDOF_Groups((ele->getExternalNodes()).Size()), myID(ele->getNumDOF()), 
+FE_Element::FE_Element(int tag, Element *ele)
+  :TaggedObject(tag),
+   myDOF_Groups((ele->getExternalNodes()).Size()), myID(ele->getNumDOF()), 
  numDOF(ele->getNumDOF()), theModel(0), myEle(ele), 
  theResidual(0), theTangent(0), theIntegrator(0)
 {
@@ -162,9 +163,10 @@ FE_Element::FE_Element(Element *ele)
 }
 
 
-FE_Element::FE_Element(int numDOF_Group, int ndof)
-:myDOF_Groups(numDOF_Group), myID(ndof), numDOF(ndof), theModel(0),
- myEle(0), theResidual(0), theTangent(0), theIntegrator(0)
+FE_Element::FE_Element(int tag, int numDOF_Group, int ndof)
+  :TaggedObject(tag),
+   myDOF_Groups(numDOF_Group), myID(ndof), numDOF(ndof), theModel(0),
+   myEle(0), theResidual(0), theTangent(0), theIntegrator(0)
 {
     // this is for a subtype, the subtype must set the myDOF_Groups ID array
     numFEs++;

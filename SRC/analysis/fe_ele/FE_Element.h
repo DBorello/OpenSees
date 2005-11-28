@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2005-02-05 00:30:58 $
+// $Revision: 1.12 $
+// $Date: 2005-11-28 21:38:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.h,v $
                                                                         
                                                                         
@@ -39,17 +39,18 @@
 #include <ID.h>
 #include <Matrix.h>
 #include <Vector.h>
+#include <TaggedObject.h>
 
 class TransientIntegrator;
 class Element;
 class Integrator;
 class AnalysisModel;
 
-class FE_Element
+class FE_Element: public TaggedObject
 {
   public:
-    FE_Element(Element *theElement);
-    FE_Element(int numDOF_Group, int ndof);
+    FE_Element(int tag, Element *theElement);
+    FE_Element(int tag, int numDOF_Group, int ndof);
     virtual ~FE_Element();    
 
     // public methods for setting/obtaining mapping information
@@ -86,6 +87,8 @@ class FE_Element
 
     virtual Integrator *getLastIntegrator(void);
     virtual const Vector &getLastResponse(void);
+
+    virtual void  Print(OPS_Stream&, int = 0) {return;};
 
     // AddingSensitivity:BEGIN ////////////////////////////////////
     virtual void addResistingForceSensitivity(int gradNumber, double fact = 1.0);

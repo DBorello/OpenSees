@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2004-10-12 21:55:54 $
+// $Revision: 1.3 $
+// $Date: 2005-11-28 21:38:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/penalty/PenaltySP_FE.h,v $
                                                                         
                                                                         
@@ -51,7 +51,7 @@ class Node;
 class PenaltySP_FE: public FE_Element
 {
   public:
-    PenaltySP_FE(Domain &theDomain, SP_Constraint &theSP, double alpha=1.0e8);    
+    PenaltySP_FE(int tag, Domain &theDomain, SP_Constraint &theSP, double alpha=1.0e8);    
     virtual ~PenaltySP_FE();    
 
     // public methods

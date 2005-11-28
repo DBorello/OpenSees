@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2005-08-31 17:36:13 $
+// $Revision: 1.16 $
+// $Date: 2005-11-28 21:38:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.cpp,v $
                                                                         
 // Written: fmk 
@@ -58,8 +58,8 @@ int TransformationFE::sizeBuffer(0);
 
 //  TransformationFE(Element *, Integrator *theIntegrator);
 //	construictor that take the corresponding model element.
-TransformationFE::TransformationFE(Element *ele)
-:FE_Element(ele), theDOFs(0), numSPs(0), theSPs(0), modID(0), 
+TransformationFE::TransformationFE(int tag, Element *ele)
+:FE_Element(tag, ele), theDOFs(0), numSPs(0), theSPs(0), modID(0), 
   modTangent(0), modResidual(0), numGroups(0), numTransformedDOF(0)
 {
   // set number of original dof at ele

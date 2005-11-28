@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2005-08-03 19:12:37 $
+// $Revision: 1.8 $
+// $Date: 2005-11-28 21:38:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.h,v $
                                                                         
                                                                         
@@ -44,7 +44,7 @@ class TransformationConstraintHandler;
 class TransformationFE: public FE_Element
 {
   public:
-  TransformationFE(Element *theElement);
+  TransformationFE(int tag, Element *theElement);
   ~TransformationFE();    
 
     // public methods for setting/obtaining mapping information

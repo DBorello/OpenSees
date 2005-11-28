@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2004-10-12 21:55:54 $
+// $Revision: 1.4 $
+// $Date: 2005-11-28 21:38:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/lagrange/LagrangeMP_FE.cpp,v $
                                                                         
                                                                         
@@ -46,9 +46,9 @@
 #include <MP_Constraint.h>
 #include <DOF_Group.h>
 
-LagrangeMP_FE::LagrangeMP_FE(Domain &theDomain, MP_Constraint &TheMP,
+LagrangeMP_FE::LagrangeMP_FE(int tag, Domain &theDomain, MP_Constraint &TheMP,
 			     DOF_Group &theGroup, double Alpha)
-:FE_Element(3,(TheMP.getConstrainedDOFs()).Size()+
+:FE_Element(tag, 3,(tag, TheMP.getConstrainedDOFs()).Size()+
 	      (TheMP.getRetainedDOFs()).Size() + 
 	      (TheMP.getRetainedDOFs()).Size()),
  alpha(Alpha), theMP(&TheMP), 
