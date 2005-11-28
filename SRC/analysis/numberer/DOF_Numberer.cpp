@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:00:51 $
+// $Revision: 1.5 $
+// $Date: 2005-11-28 21:28:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/numberer/DOF_Numberer.cpp,v $
                                                                         
                                                                         
-// File: ~/analysis/numberer/DOF_Numberer.h
-// 
 // Written: fmk 
 // Created: 9/96
 // Revision: A
@@ -54,7 +52,7 @@
 #include <MP_Constraint.h>
 #include <Node.h>
 #include <MP_ConstraintIter.h>
-
+#include <DOF_GrpIter.h>
 // Constructor
 
 DOF_Numberer::DOF_Numberer(int clsTag) 
