@@ -733,8 +733,8 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/analysis/integrator/CentralDifferenceNoDamping.o \
 	$(FE)/analysis/integrator/WilsonTheta.o \
 	$(FE)/analysis/model/AnalysisModel.o \
-	$(FE)/analysis/model/simple/SimpleFE_Iter.o \
-	$(FE)/analysis/model/simple/SimpleDOF_Iter.o \
+	$(FE)/analysis/model/FE_EleIter.o \
+	$(FE)/analysis/model/DOF_GrpIter.o \
 	$(FE)/analysis/handler/ConstraintHandler.o \
 	$(FE)/analysis/handler/PlainHandler.o \
 	$(FE)/analysis/handler/PenaltyConstraintHandler.o \
