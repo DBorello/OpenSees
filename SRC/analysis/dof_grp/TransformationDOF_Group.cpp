@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2005-09-09 17:42:06 $
+// $Revision: 1.15 $
+// $Date: 2005-11-28 21:43:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.cpp,v $
                                                                         
                                                                         
@@ -31,9 +31,6 @@
 // of the TransformationDOF_Group class interface.
 //
 // What: "@(#) TransformationDOF_Group.C, revA"
-
-
-
 
 #include <TransformationDOF_Group.h>
 #include <stdlib.h>
@@ -49,8 +46,6 @@
 #include <TransformationConstraintHandler.h>
 
 #define MAX_NUM_DOF 16
-
-static int transCounter = 0;
 
 // static variables initialisation
 Matrix **TransformationDOF_Group::modMatrices; 
@@ -452,15 +447,6 @@ TransformationDOF_Group::getCommittedAccel(void)
 void
 TransformationDOF_Group::setNodeDisp(const Vector &u)
 {
-
-  // DO THE SP STUFF
-  if (transCounter == numTransDOFs) {
-    theHandler->enforceSPs();
-    transCounter = 0;
-  }  else
-    transCounter++;
-
-
   // call base class method and return if no MP_Constraint
   if (theMP == 0) {
     this->DOF_Group::setNodeDisp(u);
