@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-08-31 17:28:10 $
+// $Revision: 1.4 $
+// $Date: 2005-11-28 21:34:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/ConstraintHandler.cpp,v $
                                                                         
-                                                                        
-// File: ~/analysis/handler/ConstraintHandler.h
-// 
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -37,7 +34,7 @@
 #include <Domain.h>
 #include <AnalysisModel.h>
 #include <Integrator.h>
-
+#include <FE_EleIter.h>
 #include <FE_Element.h>
 
 ConstraintHandler::ConstraintHandler(int clasTag)
