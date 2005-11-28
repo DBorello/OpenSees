@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-08-31 17:28:10 $
+// $Revision: 1.4 $
+// $Date: 2005-11-28 21:35:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/TransformationConstraintHandler.h,v $
                                                                         
                                                                         
@@ -72,7 +72,6 @@ class TransformationConstraintHandler : public ConstraintHandler
     Domain  *theDomain;
     int numConstrainedNodes;
 
-    ID *transformedEleLocs;
     int numTransformationFEs;
 };
 
