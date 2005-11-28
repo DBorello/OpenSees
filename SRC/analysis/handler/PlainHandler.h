@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2005-11-28 21:37:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/PlainHandler.h,v $
                                                                         
                                                                         
 #ifndef PlainHandler_h
 #define PlainHandler_h
 
-// File: ~/analysis/handler/PlainHandler.h
-// 
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -60,10 +58,7 @@ class PlainHandler : public ConstraintHandler
   protected:
     
   private:
-    FE_Element 	**theFEs;
-    DOF_Group 	**theDOFs;
-    int 	numFE;
-    int 	numDOF;
+
 };
 
 #endif

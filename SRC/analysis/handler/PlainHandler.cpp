@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:00:46 $
+// $Revision: 1.5 $
+// $Date: 2005-11-28 21:37:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/PlainHandler.cpp,v $
                                                                         
                                                                         
-// File: ~/analysis/handler/PlainHandler.C
-// 
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -55,28 +53,14 @@
 #include <FEM_ObjectBroker.h>
 
 PlainHandler::PlainHandler()
-:ConstraintHandler(HANDLER_TAG_PlainHandler),
- theFEs(0), theDOFs(0),numFE(0),numDOF(0)
+:ConstraintHandler(HANDLER_TAG_PlainHandler)
 {
 
 }
 
 PlainHandler::~PlainHandler()
 {
-  // delete the FE_Element and DOF_Group objects
-  if (theFEs != 0) {
-    for (int i=0; i<numFE; i++)
-      if (theFEs[i] != 0) 
-        delete theFEs[i];
-    delete [] theFEs;
-  }
-	    
-  if (theDOFs != 0) {
-    for (int j=0; j<numDOF; j++)
-      if (theDOFs[j] != 0) 
-        delete theDOFs[j];
-    delete [] theDOFs;
-  }
+
 }
 
 int
@@ -93,31 +77,6 @@ PlainHandler::handle(const ID *nodesLast)
 	return -1;
     }
 
-    
-    // get number ofelements and nodes in the domain 
-    // and init the theFEs and theDOFs arrays
-    
-    numFE = theDomain->getNumElements();
-    numDOF = theDomain->getNumNodes();
-
-    // create an array for the FE_elements and zero it
-    if ((numFE <= 0) || ((theFEs  = new FE_Element *[numFE]) == 0)) {
-	opserr << "WARNING PlainHandler::handle() - ";
-        opserr << "ran out of memory for FE_elements"; 
-	opserr << " array of size " << numFE << endln;
-	return -2;
-    }
-
-    for (int i=0; i<numFE; i++) theFEs[i] = 0;
-
-    // create an array for the DOF_Groups and zero it
-    if ((numDOF <= 0) || ((theDOFs = new DOF_Group *[numDOF]) == 0)) {
-	opserr << "WARNING PlainHandler::handle() - ";
-	opserr << "ran out of memory for DOF_Groups";
-	opserr << " array of size " << numDOF << endln;
-	return -3;    
-    }    
-    for (int j=0; j<numDOF; j++) theDOFs[j] = 0;
 
     // initialse the DOF_Groups and add them to the AnalysisModel.
     //    : must of course set the initial IDs
@@ -125,14 +84,14 @@ PlainHandler::handle(const ID *nodesLast)
     Node *nodPtr;
     SP_Constraint *spPtr;
     DOF_Group *dofPtr;
-    
-    int numDofGrp = 0;
+
+    int numDOF = 0;
     int count3 = 0;
     int countDOF =0;
     while ((nodPtr = theNod()) != 0) {
-	if ((dofPtr = new DOF_Group(numDofGrp, nodPtr)) == 0) {
+	if ((dofPtr = new DOF_Group(numDOF++, nodPtr)) == 0) {
 	    opserr << "WARNING PlainHandler::handle() - ran out of memory";
-	    opserr << " creating DOF_Group " << numDofGrp << endln;	
+	    opserr << " creating DOF_Group " << numDOF << endln;	
 	    return -4;    		
 	}
 	// initially set all the ID value to -2
@@ -220,8 +179,6 @@ PlainHandler::handle(const ID *nodesLast)
 	}
 
 	nodPtr->setDOF_GroupPtr(dofPtr);
-	theDOFs[numDofGrp] = dofPtr;
-	numDofGrp++;	
 	theModel->addDOF_Group(dofPtr);
     }
 
@@ -258,15 +215,11 @@ PlainHandler::handle(const ID *nodesLast)
     int numFe = 0;    
     FE_Element *fePtr;
     while ((elePtr = theEle()) != 0) {
-	if ((fePtr = new FE_Element(elePtr)) == 0) {
+	if ((fePtr = new FE_Element(numFe++, elePtr)) == 0) {
 	    opserr << "WARNING PlainHandler::handle() - ran out of memory";
 	    opserr << " creating FE_Element " << elePtr->getTag() << endln; 
 	    return -5;
 	}		
-
-	
-	theFEs[numFe] = fePtr;
-	numFe++;
 	
 	theModel->addFE_Element(fePtr);
 	if (elePtr->isSubdomain() == true) {
@@ -274,7 +227,6 @@ PlainHandler::handle(const ID *nodesLast)
 	    theSub->setFE_ElementPtr(fePtr);
 	}
     }
-
     return count3;
 }
 
@@ -282,34 +234,15 @@ PlainHandler::handle(const ID *nodesLast)
 void 
 PlainHandler::clearAll(void)
 {
-    // delete the FE_Element and DOF_Group objects
-    for (int i=0; i<numFE; i++)
-	if (theFEs[i] != 0)
-	    delete theFEs[i];
-
-    for (int j=0; j<numDOF; j++)
-	if (theDOFs[j] != 0)
-	    delete theDOFs[j];
-
-    // delete the arrays
-    if (theFEs != 0) delete [] theFEs;
-    if (theDOFs != 0) delete [] theDOFs;
-
-    // reset the numbers
-    numDOF = 0;
-    numFE =  0;
-    theFEs = 0;
-    theDOFs = 0;
-
-    // for the nodes reset the DOF_Group pointers to 0
-    Domain *theDomain = this->getDomainPtr();
-    if (theDomain == 0)
-	return;
-
-    NodeIter &theNod = theDomain->getNodes();
-    Node *nodPtr;
-    while ((nodPtr = theNod()) != 0)
-	nodPtr->setDOF_GroupPtr(0);
+  // for the nodes reset the DOF_Group pointers to 0
+  Domain *theDomain = this->getDomainPtr();
+  if (theDomain == 0)
+    return;
+  
+  NodeIter &theNod = theDomain->getNodes();
+  Node *nodPtr;
+  while ((nodPtr = theNod()) != 0)
+    nodPtr->setDOF_GroupPtr(0);
     
 }    
 

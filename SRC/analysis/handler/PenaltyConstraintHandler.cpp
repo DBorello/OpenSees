@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:00:46 $
+// $Revision: 1.5 $
+// $Date: 2005-11-28 21:37:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/PenaltyConstraintHandler.cpp,v $
                                                                         
                                                                         
-// File: ~/analysis/handler/PenaltyConstraintHandler.C
-// 
 // Written: fmk 
 // Created: May 1998
 // Revision: A
@@ -57,28 +55,14 @@
 
 PenaltyConstraintHandler::PenaltyConstraintHandler(double sp, double mp)
 :ConstraintHandler(HANDLER_TAG_PenaltyConstraintHandler),
- alphaSP(sp), alphaMP(mp),
- theFEs(0), theDOFs(0),numFE(0),numDOF(0)
+ alphaSP(sp), alphaMP(mp)
 {
 
 }
 
 PenaltyConstraintHandler::~PenaltyConstraintHandler()
 {
-  // delete the FE_Element and DOF_Group objects
-  if (theFEs != 0) {
-    for (int i=0; i<numFE; i++)
-      if (theFEs[i] != 0) 
-        delete theFEs[i];
-    delete [] theFEs;
-  }
-	    
-  if (theDOFs != 0) {
-    for (int j=0; j<numDOF; j++)
-      if (theDOFs[j] != 0) 
-        delete theDOFs[j];
-    delete [] theDOFs;
-  }
+
 }
 
 int
@@ -104,33 +88,6 @@ PenaltyConstraintHandler::handle(const ID *nodesLast)
     while ((spPtr = theSPs()) != 0)
       numSPs++;
     
-    numFE = theDomain->getNumElements() + numSPs + theDomain->getNumMPs();
-
-    numDOF = theDomain->getNumNodes();
-
-    // create an array for the FE_elements and zero it
-    if ((numFE <= 0) || ((theFEs  = new FE_Element *[numFE]) == 0)) {
-	opserr << "WARNING PenaltyConstraintHandler::handle() - ";
-        opserr << "ran out of memory for FE_elements"; 
-	opserr << " array of size " << numFE << endln;
-	opserr << "(if size == 0 YOU HAVE NO ELEMENTS)\n";
-	numFE = 0;
-	return -2;
-    }
-    int i;
-    for (i=0; i<numFE; i++) theFEs[i] = 0;
-
-    // create an array for the DOF_Groups and zero it
-    if ((numDOF <= 0) || ((theDOFs = new DOF_Group *[numDOF]) == 0)) {
-	opserr << "WARNING PenaltyConstraintHandler::handle() - ";
-        opserr << "ran out of memory for DOF_Groups";
-	opserr << " array of size " << numDOF << endln;
-	opserr << "(if size == 0 YOU HAVE NO NODES)\n";
-	numDOF = 0;	
-	return -3;    
-    }    
-    for (i=0; i<numDOF; i++) theDOFs[i] = 0;
-
     // initialse the DOF_Groups and add them to the AnalysisModel.
     //    : must of course set the initial IDs
     NodeIter &theNod = theDomain->getNodes();
@@ -142,10 +99,10 @@ PenaltyConstraintHandler::handle(const ID *nodesLast)
     int count3 = 0;
     int countDOF =0;
     while ((nodPtr = theNod()) != 0) {
-	if ((dofPtr = new DOF_Group(numDofGrp, nodPtr)) == 0) {
+	if ((dofPtr = new DOF_Group(numDofGrp++, nodPtr)) == 0) {
 	    opserr << "WARNING PenaltyConstraintHandler::handle() ";
 	    opserr << "- ran out of memory";
-	    opserr << " creating DOF_Group " << i << endln;	
+	    opserr << " creating DOF_Group " << numDofGrp << endln;	
 	    return -4;    		
 	}
 
@@ -156,7 +113,6 @@ PenaltyConstraintHandler::handle(const ID *nodesLast)
 	    countDOF++;
 	}
 	nodPtr->setDOF_GroupPtr(dofPtr);
-	theDOFs[numDofGrp++] = dofPtr;
 	theModel->addDOF_Group(dofPtr);
     }
 
@@ -166,7 +122,7 @@ PenaltyConstraintHandler::handle(const ID *nodesLast)
     // now see if we have to set any of the dof's to -3
     //    int numLast = 0;
     if (nodesLast != 0) 
-	for (i=0; i<nodesLast->Size(); i++) {
+	for (int i=0; i<nodesLast->Size(); i++) {
 	    int nodeID = (*nodesLast)(i);
 	    Node *nodPtr = theDomain->getNode(nodeID);
 	    if (nodPtr != 0) {
@@ -193,36 +149,34 @@ PenaltyConstraintHandler::handle(const ID *nodesLast)
     int numFeEle = 0;
     FE_Element *fePtr;
     while ((elePtr = theEle()) != 0) {
-	if ((fePtr = new FE_Element(elePtr)) == 0) {
+	if ((fePtr = new FE_Element(numFeEle, elePtr)) == 0) {
 	    opserr << "WARNING PenaltyConstraintHandler::handle()";
 	    opserr << " - ran out of memory";
 	    opserr << " creating FE_Element " << elePtr->getTag() << endln; 
 	    return -5;
 	}		
 	
-	theFEs[numFeEle++] = fePtr;
-	
 	theModel->addFE_Element(fePtr);
 	if (elePtr->isSubdomain() == true) {
 	    Subdomain *theSub = (Subdomain *)elePtr;
 	    theSub->setFE_ElementPtr(fePtr);
 	}
+	numFeEle++;
     }
     
 
     // create the PenaltySP_FE for the SP_Constraints and 
     // add to the AnalysisModel
-
     SP_ConstraintIter &theSPss = theDomain->getDomainAndLoadPatternSPs();
     while ((spPtr = theSPss()) != 0) {
-	if ((fePtr = new PenaltySP_FE(*theDomain, *spPtr, alphaSP)) == 0) {
+	if ((fePtr = new PenaltySP_FE(numFeEle, *theDomain, *spPtr, alphaSP)) == 0) {
 	    opserr << "WARNING PenaltyConstraintHandler::handle()";
 	    opserr << " - ran out of memory";
 	    opserr << " creating PenaltySP_FE " << endln; 
 	    return -5;
 	}		
-	theFEs[numFeEle++] = fePtr;
 	theModel->addFE_Element(fePtr);
+	numFeEle++;
     }	    
 
     // create the PenaltyMP_FE for the MP_Constraints and 
@@ -230,16 +184,14 @@ PenaltyConstraintHandler::handle(const ID *nodesLast)
 
     MP_ConstraintIter &theMPs = theDomain->getMPs();
     while ((mpPtr = theMPs()) != 0) {
-	if ((fePtr = new PenaltyMP_FE(*theDomain, *mpPtr, alphaMP)) == 0) {
+	if ((fePtr = new PenaltyMP_FE(numFeEle, *theDomain, *mpPtr, alphaMP)) == 0) {
 	    opserr << "WARNING PenaltyConstraintHandler::handle()";
 	    opserr << " - ran out of memory";
 	    opserr << " creating PenaltyMP_FE " << endln; 
 	    return -5;
 	}		
-	
-	theFEs[numFeEle++] = fePtr;
-	
 	theModel->addFE_Element(fePtr);
+	numFeEle++;
     }	        
     
     return count3;
@@ -249,25 +201,6 @@ PenaltyConstraintHandler::handle(const ID *nodesLast)
 void 
 PenaltyConstraintHandler::clearAll(void)
 {
-    // delete the FE_Element and DOF_Group objects
-    for (int i=0; i<numFE; i++)
-	if (theFEs[i] != 0)
-	    delete theFEs[i];
-
-    for (int j=0; j<numDOF; j++)
-	if (theDOFs[j] != 0)
-	    delete theDOFs[j];
-    
-    // delete the arrays
-    if (theFEs != 0) delete [] theFEs;
-    if (theDOFs != 0) delete [] theDOFs;
-    
-    // reset the numbers
-    numDOF = 0;
-    numFE =  0;
-    theFEs = 0;
-    theDOFs = 0;
-
     // for the nodes reset the DOF_Group pointers to 0
     Domain *theDomain = this->getDomainPtr();
     if (theDomain == 0)

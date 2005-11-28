@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2005-11-28 21:37:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/LagrangeConstraintHandler.h,v $
                                                                         
                                                                         
-// File: ~/analysis/handler/LagrangeConstraintHandler.h
-// 
 // Written: fmk 
 // Created: May 1998.
 // Revision: A
@@ -64,10 +62,6 @@ class LagrangeConstraintHandler : public ConstraintHandler
   private:
     double alphaSP;
     double alphaMP;
-    FE_Element 	**theFEs;
-    DOF_Group 	**theDOFs;
-    int 	numFE;
-    int 	numDOF;
 };
 
 #endif
