@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-11-28 21:37:12 $
+// $Revision: 1.5 $
+// $Date: 2005-11-29 22:04:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/LagrangeConstraintHandler.cpp,v $
                                                                         
 // Written: fmk 
@@ -79,7 +79,6 @@ LagrangeConstraintHandler::handle(const ID *nodesLast)
 	return -1;
     }
 
-    
     // get number ofelements and nodes in the domain 
     // and init the theFEs and theDOFs arrays
 
@@ -127,20 +126,36 @@ LagrangeConstraintHandler::handle(const ID *nodesLast)
     int numFeEle = 0;
     FE_Element *fePtr;
     while ((elePtr = theEle()) != 0) {
-	if ((fePtr = new FE_Element(numFeEle++, elePtr)) == 0) {
-	    opserr << "WARNING LagrangeConstraintHandler::handle()";
-	    opserr << " - ran out of memory";
+
+      // only create an FE_Element for a subdomain element if it does not
+      // do independent analysis .. then subdomain part of this analysis so create
+      // an FE_element & set subdomain to point to it.
+      if (elePtr->isSubdomain() == true) {
+	Subdomain *theSub = (Subdomain *)elePtr;
+	if (theSub->doesIndependentAnalysis() == false) {
+	  if ((fePtr = new FE_Element(numFeEle++, elePtr)) == 0) {
+	    opserr << "WARNING PlainHandler::handle() - ran out of memory";
 	    opserr << " creating FE_Element " << elePtr->getTag() << endln; 
 	    return -5;
-	}		
+	  }		
+
+	  theModel->addFE_Element(fePtr);
+	  theSub->setFE_ElementPtr(fePtr);
+
+	} //  if (theSub->doesIndependentAnalysis() == false) {
+
+      } else {
+
+	// just a regular element .. create an FE_Element for it & add to AnalysisModel
+	if ((fePtr = new FE_Element(numFeEle++, elePtr)) == 0) {
+	  opserr << "WARNING PlainHandler::handle() - ran out of memory";
+	  opserr << " creating FE_Element " << elePtr->getTag() << endln; 
+	  return -5;
+	}
 	
 	theModel->addFE_Element(fePtr);
-	if (elePtr->isSubdomain() == true) {
-	    Subdomain *theSub = (Subdomain *)elePtr;
-	    theSub->setFE_ElementPtr(fePtr);
-	}
+      }
     }
-    
 
     // create the LagrangeSP_FE for the SP_Constraints and 
     // add to the AnalysisModel
@@ -265,7 +280,7 @@ LagrangeConstraintHandler::recvSelf(int cTag,
 {
   Vector data(2);
   int result = 0;
-  result = theChannel.sendVector(this->getDbTag(), cTag, data);
+  result = theChannel.recvVector(this->getDbTag(), cTag, data);
   alphaSP = data(0);
   alphaMP = data(1);
   if (result != 0) 

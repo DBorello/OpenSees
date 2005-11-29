@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2005-11-28 21:35:54 $
+// $Revision: 1.12 $
+// $Date: 2005-11-29 22:04:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/TransformationConstraintHandler.cpp,v $
                                                                         
                                                                         
@@ -56,8 +56,7 @@
 
 TransformationConstraintHandler::TransformationConstraintHandler()
 :ConstraintHandler(HANDLER_TAG_TransformationConstraintHandler),
- theFEs(0), theDOFs(0),numFE(0),numDOF(0),numConstrainedNodes(0),
- numTransformationFEs(0)
+ theFEs(0), theDOFs(0),numFE(0),numDOF(0),numConstrainedNodes(0)
 {
 
 }
@@ -261,33 +260,41 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
     numFE = 0;
     ID transformedEle(0, 64);
 
-    // we must check to see if the element has a constrained node
     while ((elePtr = theEle()) != 0) {
+      int flag = 0;
+      if (elePtr->isSubdomain() == true) {
+	Subdomain *theSub = (Subdomain *)elePtr;
+	if (theSub->doesIndependentAnalysis() == true) 
+	  flag = 1;
+      }
+
+      if (flag == 0) {
+      
 	const ID &nodes = elePtr->getExternalNodes();
 	int nodesSize = nodes.Size();
 	int isConstrainedNode = 0;
 	for (int i=0; i<nodesSize; i++) {
-	    int nodeTag = nodes(i);
-	    if (numMPConstraints != 0) {
-		int loc = constrainedNodesMP.getLocation(nodeTag);
-		if (loc >= 0) {
-		    isConstrainedNode = 1;
-		    i = nodesSize;
-		}
-	    } 
-	    if (numSPConstraints != 0 && isConstrainedNode == 0) {
-		int loc = constrainedNodesSP.getLocation(nodeTag);
-		if (loc >= 0) {
-		    isConstrainedNode = 1;		    
-		    i = nodesSize;
-		}
+	  int nodeTag = nodes(i);
+	  if (numMPConstraints != 0) {
+	    int loc = constrainedNodesMP.getLocation(nodeTag);
+	    if (loc >= 0) {
+	      isConstrainedNode = 1;
+	      i = nodesSize;
 	    }
-	}	    
-	    
-	// if constrained Transformation otherwise normal FE_Element
+	  } 
+	  if (numSPConstraints != 0 && isConstrainedNode == 0) {
+	    int loc = constrainedNodesSP.getLocation(nodeTag);
+	    if (loc >= 0) {
+	      isConstrainedNode = 1;		    
+	      i = nodesSize;
+	    }
+	  }
+	}
+	
 	if (isConstrainedNode == 1) {
 	  transformedEle[numFE++] = elePtr->getTag();
 	}
+      }
     }
     
     // create an array for the FE_elements and zero it
@@ -308,35 +315,61 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 
     while ((elePtr = theEle1()) != 0) {
       int tag = elePtr->getTag();
-      if (transformedEle.getLocation(tag) < 0) {
-	if ((fePtr = new FE_Element(numFeEle, elePtr)) == 0) {
-	  opserr << "WARNING TransformationConstraintHandler::handle()";
-	  opserr << " - ran out of memory";
-	  opserr << " creating FE_Element " << elePtr->getTag() << endln; 
-	  if (mps != 0) delete [] mps;
-	  if (sps != 0) delete [] sps;
-	  return -5;
-	}	
-      } else {
-	if ((fePtr = new TransformationFE(numFeEle, elePtr)) == 0) {		
-	  opserr << "WARNING TransformationConstraintHandler::handle()";
-	  opserr << " - ran out of memory";
-	  opserr << " creating TransformationFE " << elePtr->getTag() << endln; 
-	  if (mps != 0) delete [] mps;
-	  if (sps != 0) delete [] sps;
-	  return -6;		    
-	}
-	theFEs[numFE++] = fePtr;
-      }
-
-      numFeEle++;
-      theModel->addFE_Element(fePtr);
       if (elePtr->isSubdomain() == true) {
 	Subdomain *theSub = (Subdomain *)elePtr;
-	theSub->setFE_ElementPtr(fePtr);
+	if (theSub->doesIndependentAnalysis() == false) {
+	  
+	  if (transformedEle.getLocation(tag) < 0) {
+	    if ((fePtr = new FE_Element(numFeEle, elePtr)) == 0) {
+	      opserr << "WARNING TransformationConstraintHandler::handle()";
+	      opserr << " - ran out of memory";
+	      opserr << " creating FE_Element " << elePtr->getTag() << endln; 
+	      if (mps != 0) delete [] mps;
+	      if (sps != 0) delete [] sps;
+	      return -5;
+	    }	
+	  } else {
+	    if ((fePtr = new TransformationFE(numFeEle, elePtr)) == 0) {		
+	      opserr << "WARNING TransformationConstraintHandler::handle()";
+	      opserr << " - ran out of memory";
+	      opserr << " creating TransformationFE " << elePtr->getTag() << endln; 
+	      if (mps != 0) delete [] mps;
+	      if (sps != 0) delete [] sps;
+	      return -6;		    
+	    }
+	    theFEs[numFE++] = fePtr;
+	  }
+
+	  numFeEle++;
+	  theModel->addFE_Element(fePtr);
+	  theSub->setFE_ElementPtr(fePtr);
+	}
+      } else {
+	if (transformedEle.getLocation(tag) < 0) {
+	  if ((fePtr = new FE_Element(numFeEle, elePtr)) == 0) {
+	    opserr << "WARNING TransformationConstraintHandler::handle()";
+	    opserr << " - ran out of memory";
+	    opserr << " creating FE_Element " << elePtr->getTag() << endln; 
+	    if (mps != 0) delete [] mps;
+	    if (sps != 0) delete [] sps;
+	    return -5;
+	  }	
+	} else {
+	  if ((fePtr = new TransformationFE(numFeEle, elePtr)) == 0) {		
+	    opserr << "WARNING TransformationConstraintHandler::handle()";
+	    opserr << " - ran out of memory";
+	    opserr << " creating TransformationFE " << elePtr->getTag() << endln; 
+	    if (mps != 0) delete [] mps;
+	    if (sps != 0) delete [] sps;
+	    return -6;		    
+	  }
+	  theFEs[numFE++] = fePtr;
+	}
+	
+	numFeEle++;
+	theModel->addFE_Element(fePtr);
       }
     }
-
 
     theModel->setNumEqn(countDOF);
     
@@ -387,7 +420,6 @@ TransformationConstraintHandler::clearAll(void)
     numFE =  0;
     theFEs = 0;
     theDOFs = 0;
-    numTransformationFEs = 0;
 
     // for the nodes reset the DOF_Group pointers to 0
     Domain *theDomain = this->getDomainPtr();
@@ -424,8 +456,6 @@ TransformationConstraintHandler::applyLoad(void)
 int 
 TransformationConstraintHandler::enforceSPs(void)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
-
     for (int i=1; i<=numConstrainedNodes; i++) {
 	// upward cast - safe as i put it in this location
 	TransformationDOF_Group *theDof  =
