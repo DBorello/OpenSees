@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2005-11-28 21:38:40 $
+// $Revision: 1.13 $
+// $Date: 2005-11-29 22:46:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.h,v $
                                                                         
                                                                         
@@ -87,6 +87,7 @@ class FE_Element: public TaggedObject
 
     virtual Integrator *getLastIntegrator(void);
     virtual const Vector &getLastResponse(void);
+    Element *getElement(void);
 
     virtual void  Print(OPS_Stream&, int = 0) {return;};
 
@@ -102,6 +103,7 @@ class FE_Element: public TaggedObject
     void  addLocalD_Force(const Vector &vel, double fact = 1.0);    
     void  addLocalM_ForceSensitivity(int gradNumber, const Vector &accel, double fact = 1.0);    
     void  addLocalD_ForceSensitivity(int gradNumber, const Vector &vel, double fact = 1.0);    
+
 
     // protected variables - a copy for each object of the class        
     ID myDOF_Groups;

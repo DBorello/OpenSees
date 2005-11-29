@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2005-11-28 21:38:40 $
+// $Revision: 1.17 $
+// $Date: 2005-11-29 22:46:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.cpp,v $
                                                                         
                                                                         
@@ -82,6 +82,7 @@ FE_Element::FE_Element(int tag, Element *ele)
 	if (nodePtr == 0) {
 	    opserr << "FATAL FE_Element::FE_Element() - Node: ";
 	    opserr <<  nodes(i) <<  "does not exist in the Domain\n";
+	    opserr << *ele;
 	    exit(-1);
 	}
 	
@@ -820,6 +821,14 @@ FE_Element::addLocalD_Force(const Vector &accel, double fact)
 	opserr << "- subclasses must provide implementation\n";
     }    	            
 }
+
+
+Element *
+FE_Element::getElement(void)
+{
+  return myEle;
+}
+
 
 // AddingSensitivity:BEGIN /////////////////////////////////
 void  
