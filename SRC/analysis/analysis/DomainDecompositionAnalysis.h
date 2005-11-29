@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-08-29 08:02:40 $
+// $Revision: 1.4 $
+// $Date: 2005-11-29 23:36:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DomainDecompositionAnalysis.h,v $
                                                                         
                                                                         
-// File: ~/analysis/method/DomainDecompositionAnalysis.h
-// 
 // Written: fmk 
 // Created: Tue Sept 17 16:34:47: 1996
 // Revision: A
@@ -59,6 +57,7 @@ class DomainDecompAlgo;
 class Subdomain;
 class Vector;
 class EquiSolnAlgo;
+class ConvergenceTest;
 
 class DomainDecompositionAnalysis: public Analysis, public MovableObject
 {
@@ -76,6 +75,7 @@ class DomainDecompositionAnalysis: public Analysis, public MovableObject
 				IncrementalIntegrator &theIntegrator,	
 				LinearSOE &theSOE,
 				DomainSolver &theSolver);
+
 
 
     virtual ~DomainDecompositionAnalysis();
@@ -108,6 +108,7 @@ class DomainDecompositionAnalysis: public Analysis, public MovableObject
     virtual int setAlgorithm(EquiSolnAlgo &theAlgorithm);
     virtual int setIntegrator(IncrementalIntegrator &theIntegrator);
     virtual int setLinearSOE(LinearSOE &theSOE);
+    virtual int setConvergenceTest(ConvergenceTest &theTest);
     
   protected: 
     Subdomain		*getSubdomainPtr(void) const;
@@ -128,6 +129,7 @@ class DomainDecompositionAnalysis: public Analysis, public MovableObject
     AnalysisModel 	     *theModel;
     DomainDecompAlgo 	     *theAlgorithm;
     IncrementalIntegrator    *theIntegrator;        
+
     LinearSOE 		     *theSOE;
     DomainSolver	     *theSolver;
 

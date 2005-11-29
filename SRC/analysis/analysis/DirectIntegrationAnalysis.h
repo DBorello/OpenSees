@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-03-04 00:48:07 $
+// $Revision: 1.4 $
+// $Date: 2005-11-29 23:36:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DirectIntegrationAnalysis.h,v $
                                                                         
                                                                         
@@ -50,6 +50,7 @@ class AnalysisModel;
 class TransientIntegrator;
 class LinearSOE;
 class EquiSolnAlgo;
+class ConvergenceTest;
 
 class DirectIntegrationAnalysis: public TransientAnalysis
 {
@@ -60,7 +61,9 @@ class DirectIntegrationAnalysis: public TransientAnalysis
 			      AnalysisModel &theModel,
 			      EquiSolnAlgo &theSolnAlgo,		   
 			      LinearSOE &theSOE,
-			      TransientIntegrator &theIntegrator);
+			      TransientIntegrator &theIntegrator,
+			      ConvergenceTest *theTest = 0);
+
     virtual ~DirectIntegrationAnalysis();
 
     void clearAll(void);	    
@@ -69,19 +72,23 @@ class DirectIntegrationAnalysis: public TransientAnalysis
     int initialize(void);
 
     int domainChanged(void);
-    
+
+    int setNumberer(DOF_Numberer &theNumberer);    
     int setAlgorithm(EquiSolnAlgo &theAlgorithm);
     int setIntegrator(TransientIntegrator &theIntegrator);
     int setLinearSOE(LinearSOE &theSOE); 
+    int setConvergenceTest(ConvergenceTest &theTest);
     
     int checkDomainChange(void);
     EquiSolnAlgo *getAlgorithm(void);
-    TransientIntegrator *getIntegrator();
-// AddingSensitivity:BEGIN ///////////////////////////////
+    TransientIntegrator *getIntegrator(void);
+    ConvergenceTest *getConvergenceTest(void);
+
+    // AddingSensitivity:BEGIN ///////////////////////////////
 #ifdef _RELIABILITY
-	int setSensitivityAlgorithm(SensitivityAlgorithm *theSensitivityAlgorithm);
+    int setSensitivityAlgorithm(SensitivityAlgorithm *theSensitivityAlgorithm);
 #endif
-// AddingSensitivity:END /////////////////////////////////
+    // AddingSensitivity:END /////////////////////////////////
     
   protected:
     
@@ -92,12 +99,16 @@ class DirectIntegrationAnalysis: public TransientAnalysis
     EquiSolnAlgo 	*theAlgorithm;
     LinearSOE 		*theSOE;
     TransientIntegrator *theIntegrator;
+    ConvergenceTest     *theTest;
+
     int domainStamp;
-// AddingSensitivity:BEGIN ///////////////////////////////
+
+    // AddingSensitivity:BEGIN ///////////////////////////////
 #ifdef _RELIABILITY
-	SensitivityAlgorithm *theSensitivityAlgorithm;
+    SensitivityAlgorithm *theSensitivityAlgorithm;
 #endif
-// AddingSensitivity:END ///////////////////////////////
+    // AddingSensitivity:END ///////////////////////////////
+
 };
 
 #endif

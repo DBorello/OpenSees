@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2005-11-29 23:36:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/SubstructuringAnalysis.h,v $
                                                                         
                                                                         
-// File: ~/analysis/method/SubstructuringAnalysis.h
-// 
 // Written: fmk 
 // Created: Tue Sept 17 16:34:47: 1996
 // Revision: A
@@ -58,14 +56,13 @@ class SubstructuringAnalysis: public DomainDecompositionAnalysis
 {
   public:
     SubstructuringAnalysis(Subdomain &theDomain,
-		   ConstraintHandler &theHandler,
-		   DOF_Numberer &theNumberer,
-		   AnalysisModel &theModel,
-		   DomainDecompAlgo &theSolnAlgo,		   
-		   IncrementalIntegrator &theIntegrator,	
-		   LinearSOE &theSOE,
-		   DomainSolver &theSolver);
-
+			   ConstraintHandler &theHandler,
+			   DOF_Numberer &theNumberer,
+			   AnalysisModel &theModel,
+			   DomainDecompAlgo &theSolnAlgo,		   
+			   IncrementalIntegrator &theIntegrator,	
+			   LinearSOE &theSOE,
+			   DomainSolver &theSolver);
 
     virtual int analyze(void);
     virtual ~SubstructuringAnalysis();

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:44 $
+// $Revision: 1.3 $
+// $Date: 2005-11-29 23:36:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/SubstructuringAnalysis.cpp,v $
                                                                         
                                                                         
@@ -55,17 +55,21 @@
 //    sets theModel and theSysOFEqn to 0 and the Algorithm to the one supplied
 
 SubstructuringAnalysis::SubstructuringAnalysis(Subdomain &the_Domain,
-			   ConstraintHandler &handler,
-			   DOF_Numberer &numberer,
-			   AnalysisModel &model,
-			   DomainDecompAlgo &theSolnAlgo,
-			   IncrementalIntegrator &integrator,
-			   LinearSOE &theLinSOE,
-			   DomainSolver &theDDSolver)
-
-
-:DomainDecompositionAnalysis(the_Domain,handler,numberer,model,
-			     theSolnAlgo,integrator,theLinSOE,theDDSolver) 
+					       ConstraintHandler &handler,
+					       DOF_Numberer &numberer,
+					       AnalysisModel &model,
+					       DomainDecompAlgo &theSolnAlgo,
+					       IncrementalIntegrator &integrator,
+					       LinearSOE &theLinSOE,
+					       DomainSolver &theDDSolver)
+:DomainDecompositionAnalysis(the_Domain,
+			     handler,
+			     numberer,
+			     model,
+			     theSolnAlgo,
+			     integrator,
+			     theLinSOE,
+			     theDDSolver)
 {
 
 }    

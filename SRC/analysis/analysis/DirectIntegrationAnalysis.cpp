@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2005-08-31 17:39:34 $
+// $Revision: 1.8 $
+// $Date: 2005-11-29 23:36:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DirectIntegrationAnalysis.cpp,v $
                                                                         
                                                                         
@@ -43,6 +43,7 @@
 #include <LinearSOE.h>
 #include <DOF_Numberer.h>
 #include <ConstraintHandler.h>
+#include <ConvergenceTest.h>
 #include <TransientIntegrator.h>
 #include <Domain.h>
 
@@ -62,29 +63,37 @@
 // Constructor
 //    sets theModel and theSysOFEqn to 0 and the Algorithm to the one supplied
 
-DirectIntegrationAnalysis::DirectIntegrationAnalysis(
-			      Domain &the_Domain,
-			      ConstraintHandler &theHandler,
-			      DOF_Numberer &theNumberer,
-			      AnalysisModel &theModel,
-			      EquiSolnAlgo &theSolnAlgo,		   
-			      LinearSOE &theLinSOE,
-			      TransientIntegrator &theTransientIntegrator)
+DirectIntegrationAnalysis::DirectIntegrationAnalysis(Domain &the_Domain,
+						     ConstraintHandler &theHandler,
+						     DOF_Numberer &theNumberer,
+						     AnalysisModel &theModel,
+						     EquiSolnAlgo &theSolnAlgo,		   
+						     LinearSOE &theLinSOE,
+						     TransientIntegrator &theTransientIntegrator,
+						     ConvergenceTest *theConvergenceTest)
 :TransientAnalysis(the_Domain), 
  theConstraintHandler(&theHandler),
  theDOF_Numberer(&theNumberer), 
  theAnalysisModel(&theModel), 
  theAlgorithm(&theSolnAlgo), 
  theSOE(&theLinSOE),
- theIntegrator(&theTransientIntegrator), domainStamp(0)
+ theIntegrator(&theTransientIntegrator), 
+ theTest(theConvergenceTest),
+ domainStamp(0)
 {
-    // first we set up the links needed by the elements in the 
-    // aggregation
-    theAnalysisModel->setLinks(the_Domain, theHandler);
-    theConstraintHandler->setLinks(the_Domain,theModel,theTransientIntegrator);
-    theDOF_Numberer->setLinks(theModel);
-    theIntegrator->setLinks(theModel,theLinSOE);
-    theAlgorithm->setLinks(theModel,theTransientIntegrator,theLinSOE);
+  // first we set up the links needed by the elements in the 
+  // aggregation
+  theAnalysisModel->setLinks(the_Domain, theHandler);
+  theConstraintHandler->setLinks(the_Domain,theModel,theTransientIntegrator);
+  theDOF_Numberer->setLinks(theModel);
+  theIntegrator->setLinks(theModel,theLinSOE);
+  theAlgorithm->setLinks(theModel,theTransientIntegrator,theLinSOE);
+
+  if (theTest != 0)
+    theAlgorithm->setConvergenceTest(theTest);
+  else
+    theTest = theAlgorithm->getConvergenceTest();
+  
 // AddingSensitivity:BEGIN ////////////////////////////////////
 #ifdef _RELIABILITY
 	theSensitivityAlgorithm = 0;
@@ -94,24 +103,43 @@ DirectIntegrationAnalysis::DirectIntegrationAnalysis(
 
 DirectIntegrationAnalysis::~DirectIntegrationAnalysis()
 {
-
+  // we don't invoke the destructors in case user switching
+  // from a static to a direct integration analysis 
+  // clearAll() must be invoked if user wishes to invoke destructor
 }    
 
 void
 DirectIntegrationAnalysis::clearAll(void)
 {
-    // invoke the destructor on all the objects in the aggregation
+  // invoke the destructor on all the objects in the aggregation
+  if (theAnalysisModel != 0)     
     delete theAnalysisModel;
+  if (theConstraintHandler != 0) 
     delete theConstraintHandler;
+  if (theDOF_Numberer != 0)      
     delete theDOF_Numberer;
+  if (theIntegrator != 0) 
     delete theIntegrator;
+  if (theAlgorithm != 0)  
     delete theAlgorithm;
+  if (theSOE != 0)
     delete theSOE;
+  if (theTest != 0)
+    delete theTest;
+
 // AddingSensitivity:BEGIN ////////////////////////////////////
 #ifdef _RELIABILITY
 	delete theSensitivityAlgorithm;
 #endif
 // AddingSensitivity:END //////////////////////////////////////
+
+    theAnalysisModel =0;
+    theConstraintHandler =0;
+    theDOF_Numberer =0;
+    theIntegrator =0;
+    theAlgorithm =0;
+    theSOE =0;
+    theTest =0;
 }    
 
 #include <NodeIter.h>
@@ -136,71 +164,79 @@ DirectIntegrationAnalysis::initialize(void)
 	return -2;
     } else
       theIntegrator->commit();
-    
+
     return 0;
 }
 
 int 
 DirectIntegrationAnalysis::analyze(int numSteps, double dT)
 {
+
   int result = 0;
-    Domain *the_Domain = this->getDomainPtr();
+  Domain *the_Domain = this->getDomainPtr();
 
     for (int i=0; i<numSteps; i++) {
-	// check if domain has undergone change
-	int stamp = the_Domain->hasDomainChanged();
-	if (stamp != domainStamp) {
-	    domainStamp = stamp;	
-	    if (this->domainChanged() < 0) {
-		opserr << "DirectIntegrationAnalysis::analyze() - domainChanged() failed\n";
-		return -1;
-	    }	
-	}
+      if (theAnalysisModel->newStepDomain(dT) < 0) {
+	opserr << "DirectIntegrationAnalysis::analyze() - the AnalysisModel failed";
+	opserr << " at time " << the_Domain->getCurrentTime() << endln;
+	the_Domain->revertToLastCommit();
+	return -2;
+      }
 
-	if (theIntegrator->newStep(dT) < 0) {
-	    opserr << "DirectIntegrationAnalysis::analyze() - the Integrator failed";
-	    opserr << " at time " << the_Domain->getCurrentTime() << endln;
-	    the_Domain->revertToLastCommit();
-	    return -2;
-	}
+      // check if domain has undergone change
+      int stamp = the_Domain->hasDomainChanged();
+      if (stamp != domainStamp) {
+	domainStamp = stamp;	
+	if (this->domainChanged() < 0) {
+	  opserr << "DirectIntegrationAnalysis::analyze() - domainChanged() failed\n";
+	  return -1;
+	}	
+      }
 
-	result = theAlgorithm->solveCurrentStep();
-	if (result < 0) {
-	    opserr << "DirectIntegrationAnalysis::analyze() - the Algorithm failed";
-	    opserr << " at time " << the_Domain->getCurrentTime() << endln;
-	    the_Domain->revertToLastCommit();	    
-	    theIntegrator->revertToLastStep();
-	    return -3;
-	}    
+      if (theIntegrator->newStep(dT) < 0) {
+	opserr << "DirectIntegrationAnalysis::analyze() - the Integrator failed";
+	opserr << " at time " << the_Domain->getCurrentTime() << endln;
+	the_Domain->revertToLastCommit();
+	return -2;
+      }
+
+      result = theAlgorithm->solveCurrentStep();
+      if (result < 0) {
+	opserr << "DirectIntegrationAnalysis::analyze() - the Algorithm failed";
+	opserr << " at time " << the_Domain->getCurrentTime() << endln;
+	the_Domain->revertToLastCommit();	    
+	theIntegrator->revertToLastStep();
+	return -3;
+      }    
 
 // AddingSensitivity:BEGIN ////////////////////////////////////
 #ifdef _RELIABILITY
-	if (theSensitivityAlgorithm != 0) {
-		result = theSensitivityAlgorithm->computeSensitivities();
-		if (result < 0) {
-			opserr << "StaticAnalysis::analyze() - the SensitivityAlgorithm failed";
-			opserr << " at iteration: " << i << " with domain at load factor ";
-			opserr << the_Domain->getCurrentTime() << endln;
-			the_Domain->revertToLastCommit();	    
-			theIntegrator->revertToLastStep();
-			return -5;
-		}    
-	}
-#endif
-// AddingSensitivity:END //////////////////////////////////////
-
-	result = theIntegrator->commit();
+      if (theSensitivityAlgorithm != 0) {
+	result = theSensitivityAlgorithm->computeSensitivities();
 	if (result < 0) {
-	    opserr << "DirectIntegrationAnalysis::analyze() - ";
-	    opserr << "the Integrator failed to commit";
-	    opserr << " at time " << the_Domain->getCurrentTime() << endln;
-	    the_Domain->revertToLastCommit();	    
-	    theIntegrator->revertToLastStep();
-	    return -4;
-	} 
-   
-	// opserr << "DirectIntegrationAnalysis - time: " << the_Domain->getCurrentTime() << endln;
+	  opserr << "StaticAnalysis::analyze() - the SensitivityAlgorithm failed";
+	  opserr << " at iteration: " << i << " with domain at load factor ";
+	  opserr << the_Domain->getCurrentTime() << endln;
+	  the_Domain->revertToLastCommit();	    
+	  theIntegrator->revertToLastStep();
+	  return -5;
 	}    
+      }
+#endif
+      // AddingSensitivity:END //////////////////////////////////////
+      
+      result = theIntegrator->commit();
+      if (result < 0) {
+	opserr << "DirectIntegrationAnalysis::analyze() - ";
+	opserr << "the Integrator failed to commit";
+	opserr << " at time " << the_Domain->getCurrentTime() << endln;
+	the_Domain->revertToLastCommit();	    
+	theIntegrator->revertToLastStep();
+	return -4;
+      } 
+      
+      // opserr << "DirectIntegrationAnalysis - time: " << the_Domain->getCurrentTime() << endln;
+    }    
     return result;
 }
 
@@ -208,6 +244,9 @@ DirectIntegrationAnalysis::analyze(int numSteps, double dT)
 int
 DirectIntegrationAnalysis::domainChanged(void)
 {
+    Domain *the_Domain = this->getDomainPtr();
+    int stamp = the_Domain->hasDomainChanged();
+    domainStamp = stamp;
    
     theAnalysisModel->clearAll();    
     theConstraintHandler->clearAll();
@@ -234,8 +273,6 @@ DirectIntegrationAnalysis::domainChanged(void)
 
 
     theConstraintHandler->doneNumberingDOF();
-
-    // opserr << theAnalysisModel->getDOFGraph();
 
     /*
     DOF_GrpIter &theDOFs1 = theAnalysisModel->getDOFs();
@@ -271,15 +308,43 @@ DirectIntegrationAnalysis::setSensitivityAlgorithm(SensitivityAlgorithm *passedS
 
     // invoke the destructor on the old one
     if (theSensitivityAlgorithm != 0) {
-		delete theSensitivityAlgorithm;
-	}
+      delete theSensitivityAlgorithm;
+    }
 
-	theSensitivityAlgorithm = passedSensitivityAlgorithm;
-
-	return 0;
+    theSensitivityAlgorithm = passedSensitivityAlgorithm;
+    
+    return 0;
 }
 #endif
 // AddingSensitivity:END ///////////////////////////////
+
+
+int 
+DirectIntegrationAnalysis::setNumberer(DOF_Numberer &theNewNumberer) 
+{
+    int result = 0;
+
+    // invoke the destructor on the old one
+    if (theDOF_Numberer != 0)
+	delete theDOF_Numberer;
+
+    // first set the links needed by the Algorithm
+    theDOF_Numberer = &theNewNumberer;
+    theDOF_Numberer->setLinks(*theAnalysisModel);
+
+    // invoke domainChanged() either indirectly or directly
+    Domain *the_Domain = this->getDomainPtr();
+    int stamp = the_Domain->hasDomainChanged();
+    domainStamp = stamp;
+    result = this->domainChanged();    
+    if (result < 0) {
+      opserr << "StaticAnalysis::setNumberer() - setNumberer() failed";
+      return -1;
+    }	
+
+    return 0;
+}
+
 
 
 int 
@@ -381,6 +446,20 @@ DirectIntegrationAnalysis::setLinearSOE(LinearSOE &theNewSOE)
 }
 
 
+int 
+DirectIntegrationAnalysis::setConvergenceTest(ConvergenceTest &theNewTest)
+{
+  // invoke the destructor on the old one
+  if (theTest != 0)
+    delete theTest;
+  
+  // set the links needed by the other objects in the aggregation
+  theTest = &theNewTest;
+  theAlgorithm->setConvergenceTest(theTest);
+  
+  return 0;
+}
+
 
 int
 DirectIntegrationAnalysis::checkDomainChange(void)
@@ -412,6 +491,12 @@ TransientIntegrator *
 DirectIntegrationAnalysis::getIntegrator(void)
 {
   return theIntegrator;
+}
+
+ConvergenceTest *
+DirectIntegrationAnalysis::getConvergenceTest(void)
+{
+  return theTest;
 }
 
 

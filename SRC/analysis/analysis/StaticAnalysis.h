@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-03-04 00:48:07 $
+// $Revision: 1.6 $
+// $Date: 2005-11-29 23:36:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.h,v $
                                                                         
                                                                         
@@ -27,7 +27,6 @@
 #define StaticAnalysis_h
 
 // Written: fmk 
-// Created: 11/96
 // Revision: A
 //
 // Description: This file contains the interface for the StaticAnalysis
@@ -37,17 +36,22 @@
 // What: "@(#) StaticAnalysis.h, revA"
 
 #include <Analysis.h>
+
+
 // AddingSensitivity:BEGIN //////////////////////////////////
 #ifdef _RELIABILITY
 #include <SensitivityAlgorithm.h>
 #endif
 // AddingSensitivity:END ////////////////////////////////////
+
+
 class ConstraintHandler;
 class DOF_Numberer;
 class AnalysisModel;
 class StaticIntegrator;
 class LinearSOE;
 class EquiSolnAlgo;
+class ConvergenceTest;
 
 class StaticAnalysis: public Analysis
 {
@@ -58,24 +62,33 @@ class StaticAnalysis: public Analysis
 		   AnalysisModel &theModel,
 		   EquiSolnAlgo &theSolnAlgo,		   
 		   LinearSOE &theSOE,
-		   StaticIntegrator &theIntegrator);
+		   StaticIntegrator &theIntegrator,
+		   ConvergenceTest *theTest = 0);
 
     ~StaticAnalysis();
 
     void clearAll(void);	    
     
-    int  analyze(int numSteps);
+    int analyze(int numSteps);
     int initialize(void);
-    int  domainChanged(void);
+    int domainChanged(void);
 
+    int setNumberer(DOF_Numberer &theNumberer);
     int setAlgorithm(EquiSolnAlgo &theAlgorithm);
     int setIntegrator(StaticIntegrator &theIntegrator);
     int setLinearSOE(LinearSOE &theSOE);
-// AddingSensitivity:BEGIN ///////////////////////////////
+    int setConvergenceTest(ConvergenceTest &theTest);
+
+    EquiSolnAlgo     *getAlgorithm(void);
+    StaticIntegrator *getIntegrator(void);
+    ConvergenceTest  *getConvergenceTest(void);
+
+
+    // AddingSensitivity:BEGIN ///////////////////////////////
 #ifdef _RELIABILITY
-	int setSensitivityAlgorithm(SensitivityAlgorithm *theSensitivityAlgorithm);
+    int setSensitivityAlgorithm(SensitivityAlgorithm *theSensitivityAlgorithm);
 #endif
-// AddingSensitivity:END /////////////////////////////////
+    // AddingSensitivity:END /////////////////////////////////
     
   protected: 
     
@@ -86,12 +99,17 @@ class StaticAnalysis: public Analysis
     EquiSolnAlgo 	*theAlgorithm;
     LinearSOE 		*theSOE;
     StaticIntegrator    *theIntegrator;
+    ConvergenceTest     *theTest;
+
     int domainStamp;
-// AddingSensitivity:BEGIN ///////////////////////////////
+
+    // AddingSensitivity:BEGIN ///////////////////////////////
 #ifdef _RELIABILITY
-	SensitivityAlgorithm *theSensitivityAlgorithm;
+    SensitivityAlgorithm *theSensitivityAlgorithm;
 #endif
-// AddingSensitivity:END ///////////////////////////////
+    // AddingSensitivity:END ///////////////////////////////
+
+
 };
 
 #endif

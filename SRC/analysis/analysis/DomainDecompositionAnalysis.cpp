@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-08-31 17:39:34 $
+// $Revision: 1.6 $
+// $Date: 2005-11-29 23:36:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DomainDecompositionAnalysis.cpp,v $
                                                                         
                                                                         
@@ -44,7 +44,7 @@
 #include <LinearSOE.h>
 #include <DomainDecompAlgo.h>
 #include <DomainSolver.h>
-
+#include <ConvergenceTest.h>
 #include <IncrementalIntegrator.h>
 #include <Subdomain.h>
 
@@ -96,13 +96,13 @@ DomainDecompositionAnalysis::DomainDecompositionAnalysis(int clsTag,
 }
 
 DomainDecompositionAnalysis::DomainDecompositionAnalysis(Subdomain &the_Domain,
-			   ConstraintHandler &handler,
-			   DOF_Numberer &numberer,
-			   AnalysisModel &model,
-			   DomainDecompAlgo &theSolnAlgo,
-			   IncrementalIntegrator &integrator,
-			   LinearSOE &theLinSOE,
-			   DomainSolver &theDDSolver)
+							 ConstraintHandler &handler,
+							 DOF_Numberer &numberer,
+							 AnalysisModel &model,
+							 DomainDecompAlgo &theSolnAlgo,
+							 IncrementalIntegrator &integrator,
+							 LinearSOE &theLinSOE,
+							 DomainSolver &theDDSolver)
 
 
 :Analysis(the_Domain),
@@ -124,7 +124,6 @@ DomainDecompositionAnalysis::DomainDecompositionAnalysis(Subdomain &the_Domain,
     theAlgorithm->setLinks(*theModel,*theIntegrator,*theSOE,
 			   *theSolver,*theSubdomain);
 
-
     theSubdomain->setDomainDecompAnalysis(*this);
 }    
 
@@ -139,20 +138,26 @@ void
 DomainDecompositionAnalysis::clearAll(void)
 {
     // invoke the destructor on all the objects in the aggregation
+  if (theModel != 0)
     delete theModel;
+  if (theHandler != 0)
     delete theHandler;
+  if (theNumberer != 0)
     delete theNumberer;
+  if (theIntegrator != 0)
     delete theIntegrator;
+  if (theAlgorithm != 0)
     delete theAlgorithm;
+  if (theSOE != 0)
     delete theSOE;
-
-    // now set the pointers to NULL
-    theModel =0;
-    theHandler =0;
-    theNumberer =0;
-    theIntegrator =0;
-    theAlgorithm =0;
-    theSOE =0;
+  
+  // now set the pointers to NULL
+  theModel =0;
+  theHandler =0;
+  theNumberer =0;
+  theIntegrator =0;
+  theAlgorithm =0;
+  theSOE =0;
 }    
 
 int 
@@ -682,6 +687,13 @@ int
 DomainDecompositionAnalysis::setLinearSOE(LinearSOE &theSOE)
 {
   opserr << "DomainDecompositionAnalysis::setLinearSOE() - not implemented\n";
+  return -1;
+}
+
+int 
+DomainDecompositionAnalysis::setConvergenceTest(ConvergenceTest &theTest)
+{
+  opserr << "DomainDecompositionAnalysis::setConvergenceTest() - not implemented\n";
   return -1;
 }
 

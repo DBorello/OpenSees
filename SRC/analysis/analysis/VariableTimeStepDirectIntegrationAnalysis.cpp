@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:00:44 $
+// $Revision: 1.4 $
+// $Date: 2005-11-29 23:36:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/VariableTimeStepDirectIntegrationAnalysis.cpp,v $
                                                                         
                                                                         
@@ -49,10 +49,11 @@ VariableTimeStepDirectIntegrationAnalysis::VariableTimeStepDirectIntegrationAnal
 			      AnalysisModel &theModel,
 			      EquiSolnAlgo &theSolnAlgo,		   
 			      LinearSOE &theLinSOE,
-			      TransientIntegrator &theTransientIntegrator)
+			      TransientIntegrator &theTransientIntegrator,
+			      ConvergenceTest *theTest)
 
 :DirectIntegrationAnalysis(the_Domain, theHandler, theNumberer, theModel, 
-			   theSolnAlgo, theLinSOE, theTransientIntegrator)
+			   theSolnAlgo, theLinSOE, theTransientIntegrator, theTest)
 {
 
 }    
@@ -70,7 +71,7 @@ VariableTimeStepDirectIntegrationAnalysis::analyze(int numSteps, double dT, doub
   Domain *theDom = this->getDomainPtr();
   EquiSolnAlgo *theAlgo = this->getAlgorithm();
   TransientIntegrator *theIntegratr = this->getIntegrator();
-  ConvergenceTest *theTest = theAlgo->getTest();
+  ConvergenceTest *theTest = theAlgo->getConvergenceTest();
 
   // set some variables
   int result = 0;  
@@ -80,13 +81,6 @@ VariableTimeStepDirectIntegrationAnalysis::analyze(int numSteps, double dT, doub
   
   // loop until analysis has performed the total time incr requested
   while (currentTimeIncr < totalTimeIncr) {
-
-    // check if domain has undergone change
-    if (this->checkDomainChange() < 0) {
-      opserr << "VariableTimeStepDirectIntegrationAnalysis::analyze() - failed";
-      opserr << " failed at time " << theDom->getCurrentTime() << endln;
-      return -1;
-    }	
 
     //
     // do newStep(), solveCurrentStep() and commit() as in regular

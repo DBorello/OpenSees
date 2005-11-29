@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-29 00:25:18 $
+// $Revision: 1.3 $
+// $Date: 2005-11-29 23:36:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/VariableTimeStepDirectIntegrationAnalysis.h,v $
                                                                         
                                                                         
@@ -58,7 +58,8 @@ class VariableTimeStepDirectIntegrationAnalysis: public DirectIntegrationAnalysi
 					      AnalysisModel &theModel,
 					      EquiSolnAlgo &theSolnAlgo,
 					      LinearSOE &theSOE,
-					      TransientIntegrator &theIntegrator);
+					      TransientIntegrator &theIntegrator,
+					      ConvergenceTest *theTest =0);
     virtual ~VariableTimeStepDirectIntegrationAnalysis();
 
     int analyze(int numSteps, double dT, double dtMin, double dtMax, int Jd);
