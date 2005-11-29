@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2005-11-28 21:43:04 $
+// $Revision: 1.16 $
+// $Date: 2005-11-29 23:31:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.cpp,v $
                                                                         
                                                                         
@@ -282,7 +282,7 @@ TransformationDOF_Group::getNumFreeDOF(void) const
     if (modID != 0) {
 	int numFreeDOF = modNumDOF;
 	for (int i=0; i<modNumDOF; i++)
-	    if ((*modID)(i) < 0)
+	    if ((*modID)(i) == -1)
 		numFreeDOF--;
 	return numFreeDOF;	
     } else
