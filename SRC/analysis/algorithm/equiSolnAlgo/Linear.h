@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:42 $
+// $Revision: 1.3 $
+// $Date: 2005-11-29 22:42:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/Linear.h,v $
                                                                         
                                                                         
@@ -49,7 +49,7 @@ class Linear: public EquiSolnAlgo
     ~Linear();
 
     int solveCurrentStep(void);
-    void setTest(ConvergenceTest &theNewTest);
+    int setConvergenceTest(ConvergenceTest *theNewTest);
     
     virtual int sendSelf(int commitTag, Channel &theChannel);
     virtual int recvSelf(int commitTag, Channel &theChannel, 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:00:42 $
+// $Revision: 1.5 $
+// $Date: 2005-11-29 22:42:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/NewtonLineSearch.cpp,v $
 
 // Written: fmk 
@@ -65,10 +65,11 @@ NewtonLineSearch::~NewtonLineSearch()
 
 }
 
-void 
-NewtonLineSearch::setTest(ConvergenceTest &newTest)
+int
+NewtonLineSearch::setConvergenceTest(ConvergenceTest *newTest)
 {
-    theTest = &newTest;
+    theTest = newTest;
+    return 0;
 }
 
 
@@ -171,7 +172,7 @@ NewtonLineSearch::solveCurrentStep(void)
 }
 
 ConvergenceTest *
-NewtonLineSearch::getTest(void)
+NewtonLineSearch::getConvergenceTest(void)
 {
   return theTest;
 }

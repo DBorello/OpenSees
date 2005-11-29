@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.10 $
-// $Date: 2005-05-20 21:41:36 $
+// $Revision: 1.11 $
+// $Date: 2005-11-29 22:42:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/KrylovNewton.cpp,v $
 
 // Written: MHS
@@ -91,10 +91,11 @@ KrylovNewton::~KrylovNewton()
     delete [] work;
 }
 
-void 
-KrylovNewton::setTest(ConvergenceTest &newTest)
+int
+KrylovNewton::setConvergenceTest(ConvergenceTest *newTest)
 {
-  theTest = &newTest;
+  theTest = newTest;
+  return 0;
 }
 
 int 
@@ -239,7 +240,7 @@ KrylovNewton::solveCurrentStep(void)
 }
 
 ConvergenceTest *
-KrylovNewton::getTest(void)
+KrylovNewton::getConvergenceTest(void)
 {
   return theTest;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:42 $
+// $Revision: 1.3 $
+// $Date: 2005-11-29 22:42:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/Linear.cpp,v $
                                                                         
                                                                         
@@ -111,11 +111,10 @@ Linear::solveCurrentStep(void)
     return 0;
 }
 
-void
-Linear::setTest(ConvergenceTest &theNewTest)
+int
+Linear::setConvergenceTest(ConvergenceTest *theNewTest)
 {
-  opserr << " WARNINGLinear::setTest() - linear algorithm does";
-  opserr << " not use a ConvergenceTest\n"; 
+  return 0;
 }
 
 int

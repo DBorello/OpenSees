@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:00:42 $
+// $Revision: 1.7 $
+// $Date: 2005-11-29 22:42:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/ModifiedNewton.cpp,v $
                                                                         
                                                                         
@@ -46,6 +46,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <ConvergenceTest.h>
+#include <Timer.h>
 
 // Constructor
 ModifiedNewton::ModifiedNewton(int theTangentToUse)
@@ -69,10 +70,11 @@ ModifiedNewton::~ModifiedNewton()
 
 }
 
-void 
-ModifiedNewton::setTest(ConvergenceTest &newTest)
+int
+ModifiedNewton::setConvergenceTest(ConvergenceTest *newTest)
 {
-    theTest = &newTest;
+    theTest = newTest;
+    return 0;
 }
 
 int 
@@ -92,7 +94,9 @@ ModifiedNewton::solveCurrentStep(void)
     }	
 
     // we form the tangent
-    
+    //    Timer timer1;
+    // timer1.start();
+
     if (theIncIntegratorr->formUnbalance() < 0) {
 	opserr << "WARNING ModifiedNewton::solveCurrentStep() -";
 	opserr << "the Integrator failed in formUnbalance()\n";	
@@ -117,12 +121,16 @@ ModifiedNewton::solveCurrentStep(void)
     int result = -1;
     int count = 0;
     do {
+      //Timer timer2;
+      //timer2.start();
 	if (theSOE->solve() < 0) {
 	    opserr << "WARNING ModifiedNewton::solveCurrentStep() -";
 	    opserr << "the LinearSysOfEqn failed in solve()\n";	
 	    return -3;
 	}	    
-
+	//timer2.pause();
+	//opserr << "TIMER::SOLVE()- " << timer2;
+	
 	if (theIncIntegratorr->update(theSOE->getX()) < 0) {
 	    opserr << "WARNING ModifiedNewton::solveCurrentStep() -";
 	    opserr << "the Integrator failed in update()\n";	
@@ -140,6 +148,9 @@ ModifiedNewton::solveCurrentStep(void)
 
     } while (result == -1);
 
+    //timer1.pause();
+    //opserr << "TIMER::solveCurrentStep - " << timer1;
+
     if (result == -2) {
       opserr << "ModifiedNewton::solveCurrentStep() -";
       opserr << "the ConvergenceTest object failed in test()\n";
@@ -150,7 +161,7 @@ ModifiedNewton::solveCurrentStep(void)
 }
 
 ConvergenceTest *
-ModifiedNewton::getTest(void)
+ModifiedNewton::getConvergenceTest(void)
 {
   return theTest;
 }
@@ -158,24 +169,9 @@ ModifiedNewton::getTest(void)
 int
 ModifiedNewton::sendSelf(int cTag, Channel &theChannel)
 {
-  int result = 0;
-  int dataTag = this->getDbTag();
-  ID data(2);
-  data(0) = theTest->getClassTag();
-  data(1) = theTest->getDbTag();
-  result = theChannel.sendID(dataTag, cTag, data);
-  if (result != 0) {
-    opserr << "ModifiedNewton::sendSelf() - failed to send ID\n";
-    return result;
-  }
-
-  result = theTest->sendSelf(cTag, theChannel);
-  if (result != 0) {
-    opserr << "ModifiedNewton::sendSelf() - failed to send CTest object\n";
-    return result;
-  }
-  
-  return 0;
+  static ID data(1);
+  data(0) = tangent;
+  return theChannel.sendID(this->getDbTag(), cTag, data);
 }
 
 int
@@ -183,27 +179,10 @@ ModifiedNewton::recvSelf(int cTag,
 			Channel &theChannel, 
 			FEM_ObjectBroker &theBroker)
 {
-    ID data(2);
-    int result;
-    int dataTag = this->getDbTag();
-
-    result = theChannel.recvID(dataTag, cTag, data);    
-    if (result != 0) {
-      opserr << "ModifiedNewton::recvSelf() - failed to receive ID\n";
-      return result;
-    }
-    int ctType = data(0);
-    int ctDb = data(1);
-    
-    theTest = theBroker.getNewConvergenceTest(ctType);
-    theTest->setDbTag(ctDb);
-    result = theTest->recvSelf(cTag, theChannel, theBroker);
-    if (result != 0) {
-      opserr << "ModifiedNewton::recvSelf() - failed to recv CTest object\n";
-      return result;
-    }
-    
-    return 0;
+  static ID data(1);
+  theChannel.recvID(this->getDbTag(), cTag, data);
+  tangent = data(0);
+  return 0;
 }
 
 void

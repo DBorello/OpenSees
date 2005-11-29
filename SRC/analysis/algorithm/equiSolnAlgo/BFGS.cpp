@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:00:42 $
+// $Revision: 1.5 $
+// $Date: 2005-11-29 22:42:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/BFGS.cpp,v $
                                                                         
 // Written: Ed Love
@@ -142,14 +142,20 @@ BFGS::~BFGS()
 }
 
 
-void 
-BFGS::setTest(ConvergenceTest &newTest)
+int
+BFGS::setConvergenceTest(ConvergenceTest *newTest)
 {
-    theTest = &newTest;
+    theTest = newTest;
 
-    if ( localTest != 0 )  delete localTest;
+    if ( localTest != 0 )  
+      delete localTest;
 
     localTest = theTest->getCopy( this->numberLoops );
+    if (localTest != 0) {
+      opserr << "BFGS::setConvergenceTest() - could not get copy for local test\n";
+      return -1;
+    } else
+      return 0;
 }
 
 
@@ -462,7 +468,7 @@ void  BFGS::BFGSUpdate(IncrementalIntegrator *theIntegrator,
 
 
 ConvergenceTest *
-BFGS::getTest(void)
+BFGS::getConvergenceTest(void)
 {
   return theTest;
 }

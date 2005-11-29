@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-14 23:00:43 $
+// $Revision: 1.9 $
+// $Date: 2005-11-29 22:42:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/NewtonRaphson.cpp,v $
                                                                         
                                                                         
@@ -71,10 +71,11 @@ NewtonRaphson::~NewtonRaphson()
 
 }
 
-void 
-NewtonRaphson::setTest(ConvergenceTest &newTest)
+int
+NewtonRaphson::setConvergenceTest(ConvergenceTest *newTest)
 {
-    theTest = &newTest;
+  theTest = newTest;
+  return 0;
 }
 
 
@@ -95,13 +96,11 @@ NewtonRaphson::solveCurrentStep(void)
 	return -5;
     }	
 
-
     if (theIntegrator->formUnbalance() < 0) {
       opserr << "WARNING NewtonRaphson::solveCurrentStep() -";
       opserr << "the Integrator failed in formUnbalance()\n";	
       return -2;
     }	    
-
 
     // set itself as the ConvergenceTest objects EquiSolnAlgo
     theTest->setEquiSolnAlgo(*this);
@@ -110,7 +109,6 @@ NewtonRaphson::solveCurrentStep(void)
       opserr << "the ConvergenceTest object failed in start()\n";
       return -3;
     }
-
 
     int result = -1;
     int count = 0;
@@ -136,28 +134,27 @@ NewtonRaphson::solveCurrentStep(void)
 	    return -1;
 	}		    
       }
-	
-	if (theSOE->solve() < 0) {
-	    opserr << "WARNING NewtonRaphson::solveCurrentStep() -";
-	    opserr << "the LinearSysOfEqn failed in solve()\n";	
-	    return -3;
-	}	    
 
+      if (theSOE->solve() < 0) {
+	opserr << "WARNING NewtonRaphson::solveCurrentStep() -";
+	opserr << "the LinearSysOfEqn failed in solve()\n";	
+	return -3;
+      }	    
 
-	if (theIntegrator->update(theSOE->getX()) < 0) {
-	    opserr << "WARNING NewtonRaphson::solveCurrentStep() -";
-	    opserr << "the Integrator failed in update()\n";	
-	    return -4;
-	}	        
+      if (theIntegrator->update(theSOE->getX()) < 0) {
+	opserr << "WARNING NewtonRaphson::solveCurrentStep() -";
+	opserr << "the Integrator failed in update()\n";	
+	return -4;
+      }	        
 
-	if (theIntegrator->formUnbalance() < 0) {
-	    opserr << "WARNING NewtonRaphson::solveCurrentStep() -";
-	    opserr << "the Integrator failed in formUnbalance()\n";	
-	    return -2;
-	}	
+      if (theIntegrator->formUnbalance() < 0) {
+	opserr << "WARNING NewtonRaphson::solveCurrentStep() -";
+	opserr << "the Integrator failed in formUnbalance()\n";	
+	return -2;
+      }	
 
-	result = theTest->test();
-	this->record(count++);
+      result = theTest->test();
+      this->record(count++);
 
     } while (result == -1);
 
@@ -173,7 +170,7 @@ NewtonRaphson::solveCurrentStep(void)
 }
 
 ConvergenceTest *
-NewtonRaphson::getTest(void)
+NewtonRaphson::getConvergenceTest(void)
 {
   return theTest;
 }
@@ -181,24 +178,9 @@ NewtonRaphson::getTest(void)
 int
 NewtonRaphson::sendSelf(int cTag, Channel &theChannel)
 {
-  int result = 0;
-  int dataTag = this->getDbTag();
-  ID data(2);
-  data(0) = theTest->getClassTag();
-  data(1) = theTest->getDbTag();
-  result = theChannel.sendID(dataTag, cTag, data);
-  if (result != 0) {
-    opserr << "NewtonRaphson::sendSelf() - failed to send ID\n";
-    return result;
-  }
-
-  result = theTest->sendSelf(cTag, theChannel);
-  if (result != 0) {
-    opserr << "NewtonRaphson::sendSelf() - failed to send CTest object\n";
-    return result;
-  }
-  
-  return 0;
+  static ID data(1);
+  data(0) = tangent;
+  return theChannel.sendID(this->getDbTag(), cTag, data);
 }
 
 int
@@ -206,27 +188,10 @@ NewtonRaphson::recvSelf(int cTag,
 			Channel &theChannel, 
 			FEM_ObjectBroker &theBroker)
 {
-    ID data(2);
-    int result;
-    int dataTag = this->getDbTag();
-
-    result = theChannel.recvID(dataTag, cTag, data);    
-    if (result != 0) {
-      opserr << "NewtonRaphson::recvSelf() - failed to receive ID\n";
-      return result;
-    }
-    int ctType = data(0);
-    int ctDb = data(1);
-    
-    theTest = theBroker.getNewConvergenceTest(ctType);
-    theTest->setDbTag(ctDb);
-    result = theTest->recvSelf(cTag, theChannel, theBroker);
-    if (result != 0) {
-      opserr << "NewtonRaphson::recvSelf() - failed to recv CTest object\n";
-      return result;
-    }
-    
-    return 0;
+  static ID data(1);
+  theChannel.recvID(this->getDbTag(), cTag, data);
+  tangent = data(0);
+  return 0;
 }
 
 

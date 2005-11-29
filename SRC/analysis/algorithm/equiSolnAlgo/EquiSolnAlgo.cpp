@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 06:19:32 $
+// $Revision: 1.3 $
+// $Date: 2005-11-29 22:42:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/EquiSolnAlgo.cpp,v $
                                                                         
                                                                         
@@ -69,7 +69,7 @@ EquiSolnAlgo::setLinks(AnalysisModel &theNewModel,
 
 
 ConvergenceTest *
-EquiSolnAlgo::getTest(void)
+EquiSolnAlgo::getConvergenceTest(void)
 {
   return 0;
 }

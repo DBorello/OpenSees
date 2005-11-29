@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:00:42 $
+// $Revision: 1.4 $
+// $Date: 2005-11-29 22:42:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/Broyden.cpp,v $
                                                                         
                                                                         
@@ -126,15 +126,21 @@ Broyden::~Broyden()
 }
 
 
-void 
-Broyden::setTest(ConvergenceTest &newTest)
+int
+Broyden::setConvergenceTest(ConvergenceTest *newTest)
 {
-  
-    theTest = &newTest;
+    theTest = newTest;
 
-    if ( localTest != 0 )  delete localTest ;
+    if ( localTest != 0 )  
+      delete localTest ;
 
     localTest = theTest->getCopy( this->numberLoops ) ;
+    if (localTest == 0) {
+      opserr << "Broyden::setTest() - could not get a copy\n";
+      return -1;
+    } 
+    
+    return 0;
 }
 
 
@@ -393,7 +399,7 @@ void  Broyden::BroydenUpdate( IncrementalIntegrator *theIntegrator,
 
 
 ConvergenceTest *
-Broyden::getTest(void)
+Broyden::getConvergenceTest(void)
 {
   return theTest;
 }

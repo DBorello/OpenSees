@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:43 $
+// $Revision: 1.3 $
+// $Date: 2005-11-29 22:42:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/PeriodicNewton.cpp,v $
 
 // Written: MHS
@@ -63,10 +63,11 @@ PeriodicNewton::~PeriodicNewton()
 
 }
 
-void 
-PeriodicNewton::setTest(ConvergenceTest &newTest)
+int
+PeriodicNewton::setConvergenceTest(ConvergenceTest *newTest)
 {
-    theTest = &newTest;
+    theTest = newTest;
+    return 0;
 }
 
 int 
@@ -155,7 +156,7 @@ PeriodicNewton::solveCurrentStep(void)
 }
 
 ConvergenceTest *
-PeriodicNewton::getTest(void)
+PeriodicNewton::getConvergenceTest(void)
 {
   return theTest;
 }
