@@ -18,16 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.31 $
-// $Date: 2005-11-07 23:53:00 $
+// $Revision: 1.32 $
+// $Date: 2005-11-30 23:32:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
-                                                                        
-// FileP: ~/domain/domain/Domain.C
-//
 // Written: fmk 
-// Created: Fri Sep 20 15:27:47: 1996
-// Revision: A
 //
 // Purpose: This file contains the class definition for Domain
 // Domain is a container class. The class is responsible for holding
@@ -281,72 +276,65 @@ Domain::Domain(TaggedObjectStorage &theStorage)
 
 Domain::~Domain()
 {
-
   // delete the objects in the domain
-  this->clearAll();
+  this->Domain::clearAll();
 
-    // delete all the storage objects
-    // SEGMENT FAULT WILL OCCUR IF THESE OBJECTS WERE NOT CONSTRUCTED
-    // USING NEW
-
-    if (theElements != 0)
-	delete theElements;    
-
-    if (theNodes != 0)
-	delete theNodes;
-
-    if (theSPs != 0)
-	delete theSPs;
-
-    if (theMPs != 0)
-	delete theMPs;
-
-    if (theLoadPatterns != 0)
-	delete theLoadPatterns;
-    
-    if (theEleIter != 0)
-	delete theEleIter;
-    
-    if (theNodIter != 0)
-	delete theNodIter;
-
-    if (theSP_Iter != 0)
-	delete theSP_Iter;
-    
-    if (theMP_Iter != 0)
-	delete theMP_Iter;
-
-    if (allSP_Iter != 0)
-	delete allSP_Iter;
-
-    if (theEigenvalues != 0)
-      delete theEigenvalues;
-
-	int i;
-    for (i=0; i<numRecorders; i++)  
-      delete theRecorders[i];
-    
-    if (theRecorders != 0) {
-      delete [] theRecorders;
-      theRecorders = 0;
-    }
-
-    for (i=0; i<numRegions; i++)  
-      delete theRegions[i];
-    
-    if (theRegions != 0) {
-      delete [] theRegions;
-      theRegions = 0;
-    }
-
-    if (theNodeGraph != 0)
-      delete theNodeGraph;
-
-    if (theElementGraph != 0)
-      delete theElementGraph;
+  // delete all the storage objects
+  // SEGMENT FAULT WILL OCCUR IF THESE OBJECTS WERE NOT CONSTRUCTED
+  // USING NEW
   
+  if (theElements != 0)
+    delete theElements;    
+  
+  if (theNodes != 0)
+    delete theNodes;
+  
+  if (theSPs != 0)
+    delete theSPs;
+  
+  if (theMPs != 0)
+    delete theMPs;
+  
+  if (theLoadPatterns != 0)
+    delete theLoadPatterns;
+  
+  if (theEleIter != 0)
+    delete theEleIter;
+  
+  if (theNodIter != 0)
+    delete theNodIter;
+  
+  if (theSP_Iter != 0)
+    delete theSP_Iter;
+  
+  if (theMP_Iter != 0)
+    delete theMP_Iter;
+  
+  if (allSP_Iter != 0)
+    delete allSP_Iter;
+  
+  if (theEigenvalues != 0)
+    delete theEigenvalues;
+  
+  int i;
+  for (i=0; i<numRecorders; i++)  
+    delete theRecorders[i];
+  
+  if (theRecorders != 0) {
+    delete [] theRecorders;
     theRecorders = 0;
-    numRecorders = 0;
+  }
+  
+  for (i=0; i<numRegions; i++)  
+    delete theRegions[i];
+  
+  if (theRegions != 0) {
+    delete [] theRegions;
+    theRegions = 0;
+  }
+  
+  theRecorders = 0;
+  numRecorders = 0;
 }
 
 
@@ -694,62 +682,80 @@ Domain::addElementalLoad(ElementalLoad *load, int pattern)
 
 void
 Domain::clearAll(void) {
-    // clear the loads and constraints from any load pattern
-    LoadPatternIter &thePatterns = this->getLoadPatterns();
-    LoadPattern *thePattern;
-    while ((thePattern = thePatterns()) != 0)
-	thePattern->clearAll();
+  // clear the loads and constraints from any load pattern
+  LoadPatternIter &thePatterns = this->getLoadPatterns();
+  LoadPattern *thePattern;
+  while ((thePattern = thePatterns()) != 0)
+    thePattern->clearAll();
+  
+  // clean out the containers
+  theElements->clearAll();
+  theNodes->clearAll();
+  theSPs->clearAll();
+  theMPs->clearAll();
+  theLoadPatterns->clearAll();
 
-    // clean out the containers
-    theElements->clearAll();
-    theNodes->clearAll();
-    theSPs->clearAll();
-    theMPs->clearAll();
-    theLoadPatterns->clearAll();
+  // remove the recorders
+  int i;
+  for (i=0; i<numRecorders; i++)
+    delete theRecorders[i];
+  numRecorders = 0; 
+  
+  if (theRecorders != 0) {
+    delete [] theRecorders;
+    theRecorders = 0;
+  }
+  
+  for (i=0; i<numRegions; i++)
+    delete theRegions[i];
+  numRegions = 0;
 
-    // remove the recorders
-    int i;
-    for (i=0; i<numRecorders; i++)
-	delete theRecorders[i];
-    numRecorders = 0; 
-    
-    if (theRecorders != 0) {
-      delete [] theRecorders;
-      theRecorders = 0;
-    }
+  if (theRegions != 0) {
+    delete [] theRegions;
+    theRegions = 0;
+  }
+  
+  // set the time back to 0.0
+  currentTime = 0.0;
+  committedTime = 0.0;
+  dT = 0.0;
 
-    for (i=0; i<numRegions; i++)
-	delete theRegions[i];
-    numRegions = 0;
-    
-    if (theRegions != 0) {
-      delete [] theRegions;
-      theRegions = 0;
-    }
+  // set the bounds around the origin
+  theBounds(0) = 0;
+  theBounds(1) = 0;
+  theBounds(2) = 0;
+  theBounds(3) = 0;
+  theBounds(4) = 0;    
+  theBounds(5) = 0;        
+  
+  currentGeoTag = 0;
+  lastGeoSendTag = -1;
+  
+  // rest the flag to be as initial
+  hasDomainChangedFlag = false;
+  nodeGraphBuiltFlag = false;
+  eleGraphBuiltFlag = false;
+  
+  dbEle =0; dbNod =0; dbSPs =0; dbMPs =0; dbLPs = 0;
 
-    // set the time back to 0.0
-    currentTime = 0.0;
-    committedTime = 0.0;
-    dT = 0.0;
+  currentGeoTag = 0;
+  lastGeoSendTag = -1;
+  lastChannel = 0;
 
-    // set the bounds around the origin
-    theBounds(0) = 0;
-    theBounds(1) = 0;
-    theBounds(2) = 0;
-    theBounds(3) = 0;
-    theBounds(4) = 0;    
-    theBounds(5) = 0;        
+  // rest the flag to be as initial
+  hasDomainChangedFlag = false;
+  nodeGraphBuiltFlag = false;
+  eleGraphBuiltFlag = false;
 
-    currentGeoTag = 0;
-    lastGeoSendTag = -1;
-    lastChannel = 0;
+  if (theNodeGraph != 0)
+    delete theNodeGraph;
+  theNodeGraph = 0;
 
-    // rest the flag to be as initial
-    hasDomainChangedFlag = false;
-    nodeGraphBuiltFlag = false;
-    eleGraphBuiltFlag = false;
-
-    dbEle =0; dbNod =0; dbSPs =0; dbMPs =0; dbLPs = 0;
+  if (theElementGraph != 0)
+    delete theElementGraph;
+  theElementGraph = 0;
+  
+  dbEle =0; dbNod =0; dbSPs =0; dbMPs =0; dbLPs = 0;
 }
 
 
@@ -1096,8 +1102,6 @@ Domain::getPhysicalBounds(void)
     return theBounds;
 }
 
-
-
 Graph  &
 Domain::getElementGraph(void)
 {
@@ -1129,7 +1133,6 @@ Domain::getElementGraph(void)
     // return the Graph
     return *theElementGraph;
 }
-
 
 
 Graph  &
@@ -1165,7 +1168,6 @@ Domain::getNodeGraph(void)
     // return the Graph
     return *theNodeGraph;
 }
-
 
 void
 Domain::setCommitTag(int newTag)
@@ -1402,6 +1404,7 @@ Domain::update(double newTime, double dT)
 {
   this->applyLoad(newTime);
   this->update();
+
   return 0;
 }
 
@@ -2479,6 +2482,35 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
   return 0;
 }
 
+
+double
+Domain::getNodeDisp(int nodeTag, int dof, int &errorFlag)
+{
+  double result = 0.0;
+  errorFlag = 0;
+  Node *theNode = this->getNode(nodeTag);
+  if (theNode == 0) {
+    errorFlag = -1;
+    return 0.0;
+  }
+  const Vector &disp = theNode->getTrialDisp();
+  if (dof < disp.Size() && dof >= 0) {
+    result = disp(dof); 
+  }  
+  
+  return result;
+}
+
+int 
+Domain::setMass(const Matrix &mass, int nodeTag)
+{
+  int result = 0;
+  Node *theNode = this->getNode(nodeTag);
+  if (theNode == 0) {
+    return -1;
+  }
+  return theNode->setMass(mass);  
+}
 
 int
 Domain::calculateNodalReactions(bool inclInertia)

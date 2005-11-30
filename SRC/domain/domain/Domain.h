@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2005-11-07 23:53:00 $
+// $Revision: 1.16 $
+// $Date: 2005-11-30 23:32:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
 // Written: fmk 
@@ -137,7 +137,8 @@ class Domain
     virtual int getNumMPs(void) const;
     virtual int getNumLoadPatterns(void) const;            
     virtual const Vector &getPhysicalBounds(void); 
-    
+
+
     // methods to get element and node graphs
     virtual  Graph  &getElementGraph(void);
     virtual  Graph  &getNodeGraph(void);
@@ -182,6 +183,10 @@ class Domain
     virtual int sendSelf(int commitTag, Channel &theChannel);  
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker);    
+
+    // nodal methods required in domain interface for parallel interprter
+    virtual double getNodeDisp(int nodeTag, int dof, int &errorFlag);
+    virtual int setMass(const Matrix &mass, int nodeTag);
 
     virtual int calculateNodalReactions(bool inclInertia);
 
