@@ -1,5 +1,5 @@
 /* ****************************************************************** **
-**    OpenSees - Open System for Earthquake Engineering Simulation    **
+**    OpenSeess - Open System for Earthquake Engineering Simulation    **
 **          Pacific Earthquake Engineering Research Center            **
 **                                                                    **
 **                                                                    **
@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-11-18 01:59:04 $
+// $Revision: 1.5 $
+// $Date: 2005-11-30 23:47:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ActorSubdomain.cpp,v $
                                                                         
                                                                         
@@ -37,10 +37,13 @@
 #include <Vector.h>
 #include <DomainDecompositionAnalysis.h>
 #include <PartitionedModelBuilder.h>
+#include <ConvergenceTest.h>
 
 #include <EquiSolnAlgo.h>
 #include <IncrementalIntegrator.h>
 #include <LinearSOE.h>
+#include <LinearSOESolver.h>
+#include <Recorder.h>
 
 #include <ArrayOfTaggedObjects.h>
 #include <ShadowActorSubdomain.h>
@@ -55,9 +58,7 @@ ActorSubdomain::ActorSubdomain(Channel &theChannel,
     
 ActorSubdomain::~ActorSubdomain()
 {
-    // does nothing
-    opserr << "ActorSubdomain DIED: " << endln;
-
+  // does nothing
 }
 
 
@@ -66,15 +67,12 @@ ActorSubdomain::run(void)
 {
     Vector theVect(4);
     bool exitYet = false;
-    opserr << "ActorSubdomain running: " << endln;
 
     while (exitYet == false) {
 
   	this->recvID(msgData);
 	int action = msgData(0);
 
-	//		opserr << "ACTORSUBDOMAIN: " << action << endln;
-	
 	int theType, theOtherType, tag, dbTag, loadPatternTag;
 	Element *theEle;
 	Node *theNod;
@@ -86,10 +84,19 @@ ActorSubdomain::run(void)
 	DomainDecompositionAnalysis *theDDAnalysis;
 	const Matrix *theMatrix;
 	const Vector *theVector;
+	Matrix *theM;
+	Vector *theV;
 	PartitionedModelBuilder *theBuilder;
 	IncrementalIntegrator *theIntegrator;
 	EquiSolnAlgo *theAlgorithm;
 	LinearSOE *theSOE;
+	LinearSOESolver *theSolver;
+	ConvergenceTest *theTest;
+	Recorder *theRecorder;
+	bool res;
+	double doubleRes;
+	int intRes;
+
 
 	const ID *theID;
 	
@@ -98,6 +105,7 @@ ActorSubdomain::run(void)
 	  case ShadowActorSubdomain_setTag:
 	    tag = msgData(1); // subdomain tag
 	    this->setTag(tag);
+	    this->Actor::setCommitTag(tag);
 
 	    break;
 
@@ -165,28 +173,51 @@ ActorSubdomain::run(void)
 	    break;
 
 	    
-	    
+	  case ShadowActorSubdomain_hasNode:
+	    theType = msgData(1);
+	    res = this->hasNode(theType);
+	    if (res == true)
+	      msgData(0) = 0;
+	    else
+	      msgData(0) = -1;
+	    this->sendID(msgData);
+
+	    break;
+
+	  case ShadowActorSubdomain_hasElement:
+	    theType = msgData(1);
+	    res = this->hasElement(theType);
+	    if (res == true)
+	      msgData(0) = 0;
+	    else
+	      msgData(0) = -1;
+	    this->sendID(msgData);
+	   
+             break;
+
+
 	  case ShadowActorSubdomain_addNode:
 	    theType = msgData(1);
 	    dbTag = msgData(2);
-	    
 	    theNod = theBroker->getNewNode(theType);
 
 	    if (theNod != 0) {
 		theNod->setDbTag(dbTag);		
-		this->recvObject(*theNod);
+		this->recvObject(*theNod); 
 		bool result = this->addNode(theNod);
 		if (result == true)
-		    msgData(0) = 0;
+		  msgData(0) = 0;
 		else
-		    msgData(0) = -1;
+		  msgData(0) = -1;
 	    } else
 		msgData(0) = -1;
-
+	    //	    opserr << "ActorSubdomain::add node: " << *theNod;
 	    break;
-	    
 
-	    
+
+
+
+
 	  case ShadowActorSubdomain_addExternalNode:
 	    theType = msgData(1);
 	    dbTag = msgData(2);
@@ -195,7 +226,15 @@ ActorSubdomain::run(void)
 	    if (theNod != 0) {
 		theNod->setDbTag(dbTag);
 		this->recvObject(*theNod);
-		bool result = this->addExternalNode(theNod);
+		bool result = this->Subdomain::addExternalNode(theNod);
+		delete theNod;
+		/*
+		Node *dummy = new Node(*theNod);
+		delete theNod;
+		opserr << *dummy;
+		opserr << dummy->getMass();
+		*/
+
 		if (result == true)
 		    msgData(0) = 0;
 		else
@@ -444,6 +483,12 @@ ActorSubdomain::run(void)
 	    this->recvVector(theVect);	    
 	    this->applyLoad(theVect(0));
 	    break;
+
+	  case ShadowActorSubdomain_setCommittedTime:
+	    this->recvVector(theVect);	    
+	    this->setCommittedTime(theVect(0));
+	    this->setCurrentTime(theVect(0));
+	    break;	    
 	    
 	  case ShadowActorSubdomain_setLoadConstant:
 	    this->setLoadConstant();
@@ -451,6 +496,10 @@ ActorSubdomain::run(void)
 	    
 	  case ShadowActorSubdomain_update:
 	    this->update();
+	    break;
+
+	  case ShadowActorSubdomain_updateTimeDt:
+	    this->updateTimeDt();
 	    break;
 
 	  case ShadowActorSubdomain_computeNodalResponse:
@@ -477,7 +526,24 @@ ActorSubdomain::run(void)
 	  case ShadowActorSubdomain_revertToStart:
 	    this->revertToStart();
 	    break;	    	    
+
+	  case ShadowActorSubdomain_addRecorder:
+	    theType = msgData(1);
+	    theRecorder = theBroker->getPtrNewRecorder(theType);
+	    if (theRecorder != 0) {
+	      this->recvObject(*theRecorder);	      
+	      this->addRecorder(*theRecorder);
+	    }
+	    break;	    	    
+
+	  case ShadowActorSubdomain_removeRecorders:
+	    this->removeRecorders();
+	    break;	    	    
 	    
+
+	case ShadowActorSubdomain_wipeAnalysis:
+	    this->wipeAnalysis();	    
+	    break;
 
 	  case ShadowActorSubdomain_setDomainDecompAnalysis:
 	    theType = msgData(1);
@@ -509,7 +575,7 @@ ActorSubdomain::run(void)
 	  theType = msgData(1);
 	  theIntegrator = theBroker->getNewIncrementalIntegrator(theType);
 	  if (theIntegrator != 0) {
-	    this->recvObject(*theAlgorithm);
+	    this->recvObject(*theIntegrator);
 	    this->setAnalysisIntegrator(*theIntegrator);
 	    msgData(0) = 0;
 	  } else
@@ -521,13 +587,29 @@ ActorSubdomain::run(void)
 	  theType = msgData(1);
 	  theOtherType = msgData(2);
 	  theSOE = theBroker->getNewLinearSOE(theType, theOtherType);
+	  
 	  if (theSOE != 0) {
-	    this->recvObject(*theAlgorithm);
+	    this->recvObject(*theSOE);
+	    theSolver = theSOE->getSolver();
+	    this->recvObject(*theSolver);
 	    this->setAnalysisLinearSOE(*theSOE);
 	    msgData(0) = 0;
 	  } else
 	    msgData(0) = -1;
 	    
+	  break;
+
+	case ShadowActorSubdomain_setAnalysisConvergenceTest:
+	  theType = msgData(1);
+	  theTest = theBroker->getNewConvergenceTest(theType);
+	  
+	  if (theTest != 0) {
+	    this->recvObject(*theTest);
+	    this->setAnalysisConvergenceTest(*theTest);
+	    msgData(0) = 0;
+	  } else
+	    msgData(0) = -1;
+
 	  break;
 	    
 	  case ShadowActorSubdomain_domainChange:
@@ -583,6 +665,47 @@ ActorSubdomain::run(void)
 	    this->computeResidual();
 	    break;
 
+	  case ShadowActorSubdomain_clearAll:
+	    this->clearAll();
+	    this->sendID(msgData);
+	    break;
+
+
+	  case ShadowActorSubdomain_getNodeDisp:
+	    tag = msgData(1);  // nodeTag
+	    dbTag = msgData(2); // dof
+	    doubleRes = this->getNodeDisp(tag, dbTag, intRes);
+	    msgData(0) = intRes;
+	    this->sendID(msgData);
+	    if (intRes == 0) {
+	      theV = new Vector(1);
+	      (*theV)(0) = doubleRes;
+	      this->sendVector(*theV);
+	      delete theV;
+	    }
+	    break;
+
+	  case ShadowActorSubdomain_setMass:
+	    tag = msgData(1);  // nodeTag
+	    dbTag = msgData(2); // noRows
+	    theOtherType = msgData(3); // noRows
+	    theM = new Matrix(dbTag, theOtherType);
+	    this->recvMatrix(*theM);
+	    intRes = this->setMass(*theM, tag);
+	    
+	    delete theM;
+	    msgData(0) = intRes;
+	    this->sendID(msgData);
+	    break;
+
+         case ShadowActorSubdomain_setRayleighDampingFactors:
+	   theV = new Vector(4);
+	   this->recvVector(*theV);
+	   intRes = this->Subdomain::setRayleighDampingFactors((*theV)(0), (*theV)(1), (*theV)(2), (*theV)
+(3));
+	   delete theV;
+	   break;
+
 	  case ShadowActorSubdomain_DIE:
 	    exitYet = true;
 	    break;
@@ -592,52 +715,12 @@ ActorSubdomain::run(void)
 	    msgData(0) = -1;
 	}
     }
+
+    this->sendID(msgData);
     return 0;
 }
 
 
-Node *
-ActorSubdomain::removeNode(int tag)
-{
-  TaggedObject *object = internalNodes->removeComponent(tag);
-  if (object == 0) {
-      object = externalNodes->removeComponent(tag);      
-      Node *result = (Node *)object;
-      this->domainChange();                
-      return result;	  
-  }
-  else {
-      this->domainChange();          
-      Node *result = (Node *)object;
-      return result;	  
-  }
-}
-
-bool 
-ActorSubdomain::addExternalNode(Node *thePtr, bool check)
-{
-
-    if (check == true) {
-	// check to see it has not alredy been added
-	
-	int nodTag = thePtr->getTag();
-	TaggedObject *other = externalNodes->getComponentPtr(nodTag);
-	if (other != 0)
-	    return false;
-	
-	other = internalNodes->getComponentPtr(nodTag);
-	if (other != 0)
-	    return false;
-    }
-
-    bool result = externalNodes->addComponent(thePtr);
-    if (result == true) {
-	thePtr->setDomain(this);
-	this->domainChange();    
-    }
-    
-    return result;
-}
 
 const Vector &
 ActorSubdomain::getLastExternalSysResponse(void)
@@ -663,6 +746,40 @@ ActorSubdomain::getLastExternalSysResponse(void)
 
     return *mappedVect;
 
+}
+
+int
+ActorSubdomain::update(void)
+{
+  int res = this->Domain::update();
+
+  this->barrierCheck(res);
+
+  return res;
+}
+
+int
+ActorSubdomain::updateTimeDt(void)
+{
+  static Vector data(2);
+
+  this->recvVector(data);
+
+  double newTime = data(0);
+  double dT = data(1);
+  int res = this->Domain::update(newTime, dT);
+  return this->barrierCheck(res);
+}
+
+int
+ActorSubdomain::barrierCheck(int myResult)
+{
+  static ID data(1);
+  data(0) = myResult;
+  this->sendID(data);
+  this->recvID(data);
+
+  return data(0);
 }
 
 

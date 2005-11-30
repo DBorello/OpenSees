@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-11-18 01:59:04 $
+// $Revision: 1.5 $
+// $Date: 2005-11-30 23:47:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -57,6 +57,9 @@
 #include <EquiSolnAlgo.h>
 #include <IncrementalIntegrator.h>
 #include <LinearSOE.h>
+#include <LinearSOESolver.h>
+#include <ConvergenceTest.h>
+#include <Recorder.h>
 
 #include <FE_Element.h>
 
@@ -65,7 +68,6 @@
 int ShadowSubdomain::count = 0; // MHS
 int ShadowSubdomain::numShadowSubdomains = 0;
 ShadowSubdomain **ShadowSubdomain::theShadowSubdomains = 0;
-
 
 ShadowSubdomain::ShadowSubdomain(int tag, 
 				 MachineBroker &theMachineBroker,
@@ -78,11 +80,11 @@ ShadowSubdomain::ShadowSubdomain(int tag,
    theNodes(0,128),
    theExternalNodes(0,128), 
    theLoadCases(0,128),
+   theShadowSPs(0), theShadowMPs(0), theShadowLPs(0),
    numDOF(0),numElements(0),numNodes(0),numExternalNodes(0),
    numSPs(0),numMPs(0), buildRemote(false), gotRemoteData(false), 
    theFEele(0),
    theVector(0), theMatrix(0)
-
 {
   
   numShadowSubdomains++;
@@ -99,12 +101,19 @@ ShadowSubdomain::ShadowSubdomain(int tag,
 
   theShadowSubdomains = theCopy;
 
+
+  theShadowSPs      = new ArrayOfTaggedObjects(256);
+  theShadowMPs      = new ArrayOfTaggedObjects(256);    
+  theShadowLPs = new ArrayOfTaggedObjects(32);
+
   // does nothing
   numLoadPatterns = 0;
 
   msgData(0) = ShadowActorSubdomain_setTag;
   msgData(1) = tag;
   this->sendID(msgData);
+
+  this->setCommitTag(tag);
 }
 
 
@@ -118,6 +127,7 @@ ShadowSubdomain::ShadowSubdomain(int tag,
    theNodes(0,128),
    theExternalNodes(0,128), 
    theLoadCases(0,128),
+   theShadowSPs(0), theShadowMPs(0), theShadowLPs(0),
    numDOF(0),numElements(0),numNodes(0),numExternalNodes(0),
    numSPs(0),numMPs(0), buildRemote(false), gotRemoteData(false), 
    theFEele(0),
@@ -138,15 +148,26 @@ ShadowSubdomain::ShadowSubdomain(int tag,
 
   theShadowSubdomains = theCopy;
 
+  theShadowSPs      = new ArrayOfTaggedObjects(256);
+  theShadowMPs      = new ArrayOfTaggedObjects(256);    
+  theShadowLPs = new ArrayOfTaggedObjects(32);
+
   // does nothing
   numLoadPatterns = 0;
 }
 
 ShadowSubdomain::~ShadowSubdomain()    
 {
-    // send a message to the remote actor telling it to shut sown
-    msgData(0) = ShadowActorSubdomain_DIE;
-    this->sendID(msgData);
+  // send a message to the remote actor telling it to shut sown
+  msgData(0) = ShadowActorSubdomain_DIE;
+  this->sendID(msgData);
+  this->recvID(msgData);
+
+  delete theShadowSPs;
+  delete theShadowMPs;
+  delete theShadowLPs;
+
+  opserr << "ShadowSubdomain::~ShadowSubdomain()\n";
 }
 
 
@@ -292,7 +313,8 @@ ShadowSubdomain::addSP_Constraint(SP_Constraint *theSP)
     numSPs++;    
     // this->domainChange();
     
-    this->Subdomain::addSP_Constraint(theSP);
+    theShadowSPs->addComponent(theSP);
+
     return true;    
 }
 
@@ -309,8 +331,8 @@ ShadowSubdomain::addMP_Constraint(MP_Constraint *theMP)
     this->sendObject(*theMP);
     numMPs++;    
     // // this->domainChange();
-    
-    this->Subdomain::addMP_Constraint(theMP);
+
+    theShadowMPs->addComponent(theMP);    
     return true;    
 }
 
@@ -328,8 +350,10 @@ ShadowSubdomain::addLoadPattern(LoadPattern *thePattern)
     this->sendObject(*thePattern);
     //    this->domainChange();
 
-    this->Subdomain::addLoadPattern(thePattern);
+
+    theShadowLPs->addComponent(thePattern);    
     numLoadPatterns++;
+
     return true;    
 }
 
@@ -342,11 +366,13 @@ ShadowSubdomain::addSP_Constraint(SP_Constraint *theSP, int loadPattern)
 	// do all the checking stuff
 #endif
 
+  /*
   LoadPattern *thePattern = this->Subdomain::getLoadPattern(loadPattern);
   if ((thePattern == 0) || (thePattern->addSP_Constraint(theSP) == false)) {
     opserr << "ShadowSubdomain::addSP_Constraint() - could not add SP_Constraint: " << *theSP;
     return false;
   }
+  */
 
   msgData(0) = ShadowActorSubdomain_addSP_ConstraintToPattern;
   msgData(1) = theSP->getClassTag();
@@ -364,13 +390,17 @@ bool
 ShadowSubdomain::addNodalLoad(NodalLoad *theLoad, int loadPattern)
 {
 #ifdef _G3DEBUG
-    // do all the checking stuff
+  // do all the checking stuff
 #endif
+
+  /*
   LoadPattern *thePattern = this->Subdomain::getLoadPattern(loadPattern);
   if ((thePattern == 0) || (thePattern->addNodalLoad(theLoad) == false)) {
     opserr << "ShadowSubdomain::addNodalLoad() - could not add the load: " << *theLoad;
     return false;
   }
+  opserr << "ShadowSubdomain::addNodalLoad : " << this->getTag() << " " << theLoad->getNodeTag() << endln;
+  */
 
   msgData(0) = ShadowActorSubdomain_addNodalLoadToPattern;
   msgData(1) = theLoad->getClassTag();
@@ -401,6 +431,33 @@ ShadowSubdomain::addElementalLoad(ElementalLoad *theLoad, int loadPattern)
   this->sendObject(*theLoad);
 
   return true;    
+}
+
+
+bool 
+ShadowSubdomain::hasNode(int tag)
+{
+    msgData(0) = ShadowActorSubdomain_hasNode;
+    msgData(1) = tag;
+    this->sendID(msgData);
+    this->recvID(msgData);
+    if (msgData(0) == 0)
+      return true;
+    else
+      return false;
+}
+
+bool 
+ShadowSubdomain::hasElement(int tag)
+{
+    msgData(0) = ShadowActorSubdomain_hasElement;
+    msgData(1) = tag;
+    this->sendID(msgData);
+    this->recvID(msgData);
+    if (msgData(0) == 0)
+      return true;
+    else
+      return false;
 }
 
     
@@ -474,62 +531,73 @@ ShadowSubdomain::removeNode(int tag)
 SP_Constraint *
 ShadowSubdomain::removeSP_Constraint(int tag)
 {
-    SP_Constraint *spPtr = this->Subdomain::removeSP_Constraint(tag);
-    if (spPtr == 0)
-	return 0;
-
-    msgData(0) = ShadowActorSubdomain_removeSP_Constraint;
-    msgData(1) = tag;
-    
-    this->sendID(msgData);
-    numSPs--;
-    
-    return spPtr;
+  TaggedObject *mc = theShadowSPs->removeComponent(tag);
+  if (mc == 0)
+    return 0;
+  
+  msgData(0) = ShadowActorSubdomain_removeSP_Constraint;
+  msgData(1) = tag;
+  
+  this->sendID(msgData);
+  numSPs--;
+  
+  SP_Constraint *result = (SP_Constraint *)mc;    
+  return result;
 }
 
 MP_Constraint *
 ShadowSubdomain::removeMP_Constraint(int tag)    
 {
-    MP_Constraint *mpPtr = this->Subdomain::removeMP_Constraint(tag);
-    if (mpPtr == 0)
-	return 0;
+  TaggedObject *mc = theShadowMPs->removeComponent(tag);
+  if (mc == 0)
+    return 0;
     
-    msgData(0) = ShadowActorSubdomain_removeMP_Constraint;
-    msgData(1) = tag;
+  msgData(0) = ShadowActorSubdomain_removeMP_Constraint;
+  msgData(1) = tag;
     
-    this->sendID(msgData);
+  this->sendID(msgData);
 
-    numMPs--;
-    return mpPtr;
+  numMPs--;
+
+  MP_Constraint *result = (MP_Constraint *)mc;    
+  return result;
 }
 
 LoadPattern *
 ShadowSubdomain::removeLoadPattern(int loadTag)
 {
-    LoadPattern *res = this->Subdomain::removeLoadPattern(loadTag);
-    if (res == 0)
-	return 0;
-    
-    msgData(0) = ShadowActorSubdomain_removeLoadPattern;
-    msgData(1) = loadTag;
-    
-    this->sendID(msgData);
-    return res;
+  TaggedObject *mc = theShadowLPs->removeComponent(loadTag);
+  if (mc == 0)
+    return 0;
+  
+  msgData(0) = ShadowActorSubdomain_removeLoadPattern;
+  msgData(1) = loadTag;
+
+  this->sendID(msgData);  
+
+  LoadPattern *result = (LoadPattern *)mc;    
+  return result;
 }
 
 NodalLoad *
 ShadowSubdomain::removeNodalLoad(int loadTag, int loadPattern)
 {
-    NodalLoad *res = this->Subdomain::removeNodalLoad(loadTag, loadPattern);
-    if (res == 0)
-	return 0;
-    
-    msgData(0) = ShadowActorSubdomain_removeNodalLoadFromPattern;
-    msgData(1) = loadTag;
-    msgData(2) = loadPattern;
-    
-    this->sendID(msgData);
-    return res;
+  // remove the object from the container            
+  TaggedObject *mc = theShadowLPs->getComponentPtr(loadPattern);
+  if (mc == 0)
+    return 0;
+
+  LoadPattern *theLoadPattern = (LoadPattern *)mc;    
+  NodalLoad *res = theLoadPattern->removeNodalLoad(loadTag);
+  if (res == 0)
+    return 0;
+  
+  msgData(0) = ShadowActorSubdomain_removeNodalLoadFromPattern;
+  msgData(1) = loadTag;
+  msgData(2) = loadPattern;
+  
+  this->sendID(msgData);
+  return res;
 }
 
 
@@ -537,45 +605,57 @@ ShadowSubdomain::removeNodalLoad(int loadTag, int loadPattern)
 ElementalLoad *
 ShadowSubdomain::removeElementalLoad(int loadTag, int loadPattern)
 {
-    ElementalLoad *res = this->Subdomain::removeElementalLoad(loadTag, loadPattern);
-    if (res == 0)
-	return 0;
+  // remove the object from the container            
+  TaggedObject *mc = theShadowLPs->getComponentPtr(loadPattern);
+  if (mc == 0)
+    return 0;
+
+  LoadPattern *theLoadPattern = (LoadPattern *)mc;    
+  ElementalLoad *res = theLoadPattern->removeElementalLoad(loadTag);
+  if (res == 0)
+    return 0;
     
-    msgData(0) = ShadowActorSubdomain_removeElementalLoadFromPattern;
-    msgData(1) = loadTag;
-    msgData(2) = loadPattern;
-    
-    this->sendID(msgData);
-    return res;
+  msgData(0) = ShadowActorSubdomain_removeElementalLoadFromPattern;
+  msgData(1) = loadTag;
+  msgData(2) = loadPattern;
+  
+  this->sendID(msgData);
+  return res;
 }
 
 SP_Constraint *
 ShadowSubdomain::removeSP_Constraint(int loadTag, int loadPattern)
 {
-    SP_Constraint *res = this->Subdomain::removeSP_Constraint(loadTag, loadPattern);
-    if (res == 0)
-	return 0;
-    
-    msgData(0) = ShadowActorSubdomain_removeSP_ConstraintFromPattern;
-    msgData(1) = loadTag;
-    msgData(2) = loadPattern;
-    
-    this->sendID(msgData);
-    return res;
+  // remove the object from the container            
+  TaggedObject *mc = theShadowLPs->getComponentPtr(loadPattern);
+  if (mc == 0)
+    return 0;
+
+  LoadPattern *theLoadPattern = (LoadPattern *)mc;    
+  SP_Constraint *res = theLoadPattern->removeSP_Constraint(loadTag);
+  if (res == 0)
+    return 0;
+  
+  msgData(0) = ShadowActorSubdomain_removeSP_ConstraintFromPattern;
+  msgData(1) = loadTag;
+  msgData(2) = loadPattern;
+  
+  this->sendID(msgData);
+  return res;
 }
 
 
 ElementIter       &
 ShadowSubdomain::getElements()
 {
-    opserr << "ShadowSubdomain::getElements() ";
-    opserr << " - SHOULD NEVER BE CALLED - EXITING\n";
-    exit(-1);
-
-    // this will never be called - just for a strict compiler    
-    ArrayOfTaggedObjects *theEror = new ArrayOfTaggedObjects(1);
-    ElementIter *theIter = new SingleDomEleIter(theEror);
-    return *theIter;
+  opserr << "ShadowSubdomain::getElements() ";
+  opserr << " - SHOULD NEVER BE CALLED - EXITING\n";
+  exit(-1);
+  
+  // this will never be called - just for a strict compiler    
+  ArrayOfTaggedObjects *theEror = new ArrayOfTaggedObjects(1);
+  ElementIter *theIter = new SingleDomEleIter(theEror);
+  return *theIter;
 }
 
 NodeIter          &
@@ -739,31 +819,32 @@ ShadowSubdomain::setCommitTag(int newTag)
     msgData(0) = ShadowActorSubdomain_setCommitTag;
     msgData(1) = newTag;
 
-    this->sendID(msgData);
+    //    this->sendID(msgData);
 }
 
 void 
 ShadowSubdomain::setCurrentTime(double time)
 {
+  DomainDecompositionAnalysis *theDDA = this->getDDAnalysis();
+  if (theDDA != 0 && theDDA->doesIndependentAnalysis() != true) {
     msgData(0) = ShadowActorSubdomain_setCurrentTime;
-    Vector data(1);
+    Vector data(4);
     data(0) = time;
-    
+
     this->sendID(msgData);
     this->sendVector(data);    
-
+  }
 }
 
 void 
 ShadowSubdomain::setCommittedTime(double time)
 {
     msgData(0) = ShadowActorSubdomain_setCommittedTime;
-    Vector data(1);
+    Vector data(4);
     data(0) = time;
     
     this->sendID(msgData);
     this->sendVector(data);    
-
 }
 
 void 
@@ -783,6 +864,88 @@ ShadowSubdomain::update(void)
     msgData(0) =  ShadowActorSubdomain_update;
     this->sendID(msgData);
   }
+  return 0;
+}
+
+int
+ShadowSubdomain::update(double newTime, double dT)
+{
+  static Vector data(2);
+  DomainDecompositionAnalysis *theDDA = this->getDDAnalysis();
+  if (theDDA != 0 && theDDA->doesIndependentAnalysis() != true) {
+    msgData(0) =  ShadowActorSubdomain_updateTimeDt;
+    this->sendID(msgData);
+    data(0) = newTime;
+    data(1) = dT;
+    this->sendVector(data);
+  }
+
+  return 0;
+}
+
+
+int
+ShadowSubdomain::barrierCheckIN(void)
+{
+  static ID data(1);
+  this->recvID(data);
+  return data(0);
+}
+
+int
+ShadowSubdomain::barrierCheckOUT(int result)
+{
+  static ID data(1);
+  data(0) = result;
+  this->sendID(data);
+
+  return 0;
+}
+
+
+
+int
+ShadowSubdomain::setRayleighDampingFactors(double alphaM, double betaK, double betaK0, double betaKc)
+{
+  msgData(0) = ShadowActorSubdomain_setRayleighDampingFactors;
+  this->sendID(msgData);
+  static Vector data(4);
+  data(0) = alphaM;
+  data(1) = betaK;
+  data(2) = betaK0;
+  data(3) = betaKc;
+  this->sendVector(data);
+
+  return 0;
+}
+
+
+
+
+void
+ShadowSubdomain::clearAll(void)
+{
+  msgData(0) = ShadowActorSubdomain_clearAll;
+  this->sendID(msgData);
+  this->recvID(msgData);
+}
+
+
+int  
+ShadowSubdomain::addRecorder(Recorder &theRecorder)
+{
+  msgData(0) = ShadowActorSubdomain_addRecorder;
+  msgData(1) = theRecorder.getClassTag();
+  this->sendID(msgData);
+  this->sendObject(theRecorder);  
+  return 0;
+}
+
+int  
+ShadowSubdomain::removeRecorders(void)
+{
+  msgData(0) = ShadowActorSubdomain_removeRecorders;
+  this->sendID(msgData);
   return 0;
 }
 
@@ -819,6 +982,13 @@ ShadowSubdomain::revertToStart(void)
 }
 
 
+void 
+ShadowSubdomain::wipeAnalysis(void)
+{
+  msgData(0) = ShadowActorSubdomain_wipeAnalysis;
+    
+  this->sendID(msgData);
+}
 
 void 
 ShadowSubdomain::setDomainDecompAnalysis(DomainDecompositionAnalysis &theDDAnalysis)
@@ -859,9 +1029,27 @@ ShadowSubdomain::setAnalysisLinearSOE(LinearSOE &theSOE)
 {
     msgData(0) = ShadowActorSubdomain_setAnalysisLinearSOE;
     msgData(1) = theSOE.getClassTag();
-    
+
+    LinearSOESolver *theSolver = theSOE.getSolver();
+    msgData(2) = theSolver->getClassTag();    
+
     this->sendID(msgData);
     this->sendObject(theSOE);
+    this->sendObject(*theSolver);
+
+    return 0;
+}
+
+int 
+ShadowSubdomain::setAnalysisConvergenceTest(ConvergenceTest &theTest)
+{
+    msgData(0) = ShadowActorSubdomain_setAnalysisConvergenceTest;
+    msgData(1) = theTest.getClassTag();
+
+    this->sendID(msgData);
+    this->sendObject(theTest);
+
+    opserr << "ShadowSubdomain::setAnalysisConvergenceTest(ConvergenceTest &theTest)\n";
     return 0;
 }
 
@@ -1070,13 +1258,11 @@ ShadowSubdomain::computeNodalResponse(void)
 int 
 ShadowSubdomain::newStep(double dT)    
 {
-  opserr << "ShadowSubdomain::newStep(double dT) -START\n";
     msgData(0) =  ShadowActorSubdomain_newStep;
     this->sendID(msgData);
     static Vector timeStep(4);
     timeStep(0) = dT;
     this->sendVector(timeStep);
-  opserr << "ShadowSubdomain::newStep(double dT) -FINISH\n";
     return 0;
 }
 
@@ -1149,10 +1335,37 @@ ShadowSubdomain::buildMap(void)
 
 
 
+double
+ShadowSubdomain::getNodeDisp(int nodeTag, int dof, int &errorFlag)
+{
+  static Vector data(1); 
+  data(0) = 0.0;
+  
+  msgData(0) = ShadowActorSubdomain_getNodeDisp;
+  msgData(1) = nodeTag;
+  msgData(2) = dof;
+  this->sendID(msgData);
+  this->recvID(msgData);
+  errorFlag = msgData(0);
+  if (errorFlag == 0) {
+    this->recvVector(data);
+  }
 
+  return data(0);
+}
 
-
-
+int 
+ShadowSubdomain::setMass(const Matrix &mass, int nodeTag)
+{
+  msgData(0) = ShadowActorSubdomain_setMass;
+  msgData(1) = nodeTag;
+  msgData(2) = mass.noRows();
+  msgData(3) = mass.noCols();
+  this->sendID(msgData);
+  this->sendMatrix(mass);
+  this->recvID(msgData);
+  return msgData(0);
+}
 
 
 

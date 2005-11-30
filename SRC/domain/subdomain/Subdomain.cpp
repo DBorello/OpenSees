@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-08-29 07:47:20 $
+// $Revision: 1.7 $
+// $Date: 2005-11-30 23:47:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -75,7 +75,7 @@ Subdomain::Subdomain(int tag)
     // init the arrays.
     internalNodes = new ArrayOfTaggedObjects(8024);
     externalNodes = new ArrayOfTaggedObjects(256);
-    realExternalNodes = new ArrayOfTaggedObjects(256);    
+    //    realExternalNodes = new ArrayOfTaggedObjects(256);    
     
     internalNodeIter = new SingleDomNodIter(internalNodes);
     externalNodeIter = new SingleDomNodIter(externalNodes);    
@@ -110,7 +110,7 @@ Subdomain::Subdomain(int tag,
  theAnalysis(0), extNodes(0), theFEele(0),
  thePartitionedModelBuilder(0)
 {
-    realExternalNodes = new ArrayOfTaggedObjects(256);    
+  //    realExternalNodes = new ArrayOfTaggedObjects(256);    
     
     internalNodeIter = new SingleDomNodIter(internalNodes);
     externalNodeIter = new SingleDomNodIter(externalNodes);    
@@ -129,28 +129,38 @@ Subdomain::Subdomain(int tag,
 
 Subdomain::~Subdomain()
 {
-    if (internalNodes != 0)
-	delete internalNodes;
+  if (internalNodes != 0)
+    delete internalNodes;
 
-    if (externalNodes != 0)
-	delete externalNodes;
-    
-    if (internalNodeIter != 0)
-	delete internalNodeIter;
+  if (externalNodes != 0)
+    delete externalNodes;
+  
+  if (internalNodeIter != 0)
+    delete internalNodeIter;
+  
+  if (externalNodeIter != 0)
+    delete externalNodeIter;
 
-    if (externalNodeIter != 0)
-	delete externalNodeIter;
-
-    if (map != 0)
-      delete map;
-    if (mappedVect != 0)
-      delete mappedVect;
-    if (mappedMatrix != 0)
-      delete mappedMatrix;
-
+  if (map != 0)
+    delete map;
+  if (mappedVect != 0)
+    delete mappedVect;
+  if (mappedMatrix != 0)
+    delete mappedMatrix;
 }
 
 
+void
+Subdomain::clearAll(void) 
+{
+  this->Domain::clearAll();
+
+  if (internalNodes != 0)
+    internalNodes->clearAll();
+
+  if (externalNodes != 0)
+    externalNodes->clearAll();
+}
 
 int 
 Subdomain::buildSubdomain(int numSubdomains, PartitionedModelBuilder &theBuilder)
@@ -194,26 +204,26 @@ bool
 Subdomain::addExternalNode(Node *thePtr)
 {
 #ifdef _G3DEBUG
-	// check to see it has not alredy been added
+  // check to see it has not alredy been added
 	
-	int nodTag = thePtr->getTag();
-	TaggedObject *other = externalNodes->getComponentPtr(nodTag);
-	if (other != 0)
-	    return false;
-	
-	other = internalNodes->getComponentPtr(nodTag);
-	if (other != 0)
-	    return false;
+  int nodTag = thePtr->getTag();
+  TaggedObject *other = externalNodes->getComponentPtr(nodTag);
+  if (other != 0)
+    return false;
+  
+  other = internalNodes->getComponentPtr(nodTag);
+  if (other != 0)
+    return false;
 	
 #endif
     // create a dummy Node & try adding it to the external nodes
-    Node *newDummy = new Node(*thePtr);
+    Node *newDummy = new Node(*thePtr, false);
     if (newDummy == 0)
 	return false;
-    
+
     bool result = externalNodes->addComponent(newDummy);
     if (result == true) {
-	result = realExternalNodes->addComponent(thePtr);
+      //	result = realExternalNodes->addComponent(thePtr);
 	newDummy->setDomain(this);
 	this->domainChange();    
     }
@@ -230,12 +240,12 @@ Subdomain::removeNode(int tag)
   if (object == 0) {
       object = externalNodes->removeComponent(tag);      
       if (object != 0) {
-          //	  Node *dummy = (Node *)object;
-	  object = realExternalNodes->removeComponent(tag);      	  
-	  Node *result = (Node *)object;
-	  this->domainChange();          
-	  //	  delete dummy;
-	  return result;	  
+        //	  Node *dummy = (Node *)object;
+	//	  object = realExternalNodes->removeComponent(tag);      	  
+	Node *result = (Node *)object;
+	this->domainChange();          
+	//	  delete dummy;
+	return result;	  
       }
   }
   else {
@@ -260,6 +270,7 @@ Subdomain::getNodePtrs(void)
   opserr << "Subdomain::getNodePtrs() - should not be called\n";
   return 0;
 }
+
 Node *
 Subdomain::getNode(int tag) 
 {
@@ -276,8 +287,28 @@ Subdomain::getNode(int tag)
       Node *result = (Node *)object;
       return result;
   }
+
   return 0;  
 }
+
+bool
+Subdomain::hasNode(int tag) 
+{
+  if (this->getNode(tag) != 0)
+    return true;
+  else
+    return false;
+}  
+
+bool
+Subdomain::hasElement(int tag) 
+{
+  if (this->getElement(tag) != 0)
+    return true;
+  else
+    return false;
+}  
+
 
 int 
 Subdomain::getNumNodes(void) const
@@ -328,7 +359,7 @@ Subdomain::revertToStart(void)
 int
 Subdomain::update(void)
 {
-    return this->Domain::update();
+  return this->Domain::update();
 }
 
 int
@@ -375,6 +406,15 @@ Subdomain::getExternalNodeIter(void)
 
 
 void
+Subdomain::wipeAnalysis(void)
+{
+  if (theAnalysis != 0) {
+    theAnalysis->clearAll();
+    delete theAnalysis;
+  }
+}
+
+void
 Subdomain::setDomainDecompAnalysis(DomainDecompositionAnalysis &theNewAnalysis)
 {
     theAnalysis = &theNewAnalysis;
@@ -403,6 +443,14 @@ Subdomain::setAnalysisLinearSOE(LinearSOE &theSOE)
 {
   if (theAnalysis != 0)
     return theAnalysis->setLinearSOE(theSOE);
+  return 0;
+}
+
+int 
+Subdomain::setAnalysisConvergenceTest(ConvergenceTest &theTest)
+{
+  if (theAnalysis != 0)
+    return theAnalysis->setConvergenceTest(theTest);
   return 0;
 }
 
@@ -468,12 +516,12 @@ Subdomain::getExternalNodes()
 int 
 Subdomain::getNumDOF(void)
 {
-    if (theAnalysis != 0)
-	return theAnalysis->getNumExternalEqn();
-    else  {
-	opserr << "Subdomain::getNumDOF() - no StaticAnalysis has been set\n";
-	return 0;
-    }
+  if (theAnalysis != 0)
+    return theAnalysis->getNumExternalEqn();
+  else  {
+    //   opserr << "Subdomain::getNumDOF() - no StaticAnalysis has been set\n";
+    return 0;
+  }
 }
     
 int
@@ -577,6 +625,12 @@ Subdomain::isSubdomain(void)
     return true;
 }
 
+
+int 
+Subdomain::setRayleighDampingFactors(double alphaM, double betaK, double betaK0, double betaKc)
+{
+  return this->Domain::setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
+}
 
 int 
 Subdomain::computeTang(void)

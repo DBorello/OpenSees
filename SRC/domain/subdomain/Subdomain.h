@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-08-29 07:47:20 $
+// $Revision: 1.6 $
+// $Date: 2005-11-30 23:47:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.h,v $
                                                                         
                                                                         
@@ -52,6 +52,7 @@ class PartitionedModelBuilder;
 class EquiSolnAlgo;
 class IncrementalIntegrator;
 class LinearSOE;
+class ConvergenceTest;
 class FE_Element;
 
 #include <SubdomainNodIter.h>
@@ -76,11 +77,15 @@ class Subdomain: public Element, public Domain
 			       PartitionedModelBuilder &theBuilder); 
 
     // Domain methods which must be rewritten
+    virtual void clearAll(void);
     virtual bool addNode(Node *);	
     virtual Node *removeNode(int tag);        
     virtual NodeIter &getNodes(void);    
     virtual Node *getNode(int tag);            
     virtual Node **getNodePtrs(void);            
+
+    virtual bool hasNode(int tag);
+    virtual bool hasElement(int tag);
 
     virtual int getNumNodes(void) const;    
     virtual int commit(void);
@@ -88,6 +93,11 @@ class Subdomain: public Element, public Domain
     virtual int revertToStart(void);        
     virtual int update(void);
     virtual int update(double newTime, double dT);
+
+#ifdef _PARALLEL_PROCESSING
+    virtual  int barrierCheckIN(void) {return 0;};
+    virtual  int barrierCheckOUT(int) {return 0;};
+#endif
     
     virtual  void Print(OPS_Stream &s, int flag =0);
     
@@ -96,10 +106,12 @@ class Subdomain: public Element, public Domain
     virtual NodeIter &getExternalNodeIter(void);
     virtual bool addExternalNode(Node *);
 
+    virtual void wipeAnalysis(void);
     virtual void setDomainDecompAnalysis(DomainDecompositionAnalysis &theAnalysis);
     virtual int setAnalysisAlgorithm(EquiSolnAlgo &theAlgorithm);
     virtual int setAnalysisIntegrator(IncrementalIntegrator &theIntegrator);
     virtual int setAnalysisLinearSOE(LinearSOE &theSOE);
+    virtual int setAnalysisConvergenceTest(ConvergenceTest &theTest);
     virtual int invokeChangeOnAnalysis(void);
     
     // Element methods which must be written
@@ -121,6 +133,7 @@ class Subdomain: public Element, public Domain
     virtual const Vector &getResistingForce(void);    
     virtual const Vector &getResistingForceIncInertia(void);        
     virtual bool isSubdomain(void);    
+    virtual int setRayleighDampingFactors(double alphaM, double betaK, double betaK0, double betaKc);
 
     // Element type methods unique to a subdomain
     virtual int computeTang(void);
@@ -138,6 +151,7 @@ class Subdomain: public Element, public Domain
 			 FEM_ObjectBroker &theBroker);
 
     virtual double getCost(void);
+
     
   protected:    
     virtual int buildMap(void);
@@ -153,7 +167,6 @@ class Subdomain: public Element, public Domain
 
     DomainDecompositionAnalysis *getDDAnalysis(void);
 
-    
   private:
     double realCost;
     double cpuCost;
@@ -163,7 +176,7 @@ class Subdomain: public Element, public Domain
     ID *extNodes;
     FE_Element *theFEele;
     
-    TaggedObjectStorage  *realExternalNodes;        
+    //    TaggedObjectStorage  *realExternalNodes;        
 
     SingleDomNodIter   *internalNodeIter;
     SingleDomNodIter   *externalNodeIter;    
@@ -171,7 +184,6 @@ class Subdomain: public Element, public Domain
 
     PartitionedModelBuilder *thePartitionedModelBuilder;
     static Matrix badResult;
-
 };
 
 #endif

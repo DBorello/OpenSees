@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-11-18 01:59:04 $
+// $Revision: 1.5 $
+// $Date: 2005-11-30 23:47:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.h,v $
                                                                         
                                                                         
@@ -71,6 +71,11 @@ class ShadowSubdomain: public Shadow, public Subdomain
     virtual  bool addElementalLoad(ElementalLoad *, int loadPattern);
     virtual  bool addSP_Constraint(SP_Constraint *, int loadPattern);    
 
+
+    virtual bool hasNode(int tag);
+    virtual bool hasElement(int tag);
+
+    virtual void clearAll(void);	
     virtual Element 	  *removeElement(int tag);
     virtual Node 	  *removeNode(int tag);    
     virtual SP_Constraint *removeSP_Constraint(int tag);
@@ -103,16 +108,26 @@ class ShadowSubdomain: public Shadow, public Subdomain
     virtual  void setCommittedTime(double newTime);        
     virtual  void applyLoad(double pseudoTime);
     virtual  void setLoadConstant(void);    
-    
+
     virtual  int update(void);    
+    virtual  int update(double newTime, double dT);    
     virtual  int commit(void);
     virtual  int revertToLastCommit(void);    
     virtual  int revertToStart(void);    
+    virtual  int barrierCheckIN(void);    
+    virtual  int barrierCheckOUT(int);    
 
+    virtual int setRayleighDampingFactors(double alphaM, double betaK, double betaK0, double betaKc);
+
+    virtual int  addRecorder(Recorder &theRecorder);    	
+    virtual int  removeRecorders(void);
+
+    virtual void wipeAnalysis(void);
     virtual void setDomainDecompAnalysis(DomainDecompositionAnalysis &theAnalysis);
     virtual int setAnalysisAlgorithm(EquiSolnAlgo &theAlgorithm);
     virtual int setAnalysisIntegrator(IncrementalIntegrator &theIntegrator);
     virtual int setAnalysisLinearSOE(LinearSOE &theSOE);
+    virtual int setAnalysisConvergenceTest(ConvergenceTest &theTest);
     virtual void clearAnalysis(void);
     virtual void domainChange(void);
     
@@ -137,6 +152,10 @@ class ShadowSubdomain: public Shadow, public Subdomain
     virtual double getCost(void);
     
     virtual  void Print(OPS_Stream &s, int flag =0);
+
+    // nodal methods required in domain interface for parallel interprter
+    virtual double getNodeDisp(int nodeTag, int dof, int &errorFlag);
+    virtual int setMass(const Matrix &mass, int nodeTag);
     
   protected:    
     virtual int buildMap(void);
@@ -149,6 +168,10 @@ class ShadowSubdomain: public Shadow, public Subdomain
     ID theNodes;
     ID theExternalNodes;    
     ID theLoadCases;
+
+    TaggedObjectStorage  *theShadowSPs;    
+    TaggedObjectStorage  *theShadowMPs;    
+    TaggedObjectStorage  *theShadowLPs;        
     
     int numDOF;
     int numElements;

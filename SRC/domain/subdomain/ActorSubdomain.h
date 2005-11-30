@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-08-29 07:47:20 $
+// $Revision: 1.3 $
+// $Date: 2005-11-30 23:47:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ActorSubdomain.h,v $
                                                                         
                                                                         
@@ -48,11 +48,14 @@ class ActorSubdomain: public Subdomain, public Actor
     virtual ~ActorSubdomain();
     
     virtual int run(void);
-    virtual Node *removeNode(int tag);            
-    virtual bool addExternalNode(Node *, bool check = false);    
     virtual const Vector &getLastExternalSysResponse(void);
-    
+
+    virtual int  update(void);    
+    virtual int  updateTimeDt(void);    
+    virtual int  barrierCheck(int res);    
+
   protected:
+
     
   private:
     ID msgData;
