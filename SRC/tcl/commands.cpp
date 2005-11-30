@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.65 $
-// $Date: 2005-11-07 21:41:16 $
+// $Revision: 1.66 $
+// $Date: 2005-11-30 00:33:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -580,9 +580,6 @@ wipeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
   
   theDomain.clearAll();
 
-  if (theTest != 0)
-      delete theTest;
-  
   if (theTclVideoPlayer != 0) {
 	  delete theTclVideoPlayer;
 	  theTclVideoPlayer = 0;
@@ -629,9 +626,6 @@ wipeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
   // NOTE : DON'T do the above on theVariableTimeStepAnalysis
   // as it and theTansientAnalysis are one in the same
 
-  if (theTest != 0)
-      delete theTest;
-  
   theAlgorithm =0;
   theHandler =0;
   theNumberer =0;
@@ -1183,7 +1177,9 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 					       *theAnalysisModel,
 					       *theAlgorithm,
 					       *theSOE,
-					       *theStaticIntegrator);
+					       *theStaticIntegrator,
+					       theTest);
+
 // AddingSensitivity:BEGIN ///////////////////////////////
 #ifdef _RELIABILITY
 	if (theSensitivityAlgorithm != 0 && theSensitivityAlgorithm->shouldComputeAtEachStep()) {
@@ -1236,7 +1232,9 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 							     *theAnalysisModel,
 							     *theAlgorithm,
 							     *theSOE,
-							     *theTransientIntegrator);
+							     *theTransientIntegrator,
+							     theTest);
+
 
 // AddingSensitivity:BEGIN ///////////////////////////////
 #ifdef _RELIABILITY
@@ -1293,7 +1291,8 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	   *theAnalysisModel,
 	   *theAlgorithm,
 	   *theSOE,
-	   *theTransientIntegrator);
+	   *theTransientIntegrator,
+	   theTest);
 
 	// set the pointer for variabble time step analysis
 	theTransientAnalysis = theVariableTimeStepTransientAnalysis;
@@ -1497,6 +1496,80 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
     FullGenLinLapackSolver *theSolver = new FullGenLinLapackSolver();
     theSOE = new FullGenLinSOE(*theSolver);
   }
+
+
+#ifdef _PETSC
+
+  else if (strcmp(argv[1],"Petsc") == 0) {
+    // now must determine the type of solver to create from rest of args
+    KSPType method = KSPCG;            // KSPCG KSPGMRES
+    PCType preconditioner = PCJACOBI; // PCJACOBI PCILU PCBJACOBI
+    int matType = 0;
+    
+    double rTol = 1.0e-5;
+    double aTol = 1.0e-50;
+    double dTol = 1.0e5;
+    int maxIts = 100000;
+    int count = 2;
+    while (count < argc-1) {
+      if (strcmp(argv[count],"-matrixType") == 0 || strcmp(argv[count],"-matrix")){	
+	if (strcmp(argv[count+1],"sparse") == 0)
+	  matType = 1;
+      }
+      else if (strcmp(argv[count],"-rTol") == 0 || strcmp(argv[count],"-relTol") ||
+	       strcmp(argv[count],"-relativeTolerance")) {
+	if (Tcl_GetDouble(interp, argv[count+1], &rTol) != TCL_OK)
+	  return TCL_ERROR;		     
+      } else if (strcmp(argv[count],"-aTol") == 0 || strcmp(argv[count],"-absTol") ||
+		 strcmp(argv[count],"-absoluteTolerance")) {
+	if (Tcl_GetDouble(interp, argv[count+1], &aTol) != TCL_OK)
+	  return TCL_ERROR;		     
+      } else if (strcmp(argv[count],"-dTol") == 0 || strcmp(argv[count],"-divTol") ||
+		 strcmp(argv[count],"-divergenceTolerance")) {
+	if (Tcl_GetDouble(interp, argv[count+1], &dTol) != TCL_OK)
+	  return TCL_ERROR;		     
+      } else if (strcmp(argv[count],"-mIts") == 0 || strcmp(argv[count],"-maxIts") ||
+		 strcmp(argv[count],"-maxIterations")) {
+	if (Tcl_GetInt(interp, argv[count+1], &maxIts) != TCL_OK)
+	  return TCL_ERROR;		     
+      } else if (strcmp(argv[count],"-KSP") == 0 || strcmp(argv[count],"-KSPType")){	
+	if (strcmp(argv[count+1],"KSPCG") == 0)
+	  method = KSPCG;
+	else if (strcmp(argv[count+1],"KSPBICG") == 0)
+	  method = KSPBICG;
+	else if (strcmp(argv[count+1],"KSPRICHARDSON") == 0)
+	  method = KSPRICHARDSON;
+	else if (strcmp(argv[count+1],"KSPCHEBYCHEV") == 0)
+	  method = KSPCHEBYCHEV;
+	else if (strcmp(argv[count+1],"KSPGMRES") == 0)
+	  method = KSPGMRES;
+      } else if (strcmp(argv[count],"-PC") == 0 || strcmp(argv[count],"-PCType")){	
+	if ((strcmp(argv[count+1],"PCJACOBI") == 0) || (strcmp(argv[count+1],"JACOBI") == 0))
+	  preconditioner = PCJACOBI;
+	else if ((strcmp(argv[count+1],"PCILU") == 0) || (strcmp(argv[count+1],"ILU") == 0))
+	  preconditioner = PCILU;
+	else if ((strcmp(argv[count+1],"PCICC") == 0) || (strcmp(argv[count+1],"ICC") == 0)) 
+	  preconditioner = PCICC;
+	else if ((strcmp(argv[count+1],"PCBJACOBI") == 0) || (strcmp(argv[count+1],"BIJACOBI") == 0))
+	  preconditioner = PCBJACOBI;
+	else if ((strcmp(argv[count+1],"PCNONE") == 0) || (strcmp(argv[count+1],"NONE") == 0))
+	  preconditioner = PCNONE;
+      }
+      count+=2;
+    }
+
+    if (matType == 0) {
+      PetscSolver *theSolver = new PetscSolver(method, preconditioner, rTol, aTol, dTol, maxIts);
+      theSOE = new PetscSOE(*theSolver);
+    } else {
+      PetscSparseSeqSolver *theSolver = new PetscSparseSeqSolver(method, preconditioner, rTol, aTol, dTol, maxIts);
+      theSOE = new SparseGenRowLinSOE(*theSolver);
+    }
+  }
+
+
+#endif
+  
 
   else {
 
@@ -1946,32 +2019,37 @@ specifyCTest(ClientData clientData, Tcl_Interp *interp, int argc,
      numIter = 25;      
   }
 
-  if (theTest != 0) {
-    delete theTest;
-    theTest = 0;
-  }
+  ConvergenceTest *theNewTest = 0;
+
       
   if (strcmp(argv[1],"NormUnbalance") == 0) 
-    theTest = new CTestNormUnbalance(tol,numIter,printIt);       
+    theNewTest = new CTestNormUnbalance(tol,numIter,printIt);       
   else if (strcmp(argv[1],"NormDispIncr") == 0) 
-    theTest = new CTestNormDispIncr(tol,numIter,printIt);             
+    theNewTest = new CTestNormDispIncr(tol,numIter,printIt);             
   else if (strcmp(argv[1],"EnergyIncr") == 0) 
-    theTest = new CTestEnergyIncr(tol,numIter,printIt);             
+    theNewTest = new CTestEnergyIncr(tol,numIter,printIt);             
   else if (strcmp(argv[1],"RelativeNormUnbalance") == 0) 
-    theTest = new CTestRelativeNormUnbalance(tol,numIter,printIt);       
+    theNewTest = new CTestRelativeNormUnbalance(tol,numIter,printIt);       
   else if (strcmp(argv[1],"RelativeNormDispIncr") == 0) 
-    theTest = new CTestRelativeNormDispIncr(tol,numIter,printIt);             
+    theNewTest = new CTestRelativeNormDispIncr(tol,numIter,printIt);             
   else if (strcmp(argv[1],"RelativeEnergyIncr") == 0) 
-    theTest = new CTestRelativeEnergyIncr(tol,numIter,printIt);             
+    theNewTest = new CTestRelativeEnergyIncr(tol,numIter,printIt);             
   else {
     opserr << "WARNING No ConvergenceTest type (NormUnbalance, NormDispIncr, EnergyIncr, \n";
     opserr << "RelativeNormUnbalance, RelativeNormDispIncr, RelativeEnergyIncr, )\n"; 
     return TCL_ERROR;
   }    
 
-  // if the algorithm exists - we want to change the test
-  if (theAlgorithm != 0)
-     theAlgorithm->setTest(*theTest);  
+  if (theNewTest != 0) {
+     theTest = theNewTest;;
+     
+     // if the analysis exists - we want to change the Test
+     if (theStaticAnalysis != 0)
+       theStaticAnalysis->setConvergenceTest(*theTest);
+     
+     else if (theTransientAnalysis != 0)
+       theTransientAnalysis->setConvergenceTest(*theTest);
+  }
 
   return TCL_OK;
 }
