@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:00:56 $
+// $Revision: 1.4 $
+// $Date: 2005-11-30 23:38:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.h,v $
                                                                         
                                                                         
-// File: ~/domain/domain/partitioned/PartitionedDomain.h
-// 
 // Written: fmk 
 // Created: Wed Sep 25 15:27:47: 1996
 // Revision: A
@@ -69,12 +67,19 @@ class PartitionedDomain: public Domain
     virtual  bool addElement(Element *elePtr);
     virtual  bool addNode(Node *nodePtr);
 
+    virtual  bool addLoadPattern(LoadPattern *);            
+    virtual  bool addSP_Constraint(SP_Constraint *); 
+    virtual  bool addSP_Constraint(SP_Constraint *, int loadPatternTag); 
+    virtual  bool addNodalLoad(NodalLoad *, int loadPatternTag);
+    virtual  bool addElementalLoad(ElementalLoad *, int loadPatternTag);
+
     // methods to remove the components     
     virtual void clearAll(void);
     virtual Element *removeElement(int tag);
     virtual Node *removeNode(int tag);        
     virtual SP_Constraint *removeSP_Constraint(int tag);
     virtual MP_Constraint *removeMP_Constraint(int tag);
+    virtual LoadPattern   *removeLoadPattern(int loadTag);
     
     // methods to access the elements
     virtual  ElementIter       &getElements();
@@ -92,14 +97,17 @@ class PartitionedDomain: public Domain
     virtual  int commit(void);    
     virtual  int revertToLastCommit(void);        
     virtual  int revertToStart(void);    
-
     virtual  int update(void);        
     virtual  int update(double newTime, double dT);
+    virtual  int newStep(double dT);
 
+    virtual int  addRecorder(Recorder &theRecorder);    	
+    virtual int  removeRecorders(void);
     
     virtual  void Print(OPS_Stream &s, int flag =0);    
 
     // public member functions in addition to the standard domain
+    virtual int setPartitioner(DomainPartitioner *thePartitioner);
     virtual int partition(int numPartitions);
 			
     virtual bool addSubdomain(Subdomain *theSubdomain);
@@ -108,19 +116,23 @@ class PartitionedDomain: public Domain
     virtual SubdomainIter &getSubdomains(void);
     virtual Node *removeExternalNode(int tag);        
     virtual Graph &getSubdomainGraph(void);
-    
+
+    // nodal methods required in domain interface for parallel interprter
+    virtual double getNodeDisp(int nodeTag, int dof, int &errorFlag);
+    virtual int setMass(const Matrix &mass, int nodeTag);
     
     // friend classes
     friend class PartitionedDomainEleIter;
     
   protected:    
+    int barrierCheck(int result);        
     DomainPartitioner *getPartitioner(void) const;
     virtual int buildEleGraph(Graph *theEleGraph);
     
   private:
     TaggedObjectStorage  *elements;    
     ArrayOfTaggedObjects *theSubdomains;
-    DomainPartitioner *theDomainPartitioner;
+    DomainPartitioner    *theDomainPartitioner;
 
     SingleDomEleIter	       *mainEleIter;  // for ele that belong to elements
     PartitionedDomainSubIter   *theSubdomainIter;
