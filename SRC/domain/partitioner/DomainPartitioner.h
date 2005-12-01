@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2005-12-01 00:03:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/partitioner/DomainPartitioner.h,v $
                                                                         
                                                                         
-// File: ~/domain/partitioner/DomainPartitioner.h
-// 
 // Written: fmk 
 // Created: Fri Sep 20 15:27:47: 1996
 // Revision: A
@@ -98,7 +96,8 @@ class DomainPartitioner
     PartitionedDomain *myDomain; 
     GraphPartitioner  &thePartitioner;
     LoadBalancer      *theBalancer;    
-    
+
+    Graph *theElementGraph;
     Graph **theBoundaryElements; 
     
     ID *nodePlace;
