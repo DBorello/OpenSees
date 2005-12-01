@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2005-12-01 01:04:04 $
+// $Revision: 1.3 $
+// $Date: 2005-12-01 01:24:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticDomainDecompositionAnalysis.cpp,v $
                                                                         
 // Written: fmk 
@@ -575,7 +575,7 @@ StaticDomainDecompositionAnalysis::recvSelf(int commitTag, Channel &theChannel,
   theSOE->recvSelf(commitTag, theChannel, theBroker);
   LinearSOESolver *theSolver = theSOE->getSolver();
   theSolver->recvSelf(commitTag, theChannel, theBroker);  
-  theSOE->setAnalysisModel(*theAnalysisModel);
+  //  theSOE->setAnalysisModel(*theAnalysisModel);
 
 
   if (theIntegrator == 0 || theIntegrator->getClassTag() != data(6)) {
