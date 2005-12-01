@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-12-07 00:17:51 $
+// $Revision: 1.4 $
+// $Date: 2005-12-01 01:12:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/LinearSOE.h,v $
                                                                         
                                                                         
@@ -81,9 +81,10 @@ class LinearSOE : public SystemOfEqn
     virtual void setX(int loc, double value) =0;
     virtual void setX(const Vector &X) =0;
     
+    LinearSOESolver *getSolver(void);
+    
   protected:
     int setSolver(LinearSOESolver &newSolver);	        
-    LinearSOESolver *getSolver(void);
     
   private:
     LinearSOESolver *theSolver;    
