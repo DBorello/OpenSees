@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-12-01 00:07:57 $
+// $Revision: 1.2 $
+// $Date: 2005-12-01 01:04:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticDomainDecompositionAnalysis.cpp,v $
                                                                         
 // Written: fmk 
@@ -473,7 +473,8 @@ StaticDomainDecompositionAnalysis::sendSelf(int commitTag, Channel &theChannel)
     opserr << "StaticDomainDecompositionAnalysis::sendSelf() - failed to send SOE\n";
     return -1;
   } else
-    theSOE->setAnalysisModel(*theAnalysisModel);
+    ;
+  //    theSOE->setAnalysisModel(*theAnalysisModel);
 
   if (theSolver->sendSelf(commitTag, theChannel) != 0) {
     opserr << "StaticDomainDecompositionAnalysis::sendSelf() - failed to send Solver\n";

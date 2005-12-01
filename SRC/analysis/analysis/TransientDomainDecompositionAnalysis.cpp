@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-12-01 00:07:57 $
+// $Revision: 1.2 $
+// $Date: 2005-12-01 01:04:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/TransientDomainDecompositionAnalysis.cpp,v $
                                                                         
 // Written: fmk 
@@ -460,8 +460,10 @@ TransientDomainDecompositionAnalysis::sendSelf(int commitTag, Channel &theChanne
   if (  theSOE->sendSelf(commitTag, theChannel) != 0) {
     opserr << "TransientDomainDecompositionAnalysis::sendSelf() - failed to send SOE\n";
     return -1;
-  } else
-    theSOE->setAnalysisModel(*theAnalysisModel);
+  } else 
+    ;
+
+  //    theSOE->setAnalysisModel(*theAnalysisModel);
 
   if (  theSolver->sendSelf(commitTag, theChannel) != 0) {
     opserr << "TransientDomainDecompositionAnalysis::sendSelf() - failed to send Solver\n";
