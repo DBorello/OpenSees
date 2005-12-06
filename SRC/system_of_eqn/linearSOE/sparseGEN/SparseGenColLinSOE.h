@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-12-07 00:17:54 $
+// $Revision: 1.3 $
+// $Date: 2005-12-06 22:11:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSOE.h,v $
                                                                         
                                                                         
 #ifndef SparseGenColLinSOE_h
 #define SparseGenColLinSOE_h
 
-// File: ~/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSOE.h
-//
 // Written: fmk 
 // Created: 04/98
 // Revision: A
@@ -48,36 +46,40 @@ class SparseGenColLinSOE : public LinearSOE
 {
   public:
     SparseGenColLinSOE(SparseGenColLinSolver &theSolver);        
+    SparseGenColLinSOE(SparseGenColLinSolver &theSolver, int classTag);        
     SparseGenColLinSOE(int N, int NNZ, int *rowStartA, int *colA,
 		       SparseGenColLinSolver &theSolver);        
 
-    ~SparseGenColLinSOE();
+    virtual ~SparseGenColLinSOE();
 
-    int getNumEqn(void) const;
-    int setSize(Graph &theGraph);
-    int addA(const Matrix &, const ID &, double fact = 1.0);
-    int addB(const Vector &, const ID &, double fact = 1.0);    
-    int setB(const Vector &, double fact = 1.0);        
+    virtual int getNumEqn(void) const;
+    virtual int setSize(Graph &theGraph);
+    virtual int addA(const Matrix &, const ID &, double fact = 1.0);
+    virtual int addB(const Vector &, const ID &, double fact = 1.0);    
+    virtual int setB(const Vector &, double fact = 1.0);        
     
-    void zeroA(void);
-    void zeroB(void);
+    virtual void zeroA(void);
+    virtual void zeroB(void);
     
-    const Vector &getX(void);
-    const Vector &getB(void);    
-    double normRHS(void);
+    virtual const Vector &getX(void);
+    virtual const Vector &getB(void);    
+    virtual double normRHS(void);
 
-    void setX(int loc, double value);        
-    void setX(const Vector &x);        
-    int setSparseGenColSolver(SparseGenColLinSolver &newSolver);    
+    virtual void setX(int loc, double value);        
+    virtual void setX(const Vector &x);        
+    virtual int setSparseGenColSolver(SparseGenColLinSolver &newSolver);    
 
-    int sendSelf(int commitTag, Channel &theChannel);
-    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
+    virtual int sendSelf(int commitTag, Channel &theChannel);
+    virtual int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
+#ifdef _PARALLEL_PROCESSING
     friend class SuperLU;    
     friend class ThreadedSuperLU;        
+    friend class DistributedSuperLU;        
+#else
+    friend class SuperLU;    
+#endif
 
   protected:
-    
-  private:
     int size;            // order of A
     int nnz;             // number of non-zeros in A
     double *A, *B, *X;   // 1d arrays containing coefficients of A, B and X
@@ -86,6 +88,9 @@ class SparseGenColLinSOE : public LinearSOE
     Vector *vectB;    
     int Asize, Bsize;    // size of the 1d array holding A
     bool factored;
+    
+  private:
+
 };
 
 

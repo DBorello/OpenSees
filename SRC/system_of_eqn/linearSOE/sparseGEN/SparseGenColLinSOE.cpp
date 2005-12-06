@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-03-17 20:47:09 $
+// $Revision: 1.6 $
+// $Date: 2005-12-06 22:11:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSOE.cpp,v $
                                                                         
                                                                         
@@ -48,6 +48,17 @@ SparseGenColLinSOE::SparseGenColLinSOE(SparseGenColLinSolver &the_Solver)
  factored(false)
 {
     the_Solver.setLinearSOE(*this);
+}
+
+
+SparseGenColLinSOE::SparseGenColLinSOE(SparseGenColLinSolver &the_Solver, int classTag)
+  :LinearSOE(the_Solver, classTag),
+   size(0), nnz(0), A(0), B(0), X(0), rowA(0), colStartA(0),
+   vectX(0), vectB(0),
+   Asize(0), Bsize(0),
+   factored(false)
+{
+  //    the_Solver.setLinearSOE(*this);
 }
 
 
@@ -253,25 +264,8 @@ SparseGenColLinSOE::setSize(Graph &theGraph)
 	startLoc = lastLoc;
       }
     }
+
     
-
-    /**************** FOR DISPLAYING SPARSITY IN MATLAB
-    opserr << "SparseGenColLinSOE::setSize size: " << size;
-    opserr << " nnz: " << nnz << endln;
-
-    ofstream idata("i.dat");
-    ofstream jdata("j.dat");
-    for (int ii=0; ii<size; ii++) {
-      int colStart = colStartA[ii];
-      int colEnd = colStartA[ii+1] - 1;
-      for (int jj=colStart; jj<=colEnd; jj++) {
-	idata << rowA[jj]+1 << endln;
-	jdata << ii+1 << endln;
-      }
-    }
-    *****************************************************/
-    
-
     // invoke setSize() on the Solver    
     LinearSOESolver *the_Solver = this->getSolver();
     int solverOK = the_Solver->setSize();
@@ -280,6 +274,7 @@ SparseGenColLinSOE::setSize(Graph &theGraph)
 	opserr << " solver failed setSize()\n";
 	return solverOK;
     }    
+
     return result;
 }
 
@@ -300,43 +295,43 @@ SparseGenColLinSOE::addA(const Matrix &m, const ID &id, double fact)
     }
     
     if (fact == 1.0) { // do not need to multiply 
-	for (int i=0; i<idSize; i++) {
-	    int col = id(i);
-	    if (col < size && col >= 0) {
-		int startColLoc = colStartA[col];
-		int endColLoc = colStartA[col+1];
-		for (int j=0; j<idSize; j++) {
-		    int row = id(j);
-		    if (row <size && row >= 0) {
-			// find place in A using rowA
-			for (int k=startColLoc; k<endColLoc; k++)
-			    if (rowA[k] == row) {
-				A[k] += m(j,i);
-				k = endColLoc;
-			    }
-		     }
-		}  // for j		
-	    } 
-	}  // for i
+      for (int i=0; i<idSize; i++) {
+	int col = id(i);
+	if (col < size && col >= 0) {
+	  int startColLoc = colStartA[col];
+	  int endColLoc = colStartA[col+1];
+	  for (int j=0; j<idSize; j++) {
+	    int row = id(j);
+	    if (row <size && row >= 0) {
+	      // find place in A using rowA
+	      for (int k=startColLoc; k<endColLoc; k++)
+		if (rowA[k] == row) {
+		  A[k] += m(j,i);
+		  k = endColLoc;
+		}
+	    }
+	  }  // for j		
+	} 
+      }  // for i
     } else {
-	for (int i=0; i<idSize; i++) {
-	    int col = id(i);
-	    if (col < size && col >= 0) {
-		int startColLoc = colStartA[col];
-		int endColLoc = colStartA[col+1];
-		for (int j=0; j<idSize; j++) {
-		    int row = id(j);
-		    if (row <size && row >= 0) {
-			// find place in A using rowA
-			for (int k=startColLoc; k<endColLoc; k++)
-			    if (rowA[k] == row) {
-				A[k] += fact * m(j,i);
-				k = endColLoc;
-			    }
-		     }
-		}  // for j		
-	    } 
-	}  // for i
+      for (int i=0; i<idSize; i++) {
+	int col = id(i);
+	if (col < size && col >= 0) {
+	  int startColLoc = colStartA[col];
+	  int endColLoc = colStartA[col+1];
+	  for (int j=0; j<idSize; j++) {
+	    int row = id(j);
+	    if (row <size && row >= 0) {
+	      // find place in A using rowA
+	      for (int k=startColLoc; k<endColLoc; k++)
+		if (rowA[k] == row) {
+		  A[k] += fact * m(j,i);
+		  k = endColLoc;
+		}
+	    }
+	  }  // for j		
+	} 
+      }  // for i
     }
     return 0;
 }
