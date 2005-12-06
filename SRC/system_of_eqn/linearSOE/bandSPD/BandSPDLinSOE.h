@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-12-07 00:17:52 $
+// $Revision: 1.3 $
+// $Date: 2005-12-06 22:03:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandSPD/BandSPDLinSOE.h,v $
                                                                         
                                                                         
@@ -51,38 +51,37 @@ class BandSPDLinSOE : public LinearSOE
 {
   public:
     BandSPDLinSOE(BandSPDLinSolver &theSolver);    
+    BandSPDLinSOE(BandSPDLinSolver &theSolver, int classTag);    
     BandSPDLinSOE(int N, int bandwidth, BandSPDLinSolver &theSolver);        
 
-    ~BandSPDLinSOE();
+    virtual ~BandSPDLinSOE();
 
-    int getNumEqn(void) const;
-    int setSize(Graph &theGraph);
+    virtual int getNumEqn(void) const;
+    virtual int setSize(Graph &theGraph);
 
-    int addA(const Matrix &, const ID &, double fact = 1.0);
-    int addB(const Vector &, const ID &, double fact = 1.0);    
-    int setB(const Vector &, double fact = 1.0);        
+    virtual int addA(const Matrix &, const ID &, double fact = 1.0);
+    virtual int addB(const Vector &, const ID &, double fact = 1.0);    
+    virtual int setB(const Vector &, double fact = 1.0);        
     
-    void zeroA(void);
-    void zeroB(void);
+    virtual void zeroA(void);
+    virtual void zeroB(void);
     
-    const Vector &getX(void);
-    const Vector &getB(void);    
-    double normRHS(void);
+    virtual const Vector &getX(void);
+    virtual const Vector &getB(void);    
+    virtual double normRHS(void);
 
-    void setX(int loc, double value);    
-    void setX(const Vector &x);    
-    int setBandSPDSolver(BandSPDLinSolver &newSolver);    
+    virtual void setX(int loc, double value);    
+    virtual void setX(const Vector &x);    
+    virtual int setBandSPDSolver(BandSPDLinSolver &newSolver);    
 
-    int sendSelf(int commitTag, Channel &theChannel);
-    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
+    virtual int sendSelf(int commitTag, Channel &theChannel);
+    virtual int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
     
     friend class BandSPDLinSolver;
     friend class BandSPDLinLapackSolver;    
     friend class BandSPDLinThreadSolver;        
     
   protected:
-    
-  private:
     int size, half_band;    
     double *A, *B, *X;
     Vector *vectX;
@@ -90,6 +89,8 @@ class BandSPDLinSOE : public LinearSOE
     int Asize, Bsize;
     int aFactored;
     bool factored;
+    
+  private:
 };
 
 

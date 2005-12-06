@@ -18,15 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:02:03 $
+// $Revision: 1.4 $
+// $Date: 2005-12-06 22:06:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinSOE.cpp,v $
                                                                         
                                                                         
-// File: ~/system_of_eqn/linearSOE/ProfileSPD/ProfileSPDLinSOE.C
-//
 // Written: fmk 
-// Created: Febuary 1997
 // Revision: A
 //
 // Description: This file contains the implementation for ProfileSPDLinSOE
@@ -46,6 +43,15 @@
 
 ProfileSPDLinSOE::ProfileSPDLinSOE(ProfileSPDLinSolver &the_Solver)
 :LinearSOE(the_Solver, LinSOE_TAGS_ProfileSPDLinSOE),
+ size(0), profileSize(0), A(0), B(0), X(0), vectX(0), vectB(0),
+ iDiagLoc(0), Asize(0), Bsize(0), isAfactored(false), isAcondensed(false),
+ numInt(0) 
+{
+    the_Solver.setLinearSOE(*this);
+}
+
+ProfileSPDLinSOE::ProfileSPDLinSOE(ProfileSPDLinSolver &the_Solver, int classTag)
+:LinearSOE(the_Solver, classTag),
  size(0), profileSize(0), A(0), B(0), X(0), vectX(0), vectB(0),
  iDiagLoc(0), Asize(0), Bsize(0), isAfactored(false), isAcondensed(false),
  numInt(0) 
@@ -267,12 +273,6 @@ ProfileSPDLinSOE::setSize(Graph &theGraph)
 	return solverOK;
     }    
 
-    /*
-    opserr << "ProfileSPDLINSOE::setSize(): Num Eqn: " ;
-    opserr << size << "  Profile Size: " << profileSize;
-    opserr << "  Avg Band: " << profileSize/size << endln;
-    */
-
     return result;
 }
 
@@ -285,7 +285,7 @@ ProfileSPDLinSOE::addA(const Matrix &m, const ID &id, double fact)
     // check that m and id are of similar size
     int idSize = id.Size();    
     if (idSize != m.noRows() && idSize != m.noCols()) {
-	opserr << "FullGenLinSOE::addA()	- Matrix and ID not of similar sizes\n";
+	opserr << "ProfileSPDLinSOE::addA()	- Matrix and ID not of similar sizes\n";
 	return -1;
     }
 
@@ -410,7 +410,7 @@ void
 ProfileSPDLinSOE::zeroA(void)
 {
     double *Aptr = A;
-    for (int i=0; i<profileSize; i++)
+    for (int i=0; i<Asize; i++)
 	*Aptr++ = 0;
     
     isAfactored = false;

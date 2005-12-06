@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:02:01 $
+// $Revision: 1.4 $
+// $Date: 2005-12-06 22:03:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandSPD/BandSPDLinSOE.cpp,v $
                                                                         
                                                                         
@@ -51,6 +51,16 @@ BandSPDLinSOE::BandSPDLinSOE(BandSPDLinSolver &the_Solver)
  factored(false)
 {
     the_Solver.setLinearSOE(*this);
+}
+
+
+BandSPDLinSOE::BandSPDLinSOE(BandSPDLinSolver &the_Solver, int classTag)
+:LinearSOE(the_Solver, classTag),
+ size(0), half_band(0), A(0), B(0), X(0), vectX(0), vectB(0),
+ Asize(0), Bsize(0),
+ factored(false)
+{
+
 }
 
 
@@ -343,7 +353,7 @@ void
 BandSPDLinSOE::zeroA(void)
 {
     double *Aptr = A;
-    int theSize = size*half_band;
+    int theSize = Asize; 
     for (int i=0; i<theSize; i++)
 	*Aptr++ = 0;
     
