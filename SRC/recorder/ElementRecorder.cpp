@@ -18,10 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2005-07-06 22:00:20 $
+// $Revision: 1.24 $
+// $Date: 2005-12-06 00:21:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
-                                                                        
                                                                         
 // Written: fmk 
 // Created: 09/99
@@ -459,7 +458,6 @@ ElementRecorder::initialize(void)
       lengthString += argLength+1;
   }
   
-
   for (i=0; i<eleID.Size(); i++) {
     int eleTag = eleID(i);
     int numVariables = 0;
@@ -481,7 +479,9 @@ ElementRecorder::initialize(void)
 	numVariables = eleInfo.theVector->Size();
       else if (eleInfo.theType == IdType) 
 	numVariables = eleInfo.theID->Size();
-      
+      else if (eleInfo.theType == MatrixType) 
+	numVariables = eleInfo.theMatrix->noRows()* eleInfo.theMatrix->noCols();
+
       // create the column headings for multiple data for the element
       for (int j=1; j<=numVariables; j++) {
 	sprintf(aColumn, "Element%d_%s_%d",eleTag, dataToStore, j);
