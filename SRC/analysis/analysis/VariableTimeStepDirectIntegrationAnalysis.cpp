@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-11-29 23:36:47 $
+// $Revision: 1.5 $
+// $Date: 2005-12-06 18:20:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/VariableTimeStepDirectIntegrationAnalysis.cpp,v $
                                                                         
                                                                         
@@ -81,6 +81,11 @@ VariableTimeStepDirectIntegrationAnalysis::analyze(int numSteps, double dT, doub
   
   // loop until analysis has performed the total time incr requested
   while (currentTimeIncr < totalTimeIncr) {
+
+    if (this->checkDomainChange() != 0) {
+      opserr << "VariableTimeStepDirectIntegrationAnalysis::analyze() - failed checkDomainChange\n";
+      return -1;
+    }
 
     //
     // do newStep(), solveCurrentStep() and commit() as in regular
