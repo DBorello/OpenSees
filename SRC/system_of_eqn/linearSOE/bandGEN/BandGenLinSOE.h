@@ -18,19 +18,15 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-12-07 00:17:52 $
+// $Revision: 1.3 $
+// $Date: 2005-12-06 21:56:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandGEN/BandGenLinSOE.h,v $
                                                                         
                                                                         
 #ifndef BandGenLinSOE_h
 #define BandGenLinSOE_h
 
-// File: ~/system_of_eqn/linearSOE/bandGEN/BandGenLinSOE.h
-//
 // Written: fmk 
-// Created: 02/97
-// Revision: A
 //
 // Description: This file contains the class definition for BandGenLinSOE
 // BandGenLinSOE is a subclass of LinearSOE. It uses the LAPACK storage
@@ -48,44 +44,46 @@ class BandGenLinSolver;
 class BandGenLinSOE : public LinearSOE
 {
   public:
-    BandGenLinSOE(BandGenLinSolver &theSolver);    
+    BandGenLinSOE(BandGenLinSolver &theSolver);
+    BandGenLinSOE(BandGenLinSolver &theSolver, int classTag);
+
     BandGenLinSOE(int N, int numSuperDiagonals, int numSubDiagonal,
 		  BandGenLinSolver &theSolver);        
     
-    ~BandGenLinSOE();
+    virtual ~BandGenLinSOE();
 
-    int getNumEqn(void) const;
-    int setSize(Graph &theGraph);
+    virtual int getNumEqn(void) const;
+    virtual int setSize(Graph &theGraph);
     
-    int addA(const Matrix &, const ID &, double fact = 1.0);
-    int addB(const Vector &, const ID &, double fact = 1.0);    
-    int setB(const Vector &, double fact = 1.0);        
+    virtual int addA(const Matrix &, const ID &, double fact = 1.0);
+    virtual int addB(const Vector &, const ID &, double fact = 1.0);    
+    virtual int setB(const Vector &, double fact = 1.0);        
 
-    void zeroA(void);
-    void zeroB(void);
+    virtual void zeroA(void);
+    virtual void zeroB(void);
 
-    const Vector &getX(void);
-    const Vector &getB(void);
-    double normRHS(void);
+    virtual const Vector &getX(void);
+    virtual const Vector &getB(void);
+    virtual double normRHS(void);
 
-    void setX(int loc, double value);    
-    void setX(const Vector &x);    
+    virtual void setX(int loc, double value);    
+    virtual void setX(const Vector &x);    
 
-    int setBandGenSolver(BandGenLinSolver &newSolver);    
+    virtual int setBandGenSolver(BandGenLinSolver &newSolver);    
 
-    int sendSelf(int commitTag, Channel &theChannel);
-    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
+    virtual int sendSelf(int commitTag, Channel &theChannel);
+    virtual int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
     friend class BandGenLinLapackSolver;
 
   protected:
-    
-  private:
     int size, numSuperD, numSubD;    
     double *A, *B, *X;
     Vector *vectX;
     Vector *vectB;
     int Asize, Bsize;
     bool factored;
+    
+  private:
 };
 
 

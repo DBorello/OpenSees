@@ -18,16 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:02:01 $
+// $Revision: 1.4 $
+// $Date: 2005-12-06 21:56:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandGEN/BandGenLinSOE.cpp,v $
                                                                         
                                                                         
-// File: ~/system_of_eqn/linearSOE/bandGEN/BandGenLinSOE.C
-//
 // Written: fmk 
-// Created: 02/97
-// Revision: A
 //
 // Description: This file contains the implementation for BandGenLinSOE
 
@@ -45,6 +41,14 @@
 
 BandGenLinSOE::BandGenLinSOE(BandGenLinSolver &theSolvr)
 :LinearSOE(theSolvr, LinSOE_TAGS_BandGenLinSOE),
+ size(0), numSuperD(0), numSubD(0), A(0), B(0), X(0), 
+ vectX(0), vectB(0), Asize(0), Bsize(0), factored(false)
+{
+    theSolvr.setLinearSOE(*this);
+}
+
+BandGenLinSOE::BandGenLinSOE(BandGenLinSolver &theSolvr, int classTag)
+:LinearSOE(theSolvr, classTag),
  size(0), numSuperD(0), numSubD(0), A(0), B(0), X(0), 
  vectX(0), vectB(0), Asize(0), Bsize(0), factored(false)
 {
@@ -230,6 +234,7 @@ BandGenLinSOE::setSize(Graph &theGraph)
 int 
 BandGenLinSOE::addA(const Matrix &m, const ID &id, double fact)
 {
+  //  opserr << "BAND- addA() " << m << id;
     
     // check for a quick return 
     if (fact == 0.0)  return 0;
@@ -297,6 +302,10 @@ BandGenLinSOE::addA(const Matrix &m, const ID &id, double fact)
 	    } 
 	}  // for i
     }    
+
+    //    for (int i=0; i<Asize; i++) opserr << A[i] << " ";
+    // opserr << endln;
+
     return 0;
 }
 
@@ -372,7 +381,7 @@ void
 BandGenLinSOE::zeroA(void)
 {
     double *Aptr = A;
-    int theSize = size*(2*numSubD+numSuperD+1);
+    int theSize = Asize;
     for (int i=0; i<theSize; i++)
 	*Aptr++ = 0;
     
@@ -395,6 +404,7 @@ BandGenLinSOE::getX(void)
 	opserr << "FATAL BandGenLinSOE::getX - vectX == 0!";
 	exit(-1);
     }    
+    
     return *vectX;
 }
 
@@ -406,6 +416,7 @@ BandGenLinSOE::getB(void)
 	opserr << "FATAL BandGenLinSOE::getB - vectB == 0!";
 	exit(-1);
     }    
+
     return *vectB;
 }
 
