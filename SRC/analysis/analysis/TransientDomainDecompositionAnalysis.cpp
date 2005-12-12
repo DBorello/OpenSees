@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-12-01 01:24:06 $
+// $Revision: 1.4 $
+// $Date: 2005-12-12 19:22:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/TransientDomainDecompositionAnalysis.cpp,v $
                                                                         
 // Written: fmk 
@@ -105,12 +105,6 @@ TransientDomainDecompositionAnalysis::TransientDomainDecompositionAnalysis(Subdo
     theAlgorithm->setConvergenceTest(theTest);
   }
 
-  // AddingSensitivity:BEGIN ////////////////////////////////////
-#ifdef _RELIABILITY
-  theSensitivityAlgorithm = 0;
-#endif
-  // AddingSensitivity:END //////////////////////////////////////
-
 }    
 
 
@@ -140,12 +134,6 @@ TransientDomainDecompositionAnalysis::clearAll(void)
   if (theTest != 0)
     delete theTest;
   
-  // AddingSensitivity:BEGIN ////////////////////////////////////
-#ifdef _RELIABILITY
-  delete theSensitivityAlgorithm;
-#endif
-  // AddingSensitivity:END //////////////////////////////////////
-
   // now set the pointers to NULL
   theAnalysisModel =0;
   theConstraintHandler =0;
@@ -213,22 +201,6 @@ TransientDomainDecompositionAnalysis::analyze(double dT)
     
     return -3;
   }    
-
-  // AddingSensitivity:BEGIN ////////////////////////////////////
-#ifdef _RELIABILITY
-  if (theSensitivityAlgorithm != 0) {
-    result = theSensitivityAlgorithm->computeSensitivities();
-    if (result < 0) {
-      opserr << "TransientDomainDecompositionAnalysis::analyze() - the SensitivityAlgorithm failed";
-      opserr << " with domain at load factor ";
-      opserr << the_Domain->getCurrentTime() << endln;
-      the_Domain->revertToLastCommit();	    
-      theIntegrator->revertToLastStep();
-      return -5;
-    }    
-  }
-#endif
-  // AddingSensitivity:END //////////////////////////////////////
 
   result = theIntegrator->commit();
   if (result < 0) {
@@ -608,27 +580,6 @@ TransientDomainDecompositionAnalysis::recvSelf(int commitTag, Channel &theChanne
 
   return 0;
 }
-
-
-// AddingSensitivity:BEGIN //////////////////////////////
-#ifdef _RELIABILITY
-int 
-TransientDomainDecompositionAnalysis::setSensitivityAlgorithm(SensitivityAlgorithm *passedSensitivityAlgorithm)
-{
-  int result = 0;
-  
-  // invoke the destructor on the old one
-  if (theSensitivityAlgorithm != 0) {
-    delete theSensitivityAlgorithm;
-  }
-  
-  theSensitivityAlgorithm = passedSensitivityAlgorithm;
-  
-  return 0;
-}
-#endif
-// AddingSensitivity:END ///////////////////////////////
-
 
 int 
 TransientDomainDecompositionAnalysis::setAlgorithm(EquiSolnAlgo &theNewAlgorithm)
