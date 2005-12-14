@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:46 $
+// $Revision: 1.3 $
+// $Date: 2005-12-14 23:49:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/main.cpp,v $
                                                                         
                                                                         
@@ -31,10 +31,32 @@
 #include <StandardStream.h>
 
 StandardStream sserr;
-OPS_Stream &opserr = sserr;
+OPS_Stream *opserrPtr = &sserr;
 
 int main()
 {
+
+  ID data(0);
+
+  opserr << data << endln;
+  opserr << data.insert(1) << endln;
+  opserr << data << endln;
+  opserr << data.insert(2) << endln;
+  opserr << data << endln;
+  opserr << data.insert(4) << endln;
+  opserr << data << endln;
+  opserr << data.insert(5) << endln;
+  opserr << data << endln;
+  opserr << data.insert(6) << endln;
+  opserr << data << endln;
+  opserr << data.insert(3) << endln;
+  opserr << data << endln;
+  opserr << data.insert(-1) << endln;
+  opserr << data << endln;
+
+  opserr << data.insert(3) << endln;
+  opserr << data << endln;
+  exit(0);
 
   opserr.setPrecision(14);
   opserr.setFloatField(SCIENTIFIC);

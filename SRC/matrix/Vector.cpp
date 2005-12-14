@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-04-02 22:02:46 $
+// $Revision: 1.10 $
+// $Date: 2005-12-14 23:49:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.cpp,v $
                                                                         
                                                                         
@@ -606,6 +606,26 @@ Vector::Norm(void) const
     value += data*data;
   }
   return sqrt(value);
+}
+
+double
+Vector::pNorm(int p) const
+{
+  double value = 0;
+  
+  if (p>0) {
+    for (int i=0; i<sz; i++) {
+      double data = fabs(theData[i]);
+      value += pow(data,p);
+    }
+    return pow(value,1.0/p);
+  } else {
+    for (int i=0; i<sz; i++) {
+      double data = fabs(theData[i]);
+      value = (data>value) ? data : value;
+    }
+    return value;
+  }
 }
 
 

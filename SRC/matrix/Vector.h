@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-04-02 22:02:46 $
+// $Revision: 1.9 $
+// $Date: 2005-12-14 23:49:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.h,v $
 
                                                                         
@@ -64,6 +64,7 @@ class Vector
     int setData(double *newData, int size);
     int Assemble(const Vector &V, const ID &l, double fact = 1.0);
     double Norm(void) const;
+    double pNorm(int p) const;
     inline int Size(void) const;
     int resize(int newSize);
     inline void Zero(void);
