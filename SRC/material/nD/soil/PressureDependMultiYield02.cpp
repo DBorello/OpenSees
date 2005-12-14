@@ -1,5 +1,5 @@
-// $Revision: 1.6 $
-// $Date: 2005-07-06 17:44:42 $
+// $Revision: 1.7 $
+// $Date: 2005-12-14 23:20:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield02.cpp,v $
 
 // Written: ZHY
@@ -1788,8 +1788,11 @@ void PressureDependMultiYield02::updatePPZ(const T2Vector & contactStress)
   double temp = strainRate.deviator() && PivotStrainRateCommitted;
   check = strainRate.deviator()[3];
 
-  if (onPPZ < 1)
+  if (onPPZ < 1) {
+    damage = 0.0;
+    if ((maxPress-currentStress.volume())/(maxPress-residualPress) > 0.)
 	  damage = pow((maxPress-currentStress.volume())/(maxPress-residualPress),0.25);
+  }
 
   // PPZ inactive if liquefyParam1==0.
   if (liquefyParam1==0. || (onPPZ < 1 && damage < 0.)) {
@@ -1904,7 +1907,10 @@ void PressureDependMultiYield02::PPZTranslation(const T2Vector & contactStress)
   //Amount of translation is proportional to the amount of previous unloading,
   //and is also limited by the amount of previous dilation (no translation
   //if there was no dilation), as damage is really caused by dilation.
-  damage = pow((maxPress-currentStress.volume())/(maxPress-residualPress),0.25);
+  damage = 0.0;
+  if ((maxPress-currentStress.volume())/(maxPress-residualPress) > 0.)
+	damage = pow((maxPress-currentStress.volume())/(maxPress-residualPress),0.25);
+
   double zzz = 0.;
   if (damage > zzz) zzz = damage;
 
@@ -2167,4 +2173,3 @@ int PressureDependMultiYield02:: isCrossingNextSurface(void)
 
   return 0;
 }
-
