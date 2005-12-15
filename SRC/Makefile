@@ -65,6 +65,7 @@ all:
 	@$(CD) $(FE)/machine; $(MAKE);
 	@$(CD) $(FE)/element; $(MAKE);
 	@$(CD) $(FE)/coordTransformation; $(MAKE);
+	@$(CD) $(FE)/package; $(MAKE);
 	@$(CD) $(FE)/damage; $(MAKE);
 	@$(CD) $(FE)/package; $(MAKE);
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATRIX_LIBS) $(ELE_LIBS) \
@@ -613,6 +614,8 @@ SysOfEqn_LIBS = $(FE)/system_of_eqn/SystemOfEqn.o \
 	$(FE)/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinSubstrSolver.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSolver.o \
+        $(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSOE.o \
+        $(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSolver.o \
 	$(SUPER_LU_OBJ) \
 	$(FE)/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSolver.o
@@ -668,6 +671,8 @@ DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/pattern/TrigSeries.o \
 	$(FE)/domain/pattern/PathSeries.o \
 	$(FE)/domain/pattern/PathTimeSeries.o \
+	$(FE)/domain/pattern/PulseSeries.o \
+	$(FE)/domain/pattern/TriangleSeries.o \
 	$(FE)/domain/pattern/TclPatternCommand.o \
 	$(FE)/domain/pattern/TclSeriesCommand.o \
 	$(FE)/domain/pattern/TclSeriesIntegratorCommand.o \

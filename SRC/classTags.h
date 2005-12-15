@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.69 $
-// $Date: 2005-09-23 22:35:29 $
+// $Revision: 1.70 $
+// $Date: 2005-12-15 20:55:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -85,6 +85,8 @@
 #define TSERIES_TAG_TrigSeries       6
 #define TSERIES_TAG_DiscretizedRandomProcessSeries 7
 #define TSERIES_TAG_SimulatedRandomProcessSeries 8
+#define TSERIES_TAG_PulseSeries 9
+#define TSERIES_TAG_TriangleSeries 10
 
 #define MAT_TAG_ElasticMaterial			1
 #define MAT_TAG_ElasticPPMaterial		2
