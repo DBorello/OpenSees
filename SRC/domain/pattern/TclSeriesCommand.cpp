@@ -17,9 +17,9 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
-// $Revision: 1.12 $
-// $Date: 2005-11-23 22:54:32 $
+
+// $Revision: 1.13 $
+// $Date: 2005-12-15 00:36:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclSeriesCommand.cpp,v $
 
 // Written: fmk 
@@ -39,6 +39,8 @@
 #include <ConstantSeries.h>
 #include <RectangularSeries.h>
 #include <TrigSeries.h>
+#include <PulseSeries.h>
+#include <TriangleSeries.h>
 #include <PathTimeSeries.h>
 #include <PathSeries.h>
 #include <string.h>
@@ -329,9 +331,152 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
     }  
 
     theSeries = new RectangularSeries(tStart, tFinish, cFactor); 
-      
   }
+
+  else if (strcmp(argv[0],"Pulse") == 0)  {
+    // LoadPattern and PulseSeries - read args & create PulseSeries object
+    double cFactor = 1.0;
+    double tStart, tFinish, period;
+    double width = 0.5;
+    double shift = 0.0;
+      
+    if (argc < 4) {
+      opserr << "WARNING not enough PulseSeries args - ";
+      opserr << " Pulse tStart tFinish period <-width pulseWidth> <-shift shift> <-factor cFactor>\n";
+      cleanup(argv);
+      return 0;	
+    }	
+    if (Tcl_GetDouble(interp, argv[1], &tStart) != TCL_OK) {
+      opserr << "WARNING invalid tStart " << argv[1] << " - ";
+      opserr << " Pulse tStart tFinish period <-width pulseWidth> <-shift shift> <-factor cFactor>\n";
+      cleanup(argv);
+      return 0;				
+    }
+    if (Tcl_GetDouble(interp, argv[2], &tFinish) != TCL_OK) {
+      opserr << "WARNING invalid tFinish " << argv[2] << " - ";
+      opserr << " Pulse tStart tFinish period <-width pulseWidth> <-shift shift> <-factor cFactor>\n";
+      cleanup(argv);
+      return 0;	
+    }     
+    if (Tcl_GetDouble(interp, argv[3], &period) != TCL_OK) {
+      opserr << "WARNING invalid period " << argv[3] << " - ";
+      opserr << " Pulse tStart tFinish period <-width pulseWidth> <-shift shift> <-factor cFactor>\n";
+      cleanup(argv);
+      return 0;	
+    }     
     
+    int endMarker = 4;
+    
+    while (endMarker < argc && endMarker < argc) {
+      if (strcmp(argv[endMarker],"-factor") == 0) {
+	// allow user to specify the factor
+	endMarker++;
+	if (endMarker == argc || 
+	    Tcl_GetDouble(interp, argv[endMarker], &cFactor) != TCL_OK) {
+	  
+	  opserr << "WARNING invalid cFactor " << argv[endMarker] << " -";
+	  opserr << " Pulse tStart tFinish period <-width pulseWidth> <-shift shift> <-factor cFactor>\n";
+	  cleanup(argv);
+	  return 0;
+	}
+      }
+
+      else if (strcmp(argv[endMarker],"-width") == 0) {
+	// allow user to specify pulse width
+	endMarker++;
+	if (endMarker == argc || 
+	    Tcl_GetDouble(interp, argv[endMarker], &width) != TCL_OK) {
+	    
+	  opserr << "WARNING invalid pulse width " << argv[endMarker] << " - ";
+	  opserr << " Pulse tStart tFinish period <-width pulseWidth> <-shift shift> <-factor cFactor>\n";
+	  cleanup(argv);
+	  return 0;
+	}
+      }
+
+      else if (strcmp(argv[endMarker],"-shift") == 0) {
+	// allow user to specify phase shift
+	endMarker++;
+	if (endMarker == argc || 
+	    Tcl_GetDouble(interp, argv[endMarker], &shift) != TCL_OK) {
+	    
+	  opserr << "WARNING invalid phase shift " << argv[endMarker] << " - ";
+	  opserr << " Pulse tStart tFinish period <-width pulseWidth> <-shift shift> <-factor cFactor>\n";
+	  cleanup(argv);
+	  return 0;
+	}
+      }
+      endMarker++;
+    }
+
+    theSeries = new PulseSeries(tStart, tFinish, period, width, shift, cFactor);
+  }	
+
+  else if (strcmp(argv[0],"Triangle") == 0)  {
+    // LoadPattern and TriangleSeries - read args & create TriangleSeries object
+    double cFactor = 1.0;
+    double tStart, tFinish, period;
+    double shift = 0.0;
+      
+    if (argc < 4) {
+      opserr << "WARNING not enough TriangleSeries args - ";
+      opserr << " Triangle tStart tFinish period <-shift shift> <-factor cFactor>\n";
+      cleanup(argv);
+      return 0;	
+    }	
+    if (Tcl_GetDouble(interp, argv[1], &tStart) != TCL_OK) {
+      opserr << "WARNING invalid tStart " << argv[1] << " - ";
+      opserr << " Triangle tStart tFinish period <-shift shift> <-factor cFactor>\n";
+      cleanup(argv);
+      return 0;				
+    }
+    if (Tcl_GetDouble(interp, argv[2], &tFinish) != TCL_OK) {
+      opserr << "WARNING invalid tFinish " << argv[2] << " - ";
+      opserr << " Triangle tStart tFinish period <-shift shift> <-factor cFactor>\n";
+      cleanup(argv);
+      return 0;	
+    }     
+    if (Tcl_GetDouble(interp, argv[3], &period) != TCL_OK) {
+      opserr << "WARNING invalid period " << argv[3] << " - ";
+      opserr << " Triangle tStart tFinish period <-shift shift> <-factor cFactor>\n";
+      cleanup(argv);
+      return 0;	
+    }     
+    
+    int endMarker = 4;
+    
+    while (endMarker < argc && endMarker < argc) {
+      if (strcmp(argv[endMarker],"-factor") == 0) {
+	// allow user to specify the factor
+	endMarker++;
+	if (endMarker == argc || 
+	    Tcl_GetDouble(interp, argv[endMarker], &cFactor) != TCL_OK) {
+	  
+	  opserr << "WARNING invalid cFactor " << argv[endMarker] << " -";
+	  opserr << " Triangle tStart tFinish period <-shift shift> <-factor cFactor>\n";
+	  cleanup(argv);
+	  return 0;
+	}
+      }
+
+      else if (strcmp(argv[endMarker],"-shift") == 0) {
+	// allow user to specify phase shift
+	endMarker++;
+	if (endMarker == argc || 
+	    Tcl_GetDouble(interp, argv[endMarker], &shift) != TCL_OK) {
+	    
+	  opserr << "WARNING invalid phase shift " << argv[endMarker] << " - ";
+	  opserr << " Triangle tStart tFinish period <-shift shift> <-factor cFactor>\n";
+	  cleanup(argv);
+	  return 0;
+	}
+      }
+      endMarker++;
+    }
+
+    theSeries = new TriangleSeries(tStart, tFinish, period, shift, cFactor);	
+  }
+  
   else if ((strcmp(argv[0],"Series") == 0) ||
 	   (strcmp(argv[0],"Path") == 0)) {
 
