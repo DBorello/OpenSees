@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-06-14 05:26:47 $
+// $Revision: 1.4 $
+// $Date: 2005-12-15 00:19:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/convergenceTest/ConvergenceTest.h,v $
                                                                         
                                                                         
 #ifndef ConvergenceTest_h
 #define ConvergenceTest_h
 
-// File: ~/convergenceTest/ConvergenceTest.h
-//
 // Written: fmk 
 // Date: 09/98
 // Revised:
