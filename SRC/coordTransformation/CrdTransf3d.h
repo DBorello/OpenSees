@@ -17,12 +17,12 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
-// $Revision: 1.2 $
-// $Date: 2003-04-04 16:53:30 $
+
+// $Revision: 1.3 $
+// $Date: 2005-12-15 00:30:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CrdTransf3d.h,v $
-                                                                        
-                                                                        
+
+
 // File: ~/CrdTransf/CrdTransf3d.h
 //
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
@@ -44,16 +44,16 @@ class Vector;
 
 class CrdTransf3d: public CrdTransf
 {
-  public:
+public:
     CrdTransf3d (int tag, int classTag);
     virtual ~CrdTransf3d();
-  
-    virtual CrdTransf3d *getCopy(void)=0;
-    virtual int  getLocalAxes(Vector &xAxis, Vector &yAxis, Vector &zAxis) =0; 
-
-  protected:
     
-  private:
+    virtual CrdTransf3d *getCopy(void) = 0;
+    virtual int  getLocalAxes(Vector &xAxis, Vector &yAxis, Vector &zAxis) = 0; 
+    
+protected:
+    
+private:
 };
 
 #endif

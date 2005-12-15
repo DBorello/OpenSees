@@ -17,12 +17,12 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+
+// $Revision: 1.2 $
+// $Date: 2005-12-15 00:30:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CrdTransf3d.cpp,v $
-                                                                        
-                                                                        
+
+
 // File: ~/crdTransf/CrdTransf3d.C
 //
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
@@ -41,7 +41,6 @@
 CrdTransf3d::CrdTransf3d(int tag, int classTag):CrdTransf(tag, classTag)
 {
 }
-
 
 // destructor:
 CrdTransf3d::~CrdTransf3d()

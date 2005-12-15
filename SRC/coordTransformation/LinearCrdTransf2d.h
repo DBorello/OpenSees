@@ -17,11 +17,11 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
-// $Revision: 1.7 $
-// $Date: 2004-10-08 22:03:04 $
+
+// $Revision: 1.8 $
+// $Date: 2005-12-15 00:30:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf2d.h,v $
-                                                                        
+
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
 // Created: 04/2000
 // Revision: A
@@ -43,60 +43,63 @@
 
 class LinearCrdTransf2d: public CrdTransf2d
 {
-  public:
-    LinearCrdTransf2d (int tag);
-    LinearCrdTransf2d (int tag,
-		const Vector &rigJntOffsetI,
-		const Vector &rigJntOffsetJ);
+public:
+    LinearCrdTransf2d(int tag);
+    LinearCrdTransf2d(int tag,
+        const Vector &rigJntOffsetI,
+        const Vector &rigJntOffsetJ);
     
     LinearCrdTransf2d();
     ~LinearCrdTransf2d();
-
-    int    initialize(Node *node1Pointer, Node *node2Pointer);
-    int    update(void);
+    
+    int initialize(Node *node1Pointer, Node *node2Pointer);
+    int update(void);
     double getInitialLength(void);
     double getDeformedLength(void);
-
+    
     int commitState(void);
     int revertToLastCommit(void);        
     int revertToStart(void);
     
-// AddingSensitivity:BEGIN //////////////////////////////////
-	const Vector &getBasicDisplSensitivity (int gradNumber);
-    const Vector &getGlobalResistingForceShapeSensitivity (const Vector &basicForce, const Vector &p0);
-    const Vector &getBasicTrialDispShapeSensitivity     (void);
-// AddingSensitivity:END //////////////////////////////////
-    const Vector &getBasicTrialDisp     (void);
-    const Vector &getBasicIncrDisp      (void);
-    const Vector &getBasicIncrDeltaDisp (void);
+    const Vector &getBasicTrialDisp(void);
+    const Vector &getBasicIncrDisp(void);
+    const Vector &getBasicIncrDeltaDisp(void);
+	const Vector &getBasicTrialVel(void);
+	const Vector &getBasicTrialAccel(void);
+    
+    // AddingSensitivity:BEGIN //////////////////////////////////
+    const Vector &getBasicDisplSensitivity(int gradNumber);
+    const Vector &getGlobalResistingForceShapeSensitivity(const Vector &basicForce, const Vector &p0);
+    const Vector &getBasicTrialDispShapeSensitivity(void);
+    // AddingSensitivity:END //////////////////////////////////
 
-    const Vector &getGlobalResistingForce (const Vector &basicForce, const Vector &p0);
-    const Matrix &getGlobalStiffMatrix    (const Matrix &basicStiff, const Vector &basicForce);
+    const Vector &getGlobalResistingForce(const Vector &basicForce, const Vector &p0);
+    const Matrix &getGlobalStiffMatrix(const Matrix &basicStiff, const Vector &basicForce);
     const Matrix &getInitialGlobalStiffMatrix(const Matrix &basicStiff);
-
+    
     CrdTransf2d *getCopy(void);
     
     int sendSelf(int cTag, Channel &theChannel);
     int recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
-
-    void Print(OPS_Stream &s, int flag =0);
-  
+    
+    void Print(OPS_Stream &s, int flag = 0);
+    
     // functions used in post-processing only    
-    const Vector &getPointGlobalCoordFromLocal (const Vector &localCoords);
-    const Vector &getPointGlobalDisplFromBasic (double xi, const Vector &basicDisps);
-  
-  private:
-    int  computeElemtLengthAndOrient (void);
+    const Vector &getPointGlobalCoordFromLocal(const Vector &localCoords);
+    const Vector &getPointGlobalDisplFromBasic(double xi, const Vector &basicDisps);
+    
+private:
+    int computeElemtLengthAndOrient(void);
     
     // internal data
-    Node *nodeIPtr, 
-	 *nodeJPtr;          // pointers to the element two endnodes
-
+    Node *nodeIPtr, *nodeJPtr;  // pointers to the element two endnodes
+    
     double *nodeIOffset, *nodeJOffset;	// rigid joint offsets
-
+    
     double cosTheta, sinTheta;
+    
+    double L;   // undeformed element length
 
-    double L;                // undeformed element length
     double *nodeIInitialDisp, *nodeJInitialDisp;
     bool initialDispChecked;
 };

@@ -17,12 +17,12 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
-// $Revision: 1.2 $
-// $Date: 2003-03-04 00:48:09 $
+
+// $Revision: 1.3 $
+// $Date: 2005-12-15 00:30:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CrdTransf2d.h,v $
-                                                                        
-                                                                        
+
+
 // File: ~/CrdTransf/CrdTransf2d.h
 //
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
@@ -43,15 +43,15 @@
 
 class CrdTransf2d: public CrdTransf
 {
-  public:
+public:
     CrdTransf2d (int tag, int classTag);
     virtual ~CrdTransf2d();
-   
-    virtual CrdTransf2d *getCopy(void)=0;
-
-  protected:
     
-  private:
+    virtual CrdTransf2d *getCopy(void)=0;
+    
+protected:
+    
+private:
 };
 
 #endif

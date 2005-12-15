@@ -17,12 +17,12 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
-// $Revision: 1.3 $
-// $Date: 2003-03-04 00:48:09 $
+
+// $Revision: 1.4 $
+// $Date: 2005-12-15 00:30:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CrdTransf.h,v $
-                                                                        
-                                                                        
+
+
 // File: ~/crdTransf/CrdTransf.h
 //
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
@@ -50,11 +50,11 @@ class Node;
 
 class CrdTransf: public TaggedObject, public MovableObject
 {
-  public:
+public:
     CrdTransf(int tag, int classTag);
     CrdTransf();
     virtual ~CrdTransf();
-
+    
     virtual int    initialize(Node *node1Pointer, Node *node2Pointer) = 0;
     virtual int    update(void) = 0;
     virtual double getInitialLength(void) = 0;
@@ -64,26 +64,29 @@ class CrdTransf: public TaggedObject, public MovableObject
     virtual int revertToLastCommit(void) = 0;        
     virtual int revertToStart(void) = 0;
     
-// AddingSensitivity:BEGIN //////////////////////////////////
-	virtual const Vector &getBasicDisplSensitivity (int gradNumber);
-    virtual const Vector &getGlobalResistingForceShapeSensitivity (const Vector &basicForce, const Vector &uniformLoad);
-    virtual const Vector &getBasicTrialDispShapeSensitivity      (void);
-// AddingSensitivity:END //////////////////////////////////
-    virtual const Vector &getBasicTrialDisp       (void) = 0;
-    virtual const Vector &getBasicIncrDisp        (void) = 0;
-    virtual const Vector &getBasicIncrDeltaDisp   (void) = 0;
-
-    virtual const Vector &getGlobalResistingForce (const Vector &basicForce, const Vector &uniformLoad) = 0;
-    virtual const Matrix &getGlobalStiffMatrix    (const Matrix &basicStiff, const Vector &basicForce) = 0;
-    virtual const Matrix &getInitialGlobalStiffMatrix(const Matrix &basicStiff) = 0;
-
-    // functions used in post-processing only    
-    virtual const Vector &getPointGlobalCoordFromLocal (const Vector &localCoords) = 0;
-    virtual const Vector &getPointGlobalDisplFromBasic (double xi, const Vector &basicDisps) = 0;
-   
-  protected:
+    virtual const Vector &getBasicTrialDisp(void) = 0;
+    virtual const Vector &getBasicIncrDisp(void) = 0;
+    virtual const Vector &getBasicIncrDeltaDisp(void) = 0;
+    virtual const Vector &getBasicTrialVel(void) = 0;
+    virtual const Vector &getBasicTrialAccel(void) = 0;
     
-  private:
+    // AddingSensitivity:BEGIN //////////////////////////////////
+    virtual const Vector &getBasicDisplSensitivity(int gradNumber);
+    virtual const Vector &getGlobalResistingForceShapeSensitivity(const Vector &basicForce, const Vector &uniformLoad);
+    virtual const Vector &getBasicTrialDispShapeSensitivity(void);
+    // AddingSensitivity:END //////////////////////////////////
+    
+    virtual const Vector &getGlobalResistingForce(const Vector &basicForce, const Vector &uniformLoad) = 0;
+    virtual const Matrix &getGlobalStiffMatrix(const Matrix &basicStiff, const Vector &basicForce) = 0;
+    virtual const Matrix &getInitialGlobalStiffMatrix(const Matrix &basicStiff) = 0;
+    
+    // functions used in post-processing only    
+    virtual const Vector &getPointGlobalCoordFromLocal(const Vector &localCoords) = 0;
+    virtual const Vector &getPointGlobalDisplFromBasic(double xi, const Vector &basicDisps) = 0;
+    
+protected:
+    
+private:
 };
 
 #endif

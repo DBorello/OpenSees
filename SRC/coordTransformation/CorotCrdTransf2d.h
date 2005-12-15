@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $                                                              
-// $Date: 2005-07-11 22:52:45 $                                                                  
+// $Revision: 1.7 $                                                              
+// $Date: 2005-12-15 00:31:03 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CorotCrdTransf2d.h,v $ 
                                         
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
@@ -41,73 +41,76 @@
 
 class CorotCrdTransf2d: public CrdTransf2d
 {
-  public:
-    CorotCrdTransf2d (int tag, const Vector &rigJntOffsetI, const Vector &rigJntOffsetJ);
+public:
+    CorotCrdTransf2d(int tag, const Vector &rigJntOffsetI, const Vector &rigJntOffsetJ);
     
     CorotCrdTransf2d();
     ~CorotCrdTransf2d();
-
-    int    initialize(Node *nodeIPointer, Node *nodeJPointer);
-    int    update(void);
+    
+    int initialize(Node *nodeIPointer, Node *nodeJPointer);
+    int update(void);
     double getInitialLength(void);
     double getDeformedLength(void);
-
+    
     int commitState(void);
     int revertToLastCommit(void);        
     int revertToStart(void);
     
-    const Vector &getBasicTrialDisp       (void);
-    const Vector &getBasicIncrDisp        (void);
-    const Vector &getBasicIncrDeltaDisp   (void);
-
-    const Vector &getGlobalResistingForce (const Vector &basicForce, const Vector &uniformLoad);
-    const Matrix &getGlobalStiffMatrix    (const Matrix &basicStiff, const Vector &basicForce);
+    const Vector &getBasicTrialDisp(void);
+    const Vector &getBasicIncrDisp(void);
+    const Vector &getBasicIncrDeltaDisp(void);
+	const Vector &getBasicTrialVel(void);
+	const Vector &getBasicTrialAccel(void);
+    
+    const Vector &getGlobalResistingForce(const Vector &basicForce, const Vector &uniformLoad);
+    const Matrix &getGlobalStiffMatrix(const Matrix &basicStiff, const Vector &basicForce);
     const Matrix &getInitialGlobalStiffMatrix(const Matrix &basicStiff);
-
+    
     CrdTransf2d *getCopy(void);
     
     int sendSelf(int cTag, Channel &theChannel);
     int recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
-
-    void Print(OPS_Stream &s, int flag =0);
-     
+    
+    void Print(OPS_Stream &s, int flag = 0);
+    
     // functions used in post-processing only    
-    const Vector &getPointGlobalCoordFromLocal (const Vector &localCoords);
-    const Vector &getPointGlobalDisplFromBasic (double xi, const Vector &basicDisps);
-
-  private:
+    const Vector &getPointGlobalCoordFromLocal(const Vector &localCoords);
+    const Vector &getPointGlobalDisplFromBasic(double xi, const Vector &basicDisps);
+    
+private:
     int compElemtLengthAndOrient(void);
     int compElemtLengthAndOrientWRTLocalSystem(const Vector &ul);
     void transfLocalDisplsToBasic(const Vector &ul);
-    void getTransfMatrixLocalGlobal (Matrix &Tlg);
+    void getTransfMatrixLocalGlobal(Matrix &Tlg);
     void getTransfMatrixBasicLocal(Matrix &Tbl);
     const Matrix &getGeomStiffMatrix(const Vector &pb) const;
-
+    
     // internal data
-    Node *nodeIPtr, 
-	 *nodeJPtr;            // pointers to the element two endnodes
-
-    Vector nodeIOffset, 
-           nodeJOffset;        // rigid joint offsets
-		 
+    Node *nodeIPtr, *nodeJPtr; // pointers to the element two endnodes
+    
+    Vector nodeIOffset, nodeJOffset;  // rigid joint offsets
+    
     double cosTheta, sinTheta; // direction cossines of undeformed element wrt to global system 
     double cosAlpha, sinAlpha; // direction cossines of deformed element wrt to local system
     double L;                  // undeformed element length
     double Ln;                 // deformed element length
-	
+    double Lx, Ly;             // components of the deformed member
+    double Lxdot, Lydot;       // time derivatives of components of the deformed member
+    double Lxdotdot, Lydotdot; // double time derivatives of components of the deformed member
+    
     Vector ub;                 // basic displacements
     Vector ubcommit;           // commited basic displacements
     Vector ubpr;               // previous basic displacements
-
-    static Matrix Tlg;     // matrix that transforms from global to local coordinates
-    static Matrix Tbl;     // matrix that transforms from local  to basic coordinates
+    
+    static Matrix Tlg;         // matrix that transforms from global to local coordinates
+    static Matrix Tbl;         // matrix that transforms from local  to basic coordinates
     static Matrix kg;     
     static Vector uxg;     
     static Vector pg;     
     static Vector dub;     
     static Vector Dub;     
+    
     double *nodeIInitialDisp, *nodeJInitialDisp;
     bool initialDispChecked;
 };
 #endif
-

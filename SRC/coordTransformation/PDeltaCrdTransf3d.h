@@ -17,11 +17,11 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
-// $Revision: 1.6 $
-// $Date: 2004-10-08 22:03:04 $
+
+// $Revision: 1.7 $
+// $Date: 2005-12-15 00:30:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf3d.h,v $
-                                                          
+
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
 // Created: 04/2000
 // Revision: A
@@ -42,59 +42,61 @@
 
 class PDeltaCrdTransf3d: public CrdTransf3d
 {
-  public:
-    PDeltaCrdTransf3d (int tag, const Vector &vecInLocXZPlane);
-    PDeltaCrdTransf3d (int tag, const Vector &vecInLocXZPlane,
-		const Vector &rigJntOffsetI,
-		const Vector &rigJntOffsetJ);
+public:
+    PDeltaCrdTransf3d(int tag, const Vector &vecInLocXZPlane);
+    PDeltaCrdTransf3d(int tag, const Vector &vecInLocXZPlane,
+        const Vector &rigJntOffsetI,
+        const Vector &rigJntOffsetJ);
     
     PDeltaCrdTransf3d();
     ~PDeltaCrdTransf3d();
-
-    int    initialize(Node *node1Pointer, Node *node2Pointer);
-    int    update(void);
+    
+    int initialize(Node *node1Pointer, Node *node2Pointer);
+    int update(void);
     double getInitialLength(void);
     double getDeformedLength(void);
-
+    
     int commitState(void);
     int revertToLastCommit(void);        
     int revertToStart(void);
     
-    const Vector &getBasicTrialDisp     (void);
-    const Vector &getBasicIncrDisp      (void);
-    const Vector &getBasicIncrDeltaDisp (void);
-
-    const Vector &getGlobalResistingForce (const Vector &basicForce, const Vector &p0);
-    const Matrix &getGlobalStiffMatrix    (const Matrix &basicStiff, const Vector &basicForce);
+    const Vector &getBasicTrialDisp(void);
+    const Vector &getBasicIncrDisp(void);
+    const Vector &getBasicIncrDeltaDisp(void);
+	const Vector &getBasicTrialVel(void);
+	const Vector &getBasicTrialAccel(void);
+    
+    const Vector &getGlobalResistingForce(const Vector &basicForce, const Vector &p0);
+    const Matrix &getGlobalStiffMatrix(const Matrix &basicStiff, const Vector &basicForce);
     const Matrix &getInitialGlobalStiffMatrix(const Matrix &basicStiff);
-
+    
     CrdTransf3d *getCopy(void);
     
     int sendSelf(int cTag, Channel &theChannel);
     int recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
-
-    void Print(OPS_Stream &s, int flag =0);
-  
+    
+    void Print(OPS_Stream &s, int flag = 0);
+    
     // functions used in post-processing only    
-    const Vector &getPointGlobalCoordFromLocal (const Vector &localCoords);
-    const Vector &getPointGlobalDisplFromBasic (double xi, const Vector &basicDisps);
-
-    int  getLocalAxes(Vector &xAxis, Vector &yAxis, Vector &zAxis);
-  
-  private:
-    int  computeElemtLengthAndOrient (void);
-
+    const Vector &getPointGlobalCoordFromLocal(const Vector &localCoords);
+    const Vector &getPointGlobalDisplFromBasic(double xi, const Vector &basicDisps);
+    
+    int getLocalAxes(Vector &xAxis, Vector &yAxis, Vector &zAxis);
+    
+private:
+    int computeElemtLengthAndOrient(void);
+    
     // internal data
-    Node *nodeIPtr, 
-	 *nodeJPtr;          // pointers to the element two endnodes
-
+    Node *nodeIPtr, *nodeJPtr;  // pointers to the element two endnodes
+    
     double *nodeIOffset, *nodeJOffset;	// rigid joint offsets
-
+    
     double R[3][3];	// Transformation matrix
-
-    double L;                // undeformed element length
+    
+    double L;       // undeformed element length
     double ul17;	// Transverse local displacement offsets of P-Delta
     double ul28;
+
     double *nodeIInitialDisp, *nodeJInitialDisp;
     bool initialDispChecked;
 };

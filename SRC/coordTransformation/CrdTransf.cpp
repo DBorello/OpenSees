@@ -17,12 +17,12 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
-// $Revision: 1.2 $
-// $Date: 2003-03-04 00:48:09 $
+
+// $Revision: 1.3 $
+// $Date: 2005-12-15 00:30:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CrdTransf.cpp,v $
-                                                                        
-                                                                        
+
+
 // File: ~/crdTransf/CrdTransf.C
 //
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
@@ -43,42 +43,37 @@ CrdTransf::CrdTransf(int tag, int classTag):TaggedObject(tag), MovableObject(cla
 {
 }
 
-
 // destructor:
 CrdTransf::~CrdTransf()
 {
 }
 
-
 const Vector &
 CrdTransf::getBasicDisplSensitivity(int gradNumber)
 {
-  opserr << "WARNING: CrdTransf::getBasicSensitivity() -- This method " << endln
-	 << " should not be called!" << endln;
-  
-  static Vector dummy(1);
-  return dummy;
+    opserr << "WARNING CrdTransf::getBasicDisplSensitivity() - this method "
+        << " should not be called." << endln;
+    
+    static Vector dummy(1);
+    return dummy;
 }
-
 
 const Vector &
 CrdTransf::getGlobalResistingForceShapeSensitivity(const Vector &pb, const Vector &p0)
 {
-  opserr<< "ERROR: The getGlobalResistingForceSensitivity() method is not" << endln
-	<< " implemented for the chosen transformation." << endln;
-  
-  static Vector dummy(1);
-  return dummy;
+    opserr << "ERROR CrdTransf::getGlobalResistingForceSensitivity() - has not been"
+        << " implemented yet for the chosen transformation." << endln;
+    
+    static Vector dummy(1);
+    return dummy;
 }
 
-
-
 const Vector &
-CrdTransf::getBasicTrialDispShapeSensitivity (void)
+CrdTransf::getBasicTrialDispShapeSensitivity(void)
 {
-  opserr<< "ERROR: The getBasicTrialDispSensitivity() method is not" << endln
-	<< " implemented for the chosen transformation." << endln;
-  
-  static Vector dummy(1);
-  return dummy;
+    opserr << "ERROR CrdTransf::getBasicTrialDispShapeSensitivity() - has not been"
+        << " implemented yet for the chosen transformation." << endln;
+    
+    static Vector dummy(1);
+    return dummy;
 }
