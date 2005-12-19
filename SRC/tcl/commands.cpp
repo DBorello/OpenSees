@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.66 $
-// $Date: 2005-11-30 00:33:43 $
+// $Revision: 1.67 $
+// $Date: 2005-12-19 23:16:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -100,6 +100,8 @@ OPS_Stream *opserrPtr = &sserr;
 #include <CTestRelativeNormUnbalance.h>
 #include <CTestRelativeNormDispIncr.h>
 #include <CTestRelativeEnergyIncr.h>
+#include <CTestRelativeTotalNormDispIncr.h>
+#include <CTestFixedNumIter.h>
 
 // soln algorithms
 #include <Linear.h>
@@ -149,6 +151,17 @@ OPS_Stream *opserrPtr = &sserr;
 #include <CentralDifferenceAlternative.h>
 #include <CentralDifferenceNoDamping.h>
 #include <CentralDifference.h>
+#include <NewmarkExplicit.h>
+#include <NewmarkHybridSimulation.h>
+#include <HHTExplicit.h>
+#include <HHTGeneralized.h>
+#include <HHTGeneralizedExplicit.h>
+#include <HHTHybridSimulation.h>
+#include <AlphaOS.h>
+#include <AlphaOSGeneralized.h>
+#include <Collocation.h>
+#include <CollocationHybridSimulation.h>
+
 
 // analysis
 #include <StaticAnalysis.h>
@@ -1997,60 +2010,86 @@ specifyCTest(ClientData clientData, Tcl_Interp *interp, int argc,
   double tol;
   int numIter;
   int printIt = 0;
-  
-  if (argc == 3) {
+  int normType = 2;
+
+  if (strcmp(argv[1],"FixedNumIter") != 0) {
+    if (argc == 4) {
       if (Tcl_GetDouble(interp, argv[2], &tol) != TCL_OK)	
-	  return TCL_ERROR;		
-      numIter = 25;      
-  } else if (argc == 4) {
-      if (Tcl_GetDouble(interp, argv[2], &tol) != TCL_OK)	
-	  return TCL_ERROR;			  
+	return TCL_ERROR;			  
       if (Tcl_GetInt(interp, argv[3], &numIter) != TCL_OK)	
-	  return TCL_ERROR;			  
-  } else if (argc == 5) {
+	return TCL_ERROR;			  
+    } else if (argc == 5) {
       if (Tcl_GetDouble(interp, argv[2], &tol) != TCL_OK)	
-	  return TCL_ERROR;			  
+	return TCL_ERROR;			  
       if (Tcl_GetInt(interp, argv[3], &numIter) != TCL_OK)	
-	  return TCL_ERROR;			  
+	return TCL_ERROR;			  
       if (Tcl_GetInt(interp, argv[4], &printIt) != TCL_OK)	
-	  return TCL_ERROR;			  
-  }  else {
-     tol = 1.0e-6;
-     numIter = 25;      
+	return TCL_ERROR;			  
+    } else if (argc == 6) {
+      if (Tcl_GetDouble(interp, argv[2], &tol) != TCL_OK)	
+	return TCL_ERROR;			  
+      if (Tcl_GetInt(interp, argv[3], &numIter) != TCL_OK)	
+	return TCL_ERROR;			  
+      if (Tcl_GetInt(interp, argv[4], &printIt) != TCL_OK)	
+	return TCL_ERROR;			  
+      if (Tcl_GetInt(interp, argv[5], &normType) != TCL_OK)	
+	return TCL_ERROR;			  
+    }
+  } else {
+    if (argc == 3) {
+      if (Tcl_GetInt(interp, argv[2], &numIter) != TCL_OK)	
+	return TCL_ERROR;			  
+    } else if (argc == 4) {
+      if (Tcl_GetInt(interp, argv[2], &numIter) != TCL_OK)	
+	return TCL_ERROR;			  
+      if (Tcl_GetInt(interp, argv[3], &printIt) != TCL_OK)	
+	return TCL_ERROR;			  
+    } else if (argc == 5) {
+      if (Tcl_GetInt(interp, argv[2], &numIter) != TCL_OK)	
+	return TCL_ERROR;			  
+      if (Tcl_GetInt(interp, argv[3], &printIt) != TCL_OK)	
+	return TCL_ERROR;			  
+      if (Tcl_GetInt(interp, argv[4], &normType) != TCL_OK)	
+	return TCL_ERROR;			  
+    }
   }
 
   ConvergenceTest *theNewTest = 0;
 
-      
   if (strcmp(argv[1],"NormUnbalance") == 0) 
-    theNewTest = new CTestNormUnbalance(tol,numIter,printIt);       
+    theTest = new CTestNormUnbalance(tol,numIter,printIt,normType);       
   else if (strcmp(argv[1],"NormDispIncr") == 0) 
-    theNewTest = new CTestNormDispIncr(tol,numIter,printIt);             
+    theTest = new CTestNormDispIncr(tol,numIter,printIt,normType);             
   else if (strcmp(argv[1],"EnergyIncr") == 0) 
-    theNewTest = new CTestEnergyIncr(tol,numIter,printIt);             
+    theTest = new CTestEnergyIncr(tol,numIter,printIt,normType);             
   else if (strcmp(argv[1],"RelativeNormUnbalance") == 0) 
-    theNewTest = new CTestRelativeNormUnbalance(tol,numIter,printIt);       
+    theTest = new CTestRelativeNormUnbalance(tol,numIter,printIt,normType);       
   else if (strcmp(argv[1],"RelativeNormDispIncr") == 0) 
-    theNewTest = new CTestRelativeNormDispIncr(tol,numIter,printIt);             
+    theTest = new CTestRelativeNormDispIncr(tol,numIter,printIt,normType);             
   else if (strcmp(argv[1],"RelativeEnergyIncr") == 0) 
-    theNewTest = new CTestRelativeEnergyIncr(tol,numIter,printIt);             
+    theTest = new CTestRelativeEnergyIncr(tol,numIter,printIt,normType);             
+  else if (strcmp(argv[1],"RelativeTotalNormDispIncr") == 0) 
+    theTest = new CTestRelativeTotalNormDispIncr(tol,numIter,printIt,normType);             
+  else if (strcmp(argv[1],"FixedNumIter") == 0)
+    theTest = new CTestFixedNumIter(numIter,printIt,normType);             
   else {
     opserr << "WARNING No ConvergenceTest type (NormUnbalance, NormDispIncr, EnergyIncr, \n";
-    opserr << "RelativeNormUnbalance, RelativeNormDispIncr, RelativeEnergyIncr, )\n"; 
+    opserr << "RelativeNormUnbalance, RelativeNormDispIncr, RelativeEnergyIncr, \n";
+    opserr << "RelativeTotalNormDispIncr, FixedNumIter)\n";
     return TCL_ERROR;
   }    
 
   if (theNewTest != 0) {
-     theTest = theNewTest;;
-     
-     // if the analysis exists - we want to change the Test
-     if (theStaticAnalysis != 0)
-       theStaticAnalysis->setConvergenceTest(*theTest);
-     
-     else if (theTransientAnalysis != 0)
-       theTransientAnalysis->setConvergenceTest(*theTest);
+    theTest = theNewTest;;
+    
+    // if the analysis exists - we want to change the Test
+    if (theStaticAnalysis != 0)
+      theStaticAnalysis->setConvergenceTest(*theTest);
+    
+    else if (theTransientAnalysis != 0)
+      theTransientAnalysis->setConvergenceTest(*theTest);
   }
-
+  
   return TCL_OK;
 }
 
@@ -2310,6 +2349,91 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
   }  
 
+  else if (strcmp(argv[1],"NewmarkExplicit") == 0) {
+      double gamma;
+      double alphaM, betaK, betaKi, betaKc;
+      if (argc != 3 && argc != 7) {
+	opserr << "WARNING integrator NewmarkExplicit gamma <alphaM betaK betaKi betaKc>\n";
+	return TCL_ERROR;
+      }    
+      if (Tcl_GetDouble(interp, argv[2], &gamma) != TCL_OK) {
+	  opserr << "WARNING integrator NewmarkExplicit gamma - undefined gamma\n";	  
+	  return TCL_ERROR;	
+      }
+      if (argc == 7) {
+	  if (Tcl_GetDouble(interp, argv[3], &alphaM) != TCL_OK) {
+	      opserr << "WARNING integrator NewmarkExplicit gamma alphaM betaK betaKi betaKc - alphaM\n";	  
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[4], &betaK) != TCL_OK) {
+	      opserr << "WARNING integrator NewmarkExplicit gamma alphaM betaK betaKi betaKc - betaK\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[5], &betaKi) != TCL_OK) {
+	      opserr << "WARNING integrator NewmarkExplicit gamma alphaM betaK betaKi betaKc - betaKi\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[6], &betaKc) != TCL_OK) {
+	    opserr << "WARNING integrator NewmarkExplicit gamma alphaM betaK betaKi betaKc - betaKc\n";
+	    return TCL_ERROR;	
+	  }
+      }
+      if (argc == 3)
+	  theTransientIntegrator = new NewmarkExplicit(gamma);       
+      else
+	  theTransientIntegrator = new NewmarkExplicit(gamma, alphaM, betaK, betaKi, betaKc);
+
+      // if the analysis exists - we want to change the Integrator
+	  if (theTransientAnalysis != 0)
+		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+  }  
+
+  else if (strcmp(argv[1],"NewmarkHybridSimulation") == 0) {
+      double beta, gamma;
+      double alphaM, betaK, betaKi, betaKc;
+      if (argc != 4 && argc != 8) {
+	opserr << "WARNING integrator NewmarkHybridSimulation gamma beta <alphaM betaK betaKi betaKc>\n";
+	return TCL_ERROR;
+      }    
+      if (Tcl_GetDouble(interp, argv[2], &gamma) != TCL_OK) {
+	  opserr << "WARNING integrator NewmarkHybridSimulation gamma beta - undefined gamma\n";	  
+	  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[3], &beta) != TCL_OK) {
+	  opserr << "WARNING integrator NewmarkHybridSimulation gamma beta - undefined beta\n";
+	  return TCL_ERROR;	
+      }
+      if (argc == 8) {
+	  if (Tcl_GetDouble(interp, argv[4], &alphaM) != TCL_OK) {
+	      opserr << "WARNING integrator NewmarkHybridSimulation gamma beta alphaM betaK betaKi betaKc - alphaM\n";	  
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[5], &betaK) != TCL_OK) {
+	      opserr << "WARNING integrator NewmarkHybridSimulation gamma beta alphaM betaK betaKi betaKc - betaK\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[6], &betaKi) != TCL_OK) {
+	      opserr << "WARNING integrator NewmarkHybridSimulation gamma beta alphaM betaK betaKi betaKc - betaKi\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[7], &betaKc) != TCL_OK) {
+	    opserr << "WARNING integrator NewmarkHybridSimulation gamma beta alphaM betaK betaKi betaKc - betaKc\n";
+	    return TCL_ERROR;	
+	  }
+      }
+      if (theTest == 0) {
+        opserr << "WARNING no ConvergenceTest specified yet\n";
+        return TCL_ERROR;	  
+      }
+      if (argc == 4)
+	  theTransientIntegrator = new NewmarkHybridSimulation(gamma, beta, *theTest);       
+      else
+	  theTransientIntegrator = new NewmarkHybridSimulation(gamma, beta, *theTest, alphaM, betaK, betaKi, betaKc);
+
+      // if the analysis exists - we want to change the Integrator
+	  if (theTransientAnalysis != 0)
+		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+  }
 
 #ifdef _RELIABILITY
   else if (strcmp(argv[1],"NewmarkWithSensitivity") == 0) {
@@ -2405,17 +2529,28 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 #endif
   
   else if (strcmp(argv[1],"HHT") == 0) {
-      double alpha;
+      double alpha, beta, gamma;
       double alphaM, betaK, betaKi, betaKc;
-      if (argc != 3 && argc != 7) {
-	opserr << "WARNING integrator HHT alpha <alphaM betaK betaK0 betaKc>\n";
+      if (argc != 3 && argc != 5 && argc != 7 && argc != 9) {
+	opserr << "WARNING integrator HHT alpha <alphaM betaK betaKi betaKc>\n";
+	opserr << "     or integrator HHT alpha beta gamma <alphaM betaK betaKi betaKc>\n";
 	return TCL_ERROR;
       }    
       if (Tcl_GetDouble(interp, argv[2], &alpha) != TCL_OK) {
 	  opserr << "WARNING integrator HHT alpha - undefined alpha\n";	  
 	  return TCL_ERROR;	
       }
-      if (argc == 6 || argc == 7) {
+      if (argc == 5 || argc == 9) {
+      if (Tcl_GetDouble(interp, argv[3], &beta) != TCL_OK) {
+	  opserr << "WARNING integrator HHT alpha beta gamma - undefined beta\n";	  
+	  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[4], &gamma) != TCL_OK) {
+	  opserr << "WARNING integrator HHT alpha beta gamma - undefined gamma\n";	  
+	  return TCL_ERROR;	
+      }
+      }
+      if (argc == 7) {
 	  if (Tcl_GetDouble(interp, argv[3], &alphaM) != TCL_OK) {
 	      opserr << "WARNING integrator HHT alpha alphaM betaK betaKi betaKc - alphaM\n";	  
 	      return TCL_ERROR;	
@@ -2433,36 +2568,6 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	    return TCL_ERROR;	
 	  }
       } 
-      
-      if (argc == 3)
-	  theTransientIntegrator = new HHT(alpha);       
-      else
-	  theTransientIntegrator = new HHT(alpha, alphaM, betaK, betaKi, betaKc);       
-
-      // if the analysis exists - we want to change the Integrator
-	  if (theTransientAnalysis != 0)
-		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
-  }    
-
-  else if (strcmp(argv[1],"GeneralizedHHT") == 0) {
-      double alpha, beta, gamma;
-      double alphaM, betaK, betaKi, betaKc;
-      if (argc != 5 && argc != 9) {
-	opserr << "WARNING integrator HHT alpha beta gamma <alphaM betaKcurrent betaKi betaKlastCommitted>\n";
-	return TCL_ERROR;
-      }    
-      if (Tcl_GetDouble(interp, argv[2], &alpha) != TCL_OK) {
-	  opserr << "WARNING integrator HHT alpha beta gamma - undefined alpha\n";	  
-	  return TCL_ERROR;	
-      }
-      if (Tcl_GetDouble(interp, argv[3], &beta) != TCL_OK) {
-	  opserr << "WARNING integrator HHT alpha beta gamma - undefined beta\n";	  
-	  return TCL_ERROR;	
-      }
-      if (Tcl_GetDouble(interp, argv[4], &gamma) != TCL_OK) {
-	  opserr << "WARNING integrator HHT alpha beta gamma - undefined gamma\n";	  
-	  return TCL_ERROR;	
-      }
       if (argc == 9) {
 	  if (Tcl_GetDouble(interp, argv[5], &alphaM) != TCL_OK) {
 	      opserr << "WARNING integrator HHT alpha beta gamma alphaM betaK betaKi betaKc - alphaM\n";	  
@@ -2481,16 +2586,643 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	    return TCL_ERROR;	
 	  }
       }      
-      if (argc == 5)
-	  theTransientIntegrator = new HHT(alpha, beta, gamma);       
-      else
-	  theTransientIntegrator = new HHT(alpha, beta, gamma, alphaM,betaK, betaKi, betaKc);       
+      if (argc == 3)
+	  theTransientIntegrator = new HHT(alpha);       
+      else if (argc == 5)
+      theTransientIntegrator = new HHT(alpha, beta, gamma);
+      else if (argc == 7)
+	  theTransientIntegrator = new HHT(alpha, alphaM, betaK, betaKi, betaKc);
+      else if (argc == 9)
+	  theTransientIntegrator = new HHT(alpha, beta, gamma, alphaM, betaK, betaKi, betaKc);
 
       // if the analysis exists - we want to change the Integrator
 	  if (theTransientAnalysis != 0)
 		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
   }    
 
+  else if (strcmp(argv[1],"HHTGeneralized") == 0) {
+      double rhoInf, alphaI, alphaF, beta, gamma;
+      double alphaM, betaK, betaKi, betaKc;
+      if (argc != 3 && argc != 6 && argc != 7 && argc != 10) {
+	opserr << "WARNING integrator HHTGeneralized rhoInf <alphaM betaK betaKi betaKc>\n";
+    opserr << "     or integrator HHTGeneralized alphaI alphaF beta gamma <alphaM betaK betaKi betaKc>\n";
+	return TCL_ERROR;
+      }
+      if (argc == 3 || argc == 7) {
+      if (Tcl_GetDouble(interp, argv[2], &rhoInf) != TCL_OK) {
+	  opserr << "WARNING integrator HHTGeneralized rhoInf - undefined rhoInf\n";	  
+	  return TCL_ERROR;	
+      }
+      }
+      if (argc == 6 || argc == 10) {
+      if (Tcl_GetDouble(interp, argv[2], &alphaI) != TCL_OK) {
+	  opserr << "WARNING integrator HHTGeneralized alphaI alphaF beta gamma - undefined alphaI\n";	  
+	  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[3], &alphaF) != TCL_OK) {
+	  opserr << "WARNING integrator HHTGeneralized alphaI alphaF beta gamma - undefined alphaF\n";	  
+	  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[4], &beta) != TCL_OK) {
+	  opserr << "WARNING integrator HHTGeneralized alphaI alphaF beta gamma - undefined beta\n";	  
+	  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[5], &gamma) != TCL_OK) {
+	  opserr << "WARNING integrator HHTGeneralized alphaI alphaF beta gamma - undefined gamma\n";	  
+	  return TCL_ERROR;	
+      }
+      }
+      if (argc == 7) {
+	  if (Tcl_GetDouble(interp, argv[3], &alphaM) != TCL_OK) {
+	      opserr << "WARNING integrator HHTGeneralized rhoInf alphaM betaK betaKi betaKc - alphaM\n";	  
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[4], &betaK) != TCL_OK) {
+	      opserr << "WARNING integrator HHTGeneralized rhoInf alphaM betaK betaKi betaKc - betaK\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[5], &betaKi) != TCL_OK) {
+	      opserr << "WARNING integrator HHTGeneralized rhoInf alphaM betaK betaKi betaKc - betaKi\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[6], &betaKc) != TCL_OK) {
+	    opserr << "WARNING integrator HHTGeneralized rhoInf alphaM betaK betaKi betaKc - betaKi\n";
+	    return TCL_ERROR;	
+	  }
+      } 
+      if (argc == 10) {
+	  if (Tcl_GetDouble(interp, argv[6], &alphaM) != TCL_OK) {
+	      opserr << "WARNING integrator HHTGeneralized alphaI alphaF beta gamma alphaM betaK betaKi betaKc - alphaM\n";	  
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[7], &betaK) != TCL_OK) {
+	      opserr << "WARNING integrator HHTGeneralized alphaI alphaF beta gamma alphaM betaK betaKi betaKc - betaK\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[8], &betaKi) != TCL_OK) {
+	      opserr << "WARNING integrator HHTGeneralized alphaI alphaF beta gamma alphaM betaK betaKi betaKc - betaKi\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[9], &betaKc) != TCL_OK) {
+	    opserr << "WARNING integrator HHTGeneralized alphaI alphaF beta gamma alphaM betaK betaKi betaKc - betaKc\n";
+	    return TCL_ERROR;	
+	  }
+      }      
+      if (argc == 3)
+	  theTransientIntegrator = new HHTGeneralized(rhoInf);       
+      else if (argc == 6)
+      theTransientIntegrator = new HHTGeneralized(alphaI, alphaF, beta, gamma);
+      else if (argc == 7)
+	  theTransientIntegrator = new HHTGeneralized(rhoInf, alphaM, betaK, betaKi, betaKc);
+      else if (argc == 10)
+	  theTransientIntegrator = new HHTGeneralized(alphaI, alphaF, beta, gamma, alphaM, betaK, betaKi, betaKc);
+
+      // if the analysis exists - we want to change the Integrator
+	  if (theTransientAnalysis != 0)
+		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+  }
+
+  else if (strcmp(argv[1],"HHTExplicit") == 0) {
+      double alpha, gamma;
+      double alphaM, betaK, betaKi, betaKc;
+      if (argc != 3 && argc != 4 && argc != 7 && argc != 8) {
+	      opserr << "WARNING integrator HHTExplicit alpha <alphaM betaK betaKi betaKc>\n";
+          opserr << "     or integrator HHTExplicit alpha gamma <alphaM betaK betaKi betaKc>\n";
+	      return TCL_ERROR;
+      }    
+      if (Tcl_GetDouble(interp, argv[2], &alpha) != TCL_OK) {
+	      opserr << "WARNING integrator HHTExplicit alpha - undefined alpha\n";	  
+	      return TCL_ERROR;	
+      }
+      if (argc == 4 || argc == 8) {
+      if (Tcl_GetDouble(interp, argv[3], &gamma) != TCL_OK) {
+	      opserr << "WARNING integrator HHTExplicit alpha gamma - undefined gamma\n";	  
+	      return TCL_ERROR;	
+      }
+      }
+      if (argc == 7) {
+	  if (Tcl_GetDouble(interp, argv[3], &alphaM) != TCL_OK) {
+	      opserr << "WARNING integrator HHTExplicit alpha alphaM betaK betaKi betaKc - alphaM\n";	  
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[4], &betaK) != TCL_OK) {
+	      opserr << "WARNING integrator HHTExplicit alpha alphaM betaK betaKi betaKc - betaK\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[5], &betaKi) != TCL_OK) {
+	      opserr << "WARNING integrator HHTExplicit alpha alphaM betaK betaKi betaKc - betaKi\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[6], &betaKc) != TCL_OK) {
+	    opserr << "WARNING integrator HHTExplicit alpha alphaM betaK betaKi betaKc - betaKi\n";
+	    return TCL_ERROR;	
+	  }
+      } 
+      if (argc == 8) {
+	  if (Tcl_GetDouble(interp, argv[4], &alphaM) != TCL_OK) {
+	      opserr << "WARNING integrator HHTExplicit alpha gamma alphaM betaK betaKi betaKc - alphaM\n";	  
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[5], &betaK) != TCL_OK) {
+	      opserr << "WARNING integrator HHTExplicit alpha gamma alphaM betaK betaKi betaKc - betaK\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[6], &betaKi) != TCL_OK) {
+	      opserr << "WARNING integrator HHTExplicit alpha gamma alphaM betaK betaKi betaKc - betaKi\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[7], &betaKc) != TCL_OK) {
+	    opserr << "WARNING integrator HHTExplicit alpha gamma alphaM betaK betaKi betaKc - betaKi\n";
+	    return TCL_ERROR;	
+	  }
+      } 
+      if (argc == 3)
+	  theTransientIntegrator = new HHTExplicit(alpha);       
+      else if (argc == 4)
+      theTransientIntegrator = new HHTExplicit(alpha, gamma);
+      else if (argc == 7)
+	  theTransientIntegrator = new HHTExplicit(alpha, alphaM, betaK, betaKi, betaKc);
+      else if (argc == 8)
+      theTransientIntegrator = new HHTExplicit(alpha, gamma, alphaM, betaK, betaKi, betaKc);
+
+      // if the analysis exists - we want to change the Integrator
+	  if (theTransientAnalysis != 0)
+		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+  }
+
+  else if (strcmp(argv[1],"HHTGeneralizedExplicit") == 0) {
+      double rhoB, alphaI, alphaF, beta, gamma;
+      double alphaM, betaK, betaKi, betaKc;
+      if (argc != 4 && argc != 6 && argc != 8 && argc != 10) {
+	opserr << "WARNING integrator HHTGeneralizedExplicit rhoB alphaF <alphaM betaK betaKi betaKc>\n";
+    opserr << "     or integrator HHTGeneralizedExplicit alphaI alphaF beta gamma <alphaM betaK betaKi betaKc>\n";
+	return TCL_ERROR;
+      }
+      if (argc == 4 || argc == 8) {
+      if (Tcl_GetDouble(interp, argv[2], &rhoB) != TCL_OK) {
+	  opserr << "WARNING integrator HHTGeneralizedExplicit rhoB alphaF - undefined rhoB\n";	  
+	  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[3], &alphaF) != TCL_OK) {
+	  opserr << "WARNING integrator HHTGeneralizedExplicit rhoB alphaF - undefined alphaF\n";	  
+	  return TCL_ERROR;	
+      }
+      }
+      if (argc == 6 || argc == 10) {
+      if (Tcl_GetDouble(interp, argv[2], &alphaI) != TCL_OK) {
+	  opserr << "WARNING integrator HHTGeneralizedExplicit alphaI alphaF beta gamma - undefined alphaI\n";	  
+	  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[3], &alphaF) != TCL_OK) {
+	  opserr << "WARNING integrator HHTGeneralizedExplicit alphaI alphaF beta gamma - undefined alphaF\n";	  
+	  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[4], &beta) != TCL_OK) {
+	  opserr << "WARNING integrator HHTGeneralizedExplicit alphaI alphaF beta gamma - undefined beta\n";	  
+	  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[5], &gamma) != TCL_OK) {
+	  opserr << "WARNING integrator HHTGeneralizedExplicit alphaI alphaF beta gamma - undefined gamma\n";	  
+	  return TCL_ERROR;	
+      }
+      }
+      if (argc == 8) {
+	  if (Tcl_GetDouble(interp, argv[4], &alphaM) != TCL_OK) {
+	      opserr << "WARNING integrator HHTGeneralizedExplicit rhoInf alphaM betaK betaKi betaKc - alphaM\n";	  
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[5], &betaK) != TCL_OK) {
+	      opserr << "WARNING integrator HHTGeneralizedExplicit rhoInf alphaM betaK betaKi betaKc - betaK\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[6], &betaKi) != TCL_OK) {
+	      opserr << "WARNING integrator HHTGeneralizedExplicit rhoInf alphaM betaK betaKi betaKc - betaKi\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[7], &betaKc) != TCL_OK) {
+	    opserr << "WARNING integrator HHTGeneralizedExplicit rhoInf alphaM betaK betaKi betaKc - betaKi\n";
+	    return TCL_ERROR;	
+	  }
+      } 
+      if (argc == 10) {
+	  if (Tcl_GetDouble(interp, argv[6], &alphaM) != TCL_OK) {
+	      opserr << "WARNING integrator HHTGeneralizedExplicit alphaI alphaF beta gamma alphaM betaK betaKi betaKc - alphaM\n";	  
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[7], &betaK) != TCL_OK) {
+	      opserr << "WARNING integrator HHTGeneralizedExplicit alphaI alphaF beta gamma alphaM betaK betaKi betaKc - betaK\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[8], &betaKi) != TCL_OK) {
+	      opserr << "WARNING integrator HHTGeneralizedExplicit alphaI alphaF beta gamma alphaM betaK betaKi betaKc - betaKi\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[9], &betaKc) != TCL_OK) {
+	    opserr << "WARNING integrator HHTGeneralizedExplicit alphaI alphaF beta gamma alphaM betaK betaKi betaKc - betaKc\n";
+	    return TCL_ERROR;	
+	  }
+      }      
+      if (argc == 4)
+	  theTransientIntegrator = new HHTGeneralizedExplicit(rhoB, alphaF);       
+      else if (argc == 6)
+      theTransientIntegrator = new HHTGeneralizedExplicit(alphaI, alphaF, beta, gamma);
+      else if (argc == 8)
+	  theTransientIntegrator = new HHTGeneralizedExplicit(rhoB, alphaF, alphaM, betaK, betaKi, betaKc);
+      else if (argc == 10)
+	  theTransientIntegrator = new HHTGeneralizedExplicit(alphaI, alphaF, beta, gamma, alphaM, betaK, betaKi, betaKc);
+
+      // if the analysis exists - we want to change the Integrator
+	  if (theTransientAnalysis != 0)
+		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+  }
+  
+  else if (strcmp(argv[1],"HHTHybridSimulation") == 0) {
+      double rhoInf, alphaI, alphaF, beta, gamma;
+      double alphaM, betaK, betaKi, betaKc;
+      if (argc != 3 && argc != 6 && argc != 7 && argc != 10) {
+	opserr << "WARNING integrator HHTHybridSimulation rhoInf <alphaM betaK betaKi betaKc>\n";
+    opserr << "     or integrator HHTHybridSimulation alphaI alphaF beta gamma <alphaM betaK betaKi betaKc>\n";
+	return TCL_ERROR;
+      }
+      if (argc == 3 || argc == 7) {
+      if (Tcl_GetDouble(interp, argv[2], &rhoInf) != TCL_OK) {
+	  opserr << "WARNING integrator HHTHybridSimulation rhoInf - undefined rhoInf\n";	  
+	  return TCL_ERROR;	
+      }
+      }
+      if (argc == 6 || argc == 10) {
+      if (Tcl_GetDouble(interp, argv[2], &alphaI) != TCL_OK) {
+	  opserr << "WARNING integrator HHTHybridSimulation alphaI alphaF beta gamma - undefined alphaI\n";	  
+	  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[3], &alphaF) != TCL_OK) {
+	  opserr << "WARNING integrator HHTHybridSimulation alphaI alphaF beta gamma - undefined alphaF\n";	  
+	  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[4], &beta) != TCL_OK) {
+	  opserr << "WARNING integrator HHTHybridSimulation alphaI alphaF beta gamma - undefined beta\n";	  
+	  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[5], &gamma) != TCL_OK) {
+	  opserr << "WARNING integrator HHTHybridSimulation alphaI alphaF beta gamma - undefined gamma\n";	  
+	  return TCL_ERROR;	
+      }
+      }
+      if (argc == 7) {
+	  if (Tcl_GetDouble(interp, argv[3], &alphaM) != TCL_OK) {
+	      opserr << "WARNING integrator HHTHybridSimulation rhoInf alphaM betaK betaKi betaKc - alphaM\n";	  
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[4], &betaK) != TCL_OK) {
+	      opserr << "WARNING integrator HHTHybridSimulation rhoInf alphaM betaK betaKi betaKc - betaK\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[5], &betaKi) != TCL_OK) {
+	      opserr << "WARNING integrator HHTHybridSimulation rhoInf alphaM betaK betaKi betaKc - betaKi\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[6], &betaKc) != TCL_OK) {
+	    opserr << "WARNING integrator HHTHybridSimulation rhoInf alphaM betaK betaKi betaKc - betaKi\n";
+	    return TCL_ERROR;	
+	  }
+      } 
+      if (argc == 10) {
+	  if (Tcl_GetDouble(interp, argv[6], &alphaM) != TCL_OK) {
+	      opserr << "WARNING integrator HHTHybridSimulation alphaI alphaF beta gamma alphaM betaK betaKi betaKc - alphaM\n";	  
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[7], &betaK) != TCL_OK) {
+	      opserr << "WARNING integrator HHTHybridSimulation alphaI alphaF beta gamma alphaM betaK betaKi betaKc - betaK\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[8], &betaKi) != TCL_OK) {
+	      opserr << "WARNING integrator HHTHybridSimulation alphaI alphaF beta gamma alphaM betaK betaKi betaKc - betaKi\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[9], &betaKc) != TCL_OK) {
+	    opserr << "WARNING integrator HHTHybridSimulation alphaI alphaF beta gamma alphaM betaK betaKi betaKc - betaKc\n";
+	    return TCL_ERROR;	
+	  }
+      }      
+      if (theTest == 0) {
+        opserr << "WARNING no ConvergenceTest specified yet\n";
+        return TCL_ERROR;	  
+      }
+      if (argc == 3)
+	  theTransientIntegrator = new HHTHybridSimulation(rhoInf, *theTest);       
+      else if (argc == 6)
+      theTransientIntegrator = new HHTHybridSimulation(alphaI, alphaF, beta, gamma, *theTest);
+      else if (argc == 7)
+	  theTransientIntegrator = new HHTHybridSimulation(rhoInf, *theTest, alphaM, betaK, betaKi, betaKc);
+      else if (argc == 10)
+	  theTransientIntegrator = new HHTHybridSimulation(alphaI, alphaF, beta, gamma, *theTest, alphaM, betaK, betaKi, betaKc);
+
+      // if the analysis exists - we want to change the Integrator
+	  if (theTransientAnalysis != 0)
+		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+  }
+
+  else if (strcmp(argv[1],"AlphaOS") == 0) {
+      double alpha, beta, gamma;
+      double alphaM, betaK, betaKi, betaKc;
+      if (argc != 3 && argc != 5 && argc != 7 && argc != 9) {
+	      opserr << "WARNING integrator AlphaOS alpha <alphaM betaK betaKi betaKc>\n";
+	      opserr << "     or integrator AlphaOS alpha beta gamma <alphaM betaK betaKi betaKc>\n";
+		  return TCL_ERROR;
+      }    
+      if (Tcl_GetDouble(interp, argv[2], &alpha) != TCL_OK) {
+	      opserr << "WARNING integrator AlphaOS alpha - undefined alpha\n";	  
+	      return TCL_ERROR;	
+      }
+      if (argc == 5 || argc == 9) {
+      if (Tcl_GetDouble(interp, argv[3], &beta) != TCL_OK) {
+	  opserr << "WARNING integrator AlphaOS alpha beta gamma - undefined beta\n";	  
+	  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[4], &gamma) != TCL_OK) {
+	  opserr << "WARNING integrator AlphaOS alpha beta gamma - undefined gamma\n";	  
+	  return TCL_ERROR;	
+      }
+      }
+      if (argc == 7) {
+	  if (Tcl_GetDouble(interp, argv[3], &alphaM) != TCL_OK) {
+	      opserr << "WARNING integrator AlphaOS alpha alphaM betaK betaKi betaKc - alphaM\n";	  
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[4], &betaK) != TCL_OK) {
+	      opserr << "WARNING integrator AlphaOS alpha alphaM betaK betaKi betaKc - betaK\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[5], &betaKi) != TCL_OK) {
+	      opserr << "WARNING integrator AlphaOS alpha alphaM betaK betaKi betaKc - betaKi\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[6], &betaKc) != TCL_OK) {
+	    opserr << "WARNING integrator AlphaOS alpha alphaM betaK betaKi betaKc - betaKi\n";
+	    return TCL_ERROR;	
+	  }
+      } 
+      if (argc == 9) {
+	  if (Tcl_GetDouble(interp, argv[5], &alphaM) != TCL_OK) {
+	      opserr << "WARNING integrator AlphaOS alpha beta gamma alphaM betaK betaKi betaKc - alphaM\n";	  
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[6], &betaK) != TCL_OK) {
+	      opserr << "WARNING integrator AlphaOS alpha beta gamma alphaM betaK betaKi betaKc - betaK\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[7], &betaKi) != TCL_OK) {
+	      opserr << "WARNING integrator AlphaOS alpha beta gamma alphaM betaK betaKi betaKc - betaKi\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[8], &betaKc) != TCL_OK) {
+	    opserr << "WARNING integrator AlphaOS alpha beta gamma alphaM betaK betaKi betaKc - betaKi\n";
+	    return TCL_ERROR;	
+	  }
+      } 
+      if (argc == 3)
+	  theTransientIntegrator = new AlphaOS(alpha);       
+      else if (argc == 5)
+	  theTransientIntegrator = new AlphaOS(alpha, beta, gamma);
+      else if (argc == 7)
+      theTransientIntegrator = new AlphaOS(alpha, alphaM, betaK, betaKi, betaKc);
+      else if (argc == 9)
+      theTransientIntegrator = new AlphaOS(alpha, beta, gamma, alphaM, betaK, betaKi, betaKc);
+
+      // if the analysis exists - we want to change the Integrator
+	  if (theTransientAnalysis != 0)
+		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+  }    
+
+  else if (strcmp(argv[1],"AlphaOSGeneralized") == 0) {
+      double rhoInf, alphaI, alphaF, beta, gamma;
+      double alphaM, betaK, betaKi, betaKc;
+      if (argc != 3 && argc != 6 && argc != 7 && argc != 10) {
+	      opserr << "WARNING integrator AlphaOSGeneralized rhoInf <alphaM betaK betaKi betaKc>\n";
+	      opserr << "     or integrator AlphaOSGeneralized alphaI alphaF beta gamma <alphaM betaK betaKi betaKc>\n";
+		  return TCL_ERROR;
+      }
+      if (argc == 3 || argc == 7) {
+      if (Tcl_GetDouble(interp, argv[2], &rhoInf) != TCL_OK) {
+	      opserr << "WARNING integrator AlphaOSGeneralized rhoInf - undefined rhoInf\n";	  
+	      return TCL_ERROR;	
+      }
+      }
+      if (argc == 6 || argc == 10) {
+      if (Tcl_GetDouble(interp, argv[2], &alphaI) != TCL_OK) {
+	  opserr << "WARNING integrator AlphaOSGeneralized alphaI alphaF beta gamma - undefined alphaI\n";	  
+	  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[3], &alphaF) != TCL_OK) {
+	  opserr << "WARNING integrator AlphaOSGeneralized alphaI alphaF beta gamma - undefined alphaF\n";	  
+	  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[4], &beta) != TCL_OK) {
+	  opserr << "WARNING integrator AlphaOSGeneralized alphaI alphaF beta gamma - undefined beta\n";	  
+	  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[5], &gamma) != TCL_OK) {
+	  opserr << "WARNING integrator AlphaOSGeneralized alphaI alphaF beta gamma - undefined gamma\n";	  
+	  return TCL_ERROR;	
+      }
+      }
+      if (argc == 7) {
+	  if (Tcl_GetDouble(interp, argv[3], &alphaM) != TCL_OK) {
+	      opserr << "WARNING integrator AlphaOSGeneralized rhoInf alphaM betaK betaKi betaKc - alphaM\n";	  
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[4], &betaK) != TCL_OK) {
+	      opserr << "WARNING integrator AlphaOSGeneralized rhoInf alphaM betaK betaKi betaKc - betaK\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[5], &betaKi) != TCL_OK) {
+	      opserr << "WARNING integrator AlphaOSGeneralized rhoInf alphaM betaK betaKi betaKc - betaKi\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[6], &betaKc) != TCL_OK) {
+	    opserr << "WARNING integrator AlphaOSGeneralized rhoInf alphaM betaK betaKi betaKc - betaKi\n";
+	    return TCL_ERROR;	
+	  }
+      } 
+      if (argc == 10) {
+	  if (Tcl_GetDouble(interp, argv[6], &alphaM) != TCL_OK) {
+	      opserr << "WARNING integrator AlphaOSGeneralized alphaI alphaF beta gamma alphaM betaK betaKi betaKc - alphaM\n";	  
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[7], &betaK) != TCL_OK) {
+	      opserr << "WARNING integrator AlphaOSGeneralized alphaI alphaF beta gamma alphaM betaK betaKi betaKc - betaK\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[8], &betaKi) != TCL_OK) {
+	      opserr << "WARNING integrator AlphaOSGeneralized alphaI alphaF beta gamma alphaM betaK betaKi betaKc - betaKi\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[9], &betaKc) != TCL_OK) {
+	    opserr << "WARNING integrator AlphaOSGeneralized alphaI alphaF beta gamma alphaM betaK betaKi betaKc - betaKi\n";
+	    return TCL_ERROR;	
+	  }
+      } 
+      if (argc == 3)
+	  theTransientIntegrator = new AlphaOSGeneralized(rhoInf);       
+      else if (argc == 6)
+	  theTransientIntegrator = new AlphaOSGeneralized(alphaI, alphaF, beta, gamma);
+      else if (argc == 7)
+      theTransientIntegrator = new AlphaOSGeneralized(rhoInf, alphaM, betaK, betaKi, betaKc);
+      else if (argc == 10)
+      theTransientIntegrator = new AlphaOSGeneralized(alphaI, alphaF, beta, gamma, alphaM, betaK, betaKi, betaKc);
+
+      // if the analysis exists - we want to change the Integrator
+	  if (theTransientAnalysis != 0)
+		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+  }    
+
+  else if (strcmp(argv[1],"Collocation") == 0) {
+      double theta, beta, gamma;
+      double alphaM, betaK, betaKi, betaKc;
+      if (argc != 3 && argc != 5 && argc != 7 && argc != 9) {
+	opserr << "WARNING integrator Collocation theta <alphaM betaK betaKi betaKc>\n";
+	opserr << "     or integrator Collocation theta beta gamma <alphaM betaK betaKi betaKc>\n";
+	return TCL_ERROR;
+      }    
+      if (Tcl_GetDouble(interp, argv[2], &theta) != TCL_OK) {
+	  opserr << "WARNING integrator Collocation theta - undefined theta\n";	  
+	  return TCL_ERROR;	
+      }
+      if (argc == 5 || argc == 9) {
+      if (Tcl_GetDouble(interp, argv[3], &beta) != TCL_OK) {
+	  opserr << "WARNING integrator Collocation theta beta gamma - undefined beta\n";	  
+	  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[4], &gamma) != TCL_OK) {
+	  opserr << "WARNING integrator Collocation theta beta gamma - undefined gamma\n";	  
+	  return TCL_ERROR;	
+      }
+      }
+      if (argc == 7) {
+	  if (Tcl_GetDouble(interp, argv[3], &alphaM) != TCL_OK) {
+	      opserr << "WARNING integrator Collocation theta alphaM betaK betaKi betaKc - alphaM\n";	  
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[4], &betaK) != TCL_OK) {
+	      opserr << "WARNING integrator Collocation theta alphaM betaK betaKi betaKc - betaK\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[5], &betaKi) != TCL_OK) {
+	      opserr << "WARNING integrator Collocation theta alphaM betaK betaKi betaKc - betaKi\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[6], &betaKc) != TCL_OK) {
+	    opserr << "WARNING integrator Collocation theta alphaM betaK betaKi betaKc - betaKi\n";
+	    return TCL_ERROR;	
+	  }
+      } 
+      if (argc == 9) {
+	  if (Tcl_GetDouble(interp, argv[5], &alphaM) != TCL_OK) {
+	      opserr << "WARNING integrator Collocation theta beta gamma alphaM betaK betaKi betaKc - alphaM\n";	  
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[6], &betaK) != TCL_OK) {
+	      opserr << "WARNING integrator Collocation theta beta gamma alphaM betaK betaKi betaKc - betaK\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[7], &betaKi) != TCL_OK) {
+	      opserr << "WARNING integrator Collocation theta beta gamma alphaM betaK betaKi betaKc - betaKi\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[8], &betaKc) != TCL_OK) {
+	    opserr << "WARNING integrator Collocation theta beta gamma alphaM betaK betaKi betaKc - betaKi\n";
+	    return TCL_ERROR;	
+	  }
+      } 
+      if (argc == 3)
+	  theTransientIntegrator = new Collocation(theta);       
+      else if (argc == 5)
+	  theTransientIntegrator = new Collocation(theta, beta, gamma);       
+      else if (argc == 7)
+	  theTransientIntegrator = new Collocation(theta, alphaM, betaK, betaKi, betaKc);       
+      else if (argc == 9)
+	  theTransientIntegrator = new Collocation(theta, beta, gamma, alphaM, betaK, betaKi, betaKc);       
+
+      // if the analysis exists - we want to change the Integrator
+	  if (theTransientAnalysis != 0)
+		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+  }    
+ 
+  else if (strcmp(argv[1],"CollocationHybridSimulation") == 0) {
+      double theta, beta, gamma;
+      double alphaM, betaK, betaKi, betaKc;
+      if (argc != 3 && argc != 5 && argc != 7 && argc != 9) {
+	opserr << "WARNING integrator CollocationHybridSimulation theta <alphaM betaK betaKi betaKc>\n";
+	opserr << "     or integrator CollocationHybridSimulation theta beta gamma <alphaM betaK betaKi betaKc>\n";
+	return TCL_ERROR;
+      }    
+      if (Tcl_GetDouble(interp, argv[2], &theta) != TCL_OK) {
+	  opserr << "WARNING integrator CollocationHybridSimulation theta - undefined theta\n";	  
+	  return TCL_ERROR;	
+      }
+      if (argc == 5 || argc == 9) {
+      if (Tcl_GetDouble(interp, argv[3], &beta) != TCL_OK) {
+	  opserr << "WARNING integrator CollocationHybridSimulation theta beta gamma - undefined beta\n";	  
+	  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[4], &gamma) != TCL_OK) {
+	  opserr << "WARNING integrator CollocationHybridSimulation theta beta gamma - undefined gamma\n";	  
+	  return TCL_ERROR;	
+      }
+      }
+      if (argc == 7) {
+	  if (Tcl_GetDouble(interp, argv[3], &alphaM) != TCL_OK) {
+	      opserr << "WARNING integrator CollocationHybridSimulation theta alphaM betaK betaKi betaKc - alphaM\n";	  
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[4], &betaK) != TCL_OK) {
+	      opserr << "WARNING integrator CollocationHybridSimulation theta alphaM betaK betaKi betaKc - betaK\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[5], &betaKi) != TCL_OK) {
+	      opserr << "WARNING integrator CollocationHybridSimulation theta alphaM betaK betaKi betaKc - betaKi\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[6], &betaKc) != TCL_OK) {
+	    opserr << "WARNING integrator CollocationHybridSimulation theta alphaM betaK betaKi betaKc - betaKi\n";
+	    return TCL_ERROR;	
+	  }
+      } 
+      if (argc == 9) {
+	  if (Tcl_GetDouble(interp, argv[5], &alphaM) != TCL_OK) {
+	      opserr << "WARNING integrator CollocationHybridSimulation theta beta gamma alphaM betaK betaKi betaKc - alphaM\n";	  
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[6], &betaK) != TCL_OK) {
+	      opserr << "WARNING integrator CollocationHybridSimulation theta beta gamma alphaM betaK betaKi betaKc - betaK\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[7], &betaKi) != TCL_OK) {
+	      opserr << "WARNING integrator CollocationHybridSimulation theta beta gamma alphaM betaK betaKi betaKc - betaKi\n";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[8], &betaKc) != TCL_OK) {
+	    opserr << "WARNING integrator CollocationHybridSimulation theta beta gamma alphaM betaK betaKi betaKc - betaKi\n";
+	    return TCL_ERROR;	
+	  }
+      } 
+      if (theTest == 0) {
+        opserr << "WARNING no ConvergenceTest specified yet\n";
+        return TCL_ERROR;	  
+      }
+      if (argc == 3)
+	  theTransientIntegrator = new CollocationHybridSimulation(theta, *theTest);       
+      else if (argc == 5)
+	  theTransientIntegrator = new CollocationHybridSimulation(theta, beta, gamma, *theTest);       
+      else if (argc == 7)
+	  theTransientIntegrator = new CollocationHybridSimulation(theta, *theTest, alphaM, betaK, betaKi, betaKc);       
+      else if (argc == 9)
+	  theTransientIntegrator = new CollocationHybridSimulation(theta, beta, gamma, *theTest, alphaM, betaK, betaKi, betaKc);       
+
+      // if the analysis exists - we want to change the Integrator
+	  if (theTransientAnalysis != 0)
+		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+  }    
 
   else if (strcmp(argv[1],"Newmark1") == 0) {
       double gamma;
