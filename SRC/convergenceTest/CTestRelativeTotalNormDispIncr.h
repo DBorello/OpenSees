@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2005-12-15 00:15:13 $
+// $Revision: 1.2 $
+// $Date: 2005-12-19 22:21:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/convergenceTest/CTestRelativeTotalNormDispIncr.h,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -46,7 +46,7 @@ class CTestRelativeTotalNormDispIncr: public ConvergenceTest
 public:
     // constructors
     CTestRelativeTotalNormDispIncr();
-    CTestRelativeTotalNormDispIncr(double tol, int maxNumIter, int printFlag, int normType);
+    CTestRelativeTotalNormDispIncr(double tol, int maxNumIter, int printFlag, int normType =2);
     
     // destructor
     ~CTestRelativeTotalNormDispIncr();
