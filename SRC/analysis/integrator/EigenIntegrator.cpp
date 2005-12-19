@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:47 $
+// $Revision: 1.3 $
+// $Date: 2005-12-19 22:43:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/EigenIntegrator.cpp,v $
                                                                         
-                                                                        
-// File: ~/analysis/integrator/eigenIntegrator/EigenIntegrator.C
-//
 // Written: Jun Peng
 // Created: Wed Jan 27, 1999
 // Revision: A
@@ -131,6 +128,7 @@ EigenIntegrator::formK()
     int result = 0;
     FE_EleIter &theEles2 = theAnalysisModel->getFEs();    
     while((elePtr = theEles2()) != 0) {
+      
         if (theSOE->addA(elePtr->getTangent(this), elePtr->getID()) < 0) {
 	    opserr << "WARNING EigenIntegrator::formK -";
 	    opserr << " failed in addA for ID " << elePtr->getID();	    
@@ -249,8 +247,5 @@ EigenIntegrator::Print(OPS_Stream &s, int flag)
 {
     s << "\t EigenIntegrator: \n";
 }
-
-
-
 
 

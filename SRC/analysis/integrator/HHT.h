@@ -17,19 +17,17 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:00:48 $
+
+// $Revision: 1.7 $
+// $Date: 2005-12-19 22:43:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHT.h,v $
-                                                                        
-                                                                        
+
+
 #ifndef HHT_h
 #define HHT_h
 
-// File: ~/analysis/integrator/HHT.h
-// 
-// Written: fmk 
-// Created: 11/98
+// Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
+// Created: 02/05
 // Revision: A
 //
 // Description: This file contains the class definition for HHT.
@@ -46,56 +44,53 @@ class Vector;
 
 class HHT : public TransientIntegrator
 {
-  public:
+public:
+    // constructors
     HHT();
     HHT(double alpha);
-    HHT(double alpha, double alphaM, double betaK, double betaKi, double betaKc);
-
-    //generalized alpha method
-    HHT( double alpha, double beta, double gamma );
-    HHT( double alpha, double beta, double gamma,
-	 double alphaM, double betaK, double betaK0, double betaKc);
-	 
-    //destructor
+    HHT(double alpha,
+        double alphaM, double betaK, double betaKi, double betaKc);
+    HHT(double alpha, double beta, double gamma);
+    HHT(double alpha, double beta, double gamma,
+        double alphaM, double betaK, double betaKi, double betaKc);
+    
+    // destructor
     ~HHT();
-
+    
     // methods which define what the FE_Element and DOF_Groups add
     // to the system of equation object.
     int formEleTangent(FE_Element *theEle);
     int formNodTangent(DOF_Group *theDof);        
-
+    
     int domainChanged(void);    
-    int initialize(void);    
     int newStep(double deltaT);    
     int revertToLastStep(void);        
     int update(const Vector &deltaU);
-
     int commit(void);
-
+    
     virtual int sendSelf(int commitTag, Channel &theChannel);
-    virtual int recvSelf(int commitTag, Channel &theChannel, 
-			 FEM_ObjectBroker &theBroker);
-
-    void Print(OPS_Stream &s, int flag =0);        
+    virtual int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
     
-  protected:
+    void Print(OPS_Stream &s, int flag = 0);        
     
-  private:
+protected:
+    
+private:
     double alpha;
-    double gamma;
     double beta;
-
+    double gamma;
+    double deltaT;
+    
     // rayleigh damping factors
     double alphaM;
     double betaK;
     double betaKi;
     double betaKc;
-
-    double c1, c2, c3;  // some constants we need to keep
-    Vector *Ut, *Utdot, *Utdotdot; // response quantities at time t
-    Vector *U, *Udot, *Udotdot; // response quantities at time t + delta t
-    Vector *Ualpha, *Udotalpha; // response quantities at time t+alpha delta t
+    
+    double c1, c2, c3;              // some constants we need to keep
+    Vector *Ut, *Utdot, *Utdotdot;  // response quantities at time t
+    Vector *U, *Udot, *Udotdot;     // response quantities at time t + deltaT
+    Vector *Ualpha, *Ualphadot;     // response quantities at time t+alpha*deltaT
 };
 
 #endif
-

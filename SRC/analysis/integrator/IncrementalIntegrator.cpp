@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-03-06 20:32:01 $
+// $Revision: 1.7 $
+// $Date: 2005-12-19 22:43:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/IncrementalIntegrator.cpp,v $
                                                                         
-                                                                        
-// File: ~/analysis/integrator/IncrementalIntegrator.C
-// 
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -212,7 +209,10 @@ IncrementalIntegrator::formNodalUnbalance(void)
     DOF_GrpIter &theDOFs = theAnalysisModel->getDOFs();
     DOF_Group *dofPtr;
     int res = 0;
-    while ((dofPtr = theDOFs()) != 0) {
+
+    while ((dofPtr = theDOFs()) != 0) { 
+      //      opserr << "NODPTR: " << dofPtr->getUnbalance(this);
+
 	if (theSOE->addB(dofPtr->getUnbalance(this),dofPtr->getID()) <0) {
 	    opserr << "WARNING IncrementalIntegrator::formNodalUnbalance -";
 	    opserr << " failed in addB for ID " << dofPtr->getID();
@@ -233,6 +233,8 @@ IncrementalIntegrator::formElementResidual(void)
 
     FE_EleIter &theEles2 = theAnalysisModel->getFEs();    
     while((elePtr = theEles2()) != 0) {
+      //      opserr << "ELEPTR " << elePtr->getResidual(this);
+
 	if (theSOE->addB(elePtr->getResidual(this),elePtr->getID()) <0) {
 	    opserr << "WARNING IncrementalIntegrator::formElementResidual -";
 	    opserr << " failed in addB for ID " << elePtr->getID();
