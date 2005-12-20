@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2005-11-07 23:53:45 $
+// $Revision: 1.13 $
+// $Date: 2005-12-20 23:37:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.cpp,v $
                                                                         
                                                                         
@@ -45,71 +45,71 @@
 using std::ios;
 using std::setiosflags;
 
+
 #include <FEM_ObjectBroker.h>
 #include <Domain.h>
 #include <ID.h>
 #include <Vector.h>
 #include <Matrix.h>
 
-//void itoa(int x, char *str);
 
 FileDatastore::FileDatastore(const char *dataBaseName,
 			     Domain &theDomain, 
 			     FEM_ObjectBroker &theObjBroker) 
   :FE_Datastore(theDomain, theObjBroker), 
-   ids(0), vects(0), mats(0), currentCommitTag(-1)
+   data(0), sizeData(0), currentMaxInt(0), currentMaxDouble(0)
 {
   dataBase = new char [strlen(dataBaseName)+1];
   strcpy(dataBase, dataBaseName);
 
-  ids = (fstream **)malloc(maxIDsize*sizeof(fstream *));
-  vects = (fstream **)malloc(maxVectSize*sizeof(fstream *));
-  mats = (fstream **)malloc(maxMatSize*sizeof(fstream *));
-
-  if (ids == 0 || vects == 0 || mats == 0) {
-    opserr << "FileDatastore::FileDatastore() - ran out of memory\n";
-    exit(-1);
-  }
-
-  for (int i=0; i<maxIDsize; i++) {
-    ids[i] = 0;
-    fileEnds.ids[i] = 0;    
-    filePos.ids[i] = 0;    
-    fileCommitTags.ids[i] = 0;    
-    fileDbTags.ids[i] = 0;        
-  }
-  for (int j=0; j<maxVectSize; j++) {
-    vects[j] = 0;
-    fileEnds.vects[j] = 0;
-    filePos.vects[j] = 0;
-    fileCommitTags.vects[j] = 0;
-    fileDbTags.vects[j] = 0;    
-  }
-  for (int k=0; k<maxMatSize; k++) {
-    mats[k] = 0;
-    fileEnds.mats[k] = 0;
-    filePos.mats[k] = 0;
-    fileCommitTags.mats[k] = 0;
-    fileDbTags.mats[k] = 0;    
-  }
+  this->resizeDouble(1024);
 }
 
 FileDatastore::~FileDatastore() 
 {
+  if (data != 0)
+    delete [] data;
 
-  for (int i=0; i<maxIDsize; i++) 
-    if (ids[i] != 0) ids[i]->close(); 
-  for (int j=0; j<maxVectSize; j++)
-    if (vects[j] != 0) vects[j]->close();
-  for (int k=0; k<maxMatSize; k++)
-    if (mats[k] != 0) mats[k]->close();
-  
-  free ((void *) ids);
-  free ((void *) vects);
-  free ((void *) mats);
+  //  while (theIDFilesIter != theIDFiles.end()) {
+  //    theIDFilesIter++;
+  // }
+  for (theIDFilesIter = theIDFiles.begin(); theIDFilesIter != theIDFiles.end(); theIDFilesIter++) {
+    FileDatastoreOutputFile *theFileStruct = theIDFilesIter->second;
+    fstream *theFile = theFileStruct->theFile;
+    theFile->seekp(0, ios::beg);
+    theIntData->dbTag = theFileStruct->maxDbTag;
+    theFile->write(data, sizeof(int));    
+    theFile->close();
+    delete theFile;
+    delete theFileStruct;
+  }
+  theIDFiles.clear();
 
-  if (dataBase != 0)
-    delete [] dataBase;
+
+  for (theMatFilesIter = theMatFiles.begin(); theMatFilesIter != theMatFiles.end(); theMatFilesIter++) {
+    FileDatastoreOutputFile *theFileStruct = theMatFilesIter->second;
+    fstream *theFile = theFileStruct->theFile;
+    theFile->seekp(0, ios::beg);
+    theIntData->dbTag = theFileStruct->maxDbTag;
+    theFile->write(data, sizeof(int));    
+    theFile->close();
+    delete theFile;
+    delete theFileStruct;
+  }
+  theMatFiles.clear();
+
+
+  for (theVectFilesIter = theVectFiles.begin(); theVectFilesIter != theVectFiles.end(); theVectFilesIter++) {
+    FileDatastoreOutputFile *theFileStruct = theVectFilesIter->second;
+    fstream *theFile = theFileStruct->theFile;
+    theFile->seekp(0, ios::beg);
+    theIntData->dbTag = theFileStruct->maxDbTag;
+    theFile->write(data, sizeof(int));    
+    theFile->close();
+    delete theFile;
+    delete theFileStruct;
+  }
+  theVectFiles.clear();
 }
 
 
@@ -126,25 +126,51 @@ FileDatastore::commitState(int commitTag)
 
 void
 FileDatastore::resetFilePointers(void) {
-  
-  for (int i=0; i<maxIDsize; i++) 
-    if (ids[i] != 0) {
-      ids[i]->close(); 
-      ids[i] = 0;
-    }
-  for (int j=0; j<maxVectSize; j++)
-    if (vects[j] != 0) {
-      vects[j]->close();
-      vects[j] = 0;
-    }
-  for (int k=0; k<maxMatSize; k++)
-    if (mats[k] != 0) {
-      mats[k]->close();	
-      mats[k] = 0;
-    }
 
+  for (theIDFilesIter = theIDFiles.begin(); theIDFilesIter != theIDFiles.end(); theIDFilesIter++) {
+    int tag = theIDFilesIter->first;
+    FileDatastoreOutputFile *theFileStruct = theIDFilesIter->second;
+    fstream *theFile = theFileStruct->theFile;
+    if (theFile != 0) {
+      theFile->seekp(0, ios::beg);
+      theIntData->dbTag = theFileStruct->maxDbTag;
+      theFile->write(data, sizeof(int));    
+      if (theFile != 0)
+	theFile->close();
+      theFileStruct->theFile = 0;
+    }
+  }
+
+  for (theMatFilesIter = theMatFiles.begin(); theMatFilesIter != theMatFiles.end(); theMatFilesIter++) {
+    int tag = theMatFilesIter->first;
+    FileDatastoreOutputFile *theFileStruct = theMatFilesIter->second;
+    fstream *theFile = theFileStruct->theFile;
+    if (theFile != 0) {
+      theFile->seekp(0, ios::beg);
+      theIntData->dbTag = theFileStruct->maxDbTag;
+      theFile->write(data, sizeof(int));    
+      if (theFile != 0)
+	theFile->close();
+      theFileStruct->theFile = 0;
+    }
+  }
+
+  for (theVectFilesIter = theVectFiles.begin(); theVectFilesIter != theVectFiles.end(); theVectFilesIter++) {
+    int tag = theVectFilesIter->first;
+    FileDatastoreOutputFile *theFileStruct = theVectFilesIter->second;
+    fstream *theFile = theFileStruct->theFile;
+    if (theFile != 0) {
+      theFile->seekp(0, ios::beg);
+      theIntData->dbTag = theFileStruct->maxDbTag;
+      theFile->write(data, sizeof(int));    
+      if (theFile != 0)
+	theFile->close();
+      theFileStruct->theFile = 0;
+    }
+  }
   currentCommitTag = -1;
 }
+
 
 int 
 FileDatastore::sendMsg(int dataTag, int commitTag, 
@@ -165,140 +191,420 @@ FileDatastore::recvMsg(int dataTag, int commitTag,
 }		       
 
 
+
+int 
+FileDatastore::sendID(int dataTag, int commitTag, 
+		      const ID &theID, 
+		      ChannelAddress *theAddress)
+{
+  if (currentCommitTag != commitTag)
+    this->resetFilePointers();
+
+  currentCommitTag = commitTag;
+  
+  FileDatastoreOutputFile *theFileStruct;
+  fstream *theFile = 0;
+  int maxDataTag = 0;
+  int currentPos = 0;
+
+  
+  //
+  // next we see if we already have this file; 
+  //  if not we need to create data structure & open it
+  //  if we have data structure, need to check file is opened (we close in a commit)
+  //
+
+  int idSize = theID.Size();
+  int stepSize = (1 + idSize)*sizeof(int);
+
+  theIDFilesIter = theIDFiles.find(idSize); 
+  if (theIDFilesIter == theIDFiles.end()) {
+
+    // we first check if we need to resize send buffer
+    if (idSize > currentMaxInt) {
+      if (this->resizeInt(idSize) < 0) {
+	opserr << "FileDatastore::sendID() - failed in resizeInt()\n";
+	return -1;
+      }
+    }
+
+    char *fileName = new char[strlen(dataBase)+21];
+    theFileStruct = new FileDatastoreOutputFile;
+
+    if (fileName == 0 || theFileStruct == 0) {
+      opserr << "FileDatastore::sendID() - out of memory\n";
+      return -1;
+    }
+
+    char intName[20];
+    strcpy(fileName, dataBase);
+    sprintf(intName,"%d.%d",idSize,commitTag);
+    strcat(fileName,".IDs.");
+    strcat(fileName,intName);
+    
+    if (this->openFile(fileName, theFileStruct, stepSize) < 0) {
+      opserr << "FileDatastore::sendID() - could not open file\n";
+      return -1;
+    } else
+      theIDFiles.insert(MAP_FILES_TYPE(idSize, theFileStruct));
+    
+  } else {
+
+    theFileStruct = theIDFilesIter->second;
+
+    // make sure not close from a last commit
+    if (theFileStruct->theFile == 0) {
+
+      if (idSize > currentMaxInt) {
+	if (this->resizeInt(idSize) < 0) {
+	  opserr << "FileDatastore::sendID() - failed in resizeInt()\n";
+	  return -1;
+	}
+      }
+      char *fileName = new char[strlen(dataBase)+21];
+      char intName[20];
+      strcpy(fileName, dataBase);
+      sprintf(intName,"%d.%d",idSize,commitTag);
+      strcat(fileName,".IDs.");
+      strcat(fileName,intName);
+      
+      if (this->openFile(fileName, theFileStruct, stepSize) < 0) {
+	opserr << "FileDatastore::sendID() - could not open file\n";
+	return -1;
+      }
+    }
+  }
+
+  fstream *theStream = theFileStruct->theFile;
+  long int fileEnd = theFileStruct->fileEnd;
+
+  
+  //
+  // find location in file to place the data
+  //
+  
+  bool found = false;  
+  int pos;
+  
+  // we first check if the data can go at the end of the file
+  // true if commitTag larger than any we have encountered so far
+  if (theFileStruct->maxDbTag < dataTag)  {
+
+    pos = fileEnd;
+    found = true;
+    theFileStruct->maxDbTag = dataTag;
+
+    // we have to search from the beginning of the file
+
+  } else { 
+    pos = sizeof(int);
+    theStream->seekg(pos, ios::beg);
+    while ((pos < fileEnd) && (found == false)) {
+      theStream->read(data, stepSize);
+      if (theIntData->dbTag == dataTag) 
+	found = true;
+      else 
+	pos += stepSize;
+    }
+  }
+
+
+  //
+  // we now place the data to be sent into our buffer
+  //
+
+  theIntData->dbTag = dataTag;
+  for (int i=0; i<idSize; i++)
+    theIntData->data[i] = theID(i);
+
+  //
+  // we now write the data
+  //
+
+  theStream->seekp(pos, ios::beg); // reset so can go write at the end
+  theStream->write(data, stepSize);
+  
+  // update the size of file if we have added to eof
+  if (theFileStruct->fileEnd <= pos)
+    theFileStruct->fileEnd += stepSize;  
+
+  return 0;
+}		       
+
+int 
+FileDatastore::recvID(int dataTag, int commitTag, 
+		      ID &theID, 
+		      ChannelAddress *theAddress)    
+{
+  if (currentCommitTag != commitTag)
+    this->resetFilePointers();
+
+  currentCommitTag = commitTag;
+  
+  FileDatastoreOutputFile *theFileStruct;
+  fstream *theFile = 0;
+  long int loc = 0;
+  int maxDataTag = 0;
+  int currentPos = 0;
+  
+  //
+  // next we see if we already have this file; 
+  //  if not we need to create data structure & open it
+  //  if we have data structure, need to check file is opened (we close in a commit)
+  //
+
+  int idSize = theID.Size();
+  int stepSize = (1 + idSize)*sizeof(int);
+
+  theIDFilesIter = theIDFiles.find(idSize); 
+  if (theIDFilesIter == theIDFiles.end()) {
+
+    // we first check if we need to resize recv buffer
+    if (idSize > currentMaxInt) {
+      if (this->resizeInt(idSize) < 0) {
+	opserr << "FileDatastore::recvID() - failed in resizeInt()\n";
+	return -1;
+      }
+    }
+
+    char *fileName = new char[strlen(dataBase)+21];
+    theFileStruct = new FileDatastoreOutputFile;
+
+    if (fileName == 0 || theFileStruct == 0) {
+      opserr << "FileDatastore::recvID() - out of memory\n";
+      return -1;
+    }
+
+    char intName[20];
+    strcpy(fileName, dataBase);
+    sprintf(intName,"%d.%d",idSize,commitTag);
+    strcat(fileName,".IDs.");
+    strcat(fileName,intName);
+    
+    if (this->openFile(fileName, theFileStruct, stepSize) < 0) {
+      opserr << "FileDatastore::recvID() - could not open file\n";
+      return -1;
+    } else
+      theIDFiles.insert(MAP_FILES_TYPE(idSize, theFileStruct));
+    
+  } else {
+
+    theFileStruct = theIDFilesIter->second;
+
+    // make sure not close from a last commit
+    if (theFileStruct->theFile == 0) {
+
+      if (idSize > currentMaxInt) {
+	if (this->resizeInt(idSize) < 0) {
+	  opserr << "FileDatastore::recvID() - failed in resizeInt()\n";
+	  return -1;
+	}
+      }
+      char *fileName = new char[strlen(dataBase)+21];
+      char intName[20];
+      strcpy(fileName, dataBase);
+      sprintf(intName,"%d.%d",idSize,commitTag);
+      strcat(fileName,".IDs.");
+      strcat(fileName,intName);
+      
+      if (this->openFile(fileName, theFileStruct, stepSize) < 0) {
+	opserr << "FileDatastore::recvID() - could not open file\n";
+	return -1;
+      }
+    } 
+  }
+
+  fstream *theStream = theFileStruct->theFile;
+  long int fileEnd = theFileStruct->fileEnd;
+  long int pos = theStream->tellg();
+  
+  //
+  // find location in file to place the data
+  //
+  
+  bool found = false;  
+
+  // we try the current file position first
+
+  if (pos < fileEnd) {
+    theStream->read(data, stepSize);
+    if ((theIntData->dbTag == dataTag)) {
+      found = true;
+      pos += stepSize;
+    } 
+  }
+
+  // we must search from the beginning of the file
+  if (found == false) {
+    pos = sizeof(int);
+    theStream->seekg(pos, ios::beg); 
+    while ((pos < fileEnd) && (found == false)) {
+      theStream->read(data, stepSize);
+      if (theIntData->dbTag == dataTag) 
+	found = true;
+      else 
+	pos += stepSize;
+    }
+  }
+
+
+  if (found == false) {
+    opserr << "FileDatastore::recvID() - failed\n";
+    return -1;
+  }
+
+  // we now place the received data into the ID 
+  for (int i=0; i<idSize; i++)
+    theID(i) = theIntData->data[i];
+
+  return 0;
+}		       
+
+
+
+
 int 
 FileDatastore::sendMatrix(int dataTag, int commitTag, 
 		      const Matrix &theMatrix, 
 		      ChannelAddress *theAddress)
 {
+
   if (currentCommitTag != commitTag)
     this->resetFilePointers();
+
   currentCommitTag = commitTag;
+  
+  FileDatastoreOutputFile *theFileStruct;
+  fstream *theFile = 0;
+  int maxDataTag = 0;
+  int currentPos = 0;
+  
+  //
+  // next we see if we already have this file; 
+  //  if not we need to create data structure & open it
+  //  if we have data structure, need to check file is opened (we close in a commit)
+  //
 
   // we first ensure that the Matrix is not too big
   int noMatCols= theMatrix.noCols();
   int noMatRows = theMatrix.noRows();
   int matSize = noMatRows * noMatCols;;
+  int stepSize = sizeof(int) + matSize*sizeof(double);
 
-  if (matSize >= maxMatSize) {
-    opserr << "FileDatastore::sendMatrix() - the database does not deal ";
-    opserr << "with Matrixs of this size " << matSize << endln;
-    return -1;
-  }
+  theMatFilesIter = theMatFiles.find(matSize); 
+  if (theMatFilesIter == theMatFiles.end()) {
 
-  // open a file if not already opened
-  if (mats[matSize] == 0) {
+    // we first check if we need to resize send buffer
+    if (matSize > currentMaxDouble) {
+      if (this->resizeDouble(matSize) < 0) {
+	opserr << "FileDatastore::sendMatrix() - failed in resizeInt()\n";
+	return -1;
+      }
+    }
+
     char *fileName = new char[strlen(dataBase)+21];
+    theFileStruct = new FileDatastoreOutputFile;
+
+    if (fileName == 0 || theFileStruct == 0) {
+      opserr << "FileDatastore::sendMatrix() - out of memory\n";
+      return -1;
+    }
+
     char intName[20];
     strcpy(fileName, dataBase);
     sprintf(intName,"%d.%d",matSize,commitTag);
-    strcat(fileName,".Mats.");
+    strcat(fileName,".MATs.");
     strcat(fileName,intName);
     
-
-    mats[matSize] = this->openFile(fileName);    
-    if (mats[matSize] == 0) {
+    if (this->openFile(fileName, theFileStruct, stepSize) < 0) {
       opserr << "FileDatastore::sendMatrix() - could not open file\n";
       return -1;
-    }
+    } else
+      theMatFiles.insert(MAP_FILES_TYPE(matSize, theFileStruct));
     
-    long int loc = mats[matSize]->tellg();
-    if (loc == -1) 
-      loc = 0;
-    else {
-      long int pos = 0;
-      int stepSize = 2*sizeof(int) + matSize*sizeof(double);
-      fstream *theStream = mats[matSize];
-      theStream->seekg(0);
-      int maxDataTag = 0;
-      int maxCommitTag = 0;
-      while (pos < loc) {
-	  theStream->read((char *)&matBuffer, stepSize);
-	  if ((matBuffer.dbTag >= dataTag) && 
-	      (matBuffer.commitTag >= commitTag)) {
-	    maxDataTag = matBuffer.dbTag;
-	    maxCommitTag = matBuffer.commitTag;	    
-	  }
-	  pos += stepSize;
+  } else {
+
+    theFileStruct = theMatFilesIter->second;
+
+    // make sure not close from a last commit
+    if (theFileStruct->theFile == 0) {
+
+      if (matSize > currentMaxDouble) {
+	if (this->resizeDouble(matSize) < 0) {
+	  opserr << "FileDatastore::sendMatrix() - failed in resizeInt()\n";
+	  return -1;
+	}
       }
-      fileCommitTags.mats[matSize] = maxCommitTag;
-      fileDbTags.mats[matSize] = maxDataTag; 	        
-      filePos.mats[matSize] = loc;
+      char *fileName = new char[strlen(dataBase)+21];
+      char intName[20];
+      strcpy(fileName, dataBase);
+      sprintf(intName,"%d.%d",matSize,commitTag);
+      strcat(fileName,".MATs.");
+      strcat(fileName,intName);
+      
+      if (this->openFile(fileName, theFileStruct, stepSize) < 0) {
+	opserr << "FileDatastore::sendMatrix() - could not open file\n";
+	return -1;
+      }
     }
-    fileEnds.mats[matSize] = loc;
-    delete [] fileName;
   }
 
-  // we now found the location in the file to write the data
-  fstream *theStream = mats[matSize];
-  int fileEnd = fileEnds.mats[matSize];
-  int stepSize = 2*sizeof(int) + matSize*sizeof(double);
+  fstream *theStream = theFileStruct->theFile;
+  long int fileEnd = theFileStruct->fileEnd;
   
   //
   // find location in file to place the data
   //
-
+  
   bool found = false;  
-  long int pos = 0;
+  int pos;
   
   // we first check if the data can go at the end of the file
   // true if commitTag larger than any we have encountered so far
-  if (fileDbTags.mats[matSize] < dataTag)  {
-      pos = fileEnd;
-      found = true;
-      
-      fileCommitTags.mats[matSize] = commitTag;
-      fileDbTags.mats[matSize] = dataTag; 	  
+  if (theFileStruct->maxDbTag < dataTag)  {
 
-  // we can also add at end if current commitTag as last time we added
-  // and the dbTag is larger than anything entered yet so far
-  } else if ((fileDbTags.mats[matSize] == dataTag) &&
-	     (fileCommitTags.mats[matSize] < commitTag)) {
-      
-      pos = fileEnd;
-      found = true;
-      fileCommitTags.mats[matSize] = commitTag;      
+    pos = fileEnd;
+    found = true;
+    theFileStruct->maxDbTag = dataTag;
 
-  // we have to search from the beginning of the file
+    // we have to search from the beginning of the file
+
   } else { 
-      theStream->seekg(0);
-      while ((pos < fileEnd) && (found == false)) {
-	  theStream->read((char *)&matBuffer, stepSize);
-	  if ((matBuffer.dbTag == dataTag) && 
-	      (matBuffer.commitTag == commitTag)) 
-
-	      found = true;
-	  else
-	    pos += stepSize;
-      }
-      if (found == true)
-	filePos.mats[matSize] = pos + stepSize;
-      else
-	filePos.mats[matSize] = pos;
+    pos = sizeof(int);
+    theStream->seekg(pos, ios::beg);
+    while ((pos < fileEnd) && (found == false)) {
+      theStream->read(data, stepSize);
+      if (theDoubleData->dbTag == dataTag) 
+	found = true;
+      else 
+	pos += stepSize;
+    }
   }
-  
+
+
+  //
   // we now place the data to be sent into our buffer
-  matBuffer.dbTag = dataTag;
-  matBuffer.commitTag = commitTag;
-  int i=0;
+  //
+
+  theDoubleData->dbTag = dataTag;
+  int loc=0;
   for (int j=0; j<noMatCols; j++)
     for (int k=0; k < noMatRows; k++) {
-      matBuffer.data[i] = theMatrix(k,j);
-      i++;
-    }
+      theDoubleData->data[loc] = theMatrix(k,j);
+      loc++;
+    }  
 
-
+  //
   // we now write the data
-  //if (found == true && filePos.mats[matSize] != pos)
-    theStream->seekp(pos);
+  //
 
-  theStream->write((char *)&matBuffer, stepSize);
-
+  theStream->seekp(pos, ios::beg); // reset so can go write at the end
+  theStream->write(data, stepSize);
+  
   // update the size of file if we have added to eof
-  if (fileEnd <= pos)
-      fileEnds.mats[matSize] += stepSize;
-  
-  filePos.mats[matSize] = pos + stepSize;
-  
+  if (theFileStruct->fileEnd <= pos)
+    theFileStruct->fileEnd += stepSize;  
+
   return 0;
 }		       
 
@@ -310,105 +616,130 @@ FileDatastore::recvMatrix(int dataTag, int commitTag,
 		      Matrix &theMatrix, 
 		      ChannelAddress *theAddress)    
 {
+
   if (currentCommitTag != commitTag)
     this->resetFilePointers();
+
   currentCommitTag = commitTag;
+
+  FileDatastoreOutputFile *theFileStruct;
+  fstream *theFile = 0;
+  int maxDataTag = 0;
+  int currentPos = 0;
+  
+  //
+  // next we see if we already have this file; 
+  //  if not we need to create data structure & open it
+  //  if we have data structure, need to check file is opened (we close in a commit)
+  //
 
   // we first check Matrix not too big
   int noMatCols= theMatrix.noCols();
   int noMatRows = theMatrix.noRows();
   int matSize = noMatRows * noMatCols;;
+  int stepSize = sizeof(int) + matSize*sizeof(double);
 
-  if (matSize >= maxMatSize) {
-    opserr << "FileDatastore::recvMatrix() - the database does not deal with Mats";
-    opserr << " of this size " << matSize << endln;
-    return -1;
-  }
+  theMatFilesIter = theMatFiles.find(matSize); 
+  if (theMatFilesIter == theMatFiles.end()) {
 
-  // open the file if not already opened
-  if (mats[matSize] == 0) {
+    // we first check if we need to resize recv buffer
+    if (matSize > currentMaxDouble) {
+      if (this->resizeDouble(matSize) < 0) {
+	opserr << "FileDatastore::recvMatrix() - failed in resizeDouble()\n";
+	return -1;
+      }
+    }
+
     char *fileName = new char[strlen(dataBase)+21];
+    theFileStruct = new FileDatastoreOutputFile;
+
+    if (fileName == 0 || theFileStruct == 0) {
+      opserr << "FileDatastore::recvMatrix() - out of memory\n";
+      return -1;
+    }
+
     char intName[20];
     strcpy(fileName, dataBase);
     sprintf(intName,"%d.%d",matSize,commitTag);
-    strcat(fileName,".Mats.");
+    strcat(fileName,".MATs.");
     strcat(fileName,intName);
-    mats[matSize] = this->openFile(fileName);    
-    if (mats[matSize] == 0) {
+    
+    if (this->openFile(fileName, theFileStruct, stepSize) < 0) {
       opserr << "FileDatastore::recvMatrix() - could not open file\n";
       return -1;
-    }
-    long int loc = mats[matSize]->tellg();
-    if (loc == -1) 
-      loc = 0;
-    else {
-      long int pos = 0;
-      int stepSize = 2*sizeof(int) + matSize*sizeof(double);
-      fstream *theStream = mats[matSize];
-      theStream->seekg(0);
-      int maxDataTag = 0;
-      int maxCommitTag = 0;
-      while (pos < loc) {
-	  theStream->read((char *)&matBuffer, stepSize);
-	  if ((matBuffer.dbTag >= dataTag) && 
-	      (matBuffer.commitTag >= commitTag)) {
-	    maxDataTag = matBuffer.dbTag;
-	    maxCommitTag = matBuffer.commitTag;	    
-	  }
-	  pos += stepSize;
+    } else
+      theMatFiles.insert(MAP_FILES_TYPE(matSize, theFileStruct));
+    
+  } else {
+
+    theFileStruct = theMatFilesIter->second;
+
+    // make sure not close from a last commit
+    if (theFileStruct->theFile == 0) {
+
+      if (matSize > currentMaxDouble) {
+	if (this->resizeDouble(matSize) < 0) {
+	  opserr << "FileDatastore::recvMatrix() - failed in resizeInt()\n";
+	  return -1;
+	}
       }
-      fileCommitTags.mats[matSize] = maxCommitTag;
-      fileDbTags.mats[matSize] = maxDataTag; 	        
-      filePos.mats[matSize] = loc;
-    }
-    fileEnds.mats[matSize] = loc;
+      char *fileName = new char[strlen(dataBase)+21];
+      char intName[20];
+      strcpy(fileName, dataBase);
+      sprintf(intName,"%d.%d",matSize,commitTag);
+      strcat(fileName,".MATs.");
+      strcat(fileName,intName);
+      
+      if (this->openFile(fileName, theFileStruct, stepSize) < 0) {
+	opserr << "FileDatastore::recvMatrix() - could not open file\n";
+	return -1;
+      }
+    } 
   }
-  
-  // we now read in the data unti we reach eof or find the data
 
-  int stepSize = 2*sizeof(int) + matSize*sizeof(double);
-  fstream *theStream = mats[matSize];
-
-  int fileEnd = fileEnds.mats[matSize];  
-  long int pos = filePos.mats[matSize];
-  bool found = false;
+  fstream *theStream = theFileStruct->theFile;
+  long int fileEnd = theFileStruct->fileEnd;
+  long int pos = theStream->tellg();
   
+  //
+  // find location in file to place the data
+  //
+  
+  bool found = false;  
+
   // we try the current file position first
+
   if (pos < fileEnd) {
-      theStream->read((char *)&matBuffer, stepSize);
-      if ((matBuffer.dbTag == dataTag) && (matBuffer.commitTag == commitTag)) {
-	  found = true;
-	  filePos.mats[matSize] += stepSize;
-      } 
+    theStream->read(data, stepSize);
+    if ((theDoubleData->dbTag == dataTag)) {
+      found = true;
+      pos += stepSize;
+    } 
   }
 
-  // we must search from the begiing of the file
+  // we must search from the beginning of the file
   if (found == false) {
-      theStream->seekg(0);
-      pos =0; 
-      while ((pos < fileEnd) && (found == false)) {
-	  theStream->read((char *)&matBuffer, stepSize);
-	  if ((matBuffer.dbTag == dataTag) && (matBuffer.commitTag == commitTag))
-	      found = true;
-	  pos += stepSize;
-      }
-
-      filePos.mats[matSize] = pos;      
+    pos = sizeof(int);
+    theStream->seekg(pos, ios::beg); 
+    while ((pos < fileEnd) && (found == false)) {
+      theStream->read(data, stepSize);
+      if (theDoubleData->dbTag == dataTag) 
+	found = true;
+      else 
+	pos += stepSize;
+    }
   }
-  
+
   if (found == false) {
+    opserr << "FileDatastore::recvMatrix() - failed\n";
     return -1;
   }
 
-  // we now place the received data into the ID 
-  matBuffer.dbTag = dataTag;
-  matBuffer.commitTag = commitTag;
-
-  int i=0;
+  int loc=0;
   for (int j=0; j<noMatCols; j++)
     for (int k=0; k < noMatRows; k++) {
-      theMatrix(k,j) = matBuffer.data[i];
-      i++;
+      theMatrix(k,j) = theDoubleData->data[loc];
+      loc++;
     }
 
   return 0;
@@ -421,122 +752,136 @@ FileDatastore::sendVector(int dataTag, int commitTag,
 		      const Vector &theVector, 
 		      ChannelAddress *theAddress)
 {
-  
+
   if (currentCommitTag != commitTag)
     this->resetFilePointers();
+
   currentCommitTag = commitTag;
+  
+  FileDatastoreOutputFile *theFileStruct;
+  fstream *theFile = 0;
+  int maxDataTag = 0;
+  int currentPos = 0;
+  
+  //
+  // next we see if we already have this file; 
+  //  if not we need to create data structure & open it
+  //  if we have data structure, need to check file is opened (we close in a commit)
+  //
 
-  // we first ensure that the ID is not too big
+  // we first ensure that the Matrix is not too big
   int vectSize = theVector.Size();
-  if (vectSize >= maxVectSize) {
-    opserr << "FileDatastore::sendVector() - the database does not deal ";
-    opserr << "with Vectors of this size " << vectSize << endln;
-  }
+  int stepSize = sizeof(int) + vectSize*sizeof(double);
 
-  // open a file if not already opened 
-  if (vects[vectSize] == 0) {
+  theVectFilesIter = theVectFiles.find(vectSize); 
+  if (theVectFilesIter == theVectFiles.end()) {
+
+    // we first check if we need to resize send buffer
+    if (vectSize > currentMaxDouble) {
+      if (this->resizeDouble(vectSize) < 0) {
+	opserr << "FileDatastore::sendVector() - failed in resizeInt()\n";
+	return -1;
+      }
+    }
+
     char *fileName = new char[strlen(dataBase)+21];
+    theFileStruct = new FileDatastoreOutputFile;
+
+    if (fileName == 0 || theFileStruct == 0) {
+      opserr << "FileDatastore::sendVector() - out of memory\n";
+      return -1;
+    }
+
     char intName[20];
     strcpy(fileName, dataBase);
     sprintf(intName,"%d.%d",vectSize,commitTag);
-    strcat(fileName,".Vects.");
+    strcat(fileName,".VECs.");
     strcat(fileName,intName);
-    vects[vectSize] = this->openFile(fileName);    
-    if (vects[vectSize] == 0) {
+    
+    if (this->openFile(fileName, theFileStruct, stepSize) < 0) {
       opserr << "FileDatastore::sendVector() - could not open file\n";
       return -1;
-    }
-    long int loc = vects[vectSize]->tellg();
-    if (loc == -1) 
-      loc = 0;
-    else {
-      long int pos = 0;
-      int stepSize = 2*sizeof(int) + vectSize*sizeof(double);
-      fstream *theStream = vects[vectSize];
-      theStream->seekg(0);
-      int maxDataTag = 0;
-      int maxCommitTag = 0;
-      while (pos < loc) {
-	  theStream->read((char *)&vectBuffer, stepSize);
-	  if ((vectBuffer.dbTag >= dataTag) && 
-	      (vectBuffer.commitTag >= commitTag)) {
-	    maxDataTag = vectBuffer.dbTag;
-	    maxCommitTag = vectBuffer.commitTag;	    
-	  }
-	  pos += stepSize;
+    } else
+      theVectFiles.insert(MAP_FILES_TYPE(vectSize, theFileStruct));
+    
+  } else {
+
+    theFileStruct = theVectFilesIter->second;
+
+    // make sure not close from a last commit
+    if (theFileStruct->theFile == 0) {
+
+      if (vectSize > currentMaxDouble) {
+	if (this->resizeDouble(vectSize) < 0) {
+	  opserr << "FileDatastore::sendVector() - failed in resizeInt()\n";
+	  return -1;
+	}
       }
-      fileCommitTags.vects[vectSize] = maxCommitTag;
-      fileDbTags.vects[vectSize] = maxDataTag; 	        
-      filePos.vects[vectSize] = loc;
+      char *fileName = new char[strlen(dataBase)+21];
+      char intName[20];
+      strcpy(fileName, dataBase);
+      sprintf(intName,"%d.%d",vectSize,commitTag);
+      strcat(fileName,".VECs.");
+      strcat(fileName,intName);
+      
+      if (this->openFile(fileName, theFileStruct, stepSize) < 0) {
+	opserr << "FileDatastore::sendVector() - could not open file\n";
+	return -1;
+      }
     }
-    fileEnds.vects[vectSize] = loc;
   }
 
-  fstream *theStream = vects[vectSize];
-  int fileEnd = fileEnds.vects[vectSize];
-  int stepSize = 2*sizeof(int) + vectSize*sizeof(double);
+  fstream *theStream = theFileStruct->theFile;
+  long int fileEnd = theFileStruct->fileEnd;
   
   //
   // find location in file to place the data
   //
-
+  
   bool found = false;  
-  long int pos = 0;
+  int pos;
   
   // we first check if the data can go at the end of the file
   // true if commitTag larger than any we have encountered so far
-  if (fileDbTags.vects[vectSize] < dataTag)  {
-      pos = fileEnd;
-      found = true;
-      
-      fileCommitTags.vects[vectSize] = commitTag;
-      fileDbTags.vects[vectSize] = dataTag; 	  
+  if (theFileStruct->maxDbTag < dataTag)  {
 
-  // we can also add at end if current commitTag as last time we added
-  // and the dbTag is larger than anything entered yet so far
-  } else if ((fileDbTags.vects[vectSize] == dataTag) &&
-	     (fileCommitTags.vects[vectSize] < commitTag)) {
-      
-      pos = fileEnd;
-      found = true;
-      fileCommitTags.vects[vectSize] = commitTag;      
+    pos = fileEnd;
+    found = true;
+    theFileStruct->maxDbTag = dataTag;
 
-  // we have to search from the beginning of the file
+    // we have to search from the beginning of the file
+
   } else { 
-      theStream->seekg(0);
-      while ((pos < fileEnd) && (found == false)) {
-	  theStream->read((char *)&vectBuffer, stepSize);
-	  if ((vectBuffer.dbTag == dataTag) && 
-	      (vectBuffer.commitTag == commitTag)) 
-
-	      found = true;
-	  else
-	    pos += stepSize;
-      }
-      if (found == true)
-	filePos.vects[vectSize] = pos + stepSize; 
-      else
-	filePos.vects[vectSize] = pos; 
+    pos = sizeof(int);
+    theStream->seekg(pos, ios::beg);
+    while ((pos < fileEnd) && (found == false)) {
+      theStream->read(data, stepSize);
+      if (theDoubleData->dbTag == dataTag) 
+	found = true;
+      else 
+	pos += stepSize;
+    }
   }
 
-  
+
+  //
   // we now place the data to be sent into our buffer
-  vectBuffer.dbTag = dataTag;
-  vectBuffer.commitTag = commitTag;
+  //
+
+  theDoubleData->dbTag = dataTag;
   for (int i=0; i<vectSize; i++)
-    vectBuffer.data[i] = theVector(i);
+    theDoubleData->data[i] = theVector(i);
 
+  //
   // we now write the data
-  // if (found == true && pos != filePos.vects[vectSize])
-    theStream->seekp(pos);
+  //
 
-  theStream->write((char *)&vectBuffer, stepSize);
-
-  filePos.vects[vectSize] = pos + stepSize;        
+  theStream->seekp(pos, ios::beg); // reset so can go write at the end
+  theStream->write(data, stepSize);
   
   // update the size of file if we have added to eof
-  if (fileEnd <= pos)
-    fileEnds.vects[vectSize] += stepSize;
+  if (theFileStruct->fileEnd <= pos)
+    theFileStruct->fileEnd += stepSize;  
 
   return 0;
 }		       
@@ -546,339 +891,125 @@ FileDatastore::recvVector(int dataTag, int commitTag,
 		      Vector &theVector, 
 		      ChannelAddress *theAddress)    
 {
- 
+
   if (currentCommitTag != commitTag)
     this->resetFilePointers();
+
   currentCommitTag = commitTag;
 
-  // we first check ID not too big
-  int vectSize = theVector.Size();
-  if (vectSize >= maxVectSize) {
-    opserr << "FileDatastore::recvVector() - the database does not deal with Vects";
-    opserr << " of this size " << vectSize << endln;
-    return -1;
-  }
+  FileDatastoreOutputFile *theFileStruct;
+  fstream *theFile = 0;
+  int maxDataTag = 0;
+  int currentPos = 0;
   
+  //
+  // next we see if we already have this file; 
+  //  if not we need to create data structure & open it
+  //  if we have data structure, need to check file is opened (we close in a commit)
+  //
 
-  if (vects[vectSize] == 0) {
+  // we first check Vector not too big
+  int vectSize = theVector.Size();
+  int stepSize = sizeof(int) + vectSize*sizeof(double);
+
+  theVectFilesIter = theVectFiles.find(vectSize); 
+  if (theVectFilesIter == theVectFiles.end()) {
+
+    // we first check if we need to resize recv buffer
+    if (vectSize > currentMaxDouble) {
+      if (this->resizeDouble(vectSize) < 0) {
+	opserr << "FileDatastore::recvVectrix() - failed in resizeDouble()\n";
+	return -1;
+      }
+    }
+
     char *fileName = new char[strlen(dataBase)+21];
+    theFileStruct = new FileDatastoreOutputFile;
+
+    if (fileName == 0 || theFileStruct == 0) {
+      opserr << "FileDatastore::recvVectrix() - out of memory\n";
+      return -1;
+    }
+
     char intName[20];
     strcpy(fileName, dataBase);
     sprintf(intName,"%d.%d",vectSize,commitTag);
-    strcat(fileName,".Vects.");
+    strcat(fileName,".VECs.");
     strcat(fileName,intName);
-    vects[vectSize] = this->openFile(fileName);    
-    if (vects[vectSize] == 0) {
-      opserr << "FileDatastore::recvVector() - could not open file\n";
+    
+    if (this->openFile(fileName, theFileStruct, stepSize) < 0) {
+      opserr << "FileDatastore::recvVectrix() - could not open file\n";
       return -1;
-    }
-    long int loc = vects[vectSize]->tellg();
-    if (loc == -1) 
-      loc = 0;
-    else {
-      long int pos = 0;
-      int stepSize = 2*sizeof(int) + vectSize*sizeof(double);
-      fstream *theStream = vects[vectSize];
-      theStream->seekg(0);  
-      int maxDataTag = 0;
-      int maxCommitTag = 0;
-      while (pos < loc) {
-	  theStream->read((char *)&vectBuffer, stepSize);
-	  if ((vectBuffer.dbTag >= dataTag) && 
-	      (vectBuffer.commitTag >= commitTag)) {
-	    maxDataTag = vectBuffer.dbTag;
-	    maxCommitTag = vectBuffer.commitTag;	    
-	  }
-	  pos += stepSize;
+    } else
+      theVectFiles.insert(MAP_FILES_TYPE(vectSize, theFileStruct));
+    
+  } else {
+
+    theFileStruct = theVectFilesIter->second;
+
+    // make sure not close from a last commit
+    if (theFileStruct->theFile == 0) {
+
+      if (vectSize > currentMaxDouble) {
+	if (this->resizeDouble(vectSize) < 0) {
+	  opserr << "FileDatastore::recvVectrix() - failed in resizeInt()\n";
+	  return -1;
+	}
       }
-      fileCommitTags.vects[vectSize] = maxCommitTag;
-      fileDbTags.vects[vectSize] = maxDataTag; 	        
-      filePos.vects[vectSize] = loc;
-    }
-    fileEnds.vects[vectSize] = loc;
-  }
-
-  // we now read in the data unti we reach eof or find the data
-  int stepSize = 2*sizeof(int) + vectSize*sizeof(double);
-  fstream *theStream = vects[vectSize];
-
-  int fileEnd = fileEnds.vects[vectSize];  
-  long int pos = filePos.vects[vectSize];
-  bool found = false;
-
-  // we try the current file position first
-  if (pos < fileEnd) {
-      theStream->read((char *)&vectBuffer, stepSize);
-      if ((vectBuffer.dbTag == dataTag) && (vectBuffer.commitTag == commitTag)) {
-	  found = true;
-	  filePos.vects[vectSize] += stepSize;
-      } 
-  }
-
-  // we must search from the begiing of the file
-  if (found == false) {
-      theStream->seekg(0);  
-      pos = 0;
-      while ((pos < fileEnd) && (found == false)) {
-	  theStream->read((char *)&vectBuffer, stepSize);
-	  if ((vectBuffer.dbTag == dataTag) && 
-	      (vectBuffer.commitTag == commitTag)) 
-
-	    found = true;
-	  pos += stepSize;
+      char *fileName = new char[strlen(dataBase)+21];
+      char intName[20];
+      strcpy(fileName, dataBase);
+      sprintf(intName,"%d.%d",vectSize,commitTag);
+      strcat(fileName,".VECs.");
+      strcat(fileName,intName);
+      
+      if (this->openFile(fileName, theFileStruct, stepSize) < 0) {
+	opserr << "FileDatastore::recvVectrix() - could not open file\n";
+	return -1;
       }
-      filePos.vects[vectSize] = pos;
+    } 
   }
+
+  fstream *theStream = theFileStruct->theFile;
+  long int fileEnd = theFileStruct->fileEnd;
+  long int pos = theStream->tellg();
   
-  if (found == false) {
-    return -1;
-  }
-
-  // we now place the received data into the Vector
-  vectBuffer.dbTag = dataTag;
-  vectBuffer.commitTag = commitTag;
-  for (int i=0; i<vectSize; i++)
-    theVector(i) = vectBuffer.data[i];
-
-  return 0;
-}		       
-
-
-
-int 
-FileDatastore::sendID(int dataTag, int commitTag, 
-		      const ID &theID, 
-		      ChannelAddress *theAddress)
-{
-  
-  if (currentCommitTag != commitTag)
-    this->resetFilePointers();
-  currentCommitTag = commitTag;
-
-  // we first ensure that the ID is not too big
-  int idSize = theID.Size();
-  if (idSize >= maxIDsize) {
-    opserr << "FileDatastore::sendID() - the database does not deal with IDs of this size ";
-    opserr << idSize << endln;
-  }
-
-  // open a file if not already opened
-  if (ids[idSize] == 0) {
-    char *fileName = new char[strlen(dataBase)+21];
-    char intName[20];
-    strcpy(fileName, dataBase);
-    sprintf(intName,"%d.%d",idSize,commitTag);
-    strcat(fileName,".IDs.");
-    strcat(fileName,intName);
-
-    ids[idSize] = this->openFile(fileName);  
-    if (ids[idSize] == 0) {
-      opserr << "FileDatastore::sendID() - could not open file\n";
-      return -1;
-    }
-	
-    long int loc = ids[idSize]->tellg();
-    if (loc == -1) 
-      loc = 0;
-    else {
-      long int pos = 0;
-      int stepSize = (2 + idSize)*sizeof(int);
-      fstream *theStream = ids[idSize];
-      theStream->seekg(0);  
-      int maxDataTag = 0;
-      int maxCommitTag = 0;
-      while (pos < loc) {
-	  theStream->read((char *)&idBuffer, stepSize);
-	  if ((idBuffer.dbTag >= dataTag) && 
-	      (idBuffer.commitTag >= commitTag)) {
-	    maxDataTag = idBuffer.dbTag;
-	    maxCommitTag = idBuffer.commitTag;	    
-	  }
-	  pos += stepSize;
-      }
-      fileCommitTags.ids[idSize] = maxCommitTag;
-      fileDbTags.ids[idSize] = maxDataTag; 	        
-      filePos.ids[idSize] = loc;
-    }
-    fileEnds.ids[idSize] = loc;
-  }
-
-
-  // we now found the location in the file to write the data
-  fstream *theStream = ids[idSize];
-  long int fileEnd = fileEnds.ids[idSize];
-  int stepSize = (2 + idSize)*sizeof(int);
-
   //
   // find location in file to place the data
   //
-
+  
   bool found = false;  
-  int pos = 0;
-
-  // we first check if the data can go at the end of the file
-  // true if commitTag larger than any we have encountered so far
-  if (fileDbTags.ids[idSize] < dataTag)  {
-
-      pos = fileEnd;
-      found = true;
-      fileCommitTags.ids[idSize] = commitTag;
-      fileDbTags.ids[idSize] = dataTag; 	  
-
-  // we can also add at end if current commitTag as last time we added
-  // and the dbTag is larger than anything entered yet so far
-  } else if ((fileDbTags.ids[idSize] == dataTag) &&
-	     (fileCommitTags.ids[idSize] < commitTag)) {
-      
-      pos = fileEnd;
-      found = true;
-      fileCommitTags.ids[idSize] = commitTag;      
-
-  // we have to search from the beginning of the file
-  } else { 
-      theStream->seekg(0);
-      while ((pos < fileEnd) && (found == false)) {
-	  theStream->read((char *)&idBuffer, stepSize);
-	  if ((idBuffer.dbTag == dataTag) && 
-	      (idBuffer.commitTag == commitTag)) 
-
-	      found = true;
-	  else
-	    pos += stepSize;
-      }
-      if (found == true)
-	filePos.ids[idSize] = pos + stepSize; 
-      else
-	filePos.ids[idSize] = pos; 
-
-  }
-
-
-  // we now place the data to be sent into our buffer
-  idBuffer.dbTag = dataTag;
-  idBuffer.commitTag = commitTag;
-  for (int i=0; i<idSize; i++)
-    idBuffer.data[i] = theID(i);
-  // we now write the data
-  //if (found == true && pos != filePos.ids[idSize]) 
-    theStream->seekp(pos);
-
-  theStream->write((char *)&idBuffer, stepSize);
-
-  filePos.ids[idSize] = pos + stepSize;        
-  
-  // update the size of file if we have added to eof
-  if (fileEnd <= pos)
-    fileEnds.ids[idSize] += stepSize;  
-
-  return 0;
-}		       
-
-int 
-FileDatastore::recvID(int dataTag, int commitTag, 
-		      ID &theID, 
-		      ChannelAddress *theAddress)    
-{
-  
-  if (currentCommitTag != commitTag)
-    this->resetFilePointers();
-  currentCommitTag = commitTag;
-
-  // we first check ID not too big
-  int idSize = theID.Size();
-  if (idSize >= maxIDsize) {
-    opserr << "FileDatastore::recvID() - the database does not deal with IDs";
-    opserr << " of this size "  << idSize << endln;
-    return -1;
-  }
-
-  // open file if not already done so
-  if (ids[idSize] == 0) {
-    char *fileName = new char[strlen(dataBase)+21];
-    char intName[20];
-    strcpy(fileName, dataBase);
-    sprintf(intName,"%d.%d",idSize,commitTag);
-    strcat(fileName,".IDs.");
-    strcat(fileName,intName);
-
-    ids[idSize] = this->openFile(fileName);    
-    if (ids[idSize] == 0) {
-      opserr << "FileDatastore::recvID() - could not open file\n";
-      return -1;
-    }
-
-    long int loc = ids[idSize]->tellg();
-    if (loc == -1) 
-      loc = 0;
-    else {
-      long int pos = 0;
-      int stepSize = (2 + idSize)*sizeof(int);
-      fstream *theStream = ids[idSize];
-      theStream->seekg(0);  
-      int maxDataTag = 0;
-      int maxCommitTag = 0;
-      while (pos < loc) {
-	  theStream->read((char *)&idBuffer, stepSize);
-	  
-	  if ((idBuffer.dbTag >= dataTag) && 
-	      (idBuffer.commitTag >= commitTag)) {
-	    maxDataTag = idBuffer.dbTag;
-	    maxCommitTag = idBuffer.commitTag;	    
-	  }
-	  pos += stepSize;
-      }
-      fileCommitTags.ids[idSize] = maxCommitTag;
-      fileDbTags.ids[idSize] = maxDataTag; 	        
-      filePos.ids[idSize] = loc;
-    }
-    fileEnds.ids[idSize] = loc;
-  }
-
-  // we now set some parameters before we go looking for the data
-  int stepSize = (2 + idSize)*sizeof(int);
-  fstream *theStream = ids[idSize];
-  long int fileEnd = fileEnds.ids[idSize];  
-  long int pos = filePos.ids[idSize];
-  bool found = false;
 
   // we try the current file position first
-  if (pos < fileEnd) {
-      theStream->read((char *)&idBuffer, stepSize);
 
-      if ((idBuffer.dbTag == dataTag) && (idBuffer.commitTag == commitTag)) {
-	  found = true;
-	  filePos.ids[idSize] += stepSize;
-      } 
+  if (pos < fileEnd) {
+    theStream->read(data, stepSize);
+    if ((theDoubleData->dbTag == dataTag)) {
+      found = true;
+      pos += stepSize;
+    } 
   }
 
   // we must search from the beginning of the file
   if (found == false) {
-      pos = 0;
-      theStream->seekg(0);  
-
-      while ((pos < fileEnd) && (found == false)) {
-	  theStream->read((char *)&idBuffer, stepSize);
-
-	  if ((idBuffer.dbTag == dataTag) && 
-	      (idBuffer.commitTag == commitTag)) {
-
-	      found = true;
-	  }
-
-	  pos += stepSize;
-      }
-      filePos.ids[idSize] = pos;
-  }  
+    pos = sizeof(int);
+    theStream->seekg(pos, ios::beg); 
+    while ((pos < fileEnd) && (found == false)) {
+      theStream->read(data, stepSize);
+      if (theDoubleData->dbTag == dataTag) 
+	found = true;
+      else 
+	pos += stepSize;
+    }
+  }
 
   if (found == false) {
+    opserr << "FileDatastore::recvVector() - failed\n";
     return -1;
   }
 
-  // we now place the received data into the ID 
-  idBuffer.dbTag = dataTag;
-  idBuffer.commitTag = commitTag;
-  for (int i=0; i<idSize; i++)
-    theID(i) = idBuffer.data[i];
+  for (int i=0; i<vectSize; i++)
+    theVector(i) = theDoubleData->data[i];
 
   return 0;
 }		       
@@ -976,10 +1107,9 @@ FileDatastore::getData(const char *tableName, char *columns[], int commitTag, Ve
  *              MISC METHODS & FUNCTONS FOR OPENING THE FILE       *
  *******************************************************************/
 
-fstream *
-FileDatastore::openFile(char *fileName)
+int
+FileDatastore::openFile(char *fileName, FileDatastoreOutputFile *theFileStruct, int dataSize)
 {
-  
   fstream *res = new fstream();
   if (res == 0) {
     opserr << "FileDatastore::openFile - out of memory; failed to open file: " << fileName << endln;
@@ -995,7 +1125,8 @@ FileDatastore::openFile(char *fileName)
     res = new fstream();
     if (res == 0) {
       opserr << "FileDatastore::openFile - out of memory; failed to open file: " << fileName << endln;
-      return 0;
+      theFileStruct->theFile = res;
+      return -1;
     }
     res->open(fileName, ios::in | ios::out | ios::trunc | ios::binary);   
   }
@@ -1003,42 +1134,99 @@ FileDatastore::openFile(char *fileName)
   if (res->bad() == true || res->is_open() == false) {
     opserr << "FATAL - FileDatastore::openFile() - could not open file " << fileName << endln;
     delete res;
-    return 0;
+    theFileStruct->theFile = 0;
+    return -1;
   }
 
   // set the position for writing to eof
   res->seekp(0,ios::end);  
-  return res;
-}
-
-/*
-char itoc(int x)
-{
- if (x == 1) return '1';
- if (x == 2) return '2';
- if (x == 3) return '3';
- if (x == 4) return '4';
- if (x == 5) return '5';
- if (x == 6) return '6';
- if (x == 7) return '7';
- if (x == 8) return '8';
- if (x == 9) return '9';
- return '0';
-}
-
-void
-itoa(int x, char *str)
-{
-  int y=x;
-  while (y >= 10) 
-    y = y/10;
-  str[0] = itoc(y);
-  str[1] = '\0';
-  if (x >= 10) {
-    int z = x/10;
-    z = x - 10*z;
-    itoa(z,&str[1]);
+  long int fileEnd = res->tellp();
+  int maxDataTag = 0;
+  
+  if (fileEnd == -1 || fileEnd == 0) {
+    theIntData->dbTag = maxDataTag;
+    res->write(data, sizeof(int));    
+    fileEnd = sizeof(int);
+    maxDataTag = -1;
+  } else {
+    long int pos = 0;
+    int stepSize = dataSize;
+    res->seekg(0, ios::beg);  
+    res->read(data, sizeof(int));
+    maxDataTag = theIntData->dbTag;
   }
+
+  // fill in the structure data
+  theFileStruct->theFile = res;
+  theFileStruct->fileEnd = fileEnd;
+
+  theFileStruct->maxDbTag = maxDataTag; 	        
+
+  return 0;
 }
 
-*/
+int 
+FileDatastore::resizeInt(int newSize) {
+  int sizeOfChar = sizeof(char);
+  int sizeOfInt = sizeof(int);
+  int sizeOfDouble = sizeof(double);  
+  newSize = (newSize+1)*sizeOfInt/sizeOfChar;
+
+  if (newSize < sizeData)
+    return 0; // already big enough
+
+  if (newSize <= 0) {
+    opserr << "FileDatastore::resizeInt(int newSize) - invalidSize " << newSize << endln;
+    return -1; // invalid size
+  }
+
+  if (data != 0)
+    delete [] data;
+
+  data = new char[newSize];
+  if (data == 0) {
+    opserr << "FileDatastore::resizeInt(int newSize) - out of memory for size: " << newSize << endln;
+    return -1;
+  }
+
+  sizeData = newSize;
+
+  currentMaxInt = (sizeOfChar*sizeData-sizeOfInt)/sizeOfInt;
+  currentMaxDouble = (sizeOfChar*sizeData-sizeOfInt)/sizeOfDouble;  
+  theIntData = (IntData *)data;
+  theDoubleData = (DoubleData *)data;
+  return 0;
+}
+
+int
+FileDatastore::resizeDouble(int newSize) {
+  int sizeOfChar = sizeof(char);
+  int sizeOfInt = sizeof(int);
+  int sizeOfDouble = sizeof(double);  
+  newSize = (newSize*sizeOfDouble+sizeOfInt)/sizeOfChar;
+
+  if (newSize < sizeData)
+    return 0; // already big enough
+
+  if (newSize <= 0) {
+    opserr << "FileDatastore::resizeInt(int newSize) - invalidSize " << newSize << endln;
+    return -1; // invalid size
+  }
+
+  if (data != 0)
+    delete [] data;
+
+  data = new char[newSize];
+  if (data == 0) {
+    opserr << "FileDatastore::resizeInt(int newSize) - out of memory for size: " << newSize << endln;
+    return -1;
+  }
+
+  sizeData = newSize;
+
+  currentMaxInt = (sizeOfChar*sizeData-sizeOfInt)/sizeOfInt;
+  currentMaxDouble = (sizeOfChar*sizeData-sizeOfInt)/sizeOfDouble;  
+  theIntData = (IntData *)data;
+  theDoubleData = (DoubleData *)data;
+  return 0;
+}

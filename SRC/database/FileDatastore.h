@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2005-11-07 23:53:45 $
+// $Revision: 1.12 $
+// $Date: 2005-12-20 23:37:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.h,v $
                                                                         
                                                                         
@@ -40,55 +40,32 @@
 #include <FE_Datastore.h>
 
 #include <fstream>
+#include <map>
 using std::fstream;
+using std::map;
 
 class FEM_ObjectBroker;
 
-#define maxIDsize   1024
-#define maxVectSize 1024
-#define maxMatSize  512
+typedef struct fileDatastoreOutputFile {
+  fstream *theFile;
+  long int fileEnd;
+  int      maxDbTag;
+} FileDatastoreOutputFile;
 
-struct IDdata{
+typedef map<int, FileDatastoreOutputFile *>      MAP_FILES;
+typedef MAP_FILES::value_type                    MAP_FILES_TYPE;
+typedef MAP_FILES::iterator                      MAP_FILES_ITERATOR;
+
+typedef struct intData{
   int dbTag;
-  int commitTag;
-  int data[maxIDsize];     
-};
+  int data[];     
+} IntData;
 
-struct VectData{
+
+typedef struct doubleData{
   int dbTag;
-  int commitTag;
-  double data[maxVectSize];     
-};
-
-struct MatrixData{
-  int dbTag;
-  int commitTag;
-  double data[maxMatSize];     
-};
-
-struct FileEnds{
-  long int ids[maxIDsize];
-  long int vects[maxVectSize];
-  long int mats[maxMatSize];
-};
-
-struct CurrentFilePos{
-  long int ids[maxIDsize];
-  long int vects[maxVectSize];
-  long int mats[maxMatSize];
-};
-
-struct CurrentFileCommitTag{
-  int ids[maxIDsize];
-  int vects[maxVectSize];
-  int mats[maxMatSize];
-};
-
-struct MaxFileDbTag{
-  int ids[maxIDsize];
-  int vects[maxVectSize];
-  int mats[maxMatSize];
-};
+  double data[];     
+} DoubleData;
 
 
 class FileDatastore: public FE_Datastore
@@ -140,26 +117,31 @@ class FileDatastore: public FE_Datastore
   protected:
 
   private:
-    void resetFilePointers(void);
-
     // Private methods
-    fstream *openFile(char *fileName);
-    
+    int resizeInt(int newSize);
+    int resizeDouble(int newSize);
+    void resetFilePointers(void);
+    int openFile(char *fileName, FileDatastoreOutputFile *, int dataSize);
+
     // private attributes
     char *dataBase;
-    fstream **ids, **vects, **mats;
+    MAP_FILES theIDFiles;
+    MAP_FILES theVectFiles;
+    MAP_FILES theMatFiles;
+    MAP_FILES_ITERATOR theIDFilesIter;
+    MAP_FILES_ITERATOR theVectFilesIter;
+    MAP_FILES_ITERATOR theMatFilesIter;
+
     int lastDomainChangeStamp;
-
-    struct MatrixData matBuffer;    
-    struct VectData vectBuffer;
-    struct IDdata idBuffer;
-    struct FileEnds fileEnds;
-
-    struct CurrentFilePos filePos;
-    struct CurrentFileCommitTag fileCommitTags;
-    struct MaxFileDbTag fileDbTags;    
-    
     int currentCommitTag;
+    char *data;
+    int sizeData;
+    
+    IntData    *theIntData;
+    DoubleData *theDoubleData;
+
+    int currentMaxInt;
+    int currentMaxDouble;
 };
 
 
