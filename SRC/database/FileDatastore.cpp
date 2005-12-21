@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2005-12-20 23:37:25 $
+// $Revision: 1.14 $
+// $Date: 2005-12-21 01:18:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.cpp,v $
                                                                         
                                                                         
@@ -284,7 +284,7 @@ FileDatastore::sendID(int dataTag, int commitTag,
   //
   
   bool found = false;  
-  int pos;
+  long int pos = theStream->tellg();
   
   // we first check if the data can go at the end of the file
   // true if commitTag larger than any we have encountered so far
@@ -294,9 +294,17 @@ FileDatastore::sendID(int dataTag, int commitTag,
     found = true;
     theFileStruct->maxDbTag = dataTag;
 
-    // we have to search from the beginning of the file
+  } else if (pos < fileEnd) {
 
-  } else { 
+    // try current location
+    theStream->read(data, stepSize);
+    if ((theIntData->dbTag == dataTag)) {
+      found = true;
+    } 
+
+  } else {
+
+    // we have to search from the beginning of the file
     pos = sizeof(int);
     theStream->seekg(pos, ios::beg);
     while ((pos < fileEnd) && (found == false)) {
@@ -307,7 +315,6 @@ FileDatastore::sendID(int dataTag, int commitTag,
 	pos += stepSize;
     }
   }
-
 
   //
   // we now place the data to be sent into our buffer
@@ -557,7 +564,8 @@ FileDatastore::sendMatrix(int dataTag, int commitTag,
   //
   
   bool found = false;  
-  int pos;
+  long int pos = theStream->tellg();
+  
   
   // we first check if the data can go at the end of the file
   // true if commitTag larger than any we have encountered so far
@@ -566,6 +574,14 @@ FileDatastore::sendMatrix(int dataTag, int commitTag,
     pos = fileEnd;
     found = true;
     theFileStruct->maxDbTag = dataTag;
+
+  } else if (pos < fileEnd) {
+
+    // try current location
+    theStream->read(data, stepSize);
+    if ((theDoubleData->dbTag == dataTag)) {
+      found = true;
+    } 
 
     // we have to search from the beginning of the file
 
@@ -839,7 +855,8 @@ FileDatastore::sendVector(int dataTag, int commitTag,
   //
   
   bool found = false;  
-  int pos;
+  long int pos = theStream->tellg();
+  
   
   // we first check if the data can go at the end of the file
   // true if commitTag larger than any we have encountered so far
@@ -849,9 +866,20 @@ FileDatastore::sendVector(int dataTag, int commitTag,
     found = true;
     theFileStruct->maxDbTag = dataTag;
 
+  } else if (pos < fileEnd) {
+
+    // try current location
+
+    theStream->read(data, stepSize);
+    if ((theDoubleData->dbTag == dataTag)) {
+      found = true;
+    } 
+
+    
+  } else { 
+    
     // we have to search from the beginning of the file
 
-  } else { 
     pos = sizeof(int);
     theStream->seekg(pos, ios::beg);
     while ((pos < fileEnd) && (found == false)) {
