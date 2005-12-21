@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2005-12-19 22:39:21 $
+// $Revision: 1.2 $
+// $Date: 2005-12-21 00:32:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHTGeneralizedExplicit.h,v $
 
 

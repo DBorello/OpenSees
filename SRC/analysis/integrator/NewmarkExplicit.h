@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2005-12-19 22:39:21 $
+// $Revision: 1.2 $
+// $Date: 2005-12-21 00:32:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/NewmarkExplicit.h,v $
 
 
 #ifndef NewmarkExplicit_h
 #define NewmarkExplicit_h
 
-// File: ~/analysis/integrator/NewmarkExplicit.h
-// 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net) 
 // Created: 02/05
 // Revision: A

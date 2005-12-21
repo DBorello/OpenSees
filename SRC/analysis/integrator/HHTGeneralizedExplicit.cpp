@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2005-12-19 22:39:21 $
+// $Revision: 1.2 $
+// $Date: 2005-12-21 00:32:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHTGeneralizedExplicit.cpp,v $
 
 
@@ -495,3 +495,8 @@ void HHTGeneralizedExplicit::Print(OPS_Stream &s, int flag)
     } else 
         s << "\t HHTGeneralizedExplicit - no associated AnalysisModel\n";
 }
+
+
+
+
+
