@@ -717,6 +717,8 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/convergenceTest/CTestRelativeNormUnbalance.o \
 	$(FE)/convergenceTest/CTestRelativeNormDispIncr.o \
 	$(FE)/convergenceTest/CTestRelativeEnergyIncr.o \
+	$(FE)/convergenceTest/CTestRelativeTotalNormDispIncr.o \
+	$(FE)/convergenceTest/CTestFixedNumIter.o \
 	$(FE)/analysis/algorithm/domainDecompAlgo/DomainDecompAlgo.o \
 	$(FE)/analysis/integrator/Integrator.o \
 	$(FE)/analysis/integrator/IncrementalIntegrator.o \
@@ -737,6 +739,16 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/analysis/integrator/CentralDifferenceAlternative.o \
 	$(FE)/analysis/integrator/CentralDifferenceNoDamping.o \
 	$(FE)/analysis/integrator/WilsonTheta.o \
+	$(FE)/analysis/integrator/NewmarkExplicit.o \
+	$(FE)/analysis/integrator/NewmarkHybridSimulation.o \
+	$(FE)/analysis/integrator/HHTExplicit.o \
+	$(FE)/analysis/integrator/HHTGeneralized.o \
+	$(FE)/analysis/integrator/HHTGeneralizedExplicit.o \
+	$(FE)/analysis/integrator/HHTHybridSimulation.o \
+	$(FE)/analysis/integrator/AlphaOS.o \
+	$(FE)/analysis/integrator/AlphaOSGeneralized.o \
+	$(FE)/analysis/integrator/Collocation.o \
+	$(FE)/analysis/integrator/CollocationHybridSimulation.o \
 	$(FE)/analysis/model/AnalysisModel.o \
 	$(FE)/analysis/model/FE_EleIter.o \
 	$(FE)/analysis/model/DOF_GrpIter.o \

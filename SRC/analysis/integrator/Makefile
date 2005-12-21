@@ -2,13 +2,38 @@
 
 include ../../../Makefile.def
 
-OBJS       = IncrementalIntegrator.o StaticIntegrator.o TransientIntegrator.o \
-	     HHT.o WilsonTheta.o Newmark.o CentralDifference.o Integrator.o \
-	     LoadControl.o HHT1.o Newmark1.o CentralDifferenceAlternative.o \
-	     ArcLength.o ArcLength1.o LoadPath.o DisplacementControl.o \
-	     MinUnbalDispNorm.o EigenIntegrator.o HSConstraint.o \
-	     CentralDifferenceAlternative.o \
-	     CentralDifferenceNoDamping.o \
+OBJS       = IncrementalIntegrator.o \
+	StaticIntegrator.o \
+	TransientIntegrator.o \
+	HHT.o \
+	WilsonTheta.o \
+	Newmark.o \
+	CentralDifference.o \
+	Integrator.o \
+	LoadControl.o \
+	HHT1.o \
+	Newmark1.o \
+	CentralDifferenceAlternative.o \
+	ArcLength.o \
+	ArcLength1.o \
+	LoadPath.o \
+	DisplacementControl.o \
+	MinUnbalDispNorm.o \
+	EigenIntegrator.o \
+	HSConstraint.o \
+	CentralDifferenceNoDamping.o \
+	NewmarkExplicit.o \
+	NewmarkHybridSimulation.o \
+	HHTExplicit.o \
+	HHTGeneralized.o \
+	HHTGeneralizedExplicit.o \
+	HHTHybridSimulation.o \
+	Collocation.o \
+	CollocationHybridSimulation.o \
+	AlphaOSGeneralized.o \
+	AlphaOS.o 
+
+
 
 all:         $(OBJS)
 
