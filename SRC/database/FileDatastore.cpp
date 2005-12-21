@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2005-12-21 01:18:59 $
+// $Revision: 1.15 $
+// $Date: 2005-12-21 19:03:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.cpp,v $
                                                                         
                                                                         
@@ -76,11 +76,13 @@ FileDatastore::~FileDatastore()
   for (theIDFilesIter = theIDFiles.begin(); theIDFilesIter != theIDFiles.end(); theIDFilesIter++) {
     FileDatastoreOutputFile *theFileStruct = theIDFilesIter->second;
     fstream *theFile = theFileStruct->theFile;
-    theFile->seekp(0, ios::beg);
-    theIntData->dbTag = theFileStruct->maxDbTag;
-    theFile->write(data, sizeof(int));    
-    theFile->close();
-    delete theFile;
+    if (theFile != 0) {
+      theFile->seekp(0, ios::beg);
+      theIntData->dbTag = theFileStruct->maxDbTag;
+      theFile->write(data, sizeof(int));    
+      theFile->close();
+      delete theFile;
+    }
     delete theFileStruct;
   }
   theIDFiles.clear();
@@ -89,11 +91,13 @@ FileDatastore::~FileDatastore()
   for (theMatFilesIter = theMatFiles.begin(); theMatFilesIter != theMatFiles.end(); theMatFilesIter++) {
     FileDatastoreOutputFile *theFileStruct = theMatFilesIter->second;
     fstream *theFile = theFileStruct->theFile;
-    theFile->seekp(0, ios::beg);
-    theIntData->dbTag = theFileStruct->maxDbTag;
-    theFile->write(data, sizeof(int));    
-    theFile->close();
-    delete theFile;
+    if (theFile != 0) {
+      theFile->seekp(0, ios::beg);
+      theIntData->dbTag = theFileStruct->maxDbTag;
+      theFile->write(data, sizeof(int));    
+      theFile->close();
+      delete theFile;
+    }
     delete theFileStruct;
   }
   theMatFiles.clear();
@@ -102,11 +106,13 @@ FileDatastore::~FileDatastore()
   for (theVectFilesIter = theVectFiles.begin(); theVectFilesIter != theVectFiles.end(); theVectFilesIter++) {
     FileDatastoreOutputFile *theFileStruct = theVectFilesIter->second;
     fstream *theFile = theFileStruct->theFile;
-    theFile->seekp(0, ios::beg);
-    theIntData->dbTag = theFileStruct->maxDbTag;
-    theFile->write(data, sizeof(int));    
-    theFile->close();
-    delete theFile;
+    if (theFile != 0) {
+      theFile->seekp(0, ios::beg);
+      theIntData->dbTag = theFileStruct->maxDbTag;
+      theFile->write(data, sizeof(int));    
+      theFile->close();
+      delete theFile;
+    }
     delete theFileStruct;
   }
   theVectFiles.clear();
@@ -137,6 +143,7 @@ FileDatastore::resetFilePointers(void) {
       theFile->write(data, sizeof(int));    
       if (theFile != 0)
 	theFile->close();
+      delete theFile;
       theFileStruct->theFile = 0;
     }
   }
@@ -151,6 +158,7 @@ FileDatastore::resetFilePointers(void) {
       theFile->write(data, sizeof(int));    
       if (theFile != 0)
 	theFile->close();
+      delete theFile;
       theFileStruct->theFile = 0;
     }
   }
@@ -165,6 +173,7 @@ FileDatastore::resetFilePointers(void) {
       theFile->write(data, sizeof(int));    
       if (theFile != 0)
 	theFile->close();
+      delete theFile;
       theFileStruct->theFile = 0;
     }
   }
