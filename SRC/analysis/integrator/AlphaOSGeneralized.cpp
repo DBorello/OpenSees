@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2005-12-19 22:39:21 $
+// $Revision: 1.2 $
+// $Date: 2005-12-21 00:31:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/AlphaOSGeneralized.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -40,7 +40,7 @@
 #include <AnalysisModel.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
-
+#include <FE_EleIter.h>
 
 AlphaOSGeneralized::AlphaOSGeneralized()
     : TransientIntegrator(INTEGRATOR_TAGS_AlphaOSGeneralized),
@@ -224,7 +224,6 @@ int AlphaOSGeneralized::revertToLastStep()
 
     return 0;
 }
-
 
 int AlphaOSGeneralized::formEleTangent(FE_Element *theEle)
 {
@@ -519,9 +518,7 @@ int AlphaOSGeneralized::formElementResidual(void)
     
     // loop through the FE_Elements and add the residual
     FE_Element *elePtr;
-    
     int res = 0;    
-    
     FE_EleIter &theEles = theModel->getFEs();
     while((elePtr = theEles()) != 0)  {
         // calculate R-F(d)
@@ -548,3 +545,4 @@ int AlphaOSGeneralized::formElementResidual(void)
 
     return res;
 }
+

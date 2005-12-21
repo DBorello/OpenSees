@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2005-12-19 22:39:21 $
+// $Revision: 1.2 $
+// $Date: 2005-12-21 00:31:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/AlphaOSGeneralized.h,v $
 
 #ifndef AlphaOSGeneralized_h
@@ -74,7 +74,7 @@ public:
     void Print(OPS_Stream &s, int flag = 0);        
     
 protected:
-    virtual int formElementResidual();
+    virtual int formElementResidual(void);
     
 private:
     double alphaI;
