@@ -65,11 +65,18 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
+				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="1"
+				EnableIntrinsicFunctions="TRUE"
+				ImproveFloatingPointConsistency="TRUE"
+				FavorSizeOrSpeed="1"
+				OmitFramePointers="TRUE"
+				EnableFiberSafeOptimizations="TRUE"
+				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories="..\..\..\src\tagged\storage;..\..\..\src\tagged;..\..\..\src\reliability\domain\components;..\..\..\src\reliability\fesensitivity;..\..\..\src\analysis\integrator;..\..\..\src\analysis\algorithm\domainDecompAlgo;..\..\..\src\analysis\algorithm\eigenAlgo;..\..\..\src\system_of_eqn\eigenSOE;..\..\..\src\handler;..\..\..\src\domain\domain\single;..\..\..\src\convergenceTest;..\..\..\src\analysis\analysis;..\..\..\src\recorder;..\..\..\src\analysis\algorithm\equiSolnAlgo;..\..\..\src\analysis\algorithm;..\..\..\src\system_of_eqn;..\..\..\src\system_of_eqn\linearSOE;..\..\..\src\graph\graph;..\..\..\src\graph\numberer;..\..\..\src\analysis\numberer;..\..\..\src\analysis\fe_ele\transformation;..\..\..\src\analysis\fe_ele\lagrange;..\..\..\src\analysis\fe_ele\penalty;..\..\..\src\actor\objectBroker;..\..\..\src\actor\channel;..\..\..\src\utility;..\..\..\src\domain\subdomain;..\..\..\src\domain\constraints;..\..\..\src\tagged;..\..\..\src\domain\component;..\..\..\src\domain\node;..\..\..\src\element;..\..\..\src\analysis\dof_grp;..\..\..\src\matrix;..\..\..\src\analysis\model\simple;..\..\..\src\domain\domain;..\..\..\src\analysis\model;..\..\..\src;..\..\..\src\actor\actor;..\..\..\src\analysis\handler;..\..\..\src\analysis\fe_ele;..\..\..\src\nDarray;..\..\..\src\reliability\domain\modulatingFunction;..\..\..\src\reliability\domain\filter;..\..\..\src\reliability\domain\spectrum;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="NDEBUG,WIN32,_LIB,_RELIABILITY,_TCL84"
 				StringPooling="TRUE"
-				RuntimeLibrary="5"
+				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				PrecompiledHeaderFile=".\..\..\obj\analysis\release/analysis.pch"
 				AssemblerListingLocation=".\..\..\obj\analysis\release/"
@@ -323,6 +330,18 @@
 			Name="integrator"
 			Filter=".cpp; .h">
 			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\AlphaOS.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\AlphaOS.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\AlphaOSGeneralized.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\AlphaOSGeneralized.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\analysis\integrator\ArcLength.cpp">
 			</File>
 			<File
@@ -353,6 +372,18 @@
 				RelativePath="..\..\..\SRC\analysis\integrator\CentralDifferenceNoDamping.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\Collocation.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\Collocation.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\CollocationHybridSimulation.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\CollocationHybridSimulation.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\analysis\integrator\DisplacementControl.cpp">
 			</File>
 			<File
@@ -375,6 +406,30 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\analysis\integrator\HHT1.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\HHTExplicit.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\HHTExplicit.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\HHTGeneralized.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\HHTGeneralized.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\HHTGeneralizedExplicit.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\HHTGeneralizedExplicit.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\HHTHybridSimulation.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\HHTHybridSimulation.h">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\analysis\integrator\HSConstraint.cpp">
@@ -423,6 +478,18 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\analysis\integrator\Newmark1.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\NewmarkExplicit.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\NewmarkExplicit.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\NewmarkHybridSimulation.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\NewmarkHybridSimulation.h">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\analysis\integrator\StaticIntegrator.cpp">
