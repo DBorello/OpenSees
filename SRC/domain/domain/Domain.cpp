@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.32 $
-// $Date: 2005-11-30 23:32:32 $
+// $Revision: 1.33 $
+// $Date: 2005-12-22 00:35:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -374,7 +374,7 @@ Domain::addElement(Element *element)
   bool result = theElements->addComponent(element);
   if (result == true) {
     element->setDomain(this);
-    element->update();
+	element->update();
 
     // finally check the ele has correct number of dof
 #ifdef _G3DEBUG

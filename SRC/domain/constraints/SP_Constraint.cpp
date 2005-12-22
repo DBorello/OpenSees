@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-11-22 19:41:17 $
+// $Revision: 1.5 $
+// $Date: 2005-12-22 00:35:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/SP_Constraint.cpp,v $
                                                                         
                                                                         
@@ -130,7 +130,7 @@ SP_Constraint::getLoadPatternTag(void) const
 int 
 SP_Constraint::sendSelf(int cTag, Channel &theChannel)
 {
-    Vector data(7);  // we send as double to avoid having 
+    static Vector data(7);  // we send as double to avoid having 
                      // to send two messages.
     data(0) = this->getTag(); 
     data(1) = nodeTag;
@@ -156,7 +156,7 @@ int
 SP_Constraint::recvSelf(int cTag, Channel &theChannel, 
 			FEM_ObjectBroker &theBroker)
 {
-    Vector data(7);  // we sent the data as double to avoid having to send
+    static Vector data(7);  // we sent the data as double to avoid having to send
                      // two messages
     int result = theChannel.recvVector(this->getDbTag(), cTag, data);
     if (result < 0) {
