@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-12-22 01:04:35 $
+// $Revision: 1.5 $
+// $Date: 2005-12-23 02:15:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/main.cpp,v $
                                                                         
                                                                         
@@ -106,6 +106,8 @@ int main(int argc, char **argv)
   theDb.sendID(1,1,id1);
   theDb.sendID(3,1,id3);
   theDb.sendID(2,1,id2);
+
+
   theDb.sendID(0,1,id0);
   theDb.sendID(1,2,id1);
   theDb.sendID(2,2,id2);
@@ -113,40 +115,44 @@ int main(int argc, char **argv)
   theDb.sendID(5,1,id5);
   theDb.sendID(4,1,id4);
   theDb.sendID(1,1,id1);
-  
-  
+
+
+
+
   theDb.recvID(3,1,id5);
   opserr << "3: " << id5;
   theDb.recvID(1,1,id5);
   opserr << "1: " << id5;
   theDb.recvID(2,1,id5);
+
   opserr << "2: " << id5;
   theDb.recvID(1,2,id5);
   opserr << "1: " << id5;
   theDb.recvID(2,2,id5);
+
   opserr << "3: " << id5;
   theDb.recvID(3,1,id5);
   opserr << "3: " << id5;
+
   theDb.recvID(4,1,id5);
   opserr << "4: " << id5;
   theDb.recvID(5,1,id5);
   opserr << "5: " << id5;
-  theDb.recvID(6,1,id5);
-  opserr << "FAILURE\n";
-  theDb.recvID(6,1,id5);
-  opserr << "FAILURE\n";
+
+  opserr << "FAILURE: " << theDb.recvID(6,1,id5) << " returned\n";
+  opserr << "FAILURE " <<  theDb.recvID(6,1,id5) << " returned\n";
+
   theDb.recvID(0,1,id5);
   opserr << "0: " << id5;
   theDb.recvID(5,1,id5);
   opserr << "5: " << id5;
-  
   
   ID id64(4);
   id64(0) = 6; id64(1) = 6; id64(2) = 6; id64(3) = 6;
   theDb.sendID(6,1,id64);
   theDb.recvID(6,1,id64);
   opserr << id64;
-  
+
 
   opserr << "TESTING MATRICES: \n";
 
@@ -177,7 +183,7 @@ int main(int argc, char **argv)
   theDb.recvMatrix(2,1,mat3);
   opserr << mat2 << mat3;
   
-  
+
     
     opserr << "TESTING VECTORS: \n";
     
@@ -232,8 +238,8 @@ int main(int argc, char **argv)
     opserr << "FAIL\n";
 
     theDatabase->commitState(0);
-    exit(0);
 
+    /*  */
 
     /*
     theDb.sendID(2,2,id1);
