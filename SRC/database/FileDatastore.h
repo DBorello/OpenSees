@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2005-12-20 23:37:25 $
+// $Revision: 1.13 $
+// $Date: 2005-12-23 02:15:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.h,v $
                                                                         
                                                                         
@@ -44,11 +44,14 @@
 using std::fstream;
 using std::map;
 
+
+#define STREAM_POSITION_TYPE int
+
 class FEM_ObjectBroker;
 
 typedef struct fileDatastoreOutputFile {
   fstream *theFile;
-  long int fileEnd;
+  STREAM_POSITION_TYPE fileEnd;
   int      maxDbTag;
 } FileDatastoreOutputFile;
 

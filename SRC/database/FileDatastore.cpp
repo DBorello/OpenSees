@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2005-12-21 19:03:10 $
+// $Revision: 1.16 $
+// $Date: 2005-12-23 02:15:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.cpp,v $
                                                                         
                                                                         
@@ -87,7 +87,6 @@ FileDatastore::~FileDatastore()
   }
   theIDFiles.clear();
 
-
   for (theMatFilesIter = theMatFiles.begin(); theMatFilesIter != theMatFiles.end(); theMatFilesIter++) {
     FileDatastoreOutputFile *theFileStruct = theMatFilesIter->second;
     fstream *theFile = theFileStruct->theFile;
@@ -101,7 +100,6 @@ FileDatastore::~FileDatastore()
     delete theFileStruct;
   }
   theMatFiles.clear();
-
 
   for (theVectFilesIter = theVectFiles.begin(); theVectFilesIter != theVectFiles.end(); theVectFilesIter++) {
     FileDatastoreOutputFile *theFileStruct = theVectFilesIter->second;
@@ -134,45 +132,39 @@ void
 FileDatastore::resetFilePointers(void) {
 
   for (theIDFilesIter = theIDFiles.begin(); theIDFilesIter != theIDFiles.end(); theIDFilesIter++) {
-    int tag = theIDFilesIter->first;
     FileDatastoreOutputFile *theFileStruct = theIDFilesIter->second;
     fstream *theFile = theFileStruct->theFile;
     if (theFile != 0) {
       theFile->seekp(0, ios::beg);
       theIntData->dbTag = theFileStruct->maxDbTag;
       theFile->write(data, sizeof(int));    
-      if (theFile != 0)
-	theFile->close();
+      theFile->close();
       delete theFile;
       theFileStruct->theFile = 0;
     }
   }
 
   for (theMatFilesIter = theMatFiles.begin(); theMatFilesIter != theMatFiles.end(); theMatFilesIter++) {
-    int tag = theMatFilesIter->first;
     FileDatastoreOutputFile *theFileStruct = theMatFilesIter->second;
     fstream *theFile = theFileStruct->theFile;
     if (theFile != 0) {
       theFile->seekp(0, ios::beg);
       theIntData->dbTag = theFileStruct->maxDbTag;
       theFile->write(data, sizeof(int));    
-      if (theFile != 0)
-	theFile->close();
+      theFile->close();
       delete theFile;
       theFileStruct->theFile = 0;
     }
   }
 
   for (theVectFilesIter = theVectFiles.begin(); theVectFilesIter != theVectFiles.end(); theVectFilesIter++) {
-    int tag = theVectFilesIter->first;
     FileDatastoreOutputFile *theFileStruct = theVectFilesIter->second;
     fstream *theFile = theFileStruct->theFile;
     if (theFile != 0) {
       theFile->seekp(0, ios::beg);
       theIntData->dbTag = theFileStruct->maxDbTag;
       theFile->write(data, sizeof(int));    
-      if (theFile != 0)
-	theFile->close();
+      theFile->close();
       delete theFile;
       theFileStruct->theFile = 0;
     }
@@ -211,11 +203,7 @@ FileDatastore::sendID(int dataTag, int commitTag,
 
   currentCommitTag = commitTag;
   
-  FileDatastoreOutputFile *theFileStruct;
-  fstream *theFile = 0;
-  int maxDataTag = 0;
-  int currentPos = 0;
-
+  FileDatastoreOutputFile *theFileStruct =0;
   
   //
   // next we see if we already have this file; 
@@ -285,37 +273,40 @@ FileDatastore::sendID(int dataTag, int commitTag,
   }
 
   fstream *theStream = theFileStruct->theFile;
-  long int fileEnd = theFileStruct->fileEnd;
+  bool found = false;  
+  STREAM_POSITION_TYPE pos = theStream->tellg();  
+  STREAM_POSITION_TYPE fileEnd = theFileStruct->fileEnd;
 
-  
   //
   // find location in file to place the data
   //
-  
-  bool found = false;  
-  long int pos = theStream->tellg();
-  
+
   // we first check if the data can go at the end of the file
   // true if commitTag larger than any we have encountered so far
+  
   if (theFileStruct->maxDbTag < dataTag)  {
 
     pos = fileEnd;
     found = true;
     theFileStruct->maxDbTag = dataTag;
+  } 
 
-  } else if (pos < fileEnd) {
+  // try current location    
+  if (pos < fileEnd && found == false) {
 
-    // try current location
     theStream->read(data, stepSize);
-    if ((theIntData->dbTag == dataTag)) {
+    if (theIntData->dbTag == dataTag ) {
       found = true;
-    } 
+    }  else
+      found = false;
+  }  
 
-  } else {
+  // we have to search from the beginning of the file  
+  if (found == false) {
 
-    // we have to search from the beginning of the file
     pos = sizeof(int);
     theStream->seekg(pos, ios::beg);
+
     while ((pos < fileEnd) && (found == false)) {
       theStream->read(data, stepSize);
       if (theIntData->dbTag == dataTag) 
@@ -323,6 +314,8 @@ FileDatastore::sendID(int dataTag, int commitTag,
       else 
 	pos += stepSize;
     }
+    if (found == false)
+      pos = fileEnd;
   }
 
   //
@@ -358,10 +351,6 @@ FileDatastore::recvID(int dataTag, int commitTag,
   currentCommitTag = commitTag;
   
   FileDatastoreOutputFile *theFileStruct;
-  fstream *theFile = 0;
-  long int loc = 0;
-  int maxDataTag = 0;
-  int currentPos = 0;
   
   //
   // next we see if we already have this file; 
@@ -431,8 +420,8 @@ FileDatastore::recvID(int dataTag, int commitTag,
   }
 
   fstream *theStream = theFileStruct->theFile;
-  long int fileEnd = theFileStruct->fileEnd;
-  long int pos = theStream->tellg();
+  STREAM_POSITION_TYPE fileEnd = theFileStruct->fileEnd;
+  STREAM_POSITION_TYPE pos = theStream->tellg();
   
   //
   // find location in file to place the data
@@ -463,7 +452,6 @@ FileDatastore::recvID(int dataTag, int commitTag,
     }
   }
 
-
   if (found == false) {
     opserr << "FileDatastore::recvID() - failed\n";
     return -1;
@@ -491,9 +479,6 @@ FileDatastore::sendMatrix(int dataTag, int commitTag,
   currentCommitTag = commitTag;
   
   FileDatastoreOutputFile *theFileStruct;
-  fstream *theFile = 0;
-  int maxDataTag = 0;
-  int currentPos = 0;
   
   //
   // next we see if we already have this file; 
@@ -565,47 +550,52 @@ FileDatastore::sendMatrix(int dataTag, int commitTag,
     }
   }
 
+
   fstream *theStream = theFileStruct->theFile;
-  long int fileEnd = theFileStruct->fileEnd;
-  
+  bool found = false;  
+  STREAM_POSITION_TYPE pos = theStream->tellg();  
+  STREAM_POSITION_TYPE fileEnd = theFileStruct->fileEnd;
+
   //
   // find location in file to place the data
   //
-  
-  bool found = false;  
-  long int pos = theStream->tellg();
-  
-  
+
   // we first check if the data can go at the end of the file
   // true if commitTag larger than any we have encountered so far
+  
   if (theFileStruct->maxDbTag < dataTag)  {
 
     pos = fileEnd;
     found = true;
     theFileStruct->maxDbTag = dataTag;
+  } 
 
-  } else if (pos < fileEnd) {
+  // try current location    
+  if (pos < fileEnd && found == false) {
 
-    // try current location
     theStream->read(data, stepSize);
-    if ((theDoubleData->dbTag == dataTag)) {
+    if (theIntData->dbTag == dataTag ) {
       found = true;
-    } 
+    }  else
+      found = false;
+  }  
 
-    // we have to search from the beginning of the file
+  // we have to search from the beginning of the file  
+  if (found == false) {
 
-  } else { 
     pos = sizeof(int);
     theStream->seekg(pos, ios::beg);
+
     while ((pos < fileEnd) && (found == false)) {
       theStream->read(data, stepSize);
-      if (theDoubleData->dbTag == dataTag) 
+      if (theIntData->dbTag == dataTag) 
 	found = true;
       else 
 	pos += stepSize;
     }
+    if (found == false)
+      pos = fileEnd;
   }
-
 
   //
   // we now place the data to be sent into our buffer
@@ -648,9 +638,6 @@ FileDatastore::recvMatrix(int dataTag, int commitTag,
   currentCommitTag = commitTag;
 
   FileDatastoreOutputFile *theFileStruct;
-  fstream *theFile = 0;
-  int maxDataTag = 0;
-  int currentPos = 0;
   
   //
   // next we see if we already have this file; 
@@ -722,9 +709,10 @@ FileDatastore::recvMatrix(int dataTag, int commitTag,
     } 
   }
 
+
   fstream *theStream = theFileStruct->theFile;
-  long int fileEnd = theFileStruct->fileEnd;
-  long int pos = theStream->tellg();
+  STREAM_POSITION_TYPE fileEnd = theFileStruct->fileEnd;
+  STREAM_POSITION_TYPE pos = theStream->tellg();
   
   //
   // find location in file to place the data
@@ -736,7 +724,7 @@ FileDatastore::recvMatrix(int dataTag, int commitTag,
 
   if (pos < fileEnd) {
     theStream->read(data, stepSize);
-    if ((theDoubleData->dbTag == dataTag)) {
+    if ((theIntData->dbTag == dataTag)) {
       found = true;
       pos += stepSize;
     } 
@@ -748,7 +736,7 @@ FileDatastore::recvMatrix(int dataTag, int commitTag,
     theStream->seekg(pos, ios::beg); 
     while ((pos < fileEnd) && (found == false)) {
       theStream->read(data, stepSize);
-      if (theDoubleData->dbTag == dataTag) 
+      if (theIntData->dbTag == dataTag) 
 	found = true;
       else 
 	pos += stepSize;
@@ -784,9 +772,6 @@ FileDatastore::sendVector(int dataTag, int commitTag,
   currentCommitTag = commitTag;
   
   FileDatastoreOutputFile *theFileStruct;
-  fstream *theFile = 0;
-  int maxDataTag = 0;
-  int currentPos = 0;
   
   //
   // next we see if we already have this file; 
@@ -857,49 +842,50 @@ FileDatastore::sendVector(int dataTag, int commitTag,
   }
 
   fstream *theStream = theFileStruct->theFile;
-  long int fileEnd = theFileStruct->fileEnd;
-  
+  bool found = false;  
+  STREAM_POSITION_TYPE pos = theStream->tellg();  
+  STREAM_POSITION_TYPE fileEnd = theFileStruct->fileEnd;
+
   //
   // find location in file to place the data
   //
-  
-  bool found = false;  
-  long int pos = theStream->tellg();
-  
-  
+
   // we first check if the data can go at the end of the file
   // true if commitTag larger than any we have encountered so far
+  
   if (theFileStruct->maxDbTag < dataTag)  {
 
     pos = fileEnd;
     found = true;
     theFileStruct->maxDbTag = dataTag;
+  } 
 
-  } else if (pos < fileEnd) {
-
-    // try current location
+  // try current location    
+  if (pos < fileEnd && found == false) {
 
     theStream->read(data, stepSize);
-    if ((theDoubleData->dbTag == dataTag)) {
+    if (theIntData->dbTag == dataTag ) {
       found = true;
-    } 
+    }  else
+      found = false;
+  }  
 
-    
-  } else { 
-    
-    // we have to search from the beginning of the file
+  // we have to search from the beginning of the file  
+  if (found == false) {
 
     pos = sizeof(int);
     theStream->seekg(pos, ios::beg);
+
     while ((pos < fileEnd) && (found == false)) {
       theStream->read(data, stepSize);
-      if (theDoubleData->dbTag == dataTag) 
+      if (theIntData->dbTag == dataTag) 
 	found = true;
       else 
 	pos += stepSize;
     }
+    if (found == false)
+      pos = fileEnd;
   }
-
 
   //
   // we now place the data to be sent into our buffer
@@ -935,9 +921,6 @@ FileDatastore::recvVector(int dataTag, int commitTag,
   currentCommitTag = commitTag;
 
   FileDatastoreOutputFile *theFileStruct;
-  fstream *theFile = 0;
-  int maxDataTag = 0;
-  int currentPos = 0;
   
   //
   // next we see if we already have this file; 
@@ -1008,8 +991,8 @@ FileDatastore::recvVector(int dataTag, int commitTag,
   }
 
   fstream *theStream = theFileStruct->theFile;
-  long int fileEnd = theFileStruct->fileEnd;
-  long int pos = theStream->tellg();
+  STREAM_POSITION_TYPE fileEnd = theFileStruct->fileEnd;
+  STREAM_POSITION_TYPE pos = theStream->tellg();
   
   //
   // find location in file to place the data
@@ -1021,7 +1004,7 @@ FileDatastore::recvVector(int dataTag, int commitTag,
 
   if (pos < fileEnd) {
     theStream->read(data, stepSize);
-    if ((theDoubleData->dbTag == dataTag)) {
+    if ((theIntData->dbTag == dataTag)) {
       found = true;
       pos += stepSize;
     } 
@@ -1033,7 +1016,7 @@ FileDatastore::recvVector(int dataTag, int commitTag,
     theStream->seekg(pos, ios::beg); 
     while ((pos < fileEnd) && (found == false)) {
       theStream->read(data, stepSize);
-      if (theDoubleData->dbTag == dataTag) 
+      if (theIntData->dbTag == dataTag) 
 	found = true;
       else 
 	pos += stepSize;
@@ -1177,21 +1160,23 @@ FileDatastore::openFile(char *fileName, FileDatastoreOutputFile *theFileStruct, 
 
   // set the position for writing to eof
   res->seekp(0,ios::end);  
-  long int fileEnd = res->tellp();
+  STREAM_POSITION_TYPE fileEnd = res->tellp();
   int maxDataTag = 0;
   
-  if (fileEnd == -1 || fileEnd == 0) {
+  if (fileEnd == 0 || fileEnd == -1) {
     theIntData->dbTag = maxDataTag;
     res->write(data, sizeof(int));    
     fileEnd = sizeof(int);
     maxDataTag = -1;
   } else {
-    long int pos = 0;
-    int stepSize = dataSize;
     res->seekg(0, ios::beg);  
     res->read(data, sizeof(int));
     maxDataTag = theIntData->dbTag;
   }
+
+  // move to start of data part
+  res->seekp(sizeof(int), ios::beg);
+  res->seekg(sizeof(int), ios::beg);
 
   // fill in the structure data
   theFileStruct->theFile = res;
@@ -1228,10 +1213,11 @@ FileDatastore::resizeInt(int newSize) {
 
   sizeData = newSize;
 
-  currentMaxInt = (sizeOfChar*sizeData-sizeOfInt)/sizeOfInt;
-  currentMaxDouble = (sizeOfChar*sizeData-sizeOfInt)/sizeOfDouble;  
+  currentMaxInt = (sizeData/sizeOfChar-sizeOfInt)/sizeOfInt;
+  currentMaxDouble = (sizeData/sizeOfChar-sizeOfInt)/sizeOfDouble;  
   theIntData = (IntData *)data;
   theDoubleData = (DoubleData *)data;
+
   return 0;
 }
 
