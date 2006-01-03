@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2006-01-03 20:49:21 $
+// $Revision: 1.18 $
+// $Date: 2006-01-03 22:48:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.cpp,v $
                                                                         
                                                                         
@@ -67,47 +67,41 @@ FileDatastore::FileDatastore(const char *dataBaseName,
 
 FileDatastore::~FileDatastore() 
 {
+
   if (data != 0)
     delete [] data;
+
 
   //  while (theIDFilesIter != theIDFiles.end()) {
   //    theIDFilesIter++;
   // }
+
   for (theIDFilesIter = theIDFiles.begin(); theIDFilesIter != theIDFiles.end(); theIDFilesIter++) {
     FileDatastoreOutputFile *theFileStruct = theIDFilesIter->second;
     fstream *theFile = theFileStruct->theFile;
     if (theFile != 0) {
-      theFile->seekp(0, ios::beg);
-      *(theIntData.dbTag) = theFileStruct->maxDbTag;
-      theFile->write(data, sizeof(int));    
       theFile->close();
       delete theFile;
     }
     delete theFileStruct;
   }
+
   theIDFiles.clear();
 
   for (theMatFilesIter = theMatFiles.begin(); theMatFilesIter != theMatFiles.end(); theMatFilesIter++) {
     FileDatastoreOutputFile *theFileStruct = theMatFilesIter->second;
     fstream *theFile = theFileStruct->theFile;
     if (theFile != 0) {
-      theFile->seekp(0, ios::beg);
-      *(theIntData.dbTag) = theFileStruct->maxDbTag;
-      theFile->write(data, sizeof(int));    
       theFile->close();
       delete theFile;
     }
     delete theFileStruct;
   }
   theMatFiles.clear();
-
   for (theVectFilesIter = theVectFiles.begin(); theVectFilesIter != theVectFiles.end(); theVectFilesIter++) {
     FileDatastoreOutputFile *theFileStruct = theVectFilesIter->second;
     fstream *theFile = theFileStruct->theFile;
     if (theFile != 0) {
-      theFile->seekp(0, ios::beg);
-      *(theIntData.dbTag) = theFileStruct->maxDbTag;
-      theFile->write(data, sizeof(int));    
       theFile->close();
       delete theFile;
     }
