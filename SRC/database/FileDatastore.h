@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2005-12-23 02:15:02 $
+// $Revision: 1.14 $
+// $Date: 2006-01-03 20:49:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.h,v $
                                                                         
                                                                         
@@ -60,14 +60,14 @@ typedef MAP_FILES::value_type                    MAP_FILES_TYPE;
 typedef MAP_FILES::iterator                      MAP_FILES_ITERATOR;
 
 typedef struct intData{
-  int dbTag;
-  int data[];     
+  int *dbTag;
+  int *data;     
 } IntData;
 
 
 typedef struct doubleData{
-  int dbTag;
-  double data[];     
+  int *dbTag;
+  double *data;     
 } DoubleData;
 
 
@@ -140,8 +140,8 @@ class FileDatastore: public FE_Datastore
     char *data;
     int sizeData;
     
-    IntData    *theIntData;
-    DoubleData *theDoubleData;
+    IntData    theIntData;
+    DoubleData theDoubleData;
 
     int currentMaxInt;
     int currentMaxDouble;
