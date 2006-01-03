@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2005-12-20 23:47:23 $
+// $Revision: 1.20 $
+// $Date: 2006-01-03 23:52:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FedeasMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -419,9 +419,13 @@ FedeasMaterial::invokeSubroutine(int ist)
   double dEpsilon = epsilon-epsilonP;
   
   switch (this->getClassTag()) {
+#ifdef _WIN32
   case MAT_TAG_FedeasHardening:
     hard_1__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
 	     &sigma, &tangent, &ist);
+#else
+	opserr << "FedeasMaterial::invokeSubroutine -- Hard1 subroutine not yet linked\n";
+#endif
     break;
 
   case MAT_TAG_FedeasBond1:
