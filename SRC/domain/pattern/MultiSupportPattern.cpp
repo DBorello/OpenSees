@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-11-22 19:44:22 $
+// $Revision: 1.4 $
+// $Date: 2006-01-04 21:59:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/MultiSupportPattern.cpp,v $
                                                                         
 // Written: fmk 11/00
@@ -210,8 +210,8 @@ MultiSupportPattern::sendSelf(int commitTag, Channel &theChannel)
     }
 
     
-    for (int i=0; i<numMotions; i++) {
-      theMotion = theMotions[i];
+    for (int j=0; j<numMotions; j++) {
+      theMotion = theMotions[j];
       if (theMotion->sendSelf(commitTag, theChannel) < 0) {
 	opserr << "MultiSupportPattern::sendSelf - ground motion  failed in sendSelf\n";
 	return -7;
