@@ -26,7 +26,6 @@ CFG=analysis - Win32 Debug
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
-F90=df.exe
 RSC=rc.exe
 
 !IF  "$(CFG)" == "analysis - Win32 Release"
@@ -41,8 +40,9 @@ RSC=rc.exe
 # PROP Output_Dir "..\..\lib\release"
 # PROP Intermediate_Dir "..\..\obj\analysis\release"
 # PROP Target_Dir ""
+F90=df.exe
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\src\reliability\domain\components" /I "..\..\..\src\reliability\fesensitivity" /I "..\..\..\src\analysis\integrator" /I "..\..\..\src\analysis\algorithm\domainDecompAlgo" /I "..\..\..\src\analysis\algorithm\eigenAlgo" /I "..\..\..\src\system_of_eqn\eigenSOE" /I "..\..\..\src\handler" /I "..\..\..\src\domain\domain\single" /I "..\..\..\src\convergenceTest" /I "..\..\..\src\analysis\analysis" /I "..\..\..\src\recorder" /I "..\..\..\src\analysis\algorithm\equiSolnAlgo" /I "..\..\..\src\analysis\algorithm" /I "..\..\..\src\system_of_eqn" /I "..\..\..\src\system_of_eqn\linearSOE" /I "..\..\..\src\graph\graph" /I "..\..\..\src\graph\numberer" /I "..\..\..\src\analysis\numberer" /I "..\..\..\src\analysis\fe_ele\transformation" /I "..\..\..\src\analysis\fe_ele\lagrange" /I "..\..\..\src\analysis\fe_ele\penalty" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\actor\channel" /I "..\..\..\src\utility" /I "..\..\..\src\domain\subdomain" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\tagged" /I "..\..\..\src\domain\component" /I "..\..\..\src\domain\node" /I "..\..\..\src\element" /I "..\..\..\src\analysis\dof_grp" /I "..\..\..\src\matrix" /I "..\..\..\src\analysis\model\simple" /I "..\..\..\src\domain\domain" /I "..\..\..\src\analysis\model" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\analysis\handler" /I "..\..\..\src\analysis\fe_ele" /I "..\..\..\src\nDarray" /I "..\..\..\src\reliability\domain\modulatingFunction" /I "..\..\..\src\reliability\domain\filter" /I "..\..\..\src\reliability\domain\spectrum" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "NDEBUG" /D "WIN32" /D "_LIB" /D "_RELIABILITY" /D "_MBCS" /D "_TCL84" /FD /c
+# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\src\tagged\storage" /I "..\..\..\src\reliability\domain\components" /I "..\..\..\src\reliability\fesensitivity" /I "..\..\..\src\analysis\integrator" /I "..\..\..\src\analysis\algorithm\domainDecompAlgo" /I "..\..\..\src\analysis\algorithm\eigenAlgo" /I "..\..\..\src\system_of_eqn\eigenSOE" /I "..\..\..\src\handler" /I "..\..\..\src\domain\domain\single" /I "..\..\..\src\convergenceTest" /I "..\..\..\src\analysis\analysis" /I "..\..\..\src\recorder" /I "..\..\..\src\analysis\algorithm\equiSolnAlgo" /I "..\..\..\src\analysis\algorithm" /I "..\..\..\src\system_of_eqn" /I "..\..\..\src\system_of_eqn\linearSOE" /I "..\..\..\src\graph\graph" /I "..\..\..\src\graph\numberer" /I "..\..\..\src\analysis\numberer" /I "..\..\..\src\analysis\fe_ele\transformation" /I "..\..\..\src\analysis\fe_ele\lagrange" /I "..\..\..\src\analysis\fe_ele\penalty" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\actor\channel" /I "..\..\..\src\utility" /I "..\..\..\src\domain\subdomain" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\tagged" /I "..\..\..\src\domain\component" /I "..\..\..\src\domain\node" /I "..\..\..\src\element" /I "..\..\..\src\analysis\dof_grp" /I "..\..\..\src\matrix" /I "..\..\..\src\analysis\model\simple" /I "..\..\..\src\domain\domain" /I "..\..\..\src\analysis\model" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\analysis\handler" /I "..\..\..\src\analysis\fe_ele" /I "..\..\..\src\nDarray" /I "..\..\..\src\reliability\domain\modulatingFunction" /I "..\..\..\src\reliability\domain\filter" /I "..\..\..\src\reliability\domain\spectrum" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "NDEBUG" /D "WIN32" /D "_LIB" /D "_RELIABILITY" /D "_MBCS" /D "_TCL84" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -65,8 +65,9 @@ LIB32=link.exe -lib
 # PROP Output_Dir "..\..\lib\debug"
 # PROP Intermediate_Dir "..\..\obj\analysis\debug"
 # PROP Target_Dir ""
+F90=df.exe
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\reliability\domain\components" /I "..\..\..\src\reliability\fesensitivity" /I "..\..\..\src\analysis\integrator" /I "..\..\..\src\analysis\algorithm\domainDecompAlgo" /I "..\..\..\src\analysis\algorithm\eigenAlgo" /I "..\..\..\src\system_of_eqn\eigenSOE" /I "..\..\..\src\handler" /I "..\..\..\src\domain\domain\single" /I "..\..\..\src\convergenceTest" /I "..\..\..\src\analysis\analysis" /I "..\..\..\src\recorder" /I "..\..\..\src\analysis\algorithm\equiSolnAlgo" /I "..\..\..\src\analysis\algorithm" /I "..\..\..\src\system_of_eqn" /I "..\..\..\src\system_of_eqn\linearSOE" /I "..\..\..\src\graph\graph" /I "..\..\..\src\graph\numberer" /I "..\..\..\src\analysis\numberer" /I "..\..\..\src\analysis\fe_ele\transformation" /I "..\..\..\src\analysis\fe_ele\lagrange" /I "..\..\..\src\analysis\fe_ele\penalty" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\actor\channel" /I "..\..\..\src\utility" /I "..\..\..\src\domain\subdomain" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\tagged" /I "..\..\..\src\domain\component" /I "..\..\..\src\domain\node" /I "..\..\..\src\element" /I "..\..\..\src\analysis\dof_grp" /I "..\..\..\src\matrix" /I "..\..\..\src\analysis\model\simple" /I "..\..\..\src\domain\domain" /I "..\..\..\src\analysis\model" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\analysis\handler" /I "..\..\..\src\analysis\fe_ele" /I "..\..\..\src\nDarray" /I "..\..\..\src\reliability\domain\modulatingFunction" /I "..\..\..\src\reliability\domain\filter" /I "..\..\..\src\reliability\domain\spectrum" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "_DEBUG" /D "WIN32" /D "_LIB" /D "_RELIABILITY" /D "_MBCS" /D "_TCL84" /FR /FD /GZ /c
+# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\tagged\storage" /I "..\..\..\src\reliability\domain\components" /I "..\..\..\src\reliability\fesensitivity" /I "..\..\..\src\analysis\integrator" /I "..\..\..\src\analysis\algorithm\domainDecompAlgo" /I "..\..\..\src\analysis\algorithm\eigenAlgo" /I "..\..\..\src\system_of_eqn\eigenSOE" /I "..\..\..\src\handler" /I "..\..\..\src\domain\domain\single" /I "..\..\..\src\convergenceTest" /I "..\..\..\src\analysis\analysis" /I "..\..\..\src\recorder" /I "..\..\..\src\analysis\algorithm\equiSolnAlgo" /I "..\..\..\src\analysis\algorithm" /I "..\..\..\src\system_of_eqn" /I "..\..\..\src\system_of_eqn\linearSOE" /I "..\..\..\src\graph\graph" /I "..\..\..\src\graph\numberer" /I "..\..\..\src\analysis\numberer" /I "..\..\..\src\analysis\fe_ele\transformation" /I "..\..\..\src\analysis\fe_ele\lagrange" /I "..\..\..\src\analysis\fe_ele\penalty" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\actor\channel" /I "..\..\..\src\utility" /I "..\..\..\src\domain\subdomain" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\tagged" /I "..\..\..\src\domain\component" /I "..\..\..\src\domain\node" /I "..\..\..\src\element" /I "..\..\..\src\analysis\dof_grp" /I "..\..\..\src\matrix" /I "..\..\..\src\analysis\model\simple" /I "..\..\..\src\domain\domain" /I "..\..\..\src\analysis\model" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\analysis\handler" /I "..\..\..\src\analysis\fe_ele" /I "..\..\..\src\nDarray" /I "..\..\..\src\reliability\domain\modulatingFunction" /I "..\..\..\src\reliability\domain\filter" /I "..\..\..\src\reliability\domain\spectrum" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "_DEBUG" /D "WIN32" /D "_LIB" /D "_RELIABILITY" /D "_MBCS" /D "_TCL84" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
@@ -156,27 +157,19 @@ SOURCE=..\..\..\SRC\analysis\model\AnalysisModel.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\analysis\model\DOF_GrpIter.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\analysis\model\DOF_GrpIter.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\analysis\model\FE_EleIter.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\analysis\model\FE_EleIter.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\analysis\model\simple\SimpleDOF_Iter.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\analysis\model\simple\SimpleDOF_Iter.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\analysis\model\simple\SimpleFE_Iter.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\analysis\model\simple\SimpleFE_Iter.h
 # End Source File
 # End Group
 # Begin Group "fe_ele"
@@ -380,6 +373,22 @@ SOURCE=..\..\..\SRC\analysis\algorithm\eigenAlgo\StandardEigenAlgo.h
 # PROP Default_Filter ".cpp; .h"
 # Begin Source File
 
+SOURCE=..\..\..\SRC\analysis\integrator\AlphaOS.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\integrator\AlphaOS.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\integrator\AlphaOSGeneralized.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\integrator\AlphaOSGeneralized.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\analysis\integrator\ArcLength.cpp
 # End Source File
 # Begin Source File
@@ -412,6 +421,22 @@ SOURCE=..\..\..\SRC\analysis\integrator\CentralDifferenceNoDamping.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\analysis\integrator\Collocation.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\integrator\Collocation.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\integrator\CollocationHybridSimulation.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\integrator\CollocationHybridSimulation.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\analysis\integrator\DisplacementControl.cpp
 # End Source File
 # Begin Source File
@@ -441,6 +466,38 @@ SOURCE=..\..\..\SRC\analysis\integrator\HHT1.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\analysis\integrator\HHT1.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\integrator\HHTExplicit.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\integrator\HHTExplicit.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\integrator\HHTGeneralized.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\integrator\HHTGeneralized.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\integrator\HHTGeneralizedExplicit.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\integrator\HHTGeneralizedExplicit.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\integrator\HHTHybridSimulation.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\integrator\HHTHybridSimulation.h
 # End Source File
 # Begin Source File
 
@@ -505,6 +562,22 @@ SOURCE=..\..\..\SRC\analysis\integrator\Newmark1.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\analysis\integrator\Newmark1.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\integrator\NewmarkExplicit.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\integrator\NewmarkExplicit.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\integrator\NewmarkHybridSimulation.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\integrator\NewmarkHybridSimulation.h
 # End Source File
 # Begin Source File
 
