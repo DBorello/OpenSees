@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2005-07-06 22:32:37 $
+// $Revision: 1.14 $
+// $Date: 2006-01-09 21:47:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -46,7 +46,7 @@
 
 EnvelopeElementRecorder::EnvelopeElementRecorder()
 :Recorder(RECORDER_TAGS_EnvelopeElementRecorder),
- numEle(0), eleID(0), theDomain(0),
+ numEle(0), eleID(0), theResponses(0), theDomain(0),
  theHandler(0), deltaT(0), nextTimeStampToRecord(0.0), 
  data(0), currentData(0), first(true),
  initializationDone(false), responseArgs(0), numArgs(0), echoTimeFlag(false)
@@ -62,7 +62,7 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &theEleID,
 						 DataOutputHandler &theOutputHandler,
 						 double dT, bool echoTime)
 :Recorder(RECORDER_TAGS_EnvelopeElementRecorder),
- numEle(theEleID.Size()), eleID(theEleID), theDomain(&theDom),
+ numEle(theEleID.Size()), eleID(theEleID), theResponses(0), theDomain(&theDom),
  theHandler(&theOutputHandler), deltaT(dT), nextTimeStampToRecord(0.0), 
  data(0), currentData(0), first(true),
  initializationDone(false), responseArgs(0), numArgs(0), echoTimeFlag(echoTime)
@@ -110,10 +110,13 @@ EnvelopeElementRecorder::~EnvelopeElementRecorder()
   //
 
   if (theResponses != 0) {
-    for (int i = 0; i < numEle; i++)
-      delete theResponses[i];
+    for (int i = 0; i < numEle; i++) 
+      if (theResponses[i] != 0)
+	delete theResponses[i];
+
     delete [] theResponses;
   }
+
   
   if (data != 0)
     delete data;
@@ -124,7 +127,7 @@ EnvelopeElementRecorder::~EnvelopeElementRecorder()
   // 
   // invoke destructor on response args
   //
-  
+
   for (int i=0; i<numArgs; i++)
     delete [] responseArgs[i];
   delete [] responseArgs;
