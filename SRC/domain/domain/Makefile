@@ -1,6 +1,6 @@
 include ../../../Makefile.def
 
-OBJS       = Domain.o newDomain.o
+OBJS       = Domain.o
 
 # Compilation control
 
