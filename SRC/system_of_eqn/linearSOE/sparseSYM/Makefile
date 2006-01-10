@@ -2,7 +2,7 @@ include ../../../../Makefile.def
 
 PROGRAM         = test
 
-OBJS       =  SymSparseLinSOE.o  SymSparseLinSolver.o \
+OBJS       =  SymSparseLinSOE.o  SymSparseLinSolver.o
 
 all:         $(OBJS) law
 
