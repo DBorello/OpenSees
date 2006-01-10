@@ -18,13 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2004-06-03 19:52:41 $
+// $Revision: 1.18 $
+// $Date: 2006-01-10 22:52:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlRenderer.cpp,v $
                                                                         
                                                                         
 // Written: fmk 
-// Created: 10/98
 // Revision: A
 //
 // Description: This file contains the class definition for OpenGLRenderer.
@@ -142,7 +141,7 @@ OpenGLRenderer::OpenGLRenderer(const char *_title, int _xLoc, int _yLoc,
       theOutputFileName = 0;
     } else {
       theFile << windowTitle << endln;
-      theFile << xLoc << " " << yLoc << " " << width << " " << height << endln;
+      theFile << 1.0*xLoc << " " << 1.0*yLoc << " " << 1.0*width << " " << 1.0*height << endln;
     }
   }
 
@@ -388,7 +387,7 @@ OpenGLRenderer::startImage(void)
 	theFile << "COP " << cop(0) << " " << cop(1) << " " 
 	    << cop(2) << " " << endln;
 	
-	theFile << "PROJECTIONMODE " << projectionMode << endln;
+	theFile << "PROJECTIONMODE " << 1.0*projectionMode << endln;
 	theFile << "VPWINDOW " << vpWindow(0) << " " << vpWindow(1) << " "
 	    << vpWindow(2) << " " << vpWindow(3) << " " << endln;
 	theFile << "PLANES " << clippingPlanes[0] << " " << clippingPlanes[1] << "\n";
