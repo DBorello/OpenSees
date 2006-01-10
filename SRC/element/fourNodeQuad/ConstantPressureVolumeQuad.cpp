@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2003-02-14 23:01:10 $
+// $Revision: 1.15 $
+// $Date: 2006-01-10 18:33:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/ConstantPressureVolumeQuad.cpp,v $
 
 // Ed "C++" Love
@@ -1369,7 +1369,6 @@ int ConstantPressureVolumeQuad :: sendSelf (int commitTag, Channel &theChannel)
       return res;
     }
   }
-  
   return res;
 }
     
@@ -1391,7 +1390,7 @@ ConstantPressureVolumeQuad :: recvSelf (int commitTag,
   }
 
   this->setTag(idData(8));
-  connectedExternalNodes(0) = idData(19);
+  connectedExternalNodes(0) = idData(9);
   connectedExternalNodes(1) = idData(10);
   connectedExternalNodes(2) = idData(11);
   connectedExternalNodes(3) = idData(12);
