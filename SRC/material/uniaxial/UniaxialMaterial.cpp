@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2005-07-21 00:22:53 $
+// $Revision: 1.13 $
+// $Date: 2006-01-10 19:15:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.cpp,v $
                                                                         
                                                                         
@@ -110,38 +110,37 @@ UniaxialMaterial::getCopy(SectionForceDeformation *s)
 Response* 
 UniaxialMaterial::setResponse(const char **argv, int argc, Information &matInfo)
 {
-	if (argc == 0) 
-		return 0;
-	
-	// stress
-    if (strcmp(argv[0],"stress") == 0)
-		return new MaterialResponse(this, 1, this->getStress());
+  if (argc == 0) 
+    return 0;
 
-    // tangent
-    else if (strcmp(argv[0],"tangent") == 0)
-		return new MaterialResponse(this, 2, this->getTangent());
+  // stress
+  if (strcmp(argv[0],"stress") == 0)
+    return new MaterialResponse(this, 1, this->getStress());
+  
+  // tangent
+  else if (strcmp(argv[0],"tangent") == 0)
+    return new MaterialResponse(this, 2, this->getTangent());
 
-    // strain
-	else if (strcmp(argv[0],"strain") == 0)
-		return new MaterialResponse(this, 3, this->getStrain());
+  // strain
+  else if (strcmp(argv[0],"strain") == 0)
+    return new MaterialResponse(this, 3, this->getStrain());
 
-    // strain
-    else if ((strcmp(argv[0],"stressStrain") == 0) || 
-	     (strcmp(argv[0],"stressANDstrain") == 0)) {
-						       
-		return new MaterialResponse(this, 4, Vector(2));
+  // strain
+  else if ((strcmp(argv[0],"stressStrain") == 0) || 
+	   (strcmp(argv[0],"stressANDstrain") == 0)) {
+    return new MaterialResponse(this, 4, Vector(2));
 
-    }
-    // otherwise unknown
-    else
-		return 0;
+  }
+  // otherwise unknown
+  else {
+    return 0;
+  }
 }
 
 int 
 UniaxialMaterial::getResponse(int responseID, Information &matInfo)
 {
-    static Vector stressStrain(2);
-
+  static Vector stressStrain(2);
   // each subclass must implement its own stuff    
   switch (responseID) {
     case 1:
@@ -157,14 +156,13 @@ UniaxialMaterial::getResponse(int responseID, Information &matInfo)
       return 0;      
     
     case 4:
-        stressStrain(0) = this->getStress();
-        stressStrain(1) = this->getStrain();
-
-        matInfo.setVector(stressStrain);
-        return 0;
-
-    default:      
-      return -1;
+      stressStrain(0) = this->getStress();
+      stressStrain(1) = this->getStrain();
+      matInfo.setVector(stressStrain);
+      return 0;
+      
+  default:      
+    return -1;
   }
 }
 
