@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-04-08 02:37:22 $
+// $Revision: 1.2 $
+// $Date: 2006-01-10 00:42:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSOE.cpp,v $
                                                                         
 // Written: fmk 
@@ -48,6 +48,7 @@ SparseGenRowLinSOE::SparseGenRowLinSOE(SparseGenRowLinSolver &the_Solver)
     the_Solver.setLinearSOE(*this);
 }
 
+/*******************************************************************************
 
 SparseGenRowLinSOE::SparseGenRowLinSOE(int N, int NNZ, int *RowStartA, int *ColA,
 				       SparseGenRowLinSolver &the_Solver)
@@ -102,7 +103,8 @@ SparseGenRowLinSOE::SparseGenRowLinSOE(int N, int NNZ, int *RowStartA, int *ColA
     }    
 }
 
-    
+*******************************************************************************/    
+
 SparseGenRowLinSOE::~SparseGenRowLinSOE()
 {
     if (A != 0) delete [] A;
@@ -252,8 +254,8 @@ SparseGenRowLinSOE::setSize(Graph &theGraph)
       }
     }
     
-    // invoke setSize() on the Solver    
-    LinearSOESolver *the_Solver = this->getSolver();
+    // invoke setSize() on the Solver   
+     LinearSOESolver *the_Solver = this->getSolver();
     int solverOK = the_Solver->setSize();
     if (solverOK < 0) {
 	opserr << "WARNING:SparseGenRowLinSOE::setSize :";

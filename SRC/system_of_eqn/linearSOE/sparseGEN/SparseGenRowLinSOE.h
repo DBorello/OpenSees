@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-04-08 02:37:22 $
+// $Revision: 1.2 $
+// $Date: 2006-01-10 00:42:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSOE.h,v $
                                                                         
 #ifndef SparseGenRowLinSOE_h
@@ -45,8 +45,6 @@ class SparseGenRowLinSOE : public LinearSOE
 {
   public:
     SparseGenRowLinSOE(SparseGenRowLinSolver &theSolver);        
-    SparseGenRowLinSOE(int N, int NNZ, int *rowStartA, int *colA,
-		       SparseGenRowLinSolver &theSolver);        
 
     ~SparseGenRowLinSOE();
 
