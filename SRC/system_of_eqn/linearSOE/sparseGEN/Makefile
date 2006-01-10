@@ -2,8 +2,17 @@
 
 include ../../../../Makefile.def
 
-
 PROGRAM         = test
+
+ifeq ($(PROGRAMMING_MODE), SEQUENTIAL)
+
+OBJS       = SparseGenColLinSOE.o \
+	SparseGenColLinSolver.o \
+	SparseGenRowLinSOE.o \
+	SparseGenRowLinSolver.o \
+	SuperLU.o 
+
+else
 
 OBJS       = SparseGenColLinSOE.o \
 	SparseGenColLinSolver.o \
@@ -13,6 +22,8 @@ OBJS       = SparseGenColLinSOE.o \
 	DistributedSuperLU.o \
 	DistributedSparseGenColLinSOE.o \
 	DistributedSparseGenRowLinSOE.o
+
+endif
 
 all:         $(OBJS)
 
