@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2004-10-19 00:37:29 $
+// $Revision: 1.5 $
+// $Date: 2006-01-10 18:16:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/NEESData.cpp,v $
                                                                         
 // Written: fmk 
@@ -39,7 +39,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <bool.h>
+//#include <bool.h>
 #include <iostream>
 #include <iomanip>
 using std::ios;
@@ -51,7 +51,6 @@ using std::setiosflags;
 #include <Vector.h>
 #include <Matrix.h>
 #include <NEESData.h>
-
 
 NEESData::NEESData(const char *dataBaseName,
 		   Domain &theDomain, 
@@ -66,7 +65,7 @@ NEESData::~NEESData()
 {
   // clean up all memory allocated
   for (int i=0; i<numTables; i++) {
-    Table *nextTable = tables->next;
+    NEES_table* nextTable = tables->next;
     int numColumns = tables->numColumns;
     char **columns = tables->columns;
     for (int j=0; j<numColumns; j++)
@@ -199,7 +198,7 @@ NEESData::createTable(const char *tableName, int numColumns, char *columns[])
   }
 
   // first ensure createTable has not already been called with this table name
-  Table *t = tables;
+  NEES_table *t = tables;
   for (int i=0; i<numTables; i++) {
     if (strcmp(t->name, tableName) == 0) {
       opserr << "WARNING: NEESData::createTable - table already exists: " << copyTableName << endln;
@@ -274,7 +273,7 @@ NEESData::createTable(const char *tableName, int numColumns, char *columns[])
 
   // if we can get here we can open the data and have written to the xml file
   // now add a new struct to our list of tables
-  Table *nextTable = new Table;
+  NEES_table *nextTable = new NEES_table;
   if (nextTable == 0) {
     opserr << "NEESData::createData - out of memory creating Table structure for table: " << copyTableName << endln;
     res = -1;
@@ -321,7 +320,7 @@ NEESData::insertData(const char *tableName, char *columns[],
 		     int commitTag, const Vector &data)
 {
   // search the tables for valid table
-  Table *t = tables;
+  NEES_table *t = tables;
   for (int i=0; i<numTables; i++) {
     if (strcmp(t->name, tableName) == 0) 
       i = numTables;

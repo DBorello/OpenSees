@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2004-08-26 23:14:16 $
+// $Revision: 1.3 $
+// $Date: 2006-01-10 18:16:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/NEESData.h,v $
                                                                         
                                                                         
@@ -41,16 +41,17 @@
 #include <fstream>
 using std::fstream;
 
-class Table
+#include <bool.h>
+
+class NEES_table
 {
  public:
   char     *name;
   char    **columns;
   int       numColumns;
-  Table    *next;
+  NEES_table    *next;
   bool      hasOutExtension;
 };
-
 
 class FEM_ObjectBroker;
 
@@ -116,7 +117,7 @@ class NEESData: public FE_Datastore
 
   private:
     char         *dataBase;
-    Table        *tables;
+    NEES_table    *tables;
     int          numTables;
 };
 
