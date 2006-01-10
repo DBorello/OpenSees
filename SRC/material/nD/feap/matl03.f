@@ -119,7 +119,7 @@ c     // F = \|s\| - sqrt(2/3)*\sigma_y
       Fn1 = nsn1 - root23*syn
 
 c     // First iteration or an elastic step
-      if (niter == 0 .or. Fn1 < 0.d0) then
+      if (niter.eq.0 .or. Fn1.lt.0.d0) then
 
 c       // No change in history variables n+1 <-- n
          do i = 1,7

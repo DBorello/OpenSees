@@ -60,7 +60,7 @@ c     // Get the strain trace
       evn1 = trace
 
 c     // If there is a bulk viscoelastic effect
-      if (muK > 0.d0) then
+      if (muK.gt.0.d0) then
 	
 c       // Put strain trace in trial history
          h1(7) = evn1
@@ -117,7 +117,7 @@ c     // e = I_{dev} \epsilon = (I - 1/3 mm^T) \epsilon
       en1(6) = eps(6)
 
 c     // If there is a shear viscoelastic effect
-      if (muG > 0.d0) then
+      if (muG.gt.0.d0) then
 
 c       // Put deviatoric strains into trial history
          do i = 1,6
