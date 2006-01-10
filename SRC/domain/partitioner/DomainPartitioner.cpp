@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-01-10 00:31:52 $
+// $Revision: 1.7 $
+// $Date: 2006-01-10 18:17:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/partitioner/DomainPartitioner.cpp,v $
                                                                         
 // Written: fmk 
@@ -134,8 +134,6 @@ DomainPartitioner::setPartitionedDomain(PartitionedDomain &theDomain)
 int
 DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
 {
-
-  opserr << "  DomainPartitioner::partition() -1\n";
   usingMainDomain = usingMain;
   mainPartition = mainPartitionTag;
 
@@ -152,8 +150,6 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
     }
   }
 
-  opserr << "  DomainPartitioner::partition() -2\n";
-
   // we get the ele graph from the domain and partition it
   //    Graph &theEleGraph = myDomain->getElementGraph();
   //    theElementGraph = new Graph(myDomain->getElementGraph());
@@ -167,8 +163,6 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
     return -10+theError;
   }
 
-  opserr << "  DomainPartitioner::partition() -3\n";
-  
   // we create empty graphs for the numParts subdomains,
   // in the graphs we place the vertices for the elements on the boundaries
   
@@ -228,8 +222,6 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
     }
   }
 
-  opserr << "  DomainPartitioner::partition() -4\n";
-  
   //
   // we now iterate through the vertices of the element graph
   // to see if the vertex is a boundary vertex or not - if it is
@@ -272,9 +264,6 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
     }
   }
 
-
-  opserr << "  DomainPartitioner::partition() -5\n";
-
   // now go through the MP_Constraints and ensure the retained node is in every 
   // partition the constrained node is in
   MP_ConstraintIter &theMPs = myDomain->getMPs();
@@ -305,8 +294,6 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
     }
   }
 
-  opserr << "  DomainPartitioner::partition() -6\n";
-  
   // we now add the nodes, 
   TaggedObjectIter &theNodeLocationIter = theNodeLocations->getComponents();
   TaggedObject *theNodeObject;
@@ -332,8 +319,6 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
     }
   }
 
-  opserr << "  DomainPartitioner::partition() -7\n";
-
   // we now move the elements 
   VertexIter &theVertices = theElementGraph->getVertices();
   while ((vertexPtr = theVertices()) != 0) {
@@ -346,9 +331,6 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
       theSubdomain->addElement(elePtr);
     }
   }
-
-
-  opserr << "  DomainPartitioner::partition() -8\n";
 
   // now we go through the load patterns and move NodalLoad
   // 1) make sure each subdomain has a copy of the partitioneddomains load patterns.
@@ -438,8 +420,6 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
       }    
     }  
 
-  opserr << "  DomainPartitioner::partition() -9\n";
-      
     ElementalLoadIter &theLoads = theLoadPattern->getElementalLoads();
     ElementalLoad *theLoad;
     while ((theLoad = theLoads()) != 0) {
@@ -484,8 +464,6 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
     }    
   }  
 
-  opserr << "  DomainPartitioner::partition() -10\n";      
-  
   // move MP_Constraints - add an MP_Constraint to every partition a constrained node is in
   MP_ConstraintIter &moreMPs = myDomain->getMPs();
   while ((mpPtr = moreMPs()) != 0) {
@@ -507,8 +485,6 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
     }
   }
 
-  opserr << "  DomainPartitioner::partition() -11\n";      
-  
   // now we go through all the subdomains and tell them to update
   // their analysis for the new layouts
   
@@ -519,8 +495,6 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
   
   // we invoke change on the PartitionedDomain
   myDomain->domainChange();
-
-  opserr << "  DomainPartitioner::partition() -12\n";      
     
   // we are done
   partitionFlag = true;
