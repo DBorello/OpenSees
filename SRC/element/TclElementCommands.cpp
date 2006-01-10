@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.37 $
-// $Date: 2005-07-25 22:58:26 $
+// $Revision: 1.38 $
+// $Date: 2006-01-10 18:50:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -86,11 +86,6 @@ extern int
 TclModelBuilder_addBrick(ClientData clientData, Tcl_Interp *interp,
 			 int argc, TCL_Char **argv, Domain*, 
 			 TclModelBuilder *, int argStart);
-
-extern int
-TclModelBuilder_addBBarBrick(ClientData clientData, Tcl_Interp *interp,
-			     int argc, TCL_Char **argv, Domain*, 
-			     TclModelBuilder *, int argStart);
 
 extern int
 TclModelBuilder_addShellMITC4(ClientData clientData, Tcl_Interp *interp,
@@ -427,12 +422,17 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
   else if (strcmp(argv[1],"stdBrick") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addBrick(clientData, interp, argc, argv,
-						theTclDomain, theTclBuilder, eleArgStart);
+					  theTclDomain, theTclBuilder, eleArgStart);
     return result;
   } else if (strcmp(argv[1],"bbarBrick") == 0) {
     int eleArgStart = 1;
-    int result = TclModelBuilder_addBBarBrick(clientData, interp, argc, argv,
-					       theTclDomain, theTclBuilder, eleArgStart);
+    int result = TclModelBuilder_addBrick(clientData, interp, argc, argv,
+					  theTclDomain, theTclBuilder, eleArgStart);
+    return result;
+  } else if (strcmp(argv[1],"flBrick") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addBrick(clientData, interp, argc, argv,
+					  theTclDomain, theTclBuilder, eleArgStart);
     return result;
   } else if (strcmp(argv[1],"zeroLength") == 0) {
     int result = TclModelBuilder_addZeroLength(clientData, interp, argc, argv,
