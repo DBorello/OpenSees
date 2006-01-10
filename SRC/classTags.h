@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.71 $
-// $Date: 2005-12-19 23:00:51 $
+// $Revision: 1.72 $
+// $Date: 2006-01-10 23:24:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -311,6 +311,7 @@
 #define ELE_TAG_Plate1          2022 
 #define ELE_TAG_Brick                      3458 
 #define ELE_TAG_BbarBrick                  3457 
+#define ELE_TAG_FLBrick                  3455 
 #define ELE_TAG_EnhancedQuad               3459
 #define ELE_TAG_ConstantPressureVolumeQuad 3456 
 #define ELE_TAG_NineNodeMixedQuad          3359 
@@ -492,6 +493,8 @@
 #define LinSOE_TAGS_DistributedSparseGenColLinSOE       18
 #define LinSOE_TAGS_DiagonalSOE       19
 #define LinSOE_TAGS_SparseGenRowLinSOE		20
+#define LinSOE_TAGS_DistributedSparseGenRowLinSOE       21
+#define LinSOE_TAGS_DistributedDiagonalSOE 22
 
 #define SOLVER_TAGS_FullGenLinLapackSolver  	1
 #define SOLVER_TAGS_BandGenLinLapackSolver  	2
@@ -514,7 +517,7 @@
 #define SOLVER_TAGS_DistributedSuperLU		      	19
 #define SOLVER_TAGS_DiagonalDirectSolver 20
 #define SOLVER_TAGS_PetscSparseSeqSolver 21
-
+#define SOLVER_TAGS_DistributedDiagonalSolver 22
 
 
 #define RECORDER_TAGS_ElementRecorder		1
