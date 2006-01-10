@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2004-04-14 18:39:38 $
+// $Revision: 1.11 $
+// $Date: 2006-01-10 18:41:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.h,v $
 
 // Ed "C++" Love
@@ -43,21 +43,21 @@ class Brick : public Element {
   public :
     
     //null constructor
-    Brick( ) ;
+    Brick();
   
     //full constructor
-    Brick( int tag, 
-			int node1,
-			int node2,
-		        int node3,
-			int node4,
-			int node5,
-			int node6,
-			int node7,
-			int node8,
-			NDMaterial &theMaterial,
-			double b1 = 0.0, double b2 = 0.0, double b3 = 0.0) ;
-
+    Brick(int tag, 
+	  int node1,
+	  int node2,
+	  int node3,
+	  int node4,
+	  int node5,
+	  int node6,
+	  int node7,
+	  int node8,
+	  NDMaterial &theMaterial,
+	  double b1 = 0.0, double b2 = 0.0, double b3 = 0.0);
+    
     //destructor 
     virtual ~Brick( ) ;
 
@@ -116,8 +116,24 @@ class Brick : public Element {
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
 
   private : 
+    //
+    // private attributes
+    //
 
-    //static data
+    ID connectedExternalNodes ;  //four node numbers
+    Node *nodePointers[8] ;      //pointers to eight nodes
+
+    //material information
+    NDMaterial *materialPointers[8]; //pointers to eight materials
+
+    double b[3];		// Body forces
+    Vector *load;
+    Matrix *Ki;
+
+    //
+    // static attributes
+    //
+
     static Matrix stiff ;
     static Vector resid ;
     static Matrix mass ;
@@ -128,21 +144,13 @@ class Brick : public Element {
     static const double one_over_root3 ;    
     static const double sg[2] ;
     static const double wg[8] ;
-
   
-    //node information
-    ID connectedExternalNodes ;  //four node numbers
-    Node *nodePointers[8] ;      //pointers to four nodes
-
-
-    //material information
-    NDMaterial *materialPointers[8] ; //pointers to eight materials
-					  
     //local nodal coordinates, three coordinates for each of four nodes
-    //    static double xl[3][8] ; 
-    static double xl[][8] ; 
+    static double xl[3][8] ; 
 
-	double b[3];		// Body forces
+    //
+    // private methods
+    //
 
     //inertia terms
     void formInertiaTerms( int tangFlag ) ;
@@ -159,8 +167,6 @@ class Brick : public Element {
     //Matrix transpose
     Matrix transpose( int dim1, int dim2, const Matrix &M ) ;
 
-    Vector *load;
-    Matrix *Ki;
 } ; 
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2005-11-07 21:58:35 $
+// $Revision: 1.24 $
+// $Date: 2006-01-10 18:41:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.cpp,v $
 
 // Ed "C++" Love
@@ -67,40 +67,39 @@ const double  Brick::wg[] = { 1.0, 1.0, 1.0, 1.0,
   
 static Matrix B(6,3) ;
 
-
-
 //null constructor
-Brick::Brick( ) :
-Element( 0, ELE_TAG_Brick ),
+Brick::Brick( ) 
+:Element( 0, ELE_TAG_Brick ),
 connectedExternalNodes(8), load(0), Ki(0)
-{ 
+{
   B.Zero();
 
   for (int i=0; i<8; i++ ) {
     materialPointers[i] = 0;
     nodePointers[i] = 0;
   }
+
   b[0] = 0.0;
-  b[1] = 0.0; 
+  b[1] = 0.0;
   b[2] = 0.0;
 }
 
 
 //*********************************************************************
 //full constructor
-Brick::Brick(  int tag, 
-                         int node1,
-                         int node2,
-   	                 int node3,
-                         int node4,
-                         int node5,
-                         int node6,
-                         int node7,
-			 int node8,
-			 NDMaterial &theMaterial,
-			 double b1, double b2, double b3) :
-Element( tag, ELE_TAG_Brick ),
-connectedExternalNodes(8) , load(0), Ki(0)
+Brick::Brick(int tag, 
+	     int node1,
+	     int node2,
+	     int node3,
+	     int node4,
+	     int node5,
+	     int node6,
+	     int node7,
+	     int node8,
+	     NDMaterial &theMaterial,
+	     double b1, double b2, double b3)
+  :Element(tag, ELE_TAG_Brick),
+   connectedExternalNodes(8) , load(0), Ki(0)
 {
   B.Zero();
 
@@ -114,22 +113,19 @@ connectedExternalNodes(8) , load(0), Ki(0)
   connectedExternalNodes(6) = node7 ;
   connectedExternalNodes(7) = node8 ;
 
-  int i ;
-  for ( i=0; i<8; i++ ) {
-
+  for (int i=0; i<8; i++ ) {
       materialPointers[i] = theMaterial.getCopy("ThreeDimensional") ;
-
       if (materialPointers[i] == 0) {
 	opserr << "Brick::constructor - failed to get a material of type: ThreeDimensional\n";
 	exit(-1);
       } //end if
-      
+      nodePointers[i] = 0;
   } //end for i 
 
-	// Body forces
-	b[0] = b1;
-	b[1] = b2;
-	b[2] = b3;
+  // Body forces
+  b[0] = b1;
+  b[1] = b2;
+  b[2] = b3;
 }
 //******************************************************************
 
@@ -137,20 +133,17 @@ connectedExternalNodes(8) , load(0), Ki(0)
 //destructor 
 Brick::~Brick( )
 {
-  int i ;
-  for ( i=0 ; i<8; i++ ) {
 
+  for (int i=0 ; i<8; i++ ) {
     delete materialPointers[i] ;
-    materialPointers[i] = 0 ; 
-
-    nodePointers[i] = 0 ;
-
   } //end for i
+
   if (load != 0)
     delete load;
 
   if (Ki != 0)
     delete Ki;
+  
 }
 
 
@@ -292,22 +285,14 @@ void  Brick::Print( OPS_Stream &s, int flag )
 
   } else {
 
-    /*s << endln ;
     s << "Standard Eight Node Brick \n" ;
     s << "Element Number: " << this->getTag() << endln ;
-    s << "Node 1 : " << connectedExternalNodes(0) << endln ;
-    s << "Node 2 : " << connectedExternalNodes(1) << endln ;
-    s << "Node 3 : " << connectedExternalNodes(2) << endln ;
-    s << "Node 4 : " << connectedExternalNodes(3) << endln ;
-    s << "Node 5 : " << connectedExternalNodes(4) << endln ;
-    s << "Node 6 : " << connectedExternalNodes(5) << endln ;
-    s << "Node 7 : " << connectedExternalNodes(6) << endln ;
-    s << "Node 8 : " << connectedExternalNodes(7) << endln ;
-    
+    s << "Nodes: " << connectedExternalNodes;
+
     s << "Material Information : \n " ;
     materialPointers[0]->Print( s, flag ) ;
     
-    s << endln ;*/
+    s << endln ;
     s << this->getTag() << " " <<connectedExternalNodes(0)
       << " " <<connectedExternalNodes(1)
 	  << " " <<connectedExternalNodes(2)
@@ -747,8 +732,6 @@ Brick::update(void)
   static const int nShape = 4 ;
 
   int i, j, k, p, q ;
-  int jj, kk ;
-
   int success ;
   
   static double volume ;
@@ -916,7 +899,6 @@ void  Brick::formResidAndTangent( int tang_flag )
   static const int nShape = 4 ;
 
   int i, j, k, p, q ;
-  int jj, kk ;
 
   int success ;
   
@@ -1028,7 +1010,7 @@ void  Brick::formResidAndTangent( int tang_flag )
 
     //residual and tangent calculations node loops
 
-    jj = 0 ;
+    int jj = 0 ;
     for ( j = 0; j < numberNodes; j++ ) {
 
       /* ************** fmk - unwinding for performance 
@@ -1086,7 +1068,7 @@ void  Brick::formResidAndTangent( int tang_flag )
 	//BJtranD = BJtran * dd ;
 	BJtranD.addMatrixProduct(0.0,  BJtran,dd,1.0) ;
 
-         kk = 0 ;
+	int kk = 0 ;
          for ( k = 0; k < numberNodes; k++ ) {
 
             BK = computeB( k, shp ) ;
@@ -1222,8 +1204,8 @@ int  Brick::sendSelf (int commitTag, Channel &theChannel)
     // tag if we are sending to a database channel.
     if (matDbTag == 0) {
       matDbTag = theChannel.getDbTag();
-			if (matDbTag != 0)
-			  materialPointers[i]->setDbTag(matDbTag);
+      if (matDbTag != 0)
+	materialPointers[i]->setDbTag(matDbTag);
     }
     idData(i+8) = matDbTag;
   }
@@ -1258,15 +1240,14 @@ int  Brick::sendSelf (int commitTag, Channel &theChannel)
 }
     
 int  Brick::recvSelf (int commitTag, 
-		       Channel &theChannel, 
-		       FEM_ObjectBroker &theBroker)
+		      Channel &theChannel, 
+		      FEM_ObjectBroker &theBroker)
 {
   int res = 0;
   
   int dataTag = this->getDbTag();
 
   static ID idData(25);
-  // Quad now receives the tags of its four external nodes
   res += theChannel.recvID(dataTag, commitTag, idData);
   if (res < 0) {
     opserr << "WARNING Brick::recvSelf() - " << this->getTag() << " failed to receive ID\n";
@@ -1283,11 +1264,10 @@ int  Brick::recvSelf (int commitTag,
   connectedExternalNodes(5) = idData(21);
   connectedExternalNodes(6) = idData(22);
   connectedExternalNodes(7) = idData(23);
-  
 
-  int i;
+
   if (materialPointers[0] == 0) {
-    for (i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++) {
       int matClassTag = idData(i);
       int matDbTag = idData(i+8);
       // Allocate new material with the sent class tag
@@ -1307,7 +1287,7 @@ int  Brick::recvSelf (int commitTag,
   }
   // materials exist , ensure materials of correct type and recvSelf on them
   else {
-    for (i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++) {
       int matClassTag = idData(i);
       int matDbTag = idData(i+8);
       // Check that material is of the right type; if not,
@@ -1320,7 +1300,7 @@ int  Brick::recvSelf (int commitTag,
 	    matClassTag << endln;
 	  exit(-1);
 	}
-      materialPointers[i]->setDbTag(matDbTag);
+	materialPointers[i]->setDbTag(matDbTag);
       }
       // Receive the material
 
