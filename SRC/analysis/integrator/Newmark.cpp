@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.12 $
-// $Date: 2005-12-19 22:43:36 $
+// $Revision: 1.13 $
+// $Date: 2006-01-10 00:34:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark.cpp,v $
 
 // Written : fmk
@@ -420,7 +420,7 @@ int Newmark::sendSelf(int cTag, Channel &theChannel)
 
 int Newmark::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-    Vector data(8);
+    Vector data(7);
     if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0)  {
         opserr << "WARNING Newmark::recvSelf() - could not receive data\n";
         gamma = 0.5; beta = 0.25; 

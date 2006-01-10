@@ -18,6 +18,7 @@ OBJS       = IncrementalIntegrator.o \
 	ArcLength1.o \
 	LoadPath.o \
 	DisplacementControl.o \
+	DistributedDisplacementControl.o \
 	MinUnbalDispNorm.o \
 	EigenIntegrator.o \
 	HSConstraint.o \
@@ -32,8 +33,6 @@ OBJS       = IncrementalIntegrator.o \
 	CollocationHybridSimulation.o \
 	AlphaOSGeneralized.o \
 	AlphaOS.o 
-
-
 
 all:         $(OBJS)
 
