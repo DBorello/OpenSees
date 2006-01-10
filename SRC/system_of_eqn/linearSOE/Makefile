@@ -14,8 +14,6 @@ all:         $(OBJS)
 	@$(CD) $(FE)/system_of_eqn/linearSOE/cg; $(MAKE);
 	@$(CD) $(FE)/system_of_eqn/linearSOE/BJsolvers; $(MAKE);
 	@$(CD) $(FE)/system_of_eqn/linearSOE/diagonal; $(MAKE);
-	@$(CD) $(FE)/system_of_eqn/linearSOE/petsc; $(MAKE);
-
 
 # Miscellaneous
 tidy:	
