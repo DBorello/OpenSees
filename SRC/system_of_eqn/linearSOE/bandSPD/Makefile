@@ -1,6 +1,9 @@
 include ../../../../Makefile.def
 
-OBJS       = BandSPDLinSOE.o BandSPDLinSolver.o BandSPDLinLapackSolver.o 
+OBJS       = BandSPDLinSOE.o \
+	BandSPDLinSolver.o \
+	BandSPDLinLapackSolver.o \
+	DistributedBandSPDLinSOE.o
 
 PROGRAM = go
 

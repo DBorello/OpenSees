@@ -6,7 +6,9 @@ PROGRAM = test
 
 OBJS       = DiagonalSOE.o \
 	DiagonalSolver.o \
-	DiagonalDirectSolver.o
+	DiagonalDirectSolver.o \
+	DistributedDiagonalSOE.o \
+	DistributedDiagonalSolver.o
 
 all:         $(OBJS)
 

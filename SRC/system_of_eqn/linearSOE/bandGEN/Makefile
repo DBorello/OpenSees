@@ -1,6 +1,9 @@
 include ../../../../Makefile.def
 
-OBJS       = BandGenLinSOE.o BandGenLinSolver.o BandGenLinLapackSolver.o
+OBJS       = BandGenLinSOE.o \
+	BandGenLinSolver.o \
+	BandGenLinLapackSolver.o \
+	DistributedBandGenLinSOE.o
 
 all:    $(OBJS)
 

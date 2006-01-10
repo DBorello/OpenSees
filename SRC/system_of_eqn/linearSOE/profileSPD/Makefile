@@ -4,9 +4,15 @@ include ../../../../Makefile.def
 
 PROGRAM = test
 
-OBJS       = ProfileSPDLinSOE.o ProfileSPDLinSolver.o \
-	ProfileSPDLinDirectSolver.o ProfileSPDLinSubstrSolver.o \
-	ProfileSPDLinDirectBlockSolver.o  ProfileSPDLinDirectSkypackSolver.o  
+OBJS       = ProfileSPDLinSOE.o \
+	ProfileSPDLinSolver.o \
+	ProfileSPDLinDirectSolver.o \
+	ProfileSPDLinSubstrSolver.o \
+	ProfileSPDLinDirectBlockSolver.o \
+	ProfileSPDLinDirectSkypackSolver.o \
+	ProfileSPDLinSolverGather.o \
+	ProfileSPDLinSOEGather.o \
+	DistributedProfileSPDLinSOE.o
 
 all:         $(OBJS)
 
