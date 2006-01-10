@@ -8,9 +8,13 @@
 #include <math.h>
 #include <stdlib.h>
 
+#ifdef _NOGRAPHICS
+
+#else
 #ifdef _GLX    // Boris Jeremic added 23Oct2002
 #include <OpenGLRenderer.h>
 #endif         // Boris Jeremic added 23Oct2002
+#endif
 
 #include "InelasticYS2DGNL.h"
 #include <Renderer.h>
@@ -1619,36 +1623,41 @@ void InelasticYS2DGNL::createView(char *title, double scale, int x, int y, int c
 {
 	displayType = displaytype;
 
+
+#ifdef _NOGRAPHICS
+
+#else
 #ifdef _GLX // Boris Jeremic added 23Oct2002
 theMap = new PlainMap();
 pView =  new OpenGLRenderer(title, x, y, cx, cy, *theMap);
 
-if(pView)
-{
-pView->setVRP(0.0, 0.0, 0.0);
-pView->setVPN(0.0, 0.0, 1.0);
-pView->setVUP(0.0, 1.0, 0.0);
-pView->setFillMode("wire");             // wire mode
-pView->setPlaneDist(1.0, -1.0);
-pView->setPRP(0.0, 0.0, 10.0);
-pView->setPortWindow(-1, 1, -1, 1);  // use the whole window
+ if(pView){
+   pView->setVRP(0.0, 0.0, 0.0);
+   pView->setVPN(0.0, 0.0, 1.0);
+   pView->setVUP(0.0, 1.0, 0.0);
+   pView->setFillMode("wire");             // wire mode
+   pView->setPlaneDist(1.0, -1.0);
+   pView->setPRP(0.0, 0.0, 10.0);
+   pView->setPortWindow(-1, 1, -1, 1);  // use the whole window
+   
+   pView->setViewWindow(-scale, scale, -scale, scale);
+   
+   pView->clearImage();
+   pView->startImage();
+   
 
-pView->setViewWindow(-scale, scale, -scale, scale);
-
-pView->clearImage();
-pView->startImage();
-
-
-ys1->setView(pView);
-ys2->setView(pView);
-
-ys1->displaySelf(*pView, 10, 1);
-ys2->displaySelf(*pView, 10, 1);
+   ys1->setView(pView);
+   ys2->setView(pView);
+   
+   ys1->displaySelf(*pView, 10, 1);
+   ys2->displaySelf(*pView, 10, 1);
 pView->doneImage();
-}
-else
-		opserr << "WARNING: InelasticYS2DGNL::createView - Renderer not available\n";
+ 
+ }
+ else
+   opserr << "WARNING: InelasticYS2DGNL::createView - Renderer not available\n";
 #endif   // Boris Jeremic added 23Oct2002
+#endif
 
 }
 
