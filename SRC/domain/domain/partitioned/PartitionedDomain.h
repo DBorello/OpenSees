@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-11-30 23:38:35 $
+// $Revision: 1.5 $
+// $Date: 2006-01-10 00:33:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.h,v $
                                                                         
                                                                         
@@ -108,7 +108,7 @@ class PartitionedDomain: public Domain
 
     // public member functions in addition to the standard domain
     virtual int setPartitioner(DomainPartitioner *thePartitioner);
-    virtual int partition(int numPartitions);
+    virtual int partition(int numPartitions, bool usingMain = false, int mainPartitionID = 0);
 			
     virtual bool addSubdomain(Subdomain *theSubdomain);
     virtual int getNumSubdomains(void);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-11-30 23:38:35 $
+// $Revision: 1.5 $
+// $Date: 2006-01-10 00:33:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.cpp,v $
                                                                         
                                                                         
@@ -923,28 +923,18 @@ PartitionedDomain::setPartitioner(DomainPartitioner *thePartitioner)
 
 
 int 
-PartitionedDomain::partition(int numPartitions)
+PartitionedDomain::partition(int numPartitions, bool usingMain, int mainPartitionID)
 {
   int result = 0;
     // need to create element graph before create new subdomains
     // DO NOT REMOVE THIS LINE __ EVEN IF COMPILER WARNING ABOUT UNUSED VARIABLE
     Graph &theEleGraph = this->getElementGraph();
     
-    // check to see that they have ones with the correct tags
-    if (theSubdomains != 0) {
-	for (int i=1; i<=numPartitions; i++) {
-	    TaggedObject *theObject = theSubdomains->getComponentPtr(i);
-	    if (theObject == 0) { // create a subdomain with appropriate tag
-	      Subdomain *theSubdomain = new Subdomain(i);
-	      this->addSubdomain(theSubdomain);
-	    }
-	}
-    } 
     // now we call partition on the domainPartitioner which does the partitioning
     DomainPartitioner *thePartitioner = this->getPartitioner();
     if (thePartitioner != 0) {
       thePartitioner->setPartitionedDomain(*this);
-      result =  thePartitioner->partition(numPartitions);
+      result =  thePartitioner->partition(numPartitions, usingMain, mainPartitionID);
     } else {
       opserr << "PartitionedDomain::partition(int numPartitions) - no associated partitioner\n";
       return -1;
