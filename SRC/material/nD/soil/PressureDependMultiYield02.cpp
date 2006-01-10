@@ -1,5 +1,5 @@
-// $Revision: 1.7 $
-// $Date: 2005-12-14 23:20:11 $
+// $Revision: 1.8 $
+// $Date: 2006-01-10 19:00:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield02.cpp,v $
 
 // Written: ZHY
@@ -526,7 +526,7 @@ const Matrix & PressureDependMultiYield02::getTangent (void)
       double plastModul = factor*committedSurfaces[committedActiveSurf].modulus();
       coeff1 = 9.*bulkModulus*bulkModulus*volume*volume/(Ho+plastModul);
       coeff2 = 4.*shearModulus*shearModulus/(Ho+plastModul);
-      /* non-symmetric stiffness
+      // non-symmetric stiffness
       getSurfaceNormal(updatedTrialStress, workT2V);
       workV6 = workT2V.deviator();
       double qq = workT2V.volume();
@@ -537,7 +537,7 @@ const Matrix & PressureDependMultiYield02::getTangent (void)
       coeff2 = 4.*shearModulus*shearModulus/(Ho+plastModul);
 			coeff3 = 6.*shearModulus*pp/(Ho+plastModul);
 			coeff4 = 6.*shearModulus*qq/(Ho+plastModul);
-	  }*/
+    }*/
     if (loadStage!=0 && activeSurfaceNum > 0) {
       factor = getModulusFactor(trialStress);
       shearModulus = factor*refShearModulus;
