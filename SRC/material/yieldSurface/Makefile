@@ -1,8 +1,7 @@
 include ../../../Makefile.def
 
-OBJS       = Material.o
 
-all:         $(OBJS)
+all:
 	@$(CD) $(FE)/material/yieldSurface/yieldSurfaceBC; $(MAKE);
 	@$(CD) $(FE)/material/yieldSurface/plasticHardeningMaterial; $(MAKE);
 	@$(CD) $(FE)/material/yieldSurface/evolution; $(MAKE);
