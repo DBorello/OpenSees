@@ -18,10 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2005-12-01 00:03:59 $
+// $Revision: 1.3 $
+// $Date: 2006-01-10 00:31:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/partitioner/DomainPartitioner.h,v $
-                                                                        
                                                                         
 // Written: fmk 
 // Created: Fri Sep 20 15:27:47: 1996
@@ -46,7 +45,7 @@ class LoadBalancer;
 class PartitionedDomain;
 class Vector;
 class Graph;
-
+class TaggedObjectStorage;
 
 class DomainPartitioner
 {
@@ -59,7 +58,7 @@ class DomainPartitioner
     virtual  ~DomainPartitioner();    
 
     virtual void setPartitionedDomain(PartitionedDomain &theDomain);
-    virtual int partition(int numParts);
+    virtual int partition(int numParts, bool useMainDomain = false, int mainPartition = 0);
 
     virtual int balance(Graph &theWeightedSubdomainGraph);
 
@@ -100,11 +99,14 @@ class DomainPartitioner
     Graph *theElementGraph;
     Graph **theBoundaryElements; 
     
-    ID *nodePlace;
+    TaggedObjectStorage *theNodeLocations;
     ID *elementPlace;
     int numPartitions;
     ID primes;
     bool partitionFlag;
+    
+    bool usingMainDomain;
+    int mainPartition;
 };
 
 #endif
