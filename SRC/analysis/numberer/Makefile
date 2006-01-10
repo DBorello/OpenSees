@@ -1,6 +1,6 @@
 include ../../../Makefile.def
 
-OBJS       = DOF_Numberer.o PlainNumberer.o
+OBJS       = DOF_Numberer.o PlainNumberer.o ParallelNumberer.o
 
 # Compilation control
 all:         $(OBJS)
