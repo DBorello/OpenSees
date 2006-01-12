@@ -4,9 +4,19 @@ OBJS       = commands.o TclFeViewer.o TclVideoPlayer.o
 
 all: $(OBJS)
 
+ifeq ($(PROGRAMMING_MODE), PARALLEL)
+
+tcl: $(OBJS) tclMain.o mpiMain.o
+
+else
+
 tcl: $(OBJS)  tclMain.o tclAppInit.o
 
+endif
+
+
 tk: $(OBJS)  tkMain.o tkAppInit.o
+
 
 FEAP_ELE_LIBS = $(FE)/element/feap/elmt01.o \
 	$(FE)/element/feap/elmt02.o \
