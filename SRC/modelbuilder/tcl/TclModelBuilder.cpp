@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2005-11-22 19:45:03 $
+// $Revision: 1.29 $
+// $Date: 2006-01-12 19:57:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -1154,7 +1154,7 @@ TclModelBuilder_addNodalLoad(ClientData clientData, Tcl_Interp *interp, int argc
 
   // add the load to the domain
   if (theTclDomain->addNodalLoad(theLoad, loadPatternTag) == false) {
-    opserr << "WARNING TclModelBuilder - could not add load to domain ";
+    opserr << "WARNING TclModelBuilder - could not add load to domain\n";
     printCommand(argc, argv);
     delete theLoad;
     return TCL_ERROR;
@@ -1460,16 +1460,6 @@ TclModelBuilder_addNodalMass(ClientData clientData, Tcl_Interp *interp, int argc
     return TCL_ERROR;
   }
 
-  Node *theNode = 0;
-  theNode = theTclDomain->getNode(nodeId);
-
-  if (theNode == 0)
-  {
-    opserr << "WARNING failed to get node pointer from the domain\n";
-    opserr << "node: " << nodeId << endln;
-    return TCL_ERROR;
-  }
-
   // check for mass terms
   Matrix mass(ndf,ndf);
   double theMass;
@@ -1483,9 +1473,12 @@ TclModelBuilder_addNodalMass(ClientData clientData, Tcl_Interp *interp, int argc
       }
       mass(i,i) = theMass;
   }
-      
-  theNode->setMass(mass);      
 
+  if (theTclDomain->setMass(mass, nodeId) != 0) {
+    opserr << "WARNING failed to set mass at node " << nodeId << endln;
+    return TCL_ERROR;
+  }
+    
   // if get here we have sucessfully created the node and added it to the domain
   return TCL_OK;
 }
@@ -1831,8 +1824,6 @@ TclModelBuilder_addHomogeneousBC_Z(ClientData clientData, Tcl_Interp *interp,
   // if get here we have sucessfully created the node and added it to the domain
   return TCL_OK;
 }
-
-
 
 
 
