@@ -18,16 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2006-01-12 23:37:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/partitioner/Metis.h,v $
                                                                         
                                                                         
-// File: ~/graph/partitioner/Metis.h
-// 
 // Written: fmk 
-// Created: Sun Sept 15 11:47:47: 1996
-// Revision: A
 //
 // Description: This file contains the class definition for Metis.
 // Metis is a type of GraphPartitioner which uses 'METIS - Unstructured

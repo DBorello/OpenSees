@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:24 $
+// $Revision: 1.3 $
+// $Date: 2006-01-12 23:37:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/partitioner/Metis.cpp,v $
                                                                         
                                                                         
-// File: ~/graph/partitioner/Metis.C
-// 
 // Written: fmk 
 // Created: Sun Sept 15 11:47:47: 1996
 // Revision: A
@@ -42,36 +40,18 @@
 #include <Metis.h>
 #include <Graph.h>
 #include <Vertex.h>
+#include <VertexIter.h>
 
 /* stuff needed to get the program working on the clump & NOW machines*/
 #include <bool.h>
-#ifdef _LINUX
-extern "C" {
-#include <GKlib.h>
-}
 
-int IsWeighted;
-timer TotalTmr;         /* Times the entire algorithm */
-timer CoarsenTmr;       /* Times total coarsening time */
-timer GreedyTmr;        /* Times Total Greedy Time */
-timer GreedyInitTmr;    /* Times initialization cost of Greedy */
-timer GreedyIterTmr;    /* Times Iterative cost of Greedy */
-timer GreedyWrapUpTmr;  /* Times the wrap up phase of Greedy */
-timer MlevelTmr;        /* Times the entire multilevel algorithm */
-timer InitPartTmr;      /* Times the initial partition phase */
-timer ProjectTmr;       /* Times the projection of the partition */
-timer SplitTmr;         /* Times the boundary creation */
-timer BalanceTmr;       /* Times the time required for balancing */
-timer IOTmr;            /* Times the file input time */
-timer UncrsTmr;         /* Times the file input time */
-#endif
+//int IsWeighted;
 
 extern "C" 
 int PMETIS(int *, int *, int *, int *, int *, int *, int *, int *, int *, int *, int *);
 
 extern "C" 
 int KMETIS(int *, int *, int *, int *, int *, int *, int *, int *, int *, int *, int *);
-
 
 Metis::Metis(int numParts) 
 :GraphNumberer(GraphNUMBERER_TAG_Metis),
@@ -208,6 +188,16 @@ Metis::setDefaultOptions(void)
 int
 Metis::partition(Graph &theGraph, int numPart)
 {
+  if (theGraph.getNumVertex() == numPart) {
+    Vertex *vertex;
+    int current = 1;
+    VertexIter &theVertices = theGraph.getVertices();
+    while ((vertex = theVertices()) != 0)
+	   vertex->setColor(current++);
+    
+    return 0;
+  }
+
     // first we check that the options are valid
     if (checkOptions() == false)
 	return -1;
@@ -277,7 +267,6 @@ Metis::partition(Graph &theGraph, int numPart)
 	xadj[vertex+1] = indexEdge;
     }
 
-
     if (defaultOptions == true) 
 	options[0] = 0;
     else {
@@ -288,7 +277,6 @@ Metis::partition(Graph &theGraph, int numPart)
 	options[4] = myRtype;
     }
     
-    
     // we now the metis routines
 
     if (myPtype == 1)
@@ -297,7 +285,6 @@ Metis::partition(Graph &theGraph, int numPart)
     else		
 	KMETIS(&numVertex, xadj, adjncy, vwgts, ewgts, &weightflag, &numPart,
 	       options, &numbering, &edgecut, partition);
-
 
     // we set the vertex colors to correspond to the partitioned scheme
     for (int vert =0; vert<numVertex; vert++) {
@@ -311,7 +298,7 @@ Metis::partition(Graph &theGraph, int numPart)
     delete [] partition;
     delete [] xadj;
     delete [] adjncy;
-    
+
     return 0;
 }
 
