@@ -11,7 +11,7 @@ include ../../../Makefile.def
 	Pinching4Material.o BarSlipMaterial.o \
 	FatigueMaterial.o \
 	Steel03.o KinematicHardening.o TclKinematicHardening.o \
-	NewUniaxialMaterial.o TclNewUnixailaMaterial.o \
+	NewUniaxialMaterial.o TclNewUnixialMaterial.o \
 	ReinforcingSteel.o TclReinforcingSteel.o\
         TclModelBuilderUniaxialMaterialCommand.o
 
