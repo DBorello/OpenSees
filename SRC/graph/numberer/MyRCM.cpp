@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:23 $
+// $Revision: 1.3 $
+// $Date: 2006-01-12 23:39:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/numberer/MyRCM.cpp,v $
                                                                         
                                                                         
@@ -199,9 +199,11 @@ MyRCM::number(Graph &theGraph, int startVertex)
 	int vertexTag = (*theRefResult)(i);
 	vertexPtr = theGraph.getVertexPtr(vertexTag);
 	vertexPtr->setTmp(i+1); // 1 through numVertex
-	(*theRefResult)(i) = vertexPtr->getRef();
+	(*theRefResult)(i) = vertexPtr->getTag();
     }
 
+    theGraph.Print(opserr, 3);
+    opserr << *theRefResult;
     return *theRefResult;
 }
 
@@ -524,7 +526,7 @@ MyRCM::number(Graph &theGraph, const ID &startVertices)
 	int vertexTag = (*theRefResult)(m);
 	vertexPtr = theGraph.getVertexPtr(vertexTag);
 	vertexPtr->setTmp(m+1); // 1 through numVertex
-	(*theRefResult)(m) = vertexPtr->getRef();
+	(*theRefResult)(m) = vertexPtr->getTag();
     }
 
     return *theRefResult;

@@ -18,15 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:23 $
+// $Revision: 1.3 $
+// $Date: 2006-01-12 23:39:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/numberer/SimpleNumberer.cpp,v $
                                                                         
                                                                         
-// File: ~/graph/numberer/SimpleNumberer.C
-// 
+
 // Written: fmk 
-// Created: Sun Sept 15 11:47:47: 1996
 // Revision: A
 //
 // Description: This file contains the class definition for SimpleNumberer.
@@ -103,8 +101,8 @@ SimpleNumberer::number(Graph &theGraph, int lastVertex)
     
     while ((vertexPtr = vertexIter()) != 0) {
 
-	(*theRefResult)(count++) = vertexPtr->getRef();
-	vertexPtr->setColor(count);
+	(*theRefResult)(count++) = vertexPtr->getTag();
+	vertexPtr->setTmp(count);
     }
     
     return *theRefResult;

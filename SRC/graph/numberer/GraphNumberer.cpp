@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2006-01-12 23:39:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/numberer/GraphNumberer.cpp,v $
                                                                         
                                                                         
-// File: ~/graph/numberer/GraphNumberer.C
-// 
 // Written: fmk 
 // Created: 11/96
 // Revision: A
