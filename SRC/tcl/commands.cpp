@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.67 $
-// $Date: 2005-12-19 23:16:50 $
+// $Revision: 1.68 $
+// $Date: 2006-01-12 19:52:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -2057,21 +2057,21 @@ specifyCTest(ClientData clientData, Tcl_Interp *interp, int argc,
   ConvergenceTest *theNewTest = 0;
 
   if (strcmp(argv[1],"NormUnbalance") == 0) 
-    theTest = new CTestNormUnbalance(tol,numIter,printIt,normType);       
+    theNewTest = new CTestNormUnbalance(tol,numIter,printIt,normType);       
   else if (strcmp(argv[1],"NormDispIncr") == 0) 
-    theTest = new CTestNormDispIncr(tol,numIter,printIt,normType);             
+    theNewTest = new CTestNormDispIncr(tol,numIter,printIt,normType);             
   else if (strcmp(argv[1],"EnergyIncr") == 0) 
-    theTest = new CTestEnergyIncr(tol,numIter,printIt,normType);             
+    theNewTest = new CTestEnergyIncr(tol,numIter,printIt,normType);             
   else if (strcmp(argv[1],"RelativeNormUnbalance") == 0) 
-    theTest = new CTestRelativeNormUnbalance(tol,numIter,printIt,normType);       
+    theNewTest = new CTestRelativeNormUnbalance(tol,numIter,printIt,normType);       
   else if (strcmp(argv[1],"RelativeNormDispIncr") == 0) 
-    theTest = new CTestRelativeNormDispIncr(tol,numIter,printIt,normType);             
+    theNewTest = new CTestRelativeNormDispIncr(tol,numIter,printIt,normType);             
   else if (strcmp(argv[1],"RelativeEnergyIncr") == 0) 
-    theTest = new CTestRelativeEnergyIncr(tol,numIter,printIt,normType);             
+    theNewTest = new CTestRelativeEnergyIncr(tol,numIter,printIt,normType);             
   else if (strcmp(argv[1],"RelativeTotalNormDispIncr") == 0) 
-    theTest = new CTestRelativeTotalNormDispIncr(tol,numIter,printIt,normType);             
+    theNewTest = new CTestRelativeTotalNormDispIncr(tol,numIter,printIt,normType);             
   else if (strcmp(argv[1],"FixedNumIter") == 0)
-    theTest = new CTestFixedNumIter(numIter,printIt,normType);             
+    theNewTest = new CTestFixedNumIter(numIter,printIt,normType);             
   else {
     opserr << "WARNING No ConvergenceTest type (NormUnbalance, NormDispIncr, EnergyIncr, \n";
     opserr << "RelativeNormUnbalance, RelativeNormDispIncr, RelativeEnergyIncr, \n";
@@ -2080,7 +2080,7 @@ specifyCTest(ClientData clientData, Tcl_Interp *interp, int argc,
   }    
 
   if (theNewTest != 0) {
-    theTest = theNewTest;;
+    theTest = theNewTest;
     
     // if the analysis exists - we want to change the Test
     if (theStaticAnalysis != 0)
