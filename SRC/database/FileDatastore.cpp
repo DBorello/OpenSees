@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2006-01-03 22:48:01 $
+// $Revision: 1.19 $
+// $Date: 2006-01-12 23:25:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.cpp,v $
                                                                         
                                                                         
@@ -1093,7 +1093,7 @@ FileDatastore::createTable(const char *tableName, int numColumns, char *columns[
 {
   // open the file
   int res = 0;
-  char *fileName = new char[strlen(tableName) + strlen(dataBase) + 1];
+  char *fileName = new char[strlen(tableName) + strlen(dataBase) + 10];
   if (fileName == 0) {
     opserr << "FileDatastore::insertData - out of memory; failed to open file: " << fileName << endln;
     return -1;
@@ -1106,20 +1106,22 @@ FileDatastore::createTable(const char *tableName, int numColumns, char *columns[
   ofstream table;
   table.open(fileName, ios::out | ios::trunc); 
 
-  if (table.is_open()) {
-    // write the data
-    for (int i=0; i<numColumns; i++) {
-      table << columns[i] << "\t";
-    }
-    table << "\n";
-    table.close();
-    
-  } else {
+  if (table.bad() == true || table.is_open() == false) {
     opserr << "FileDatastore::insertData - failed to open file: " << fileName << endln;
+    delete [] fileName;
     res = -1;
+    
+  } 
+
+  // write the data
+  for (int i=0; i<numColumns; i++) {
+    table << columns[i] << "\t"; 
   }
-  
+  table << "\n";
+  table.close();
+
   delete [] fileName;
+
   return res;
 }
 
@@ -1128,7 +1130,7 @@ FileDatastore::insertData(const char *tableName, char *columns[],
 			  int commitTag, const Vector &data)
 {
   // open the file
-  char *fileName = new char[strlen(tableName) + strlen(dataBase) + 1];
+  char *fileName = new char[strlen(tableName) + strlen(dataBase) + 10];
   if (fileName == 0) {
     opserr << "FileDatastore::insertData - out of memory; failed to open file: " << fileName << endln;
     return -1;
@@ -1140,23 +1142,22 @@ FileDatastore::insertData(const char *tableName, char *columns[],
 
   ofstream table;
   table.open(fileName, ios::app); 
+  if (table.bad() == true || table.is_open() == false) {
+    opserr << "FileDatastore::insertData - failed to open file: " << fileName << endln;
+    delete [] fileName;
+    return -1;
+  }
 
   table << setiosflags(ios::scientific);
   table << std::setprecision(16);
 
-  if (table.is_open()) {
-    // write the data
-    for (int i=0; i<data.Size(); i++) {
-      table << data(i) << "\t";
-    }
-    
-    table << "\n";
-    table.close();
-
-  } else {
-    opserr << "FileDatastore::insertData - failed to open file: " << fileName << endln;
-    return -1;
+  // write the data
+  for (int i=0; i<data.Size(); i++) {
+    table << data(i) << "\t";
   }
+  
+  table << "\n";
+  table.close();
 
   delete [] fileName;
   return 0;
