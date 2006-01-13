@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-25 23:34:46 $
+// $Revision: 1.7 $
+// $Date: 2006-01-13 18:19:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclVideoPlayer.cpp,v $
                                                                         
                                                                         
@@ -61,7 +61,12 @@ using std::ios;
 // some static variables used in the functions
 //
 
+#ifdef _NOGRAPHICS
+
+#else
 extern TclVideoPlayer *theTclVideoPlayer;
+#endif
+
 
 int
 TclVideoPlayer_play(ClientData clientData, Tcl_Interp *interp, int argc, 
@@ -270,8 +275,12 @@ int
 TclVideoPlayer_play(ClientData clientData, Tcl_Interp *interp, int argc, 
 		    TCL_Char **argv)
 {
+#ifdef _NOGRAPHICS
+
+#else
   if (theTclVideoPlayer != 0)
-	theTclVideoPlayer->play();
+    theTclVideoPlayer->play();
+#endif
   return TCL_OK;
 }
 
