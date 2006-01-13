@@ -478,7 +478,6 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/shell/TclShellCommand.o \
 	$(FE)/element/brick/Brick.o \
 	$(FE)/element/brick/BbarBrick.o \
-	$(FE)/element/brick/FLBrick.o \
 	$(FE)/element/brick/shp3d.o \
 	$(FE)/element/brick/TclBrickCommand.o
 
@@ -604,12 +603,20 @@ SECTION_LIBS = $(FE)/material/section/SectionForceDeformation.o \
 	$(FE)/material/section/TclModelBuilderSectionCommand.o
 
 
+
 ifeq ($(PROGRAMMING_MODE), THREADS)
 SUPER_LU_OBJ = $(FE)/system_of_eqn/linearSOE/sparseGEN/ThreadedSuperLU.o
-else
-SUPER_LU_OBJ = $(FE)/system_of_eqn/linearSOE/sparseGEN/SuperLU.o \
-	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSuperLU.o
 endif
+
+ifeq ($(PROGRAMMING_MODE), PARALLEL)
+SUPER_LU_OBJ = $(FE)/system_of_eqn/linearSOE/sparseGEN/SuperLU.o \
+	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSuperLU.o \
+	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLinSOE.o 
+else
+SUPER_LU_OBJ = $(FE)/system_of_eqn/linearSOE/sparseGEN/SuperLU.o 
+endif
+
+
 
 SysOfEqn_LIBS = $(FE)/system_of_eqn/SystemOfEqn.o \
 	$(FE)/system_of_eqn/Solver.o \
@@ -641,7 +648,6 @@ SysOfEqn_LIBS = $(FE)/system_of_eqn/SystemOfEqn.o \
 	$(FE)/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinSubstrSolver.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSOE.o \
-	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSolver.o \
         $(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSOE.o \
         $(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSolver.o \

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2006-01-13 00:05:32 $
+// $Revision: 1.30 $
+// $Date: 2006-01-13 01:09:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -267,6 +267,9 @@
 #include <ProfileSPDLinDirectSolver.h>
 #include <ProfileSPDLinSubstrSolver.h>
 
+#include <SparseGenColLinSOE.h>
+#include <SuperLU.h>
+
 #include <DomainDecompositionAnalysis.h>
 
 // load patterns
@@ -295,8 +298,6 @@
 #endif
 
 #ifdef _PARALLEL_PROCESSING
-#include <SparseGenColLinSOE.h>
-#include <SuperLU.h>
 #include <DistributedBandSPDLinSOE.h>
 #include <DistributedProfileSPDLinSOE.h>
 #include <DistributedSparseGenColLinSOE.h>
