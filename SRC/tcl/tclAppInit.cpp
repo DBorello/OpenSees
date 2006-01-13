@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-18 00:22:12 $
+// $Revision: 1.4 $
+// $Date: 2006-01-13 18:21:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/tclAppInit.cpp,v $
 
 
@@ -36,12 +36,12 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclAppInit.cpp,v 1.3 2001-08-18 00:22:12 fmk Exp $
+ * RCS: @(#) $Id: tclAppInit.cpp,v 1.4 2006-01-13 18:21:43 fmk Exp $
  */
 
 extern "C" {
 #include <tcl.h>
-#include <tk.h>
+//#include <tk.h>
 }
 
 #include "commands.h"
@@ -53,7 +53,7 @@ extern "C" {
 
 #ifdef _UNIX
 extern "C" int matherr();
-int *tclDummyMathPtr = (int *) matherr;
+//int *tclDummyMathPtr = (int *) matherr;
 #endif
 
 
@@ -77,6 +77,7 @@ extern int		TclThread_Init _ANSI_ARGS_((Tcl_Interp *interp));
 extern void		XtToolkitInitialize _ANSI_ARGS_((void));
 extern int		Tclxttest_Init _ANSI_ARGS_((Tcl_Interp *interp));
 #endif
+
 
 /*
  *----------------------------------------------------------------------
@@ -219,4 +220,11 @@ int Tcl_AppInit(Tcl_Interp *interp)
 
     Tcl_SetVar(interp, "tcl_rcFileName", "~/.tclshrc", TCL_GLOBAL_ONLY);
     return TCL_OK;
+}
+
+
+int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  Tcl_Exit(0);
+  return 0;
 }
