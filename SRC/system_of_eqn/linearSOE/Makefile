@@ -2,6 +2,8 @@ include ../../../Makefile.def
 
 OBJS       = LinearSOE.o DomainSolver.o LinearSOESolver.o
 
+ifeq ($(PROGRAMMING_MODE), PARALLEL)
+
 all:         $(OBJS)
 	@$(CD) $(FE)/system_of_eqn/linearSOE/bandSPD; $(MAKE);
 	@$(CD) $(FE)/system_of_eqn/linearSOE/bandGEN; $(MAKE);
@@ -14,6 +16,26 @@ all:         $(OBJS)
 	@$(CD) $(FE)/system_of_eqn/linearSOE/cg; $(MAKE);
 	@$(CD) $(FE)/system_of_eqn/linearSOE/BJsolvers; $(MAKE);
 	@$(CD) $(FE)/system_of_eqn/linearSOE/diagonal; $(MAKE);
+	@$(CD) $(FE)/system_of_eqn/linearSOE/petsc; $(MAKE);
+
+else
+
+all:         $(OBJS)
+	@$(CD) $(FE)/system_of_eqn/linearSOE/bandSPD; $(MAKE);
+	@$(CD) $(FE)/system_of_eqn/linearSOE/bandGEN; $(MAKE);
+	@$(CD) $(FE)/system_of_eqn/linearSOE/fullGEN; $(MAKE);
+	@$(CD) $(FE)/system_of_eqn/linearSOE/profileSPD; $(MAKE);
+	@$(CD) $(FE)/system_of_eqn/linearSOE/sparseGEN; $(MAKE);
+	@$(CD) $(FE)/system_of_eqn/linearSOE/sparseSYM; $(MAKE);
+	@$(CD) $(FE)/system_of_eqn/linearSOE/sparseSYM; $(MAKE) law;
+	@$(CD) $(FE)/system_of_eqn/linearSOE/umfGEN; $(MAKE);
+	@$(CD) $(FE)/system_of_eqn/linearSOE/cg; $(MAKE);
+	@$(CD) $(FE)/system_of_eqn/linearSOE/BJsolvers; $(MAKE);
+	@$(CD) $(FE)/system_of_eqn/linearSOE/diagonal; $(MAKE);
+
+endif
+
+
 
 # Miscellaneous
 tidy:	
