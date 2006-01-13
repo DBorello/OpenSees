@@ -815,9 +815,6 @@ ACTOR_LIBS = $(FE)/actor/channel/Channel.o \
 	$(FE)/actor/channel/TCP_Socket.o \
 	$(FE)/actor/message/Message.o \
 	$(FE)/actor/machineBroker/MachineBroker.o \
-	$(FE)/actor/machineBroker/AlphaMachineBroker.o \
-	$(FE)/actor/machineBroker/MillMachineBroker.o \
-	$(FE)/actor/machineBroker/DecMachineBroker.o \
 	$(FE)/actor/objectBroker/FEM_ObjectBroker.o \
 	$(FE)/actor/actor/Actor.o \
 	$(FE)/actor/actor/MovableObject.o \
