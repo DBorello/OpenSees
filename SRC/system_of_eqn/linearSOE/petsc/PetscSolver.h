@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2005-05-18 19:25:03 $
+// $Revision: 1.3 $
+// $Date: 2006-01-13 00:02:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/PetscSolver.h,v $
                                                                         
                                                                         
@@ -73,6 +73,8 @@ class PetscSolver : public LinearSOESolver
     double aTol;
     double dTol; 
     int maxIts;
+
+    static int numSolver;
 };
 
 #endif

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-06-24 18:19:03 $
+// $Revision: 1.5 $
+// $Date: 2006-01-13 00:02:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/PetscSolver.cpp,v $
                                                                         
 // Written: fmk & om
@@ -42,30 +42,38 @@
 #include <ID.h>
 #include <Vector.h>
 
+int PetscSolver::numSolver=0;
+
 PetscSolver::PetscSolver()
   :LinearSOESolver(SOLVER_TAGS_PetscSolver), 
    rTol(PETSC_DEFAULT), aTol(PETSC_DEFAULT), dTol(PETSC_DEFAULT), maxIts(PETSC_DEFAULT)
 {
-
+  numSolver++;
 }
 
 PetscSolver::PetscSolver(KSPType meth, PCType pre)
   :LinearSOESolver(SOLVER_TAGS_PetscSolver), method(meth), preconditioner(pre),
    rTol(PETSC_DEFAULT), aTol(PETSC_DEFAULT), dTol(PETSC_DEFAULT), maxIts(PETSC_DEFAULT)
 {
-
+  numSolver++;
 }
 
 PetscSolver::PetscSolver(KSPType meth, PCType pre, double relTol, double absTol, double divTol, int maxIterations)
   :LinearSOESolver(SOLVER_TAGS_PetscSolver), method(meth), preconditioner(pre),
    rTol(relTol), aTol(absTol), dTol(divTol), maxIts(maxIterations)
 {
-
+  numSolver++;
 }
 
 PetscSolver::~PetscSolver()
 {
-  
+
+  KSPDestroy(ksp);
+  numSolver--;
+  /*
+  if (numSolver == 0)
+    PetscFinalize();
+  */
 }
 
 
