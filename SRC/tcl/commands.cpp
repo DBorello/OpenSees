@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.68 $
-// $Date: 2006-01-12 19:52:29 $
+// $Revision: 1.69 $
+// $Date: 2006-01-13 19:40:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -34,9 +34,9 @@
 
 extern "C" {
 #include <tcl.h>
-#include <tk.h>
 EXTERN int      Tcl_SetObjCmd _ANSI_ARGS_((ClientData clientData,
-                    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+					   Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+
 }
 
 
@@ -77,7 +77,12 @@ OPS_Stream *opserrPtr = &sserr;
 #include "commands.h"
 
 // domain
+ #ifdef _PARALLEL_PROCESSING
+#include <PartitionedDomain.h>
+#else
 #include <Domain.h>
+#endif
+
 #include <Element.h>
 #include <Node.h>
 #include <ElementIter.h>
@@ -170,18 +175,17 @@ OPS_Stream *opserrPtr = &sserr;
 #include <EigenAnalysis.h>
 
 // system of eqn and solvers
-// #include <SlowLinearSOE.h>
-// #include <SlowLinearSOESolver.h>
 #include <BandSPDLinSOE.h>
 #include <BandSPDLinLapackSolver.h>
+
 #include <BandGenLinSOE.h>
 #include <BandGenLinLapackSolver.h>
-
 
 #include <ConjugateGradientSolver.h>
 
 #include <FullGenLinSOE.h>
 #include <FullGenLinLapackSolver.h>
+
 #include <ProfileSPDLinSOE.h>
 #include <ProfileSPDLinDirectSolver.h>
 #include <DiagonalSOE.h>
@@ -199,9 +203,15 @@ OPS_Stream *opserrPtr = &sserr;
 #include <SuperLU.h>
 #endif
 
+#ifdef _PETSC
+#include <PetscSOE.h>
+#include <PetscSolver.h>
+#include <SparseGenRowLinSOE.h>
+#include <PetscSparseSeqSolver.h>
+#endif
+
 #include <SymSparseLinSOE.h>
 #include <SymSparseLinSolver.h>
-
 
 #include <UmfpackGenLinSOE.h>
 #include <UmfpackGenLinSolver.h>
@@ -231,9 +241,13 @@ OPS_Stream *opserrPtr = &sserr;
 #include <ErrorHandler.h>
 #include <ConsoleErrorHandler.h>
 
-#include <TclVideoPlayer.h>
-#include <FE_Datastore.h>
+#ifdef _NOGRAPHICS
 
+#else
+#include <TclVideoPlayer.h>
+#endif
+
+#include <FE_Datastore.h>
 
 #ifdef _RELIABILITY
 // AddingSensitivity:BEGIN /////////////////////////////////////////////////
@@ -252,7 +266,55 @@ int wipeReliability(ClientData, Tcl_Interp *, int, TCL_Char **);
 #endif
 
 ModelBuilder *theBuilder =0;
+
+// some global variables 
+#ifdef _PARALLEL_PROCESSING
+#include <DistributedDisplacementControl.h>
+#include <ShadowSubdomain.h>
+#include <Metis.h>
+#include <ShedHeaviest.h>
+#include <DomainPartitioner.h>
+#include <GraphPartitioner.h>
+#include <FEM_ObjectBroker.h>
+#include <Subdomain.h>
+#include <SubdomainIter.h>
+#include <MachineBroker.h>
+
+// parallel analysis
+#include <StaticDomainDecompositionAnalysis.h>
+#include <TransientDomainDecompositionAnalysis.h>
+#include <ParallelNumberer.h>
+
+//  parallel soe & solvers
+#include <DistributedBandSPDLinSOE.h>
+#include <DistributedSparseGenColLinSOE.h>
+#include <DistributedSparseGenRowLinSOE.h>
+#include <DistributedBandGenLinSOE.h>
+#include <DistributedDiagonalSOE.h>
+#include <DistributedDiagonalSolver.h>
+#define MPIPP_H
+#include <DistributedSuperLU.h>
+#include <DistributedProfileSPDLinSOE.h>
+
+PartitionedDomain theDomain;
+int OPS_PARALLEL_PROCESSING =0;
+int OPS_NUM_SUBDOMAINS      =0;
+bool OPS_PARTITIONED        =false;
+bool OPS_USING_MAIN_DOMAIN  = false;
+int OPS_MAIN_DOMAIN_PARTITION_ID =0;
+
+DomainPartitioner *OPS_DOMAIN_PARTITIONER =0;
+GraphPartitioner  *OPS_GRAPH_PARTITIONER =0;
+LoadBalancer      *OPS_BALANCER = 0;
+FEM_ObjectBroker  *OPS_OBJECT_BROKER;
+MachineBroker     *OPS_MACHINE;
+Channel          **OPS_theChannels = 0;
+
+#else
+
 Domain theDomain;
+
+#endif
 
 static AnalysisModel *theAnalysisModel =0;
 static EquiSolnAlgo *theAlgorithm =0;
@@ -285,13 +347,16 @@ static Timer *theTimer = 0;
 FE_Datastore *theDatabase  =0;
 FEM_ObjectBroker theBroker;
 
-
 // init the global variabled defined in OPS_Globals.h
 double        ops_Dt = 1.0;
 Domain       *ops_TheActiveDomain = 0;
 Element      *ops_TheActiveElement = 0;
 
+#ifdef _NOGRAPHICS
+
+#else
 TclVideoPlayer *theTclVideoPlayer =0;
+#endif
 
 // g3AppInit() is the method called by tkAppInit() when the
 // interpreter is being set up .. this is where all the
@@ -299,6 +364,8 @@ TclVideoPlayer *theTclVideoPlayer =0;
 
 int 
 logFile(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+extern int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 extern int myCommands(Tcl_Interp *interp);
 
@@ -309,8 +376,7 @@ int g3AppInit(Tcl_Interp *interp) {
     opserr.setFloatField(FIXEDD);
 #endif
     Tcl_CreateObjCommand(interp, "pset", Tcl_SetObjCmd,
-			 (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);    
-
+			 (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
     Tcl_CreateCommand(interp, "wipe", &wipeModel,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);    
     Tcl_CreateCommand(interp, "wipeAnalysis", &wipeAnalysis,
@@ -378,6 +444,9 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "logFile", &logFile, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateCommand(interp, "exit", &OpenSeesExit, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
 #ifdef _RELIABILITY
     Tcl_CreateCommand(interp, "wipeReliability", wipeReliability, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
@@ -415,7 +484,12 @@ int g3AppInit(Tcl_Interp *interp) {
     theTest = 0;
 
     // create an error handler
+
+#ifdef _NOGRAPHICS
+
+#else
     theTclVideoPlayer = 0;
+#endif
 
     return myCommands(interp);
 }
@@ -577,7 +651,6 @@ wipeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
   }
 
 
-
   // NOTE : DON'T do the above on theVariableTimeStepAnalysis
   // as it and theTansientAnalysis are one in the same
 
@@ -593,10 +666,15 @@ wipeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
   
   theDomain.clearAll();
 
+#ifdef _NOGRAPHICS
+
+#else
+
   if (theTclVideoPlayer != 0) {
 	  delete theTclVideoPlayer;
 	  theTclVideoPlayer = 0;
   }
+#endif
 
   theAlgorithm =0;
   theHandler =0;
@@ -608,16 +686,20 @@ wipeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
   theStaticAnalysis =0;
   theTransientAnalysis =0;    
   theVariableTimeStepTransientAnalysis =0;    
+
   theTest = 0;
   theDatabase = 0;
+
 // AddingSensitivity:BEGIN /////////////////////////////////////////////////
 #ifdef _RELIABILITY
   theSensitivityAlgorithm =0;
   theSensitivityIntegrator =0;
 #endif
 // AddingSensitivity:END /////////////////////////////////////////////////
+
   // the domain deletes the record objects, 
   // just have to delete the private array
+
   return TCL_OK;  
 }
 
@@ -625,6 +707,16 @@ int
 wipeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 
+#ifdef _PARALLEL_PROCESSING
+  if (OPS_PARTITIONED == true && OPS_NUM_SUBDOMAINS > 1) {
+    SubdomainIter &theSubdomains = theDomain.getSubdomains();
+    Subdomain *theSub =0;
+    
+    // create the appropriate domain decomposition analysis
+    while ((theSub = theSubdomains()) != 0) 
+      theSub->wipeAnalysis();
+  }
+#endif
 
   if (theStaticAnalysis != 0) {
       theStaticAnalysis->clearAll();
@@ -650,6 +742,7 @@ wipeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
   theTransientAnalysis =0;    
   theVariableTimeStepTransientAnalysis =0;    
   theTest = 0;
+
 // AddingSensitivity:BEGIN /////////////////////////////////////////////////
 #ifdef _RELIABILITY
   theSensitivityAlgorithm =0;
@@ -658,6 +751,7 @@ wipeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
 // AddingSensitivity:END /////////////////////////////////////////////////
   // the domain deletes the record objects, 
   // just have to delete the private array
+
   return TCL_OK;  
 }
 
@@ -765,6 +859,82 @@ buildModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 }
 
 
+#ifdef _PARALLEL_PROCESSING
+
+int 
+partitionModel(void)
+{
+  int result = 0;
+  
+  if (OPS_theChannels != 0)
+    delete [] OPS_theChannels;
+
+  OPS_theChannels = new Channel *[OPS_NUM_SUBDOMAINS];
+  
+  // create some subdomains
+  for (int i=1; i<=OPS_NUM_SUBDOMAINS; i++) {
+    if (i != OPS_MAIN_DOMAIN_PARTITION_ID) {
+      opserr << "Creating SUBDOMAIN: " << i << endln;
+      ShadowSubdomain *theSubdomain = new ShadowSubdomain(i, *OPS_MACHINE, *OPS_OBJECT_BROKER);
+      theDomain.addSubdomain(theSubdomain);
+      OPS_theChannels[i-1] = theSubdomain->getChannelPtr();
+    }
+  }
+
+  // create a partitioner & partition the domain
+  if (OPS_DOMAIN_PARTITIONER == 0) {
+    //      OPS_BALANCER = new ShedHeaviest();
+    OPS_GRAPH_PARTITIONER  = new Metis;
+    //OPS_DOMAIN_PARTITIONER = new DomainPartitioner(*OPS_GRAPH_PARTITIONER, *OPS_BALANCER);
+    OPS_DOMAIN_PARTITIONER = new DomainPartitioner(*OPS_GRAPH_PARTITIONER);
+    theDomain.setPartitioner(OPS_DOMAIN_PARTITIONER);
+  }
+
+  theDomain.partition(OPS_NUM_SUBDOMAINS, OPS_USING_MAIN_DOMAIN, OPS_MAIN_DOMAIN_PARTITION_ID);
+  
+  OPS_PARTITIONED = true;
+  
+  DomainDecompositionAnalysis *theSubAnalysis;
+  SubdomainIter &theSubdomains = theDomain.getSubdomains();
+  Subdomain *theSub =0;
+  
+  // create the appropriate domain decomposition analysis
+  while ((theSub = theSubdomains()) != 0) {
+    if (theStaticAnalysis != 0) {      
+      theSubAnalysis = new StaticDomainDecompositionAnalysis(*theSub,
+							     *theHandler,
+							     *theNumberer,
+							     *theAnalysisModel,
+							     *theAlgorithm,
+							     *theSOE,
+							     *theStaticIntegrator,
+							     theTest,
+							     false);
+      
+    } else {
+      theSubAnalysis = new TransientDomainDecompositionAnalysis(*theSub,
+								*theHandler,
+								*theNumberer,
+								*theAnalysisModel,
+								*theAlgorithm,
+								*theSOE,
+								*theTransientIntegrator,
+								theTest,
+								false);
+    }       
+    theSub->setDomainDecompAnalysis(*theSubAnalysis);
+    //  delete theSubAnalysis;
+  }
+  return result;
+}
+
+#endif
+
+
+
+
+
+
 //
 // command invoked to build the model, i.e. to invoke analyze() 
 // on the Analysis object
@@ -774,6 +944,13 @@ analyzeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
 {
   int result = 0;
 
+#ifdef _PARALLEL_PROCESSING
+  if (OPS_PARTITIONED == false && OPS_NUM_SUBDOMAINS > 1) 
+    if (partitionModel() < 0) {
+      opserr << "WARNING before analysis; partition failed\n";
+      return TCL_ERROR;
+    }
+#endif
 
   if (theStaticAnalysis != 0) {
     if (argc < 2) {
@@ -785,6 +962,7 @@ analyzeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
     if (Tcl_GetInt(interp, argv[1], &numIncr) != TCL_OK)	
       return TCL_ERROR;	      
     result = theStaticAnalysis->analyze(numIncr);
+
   } else if (theTransientAnalysis != 0) {
     if (argc < 3) {
       opserr << "WARNING transient analysis: analysis numIncr? deltaT?\n";
@@ -1151,13 +1329,14 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	// otherwise print a warning and use some defaults
 	if (theAnalysisModel == 0) 
 	    theAnalysisModel = new AnalysisModel();
+
+	if (theTest == 0) 
+	  theTest = new CTestNormUnbalance(1.0e-6,25,0);       
 	
 	if (theAlgorithm == 0) {
 	    opserr << "WARNING analysis Static - no Algorithm yet specified, \n";
 	    opserr << " NewtonRaphson default will be used\n";	    
 
-	    if (theTest == 0) 
-		theTest = new CTestNormUnbalance(1.0e-6,25,0);       
 	    theAlgorithm = new NewtonRaphson(*theTest); 
 	}
 	if (theHandler == 0) {
@@ -1206,13 +1385,14 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	// otherwise print a warning and use some defaults
 	if (theAnalysisModel == 0) 
 	    theAnalysisModel = new AnalysisModel();
+
+	if (theTest == 0) 
+	  theTest = new CTestNormUnbalance(1.0e-6,25,0);       
 	
 	if (theAlgorithm == 0) {
 	    opserr << "WARNING analysis Transient - no Algorithm yet specified, \n";
 	    opserr << " NewtonRaphson default will be used\n";	    
 
-	    if (theTest == 0) 
-		theTest = new CTestNormUnbalance(1.0e-6,25,0);       
 	    theAlgorithm = new NewtonRaphson(*theTest); 
 	}
 	if (theHandler == 0) {
@@ -1264,31 +1444,35 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	// otherwise print a warning and use some defaults
 	if (theAnalysisModel == 0) 
 	    theAnalysisModel = new AnalysisModel();
+
+	if (theTest == 0) 
+	  theTest = new CTestNormUnbalance(1.0e-6,25,0);       
 	
 	if (theAlgorithm == 0) {
 	    opserr << "WARNING analysis Transient - no Algorithm yet specified, \n";
 	    opserr << " NewtonRaphson default will be used\n";	    
-
-	    if (theTest == 0) 
-		theTest = new CTestNormUnbalance(1.0e-6,25,0);       
 	    theAlgorithm = new NewtonRaphson(*theTest); 
 	}
+
 	if (theHandler == 0) {
 	    opserr << "WARNING analysis Transient dt tFinal - no ConstraintHandler\n";
 	    opserr << " yet specified, PlainHandler default will be used\n";
 	    theHandler = new PlainHandler();       
 	}
+
 	if (theNumberer == 0) {
 	    opserr << "WARNING analysis Transient dt tFinal - no Numberer specified, \n";
 	    opserr << " RCM default will be used\n";
 	    RCM *theRCM = new RCM();	
 	    theNumberer = new DOF_Numberer(*theRCM);    	
 	}
+
 	if (theTransientIntegrator == 0) {
 	    opserr << "WARNING analysis Transient dt tFinal - no Integrator specified, \n";
 	    opserr << " Newmark(.5,.25) default will be used\n";
 	    theTransientIntegrator = new Newmark(0.5,0.25);       
 	}
+
 	if (theSOE == 0) {
 	    opserr << "WARNING analysis Transient dt tFinal - no LinearSOE specified, \n";
 	    opserr << " ProfileSPDLinSOE default will be used\n";
@@ -1314,6 +1498,42 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	opserr << "WARNING No Analysis type exists (Static Transient only) \n";
 	return TCL_ERROR;
     }
+
+#ifdef _PARALLEL_PROCESSING
+    if (OPS_PARTITIONED == true && OPS_NUM_SUBDOMAINS > 1) {
+      DomainDecompositionAnalysis *theSubAnalysis;
+      SubdomainIter &theSubdomains = theDomain.getSubdomains();
+      Subdomain *theSub =0;
+      // create the appropriate domain decomposition analysis
+      while ((theSub = theSubdomains()) != 0) {
+	if (theStaticAnalysis != 0) {      
+	  theSubAnalysis = new StaticDomainDecompositionAnalysis(*theSub,
+								 *theHandler,
+								 *theNumberer,
+								 *theAnalysisModel,
+								 *theAlgorithm,
+								 *theSOE,
+								 *theStaticIntegrator,
+								 theTest,
+								 false);
+	  
+	} else {
+	  theSubAnalysis = new TransientDomainDecompositionAnalysis(*theSub,
+								    *theHandler,
+								    *theNumberer,
+								    *theAnalysisModel,
+								    *theAlgorithm,
+								    *theSOE,
+								    *theTransientIntegrator,
+								    theTest,
+								  false);
+	}       
+	
+	theSub->setDomainDecompAnalysis(*theSubAnalysis);
+	//	delete theSubAnalysis;
+      }
+    }
+#endif
     return TCL_OK;
 }
 
@@ -1347,23 +1567,44 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       return TCL_ERROR;
   }    
 
+
+
   // check argv[1] for type of SOE and create it
   // BAND GENERAL SOE & SOLVER
-  if ((strcmp(argv[1],"BandGeneral") == 0) || (strcmp(argv[1],"BandGEN") == 0)){
-      BandGenLinSolver    *theSolver = new BandGenLinLapackSolver();
-      theSOE = new BandGenLinSOE(*theSolver);      
+  if ((strcmp(argv[1],"BandGeneral") == 0) || (strcmp(argv[1],"BandGEN") == 0)
+      || (strcmp(argv[1],"BandGen") == 0)){
+    BandGenLinSolver    *theSolver = new BandGenLinLapackSolver();
+#ifdef _PARALLEL_PROCESSING
+    theSOE = new DistributedBandGenLinSOE(*theSolver);      
+#else
+    theSOE = new BandGenLinSOE(*theSolver);      
+#endif
   } 
+
+
 
   // BAND SPD SOE & SOLVER
   else if (strcmp(argv[1],"BandSPD") == 0) {
       BandSPDLinSolver    *theSolver = new BandSPDLinLapackSolver();   
+#ifdef _PARALLEL_PROCESSING
+      theSOE = new DistributedBandSPDLinSOE(*theSolver);        
+#else
       theSOE = new BandSPDLinSOE(*theSolver);        
+#endif
+
   } 
 
   // Diagonal SOE & SOLVER
   else if (strcmp(argv[1],"Diagonal") == 0) {
+#ifdef _PARALLEL_PROCESSING
+      DistributedDiagonalSolver    *theSolver = new DistributedDiagonalSolver();   
+      theSOE = new DistributedDiagonalSOE(*theSolver);
+#else
       DiagonalSolver    *theSolver = new DiagonalDirectSolver();   
       theSOE = new DiagonalSOE(*theSolver);
+#endif
+
+
   } 
 
   // PROFILE SPD SOE * SOLVER
@@ -1420,43 +1661,72 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
     else 
       theSolver = new ProfileSPDLinDirectSolver(); 	
     ***************************************************************  */
-    
-      theSOE = new ProfileSPDLinSOE(*theSolver);      
-   }
 
+#ifdef _PARALLEL_PROCESSING
+    theSOE = new DistributedProfileSPDLinSOE(*theSolver);
+#else
+    theSOE = new ProfileSPDLinSOE(*theSolver);      
+#endif
+  }
 
   // SPARSE GENERAL SOE * SOLVER
-  else if ((strcmp(argv[1],"SparseGeneral") == 0) ||
+  else if ((strcmp(argv[1],"SparseGeneral") == 0) || (strcmp(argv[1],"SuperLU") == 0) ||
 	   (strcmp(argv[1],"SparseGEN") == 0)) {
     
-    SparseGenColLinSolver *theSolver;    
+    SparseGenColLinSolver *theSolver =0;    
 
-#ifdef _THREADS
+    double thresh = 0.0;
+    int npRow = 1;
+    int npCol = 1;
+    int np = 1;
 
+    // defaults for threaded SuperLU
     int count = 2;
-    int np = 2;
     int permSpec = 0;
     int panelSize = 6;
     int relax = 6;
-    double thresh = 0.0;
 
 
     while (count < argc) {
-      if (strcmp(argv[count],"p") == 0 || strcmp(argv[count],"piv") ||
-	  strcmp(argv[count],"-piv")) {
+
+      if ((strcmp(argv[count],"p") == 0) || (strcmp(argv[count],"piv") == 0)||
+	  (strcmp(argv[count],"-piv") == 0)) {
 	thresh = 1.0;
       }
-      if (strcmp(argv[count],"-np") == 0 || strcmp(argv[count],"np")) {
+      else if ((strcmp(argv[count],"-np") == 0) || (strcmp(argv[count],"np") == 0)) {
 	count++;
 	if (count < argc)
 	  if (Tcl_GetInt(interp, argv[count], &np) != TCL_OK)
 	    return TCL_ERROR;		     
       }
+      else if ((strcmp(argv[count],"npRow") == 0) || (strcmp(argv[count],"-npRow") ==0)) {
+	count++;
+	if (count < argc)
+	  if (Tcl_GetInt(interp, argv[count], &npRow) != TCL_OK)
+	    return TCL_ERROR;		     
+      } else if ((strcmp(argv[count],"npCol") == 0) || (strcmp(argv[count],"-npCol") ==0)) {
+	count++;
+	if (count < argc)
+	  if (Tcl_GetInt(interp, argv[count], &npCol) != TCL_OK)
+	    return TCL_ERROR;		     
+      }
       count++;
     }
+  
 
-    theSolver = new ThreadedSuperLU(np, permSpec, panelSize, relax, thresh); 	
+#ifdef _THREADS
+    if (np != 0)
+      theSolver = new ThreadedSuperLU(np, permSpec, panelSize, relax, thresh); 	
+#endif
 
+#ifdef _PARALLEL_PROCESSING
+    if (theSolver != 0)
+      delete theSolver;
+    theSolver = 0;
+
+    if (npRow != 0 && npCol != 0) {
+      theSolver = new DistributedSuperLU(npRow, npCol);
+    }
 #else
     int permSpec = 0;
     int panelSize = 6;
@@ -1473,14 +1743,18 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       }
       count++;
     }
-
     theSolver = new SuperLU(permSpec, drop_tol, panelSize, relax, symmetric); 	
 
 #endif
 
+#ifdef _PARALLEL_PROCESSING
+    theSOE = new DistributedSparseGenColLinSOE(*theSolver);      
+#else
     theSOE = new SparseGenColLinSOE(*theSolver);      
-  }	
+#endif
+  }
 
+  
   else if (strcmp(argv[1],"SparseSPD") == 0) {
     // now must determine the type of solver to create from rest of args
 
@@ -1503,13 +1777,11 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       UmfpackGenLinSolver *theSolver = new UmfpackGenLinSolver();
       theSOE = new UmfpackGenLinSOE(*theSolver);      
   }	  
-
   else if (strcmp(argv[1],"FullGeneral") == 0) {
     // now must determine the type of solver to create from rest of args
     FullGenLinLapackSolver *theSolver = new FullGenLinLapackSolver();
     theSOE = new FullGenLinSOE(*theSolver);
   }
-
 
 #ifdef _PETSC
 
@@ -1583,7 +1855,6 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 
 #endif
   
-
   else {
 
     //
@@ -1644,11 +1915,25 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
     return TCL_OK;
   }
 
-  opserr << "WARNING system " << argv[1] << " : no such system found\n";
+
+  // if the analysis exists - we want to change the SOE
+  if (theStaticAnalysis != 0)
+    theStaticAnalysis->setLinearSOE(*theSOE);
+  else if (theTransientAnalysis != 0)
+    theTransientAnalysis->setLinearSOE(*theSOE);  
+
+#ifdef _PARALLEL_PROCESSING
+    if (theStaticAnalysis != 0 || theTransientAnalysis != 0) {
+      SubdomainIter &theSubdomains = theDomain.getSubdomains();
+      Subdomain *theSub;
+      while ((theSub = theSubdomains()) != 0) {
+	theSub->setAnalysisLinearSOE(*theSOE);
+      }
+    }
+#endif
 
   return TCL_ERROR;
 }
-
 
 
 
@@ -1664,17 +1949,33 @@ specifyNumberer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **
       return TCL_ERROR;
   }    
 
+#ifdef _PARALLEL_PROCESSING
+
   // check argv[1] for type of Numberer and create the object
-  if (strcmp(argv[1],"Plain") == 0) 
-    theNumberer = new PlainNumberer();       
-  else if (strcmp(argv[1],"RCM") == 0) {
+  if (strcmp(argv[1],"Plain") == 0) {
+    theNumberer = new ParallelNumberer();       
+  } else if (strcmp(argv[1],"RCM") == 0) {
     RCM *theRCM = new RCM();	
-    theNumberer = new DOF_Numberer(*theRCM);    	
-  }
-  else {
+    theNumberer = new ParallelNumberer(*theRCM);    	
+  } else {
     opserr << "WARNING No Numberer type exists (Plain, RCM only) \n";
     return TCL_ERROR;
   }    
+
+#else
+
+  // check argv[1] for type of Numberer and create the object
+  if (strcmp(argv[1],"Plain") == 0) {
+    theNumberer = new PlainNumberer();       
+  } else if (strcmp(argv[1],"RCM") == 0) {
+    RCM *theRCM = new RCM();	
+    theNumberer = new DOF_Numberer(*theRCM);    	
+  } else {
+    opserr << "WARNING No Numberer type exists (Plain, RCM only) \n";
+    return TCL_ERROR;
+  }    
+#endif
+
   return TCL_OK;
 }
 
@@ -1980,13 +2281,23 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
 
 
   if (theNewAlgo != 0) {
-      theAlgorithm = theNewAlgo;
-
+    theAlgorithm = theNewAlgo;
+    
     // if the analysis exists - we want to change the SOE
     if (theStaticAnalysis != 0)
       theStaticAnalysis->setAlgorithm(*theAlgorithm);
     else if (theTransientAnalysis != 0)
       theTransientAnalysis->setAlgorithm(*theAlgorithm);  
+
+#ifdef _PARALLEL_PROCESSING
+    if (theStaticAnalysis != 0 || theTransientAnalysis != 0) {
+      SubdomainIter &theSubdomains = theDomain.getSubdomains();
+      Subdomain *theSub;
+      while ((theSub = theSubdomains()) != 0) {
+	theSub->setAnalysisAlgorithm(*theAlgorithm);
+      }
+    }
+#endif
   }
 
   return TCL_OK;
@@ -2081,13 +2392,24 @@ specifyCTest(ClientData clientData, Tcl_Interp *interp, int argc,
 
   if (theNewTest != 0) {
     theTest = theNewTest;
-    
-    // if the analysis exists - we want to change the Test
-    if (theStaticAnalysis != 0)
-      theStaticAnalysis->setConvergenceTest(*theTest);
-    
-    else if (theTransientAnalysis != 0)
-      theTransientAnalysis->setConvergenceTest(*theTest);
+  
+
+  // if the analysis exists - we want to change the Test
+  if (theStaticAnalysis != 0)
+    theStaticAnalysis->setConvergenceTest(*theTest);
+
+  else if (theTransientAnalysis != 0)
+    theTransientAnalysis->setConvergenceTest(*theTest); 
+
+#ifdef _PARALLEL_PROCESSING
+    if (theStaticAnalysis != 0 || theTransientAnalysis != 0) {
+      SubdomainIter &theSubdomains = theDomain.getSubdomains();
+      Subdomain *theSub;
+      while ((theSub = theSubdomains()) != 0) {
+	theSub->setAnalysisConvergenceTest(*theTest);;
+      }
+    }
+#endif
   }
   
   return TCL_OK;
@@ -2286,6 +2608,11 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	return TCL_ERROR;	  
       }
 
+
+#ifdef _PARALLEL_PROCESSING
+      theStaticIntegrator = new DistributedDisplacementControl(node,dof-1,increment,
+							       numIter, minIncr, maxIncr);
+#else
       int numDOF = theNode->getNumberDOF();
       if (dof <= 0 || dof > numDOF) {
 	opserr << "WARNING integrator DisplacementControl node dof dU : invalid dof given\n";
@@ -2294,8 +2621,7 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 
       theStaticIntegrator = new DisplacementControl(node, dof-1, increment, &theDomain,
 						    numIter, minIncr, maxIncr);
-
-      
+#endif
 
       // if the analysis exists - we want to change the Integrator
       if (theStaticAnalysis != 0)
@@ -3376,6 +3702,28 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
     return TCL_ERROR;
   }    
 
+#ifdef _PARALLEL_PROCESSING
+  if (theStaticAnalysis != 0 && theStaticIntegrator != 0) {
+    IncrementalIntegrator *theIntegrator;
+    theIntegrator = theStaticIntegrator;
+
+    SubdomainIter &theSubdomains = theDomain.getSubdomains();
+    Subdomain *theSub;
+    while ((theSub = theSubdomains()) != 0) {
+      theSub->setAnalysisIntegrator(*theIntegrator);
+    }
+  } else if (theTransientAnalysis != 0 && theTransientIntegrator != 0) {
+    IncrementalIntegrator *theIntegrator;
+    theIntegrator = theStaticIntegrator;
+    
+    SubdomainIter &theSubdomains = theDomain.getSubdomains();
+    Subdomain *theSub;
+    while ((theSub = theSubdomains()) != 0) {
+      theSub->setAnalysisIntegrator(*theIntegrator);
+    }
+  }
+#endif
+
   return TCL_OK;
 }
 
@@ -3388,7 +3736,7 @@ int
 addRecorder(ClientData clientData, Tcl_Interp *interp, int argc, 
 	    TCL_Char **argv)
 {
-    return TclAddRecorder(clientData, interp, argc, argv, theDomain);
+  return TclAddRecorder(clientData, interp, argc, argv, theDomain);
 }
 
 extern int
@@ -3714,7 +4062,11 @@ videoPlayer(ClientData clientData, Tcl_Interp *interp, int argc,
 	return TCL_ERROR;
       }
     }
-    
+
+
+#ifdef _NOGRAPHICS
+
+#else    
     if (wTitle != 0 && fName != 0) {
       // delete the old video player if one exists
       if (theTclVideoPlayer != 0)
@@ -3725,7 +4077,7 @@ videoPlayer(ClientData clientData, Tcl_Interp *interp, int argc,
     }
     else
       return TCL_ERROR;
-
+#endif
     return TCL_OK;
 }
 
@@ -4204,4 +4556,12 @@ logFile(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 
   return TCL_OK;
 }
+
+int 
+exit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  Tcl_Finalize();
+  return TCL_OK;
+}
+
 
