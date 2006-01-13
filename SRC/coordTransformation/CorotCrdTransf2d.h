@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $                                                              
-// $Date: 2005-12-15 00:31:03 $                                                                  
+// $Revision: 1.8 $                                                              
+// $Date: 2006-01-13 01:07:48 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CorotCrdTransf2d.h,v $ 
                                         
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
