@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.26 2006-01-03 22:58:04 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.27 2006-01-13 19:26:07 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -366,8 +366,13 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc)
     if (commandPtr != NULL) {
 	Tcl_DecrRefCount(commandPtr);
     }
+
+#ifndef _PARALLEL_PROCESSING
     sprintf(buffer, "exit %d", exitCode);
     Tcl_Eval(interp, buffer);
+#endif
+
+    return;
 }
 
 
