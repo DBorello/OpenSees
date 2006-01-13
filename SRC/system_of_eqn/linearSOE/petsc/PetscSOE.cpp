@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-05-18 19:24:49 $
+// $Revision: 1.5 $
+// $Date: 2006-01-13 00:00:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/PetscSOE.cpp,v $
                                                                         
 // Written: fmk & om
@@ -77,7 +77,6 @@ PetscSOE::~PetscSOE()
   if (A != 0) MatDestroy(A);
   if (b != 0) VecDestroy(b);
   if (x != 0) VecDestroy(x);
-
 }
 
 
@@ -88,8 +87,6 @@ PetscSOE::setSize(Graph &theGraph)
   MPI_Comm_size(PETSC_COMM_WORLD, &numProcesses);
   MPI_Comm_rank(PETSC_COMM_WORLD, &processID);
   
-  opserr << "PetscSOE::setSize(Graph &theGraph) - " << processID << endln;
-
   int result = 0;
   int ierr = 0;
 
