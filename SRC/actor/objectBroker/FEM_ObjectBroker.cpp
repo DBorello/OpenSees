@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2005-11-22 19:40:05 $
+// $Revision: 1.29 $
+// $Date: 2006-01-13 00:05:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -247,6 +247,9 @@
 #include <TransientIntegrator.h>
 #include <Newmark.h>
 #include <DisplacementControl.h>
+#include <CentralDifferenceNoDamping.h>
+#include <CentralDifferenceAlternative.h>
+
 #ifdef _PARALLEL_PROCESSING
 #include <DistributedDisplacementControl.h>
 #endif
@@ -263,9 +266,6 @@
 #include <ProfileSPDLinSOE.h>
 #include <ProfileSPDLinDirectSolver.h>
 #include <ProfileSPDLinSubstrSolver.h>
-#include <SparseGenColLinSOE.h>
-#include <SuperLU.h>
-
 
 #include <DomainDecompositionAnalysis.h>
 
@@ -287,15 +287,28 @@
 // time series integrators
 #include <TrapezoidalTimeSeriesIntegrator.h>
 
+#ifdef _PETSC
+#include <PetscSOE.h>
+#include <PetscSolver.h>
+#include <SparseGenColLinSOE.h>
+#include <PetscSparseSeqSolver.h>
+#endif
+
 #ifdef _PARALLEL_PROCESSING
+#include <SparseGenColLinSOE.h>
+#include <SuperLU.h>
 #include <DistributedBandSPDLinSOE.h>
 #include <DistributedProfileSPDLinSOE.h>
 #include <DistributedSparseGenColLinSOE.h>
+#include <DistributedSparseGenRowLinSOE.h>
+#include <DistributedSparseGenRowLinSolver.h>
 #include <DistributedBandGenLinSOE.h>
 #include <DistributedSuperLU.h>
 #include <ParallelNumberer.h>
 #include <StaticDomainDecompositionAnalysis.h>
 #include <TransientDomainDecompositionAnalysis.h>
+#include <DistributedDiagonalSOE.h>
+#include <DistributedDiagonalSolver.h>
 #endif
 
 #include <packages.h>
@@ -309,6 +322,7 @@ typedef struct uniaxialPackage {
 } UniaxialPackage;
 
 static UniaxialPackage *theUniaxialPackage = NULL;
+
 
 
 FEM_ObjectBroker::FEM_ObjectBroker()
@@ -1284,7 +1298,7 @@ FEM_ObjectBroker::getNewStaticIntegrator(int classTag)
 	     
 	case INTEGRATOR_TAGS_ArcLength:  
 	     return new ArcLength(1.0);      // must recvSelf
-	     	     
+
 	     
 	default:
 	     opserr << "FEM_ObjectBroker::getNewStaticIntegrator - ";
@@ -1302,8 +1316,13 @@ FEM_ObjectBroker::getNewTransientIntegrator(int classTag)
     switch(classTag) {
 	case INTEGRATOR_TAGS_Newmark:  
 	     return new Newmark();
-	     
-	     
+
+	case INTEGRATOR_TAGS_CentralDifferenceNoDamping:  
+	     return new CentralDifferenceNoDamping();      // must recvSelf
+
+	case INTEGRATOR_TAGS_CentralDifferenceAlternative:  
+	     return new CentralDifferenceAlternative();      // must recvSelf
+	     	     
 	default:
 	     opserr << "FEM_ObjectBroker::getNewTransientIntegrator - ";
 	     opserr << " - no TransientIntegrator type exists for class tag ";
@@ -1362,8 +1381,13 @@ FEM_ObjectBroker::getNewLinearSOE(int classTagSOE,
     ProfileSPDLinSolver *theProfileSPDSolver =0;    
     SuperLU *theSparseGenLinSolver =0;
 
+#ifdef _PETSC
+    PetscSolver *thePetscSolver = 0;
+#endif
+
 #ifdef _PARALLEL_PROCESSING
     DistributedSuperLU *theDistributedSparseGenLinSolver =0;
+    DistributedDiagonalSolver *theDistributedDiagonalSolver =0;
 #endif    
 
     /*
@@ -1447,20 +1471,21 @@ FEM_ObjectBroker::getNewLinearSOE(int classTagSOE,
 	      return 0;		 
 	  }	     
 
-	case LinSOE_TAGS_SparseGenColLinSOE:  
 
-	  if (classTagSolver == SOLVER_TAGS_SuperLU) {
-	      theSparseGenLinSolver = new SuperLU();
-	      theSOE = new SparseGenColLinSOE(*theSparseGenLinSolver);
-	      lastLinearSolver = theSparseGenLinSolver;
+#ifdef _PETSC
+      case LinSOE_TAGS_PetscSOE:  
+	
+	  if (classTagSolver == SOLVER_TAGS_PetscSolver) {
+	      thePetscSolver = new PetscSolver();
+	      theSOE = new PetscSOE(*thePetscSolver);
 	      return theSOE;
 	  } else {
 	      opserr << "FEM_ObjectBroker::getNewLinearSOE - ";
-	      opserr << " - no SparseGenLinSolverSolver type exists for class tag ";
+	      opserr << " - no PetscSolver type exists for class tag ";
 	      opserr << classTagSolver << endln;
 	      return 0;
-	  }	     
-
+	  }		     
+#endif
 
 #ifdef _PARALLEL_PROCESSING
       case LinSOE_TAGS_DistributedBandGenLinSOE:  
@@ -1512,8 +1537,22 @@ FEM_ObjectBroker::getNewLinearSOE(int classTagSOE,
 	      return 0;		 
 	  }	     
 	  
+	case LinSOE_TAGS_DistributedDiagonalSOE:  
+
+	  if (classTagSolver == SOLVER_TAGS_DistributedDiagonalSolver) {
+	    theDistributedDiagonalSolver = new DistributedDiagonalSolver();
+	    theSOE = new DistributedDiagonalSOE(*theDistributedDiagonalSolver);
+	    lastLinearSolver = theDistributedDiagonalSolver;
+	    return theSOE;
+	  } else {
+	    opserr << "FEM_ObjectBroker::getNewLinearSOE - ";
+	    opserr << " - no DistributedSparseGenLinSolverSolver type exists for class tag ";
+	    opserr << classTagSolver << endln;
+	    return 0;
+	  }	     
 
 	case LinSOE_TAGS_DistributedSparseGenColLinSOE:  
+
 	  if (classTagSolver == SOLVER_TAGS_SuperLU) {
 	      theSparseGenLinSolver = new SuperLU();
 	      theSOE = new DistributedSparseGenColLinSOE(*theSparseGenLinSolver);
@@ -1530,6 +1569,22 @@ FEM_ObjectBroker::getNewLinearSOE(int classTagSOE,
 	      opserr << classTagSolver << endln;
 	      return 0;
 	  }	     
+
+#else
+	case LinSOE_TAGS_SparseGenColLinSOE:  
+
+	  if (classTagSolver == SOLVER_TAGS_SuperLU) {
+	      theSparseGenLinSolver = new SuperLU();
+	      theSOE = new SparseGenColLinSOE(*theSparseGenLinSolver);
+	      lastLinearSolver = theSparseGenLinSolver;
+	      return theSOE;
+	  } else {
+	      opserr << "FEM_ObjectBroker::getNewLinearSOE - ";
+	      opserr << " - no SparseGenLinSolverSolver type exists for class tag ";
+	      opserr << classTagSolver << endln;
+	      return 0;
+	  }	     
+
 
 #endif
 
