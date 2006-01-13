@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.69 $
-// $Date: 2006-01-13 19:40:27 $
+// $Revision: 1.70 $
+// $Date: 2006-01-13 22:33:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -1687,6 +1687,8 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
     int relax = 6;
 
 
+
+
     while (count < argc) {
 
       if ((strcmp(argv[count],"p") == 0) || (strcmp(argv[count],"piv") == 0)||
@@ -1728,12 +1730,8 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       theSolver = new DistributedSuperLU(npRow, npCol);
     }
 #else
-    int permSpec = 0;
-    int panelSize = 6;
-    int relax = 6;
-    int count = 2;
+
     char symmetric = 'N';
-    double thresh = 0.0;
     double drop_tol = 0.0;
 
     while (count < argc) {
