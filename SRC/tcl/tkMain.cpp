@@ -14,7 +14,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkMain.cpp,v 1.13 2006-01-03 22:58:04 fmk Exp $
+ * RCS: @(#) $Id: tkMain.cpp,v 1.14 2006-01-17 23:15:03 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -492,4 +492,9 @@ Prompt(Tcl_Interp *interp, int partial)
 }
 
 
+int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, const char **argv)
+{
+  Tcl_Exit(0);
+  return 0;
+}
 
