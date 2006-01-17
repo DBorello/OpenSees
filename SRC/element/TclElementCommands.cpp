@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.38 $
-// $Date: 2006-01-10 18:50:25 $
+// $Revision: 1.39 $
+// $Date: 2006-01-17 19:32:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -280,6 +280,7 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 						    theTclDomain, theTclBuilder);
     return result;
   } else if (strcmp(argv[1],"beamWithHinges") == 0 ||
+	     strcmp(argv[1],"beamWithHinges1") == 0 ||
 	     strcmp(argv[1],"beamWithHinges2") == 0 ||
 	     strcmp(argv[1],"beamWithHinges3") == 0) {
 	  int result = TclModelBuilder_addBeamWithHinges(clientData, interp, argc, argv,

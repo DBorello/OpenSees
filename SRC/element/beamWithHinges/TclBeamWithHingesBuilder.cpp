@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-06-09 20:49:51 $
+// $Revision: 1.11 $
+// $Date: 2006-01-17 19:32:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/TclBeamWithHingesBuilder.cpp,v $
                                                                         
                                                                         
@@ -230,7 +230,7 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 
 	Element *theElement = 0;
 
-	if (strcmp(argv[1],"beamWithHinges") == 0) {
+	if (strcmp(argv[1],"beamWithHinges1") == 0) {
 	  HingeMidpointBeamIntegration2d beamIntegr(E, A, I, lenI, lenJ);
 	  
 	  SectionForceDeformation *sections[2];
@@ -254,10 +254,12 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 					     sections, beamIntegr,
 					     *theTransf, massDens, numIters, tol);
 	}
-	else {
+	else if ((strcmp(argv[1],"beamWithHinges3") == 0) ||
+		 (strcmp(argv[1],"beamWithHinges") == 0)) {
+
 	  if (useFour) {
 	    HingeRadauTwoBeamIntegration2d beamIntegr(E, A, I, 4*lenI, 4*lenJ);
-
+	    
 	    ElasticSection2d elastic(0, E, A, I);
 	    SectionForceDeformation *sections[4];
 	    sections[0] = sectionI;
@@ -463,7 +465,7 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 
 	Element *theElement = 0;
 
-	if (strcmp(argv[1],"beamWithHinges") == 0) {
+	if (strcmp(argv[1],"beamWithHinges1") == 0) {
 	  HingeMidpointBeamIntegration3d beamIntegr(E, A, Iz, Iy, G, J, lenI, lenJ);
 	  SectionForceDeformation *sections[2];
 	  sections[0] = sectionI;
@@ -486,7 +488,10 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 					     sections, beamIntegr,
 					     *theTransf, massDens, numIters, tol);
 	}
-	else {
+
+	else if ((strcmp(argv[1],"beamWithHinges3") == 0) ||
+		 (strcmp(argv[1],"beamWithHinges") == 0)) {
+
 	  if (useFour) {
 	    HingeRadauTwoBeamIntegration3d beamIntegr(E, A, Iz, Iy, G, J,
 						      4*lenI, 4*lenJ);
