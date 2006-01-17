@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2003-06-10 00:18:05 $
+// $Revision: 1.6 $
+// $Date: 2006-01-17 21:24:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/BeamIntegration.h,v $
 
 #ifndef BeamIntegration_h
@@ -57,6 +57,14 @@ class BeamIntegration : public MovableObject
   virtual int setParameter(const char **argv, int argc, Information &info);
   virtual int updateParameter(int parameterID, Information &info);
   virtual int activateParameter(int parameterID);
+
+  virtual void getLocationsDeriv(int nIP, double L, double dLdh,
+				 double *dptsdh);
+  virtual void getWeightsDeriv(int nIP, double L, double dLdh,
+			       double *dwtsdh);
+  // Return 0 if there is no elastic interior, -1 otherwise
+  virtual int addElasticFlexDeriv(double L, Matrix &dfedh,
+				  double dLdh = 0.0) {return 0;}
 
   virtual void Print(OPS_Stream &s, int flag = 0) = 0;
 };

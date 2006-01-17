@@ -18,11 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2003-03-15 00:09:47 $
+// $Revision: 1.3 $
+// $Date: 2006-01-17 21:24:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/BeamIntegration.cpp,v $
 
 #include <BeamIntegration.h>
+#include <Matrix.h>
 
 BeamIntegration::BeamIntegration(int classTag):
   MovableObject(classTag)
@@ -51,4 +52,20 @@ int
 BeamIntegration::activateParameter(int parameterID)
 {
   return 0;
+}
+
+void
+BeamIntegration::getLocationsDeriv(int nIP, double L, double dLdh,
+				   double *dptsdh)
+{
+  for (int i = 0; i < nIP; i++)
+    dptsdh[i] = 0.0;
+}
+
+void
+BeamIntegration::getWeightsDeriv(int nIP, double L, double dLdh,
+				 double *dwtsdh)
+{
+  for (int i = 0; i < nIP; i++)
+    dwtsdh[i] = 0.0;
 }
