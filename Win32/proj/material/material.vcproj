@@ -1055,6 +1055,12 @@
 				RelativePath="..\..\..\SRC\material\section\GenericSection1d.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\material\section\Isolator2spring.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\section\Isolator2spring.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\material\section\MembranePlateFiberSection.cpp">
 			</File>
 			<File
