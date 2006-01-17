@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.72 $
-// $Date: 2006-01-10 23:24:30 $
+// $Revision: 1.73 $
+// $Date: 2006-01-17 20:48:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -178,6 +178,7 @@
 #define SEC_TAG_ElasticMembranePlateSection	14
 #define SEC_TAG_MembranePlateFiberSection	15 
 #define SEC_TAG_Bidirectional	16
+#define SEC_TAG_Isolator2spring	17
 
 #define ND_TAG_ElasticIsotropic					10
 #define ND_TAG_ElasticIsotropicPlaneStrain2d	11
