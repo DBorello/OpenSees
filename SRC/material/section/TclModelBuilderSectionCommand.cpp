@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2003-02-25 23:33:35 $
+// $Revision: 1.22 $
+// $Date: 2006-01-17 20:45:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -59,7 +59,7 @@
 #include <UniaxialFiber3d.h>
 
 #include <Bidirectional.h>
-
+#include <Isolator2spring.h>
 #include <string.h>
 #include <fstream>
 using std::ifstream;
@@ -552,7 +552,74 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 
 	theSection = new Bidirectional(tag, E, sigY, Hi, Hk);
 	}
-		
+
+        else if (strcmp(argv[1],"Iso2spring") == 0) {
+	  if (argc < 10) {
+	    opserr << "WARNING insufficient arguments\n";
+	    printCommand(argc,argv);
+	    opserr << "Want: section Iso2spring tag? tol? k1? Fy? k2? kv? hb? Pe? <Po?>" << endln;
+	    return TCL_ERROR;
+	  }    
+	  
+	  int tag;
+	  double tol, k1, Fy, kb, kvo, hb, Pe, Po;
+
+	  if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	    opserr << "WARNING invalid Iso2spring tag" << endln;
+	    return TCL_ERROR;		
+	  }
+
+	  if (Tcl_GetDouble(interp, argv[3], &tol) != TCL_OK) {
+	    opserr << "WARNING invalid tol\n";
+	    opserr << "section Iso2spring: " << tag << endln;
+	    return TCL_ERROR;
+	  }
+	  
+	  if (Tcl_GetDouble(interp, argv[4], &k1) != TCL_OK) {
+	    opserr << "WARNING invalid k1\n";
+	    opserr << "section Iso2spring: " << tag << endln;
+	    return TCL_ERROR;	
+	  }
+	  
+	  if (Tcl_GetDouble(interp, argv[5], &Fy) != TCL_OK) {
+	    opserr << "WARNING invalid Fy\n";
+	    opserr << "section Iso2spring: " << tag << endln;
+	    return TCL_ERROR;	
+	  }
+	  
+	  if (Tcl_GetDouble(interp, argv[6], &kb) != TCL_OK) {
+	    opserr << "WARNING invalid k2\n";
+	    opserr << "section Iso2spring: " << tag << endln;
+	    return TCL_ERROR;	
+	  }
+	  
+	  if (Tcl_GetDouble(interp, argv[7], &kvo) != TCL_OK) {
+	    opserr << "WARNING invalid kv\n";
+	    opserr << "section Iso2spring: " << tag << endln;
+	    return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[8], &hb) != TCL_OK) {
+	    opserr << "WARNING invalid hb\n";
+	    opserr << "section Iso2spring: " << tag << endln;
+	    return TCL_ERROR;	
+	}
+	  
+	  if (Tcl_GetDouble(interp, argv[9], &Pe) != TCL_OK) {
+	    opserr << "WARNING invalid Pe\n";
+	    opserr << "section Iso2spring: " << tag << endln;
+	    return TCL_ERROR;	
+	  }
+	  if (argc > 10) {
+	    if (Tcl_GetDouble(interp, argv[10], &Po) != TCL_OK) {
+	      opserr << "WARNING invalid Po\n";
+	      opserr << "section Iso2spring: " << tag << endln;
+	      return TCL_ERROR;	
+	    }
+	  }	    
+	  
+	  theSection = new Isolator2spring(tag, tol, k1, Fy, kb, kvo, hb, Pe, Po);
+	}
+    		
     else {
       theSection = TclModelBuilderYS_SectionCommand(clientData, interp, argc, 
 						    argv, theTclBuilder);
