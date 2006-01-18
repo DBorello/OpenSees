@@ -1,40 +1,39 @@
 #include <stdio.h>
-#include "util.h"
 #define TRUE_ (1)
 #define FALSE_ (0)
-#ifndef abs
-#define abs(x) ((x) >= 0 ? (x) : -(x))
-#endif
 #define min(a,b) ((a) <= (b) ? (a) : (b))
 #define max(a,b) ((a) >= (b) ? (a) : (b))
+#define abs(x) ((x) >= 0 ? (x) : -(x))
+#define dabs(x) (double)abs(x)
 
-double dlamch_(char *cmach)
+float slamch_(char *cmach)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
        Courant Institute, Argonne National Lab, and Rice University   
        October 31, 1992   
 
+
     Purpose   
     =======   
 
-    DLAMCH determines double precision machine parameters.   
+    SLAMCH determines single precision machine parameters.   
 
     Arguments   
     =========   
 
     CMACH   (input) CHARACTER*1   
-            Specifies the value to be returned by DLAMCH:   
-            = 'E' or 'e',   DLAMCH := eps   
-            = 'S' or 's ,   DLAMCH := sfmin   
-            = 'B' or 'b',   DLAMCH := base   
-            = 'P' or 'p',   DLAMCH := eps*base   
-            = 'N' or 'n',   DLAMCH := t   
-            = 'R' or 'r',   DLAMCH := rnd   
-            = 'M' or 'm',   DLAMCH := emin   
-            = 'U' or 'u',   DLAMCH := rmin   
-            = 'L' or 'l',   DLAMCH := emax   
-            = 'O' or 'o',   DLAMCH := rmax   
+            Specifies the value to be returned by SLAMCH:   
+            = 'E' or 'e',   SLAMCH := eps   
+            = 'S' or 's ,   SLAMCH := sfmin   
+            = 'B' or 'b',   SLAMCH := base   
+            = 'P' or 'p',   SLAMCH := eps*base   
+            = 'N' or 'n',   SLAMCH := t   
+            = 'R' or 'r',   SLAMCH := rnd   
+            = 'M' or 'm',   SLAMCH := emin   
+            = 'U' or 'u',   SLAMCH := rmin   
+            = 'L' or 'l',   SLAMCH := emax   
+            = 'O' or 'o',   SLAMCH := rmax   
 
             where   
 
@@ -51,52 +50,56 @@ double dlamch_(char *cmach)
 
    ===================================================================== 
 */
-
+/* >>Start of File<<   
+       Initialized data */
     static int first = TRUE_;
-
     /* System generated locals */
     int i__1;
-    double ret_val;
+    float ret_val;
     /* Builtin functions */
-    double pow_di(double *, int *);
+    double pow_ri(float *, int *);
     /* Local variables */
-    static double base;
+    static float base;
     static int beta;
-    static double emin, prec, emax;
+    static float emin, prec, emax;
     static int imin, imax;
     static int lrnd;
-    static double rmin, rmax, t, rmach;
-/*    extern int lsame_(char *, char *);*/
-    static double small, sfmin;
-    extern /* Subroutine */ int dlamc2_(int *, int *, int *, 
-	    double *, int *, double *, int *, double *);
+    static float rmin, rmax, t, rmach;
+    extern int lsame_(char *, char *);
+    static float small, sfmin;
+    extern /* Subroutine */ int slamc2_(int *, int *, int *, float 
+	    *, int *, float *, int *, float *);
     static int it;
-    static double rnd, eps;
+    static float rnd, eps;
+
+
 
     if (first) {
 	first = FALSE_;
-	dlamc2_(&beta, &it, &lrnd, &eps, &imin, &rmin, &imax, &rmax);
-	base = (double) beta;
-	t = (double) it;
+	slamc2_(&beta, &it, &lrnd, &eps, &imin, &rmin, &imax, &rmax);
+	base = (float) beta;
+	t = (float) it;
 	if (lrnd) {
-	    rnd = 1.;
+	    rnd = 1.f;
 	    i__1 = 1 - it;
-	    eps = pow_di(&base, &i__1) / 2;
+	    eps = pow_ri(&base, &i__1) / 2;
 	} else {
-	    rnd = 0.;
+	    rnd = 0.f;
 	    i__1 = 1 - it;
-	    eps = pow_di(&base, &i__1);
+	    eps = pow_ri(&base, &i__1);
 	}
 	prec = eps * base;
-	emin = (double) imin;
-	emax = (double) imax;
+	emin = (float) imin;
+	emax = (float) imax;
 	sfmin = rmin;
-	small = 1. / rmax;
+	small = 1.f / rmax;
 	if (small >= sfmin) {
 
-	/* Use SMALL plus a bit, to avoid the possibility of rounding   
+/*           Use SMALL plus a bit, to avoid the possibility of rou
+nding   
              causing overflow when computing  1/sfmin. */
-	    sfmin = small * (eps + 1.);
+
+	    sfmin = small * (eps + 1.f);
 	}
     }
 
@@ -125,12 +128,12 @@ double dlamch_(char *cmach)
     ret_val = rmach;
     return ret_val;
 
-/*     End of DLAMCH */
+/*     End of SLAMCH */
 
-} /* dlamch_ */
+} /* slamch_ */
 
 
-/* Subroutine */ int dlamc1_(int *beta, int *t, int *rnd, int 
+/* Subroutine */ int slamc1_(int *beta, int *t, int *rnd, int 
 	*ieee1)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
@@ -142,7 +145,7 @@ double dlamch_(char *cmach)
     Purpose   
     =======   
 
-    DLAMC1 determines the machine parameters given by BETA, T, RND, and   
+    SLAMC1 determines the machine parameters given by BETA, T, RND, and   
     IEEE1.   
 
     Arguments   
@@ -184,27 +187,29 @@ double dlamch_(char *cmach)
     /* Initialized data */
     static int first = TRUE_;
     /* System generated locals */
-    double d__1, d__2;
+    float r__1, r__2;
     /* Local variables */
     static int lrnd;
-    static double a, b, c, f;
+    static float a, b, c, f;
     static int lbeta;
-    static double savec;
-    extern double dlamc3_(double *, double *);
+    static float savec;
     static int lieee1;
-    static double t1, t2;
+    static float t1, t2;
+    extern double slamc3_(float *, float *);
     static int lt;
-    static double one, qtr;
+    static float one, qtr;
+
+
 
     if (first) {
 	first = FALSE_;
-	one = 1.;
+	one = 1.f;
 
 /*        LBETA,  LIEEE1,  LT and  LRND  are the  local values  of  BE
 TA,   
           IEEE1, T and RND.   
 
-          Throughout this routine  we use the function  DLAMC3  to ens
+          Throughout this routine  we use the function  SLAMC3  to ens
 ure   
           that relevant values are  stored and not held in registers, 
  or   
@@ -216,16 +221,16 @@ uch
 
              fl( a + 1.0 ) = a. */
 
-	a = 1.;
-	c = 1.;
+	a = 1.f;
+	c = 1.f;
 
 /* +       WHILE( C.EQ.ONE )LOOP */
 L10:
 	if (c == one) {
 	    a *= 2;
-	    c = dlamc3_(&a, &one);
-	    d__1 = -a;
-	    c = dlamc3_(&c, &d__1);
+	    c = slamc3_(&a, &one);
+	    r__1 = -(double)a;
+	    c = slamc3_(&c, &r__1);
 	    goto L10;
 	}
 /* +       END WHILE   
@@ -236,14 +241,14 @@ m
 
              fl( a + b ) .gt. a. */
 
-	b = 1.;
-	c = dlamc3_(&a, &b);
+	b = 1.f;
+	c = slamc3_(&a, &b);
 
 /* +       WHILE( C.EQ.A )LOOP */
 L20:
 	if (c == a) {
 	    b *= 2;
-	    c = dlamc3_(&a, &b);
+	    c = slamc3_(&a, &b);
 	    goto L20;
 	}
 /* +       END WHILE   
@@ -258,29 +263,29 @@ int
 
 	qtr = one / 4;
 	savec = c;
-	d__1 = -a;
-	c = dlamc3_(&c, &d__1);
-	lbeta = (int) (c + qtr);
+	r__1 = -(double)a;
+	c = slamc3_(&c, &r__1);
+	lbeta = c + qtr;
 
 /*        Now determine whether rounding or chopping occurs,  by addin
 g a   
           bit  less  than  beta/2  and a  bit  more  than  beta/2  to 
  a. */
 
-	b = (double) lbeta;
-	d__1 = b / 2;
-	d__2 = -b / 100;
-	f = dlamc3_(&d__1, &d__2);
-	c = dlamc3_(&f, &a);
+	b = (float) lbeta;
+	r__1 = b / 2;
+	r__2 = -(double)b / 100;
+	f = slamc3_(&r__1, &r__2);
+	c = slamc3_(&f, &a);
 	if (c == a) {
 	    lrnd = TRUE_;
 	} else {
 	    lrnd = FALSE_;
 	}
-	d__1 = b / 2;
-	d__2 = b / 100;
-	f = dlamc3_(&d__1, &d__2);
-	c = dlamc3_(&f, &a);
+	r__1 = b / 2;
+	r__2 = b / 100;
+	f = slamc3_(&r__1, &r__2);
+	c = slamc3_(&f, &a);
 	if (lrnd && c == a) {
 	    lrnd = FALSE_;
 	}
@@ -295,10 +300,10 @@ bit
 nge   
           A, but adding B/2 to SAVEC should change SAVEC. */
 
-	d__1 = b / 2;
-	t1 = dlamc3_(&d__1, &a);
-	d__1 = b / 2;
-	t2 = dlamc3_(&d__1, &savec);
+	r__1 = b / 2;
+	t1 = slamc3_(&r__1, &a);
+	r__1 = b / 2;
+	t2 = slamc3_(&r__1, &savec);
 	lieee1 = t1 == a && t2 > savec && lrnd;
 
 /*        Now find  the  mantissa, t.  It should  be the  integer part
@@ -312,17 +317,17 @@ for
              fl( beta**t + 1.0 ) = 1.0. */
 
 	lt = 0;
-	a = 1.;
-	c = 1.;
+	a = 1.f;
+	c = 1.f;
 
 /* +       WHILE( C.EQ.ONE )LOOP */
 L30:
 	if (c == one) {
 	    ++lt;
 	    a *= lbeta;
-	    c = dlamc3_(&a, &one);
-	    d__1 = -a;
-	    c = dlamc3_(&c, &d__1);
+	    c = slamc3_(&a, &one);
+	    r__1 = -(double)a;
+	    c = slamc3_(&c, &r__1);
 	    goto L30;
 	}
 /* +       END WHILE */
@@ -335,14 +340,13 @@ L30:
     *ieee1 = lieee1;
     return 0;
 
-/*     End of DLAMC1 */
+/*     End of SLAMC1 */
 
-} /* dlamc1_ */
+} /* slamc1_ */
 
 
-/* Subroutine */ int dlamc2_(int *beta, int *t, int *rnd, 
-	double *eps, int *emin, double *rmin, int *emax, 
-	double *rmax)
+/* Subroutine */ int slamc2_(int *beta, int *t, int *rnd, float *
+	eps, int *emin, float *rmin, int *emax, float *rmax)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -353,7 +357,7 @@ L30:
     Purpose   
     =======   
 
-    DLAMC2 determines the machine parameters specified in its argument   
+    SLAMC2 determines the machine parameters specified in its argument   
     list.   
 
     Arguments   
@@ -373,7 +377,7 @@ L30:
   
             its arithmetic.   
 
-    EPS     (output) DOUBLE PRECISION   
+    EPS     (output) FLOAT   
             The smallest positive number such that   
 
                fl( 1.0 - EPS ) .LT. 1.0,   
@@ -383,7 +387,7 @@ L30:
     EMIN    (output) INT   
             The minimum exponent before (gradual) underflow occurs.   
 
-    RMIN    (output) DOUBLE PRECISION   
+    RMIN    (output) FLOAT   
             The smallest normalized number for the machine, given by   
             BASE**( EMIN - 1 ), where  BASE  is the floating point value 
   
@@ -392,7 +396,7 @@ L30:
     EMAX    (output) INT   
             The maximum exponent before overflow occurs.   
 
-    RMAX    (output) DOUBLE PRECISION   
+    RMAX    (output) FLOAT   
             The largest positive number for the machine, given by   
             BASE**EMAX * ( 1 - EPS ), where  BASE  is the floating point 
   
@@ -414,56 +418,58 @@ L30:
     static int iwarn = FALSE_;
     /* System generated locals */
     int i__1;
-    double d__1, d__2, d__3, d__4, d__5;
+    float r__1, r__2, r__3, r__4, r__5;
     /* Builtin functions */
-    double pow_di(double *, int *);
+    double pow_ri(float *, int *);
     /* Local variables */
     static int ieee;
-    static double half;
+    static float half;
     static int lrnd;
-    static double leps, zero, a, b, c;
+    static float leps, zero, a, b, c;
     static int i, lbeta;
-    static double rbase;
+    static float rbase;
     static int lemin, lemax, gnmin;
-    static double small;
+    static float small;
     static int gpmin;
-    static double third, lrmin, lrmax, sixth;
-    extern /* Subroutine */ int dlamc1_(int *, int *, int *, 
-	    int *);
-    extern double dlamc3_(double *, double *);
+    static float third, lrmin, lrmax, sixth;
     static int lieee1;
-    extern /* Subroutine */ int dlamc4_(int *, double *, int *), 
-	    dlamc5_(int *, int *, int *, int *, int *, 
-	    double *);
+    extern /* Subroutine */ int slamc1_(int *, int *, int *, 
+	    int *);
+    extern double slamc3_(float *, float *);
+    extern /* Subroutine */ int slamc4_(int *, float *, int *), 
+	    slamc5_(int *, int *, int *, int *, int *, 
+	    float *);
     static int lt, ngnmin, ngpmin;
-    static double one, two;
+    static float one, two;
+
+
 
     if (first) {
 	first = FALSE_;
-	zero = 0.;
-	one = 1.;
-	two = 2.;
+	zero = 0.f;
+	one = 1.f;
+	two = 2.f;
 
 /*        LBETA, LT, LRND, LEPS, LEMIN and LRMIN  are the local values
  of   
           BETA, T, RND, EPS, EMIN and RMIN.   
 
-          Throughout this routine  we use the function  DLAMC3  to ens
+          Throughout this routine  we use the function  SLAMC3  to ens
 ure   
           that relevant values are stored  and not held in registers, 
  or   
           are not affected by optimizers.   
 
-          DLAMC1 returns the parameters  LBETA, LT, LRND and LIEEE1. 
+          SLAMC1 returns the parameters  LBETA, LT, LRND and LIEEE1. 
 */
 
-	dlamc1_(&lbeta, &lt, &lrnd, &lieee1);
+	slamc1_(&lbeta, &lt, &lrnd, &lieee1);
 
 /*        Start to find EPS. */
 
-	b = (double) lbeta;
+	b = (float) lbeta;
 	i__1 = -lt;
-	a = pow_di(&b, &i__1);
+	a = pow_ri(&b, &i__1);
 	leps = a;
 
 /*        Try some tricks to see whether or not this is the correct  E
@@ -471,36 +477,36 @@ PS. */
 
 	b = two / 3;
 	half = one / 2;
-	d__1 = -half;
-	sixth = dlamc3_(&b, &d__1);
-	third = dlamc3_(&sixth, &sixth);
-	d__1 = -half;
-	b = dlamc3_(&third, &d__1);
-	b = dlamc3_(&b, &sixth);
-	b = abs(b);
+	r__1 = -(double)half;
+	sixth = slamc3_(&b, &r__1);
+	third = slamc3_(&sixth, &sixth);
+	r__1 = -(double)half;
+	b = slamc3_(&third, &r__1);
+	b = slamc3_(&b, &sixth);
+	b = dabs(b);
 	if (b < leps) {
 	    b = leps;
 	}
 
-	leps = 1.;
+	leps = 1.f;
 
 /* +       WHILE( ( LEPS.GT.B ).AND.( B.GT.ZERO ) )LOOP */
 L10:
 	if (leps > b && b > zero) {
 	    leps = b;
-	    d__1 = half * leps;
+	    r__1 = half * leps;
 /* Computing 5th power */
-	    d__3 = two, d__4 = d__3, d__3 *= d__3;
+	    r__3 = two, r__4 = r__3, r__3 *= r__3;
 /* Computing 2nd power */
-	    d__5 = leps;
-	    d__2 = d__4 * (d__3 * d__3) * (d__5 * d__5);
-	    c = dlamc3_(&d__1, &d__2);
-	    d__1 = -c;
-	    c = dlamc3_(&half, &d__1);
-	    b = dlamc3_(&half, &c);
-	    d__1 = -b;
-	    c = dlamc3_(&half, &d__1);
-	    b = dlamc3_(&half, &c);
+	    r__5 = leps;
+	    r__2 = r__4 * (r__3 * r__3) * (r__5 * r__5);
+	    c = slamc3_(&r__1, &r__2);
+	    r__1 = -(double)c;
+	    c = slamc3_(&half, &r__1);
+	    b = slamc3_(&half, &c);
+	    r__1 = -(double)b;
+	    c = slamc3_(&half, &r__1);
+	    b = slamc3_(&half, &c);
 	    goto L10;
 	}
 /* +       END WHILE */
@@ -520,17 +526,17 @@ his
 	rbase = one / lbeta;
 	small = one;
 	for (i = 1; i <= 3; ++i) {
-	    d__1 = small * rbase;
-	    small = dlamc3_(&d__1, &zero);
+	    r__1 = small * rbase;
+	    small = slamc3_(&r__1, &zero);
 /* L20: */
 	}
-	a = dlamc3_(&one, &small);
-	dlamc4_(&ngpmin, &one, &lbeta);
-	d__1 = -one;
-	dlamc4_(&ngnmin, &d__1, &lbeta);
-	dlamc4_(&gpmin, &a, &lbeta);
-	d__1 = -a;
-	dlamc4_(&gnmin, &d__1, &lbeta);
+	a = slamc3_(&one, &small);
+	slamc4_(&ngpmin, &one, &lbeta);
+	r__1 = -(double)one;
+	slamc4_(&ngnmin, &r__1, &lbeta);
+	slamc4_(&gpmin, &a, &lbeta);
+	r__1 = -(double)a;
+	slamc4_(&gnmin, &r__1, &lbeta);
 	ieee = FALSE_;
 
 	if (ngpmin == ngnmin && gpmin == gnmin) {
@@ -591,7 +597,7 @@ w;
 	    printf("EMIN = %8i\n",lemin);
 	    printf("If, after inspection, the value EMIN looks acceptable");
             printf("please comment out \n the IF block as marked within the"); 
-            printf("code of routine DLAMC2, \n otherwise supply EMIN"); 
+            printf("code of routine SLAMC2, \n otherwise supply EMIN"); 
             printf("explicitly.\n");
 	}
 /* **   
@@ -600,7 +606,7 @@ w;
 ve,   
           or if arithmetic seems to round in the  IEEE style,  determi
 ned   
-          in routine DLAMC1. A true IEEE machine should have both  thi
+          in routine SLAMC1. A true IEEE machine should have both  thi
 ngs   
           true; however, faulty machines may have one or the other. */
 
@@ -612,17 +618,17 @@ ute
 ing   
           this computation. */
 
-	lrmin = 1.;
+	lrmin = 1.f;
 	i__1 = 1 - lemin;
 	for (i = 1; i <= 1-lemin; ++i) {
-	    d__1 = lrmin * rbase;
-	    lrmin = dlamc3_(&d__1, &zero);
+	    r__1 = lrmin * rbase;
+	    lrmin = slamc3_(&r__1, &zero);
 /* L30: */
 	}
 
-/*        Finally, call DLAMC5 to compute EMAX and RMAX. */
+/*        Finally, call SLAMC5 to compute EMAX and RMAX. */
 
-	dlamc5_(&lbeta, &lt, &lemin, &ieee, &lemax, &lrmax);
+	slamc5_(&lbeta, &lt, &lemin, &ieee, &lemax, &lrmax);
     }
 
     *beta = lbeta;
@@ -637,12 +643,12 @@ ing
     return 0;
 
 
-/*     End of DLAMC2 */
+/*     End of SLAMC2 */
 
-} /* dlamc2_ */
+} /* slamc2_ */
 
 
-double dlamc3_(double *a, double *b)
+double slamc3_(float *a, float *b)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -653,7 +659,7 @@ double dlamc3_(double *a, double *b)
     Purpose   
     =======   
 
-    DLAMC3  is intended to force  A  and  B  to be stored prior to doing 
+    SLAMC3  is intended to force  A  and  B  to be stored prior to doing 
   
     the addition of  A  and  B ,  for use in situations where optimizers 
   
@@ -662,25 +668,27 @@ double dlamc3_(double *a, double *b)
     Arguments   
     =========   
 
-    A, B    (input) DOUBLE PRECISION   
+    A, B    (input) FLOAT   
             The values A and B.   
 
    ===================================================================== 
 */
 /* >>Start of File<<   
        System generated locals */
-    double ret_val;
+    float ret_val;
+
+
 
     ret_val = *a + *b;
 
     return ret_val;
 
-/*     End of DLAMC3 */
+/*     End of SLAMC3 */
 
-} /* dlamc3_ */
+} /* slamc3_ */
 
 
-/* Subroutine */ int dlamc4_(int *emin, double *start, int *base)
+/* Subroutine */ int slamc4_(int *emin, float *start, int *base)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -691,7 +699,7 @@ double dlamc3_(double *a, double *b)
     Purpose   
     =======   
 
-    DLAMC4 is a service routine for DLAMC2.   
+    SLAMC4 is a service routine for SLAMC2.   
 
     Arguments   
     =========   
@@ -702,7 +710,7 @@ double dlamc3_(double *a, double *b)
             setting A = START and dividing by BASE until the previous A   
             can not be recovered.   
 
-    START   (input) DOUBLE PRECISION   
+    START   (input) FLOAT   
             The starting point for determining EMIN.   
 
     BASE    (input) INT   
@@ -712,21 +720,23 @@ double dlamc3_(double *a, double *b)
 */
     /* System generated locals */
     int i__1;
-    double d__1;
+    float r__1;
     /* Local variables */
-    static double zero, a;
+    static float zero, a;
     static int i;
-    static double rbase, b1, b2, c1, c2, d1, d2;
-    extern double dlamc3_(double *, double *);
-    static double one;
+    static float rbase, b1, b2, c1, c2, d1, d2;
+    extern double slamc3_(float *, float *);
+    static float one;
+
+
 
     a = *start;
-    one = 1.;
+    one = 1.f;
     rbase = one / *base;
-    zero = 0.;
+    zero = 0.f;
     *emin = 1;
-    d__1 = a * rbase;
-    b1 = dlamc3_(&d__1, &zero);
+    r__1 = a * rbase;
+    b1 = slamc3_(&r__1, &zero);
     c1 = a;
     c2 = a;
     d1 = a;
@@ -737,20 +747,20 @@ L10:
     if (c1 == a && c2 == a && d1 == a && d2 == a) {
 	--(*emin);
 	a = b1;
-	d__1 = a / *base;
-	b1 = dlamc3_(&d__1, &zero);
-	d__1 = b1 * *base;
-	c1 = dlamc3_(&d__1, &zero);
+	r__1 = a / *base;
+	b1 = slamc3_(&r__1, &zero);
+	r__1 = b1 * *base;
+	c1 = slamc3_(&r__1, &zero);
 	d1 = zero;
 	i__1 = *base;
 	for (i = 1; i <= *base; ++i) {
 	    d1 += b1;
 /* L20: */
 	}
-	d__1 = a * rbase;
-	b2 = dlamc3_(&d__1, &zero);
-	d__1 = b2 / rbase;
-	c2 = dlamc3_(&d__1, &zero);
+	r__1 = a * rbase;
+	b2 = slamc3_(&r__1, &zero);
+	r__1 = b2 / rbase;
+	c2 = slamc3_(&r__1, &zero);
 	d2 = zero;
 	i__1 = *base;
 	for (i = 1; i <= *base; ++i) {
@@ -763,13 +773,13 @@ L10:
 
     return 0;
 
-/*     End of DLAMC4 */
+/*     End of SLAMC4 */
 
-} /* dlamc4_ */
+} /* slamc4_ */
 
 
-/* Subroutine */ int dlamc5_(int *beta, int *p, int *emin, 
-	int *ieee, int *emax, double *rmax)
+/* Subroutine */ int slamc5_(int *beta, int *p, int *emin, 
+	int *ieee, int *emax, float *rmax)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -780,7 +790,7 @@ L10:
     Purpose   
     =======   
 
-    DLAMC5 attempts to compute RMAX, the largest machine floating-point   
+    SLAMC5 attempts to compute RMAX, the largest machine floating-point   
     number, without overflow.  It assumes that EMAX + abs(EMIN) sum   
     approximately to a power of 2.  It will fail on machines where this   
     assumption does not hold, for example, the Cyber 205 (EMIN = -28625, 
@@ -802,13 +812,13 @@ L10:
             The minimum exponent before (gradual) underflow.   
 
     IEEE    (input) INT   
-            A int flag specifying whether or not the arithmetic   
+            A logical flag specifying whether or not the arithmetic   
             system is thought to comply with the IEEE standard.   
 
     EMAX    (output) INT   
             The largest exponent before overflow   
 
-    RMAX    (output) DOUBLE PRECISION   
+    RMAX    (output) FLOAT   
             The largest machine floating-point number.   
 
    ===================================================================== 
@@ -820,19 +830,19 @@ L10:
        approximately to the bound that is closest to abs(EMIN).   
        (EMAX is the exponent of the required number RMAX). */
     /* Table of constant values */
-    static double c_b5 = 0.;
+    static float c_b5 = 0.f;
     
     /* System generated locals */
     int i__1;
-    double d__1;
+    float r__1;
     /* Local variables */
     static int lexp;
-    static double oldy;
+    static float oldy;
     static int uexp, i;
-    static double y, z;
+    static float y, z;
     static int nbits;
-    extern double dlamc3_(double *, double *);
-    static double recbas;
+    extern double slamc3_(float *, float *);
+    static float recbas;
     static int exbits, expsum, try__;
 
 
@@ -909,19 +919,19 @@ it
        First compute 1.0 - BETA**(-P), being careful that the   
        result is less than 1.0 . */
 
-    recbas = 1. / *beta;
-    z = *beta - 1.;
-    y = 0.;
+    recbas = 1.f / *beta;
+    z = *beta - 1.f;
+    y = 0.f;
     i__1 = *p;
     for (i = 1; i <= *p; ++i) {
 	z *= recbas;
-	if (y < 1.) {
+	if (y < 1.f) {
 	    oldy = y;
 	}
-	y = dlamc3_(&y, &z);
+	y = slamc3_(&y, &z);
 /* L20: */
     }
-    if (y >= 1.) {
+    if (y >= 1.f) {
 	y = oldy;
     }
 
@@ -929,38 +939,44 @@ it
 
     i__1 = *emax;
     for (i = 1; i <= *emax; ++i) {
-	d__1 = y * *beta;
-	y = dlamc3_(&d__1, &c_b5);
+	r__1 = y * *beta;
+	y = slamc3_(&r__1, &c_b5);
 /* L30: */
     }
 
     *rmax = y;
     return 0;
 
-/*     End of DLAMC5 */
+/*     End of SLAMC5 */
 
-} /* dlamc5_ */
+} /* slamc5_ */
 
-double pow_di(double *ap, int *bp)
+
+double pow_ri(float *ap, int *bp)
 {
-    double pow, x;
-    int n;
+double pow, x;
+int n;
 
-    pow = 1;
-    x = *ap;
-    n = *bp;
+pow = 1;
+x = *ap;
+n = *bp;
 
-    if(n != 0){
-	if(n < 0) {
-	    n = -n;
-	    x = 1/x;
+if(n != 0)
+	{
+	if(n < 0)
+		{
+		n = -n;
+		x = 1/x;
+		}
+	for( ; ; )
+		{
+		if(n & 01)
+			pow *= x;
+		if(n >>= 1)
+			x *= x;
+		else
+			break;
+		}
 	}
-	for( ; ; ) {
-	    if(n & 01) pow *= x;
-	    if(n >>= 1)	x *= x;
-	    else break;
-	}
-    }
-    return(pow);
+return(pow);
 }
-

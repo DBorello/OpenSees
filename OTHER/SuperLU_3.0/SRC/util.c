@@ -21,6 +21,7 @@
 #include <math.h>
 #include "dsp_defs.h"
 #include "util.h"
+#include "util.h"
 
 /* 
  * Global statistics variale

@@ -1,10 +1,8 @@
 #include <stdio.h>
-#include "util.h"
+#include "Cnames.h"
 #define TRUE_ (1)
 #define FALSE_ (0)
-#ifndef abs
 #define abs(x) ((x) >= 0 ? (x) : -(x))
-#endif
 #define min(a,b) ((a) <= (b) ? (a) : (b))
 #define max(a,b) ((a) >= (b) ? (a) : (b))
 
@@ -66,7 +64,7 @@ double dlamch_(char *cmach)
     static int imin, imax;
     static int lrnd;
     static double rmin, rmax, t, rmach;
-/*    extern int lsame_(char *, char *);*/
+    extern int lsame_(char *, char *);
     static double small, sfmin;
     extern /* Subroutine */ int dlamc2_(int *, int *, int *, 
 	    double *, int *, double *, int *, double *);

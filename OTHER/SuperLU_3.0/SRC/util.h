@@ -67,6 +67,7 @@
 /***********************************************************************
  * Enumerate types
  ***********************************************************************/
+#ifndef SuperLU_ENUMERATED_DEFINED 
 typedef enum {NO, YES}                                          yes_no_t;
 typedef enum {DOFACT, SamePattern, SamePattern_SameRowPerm, FACTORED} fact_t;
 typedef enum {NOROWPERM, LargeDiag, MY_PERMR}                   rowperm_t;
@@ -77,6 +78,8 @@ typedef enum {NOREFINE, SINGLE=1, DOUBLE, EXTRA}                IterRefine_t;
 typedef enum {LUSUP, UCOL, LSUB, USUB}                          MemType;
 typedef enum {HEAD, TAIL}                                       stack_end_t;
 typedef enum {SYSTEM, USER}                                     LU_space_t;
+#define SuperLU_ENUMERATED_DEFINED 1
+#endif
 
 /* 
  * The following enumerate type is used by the statistics variable 
