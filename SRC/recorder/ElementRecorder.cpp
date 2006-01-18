@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2005-12-06 00:21:41 $
+// $Revision: 1.25 $
+// $Date: 2006-01-18 19:43:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -193,7 +193,7 @@ ElementRecorder::setDomain(Domain &theDom)
 int
 ElementRecorder::sendSelf(int commitTag, Channel &theChannel)
 {
-  if (theChannel.isDatastore() == 0) {
+  if (theChannel.isDatastore() == 1) {
     opserr << "ElementRecorder::sendSelf() - does not send data to a datastore\n";
     return -1;
   }
@@ -284,7 +284,7 @@ int
 ElementRecorder::recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker)
 {
-  if (theChannel.isDatastore() == 0) {
+  if (theChannel.isDatastore() == 1) {
     opserr << "ElementRecorder::recvSelf() - does not recv data to a datastore\n";
     return -1;
   }
