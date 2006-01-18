@@ -159,15 +159,16 @@ REMO_LIBS = $(FE)/element/nonlinearBeamColumn/quadrule/QuadRule.o \
 	$(FE)/element/forceBeamColumn/TclForceBeamColumnCommand.o \
 	$(FE)/element/forceBeamColumn/BeamIntegration.o \
 	$(FE)/element/forceBeamColumn/LobattoBeamIntegration.o \
+	$(FE)/element/forceBeamColumn/LegendreBeamIntegration.o \
+	$(FE)/element/forceBeamColumn/RadauBeamIntegration.o \
+	$(FE)/element/forceBeamColumn/NewtonCotesBeamIntegration.o \
+	$(FE)/element/forceBeamColumn/HingeMidpointBeamIntegration.o \
+	$(FE)/element/forceBeamColumn/HingeEndpointBeamIntegration.o \
+	$(FE)/element/forceBeamColumn/HingeRadauBeamIntegration.o \
+	$(FE)/element/forceBeamColumn/HingeRadauTwoBeamIntegration.o \
 	$(FE)/element/forceBeamColumn/UserDefinedBeamIntegration.o \
-	$(FE)/element/forceBeamColumn/HingeMidpointBeamIntegration2d.o \
-	$(FE)/element/forceBeamColumn/HingeMidpointBeamIntegration3d.o \
-	$(FE)/element/forceBeamColumn/HingeRadauBeamIntegration2d.o \
-	$(FE)/element/forceBeamColumn/HingeRadauBeamIntegration3d.o \
-	$(FE)/element/forceBeamColumn/HingeRadauTwoBeamIntegration2d.o \
-	$(FE)/element/forceBeamColumn/HingeRadauTwoBeamIntegration3d.o \
-	$(FE)/element/forceBeamColumn/UserDefinedHingeIntegration2d.o \
-	$(FE)/element/forceBeamColumn/UserDefinedHingeIntegration3d.o \
+	$(FE)/element/forceBeamColumn/UserDefinedHingeIntegration.o \
+	$(FE)/element/forceBeamColumn/DistHingeIntegration.o \
 	$(FE)/coordTransformation/CrdTransf.o \
 	$(FE)/coordTransformation/CrdTransf2d.o \
 	$(FE)/coordTransformation/CrdTransf3d.o \
