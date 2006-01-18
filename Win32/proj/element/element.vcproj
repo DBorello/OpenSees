@@ -577,6 +577,18 @@
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\BeamIntegration.h">
 				</File>
 				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeEndpointBeamIntegration.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeEndpointBeamIntegration.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeMidpointBeamIntegration.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeMidpointBeamIntegration.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeMidpointBeamIntegration2d.cpp">
 				</File>
 				<File
@@ -587,6 +599,12 @@
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeMidpointBeamIntegration3d.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeRadauBeamIntegration.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeRadauBeamIntegration.h">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeRadauBeamIntegration2d.cpp">
@@ -601,6 +619,12 @@
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeRadauBeamIntegration3d.h">
 				</File>
 				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeRadauTwoBeamIntegration.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeRadauTwoBeamIntegration.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeRadauTwoBeamIntegration2d.cpp">
 				</File>
 				<File
@@ -613,10 +637,28 @@
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeRadauTwoBeamIntegration3d.h">
 				</File>
 				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\LegendreBeamIntegration.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\LegendreBeamIntegration.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\LobattoBeamIntegration.cpp">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\LobattoBeamIntegration.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\NewtonCotesBeamIntegration.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\NewtonCotesBeamIntegration.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\RadauBeamIntegration.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\RadauBeamIntegration.h">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\UserDefinedBeamIntegration.cpp">
