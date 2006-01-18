@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2006-01-17 19:32:17 $
+// $Revision: 1.12 $
+// $Date: 2006-01-18 23:44:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/TclBeamWithHingesBuilder.cpp,v $
                                                                         
                                                                         
@@ -42,14 +42,12 @@
 
 
 #include <ForceBeamColumn2d.h>
-#include <HingeMidpointBeamIntegration2d.h>
-#include <HingeRadauTwoBeamIntegration2d.h>
-#include <HingeRadauBeamIntegration2d.h>
-
 #include <ForceBeamColumn3d.h>
-#include <HingeMidpointBeamIntegration3d.h>
-#include <HingeRadauTwoBeamIntegration3d.h>
-#include <HingeRadauBeamIntegration3d.h>
+
+#include <HingeMidpointBeamIntegration.h>
+#include <HingeEndpointBeamIntegration.h>
+#include <HingeRadauTwoBeamIntegration.h>
+#include <HingeRadauBeamIntegration.h>
 
 #include <ElasticSection2d.h>
 #include <ElasticSection3d.h>
@@ -92,7 +90,6 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	double massDens = 0.0;
 	int numIters = 10;
 	double tol = 1.0e-10;
-	double shearLength = 1.0;
     
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
 	    opserr << "WARNING invalid beamWithHinges tag" << endln;
@@ -160,6 +157,8 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	}	
 
 	bool useFour = false;
+	bool isShear = false;
+	int shearTag = 0;
 
 	if (argc > 13) {
 	    for (int i = 13; i < argc; i++) {
@@ -171,12 +170,13 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 		    }
 		}
 		
-		if (strcmp(argv[i],"-shear") == 0 && ++i < argc) {
-		    if (Tcl_GetDouble(interp, argv[i], &shearLength) != TCL_OK) {
-			opserr << "WARNING invalid shearLength\n";
+		if (strcmp(argv[i],"-constHinge") == 0 && ++i < argc) {
+		    if (Tcl_GetInt(interp, argv[i], &shearTag) != TCL_OK) {
+			opserr << "WARNING invalid constHinge tag\n";
 			opserr << "BeamWithHinges: " << tag << endln;
 			return TCL_ERROR;
 		    }
+		    isShear = true;
 		}
 
 		if (strcmp(argv[i],"-iter") == 0 && i+2 < argc) {
@@ -225,64 +225,80 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	    return TCL_ERROR;
 	}	
 	
-	//Element *theElement = new BeamWithHinges2d (tag, ndI, ndJ, E, A, I,
-	//*sectionI, lenI, *sectionJ, lenJ, *theTransf, massDens, numIters, tol);
-
 	Element *theElement = 0;
+	int numSections = 0;
+	SectionForceDeformation *sections[10];
+	BeamIntegration *theBeamIntegr = 0;
 
-	if (strcmp(argv[1],"beamWithHinges1") == 0) {
-	  HingeMidpointBeamIntegration2d beamIntegr(E, A, I, lenI, lenJ);
-	  
-	  SectionForceDeformation *sections[2];
+	ElasticSection2d elastic(0, E, A, I);
+
+	if (strcmp(argv[1],"beamWithHinges") == 0) {
+	  theBeamIntegr =
+	    new HingeMidpointBeamIntegration(lenI, lenJ);
+
+	  numSections = 4;
+
 	  sections[0] = sectionI;
-	  sections[1] = sectionJ;
-	  
-	  theElement = new ForceBeamColumn2d(tag, ndI, ndJ, 2,
-					     sections, beamIntegr,
-					     *theTransf, massDens, numIters, tol);
+	  sections[1] = &elastic;
+	  sections[2] = &elastic;
+	  sections[3] = sectionJ;
 	}
 	else if (strcmp(argv[1],"beamWithHinges2") == 0) {
-	  HingeRadauTwoBeamIntegration2d beamIntegr(E, A, I, lenI, lenJ);
+	  theBeamIntegr =
+	    new HingeRadauTwoBeamIntegration(lenI, lenJ);
 	  
-	  SectionForceDeformation *sections[4];
+	  numSections = 6;
 	  sections[0] = sectionI;
 	  sections[1] = sectionI;
-	  sections[2] = sectionJ;
-	  sections[3] = sectionJ;
+	  sections[2] = &elastic;
+	  sections[3] = &elastic;
+	  sections[4] = sectionJ;
+	  sections[5] = sectionJ;
+	}
+	else if (strcmp(argv[1],"beamWithHinges3") == 0 ||
+		 strcmp(argv[1],"beamWithHinges") == 0) {
+	  theBeamIntegr =
+	    new HingeRadauBeamIntegration(lenI, lenJ);
 	  
-	  theElement = new ForceBeamColumn2d(tag, ndI, ndJ, 4,
-					     sections, beamIntegr,
-					     *theTransf, massDens, numIters, tol);
+	  numSections = 6;
+	  sections[0] = sectionI;
+	  sections[1] = &elastic;
+	  sections[2] = &elastic;
+	  sections[3] = &elastic;
+	  sections[4] = &elastic;
+	  sections[5] = sectionJ;
 	}
-	else if ((strcmp(argv[1],"beamWithHinges3") == 0) ||
-		 (strcmp(argv[1],"beamWithHinges") == 0)) {
+	else if (strcmp(argv[1],"beamWithHinges4") == 0) {
+	  theBeamIntegr =
+	    new HingeEndpointBeamIntegration(lenI, lenJ);
+	  
+	  numSections = 4;
+	  sections[0] = sectionI;
+	  sections[1] = &elastic;
+	  sections[2] = &elastic;
+	  sections[3] = sectionJ;
+	}
 
-	  if (useFour) {
-	    HingeRadauTwoBeamIntegration2d beamIntegr(E, A, I, 4*lenI, 4*lenJ);
-	    
-	    ElasticSection2d elastic(0, E, A, I);
-	    SectionForceDeformation *sections[4];
-	    sections[0] = sectionI;
-	    sections[1] = &elastic;
-	    sections[2] = &elastic;
-	    sections[3] = sectionJ;
-	    
-	    theElement = new ForceBeamColumn2d(tag, ndI, ndJ, 4,
-					       sections, beamIntegr,
-					       *theTransf, massDens, numIters, tol);
-	  }
-	  else {
-	    HingeRadauBeamIntegration2d beamIntegr(E, A, I, lenI, lenJ);
-	    
-	    SectionForceDeformation *sections[2];
-	    sections[0] = sectionI;
-	    sections[1] = sectionJ;
-	    
-	    theElement = new ForceBeamColumn2d(tag, ndI, ndJ, 2,
-					       sections, beamIntegr,
-					       *theTransf, massDens, numIters, tol);
-	  }
+	if (theBeamIntegr == 0) {
+	  opserr << "Unknown element type: " << argv[1] << endln;
+	  return TCL_ERROR;
 	}
+
+	if (isShear) {
+	  SectionForceDeformation *sectionL = theBuilder->getSection(shearTag);
+
+	  if (sectionL == 0) {
+	    opserr << "WARNING section L does not exist\n";
+	    opserr << "section: " << shearTag; 
+	    opserr << "\nBeamWithHinges: " << tag << endln;
+	    return TCL_ERROR;
+	  }
+	  sections[numSections++] = sectionL;
+	}
+
+	theElement = new ForceBeamColumn2d(tag, ndI, ndJ, numSections,
+					   sections, *theBeamIntegr,
+					   *theTransf,massDens,numIters,tol);
 
 	// Ensure we have created the element, out of memory if got here and no element
 	if (theElement == 0) {
@@ -464,61 +480,76 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	}		
 
 	Element *theElement = 0;
+	int numSections = 0;
+	SectionForceDeformation *sections[10];
+	BeamIntegration *theBeamIntegr = 0;
+
+	ElasticSection3d elastic(0, E, A, Iz, Iy, G, J);
 
 	if (strcmp(argv[1],"beamWithHinges1") == 0) {
-	  HingeMidpointBeamIntegration3d beamIntegr(E, A, Iz, Iy, G, J, lenI, lenJ);
-	  SectionForceDeformation *sections[2];
+	  theBeamIntegr = new HingeMidpointBeamIntegration(lenI, lenJ);
+
+	  numSections = 4;
 	  sections[0] = sectionI;
-	  sections[1] = sectionJ;
-	  
-	  theElement = new ForceBeamColumn3d(tag, ndI, ndJ, 2,
-					     sections, beamIntegr,
-					     *theTransf, massDens, numIters, tol);
+	  sections[1] = &elastic;
+	  sections[2] = &elastic;
+	  sections[3] = sectionJ;
 	}
 	else if (strcmp(argv[1],"beamWithHinges2") == 0) {
-	  HingeRadauTwoBeamIntegration3d beamIntegr(E, A, Iz, Iy, G, J, lenI, lenJ);
+	  theBeamIntegr = new HingeRadauTwoBeamIntegration(lenI, lenJ);
 	  
-	  SectionForceDeformation *sections[4];
+	  numSections = 6;
 	  sections[0] = sectionI;
 	  sections[1] = sectionI;
-	  sections[2] = sectionJ;
+	  sections[2] = &elastic;
+	  sections[3] = &elastic;
+	  sections[4] = sectionJ;
+	  sections[5] = sectionJ;
+	}
+	else if (strcmp(argv[1],"beamWithHinges3") == 0 ||
+		 strcmp(argv[1],"beamWithHinges") == 0) {
+	  theBeamIntegr = new HingeRadauBeamIntegration(lenI, lenJ);
+	  
+	  numSections = 6;
+	  sections[0] = sectionI;
+	  sections[1] = &elastic;
+	  sections[2] = &elastic;
+	  sections[3] = &elastic;
+	  sections[4] = &elastic;
+	  sections[5] = sectionJ;
+	}
+	else if (strcmp(argv[1],"beamWithHinges4") == 0) {
+	  theBeamIntegr = new HingeEndpointBeamIntegration(lenI, lenJ);
+	  
+	  numSections = 4;
+	  sections[0] = sectionI;
+	  sections[1] = &elastic;
+	  sections[2] = &elastic;
 	  sections[3] = sectionJ;
-	  
-	  theElement = new ForceBeamColumn3d(tag, ndI, ndJ, 4,
-					     sections, beamIntegr,
-					     *theTransf, massDens, numIters, tol);
 	}
 
-	else if ((strcmp(argv[1],"beamWithHinges3") == 0) ||
-		 (strcmp(argv[1],"beamWithHinges") == 0)) {
-
-	  if (useFour) {
-	    HingeRadauTwoBeamIntegration3d beamIntegr(E, A, Iz, Iy, G, J,
-						      4*lenI, 4*lenJ);
-	  
-	    ElasticSection3d elastic(0, E, A, Iz, Iy, G, J);
-	    SectionForceDeformation *sections[4];
-	    sections[0] = sectionI;
-	    sections[1] = &elastic;
-	    sections[2] = &elastic;
-	    sections[3] = sectionJ;
-	    
-	    theElement = new ForceBeamColumn3d(tag, ndI, ndJ, 4,
-					     sections, beamIntegr,
-					     *theTransf, massDens, numIters, tol);
-	  }
-	  else {
-	    HingeRadauBeamIntegration3d beamIntegr(E, A, Iz, Iy, G, J, lenI, lenJ);
-	  
-	    SectionForceDeformation *sections[2];
-	    sections[0] = sectionI;
-	    sections[1] = sectionJ;
-	    
-	    theElement = new ForceBeamColumn3d(tag, ndI, ndJ, 2,
-					     sections, beamIntegr,
-					     *theTransf, massDens, numIters, tol);
-	  }
+	if (theBeamIntegr == 0) {
+	  opserr << "Unknown element type: " << argv[1] << endln;
+	  return TCL_ERROR;
 	}
+
+	/*
+	if (isShear) {
+	  SectionForceDeformation *sectionL = theBuilder->getSection(shearTag);
+
+	  if (sectionL == 0) {
+	    opserr << "WARNING section L does not exist\n";
+	    opserr << "section: " << shearTag; 
+	    opserr << "\nBeamWithHinges: " << tag << endln;
+	    return TCL_ERROR;
+	  }
+	  sections[numSections++] = sectionL;
+	}
+	*/
+
+	theElement = new ForceBeamColumn3d(tag, ndI, ndJ, numSections,
+					   sections, *theBeamIntegr,
+					   *theTransf,massDens,numIters,tol);
 
 	// Ensure we have created the element, out of memory if got here and no element
 	if (theElement == 0) {
