@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2006-01-13 01:09:21 $
+// $Revision: 1.31 $
+// $Date: 2006-01-18 23:02:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -168,13 +168,14 @@
 #include <CorotCrdTransf2d.h>
 #include <CorotCrdTransf3d.h>
 
-#include <HingeMidpointBeamIntegration2d.h>
-#include <HingeMidpointBeamIntegration3d.h>
-#include <HingeRadauBeamIntegration2d.h>
-#include <HingeRadauBeamIntegration3d.h>
-#include <HingeRadauTwoBeamIntegration2d.h>
-#include <HingeRadauTwoBeamIntegration3d.h>
+#include <HingeMidpointBeamIntegration.h>
+#include <HingeEndpointBeamIntegration.h>
+#include <HingeRadauBeamIntegration.h>
+#include <HingeRadauTwoBeamIntegration.h>
 #include <LobattoBeamIntegration.h>
+#include <LegendreBeamIntegration.h>
+#include <RadauBeamIntegration.h>
+#include <NewtonCotesBeamIntegration.h>
 
 // node header files
 #include <Node.h>
@@ -660,32 +661,35 @@ BeamIntegration *
 FEM_ObjectBroker::getNewBeamIntegration(int classTag)
 {
   switch(classTag) {
-    case BEAM_INTEGRATION_TAG_Lobatto:        
-      return new LobattoBeamIntegration();
+  case BEAM_INTEGRATION_TAG_Lobatto:        
+    return new LobattoBeamIntegration();
 
-    case BEAM_INTEGRATION_TAG_HingeMidpoint2d:
-      return new HingeMidpointBeamIntegration2d();
+  case BEAM_INTEGRATION_TAG_Legendre:        
+    return new LegendreBeamIntegration();
+    
+  case BEAM_INTEGRATION_TAG_Radau:
+      return new RadauBeamIntegration();
 
-    case BEAM_INTEGRATION_TAG_HingeRadau2d:
-      return new HingeRadauBeamIntegration2d();
+  case BEAM_INTEGRATION_TAG_NewtonCotes:        
+    return new NewtonCotesBeamIntegration();
 
-    case BEAM_INTEGRATION_TAG_HingeRadauTwo2d:
-      return new HingeRadauTwoBeamIntegration2d();
+  case BEAM_INTEGRATION_TAG_HingeMidpoint:
+    return new HingeMidpointBeamIntegration();
+    
+  case BEAM_INTEGRATION_TAG_HingeRadau:
+    return new HingeRadauBeamIntegration();
+    
+  case BEAM_INTEGRATION_TAG_HingeRadauTwo:
+    return new HingeRadauTwoBeamIntegration();
+    
+  case BEAM_INTEGRATION_TAG_HingeEndpoint:
+    return new HingeEndpointBeamIntegration();
 
-    case BEAM_INTEGRATION_TAG_HingeMidpoint3d:
-      return new HingeMidpointBeamIntegration3d();
-
-    case BEAM_INTEGRATION_TAG_HingeRadau3d:   
-      return new HingeRadauBeamIntegration3d();
-
-    case BEAM_INTEGRATION_TAG_HingeRadauTwo3d:   
-      return new HingeRadauTwoBeamIntegration3d();
-
-    default:
-      opserr << "FEM_ObjectBroker::getBeamIntegration - ";
-      opserr << " - no BeamIntegration type exists for class tag ";
-      opserr << classTag << endln;
-      return 0;
+  default:
+    opserr << "FEM_ObjectBroker::getBeamIntegration - ";
+    opserr << " - no BeamIntegration type exists for class tag ";
+    opserr << classTag << endln;
+    return 0;
   }
 }
 
