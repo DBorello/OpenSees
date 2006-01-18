@@ -13,6 +13,12 @@ OBJS       = Renderer.o WindowRenderer.o View.o Projection.o Clipping.o \
 
 endif
 
+ifeq ($(GRAPHICS), NONE)
+
+OBJS = 
+
+endif
+
 # Compilation control
 all:         $(OBJS)
 

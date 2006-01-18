@@ -55,9 +55,7 @@ INTERPRETER_LIBS_MPI = $(FE)/tcl/tclMain.o \
 	$(FE)/actor/channel/MPI_Channel.o \
 	$(FE)/actor/machineBroker/MPI_MachineBroker.o \
 	$(FE)/domain/subdomain/ActorSubdomain.o \
-	$(FE)/domain/subdomain/ShadowSubdomain.o \
-	$(FE)/tcl/TclFeViewer.o \
-	$(FE)/tcl/TclVideoPlayer.o 
+	$(FE)/domain/subdomain/ShadowSubdomain.o 
 
 INTERPRETER_LIBS_TK = $(FE)/tcl/tkMain.o \
 	$(FE)/tcl/tkAppInit.o \

@@ -407,6 +407,12 @@ RENDERER_LIBS = $(FE)/renderer/db.o \
 
 endif
 
+ifeq ($(GRAPHICS), NONE)
+
+RENDERER_LIBS = 
+
+endif
+
 RECORDER_LIBS = $(FE)/recorder/Recorder.o \
 	$(FE)/recorder/MaxNodeDispRecorder.o \
 	$(FE)/recorder/DatastoreRecorder.o \
