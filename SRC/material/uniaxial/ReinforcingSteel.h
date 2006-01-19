@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2005-08-24 01:51:13 $
+// $Revision: 1.3 $
+// $Date: 2006-01-19 19:19:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ReinforcingSteel.h,v $
 
 /* ****************************************************************** **
@@ -31,29 +31,28 @@
 ********************************************************************* */
 // Written: Jon Mohle
 // Created: October 2003
-// Updated: August 2005
+// Updated: September 2005
 // Description: This file contains the class definition for 
 // ReinforcingSteel.
 
-// More Technical crap here! 
-
 #ifndef ReinforcingSteel_h
 #define ReinforcingSteel_h
+#define HelpDebugMat        //Debugging info, JFM
 
 #include "UniaxialMaterial.h"
 
 // LastRule_RS must be greater than or equal to 12.  Add branches 4 at a time
-// eq 12, 16, 20, 24 etc... failure to add branches 4 at a time will cause problems
+// eq 12, 16, 20, 24 etc... failure to add branches 4 at a time will cause problems.
 // A higher number will result in better tracking of the loop memory effects at the cost of additional memory usage
-// each rule requires 11 additional double variables.
+// each pair of rules requires 11 additional double variables.
 const int LastRule_RS=20;  // must be divisable by 4!!!!!!!!!!!
 
 class ReinforcingSteel : public UniaxialMaterial
 {
  public:
   ReinforcingSteel(int tag, double fyield, double fultimate, double youngs, double youngs_hard, 
-		   double estrainhard, double eultimate, double slenderness, double alpha, double r, 
-		   double gama, double Fatigue1, double Fatigue2, double Degrade1);
+		   double estrainhard, double eultimate, int buckModel, double slenderness, double alpha, double r, 
+		   double gama, double Fatigue1, double Fatigue2, double Degrade1, double RC1, double RC2, double RC3, double A1, double HardLim);
   ReinforcingSteel(int tag);    
   ~ReinforcingSteel();
   
@@ -78,31 +77,49 @@ class ReinforcingSteel : public UniaxialMaterial
  protected:
   
  private:
+
+  #ifdef HelpDebugMat
+    static int classCount;
+    int thisClassNumber;
+    int thisClassCommit;
+    int thisClassStep;
+  #endif
+
   double ZeroTol;
   double reduction;
   double fsu_fraction;
-  double alpha_;
+  double beta;
   int theBarFailed;
 
   // natural stress-strain variables
   double p;
-  double Esp;   // Elastic Modulus
-  double eshp;	// Strain Hardening Strain
-  double fshp;  // Strain Hardening Stress
-  double Eshp;  // Strain Hardening Modulus
-  double esup;  // Strain at Peak Stress
-  double fsup;  // Peak Stress
-  double Eypp;  // Yield Plateu Modulus
-  double fint;  // Stress at yield plateu intersect
-  double eyp;
-  double fyp;
+  double Esp;   // natural Elastic Modulus
+  double eshp;	// natural Hardening Strain
+  double fshp;  // natural Hardening Stress
+  double Eshp;  // natural Hardening Modulus
+  double esup;  // natural Strain at Peak Stress
+  double fsup;  // natural Peak Stress
+  double Esup;  // natural peak stress Modulus
+  double Eypp;  // natural Yield Plateu Modulus
+  double fint;  // natural Stress yield plateu intersect
+  double eyp;   // natural strain at yield
+  double fyp;   // natural yield stress
+
+  double esh;   // engineering hardening strain (user input)
+  double Esh;   // engineering hardening slope (user input)
 
   double eshpa;	// Curve smoothing Parameters (at SH transition)
   double Eshpb;	// These are used to eliminate a sudden discontinuity in stiffness
 
+  double a1;    // Linear Hardening Constant (with relation to accumulated plastic strain)
+  double hardLim;
+
+  double THardFact;
+  double CHardFact;
+
   // Strength degradation parameters
-  double T_FDamage[LastRule_RS/2+1];
-  double C_FDamage[LastRule_RS/2+1];
+  double T_ePlastic[LastRule_RS/2+1];
+  double C_ePlastic[LastRule_RS/2+1];
   //double Nbf;               // Cyclic Backbone factor used correct backbone proporsional to return strain
   double TFatDamage;
   double CFatDamage;
@@ -110,8 +127,13 @@ class ReinforcingSteel : public UniaxialMaterial
   double Fat1;
   double Fat2;
   double Deg1;
-  double Deg2;
+  int    BuckleModel;
+  double BackStress;
 
+  // Menegotto-Pinto Calibration Constants
+  double RC1;
+  double RC2;
+  double RC3;
 
   // Menegotto-Pinto Equation paramenters
   double TR;
@@ -150,6 +172,7 @@ class ReinforcingSteel : public UniaxialMaterial
   double Temin;
   double TeAbsMax;
   double TeAbsMin;
+  double TeCumPlastic;
 
   // Converged History Variables
   int    CBranchNum;
@@ -159,6 +182,7 @@ class ReinforcingSteel : public UniaxialMaterial
   double Cemin;
   double CeAbsMax;
   double CeAbsMin;
+  double CeCumPlastic;
 
   // Trial State Variables
   double TStrain;           // Trial strain
@@ -175,9 +199,10 @@ class ReinforcingSteel : public UniaxialMaterial
   double Backbone_f(double ess);
   double Backbone_fNat(double essp);
   double Backbone_E(double ess);
-  double Buckled_fact(double ess);
+  double Buckled_stress_Dhakal(double ess, double fss);
   double Buckled_stress_Gomes(double ess, double fss);
   double Buckled_mod_Gomes(double ess, double fss, double Ess);
+  double Buckled_mod_Dhakal(double ess, double fss, double Ess);
 
   double inline MP_f(double e);
   double inline MP_E(double e);
@@ -203,9 +228,12 @@ class ReinforcingSteel : public UniaxialMaterial
   int    Rule11(int res);
   int    Rule12(int res);
 
-  double inline damage(double ehalf,double stressAmp);
+  double inline damage(double ehalfPlastic);
+  double inline getPlasticStrain(double ehalf, double stressAmp);
   double scalefactor();
   double inline ReturnSlope(double dea);
+  void updateHardeningLoaction(double PlasticStrain);
+  void updateHardeningLoactionParams(void);
 };
 
 #endif
