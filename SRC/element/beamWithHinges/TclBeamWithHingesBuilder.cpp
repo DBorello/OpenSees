@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2006-01-18 23:44:05 $
+// $Revision: 1.13 $
+// $Date: 2006-01-23 23:42:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/TclBeamWithHingesBuilder.cpp,v $
                                                                         
                                                                         
@@ -300,6 +300,8 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 					   sections, *theBeamIntegr,
 					   *theTransf,massDens,numIters,tol);
 
+	delete theBeamIntegr;
+
 	// Ensure we have created the element, out of memory if got here and no element
 	if (theElement == 0) {
 	    opserr << "WARNING ran out of memory creating element\n";
@@ -550,6 +552,8 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	theElement = new ForceBeamColumn3d(tag, ndI, ndJ, numSections,
 					   sections, *theBeamIntegr,
 					   *theTransf,massDens,numIters,tol);
+
+	delete theBeamIntegr;
 
 	// Ensure we have created the element, out of memory if got here and no element
 	if (theElement == 0) {
