@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2005-10-05 21:53:35 $
+// $Revision: 1.31 $
+// $Date: 2006-01-24 23:20:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -616,32 +616,31 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 
     else if (strcmp(argv[1],"Steel03") == 0) {
       // Check that there is the minimum number of arguments
-      if (argc < 8) {
+      if (argc < 9) {
         opserr << "WARNING insufficient arguments\n";
         printCommand(argc,argv);
-        opserr << "Want: uniaxialMaterial Steel03 tag? fy? E0? b? r? rtype?";
+        opserr << "Want: uniaxialMaterial Steel03 tag? fy? E0? b? r? cR1 cR2?";
         opserr << " <a1? a2? a3? a4?>" << endln;    
         return TCL_ERROR;
       }
       
       int tag;
       
-      
       if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
         opserr << "WARNING invalid uniaxialMaterial Steel03 tag" << endln;
         return TCL_ERROR;
       }
       
+      
       // Read required Steel01 material parameters
       double fy, E, b, r;
-      int rtype;
-      
       
       if (Tcl_GetDouble(interp, argv[3], &fy) != TCL_OK) {
         opserr << "WARNING invalid fy\n";
         opserr << "uniaxialMaterial Steel03: " << tag << endln;
         return TCL_ERROR;
       }
+      
       
       if (Tcl_GetDouble(interp, argv[4], &E) != TCL_OK) {
         opserr << "WARNING invalid E0\n";
@@ -655,70 +654,19 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
         return TCL_ERROR;
       }
       
+      if (Tcl_GetDouble(interp, argv[6], &r) != TCL_OK) {
+	opserr << "WARNING invalid r\n";
+	opserr << "uniaxialMaterial Steel03: " << tag << endln;
+	return TCL_ERROR;
+      }
+    }      
       
-        if (Tcl_GetDouble(interp, argv[6], &r) != TCL_OK) {
-	  opserr << "WARNING invalid r\n";
-	  opserr << "uniaxialMaterial Steel03: " << tag << endln;
-	  return TCL_ERROR;
-	}
-	
-        
-        if (Tcl_GetInt(interp, argv[7], &rtype) != TCL_OK) {
-	  opserr << "WARNING invalid rtype\n";
-	  opserr << "uniaxialMaterial Steel03: " << tag << endln;
-	  return TCL_ERROR;
-	}
-	
-	// Read optional Steel01 material parameters
-	double a1, a2, a3, a4;
-	if (argc > 8) {
-	  if (argc < 12) {
-	    opserr << "WARNING insufficient number of hardening parameters\n";
-	    opserr << "uniaxialMaterial Steel03: " << tag << endln;
-	    return TCL_ERROR;
-	  }
-	  
-	  
-	  if (Tcl_GetDouble(interp, argv[8], &a1) != TCL_OK) {
-	    opserr << "WARNING invalid a1\n";
-	    opserr << "uniaxialMaterial Steel03: " << tag << endln;
-	    return TCL_ERROR;
-	  }
-	  
-        
-	  if (Tcl_GetDouble(interp, argv[9], &a2) != TCL_OK) {
-	    opserr << "WARNING invalid a2\n";
-	    opserr << "uniaxialMaterial Steel03: " << tag << endln;
-	    return TCL_ERROR;
-	  }
-	  
-	  
-	  if (Tcl_GetDouble(interp, argv[10], &a3) != TCL_OK) {
-	    opserr << "WARNING invalid a3\n";
-	    opserr << "uniaxialMaterial Steel03: " << tag << endln;
-	    return TCL_ERROR;
-	  }
-	  
-	  if (Tcl_GetDouble(interp, argv[11], &a4) != TCL_OK) {
-	    opserr << "WARNING invalid a4\n";
-	    opserr << "uniaxialMaterial Steel03: " << tag << endln;
-	    return TCL_ERROR;
-	  }
-	  
-        // Parsing was successful, allocate the material
-	  theMaterial = new Steel03 (tag, fy, E, b, r, rtype, a1, a2, a3, a4);
-	}
-	else
-	  // Parsing was successful, allocate the material
-	  theMaterial = new Steel03 (tag, fy, E, b, r, rtype);
-    }
-    
-
+      
     else if (strcmp(argv[1],"Concrete01") == 0) {
-	if (argc < 7) {
-	    opserr << "WARNING insufficient arguments\n";
-	    printCommand(argc,argv);
-	    opserr << "Want: uniaxialMaterial Concrete01 tag? fpc? epsc0? fpcu? epscu?" << endln;
+      if (argc < 7) {
+	  opserr << "WARNING insufficient arguments\n";
+	  printCommand(argc,argv);
+	  opserr << "Want: uniaxialMaterial Concrete01 tag? fpc? epsc0? fpcu? epscu?" << endln;
 	    return TCL_ERROR;
 	}
 
@@ -1519,215 +1467,213 @@ ft, etu);
    
   else if (strcmp(argv[1],"BarSlip") == 0)
    {
-		
-	   if (argc != 17 && argc != 15)
+     if (argc != 17 && argc != 15)
+       {
+	 opserr << "WARNING insufficient arguments\n";
+	 printCommand(argc,argv);
+	 opserr << "Want: uniaxialMaterial BarSlip tag? fc? fy? Es? fu? Eh? db? ld? nb? width? depth? bsflag? type? <damage? unit?>"  << endln;
+	 return TCL_ERROR;
+       }
+     
+     int tag, nb, bsf, typ, dmg, unt;
+     double fc, fy, Es, fu, Eh, ld, width, depth, db;
+     
+     int argStart = 2;
+     
+     if (Tcl_GetInt(interp, argv[argStart++], &tag) != TCL_OK)
+       {
+	 opserr << "WARNING invalid tag\n";
+	 opserr << "BarSlip: " << tag << endln;
+	 return TCL_ERROR;
+       }
+     if (Tcl_GetDouble(interp, argv[argStart++], &fc) != TCL_OK)
+       {
+	 opserr << "WARNING invalid fc\n";
+	 opserr << "BarSlip: " << tag << endln;
+	 return TCL_ERROR;
+       }
+     if (Tcl_GetDouble(interp, argv[argStart++], &fy) != TCL_OK)
+       {
+	 opserr << "WARNING invalid fy\n";
+	 opserr << "BarSlip: " << tag << endln;
+	 return TCL_ERROR;
+       }
+     if (Tcl_GetDouble(interp, argv[argStart++], &Es) != TCL_OK)
+       {
+	 opserr << "WARNING invalid Es\n";
+	 opserr << "BarSlip: " << tag << endln;
+	 return TCL_ERROR;
+       }
+     if (Tcl_GetDouble(interp, argv[argStart++], &fu) != TCL_OK)
+       {
+	 opserr << "WARNING invalid fu\n";
+	 opserr << "BarSlip: " << tag << endln;
+	 return TCL_ERROR;
+       }
+     if (Tcl_GetDouble(interp, argv[argStart++], &Eh) != TCL_OK)
+       {
+	 opserr << "WARNING invalid Eh\n";
+	 opserr << "BarSlip: " << tag << endln;
+	 return TCL_ERROR;
+       }
+     if (Tcl_GetDouble(interp, argv[argStart++], &db) != TCL_OK)
+       {
+	 opserr << "WARNING invalid db\n";
+	 opserr << "BarSlip: " << tag << endln;
+	 return TCL_ERROR;
+       }
+     if (Tcl_GetDouble(interp, argv[argStart++], &ld) != TCL_OK)
+       {
+	 opserr << "WARNING invalid ld\n";
+	 opserr << "BarSlip: " << tag << endln;
+	 return TCL_ERROR;
+       }
+     if (Tcl_GetInt(interp, argv[argStart++], &nb) != TCL_OK)
+       {
+	 opserr << "WARNING invalid nbars\n";
+	 opserr << "BarSlip: " << tag << endln;
+	 return TCL_ERROR;
+       }
+     if (Tcl_GetDouble(interp, argv[argStart++], &width) != TCL_OK)
+       {
+	 opserr << "WARNING invalid width\n";
+	 opserr << "BarSlip: " << tag << endln;
+	 return TCL_ERROR;
+       }
+     if (Tcl_GetDouble(interp, argv[argStart++], &depth) != TCL_OK)
+       {
+	 opserr << "WARNING invalid depth\n";
+	 opserr << "BarSlip: " << tag << endln;
+	 return TCL_ERROR;
+       }
+     
+     int y;
+     y = argStart;
+     
+     
+     if ((strcmp(argv[y],"strong") == 0) || (strcmp(argv[y],"Strong") == 0) || (strcmp(argv[y],"weak") == 0) || (strcmp(argv[y],"Weak") == 0))
+       {
+	 if ((strcmp(argv[y],"strong") == 0) || (strcmp(argv[y],"Strong") == 0))
 	   {
-		   opserr << "WARNING insufficient arguments\n";
-		   printCommand(argc,argv);
-		   opserr << "Want: uniaxialMaterial BarSlip tag? fc? fy? Es? fu? Eh? db? ld? nb? width? depth? bsflag? type? <damage? unit?>"  << endln;
-		   return TCL_ERROR;
+	     bsf = 0;
 	   }
-
-	   int tag, nb, bsf, typ, dmg, unt;
-	   double fc, fy, Es, fu, Eh, ld, width, depth, db;
-
-	   int argStart = 2;
-
-	   if (Tcl_GetInt(interp, argv[argStart++], &tag) != TCL_OK)
+	 
+	 if ((strcmp(argv[y],"weak") == 0) || (strcmp(argv[y],"Weak") == 0))
 	   {
-		   opserr << "WARNING invalid tag\n";
-		   opserr << "BarSlip: " << tag << endln;
-		   return TCL_ERROR;
+	     bsf = 1;
 	   }
-	   if (Tcl_GetDouble(interp, argv[argStart++], &fc) != TCL_OK)
+       }
+     else
+       {
+	 opserr << "WARNING invalid bond strength specified\n";
+	 opserr << "BarSlip: " << tag << endln;
+	 return TCL_ERROR;
+       }
+     y ++;
+     
+     if ((strcmp(argv[y],"beamtop") == 0) || (strcmp(argv[y],"beamTop") == 0) || 
+	 (strcmp(argv[y],"beambot") == 0) || (strcmp(argv[y],"beamBot") == 0) || (strcmp(argv[y],"beambottom") == 0) || (strcmp(argv[y],"beamBottom") == 0) ||
+	 (strcmp(argv[y],"beam") == 0) || (strcmp(argv[y],"Beam") == 0) || (strcmp(argv[y],"Column") == 0) || (strcmp(argv[y],"column") == 0))
+       {
+	 if ((strcmp(argv[y],"beamtop") == 0) || (strcmp(argv[y],"beamTop") == 0) || (strcmp(argv[y],"beam") == 0) || (strcmp(argv[y],"Beam") == 0))
 	   {
-		   opserr << "WARNING invalid fc\n";
-		   opserr << "BarSlip: " << tag << endln;
-		   return TCL_ERROR;
+	     typ = 0;
 	   }
-	   if (Tcl_GetDouble(interp, argv[argStart++], &fy) != TCL_OK)
+	 
+	 if ((strcmp(argv[y],"beambot") == 0) || (strcmp(argv[y],"beamBot") == 0) || (strcmp(argv[y],"beambottom") == 0) || (strcmp(argv[y],"beamBottom") == 0))
 	   {
-		   opserr << "WARNING invalid fy\n";
-		   opserr << "BarSlip: " << tag << endln;
-		   return TCL_ERROR;
+	     typ = 1;
 	   }
-	   if (Tcl_GetDouble(interp, argv[argStart++], &Es) != TCL_OK)
+	 
+	 if ((strcmp(argv[y],"column") == 0) || (strcmp(argv[y],"Column") == 0))
 	   {
-		   opserr << "WARNING invalid Es\n";
-		   opserr << "BarSlip: " << tag << endln;
-		   return TCL_ERROR;
+	     typ = 2;
 	   }
-	   if (Tcl_GetDouble(interp, argv[argStart++], &fu) != TCL_OK)
-	   {
-		   opserr << "WARNING invalid fu\n";
-		   opserr << "BarSlip: " << tag << endln;
-		   return TCL_ERROR;
-	   }
-	   if (Tcl_GetDouble(interp, argv[argStart++], &Eh) != TCL_OK)
-	   {
-		   opserr << "WARNING invalid Eh\n";
-		   opserr << "BarSlip: " << tag << endln;
-		   return TCL_ERROR;
-	   }
-	   if (Tcl_GetDouble(interp, argv[argStart++], &db) != TCL_OK)
-	   {
-		   opserr << "WARNING invalid db\n";
-		   opserr << "BarSlip: " << tag << endln;
-		   return TCL_ERROR;
-	   }
-	   if (Tcl_GetDouble(interp, argv[argStart++], &ld) != TCL_OK)
-	   {
-		   opserr << "WARNING invalid ld\n";
-		   opserr << "BarSlip: " << tag << endln;
-		   return TCL_ERROR;
-	   }
-	   if (Tcl_GetInt(interp, argv[argStart++], &nb) != TCL_OK)
-	   {
-		   opserr << "WARNING invalid nbars\n";
-		   opserr << "BarSlip: " << tag << endln;
-		   return TCL_ERROR;
-	   }
-	   if (Tcl_GetDouble(interp, argv[argStart++], &width) != TCL_OK)
-	   {
-		   opserr << "WARNING invalid width\n";
-		   opserr << "BarSlip: " << tag << endln;
-		   return TCL_ERROR;
-	   }
-	   if (Tcl_GetDouble(interp, argv[argStart++], &depth) != TCL_OK)
-	   {
-		   opserr << "WARNING invalid depth\n";
-		   opserr << "BarSlip: " << tag << endln;
-		   return TCL_ERROR;
-	   }
-
-	   int y;
-	   y = argStart;
-
-
-	   if ((strcmp(argv[y],"strong") == 0) || (strcmp(argv[y],"Strong") == 0) || (strcmp(argv[y],"weak") == 0) || (strcmp(argv[y],"Weak") == 0))
-	   {
-		   if ((strcmp(argv[y],"strong") == 0) || (strcmp(argv[y],"Strong") == 0))
-		   {
-			   bsf = 0;
-		   }
-
-		   if ((strcmp(argv[y],"weak") == 0) || (strcmp(argv[y],"Weak") == 0))
-		   {
-			   bsf = 1;
-		   }
-	   }
-	   else
-	   {
-		   opserr << "WARNING invalid bond strength specified\n";
-		   opserr << "BarSlip: " << tag << endln;
-		   return TCL_ERROR;
-	   }
-	   y ++;
-
-	   if ((strcmp(argv[y],"beamtop") == 0) || (strcmp(argv[y],"beamTop") == 0) || 
-		   (strcmp(argv[y],"beambot") == 0) || (strcmp(argv[y],"beamBot") == 0) || (strcmp(argv[y],"beambottom") == 0) || (strcmp(argv[y],"beamBottom") == 0) ||
-		   (strcmp(argv[y],"beam") == 0) || (strcmp(argv[y],"Beam") == 0) || (strcmp(argv[y],"Column") == 0) || (strcmp(argv[y],"column") == 0))
-	   {
-		   if ((strcmp(argv[y],"beamtop") == 0) || (strcmp(argv[y],"beamTop") == 0) || (strcmp(argv[y],"beam") == 0) || (strcmp(argv[y],"Beam") == 0))
-		   {
-			   typ = 0;
-		   }
-
-		   if ((strcmp(argv[y],"beambot") == 0) || (strcmp(argv[y],"beamBot") == 0) || (strcmp(argv[y],"beambottom") == 0) || (strcmp(argv[y],"beamBottom") == 0))
-		   {
-			   typ = 1;
-		   }
-
-		   if ((strcmp(argv[y],"column") == 0) || (strcmp(argv[y],"Column") == 0))
-		   {
-			   typ = 2;
-		   }
-	   }
-	   else
-	   {
-		   opserr << "WARNING invalid location of bar specified\n";
-		   opserr << "BarSlip: " << tag << endln;
-		   return TCL_ERROR;
-	   }
-	   if (argc == 17) {
-	   y ++;
-
-	   if ((strcmp(argv[y],"damage1") == 0) || (strcmp(argv[y],"Damage1") == 0) || (strcmp(argv[y],"damage2") == 0) || (strcmp(argv[y],"Damage2") == 0) || 
-		   (strcmp(argv[y],"nodamage") == 0) || (strcmp(argv[y],"Nodamage") == 0) || (strcmp(argv[y],"NoDamage") == 0) || (strcmp(argv[y],"noDamage") == 0))
-	   {
-		   if ((strcmp(argv[y],"damage1") == 0) || (strcmp(argv[y],"Damage1") == 0))
-		   {
-			   dmg = 1;
-		   }
-		   else if ((strcmp(argv[y],"damage2") == 0) || (strcmp(argv[y],"Damage2") == 0))
-		   {
-			   dmg = 2;
-		   }
-		   else if ((strcmp(argv[y],"nodamage") == 0) || (strcmp(argv[y],"Nodamage") == 0) || (strcmp(argv[y],"NoDamage") == 0) || (strcmp(argv[y],"noDamage") == 0))
-		   {
-			   dmg = 0;
-		   }
-
-	   }
-	   else
-	   {
-		   opserr << "WARNING invalid damage specified\n";
-		   opserr << "BarSlip: " << tag << endln;
-		   return TCL_ERROR;
-	   }
-
-	   y ++;
-
-	   if ((strcmp(argv[y],"mpa") == 0) || (strcmp(argv[y],"MPa") == 0) || (strcmp(argv[y],"mPa") == 0) || (strcmp(argv[y],"Mpa") == 0) ||
-		   (strcmp(argv[y],"psi") == 0) || (strcmp(argv[y],"Psi") == 0) || (strcmp(argv[y],"PSI") == 0) || (strcmp(argv[y],"Pa") == 0) ||
-		   (strcmp(argv[y],"pa") == 0) ||  (strcmp(argv[y],"psf") == 0) || (strcmp(argv[y],"Psf") == 0) || (strcmp(argv[y],"PSF") == 0) ||
-		   (strcmp(argv[y],"ksi") == 0) || (strcmp(argv[y],"Ksi") == 0) || (strcmp(argv[y],"KSI") == 0) || (strcmp(argv[y],"ksf") == 0) ||
-		   (strcmp(argv[y],"Ksf") == 0) || (strcmp(argv[y],"KSF") == 0))
-	   {
-		   if ((strcmp(argv[y],"mpa") == 0) || (strcmp(argv[y],"MPa") == 0) || (strcmp(argv[y],"mPa") == 0) || (strcmp(argv[y],"Mpa") == 0))
-		   {
-			   unt = 1;
-		   }
-		   else if ((strcmp(argv[y],"psi") == 0) || (strcmp(argv[y],"Psi") == 0) || (strcmp(argv[y],"PSI") == 0))
-		   {
-			   unt = 2;
-		   }
-		   else if ((strcmp(argv[y],"Pa") == 0) || (strcmp(argv[y],"pa") == 0))
-		   {
-			   unt = 3;
-		   }
-		   else if ((strcmp(argv[y],"psf") == 0) || (strcmp(argv[y],"Psf") == 0) || (strcmp(argv[y],"PSF") == 0))
-		   {
-			   unt = 4;
-		   }
-		   else if ((strcmp(argv[y],"ksi") == 0) || (strcmp(argv[y],"Ksi") == 0) || (strcmp(argv[y],"KSI") == 0))
-		   {
-			   unt = 5;
-		   }
-		   else if ((strcmp(argv[y],"ksf") == 0) || (strcmp(argv[y],"Ksf") == 0) || (strcmp(argv[y],"KSF") == 0))
-		   {
-			   unt = 6;
-		   }
-	   }
-	   else
-	   {
-		   opserr << "WARNING invalid unit specified\n";
-		   opserr << "BarSlip: " << tag << endln;
-		   return TCL_ERROR;
-	   }
-	   }
-
-	   // allocate the material
-	   if (argc == 15 ) {
-		   theMaterial = new BarSlipMaterial (tag, fc, fy, Es, fu, Eh, db, ld, nb, width, depth, bsf, typ);
-	   }
-
-	   if (argc == 17) {
-		   theMaterial = new BarSlipMaterial (tag, fc, fy, Es, fu, Eh, db, ld, nb, width, depth, bsf, typ, dmg, unt);
-	   }
-
+       }
+     else
+       {
+	 opserr << "WARNING invalid location of bar specified\n";
+	 opserr << "BarSlip: " << tag << endln;
+	 return TCL_ERROR;
+       }
+     if (argc == 17) {
+       y ++;
+       
+       if ((strcmp(argv[y],"damage1") == 0) || (strcmp(argv[y],"Damage1") == 0) || (strcmp(argv[y],"damage2") == 0) || (strcmp(argv[y],"Damage2") == 0) || 
+	   (strcmp(argv[y],"nodamage") == 0) || (strcmp(argv[y],"Nodamage") == 0) || (strcmp(argv[y],"NoDamage") == 0) || (strcmp(argv[y],"noDamage") == 0))
+	 {
+	   if ((strcmp(argv[y],"damage1") == 0) || (strcmp(argv[y],"Damage1") == 0))
+	     {
+	       dmg = 1;
+	     }
+	   else if ((strcmp(argv[y],"damage2") == 0) || (strcmp(argv[y],"Damage2") == 0))
+	     {
+	       dmg = 2;
+	     }
+	   else if ((strcmp(argv[y],"nodamage") == 0) || (strcmp(argv[y],"Nodamage") == 0) || (strcmp(argv[y],"NoDamage") == 0) || (strcmp(argv[y],"noDamage") == 0))
+	     {
+	       dmg = 0;
+	     }
+	   
+	 }
+       else
+	 {
+	   opserr << "WARNING invalid damage specified\n";
+	   opserr << "BarSlip: " << tag << endln;
+	   return TCL_ERROR;
+	 }
+       
+       y ++;
+       
+       if ((strcmp(argv[y],"mpa") == 0) || (strcmp(argv[y],"MPa") == 0) || (strcmp(argv[y],"mPa") == 0) || (strcmp(argv[y],"Mpa") == 0) ||
+	   (strcmp(argv[y],"psi") == 0) || (strcmp(argv[y],"Psi") == 0) || (strcmp(argv[y],"PSI") == 0) || (strcmp(argv[y],"Pa") == 0) ||
+	   (strcmp(argv[y],"pa") == 0) ||  (strcmp(argv[y],"psf") == 0) || (strcmp(argv[y],"Psf") == 0) || (strcmp(argv[y],"PSF") == 0) ||
+	   (strcmp(argv[y],"ksi") == 0) || (strcmp(argv[y],"Ksi") == 0) || (strcmp(argv[y],"KSI") == 0) || (strcmp(argv[y],"ksf") == 0) ||
+	   (strcmp(argv[y],"Ksf") == 0) || (strcmp(argv[y],"KSF") == 0))
+	 {
+	   if ((strcmp(argv[y],"mpa") == 0) || (strcmp(argv[y],"MPa") == 0) || (strcmp(argv[y],"mPa") == 0) || (strcmp(argv[y],"Mpa") == 0))
+	     {
+	       unt = 1;
+	     }
+	   else if ((strcmp(argv[y],"psi") == 0) || (strcmp(argv[y],"Psi") == 0) || (strcmp(argv[y],"PSI") == 0))
+	     {
+	       unt = 2;
+	     }
+	   else if ((strcmp(argv[y],"Pa") == 0) || (strcmp(argv[y],"pa") == 0))
+	     {
+	       unt = 3;
+	     }
+	   else if ((strcmp(argv[y],"psf") == 0) || (strcmp(argv[y],"Psf") == 0) || (strcmp(argv[y],"PSF") == 0))
+	     {
+	       unt = 4;
+	     }
+	   else if ((strcmp(argv[y],"ksi") == 0) || (strcmp(argv[y],"Ksi") == 0) || (strcmp(argv[y],"KSI") == 0))
+	     {
+	       unt = 5;
+	     }
+	   else if ((strcmp(argv[y],"ksf") == 0) || (strcmp(argv[y],"Ksf") == 0) || (strcmp(argv[y],"KSF") == 0))
+	     {
+	       unt = 6;
+	     }
+	 }
+       else
+	 {
+	   opserr << "WARNING invalid unit specified\n";
+	   opserr << "BarSlip: " << tag << endln;
+	   return TCL_ERROR;
+	 }
+     }
+     
+     // allocate the material
+     if (argc == 15 ) {
+       theMaterial = new BarSlipMaterial (tag, fc, fy, Es, fu, Eh, db, ld, nb, width, depth, bsf, typ);
+     }
+     
+     if (argc == 17) {
+       theMaterial = new BarSlipMaterial (tag, fc, fy, Es, fu, Eh, db, ld, nb, width, depth, bsf, typ, dmg, unt);
+     }
+     
    } 
-
 
     else {
       // Fedeas

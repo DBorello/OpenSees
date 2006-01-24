@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-08-08 21:54:39 $
+// $Revision: 1.2 $
+// $Date: 2006-01-24 23:20:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel03.h,v $
                                                                         
                                                                         
@@ -61,7 +61,7 @@
 class Steel03 : public UniaxialMaterial
 {
   public:
-    Steel03(int tag, double fy, double E0, double b, double r, int rtype,
+    Steel03(int tag, double fy, double E0, double b, double r, double cR1, double cR2,
        double a1 = STEEL_03_DEFAULT_A1, double a2 = STEEL_03_DEFAULT_A2,
        double a3 = STEEL_03_DEFAULT_A3, double a4 = STEEL_03_DEFAULT_A4);
     Steel03();
@@ -94,7 +94,8 @@ class Steel03 : public UniaxialMaterial
     double E0;  // Initial stiffness
     double b;   // Hardening ratio (b = Esh/E0)
     double r;	// radius of rounded corners
-    int rtype;
+    double cR1;
+    double cR2;
     double a1;
     double a2;
     double a3;

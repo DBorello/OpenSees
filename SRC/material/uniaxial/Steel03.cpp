@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2005-11-09 00:30:14 $
+// $Revision: 1.3 $
+// $Date: 2006-01-24 23:20:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel03.cpp,v $
                                                                         
 // Written: mackie
@@ -49,11 +49,13 @@
 #include <math.h>
 #include <float.h>
 
+//uniaxialMaterial Steel02 $matTag $Fy $E $b $R0 $cR1 $cR2 $a1 $a2 $a3 $a4
+
 Steel03::Steel03
-(int tag, double FY, double E, double B, double R, int RTYP, 
+(int tag, double FY, double E, double B, double R, double R1, double R2, 
  double A1, double A2, double A3, double A4):
    UniaxialMaterial(tag,MAT_TAG_Steel03),
-   fy(FY), E0(E), b(B), r(R), rtype(RTYP), a1(A1), a2(A2), a3(A3), a4(A4)
+   fy(FY), E0(E), b(B), r(R), cR1(R1), cR2(R2), a1(A1), a2(A2), a3(A3), a4(A4)
 {
    // Sets all history and state variables to initial values
    // History variables
@@ -92,7 +94,7 @@ Steel03::Steel03
 }
 
 Steel03::Steel03():UniaxialMaterial(0,MAT_TAG_Steel03),
- fy(0.0), E0(0.0), b(0.0), r(0.0), rtype(1), a1(0.0), a2(0.0), a3(0.0), a4(0.0)
+ fy(0.0), E0(0.0), b(0.0), r(0.0), cR1(0.0), cR2(0.0), a1(0.0), a2(0.0), a3(0.0), a4(0.0)
 {
 
 }
@@ -124,7 +126,7 @@ int Steel03::setTrialStrain (double strain, double strainRate)
    double dStrain = Tstrain - Cstrain;
 
    // Calculate the trial state given the trial strain
-   if (fabs(dStrain) > DBL_EPSILON)   
+   if (fabs(dStrain) > DBL_EPSILON)
      determineTrialState (dStrain);
 
    return 0;
@@ -168,27 +170,28 @@ double Steel03::getR (double x_in)
     x_in = fabs(x_in);
     double temp_r = r;
     
-    if (rtype == 2) {
-        // Dhakal and Maekawa (see ref above)
-        temp_r = r - 18.5*x_in/(0.15+x_in);
-        if (temp_r < 0)
-            temp_r = 1.0e-8;
-    } else if (rtype == 3) {
-        // Gomes and Appleton (see ref above)
-        temp_r = r - 19.0*x_in/(0.3+x_in);
-        if (temp_r < 0)
-            temp_r = 1.0e-8;
-    } else {
+    // new input parameters are supposed to match Steel02 which look like 
+    // Dhakal and Maekawa values: cr1 = 0.925, cr2 = 0.15
+    // where 0.925 comes from 18.5/20.0 where R0=20 and 18.5 is the old coefficient provided
+    //
+    // so for old Dhakal and Maekawa R0 = 20, cr1 = 18.5/R0 = 0.925, cr2 = 0.15
+    // so for old Gomes and Appleton R0 = 20, cr1 = 19.0/R0 = 0.95, cR2 = 0.3
+    // so for my old model, now just use R0 = 20, cR1 = 0, cR2 = 0
+    if (cR1 < 0.1 && cR2 < 0.1) {
         // Mackie, rough trilinear fit to the tangent to the x_in-r first 
-        // quadrant circle.  Try using with small values of R like 2 and 3
-        temp_r = r;
-        double t1 = -x_in/7+15/7*r;
-        double t2 = -4*x_in+6*r;
+        // quadrant circle.  Try using with values of R0 like 20 to 30
+        temp_r = r*2.0/20.0;
+        double t1 = -x_in/7+15/7*temp_r;
+        double t2 = -4*x_in+6*temp_r;
         if (t1 > temp_r)
             temp_r = t1;
         if (t2 > temp_r)
             temp_r = t2;
         //opserr << "xin = " << x_in << " rout = " << temp_r << endln;
+    } else {
+    	temp_r = r * (1.0 - cR1*x_in/(cR2+x_in));
+        if (temp_r < 0)
+            temp_r = 1.0e-8;
     }
     
     return temp_r;
@@ -376,7 +379,7 @@ int Steel03::revertToStart ()
 
 UniaxialMaterial* Steel03::getCopy ()
 {
-   Steel03* theCopy = new Steel03(this->getTag(), fy, E0, b, r, rtype, 
+   Steel03* theCopy = new Steel03(this->getTag(), fy, E0, b, r, cR1, cR2, 
 				  a1, a2, a3, a4);
 
    // Converged history variables
@@ -421,7 +424,7 @@ UniaxialMaterial* Steel03::getCopy ()
 int Steel03::sendSelf (int commitTag, Channel& theChannel)
 {
    int res = 0;
-   static Vector data(24);
+   static Vector data(25);
    data(0) = this->getTag();
 
    // Material properties
@@ -429,29 +432,30 @@ int Steel03::sendSelf (int commitTag, Channel& theChannel)
    data(2) = E0;
    data(3) = b;
    data(4) = r;
-   data(5) = rtype;
-   data(6) = a1;
-   data(7) = a2;
-   data(8) = a3;
-   data(9) = a4;
+   data(5) = cR1;
+   data(6) = cR2;
+   data(7) = a1;
+   data(8) = a2;
+   data(9) = a3;
+   data(10) = a4;
 
    // History variables from last converged state
-   data(10) = CminStrain;
-   data(11) = CmaxStrain;
-   data(12) = CshiftP;
-   data(13) = CshiftN;
-   data(14) = Cloading;
-   data(15) = CbStrain;
-   data(16) = CbStress;
-   data(17) = CrStrain;
-   data(18) = CrStress;
-   data(19) = Cplastic;
+   data(11) = CminStrain;
+   data(12) = CmaxStrain;
+   data(13) = CshiftP;
+   data(14) = CshiftN;
+   data(15) = Cloading;
+   data(16) = CbStrain;
+   data(17) = CbStress;
+   data(18) = CrStrain;
+   data(19) = CrStress;
+   data(20) = Cplastic;
 
    // State variables from last converged state
-   data(20) = Cstrain;
-   data(21) = Cstress;
-   data(22) = Ctangent;
-   data(23) = CcurR;
+   data(21) = Cstrain;
+   data(22) = Cstress;
+   data(23) = Ctangent;
+   data(24) = CcurR;
 
    // Data is only sent after convergence, so no trial variables
    // need to be sent through data vector
@@ -467,7 +471,7 @@ int Steel03::recvSelf (int commitTag, Channel& theChannel,
                                 FEM_ObjectBroker& theBroker)
 {
    int res = 0;
-   static Vector data(24);
+   static Vector data(25);
    res = theChannel.recvVector(this->getDbTag(), commitTag, data);
   
    if (res < 0) {
@@ -482,23 +486,24 @@ int Steel03::recvSelf (int commitTag, Channel& theChannel,
       E0 = data(2);
       b = data(3);
       r = data(4);
-      rtype = int(data(5));
-      a1 = data(6);
-      a2 = data(7);
-      a3 = data(8);
-      a4 = data(9);
+      cR1 = data(5);
+      cR2 = data(6);
+      a1 = data(7);
+      a2 = data(8);
+      a3 = data(9);
+      a4 = data(10);
 
       // History variables from last converged state
-      CminStrain = data(10);
-      CmaxStrain = data(11);
-      CshiftP = data(12);
-      CshiftN = data(13);
-      Cloading = int(data(14));
-      CbStrain = data(15);
-      CbStress = data(16);
-      CrStrain = data(17);
-      CrStress = data(18);
-      Cplastic = data(19);
+      CminStrain = data(11);
+      CmaxStrain = data(12);
+      CshiftP = data(13);
+      CshiftN = data(14);
+      Cloading = int(data(15));
+      CbStrain = data(16);
+      CbStress = data(17);
+      CrStrain = data(18);
+      CrStress = data(19);
+      Cplastic = data(20);
 
       // Copy converged history values into trial values since data is only
       // sent (received) after convergence
@@ -514,10 +519,10 @@ int Steel03::recvSelf (int commitTag, Channel& theChannel,
       Tplastic = Cplastic;
 
       // State variables from last converged state
-      Cstrain = data(20);
-      Cstress = data(21);
-      Ctangent = data(22);
-      CcurR = data(23);
+      Cstrain = data(21);
+      Cstress = data(22);
+      Ctangent = data(23);
+      CcurR = data(24);
 
       // Copy converged state values into trial values
       Tstrain = Cstrain;
@@ -532,10 +537,10 @@ int Steel03::recvSelf (int commitTag, Channel& theChannel,
 void Steel03::Print (OPS_Stream& s, int flag)
 {
    s << "Steel03 tag: " << this->getTag() << endln;
-   s << "  type: " << rtype << " fy: " << fy << " ";
+   s << " fy: " << fy << " ";
    s << "  E0: " << E0 << " ";
    s << "  b: " << b << " ";
-   s << "  r:  " << r << endln;
+   s << "  r:  " << r << " cR1: " << cR1 << " cR2: " << cR2 << endln;
    s << "  a1: " << a1 << " ";
    s << "  a2: " << a2 << " ";
    s << "  a3: " << a3 << " ";
