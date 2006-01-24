@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2006-01-23 23:42:13 $
+// $Revision: 1.14 $
+// $Date: 2006-01-24 18:51:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/TclBeamWithHingesBuilder.cpp,v $
                                                                         
                                                                         
@@ -232,7 +232,7 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 
 	ElasticSection2d elastic(0, E, A, I);
 
-	if (strcmp(argv[1],"beamWithHinges") == 0) {
+	if (strcmp(argv[1],"beamWithHinges1") == 0) {
 	  theBeamIntegr =
 	    new HingeMidpointBeamIntegration(lenI, lenJ);
 
