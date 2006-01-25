@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2005-06-20 21:35:18 $
+// $Revision: 1.3 $
+// $Date: 2006-01-25 01:44:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSOE.cpp,v $
 
 // Written: fmk 
@@ -306,8 +306,6 @@ DistributedDiagonalSOE::setSize(Graph &theGraph)
   the_Solver->setLinearSOE(*this);
   int solverOK = the_Solver->setSize();
   
-  int address = (int)the_Solver;
-
   if (solverOK < 0) {
     opserr << "WARNING DistributedDiagonalSOE::setSize :";
     opserr << " solver failed setSize()\n";

@@ -13,10 +13,7 @@
 # #MPI_LIB_DIR     = -L/home/zhyang/mpich/build/LINUX/ch_p4/lib  
 # 
 
-
 include ../../../../Makefile.def
-
-
 
 OBJS  = Template3Dep.o \
         TclTemplate3DepCommand.o \
@@ -49,10 +46,10 @@ OBJS  = Template3Dep.o \
 
 ################### TARGETS ########################
 all: $(OBJS) 
-	$(AR) -rv $(MATMOD_LIBRARY) $(OBJS)
+	$(AR) $(ARFLAGS) $(MATMOD_LIBRARY) $(OBJS)
 
 libmatmod.a: $(OBJS)
-	$(AR) -rv $(MATMOD_LIBRARY) $(OBJS)
+	$(AR) $(ARFLAGS) $(MATMOD_LIBRARY) $(OBJS)
 
 
 
