@@ -385,8 +385,9 @@ ifeq ($(GRAPHICS), UsingOpenGL)
 RENDERER_LIBS = $(FE)/renderer/OpenGlDevice.o \
 	$(FE)/renderer/OpenGlRenderer.o \
 	$(FE)/renderer/Renderer.o \
-	$(FE)/renderer/PlainMap.o 
-
+	$(FE)/renderer/PlainMap.o \
+	$(FE)/recorder/FilePlotter.o \
+	$(FE)/recorder/AlgorithmIncrements.o \
 
 else
 
@@ -404,7 +405,10 @@ RENDERER_LIBS = $(FE)/renderer/db.o \
 	$(FE)/renderer/Renderer.o \
 	$(FE)/renderer/WindowRenderer.o \
 	$(FE)/renderer/X11Renderer.o \
-	$(FE)/renderer/PlainMap.o
+	$(FE)/renderer/PlainMap.o \
+	$(FE)/recorder/FilePlotter.o \
+	$(FE)/recorder/AlgorithmIncrements.o
+
 
 endif
 
@@ -423,9 +427,7 @@ RECORDER_LIBS = $(FE)/recorder/Recorder.o \
 	$(FE)/recorder/PatternRecorder.o \
 	$(FE)/recorder/ElementRecorder.o \
 	$(FE)/recorder/EnvelopeElementRecorder.o \
-	$(FE)/recorder/FilePlotter.o \
 	$(FE)/recorder/GSA_Recorder.o \
-	$(FE)/recorder/AlgorithmIncrements.o \
 	$(FE)/recorder/TclRecorderCommands.o \
 	$(FE)/recorder/response/Response.o \
 	$(FE)/recorder/response/ElementResponse.o \
@@ -436,7 +438,6 @@ RECORDER_LIBS = $(FE)/recorder/Recorder.o \
 	$(FE)/handler/DataOutputDatabaseHandler.o \
 	$(FE)/handler/DataOutputStreamHandler.o \
 	$(FE)/handler/DataOutputFileHandler.o 
-
 
 
 DATABASE_LIBS = $(FE)/database/FileDatastore.o \
