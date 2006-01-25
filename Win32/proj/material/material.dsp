@@ -1517,6 +1517,10 @@ SOURCE=..\..\..\SRC\material\section\GenericSection1d.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\section\Isolator2spring.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\material\section\MembranePlateFiberSection.cpp
 # End Source File
 # Begin Source File

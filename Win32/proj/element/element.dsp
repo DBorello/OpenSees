@@ -261,6 +261,30 @@ SOURCE=..\..\..\SRC\coordTransformation\CrdTransf3d.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\element\forceBeamColumn\DistHingeIntegration.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeEndpointBeamIntegration.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeMidpointBeamIntegration.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeRadauBeamIntegration.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeRadauTwoBeamIntegration.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\forceBeamColumn\LegendreBeamIntegration.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\coordTransformation\LinearCrdTransf2d.cpp
 # End Source File
 # Begin Source File
@@ -274,6 +298,10 @@ SOURCE=..\..\..\SRC\coordTransformation\LinearCrdTransf3d.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\coordTransformation\LinearCrdTransf3d.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\forceBeamColumn\NewtonCotesBeamIntegration.cpp
 # End Source File
 # Begin Source File
 
@@ -293,7 +321,15 @@ SOURCE=..\..\..\SRC\coordTransformation\PDeltaCrdTransf3d.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\element\forceBeamColumn\RadauBeamIntegration.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\coordTransformation\TclGeomTransfCommand.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\forceBeamColumn\UserDefinedHingeIntegration.cpp
 # End Source File
 # End Group
 # Begin Group "quad"
