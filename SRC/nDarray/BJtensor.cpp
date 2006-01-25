@@ -1,9 +1,3 @@
-                                                                        
-// $Revision: 1.4 $                                                              
-// $Date: 2005-10-21 22:02:39 $                                                                  
-// $Source: /usr/local/cvs/OpenSees/SRC/nDarray/BJtensor.cpp,v $                                                                
-                                                                        
-                                                                        
 //############################################################################
 //#                                                                          #
 //#             /~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~/~~\              #
@@ -74,13 +68,10 @@
 #ifndef TENSOR_CC
 #define TENSOR_CC
 
-//  #include "basics.h"
-//  #include "nDarray.h"
 #include "BJtensor.h"
 
 // just send appropriate arguments to the base constructor
 //##############################################################################
-
 BJtensor::BJtensor(int rank_of_BJtensor, double initval):
   nDarray(rank_of_BJtensor, initval)  // default constructor
     {
@@ -122,48 +113,18 @@ BJtensor::BJtensor(char *flag):
 
 
 
-////##############################################################################
-//BJtensor::BJtensor(const BJtensor & x):   // copy initializer
-//  nDarray("NO")           // with base class constructor cancelation
-//  {
-//    x.pc_nDarray_rep->n++;  // we're adding another reference.
-////    x.reference_count(+1); // we're adding another reference.
-//    pc_nDarray_rep = x.pc_nDarray_rep;  // point to the new BJtensor_rep.
-//// add the indices
-//    indices1 = x.indices1;
-//    indices2 = x.indices2;
-// }
-
-
-//ZhaoOct2005 re-wrote the copy constructor 
 //##############################################################################
-BJtensor::BJtensor(const BJtensor & x)
-: indices1(x.indices1), indices2(x.indices2)    
-{
-   pc_nDarray_rep = new nDarray_rep;
-   pc_nDarray_rep->nDarray_rank = x.pc_nDarray_rep->nDarray_rank;
+BJtensor::BJtensor(const BJtensor & x):   // copy initializer
+  nDarray("NO")           // with base class constructor cancelation
+  {
+    x.pc_nDarray_rep->n++;  // we're adding another reference.
+//    x.reference_count(+1); // we're adding another reference.
+    pc_nDarray_rep = x.pc_nDarray_rep;  // point to the new BJtensor_rep.
+// add the indices
+    indices1 = x.indices1;
+    indices2 = x.indices2;
+ }
 
-   int one_or0 = 0;
-   if(!x.pc_nDarray_rep->nDarray_rank) one_or0 = 1;
-   pc_nDarray_rep->dim = new int[pc_nDarray_rep->nDarray_rank+one_or0];
-                                                                
-   pc_nDarray_rep->total_numb = x.pc_nDarray_rep->total_numb;
-
-   for( int idim = 0 ; idim < pc_nDarray_rep->nDarray_rank ; idim++ )
-       pc_nDarray_rep->dim[idim] = x.pc_nDarray_rep->dim[idim];
-
-   pc_nDarray_rep->pd_nDdata = new double [x.pc_nDarray_rep->total_numb];
-     if (!pc_nDarray_rep->pd_nDdata)
-       {
-         ::fprintf(stderr,"\a\nInsufficient memory for array\n");
-         ::exit(1);
-       }
-
-   pc_nDarray_rep->n = 1;
-
-   for ( int i=0 ; i<pc_nDarray_rep->total_numb ; i++ )
-      pc_nDarray_rep->pd_nDdata[i] = x.pc_nDarray_rep->pd_nDdata[i];
-}
 
 
 //##############################################################################
@@ -202,9 +163,6 @@ BJtensor::BJtensor(const nDarray & x):
 //##############################################################################
 BJtensor& BJtensor::operator=( const BJtensor & rval)
   {
-    if (&rval == this) // if assign an BJtensor to itself
-        return *this;
-    
     rval.pc_nDarray_rep->n++; // we're adding another reference.
 //    rval.reference_count(+1);  // tell the rval it has another reference
 //   /*  It is important to increment the reference_counter in the new
@@ -708,84 +666,67 @@ BJtensor operator-(const BJtensor & lval, const BJtensor & rval)
 //  }
 //
 
-// Optimized by  Zhao Oct2005
-BJtensor& BJtensor::operator*=( const double  rval)
-{
-   for ( int i=0 ; i<pc_nDarray_rep->total_numb ; i++ )
-    pc_nDarray_rep->pd_nDdata[i] *= rval;
-    
-   this->null_indices();
-   
-   return *this;    
-}
-
-
-
-
 //##############################################################################
 //// scalar multiplication (BJtensor * scalar)
-//check what happens if you have tenosr A=B and then you do B*5.13
+//check what happens if you are have tenosr A=B and then you do B*5.13
 // does it change A as well !!!!!!!!!!!!!!!!!!!!!!!!!!
 // TS KR!!!!
 //
-BJtensor BJtensor::operator*( const double rval) const // Added const here!
+BJtensor BJtensor::operator*( const double rval) const //Guanzhou added const
  {
-//ZC// construct BJtensor using the same control numbers as for the
-//ZC// original one.
-//ZC    BJtensor mult(this->rank(), dim(), 0.0);
-//ZC
-//ZC    mult.indices1 = this->indices1;
-//ZC
-//ZC    switch(this->rank())
-//ZC      {
-//ZC        case 0:
-//ZC          {
-//ZC            mult.val(1) = val(1) * rval;
-//ZC            break;
-//ZC          }
-//ZC
-//ZC        case 1:
-//ZC          {
-//ZC            for ( int i1=1 ; i1<=this->dim()[0] ; i1++ )
-//ZC              mult.val(i1) = val(i1) * rval;
-//ZC            break;
-//ZC          }
-//ZC
-//ZC        case 2:
-//ZC          {
-//ZC            for ( int i2=1 ; i2<=this->dim()[0] ; i2++ )
-//ZC              for ( int j2=1 ; j2<=this->dim()[1] ; j2++ )
-//ZC                mult.val(i2, j2) = val(i2, j2) * rval;
-//ZC            break;
-//ZC          }
-//ZC
-//ZC        case 3:
-//ZC          {
-//ZC            for ( int i3=1 ; i3<=this->dim()[0] ; i3++ )
-//ZC              for ( int j3=1 ; j3<=this->dim()[1] ; j3++ )
-//ZC                for ( int k3=1 ; k3<=this->dim()[2] ; k3++ )
-//ZC                  mult.val(i3, j3, k3) = val(i3, j3, k3) * rval;
-//ZC            break;
-//ZC          }
-//ZC
-//ZC        case 4:
-//ZC          {
-//ZC            for ( int i4=1 ; i4<=this->dim()[0] ; i4++ )
-//ZC              for ( int j4=1 ; j4<=this->dim()[1] ; j4++ )
-//ZC                for ( int k4=1 ; k4<=this->dim()[2] ; k4++ )
-//ZC                  for ( int l4=1 ; l4<=this->dim()[3] ; l4++ )
-//ZC                    mult.val(i4,j4,k4,l4)=val(i4,j4,k4,l4)*rval;
-//ZC            break;
-//ZC          }
-//ZC      }
-//ZC
-//ZC    null_indices();
-//ZC
-//ZC    return mult;
+// construct BJtensor using the same control numbers as for the
+// original one.
+    
+    //Guanzhou changed!!! taking const values from cval instead of val
+    
+    BJtensor mult(this->rank(), dim(), 0.0);
+    
+    mult.indices1 = this->indices1;
 
-    BJtensor mult(*this);
+    switch(this->rank())
+      {
+        case 0:
+          {
+            mult.val(1) = cval(1) * rval;
+            break;
+          }
 
-    mult *= rval;
+        case 1:
+          {
+            for ( int i1=1 ; i1<=this->dim()[0] ; i1++ )
+              mult.val(i1) = cval(i1) * rval;
+            break;
+          }
+
+        case 2:
+          {
+            for ( int i2=1 ; i2<=this->dim()[0] ; i2++ )
+              for ( int j2=1 ; j2<=this->dim()[1] ; j2++ )
+                mult.val(i2, j2) = cval(i2, j2) * rval;
+            break;
+          }
+
+        case 3:
+          {
+            for ( int i3=1 ; i3<=this->dim()[0] ; i3++ )
+              for ( int j3=1 ; j3<=this->dim()[1] ; j3++ )
+                for ( int k3=1 ; k3<=this->dim()[2] ; k3++ )
+                  mult.val(i3, j3, k3) = cval(i3, j3, k3) * rval;
+            break;
+          }
+
+        case 4:
+          {
+            for ( int i4=1 ; i4<=this->dim()[0] ; i4++ )
+              for ( int j4=1 ; j4<=this->dim()[1] ; j4++ )
+                for ( int k4=1 ; k4<=this->dim()[2] ; k4++ )
+                  for ( int l4=1 ; l4<=this->dim()[3] ; l4++ )
+                    mult.val(i4,j4,k4,l4) = cval(i4,j4,k4,l4)*rval;
+            break;
+          }
+      }
+
+    mult.null_indices();
 
     return mult;
  }
@@ -793,7 +734,7 @@ BJtensor BJtensor::operator*( const double rval) const // Added const here!
 //    BJtensor operator*( double lval, nDarray & rval);  // REVIEWER global
 //##############################################################################
 // scalar multiplication
-BJtensor  operator*( const double lval, const BJtensor & rval)
+BJtensor  operator*( const double lval, BJtensor & rval)
   {
     return rval*lval;
   }
@@ -2496,7 +2437,7 @@ BJtensor BJtensor::inverse()  const // invert BJtensor of even rank by
 
 //    result.print("t","back to BJtensor result");
 #ifdef SASA
-//***** Dodo Sasa
+//***** Dodao Sasa
 //  result.pc_nDarray_rep->dim=this->dim();
 //************** Dosta prljavo ( ako se ubije treba videti da se
 // iskopira niz a ne pointer jer ovako moze da bude problema ako 
@@ -2569,4 +2510,5 @@ char * BJtensor::f_indices2( void ) const
 
 
 #endif
+
 
