@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.31 $
-// $Date: 2006-01-24 23:20:18 $
+// $Revision: 1.32 $
+// $Date: 2006-01-25 02:28:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -659,7 +659,65 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	opserr << "uniaxialMaterial Steel03: " << tag << endln;
 	return TCL_ERROR;
       }
-    }      
+       
+
+      if (Tcl_GetDouble(interp, argv[7], &cR1) != TCL_OK) {
+	opserr << "WARNING invalid cR1\n";
+	opserr << "uniaxialMaterial Steel03: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      
+      if (Tcl_GetDouble(interp, argv[8], &cR2) != TCL_OK) {
+	opserr << "WARNING invalid cR2\n";
+	opserr << "uniaxialMaterial Steel03: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      // Read optional Steel01 material parameters
+      double a1, a2, a3, a4;
+      if (argc > 9) {
+	if (argc < 13) {
+	  opserr << "WARNING insufficient number of hardening parameters\n";
+	  opserr << "uniaxialMaterial Steel03: " << tag << endln;
+	  return TCL_ERROR;
+	}
+	
+	if (Tcl_GetDouble(interp, argv[9], &a1) != TCL_OK) {
+	  opserr << "WARNING invalid a1\n";
+	  opserr << "uniaxialMaterial Steel03: " << tag << endln;
+	  return TCL_ERROR;
+	}
+	
+	if (Tcl_GetDouble(interp, argv[10], &a2) != TCL_OK) {
+	  opserr << "WARNING invalid a2\n";
+	  opserr << "uniaxialMaterial Steel03: " << tag << endln;
+	  return TCL_ERROR;
+	}
+	
+	if (Tcl_GetDouble(interp, argv[11], &a3) != TCL_OK) {
+	  opserr << "WARNING invalid a3\n";
+	  opserr << "uniaxialMaterial Steel03: " << tag << endln;
+	  return TCL_ERROR;
+	}
+	
+	
+	if (Tcl_GetDouble(interp, argv[12], &a4) != TCL_OK) {
+	  opserr << "WARNING invalid a4\n";
+	  opserr << "uniaxialMaterial Steel03: " << tag << endln;
+	  return TCL_ERROR;
+	}
+	
+	
+        // Parsing was successful, allocate the material
+	theMaterial = new Steel03 (tag, fy, E, b, r, cR1, cR2, a1, a2, a3, a4);
+      }
+      else
+	// Parsing was successful, allocate the material
+	theMaterial = new Steel03 (tag, fy, E, b, r, cR1, cR2);
+      
+    }
+
       
       
     else if (strcmp(argv[1],"Concrete01") == 0) {
