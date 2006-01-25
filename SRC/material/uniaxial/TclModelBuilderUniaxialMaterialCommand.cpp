@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.32 $
-// $Date: 2006-01-25 02:28:08 $
+// $Revision: 1.33 $
+// $Date: 2006-01-25 19:00:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -633,7 +633,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
       
       
       // Read required Steel01 material parameters
-      double fy, E, b, r;
+      double fy, E, b, r, cR1, cR2;
       
       if (Tcl_GetDouble(interp, argv[3], &fy) != TCL_OK) {
         opserr << "WARNING invalid fy\n";
