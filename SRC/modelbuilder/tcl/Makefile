@@ -11,32 +11,32 @@ all: $(OBJS)
 
 ifeq ($(PROGRAMMING_MODE), PARALLEL)
 
-tcl: myCommands.o
+tcl: $(OBJS)  
 	@$(CD) $(FE)/tcl; $(MAKE) tcl;
-	@$(LINKER) $(LINKFLAGS) myCommands.o $(INTERPRETER_LIBS_MPI) \
+	@$(LINKER) $(LINKFLAGS) $(INTERPRETER_LIBS_MPI) \
 	$(FE_LIBRARY) $(MACHINE_LINKLIBS) $(PARALLEL_LIB) \
 	$(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY)  \
 	$(MACHINE_SPECIFIC_LIBS) -o $(OpenSees_PROGRAM)
 
-tk: myCommands.o
+tk: $(OBJS)  
 	@$(CD) $(FE)/tcl; $(MAKE) tk;
-	@$(LINKER) $(LINKFLAGS) myCommands.o $(INTERPRETER_LIBS_TK) \
+	@$(LINKER) $(LINKFLAGS) $(INTERPRETER_LIBS_TK) \
 	$(FE_LIBRARY) $(MACHINE_LINKLIBS) $(PARALLEL_LIB) \
 	$(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY)  \
 	$(MACHINE_SPECIFIC_LIBS) -o $(OpenSees_PROGRAM)
 
 else
 
-tcl: myCommands.o
+tcl: $(OBJS)  
 	@$(CD) $(FE)/tcl; $(MAKE) tcl;
-	@$(LINKER) $(LINKFLAGS) myCommands.o $(INTERPRETER_LIBS_TCL) \
+	@$(LINKER) $(LINKFLAGS) $(INTERPRETER_LIBS_TCL) \
 	$(FE_LIBRARY) $(MACHINE_LINKLIBS) \
 	$(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY)  \
 	$(MACHINE_SPECIFIC_LIBS) -o $(OpenSees_PROGRAM)
 
-tk: myCommands.o
+tk: $(OBJS)  
 	@$(CD) $(FE)/tcl; $(MAKE) tk;
-	@$(LINKER) $(LINKFLAGS) myCommands.o $(INTERPRETER_LIBS_TK) \
+	@$(LINKER) $(LINKFLAGS) $(INTERPRETER_LIBS_TK) \
 	$(FE_LIBRARY) $(MACHINE_LINKLIBS) \
 	$(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY)  \
 	$(MACHINE_SPECIFIC_LIBS) -o $(OpenSees_PROGRAM)
@@ -46,12 +46,14 @@ endif
 INTERPRETER_LIBS_TCL = $(FE)/tcl/tclMain.o \
 	$(FE)/tcl/tclAppInit.o \
 	$(FE)/tcl/commands.o \
+	$(FE)/modelbuilder/tcl/myCommands.o \
 	$(FE)/tcl/TclFeViewer.o \
 	$(FE)/tcl/TclVideoPlayer.o 
 
 INTERPRETER_LIBS_MPI = $(FE)/tcl/tclMain.o \
 	$(FE)/tcl/mpiMain.o \
 	$(FE)/tcl/commands.o \
+	$(FE)/modelbuilder/tcl/myCommands.o \
 	$(FE)/actor/channel/MPI_Channel.o \
 	$(FE)/actor/machineBroker/MPI_MachineBroker.o \
 	$(FE)/domain/subdomain/ActorSubdomain.o \
@@ -60,6 +62,7 @@ INTERPRETER_LIBS_MPI = $(FE)/tcl/tclMain.o \
 INTERPRETER_LIBS_TK = $(FE)/tcl/tkMain.o \
 	$(FE)/tcl/tkAppInit.o \
 	$(FE)/tcl/commands.o \
+	$(FE)/modelbuilder/tcl/myCommands.o \
 	$(FE)/tcl/TclFeViewer.o \
 	$(FE)/tcl/TclVideoPlayer.o 
 
