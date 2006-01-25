@@ -240,6 +240,9 @@
 				RelativePath="..\..\..\SRC\coordTransformation\CrdTransf3d.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\element\forceBeamColumn\DistHingeIntegration.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\coordTransformation\LinearCrdTransf2d.cpp">
 			</File>
 			<File
@@ -262,6 +265,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\coordTransformation\TclGeomTransfCommand.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\forceBeamColumn\UserDefinedHingeIntegration.cpp">
 			</File>
 		</Filter>
 		<Filter
