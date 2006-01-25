@@ -29,14 +29,15 @@ OpenSees_PROGRAM = $(HOME)/bin/OpenSees
 # Specify the constants the are used as control structure variables in the Makefiles.
 
 OPERATING_SYSTEM = LINUX
-GRAPHICS = UsingOpenGL
-PROGRAMMING_MODE = SEQUENTIAL
-
-#DEBUG_MODE = DEBUG, NO_DEBUG
+PROGRAMMING_MODE = PARALLEL
+RELIABILITY = NO_RELIABILITY
+GRAPHICS = NONE
 DEBUG_MODE = NO_DEBUG
 
+#PROGRAMMING_MODE = PARALLEL, SEQUENTIAL
+#GRAPHICS = NONE, UsingOpenGL
 #RELIABILITY = YES_RELIABILITY, NO_RELIABILITY
-RELIABILITY = NO_RELIABILITY
+#DEBUG_MODE = DEBUG, NO_DEBUG
 
 
 # %---------------------------------%
@@ -49,7 +50,7 @@ RELIABILITY = NO_RELIABILITY
 
 BASE  = 
 #  PUT YOUR HOME DIRECTOREY HERE
-HOME  = /users03/ucb/ux455280
+HOME = /gpfs/fmk
 FE    = $(HOME)/OpenSees/SRC
 
 
@@ -61,10 +62,12 @@ UMFPACKdir   = $(HOME)/OpenSees/OTHER/UMFPACK
 METISdir     = $(HOME)/OpenSees/OTHER/METIS
 SRCdir       = $(HOME)/OpenSees/SRC
 SUPERLUdir   = $(HOME)/OpenSees/OTHER/SuperLU_3.0/SRC
+SUPERLU_DISTdir   = $(HOME)/OpenSees/OTHER/SuperLU_DIST_2.0/SRC
 
 DIRS        = $(BLASdir) \
               $(CBLASdir) \
               $(SUPERLUdir) \
+              $(SUPERLU_DISTdir) \
               $(LAPACKdir) \
               $(ARPACKdir) \
               $(UMFPACKdir) \
@@ -97,11 +100,12 @@ CBLAS_LIBRARY       = $(HOME)/lib/libCBlas.a
 ARPACK_LIBRARY      = $(HOME)/lib/libArpack.a
 UMFPACK_LIBRARY     = $(HOME)/lib/libUmfpack.a
 METIS_LIBRARY       = $(HOME)/lib/libMetis.a
+DISTRIBUTED_SUPERLU_LIBRARY     = $(HOME)/lib/libDistributedSuperLU.a
 
-TCL_LIBRARY         = /usr/lib/libtk8.3.so \
-	 	/usr/lib/libtcl8.3.so
+TCL_LIBRARY         = /usr/local/apps/tcl-8.3.5/lib/libtcl8.3g.so \
+	 	/usr/local/apps/tk-8.3.5/lib/libtk8.3g.so
 
-GRAPHIC_LIBRARY     = -L/usr/include/GL -lGL -lGLU 
+GRAPHIC_LIBRARY     = 
 
 
 #RELIABILITY_LIBRARY = $(HOME)/lib/libReliability.a
@@ -134,26 +138,28 @@ WIPE_LIBS	= $(FE_LIBRARY) \
 # # Compilers
 # ################################################### 
 
-CC++            =  xlC_r
+CC++            =  mpCC_r
+CC              =  mpcc_r
+FC              =  mpxlf_r
 
-CC              =  xlc_r
+F90             =  mpxlf90_r
+FORTRAN             =  $(FC)
 
-FC              =  xlf_r
-
-F90             =  xlf90_r
-
-LINKER          =  xlC_r
+LINKER          =  $(CC++)
 
 AR		= ar 
+ARCH		= ar 
 
-ARFLAGS		= cqls
+ARFLAGS		= -v -q -X64
+#ARCHFLAGS       = cqls
+ARCHFLAGS       = -v -q -X64
 
 RANLIB		= ranlib
 
 RANLIBFLAGS     = 
 
 
-GRAPHIC_FLAG = -D_GLX
+GRAPHIC_FLAG = -D_NOGRAPHICS
 PROGRAMMING_FLAG = 
 
 #RELIABILITY_FLAG = -D_RELIABILITY
@@ -162,16 +168,19 @@ RELIABILITY_FLAG =
 #DEBUG_FLAG = -D_G3DEBUG 
 DEBUG_FLAG =
 
-C++FLAGS         = -D_LINUX -D_UNIX  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) \
-	$(PROGRAMMING_FLAG) -O3 -qstrict -D_KAI
+OPT_FLAG = -O3 -qstrict -q64 
+NOOPTS =  -qstrict -q64 
+#-pg
+C++FLAGS         = -D_LINUX -D_UNIX  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(OPT_FLAG)\
+		$(PROGRAMMING_FLAG) -qarch=pwr4 -qtune=pwr4  -D_KAI -D_PARALLEL_PROCESSING -cpp -D_PETSC
 
-CFLAGS          = -O3 -qstrict $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG)  -D_KAI
-FFLAGS          = -O3 -qstrict -qextname
-LINKFLAGS       = 
+CFLAGS          = -qarch=pwr4 -qtune=pwr4  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG)  -D_KAI -D_PARALLEL_PROCESSING $(OPT_FLAG)
+FFLAGS          = -qarch=pwr4 -qtune=pwr4   -qextname $(OPT_FLAG)
+LINKFLAGS       = -bnoquiet $(OPT_FLAG)
 
 
 # Misc
-MAKE            = $(HOME)/bin/make
+MAKE            = /usr/bin/gmake
 CD              = cd
 ECHO            = echo
 RM              = rm
@@ -235,9 +244,25 @@ SHELL           = /bin/sh
 # | platform specific and typically order does matter!!     |
 # %---------------------------------------------------------%
 MACHINE_LINKLIBS  = -L$(BASE)/lib \
-                    -L$(HOME)/lib \
+                    -L$(HOME)/lib 
+
+PETSC_DIR = /usr/local/apps/petsc-2.2.1-64
+PETSC_ARCH = rs6000_64
+BOPT = O
+
+#-Wl,-rpath,$(PETSC_DIR)/lib/libg/$(PETSC_ARCH) \
+
+PETSC_LIB =  -L$(PETSC_DIR)/lib/libg/$(PETSC_ARCH) \
+	-lpetscsnes -lpetscksp -lpetscdm -lpetscmat -lpetscvec -lpetsc \
+	$(FE)/system_of_eqn/linearSOE/petsc/PetscSOE.o \
+	$(FE)/system_of_eqn/linearSOE/petsc/PetscSolver.o \
+	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSOE.o \
+	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSolver.o \
+	$(FE)/system_of_eqn/linearSOE/petsc/PetscSparseSeqSolver.o 
 
 
+PARALLEL_LIB = 	$(FE)/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSOE.o \
+	$(FE)/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSolver.o 
 
 
 MACHINE_NUMERICAL_LIBS  = -lm \
@@ -248,12 +273,15 @@ MACHINE_NUMERICAL_LIBS  = -lm \
   $(BLAS_LIBRARY) \
   $(CBLAS_LIBRARY) \
   $(GRAPHIC_LIBRARY)\
-  $(RELIABILITY_LIBRARY)
+  $(RELIABILITY_LIBRARY) \
+  $(DISTRIBUTED_SUPERLU_LIBRARY) \
+  $(METIS_LIBRARY) $(PARALLEL_LIB) $(PETSC_LIB)
 
 
 
-#MACHINE_SPECIFIC_LIBS = -lpthread
-MACHINE_SPECIFIC_LIBS = -lpng -lessl -lGL -lX11 -lf
+
+#MACHINE_SPECIFIC_LIBS = -lpng -lessl -lGL -lX11 -lf
+MACHINE_SPECIFIC_LIBS = -lessl -lGL -lX11 -lf
 
 
 # %---------------------------------------------------------%
@@ -264,11 +292,19 @@ MACHINE_SPECIFIC_LIBS = -lpng -lessl -lGL -lX11 -lf
 # %---------------------------------------------------------%
 
 
+
+PETSCINC = -I$(PETSC_DIR)/include -I$(PETSC_DIR)/bmake/$(PETSC_ARCH) -D_PETSC -DPETSC_USE_BOPT_g -DPETSC_USE_EXTERN_CXX
+
 MACHINE_INCLUDES        = -I/usr/local/BerkeleyDB.4.0/include \
-                          -I/usr/include/mysql \
-                          -I$(HOME)/include   \
-	                  -I$(UMFPACKdir) \
-                          -I$(SUPERLUdir) 
+	-I/usr/include/mysql \
+	-I$(HOME)/include   \
+	-I$(UMFPACKdir) \
+	-I$(SUPERLUdir) \
+	-I$(SUPERLU_DISTdir) \
+	-I/usr/lpp/ppe.poe/include \
+	$(PETSCINC)
+ 
+
 
 # this file contains all the OpenSees/SRC includes
 include $(FE)/Makefile.incl
