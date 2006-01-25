@@ -75,6 +75,8 @@ complex16: $(ZSLUSRC) $(ZPLUSRC) $(ALLAUX)
 	$(RANLIB) $(DSUPERLULIB)
 
 
+DSUPERLULIB = $(DISTRIBUTED_SUPERLU_LIBRARY)
+
 ##################################
 # Do not optimize these routines #
 ##################################
@@ -82,12 +84,6 @@ slamch.o: slamch.c ; $(CC) $(NOOPTS) $(CDEFS) -c $<
 dlamch.o: dlamch.c ; $(CC) $(NOOPTS) $(CDEFS) -c $<
 superlu_timer.o: superlu_timer.c ; $(CC) -c $(NOOPTS) $(CDEFS) $<
 
-
-.c.o:
-	$(CC) $(MPIINC) $(CFLAGS) $(CDEFS) $(BLASDEF) -c $< $(VERBOSE)
-
-.f.o:
-	$(FORTRAN) $(MPIINC) $(FFLAGS) -c $< $(VERBOSE)
 
 clean:	
 	rm -f *.o ../superlu$(PLAT).a
