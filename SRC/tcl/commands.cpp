@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.70 $
-// $Date: 2006-01-13 22:33:51 $
+// $Revision: 1.71 $
+// $Date: 2006-01-27 19:37:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -2316,8 +2316,8 @@ specifyCTest(ClientData clientData, Tcl_Interp *interp, int argc,
   }    
 
   // get the tolerence first
-  double tol;
-  int numIter;
+  double tol 1.0e-8;
+  int numIter = 10;
   int printIt = 0;
   int normType = 2;
 
