@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.71 $
-// $Date: 2006-01-27 19:37:09 $
+// $Revision: 1.72 $
+// $Date: 2006-01-28 00:56:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -2316,8 +2316,8 @@ specifyCTest(ClientData clientData, Tcl_Interp *interp, int argc,
   }    
 
   // get the tolerence first
-  double tol 1.0e-8;
-  int numIter = 10;
+  double tol = 0.0;
+  int numIter = 0;
   int printIt = 0;
   int normType = 2;
 
@@ -2365,28 +2365,39 @@ specifyCTest(ClientData clientData, Tcl_Interp *interp, int argc,
 
   ConvergenceTest *theNewTest = 0;
 
-  if (strcmp(argv[1],"NormUnbalance") == 0) 
-    theNewTest = new CTestNormUnbalance(tol,numIter,printIt,normType);       
-  else if (strcmp(argv[1],"NormDispIncr") == 0) 
-    theNewTest = new CTestNormDispIncr(tol,numIter,printIt,normType);             
-  else if (strcmp(argv[1],"EnergyIncr") == 0) 
-    theNewTest = new CTestEnergyIncr(tol,numIter,printIt,normType);             
-  else if (strcmp(argv[1],"RelativeNormUnbalance") == 0) 
-    theNewTest = new CTestRelativeNormUnbalance(tol,numIter,printIt,normType);       
-  else if (strcmp(argv[1],"RelativeNormDispIncr") == 0) 
-    theNewTest = new CTestRelativeNormDispIncr(tol,numIter,printIt,normType);             
-  else if (strcmp(argv[1],"RelativeEnergyIncr") == 0) 
-    theNewTest = new CTestRelativeEnergyIncr(tol,numIter,printIt,normType);             
-  else if (strcmp(argv[1],"RelativeTotalNormDispIncr") == 0) 
-    theNewTest = new CTestRelativeTotalNormDispIncr(tol,numIter,printIt,normType);             
-  else if (strcmp(argv[1],"FixedNumIter") == 0)
+  if (numIter == 0) {
+    opserr << "ERROR: no numIter specified in test command\n";
+    return TCL_ERROR;
+  }
+
+  if (strcmp(argv[1],"FixedNumIter") == 0)
     theNewTest = new CTestFixedNumIter(numIter,printIt,normType);             
   else {
-    opserr << "WARNING No ConvergenceTest type (NormUnbalance, NormDispIncr, EnergyIncr, \n";
-    opserr << "RelativeNormUnbalance, RelativeNormDispIncr, RelativeEnergyIncr, \n";
-    opserr << "RelativeTotalNormDispIncr, FixedNumIter)\n";
-    return TCL_ERROR;
-  }    
+    if (tol == 0.0) {
+      opserr << "ERROR: no tolerance specified in test command\n";
+      return TCL_ERROR;
+    }
+    if (strcmp(argv[1],"NormUnbalance") == 0) 
+      theNewTest = new CTestNormUnbalance(tol,numIter,printIt,normType);       
+    else if (strcmp(argv[1],"NormDispIncr") == 0) 
+      theNewTest = new CTestNormDispIncr(tol,numIter,printIt,normType);             
+    else if (strcmp(argv[1],"EnergyIncr") == 0) 
+      theNewTest = new CTestEnergyIncr(tol,numIter,printIt,normType);             
+    else if (strcmp(argv[1],"RelativeNormUnbalance") == 0) 
+      theNewTest = new CTestRelativeNormUnbalance(tol,numIter,printIt,normType);       
+    else if (strcmp(argv[1],"RelativeNormDispIncr") == 0) 
+      theNewTest = new CTestRelativeNormDispIncr(tol,numIter,printIt,normType);             
+    else if (strcmp(argv[1],"RelativeEnergyIncr") == 0) 
+      theNewTest = new CTestRelativeEnergyIncr(tol,numIter,printIt,normType);             
+    else if (strcmp(argv[1],"RelativeTotalNormDispIncr") == 0) 
+      theNewTest = new CTestRelativeTotalNormDispIncr(tol,numIter,printIt,normType);             
+    else {
+      opserr << "WARNING No ConvergenceTest type (NormUnbalance, NormDispIncr, EnergyIncr, \n";
+      opserr << "RelativeNormUnbalance, RelativeNormDispIncr, RelativeEnergyIncr, \n";
+      opserr << "RelativeTotalNormDispIncr, FixedNumIter)\n";
+      return TCL_ERROR;
+    }    
+  }
 
   if (theNewTest != 0) {
     theTest = theNewTest;
