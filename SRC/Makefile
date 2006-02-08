@@ -61,6 +61,7 @@ all:
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(DRAIN_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(SNAP_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(FMK_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(KJE_LIBS)
 	@$(RANLIB) $(RANLIBFLAGS) $(FE_LIBRARY)
 
 else
@@ -121,6 +122,7 @@ all:
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(DRAIN_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(SNAP_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(FMK_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(KJE_LIBS)
 	@$(RANLIB) $(RANLIBFLAGS) $(FE_LIBRARY)
 
 endif
@@ -138,6 +140,13 @@ metis:
 FMK_LIBS = $(FE)/database/FE_Datastore.o \
 	$(FE)/package/packages.o
 
+
+KJE_LIBS = $(FE)/material/uniaxial/limitState/LimitStateMaterial.o \
+	$(FE)/material/uniaxial/limitState/TclLimitState.o \
+	$(FE)/material/uniaxial/limitState/limitCurve/LimitCurve.o \
+	$(FE)/material/uniaxial/limitState/limitCurve/AxialCurve.o \
+	$(FE)/material/uniaxial/limitState/limitCurve/ShearCurve.o \
+	$(FE)/material/uniaxial/limitState/limitCurve/ThreePointCurve.o 
 
 # the files that make up the FE_LIBRARY
 GLF_LIBS = $(FE)/element/zeroLength/ZeroLength.o \
