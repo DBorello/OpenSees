@@ -41,8 +41,6 @@
 #ifndef LimitStateMaterial_h
 #define LimitStateMaterial_h
 
-#define MAT_TAG_LimitState	1971 //to be moved to higher class later
-
 #include <UniaxialMaterial.h>
 #include <LimitCurve.h>
 
