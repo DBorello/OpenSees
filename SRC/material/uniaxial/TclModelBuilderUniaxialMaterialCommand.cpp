@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.33 $
-// $Date: 2006-01-25 19:00:52 $
+// $Revision: 1.34 $
+// $Date: 2006-02-08 02:29:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -63,7 +63,16 @@
 #include <Vector.h>
 #include <string.h>
 
+
+#ifdef _LIMITSTATEMATERIAL
+extern UniaxialMaterial *
+Tcl_AddLimitStateMaterial(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+#endif
+
+
 #include <packages.h>
+
+
 
 typedef struct uniaxialPackageCommand {
   char *funcName;
@@ -1748,6 +1757,12 @@ ft, etu);
       // Py, Tz, Qz models
       if (theMaterial == 0)
 	theMaterial = TclModelBuilder_addPyTzQzMaterial(clientData, interp, argc, argv, theTclBuilder, theDomain);
+
+#ifdef _LIMITSTATEMATERIAL
+      // LimitState
+      if (theMaterial == 0)
+	theMaterial = Tcl_AddLimitStateMaterial(clientData, interp, argc, argv);
+#endif
     }
 
     if (theMaterial == 0) {
