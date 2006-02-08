@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2006-01-12 19:57:12 $
+// $Revision: 1.30 $
+// $Date: 2006-02-08 02:27:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -281,6 +281,15 @@ extern int
 TclModelBuilder_addGeomTransf(ClientData, Tcl_Interp *, int, TCL_Char **,
 			      Domain*, TclModelBuilder *);   
 	
+
+#ifdef _LIMITSTATEMATERIAL
+extern int
+Tcl_AddLimitCurveCommand(Tcl_Interp *interp, Domain *theDomain);
+
+extern int
+Tcl_RemoveLimitCurve(Tcl_Interp *interp);
+#endif
+
 //
 // CLASS CONSTRUCTOR & DESTRUCTOR
 //
@@ -421,6 +430,13 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
 		    TclModelBuilder_UpdateParameter,
 		    (ClientData)NULL, NULL);
 
+
+
+#ifdef _LIMITSTATEMATERIAL
+  ///new command for LimitCurve
+  Tcl_AddLimitCurveCommand(interp, &theDomain);
+#endif
+
   // set the static pointers in this file
   theTclBuilder = this;
   theTclDomain = &theDomain;
@@ -490,10 +506,15 @@ TclModelBuilder::~TclModelBuilder()
   Tcl_DeleteCommand(theInterp, "block3D");
   Tcl_DeleteCommand(theInterp, "patch");
   Tcl_DeleteCommand(theInterp, "layer");
+
   Tcl_DeleteCommand(theInterp, "fiber");
   Tcl_DeleteCommand(theInterp, "geomTransf");
   Tcl_DeleteCommand(theInterp, "updateMaterialStage");
   Tcl_DeleteCommand(theInterp, "updateParameter");
+
+#ifdef _LIMITSTATE
+  Tcl_removeLimitCurve(Tcl_Interp *interp);
+#endif
 }
 
 
