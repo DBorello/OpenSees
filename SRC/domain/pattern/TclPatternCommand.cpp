@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.11 $
-// $Date: 2005-11-04 19:24:54 $
+// $Revision: 1.12 $
+// $Date: 2006-02-08 19:29:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclPatternCommand.cpp,v $
 
 // File: ~/domain/pattern/TclPatternComand.C
@@ -129,35 +129,24 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
   else if (strcmp(argv[1],"UniformExcitation") == 0) {
 
   int dir;
-  char inputDir;
-  inputDir = argv[3][0];
-  switch (inputDir)  {
 
-    case 'X': case 'x': case '1': // Global X
-      dir = 0;
-      break;
-    case 'Y': case 'y': case '2': // Global Y
-      dir = 1;
-      break;
-    case 'Z': case 'z': case '3': // Global Z
-      dir = 2;
-      break;
-    default:
-      opserr << "WARNING cannot read direction for excitation \n";
-      opserr << "UniformExcitation " << patternID << " dir factor" << endln;
-      return TCL_ERROR;
-      break;
+  if (Tcl_GetInt(interp, argv[3], &dir) != TCL_OK) {
+    opserr << "WARNING invalid patternID: pattern type " << argv[2]
+	<< "<type args>\n";
+    return TCL_ERROR;
   }
 
-      TimeSeries *accelSeries = 0;
-      TimeSeries *velSeries = 0;
-      TimeSeries *dispSeries = 0;
-      TimeSeriesIntegrator *seriesIntegrator = 0;
-      double vel0 = 0.0;
+  dir--; // subtract 1 for c indexing
 
-      int currentArg = 4;
-      bool doneSeries = false;
-      while (currentArg < argc-1 && doneSeries == false) {
+  TimeSeries *accelSeries = 0;
+  TimeSeries *velSeries = 0;
+  TimeSeries *dispSeries = 0;
+  TimeSeriesIntegrator *seriesIntegrator = 0;
+  double vel0 = 0.0;
+  
+  int currentArg = 4;
+  bool doneSeries = false;
+  while (currentArg < argc-1 && doneSeries == false) {
 
   if ((strcmp(argv[currentArg],"-vel0") == 0) ||
       (strcmp(argv[currentArg],"-initialVel") == 0)) {
