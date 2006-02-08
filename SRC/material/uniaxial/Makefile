@@ -20,6 +20,7 @@ all:         $(OBJS)
 	@$(CD) $(FE)/material/uniaxial/drain; $(MAKE);
 	@$(CD) $(FE)/material/uniaxial/snap; $(MAKE);
 	@$(CD) $(FE)/material/uniaxial/PY; $(MAKE);
+	@$(CD) $(FE)/material/uniaxial/limitState; $(MAKE);
 
 # Miscellaneous
 
@@ -34,6 +35,7 @@ spotless: clean
 	@$(CD) $(FE)/material/uniaxial/drain; $(MAKE) wipe;
 	@$(CD) $(FE)/material/uniaxial/snap; $(MAKE) wipe;
 	@$(CD) $(FE)/material/uniaxial/PY; $(MAKE) wipe;
+	@$(CD) $(FE)/material/uniaxial/limitState; $(MAKE) wipe;
 
 wipe: spotless
 
