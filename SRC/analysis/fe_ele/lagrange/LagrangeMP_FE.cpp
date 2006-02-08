@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-11-28 21:38:40 $
+// $Revision: 1.5 $
+// $Date: 2006-02-08 20:20:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/lagrange/LagrangeMP_FE.cpp,v $
                                                                         
                                                                         
@@ -232,28 +232,36 @@ LagrangeMP_FE::getResidual(Integrator *theNewIntegrator)
 const Vector &
 LagrangeMP_FE::getTangForce(const Vector &disp, double fact)
 {
- opserr << "WARNING LagrangeSP_FE::getTangForce() - not yet implemented\n";
+ opserr << "WARNING lagrangeMP_FE::getTangForce() - not yet implemented\n";
  return *resid;
 }
+
 
 const Vector &
 LagrangeMP_FE::getK_Force(const Vector &disp, double fact)
 {
- opserr << "WARNING LagrangeSP_FE::getK_Force() - not yet implemented\n";
+ opserr << "WARNING lagrangeMP_FE::getK_Force() - not yet implemented\n";
+ return *resid;
+}
+
+const Vector &
+LagrangeMP_FE::getKi_Force(const Vector &disp, double fact)
+{
+ opserr << "WARNING LagrangeMP_FE::getKi_Force() - not yet implemented\n";
  return *resid;
 }
 
 const Vector &
 LagrangeMP_FE::getC_Force(const Vector &disp, double fact)
 {
- opserr << "WARNING LagrangeSP_FE::getC_Force() - not yet implemented\n";
+ opserr << "WARNING lagrangeMP_FE::getC_Force() - not yet implemented\n";
  return *resid;
 }
 
 const Vector &
 LagrangeMP_FE::getM_Force(const Vector &disp, double fact)
 {
- opserr << "WARNING LagrangeSP_FE::getM_Force() - not yet implemented\n";
+ opserr << "WARNING lagrangeMP_FE::getM_Force() - not yet implemented\n";
  return *resid;
 }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2005-11-28 21:38:40 $
+// $Revision: 1.7 $
+// $Date: 2006-02-08 20:20:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/penalty/PenaltyMP_FE.cpp,v $
                                                                         
                                                                         
@@ -224,6 +224,13 @@ PenaltyMP_FE::getTangForce(const Vector &disp, double fact)
 
 const Vector &
 PenaltyMP_FE::getK_Force(const Vector &disp, double fact)
+{
+ opserr << "WARNING PenaltySP_FE::getK_Force() - not yet implemented\n";
+ return *resid;
+}
+
+const Vector &
+PenaltyMP_FE::getKi_Force(const Vector &disp, double fact)
 {
  opserr << "WARNING PenaltySP_FE::getK_Force() - not yet implemented\n";
  return *resid;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2005-11-29 22:46:50 $
+// $Revision: 1.18 $
+// $Date: 2006-02-08 20:20:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.cpp,v $
                                                                         
                                                                         
@@ -573,6 +573,44 @@ FE_Element::getK_Force(const Vector &disp, double fact)
 	}
 
 	if (theResidual->addMatrixVector(1.0, myEle->getTangentStiff(), tmp, fact) < 0){
+	  opserr << "WARNING FE_Element::getKForce() - ";
+	  opserr << "- addMatrixVector returned error\n";		 
+	}		
+
+	return *theResidual;
+    }
+    else {
+	opserr << "WARNING FE_Element::getKForce() - no Element *given ";
+	opserr << "- subclasses must provide implementation\n";
+	return errVector;	
+    }    	            
+}
+
+
+const Vector &
+FE_Element::getKi_Force(const Vector &disp, double fact)
+{
+    if (myEle != 0) {    
+
+	// zero out the force vector
+	theResidual->Zero();
+
+	// check for a quick return
+	if (fact == 0.0) 
+	    return *theResidual;
+
+	// get the components we need out of the vector
+	// and place in a temporary vector
+	Vector tmp(numDOF);
+	for (int i=0; i<numDOF; i++) {
+	  int dof = myID(i);
+	  if (dof >= 0)
+	    tmp(i) = disp(myID(i));
+	  else
+	    tmp(i) = 0.0;
+	}
+
+	if (theResidual->addMatrixVector(1.0, myEle->getInitialStiff(), tmp, fact) < 0){
 	  opserr << "WARNING FE_Element::getKForce() - ";
 	  opserr << "- addMatrixVector returned error\n";		 
 	}		

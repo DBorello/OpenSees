@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2005-11-28 21:38:40 $
+// $Revision: 1.17 $
+// $Date: 2006-02-08 20:20:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.cpp,v $
                                                                         
 // Written: fmk 
@@ -451,6 +451,119 @@ TransformationFE::getK_Force(const Vector &accel, double fact)
 {
   this->FE_Element::zeroTangent();    
   this->FE_Element::addKtToTang();    
+  const Matrix &theTangent = this->FE_Element::getTangent(0);
+
+  static ID numDOFs(dofData, 1);
+  numDOFs.setData(dofData, numGroups);
+    
+  // DO THE SP STUFF TO THE TANGENT 
+  
+  // get the transformation matrix from each dof group & number of local dof
+  // for original node.
+  int numNode = numGroups;
+  for (int a = 0; a<numNode; a++) {
+    Matrix *theT = theDOFs[a]->getT();
+    theTransformations[a] = theT;
+    if (theT != 0)
+      numDOFs[a] = theT->noRows(); // T^ 
+    else
+      numDOFs[a] = theDOFs[a]->getNumDOF();
+  }
+  
+  // perform Tt K T -- as T is block diagonal do T(i)^T K(i,j) T(j)
+  // where blocks are of size equal to num ele dof at a node
+  
+  int startRow = 0;
+  int noRowsTransformed = 0;
+  int noRowsOriginal = 0;
+  
+  static Matrix localK;
+  
+  // foreach block row, for each block col do
+  for (int i=0; i<numNode; i++) {
+    
+    int startCol = 0;
+    int numDOFi = numDOFs[i];	
+    int noColsOriginal = 0;
+    
+    for (int j=0; j<numNode; j++) {
+      
+      const Matrix *Ti = theTransformations[i];
+      const Matrix *Tj = theTransformations[j];
+      int numDOFj = numDOFs[j];	
+      localK.setData(localKbuffer, numDOFi, numDOFj);
+      
+      // copy K(i,j) into localK matrix
+      // CHECK SIZE OF BUFFFER	    
+      for (int a=0; a<numDOFi; a++)
+	for (int b=0; b<numDOFj; b++)
+	  localK(a,b) = theTangent(noRowsOriginal+a, noColsOriginal+b);
+      
+      // now perform the matrix computation T(i)^T localK T(j)
+      // note: if T == 0 then the Identity is assumed
+      int noColsTransformed = 0;
+      static Matrix localTtKT;
+      
+      if (Ti != 0 && Tj != 0) {
+	noRowsTransformed = Ti->noCols();
+	noColsTransformed = Tj->noCols();
+	// CHECK SIZE OF BUFFFER
+	localTtKT.setData(dataBuffer, noRowsTransformed, noColsTransformed);
+	localTtKT = (*Ti) ^ localK * (*Tj);
+      } else if (Ti == 0 && Tj != 0) {
+	noRowsTransformed = numDOFi;
+	noColsTransformed = Tj->noCols();
+	// CHECK SIZE OF BUFFFER
+	localTtKT.setData(dataBuffer, noRowsTransformed, noColsTransformed);
+	// localTtKT = localK * (*Tj);	       
+	localTtKT.addMatrixProduct(0.0, localK, *Tj, 1.0);
+      } else if (Ti != 0 && Tj == 0) {
+	noRowsTransformed = Ti->noCols();
+	noColsTransformed = numDOFj;
+	// CHECK SIZE OF BUFFFER
+	localTtKT.setData(dataBuffer, noRowsTransformed, noColsTransformed);
+	localTtKT = (*Ti) ^ localK;
+      } else {
+	noRowsTransformed = numDOFi;
+	noColsTransformed = numDOFj;
+	localTtKT.setData(dataBuffer, noRowsTransformed, noColsTransformed);
+	localTtKT = localK;
+      }
+      // now copy into modTangent the T(i)^t K(i,j) T(j) product
+      for (int c=0; c<noRowsTransformed; c++) 
+	for (int d=0; d<noColsTransformed; d++) 
+	  (*modTangent)(startRow+c, startCol+d) = localTtKT(c,d);
+      
+      startCol += noColsTransformed;
+      noColsOriginal += numDOFj;
+    }
+    
+    noRowsOriginal += numDOFi;
+    startRow += noRowsTransformed;
+  }
+  
+  // get the components we need out of the vector
+  // and place in a temporary vector
+  Vector tmp(numTransformedDOF);
+  for (int j=0; j<numTransformedDOF; j++) {
+    int dof = (*modID)(j);
+    if (dof >= 0)
+      tmp(j) = accel(dof);
+    else
+      tmp(j) = 0.0;
+  }
+
+  modResidual->addMatrixVector(0.0, *modTangent, tmp, 1.0);
+
+  return *modResidual;
+}
+
+
+const Vector &
+TransformationFE::getKi_Force(const Vector &accel, double fact)
+{
+  this->FE_Element::zeroTangent();    
+  this->FE_Element::addKiToTang();    
   const Matrix &theTangent = this->FE_Element::getTangent(0);
 
   static ID numDOFs(dofData, 1);

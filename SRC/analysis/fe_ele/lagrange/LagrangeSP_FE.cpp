@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-11-28 21:38:40 $
+// $Revision: 1.5 $
+// $Date: 2006-02-08 20:20:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/lagrange/LagrangeSP_FE.cpp,v $
                                                                         
 // Written: fmk 
@@ -177,6 +177,13 @@ const Vector &
 LagrangeSP_FE::getK_Force(const Vector &disp, double fact)
 {
  opserr << "WARNING PenaltySP_FE::getK_Force() - not yet implemented\n";
+ return *resid;
+}
+
+const Vector &
+LagrangeSP_FE::getKi_Force(const Vector &disp, double fact)
+{
+ opserr << "WARNING PenaltySP_FE::getKi_Force() - not yet implemented\n";
  return *resid;
 }
 

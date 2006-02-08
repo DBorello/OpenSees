@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2005-11-28 21:38:40 $
+// $Revision: 1.9 $
+// $Date: 2006-02-08 20:20:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.h,v $
                                                                         
                                                                         
@@ -60,6 +60,7 @@ class TransformationFE: public FE_Element
     // methods for ele-by-ele strategies
     virtual const Vector &getTangForce(const Vector &x, double fact = 1.0);
     virtual const Vector &getK_Force(const Vector &accel, double fcat = 1.0);
+    virtual const Vector &getKi_Force(const Vector &accel, double fcat = 1.0);
     virtual const Vector &getM_Force(const Vector &accel, double fcat = 1.0);
     virtual const Vector &getC_Force(const Vector &vel, double fcat = 1.0);
     virtual void  addD_Force(const Vector &vel,   double fact = 1.0);
