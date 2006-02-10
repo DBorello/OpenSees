@@ -1,5 +1,3 @@
-// File: ~/system_of_eqn/eigenSOE/BandArpackSolver.h
-//
 // Written: Jun Peng
 // Created: Feb. 11, 1999
 // Revision: A

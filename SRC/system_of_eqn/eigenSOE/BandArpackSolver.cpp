@@ -1,5 +1,3 @@
-// File: ~/system_of_eqn/eigenSOE/BandArpackSolver.C
-//
 // Written: Jun Peng
 // Created: Feb. 11, 1999
 // Revision: A
@@ -23,7 +21,7 @@
 
 BandArpackSolver::BandArpackSolver(int numE)
 :EigenSolver(EigenSOLVER_TAGS_BandArpackSolver),
- theNev(numE), iPiv(0), iPivSize(0), eigenV(0)
+ theNev(numE), value(0), eigenvector(0), iPiv(0), iPivSize(0), eigenV(0)
 {
   // do nothing here.    
 }

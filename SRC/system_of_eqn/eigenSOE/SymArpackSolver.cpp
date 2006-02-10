@@ -66,7 +66,7 @@ extern "C" int dseupd_(bool *rvec, char *howmny, logical *select, double *d, dou
 
 SymArpackSolver::SymArpackSolver(int numE)
 :EigenSolver(EigenSOLVER_TAGS_SymArpackSolver),
-theSOE(0), factored(false), theNev(numE), eigenV(0)
+ theSOE(0), factored(false), theNev(numE), value(0), eigenV(0)
 {
     // nothing to do.
 }
