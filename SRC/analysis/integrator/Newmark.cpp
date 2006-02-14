@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.13 $
-// $Date: 2006-01-10 00:34:55 $
+// $Revision: 1.14 $
+// $Date: 2006-02-14 21:25:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark.cpp,v $
 
 // Written : fmk
@@ -152,33 +152,27 @@ int Newmark::newStep(double deltaT)
         double a4 = 1.0 - 0.5/beta;
         Udotdot->addVector(a4, *Utdot, a3);
 
-        // set the trial response quantities for the nodes
-        theModel->setVel(*Udot);
-        theModel->setAccel(*Udotdot);
     } else  {
         // determine new displacements at t+deltaT      
         double a1 = (deltaT*deltaT/2.0);
         U->addVector(1.0, *Utdot, deltaT);
         U->addVector(1.0, *Utdotdot, a1);
         
-        // set the trial response quantities for the elements
-        theModel->setDisp(*U);
-        
-        // increment the time and apply the load
-        double time = theModel->getCurrentDomainTime();
-        time += deltaT;
-        if (theModel->updateDomain(time, deltaT) < 0)  {
-            opserr << "Newmark::newStep() - failed to update the domain\n";
-            return -4;
-        }
-
         // determine the velocities at t+deltaT
         Udot->addVector(1.0, *Utdotdot, deltaT);
-    
-        // set the trial response quantities for the nodes
-        theModel->setVel(*Udot);
     }
-        
+
+    // set the new trial response quantities
+    theModel->setResponse(*U,*Udot,*Udotdot);        
+    
+    // increment the time and apply the load
+    double time = theModel->getCurrentDomainTime();
+    time +=deltaT;
+    if (theModel->updateDomain(time, deltaT) < 0) {
+      opserr << "Newmark::newStep() - failed to update the domain\n";
+      return -4;
+    }
+    
     return 0;
 }
 
