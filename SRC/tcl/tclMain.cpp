@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.27 2006-01-13 19:26:07 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.28 2006-02-22 22:23:54 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -18,6 +18,8 @@
 **    OpenSees - Open System for Earthquake Engineering Simulation    **
 **          Pacific Earthquake Engineering Research Center            **
 ** ****************************************************************** */
+
+#include <string.h>
 
 extern "C" {
 #include <tcl.h>
@@ -54,6 +56,21 @@ int (*tclDummyLinkVarPtr)(Tcl_Interp *interp, char *a,
  * declare it without causing conflicts with other definitions elsewher
  * on some systems, so it's better just to leave it out.
  */
+
+
+typedef struct parameterValues {
+  char *value;
+  struct parameterValues *next;
+} ParameterValues;
+
+typedef struct parameter {
+  char *name;
+  ParameterValues *values;
+  struct parameter *next;
+} Parameter;
+
+
+
 
 extern "C" int	isatty _ANSI_ARGS_((int fd));
 extern "C" char * strcpy _ANSI_ARGS_((char *dst, CONST char *src)) throw();
@@ -103,6 +120,52 @@ char *TclGetStartupScriptFileName()
     return tclStartupScriptFileName;
 }
 
+int
+EvalFileWithParameters(Tcl_Interp *interp, 
+		       char *tclStartupFileScript, 
+		       Parameter *theParameters, 
+		       char **paramNames, 
+		       char **paramValues, 
+		       int numParam, 
+		       int currentParam, 
+		       int rank, 
+		       int np)
+{
+  if (currentParam < numParam) {
+    Parameter *theCurrentParam = theParameters;
+    Parameter *theNextParam = theParameters->next;
+    char *paramName = theCurrentParam->name;
+    paramNames[currentParam] = paramName;
+
+    ParameterValues *theValue = theCurrentParam->values;
+    int nextParam = currentParam+1;
+    while (theValue != 0) {
+      char *paramValue = theValue->value;
+      paramValues[currentParam] = paramValue;
+      EvalFileWithParameters(interp, tclStartupFileScript, theNextParam, paramNames, paramValues, numParam, nextParam, rank, np);
+      theValue=theValue->next;
+    } 
+  } else {
+
+    static int count = 0;
+    
+    if ((count % np) == rank) {
+
+      fprintf(stderr,"np %d rank %d count: %d\n", np, rank, count);
+
+      Tcl_Eval(interp, "wipe");
+      
+      for (int i=0; i<numParam; i++) 
+	Tcl_SetVar(interp, paramNames[i], paramValues[i], TCL_GLOBAL_ONLY);	    
+
+      count++;
+      return Tcl_EvalFile(interp, tclStartupScriptFileName);
+    } else
+      count++;
+  }
+  return 0;
+}
+
 
 
 /*
@@ -130,7 +193,7 @@ char *TclGetStartupScriptFileName()
 
 
 void
-g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc)
+g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np)
 {
     Tcl_Obj *resultPtr;
     Tcl_Obj *commandPtr = NULL;
@@ -151,8 +214,8 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc)
     /* fmk - end of modifications for OpenSees */
 // Boris Jeremic additions
 # ifdef _UNIX
-   #include "version.txt"
-   fprintf(stderr,"\n %s \n\n\n", version);    
+    //   #include "version.txt"
+    //   fprintf(stderr,"\n %s \n\n\n", version);    
 # endif
 // Boris Jeremic additions
 
@@ -176,11 +239,13 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc)
 	    argv++;
 	}
     }
+
     args = Tcl_Merge(argc-1, argv+1);
     Tcl_ExternalToUtfDString(NULL, args, -1, &argString);
     Tcl_SetVar(interp, "argv", Tcl_DStringValue(&argString), TCL_GLOBAL_ONLY);
     Tcl_DStringFree(&argString);
     ckfree(args);
+
 
     if (tclStartupScriptFileName == NULL) {
 	Tcl_ExternalToUtfDString(NULL, argv[0], -1, &argString);
@@ -224,24 +289,116 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc)
      * and quit.
      */
 
+
+
     if (tclStartupScriptFileName != NULL) {
-	code = Tcl_EvalFile(interp, tclStartupScriptFileName);
-	if (code != TCL_OK) {
+
+      Parameter *theParameters = 0;
+      Parameter *endParameters = 0;
+      int numParam = 0;
+
+      if (argc > 1) {
+	int currentArg = 1;
+	while (currentArg < argc && argv[currentArg] != NULL) {
+	  if ((strcmp(argv[currentArg], "-par") == 0) || (strcmp(argv[currentArg], "-Par") == 0)) {
+
+
+	    char *parName = argv[currentArg+1];
+	    char *parValue = argv[currentArg+2];
+
+	    // add a Parameter to end of list of parameters
+	    Parameter *nextParam = new Parameter;
+	    nextParam->name = new char [strlen(parName+1)];
+	    strcpy(nextParam->name, parName);
+	    nextParam->values = 0;
+
+	    if (theParameters == 0)
+	      theParameters = nextParam;
+	    if (endParameters != 0)
+	      endParameters->next = nextParam;
+	    nextParam->next = 0;
+	    endParameters = nextParam;
+
+	    // now open par values files to create the values
+	    char nextLine[1000];
+	    FILE *valueFP = fopen(parValue,"r");
+	    if (valueFP != 0) {
+	      ParameterValues *endValues = 0;
+
+	      while (fscanf(valueFP, "%s", nextLine) != EOF) {
+		
+		ParameterValues *nextValue = new ParameterValues;
+		nextValue->value = new char (strlen(nextLine)+1);
+		strcpy(nextValue->value, nextLine);
+		
+		if (nextParam->values == 0) {
+		  nextParam->values = nextValue;
+		}
+		if (endValues != 0)
+		  endValues->next = nextValue;
+		endValues = nextValue;
+		nextValue->next = 0;	      
+	      }
+	      fclose(valueFP);
+	    } else {
+
+	      ParameterValues *nextValue = new ParameterValues;		
+	      nextValue->value = new char (strlen(parValue)+1);
+	      strcpy(nextValue->value, parValue);
+	      nextParam->values = nextValue;
+	      nextValue->next = 0;	      
+
+	    }
+
+	    //	    Tcl_SetVar(interp, parName, parValue, TCL_GLOBAL_ONLY);	    
+	    numParam++;
+	    currentArg += 3;
+	  } else
+	    currentArg++;
+	}
+
+	if (numParam != 0) {
+	  char **paramNames = new char *[numParam];
+	  char **paramValues = new char *[numParam];
+
+	  code = EvalFileWithParameters(interp, tclStartupScriptFileName, theParameters, paramNames, paramValues, numParam, 0, rank, np);
+
+	  if (code != TCL_OK) {
 	    errChannel = Tcl_GetStdChannel(TCL_STDERR);
 	    if (errChannel) {
-		/*
-		 * The following statement guarantees that the errorInfo
-		 * variable is set properly.
-		 */
-
-		Tcl_AddErrorInfo(interp, "");
-		Tcl_WriteObj(errChannel, Tcl_GetVar2Ex(interp, "errorInfo",
-			NULL, TCL_GLOBAL_ONLY));
-		Tcl_WriteChars(errChannel, "\n", 1);
+	      /*
+	       * The following statement guarantees that the errorInfo
+	       * variable is set properly.
+	       */
+	      
+	      Tcl_AddErrorInfo(interp, "");
+	      Tcl_WriteObj(errChannel, Tcl_GetVar2Ex(interp, "errorInfo",
+						     NULL, TCL_GLOBAL_ONLY));
+	      Tcl_WriteChars(errChannel, "\n", 1);
 	    }
 	    exitCode = 1;
+	  }
+	  goto done;
 	}
-	goto done;
+      }
+
+      code = Tcl_EvalFile(interp, tclStartupScriptFileName);
+      if (code != TCL_OK) {
+	errChannel = Tcl_GetStdChannel(TCL_STDERR);
+	if (errChannel) {
+	  /*
+	   * The following statement guarantees that the errorInfo
+	   * variable is set properly.
+	   */
+	  
+	  Tcl_AddErrorInfo(interp, "");
+	  Tcl_WriteObj(errChannel, Tcl_GetVar2Ex(interp, "errorInfo",
+						 NULL, TCL_GLOBAL_ONLY));
+	  Tcl_WriteChars(errChannel, "\n", 1);
+	}
+	exitCode = 1;
+      }
+      goto done;
     }
     Tcl_DStringFree(&argString);
 
@@ -265,67 +422,62 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc)
     outChannel = Tcl_GetStdChannel(TCL_STDOUT);
     gotPartial = 0;
     while (1) {
-	if (tty) {
-	    Tcl_Obj *promptCmdPtr;
-
-	    char one[12] = "tcl_prompt1";
-	    char two[12] = "tcl_prompt2";
-	    promptCmdPtr = Tcl_GetVar2Ex(interp,
-		    (gotPartial ? one : two),
-		    NULL, TCL_GLOBAL_ONLY);
-	    if (promptCmdPtr == NULL) {
-                defaultPrompt:
-		if (!gotPartial && outChannel) {
+      if (tty) {
+	Tcl_Obj *promptCmdPtr;
+	
+	char one[12] = "tcl_prompt1";
+	char two[12] = "tcl_prompt2";
+	promptCmdPtr = Tcl_GetVar2Ex(interp,
+				     (gotPartial ? one : two),
+				     NULL, TCL_GLOBAL_ONLY);
+	if (promptCmdPtr == NULL) {
+	defaultPrompt:
+	  if (!gotPartial && outChannel) {
 		    Tcl_WriteChars(outChannel, "OpenSees > ", 11);
-		}
-	    } else {
-		
-// Boris Jeremic: this is the entry point!!!!!
-	 code = Tcl_EvalObjEx(interp, promptCmdPtr, 0);
-
-
-
-
-
-
-		inChannel = Tcl_GetStdChannel(TCL_STDIN);
-		outChannel = Tcl_GetStdChannel(TCL_STDOUT);
-		errChannel = Tcl_GetStdChannel(TCL_STDERR);
-		if (code != TCL_OK) {
-		    if (errChannel) {
-			Tcl_WriteObj(errChannel, Tcl_GetObjResult(interp));
-			Tcl_WriteChars(errChannel, "\n", 1);
-		    }
-		    Tcl_AddErrorInfo(interp,
-			    "\n    (script that generates prompt)");
-		    goto defaultPrompt;
-		}
+	  }
+	} else {
+	  
+	  // Boris Jeremic: this is the entry point!!!!!
+	  code = Tcl_EvalObjEx(interp, promptCmdPtr, 0);
+	  
+	  inChannel = Tcl_GetStdChannel(TCL_STDIN);
+	  outChannel = Tcl_GetStdChannel(TCL_STDOUT);
+	  errChannel = Tcl_GetStdChannel(TCL_STDERR);
+	  if (code != TCL_OK) {
+	    if (errChannel) {
+	      Tcl_WriteObj(errChannel, Tcl_GetObjResult(interp));
+	      Tcl_WriteChars(errChannel, "\n", 1);
 	    }
-	    if (outChannel) {
-		Tcl_Flush(outChannel);
-	    }
+	    Tcl_AddErrorInfo(interp,
+			     "\n    (script that generates prompt)");
+	    goto defaultPrompt;
+	  }
 	}
-	if (!inChannel) {
-	    goto done;
+	if (outChannel) {
+	  Tcl_Flush(outChannel);
 	}
-        length = Tcl_GetsObj(inChannel, commandPtr);
-	if (length < 0) {
-	    goto done;
-	}
-	if ((length == 0) && Tcl_Eof(inChannel) && (!gotPartial)) {
-	    goto done;
-	}
-
-        /*
-         * Add the newline removed by Tcl_GetsObj back to the string.
-         */
-
-	Tcl_AppendToObj(commandPtr, "\n", 1);
+      }
+      if (!inChannel) {
+	goto done;
+      }
+      length = Tcl_GetsObj(inChannel, commandPtr);
+      if (length < 0) {
+	goto done;
+      }
+      if ((length == 0) && Tcl_Eof(inChannel) && (!gotPartial)) {
+	goto done;
+      }
+      
+      /*
+       * Add the newline removed by Tcl_GetsObj back to the string.
+       */
+      
+      Tcl_AppendToObj(commandPtr, "\n", 1);
 	if (!TclObjCommandComplete(commandPtr)) {
-	    gotPartial = 1;
-	    continue;
+	  gotPartial = 1;
+	  continue;
 	}
-
+	
 	gotPartial = 0;
 	code = Tcl_RecordAndEvalObj(interp, commandPtr, 0);
 	inChannel = Tcl_GetStdChannel(TCL_STDIN);
@@ -367,12 +519,19 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc)
 	Tcl_DecrRefCount(commandPtr);
     }
 
-#ifndef _PARALLEL_PROCESSING
-    sprintf(buffer, "exit %d", exitCode);
-    Tcl_Eval(interp, buffer);
+
+#ifdef _PARALLEL_PROCESSING
+  return;
 #endif
 
-    return;
+#ifdef _PARALLEL_INTERPRETERS
+  return;
+#endif
+
+  sprintf(buffer, "exit %d", exitCode);
+  Tcl_Eval(interp, buffer);
+
+  return;
 }
 
 

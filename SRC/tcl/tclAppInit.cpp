@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-01-17 23:15:03 $
+// $Revision: 1.6 $
+// $Date: 2006-02-22 22:23:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/tclAppInit.cpp,v $
 
 
@@ -36,7 +36,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclAppInit.cpp,v 1.5 2006-01-17 23:15:03 fmk Exp $
+ * RCS: @(#) $Id: tclAppInit.cpp,v 1.6 2006-02-22 22:23:54 fmk Exp $
  */
 
 extern "C" {
@@ -96,7 +96,7 @@ extern int		Tclxttest_Init _ANSI_ARGS_((Tcl_Interp *interp));
  *----------------------------------------------------------------------
  */
 
-extern void g3TclMain(int argc, char **argv, Tcl_AppInitProc *appInitProc);
+extern void g3TclMain(int argc, char **argv, Tcl_AppInitProc *appInitProc, int rank, int np);
 
 int
 main(int argc, char **argv)
@@ -134,7 +134,7 @@ main(int argc, char **argv)
     TCL_LOCAL_MAIN_HOOK(&argc, &argv);
 #endif
 
-    g3TclMain(argc, argv, TCL_LOCAL_APPINIT);
+    g3TclMain(argc, argv, TCL_LOCAL_APPINIT, 0, 1);
 
     return 0;			/* Needed only to prevent compiler warning. */
 }
