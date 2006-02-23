@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.28 2006-02-22 22:23:54 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.29 2006-02-23 20:37:39 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -150,19 +150,20 @@ EvalFileWithParameters(Tcl_Interp *interp,
     static int count = 0;
     
     if ((count % np) == rank) {
-
-      fprintf(stderr,"np %d rank %d count: %d\n", np, rank, count);
-
       Tcl_Eval(interp, "wipe");
-      
+     
       for (int i=0; i<numParam; i++) 
-	Tcl_SetVar(interp, paramNames[i], paramValues[i], TCL_GLOBAL_ONLY);	    
+		  Tcl_SetVar(interp, paramNames[i], paramValues[i], TCL_GLOBAL_ONLY);	    
 
       count++;
+	
       return Tcl_EvalFile(interp, tclStartupScriptFileName);
-    } else
-      count++;
+	 
+	}
+	else
+		count++;
   }
+
   return 0;
 }
 
@@ -207,7 +208,7 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 
     /* fmk - beginning of modifications for OpenSees */
     fprintf(stderr,"\n\n\t OpenSees -- Open System For Earthquake Engineering Simulation");
-    fprintf(stderr,"\n\tPacific Earthquake Engineering Research Center -- Version 1.7.0\n\n");
+    fprintf(stderr,"\n\tPacific Earthquake Engineering Research Center -- Version 1.7.1\n\n");
     
     fprintf(stderr,"\t    (c) Copyright 1999 The Regents of the University of California");
     fprintf(stderr,"\n\t\t\t\t All Rights Reserved \n\n\n");    
@@ -289,10 +290,7 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
      * and quit.
      */
 
-
-
     if (tclStartupScriptFileName != NULL) {
-
       Parameter *theParameters = 0;
       Parameter *endParameters = 0;
       int numParam = 0;
@@ -302,13 +300,12 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	while (currentArg < argc && argv[currentArg] != NULL) {
 	  if ((strcmp(argv[currentArg], "-par") == 0) || (strcmp(argv[currentArg], "-Par") == 0)) {
 
-
 	    char *parName = argv[currentArg+1];
 	    char *parValue = argv[currentArg+2];
-
+		
 	    // add a Parameter to end of list of parameters
 	    Parameter *nextParam = new Parameter;
-	    nextParam->name = new char [strlen(parName+1)];
+	    nextParam->name = new char [strlen(parName)+1];
 	    strcpy(nextParam->name, parName);
 	    nextParam->values = 0;
 
@@ -328,7 +325,7 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	      while (fscanf(valueFP, "%s", nextLine) != EOF) {
 		
 		ParameterValues *nextValue = new ParameterValues;
-		nextValue->value = new char (strlen(nextLine)+1);
+		nextValue->value = new char [strlen(nextLine)+1];
 		strcpy(nextValue->value, nextLine);
 		
 		if (nextParam->values == 0) {
@@ -343,14 +340,15 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	    } else {
 
 	      ParameterValues *nextValue = new ParameterValues;		
-	      nextValue->value = new char (strlen(parValue)+1);
+	      nextValue->value = new char [strlen(parValue)+1];
+		 
 	      strcpy(nextValue->value, parValue);
+		 
 	      nextParam->values = nextValue;
-	      nextValue->next = 0;	      
-
+	      nextValue->next = 0;
+		
 	    }
-
-	    //	    Tcl_SetVar(interp, parName, parValue, TCL_GLOBAL_ONLY);	    
+   
 	    numParam++;
 	    currentArg += 3;
 	  } else
@@ -360,7 +358,6 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	if (numParam != 0) {
 	  char **paramNames = new char *[numParam];
 	  char **paramValues = new char *[numParam];
-
 	  code = EvalFileWithParameters(interp, tclStartupScriptFileName, theParameters, paramNames, paramValues, numParam, 0, rank, np);
 
 	  if (code != TCL_OK) {
