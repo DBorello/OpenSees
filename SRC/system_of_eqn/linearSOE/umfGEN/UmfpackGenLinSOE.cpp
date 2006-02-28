@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:02:09 $
+// $Revision: 1.5 $
+// $Date: 2006-02-28 19:19:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSOE.cpp,v $
                                                                         
                                                                         
@@ -328,7 +328,7 @@ UmfpackGenLinSOE::addB(const Vector &v, const ID &id, double fact)
 	for (int i=0; i<idSize; i++) {
 	    int pos = id(i);
 	    if (pos <size && pos >= 0)
-		B[pos] -= v(i) * fact;
+		B[pos] -= v(i);
 	}
     } else {
 	for (int i=0; i<idSize; i++) {
