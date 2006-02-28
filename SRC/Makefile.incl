@@ -10,6 +10,8 @@ FE_INCLUDES  = -I$(FE)/matrix \
                -I$(FE)/material/uniaxial/drain \
                -I$(FE)/material/uniaxial/snap \
                -I$(FE)/material/uniaxial/PY \
+               -I$(FE)/material/uniaxial/limitState \
+               -I$(FE)/material/uniaxial/limitState/limitCurve \
                -I$(FE)/material/backbone \
                -I$(FE)/material/state \
                -I$(FE)/material/state/stiffness \
