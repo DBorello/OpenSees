@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-01-27 04:32:07 $
+// $Revision: 1.2 $
+// $Date: 2006-02-28 19:34:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/CentralDifferenceAlternative.cpp,v $
 
 // Written: fmk 
@@ -148,17 +148,25 @@ CentralDifferenceAlternative::domainChanged()
   DOF_Group *dofPtr;
     
   while ((dofPtr = theDOFs()) != 0) {
-    const Vector &disp = dofPtr->getCommittedDisp();	
-    const Vector &vel = dofPtr->getCommittedVel();	
     const ID &id = dofPtr->getID();
-    for (int i=0; i < id.Size(); i++) {
+    int idSize = id.Size();
+    int i;
+    const Vector &disp = dofPtr->getCommittedDisp();	
+    for (i=0; i < idSize; i++)  {
       int loc = id(i);
-      if (loc >= 0) {
- 	(*Ut)(loc) = disp(i);		
-	(*Udot)(loc) = vel(i);		
+      if (loc >= 0)  {
+	(*Ut)(loc) = disp(i);		
       }
     }
-  }    
+    
+    const Vector &vel = dofPtr->getCommittedVel();
+    for (i=0; i < idSize; i++)  {
+      int loc = id(i);
+      if (loc >= 0)  {
+	(*Udot)(loc) = vel(i);
+      }
+    }
+  }
   
   return 0;
 }
