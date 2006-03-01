@@ -21,6 +21,7 @@
 # that will be created (if this all works!)
 
 OpenSees_PROGRAM = $(HOME)/bin/OpenSees
+OpenSees_PROGRAM_MPI = $(HOME)/bin/OpenSeesMPI
 
 # %---------------------------------%
 # |  SECTION 2: MAKEFILE CONSTANTS  |
@@ -29,15 +30,15 @@ OpenSees_PROGRAM = $(HOME)/bin/OpenSees
 # Specify the constants the are used as control structure variables in the Makefiles.
 
 OPERATING_SYSTEM = LINUX
+#GRAPHICS = UsingOpenGL
+GRAPHICS = 
 PROGRAMMING_MODE = PARALLEL
-RELIABILITY = NO_RELIABILITY
-GRAPHICS = NONE
+
+#DEBUG_MODE = DEBUG, NO_DEBUG
 DEBUG_MODE = NO_DEBUG
 
-#PROGRAMMING_MODE = PARALLEL, SEQUENTIAL
-#GRAPHICS = NONE, UsingOpenGL
 #RELIABILITY = YES_RELIABILITY, NO_RELIABILITY
-#DEBUG_MODE = DEBUG, NO_DEBUG
+RELIABILITY = NO_RELIABILITY
 
 
 # %---------------------------------%
@@ -50,7 +51,7 @@ DEBUG_MODE = NO_DEBUG
 
 BASE  = 
 #  PUT YOUR HOME DIRECTOREY HERE
-HOME = /gpfs/fmk
+HOME  = /gpfs/fmk
 FE    = $(HOME)/OpenSees/SRC
 
 
@@ -67,7 +68,6 @@ SUPERLU_DISTdir   = $(HOME)/OpenSees/OTHER/SuperLU_DIST_2.0/SRC
 DIRS        = $(BLASdir) \
               $(CBLASdir) \
               $(SUPERLUdir) \
-              $(SUPERLU_DISTdir) \
               $(LAPACKdir) \
               $(ARPACKdir) \
               $(UMFPACKdir) \
@@ -105,7 +105,7 @@ DISTRIBUTED_SUPERLU_LIBRARY     = $(HOME)/lib/libDistributedSuperLU.a
 TCL_LIBRARY         = /usr/local/apps/tcl-8.3.5/lib/libtcl8.3g.so \
 	 	/usr/local/apps/tk-8.3.5/lib/libtk8.3g.so
 
-GRAPHIC_LIBRARY     = 
+GRAPHIC_LIBRARY     = -L/usr/include/GL -lGL -lGLU 
 
 
 #RELIABILITY_LIBRARY = $(HOME)/lib/libReliability.a
@@ -138,6 +138,13 @@ WIPE_LIBS	= $(FE_LIBRARY) \
 # # Compilers
 # ################################################### 
 
+#CC++            =  xlC_r
+#CC              =  xlc_r
+#FC              =  xlf_r
+
+#F90             =  xlf90_r
+#LINKER          =  xlC_r
+
 CC++            =  mpCC_r
 CC              =  mpcc_r
 FC              =  mpxlf_r
@@ -150,15 +157,16 @@ LINKER          =  $(CC++)
 AR		= ar 
 ARCH		= ar 
 
-ARFLAGS		= -v -q -X64
+ARFLAGS		= -v -q
 #ARCHFLAGS       = cqls
-ARCHFLAGS       = -v -q -X64
+ARCHFLAGS       = -v -q
 
 RANLIB		= ranlib
 
 RANLIBFLAGS     = 
 
 
+GRAPHIC_FLAG = -D_NOGRAPHICS -D_GLX
 GRAPHIC_FLAG = -D_NOGRAPHICS
 PROGRAMMING_FLAG = 
 
@@ -168,15 +176,16 @@ RELIABILITY_FLAG =
 #DEBUG_FLAG = -D_G3DEBUG 
 DEBUG_FLAG =
 
-OPT_FLAG = -O3 -qstrict -q64 
-NOOPTS =  -qstrict -q64 
-#-pg
-C++FLAGS         = -D_LINUX -D_UNIX  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(OPT_FLAG)\
-		$(PROGRAMMING_FLAG) -qarch=pwr4 -qtune=pwr4  -D_KAI -D_PARALLEL_PROCESSING -cpp -D_PETSC
+OPT_FLAG = -O3 -qstrict  -q64 
 
-CFLAGS          = -qarch=pwr4 -qtune=pwr4  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG)  -D_KAI -D_PARALLEL_PROCESSING $(OPT_FLAG)
-FFLAGS          = -qarch=pwr4 -qtune=pwr4   -qextname $(OPT_FLAG)
-LINKFLAGS       = -bnoquiet $(OPT_FLAG)
+COMP_FLAG = -qnoipa
+#-pg
+C++FLAGS         = -D_LINUX -D_UNIX  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(OPT_FLAG) $(COMP_FLAG)\
+		$(PROGRAMMING_FLAG) -qarch=pwr4 -qtune=pwr4  -D_KAI -D_PARALLEL_PROCESSING -cpp
+
+CFLAGS          = -qarch=pwr4 -qtune=pwr4  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG)  -D_KAI -D_PARALLEL_PROCESSING $(OPT_FLAG) $(COMP_FLAG)
+FFLAGS          = -qarch=pwr4 -qtune=pwr4   -qextname $(OPT_FLAG) $(COMP_FLAG)
+LINKFLAGS       = -bnoquiet
 
 
 # Misc
@@ -262,8 +271,15 @@ PETSC_LIB =  -L$(PETSC_DIR)/lib/libg/$(PETSC_ARCH) \
 
 
 PARALLEL_LIB = 	$(FE)/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSOE.o \
-	$(FE)/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSolver.o 
+	$(FE)/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSolver.o \
+	$(FE)/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSolver.o \
+	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLinSOE.o \
+	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSuperLU.o 
+	
 
+
+HPM_LIB = -L/usr/local/apps/hpm/lib/pwr4/ \
+	-lhpm_r -lpmapi -lm 
 
 MACHINE_NUMERICAL_LIBS  = -lm \
   $(ARPACK_LIBRARY) \
@@ -275,7 +291,7 @@ MACHINE_NUMERICAL_LIBS  = -lm \
   $(GRAPHIC_LIBRARY)\
   $(RELIABILITY_LIBRARY) \
   $(DISTRIBUTED_SUPERLU_LIBRARY) \
-  $(METIS_LIBRARY) $(PARALLEL_LIB) $(PETSC_LIB)
+  $(METIS_LIBRARY) $(PARALLEL_LIB) $(PETSC_LIB) $(HPM_LIB)
 
 
 
@@ -297,6 +313,7 @@ PETSCINC = -I$(PETSC_DIR)/include -I$(PETSC_DIR)/bmake/$(PETSC_ARCH) -D_PETSC -D
 
 MACHINE_INCLUDES        = -I/usr/local/BerkeleyDB.4.0/include \
 	-I/usr/include/mysql \
+	-I/usr/local/apps/hpm/include \
 	-I$(HOME)/include   \
 	-I$(UMFPACKdir) \
 	-I$(SUPERLUdir) \
