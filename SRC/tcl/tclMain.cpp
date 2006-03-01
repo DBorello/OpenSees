@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.29 2006-02-23 20:37:39 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.30 2006-03-01 00:02:41 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -69,11 +69,10 @@ typedef struct parameter {
   struct parameter *next;
 } Parameter;
 
-
-
-
 extern "C" int	isatty _ANSI_ARGS_((int fd));
+#ifdef _WIN32
 extern "C" char * strcpy _ANSI_ARGS_((char *dst, CONST char *src)) throw();
+#endif
 static char *tclStartupScriptFileName = NULL;
 
 /*

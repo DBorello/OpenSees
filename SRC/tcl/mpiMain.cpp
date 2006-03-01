@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-01-13 19:35:27 $
+// $Revision: 1.2 $
+// $Date: 2006-03-01 00:02:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/mpiMain.cpp,v $
 
 /* 
@@ -35,7 +35,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: mpiMain.cpp,v 1.1 2006-01-13 19:35:27 fmk Exp $
+ * RCS: @(#) $Id: mpiMain.cpp,v 1.2 2006-03-01 00:02:41 fmk Exp $
  */
 
 extern "C" {
@@ -103,7 +103,7 @@ extern int		Tclxttest_Init _ANSI_ARGS_((Tcl_Interp *interp));
  *----------------------------------------------------------------------
  */
 
-extern void g3TclMain(int argc, char **argv, Tcl_AppInitProc *appInitProc);
+extern void g3TclMain(int argc, char **argv, Tcl_AppInitProc *appInitProc, int rank, int np);
 #include <stdio.h>
 #include <string.h>
 
@@ -207,7 +207,7 @@ main(int argc, char **argv)
     TCL_LOCAL_MAIN_HOOK(&argc, &argv);
 #endif
 
-    g3TclMain(argc, argv, TCL_LOCAL_APPINIT);
+    g3TclMain(argc, argv, TCL_LOCAL_APPINIT, 1, 0);
 
     // some clean up to shut the remotes down if still running
     theDomain.clearAll();
