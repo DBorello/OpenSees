@@ -4,15 +4,13 @@ include ../../../../Makefile.def
 
 PROGRAM         = test
 
-ifeq ($(PROGRAMMING_MODE), SEQUENTIAL)
-
 OBJS       = SparseGenColLinSOE.o \
 	SparseGenColLinSolver.o \
 	SparseGenRowLinSOE.o \
 	SparseGenRowLinSolver.o \
 	SuperLU.o 
 
-else
+ifeq ($(PROGRAMMING_MODE), PARALLEL)
 
 OBJS       = SparseGenColLinSOE.o \
 	SparseGenColLinSolver.o \
