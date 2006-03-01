@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.34 $
-// $Date: 2006-02-08 02:29:12 $
+// $Revision: 1.35 $
+// $Date: 2006-03-01 00:31:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -1136,6 +1136,7 @@ ft, etu);
 	opserr << "WARNING insufficient arguments\n";
 	printCommand(argc,argv);
 	opserr << "Want: uniaxialMaterial Fatigue tag? matTag?";
+	opserr << " <-D_max dmax?> <-e0 e0?> <-m m?>" << endln;
 	opserr << " <-min min?> <-max max?>" << endln;
 	return TCL_ERROR;
       }
@@ -1146,66 +1147,75 @@ ft, etu);
 	opserr << "WARNING invalid uniaxialMaterial Fatigue tag" << endln;
 	return TCL_ERROR;		
       }
-
+      
       if (Tcl_GetInt(interp, argv[3], &matTag) != TCL_OK) {
 	opserr << "WARNING invalid component tag\n";
 	opserr << "uniaxialMaterial Fatigue: " << tag << endln;
 	return TCL_ERROR;
       }
-
-      double Dmax = 1.0;
-      double Nf  = 0.5E6;
-      double E0  = 14.5/29000.0;
-      double FE  = -1.0/2.31;
-
-      int loc = 4;
-      while (loc < argc) {
-	if (strcmp(argv[loc],"-Dmax") == 0) {
-	  loc++;
-	  if ((loc >= argc) || (Tcl_GetDouble (interp, argv[loc], &Dmax) != TCL_OK)) {
-	    opserr << "WARNING invalid Dmax -";
+      
+      double Dmax      =  1.0;
+      double E0        =  0.191;
+      double m         = -0.458;
+      double epsmin    = NEG_INF_STRAIN;
+      double epsmax    = POS_INF_STRAIN;
+      
+      for (int j = 4; j < argc; j++) {
+	if (strcmp(argv[j],"-Dmax") == 0) {
+	  if ((j+1 >= argc) || 
+	      (Tcl_GetDouble (interp, argv[j+1], &Dmax) != TCL_OK)) {
+	    opserr << "WARNING invalid -Dmax";
 	    opserr << "uniaxialMaterial Fatigue: " << tag << endln;
 	    return TCL_ERROR;
 	  }
-	} else if (strcmp(argv[loc],"-Nf") == 0) {
-	  loc++;
-	  if ((loc >= argc) || (Tcl_GetDouble (interp, argv[loc], &Nf) != TCL_OK)) {
-	    opserr << "WARNING invalid Nf -";	 
+	} else if (strcmp(argv[j],"-E0") == 0) {
+	  if ((j+1 >= argc) || 
+	      (Tcl_GetDouble (interp, argv[j+1], &E0) != TCL_OK)) {
+	    opserr << "WARNING invalid -E0";	 
 	    opserr << "uniaxialMaterial Fatigue: " << tag << endln;
 	    return TCL_ERROR;
 	  }
-	} else if (strcmp(argv[loc],"-E0") == 0) {
-	  loc++;
-	  if ((loc >= argc) || (Tcl_GetDouble (interp, argv[loc], &E0) != TCL_OK)) {
-	    opserr << "WARNING invalid E0 -"; 
+	} else if (strcmp(argv[j],"-m") == 0) {
+	  if ((j+1 >= argc) || 
+	      (Tcl_GetDouble (interp, argv[j+1], &m) != TCL_OK)) {
+	    opserr << "WARNING invalid -m"; 
 	    opserr << "uniaxialMaterial Fatigue: " << tag << endln;
 	    return TCL_ERROR;
 	  }
-	} else if (strcmp(argv[loc],"-FE") == 0) {
-	  loc++;
-	  if ((loc >= argc) || (Tcl_GetDouble (interp, argv[loc], &FE) != TCL_OK)) {
-	    opserr << "WARNING invalid FE -";
+	} else if (strcmp(argv[j],"-min") == 0) {
+	  if ((j+1 >= argc) || 
+	      (Tcl_GetDouble (interp, argv[j+1], &epsmin) != TCL_OK)) {
+	    opserr << "WARNING invalid -min ";
 	    opserr << "uniaxialMaterial Fatigue: " << tag << endln;
 	    return TCL_ERROR;
 	  }
-	} else
-	  loc++;
+	} else if (strcmp(argv[j],"-max") == 0) {
+	  if ((j+1 >= argc) || 
+	      (Tcl_GetDouble (interp, argv[j+1], &epsmax) != TCL_OK)) {
+	    opserr << "WARNING invalid -max";
+	    opserr << "uniaxialMaterial Fatigue: " << tag << endln;
+	    return TCL_ERROR;
+	  }
+	}
+	j++;
       }
-	
+      
+      
       UniaxialMaterial *theMat = theTclBuilder->getUniaxialMaterial(matTag);
-	    
+      
       if (theMat == 0) {
 	opserr << "WARNING component material does not exist\n";
 	opserr << "Component material: " << matTag; 
 	opserr << "\nuniaxialMaterial Fatigue: " << tag << endln;
 	return TCL_ERROR;
       }
-	
+      
       // Parsing was successful, allocate the material
-      theMaterial = new FatigueMaterial(tag, *theMat, Dmax, Nf, E0, FE);
+      theMaterial = new FatigueMaterial(tag, *theMat, Dmax, E0, 
+					m, epsmin, epsmax);
       
     }
-	else if (strcmp(argv[1],"Cable") == 0) 
+    else if (strcmp(argv[1],"Cable") == 0) 
 	{
 		if (argc != 7) {
 			opserr << "WARNING invalid number of arguments\n";

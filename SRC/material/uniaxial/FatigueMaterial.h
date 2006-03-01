@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-08-14 20:23:50 $
+// $Revision: 1.2 $
+// $Date: 2006-03-01 00:31:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FatigueMaterial.h,v $
                                                       
 // Written: Patxi
@@ -27,7 +27,17 @@
 //
 // Description: This file contains the class definition for 
 // FatigueMaterial.  FatigueMaterial wraps a UniaxialMaterial
-// and imposes fatigue limits.
+// and imposes fatigue limits. More information about this material can
+// be found in the doctoral dissertation of Patxi Uriz:
+//
+//   Uriz, Patxi, "Towards Earthquake Resistant Design of 
+//      Concentrically Braced Steel Frames," Ph.D. Dissertation, 
+//      Structural Engineering, Mechanics, and Materials, Civil 
+//      and Envrironmental Engineering, University of California, 
+//      Berkeley, December 2005
+//
+
+
 
 #ifndef FatigueMaterial_h
 #define FatigueMaterial_h
@@ -36,62 +46,76 @@
 
 class FatigueMaterial : public UniaxialMaterial
 {
-  public:
-    FatigueMaterial(int tag, UniaxialMaterial &material, 
-		    double Dmax = 1.0,
-		    double Nf  = 0.5E6,
-		    double E0  = 14.5/29000.0,
-		    double FE  = -1.0/2.31);
-    FatigueMaterial();
-    ~FatigueMaterial();
+ public:
+  // Default calibrated values from Ballio and Castiglioni Calibrations for 
+  // European steel, wide flange sections.
 
-    int setTrialStrain(double strain, double strainRate = 0.0); 
-    double getStrain(void);          
-    double getStrainRate(void);
-    double getStress(void);
-    double getTangent(void);
-    double getDampTangent(void);
-    double getInitialTangent(void) {return theMaterial->getInitialTangent();}
+  FatigueMaterial(int tag, UniaxialMaterial &material, 
+		  double Dmax    =  1.0,
+		  double E0      =  0.191,
+		  double m       = -0.458,
+		  double minStrain = -1.0e16,
+		  double maxStrain =  1.0e16 );
+  
+  FatigueMaterial();
+  ~FatigueMaterial();
+  
+  int setTrialStrain(double strain, double strainRate = 0.0); 
+  double getStrain(void);          
+  double getStrainRate(void);
+  double getStress(void);
+  double getTangent(void);
+  double getDampTangent(void);
+  double getInitialTangent(void) {return theMaterial->getInitialTangent();}
+  
+  int commitState(void);
+  int revertToLastCommit(void);    
+  int revertToStart(void);        
+  
+  UniaxialMaterial *getCopy(void);
+  
+  int sendSelf(int commitTag, Channel &theChannel);  
+  int recvSelf(int commitTag, Channel &theChannel, 
+	       FEM_ObjectBroker &theBroker);    
+  
+  void Print(OPS_Stream &s, int flag =0);
 
-    int commitState(void);
-    int revertToLastCommit(void);    
-    int revertToStart(void);        
-
-    UniaxialMaterial *getCopy(void);
-    
-    int sendSelf(int commitTag, Channel &theChannel);  
-    int recvSelf(int commitTag, Channel &theChannel, 
-		 FEM_ObjectBroker &theBroker);    
-    
-    void Print(OPS_Stream &s, int flag =0);
-    
-  protected:
-    
-  private:
-    UniaxialMaterial *theMaterial;
-
-    double D;   //; % Damage index
-    double X;   //; % Range in consideration
-    double Y;   //; % Previous Adjacent Range
-    double A;   //; % Strain at first  cycle peak/valley
-    double B;   //; % Strain at second cycle peak/valley
-    int R1F;    // % Flag for first  cycle count
-    int R2F;    // % Flag for second cycle count
-    double CS;  // % Current Slope
-    double PS;  // % Previous slope
-    double EP;  // % Previous Strain
-    int FF;     // % Failure Flag
-    int SF;     // % Start Flag - for initializing the very first strain
-    int PF;     // % Peak Flag --> Did we reach a peak/valley at current strain?
-    
-    double Dmax; // = 1.0; % Maximum Damage index, normally 1.0
-    double Nf;   //  = 0.5E6; % Number of cycles to failure at strain E0
-    double E0;   //  = 14.5/29000;
-    double FE;   //  = -1/2.31; % Log log slope of fracture curve
-    double b;    //   =  log10(E0) - log10(Nf)*FE; %Theoretical Intercept
-    
-    bool Tfailed;
-    bool Cfailed;
+  Response *setResponse (const char **argv, int argc, Information &matInformation);
+  int getResponse (int responseID, Information &matInformation);    
+  
+ protected:
+  
+ private:
+  UniaxialMaterial *theMaterial;
+  
+  double DI; //Damage index
+  double  X; //Range in consideration
+  double  Y; //Previous Adjacent Range
+  double  A; //Peak or valley 1
+  double  B; //Peak or valley 2
+  double  C; //Peak or valley 2
+  double  D; //Peak or valley 4
+  int   PCC; /*Previous Cycle counter flag if >1 then previous 'n' 
+	       cycles did not flag a complete cycle */
+  int   R1F; //Flag for first  peak count
+  int   R2F; //Flag for second peak count
+  double CS; //Current Slope
+  double PS; //Previous slope
+  double EP; //Previous Strain
+  int    SF; /*Start Flag = 0 if very first strain, 
+	       (i.e. when initializing)    = 1 otherwise */
+  double DL; //Damage if current strain was last peak.
+  
+  double Dmax;
+  double E0;
+  double m;
+  
+  double minStrain;
+  double maxStrain;
+  
+  bool Cfailed;
+  double trialStrain;
+  
 };
 
 
