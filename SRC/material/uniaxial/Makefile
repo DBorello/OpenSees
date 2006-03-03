@@ -10,6 +10,7 @@ include ../../../Makefile.def
 	BoucWenMaterial.o \
 	Pinching4Material.o BarSlipMaterial.o \
 	FatigueMaterial.o \
+	Steel02.o Concrete02.o \
 	Steel03.o KinematicHardening.o TclKinematicHardening.o \
 	NewUniaxialMaterial.o TclNewUnixialMaterial.o \
 	ReinforcingSteel.o TclReinforcingSteel.o\

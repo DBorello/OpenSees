@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.35 $
-// $Date: 2006-03-01 00:31:26 $
+// $Revision: 1.36 $
+// $Date: 2006-03-03 18:53:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -38,8 +38,10 @@
 #include <ParallelMaterial.h>	// fmk
 #include <HardeningMaterial.h>	// MHS
 #include <Steel01.h>			// MHS
+#include <Steel02.h>                    // FF 
 #include <Steel03.h>			// KM
 #include <Concrete01.h>			// MHS
+#include <Concrete02.h>			// MHS
 #include <Concrete04.h>
 #include <HystereticMaterial.h>	// MHS
 #include <EPPGapMaterial.h>		// Mackie
@@ -618,10 +620,90 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 		theMaterial = new Steel01 (tag, fy, E, b, a1, a2, a3, a4);
 	}
 	else
-		// Parsing was successful, allocate the material
-		theMaterial = new Steel01 (tag, fy, E, b);
+	  // Parsing was successful, allocate the material
+	  theMaterial = new Steel01 (tag, fy, E, b);
     }
 
+    else if (strcmp(argv[1],"Steel2") == 0 || strcmp(argv[1],"Steel02") == 0) {
+      if (argc < 6) {
+	opserr << "WARNING invalid number of arguments\n";
+	printCommand(argc,argv);
+	opserr << "Want: uniaxialMaterial Steel02 tag? fy? E? b? <R0? cR1? cR2? <a1? a2? a3? a4?>>" << endln;
+	return 0;
+      }    
+      
+      double fy, E, b;
+      double R0, cR1, cR2;
+      double a1, a2, a3, a4;
+
+      int tag;
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	opserr << "WARNING invalid tag\n";
+	printCommand(argc, argv);
+	return 0;	
+      }
+      if (Tcl_GetDouble(interp, argv[3], &fy) != TCL_OK) {
+	opserr << "WARNING invalid fy\n";
+	printCommand(argc, argv);
+	return 0;	
+      }
+      if (Tcl_GetDouble(interp, argv[4], &E) != TCL_OK) {
+	opserr << "WARNING invalid E\n";
+	printCommand(argc, argv);
+	return 0;	
+      }
+      if (Tcl_GetDouble(interp, argv[5], &b) != TCL_OK) {
+	opserr << "WARNING invalid b\n";
+	printCommand(argc, argv);
+	return 0;	
+      }
+      if (argc > 8) {
+	if (Tcl_GetDouble(interp, argv[6], &R0) != TCL_OK) {
+	  opserr << "WARNING invalid R0\n";
+	  printCommand(argc, argv);
+	  return 0;	
+	}
+	if (Tcl_GetDouble(interp, argv[7], &cR1) != TCL_OK) {
+	  opserr << "WARNING invalid cR1\n";
+	  printCommand(argc, argv);
+	  return 0;	
+	}
+	if (Tcl_GetDouble(interp, argv[8], &cR2) != TCL_OK) {
+	  opserr << "WARNING invalid cR2\n";
+	  printCommand(argc, argv);
+	  return 0;	
+	}
+	if (argc > 12) {
+	  if (Tcl_GetDouble(interp, argv[9], &a1) != TCL_OK) {
+	    opserr << "WARNING invalid a1\n";
+	    printCommand(argc, argv);
+	    return 0;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[10], &a2) != TCL_OK) {
+	    opserr << "WARNING invalid a2\n";
+	    printCommand(argc, argv);
+	    return 0;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[11], &a3) != TCL_OK) {
+	    opserr << "WARNING invalid a3\n";
+	    printCommand(argc, argv);
+	    return 0;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[12], &a4) != TCL_OK) {
+	    opserr << "WARNING invalid a4\n";
+	    printCommand(argc, argv);
+	    return 0;	
+	  }
+	  theMaterial = new Steel02(tag, fy, E, b, R0, cR1, cR2, a1, a2, a3, a4);
+	}
+	else
+	  theMaterial = new Steel02(tag, fy, E, b, R0, cR1, cR2);
+      }
+      else
+	theMaterial = new Steel02(tag, fy, E, b);
+      
+    }
+    
 
     else if (strcmp(argv[1],"Steel03") == 0) {
       // Check that there is the minimum number of arguments
@@ -775,8 +857,72 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	theMaterial = new Concrete01(tag, fpc, epsc0, fpcu, epscu);
     }
 
-	else if (strcmp(argv[1],"Hysteretic") == 0) {
-		if (argc != 20 && argc != 19 && argc != 16 && argc != 15) {
+    else if (strcmp(argv[1],"Concrete2") == 0 || strcmp(argv[1],"Concrete02") == 0) {
+      if (argc < 10) {
+	opserr << "WARNING invalid number of arguments\n";
+	printCommand(argc,argv);
+	opserr << "Want: uniaxialMaterial Concrete02 tag? fpc? epsc0? fpcu? epscu? rat? ft? Ets?" << endln;
+	return 0;
+      }    
+      
+      double fpc, epsc0, fpcu, epscu;
+      double rat, ft, Ets;
+      int tag;
+      
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	opserr << "WARNING invalid uniaxialMaterial Concrete02 tag" << endln;
+	return TCL_ERROR;
+      }      
+
+      if (Tcl_GetDouble(interp, argv[3], &fpc) != TCL_OK) {
+	opserr << "WARNING invalid fpc\n";
+	printCommand(argc, argv);
+	return 0;	
+      }
+
+      if (Tcl_GetDouble(interp, argv[4], &epsc0) != TCL_OK) {
+	opserr << "WARNING invalid epsc0\n";
+	printCommand(argc, argv);
+	return 0;	
+      }
+
+      if (Tcl_GetDouble(interp, argv[5], &fpcu) != TCL_OK) {
+	opserr << "WARNING invalid fpcu\n";
+	printCommand(argc, argv);
+	return 0;	
+      }
+
+      if (Tcl_GetDouble(interp, argv[6], &epscu) != TCL_OK) {
+	opserr << "WARNING invalid epscu\n";
+	printCommand(argc, argv);
+	return 0;	
+      }
+
+      if (Tcl_GetDouble(interp, argv[7], &rat) != TCL_OK) {
+	opserr << "WARNING invalid rat\n";
+	printCommand(argc, argv);
+	return 0;	
+      }
+
+      if (Tcl_GetDouble(interp, argv[8], &ft) != TCL_OK) {
+	opserr << "WARNING invalid ft\n";
+	printCommand(argc, argv);
+	return 0;	
+      }
+
+      if (Tcl_GetDouble(interp, argv[9], &Ets) != TCL_OK) {
+	opserr << "WARNING invalid Ets\n";
+	printCommand(argc, argv);
+	return 0;	
+      }
+      
+      theMaterial = new Concrete02(tag, fpc, epsc0, fpcu, epscu, rat, ft, Ets);
+    }
+    
+    
+    
+    else if (strcmp(argv[1],"Hysteretic") == 0) {
+      if (argc != 20 && argc != 19 && argc != 16 && argc != 15) {
 			opserr << "WARNING insufficient arguments\n";
 			printCommand(argc,argv);
 			opserr << "Want: uniaxialMaterial Hysteretic tag? mom1p? rot1p? mom2p? rot2p? <mom3p? rot3p?> "
