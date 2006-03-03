@@ -25,7 +25,27 @@ tk: $(OBJS)
 	$(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY)  \
 	$(MACHINE_SPECIFIC_LIBS) -o $(OpenSees_PROGRAM)
 
-else
+endif
+
+ifeq ($(PROGRAMMING_MODE), PARALLEL_INTERPRETERS)
+
+tcl: $(OBJS)  
+	@$(CD) $(FE)/tcl; $(MAKE) tcl;
+	@$(LINKER) $(LINKFLAGS) $(INTERPRETER_LIBS_MPI_PARAMETERS) \
+	$(FE_LIBRARY) $(MACHINE_LINKLIBS) $(PARALLEL_LIB) \
+	$(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY)  \
+	$(MACHINE_SPECIFIC_LIBS) -o $(OpenSees_PROGRAM)
+
+tk: $(OBJS)  
+	@$(CD) $(FE)/tcl; $(MAKE) tk;
+	@$(LINKER) $(LINKFLAGS) $(INTERPRETER_LIBS_TK) \
+	$(FE_LIBRARY) $(MACHINE_LINKLIBS) $(PARALLEL_LIB) \
+	$(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY)  \
+	$(MACHINE_SPECIFIC_LIBS) -o $(OpenSees_PROGRAM)
+
+endif
+
+ifeq ($(PROGRAMMING_MODE), SEQUENTIAL)
 
 tcl: $(OBJS)  
 	@$(CD) $(FE)/tcl; $(MAKE) tcl;
@@ -58,6 +78,16 @@ INTERPRETER_LIBS_MPI = $(FE)/tcl/tclMain.o \
 	$(FE)/actor/machineBroker/MPI_MachineBroker.o \
 	$(FE)/domain/subdomain/ActorSubdomain.o \
 	$(FE)/domain/subdomain/ShadowSubdomain.o 
+
+INTERPRETER_LIBS_MPI_PARAMETERS = $(FE)/tcl/tclMain.o \
+	$(FE)/tcl/mpiParameterMain.o \
+	$(FE)/tcl/commands.o \
+	$(FE)/modelbuilder/tcl/myCommands.o \
+	$(FE)/actor/channel/MPI_Channel.o \
+	$(FE)/actor/machineBroker/MPI_MachineBroker.o \
+	$(FE)/domain/subdomain/ActorSubdomain.o \
+	$(FE)/domain/subdomain/ShadowSubdomain.o 
+
 
 INTERPRETER_LIBS_TK = $(FE)/tcl/tkMain.o \
 	$(FE)/tcl/tkAppInit.o \

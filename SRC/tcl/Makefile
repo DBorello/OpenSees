@@ -2,17 +2,23 @@ include ../../Makefile.def
 
 OBJS       = commands.o TclFeViewer.o TclVideoPlayer.o
 
-all: $(OBJS)
+tcl: $(OBJS)  tclMain.o tclAppInit.o
 
 ifeq ($(PROGRAMMING_MODE), PARALLEL)
 
+OBJS       = commands.o 
 tcl: $(OBJS) tclMain.o mpiMain.o
 
-else
-
-tcl: $(OBJS)  tclMain.o tclAppInit.o
-
 endif
+
+ifeq ($(PROGRAMMING_MODE), PARALLEL_INTERPRETERS)
+
+tcl: $(OBJS) tclMain.o mpiParameterMain.o
+OBJS       = commands.o 
+endif
+
+
+all: $(OBJS)
 
 
 tk: $(OBJS)  tkMain.o tkAppInit.o

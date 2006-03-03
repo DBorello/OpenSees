@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.72 $
-// $Date: 2006-01-28 00:56:34 $
+// $Revision: 1.73 $
+// $Date: 2006-03-03 22:48:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -292,6 +292,7 @@ ModelBuilder *theBuilder =0;
 #include <DistributedBandGenLinSOE.h>
 #include <DistributedDiagonalSOE.h>
 #include <DistributedDiagonalSolver.h>
+
 #define MPIPP_H
 #include <DistributedSuperLU.h>
 #include <DistributedProfileSPDLinSOE.h>

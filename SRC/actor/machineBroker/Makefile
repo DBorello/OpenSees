@@ -1,14 +1,21 @@
 include ../../../Makefile.def
 
+OBJS = MachineBroker.o 
+
 ifeq ($(PROGRAMMING_MODE), PARALLEL)
 
 OBJS = MachineBroker.o MPI_MachineBroker.o
 
-else
+endif
 
-OBJS = MachineBroker.o 
+ifeq ($(PROGRAMMING_MODE), PARALLEL_INTERPRETERS)
+
+OBJS = MachineBroker.o MPI_MachineBroker.o
 
 endif
+
+
+
 
 all: $(OBJS)
 

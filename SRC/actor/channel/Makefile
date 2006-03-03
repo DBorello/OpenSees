@@ -1,12 +1,17 @@
 include ../../../Makefile.def
 
+OBJS	=	Channel.o TCP_Socket.o UDP_Socket.o 
+
 ifeq ($(PROGRAMMING_MODE), PARALLEL)
 
 OBJS	=	Channel.o TCP_Socket.o UDP_Socket.o MPI_Channel.o
 
-else
+endif
 
-OBJS	=	Channel.o TCP_Socket.o UDP_Socket.o 
+
+ifeq ($(PROGRAMMING_MODE), PARALLEL_INTERPRETERS)
+
+OBJS	=	Channel.o TCP_Socket.o UDP_Socket.o MPI_Channel.o
 
 endif
 

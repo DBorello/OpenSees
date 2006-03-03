@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.31 $
-// $Date: 2006-01-18 23:02:17 $
+// $Revision: 1.32 $
+// $Date: 2006-03-03 22:48:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -1589,7 +1589,6 @@ FEM_ObjectBroker::getNewLinearSOE(int classTagSOE,
 	      opserr << classTagSolver << endln;
 	      return 0;
 	  }	     
-
 
 #endif
 
