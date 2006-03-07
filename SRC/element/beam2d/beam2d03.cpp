@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:05 $
+// $Revision: 1.6 $
+// $Date: 2006-03-07 17:14:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam2d/beam2d03.cpp,v $
                                                                         
                                                                         
@@ -286,7 +286,7 @@ beam2d03::getResistingForce()
 {	
     // compute the residual Res = k*uTrial
     const Vector &end1Disp = theNodes[0]->getTrialDisp();
-    const Vector &end2Disp = theNodes[0]->getTrialDisp();    
+    const Vector &end2Disp = theNodes[1]->getTrialDisp();    
     rForce(0) = end1Disp(0);
     rForce(1) = end1Disp(1);
     rForce(2) = end1Disp(2);    
