@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.73 $
-// $Date: 2006-03-03 22:48:09 $
+// $Revision: 1.74 $
+// $Date: 2006-03-15 00:29:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -203,6 +203,17 @@ OPS_Stream *opserrPtr = &sserr;
 #include <SuperLU.h>
 #endif
 
+
+#ifdef _MUMPS
+#ifdef _PARALLEL_PROCESSING
+#include <MumpsParallelSOE.h>
+#include <MumpsParallelSolver.h>
+#else
+#include <MumpsSOE.h>
+#include <MumpsSolver.h>
+#endif
+#endif
+
 #ifdef _PETSC
 #include <PetscSOE.h>
 #include <PetscSolver.h>
@@ -212,18 +223,8 @@ OPS_Stream *opserrPtr = &sserr;
 
 #include <SymSparseLinSOE.h>
 #include <SymSparseLinSolver.h>
-
 #include <UmfpackGenLinSOE.h>
 #include <UmfpackGenLinSolver.h>
-
-
-#ifdef _PETSC
-#include <PetscSOE.h>
-#include <PetscSolver.h>
-#include <SparseGenRowLinSOE.h>
-#include <PetscSparseSeqSolver.h>
-#endif
-
 
 #include <EigenSOE.h>
 #include <EigenSolver.h>
@@ -1853,6 +1854,25 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 
 
 #endif
+
+
+#ifdef _MUMPS
+
+  else if (strcmp(argv[1],"Mumps") == 0) {
+    
+#ifdef _PARALLEL_PROCESSING
+    MumpsParallelSolver *theSolver = new MumpsParallelSolver();
+    theSOE = new MumpsParallelSOE(*theSolver);
+#else
+    MumpsSolver *theSolver = new MumpsSolver();
+    theSOE = new MumpsSOE(*theSolver);
+
+#endif
+
+  }
+
+#endif
+
   
   else {
 
