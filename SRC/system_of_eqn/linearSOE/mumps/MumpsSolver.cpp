@@ -19,8 +19,13 @@
 ** ****************************************************************** */
                                                                         
 // Description: This file contains the implementation of MumpsSolver
-//
-// What: "@(#) SuperLU.h, revA"
+
+// $Revision: 1.2 $
+// $Date: 2006-03-15 00:24:00 $
+// $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsSolver.cpp,v $
+
+// Written: fmk 
+// Created: 02/06
 
 #include <MumpsSolver.h>
 #include <MumpsSOE.h>
@@ -30,22 +35,35 @@
 
 #define ICNTL(I) icntl[(I)-1] /* macro s.t. indices match documentation */
 
-#define SOLVER_TAGS_MUMPS 100001
-
 extern "C" {
 #include <mpi.h>
 }
 
 MumpsSolver::MumpsSolver()
-  :LinearSOESolver(SOLVER_TAGS_MUMPS),
+  :LinearSOESolver(SOLVER_TAGS_MumpsSolver),
    theMumpsSOE(0)
 {
-  MPI_COMM_WORLD=(MPI_Comm)0;
   id.job=-1; 
   id.par=1; 
   id.sym=0;  // general symmetric (for SPD =1 defaults to =2 in current version)
 
   id.comm_fortran=MPI_COMM_WORLD;
+  dmumps_c(&id);
+
+}
+
+
+MumpsSolver::MumpsSolver(int ICNTL7)
+  :LinearSOESolver(SOLVER_TAGS_MumpsSolver),
+   theMumpsSOE(0)
+{
+  id.job=-1; 
+  id.par=1; 
+  id.sym=0;  // general symmetric (for SPD =1 defaults to =2 in current version)
+
+  id.comm_fortran=MPI_COMM_WORLD;
+  id.ICNTL(7)=ICNTL7;;
+
   dmumps_c(&id);
 
 }

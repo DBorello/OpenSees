@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-03-09 01:54:01 $
+// $Revision: 1.2 $
+// $Date: 2006-03-15 00:24:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsSOE.cpp,v $
                                                                         
                                                                         
@@ -39,8 +39,6 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
-#define LinSOE_TAGS_MumpsSOE 100001
-
 MumpsSOE::MumpsSOE(MumpsSolver &the_Solver)
 :LinearSOE(the_Solver, LinSOE_TAGS_MumpsSOE),
  size(0), nnz(0), A(0), B(0), X(0), rowA(0), colStartA(0),
@@ -52,14 +50,14 @@ MumpsSOE::MumpsSOE(MumpsSolver &the_Solver)
 }
 
 
-MumpsSOE::MumpsSOE(MumpsSolver &the_Solver, int classTag)
+MumpsSOE::MumpsSOE(LinearSOESolver &the_Solver, int classTag)
   :LinearSOE(the_Solver, classTag),
    size(0), nnz(0), A(0), B(0), X(0), rowA(0), colStartA(0),
    vectX(0), vectB(0),
    Asize(0), Bsize(0),
    factored(false)
 {
-  the_Solver.setLinearSOE(*this);
+
 }
 
 

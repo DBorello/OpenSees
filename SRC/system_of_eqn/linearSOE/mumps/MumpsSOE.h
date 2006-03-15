@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-03-09 01:54:01 $
+// $Revision: 1.2 $
+// $Date: 2006-03-15 00:24:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsSOE.h,v $
                                                                         
 #ifndef MumpsSOE_h
@@ -39,12 +39,13 @@
 #include <Vector.h>
 
 class MumpsSolver;
+class LinearSOESolver;
 
 class MumpsSOE : public LinearSOE
 {
   public:
     MumpsSOE(MumpsSolver &theSolver);        
-    MumpsSOE(MumpsSolver &theSolver, int classTag);        
+    MumpsSOE(LinearSOESolver &theSolver, int classTag);        
     MumpsSOE(int N, int NNZ, int *rowStartA, int *colA,
 	     MumpsSolver &theSolver);        
 

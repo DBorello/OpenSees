@@ -18,13 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-03-09 01:54:01 $
+// $Revision: 1.2 $
+// $Date: 2006-03-15 00:24:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsSolver.h,v $
                                                                         
                                                                         
-#ifndef Mumps_h
-#define Mumps_h
+#ifndef MumpsSolver_h
+#define MumpsSolver_h
 
 // Written: fmk 
 // Created: 02/06
@@ -55,11 +55,8 @@ class MumpsSolver : public LinearSOESolver
 {
   public:
   MumpsSolver();
-  MumpsSolver(int MPI_COMM,
-	      int PAR_HOST = 1,
-	      int ICNTL5 = 0,
-	      int ICNTL18 = 0,
-	      int ICNTL7 =7);
+  MumpsSolver(int ICNTL7 =7);
+	      
   virtual ~MumpsSolver();
   
   int solve(void);
