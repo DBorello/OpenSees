@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.32 $
-// $Date: 2006-03-03 22:48:08 $
+// $Revision: 1.33 $
+// $Date: 2006-03-15 00:28:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -296,6 +296,16 @@
 #include <PetscSolver.h>
 #include <SparseGenColLinSOE.h>
 #include <PetscSparseSeqSolver.h>
+#endif
+
+
+#ifdef _MUMPS
+#include <MumpsSOE.h>
+#include <MumpsSolver.h>
+#ifdef _PARALLEL_PROCESSING
+#include <MumpsParallelSOE.h>
+#include <MumpsParallelSolver.h>
+#endif
 #endif
 
 #ifdef _PARALLEL_PROCESSING
@@ -1393,6 +1403,9 @@ FEM_ObjectBroker::getNewLinearSOE(int classTagSOE,
 #ifdef _PARALLEL_PROCESSING
     DistributedSuperLU *theDistributedSparseGenLinSolver =0;
     DistributedDiagonalSolver *theDistributedDiagonalSolver =0;
+#ifdef _MUMPS
+    MumpsParallelSolver *theMumpsSolver = 0;
+#endif
 #endif    
 
     /*
@@ -1493,6 +1506,22 @@ FEM_ObjectBroker::getNewLinearSOE(int classTagSOE,
 #endif
 
 #ifdef _PARALLEL_PROCESSING
+
+#ifdef _MUMPS
+      case LinSOE_TAGS_MumpsParallelSOE:  
+	  if (classTagSolver == SOLVER_TAGS_MumpsParallelSolver) {
+	      theMumpsSolver = new MumpsParallelSolver();
+	      theSOE = new MumpsParallelSOE(*theMumpsSolver);
+	      lastLinearSolver = theMumpsSolver;
+	      return theSOE;
+	  } else {
+	      opserr << "FEM_ObjectBroker::getNewLinearSOE - ";
+	      opserr << " - no DistributedBandGenLinSolver type exists for class tag ";
+	      opserr << classTagSolver << endln;
+	      return 0;
+	  }		     
+#endif
+
       case LinSOE_TAGS_DistributedBandGenLinSOE:  
 
 	  if (classTagSolver == SOLVER_TAGS_BandGenLinLapackSolver) {
