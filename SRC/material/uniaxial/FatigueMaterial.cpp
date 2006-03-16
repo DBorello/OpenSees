@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2006-03-01 00:31:26 $
+// $Revision: 1.3 $
+// $Date: 2006-03-16 19:28:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FatigueMaterial.cpp,v $
 
 // Written: Patxi 
@@ -370,59 +370,62 @@ FatigueMaterial::commitState(void)
       DL=DI;
     }
 
-  } else {
-
-    // Now check for damage, although we are not at a peak at all.
+    // Modified by Patxi 3/5/2006
+  // } else {
+  }
+  if (Cfailed == false) {
+    
+    // Now check for damage, although we may not be at a peak at all.
     // Store temporary damage only as if it were the last peak: DL
     // Commit to DI only if failure occurs.
     if (B == 0 && C == 0 &&  D == 0) {
-
+      
       // If we have not yet found the second peak
       X = fabs(trialStrain - A);
-
+      
       if (fabs(X) < 1e-10) {
 	DL = DI ;
       } else {
 	DL = DI +  0.5 / fabs(pow( (X/E0), 1/m ));
       }
-
+      
     } else if (B != 0 && C == 0 &&  D == 0) {
-
+      
       // On our way to find point C. Range Y defined, no X yet
       X = fabs(trialStrain - B);
-
+      
       if (fabs(X) < 1e-10) {
 	DL = DI;
       } else {
 	DL = DI +  0.5 / fabs(pow( (X/E0) , 1/m ));
       }	
-
+      
       if (fabs(Y) < 1e-10) {
 	DL = DL;
       } else {
 	DL = DL +  0.5 / fabs(pow( (Y/E0) , 1/m ));
       }
-
+      
     } else if (B != 0 && C != 0 &&  D == 0) {
-
+      
       // Two ranges stored, but no cycles for either stored
       //   Make sure we get the potential |D-A| range.
       X = fabs(trialStrain-A);
-
+      
       if (fabs(Y) < 1e-10) {
 	DL = DI;
       } else {
 	DL = DI +  1.0 / fabs(pow( (Y/E0) , 1/m ));
       } 
-
+      
       if (fabs(X) < 1e-10) {
 	DL = DL;
       } else {
 	DL = DL +  0.5 / fabs(pow( (X/E0) , 1/m ));
       }
-
+      
     }
-
+    
     // Did we fail before a peak?
     double mStress = theMaterial->getStress();
     if (DL > Dmax && mStress > 0.0 ) {
@@ -432,11 +435,12 @@ FatigueMaterial::commitState(void)
     } else {
       Cfailed = false;
     }
+    
   }
 
   PS = CS;            // Previous Slope
   EP = trialStrain;   // Keep track of previous strain
-
+  
   // Check if failed at current step
   if (Cfailed) {
     return 0;
@@ -444,7 +448,7 @@ FatigueMaterial::commitState(void)
   else 
     return theMaterial->commitState();
 
-}  
+}
 
 
 int 
