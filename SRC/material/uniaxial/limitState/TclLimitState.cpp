@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-02-07 23:15:54 $
+// $Revision: 1.2 $
+// $Date: 2006-03-17 22:47:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/limitState/TclLimitState.cpp,v $
                                                                         
                                                                         
@@ -61,15 +61,10 @@ Tcl_AddLimitCurveCommand(Tcl_Interp *theInterp, Domain *theTclDomain)
 int
 Tcl_RemoveLimitCurveCommand(Tcl_Interp *theInterp)
 {
-  opserr << "Tcl_RemoveLimitCurveCommand(Tcl_Interp *theInterp)  -1\n";
   if (theLimitCurves != 0) {
-  opserr << "Tcl_RemoveLimitCurveCommand(Tcl_Interp *theInterp)  -2\n";
       theLimitCurves->clearAll();
-  opserr << "Tcl_RemoveLimitCurveCommand(Tcl_Interp *theInterp)  -3\n";
       delete theLimitCurves;
-  opserr << "Tcl_RemoveLimitCurveCommand(Tcl_Interp *theInterp)  -4\n";
       theLimitCurves = 0;
-  opserr << "Tcl_RemoveLimitCurveCommand(Tcl_Interp *theInterp)  -5\n";
   }
   
   return Tcl_DeleteCommand(theInterp, "limitCurve");
