@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2005-11-28 21:23:50 $
+// $Revision: 1.13 $
+// $Date: 2006-03-20 23:47:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.cpp,v $
                                                                         
                                                                         
@@ -98,11 +98,15 @@ AnalysisModel::AnalysisModel(TaggedObjectStorage &theFes, TaggedObjectStorage &t
 // ~AnalysisModel();    
 AnalysisModel::~AnalysisModel()
 {
-  if (theFEs != 0)
+  if (theFEs != 0) {
+    theFEs->clearAll();
     delete theFEs;
+  }
 
-  if (theDOFs != 0)
+  if (theDOFs != 0) {
+    theDOFs->clearAll();
     delete theDOFs;
+  }
 
   if (theFEiter != 0)
     delete theFEiter;
