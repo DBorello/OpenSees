@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2003-08-13 23:52:23 $
+// $Revision: 1.24 $
+// $Date: 2006-03-21 22:19:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -811,12 +811,14 @@ Truss::displaySelf(Renderer &theViewer, int displayMode, float fact)
     // store this information in 2 3d vectors v1 and v2
     const Vector &end1Crd = theNodes[0]->getCrds();
     const Vector &end2Crd = theNodes[1]->getCrds();	
-    const Vector &end1Disp = theNodes[0]->getDisp();
-    const Vector &end2Disp = theNodes[1]->getDisp();    
+
+    static Vector v1(3);
+    static Vector v2(3);
 
     if (displayMode == 1 || displayMode == 2) {
-	Vector v1(3);
-	Vector v2(3);
+      const Vector &end1Disp = theNodes[0]->getDisp();
+      const Vector &end2Disp = theNodes[1]->getDisp();    
+
 	for (int i=0; i<dimension; i++) {
 	    v1(i) = end1Crd(i)+end1Disp(i)*fact;
 	    v2(i) = end2Crd(i)+end2Disp(i)*fact;    
@@ -834,10 +836,25 @@ Truss::displaySelf(Renderer &theViewer, int displayMode, float fact)
 	}
     
 	if (displayMode == 2) // use the strain as the drawing measure
-	    return theViewer.drawLine(v1, v2, strain, strain);	
+	  return theViewer.drawLine(v1, v2, strain, strain);	
 	else { // otherwise use the axial force as measure
-	    return theViewer.drawLine(v1,v2, force, force);
+	  return theViewer.drawLine(v1,v2, force, force);
 	}
+    } else if (displayMode < 0) {
+      int mode = displayMode  *  -1;
+      const Matrix &eigen1 = theNodes[0]->getEigenvectors();
+      const Matrix &eigen2 = theNodes[1]->getEigenvectors();
+      if (eigen1.noCols() >= mode) {
+	for (int i = 0; i < dimension; i++) {
+	  v1(i) = end1Crd(i) + eigen1(i,mode-1)*fact;
+	  v2(i) = end2Crd(i) + eigen2(i,mode-1)*fact;    
+	}    
+      } else {
+	for (int i = 0; i < dimension; i++) {
+	  v1(i) = end1Crd(i);
+	  v2(i) = end2Crd(i);
+	}    
+      }
     }
     return 0;
 }

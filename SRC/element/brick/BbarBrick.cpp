@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2003-08-28 22:42:32 $
+// $Revision: 1.17 $
+// $Date: 2006-03-21 22:19:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.cpp,v $
 
 // Ed "C++" Love
@@ -1223,16 +1223,6 @@ BbarBrick::displaySelf(Renderer &theViewer, int displayMode, float fact)
     const Vector &end7Crd = nodePointers[6]->getCrds();	
     const Vector &end8Crd = nodePointers[7]->getCrds();	
 
-    const Vector &end1Disp = nodePointers[0]->getDisp();
-    const Vector &end2Disp = nodePointers[1]->getDisp();
-    const Vector &end3Disp = nodePointers[2]->getDisp();
-    const Vector &end4Disp = nodePointers[3]->getDisp();
-
-    const Vector &end5Disp = nodePointers[4]->getDisp();
-    const Vector &end6Disp = nodePointers[5]->getDisp();
-    const Vector &end7Disp = nodePointers[6]->getDisp();
-    const Vector &end8Disp = nodePointers[7]->getDisp();
-
     static Matrix coords(4,3);
     static Vector values(4);
     static Vector P(24) ;
@@ -1242,61 +1232,198 @@ BbarBrick::displaySelf(Renderer &theViewer, int displayMode, float fact)
     values(2) = 1 ;
     values(3) = 1 ;
 
-    if (displayMode < 3 && displayMode > 0)
-      P = this->getResistingForce();
-
     int error = 0;
-
     int i;
-    for (i = 0; i < 3; i++) {
-      coords(0,i) = end1Crd(i) + end1Disp(i)*fact;
-      coords(1,i) = end2Crd(i) + end2Disp(i)*fact;
-      coords(2,i) = end3Crd(i) + end3Disp(i)*fact;
-      coords(3,i) = end4Crd(i) + end4Disp(i)*fact;
+
+    if (displayMode >= 0) {
+      const Vector &end1Disp = nodePointers[0]->getDisp();
+      const Vector &end2Disp = nodePointers[1]->getDisp();
+      const Vector &end3Disp = nodePointers[2]->getDisp();
+      const Vector &end4Disp = nodePointers[3]->getDisp();
+      
+      const Vector &end5Disp = nodePointers[4]->getDisp();
+      const Vector &end6Disp = nodePointers[5]->getDisp();
+      const Vector &end7Disp = nodePointers[6]->getDisp();
+      const Vector &end8Disp = nodePointers[7]->getDisp();
+      
+      if (displayMode < 3 && displayMode > 0)
+	P = this->getResistingForce();
+      
+      for (i = 0; i < 3; i++) {
+	coords(0,i) = end1Crd(i) + end1Disp(i)*fact;
+	coords(1,i) = end2Crd(i) + end2Disp(i)*fact;
+	coords(2,i) = end3Crd(i) + end3Disp(i)*fact;
+	coords(3,i) = end4Crd(i) + end4Disp(i)*fact;
+      }
+      error += theViewer.drawPolygon (coords, values);
+      
+      for (i = 0; i < 3; i++) {
+	coords(0,i) = end5Crd(i) + end5Disp(i)*fact;
+	coords(1,i) = end6Crd(i) + end6Disp(i)*fact;
+	coords(2,i) = end7Crd(i) + end7Disp(i)*fact;
+	coords(3,i) = end8Crd(i) + end8Disp(i)*fact;
+      }
+      error += theViewer.drawPolygon (coords, values);
+      
+      for (i = 0; i < 3; i++) {
+	coords(0,i) = end1Crd(i) + end1Disp(i)*fact;
+	coords(1,i) = end4Crd(i) + end4Disp(i)*fact;
+	coords(2,i) = end8Crd(i) + end8Disp(i)*fact;
+	coords(3,i) = end5Crd(i) + end5Disp(i)*fact;
+      }
+      error += theViewer.drawPolygon (coords, values);
+      
+      for (i = 0; i < 3; i++) {
+	coords(0,i) = end2Crd(i) + end2Disp(i)*fact;
+	coords(1,i) = end3Crd(i) + end3Disp(i)*fact;
+	coords(2,i) = end7Crd(i) + end7Disp(i)*fact;
+	coords(3,i) = end6Crd(i) + end6Disp(i)*fact;
+      }
+      error += theViewer.drawPolygon (coords, values);
+      
+      
+      for (i = 0; i < 3; i++) {
+	coords(0,i) = end1Crd(i) + end1Disp(i)*fact;
+	coords(1,i) = end2Crd(i) + end2Disp(i)*fact;
+	coords(2,i) = end6Crd(i) + end6Disp(i)*fact;
+	coords(3,i) = end5Crd(i) + end5Disp(i)*fact;
+      }
+      error += theViewer.drawPolygon (coords, values);
+      
+      for (i = 0; i < 3; i++) {
+	coords(0,i) = end4Crd(i) + end4Disp(i)*fact;
+	coords(1,i) = end3Crd(i) + end3Disp(i)*fact;
+	coords(2,i) = end7Crd(i) + end7Disp(i)*fact;
+	coords(3,i) = end8Crd(i) + end8Disp(i)*fact;
+      }
+      error += theViewer.drawPolygon (coords, values);
+
+    } else {
+      int mode = displayMode  *  -1;
+
+      const Matrix &eigen1 = nodePointers[0]->getEigenvectors();
+      const Matrix &eigen2 = nodePointers[1]->getEigenvectors();
+      const Matrix &eigen3 = nodePointers[2]->getEigenvectors();
+      const Matrix &eigen4 = nodePointers[3]->getEigenvectors();
+      const Matrix &eigen5 = nodePointers[4]->getEigenvectors();
+      const Matrix &eigen6 = nodePointers[5]->getEigenvectors();
+      const Matrix &eigen7 = nodePointers[6]->getEigenvectors();
+      const Matrix &eigen8 = nodePointers[7]->getEigenvectors();
+      
+      if (eigen1.noCols() >= mode) {
+
+	for (i = 0; i < 3; i++) {
+	  coords(0,i) = end1Crd(i) + eigen1(i,mode-1)*fact;
+	  coords(1,i) = end2Crd(i) + eigen2(i,mode-1)*fact;    
+	  coords(2,i) = end3Crd(i) + eigen3(i,mode-1)*fact;    
+	  coords(3,i) = end4Crd(i) + eigen4(i,mode-1)*fact;
+	}
+	
+	error += theViewer.drawPolygon (coords, values);
+	
+	for (i = 0; i < 3; i++) {
+	  coords(0,i) = end5Crd(i) + eigen5(i,mode-1)*fact;
+	  coords(1,i) = end6Crd(i) + eigen6(i,mode-1)*fact;
+	  coords(2,i) = end7Crd(i) + eigen7(i,mode-1)*fact;
+	  coords(3,i) = end8Crd(i) + eigen8(i,mode-1)*fact;
+	}
+	
+	error += theViewer.drawPolygon (coords, values);
+	
+	for (i = 0; i < 3; i++) {
+	  coords(0,i) = end1Crd(i) + eigen1(i,mode-1)*fact;
+	  coords(1,i) = end4Crd(i) + eigen4(i,mode-1)*fact;
+	  coords(2,i) = end8Crd(i) + eigen8(i,mode-1)*fact;
+	  coords(3,i) = end5Crd(i) + eigen5(i,mode-1)*fact;
+	}
+	
+	error += theViewer.drawPolygon (coords, values);
+	
+	for (i = 0; i < 3; i++) {
+	  coords(0,i) = end2Crd(i) + eigen2(i,mode-1)*fact;
+	  coords(1,i) = end3Crd(i) + eigen3(i,mode-1)*fact;
+	  coords(2,i) = end7Crd(i) + eigen7(i,mode-1)*fact;
+	  coords(3,i) = end6Crd(i) + eigen6(i,mode-1)*fact;
+	}
+	
+	error += theViewer.drawPolygon (coords, values);
+	
+	
+	for (i = 0; i < 3; i++) {
+	  coords(0,i) = end1Crd(i) + eigen1(i,mode-1)*fact;
+	  coords(1,i) = end2Crd(i) + eigen2(i,mode-1)*fact;
+	  coords(2,i) = end6Crd(i) + eigen6(i,mode-1)*fact;
+	  coords(3,i) = end5Crd(i) + eigen5(i,mode-1)*fact;
+	}
+	
+	error += theViewer.drawPolygon (coords, values);
+	
+	for (i = 0; i < 3; i++) {
+	  coords(0,i) = end4Crd(i) + eigen4(i,mode-1)*fact;
+	  coords(1,i) = end3Crd(i) + eigen3(i,mode-1)*fact;
+	  coords(2,i) = end7Crd(i) + eigen7(i,mode-1)*fact;
+	  coords(3,i) = end8Crd(i) + eigen8(i,mode-1)*fact;
+	}
+	
+	error += theViewer.drawPolygon (coords, values);
+      } else {
+	values.Zero();
+	for (i = 0; i < 3; i++) {
+	  coords(0,i) = end1Crd(i); 
+	  coords(1,i) = end2Crd(i); 
+	  coords(2,i) = end3Crd(i); 
+	  coords(3,i) = end4Crd(i); 
+	}
+	
+	error += theViewer.drawPolygon (coords, values);
+	
+	for (i = 0; i < 3; i++) {
+	  coords(0,i) = end5Crd(i); 
+	  coords(1,i) = end6Crd(i); 
+	  coords(2,i) = end7Crd(i); 
+	  coords(3,i) = end8Crd(i); 
+	}
+	
+	error += theViewer.drawPolygon (coords, values);
+	
+	for (i = 0; i < 3; i++) {
+	  coords(0,i) = end1Crd(i); 
+	  coords(1,i) = end4Crd(i); 
+	  coords(2,i) = end8Crd(i); 
+	  coords(3,i) = end5Crd(i); 
+	}
+	
+	error += theViewer.drawPolygon (coords, values);
+	
+	for (i = 0; i < 3; i++) {
+	  coords(0,i) = end2Crd(i); 
+	  coords(1,i) = end3Crd(i); 
+	  coords(2,i) = end7Crd(i); 
+	  coords(3,i) = end6Crd(i); 
+	}
+	
+	error += theViewer.drawPolygon (coords, values);
+	
+	
+	for (i = 0; i < 3; i++) {
+	  coords(0,i) = end1Crd(i); 
+	  coords(1,i) = end2Crd(i); 
+	  coords(2,i) = end6Crd(i); 
+	  coords(3,i) = end5Crd(i); 
+	}
+	
+	error += theViewer.drawPolygon (coords, values);
+	
+	for (i = 0; i < 3; i++) {
+	  coords(0,i) = end4Crd(i); 
+	  coords(1,i) = end3Crd(i); 
+	  coords(2,i) = end7Crd(i); 
+	  coords(3,i) = end8Crd(i); 
+	}
+	
+	error += theViewer.drawPolygon (coords, values);
+      }      
     }
-    error += theViewer.drawPolygon (coords, values);
-
-    for (i = 0; i < 3; i++) {
-      coords(0,i) = end5Crd(i) + end5Disp(i)*fact;
-      coords(1,i) = end6Crd(i) + end6Disp(i)*fact;
-      coords(2,i) = end7Crd(i) + end7Disp(i)*fact;
-      coords(3,i) = end8Crd(i) + end8Disp(i)*fact;
-    }
-    error += theViewer.drawPolygon (coords, values);
-
-    for (i = 0; i < 3; i++) {
-      coords(0,i) = end1Crd(i) + end1Disp(i)*fact;
-      coords(1,i) = end4Crd(i) + end4Disp(i)*fact;
-      coords(2,i) = end8Crd(i) + end8Disp(i)*fact;
-      coords(3,i) = end5Crd(i) + end5Disp(i)*fact;
-    }
-    error += theViewer.drawPolygon (coords, values);
-
-    for (i = 0; i < 3; i++) {
-      coords(0,i) = end2Crd(i) + end2Disp(i)*fact;
-      coords(1,i) = end3Crd(i) + end3Disp(i)*fact;
-      coords(2,i) = end7Crd(i) + end7Disp(i)*fact;
-      coords(3,i) = end6Crd(i) + end6Disp(i)*fact;
-    }
-    error += theViewer.drawPolygon (coords, values);
-
-
-    for (i = 0; i < 3; i++) {
-      coords(0,i) = end1Crd(i) + end1Disp(i)*fact;
-      coords(1,i) = end2Crd(i) + end2Disp(i)*fact;
-      coords(2,i) = end6Crd(i) + end6Disp(i)*fact;
-      coords(3,i) = end5Crd(i) + end5Disp(i)*fact;
-    }
-    error += theViewer.drawPolygon (coords, values);
-
-    for (i = 0; i < 3; i++) {
-      coords(0,i) = end4Crd(i) + end4Disp(i)*fact;
-      coords(1,i) = end3Crd(i) + end3Disp(i)*fact;
-      coords(2,i) = end7Crd(i) + end7Disp(i)*fact;
-      coords(3,i) = end8Crd(i) + end8Disp(i)*fact;
-    }
-    error += theViewer.drawPolygon (coords, values);
-
 
     return error;
 }

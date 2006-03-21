@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2003-10-07 21:18:50 $
+// $Revision: 1.25 $
+// $Date: 2006-03-21 22:19:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -869,20 +869,44 @@ FourNodeQuad::displaySelf(Renderer &theViewer, int displayMode, float fact)
     const Vector &end3Crd = theNodes[2]->getCrds();	
     const Vector &end4Crd = theNodes[3]->getCrds();	
 
-    const Vector &end1Disp = theNodes[0]->getDisp();
-    const Vector &end2Disp = theNodes[1]->getDisp();
-    const Vector &end3Disp = theNodes[2]->getDisp();
-    const Vector &end4Disp = theNodes[3]->getDisp();
-
     static Matrix coords(4,3);
 
-    for (int i = 0; i < 2; i++) {
-      coords(0,i) = end1Crd(i) + end1Disp(i)*fact;
-      coords(1,i) = end2Crd(i) + end2Disp(i)*fact;    
-      coords(2,i) = end3Crd(i) + end3Disp(i)*fact;    
-      coords(3,i) = end4Crd(i) + end4Disp(i)*fact;    
-    }
+    if (displayMode >= 0) {    
+      
+      const Vector &end1Disp = theNodes[0]->getDisp();
+      const Vector &end2Disp = theNodes[1]->getDisp();
+      const Vector &end3Disp = theNodes[2]->getDisp();
+      const Vector &end4Disp = theNodes[3]->getDisp();
 
+      for (int i = 0; i < 2; i++) {
+	coords(0,i) = end1Crd(i) + end1Disp(i)*fact;
+	coords(1,i) = end2Crd(i) + end2Disp(i)*fact;    
+	coords(2,i) = end3Crd(i) + end3Disp(i)*fact;    
+	coords(3,i) = end4Crd(i) + end4Disp(i)*fact;    
+      }
+    } else {
+      int mode = displayMode * -1;
+      const Matrix &eigen1 = theNodes[0]->getEigenvectors();
+      const Matrix &eigen2 = theNodes[1]->getEigenvectors();
+      const Matrix &eigen3 = theNodes[2]->getEigenvectors();
+      const Matrix &eigen4 = theNodes[3]->getEigenvectors();
+      if (eigen1.noCols() >= mode) {
+	for (int i = 0; i < 2; i++) {
+	  coords(0,i) = end1Crd(i) + eigen1(i,mode-1)*fact;
+	  coords(1,i) = end2Crd(i) + eigen2(i,mode-1)*fact;
+	  coords(2,i) = end3Crd(i) + eigen3(i,mode-1)*fact;
+	  coords(3,i) = end4Crd(i) + eigen4(i,mode-1)*fact;
+	}    
+      } else {
+	for (int i = 0; i < 2; i++) {
+	  coords(0,i) = end1Crd(i);
+	  coords(1,i) = end2Crd(i);
+	  coords(2,i) = end3Crd(i);
+	  coords(3,i) = end4Crd(i);
+	}    
+      }
+    }
+    
     int error = 0;
 
     // finally we draw the element using drawPolygon
