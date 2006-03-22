@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2005-11-23 22:48:50 $
+// $Revision: 1.21 $
+// $Date: 2006-03-22 19:05:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -1281,8 +1281,10 @@ const Matrix &
 Node::getEigenvectors(void)
 {
   // check the eigen vectors have been set
-  if (theEigenvectors == 0)
+	if (theEigenvectors == 0) {
     opserr << "Node::getEigenvectors() - eigenvectors have not been set\n";
+	exit(0);
+	}
   
   return *theEigenvectors;
 }
