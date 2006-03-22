@@ -72,6 +72,63 @@ proc doneConcrete01 { } {
 
 
 # ##############################################################
+# Define the data structures & procedures for Concrete02
+# ##############################################################
+
+set Concrete02(materialId) 0
+set Concrete02(fc) 0
+set Concrete02(epsc0) 0
+set Concrete02(fcu) 0
+set Concrete02(epscu) 0
+set Concrete02(rat) 0
+set Concrete02(ft) 0
+set Concrete02(Ets) 0
+
+$m add command -label Concrete02 -command "SetConcrete02 .concrete02"
+
+proc SetConcrete02 {w} {
+    global matID
+
+    # Turn off all buttons & create a top level window
+    disable_buttons
+    toplevel $w
+
+    set count 0
+    foreach field {materialId fc epsc0 fcu epscu rat ft Ets} {
+	label $w.l$field -text $field
+	entry $w.e$field -textvariable Concrete02($field) -relief sunken 
+	grid $w.l$field -row $count -column 0 -sticky e
+	grid $w.e$field -row $count -column 1 -sticky ew
+	incr count
+    }
+
+    button $w.ok -text OK -command "doneConcrete02; destroy $w; enable_buttons"
+    grid $w.ok -row 0 -rowspan 3 -column 2 -sticky nsew
+
+    $w.ematerialId config -state normal
+    set Concrete02(materialId) [expr $matID + 1]
+    $w.ematerialId delete 0 end
+    $w.ematerialId insert 0 $Concrete02(materialId)
+    $w.ematerialId config -state disabled
+}
+
+
+proc doneConcrete02 { } {
+    global matID
+    global Concrete02
+
+    set matID $Concrete02(materialId)
+    uniaxialMaterial Concrete02 $matID $Concrete02(fc) $Concrete02(epsc0) $Concrete02(fcu) $Concrete02(epscu) $Concrete02(rat) $Concrete02(ft) $Concrete02(Ets)
+    eval uniaxialTest $matID
+    set matID $Concrete02(materialId)
+
+    SetValues
+    Reset
+}
+
+
+
+# ##############################################################
 # Define the data structures & procedures for Elastic
 # ##############################################################
 
@@ -584,6 +641,7 @@ set Steel01(a2) 55
 set Steel01(a3) 0
 set Steel01(a4) 55
 
+
 # add Steel01 to the materials menu
 $m add command -label Steel01 -command "SetSteel01 .steel01"
 
@@ -622,6 +680,52 @@ proc doneSteel01 { } {
     uniaxialMaterial Steel01 $matID $Steel01(fy) $Steel01(E) $Steel01(b) $Steel01(a1) $Steel01(a2) $Steel01(a3) $Steel01(a4)
     eval uniaxialTest $matID
     set matID $Steel01(materialId)
+
+    SetValues
+    Reset
+}
+
+
+
+
+# add Steel02 to the materials menu
+$m add command -label Steel02 -command "SetSteel02 .steel02"
+
+proc SetSteel02 {w} {
+    global matID
+
+    # Turn off all buttons & create a top level window
+    disable_buttons
+    toplevel $w
+
+    set count 0
+    foreach field {materialId fy E b R0 cR1 cR2 a1 a2 a3 a4} {
+	label $w.l$field -text $field
+	entry $w.e$field -textvariable Steel02($field) -relief sunken 
+	grid $w.l$field -row $count -column 0 -sticky e
+	grid $w.e$field -row $count -column 1 -sticky ew
+	incr count
+    }
+
+    button $w.ok -text OK -command "doneSteel02; destroy $w; enable_buttons;"
+    grid $w.ok -row 0 -rowspan 3 -column 2 -sticky nsew
+
+    $w.ematerialId config -state normal
+    set Steel02(materialId) [expr $matID + 1]
+    $w.ematerialId delete 0 end
+    $w.ematerialId insert 0 $Steel02(materialId)
+    $w.ematerialId config -state disabled
+}
+
+
+proc doneSteel02 { } {
+    global matID
+    global Steel02
+
+    set matID $Steel02(materialId)
+    uniaxialMaterial Steel02 $matID $Steel02(fy) $Steel02(E) $Steel02(b) $Steel02(R0) $Steel02(cR1) $Steel02(cR2) $Steel02(a1) $Steel02(a2) $Steel02(a3) $Steel02(a4)
+    eval uniaxialTest $matID
+    set matID $Steel02(materialId)
 
     SetValues
     Reset
