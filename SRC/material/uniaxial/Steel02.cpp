@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-03-03 18:52:40 $
+// $Revision: 1.2 $
+// $Date: 2006-03-23 23:02:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel02.cpp,v $
                                                                       
 // Written: fmk
@@ -163,6 +163,8 @@ Steel02::setTrialStrain(double trialStrain, double strainRate)
   eps = trialStrain;
   double deps = eps - epsP;
 
+
+
   epsmax = epsmaxP;
   epsmin = epsminP;
   epspl  = epsplP;
@@ -173,7 +175,9 @@ Steel02::setTrialStrain(double trialStrain, double strainRate)
   kon = konP;
 
   if (kon == 0) {
+
     if (fabs(deps) < 10.0*DBL_EPSILON) {
+
       e = E0;
       sig = 0.;
       return 0;
@@ -205,6 +209,8 @@ Steel02::setTrialStrain(double trialStrain, double strainRate)
   // Constants a3 and a4 control this stress shift on the tension side 
   
   if (kon == 2 && deps > 0.0) {
+
+
     kon = 1;
     epsr = epsP;
     sigr = sigP;
@@ -226,15 +232,16 @@ Steel02::setTrialStrain(double trialStrain, double strainRate)
     // asymptote by sigsft before calculating the intersection point 
     // Constants a1 and a2 control this stress shift on compression side 
     
-    if (kon == 1 && deps < 0.) {
+    if (kon == 1 && deps < 0.0) {
+
       kon = 2;
       epsr = epsP;
       sigr = sigP;
       //      epsmax = max(epsP, epsmax);
       if (epsP > epsmax)
-	epsP = epsmax;
+	epsmax = epsP;
 
-      double d1 = (epsmax - epsmin) / (a2 * epsy * 2.);
+      double d1 = (epsmax - epsmin) / (2.0*(a2 * epsy));
       double shft = 1.0 + a1 * pow(d1, 0.8);
       epss0 = (-Fy * shft + Esh * epsy * shft - sigr + E0 * epsr) / (E0 - Esh);
       sigs0 = -Fy * shft + Esh * (epss0 + epsy * shft);
@@ -294,6 +301,7 @@ Steel02::commitState(void)
   eP = e;
   sigP = sig;
   epsP = eps;
+
   return 0;
 }
 
