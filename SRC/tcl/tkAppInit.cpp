@@ -10,7 +10,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkAppInit.cpp,v 1.3 2006-01-13 18:22:21 fmk Exp $
+ * RCS: @(#) $Id: tkAppInit.cpp,v 1.4 2006-03-24 20:11:59 fmk Exp $
  */
 
 extern "C" {
@@ -167,9 +167,9 @@ Tcl_AppInit(Tcl_Interp *interp)
 
 
 
-
+/*
 int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   return 0;
 }
-
+*/

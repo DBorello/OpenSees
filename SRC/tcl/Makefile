@@ -17,9 +17,9 @@ tcl: $(OBJS) tclMain.o mpiParameterMain.o
 OBJS       = commands.o 
 endif
 
+java: $(OBJS)  OpenSeesEvaluator.o OpenSeesEvaluatorImpl.o
 
 all: $(OBJS)
-
 
 tk: $(OBJS)  tkMain.o tkAppInit.o
 

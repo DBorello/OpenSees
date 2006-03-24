@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.74 $
-// $Date: 2006-03-15 00:29:38 $
+// $Revision: 1.75 $
+// $Date: 2006-03-24 20:11:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -219,6 +219,11 @@ OPS_Stream *opserrPtr = &sserr;
 #include <PetscSolver.h>
 #include <SparseGenRowLinSOE.h>
 #include <PetscSparseSeqSolver.h>
+#endif
+
+#ifdef _MUMPS
+#include <MumpsSOE.h>
+#include <MumpsSolver.h>
 #endif
 
 #include <SymSparseLinSOE.h>
@@ -435,6 +440,8 @@ int g3AppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "nodeCoord", &nodeCoord, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
+    Tcl_CreateCommand(interp, "nodeBounds", &nodeBounds, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "start", &startTimer, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "stop", &stopTimer, 
@@ -445,7 +452,6 @@ int g3AppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
     Tcl_CreateCommand(interp, "logFile", &logFile, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-
     Tcl_CreateCommand(interp, "exit", &OpenSeesExit, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
@@ -1777,6 +1783,15 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       UmfpackGenLinSolver *theSolver = new UmfpackGenLinSolver();
       theSOE = new UmfpackGenLinSOE(*theSolver);      
   }	  
+
+#ifdef _MUMPS
+  else if (strcmp(argv[1],"Mumps") == 0) {
+    // now must determine the type of solver to create from rest of args
+      MumpsSolver *theSolver = new MumpsSolver();
+      theSOE = new MumpsSOE(*theSolver);      
+  }	  
+#endif
+
   else if (strcmp(argv[1],"FullGeneral") == 0) {
     // now must determine the type of solver to create from rest of args
     FullGenLinLapackSolver *theSolver = new FullGenLinLapackSolver();
@@ -4055,6 +4070,11 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 
 
 
+
+
+
+
+
 int 
 videoPlayer(ClientData clientData, Tcl_Interp *interp, int argc, 
 	    TCL_Char **argv)
@@ -4369,6 +4389,34 @@ nodeCoord(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
   
   // now we copy the value to the tcl string that is returned
   sprintf(interp->result,"%35.20f",value);
+  
+  return TCL_OK;
+}
+
+int 
+nodeBounds(ClientData clientData, Tcl_Interp *interp, int argc, 
+	   TCL_Char **argv)
+{
+  int requiredDataSize = 20*6;
+  if (requiredDataSize > resDataSize) {
+    if (resDataPtr != 0) {
+      delete [] resDataPtr;
+    }
+    resDataPtr = new char[requiredDataSize];
+    resDataSize = requiredDataSize;
+  }
+  
+  for (int i=0; i<requiredDataSize; i++)
+    resDataPtr[i] = '\n';
+  
+  const Vector &bounds = theDomain.getPhysicalBounds();
+  
+  int cnt = 0;
+  for (int i=0; i<6; i++) {
+    cnt += sprintf(&resDataPtr[cnt], "%.6e  ", bounds(i));
+  }
+  
+  Tcl_SetResult(interp, resDataPtr, TCL_STATIC);
   
   return TCL_OK;
 }
