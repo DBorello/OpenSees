@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2006-03-20 23:47:07 $
+// $Revision: 1.14 $
+// $Date: 2006-03-29 18:50:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.cpp,v $
                                                                         
                                                                         
-// File: ~/analysis/model/AnalysisModel.C
-//
 // Written: fmk 
 // Created: Fri Sep 20 15:27:47: 1996
 // Revision: A
@@ -46,11 +44,19 @@
 #include <DOF_Group.h>
 #include <DOF_GrpIter.h>
 #include <FE_EleIter.h>
-#include <DOF_Graph.h>
-#include <DOF_GroupGraph.h>
+#include <Graph.h>
+#include <Vertex.h>
 #include <Node.h>
 #include <NodeIter.h>
 #include <ConstraintHandler.h>
+
+
+#include <MapOfTaggedObjects.h>
+
+#include <Timer.h>
+
+#define START_EQN_NUM 0
+#define START_VERTEX_NUM 0
 
 //  AnalysisModel();
 //	constructor
@@ -269,8 +275,70 @@ AnalysisModel::getNumEqn(void) const
 Graph &
 AnalysisModel::getDOFGraph(void)
 {
-  if (myDOFGraph == 0) 
-	myDOFGraph = new DOF_Graph(*this);
+  if (myDOFGraph == 0) {
+    int numVertex = this->getNumDOF_Groups();
+
+    //    myDOFGraph = new Graph(numVertex);
+    MapOfTaggedObjects *graphStorage = new MapOfTaggedObjects();
+    myDOFGraph = new Graph(*graphStorage);
+
+    //
+    // create a vertex for each dof
+    //
+    
+    DOF_Group *dofPtr =0;
+    DOF_GrpIter &theDOFs = this->getDOFs();
+    while ((dofPtr = theDOFs()) != 0) {
+      const ID &id = dofPtr->getID();
+      int size = id.Size();
+      for (int i=0; i<size; i++) {
+	int dofTag = id(i);
+	if (dofTag >= START_EQN_NUM) {
+	  Vertex *vertexPtr = myDOFGraph->getVertexPtr(dofTag);
+	  if (vertexPtr == 0) {
+	    Vertex *vertexPtr = new Vertex(dofTag, dofTag);      
+	    if (vertexPtr == 0) {
+	      opserr << "WARNING AnalysisModel::getDOFGraph";
+	      opserr << " - Not Enough Memory to create " << i+1 << "th Vertex\n";
+	      return *myDOFGraph;
+	    }
+	    if (myDOFGraph->addVertex(vertexPtr, false) == false) {
+	      opserr << "WARNING AnalysisModel::getDOFGraph - error adding vertex\n";
+	      return *myDOFGraph;
+	    }
+	  }
+	}
+      }
+    }
+    
+    // now add the edges, by looping over the FE_elements, getting their
+    // IDs and adding edges between DOFs for equation numbers >= START_EQN_NUM
+    
+    FE_Element *elePtr =0;
+    FE_EleIter &eleIter = this->getFEs();
+    int cnt = 0;
+    
+    while((elePtr = eleIter()) != 0) {
+      const ID &id = elePtr->getID();
+      cnt++;
+      int size = id.Size();
+      for (int i=0; i<size; i++) {
+	int eqn1 = id(i);
+	
+	// if eqnNum of DOF is a valid eqn number add an edge
+	// to all other DOFs with valid eqn numbers.
+	
+	if (eqn1 >=START_EQN_NUM) {
+	  for (int j=i+1; j<size; j++) {
+	    int eqn2 = id(j);
+	    if (eqn2 >=START_EQN_NUM)
+	      myDOFGraph->addEdge(eqn1-START_EQN_NUM+START_VERTEX_NUM,
+				  eqn2-START_EQN_NUM+START_VERTEX_NUM);
+	  }
+	}
+      }
+    }
+  }    
 
   return *myDOFGraph;
 }
@@ -279,10 +347,69 @@ AnalysisModel::getDOFGraph(void)
 Graph &
 AnalysisModel::getDOFGroupGraph(void)
 {
-    if (myGroupGraph == 0)
-	myGroupGraph = new DOF_GroupGraph(*this);
+  if (myGroupGraph == 0) {
+    int numVertex = this->getNumDOF_Groups();
 
-    return *myGroupGraph;
+    if (numVertex == 0) {
+	opserr << "WARNING AnalysisMode::getGroupGraph";
+	opserr << "  - 0 vertices, has the Domain been populated?\n";
+	exit(-1);
+    }	
+
+    //    myGroupGraph = new Graph(numVertex);
+    MapOfTaggedObjects *graphStorage = new MapOfTaggedObjects();
+    myGroupGraph = new Graph(*graphStorage);
+
+    if (numVertex == 0) {
+	opserr << "WARNING AnalysisMode::getGroupGraph";
+	opserr << "  - out of memory\n";
+	exit(-1);
+    }	
+	
+    DOF_Group *dofPtr;
+
+    // now create the vertices with a reference equal to the DOF_Group number.
+    // and a tag which ranges from 0 through numVertex-1
+
+    DOF_GrpIter &dofIter2 = this->getDOFs();
+    int count = START_VERTEX_NUM;
+    while ((dofPtr = dofIter2()) != 0) {
+	int DOF_GroupTag = dofPtr->getTag();
+	int DOF_GroupNodeTag = dofPtr->getNodeTag();
+	int numDOF = dofPtr->getNumFreeDOF();
+	Vertex *vertexPtr = new Vertex(DOF_GroupTag, DOF_GroupNodeTag, 0, numDOF);
+
+	if (vertexPtr == 0) {
+	    opserr << "WARNING DOF_GroupGraph::DOF_GroupGraph";
+	    opserr << " - Not Enough Memory to create ";
+	    opserr << count << "th Vertex\n";
+	    return *myGroupGraph;
+	}
+	
+	myGroupGraph->addVertex(vertexPtr);
+    }
+
+    // now add the edges, by looping over the Elements, getting their
+    // IDs and adding edges between DOFs for equation numbers >= START_EQN_NUM
+    
+    FE_Element *elePtr;
+    FE_EleIter &eleIter = this->getFEs();
+
+    while((elePtr = eleIter()) != 0) {
+	const ID &id = elePtr->getDOFtags();
+	int size = id.Size();
+	for (int i=0; i<size; i++) {
+	    int dof1 = id(i);
+	    for (int j=0; j<size; j++) 
+		if (i != j) {
+		    int dof2 = id(j);
+		    myGroupGraph->addEdge(dof1,dof2);
+		}
+	}
+    }
+  }
+
+  return *myGroupGraph;
 }
 
 

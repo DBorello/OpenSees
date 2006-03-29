@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2005-11-28 21:23:50 $
+// $Revision: 1.10 $
+// $Date: 2006-03-29 18:50:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.h,v $
                                                                         
                                                                         
@@ -53,8 +53,6 @@ class Graph;
 class FE_Element;
 class DOF_Group;
 class Vector;
-class DOF_Graph;
-class DOF_GroupGraph;
 class FEM_ObjectBroker;
 class ConstraintHandler;
 
@@ -128,8 +126,8 @@ class AnalysisModel: public MovableObject
     Domain *myDomain;
     ConstraintHandler *myHandler;
 
-    DOF_Graph *myDOFGraph;
-    DOF_GroupGraph *myGroupGraph;    
+    Graph *myDOFGraph;
+    Graph *myGroupGraph;    
     
     int numFE_Ele;             // number of FE_Elements objects added
     int numDOF_Grp;            // number of DOF_Group objects added
