@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-03-15 00:24:00 $
+// $Revision: 1.3 $
+// $Date: 2006-04-04 22:59:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsSOE.cpp,v $
                                                                         
                                                                         
@@ -39,23 +39,23 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
-MumpsSOE::MumpsSOE(MumpsSolver &the_Solver)
+MumpsSOE::MumpsSOE(MumpsSolver &the_Solver, int _matType)
 :LinearSOE(the_Solver, LinSOE_TAGS_MumpsSOE),
  size(0), nnz(0), A(0), B(0), X(0), rowA(0), colStartA(0),
  vectX(0), vectB(0),
  Asize(0), Bsize(0),
- factored(false)
+ factored(false), matType(_matType)
 {
   the_Solver.setLinearSOE(*this);
 }
 
 
-MumpsSOE::MumpsSOE(LinearSOESolver &the_Solver, int classTag)
+MumpsSOE::MumpsSOE(LinearSOESolver &the_Solver, int classTag, int _matType)
   :LinearSOE(the_Solver, classTag),
    size(0), nnz(0), A(0), B(0), X(0), rowA(0), colStartA(0),
    vectX(0), vectB(0),
    Asize(0), Bsize(0),
-   factored(false)
+   factored(false), matType(_matType)
 {
 
 }
@@ -95,6 +95,13 @@ MumpsSOE::setSize(Graph &theGraph)
     const ID &theAdjacency = theVertex->getAdjacency();
     newNNZ += theAdjacency.Size() +1; // the +1 is for the diag entry
   }
+
+  if (matType !=  0) {
+    newNNZ -= size;
+    newNNZ /= 2;
+    newNNZ += size;
+  }
+
   nnz = newNNZ;
   
   if (newNNZ > Asize) { // we have to get more space for A and rowA
@@ -180,32 +187,60 @@ MumpsSOE::setSize(Graph &theGraph)
 	return -1;
       }
       
-      rowA[lastLoc++] = theVertex->getTag(); // place diag in first
+      int vertexTag = theVertex->getTag();
+      rowA[lastLoc++] = vertexTag; // place diag in first
       const ID &theAdjacency = theVertex->getAdjacency();
       int idSize = theAdjacency.Size();
       
       // now we have to place the entries in the ID into order in rowA
-      for (int i=0; i<idSize; i++) {
-	
-	int row = theAdjacency(i);
-	bool foundPlace = false;
-	// find a place in rowA for current col
-	for (int j=startLoc; j<lastLoc; j++)
-	  if (rowA[j] > row) { 
-	    // move the entries already there one further on
-	    // and place col in current location
-	    for (int k=lastLoc; k>j; k--)
-	      
-	      rowA[k] = rowA[k-1];
-	    rowA[j] = row;
-	    foundPlace = true;
-	    j = lastLoc;
+
+      if (matType != 0) {
+
+	for (int i=0; i<idSize; i++) {
+	  int row = theAdjacency(i);
+	  if (row > vertexTag) {
+	    bool foundPlace = false;
+	    // find a place in rowA for current col
+	    for (int j=startLoc; j<lastLoc; j++)
+	      if (rowA[j] > row) { 
+		// move the entries already there one further on
+		// and place col in current location
+		for (int k=lastLoc; k>j; k--)
+		  rowA[k] = rowA[k-1];
+		rowA[j] = row;
+		foundPlace = true;
+		j = lastLoc;
+	      }
+	    
+	    if (foundPlace == false) // put in at the end
+	      rowA[lastLoc] = row;
+	    lastLoc++;
 	  }
-	if (foundPlace == false) // put in at the end
-	  rowA[lastLoc] = row;
-	
-	lastLoc++;
+	}
+
+      } else {
+
+	for (int i=0; i<idSize; i++) {
+	  int row = theAdjacency(i);
+	  bool foundPlace = false;
+	  // find a place in rowA for current col
+	  for (int j=startLoc; j<lastLoc; j++)
+	    if (rowA[j] > row) { 
+	      // move the entries already there one further on
+	      // and place col in current location
+	      for (int k=lastLoc; k>j; k--)
+		rowA[k] = rowA[k-1];
+	      rowA[j] = row;
+	      foundPlace = true;
+	      j = lastLoc;
+	    }
+	  if (foundPlace == false) // put in at the end
+	    rowA[lastLoc] = row;
+	  
+	  lastLoc++;
+	}
       }
+
       colStartA[a+1] = lastLoc;;	    
       startLoc = lastLoc;
     }
@@ -244,45 +279,91 @@ MumpsSOE::addA(const Matrix &m, const ID &id, double fact)
 	opserr << " - Matrix and ID not of similar sizes\n";
 	return -1;
     }
-    
-    if (fact == 1.0) { // do not need to multiply 
-      for (int i=0; i<idSize; i++) {
-	int col = id(i);
-	if (col < size && col >= 0) {
-	  int startColLoc = colStartA[col];
-	  int endColLoc = colStartA[col+1];
-	  for (int j=0; j<idSize; j++) {
-	    int row = id(j);
-	    if (row <size && row >= 0) {
-	      // find place in A using rowA
-	      for (int k=startColLoc; k<endColLoc; k++)
-		if (rowA[k] == row) {
-		  A[k] += m(j,i);
-		  k = endColLoc;
-		}
-	    }
-	  }  // for j		
-	} 
-      }  // for i
+
+    if (matType != 0) {
+
+      if (fact == 1.0) { // do not need to multiply 
+	for (int i=0; i<idSize; i++) {
+	  int col = id(i);
+	  if (col < size && col >= 0) {
+	    int startColLoc = colStartA[col];
+	    int endColLoc = colStartA[col+1];
+	    for (int j=0; j<idSize; j++) {
+	      int row = id(j);
+	      if (row >= col && row < size && row >= 0) {
+		// find place in A using rowA
+		for (int k=startColLoc; k<endColLoc; k++)
+		  if (rowA[k] == row) {
+		    A[k] += m(j,i);
+		    k = endColLoc;
+		  }
+	      }
+	    }  // for j		
+	  } 
+	}  // for i
+      } else {
+	for (int i=0; i<idSize; i++) {
+	  int col = id(i);
+	  if (col < size && col >= 0) {
+	    int startColLoc = colStartA[col];
+	    int endColLoc = colStartA[col+1];
+	    for (int j=0; j<idSize; j++) {
+	      int row = id(j);
+	      if (row >= col && row <size && row >= 0) {
+		// find place in A using rowA
+		for (int k=startColLoc; k<endColLoc; k++)
+		  if (rowA[k] == row) {
+		    A[k] += fact * m(j,i);
+		    k = endColLoc;
+		  }
+	      }
+	    }  // for j		
+	  } 
+	}  // for i
+      }
+
+
     } else {
-      for (int i=0; i<idSize; i++) {
-	int col = id(i);
-	if (col < size && col >= 0) {
-	  int startColLoc = colStartA[col];
-	  int endColLoc = colStartA[col+1];
-	  for (int j=0; j<idSize; j++) {
-	    int row = id(j);
-	    if (row <size && row >= 0) {
-	      // find place in A using rowA
-	      for (int k=startColLoc; k<endColLoc; k++)
-		if (rowA[k] == row) {
-		  A[k] += fact * m(j,i);
-		  k = endColLoc;
-		}
-	    }
-	  }  // for j		
-	} 
-      }  // for i
+    
+      if (fact == 1.0) { // do not need to multiply 
+	for (int i=0; i<idSize; i++) {
+	  int col = id(i);
+	  if (col < size && col >= 0) {
+	    int startColLoc = colStartA[col];
+	    int endColLoc = colStartA[col+1];
+	    for (int j=0; j<idSize; j++) {
+	      int row = id(j);
+	      if (row <size && row >= 0) {
+		// find place in A using rowA
+		for (int k=startColLoc; k<endColLoc; k++)
+		  if (rowA[k] == row) {
+		    A[k] += m(j,i);
+		    k = endColLoc;
+		  }
+	      }
+	    }  // for j		
+	  } 
+	}  // for i
+      } else {
+	for (int i=0; i<idSize; i++) {
+	  int col = id(i);
+	  if (col < size && col >= 0) {
+	    int startColLoc = colStartA[col];
+	    int endColLoc = colStartA[col+1];
+	    for (int j=0; j<idSize; j++) {
+	      int row = id(j);
+	      if (row <size && row >= 0) {
+		// find place in A using rowA
+		for (int k=startColLoc; k<endColLoc; k++)
+		  if (rowA[k] == row) {
+		    A[k] += fact * m(j,i);
+		    k = endColLoc;
+		  }
+	      }
+	    }  // for j		
+	  } 
+	}  // for i
+      }
     }
     return 0;
 }

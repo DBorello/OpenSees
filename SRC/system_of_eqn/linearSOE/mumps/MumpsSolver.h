@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-03-15 00:24:00 $
+// $Revision: 1.3 $
+// $Date: 2006-04-04 22:59:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsSolver.h,v $
                                                                         
                                                                         
@@ -55,7 +55,7 @@ class MumpsSolver : public LinearSOESolver
 {
   public:
   MumpsSolver();
-  MumpsSolver(int ICNTL7 =7);
+  MumpsSolver(int ICNTL7);
 	      
   virtual ~MumpsSolver();
   
@@ -72,6 +72,7 @@ class MumpsSolver : public LinearSOESolver
  private:
   DMUMPS_STRUC_C id;
   MumpsSOE *theMumpsSOE;
+  bool init;
 };
 
 #endif

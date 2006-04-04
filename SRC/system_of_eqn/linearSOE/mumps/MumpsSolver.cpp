@@ -20,8 +20,8 @@
                                                                         
 // Description: This file contains the implementation of MumpsSolver
 
-// $Revision: 1.2 $
-// $Date: 2006-03-15 00:24:00 $
+// $Revision: 1.3 $
+// $Date: 2006-04-04 22:59:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsSolver.cpp,v $
 
 // Written: fmk 
@@ -43,13 +43,11 @@ MumpsSolver::MumpsSolver()
   :LinearSOESolver(SOLVER_TAGS_MumpsSolver),
    theMumpsSOE(0)
 {
+  init = false;
   id.job=-1; 
   id.par=1; 
-  id.sym=0;  // general symmetric (for SPD =1 defaults to =2 in current version)
 
   id.comm_fortran=MPI_COMM_WORLD;
-  dmumps_c(&id);
-
 }
 
 
@@ -57,15 +55,12 @@ MumpsSolver::MumpsSolver(int ICNTL7)
   :LinearSOESolver(SOLVER_TAGS_MumpsSolver),
    theMumpsSOE(0)
 {
+  init = false;
   id.job=-1; 
   id.par=1; 
-  id.sym=0;  // general symmetric (for SPD =1 defaults to =2 in current version)
 
   id.comm_fortran=MPI_COMM_WORLD;
   id.ICNTL(7)=ICNTL7;;
-
-  dmumps_c(&id);
-
 }
 
 MumpsSolver::~MumpsSolver()
@@ -158,6 +153,12 @@ MumpsSOE::setMumpsSolver(MumpsSolver &newSolver)
 int
 MumpsSolver::setSize()
 {
+  if (init == false) {
+    id.sym=theMumpsSOE->matType; 
+    dmumps_c(&id);
+    init = true;
+  }
+
   int nnz = theMumpsSOE->nnz;
   int *rowA = theMumpsSOE->rowA;
   int *colA = theMumpsSOE->colA;
@@ -167,7 +168,7 @@ MumpsSolver::setSize()
     rowA[i]++;
     colA[i]++;
   }
-  
+
   // analyze the matrix
   id.n   = theMumpsSOE->size; 
   id.nz  = theMumpsSOE->nnz; 

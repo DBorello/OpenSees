@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-03-15 00:24:00 $
+// $Revision: 1.3 $
+// $Date: 2006-04-04 22:59:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsSOE.h,v $
                                                                         
 #ifndef MumpsSOE_h
@@ -33,6 +33,10 @@
 // Ax=b using the sparse column-compacted storage scheme for storing the 
 // matrix A. 
 //
+// matrix types (matType): 0 Unsymmetrc
+//                         1 Symmetrix positive definite
+//                         2 General Symmetric
+//
 // What: "@(#) MumpsSOE.h, revA"
 
 #include <LinearSOE.h>
@@ -44,10 +48,8 @@ class LinearSOESolver;
 class MumpsSOE : public LinearSOE
 {
   public:
-    MumpsSOE(MumpsSolver &theSolver);        
-    MumpsSOE(LinearSOESolver &theSolver, int classTag);        
-    MumpsSOE(int N, int NNZ, int *rowStartA, int *colA,
-	     MumpsSolver &theSolver);        
+  MumpsSOE(MumpsSolver &theSolver, int matType=2);        
+  MumpsSOE(LinearSOESolver &theSolver, int classTag, int matType = 2);        
 
     virtual ~MumpsSOE();
 
@@ -83,7 +85,8 @@ class MumpsSOE : public LinearSOE
     Vector *vectB;    
     int Asize, Bsize;    // size of the 1d array holding A
     bool factored;
-    
+    int matType;
+
   private:
 
 };
