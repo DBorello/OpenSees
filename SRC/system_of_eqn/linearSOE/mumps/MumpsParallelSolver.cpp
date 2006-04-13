@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2006-03-15 00:26:02 $
+// $Revision: 1.2 $
+// $Date: 2006-04-13 20:58:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsParallelSolver.cpp,v $
 
 // Written: fmk 
@@ -63,56 +63,55 @@ MumpsParallelSolver::~MumpsParallelSolver()
 int
 MumpsParallelSolver::solve(void)
 {
-  int nnz = theMumpsSOE->nnz;
   int n = theMumpsSOE->size;
+  int nnz = theMumpsSOE->nnz;
   int *rowA = theMumpsSOE->rowA;
   int *colA = theMumpsSOE->colA;
-    
+  double *A = theMumpsSOE->A;
   double *X = theMumpsSOE->X;
   double *B = theMumpsSOE->B;
+
+  // parallel solver; distributed i/p matrix A
+  id.ICNTL(5)=0; id.ICNTL(18)=3; 
+
+  // No outputs 
+  id.ICNTL(1)=-1; id.ICNTL(2)=-1; id.ICNTL(3)=-1; id.ICNTL(4)=0;
+  
+  // increment row and col A values by 1 for mumps fortran indexing
+  for (int i=0; i<nnz; i++) {
+    rowA[i]++;
+    colA[i]++;
+  }
   
   if (rank == 0) {
-
-    // increment row and col A values by 1 for mumps fortran indexing
-    for (int i=0; i<nnz; i++) {
-      rowA[i]++;
-      colA[i]++;
-      //    opserr << rowA[i] << " " << colA[i] << " " << theMumpsSOE->A[i] << endln;
-    }
-    
-    for (int i=0; i<n; i++)
+    id.n   = n; 
+    for (int i=0; i<n; i++) {
       X[i] = B[i];
+    }
+    id.rhs = X;
+  } 
 
-    // factor the matrix
-    id.n   = theMumpsSOE->size; 
-    id.nz  = theMumpsSOE->nnz; 
-    id.irn = theMumpsSOE->rowA;
-    id.jcn = theMumpsSOE->colA;
-    id.a   = theMumpsSOE->A; 
-    id.rhs = theMumpsSOE->X;
-  }  
-  
-  int info = 0;
+  // factor the matrix
+  id.nz_loc  = nnz; 
+  id.irn_loc = rowA;
+  id.jcn_loc = colA;
+  id.a_loc   = A; 
+
   if (theMumpsSOE->factored == false) {
-    
-    // No outputs 
-    id.ICNTL(1)=-1; id.ICNTL(2)=-1; id.ICNTL(3)=-1; id.ICNTL(4)=0;
 
     // Call the MUMPS package to factor & solve the system
     id.job = 5;
     dmumps_c(&id);
-    
     theMumpsSOE->factored = true;
+
   } else {
-    
-    // No outputs 
-    id.ICNTL(1)=-1; id.ICNTL(2)=-1; id.ICNTL(3)=-1; id.ICNTL(4)=0;
+
     // Call the MUMPS package to solve the system
     id.job = 3;
     dmumps_c(&id);
   }	
-  
-  info = id.infog[0];
+
+  int info = id.infog[0];
   if (info != 0) {	
     opserr << "WARNING MumpsParallelSolver::solve(void)- ";
     opserr << " Error " << info << " returned in substitution dmumps()\n";
@@ -120,11 +119,9 @@ MumpsParallelSolver::solve(void)
   }
 
   // decrement row and col A values by 1 to return to C++ indexing
-  if (rank == 0) {
-    for (int i=0; i<nnz; i++) {
-      rowA[i]--;
-      colA[i]--;
-    }
+  for (int i=0; i<nnz; i++) {
+    rowA[i]--;
+    colA[i]--;
   }
 
   return 0;
@@ -137,7 +134,7 @@ MumpsParallelSolver::setSize()
   if (init == false) {
     id.job=-1; 
     id.par=1; 
-    id.sym=0;  // general symmetric (for SPD =1 defaults to =2 in current version)
+    id.sym=theMumpsSOE->matType; 
     
     id.comm_fortran=MPI_COMM_WORLD;
     dmumps_c(&id);
@@ -147,31 +144,39 @@ MumpsParallelSolver::setSize()
     init = true;
   }
 
-  if (rank == 0) {
-    int nnz = theMumpsSOE->nnz;
-    int *rowA = theMumpsSOE->rowA;
-    int *colA = theMumpsSOE->colA;
-    
-    // increment row and col A values by 1 for mumps fortran indexing
-    for (int i=0; i<nnz; i++) {
-      rowA[i]++;
-      colA[i]++;
-    }
-    
-    // analyze the matrix
-    id.n   = theMumpsSOE->size; 
-    id.nz  = theMumpsSOE->nnz; 
-    id.irn = theMumpsSOE->rowA;
-    id.jcn = theMumpsSOE->colA;
-    id.a   = theMumpsSOE->A; 
-    id.rhs = theMumpsSOE->X;
-  }
+  // parallel solver; distributed i/p matrix A
+  id.ICNTL(5)=0; id.ICNTL(18)=3; 
+
   // No outputs 
   id.ICNTL(1)=-1; id.ICNTL(2)=-1; id.ICNTL(3)=-1; id.ICNTL(4)=0;
-  // Call the MUMPS package to factor & solve the system
+
+  int nnz = theMumpsSOE->nnz;
+  int *rowA = theMumpsSOE->rowA;
+  int *colA = theMumpsSOE->colA;
+  
+  // increment row and col A values by 1 for mumps fortran indexing
+  for (int i=0; i<nnz; i++) {
+    rowA[i]++;
+    colA[i]++;
+  }
+
+  // analyze the matrix
+  id.n   = theMumpsSOE->size; 
+  id.nz_loc  = theMumpsSOE->nnz; 
+  id.irn_loc = theMumpsSOE->rowA;
+  id.jcn_loc = theMumpsSOE->colA;
+  id.a_loc = theMumpsSOE->A;
+
+  // Call the MUMPS package to analyze the system
   id.job = 1;
   dmumps_c(&id);
-  
+
+  // decrement row and col A values by 1 to return to C++ indexing
+  for (int i=0; i<nnz; i++) {
+    rowA[i]--;
+    colA[i]--;
+  }
+
   int info = id.infog[0];
   if (info != 0) {	
     opserr << "WARNING MumpsParallelSolver::setSize(void)- ";
@@ -179,16 +184,6 @@ MumpsParallelSolver::setSize()
     return info;
   }
   
-  // decrement row and col A values by 1 to return to C++ indexing
-  if (rank == 0) {
-    int nnz = theMumpsSOE->nnz;
-    int *rowA = theMumpsSOE->rowA;
-    int *colA = theMumpsSOE->colA;
-    for (int i=0; i<nnz; i++) {
-      rowA[i]--;
-      colA[i]--;
-    }
-  }
   return info;
 }
 

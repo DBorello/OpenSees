@@ -7,7 +7,7 @@
 ** All Rights Reserved.                                               **
 **                                                                    **
 ** Commercial use of this program without express permission of the   **
-** University of California, Berkeley, is strictly prohibited.  See   **
+* University of California, Berkeley, is strictly prohibited.  See   **
 ** file 'COPYRIGHT'  in main directory for information on usage and   **
 ** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
 **                                                                    **
@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-03-15 00:26:02 $
+// $Revision: 1.2 $
+// $Date: 2006-04-13 20:58:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsParallelSOE.cpp,v $
                                                                         
 // Written: fmk 
@@ -38,10 +38,10 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
-MumpsParallelSOE::MumpsParallelSOE(MumpsParallelSolver &theSolvr)
-  :MumpsSOE(theSolvr, LinSOE_TAGS_MumpsParallelSOE), 
-   processID(0), numChannels(0), theChannels(0), localCol(0), workArea(0), sizeWork(0), myB(0),
-   myVectB(0)
+MumpsParallelSOE::MumpsParallelSOE(MumpsParallelSolver &theSolvr, int matType)
+  :MumpsSOE(theSolvr, LinSOE_TAGS_MumpsParallelSOE, matType), 
+   processID(0), numChannels(0), theChannels(0), localCol(0), workArea(0), 
+   sizeWork(0), myB(0), myVectB(0)
 {
     theSolvr.setLinearSOE(*this);
 }
@@ -71,254 +71,112 @@ MumpsParallelSOE::setSize(Graph &theGraph)
   int result = 0;
   int oldSize = size;
   int maxNumSubVertex = 0;
-
-  // if subprocess, collect graph, send it off, 
-  // vector back containing size of system, etc.
-  if (processID != 0) {
-    Channel *theChannel = theChannels[0];
-    theGraph.sendSelf(0, *theChannel);
-    
-    static ID data(2);
-    theChannel->recvID(0, 0, data);
-    size = data(0);
-    nnz = data(1);
-
-    ID *subMap = new ID(theGraph.getNumVertex());
-    localCol[0] = subMap;
-    Vertex *vertex;
-    VertexIter &theSubVertices = theGraph.getVertices();
-    int cnt = 0;
-    while((vertex = theSubVertices()) != 0) 
-      (*subMap)(cnt++) = vertex->getTag();
-
-    theChannel->sendID(0, 0, *subMap);
-
-    if (nnz > Asize) { // we have to get more space for A and rowA
-      if (rowA != 0)
-	delete [] rowA;
-      
-      rowA = new int[nnz];
-	
-      if (rowA == 0) {
-	opserr << "WARNING SparseGenColLinSOE::SparseGenColLinSOE :";
-	opserr << " ran out of memory for A and rowA with nnz = ";
-	opserr << nnz << " \n";
-	size = 0; Asize = 0; nnz = 0;
-	result =  -1;
-      } 
-    }
-
-    if (size > Bsize) { // we have to get space for the vectors
-	
-      if (colStartA != 0) 
-	delete [] colStartA;
-      colStartA = new int[size+1]; 
-      
-      if (colStartA == 0) {
-	opserr << "WARNING SparseGenColLinSOE::SparseGenColLinSOE :";
-	opserr << " ran out of memory for vectors (size) (";
-	opserr << size << ") \n";
-	size = 0; Bsize = 0;
-	result =  -1;
-      }    
-    }
-
-    ID rowAdata(rowA, nnz);
-    ID colStartAdata(colStartA, size+1);
-    theChannel->recvID(0, 0, rowAdata);
-    theChannel->recvID(0, 0, colStartAdata);
-  } 
   
-  // if main domain, collect graphs from all subdomains,
-  // merge into 1, number this one, send to subdomains the
-  // id containing dof tags & start id's.
-  else {
+  // fist itearte through the vertices of the graph to get nnzLoc and n
+  int maxVertexTag = -1;
+  Vertex *theVertex;
+  int newNNZ = 0;
+  size = theGraph.getNumVertex();
+  int mySize = size;
 
-    // from each distributed soe recv it's graph
-    // and merge them into master graph
+  VertexIter &theVertices = theGraph.getVertices();
+  while ((theVertex = theVertices()) != 0) {
+    int vertexTag = theVertex->getTag();
+    if (vertexTag > maxVertexTag)
+      maxVertexTag = vertexTag;
+    const ID &theAdjacency = theVertex->getAdjacency();
+    newNNZ += theAdjacency.Size() +1; // the +1 is for the diag entry
+  }
+
+  if (matType !=  0) {
+
+    // symmetric - allows us to reduce nnz by almost half
+    newNNZ -= size;
+    newNNZ /= 2;
+    newNNZ += size;
+  }
+
+  nnz = newNNZ;
+
+  if (processID != 0) {
+
+    //
+    // if subprocess, send local max vertexTag (n)
+    // recv ax n from P0
+    //
+    static ID data(1);
+
+    data(0) = maxVertexTag;
+    Channel *theChannel = theChannels[0];
+    theChannel->sendID(0, 0, data);
+    theChannel->recvID(0, 0, data);
+    
+    size = data(0);
+
+  } else {
+
+    //
+    // from each distributed soe recv it's max n and compare; return max n to all
+    //
+
+    static ID data(1);
     FEM_ObjectBroker theBroker;
     for (int j=0; j<numChannels; j++) {
       Channel *theChannel = theChannels[j];
-      Graph theSubGraph;
-      theSubGraph.recvSelf(0, *theChannel, theBroker);
-      theGraph.merge(theSubGraph);
-
-      int numSubVertex = theSubGraph.getNumVertex();
-      ID *subMap = new ID(numSubVertex);
-      localCol[j] = subMap;
-      if (numSubVertex > maxNumSubVertex)
-	maxNumSubVertex = numSubVertex;
+      theChannel->recvID(0, 0, data);
+      if (data(0) > maxVertexTag)
+	maxVertexTag = data(0);
     }
 
-    size = theGraph.getNumVertex();
-  
-    //
-    // determine the number of non-zeros
-    //
-
-    Vertex *theVertex;
-    VertexIter &theVertices = theGraph.getVertices();
-    nnz = 0;
-    while ((theVertex = theVertices()) != 0) {
-	const ID &theAdjacency = theVertex->getAdjacency();
-	nnz += theAdjacency.Size() +1; // the +1 is for the diag entry
-    }
-
-    static ID data(2);
-    data(0) = size;
-    data(1) = nnz;
-
-    // to each distributed soe send the size data
-    // and merge them into master graph
+    data(0) = maxVertexTag;
 
     for (int j=0; j<numChannels; j++) {
       Channel *theChannel = theChannels[j];
       theChannel->sendID(0, 0, data);
-
-      ID *subMap = localCol[j];
-      theChannel->recvID(0, 0, *subMap);
-    }    
-
-    if (nnz > Asize) { // we have to get more space for A and rowA
-      if (rowA != 0)
-	delete [] rowA;
-
-      if (workArea != 0) 
-	delete [] workArea;
-
-      if (colA != 0)
-	delete [] colA;
-
-      rowA = new int[nnz];
-      colA = new int[nnz];
-      workArea = new double[nnz];
-
-      sizeWork = nnz;
-	
-      if (rowA == 0 || workArea == 0 || colA == 0) {
-	opserr << "WARNING SparseGenColLinSOE::SparseGenColLinSOE :";
-	opserr << " ran out of memory for A and rowA with nnz = ";
-	opserr << nnz << " \n";
-	size = 0; Asize = 0; nnz = 0;
-	result =  -1;
-      } 
     }
-
-    if (size > Bsize) { // we have to get space for the vectors
-	
-      if (colStartA != 0) 
-	delete [] colStartA;
-      colStartA = new int[size+1]; 
-      
-      if (colStartA == 0) {
-	opserr << "WARNING SparseGenColLinSOE::SparseGenColLinSOE :";
-	opserr << " ran out of memory for vectors (size) (";
-	opserr << size << ") \n";
-	size = 0; Bsize = 0;
-	result =  -1;
-      }    
-    }
-
-    // fill in colStartA and rowA
-    if (size != 0) {
-      colStartA[0] = 0;
-      int startLoc = 0;
-      int lastLoc = 0;
-      for (int a=0; a<size; a++) {
-	
-	theVertex = theGraph.getVertexPtr(a);
-	if (theVertex == 0) {
-	  opserr << "WARNING:SparseGenColLinSOE::setSize :";
-	  opserr << " vertex " << a << " not in graph! - size set to 0\n";
-	  size = 0;
-	  return -1;
-	}
-	
-	rowA[lastLoc++] = theVertex->getTag(); // place diag in first
-	const ID &theAdjacency = theVertex->getAdjacency();
-	int idSize = theAdjacency.Size();
-	
-	// now we have to place the entries in the ID into order in rowA
-	for (int i=0; i<idSize; i++) {
-	  
-	  int row = theAdjacency(i);
-	  bool foundPlace = false;
-	  // find a place in rowA for current col
-	  for (int j=startLoc; j<lastLoc; j++)
-	    if (rowA[j] > row) { 
-	      // move the entries already there one further on
-	      // and place col in current location
-	      for (int k=lastLoc; k>j; k--)
-		
-		rowA[k] = rowA[k-1];
-	      rowA[j] = row;
-	      foundPlace = true;
-	      j = lastLoc;
-	    }
-	  if (foundPlace == false) // put in at the end
-	    rowA[lastLoc] = row;
-	  
-	  lastLoc++;
-	}
-	colStartA[a+1] = lastLoc;;	    
-	startLoc = lastLoc;
-      }
-    }
-
-
-    ID rowAdata(rowA, nnz);
-    ID colStartAdata(colStartA, size+1);
-
-    for (int j=0; j<numChannels; j++) {
-      Channel *theChannel = theChannels[j];
-      theChannel->sendID(0, 0, rowAdata);
-      theChannel->sendID(0, 0, colStartAdata);
-    }
-
-    // fill in colA
-    int count = 0;
-    for (int i=0; i<size; i++)
-      for (int k=colStartA[i]; k<colStartA[i+1]; k++)
-	colA[count++] = i;
+    size = maxVertexTag;
   }
 
+  size+=1; // vertices numbered 0 through n-1
+
   if (nnz > Asize) { // we have to get more space for A and rowA
-    if (A != 0) 
-      delete [] A;
-    
-    A = new double[nnz];
-    
-    if (A == 0 || rowA == 0) {
+    if (A != 0) delete [] A;
+    if (rowA != 0) delete [] rowA;
+    if (colA != 0) delete [] colA;
+
+    A = new double[nnz];    
+    rowA = new int[nnz];
+    colA = new int[nnz];
+      
+    if (rowA == 0 || A == 0 || colA == 0) {
       opserr << "WARNING SparseGenColLinSOE::SparseGenColLinSOE :";
       opserr << " ran out of memory for A and rowA with nnz = ";
       opserr << nnz << " \n";
       size = 0; Asize = 0; nnz = 0;
-      result =  -1;
+	result =  -1;
     } 
-    
     Asize = nnz;
   }
+
   
-  // zero the matrix
-  for (int i=0; i<Asize; i++)
-    A[i] = 0;
-
-  factored = false;
-
   if (size > Bsize) { // we have to get space for the vectors
-    
-    // delete the old	
+
+
     if (B != 0) delete [] B;
-    if (X != 0) delete [] X;
+    if (X != 0) delete [] X;    
     if (myB != 0) delete [] myB;
-    
+    if (workArea != 0) delete [] workArea;
+    if (colStartA != 0)  delete [] colStartA;
+
     // create the new
     B = new double[size];
     X = new double[size];
     myB = new double[size];
+    workArea = new double[size];
+    colStartA = new int[size+1]; 
     
-    if (B == 0 || X == 0 || colStartA == 0 || myB == 0) {
-      opserr << "WARNING SparseGenColLinSOE::SparseGenColLinSOE :";
+    if (B == 0 || X == 0 || colStartA == 0 || workArea == 0 || myB == 0) {
+      opserr << "WARNING MumpsSOE::MumpsSOE :";
       opserr << " ran out of memory for vectors (size) (";
       opserr << size << ") \n";
       size = 0; Bsize = 0;
@@ -327,25 +185,101 @@ MumpsParallelSOE::setSize(Graph &theGraph)
     else
       Bsize = size;
   }
-
+  
   // zero the vectors
   for (int j=0; j<size; j++) {
     B[j] = 0;
     X[j] = 0;
     myB[j] = 0;
   }
-
+  
   // create new Vectors objects
   if (size != oldSize) {
-    if (vectX != 0)
-      delete vectX;
-    
-    if (vectB != 0)
-      delete vectB;
+    if (vectX != 0) delete vectX;
+    if (vectB != 0) delete vectB;
+    if (myVectB != 0) delete myVectB;
     
     vectX = new Vector(X,size);
     vectB = new Vector(B,size);	
     myVectB = new Vector(myB, size);
+  }
+
+  // fill in colStartA and rowA
+  if (size != 0) {
+    colStartA[0] = 0;
+    int startLoc = 0;
+    int lastLoc = 0;
+    for (int a=0; a<size; a++) {
+      
+      theVertex = theGraph.getVertexPtr(a);
+      if (theVertex != 0) {
+	
+	int vertexTag = theVertex->getTag();
+	rowA[lastLoc++] = vertexTag; // place diag in first
+	const ID &theAdjacency = theVertex->getAdjacency();
+	int idSize = theAdjacency.Size();
+	
+	// now we have to place the entries in the ID into order in rowA
+	
+	if (matType != 0) {
+	  
+	  // symmetric
+	  for (int i=0; i<idSize; i++) {
+	    int row = theAdjacency(i);
+	    if (row > vertexTag) {
+	      bool foundPlace = false;
+	      // find a place in rowA for current col
+	      for (int j=startLoc; j<lastLoc; j++)
+		if (rowA[j] > row) { 
+		  // move the entries already there one further on
+		  // and place col in current location
+		  for (int k=lastLoc; k>j; k--)
+		    rowA[k] = rowA[k-1];
+		  rowA[j] = row;
+		  foundPlace = true;
+		  j = lastLoc;
+		}
+	      
+	      if (foundPlace == false) // put in at the end
+		rowA[lastLoc] = row;
+	      lastLoc++;
+	    }
+	  }
+	  
+	} else {
+
+	  // unsymmetric	  
+	  for (int i=0; i<idSize; i++) {
+	    int row = theAdjacency(i);
+	    bool foundPlace = false;
+	    // find a place in rowA for current col
+	    for (int j=startLoc; j<lastLoc; j++)
+	      if (rowA[j] > row) { 
+		// move the entries already there one further on
+		// and place col in current location
+		for (int k=lastLoc; k>j; k--)
+		  rowA[k] = rowA[k-1];
+		rowA[j] = row;
+		foundPlace = true;
+		j = lastLoc;
+	      }
+	    if (foundPlace == false) // put in at the end
+	      rowA[lastLoc] = row;
+	    
+	    lastLoc++;
+	  }
+	}
+      }
+      colStartA[a+1] = lastLoc;
+      startLoc = lastLoc;
+    }
+  }
+
+  // fill in colA
+  int count = 0;
+  for (int i=0; i<size; i++) {
+    for (int k=colStartA[i]; k<colStartA[i+1]; k++)
+      colA[count++] = i;
   }
 
   LinearSOESolver *theSolvr = this->getSolver();
@@ -361,166 +295,28 @@ MumpsParallelSOE::setSize(Graph &theGraph)
 
 
 int 
-MumpsParallelSOE::addA(const Matrix &m, const ID &id, double fact)
-{
-    // check for a quick return 
-    if (fact == 0.0)  
-	return 0;
-
-    int idSize = id.Size();
-    
-    // check that m and id are of similar size
-    if (idSize != m.noRows() && idSize != m.noCols()) {
-	opserr << "SparseGenColLinSOE::addA() ";
-	opserr << " - Matrix and ID not of similar sizes\n";
-	return -1;
-    }
-    
-    if (fact == 1.0) { // do not need to multiply 
-      for (int i=0; i<idSize; i++) {
-	int col = id(i);
-	if (col < size && col >= 0) {
-	  int startColLoc = colStartA[col];
-	  int endColLoc = colStartA[col+1];
-	  for (int j=0; j<idSize; j++) {
-	    int row = id(j);
-	    if (row <size && row >= 0) {
-	      // find place in A using rowA
-	      for (int k=startColLoc; k<endColLoc; k++)
-		if (rowA[k] == row) {
-		  A[k] += m(j,i);
-		  k = endColLoc;
-		}
-	    }
-	  }  // for j		
-	} 
-      }  // for i
-    } else {
-      for (int i=0; i<idSize; i++) {
-	int col = id(i);
-	if (col < size && col >= 0) {
-	  int startColLoc = colStartA[col];
-	  int endColLoc = colStartA[col+1];
-	  for (int j=0; j<idSize; j++) {
-	    int row = id(j);
-	    if (row <size && row >= 0) {
-	      // find place in A using rowA
-	      for (int k=startColLoc; k<endColLoc; k++)
-		if (rowA[k] == row) {
-		  A[k] += fact * m(j,i);
-		  k = endColLoc;
-		}
-	    }
-	  }  // for j		
-	} 
-      }  // for i
-    }
-    return 0;
-}
-
-int 
-MumpsParallelSOE::addB(const Vector &v, const ID &id, double fact)
-{
-    // check for a quick return 
-    if (fact == 0.0)  return 0;
-
-    int idSize = id.Size();    
-    // check that m and id are of similar size
-    if (idSize != v.Size() ) {
-	opserr << "SparseGenColLinSOE::addB() ";
-	opserr << " - Vector and ID not of similar sizes\n";
-	return -1;
-    }    
-
-    if (fact == 1.0) { // do not need to multiply if fact == 1.0
-	for (int i=0; i<idSize; i++) {
-	    int pos = id(i);
-	    if (pos <size && pos >= 0)
-		myB[pos] += v(i);
-	}
-    } else if (fact == -1.0) { // do not need to multiply if fact == -1.0
-	for (int i=0; i<idSize; i++) {
-	    int pos = id(i);
-	    if (pos <size && pos >= 0)
-		myB[pos] -= v(i) * fact;
-	}
-    } else {
-	for (int i=0; i<idSize; i++) {
-	    int pos = id(i);
-	    if (pos <size && pos >= 0)
-		myB[pos] += v(i) * fact;
-	}
-    }	
-    return 0;
-}
-
-
-int
-MumpsParallelSOE::setB(const Vector &v, double fact)
-{
-    // check for a quick return 
-    if (fact == 0.0)  return 0;
-
-
-    if (v.Size() != size) {
-	opserr << "WARNING DistributedBandGenLinSOE::setB() -";
-	opserr << " incomptable sizes " << size << " and " << v.Size() << endln;
-	return -1;
-    }
-    
-    if (fact == 1.0) { // do not need to multiply if fact == 1.0
-	for (int i=0; i<size; i++) {
-	    myB[i] = v(i);
-	}
-    } else if (fact == -1.0) {
-	for (int i=0; i<size; i++) {
-	    myB[i] = -v(i);
-	}
-    } else {
-	for (int i=0; i<size; i++) {
-	    myB[i] = v(i) * fact;
-	}
-    }	
-    return 0;
-}
-
-void 
-MumpsParallelSOE::zeroB(void)
-{
-  double *Bptr = myB;
-  for (int i=0; i<size; i++)
-    *Bptr++ = 0;
-}
-
-int 
 MumpsParallelSOE::solve(void)
 {
-  static ID result(1);
+  int resSolver = 0;
 
   //
-  // if subprocess send B and A and receive back result X, B & result
+  // if subprocess send B, solve and recv back X and B
   //
 
   if (processID != 0) {
-    Channel *theChannel = theChannels[0];
 
     // send B
+    Channel *theChannel = theChannels[0];
     theChannel->sendVector(0, 0, *myVectB);
-
-    // send A in packets placed in vector X
-    if (factored == false) {
-      Vector vectA(A, nnz);    
-      theChannel->sendVector(0, 0, vectA);
-    }
-
     LinearSOESolver *theSoeSolver = this->getSolver();
-    this->LinearSOE::solve();
+    resSolver =  this->LinearSOE::solve();
 
-    // receive X,B and result
-    theChannel->recvVector(0, 0, *vectX);
-    theChannel->recvVector(0, 0, *vectB);
-    theChannel->recvID(0, 0, result);
-    factored = true;
+    if (resSolver == 0) {
+      // receive X,B and result
+      theChannel->recvVector(0, 0, *vectX);
+      theChannel->recvVector(0, 0, *vectB);
+      factored = true;
+    }
   } 
 
   //
@@ -532,53 +328,105 @@ MumpsParallelSOE::solve(void)
     // add P0 contribution to B
     *vectB = *myVectB;
     
-    // receive X and A contribution from subprocess & add them in
+    // receive B 
     for (int j=0; j<numChannels; j++) {
-      
       // get X & add
       Channel *theChannel = theChannels[j];
       theChannel->recvVector(0, 0, *vectX);
       *vectB += *vectX;
-      
-      if (factored == false) {
-	Vector vectA(workArea, nnz);
-	theChannel->recvVector(0, 0, vectA);
-	for (int i=0; i<nnz; i++)
-	  A[i] += workArea[i];	
-      }	
-      
-      /*
-      // get A & add using local map
-      const ID &localMap = *(localCol[j]);
-      int localSize = localMap.Size() * half_band;
-      Vector vectA(workArea, localSize);    
-      theChannel->recvVector(0, 0, vectA);
-      
-      int loc = 0;
-      for (int i=0; i<localMap.Size(); i++) {
-	int pos = localMap(i)*half_band;
-	for (int k=0; k<half_band; k++) 
-	  A[pos++] += workArea[loc++];
-	  }    
-      */
     }
-    
-    
+
     // solve
-    result(0) = this->LinearSOE::solve();
-    
+    resSolver = this->LinearSOE::solve();
+
     // send results back
-    for (int j=0; j<numChannels; j++) {
-      Channel *theChannel = theChannels[j];
-      theChannel->sendVector(0, 0, *vectX);
-      theChannel->sendVector(0, 0, *vectB);
-      
-      theChannel->sendID(0, 0, result);      
+    if (resSolver == 0) {
+      for (int j=0; j<numChannels; j++) {
+	Channel *theChannel = theChannels[j];
+	theChannel->sendVector(0, 0, *vectX);
+	theChannel->sendVector(0, 0, *vectB);
+      }
     }
   } 
   
-  return result(0);
+  return resSolver;
 }	
+
+
+
+int 
+MumpsParallelSOE::addB(const Vector &v, const ID &id, double fact)
+{
+  // check for a quick return 
+  if (fact == 0.0)  return 0;
+
+  int idSize = id.Size();    
+  // check that m and id are of similar size
+  if (idSize != v.Size() ) {
+    opserr << "SparseGenColLinSOE::addB() ";
+    opserr << " - Vector and ID not of similar sizes\n";
+    return -1;
+  }    
+
+  if (fact == 1.0) { // do not need to multiply if fact == 1.0
+    for (int i=0; i<idSize; i++) {
+      int pos = id(i);
+      if (pos <size && pos >= 0)
+	myB[pos] += v(i);
+    }
+  } else if (fact == -1.0) { // do not need to multiply if fact == -1.0
+    for (int i=0; i<idSize; i++) {
+      int pos = id(i);
+      if (pos <size && pos >= 0)
+	myB[pos] -= v(i) * fact;
+    }
+  } else {
+    for (int i=0; i<idSize; i++) {
+      int pos = id(i);
+      if (pos <size && pos >= 0)
+	myB[pos] += v(i) * fact;
+    }
+  }
+  return 0;
+}
+
+
+int
+MumpsParallelSOE::setB(const Vector &v, double fact)
+{
+  // check for a quick return 
+  if (fact == 0.0)  return 0;
+
+
+  if (v.Size() != size) {
+    opserr << "WARNING DistributedBandGenLinSOE::setB() -";
+    opserr << " incomptable sizes " << size << " and " << v.Size() << endln;
+    return -1;
+  }
+    
+  if (fact == 1.0) { // do not need to multiply if fact == 1.0
+    for (int i=0; i<size; i++) {
+      myB[i] = v(i);
+    }
+  } else if (fact == -1.0) {
+    for (int i=0; i<size; i++) {
+      myB[i] = -v(i);
+    }
+  } else {
+    for (int i=0; i<size; i++) {
+      myB[i] = v(i) * fact;
+    }
+  }
+  return 0;
+}
+
+void 
+MumpsParallelSOE::zeroB(void)
+{
+  double *Bptr = myB;
+  for (int i=0; i<size; i++)
+    *Bptr++ = 0;
+}
 
 
 const Vector &
@@ -682,8 +530,9 @@ MumpsParallelSOE::sendSelf(int commitTag, Channel &theChannel)
 
 
   // send remotes processID
-  ID idData(1);
+  ID idData(2);
   idData(0) = sendID;
+  idData(1) = matType;
   
   int res = theChannel.sendID(0, commitTag, idData);
   if (res < 0) {
@@ -698,18 +547,18 @@ MumpsParallelSOE::sendSelf(int commitTag, Channel &theChannel)
 int 
 MumpsParallelSOE::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-  ID idData(1);
+  ID idData(2);
   int res = theChannel.recvID(0, commitTag, idData);
   if (res < 0) {
     opserr <<"WARNING MumpsParallelSOE::recvSelf() - failed to send data\n";
     return -1;
   }	      
   processID = idData(0);
+  matType = idData(1);
 
   numChannels = 1;
   theChannels = new Channel *[1];
   theChannels[0] = &theChannel;
-
 
   localCol = new ID *[numChannels];
   for (int i=0; i<numChannels; i++)

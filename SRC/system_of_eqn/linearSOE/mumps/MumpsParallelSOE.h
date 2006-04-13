@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-03-15 00:26:02 $
+// $Revision: 1.2 $
+// $Date: 2006-04-13 20:58:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsParallelSOE.h,v $
                                                                         
 #ifndef MumpsParallelSOE_h
@@ -28,10 +28,12 @@
 // Written: fmk 
 // Description: This file contains the class definition for MumpsParallelSOE
 // MumpsParallelSOE is a subclass of LinearSOE. It uses the sparse column
-// storage scheme. It collects all contributions from the matrices and assembles them onto 
-// P0 (not really a distributed SOE .. but until i get a solver that will work with a distributed
-// col storage scheme this is what will have to stick with).
+// storage scheme. The matrix A is kept distributed, X and B kept on all processors.
 //
+// matrix types (matType): 0 Unsymmetrc
+//                         1 Symmetrix positive definite
+//                         2 General Symmetric
+
 // What: "@(#) MumpsParallelSOE.h, revA"
 
 
@@ -43,19 +45,18 @@ class MumpsParallelSolver;
 class MumpsParallelSOE : public MumpsSOE
 {
   public:
-    MumpsParallelSOE(MumpsParallelSolver &theSolver);
+    MumpsParallelSOE(MumpsParallelSolver &theSolver, int matType=2);
     
     ~MumpsParallelSOE();
 
     // these methods need to be rewritten
     int setSize(Graph &theGraph);
-    int addA(const Matrix &, const ID &, double fact = 1.0);
+
     int addB(const Vector &, const ID &, double fact = 1.0);    
     int setB(const Vector &, double fact = 1.0);            
     const Vector &getB(void);
     void zeroB(void);
     int solve(void);
-
 
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
