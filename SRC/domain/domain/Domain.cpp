@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.33 $
-// $Date: 2005-12-22 00:35:08 $
+// $Revision: 1.34 $
+// $Date: 2006-04-13 20:11:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -49,8 +49,8 @@
 #include <ElementalLoad.h>
 #include <LoadPattern.h>
 
-#include <ArrayOfTaggedObjects.h>
-#include <ArrayOfTaggedObjectsIter.h>
+#include <MapOfTaggedObjects.h>
+#include <MapOfTaggedObjectsIter.h>
 
 #include <SingleDomEleIter.h>
 #include <SingleDomNodIter.h>
@@ -79,11 +79,11 @@ Domain::Domain()
 {
   
     // init the arrays for storing the domain components
-    theElements = new ArrayOfTaggedObjects(4096);
-    theNodes    = new ArrayOfTaggedObjects(4096);
-    theSPs      = new ArrayOfTaggedObjects(256);
-    theMPs      = new ArrayOfTaggedObjects(256);    
-    theLoadPatterns = new ArrayOfTaggedObjects(32);
+    theElements = new MapOfTaggedObjects();
+    theNodes    = new MapOfTaggedObjects();
+    theSPs      = new MapOfTaggedObjects();
+    theMPs      = new MapOfTaggedObjects();    
+    theLoadPatterns = new MapOfTaggedObjects();
 
     // init the iters    
     theEleIter = new SingleDomEleIter(theElements);    
@@ -125,11 +125,11 @@ Domain::Domain(int numNodes, int numElements, int numSPs, int numMPs,
  theBounds(6), theEigenvalues(0), theEigenvalueSetTime(0), lastChannel(0)
 {
     // init the arrays for storing the domain components
-    theElements = new ArrayOfTaggedObjects(numElements);
-    theNodes    = new ArrayOfTaggedObjects(numNodes);
-    theSPs      = new ArrayOfTaggedObjects(numSPs);
-    theMPs      = new ArrayOfTaggedObjects(numMPs);    
-    theLoadPatterns = new ArrayOfTaggedObjects(numLoadPatterns);
+    theElements = new MapOfTaggedObjects();
+    theNodes    = new MapOfTaggedObjects();
+    theSPs      = new MapOfTaggedObjects();
+    theMPs      = new MapOfTaggedObjects();    
+    theLoadPatterns = new MapOfTaggedObjects();
     
     // init the iters
     theEleIter = new SingleDomEleIter(theElements);    
@@ -1221,7 +1221,7 @@ Domain::applyLoad(double timeStep)
     //
     // finally loop over the MP_Constraints and SP_Constraints of the domain
     //
-    
+
     MP_ConstraintIter &theMPs = this->getMPs();
     MP_Constraint *theMP;
     while ((theMP = theMPs()) != 0)
@@ -1229,8 +1229,9 @@ Domain::applyLoad(double timeStep)
 
     SP_ConstraintIter &theSPs = this->getSPs();
     SP_Constraint *theSP;
-    while ((theSP = theSPs()) != 0)
+    while ((theSP = theSPs()) != 0) {
 	theSP->applyConstraint(timeStep);
+    }
 }
 
 

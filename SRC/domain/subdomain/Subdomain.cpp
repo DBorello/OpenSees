@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2005-11-30 23:47:00 $
+// $Revision: 1.8 $
+// $Date: 2006-04-13 20:12:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -41,7 +41,7 @@
 #include <Node.h>
 #include <SP_Constraint.h>
 #include <MP_Constraint.h>
-#include <ArrayOfTaggedObjects.h>
+#include <MapOfTaggedObjects.h>
 #include <DomainDecompositionAnalysis.h>
 #include <FE_Element.h>
 #include <SingleDomNodIter.h>
@@ -73,9 +73,9 @@ Subdomain::Subdomain(int tag)
  thePartitionedModelBuilder(0)
 {
     // init the arrays.
-    internalNodes = new ArrayOfTaggedObjects(8024);
-    externalNodes = new ArrayOfTaggedObjects(256);
-    //    realExternalNodes = new ArrayOfTaggedObjects(256);    
+    internalNodes = new MapOfTaggedObjects();
+    externalNodes = new MapOfTaggedObjects();
+    //    realExternalNodes = new MapOfTaggedObjects();    
     
     internalNodeIter = new SingleDomNodIter(internalNodes);
     externalNodeIter = new SingleDomNodIter(externalNodes);    
@@ -85,9 +85,9 @@ Subdomain::Subdomain(int tag)
     if (internalNodes == 0 || externalNodes == 0 ||
 	internalNodeIter == 0 || externalNodeIter == 0 ||
 	theNodIter == 0) {
-	
-	opserr << "Subdomain::Subdomain() - ran out of memory\n";
-	exit(-1);
+      
+      opserr << "Subdomain::Subdomain() - ran out of memory\n";
+      exit(-1);
     }
 }
 
@@ -99,18 +99,18 @@ Subdomain::Subdomain(int tag,
 		     TaggedObjectStorage &theLoadPatternsStorage,	      
 		     TaggedObjectStorage &theMPsStorage,
 		     TaggedObjectStorage &theSPsStorage)
-:Element(tag,ELE_TAG_Subdomain), 
- Domain(theExternalNodeStorage, theElementsStorage,
-	theLoadPatternsStorage, 
-	theMPsStorage,theSPsStorage),
- mapBuilt(false),map(0),mappedVect(0),mappedMatrix(0),
- internalNodes(&theInternalNodeStorage),
- externalNodes(&theExternalNodeStorage), 
- realCost(0.0),cpuCost(0),pageCost(0),
- theAnalysis(0), extNodes(0), theFEele(0),
- thePartitionedModelBuilder(0)
+  :Element(tag,ELE_TAG_Subdomain), 
+   Domain(theExternalNodeStorage, theElementsStorage,
+	  theLoadPatternsStorage, 
+	  theMPsStorage,theSPsStorage),
+   mapBuilt(false),map(0),mappedVect(0),mappedMatrix(0),
+   internalNodes(&theInternalNodeStorage),
+   externalNodes(&theExternalNodeStorage), 
+   realCost(0.0),cpuCost(0),pageCost(0),
+   theAnalysis(0), extNodes(0), theFEele(0),
+   thePartitionedModelBuilder(0)
 {
-  //    realExternalNodes = new ArrayOfTaggedObjects(256);    
+  //    realExternalNodes = new MapOfTaggedObjects(256);    
     
     internalNodeIter = new SingleDomNodIter(internalNodes);
     externalNodeIter = new SingleDomNodIter(externalNodes);    
