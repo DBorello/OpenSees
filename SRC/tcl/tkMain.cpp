@@ -14,7 +14,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkMain.cpp,v 1.14 2006-01-17 23:15:03 fmk Exp $
+ * RCS: @(#) $Id: tkMain.cpp,v 1.15 2006-04-14 20:19:37 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -140,7 +140,7 @@ Tk_MainOpenSees(int argc, char **argv, Tcl_AppInitProc *appInitProc, Tcl_Interp 
 
     /* fmk - beginning of modifications for OpenSees */
     fprintf(stderr,"\n\n\t OpenSees -- Open System For Earthquake Engineering Simulation");
-    fprintf(stderr,"\n\tPacific Earthquake Engineering Research Center -- Version 1.7.0\n\n");
+    fprintf(stderr,"\n\tPacific Earthquake Engineering Research Center -- Version 1.7.1\n\n");
     
     fprintf(stderr,"\t    (c) Copyright 1999 The Regents of the University of California");
     fprintf(stderr,"\n\t\t\t\t All Rights Reserved \n\n\n");    
