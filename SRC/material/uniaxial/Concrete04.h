@@ -18,9 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-04-12 17:52:00 $
+// $Revision: 1.3 $
+// $Date: 2006-04-14 20:37:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete04.h,v $
+                                                                        
                                                                         
 #ifndef Concrete04_h
 #define Concrete04_h
@@ -41,67 +42,69 @@
 
 #include <UniaxialMaterial.h>
 
-
 class Concrete04 : public UniaxialMaterial
 {
  public:
-// Concrete04 (int tag, double fpc, double eco, double ecu, double Ec0, double fct);
-  Concrete04 (int tag, double fpc, double eco, double ecu, double Ec0, double fct, double etu);
+//  Concrete04 (int tag, double fpc, double eco, double ecu, double Ec0, double fct);
+  Concrete04 (int tag, double fpc, double eco, double ecu, double Ec0, double fct, double etu);  
   Concrete04 (int tag, double fpc, double eco, double ecu, double Ec0, double fct, double etu, double beta);
   Concrete04 (int tag, double fpc, double eco, double ecu, double Ec0);
   Concrete04 ();
   ~Concrete04();
-
-  int setTrialStrain(double strain, double strainRate = 0.0);
-  double getStrain(void);
+  
+  int setTrialStrain(double strain, double strainRate = 0.0); 
+  double getStrain(void);      
   double getStress(void);
   double getTangent(void);
   double getInitialTangent(void) {return Ec0;}
   
   int commitState(void);
   int revertToLastCommit(void);
-  int revertToStart(void);
+  int revertToStart(void);        
   
   UniaxialMaterial *getCopy(void);
   
-  int sendSelf(int commitTag, Channel &theChannel);
-  int recvSelf(int commitTag, Channel &theChannel,
-	       FEM_ObjectBroker &theBroker);
+  int sendSelf(int commitTag, Channel &theChannel);  
+  int recvSelf(int commitTag, Channel &theChannel, 
+	       FEM_ObjectBroker &theBroker);    
   
   void Print(OPS_Stream &s, int flag =0);
+  
+  // LOWES: add function for use with variable hinge lnegth model
+  int getMaterialType(void);
+  // LOWES: end
   
  protected:
   
  private:
   /*** Material Properties ***/
-  double fpc; // Compressive strength
-  double epsc0; // Strain at compressive strength
-  double epscu; // Strain at crushing strength
-  double Ec0; // initial tangent
-  double fct; // Concrete tensile strength
-  double etu; // ultimate tensile strain
-  double beta; // exponential curve parameter, residual stress (as a factor of ft)
-  // at etu.
+  double fpc;    // Compressive strength
+  double epsc0;  // Strain at compressive strength
+  double epscu;  // Strain at crushing strength
+  double Ec0;    // initial tangent
+  double fct;   // Concrete tensile strength
+  double etu;   // ultimate tensile strain              
+  double beta;  // exponential curve parameter, residual stress (as a factor of ft)
+  // at etu. 
   
   /*** CONVERGED History Variables ***/
-  double CminStrain; // Smallest previous concrete strain (compression)
-  double CmaxStrain;
+  double CminStrain;   // Smallest previous concrete strain (compression)      
+  double CmaxStrain;  
   double CunloadSlope; // Unloading (reloading) slope from CminStrain
-  double CendStrain; // Strain at the end of unloading from CminStrain
-  double CcompStrain; // strain value at which the compression unloading intersects the
-  // zero stress value or the strain value at which tensile reloading starts.
-  double CUtenStress; // tensile stress value at which unloading begins
-  double CUtenSlope; // unloading tensile slope value
+  double CendStrain;   // Strain at the end of unloading from CminStrain
+  double CcompStrain;   // strain value at which the compression unloading intersects the   
+  // zero stress value or the strain value at which tensile reloading starts.                                  
+  double CUtenStress;      // tensile stress value at which unloading begins
+  double CUtenSlope;      // unloading tensile slope value
   
   /*** CONVERGED State Variables ***/
   double Cstrain;
-  double Cstress;
-  double Ctangent; // Don't need Ctangent other than for revert and sendSelf/recvSelf
+  double Cstress;   
+  double Ctangent;	// Don't need Ctangent other than for revert and sendSelf/recvSelf
   // Storing it is better than recomputing it!!!
   
   double TminStrain;
-  /*** TRIAL History Variables ***/
-  double TmaxStrain;
+  /*** TRIAL History Variables ***/      double TmaxStrain;
   double TunloadSlope;
   double TendStrain;
   double TcompStrain;
@@ -121,9 +124,6 @@ class Concrete04 : public UniaxialMaterial
   void TensEnvelope(void);
   void setTenUnload(void);
 };
-
-
-
 
 
 #endif
