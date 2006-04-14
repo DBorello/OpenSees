@@ -117,6 +117,18 @@
 				RelativePath="..\..\..\SRC\tagged\storage\ArrayOfTaggedObjectsIter.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\tagged\storage\MapOfTaggedObjects.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\tagged\storage\MapOfTaggedObjects.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\tagged\storage\MapOfTaggedObjectsIter.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\tagged\storage\MapOfTaggedObjectsIter.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\tagged\storage\TaggedObjectIter.h">
 			</File>
 			<File
