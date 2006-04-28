@@ -463,7 +463,8 @@ TAGGED_LIBS =   $(FE)/tagged/TaggedObject.o \
 	$(FE)/tagged/storage/MapOfTaggedObjects.o \
 	$(FE)/tagged/storage/MapOfTaggedObjectsIter.o
 
-UTILITY_LIBS = $(FE)/utility/Timer.o
+UTILITY_LIBS = $(FE)/utility/Timer.o \
+	$(FE)/utility/SimulationInformation.o \
 
 
 GRAPH_LIBS = $(FE)/graph/graph/DOF_Graph.o \

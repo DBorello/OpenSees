@@ -1,6 +1,6 @@
 include ../../Makefile.def
 
-OBJS       = Timer.o
+OBJS       = Timer.o SimulationInformation.o
 
 # Compilation control
 
