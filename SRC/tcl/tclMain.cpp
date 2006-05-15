@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.30 2006-03-01 00:02:41 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.31 2006-05-15 19:21:00 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -69,11 +69,19 @@ typedef struct parameter {
   struct parameter *next;
 } Parameter;
 
-extern "C" int	isatty _ANSI_ARGS_((int fd));
+
 #ifdef _WIN32
+extern "C" int	isatty _ANSI_ARGS_((int fd));
 extern "C" char * strcpy _ANSI_ARGS_((char *dst, CONST char *src)) throw();
 #endif
 static char *tclStartupScriptFileName = NULL;
+
+
+#include <FileStream.h>
+#include <SimulationInformation.h>
+SimulationInformation simulationInfo;
+char *simulationInfoOutputFilename = 0;
+
 
 /*
  *----------------------------------------------------------------------
@@ -145,22 +153,31 @@ EvalFileWithParameters(Tcl_Interp *interp,
       theValue=theValue->next;
     } 
   } else {
-
+    
+    simulationInfo.start();
     static int count = 0;
     
     if ((count % np) == rank) {
       Tcl_Eval(interp, "wipe");
      
-      for (int i=0; i<numParam; i++) 
-		  Tcl_SetVar(interp, paramNames[i], paramValues[i], TCL_GLOBAL_ONLY);	    
+      for (int i=0; i<numParam; i++) {
+	Tcl_SetVar(interp, paramNames[i], paramValues[i], TCL_GLOBAL_ONLY);	    
+	simulationInfo.addParameter(paramNames[i], paramValues[i]);
+      }
 
       count++;
-	
-      return Tcl_EvalFile(interp, tclStartupScriptFileName);
-	 
-	}
-	else
-		count++;
+      
+      simulationInfo.addReadFile(tclStartupScriptFileName);
+
+      int ok = Tcl_EvalFile(interp, tclStartupScriptFileName);
+
+      simulationInfo.end();
+      opserr << simulationInfo;
+      
+      return ok;
+    }
+    else
+      count++;
   }
 
   return 0;
@@ -209,8 +226,9 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
     fprintf(stderr,"\n\n\t OpenSees -- Open System For Earthquake Engineering Simulation");
     fprintf(stderr,"\n\tPacific Earthquake Engineering Research Center -- Version 1.7.1\n\n");
     
-    fprintf(stderr,"\t    (c) Copyright 1999 The Regents of the University of California");
-    fprintf(stderr,"\n\t\t\t\t All Rights Reserved \n\n\n");    
+    fprintf(stderr,"\t    (c) Copyright 1999,2000 The Regents of the University of California");
+    fprintf(stderr,"\n\t\t\t\t All Rights Reserved\n");    
+    fprintf(stderr,"\t(Copyright statement @ http://www.berkeley.edu/OpenSees/copyright.html)\n\n\n");
     /* fmk - end of modifications for OpenSees */
 // Boris Jeremic additions
 # ifdef _UNIX
@@ -297,60 +315,72 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
       if (argc > 1) {
 	int currentArg = 1;
 	while (currentArg < argc && argv[currentArg] != NULL) {
+	  opserr << argv[currentArg] << endln;
+
 	  if ((strcmp(argv[currentArg], "-par") == 0) || (strcmp(argv[currentArg], "-Par") == 0)) {
-
-	    char *parName = argv[currentArg+1];
-	    char *parValue = argv[currentArg+2];
+	    
+	    if (argc > (currentArg+2)) {
+	      
+	      char *parName = argv[currentArg+1];
+	      char *parValue = argv[currentArg+2];
+	      
+	      // add a Parameter to end of list of parameters
+	      Parameter *nextParam = new Parameter;
+	      nextParam->name = new char [strlen(parName)+1];
+	      strcpy(nextParam->name, parName);
+	      nextParam->values = 0;
+	      
+	      if (theParameters == 0)
+		theParameters = nextParam;
+	      if (endParameters != 0)
+		endParameters->next = nextParam;
+	      nextParam->next = 0;
+	      endParameters = nextParam;
+	      
+	      // now open par values files to create the values
+	      char nextLine[1000];
+	      FILE *valueFP = fopen(parValue,"r");
+	      if (valueFP != 0) {
+		ParameterValues *endValues = 0;
 		
-	    // add a Parameter to end of list of parameters
-	    Parameter *nextParam = new Parameter;
-	    nextParam->name = new char [strlen(parName)+1];
-	    strcpy(nextParam->name, parName);
-	    nextParam->values = 0;
-
-	    if (theParameters == 0)
-	      theParameters = nextParam;
-	    if (endParameters != 0)
-	      endParameters->next = nextParam;
-	    nextParam->next = 0;
-	    endParameters = nextParam;
-
-	    // now open par values files to create the values
-	    char nextLine[1000];
-	    FILE *valueFP = fopen(parValue,"r");
-	    if (valueFP != 0) {
-	      ParameterValues *endValues = 0;
-
-	      while (fscanf(valueFP, "%s", nextLine) != EOF) {
-		
-		ParameterValues *nextValue = new ParameterValues;
-		nextValue->value = new char [strlen(nextLine)+1];
-		strcpy(nextValue->value, nextLine);
-		
-		if (nextParam->values == 0) {
-		  nextParam->values = nextValue;
-		}
+		while (fscanf(valueFP, "%s", nextLine) != EOF) {
+		  
+		  ParameterValues *nextValue = new ParameterValues;
+		  nextValue->value = new char [strlen(nextLine)+1];
+		  strcpy(nextValue->value, nextLine);
+		  
+		  if (nextParam->values == 0) {
+		    nextParam->values = nextValue;
+		  }
 		if (endValues != 0)
 		  endValues->next = nextValue;
 		endValues = nextValue;
 		nextValue->next = 0;	      
-	      }
-	      fclose(valueFP);
-	    } else {
-
-	      ParameterValues *nextValue = new ParameterValues;		
-	      nextValue->value = new char [strlen(parValue)+1];
-		 
-	      strcpy(nextValue->value, parValue);
-		 
-	      nextParam->values = nextValue;
-	      nextValue->next = 0;
+		}
+		fclose(valueFP);
+	      } else {
 		
+		ParameterValues *nextValue = new ParameterValues;		
+		nextValue->value = new char [strlen(parValue)+1];
+		
+		strcpy(nextValue->value, parValue);
+		
+		nextParam->values = nextValue;
+		nextValue->next = 0;
+		
+	      }
+	      numParam++;
 	    }
-   
-	    numParam++;
 	    currentArg += 3;
-	  } else
+	  } else if ((strcmp(argv[currentArg], "-info") == 0) || (strcmp(argv[currentArg], "-INFO") == 0)) {
+	    opserr << "OUTPUT: " << argc << " " << currentArg << endln;
+	    if (argc > (currentArg+1)) {
+	      
+	      simulationInfoOutputFilename = argv[currentArg+1];	    
+	      opserr << "OUTPUT" << simulationInfoOutputFilename << endln;
+	    }			   
+	    currentArg+=2;
+	  } else 
 	    currentArg++;
 	}
 
@@ -378,7 +408,21 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	}
       }
 
+      simulationInfo.start();
+      simulationInfo.addReadFile(tclStartupScriptFileName);
+
       code = Tcl_EvalFile(interp, tclStartupScriptFileName);
+
+      simulationInfo.end();
+      if (simulationInfoOutputFilename != 0) {
+	FileStream simulationInfoOutputFile;
+	simulationInfoOutputFile.setFile(simulationInfoOutputFilename);
+	simulationInfoOutputFile.open();
+	simulationInfoOutputFile << simulationInfo;
+	simulationInfoOutputFile.close();
+      }
+      
+
       if (code != TCL_OK) {
 	errChannel = Tcl_GetStdChannel(TCL_STDERR);
 	if (errChannel) {
@@ -433,7 +477,6 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	  }
 	} else {
 	  
-	  // Boris Jeremic: this is the entry point!!!!!
 	  code = Tcl_EvalObjEx(interp, promptCmdPtr, 0);
 	  
 	  inChannel = Tcl_GetStdChannel(TCL_STDIN);

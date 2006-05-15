@@ -14,7 +14,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkMain.cpp,v 1.15 2006-04-14 20:19:37 fmk Exp $
+ * RCS: @(#) $Id: tkMain.cpp,v 1.16 2006-05-15 19:21:00 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -144,6 +144,7 @@ Tk_MainOpenSees(int argc, char **argv, Tcl_AppInitProc *appInitProc, Tcl_Interp 
     
     fprintf(stderr,"\t    (c) Copyright 1999 The Regents of the University of California");
     fprintf(stderr,"\n\t\t\t\t All Rights Reserved \n\n\n");    
+    fprintf(stderr,"\t(Copyright statement @ http://www.berkeley.edu/OpenSees/copyright.html)\n\n\n");
     /* fmk - end of modifications for OpenSees */
 
     /*
