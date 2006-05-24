@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.76 $
-// $Date: 2006-03-15 00:20:37 $
+// $Revision: 1.77 $
+// $Date: 2006-05-24 21:11:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -124,6 +124,7 @@
 #define MAT_TAG_Concrete02				25
 #define MAT_TAG_Steel02					26
 
+#define MAT_TAG_Bond_SP01  27
 #define MAT_TAG_Concrete04 30
 
 //B Jeremic

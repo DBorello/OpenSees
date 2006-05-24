@@ -1,19 +1,37 @@
 include ../../../Makefile.def
 
- OBJS       = UniaxialMaterial.o ElasticMaterial.o \
-        ElasticPPMaterial.o ParallelMaterial.o \
-        HardeningMaterial.o Concrete01.o Concrete04.o Steel01.o \
-        HystereticMaterial.o EPPGapMaterial.o \
-        ViscousMaterial.o SeriesMaterial.o MinMaxMaterial.o \
-        PathIndependentMaterial.o CableMaterial.o \
-	ENTMaterial.o FedeasMaterial.o DrainMaterial.o \
+ OBJS       = UniaxialMaterial.o \
+	ElasticMaterial.o \
+        ElasticPPMaterial.o \
+	ParallelMaterial.o \
+        HardeningMaterial.o \
+	Concrete01.o \
+	Concrete04.o \
+	Steel01.o \
+        HystereticMaterial.o \
+	EPPGapMaterial.o \
+        ViscousMaterial.o \
+	SeriesMaterial.o \
+	MinMaxMaterial.o \
+        PathIndependentMaterial.o \
+	CableMaterial.o \
+	ENTMaterial.o \
+	FedeasMaterial.o \
+	DrainMaterial.o \
 	BoucWenMaterial.o \
-	Pinching4Material.o BarSlipMaterial.o \
+	Pinching4Material.o \
+	BarSlipMaterial.o \
 	FatigueMaterial.o \
-	Steel02.o Concrete02.o \
-	Steel03.o KinematicHardening.o TclKinematicHardening.o \
-	NewUniaxialMaterial.o TclNewUnixialMaterial.o \
-	ReinforcingSteel.o TclReinforcingSteel.o\
+	Steel02.o \
+	Concrete02.o \
+	Steel03.o \
+	Bond_SP01.o \
+	KinematicHardening.o \
+	TclKinematicHardening.o \
+	NewUniaxialMaterial.o \
+	TclNewUnixialMaterial.o \
+	ReinforcingSteel.o \
+	TclReinforcingSteel.o\
         TclModelBuilderUniaxialMaterialCommand.o
 
 all:         $(OBJS)
