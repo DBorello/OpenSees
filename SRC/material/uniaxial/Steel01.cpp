@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2005-01-25 21:55:36 $
+// $Revision: 1.15 $
+// $Date: 2006-05-24 21:31:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.cpp,v $
                                                                         
 // Written: MHS 
@@ -102,16 +102,21 @@ int Steel01::setTrialStrain (double strain, double strainRate)
    TshiftP = CshiftP;
    TshiftN = CshiftN;
    Tloading = Cloading;
-
-   // Set trial strain
-   Tstrain = strain;
+   Tstrain = Cstrain;
+   Tstress = Cstress;
+   Ttangent = Ctangent;
 
    // Determine change in strain from last converged state
-   double dStrain = Tstrain - Cstrain;
+   double dStrain = strain - Cstrain;
 
-   // Calculate the trial state given the trial strain
-   if (fabs(dStrain) > DBL_EPSILON)   
+   if (fabs(dStrain) > DBL_EPSILON) {
+     // Set trial strain
+     Tstrain = strain;
+
+     // Calculate the trial state given the trial strain
      determineTrialState (dStrain);
+
+   }
 
    return 0;
 }
@@ -124,17 +129,21 @@ int Steel01::setTrial (double strain, double &stress, double &tangent, double st
    TshiftP = CshiftP;
    TshiftN = CshiftN;
    Tloading = Cloading;
-
-   // Set trial strain
-   Tstrain = strain;
+   Tstrain = Cstrain;
+   Tstress = Cstress;
+   Ttangent = Ctangent;
 
    // Determine change in strain from last converged state
-   double dStrain;
-   dStrain = Tstrain - Cstrain;
+   double dStrain = strain - Cstrain;
 
-   // Calculate the trial state given the trial strain
-   if (fabs(dStrain) > DBL_EPSILON) 
+   if (fabs(dStrain) > DBL_EPSILON) {
+     // Set trial strain
+     Tstrain = strain;
+
+     // Calculate the trial state given the trial strain
      determineTrialState (dStrain);
+
+   }
 
    stress = Tstress;
    tangent = Ttangent;
