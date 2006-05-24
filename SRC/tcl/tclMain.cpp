@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.31 2006-05-15 19:21:00 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.32 2006-05-24 21:17:10 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -29,6 +29,7 @@ EXTERN int		TclObjCommandComplete _ANSI_ARGS_((Tcl_Obj *cmdPtr));
 }
 
 int		Tcl_AppInit _ANSI_ARGS_((Tcl_Interp *interp));
+#include <OPS_Globals.h>
 
 # undef TCL_STORAGE_CLASS
 # define TCL_STORAGE_CLASS DLLEXPORT
@@ -224,11 +225,12 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 
     /* fmk - beginning of modifications for OpenSees */
     fprintf(stderr,"\n\n\t OpenSees -- Open System For Earthquake Engineering Simulation");
-    fprintf(stderr,"\n\tPacific Earthquake Engineering Research Center -- Version 1.7.1\n\n");
+    fprintf(stderr,"\n\tPacific Earthquake Engineering Research Center -- %s\n\n", OPS_VERSION);
     
     fprintf(stderr,"\t    (c) Copyright 1999,2000 The Regents of the University of California");
     fprintf(stderr,"\n\t\t\t\t All Rights Reserved\n");    
-    fprintf(stderr,"\t(Copyright statement @ http://www.berkeley.edu/OpenSees/copyright.html)\n\n\n");
+    fprintf(stderr,"\t(Copyright and Disclaimer  @ http://www.berkeley.edu/OpenSees/copyright.html)\n\n\n");
+
     /* fmk - end of modifications for OpenSees */
 // Boris Jeremic additions
 # ifdef _UNIX
