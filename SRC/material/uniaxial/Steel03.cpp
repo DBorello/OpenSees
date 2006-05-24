@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-01-24 23:20:18 $
+// $Revision: 1.4 $
+// $Date: 2006-05-24 21:44:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel03.cpp,v $
                                                                         
 // Written: mackie
@@ -119,15 +119,16 @@ int Steel03::setTrialStrain (double strain, double strainRate)
    Tplastic = Cplastic;
    TcurR = CcurR;
 
-   // Set trial strain
-   Tstrain = strain;
-
    // Determine change in strain from last converged state
-   double dStrain = Tstrain - Cstrain;
+   double dStrain = strain - Cstrain;
 
-   // Calculate the trial state given the trial strain
-   if (fabs(dStrain) > DBL_EPSILON)
+   if (fabs(dStrain) > DBL_EPSILON) {
+     // Set trial strain
+     Tstrain = strain;
+
+     // Calculate the trial state given the trial strain
      determineTrialState (dStrain);
+   }
 
    return 0;
 }
@@ -147,16 +148,16 @@ int Steel03::setTrial (double strain, double &stress, double &tangent, double st
    Tplastic = Cplastic;
    TcurR = CcurR;
 
-   // Set trial strain
-   Tstrain = strain;
-
    // Determine change in strain from last converged state
-   double dStrain;
-   dStrain = Tstrain - Cstrain;
+   double dStrain = strain - Cstrain;
 
-   // Calculate the trial state given the trial strain
-   if (fabs(dStrain) > DBL_EPSILON) 
+   if (fabs(dStrain) > DBL_EPSILON) {
+     // Set trial strain
+     Tstrain = strain;
+
+     // Calculate the trial state given the trial strain
      determineTrialState (dStrain);
+   }
 
    stress = Tstress;
    tangent = Ttangent;
