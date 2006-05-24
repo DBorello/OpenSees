@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-04-14 20:37:38 $
+// $Revision: 1.4 $
+// $Date: 2006-05-24 21:45:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete04.cpp,v $
                                                                         
 // Written: N.Mitra (nmitra@u.washington.edu) 
@@ -132,21 +132,75 @@ Concrete04::~Concrete04()
 
 int Concrete04::setTrialStrain (double strain, double strainRate)
 {
-  /* // Set trial strain*/  Tstrain = strain;  if (fct == 0.0 && Tstrain > 0.0) {    Tstress = 0.0;    Ttangent = 0.0;    TUtenSlope = 0.0;    return 0;  }
-  /*// Determine change in strain from last converged state*/  double dStrain = Tstrain - Cstrain;
-  if (fabs(dStrain) < DBL_EPSILON)       return 0;
+
+  /*// Reset trial history variables to last committed state*/
+  TminStrain = CminStrain;   
+  TmaxStrain = CmaxStrain;   
+  TendStrain = CendStrain;   
+  TunloadSlope = CunloadSlope;   
+  TUtenSlope = CUtenSlope;
+  Tstrain = Cstrain;   
+  Tstress = Cstress;   
+  Ttangent = Ctangent;
+
+  /* // Set trial strain*/  
+  if (fct == 0.0 && strain > 0.0) {    
+    Tstrain = strain;
+    Tstress = 0.0;    
+    Ttangent = 0.0;    
+    TUtenSlope = 0.0;    
+    return 0;  
+  }
+
+  /*// Determine change in strain from last converged state*/  
+  double dStrain = strain - Cstrain;
+
+  if (fabs(dStrain) < DBL_EPSILON)       
+    return 0;
+
+  Tstrain = strain;  
+
   /*// Calculate the trial state given the change in strain  // determineTrialState (dStrain);*/
-  TunloadSlope = CunloadSlope;  TUtenSlope = CUtenSlope;
+  TunloadSlope = CunloadSlope;  
+  TUtenSlope = CUtenSlope;
   if (dStrain <= 0.0) {	  /*// Material can be either in Compression-Reloading	  // or Tension-Unloading state.*/
-    if (Tstrain > 0.0) {         /*// Material is in Tension-Unloading State*/		  Ttangent = TUtenSlope;		  Tstress = Tstrain * TUtenSlope; 	  } else {
-      /*// Material is in Compression-Reloading State*/      TminStrain = CminStrain;      TendStrain = CendStrain;      TunloadSlope = CunloadSlope;      
+    if (Tstrain > 0.0) {         
+      /*// Material is in Tension-Unloading State*/		  
+      Ttangent = TUtenSlope;		  
+      Tstress = Tstrain * TUtenSlope; 	  
+    } else {
+      /*// Material is in Compression-Reloading State*/      
+      TminStrain = CminStrain;      
+      TendStrain = CendStrain;      
+      TunloadSlope = CunloadSlope;      
       CompReload();
     }
   } else {
     /*// Material can be either in Compression-Unloading	  // or Tension-Reloading State.*/
-    if (Tstrain >= 0.0) {      /*// Material is in Tension-Reloading State*/      TmaxStrain = CmaxStrain;                  if (Tstrain < TmaxStrain) {        Tstress = Tstrain * CUtenSlope;        Ttangent = CUtenSlope;        TUtenSlope = CUtenSlope;      } else {        TmaxStrain = Tstrain;        TensEnvelope();        setTenUnload();      }        } else {
-      if (Tstrain <= TendStrain) {          Ttangent = TunloadSlope;          Tstress = Ttangent * (Tstrain - TendStrain);        } else {          Tstress = 0.0;          Ttangent = 0.0;        }        }  }    return 0;
+    if (Tstrain >= 0.0) {    /*// Material is in Tension-Reloading State*/      
+      TmaxStrain = CmaxStrain;                  
+      if (Tstrain < TmaxStrain) {        
+	Tstress = Tstrain * CUtenSlope;        
+	Ttangent = CUtenSlope;        
+	TUtenSlope = CUtenSlope;      
+      } else {        
+	TmaxStrain = Tstrain;        
+	TensEnvelope();        
+	setTenUnload();      
+      }        
+    } else {
+      if (Tstrain <= TendStrain) {          
+	Ttangent = TunloadSlope;          
+	Tstress = Ttangent * (Tstrain - TendStrain);        
+      } else {          
+	Tstress = 0.0;          
+	Ttangent = 0.0;        
+      }        
+    }  
+  }    
+  return 0;
 }
+
 void Concrete04::CompReload()
 {
   if (Tstrain <= TminStrain) {
@@ -231,7 +285,19 @@ void Concrete04::TensReload()
 {  TensEnvelope();  setTenUnload();}
 
 void Concrete04::TensEnvelope()
-{  double ect = fct / Ec0;    if (Tstrain <= ect) {    Tstress = Tstrain * Ec0;    Ttangent = Ec0;} else if (Tstrain > etu) {    Tstress = 0.0;    Ttangent = 0.0;  } else {    Tstress = fct * pow(beta, (Tstrain - ect) / (etu - ect));    Ttangent = fct * pow(beta, (Tstrain - ect) / (etu - ect)) * log(beta) / (etu - ect);  }}
+{  double ect = fct / Ec0;    
+  if (Tstrain <= ect) {    
+    Tstress = Tstrain * Ec0;    
+    Ttangent = Ec0;
+  } else if (Tstrain > etu) {    
+    Tstress = 0.0;    
+    Ttangent = 0.0;  
+  } else {    
+    Tstress = fct * pow(beta, (Tstrain - ect) / (etu - ect));    
+    Ttangent = fct * pow(beta, (Tstrain - ect) / (etu - ect)) * log(beta) / (etu - ect);  
+  }
+}
+
 void Concrete04::setTenUnload(){
   TUtenStress = Tstress;
   TUtenSlope = Tstress / Tstrain;
@@ -246,17 +312,33 @@ double Concrete04::getTangent ()
 
 int Concrete04::commitState ()
 {
-  /*// History variables*/   CminStrain = TminStrain;   CmaxStrain = TmaxStrain;   CunloadSlope = TunloadSlope;   CendStrain = TendStrain;   CUtenSlope = TUtenSlope;
+  /*// History variables*/   
+  CminStrain = TminStrain;   
+  CmaxStrain = TmaxStrain;   
+  CunloadSlope = TunloadSlope;   
+  CendStrain = TendStrain;   
+  CUtenSlope = TUtenSlope;
   
-  /*// State variables*/   Cstrain = Tstrain;   Cstress = Tstress;   Ctangent = Ttangent;      return 0;
+  /*// State variables*/   
+  Cstrain = Tstrain;   
+  Cstress = Tstress;   
+  Ctangent = Ttangent;      
+  return 0;
 }
 
 int Concrete04::revertToLastCommit ()
 {
   /*// Reset trial history variables to last committed state*/
-  TminStrain = CminStrain;   TmaxStrain = CmaxStrain;   TendStrain = CendStrain;   TunloadSlope = CunloadSlope;   TUtenSlope = CUtenSlope;
+  TminStrain = CminStrain;   
+  TmaxStrain = CmaxStrain;   
+  TendStrain = CendStrain;   
+  TunloadSlope = CunloadSlope;   
+  TUtenSlope = CUtenSlope;
   
-  /*// Recompute trial stress and tangent*/   Tstrain = Cstrain;   Tstress = Cstress;   Ttangent = Ctangent;
+  /*// Recompute trial stress and tangent*/   
+  Tstrain = Cstrain;   
+  Tstress = Cstress;   
+  Ttangent = Ctangent;
   return 0;
 }
 

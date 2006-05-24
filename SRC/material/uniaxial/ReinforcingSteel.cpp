@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2006-01-19 19:19:12 $
+// $Revision: 1.5 $
+// $Date: 2006-05-24 21:45:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ReinforcingSteel.cpp,v $
 
 /* ****************************************************************** **
@@ -112,21 +112,21 @@ ReinforcingSteel::updateHardeningLoactionParams()
   double eshLoc = THardFact*(esh-ey)+ey;
   
   // strain hardened point in natural stress-strain
-	eshp=log(1.0+eshLoc);
-	fshp=fy*(1.0+eshLoc);
-
+  eshp=log(1.0+eshLoc);
+  fshp=fy*(1.0+eshLoc);
+  
   // ultimate stress in natural stress-strain
   fsup=Esup-(esup-eshp)*Esup; 
-
+  
   // strain hardedned slope, yield plateu slope, and intersect
   Eshp=Esh*pow(1.0+eshLoc,2.0)+fshp - Esup;
-	Eypp=(fshp-fyp)/(eshp-eyp);
-	fint = fyp-Eypp*eyp;
+  Eypp=(fshp-fyp)/(eshp-eyp);
+  fint = fyp-Eypp*eyp;
   
   p = Eshp*(esup-eshp)/(fsup-fshp);
-	// Set backbone transition variables
-	double fTemp = Backbone_fNat(eshp+0.0002);
-	Eshpb = Eshp*pow((fsup-fTemp)/(fsup-fshp),1.0-1.0/p);
+  // Set backbone transition variables
+  double fTemp = Backbone_fNat(eshp+0.0002);
+  Eshpb = Eshp*pow((fsup-fTemp)/(fsup-fshp),1.0-1.0/p);
   eshpa = eshp + 0.0002 - 2.0*(fTemp-fshp)/Eshpb;
 }
 
@@ -147,23 +147,27 @@ ReinforcingSteel::~ReinforcingSteel(){
 /***************** material state determination methods ***********/
 int 
 ReinforcingSteel::setTrialStrain(double strain, double strainRate) {
+
+  // need to reset values to last committed
+  this->revertToLastCommit();
+
   int res = 0;
   #ifdef HelpDebugMat
-    thisClassStep++;
-    if (thisClassCommit == 4000 && thisClassStep == 1)
-      if (scalefactor()<1.0)
-        opserr << scalefactor() << "\n";
-  #endif
+  thisClassStep++;
+  if (thisClassCommit == 4000 && thisClassStep == 1)
+    if (scalefactor()<1.0)
+      opserr << scalefactor() << "\n";
+#endif
   // Reset Trial History Variables to Last Converged State
   revertToLastCommit();
-
+  
 #ifdef _WIN32  
   if(_fpclass(strain)< 8 || _fpclass(strain)==512) {
     opserr << "bad trial strain\n";
     return -1;
   }
 #endif
-
+  
   if(strain< -0.95) {
     opserr << "Large trial compressive strain\n";
     return -1;
@@ -171,12 +175,12 @@ ReinforcingSteel::setTrialStrain(double strain, double strainRate) {
     TStrain = log(1.0 + strain);
   
   if (TStrain == CStrain) return 0;
-
+  
   if (TBranchNum==0){
-		if (TStrain>0.0) TBranchNum = 1;
-		if (TStrain<0.0) TBranchNum = 2;
+    if (TStrain>0.0) TBranchNum = 1;
+    if (TStrain<0.0) TBranchNum = 2;
   }
-
+  
 #ifdef _WIN32
   if(_fpclass(Tfch)< 8 || _fpclass(Tfch)==512 || _fpclass(Tfch)< 8 || _fpclass(Tfch)==512) {
     opserr << "bad stress or tangent\n";
@@ -187,14 +191,14 @@ ReinforcingSteel::setTrialStrain(double strain, double strainRate) {
     thisClassCommit = thisClassCommit;
   }
   res = BranchDriver(res);
-
+  
 #ifdef _WIN32
   if(_fpclass(TStress)< 8 || _fpclass(TStress)==512 || _fpclass(TTangent)< 8 || _fpclass(TTangent)==512) {
     opserr << "bad stress or tangent\n";
     return -1;
   }
 #endif
-
+  
   if (res==0)
     return 0;
   else
@@ -211,17 +215,17 @@ ReinforcingSteel::getStress(void) {
   if (theBarFailed) return 0.0;
   double tempstr=TStress;
   switch(BuckleModel) {
-    case  1:  tempstr = Buckled_stress_Gomes(TStrain,TStress);
-			        break;
-	  case  2:  tempstr = Buckled_stress_Dhakal(TStrain,TStress);
-              break;
+  case  1:  tempstr = Buckled_stress_Gomes(TStrain,TStress);
+    break;
+  case  2:  tempstr = Buckled_stress_Dhakal(TStrain,TStress);
+    break;
   }
   double tempOut = tempstr*scalefactor()/exp(TStrain);
   
-  #ifdef _WIN32
+#ifdef _WIN32
   if(_fpclass(tempOut)< 8 || _fpclass(tempOut)==512)
     opserr << "bad Stress in ReinforcingSteel::getStress\n";
-  #endif
+#endif
   
   return tempOut;
 }
@@ -230,19 +234,19 @@ double
 ReinforcingSteel::getTangent(void) {
   double taTan = TTangent;
   switch(BuckleModel) {
-    case  1:  taTan = Buckled_mod_Gomes(TStrain,TStress,TTangent);
-			        break;
-	  case  2:  taTan = Buckled_mod_Dhakal(TStrain,TStress,TTangent);
-              break;
+  case  1:  taTan = Buckled_mod_Gomes(TStrain,TStress,TTangent);
+    break;
+  case  2:  taTan = Buckled_mod_Dhakal(TStrain,TStress,TTangent);
+    break;
   }
   double scfact = scalefactor();
   double tempOut = (taTan+TStress)*scfact/pow(exp(TStrain),2.0);
   
-  #ifdef _WIN32
+#ifdef _WIN32
   if(_fpclass(tempOut)< 8 || _fpclass(tempOut)==512)
     opserr << "bad tangent in ReinforcingSteel::getTangentat\n";
-  #endif
-    
+#endif
+  
   return tempOut;
 }
 
@@ -260,13 +264,13 @@ ReinforcingSteel::commitState(void) {
 #endif
   
   if(TBranchNum <= 1)
-	TBranchMem=0;
+    TBranchMem=0;
   else
-	TBranchMem = (TBranchNum+1)/2;
-
+    TBranchMem = (TBranchNum+1)/2;
+  
   for(int i=0; i<=LastRule_RS/2; i++)
     C_ePlastic[i]=T_ePlastic[i];
-
+  
   CFatDamage       = TFatDamage;
   
   // commit trial history variables
@@ -281,18 +285,18 @@ ReinforcingSteel::commitState(void) {
   CHardFact     = THardFact;
 
   if(TBranchNum > 2) {
-	CR[TBranchMem]    = TR;
-	Cfch[TBranchMem]  = Tfch;
-	CQ[TBranchMem]    = TQ;
-	CEsec[TBranchMem] = TEsec;
-	Cea[TBranchMem]   = Tea;
-	Cfa[TBranchMem]   = Tfa;
-	CEa[TBranchMem]   = TEa;
-	Ceb[TBranchMem]   = Teb;
-	Cfb[TBranchMem]   = Tfb;
-	CEb[TBranchMem]   = TEb;
+    CR[TBranchMem]    = TR;
+    Cfch[TBranchMem]  = Tfch;
+    CQ[TBranchMem]    = TQ;
+    CEsec[TBranchMem] = TEsec;
+    Cea[TBranchMem]   = Tea;
+    Cfa[TBranchMem]   = Tfa;
+    CEa[TBranchMem]   = TEa;
+    Ceb[TBranchMem]   = Teb;
+    Cfb[TBranchMem]   = Tfb;
+    CEb[TBranchMem]   = TEb;
   }
-
+  
   // commit trial state variables
   CStrain    = TStrain;  
   CStress    = TStress;
@@ -304,9 +308,9 @@ int
 ReinforcingSteel::revertToLastCommit(void) {
   for(int i=0; i<=LastRule_RS/2; i++)
     T_ePlastic[i]=C_ePlastic[i];
-
+  
   TFatDamage = CFatDamage;
-
+  
   // Reset trial history variables to last committed state
   TBranchNum    = CBranchNum;
   Teo_p         = Ceo_p;
@@ -320,7 +324,7 @@ ReinforcingSteel::revertToLastCommit(void) {
   updateHardeningLoactionParams();
   
   if(TBranchNum > 2) SetPastCurve(TBranchNum);
-
+  
   // Reset trial state variables to last committed state
   TStress    = CStress;
   TTangent   = CTangent;
@@ -341,16 +345,16 @@ ReinforcingSteel::revertToStart(void)
   for(int i=0; i<=LastRule_RS/2; i++) {
     C_ePlastic[i]  = 0.0;
     T_ePlastic[i]  = 0.0;
-	  CR[i]         = 0.0;
-	  Cfch[i]       = 0.0;
-	  CQ[i]         = 0.0;
-	  CEsec[i]      = 0.0;
-	  Cea[i]        = 0.0;
-	  Cfa[i]        = 0.0;
-	  CEa[i]        = 0.0;
-	  Ceb[i]        = 0.0;
-	  Cfb[i]        = 0.0;
-	  CEb[i]        = 0.0;
+    CR[i]         = 0.0;
+    Cfch[i]       = 0.0;
+    CQ[i]         = 0.0;
+    CEsec[i]      = 0.0;
+    Cea[i]        = 0.0;
+    Cfa[i]        = 0.0;
+    CEa[i]        = 0.0;
+    Ceb[i]        = 0.0;
+    Cfb[i]        = 0.0;
+    CEb[i]        = 0.0;
   }
   TR            = 0.0;
   Tfch          = 0.0;
