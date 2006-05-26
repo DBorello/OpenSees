@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2006-05-26 18:26:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/numberer/RCM.h,v $
                                                                         
                                                                         
@@ -51,7 +51,7 @@
 class RCM: public GraphNumberer
 {
   public:
-    RCM(bool GPS = true); 
+    RCM(bool GPS = false); 
     ~RCM();
 
     const ID &number(Graph &theGraph, int lastVertex = -1);
