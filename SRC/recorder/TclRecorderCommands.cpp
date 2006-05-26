@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.35 $
-// $Date: 2005-05-27 00:12:15 $
+// $Revision: 1.36 $
+// $Date: 2006-05-26 00:18:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -81,6 +81,9 @@ extern TclModelBuilder *theDamageTclModelBuilder;
 #include <AlgorithmIncrements.h>
 #endif
 
+
+#include <SimulationInformation.h>
+extern SimulationInformation simulationInfo;
 
 
 static EquiSolnAlgo *theAlgorithm =0;
@@ -275,6 +278,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 
 	  else if (strcmp(argv[loc],"-file") == 0) {
 	    fileName = argv[loc+1];
+	    simulationInfo.addWriteFile(fileName);
 	    loc += 2;
 	    if (strcmp(argv[loc],"-xml") == 0) {
 	      eMode = XML_FILE;
@@ -300,6 +304,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  else if (strcmp(argv[loc],"-nees") == 0) {
 	    // allow user to specify load pattern other than current
 	    fileName = argv[loc+1];
+	    simulationInfo.addWriteFile(fileName);
 	    eMode = XML_FILE;
 	    loc += 2;
 	  }	    
@@ -529,6 +534,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 
 	else if (strcmp(argv[pos],"-file") == 0) {
 	  fileName = argv[pos+1];
+	  simulationInfo.addWriteFile(fileName);
+
 	  pos += 2;
 	  if (strcmp(argv[pos],"-xml") == 0) {
 	    eMode = XML_FILE;
@@ -553,6 +560,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	else if (strcmp(argv[pos],"-nees") == 0) {
 	  // allow user to specify load pattern other than current
 	  fileName = argv[pos+1];
+	  simulationInfo.addWriteFile(fileName);
 	  eMode = XML_FILE;
 	  pos += 2;
 	}	    
@@ -767,7 +775,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 
 	echoMode eMode = NONE;       // enum found in DataOutputFileHandler.h
 	fileName = argv[2];
-	
+	simulationInfo.addWriteFile(fileName);	
+
 	int flag = 0;
 	if (strcmp(argv[3],"-time") == 0) 
 	  flag = 1;
