@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-04-28 17:54:28 $
+// $Revision: 1.2 $
+// $Date: 2006-05-26 00:12:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/SimulationInformation.cpp,v $
 //
 // Description: This file contains the class definition for SimulationInformation.
@@ -97,11 +97,10 @@ SimulationInformation::end(void)
 
  SimulationInformation::~SimulationInformation()
  { 
-
-     if (filesRead != 0) {
-       for (int i=0; i<numFilesRead; i++) {
-	 delete [] filesRead[i];
-       }
+   if (filesRead != 0) {
+     for (int i=0; i<numFilesRead; i++) {
+       delete [] filesRead[i];
+     }
      delete [] filesRead;
    }
 
@@ -125,9 +124,17 @@ SimulationInformation::end(void)
  int 
  SimulationInformation::addReadFile(const char *fileName)
  {
-   // if valid fileName
+   // check valid fileName
    if (fileName == 0) 
      return -1;
+
+   // don't add string ending "history.tcl"
+   int filenameLength = strlen(fileName+1);
+   int historyLocation = filenameLength-10;
+   if (historyLocation > 0) {
+     if (strcmp("history.tcl",&fileName[historyLocation]) == 0)
+       return 0;
+   }
 
    // create new array to hold pointers and copy pointers there
    char **nextFiles = new char *[numFilesRead+1];
