@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.76 $
-// $Date: 2006-05-26 00:17:12 $
+// $Revision: 1.77 $
+// $Date: 2006-05-26 18:30:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -219,11 +219,6 @@ OPS_Stream *opserrPtr = &sserr;
 #include <PetscSolver.h>
 #include <SparseGenRowLinSOE.h>
 #include <PetscSparseSeqSolver.h>
-#endif
-
-#ifdef _MUMPS
-#include <MumpsSOE.h>
-#include <MumpsSolver.h>
 #endif
 
 #include <SymSparseLinSOE.h>
@@ -1386,7 +1381,7 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	if (theNumberer == 0) {
 	    opserr << "WARNING analysis Static - no Numberer specified, \n";
 	    opserr << " RCM default will be used\n";
-	    RCM *theRCM = new RCM();	
+	    RCM *theRCM = new RCM(false);	
 	    theNumberer = new DOF_Numberer(*theRCM);    	
 	}
 	if (theStaticIntegrator == 0) {
@@ -1442,7 +1437,7 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	if (theNumberer == 0) {
 	    opserr << "WARNING analysis Transient dt tFinal - no Numberer specified, \n";
 	    opserr << " RCM default will be used\n";
-	    RCM *theRCM = new RCM();	
+	    RCM *theRCM = new RCM(false);	
 	    theNumberer = new DOF_Numberer(*theRCM);    	
 	}
 	if (theTransientIntegrator == 0) {
@@ -1502,7 +1497,7 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	if (theNumberer == 0) {
 	    opserr << "WARNING analysis Transient dt tFinal - no Numberer specified, \n";
 	    opserr << " RCM default will be used\n";
-	    RCM *theRCM = new RCM();	
+	    RCM *theRCM = new RCM(false);	
 	    theNumberer = new DOF_Numberer(*theRCM);    	
 	}
 
@@ -1815,14 +1810,6 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       theSOE = new UmfpackGenLinSOE(*theSolver);      
   }	  
 
-#ifdef _MUMPS
-  else if (strcmp(argv[1],"Mumps") == 0) {
-    // now must determine the type of solver to create from rest of args
-      MumpsSolver *theSolver = new MumpsSolver();
-      theSOE = new MumpsSOE(*theSolver);      
-  }	  
-#endif
-
   else if (strcmp(argv[1],"FullGeneral") == 0) {
     // now must determine the type of solver to create from rest of args
     FullGenLinLapackSolver *theSolver = new FullGenLinLapackSolver();
@@ -2020,7 +2007,7 @@ specifyNumberer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **
   if (strcmp(argv[1],"Plain") == 0) {
     theNumberer = new ParallelNumberer();       
   } else if (strcmp(argv[1],"RCM") == 0) {
-    RCM *theRCM = new RCM();	
+    RCM *theRCM = new RCM(false);	
     theNumberer = new ParallelNumberer(*theRCM);    	
   } else {
     opserr << "WARNING No Numberer type exists (Plain, RCM only) \n";
@@ -2033,7 +2020,7 @@ specifyNumberer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **
   if (strcmp(argv[1],"Plain") == 0) {
     theNumberer = new PlainNumberer();       
   } else if (strcmp(argv[1],"RCM") == 0) {
-    RCM *theRCM = new RCM();	
+    RCM *theRCM = new RCM(false);	
     theNumberer = new DOF_Numberer(*theRCM);    	
   } else {
     opserr << "WARNING No Numberer type exists (Plain, RCM only) \n";
@@ -4051,7 +4038,7 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
     }
     // create the rest of components of an eigen analysis
     EigenIntegrator  *theEigenIntegrator = new EigenIntegrator();    
-    RCM *theRCM = new RCM();	
+    RCM *theRCM = new RCM(false);	
     DOF_Numberer *theEigenNumberer = new DOF_Numberer(*theRCM);    	
     ConstraintHandler *theEigenHandler = new TransformationConstraintHandler();
 
