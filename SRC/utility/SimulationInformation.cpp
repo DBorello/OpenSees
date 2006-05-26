@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-05-26 00:12:36 $
+// $Revision: 1.3 $
+// $Date: 2006-05-26 00:24:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/SimulationInformation.cpp,v $
 //
 // Description: This file contains the class definition for SimulationInformation.
@@ -80,7 +80,12 @@ SimulationInformation::start(void)
   
   time_t timeT;
   if (time(&timeT) != 0) {
-    ctime_r(&timeT, &startTime[0]);
+#ifdef _WIN32
+    char *sTime = &startTime[0];
+    sTime = ctime(&timeT);
+#else
+	ctime_r(&timeT, &startTime[0]);
+#endif
   }
   return 0;
 }
@@ -89,8 +94,13 @@ int
 SimulationInformation::end(void)
 {
   time_t timeT;
-  if (time(&timeT) != 0) {
-    ctime_r(&timeT, &endTime[0]);
+ if (time(&timeT) != 0) {
+#ifdef _WIN32
+    char *eTime = &endTime[0];
+    eTime = ctime(&timeT);
+#else
+	ctime_r(&timeT, &endTime[0]);
+#endif
   }
   return 0;
 }
