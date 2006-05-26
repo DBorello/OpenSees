@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-04-04 22:59:50 $
+// $Revision: 1.4 $
+// $Date: 2006-05-26 18:31:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsSOE.cpp,v $
                                                                         
                                                                         
@@ -105,10 +105,8 @@ MumpsSOE::setSize(Graph &theGraph)
   nnz = newNNZ;
   
   if (newNNZ > Asize) { // we have to get more space for A and rowA
-    if (A != 0) 
-      delete [] A;
-    if (rowA != 0)
-      delete [] rowA;
+    if (A != 0) delete [] A;
+    if (rowA != 0) delete [] rowA;
     
     A = new double[newNNZ];
     rowA = new int[newNNZ];
@@ -288,6 +286,7 @@ MumpsSOE::addA(const Matrix &m, const ID &id, double fact)
 	  if (col < size && col >= 0) {
 	    int startColLoc = colStartA[col];
 	    int endColLoc = colStartA[col+1];
+	    
 	    for (int j=0; j<idSize; j++) {
 	      int row = id(j);
 	      if (row >= col && row < size && row >= 0) {
@@ -307,6 +306,7 @@ MumpsSOE::addA(const Matrix &m, const ID &id, double fact)
 	  if (col < size && col >= 0) {
 	    int startColLoc = colStartA[col];
 	    int endColLoc = colStartA[col+1];
+
 	    for (int j=0; j<idSize; j++) {
 	      int row = id(j);
 	      if (row >= col && row <size && row >= 0) {
@@ -331,6 +331,7 @@ MumpsSOE::addA(const Matrix &m, const ID &id, double fact)
 	  if (col < size && col >= 0) {
 	    int startColLoc = colStartA[col];
 	    int endColLoc = colStartA[col+1];
+
 	    for (int j=0; j<idSize; j++) {
 	      int row = id(j);
 	      if (row <size && row >= 0) {
@@ -440,7 +441,7 @@ void
 MumpsSOE::zeroA(void)
 {
     double *Aptr = A;
-    for (int i=0; i<Asize; i++)
+    for (int i=0; i<nnz; i++)
 	*Aptr++ = 0;
 
     factored = false;
