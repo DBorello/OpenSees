@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2005-11-23 22:37:43 $
+// $Revision: 1.11 $
+// $Date: 2006-05-26 18:19:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.cpp,v $
                                                                         
                                                                         
@@ -471,12 +471,13 @@ ID::insert(int x)
   // without having to go get more space
 
   middle = left;
+
   /*
   for (int i=middle; i<sz; i++)
-		(*this)[i+1] = (*this)[i];
+  (*this)[i+1] = (*this)[i];
   (*this)[i]=middle;
   return middle;
-*/
+  */
   
   if (sz < arraySize) {
 
@@ -485,35 +486,34 @@ ID::insert(int x)
       data[i] = data[i-1];
       i--;
     }
-	sz++;
+    sz++;
     data[i] = x;
     return 0;
   } else {
-	int newArraySize = (sz+1) * 2;
-	int *newData = new int[newArraySize];
-	if (newData != 0) {
-
+    int newArraySize = (sz+1) * 2;
+    int *newData = new int[newArraySize];
+    if (newData != 0) {
+      
       // copy the old
       for (int ii=0; ii<middle; ii++)
-		newData[ii] = data[ii];
-	  newData[middle] = x;
-
-	  for (int jj=middle; jj<sz; jj++)
-		newData[jj+1] = data[jj];
-
+	newData[ii] = data[ii];
+      newData[middle] = x;
+      
+      for (int jj=middle; jj<sz; jj++)
+	newData[jj+1] = data[jj];
+      
       sz++;
-
-     if (data != 0 && fromFree == 0)
-	   
-		delete [] data;
+      
+      if (data != 0 && fromFree == 0)
+	delete [] data;
       data = newData;
       arraySize = newArraySize;
       
       return 0;
-	  
-	} else
-		return -1;
+      
+    } else
+      return -1;
   }
- return -1; // should never get here
+  return -1; // should never get here
 }
 
