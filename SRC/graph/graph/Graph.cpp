@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2005-11-17 23:21:40 $
+// $Revision: 1.7 $
+// $Date: 2006-05-26 18:23:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/Graph.cpp,v $
                                                                         
                                                                         
@@ -34,16 +34,15 @@
 #include <Graph.h>
 #include <Vertex.h>
 #include <VertexIter.h>
-#include <ArrayOfTaggedObjects.h>
+#include <MapOfTaggedObjects.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <Vector.h>
 
-
 Graph::Graph()
   :myVertices(0), theVertexIter(0), numEdge(0), nextFreeTag(START_VERTEX_NUM)
 {
-    myVertices = new ArrayOfTaggedObjects(32);
+    myVertices = new MapOfTaggedObjects();
     theVertexIter = new VertexIter(myVertices);
 }
 
@@ -51,7 +50,7 @@ Graph::Graph()
 Graph::Graph(int numVertices)
   :myVertices(0), theVertexIter(0), numEdge(0), nextFreeTag(START_VERTEX_NUM)
 {
-    myVertices = new ArrayOfTaggedObjects(numVertices);
+    myVertices = new MapOfTaggedObjects();
     theVertexIter = new VertexIter(myVertices);
 }
 
@@ -73,7 +72,7 @@ Graph::Graph(TaggedObjectStorage &theVerticesStorage)
 Graph::Graph(Graph &other) 
   :myVertices(0), theVertexIter(0), numEdge(0), nextFreeTag(START_VERTEX_NUM)
 {
-  myVertices = new ArrayOfTaggedObjects(other.getNumVertex());
+  myVertices = new MapOfTaggedObjects();
   theVertexIter = new VertexIter(myVertices);
 
   VertexIter &otherVertices = other.getVertices();
