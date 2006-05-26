@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.75 $
-// $Date: 2006-03-24 20:11:59 $
+// $Revision: 1.76 $
+// $Date: 2006-05-26 00:17:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -39,9 +39,9 @@ EXTERN int      Tcl_SetObjCmd _ANSI_ARGS_((ClientData clientData,
 
 }
 
-
-
 #include <OPS_Globals.h>
+#include <SimulationInformation.h>
+extern SimulationInformation simulationInfo;
 
 // the following is a little kludgy but it works!
 #ifdef _USING_STL_STREAMS
@@ -382,8 +382,10 @@ int g3AppInit(Tcl_Interp *interp) {
     opserr.setFloatField(SCIENTIFIC);
     opserr.setFloatField(FIXEDD);
 #endif
-    Tcl_CreateObjCommand(interp, "pset", Tcl_SetObjCmd,
+    Tcl_CreateObjCommand(interp, "pset", &OPS_SetObjCmd,
 			 (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
+    Tcl_CreateCommand(interp, "source", &OPS_SourceCmd,
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
     Tcl_CreateCommand(interp, "wipe", &wipeModel,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);    
     Tcl_CreateCommand(interp, "wipeAnalysis", &wipeAnalysis,
@@ -501,6 +503,31 @@ int g3AppInit(Tcl_Interp *interp) {
 
     return myCommands(interp);
 }
+
+int 
+OPS_SetObjCmd(ClientData clientData, Tcl_Interp *interp, int argc, Tcl_Obj * const *argv)
+{
+  
+  if (argc > 2)
+    simulationInfo.addParameter(Tcl_GetString(argv[1]), Tcl_GetString(argv[2]));
+
+
+  Tcl_SetObjCmd(clientData, interp, argc, argv);
+  return 0;
+}
+
+int 
+OPS_SourceCmd(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  int ok = TCL_OK;
+  if (argc > 1) {
+    simulationInfo.addReadFile(argv[1]);
+
+    ok = Tcl_EvalFile(interp, argv[1]);
+  }
+  return ok;
+}
+
 
 
 #ifdef _RELIABILITY
@@ -636,6 +663,10 @@ sensitivityIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, TCL_C
 // AddingSensitivity:END /////////////////////////////////////////////////
 
 #endif
+
+
+
+
 
 int 
 wipeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
@@ -4631,6 +4662,9 @@ logFile(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 
   if (opserr.setFile(argv[1], mode) < 0) 
     opserr << "WARNING logFile " << argv[1] << " failed to set the file\n";
+
+  
+  simulationInfo.addWriteFile(argv[1]);
 
   return TCL_OK;
 }

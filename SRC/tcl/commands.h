@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2006-03-24 20:11:59 $
+// $Revision: 1.14 $
+// $Date: 2006-05-26 00:17:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
                                                                         
@@ -37,6 +37,12 @@
 
 int
 g3AppInit(Tcl_Interp *interp);
+
+int 
+OPS_SetObjCmd(ClientData clientData, Tcl_Interp *interp, int argc, Tcl_Obj * const *argv);
+
+int 
+OPS_SourceCmd(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
 wipeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);

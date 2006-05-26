@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.32 2006-05-24 21:17:10 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.33 2006-05-26 00:17:36 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -150,7 +150,16 @@ EvalFileWithParameters(Tcl_Interp *interp,
     while (theValue != 0) {
       char *paramValue = theValue->value;
       paramValues[currentParam] = paramValue;
-      EvalFileWithParameters(interp, tclStartupFileScript, theNextParam, paramNames, paramValues, numParam, nextParam, rank, np);
+      EvalFileWithParameters(interp, 
+			     tclStartupFileScript, 
+			     theNextParam, 
+			     paramNames, 
+			     paramValues, 
+			     numParam, 
+			     nextParam, 
+			     rank, 
+			     np);
+
       theValue=theValue->next;
     } 
   } else {
@@ -163,8 +172,8 @@ EvalFileWithParameters(Tcl_Interp *interp,
      
       for (int i=0; i<numParam; i++) {
 	Tcl_SetVar(interp, paramNames[i], paramValues[i], TCL_GLOBAL_ONLY);	    
-	simulationInfo.addParameter(paramNames[i], paramValues[i]);
-      }
+	simulationInfo.addParameter(paramNames[i], paramValues[i]); 
+     }
 
       count++;
       
@@ -173,7 +182,6 @@ EvalFileWithParameters(Tcl_Interp *interp,
       int ok = Tcl_EvalFile(interp, tclStartupScriptFileName);
 
       simulationInfo.end();
-      opserr << simulationInfo;
       
       return ok;
     }
@@ -212,7 +220,7 @@ EvalFileWithParameters(Tcl_Interp *interp,
 
 void
 g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np)
-{
+{ 
     Tcl_Obj *resultPtr;
     Tcl_Obj *commandPtr = NULL;
     char buffer[1000], *args;
@@ -229,10 +237,10 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
     
     fprintf(stderr,"\t    (c) Copyright 1999,2000 The Regents of the University of California");
     fprintf(stderr,"\n\t\t\t\t All Rights Reserved\n");    
-    fprintf(stderr,"\t(Copyright and Disclaimer  @ http://www.berkeley.edu/OpenSees/copyright.html)\n\n\n");
+    fprintf(stderr,"    (Copyright and Disclaimer @ http://www.berkeley.edu/OpenSees/copyright.html)\n\n\n");
 
     /* fmk - end of modifications for OpenSees */
-// Boris Jeremic additions
+    // Boris Jeremic additions
 # ifdef _UNIX
     //   #include "version.txt"
     //   fprintf(stderr,"\n %s \n\n\n", version);    
@@ -317,7 +325,6 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
       if (argc > 1) {
 	int currentArg = 1;
 	while (currentArg < argc && argv[currentArg] != NULL) {
-	  opserr << argv[currentArg] << endln;
 
 	  if ((strcmp(argv[currentArg], "-par") == 0) || (strcmp(argv[currentArg], "-Par") == 0)) {
 	    
@@ -410,20 +417,12 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	}
       }
 
-      simulationInfo.start();
-      simulationInfo.addReadFile(tclStartupScriptFileName);
+      if (simulationInfoOutputFilename != 0) {
+	simulationInfo.start();
+	simulationInfo.addReadFile(tclStartupScriptFileName);
+      }
 
       code = Tcl_EvalFile(interp, tclStartupScriptFileName);
-
-      simulationInfo.end();
-      if (simulationInfoOutputFilename != 0) {
-	FileStream simulationInfoOutputFile;
-	simulationInfoOutputFile.setFile(simulationInfoOutputFilename);
-	simulationInfoOutputFile.open();
-	simulationInfoOutputFile << simulationInfo;
-	simulationInfoOutputFile.close();
-      }
-      
 
       if (code != TCL_OK) {
 	errChannel = Tcl_GetStdChannel(TCL_STDERR);
@@ -441,79 +440,97 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	exitCode = 1;
       }
       goto done;
-    }
-    Tcl_DStringFree(&argString);
+
+    } else {
 
     /*
      * We're running interactively.  Source a user-specific startup
      * file if the application specified one and if the file exists.
      */
 
-    Tcl_SourceRCFile(interp);
+      Tcl_DStringFree(&argString);
+      
+      int currentArg = 1;
+      while (currentArg < argc && argv[currentArg] != NULL) {
+	if ((strcmp(argv[currentArg], "-info") == 0) || (strcmp(argv[currentArg], "-INFO") == 0)) {
+	  if (argc > (currentArg+1)) {
+	    
+	    simulationInfoOutputFilename = argv[currentArg+1];	    
+	  }			   
+	  currentArg+=2;
+	} else 	
+	  currentArg++;
+      }
 
-    /*
-     * Process commands from stdin until there's an end-of-file.  Note
-     * that we need to fetch the standard channels again after every
-     * eval, since they may have been changed.
-     */
-
-    commandPtr = Tcl_NewObj();
-    Tcl_IncrRefCount(commandPtr);
-
-    inChannel = Tcl_GetStdChannel(TCL_STDIN);
-    outChannel = Tcl_GetStdChannel(TCL_STDOUT);
-    gotPartial = 0;
-    while (1) {
-      if (tty) {
-	Tcl_Obj *promptCmdPtr;
-	
-	char one[12] = "tcl_prompt1";
-	char two[12] = "tcl_prompt2";
-	promptCmdPtr = Tcl_GetVar2Ex(interp,
-				     (gotPartial ? one : two),
-				     NULL, TCL_GLOBAL_ONLY);
-	if (promptCmdPtr == NULL) {
-	defaultPrompt:
-	  if (!gotPartial && outChannel) {
-		    Tcl_WriteChars(outChannel, "OpenSees > ", 11);
-	  }
-	} else {
-	  
-	  code = Tcl_EvalObjEx(interp, promptCmdPtr, 0);
-	  
-	  inChannel = Tcl_GetStdChannel(TCL_STDIN);
-	  outChannel = Tcl_GetStdChannel(TCL_STDOUT);
-	  errChannel = Tcl_GetStdChannel(TCL_STDERR);
-	  if (code != TCL_OK) {
-	    if (errChannel) {
-	      Tcl_WriteObj(errChannel, Tcl_GetObjResult(interp));
-	      Tcl_WriteChars(errChannel, "\n", 1);
-	    }
-	    Tcl_AddErrorInfo(interp,
-			     "\n    (script that generates prompt)");
-	    goto defaultPrompt;
-	  }
-	}
-	if (outChannel) {
-	  Tcl_Flush(outChannel);
-	}
-      }
-      if (!inChannel) {
-	goto done;
-      }
-      length = Tcl_GetsObj(inChannel, commandPtr);
-      if (length < 0) {
-	goto done;
-      }
-      if ((length == 0) && Tcl_Eof(inChannel) && (!gotPartial)) {
-	goto done;
-      }
+      Tcl_SourceRCFile(interp);
       
       /*
-       * Add the newline removed by Tcl_GetsObj back to the string.
+       * Process commands from stdin until there's an end-of-file.  Note
+       * that we need to fetch the standard channels again after every
+       * eval, since they may have been changed.
        */
       
-      Tcl_AppendToObj(commandPtr, "\n", 1);
+      if (simulationInfoOutputFilename != 0) {
+	simulationInfo.start();
+      }
+      
+      commandPtr = Tcl_NewObj();
+      Tcl_IncrRefCount(commandPtr);
+      
+      inChannel = Tcl_GetStdChannel(TCL_STDIN);
+      outChannel = Tcl_GetStdChannel(TCL_STDOUT);
+      gotPartial = 0;
+      while (1) {
+	if (tty) {
+	  Tcl_Obj *promptCmdPtr;
+	  
+	  char one[12] = "tcl_prompt1";
+	  char two[12] = "tcl_prompt2";
+	  promptCmdPtr = Tcl_GetVar2Ex(interp,
+				       (gotPartial ? one : two),
+				       NULL, TCL_GLOBAL_ONLY);
+	  if (promptCmdPtr == NULL) {
+	  defaultPrompt:
+	    if (!gotPartial && outChannel) {
+	      Tcl_WriteChars(outChannel, "OpenSees > ", 11);
+	    }
+	  } else {
+	    
+	    code = Tcl_EvalObjEx(interp, promptCmdPtr, 0);
+	    
+	    inChannel = Tcl_GetStdChannel(TCL_STDIN);
+	    outChannel = Tcl_GetStdChannel(TCL_STDOUT);
+	    errChannel = Tcl_GetStdChannel(TCL_STDERR);
+	    if (code != TCL_OK) {
+	      if (errChannel) {
+		Tcl_WriteObj(errChannel, Tcl_GetObjResult(interp));
+		Tcl_WriteChars(errChannel, "\n", 1);
+	      }
+	      Tcl_AddErrorInfo(interp,
+			       "\n    (script that generates prompt)");
+	      goto defaultPrompt;
+	    }
+	  }
+	  if (outChannel) {
+	    Tcl_Flush(outChannel);
+	    }
+	}
+	if (!inChannel) {
+	  goto done;
+	}
+	length = Tcl_GetsObj(inChannel, commandPtr);
+	if (length < 0) {
+	  goto done;
+	}
+	if ((length == 0) && Tcl_Eof(inChannel) && (!gotPartial)) {
+	  goto done;
+	}
+	
+	/*
+	 * Add the newline removed by Tcl_GetsObj back to the string.
+	 */
+	
+	Tcl_AppendToObj(commandPtr, "\n", 1);
 	if (!TclObjCommandComplete(commandPtr)) {
 	  gotPartial = 1;
 	  continue;
@@ -528,52 +545,70 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	commandPtr = Tcl_NewObj();
 	Tcl_IncrRefCount(commandPtr);
 	if (code != TCL_OK) {
-	    if (errChannel) {
-		Tcl_WriteObj(errChannel, Tcl_GetObjResult(interp));
-		Tcl_WriteChars(errChannel, "\n", 1);
-	    }
+	  if (errChannel) {
+	    Tcl_WriteObj(errChannel, Tcl_GetObjResult(interp));
+	    Tcl_WriteChars(errChannel, "\n", 1);
+	  }
 	} else if (tty) {
-	    resultPtr = Tcl_GetObjResult(interp);
-	    Tcl_GetStringFromObj(resultPtr, &length);
-	    if ((length > 0) && outChannel) {
-		Tcl_WriteObj(outChannel, resultPtr);
-		Tcl_WriteChars(outChannel, "\n", 1);
-	    }
+	  resultPtr = Tcl_GetObjResult(interp);
+	  Tcl_GetStringFromObj(resultPtr, &length);
+	  if ((length > 0) && outChannel) {
+	    Tcl_WriteObj(outChannel, resultPtr);
+	    Tcl_WriteChars(outChannel, "\n", 1);
+	  }
 	}
 #ifdef TCL_MEM_DEBUG
 	if (tclMemDumpFileName != NULL) {
-	    Tcl_DecrRefCount(commandPtr);
-	    Tcl_DeleteInterp(interp);
-	    Tcl_Exit(0);
+	  Tcl_DecrRefCount(commandPtr);
+	  Tcl_DeleteInterp(interp);
+	  Tcl_Exit(0);
 	}
 #endif
+      }
     }
+      
 
+ done:
+    
+    if (commandPtr != NULL) {
+      Tcl_DecrRefCount(commandPtr);
+    }
+    
+    
+#ifdef _PARALLEL_PROCESSING
+    return;
+#endif
+    
+#ifdef _PARALLEL_INTERPRETERS
+    return;
+#endif
+    
     /*
      * Rather than calling exit, invoke the "exit" command so that
      * users can replace "exit" with some other command to do additional
      * cleanup on exit.  The Tcl_Eval call should never return.
      */
-
-    done:
-    if (commandPtr != NULL) {
-	Tcl_DecrRefCount(commandPtr);
-    }
-
-
-#ifdef _PARALLEL_PROCESSING
-  return;
-#endif
-
-#ifdef _PARALLEL_INTERPRETERS
-  return;
-#endif
-
-  sprintf(buffer, "exit %d", exitCode);
-  Tcl_Eval(interp, buffer);
-
-  return;
+    
+    sprintf(buffer, "exit %d", exitCode);
+    Tcl_Eval(interp, buffer);
+    
+    return;
 }
 
 
+int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, const char **argv)
+{
+  if (simulationInfoOutputFilename != 0) {
+    simulationInfo.end();
+    FileStream simulationInfoOutputFile;
+    simulationInfoOutputFile.setFile(simulationInfoOutputFilename);
+    simulationInfoOutputFile.open();
+    simulationInfoOutputFile << simulationInfo;
+    simulationInfoOutputFile.close();
+  }
 
+  Tcl_Exit(0);
+  return 0;
+}
+
+    
