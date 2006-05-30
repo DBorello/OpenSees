@@ -111,6 +111,12 @@
 				RelativePath="..\..\..\SRC\material\uniaxial\BarSlipMaterial.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\Bond_SP01.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\Bond_SP01.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\BoucWenMaterial.cpp">
 			</File>
 			<File

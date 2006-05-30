@@ -102,6 +102,12 @@
 	</Configurations>
 	<Files>
 		<File
+			RelativePath="..\..\..\SRC\utility\SimulationInformation.cpp">
+		</File>
+		<File
+			RelativePath="..\..\..\SRC\utility\SimulationInformation.h">
+		</File>
+		<File
 			RelativePath="..\..\..\SRC\utility\Timer.cpp">
 		</File>
 		<File
