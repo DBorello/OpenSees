@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.33 2006-05-26 00:17:36 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.34 2006-05-30 22:16:25 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -170,18 +170,20 @@ EvalFileWithParameters(Tcl_Interp *interp,
     if ((count % np) == rank) {
       Tcl_Eval(interp, "wipe");
      
+	  
       for (int i=0; i<numParam; i++) {
+		  
 	Tcl_SetVar(interp, paramNames[i], paramValues[i], TCL_GLOBAL_ONLY);	    
 	simulationInfo.addParameter(paramNames[i], paramValues[i]); 
      }
 
       count++;
       
-      simulationInfo.addReadFile(tclStartupScriptFileName);
+   simulationInfo.addReadFile(tclStartupScriptFileName);
 
       int ok = Tcl_EvalFile(interp, tclStartupScriptFileName);
 
-      simulationInfo.end();
+     simulationInfo.end();
       
       return ok;
     }
@@ -382,11 +384,9 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	    }
 	    currentArg += 3;
 	  } else if ((strcmp(argv[currentArg], "-info") == 0) || (strcmp(argv[currentArg], "-INFO") == 0)) {
-	    opserr << "OUTPUT: " << argc << " " << currentArg << endln;
 	    if (argc > (currentArg+1)) {
 	      
 	      simulationInfoOutputFilename = argv[currentArg+1];	    
-	      opserr << "OUTPUT" << simulationInfoOutputFilename << endln;
 	    }			   
 	    currentArg+=2;
 	  } else 
@@ -455,7 +455,7 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	if ((strcmp(argv[currentArg], "-info") == 0) || (strcmp(argv[currentArg], "-INFO") == 0)) {
 	  if (argc > (currentArg+1)) {
 	    
-	    simulationInfoOutputFilename = argv[currentArg+1];	    
+		simulationInfoOutputFilename = argv[currentArg+1];	    
 	  }			   
 	  currentArg+=2;
 	} else 	
@@ -469,11 +469,11 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
        * that we need to fetch the standard channels again after every
        * eval, since they may have been changed.
        */
-      
+     
       if (simulationInfoOutputFilename != 0) {
 	simulationInfo.start();
       }
-      
+     
       commandPtr = Tcl_NewObj();
       Tcl_IncrRefCount(commandPtr);
       
@@ -598,6 +598,7 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 
 int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, const char **argv)
 {
+	
   if (simulationInfoOutputFilename != 0) {
     simulationInfo.end();
     FileStream simulationInfoOutputFile;
