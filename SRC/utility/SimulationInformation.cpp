@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-05-26 00:24:34 $
+// $Revision: 1.4 $
+// $Date: 2006-05-30 22:17:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/SimulationInformation.cpp,v $
 //
 // Description: This file contains the class definition for SimulationInformation.
@@ -36,8 +36,10 @@ SimulationInformation::SimulationInformation()
   :filesRead(0), filesWritten(0), paramNames(0), paramValues(0),
    numFilesWritten(0), numFilesRead(0), numParameters(0)
 {
+
   strcpy(startTime," ");
   strcpy(endTime," ");
+  
 }
 
 
@@ -81,12 +83,14 @@ SimulationInformation::start(void)
   time_t timeT;
   if (time(&timeT) != 0) {
 #ifdef _WIN32
-    char *sTime = &startTime[0];
-    sTime = ctime(&timeT);
+    const char *sTime = ctime(&timeT);
+	strcpy(startTime, sTime);
 #else
 	ctime_r(&timeT, &startTime[0]);
 #endif
+	
   }
+  
   return 0;
 }
 
@@ -96,17 +100,19 @@ SimulationInformation::end(void)
   time_t timeT;
  if (time(&timeT) != 0) {
 #ifdef _WIN32
-    char *eTime = &endTime[0];
-    eTime = ctime(&timeT);
+	const char *eTime = ctime(&timeT);
+	strcpy(endTime, eTime);
 #else
 	ctime_r(&timeT, &endTime[0]);
 #endif
   }
+  
   return 0;
 }
 
  SimulationInformation::~SimulationInformation()
  { 
+	 
    if (filesRead != 0) {
      for (int i=0; i<numFilesRead; i++) {
        delete [] filesRead[i];
@@ -128,6 +134,7 @@ SimulationInformation::end(void)
      delete [] paramNames;
      delete [] paramValues;
    }
+   
  }
 
 
@@ -155,7 +162,7 @@ SimulationInformation::end(void)
      nextFiles[i] = filesRead[i];
 
    // create new pointer for new file name and add to end of array
-   char *copyFileName = new char[strlen(fileName+1)];
+   char *copyFileName = new char[strlen(fileName)+1];
    if (copyFileName == 0)
      return -3;
 
@@ -176,6 +183,7 @@ SimulationInformation::end(void)
 int 
 SimulationInformation::addWriteFile(const char *fileName)
 {
+	
   // if valid fileName
   if (fileName == 0) 
     return -1;
@@ -189,13 +197,15 @@ SimulationInformation::addWriteFile(const char *fileName)
     nextFiles[i] = filesWritten[i];
   
   // create new pointer for new file name and add to end of array
-  char *copyFileName = new char[strlen(fileName+1)];
+  char *copyFileName = new char[strlen(fileName)+1];
   if (copyFileName == 0)
     return -3;
 
   strcpy(copyFileName, fileName);
+
   nextFiles[numFilesWritten] = copyFileName;
-  
+
+
   // delete old array and reset the array pointer
   if (filesWritten != 0)
     delete [] filesWritten;
@@ -205,6 +215,7 @@ SimulationInformation::addWriteFile(const char *fileName)
   numFilesWritten++;
 
   // return ok
+  
   return 0;
 }
 
@@ -227,8 +238,8 @@ SimulationInformation::addParameter(const char *name, const char *value)
   }  
 
   // create new pointer for new file name and add to end of array
-  char *copyParamName = new char[strlen(name+1)];
-  char *copyParamValue = new char[strlen(value+1)];
+  char *copyParamName = new char[strlen(name)+1];
+  char *copyParamValue = new char[strlen(value)+1];
   if (copyParamName == 0 || copyParamValue == 0) {
     delete [] nextNames;
     delete [] nextValues;
