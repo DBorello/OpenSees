@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.77 $
-// $Date: 2006-05-26 18:30:05 $
+// $Revision: 1.78 $
+// $Date: 2006-06-14 22:22:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -4430,8 +4430,8 @@ nodeBounds(ClientData clientData, Tcl_Interp *interp, int argc,
   const Vector &bounds = theDomain.getPhysicalBounds();
   
   int cnt = 0;
-  for (int i=0; i<6; i++) {
-    cnt += sprintf(&resDataPtr[cnt], "%.6e  ", bounds(i));
+  for (int j=0; j<6; j++) {
+    cnt += sprintf(&resDataPtr[cnt], "%.6e  ", bounds(j));
   }
   
   Tcl_SetResult(interp, resDataPtr, TCL_STATIC);
