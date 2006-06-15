@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-01-13 00:00:14 $
+// $Revision: 1.6 $
+// $Date: 2006-06-15 00:20:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/PetscSOE.cpp,v $
                                                                         
 // Written: fmk & om
@@ -70,6 +70,7 @@ PetscSOE::~PetscSOE()
   
   if (vectX != 0) delete vectX;  
   if (vectB != 0) delete vectB;  
+
   if (B != 0) delete [] B;
   if (X != 0) delete [] X;
   
@@ -404,11 +405,42 @@ PetscSOE::getX(void)
 const Vector &
 PetscSOE::getB(void)
 {
+  static Vector recvVector(1);
+  static Vector myVectorB(1);
+
   if (vectB == 0) {
     opserr << "FATAL PetscSOE::getB - vectB == 0!";
     exit(-1);
   }    
-  return *vectB;
+
+  if (numProcesses > 1) {
+      if (myVectorB.Size() != size) 
+	myVectorB.resize(size);
+
+    if (processID != 0) {
+      Channel *theChannel = theChannels[0];
+      
+      theChannel->sendVector(0, 0, *vectB);
+      theChannel->recvVector(0, 0, myVectorB);
+    } else {
+      if (recvVector.Size() != size) 
+	recvVector.resize(size);
+
+      myVectorB = *vectB;
+      for (int j=0; j<numChannels; j++) {
+	Channel *theChannel = theChannels[j];
+	theChannel->recvVector(0, 0, recvVector);
+	myVectorB += recvVector;
+      }
+      for (int j=0; j<numChannels; j++) {
+	Channel *theChannel = theChannels[j];
+	theChannel->sendVector(0, 0, myVectorB);
+      }
+    }
+    return myVectorB;
+
+  } else
+    return *vectB;
 }
 
 
