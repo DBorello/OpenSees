@@ -24,7 +24,7 @@
 				AdditionalIncludeDirectories="..\..\..\src\matrix,..\..\..\src\handler,..\..\..\src,..\..\..\src\nDarray,c:\Program Files\tcl"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,_TCL84"
 				StringPooling="TRUE"
-				RuntimeLibrary="5"
+				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				PrecompiledHeaderFile=".\..\..\obj\matrix\release/matrix.pch"
 				AssemblerListingLocation=".\..\..\obj\matrix\release/"

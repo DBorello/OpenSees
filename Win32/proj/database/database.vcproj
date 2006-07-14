@@ -24,7 +24,7 @@
 				AdditionalIncludeDirectories="..\..\..\src\package;..\..\..\src\analysis\integrator;..\..\..\src\analysis\algorithm;..\..\..\src\analysis\algorithm\equiSolnAlgo;..\..\..\src\actor\actor;..\..\..\src\ndarray;..\..\..\src\handler;..\..\..\src\domain\domain;..\..\..\src\actor\objectbroker;..\..\..\src\matrix;..\..\..\src\actor\channel;..\..\..\src\database;..\..\..\src;&quot;c:\Program Files\tcl\include&quot;;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,_TCL84"
 				StringPooling="TRUE"
-				RuntimeLibrary="5"
+				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				PrecompiledHeaderFile=".\..\..\obj\database\release/database.pch"
 				AssemblerListingLocation=".\..\..\obj\database\release/"

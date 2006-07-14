@@ -69,7 +69,7 @@
 				AdditionalIncludeDirectories="..\..\..\src\utility,..\..\..\src\matrix,..\..\..\src\domain\domain,..\..\..\src\tagged\storage,..\..\..\src,..\..\..\src\tagged,..\..\..\src\handler,c:\Program Files\tcl"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,_TCL84"
 				StringPooling="TRUE"
-				RuntimeLibrary="5"
+				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				PrecompiledHeaderFile=".\..\..\obj\utility\release/utility.pch"
 				AssemblerListingLocation=".\..\..\obj\utility\release/"

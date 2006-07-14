@@ -69,7 +69,7 @@
 				AdditionalIncludeDirectories="&quot;c:\Program Files\tcl\include&quot;;..\..\..\src\element\elasticBeamColumn;..\..\..\src\modelbuilder\tcl;..\..\..\src\coordTransformation;..\..\..\src\handler;..\..\..\src\domain\pattern;..\..\..\src\domain\load;..\..\..\src\actor\channel;..\..\..\src\domain\node;..\..\..\src\domain\constraints;..\..\..\src\tagged;..\..\..\src\actor\actor;..\..\..\src\domain\component;..\..\..\src\element;..\..\..\src\element\beam3d;..\..\..\src;..\..\..\src\matrix;..\..\..\src\domain\domain;..\..\..\src\modelbuilder;..\..\..\src\element\beam2d;..\..\..\src\nDarray;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="c:\Program Files\tcl\include"
 				StringPooling="TRUE"
-				RuntimeLibrary="5"
+				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				PrecompiledHeaderFile=".\..\..\obj\modelbuilder\release/modelbuilder.pch"
 				AssemblerListingLocation=".\..\..\obj\modelbuilder\release/"

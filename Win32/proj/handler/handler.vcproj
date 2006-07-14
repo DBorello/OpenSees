@@ -24,7 +24,7 @@
 				AdditionalIncludeDirectories="&quot;c:\Program Files\tcl\include&quot;;..\..\..\SRC\actor\message;..\..\..\SRC\actor\channel;..\..\..\SRC\database;..\..\..\SRC\nDarray;..\..\..\arc\objectbroker;..\..\..\src\matrix;..\..\..\src;..\..\..\src\actor\actor;..\..\..\src\handler;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,_TCL84"
 				StringPooling="TRUE"
-				RuntimeLibrary="5"
+				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				PrecompiledHeaderFile=".\..\..\obj\handler\release/handler.pch"
 				AssemblerListingLocation=".\..\..\obj\handler\release/"
