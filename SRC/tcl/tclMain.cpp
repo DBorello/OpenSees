@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.35 2006-07-05 22:23:09 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.36 2006-07-27 00:29:41 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -20,6 +20,7 @@
 ** ****************************************************************** */
 
 #include <string.h>
+#include <unistd.h>
 
 extern "C" {
 #include <tcl.h>
@@ -28,8 +29,10 @@ EXTERN int		TclFormatInt _ANSI_ARGS_((char *buffer, long n));
 EXTERN int		TclObjCommandComplete _ANSI_ARGS_((Tcl_Obj *cmdPtr));
 }
 
-int		Tcl_AppInit _ANSI_ARGS_((Tcl_Interp *interp));
 #include <OPS_Globals.h>
+
+int		Tcl_AppInit _ANSI_ARGS_((Tcl_Interp *interp));
+
 
 # undef TCL_STORAGE_CLASS
 # define TCL_STORAGE_CLASS DLLEXPORT
