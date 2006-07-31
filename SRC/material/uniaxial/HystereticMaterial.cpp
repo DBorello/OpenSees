@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2004-10-20 20:04:43 $
+// $Revision: 1.13 $
+// $Date: 2006-07-31 21:55:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HystereticMaterial.cpp,v $
 
 // Written: MHS
@@ -48,7 +48,6 @@ mom1p(m1p), rot1p(r1p), mom2p(m2p), rot2p(r2p), mom3p(m3p), rot3p(r3p),
 mom1n(m1n), rot1n(r1n), mom2n(m2n), rot2n(r2n), mom3n(m3n), rot3n(r3n)
 {
 	bool error = false;
-	
 	// Positive backbone parameters
 	if (rot1p <= 0.0)
 		error = true;
@@ -151,6 +150,9 @@ HystereticMaterial::~HystereticMaterial()
 int
 HystereticMaterial::setTrialStrain(double strain, double strainRate)
 {
+  if (TloadIndicator == 0 && strain == 0.0)
+    return 0;
+
 	TrotMax = CrotMax;
 	TrotMin = CrotMin;
 	TenergyD = CenergyD;
@@ -163,7 +165,7 @@ HystereticMaterial::setTrialStrain(double strain, double strainRate)
 	TloadIndicator = CloadIndicator;
 	
 	if (TloadIndicator == 0)
-		TloadIndicator = (dStrain < 0.0) ? 2 : 1;
+	  TloadIndicator = (dStrain < 0.0) ? 2 : 1;
 
 	if (Tstrain >= CrotMax) {
 		TrotMax = Tstrain;
