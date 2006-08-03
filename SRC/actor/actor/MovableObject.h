@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:15 $
+// $Revision: 1.2 $
+// $Date: 2006-08-03 23:12:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/actor/MovableObject.h,v $
                                                                         
                                                                         
 #ifndef MovableObject_h
 #define MovableObject_h
 
-// File: ~/actor/MovableObject.h
-//
 // Written: fmk
 // Created: 11/96
 // Revision: A
@@ -52,6 +50,8 @@ class MovableObject
     virtual ~MovableObject();
 
     int getClassTag(void) const;
+    virtual const char *getClassType(void) const;
+
     int getDbTag(void) const;
     void setDbTag(int dbTag);
 

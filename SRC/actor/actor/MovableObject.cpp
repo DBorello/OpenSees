@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:15 $
+// $Revision: 1.2 $
+// $Date: 2006-08-03 23:12:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/actor/MovableObject.cpp,v $
                                                                         
                                                                         
-// File: ~/actor/MovableObject.C
-//
 // Written: fmk
 // Created: 11/96
 // Revision: A
@@ -61,6 +59,13 @@ MovableObject::getClassTag(void) const
 {
     return classTag;
 }
+
+const char *
+MovableObject::getClassType(void) const
+{
+    return "UnknownMovableObject";
+}
+
 
 int 
 MovableObject::getDbTag(void) const
