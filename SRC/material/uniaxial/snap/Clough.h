@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-09-01 03:53:13 $
+// $Revision: 1.2 $
+// $Date: 2006-08-03 23:44:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/snap/Clough.h,v $
 //
 //
@@ -46,52 +46,51 @@
 
 class Clough : public UniaxialMaterial
 {
-public:
-	Clough();
-	Clough(int tag, Vector inputParam );
-	virtual ~Clough();
+ public:
+  Clough();
+  Clough(int tag, Vector inputParam );
+  virtual ~Clough();
+  const char *getClassType(void) const {return "Clough";};	
+  int setTrialStrain(double d, double strainRate = 0.0);
+  double getStrain(void);
+  
+  double getStress(void);
+  double getTangent(void);
+  double getInitialTangent(void);
+  int commitState(void);
+  int revertToLastCommit(void);    
+  int revertToStart(void);  
 	
-	int setTrialStrain(double d, double strainRate = 0.0);
-	double getStrain(void);
-	
-	double getStress(void);
-	double getTangent(void);
-	double getInitialTangent(void);
-	int commitState(void);
-	int revertToLastCommit(void);    
-	int revertToStart(void);  
-	
-	//virtual
-	UniaxialMaterial *getCopy(void);
-	
-	int sendSelf(int commitTag, Channel &theChannel);  
-	int recvSelf(int commitTag, Channel &theChannel,FEM_ObjectBroker &theBroker);
-	
-	void Print(OPS_Stream &s, int flag =0);
-	
-protected:
-	void envelPosCap(double fy, double alphaPos, double alphaCap,
-		double cpDsp, double d, double *f, double *ek );
-	
-	void envelNegCap(double fy, double alphaNeg, double alphaCap,
-		double cpDsp, double d, double *f, double *ek);
-	
-	void recordInfo(int cond =0);
-	
-	
-private:
-	// Input parameters
-	double elstk,fyieldPos,fyieldNeg,alpha,Resfac;		//	Properties
-	double capSlope,capDispPos,capDispNeg;	 // Cap
-	double ecaps,ecapk,ecapa,ecapd,cs,ck,ca,cd;	 // Degradation parameters
-
-	// Parameters calculated from input data
-	double dyieldPos,dyieldNeg;
-	double Enrgts,Enrgtk,Enrgta,Enrgtd;
-
-	double hsTrial[24], hsCommit[24], hsLastCommit[24];
-	
-	FILE *OutputFile;		// For debugging
+  //virtual
+  UniaxialMaterial *getCopy(void);
+  
+  int sendSelf(int commitTag, Channel &theChannel);  
+  int recvSelf(int commitTag, Channel &theChannel,FEM_ObjectBroker &theBroker);
+  
+  void Print(OPS_Stream &s, int flag =0);
+  
+ protected:
+  void envelPosCap(double fy, double alphaPos, double alphaCap,
+		   double cpDsp, double d, double *f, double *ek );
+  
+  void envelNegCap(double fy, double alphaNeg, double alphaCap,
+		   double cpDsp, double d, double *f, double *ek);
+  
+  void recordInfo(int cond =0);
+  
+  
+ private:
+  // Input parameters
+  double elstk,fyieldPos,fyieldNeg,alpha,Resfac;		//	Properties
+  double capSlope,capDispPos,capDispNeg;	 // Cap
+  double ecaps,ecapk,ecapa,ecapd,cs,ck,ca,cd;	 // Degradation parameters
+  
+  // Parameters calculated from input data
+  double dyieldPos,dyieldNeg;
+  double Enrgts,Enrgtk,Enrgta,Enrgtd;
+  
+  double hsTrial[24], hsCommit[24], hsLastCommit[24];
+  
 };
 
 #endif

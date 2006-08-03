@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-09-01 03:53:13 $
+// $Revision: 1.2 $
+// $Date: 2006-08-03 23:44:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/snap/PinchingDamage.cpp,v $
 //
 //
@@ -147,15 +147,6 @@ PinchingDamage::PinchingDamage(int tag, Vector inputParam , DamageModel *strengt
 	}
 
 	
-	if ( DEBG ==1 )
-    {
-		// Open an output file for debugging
-		char FileName[20];						// debugging
-		sprintf(FileName, "PinchingDamage%d.out", tag);
-		OutputFile = fopen ( FileName , "w" );	// debugging
-		fprintf( OutputFile , "Constructor\n" );	// debugging
-    }
-	
 	// Initialice history data
 	this->revertToStart();
 }
@@ -164,19 +155,13 @@ PinchingDamage::PinchingDamage(int tag, Vector inputParam , DamageModel *strengt
 PinchingDamage::PinchingDamage()
   :UniaxialMaterial(0,MAT_TAG_SnapPinchingDamage) 
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Empty constructor\n" );	// debugging
+
 }
 
 
 
 PinchingDamage::~PinchingDamage()
 {
-  if ( DEBG ==1 )
-    {
-      fprintf( OutputFile , "Distructor\n" );		// debugging
-      fclose( OutputFile );						// debugging
-    }
-
    	if ( StrDamage != 0 ) delete StrDamage;
 	if ( StfDamage != 0 ) delete StfDamage;
 	if ( AccDamage != 0 ) delete AccDamage;
@@ -233,7 +218,7 @@ int PinchingDamage::revertToStart()
 
 void PinchingDamage::Print(OPS_Stream &s, int flag)
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Print\n" );	// debugging
+
 	s << "BondSlipMaterial Tag: " << this->getTag() << endln;
 	s << "D : " << hsTrial[0] << endln;
 	s << "F : " << hsTrial[1] << endln;
@@ -245,8 +230,6 @@ void PinchingDamage::Print(OPS_Stream &s, int flag)
 
 int PinchingDamage::revertToLastCommit()
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Revert to last commit\n" );	// debugging
-	
 	for(int i=0; i<24; i++) {
 		hsTrial[i]	= hsCommit[i];
 		hsCommit[i] = hsLastCommit[i];
@@ -262,7 +245,6 @@ int PinchingDamage::revertToLastCommit()
 
 double PinchingDamage::getTangent()
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Get tangent\n" );	// debugging
 	return hsTrial[2];
 }
 
@@ -298,7 +280,6 @@ int PinchingDamage::sendSelf(int cTag, Channel &theChannel)
 
 UniaxialMaterial *PinchingDamage::getCopy(void)
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Get copy\n" );	// debugging
 	Vector inp(11);
 	
 	inp[0] = elstk;
@@ -328,7 +309,6 @@ UniaxialMaterial *PinchingDamage::getCopy(void)
 
 int PinchingDamage::setTrialStrain( double d, double strainRate)
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Set trial displacement\n" );	// debugging
 	int flagDeg , flgstop , Unl, kon;
 	double deltaD;
 	double ekP,ekunload,ekexcurs,Enrgtot,Enrgc,sp,sn,dmax,dmin,fyPos,fyNeg,fP,dP;
@@ -738,7 +718,7 @@ int PinchingDamage::setTrialStrain( double d, double strainRate)
 
 int PinchingDamage::commitState()
 {
-  if ( DEBG ==1 ) fprintf( OutputFile , "Commit State\n" );	// debugging
+
   int i;
   for( i=0; i<24 ; i++ ) {
 	  hsLastCommit[i] = hsCommit[i];

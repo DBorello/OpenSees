@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2004-09-01 03:53:13 $
+// $Revision: 1.5 $
+// $Date: 2006-08-03 23:44:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/snap/Pinching.h,v $
 //
 //
@@ -50,7 +50,8 @@ class Pinching : public UniaxialMaterial
   Pinching();
   Pinching(int tag, Vector inputParam );
   virtual ~Pinching();
-  
+
+  const char *getClassType(void) const {return "Pinching";};  
   int setTrialStrain(double d, double strainRate = 0.0);
   double getStrain(void);
   
@@ -93,7 +94,6 @@ class Pinching : public UniaxialMaterial
   
   double hsTrial[22], hsCommit[22], hsLastCommit[22];
   
-  FILE *OutputFile;		// For debugging
 };
 
 #endif

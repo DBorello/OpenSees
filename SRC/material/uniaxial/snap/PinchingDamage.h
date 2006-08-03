@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-09-01 03:53:13 $
+// $Revision: 1.2 $
+// $Date: 2006-08-03 23:44:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/snap/PinchingDamage.h,v $
 //
 //
@@ -52,7 +52,8 @@ class PinchingDamage : public UniaxialMaterial
   PinchingDamage();
   PinchingDamage(int tag, Vector inputParam , DamageModel *strength, DamageModel *stiffness, DamageModel *accelerated, DamageModel *capping );
   virtual ~PinchingDamage();
-  
+
+  const char *getClassType(void) const {return "PinchingDamage";};  
   int setTrialStrain(double d, double strainRate = 0.0);
   double getStrain(void);
   
@@ -99,7 +100,6 @@ class PinchingDamage : public UniaxialMaterial
   
   double hsTrial[24], hsCommit[24], hsLastCommit[24];
   
-  FILE *OutputFile;		// For debugging
 };
 
 #endif

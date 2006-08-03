@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2004-09-01 03:53:13 $
+// $Revision: 1.5 $
+// $Date: 2006-08-03 23:44:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/snap/Pinching.cpp,v $
 //
 //
@@ -125,15 +125,6 @@ Pinching::Pinching(int tag, Vector inputParam )
 		opserr << "Error: Pinching::Pinching  : Error: alpha Hard. can not be equal to alphaCap\n" << "\a";	
     }
 	
-	if ( DEBG ==1 )
-    {
-		// Open an output file for debugging
-		char FileName[20];						// debugging
-		sprintf(FileName, "Pinching%d.out", tag);
-		OutputFile = fopen ( FileName , "w" );	// debugging
-		fprintf( OutputFile , "Constructor\n" );	// debugging
-    }
-	
 	// Initialice history data
 	this->revertToStart();
 }
@@ -142,18 +133,13 @@ Pinching::Pinching(int tag, Vector inputParam )
 Pinching::Pinching()
   :UniaxialMaterial(0,MAT_TAG_Pinching) 
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Empty constructor\n" );	// debugging
 }
 
 
 
 Pinching::~Pinching()
 {
-  if ( DEBG ==1 )
-    {
-      fprintf( OutputFile , "Distructor\n" );		// debugging
-      fclose( OutputFile );						// debugging
-    }
+
 }
 
 
@@ -206,7 +192,7 @@ int Pinching::revertToStart()
 
 void Pinching::Print(OPS_Stream &s, int flag)
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Print\n" );	// debugging
+
 	s << "BondSlipMaterial Tag: " << this->getTag() << endln;
 	s << "D : " << hsTrial[0] << endln;
 	s << "F : " << hsTrial[1] << endln;
@@ -218,8 +204,6 @@ void Pinching::Print(OPS_Stream &s, int flag)
 
 int Pinching::revertToLastCommit()
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Revert to last commit\n" );	// debugging
-	
 	for(int i=0; i<22; i++) {
 		hsTrial[i] = hsCommit[i];
 		hsCommit[i] = hsLastCommit[i];
@@ -231,7 +215,6 @@ int Pinching::revertToLastCommit()
 
 double Pinching::getTangent()
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Get tangent\n" );	// debugging
 	return hsTrial[2];
 }
 
@@ -267,7 +250,6 @@ int Pinching::sendSelf(int cTag, Channel &theChannel)
 
 UniaxialMaterial *Pinching::getCopy(void)
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Get copy\n" );	// debugging
 	Vector inp(19);
 	
 	inp[0] = elstk;
@@ -304,7 +286,6 @@ UniaxialMaterial *Pinching::getCopy(void)
 
 int Pinching::setTrialStrain( double d, double strainRate)
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Set trial displacement\n" );	// debugging
 	int flagDeg , flgstop , Unl, kon;
 	double deltaD;
 	double ekP,ekunload,ekexcurs,Enrgtot,Enrgc,sp,sn,dmax,dmin,fyPos,fyNeg,fP,dP;
@@ -675,7 +656,6 @@ int Pinching::setTrialStrain( double d, double strainRate)
 
 int Pinching::commitState()
 {
-  if ( DEBG ==1 ) fprintf( OutputFile , "Commit State\n" );	// debugging
   int i;
   for( i=0; i<22 ; i++ ) {
 	  hsLastCommit[i] = hsCommit[i];

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-09-01 03:53:13 $
+// $Revision: 1.2 $
+// $Date: 2006-08-03 23:44:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/snap/Bilinear.h,v $
 //
 //
@@ -52,6 +52,8 @@ class Bilinear : public UniaxialMaterial
 	Bilinear();
 	Bilinear(int tag, Vector inputParam ,DamageModel *strength,DamageModel *stiffness,DamageModel *capping);
 	virtual ~Bilinear();
+	
+	const char *getClassType(void) const {return "Bilinear";};
   
 	int setTrialStrain(double d, double strainRate = 0.0);
 	double getStrain(void);

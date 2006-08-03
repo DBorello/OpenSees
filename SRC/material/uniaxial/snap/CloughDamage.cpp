@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-09-01 03:53:13 $
+// $Revision: 1.2 $
+// $Date: 2006-08-03 23:44:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/snap/CloughDamage.cpp,v $
 //
 //
@@ -131,15 +131,6 @@ CloughDamage::CloughDamage(int tag, Vector inputParam, DamageModel *strength, Da
 		}
 	}
 
-	if ( DEBG ==1 )
-    {
-      // Open an output file for debugging
-		char FileName[20];						// debugging
-        sprintf(FileName, "CloughDamage%d.out", tag);
-		OutputFile = fopen ( FileName , "w" );	// debugging
-		fprintf( OutputFile , "Constructor\n" );	// debugging
-    }
-	
 	// Initialize history data
 	this->revertToStart();
 
@@ -149,18 +140,13 @@ CloughDamage::CloughDamage(int tag, Vector inputParam, DamageModel *strength, Da
 CloughDamage::CloughDamage()
   :UniaxialMaterial(0,MAT_TAG_SnapCloughDamage) 
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Empty constructor\n" );	// debugging
+
 }
 
 
 
 CloughDamage::~CloughDamage()
 {
-	if ( DEBG ==1 )
-    {
-		fprintf( OutputFile , "Distructor\n" );		// debugging
-		fclose( OutputFile );						// debugging
-    }
 	
   	if ( StrDamage != 0 ) delete StrDamage;
 	if ( StfDamage != 0 ) delete StfDamage;
@@ -169,9 +155,9 @@ CloughDamage::~CloughDamage()
 }
 
 
+
 int CloughDamage::revertToStart()
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Revert to start\n" );		// debugging
 
 	dyieldPos = fyieldPos/elstk;
 	dyieldNeg = fyieldNeg/elstk;
@@ -219,7 +205,7 @@ int CloughDamage::revertToStart()
 
 void CloughDamage::Print(OPS_Stream &s, int flag)
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Print\n" );	// debugging
+
 	s << "BondSlipMaterial Tag: " << this->getTag() << endln;
 	s << "D : " << hsTrial[0] << endln;
 	s << "F : " << hsTrial[1] << endln;
@@ -231,7 +217,6 @@ void CloughDamage::Print(OPS_Stream &s, int flag)
 
 int CloughDamage::revertToLastCommit()
 {
-  if ( DEBG ==1 ) fprintf( OutputFile , "Revert to last commit\n" );	// debugging
   
   for(int i=0; i<24; i++) {
 	  hsTrial[i] = hsCommit[i];
@@ -248,26 +233,26 @@ int CloughDamage::revertToLastCommit()
 
 double CloughDamage::getTangent()
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Get tangent\n" );	// debugging
+
 	return hsTrial[2];
 }
 
 double CloughDamage::getInitialTangent (void)
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Get initial tangent\n" );	// debugging
+
 	return elstk;
 }
 
 double CloughDamage::getStress()
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Get stress\n" );	// debugging
+
 	return hsTrial[1];
 }
 
 
 double CloughDamage::getStrain (void)
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Get strain\n" );	// debugging
+
 	return hsTrial[0];
 }
 
@@ -275,21 +260,21 @@ double CloughDamage::getStrain (void)
 int CloughDamage::recvSelf(int cTag, Channel &theChannel, 
 			       FEM_ObjectBroker &theBroker)
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Receive self\n" );	// debugging
+
 	return 0;
 }
 
 
 int CloughDamage::sendSelf(int cTag, Channel &theChannel)
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Send self\n" );	// debugging
+
 	return 0;
 }
 
 
 UniaxialMaterial *CloughDamage::getCopy(void)
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Get copy\n" );	// debugging
+
 	Vector inp(8);
 	
 	inp[0]  = 	elstk;
@@ -315,7 +300,7 @@ UniaxialMaterial *CloughDamage::getCopy(void)
 
 int CloughDamage::setTrialStrain( double d, double strainRate)
 {
-	if ( DEBG ==1 ) fprintf( OutputFile , "Set trial displacement\n" );	// debugging
+
 
 	int kon,idiv,Unl,flagDeg,flgstop;
 
@@ -685,7 +670,7 @@ int CloughDamage::setTrialStrain( double d, double strainRate)
 
 int CloughDamage::commitState()
 {
-  if ( DEBG ==1 ) fprintf( OutputFile , "Commit State\n" );	// debugging
+
   int i;
   for( i=0; i<24; i++ ) {
 	  hsLastCommit[i] = hsCommit[i];
