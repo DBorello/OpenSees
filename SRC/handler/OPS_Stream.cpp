@@ -18,15 +18,16 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-02-14 22:56:59 $
+// $Revision: 1.2 $
+// $Date: 2006-08-03 23:23:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/OPS_Stream.cpp,v $
 
 #include <OPS_Stream.h>
 
-OPS_Stream::OPS_Stream()
+OPS_Stream::OPS_Stream(int classTag)
+  :MovableObject(classTag)
 {
-
+  
 }
 OPS_Stream::~OPS_Stream()
 {

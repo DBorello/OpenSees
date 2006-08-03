@@ -18,20 +18,23 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-25 23:33:14 $
+// $Revision: 1.3 $
+// $Date: 2006-08-03 23:23:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/OPS_Stream.h,v $
 
 #ifndef _OPS_Stream
 #define _OPS_Stream
 
+#include <MovableObject.h>
 enum openMode  {OVERWRITE, APPEND};
 enum floatField {FIXEDD, SCIENTIFIC};
+class Vector;
 
-class OPS_Stream
+
+class OPS_Stream:  public MovableObject
 {
  public:
-  OPS_Stream();
+  OPS_Stream(int classTag);
   virtual ~OPS_Stream();
 
   virtual int setFile(const char *fileName, openMode mode = OVERWRITE) {return 0;};
@@ -40,6 +43,16 @@ class OPS_Stream
   virtual int precision(int precision) {return 0;};
   virtual int width(int width) {return 0;};
 
+  // xml stuff
+  virtual int tag(const char *) =0;
+  virtual int tag(const char *, const char *) =0;
+  virtual int endTag() =0;
+  virtual int attr(const char *name, int value) =0;
+  virtual int attr(const char *name, double value) =0;
+  virtual int attr(const char *name, const char *value) =0;
+  virtual int write(Vector &data) =0;
+
+  // regular stuff
   virtual OPS_Stream& write(const char *s, int n) {return *this;};
   virtual OPS_Stream& write(const unsigned char *s, int n) {return *this;};
   virtual OPS_Stream& write(const signed char *s, int n) {return *this;};
@@ -61,6 +74,17 @@ class OPS_Stream
   virtual OPS_Stream& operator<<(bool b) {return *this;};
   virtual OPS_Stream& operator<<(double n) {return *this;};
   virtual OPS_Stream& operator<<(float n) {return *this;};
+
+  int sendSelf(int commitTag, Channel &theChannel) =0;  
+  int recvSelf(int commitTag, Channel &theChannel, 
+	       FEM_ObjectBroker &theBroker) =0;
+
+
+ private:
+
+  void indent(void);
+  int numIndent;
+  char *indentString;
 };
 
 #endif
