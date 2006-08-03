@@ -1,6 +1,15 @@
 include ../../Makefile.def
 
+
 OBJS       = commands.o TclFeViewer.o TclVideoPlayer.o
+
+ifeq ($(GRAPHICS), NONE)
+
+OBJS       = commands.o 
+
+endif
+
+
 
 tcl: $(OBJS)  tclMain.o tclAppInit.o
 

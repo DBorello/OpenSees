@@ -9,6 +9,20 @@ OBJS       = TclModelBuilder.o myCommands.o TclUniaxialMaterialTester.o \
 
 all: $(OBJS)  
 
+tcl: $(OBJS)  
+	@$(CD) $(FE)/tcl; $(MAKE) tcl;
+	@$(LINKER) $(LINKFLAGS) $(INTERPRETER_LIBS_TCL) \
+	$(GRAPHIC_LIBS_TCL) $(FE_LIBRARY) $(MACHINE_LINKLIBS) \
+	$(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY)  \
+	$(MACHINE_SPECIFIC_LIBS) -o $(OpenSees_PROGRAM)
+
+tk: $(OBJS)  
+	@$(CD) $(FE)/tcl; $(MAKE) tk;
+	@$(LINKER) $(LINKFLAGS) $(INTERPRETER_LIBS_TK) \
+	$(GRAPHIC_LIBS_TCL) $(FE_LIBRARY) $(MACHINE_LINKLIBS) \
+	$(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY)  \
+	$(MACHINE_SPECIFIC_LIBS) -o $(OpenSees_PROGRAM)
+
 ifeq ($(PROGRAMMING_MODE), PARALLEL)
 
 tcl: $(OBJS)  
@@ -45,30 +59,11 @@ tk: $(OBJS)
 
 endif
 
-ifeq ($(PROGRAMMING_MODE), SEQUENTIAL)
-
-tcl: $(OBJS)  
-	@$(CD) $(FE)/tcl; $(MAKE) tcl;
-	@$(LINKER) $(LINKFLAGS) $(INTERPRETER_LIBS_TCL) \
-	$(FE_LIBRARY) $(MACHINE_LINKLIBS) \
-	$(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY)  \
-	$(MACHINE_SPECIFIC_LIBS) -o $(OpenSees_PROGRAM)
-
-tk: $(OBJS)  
-	@$(CD) $(FE)/tcl; $(MAKE) tk;
-	@$(LINKER) $(LINKFLAGS) $(INTERPRETER_LIBS_TK) \
-	$(FE_LIBRARY) $(MACHINE_LINKLIBS) \
-	$(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY)  \
-	$(MACHINE_SPECIFIC_LIBS) -o $(OpenSees_PROGRAM)
-endif
-
 
 INTERPRETER_LIBS_TCL = $(FE)/tcl/tclMain.o \
 	$(FE)/tcl/tclAppInit.o \
 	$(FE)/tcl/commands.o \
-	$(FE)/modelbuilder/tcl/myCommands.o \
-	$(FE)/tcl/TclFeViewer.o \
-	$(FE)/tcl/TclVideoPlayer.o 
+	$(FE)/modelbuilder/tcl/myCommands.o 
 
 INTERPRETER_LIBS_MPI = $(FE)/tcl/tclMain.o \
 	$(FE)/tcl/mpiMain.o \
@@ -92,9 +87,17 @@ INTERPRETER_LIBS_MPI_PARAMETERS = $(FE)/tcl/tclMain.o \
 INTERPRETER_LIBS_TK = $(FE)/tcl/tkMain.o \
 	$(FE)/tcl/tkAppInit.o \
 	$(FE)/tcl/commands.o \
-	$(FE)/modelbuilder/tcl/myCommands.o \
-	$(FE)/tcl/TclFeViewer.o \
+	$(FE)/modelbuilder/tcl/myCommands.o 
+
+GRAPHICS_LIBS_TCL = $(FE)/tcl/TclFeViewer.o \
 	$(FE)/tcl/TclVideoPlayer.o 
+
+
+ifeq ($(GRAPHICS), NONE)
+
+GRAPHICS_LIBS_TCL = 
+
+endif
 
 # Miscellaneous
 tidy:	
