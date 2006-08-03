@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-05-24 21:10:28 $
+// $Revision: 1.2 $
+// $Date: 2006-08-03 22:06:26 $
                                                                         
 // Written: 		Jian Zhao, Iowa State University 		04/2004
 // Revision:		Jian Zhao, University of Wisconsin, Milwaukee 		04/2006
@@ -47,6 +47,8 @@ class Bond_SP01 : public UniaxialMaterial
     Bond_SP01(int tag, double fy, double sy, double fu, double su, double Kz, double R); 
     Bond_SP01();
     ~Bond_SP01();
+
+    const char *getClassType(void) const {return "Bond_SP01";};   
 
     int setTrialStrain (double strain, double strainRate = 0.0); 
     int setTrial (double strain, double &stress, double &tangent, double strainRate = 0.0);
@@ -127,7 +129,7 @@ class Bond_SP01 : public UniaxialMaterial
     void determineTrialState (double tslip, double dslip);
     
     // Calculates envelope stress for a slip
-    double Bond_SP01::getEnvelopeStress (double slip);
+    double getEnvelopeStress (double slip);
     
     // Determines if a Stress reversal has occurred based on the trial Strain
     void detectStressReversal (double dslip);
