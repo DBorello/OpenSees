@@ -1,7 +1,12 @@
 include ../../Makefile.def
 
-OBJS       = OPS_Stream.o StandardStream.o FileStream.o DataOutputHandler.o \
-	DataOutputFileHandler.o DataOutputStreamHandler.o DataOutputDatabaseHandler.o
+OBJS       = OPS_Stream.o \
+	StandardStream.o \
+	FileStream.o \
+	XmlFileStream.o \
+	DataFileStream.o \
+	DatabaseStream.o \
+	DummyStream.o
 
 TEST_OBJS = $(OBJS) TestDataOutputStreamHandler.o  TestDataOutputFileHandler.o TestDataOutputDatabaseHandler.o
 # Compilation control
@@ -17,10 +22,11 @@ test:  $(TEST_OBJS)
 	$(FE_LIBRARY) $(MACHINE_LINKLIBS) \
 	$(MACHINE_NUMERICAL_LIBS) $(MACHINE_SPECIFIC_LIBS) $(METIS_LIBRARY) \
 	 -o testDataFileHandler
-	$(LINKER) $(LINKFLAGS) TestDataOutputDatabaseHandler.o $(OBJS) $(FE_LIBRARY) \
-	$(FE_LIBRARY) $(MACHINE_LINKLIBS) \
-	$(MACHINE_NUMERICAL_LIBS) $(MACHINE_SPECIFIC_LIBS) $(METIS_LIBRARY) \
-	 -o testDataDatabaseHandler
+
+#	$(LINKER) $(LINKFLAGS) TestDataOutputDatabaseHandler.o $(OBJS) $(FE_LIBRARY) \
+#	$(FE_LIBRARY) $(MACHINE_LINKLIBS) \
+#	$(MACHINE_NUMERICAL_LIBS) $(MACHINE_SPECIFIC_LIBS) $(METIS_LIBRARY) \
+#	 -o testDataDatabaseHandler
 
 # Miscellaneous
 tidy:	
