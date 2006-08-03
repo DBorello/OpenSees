@@ -18,26 +18,33 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2004-11-24 22:37:26 $
+// $Revision: 1.6 $
+// $Date: 2006-08-03 23:24:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/StandardStream.cpp,v $
 
 #include <StandardStream.h>
+#include <Vector.h>
 #include <iostream>
 #include <iomanip>
 using std::cerr;
 using std::ios;
 using std::setiosflags;
 
-StandardStream::StandardStream()
-  :fileOpen(0)
+StandardStream::StandardStream(int indent)
+  :OPS_Stream(OPS_STREAM_TAGS_FileStream), 
+   fileOpen(0),  indentSize(indent)
 {
-
+  if (indentSize < 1) indentSize = 1;
+  indentString = new char[indentSize+1];
+  for (int i=0; i<indentSize; i++)
+    strcpy(indentString, " ");
 }
 StandardStream::~StandardStream()
 {
   if (fileOpen == 1)
     theFile.close();
+
+
 }
 
 int 
@@ -93,6 +100,75 @@ StandardStream::setFloatField(floatField field)
   return 0;
 }
 
+
+int 
+StandardStream::tag(const char *tagName)
+{
+  // output the xml for it to the file
+  this->indent();
+  (*this) << tagName << "\n";
+
+  numIndent++;
+
+  return 0;
+}
+
+int
+StandardStream::tag(const char *tagName, const char *value)
+{
+  // output the xml for it to the file
+  this->indent();
+  (*this) << tagName << " " << value << "\n";
+
+
+  numIndent++;
+
+  return 0;
+}
+
+int 
+StandardStream::endTag()
+{
+  numIndent--;
+
+  return 0;
+}
+
+int 
+StandardStream::attr(const char *name, int value)
+{
+  this->indent();
+  (*this) << name << " = " << value << "\n";
+  
+  return 0;
+}
+
+int 
+StandardStream::attr(const char *name, double value)
+{
+  this->indent();
+  (*this) << name << " = " << value << "\n";
+
+  return 0;
+}
+
+int 
+StandardStream::attr(const char *name, const char *value)
+{
+  this->indent();
+  (*this) << name << " = " << value << "\n";
+
+  return 0;
+}
+
+int 
+StandardStream::write(Vector &data)
+{
+  this->indent();
+  (*this) << data;  
+
+  return 0;
+}
 
 
 OPS_Stream& 
@@ -310,4 +386,29 @@ StandardStream::operator<<(float n)
     theFile << n;
 
  return *this;
+}
+
+
+void
+StandardStream::indent(void)
+{
+  for (int i=0; i<numIndent; i++) {
+    cerr << indentString;
+    if (fileOpen != 0)
+      theFile << indentString;
+  }
+}
+
+int 
+StandardStream::sendSelf(int commitTag, Channel &theChannel)
+{
+  return 0;
+}
+
+int 
+StandardStream::recvSelf(int commitTag, Channel &theChannel, 
+			 FEM_ObjectBroker &theBroker)
+{
+
+  return 0;
 }

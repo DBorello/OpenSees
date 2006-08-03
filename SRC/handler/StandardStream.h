@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-25 23:33:14 $
+// $Revision: 1.3 $
+// $Date: 2006-08-03 23:24:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/StandardStream.h,v $
 
 #ifndef _StandardStream
@@ -33,14 +33,24 @@ using std::ofstream;
 class StandardStream : public OPS_Stream
 {
  public:
-  StandardStream();
-  virtual ~StandardStream();
+  StandardStream(int indentSize=2);
+  ~StandardStream();
 
   int setFile(const char *fileName, openMode mode = OVERWRITE);
   int setPrecision(int precision);
   int setFloatField(floatField);
   int precision(int precision) {return 0;};
   int width(int width) {return 0;};
+
+  // xml stuff
+  int tag(const char *);
+  int tag(const char *, const char *);
+  int endTag();
+  int attr(const char *name, int value);
+  int attr(const char *name, double value);
+  int attr(const char *name, const char *value);
+  int write(Vector &data);
+
 
   OPS_Stream& write(const char *s, int n);
   OPS_Stream& write(const unsigned char *s, int n);
@@ -62,16 +72,19 @@ class StandardStream : public OPS_Stream
   OPS_Stream& operator<<(bool b);
   OPS_Stream& operator<<(double n);
   OPS_Stream& operator<<(float n);
-  // OPS_Stream& operator<<(__omanip func);
-  // OPS_Stream& operator<<(__manip func);
-  // OPS_Stream& operator<<(streambuf*);
-  // OPS_Stream& ends(OPS_Stream& outs);
-  // OPS_Stream& flush(OPS_Stream& outs);
-  // OPS_Stream& (OPS_Stream& outs);
+
+  int sendSelf(int commitTag, Channel &theChannel);  
+  int recvSelf(int commitTag, Channel &theChannel, 
+	       FEM_ObjectBroker &theBroker);
 
  private:
   ofstream theFile;
   int fileOpen;
+
+  void indent(void);
+  int indentSize;
+  int numIndent;
+  char *indentString;
 };
 
 #endif

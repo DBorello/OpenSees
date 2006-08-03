@@ -18,23 +18,48 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2005-02-14 19:43:26 $
+// $Revision: 1.8 $
+// $Date: 2006-08-03 23:24:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/FileStream.cpp,v $
 
 
 #include <FileStream.h>
+#include <Vector.h>
 #include <iostream>
 #include <iomanip>
+#include <ID.h>
+#include <Channel.h>
+#include <Message.h>
+
+
 using std::cerr;
 using std::ios;
 using std::setiosflags;
 
-FileStream::FileStream()
-  :fileOpen(0), fileName(0)
+FileStream::FileStream(int indent)
+  :OPS_Stream(OPS_STREAM_TAGS_FileStream), 
+   fileOpen(0), fileName(0), indentSize(indent)
 {
-
+  if (indentSize < 1) indentSize = 1;
+  indentString = new char[indentSize+1];
+  for (int i=0; i<indentSize; i++)
+    strcpy(indentString, " ");
 }
+
+
+FileStream::FileStream(const char *name, openMode mode, int indent)
+  :OPS_Stream(OPS_STREAM_TAGS_FileStream), 
+   fileOpen(0), fileName(0), indentSize(indent)
+{
+  if (indentSize < 1) indentSize = 1;
+  indentString = new char[indentSize+1];
+  for (int i=0; i<indentSize; i++)
+    strcpy(indentString, " ");
+
+  this->setFile(name, mode);
+}
+
+
 FileStream::~FileStream()
 {
   if (fileOpen == 1)
@@ -87,6 +112,11 @@ FileStream::setFile(const char *name, openMode mode)
     return -1;
   } else
     fileOpen = 1;
+
+  if (mode == 0)
+    theOpenMode = OVERWRITE;
+  else
+    theOpenMode = APPEND;
 
   return 0;
 }
@@ -148,6 +178,77 @@ FileStream::setFloatField(floatField field)
     if (fileOpen != 0)
       theFile << setiosflags(ios::scientific);
   }
+
+  return 0;
+}
+
+
+int 
+FileStream::tag(const char *tagName)
+{
+  // output the xml for it to the file
+  this->indent();
+  (*this) << tagName << endln;
+
+  numIndent++;
+
+  return 0;
+}
+
+int 
+FileStream::tag(const char *tagName, const char *value)
+{
+  // output the xml for it to the file
+  numIndent++;
+  this->indent();
+  (*this) << tagName << " = " << value << endln;
+
+  numIndent--;
+
+  return 0;
+}
+
+
+int 
+FileStream::endTag()
+{
+  numIndent--;
+
+  return 0;
+}
+
+int 
+FileStream::attr(const char *name, int value)
+{
+  this->indent();
+  (*this) << name << " = " << value << endln;
+  
+  return 0;
+}
+
+int 
+FileStream::attr(const char *name, double value)
+{
+  this->indent();
+  (*this) << name << " = " << value << endln;
+
+  return 0;
+}
+
+int 
+FileStream::attr(const char *name, const char *value)
+{
+  this->indent();
+  (*this) << name << " = " << value << endln;
+
+  return 0;
+}
+
+int 
+FileStream::write(Vector &data)
+{
+  this->indent();
+  (*this) << data << endln;  
 
   return 0;
 }
@@ -324,4 +425,89 @@ FileStream::operator<<(float n)
     theFile << n;
 
   return *this;
+}
+
+
+int 
+FileStream::sendSelf(int commitTag, Channel &theChannel)
+{
+  static ID idData(2);
+  int fileNameLength = 0;
+  if (fileName != 0)
+    fileNameLength = strlen(fileName);
+
+  idData(0) = fileNameLength;
+
+  if (theOpenMode == OVERWRITE)
+    idData(1) = 0;
+  else
+    idData(1) = 1;
+
+  if (theChannel.sendID(0, commitTag, idData) < 0) {
+    opserr << "FileStream::sendSelf() - failed to send id data\n";
+    return -1;
+  }
+
+  if (fileNameLength != 0) {
+    Message theMessage(fileName, fileNameLength);
+    if (theChannel.sendMsg(0, commitTag, theMessage) < 0) {
+      opserr << "FileStream::sendSelf() - failed to send message\n";
+      return -1;
+    }
+  }
+
+  return 0;
+}
+
+int 
+FileStream::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  static ID idData(2);
+
+  if (theChannel.recvID(0, commitTag, idData) < 0) {
+    opserr << "FileStream::recvSelf() - failed to recv id data\n";
+    return -1;
+  }
+
+  int fileNameLength = idData(0);
+  if (idData(1) == 0)
+    theOpenMode = OVERWRITE;
+  else
+    theOpenMode = APPEND;
+
+  if (fileNameLength != 0) {
+    if (fileName != 0)
+      delete [] fileName;
+    fileName = new char[fileNameLength+5];
+    if (fileName == 0) {
+      opserr << "FileStream::recvSelf() - out of memory\n";
+      return -1;
+    }
+
+    Message theMessage(fileName, fileNameLength);
+    if (theChannel.recvMsg(0, commitTag, theMessage) < 0) {
+      opserr << "FileStream::recvSelf() - failed to recv message\n";
+      return -1;
+    }
+    sprintf(&fileName[fileNameLength],".%d",commitTag);
+
+    if (this->setFile(fileName, theOpenMode) < 0) {
+      opserr << "FileStream::FileStream() - setFile() failed\n";
+      if (fileName != 0) {
+	delete [] fileName;
+	fileName = 0;
+      }
+    }
+  }
+  
+  return 0;
+}
+
+
+void
+FileStream::indent(void)
+{
+  if (fileOpen != 0)
+    for (int i=0; i<numIndent; i++)
+      theFile << indentString;
 }
