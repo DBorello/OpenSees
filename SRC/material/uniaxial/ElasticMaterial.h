@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-25 23:33:38 $
+// $Revision: 1.5 $
+// $Date: 2006-08-03 23:42:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ElasticMaterial.h,v $
                                                                         
                                                                         
 #ifndef ElasticMaterial_h
 #define ElasticMaterial_h
 
-// File: ~/material/ElasticMaterial.h
-//
 // Written: fmk 
 // Created: 07/98
 // Revision: A
@@ -49,6 +47,8 @@ class ElasticMaterial : public UniaxialMaterial
     ElasticMaterial(int tag, double E, double eta = 0.0);    
     ElasticMaterial();    
     ~ElasticMaterial();
+
+    const char *getClassType(void) const {return "ElasticMaterial";};
 
     int setTrialStrain(double strain, double strainRate = 0.0); 
     int setTrial(double strain, double &stress, double &tangent, double strainRate = 0.0); 

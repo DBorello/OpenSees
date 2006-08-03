@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-02-25 23:33:34 $
+// $Revision: 1.11 $
+// $Date: 2006-08-03 23:49:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.h,v $
                                                                         
                                                                         
@@ -60,6 +60,8 @@ class SectionAggregator : public SectionForceDeformation
 
     ~SectionAggregator();
 
+    const char *getClassType(void) const {return "SectionAggregator";};
+
     int   setTrialSectionDeformation(const Vector &deforms); 
     const Vector &getSectionDeformation(void);
 
@@ -83,7 +85,7 @@ class SectionAggregator : public SectionForceDeformation
  
     void Print(OPS_Stream &s, int flag =0);
 
-    Response *setResponse(const char **argv, int argc, Information &info);
+    Response *setResponse(const char **argv, int argc, Information &info, OPS_Stream &s);
     int getResponse(int responseID, Information &info);
 
     int setVariable(const char *argv);

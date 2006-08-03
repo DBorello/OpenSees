@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-03-03 18:52:40 $
+// $Revision: 1.2 $
+// $Date: 2006-08-03 23:42:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete02.h,v $
                                                                       
 // Written: fmk
@@ -51,7 +51,8 @@ class Concrete02 : public UniaxialMaterial
     Concrete02(void);
 
     virtual ~Concrete02();
-    
+
+    const char *getClassType(void) const {return "Concrete02";};    
     double getInitialTangent(void);
     UniaxialMaterial *getCopy(void);
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-01-19 19:19:12 $
+// $Revision: 1.4 $
+// $Date: 2006-08-03 23:42:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ReinforcingSteel.h,v $
 
 /* ****************************************************************** **
@@ -52,9 +52,12 @@ class ReinforcingSteel : public UniaxialMaterial
  public:
   ReinforcingSteel(int tag, double fyield, double fultimate, double youngs, double youngs_hard, 
 		   double estrainhard, double eultimate, int buckModel, double slenderness, double alpha, double r, 
-		   double gama, double Fatigue1, double Fatigue2, double Degrade1, double RC1, double RC2, double RC3, double A1, double HardLim);
+		   double gama, double Fatigue1, double Fatigue2, double Degrade1, 
+		   double RC1, double RC2, double RC3, double A1, double HardLim);
   ReinforcingSteel(int tag);    
   ~ReinforcingSteel();
+
+  const char *getClassType(void) const {return "ReinforcingSteel";};
   
   int setTrialStrain(double strain, double strainRate = 0.0); 
   double getStrain(void);

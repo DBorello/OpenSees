@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-01-24 23:20:18 $
+// $Revision: 1.3 $
+// $Date: 2006-08-03 23:42:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel03.h,v $
                                                                         
                                                                         
@@ -66,6 +66,8 @@ class Steel03 : public UniaxialMaterial
        double a3 = STEEL_03_DEFAULT_A3, double a4 = STEEL_03_DEFAULT_A4);
     Steel03();
     ~Steel03();
+
+    const char *getClassType(void) const {return "Steel03";};
 
     int setTrialStrain(double strain, double strainRate = 0.0); 
     int setTrial (double strain, double &stress, double &tangent, double strainRate = 0.0);

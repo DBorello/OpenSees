@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-03-03 18:52:40 $
+// $Revision: 1.2 $
+// $Date: 2006-08-03 23:42:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel02.h,v $
                                                                       
 // Written: fmk
@@ -61,6 +61,9 @@ class Steel02 : public UniaxialMaterial
     Steel02(void);
     virtual ~Steel02();
     
+
+    const char *getClassType(void) const {return "Steel02";};
+
     double getInitialTangent(void);
     UniaxialMaterial *getCopy(void);
 

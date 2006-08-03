@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:33:40 $
+// $Revision: 1.6 $
+// $Date: 2006-08-03 23:42:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SeriesMaterial.h,v $
 
 #ifndef SeriesMaterial_h
@@ -44,6 +44,8 @@ class SeriesMaterial : public UniaxialMaterial
     SeriesMaterial();
     ~SeriesMaterial();
 
+    const char *getClassType(void) const {return "SeriesMaterial";};
+
     int setTrialStrain(double strain, double strainRate = 0.0); 
     double getStrain(void);          
     double getStress(void);
@@ -62,28 +64,30 @@ class SeriesMaterial : public UniaxialMaterial
     
     void Print(OPS_Stream &s, int flag =0);
 
-    Response *setResponse(const char **argv, int argc,
-			  Information &matInformation);
+    Response *setResponse(const char **argv, int argc, 
+			  Information &matInformation, 
+			  OPS_Stream &theOutputStream);
+			  
     int getResponse(int responseID, Information &matInformation);
     
   protected:
     
   private:
     double Tstrain;
-	double Cstrain;
-	double Tstress;
-	double Cstress;
-	double Ttangent;
-	double Ctangent;
-
-	int maxIterations;
-	double tolerance;
-
-	double *stress;
-	double *flex;
-	double *strain;
-
-	bool initialFlag;
+    double Cstrain;
+    double Tstress;
+    double Cstress;
+    double Ttangent;
+    double Ctangent;
+    
+    int maxIterations;
+    double tolerance;
+    
+    double *stress;
+    double *flex;
+    double *strain;
+    
+    bool initialFlag;
 
     int numMaterials;   // the number of UniaxialMaterials in the aggregation
     UniaxialMaterial **theModels; // an array of pointers to the UniaxialMaterials

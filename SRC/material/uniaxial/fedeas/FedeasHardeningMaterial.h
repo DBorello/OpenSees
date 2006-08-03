@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-26 23:00:12 $
+// $Revision: 1.3 $
+// $Date: 2006-08-03 23:45:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasHardeningMaterial.h,v $
                                                                       
 // Written: MHS
@@ -38,13 +38,15 @@ class FedeasHardeningMaterial : public FedeasMaterial
 {
   public:
     FedeasHardeningMaterial(int tag,
-		double E, double sigmaY, double Hiso, double Hkin);
-	FedeasHardeningMaterial(int tag, const Vector &d);
-	FedeasHardeningMaterial(void);
-    virtual ~FedeasHardeningMaterial();
+			    double E, double sigmaY, double Hiso, double Hkin);
+    FedeasHardeningMaterial(int tag, const Vector &d);
+    FedeasHardeningMaterial(void);
+    ~FedeasHardeningMaterial();
 
-	double getInitialTangent(void);
-	UniaxialMaterial *getCopy(void);
+    const char *getClassType(void) const {return "FedeasHardeningMaterial";};
+    
+    double getInitialTangent(void);
+    UniaxialMaterial *getCopy(void);
 
   protected:
 

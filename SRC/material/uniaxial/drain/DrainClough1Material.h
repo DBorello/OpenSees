@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-18 21:39:05 $
+// $Revision: 1.2 $
+// $Date: 2006-08-03 23:42:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/drain/DrainClough1Material.h,v $
                                                                       
 // Written: MHS
@@ -36,18 +36,20 @@
 class DrainClough1Material : public DrainMaterial
 {
   public:
-	DrainClough1Material(int tag,
-		double E, double fyp, double fyn, double alpha,
-		double ecaps, double ecapk, double ecapa, double ecapd,
-		double cs, double ck, double ca, double cd,
-		double capSlope, double capDispP, double capDispN, double res, double beto = 0.0);
-    DrainClough1Material(int tag, const Vector &input, double beto = 0.0);
-	DrainClough1Material(void);
-    virtual ~DrainClough1Material();
+  DrainClough1Material(int tag,
+		       double E, double fyp, double fyn, double alpha,
+		       double ecaps, double ecapk, double ecapa, double ecapd,
+		       double cs, double ck, double ca, double cd,
+		       double capSlope, double capDispP, double capDispN, double res, double beto = 0.0);
+  DrainClough1Material(int tag, const Vector &input, double beto = 0.0);
+  DrainClough1Material(void);
+  virtual ~DrainClough1Material();
 
-	int revertToStart(void);
+  const char *getClassType(void) {return "DrainClough1Material";};
 
-	UniaxialMaterial *getCopy(void);
+  int revertToStart(void);
+  
+  UniaxialMaterial *getCopy(void);
 
   protected:
 

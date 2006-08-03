@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:34 $
+// $Revision: 1.7 $
+// $Date: 2006-08-03 23:49:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/MembranePlateFiberSection.h,v $
 
 // Ed "C++" Love
@@ -54,6 +54,8 @@ class MembranePlateFiberSection : public SectionForceDeformation{
                                  double thickness, 
                                  NDMaterial &Afiber ) ;
 
+
+    const char *getClassType(void) const {return "MembranePlateFiberSection";};
 
     //destructor
     virtual ~MembranePlateFiberSection( ) ;

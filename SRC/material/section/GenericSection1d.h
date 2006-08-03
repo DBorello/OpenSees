@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:34 $
+// $Revision: 1.6 $
+// $Date: 2006-08-03 23:49:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/GenericSection1d.h,v $
                                                                         
                                                                         
 #ifndef GenericSection1d_h
 #define GenericSection1d_h
 
-// File: ~/material/GenericSection1d.h
-//
 // Written: MHS
 // Created: Apr 2000
 // Revision: A
@@ -52,6 +50,8 @@ class GenericSection1d : public SectionForceDeformation
     GenericSection1d ();
 
     ~GenericSection1d ();
+
+    const char *getClassType(void) const {return "GenericSection1d";};
 
     int setTrialSectionDeformation (const Vector&);
     const Vector &getSectionDeformation (void);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-25 23:33:34 $
+// $Revision: 1.4 $
+// $Date: 2006-08-03 23:49:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSectionGJ.h,v $
                                                                         
 // Written: fmk
@@ -47,6 +47,8 @@ class FiberSectionGJ : public SectionForceDeformation
   FiberSectionGJ(); 
   FiberSectionGJ(int tag, int numFibers, Fiber **fibers, double GJ = 1.0e10); 
   ~FiberSectionGJ();
+
+    const char *getClassType(void) const {return "FiberSectionGJ";};
   
   int   setTrialSectionDeformation(const Vector &deforms); 
   const Vector &getSectionDeformation(void);
@@ -68,7 +70,7 @@ class FiberSectionGJ : public SectionForceDeformation
 	       FEM_ObjectBroker &theBroker);
   void Print(OPS_Stream &s, int flag = 0);
   
-  Response *setResponse(const char **argv, int argc, Information &info);
+  Response *setResponse(const char **argv, int argc, Information &info, OPS_Stream &s);
   int getResponse(int responseID, Information &info);
   
   int addFiber(Fiber &theFiber);

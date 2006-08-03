@@ -34,6 +34,8 @@ class QzSimple1 : public UniaxialMaterial
     QzSimple1();
     ~QzSimple1();
 
+    const char *getClassType(void) const {return "QzSimple1";};
+
     int setTrialStrain(double z, double zRate); 
     double getStrain(void);          
     double getStress(void);

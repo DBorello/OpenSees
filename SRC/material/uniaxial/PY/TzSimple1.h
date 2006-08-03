@@ -29,8 +29,10 @@ class TzSimple1 : public UniaxialMaterial
 {
   public:
     TzSimple1(int tag, int classtag, int tzType, double tult, double z50, double dashpot);
-	TzSimple1();
+    TzSimple1();
     ~TzSimple1();
+
+    const char *getClassType(void) const {return "TzSimple1";};
 
     int setTrialStrain(double y, double yRate); 
     double getStrain(void);          

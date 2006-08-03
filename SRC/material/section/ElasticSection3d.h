@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:33 $
+// $Revision: 1.7 $
+// $Date: 2006-08-03 23:49:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection3d.h,v $
                                                                         
                                                                         
@@ -52,6 +52,8 @@ class ElasticSection3d: public SectionForceDeformation
     ElasticSection3d (int tag, double EA, double EIz, double EIy, double GJ);
 	ElasticSection3d (void);
     ~ElasticSection3d (void);
+
+    const char *getClassType(void) const {return "ElasticSection3d";};
 
     int commitState (void);
     int revertToLastCommit (void);

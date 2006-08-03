@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-18 21:39:05 $
+// $Revision: 1.2 $
+// $Date: 2006-08-03 23:42:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/drain/DrainBilinearMaterial.h,v $
                                                                       
 // Written: MHS
@@ -36,18 +36,20 @@
 class DrainBilinearMaterial : public DrainMaterial
 {
   public:
-	DrainBilinearMaterial(int tag,
-		double E, double fyp, double fyn, double alpha,
-		double ecaps, double ecapk, double ecapa, double ecapd,
-		double cs, double ck, double ca, double cd,
+  DrainBilinearMaterial(int tag,
+			double E, double fyp, double fyn, double alpha,
+			double ecaps, double ecapk, double ecapa, double ecapd,
+			double cs, double ck, double ca, double cd,
 		double capSlope, double capDispP, double capDispN, double res, double beto = 0.0);
-    DrainBilinearMaterial(int tag, const Vector &input, double beto = 0.0);
-	DrainBilinearMaterial(void);
-    virtual ~DrainBilinearMaterial();
+  DrainBilinearMaterial(int tag, const Vector &input, double beto = 0.0);
+  DrainBilinearMaterial(void);
+  virtual ~DrainBilinearMaterial();
 
-	int revertToStart(void);
+  const char *getClassType(void) {return "DrainBilinearMaterial";};
 
-	UniaxialMaterial *getCopy(void);
+  int revertToStart(void);
+  
+  UniaxialMaterial *getCopy(void);
 
   protected:
 

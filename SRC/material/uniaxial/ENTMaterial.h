@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-25 23:33:38 $
+// $Revision: 1.5 $
+// $Date: 2006-08-03 23:42:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ENTMaterial.h,v $
                                                                         
                                                                         
 #ifndef ENTMaterial_h
 #define ENTMaterial_h
 
-// File: ~/material/ENTMaterial.h
-//
 // Written: fmk 
 // Created: 07/98
 // Revision: A
@@ -48,6 +46,8 @@ class ENTMaterial : public UniaxialMaterial
     ENTMaterial(int tag, double E);    
     ENTMaterial();    
     ~ENTMaterial();
+
+    const char *getClassType(void) const {return "ENTMaterial";};
 
     int setTrialStrain(double strain, double strainRate = 0.0); 
     double getStrain(void);

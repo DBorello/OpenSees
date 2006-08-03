@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:33:33 $
+// $Revision: 1.6 $
+// $Date: 2006-08-03 23:49:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/Bidirectional.h,v $
                                                                         
                                                                         
@@ -48,6 +48,8 @@ class Bidirectional : public SectionForceDeformation
     Bidirectional(int tag, double E, double sigY, double Hiso, double Hkin);
     Bidirectional();
     ~Bidirectional();
+
+    const char *getClassType(void) const {return "Bidirectionald";};
 
     int setTrialSectionDeformation(const Vector &v);
     const Matrix &getSectionTangent(void);

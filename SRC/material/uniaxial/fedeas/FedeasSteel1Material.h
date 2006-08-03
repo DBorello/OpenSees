@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-26 23:00:13 $
+// $Revision: 1.3 $
+// $Date: 2006-08-03 23:45:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasSteel1Material.h,v $
                                                                       
 // Written: MHS
@@ -38,19 +38,21 @@ class FedeasSteel1Material : public FedeasMaterial
 {
   public:
     FedeasSteel1Material(int tag,
-		double fy, double E0, double b,
-		double a1, double a2, double a3, double a4);
-
-	// Constructor for no isotropic hardening
+			 double fy, double E0, double b,
+			 double a1, double a2, double a3, double a4);
+    
+    // Constructor for no isotropic hardening
     FedeasSteel1Material(int tag,
-		double fy, double E0, double b);
+			 double fy, double E0, double b);
+    
+    FedeasSteel1Material(int tag, const Vector &d);
+    FedeasSteel1Material(void);
+    ~FedeasSteel1Material();
 
-	FedeasSteel1Material(int tag, const Vector &d);
-	FedeasSteel1Material(void);
-    virtual ~FedeasSteel1Material();
+    const char *getClassType(void) const {return "FedeasSteel1Material";};
 
-	double getInitialTangent(void);
-	UniaxialMaterial *getCopy(void);
+    double getInitialTangent(void);
+    UniaxialMaterial *getCopy(void);
 
   protected:
 

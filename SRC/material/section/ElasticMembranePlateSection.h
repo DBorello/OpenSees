@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-14 23:01:33 $
+// $Revision: 1.9 $
+// $Date: 2006-08-03 23:49:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticMembranePlateSection.h,v $
 
 // Ed "C++" Love
@@ -63,6 +63,8 @@ class ElasticMembranePlateSection : public SectionForceDeformation{
     //make a clone of this material
     SectionForceDeformation *getCopy( ) ;
 
+
+    const char *getClassType(void) const {return "ElasticMembranePlate";};
 
     //send back order of strain in vector form
     int getOrder( ) const ;

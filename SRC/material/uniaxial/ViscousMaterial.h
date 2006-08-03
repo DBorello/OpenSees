@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:40 $
+// $Revision: 1.5 $
+// $Date: 2006-08-03 23:42:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ViscousMaterial.h,v $
                                                                         
 // Written: Mehrdad Sasani 
@@ -40,8 +40,10 @@ class ViscousMaterial : public UniaxialMaterial
 {
   public:
     ViscousMaterial(int tag, double C, double Alpha);    
-	ViscousMaterial(); 
+    ViscousMaterial(); 
     ~ViscousMaterial();
+
+    const char *getClassType(void) const {return "ViscousMaterial";};
 
     int setTrialStrain(double velocity, double strainRate = 0.0); 
     double getStrain(void); 

@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-03-05 01:02:51 $
+// $Revision: 1.12 $
+// $Date: 2006-08-03 23:42:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.h,v $
                                                                         
                                                                         
 #ifndef Steel01_h
 #define Steel01_h
 
-// File: Steel01.h
-//
 // Written: MHS 
 // Created: 06/99
 // Revision: A
@@ -57,6 +55,8 @@ class Steel01 : public UniaxialMaterial
     Steel01();
     ~Steel01();
 
+    const char *getClassType(void) const {return "Steel01";};
+
     int setTrialStrain(double strain, double strainRate = 0.0); 
     int setTrial (double strain, double &stress, double &tangent, double strainRate = 0.0);
     double getStrain(void);              
@@ -79,15 +79,15 @@ class Steel01 : public UniaxialMaterial
 // AddingSensitivity:BEGIN //////////////////////////////////////////
     int    setParameter             (const char **argv, int argc, Information &info);
     int    updateParameter          (int parameterID, Information &info);
-	int    activateParameter        (int parameterID);
-	double getStressSensitivity     (int gradNumber, bool conditional);
-	double getInitialTangentSensitivity(int gradNumber);
-	int    commitSensitivity        (double strainGradient, int gradNumber, int numGrads);
-// AddingSensitivity:END ///////////////////////////////////////////
-
-  protected:
+    int    activateParameter        (int parameterID);
+    double getStressSensitivity     (int gradNumber, bool conditional);
+    double getInitialTangentSensitivity(int gradNumber);
+    int    commitSensitivity        (double strainGradient, int gradNumber, int numGrads);
+    // AddingSensitivity:END ///////////////////////////////////////////
     
-  private:
+ protected:
+    
+ private:
     /*** Material Properties ***/
     double fy;  // Yield stress
     double E0;  // Initial stiffness
@@ -96,7 +96,7 @@ class Steel01 : public UniaxialMaterial
     double a2;
     double a3;
     double a4;  // a1 through a4 are coefficients for isotropic hardening
-
+    
     /*** CONVERGED History Variables ***/
     double CminStrain;  // Minimum strain in compression
     double CmaxStrain;  // Maximum strain in tension

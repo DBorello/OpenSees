@@ -18,15 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:33:38 $
+// $Revision: 1.6 $
+// $Date: 2006-08-03 23:42:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ElasticPPMaterial.h,v $
                                                                         
 #ifndef ElasticPPMaterial_h
 #define ElasticPPMaterial_h
 
-// File: ~/material/ElasticPPMaterial.h
-//
 // Written: fmk 
 // Created: 07/98
 // Revision: A
@@ -47,6 +45,8 @@ class ElasticPPMaterial : public UniaxialMaterial
     ElasticPPMaterial();    
 
     ~ElasticPPMaterial();
+
+    const char *getClassType(void) const {return "ElasticPPMaterial";};
 
     int setTrialStrain(double strain, double strainRate = 0.0); 
     double getStrain(void);          

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:33:37 $: 2001/07/16 08:23:22 $
+// $Revision: 1.6 $
+// $Date: 2006-08-03 23:42:19 $: 2001/07/16 08:23:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/CableMaterial.h,v $
                                                                         
                                                                         
@@ -53,6 +53,8 @@ class CableMaterial : public UniaxialMaterial
     CableMaterial(int tag, double Prestress, double E, double unitWeightEff, double L_Element);    
     CableMaterial();    
     ~CableMaterial();
+
+    const char *getClassType(void) const {return "CableMaterial";};
 
     int setTrialStrain(double strain, double strainRate = 0.0); 
     int setTrial (double strain, double &stress, double &tangent, double strainRate = 0.0);

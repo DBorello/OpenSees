@@ -29,9 +29,12 @@ class PySimple1 : public UniaxialMaterial
 {
   public:
     PySimple1(int tag, int classtag, int soilType, double pult, double y50, 
-			double drag, double dashpot);
-	PySimple1();
+	      double drag, double dashpot);
+    PySimple1();
     ~PySimple1();
+
+
+    const char *getClassType(void) const {return "PySimple1";};
 
     int setTrialStrain(double y, double yRate); 
     double getStrain(void);          

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-26 23:00:12 $
+// $Revision: 1.3 $
+// $Date: 2006-08-03 23:45:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasConcr1Material.h,v $
                                                                       
 // Written: MHS
@@ -38,14 +38,16 @@ class FedeasConcr1Material : public FedeasMaterial
 {
   public:
     FedeasConcr1Material(int tag,
-		double fc, double ec, double fu, double eu);
-	FedeasConcr1Material(int tag, const Vector &data);
-	FedeasConcr1Material(void);
-    virtual ~FedeasConcr1Material();
+			 double fc, double ec, double fu, double eu);
+    FedeasConcr1Material(int tag, const Vector &data);
+    FedeasConcr1Material(void);
+    ~FedeasConcr1Material();
 
-	double getInitialTangent(void);
-	UniaxialMaterial *getCopy(void);
-
+    const char *getClassType(void) const {return "FedeasConcr1Material";};
+    
+    double getInitialTangent(void);
+    UniaxialMaterial *getCopy(void);
+    
   protected:
 
   private:

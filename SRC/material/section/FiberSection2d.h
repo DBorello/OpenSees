@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-03-04 00:48:16 $
+// $Revision: 1.11 $
+// $Date: 2006-08-03 23:49:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.h,v $
                                                                         
 // Written: fmk
@@ -48,6 +48,8 @@ class FiberSection2d : public SectionForceDeformation
     FiberSection2d(int tag, int numFibers, Fiber **fibers); 
     ~FiberSection2d();
 
+    const char *getClassType(void) const {return "FiberSection2d";};
+
     int   setTrialSectionDeformation(const Vector &deforms); 
     const Vector &getSectionDeformation(void);
 
@@ -68,7 +70,9 @@ class FiberSection2d : public SectionForceDeformation
 		 FEM_ObjectBroker &theBroker);
     void Print(OPS_Stream &s, int flag = 0);
 	    
-    Response *setResponse(const char **argv, int argc, Information &info);
+    Response *setResponse(const char **argv, int argc, 
+			  Information &info, 
+			  OPS_Stream &s);
     int getResponse(int responseID, Information &info);
 
     int addFiber(Fiber &theFiber);

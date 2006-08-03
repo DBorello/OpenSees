@@ -35,15 +35,17 @@ class TzLiq1 : public TzSimple1
   public:
     TzLiq1(int tag, int classtag, int tzType, double tult, double z50,
 		      double dashpot, int solidElem1, int solidElem2, Domain *theDomain);
-	TzLiq1();
+    TzLiq1();
     ~TzLiq1();
+
+    const char *getClassType(void) const {return "TzLiq1";};
 
     int setTrialStrain(double y, double yRate); 
     double getStrain(void);          
     double getStress(void);
     double getTangent(void);
-	double getStrainRate(void);
-	double getDampTangent(void);
+    double getStrainRate(void);
+    double getDampTangent(void);
     double getInitialTangent(void);
 
     int commitState(void);

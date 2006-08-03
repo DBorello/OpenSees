@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-03-01 00:31:26 $
+// $Revision: 1.3 $
+// $Date: 2006-08-03 23:42:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FatigueMaterial.h,v $
                                                       
 // Written: Patxi
@@ -59,6 +59,8 @@ class FatigueMaterial : public UniaxialMaterial
   
   FatigueMaterial();
   ~FatigueMaterial();
+
+  const char *getClassType(void) const {return "FatigueMaterial";};
   
   int setTrialStrain(double strain, double strainRate = 0.0); 
   double getStrain(void);          

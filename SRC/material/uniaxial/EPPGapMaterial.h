@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2005-06-16 21:41:03 $
+// $Revision: 1.7 $
+// $Date: 2006-08-03 23:42:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/EPPGapMaterial.h,v $
 
 // File: ~/material/EPPGapMaterial.h
@@ -58,6 +58,8 @@ class EPPGapMaterial : public UniaxialMaterial
     EPPGapMaterial(int tag, double E, double fy, double gap, double eta, int damage = 0);
     EPPGapMaterial();  
     ~EPPGapMaterial();
+
+    const char *getClassType(void) const {return "EPPGapMaterial";};
 
     int setTrialStrain(double strain, double strainRate = 0.0); 
     double getStrain(void);          

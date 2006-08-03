@@ -31,22 +31,24 @@
 #include <iostream>
 #include <string>
 
-	class PyLiq1 : public PySimple1
+class PyLiq1 : public PySimple1
 {
   public:
     PyLiq1(int tag, int classtag, int soilType, double pult, double y50, double drag,
-		      double dashpot, double pRes, int solidElem1, int solidElem2, Domain *theDomain);
-	PyLiq1();
+	   double dashpot, double pRes, int solidElem1, int solidElem2, Domain *theDomain);
+    PyLiq1();
     ~PyLiq1();
+
+    const char *getClassType(void) const {return "PyLiq1";};
 
     int setTrialStrain(double y, double yRate); 
     double getStrain(void);          
     double getStress(void);
     double getTangent(void);
-	double getStrainRate(void);
-	double getDampTangent(void);
+    double getStrainRate(void);
+    double getDampTangent(void);
     double getInitialTangent(void);
-
+    
     int commitState(void);
     int revertToLastCommit(void);    
     int revertToStart(void);        
@@ -56,12 +58,12 @@
     int sendSelf(int commitTag, Channel &theChannel);  
     int recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker);
-
+    
     //  Command for initiating vertConsolStress from TclUpdateMaterialStageCommand
-	int updateParameter(int snum, Information &eleInformation);
+    int updateParameter(int snum, Information &eleInformation);
     
     void Print(OPS_Stream &s, int flag =0);
-   
+    
   protected:
     
   private:

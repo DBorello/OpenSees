@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-06 18:34:14 $
+// $Revision: 1.2 $
+// $Date: 2006-08-03 23:42:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/BoucWenMaterial.h,v $
 
 
@@ -41,19 +41,22 @@ class BoucWenMaterial : public UniaxialMaterial
 {
   public:
     BoucWenMaterial(int tag, 
-					double alpha,
-					double ko,
-					double n,
-					double gamma,
-					double beta,
-					double Ao,
-					double deltaA,
-					double deltaNu,
-					double deltaEta,
-					double tolerance,
-					int maxNumIter);
-	BoucWenMaterial();
+		    double alpha,
+		    double ko,
+		    double n,
+		    double gamma,
+		    double beta,
+		    double Ao,
+		    double deltaA,
+		    double deltaNu,
+		    double deltaEta,
+		    double tolerance,
+		    int maxNumIter);
+    BoucWenMaterial();
     ~BoucWenMaterial();
+
+    const char *getClassType(void) const {return "BoucWenMaterial";};
+
     int setTrialStrain(double strain, double strainRate = 0.0); 
     double getStrain(void);          
     double getStress(void);
