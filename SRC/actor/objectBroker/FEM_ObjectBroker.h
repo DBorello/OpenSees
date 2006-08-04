@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-11-22 19:40:05 $
+// $Revision: 1.6 $
+// $Date: 2006-08-04 22:37:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.h,v $
                                                                         
                                                                         
@@ -32,9 +32,6 @@
 // used by programmers when introducing new subclasses of the main objects.
 //
 // What: "@(#) FEM_ObjectBroker.h, revA"
-
-
-
 
 
 #ifndef FEM_ObjectBroker_h
@@ -83,8 +80,7 @@ class Fiber;
 class ConvergenceTest;
 class SectionForceDeformation;
 class GroundMotion;
-
-class DataOutputHandler;
+class OPS_Stream;
 class Recorder;
 
 class Actor;
@@ -133,7 +129,8 @@ class FEM_ObjectBroker
     virtual ID	          *getPtrNewID(int classTag, int size);
 
     // methods for ouput objects
-    virtual DataOutputHandler *getPtrNewDataOutputHandler(int classTag);
+    //    virtual DataOutputHandler *getPtrNewDataOutputHandler(int classTag);
+    virtual OPS_Stream *getPtrNewStream(int classTag);
     virtual Recorder *getPtrNewRecorder(int classTag);
     
     

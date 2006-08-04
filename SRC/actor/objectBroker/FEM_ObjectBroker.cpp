@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.33 $
-// $Date: 2006-03-15 00:28:56 $
+// $Revision: 1.34 $
+// $Date: 2006-08-04 22:37:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -146,10 +146,6 @@
 #include <ConstantPressureVolumeQuad.h>
 #include <ElasticBeam2d.h>
 #include <ElasticBeam3d.h>
-#include <BeamWithHinges2d.h>
-#include <BeamWithHinges3d.h>
-#include <NLBeamColumn2d.h>
-#include <NLBeamColumn3d.h>
 #include <ForceBeamColumn2d.h>
 #include <ForceBeamColumn3d.h>
 
@@ -181,9 +177,11 @@
 #include <Node.h>
 
 
-#include <DataOutputStreamHandler.h>
-#include <DataOutputFileHandler.h>
-#include <DataOutputDatabaseHandler.h>
+#include <FileStream.h>
+#include <StandardStream.h>
+#include <XmlFileStream.h>
+#include <DataFileStream.h>
+#include <DatabaseStream.h>
 
 #include <NodeRecorder.h>
 #include <ElementRecorder.h>
@@ -461,18 +459,6 @@ FEM_ObjectBroker::getNewElement(int classTag)
 
 	case ELE_TAG_ElasticBeam3d:
 		return new ElasticBeam3d();
-
-	case ELE_TAG_BeamWithHinges2d:  
-	     return new BeamWithHinges2d(); 	     	     
-
-	case ELE_TAG_BeamWithHinges3d:  
-	     return new BeamWithHinges3d(); 	     	     
-
-	case ELE_TAG_NLBeamColumn2d:  
-	     return new NLBeamColumn2d();					     
-
-	case ELE_TAG_NLBeamColumn3d:  
-	     return new NLBeamColumn3d();  
 
 	case ELE_TAG_ForceBeamColumn2d:  
 	     return new ForceBeamColumn2d();					     
@@ -1130,24 +1116,32 @@ FEM_ObjectBroker::getPtrNewID(int classTag, int size)
  *
  *****************************************/
 
-DataOutputHandler *
-FEM_ObjectBroker::getPtrNewDataOutputHandler(int classTag)
+OPS_Stream *
+FEM_ObjectBroker::getPtrNewStream(int classTag)
 {
     switch(classTag) {
-	case DATAHANDLER_TAGS_DataOutputStreamHandler:  
-	     return new DataOutputStreamHandler();
+    case OPS_STREAM_TAGS_StandardStream:
+	     return new StandardStream();
 
-	case DATAHANDLER_TAGS_DataOutputFileHandler:  
-	     return new DataOutputFileHandler();
+    case OPS_STREAM_TAGS_FileStream:
+	     return new FileStream();
 
-	case DATAHANDLER_TAGS_DataOutputDatabaseHandler:  
-	     return new DataOutputDatabaseHandler();
+    case OPS_STREAM_TAGS_XmlFileStream:
+	     return new XmlFileStream();
+
+    case OPS_STREAM_TAGS_DataFileStream:
+	     return new DataFileStream();
+
+    case OPS_STREAM_TAGS_DatabaseStream:
+      return new DatabaseStream();
+
+
 	     
-	default:
-	     opserr << "FEM_ObjectBroker::getPtrNewDataOutputHandler - ";
-	     opserr << " - no DataOutputHandler type exists for class tag ";
-	     opserr << classTag << endln;
-	     return 0;
+    default:
+      opserr << "FEM_ObjectBroker::getPtrNewStream - ";
+      opserr << " - no DataOutputHandler type exists for class tag ";
+      opserr << classTag << endln;
+      return 0;
 	     
 	 }        
 }
