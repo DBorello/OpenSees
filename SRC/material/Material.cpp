@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-25 23:33:21 $
+// $Revision: 1.4 $
+// $Date: 2006-08-04 18:40:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/Material.cpp,v $
                                                                         
                                                                         
-// File: ~/material/Material.C
-//
 // Written: fmk 
 // Created: 05/98
 // Revision: A
@@ -74,7 +72,7 @@ Material::updateParameter(int responseID, Information &eleInformation)
 }
 
 Response*
-Material::setResponse(const char **argv, int argc, Information &info)
+Material::setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &s)
 {
 	return 0;
 }
