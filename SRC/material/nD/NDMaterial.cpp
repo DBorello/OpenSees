@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $                                                              
-// $Date: 2004-07-20 22:39:02 $                                                                  
+// $Revision: 1.18 $                                                              
+// $Date: 2006-08-04 18:18:00 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C
@@ -185,6 +185,7 @@ NDMaterial::setTrialStrainIncr(const Tensor &v, const Tensor &r)
 
 //Zhao (zcheng@ucdavis.edu) 
 // added Sept 22 2003 for Large Deformation, F is the Deformation Grandient
+
 int
 NDMaterial::setTrialF(const straintensor &f)
 {
@@ -278,37 +279,79 @@ const straintensor NDMaterial::getPlasticStrainTensor(void)
 //}
 
 Response*
-NDMaterial::setResponse (const char **argv, int argc, Information &matInfo)
+NDMaterial::setResponse (const char **argv, int argc, 
+			 Information &matInfo, OPS_Stream &output)
 {
-    if (strcmp(argv[0],"stress") == 0 || strcmp(argv[0],"stresses") == 0)
-		return new MaterialResponse(this, 1, this->getStress());
+  Response *theResponse =0;
+  const char *matType = this->getType();
 
-    else if (strcmp(argv[0],"strain") == 0 || strcmp(argv[0],"strains") == 0)
-		return new MaterialResponse(this, 2, this->getStrain());
+  output.tag("NdMaterialOutput");
+  output.attr("matType",this->getClassType());
+  output.attr("matTag",this->getTag());
+
+  if (strcmp(argv[0],"stress") == 0 || strcmp(argv[0],"stresses") == 0) {
+    const Vector &res = this->getStress();
+    int size = res.Size();
     
-    else if (strcmp(argv[0],"tangent") == 0)
-      return new MaterialResponse(this, 3, this->getTangent());
-    
-    else
-      return 0;
+    if ( (strcmp(matType,"PlaneStress") == 0 && size == 3) ||
+	 (strcmp(matType,"PlaneStrain") == 0 && size == 3)) {
+	output.tag("ResponseType","sigma11");
+	output.tag("ResponseType","sigma22");
+	output.tag("ResponseType","sigma12");
+    } else if (strcmp(matType,"ThreeDimensional") == 0 && size == 6) {
+	output.tag("ResponseType","sigma11");
+	output.tag("ResponseType","sigma22");
+	output.tag("ResponseType","sigma33");
+	output.tag("ResponseType","sigma12");
+	output.tag("ResponseType","sigma13");
+	output.tag("ResponseType","sigma23");
+    } else {
+      for (int i=0; i<size; i++) 
+	output.tag("ResponseType","UnknownStress");
+      
+      theResponse =  new MaterialResponse(this, 1, this->getStress());
+    }
+  } else if (strcmp(argv[0],"strain") == 0 || strcmp(argv[0],"strains") == 0) {
+    const Vector &res = this->getStrain();
+    int size = res.Size();
+    if ( (strcmp(matType,"PlaneStress") == 0 && size == 3) ||
+	 (strcmp(matType,"PlaneStrain") == 0 && size == 3)) {
+	output.tag("ResponseType","eta11");
+	output.tag("ResponseType","eta22");
+	output.tag("ResponseType","eta12");
+    } else if (strcmp(matType,"ThreeDimensional") == 0 && size == 6) {
+	output.tag("ResponseType","eps11");
+	output.tag("ResponseType","eps22");
+	output.tag("ResponseType","eps33");
+	output.tag("ResponseType","eps12");
+	output.tag("ResponseType","eps13");
+	output.tag("ResponseType","eps23");
+    } else {
+      for (int i=0; i<size; i++) 
+	output.tag("ResponseType","UnknownStrain");
+      
+      theResponse =  new MaterialResponse(this, 1, this->getStress());
+    }
+  }
+
+  output.endTag(); // NdMaterialOutput
+
+  return theResponse;
 }
 
 int 
 NDMaterial::getResponse (int responseID, Information &matInfo)
 {
-	switch (responseID) {
-		case 1:
-			return matInfo.setVector(this->getStress());
-
-		case 2:
-			return matInfo.setVector(this->getStrain());
-
-		case 3:
-			return matInfo.setMatrix(this->getTangent());
-			
-		default:
-			return -1;
-	}
+  switch (responseID) {
+  case 1:
+    return matInfo.setVector(this->getStress());
+    
+  case 2:
+    return matInfo.setVector(this->getStrain());
+    
+  default:
+    return -1;
+  }
 }
 
 

@@ -23,8 +23,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.16 $
-// $Date: 2004-07-20 22:39:02 $
+// $Revision: 1.17 $
+// $Date: 2006-08-04 18:18:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.h,v $
 
 
@@ -116,7 +116,9 @@ class NDMaterial : public Material
     virtual const char *getType(void) const = 0;
     virtual int getOrder(void) const = 0;
 
-    virtual Response *setResponse (const char **argv, int argc, Information &matInformation);
+    virtual Response *setResponse (const char **argv, int argc, 
+				   Information &matInformation, 
+				   OPS_Stream &s);
     virtual int getResponse (int responseID, Information &matInformation);
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////
