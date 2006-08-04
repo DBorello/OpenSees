@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:33:36 $
+// $Revision: 1.6 $
+// $Date: 2006-08-04 18:32:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/Fiber.h,v $
                                                                         
                                                                         
@@ -68,7 +68,7 @@ class Fiber : public TaggedObject, public MovableObject
     virtual int getOrder(void) = 0;
     virtual const ID &getType(void) = 0;
 
-    virtual Response *setResponse(const char **argv, int argc, Information &info);
+    virtual Response *setResponse(const char **argv, int argc, Information &info, OPS_Stream &s);
     virtual int getResponse(int responseID, Information &info);
 
     virtual void getFiberLocation(double &y, double &z) =0;
