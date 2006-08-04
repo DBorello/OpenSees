@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2006-05-24 21:31:34 $
+// $Revision: 1.14 $
+// $Date: 2006-08-04 17:34:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.cpp,v $
                                                                         
-                                                                        
-// File: ~/material/Concrete01.C
-//
 // Written: MHS 
 // Created: 06/99
 // Revision: A
@@ -99,6 +96,7 @@ Concrete01::~Concrete01 ()
 {
   // Does nothing
 }
+
 
 int Concrete01::setTrialStrain (double strain, double strainRate)
 {

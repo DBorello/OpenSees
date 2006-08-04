@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-05-24 21:45:40 $
+// $Revision: 1.5 $
+// $Date: 2006-08-04 17:34:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete04.cpp,v $
                                                                         
 // Written: N.Mitra (nmitra@u.washington.edu) 
@@ -35,7 +35,8 @@
 // Dt. 05-16-05
 
 
-#include <Concrete04.h>#include <Vector.h>
+#include <Concrete04.h>
+#include <Vector.h>
 #include <Matrix.h>
 #include <Channel.h>
 #include <Information.h>
