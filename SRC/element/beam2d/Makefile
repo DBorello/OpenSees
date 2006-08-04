@@ -1,7 +1,10 @@
 include ../../../Makefile.def
 
+
+OBJS       =  
+
 #OBJS       = beam2d02.o beam2d03.o beam2d04.o ElasticBeam2d.o
-OBJS       =  beam2d03.o beam2d04.o beam2d02.o
+#OBJS       =  beam2d03.o beam2d04.o beam2d02.o
 
 all:         $(OBJS)
 
