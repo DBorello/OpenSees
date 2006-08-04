@@ -1,905 +1,456 @@
 /* *********************************************************************
-
 **    OpenSees - Open System for Earthquake Engineering Simulation    **
-
 **          Pacific Earthquake Engineering Research Center            **
-
 **                                                                    **
-
 **                                                                    **
-
 ** (C) Copyright 1999, The Regents of the University of California    **
-
 ** All Rights Reserved.                                               **
-
 **                                                                    **
-
 ** Commercial use of this program without express permission of the   **
-
 ** University of California, Berkeley, is strictly prohibited.  See   **
-
 ** file 'COPYRIGHT'  in main directory for information on usage and   **
-
 ** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
-
 **                                                                    **
-
 ** Developed by:                                                      **
-
 **   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
-
 **   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
-
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
-
 **                                                                    **
-
 ** ****************************************************************** */
-
 //
-
 // by Jinchi Lu and Zhaohui Yang (May 2004)
-
 //
-
 // 20NodeBrick element
-
-//
 
 
 
 #include <stdio.h>
-
 #include <stdlib.h>
-
 #include <math.h>
 
-
-
 #include <ID.h>
-
 #include <Vector.h>
-
 #include <Matrix.h>
-
 #include <Element.h>
-
 #include <Node.h>
-
 #include <Domain.h>
-
 #include <ErrorHandler.h>
-
 #include <Twenty_Node_Brick.h>
-
 #include <shp3d.h>
-
 #include <shp3dv.h>
-
 #include <Renderer.h>
-
 #include <ElementResponse.h>
 
 
-
-
-
 #include <Channel.h>
-
 #include <FEM_ObjectBroker.h>
 
-
-
 //static data
-
 double  Twenty_Node_Brick::xl[3][20] ;
 
-
-
 Matrix  Twenty_Node_Brick::stiff(60,60) ;
-
 Vector  Twenty_Node_Brick::resid(60) ;
-
 Matrix  Twenty_Node_Brick::mass(60,60) ;
-
 Matrix  Twenty_Node_Brick::damp(60,60) ;
 
-
-
 const int Twenty_Node_Brick::nintu=27;
-
 const int Twenty_Node_Brick::nenu=20;
-
 double Twenty_Node_Brick::shgu[4][20][27];
-
 double Twenty_Node_Brick::shlu[4][20][27];
-
 double Twenty_Node_Brick::wu[27];
-
 double Twenty_Node_Brick::dvolu[27];
 
-
-
 //null constructor
-
 Twenty_Node_Brick::Twenty_Node_Brick( ) :
-
 Element( 0, ELE_TAG_Twenty_Node_Brick ),
-
 connectedExternalNodes(20), load(0), Ki(0)//, kc(0), rho(0)
-
 {
-
 	for (int i=0; i<20; i++ ) {
-
 		nodePointers[i] = 0;
-
 	}
-
 	b[0] = b[1] = b[2] = 0.;
 
-
-
 	// calculate local shape functions and derivatives
-
 	compuLocalShapeFunction();
-
 }
-
-
-
 
 
 //*********************************************************************
-
 //full constructor
-
 Twenty_Node_Brick::Twenty_Node_Brick(int tag,
-
 											   int node1,
-
 											   int node2,
-
 											   int node3,
-
 											   int node4,
-
 											   int node5,
-
 											   int node6,
-
 											   int node7,
-
 											   int node8,
-
 											   int node9,
-
 											   int node10,
-
 											   int node11,
-
 											   int node12,
-
 											   int node13,
-
 											   int node14,
-
 											   int node15,
-
 											   int node16,
-
 											   int node17,
-
 											   int node18,
-
 											   int node19,
-
 											   int node20,
-
 											   NDMaterial &theMaterial,
-
 											   double b1, double b2, double b3) :
-
 Element( tag, ELE_TAG_Twenty_Node_Brick ),
-
 connectedExternalNodes(20), load(0), Ki(0)//, kc(bulk), rho(rhof)
-
 {
-
 	connectedExternalNodes(0) = node1 ;
-
 	connectedExternalNodes(1) = node2 ;
-
 	connectedExternalNodes(2) = node3 ;
-
 	connectedExternalNodes(3) = node4 ;
-
 	connectedExternalNodes(4) = node5 ;
-
 	connectedExternalNodes(5) = node6 ;
-
 	connectedExternalNodes(6) = node7 ;
-
 	connectedExternalNodes(7) = node8 ;
-
 	connectedExternalNodes(8) = node9 ;
-
 	connectedExternalNodes(9) = node10 ;
-
 	connectedExternalNodes(10) = node11 ;
-
 	connectedExternalNodes(11) = node12 ;
-
 	connectedExternalNodes(12) = node13 ;
-
 	connectedExternalNodes(13) = node14 ;
-
 	connectedExternalNodes(14) = node15 ;
-
 	connectedExternalNodes(15) = node16 ;
-
 	connectedExternalNodes(16) = node17 ;
-
 	connectedExternalNodes(17) = node18 ;
-
 	connectedExternalNodes(18) = node19 ;
-
 	connectedExternalNodes(19) = node20 ;
-
 	int i ;
-
     // Allocate arrays of pointers to NDMaterials
-
     materialPointers = new NDMaterial *[nintu];
 
-
-
     if (materialPointers == 0) {
-
 		opserr << "Twenty_Node_Brick::Twenty_Node_Brick - failed allocate material model pointer\n";
-
 		exit(-1);
-
     }
-
 	for ( i=0; i<nintu; i++ ) {
-
-
 
 		materialPointers[i] = theMaterial.getCopy("ThreeDimensional") ;
 
-
-
 		if (materialPointers[i] == 0) {
-
 			opserr <<"Twenty_Node_Brick::constructor - failed to get a material of type: ThreeDimensional\n";
-
 			exit(-1);
-
 		} //end if
-
-
 
 	} //end for i
 
-
-
 	// Body forces
-
 	b[0] = b1;
-
 	b[1] = b2;
-
 	b[2] = b3;
-
 //	printf("b %15.6e %15.6e %15.6e \n", b1, b2,b3);
-
 	// calculate local shape functions and derivatives
-
 	compuLocalShapeFunction();
 
-
-
 }
-
 //******************************************************************
 
 
-
-
-
 //destructor
-
 Twenty_Node_Brick::~Twenty_Node_Brick( )
-
 {
-
 	int i ;
-
     for ( i = 0; i < nintu; i++) {
-
 		if (materialPointers[i])
-
 			delete materialPointers[i];
-
 	}
 
-
-
     // Delete the array of pointers to NDMaterial pointer arrays
-
     if (materialPointers)
-
 		delete [] materialPointers;
 
-
-
 	for ( i=0 ; i<nenu; i++ ) {
-
 		nodePointers[i] = 0 ;
-
 	} //end for i
 
-
-
 	if (load != 0)
-
 		delete load;
 
-
-
 	if (Ki != 0)
-
 		delete Ki;
-
 }
-
-
-
 
 
 //set domain
-
 void  Twenty_Node_Brick::setDomain( Domain *theDomain )
-
 {
-
 	int i,dof ;
-
 	// Check Domain is not null - invoked when object removed from a domain
-
 	if (theDomain == 0) {
-
 		for ( i=0; i<nenu; i++ )
-
 			nodePointers[i] = 0;
-
 		return;
-
 	}
-
 	//node pointers
-
 	for ( i=0; i<nenu; i++ ) {
-
 		nodePointers[i] = theDomain->getNode( connectedExternalNodes(i) ) ;
-
 		if (nodePointers[i] == 0) {
-
 			opserr << "FATAL ERROR Twenty_Node_Brick ("<<this->getTag()<<"): node not found in domain"<<endln;
-
 			return;
-
 		}
-
-
 
 		dof = nodePointers[i]->getNumberDOF();
-
 		if( dof != 3 ) {
-
 			opserr << "FATAL ERROR Twenty_Node_Brick ("<<this->getTag()<<"): has wrong number of DOFs at its nodes"<<endln;
-
 			return;
-
 		}
-
 	}
-
 	this->DomainComponent::setDomain(theDomain);
-
 }
-
-
-
 
 
 //get the number of external nodes
-
 int  Twenty_Node_Brick::getNumExternalNodes( ) const
-
 {
-
 	return nenu ;
-
 }
-
-
-
 
 
 //return connected external nodes
-
 const ID&  Twenty_Node_Brick::getExternalNodes( )
-
 {
-
 	return connectedExternalNodes ;
-
 }
-
-
 
 //return connected external node
-
 Node **
-
 Twenty_Node_Brick::getNodePtrs(void)
-
 {
-
 	return nodePointers ;
-
 }
-
-
-
 
 
 //return number of dofs
-
 int  Twenty_Node_Brick::getNumDOF( )
-
 {
-
 	return 60 ;
-
 }
-
-
-
 
 
 //commit state
-
 int  Twenty_Node_Brick::commitState( )
-
 {
-
 	int success = 0 ;
 
-
-
 	// call element commitState to do any base class stuff
-
 	if ((success = this->Element::commitState()) != 0) {
-
 		opserr << "Twenty_Node_Brick::commitState () - failed in base class";
-
 	}
 
-
-
 	for (int i=0; i<nintu; i++ )
-
 		success += materialPointers[i]->commitState( ) ;
 
-
-
 	return success ;
-
 }
-
-
-
-
 
 
 
 //revert to last commit
-
 int  Twenty_Node_Brick::revertToLastCommit( )
-
 {
-
 	int i ;
-
 	int success = 0 ;
 
-
-
 	for ( i=0; i<nintu; i++ )
-
 		success += materialPointers[i]->revertToLastCommit( ) ;
 
-
-
 	return success ;
-
 }
-
-
-
 
 
 //revert to start
-
 int  Twenty_Node_Brick::revertToStart( )
-
 {
-
 	int i ;
-
 	int success = 0 ;
 
-
-
-	for ( i=0; i<nintu; i++ )
-
-		success += materialPointers[i]->revertToStart( ) ;
-
+	for (int i=0; i<nintu; i++)
+	  success += materialPointers[i]->revertToStart( ) ;
 
 
 	return success ;
-
 }
 
-
-
 //print out element data
-
 void  Twenty_Node_Brick::Print( OPS_Stream &s, int flag )
-
 {
-
-
 
 	if (flag == 2) {
 
-
-
 		s << "#20NodeBrick\n";
 
-
-
 		int i;
-
 		const int numNodes = 20;
-
 		const int nstress = 6 ;
 
-
-
 		for (i=0; i<numNodes; i++) {
-
 			const Vector &nodeCrd = nodePointers[i]->getCrds();
-
 			const Vector &nodeDisp = nodePointers[i]->getDisp();
-
 			s << "#NODE " << nodeCrd(0) << " " << nodeCrd(1) << " " << nodeCrd(2)
-
 				<< " " << nodeDisp(0) << " " << nodeDisp(1) << " " << nodeDisp(2) << endln;
-
 		}
-
-
 
 		// spit out the section location & invoke print on the scetion
-
 		const int numMaterials = nintu;
 
-
-
 		static Vector avgStress(7);
-
 		static Vector avgStrain(nstress);
-
 		avgStress.Zero();
-
 		avgStrain.Zero();
-
 		for (i=0; i<numMaterials; i++) {
-
 			avgStress += materialPointers[i]->getCommittedStress();
-
 			avgStrain += materialPointers[i]->getCommittedStrain();
-
 		}
-
 		avgStress /= numMaterials;
-
 		avgStrain /= numMaterials;
 
-
-
 		s << "#AVERAGE_STRESS ";
-
 		for (i=0; i<7; i++)
-
 			s << avgStress(i) << " " ;
-
 		s << endln;
-
-
 
 		s << "#AVERAGE_STRAIN ";
-
 		for (i=0; i<nstress; i++)
-
 			s << avgStrain(i) << " " ;
-
 		s << endln;
 
-
-
 		/*
-
 		for (i=0; i<numMaterials; i++) {
-
 		s << "#MATERIAL\n";
-
 		//      materialPointers[i]->Print(s, flag);
-
 		s << materialPointers[i]->getStress();
-
 		}
-
 		*/
-
-
 
 	} else {
 
-
-
 		s << endln ;
-
 		s << "20NodeBrick Twenty_Node_Brick \n" ;
-
 		s << "Element Number: " << this->getTag() << endln ;
-
 		s << "Node 1 : " << connectedExternalNodes(0) << endln ;
-
 		s << "Node 2 : " << connectedExternalNodes(1) << endln ;
-
 		s << "Node 3 : " << connectedExternalNodes(2) << endln ;
-
 		s << "Node 4 : " << connectedExternalNodes(3) << endln ;
-
 		s << "Node 5 : " << connectedExternalNodes(4) << endln ;
-
 		s << "Node 6 : " << connectedExternalNodes(5) << endln ;
-
 		s << "Node 7 : " << connectedExternalNodes(6) << endln ;
-
 		s << "Node 8 : " << connectedExternalNodes(7) << endln ;
-
 		s << "Node 9 : " << connectedExternalNodes(8) << endln ;
-
 		s << "Node 10 : " << connectedExternalNodes(9) << endln ;
-
 		s << "Node 11 : " << connectedExternalNodes(10) << endln ;
-
 		s << "Node 12 : " << connectedExternalNodes(11) << endln ;
-
 		s << "Node 13 : " << connectedExternalNodes(12) << endln ;
-
 		s << "Node 14 : " << connectedExternalNodes(13) << endln ;
-
 		s << "Node 15 : " << connectedExternalNodes(14) << endln ;
-
 		s << "Node 16 : " << connectedExternalNodes(15) << endln ;
-
 		s << "Node 17 : " << connectedExternalNodes(16) << endln ;
-
 		s << "Node 18 : " << connectedExternalNodes(17) << endln ;
-
 		s << "Node 19 : " << connectedExternalNodes(18) << endln ;
-
 		s << "Node 20 : " << connectedExternalNodes(19) << endln ;
 
-
-
 		s << "Material Information : \n " ;
-
 		materialPointers[0]->Print( s, flag ) ;
 
-
-
 		s << endln ;
-
 	}
-
 }
 
-
-
 int
-
 Twenty_Node_Brick::update()
-
 {
-
 	int i, j, k, k1;
-
 	static double u[3][20];
-
 	static double xsj;
-
 	static Matrix B(6, 3);
-
 	double volume = 0.;
 
-
-
 	for (i = 0; i < nenu; i++) {
-
 	     const Vector &disp = nodePointers[i]->getTrialDisp();
-
 	     u[0][i] = disp(0);
-
 	     u[1][i] = disp(1);
-
 	     u[2][i] = disp(2);
-
     }
-
-
 
 	static Vector eps(6);
 
-
-
 	int ret = 0;
 
-
-
 	//compute basis vectors and local nodal coordinates
-
 	computeBasis( ) ;
 
-
-
 	for( i = 0; i < nintu; i++ ) {
-
 		// compute Jacobian and global shape functions
-
 		Jacobian3d(i, xsj, 0);
-
 		//volume element to also be saved
-
 		dvolu[i] = wu[i] * xsj ;
-
 		volume += dvolu[i];
-
 	} // end for i
-
     //printf("volume = %f\n", volume);
 
-
-
 	// Loop over the integration points
-
 	for (i = 0; i < nintu; i++) {
 
-
-
 		// Interpolate strains
-
 		//eps = B*u;
-
 		//eps.addMatrixVector(0.0, B, u, 1.0);
-
 		eps.Zero();
-
 		for ( j = 0; j < nenu; j++) {
 
 
-
-
-
 			B(0,0) = shgu[0][j][i];
-
 			B(0,1) = 0.;
-
 			B(0,2) = 0.;
-
 			B(1,0) = 0.;
-
 			B(1,1) = shgu[1][j][i];
-
 			B(1,2) = 0.;
-
 			B(2,0) = 0.;
-
 			B(2,1) = 0.;
-
 			B(2,2) = shgu[2][j][i];
-
 			B(3,0) = shgu[1][j][i];
-
 			B(3,1) = shgu[0][j][i];
-
 			B(3,2) = 0.;
-
 			B(4,0) = 0.;
-
 			B(4,1) = shgu[2][j][i];
-
 			B(4,2) = shgu[1][j][i];
-
 			B(5,0) = shgu[2][j][i];
-
 			B(5,1) = 0.;
-
 			B(5,2) = shgu[0][j][i];
-
-
 
 			//BJ = computeB( j, shp ) ;
 
-
-
 			//nodal displacements
-
 			const Vector &ul = nodePointers[j]->getTrialDisp( ) ;
-
 			Vector ul3(3);
-
 			ul3(0) = ul(0);
-
 			ul3(1) = ul(1);
-
 			ul3(2) = ul(2);
-
 			//compute the strain
-
 			//strain += (BJ*ul) ;
-
 			eps.addMatrixVector(1.0,B,ul3,1.0 ) ;
 
-
-
 			/* for( k = 0; k < 6; k++) {
-
 			for( k1 = 0; k1 < 3; k1++) {
-
 			eps[k] += BJ(k, k1)*u[k1][j];
-
 			}
-
 		}	*/
-
-
-
 
 
 		}
 
-
-
 		// Set the material strain
-
 		ret += materialPointers[i]->setTrialStrain(eps);
-
 	}
 
-
-
 	return ret;
-
 }
-
 
 
 //return tangent stiffness matrix
@@ -2055,60 +1606,66 @@ Twenty_Node_Brick::displaySelf(Renderer &theViewer, int displayMode, float fact)
 
 
 Response*
-
-Twenty_Node_Brick::setResponse(const char **argv, int argc, Information &eleInfo)
-
+Twenty_Node_Brick::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
 {
 
-	if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
+  Response *theResponse = 0;
 
-		return new ElementResponse(this, 1, resid);
+  char outputData[32];
 
+  output.tag("ElementOutput");
+  output.attr("eleType","Twenty_Node_Brick");
+  output.attr("eleTag",this->getTag());
+  for (int i=1; i<=20; i++) {
+    sprintf(outputData,"node%d",i);
+    output.attr(outputData, connectedExternalNodes[i-1]);
+  }
 
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0) {
 
-	else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
+    for (int i=1; i<=20; i++)
+      for (int j=1; j<=3; j++) {
+	sprintf(outputData,"P%d_%d",j,i);
+	output.tag("ResponseType",outputData);
+      }
 
-		return new ElementResponse(this, 2, stiff);
+    theResponse = new ElementResponse(this, 1, resid);
+  
+  }  else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
+    int pointNum = atoi(argv[1]);
+    if (pointNum > 0 && pointNum <= nintu) {
 
+      output.tag("GaussPoint");
+      output.attr("number",pointNum);
 
+      theResponse =  materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+      
+      output.endTag(); // GaussPoint
+    }
+  } else if (strcmp(argv[0],"stresses") ==0) {
 
-    else if (strcmp(argv[0],"mass") == 0)
+    for (int i=0; i<27; i++) {
+      output.tag("GaussPoint");
+      output.attr("number",i+1);
+      output.tag("NdMaterialOutput");
+      output.attr("classType", materialPointers[i]->getClassTag());
+      output.attr("tag", materialPointers[i]->getTag());
 
-    	return new ElementResponse(this, 3, mass);
+      output.tag("ResponseType","sigma11");
+      output.tag("ResponseType","sigma22");
+      output.tag("ResponseType","sigma33");
+      output.tag("ResponseType","sigma12");
+      output.tag("ResponseType","sigma13");
+      output.tag("ResponseType","sigma23");      
 
-
-
-    else if (strcmp(argv[0],"damp") == 0)
-
-    	return new ElementResponse(this, 4, damp);
-
-
-
-	else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
-
-		int pointNum = atoi(argv[1]);
-
-		if (pointNum > 0 && pointNum <= nintu)
-
-			return materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo);
-
-		else
-
-			return 0;
-
-	} else if (strcmp(argv[0],"stresses") ==0) {
-
-		return new ElementResponse(this, 5, Vector(162));
-
-	}
-
-
-
-	// otherwise response quantity is unknown for the Twenty_Node_Brick class
-
-	else
-
-		return 0;
+      output.endTag(); // NdMaterialOutput
+      output.endTag(); // GaussPoint
+    }
+    theResponse = new ElementResponse(this, 5, Vector(162));
+  }
+  
+  output.endTag(); // ElementOutput
+  return theResponse;
 
 }
 

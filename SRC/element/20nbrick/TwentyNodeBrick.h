@@ -88,6 +88,8 @@ class TwentyNodeBrick: public Element
     TwentyNodeBrick ();
     ~TwentyNodeBrick();
 
+    const char *getClassType(void) const {return "TwentyNodeBrick";};
+
     int getNumExternalNodes () const;
     const ID &getExternalNodes ();
     Node **getNodePtrs();
@@ -129,7 +131,7 @@ class TwentyNodeBrick: public Element
     void Print(OPS_Stream &s, int flag =0);   
     //    Do nothing with void Print (OPS_Stream &s, int flag =0);
     //    use Brick3D report.  08/16/00
-    Response *setResponse (const char **argv, int argc, Information &eleInformation);
+    Response *setResponse (const char **argv, int argc, Information &eleInformation, OPS_Stream &s);
     int getResponse (int responseID, Information &eleInformation);
 	
   protected:

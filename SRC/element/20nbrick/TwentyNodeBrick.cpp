@@ -3569,19 +3569,36 @@ void TwentyNodeBrick::Print(OPS_Stream &s, int flag)
 }
 
 //=============================================================================
-Response * TwentyNodeBrick::setResponse (const char **argv, int argc, Information &eleInformation)
+Response * 
+TwentyNodeBrick::setResponse (const char **argv, int argc, Information &eleInformation, OPS_Stream &output)
 {
-    //========================================================
-    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
-  return new ElementResponse(this, 1, P);
 
-    //========================================================
-    else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
-      return new ElementResponse(this, 5, K);
+  Response *theResponse = 0;
 
-    //========================================================
-    else if (strcmp(argv[0],"plastic") == 0 || strcmp(argv[0],"plastified") == 0)
-    {
+  char outputData[32];
+
+  output.tag("ElementOutput");
+  output.attr("eleType","TwentyNodeBrick");
+  output.attr("eleTag",this->getTag());
+  for (int i=1; i<=20; i++) {
+    sprintf(outputData,"node%d",i);
+    output.attr(outputData, connectedExternalNodes[i-1]);
+  }
+
+
+  //========================================================
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0) {
+
+    for (int i=1; i<=20; i++)
+      for (int j=1; j<=3; j++) {
+	sprintf(outputData,"P%d_%d",j,i);
+	output.tag("ResponseType",outputData);
+      }
+
+      theResponse = new ElementResponse(this, 1, P);
+
+  } else if (strcmp(argv[0],"plastic") == 0 || strcmp(argv[0],"plastified") == 0) {
+
        ////checking if element plastified
        //int count  = r_integration_order* s_integration_order * t_integration_order;
        //straintensor pl_stn;
@@ -3597,42 +3614,56 @@ Response * TwentyNodeBrick::setResponse (const char **argv, int argc, Informatio
        //  }
        //}
 
-       return new ElementResponse(this, 2, InfoPt);
-    }
-    //========================================================
-    //Specially designed for moment computation of solid pile elements Zhaohui Yang UCDavis August 1, 2001
-    else if (strcmp(argv[0],"PileM") == 0 || strcmp(argv[0],"PileM") == 0)
+    for (int i=0; i<=InfoPt.Size(); i++)
+      output.tag("ResponseType","Unknown");
+    
+    theResponse =  new ElementResponse(this, 2, InfoPt);
+  }
+  //========================================================
+  //Specially designed for moment computation of solid pile elements Zhaohui Yang UCDavis August 1, 2001
+  else if (strcmp(argv[0],"PileM") == 0 || strcmp(argv[0],"PileM") == 0)
     {
-       return new ElementResponse(this, 3, InfoSt);
+      for (int i=0; i<=InfoSt.Size(); i++)
+	output.tag("ResponseType","Unknown");
+      
+      theResponse =  new ElementResponse(this, 3, InfoSt);
     }
-    //========================================================
-    else if (strcmp(argv[0],"stress") == 0 || strcmp(argv[0],"stresses") == 0)
+  //========================================================
+  else if (strcmp(argv[0],"stress") == 0 || strcmp(argv[0],"stresses") == 0)
     {
-       return new ElementResponse(this, 4, InfoSt);
+      for (int i=0; i<=InfoSt.Size(); i++)
+	output.tag("ResponseType","Unknown");
+      
+      theResponse =  new ElementResponse(this, 4, InfoSt);
     }
+  
+    //========================================================
+  else if (strcmp(argv[0],"pq") == 0 || strcmp(argv[0],"PQ") == 0)
+    {
+      for (int i=0; i<=InfoSpq2.Size(); i++)
+	output.tag("ResponseType","Unknown");
 
-    //========================================================
-    else if (strcmp(argv[0],"pq") == 0 || strcmp(argv[0],"PQ") == 0)
-    {
-       return new ElementResponse(this, 41, InfoSpq2);
+      theResponse =  new ElementResponse(this, 41, InfoSpq2);
     }
-
-    //========================================================
-    else if (strcmp(argv[0],"GaussPoint") == 0 || strcmp(argv[0],"gausspoint") == 0)
+  
+  //========================================================
+  else if (strcmp(argv[0],"GaussPoint") == 0 || strcmp(argv[0],"gausspoint") == 0)
     {
-       return new ElementResponse(this, 6, Gsc);
+      for (int i=0; i<=Gsc.Size(); i++)
+	output.tag("ResponseType","Unknown");
+      
+      theResponse =  new ElementResponse(this, 6, Gsc);
     }
-    /*else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
+  /*else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
         int pointNum = atoi(argv[1]);
- if (pointNum > 0 && pointNum <= 4)
-  return theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo);
+	if (pointNum > 0 && pointNum <= 4)
+	return theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo);
         else
-         return 0;
+	return 0;
     }*/
 
-    // otherwise response quantity is unknown for the quad class
-    else
-  return 0;
+    output.endTag();
+    return theResponse;
 }
 
 //=============================================================================
