@@ -1,7 +1,8 @@
 include ../../../../Makefile.def
 
-OBJS       = NLBeamColumn2d.o NLBeamColumn3d.o \
-	TclNLBeamColumnCommand.o
+OBJS       = TclNLBeamColumnCommand.o
+
+#	NLBeamColumn2d.o NLBeamColumn3d.o \
 
 # Compilation control
 
