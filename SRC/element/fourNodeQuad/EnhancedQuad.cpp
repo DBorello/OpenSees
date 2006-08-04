@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2006-03-21 22:19:12 $
+// $Revision: 1.13 $
+// $Date: 2006-08-04 19:07:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/EnhancedQuad.cpp,v $
 
 #include <stdio.h> 
@@ -36,7 +36,7 @@
 #include <ErrorHandler.h>
 #include <EnhancedQuad.h>
 #include <Renderer.h>
-
+#include <ElementResponse.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
@@ -1440,6 +1440,103 @@ EnhancedQuad::transpose( const Matrix &M )
 }
 
 //**********************************************************************
+
+Response*
+EnhancedQuad::setResponse(const char **argv, int argc, 
+			  Information &eleInfo, OPS_Stream &output)
+{
+  Response *theResponse =0;
+
+  output.tag("ElementOutput");
+  output.attr("eleType","EnhancedQuad");
+  output.attr("eleTag",this->getTag());
+  output.attr("node1",connectedExternalNodes[0]);
+  output.attr("node2",connectedExternalNodes[1]);
+  output.attr("node3",connectedExternalNodes[2]);
+  output.attr("node4",connectedExternalNodes[3]);
+
+  char dataOut[10];
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0) {
+    
+    for (int i=1; i<=4; i++) {
+      sprintf(dataOut,"P1_%d",i);
+      output.tag("ResponseType",dataOut);
+      sprintf(dataOut,"P2_%d",i);
+      output.tag("ResponseType",dataOut);
+    }
+    
+    theResponse =  new ElementResponse(this, 1, resid);
+  }   else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
+    int pointNum = atoi(argv[1]);
+    if (pointNum > 0 && pointNum <= 4) {
+
+      output.tag("GaussPoint");
+      output.attr("number",pointNum);
+      output.attr("eta",sg[pointNum-1]);
+      output.attr("neta",tg[pointNum-1]);
+
+      theResponse =  materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+      
+      output.endTag();
+
+  } else if (strcmp(argv[0],"stresses") ==0) {
+
+      for (int i=0; i<4; i++) {
+	output.tag("GaussPoint");
+	output.attr("number",i+1);
+	output.attr("eta",sg[i]);
+	output.attr("neta",tg[i]);
+
+	output.tag("NdMaterialOutput");
+	output.attr("classType", materialPointers[i]->getClassTag());
+	output.attr("tag", materialPointers[i]->getTag());
+
+	output.tag("ResponseType","sigma11");
+	output.tag("ResponseType","sigma22");
+	output.tag("ResponseType","sigma12");
+
+	output.endTag(); // GaussPoint
+	output.endTag(); // NdMaterialOutput
+      }
+
+      theResponse =  new ElementResponse(this, 3, Vector(12));
+    }
+  }
+	
+  output.endTag(); // ElementOutput
+
+  return theResponse;
+}
+
+int 
+EnhancedQuad::getResponse(int responseID, Information &eleInfo)
+{
+  if (responseID == 1) {
+
+    return eleInfo.setVector(this->getResistingForce());
+
+  } else if (responseID == 3) {
+
+    // Loop over the integration points
+    static Vector stresses(12);
+    int cnt = 0;
+    for (int i = 0; i < 4; i++) {
+
+      // Get material stress response
+      const Vector &sigma = materialPointers[i]->getStress();
+      stresses(cnt) = sigma(0);
+      stresses(cnt+1) = sigma(1);
+      stresses(cnt+2) = sigma(2);
+      cnt += 3;
+    }
+    return eleInfo.setVector(resid);
+	
+  } else
+
+    return -1;
+}
+
+
 
 int  EnhancedQuad::sendSelf (int commitTag, Channel &theChannel)
 {

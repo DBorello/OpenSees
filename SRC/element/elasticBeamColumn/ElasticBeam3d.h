@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-03-11 20:42:40 $
+// $Revision: 1.9 $
+// $Date: 2006-08-04 19:08:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam3d.h,v $
                                                                         
                                                                         
-// File: ~/model/ElasticBeam3d.h
-//
 // Written: fmk 11/95
 // Revised:
 //
@@ -59,6 +57,8 @@ class ElasticBeam3d : public Element
 
     ~ElasticBeam3d();
 
+    const char *getClassType(void) const {return "ElasticBeam3d";};
+
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
     Node **getNodePtrs(void);
@@ -88,7 +88,7 @@ class ElasticBeam3d : public Element
     void Print(OPS_Stream &s, int flag =0);    
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
 
-    Response *setResponse (const char **argv, int argc, Information &info);
+    Response *setResponse (const char **argv, int argc, Information &info, OPS_Stream &s);
     int getResponse (int responseID, Information &info);
  
   private:

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-10-07 21:18:50 $
+// $Revision: 1.11 $
+// $Date: 2006-08-04 19:07:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.h,v $
                                                                         
 // Written: MHS
@@ -52,7 +52,9 @@ class FourNodeQuad : public Element
 		  double t, double pressure = 0.0, double rho = 0.0,
 		  double b1 = 0.0, double b2 = 0.0);
     FourNodeQuad();
-    virtual ~FourNodeQuad();
+    ~FourNodeQuad();
+
+    const char *getClassType(void) const {return "FourNodeQuad";};
 
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
@@ -86,7 +88,9 @@ class FourNodeQuad : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
     void Print(OPS_Stream &s, int flag =0);
 
-	Response *setResponse(const char **argv, int argc, Information &eleInformation);
+    Response *setResponse(const char **argv, int argc, 
+			  Information &eleInformation, OPS_Stream &s);
+
     int getResponse(int responseID, Information &eleInformation);
 
     int setParameter(const char **argv, int argc, Information &info);

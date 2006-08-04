@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-03-12 19:20:46 $
+// $Revision: 1.12 $
+// $Date: 2006-08-04 19:13:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.cpp,v $
                                                                         
 // Written: MHS 
@@ -694,22 +694,39 @@ CorotTruss::Print(OPS_Stream &s, int flag)
 }
 
 Response*
-CorotTruss::setResponse(const char **argv, int argc, Information &eleInfo)
+CorotTruss::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
 {
-    // force (axialForce)
-    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"axialForce") == 0)
-		return new ElementResponse(this, 1, 0.0);
+  Response *theResponse = 0;
 
-    else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
-		strcmp(argv[0],"deformation") == 0)
-		return new ElementResponse(this, 2, 0.0);
+  output.tag("ElementOutput");
+  output.attr("eleType","Truss");
+  output.attr("eleTag",this->getTag());
+  output.attr("node1",connectedExternalNodes[0]);
+  output.attr("node2",connectedExternalNodes[1]);
 
-    // a material quantity    
-    else if (strcmp(argv[0],"material") == 0)
-		return theMaterial->setResponse(&argv[1], argc-1, eleInfo);
-    
-	else
-		return 0;
+  //
+  // we compare argv[0] for known response types for the Truss
+  //
+
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"axialForce") == 0) {
+
+    output.tag("ResponseType", "N");
+    theResponse =  new ElementResponse(this, 1, 0.0);
+
+  } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
+	     strcmp(argv[0],"deformation") == 0) {
+
+    output.tag("ResponseType", "eps");
+    theResponse = new ElementResponse(this, 2, 0.0);
+
+  // a material quantity    
+  } else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"-material") == 0) {
+
+    theResponse =  theMaterial->setResponse(&argv[1], argc-1, eleInfo, output);
+  }
+
+  output.endTag();
+  return theResponse;
 }
 
 int 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-14 23:01:10 $
+// $Revision: 1.9 $
+// $Date: 2006-08-04 19:07:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/EnhancedQuad.h,v $
                                                                         
 #include <stdio.h> 
@@ -50,7 +50,9 @@ class EnhancedQuad : public Element {
     EnhancedQuad();
 
     //destructor
-    virtual ~EnhancedQuad();
+    ~EnhancedQuad();
+
+    const char *getClassType(void) const {return "EnhancedQuad";};
 
     //set domain
     void setDomain( Domain *theDomain ) ;
@@ -88,6 +90,10 @@ class EnhancedQuad : public Element {
     const Vector &getResistingForceIncInertia( ) ;
 
     // public methods for element output
+    Response *setResponse(const char **argv, int argc, 
+			  Information &eleInformation, OPS_Stream &s);
+
+    int getResponse(int responseID, Information &eleInformation);
     int sendSelf (int commitTag, Channel &theChannel);
     int recvSelf (int commitTag, Channel &theChannel, FEM_ObjectBroker 
 		  &theBroker);

@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2006-03-21 22:19:12 $
+// $Revision: 1.17 $
+// $Date: 2006-08-04 19:13:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
-// File: ~/element/truss/TrussSection.C
-// 
 // Written: fmk 
 // Created: 07/98
 // Revision: A
@@ -872,28 +870,40 @@ TrussSection::computeCurrentStrain(void) const
 }
 
 Response*
-TrussSection::setResponse(const char **argv, int argc, Information &eleInformation)
+TrussSection::setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &output)
 {
+  Response *theResponse = 0;
+
+  output.tag("ElementOutput");
+  output.attr("eleType","Truss");
+  output.attr("eleTag",this->getTag());
+  output.attr("node1",connectedExternalNodes[0]);
+  output.attr("node2",connectedExternalNodes[1]);
+
   //
   // we compare argv[0] for known response types for the Truss
   //
 
-  // axial force
-  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 || 
-      strcmp(argv[0],"axialForce") == 0) 
-    return new ElementResponse(this, 1, 0);
-  
-  else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
-	   strcmp(argv[0],"deformation") == 0) 
-    return new ElementResponse(this, 2, 0);
-  
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"axialForce") == 0) {
+
+    output.tag("ResponseType", "N");
+    theResponse =  new ElementResponse(this, 1, 0.0);
+
+  } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
+	     strcmp(argv[0],"deformation") == 0) {
+
+    output.tag("ResponseType", "eps");
+    theResponse = new ElementResponse(this, 2, 0.0);
+
   // a section quantity    
-  else if (strcmp(argv[0],"section") ==0)
-    return theSection->setResponse(&argv[1], argc-1, eleInformation);
-  
-  // otherwise response quantity is unknown for the Truss class
-  else
-    return 0;
+  }  else if (strcmp(argv[0],"section") ==0) {
+    theResponse = theSection->setResponse(&argv[1], argc-1, eleInformation, output);
+
+  }  
+
+  output.endTag();
+  return theResponse;
+
 }
 
 int 
@@ -907,44 +917,44 @@ TrussSection::getResponse(int responseID, Information &eleInformation)
 	  strain = 0;
 	  force = 0.0;
       } else {
-	  strain = this->computeCurrentStrain();	
-		int order = theSection->getOrder();
-		const ID &code = theSection->getType();
-
-		Vector e (order);
+	strain = this->computeCurrentStrain();	
+	int order = theSection->getOrder();
+	const ID &code = theSection->getType();
 	
-		int i;
-		for (i = 0; i < order; i++) {
-			if (code(i) == SECTION_RESPONSE_P)
-				e(i) = strain;
-		}
+	Vector e (order);
 	
-		theSection->setTrialSectionDeformation(e);
-    
-		const Vector &s = theSection->getStressResultant();
-		for (i = 0; i < order; i++) {
-			if (code(i) == SECTION_RESPONSE_P)
-				force += s(i);
-		}
-
+	int i;
+	for (i = 0; i < order; i++) {
+	  if (code(i) == SECTION_RESPONSE_P)
+	    e(i) = strain;
+	}
+	
+	theSection->setTrialSectionDeformation(e);
+	
+	const Vector &s = theSection->getStressResultant();
+	for (i = 0; i < order; i++) {
+	  if (code(i) == SECTION_RESPONSE_P)
+	    force += s(i);
+	}
+	
       }      
       eleInformation.theDouble = force;    
       return 0;
-
-    case 2:
-      if (L == 0.0) {
-	  strain = 0;
-      } else {
-	  strain = this->computeCurrentStrain();	
-      }
-      eleInformation.theDouble = strain*L;    
-      return 0;
       
-    default:
-      if (responseID >= 100)
-	  return theSection->getResponse(responseID-100, eleInformation);
-      else
-	  return -1;
+  case 2:
+    if (L == 0.0) {
+      strain = 0;
+    } else {
+      strain = this->computeCurrentStrain();	
+    }
+    eleInformation.theDouble = strain*L;    
+    return 0;
+    
+  default:
+    if (responseID >= 100)
+      return theSection->getResponse(responseID-100, eleInformation);
+    else
+      return -1;
   }
 }
 

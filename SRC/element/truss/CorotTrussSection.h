@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-03-12 19:20:46 $
+// $Revision: 1.7 $
+// $Date: 2006-08-04 19:13:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTrussSection.h,v $
 
 #ifndef CorotTrussSection_h
@@ -51,6 +51,8 @@ class CorotTrussSection : public Element
     
     CorotTrussSection();    
     ~CorotTrussSection();
+
+    const char *getClassType(void) const {return "CorotTrussSection";};
 
     // public methods to obtain inforrmation about dof & connectivity    
     int getNumExternalNodes(void) const;
@@ -85,7 +87,7 @@ class CorotTrussSection : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(OPS_Stream &s, int flag =0);    
 
-    Response *setResponse(const char **argv, int argc, Information &eleInfo);
+    Response *setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &s);
     int getResponse(int responseID, Information &eleInformation);
 
   protected:
@@ -99,9 +101,9 @@ class CorotTrussSection : public Element
     int numDIM;                     // number of dimensions
 
     double Lo;	    // initial length of truss
-    double Ln;		// current length of truss
-    double d21[3];	// current displacement offsets in basic system
-    double rho; 	    // mass density per unit length
+    double Ln;	    // current length of truss
+    double d21[3];  // current displacement offsets in basic system
+    double rho;     // mass density per unit length
 
     Node *theNodes[2];
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-02-14 23:01:10 $
+// $Revision: 1.11 $
+// $Date: 2006-08-04 19:07:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/ConstantPressureVolumeQuad.h,v $
 
 // Ed "C++" Love
@@ -52,6 +52,8 @@ class ConstantPressureVolumeQuad : public Element
 			        NDMaterial &theMaterial ) ;
     virtual ~ConstantPressureVolumeQuad( ) ;
 
+    const char *getClassType(void) const {return "ConstantPressureVolumeQuad";};
+
     int getNumExternalNodes( ) const ;
     const ID &getExternalNodes( ) ;
     Node **getNodePtrs(void);
@@ -79,6 +81,10 @@ class ConstantPressureVolumeQuad : public Element
     const Vector &getResistingForceIncInertia( ) ;
 
     // public methods for element output
+    Response *setResponse(const char **argv, int argc, 
+			  Information &eleInformation, OPS_Stream &s);
+
+    int getResponse(int responseID, Information &eleInformation);
     int sendSelf (int commitTag, Channel &theChannel);
     int recvSelf (int commitTag, Channel &theChannel, FEM_ObjectBroker 
 		  &theBroker);

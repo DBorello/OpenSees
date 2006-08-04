@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2006-03-21 22:19:12 $
+// $Revision: 1.19 $
+// $Date: 2006-08-04 19:08:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.cpp,v $
                                                                         
                                                                         
@@ -647,23 +647,46 @@ ElasticBeam2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-ElasticBeam2d::setResponse(const char **argv, int argc, Information &info)
+ElasticBeam2d::setResponse(const char **argv, int argc, Information &info, OPS_Stream &output)
 {
-    // stiffness
-    if (strcmp(argv[0],"stiffness") == 0)
-		return new ElementResponse(this, 1, K);
+
+  Response *theResponse = 0;
+
+  output.tag("ElementOutput");
+  output.attr("eleType","ElasticBeam2d");
+  output.attr("eleTag",this->getTag());
+  output.attr("node1",connectedExternalNodes[0]);
+  output.attr("node2",connectedExternalNodes[1]);
 
     // global forces
-    else if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 ||
-		strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0)
-		return new ElementResponse(this, 2, P);
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 ||
+      strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0) {
 
-	// local forces
-    else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
-		return new ElementResponse(this, 3, P);
+    output.tag("ResponseType","Px_1");
+    output.tag("ResponseType","Py_1");
+    output.tag("ResponseType","Mz_1");
+    output.tag("ResponseType","Px_2");
+    output.tag("ResponseType","Py_2");
+    output.tag("ResponseType","Mz_2");
 
-    else
-		return 0;
+    theResponse =  new ElementResponse(this, 2, P);
+  
+  // local forces
+  }    else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0) {
+
+    output.tag("ResponseType","N_1");
+    output.tag("ResponseType","V_1");
+    output.tag("ResponseType","M_1");
+    output.tag("ResponseType","N_2");
+    output.tag("ResponseType","V_2");
+    output.tag("ResponseType","M_2");
+    
+    theResponse = new ElementResponse(this, 3, P);
+  }  
+
+  output.endTag(); // ElementOutput
+
+  return theResponse;
 }
 
 int

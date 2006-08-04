@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-03-11 20:42:39 $
+// $Revision: 1.11 $
+// $Date: 2006-08-04 19:08:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.h,v $
                                                                         
                                                                         
-// File: ~/model/ElasticBeam2d.h
-//
 // Written: fmk 11/95
 // Revised:
 //
@@ -53,6 +51,8 @@ class ElasticBeam2d : public Element
 		  int Nd1, int Nd2, CrdTransf2d &theTransf, 
 		  double alpha = 0.0, double d = 0.0, double rho = 0.0);
     ~ElasticBeam2d();
+
+    const char *getClassType(void) const {return "ElasticBeam2d";};
 
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
@@ -83,7 +83,7 @@ class ElasticBeam2d : public Element
     void Print(OPS_Stream &s, int flag = 0);    
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
 
-    Response *setResponse (const char **argv, int argc, Information &info);
+    Response *setResponse (const char **argv, int argc, Information &info, OPS_Stream &s);
     int getResponse (int responseID, Information &info);
  
     int setParameter (const char **argv, int argc, Information &info);

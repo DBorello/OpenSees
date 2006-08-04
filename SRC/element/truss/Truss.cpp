@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2006-03-21 22:19:12 $
+// $Revision: 1.25 $
+// $Date: 2006-08-04 19:13:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
-// File: ~/element/truss/Truss.C
-// 
 // Written: fmk 
 // Created: 07/98
 // Revision: A
@@ -931,29 +929,40 @@ Truss::computeCurrentStrainRate(void) const
 }
 
 Response*
-Truss::setResponse(const char **argv, int argc, Information &eleInfo)
+Truss::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
 {
+
+  Response *theResponse = 0;
+
+  output.tag("ElementOutput");
+  output.attr("eleType","Truss");
+  output.attr("eleTag",this->getTag());
+  output.attr("node1",connectedExternalNodes[0]);
+  output.attr("node2",connectedExternalNodes[1]);
+
   //
   // we compare argv[0] for known response types for the Truss
   //
 
-  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"axialForce") == 0)
-    return new ElementResponse(this, 1, 0.0);
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"axialForce") == 0) {
+    opserr << "HELLO\n";
+    output.tag("ResponseType", "N");
+    theResponse =  new ElementResponse(this, 1, 0.0);
 
-  else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
-	   strcmp(argv[0],"deformation") == 0)
-    return new ElementResponse(this, 2, 0.0);
+  } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
+	     strcmp(argv[0],"deformation") == 0) {
 
-  // tangent stiffness matrix
-  else if (strcmp(argv[0],"stiff") == 0)
-    return new ElementResponse(this, 3, *theMatrix);
+    output.tag("ResponseType", "eps");
+    theResponse = new ElementResponse(this, 2, 0.0);
 
   // a material quantity    
-  else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"-material") == 0)
-    return theMaterial->setResponse(&argv[1], argc-1, eleInfo);
-  
-  else
-    return 0;
+  } else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"-material") == 0) {
+
+    theResponse =  theMaterial->setResponse(&argv[1], argc-1, eleInfo, output);
+  }
+
+  output.endTag();
+  return theResponse;
 }
 
 int 

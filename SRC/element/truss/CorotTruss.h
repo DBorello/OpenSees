@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-03-12 19:20:46 $
+// $Revision: 1.8 $
+// $Date: 2006-08-04 19:13:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.h,v $
 
 #ifndef CorotTruss_h
@@ -51,6 +51,8 @@ class CorotTruss : public Element
     
     CorotTruss();    
     ~CorotTruss();
+
+    const char *getClassType(void) const {return "CorotTruss";};
 
     // public methods to obtain inforrmation about dof & connectivity    
     int getNumExternalNodes(void) const;
@@ -84,7 +86,7 @@ class CorotTruss : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(OPS_Stream &s, int flag =0);    
 
-    Response *setResponse(const char **argv, int argc, Information &eleInfo);
+    Response *setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &s);
     int getResponse(int responseID, Information &eleInformation);
 
   protected:

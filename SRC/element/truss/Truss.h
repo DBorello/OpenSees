@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2003-03-17 19:19:49 $
+// $Revision: 1.14 $
+// $Date: 2006-08-04 19:13:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.h,v $
                                                                         
                                                                         
 #ifndef Truss_h
 #define Truss_h
 
-// File: ~/element/truss/Truss.h
-// 
 // Written: fmk 
 // Created: 07/98
 // Revision: A
@@ -57,6 +55,8 @@ class Truss : public Element
     
     Truss();    
     ~Truss();
+
+    const char *getClassType(void) const {return "Truss";};
 
     // public methods to obtain inforrmation about dof & connectivity    
     int getNumExternalNodes(void) const;
@@ -92,7 +92,7 @@ class Truss : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(OPS_Stream &s, int flag =0);    
 
-    Response *setResponse(const char **argv, int argc, Information &eleInfo);
+    Response *setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &s);
     int getResponse(int responseID, Information &eleInformation);
 
     // AddingSensitivity:BEGIN //////////////////////////////////////////

@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-03-17 19:33:47 $
+// $Revision: 1.10 $
+// $Date: 2006-08-04 19:13:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.h,v $
                                                                         
                                                                         
 #ifndef TrussSection_h
 #define TrussSection_h
 
-// File: ~/element/truss/TrussSection.h
-// 
 // Written: fmk 
 // Created: 07/98
 // Revision: A
@@ -57,6 +55,8 @@ class TrussSection : public Element
     
     TrussSection();    
     ~TrussSection();
+
+    const char *getClassType(void) const {return "TrussSection";};
 
     // public methods to obtain inforrmation about dof & connectivity    
     int getNumExternalNodes(void) const;
@@ -90,7 +90,7 @@ class TrussSection : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(OPS_Stream &s, int flag =0);    
     
-    Response *setResponse(const char **argv, int argc, Information &eleInformation);
+    Response *setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &s);
     int getResponse(int responseID, Information &eleInformation);
     
     int setParameter (const char **argv, int argc, Information &info);

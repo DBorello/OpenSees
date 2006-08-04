@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-03-12 19:20:46 $
+// $Revision: 1.8 $
+// $Date: 2006-08-04 19:13:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTrussSection.cpp,v $
                                                                         
 // Written: MHS 
@@ -633,18 +633,27 @@ CorotTrussSection::Print(OPS_Stream &s, int flag)
 }
 
 Response*
-CorotTrussSection::setResponse(const char **argv, int argc, Information &eleInfo)
+CorotTrussSection::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
 {
-    // a material quantity    
-	if (strcmp(argv[0],"section") == 0)
-		return theSection->setResponse(&argv[1], argc-1, eleInfo);
-    
-	else
-		return 0;
+  Response *theResponse = 0;
+
+  output.tag("ElementOutput");
+  output.attr("eleType","Truss");
+  output.attr("eleTag",this->getTag());
+  output.attr("node1",connectedExternalNodes[0]);
+  output.attr("node2",connectedExternalNodes[1]);
+
+  if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"-material") == 0) {
+
+    theResponse =  theSection->setResponse(&argv[1], argc-1, eleInfo, output);
+  }
+
+  output.endTag();
+  return theResponse;
 }
 
 int 
 CorotTrussSection::getResponse(int responseID, Information &eleInfo)
 {
-	return 0;
+  return 0;
 }

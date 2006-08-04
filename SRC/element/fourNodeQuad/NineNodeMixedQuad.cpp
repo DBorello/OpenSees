@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-02-14 23:01:12 $
+// $Revision: 1.11 $
+// $Date: 2006-08-04 19:07:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/NineNodeMixedQuad.cpp,v $
 
 // Ed "C++" Love
@@ -41,6 +41,7 @@
 #include <Domain.h>
 #include <ErrorHandler.h>
 #include <NineNodeMixedQuad.h>
+#include <ElementResponse.h>
 
 #include <Renderer.h>
 
@@ -1341,6 +1342,110 @@ NineNodeMixedQuad::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
    
 //**************************************************************************
+
+
+Response*
+NineNodeMixedQuad::setResponse(const char **argv, int argc, 
+			  Information &eleInfo, OPS_Stream &output)
+{
+  Response *theResponse =0;
+
+  output.tag("ElementOutput");
+  output.attr("eleType","NineNodeMixedQuad");
+  output.attr("eleTag",this->getTag());
+  output.attr("node1",connectedExternalNodes[0]);
+  output.attr("node2",connectedExternalNodes[1]);
+  output.attr("node3",connectedExternalNodes[2]);
+  output.attr("node4",connectedExternalNodes[3]);
+  output.attr("node5",connectedExternalNodes[4]);
+  output.attr("node6",connectedExternalNodes[5]);
+  output.attr("node7",connectedExternalNodes[6]);
+  output.attr("node8",connectedExternalNodes[7]);
+  output.attr("node9",connectedExternalNodes[8]);
+
+  char dataOut[10];
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0) {
+    
+    for (int i=1; i<=4; i++) {
+      sprintf(dataOut,"P1_%d",i);
+      output.tag("ResponseType",dataOut);
+      sprintf(dataOut,"P2_%d",i);
+      output.tag("ResponseType",dataOut);
+    }
+    
+    theResponse =  new ElementResponse(this, 1, resid);
+  }   else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
+    int pointNum = atoi(argv[1]);
+    if (pointNum > 0 && pointNum <= 9) {
+
+      output.tag("GaussPoint");
+      output.attr("number",pointNum);
+      output.attr("eta",sg[pointNum-1]);
+      output.attr("neta",sg[pointNum-1]);
+
+      theResponse =  materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+      
+      output.endTag();
+
+  } else if (strcmp(argv[0],"stresses") ==0) {
+
+      for (int i=0; i<9; i++) {
+	output.tag("GaussPoint");
+	output.attr("number",i+1);
+	output.attr("eta",sg[i]);
+	output.attr("neta",sg[i]);
+
+	output.tag("NdMaterialOutput");
+	output.attr("classType", materialPointers[i]->getClassTag());
+	output.attr("tag", materialPointers[i]->getTag());
+
+	output.tag("ResponseType","UnknownStress");
+	output.tag("ResponseType","UnknownStress");
+	output.tag("ResponseType","UnknownStress");
+	output.tag("ResponseType","UnknownStress");
+
+	output.endTag(); // GaussPoint
+	output.endTag(); // NdMaterialOutput
+      }
+
+      theResponse =  new ElementResponse(this, 3, Vector(4*9));
+    }
+  }
+	
+  output.endTag(); // ElementOutput
+
+  return theResponse;
+}
+
+int 
+NineNodeMixedQuad::getResponse(int responseID, Information &eleInfo)
+{
+  if (responseID == 1) {
+
+    return eleInfo.setVector(this->getResistingForce());
+
+  } else if (responseID == 3) {
+
+    // Loop over the integration points
+    static Vector stresses(4*9);
+    int cnt = 0;
+    for (int i = 0; i < 9; i++) {
+
+      // Get material stress response
+      const Vector &sigma = materialPointers[i]->getStress();
+      stresses(cnt) = sigma(0);
+      stresses(cnt+1) = sigma(1);
+      stresses(cnt+2) = sigma(2);
+      stresses(cnt+3) = sigma(3);
+      cnt += 4;
+    }
+    return eleInfo.setVector(stresses);
+	
+  } else
+
+    return -1;
+}
+
 
 int 
 NineNodeMixedQuad::sendSelf (int commitTag, Channel &theChannel)

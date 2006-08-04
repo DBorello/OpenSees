@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2006-03-21 22:19:12 $
+// $Revision: 1.26 $
+// $Date: 2006-08-04 19:07:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -916,27 +916,70 @@ FourNodeQuad::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-FourNodeQuad::setResponse(const char **argv, int argc, Information &eleInfo)
+FourNodeQuad::setResponse(const char **argv, int argc, 
+			  Information &eleInfo, OPS_Stream &output)
 {
-    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
-      return new ElementResponse(this, 1, P);
-    
-    else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
-      return new ElementResponse(this, 2, K);
+  Response *theResponse =0;
 
-    else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
-      int pointNum = atoi(argv[1]);
-      if (pointNum > 0 && pointNum <= 4)
-	return theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo);
-      else 
-	return 0;
-    } else if (strcmp(argv[0],"stresses") ==0) {
-      return new ElementResponse(this, 3, P);
+  output.tag("ElementOutput");
+  output.attr("eleType","FourNodeQuad");
+  output.attr("eleTag",this->getTag());
+  output.attr("node1",connectedExternalNodes[0]);
+  output.attr("node2",connectedExternalNodes[1]);
+  output.attr("node3",connectedExternalNodes[2]);
+  output.attr("node4",connectedExternalNodes[3]);
+
+  char dataOut[10];
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0) {
+    
+    for (int i=1; i<=4; i++) {
+      sprintf(dataOut,"P1_%d",i);
+      output.tag("ResponseType",dataOut);
+      sprintf(dataOut,"P2_%d",i);
+      output.tag("ResponseType",dataOut);
     }
- 
-    // otherwise response quantity is unknown for the quad class
-    else
-      return 0;
+    
+    theResponse =  new ElementResponse(this, 1, P);
+  }   else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
+    int pointNum = atoi(argv[1]);
+    if (pointNum > 0 && pointNum <= 4) {
+
+      output.tag("GaussPoint");
+      output.attr("number",pointNum);
+      output.attr("eta",pts[pointNum-1][0]);
+      output.attr("neta",pts[pointNum-1][1]);
+
+      theResponse =  theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+      
+      output.endTag();
+
+  } else if (strcmp(argv[0],"stresses") ==0) {
+
+      for (int i=0; i<4; i++) {
+	output.tag("GaussPoint");
+	output.attr("number",i+1);
+	output.attr("eta",pts[i][0]);
+	output.attr("neta",pts[i][1]);
+
+	output.tag("NdMaterialOutput");
+	output.attr("classType", theMaterial[i]->getClassTag());
+	output.attr("tag", theMaterial[i]->getTag());
+
+	output.tag("ResponseType","sigma11");
+	output.tag("ResponseType","sigma22");
+	output.tag("ResponseType","sigma12");
+
+	output.endTag(); // GaussPoint
+	output.endTag(); // NdMaterialOutput
+      }
+
+      theResponse =  new ElementResponse(this, 3, Vector(12));
+    }
+  }
+	
+  output.endTag(); // ElementOutput
+
+  return theResponse;
 }
 
 int 
@@ -946,23 +989,21 @@ FourNodeQuad::getResponse(int responseID, Information &eleInfo)
 
     return eleInfo.setVector(this->getResistingForce());
 
-  } else if (responseID == 2) {
-
-    return eleInfo.setMatrix(this->getTangentStiff());
-
   } else if (responseID == 3) {
 
     // Loop over the integration points
+    static Vector stresses(12);
     int cnt = 0;
     for (int i = 0; i < 4; i++) {
 
       // Get material stress response
       const Vector &sigma = theMaterial[i]->getStress();
-      P(cnt) = sigma(0);
-      P(cnt+1) = sigma(1);
-      cnt += 2;
+      stresses(cnt) = sigma(0);
+      stresses(cnt+1) = sigma(1);
+      stresses(cnt+2) = sigma(2);
+      cnt += 3;
     }
-    return eleInfo.setVector(P);
+    return eleInfo.setVector(stresses);
 	
   } else
 
@@ -972,37 +1013,37 @@ FourNodeQuad::getResponse(int responseID, Information &eleInfo)
 int
 FourNodeQuad::setParameter(const char **argv, int argc, Information &info)
 {
-	// quad mass density per unit volume
-	if (strcmp(argv[0],"rho") == 0) {
-		info.theType = DoubleType;
-		info.theDouble = rho;
-		return 1;
-	}
-	// quad pressure loading
-	if (strcmp(argv[0],"pressure") == 0) {
+  // quad mass density per unit volume
+  if (strcmp(argv[0],"rho") == 0) {
+    info.theType = DoubleType;
+    info.theDouble = rho;
+    return 1;
+  }
+  // quad pressure loading
+  if (strcmp(argv[0],"pressure") == 0) {
 		info.theType = DoubleType;
 		info.theDouble = pressure;
 		return 2;
-	}
-    // a material parameter
-    else if (strcmp(argv[0],"material") == 0) {
-		int pointNum = atoi(argv[1]);
-		if (pointNum > 0 && pointNum <= 4) {
-			int ok = theMaterial[pointNum-1]->setParameter(&argv[2], argc-2, info);
-			if (ok < 0)
-				return -1;
-		    else if (ok >= 0 && ok < 100)
+  }
+  // a material parameter
+  else if (strcmp(argv[0],"material") == 0) {
+    int pointNum = atoi(argv[1]);
+    if (pointNum > 0 && pointNum <= 4) {
+      int ok = theMaterial[pointNum-1]->setParameter(&argv[2], argc-2, info);
+      if (ok < 0)
+	return -1;
+      else if (ok >= 0 && ok < 100)
 				return pointNum*100 + ok;
-			else
-				return -1;
-		}
-	    else 
-			return -1;
-	}
-    
-    // otherwise parameter is unknown for the FourNodeQuad class
-    else
+      else
+	return -1;
+    }
+    else 
       return -1;
+	}
+  
+  // otherwise parameter is unknown for the FourNodeQuad class
+  else
+    return -1;
 
 }
     
