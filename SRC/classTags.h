@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.77 $
-// $Date: 2006-05-24 21:11:42 $
+// $Revision: 1.78 $
+// $Date: 2006-08-04 22:36:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -546,9 +546,14 @@
 #define RECORDER_TAGS_PatternRecorder		13
 #define RECORDER_TAGS_TclFeViewer		14
 
-#define DATAHANDLER_TAGS_DataOutputStreamHandler		1
-#define DATAHANDLER_TAGS_DataOutputFileHandler		2
-#define DATAHANDLER_TAGS_DataOutputDatabaseHandler		3
+
+#define OPS_STREAM_TAGS_FileStream		1
+#define OPS_STREAM_TAGS_StandardStream		2
+#define OPS_STREAM_TAGS_XmlFileStream		3
+#define OPS_STREAM_TAGS_DataFileStream		4
+#define OPS_STREAM_TAGS_DatabaseStream		5
+#define OPS_STREAM_TAGS_DummyStream		6
+
 
 #define DomDecompALGORITHM_TAGS_DomainDecompAlgo 1
 
