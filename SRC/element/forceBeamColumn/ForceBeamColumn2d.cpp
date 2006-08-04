@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2006-03-21 22:19:12 $
+// $Revision: 1.20 $
+// $Date: 2006-08-04 18:43:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 #include <math.h>
@@ -91,10 +91,10 @@ ForceBeamColumn2d::ForceBeamColumn2d():
 // and the node ID's of it's nodal end points. 
 // allocates the necessary space needed by each object
 ForceBeamColumn2d::ForceBeamColumn2d (int tag, int nodeI, int nodeJ,
-					  int numSec, SectionForceDeformation **sec,
-					  BeamIntegration &bi,
-					  CrdTransf2d &coordTransf, double massDensPerUnitLength,
-					  int maxNumIters, double tolerance):
+				      int numSec, SectionForceDeformation **sec,
+				      BeamIntegration &bi,
+				      CrdTransf2d &coordTransf, double massDensPerUnitLength,
+				      int maxNumIters, double tolerance):
   Element(tag,ELE_TAG_ForceBeamColumn2d), connectedExternalNodes(2),
   beamIntegr(0), numSections(0), sections(0), crdTransf(0),
   rho(massDensPerUnitLength),maxIters(maxNumIters), tol(tolerance), 
@@ -1752,52 +1752,107 @@ ForceBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-ForceBeamColumn2d::setResponse(const char **argv, int argc, Information &eleInformation)
+ForceBeamColumn2d::setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &output)
 {
-  //
-  // we compare argv[0] for known response types 
-  //
-  
+
+  Response *theResponse = 0;
+
+  output.tag("ElementOutput");
+  output.attr("eleType","ForceBeamColumn2d");
+  output.attr("eleTag",this->getTag());
+  output.attr("node1",connectedExternalNodes[0]);
+  output.attr("node2",connectedExternalNodes[1]);
+
   // global force - 
   if (strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"force") == 0
-      || strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0)
-    return new ElementResponse(this, 1, theVector);
+      || strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0) {
+
+    output.tag("ResponseType","Px_1");
+    output.tag("ResponseType","Py_1");
+    output.tag("ResponseType","Mz_1");
+    output.tag("ResponseType","Px_2");
+    output.tag("ResponseType","Py_2");
+    output.tag("ResponseType","Mz_2");
+
+    theResponse =  new ElementResponse(this, 1, theVector);
+  
   
   // local force -
-  else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
-    return new ElementResponse(this, 2, theVector);
+  } else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0) {
+
+    output.tag("ResponseType","N_1");
+    output.tag("ResponseType","V_1");
+    output.tag("ResponseType","M_1");
+    output.tag("ResponseType","N_2");
+    output.tag("ResponseType","V_2");
+    output.tag("ResponseType","M_2");
+
+    theResponse =  new ElementResponse(this, 2, theVector);
   
+
+  // basic force -
+  } else if (strcmp(argv[0],"basicForce") == 0 || strcmp(argv[0],"basicForces") == 0) {
+
+    output.tag("ResponseType","N");
+    output.tag("ResponseType","M_1");
+    output.tag("ResponseType","M_2");
+
+    theResponse =  new ElementResponse(this, 7, Vector(3));
+
   // chord rotation -
-  else if (strcmp(argv[0],"chordRotation") == 0 || strcmp(argv[0],"chordDeformation") == 0
-	   || strcmp(argv[0],"basicDeformation") == 0)
-    return new ElementResponse(this, 3, Vector(3));
+  } else if (strcmp(argv[0],"chordRotation") == 0 || strcmp(argv[0],"chordDeformation") == 0 
+	     || strcmp(argv[0],"basicDeformation") == 0) {
+
+    output.tag("ResponseType","eps");
+    output.tag("ResponseType","theta_1");
+    output.tag("ResponseType","theta_2");
+
+    theResponse =  new ElementResponse(this, 3, Vector(3));
   
   // plastic rotation -
-  else if (strcmp(argv[0],"plasticRotation") == 0 || strcmp(argv[0],"plasticDeformation") == 0)
-    return new ElementResponse(this, 4, Vector(3));
+  } else if (strcmp(argv[0],"plasticRotation") == 0 || strcmp(argv[0],"plasticDeformation") == 0) {
+
+    output.tag("ResponseType","epsP");
+    output.tag("ResponseType","thetaP_1");
+    output.tag("ResponseType","thetaP_2");
+
+    theResponse =  new ElementResponse(this, 4, Vector(3));
 
   // point of inflection
-  else if (strcmp(argv[0],"inflectionPoint") == 0)
-    return new ElementResponse(this, 5, 0.0);
+  } else if (strcmp(argv[0],"inflectionPoint") == 0) {
+    
+    output.tag("ResponseType","inflectionPoint");
+
+    theResponse =  new ElementResponse(this, 5, 0.0);
   
   // tangent drift
-  else if (strcmp(argv[0],"tangentDrift") == 0)
-    return new ElementResponse(this, 6, Vector(2));
+  } else if (strcmp(argv[0],"tangentDrift") == 0) {
+    theResponse =  new ElementResponse(this, 6, Vector(2));
 
   // section response -
-  else if (strcmp(argv[0],"section") ==0) {
-    if (argc <= 2)
-      return 0;
-    
-    int sectionNum = atoi(argv[1]);
-    if (sectionNum > 0 && sectionNum <= numSections)
-      return sections[sectionNum-1]->setResponse(&argv[2], argc-2, eleInformation);
-    else
-      return 0;
+  } else if (strcmp(argv[0],"section") ==0) {
+    if (argc > 2) {
+      int sectionNum = atoi(argv[1]);
+      if (sectionNum > 0 && sectionNum <= numSections) {
+
+	double xi[maxNumSections];
+	double L = crdTransf->getInitialLength();
+	beamIntegr->getSectionLocations(numSections, L, xi);
+
+	output.tag("GaussPointOutput");
+	output.attr("number",sectionNum);
+	output.attr("eta",2.0*xi[sectionNum-1] - 1.0);
+
+	theResponse = sections[sectionNum-1]->setResponse(&argv[2], argc-2, eleInformation, output);
+	
+	output.endTag();
+      }
+    }
   }
   
-  else
-    return 0;
+  output.endTag(); // ElementOutput
+
+  return theResponse;
 }
 
 int 
@@ -1818,6 +1873,11 @@ ForceBeamColumn2d::getResponse(int responseID, Information &eleInfo)
     theVector(1) =  V+p0[1];
     theVector(4) = -V+p0[2];
     return eleInfo.setVector(theVector);
+  }
+
+  // Chord rotation
+  else if (responseID == 7) {
+    return eleInfo.setVector(Se);
   }
       
   // Chord rotation

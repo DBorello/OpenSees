@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2006-03-21 22:19:12 $
+// $Revision: 1.21 $
+// $Date: 2006-08-04 18:44:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.cpp,v $
 
 // Written: MHS
@@ -1082,40 +1082,105 @@ DispBeamColumn3d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-DispBeamColumn3d::setResponse(const char **argv, int argc, Information &eleInfo)
+DispBeamColumn3d::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
 {
+
+    Response *theResponse = 0;
+
+    output.tag("ElementOutput");
+    output.attr("eleType","DispBeamColumn2d");
+    output.attr("eleTag",this->getTag());
+    output.attr("node1",connectedExternalNodes[0]);
+    output.attr("node2",connectedExternalNodes[1]);
+
+    //
+    // we compare argv[0] for known response types 
+    //
+
     // global force - 
     if (strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"force") == 0
-		|| strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0)
-		return new ElementResponse(this, 1, P);
+	|| strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0) {
+
+      output.tag("ResponseType","Px_1");
+      output.tag("ResponseType","Py_1");
+      output.tag("ResponseType","Pz_1");
+      output.tag("ResponseType","Mx_1");
+      output.tag("ResponseType","My_1");
+      output.tag("ResponseType","Mz_1");
+      output.tag("ResponseType","Px_2");
+      output.tag("ResponseType","Py_2");
+      output.tag("ResponseType","Pz_2");
+      output.tag("ResponseType","Mx_2");
+      output.tag("ResponseType","My_2");
+      output.tag("ResponseType","Mz_2");
+
+
+      theResponse = new ElementResponse(this, 1, P);
 
     // local force -
-    else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
-		return new ElementResponse(this, 2, P);
-    
+    }  else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0) {
+
+      output.tag("ResponseType","N_ 1");
+      output.tag("ResponseType","Vy_1");
+      output.tag("ResponseType","Vz_1");
+      output.tag("ResponseType","T_1");
+      output.tag("ResponseType","My_1");
+      output.tag("ResponseType","Tz_1");
+      output.tag("ResponseType","N_2");
+      output.tag("ResponseType","Py_2");
+      output.tag("ResponseType","Pz_2");
+      output.tag("ResponseType","T_2");
+      output.tag("ResponseType","My_2");
+      output.tag("ResponseType","Mz_2");
+
+      theResponse = new ElementResponse(this, 2, P);
+
     // chord rotation -
-    else if (strcmp(argv[0],"chordRotation") == 0 || strcmp(argv[0],"chordDeformation") == 0
-	     || strcmp(argv[0],"basicDeformation") == 0)
-      return new ElementResponse(this, 3, Vector(6));
-    
+    }  else if (strcmp(argv[0],"chordRotation") == 0 || strcmp(argv[0],"chordDeformation") == 0 
+	      || strcmp(argv[0],"basicDeformation") == 0) {
+
+      output.tag("ResponseType","eps");
+      output.tag("ResponseType","thetaZ_1");
+      output.tag("ResponseType","thetaZ_2");
+      output.tag("ResponseType","thetaY_1");
+      output.tag("ResponseType","thetaY_2");
+      output.tag("ResponseType","thetaX");
+
+      theResponse = new ElementResponse(this, 3, Vector(6));
+
     // plastic rotation -
-    else if (strcmp(argv[0],"plasticRotation") == 0 || strcmp(argv[0],"plasticDeformation") == 0)
-      return new ElementResponse(this, 4, Vector(6));
+    } else if (strcmp(argv[0],"plasticRotation") == 0 || strcmp(argv[0],"plasticDeformation") == 0) {
+
+    output.tag("ResponseType","epsP");
+    output.tag("ResponseType","thetaZP_1");
+    output.tag("ResponseType","thetaZP_2");
+    output.tag("ResponseType","thetaYP_1");
+    output.tag("ResponseType","thetaYP_2");
+    output.tag("ResponseType","thetaXP");
+
+    theResponse = new ElementResponse(this, 4, Vector(6));
+  
+  // section response -
+  } else if (strcmp(argv[0],"section") ==0) { 
+    if (argc > 2) {
     
-    // section response -
-    else if (strcmp(argv[0],"section") == 0 || strcmp(argv[0],"-section") == 0) {
-		if (argc <= 2)
-			return 0;
+      int sectionNum = atoi(argv[1]);
+      if (sectionNum > 0 && sectionNum <= numSections) {
 	
-		int sectionNum = atoi(argv[1]);
-		if (sectionNum > 0 && sectionNum <= numSections)
-			return theSections[sectionNum-1]->setResponse(&argv[2], argc-2, eleInfo);
-		else
-			return 0;
-	}
-    
-	else
-		return 0;
+	output.tag("GaussPointOutput");
+	output.attr("number",sectionNum);
+	const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+	output.attr("eta",2.0*pts(sectionNum-1,0)-1);
+
+	theResponse =  theSections[sectionNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+	
+	output.endTag();
+      }
+    }
+  }
+  
+  output.endTag();
+  return theResponse;
 }
 
 int 

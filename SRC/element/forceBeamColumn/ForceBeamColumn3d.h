@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.7 $
-// $Date: 2003-10-06 18:37:50 $
+// $Revision: 1.8 $
+// $Date: 2006-08-04 18:43:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.h,v $
 
 #ifndef ForceBeamColumn3d_h
@@ -47,7 +47,8 @@ class ForceBeamColumn3d: public Element
 		    CrdTransf3d &coordTransf, double rho = 0.0, 
 		    int maxNumIters = 10, double tolerance = 1.0e-12);
   
-  virtual ~ForceBeamColumn3d();
+  ~ForceBeamColumn3d();
+  const char *getClassType(void) const {return "ForceBeamColumn3d";};
   
   int getNumExternalNodes(void) const;
   const ID &getExternalNodes(void);
@@ -79,7 +80,7 @@ class ForceBeamColumn3d: public Element
   friend OPS_Stream &operator<<(OPS_Stream &s, ForceBeamColumn3d &E);        
   void Print(OPS_Stream &s, int flag =0);    
   
-  Response *setResponse(const char **argv, int argc, Information &eleInformation);
+  Response *setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &s);
   int getResponse(int responseID, Information &eleInformation);
   
   int setParameter(const char **argv, int argc, Information &info);
