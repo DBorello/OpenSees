@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2004-11-24 00:48:29 $
+// $Revision: 1.8 $
+// $Date: 2006-08-04 18:17:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SeriesMaterial.cpp,v $
 
 // Written: MHS
@@ -506,32 +506,62 @@ SeriesMaterial::Print(OPS_Stream &s, int flag)
 }
 
 Response*
-SeriesMaterial::setResponse(const char **argv, int argc,
-			    Information &info)
+SeriesMaterial::setResponse(const char **argv, int argc, Information &info, OPS_Stream &theOutput)
 {
-  // See if the response is one of the defaults
-  Response *res = UniaxialMaterial::setResponse(argv, argc, info);
-  if (res != 0)
-    return res;
 
-  if (strcmp(argv[0],"strains") == 0)
-    return new MaterialResponse(this, 100, Vector(numMaterials));
+  Response *theResponse = 0;
 
+  theOutput.tag("UniaxialMaterialOutput");
+  theOutput.attr("matType", this->getClassType());
+  theOutput.attr("matTag", this->getTag());
+
+  // stress
+  if (strcmp(argv[0],"stress") == 0) {
+    theOutput.tag("ResponseType", "sigma11");
+    theResponse =  new MaterialResponse(this, 1, this->getStress());
+  }  
+  // tangent
+  else if (strcmp(argv[0],"tangent") == 0) {
+    theOutput.tag("ResponseType", "C11");
+    theResponse =  new MaterialResponse(this, 2, this->getTangent());
+  }
+
+  // strain
+  else if (strcmp(argv[0],"strain") == 0) {
+    theOutput.tag("ResponseType", "eps11");
+    theResponse =  new MaterialResponse(this, 3, this->getStrain());
+  }
+
+  // strain
+  else if ((strcmp(argv[0],"stressStrain") == 0) || 
+	   (strcmp(argv[0],"stressANDstrain") == 0)) {
+    theOutput.tag("ResponseType", "sig11");
+    theOutput.tag("ResponseType", "eps11");
+    theResponse =  new MaterialResponse(this, 4, Vector(2));
+  }
+
+  else if (strcmp(argv[0],"strains") == 0) {
+    for (int i=0; i<numMaterials; i++) {
+      theOutput.tag("UniaxialMaterialOutput");
+      theOutput.attr("matType", this->getClassType());
+      theOutput.attr("matTag", this->getTag());
+      theOutput.tag("ResponseType", "eps11");
+      theOutput.endTag();
+    }
+
+    theResponse =  new MaterialResponse(this, 100, Vector(numMaterials));
+  }
   else if (strcmp(argv[0],"material") == 0 ||
 	   strcmp(argv[0],"component") == 0) {
     if (argc > 1) {
       int matNum = atoi(argv[1]) - 1;
       if (matNum >= 0 && matNum < numMaterials)
-	return theModels[matNum]->setResponse(&argv[2], argc-2, info);
-      else
-	return 0;
+	theResponse =  theModels[matNum]->setResponse(&argv[2], argc-2, info, theOutput);
     }
-    else
-      return 0;
   }
-  
-  else
-    return this->UniaxialMaterial::setResponse(argv, argc, info);
+
+  theOutput.endTag();
+  return theResponse;
 }
 
 int

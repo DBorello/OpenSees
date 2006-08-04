@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2006-01-10 19:15:48 $
+// $Revision: 1.14 $
+// $Date: 2006-08-04 18:17:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.cpp,v $
                                                                         
                                                                         
-// File: ~/material/UniaxialMaterial.C
-//
 // Written: fmk 
 // Created: 05/98
 // Revision: A
@@ -40,6 +38,8 @@
 #include <MaterialResponse.h>
 #include <float.h>
 #include <Vector.h>
+#include <DataOutputHandler.h>
+
 
 UniaxialMaterial::UniaxialMaterial(int tag, int clasTag)
 :Material(tag,clasTag)
@@ -108,35 +108,44 @@ UniaxialMaterial::getCopy(SectionForceDeformation *s)
 }
 
 Response* 
-UniaxialMaterial::setResponse(const char **argv, int argc, Information &matInfo)
+UniaxialMaterial::setResponse(const char **argv, int argc, Information &matInfo, OPS_Stream &theOutput)
 {
-  if (argc == 0) 
-    return 0;
+  Response *theResponse = 0;
+
+  theOutput.tag("UniaxialMaterialOutput");
+  theOutput.attr("matType", this->getClassType());
+  theOutput.attr("matTag", this->getTag());
 
   // stress
-  if (strcmp(argv[0],"stress") == 0)
-    return new MaterialResponse(this, 1, this->getStress());
-  
+  if (strcmp(argv[0],"stress") == 0) {
+    theOutput.tag("ResponseType", "sigma11");
+    theResponse =  new MaterialResponse(this, 1, this->getStress());
+  }  
   // tangent
-  else if (strcmp(argv[0],"tangent") == 0)
-    return new MaterialResponse(this, 2, this->getTangent());
+  else if (strcmp(argv[0],"tangent") == 0) {
+    theOutput.tag("ResponseType", "C11");
+    theResponse =  new MaterialResponse(this, 2, this->getTangent());
+  }
 
   // strain
-  else if (strcmp(argv[0],"strain") == 0)
-    return new MaterialResponse(this, 3, this->getStrain());
+  else if (strcmp(argv[0],"strain") == 0) {
+    theOutput.tag("ResponseType", "eps11");
+    theResponse =  new MaterialResponse(this, 3, this->getStrain());
+  }
 
   // strain
   else if ((strcmp(argv[0],"stressStrain") == 0) || 
 	   (strcmp(argv[0],"stressANDstrain") == 0)) {
-    return new MaterialResponse(this, 4, Vector(2));
+    theOutput.tag("ResponseType", "sig11");
+    theOutput.tag("ResponseType", "eps11");
+    theResponse =  new MaterialResponse(this, 4, Vector(2));
+  }
 
-  }
-  // otherwise unknown
-  else {
-    return 0;
-  }
+  theOutput.endTag();
+  return theResponse;
+
 }
-
+ 
 int 
 UniaxialMaterial::getResponse(int responseID, Information &matInfo)
 {
