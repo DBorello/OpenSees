@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-03-04 00:48:16 $
+// $Revision: 1.10 $
+// $Date: 2006-08-04 18:31:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionForceDeformation.cpp,v $
                                                                         
                                                                         
-// File: ~/material/SectionForceDeformation.C
-//
 // Written: MHS 
 // Created: Feb 2000
 // Revision: A
@@ -136,90 +134,196 @@ SectionForceDeformation::getRho(void)
 int 
 SectionForceDeformation::setResponse(const char **argv, int argc, Information &sectInfo)
 {
-    // deformations
-    if ((strcmp(argv[0],"deformations") ==0) || 
-	(strcmp(argv[0],"deformation") ==0)) {
-
-	Vector *theVector = new Vector(this->getOrder());
-	if (theVector == 0) {
-	    opserr << "WARNING SectionForceDeformation::setResponse() - out of memory\n";
-	    return -1;
-	} 
-	sectInfo.theVector = theVector;
-	sectInfo.theType = VectorType;	
-	return 1;
+  // deformations
+  if ((strcmp(argv[0],"deformations") ==0) || 
+      (strcmp(argv[0],"deformation") ==0)) {
+    
+    Vector *theVector = new Vector(this->getOrder());
+    if (theVector == 0) {
+      opserr << "WARNING SectionForceDeformation::setResponse() - out of memory\n";
+      return -1;
+ } 
+    sectInfo.theVector = theVector;
+    sectInfo.theType = VectorType;	
+    return 1;
+  } 
+  
+  // stress resultants
+  else if ((strcmp(argv[0],"forces") ==0) ||
+	   (strcmp(argv[0],"force") ==0)) {
+    
+    Vector *theVector = new Vector(this->getOrder());
+    if (theVector == 0) {
+      opserr << "WARNING SectionForceDeformation::setResponse() - out of memory\n";
+      return -1;
     } 
-
-    // stress resultants
-    else if ((strcmp(argv[0],"forces") ==0) ||
-	     (strcmp(argv[0],"force") ==0)) {
-
-	Vector *theVector = new Vector(this->getOrder());
-	if (theVector == 0) {
-	    opserr << "WARNING SectionForceDeformation::setResponse() - out of memory\n";
-	    return -1;
-	} 
-	sectInfo.theVector = theVector;
-	sectInfo.theType = VectorType;	
-	return 2;
+    sectInfo.theVector = theVector;
+    sectInfo.theType = VectorType;	
+    return 2;
+  } 
+  
+  // tangent stiffness
+  else if (strcmp(argv[0],"stiff") == 0 ||
+	   strcmp(argv[0],"stiffness") == 0) {
+    int order = this->getOrder();
+    Matrix *newMatrix = new Matrix(order,order);
+    if (newMatrix == 0) {
+      opserr << "WARNING SectionForceDeformation::setResponse() - out of memory\n";
+      return -1;
     } 
-
-	// tangent stiffness
-	else if (strcmp(argv[0],"stiff") == 0 ||
-		strcmp(argv[0],"stiffness") == 0) {
-		int order = this->getOrder();
-		Matrix *newMatrix = new Matrix(order,order);
-		if (newMatrix == 0) {
-			opserr << "WARNING SectionForceDeformation::setResponse() - out of memory\n";
-			return -1;
-		} 
-		sectInfo.theMatrix = newMatrix;
-		sectInfo.theType = MatrixType;	
-		return 3;
-	}
-
-    // otherwise response quantity is unknown for the Section class
-    else
-	return -1;    
+    sectInfo.theMatrix = newMatrix;
+    sectInfo.theType = MatrixType;	
+    return 3;
+  }
+  
+  // otherwise response quantity is unknown for the Section class
+  else
+    return -1;    
 }
 */
 
 Response*
-SectionForceDeformation::setResponse(const char **argv, int argc, Information &sectInfo)
+SectionForceDeformation::setResponse(const char **argv, int argc, Information &sectInfo, OPS_Stream &output)
 {
-    // deformations
-    if (strcmp(argv[0],"deformations") == 0 || strcmp(argv[0],"deformation") == 0)
-		return new MaterialResponse(this, 1, this->getSectionDeformation());
-    
-	// forces
-	else if (strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"force") == 0)
-		return new MaterialResponse(this, 2, this->getStressResultant());
+  const ID &type = this->getType();
+  int typeSize = this->getOrder();
+  
+  Response *theResponse =0;
 
-	// tangent
-	else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
-		return new MaterialResponse(this, 3, this->getSectionTangent());
+  output.tag("SectionOutput");
+  output.attr("secType", this->getClassType());
+  output.attr("secTag", this->getTag());
 
-    // force and deformation
-    else if (strcmp(argv[0],"forceAndDeformation") == 0)
-      return new MaterialResponse(this, 4, Vector(2*this->getOrder()));
+  // deformations
+  if (strcmp(argv[0],"deformations") == 0 || strcmp(argv[0],"deformation") == 0) {
+    for (int i=0; i<typeSize; i++) {
+      int code = type(i);
+      switch (code){
+      case SECTION_RESPONSE_MZ:
+	output.tag("ResponseType","kappaZ");
+	break;
+      case SECTION_RESPONSE_P:
+	output.tag("ResponseType","eps");
+	break;
+      case SECTION_RESPONSE_VY:
+	output.tag("ResponseType","gammaY");
+	break;
+      case SECTION_RESPONSE_MY:
+	output.tag("ResponseType","kappaY");
+	break;
+      case SECTION_RESPONSE_VZ:
+	output.tag("ResponseType","gammaZ");
+	break;
+      case SECTION_RESPONSE_T:
+	output.tag("ResponseType","theta");
+	break;
+      default:
+	output.tag("ResponseType","Unknown");
+      }
+    }
+    theResponse =  new MaterialResponse(this, 1, this->getSectionDeformation());
+  
+  // forces
+  } else if (strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"force") == 0) {
+    for (int i=0; i<typeSize; i++) {
+      int code = type(i);
+      switch (code){
+      case SECTION_RESPONSE_MZ:
+	output.tag("ResponseType","Mz");
+	break;
+      case SECTION_RESPONSE_P:
+	output.tag("ResponseType","P");
+	break;
+      case SECTION_RESPONSE_VY:
+	output.tag("ResponseType","Vy");
+	break;
+      case SECTION_RESPONSE_MY:
+	output.tag("ResponseType","My");
+	break;
+      case SECTION_RESPONSE_VZ:
+	output.tag("ResponseType","Vz");
+	break;
+      case SECTION_RESPONSE_T:
+	output.tag("ResponseType","T");
+	break;
+      default:
+	output.tag("ResponseType","Unknown");
+      }
+    }
+    theResponse =  new MaterialResponse(this, 2, this->getStressResultant());
+  
+  // force and deformation
+  } else if (strcmp(argv[0],"forceAndDeformation") == 0) { 
+    for (int i=0; i<typeSize; i++) {
+      int code = type(i);
+      switch (code){
+      case SECTION_RESPONSE_MZ:
+	output.tag("ResponseType","kappaZ");
+	break;
+      case SECTION_RESPONSE_P:
+	output.tag("ResponseType","eps");
+	break;
+      case SECTION_RESPONSE_VY:
+	output.tag("ResponseType","gammaY");
+	break;
+      case SECTION_RESPONSE_MY:
+	output.tag("ResponseType","kappaY");
+	break;
+      case SECTION_RESPONSE_VZ:
+	output.tag("ResponseType","gammaZ");
+	break;
+      case SECTION_RESPONSE_T:
+	output.tag("ResponseType","theta");
+	break;
+      default:
+	output.tag("ResponseType","Unknown");
+      }
+    }
+    for (int i=0; i<typeSize; i++) {
+      int code = type(i);
+      switch (code){
+      case SECTION_RESPONSE_MZ:
+	output.tag("ResponseType","Mz");
+	break;
+      case SECTION_RESPONSE_P:
+	output.tag("ResponseType","P");
+	break;
+      case SECTION_RESPONSE_VY:
+	output.tag("ResponseType","Vy");
+	break;
+      case SECTION_RESPONSE_MY:
+	output.tag("ResponseType","My");
+	break;
+      case SECTION_RESPONSE_VZ:
+	output.tag("ResponseType","Vz");
+	break;
+      case SECTION_RESPONSE_T:
+	output.tag("ResponseType","T");
+	break;
+      default:
+	output.tag("ResponseType","Unknown");
+      }
+    }
 
-	else
-		return 0;
+    theResponse =  new MaterialResponse(this, 4, Vector(2*this->getOrder()));
+  
+  }  
+
+  output.endTag(); // SectionOutput
+  return theResponse;
 }
 
 int 
 SectionForceDeformation::getResponse(int responseID, Information &secInfo)
 {
   switch (responseID) {
-    case 1:
-		return secInfo.setVector(this->getSectionDeformation());
-
-    case 2:
-		return secInfo.setVector(this->getStressResultant());
-
-	case 3:
-		return secInfo.setMatrix(this->getSectionTangent());
-
+  case 1:
+    return secInfo.setVector(this->getSectionDeformation());
+    
+  case 2:
+    return secInfo.setVector(this->getStressResultant());
+    
+    
   case 4: {
     Vector &theVec = *(secInfo.theVector);
     const Vector &e = this->getSectionDeformation();
@@ -229,11 +333,11 @@ SectionForceDeformation::getResponse(int responseID, Information &secInfo)
       theVec(i) = e(i);
       theVec(i+order) = s(i);
     }
-
+    
     return secInfo.setVector(theVec);
   }
-    default:
-      return -1;
+  default:
+    return -1;
   }
 }
 

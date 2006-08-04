@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-05-15 21:34:47 $
+// $Revision: 1.12 $
+// $Date: 2006-08-04 18:31:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.cpp,v $
                                                                         
                                                                         
@@ -805,10 +805,10 @@ SectionAggregator::Print(OPS_Stream &s, int flag)
 }
 
 Response*
-SectionAggregator::setResponse(const char **argv, int argc, Information &info)
+SectionAggregator::setResponse(const char **argv, int argc, Information &info, OPS_Stream &output)
 {
   // See if the response is one of the defaults
-  Response *res = SectionForceDeformation::setResponse(argv, argc, info);
+  Response *res = SectionForceDeformation::setResponse(argv, argc, info, output);
   if (res != 0)
     return res;
   
@@ -817,7 +817,7 @@ SectionAggregator::setResponse(const char **argv, int argc, Information &info)
   // don't need anything more from them than stress, strain, and stiffness, 
   // which are covered in base class method ... can change if need arises
   else if (theSection != 0)
-    return theSection->setResponse(argv, argc, info);
+    return theSection->setResponse(argv, argc, info,output);
   
   else
     return 0;
