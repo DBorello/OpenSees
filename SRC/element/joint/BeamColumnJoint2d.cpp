@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2004-10-06 19:21:45 $
+// $Revision: 1.4 $
+// $Date: 2006-08-04 22:22:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/BeamColumnJoint2d.cpp,v $
                                                                         
 // Written: NM (nmitra@u.washington.edu)
@@ -1176,61 +1176,61 @@ BeamColumnJoint2d::Print(OPS_Stream &s, int flag)
 }
 
 Response*
-BeamColumnJoint2d::setResponse(const char **argv, int argc, Information &eleInfo)
+BeamColumnJoint2d::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
 {
-	// we will compare argv[0] to determine the type of response required
-
-	if (strcmp(argv[0],"node1BarSlipL") == 0 || strcmp(argv[0],"node1BarslipL") ==0 || strcmp(argv[0],"Node1BarSlipL") == 0)
-		return MaterialPtr[0]->setResponse(&argv[1], argc-1, eleInfo);
-
-	else if (strcmp(argv[0],"node1BarSlipR") == 0 || strcmp(argv[0],"node1BarslipR") ==0 || strcmp(argv[0],"Node1BarSlipR") == 0)
-		return MaterialPtr[1]->setResponse(&argv[1], argc-1, eleInfo);
-
-	else if (strcmp(argv[0],"node1InterfaceShear") == 0 || strcmp(argv[0],"node1Interfaceshear") ==0 || strcmp(argv[0],"Node1InterfaceShear") ==0 )
-		return MaterialPtr[2]->setResponse(&argv[1], argc-1, eleInfo);
-
-	else if (strcmp(argv[0],"node2BarSlipB") == 0 || strcmp(argv[0],"node2BarslipB") ==0 || strcmp(argv[0],"Node2BarSlipB") == 0)
-		return MaterialPtr[3]->setResponse(&argv[1], argc-1, eleInfo);
-
-	else if (strcmp(argv[0],"node2BarSlipT") == 0 || strcmp(argv[0],"node2BarslipT") ==0 || strcmp(argv[0],"Node2BarSlipT") == 0)
-		return MaterialPtr[4]->setResponse(&argv[1], argc-1, eleInfo);
-
-	else if (strcmp(argv[0],"node2InterfaceShear") == 0 || strcmp(argv[0],"node2Interfaceshear") ==0 || strcmp(argv[0],"Node2InterfaceShear") ==0 )
-		return MaterialPtr[5]->setResponse(&argv[1], argc-1, eleInfo);
-
-	else if (strcmp(argv[0],"node3BarSlipL") == 0 || strcmp(argv[0],"node3BarslipL") ==0 || strcmp(argv[0],"Node3BarSlipL") == 0)
-		return MaterialPtr[6]->setResponse(&argv[1], argc-1, eleInfo);
-
-	else if (strcmp(argv[0],"node3BarSlipR") == 0 || strcmp(argv[0],"node3BarslipR") ==0 || strcmp(argv[0],"Node3BarSlipR") == 0)
-		return MaterialPtr[7]->setResponse(&argv[1], argc-1, eleInfo);
-
-	else if (strcmp(argv[0],"node3InterfaceShear") == 0 || strcmp(argv[0],"node3Interfaceshear") ==0 || strcmp(argv[0],"Node3InterfaceShear") ==0 )
-		return MaterialPtr[8]->setResponse(&argv[1], argc-1, eleInfo);
-
-	else if (strcmp(argv[0],"node4BarSlipB") == 0 || strcmp(argv[0],"node4BarslipB") ==0 || strcmp(argv[0],"Node4BarSlipB") == 0)
-		return MaterialPtr[9]->setResponse(&argv[1], argc-1, eleInfo);
-
-	else if (strcmp(argv[0],"node4BarSlipT") == 0 || strcmp(argv[0],"node4BarslipT") ==0 || strcmp(argv[0],"Node4BarSlipT") == 0)
-		return MaterialPtr[10]->setResponse(&argv[1], argc-1, eleInfo);
-
-	else if (strcmp(argv[0],"node4InterfaceShear") == 0 || strcmp(argv[0],"node4Interfaceshear") ==0 || strcmp(argv[0],"Node4InterfaceShear") ==0 )
-		return MaterialPtr[11]->setResponse(&argv[1], argc-1, eleInfo);
-
-	else if (strcmp(argv[0],"shearpanel") == 0 || strcmp(argv[0],"shearPanel") ==0)
-		return MaterialPtr[12]->setResponse(&argv[1], argc-1, eleInfo);
-	
-
-	else if (strcmp(argv[0],"externalDisplacement") == 0 || strcmp(argv[0],"externaldisplacement") == 0)
-		return new ElementResponse(this,1,Vector(12));
+  // we will compare argv[0] to determine the type of response required
+  
+  if (strcmp(argv[0],"node1BarSlipL") == 0 || strcmp(argv[0],"node1BarslipL") ==0 || strcmp(argv[0],"Node1BarSlipL") == 0)
+    return MaterialPtr[0]->setResponse(&argv[1], argc-1, eleInfo, output);
+  
+  else if (strcmp(argv[0],"node1BarSlipR") == 0 || strcmp(argv[0],"node1BarslipR") ==0 || strcmp(argv[0],"Node1BarSlipR") == 0)
+    return MaterialPtr[1]->setResponse(&argv[1], argc-1, eleInfo, output);
+  
+  else if (strcmp(argv[0],"node1InterfaceShear") == 0 || strcmp(argv[0],"node1Interfaceshear") ==0 || strcmp(argv[0],"Node1InterfaceShear") ==0 )
+    return MaterialPtr[2]->setResponse(&argv[1], argc-1, eleInfo, output);
+  
+  else if (strcmp(argv[0],"node2BarSlipB") == 0 || strcmp(argv[0],"node2BarslipB") ==0 || strcmp(argv[0],"Node2BarSlipB") == 0)
+    return MaterialPtr[3]->setResponse(&argv[1], argc-1, eleInfo, output);
+  
+  else if (strcmp(argv[0],"node2BarSlipT") == 0 || strcmp(argv[0],"node2BarslipT") ==0 || strcmp(argv[0],"Node2BarSlipT") == 0)
+    return MaterialPtr[4]->setResponse(&argv[1], argc-1, eleInfo, output);
+  
+  else if (strcmp(argv[0],"node2InterfaceShear") == 0 || strcmp(argv[0],"node2Interfaceshear") ==0 || strcmp(argv[0],"Node2InterfaceShear") ==0 )
+    return MaterialPtr[5]->setResponse(&argv[1], argc-1, eleInfo, output);
+  
+  else if (strcmp(argv[0],"node3BarSlipL") == 0 || strcmp(argv[0],"node3BarslipL") ==0 || strcmp(argv[0],"Node3BarSlipL") == 0)
+    return MaterialPtr[6]->setResponse(&argv[1], argc-1, eleInfo, output);
+  
+  else if (strcmp(argv[0],"node3BarSlipR") == 0 || strcmp(argv[0],"node3BarslipR") ==0 || strcmp(argv[0],"Node3BarSlipR") == 0)
+    return MaterialPtr[7]->setResponse(&argv[1], argc-1, eleInfo, output);
+  
+  else if (strcmp(argv[0],"node3InterfaceShear") == 0 || strcmp(argv[0],"node3Interfaceshear") ==0 || strcmp(argv[0],"Node3InterfaceShear") ==0 )
+    return MaterialPtr[8]->setResponse(&argv[1], argc-1, eleInfo, output);
+  
+  else if (strcmp(argv[0],"node4BarSlipB") == 0 || strcmp(argv[0],"node4BarslipB") ==0 || strcmp(argv[0],"Node4BarSlipB") == 0)
+    return MaterialPtr[9]->setResponse(&argv[1], argc-1, eleInfo, output);
+  
+  else if (strcmp(argv[0],"node4BarSlipT") == 0 || strcmp(argv[0],"node4BarslipT") ==0 || strcmp(argv[0],"Node4BarSlipT") == 0)
+    return MaterialPtr[10]->setResponse(&argv[1], argc-1, eleInfo, output);
+  
+  else if (strcmp(argv[0],"node4InterfaceShear") == 0 || strcmp(argv[0],"node4Interfaceshear") ==0 || strcmp(argv[0],"Node4InterfaceShear") ==0 )
+    return MaterialPtr[11]->setResponse(&argv[1], argc-1, eleInfo, output);
+  
+  else if (strcmp(argv[0],"shearpanel") == 0 || strcmp(argv[0],"shearPanel") ==0)
+    return MaterialPtr[12]->setResponse(&argv[1], argc-1, eleInfo, output);
+  
+  
+  else if (strcmp(argv[0],"externalDisplacement") == 0 || strcmp(argv[0],"externaldisplacement") == 0)
+    return new ElementResponse(this,1,Vector(12));
     
-	else if (strcmp(argv[0],"internalDisplacement") == 0 || strcmp(argv[0],"internaldisplacement") == 0)
-		return new ElementResponse(this,2,Vector(4));
-
-	else if (strcmp(argv[0],"deformation") == 0 || strcmp(argv[0],"Deformation") == 0)
-		return new ElementResponse(this,3,Vector(4));
-
-	else
-		return 0;
+  else if (strcmp(argv[0],"internalDisplacement") == 0 || strcmp(argv[0],"internaldisplacement") == 0)
+    return new ElementResponse(this,2,Vector(4));
+  
+  else if (strcmp(argv[0],"deformation") == 0 || strcmp(argv[0],"Deformation") == 0)
+    return new ElementResponse(this,3,Vector(4));
+  
+  else
+    return 0;
 }
 
 int 

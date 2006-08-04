@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2004-09-01 04:01:27 $
+// $Revision: 1.3 $
+// $Date: 2006-08-04 22:22:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint3D.h,v $
 
 // Written: Arash Altoontash, Gregory Deierlein
@@ -58,6 +58,8 @@ public:
   
   
   ~Joint3D();
+
+  const char *getClassType(void) const {return "Joint3D";};
   
   // methods dealing with domain
   int	getNumExternalNodes(void) const;
@@ -94,7 +96,7 @@ public:
   int	displaySelf(Renderer &theViewer, int displayMode, float fact);  
 	
   // method for obtaining information specific to an element
-  Response* setResponse(const char **argv, int argc, Information &eleInformation);
+  Response* setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &s);
   int getResponse(int responseID, Information &eleInformation);
   int sendSelf(int commitTag, Channel &theChannel);
   int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);

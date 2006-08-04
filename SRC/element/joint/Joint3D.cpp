@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2004-09-01 04:01:27 $
+// $Revision: 1.3 $
+// $Date: 2006-08-04 22:22:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint3D.cpp,v $
 
 // Written: Arash Altoontash, Gregory Deierlein
@@ -624,7 +624,7 @@ int Joint3D::displaySelf(Renderer &theViewer, int displayMode, float fact)
 
 
 //most-probably requires to be overridden
-Response* Joint3D::setResponse(const char **argv, int argc, Information &eleInformation)
+Response* Joint3D::setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &output)
 {
 //
 // we compare argv[0] for known response types for the Truss

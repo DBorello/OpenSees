@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.8 $
-// $Date: 2004-09-01 04:01:27 $
+// $Revision: 1.9 $
+// $Date: 2006-08-04 22:22:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint2D.cpp,v $
 
 // Written: Arash & GGD
@@ -769,7 +769,7 @@ int Joint2D::displaySelf(Renderer &theViewer, int displayMode, float fact)
 
 
 //most-probably requires to be overridden
-Response* Joint2D::setResponse(const char **argv, int argc, Information &eleInformation)
+Response* Joint2D::setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &output)
 {
 //
 // we compare argv[0] for known response types for the Truss
@@ -808,7 +808,7 @@ Response* Joint2D::setResponse(const char **argv, int argc, Information &eleInfo
 		
 		if (materialNum >= 0 && materialNum < 5)
 			if (theSprings[materialNum] != 0)
-				return theSprings[materialNum]->setResponse(&argv[2], argc-2, eleInformation);
+			  return theSprings[materialNum]->setResponse(&argv[2], argc-2, eleInformation, output);
 	}
 
 	else 
