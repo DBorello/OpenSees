@@ -506,36 +506,80 @@ int TwentyNodeBrick_u_p_U::displaySelf (Renderer &theViewer, int displayMode, fl
 }
 
 //=============================================================================
-Response* TwentyNodeBrick_u_p_U::setResponse(const char **argv, int argc, Information &eleInfo)
+Response* TwentyNodeBrick_u_p_U::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
 {
-  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
-    return new ElementResponse(this, 1, P);
+  Response *theResponse = 0;
 
-  else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
-    return new ElementResponse(this, 2, K);
+  char outputData[32];
+  output.tag("ElementOutput");
+  output.attr("eleType","EightNodeBrick_u_p_U");
+  output.attr("eleTag",this->getTag());
+  for (int i=1; i<=Num_Nodes; i++) {
+    sprintf(outputData,"node%d",i);
+    output.attr(outputData,connectedExternalNodes[i-1]);
+  }
 
-  else if (strcmp(argv[0],"mass") == 0)
-    return new ElementResponse(this, 3, M);
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0) {
 
-  else if (strcmp(argv[0],"damp") == 0)
-    return new ElementResponse(this, 4, C);
+    for (int i=1; i<=Num_Nodes; i++)
+      for (int j=1; j<=Num_Dof; j++) {
+	sprintf(outputData,"P%d_%d",j,i);
+	output.tag("ResponseType",outputData);
+      }
 
-  else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
+    theResponse = new ElementResponse(this, 1, P);
+
+  } else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0) {
+    theResponse = new ElementResponse(this, 2, K);
+
+  } else if (strcmp(argv[0],"mass") == 0) {
+    theResponse = new ElementResponse(this, 3, M);
+
+  } else if (strcmp(argv[0],"damp") == 0) {
+    theResponse = new ElementResponse(this, 4, C);
+
+  } else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) { 
     int pointNum = atoi(argv[1]);
-    if (pointNum > 0 && pointNum <= Num_TotalGaussPts)
-      return theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo);
-    else
-      return 0;
+    if (pointNum > 0 && pointNum <= Num_TotalGaussPts) {
+
+      output.tag("GaussPoint");
+      output.attr("number",pointNum);
+
+      theResponse =  theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+
+      output.endTag(); // GaussPoint
     }
+  }
 
-   else if (strcmp(argv[0],"stresses") ==0)
-     return new ElementResponse(this, 5, Vector(Num_TotalGaussPts*6) );
+  else if (strcmp(argv[0],"stresses") ==0) {
 
-   else if (strcmp(argv[0],"gausspoint") == 0 || strcmp(argv[0],"GaussPoint") == 0)
-     return new ElementResponse(this, 6, Vector(Num_TotalGaussPts*Num_Dim) );
+    for (int i=0; i<Num_TotalGaussPts; i++) {
+      output.tag("GaussPoint");
+      output.attr("number",i+1);
+      output.tag("NdMaterialOutput");
+      output.attr("classType", theMaterial[i]->getClassTag());
+      output.attr("tag", theMaterial[i]->getTag());
 
-   else
-     return 0;
+      output.tag("ResponseType","sigma11");
+      output.tag("ResponseType","sigma22");
+      output.tag("ResponseType","sigma33");
+      output.tag("ResponseType","sigma23");
+      output.tag("ResponseType","sigma31");
+      output.tag("ResponseType","sigma12");      
+
+      output.endTag(); // NdMaterialOutput
+      output.endTag(); // GaussPoint
+    }
+     
+    theResponse = new ElementResponse(this, 5, Vector(Num_TotalGaussPts*6) );
+
+  } else if (strcmp(argv[0],"gausspoint") == 0 || strcmp(argv[0],"GaussPoint") == 0) {
+     theResponse = new ElementResponse(this, 6, Vector(Num_TotalGaussPts*Num_Dim) );
+  }
+  output.endTag(); // ElementOutput
+
+  return theResponse; 
+
 }
 
 //=============================================================================
@@ -565,7 +609,7 @@ int TwentyNodeBrick_u_p_U::getResponse(int responseID, Information &eleInfo)
       stresses(cnt++) = sigma.cval(3,3);  //zz
       stresses(cnt++) = sigma.cval(2,3);  //yz
       stresses(cnt++) = sigma.cval(3,1);  //zx
-      stresses(cnt++) = sigma.cval(2,3);  //xy
+      stresses(cnt++) = sigma.cval(1,2);  //xy
     }
     return eleInfo.setVector(stresses);
   }
