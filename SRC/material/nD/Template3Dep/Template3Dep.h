@@ -153,6 +153,8 @@ class Template3Dep : public NDMaterial
     Template3Dep(void);
     virtual ~Template3Dep(void);
 
+    const char *getClassType(void) const {return "Template3Dep";};
+
     // methods to set state and retrieve state using Matrix and Vector classes
     int setTrialStrain(const Vector &v);
     int setTrialStrain(const Vector &v, const Vector &r);

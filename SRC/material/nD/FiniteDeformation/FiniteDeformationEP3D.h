@@ -77,6 +77,7 @@ public:
 			fdFlow *fdf_in);
   // Destructor
   virtual ~FiniteDeformationEP3D( );
+    const char *getClassType(void) const {return "FiniteDeformationEP3D";};
   
   double getRho(void);  
 

@@ -74,6 +74,8 @@ class MultiaxialCyclicPlasticityAxiSymm : public MultiaxialCyclicPlasticity {
   //destructor
   ~MultiaxialCyclicPlasticityAxiSymm( ) ;
 
+  const char *getClassType(void) const {return "MultiaxialCyclicPlasticityAxiSymm";};
+
   //make a clone of this material
   NDMaterial* getCopy( ) ;
 

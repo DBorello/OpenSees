@@ -51,7 +51,6 @@ class FiniteDeformationElastic3D : public NDMaterial
     FiniteDeformationElastic3D();      
     
     virtual ~FiniteDeformationElastic3D();
-
     virtual double getRho(void);
 
     virtual int setTrialF(const straintensor &f);

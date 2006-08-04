@@ -43,6 +43,8 @@ class FDdecoupledElastic3D : public FiniteDeformationElastic3D
 
     FDdecoupledElastic3D(FDdecoupledElastic3D &fde3d); 
 
+    const char *getClassType(void) const {return "FDdecoupledElastic3D";};
+
     double getRho(void);
 
     int setTrialF(const straintensor &f);

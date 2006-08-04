@@ -69,6 +69,7 @@ class MultiaxialCyclicPlasticityPlaneStrain : public MultiaxialCyclicPlasticity 
   //destructor
   ~MultiaxialCyclicPlasticityPlaneStrain( ) ;
 
+  const char *getClassType(void) const {return "MultiaxialCyclicPlasticityPlaneStrain";};
 
   //make a clone of this material
   NDMaterial* getCopy( ) ;

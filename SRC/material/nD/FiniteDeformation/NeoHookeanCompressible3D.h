@@ -38,6 +38,8 @@ class NeoHookeanCompressible3D : public FiniteDeformationElastic3D
     
     virtual ~NeoHookeanCompressible3D();
 
+    const char *getClassType(void) const {return "NeoHookeanCompressible3D";};
+
     double getRho(void);
 
     int setTrialF(const straintensor &f);

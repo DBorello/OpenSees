@@ -72,6 +72,8 @@ class MultiaxialCyclicPlasticity3D : public MultiaxialCyclicPlasticity {
   //destructor
   ~MultiaxialCyclicPlasticity3D( ) ;
 
+  const char *getClassType(void) const {return "MultiaxialCyclicPlasticity3D";};
+
   //make a clone of this material
   NDMaterial* getCopy( ) ;
 

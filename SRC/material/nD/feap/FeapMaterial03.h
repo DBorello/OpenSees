@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-10-29 20:26:24 $
+// $Revision: 1.2 $
+// $Date: 2006-08-04 18:11:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/feap/FeapMaterial03.h,v $
                                                                       
 // Written: MHS
@@ -38,7 +38,8 @@ class FeapMaterial03 : public FeapMaterial
  public:
   FeapMaterial03(int tag, double K, double G, double sigY, double Hiso);
   FeapMaterial03(void);
-  virtual ~FeapMaterial03();
+  ~FeapMaterial03();
+  const char *getClassType(void) const {return "FeapMaterial03";};
   
  protected:
   int fillDArray(void);
