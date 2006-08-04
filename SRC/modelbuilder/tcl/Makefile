@@ -89,7 +89,7 @@ INTERPRETER_LIBS_TK = $(FE)/tcl/tkMain.o \
 	$(FE)/tcl/commands.o \
 	$(FE)/modelbuilder/tcl/myCommands.o 
 
-GRAPHICS_LIBS_TCL = $(FE)/tcl/TclFeViewer.o \
+GRAPHIC_LIBS_TCL = $(FE)/tcl/TclFeViewer.o \
 	$(FE)/tcl/TclVideoPlayer.o 
 
 
