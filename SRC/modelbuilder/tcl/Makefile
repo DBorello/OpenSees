@@ -95,7 +95,7 @@ GRAPHIC_LIBS_TCL = $(FE)/tcl/TclFeViewer.o \
 
 ifeq ($(GRAPHICS), NONE)
 
-GRAPHICS_LIBS_TCL = 
+GRAPHIC_LIBS_TCL = 
 
 endif
 
