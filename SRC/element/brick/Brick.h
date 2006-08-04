@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2006-01-10 18:41:34 $
+// $Revision: 1.12 $
+// $Date: 2006-08-04 21:25:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.h,v $
 
 // Ed "C++" Love
@@ -60,6 +60,8 @@ class Brick : public Element {
     
     //destructor 
     virtual ~Brick( ) ;
+
+    const char *getClassType(void) const {return "Brick";};
 
     //set domain
     void setDomain( Domain *theDomain ) ;
@@ -109,7 +111,7 @@ class Brick : public Element {
     int recvSelf (int commitTag, Channel &theChannel, FEM_ObjectBroker 
 		  &theBroker);
       
-    Response *setResponse(const char **argv, int argc, Information &eleInformation);
+    Response *setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &s);
     int getResponse(int responseID, Information &eleInformation);
 
     //plotting 
