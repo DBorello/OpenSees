@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-12-05 22:49:10 $
+// $Revision: 1.6 $
+// $Date: 2006-08-04 18:18:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicPlaneStress2D.h,v $
                                                                         
                                                                         
@@ -50,6 +50,8 @@ class ElasticIsotropicPlaneStress2D : public ElasticIsotropicMaterial
     ElasticIsotropicPlaneStress2D (int tag, double E, double nu, double rho);
     ElasticIsotropicPlaneStress2D ();
     ~ElasticIsotropicPlaneStress2D ();
+
+    const char *getClassType(void) const {return "ElasticIsotropicPlaneStress2D";};
 
     int setTrialStrain (const Vector &v);
     int setTrialStrain (const Vector &v, const Vector &r);

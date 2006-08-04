@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:25 $
+// $Revision: 1.6 $
+// $Date: 2006-08-04 18:18:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2AxiSymm.h,v $
 
 // Written: Ed "C++" Love
@@ -87,6 +87,8 @@ class J2AxiSymm : public J2Plasticity {
 
   //destructor
   ~J2AxiSymm( ) ;
+
+  const char *getClassType(void) const {return "J2AxiSymm";};
 
   //make a clone of this material
   NDMaterial* getCopy( ) ;

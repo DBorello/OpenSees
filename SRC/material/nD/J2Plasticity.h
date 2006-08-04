@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:25 $
+// $Revision: 1.5 $
+// $Date: 2006-08-04 18:18:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2Plasticity.h,v $
 
 #ifndef J2Plasticity_h
@@ -81,6 +81,8 @@ class J2Plasticity : public NDMaterial {
 
   //destructor
   virtual ~J2Plasticity( ) ;
+
+  virtual const char *getClassType(void) const {return "J2Plasticity";};
 
   virtual NDMaterial* getCopy (const char *type);
 

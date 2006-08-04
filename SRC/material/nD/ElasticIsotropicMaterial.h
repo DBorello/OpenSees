@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-02-14 23:01:25 $
+// $Revision: 1.11 $
+// $Date: 2006-08-04 18:18:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.h,v $
                                                                         
                                                                         
@@ -61,8 +61,10 @@ class ElasticIsotropicMaterial : public NDMaterial
 
     virtual ~ElasticIsotropicMaterial (void);
 
+    virtual const char *getClassType(void) const {return "ElasticIsotropicMaterial";};
+
     virtual double getRho( ) ;
-// BJ added 19June2002
+    // BJ added 19June2002
     double getE( ) ;
     double getnu( ) ;
 

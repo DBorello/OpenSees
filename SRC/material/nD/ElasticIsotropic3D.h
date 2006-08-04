@@ -47,6 +47,8 @@ class ElasticIsotropic3D : public ElasticIsotropicMaterial
     ElasticIsotropic3D ();
     ~ElasticIsotropic3D ();
 
+    const char *getClassType(void) const {return "ElasticIsotropic3D";};
+
     int setTrialStrain (const Vector &v);
     int setTrialStrain (const Vector &v, const Vector &r);
     int setTrialStrainIncr (const Vector &v);

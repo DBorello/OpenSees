@@ -54,6 +54,9 @@ class PressureDependentElastic3D : public ElasticIsotropicMaterial
     PressureDependentElastic3D ();
     ~PressureDependentElastic3D ();
 
+
+    const char *getClassType(void) const {return "PressureDependentElastic";};
+
     int setTrialStrain (const Vector &v);
     int setTrialStrain (const Vector &v, const Vector &r);
     int setTrialStrainIncr (const Vector &v);

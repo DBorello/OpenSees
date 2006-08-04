@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:25 $
+// $Revision: 1.6 $
+// $Date: 2006-08-04 18:18:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2PlaneStrain.h,v $
 
 #ifndef J2PlaneStrain_h
@@ -92,6 +92,8 @@ class J2PlaneStrain : public J2Plasticity {
 
   //send back type of material
   const char* getType( ) const ;
+
+  const char *getClassType(void) const {return "J2PlaneStrain";};
 
   //send back order of strain in vector form
   int getOrder( ) const ;

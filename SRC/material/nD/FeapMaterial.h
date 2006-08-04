@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:25 $
+// $Revision: 1.3 $
+// $Date: 2006-08-04 18:18:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/FeapMaterial.h,v $
                                                                       
 // Written: MHS
@@ -40,6 +40,8 @@ class FeapMaterial : public NDMaterial
 	       double rho = 0.0);
   FeapMaterial(int classTag);
   virtual ~FeapMaterial();
+
+  virtual const char *getClassType(void) const {return "FeapMaterial";};
   
   virtual int setTrialStrain(const Vector &strain);
   virtual const Vector &getStrain(void);

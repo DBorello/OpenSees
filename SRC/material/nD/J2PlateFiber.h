@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:25 $
+// $Revision: 1.6 $
+// $Date: 2006-08-04 18:18:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2PlateFiber.h,v $
 
 #ifndef J2PlateFiber_h
@@ -86,6 +86,8 @@ class J2PlateFiber : public J2Plasticity {
 
   //destructor
   ~J2PlateFiber( ) ;
+
+  const char *getClassType(void) const {return "J2PlateFiber";};
 
   //make a clone of this material
   NDMaterial* getCopy( ) ;
