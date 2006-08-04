@@ -160,8 +160,6 @@ REMO_LIBS = $(FE)/element/nonlinearBeamColumn/quadrule/QuadRule.o \
 	$(FE)/element/nonlinearBeamColumn/quadrule/GaussQuadRule1d01.o \
 	$(FE)/element/nonlinearBeamColumn/quadrule/GaussLobattoQuadRule1d01.o \
 	$(FE)/element/nonlinearBeamColumn/matrixutil/MatrixUtil.o \
-	$(FE)/element/nonlinearBeamColumn/element/NLBeamColumn2d.o \
-	$(FE)/element/nonlinearBeamColumn/element/NLBeamColumn3d.o \
 	$(FE)/element/nonlinearBeamColumn/element/TclNLBeamColumnCommand.o \
 	$(FE)/element/forceBeamColumn/ForceBeamColumn2d.o \
 	$(FE)/element/forceBeamColumn/ForceBeamColumn3d.o \
@@ -262,7 +260,6 @@ GGD_LIBS = $(FE)/element/joint/MP_Joint2D.o \
 	$(FE)/material/yieldSurface/plasticHardeningMaterial/NullPlasticMaterial.o \
 	$(FE)/material/yieldSurface/plasticHardeningMaterial/PlasticHardeningMaterial.o \
 	$(FE)/material/yieldSurface/plasticHardeningMaterial/TclModelBuilderYSPlasticMaterialCommand.o \
-	$(FE)/recorder/YsVisual.o \
 	$(FE)/damage/DamageModel.o \
 	$(FE)/damage/Kratzig.o \
 	$(FE)/damage/ParkAng.o \
@@ -274,7 +271,11 @@ GGD_LIBS = $(FE)/element/joint/MP_Joint2D.o \
 
 ERRORHANDLER_LIBS = $(FE)/handler/StandardStream.o \
 	$(FE)/handler/FileStream.o \
-	$(FE)/handler/OPS_Stream.o
+	$(FE)/handler/OPS_Stream.o \
+	$(FE)/handler/DataFileStream.o \
+	$(FE)/handler/XmlFileStream.o \
+	$(FE)/handler/DatabaseStream.o 
+
 
 
 NDARRAY_BJ_LIBS = $(FE)/nDarray/basics.o \
@@ -428,7 +429,6 @@ RENDERER_LIBS =
 endif
 
 RECORDER_LIBS = $(FE)/recorder/Recorder.o \
-	$(FE)/recorder/MaxNodeDispRecorder.o \
 	$(FE)/recorder/DatastoreRecorder.o \
 	$(FE)/recorder/NodeRecorder.o \
 	$(FE)/recorder/EnvelopeNodeRecorder.o \
@@ -436,17 +436,12 @@ RECORDER_LIBS = $(FE)/recorder/Recorder.o \
 	$(FE)/recorder/PatternRecorder.o \
 	$(FE)/recorder/ElementRecorder.o \
 	$(FE)/recorder/EnvelopeElementRecorder.o \
-	$(FE)/recorder/GSA_Recorder.o \
 	$(FE)/recorder/TclRecorderCommands.o \
 	$(FE)/recorder/response/Response.o \
 	$(FE)/recorder/response/ElementResponse.o \
 	$(FE)/recorder/response/MaterialResponse.o \
 	$(FE)/recorder/response/FiberResponse.o \
-	$(FE)/recorder/DamageRecorder.o \
-	$(FE)/handler/DataOutputHandler.o \
-	$(FE)/handler/DataOutputDatabaseHandler.o \
-	$(FE)/handler/DataOutputStreamHandler.o \
-	$(FE)/handler/DataOutputFileHandler.o 
+	$(FE)/recorder/DamageRecorder.o 
 
 
 DATABASE_LIBS = $(FE)/database/FileDatastore.o \
@@ -499,8 +494,6 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/feap/TclFeapElementCommand.o \
 	$(FE)/element/truss/TclTrussCommand.o \
 	$(FE)/element/beamWithHinges/TclBeamWithHingesBuilder.o \
-	$(FE)/element/beamWithHinges/BeamWithHinges2d.o \
-	$(FE)/element/beamWithHinges/BeamWithHinges3d.o \
 	$(FE)/element/dispBeamColumn/DispBeamColumn2d.o \
 	$(FE)/element/dispBeamColumn/DispBeamColumn3d.o \
 	$(FE)/element/dispBeamColumn/TclDispBeamColumnCommand.o \
@@ -612,7 +605,11 @@ SNAP_LIBS = $(FE)/material/uniaxial/snap/TclSnapMaterialCommand.o \
 	$(FE)/material/uniaxial/snap/CloughDamage.o \
 	$(FE)/material/uniaxial/snap/PinchingDamage.o \
 
+
 SECTION_LIBS = $(FE)/material/section/SectionForceDeformation.o \
+	$(FE)/material/section/fiber/Fiber.o \
+	$(FE)/material/section/fiber/UniaxialFiber2d.o \
+	$(FE)/material/section/fiber/UniaxialFiber3d.o \
 	$(FE)/material/section/ElasticSection2d.o \
 	$(FE)/material/section/ElasticSection3d.o \
 	$(FE)/material/section/FiberSection2d.o \
@@ -625,9 +622,6 @@ SECTION_LIBS = $(FE)/material/section/SectionForceDeformation.o \
 	$(FE)/material/section/MembranePlateFiberSection.o \
 	$(FE)/material/section/Bidirectional.o \
 	$(FE)/material/section/Isolator2spring.o \
-	$(FE)/material/section/fiber/Fiber.o \
-	$(FE)/material/section/fiber/UniaxialFiber2d.o \
-	$(FE)/material/section/fiber/UniaxialFiber3d.o \
 	$(FE)/material/section/repres/patch/Patch.o \
 	$(FE)/material/section/repres/patch/QuadPatch.o \
 	$(FE)/material/section/repres/patch/CircPatch.o \
