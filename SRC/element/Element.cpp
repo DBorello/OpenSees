@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2005-02-17 22:29:54 $
+// $Revision: 1.18 $
+// $Date: 2006-08-04 18:43:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
@@ -381,12 +381,34 @@ Element::isSubdomain(void)
 }
 
 Response*
-Element::setResponse(const char **argv, int argc, Information &eleInfo)
+Element::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
 {
+  Response *theResponse = 0;
+
+  output.tag("ElementOutput");
+  output.attr("eleType",this->getClassType());
+  output.attr("eleTag",this->getTag());
+  int numNodes = this->getNumExternalNodes();
+  const ID &nodes = this->getExternalNodes();
+  static char nodeData[32];
+
+  for (int i=0; i<numNodes; i++) {
+    sprintf(nodeData,"node%d",i+1);
+    output.attr(nodeData,nodes(i));
+  }
+
   if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 ||
-      strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0)
-    return new ElementResponse(this, 1, this->getResistingForce());
-  return 0;
+      strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0) {
+    const Vector &force = this->getResistingForce();
+    int size = force.Size();
+    for (int i=0; i<size; i++) {
+      sprintf(nodeData,"P%d",i+1);
+      output.tag("ResponseType",nodeData);
+    }
+    theResponse = new ElementResponse(this, 1, this->getResistingForce());
+  }
+  output.endTag();
+  return theResponse;
 }
 
 int
