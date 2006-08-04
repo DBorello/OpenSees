@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2004-11-24 22:43:37 $
+// $Revision: 1.12 $
+// $Date: 2006-08-04 22:33:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.h,v $
                                                                         
                                                                         
@@ -47,7 +47,6 @@ class Matrix;
 class Element;
 class Response;
 class FE_Datastore;
-class DataOutputHandler;
 
 class ElementRecorder: public Recorder
 {
@@ -58,7 +57,7 @@ class ElementRecorder: public Recorder
 		    int argc,
 		    bool echoTime, 
 		    Domain &theDomain, 
-		    DataOutputHandler &theOutputHandler,
+		    OPS_Stream &theOutputHandler,
 		    double deltaT = 0.0);
 
     ~ElementRecorder();
@@ -83,7 +82,7 @@ class ElementRecorder: public Recorder
     Response **theResponses;
 
     Domain *theDomain;
-    DataOutputHandler *theHandler;
+    OPS_Stream *theOutputHandler;
 
     bool echoTimeFlag;             // flag indicating if pseudo time also printed
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2005-05-27 00:12:15 $
+// $Revision: 1.8 $
+// $Date: 2006-08-04 22:33:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.h,v $
                                                                         
 #ifndef EnvelopeElementRecorder_h
@@ -41,7 +41,6 @@ class Matrix;
 class Element;
 class Response;
 class FE_Datastore;
-class DataOutputHandler;
 
 class EnvelopeElementRecorder: public Recorder
 {
@@ -51,7 +50,7 @@ class EnvelopeElementRecorder: public Recorder
 			    const char **argv, 
 			    int argc,
 			    Domain &theDomain, 
-			    DataOutputHandler &theOutputHandler,
+			    OPS_Stream &theOutputHandler,
 			    double deltaT = 0.0,
 			    bool echoTimeFlag = true); 
 
@@ -76,7 +75,7 @@ class EnvelopeElementRecorder: public Recorder
     Response **theResponses;
 
     Domain *theDomain;
-    DataOutputHandler *theHandler;
+    OPS_Stream *theHandler;
 
     double deltaT;
     double nextTimeStampToRecord;

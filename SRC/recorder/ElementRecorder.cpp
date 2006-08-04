@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2006-01-18 19:43:42 $
+// $Revision: 1.26 $
+// $Date: 2006-08-04 22:33:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -38,7 +38,6 @@
 #include <string.h>
 #include <Response.h>
 #include <FE_Datastore.h>
-#include <DataOutputHandler.h>
 #include <OPS_Globals.h>
 #include <Message.h>
 #include <Channel.h>
@@ -47,7 +46,7 @@
 ElementRecorder::ElementRecorder()
 :Recorder(RECORDER_TAGS_ElementRecorder),
  numEle(0), eleID(0), theResponses(0), 
- theDomain(0), theHandler(0),
+ theDomain(0), theOutputHandler(0),
  echoTimeFlag(true), deltaT(0), nextTimeStampToRecord(0.0), data(0), 
  initializationDone(false), responseArgs(0), numArgs(0)
 {
@@ -59,11 +58,11 @@ ElementRecorder::ElementRecorder(const ID &ele,
 				 int argc,
 				 bool echoTime, 
 				 Domain &theDom, 
-				 DataOutputHandler &theOutputHandler,
+				 OPS_Stream &theOutputHandler,
 				 double dT)
 :Recorder(RECORDER_TAGS_ElementRecorder),
  numEle(ele.Size()), eleID(ele), theResponses(0), 
- theDomain(&theDom), theHandler(&theOutputHandler),
+ theDomain(&theDom), theOutputHandler(&theOutputHandler),
  echoTimeFlag(echoTime), deltaT(dT), nextTimeStampToRecord(0.0), data(0),
  initializationDone(false), responseArgs(0), numArgs(0)
 {
@@ -114,9 +113,11 @@ ElementRecorder::~ElementRecorder()
     delete [] responseArgs[i];
   delete [] responseArgs;
 
+  theOutputHandler->endTag(); // Data
+  theOutputHandler->endTag(); // OpenSeesOutput
 
-  if (theHandler != 0)
-    delete theHandler;
+  if (theOutputHandler != 0)
+    delete theOutputHandler;
 }
 
 
@@ -167,7 +168,7 @@ ElementRecorder::record(int commitTag, double timeStamp)
     // send the response vector to the output handler for o/p
     //
 
-    theHandler->write(*data);
+    theOutputHandler->write(*data);
   }
   
   // succesfull completion - return 0
@@ -211,8 +212,8 @@ ElementRecorder::sendSelf(int commitTag, Channel &theChannel)
     msgLength += strlen(responseArgs[i])+1;
   idData(2) = msgLength;
 
-  if (theHandler != 0) {
-    idData(3) = theHandler->getClassTag();
+  if (theOutputHandler != 0) {
+    idData(3) = theOutputHandler->getClassTag();
   } else 
     idData(3) = 0;
 
@@ -267,7 +268,7 @@ ElementRecorder::sendSelf(int commitTag, Channel &theChannel)
   // invoke sendSelf() on the output handler
   //
 
-  if (theHandler == 0 || theHandler->sendSelf(commitTag, theChannel) < 0) {
+  if (theOutputHandler == 0 || theOutputHandler->sendSelf(commitTag, theChannel) < 0) {
     opserr << "ElementRecorder::sendSelf() - failed to send the DataOutputHandler\n";
     return -1;
   }
@@ -369,16 +370,16 @@ ElementRecorder::recvSelf(int commitTag, Channel &theChannel,
   // create a new handler object and invoke recvSelf() on it
   //
 
-  if (theHandler != 0)
-    delete theHandler;
+  if (theOutputHandler != 0)
+    delete theOutputHandler;
 
-  theHandler = theBroker.getPtrNewDataOutputHandler(idData(3));
-  if (theHandler == 0) {
+  theOutputHandler = theBroker.getPtrNewStream(idData(3));
+  if (theOutputHandler == 0) {
     opserr << "NodeRecorder::sendSelf() - failed to get a data output handler\n";
     return -1;
   }
 
-  if (theHandler->recvSelf(commitTag, theChannel, theBroker) < 0) {
+  if (theOutputHandler->recvSelf(commitTag, theChannel, theBroker) < 0) {
     opserr << "NodeRecorder::sendSelf() - failed to send the DataOutputHandler\n";
     return -1;
   }
@@ -397,14 +398,20 @@ ElementRecorder::initialize(void)
   if (numEle == 0 || theDomain == 0)
     return 0;
 
+  theOutputHandler->tag("OpenSeesOutput");
+
+  int numDbColumns = 0;
+  if (echoTimeFlag == true) {
+    theOutputHandler->tag("TimeOutput");
+    theOutputHandler->tag("ResponseType", "time");
+    theOutputHandler->endTag(); // TimeOutput
+    numDbColumns += 1;
+  }
+
   // Set the response objects:
   //   1. create an array of pointers for them
   //   2. iterate over the elements invoking setResponse() to get the new objects & determine size of data
   //
-
-  int numDbColumns = 0;
-  if (echoTimeFlag == true) 
-    numDbColumns = 1;  // 1 for the pseudo-time
 
   theResponses = new Response *[numEle];
   for (int k=0; k<numEle; k++)
@@ -412,12 +419,13 @@ ElementRecorder::initialize(void)
 
   Information eleInfo(1.0);
   int i;
+
   for (i=0; i<numEle; i++) {
     Element *theEle = theDomain->getElement(eleID(i));
     if (theEle == 0) {
       theResponses[i] = 0;
     } else {
-      theResponses[i] = theEle->setResponse((const char **)responseArgs, numArgs, eleInfo);
+      theResponses[i] = theEle->setResponse((const char **)responseArgs, numArgs, eleInfo, *theOutputHandler);
       if (theResponses[i] != 0) {
 	// from the response type determine no of cols for each
 	Information &eleInfo = theResponses[i]->getInformation();
@@ -427,100 +435,6 @@ ElementRecorder::initialize(void)
     }
   }
 
-  //
-  // now create the columns strings for the data description
-  // for each element do a getResponse() 
-  //
-  char **dbColumns = new char *[numDbColumns];
-  static char aColumn[1012]; // assumes a column name will not be longer than 256 characters
-  char *newColumn = new char[5];
-
-  int counter = 0;
-  if (echoTimeFlag == true) {
-    sprintf(newColumn, "%s","time");  
-    dbColumns[0] = newColumn;
-    counter = 1;
-  }
-  
-  int lengthString = 0;
-  for (i=0; i<numArgs; i++)
-    lengthString += strlen(responseArgs[i])+1;
-  char *dataToStore = new char[lengthString];
-  lengthString = 0;
-  for (int j=0; j<numArgs; j++) {
-    int argLength = strlen(responseArgs[j]);
-    strcpy(&dataToStore[lengthString], responseArgs[j]);
-    if (j<(numArgs-1)) {
-      lengthString += argLength;
-      dataToStore[lengthString] = ' ';
-      lengthString ++;
-    } else
-      lengthString += argLength+1;
-  }
-  
-  for (i=0; i<eleID.Size(); i++) {
-    int eleTag = eleID(i);
-    int numVariables = 0;
-    if (theResponses[i]!= 0) {
-      const Information &eleInfo = theResponses[i]->getInformation();
-      
-      if (eleInfo.theType == IntType || eleInfo.theType == DoubleType) {
-	// create column heading for single data item for element
-	numVariables = 0;
-	sprintf(aColumn, "Element%d_%s", eleTag, dataToStore);
-	int lenColumn = strlen(aColumn);
-	char *newColumn = new char[lenColumn+1];
-	strcpy(newColumn, aColumn);
-	dbColumns[counter] = newColumn;
-	counter++;
-      }
-      
-      else if (eleInfo.theType == VectorType) 
-	numVariables = eleInfo.theVector->Size();
-      else if (eleInfo.theType == IdType) 
-	numVariables = eleInfo.theID->Size();
-      else if (eleInfo.theType == MatrixType) 
-	numVariables = eleInfo.theMatrix->noRows()* eleInfo.theMatrix->noCols();
-
-      // create the column headings for multiple data for the element
-      for (int j=1; j<=numVariables; j++) {
-	sprintf(aColumn, "Element%d_%s_%d",eleTag, dataToStore, j);
-	int lenColumn = strlen(aColumn);
-	char *newColumn = new char[lenColumn+1];
-	strcpy(newColumn, aColumn);
-	dbColumns[counter] = newColumn;
-	counter++;
-      }
-    }
-  }
-
-  // replace spaces with undescore for tables
-  for (i=0; i<numDbColumns; i++) {
-    char *data = dbColumns[i];
-    int length = strlen(data);
-    for (int j=0; j<length; j++)
-      if (data[j] == ' ') data[j]='_';
-  }
-
-  //
-  // call open in the handler with the data description
-  //
-
-  theHandler->open(dbColumns, numDbColumns);
-
-  //
-  // clean up the data description
-  //
-
-  if (dbColumns != 0) {
-
-    for (int i=0; i<numDbColumns; i++) 
-      delete [] dbColumns[i];
-
-      delete [] dbColumns;
-  }
-  
-  delete [] dataToStore;
 
   // create the vector to hold the data
   data = new Vector(numDbColumns);
@@ -529,8 +443,8 @@ ElementRecorder::initialize(void)
     opserr << "ElementRecorder::initialize() - out of memory\n";
     return -1;
   }
-
   
+  theOutputHandler->tag("Data");
 
   initializationDone = true;
   return 0;

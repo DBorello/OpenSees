@@ -1,10 +1,17 @@
 include ../../Makefile.def
 
-OBJS       = Recorder.o DatastoreRecorder.o MaxNodeDispRecorder.o \
-	ElementRecorder.o TclRecorderCommands.o FilePlotter.o \
-	NodeRecorder.o AlgorithmIncrements.o DriftRecorder.o \
-	EnvelopeNodeRecorder.o  EnvelopeElementRecorder.o GSA_Recorder.o \
-	YsVisual.o PatternRecorder.o DamageRecorder.o
+OBJS       = Recorder.o \
+	DatastoreRecorder.o \
+	ElementRecorder.o \
+	NodeRecorder.o \
+	EnvelopeElementRecorder.o \
+	EnvelopeNodeRecorder.o \
+	TclRecorderCommands.o \
+	FilePlotter.o \
+	AlgorithmIncrements.o \
+	DriftRecorder.o \
+	PatternRecorder.o \
+	DamageRecorder.o
 
 # Compilation control
 

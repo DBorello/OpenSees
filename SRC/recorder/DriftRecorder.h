@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2005-03-30 20:12:10 $
+// $Revision: 1.10 $
+// $Date: 2006-08-04 22:33:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DriftRecorder.h,v $
                                                                         
 #ifndef DriftRecorder_h
@@ -36,7 +36,6 @@
 #include <Vector.h>
 
 class Domain;
-class DataOutputHandler;
 class Node;
 
 class DriftRecorder: public Recorder
@@ -45,12 +44,12 @@ class DriftRecorder: public Recorder
   DriftRecorder();
   DriftRecorder(int ndI, int ndJ, int dof, int perpDirn,
 		Domain &theDomain, 
-		DataOutputHandler &theHandler,
+		OPS_Stream &theHandler,
 		bool echoTime = false);
 
   DriftRecorder(const ID &ndI, const ID &ndJ, int dof, int perpDirn,
 		Domain &theDomain, 
-		DataOutputHandler &theHandler,
+		OPS_Stream &theHandler,
 		bool echoTime = false);
   
   ~DriftRecorder();
@@ -77,7 +76,7 @@ class DriftRecorder: public Recorder
   Vector *data;
 
   Domain *theDomain;
-  DataOutputHandler *theHandler;
+  OPS_Stream *theOutputHandler;
 
   bool initializationDone;
   int numNodes;

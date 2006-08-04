@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2005-03-30 03:54:33 $
+// $Revision: 1.13 $
+// $Date: 2006-08-04 22:33:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.h,v $
                                                                         
 #ifndef NodeRecorder_h
@@ -42,7 +42,6 @@
 
 class Domain;
 class FE_Datastore;
-class DataOutputHandler;
 class Node;
 
 class NodeRecorder: public Recorder
@@ -54,7 +53,7 @@ class NodeRecorder: public Recorder
 		 int sensitivity,
 		 const char *dataToStore,
 		 Domain &theDomain,
-		 DataOutputHandler &theOutputHandler,
+		 OPS_Stream &theOutputHandler,
 		 double deltaT = 0.0,
 		 bool echoTimeFlag = true); 
     
@@ -78,7 +77,7 @@ class NodeRecorder: public Recorder
     Vector response;
 
     Domain *theDomain;
-    DataOutputHandler *theHandler;
+    OPS_Stream *theOutputHandler;
 
     bool echoTimeFlag;   // flag indicating whether time to be included in o/p
     int dataFlag;        // flag indicating what it is to be stored in recorder

@@ -19,8 +19,8 @@
 ** ****************************************************************** */
                                                                         
 
-// $Revision: 1.7 $
-// $Date: 2005-05-27 00:12:15 $
+// $Revision: 1.8 $
+// $Date: 2006-08-04 22:33:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.h,v $
                                                                         
 
@@ -45,7 +45,6 @@
 
 class Domain;
 class FE_Datastore;
-class DataOutputHandler;
 class Node;
 
 class EnvelopeNodeRecorder: public Recorder
@@ -56,7 +55,7 @@ class EnvelopeNodeRecorder: public Recorder
 			 const ID &theNodes, 
 			 const char *dataToStore,
 			 Domain &theDomain,
-			 DataOutputHandler &theOutputHandler,
+			 OPS_Stream &theOutputHandler,
 			 double deltaT = 0.0,
 			 bool echoTimeFlag = false); 
     
@@ -83,7 +82,7 @@ class EnvelopeNodeRecorder: public Recorder
     Matrix *data;
 
     Domain *theDomain;
-    DataOutputHandler *theHandler;
+    OPS_Stream *theHandler;
 
     int dataFlag; // flag indicating what it is to be stored in recorder
 

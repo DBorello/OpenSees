@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2004-11-24 22:45:28 $
+// $Revision: 1.3 $
+// $Date: 2006-08-04 22:33:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DamageRecorder.h,v $
                                                                         
 #ifndef DamageRecorder_h
@@ -56,7 +56,7 @@ class DamageRecorder: public Recorder
 {
   public:
     DamageRecorder( int elemid, ID &secIDs, int dofid, DamageModel *dmgPtr, Domain &theDomainPtr,
-		    bool echotimeflag, double deltat , const char *filename );
+		    bool echotimeflag, double deltat , OPS_Stream &theOutputStream);
 
     ~DamageRecorder();
     int record(int commitTag, double timeStamp);
@@ -70,19 +70,20 @@ class DamageRecorder: public Recorder
 
     int eleID, numSec, dofID;
     ID responseID;                 // integer element returns in setResponse
-	ID sectionTags;
+    ID sectionTags;
 
     Response **theResponses;
-	DamageModel **theDamageModels;
+    DamageModel **theDamageModels;
 
     Domain *theDomain;
     bool echoTimeFlag;             // flag indicating if pseudo time also printed
-    char *fileName;                // file name  
-    ofstream theFile; 	           // output stream
 
     double deltaT;
     double nextTimeStampToRecord;
 
+    OPS_Stream *theOutput;
+
+    Vector *data;
 };
 
 

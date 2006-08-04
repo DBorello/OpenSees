@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.13 $
-// $Date: 2005-07-06 22:00:20 $
+// $Revision: 1.14 $
+// $Date: 2006-08-04 22:33:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DriftRecorder.cpp,v $
 
 // Written: MHS
@@ -35,7 +35,6 @@
 #include <Vector.h>
 #include <ID.h>
 #include <Matrix.h>
-#include <DataOutputHandler.h>
 #include <string.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
@@ -43,7 +42,7 @@
 DriftRecorder::DriftRecorder()
   :Recorder(RECORDER_TAGS_DriftRecorder),
    ndI(0), ndJ(0), dof(0), perpDirn(0), oneOverL(0), data(0),
-   theDomain(0), theHandler(0),
+   theDomain(0), theOutputHandler(0),
    initializationDone(false), numNodes(0), echoTimeFlag(false)
 {
 
@@ -55,11 +54,11 @@ DriftRecorder::DriftRecorder(int ni,
 			     int df, 
 			     int dirn,
 			     Domain &theDom, 
-			     DataOutputHandler &theDataOutputHandler,
+			     OPS_Stream &theDataOutputHandler,
 			     bool timeFlag)
   :Recorder(RECORDER_TAGS_DriftRecorder),
    ndI(0), ndJ(0), theNodes(0), dof(df), perpDirn(dirn), oneOverL(0), data(0),
-   theDomain(&theDom), theHandler(&theDataOutputHandler),
+   theDomain(&theDom), theOutputHandler(&theDataOutputHandler),
    initializationDone(false), numNodes(0), echoTimeFlag(timeFlag)
 {
   ndI = new ID(1);
@@ -77,11 +76,11 @@ DriftRecorder::DriftRecorder(const ID &nI,
 			     int df, 
 			     int dirn,
 			     Domain &theDom, 
-			     DataOutputHandler &theDataOutputHandler,
+			     OPS_Stream &theDataOutputHandler,
 			     bool timeFlag)
   :Recorder(RECORDER_TAGS_DriftRecorder),
    ndI(0), ndJ(0), theNodes(0), dof(df), perpDirn(dirn), oneOverL(0), data(0),
-   theDomain(&theDom), theHandler(&theDataOutputHandler),
+   theDomain(&theDom), theOutputHandler(&theDataOutputHandler),
    initializationDone(false), numNodes(0), echoTimeFlag(timeFlag)
 {
   ndI = new ID(nI);
@@ -105,8 +104,11 @@ DriftRecorder::~DriftRecorder()
   if (theNodes != 0)
     delete [] theNodes;
 
-  if (theHandler != 0)
-    delete theHandler;
+  theOutputHandler->endTag(); // Data
+  theOutputHandler->endTag(); // OpenSeesOutput
+
+  if (theOutputHandler != 0)
+    delete theOutputHandler;
 }
 
 int 
@@ -117,7 +119,7 @@ DriftRecorder::record(int commitTag, double timeStamp)
     return 0;
   }
 
-  if (theHandler == 0) {
+  if (theOutputHandler == 0) {
     opserr << "DriftRecorder::record() - no DataOutputHandler has been set\n";
     return -1;
   }
@@ -154,7 +156,7 @@ DriftRecorder::record(int commitTag, double timeStamp)
       (*data)(i+timeOffset) = 0.0;
   }
 
-  theHandler->write(*data);
+  theOutputHandler->write(*data);
   return 0;
 }
 
@@ -183,8 +185,8 @@ DriftRecorder::sendSelf(int commitTag, Channel &theChannel)
     idData(1) = ndJ->Size();
   idData(2) = dof;
   idData(3) = perpDirn;
-  if (theHandler != 0) {
-    idData(4) = theHandler->getClassTag();
+  if (theOutputHandler != 0) {
+    idData(4) = theOutputHandler->getClassTag();
   }
   if (echoTimeFlag == true)
     idData(5) = 0;
@@ -209,7 +211,7 @@ DriftRecorder::sendSelf(int commitTag, Channel &theChannel)
     }
 
 
-  if (theHandler->sendSelf(commitTag, theChannel) < 0) {
+  if (theOutputHandler->sendSelf(commitTag, theChannel) < 0) {
     opserr << "DriftRecorder::sendSelf() - failed to send the DataOutputHandler\n";
     return -1;
   }
@@ -260,16 +262,16 @@ DriftRecorder::recvSelf(int commitTag, Channel &theChannel,
   else
     echoTimeFlag = false;
 
-  if (theHandler != 0)
-    delete theHandler;
+  if (theOutputHandler != 0)
+    delete theOutputHandler;
 
-  theHandler = theBroker.getPtrNewDataOutputHandler(idData(4));
-  if (theHandler == 0) {
+  theOutputHandler = theBroker.getPtrNewStream(idData(4));
+  if (theOutputHandler == 0) {
     opserr << "DriftRecorder::sendSelf() - failed to get a data output handler\n";
     return -1;
   }
 
-  if (theHandler->recvSelf(commitTag, theChannel, theBroker) < 0) {
+  if (theOutputHandler->recvSelf(commitTag, theChannel, theBroker) < 0) {
     opserr << "DriftRecorder::sendSelf() - failed to send the DataOutputHandler\n";
     return -1;
   }
@@ -281,6 +283,15 @@ DriftRecorder::recvSelf(int commitTag, Channel &theChannel,
 int
 DriftRecorder::initialize(void)
 {
+
+
+  theOutputHandler->tag("OpenSeesOutput");
+
+  if (echoTimeFlag == true) {
+    theOutputHandler->tag("TimeOutput");
+    theOutputHandler->attr("ResponseType", "time");
+    theOutputHandler->endTag();
+  }
 
   initializationDone = true; // still might fail but don't want back in again
 
@@ -388,6 +399,14 @@ DriftRecorder::initialize(void)
 
      if (crdI.Size() > perpDirn  && crdJ.Size() > perpDirn) 
        if (crdI(perpDirn) != crdJ(perpDirn)) {
+
+	 theOutputHandler->tag("DriftOutput");	 
+	 theOutputHandler->attr("node1", ni);	 
+	 theOutputHandler->attr("node2", ni);	 
+	 theOutputHandler->attr("perpDirn", perpDirn);	 
+	 theOutputHandler->attr("lengthPerpDirn", fabs(crdJ(perpDirn) - crdI(perpDirn)));
+	 theOutputHandler->tag("ResponseType", "drift");
+
 	 (*oneOverL)(counter) = 1.0/fabs(crdJ(perpDirn) - crdI(perpDirn));
 	 theNodes[counterI] = nodeI;
 	 theNodes[counterJ] = nodeJ;
@@ -398,52 +417,7 @@ DriftRecorder::initialize(void)
     }
   }
 
-  //
-  // create the data description for the OutputHandler & compute length between nodes
-  //
-
-  int numDbColumns = timeOffset + numNodes;
-  char **dbColumns = new char *[numDbColumns];
-  
-  static char aColumn[128]; // assumes a column name will not be longer than 256 characters
-
-  if (echoTimeFlag == true) {  
-    char *newColumn = new char[5];
-    sprintf(newColumn, "%s","time");  
-    dbColumns[0] = newColumn;
-  }
-  
-  for (int k=0; k<numNodes; k++) {
-    Node *ndI = theNodes[2*k];
-    Node *ndJ = theNodes[2*k+1];
-    int ni = ndI->getTag();
-    int nj = ndJ->getTag();
-    
-    sprintf(aColumn, "Drift%d_%d_%d", ni, nj, perpDirn);
-    int lenColumn = strlen(aColumn);
-    char *newColumn = new char[lenColumn+1];
-    strcpy(newColumn, aColumn);
-    dbColumns[k+timeOffset] = newColumn;
-  }
-  
-  //
-  // call open in the handler with the data description
-  //
-  
-  if (theHandler != 0)
-    theHandler->open(dbColumns, numDbColumns);
-  
-  //
-  // clean up the data description
-  //
-  
-  if (dbColumns != 0) {
-    
-    for (int i=0; i<numDbColumns; i++) 
-      delete [] dbColumns[i];
-    
-    delete [] dbColumns;
-  }
+  theOutputHandler->tag("Data");
   
 
   //

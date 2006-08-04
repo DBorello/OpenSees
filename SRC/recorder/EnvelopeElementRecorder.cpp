@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2006-01-18 19:43:42 $
+// $Revision: 1.16 $
+// $Date: 2006-08-04 22:33:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -39,7 +39,6 @@
 #include <Response.h>
 #include <FE_Datastore.h>
 #include <Information.h>
-#include <DataOutputHandler.h>
 
 #include <Message.h>
 #include <FEM_ObjectBroker.h>
@@ -59,7 +58,7 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &theEleID,
 						 const char **argv, 
 						 int argc,
 						 Domain &theDom, 
-						 DataOutputHandler &theOutputHandler,
+						 OPS_Stream &theOutputHandler,
 						 double dT, bool echoTime)
 :Recorder(RECORDER_TAGS_EnvelopeElementRecorder),
  numEle(theEleID.Size()), eleID(theEleID), theResponses(0), theDomain(&theDom),
@@ -209,32 +208,32 @@ EnvelopeElementRecorder::record(int commitTag, double timeStamp)
       size /= 2;
       if (first == true) {
 	for (int i=0; i<size; i++) {
-	  (*data)(0,i*2) = timeStamp;
-	  (*data)(1,i*2) = timeStamp;
-	  (*data)(2,i*2) = timeStamp;
-	  (*data)(0,i*2+1) = (*currentData)(i);
-	  (*data)(1,i*2+1) = (*currentData)(i);
-	  (*data)(2,i*2+1) = fabs((*currentData)(i));
+	  (*data)(0,i+size) = timeStamp;
+	  (*data)(1,i+size) = timeStamp;
+	  (*data)(2,i+size) = timeStamp;
+	  (*data)(0,i) = (*currentData)(i);
+	  (*data)(1,i) = (*currentData)(i);
+	  (*data)(2,i) = fabs((*currentData)(i));
 	  first = false;
 	} 
       } else {
 	for (int i=0; i<size; i++) {
 	  double value = (*currentData)(i);
-	  if ((*data)(0,2*i+1) > value) {
-	    (*data)(0,2*i) = timeStamp;
-	    (*data)(0,2*i+1) = value;
+	  if ((*data)(0,i) > value) {
+	    (*data)(0,i+size) = timeStamp;
+	    (*data)(0,i) = value;
 	    double absValue = fabs(value);
-	    if ((*data)(2,2*i+1) < absValue) {
-	      (*data)(2,2*i) = timeStamp;
-	      (*data)(2,2*i+1) = absValue;
+	    if ((*data)(2,i) < absValue) {
+	      (*data)(2,i+size) = timeStamp;
+	      (*data)(2,i) = absValue;
 	    }
-	  } else if ((*data)(1,2*i+1) < value) {
-	    (*data)(1,2*i) = timeStamp;
-	    (*data)(1,2*i+1) = value;
+	  } else if ((*data)(1,i) < value) {
+	    (*data)(1,i+size) = timeStamp;
+	    (*data)(1,i) = value;
 	    double absValue = fabs(value);
-	    if ((*data)(2,2*i+1) < absValue) {
-	      (*data)(2,2*i) = timeStamp;
-	      (*data)(2,2*i+1) = absValue;
+	    if ((*data)(2,i) < absValue) {
+	      (*data)(2,i+size) = timeStamp;
+	      (*data)(2,i) = absValue;
 	    }
 	  }
 	}
@@ -443,7 +442,7 @@ EnvelopeElementRecorder::recvSelf(int commitTag, Channel &theChannel,
   if (theHandler != 0)
     delete theHandler;
 
-  theHandler = theBroker.getPtrNewDataOutputHandler(idData(3));
+  theHandler = theBroker.getPtrNewStream(idData(3));
   if (theHandler == 0) {
     opserr << "NodeRecorder::sendSelf() - failed to get a data output handler\n";
     return -1;
@@ -470,6 +469,8 @@ EnvelopeElementRecorder::initialize(void)
   if (numEle == 0 || theDomain == 0)
     return 0;
 
+  theHandler->tag("OpenSeesOutput");
+
   // Set the response objects:
   //   1. create an array of pointers for them
   //   2. iterate over the elements invoking setResponse() to get the new objects & determine size of data
@@ -487,7 +488,7 @@ EnvelopeElementRecorder::initialize(void)
     if (theEle == 0) {
       theResponses[ii] = 0;
     } else {
-      theResponses[ii] = theEle->setResponse((const char **)responseArgs, numArgs, eleInfo);
+      theResponses[ii] = theEle->setResponse((const char **)responseArgs, numArgs, eleInfo, *theHandler);
       if (theResponses[ii] != 0) {
 	// from the response type determine no of cols for each      
 	Information &eleInfo = theResponses[ii]->getInformation();
@@ -501,8 +502,14 @@ EnvelopeElementRecorder::initialize(void)
   // create the matrix & vector that holds the data
   //
 
-  if (echoTimeFlag == true)
+  if (echoTimeFlag == true) {
+    for (int i=0; i<numDbColumns; i++) {
+      theHandler->tag("TimeOutput");
+      theHandler->attr("ResponseType", "time");
+      theHandler->endTag();
+    }
     numDbColumns *= 2;
+  }
 
   data = new Matrix(3, numDbColumns);
   currentData = new Vector(numDbColumns);
@@ -511,105 +518,7 @@ EnvelopeElementRecorder::initialize(void)
     exit(-1);
   }
 
-  //
-  // now create the columns strings for the database
-  // for each element do a getResponse() & print the result
-  //
-
-  char **dbColumns = new char *[numDbColumns];
-  static char aColumn[1012]; // assumes a column name will not be longer than 256 characters
-  
-  int lengthString = 0;
-  for (int l=0; l<numArgs; l++)
-    lengthString += strlen(responseArgs[l])+1;
-  char *dataToStore = new char[lengthString];
-  lengthString = 0;
-  for (int j=0; j<numArgs; j++) {
-    int argLength = strlen(responseArgs[j]);
-    strcpy(&dataToStore[lengthString], responseArgs[j]);
-    if (j<(numArgs-1)) {
-      lengthString += argLength;
-      dataToStore[lengthString] = ' ';
-      lengthString ++;
-    } else
-      lengthString += argLength+1;
-  }
-
-  int counter = 0;
-  for (int i=0; i<eleID.Size(); i++) {
-    int eleTag = eleID(i);
-    int numVariables = 0;
-    if (theResponses[i]!= 0) {
-      const Information &eleInfo = theResponses[i]->getInformation();
-      
-      if (eleInfo.theType == IntType || eleInfo.theType == DoubleType) {
-	// create column heading for single data item for element
-	if (echoTimeFlag == true) {
-	  int lenColumn = strlen("time");
-	  char *newColumn = new char[lenColumn+1];
-	  strcpy(newColumn, "time");
-	  dbColumns[counter] = newColumn;
-	  counter++;
-	}
-
-	numVariables = 0;
-	sprintf(aColumn, "Element%d_%s", eleTag, dataToStore);
-	int lenColumn = strlen(aColumn);
-	char *newColumn = new char[lenColumn+1];
-	strcpy(newColumn, aColumn);
-	dbColumns[counter] = newColumn;
-	counter++;
-      }
-
-      else if (eleInfo.theType == VectorType) 
-	numVariables = eleInfo.theVector->Size();
-      else if (eleInfo.theType == IdType) 
-	numVariables = eleInfo.theID->Size();
-
-      // create the column headings for multiple data for the element
-      for (int j=1; j<=numVariables; j++) {
-	if (echoTimeFlag == true) {
-	  int lenColumn = strlen("time");
-	  char *newColumn = new char[lenColumn+1];
-	  strcpy(newColumn, "time");
-	  dbColumns[counter] = newColumn;
-	  counter++;
-	}
-	sprintf(aColumn, "Element%d_%s_%d",eleTag, dataToStore, j);
-	int lenColumn = strlen(aColumn);
-	char *newColumn = new char[lenColumn+1];
-	strcpy(newColumn, aColumn);
-	dbColumns[counter] = newColumn;
-	counter++;
-      }
-    }
-  }
-
-  // replace spaces with undescore for tables
-  for (int kk=0; kk<numDbColumns; kk++) {
-    char *data = dbColumns[kk];
-    int length = strlen(data);
-    for (int j=0; j<length; j++)
-      if (data[j] == ' ') data[j]='_';
-  }
-
-  //
-  // call open in the handler with the data description
-  //
-
-  theHandler->open(dbColumns, numDbColumns);
-
-  //
-  // clean up the data description
-  //
-
-  if (dbColumns != 0) {
-
-    for (int i=0; i<numDbColumns; i++) 
-      delete [] dbColumns[i];
-
-      delete [] dbColumns;
-  }
+  theHandler->tag("Data");
 
   initializationDone = true;  
   return 0;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2006-01-18 19:43:42 $
+// $Revision: 1.25 $
+// $Date: 2006-08-04 22:33:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -38,7 +38,6 @@
 #include <ID.h>
 #include <Matrix.h>
 #include <FE_Datastore.h>
-#include <DataOutputHandler.h>
 #include <FEM_ObjectBroker.h>
 
 #include <string.h>
@@ -46,7 +45,7 @@
 NodeRecorder::NodeRecorder()
 :Recorder(RECORDER_TAGS_NodeRecorder),
  theDofs(0), theNodalTags(0), theNodes(0), response(0), 
- theDomain(0), theHandler(0),
+ theDomain(0), theOutputHandler(0),
  echoTimeFlag(true), dataFlag(0), 
  deltaT(0), nextTimeStampToRecord(0.0), 
  sensitivity(0),
@@ -60,13 +59,13 @@ NodeRecorder::NodeRecorder(const ID &dofs,
 			   int psensitivity,
 			   const char *dataToStore,
 			   Domain &theDom,
-			   DataOutputHandler &theOutputHandler,
+			   OPS_Stream &theOutputHandler,
 			   double dT,
 			   bool timeFlag)
 :Recorder(RECORDER_TAGS_NodeRecorder),
  theDofs(0), theNodalTags(0), theNodes(0), 
  response(1 + nodes.Size()*dofs.Size()), 
- theDomain(&theDom), theHandler(&theOutputHandler),
+ theDomain(&theDom), theOutputHandler(&theOutputHandler),
  echoTimeFlag(timeFlag), dataFlag(0), 
  deltaT(dT), nextTimeStampToRecord(0.0), 
  sensitivity(psensitivity), 
@@ -169,8 +168,11 @@ NodeRecorder::NodeRecorder(const ID &dofs,
 
 NodeRecorder::~NodeRecorder()
 {
-  if (theHandler != 0)
-    delete theHandler;
+  theOutputHandler->endTag(); // Data
+  theOutputHandler->endTag(); // OpenSeesOutput
+
+  if (theOutputHandler != 0)
+    delete theOutputHandler;
 
   if (theDofs != 0)
     delete theDofs;
@@ -189,7 +191,7 @@ NodeRecorder::record(int commitTag, double timeStamp)
     return 0;
   }
 
-  if (theHandler == 0) {
+  if (theOutputHandler == 0) {
     opserr << "NodeRecorder::record() - no DataOutputHandler has been set\n";
     return -1;
   }
@@ -417,7 +419,7 @@ NodeRecorder::record(int commitTag, double timeStamp)
     }
     
     // insert the data into the database
-    theHandler->write(response);
+    theOutputHandler->write(response);
   }
     
   return 0;
@@ -446,8 +448,8 @@ NodeRecorder::sendSelf(int commitTag, Channel &theChannel)
     idData(0) = theDofs->Size();
   if (theNodalTags != 0)
     idData(1) = theNodalTags->Size();
-  if (theHandler != 0) {
-    idData(2) = theHandler->getClassTag();
+  if (theOutputHandler != 0) {
+    idData(2) = theOutputHandler->getClassTag();
   }
   
   if (echoTimeFlag == true)
@@ -483,7 +485,7 @@ NodeRecorder::sendSelf(int commitTag, Channel &theChannel)
     return -1;
   }
 
-  if (theHandler->sendSelf(commitTag, theChannel) < 0) {
+  if (theOutputHandler->sendSelf(commitTag, theChannel) < 0) {
     opserr << "NodeRecorder::sendSelf() - failed to send the DataOutputHandler\n";
     return -1;
   }
@@ -572,16 +574,16 @@ NodeRecorder::recvSelf(int commitTag, Channel &theChannel,
     return -1;
   }
 
-  if (theHandler != 0)
-    delete theHandler;
+  if (theOutputHandler != 0)
+    delete theOutputHandler;
 
-  theHandler = theBroker.getPtrNewDataOutputHandler(idData(2));
-  if (theHandler == 0) {
+  theOutputHandler = theBroker.getPtrNewStream(idData(2));
+  if (theOutputHandler == 0) {
     opserr << "NodeRecorder::sendSelf() - failed to get a data output handler\n";
     return -1;
   }
 
-  if (theHandler->recvSelf(commitTag, theChannel, theBroker) < 0) {
+  if (theOutputHandler->recvSelf(commitTag, theChannel, theBroker) < 0) {
     opserr << "NodeRecorder::sendSelf() - failed to send the DataOutputHandler\n";
     return -1;
   }
@@ -597,6 +599,14 @@ NodeRecorder::initialize(void)
   if (theDofs == 0 || theNodalTags == 0 || theDomain == 0) {
     opserr << "NodeRecorder::initialize() - either nodes, dofs or domain has not been set\n";
     return -1;
+  }
+
+  theOutputHandler->tag("OpenSeesOutput");
+
+  if (echoTimeFlag == true) {
+    theOutputHandler->tag("TimeOutput");
+    theOutputHandler->tag("ResponseType", "time");
+    theOutputHandler->endTag();
   }
   
   //
@@ -649,67 +659,82 @@ NodeRecorder::initialize(void)
   // need to create the data description, i.e. what each column of data is
   //
   
-  char dataToStore[16];
-  if (dataFlag == 0)
-    strcpy(dataToStore, "disp");
-  else if (dataFlag == 1)
-    strcpy(dataToStore, "vel");
-  else if (dataFlag == 2)
-    strcpy(dataToStore, "accel");
-  else if (dataFlag == 3)
-    strcpy(dataToStore, "deltaDisp");
-  else if (dataFlag == 4)
-    strcpy(dataToStore, "incrDeltaDisp");
-  else if (dataFlag == 5)
-    sprintf(dataToStore,"eigen_%d",dataToStore-10);
-  else
-    strcpy(dataToStore,"invalid");
-  
-  int numDbColumns = numValidResponse;
-  char **dbColumns = new char *[numDbColumns];
+  char outputData[32];
+  char dataType[10];
 
-  static char aColumn[128]; // assumes a column name will not be longer than 256 characters
+  if (dataFlag == 0) {
+    strcpy(dataType,"D");
+  } else if (dataFlag == 1) {
+    strcpy(dataType,"V");
+  } else if (dataFlag == 2) {
+    strcpy(dataType,"A");
+  } else if (dataFlag == 3) {
+    strcpy(dataType,"dD");
+  } else if (dataFlag == 4) {
+    strcpy(dataType,"ddD");
+  } else if (dataFlag == 5) {
+    strcpy(dataType,"U");
+  } else if (dataFlag == 6) {
+    strcpy(dataType,"U");
+  } else if (dataFlag == 7) {
+    strcpy(dataType,"R");
+  } else if (dataFlag == 8) {
+    strcpy(dataType,"R");
+  } else if (dataFlag > 10) {
+    sprintf(dataType,"E%d", dataFlag-10);
+  } else
+    strcpy(dataType,"Unknown");
 
-  if (echoTimeFlag == true) {
-    char *newColumn = new char[5];
-    sprintf(newColumn, "%s","time");  
-    dbColumns[0] = newColumn;
-  }
-  
-  int counter = timeOffset;
+  /************************************************************
+  } else if ((strncmp(dataToStore, "sensitivity",11) == 0)) {
+    int grad = atoi(&(dataToStore[11]));
+    if (grad > 0)
+      dataFlag = 1000 + grad;
+    else
+      dataFlag = 6;
+  } else if ((strncmp(dataToStore, "velSensitivity",14) == 0)) {
+    int grad = atoi(&(dataToStore[14]));
+    if (grad > 0)
+      dataFlag = 2000 + grad;
+    else
+      dataFlag = 6;
+  } else if ((strncmp(dataToStore, "accSensitivity",14) == 0)) {
+    int grad = atoi(&(dataToStore[14]));
+    if (grad > 0)
+      dataFlag = 3000 + grad;
+    else
+      dataFlag = 6;
+
+  ***********************************************************/
+
+  char nodeCrdData[20];
+  sprintf(nodeCrdData,"coord");
 
   for (i=0; i<numValidNodes; i++) {
     int nodeTag = theNodes[i]->getTag();
-    for (int j=0; j<theDofs->Size(); j++) {
-      int dof = (*theDofs)(j);
-      sprintf(aColumn, "Node%d_%s_%d", nodeTag, dataToStore, dof+1);
-      int lenColumn = strlen(aColumn);
-      char *newColumn = new char[lenColumn+1];
-      strcpy(newColumn, aColumn);
-      dbColumns[counter] = newColumn;
-      counter++;
-    }
-  }
-
-  //
-  // call open in the handler with the data description
-  //
-  
-  if (theHandler != 0)
-    theHandler->open(dbColumns, counter);
-
-  //
-  // clean up the data description
-  //
-
-  if (dbColumns != 0) {
+    const Vector &nodeCrd = theNodes[i]->getCrds();
+    int numCoord = nodeCrd.Size();
     
-    for (int i=0; i<numDbColumns; i++) {
-      delete [] dbColumns[i];
+    theOutputHandler->tag("NodeOutput");
+    theOutputHandler->attr("nodeTag", nodeTag);
+
+    for (int j=0; j<3; j++) {
+      sprintf(nodeCrdData,"coord%d",j+1);
+      if (j < numCoord)
+	theOutputHandler->attr(nodeCrdData, nodeCrd(j));      
+      else
+	theOutputHandler->attr(nodeCrdData, 0.0);      
     }
-    delete [] dbColumns;
+
+    for (int j=0; j<theDofs->Size(); j++) {
+      sprintf(outputData, "%s%d", dataType, j+1);
+      theOutputHandler->tag("ResponseType",outputData);
+    }
+
+    theOutputHandler->endTag();
   }
 
+  theOutputHandler->tag("Data");
   initializationDone = true;
 
   return 0;

@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.11 $
-// $Date: 2006-01-18 19:43:42 $
+// $Revision: 1.12 $
+// $Date: 2006-08-04 22:33:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -43,7 +43,6 @@
 #include <Matrix.h>
 #include <FE_Datastore.h>
 #include <FEM_ObjectBroker.h>
-#include <DataOutputHandler.h>
 
 #include <string.h>
 
@@ -62,7 +61,7 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID &dofs,
 					   const ID &nodes, 
 					   const char *dataToStore,
 					   Domain &theDom,
-					   DataOutputHandler &theOutputHandler,
+					   OPS_Stream &theOutputHandler,
 					   double dT, bool echoTime)
 :Recorder(RECORDER_TAGS_EnvelopeNodeRecorder),
  theDofs(0), theNodalTags(0), theNodes(0),
@@ -325,12 +324,12 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
     bool writeIt = false;
     if (first == true) {
       for (int i=0; i<sizeData; i++) {
-	(*data)(0,i*2) = timeStamp;
-	(*data)(1,i*2) = timeStamp;
-	(*data)(2,i*2) = timeStamp;
-	(*data)(0,i*2+1) = (*currentData)(i);
-	(*data)(1,i*2+1) = (*currentData)(i);
-	(*data)(2,i*2+1) = fabs((*currentData)(i));
+	(*data)(0,i+sizeData) = timeStamp;
+	(*data)(1,i+sizeData) = timeStamp;
+	(*data)(2,i+sizeData) = timeStamp;
+	(*data)(0,i) = (*currentData)(i);
+	(*data)(1,i) = (*currentData)(i);
+	(*data)(2,i) = fabs((*currentData)(i));
 	first = false;
 	writeIt = true;
       } 
@@ -338,21 +337,21 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
       for (int i=0; i<sizeData; i++) {
 	double value = (*currentData)(i);
 	if ((*data)(0,2*i+1) > value) {
-	  (*data)(0,i*2) = timeStamp;
-	  (*data)(0,i*2+1) = value;
+	  (*data)(0,i+sizeData) = timeStamp;
+	  (*data)(0,i) = value;
 	  double absValue = fabs(value);
-	  if ((*data)(2,i*2+1) < absValue) {
-	    (*data)(2,i*2+1) = absValue;
-	    (*data)(2,i*2) = timeStamp;
+	  if ((*data)(2,i) < absValue) {
+	    (*data)(2,i) = absValue;
+	    (*data)(2,i+sizeData) = timeStamp;
 	  }
 	  writeIt = true;
-	} else if ((*data)(1,2*i+1) < value) {
-	  (*data)(1,2*i) = timeStamp;
-	  (*data)(1,2*i+1) = value;
+	} else if ((*data)(1,i) < value) {
+	  (*data)(1,i+sizeData) = timeStamp;
+	  (*data)(1,i) = value;
 	  double absValue = fabs(value);
-	  if ((*data)(2,2*i+1) < absValue) { 
-	    (*data)(2,2*i) = timeStamp;
-	    (*data)(2,2*i+1) = absValue;
+	  if ((*data)(2,i) < absValue) { 
+	    (*data)(2,i+sizeData) = timeStamp;
+	    (*data)(2,i) = absValue;
 	  }
 	  writeIt = true;
 	}
@@ -510,7 +509,7 @@ EnvelopeNodeRecorder::recvSelf(int commitTag, Channel &theChannel,
   if (theHandler != 0)
     delete theHandler;
 
-  theHandler = theBroker.getPtrNewDataOutputHandler(idData(2));
+  theHandler = theBroker.getPtrNewStream(idData(2));
   if (theHandler == 0) {
     opserr << "EnvelopeNodeRecorder::sendSelf() - failed to get a data output handler\n";
     return -1;
@@ -532,6 +531,8 @@ EnvelopeNodeRecorder::initialize(void)
     opserr << "EnvelopeNodeRecorder::initialize() - either nodes, dofs or domain has not been set\n";
     return -1;
   }
+
+  theHandler->tag("OpenSeesOutput");
   
   //
   // create & set nodal array pointer
@@ -567,83 +568,73 @@ EnvelopeNodeRecorder::initialize(void)
     }
   }
 
-  //
-  // resize the response vector
-  //
-  int numValidResponse = numValidNodes*theDofs->Size();
 
-  if (echoTimeFlag == true)
-    numValidResponse *= 2;
-
-  currentData = new Vector(numValidResponse);
-  data = new Matrix(3, numValidResponse);
-  data->Zero();
+  //
+  // need to create the data description, i.e. what each column of data is
+  //
 
   //
   // need to create the data description, i.e. what each column of data is
   //
   
-  char dataToStore[16];
-  if (dataFlag == 0)
-    strcpy(dataToStore, "disp");
-  else if (dataFlag == 1)
-    strcpy(dataToStore, "vel");
-  else if (dataFlag == 2)
-    strcpy(dataToStore, "accel");
-  else if (dataFlag == 3)
-    strcpy(dataToStore, "deltaDisp");
-  else if (dataFlag == 4)
-    strcpy(dataToStore, "incrDeltaDisp");
-  else if (dataFlag == 5)
-    sprintf(dataToStore,"eigen_%d",dataToStore-10);
-  else
-    strcpy(dataToStore,"invalid");
-  
-  int numDbColumns = numValidResponse;
-  char **dbColumns = new char *[numDbColumns];
+  char outputData[32];
+  char dataType[10];
 
-  static char aColumn[128]; // assumes a column name will not be longer than 256 characters
-  
-  int counter = 0;
+  if (dataFlag == 0) {
+    strcpy(dataType,"D");
+  } else if (dataFlag == 1) {
+    strcpy(dataType,"V");
+  } else if (dataFlag == 2) {
+    strcpy(dataType,"A");
+  } else if (dataFlag == 3) {
+    strcpy(dataType,"dD");
+  } else if (dataFlag == 4) {
+    strcpy(dataType,"ddD");
+  } else if (dataFlag == 5) {
+    strcpy(dataType,"U");
+  } else if (dataFlag == 6) {
+    strcpy(dataType,"U");
+  } else if (dataFlag == 7) {
+    strcpy(dataType,"R");
+  } else if (dataFlag == 8) {
+    strcpy(dataType,"R");
+  } else if (dataFlag > 10) {
+    sprintf(dataType,"E%d", dataFlag-10);
+  } else
+    strcpy(dataType,"Unknown");
+
   for (i=0; i<numValidNodes; i++) {
     int nodeTag = theNodes[i]->getTag();
+
+    theHandler->tag("NodeOutput");
+    theHandler->attr("nodeTag", nodeTag);
+
     for (int j=0; j<theDofs->Size(); j++) {
-      if (echoTimeFlag == true) {
-	int lenColumn = strlen("time");
-	char *newColumn = new char[lenColumn+1];
-	strcpy(newColumn, "time");
-	dbColumns[counter] = newColumn;
-	counter++;
-      }
-      int dof = (*theDofs)(j);
-      sprintf(aColumn, "Node%d_%s_%d", nodeTag, dataToStore, dof+1);
-      int lenColumn = strlen(aColumn);
-      char *newColumn = new char[lenColumn+1];
-      strcpy(newColumn, aColumn);
-      dbColumns[counter] = newColumn;
-      counter++;
+      sprintf(outputData, "%s%d", dataType, j+1);
+      theHandler->tag("ResponseType",outputData);
     }
-  }
-  
-  //
-  // call open in the handler with the data description
-  //
 
-  if (theHandler != 0)
-    theHandler->open(dbColumns, numDbColumns);
-
-  //
-  // clean up the data description
-  //
-
-  if (dbColumns != 0) {
-
-    for (int i=0; i<numDbColumns; i++) 
-      delete [] dbColumns[i];
-
-      delete [] dbColumns;
+    theHandler->endTag();
   }
 
+  //
+  // resize the response vector
+  //
+  int numValidResponse = numValidNodes*theDofs->Size();
+
+  if (echoTimeFlag == true) {
+    for (int i=0; i<numValidResponse; i++) {
+      theHandler->tag("TimeOutput");
+      theHandler->attr("ResponseType", "time");
+      theHandler->endTag();
+    }
+    numValidResponse *= 2;
+  }
+
+
+  currentData = new Vector(numValidResponse);
+  data = new Matrix(3, numValidResponse);
+  data->Zero();
 
   initializationDone = true;
 
