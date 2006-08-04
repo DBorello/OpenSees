@@ -1,5 +1,5 @@
-// $Revision: 1.8 $
-// $Date: 2006-01-10 19:00:10 $
+// $Revision: 1.9 $
+// $Date: 2006-08-04 18:29:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield02.cpp,v $
 
 // Written: ZHY
@@ -1097,7 +1097,7 @@ int PressureDependMultiYield02::recvSelf(int commitTag, Channel &theChannel,
 
 
 Response*
-PressureDependMultiYield02::setResponse (const char **argv, int argc, Information &matInfo)
+PressureDependMultiYield02::setResponse (const char **argv, int argc, Information &matInfo, OPS_Stream &s)
 {
   if (strcmp(argv[0],"stress") == 0 || strcmp(argv[0],"stresses") == 0)
 		return new MaterialResponse(this, 1, this->getCommittedStress());

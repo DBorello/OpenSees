@@ -1,5 +1,5 @@
-// $Revision: 1.30 $
-// $Date: 2004-08-27 18:31:17 $
+// $Revision: 1.31 $
+// $Date: 2006-08-04 18:29:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -696,53 +696,53 @@ int PressureIndependMultiYield::recvSelf(int commitTag, Channel &theChannel,
 
 
 Response*
-PressureIndependMultiYield::setResponse (const char **argv, int argc, Information &matInfo)
+PressureIndependMultiYield::setResponse (const char **argv, int argc, Information &matInfo, OPS_Stream &output)
 {
   if (strcmp(argv[0],"stress") == 0 || strcmp(argv[0],"stresses") == 0)
-		return new MaterialResponse(this, 1, this->getCommittedStress());
-
+    return new MaterialResponse(this, 1, this->getCommittedStress());
+  
   else if (strcmp(argv[0],"strain") == 0 || strcmp(argv[0],"strains") == 0)
-		return new MaterialResponse(this, 2, this->getCommittedStrain());
-    
-	else if (strcmp(argv[0],"tangent") == 0)
-		return new MaterialResponse(this, 3, this->getTangent());
-    
-	else if (strcmp(argv[0],"backbone") == 0) {
-	    int numOfSurfaces = numOfSurfacesx[matN];
-        static Matrix curv(numOfSurfaces+1,(argc-1)*2);
-		  for (int i=1; i<argc; i++)
-		   	curv(0,(i-1)*2) = atoi(argv[i]);
-		return new MaterialResponse(this, 4, curv);
-	}
-	else
-		return 0;
+    return new MaterialResponse(this, 2, this->getCommittedStrain());
+  
+  else if (strcmp(argv[0],"tangent") == 0)
+    return new MaterialResponse(this, 3, this->getTangent());
+  
+  else if (strcmp(argv[0],"backbone") == 0) {
+    int numOfSurfaces = numOfSurfacesx[matN];
+    static Matrix curv(numOfSurfaces+1,(argc-1)*2);
+    for (int i=1; i<argc; i++)
+      curv(0,(i-1)*2) = atoi(argv[i]);
+    return new MaterialResponse(this, 4, curv);
+  }
+  else
+    return 0;
 }
 
 
 int PressureIndependMultiYield::getResponse (int responseID, Information &matInfo)
 {
-	switch (responseID) {
-		case -1:
-			return -1;
-		case 1:
-			if (matInfo.theVector != 0)
-				*(matInfo.theVector) = getCommittedStress();
-			return 0;
-		case 2:
-			if (matInfo.theVector != 0)
-				*(matInfo.theVector) = getCommittedStrain();
-			return 0;
-		case 3:
-			if (matInfo.theMatrix != 0)
-				*(matInfo.theMatrix) = getTangent();
-			return 0;
-		case 4:
-			if (matInfo.theMatrix != 0) 
-				getBackbone(*(matInfo.theMatrix));
-			return 0;
-		default:
-			return -1;
-	}
+  switch (responseID) {
+  case -1:
+    return -1;
+  case 1:
+    if (matInfo.theVector != 0)
+      *(matInfo.theVector) = getCommittedStress();
+    return 0;
+  case 2:
+    if (matInfo.theVector != 0)
+      *(matInfo.theVector) = getCommittedStrain();
+    return 0;
+  case 3:
+    if (matInfo.theMatrix != 0)
+      *(matInfo.theMatrix) = getTangent();
+    return 0;
+  case 4:
+    if (matInfo.theMatrix != 0) 
+      getBackbone(*(matInfo.theMatrix));
+    return 0;
+  default:
+    return -1;
+  }
 }
 
 
