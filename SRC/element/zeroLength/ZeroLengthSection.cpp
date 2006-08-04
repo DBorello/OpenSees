@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-02-25 23:33:13 $
+// $Revision: 1.10 $
+// $Date: 2006-08-04 21:50:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthSection.cpp,v $
                                                                         
 // Written: MHS
@@ -507,26 +507,43 @@ ZeroLengthSection::Print(OPS_Stream &s, int flag)
 }
 
 Response*
-ZeroLengthSection::setResponse(const char **argv, int argc, Information &eleInformation)
+ZeroLengthSection::setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &output)
 {
-	// element forces
-    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
-		return new ElementResponse(this, 1, *P);
+  Response *theResponse = 0;
 
-    // element stiffness matrix
-    else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
-		return new ElementResponse(this, 2, *K);
+  output.tag("ElementOutput");
+  output.attr("eleType","ZeroLengthSection");
+  output.attr("eleTag",this->getTag());
+  output.attr("node1",connectedExternalNodes[0]);
+  output.attr("node2",connectedExternalNodes[1]);
 
-    else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
+  char outputData[5];
+  // element forces
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0) {
+    
+    for (int i=0; i<P->Size(); i++) {
+      sprintf(outputData,"P%d",i+1);
+      output.tag("ResponseType",outputData);
+    }
+    theResponse =  new ElementResponse(this, 1, *P);
+
+  } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
 		strcmp(argv[0],"deformation") == 0) {
-		return new ElementResponse(this, 3, Vector(order));
-	}     
 
-	else if (strcmp(argv[0],"section") == 0)
-		return theSection->setResponse(&argv[1], argc-1, eleInformation);
+    for (int i=0; i<order; i++) {
+      sprintf(outputData,"e%d",i+1);
+      output.tag("ResponseType",outputData);
+    }
 
-	else 
-		return 0;
+    theResponse = new ElementResponse(this, 3, Vector(order));
+
+  }  else if (strcmp(argv[0],"section") == 0) {
+    theResponse =  theSection->setResponse(&argv[1], argc-1, eleInformation, output);
+  }
+  
+  output.endTag();
+  return theResponse;
+
 }
 
 int 

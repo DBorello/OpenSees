@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2003-02-25 23:33:12 $
+// $Revision: 1.17 $
+// $Date: 2006-08-04 21:50:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
                                                                         
                                                                         
@@ -821,35 +821,63 @@ ZeroLength::Print(OPS_Stream &s, int flag)
 }
 
 Response*
-ZeroLength::setResponse(const char **argv, int argc, Information &eleInformation)
+ZeroLength::setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &output)
 {
-    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
-		return new ElementResponse(this, 1, Vector(numMaterials1d));
-    
-    else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
-		strcmp(argv[0],"deformation") == 0)
-		return new ElementResponse(this, 2, Vector(numMaterials1d));
+  Response *theResponse = 0;
 
-    else if ((strcmp(argv[0],"defoANDforce") == 0) ||
-	     (strcmp(argv[0],"deformationANDforces") == 0) ||
-	     (strcmp(argv[0],"deformationsANDforces") == 0))
-		return new ElementResponse(this, 4, Vector(2*numMaterials1d));
+  output.tag("ElementOutput");
+  output.attr("eleType","ZeroLength");
+  output.attr("eleTag",this->getTag());
+  output.attr("node1",connectedExternalNodes[0]);
+  output.attr("node2",connectedExternalNodes[1]);
 
-    // tangent stiffness matrix
-    else if (strcmp(argv[0],"stiff") == 0)
-		return new ElementResponse(this, 3, Matrix(numMaterials1d,numMaterials1d));
+  char outputData[10];
 
-	else if (strcmp(argv[0],"material") == 0) {
-		if (argc <= 2)
-			return 0;
-		int matNum = atoi(argv[1]);
-		if (matNum < 1 || matNum > numMaterials1d)
-			return 0;
-		else
-			return theMaterial1d[matNum-1]->setResponse(&argv[2], argc-2, eleInformation);
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0) {
+
+    for (int i=0; i<numMaterials1d; i++) {
+      sprintf(outputData,"P%d",i+1);
+      output.tag("ResponseType",outputData);
     }
-	else 
-		return 0;
+
+    theResponse =  new ElementResponse(this, 1, Vector(numMaterials1d));
+  
+  }  else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
+	      strcmp(argv[0],"deformation") == 0) {
+
+    for (int i=0; i<numMaterials1d; i++) {
+      sprintf(outputData,"e%d",i+1);
+      output.tag("ResponseType",outputData);
+    }
+
+    theResponse =  new ElementResponse(this, 2, Vector(numMaterials1d));
+  
+  }  else if ((strcmp(argv[0],"defoANDforce") == 0) ||
+	   (strcmp(argv[0],"deformationANDforces") == 0) ||
+	      (strcmp(argv[0],"deformationsANDforces") == 0)) {
+
+    for (int i=0; i<numMaterials1d; i++) {
+      sprintf(outputData,"e%d",i+1);
+      output.tag("ResponseType",outputData);
+    }
+    for (int i=0; i<numMaterials1d; i++) {
+      sprintf(outputData,"P%d",i+1);
+      output.tag("ResponseType",outputData);
+    }
+
+    theResponse =  new ElementResponse(this, 4, Vector(2*numMaterials1d));
+
+  }  else if (strcmp(argv[0],"material") == 0) {
+    if (argc > 2) {
+      int matNum = atoi(argv[1]);
+      if (matNum >= 1 && matNum <= numMaterials1d)
+	theResponse =  theMaterial1d[matNum-1]->setResponse(&argv[2], argc-2, eleInformation, output);
+    }
+  }
+
+  output.endTag();
+
+  return theResponse;
 }
 
 int 

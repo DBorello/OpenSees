@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-25 23:33:13 $
+// $Revision: 1.7 $
+// $Date: 2006-08-04 21:50:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthSection.h,v $
                                                                         
 // Written: MHS
@@ -58,6 +58,8 @@ class ZeroLengthSection : public Element
     ZeroLengthSection();    
     ~ZeroLengthSection();
 
+    const char *getClassType(void) const {return "ZeroLengthSection";};
+
     // public methods to obtain inforrmation about dof & connectivity    
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
@@ -88,7 +90,7 @@ class ZeroLengthSection : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(OPS_Stream &s, int flag =0);    
 
-    Response *setResponse(const char **argv, int argc, Information &eleInformation);
+    Response *setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &output);
     int getResponse(int responseID, Information &eleInformation);
     
   protected:

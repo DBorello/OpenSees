@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-25 23:33:13 $
+// $Revision: 1.9 $
+// $Date: 2006-08-04 21:50:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.h,v $
                                                                         
                                                                         
@@ -82,6 +82,8 @@ class ZeroLength : public Element
     ZeroLength();    
     ~ZeroLength();
 
+    const char *getClassType(void) const {return "ZeroLength";};
+
     // public methods to obtain inforrmation about dof & connectivity    
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
@@ -115,10 +117,10 @@ class ZeroLength : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(OPS_Stream &s, int flag =0);    
 
-	Response *setResponse(const char **argv, int argc, Information &eleInformation);
+    Response *setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &s);
     int getResponse(int responseID, Information &eleInformation);
     
-	void updateDir (const Vector& x, const Vector& y);
+    void updateDir (const Vector& x, const Vector& y);
 
   protected:
     
