@@ -29,8 +29,8 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
                                                                            
-// $Revision: 1.1 $
-// $Date: 2005-09-22 21:28:36 $
+// $Revision: 1.2 $
+// $Date: 2006-08-04 22:32:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/BrickUP.cpp,v $
 
 // by Zhaohui Yang (Modified based on Ed "C++" Love's Brick element)
@@ -1441,33 +1441,82 @@ BrickUP::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-BrickUP::setResponse(const char **argv, int argc, Information &eleInfo)
+BrickUP::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
 {
-  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
-    return new ElementResponse(this, 1, resid);
-  
-  else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
-    return new ElementResponse(this, 2, stiff);
-  
-  else if (strcmp(argv[0],"mass") == 0)
-	return new ElementResponse(this, 3, mass);
 
-  else if (strcmp(argv[0],"damp") == 0)
-	return new ElementResponse(this, 4, damp);
+  Response *theResponse = 0;
 
-  else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
+  char outputData[32];
+
+  output.tag("ElementOutput");
+  output.attr("eleType","BrickUP");
+  output.attr("eleTag",this->getTag());
+  for (int i=1; i<=8; i++) {
+    sprintf(outputData,"node%d",i);
+    output.attr(outputData,nodePointers[i-1]->getTag());
+  }
+
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0) {
+
+    for (int i=1; i<=8; i++) {
+      sprintf(outputData,"P1_%d",i);
+      output.tag("ResponseType",outputData);
+      sprintf(outputData,"P2_%d",i);
+      output.tag("ResponseType",outputData);
+      sprintf(outputData,"P3_%d",i);
+      output.tag("ResponseType",outputData);
+      sprintf(outputData,"Pp_%d",i);
+      output.tag("ResponseType",outputData);
+    }
+
+    theResponse = new ElementResponse(this, 1, resid);
+    
+  }   else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0) {
+    theResponse = new ElementResponse(this, 2, stiff);
+    
+  }   else if (strcmp(argv[0],"mass") == 0) {
+    theResponse = new ElementResponse(this, 3, mass);
+    
+  }   else if (strcmp(argv[0],"damp") == 0) {
+    theResponse = new ElementResponse(this, 4, damp);
+    
+  } else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
     int pointNum = atoi(argv[1]);
-    if (pointNum > 0 && pointNum <= 8)
-      return materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo);
-    else 
-      return 0;
+    if (pointNum > 0 && pointNum <= 8) {
+
+      output.tag("GaussPoint");
+      output.attr("number",pointNum);
+
+      theResponse =  materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+      
+      output.endTag(); // GaussPoint
+    }
+
   } else if (strcmp(argv[0],"stresses") ==0) {
-    return new ElementResponse(this, 5, Vector(48));
+
+    for (int i=0; i<8; i++) {
+      output.tag("GaussPoint");
+      output.attr("number",i+1);
+      output.tag("NdMaterialOutput");
+      output.attr("classType", materialPointers[i]->getClassTag());
+      output.attr("tag", materialPointers[i]->getTag());
+
+      output.tag("ResponseType","sigma11");
+      output.tag("ResponseType","sigma22");
+      output.tag("ResponseType","sigma33");
+      output.tag("ResponseType","sigma12");
+      output.tag("ResponseType","sigma13");
+      output.tag("ResponseType","sigma23");      
+
+      output.endTag(); // NdMaterialOutput
+      output.endTag(); // GaussPoint
+    }
+    theResponse = new ElementResponse(this, 5, Vector(48));
   }
   
-  // otherwise response quantity is unknown for the BrickUP class
-  else
-    return 0;
+  output.endTag(); // ElementOutput
+  return theResponse;
+
 }
 
 int 

@@ -140,7 +140,7 @@ public :
 
     virtual ~TwentyEightNodeBrickUP( ) ;
 
-
+    const char *getClassType(void) const {return "TwentyEightNodeBrickUP";};
 
     //set domain
 
@@ -238,7 +238,7 @@ public :
 
 
 
-    Response *setResponse(const char **argv, int argc, Information &eleInformation);
+    Response *setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &s);
 
     int getResponse(int responseID, Information &eleInformation);
 

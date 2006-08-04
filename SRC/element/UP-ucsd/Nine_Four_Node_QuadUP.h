@@ -22,9 +22,9 @@
 
 
 
-// $Revision: 1.2 $
+// $Revision: 1.3 $
 
-// $Date: 2006-07-12 21:17:23 $
+// $Date: 2006-08-04 22:32:17 $
 
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/Nine_Four_Node_QuadUP.h,v $
 
@@ -84,7 +84,7 @@ class NineFourNodeQuadUP : public Element
 
     virtual ~NineFourNodeQuadUP();
 
-
+    const char *getClassType(void) const {return "NineFourNodeQuadUP";};
 
     int getNumExternalNodes(void) const;
 
@@ -150,7 +150,7 @@ class NineFourNodeQuadUP : public Element
 
 
 
-    Response *setResponse(const char **argv, int argc, Information &eleInformation);
+    Response *setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &s);
 
     int getResponse(int responseID, Information &eleInformation);
 

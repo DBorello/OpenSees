@@ -29,8 +29,8 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.1 $
-// $Date: 2005-09-22 21:28:36 $
+// $Revision: 1.2 $
+// $Date: 2006-08-04 22:32:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/BrickUP.h,v $
 
 // by Zhaohui Yang (Modified based on Ed "C++" Love's Brick element)
@@ -72,6 +72,8 @@ class BrickUP : public Element {
 
     //destructor
     virtual ~BrickUP( ) ;
+
+    const char *getClassType(void) const {return "BrickUP";};
 
     //set domain
     void setDomain( Domain *theDomain ) ;
@@ -119,7 +121,7 @@ class BrickUP : public Element {
     int recvSelf (int commitTag, Channel &theChannel, FEM_ObjectBroker
 		  &theBroker);
 
-    Response *setResponse(const char **argv, int argc, Information &eleInformation);
+    Response *setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &s);
     int getResponse(int responseID, Information &eleInformation);
 
     //plotting

@@ -9,8 +9,8 @@
 // based on FourNodeQuad element by Michael Scott		  	     //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.1 $
-// $Date: 2005-09-22 21:28:36 $
+// $Revision: 1.2 $
+// $Date: 2006-08-04 22:32:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/FourNodeQuadUP.cpp,v $
 
 #include <FourNodeQuadUP.h>
@@ -951,43 +951,71 @@ FourNodeQuadUP::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-FourNodeQuadUP::setResponse(const char **argv, int argc, Information &eleInfo)
+FourNodeQuadUP::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
 {
-    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
-		return new ElementResponse(this, 1, P);
-    
-    else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
-		return new ElementResponse(this, 2, K);
+  Response *theResponse = 0;
 
-	else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
-		int pointNum = atoi(argv[1]);
-		if (pointNum > 0 && pointNum <= 4)
-			return theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo);
-	    else 
-			return 0;
-	}
- 
-    // otherwise response quantity is unknown for the quad class
-    else
-		return 0;
+
+  char outputData[32];
+
+
+  output.tag("ElementOutput");
+  output.attr("eleType","BrickUP");
+  output.attr("eleTag",this->getTag());
+  output.attr("node1",nd1Ptr->getTag());
+  output.attr("node2",nd2Ptr->getTag());
+  output.attr("node3",nd3Ptr->getTag());
+  output.attr("node4",nd4Ptr->getTag());
+
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0) {
+
+    for (int i=1; i<=4; i++) {
+      sprintf(outputData,"P1_%d",i);
+      output.tag("ResponseType",outputData);
+      sprintf(outputData,"P2_%d",i);
+      output.tag("ResponseType",outputData);
+      sprintf(outputData,"Pp_%d",i);
+      output.tag("ResponseType",outputData);
+    }
+
+    theResponse = new ElementResponse(this, 1, P);
+
+  }  else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0) {
+    return new ElementResponse(this, 2, K);
+
+  } else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
+    int pointNum = atoi(argv[1]);
+    if (pointNum > 0 && pointNum <= 4) {
+
+      output.tag("GaussPoint");
+      output.attr("number",pointNum);
+
+      theResponse =  theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+      
+      output.endTag(); // GaussPoint
+    }
+  }
+
+  output.endTag(); // ElementOutput
+  return theResponse;
 }
 
 int 
 FourNodeQuadUP::getResponse(int responseID, Information &eleInfo)
 {
-	switch (responseID) {
+  switch (responseID) {
+    
+  case 1:
+    return eleInfo.setVector(this->getResistingForce());
       
-		case 1:
-			return eleInfo.setVector(this->getResistingForce());
-      
-		case 2:
-			return eleInfo.setMatrix(this->getTangentStiff());
-
-		default: 
-			return -1;
-	}
+  case 2:
+    return eleInfo.setMatrix(this->getTangentStiff());
+    
+  default: 
+    return -1;
+  }
 }
-
+ 
 int
 FourNodeQuadUP::setParameter(const char **argv, int argc, Information &info)
 {

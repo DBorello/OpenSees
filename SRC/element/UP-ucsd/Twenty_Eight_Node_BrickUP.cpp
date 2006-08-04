@@ -2365,61 +2365,97 @@ TwentyEightNodeBrickUP::displaySelf(Renderer &theViewer, int displayMode, float 
 
 
 Response*
-
-TwentyEightNodeBrickUP::setResponse(const char **argv, int argc, Information &eleInfo)
-
+TwentyEightNodeBrickUP::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
 {
 
-	if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
+  Response *theResponse = 0;
 
-		return new ElementResponse(this, 1, resid);
+  char outputData[32];
 
-	
+  output.tag("ElementOutput");
+  output.attr("eleType","Twenty_Eight_Node_BrickUP");
+  output.attr("eleTag",this->getTag());
+  for (int i=1; i<=20; i++) {
+    sprintf(outputData,"node%d",i);
+    output.attr(outputData, nodePointers[i-1]->getTag());
+  }
 
-	else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0) {
 
-		return new ElementResponse(this, 2, stiff);
 
+    for (int i=1; i<=20; i++) {
+      sprintf(outputData,"P1_",i);
+      output.tag("ResponseType",outputData);
+      sprintf(outputData,"P2_",i);
+      output.tag("ResponseType",outputData);
+      sprintf(outputData,"P3_",i);
+      output.tag("ResponseType",outputData);
+      if (i <= nenp) {
+	sprintf(outputData,"Pp_",i);
+	output.tag("ResponseType",outputData);
+      }
+    }
+
+    theResponse = new ElementResponse(this, 1, resid);
+    
+  } else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
+    
+    theResponse = new ElementResponse(this, 2, stiff);
+    
+  
+  
+  else if (strcmp(argv[0],"mass") == 0)
+    
+    theResponse = new ElementResponse(this, 3, mass);
+  
+  
+  
+  else if (strcmp(argv[0],"damp") == 0)
+    
+    theResponse = new ElementResponse(this, 4, damp);
   
 
-    else if (strcmp(argv[0],"mass") == 0)
+  
+  else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
+    
+    int pointNum = atoi(argv[1]);
+    
+    if (pointNum > 0 && pointNum <= nintu) {
 
-	    return new ElementResponse(this, 3, mass);
+      output.tag("GaussPoint");
+      output.attr("number",pointNum);
 
+      theResponse =  materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+      
+      output.endTag(); // GaussPoint
+    }
+  } else if (strcmp(argv[0],"stresses") ==0) {
 
+    for (int i=0; i<nintu; i++) {
+      output.tag("GaussPoint");
+      output.attr("number",i+1);
+      output.tag("NdMaterialOutput");
+      output.attr("classType", materialPointers[i]->getClassTag());
+      output.attr("tag", materialPointers[i]->getTag());
 
-    else if (strcmp(argv[0],"damp") == 0)
+      output.tag("ResponseType","sigma11");
+      output.tag("ResponseType","sigma22");
+      output.tag("ResponseType","sigma33");
+      output.tag("ResponseType","sigma12");
+      output.tag("ResponseType","sigma13");
+      output.tag("ResponseType","sigma23");      
 
-	    return new ElementResponse(this, 4, damp);
-
-
-
-	else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
-
-		int pointNum = atoi(argv[1]);
-
-		if (pointNum > 0 && pointNum <= nintu)
-
-			return materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo);
-
-		else
-
-			return 0;
-
-	} else if (strcmp(argv[0],"stresses") ==0) {
-
-		return new ElementResponse(this, 5, Vector(162));
-
-	}
-
-	
-
-	// otherwise response quantity is unknown for the TwentyEightNodeBrickUP class
-
-	else
-
-		return 0;
-
+      output.endTag(); // NdMaterialOutput
+      output.endTag(); // GaussPoint
+    }	       
+    
+    theResponse = new ElementResponse(this, 5, Vector(nintu*6));
+    
+  }
+  
+  
+  output.endTag(); // ElementOutput
+  return theResponse;
 }
 
 
@@ -2430,7 +2466,7 @@ TwentyEightNodeBrickUP::getResponse(int responseID, Information &eleInfo)
 
 {
 
-	static Vector stresses(162);
+	static Vector stresses(nintu*6);
 
 	
 
@@ -2467,8 +2503,6 @@ TwentyEightNodeBrickUP::getResponse(int responseID, Information &eleInfo)
 		int cnt = 0;
 
 		for (int i = 0; i < nintu; i++) {
-
-			
 
 			// Get material stress response
 
