@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2006-02-07 23:15:55 $
+// $Revision: 1.2 $
+// $Date: 2006-08-04 18:35:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/limitState/limitCurve/ThreePointCurve.cpp,v $                                                                        
 // Written: KJE
 // Created: Aug 2001
@@ -36,6 +36,7 @@
 #include <Vector.h>
 #include <float.h>
 
+#include <DummyStream.h>
 
 ThreePointCurve::ThreePointCurve(int tag, int eTag, Domain *theDom, 
 			double a1, double b1, double a2, double b2,
@@ -83,6 +84,7 @@ ThreePointCurve::getCopy(void)
 int
 ThreePointCurve::checkElementState(double springForce)
 {
+  DummyStream dummy;
 	// find associated beam-column elementon first visit
 	if (theElement == 0)
 	{
@@ -129,7 +131,7 @@ ThreePointCurve::checkElementState(double springForce)
 		Vector *rotVec; //vector of chord rotations at beam-column ends
 
 		// set type of beam-column element response desired
-		theRotations = theElement->setResponse(r, 1, *rotInfoObject);
+		theRotations = theElement->setResponse(r, 1, *rotInfoObject, dummy);
 
 		// put element response in the vector of "myInfo"
 		result = theRotations->getResponse();
@@ -165,7 +167,7 @@ ThreePointCurve::checkElementState(double springForce)
 		Vector *forceVec; //vector of basic forces from beam column
 
 		// set type of beam-column element response desired
-		theForces    = theElement->setResponse(f, 1, *forInfoObject);
+		theForces    = theElement->setResponse(f, 1, *forInfoObject, dummy);
 
 		// put element response in the vector of "myInfo"
 		result += theForces->getResponse();

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2006-02-07 23:15:55 $
+// $Revision: 1.2 $
+// $Date: 2006-08-04 18:35:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/limitState/limitCurve/AxialCurve.cpp,v $
                                                                         
 // Written: KJE
@@ -37,6 +37,8 @@
 #include <float.h>
 #include <tcl.h>
 
+#include <DummyStream.h>
+
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -45,11 +47,6 @@ using std::ios;
 using std::setw;
 using std::setprecision;
 using std::setiosflags;
-
-
-
-
-
 
 AxialCurve::AxialCurve(Tcl_Interp *passedTclInterp, int tag, int eTag, Domain *theDom, 
 			double Fsw, double Kd, double Fr, //SDK 
@@ -69,7 +66,6 @@ ndI(ni), ndJ(nj), dof(df), perpDirn(dirn), eleRemove(eleRem), delta(del)
 	deform_old = 0.0; // SDK
 	failDrift = 0.0; // SDK
 	stepCounter = 0; // Terje
-
 }
 
 
@@ -121,13 +117,12 @@ AxialCurve::getCopy(void)
 int
 AxialCurve::checkElementState(double springForce)
 {
-
+  static DummyStream dummy;
 	// Terje
 	// Count the number of times this method is called 
 	// (this is equal to the number of loadsteps)
 	stepCounter++;
 
-	
 	// if element has not been removed (element removal not fully implemented)
 	if (eleRemove != 2) {
 
@@ -180,7 +175,7 @@ AxialCurve::checkElementState(double springForce)
 			Vector *rotVec; //vector of chord rotations at beam-column ends
 
 			// set type of beam-column element response desired
-			theRotations = theElement->setResponse(r, 1, *rotInfoObject);
+			theRotations = theElement->setResponse(r, 1, *rotInfoObject, dummy);
 
 			// put element response in the vector of "myInfo"
 			result = theRotations->getResponse();
@@ -220,7 +215,7 @@ AxialCurve::checkElementState(double springForce)
 			Vector *forceVec; //vector of basic forces from beam column
 
 			// set type of beam-column element response desired
-			theForces    = theElement->setResponse(f, 1, *forInfoObject);
+			theForces    = theElement->setResponse(f, 1, *forInfoObject, dummy);
 
 			// put element response in the vector of "myInfo"
 			result += theForces->getResponse();

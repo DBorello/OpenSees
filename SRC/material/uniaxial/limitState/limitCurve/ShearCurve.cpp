@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2006-02-07 23:15:55 $
+// $Revision: 1.2 $
+// $Date: 2006-08-04 18:35:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/limitState/limitCurve/ShearCurve.cpp,v $
                                                                         
 // Written: KJE
@@ -34,6 +34,8 @@
 #include <Domain.h>
 #include <Vector.h>
 #include <float.h>
+
+#include <DummyStream.h>
 
 
 ShearCurve::ShearCurve(int tag, int eTag, Domain *theDom, 
@@ -91,6 +93,7 @@ ShearCurve::getCopy(void)
 int
 ShearCurve::checkElementState(double springForce)
 {
+  DummyStream dummy;
 	// find associated beam-column elementon first visit
 	if (theElement == 0)
 	{
@@ -138,7 +141,7 @@ ShearCurve::checkElementState(double springForce)
 		Vector *rotVec; //vector of chord rotations at beam-column ends
 
 		// set type of beam-column element response desired
-		theRotations = theElement->setResponse(r, 1, *rotInfoObject);
+		theRotations = theElement->setResponse(r, 1, *rotInfoObject, dummy);
 
 		// put element response in the vector of "myInfo"
 		result = theRotations->getResponse();
@@ -183,7 +186,7 @@ ShearCurve::checkElementState(double springForce)
 		Vector *forceVec; //vector of basic forces from beam column
 
 		// set type of beam-column element response desired
-		theForces    = theElement->setResponse(f, 1, *forInfoObject);
+		theForces    = theElement->setResponse(f, 1, *forInfoObject, dummy);
 
 		// put element response in the vector of "myInfo"
 		result += theForces->getResponse();
