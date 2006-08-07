@@ -21,7 +21,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\src\matrix,..\..\..\src\handler,..\..\..\src\domain\domain,..\..\..\src\tagged\storage,..\..\..\src,..\..\..\src\tagged,c:\Program Files\tcl"
+				AdditionalIncludeDirectories="..\..\..\src\actor\actor;..\..\..\src\matrix;..\..\..\src\handler;..\..\..\src\domain\domain;..\..\..\src\tagged\storage;..\..\..\src;..\..\..\src\tagged;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="WIN32,_DEBUG,_LIB,_TCL84"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
@@ -66,7 +66,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\src\matrix,..\..\..\src\handler,..\..\..\src\domain\domain,..\..\..\src\tagged\storage,..\..\..\src,..\..\..\src\tagged,c:\Program Files\tcl"
+				AdditionalIncludeDirectories="..\..\..\src\actor\actor;..\..\..\src\matrix;..\..\..\src\handler;..\..\..\src\domain\domain;..\..\..\src\tagged\storage;..\..\..\src;..\..\..\src\tagged;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,_TCL84"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"

@@ -149,9 +149,6 @@
 			<File
 				RelativePath="..\..\..\SRC\recorder\TclRecorderCommands.cpp">
 			</File>
-			<File
-				RelativePath="..\..\..\SRC\recorder\YsVisual.cpp">
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -191,9 +188,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\recorder\Recorder.h">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\recorder\YsVisual.h">
 			</File>
 		</Filter>
 		<Filter

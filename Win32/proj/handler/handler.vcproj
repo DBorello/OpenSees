@@ -105,16 +105,13 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
-				RelativePath="..\..\..\SRC\handler\DataOutputDatabaseHandler.cpp">
+				RelativePath="..\..\..\SRC\handler\DataFileStream.cpp">
 			</File>
 			<File
-				RelativePath="..\..\..\SRC\handler\DataOutputFileHandler.cpp">
+				RelativePath="..\..\..\SRC\handler\DatabaseStream.cpp">
 			</File>
 			<File
-				RelativePath="..\..\..\SRC\handler\DataOutputHandler.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\handler\DataOutputStreamHandler.cpp">
+				RelativePath="..\..\..\SRC\handler\DummyStream.cpp">
 			</File>
 			<File
 				RelativePath="..\..\..\Src\handler\FileStream.cpp">
@@ -125,18 +122,18 @@
 			<File
 				RelativePath="..\..\..\Src\handler\StandardStream.cpp">
 			</File>
+			<File
+				RelativePath="..\..\..\SRC\handler\XmlFileStream.cpp">
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
 			<File
-				RelativePath="..\..\..\SRC\handler\DataOutputDatabaseHandler.h">
+				RelativePath="..\..\..\SRC\handler\DataFileStream.h">
 			</File>
 			<File
-				RelativePath="..\..\..\SRC\handler\DataOutputFileHandler.h">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\handler\DataOutputHandler.h">
+				RelativePath="..\..\..\SRC\handler\DummyStream.h">
 			</File>
 			<File
 				RelativePath="..\..\..\Src\handler\FileStream.h">
@@ -146,6 +143,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\Src\handler\StandardStream.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\handler\XmlFileStream.h">
 			</File>
 		</Filter>
 	</Files>

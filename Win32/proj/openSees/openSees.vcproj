@@ -43,7 +43,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="c:\program Files\tcl\lib,..\..\lib\release, ..\..\lib"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				SubSystem="1"/>
 			<Tool
 				Name="VCMIDLTool"

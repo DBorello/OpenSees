@@ -203,18 +203,6 @@
 			Name="beamWithHinges"
 			Filter="">
 			<File
-				RelativePath="..\..\..\SRC\element\beamWithHinges\BeamWithHinges2d.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\beamWithHinges\BeamWithHinges2d.h">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\beamWithHinges\BeamWithHinges3d.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\beamWithHinges\BeamWithHinges3d.h">
-			</File>
-			<File
 				RelativePath="..\..\..\SRC\element\beamWithHinges\TclBeamWithHingesBuilder.cpp">
 			</File>
 		</Filter>
@@ -686,18 +674,6 @@
 		<Filter
 			Name="nonlinearBeamColumn"
 			Filter="">
-			<File
-				RelativePath="..\..\..\SRC\element\nonlinearBeamColumn\element\NLBeamColumn2d.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\nonlinearBeamColumn\element\NLBeamColumn2d.h">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\nonlinearBeamColumn\element\NLBeamColumn3d.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\nonlinearBeamColumn\element\NLBeamColumn3d.h">
-			</File>
 			<File
 				RelativePath="..\..\..\SRC\element\nonlinearBeamColumn\element\TclNLBeamColumnCommand.cpp">
 			</File>

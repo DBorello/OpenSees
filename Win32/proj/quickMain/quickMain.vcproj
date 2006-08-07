@@ -99,7 +99,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="c:\Program Files\tcl\lib,c:\msdev\lib,..\..\lib,..\..\lib\release"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\..\..\bin/quickMain.pdb"
 				SubSystem="1"/>
 			<Tool
