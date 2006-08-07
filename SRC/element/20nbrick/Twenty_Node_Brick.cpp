@@ -269,7 +269,6 @@ int  Twenty_Node_Brick::revertToLastCommit( )
 //revert to start
 int  Twenty_Node_Brick::revertToStart( )
 {
-	int i ;
 	int success = 0 ;
 
 	for (int i=0; i<nintu; i++)

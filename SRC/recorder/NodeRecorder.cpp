@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2006-08-04 22:33:53 $
+// $Revision: 1.26 $
+// $Date: 2006-08-07 22:18:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -726,8 +726,8 @@ NodeRecorder::initialize(void)
 	theOutputHandler->attr(nodeCrdData, 0.0);      
     }
 
-    for (int j=0; j<theDofs->Size(); j++) {
-      sprintf(outputData, "%s%d", dataType, j+1);
+    for (int k=0; k<theDofs->Size(); k++) {
+      sprintf(outputData, "%s%d", dataType, k+1);
       theOutputHandler->tag("ResponseType",outputData);
     }
 

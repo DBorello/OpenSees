@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2006-08-04 18:31:30 $
+// $Revision: 1.22 $
+// $Date: 2006-08-07 22:14:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -821,8 +821,8 @@ FiberSection3d::setResponse(const char **argv, int argc, Information &sectInfo, 
 	output.tag("ResponseType","Unknown");
       }
     }
-    for (int i=0; i<typeSize; i++) {
-      int code = type(i);
+    for (int j=0; j<typeSize; j++) {
+      int code = type(j);
       switch (code){
       case SECTION_RESPONSE_MZ:
 	output.tag("ResponseType","Mz");

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2006-08-04 21:50:27 $
+// $Revision: 1.18 $
+// $Date: 2006-08-07 22:15:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
                                                                         
                                                                         
@@ -855,12 +855,12 @@ ZeroLength::setResponse(const char **argv, int argc, Information &eleInformation
   }  else if ((strcmp(argv[0],"defoANDforce") == 0) ||
 	   (strcmp(argv[0],"deformationANDforces") == 0) ||
 	      (strcmp(argv[0],"deformationsANDforces") == 0)) {
-
-    for (int i=0; i<numMaterials1d; i++) {
+	int i;
+    for (i=0; i<numMaterials1d; i++) {
       sprintf(outputData,"e%d",i+1);
       output.tag("ResponseType",outputData);
     }
-    for (int i=0; i<numMaterials1d; i++) {
+    for (i=0; i<numMaterials1d; i++) {
       sprintf(outputData,"P%d",i+1);
       output.tag("ResponseType",outputData);
     }

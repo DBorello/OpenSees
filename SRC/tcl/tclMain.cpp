@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.36 2006-07-27 00:29:41 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.37 2006-08-07 22:18:21 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -20,7 +20,10 @@
 ** ****************************************************************** */
 
 #include <string.h>
+
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 extern "C" {
 #include <tcl.h>

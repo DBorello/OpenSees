@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-05-30 22:17:39 $
+// $Revision: 1.5 $
+// $Date: 2006-08-07 22:18:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/SimulationInformation.cpp,v $
 //
 // Description: This file contains the class definition for SimulationInformation.
@@ -280,11 +280,11 @@ SimulationInformation::Print(OPS_Stream &s) const
   for (int i=0; i<numFilesRead; i++)
     s << "  " << filesRead[i] << "\n";
   s << "\nOutput Files:\n";
-  for (int i=0; i<numFilesWritten; i++)
-    s << "  " << filesWritten[i] << "\n";
+  for (int k=0; k<numFilesWritten; k++)
+    s << "  " << filesWritten[k] << "\n";
   s << "\nParameters:\n";
-  for (int i=0; i<numParameters; i++)
-    s << "  " << paramNames[i] << " " << paramValues[i] << "\n";
+  for (int j=0; j<numParameters; j++)
+    s << "  " << paramNames[j] << " " << paramValues[j] << "\n";
   s << endln;
 }    
 
