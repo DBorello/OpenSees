@@ -1,5 +1,5 @@
-// $Revision: 1.5 $
-// $Date: 2004-07-20 22:44:18 $
+// $Revision: 1.6 $
+// $Date: 2006-08-07 22:17:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/nDarray/nDarray.cpp,v $
                                                                         
                                                                         
@@ -1063,12 +1063,23 @@ i,rval.pc_nDarray_rep->dim[i]);
 
 //##############################################################################
 // nDarray addition
+#ifndef _VC6
 nDarray operator+(const nDarray & lval, const nDarray & rval)
   {
     nDarray result(lval);
     result += rval;
     return result;
   }
+#else
+nDarray nDarray::operator+(const nDarray & rval) const
+  {
+    nDarray result(*this);
+    result += rval;
+    return result;
+  }
+#endif
+
+
 
 //##############################################################################
 // scalar addition

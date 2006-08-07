@@ -225,7 +225,13 @@ class nDarray
 
 //..
 
-
+#ifndef _VC6
+    friend nDarray operator+(const nDarray & , const nDarray & );
+	friend nDarray operator-(const nDarray & , const nDarray & ); // nDarray subtraction
+#else
+   nDarray operator+(const nDarray & ) const;
+   nDarray operator-(const nDarray & ) const; // nDarray subtraction
+#endif
 
     nDarray& operator=( const nDarray & rval); // nDarray assignment
 
@@ -234,7 +240,7 @@ class nDarray
     nDarray& operator +=( const nDarray & ); // nDarray addition
 
 
-    friend nDarray operator+(const nDarray & , const nDarray & ); // nDarray addition
+
 ///////##############################################################################
 /////// nDarray addition
 /////friend nDarray operator+(const nDarray & lval, const nDarray & rval)
@@ -249,7 +255,8 @@ class nDarray
 //++    nDarray operator-( nDarray & rval); // nDarray subtraction
 //....// This is from JOOP May/June 1990 after ARKoenig
     nDarray& operator -=( const nDarray & ); // nDarray subtraction
-    friend nDarray operator-(const nDarray & , const nDarray & ); // nDarray subtraction
+
+
 
     nDarray operator+( double rval);  // scalar addition
     nDarray operator-( double rval);  // scalar subtraction
@@ -319,4 +326,5 @@ class nDarray
 nDarray operator*( const double lval, const nDarray & rval);  // REVIEWER global *
 
 #endif
+
 

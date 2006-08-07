@@ -378,12 +378,21 @@ void BJtensor::null_indices()
 
 //##############################################################################
 // BJtensor addition
+#ifndef _VC6
 BJtensor operator+(const BJtensor & lval, const BJtensor & rval)
   {
     BJtensor result(lval);
     result += rval;
     return result;
   }
+#else
+BJtensor BJtensor::operator+(const BJtensor & rval) const
+  {
+    BJtensor result(*this);
+    result += rval;
+    return result;
+  }
+#endif
 
 
 
@@ -597,12 +606,21 @@ BJtensor operator+(const BJtensor & lval, const BJtensor & rval)
 
 //##############################################################################
 // BJtensor substraction
+#ifndef _VC6
 BJtensor operator-(const BJtensor & lval, const BJtensor & rval)
   {
     BJtensor result(lval);
     result -= rval;
     return result;
   }
+#else
+BJtensor BJtensor::operator-(const BJtensor & rval) const
+  {
+    BJtensor result(*this);
+    result -= rval;
+    return result;
+  }
+#endif
 
 
 

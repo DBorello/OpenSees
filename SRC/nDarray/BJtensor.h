@@ -96,8 +96,13 @@ class BJtensor : public nDarray
 
     BJtensor&  operator=( const BJtensor & rval);       // BJtensor assignment
 
+#ifndef _VC6
     friend BJtensor operator+(const BJtensor & , const BJtensor & ); // BJtensor addition
     friend BJtensor operator-(const BJtensor & , const BJtensor & ); // BJtensor substraction
+#else
+    BJtensor operator+(const BJtensor & ) const; // BJtensor addition
+    BJtensor operator-(const BJtensor & ) const; // BJtensor substraction
+#endif
 
     BJtensor operator*( const double   rval) const; //Guanzhou   // scalar multiplication
     BJtensor operator*( BJtensor & rval);       // inner/outter product
