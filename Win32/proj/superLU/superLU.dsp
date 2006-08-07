@@ -26,7 +26,6 @@ CFG=superLU - Win32 Debug
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
-F90=df.exe
 RSC=rc.exe
 
 !IF  "$(CFG)" == "superLU - Win32 Release"
@@ -41,8 +40,9 @@ RSC=rc.exe
 # PROP Output_Dir "..\..\lib\release"
 # PROP Intermediate_Dir "..\..\obj\superLU\release"
 # PROP Target_Dir ""
+F90=df.exe
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\other\superLU_3.0\SRC" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "NDEBUG" /D "NO_TIMER" /D "WIN32" /D "_LIB" /D "_MBCS" /D "_TCL84" /FD /c
+# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\other\superLU_3.0\SRC" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "NDEBUG" /D "WIN32" /D "_LIB" /D "_MBCS" /D "_TCL84" /D "NO_TIMER" /D "_VC6" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -65,8 +65,9 @@ LIB32=link.exe -lib
 # PROP Output_Dir "..\..\lib\debug"
 # PROP Intermediate_Dir "..\..\obj\superLU\debug"
 # PROP Target_Dir ""
+F90=df.exe
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\other\superLU_3.0\SRC" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "_DEBUG" /D "WINDOWS" /D "WIN32" /D "_LIB" /D "_MBCS" /D "_TCL84" /D "NO_TIMER" /FR /FD /GZ /c
+# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\other\superLU_3.0\SRC" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "_DEBUG" /D "WINDOWS" /D "WIN32" /D "_LIB" /D "_MBCS" /D "_TCL84" /D "NO_TIMER" /D "_VC6" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"

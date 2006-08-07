@@ -26,7 +26,6 @@ CFG=string - Win32 Debug
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
-F90=df.exe
 RSC=rc.exe
 
 !IF  "$(CFG)" == "string - Win32 Release"
@@ -41,8 +40,9 @@ RSC=rc.exe
 # PROP Output_Dir "..\..\lib\release"
 # PROP Intermediate_Dir "..\..\obj\string\release"
 # PROP Target_Dir ""
+F90=df.exe
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /W3 /GX /O2 /I "..\..\..\src\string" /I "..\..\..\src\handler" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "WIN32" /D "NDEBUG" /D "_LIB" /D "_MBCS" /D "_TCL84" /YX /FD /c
+# ADD CPP /nologo /W3 /GX /O2 /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\string" /I "..\..\..\src\handler" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "NDEBUG" /D "WIN32" /D "_LIB" /D "_MBCS" /D "_TCL84" /D "_VC6" /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -64,8 +64,9 @@ LIB32=link.exe -lib
 # PROP Output_Dir "..\..\lib\debug"
 # PROP Intermediate_Dir "..\..\obj\string\debug"
 # PROP Target_Dir ""
+F90=df.exe
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "..\..\..\src\string" /I "..\..\..\src\handler" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "WIN32" /D "_DEBUG" /D "_LIB" /D "_MBCS" /D "_TCL84" /FD /GZ /c
+# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\string" /I "..\..\..\src\handler" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "_DEBUG" /D "WIN32" /D "_LIB" /D "_MBCS" /D "_TCL84" /D "_VC6" /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"

@@ -26,7 +26,6 @@ CFG=handler - Win32 Debug
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
-F90=df.exe
 RSC=rc.exe
 
 !IF  "$(CFG)" == "handler - Win32 Release"
@@ -41,8 +40,9 @@ RSC=rc.exe
 # PROP Output_Dir "..\..\lib\release"
 # PROP Intermediate_Dir "..\..\obj\handler\release"
 # PROP Target_Dir ""
+F90=df.exe
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\src\actor\channel" /I "..\..\..\src\objectBroker" /I "..\..\..\src\actor\message" /I "..\..\..\src\matrix" /I "..\..\..\src\database" /I "..\..\..\src\ndarray" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\handler" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "WIN32" /D "NDEBUG" /D "_LIB" /D "_MBCS" /D "_TCL84" /FD /c
+# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\src\actor\channel" /I "..\..\..\src\objectBroker" /I "..\..\..\src\actor\message" /I "..\..\..\src\matrix" /I "..\..\..\src\database" /I "..\..\..\src\ndarray" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\handler" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "NDEBUG" /D "WIN32" /D "_LIB" /D "_MBCS" /D "_TCL84" /D "_VC6" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -65,8 +65,9 @@ LIB32=link.exe -lib
 # PROP Output_Dir "..\..\lib\debug"
 # PROP Intermediate_Dir "..\..\obj\handler\debug"
 # PROP Target_Dir ""
+F90=df.exe
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "..\..\..\src\actor\channel" /I "..\..\..\src\objectBroker" /I "..\..\..\src\actor\message" /I "..\..\..\src\matrix" /I "..\..\..\src\database" /I "..\..\..\src\ndarray" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\handler" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "WIN32" /D "_DEBUG" /D "_LIB" /D "_MBCS" /D "_TCL84" /FR /FD /GZ /c
+# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "..\..\..\src\actor\channel" /I "..\..\..\src\objectBroker" /I "..\..\..\src\actor\message" /I "..\..\..\src\matrix" /I "..\..\..\src\database" /I "..\..\..\src\ndarray" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\handler" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "_DEBUG" /D "WIN32" /D "_LIB" /D "_MBCS" /D "_TCL84" /D "_VC6" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
@@ -88,19 +89,15 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=..\..\..\SRC\handler\DataOutputDatabaseHandler.cpp
+SOURCE=..\..\..\SRC\handler\DatabaseStream.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\handler\DataOutputFileHandler.cpp
+SOURCE=..\..\..\SRC\handler\DataFileStream.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\handler\DataOutputHandler.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\handler\DataOutputStreamHandler.cpp
+SOURCE=..\..\..\SRC\handler\DummyStream.cpp
 # End Source File
 # Begin Source File
 
@@ -113,6 +110,10 @@ SOURCE=..\..\..\Src\handler\OPS_Stream.cpp
 # Begin Source File
 
 SOURCE=..\..\..\Src\handler\StandardStream.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\handler\XmlFileStream.cpp
 # End Source File
 # End Group
 # Begin Group "Header Files"
