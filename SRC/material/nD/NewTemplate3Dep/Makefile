@@ -8,11 +8,13 @@ OBJS =  MaterialParameter.o \
 	DM04_Elastic.o \
 	YieldFunction.o \
 	VM_YF.o \
+	RMC_YF.o \
 	DP_YF.o \
 	CC_YF.o \
 	DM04_YF.o \
 	PlasticFlow.o \
 	VM_PF.o \
+	RMC_PF.o \
 	DP_PF.o \
 	CC_PF.o \
 	DM04_PF.o \
@@ -29,13 +31,6 @@ OBJS =  MaterialParameter.o \
    
 
 all: $(OBJS)
-
-
-FT3Dep_test: $(OBJS) FT3Dep_test.o
-	$(LINKER) $(LINKFLAGS) FT3Dep_test.o $(OBJS) \
-	$(FE_LIBRARY) $(MACHINE_LINKLIBS) $(TCL_LIBRARY)\
-	$(MACHINE_NUMERICAL_LIBS) $(MACHINE_SPECIFIC_LIBS) \
-	-o FT3Dep_test
 
 tidy:
 	@$(RM) $(RMFLAGS) Makefile.bak *~ #*# core
