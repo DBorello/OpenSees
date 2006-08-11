@@ -28,8 +28,7 @@
 
 #include <math.h>
 #include "EL_T.h"
-#include <iostream>
-using std::ostream;
+#include <OPS_Globals.h>
 
 
 class EvolutionLaw_NL_EijMD : public EvolutionLaw_T

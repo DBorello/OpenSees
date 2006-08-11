@@ -14,7 +14,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkMain.cpp,v 1.17 2006-07-05 22:23:09 fmk Exp $
+ * RCS: @(#) $Id: tkMain.cpp,v 1.18 2006-08-11 23:36:00 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -40,7 +40,13 @@ extern "C" {
 #include <tkWin.h>
 #endif
 
+#include <OPS_Globals.h>
 
+
+#include <FileStream.h>
+#include <SimulationInformation.h>
+SimulationInformation simulationInfo;
+char *simulationInfoOutputFilename = 0;
 
 
 typedef struct ThreadSpecificData {
