@@ -9,6 +9,11 @@
 #include <YS_Section2D01.h>
 #include <YS_Section2D02.h>
 
+#include <SoilFootingSection2d.h>
+
+// Added by S.Gajan <sgajan@ucdavis.edu>
+
+
 static void printCommand(int argc, TCL_Char **argv)
 {
   opserr << "Input command: ";
@@ -163,6 +168,70 @@ TclModelBuilderYS_SectionCommand(ClientData clienData, Tcl_Interp *interp, int a
      
     theModel = new YS_Section2D02(tag,E, A, Iz, maxPlstkRot, ys, useKr);    
   }
+
+// Added by S.Gajan <sgajan@ucdavis.edu>
+
+
+
+ else if ((strcmp(argv[1], "soilFootingSection2d") == 0) ||
+           (strcmp(argv[1], "SoilFootingSection2d") == 0) )  
+  {
+      
+    if (argc < 10) {
+      opserr << "WARNING invalid number of arguments\n";
+      printCommand(argc,argv);
+      opserr << "Want: section soilFootingSection2d tag? FS? Vult? L? Kv? dL?" << endln;
+      return 0;
+    }
+      
+    double FS, Vult, L, Kv, Kh, Rv, deltaL;
+    int indx = 3;
+    
+    if (Tcl_GetDouble (interp, argv[indx++], &FS) != TCL_OK) {
+      opserr << "WARNING invalid FS" << endln;
+      opserr << " section: " << tag << endln;
+      return 0;
+    }
+    
+    if (Tcl_GetDouble (interp, argv[indx++], &Vult) != TCL_OK) {
+      opserr << "WARNING invalid Vult" << endln;
+      opserr << " section: " << tag << endln;
+      return 0;
+    }
+
+    if (Tcl_GetDouble (interp, argv[indx++], &L) != TCL_OK) {
+      opserr << "WARNING invalid L" << endln;
+      opserr << " section: " << tag << endln;
+      return 0;
+    }
+      
+    if (Tcl_GetDouble (interp, argv[indx++], &Kv) != TCL_OK) {
+      opserr << "WARNING invalid Kv" << endln;
+      opserr << " section: " << tag << endln;
+      return 0;
+    }
+    
+    if (Tcl_GetDouble (interp, argv[indx++], &Kh) != TCL_OK) {
+      opserr << "WARNING invalid Kh" << endln;
+      opserr << " section: " << tag << endln;
+      return 0;
+    }
+
+    if (Tcl_GetDouble (interp, argv[indx++], &Rv) != TCL_OK) {
+      opserr << "WARNING invalid Rv" << endln;
+      opserr << " section: " << tag << endln;
+      return 0;
+    }
+
+    if (Tcl_GetDouble (interp, argv[indx++], &deltaL) != TCL_OK) {
+      opserr << "WARNING invalid Kv" << endln;
+      opserr << " section: " << tag << endln;
+      return 0;
+    }
+
+    theModel = new SoilFootingSection2d (tag, FS, Vult, L, Kv, Kh, Rv, deltaL);
+  }
+
 
   return theModel;
 }
