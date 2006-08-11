@@ -71,7 +71,9 @@ class TotalLagrangianFD20NodeBrick: public Element
 
     TotalLagrangianFD20NodeBrick ();
     ~TotalLagrangianFD20NodeBrick();
-
+    
+    const char *getClassType(void) const {return "TotalLagrangianFD20NodeBrick";};
+    
     int getNumExternalNodes () const;
     const ID &getExternalNodes ();
     Node **getNodePtrs();
@@ -101,7 +103,7 @@ class TotalLagrangianFD20NodeBrick: public Element
     int displaySelf (Renderer &theViewer, int displayMode, float fact);
     void Print(OPS_Stream &s, int flag =0);
 
-    Response *setResponse (const char **argv, int argc, Information &eleInformation);
+    Response *setResponse (const char **argv, int argc, Information &eleInformation, OPS_Stream &s);
     int getResponse (int responseID, Information &eleInformation);
 
 //    int setParameter(const char **argv, int argc, Information &info);
@@ -142,9 +144,9 @@ class TotalLagrangianFD20NodeBrick: public Element
     tensor shapeFunction(double , double , double );
     tensor shapeFunctionDerivative(double , double , double );
 
-    tensor Jacobian_3D(tensor dh);
-    tensor Jacobian_3Dinv(tensor dh);
-    tensor dh_Global(tensor dh);
+    tensor Jacobian_3D(double , double , double);
+    tensor Jacobian_3Dinv(double , double , double);
+    tensor dh_Global(double , double , double);
     tensor getNodesCrds(void);
     tensor getNodesDisp(void);
 

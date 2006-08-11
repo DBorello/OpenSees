@@ -1,6 +1,8 @@
 include ../../../Makefile.def
 
-OBJS       = TotalLagrangianFD20NodeBrick.o TclTLFD20NodeBrickCommand.o
+OBJS  = TotalLagrangianFD20NodeBrick.o \
+	TotalLagrangianFD8NodeBrick.o \
+	TclTLFD20NodeBrickCommand.o
 
 all:         $(OBJS)
 

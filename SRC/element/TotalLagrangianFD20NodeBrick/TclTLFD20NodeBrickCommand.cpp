@@ -31,10 +31,11 @@
 
 #include <ErrorHandler.h>
 #include <TotalLagrangianFD20NodeBrick.h>
+#include <TotalLagrangianFD8NodeBrick.h>
 #include <TclModelBuilder.h>
 
-#define NumNodes 20
-#define NumDof 3
+//#define NumNodes 20
+//#define NumDof 3
 
 extern void printCommand(int argc, TCL_Char **argv);
 
@@ -50,7 +51,7 @@ TclModelBuilder_addTLFD20nBrick(ClientData clientData,
   // ensure the destructor has not been called -
   if (theTclBuilder == 0)
   {
-    opserr << "command: element TotalLagrangianFD20nbrick - no modelbuilder\n";
+    opserr << "command: element TotalLagrangianFD20nbrick - no modelbuilder \n";
     return TCL_ERROR;
   }
 
@@ -64,23 +65,23 @@ TclModelBuilder_addTLFD20nBrick(ClientData clientData,
 
   // get the id and end nodes
   int eleID, matID;
-  int nodes[NumNodes];
-  double bodyforces[NumDof];
+  int nodes[20];
+  double bodyforces[3];
 
   // read the eleTag
   if (Tcl_GetInt(interp, argv[1+eleArgStart], &eleID) != TCL_OK)
   {
-    opserr << "command: element TotalLagrangianFD20nbrick - invalid integer tag " << argv[1+eleArgStart] << endln;
+    opserr << "command: element TotalLagrangianFD20nbrick - invalid integer tag " << argv[1+eleArgStart] << "\n";
     return TCL_ERROR;
   }
 
   // read the 20 node tags
-  for (int i=0; i<NumNodes; i++)
+  for (int i=0; i<20; i++)
   {
       if (Tcl_GetInt(interp, argv[2+i+eleArgStart], &nodes[i]) != TCL_OK)
       {
   opserr << "command: element TotalLagrangianFD20nbrick " << eleID << " - invalid integer tag " <<
-    argv[2+i+eleArgStart] << endln;
+    argv[2+i+eleArgStart] << "\n";
   return TCL_ERROR;
       }
   }
@@ -89,7 +90,7 @@ TclModelBuilder_addTLFD20nBrick(ClientData clientData,
   if (Tcl_GetInt(interp, argv[22+eleArgStart], &matID) != TCL_OK)
   {
     opserr << "command: element TotalLagrangianFD20nbrick " << eleID << " - invalid matID tag " <<
-      argv[22+eleArgStart] << endln;
+      argv[22+eleArgStart] << "\n";
     return TCL_ERROR;
   }
 
@@ -98,17 +99,17 @@ TclModelBuilder_addTLFD20nBrick(ClientData clientData,
   if (theMaterial == 0)
   {
     opserr << "command: element TotalLagrangianFD20nbrick " << eleID <<
-      " - no NDMaterial with tag " << argv[22+eleArgStart] << "exists\n";
+      " - no NDMaterial with tag " << argv[22+eleArgStart] << "exists \n";
     return TCL_ERROR;
   }
 
   // read the 3 bodyforce accel's
-  for (int j=0; j<NumDof; j++)
+  for (int j=0; j<3; j++)
   {
       if (Tcl_GetDouble(interp, argv[23+j+eleArgStart], &bodyforces[j]) != TCL_OK)
       {
   opserr << "command: element TotalLagrangianFD20nbrick " << eleID << " - invalid bodyforces tag " <<
-    argv[23+j+eleArgStart] << endln;
+    argv[23+j+eleArgStart] << "\n";
   return TCL_ERROR;
       }
   }
@@ -142,13 +143,13 @@ TclModelBuilder_addTLFD20nBrick(ClientData clientData,
 
   if (theEle == 0)
   {
-    opserr << "command: element TotalLagrangianFD20nbrick " << eleID << " - out of memory\n";
+    opserr << "command: element TotalLagrangianFD20nbrick " << eleID << " - out of memory \n";
     return TCL_ERROR;
   }
 
   if (theTclDomain->addElement(theEle) == false)
   {
-    opserr << "command: element TotalLagrangianFD20nbrick  - could not add ele: " << eleID << " to domain\n";
+    opserr << "command: element TotalLagrangianFD20nbrick  - could not add ele: " << eleID << " to domain \n";
     delete theEle;
     return TCL_ERROR;
   }
@@ -157,6 +158,114 @@ TclModelBuilder_addTLFD20nBrick(ClientData clientData,
   return TCL_OK;
 }
 
+
+
+int
+TclModelBuilder_addTLFD8nBrick(ClientData clientData,
+                                Tcl_Interp *interp,
+                                int argc,
+                                TCL_Char **argv,
+                                Domain*theTclDomain,
+                                TclModelBuilder *theTclBuilder,
+                                int eleArgStart)
+{
+  // ensure the destructor has not been called -
+  if (theTclBuilder == 0)
+  {
+    opserr << "command: element TotalLagrangianFD8nbrick - no modelbuilder \n";
+    return TCL_ERROR;
+  }
+
+  // check the number of arguments is correct
+  if ((argc-eleArgStart) < 14)
+  {
+    opserr << "command: element TotalLagrangianFD8nbrick - insufficient args - want " <<
+      "element TotalLagrangianFD8nbrick eleTag? node1? node2? .. node8? matTag? bforce1? bforce2? bforce3? \n";
+    return TCL_ERROR;
+  }
+
+  // get the id and end nodes
+  int eleID, matID;
+  int nodes[8];
+  double bodyforces[3];
+
+  // read the eleTag
+  if (Tcl_GetInt(interp, argv[1+eleArgStart], &eleID) != TCL_OK)
+  {
+    opserr << "command: element TotalLagrangianFD8nbrick - invalid integer tag " << argv[1+eleArgStart] << "\n";
+    return TCL_ERROR;
+  }
+
+  // read the 8 node tags
+  for (int i=0; i<8; i++)
+  {
+      if (Tcl_GetInt(interp, argv[2+i+eleArgStart], &nodes[i]) != TCL_OK)
+      {
+  opserr << "command: element TotalLagrangianFD8nbrick " << eleID << " - invalid integer tag " <<
+    argv[2+i+eleArgStart] << "\n";
+  return TCL_ERROR;
+      }
+  }
+
+  // read in material tag & check the material exists in the model builder
+  if (Tcl_GetInt(interp, argv[10+eleArgStart], &matID) != TCL_OK)
+  {
+    opserr << "command: element TotalLagrangianFD8nbrick " << eleID << " - invalid matID tag " <<
+      argv[10+eleArgStart] << "\n";
+    return TCL_ERROR;
+  }
+
+  NDMaterial *theMaterial = theTclBuilder->getNDMaterial(matID);
+
+  if (theMaterial == 0)
+  {
+    opserr << "command: element TotalLagrangianFD8nbrick " << eleID <<
+      " - no NDMaterial with tag " << argv[10+eleArgStart] << "exists \n";
+    return TCL_ERROR;
+  }
+
+  // read the 3 bodyforce accel's
+  for (int j=0; j<3; j++)
+  {
+      if (Tcl_GetDouble(interp, argv[11+j+eleArgStart], &bodyforces[j]) != TCL_OK)
+      {
+  opserr << "command: element TotalLagrangianFD8nbrick " << eleID << " - invalid bodyforces tag " <<
+    argv[11+j+eleArgStart] << "\n";
+  return TCL_ERROR;
+      }
+  }
+
+  // now create the TwentyNodeBrick and add it to the Domain
+  TotalLagrangianFD8NodeBrick *theEle = new TotalLagrangianFD8NodeBrick(eleID,
+                                                                          nodes[ 0],
+                                                                          nodes[ 1],
+                                                                          nodes[ 2],
+                                                                          nodes[ 3],
+                                                                          nodes[ 4],
+                                                                          nodes[ 5],
+                                                                          nodes[ 6],
+                                                                          nodes[ 7],
+                                                                         *theMaterial,
+                                                                          bodyforces[0],
+                                                                          bodyforces[1],
+                                                                          bodyforces[2]);
+
+  if (theEle == 0)
+  {
+    opserr << "command: element TotalLagrangianFD8nbrick " << eleID << " - out of memory \n";
+    return TCL_ERROR;
+  }
+
+  if (theTclDomain->addElement(theEle) == false)
+  {
+    opserr << "command: element TotalLagrangianFD8nbrick  - could not add ele: " << eleID << " to domain \n";
+    delete theEle;
+    return TCL_ERROR;
+  }
+
+   // if get here we have sucessfully created the node and added it to the domain
+  return TCL_OK;
+}
 
 
 
