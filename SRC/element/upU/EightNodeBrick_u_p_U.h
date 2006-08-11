@@ -17,17 +17,16 @@
 // VERSION:
 // LANGUAGE:          C++.ver >= 3.0
 // TARGET OS:         DOS || UNIX || . . .
-// DESIGNER:          Boris Jeremic, Xiaoyan Wu, Chao Cheng (main for last revision)
+// DESIGNER:          Boris Jeremic, Xiaoyan Wu, Zhao Cheng (main for last revision)
 // PROGRAMMER:        Boris Jeremic, Xiaoyan Wu, Zhaohui Yang, Zhao Cheng (main for last revision)
 // DATE:              Sept. 2001
 // UPDATE HISTORY:    Modified from EightNodeBrick.h.  Reorganized a lot by Xiaoyan
 //                    01/24/2002    Xiaoyan
 //                    Add the permeability tensor and ks, kf  to the constructor  Xiaoyan
 //
-//
-//
 //                    Clean-up and re-write by Zhao Cheng, 10/20/2004
 //
+//                    Fixed a bug, and some small modification, ZC 05/2006
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -70,10 +69,9 @@ public:
                    double kks, double kkf, double pp);
                    EightNodeBrick_u_p_U ();
                    ~EightNodeBrick_u_p_U();
-
-
+    
     const char *getClassType(void) const {return "EightNodeBrick_u_P_U";};
-
+    
     // public methods to obtain information about dof & connectivity
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
@@ -105,41 +103,39 @@ public:
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
     void Print(OPS_Stream &s, int flag =0);
 
-    Response *setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &s);
+    Response *setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output);
     int getResponse(int responseID, Information &eleInformation);
 
     //int setParameter (const char **argv, int argc, Information &info);
     //int updateParameter (int parameterID, Information &info);
 
-private:
+private:        
     tensor shapeFunction(double, double, double);
     tensor shapeFunctionDerivative(double, double, double);
     tensor getGaussPts(void);
     tensor getNodesCrds(void);
     tensor getNodesDisp(void);
-    tensor Jacobian_3D(tensor dh);
-    tensor Jacobian_3Dinv(tensor dh);
-    tensor dh_Global(tensor dh);
-
+    tensor Jacobian_3D(double, double, double);
+    tensor Jacobian_3Dinv(double, double, double);
+    tensor dh_Global(double, double, double);
+    
     tensor getStiffnessTensorKep();
     tensor getStiffnessTensorG12();
-    tensor getStiffnessTensorP();
     tensor getMassTensorMsf();
     tensor getDampTensorC123();
-    const Matrix &getStiff(int Ki_flag);
+    const Matrix& getStiff00(void);
+    const Matrix& getStiff(int Ki_flag);
     double getPorePressure(double, double, double);
-    Vector getExForceS();
-    Vector getExForceF();
+    const Vector& getInternalForce();
+    const Vector& getBodyForce();
 
 private:
     ID  connectedExternalNodes;    // tags of nodes
     Node *theNodes[8] ;            // pointers to eight nodes
     NDMaterial **theMaterial;      // pointers to the ND material objects
-
-    static Matrix K;               // Stiffness
-    static Matrix C;               // Damping
-    static Matrix M;               // Mass
-    static Vector P;               // Residual
+     
+    static Matrix MCK;             // Mass, Damping, Stiffness
+    static Vector P;               
 
     static const int  Num_IntegrationPts;
     static const int  Num_TotalGaussPts;
@@ -149,19 +145,18 @@ private:
     static const int  Num_ElemDof;
     static const double pts[2];    // Stores quadrature points
     static const double wts[2];    // Stores quadrature weights
-    static tensor perm;      // Permeability = k/(rho_f*g)
 
-    Vector bf;               // Body forces
+    Vector perm;                   // Permeability = k/(rho_f*g)
+    Vector bf;                     // Body forces
     double poro;                   // Porosity
-    double alpha;       // Coefficient for soil (approximate equal 1)
-    double rho_s;             // Solid density
-    double rho_f;             // Fluid density
+    double alpha;                  // Coefficient for soil (approximate equal 1)
+    double rho_s;                  // Solid density
+    double rho_f;                  // Fluid density
     double ks;                     // Bulk modulus of solid
     double kf;                     // Bulk modulus of fluid
-    double pressure;          // Normal surface traction (pressure) over entire element  //?
+    double pressure;               // Normal surface traction (pressure) over entire element  //?
 
     Vector *Q;
-    Vector *eleQ;
     Matrix *Ki;
 };
 
