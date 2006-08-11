@@ -38,6 +38,10 @@
 #include "Template3Dep.h"
 
 
+stresstensor Template3Dep::Stress;
+straintensor Template3Dep::Strain;
+
+
 //================================================================================
 // Constructor
 //================================================================================
@@ -1149,7 +1153,7 @@ const tensor& Template3Dep::getTangentTensor(void)
 }
 
 //================================================================================
-const stresstensor  Template3Dep::getStressTensor(void)
+const stresstensor&  Template3Dep::getStressTensor(void)
 {
     //opserr << *EPS;
     //stresstensor tmp;
@@ -1158,30 +1162,34 @@ const stresstensor  Template3Dep::getStressTensor(void)
 
     //Something funny!!! happened here when returning EPS->getStress()
     // This function will return wrong Stress.
-    stresstensor ret = EPS->getStress();
-    return ret;
+    //stresstensor ret = EPS->getStress();
+    //return ret;
+    Stress = EPS->getStress();
+    return Stress;
 }
 
 
 //================================================================================
-const straintensor Template3Dep::getStrainTensor(void)
+const straintensor& Template3Dep::getStrainTensor(void)
 {
-    return EPS->getStrain();
+    Strain = EPS->getStrain();
+    return Strain;
 }
 
 //================================================================================
-const straintensor Template3Dep::getPlasticStrainTensor(void)
+const straintensor& Template3Dep::getPlasticStrainTensor(void)
 {
-    return EPS->getPlasticStrain();
+    Strain = EPS->getPlasticStrain();
+    return Strain;
 }
 
-//================================================================================
-double Template3Dep::getpsi(void)
-{
-     //this function cannot be moved, 
-     //leave here for compiling..., Zhao04/22/04
-     return 0.05;
-}
+////================================================================================
+//double Template3Dep::getpsi(void)
+//{
+//     //this function cannot be moved, 
+//     //leave here for compiling..., Zhao04/22/04
+//     return 0.05;
+//}
 
 //================================================================================
 int Template3Dep::commitState(void)
@@ -1280,11 +1288,11 @@ const char *Template3Dep::getType(void) const
 
 //================================================================================
 //??What is the Order????????? might be the
-
-int Template3Dep::getOrder(void) const
-{
-    return 6;
-}
+//
+//int Template3Dep::getOrder(void) const
+//{
+//    return 6;
+//}
 
 //================================================================================
 int Template3Dep::sendSelf(int commitTag, Channel &theChannel)

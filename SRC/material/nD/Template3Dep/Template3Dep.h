@@ -172,10 +172,10 @@ class Template3Dep : public NDMaterial
     int setTrialStrainIncr(const Tensor &v) ;
     int setTrialStrainIncr(const Tensor &v, const Tensor &r) ;
     const Tensor &getTangentTensor(void) ;
-    const stresstensor getStressTensor(void) ;
-    const straintensor getStrainTensor(void) ;
-    const straintensor getPlasticStrainTensor(void); //Added Joey Aug. 13, 2001
-    double getpsi(void); //Added Joey 02-18-03
+    const stresstensor& getStressTensor(void) ;
+    const straintensor& getStrainTensor(void) ;
+    const straintensor& getPlasticStrainTensor(void); //Added Joey Aug. 13, 2001
+    //double getpsi(void); //Added Joey 02-18-03
 
     EPState * getEPS() const;
     void setEPS( EPState &eps);
@@ -191,7 +191,7 @@ class Template3Dep : public NDMaterial
     //Template3Dep getCopy(const char *code) ;///???/
 
     const char *getType(void) const ;
-    int getOrder(void) const ;
+    //int getOrder(void) const ;
 
     int sendSelf(int commitTag, Channel &theChannel);  
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
@@ -299,7 +299,10 @@ class Template3Dep : public NDMaterial
     EvolutionLaw_T *ELT1; 
     EvolutionLaw_T *ELT2; 
     EvolutionLaw_T *ELT3; 
-    EvolutionLaw_T *ELT4; 
+    EvolutionLaw_T *ELT4;
+    
+    static stresstensor Stress;
+    static straintensor Strain;     
 
 };
 

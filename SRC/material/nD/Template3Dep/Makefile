@@ -17,7 +17,7 @@ include ../../../../Makefile.def
 
 OBJS  = Template3Dep.o \
         TclTemplate3DepCommand.o \
-        MatPoint3D.o \
+	MatPoint3D.o \
         CAM_PS.o  \
         CAM_YS.o \
         DP_PS.o  \
