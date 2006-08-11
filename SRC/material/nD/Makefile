@@ -27,7 +27,8 @@ all: $(OBJS)
 	@$(CD) $(FE)/material/nD/feap; $(MAKE);
 	@$(CD) $(FE)/material/nD/cyclicSoil; $(MAKE);
 	@$(CD) $(FE)/material/nD/Template3Dep; $(MAKE);  
-	@$(CD) $(FE)/material/nD/FiniteDeformation; $(MAKE); 
+	@$(CD) $(FE)/material/nD/FiniteDeformation; $(MAKE);
+	@$(CD) $(FE)/material/nD/NewTemplate3Dep; $(MAKE); 
 
 # Miscellaneous
 
@@ -45,6 +46,7 @@ spotless: clean
 	@$(CD) $(FE)/material/nD/cyclicSoil; $(MAKE) wipe;
 	@$(CD) $(FE)/material/nD/Template3Dep; $(MAKE) wipe;
 	@$(CD) $(FE)/material/nD/FiniteDeformation; $(MAKE) wipe;
+	@$(CD) $(FE)/material/nD/NewTemplate3Dep; $(MAKE) wipe;
 
 wipe: spotless
 
