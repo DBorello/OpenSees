@@ -21,6 +21,7 @@ FE_INCLUDES  = -I$(FE)/matrix \
                -I$(FE)/material/nD/soil \
                -I$(FE)/material/nD/feap \
                -I$(FE)/material/nD/Template3Dep \
+	       -I$(FE)/material/nD/NewTemplate3Dep \
 	       -I$(FE)/material/nD/FiniteDeformation \
 	       -I$(FE)/material/nD/FiniteDeformation/fdFlow \
 	       -I$(FE)/material/nD/FiniteDeformation/fdYield \
@@ -85,6 +86,7 @@ FE_INCLUDES  = -I$(FE)/matrix \
                -I$(FE)/element/20nbrick \
                -I$(FE)/element/27nbrick \
                -I$(FE)/element/upU \
+	       -I$(FE)/element/UP_ucdavis \
                -I$(FE)/element/UP-ucsd \
                -I$(FE)/element/TotalLagrangianFD20NodeBrick \
                -I$(FE)/element/brick \

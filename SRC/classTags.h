@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.78 $
-// $Date: 2006-08-04 22:36:01 $
+// $Revision: 1.79 $
+// $Date: 2006-08-11 17:25:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -203,6 +203,7 @@
 #define ND_TAG_J2BeamFiber					3011
 #define ND_TAG_PressureDependentElastic3D       22
 #define ND_TAG_Template3Dep 			        31
+#define ND_TAG_NewTemplate3Dep 			        32
 #define ND_TAG_FluidSolidPorousMaterial        100
 #define ND_TAG_PressureDependMultiYield		101
 #define ND_TAG_PressureIndependMultiYield		102
@@ -308,7 +309,10 @@
 #define ELE_TAG_EightNodeBrick_u_p_U            7003
 #define ELE_TAG_TwentyNodeBrick_u_p_U            7004
 #define ELE_TAG_FourNodeQuadUP  7005
-#define ELE_TAG_TotalLagrangianFD20NodeBrick 7006 // ZC added
+#define ELE_TAG_TotalLagrangianFD20NodeBrick 7006
+#define ELE_TAG_TotalLagrangianFD8NodeBrick 7007
+#define ELE_TAG_EightNode_LDBrick_u_p 7008
+#define ELE_TAG_EightNode_Brick_u_p 7009
 #define ELE_TAG_TwentySevenNodeBrick   7010
 #define ELE_TAG_BrickUP         7011
 #define ELE_TAG_Nine_Four_Node_QuadUP         7012
