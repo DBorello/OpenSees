@@ -3454,19 +3454,19 @@ int EightNodeBrick::getResponse (int responseID, Information &eleInfo)
         principle = sts.principal();
               //InfoSpq_all(i*2+1) =principle.val(1,1)-principle.val(3,3); 
                            
-                           if (i == 7)  {
-          InfoSpq_all(i*2+2) = principle.val(1,1); 
-          //InfoSpq_all(i*2+3) = principle.val(2,2); 
-          InfoSpq_all(i*2+3) = principle.val(3,3); 
-         
-          //Output volumetric strain for the eight Gauss point
-          straintensor pl_stn;
-          pl_stn = matpoint[i]->getPlasticStrainTensor();
-          //pl_stn = matpoint[i]->getStrainTensor();
-          InfoSpq_all(i*2+4) = pl_stn.Iinvariant1();
-          double psi = matpoint[i]->getpsi();
-          InfoSpq_all(i*2+5) = psi;
-        }
+//                           if (i == 7)  {
+//          InfoSpq_all(i*2+2) = principle.val(1,1); 
+//          //InfoSpq_all(i*2+3) = principle.val(2,2); 
+//          InfoSpq_all(i*2+3) = principle.val(3,3); 
+//         
+//          //Output volumetric strain for the eight Gauss point
+//          straintensor pl_stn;
+//          pl_stn = matpoint[i]->getPlasticStrainTensor();
+//          //pl_stn = matpoint[i]->getStrainTensor();
+//          InfoSpq_all(i*2+4) = pl_stn.Iinvariant1();
+//          double psi = matpoint[i]->getpsi();
+//          InfoSpq_all(i*2+5) = psi;
+//        }
             }
         }
     }
