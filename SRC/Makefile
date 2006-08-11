@@ -314,8 +314,35 @@ MATMOD_BJ_LIBS = $(FE)/material/nD/ElasticIsotropic3D.o  \
                  $(FE)/material/nD/Template3Dep/EL_LEij.o \
                  $(FE)/material/nD/Template3Dep/RMC01.o  \
                  $(FE)/material/nD/Template3Dep/RMC01_YS.o  \
-                 $(FE)/material/nD/Template3Dep/RMC01_PS.o
-
+                 $(FE)/material/nD/Template3Dep/RMC01_PS.o \
+		 $(FE)/material/nD/NewTemplate3Dep/MaterialParameter.o \
+		 $(FE)/material/nD/NewTemplate3Dep/ElasticState.o \
+		 $(FE)/material/nD/NewTemplate3Dep/Isotropic_Elastic.o \
+		 $(FE)/material/nD/NewTemplate3Dep/elnp_Elastic.o \
+		 $(FE)/material/nD/NewTemplate3Dep/PressureDependent_Elastic.o \
+		 $(FE)/material/nD/NewTemplate3Dep/DM04_Elastic.o \
+		 $(FE)/material/nD/NewTemplate3Dep/YieldFunction.o \
+		 $(FE)/material/nD/NewTemplate3Dep/VM_YF.o \
+		 $(FE)/material/nD/NewTemplate3Dep/RMC_YF.o \
+		 $(FE)/material/nD/NewTemplate3Dep/DP_YF.o \
+		 $(FE)/material/nD/NewTemplate3Dep/CC_YF.o \
+		 $(FE)/material/nD/NewTemplate3Dep/DM04_YF.o \
+		 $(FE)/material/nD/NewTemplate3Dep/PlasticFlow.o \
+		 $(FE)/material/nD/NewTemplate3Dep/VM_PF.o \
+		 $(FE)/material/nD/NewTemplate3Dep/RMC_PF.o \
+		 $(FE)/material/nD/NewTemplate3Dep/DP_PF.o \
+		 $(FE)/material/nD/NewTemplate3Dep/CC_PF.o \
+		 $(FE)/material/nD/NewTemplate3Dep/DM04_PF.o \
+		 $(FE)/material/nD/NewTemplate3Dep/ScalarEvolution.o \
+		 $(FE)/material/nD/NewTemplate3Dep/Linear_Eeq.o \
+		 $(FE)/material/nD/NewTemplate3Dep/CC_Ev.o \
+		 $(FE)/material/nD/NewTemplate3Dep/TensorEvolution.o \
+		 $(FE)/material/nD/NewTemplate3Dep/Linear_Eij.o \
+		 $(FE)/material/nD/NewTemplate3Dep/AF_Eij.o \
+		 $(FE)/material/nD/NewTemplate3Dep/DM04_alpha_Eij.o \
+		 $(FE)/material/nD/NewTemplate3Dep/DM04_z_Eij.o \
+		 $(FE)/material/nD/NewTemplate3Dep/NewTemplate3Dep.o \
+		 $(FE)/material/nD/NewTemplate3Dep/TclNewTemplate3Dep.o
 
 
 ELEMENT_BJ_LIBS = $(FE)/element/8nbrick/EightNodeBrick.o \
@@ -325,11 +352,16 @@ ELEMENT_BJ_LIBS = $(FE)/element/8nbrick/EightNodeBrick.o \
                   $(FE)/element/27nbrick/TwentySevenNodeBrick.o \
                   $(FE)/element/27nbrick/TclTwentySevenNodeBrickCommand.o \
                   $(FE)/element/TotalLagrangianFD20NodeBrick/TotalLagrangianFD20NodeBrick.o \
-                  $(FE)/element/TotalLagrangianFD20NodeBrick/TclTLFD20NodeBrickCommand.o \
-                  $(FE)/element/upU/EightNodeBrick_u_p_U.o \
+		  $(FE)/element/TotalLagrangianFD20NodeBrick/TotalLagrangianFD8NodeBrick.o \
+		  $(FE)/element/TotalLagrangianFD20NodeBrick/TclTLFD20NodeBrickCommand.o \
+		  $(FE)/element/upU/EightNodeBrick_u_p_U.o \
                   $(FE)/element/upU/TwentyNodeBrick_u_p_U.o \
                   $(FE)/element/upU/TclEightNodeBrick_u_p_U.o \
-                  $(FE)/element/upU/TclTwentyNodeBrick_u_p_U.o
+                  $(FE)/element/upU/TclTwentyNodeBrick_u_p_U.o \
+		  $(FE)/element/upU/TclTwentyNodeBrick_u_p_U.o \
+		  $(FE)/element/UP_ucdavis/EightNode_LDBrick_u_p.o \
+		  $(FE)/element/UP_ucdavis/EightNode_Brick_u_p.o \
+		  $(FE)/element/UP_ucdavis/TclBrick_u_p.o
 
 
 FINITE_DEFORMATION_BJ_LIBS = $(FE)/material/nD/FiniteDeformation/NeoHookeanWEnergy.o \
@@ -637,6 +669,7 @@ SECTION_LIBS = $(FE)/material/section/SectionForceDeformation.o \
 	$(FE)/material/section/yieldSurface/YS_Section2D01.o \
 	$(FE)/material/section/yieldSurface/YS_Section2D02.o \
 	$(FE)/material/section/yieldSurface/TclModelBuilderYS_SectionCommand.o \
+	$(FE)/material/section/yieldSurface/SoilFootingSection2d.o \
 	$(FE)/material/section/TclModelBuilderSectionCommand.o
 
 
