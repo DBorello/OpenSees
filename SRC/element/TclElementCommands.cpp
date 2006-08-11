@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.40 $
-// $Date: 2006-07-19 18:42:35 $
+// $Revision: 1.41 $
+// $Date: 2006-08-11 17:19:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -234,6 +234,22 @@ extern int
 TclModelBuilder_addTLFD20nBrick(ClientData, Tcl_Interp *, int, TCL_Char **,
 				Domain*, TclModelBuilder *, int);
 
+// Boris Jeremic and Zhao Cheng
+extern int
+TclModelBuilder_addTLFD8nBrick(ClientData, Tcl_Interp *, int, TCL_Char **,
+				Domain*, TclModelBuilder *, int);
+				
+				
+// Boris Jeremic and Zhao Cheng
+extern int
+TclModelBuilder_addEightNode_LDBrick_u_p(ClientData, Tcl_Interp *, int, TCL_Char **,
+				Domain*, TclModelBuilder *, int);
+
+// Boris Jeremic and Zhao Cheng
+extern int
+TclModelBuilder_addEightNode_Brick_u_p(ClientData, Tcl_Interp *, int, TCL_Char **,
+				Domain*, TclModelBuilder *, int);
+
 int
 TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 			      int argc, TCL_Char **argv, 
@@ -392,7 +408,19 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
     return result;
   }
 
-
+  // Boris jeremic & Zhao Cheng
+  else if (strcmp(argv[1],"TLFD8nBrick") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addTLFD8nBrick(clientData,
+                                                   interp,
+                                                   argc,
+                                                   argv,
+                                                   theTclDomain,
+                                                   theTclBuilder,
+                                                   eleArgStart);
+    return result;
+  }
+  
   //Boris Jeremic & Zhaohui  
   else if (strcmp(argv[1],"Brick8N_u_p_U") == 0) {
     int eleArgStart = 1;
@@ -417,6 +445,34 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 							  eleArgStart);
     return result;
   } 
+
+  // Boris Jeremic & Zhao Cheng
+  else if (strcmp(argv[1],"EightNode_LDBrick_u_p") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addEightNode_LDBrick_u_p(clientData,
+                                                   interp,
+                                                   argc,
+                                                   argv,
+                                                   theTclDomain,
+                                                   theTclBuilder,
+                                                   eleArgStart);
+    return result;
+  }
+  
+  // Boris Jeremic & Zhao Cheng
+  else if (strcmp(argv[1],"EightNode_Brick_u_p") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addEightNode_Brick_u_p(clientData,
+                                                   interp,
+                                                   argc,
+                                                   argv,
+                                                   theTclDomain,
+                                                   theTclBuilder,
+                                                   eleArgStart);
+    return result;
+  }
+    
+
   else if (strcmp(argv[1],"stdBrick") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addBrick(clientData, interp, argc, argv,
