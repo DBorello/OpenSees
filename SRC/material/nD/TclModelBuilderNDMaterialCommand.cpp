@@ -25,8 +25,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.39 $
-// $Date: 2005-04-01 20:21:29 $
+// $Revision: 1.40 $
+// $Date: 2006-08-11 21:22:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
 
 
@@ -57,6 +57,7 @@
 #include <string.h>
 
 #include <Template3Dep.h>
+#include <NewTemplate3Dep.h>
 #include <FiniteDeformationElastic3D.h>
 #include <FiniteDeformationEP3D.h>
 
@@ -64,6 +65,10 @@ Template3Dep *
 TclModelBuilder_addTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  int argc,
 				TCL_Char **argv, TclModelBuilder *theTclBuilder, int eleArgStart);
 
+NewTemplate3Dep *
+TclModelBuilder_addNewTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  int argc,
+				TCL_Char **argv, TclModelBuilder *theTclBuilder, int eleArgStart);				
+				
 FiniteDeformationElastic3D *
 TclModelBuilder_addFiniteDeformationElastic3D(ClientData clientData, Tcl_Interp *interp,  int argc,
 				TCL_Char **argv, TclModelBuilder *theTclBuilder, int eleArgStart);
@@ -826,6 +831,11 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 						    theTclBuilder, 2);
     }
 
+    else if (strcmp(argv[1],"NewTemplate3Dep") == 0) {
+      theMaterial = TclModelBuilder_addNewTemplate3Dep(clientData, interp, argc, argv,
+						    theTclBuilder, 2);
+    }
+        
     else if (strcmp(argv[1],"FiniteDeformationElastic3D") == 0 ||
              strcmp(argv[1],"FDElastic3D" ) == 0) {
       theMaterial = TclModelBuilder_addFiniteDeformationElastic3D(clientData, interp, argc, argv,
