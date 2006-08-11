@@ -3,6 +3,7 @@ include ../../../../Makefile.def
 OBJS = YieldSurfaceSection2d.o \
 	   YS_Section2D01.o \
 	   YS_Section2D02.o \
+           SoilFootingSection2d.o \
 	   TclModelBuilderYS_SectionCommand.o
 
 all:         $(OBJS)
