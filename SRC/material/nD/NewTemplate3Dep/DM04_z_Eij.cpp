@@ -24,7 +24,7 @@
 // LANGUAGE:          C++
 // TARGET OS:         
 // DESIGNER:          Zhao Cheng, Boris Jeremic
-// PROGRAMMER:        Zhao Cheng, 
+// PROGRAMMER:        Zhao Cheng,
 // DATE:              Fall 2005
 // UPDATE HISTORY:    
 //
@@ -37,7 +37,7 @@
 //  2- c_z:       parameter
 //  3- z_max      parameter
 //  4- alpha:     "back-stress" tensor in yield function; (the 1st tensorial internal variable);
-//  5- z:         fabric dilatancy internal tensor (the 2nd tensorial internal variable); 
+//  5- z:         fabric dilation internal tensor (the 2nd tensorial internal variable); 
 
 #ifndef DM04_z_Eij_CPP
 #define DM04_z_Eij_CPP
@@ -85,20 +85,19 @@ const straintensor& DM04_z_Eij::Hij(const straintensor& plastic_flow, const stre
 
     stresstensor n;
     
-    //if (p != 0.0 && m != 0.0)
-    //    n = (s * (1.0/p) - alpha) *(1.0/(sqrt(2.0/3.0)*m));
-    
     stresstensor s_bar = Stre.deviator() - (alpha *p);
     double _s_bar_ = sqrt( (s_bar("ij")*s_bar("ij")).trace() );
     if (p > 0.0 && _s_bar_ > 0.0)
         n = s_bar * (1.0/_s_bar_);
     
     // here d_Ev has different sign assumption from the ref.
-    // hence no "negtive" sign for d_Ev in the following line
+    // hence no "negative" sign for d_Ev in the following line
     double d_Ev = plastic_flow.Iinvariant1();
-    if (d_Ev < 0.0) d_Ev = 0.0;  
+    if (d_Ev < 0.0) 
+      d_Ev = 0.0;  
    
     TensorEvolution::TensorEvolutionHij = ((n *z_max) +z) *(-c_z*d_Ev); 
+    
     return TensorEvolution::TensorEvolutionHij;
 }
 

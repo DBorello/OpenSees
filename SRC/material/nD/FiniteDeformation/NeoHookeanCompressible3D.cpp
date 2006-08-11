@@ -29,6 +29,8 @@
 
 #include <NeoHookeanCompressible3D.h>
 
+stresstensor NeoHookeanCompressible3D::static_NHC_stress;
+
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 NeoHookeanCompressible3D::NeoHookeanCompressible3D(int tag,
                                                    int classTag,
@@ -99,13 +101,13 @@ int NeoHookeanCompressible3D::setTrialCIncr(const straintensor &dc)
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
-const straintensor NeoHookeanCompressible3D::getF(void)
+const straintensor& NeoHookeanCompressible3D::getF(void)
 {
    return F;
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
-const straintensor NeoHookeanCompressible3D::getC(void)
+const straintensor& NeoHookeanCompressible3D::getC(void)
 {
    return C;
 }
@@ -130,26 +132,25 @@ const Tensor
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-const straintensor NeoHookeanCompressible3D::getStrainTensor(void)
+const straintensor& NeoHookeanCompressible3D::getStrainTensor(void)
 {
    return thisGreenStrain;
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-const stresstensor NeoHookeanCompressible3D::getStressTensor(void)
+const stresstensor& NeoHookeanCompressible3D::getStressTensor(void)
 {
    return thisPK2Stress;
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-const stresstensor NeoHookeanCompressible3D::getPK1StressTensor(void)
+const stresstensor& NeoHookeanCompressible3D::getPK1StressTensor(void)
 {
    stresstensor thisSPKStress;
-   stresstensor thisFPKStress;
 
    if ( FromForC == 0 ) {
     thisSPKStress = this->getStressTensor();
-    thisFPKStress = thisSPKStress("ij") * (F.transpose11())("jk") ;
+    static_NHC_stress = F("kJ") * thisSPKStress("IJ");
    }
 
    if ( FromForC == 1 ) {
@@ -157,18 +158,19 @@ const stresstensor NeoHookeanCompressible3D::getPK1StressTensor(void)
     exit (-1);
    }
 
-    return thisFPKStress;
+    return NeoHookeanCompressible3D::static_NHC_stress;
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-const stresstensor NeoHookeanCompressible3D::getCauchyStressTensor(void)
+const stresstensor& NeoHookeanCompressible3D::getCauchyStressTensor(void)
 {
    stresstensor thisSPKStress;
-   stresstensor thisCauchyStress;
 
    if ( FromForC == 0 ) {
     thisSPKStress = this->getStressTensor();
-    thisCauchyStress = F("ij") * thisSPKStress("jk") * (F.transpose11())("kl") * (1.0/J);
+    static_NHC_stress = F("iJ") * thisSPKStress("JK"); 
+    static_NHC_stress = static_NHC_stress("iK") * F("mK");
+    static_NHC_stress = static_NHC_stress *(1.0/J);
    }
 
    if ( FromForC == 1 ) {
@@ -176,7 +178,7 @@ const stresstensor NeoHookeanCompressible3D::getCauchyStressTensor(void)
     exit (-1);
    }
 
-    return thisCauchyStress;
+    return NeoHookeanCompressible3D::static_NHC_stress;
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -240,11 +242,11 @@ const char* NeoHookeanCompressible3D::getType (void) const
    return "ThreeDimentionalFD";
 }
 
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-int NeoHookeanCompressible3D::getOrder (void) const
-{
-   return 6;
-}
+////--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//int NeoHookeanCompressible3D::getOrder (void) const
+//{
+//   return 6;
+//}
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 int NeoHookeanCompressible3D::sendSelf (int commitTag, Channel &theChannel)

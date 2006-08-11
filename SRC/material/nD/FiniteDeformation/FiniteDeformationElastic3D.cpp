@@ -88,19 +88,24 @@ int FiniteDeformationElastic3D::setTrialCIncr(const straintensor &dc)
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
-const straintensor FiniteDeformationElastic3D::getF(void)
+const straintensor& FiniteDeformationElastic3D::getF(void)
 {
    opserr << "FiniteDeformationElastic3D-- subclass responsibility\n";
    exit (-1);
-   return 0;
+   // Just to make it compile
+   straintensor *ret = new straintensor;
+   return *ret;
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
-const straintensor FiniteDeformationElastic3D::getC(void)
+const straintensor& FiniteDeformationElastic3D::getC(void)
 {
    opserr << "FiniteDeformationElastic3D-- subclass responsibility\n";
    exit (-1);
-   return 0;
+   // Just to make it compile
+   straintensor *ret = new straintensor;
+   return *ret;
+
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -123,37 +128,37 @@ const Tensor
    return *ret;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-const straintensor FiniteDeformationElastic3D::getStrainTensor(void)
+const straintensor& FiniteDeformationElastic3D::getStrainTensor(void)
 {
    opserr << "FiniteDeformationElastic3D-- subclass responsibility\n";
    exit (-1);
    // Just to make it compile
-   straintensor ret;
-   return ret;
+   straintensor *ret = new straintensor;
+   return *ret;
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-const stresstensor FiniteDeformationElastic3D::getStressTensor(void)
+const stresstensor& FiniteDeformationElastic3D::getStressTensor(void)
 {
    opserr << "FiniteDeformationElastic3D-- subclass responsibility\n";
    exit (-1);
-   stresstensor ret; 
-   return ret;
+   stresstensor *ret = new stresstensor; 
+   return *ret;
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-const stresstensor FiniteDeformationElastic3D::getPK1StressTensor(void)
+const stresstensor& FiniteDeformationElastic3D::getPK1StressTensor(void)
 {
    opserr << "FiniteDeformationElastic3D-- subclass responsibility\n";
    exit (-1);
-   stresstensor ret; 
-   return ret;
+   stresstensor *ret = new stresstensor; 
+   return *ret;
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-const stresstensor FiniteDeformationElastic3D::getCauchyStressTensor(void)
+const stresstensor& FiniteDeformationElastic3D::getCauchyStressTensor(void)
 {
    opserr << "FiniteDeformationElastic3D-- subclass responsibility\n";
    exit (-1);
-   stresstensor ret; 
-   return ret;
+   stresstensor *ret = new stresstensor; 
+   return *ret;
 }
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 int FiniteDeformationElastic3D::commitState (void)
@@ -197,13 +202,13 @@ const char* FiniteDeformationElastic3D::getType (void) const
    exit (-1);
    return 0;
 }
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-int FiniteDeformationElastic3D::getOrder (void) const
-{
-   opserr << "FiniteDeformationElastic3D-- subclass responsibility\n";
-   exit (-1);
-   return 0;
-}
+////--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//int FiniteDeformationElastic3D::getOrder (void) const
+//{
+//   opserr << "FiniteDeformationElastic3D-- subclass responsibility\n";
+//   exit (-1);
+//   return 0;
+//}
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 int FiniteDeformationElastic3D::sendSelf (int commitTag, Channel &theChannel)
 {

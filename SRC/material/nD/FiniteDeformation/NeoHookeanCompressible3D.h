@@ -50,10 +50,10 @@ class NeoHookeanCompressible3D : public FiniteDeformationElastic3D
     const Tensor& getTangentTensor(void) ;	  // Default Lagrangian Tangent Tensor
     const Tensor& getInitialTangentTensor(void) ;
 
-    const  straintensor getStrainTensor(void) ;   // Default Green Lagrangian Strain
-    const  stresstensor getStressTensor(void) ;   // Default 2nd Piola Kirchhoff Stress
-    const  straintensor getF(void);
-    const  straintensor getC(void);
+    const  straintensor& getStrainTensor(void) ;   // Default Green Lagrangian Strain
+    const  stresstensor& getStressTensor(void) ;   // Default 2nd Piola Kirchhoff Stress
+    const  straintensor& getF(void);
+    const  straintensor& getC(void);
 
     int commitState(void) ;
     int revertToLastCommit(void) ;
@@ -63,7 +63,7 @@ class NeoHookeanCompressible3D : public FiniteDeformationElastic3D
     NDMaterial *getCopy (const char *type);
 
     const char *getType (void) const;
-    int getOrder (void) const;
+    //int getOrder (void) const;
 
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
@@ -73,8 +73,8 @@ class NeoHookeanCompressible3D : public FiniteDeformationElastic3D
 //    int setParameter(char **argv, int argc, Information &info);
 //    int updateParameter(int parameterID, Information &info);
 
-    const  stresstensor getPK1StressTensor(void) ;
-    const  stresstensor getCauchyStressTensor(void) ;
+    const  stresstensor& getPK1StressTensor(void) ;
+    const  stresstensor& getCauchyStressTensor(void) ;
 
    
   private:
@@ -98,6 +98,7 @@ class NeoHookeanCompressible3D : public FiniteDeformationElastic3D
     straintensor thisGreenStrain;
     stresstensor thisPK2Stress;
 
+    static stresstensor static_NHC_stress;  // only for static reference return
 };
 
 #endif

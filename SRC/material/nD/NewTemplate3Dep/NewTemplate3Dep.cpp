@@ -26,7 +26,7 @@
 // DESIGNER:          Zhao Cheng, Boris Jeremic
 // PROGRAMMER:        Zhao Cheng, 
 // DATE:              Fall 2005
-// UPDATE HISTORY:    
+// UPDATE HISTORY:    06/2006, add functions for matrix based elements, CZ
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -36,13 +36,18 @@
 
 #include "NewTemplate3Dep.h"
 
-const  straintensor ZeroStrain;
-const  stresstensor ZeroStress;
-const  BJtensor ZeroI4(4, def_dim_4, 0.0);
-const int ISMAX = 20;
-const int ITMAX = 30;
-const double TOL = 1.0e-7;
+const  straintensor NewTemplate3Dep::ZeroStrain;
+const  stresstensor NewTemplate3Dep::ZeroStress;
+const  BJtensor NewTemplate3Dep::ZeroI4(4, def_dim_4, 0.0);
+const int NewTemplate3Dep::ISMAX = 30;
+const int NewTemplate3Dep::ITMAX = 30;
+const double NewTemplate3Dep::TOL = 1.0e-7;
+const double NewTemplate3Dep::FTOL = 1.0e-8;
 
+// For Matrix based elements
+Matrix NewTemplate3Dep::D(6,6);
+Vector NewTemplate3Dep::sigma(6);
+Vector NewTemplate3Dep::epsilon(6);
 
 #include "NewTemplate3Dep.h"
 
@@ -210,6 +215,128 @@ NewTemplate3Dep::~NewTemplate3Dep()
        delete pointer_material_parameter;
 }
 
+// For Matrix based elements
+int NewTemplate3Dep::setTrialStrain (const Vector &v)
+{
+	straintensor temp;
+    
+    temp.val(1,1) = v(0);  
+    temp.val(2,2) = v(1);
+    temp.val(3,3) = v(2);
+    temp.val(1,2) = 0.5 * v(3);  
+    temp.val(2,1) = 0.5 * v(3);  
+    temp.val(3,1) = 0.5 * v(4);  
+    temp.val(1,3) = 0.5 * v(4);
+    temp.val(2,3) = 0.5 * v(5);  
+    temp.val(3,2) = 0.5 * v(5);
+    
+	return this->setTrialStrainIncr(temp - getStrainTensor());
+}
+
+// For Matrix based elements
+int NewTemplate3Dep::setTrialStrain (const Vector &v, const Vector &r)
+{
+	return this->setTrialStrainIncr(v);;
+}
+
+// For Matrix based elements
+int NewTemplate3Dep::setTrialStrainIncr (const Vector &v)
+{
+	straintensor temp;
+    
+    temp.val(1,1) = v(0);  
+    temp.val(2,2) = v(1);
+    temp.val(3,3) = v(2);
+    temp.val(1,2) = 0.5 * v(3);  
+    temp.val(2,1) = 0.5 * v(3);  
+    temp.val(3,1) = 0.5 * v(4);  
+    temp.val(1,3) = 0.5 * v(4);
+    temp.val(2,3) = 0.5 * v(5);  
+    temp.val(3,2) = 0.5 * v(5);
+	
+    return this->setTrialStrainIncr(temp);
+}
+
+// For Matrix based elements
+int NewTemplate3Dep::setTrialStrainIncr (const Vector &v, const Vector &r)
+{
+	return this->setTrialStrainIncr(v);
+}
+
+// For Matrix based elements
+const Matrix& NewTemplate3Dep::getTangent (void)
+{
+   D(0,0) = Stiffness.cval(1,1,1,1);
+   D(0,1) = Stiffness.cval(1,1,2,2);
+   D(0,2) = Stiffness.cval(1,1,3,3);      
+   D(0,3) = Stiffness.cval(1,1,1,2);
+   D(0,4) = Stiffness.cval(1,1,1,3);
+   D(0,5) = Stiffness.cval(1,1,2,3);      
+    
+   D(1,0) = Stiffness.cval(2,2,1,1);
+   D(1,1) = Stiffness.cval(2,2,2,2);
+   D(1,2) = Stiffness.cval(2,2,3,3);      
+   D(1,3) = Stiffness.cval(2,2,1,2);
+   D(1,4) = Stiffness.cval(2,2,1,3);
+   D(1,5) = Stiffness.cval(2,2,2,3);            
+    
+   D(2,0) = Stiffness.cval(3,3,1,1);
+   D(2,1) = Stiffness.cval(3,3,2,2);
+   D(2,2) = Stiffness.cval(3,3,3,3);      
+   D(2,3) = Stiffness.cval(3,3,1,2);
+   D(2,4) = Stiffness.cval(3,3,1,3);
+   D(2,5) = Stiffness.cval(3,3,2,3);                  
+    
+   D(3,0) = Stiffness.cval(1,2,1,1);
+   D(3,1) = Stiffness.cval(1,2,2,2);
+   D(3,2) = Stiffness.cval(1,2,3,3);      
+   D(3,3) = Stiffness.cval(1,2,1,2);
+   D(3,4) = Stiffness.cval(1,2,1,3);
+   D(3,5) = Stiffness.cval(1,2,2,3);                        
+    
+   D(4,0) = Stiffness.cval(1,3,1,1);
+   D(4,1) = Stiffness.cval(1,3,2,2);
+   D(4,2) = Stiffness.cval(1,3,3,3);      
+   D(4,3) = Stiffness.cval(1,3,1,2);
+   D(4,4) = Stiffness.cval(1,3,1,3);
+   D(4,5) = Stiffness.cval(1,3,2,3);                              
+    
+   D(5,0) = Stiffness.cval(2,3,1,1);
+   D(5,1) = Stiffness.cval(2,3,2,2);
+   D(5,2) = Stiffness.cval(2,3,3,3);      
+   D(5,3) = Stiffness.cval(2,3,1,2);
+   D(5,4) = Stiffness.cval(2,3,1,3);
+   D(5,5) = Stiffness.cval(2,3,2,3);    
+
+   return D;
+}
+
+// For Matrix based elements
+const Vector& NewTemplate3Dep::getStress (void)
+{
+   sigma(0) = TrialStress.cval(1,1);
+   sigma(1) = TrialStress.cval(2,2);
+   sigma(2) = TrialStress.cval(3,3);
+   sigma(3) = TrialStress.cval(1,2);
+   sigma(4) = TrialStress.cval(1,3);
+   sigma(5) = TrialStress.cval(2,3);
+
+   return sigma;
+}
+
+// For Matrix based elements
+const Vector& NewTemplate3Dep::getStrain (void)
+{
+   epsilon(0) = TrialStrain.cval(1,1);
+   epsilon(1) = TrialStrain.cval(2,2);
+   epsilon(2) = TrialStrain.cval(3,3);
+   epsilon(3) = TrialStrain.cval(1,2) + TrialStrain.cval(2,1);
+   epsilon(4) = TrialStrain.cval(1,3) + TrialStrain.cval(3,1);
+   epsilon(5) = TrialStrain.cval(2,3) + TrialStrain.cval(3,2);    
+    
+   return epsilon;
+}
+
 //================================================================================
 int NewTemplate3Dep::setTrialStrain(const Tensor& v)
 {       
@@ -298,10 +425,10 @@ int NewTemplate3Dep::commitState(void)
         
     //err += pointer_elastic_state->commitState();
     
-    CommitStress = TrialStress;
-    CommitStrain = TrialStrain;
+    CommitStress.Initialize(TrialStress);
+    CommitStrain.Initialize(TrialStrain);
     
-    CommitPlastic_Strain = TrialPlastic_Strain;
+    CommitPlastic_Strain.Initialize(TrialPlastic_Strain);
     
     return err;
 }
@@ -311,10 +438,10 @@ int NewTemplate3Dep::revertToLastCommit(void)
 {
     int err = 0;
     
-    TrialStress = CommitStress;
-    TrialStrain = CommitStrain;
+    TrialStress.Initialize(CommitStress);
+    TrialStrain.Initialize(CommitStrain);
     
-    TrialPlastic_Strain = CommitPlastic_Strain;
+    TrialPlastic_Strain.Initialize(CommitPlastic_Strain);
     
     return err;
 }
@@ -324,10 +451,15 @@ int NewTemplate3Dep::revertToStart(void)
 {
     int err = 0;
     
-    TrialStress = CommitStress = pointer_elastic_state->getStress();
-    TrialStrain = CommitStrain = pointer_elastic_state->getStrain();
+    CommitStress = pointer_elastic_state->getStress();
+    CommitStrain = pointer_elastic_state->getStrain();
     
-    TrialPlastic_Strain = CommitPlastic_Strain = ZeroStrain;
+    CommitPlastic_Strain.Initialize(ZeroStrain);
+
+    TrialStress.Initialize(CommitStress);
+    TrialStrain.Initialize(CommitStrain);
+    
+    TrialPlastic_Strain.Initialize(ZeroStrain);
 
     Stiffness = pointer_elastic_state->getElasticStiffness(*pointer_material_parameter);
     
@@ -352,7 +484,7 @@ NDMaterial * NewTemplate3Dep::getCopy(void)
 //================================================================================
 NDMaterial * NewTemplate3Dep::getCopy(const char *code)
 {
-    if (strcmp(code,"NewTemplate3Dep") == 0) {
+    if (strcmp(code,"ThreeDimensional") == 0) {
        NewTemplate3Dep* tmp = new NewTemplate3Dep( this->getTag(),
                                                    this->pointer_material_parameter,
                                                    this->pointer_elastic_state,
@@ -373,7 +505,7 @@ NDMaterial * NewTemplate3Dep::getCopy(const char *code)
 //================================================================================
 const char *NewTemplate3Dep::getType(void) const
 {
-    return "ThreeDimensional_Tensor";
+    return "ThreeDimensional";
 }
 
 //================================================================================
@@ -406,7 +538,7 @@ int NewTemplate3Dep::ForwardEuler(const straintensor& strain_incr)
     stresstensor Intersection_stress;
     stresstensor elastic_predictor_stress;
     BJtensor Ee;
- 
+    straintensor  incr_strain;
     int err = 0;
 
     double f_start = 0.0;
@@ -419,10 +551,10 @@ int NewTemplate3Dep::ForwardEuler(const straintensor& strain_incr)
     start_stress = getStressTensor();
     start_strain = getStrainTensor();
     
-    Intersection_stress = start_stress;
+    Intersection_stress.Initialize(start_stress);
     
     // I had to use the one line incr_strain = strain_incr; Problem of BJTensor;
-    straintensor  incr_strain = strain_incr;
+    incr_strain.Initialize(strain_incr);
     stress_incr = Ee("ijpq") * incr_strain("pq");
     stress_incr.null_indices();
 
@@ -432,9 +564,9 @@ int NewTemplate3Dep::ForwardEuler(const straintensor& strain_incr)
     f_pred =  pointer_yield_function->YieldFunctionValue( elastic_predictor_stress, *pointer_material_parameter );
     
     // If Elastic
-    if ( (f_start <= 0.0 && f_pred <= TOL) || f_start > f_pred ) {
+    if ( (f_start <= 0.0 && f_pred <= FTOL) || f_start > f_pred ) {
         //TrialStrain = start_strain + strain_incr;
-        TrialStress = elastic_predictor_stress;
+        TrialStress.Initialize(elastic_predictor_stress);
 
         Stiffness = Ee;
                
@@ -457,7 +589,9 @@ int NewTemplate3Dep::ForwardEuler(const straintensor& strain_incr)
         
         // Update elastic part
         err += pointer_elastic_state->setStress(Intersection_stress);      
-        err += pointer_elastic_state->setStrain(TrialStrain);
+        err += pointer_elastic_state->setStrain(Intersection_strain);
+        
+        Ee = pointer_elastic_state->getElasticStiffness(*pointer_material_parameter);
     }
     
     // If E-P Response,
@@ -480,7 +614,7 @@ int NewTemplate3Dep::ForwardEuler(const straintensor& strain_incr)
         stresstensor ep_stress;
         
         // For better numerical performance
-        Intersection_stress = Intersection_stress *(1.0 - TOL);
+        //Intersection_stress = Intersection_stress *(1.0 - TOL);
                    
         dFods = pointer_yield_function->StressDerivative( Intersection_stress, *pointer_material_parameter );
         dQods = pointer_plastic_flow->PlasticFlowTensor( Intersection_stress, Intersection_strain, *pointer_material_parameter );
@@ -516,9 +650,12 @@ int NewTemplate3Dep::ForwardEuler(const straintensor& strain_incr)
                 
         // L_ij * E_ijkl * d e_kl ( true ep strain increment)
         Delta_lambda = ( dFods("ij") * stress_incr("ij") ).trace();
-        Delta_lambda /= lower;              
+        
+        if (lower != 0.0)
+          Delta_lambda /= lower;              
          
-        if (Delta_lambda < 0.0)  Delta_lambda = 0.0;
+        if (Delta_lambda < 0.0)  
+          Delta_lambda = 0.0;
 
         // Plastic strain increment
         plastic_strain_incr = dQods * Delta_lambda;
@@ -528,7 +665,9 @@ int NewTemplate3Dep::ForwardEuler(const straintensor& strain_incr)
         TrialStress = ep_stress;
         
         // To obtain Eep
-        Ep = Hq("pq") * Hf("mn");  Ep.null_indices();        	
+        Ep = Hq("pq") * Hf("mn");  
+        Ep.null_indices();        	
+        
         Ep = Ep * (1.0/lower);
         if ( Delta_lambda > 0.0 )
         	Stiffness = Ee - Ep;
@@ -557,8 +696,7 @@ int NewTemplate3Dep::ForwardEuler(const straintensor& strain_incr)
         
         // Update elastic part
         err += pointer_elastic_state->setStrain(TrialStrain);
-        err += pointer_elastic_state->setStress(TrialStress);
-       
+        err += pointer_elastic_state->setStress(TrialStress);       
     }
 
     return err;
@@ -583,17 +721,17 @@ int NewTemplate3Dep::SemiImplicit(const straintensor& strain_incr)
     
     // I had to use the one line incr_strain = strain_incr; Problem of BJTensor;
     straintensor  incr_strain = strain_incr;
-    stress_incr = Ee("ijpq") * incr_strain("pq");
+    stress_incr = Ee("ijpq") * incr_strain("pq");    
     stress_incr.null_indices();
 
     TrialPlastic_Strain = this->getPlasticStrainTensor();
     TrialStress = start_stress + stress_incr;
-    
+
     YieldFun = pointer_yield_function->YieldFunctionValue(TrialStress, *pointer_material_parameter);
     
     //cout << "YieldFun = " << YieldFun << endl;
     
-    if ( YieldFun <= TOL ) {      // If Elastic
+    if ( YieldFun <= FTOL ) {      // If Elastic
         err += pointer_elastic_state->setStress(TrialStress);
         err += pointer_elastic_state->setStrain(TrialStrain);       
         Stiffness = Ee;
@@ -682,10 +820,10 @@ int NewTemplate3Dep::SemiImplicit(const straintensor& strain_incr)
           YieldFun = pointer_yield_function->YieldFunctionValue(TrialStress, *pointer_material_parameter);
           //cout << "F = " << YieldFun << endl;
 
-          if (iter_counter == ITMAX)
-            cout << "Warning! The iteration number in the semi-implicit algorithm reaches to " << ITMAX << endl;
+          //if (iter_counter == ITMAX)
+          //  cout << "Warning! The iteration number in the semi-implicit algorithm reaches to " << ITMAX << endl;
 
-        } while (YieldFun > TOL && iter_counter < ITMAX);
+        } while (YieldFun > FTOL && iter_counter < ITMAX);
         // ################## End of do-while ########################
         
         if (Delta_lambda < 0.0)
@@ -837,14 +975,6 @@ double NewTemplate3Dep::func(const stresstensor& start_stress,
    
     return f;
 }
-
-////================================================================================
-//OPS_Stream& operator<< (OPS_Stream& os, const NewTemplate3Dep& MP)
-//{
-//    // May need work
-//    return os;
-//}
-
 
 #endif
 

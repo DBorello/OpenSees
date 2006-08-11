@@ -35,7 +35,7 @@
 // Richart et al 1970, Li & Dafalias 2000, Dafalias & Mazari 2004
 // Parameters:
 // 1: G0:    reference shear mudulus factor (no unit);
-// 2: v:     Poissoin's ratio;
+// 2: v:     Poisson's ratio;
 // 3: Pat:   Atmospheric pressure;
 // 4: k_c;   cut-off factor, for p < k_c*Pat, let p = k_c*Pat to calculate G;
 // 5: e0;    initial void ratio 
@@ -59,8 +59,7 @@ DM04_Elastic::DM04_Elastic(int G0_in,
   v_index(v_in),
   Pat_index(Pat_in),
   k_c_index(k_c_in),
-  e0_index(e0_in)
-   
+  e0_index(e0_in)   
 {
 
 }
@@ -100,6 +99,8 @@ const BJtensor& DM04_Elastic::getElasticStiffness(const MaterialParameter &Mater
     double e = e0 + (1 + e0) *epsilon_v;
     double ef = (2.97-e)*(2.97-e)/(1.0+e);
     double p_cal = this->getStress().p_hydrostatic();
+    if (p_cal < 0.0)
+      p_cal = 0.0; 
     double p_cut = Pat *k_c;
 
     double p = (p_cal > p_cut) ? p_cal : p_cut;
@@ -111,6 +112,12 @@ const BJtensor& DM04_Elastic::getElasticStiffness(const MaterialParameter &Mater
     ElasticState::ElasticStiffness = I_ijkl *(K - 2.0*G/3.0) + I4s *(2.0*G);
 
     return ElasticState::ElasticStiffness;
+}
+
+////////////////////////////////////////////////////////////////
+stresstensor DM04_Elastic::getStress() const 
+{  
+    return Stress;
 }
 
 // Get G0

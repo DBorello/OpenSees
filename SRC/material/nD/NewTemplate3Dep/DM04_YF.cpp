@@ -24,7 +24,7 @@
 // LANGUAGE:          C++
 // TARGET OS:         
 // DESIGNER:          Zhao Cheng, Boris Jeremic
-// PROGRAMMER:        Zhao Cheng, 
+// PROGRAMMER:        Zhao Cheng
 // DATE:              Fall 2005
 // UPDATE HISTORY:    
 //
@@ -71,59 +71,37 @@ YieldFunction* DM04_YF::newObj()
 double DM04_YF::YieldFunctionValue( const stresstensor& Stre, 
                                     const MaterialParameter &MaterialParameter_in ) const
 {
-	// f = [(sij-p*aij)(sij-p*aij)]^0.5 - sqrt(2/3)*p*m = 0
-
-	double sqrt23 = sqrt(2.0/3.0);
+	//f = [(sij-p*aij)(sij-p*aij)] - (2/3)*(p*m)^2 = 0
+	
 	double p = Stre.p_hydrostatic();
+
 	double m = getm(MaterialParameter_in);
 	stresstensor alpha = getalpha(MaterialParameter_in);
-	stresstensor s_bar = Stre.deviator() - (alpha *p);
+	
+    stresstensor s_bar = Stre.deviator() - (alpha * p);
 	double temp1 = ( s_bar("ij") * s_bar("ij") ).trace();
 	
-	return sqrt(temp1) - sqrt23*m*p; // a little moving of cone point
+    return temp1 - (2.0/3.0)*m*m*p*p - 1.0e-6;
 }
 
 //================================================================================
 const stresstensor& DM04_YF::StressDerivative(const stresstensor& Stre, 
                                               const MaterialParameter &MaterialParameter_in) const
 {
-//    //using f = 0
-//    BJtensor KroneckerI("I", 2, def_dim_2);
-//    stresstensor r;
-//    stresstensor n;
-//    double nr = 0.0;
-//    double sqrt23 = sqrt(2.0/3.0);
-//    double p = Stre.p_hydrostatic();
-//    double m = getm(MaterialParameter_in);
-//    stresstensor alpha = getalpha(MaterialParameter_in);
-//    if (p != 0.0) {
-//	    r = Stre.deviator() *(1.0/p);
-//	    n = (r - alpha) *(1.0/(sqrt23*m));
-//	    nr = ( n("ij") * r("ij") ).trace();
-//	}
-//	
-//    DM04st = n + ( KroneckerI *(nr/3.0) );
-//    return DM04st;
-
- 	// no using f = 0
      BJtensor KroneckerI("I", 2, def_dim_2);
-     stresstensor n;
-     double n_alpha = 0.0;
-     double sqrt23 = sqrt(2.0/3.0);
+
      double p = Stre.p_hydrostatic();
+     
      double m = getm(MaterialParameter_in);
      stresstensor alpha = getalpha(MaterialParameter_in);
-     stresstensor s_bar = Stre.deviator() - (alpha *p);
-     double _s_bar_ = sqrt( (s_bar("ij")*s_bar("ij")).trace() );
-     if (p > 0.0 && _s_bar_ > 0.0) {
- 	    n = s_bar * (1.0/_s_bar_);
- 	    n_alpha = ( n("ij") * alpha("ij") ).trace();
-     }
      
-     DM04st = n + ( KroneckerI * ( (n_alpha + sqrt23*m)/3.0 ) );
+	 stresstensor s_bar = Stre.deviator() - (alpha * p);
+
+     double s_bar_alpha = (s_bar("ij")*alpha("ij")).trace();
+     
+     DM04st = s_bar + ( KroneckerI * ( s_bar_alpha/3.0 + (4.0/9.0)*m*m*p ));
      
      return DM04st;
-
 }
 
 //================================================================================
@@ -131,33 +109,15 @@ const stresstensor& DM04_YF::InTensorDerivative(const stresstensor& Stre,
                                                 const MaterialParameter &MaterialParameter_in, 
                                                 int which) const
 {
-	// using f =0
-    //if (which == index_alpha) {
-	//	double sqrt23 = sqrt(2.0/3.0);
-	//	double m = getm(MaterialParameter_in);
-	//	double p = Stre.p_hydrostatic();
-	//	stresstensor alpha = getalpha(MaterialParameter_in);
-	//	stresstensor s_bar = Stre.deviator() - (alpha *p);
-	//	DM04st = s_bar *(-1.0/(sqrt23*m));
-	//}
-	//else {
-	//	cout << "DM04_YF: Invalid Input. " << endl;
-	//	exit (1);
-	//}
-    //
-	//return DM04st;
-
-	// no using f =0
     if (which == index_alpha) {
-	    stresstensor n;
-	    double p = Stre.p_hydrostatic();
-	    stresstensor alpha = getalpha(MaterialParameter_in);
-        stresstensor s_bar = Stre.deviator() - (alpha *p);
-        double _s_bar_ = sqrt( (s_bar("ij")*s_bar("ij")).trace() );
-	    if (p > 0.0 && _s_bar_ > 0.0)
-		    n = s_bar * (1.0/_s_bar_);
-		DM04_YF::DM04st = n *(-p);
-	}
+    
+        stresstensor alpha = getalpha(MaterialParameter_in);
+
+	    double p = Stre.p_hydrostatic();	        
+        stresstensor s_bar = Stre.deviator() - (alpha *p);	    
+		
+		DM04_YF::DM04st = s_bar *(-p);	    
+    }
 	else {
 		cout << "DM04_YF: Invalid Input. " << endl;
 		exit (1);

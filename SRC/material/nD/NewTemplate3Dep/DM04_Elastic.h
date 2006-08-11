@@ -56,6 +56,8 @@ class DM04_Elastic : public ElasticState
     ElasticState* newObj();
     
     const BJtensor& getElasticStiffness (const MaterialParameter &MaterialParameter_in) const;
+
+    stresstensor getStress() const;    
     
   private:
   

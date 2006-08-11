@@ -26,6 +26,10 @@
 
 #include <FDdecoupledElastic3D.h>
 
+
+stresstensor FDdecoupledElastic3D::static_FDE_stress;
+
+
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 FDdecoupledElastic3D::FDdecoupledElastic3D(int tag,
                                            int classTag,
@@ -144,12 +148,12 @@ int FDdecoupledElastic3D::setTrialCIncr(const straintensor &dc)
    return this->setTrialC(this->getC() + dc);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
-const straintensor FDdecoupledElastic3D::getF(void)
+const straintensor& FDdecoupledElastic3D::getF(void)
 {
    return F;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
-const straintensor FDdecoupledElastic3D::getC(void)
+const straintensor& FDdecoupledElastic3D::getC(void)
 {
    return C;
 }
@@ -398,24 +402,23 @@ const Tensor
     return this->getTangentTensor();
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-const straintensor FDdecoupledElastic3D::getStrainTensor(void)
+const straintensor& FDdecoupledElastic3D::getStrainTensor(void)
 {
    return thisGreenStrain;
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-const stresstensor FDdecoupledElastic3D::getStressTensor(void)
+const stresstensor& FDdecoupledElastic3D::getStressTensor(void)
 {
    return thisPK2Stress;
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-const stresstensor FDdecoupledElastic3D::getPK1StressTensor(void)
+const stresstensor& FDdecoupledElastic3D::getPK1StressTensor(void)
 {
    stresstensor thisSPKStress;
-   stresstensor thisFPKStress;
 
    if ( FromForC == 0 ) {
     thisSPKStress = this->getStressTensor();
-    thisFPKStress = thisSPKStress("ij") * (F.transpose11())("jk") ;
+    FDdecoupledElastic3D::static_FDE_stress = thisSPKStress("ij") * (F.transpose11())("jk") ;
    }
 
    if ( FromForC == 1 ) {
@@ -423,17 +426,16 @@ const stresstensor FDdecoupledElastic3D::getPK1StressTensor(void)
     exit (-1);
    }
 
-    return thisFPKStress;
+    return FDdecoupledElastic3D::static_FDE_stress;
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-const stresstensor FDdecoupledElastic3D::getCauchyStressTensor(void)
+const stresstensor& FDdecoupledElastic3D::getCauchyStressTensor(void)
 {
    stresstensor thisSPKStress;
-   stresstensor thisCauchyStress;
 
    if ( FromForC == 0 ) {
     thisSPKStress = this->getStressTensor();
-    thisCauchyStress = F("ij") * thisSPKStress("jk") * (F.transpose11())("kl") * (1.0/J);
+    FDdecoupledElastic3D::static_FDE_stress = F("ij") * thisSPKStress("jk") * (F.transpose11())("kl") * (1.0/J);
    }
 
    if ( FromForC == 1 ) {
@@ -441,7 +443,7 @@ const stresstensor FDdecoupledElastic3D::getCauchyStressTensor(void)
     exit (-1);
    }
 
-    return thisCauchyStress;
+    return FDdecoupledElastic3D::static_FDE_stress;
 }
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 int FDdecoupledElastic3D::commitState (void)
@@ -514,11 +516,11 @@ const char* FDdecoupledElastic3D::getType (void) const
 {
    return "ThreeDimentionalFD";
 }
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-int FDdecoupledElastic3D::getOrder (void) const
-{
-   return 6;
-}
+////--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//int FDdecoupledElastic3D::getOrder (void) const
+//{
+//   return 6;
+//}
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 int FDdecoupledElastic3D::sendSelf (int commitTag, Channel &theChannel)
 {

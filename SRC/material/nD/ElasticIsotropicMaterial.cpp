@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $                                                              
-// $Date: 2004-02-24 20:50:58 $                                                                  
+// $Revision: 1.20 $                                                              
+// $Date: 2006-08-11 21:20:20 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
                                                                         
                                                                         
@@ -74,21 +74,6 @@ ElasticIsotropicMaterial::getRho()
 { 
   return rho ;
 }
-
-
-// Boris Jeremic (@ucdavis.edu) 19June2002
-double ElasticIsotropicMaterial::getE() 
-{ 
-  return E;
-}
-
-// Boris Jeremic (@ucdavis.edu) 19June2002
-double ElasticIsotropicMaterial::getnu() 
-{ 
-  return v;
-}
-
-
 
 NDMaterial*
 ElasticIsotropicMaterial::getCopy (const char *type)
@@ -291,27 +276,27 @@ ElasticIsotropicMaterial::getTangentTensor (void)
   return *t;
 }
 
-const stresstensor ElasticIsotropicMaterial::getStressTensor (void)
+const stresstensor& ElasticIsotropicMaterial::getStressTensor (void)
 {
   opserr << "ElasticIsotropicMaterial::getStressTensor -- subclass responsibility\n";
   exit(-1);
 
   // Just to make it compile
-  stresstensor t;
-  return t;
+  stresstensor *t = new stresstensor;
+  return *t;
 }
 
-const straintensor ElasticIsotropicMaterial::getStrainTensor (void)
+const straintensor& ElasticIsotropicMaterial::getStrainTensor (void)
 {
   opserr << "ElasticIsotropicMaterial::getStrainTensor -- subclass responsibility\n";
   exit(-1);
 
   // Just to make it compile
-  straintensor t;
-  return t;
+  straintensor *t = new straintensor;
+  return *t;
 }
 
-const straintensor ElasticIsotropicMaterial::getPlasticStrainTensor (void)
+const straintensor& ElasticIsotropicMaterial::getPlasticStrainTensor (void)
 {
   opserr << "ElasticIsotropicMaterial::getPlasticStrainTensor -- subclass responsibility\n";
   exit(-1);

@@ -24,7 +24,7 @@
 // LANGUAGE:          C++
 // TARGET OS:         
 // DESIGNER:          Zhao Cheng, Boris Jeremic
-// PROGRAMMER:        Zhao Cheng, 
+// PROGRAMMER:        Zhao Cheng, Mahdi Taiebat
 // DATE:              Fall 2005
 // UPDATE HISTORY:    
 //
@@ -37,14 +37,14 @@
 //  2- e_r:       reference void for critical state line, ec = e_r - lambda_c*(pc/Pat)^xi;
 //  3- lambda_c:  parameter for critical state line, ec = e_r - lambda_c*(pc/Pat)^xi;
 //  4- xi:        parameter for critical state line, ec = e_r - lambda_c*(pc/Pat)^xi;
-//  5- Pat:       atmospheris pressure for critical state line, ec = e0 - lambda_c*(pc/Pat)^xi;
+//  5- Pat:       atmospherics pressure for critical state line, ec = e0 - lambda_c*(pc/Pat)^xi;
 //  6- m:         parameter in the yield function;
 //  7- M:         critical state stress ration;
 //  8- cc:        tension-compression strength ratio;
 //  9- A0:        parameter;
 // 10- nd         parameter;
 // 11- alpha:     "back-stress" tensor in yield function; (the 1st tensorial internal variable);
-// 12- z:         fabric dilatancy internal tensor (the 2nd tensorial internal variable); 
+// 12- z:         fabric dilation internal tensor (the 2nd tensorial internal variable); 
 
 #ifndef DM04_PF_CPP
 #define DM04_PF_CPP
@@ -120,16 +120,14 @@ const straintensor& DM04_PF::PlasticFlowTensor(const stresstensor& Stre,
     double lambda_c = getlambda_c(MaterialParameter_in);
     double xi = getxi(MaterialParameter_in);
     double Pat = getPat(MaterialParameter_in);
-    double m = getm(MaterialParameter_in);
+    //double m = getm(MaterialParameter_in);
     double M_cal = getM_cal(MaterialParameter_in);
     double cc = getcc(MaterialParameter_in);
     double A0 = getA0(MaterialParameter_in);
     double nd = getnd(MaterialParameter_in);    
 
     stresstensor alpha = getalpha(MaterialParameter_in);
-    //alpha.print("a", " ");
     stresstensor z = getz(MaterialParameter_in);
-    //z.print("z", " ");
 
     double p = Stre.p_hydrostatic();
     stresstensor s = Stre.deviator();
@@ -137,7 +135,6 @@ const straintensor& DM04_PF::PlasticFlowTensor(const stresstensor& Stre,
     stresstensor n;
     stresstensor alpha_d;
     stresstensor alpha_d_alpha;
-    double b0 = 0.0;
     double g = 0.0;
     double ec = e_r;
     double stateParameter = 0.0;
@@ -149,30 +146,28 @@ const straintensor& DM04_PF::PlasticFlowTensor(const stresstensor& Stre,
     double C_cal = 0.0;
     double D_cal = 0.0;
     stresstensor s_bar;
-    double _s_bar_ = 0.0;
+    double lls_barll = 0.0;
     double epsilon_v = 0.0;
     double e = e0;
     double J3D;
     double cos3theta = 0.0;
-        
-    //if (p != 0.0 && m != 0.0)
-    //    n = (s * (1.0/p) - alpha) *(1.0/(sqrt(2.0/3.0)*m));
-    
-    s_bar = Stre.deviator() - (alpha *p);
-    _s_bar_ = sqrt( (s_bar("ij")*s_bar("ij")).trace() );
-    if (_s_bar_ != 0.0)
-        n = s_bar * (1.0/_s_bar_);
-   
-    //double J2D = n.Jinvariant2();
-    //J3D = n.Jinvariant3();
-    //if ( J2D != 0.0)
-      //cos3theta = -1.5*sqrt(3.0) *J3D / pow(J2D, 1.5);  
-    
+            
+    s_bar = s - (alpha *p);
+    lls_barll = sqrt( (s_bar("ij")*s_bar("ij")).trace() );
+    if (p > 0.0 && lls_barll > 0.0)
+        n = s_bar * (1.0/lls_barll);
+       
     J3D = n.Jinvariant3();
     cos3theta = -3.0*sqrt(6.0) *J3D;
+
+    if (p <= 0.0)
+      cos3theta = 1.0;
     
-    if (cos3theta > 1.0) cos3theta = 1.0;
-    if (cos3theta < -1.0) cos3theta = -1.0;
+    if (cos3theta > 1.0) 
+      cos3theta = 1.0;
+
+    if (cos3theta < -1.0) 
+      cos3theta = -1.0;
     
     g = getg(cc, cos3theta);
 
@@ -185,16 +180,21 @@ const straintensor& DM04_PF::PlasticFlowTensor(const stresstensor& Stre,
     stateParameter = e - ec;
     
     expnd = exp( nd *stateParameter );
-    ad = sqrt(2.0/3.0) * ( g *M_cal *expnd - m);
-    alpha_d  = n *ad;
-    alpha_d_alpha = alpha_d - alpha;
     
+    // Just using another way
+    //ad = sqrt(2.0/3.0) * ( g *M_cal *expnd - m);
+    //D_cal = ad - (alpha("ij")*n("ij")).trace();
+
+    // Replacing the above
+    ad = sqrt(2.0/3.0) * g *M_cal *expnd;  
+    D_cal = ad - (s("ij")*n("ij")).trace() / p;
+
     z_n = (z("ij")*n("ij")).trace();
     if (z_n < 0.0) 
       z_n = 0.0;
     A_d = A0 * (1.0 + z_n);
-
-    D_cal = (alpha_d_alpha("ij")*n("ij")).trace() *A_d;
+     
+    D_cal *= (-A_d);
 
     B_cal = 1.0 + 1.5 *((1.0-cc)/cc) *g *cos3theta;
     C_cal = 3.0 *sqrt(1.5) *((1.0-cc)/cc) *g;
@@ -202,9 +202,9 @@ const straintensor& DM04_PF::PlasticFlowTensor(const stresstensor& Stre,
     stresstensor n_n = n("ik")*n("kj");
         n_n.null_indices();
 
-    // note diffrent 'positive-negtive' since we assume extension (dilatant) positive 
-    // which is diffrenet from the Ref. 
-    DM04m = (n *B_cal) + (n_n *C_cal) + (KroneckerI *(( - C_cal - D_cal)/3.0));
+    // note different 'positive-negative' since we assume extension (dilation) positive 
+    // which is different from the Ref. 
+    DM04m = (n *B_cal) + (n_n *C_cal) + (KroneckerI *(( - C_cal + D_cal)/3.0));
     
                        
     return DM04m;

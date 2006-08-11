@@ -1,4 +1,4 @@
-//===============================================================================
+//========================================================================
 //# COPYRIGHT (C): Woody's license (by BJ):
 //                 ``This    source  code is Copyrighted in
 //                 U.S.,  for  an  indefinite  period,  and anybody
@@ -31,13 +31,6 @@
 
 #include <ElasticIsotropicMaterial.h>
 
-#include <Matrix.h>
-#include <Vector.h>
-#include <ID.h>
-
-#include <straint.h>
-#include <stresst.h>
-#include <Tensor.h>
 #include <Channel.h>
 
 
@@ -54,25 +47,18 @@ class PressureDependentElastic3D : public ElasticIsotropicMaterial
     PressureDependentElastic3D ();
     ~PressureDependentElastic3D ();
 
-
     const char *getClassType(void) const {return "PressureDependentElastic";};
-
-    int setTrialStrain (const Vector &v);
-    int setTrialStrain (const Vector &v, const Vector &r);
-    int setTrialStrainIncr (const Vector &v);
-    int setTrialStrainIncr (const Vector &v, const Vector &r);
-    const Matrix &getTangent (void);
-    const Vector &getStress (void);
-    const Vector &getStrain (void);
 
     int setTrialStrain (const Tensor &v);
     int setTrialStrain (const Tensor &v, const Tensor &r);
     int setTrialStrainIncr (const Tensor &v);
     int setTrialStrainIncr (const Tensor &v, const Tensor &r);
     const Tensor &getTangentTensor (void);
-    const stresstensor getStressTensor (void);
-    const straintensor getStrainTensor (void);
-    const straintensor getPlasticStrainTensor (void);
+    const stresstensor& getStressTensor (void);
+    const straintensor& getStrainTensor (void);
+    
+    // For elastoplastic material model
+    int setStressTensor(const Tensor& stressIn);
 
     int commitState (void);
     int revertToLastCommit (void);
@@ -80,33 +66,31 @@ class PressureDependentElastic3D : public ElasticIsotropicMaterial
 
     NDMaterial *getCopy (void);
     const char *getType (void) const;
-    int getOrder (void) const;
+    //int getOrder (void) const;
 
     int sendSelf(int commitTag, Channel &theChannel);
-    int recvSelf(int commitTag, Channel &theChannel,
-    FEM_ObjectBroker &theBroker);
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
 
     void Print(OPS_Stream &s, int flag =0);
-    void ComputeElasticStiffness(void);
 
   //Private functions
   private:
-
+    const Tensor& ComputeElasticStiffness(void);
 
   protected:
 
   private:
-    static Vector sigma;  // Stress vector
-    static Matrix D;    // Elastic constants
-    Vector epsilon;    // Strain vector
+    double exp0;                 // exponent usually 0.6
+    double p_ref;                // Reference pressure, usually atmosphere pressure, i.e. 100kPa
+    double p_cutoff;             // Cutoff pressure of this material point
 
-    double exp;                 // exponent usually 0.6
-    double p_ref;               // Reference pressure, usually atmosphere pressure, i.e. 100kPa
-    double p_cutoff;            // Cutoff pressure of this material point
-
-    stresstensor Stress;  // Stress tensor
-    Tensor Dt;      // Elastic constants tensor
-    straintensor Strain;  // Strain tensor
-
+    static stresstensor Stress;  // Stress tensor
+    static Tensor Dt;            // Elastic constants tensor
+    straintensor Strain;         // Strain tensor
+    
+    stresstensor CStrain;
+    stresstensor CStress;
 };
+
 #endif
+

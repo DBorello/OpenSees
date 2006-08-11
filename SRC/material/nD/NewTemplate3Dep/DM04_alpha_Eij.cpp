@@ -24,7 +24,7 @@
 // LANGUAGE:          C++
 // TARGET OS:         
 // DESIGNER:          Zhao Cheng, Boris Jeremic
-// PROGRAMMER:        Zhao Cheng, 
+// PROGRAMMER:        Zhao Cheng, Mahdi Taiebat
 // DATE:              Fall 2005
 // UPDATE HISTORY:    
 //
@@ -37,7 +37,7 @@
 //  2- e_r:       reference void for critical state line, ec = e_r - lambda_c*(pc/Pat)^xi;
 //  3- lambda_c:  parameter for critical state line, ec = e_r - lambda_c*(pc/Pat)^xi;
 //  4- xi:        parameter for critical state line, ec = e_r - lambda_c*(pc/Pat)^xi;
-//  5- Pat:       atmospheris pressure for critical state line, ec = e0 - lambda_c*(pc/Pat)^xi;
+//  5- Pat:       atmospherics pressure for critical state line, ec = e0 - lambda_c*(pc/Pat)^xi;
 //  6- m:         parameter in the yield function;
 //  7- M:         critical state stress ration;
 //  8- cc:        tension-compression strength ratio;
@@ -46,7 +46,7 @@
 // 11- ch:        parameter;
 // 12- G0:        parameter in the elastic part
 // 13- alpha:     "back-stress ratio" tensor in yield function; (the 1st tensorial internal variable);
-// 14- z:         fabric dilatancy internal tensor (the 2nd tensorial internal variable); 
+// 14- z:         fabric dilation internal tensor (the 2nd tensorial internal variable); 
 
 #ifndef DM04_alpha_Eij_CPP
 #define DM04_alpha_Eij_CPP
@@ -86,7 +86,7 @@ DM04_alpha_Eij::DM04_alpha_Eij(int e0_index_in,
 {
    a_index = 0;
    stresstensor zT;
-   alpha_in = zT;
+   alpha_in.Initialize(zT);
 }
 
 TensorEvolution* DM04_alpha_Eij::newObj()
@@ -150,30 +150,25 @@ const straintensor& DM04_alpha_Eij::Hij(const straintensor& plastic_flow, const 
     double cos3theta = 0.0;
     
     double e = e0 + (1.0 + e0) *Stra.Iinvariant1();
-
-    //if (p != 0.0 && m != 0.0)
-    //    n = (s * (1.0/p) - alpha) *(1.0/(sqrt(2.0/3.0)*m));
     
     s_bar = Stre.deviator() - (alpha *p);
     _s_bar_ = sqrt( (s_bar("ij")*s_bar("ij")).trace() );
-    //cout << "_s_bar_ = " << _s_bar_ << endl;
-    if (_s_bar_ > 0.0)
+    if (p > 0.0 && _s_bar_ > 0.0)
         n = s_bar * (1.0/_s_bar_);
-
-    //double J2D = n.Jinvariant2();
-    //J3D = n.Jinvariant3();
-    //if ( J2D != 0.0)
-      //cos3theta = -1.5*sqrt(3.0) *J3D / pow(J2D, 1.5);  
     
     J3D = n.Jinvariant3();
     cos3theta = -3.0*sqrt(6.0) *J3D;
-    //cout << "cos3theta = " << cos3theta << endl;
 
-    if (cos3theta > 1.0) cos3theta = 1.0;
-    if (cos3theta < -1.0) cos3theta = -1.0;
+    if (p <= 0.0)
+      cos3theta = 1.0;
+    
+    if (cos3theta > 1.0) 
+      cos3theta = 1.0;
+
+    if (cos3theta < -1.0) 
+      cos3theta = -1.0;
 
     g = getg(cc, cos3theta);
-    //cout << "g = " << g << endl;
     
     if ( (p/Pat) >= 0.0 )
       ec = getec(e_r, lambda_c, xi, Pat, p);
@@ -181,18 +176,24 @@ const straintensor& DM04_alpha_Eij::Hij(const straintensor& plastic_flow, const 
     stateParameter = e - ec;
 
     expnb = exp( -nb *stateParameter );
-    ab = sqrt(2.0/3.0) * ( g *M_cal *expnb - m);
-    alpha_b  = n *ab;
-    alpha_b_alpha = alpha_b - alpha;
+    
+    // Using the other equation
+    //ab = sqrt(2.0/3.0) * ( g *M_cal *expnb - m);
+    //alpha_b = n *ab;
+    //alpha_b_alpha = alpha_b - alpha;
+    
+    // Replacing the above equation
+    ab = sqrt(2.0/3.0) * g *M_cal *expnb;
+    alpha_b_alpha = n *ab - s *(1.0/p);
+
     
     if ( (p/Pat) >= 0.01 )
       b0 = G0 *h0 *(1.0-ch*e) *pow(p/Pat, -0.5);
     else
       b0 = G0 *h0 *(1.0-ch*e) *10.0;
-    //cout << "b0 = " << b0 << endl;
 
     if (a_index == 0) {
-        alpha_in = alpha;
+        alpha_in.Initialize(alpha);
         a_in = 0.0;
         a_index = 1;
         h = 1.0e10 * b0;
@@ -200,8 +201,10 @@ const straintensor& DM04_alpha_Eij::Hij(const straintensor& plastic_flow, const 
     else {
         alpha_alpha_in = alpha - alpha_in;
         a_in = (alpha_alpha_in("ij")*n("ij")).trace();
-        if ( a_in < 0.0 )
+        if ( a_in < 0.0 ) {
             a_index = 0;
+            alpha_in.Initialize(alpha);
+        }
         if ( a_in < 1.0e-10 )
             a_in = 1.0e-10;
         h = b0 /a_in;

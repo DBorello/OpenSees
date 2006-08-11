@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2006-08-04 18:18:37 $
+// $Revision: 1.12 $
+// $Date: 2006-08-11 21:20:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.h,v $
                                                                         
                                                                         
@@ -46,6 +46,9 @@
 #include <ID.h>
 
 #include <Tensor.h>
+#include <stresst.h>
+#include <straint.h>
+
 
 class ElasticIsotropicMaterial : public NDMaterial
 {
@@ -64,9 +67,6 @@ class ElasticIsotropicMaterial : public NDMaterial
     virtual const char *getClassType(void) const {return "ElasticIsotropicMaterial";};
 
     virtual double getRho( ) ;
-    // BJ added 19June2002
-    double getE( ) ;
-    double getnu( ) ;
 
     virtual int setTrialStrain (const Vector &v);
     virtual int setTrialStrain (const Vector &v, const Vector &r);
@@ -82,9 +82,9 @@ class ElasticIsotropicMaterial : public NDMaterial
     int setTrialStrainIncr (const Tensor &v);
     int setTrialStrainIncr (const Tensor &v, const Tensor &r);
     const Tensor &getTangentTensor (void);
-    const stresstensor getStressTensor (void);
-    const straintensor getStrainTensor (void);
-    const straintensor getPlasticStrainTensor (void);
+    const stresstensor& getStressTensor (void);
+    const straintensor& getStrainTensor (void);
+    const straintensor& getPlasticStrainTensor (void);
     
     
     virtual int commitState (void);

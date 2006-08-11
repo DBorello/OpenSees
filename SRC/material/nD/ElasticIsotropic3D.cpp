@@ -21,7 +21,7 @@
 //#
 //# DATE:              10Oct2000
 //# UPDATE HISTORY:    22Nov2002 small fixes 
-//#
+//#                    Aug2006   Z.Cheng
 //#
 //===============================================================================
                                                                         
@@ -30,12 +30,14 @@
 
 Matrix ElasticIsotropic3D::D(6,6);	  // global for ElasticIsotropic3D only
 Vector ElasticIsotropic3D::sigma(6);	 // global for ElasticIsotropic3D onyl
+
+Tensor ElasticIsotropic3D::Dt(4, def_dim_4, 0.0);
 stresstensor ElasticIsotropic3D::Stress;
 
 ElasticIsotropic3D::ElasticIsotropic3D
 (int tag, double E, double nu, double rho):
  ElasticIsotropicMaterial (tag, ND_TAG_ElasticIsotropic3D, E, nu, rho),
- epsilon(6) , Dt(0)
+ epsilon(6) 
 {
 	// Set up the elastic constant matrix for 3D elastic isotropic 
 	D.Zero();
@@ -43,15 +45,14 @@ ElasticIsotropic3D::ElasticIsotropic3D
 
 ElasticIsotropic3D::ElasticIsotropic3D():
  ElasticIsotropicMaterial (0, ND_TAG_ElasticIsotropic3D, 0.0, 0.0, 0.0),
- epsilon(6), Dt(0)
+ epsilon(6)
 {
 
 }
 
 ElasticIsotropic3D::~ElasticIsotropic3D ()
 {
-  if (Dt != 0)
-    delete Dt;
+
 }
 
 int
@@ -88,26 +89,6 @@ ElasticIsotropic3D::setTrialStrainIncr (const Vector &v, const Vector &r)
 
 const Matrix&
 ElasticIsotropic3D::getTangent (void)
-{
-   double mu2 = E/(1.0+v);
-   double lam = v*mu2/(1.0-2.0*v);
-   double mu  = 0.50*mu2;
-
-   mu2 += lam;
-
-   D(0,0) = D(1,1) = D(2,2) = mu2;
-   D(0,1) = D(1,0) = lam;
-   D(0,2) = D(2,0) = lam;
-   D(1,2) = D(2,1) = lam;
-   D(3,3) = mu;
-   D(4,4) = mu;
-   D(5,5) = mu;
-
-   return D;
-}
-
-const Matrix&
-ElasticIsotropic3D::getInitialTangent (void)
 {
    double mu2 = E/(1.0+v);
    double lam = v*mu2/(1.0-2.0*v);
@@ -190,36 +171,22 @@ ElasticIsotropic3D::setTrialStrainIncr (const Tensor &v, const Tensor &r)
 const Tensor&
 ElasticIsotropic3D::getTangentTensor (void)
 {
-  if (Dt == 0) {
-    Dt = new tensor( 4, def_dim_4, 0.0 ); 
-    setInitElasticStiffness();
-  }
-  return *Dt;
+  setInitElasticStiffness();  
+  return Dt;
 }
 
-const stresstensor
+const stresstensor&
 ElasticIsotropic3D::getStressTensor (void)
 {
-  if (Dt == 0) {
-    Dt = new tensor( 4, def_dim_4, 0.0 ); 
-    setInitElasticStiffness();
-  }
-  Stress = (*Dt)("ijkl") * Strain("kl");
+  setInitElasticStiffness();
+  Stress = Dt("ijkl") * Strain("kl");
   return Stress;
 }
 
-const straintensor
+const straintensor&
 ElasticIsotropic3D::getStrainTensor (void)
 {
     return Strain;
-}
-
-const straintensor
-ElasticIsotropic3D::getPlasticStrainTensor (void)
-{
-    //Return zero straintensor
-    straintensor t;
-    return t;
 }
 
 int
@@ -276,14 +243,11 @@ ElasticIsotropic3D::Print(OPS_Stream &s, int flag)
 
 //================================================================================
 void ElasticIsotropic3D::setInitElasticStiffness(void)
-{    
-    tensor ret( 4, def_dim_4, 0.0 );
-    				       
+{        				       
     // Kronecker delta tensor
     tensor I2("I", 2, def_dim_2);
 
     tensor I_ijkl = I2("ij")*I2("kl");
-
 
     //I_ijkl.null_indices();
     tensor I_ikjl = I_ijkl.transpose0110();
@@ -291,10 +255,7 @@ void ElasticIsotropic3D::setInitElasticStiffness(void)
     tensor I4s = (I_ikjl+I_iljk)*0.5;
     
     // Building elasticity tensor
-    ret = I_ijkl*( E*v / ( (1.0+v)*(1.0 - 2.0*v) ) ) + I4s*( E / (1.0 + v) );
-    
-    //ret.print();
-    *Dt = ret;
+    Dt = I_ijkl*( E*v / ( (1.0+v)*(1.0 - 2.0*v) ) ) + I4s*( E / (1.0 + v) );
 
     return;
 

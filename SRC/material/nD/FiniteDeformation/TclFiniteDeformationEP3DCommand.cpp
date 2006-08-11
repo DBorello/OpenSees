@@ -203,28 +203,20 @@ fdYield *EvaluatefdYield(ClientData clientData, Tcl_Interp *interp, TCL_Char *tc
   //
   else if ((strcmp(argv[0],"-DP") == 0) || (strcmp(argv[0],"-dp") == 0) ) {
     double FrictionAng_in = 0.0;
-    double Cohension_in = 0.0;
-    int ConeIndex_in = 0;
+    double k_in = 0.0;
 
     if (argc >= 3) {
       if (Tcl_GetDouble(interp, argv[1], &FrictionAng_in) != TCL_OK) {
         opserr << "Warning: nDMaterial FDEP3D - invalid Friction Angle " << argv[1] << "\n";
         exit (-1);
       }
-      if (Tcl_GetDouble(interp, argv[2], &Cohension_in) != TCL_OK) {
+      if (Tcl_GetDouble(interp, argv[2], &k_in) != TCL_OK) {
         opserr << "Warning: nDMaterial FDEP3D - invalid Conhesion " << argv[2] << "\n";
         exit (-1);
       }
     }   
 
-    if (argc == 4) {
-      if (Tcl_GetInt(interp, argv[3], &ConeIndex_in) != TCL_OK) {
-        opserr << "Warning: nDMaterial FDEP3D - invalid Cone Index " << argv[1] << "\n";
-        exit (-1);
-      }
-    } 
-
-    fdY = new fdYieldDP(FrictionAng_in, Cohension_in, ConeIndex_in);
+    fdY = new fdYieldDP(FrictionAng_in, k_in);
   }
 
   else {
@@ -274,28 +266,20 @@ fdFlow *EvaluatefdFlow(ClientData clientData, Tcl_Interp *interp, TCL_Char *tclS
   //
   else if ((strcmp(argv[0],"-DP") == 0) || (strcmp(argv[0],"-dp") == 0) ) {
     double DilatedAngle_in = 0.0;
-    double Cohesion_in = 0.0;
-    int ConeIndex_in = 0;
+    double k_in = 0.0;
 
     if (argc >= 3) {
       if (Tcl_GetDouble(interp, argv[1], &DilatedAngle_in) != TCL_OK) {
         opserr << "Warning: nDMaterial FDEP3D - invalid Dilated Angle " << argv[1] << "\n";
         exit (-1);
       }
-      if (Tcl_GetDouble(interp, argv[2], &Cohesion_in) != TCL_OK) {
+      if (Tcl_GetDouble(interp, argv[2], &k_in) != TCL_OK) {
         opserr << "Warning: nDMaterial FDEP3D - invalid Conhesion " << argv[2] << "\n";
         exit (-1);
       }
     }   
 
-    if (argc == 4) {
-      if (Tcl_GetInt(interp, argv[3], &ConeIndex_in) != TCL_OK) {
-        opserr << "Warning: nDMaterial FDEP3D - invalid Cone Index " << argv[3] << "\n";
-        exit (-1);
-      }
-    } 
-
-    fdF = new fdFlowDP(DilatedAngle_in, Cohesion_in, ConeIndex_in);
+    fdF = new fdFlowDP(DilatedAngle_in, k_in);
   }
 
   else {

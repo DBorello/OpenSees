@@ -29,12 +29,15 @@
 
 #include "FiniteDeformationEP3D.h"
 
-const int    Max_Iter  = 40;
-const double tolerance = 1.0e-8;
+const int    Max_Iter  = 30;
+const double tolerance = 1.0e-6;
 
 tensor tensorZ2(2, def_dim_2, 0.0);
 tensor tensorI2("I", 2, def_dim_2);
 tensor tensorZ4(4, def_dim_4, 0.0);
+
+stresstensor FiniteDeformationEP3D::static_stress;
+straintensor FiniteDeformationEP3D::static_strain;
 
 //Constructor 00----------------------------------------------------------------------------------
 FiniteDeformationEP3D::FiniteDeformationEP3D()
@@ -246,7 +249,7 @@ double FiniteDeformationEP3D::getRho(void)
 //----------------------------------------------------------------------
 int FiniteDeformationEP3D::setTrialF(const straintensor &f)
 {
-        F = f;
+    F.Initialize(f);
 
 	// Choose One:
 	//return ImplicitAlgorithm();
@@ -257,7 +260,7 @@ int FiniteDeformationEP3D::setTrialF(const straintensor &f)
 //----------------------------------------------------------------------
 int FiniteDeformationEP3D::setTrialFIncr(const straintensor &df)
 {
-        return this->setTrialF(this->getF() + df);
+    return this->setTrialF(this->getF() + df);
 }
 
 //----------------------------------------------------------------------
@@ -267,27 +270,30 @@ const tensor& FiniteDeformationEP3D::getTangentTensor(void)
 }
 
 //----------------------------------------------------------------------
-const straintensor FiniteDeformationEP3D::getStrainTensor(void)
+const straintensor& FiniteDeformationEP3D::getStrainTensor(void)
 {
 	return iniGreen;
 }
 
 //----------------------------------------------------------------------
-const stresstensor FiniteDeformationEP3D::getStressTensor(void)
+const stresstensor& FiniteDeformationEP3D::getStressTensor(void)
 {
 	return iniPK2;
 }
 
 //----------------------------------------------------------------------
-const straintensor FiniteDeformationEP3D::getF(void)
+const straintensor& FiniteDeformationEP3D::getF(void)
 {
 	return F;
 }
 
 //----------------------------------------------------------------------
-const straintensor FiniteDeformationEP3D::getFp(void)
+const straintensor& FiniteDeformationEP3D::getFp(void)
 {
-	return fdeps->getFpInVar();
+	straintensor fpp = fdeps->getFpInVar();
+	static_strain.Initialize(fpp);
+    
+	return static_strain;
 }
 
 //----------------------------------------------------------------------
@@ -352,11 +358,11 @@ const char* FiniteDeformationEP3D::getType (void) const
 }
   
 
-//----------------------------------------------------------------------
-int FiniteDeformationEP3D::getOrder (void) const
-{
-	return 6;	
-}
+////----------------------------------------------------------------------
+//int FiniteDeformationEP3D::getOrder (void) const
+//{
+//	return 6;	
+//}
 
 //----------------------------------------------------------------------
 int FiniteDeformationEP3D::sendSelf(int commitTag, Channel &theChannel)
@@ -379,9 +385,28 @@ void FiniteDeformationEP3D::Print(OPS_Stream &s, int flag)
 }
 
 //----------------------------------------------------------------------
-const stresstensor FiniteDeformationEP3D::getCauchyStressTensor(void)
+const stresstensor& FiniteDeformationEP3D::getPK1StressTensor(void)
 {
-	return cauchystress;
+   stresstensor thisSPKStress;
+
+   thisSPKStress = this->getStressTensor();   
+   static_stress = F("kJ") * thisSPKStress("IJ");
+
+   return static_stress;
+}
+
+//----------------------------------------------------------------------
+const stresstensor& FiniteDeformationEP3D::getCauchyStressTensor(void)
+{
+   stresstensor thisSPKStress;
+   double JJ = F.determinant();
+
+   thisSPKStress = this->getStressTensor();
+   static_stress = F("iK") * thisSPKStress("JK"); 
+   static_stress = static_stress("iJ") * F("mJ");
+   static_stress = static_stress *(1.0/JJ);
+   
+   return static_stress;
 }
 	
 //----------------------------------------------------------------------
@@ -931,12 +956,12 @@ int FiniteDeformationEP3D::ImplicitAlgorithm()
 	iter_counter++;
 	
 	if ( iter_counter > Max_Iter ) {
-	  opserr << "Stop: Iteration More than " << Max_Iter;
+	  opserr << "Warnning: Iteration More than " << Max_Iter;
 	  opserr << " in return mapping algorithm of FD EP model" << "\n";
-	  exit (-1);
+	  //exit (-1);
 	}
 
-      } while ( yieldfun > fdy->getTolerance() || residual > tolerance ); // end of do - while
+      } while ( yieldfun > fdy->getTolerance() || residual > tolerance && iter_counter < Max_Iter ); // end of do - while
 
       // For Numerical stability
       D_gamma *= (1.0 - tolerance);  
@@ -967,7 +992,7 @@ int FiniteDeformationEP3D::ImplicitAlgorithm()
 
       //Begin, Evaluate \hat{C}^{11}
       tensorTemp6 = A11("klmn") *MCtensor("mn"); 
-	tensorTemp6.null_indices();
+	    tensorTemp6.null_indices();
       tensorTemp7  = A12 *nscalar;
       tensorTemp0 = tensorTemp6 + tensorTemp7;
       if ( fdEvolutionT ) {
@@ -986,14 +1011,14 @@ int FiniteDeformationEP3D::ImplicitAlgorithm()
 	
       //Begin, Evaluate \hat{C}^{21}
       tensorTemp6 = A21("mn") *MCtensor("mn"); 
-	tensorTemp6.null_indices();
+	    tensorTemp6.null_indices();
       temp1 = tensorTemp6.trace();
       temp4 = temp1 + a22 *nscalar;
       if ( fdEvolutionT ) {
         tensorTemp8 = A23("mn") *ntensor("mn"); 
 	  tensorTemp8.null_indices();
-	temp3 = tensorTemp8.trace();
-        temp4 += temp3;
+	  temp3 = tensorTemp8.trace();
+      temp4 += temp3;
       }
       tensorTemp0 = tensorTemp4 *temp4;      
       tensorTemp2 = A21 - tensorTemp0*(1.0/temp5);
@@ -1088,11 +1113,11 @@ int FiniteDeformationEP3D::ImplicitAlgorithm()
       iniGreen.null_indices();
     iniGreen = (iniGreen - tensorI2) * 0.5;
 
-    cauchystress = Fe("ip")*B_PK2("pq");
-      cauchystress.null_indices();
-    cauchystress = cauchystress("iq")*Fe("jq");
-      cauchystress.null_indices();
-    cauchystress = cauchystress*(1.0/F.determinant());
+    //cauchystress = Fe("ip")*B_PK2("pq");
+    //  cauchystress.null_indices();
+    //cauchystress = cauchystress("iq")*Fe("jq");
+    //  cauchystress.null_indices();
+    //cauchystress = cauchystress*(1.0/F.determinant());
 
     return 0;    
 }
@@ -1298,12 +1323,12 @@ int FiniteDeformationEP3D::SemiImplicitAlgorithm()
 	iter_counter++;
 	
 	if ( iter_counter > Max_Iter ) {
-	  opserr << "Stop: Iteration More than " << Max_Iter;
+	  opserr << "Warnning: Iteration More than " << Max_Iter;
 	  opserr << " in return mapping algorithm of FD EP model" << "\n";
-	  exit (-1);
+	  //exit (-1);
 	}
 
-      } while ( yieldfun > fdy->getTolerance() ); // end of do - while
+      } while ( yieldfun > fdy->getTolerance() && iter_counter < Max_Iter); // end of do - while
 
       //// For Numerical stability
       //D_gamma *= (1.0 - tolerance);      
@@ -1393,11 +1418,11 @@ int FiniteDeformationEP3D::SemiImplicitAlgorithm()
       iniGreen.null_indices();
     iniGreen = (iniGreen - tensorI2) * 0.5;
 
-    cauchystress = Fe("ip") * B_PK2("pq");
-      cauchystress.null_indices();
-    cauchystress = cauchystress("iq") * Fe("jq");
-      cauchystress.null_indices();
-    cauchystress = cauchystress * (1.0/F.determinant());
+    //cauchystress = Fe("ip") * B_PK2("pq");
+    //  cauchystress.null_indices();
+    //cauchystress = cauchystress("iq") * Fe("jq");
+    //  cauchystress.null_indices();
+    //cauchystress = cauchystress * (1.0/F.determinant());
 		    
     return 0;  
 }

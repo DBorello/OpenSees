@@ -23,8 +23,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.17 $
-// $Date: 2006-08-04 18:18:00 $
+// $Revision: 1.18 $
+// $Date: 2006-08-11 21:21:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.h,v $
 
 
@@ -62,11 +62,6 @@ class NDMaterial : public Material
 
     // methods to set state and retrieve state using Matrix and Vector classes
     virtual double getRho(void);
-// BJ added 19June2002
-    virtual double getE(void);
-    virtual double getnu(void);
-    virtual double getpsi(void);
-
 
     virtual int setTrialStrain(const Vector &v);
     virtual int setTrialStrain(const Vector &v, const Vector &r);
@@ -87,23 +82,22 @@ class NDMaterial : public Material
     virtual int setTrialStrain(const Tensor &v, const Tensor &r);
     virtual int setTrialStrainIncr(const Tensor &v);
     virtual int setTrialStrainIncr(const Tensor &v, const Tensor &r);
-    virtual const Tensor &getTangentTensor(void);
-    virtual const stresstensor getStressTensor(void);
-    virtual const straintensor getStrainTensor(void);
+    virtual const Tensor& getTangentTensor(void);
+    virtual const stresstensor& getStressTensor(void);
+    virtual const straintensor& getStrainTensor(void);
     //Added Joey Aug. 13, 2001
-    virtual const straintensor getPlasticStrainTensor(void);
+    virtual const straintensor& getPlasticStrainTensor(void);
 
-//Zhao (zcheng@ucdavis.edu)
 // added Sept 22 2003 for Large Deformation, F is the Deformation Gradient
     virtual int setTrialF(const straintensor &f);
     virtual int setTrialFIncr(const straintensor &df);
     virtual int setTrialC(const straintensor &c);
     virtual int setTrialCIncr(const straintensor &dc);
-    virtual const stresstensor getPK1StressTensor(void);
-    virtual const stresstensor getCauchyStressTensor(void);
-    virtual const straintensor getF(void);
-    virtual const straintensor getC(void);
-    virtual const straintensor getFp(void);
+    virtual const stresstensor& getPK1StressTensor(void);
+    virtual const stresstensor& getCauchyStressTensor(void);
+    virtual const straintensor& getF(void);
+    virtual const straintensor& getC(void);
+    virtual const straintensor& getFp(void);
 // Only For Large Deformation, END////////////////////////////////////////
 
     virtual int commitState(void) = 0;
@@ -114,7 +108,7 @@ class NDMaterial : public Material
     virtual NDMaterial *getCopy(const char *code) = 0;
 
     virtual const char *getType(void) const = 0;
-    virtual int getOrder(void) const = 0;
+    virtual int getOrder(void) const {return 0;};  //??
 
     virtual Response *setResponse (const char **argv, int argc, 
 				   Information &matInformation, 

@@ -26,7 +26,7 @@
 // DESIGNER:          Zhao Cheng, Boris Jeremic
 // PROGRAMMER:        Zhao Cheng, 
 // DATE:              Fall 2005
-// UPDATE HISTORY:    
+// UPDATE HISTORY:    06/2006, add functions for matrix based elements, CZ
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -37,6 +37,8 @@
 #include <stresst.h>
 #include <straint.h>
 #include <BJtensor.h>
+#include <Matrix.h>
+#include <Vector.h>
 #include <iostream.h>
 
 #include <NDMaterial.h>
@@ -75,18 +77,29 @@ public:
     
     ~NewTemplate3Dep(void);
 
+    const char *getClassType(void) const {return "NewTemplate3Dep";};
+
+    // methods to set and retrieve state using the Matrix class, added 06/2006
+    int setTrialStrain (const Vector &v);
+    int setTrialStrain (const Vector &v, const Vector &r);
+    int setTrialStrainIncr (const Vector &v);
+    int setTrialStrainIncr (const Vector &v, const Vector &r);
+    const Matrix &getTangent (void);
+    const Vector &getStress (void);
+    const Vector &getStrain (void);
+
+
     // methods to set and retrieve state using the Tensor class    
     int setTrialStrain(const Tensor& v);
     int setTrialStrain(const Tensor& v, const Tensor& r);    
     int setTrialStrainIncr(const Tensor& v);
     int setTrialStrainIncr(const Tensor& v, const Tensor& r);
-    
-    double getRho();
-
     const BJtensor& getTangentTensor(void);
     const stresstensor& getStressTensor(void);
     const straintensor& getStrainTensor(void);
     const straintensor& getPlasticStrainTensor(void);
+    
+    double getRho();
 
     int commitState(void);
     int revertToLastCommit(void);
@@ -101,13 +114,12 @@ public:
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
 
     void Print(OPS_Stream& s, int flag =0);
-    //friend OPS_Stream& operator<< (OPS_Stream& os, const NewTemplate3Dep& MP);                                              
   
 private:
 
     int ForwardEuler(const straintensor& strain_incr);
     int SemiImplicit(const straintensor& strain_incr);
-    int BackwardEuler(const straintensor& strain_incr); 
+    int BackwardEuler(const straintensor& strain_incr);
 
     int PredictorEPState(const straintensor& strain_incr);
     stresstensor yield_surface_cross(const stresstensor& start_stress, 
@@ -141,6 +153,19 @@ private:
     TensorEvolution   **pointer_tensor_evolution;
     
     int caseIndex;
+    
+    static const  straintensor ZeroStrain;
+    static const  stresstensor ZeroStress;
+    static const  BJtensor ZeroI4;
+    static const int ISMAX;
+    static const int ITMAX;
+    static const double TOL;
+    static const double FTOL;
+
+    // For Matrix based elements
+    static Vector sigma; 
+    static Matrix D;
+    static Vector epsilon;
 };
 
 #endif

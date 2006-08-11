@@ -86,10 +86,10 @@ public:
 
   const Tensor& getTangentTensor(void) ;
 
-  const  straintensor getStrainTensor(void) ;  // Default Green Strain
-  const  stresstensor getStressTensor(void) ;  // Default 2nd Piola Kirchhoff Stress
-  const  straintensor getF(void);
-  const  straintensor getFp(void);
+  const  straintensor& getStrainTensor(void) ;  // Default Green Strain
+  const  stresstensor& getStressTensor(void) ;  // Default 2nd Piola Kirchhoff Stress
+  const  straintensor& getF(void);
+  const  straintensor& getFp(void);
 
   int commitState(void) ;
   int revertToLastCommit(void) ;
@@ -99,14 +99,15 @@ public:
   NDMaterial *getCopy (const char *type);
 
   const char *getType (void) const;
-  int getOrder (void) const;
+  //int getOrder (void) const;
 
   int sendSelf(int commitTag, Channel &theChannel);
   int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
 
   void Print(OPS_Stream &s, int flag);
 
-  const  stresstensor getCauchyStressTensor(void);
+  const  stresstensor& getCauchyStressTensor(void);
+  const  stresstensor& getPK1StressTensor(void) ;
   
 private:
 
@@ -137,9 +138,13 @@ private:
   
   stresstensor B_PK2;
   straintensor Fe;
-  stresstensor cauchystress;
+  //stresstensor cauchystress;
   
   FDEPState *fdeps;
+  
+  static stresstensor static_stress; //Only for reference return
+  static straintensor static_strain; //Only for reference return
+
 
 };
 

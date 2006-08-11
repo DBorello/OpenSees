@@ -32,29 +32,27 @@
 class fdFlowDP : public fdFlow
 {
   private:
-    double DilatedAngle;
-    double Cohesion;
-    int ConeIndex;
-    double k1;
-    double k2;
+    double dilation;
+    double k;
+  
   public:
-    fdFlowDP(double DilatedAngle_in, double Cohesion_in, int ConeIndex_in = 0);
+    fdFlowDP(double dilation_in, double k_in);
     // virtual ~fdFlowDP() {}; 
     
     fdFlow *newObj();   
 
     stresstensor dFods(const stresstensor &sts, const FDEPState &fdepstate ) const ; 
     double dFodq(const stresstensor &sts, const FDEPState &fdepstate ) const;	    
-    stresstensor dFoda(const stresstensor &sts, const FDEPState &fdepstate ) const ; 
+    //stresstensor dFoda(const stresstensor &sts, const FDEPState &fdepstate ) const ; 
     
     tensor d2Fodsds(const stresstensor &sts, const FDEPState &fdepstate ) const ;     	 
-    stresstensor d2Fodsdq(const stresstensor &sts, const FDEPState &fdepstate ) const ;
-    tensor d2Fodsda(const stresstensor &sts, const FDEPState &fdepstate ) const ;
+    //stresstensor d2Fodsdq(const stresstensor &sts, const FDEPState &fdepstate ) const ;
+    //tensor d2Fodsda(const stresstensor &sts, const FDEPState &fdepstate ) const ;
      
-    double d2Fodqdq(const stresstensor &sts, const FDEPState &fdepstate ) const; 
-    stresstensor d2Fodqda(const stresstensor &sts, const FDEPState &fdepstate ) const ;
+    //double d2Fodqdq(const stresstensor &sts, const FDEPState &fdepstate ) const; 
+    //stresstensor d2Fodqda(const stresstensor &sts, const FDEPState &fdepstate ) const ;
 
-    tensor d2Fodada(const stresstensor &sts, const FDEPState &fdepstate ) const ;
+    //tensor d2Fodada(const stresstensor &sts, const FDEPState &fdepstate ) const ;
 
     void print() { opserr << *this; };   
 

@@ -21,7 +21,7 @@
 //#
 //# DATE:              10Oct2000
 //# UPDATE HISTORY:    22Nov2002 small fixes 
-//#
+//#                    Aug2006   Z.Cheng
 //#
 //===============================================================================
                                                                         
@@ -30,15 +30,6 @@
 #define ElasticIsotropic3D_h
 	 
 #include <ElasticIsotropicMaterial.h>
-#include <Matrix.h>
-#include <Vector.h>
-#include <ID.h>
-
-#include <straint.h>
-#include <stresst.h>
-#include <Tensor.h>
-
-#include <Channel.h>
 
 class ElasticIsotropic3D : public ElasticIsotropicMaterial
 {
@@ -54,7 +45,6 @@ class ElasticIsotropic3D : public ElasticIsotropicMaterial
     int setTrialStrainIncr (const Vector &v);
     int setTrialStrainIncr (const Vector &v, const Vector &r);
     const Matrix &getTangent (void);
-    const Matrix &getInitialTangent (void);
 
     const Vector &getStress (void);
     const Vector &getStrain (void);
@@ -64,10 +54,9 @@ class ElasticIsotropic3D : public ElasticIsotropicMaterial
     int setTrialStrainIncr (const Tensor &v);
     int setTrialStrainIncr (const Tensor &v, const Tensor &r);
     const Tensor &getTangentTensor (void);
-    const stresstensor getStressTensor (void);
-    const straintensor getStrainTensor (void);
-    const straintensor getPlasticStrainTensor (void);
-
+    const stresstensor& getStressTensor (void);
+    const straintensor& getStrainTensor (void);
+ 
     int commitState (void);
     int revertToLastCommit (void);
     int revertToStart (void);
@@ -77,6 +66,8 @@ class ElasticIsotropic3D : public ElasticIsotropicMaterial
     int getOrder (void) const;
 
     void Print(OPS_Stream &s, int flag =0);
+    
+  private:  
     void setInitElasticStiffness(void);
 
   protected:
@@ -87,7 +78,7 @@ class ElasticIsotropic3D : public ElasticIsotropicMaterial
     Vector epsilon;		// Strain vector
 
     static stresstensor Stress;	// Stress tensor    
-    Tensor *Dt;			// Elastic constants tensor
+    static Tensor Dt;           // Elastic constants tensor
     straintensor Strain;	// Strain tensor    
 };
 

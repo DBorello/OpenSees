@@ -21,54 +21,42 @@
 //#
 //# DATE:              10Oct2002
 //# UPDATE HISTORY:    March 20, 2003 Re-activated Joey Yang
-//#
+//#                    Aug2006   Z.Cheng
 //#
 //===============================================================================
 
 #ifndef ElasticCrossAnisotropic_h
 #define ElasticCrossAnisotropic_h
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+//#include <Channel.h>
+//#include <string.h>
+//#include <G3Globals.h>
 
 #include <Matrix.h>
-#include <ID.h>
 #include <Vector.h>
 #include <Tensor.h>
-#include <straint.h>
 #include <stresst.h>
+#include <straint.h>
+
 #include <NDMaterial.h>
-
-
-#include <Channel.h>
-#include <string.h>
-#include <G3Globals.h>
-
-
 
 class ElasticCrossAnisotropic : public NDMaterial
 {
 public:
-  ElasticCrossAnisotropic(int tag, 
-	                         double Ehp, 
-																									 double Evp, 
-																									 double nuhvp,
-                          double nuhhp, 
-																									 double Ghvp, 
-																									 double rhop = 0.0);
+  ElasticCrossAnisotropic(int tag,
+                          double Ehp,
+			  double Evp,
+			  double nuhvp,
+			  double nuhhp,
+			  double Ghvp,
+			  double rhop = 0.0);
   ElasticCrossAnisotropic ();
   ~ElasticCrossAnisotropic ();
 
-        double getrho ();
-        int setTrialStrain (const Vector &v);
-        int setTrialStrain (const Vector &v, const Vector &r);
-        int setTrialStrainIncr (const Vector &v);
-        int setTrialStrainIncr (const Vector &v, const Vector &r);
+        const char *getClassType(void) const {return "ElasticCrossAnisotropic";};
 
-        const Matrix &getTangent (void);
-        const Vector &getStress (void);
-        const Vector &getStrain (void);
+        double getrho ();
+	double getMatParameter(int MatParameterID);
 
         int setTrialStrain (const Tensor &v);
         int setTrialStrain (const Tensor &v, const Tensor &r);
@@ -76,9 +64,8 @@ public:
         int setTrialStrainIncr (const Tensor &v, const Tensor &r);
 
         const Tensor &getTangentTensor (void);
-        const stresstensor getStressTensor (void);
-        const straintensor getStrainTensor (void);
-        const straintensor getPlasticStrainTensor (void);
+        const stresstensor& getStressTensor (void);
+        const straintensor& getStrainTensor (void);
 
         int commitState (void);
         int revertToLastCommit (void);
@@ -87,40 +74,26 @@ public:
         NDMaterial *getCopy (void);
         NDMaterial *getCopy (const char *type);
         const char *getType (void) const;
-        int getOrder (void) const;
 
         void Print(OPS_Stream &s, int flag = 0);
-
-//int setParameter (char **argv, int argc, Information &info);
-//int updateParameter (int parameterID, Information &info);
 
         int sendSelf(int commitTag, Channel &theChannel);
         int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
 
-private:
-        void setInitElasticStiffness(void);
-        void convertD2TensorEijkl(void);
-
 protected:
 
 private:
-    static Vector sigma;   // Stress vector ... class-wide for returns
-    static Matrix D;       // Elastic constants
-    Vector Tepsilon;       // Trial strain vector
-    Vector Cepsilon;       // Commited strains
-
-    stresstensor Stress;   // Stress tensor
-    Tensor Dt;         // Elastic constants tensor
-//Tensor Dt_commit;      // last-step Elastic constants tensor
+    static stresstensor Stress;   // Stress tensor
+    static Tensor Dt;         // Elastic constants tensor
     straintensor Strain;   // Strain tensor
 
 // all the directions are relative so we call them "horizontal" and "vertical", take that
 // horizontal is one plane of anisotropy while vertical is the axes perpendicular to that plane.
   double Eh;             // Eh: Young's modulus in any horizontal direction.
-  double Ev;          // Ev: Young's modulus in a vertical direction.
-  double nuhv;         // nuhv: Poisson's ratio for strain in the vertical direction due to a horizontal direct stress.
-  double nuhh;         // nvhh: Poisoon's ratio for strain in any horizontal direction due to a horizontal direct stress at right angles.
-  double Ghv;         // Ghv: Modulus of shear deformation in a vertical plane.
+  double Ev;             // Ev: Young's modulus in a vertical direction.
+  double nuhv;           // nuhv: Poisson's ratio for strain in the vertical direction due to a horizontal direct stress.
+  double nuhh;           // nvhh: Poisoon's ratio for strain in any horizontal direction due to a horizontal direct stress at right angles.
+  double Ghv;            // Ghv: Modulus of shear deformation in a vertical plane.
   double rho;            // Mass density
 };
 

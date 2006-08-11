@@ -66,11 +66,12 @@ const straintensor& DP_PF::PlasticFlowTensor(const stresstensor &Stre,
                                                     const straintensor &Stra, 
                                                     const MaterialParameter &MaterialParameter_in) const
 {
+	double eps = pow( d_macheps(), 0.5 );
 	BJtensor KroneckerI("I", 2, def_dim_2);
 	if (alpha_which == -1) {
 		double temp0 = Stre.Jinvariant2();
-        temp0 = sqrt(0.5*temp0);
-		if (fabs(temp0) < 1.0e-7) {
+        temp0 = sqrt(temp0);
+		if (fabs(temp0) < eps) {
 			DPm = KroneckerI *getdilatant(MaterialParameter_in);
 			return DPm;
 		}
@@ -80,18 +81,18 @@ const straintensor& DP_PF::PlasticFlowTensor(const stresstensor &Stre,
 	else {
 		double p = Stre.p_hydrostatic();
 		stresstensor s_back = getalpha(MaterialParameter_in);
-		stresstensor s_bar = Stre.deviator() - (s_back * p);
+		stresstensor sigma_b = Stre - (s_back * p);
+		stresstensor s_bar = sigma_b.deviator();
 		double temp1 = ( s_bar("ij") * s_bar("ij") ).trace();
         temp1 = sqrt(0.5*temp1);
-		if (fabs(temp1) < 1.0e-7) {
+		if (fabs(temp1) < eps) {
 			DPm = KroneckerI *getdilatant(MaterialParameter_in);
 			return DPm;
 		}
-		stresstensor I_back = KroneckerI - s_back;
-		double temp2 = ( s_bar("ij") * I_back("ij") ).trace();
+		double temp2 = ( s_bar("ij") * s_back("ij") ).trace();
 		DPm = s_bar + ( KroneckerI * (temp2/3.0) );
 		DPm = DPm*(0.5/temp1);
-        DPm += ( KroneckerI *getdilatant(MaterialParameter_in) );
+        DPm += ( KroneckerI *(getdilatant(MaterialParameter_in)/3.0) );
 		return DPm;
 	}
 }

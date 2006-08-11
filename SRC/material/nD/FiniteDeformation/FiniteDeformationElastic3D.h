@@ -61,10 +61,10 @@ class FiniteDeformationElastic3D : public NDMaterial
     virtual const Tensor& getTangentTensor(void) ;	  // Default Lagrangian Tangent Tensor
     virtual const Tensor& getInitialTangentTensor(void) ;
 
-    virtual const  straintensor getStrainTensor(void) ;   // Default Green Lagrangian Strain
-    virtual const  stresstensor getStressTensor(void) ;   // Default 2nd Piola Kirchhoff Stress
-    virtual const  straintensor getF(void);
-    virtual const  straintensor getC(void);
+    virtual const  straintensor& getStrainTensor(void) ;   // Default Green Lagrangian Strain
+    virtual const  stresstensor& getStressTensor(void) ;   // Default 2nd Piola Kirchhoff Stress
+    virtual const  straintensor& getF(void);
+    virtual const  straintensor& getC(void);
 
     virtual int commitState(void) ;
     virtual int revertToLastCommit(void) ;
@@ -74,7 +74,7 @@ class FiniteDeformationElastic3D : public NDMaterial
     virtual NDMaterial *getCopy (const char *type);
 
     virtual const char *getType (void) const;
-    virtual int getOrder (void) const;
+    //virtual int getOrder (void) const;
 
     virtual int sendSelf(int commitTag, Channel &theChannel);
     virtual int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
@@ -84,8 +84,8 @@ class FiniteDeformationElastic3D : public NDMaterial
     virtual int setParameter(char **argv, int argc, Information &info);
     virtual int updateParameter(int parameterID, Information &info);
 
-    virtual const  stresstensor getPK1StressTensor(void) ;
-    virtual const  stresstensor getCauchyStressTensor(void) ;
+    virtual const  stresstensor& getPK1StressTensor(void) ;
+    virtual const  stresstensor& getCauchyStressTensor(void) ;
 
   protected:
 
