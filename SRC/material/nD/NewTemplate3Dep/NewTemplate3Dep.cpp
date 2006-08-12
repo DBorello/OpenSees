@@ -198,9 +198,9 @@ NewTemplate3Dep::~NewTemplate3Dep()
     if (pointer_scalar_evolution)
       delete [] pointer_scalar_evolution;         
 
-    for (int i = 0; i < pointer_material_parameter->getNum_Internal_Tensor(); i++) {
-      if (pointer_tensor_evolution[i])
-        delete pointer_tensor_evolution[i];
+    for (int j = 0; j < pointer_material_parameter->getNum_Internal_Tensor(); j++) {
+      if (pointer_tensor_evolution[j])
+        delete pointer_tensor_evolution[j];
     }
     if (pointer_tensor_evolution)
        delete [] pointer_tensor_evolution;
@@ -629,10 +629,10 @@ int NewTemplate3Dep::ForwardEuler(const straintensor& strain_incr)
         
         // L_ij * E_ijkl * R_kl
         lower = ( Hf("ij") * dQods("ij") ).trace(); 
-          
+        int i;  
         // Evolution of scalar (isotropic) internal variables in yield function
         double Num_internal_scalar_in_yield_function = pointer_yield_function->getNumInternalScalar();
-        for (int i = 0; i < Num_internal_scalar_in_yield_function; i++) {
+        for (i = 0; i < Num_internal_scalar_in_yield_function; i++) {
           h_s = pointer_scalar_evolution[i]->H( dQods, Intersection_stress, Intersection_strain, *pointer_material_parameter);
           xi_s = pointer_yield_function->InScalarDerivative( Intersection_stress, *pointer_material_parameter, i+1);
           hardMod += h_s * xi_s;
@@ -640,7 +640,7 @@ int NewTemplate3Dep::ForwardEuler(const straintensor& strain_incr)
         
         // Evolution of tensor (kinematic) internal variables in yield function
         double Num_internal_tensor_in_yield_function = pointer_yield_function->getNumInternalTensor();
-        for (int i = 0;  i < Num_internal_tensor_in_yield_function; i++) {
+        for (i = 0;  i < Num_internal_tensor_in_yield_function; i++) {
           h_t = pointer_tensor_evolution[i]->Hij( dQods, Intersection_stress, Intersection_strain, *pointer_material_parameter);
           xi_t = pointer_yield_function->InTensorDerivative( Intersection_stress, *pointer_material_parameter, i+1);
           hardMod += ( h_t("mn") * xi_t("mn") ).trace();
@@ -678,7 +678,7 @@ int NewTemplate3Dep::ForwardEuler(const straintensor& strain_incr)
         double dS= 0.0;
         double S = 0.0;
         int Num_internal_scalar = pointer_material_parameter->getNum_Internal_Scalar();
-        for (int i = 0; i < Num_internal_scalar; i++) {
+        for (i = 0; i < Num_internal_scalar; i++) {
           dS = ( pointer_scalar_evolution[i]->H(dQods, Intersection_stress, Intersection_strain, *pointer_material_parameter) ) *Delta_lambda;
           S = pointer_material_parameter->getInternal_Scalar(i);
           err += pointer_material_parameter->setInternal_Scalar(i, S + dS );
@@ -688,7 +688,7 @@ int NewTemplate3Dep::ForwardEuler(const straintensor& strain_incr)
         stresstensor dT;
         stresstensor T;
         int Num_internal_tensor = pointer_material_parameter->getNum_Internal_Tensor();
-        for (int i = 0; i < Num_internal_tensor; i++) {
+        for (i = 0; i < Num_internal_tensor; i++) {
           dT = pointer_tensor_evolution[i]->Hij(dQods, Intersection_stress, Intersection_strain, *pointer_material_parameter) *Delta_lambda; 
           T = pointer_material_parameter->getInternal_Tensor(i);
           err += pointer_material_parameter->setInternal_Tensor(i, T + dT );
@@ -757,17 +757,17 @@ int NewTemplate3Dep::SemiImplicit(const straintensor& strain_incr)
 
         Hq = Ee("ijkl") * dQods("kl");
           Hq.null_indices();
-        
+        int i;
         // Evolution of scalar (isotropic) internal variables in yield function
         double Num_internal_scalar_in_yield_function = pointer_yield_function->getNumInternalScalar();
-        for (int i = 0; i < Num_internal_scalar_in_yield_function; i++) {
+        for (i = 0; i < Num_internal_scalar_in_yield_function; i++) {
           h_s = pointer_scalar_evolution[i]->H( dQods, start_stress, start_strain, *pointer_material_parameter);
           xi_s = pointer_yield_function->InScalarDerivative( TrialStress, *pointer_material_parameter, i+1);
           hardMod += h_s * xi_s;
         }        
         // Evolution of tensor (kinematic) internal variables in yield function
         double Num_internal_tensor_in_yield_function = pointer_yield_function->getNumInternalTensor();
-        for (int i = 0;  i < Num_internal_tensor_in_yield_function; i++) {
+        for (i = 0;  i < Num_internal_tensor_in_yield_function; i++) {
           h_t = pointer_tensor_evolution[i]->Hij( dQods, start_stress, start_strain, *pointer_material_parameter);
           xi_t = pointer_yield_function->InTensorDerivative( TrialStress, *pointer_material_parameter, i+1);
           hardMod += ( h_t("mn") * xi_t("mn") ).trace();
@@ -791,8 +791,9 @@ int NewTemplate3Dep::SemiImplicit(const straintensor& strain_incr)
           // Update internal scalar variables
           double dS= 0.0;
           double S = 0.0;
+		  int i;
           int Num_internal_scalar = pointer_material_parameter->getNum_Internal_Scalar();
-          for (int i = 0; i < Num_internal_scalar; i++) {
+          for (i = 0; i < Num_internal_scalar; i++) {
             dS = ( pointer_scalar_evolution[i]->H(dQods, start_stress, start_strain, *pointer_material_parameter) ) *d2_lambda;
             S = pointer_material_parameter->getInternal_Scalar(i);
             err += pointer_material_parameter->setInternal_Scalar(i, S + dS );
@@ -801,7 +802,7 @@ int NewTemplate3Dep::SemiImplicit(const straintensor& strain_incr)
           stresstensor dT;
           stresstensor T;
           int Num_internal_tensor = pointer_material_parameter->getNum_Internal_Tensor();
-          for (int i = 0; i < Num_internal_tensor; i++) {
+          for (i = 0; i < Num_internal_tensor; i++) {
             dT = pointer_tensor_evolution[i]->Hij(dQods, start_stress, start_strain, *pointer_material_parameter) *d2_lambda; 
             T = pointer_material_parameter->getInternal_Tensor(i);
             err += pointer_material_parameter->setInternal_Tensor(i, T + dT );

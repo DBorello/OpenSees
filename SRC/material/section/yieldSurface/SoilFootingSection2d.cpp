@@ -172,13 +172,13 @@ SoilFootingSection2d::initializeInternalVariables (void)
    pressure = new double* [noNodes+1];
    pressMax = new double* [noNodes+1];
       
-   for (int i = 0; i <= noNodes; i++)
+   for (int j = 0; j <= noNodes; j++)
    {
-      foot[i] = new double [ini_size];
-      soilMin[i] = new double [ini_size];
-      soilMax[i] = new double [ini_size];
-      pressure[i] = new double [ini_size];
-      pressMax[i] = new double [ini_size];
+      foot[j] = new double [ini_size];
+      soilMin[j] = new double [ini_size];
+      soilMax[j] = new double [ini_size];
+      pressure[j] = new double [ini_size];
+      pressMax[j] = new double [ini_size];
    }
 
 
@@ -561,8 +561,8 @@ SoilFootingSection2d::applyLoading(Vector de)
          pressMaxTemp[i] = pressMax[i][1];
       }
 
-      for (int i = 0; i < 190; i++)
-         ddH[i] = 0.0;
+      for (int j = 0; j < 190; j++)
+         ddH[j] = 0.0;
 
 
       Vinit = sCommit(0);
@@ -698,7 +698,8 @@ SoilFootingSection2d::applyLoading(Vector de)
 
                do // check for Vinit
                {
-                  for (int i = 0; i <= noNodes; i++)
+				   int i;
+                  for (i = 0; i <= noNodes; i++)
                   {
                      ds = (i-c)*(L/noNodes)*tan(dTheta);
 
@@ -717,14 +718,14 @@ SoilFootingSection2d::applyLoading(Vector de)
             
                   c1 = c2 = -1;
 
-                  for (int i = 0; i <= noNodes; i++)
+                  for (i = 0; i <= noNodes; i++)
                      if (foot[i][0] >= soilMax[i][0])
                      {
                         c1 = i;
                         break;
                      }
               
-                  for (int i = noNodes; i >= 0; i--)
+                  for (i = noNodes; i >= 0; i--)
                      if (foot[i][0] >= soilMax[i][0])  
                      {
                         c2 = i;
@@ -743,7 +744,7 @@ SoilFootingSection2d::applyLoading(Vector de)
                   }
 
 
-                  for (int i = 0; i <= c1; i++)
+                  for (i = 0; i <= c1; i++)
                   {
                      soilMin[i][0] = soilMax[i][0]
                                    - (soilMax[i][0] - soilFree)*s_recover;
@@ -751,14 +752,14 @@ SoilFootingSection2d::applyLoading(Vector de)
                         soilMin[i][0] = foot[i][0];
                   }
  
-                  for (int i = 0; i <= noNodes; i++) 
+                  for (i = 0; i <= noNodes; i++) 
                      if (foot[i][0] >= soilMin[i][0])
                      {
                         c1T = i;
                         break;
                      }
               
-                  for (int i = noNodes; i >= 0; i--)
+                  for (i = noNodes; i >= 0; i--)
                   if (foot[i][0] >= soilMin[i][0])
                   {
                      c2T = i;
@@ -774,7 +775,7 @@ SoilFootingSection2d::applyLoading(Vector de)
                      for (int i = 0; i <= c1T; i++)
                         pressure[i][0] = 0.0;
 
-                  for (int i = c1; i <= c2; i++)
+                  for (i = c1; i <= c2; i++)
                      pressure[i][0] = pressureTemp[i] +
                                (soilMax[i][0]-soilMin[i][1])*q_recover* Kv/ Vult;
 
@@ -802,10 +803,12 @@ SoilFootingSection2d::applyLoading(Vector de)
                         pressure[i][0] = pow((double)(c2T-i)/(c2T-c2), n_load)
                                        * pressure[c2][0];
                  
-                  for (int i = c2T+1; i <= noNodes; i++)
+                  for (i = c2T+1; i <= noNodes; i++)
                      pressure[i][0] = 0.0;
 
-                  for (int a = 0; a <= noNodes; a++)
+				  int a;
+
+                  for (a = 0; a <= noNodes; a++)
                   {
                      if (pressure[a][0] > pult)
                         pressure[a][0] = pult;
@@ -814,16 +817,16 @@ SoilFootingSection2d::applyLoading(Vector de)
                   }
                              
                   area1 = 0.0;
-                  for (int a = 0; a <= noNodes; a++)
+                  for (a = 0; a <= noNodes; a++)
                      area1 += pressure[a][0];
                   area1 *= (L/noNodes);
            
                   area2 = 0.0;
-                  for (int a = 0; a <= noNodes; a++)
+                  for (a = 0; a <= noNodes; a++)
                      area2 += (pressure[a][0] * (L/noNodes)
                            * (a - noNodes/2)*(L/noNodes));
   
-                  for (int a = 0; a <= noNodes; a++)
+                  for (a = 0; a <= noNodes; a++)
                      if (pressure[a][0] > pressMax[a][1])
                         pressMax[a][0] = pressure[a][0];
                      else
@@ -876,8 +879,8 @@ SoilFootingSection2d::applyLoading(Vector de)
 
 
                do // check for Vinit
-               {              
-                  for (int i = 0; i <= noNodes; i++)
+               {  int i;            
+                  for (i = 0; i <= noNodes; i++)
                   {
                      ds = (i-c)*(L/noNodes)*tan(dTheta);
 
@@ -897,14 +900,14 @@ SoilFootingSection2d::applyLoading(Vector de)
   
                   c1 = c2 = -1;
          
-                  for (int i = 0; i <= noNodes; i++)
+                  for (i = 0; i <= noNodes; i++)
                      if (foot[i][0] >= soilMax[i][0])
                      {  
                         c1 = i;
                         break;
                      }
 
-                  for (int i = noNodes; i >= 0; i--)   
+                  for (i = noNodes; i >= 0; i--)   
                      if (foot[i][0] >= soilMax[i][0])
                      {   
                         c2 = i;
@@ -921,7 +924,7 @@ SoilFootingSection2d::applyLoading(Vector de)
                   }  
 
 
-                  for (int i = c2; i <= noNodes; i++)
+                  for (i = c2; i <= noNodes; i++)
                   {
                      soilMin[i][0] = soilMax[i][0]
                                    - (soilMax[i][0] - soilFree)*s_recover;
@@ -929,14 +932,14 @@ SoilFootingSection2d::applyLoading(Vector de)
                         soilMin[i][0] = foot[i][0];
                   }
 
-                  for (int i = 0; i <= noNodes; i++)
+                  for (i = 0; i <= noNodes; i++)
                      if (foot[i][0] >= soilMin[i][0])
                      {
                         c1T = i;
                         break;
                      }
                
-                  for (int i = noNodes; i >= 0; i--)
+                  for (i = noNodes; i >= 0; i--)
                      if (foot[i][0] >= soilMin[i][0])
                      {
                         c2T = i;
@@ -953,7 +956,7 @@ SoilFootingSection2d::applyLoading(Vector de)
                      for (int i = 0; i <= c1T; i++) 
                         pressure[i][0] = 0.0;
 
-                  for (int i = c1; i <= c2; i++)
+                  for (i = c1; i <= c2; i++)
                      pressure[i][0] = pressureTemp[i] +
                                     (soilMax[i][0]-soilMin[i][1])*q_recover* Kv/ Vult;
 
@@ -980,10 +983,10 @@ SoilFootingSection2d::applyLoading(Vector de)
                         pressure[i][0] = pow((double)(i-c1T)/(c1-c1T), n_load)
                                        * pressure[c1][0];  
                           
-                  for (int i = c2T+1; i <= noNodes; i++)
-                     pressure[i][0] = 0.0;
-
-                  for (int a = 0; a <= noNodes; a++)
+                  for (i = c2T+1; i <= noNodes; i++)
+                     pressure[i][0] = 0.0;	
+				   int a;
+                  for (a = 0; a <= noNodes; a++)
                   {
                      if (pressure[a][0] > pult)
                         pressure[a][0] = pult;
@@ -992,17 +995,17 @@ SoilFootingSection2d::applyLoading(Vector de)
                   }
                              
                   area1 = 0.0;
-                  for (int a = 0; a <= noNodes; a++)
+                  for (a = 0; a <= noNodes; a++)
                      area1 += pressure[a][0];
                   area1 *= (L/noNodes);
            
                   area2 = 0.0;
-                  for (int a = 0; a <= noNodes; a++)
+                  for (a = 0; a <= noNodes; a++)
                      area2 += (pressure[a][0] * (L/noNodes)
                            * (a - noNodes/2)*(L/noNodes));
 
 
-                  for (int a = 0; a <= noNodes; a++)
+                  for (a = 0; a <= noNodes; a++)
                      if (pressure[a][0] > pressMax[a][1])
                         pressMax[a][0] = pressure[a][0];
                      else      
@@ -1314,11 +1317,11 @@ SoilFootingSection2d::applyLoading(Vector de)
 
    dHt1 = 100000000000.0;
 
-   for (int i = 0; i <= 180; i++)
+   for (int j = 0; j <= 180; j++)
    {
-      if (ddH[i] <= dHt1)
+      if (ddH[j] <= dHt1)
       {
-         dHt1 = ddH[i];
+         dHt1 = ddH[j];
          ii = i;         
       }
    }
