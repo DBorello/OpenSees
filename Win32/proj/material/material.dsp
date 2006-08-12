@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Target_Dir ""
 F90=df.exe
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MLd /W3 /GX /O2 /I "." /I "..\..\..\src\package" /I "..\..\..\src\material\nd\cyclicSoil" /I "..\..\..\src\damage" /I "..\..\..\src\material\nd\finitedeformation\fdevolution" /I "..\..\..\src\material\nd\finitedeformation\fdflow" /I "..\..\..\src\material\nd\finitedeformation\fdYield" /I "..\..\..\src\material\nd\finitedeformation" /I "..\..\..\src\element\fournodequad" /I "..\..\..\src\material\uniaxial\fedeas" /I "..\..\..\src\material\uniaxial\drain" /I "..\..\..\src\domain\domain" /I "..\..\..\src\renderer" /I "..\..\..\src\material\nD\soil" /I "..\..\..\src\material\nD\template3dep" /I "..\..\..\src\recorder\response" /I "..\..\..\src\material\backbone" /I "..\..\..\src\material\state" /I "..\..\..\src\material\state\strength" /I "..\..\..\src\material\state\deformation" /I "..\..\..\src\material\state\stiffness" /I "..\..\..\src\material\section\repres\section" /I "..\..\..\src\material\section\repres\cell" /I "..\..\..\src\material\section\repres\patch" /I "..\..\..\src\material\section\repres\reinfBar" /I "..\..\..\src\material\section\repres\reinfLayer" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\material\section" /I "..\..\..\src\handler" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\material\nD" /I "..\..\..\src\element" /I "..\..\..\src\actor\channel" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\component" /I "..\..\..\src\material" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\material\nd\template3dep" /I "..\..\..\src\nDarray" /I "..\..\..\src\material\uniaxial\py" /I "..\..\..\src\material\uniaxial\snap" /I "..\..\..\src\material\yieldSurface\yieldSurfaceBC" /I "..\..\..\src\material\yieldSurface\evolution" /I "..\..\..\src\material\yieldSurface\plasticHardeningMaterial" /I "..\..\..\src\material\section\yieldSurface" /I "..\..\..\src\material\nd\feap" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "NDEBUG" /D "WIN32" /D "_LIB" /D "_MBCS" /D "_TCL84" /D "_VC6" /FD /c
+# ADD CPP /nologo /MLd /W3 /GX /O2 /I "." /I "..\..\..\src\material\nd\newtemplate3dep" /I "..\..\..\src\package" /I "..\..\..\src\material\nd\cyclicSoil" /I "..\..\..\src\damage" /I "..\..\..\src\material\nd\finitedeformation\fdevolution" /I "..\..\..\src\material\nd\finitedeformation\fdflow" /I "..\..\..\src\material\nd\finitedeformation\fdYield" /I "..\..\..\src\material\nd\finitedeformation" /I "..\..\..\src\element\fournodequad" /I "..\..\..\src\material\uniaxial\fedeas" /I "..\..\..\src\material\uniaxial\drain" /I "..\..\..\src\domain\domain" /I "..\..\..\src\renderer" /I "..\..\..\src\material\nD\soil" /I "..\..\..\src\material\nD\template3dep" /I "..\..\..\src\recorder\response" /I "..\..\..\src\material\backbone" /I "..\..\..\src\material\state" /I "..\..\..\src\material\state\strength" /I "..\..\..\src\material\state\deformation" /I "..\..\..\src\material\state\stiffness" /I "..\..\..\src\material\section\repres\section" /I "..\..\..\src\material\section\repres\cell" /I "..\..\..\src\material\section\repres\patch" /I "..\..\..\src\material\section\repres\reinfBar" /I "..\..\..\src\material\section\repres\reinfLayer" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\material\section" /I "..\..\..\src\handler" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\material\nD" /I "..\..\..\src\element" /I "..\..\..\src\actor\channel" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\component" /I "..\..\..\src\material" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\material\nd\template3dep" /I "..\..\..\src\nDarray" /I "..\..\..\src\material\uniaxial\py" /I "..\..\..\src\material\uniaxial\snap" /I "..\..\..\src\material\yieldSurface\yieldSurfaceBC" /I "..\..\..\src\material\yieldSurface\evolution" /I "..\..\..\src\material\yieldSurface\plasticHardeningMaterial" /I "..\..\..\src\material\section\yieldSurface" /I "..\..\..\src\material\nd\feap" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "NDEBUG" /D "WIN32" /D "_LIB" /D "_MBCS" /D "_TCL84" /D "_VC6" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -67,7 +67,7 @@ LIB32=link.exe -lib
 # PROP Target_Dir ""
 F90=df.exe
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\package" /I "..\..\..\src\material\nd\cyclicSoil" /I "..\..\..\src\damage" /I "..\..\..\src\material\nd\finitedeformation\fdevolution" /I "..\..\..\src\material\nd\finitedeformation\fdflow" /I "..\..\..\src\material\nd\finitedeformation\fdYield" /I "..\..\..\src\material\nd\finitedeformation" /I "..\..\..\src\element\fournodequad" /I "..\..\..\src\material\uniaxial\fedeas" /I "..\..\..\src\material\uniaxial\drain" /I "..\..\..\src\domain\domain" /I "..\..\..\src\renderer" /I "..\..\..\src\material\nD\soil" /I "..\..\..\src\material\nD\template3dep" /I "..\..\..\src\recorder\response" /I "..\..\..\src\material\backbone" /I "..\..\..\src\material\state" /I "..\..\..\src\material\state\strength" /I "..\..\..\src\material\state\deformation" /I "..\..\..\src\material\state\stiffness" /I "..\..\..\src\material\section\repres\section" /I "..\..\..\src\material\section\repres\cell" /I "..\..\..\src\material\section\repres\patch" /I "..\..\..\src\material\section\repres\reinfBar" /I "..\..\..\src\material\section\repres\reinfLayer" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\material\section" /I "..\..\..\src\handler" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\material\nD" /I "..\..\..\src\element" /I "..\..\..\src\actor\channel" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\component" /I "..\..\..\src\material" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\material\nd\template3dep" /I "..\..\..\src\nDarray" /I "..\..\..\src\material\uniaxial\py" /I "..\..\..\src\material\uniaxial\snap" /I "..\..\..\src\material\yieldSurface\yieldSurfaceBC" /I "..\..\..\src\material\yieldSurface\evolution" /I "..\..\..\src\material\yieldSurface\plasticHardeningMaterial" /I "..\..\..\src\material\section\yieldSurface" /I "..\..\..\src\material\nd\feap" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "_DEBUG" /D "MHS_INSURE" /D "WIN32" /D "_LIB" /D "_MBCS" /D "_TCL84" /D "_VC6" /FR /FD /GZ /c
+# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\material\nd\newtemplate3dep" /I "..\..\..\src\package" /I "..\..\..\src\material\nd\cyclicSoil" /I "..\..\..\src\damage" /I "..\..\..\src\material\nd\finitedeformation\fdevolution" /I "..\..\..\src\material\nd\finitedeformation\fdflow" /I "..\..\..\src\material\nd\finitedeformation\fdYield" /I "..\..\..\src\material\nd\finitedeformation" /I "..\..\..\src\element\fournodequad" /I "..\..\..\src\material\uniaxial\fedeas" /I "..\..\..\src\material\uniaxial\drain" /I "..\..\..\src\domain\domain" /I "..\..\..\src\renderer" /I "..\..\..\src\material\nD\soil" /I "..\..\..\src\material\nD\template3dep" /I "..\..\..\src\recorder\response" /I "..\..\..\src\material\backbone" /I "..\..\..\src\material\state" /I "..\..\..\src\material\state\strength" /I "..\..\..\src\material\state\deformation" /I "..\..\..\src\material\state\stiffness" /I "..\..\..\src\material\section\repres\section" /I "..\..\..\src\material\section\repres\cell" /I "..\..\..\src\material\section\repres\patch" /I "..\..\..\src\material\section\repres\reinfBar" /I "..\..\..\src\material\section\repres\reinfLayer" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\material\section" /I "..\..\..\src\handler" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\material\nD" /I "..\..\..\src\element" /I "..\..\..\src\actor\channel" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\component" /I "..\..\..\src\material" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\material\nd\template3dep" /I "..\..\..\src\nDarray" /I "..\..\..\src\material\uniaxial\py" /I "..\..\..\src\material\uniaxial\snap" /I "..\..\..\src\material\yieldSurface\yieldSurfaceBC" /I "..\..\..\src\material\yieldSurface\evolution" /I "..\..\..\src\material\yieldSurface\plasticHardeningMaterial" /I "..\..\..\src\material\section\yieldSurface" /I "..\..\..\src\material\nd\feap" /I "c:\Program Files\tcl" /I "c:\Program Files\tcl\include" /D "_DEBUG" /D "MHS_INSURE" /D "WIN32" /D "_LIB" /D "_MBCS" /D "_TCL84" /D "_VC6" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
@@ -1263,6 +1263,234 @@ SOURCE=..\..\..\SRC\material\nD\cyclicSoil\MultiaxialCyclicPlasticityPlaneStrain
 SOURCE=..\..\..\SRC\material\nD\cyclicSoil\MultiaxialCyclicPlasticityPlaneStrain.h
 # End Source File
 # End Group
+# Begin Group "newTEmplate3Dep"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\AF_Eij.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\AF_Eij.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\CC_Ev.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\CC_Ev.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\CC_PF.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\CC_PF.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\CC_YF.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\CC_YF.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\DM04_alpha_Eij.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\DM04_alpha_Eij.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\DM04_Elastic.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\DM04_Elastic.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\DM04_PF.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\DM04_PF.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\DM04_YF.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\DM04_YF.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\DM04_z_Eij.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\DM04_z_Eij.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\DP_PF.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\DP_PF.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\DP_YF.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\DP_YF.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\ElasticState.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\ElasticState.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\elnp_Elastic.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\elnp_Elastic.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\FT3Dep_test.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\Isotropic_Elastic.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\Isotropic_Elastic.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\Linear_Eeq.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\Linear_Eeq.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\Linear_Eij.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\Linear_Eij.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\MaterialParameter.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\MaterialParameter.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\NewTemplate3Dep.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\NewTemplate3Dep.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\PlasticFlow.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\PlasticFlow.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\PressureDependent_Elastic.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\PressureDependent_Elastic.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\RMC_PF.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\RMC_PF.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\RMC_YF.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\RMC_YF.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\ScalarEvolution.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\ScalarEvolution.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\TclNewTemplate3Dep.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\TensorEvolution.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\TensorEvolution.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\VM_PF.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\VM_PF.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\VM_YF.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\VM_YF.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\YieldFunction.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\YieldFunction.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\nD\NDMaterial.cpp
@@ -1787,6 +2015,14 @@ SOURCE=..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\PlasticHarden
 SOURCE=..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\TclModelBuilderYSPlasticMaterialCommand.cpp
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\section\yieldSurface\SoilFootingSection2d.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\section\yieldSurface\SoilFootingSection2d.h
+# End Source File
 # End Group
 # Begin Source File
 
