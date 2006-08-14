@@ -66,28 +66,28 @@ NewTemplate3Dep::NewTemplate3Dep( int tag,
     if ( pointer_material_parameter_in )
       pointer_material_parameter = pointer_material_parameter_in->newObj();
     else {
-      cout << "NewTemplate3Dep:: NewTemplate3Dep failed to construct the input parameters. " << endl;
+      opserr << "NewTemplate3Dep:: NewTemplate3Dep failed to construct the input parameters. " << endln;
       exit(1);
     }
 
     if ( pointer_elastic_state_in )
       pointer_elastic_state = pointer_elastic_state_in->newObj();     
     else{
-      cout << "NewTemplate3Dep:: NewTemplate3Dep failed to get copy of elastic material. " << endl;
+      opserr << "NewTemplate3Dep:: NewTemplate3Dep failed to get copy of elastic material. " << endln;
       exit(1);
     }
 
     if ( pointer_yield_function_in )
       pointer_yield_function = pointer_yield_function_in->newObj();
     else {
-      cout << "NewTemplate3Dep:: NewTemplate3Dep failed to construct the yield function. " << endl;
+      opserr << "NewTemplate3Dep:: NewTemplate3Dep failed to construct the yield function. " << endln;
       exit(1);
     }
 
     if ( pointer_plastic_flow_in )
       pointer_plastic_flow = pointer_plastic_flow_in->newObj();
     else {
-      cout << "NewTemplate3Dep:: NewTemplate3Dep failed to construct the plastic flow. " << endl;
+      opserr << "NewTemplate3Dep:: NewTemplate3Dep failed to construct the plastic flow. " << endln;
       exit(1);
     }
 
@@ -127,28 +127,28 @@ NewTemplate3Dep::NewTemplate3Dep( int tag,
     if ( pointer_material_parameter_in )
       pointer_material_parameter = pointer_material_parameter_in->newObj();
     else {
-      cout << "NewTemplate3Dep:: NewTemplate3Dep failed to construct the input parameters. " << endl;
+      opserr << "NewTemplate3Dep:: NewTemplate3Dep failed to construct the input parameters. " << endln;
       exit(1);
     }
 
     if ( pointer_elastic_state_in )
       pointer_elastic_state = pointer_elastic_state_in->newObj();     
     else{
-      cout << "NewTemplate3Dep:: NewTemplate3Dep failed to get copy of elastic material. " << endl;
+      opserr << "NewTemplate3Dep:: NewTemplate3Dep failed to get copy of elastic material. " << endln;
       exit(1);
     }
 
     if ( pointer_yield_function_in )
       pointer_yield_function = pointer_yield_function_in->newObj();
     else {
-      cout << "NewTemplate3Dep:: NewTemplate3Dep failed to construct the yield function. " << endl;
+      opserr << "NewTemplate3Dep:: NewTemplate3Dep failed to construct the yield function. " << endln;
       exit(1);
     }
 
     if ( pointer_plastic_flow_in )
        pointer_plastic_flow = pointer_plastic_flow_in->newObj();
     else {
-      cout << "NewTemplate3Dep:: NewTemplate3Dep failed to construct the plastic flow. " << endl;
+      opserr << "NewTemplate3Dep:: NewTemplate3Dep failed to construct the plastic flow. " << endln;
       exit(1);
     }
 
@@ -384,8 +384,8 @@ double NewTemplate3Dep::getRho(void)
     if (pointer_material_parameter->getNum_Material_Parameter() > 0)
         rho = pointer_material_parameter->getMaterial_Parameter(0);
     else {
-      cout << "Error!! NewTemplate3Dep:: number of input parameter for material constants less than 1. " << endl;
-      cout << "Remind: NewTemplate3Dep:: the 1st material constant is the density. " << endl;
+      opserr << "Error!! NewTemplate3Dep:: number of input parameter for material constants less than 1. " << endln;
+      opserr << "Remind: NewTemplate3Dep:: the 1st material constant is the density. " << endln;
       exit(1);
     }
     
@@ -496,7 +496,7 @@ NDMaterial * NewTemplate3Dep::getCopy(const char *code)
        return tmp;
     }
     else {
-      cout << "NewTemplate3Dep::getCopy failed to get model: " <<  code << endl;
+      opserr << "NewTemplate3Dep::getCopy failed to get model: " <<  code << endln;
       exit(1);
     }
     return 0;
@@ -729,7 +729,7 @@ int NewTemplate3Dep::SemiImplicit(const straintensor& strain_incr)
 
     YieldFun = pointer_yield_function->YieldFunctionValue(TrialStress, *pointer_material_parameter);
     
-    //cout << "YieldFun = " << YieldFun << endl;
+    //opserr << "YieldFun = " << YieldFun << endln;
     
     if ( YieldFun <= FTOL ) {      // If Elastic
         err += pointer_elastic_state->setStress(TrialStress);
@@ -819,10 +819,10 @@ int NewTemplate3Dep::SemiImplicit(const straintensor& strain_incr)
           
           // Update Yield Function
           YieldFun = pointer_yield_function->YieldFunctionValue(TrialStress, *pointer_material_parameter);
-          //cout << "F = " << YieldFun << endl;
+          //opserr << "F = " << YieldFun << endln;
 
           //if (iter_counter == ITMAX)
-          //  cout << "Warning! The iteration number in the semi-implicit algorithm reaches to " << ITMAX << endl;
+          //  opserr << "Warning! The iteration number in the semi-implicit algorithm reaches to " << ITMAX << endln;
 
         } while (YieldFun > FTOL && iter_counter < ITMAX);
         // ################## End of do-while ########################
@@ -851,7 +851,7 @@ int NewTemplate3Dep::SemiImplicit(const straintensor& strain_incr)
 int NewTemplate3Dep::BackwardEuler(const straintensor& strain_incr)
 {
 	// Need Work Here!
-    cout << "BackwardEuler is not yet implemented!" << endl;
+    opserr << "BackwardEuler is not yet implemented!" << endln;
 	return 0;
 }
 
@@ -898,7 +898,7 @@ double NewTemplate3Dep::zbrentstress(const stresstensor& start_stress,
   double fb = func(start_stress, end_stress, *pointer_material_parameter, b);
  
   if ( (fb * fa) > 0.0) {
-      cout << "\a\n Root must be bracketed in ZBRENTstress " << endl;
+      opserr << "\a\n Root must be bracketed in ZBRENTstress " << endln;
       exit(1);
   }
   

@@ -36,8 +36,6 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream.h>
-#include <fstream.h>
 
 #include "NewTemplate3Dep.h"
 
@@ -82,7 +80,7 @@ OPS_Stream *opserrPtr;
 
 int main() {
 
-cout << "\n\n\n*** EP Finite Deformations: T E S T ***\n\n" << "\n";
+opserr << "\n\n\n*** EP Finite Deformations: T E S T ***\n\n" << "\n";
 
 ofstream outStress ("Results.txt");
 
@@ -162,7 +160,7 @@ double d_g = 0.00005;
     pp  = tStress.p_hydrostatic();
     qq = - tStress.val(1,1) + tStress.val(2,2);
 
-    outStress << -tStrain.val(1,1)  <<  "  "  <<  pp << "  " << qq << endl;
+    outStress << -tStrain.val(1,1)  <<  "  "  <<  pp << "  " << qq << endln;
 
     //if (fabs(E11) >= ep_cut) {
     if (fabs(qq) >= q_cut) {
@@ -255,7 +253,7 @@ while ( I_cyc < Num_cyc) {
     //qq  = tStress.q_deviatoric();
     qq = - tStress.val(1,1) + tStress.val(2,2);    
 
-    outStress << -tStrain.val(1,1)  <<  "  "  <<  pp << "  " << qq << endl;
+    outStress << -tStrain.val(1,1)  <<  "  "  <<  pp << "  " << qq << endlnn;
     
     if (fabs(E11) >= ep_cut) {
     //if (fabs(qq) >= q_cut) {
@@ -333,7 +331,7 @@ while ( I_cyc < Num_cyc) {
  pp  = tStress.p_hydrostatic();
  qq = tStress.val(1,1) - tStress.val(2,2);
 
- outStress << -tStrain.val(1,1)  <<  "  "  <<  pp << "  " << qq << endl;
+ outStress << -tStrain.val(1,1)  <<  "  "  <<  pp << "  " << qq << endlnn;
 
  }
 
@@ -402,7 +400,7 @@ while ( I_cyc < Num_cyc) {
  pp  = tStress.p_hydrostatic();
  qq = -tStress.val(1,1) + tStress.val(2,2);
 
- outStress << -tStrain.val(1,1)  <<  "  "  <<  pp << "  " << qq << endl;
+ outStress << -tStrain.val(1,1)  <<  "  "  <<  pp << "  " << qq << endlnn;
 
  }
 

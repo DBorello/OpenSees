@@ -35,7 +35,6 @@
 #define DM04_z_Eij_H 
 
 #include "TensorEvolution.h"
-#include <iostream.h>
 
 class DM04_z_Eij : public TensorEvolution
 {

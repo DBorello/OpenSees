@@ -97,7 +97,7 @@ double RMC_PF::getdilatant(const MaterialParameter &MaterialParameter_in) const
 		if ( index_dilatant <= MaterialParameter_in.getNum_Material_Parameter() && index_dilatant > 0)
 			return MaterialParameter_in.getMaterial_Parameter(index_dilatant-1); 
 		else {
-			cout << "RMC_PF: Invalid Input. " << endl;
+			opserr << "RMC_PF: Invalid Input. " << endln;
 			exit (1);
 		}
 	}
@@ -105,12 +105,12 @@ double RMC_PF::getdilatant(const MaterialParameter &MaterialParameter_in) const
 		if ( index_dilatant <= MaterialParameter_in.getNum_Internal_Scalar() && index_dilatant > 0)
 			return MaterialParameter_in.getInternal_Scalar(index_dilatant-1); 
 		else {
-			cout << "RMC_PF: Invalid Input. " << endl;
+			opserr << "RMC_PF: Invalid Input. " << endln;
 			exit (1);
 		}
     }
 	else {
-		cout << "RMC_PF: Invalid Input. " << endl;
+		opserr << "RMC_PF: Invalid Input. " << endln;
 		exit(1);
 	}
 }
@@ -123,7 +123,7 @@ double RMC_PF::getr(const MaterialParameter &MaterialParameter_in) const
 		if ( index_r <= MaterialParameter_in.getNum_Material_Parameter() && index_r > 0)
 			return MaterialParameter_in.getMaterial_Parameter(index_r-1); 
 		else {
-			cout << "RMC_YF: Invalid Input. " << endl;
+			opserr << "RMC_YF: Invalid Input. " << endln;
 			exit (1);
 		}
 	}
@@ -131,12 +131,12 @@ double RMC_PF::getr(const MaterialParameter &MaterialParameter_in) const
 		if ( index_r <= MaterialParameter_in.getNum_Internal_Scalar() && index_r > 0)
 			return MaterialParameter_in.getInternal_Scalar(index_r-1); 
 		else {
-			cout << "RMC_YF: Invalid Input. " << endl;
+			opserr << "RMC_YF: Invalid Input. " << endln;
 			exit (1);
 		}
     }
 	else {
-		cout << "RMC_YF: Invalid Input. " << endl;
+		opserr << "RMC_YF: Invalid Input. " << endln;
 		exit(1);
 	}
 }

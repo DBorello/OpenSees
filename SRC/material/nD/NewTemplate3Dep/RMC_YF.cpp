@@ -100,12 +100,12 @@ const stresstensor& RMC_YF::StressDerivative(const stresstensor& Stre,
 	double df2 = RoundedFunctiondf2(theta, r);
 	double dginv = (df2*f1 - df1*f2) /(f1*f1);
 	
-	//cout << "theta = " << theta/3.1415926 << endl;
-	//cout << "f1 = " << f1 << endl;
-	//cout << "f2 = " << f2 << endl;
-	//cout << "df1 = " << df1 << endl;
-	//cout << "df2 = " << df2 << endl;
-	//cout << "dginv = " << dginv << endl;
+	//opserr << "theta = " << theta/3.1415926 << endln;
+	//opserr << "f1 = " << f1 << endln;
+	//opserr << "f2 = " << f2 << endln;
+	//opserr << "df1 = " << df1 << endln;
+	//opserr << "df2 = " << df2 << endln;
+	//opserr << "dginv = " << dginv << endln;
 	
 	double dfodp = -3.0*a;
 	double dfodq = f1/(f2*sqrt(3.0));
@@ -164,7 +164,7 @@ double RMC_YF::geta(const MaterialParameter &MaterialParameter_in) const
 		if ( index_a <= MaterialParameter_in.getNum_Material_Parameter() && index_a > 0)
 			return MaterialParameter_in.getMaterial_Parameter(index_a-1); 
 		else {
-			cout << "RMC_YF: Invalid Input. " << endl;
+			opserr << "RMC_YF: Invalid Input. " << endln;
 			exit (1);
 		}
 	}
@@ -172,12 +172,12 @@ double RMC_YF::geta(const MaterialParameter &MaterialParameter_in) const
 		if ( index_a <= MaterialParameter_in.getNum_Internal_Scalar() && index_a > 0)
 			return MaterialParameter_in.getInternal_Scalar(index_a-1); 
 		else {
-			cout << "RMC_YF: Invalid Input. " << endl;
+			opserr << "RMC_YF: Invalid Input. " << endln;
 			exit (1);
 		}
     }
 	else {
-		cout << "RMC_YF: Invalid Input. " << endl;
+		opserr << "RMC_YF: Invalid Input. " << endln;
 		exit(1);
 	}
 }
@@ -190,7 +190,7 @@ double RMC_YF::getk(const MaterialParameter &MaterialParameter_in) const
 		if ( index_k <= MaterialParameter_in.getNum_Material_Parameter() && index_k > 0)
 			return MaterialParameter_in.getMaterial_Parameter(index_k-1); 
 		else {
-			cout << "RMC_YF: Invalid Input. " << endl;
+			opserr << "RMC_YF: Invalid Input. " << endln;
 			exit (1);
 		}
 	}
@@ -198,12 +198,12 @@ double RMC_YF::getk(const MaterialParameter &MaterialParameter_in) const
 		if ( index_k <= MaterialParameter_in.getNum_Internal_Scalar() && index_k > 0)
 			return MaterialParameter_in.getInternal_Scalar(index_k-1); 
 		else {
-			cout << "RMC_YF: Invalid Input. " << endl;
+			opserr << "RMC_YF: Invalid Input. " << endln;
 			exit (1);
 		}
     }
 	else {
-		cout << "RMC_YF: Invalid Input. " << endl;
+		opserr << "RMC_YF: Invalid Input. " << endln;
 		exit(1);
 	}
 }
@@ -216,7 +216,7 @@ double RMC_YF::getr(const MaterialParameter &MaterialParameter_in) const
 		if ( index_r <= MaterialParameter_in.getNum_Material_Parameter() && index_r > 0)
 			return MaterialParameter_in.getMaterial_Parameter(index_r-1); 
 		else {
-			cout << "RMC_YF: Invalid Input. " << endl;
+			opserr << "RMC_YF: Invalid Input. " << endln;
 			exit (1);
 		}
 	}
@@ -224,12 +224,12 @@ double RMC_YF::getr(const MaterialParameter &MaterialParameter_in) const
 		if ( index_r <= MaterialParameter_in.getNum_Internal_Scalar() && index_r > 0)
 			return MaterialParameter_in.getInternal_Scalar(index_r-1); 
 		else {
-			cout << "RMC_YF: Invalid Input. " << endl;
+			opserr << "RMC_YF: Invalid Input. " << endln;
 			exit (1);
 		}
     }
 	else {
-		cout << "RMC_YF: Invalid Input. " << endl;
+		opserr << "RMC_YF: Invalid Input. " << endln;
 		exit(1);
 	}
 }

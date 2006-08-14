@@ -35,7 +35,6 @@
 #define Linear_Eij_H 
 
 #include "TensorEvolution.h"
-#include <iostream.h>
 
 class Linear_Eij : public TensorEvolution
 {

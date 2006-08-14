@@ -34,7 +34,6 @@
 #ifndef ElasticState_H
 #define ElasticState_H
 
-#include "iostream.h"
 #include <BJtensor.h>
 #include <stresst.h>
 #include <straint.h>

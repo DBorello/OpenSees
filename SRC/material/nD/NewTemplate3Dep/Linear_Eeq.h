@@ -35,7 +35,6 @@
 #define Linear_Eeq_H 
 
 #include "ScalarEvolution.h"
-#include <iostream.h>
 
 class Linear_Eeq : public ScalarEvolution
 {

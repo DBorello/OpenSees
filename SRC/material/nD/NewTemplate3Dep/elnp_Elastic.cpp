@@ -88,7 +88,7 @@ const BJtensor& elnp_Elastic::getElasticStiffness(const MaterialParameter &Mater
     double kappa = getkappa(MaterialParameter_in);
     double v = getv(MaterialParameter_in);
     if (v >= 0.5 || v < -1.0) {
-      cout << "Warning!! elnp_Elastic: Invalid Possoin's ratio. " << endl;
+      opserr << "Warning!! elnp_Elastic: Invalid Possoin's ratio. " << endln;
       exit (1);
     }
     double Kc = getK_c(MaterialParameter_in);
@@ -115,7 +115,7 @@ const BJtensor& elnp_Elastic::getElasticStiffness(const MaterialParameter &Mater
 double elnp_Elastic::getkappa(const MaterialParameter &MaterialParameter_in) const
 {
     if ( kappa_index > MaterialParameter_in.getNum_Material_Parameter() || kappa_index < 2) { 
-        cout << "elnp_Elastic: Invalid Input. " << endl;
+        opserr << "elnp_Elastic: Invalid Input. " << endln;
         exit (1);
     }
     else
@@ -126,7 +126,7 @@ double elnp_Elastic::getkappa(const MaterialParameter &MaterialParameter_in) con
 double elnp_Elastic::getv(const MaterialParameter &MaterialParameter_in) const
 {
     if ( v_index > MaterialParameter_in.getNum_Material_Parameter() || v_index < 2) { 
-        cout << "elnp_Elastic: Invalid Input. " << endl;
+        opserr << "elnp_Elastic: Invalid Input. " << endln;
         exit (1);
     }
     else
@@ -137,7 +137,7 @@ double elnp_Elastic::getv(const MaterialParameter &MaterialParameter_in) const
 double elnp_Elastic::getK_c(const MaterialParameter &MaterialParameter_in) const
 {
     if ( K_c_index > MaterialParameter_in.getNum_Material_Parameter() || K_c_index < 2) { 
-        cout << "elnp_Elastic: Invalid Input. " << endl;
+        opserr << "elnp_Elastic: Invalid Input. " << endln;
         exit (1);
     }
     else
@@ -148,7 +148,7 @@ double elnp_Elastic::getK_c(const MaterialParameter &MaterialParameter_in) const
 double elnp_Elastic::gete0(const MaterialParameter &MaterialParameter_in) const
 {
     if ( e0_index > MaterialParameter_in.getNum_Material_Parameter() || e0_index < 2) { 
-        cout << "elnp_Elastic: Invalid Input. " << endl;
+        opserr << "elnp_Elastic: Invalid Input. " << endln;
         exit (1);
     }
     else

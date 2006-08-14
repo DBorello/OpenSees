@@ -77,7 +77,7 @@ double CC_Ev::getlambda(const MaterialParameter& material_parameter) const
     if ( lambda_index <= material_parameter.getNum_Material_Parameter() && lambda_index > 0)
         return material_parameter.getMaterial_Parameter(lambda_index-1);
     else {
-        cout << "CC_Ev: Invalid Input of " << lambda_index << endl;
+        opserr << "CC_Ev: Invalid Input of " << lambda_index << endln;
         exit (1);
     }
 }
@@ -88,7 +88,7 @@ double CC_Ev::getkappa(const MaterialParameter& material_parameter) const
     if ( kappa_index <= material_parameter.getNum_Material_Parameter() && kappa_index > 0)
         return material_parameter.getMaterial_Parameter(kappa_index-1);
     else {
-        cout << "CC_Ev: Invalid Input of " << kappa_index << endl;
+        opserr << "CC_Ev: Invalid Input of " << kappa_index << endln;
         exit (1);
     }
 }
@@ -99,7 +99,7 @@ double CC_Ev::gete0(const MaterialParameter& material_parameter) const
     if ( e0_index <= material_parameter.getNum_Material_Parameter() && e0_index > 0)
         return material_parameter.getMaterial_Parameter(e0_index-1);
     else {
-        cout << "CC_Ev: Invalid Input of " << e0_index << endl;
+        opserr << "CC_Ev: Invalid Input of " << e0_index << endln;
         exit (1);
     }
 }
@@ -110,7 +110,7 @@ double CC_Ev::getp0(const MaterialParameter& material_parameter) const
     if ( p0_index <= material_parameter.getNum_Internal_Scalar() && p0_index > 0)
         return material_parameter.getInternal_Scalar(p0_index-1);
     else {
-        cout << "CC_Ev: Invalid Input of " << p0_index << endl;
+        opserr << "CC_Ev: Invalid Input of " << p0_index << endln;
         exit (1);
     }
 }

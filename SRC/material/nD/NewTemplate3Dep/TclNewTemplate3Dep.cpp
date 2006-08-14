@@ -35,7 +35,6 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream.h>
 
 #include <Domain.h>
 
@@ -115,7 +114,7 @@ TclModelBuilder_addNewTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  i
   int loc = eleArgStart;
 
   if (Tcl_GetInt(interp, argv[loc++], &tag) != TCL_OK) {
-    cout << "Warning:  NewTemplate3Dep - invalid tag " << argv[loc] << endl;
+    opserr << "Warning:  NewTemplate3Dep - invalid tag " << argv[loc] << endln;
     exit (1);
   }
 
@@ -124,7 +123,7 @@ TclModelBuilder_addNewTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  i
     if ( strcmp(argv[loc],"-MaterialParameter") == 0 ) {
       MatP = EvaluateMaterialParameter(clientData, interp, argv[loc+1]);
       if (MatP == NULL) {
-        cout << "Warning:  TclNewTemplate3Dep - could not create elastic state from " << argv[loc+1] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - could not create elastic state from " << argv[loc+1] << endln;
         exit (1);
       }
       loc += 2;
@@ -133,7 +132,7 @@ TclModelBuilder_addNewTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  i
     else if ( strcmp(argv[loc],"-ElasticState") == 0 ) {
       ES = EvaluateElasticState(clientData, interp, argv[loc+1]);
       if (ES == NULL) {
-        cout << "Warning:  TclNewTemplate3Dep - could not create elastic state from " << argv[loc+1] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - could not create elastic state from " << argv[loc+1] << endln;
         exit (1);
       }
       loc += 2;
@@ -142,7 +141,7 @@ TclModelBuilder_addNewTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  i
     else if ( strcmp(argv[loc],"-YieldFunction") == 0 ) {
       YF = EvaluateYieldFunction(clientData, interp, argv[loc+1]);
       if (YF == NULL) {
-        cout << "Warning:  TclNewTemplate3Dep - could not create a yield function from " << argv[loc+1] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - could not create a yield function from " << argv[loc+1] << endln;
         exit (1);
       }
       loc += 2;
@@ -151,7 +150,7 @@ TclModelBuilder_addNewTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  i
     else if ( strcmp(argv[loc],"-PlasticFlow") == 0 ) {
       PF = EvaluatePlasticFlow(clientData, interp, argv[loc+1]);
       if (PF == NULL) {
-        cout << "Warning:  TclNewTemplate3Dep - could not create a yield function from " << argv[loc+1] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - could not create a yield function from " << argv[loc+1] << endln;
         exit (1);
       }
       loc += 2;
@@ -160,7 +159,7 @@ TclModelBuilder_addNewTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  i
     else if ( strcmp(argv[loc],"-ScalarEvolution") == 0 ) {
       SSE = EvaluateSE(clientData, interp, argv[loc+1]);
       if (SSE == NULL) {
-        cout << "Warning:  TclNewTemplate3Dep - could not create a scalar evolution from " << argv[loc+1] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - could not create a scalar evolution from " << argv[loc+1] << endln;
         exit (1);
       }
       loc += 2;
@@ -169,7 +168,7 @@ TclModelBuilder_addNewTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  i
     else if ( strcmp(argv[loc],"-TensorEvolution") == 0 ) {
       TTE = EvaluateTE(clientData, interp, argv[loc+1]);
       if (TTE == NULL) {
-        cout << "Warning:  TclNewTemplate3Dep - could not create a tensor evolution from " << argv[loc+1] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - could not create a tensor evolution from " << argv[loc+1] << endln;
         exit (1);
       }
       loc += 2;
@@ -177,14 +176,14 @@ TclModelBuilder_addNewTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  i
 
     else if ( strcmp(argv[loc],"-Algorithm") == 0 ) {
       if (Tcl_GetInt(interp, argv[loc+1], &CI) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid  algorithm index " << argv[loc] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid  algorithm index " << argv[loc] << endln;
         exit (1);
       }
       loc += 2;
     }
     
     else {
-        cout << "Warning:  TclNewTemplate3Dep - unknown keyword/command : " << argv[loc] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - unknown keyword/command : " << argv[loc] << endln;
         exit (1);
       }
 
@@ -197,7 +196,7 @@ TclModelBuilder_addNewTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  i
   else if ( (MatP != NULL) && (ES != NULL) && (YF != NULL) && (PF != NULL) && (SSE == NULL) )
     theMaterial = new NewTemplate3Dep(tag, MatP, ES, YF, PF, TTE, CI);
   else
-    cout << "Warning: invalid args used to create a NewTemplate3Dep material." << endl;
+    opserr << "Warning: invalid args used to create a NewTemplate3Dep material." << endln;
 
   return theMaterial;
 }
@@ -230,24 +229,24 @@ MaterialParameter *EvaluateMaterialParameter(ClientData clientData, Tcl_Interp *
       loc++;  
       
       if (Tcl_GetInt(interp, argv[loc], &n_mc) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endln;
         exit (1);
       } 
  
-      //cout << "n_mc = " << n_mc << endl;
+      //opserr << "n_mc = " << n_mc << endln;
       
       if (n_mc > 0)
         mc = new double[n_mc];
 
       if (mc == 0) {
-        cout << "Warning:  TclNewTemplate3Dep - could not create material constants " << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - could not create material constants " << endln;
         exit (1);
       }
 
       for (int i = 0; i < n_mc; i++) {
         loc++;
         if (Tcl_GetDouble(interp, argv[loc], &mc[i]) != TCL_OK) {
-          cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endl;
+          opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endln;
           exit (1);
         }
       }            
@@ -258,23 +257,23 @@ MaterialParameter *EvaluateMaterialParameter(ClientData clientData, Tcl_Interp *
       loc++;
 
       if (Tcl_GetInt(interp, argv[loc], &n_is) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endln;
         exit (1);
       } 
       
-      //cout << "n_is = " << n_is << endl;
+      //opserr << "n_is = " << n_is << endln;
       
       if (n_is > 0) {
         is = new double[n_is];
         if (is == 0) {
-          cout << "Warning:  TclNewTemplate3Dep - could not create scalar variables " << endl;
+          opserr << "Warning:  TclNewTemplate3Dep - could not create scalar variables " << endln;
           exit (1);
         }
 
         for (int i = 0; i < n_is; i++) {
           loc++;
           if (Tcl_GetDouble(interp, argv[loc], &is[i]) != TCL_OK) {
-            cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endl;
+            opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endln;
             exit (1);
           }
         }
@@ -286,7 +285,7 @@ MaterialParameter *EvaluateMaterialParameter(ClientData clientData, Tcl_Interp *
       loc++;
 
       if (Tcl_GetInt(interp, argv[loc], &n_it) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endln;
         exit (1);
       } 
 
@@ -294,17 +293,17 @@ MaterialParameter *EvaluateMaterialParameter(ClientData clientData, Tcl_Interp *
         it = new stresstensor[n_it];
         double a[9];
         if (it == 0) {
-          cout << "Warning:  TclNewTemplate3Dep - could not create tensor variables " << endl;
+          opserr << "Warning:  TclNewTemplate3Dep - could not create tensor variables " << endln;
           exit (1);
         }
  
-        //cout << "n_it = " << n_it << endl;
+        //opserr << "n_it = " << n_it << endln;
         
         for (int i = 0; i < n_it; i++) {
           for (int j = 0; j < 9; j++) {
             loc++;
             if (Tcl_GetDouble(interp, argv[loc], &a[j]) != TCL_OK) {
-              cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endl;
+              opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endln;
               exit (1);
             }
           }
@@ -328,7 +327,7 @@ MaterialParameter *EvaluateMaterialParameter(ClientData clientData, Tcl_Interp *
   else if ( (mc != NULL) && (is == NULL) && (it == NULL) )
     inp = new MaterialParameter(mc, n_mc);
   else {
-    cout << "Warning:  TclNewTemplate3Dep - could not create input parameter " << endl;
+    opserr << "Warning:  TclNewTemplate3Dep - could not create input parameter " << endln;
     exit (1);
   }
 
@@ -364,11 +363,11 @@ ElasticState *EvaluateElasticState(ClientData clientData, Tcl_Interp *interp, TC
 
     if (argc > 2 ) {
       if (Tcl_GetInt(interp, argv[1], &a1) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[2], &a2) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endln;
         exit (1);
       }
     }
@@ -376,7 +375,7 @@ ElasticState *EvaluateElasticState(ClientData clientData, Tcl_Interp *interp, TC
       double a[9];
         for (int j = 0; j < 9; j++) {
           if (Tcl_GetDouble(interp, argv[4+1+j], &a[j]) != TCL_OK) {
-            cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2+1+j] << endl;
+            opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2+1+j] << endln;
             exit (1);
           }
         }
@@ -388,7 +387,7 @@ ElasticState *EvaluateElasticState(ClientData clientData, Tcl_Interp *interp, TC
       double a[9];
         for (int j = 0; j < 9; j++) {
           if (Tcl_GetDouble(interp, argv[2+10+j], &a[j]) != TCL_OK) {
-            cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2+10+j] << endl;
+            opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2+10+j] << endln;
             exit (1);
           }
         }
@@ -411,19 +410,19 @@ ElasticState *EvaluateElasticState(ClientData clientData, Tcl_Interp *interp, TC
 
     if (argc > 4 ) {
       if (Tcl_GetInt(interp, argv[1], &a1) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[2], &a2) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[3], &a3) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[3] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[3] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[4], &a4) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4] << endln;
         exit (1);
       }          
     }
@@ -431,7 +430,7 @@ ElasticState *EvaluateElasticState(ClientData clientData, Tcl_Interp *interp, TC
       double a[9];
         for (int j = 0; j < 9; j++) {
           if (Tcl_GetDouble(interp, argv[4+1+j], &a[j]) != TCL_OK) {
-            cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4+1+j] << endl;
+            opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4+1+j] << endln;
             exit (1);
           }
         }
@@ -443,7 +442,7 @@ ElasticState *EvaluateElasticState(ClientData clientData, Tcl_Interp *interp, TC
       double a[9];
         for (int j = 0; j < 9; j++) {
           if (Tcl_GetDouble(interp, argv[4+10+j], &a[j]) != TCL_OK) {
-            cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4+10+j] << endl;
+            opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4+10+j] << endln;
             exit (1);
           }
         }
@@ -467,23 +466,23 @@ ElasticState *EvaluateElasticState(ClientData clientData, Tcl_Interp *interp, TC
 
     if (argc > 5 ) {
       if (Tcl_GetInt(interp, argv[1], &a1) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[2], &a2) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[3], &a3) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[3] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[3] << endln;
         exit (1);
       }    
       if (Tcl_GetInt(interp, argv[4], &a4) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[5], &a5) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[5] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[5] << endln;
         exit (1);
       } 
     }
@@ -491,7 +490,7 @@ ElasticState *EvaluateElasticState(ClientData clientData, Tcl_Interp *interp, TC
       double a[9];
         for (int j = 0; j < 9; j++) {
           if (Tcl_GetDouble(interp, argv[5+1+j], &a[j]) != TCL_OK) {
-            cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[5+1+j] << endl;
+            opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[5+1+j] << endln;
             exit (1);
           }
         }
@@ -503,7 +502,7 @@ ElasticState *EvaluateElasticState(ClientData clientData, Tcl_Interp *interp, TC
       double a[9];
         for (int j = 0; j < 9; j++) {
           if (Tcl_GetDouble(interp, argv[4+10+j], &a[j]) != TCL_OK) {
-            cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[5+10+j] << endl;
+            opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[5+10+j] << endln;
             exit (1);
           }
         }
@@ -527,23 +526,23 @@ ElasticState *EvaluateElasticState(ClientData clientData, Tcl_Interp *interp, TC
 
     if (argc > 5 ) {
       if (Tcl_GetInt(interp, argv[1], &a1) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[2], &a2) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[3], &a3) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[3] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[3] << endln;
         exit (1);
       }    
       if (Tcl_GetInt(interp, argv[4], &a4) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[5], &a5) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[5] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[5] << endln;
         exit (1);
       }      
     }
@@ -551,7 +550,7 @@ ElasticState *EvaluateElasticState(ClientData clientData, Tcl_Interp *interp, TC
       double a[9];
         for (int j = 0; j < 9; j++) {
           if (Tcl_GetDouble(interp, argv[5+1+j], &a[j]) != TCL_OK) {
-            cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[5+1+j] << endl;
+            opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[5+1+j] << endln;
             exit (1);
           }
         }
@@ -563,7 +562,7 @@ ElasticState *EvaluateElasticState(ClientData clientData, Tcl_Interp *interp, TC
       double a[9];
         for (int j = 0; j < 9; j++) {
           if (Tcl_GetDouble(interp, argv[5+10+j], &a[j]) != TCL_OK) {
-            cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[5+10+j] << endl;
+            opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[5+10+j] << endln;
             exit (1);
           }
         }
@@ -577,7 +576,7 @@ ElasticState *EvaluateElasticState(ClientData clientData, Tcl_Interp *interp, TC
 
   // if others
   else {
-    cout << "Warning: invalid elastic state object: " << argv[0] << endl;
+    opserr << "Warning: invalid elastic state object: " << argv[0] << endln;
     exit(1);
   }
 
@@ -610,27 +609,27 @@ YieldFunction *EvaluateYieldFunction(ClientData clientData, Tcl_Interp *interp, 
     int a2 = -1;  int b2 = 0;
 
     if (argc <= 2)  {
-        cout << "Warning:  TclNewTemplate3Dep - Yield Function (VM) - input parameters < 2" << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - Yield Function (VM) - input parameters < 2" << endln;
         exit (1);
     }
 
     if (argc > 2 ) {
       if (Tcl_GetInt(interp, argv[1], &a1) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[2], &b1) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endln;
         exit (1);
       }
     }
     if (argc > 4 ) {
       if (Tcl_GetInt(interp, argv[3], &a2) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[3] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[3] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[4], &b2) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4] << endln;
         exit (1);
       }
     }
@@ -645,37 +644,37 @@ YieldFunction *EvaluateYieldFunction(ClientData clientData, Tcl_Interp *interp, 
     int a3 = -1;  int b3 = 0;
 
     if (argc <= 2)  {
-        cout << "Warning:  TclNewTemplate3Dep - Yield Function (DP) - input parameters < 2" << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - Yield Function (DP) - input parameters < 2" << endln;
         exit (1);
     }
 
     if (argc > 2 ) {
       if (Tcl_GetInt(interp, argv[1], &a1) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[2], &b1) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endln;
         exit (1);
       }
     }
     if (argc > 4 ) {
       if (Tcl_GetInt(interp, argv[3], &a2) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[3] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[3] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[4], &b2) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4] << endln;
         exit (1);
       }
     }   
     if (argc > 6 ) {
       if (Tcl_GetInt(interp, argv[5], &a3) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[5] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[5] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[6], &b3) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[6] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[6] << endln;
         exit (1);
       }
     }
@@ -689,25 +688,25 @@ YieldFunction *EvaluateYieldFunction(ClientData clientData, Tcl_Interp *interp, 
     int a2 = -1;  int b2 = 0;
 
     if (argc <= 4)  {
-        cout << "Warning:  TclNewTemplate3Dep - Yield Function (CC) - input parameters < 4" << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - Yield Function (CC) - input parameters < 4" << endln;
         exit (1);
     }
 
     if (argc > 4 ) {
       if (Tcl_GetInt(interp, argv[1], &a1) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[2], &b1) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[3], &a2) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[3] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[3] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[4], &b2) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4] << endln;
         exit (1);
       }
     }  
@@ -721,25 +720,25 @@ YieldFunction *EvaluateYieldFunction(ClientData clientData, Tcl_Interp *interp, 
     int a2 = -1;  int b2 = 0;
 
     if (argc <= 2)  {
-        cout << "Warning:  TclNewTemplate3Dep - Yield Function (DM) - input parameters < 2" << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - Yield Function (DM) - input parameters < 2" << endln;
         exit (1);
     }
 
     if (argc > 2 ) {
       if (Tcl_GetInt(interp, argv[1], &a1) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[2], &b1) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[3], &a2) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[3] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[3] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[4], &b2) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4] << endln;
         exit (1);
       }
     }   
@@ -749,7 +748,7 @@ YieldFunction *EvaluateYieldFunction(ClientData clientData, Tcl_Interp *interp, 
 
   // if others
   else {
-    cout << "Warning: invalid yield function: " << argv[0] << endl;
+    opserr << "Warning: invalid yield function: " << argv[0] << endln;
     exit (1);
   }
 
@@ -781,17 +780,17 @@ PlasticFlow *EvaluatePlasticFlow(ClientData clientData, Tcl_Interp *interp, TCL_
     int a1 = -1;  int b1 = 0;
 
     //if (argc <= 2)  {
-    //    cout << "Warning:  TclNewTemplate3Dep - Plastic Flow (VM) - input parameters < 2" << endl;
+    //    opserr << "Warning:  TclNewTemplate3Dep - Plastic Flow (VM) - input parameters < 2" << endln;
     //    exit (1);
     //}
 
     if (argc > 2 ) {
       if (Tcl_GetInt(interp, argv[1], &a1) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[2], &b1) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endln;
         exit (1);
       }
     } 
@@ -805,27 +804,27 @@ PlasticFlow *EvaluatePlasticFlow(ClientData clientData, Tcl_Interp *interp, TCL_
     int a2 = -1;  int b2 = 0;
 
     if (argc <= 2)  {
-        cout << "Warning:  TclNewTemplate3Dep - Plastic Flow (DP) - input parameters < 2" << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - Plastic Flow (DP) - input parameters < 2" << endln;
         exit (1);
     }
 
     if (argc > 2 ) {
       if (Tcl_GetInt(interp, argv[1], &a1) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[2], &b1) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endln;
         exit (1);
       }
     }
     if (argc > 4 ) {
       if (Tcl_GetInt(interp, argv[3], &a2) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[3] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[3] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[4], &b2) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4] << endln;
         exit (1);
       }
     }   
@@ -839,27 +838,27 @@ PlasticFlow *EvaluatePlasticFlow(ClientData clientData, Tcl_Interp *interp, TCL_
     int a2 = -1;  int b2 = 0;
 
     if (argc <= 4)  {
-        cout << "Warning:  TclNewTemplate3Dep - Plastic Flow (CC) - input parameters < 4" << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - Plastic Flow (CC) - input parameters < 4" << endln;
         exit (1);
     }
 
     if (argc > 2 ) {
       if (Tcl_GetInt(interp, argv[1], &a1) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[1] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[2], &b1) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[2] << endln;
         exit (1);
       }
     }
     if (argc > 4 ) {
       if (Tcl_GetInt(interp, argv[3], &a2) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[3] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[3] << endln;
         exit (1);
       }
       if (Tcl_GetInt(interp, argv[4], &b2) != TCL_OK) {
-        cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4] << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[4] << endln;
         exit (1);
       }
     }   
@@ -873,18 +872,18 @@ PlasticFlow *EvaluatePlasticFlow(ClientData clientData, Tcl_Interp *interp, TCL_
     int b[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
 
     if (argc <= 22)  {
-        cout << "Warning:  TclNewTemplate3Dep - Plastic Flow (DM) - input parameters < 22" << endl;
+        opserr << "Warning:  TclNewTemplate3Dep - Plastic Flow (DM) - input parameters < 22" << endln;
         exit (1);
     }
 
     if (argc > 24 ) {
       for (int i = 0; i < 12; i++) {
         if (Tcl_GetInt(interp, argv[i*2+1], &a[i]) != TCL_OK) {
-          cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[i*2+1] << endl;
+          opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[i*2+1] << endln;
           exit (1);
         }
         if (Tcl_GetInt(interp, argv[i*2+2], &b[i]) != TCL_OK) {
-          cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[i*2+2] << endl;
+          opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[i*2+2] << endln;
           exit (1);
         }
       }
@@ -896,7 +895,7 @@ PlasticFlow *EvaluatePlasticFlow(ClientData clientData, Tcl_Interp *interp, TCL_
 
   // if others
   else {
-    cout << "Warning: invalid plastic flow: " << argv[0] << endl;
+    opserr << "Warning: invalid plastic flow: " << argv[0] << endln;
     exit (1);
   }
 
@@ -922,7 +921,7 @@ ScalarEvolution** EvaluateSE(ClientData clientData, Tcl_Interp *interp, TCL_Char
   if (n_is > 0) {
     ISS = new ScalarEvolution* [n_is];
     if ( ISS == NULL) {
-      cout << "Warning:  TclNewTemplate3Dep - invalid input " << endl;
+      opserr << "Warning:  TclNewTemplate3Dep - invalid input " << endln;
       exit (1);
     }
   }
@@ -936,7 +935,7 @@ ScalarEvolution** EvaluateSE(ClientData clientData, Tcl_Interp *interp, TCL_Char
          int a1 = 0;          
          loc++; 
          if (Tcl_GetInt(interp, argv[loc], &a1) != TCL_OK) {
-           cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endl;
+           opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endln;
            exit (1);
          }
          ISS[i] = new Linear_Eeq(a1);
@@ -949,7 +948,7 @@ ScalarEvolution** EvaluateSE(ClientData clientData, Tcl_Interp *interp, TCL_Char
          for (int j = 0; j < 4; j++) {
            loc++;
            if (Tcl_GetInt(interp, argv[loc], &a[j]) != TCL_OK) {
-             cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endl;
+             opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endln;
              exit (1);
            }
          }   
@@ -959,7 +958,7 @@ ScalarEvolution** EvaluateSE(ClientData clientData, Tcl_Interp *interp, TCL_Char
 
        // other
        else {
-         cout << "Warning:  TclNewTemplate3Dep - unknown scalar evolution: " << argv[loc] << endl;
+         opserr << "Warning:  TclNewTemplate3Dep - unknown scalar evolution: " << argv[loc] << endln;
          exit (1);       
        }
            
@@ -986,7 +985,7 @@ TensorEvolution** EvaluateTE(ClientData clientData, Tcl_Interp *interp, TCL_Char
   if (n_it > 0) {
     ITT = new TensorEvolution* [n_is];
     if ( ITT == NULL) {
-      cout << "Warning:  TclNewTemplate3Dep - invalid input " << endl;
+      opserr << "Warning:  TclNewTemplate3Dep - invalid input " << endln;
       exit (1);
     }
   }
@@ -1000,7 +999,7 @@ TensorEvolution** EvaluateTE(ClientData clientData, Tcl_Interp *interp, TCL_Char
          int a1 = 0;          
          loc++; 
          if (Tcl_GetInt(interp, argv[loc], &a1) != TCL_OK) {
-           cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endl;
+           opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endln;
            exit (1);
          }
          ITT[i] = new Linear_Eij(a1);
@@ -1013,7 +1012,7 @@ TensorEvolution** EvaluateTE(ClientData clientData, Tcl_Interp *interp, TCL_Char
          for (int j = 0; j < 3; j++) {
            loc++;
            if (Tcl_GetInt(interp, argv[loc], &a[j]) != TCL_OK) {
-             cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endl;
+             opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endln;
              exit (1);
            }
          }  
@@ -1027,7 +1026,7 @@ TensorEvolution** EvaluateTE(ClientData clientData, Tcl_Interp *interp, TCL_Char
          for (int j = 0; j < 14; j++) {
            loc++;
            if (Tcl_GetInt(interp, argv[loc], &a[j]) != TCL_OK) {
-             cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endl;
+             opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endln;
              exit (1);
            }
          }   
@@ -1041,7 +1040,7 @@ TensorEvolution** EvaluateTE(ClientData clientData, Tcl_Interp *interp, TCL_Char
          for (int j = 0; j < 5; j++) {
            loc++;
            if (Tcl_GetInt(interp, argv[loc], &a[j]) != TCL_OK) {
-             cout << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endl;
+             opserr << "Warning:  TclNewTemplate3Dep - invalid input " << argv[loc] << endln;
              exit (1);
            }
          }   
@@ -1051,7 +1050,7 @@ TensorEvolution** EvaluateTE(ClientData clientData, Tcl_Interp *interp, TCL_Char
 
        // other
        else {
-         cout << "Warning:  TclNewTemplate3Dep - unknown tensor evolution: " << argv[loc] << endl;
+         opserr << "Warning:  TclNewTemplate3Dep - unknown tensor evolution: " << argv[loc] << endln;
          exit (1);              
        }
     

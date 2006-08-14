@@ -60,7 +60,7 @@ double Linear_Eeq::getLinearFactor(const MaterialParameter& material_parameter) 
     if ( LinearFactor_index <= material_parameter.getNum_Material_Parameter() && LinearFactor_index > 0)
         return material_parameter.getMaterial_Parameter(LinearFactor_index-1);
     else {
-        cout << "Linear_Eeq: Invalid Input. " << endl;
+        opserr << "Linear_Eeq: Invalid Input. " << endln;
         exit (1);
     }
 } 

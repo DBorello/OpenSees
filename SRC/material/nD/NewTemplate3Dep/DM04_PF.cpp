@@ -291,7 +291,7 @@ const stresstensor& DM04_PF::getalpha(const MaterialParameter &MaterialParameter
 		return DM04_PF::DM04temp;
 	}
 	else {
-		cout << "DM04_PF: Invalid Input. " << endl;
+		opserr << "DM04_PF: Invalid Input. " << endln;
 		exit (1);
 	}
 }
@@ -305,7 +305,7 @@ const stresstensor& DM04_PF::getz(const MaterialParameter &MaterialParameter_in)
 		return DM04_PF::DM04temp;
 	}
 	else {
-		cout << "DM04_PF: Invalid Input. " << endl;
+		opserr << "DM04_PF: Invalid Input. " << endln;
 		exit (1);
 	}
 }
@@ -319,7 +319,7 @@ double DM04_PF::getParameters(const MaterialParameter &MaterialParameter_in, int
 	else if ( parIndex == 1 && which <= MaterialParameter_in.getNum_Internal_Scalar() && which > 0)
 		return MaterialParameter_in.getInternal_Scalar(which-1);
 	else {
-		cout << "DM04_PF: Invalid Input. " << parIndex << " and " << which << endl;
+		opserr << "DM04_PF: Invalid Input. " << parIndex << " and " << which << endln;
 		exit (1);
 	}
 } 
@@ -333,7 +333,7 @@ double DM04_PF::getec(double e_r, double lambda_c, double xi, double Pat, double
     if ( p_c/Pat >= 0.0 )
       ee = e_r - lambda_c * pow(p_c/Pat, xi);
     else 
-      cout << "Warning: DM04_PF - 'p_c/Pat' less than zero! " << endl;
+      opserr << "Warning: DM04_PF - 'p_c/Pat' less than zero! " << endln;
 
     return ee;
 }

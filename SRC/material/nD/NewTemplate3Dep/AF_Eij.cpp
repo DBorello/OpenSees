@@ -33,6 +33,7 @@
 
 #ifndef AF_Eij_CPP
 #define AF_Eij_CPP
+#include <OPS_Globals.h>
 
 #include "AF_Eij.h"
 	
@@ -74,7 +75,7 @@ double AF_Eij::getha(const MaterialParameter& material_parameter) const
     if ( ha_index <= material_parameter.getNum_Material_Parameter() && ha_index > 0)
         return material_parameter.getMaterial_Parameter(ha_index -1);
     else {
-        cout << "AF_Eij: Invalid Input of " << ha_index << endl;
+        opserr << "AF_Eij: Invalid Input of " << ha_index << endln;
         exit (1);
     }
 }
@@ -84,7 +85,7 @@ double AF_Eij::getCr(const MaterialParameter& material_parameter) const
     if ( Cr_index <= material_parameter.getNum_Material_Parameter() && Cr_index > 0)
         return material_parameter.getMaterial_Parameter(Cr_index -1);
     else {
-        cout << "AF_Eij: Invalid Input of " << Cr_index << endl;
+        opserr << "AF_Eij: Invalid Input of " << Cr_index << endln;
         exit (1);
     }
 }
@@ -96,7 +97,7 @@ const stresstensor& AF_Eij::getalpha(const MaterialParameter& material_parameter
         return AF_Eij::AFal;
     }
     else {
-        cout << "AF_Eij: Invalid Input of " << alpha_index << endl;
+        opserr << "AF_Eij: Invalid Input of " << alpha_index << endln;
         exit (1);
     }
 }

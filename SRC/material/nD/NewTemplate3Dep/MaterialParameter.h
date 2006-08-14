@@ -35,7 +35,6 @@
 #define MaterialParameter_H
 
 #include <stresst.h>
-#include <iostream.h>
 		
 class MaterialParameter
 {  

@@ -76,7 +76,7 @@ double VM_YF::YieldFunctionValue( const stresstensor &Stre,
 		return temp2*1.5 - pow(getk(MaterialParameter_in), 2);
 	}
 	else {
-		cout << "Warning!! VM_YF: Invalid Input Parameter. " << endl;
+		opserr << "Warning!! VM_YF: Invalid Input Parameter. " << endln;
 		exit (1);
 	}
 }
@@ -96,7 +96,7 @@ const stresstensor& VM_YF::StressDerivative(const stresstensor &Stre,
 		return VMst;
 	}
 	else {
-		cout << "Warning!! VM_YF: Invalid Input Parameter. " << endl;
+		opserr << "Warning!! VM_YF: Invalid Input Parameter. " << endln;
 		exit (1);
 	}
 }
@@ -109,7 +109,7 @@ double VM_YF::InScalarDerivative(const stresstensor &Stre,
 	if (k_which == 1 && index_ == index_k)
 		return -2.0*getk(MaterialParameter_in);
 	else {
-		cout << "Warning!! VM_YF: Invalid Input Parameter. " << endl;
+		opserr << "Warning!! VM_YF: Invalid Input Parameter. " << endln;
 		exit (1);
 	}
 }
@@ -126,7 +126,7 @@ const stresstensor& VM_YF::InTensorDerivative(const stresstensor &Stre,
 		return VMst;
 	}
 	else {
-		cout << "Warning!! VM_YF: Invalid Input Parameter. " << endl;
+		opserr << "Warning!! VM_YF: Invalid Input Parameter. " << endln;
 		exit (1);
 	}
 }
@@ -164,7 +164,7 @@ double VM_YF::getk(const MaterialParameter &MaterialParameter_in) const
 	else if( k_which == 1 && index_k <= MaterialParameter_in.getNum_Internal_Scalar() && index_k > 0)
 		return MaterialParameter_in.getInternal_Scalar(index_k-1);
 	else {
-		cout << "Warning!! VM_YF: Invalid Input. " << endl;
+		opserr << "Warning!! VM_YF: Invalid Input. " << endln;
 		exit (1);
 	}
 }
@@ -178,7 +178,7 @@ const stresstensor& VM_YF::getbackstress(const MaterialParameter &MaterialParame
 		return VMst;
 	}
 	else {
-		cout << "Warning!! VM_YF: Invalid Input. " << endl;
+		opserr << "Warning!! VM_YF: Invalid Input. " << endln;
 		exit (1);
 	}
 }

@@ -35,7 +35,6 @@
 
 #include "YieldFunction.h"
 #include <math.h>
-#include <iostream.h>
 
 class DP_YF : public YieldFunction
 {

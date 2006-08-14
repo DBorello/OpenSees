@@ -36,7 +36,6 @@
 
 #include "ElasticState.h"
 #include <math.h>
-#include <iostream.h>
 
 //stresstensor zerostress;
 //straintensor zerostrain;

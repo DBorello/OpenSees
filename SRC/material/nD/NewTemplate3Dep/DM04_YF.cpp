@@ -119,7 +119,7 @@ const stresstensor& DM04_YF::InTensorDerivative(const stresstensor& Stre,
 		DM04_YF::DM04st = s_bar *(-p);	    
     }
 	else {
-		cout << "DM04_YF: Invalid Input. " << endl;
+		opserr << "DM04_YF: Invalid Input. " << endln;
 		exit (1);
 	}
     
@@ -152,13 +152,13 @@ double DM04_YF::getm(const MaterialParameter &MaterialParameter_in) const
     if ( m_which == 0 && index_m <= MaterialParameter_in.getNum_Material_Parameter() && index_m > 0 ) {
         m = MaterialParameter_in.getMaterial_Parameter(index_m-1);
 	    if (m <= 0.0) {
-		    cout << "DM04_YF: Invalid Input, m <= 0.0. " << endl;
+		    opserr << "DM04_YF: Invalid Input, m <= 0.0. " << endln;
 		    exit (1);
 	    }
 		return m;
     }
 	else {
-		cout << "Warning!! DM04_YF: Invalid Input. " << endl;
+		opserr << "Warning!! DM04_YF: Invalid Input. " << endln;
 		exit (1);
 	}
 }
@@ -172,7 +172,7 @@ const stresstensor& DM04_YF::getalpha(const MaterialParameter &MaterialParameter
 		return DM04_YF::DM04st;
 	}
 	else {
-		cout << "Warning!! DM04_YF: Invalid Input. " << endl;
+		opserr << "Warning!! DM04_YF: Invalid Input. " << endln;
 		exit (1);
 	}
 }

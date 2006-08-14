@@ -35,7 +35,6 @@
 
 #include "PlasticFlow.h"
 #include <math.h>
-#include <iostream.h>
 
 class CC_PF : public PlasticFlow
 {

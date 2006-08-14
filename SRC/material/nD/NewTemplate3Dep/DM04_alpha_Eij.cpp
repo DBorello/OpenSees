@@ -314,7 +314,7 @@ const stresstensor& DM04_alpha_Eij::getalpha(const MaterialParameter& material_p
 		return DM04_alpha_Eij::DM04_alpha_t;
 	}
 	else {
-		cout << "DM04_alpha: Invalid Input (alpha) " << endl;
+		opserr << "DM04_alpha: Invalid Input (alpha) " << endln;
 		exit (1);
 	}
 }
@@ -328,7 +328,7 @@ const stresstensor& DM04_alpha_Eij::getz(const MaterialParameter& material_param
 		return DM04_alpha_Eij::DM04_alpha_t;
 	}
 	else {
-		cout << "DM04_alpha: Invalid Input (z) " << endl;
+		opserr << "DM04_alpha: Invalid Input (z) " << endln;
 		exit (1);
 	}
 }
@@ -339,7 +339,7 @@ double DM04_alpha_Eij::getParameters(const MaterialParameter& material_parameter
 	if ( which <= material_parameter.getNum_Material_Parameter() && which > 0)
 		return material_parameter.getMaterial_Parameter(which-1);
 	else {
-		cout << "DM04_alpha: Invalid Input - #" << which << endl;
+		opserr << "DM04_alpha: Invalid Input - #" << which << endln;
 		exit (1);
 	}
 } 
@@ -353,7 +353,7 @@ double DM04_alpha_Eij::getec(double e_r, double lambda_c, double xi, double Pat,
     if ( p_c/Pat >= 0.0 )
       ee = e_r - lambda_c * pow(p_c/Pat, xi);
     else 
-      cout << "Warning: DM04_alpha_Eij - 'p_c/Pat' less than zero! " << endl;
+      opserr << "Warning: DM04_alpha_Eij - 'p_c/Pat' less than zero! " << endln;
 
     return ee;
 }

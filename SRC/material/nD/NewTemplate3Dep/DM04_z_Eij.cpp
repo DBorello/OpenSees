@@ -108,7 +108,7 @@ double DM04_z_Eij::getm(const MaterialParameter& material_parameter) const
     if ( m_index <= material_parameter.getNum_Material_Parameter() && m_index > 0)
         return material_parameter.getMaterial_Parameter(m_index-1);
     else {
-        cout << "DM04_alpha: Invalid Input. " << endl;
+        opserr << "DM04_alpha: Invalid Input. " << endln;
         exit (1);
     }
 }
@@ -120,7 +120,7 @@ double DM04_z_Eij::getc_z(const MaterialParameter& material_parameter) const
     if ( c_z_index <= material_parameter.getNum_Material_Parameter() && c_z_index > 0)
         return material_parameter.getMaterial_Parameter(c_z_index-1);
     else {
-        cout << "DM04_alpha: Invalid Input. " << endl;
+        opserr << "DM04_alpha: Invalid Input. " << endln;
         exit (1);
     }
 }
@@ -132,7 +132,7 @@ double DM04_z_Eij::getz_max(const MaterialParameter& material_parameter) const
     if ( z_max_index <= material_parameter.getNum_Material_Parameter() && z_max_index > 0)
         return material_parameter.getMaterial_Parameter(z_max_index-1);
     else {
-        cout << "DM04_alpha: Invalid Input. " << endl;
+        opserr << "DM04_alpha: Invalid Input. " << endln;
         exit (1);
     }
 }
@@ -146,7 +146,7 @@ const stresstensor& DM04_z_Eij::getalpha(const MaterialParameter& material_param
         return DM04_z_Eij::DM04_z_t;
     }
     else {
-        cout << "DM04_z: Invalid Input. " << endl;
+        opserr << "DM04_z: Invalid Input. " << endln;
         exit (1);
     }
 }
@@ -160,7 +160,7 @@ const stresstensor& DM04_z_Eij::getz(const MaterialParameter& material_parameter
         return DM04_z_Eij::DM04_z_t;
     }
     else {
-        cout << "DM04_z: Invalid Input. " << endl;
+        opserr << "DM04_z: Invalid Input. " << endln;
         exit (1);
     }
 }

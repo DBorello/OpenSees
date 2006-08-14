@@ -61,7 +61,7 @@ MaterialParameter::MaterialParameter(const double *Material_Parameter_in,
     if (Num_Material_Parameter_in > 0) {
         Material_Parameter = new double [Num_Material_Parameter = Num_Material_Parameter_in];
         if (!Material_Parameter) {
-            cout << "MaterialParameter::Insufficient memory! " << endl;
+            opserr << "MaterialParameter::Insufficient memory! " << endln;
             exit (1);
         }        
         for (int i = 0; i < Num_Material_Parameter; i++)
@@ -76,7 +76,7 @@ MaterialParameter::MaterialParameter(const double *Material_Parameter_in,
     if (Num_Internal_Scalar_in > 0) {
         Internal_Scalar = new double [Num_Internal_Scalar = Num_Internal_Scalar_in];
         if (!Internal_Scalar) {
-            cout << "MaterialParameter::Insufficient memory! " << endl;
+            opserr << "MaterialParameter::Insufficient memory! " << endln;
             exit (1);
         }        
         for (int i = 0; i < Num_Internal_Scalar; i++)
@@ -91,7 +91,7 @@ MaterialParameter::MaterialParameter(const double *Material_Parameter_in,
     if (Num_Internal_Tensor_in > 0) {
         Internal_Tensor = new stresstensor[Num_Internal_Tensor = Num_Internal_Tensor_in];
         if (!Internal_Tensor) {
-            cout << "MaterialParameter::Insufficient memory! " << endl;
+            opserr << "MaterialParameter::Insufficient memory! " << endln;
             exit (1);
         }        
         for (int i = 0; i < Num_Internal_Tensor; i++)
@@ -114,7 +114,7 @@ MaterialParameter::MaterialParameter(const double *Material_Parameter_in,
     if (Num_Material_Parameter_in > 0) {
         Material_Parameter = new double [Num_Material_Parameter = Num_Material_Parameter_in];
         if (!Material_Parameter) {
-            cout << "MaterialParameter::Insufficient memory! " << endl;
+            opserr << "MaterialParameter::Insufficient memory! " << endln;
             exit (1);
         }        
         for (int i = 0; i < Num_Material_Parameter; i++)
@@ -129,7 +129,7 @@ MaterialParameter::MaterialParameter(const double *Material_Parameter_in,
     if (Num_Internal_Tensor_in > 0) {
         Internal_Tensor = new stresstensor[Num_Internal_Tensor = Num_Internal_Tensor_in];
         if (!Internal_Tensor) {
-            cout << "MaterialParameter::Insufficient memory! " << endl;
+            opserr << "MaterialParameter::Insufficient memory! " << endln;
             exit (1);
         }        
         for (int i = 0; i < Num_Internal_Tensor; i++)
@@ -170,7 +170,7 @@ MaterialParameter::MaterialParameter(const MaterialParameter &refer_MaterialPara
     if (refer_MaterialParameter.getNum_Material_Parameter() > 0) {
         Material_Parameter = new double [Num_Material_Parameter = refer_MaterialParameter.getNum_Material_Parameter()];
         if (!Material_Parameter) {
-            cout << "MaterialParameter::Insufficient memory! " << endl;
+            opserr << "MaterialParameter::Insufficient memory! " << endln;
             exit (1);
         }        
         for (int i = 0; i < Num_Material_Parameter; i++)
@@ -185,7 +185,7 @@ MaterialParameter::MaterialParameter(const MaterialParameter &refer_MaterialPara
     if (refer_MaterialParameter.getNum_Internal_Scalar() > 0) {
         Internal_Scalar = new double [Num_Internal_Scalar = refer_MaterialParameter.getNum_Internal_Scalar()];
         if (!Internal_Scalar) {
-            cout << "MaterialParameter::Insufficient memory! " << endl;
+            opserr << "MaterialParameter::Insufficient memory! " << endln;
             exit (1);
         }        
         for (int i = 0; i < Num_Internal_Scalar; i++)
@@ -200,7 +200,7 @@ MaterialParameter::MaterialParameter(const MaterialParameter &refer_MaterialPara
     if (refer_MaterialParameter.getNum_Internal_Tensor() > 0) {
         Internal_Tensor = new stresstensor[Num_Internal_Tensor = refer_MaterialParameter.getNum_Internal_Tensor()];
         if (!Internal_Tensor) {
-            cout << "MaterialParameter::Insufficient memory! " << endl;
+            opserr << "MaterialParameter::Insufficient memory! " << endln;
             exit (1);
         }        
         for (int i = 0; i < Num_Internal_Tensor; i++)
@@ -246,7 +246,7 @@ int MaterialParameter::getNum_Internal_Tensor() const
 double MaterialParameter::getMaterial_Parameter(int which) const
 {
 	if (which < 0 || which > Num_Material_Parameter) {
-		cout << "Error! MaterialParameter::getMaterial_Parameter - Invalid index of material constants. " << endl;
+		opserr << "Error! MaterialParameter::getMaterial_Parameter - Invalid index of material constants. " << endln;
 		exit(1);
 	}	
 
@@ -257,7 +257,7 @@ double MaterialParameter::getMaterial_Parameter(int which) const
 double MaterialParameter::getInternal_Scalar(int which) const
 {
 	if (which < 0 || which > Num_Internal_Scalar) {
-		cout << "Error! MaterialParameter::getInternal_Scalar - Invalid index of internal scalars. " << endl;
+		opserr << "Error! MaterialParameter::getInternal_Scalar - Invalid index of internal scalars. " << endln;
 		exit(1);
 	}	
 
@@ -268,7 +268,7 @@ double MaterialParameter::getInternal_Scalar(int which) const
 const stresstensor& MaterialParameter::getInternal_Tensor(int which) const
 {
 	if (which < 0 || which > Num_Internal_Tensor) {
-		cout << "Error! MaterialParameter::getInternal_Tensor - Invalid index of internal tensors. " << endl;
+		opserr << "Error! MaterialParameter::getInternal_Tensor - Invalid index of internal tensors. " << endln;
 		exit (1);
 	}	
 
@@ -279,7 +279,7 @@ const stresstensor& MaterialParameter::getInternal_Tensor(int which) const
 int MaterialParameter::setMaterial_Parameter(int which, double newMaterial_Parameter) 
 {
 	if (which < 0 || which > Num_Material_Parameter) {
-		cout << "Error! MaterialParameter::setMaterial_Parameter - Invalid index of material constants. " << endl;
+		opserr << "Error! MaterialParameter::setMaterial_Parameter - Invalid index of material constants. " << endln;
 		return (1);
 	}	
 	
@@ -292,7 +292,7 @@ int MaterialParameter::setMaterial_Parameter(int which, double newMaterial_Param
 int MaterialParameter::setInternal_Scalar(int which, double newInternal_Scalar) 
 {
 	if (which < 0 || which > Num_Internal_Scalar) {
-		cout << "Error! MaterialParameter::setInternal_Scalar - Invalid index of internal scalars. " << endl;
+		opserr << "Error! MaterialParameter::setInternal_Scalar - Invalid index of internal scalars. " << endln;
 		exit (1);
 	}	
 	
@@ -305,7 +305,7 @@ int MaterialParameter::setInternal_Scalar(int which, double newInternal_Scalar)
 int MaterialParameter::setInternal_Tensor(int which, const stresstensor &newInternal_Tensor) 
 {
 	if (which < 0 || which > Num_Internal_Tensor) {
-		cout << "Error! MaterialParameter::setInternal_Tensor - Invalid index of internal tensors. " << endl;
+		opserr << "Error! MaterialParameter::setInternal_Tensor - Invalid index of internal tensors. " << endln;
 		exit (1);
 	}	
 		

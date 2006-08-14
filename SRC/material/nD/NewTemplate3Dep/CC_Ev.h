@@ -36,7 +36,6 @@
 
 #include "ScalarEvolution.h"
 #include "ElasticState.h"
-#include <iostream.h>
 
 class CC_Ev : public ScalarEvolution
 {

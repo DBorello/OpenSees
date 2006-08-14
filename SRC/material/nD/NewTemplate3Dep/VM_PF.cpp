@@ -76,7 +76,7 @@ const straintensor& VM_PF::PlasticFlowTensor(const stresstensor &Stre,
 		return VMm;
 	}
 	else {
-		cout << "Warning!! VM_PF: Invalid Input Parameter. " << endl;
+		opserr << "Warning!! VM_PF: Invalid Input Parameter. " << endln;
 		exit (1);
 	}
 }
@@ -90,7 +90,7 @@ const stresstensor& VM_PF::getalpha(const MaterialParameter &MaterialParameter_i
 		return VMb;
 	}
 	
-	cout << "Warning!! VM_PF: Invalid Input. " << endl;
+	opserr << "Warning!! VM_PF: Invalid Input. " << endln;
 	exit (1);
 }
 

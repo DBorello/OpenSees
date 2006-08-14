@@ -73,7 +73,7 @@ const BJtensor& Isotropic_Elastic::getElasticStiffness(const MaterialParameter &
     double v = getv(MaterialParameter_in);
     
     if (E< 0.0 || v < -1.0 || v >= 0.5) {
-      cout << "Isotropic_Elastic: Invalid Input. " << endl;
+      opserr << "Isotropic_Elastic: Invalid Input. " << endln;
       exit (1);
     }
         
@@ -87,7 +87,7 @@ const BJtensor& Isotropic_Elastic::getElasticStiffness(const MaterialParameter &
 double Isotropic_Elastic::getE(const MaterialParameter &MaterialParameter_in) const
 {
     if ( E_index > MaterialParameter_in.getNum_Material_Parameter() || E_index < 1) {
-      cout << "Isotropic_Elastic: Invalid Input. " << endl;
+      opserr << "Isotropic_Elastic: Invalid Input. " << endln;
       exit (1);
     }
     else    
@@ -99,7 +99,7 @@ double Isotropic_Elastic::getE(const MaterialParameter &MaterialParameter_in) co
 double Isotropic_Elastic::getv(const MaterialParameter &MaterialParameter_in) const
 {
     if ( v_index > MaterialParameter_in.getNum_Material_Parameter() || v_index  < 1) { 
-      cout << "Isotropic_Elastic: Invalid Input. " << endl;
+      opserr << "Isotropic_Elastic: Invalid Input. " << endln;
       exit (1);
     }
     else

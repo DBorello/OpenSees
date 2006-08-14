@@ -35,7 +35,6 @@
 #define elnp_Elastic_H
 
 #include "ElasticState.h"
-#include <iostream.h>
 
 //stresstensor zerostress;
 //straintensor zerostrain;

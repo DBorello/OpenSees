@@ -90,13 +90,13 @@ const BJtensor& PressureDependent_Elastic::getElasticStiffness (const MaterialPa
     double E0 = getE0(MaterialParameter_in);
     double v = getv(MaterialParameter_in);
     if (v >= 0.5 || v < -1.0) {
-	    cout << "Warning!! PressureDependent_Elastic: Invalid possoin's ratio. " << endl;
+	    opserr << "Warning!! PressureDependent_Elastic: Invalid possoin's ratio. " << endln;
 	    exit (1);
     }
     double m = getm(MaterialParameter_in);
     double p_ref = getp_ref(MaterialParameter_in);
     if ( p_ref <= 0.0) {
-	    cout << "Warning!! PressureDependent_Elastic: Invalid reference pressure. " << endl;
+	    opserr << "Warning!! PressureDependent_Elastic: Invalid reference pressure. " << endln;
 	    exit (1);
     }   
     double k_cut = getk_cut(MaterialParameter_in);
@@ -120,7 +120,7 @@ const BJtensor& PressureDependent_Elastic::getElasticStiffness (const MaterialPa
 double PressureDependent_Elastic::getE0(const MaterialParameter &MaterialParameter_in) const
 {
 	if ( E0_index > MaterialParameter_in.getNum_Material_Parameter() || E0_index < 2) { 
-		cout << "PressureDependent_Elastic: Invalid Input. " << endl;
+		opserr << "PressureDependent_Elastic: Invalid Input. " << endln;
 		exit (1);
 	}
 	else
@@ -131,7 +131,7 @@ double PressureDependent_Elastic::getE0(const MaterialParameter &MaterialParamet
 double PressureDependent_Elastic::getv(const MaterialParameter &MaterialParameter_in) const
 {
 	if ( v_index > MaterialParameter_in.getNum_Material_Parameter() || v_index < 2) { 
-		cout << "PressureDependent_Elastic: Invalid Input. " << endl;
+		opserr << "PressureDependent_Elastic: Invalid Input. " << endln;
 		exit (1);
 	}
 	else
@@ -142,7 +142,7 @@ double PressureDependent_Elastic::getv(const MaterialParameter &MaterialParamete
 double PressureDependent_Elastic::getm(const MaterialParameter &MaterialParameter_in) const
 {
 	if ( m_index > MaterialParameter_in.getNum_Material_Parameter() || m_index < 2) { 
-		cout << "PressureDependent_Elastic: Invalid Input. " << endl;
+		opserr << "PressureDependent_Elastic: Invalid Input. " << endln;
 		exit (1);
 	}
 	else
@@ -153,7 +153,7 @@ double PressureDependent_Elastic::getm(const MaterialParameter &MaterialParamete
 double PressureDependent_Elastic::getp_ref(const MaterialParameter &MaterialParameter_in) const
 {
 	if ( p_ref_index > MaterialParameter_in.getNum_Material_Parameter() || p_ref_index < 2) { 
-		cout << "PressureDependent_Elastic: Invalid Input. " << endl;
+		opserr << "PressureDependent_Elastic: Invalid Input. " << endln;
 		exit (1);
 	}
 	else
@@ -164,7 +164,7 @@ double PressureDependent_Elastic::getp_ref(const MaterialParameter &MaterialPara
 double PressureDependent_Elastic::getk_cut(const MaterialParameter &MaterialParameter_in) const
 {
 	if ( k_cut_index > MaterialParameter_in.getNum_Material_Parameter() || k_cut_index < 2) { 
-		cout << "PressureDependent_Elastic: Invalid Input. " << endl;
+		opserr << "PressureDependent_Elastic: Invalid Input. " << endln;
 		exit (1);
 	}
 	else

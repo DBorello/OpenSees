@@ -35,7 +35,6 @@
 #define DM04_alpha_Eij_H 
 
 #include "TensorEvolution.h"
-#include <iostream.h>
 
 class DM04_alpha_Eij : public TensorEvolution
 {

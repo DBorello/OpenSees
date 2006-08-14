@@ -107,7 +107,7 @@ double CC_YF::InScalarDerivative(const stresstensor& Stre,
 		return  (-1.0)*M*M*p;
 	}
 	else {
-		cout << "Warning!! CC_YF: Invalid Input Parameter. " << endl;
+		opserr << "Warning!! CC_YF: Invalid Input Parameter. " << endln;
 		exit (1);
 	}
 }
@@ -137,7 +137,7 @@ double CC_YF::getM(const MaterialParameter &MaterialParameter_in) const
 	if ( M_which == 0 && index_M <= MaterialParameter_in.getNum_Material_Parameter() && index_M > 0 )
 		return MaterialParameter_in.getMaterial_Parameter(index_M-1);
 	else {
-		cout << "Warning!! CC_YF: Invalid Input (M). " << endl;
+		opserr << "Warning!! CC_YF: Invalid Input (M). " << endln;
 		exit (1);
 	}
 }
@@ -146,10 +146,10 @@ double CC_YF::getM(const MaterialParameter &MaterialParameter_in) const
 double CC_YF::getP0(const MaterialParameter &MaterialParameter_in) const
 {
 	//to get P0
-	if ( p0_which == 1 && index_p0 <= MaterialParameter_in.getNum_Internal_Scalar() & index_p0 > 0 )
+	if ( p0_which == 1 && index_p0 <= MaterialParameter_in.getNum_Internal_Scalar() && index_p0 > 0 )
 		return MaterialParameter_in.getInternal_Scalar(index_p0-1);
 	else {
-		cout << "Warning!! CC_YF: Invalid Input (po). " << endl;
+		opserr << "Warning!! CC_YF: Invalid Input (po). " << endln;
 		exit (1);
 	}
 }

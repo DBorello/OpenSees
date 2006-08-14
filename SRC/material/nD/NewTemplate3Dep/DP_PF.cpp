@@ -105,7 +105,7 @@ double DP_PF::getdilatant(const MaterialParameter &MaterialParameter_in) const
 		if ( index_dilatant <= MaterialParameter_in.getNum_Material_Parameter() && index_dilatant > 0)
 			return MaterialParameter_in.getMaterial_Parameter(index_dilatant-1); 
 		else {
-			cout << "DP_PF: Invalid Input. " << endl;
+			opserr << "DP_PF: Invalid Input. " << endln;
 			exit (1);
 		}
 	}
@@ -113,12 +113,12 @@ double DP_PF::getdilatant(const MaterialParameter &MaterialParameter_in) const
 		if ( index_dilatant <= MaterialParameter_in.getNum_Internal_Scalar() && index_dilatant > 0)
 			return MaterialParameter_in.getInternal_Scalar(index_dilatant-1); 
 		else {
-			cout << "DP_PF: Invalid Input. " << endl;
+			opserr << "DP_PF: Invalid Input. " << endln;
 			exit (1);
 		}
     }
 	else {
-		cout << "DP_PF: Invalid Input. " << endl;
+		opserr << "DP_PF: Invalid Input. " << endln;
 		exit(1);
 	}
 }
@@ -132,7 +132,7 @@ const stresstensor& DP_PF::getalpha(const MaterialParameter &MaterialParameter_i
 		return DPm;
 	}
 	else {
-		cout << "DP_PF: Invalid Input. " << endl;
+		opserr << "DP_PF: Invalid Input. " << endln;
 		exit (1);
 	}
 }

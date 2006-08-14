@@ -71,7 +71,7 @@ double DP_YF::YieldFunctionValue( const stresstensor& Stre,
 {
 	// f = a*I1 + [0.5(sij-p*aij)(sij-p*aij)]^0.5 - k = 0
     if (a_which == -1) {
-		cout << "DP_YF: Invalid Input Parameter. " << endl;
+		opserr << "DP_YF: Invalid Input Parameter. " << endln;
 		exit(1);
 	}
 	if (alpha_which == -1)
@@ -145,7 +145,7 @@ const stresstensor& DP_YF::InTensorDerivative(const stresstensor& Stre,
 {
 	double eps = pow( d_macheps(), 0.5 );
 	if (alpha_which != 2 || which != 1){
-		cout << "DP_YF: Invalid Input Parameter. " << endl;
+		opserr << "DP_YF: Invalid Input Parameter. " << endln;
 		exit (1);
 	}
 	
@@ -200,7 +200,7 @@ double DP_YF::geta(const MaterialParameter &MaterialParameter_in) const
 		if ( index_a <= MaterialParameter_in.getNum_Material_Parameter() && index_a > 0)
 			return MaterialParameter_in.getMaterial_Parameter(index_a-1); 
 		else {
-			cout << "DP_YF: Invalid Input. " << endl;
+			opserr << "DP_YF: Invalid Input. " << endln;
 			exit (1);
 		}
 	}
@@ -208,12 +208,12 @@ double DP_YF::geta(const MaterialParameter &MaterialParameter_in) const
 		if ( index_a <= MaterialParameter_in.getNum_Internal_Scalar() && index_a > 0)
 			return MaterialParameter_in.getInternal_Scalar(index_a-1); 
 		else {
-			cout << "DP_YF: Invalid Input. " << endl;
+			opserr << "DP_YF: Invalid Input. " << endln;
 			exit (1);
 		}
     }
 	else {
-		cout << "DP_YF: Invalid Input. " << endl;
+		opserr << "DP_YF: Invalid Input. " << endln;
 		exit(1);
 	}
 }
@@ -226,7 +226,7 @@ double DP_YF::getk(const MaterialParameter &MaterialParameter_in) const
 		if ( index_k <= MaterialParameter_in.getNum_Material_Parameter() && index_k > 0)
 			return MaterialParameter_in.getMaterial_Parameter(index_k-1); 
 		else {
-			cout << "DP_YF: Invalid Input. " << endl;
+			opserr << "DP_YF: Invalid Input. " << endln;
 			exit (1);
 		}
 	}
@@ -234,12 +234,12 @@ double DP_YF::getk(const MaterialParameter &MaterialParameter_in) const
 		if ( index_k <= MaterialParameter_in.getNum_Internal_Scalar() && index_k > 0)
 			return MaterialParameter_in.getInternal_Scalar(index_k-1); 
 		else {
-			cout << "DP_YF: Invalid Input. " << endl;
+			opserr << "DP_YF: Invalid Input. " << endln;
 			exit (1);
 		}
     }
 	else {
-		cout << "DP_YF: Invalid Input. " << endl;
+		opserr << "DP_YF: Invalid Input. " << endln;
 		exit(1);
 	}
 }
@@ -253,7 +253,7 @@ const stresstensor& DP_YF::getalpha(const MaterialParameter &MaterialParameter_i
 		return DPst;
 	}
 	else {
-		cout << "DP_YF: Invalid Input. " << endl;
+		opserr << "DP_YF: Invalid Input. " << endln;
 		exit (1);
 	}
 }

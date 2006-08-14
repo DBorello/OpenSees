@@ -35,7 +35,6 @@
 
 #include "YieldFunction.h"
 #include <math.h>
-#include <iostream.h>
 
 class RMC_YF : public YieldFunction
 {

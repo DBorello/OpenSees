@@ -124,7 +124,7 @@ stresstensor DM04_Elastic::getStress() const
 double DM04_Elastic::getG0(const MaterialParameter &MaterialParameter_in) const
 {
 	if ( G0_index > MaterialParameter_in.getNum_Material_Parameter() || G0_index < 2) { 
-		cout << "DM04_Elastic: Invalid Input. " << endl;
+		opserr << "DM04_Elastic: Invalid Input. " << endln;
 		exit (1);
 	}
 	else
@@ -136,13 +136,13 @@ double DM04_Elastic::getv(const MaterialParameter &MaterialParameter_in) const
 {
 	double v = 0.0;
 	if ( v_index > MaterialParameter_in.getNum_Material_Parameter() || v_index < 2) { 
-		cout << "DM04_Elastic: Invalid Input. " << endl;
+		opserr << "DM04_Elastic: Invalid Input. " << endln;
 		exit (1);
 	}
 	else {
 		v = MaterialParameter_in.getMaterial_Parameter(v_index - 1);
 		if (v >= 0.5 || v <= -1.0) {
-			cout << "Warning!! DM04_Elastic: Invalid possoin's ratio. " << endl;
+			opserr << "Warning!! DM04_Elastic: Invalid possoin's ratio. " << endln;
 			exit (1);
 		}
 		return v;
@@ -153,7 +153,7 @@ double DM04_Elastic::getv(const MaterialParameter &MaterialParameter_in) const
 double DM04_Elastic::getPat(const MaterialParameter &MaterialParameter_in) const
 {
 	if ( Pat_index > MaterialParameter_in.getNum_Material_Parameter() || Pat_index < 1) { 
-		cout << "DM04_Elastic: Invalid Input. " << endl;
+		opserr << "DM04_Elastic: Invalid Input. " << endln;
 		exit (1);
 	}
 	else
@@ -164,7 +164,7 @@ double DM04_Elastic::getPat(const MaterialParameter &MaterialParameter_in) const
 double DM04_Elastic::getk_c(const MaterialParameter &MaterialParameter_in) const
 {
 	if ( k_c_index > MaterialParameter_in.getNum_Material_Parameter() || k_c_index < 1) { 
-		cout << "DM04_Elastic: Invalid Input. " << endl;
+		opserr << "DM04_Elastic: Invalid Input. " << endln;
 		exit (1);
 	}
 	else
@@ -175,7 +175,7 @@ double DM04_Elastic::getk_c(const MaterialParameter &MaterialParameter_in) const
 double DM04_Elastic::gete0(const MaterialParameter &MaterialParameter_in) const
 {
 	if ( e0_index > MaterialParameter_in.getNum_Material_Parameter() || e0_index < 2) { 
-		cout << "DM04_Elastic: Invalid Input. " << endl;
+		opserr << "DM04_Elastic: Invalid Input. " << endln;
 		exit (1);
 	}
 	else

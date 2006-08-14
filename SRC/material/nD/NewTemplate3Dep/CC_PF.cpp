@@ -35,6 +35,7 @@
 #define CC_PF_CPP
 
 #include "CC_PF.h"
+#include <OPS_Globals.h>
 
 straintensor CC_PF::CCm;
 
@@ -92,7 +93,7 @@ double CC_PF::getM(const MaterialParameter &MaterialParameter_in) const
 	if ( M_which == 0 && index_M <= MaterialParameter_in.getNum_Material_Parameter() && index_M > 0)
 		return MaterialParameter_in.getMaterial_Parameter(index_M-1);
 	else {
-		cout << "Warning!! CC_PF: Invalid Input (M). " << endl;
+		opserr << "Warning!! CC_PF: Invalid Input (M). " << endln;
 		exit (1);
 	}
 }
@@ -104,7 +105,7 @@ double CC_PF::getP0(const MaterialParameter &MaterialParameter_in) const
 	if ( p0_which == 1 && index_p0 <= MaterialParameter_in.getNum_Internal_Scalar() && index_p0 > 0)
 		return MaterialParameter_in.getInternal_Scalar(index_p0-1);
 	else {
-		cout << "Warning!! CC_PF: Invalid Input (po). " << endl;
+		opserr << "Warning!! CC_PF: Invalid Input (po). " << endln;
 		exit (1);
 	}
 }

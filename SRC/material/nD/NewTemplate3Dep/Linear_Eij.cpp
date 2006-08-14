@@ -61,7 +61,7 @@ double Linear_Eij::getLinearFactor(const MaterialParameter& material_parameter) 
     if ( LinearFactor_index <= material_parameter.getNum_Material_Parameter() && LinearFactor_index > 0)
         return material_parameter.getMaterial_Parameter(LinearFactor_index -1);
     else {
-        cout << "Linear_Eij: Invalid Input. " << endl;
+        opserr << "Linear_Eij: Invalid Input. " << endln;
         exit (1);
     }  
 }
