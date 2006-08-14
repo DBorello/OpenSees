@@ -125,6 +125,9 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
+				RelativePath="..\..\VC2005errno.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\tcl\tclAppInit.cpp">
 			</File>
 			<File

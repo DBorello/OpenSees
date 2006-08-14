@@ -38,7 +38,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/MACHINE:I386"
+				AdditionalOptions="/MACHINE:I386 /FORCE:MULTIPLE"
 				AdditionalDependencies="OpenGL32.lib glu32.lib GlAux.lib damage.lib corotational.lib fedeas.lib drain.lib reliability.lib database.lib renderer.lib blas.lib lapack.lib feap.lib arpack.lib umfpack.lib openSeesFortran.lib actor.lib analysis.lib cblas.lib convergence.lib domain.lib element.lib graph.lib material.lib matrix.lib modelbuilder.lib recorder.lib superLU.lib system.lib tagged.lib tcl.lib utility.lib tcl84.lib tk84.lib odbc32.lib odbccp32.lib"
 				OutputFile=".\..\..\bin/openSeesTk.exe"
 				LinkIncremental="1"
@@ -93,7 +93,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/MACHINE:I386"
+				AdditionalOptions="/MACHINE:I386 /FORCE:MULTIPLE"
 				AdditionalDependencies="OpenGL32.lib glu32.lib GlAux.lib damage.lib corotational.lib fedeas.lib drain.lib reliability.lib database.lib renderer.lib blas.lib lapack.lib feap.lib arpack.lib umfpack.lib openSeesFortran.lib actor.lib analysis.lib cblas.lib convergence.lib domain.lib element.lib graph.lib material.lib matrix.lib modelbuilder.lib recorder.lib superLU.lib system.lib tagged.lib tcl.lib utility.lib tcl84.lib tk84.lib odbc32.lib odbccp32.lib"
 				OutputFile=".\..\..\bin/openSeesTk.exe"
 				LinkIncremental="2"
@@ -126,6 +126,9 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
+			<File
+				RelativePath="..\..\VC2005errno.cpp">
+			</File>
 			<File
 				RelativePath="..\..\..\SRC\tcl\tkMain.cpp">
 			</File>
