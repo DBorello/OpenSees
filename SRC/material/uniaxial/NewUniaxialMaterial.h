@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-08-19 19:40:26 $
+// $Revision: 1.5 $
+// $Date: 2006-08-14 13:45:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/NewUniaxialMaterial.h,v $
 
 // Written: MHS
@@ -41,7 +41,9 @@ class NewUniaxialMaterial : public UniaxialMaterial
   NewUniaxialMaterial(int tag);
   NewUniaxialMaterial();    
   ~NewUniaxialMaterial();
-  
+
+  const char *getClassType(void) const {return "NewUniaxialMaterial";};
+
   int setTrialStrain(double strain, double strainRate = 0.0); 
   double getStrain(void);
   double getStress(void);

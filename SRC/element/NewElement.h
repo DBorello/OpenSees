@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-03-11 20:40:07 $
+// $Revision: 1.5 $
+// $Date: 2006-08-14 13:45:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/NewElement.h,v $
                                                                         
 #ifndef NewElement_h
@@ -46,6 +46,8 @@ class NewElement : public Element
     NewElement(int tag);
     NewElement();    
     ~NewElement();
+
+	const char *getClassType(void) const {return "NewElement";};
 
     // public methods to obtain inforrmation about dof & connectivity    
     int getNumExternalNodes(void) const;
@@ -78,7 +80,7 @@ class NewElement : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(OPS_Stream &s, int flag =0);    
 
-    Response *setResponse(const char **argv, int argc, Information &eleInfo);
+    Response *setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &);
     int getResponse(int responseID, Information &eleInformation);
 
     int setParameter (const char **argv, int argc, Information &info);

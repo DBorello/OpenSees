@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-03-11 20:40:07 $
+// $Revision: 1.6 $
+// $Date: 2006-08-14 13:45:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/NewElement.cpp,v $
                                                                         
 // Written: fmk 
@@ -39,7 +39,7 @@
 #include <FEM_ObjectBroker.h>
 #include <Renderer.h>
 #include <OPS_Globals.h>
-
+#include <OPS_Stream.h>
 
 static int NUM_NODE =2;
 static int NUM_DOF  =4;
@@ -206,16 +206,16 @@ NewElement::Print(OPS_Stream &s, int flag)
 
 
 Response*
-NewElement::setResponse(const char **argv, int argc, Information &eleInfo)
+NewElement::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &S)
 {
-  return 0;
+	return this->Element::setResponse(argv, argc, eleInfo, S);
 }
 
 
 int 
 NewElement::getResponse(int responseID, Information &eleInfo)
 {
-  return -1;
+	return this->Element::getResponse(responseID, eleInfo);
 }
 
 
