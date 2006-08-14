@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.37 $
-// $Date: 2006-08-04 22:33:53 $
+// $Revision: 1.38 $
+// $Date: 2006-08-14 06:14:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -654,16 +654,12 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 
       // construct the DataHandler
       if (eMode == DATA_STREAM && fileName != 0) {
-	opserr << "DataFile\n";
 	theOutputStream = new DataFileStream(fileName);
       } else if (eMode == XML_STREAM && fileName != 0) {
-	opserr << "XmlFile\n";
 	theOutputStream = new XmlFileStream(fileName);
       } else if (eMode == DATABASE_STREAM && tableName != 0) {
-	opserr << "Database\n";
 	theOutputStream = new DatabaseStream(theDatabase, tableName);
       } else {
-	opserr << "Standard\n";
 	theOutputStream = new StandardStream();
       }
       
