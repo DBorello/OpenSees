@@ -22,8 +22,6 @@
 
 #define SEC_TAG_SFS2d 1
 
-#include <iostream>
-
 
 ID SoilFootingSection2d::code(3);
 
@@ -1322,9 +1320,10 @@ SoilFootingSection2d::applyLoading(Vector de)
       if (ddH[j] <= dHt1)
       {
          dHt1 = ddH[j];
-         ii = i;         
+         ii = j;         
       }
    }
+
 
 
 
@@ -2078,3 +2077,4 @@ SoilFootingSection2d::Print(OPS_Stream &s, int flag)
   s << "\tSection Force:" << sCommit;
   s << "\tSection Defom:" << eCommit;
 }
+
