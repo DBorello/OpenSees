@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2005-08-22 20:50:01 $
+// $Revision: 1.6 $
+// $Date: 2006-08-15 00:41:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/NewUniaxialMaterial.cpp,v $
 
 // Written: MHS
@@ -36,14 +36,16 @@
 
 NewUniaxialMaterial::NewUniaxialMaterial(int tag)
   :UniaxialMaterial(tag,MAT_TAG_NewUniaxialMaterial),
-   Tstrain(0.0), Tstress(0.0), Ttangent(0.0)
+   trialStrain(0.0), trialStress(0.0), trialTangent(0.0),
+   commitStrain(0.0), commitStress(0.0), commitTangent(0.0)
 {
 
 }
 
 NewUniaxialMaterial::NewUniaxialMaterial()
   :UniaxialMaterial(0,MAT_TAG_NewUniaxialMaterial),
-   Tstrain(0.0), Tstress(0.0), Ttangent(0.0)
+   trialStrain(0.0), trialStress(0.0), trialTangent(0.0),
+   commitStrain(0.0), commitStress(0.0), commitTangent(0.0)
 {
 
 }
@@ -57,24 +59,25 @@ int
 NewUniaxialMaterial::setTrialStrain(double strain, double strainRate)
 {
   // set the trial strain
-  Tstrain = strain;
+  trialStrain = strain;
 
   // determine trial stress and tangent
-  Tstress = 0.0;
-  Ttangent = 0.0;
+  trialStress = 0.0;
+  trialTangent = 0.0;
+
   return 0;
 }
 
 double 
 NewUniaxialMaterial::getStress(void)
 {
-  return Tstress;
+  return trialStress;
 }
 
 double 
 NewUniaxialMaterial::getTangent(void)
 {
-  return Ttangent;
+  return trialTangent;
 }
 
 double 
@@ -87,24 +90,39 @@ NewUniaxialMaterial::getInitialTangent(void)
 double 
 NewUniaxialMaterial::getStrain(void)
 {
-  return Tstrain;
+  return trialStrain;
 }
 
 int 
 NewUniaxialMaterial::commitState(void)
 {
+  commitStrain  = trialStrain;
+  commitStress  = trialStress;
+  commitTangent = trialTangent;
+
   return 0;
 }
 
 int 
 NewUniaxialMaterial::revertToLastCommit(void)
 {
+  trialStrain = commitStrain;
+  trialStress = commitStress;
+  trialTangent = commitTangent;
+
   return 0;
 }
 
 int 
 NewUniaxialMaterial::revertToStart(void)
 {
+  trialStrain = 0.;
+  trialStress = 0.0;
+  trialTangent = 0.0;
+  commitStrain = 0.;
+  commitStress = 0.0;
+  commitTangent = 0.0;
+
   return 0;
 }
 
@@ -132,6 +150,8 @@ NewUniaxialMaterial::recvSelf(int cTag, Channel &theChannel,
 void 
 NewUniaxialMaterial::Print(OPS_Stream &s, int flag)
 {
+  s << "NewUniaxialMaterial : " << this->getTag();
+
   return;
 }
 

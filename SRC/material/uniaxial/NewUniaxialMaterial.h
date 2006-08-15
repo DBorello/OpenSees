@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-08-14 13:45:57 $
+// $Revision: 1.6 $
+// $Date: 2006-08-15 00:41:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/NewUniaxialMaterial.h,v $
 
 // Written: MHS
@@ -65,9 +65,12 @@ class NewUniaxialMaterial : public UniaxialMaterial
  protected:
   
  private:
-  double Tstrain;   // trial strain
-  double Tstress;   // trial stress
-  double Ttangent;  // trial tangent
+  double trialStrain;   // trial strain
+  double trialStress;   // trial stress
+  double trialTangent;  // trial tangent
+  double commitStrain;   // commit strain
+  double commitStress;   // commit stress
+  double commitTangent;  // commit tangent
 };
 
 #endif
