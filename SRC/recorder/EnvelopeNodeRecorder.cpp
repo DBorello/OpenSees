@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.12 $
-// $Date: 2006-08-04 22:33:53 $
+// $Revision: 1.13 $
+// $Date: 2006-08-17 22:27:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -137,6 +137,8 @@ EnvelopeNodeRecorder::~EnvelopeNodeRecorder()
   // write the data
   //
   if (theHandler != 0 && currentData != 0) {
+    
+    theHandler->tag("Data"); // Data
 
     for (int i=0; i<3; i++) {
       int size = currentData->Size();
@@ -144,7 +146,10 @@ EnvelopeNodeRecorder::~EnvelopeNodeRecorder()
 	(*currentData)(j) = (*data)(i,j);
       theHandler->write(*currentData);
     }
+    theHandler->endTag(); // Data
+    theHandler->endTag(); // OpenSeesOutput
   }
+
 
   //
   // clean up the memory
@@ -324,12 +329,13 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
     bool writeIt = false;
     if (first == true) {
       for (int i=0; i<sizeData; i++) {
-	(*data)(0,i+sizeData) = timeStamp;
-	(*data)(1,i+sizeData) = timeStamp;
-	(*data)(2,i+sizeData) = timeStamp;
-	(*data)(0,i) = (*currentData)(i);
-	(*data)(1,i) = (*currentData)(i);
-	(*data)(2,i) = fabs((*currentData)(i));
+
+	(*data)(0,i*2) = timeStamp;
+	(*data)(1,i*2) = timeStamp;
+	(*data)(2,i*2) = timeStamp;
+	(*data)(0,i*2+1) = (*currentData)(i);
+	(*data)(1,i*2+1) = (*currentData)(i);
+	(*data)(2,i*2+1) = fabs((*currentData)(i));
 	first = false;
 	writeIt = true;
       } 
@@ -337,28 +343,27 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
       for (int i=0; i<sizeData; i++) {
 	double value = (*currentData)(i);
 	if ((*data)(0,2*i+1) > value) {
-	  (*data)(0,i+sizeData) = timeStamp;
-	  (*data)(0,i) = value;
+	  (*data)(0,i*2) = timeStamp;
+	  (*data)(0,i*2+1) = value;
 	  double absValue = fabs(value);
-	  if ((*data)(2,i) < absValue) {
-	    (*data)(2,i) = absValue;
-	    (*data)(2,i+sizeData) = timeStamp;
+	  if ((*data)(2,i*2+1) < absValue) {
+	    (*data)(2,i*2+1) = absValue;
+	    (*data)(2,i*2) = timeStamp;
 	  }
 	  writeIt = true;
-	} else if ((*data)(1,i) < value) {
-	  (*data)(1,i+sizeData) = timeStamp;
-	  (*data)(1,i) = value;
+	} else if ((*data)(1,i*2+1) < value) {
+	  (*data)(1,i*2) = timeStamp;
+	  (*data)(1,i*2+1) = value;
 	  double absValue = fabs(value);
-	  if ((*data)(2,i) < absValue) { 
-	    (*data)(2,i+sizeData) = timeStamp;
-	    (*data)(2,i) = absValue;
+	  if ((*data)(2,i*2+1) < absValue) { 
+	    (*data)(2,i*2) = timeStamp;
+	    (*data)(2,i*2+1) = absValue;
 	  }
 	  writeIt = true;
 	}
       }
     }
   }
-
   return 0;
 }
 
@@ -376,6 +381,7 @@ int
 EnvelopeNodeRecorder::setDomain(Domain &theDom)
 {
   theDomain = &theDom;
+  initializationDone = false;  
   return 0;
 }
 
@@ -610,6 +616,13 @@ EnvelopeNodeRecorder::initialize(void)
     theHandler->attr("nodeTag", nodeTag);
 
     for (int j=0; j<theDofs->Size(); j++) {
+      
+      if (echoTimeFlag == true) {
+	theHandler->tag("TimeOutput");
+	theHandler->tag("ResponseType", "time");
+	theHandler->endTag();
+      }
+
       sprintf(outputData, "%s%d", dataType, j+1);
       theHandler->tag("ResponseType",outputData);
     }
@@ -623,11 +636,6 @@ EnvelopeNodeRecorder::initialize(void)
   int numValidResponse = numValidNodes*theDofs->Size();
 
   if (echoTimeFlag == true) {
-    for (int i=0; i<numValidResponse; i++) {
-      theHandler->tag("TimeOutput");
-      theHandler->attr("ResponseType", "time");
-      theHandler->endTag();
-    }
     numValidResponse *= 2;
   }
 
