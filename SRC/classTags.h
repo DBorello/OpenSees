@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.79 $
-// $Date: 2006-08-11 17:25:34 $
+// $Revision: 1.80 $
+// $Date: 2006-08-17 22:27:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -544,6 +544,7 @@
 #define RECORDER_TAGS_FilePlotter		7
 #define RECORDER_TAGS_AlgorithmIncrements	8
 #define RECORDER_TAGS_DriftRecorder		9
+#define RECORDER_TAGS_EnvelopeDriftRecorder	15
 #define RECORDER_TAGS_GSA_Recorder		10
 #define RECORDER_TAGS_YsVisual                  11
 #define RECORDER_TAGS_DamageRecorder		12

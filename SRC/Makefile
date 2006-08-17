@@ -465,6 +465,7 @@ RECORDER_LIBS = $(FE)/recorder/Recorder.o \
 	$(FE)/recorder/NodeRecorder.o \
 	$(FE)/recorder/EnvelopeNodeRecorder.o \
 	$(FE)/recorder/DriftRecorder.o \
+	$(FE)/recorder/EnvelopeDriftRecorder.o \
 	$(FE)/recorder/PatternRecorder.o \
 	$(FE)/recorder/ElementRecorder.o \
 	$(FE)/recorder/EnvelopeElementRecorder.o \
@@ -552,6 +553,8 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/ReinforcingSteel.o \
 	$(FE)/material/uniaxial/TclReinforcingSteel.o \
 	$(FE)/material/uniaxial/ElasticPPMaterial.o \
+	$(FE)/material/uniaxial/KinematicHardening.o \
+	$(FE)/material/uniaxial/TclKinematicHardening.o \
 	$(FE)/material/uniaxial/HardeningMaterial.o \
 	$(FE)/material/uniaxial/ParallelMaterial.o \
 	$(FE)/material/uniaxial/SeriesMaterial.o \
