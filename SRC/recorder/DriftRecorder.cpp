@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.14 $
-// $Date: 2006-08-04 22:33:53 $
+// $Revision: 1.15 $
+// $Date: 2006-08-17 22:26:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DriftRecorder.cpp,v $
 
 // Written: MHS
@@ -289,7 +289,7 @@ DriftRecorder::initialize(void)
 
   if (echoTimeFlag == true) {
     theOutputHandler->tag("TimeOutput");
-    theOutputHandler->attr("ResponseType", "time");
+    theOutputHandler->tag("ResponseType", "time");
     theOutputHandler->endTag();
   }
 
@@ -406,7 +406,7 @@ DriftRecorder::initialize(void)
 	 theOutputHandler->attr("perpDirn", perpDirn);	 
 	 theOutputHandler->attr("lengthPerpDirn", fabs(crdJ(perpDirn) - crdI(perpDirn)));
 	 theOutputHandler->tag("ResponseType", "drift");
-
+	 theOutputHandler->endTag();  // DriftOutput
 	 (*oneOverL)(counter) = 1.0/fabs(crdJ(perpDirn) - crdI(perpDirn));
 	 theNodes[counterI] = nodeI;
 	 theNodes[counterJ] = nodeJ;
