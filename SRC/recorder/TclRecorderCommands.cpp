@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.38 $
-// $Date: 2006-08-14 06:14:53 $
+// $Revision: 1.39 $
+// $Date: 2006-08-17 22:25:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -32,8 +32,6 @@
 // user.
 //
 // What: "@(#) commands.C, revA"
-
-
 
 
 #include <tcl.h>
@@ -51,6 +49,7 @@
 #include <EnvelopeElementRecorder.h>
 #include <PatternRecorder.h>
 #include <DriftRecorder.h>
+#include <EnvelopeDriftRecorder.h>
 #include <ElementRecorder.h>
 
 
@@ -706,174 +705,132 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
     }
     
     // Create a recorder to write nodal drifts to a file
-    else if (strcmp(argv[1],"Drift") == 0) {
+    else if ((strcmp(argv[1],"Drift") == 0) || (strcmp(argv[1],"EnvelopeDrift") == 0)) {
 
-      if (argc < 7) {
-	opserr << "WARNING recorder Drift filename? <startFlag> ";
-	opserr << "node1? node2? dof? perpDirn?\n";
-	return TCL_ERROR;
-      }    
+      outputMode eMode = STANDARD_STREAM;       // enum found in DataOutputFileHandler.h
+      
+      bool echoTimeFlag = false;
+      ID iNodes(0,16);
+      ID jNodes(0,16);
+      int dof = 1;
+      int perpDirn = 2;
+      int pos = 2;
+      while (pos < argc) {
 
-      if ((strcmp(argv[2],"-file") != 0) && (strcmp(argv[2],"-iNode") != 0) &&
-	  (strcmp(argv[2],"-jNode") != 0) && (strcmp(argv[2],"-dirn") != 0) &&
-	  (strcmp(argv[2],"-perpDirn") != 0) && (strcmp(argv[2],"-dof") != 0)) {
-
-
-	//
-	// for legacy reasons we enter the first branch of the if
-	//
-
-	fileName = argv[2];
-	simulationInfo.addWriteFile(fileName);	
-
-	int flag = 0;
-	if (strcmp(argv[3],"-time") == 0) 
-	  flag = 1;
-	if (strcmp(argv[3],"-load") == 0)
-	  flag = 2;      
 	
-	int pos = 3;
-	if (flag != 0) pos = 4;
-	
-	int node1, node2, dof, perpDirn;
-	
-	if (Tcl_GetInt(interp, argv[pos++], &node1) != TCL_OK)	
-	  return TCL_ERROR;	
-	if (Tcl_GetInt(interp, argv[pos++], &node2) != TCL_OK)	
-	  return TCL_ERROR;	      
-	if (Tcl_GetInt(interp, argv[pos++], &dof) != TCL_OK)	
-	  return TCL_ERROR;	
-	if (Tcl_GetInt(interp, argv[pos++], &perpDirn) != TCL_OK)	
-	  return TCL_ERROR;
-
-	theOutputStream = new DataFileStream(fileName);
-
-
-	// Subtract one from dof and perpDirn for C indexing
-	(*theRecorder) = new DriftRecorder(node1, node2, dof-1, perpDirn-1,
-					   theDomain, *theOutputStream);
-      } else {
-
-	outputMode eMode = STANDARD_STREAM;       // enum found in DataOutputFileHandler.h
-
-	bool echoTimeFlag = false;
-	ID iNodes(0,16);
-	ID jNodes(0,16);
-	int dof = 1;
-	int perpDirn = 2;
-	int pos = 2;
-	while (pos < argc) {
-
-
-	  if (strcmp(argv[pos],"-file") == 0) {
-	    fileName = argv[pos+1];
+	if (strcmp(argv[pos],"-file") == 0) {
+	  fileName = argv[pos+1];
+	  eMode = DATA_STREAM;
+	  simulationInfo.addWriteFile(fileName);
+	  pos += 2;
+	  if (strcmp(argv[pos],"-xml") == 0) {
+	    eMode = XML_STREAM;
+	    pos+=1;
+	  } else if (strcmp(argv[pos],"-headings") == 0) {
 	    eMode = DATA_STREAM;
-	    simulationInfo.addWriteFile(fileName);
-	    pos += 2;
-	    if (strcmp(argv[pos],"-xml") == 0) {
-	    eMode = XML_STREAM;
-	    pos+=1;
-	    } else if (strcmp(argv[pos],"-headings") == 0) {
-	      eMode = DATA_STREAM;
-	      pos +=1;
-	    }
+	    pos +=1;
 	  }
-	  
-	  else if (strcmp(argv[pos],"-database") == 0) {
-	    theRecorderDatabase = theDatabase;
-	    if (theRecorderDatabase != 0) {
-	      tableName = argv[pos+1];
-	      eMode = DATABASE_STREAM;
-	    } else {
-	      opserr << "WARNING recorder Node .. -database &lt;fileName&gt; - NO CURRENT DATABASE, results to File instead\n";
-	      fileName = argv[pos+1];
-	    }
-	    
-	    pos += 2;
-	  }
-	  
-	  else if ((strcmp(argv[pos],"-nees") == 0) || (strcmp(argv[pos],"-xml") == 0)) {
-	    // allow user to specify load pattern other than current
-	    fileName = argv[pos+1];
-	    simulationInfo.addWriteFile(fileName);
-	    eMode = XML_STREAM;
-	    pos += 2;
-	  }	    
-
-	  else if ((strcmp(argv[pos],"-iNode") == 0) || 
-		 (strcmp(argv[pos],"-iNodes") == 0)) {
-	    pos++;
-	    
-	    int node;
-	    int numNodes = 0;
-	    for (int j=pos; j< argc; j++) 
-	      if (Tcl_GetInt(interp, argv[pos], &node) != TCL_OK) {
-		j = argc;
-		Tcl_ResetResult(interp);
-	      } else {
-		iNodes[numNodes] = node;
-		numNodes++;
-		pos++;
-	      }
-	  }
-
-	  else if ((strcmp(argv[pos],"-jNode") == 0) || 
-		 (strcmp(argv[pos],"-jNodes") == 0)) {
-	    pos++;
-	    int node;
-	    int numNodes = 0;
-	    for (int j=pos; j< argc; j++) 
-	      if (Tcl_GetInt(interp, argv[pos], &node) != TCL_OK) {
-		j = argc;
-		Tcl_ResetResult(interp);
-	      } else {
-		jNodes[numNodes] = node;
-		numNodes++;
-		pos++;
-	      }
-	  }
-
-	  else if (strcmp(argv[pos],"-dof") == 0) {
-	    if (Tcl_GetInt(interp, argv[pos+1], &dof) != TCL_OK) {
-	      pos = argc;
-	    } 
-	    pos+=2;
-	  }
-	  
-	  else if (strcmp(argv[pos],"-perpDirn") == 0) {
-	    if (Tcl_GetInt(interp, argv[pos+1], &perpDirn) != TCL_OK) {
-	      pos = argc;
-	    } 
-	    pos+=2;
-	  } 
-	  
-	  else if (strcmp(argv[pos],"-time") == 0) {
-	    echoTimeFlag = true;
-	    pos+=1;
-
-	  } else 
-	    pos++;
 	}
-	  
-	if (iNodes.Size() != jNodes.Size()) {
-	  opserr << "WARNING recorder Drift - the number of iNodes and jNodes must be the same " << iNodes << " " << jNodes << endln;
-	  return TCL_ERROR;
-	}
-
-	// construct the DataHandler
-	if (eMode == DATA_STREAM && fileName != 0) {
-	  theOutputStream = new DataFileStream(fileName);
-	} else if (eMode == XML_STREAM && fileName != 0) {
-	  theOutputStream = new XmlFileStream(fileName);
-	} else if (eMode == DATABASE_STREAM && tableName != 0) {
-	  theOutputStream = new DatabaseStream(theDatabase, tableName);
-	} else
-	  theOutputStream = new StandardStream();
 	
-	// Subtract one from dof and perpDirn for C indexing
+	else if (strcmp(argv[pos],"-database") == 0) {
+	  theRecorderDatabase = theDatabase;
+	  if (theRecorderDatabase != 0) {
+	    tableName = argv[pos+1];
+	    eMode = DATABASE_STREAM;
+	  } else {
+	    opserr << "WARNING recorder Node .. -database &lt;fileName&gt; - NO CURRENT DATABASE, results to File instead\n";
+	    fileName = argv[pos+1];
+	  }
+	  
+	  pos += 2;
+	}
+	
+	else if ((strcmp(argv[pos],"-nees") == 0) || (strcmp(argv[pos],"-xml") == 0)) {
+	  // allow user to specify load pattern other than current
+	  fileName = argv[pos+1];
+	  simulationInfo.addWriteFile(fileName);
+	  eMode = XML_STREAM;
+	  pos += 2;
+	}	    
+	
+	else if ((strcmp(argv[pos],"-iNode") == 0) || 
+		 (strcmp(argv[pos],"-iNodes") == 0)) {
+	  pos++;
+	  
+	  int node;
+	  int numNodes = 0;
+	  for (int j=pos; j< argc; j++) 
+	    if (Tcl_GetInt(interp, argv[pos], &node) != TCL_OK) {
+	      j = argc;
+	      Tcl_ResetResult(interp);
+	    } else {
+	      iNodes[numNodes] = node;
+	      numNodes++;
+	      pos++;
+	    }
+	}
+	
+	else if ((strcmp(argv[pos],"-jNode") == 0) || 
+		 (strcmp(argv[pos],"-jNodes") == 0)) {
+	  pos++;
+	  int node;
+	  int numNodes = 0;
+	  for (int j=pos; j< argc; j++) 
+	    if (Tcl_GetInt(interp, argv[pos], &node) != TCL_OK) {
+	      j = argc;
+	      Tcl_ResetResult(interp);
+	    } else {
+	      jNodes[numNodes] = node;
+	      numNodes++;
+	      pos++;
+	    }
+	}
+	
+	else if (strcmp(argv[pos],"-dof") == 0) {
+	  if (Tcl_GetInt(interp, argv[pos+1], &dof) != TCL_OK) {
+	    pos = argc;
+	  } 
+	  pos+=2;
+	}
+	
+	else if (strcmp(argv[pos],"-perpDirn") == 0) {
+	  if (Tcl_GetInt(interp, argv[pos+1], &perpDirn) != TCL_OK) {
+	    pos = argc;
+	  } 
+	  pos+=2;
+	} 
+	
+	else if (strcmp(argv[pos],"-time") == 0) {
+	  echoTimeFlag = true;
+	  pos+=1;
+	  
+	} else 
+	  pos++;
+      }
+      
+      if (iNodes.Size() != jNodes.Size()) {
+	opserr << "WARNING recorder Drift - the number of iNodes and jNodes must be the same " << iNodes << " " << jNodes << endln;
+	return TCL_ERROR;
+      }
+      
+      // construct the DataHandler
+      if (eMode == DATA_STREAM && fileName != 0) {
+	theOutputStream = new DataFileStream(fileName);
+      } else if (eMode == XML_STREAM && fileName != 0) {
+	theOutputStream = new XmlFileStream(fileName);
+      } else if (eMode == DATABASE_STREAM && tableName != 0) {
+	theOutputStream = new DatabaseStream(theDatabase, tableName);
+      } else
+	theOutputStream = new StandardStream();
+      
+      // Subtract one from dof and perpDirn for C indexing
+      if (strcmp(argv[1],"Drift") == 0) 
 	(*theRecorder) = new DriftRecorder(iNodes, jNodes, dof-1, perpDirn-1,
 					   theDomain, *theOutputStream, echoTimeFlag);
-      }
+      else
+	(*theRecorder) = new EnvelopeDriftRecorder(iNodes, jNodes, dof-1, perpDirn-1,
+						   theDomain, *theOutputStream, echoTimeFlag);
+      
     }
     
     // a recorder for the graphical display of the domain

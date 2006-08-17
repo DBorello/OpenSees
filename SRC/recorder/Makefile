@@ -10,6 +10,7 @@ OBJS       = Recorder.o \
 	FilePlotter.o \
 	AlgorithmIncrements.o \
 	DriftRecorder.o \
+	EnvelopeDriftRecorder.o \
 	PatternRecorder.o \
 	DamageRecorder.o
 
