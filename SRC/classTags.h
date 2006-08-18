@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.80 $
-// $Date: 2006-08-17 22:27:54 $
+// $Revision: 1.81 $
+// $Date: 2006-08-18 23:43:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -126,6 +126,8 @@
 
 #define MAT_TAG_Bond_SP01  27
 #define MAT_TAG_Concrete04 30
+#define MAT_TAG_SecantConcrete 31
+#define MAT_TAG_ContinuumUniaxial 32
 
 //B Jeremic
 #define MAT_TAG_PySimple1        205
@@ -185,7 +187,10 @@
 #define SEC_TAG_ElasticMembranePlateSection	14
 #define SEC_TAG_MembranePlateFiberSection	15 
 #define SEC_TAG_Bidirectional	16
-#define SEC_TAG_Isolator2spring	17
+#define SEC_TAG_WSection2d	17
+
+#define SECTION_INTEGRATION_TAG_WideFlange 1
+#define SECTION_INTEGRATION_TAG_RC 2
 
 #define ND_TAG_ElasticIsotropic					10
 #define ND_TAG_ElasticIsotropicPlaneStrain2d	11
@@ -358,6 +363,8 @@
 #define BEAM_INTEGRATION_TAG_Midpoint           6
 #define BEAM_INTEGRATION_TAG_UserDefined     7
 #define BEAM_INTEGRATION_TAG_FixedLocation     8
+#define BEAM_INTEGRATION_TAG_LowOrder     9
+#define BEAM_INTEGRATION_TAG_MidDistance     40
 
 #define BEAM_INTEGRATION_TAG_HingeMidpoint 10
 #define BEAM_INTEGRATION_TAG_HingeEndpoint 11
@@ -439,7 +446,8 @@
 #define EquiALGORITHM_TAGS_NewtonLineSearch     8
 #define EquiALGORITHM_TAGS_PeriodicNewton       9
 #define EquiALGORITHM_TAGS_SecantNewton         10
-#define EquiALGORITHM_TAGS_AccelNewton          11
+#define EquiALGORITHM_TAGS_AcceleratedNewton          11
+#define EquiALGORITHM_TAGS_AcceleratedNewtonLineSearch          12
 
 #define ACCELERATOR_TAGS_Krylov		1
 #define ACCELERATOR_TAGS_Secant		2
