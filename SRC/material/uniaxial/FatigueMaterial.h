@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-08-03 23:42:19 $
+// $Revision: 1.4 $
+// $Date: 2006-08-18 23:00:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FatigueMaterial.h,v $
                                                       
 // Written: Patxi
@@ -82,7 +82,7 @@ class FatigueMaterial : public UniaxialMaterial
   
   void Print(OPS_Stream &s, int flag =0);
 
-  Response *setResponse (const char **argv, int argc, Information &matInformation);
+  Response *setResponse (const char **argv, int argc, Information &matInformation, OPS_Stream &s);
   int getResponse (int responseID, Information &matInformation);    
   
  protected:
@@ -117,6 +117,15 @@ class FatigueMaterial : public UniaxialMaterial
   
   bool Cfailed;
   double trialStrain;
+
+  // added 6/9/2006
+  // For recording strain ranges (SRXX) and Number of Cycles (NCXX)
+  double SR1;  // Committed strain range at peak
+  double NC1;  // Committed number of cycles at SR1 (i.e. 1.0 or 0.5)
+  double SR2;  // Committed strain range 2 at PSUEDO peak - there are potentially two ranges
+  double NC2;  // Committed number of cycles at SR2 2 (at PSUEDO peak) - there are potentially two ranges
+  double SR3;  // Committed strain range 3 at PSUEDO peak - there are potentially two ranges
+  double NC3;  // Committed number of cycles at SR2 3 (at PSUEDO peak) - there are potentially two ranges
   
 };
 
