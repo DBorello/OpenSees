@@ -20,9 +20,6 @@
 
 #include <classTags.h>
 
-#define SEC_TAG_SFS2d 1
-
-
 ID SoilFootingSection2d::code(3);
 
 
@@ -30,7 +27,7 @@ ID SoilFootingSection2d::code(3);
 // default constructor
 
 SoilFootingSection2d::SoilFootingSection2d(void)
-   :SectionForceDeformation(0, SEC_TAG_SFS2d),
+   :SectionForceDeformation(0, SEC_TAG_SoilFooting2d),
     e(3), s(3),eCommit(3), sCommit(3), deModel(3), ks(3,3), ksE(3,3), ini_size(3)
 {
    code(0) = SECTION_RESPONSE_P;   // vertical load
@@ -43,7 +40,7 @@ SoilFootingSection2d::SoilFootingSection2d(void)
 
 SoilFootingSection2d::SoilFootingSection2d
    (int tag, double fs, double vult, double l, double kv, double kh, double rv, double deltaL)
-   :SectionForceDeformation(tag, SEC_TAG_SFS2d),
+   :SectionForceDeformation(tag, SEC_TAG_SoilFooting2d),
    e(3), s(3), eCommit(3), sCommit(3), deModel(3), ks(3,3), ksE(3,3), ini_size(3), 
    FS(fs), Vult(vult), L(l), Kv(kv), Kh(kh), Rv(rv), dL(deltaL)
 {

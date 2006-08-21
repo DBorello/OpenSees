@@ -3,18 +3,17 @@
 
 #include <math.h>
 #include <YS_Section2D02.h>
-#define SEC_TAG_YS2D02 -1
 
 
 YS_Section2D02::YS_Section2D02(void)
-:YieldSurfaceSection2d(0, SEC_TAG_YS2D02, 0, true),
+:YieldSurfaceSection2d(0, SEC_TAG_YieldSurface2D02, 0, true),
  E(0), A(0), I(0), maxPlstkRot(0.0), peakPlstkRot(0.0), iFactor(1.0)
 {
 }
 
 YS_Section2D02::YS_Section2D02
 (int tag, double E_in, double A_in, double I_in, double theta_p_max, YieldSurface_BC *ptrys, bool use_kr)
-:YieldSurfaceSection2d(tag, SEC_TAG_YS2D02, ptrys, use_kr),
+:YieldSurfaceSection2d(tag, SEC_TAG_YieldSurface2D02, ptrys, use_kr),
  E(E_in), A(A_in), I(I_in), maxPlstkRot(theta_p_max),
  peakPlstkRot(0.0), iFactor(1.0)
 {

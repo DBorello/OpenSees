@@ -2,18 +2,16 @@
 // @ ggd@stanford.edu
 
 #include <YS_Section2D01.h>
-#define SEC_TAG_YS2D01 -1
-
 
 YS_Section2D01::YS_Section2D01(void)
-:YieldSurfaceSection2d(0, SEC_TAG_YS2D01, 0, true),
+:YieldSurfaceSection2d(0, SEC_TAG_YieldSurface2D01, 0, true),
  E(0), A(0), I(0)
 {
 }
 
 YS_Section2D01::YS_Section2D01
 (int tag, double E_in, double A_in, double I_in, YieldSurface_BC *ptrys, bool use_kr)
-:YieldSurfaceSection2d(tag, SEC_TAG_YS2D01, ptrys, use_kr),
+:YieldSurfaceSection2d(tag, SEC_TAG_YieldSurface2D01, ptrys, use_kr),
  E(E_in), A(A_in), I(I_in)
 {
     if (E <= 0.0)

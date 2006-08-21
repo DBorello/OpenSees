@@ -13,8 +13,6 @@
 
 #include <classTags.h>
 
-#define SEC_TAG_YS2d -1
-
 ID      YieldSurfaceSection2d::code(2);
 Vector  YieldSurfaceSection2d::dele(2);
 Vector  YieldSurfaceSection2d::surfaceForce(2);
@@ -22,7 +20,7 @@ Matrix  YieldSurfaceSection2d::G(2,1);
 Matrix  YieldSurfaceSection2d::Ktp(2,2);
 
 YieldSurfaceSection2d::YieldSurfaceSection2d(void)
-  :SectionForceDeformation(0, SEC_TAG_YS2d),
+  :SectionForceDeformation(0, SEC_TAG_YieldSurface2d),
    use_Kr_orig(true), ys(0), e(2), s(2),
    eCommit(2), sCommit(2), ks(2,2),
    use_Kr(true), split_step(false)
