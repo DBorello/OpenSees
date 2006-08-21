@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.81 $
-// $Date: 2006-08-18 23:43:10 $
+// $Revision: 1.82 $
+// $Date: 2006-08-21 18:26:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -188,6 +188,12 @@
 #define SEC_TAG_MembranePlateFiberSection	15 
 #define SEC_TAG_Bidirectional	16
 #define SEC_TAG_WSection2d	17
+#define SEC_TAG_Isolator2spring 18
+#define SEC_TAG_SoilFooting2d   19
+#define SEC_TAG_YieldSurface2d  30
+#define SEC_TAG_YieldSurface2D02  31
+#define SEC_TAG_YieldSurface2D01  32
+
 
 #define SECTION_INTEGRATION_TAG_WideFlange 1
 #define SECTION_INTEGRATION_TAG_RC 2
