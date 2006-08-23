@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.37 2006-08-07 22:18:21 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.38 2006-08-23 23:36:28 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -87,6 +87,7 @@ static char *tclStartupScriptFileName = NULL;
 #include <FileStream.h>
 #include <SimulationInformation.h>
 SimulationInformation simulationInfo;
+
 char *simulationInfoOutputFilename = 0;
 
 
@@ -602,6 +603,8 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 }
 
 
+/*
+
 int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 	
@@ -618,4 +621,4 @@ int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char *
   return 0;
 }
 
-    
+*/    
