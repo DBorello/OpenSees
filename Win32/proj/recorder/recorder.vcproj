@@ -123,6 +123,9 @@
 				RelativePath="..\..\..\SRC\recorder\ElementRecorder.cpp">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\recorder\EnvelopeDriftRecorder.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\recorder\EnvelopeElementRecorder.cpp">
 			</File>
 			<File
