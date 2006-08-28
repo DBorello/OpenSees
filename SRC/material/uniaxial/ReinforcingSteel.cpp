@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2006-05-24 21:45:40 $
+// $Revision: 1.6 $
+// $Date: 2006-08-28 17:40:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ReinforcingSteel.cpp,v $
 
 /* ****************************************************************** **
@@ -240,7 +240,7 @@ ReinforcingSteel::getTangent(void) {
     break;
   }
   double scfact = scalefactor();
-  double tempOut = (taTan+TStress)*scfact/pow(exp(TStrain),2.0);
+  double tempOut = (taTan-TStress)*scfact/pow(exp(TStrain),2.0);
   
 #ifdef _WIN32
   if(_fpclass(tempOut)< 8 || _fpclass(tempOut)==512)
@@ -997,6 +997,7 @@ ReinforcingSteel::Buckled_stress_Dhakal(double ess, double fss)
 			  if (aveStress>-0.2*fyp) aveStress=-0.2*fyp;
 		  }
 		  return BackStress - (BackStress-fss)*(BackStress-aveStress)/(BackStress-Tfa);
+      //return Cfa[0]-aveStress/(BackStress-Cfa[0])*(fss-Cfa[0]);
     }
   } else {
 	  return fss;
@@ -1035,7 +1036,7 @@ ReinforcingSteel::Buckled_mod_Gomes(double ess, double fss, double Ess)
 double
 ReinforcingSteel::Buckled_mod_Dhakal(double ess, double fss, double Ess)
 {
-	double Etmp = Ess + (Buckled_stress_Dhakal(ess+0.00005, fss)-Buckled_stress_Gomes(ess-0.00005, fss))/0.0001;
+	double Etmp = Ess + (Buckled_stress_Dhakal(ess+0.00005, fss)-Buckled_stress_Dhakal(ess-0.00005, fss))/0.0001;
 	return Etmp;
 }
 /*****************************************************************************************/
