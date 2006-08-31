@@ -1372,10 +1372,6 @@ SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\elnp_Elastic.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\FT3Dep_test.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\SRC\material\nD\NewTemplate3Dep\Isotropic_Elastic.cpp
 # End Source File
 # Begin Source File

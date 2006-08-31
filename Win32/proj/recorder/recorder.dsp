@@ -109,6 +109,10 @@ SOURCE=..\..\..\SRC\recorder\ElementRecorder.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\recorder\EnvelopeDriftRecorder.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\recorder\EnvelopeElementRecorder.cpp
 # End Source File
 # Begin Source File
