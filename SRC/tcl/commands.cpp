@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.78 $
-// $Date: 2006-06-14 22:22:42 $
+// $Revision: 1.79 $
+// $Date: 2006-09-01 00:49:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -318,6 +318,20 @@ Domain theDomain;
 
 #endif
 
+
+#ifdef _PARALLEL_INTERPRETERS
+#include <MachineBroker.h>
+extern MachineBroker *theMachineBroker;
+#endif
+
+
+#ifdef _PARALLEL_PROCESSING
+#include <MachineBroker.h>
+extern MachineBroker *theMachineBroker;
+#endif
+
+
+
 static AnalysisModel *theAnalysisModel =0;
 static EquiSolnAlgo *theAlgorithm =0;
 static ConstraintHandler *theHandler =0;
@@ -366,6 +380,12 @@ TclVideoPlayer *theTclVideoPlayer =0;
 
 int 
 logFile(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+getPID(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+getNP(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 extern int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
@@ -450,6 +470,10 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "logFile", &logFile, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
     Tcl_CreateCommand(interp, "exit", &OpenSeesExit, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    Tcl_CreateCommand(interp, "getNP", &getNP, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    Tcl_CreateCommand(interp, "getPID", &getPID, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
 #ifdef _RELIABILITY
@@ -4661,6 +4685,47 @@ exit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   Tcl_Finalize();
   return TCL_OK;
+}
+
+
+
+int 
+getPID(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  int pid = 0;
+#ifdef _PARALLEL_INTERPRETERS
+  if (theMachineBroker != 0)
+    pid =  theMachineBroker->getPID();
+#endif
+
+#ifdef _PARALLEL_PROCESSING
+  if (theMachineBroker != 0)
+    pid =  theMachineBroker->getPID();
+#endif
+
+  // now we copy the value to the tcl string that is returned
+  sprintf(interp->result,"%d",pid);
+  return TCL_OK;  
+}
+
+
+int 
+getNP(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  int np = 1;
+#ifdef _PARALLEL_INTERPRETERS
+  if (theMachineBroker != 0)
+    np =  theMachineBroker->getNP();
+#endif
+
+#ifdef _PARALLEL_PROCESSING
+  if (theMachineBroker != 0)
+    np =  theMachineBroker->getNP();
+#endif
+
+  // now we copy the value to the tcl string that is returned
+  sprintf(interp->result,"%d",np);
+  return TCL_OK;  
 }
 
 

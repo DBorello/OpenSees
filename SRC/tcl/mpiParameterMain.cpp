@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-02-22 22:29:00 $
+// $Revision: 1.2 $
+// $Date: 2006-09-01 00:49:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/mpiParameterMain.cpp,v $
 
 /* 
@@ -35,7 +35,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: mpiParameterMain.cpp,v 1.1 2006-02-22 22:29:00 fmk Exp $
+ * RCS: @(#) $Id: mpiParameterMain.cpp,v 1.2 2006-09-01 00:49:09 fmk Exp $
  */
 
 extern "C" {
@@ -125,7 +125,7 @@ extern MachineBroker    *OPS_MACHINE;
 extern bool OPS_USING_MAIN_DOMAIN;
 extern int OPS_MAIN_DOMAIN_PARTITION_ID;
 
-static MPI_MachineBroker *theMachineBroker = 0;
+MachineBroker *theMachineBroker = 0;
 
 int
 main(int argc, char **argv)
