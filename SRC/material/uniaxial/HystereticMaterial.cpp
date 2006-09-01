@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2006-07-31 21:55:31 $
+// $Revision: 1.14 $
+// $Date: 2006-09-01 01:08:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HystereticMaterial.cpp,v $
 
 // Written: MHS
@@ -73,6 +73,9 @@ mom1n(m1n), rot1n(r1n), mom2n(m2n), rot2n(r2n), mom3n(m3n), rot3n(r3n)
 	  exit(-1);
 	}		
 
+	opserr << mom1p << " " << mom2p << " " << mom3p << " " << rot1p << " " << rot2p << " " << rot3p << endln;
+	opserr << pinchX << " " << pinchY << " " << endln;
+
 	energyA = 0.5 * (rot1p*mom1p + (rot2p-rot1p)*(mom2p+mom1p) + (rot3p-rot2p)*(mom3p+mom2p) +
 		rot1n*mom1n + (rot2n-rot1n)*(mom2n+mom1n) + (rot3n-rot2n)*(mom3n+mom2n));
 
@@ -125,6 +128,8 @@ mom1n(m1n), rot1n(r1n), mom3n(m2n), rot3n(r2n)
 	rot2p = 0.5*(rot1p+rot3p);
 	rot2n = 0.5*(rot1n+rot3n);
 
+	opserr << mom1p << " " << mom2p << " " << mom3p << " " << rot1p << " " << rot2p << " " << rot3p << endln;
+
 	// Set envelope slopes
 	this->setEnvelope();
 
@@ -153,40 +158,40 @@ HystereticMaterial::setTrialStrain(double strain, double strainRate)
   if (TloadIndicator == 0 && strain == 0.0)
     return 0;
 
-	TrotMax = CrotMax;
-	TrotMin = CrotMin;
-	TenergyD = CenergyD;
-	TrotPu = CrotPu;
-	TrotNu = CrotNu;
+  TrotMax = CrotMax;
+  TrotMin = CrotMin;
+  TenergyD = CenergyD;
+  TrotPu = CrotPu;
+  TrotNu = CrotNu;
 
-	Tstrain = strain;
-	double dStrain = Tstrain - Cstrain;
-
-	TloadIndicator = CloadIndicator;
-	
-	if (TloadIndicator == 0)
-	  TloadIndicator = (dStrain < 0.0) ? 2 : 1;
-
-	if (Tstrain >= CrotMax) {
-		TrotMax = Tstrain;
-		Ttangent = posEnvlpTangent(Tstrain);
-		Tstress = posEnvlpStress(Tstrain);
-	}
-	else if (Tstrain <= CrotMin) {
-		TrotMin = Tstrain;
-		Ttangent = negEnvlpTangent(Tstrain);
-		Tstress = negEnvlpStress(Tstrain);
-	}
-	else {
-	  if (dStrain < 0.0)
-	    negativeIncrement(dStrain);
-	  else if (dStrain > 0.0)
-	    positiveIncrement(dStrain);
-	}
-
-	TenergyD = CenergyD + 0.5*(Cstress+Tstress)*dStrain;
-
-	return 0;
+  Tstrain = strain;
+  double dStrain = Tstrain - Cstrain;
+  
+  TloadIndicator = CloadIndicator;
+  
+  if (TloadIndicator == 0)
+    TloadIndicator = (dStrain < 0.0) ? 2 : 1;
+  
+  if (Tstrain >= CrotMax) {
+    TrotMax = Tstrain;
+    Ttangent = posEnvlpTangent(Tstrain);
+    Tstress = posEnvlpStress(Tstrain);
+  }
+  else if (Tstrain <= CrotMin) {
+    TrotMin = Tstrain;
+    Ttangent = negEnvlpTangent(Tstrain);
+    Tstress = negEnvlpStress(Tstrain);
+  }
+  else {
+    if (dStrain < 0.0)
+      negativeIncrement(dStrain);
+    else if (dStrain > 0.0)
+      positiveIncrement(dStrain);
+  }
+  
+  TenergyD = CenergyD + 0.5*(Cstress+Tstress)*dStrain;
+  
+  return 0;
 }
 
 
@@ -238,13 +243,17 @@ HystereticMaterial::positiveIncrement(double dStrain)
 	double maxmom = posEnvlpStress(TrotMax);
 	double rotlim = negEnvlpRotlim(CrotMin);
 	double rotrel = (rotlim > TrotNu) ? rotlim : TrotNu;
-	rotrel = TrotNu;
-	if (negEnvlpStress(CrotMin) >= 0.0)
-	  rotrel = rotlim;
 
-	double rotmp1 = rotrel + pinchY*(TrotMax-rotrel);
+	// rotrel = TrotNu;
+	// if (negEnvlpStress(CrotMin) >= 0.0)
+	//    rotrel = rotlim;
+	
+	//	double rotmp1 = rotrel + pinchY*(TrotMax-rotrel);
+
 	double rotmp2 = TrotMax - (1.0-pinchY)*maxmom/(E1p*kp);
-	double rotch = rotmp1 + (rotmp2-rotmp1)*pinchX;
+	//double rotmp2 = TrotMax-(1-pinchY)*maxmom/E1p;
+	//	double rotch = rotmp1 + (rotmp2-rotmp1)*pinchX;
+	double rotch = rotrel + (rotmp2-rotrel)*pinchX;                   // changed on 7/11/2006
 
 	double tmpmo1;
 	double tmpmo2;
@@ -319,13 +328,16 @@ HystereticMaterial::negativeIncrement(double dStrain)
 	double minmom = negEnvlpStress(TrotMin);
 	double rotlim = posEnvlpRotlim(CrotMax);
 	double rotrel = (rotlim < TrotPu) ? rotlim : TrotPu;
-	rotrel = TrotPu;
-	if (posEnvlpStress(CrotMax) <= 0.0)
-	  rotrel = rotlim;
 
-	double rotmp1 = rotrel + pinchY*(TrotMin-rotrel);
+	//rotrel = TrotPu;
+	//if (posEnvlpStress(CrotMax) <= 0.0)
+	//  rotrel = rotlim;
+
+	//double rotmp1 = rotrel + pinchY*(TrotMin-rotrel);
 	double rotmp2 = TrotMin - (1.0-pinchY)*minmom/(E1n*kn);
-	double rotch = rotmp1 + (rotmp2-rotmp1)*pinchX;
+	//double rotmp2 = TrotMin-(1-pinchY)*minmom/E1n;	
+	//double rotch = rotmp1 + (rotmp2-rotmp1)*pinchX;
+	double rotch = rotrel + (rotmp2-rotrel)*pinchX;                   // changed on 7/11/2006
 
 	double tmpmo1;
 	double tmpmo2;
