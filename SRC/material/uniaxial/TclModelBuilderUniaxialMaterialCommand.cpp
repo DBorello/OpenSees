@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.37 $
-// $Date: 2006-05-24 21:11:03 $
+// $Revision: 1.38 $
+// $Date: 2006-09-01 00:51:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -117,9 +117,12 @@ TclModelBuilder_addSnapMaterial(ClientData clientData, Tcl_Interp *interp, int a
 UniaxialMaterial *
 TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
 				  TCL_Char **argv, TclModelBuilder *theTclBuilder, Domain *theDomain);
+
+/*
 int
 TclCommand_KinematicHardening(ClientData clientData, Tcl_Interp *interp, int argc, 
 			      TCL_Char **argv, TclModelBuilder *theTclBuilder);
+*/
 
 int
 TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *interp, int argc,
