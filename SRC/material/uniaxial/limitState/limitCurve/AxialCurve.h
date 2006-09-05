@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2006-02-07 23:15:55 $
+// $Revision: 1.2 $
+// $Date: 2006-09-05 22:39:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/limitState/limitCurve/AxialCurve.h,v $
 
 // Written: kje
@@ -73,8 +73,8 @@ class AxialCurve : public LimitCurve
 	int revertToStart(void);  
 	
 
-//	int    setParameter             (const char **argv, int argc, Information &info);//SDK
-//	int    updateParameter          (int parameterID, Information &info);//SDK
+	int    setParameter (const char **argv, int argc, Parameter &param);
+	int    updateParameter          (int parameterID, Information &info);
 
 
 

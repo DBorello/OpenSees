@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2006-08-04 18:35:06 $
+// $Revision: 1.3 $
+// $Date: 2006-09-05 22:39:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/limitState/limitCurve/ShearCurve.cpp,v $
                                                                         
 // Written: KJE
@@ -33,6 +33,8 @@
 #include <Node.h>
 #include <Domain.h>
 #include <Vector.h>
+#include <Parameter.h>
+
 #include <float.h>
 
 #include <DummyStream.h>
@@ -400,42 +402,33 @@ ShearCurve::findLimit(double DR) //SDK
 
 // AddingSensitivity:BEGIN ///////////////////////////////////
 int
-ShearCurve::setParameter(const char **argv, int argc, Information &info)
+ShearCurve::setParameter(const char **argv, int argc, Parameter &param)
 {
-	if (argc < 1)
-		return -1;
+  if (argc < 1)
+    return 0;
+  
+  if (strcmp(argv[0],"theta1") == 0)
+    return param.addObject(1, this);
 
-	if (strcmp(argv[0],"theta1") == 0) {
-		info.theType = DoubleType;
-		return 1;
-	}
-	if (strcmp(argv[0],"theta4") == 0) {
-		info.theType = DoubleType;
-		return 2;
-	}
-	if (strcmp(argv[0],"theta5") == 0) {
-		info.theType = DoubleType;
-		return 3;
-	}
-	if (strcmp(argv[0],"sigma") == 0) {
-		info.theType = DoubleType;
-		return 4;
-	}
-	if (strcmp(argv[0],"eps_normal") == 0) {
-		info.theType = DoubleType;
-		return 5;
-	}
-	
-	if (strcmp(argv[0],"fc") == 0) {
-		info.theType = DoubleType;
-		return 6;
-	}
-	
-	
-	else
-		opserr << "WARNING: Could not set parameter in Shear Curve. " << endln;
-                
-	return -1;
+  if (strcmp(argv[0],"theta4") == 0)
+    return param.addObject(2, this);
+
+  if (strcmp(argv[0],"theta5") == 0)
+    return param.addObject(3, this);
+
+  if (strcmp(argv[0],"sigma") == 0)
+    return param.addObject(4, this);
+
+  if (strcmp(argv[0],"eps_normal") == 0)
+    return param.addObject(5, this);
+
+  if (strcmp(argv[0],"fc") == 0)
+    return param.addObject(6, this);
+    
+  else
+    opserr << "WARNING: Could not set parameter in Shear Curve. " << endln;
+  
+  return 0;
 }
 
 

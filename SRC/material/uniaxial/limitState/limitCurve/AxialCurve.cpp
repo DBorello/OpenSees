@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2006-08-04 18:35:06 $
+// $Revision: 1.3 $
+// $Date: 2006-09-05 22:39:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/limitState/limitCurve/AxialCurve.cpp,v $
                                                                         
 // Written: KJE
@@ -460,36 +460,17 @@ AxialCurve::findLimit(double DR)
 
 
 
-/*// AddingSensitivity:BEGIN /////////////////////////////////// SDK
+// AddingSensitivity:BEGIN ///////////////////////////////////
 int
-AxialCurve::setParameter(const char **argv, int argc, Information &info)
+AxialCurve::setParameter(const char **argv, int argc, Parameter &param)
 {
-	if (argc < 1)
-		return -1;
-
-	if (strcmp(argv[0],"theta2") == 0) {
-		info.theType = DoubleType;
-		return 1;
-	}
-
-	if (strcmp(argv[0],"sigma") == 0) {
-		info.theType = DoubleType;
-		return 2;
-	}
-	if (strcmp(argv[0],"eps_normal") == 0) {
-		info.theType = DoubleType;
-		return 3;
-	}
-	
-	if (strcmp(argv[0],"fyt") == 0) {
-		info.theType = DoubleType;
-		return 4;
-	}
-
-	else
-		opserr << "WARNING: Could not set parameter in Axial Curve. " << endln;
-                
-	return -1;
+  if (argc < 1)
+    return -1;
+  
+  else
+    opserr << "WARNING: Could not set parameter in Axial Curve. " << endln;
+  
+  return -1;
 }
 
 
@@ -500,19 +481,6 @@ AxialCurve::updateParameter(int parameterID, Information &info)
 	switch (parameterID) {
 	case -1:
 		return -1;
-	case 1:
-		this->theta2 = info.theDouble;
-		break;
-	
-	case 2:
-		this->sigma = info.theDouble;
-		break;
-	case 3:
-		this->eps_normal = info.theDouble;
-		break;
-	case 4:
-		this->fyt = info.theDouble;
-		break;
 
 	default:
 		return -1;
@@ -523,8 +491,7 @@ AxialCurve::updateParameter(int parameterID, Information &info)
 }
 
 
-/////////////////////////////////////////ENDS///SDK
-*/
+/////////////////////////////////////////ENDS
 
 int AxialCurve::revertToStart ()
 {
