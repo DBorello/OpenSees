@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.11 $
-// $Date: 2003-03-11 03:49:27 $
+// $Revision: 1.12 $
+// $Date: 2006-09-05 22:22:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HardeningMaterial.cpp,v $
 
 // Written: MHS
@@ -32,9 +32,11 @@
 #include <HardeningMaterial.h>
 #include <Vector.h>
 #include <Channel.h>
-#include <math.h>
 #include <Matrix.h>
 #include <Information.h>
+#include <Parameter.h>
+
+#include <math.h>
 #include <float.h>
 
 HardeningMaterial::HardeningMaterial(int tag, double e, double s,
@@ -92,9 +94,8 @@ HardeningMaterial::setTrialStrain (double strain, double strainRate)
     double f = fabs(xsi) - (sigmaY + Hiso*Chardening);
 
     // Elastic step ... no updates required
-//    if (f <= -DBL_EPSILON * E)
-    if (f <= 1.0e-8)
-    {
+    if (f <= -DBL_EPSILON * E) {
+    //if (f <= 1.0e-8) {
 	// Set trial tangent
 	Ttangent = E;
     }
@@ -289,31 +290,26 @@ HardeningMaterial::Print(OPS_Stream &s, int flag)
 
 // AddingSensitivity:BEGIN ///////////////////////////////////
 int
-HardeningMaterial::setParameter(const char **argv, int argc, Information &info)
+HardeningMaterial::setParameter(const char **argv, int argc, Parameter &param)
 {
-	if (argc < 1)
-		return -1;
+  if (argc < 1)
+    return -1;
 
-	if (strcmp(argv[0],"sigmaY") == 0 || strcmp(argv[0],"fy") == 0) {
-		info.theType = DoubleType;
-		return 1;
-	}
-	if (strcmp(argv[0],"E") == 0) {
-		info.theType = DoubleType;
-		return 2;
-	}
-	if (strcmp(argv[0],"H_kin") == 0) {
-		info.theType = DoubleType;
-		return 3;
-	}
-	if (strcmp(argv[0],"H_iso") == 0) {
-		info.theType = DoubleType;
-		return 4;
-	}
-	else
-		opserr << "WARNING: Could not set parameter in HardeningMaterial. " << endln;
-                
-	return -1;
+  if (strcmp(argv[0],"sigmaY") == 0 || strcmp(argv[0],"fy") == 0)
+    return param.addObject(1, this);
+
+  if (strcmp(argv[0],"E") == 0)
+    return param.addObject(2, this);
+
+  if (strcmp(argv[0],"H_kin") == 0)
+    return param.addObject(3, this);
+
+  if (strcmp(argv[0],"H_iso") == 0)
+    return param.addObject(4, this);
+
+  else
+    opserr << "WARNING: Could not set parameter in HardeningMaterial. " << endln;
+  return -1;
 }
 
 int
@@ -390,9 +386,20 @@ HardeningMaterial::getStressSensitivity(int gradNumber, bool conditional)
 		ChardeningSensitivity	 = (*SHVs)(2,(gradNumber-1));
 	}
 
+	// Elastic trial stress
+	double Tstress = E * (Tstrain-CplasticStrain);
+
+	// Compute trial stress relative to committed back stress
+	double xsi = Tstress - CbackStress;
+
+	// Compute yield criterion
+	double f = fabs(xsi) - (sigmaY + Hiso*Chardening);
+
 	double sensitivity;
-	// Elastic step
-	if ( fabs(TplasticStrain-CplasticStrain) < 1.0e-8) { 
+
+	// Elastic step ... no updates required
+	if (f <= -DBL_EPSILON * E) {
+	//if (f <= 1.0e-8) {
 
 		sensitivity = ESensitivity*(Tstrain-CplasticStrain)-E*CplasticStrainSensitivity;
 
@@ -401,12 +408,6 @@ HardeningMaterial::getStressSensitivity(int gradNumber, bool conditional)
 	// Plastic step
 	else { 
 
-		double myTstress = E * (Tstrain-CplasticStrain);
-
-		double xsi = myTstress - CbackStress;
-		
-		double f = fabs(xsi) - (sigmaY + Hiso*Chardening);
-		
 		double TstressSensitivity = ESensitivity*(Tstrain-CplasticStrain)-E*CplasticStrainSensitivity;
 		
 		int sign = (xsi < 0) ? -1 : 1;
@@ -475,19 +476,23 @@ HardeningMaterial::commitSensitivity(double TstrainSensitivity, int gradNumber, 
 	double CbackStressSensitivity	= (*SHVs)(1,(gradNumber-1));
 	double ChardeningSensitivity	= (*SHVs)(2,(gradNumber-1));
 
-	// Elastic step
-	if ( fabs(TplasticStrain-CplasticStrain) < 1.0e-8) { 
+	// Elastic trial stress
+	double Tstress = E * (Tstrain-CplasticStrain);
+
+	// Compute trial stress relative to committed back stress
+	double xsi = Tstress - CbackStress;
+
+	// Compute yield criterion
+	double f = fabs(xsi) - (sigmaY + Hiso*Chardening);
+
+	// Elastic step ... no updates required
+	if (f <= -DBL_EPSILON * E) {
+	//if (f <= 1.0e-8) {
 		// No changes in the sensitivity history variables
 	}
 
 	// Plastic step
 	else { 
-
-		double myTstress = E * (Tstrain-CplasticStrain);
-
-		double xsi = myTstress - CbackStress;
-		
-		double f = fabs(xsi) - (sigmaY + Hiso*Chardening);
 
 		double TstressSensitivity = ESensitivity*(Tstrain-CplasticStrain)
 			+ E*(TstrainSensitivity-CplasticStrainSensitivity);

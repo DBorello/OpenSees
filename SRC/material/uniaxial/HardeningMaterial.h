@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.10 $
-// $Date: 2006-08-03 23:42:19 $
+// $Revision: 1.11 $
+// $Date: 2006-09-05 22:22:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HardeningMaterial.h,v $
 
 #ifndef HardeningMaterial_h
@@ -65,7 +65,7 @@ class HardeningMaterial : public UniaxialMaterial
     void Print(OPS_Stream &s, int flag =0);
     
     // AddingSensitivity:BEGIN //////////////////////////////////////////
-    int    setParameter             (const char **argv, int argc, Information &info);
+    int setParameter (const char **argv, int argc, Parameter &param);
     int    updateParameter          (int parameterID, Information &info);
     int    activateParameter        (int parameterID);
     double getStressSensitivity     (int gradNumber, bool conditional);
