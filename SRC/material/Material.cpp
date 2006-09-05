@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-08-04 18:40:37 $
+// $Revision: 1.5 $
+// $Date: 2006-09-05 21:17:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/Material.cpp,v $
                                                                         
                                                                         
@@ -59,28 +59,21 @@ Material::getVariable(int variableID, double &info)
 	return -1;
 }
 
-int
-Material::setParameter(const char **argv, int argc, Information &eleInformation)
-{
-    return -1;
-}
-
-int
-Material::updateParameter(int responseID, Information &eleInformation)
-{
-    return -1;
-}
-
 Response*
 Material::setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &s)
 {
-	return 0;
+  return 0;
 }
 
 int 
 Material::getResponse(int responseID, Information &info)
 {
-	return -1;
+  return -1;
 }
 
-
+int 
+Material::getResponseSensitivity(int responseID, int gradNumber,
+				 Information &info)
+{
+  return -1;
+}
