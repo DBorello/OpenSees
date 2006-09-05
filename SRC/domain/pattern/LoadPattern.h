@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2005-11-22 19:44:22 $
+// $Revision: 1.13 $
+// $Date: 2006-09-05 20:50:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.h,v $
                                                                         
                                                                         
@@ -39,6 +39,8 @@
 // What: "@(#) LoadPattern.h, revA"
 
 #include <DomainComponent.h>
+#include <Vector.h>
+
 class NodalLoad;
 class TimeSeries;
 class ElementalLoad;
@@ -99,7 +101,7 @@ class LoadPattern : public DomainComponent
 
     // AddingSensitivity:BEGIN //////////////////////////////////////////
     virtual void applyLoadSensitivity(double pseudoTime = 0.0);
-    virtual int  setParameter(const char **argv, int argc, Information &info);
+    virtual int setParameter(const char **argv, int argc, Parameter &param);
     virtual int  updateParameter(int parameterID, Information &info);
     virtual int  activateParameter(int parameterID);
     virtual const Vector & getExternalForceSensitivity(int gradNumber);

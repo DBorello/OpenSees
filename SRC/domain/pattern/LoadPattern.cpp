@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2005-11-22 19:44:22 $
+// $Revision: 1.14 $
+// $Date: 2006-09-05 20:50:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.cpp,v $
                                                                         
 // Written: fmk 07/99
@@ -915,14 +915,21 @@ LoadPattern::applyLoadSensitivity(double pseudoTime)
 }
 
 int
-LoadPattern::setParameter(const char **argv, int argc, Information &info)
+LoadPattern::setParameter(const char **argv, int argc, Parameter &param)
 {
     if (theSeries == 0) {
         opserr << "set/update/activate parameter is illegaly called in LoadPattern " << endln;
+	return 0;
     }
 
+    if (argc < 1)
+      return -1;
+
     // Nodal load
-    if (strcmp(argv[0],"-loadAtNode") == 0) {
+    if (strstr(argv[0],"loadAtNode") != 0) {
+
+      if (argc < 3)
+	return -1;
 
         RVisRandomProcessDiscretizer = false;
 
@@ -937,25 +944,45 @@ LoadPattern::setParameter(const char **argv, int argc, Information &info)
             }
         }
 
-        int ok = -1;
-        ok = theNodalLoad->setParameter (&argv[2], argc, info);
-
-        if (ok > 0 )
-            return ok*1000 + nodeNumber;
-        else
-            return -1;
+	if (theNodalLoad != 0)
+	  return theNodalLoad->setParameter(&argv[2], argc-2, param);
+	else
+	  return -1;
     }
 
+    else if (strstr(argv[0],"elementPointLoad") != 0) {
 
-    else if (strcmp(argv[0],"-randomProcessDiscretizer") == 0) {
+      if (argc < 3)
+	return -1;
+
+      RVisRandomProcessDiscretizer = false;
+
+      int eleNumber = atoi(argv[1]);
+      ElementalLoad *theEleLoad = 0;
+      ElementalLoadIter &theEleLoadIter = this->getElementalLoads();
+      while ((theEleLoad = theEleLoadIter()) != 0) {
+	const ID &eleTags = theEleLoad->getElementTags();
+	for (int i = 0; i < eleTags.Size(); i++)
+	  if (eleNumber == eleTags(i)) {
+	    return theEleLoad->setParameter(&argv[2], argc-2, param);
+	  }
+      }
+
+      return -1;
+    }
+
+    else if (strstr(argv[0],"randomProcessDiscretizer") != 0) {
+
+      if (argc < 2)
+	return -1;
 
         RVisRandomProcessDiscretizer = true;
-        return theSeries->setParameter(&argv[1], argc-1, info);
+        return theSeries->setParameter(&argv[1], argc-1, param);
     }
 
     // Unknown parameter
     else
-        return -1;
+      return -1;
 }
 
 int
@@ -965,7 +992,11 @@ LoadPattern::updateParameter(int parameterID, Information &info)
     opserr << "set/update/activate parameter is illegaly called in LoadPattern " << endln;
   }
   
+  opserr << "LoadPattern::updateParameter -- no parameters defined, this method should not be called" << endln;
 
+  return 0;
+
+  /*
   if (RVisRandomProcessDiscretizer) {
     return theSeries->updateParameter(parameterID,info);
   }
@@ -1009,6 +1040,7 @@ LoadPattern::updateParameter(int parameterID, Information &info)
 	return -1;
     }
   }
+  */
 }
 
 
@@ -1022,7 +1054,11 @@ LoadPattern::activateParameter(int parameterID)
     opserr << "set/update/activate parameter is illegaly called in LoadPattern " << endln;
   }
   
+  opserr << "LoadPattern::activateParameter -- no parameters defined, this method should not be called" << endln;
 
+  return 0;
+
+  /*
   if (RVisRandomProcessDiscretizer) {
     return theSeries->activateParameter(parameterID);
   }
@@ -1078,6 +1114,8 @@ LoadPattern::activateParameter(int parameterID)
     }
   }
   return 0;
+  */
+
 }
 
 
