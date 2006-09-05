@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-09-05 19:47:28 $
+// $Revision: 1.4 $
+// $Date: 2006-09-05 20:25:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/actor/MovableObject.h,v $
                                                                         
                                                                         
@@ -62,7 +62,7 @@ class MovableObject
 			 FEM_ObjectBroker &theBroker) =0;
     
     // methods for sensitivity studies
-    virtual int setParameter(const char **argv, int argc, Information &param);
+    virtual int setParameter(const char **argv, int argc, Parameter &param);
     virtual int updateParameter(int parameterID, Information &info);
     virtual int activateParameter(int parameterID);
     

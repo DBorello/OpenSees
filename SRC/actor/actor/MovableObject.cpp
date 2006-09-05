@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-09-05 19:47:28 $
+// $Revision: 1.4 $
+// $Date: 2006-09-05 20:25:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/actor/MovableObject.cpp,v $
                                                                         
                                                                         
@@ -80,7 +80,7 @@ MovableObject::setDbTag(int newTag)
 }
 
 int
-MovableObject::setParameter(const char **argv, int argc, Information &param)
+MovableObject::setParameter(const char **argv, int argc, Parameter &param)
 {
   return 0;
 }
