@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:34 $
+// $Revision: 1.7 $
+// $Date: 2006-09-05 21:31:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/GenericSection1d.cpp,v $
                                                                         
                                                                         
@@ -268,4 +268,28 @@ GenericSection1d::Print (OPS_Stream &s, int flag)
     s << "GenericSection1d (Uniaxial), tag: " << this->getTag() << endln;
     s << "\tResponse code: " << code << endln;
     s << "\tUniaxialMaterial: " << theModel->getTag() << endln;
+}
+
+int
+GenericSection1d::setParameter(const char **argv, int argc, Parameter &param)
+{
+  return theModel->setParameter(argv, argc, param);
+}
+
+const Vector&
+GenericSection1d::getStressResultantSensitivity(int gradNumber,
+						bool conditional)
+{
+  static Vector dsdh(1);
+
+  dsdh(0) = theModel->getStressSensitivity(gradNumber, conditional);
+
+  return dsdh;
+}
+
+int
+GenericSection1d::commitSensitivity(const Vector &dedh, int gradNumber,
+				    int numGrads)
+{
+  return theModel->commitSensitivity(dedh(0), gradNumber, numGrads);
 }

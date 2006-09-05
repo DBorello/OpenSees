@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-08-03 23:49:46 $
+// $Revision: 1.7 $
+// $Date: 2006-09-05 21:31:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/GenericSection1d.h,v $
                                                                         
                                                                         
@@ -42,6 +42,7 @@
 
 class Information;
 class UniaxialMaterial;
+class MovableObject;
 
 class GenericSection1d : public SectionForceDeformation
 {
@@ -72,18 +73,25 @@ class GenericSection1d : public SectionForceDeformation
     
     int sendSelf (int commitTag, Channel &theChannel);
     int recvSelf (int commitTag, Channel &theChannel,
-			  FEM_ObjectBroker &theBroker);
+		  FEM_ObjectBroker &theBroker);
     
     void Print (OPS_Stream &s, int flag = 0);
+
+    // AddingSensitivity:BEGIN //////////////////////////////////////////
+    int setParameter(const char **argv, int argc, Parameter &param);
+    const Vector &getStressResultantSensitivity(int gradNumber, bool conditional);
+    int   commitSensitivity(const Vector &dedh, int gradNumber, int numGrads);
+    // AddingSensitivity:END ///////////////////////////////////////////
     
-  protected:
+ protected:
+
+ private:
     UniaxialMaterial *theModel;
     int code;
 
     static Vector s;
     static Matrix ks;
     static ID c;
-  private:
 };
 
 
