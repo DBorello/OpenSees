@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2006-08-03 23:42:19 $
+// $Revision: 1.11 $
+// $Date: 2006-09-05 22:14:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.h,v $
                                                                         
                                                                         
@@ -47,7 +47,7 @@ class Concrete01 : public UniaxialMaterial
   Concrete01 (int tag, double fpc, double eco, double fpcu, double ecu);
   Concrete01 ();
   ~Concrete01();
-  
+
   const char *getClassType(void) const {return "Concrete01";};
   
   int setTrialStrain(double strain, double strainRate = 0.0); 
@@ -70,7 +70,7 @@ class Concrete01 : public UniaxialMaterial
   void Print(OPS_Stream &s, int flag =0);
   
   // AddingSensitivity:BEGIN //////////////////////////////////////////
-  int    setParameter             (const char **argv, int argc, Information &info);
+  int    setParameter             (const char **argv, int argc, Parameter &param);
   int    updateParameter          (int parameterID, Information &info);
   int    activateParameter        (int parameterID);
   double getStressSensitivity     (int gradNumber, bool conditional);

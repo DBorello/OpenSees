@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2006-08-04 17:34:58 $
+// $Revision: 1.15 $
+// $Date: 2006-09-05 22:14:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.cpp,v $
                                                                         
 // Written: MHS 
@@ -37,6 +37,8 @@
 #include <Matrix.h>
 #include <Channel.h>
 #include <Information.h>
+#include <Parameter.h>
+
 #include <math.h>
 #include <float.h>
 
@@ -507,28 +509,27 @@ void Concrete01::Print (OPS_Stream& s, int flag)
 
 // AddingSensitivity:BEGIN ///////////////////////////////////
 int
-Concrete01::setParameter(const char **argv, int argc, Information &info)
+Concrete01::setParameter(const char **argv, int argc, Parameter &param)
 {
-	if (strcmp(argv[0],"fc") == 0) {// Compressive strength
-		info.theType = DoubleType;
-		return 1;
-	}
-	if (strcmp(argv[0],"epsco") == 0) {// Strain at compressive strength
-		info.theType = DoubleType;
-		return 2;
-	}
-	if (strcmp(argv[0],"fcu") == 0) {// Crushing strength
-		info.theType = DoubleType;
-		return 3;
-	}
-	if (strcmp(argv[0],"epscu") == 0) {// Strain at crushing strength
-		info.theType = DoubleType;
-		return 4;
-	}
-	else {
-		opserr << "WARNING: Could not set parameter in Concrete01! " << endln;
-		return -1;
-	}
+  if (argc < 1)
+    return 0;
+
+  if (strcmp(argv[0],"fc") == 0) {// Compressive strength
+    return param.addObject(1, this);
+  }
+  if (strcmp(argv[0],"epsco") == 0) {// Strain at compressive strength
+    return param.addObject(2, this);
+  }
+  if (strcmp(argv[0],"fcu") == 0) {// Crushing strength
+    return param.addObject(3, this);
+  }
+  if (strcmp(argv[0],"epscu") == 0) {// Strain at crushing strength
+    return param.addObject(4, this);
+  }
+  else {
+    opserr << "WARNING: Could not set parameter in Concrete01! " << endln;
+    return 0;
+  }
 }
     
                             
