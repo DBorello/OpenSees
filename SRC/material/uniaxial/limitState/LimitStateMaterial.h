@@ -94,8 +94,7 @@ class LimitStateMaterial : public UniaxialMaterial
     
 	    void Print(OPS_Stream &s, int flag =0);
 
-		int    setParameter             (const char **argv, int argc, Information &info);
-		int    updateParameter          (int parameterID, Information &info);
+	    int setParameter (const char **argv, int argc, Parameter &param);
 
 
 	protected:

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2006-02-07 23:15:54 $
+// $Revision: 1.2 $
+// $Date: 2006-09-05 22:32:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/limitState/LimitStateMaterial.cpp,v $
                                                                         
 // Written: KJE
@@ -47,6 +47,7 @@
 #include <math.h>
 #include <float.h>
 #include <Channel.h>
+#include <Vector.h>
 
 LimitStateMaterial::LimitStateMaterial(int tag,
 			double m1p, double r1p, double m2p, double r2p, double m3p, double r3p,
@@ -1260,17 +1261,7 @@ LimitStateMaterial::mirrorBackbone(void)
 
 
 int
-LimitStateMaterial::setParameter(const char **argv, int argc, Information &info)
+LimitStateMaterial::setParameter(const char **argv, int argc, Parameter &param)
 {
-  return theCurve->setParameter(argv, argc, info);
+  return theCurve->setParameter(argv, argc, param);
 }
-
-
-
-
-int
-LimitStateMaterial::updateParameter(int parameterID, Information &info)
-{
-	return theCurve->updateParameter(parameterID, info);
-}
-
