@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2004-09-01 03:56:49 $
+// $Revision: 1.6 $
+// $Date: 2006-09-05 23:11:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.h,v $
                                                                         
 // Written: fmk 
@@ -51,6 +51,10 @@ class YS_Evolution;
 class PlasticHardeningMaterial;
 class CyclicModel;	 //!!
 class DamageModel;
+class HystereticBackbone;
+class StiffnessDegradation;
+class UnloadingRule;
+class StrengthDegradation;
 
 class CrdTransf2d;
 class CrdTransf3d;
@@ -104,7 +108,17 @@ class TclModelBuilder : public ModelBuilder
     int addDamageModel(DamageModel &theModel); //!!
     DamageModel *getDamageModel(int tag); //!!
 
-  protected:
+#ifdef OO_HYSTERETIC
+    // methods needed to add/get material state relationships
+    int addStiffnessDegradation(StiffnessDegradation &theDegr);
+    StiffnessDegradation *getStiffnessDegradation(int tag);
+    int addUnloadingRule(UnloadingRule &theDegr);
+    UnloadingRule *getUnloadingRule(int tag);
+    int addStrengthDegradation(StrengthDegradation &theDegr);
+    StrengthDegradation *getStrengthDegradation(int tag);
+    int addHystereticBackbone(HystereticBackbone &theBackbone);
+    HystereticBackbone *getHystereticBackbone(int tag);
+#endif
 
   private:
     int ndm;	// space dimension of the mesh
@@ -122,6 +136,14 @@ class TclModelBuilder : public ModelBuilder
     TaggedObjectStorage *theCycModels; //!!
     TaggedObjectStorage *theDamageModels; //!!
 
+#ifdef OO_HYSTERETIC
+    TaggedObjectStorage *theStiffnessDegradations;
+    TaggedObjectStorage *theUnloadingRules;
+    TaggedObjectStorage *theStrengthDegradations;
+    TaggedObjectStorage *theHystereticBackbones;
+#endif
+
+ protected:
     Tcl_Interp *theInterp;
 };
 
