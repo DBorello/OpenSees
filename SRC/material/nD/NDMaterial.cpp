@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $                                                              
-// $Date: 2006-08-11 21:21:00 $                                                                  
+// $Revision: 1.20 $                                                              
+// $Date: 2006-09-05 21:25:35 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C
@@ -44,6 +44,10 @@
 #include <stresst.h>
 #include <straint.h>
 #include <MaterialResponse.h>
+
+#include <PlaneStressMaterial.h>
+#include <BeamFiberMaterial.h>
+#include <PlateFiberMaterial.h>
 
 Matrix NDMaterial::errMatrix(1,1);
 Vector NDMaterial::errVector(1);
@@ -68,6 +72,29 @@ NDMaterial::~NDMaterial()
 
 }
 
+NDMaterial*
+NDMaterial::getCopy(const char *type)
+{
+  if (strcmp(type,"PlaneStress") == 0 ||
+      strcmp(type,"PlaneStress2D") == 0) {
+    NDMaterial *copy = this->getCopy("ThreeDimensional");
+    PlaneStressMaterial *clone = new PlaneStressMaterial(this->getTag(),*copy);
+    return clone;
+  }
+  else if (strcmp(type,"BeamFiber") == 0 ||
+	   strcmp(type,"TimoshenkoFiber") == 0) {
+    NDMaterial *copy = this->getCopy("ThreeDimensional");
+    BeamFiberMaterial *clone = new BeamFiberMaterial(this->getTag(),*copy);
+    return clone;
+  }
+  else if (strcmp(type,"PlateFiber") == 0) {
+    NDMaterial *copy = this->getCopy("ThreeDimensional");
+    PlateFiberMaterial *clone = new PlateFiberMaterial(this->getTag(),*copy);
+    return clone;
+  }
+  else
+    return 0;
+}
 
 double
 NDMaterial::getRho(void)
@@ -339,24 +366,6 @@ NDMaterial::getResponse (int responseID, Information &matInfo)
 
 
 // AddingSensitivity:BEGIN ////////////////////////////////////////
-int
-NDMaterial::setParameter(const char **argv, int argc, Information &info)
-{
-    return -1;
-}
-
-int
-NDMaterial::updateParameter(int parameterID, Information &info)
-{
-    return -1;
-}
-
-int
-NDMaterial::activateParameter(int parameterID)
-{
-    return -1;
-}
-
 const Vector &
 NDMaterial::getStressSensitivity(int gradNumber, bool conditional)
 {
