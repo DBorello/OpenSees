@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2006-08-04 18:44:02 $
+// $Revision: 1.16 $
+// $Date: 2006-09-05 22:59:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.h,v $
 
 // Written: MHS
@@ -40,7 +40,7 @@
 #include <Matrix.h>
 #include <Vector.h>
 #include <ID.h>
-#include <GaussQuadRule1d01.h>
+#include <BeamIntegration.h>
 
 class Node;
 class SectionForceDeformation;
@@ -52,7 +52,8 @@ class DispBeamColumn2d : public Element
   public:
     DispBeamColumn2d(int tag, int nd1, int nd2,
 		     int numSections, SectionForceDeformation **s,
-		     CrdTransf2d &coordTransf, double rho = 0.0);
+		     BeamIntegration &bi, CrdTransf2d &coordTransf,
+		     double rho = 0.0);
     DispBeamColumn2d();
     ~DispBeamColumn2d();
 
@@ -94,7 +95,7 @@ class DispBeamColumn2d : public Element
     int getResponse(int responseID, Information &eleInfo);
 
     // AddingSensitivity:BEGIN //////////////////////////////////////////
-    int            setParameter(const char **argv, int argc, Information &info);
+    int setParameter(const char **argv, int argc, Parameter &param);
     int            updateParameter(int parameterID, Information &info);
     int            activateParameter(int parameterID);
     const Vector & getResistingForceSensitivity(int gradNumber);
@@ -112,6 +113,8 @@ class DispBeamColumn2d : public Element
     SectionForceDeformation **theSections; // pointer to the ND material objects
     CrdTransf2d *crdTransf;        // pointer to coordinate tranformation object 
 
+    BeamIntegration *beamInt;
+
     ID connectedExternalNodes; // Tags of quad nodes
 
     Node *theNodes[2];
@@ -127,8 +130,6 @@ class DispBeamColumn2d : public Element
     double rho;			// Mass density per unit length
 
     static double workArea[];
-
-    static GaussQuadRule1d01 quadRule;
 
     // AddingSensitivity:BEGIN //////////////////////////////////////////
     int parameterID;
