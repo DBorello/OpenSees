@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-03-04 00:48:10 $
+// $Revision: 1.5 $
+// $Date: 2006-09-05 19:47:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/DomainComponent.cpp,v $
                                                                         
                                                                         
@@ -35,9 +35,6 @@
 
 #include <Domain.h>
 #include <DomainComponent.h>
-// AddingSensitivity:BEGIN //////////////////////////////////
-#include <Vector.h>
-// AddingSensitivity:END ////////////////////////////////////
 
 DomainComponent::DomainComponent(int tag, int clasTag)
   :TaggedObject(tag), MovableObject(clasTag), theDomain(0)
@@ -73,23 +70,4 @@ int
 DomainComponent::displaySelf(Renderer &theViewer, int displayMode, float fact)
 {
   return 0;
-}
-
-int
-DomainComponent::setParameter(const char **argv, int argc, Information &eleInformation)
-{
-    return -1;
-}
-    
-			    
-int
-DomainComponent::updateParameter(int responseID, Information &eleInformation)
-{
-    return -1;
-}
-
-int
-DomainComponent::activateParameter(int parameterID)
-{
-	return 0;
 }

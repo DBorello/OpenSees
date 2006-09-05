@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-08-03 23:12:31 $
+// $Revision: 1.3 $
+// $Date: 2006-09-05 19:47:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/actor/MovableObject.h,v $
                                                                         
                                                                         
@@ -41,6 +41,8 @@
 
 class Channel;
 class FEM_ObjectBroker;
+class Information;
+class Parameter;
 
 class MovableObject
 {
@@ -58,6 +60,11 @@ class MovableObject
     virtual int sendSelf(int commitTag, Channel &theChannel) =0;  
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker) =0;
+    
+    // methods for sensitivity studies
+    virtual int setParameter(const char **argv, int argc, Information &param);
+    virtual int updateParameter(int parameterID, Information &info);
+    virtual int activateParameter(int parameterID);
     
   protected:
     
