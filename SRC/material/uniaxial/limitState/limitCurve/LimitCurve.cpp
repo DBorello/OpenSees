@@ -19,8 +19,8 @@
 ** ****************************************************************** */
                                                                         
 
-// $Revision: 1.1 $
-// $Date: 2006-02-07 23:15:55 $
+// $Revision: 1.2 $
+// $Date: 2006-09-05 22:32:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/limitState/limitCurve/LimitCurve.cpp,v $
 
 // Written: kje 
@@ -46,19 +46,4 @@ LimitCurve::LimitCurve(int tag, int clasTag)
 LimitCurve::~LimitCurve()
 {
   // does nothing
-}
-
-
-
-
-int
-LimitCurve::setParameter(const char **argv, int argc, Information &info)
-{
-    return -1;
-}
-
-int
-LimitCurve::updateParameter(int parameterID, Information &info)
-{
-    return -1;
 }
