@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2006-08-03 23:49:46 $
+// $Revision: 1.11 $
+// $Date: 2006-09-05 21:39:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionForceDeformation.h,v $
                                                                         
                                                                         
@@ -80,25 +80,31 @@ class SectionForceDeformation : public Material
   virtual const ID &getType (void) = 0;
   virtual int getOrder (void) const = 0;
   
-  virtual Response *setResponse(const char **argv, int argc, Information &info, OPS_Stream &s);
+  virtual Response *setResponse(const char **argv, int argc,
+				Information &info, OPS_Stream &s);
   virtual int getResponse(int responseID, Information &info);
+  virtual int getResponseSensitivity(int responseID, int gradNumber,
+				     Information &info);
   
   // AddingSensitivity:BEGIN //////////////////////////////////////////
-  virtual int            setParameter                     (const char **argv, int argc, Information &info);
-  virtual int            updateParameter                  (int parameterID, Information &info);
-  virtual int            activateParameter                (int parameterID);
-  virtual const Vector & getStressResultantSensitivity    (int gradNumber, bool conditional);
-  virtual const Vector & getSectionDeformationSensitivity (int gradNumber);
-  virtual const Matrix & getSectionTangentSensitivity     (int gradNumber);
-  virtual double         getRhoSensitivity                (int gradNumber);
-  virtual int            commitSensitivity                (const Vector& sectionDeformationGradient, int gradNumber, int numGrads);
+  virtual const Vector &getStressResultantSensitivity(int gradNumber,
+						      bool conditional);
+  virtual const Vector &getSectionDeformationSensitivity(int gradNumber);
+  virtual const Matrix &getSectionTangentSensitivity(int gradNumber);
+  virtual const Matrix &getSectionFlexibilitySensitivity(int gradNumber);
+  virtual const Matrix &getInitialTangentSensitivity(int gradNumber);
+  virtual const Matrix &getInitialFlexibilitySensitivity(int gradNumber);
+  virtual double getRhoSensitivity(int gradNumber);
+  virtual int commitSensitivity(const Vector& sectionDeformationGradient,
+				int gradNumber, int numGrads);
   // AddingSensitivity:END ///////////////////////////////////////////
-  
   
  protected:
   Matrix *fDefault;	// Default flexibility matrix
+  Vector *sDefault;
   
  private:
+
 };
 
 

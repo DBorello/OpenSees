@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2006-08-07 22:14:37 $
+// $Revision: 1.12 $
+// $Date: 2006-09-05 21:39:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionForceDeformation.cpp,v $
                                                                         
                                                                         
@@ -44,7 +44,7 @@ double invert3by3Matrix(const Matrix &a, Matrix &b);
 void invertMatrix(int n, const Matrix &a, Matrix &b);
 
 SectionForceDeformation::SectionForceDeformation(int tag, int classTag)
-:Material(tag,classTag), fDefault(0)
+  :Material(tag,classTag), fDefault(0), sDefault(0)
 {
 
 }
@@ -53,6 +53,8 @@ SectionForceDeformation::~SectionForceDeformation()
 {
   if (fDefault != 0)
     delete fDefault;
+  if (sDefault != 0)
+    delete sDefault;
 }
 
 const Matrix&
@@ -129,61 +131,9 @@ SectionForceDeformation::getRho(void)
   return 0.0 ;
 }
 
-
-/*
-int 
-SectionForceDeformation::setResponse(const char **argv, int argc, Information &sectInfo)
-{
-  // deformations
-  if ((strcmp(argv[0],"deformations") ==0) || 
-      (strcmp(argv[0],"deformation") ==0)) {
-    
-    Vector *theVector = new Vector(this->getOrder());
-    if (theVector == 0) {
-      opserr << "WARNING SectionForceDeformation::setResponse() - out of memory\n";
-      return -1;
- } 
-    sectInfo.theVector = theVector;
-    sectInfo.theType = VectorType;	
-    return 1;
-  } 
-  
-  // stress resultants
-  else if ((strcmp(argv[0],"forces") ==0) ||
-	   (strcmp(argv[0],"force") ==0)) {
-    
-    Vector *theVector = new Vector(this->getOrder());
-    if (theVector == 0) {
-      opserr << "WARNING SectionForceDeformation::setResponse() - out of memory\n";
-      return -1;
-    } 
-    sectInfo.theVector = theVector;
-    sectInfo.theType = VectorType;	
-    return 2;
-  } 
-  
-  // tangent stiffness
-  else if (strcmp(argv[0],"stiff") == 0 ||
-	   strcmp(argv[0],"stiffness") == 0) {
-    int order = this->getOrder();
-    Matrix *newMatrix = new Matrix(order,order);
-    if (newMatrix == 0) {
-      opserr << "WARNING SectionForceDeformation::setResponse() - out of memory\n";
-      return -1;
-    } 
-    sectInfo.theMatrix = newMatrix;
-    sectInfo.theType = MatrixType;	
-    return 3;
-  }
-  
-  // otherwise response quantity is unknown for the Section class
-  else
-    return -1;    
-}
-*/
-
 Response*
-SectionForceDeformation::setResponse(const char **argv, int argc, Information &sectInfo, OPS_Stream &output)
+SectionForceDeformation::setResponse(const char **argv, int argc,
+				     Information &sectInfo, OPS_Stream &output)
 {
   const ID &type = this->getType();
   int typeSize = this->getOrder();
@@ -323,7 +273,6 @@ SectionForceDeformation::getResponse(int responseID, Information &secInfo)
   case 2:
     return secInfo.setVector(this->getStressResultant());
     
-    
   case 4: {
     Vector &theVec = *(secInfo.theVector);
     const Vector &e = this->getSectionDeformation();
@@ -341,58 +290,138 @@ SectionForceDeformation::getResponse(int responseID, Information &secInfo)
   }
 }
 
+int 
+SectionForceDeformation::getResponseSensitivity(int responseID, int gradNumber,
+						Information &secInfo)
+{
+  Vector &theVec = *(secInfo.theVector);
 
+  switch (responseID) {
+  case 1:
+    theVec = this->getSectionDeformationSensitivity(gradNumber);
+    return secInfo.setVector(theVec);
+    
+  case 2: {
+    const Matrix &ks = this->getSectionTangent();
+    const Vector &dedh = this->getSectionDeformationSensitivity(gradNumber);
+    const Vector &dsdh = this->getStressResultantSensitivity(gradNumber, true);
+    theVec.addMatrixVector(0.0, ks, dedh, 1.0);
+    theVec.addVector(1.0, dsdh, 1.0);
+    return secInfo.setVector(theVec);
+  }
 
+  default:
+    return -1;
+  }
+}
 
 // AddingSensitivity:BEGIN ////////////////////////////////////////
-int
-SectionForceDeformation::setParameter(const char **argv, int argc, Information &eleInformation)
-{
-    return -1;
-}
-
-int
-SectionForceDeformation::updateParameter(int responseID, Information &eleInformation)
-{
-    return -1;
-}
-
-int
-SectionForceDeformation::activateParameter(int parameterID)
-{
-    return -1;
-}
-
 const Vector &
 SectionForceDeformation::getStressResultantSensitivity(int gradNumber, bool conditional)
 {
-	static Vector dummy(1);
-    return dummy;
+  if (sDefault == 0)
+    sDefault = new Vector (this->getOrder());
+  return *sDefault;
 }
 
 const Vector &
 SectionForceDeformation::getSectionDeformationSensitivity(int gradNumber)
 {
-	static Vector dummy(1);
-    return dummy;
+  if (sDefault == 0)
+    sDefault = new Vector (this->getOrder());
+  return *sDefault;
 }
 
 const Matrix &
 SectionForceDeformation::getSectionTangentSensitivity(int gradNumber)
 {
-	static Matrix dummy(1,1);
-    return dummy;
+  int order = this->getOrder();
+  
+  if (fDefault == 0) {		
+    fDefault = new Matrix(order,order);
+    if (fDefault == 0) {
+      opserr << "SectionForceDeformation::getSectionTangentSensitivity -- failed to allocate matrix\n";
+      exit(-1);
+    }
+  }
+
+  fDefault->Zero();
+
+  return *fDefault;
+}
+
+const Matrix &
+SectionForceDeformation::getInitialTangentSensitivity(int gradNumber)
+{
+  int order = this->getOrder();
+  
+  if (fDefault == 0) {		
+    fDefault = new Matrix(order,order);
+    if (fDefault == 0) {
+      opserr << "SectionForceDeformation::getInitialTangentSensitivity -- failed to allocate matrix\n";
+      exit(-1);
+    }
+  }
+
+  fDefault->Zero();
+
+  return *fDefault;
+}
+
+const Matrix&
+SectionForceDeformation::getSectionFlexibilitySensitivity(int gradNumber)
+{
+  int order = this->getOrder();
+  
+  if (fDefault == 0) {		
+    fDefault = new Matrix(order,order);
+    if (fDefault == 0) {
+      opserr << "SectionForceDeformation::getSectionFlexibilitySensitivity -- failed to allocate matrix\n";
+      exit(-1);
+    }
+  }
+
+  const Matrix &dksdh = this->getSectionTangentSensitivity(gradNumber);
+  
+  const Matrix &fs = this->getSectionFlexibility();
+
+  *fDefault = (fs * dksdh * fs) * -1;
+
+  return *fDefault;
+}
+
+const Matrix&
+SectionForceDeformation::getInitialFlexibilitySensitivity(int gradNumber)
+{
+  int order = this->getOrder();
+  
+  if (fDefault == 0) {		
+    fDefault = new Matrix(order,order);
+    if (fDefault == 0) {
+      opserr << "SectionForceDeformation::getInitialFlexibilitySensitivity -- failed to allocate matrix\n";
+      exit(-1);
+    }
+  }
+  
+  const Matrix &dksdh = this->getInitialTangentSensitivity(gradNumber);
+  
+  const Matrix &fs = this->getInitialFlexibility();
+
+  *fDefault = (fs * dksdh * fs) * -1;
+  
+  return *fDefault;
 }
 
 double
 SectionForceDeformation::getRhoSensitivity(int gradNumber)
 {
-	return 0.0;
+  return 0.0;
 }
 
 int
-SectionForceDeformation::commitSensitivity(const Vector& defSens, int gradNumber, int numGrads)
+SectionForceDeformation::commitSensitivity(const Vector& defSens,
+					   int gradNumber, int numGrads)
 {
-    return -1;
+  return -1;
 }
 // AddingSensitivity:END ///////////////////////////////////////////
