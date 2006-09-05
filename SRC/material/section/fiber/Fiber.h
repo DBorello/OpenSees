@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-08-04 18:32:01 $
+// $Revision: 1.7 $
+// $Date: 2006-09-05 22:06:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/Fiber.h,v $
                                                                         
                                                                         
@@ -42,8 +42,8 @@
 
 #include <DomainComponent.h>
 #include <MovableObject.h>
+#include <Vector.h>
 
-class Vector;
 class Matrix;
 class ID;
 class UniaxialMaterial;
@@ -75,11 +75,15 @@ class Fiber : public TaggedObject, public MovableObject
     virtual UniaxialMaterial *getMaterial(void) =0;
     virtual double getArea(void) =0;
 
-  protected:
-    
-  private:
+    virtual const Vector &getFiberSensitivity(int gradNumber, bool cond);
+    virtual int commitSensitivity(const Vector &dedh, int gradNumber,
+				  int numGrads);
+
+ protected:
+    Vector *sDefault;
+    Matrix *fDefault;
+
+ private:
 };
 
-
 #endif
-
