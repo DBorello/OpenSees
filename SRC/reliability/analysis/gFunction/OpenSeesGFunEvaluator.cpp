@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-10-27 23:45:43 $
+// $Revision: 1.10 $
+// $Date: 2006-09-05 23:36:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.cpp,v $
 
 
@@ -404,7 +404,7 @@ OpenSeesGFunEvaluator::rec_element_occurrence(char tempchar[100], bool createRec
 		line = 0;
 		col = globalForceComponent+1;
 		if (createRecorder) {
-			sprintf(tclAssignment , "recorder Element %d -file %s.out -time globalForce",eleNumber, tempString);
+			sprintf(tclAssignment , "recorder Element -ele %d -file %s.out -time globalForce",eleNumber, tempString);
 			Tcl_Eval( theTclInterp, tclAssignment);
 		}
 	}
@@ -416,7 +416,19 @@ OpenSeesGFunEvaluator::rec_element_occurrence(char tempchar[100], bool createRec
 		line = 0;
 		col = localForceComponent+1;
 		if (createRecorder) {
-			sprintf(tclAssignment , "recorder Element %d -file %s.out -time localForce",eleNumber, tempString);
+			sprintf(tclAssignment , "recorder Element -ele %d -file %s.out -time localForce",eleNumber, tempString);
+			Tcl_Eval( theTclInterp, tclAssignment);
+		}
+	}
+	else if ( strncmp(restString, "plasticDeformation",18) == 0) {
+		// recorder Element 5 fileName.out -time localForce {rec_element_5_localForce_2}
+		int localForceComponent;
+		sscanf(restString,"plasticDeformation_%i", &localForceComponent);
+		sprintf(tempString, "rec_element_%d_plasticDeformation_%d", eleNumber, localForceComponent);
+		line = 0;
+		col = localForceComponent+1;
+		if (createRecorder) {
+			sprintf(tclAssignment , "recorder Element -ele %d -file %s.out -time plasticDeformation",eleNumber, tempString);
 			Tcl_Eval( theTclInterp, tclAssignment);
 		}
 	}
