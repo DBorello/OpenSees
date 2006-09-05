@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-11-29 22:42:41 $
+// $Revision: 1.6 $
+// $Date: 2006-09-05 23:01:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/EquiSolnAlgo.h,v $
                                                                         
                                                                         
@@ -65,6 +65,14 @@ class EquiSolnAlgo: public SolutionAlgorithm
     virtual ConvergenceTest *getConvergenceTest(void);     
     virtual void Print(OPS_Stream &s, int flag =0) =0;    
 
+    virtual int getNumFactorizations(void) {return 0;}
+    virtual double getTotalTimeCPU(void)   {return 0.0;}
+    virtual double getTotalTimeReal(void)  {return 0.0;}
+    virtual double getSolveTimeCPU(void)   {return 0.0;}
+    virtual double getSolveTimeReal(void)  {return 0.0;}
+    virtual double getAccelTimeCPU(void)   {return 0.0;}
+    virtual double getAccelTimeReal(void)  {return 0.0;}
+ 
     // the following are not protected as convergence test
     // may need access to them
     AnalysisModel           *getAnalysisModelPtr(void) const;
