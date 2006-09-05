@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2006-08-04 19:07:15 $
+// $Revision: 1.27 $
+// $Date: 2006-09-05 21:11:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -38,6 +38,7 @@
 #include <Domain.h>
 #include <string.h>
 #include <Information.h>
+#include <Parameter.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <ElementResponse.h>
@@ -1011,40 +1012,35 @@ FourNodeQuad::getResponse(int responseID, Information &eleInfo)
 }
 
 int
-FourNodeQuad::setParameter(const char **argv, int argc, Information &info)
+FourNodeQuad::setParameter(const char **argv, int argc, Parameter &param)
 {
+  if (argc < 1)
+    return -1;
+
   // quad mass density per unit volume
-  if (strcmp(argv[0],"rho") == 0) {
-    info.theType = DoubleType;
-    info.theDouble = rho;
-    return 1;
-  }
+  if (strcmp(argv[0],"rho") == 0)
+    return param.addObject(1, this);
+
   // quad pressure loading
-  if (strcmp(argv[0],"pressure") == 0) {
-		info.theType = DoubleType;
-		info.theDouble = pressure;
-		return 2;
-  }
+  if (strcmp(argv[0],"pressure") == 0)
+    return param.addObject(2, this);
+
   // a material parameter
-  else if (strcmp(argv[0],"material") == 0) {
+  else if (strstr(argv[0],"material") != 0) {
+
+    if (argc < 3)
+      return -1;
+
     int pointNum = atoi(argv[1]);
-    if (pointNum > 0 && pointNum <= 4) {
-      int ok = theMaterial[pointNum-1]->setParameter(&argv[2], argc-2, info);
-      if (ok < 0)
-	return -1;
-      else if (ok >= 0 && ok < 100)
-				return pointNum*100 + ok;
-      else
-	return -1;
-    }
+    if (pointNum > 0 && pointNum <= 4)
+      return theMaterial[pointNum-1]->setParameter(&argv[2], argc-2, param);
     else 
       return -1;
-	}
+  }
   
   // otherwise parameter is unknown for the FourNodeQuad class
   else
     return -1;
-
 }
     
 int
@@ -1063,14 +1059,16 @@ FourNodeQuad::updateParameter(int parameterID, Information &info)
 		this->setPressureLoadAtNodes();	// update consistent nodal loads
 		return 0;
 	default: 
-		if (parameterID >= 100) { // material parameter
-			int pointNum = parameterID/100;
-			if (pointNum > 0 && pointNum <= 4)
-				return theMaterial[pointNum-1]->updateParameter(parameterID-100*pointNum, info);
-			else
-				return -1;
-		} else // unknown
-			return -1;
+	  /*	  
+	  if (parameterID >= 100) { // material parameter
+	    int pointNum = parameterID/100;
+	    if (pointNum > 0 && pointNum <= 4)
+	      return theMaterial[pointNum-1]->updateParameter(parameterID-100*pointNum, info);
+	    else
+	      return -1;
+	  } else // unknown
+	  */
+	    return -1;
   }
 }
 

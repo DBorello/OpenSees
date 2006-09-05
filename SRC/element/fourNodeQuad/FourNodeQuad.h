@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2006-08-04 19:07:15 $
+// $Revision: 1.12 $
+// $Date: 2006-09-05 21:11:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.h,v $
                                                                         
 // Written: MHS
@@ -93,7 +93,7 @@ class FourNodeQuad : public Element
 
     int getResponse(int responseID, Information &eleInformation);
 
-    int setParameter(const char **argv, int argc, Information &info);
+    int setParameter(const char **argv, int argc, Parameter &param);
     int updateParameter(int parameterID, Information &info);
 
     // RWB; PyLiq1 & TzLiq1 need to see the excess pore pressure and initial stresses.
