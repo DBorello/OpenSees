@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-14 23:01:33 $
+// $Revision: 1.9 $
+// $Date: 2006-09-05 21:27:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection2d.cpp,v $
                                                                         
                                                                         
@@ -43,6 +43,8 @@
 #include <FEM_ObjectBroker.h>
 #include <MatrixUtil.h>
 #include <stdlib.h>
+#include <Information.h>
+#include <Parameter.h>
 
 #include <classTags.h>
 
@@ -285,3 +287,85 @@ ElasticSection2d::Print(OPS_Stream &s, int flag)
   s << "\tI: " << I << endln;
 }
 
+int
+ElasticSection2d::setParameter(const char **argv, int argc, Parameter &param)
+{
+  if (argc < 1)
+    return -1;
+
+  if (strcmp(argv[0],"E") == 0)
+    return param.addObject(1, this);
+
+  if (strcmp(argv[0],"A") == 0)
+    return param.addObject(2, this);
+
+  if (strcmp(argv[0],"I") == 0)
+    return param.addObject(3, this);
+
+  return -1;
+}
+
+int
+ElasticSection2d::updateParameter(int paramID, Information &info)
+{
+  //opserr << "ES: " << paramID << endln;
+
+  if (paramID == 1)
+    E = info.theDouble;
+  if (paramID == 2)
+    A = info.theDouble;
+  if (paramID == 3)
+    I = info.theDouble;
+
+  return 0;
+}
+
+int
+ElasticSection2d::activateParameter(int paramID)
+{
+  parameterID = paramID;
+
+  return 0;
+}
+
+const Vector&
+ElasticSection2d::getStressResultantSensitivity(int gradNumber,
+						bool conditional)
+{
+  s.Zero();
+
+  if (parameterID == 1) { // E
+    s(0) = A*e(0);
+    s(1) = I*e(1);
+  }
+  if (parameterID == 2) // A
+    s(0) = E*e(0);
+  if (parameterID == 3) // I
+    s(1) = E*e(1);
+
+  return s;
+}
+
+const Vector&
+ElasticSection2d::getSectionDeformationSensitivity(int gradNumber)
+{
+  s.Zero();
+
+  return s;
+}
+
+const Matrix&
+ElasticSection2d::getInitialTangentSensitivity(int gradNumber)
+{
+  ks.Zero();
+
+  return ks;
+}
+
+int
+ElasticSection2d::commitSensitivity(const Vector& sectionDeformationGradient,
+				    int gradNumber, int numGrads)
+{
+  // Nothing to commit, path independent
+  return 0;
+}
