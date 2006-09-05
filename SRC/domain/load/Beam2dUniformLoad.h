@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:00:57 $
+// $Revision: 1.4 $
+// $Date: 2006-09-05 23:08:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dUniformLoad.h,v $
                                                                         
 #ifndef Beam2dUniformLoad_h
@@ -45,12 +45,20 @@ class Beam2dUniformLoad : public ElementalLoad
     int recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroker &theBroker);
     void Print(OPS_Stream &s, int flag =0);       
 
+    int setParameter(const char **argv, int argc, Parameter &param);
+    int updateParameter(int parameterID, Information &info);
+    int activateParameter(int paramID);
+
+    const Vector &getSensitivityData(int gradNumber);
+
   protected:
 	
   private:
     double wTrans;
     double wAxial;
     static Vector data;
+
+    int parameterID;
 };
 
 #endif

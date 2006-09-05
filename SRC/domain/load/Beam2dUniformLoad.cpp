@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:00:57 $
+// $Revision: 1.6 $
+// $Date: 2006-09-05 23:08:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dUniformLoad.cpp,v $
                                                                         
 
@@ -31,19 +31,22 @@
 #include <Vector.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
+#include <Information.h>
+#include <Parameter.h>
 
 Vector Beam2dUniformLoad::data(2);
 
 Beam2dUniformLoad::Beam2dUniformLoad(int tag, double wt, double wa,
 				     const ID &theElementTags)
   :ElementalLoad(tag, LOAD_TAG_Beam2dUniformLoad, theElementTags),
-   wTrans(wt), wAxial(wa)
+   wTrans(wt), wAxial(wa), parameterID(0)
 {
 
 }
 
 Beam2dUniformLoad::Beam2dUniformLoad()
-  :ElementalLoad(LOAD_TAG_Beam2dUniformLoad), wTrans(0.0), wAxial(0.0)
+  :ElementalLoad(LOAD_TAG_Beam2dUniformLoad),
+   wTrans(0.0), wAxial(0.0), parameterID(0)
 {
 
 }
@@ -132,4 +135,61 @@ Beam2dUniformLoad::Print(OPS_Stream &s, int flag)
   s << "  Transverse: " << wTrans << endln;
   s << "  Axial:      " << wAxial << endln;
   s << "  Elements acted on: " << this->getElementTags();
+}
+
+int
+Beam2dUniformLoad::setParameter(const char **argv, int argc, Parameter &param)
+{
+  if (argc < 1)
+    return -1;
+  
+  if (strcmp(argv[0],"wTrans") == 0 || strcmp(argv[0],"wy") == 0)
+    return param.addObject(1, this);
+
+  if (strcmp(argv[0],"wAxial") == 0 || strcmp(argv[0],"wx") == 0)
+    return param.addObject(2, this);
+
+  return -1;
+}
+
+int
+Beam2dUniformLoad::updateParameter(int parameterID, Information &info)
+{
+  switch (parameterID) {
+  case 1:
+    wTrans = info.theDouble;
+    return 0;
+  case 2:
+    wAxial = info.theDouble;
+    return 0;
+  default:
+    return -1;
+  }
+}
+
+int
+Beam2dUniformLoad::activateParameter(int paramID)
+{
+  parameterID = paramID;
+
+  return 0;
+}
+
+const Vector&
+Beam2dUniformLoad::getSensitivityData(int gradNumber)
+{
+  data.Zero();
+
+  switch(parameterID) {
+  case 1:
+    data(0) = 1.0;
+    break;
+  case 2:
+    data(1) = 1.0;
+    break;
+  default:
+    break;
+  }
+
+  return data;
 }

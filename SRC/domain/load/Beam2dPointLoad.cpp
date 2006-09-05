@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:00:57 $
+// $Revision: 1.6 $
+// $Date: 2006-09-05 23:08:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dPointLoad.cpp,v $
                                                                         
 // Written: fmk 
@@ -30,21 +30,22 @@
 #include <Vector.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
-
+#include <Information.h>
+#include <Parameter.h>
 
 Vector Beam2dPointLoad::data(3);
 
 Beam2dPointLoad::Beam2dPointLoad(int tag, double Pt, double dist,
 				 const ID &theElementTags, double Pa)
   :ElementalLoad(tag, LOAD_TAG_Beam2dPointLoad, theElementTags),
-   Ptrans(Pt), Paxial(Pa), x(dist)
+   Ptrans(Pt), Paxial(Pa), x(dist), parameterID(0)
 {
 
 }
 
 Beam2dPointLoad::Beam2dPointLoad()
   :ElementalLoad(LOAD_TAG_Beam2dPointLoad),
-   Ptrans(0.0), Paxial(0.0), x(0.0)
+   Ptrans(0.0), Paxial(0.0), x(0.0), parameterID(0)
 {
 
 }
@@ -104,10 +105,10 @@ Beam2dPointLoad::recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroker 
     return result;
   }
 
-  Ptrans = vectData(0);;
-  Paxial = vectData(1);;
+  Ptrans = vectData(0);
+  Paxial = vectData(1);
   x      = vectData(2);  
-  int numEle = vectData(3);
+  int numEle = (int)vectData(3);
 
 
   if (theElementTags == 0 || theElementTags->Size() != numEle) {
@@ -135,4 +136,70 @@ Beam2dPointLoad::Print(OPS_Stream &s, int flag)
   s << "Beam2dPointLoad - reference load : (" << Ptrans
     << ", " << Paxial << ") acting at : " << x << " relative to length\n";
   s << "  elements acted on: " << this->getElementTags();
+}
+
+int
+Beam2dPointLoad::setParameter(const char **argv, int argc, Parameter &param)
+{
+  if (argc < 1)
+    return -1;
+
+  if (strcmp(argv[0],"Ptrans") == 0 || strcmp(argv[0],"P") == 0)
+    return param.addObject(1, this);
+
+  if (strcmp(argv[0],"Paxial") == 0 || strcmp(argv[0],"N") == 0)
+    return param.addObject(2, this);
+
+  if (strcmp(argv[0],"x") == 0)
+    return param.addObject(3, this);
+
+  return -1;
+}
+
+int
+Beam2dPointLoad::updateParameter(int parameterID, Information &info)
+{
+  switch (parameterID) {
+  case 1:
+    Ptrans = info.theDouble;
+    return 0;
+  case 2:
+    Paxial = info.theDouble;
+    return 0;
+  case 3:
+    x = info.theDouble;
+    return 0;
+  default:
+    return -1;
+  }
+}
+
+int
+Beam2dPointLoad::activateParameter(int paramID)
+{
+  parameterID = paramID;
+
+  return 0;
+}
+
+const Vector&
+Beam2dPointLoad::getSensitivityData(int gradNumber)
+{
+  data.Zero();
+
+  switch(parameterID) {
+  case 1:
+    data(0) = 1.0;
+    break;
+  case 2:
+    data(1) = 1.0;
+    break;
+  case 3:
+    data(2) = 1.0;
+    break;
+  default:
+    break;
+  }
+
+  return data;
 }

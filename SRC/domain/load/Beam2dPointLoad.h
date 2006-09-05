@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:00:57 $
+// $Revision: 1.4 $
+// $Date: 2006-09-05 23:08:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dPointLoad.h,v $
                                                                         
 #ifndef Beam2dPointLoad_h
@@ -30,6 +30,8 @@
 // Purpose: This file contains the class definition for Beam2dPointLoad.
 
 #include <ElementalLoad.h>
+
+class Information;
 
 class Beam2dPointLoad : public ElementalLoad
 {
@@ -45,6 +47,12 @@ class Beam2dPointLoad : public ElementalLoad
     int recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroker &theBroker);
     void Print(OPS_Stream &s, int flag =0);       
 
+    int setParameter(const char **argv, int argc, Parameter &param);
+    int updateParameter(int parameterID, Information &info);
+    int activateParameter(int paramID);
+
+    const Vector &getSensitivityData(int gradNumber);
+
   protected:
 	
   private:
@@ -52,6 +60,8 @@ class Beam2dPointLoad : public ElementalLoad
     double Paxial;     // magnitude of the axial load
     double x;     // relative distance (x/L) along length from end 1 of element
     static Vector data;
+
+    int parameterID;
 };
 
 #endif
