@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2006-08-04 19:08:07 $
+// $Revision: 1.20 $
+// $Date: 2006-09-05 21:10:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.cpp,v $
                                                                         
                                                                         
@@ -41,6 +41,7 @@
 
 #include <CrdTransf2d.h>
 #include <Information.h>
+#include <Parameter.h>
 #include <ElementResponse.h>
 #include <Renderer.h>
 
@@ -724,28 +725,24 @@ ElasticBeam2d::getResponse (int responseID, Information &eleInfo)
 }
 
 int
-ElasticBeam2d::setParameter (const char **argv, int argc, Information &info)
+ElasticBeam2d::setParameter(const char **argv, int argc, Parameter &param)
 {
-    // E of the beam interior
-    if (strcmp(argv[0],"E") == 0) {
-        info.theType = DoubleType;
-        return 1;
-    }
+  if (argc < 1)
+    return -1;
 
-    // A of the beam interior
-    else if (strcmp(argv[0],"A") == 0) {
-        info.theType = DoubleType;
-        return 2;
-    }
+  // E of the beam interior
+  if (strcmp(argv[0],"E") == 0)
+    return param.addObject(1, this);
 
-    // I of the beam interior
-    else if (strcmp(argv[0],"I") == 0) {
-        info.theType = DoubleType;
-        return 3;
-    }
-
-    else
-        return -1;
+  // A of the beam interior
+  if (strcmp(argv[0],"A") == 0)
+    return param.addObject(2, this);
+  
+  // I of the beam interior
+  if (strcmp(argv[0],"I") == 0)
+    return param.addObject(3, this);
+  
+  return -1;
 }
 
 int
@@ -755,13 +752,13 @@ ElasticBeam2d::updateParameter (int parameterID, Information &info)
 	case -1:
 		return -1;
 	case 1:
-		this->E = info.theDouble;
+		E = info.theDouble;
 		return 0;
 	case 2:
-		this->A = info.theDouble;
+		A = info.theDouble;
 		return 0;
 	case 3:
-		this->I = info.theDouble;
+		I = info.theDouble;
 		return 0;
 	default:
 		return -1;
