@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2006-08-04 19:13:02 $
+// $Revision: 1.11 $
+// $Date: 2006-09-05 21:15:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.h,v $
                                                                         
                                                                         
@@ -93,8 +93,7 @@ class TrussSection : public Element
     Response *setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &s);
     int getResponse(int responseID, Information &eleInformation);
     
-    int setParameter (const char **argv, int argc, Information &info);
-    int updateParameter (int parameterID, Information &info);
+    int setParameter (const char **argv, int argc, Parameter &param);
 
   protected:
     

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2006-08-04 19:13:02 $
+// $Revision: 1.18 $
+// $Date: 2006-09-05 21:15:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -33,6 +33,7 @@
 
 #include <TrussSection.h>
 #include <Information.h>
+#include <Parameter.h>
 
 #include <string.h>
 
@@ -959,34 +960,23 @@ TrussSection::getResponse(int responseID, Information &eleInformation)
 }
 
 int
-TrussSection::setParameter (const char **argv, int argc, Information &info)
+TrussSection::setParameter (const char **argv, int argc, Parameter &param)
 {
-    // a material parameter
-    if (strcmp(argv[0],"section") == 0 || strcmp(argv[0],"-section") == 0) {
-		int ok = theSection->setParameter(&argv[1], argc-1, info);
-		if (ok < 0)
-			return -1;
-		else
-			return ok + 100;
-    } 
-    
-    // otherwise parameter is unknown for the TrussSection class
-    else
-		return -1;
+  if (argc < 1)
+    return -1;
 
-}
-    
-int
-TrussSection::updateParameter (int parameterID, Information &info)
-{
-  switch (parameterID) {
-    case -1:
+  // a section parameter
+  if (strstr(argv[0],"section") != 0) {
+
+    if (argc < 2)
       return -1;
-      
-    default:
-      if (parameterID >= 100)
-	  return theSection->updateParameter(parameterID-100, info);
-      else
-	  return -1;
-  }
+
+    else
+      return theSection->setParameter(&argv[1], argc-1, param);
+  } 
+  
+  // otherwise parameter is unknown for the TrussSection class
+  else
+    return -1;
 }
+

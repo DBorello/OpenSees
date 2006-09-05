@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2006-08-04 19:13:02 $
+// $Revision: 1.26 $
+// $Date: 2006-09-05 21:15:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -31,8 +31,9 @@
 //
 // What: "@(#) Truss.C, revA"
 
-#include "Truss.h"
+#include <Truss.h>
 #include <Information.h>
+#include <Parameter.h>
 
 #include <Domain.h>
 #include <Node.h>
@@ -985,75 +986,55 @@ Truss::getResponse(int responseID, Information &eleInfo)
 
 // AddingSensitivity:BEGIN ///////////////////////////////////
 int
-Truss::setParameter (const char **argv, int argc, Information &info)
+Truss::setParameter(const char **argv, int argc, Parameter &param)
 {
-    if (argc < 1)
-        return -1;
-
-    // Cross sectional area of the truss itself
-    if (strcmp(argv[0],"A") == 0) {
-        info.theType = DoubleType;
-        return 1;
-    }
-
-    // Mass densitity (per unit volume) of the truss itself
-    if (strcmp(argv[0],"rho") == 0) {
-        info.theType = DoubleType;
-        return 2;
-    }
-
-    // a material parameter
-    if (strcmp(argv[0],"-material") == 0 || strcmp(argv[0],"material") == 0) {
-      int ok = theMaterial->setParameter(&argv[1], argc-1, info);
-      if (ok < 0)
-	return -1;
-      else
-	return ok + 100;
-    } 
+  if (argc < 1)
+    return -1;
+  
+  // Cross sectional area of the truss
+  if (strcmp(argv[0],"A") == 0)
+    return param.addObject(1, this);
+  
+  // Mass densitity of the truss
+  if (strcmp(argv[0],"rho") == 0)
+    return param.addObject(2, this);
+  
+  // Explicit specification of a material parameter
+  if (strstr(argv[0],"material") != 0) {
     
-    // otherwise parameter is unknown for the Truss class
-    else
+    if (argc < 2)
       return -1;
+    
+    else
+      return theMaterial->setParameter(&argv[1], argc-1, param);
+  } 
+  
+  // Otherwise, send it to the material
+  else
+    return theMaterial->setParameter(argv, argc, param);
 }
 
 int
 Truss::updateParameter (int parameterID, Information &info)
 {
   switch (parameterID) {
-    case -1:
-      return -1;
-      
-    case 1:
-        this->A = info.theDouble;
-        return 0;
-
-    case 2:
-        this->rho = info.theDouble;
-        return 0;
-
-    default:
-      if (parameterID >= 100)
-	  return theMaterial->updateParameter(parameterID-100, info);
-      else
-	  return -1;
+  case 1:
+    A = info.theDouble;
+    return 0;
+  case 2:
+    rho = info.theDouble;
+    return 0;
+  default:
+    return -1;
   }
 }
+
 int
 Truss::activateParameter(int passedParameterID)
 {
-	parameterID = passedParameterID;
-
-	// The identifier needs to be passed "downwards" also when it's zero
-	if (passedParameterID == 0 || passedParameterID == 1 || passedParameterID == 2) {
-		theMaterial->activateParameter(0);
-	}
-
-	// If the identifier is non-zero and the parameter belongs to the material
-	else if ( passedParameterID > 100) {
-		theMaterial->activateParameter(passedParameterID-100);
-	}
-
-	return 0;
+  parameterID = passedParameterID;
+  
+  return 0;
 }
 
 
