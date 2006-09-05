@@ -34,10 +34,12 @@ FE_INCLUDES  = -I$(FE)/matrix \
                -I$(FE)/material/section/repres/reinfLayer \
                -I$(FE)/material/section/repres/section \
                -I$(FE)/material/section/fiber \
+               -I$(FE)/material/section/integration \
                -I$(FE)/material/section/yieldSurface \
                -I$(FE)/material/yieldSurface/evolution \
                -I$(FE)/material/yieldSurface/plasticHardeningMaterial \
                -I$(FE)/material/yieldSurface/yieldSurfaceBC \
+               -I$(FE)/material/ce234 \
                -I$(FE)/recorder \
                -I$(FE)/recorder/response \
                -I$(FE)/handler \
@@ -100,6 +102,7 @@ FE_INCLUDES  = -I$(FE)/matrix \
                -I$(FE)/analysis/algorithm \
                -I$(FE)/analysis/algorithm/eigenAlgo \
                -I$(FE)/analysis/algorithm/equiSolnAlgo \
+               -I$(FE)/analysis/algorithm/equiSolnAlgo/accelerator \
                -I$(FE)/analysis/algorithm/domainDecompAlgo \
                -I$(FE)/analysis/model \
                -I$(FE)/analysis/model/simple \
@@ -163,6 +166,7 @@ FE_INCLUDES  = -I$(FE)/matrix \
                -I$(FE)/reliability/FEsensitivity \
                -I$(FE)/reliability/tcl \
                -I$(FE)/unittest \
+               -I$(FE)/package \
                -I$(FE) \
                -I$(SUPERLUdir) \
                -I$(FE)/package 	
