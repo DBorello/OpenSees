@@ -18,14 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2006-08-11 18:32:56 $
+// $Revision: 1.2 $
+// $Date: 2006-09-05 22:08:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/integration/WideFlangeSectionIntegration.h,v $
 
 #ifndef WideFlangeSectionIntegration_h
 #define WideFlangeSectionIntegration_h
-
-#define SECTION_INTEGRATION_TAG_WideFlange 1976
 
 #include <SectionIntegration.h>
 

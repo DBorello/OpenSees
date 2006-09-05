@@ -18,14 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2006-08-11 18:32:56 $
+// $Revision: 1.2 $
+// $Date: 2006-09-05 22:08:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/integration/RCSectionIntegration.h,v $
 
 #ifndef RCSectionIntegration_h
 #define RCSectionIntegration_h
-
-#define SECTION_INTEGRATION_TAG_RC 1976
 
 #include <SectionIntegration.h>
 
