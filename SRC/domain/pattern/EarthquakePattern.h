@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-02-17 01:15:27 $
+// $Revision: 1.6 $
+// $Date: 2006-09-05 20:51:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/EarthquakePattern.h,v $
                                                                         
                                                                         
@@ -61,7 +61,7 @@ class EarthquakePattern : public LoadPattern
     
     // AddingSensitivity:BEGIN //////////////////////////////////////////
     virtual void applyLoadSensitivity(double pseudoTime = 0.0);
-    virtual int  setParameter(const char **argv, int argc, Information &info);
+    virtual int setParameter(const char **argv, int argc, Parameter &param);
     virtual int  updateParameter(int parameterID, Information &info);
     virtual int  activateParameter(int parameterID);
     // AddingSensitivity:END ///////////////////////////////////////////
