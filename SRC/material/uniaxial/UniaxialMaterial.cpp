@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2006-08-04 18:17:04 $
+// $Revision: 1.15 $
+// $Date: 2006-09-05 22:28:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.cpp,v $
                                                                         
                                                                         
@@ -177,24 +177,6 @@ UniaxialMaterial::getResponse(int responseID, Information &matInfo)
 
 
 // AddingSensitivity:BEGIN ////////////////////////////////////////
-int
-UniaxialMaterial::setParameter(const char **argv, int argc, Information &info)
-{
-    return -1;
-}
-
-int
-UniaxialMaterial::updateParameter(int parameterID, Information &info)
-{
-    return -1;
-}
-
-int
-UniaxialMaterial::activateParameter(int parameterID)
-{
-    return -1;
-}
-
 double
 UniaxialMaterial::getStressSensitivity(int gradNumber, bool conditional)
 {
