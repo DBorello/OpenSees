@@ -81,9 +81,6 @@ class FiniteDeformationElastic3D : public NDMaterial
 
     virtual void Print(OPS_Stream &s, int flag = 0);
 
-    virtual int setParameter(char **argv, int argc, Information &info);
-    virtual int updateParameter(int parameterID, Information &info);
-
     virtual const  stresstensor& getPK1StressTensor(void) ;
     virtual const  stresstensor& getCauchyStressTensor(void) ;
 
