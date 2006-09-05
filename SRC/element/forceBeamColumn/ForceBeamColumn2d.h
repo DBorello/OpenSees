@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.7 $
-// $Date: 2006-08-04 18:43:52 $
+// $Revision: 1.8 $
+// $Date: 2006-09-05 23:24:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.h,v $
 
 #ifndef ForceBeamColumn2d_h
@@ -83,10 +83,19 @@ class ForceBeamColumn2d: public Element
   
   Response *setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &s);
   int getResponse(int responseID, Information &eleInformation);
+  int getResponseSensitivity(int responseID, int gradNumber,
+			     Information &eleInformation);
   
-  int setParameter(const char **argv, int argc, Information &info);
+  // AddingSensitivity:BEGIN //////////////////////////////////////////
+  int setParameter(const char **argv, int argc, Parameter &param);
   int updateParameter(int parameterID, Information &info);
-  
+  int activateParameter(int parameterID);
+  const Vector &getResistingForceSensitivity(int gradNumber);
+  const Matrix &getKiSensitivity(int gradNumber);
+  const Matrix &getMassSensitivity(int gradNumber);
+  int commitSensitivity(int gradNumber, int numGrads);
+  // AddingSensitivity:END ///////////////////////////////////////////
+
  protected:
   void setSectionPointers(int numSections, SectionForceDeformation **secPtrs);
   int getInitialFlexibility(Matrix &fe);
@@ -97,6 +106,12 @@ class ForceBeamColumn2d: public Element
   void compSectionDisplacements(Vector sectionCoords[], Vector sectionDispls[]) const;
   void initializeSectionHistoryVariables (void);
   
+  // Reactions of basic system due to element loads
+  void computeReactions(double *p0);
+
+  // Section forces due to element loads
+  void computeSectionForces(Vector &sp, int isec);
+
   // internal data
   ID     connectedExternalNodes; // tags of the end nodes
 
@@ -125,9 +140,9 @@ class ForceBeamColumn2d: public Element
   
   Vector *vscommit;              // array of commited section deformation vectors
   
-  Matrix *sp;
-  double p0[3]; // Reactions in the basic system due to element loads
-  double v0[3]; // Initial deformations due to element loads
+  enum {maxNumEleLoads = 100};
+  int numEleLoads; // Number of element load objects
+  ElementalLoad *eleLoads[maxNumEleLoads];
 
   Matrix *Ki;
   
@@ -135,7 +150,7 @@ class ForceBeamColumn2d: public Element
   static Vector theVector;
   static double workArea[];
   
-  enum {maxNumSections = 10};
+  enum {maxNumSections = 100};
   
   // following are added for subdivision of displacement increment
   int    maxSubdivisions;       // maximum number of subdivisons of dv for local iterations
@@ -144,6 +159,14 @@ class ForceBeamColumn2d: public Element
   static Vector *SsrSubdivide;
   static Matrix *fsSubdivide;
   //static int maxNumSections;
+
+  // AddingSensitivity:BEGIN //////////////////////////////////////////
+  int parameterID;
+  const Vector &computedqdh(int gradNumber);
+  const Matrix &computedfedh(int gradNumber);
+  void computeReactionSensitivity(double *dp0dh, int gradNumber);
+  void computeSectionForceSensitivity(Vector &dspdh, int isec, int gradNumber);
+  // AddingSensitivity:END ///////////////////////////////////////////
 };
 
 #endif

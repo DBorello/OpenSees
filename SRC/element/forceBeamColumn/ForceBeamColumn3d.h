@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.8 $
-// $Date: 2006-08-04 18:43:52 $
+// $Revision: 1.9 $
+// $Date: 2006-09-05 23:24:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.h,v $
 
 #ifndef ForceBeamColumn3d_h
@@ -83,7 +83,7 @@ class ForceBeamColumn3d: public Element
   Response *setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &s);
   int getResponse(int responseID, Information &eleInformation);
   
-  int setParameter(const char **argv, int argc, Information &info);
+  int setParameter(const char **argv, int argc, Parameter &param);
   int updateParameter(int parameterID, Information &info);
   
  protected:

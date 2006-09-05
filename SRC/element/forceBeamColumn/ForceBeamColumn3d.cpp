@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2006-08-04 18:43:52 $
+// $Revision: 1.21 $
+// $Date: 2006-09-05 23:24:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 #include <math.h>
@@ -28,6 +28,7 @@
 #include <float.h>
 
 #include <Information.h>
+#include <Parameter.h>
 #include <ForceBeamColumn3d.h>
 #include <MatrixUtil.h>
 #include <Domain.h>
@@ -2289,68 +2290,42 @@ ForceBeamColumn3d::getResponse(int responseID, Information &eleInfo)
 }
 
 int
-ForceBeamColumn3d::setParameter (const char **argv, int argc, Information &info)
+ForceBeamColumn3d::setParameter(const char **argv, int argc, Parameter &param)
 {
-  //
-  // From the parameterID value it should be possible to extract
-  // information about:
-  //  1) Which parameter is in question. The parameter could
-  //     be at element, section, or material level. 
-  //  2) Which section and material number (tag) it belongs to. 
-  //
-  // To accomplish this the parameterID is given the following value:
-  //     parameterID = type + 1000*matrTag + 100000*sectionTag
-  // ...where 'type' is an integer in the range (1-99) and added 100
-  // for each level (from material to section to element). 
-  //
-  // Example:
-  //    If 'E0' (case 2) is random in material #3 of section #5
-  //    the value of the parameterID at this (element) level would be:
-  //    parameterID = 2 + 1000*3 + 100000*5 = 503002
-  //    As seen, all given information can be extracted from this number. 
-  //
-  
-  // Initial declarations
-  int parameterID;
+  if (argc < 1)
+    return -1;
 
   // If the parameter belongs to the element itself
-  if (strcmp(argv[0],"rho") == 0) {
-    info.theType = DoubleType;
-    return 1;
-  }
+  if (strcmp(argv[0],"rho") == 0)
+    return param.addObject(1, this);
   
-  // If the parameter is belonging to a section or lower
-  else if (strcmp(argv[0],"section") == 0) {
+  // If the parameter belongs to a section or lower
+  if (strstr(argv[0],"section") != 0) {
     
-    // For now, no parameters of the section itself:
-    if (argc<5) {
-      opserr << "For now: cannot handle parameters of the section itself." << endln;
+    if (argc < 3)
       return -1;
-    }
     
     // Get section and material tag numbers from user input
     int paramSectionTag = atoi(argv[1]);
     
     // Find the right section and call its setParameter method
-    for (int i=0; i<numSections; i++) {
-      if (paramSectionTag == sections[i]->getTag()) {
-	parameterID = sections[i]->setParameter(&argv[2], argc-2, info);
-      }
-    }
-    
-    // Check if the parameterID is valid
-    if (parameterID < 0) {
-      opserr << "ForceBeamColumn3d::setParameter() - could not set parameter. " << endln;
-      return -1;
-    }
-    else {
-      // Return the parameterID value (according to the above comments)
-      return parameterID;
-    }
+    int ok = 0;
+    for (int i = 0; i < numSections; i++)
+      if (paramSectionTag == sections[i]->getTag())
+	ok += sections[i]->setParameter(&argv[2], argc-2, param);
+
+    return ok;
   }
   
-  // Otherwise parameter is unknown for this class
+  else if (strstr(argv[0],"integration") != 0) {
+    
+    if (argc < 2)
+      return -1;
+
+    return beamIntegr->setParameter(&argv[1], argc-1, param);
+  }
   else {
+    opserr << "ForceBeamColumn3d::setParameter() - could not set parameter. " << endln;
     return -1;
   }
 }
@@ -2361,6 +2336,9 @@ ForceBeamColumn3d::updateParameter (int parameterID, Information &info)
   // If the parameterID value is not equal to 1 it belongs 
   // to section or material further down in the hierarchy. 
   
+  return 0;
+
+  /*
   if (parameterID == 1) {
     
     this->rho = info.theDouble;
@@ -2390,7 +2368,8 @@ ForceBeamColumn3d::updateParameter (int parameterID, Information &info)
   else {
     opserr << "ForceBeamColumn3d::updateParameter() - could not update parameter. " << endln;
     return -1;
-  }       
+  }      
+  */ 
 }
 
 void
