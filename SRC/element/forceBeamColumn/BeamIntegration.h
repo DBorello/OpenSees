@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.6 $
-// $Date: 2006-01-17 21:24:00 $
+// $Revision: 1.7 $
+// $Date: 2006-09-05 22:57:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/BeamIntegration.h,v $
 
 #ifndef BeamIntegration_h
@@ -53,10 +53,6 @@ class BeamIntegration : public MovableObject
 				  double q3, bool yAxis = false) {return 0.0;}
 
   virtual BeamIntegration *getCopy(void) = 0;
-
-  virtual int setParameter(const char **argv, int argc, Information &info);
-  virtual int updateParameter(int parameterID, Information &info);
-  virtual int activateParameter(int parameterID);
 
   virtual void getLocationsDeriv(int nIP, double L, double dLdh,
 				 double *dptsdh);

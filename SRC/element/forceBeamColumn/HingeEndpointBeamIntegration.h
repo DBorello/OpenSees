@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2006-01-17 21:32:35 $
+// $Revision: 1.2 $
+// $Date: 2006-09-05 22:55:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/HingeEndpointBeamIntegration.h,v $
 
 #ifndef HingeEndpointBeamIntegration_h
@@ -47,7 +47,7 @@ class HingeEndpointBeamIntegration : public BeamIntegration
   int sendSelf(int cTag, Channel &theChannel);
   int recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
 
-  int setParameter(const char **argv, int argc, Information &info);
+  int setParameter(const char **argv, int argc, Parameter &param);
   int updateParameter(int parameterID, Information &info);
   int activateParameter(int parameterID);
 

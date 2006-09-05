@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2006-01-17 21:24:00 $
+// $Revision: 1.4 $
+// $Date: 2006-09-05 22:57:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/BeamIntegration.cpp,v $
 
 #include <BeamIntegration.h>
@@ -34,24 +34,6 @@ BeamIntegration::BeamIntegration(int classTag):
 BeamIntegration::~BeamIntegration()
 {
   // Nothing to do
-}
-
-int 
-BeamIntegration::setParameter(const char **argv, int argc, Information &info)
-{
-  return 0;
-}
-
-int
-BeamIntegration::updateParameter(int parameterID, Information &info)
-{
-  return 0;
-}
-
-int
-BeamIntegration::activateParameter(int parameterID)
-{
-  return 0;
 }
 
 void

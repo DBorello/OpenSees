@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2006-01-17 21:32:35 $
+// $Revision: 1.2 $
+// $Date: 2006-09-05 22:55:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/HingeMidpointBeamIntegration.cpp,v $
 
 #include <HingeMidpointBeamIntegration.h>
@@ -30,6 +30,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <Information.h>
+#include <Parameter.h>
 
 HingeMidpointBeamIntegration::HingeMidpointBeamIntegration(double lpi,
 							   double lpj):
@@ -127,23 +128,22 @@ HingeMidpointBeamIntegration::recvSelf(int cTag, Channel &theChannel,
 }
 
 int
-HingeMidpointBeamIntegration::setParameter(const char **argv,
-					   int argc, Information &info)
+HingeMidpointBeamIntegration::setParameter(const char **argv, int argc,
+					   Parameter &param)
 {
-  if (strcmp(argv[0],"lpI") == 0) {
-    info.theType = DoubleType;
-    return 1;
-  }
-  else if (strcmp(argv[0],"lpJ") == 0) {
-    info.theType = DoubleType;
-    return 2;
-  }
-  else if (strcmp(argv[0],"lp") == 0) {
-    info.theType = DoubleType;
-    return 3;
-  }
-  else 
+  if (argc < 1)
     return -1;
+
+  if (strcmp(argv[0],"lpI") == 0)
+    return param.addObject(1, this);
+
+  if (strcmp(argv[0],"lpJ") == 0)
+    return param.addObject(2, this);
+
+  if (strcmp(argv[0],"lp") == 0)
+    return param.addObject(3, this);
+
+  return -1;
 }
 
 int
@@ -170,7 +170,6 @@ HingeMidpointBeamIntegration::activateParameter(int paramID)
 {
   parameterID = paramID;
 
-  // For Terje to do
   return 0;
 }
 

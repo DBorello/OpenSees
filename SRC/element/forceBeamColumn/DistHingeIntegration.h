@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2006-01-18 22:11:05 $
+// $Revision: 1.2 $
+// $Date: 2006-09-05 22:57:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/DistHingeIntegration.h,v $
 
 #ifndef DistHingeIntegration_h
@@ -47,7 +47,7 @@ class DistHingeIntegration : public BeamIntegration
   int sendSelf(int cTag, Channel &theChannel);
   int recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
 
-  int setParameter(const char **argv, int argc, Information &info);
+  int setParameter(const char **argv, int argc, Parameter &param);
   int updateParameter(int parameterID, Information &info);
   int activateParameter(int parameterID);
 
