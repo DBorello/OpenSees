@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-25 23:33:38 $
+// $Revision: 1.4 $
+// $Date: 2006-09-05 22:19:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ENTMaterial.cpp,v $
                                                                         
                                                                         
@@ -38,6 +38,7 @@
 #include <Vector.h>
 #include <Channel.h>
 #include <Information.h>
+#include <Parameter.h>
 
 ENTMaterial::ENTMaterial(int tag, double e)
 :UniaxialMaterial(tag,MAT_TAG_ENTMaterial),
@@ -158,26 +159,26 @@ ENTMaterial::Print(OPS_Stream &s, int flag)
 }
 
 int
-ENTMaterial::setParameter(const char **argv, int argc, Information &info)
+ENTMaterial::setParameter(const char **argv, int argc, Parameter &param)
 {
-	if (strcmp(argv[0],"E") == 0) {
-		info.theType = DoubleType;
-		return 1;
-	}
-	else
-		return -1;
+  if (argc < 1)
+    return -1;
+
+  if (strcmp(argv[0],"E") == 0)
+    return param.addObject(1, this);
+
+  else
+    return -1;
 }
 
 int 
 ENTMaterial::updateParameter(int parameterID, Information &info)
 {
-	switch(parameterID) {
-	case -1:
-		return -1;
-	case 1:
-		E = info.theDouble;
-		return 0;
-	default:
-		return -1;
-	}
+  switch(parameterID) {
+  case 1:
+    E = info.theDouble;
+    return 0;
+  default:
+    return -1;
+  }
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-08-03 23:42:19 $
+// $Revision: 1.6 $
+// $Date: 2006-09-05 22:19:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ENTMaterial.h,v $
                                                                         
                                                                         
@@ -67,7 +67,7 @@ class ENTMaterial : public UniaxialMaterial
     
     void Print(OPS_Stream &s, int flag =0);
     
-    int setParameter(const char **argv, int argc, Information &info);
+    int setParameter(const char **argv, int argc, Parameter &param);
     int updateParameter(int parameterID, Information &info);
 
   protected:
