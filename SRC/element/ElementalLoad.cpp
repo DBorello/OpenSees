@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:03 $
+// $Revision: 1.4 $
+// $Date: 2006-09-05 23:25:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/ElementalLoad.cpp,v $
                                                                         
                                                                         
@@ -28,7 +28,7 @@
 
 // Purpose: This file contains the methods for class ElementalLoad.
 
-#include "ElementalLoad.h"
+#include <ElementalLoad.h>
 #include <Element.h>
 #include <Domain.h>
 
@@ -94,6 +94,13 @@ ElementalLoad::applyLoad(double loadFactor)
       theElements[i]->addLoad(this, loadFactor);
 }
 
+const Vector&
+ElementalLoad::getSensitivityData(int gradNumber)
+{
+  static Vector trash(10);
+
+  return trash;
+}
 
 const ID &
 ElementalLoad::getElementTags(void) 
