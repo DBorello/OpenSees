@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.9 $
-// $Date: 2006-08-04 22:22:37 $
+// $Revision: 1.10 $
+// $Date: 2006-09-05 21:13:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint2D.cpp,v $
 
 // Written: Arash & GGD
@@ -35,6 +35,7 @@
 #include <FEM_ObjectBroker.h>
 #include <Renderer.h>
 #include <Information.h>
+#include <Parameter.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1108,111 +1109,29 @@ Joint2D::addInertiaLoadSensitivityToUnbalance(const Vector &accel, bool somethin
 
 
 int
-Joint2D::setParameter (const char **argv, int argc, Information &info)
-{//
-	// From the parameterID value it should be possible to extract
-	// information about:
-	//  1) Which parameter is in question. The parameter could
-	//     be at element, section, or material level. 
-	//  2) Which section and material number (tag) it belongs to. 
-	//
-	// To accomplish this the parameterID is given the following value:
-	//     parameterID = type + 1000*matrTag + 100000*sectionTag
-	// ...where 'type' is an integer in the range (1-99) and added 100
-	// for each level (from material to section to element). 
-	//
-	// Example:
-	//    If 'E0' (case 2) is random in material #3 of section #5
-	//    the value of the parameterID at this (element) level would be:
-	//    parameterID = 2 + 1000*3 + 100000*5 = 503002
-	//    As seen, all given information can be extracted from this number. 
-	//
+Joint2D::setParameter(const char **argv, int argc, Parameter &param)
+{
+  if (argc < 1)
+    return -1;
+  
+  // a material parameter
+  if (strstr(argv[0],"material") != 0) {
 
-	int ok = -1;
-	if (argc < 3)
-        return ok;
-
-    // a material parameter
-    if (strcmp(argv[0],"-material") == 0 || strcmp(argv[0],"material") == 0) {
-		// Get material tag numbers from user input
-		int paramMaterialTag = atoi(argv[1]);
-		if ( paramMaterialTag<0 || paramMaterialTag>4 ) {
-			opserr << "Joint2D::setParameter() - material number out of range, must be 0 to 4." << endln;
-		return -1;
-		}
-
-		// Find the material and call its setParameter method
-		if ( theSprings[paramMaterialTag] != NULL )
-			ok = theSprings[paramMaterialTag]->setParameter(&argv[2], argc-2, info);
-		
-		// Check if the ok is valid
-		if (ok < 0) {
-			opserr << "Joint2D::setParameter() - could not set parameter. " << endln;
-			return -1;
-		}
-		else {
-			// Return the ok value (according to the above comments)
-			return 1000*paramMaterialTag + ok;
-		}
-	}		
-		 
-    // otherwise parameter is unknown for the Joint2D class
+    if (argc < 3)
       return -1;
+
+    // Get material tag numbers from user input
+    int paramMaterialTag = atoi(argv[1]);
+    if ( paramMaterialTag >= 0 && paramMaterialTag < 5)
+      if ( theSprings[paramMaterialTag] != NULL )
+	return theSprings[paramMaterialTag]->setParameter(&argv[2], argc-2, param);
+
+    return -1;
+  }
+  
+  // otherwise parameter is unknown for the Joint2D class
+  return -1;   
 }
-
-int
-Joint2D::updateParameter (int parameterID, Information &info)
-{
-	// Extract section and material tags from the passedParameterID
-	int MaterialTag = (int)( floor( (double)parameterID / 1000.0 ) );
-	int MaterialParameterID = parameterID-1000*MaterialTag;
-	if ( MaterialTag<0 || MaterialTag>4 ) {
-		opserr << "Joint2D::updateParameter() - material number out of range, must be 0 to 4." << endln;
-		return -1;
-	}
-	
-	// Go down to the material and set appropriate flags
-	if ( theSprings[MaterialTag] != NULL )
-		return theSprings[MaterialTag]->updateParameter(MaterialParameterID,info);
-	
-	return -1;
-}
-
-
-int
-Joint2D::activateParameter(int passedParameterID)
-{
-	// Note that the parameteID that is stored here at the 
-	// element level contains all information about section
-	// and material tag number:
-	parameterID = passedParameterID;
-
-	if (passedParameterID == 0 ) {
-		// "Zero out" all flags downwards through sections/materials 
-		for (int i=0; i<5; i++) {
-			if ( theSprings[i] !=0 )
-				theSprings[i]->activateParameter(passedParameterID);
-		}
-	}
-	else {
-		
-		// Extract section and material tags from the passedParameterID
-		int activeMaterialTag = (int)( floor( (double)passedParameterID / 1000.0 ) );
-
-		if ( activeMaterialTag<0 || activeMaterialTag>4 ) {
-			opserr << "Joint2D::activateParameter() - material number out of range, must be 0 to 4." << endln;
-			return -1;
-		}
-		
-		// Go down to the material and set appropriate flags
-		if ( theSprings[activeMaterialTag] != NULL ) {
-			theSprings[activeMaterialTag]->activateParameter(passedParameterID-1000*activeMaterialTag);
-		}
-	}
-	
-	return 0;
-}
-
 
 const Matrix &
 Joint2D::getKiSensitivity(int gradNumber)

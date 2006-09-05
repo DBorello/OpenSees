@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.8 $
-// $Date: 2006-08-04 22:22:37 $
+// $Revision: 1.9 $
+// $Date: 2006-09-05 21:13:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint2D.h,v $
 
 // Written: Arash & GGD
@@ -120,9 +120,7 @@ public:
 
     // AddingSensitivity:BEGIN //////////////////////////////////////////
     int	  addInertiaLoadSensitivityToUnbalance(const Vector &accel, bool tag);
-    int   setParameter(const char **argv, int argc, Information &info);
-    int   updateParameter(int parameterID, Information &info);
-    int   activateParameter(int parameterID);
+    int   setParameter(const char **argv, int argc, Parameter &param);
     const Vector & getResistingForceSensitivity(int gradNumber);
     const Matrix & getKiSensitivity(int gradNumber);
     const Matrix & getMassSensitivity(int gradNumber);
