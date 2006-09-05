@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2005-08-08 22:22:09 $
+// $Revision: 1.17 $
+// $Date: 2006-09-05 23:15:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -1777,7 +1777,6 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 		return TCL_ERROR;
 	}
 
-
 	// CHECK IF THE USER WANTS TO CREATE THE RANDOM VARIABLE HERE
 	if (strcmp(argv[argvCounter],"-createRV3") == 0) {
 		argvCounter++;
@@ -1967,14 +1966,29 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 		return TCL_ERROR;
 	}
 	
+	if (strcmp(argv[argvCounter],"-parameter") == 0) {
+	  argvCounter++;
+	  int paramTag;
+	  if (Tcl_GetInt(interp, argv[argvCounter++], &paramTag) != TCL_OK) {
+	    opserr << "ERROR: invalid input in positioner: parameter tag \n";
+	    return TCL_ERROR;
+	  }
 
-	const char **data = new const char *[argc-argvCounter-2];
-	int ii,jj;
-	for (ii=argvCounter+2, jj=0; ii<argc; ii++, jj++)
-	  data[jj] = argv[ii];
+	  Parameter *theParameter = theStructuralDomain->getParameter(paramTag);
+
+	  if (theParameter == 0) {
+	    opserr << "ERROR: parameter with tag " << paramTag 
+		   << " not found in structural domain\n";
+	    return TCL_ERROR;
+	  }
+	  else {
+	    theRandomVariablePositioner =
+	      new RandomVariablePositioner(tag, rvNumber, *theParameter);
+	  }
+	}
 
 	// IF UNCERTAIN *ELEMENT* PROPERTY
-	if (strcmp(argv[argvCounter],"-element") == 0) {
+	else if (strcmp(argv[argvCounter],"-element") == 0) {
 		argvCounter++;
 
 		if (Tcl_GetInt(interp, argv[argvCounter++], &tagOfObject) != TCL_OK) {
@@ -1985,13 +1999,14 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 
 		theObject = (DomainComponent *)theStructuralDomain->getElement(tagOfObject);
 
-		theRandomVariablePositioner = new RandomVariablePositioner(tag,
-									   rvNumber,
-									   theObject,
-									   data,
-									   argc-argvCounter);
+		theRandomVariablePositioner =
+		  new RandomVariablePositioner(tag,
+					       rvNumber,
+					       theObject,
+					       &argv[argvCounter],
+					       argc-argvCounter);
 
-		int rvnumber = theRandomVariablePositioner->getRvNumber();
+		//int rvnumber = theRandomVariablePositioner->getRvNumber();
 	}
 
 	// IF UNCERTAIN *LOAD*
@@ -2018,11 +2033,12 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 //		else {
 //			theRandomVariablePositioner = new RandomVariablePositioner(tag,rvNumber,theObject,&argv[5],argc-5);
 //		}
-		theRandomVariablePositioner = new RandomVariablePositioner(tag,
-									   rvNumber,
-									   theObject,
-									   data,
-									   argc-argvCounter);
+		theRandomVariablePositioner =
+		  new RandomVariablePositioner(tag,
+					       rvNumber,
+					       theObject,
+					       &argv[argvCounter],
+					       argc-argvCounter);
 	}
 
 	// IF UNCERTAIN *NODE* PROPERTY
@@ -2035,18 +2051,17 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 		}
 		theObject = (DomainComponent *)theStructuralDomain->getNode(tagOfObject);
 
-		theRandomVariablePositioner = new RandomVariablePositioner(tag,
-									   rvNumber,
-									   theObject,
-									   data,
-									   argc-argvCounter);
+		theRandomVariablePositioner =
+		  new RandomVariablePositioner(tag,
+					       rvNumber,
+					       theObject,
+					       &argv[argvCounter],
+					       argc-argvCounter);
 	}
 	else {
 		opserr << "ERROR: Unknown parameter in randomVariablePositioner" << endln;
 		return TCL_ERROR;
 	}
-
-	delete [] data;
 
 	// ADD THE RANDOMVARIABLEPOSITIONER TO THE DOMAIN
 	if (theReliabilityDomain->addRandomVariablePositioner(theRandomVariablePositioner) == false) {
@@ -2146,9 +2161,29 @@ TclReliabilityModelBuilder_addParameterPositioner(ClientData clientData, Tcl_Int
 		return TCL_ERROR;
 	}
 
+	if (strcmp(argv[argvCounter],"-parameter") == 0) {
+	  argvCounter++;
+	  int paramTag;
+	  if (Tcl_GetInt(interp, argv[argvCounter++], &paramTag) != TCL_OK) {
+	    opserr << "ERROR: invalid input in positioner: parameter tag \n";
+	    return TCL_ERROR;
+	  }
+
+	  Parameter *theParameter = theStructuralDomain->getParameter(paramTag);
+
+	  if (theParameter == 0) {
+	    opserr << "ERROR: parameter with tag " << paramTag 
+		   << " not found in structural domain\n";
+	    return TCL_ERROR;
+	  }
+	  else {
+	    theParameterPositioner =
+	      new ParameterPositioner(tag, *theParameter);
+	  }
+	}
 
 	// IF UNCERTAIN *LOAD*
-	if (strcmp(argv[argvCounter],"-loadPattern") == 0) {
+	else if (strcmp(argv[argvCounter],"-loadPattern") == 0) {
 		argvCounter++;
 		
 		if (Tcl_GetInt(interp, argv[argvCounter++], &tagOfObject) != TCL_OK) {
@@ -2157,24 +2192,48 @@ TclReliabilityModelBuilder_addParameterPositioner(ClientData clientData, Tcl_Int
 		}
 		theObject = (DomainComponent *)theStructuralDomain->getLoadPattern(tagOfObject);
 
-		const char **data = new const char *[argc-argvCounter];
-		int ii,jj;
-		for (ii=argvCounter, jj=0; ii<argc; ii++, jj++)
-		  data[jj] = argv[ii];		
-		
-
-		theParameterPositioner = new ParameterPositioner(tag,
-								 theObject,
-								 data,
-								 argc-argvCounter);
-		
-		delete [] data;
+		theParameterPositioner =
+		  new ParameterPositioner(tag,
+					  theObject,
+					  &argv[argvCounter],
+					  argc-argvCounter);
 	}
-	else {
+
+	// IF UNCERTAIN element property
+	else if (strcmp(argv[argvCounter],"-element") == 0) {
+		argvCounter++;
+		
+		if (Tcl_GetInt(interp, argv[argvCounter++], &tagOfObject) != TCL_OK) {
+		  opserr << "ERROR: invalid input: tagOfObject \n";
+		  return TCL_ERROR;
+		}
+		theObject = (DomainComponent *)theStructuralDomain->getElement(tagOfObject);
+
+		theParameterPositioner =
+		  new ParameterPositioner(tag,
+					  theObject,
+					  &argv[argvCounter],
+					  argc-argvCounter);
+	}
+	// IF UNCERTAIN *NODE* PROPERTY
+	else if (strcmp(argv[argvCounter],"-node") == 0) {
+		argvCounter++;
+
+		if (Tcl_GetInt(interp, argv[argvCounter++], &tagOfObject) != TCL_OK) {
+			opserr << "ERROR: invalid input: tagOfObject \n";
+			return TCL_ERROR;
+		}
+		theObject = (DomainComponent *)theStructuralDomain->getNode(tagOfObject);
+
+		theParameterPositioner =
+		  new ParameterPositioner(tag,
+					  theObject,
+					  &argv[argvCounter],
+					  argc-argvCounter);
+	}	else {
 		opserr << "ERROR: Unknown parameter in parameterPositioner" << endln;
 		return TCL_ERROR;
 	}
-
 
 	// ADD THE PARAMETERPOSITIONER TO THE DOMAIN
 	if (theReliabilityDomain->addParameterPositioner(theParameterPositioner) == false) {
@@ -3748,8 +3807,7 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 		}
 
 		int printFlag=0;
-		char *fileNamePrint;
-		fileNamePrint = new char[256];
+		char fileNamePrint[256];
 		strcpy(fileNamePrint,"initialized");
 
 
@@ -3820,8 +3878,6 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 					fileNamePrint,
 					theStartPoint);
 
-		delete [] fileNamePrint;
-		
 	}
 	else {
 		opserr << "ERROR: unrecognized type of FindDesignPointAlgorithm Algorithm \n";
