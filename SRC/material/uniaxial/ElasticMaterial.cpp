@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:33:38 $
+// $Revision: 1.6 $
+// $Date: 2006-09-05 22:20:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ElasticMaterial.cpp,v $
                                                                         
                                                                         
@@ -38,13 +38,14 @@
 #include <Vector.h>
 #include <Channel.h>
 #include <Information.h>
+#include <Parameter.h>
 
 #include <OPS_Globals.h>
 
 ElasticMaterial::ElasticMaterial(int tag, double e, double et)
 :UniaxialMaterial(tag,MAT_TAG_ElasticMaterial),
  trialStrain(0.0),  trialStrainRate(0.0),
-  E(e), eta(et)
+ E(e), eta(et), parameterID(0)
 {
 
 }
@@ -52,7 +53,7 @@ ElasticMaterial::ElasticMaterial(int tag, double e, double et)
 ElasticMaterial::ElasticMaterial()
 :UniaxialMaterial(0,MAT_TAG_ElasticMaterial),
  trialStrain(0.0),  trialStrainRate(0.0),
-  E(0.0), eta(0.0)
+ E(0.0), eta(0.0), parameterID(0)
 {
 
 }
@@ -139,7 +140,7 @@ ElasticMaterial::sendSelf(int cTag, Channel &theChannel)
 
 int 
 ElasticMaterial::recvSelf(int cTag, Channel &theChannel, 
-			       FEM_ObjectBroker &theBroker)
+			  FEM_ObjectBroker &theBroker)
 {
   int res = 0;
   static Vector data(3);
@@ -167,34 +168,65 @@ ElasticMaterial::Print(OPS_Stream &s, int flag)
 }
 
 int
-ElasticMaterial::setParameter(const char **argv, int argc, Information &info)
+ElasticMaterial::setParameter(const char **argv, int argc, Parameter &param)
 {
-	if (strcmp(argv[0],"E") == 0) {
-		info.theType = DoubleType;
-		return 1;
-	}
-	else if (strcmp(argv[0],"eta") == 0) {
-		info.theType = DoubleType;
-		return 2;
-	}
-	else
-		return -1;
+  if (argc < 1)
+    return -1;
+
+  if (strcmp(argv[0],"E") == 0)
+    return param.addObject(1, this);
+
+  else if (strcmp(argv[0],"eta") == 0)
+    return param.addObject(2, this);
+
+  else
+    return -1;
 }
 
 int 
 ElasticMaterial::updateParameter(int parameterID, Information &info)
 {
-	switch(parameterID) {
-	case -1:
-		return -1;
-	case 1:
-		E = info.theDouble;
-		return 0;
-	case 2:
-		eta = info.theDouble;
-		return 0;
-	default:
-		return -1;
-	}
+  switch(parameterID) {
+  case 1:
+    E = info.theDouble;
+    return 0;
+  case 2:
+    eta = info.theDouble;
+    return 0;
+  default:
+    return -1;
+  }
 }
 
+int
+ElasticMaterial::activateParameter(int paramID)
+{
+  parameterID = paramID;
+
+  return 0;
+}
+
+double
+ElasticMaterial::getStressSensitivity(int gradNumber, bool conditional)
+{
+  if (parameterID == 1)
+    return trialStrain;
+  else if (parameterID == 2)
+    return trialStrainRate;
+  else
+    return 0.0;
+}
+
+double
+ElasticMaterial::getInitialTangentSensitivity(int gradNumber)
+{
+  return 0.0;
+}
+
+int
+ElasticMaterial::commitSensitivity(double strainGradient,
+				   int gradNumber, int numGrads)
+{
+  // Nothing to commit ... path independent
+  return 0.0;
+}
