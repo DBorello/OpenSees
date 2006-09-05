@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-08-03 23:49:46 $
+// $Revision: 1.5 $
+// $Date: 2006-09-05 23:29:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSectionGJ.h,v $
                                                                         
 // Written: fmk
@@ -75,8 +75,7 @@ class FiberSectionGJ : public SectionForceDeformation
   
   int addFiber(Fiber &theFiber);
   
-  int setParameter(const char **argv, int argc, Information &info);
-  int updateParameter(int parameterID, Information &info);
+  int setParameter(const char **argv, int argc, Parameter &param);
   
  protected:
   

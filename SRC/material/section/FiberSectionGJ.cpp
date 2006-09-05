@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-08-04 18:31:30 $
+// $Revision: 1.6 $
+// $Date: 2006-09-05 23:29:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSectionGJ.cpp,v $
                                                                         
 // Written: fmk
@@ -819,64 +819,26 @@ FiberSectionGJ::getResponse(int responseID, Information &sectInfo)
 }
 
 int
-FiberSectionGJ::setParameter (const char **argv, int argc, Information &info)
+FiberSectionGJ::setParameter (const char **argv, int argc, Parameter &param)
 {
-	// Initial declarations
-	int ok = -1;
+  if (argc < 3)
+    return 0;
 
-	// A material parameter
-	if (strcmp(argv[0],"material") == 0) {
+  // A material parameter
+  if (strstr(argv[0],"material") != 0) {
 
-		// Get the tag of the material
-		int paramMatTag = atoi(argv[1]);
+    // Get the tag of the material
+    int paramMatTag = atoi(argv[1]);
 
-		// Loop over fibers to find the right material(s)
-		for (int i=0; i<numFibers; i++) {
-			if (paramMatTag == theMaterials[i]->getTag()) {
-				ok = theMaterials[i]->setParameter(&argv[2], argc-2, info);
-			}
-		}
-		if (ok<0) {
-		  opserr << "FiberSectionGJ::setParameter() - could not set parameter. " << endln;
-		  return -1;
-		}
-		else {
-			return ok + 100;
-		}
-	} 
-	else
-		return -1;
-}
+    // Loop over fibers to find the right material(s)
+    int ok = 0;
+    for (int i = 0; i < numFibers; i++) 
+      if (paramMatTag == theMaterials[i]->getTag())
+	ok += theMaterials[i]->setParameter(&argv[2], argc-2, param);
 
-int
-FiberSectionGJ::updateParameter (int parameterID, Information &info)
-{
-	int ok = -1;
+    return ok;
+  }
 
-	switch (parameterID) {
-	case 1:
-		return -1;
-	default:
-		if (parameterID >= 100) {
-			ID *paramIDPtr;
-			paramIDPtr = info.theID;
-			ID paramID = (*paramIDPtr);
-			int paramMatrTag = paramID(1);
-
-			for (int i=0; i<numFibers; i++) {
-				if (paramMatrTag == theMaterials[i]->getTag()) {
-					ok =theMaterials[i]->updateParameter(parameterID-100, info);
-				}
-			}
-			if (ok < 0) {
-				opserr << "FiberSectionGJ::updateParameter() - could not update parameter. " << endln;
-				return ok;
-			}
-			else {
-				return ok;
-			}
-		}
-		else
-			return -1;
-	}
+  else
+    return -1;
 }
