@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-08-03 23:44:38 $
+// $Revision: 1.3 $
+// $Date: 2006-09-05 22:47:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/snap/Bilinear.h,v $
 //
 //
@@ -75,8 +75,8 @@ class Bilinear : public UniaxialMaterial
 	int getResponse(int responseID, Information &matInfo);
 
 	void Print(OPS_Stream &s, int flag =0);
-    int    setParameter             (const char **argv, int argc, Information &info);
-    int    updateParameter          (int parameterID, Information &info);
+	int setParameter(const char **argv, int argc, Parameter &param);
+	int    updateParameter          (int parameterID, Information &info);
 	int    activateParameter        (int parameterID);
 
 /*
