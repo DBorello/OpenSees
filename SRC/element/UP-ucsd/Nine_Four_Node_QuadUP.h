@@ -22,9 +22,9 @@
 
 
 
-// $Revision: 1.3 $
+// $Revision: 1.4 $
 
-// $Date: 2006-08-04 22:32:17 $
+// $Date: 2006-09-05 21:04:59 $
 
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/Nine_Four_Node_QuadUP.h,v $
 
@@ -156,7 +156,7 @@ class NineFourNodeQuadUP : public Element
 
 
 
-    int setParameter(const char **argv, int argc, Information &info);
+    int setParameter(const char **argv, int argc, Parameter &param);
 
     int updateParameter(int parameterID, Information &info);
 
@@ -259,6 +259,3 @@ class NineFourNodeQuadUP : public Element
 
 
 #endif
-
-
-

@@ -22,9 +22,9 @@
 
 
 
-// $Revision: 1.3 $
+// $Revision: 1.4 $
 
-// $Date: 2006-08-04 22:32:17 $
+// $Date: 2006-09-05 21:04:59 $
 
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/Nine_Four_Node_QuadUP.cpp,v $
 
@@ -49,6 +49,7 @@
 #include <string.h>
 
 #include <Information.h>
+#include <Parameter.h>
 
 #include <Channel.h>
 
@@ -1959,119 +1960,47 @@ NineFourNodeQuadUP::getResponse(int responseID, Information &eleInfo)
 
 }
 
-
-
 int
-
-NineFourNodeQuadUP::setParameter(const char **argv, int argc, Information &info)
-
+NineFourNodeQuadUP::setParameter(const char **argv, int argc, Parameter &param)
 {
+  if (argc < 1)
+    return -1;
 
-	// quad mass density per unit volume
+  // quad mass density per unit volume
+  if (strcmp(argv[0],"rho") == 0)
+    return param.addObject(1, this);
 
-	if (strcmp(argv[0],"rho") == 0) {
+  // a material parameter
+  else if (strstr(argv[0],"material") != 0) {
 
-		info.theType = DoubleType;
-
-		info.theDouble = rho;
-
-		return 1;
-
-	}
-
-
-
-    // a material parameter
-
-    else if (strcmp(argv[0],"material") == 0) {
-
-		int pointNum = atoi(argv[1]);
-
-		if (pointNum > 0 && pointNum <= nenu) {
-
-			int ok = theMaterial[pointNum-1]->setParameter(&argv[2], argc-2, info);
-
-			if (ok < 0)
-
-				return -1;
-
-		    else if (ok >= 0 && ok < 100)
-
-				return pointNum*100 + ok;
-
-			else
-
-				return -1;
-
-		}
-
-	    else 
-
-			return -1;
-
-	}
-
-    
-
-    // otherwise parameter is unknown for the Truss class
-
-    else
-
-		return -1;
-
-
-
-}
-
-    
-
-int
-
-NineFourNodeQuadUP::updateParameter(int parameterID, Information &info)
-
-{
-
-  switch (parameterID) {
-
-    case -1:
-
+    if (argc < 3)
       return -1;
 
-      
-
-	case 1:
-
-		rho = info.theDouble;
-
-		this->getMass();	// update mass matrix
-
-		return 0;
-
-
-
-	default: 
-
-		if (parameterID >= 100) { // material parameter
-
-			int pointNum = parameterID/100;
-
-			if (pointNum > 0 && pointNum <= nenu)
-
-				return theMaterial[pointNum-1]->updateParameter(parameterID-100*pointNum, info);
-
-			else
-
-				return -1;
-
-		} else // unknown
-
-			return -1;
-
+    int pointNum = atoi(argv[1]);
+    if (pointNum > 0 && pointNum <= nenu)
+      return theMaterial[pointNum-1]->setParameter(&argv[2], argc-2, param);
+    else 
+      return -1;
   }
-
+  
+  // otherwise parameter is unknown for the Truss class
+  else
+    return -1;
 }
 
-
+int
+NineFourNodeQuadUP::updateParameter(int parameterID, Information &info)
+{
+  switch (parameterID) {
+  case 1:
+    rho = info.theDouble;
+    this->getMass();	// update mass matrix
+    return 0;
+    
+  default: 
+    return -1;
+  }
+}
 
 void NineFourNodeQuadUP::globalShapeFunction(double *dvol, double *w, int nint, int nen, int mode)
 
@@ -2468,6 +2397,3 @@ double NineFourNodeQuadUP::mixtureRho(int i)
 	return rhoi;
 
 }
-
-
-

@@ -18,9 +18,9 @@
 
 
 
-// $Revision: 1.3 $
+// $Revision: 1.4 $
 
-// $Date: 2006-08-04 22:32:17 $
+// $Date: 2006-09-05 21:04:59 $
 
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/FourNodeQuadUP.h,v $
 
@@ -149,9 +149,7 @@ class FourNodeQuadUP : public Element
     int getResponse(int responseID, Information &eleInformation);
 
 
-
-    int setParameter(const char **argv, int argc, Information &info);
-
+    int setParameter(const char **argv, int argc, Parameter &param);
     int updateParameter(int parameterID, Information &info);
 
 
@@ -253,6 +251,3 @@ class FourNodeQuadUP : public Element
 
 
 #endif
-
-
-
