@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-11-29 22:42:41 $
+// $Revision: 1.4 $
+// $Date: 2006-09-05 23:02:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/Linear.h,v $
                                                                         
                                                                         
@@ -45,7 +45,7 @@
 class Linear: public EquiSolnAlgo
 {
   public:
-    Linear();
+    Linear(int theTangent = CURRENT_TANGENT);
     ~Linear();
 
     int solveCurrentStep(void);
@@ -60,7 +60,7 @@ class Linear: public EquiSolnAlgo
   protected:
     
   private:
-    
+    int incrTangent;
 };
 
 #endif

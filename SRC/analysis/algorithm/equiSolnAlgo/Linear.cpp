@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-11-29 22:42:41 $
+// $Revision: 1.4 $
+// $Date: 2006-09-05 23:02:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/Linear.cpp,v $
                                                                         
                                                                         
@@ -49,8 +49,8 @@
 
 #include <Timer.h>
 // Constructor
-Linear::Linear()
-:EquiSolnAlgo(EquiALGORITHM_TAGS_Linear)
+Linear::Linear(int theTangent)
+  :EquiSolnAlgo(EquiALGORITHM_TAGS_Linear), incrTangent(theTangent)
 {
 
 }
@@ -81,7 +81,7 @@ Linear::solveCurrentStep(void)
 	return -5;
     }
 
-    if (theIncIntegrator->formTangent() < 0) {
+    if (theIncIntegrator->formTangent(incrTangent) < 0) {
 	opserr << "WARNING Linear::solveCurrentStep() -";
 	opserr << "the Integrator failed in formTangent()\n";
 	return -1;
