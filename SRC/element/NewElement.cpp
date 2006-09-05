@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-08-14 13:45:57 $
+// $Revision: 1.7 $
+// $Date: 2006-09-05 21:02:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/NewElement.cpp,v $
                                                                         
 // Written: fmk 
@@ -220,9 +220,9 @@ NewElement::getResponse(int responseID, Information &eleInfo)
 
 
 int
-NewElement::setParameter(const char **argv, int argc, Information &info)
+NewElement::setParameter(const char **argv, int argc, Parameter &param)
 {
-  return -1;
+  return 0;
 }
     
 
