@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-03-04 00:48:11 $
+// $Revision: 1.4 $
+// $Date: 2006-09-05 20:54:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/groundMotion/GroundMotion.h,v $
                                                                         
                                                                         
@@ -76,7 +76,7 @@ class GroundMotion : public MovableObject
     
     // AddingSensitivity:BEGIN //////////////////////////////////////////
     virtual double getAccelSensitivity(double time);
-    virtual int    setParameter(const char **argv, int argc, Information &info);
+    virtual int setParameter(const char **argv, int argc, Parameter &param);
     virtual int    updateParameter(int parameterID, Information &info);
     virtual int    activateParameter(int parameterID);
     // AddingSensitivity:END ///////////////////////////////////////////

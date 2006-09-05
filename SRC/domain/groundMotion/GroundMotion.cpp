@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2004-07-07 00:51:41 $
+// $Revision: 1.10 $
+// $Date: 2006-09-05 20:54:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/groundMotion/GroundMotion.cpp,v $
                                                                         
 // Written: fmk 
@@ -85,7 +85,7 @@ GroundMotion::integrate(TimeSeries *theSeries, double delta)
 {
   // check that an integrator & accel series exist
   if(theIntegrator == 0) {
-    opserr << "WARNING:GroundMotion::integrate() - no TimeSeriesIntegrator provided - will use Trapezoidal. \n";
+    //opserr << "WARNING:GroundMotion::integrate() - no TimeSeriesIntegrator provided - will use Trapezoidal. \n";
     theIntegrator = new TrapezoidalTimeSeriesIntegrator();
     if(theIntegrator == 0) {
       opserr << "WARNING:GroundMotion::integrate() - no TimeSeriesIntegrator provided - failed to create a Trapezoidal .. memory problems! \n";
@@ -211,7 +211,7 @@ GroundMotion::getVel(double time)
 
   // if theAccel is not 0, integrate accel series to get a vel series
   else if (theAccelSeries != 0) {
-    opserr << " WARNING: GroundMotion::getVel(double time) - integration is required to get the ground velocities from the ground accelerations\n";
+    //opserr << " WARNING: GroundMotion::getVel(double time) - integration is required to get the ground velocities from the ground accelerations\n";
     theVelSeries = this->integrate(theAccelSeries, delta);
 
     if (theVelSeries != 0) {
@@ -478,21 +478,21 @@ GroundMotion::recvSelf(int commitTag, Channel &theChannel,
 
 // AddingSensitivity:BEGIN ////////////////////////////////////
 int
-GroundMotion::setParameter(const char **argv, int argc, Information &info)
+GroundMotion::setParameter(const char **argv, int argc, Parameter &param)
 {
-  return theAccelSeries->setParameter(argv, argc, info);
+  return theAccelSeries->setParameter(argv, argc, param);
 }
 
 int
 GroundMotion::updateParameter(int parameterID, Information &info)
 {
-	return theAccelSeries->updateParameter(parameterID,info);
+  return theAccelSeries->updateParameter(parameterID, info);
 }
 
 int
 GroundMotion::activateParameter(int pparameterID)
 {
-	return theAccelSeries->activateParameter(pparameterID);
+  return theAccelSeries->activateParameter(pparameterID);
 }
 // AddingSensitivity:END ////////////////////////////////////
 
