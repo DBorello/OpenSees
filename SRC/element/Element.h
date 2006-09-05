@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2006-08-04 18:43:04 $
+// $Revision: 1.14 $
+// $Date: 2006-09-05 21:00:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.h,v $
                                                                         
                                                                         
@@ -95,12 +95,11 @@ class Element : public DomainComponent
 				  Information &eleInformation, 
 				  OPS_Stream &theHandler);
     virtual int getResponse(int responseID, Information &eleInformation);
+    virtual int getResponseSensitivity(int responseID, int gradNumber,
+				       Information &eleInformation);
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////
     virtual int addInertiaLoadSensitivityToUnbalance(const Vector &accel, bool tag);
-    virtual int setParameter(const char **argv, int argc, Information &info);
-    virtual int updateParameter(int parameterID, Information &info);
-    virtual int activateParameter(int parameterID);
     virtual const Vector & getResistingForceSensitivity(int gradNumber);
     virtual const Matrix & getInitialStiffSensitivity(int gradNumber);
     virtual const Matrix & getDampSensitivity(int gradNumber);

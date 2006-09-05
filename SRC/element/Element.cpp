@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2006-08-04 18:43:04 $
+// $Revision: 1.19 $
+// $Date: 2006-09-05 21:00:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
@@ -422,22 +422,14 @@ Element::getResponse(int responseID, Information &eleInfo)
   }
 }
 
+int
+Element::getResponseSensitivity(int responseID, int gradNumber,
+				Information &eleInfo)
+{
+  return -1;
+}
+
 // AddingSensitivity:BEGIN //////////////////////////////////////////
-int
-Element::setParameter     (const char **argv, int argc, Information &info)
-{
-	return -1;
-}
-int
-Element::updateParameter  (int parameterID, Information &info)
-{
-	return -1;
-}
-int
-Element::activateParameter(int parameterID)
-{
-	return -1;
-}
 const Vector &
 Element::getResistingForceSensitivity(int gradNumber)
 {
