@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-10-27 23:04:38 $
+// $Revision: 1.6 $
+// $Date: 2006-09-05 22:49:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.h,v $
 
 
@@ -88,6 +88,7 @@ public:
 
 	// Member functions to remove single components from the domain
 	int removeRandomVariablePositioner(int tag);
+	int removeParameterPositioner(int tag);
 	int removeRandomVariable(int tag);
 	int removeCorrelationCoefficient(int tag);
 	int removePerformanceFunction(int tag);

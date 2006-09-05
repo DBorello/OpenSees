@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-10-27 23:04:38 $
+// $Revision: 1.3 $
+// $Date: 2006-09-05 22:49:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ParameterPositioner.cpp,v $
 
 
@@ -33,55 +33,50 @@
 
 #include <ParameterPositioner.h>
 #include <classTags.h>
-
+#include <DomainComponent.h>
+#include <Parameter.h>
 
 ParameterPositioner::ParameterPositioner (int passedTag,
-		DomainComponent *object,
-		const char **argv, int argc)
-:ReliabilityDomainComponent(passedTag, RANDOM_VARIABLE_POSITIONER)
+					  DomainComponent *parentObject,
+					  const char **argv, int argc)
+  :ReliabilityDomainComponent(passedTag, PARAMETER_POSITIONER),
+   theParameter(passedTag, parentObject, argv, argc)
 {
-	theObject = object;
 
-	if (theObject) 
-		parameterID = theObject->setParameter (argv, argc, theInfo);
-
-	if (parameterID < 0)
-		opserr << "ParameterPositioner::ParameterPositioner "<< this->getTag() <<" -- unable to set parameter" << endln;
 }
 
+ParameterPositioner::ParameterPositioner (int passedTag, Parameter &param)
+  :ReliabilityDomainComponent(passedTag, PARAMETER_POSITIONER),
+   theParameter(param)
+{
+
+}
 
 ParameterPositioner::~ParameterPositioner()
 {
+
 }
 
+int
+ParameterPositioner::update(int newValue)
+{
+  return theParameter.update(newValue);
+}
 
 int
-ParameterPositioner::update (double newValue)
+ParameterPositioner::update(double newValue)
 {
-	theInfo.theDouble = newValue;
-
-	if (parameterID >= 0)
-		return theObject->updateParameter (parameterID, theInfo);
-	else
-		return -1;
+  return theParameter.update(newValue);
 }
 
 int
 ParameterPositioner::activate(bool active)
 {
-	if (active) {
-		theObject->activateParameter(parameterID);
-	}
-	else {
-		theObject->activateParameter(0);
-	}
-	return 0;
+  return theParameter.activate(active);
 }
-
 
 void
 ParameterPositioner::Print(OPS_Stream &s, int flag)  
 {
+  s << "ParameterPositioner, tag = " << this->getTag() << endln;
 }
-
-
