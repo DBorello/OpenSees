@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2005-11-30 23:32:32 $
+// $Revision: 1.17 $
+// $Date: 2006-09-05 23:03:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
 // Written: fmk 
@@ -50,6 +50,7 @@ class MP_Constraint;
 class NodalLoad;
 class ElementalLoad;
 class LoadPattern;
+class Parameter;
 
 class ElementIter;
 class NodeIter;
@@ -61,7 +62,7 @@ class SingleDomEleIter;
 class SingleDomNodIter;
 class SingleDomSP_Iter;
 class SingleDomMP_Iter;
-class  SingleDomAllSP_Iter;
+class SingleDomAllSP_Iter;
 
 class MeshRegion;
 class Recorder;
@@ -96,6 +97,7 @@ class Domain
     virtual  bool addSP_Constraint(SP_Constraint *);
     virtual  bool addMP_Constraint(MP_Constraint *); 
     virtual  bool addLoadPattern(LoadPattern *);            
+    virtual  bool addParameter(Parameter *);            
     
     // methods to add components to a LoadPattern object
     virtual  bool addSP_Constraint(SP_Constraint *, int loadPatternTag); 
@@ -108,7 +110,8 @@ class Domain
     virtual Node          *removeNode(int tag);    
     virtual SP_Constraint *removeSP_Constraint(int tag);
     virtual MP_Constraint *removeMP_Constraint(int tag);    
-    virtual LoadPattern   *removeLoadPattern(int loadTag);
+    virtual LoadPattern   *removeLoadPattern(int tag);
+    virtual Parameter     *removeParameter(int tag);
 
     virtual NodalLoad     *removeNodalLoad(int tag, int loadPattern);
     virtual ElementalLoad *removeElementalLoad(int tag, int loadPattern);
@@ -127,6 +130,7 @@ class Domain
     virtual  SP_Constraint *getSP_Constraint(int tag);    
     virtual  MP_Constraint *getMP_Constraint(int tag);    
     virtual  LoadPattern   *getLoadPattern(int tag);        
+    virtual  Parameter     *getParameter(int tag);        
 
     // methods to query the state of the domain
     virtual double  getCurrentTime(void) const;
@@ -136,6 +140,7 @@ class Domain
     virtual int getNumSPs(void) const;
     virtual int getNumMPs(void) const;
     virtual int getNumLoadPatterns(void) const;            
+    virtual int getNumParameters(void) const;            
     virtual const Vector &getPhysicalBounds(void); 
 
 
@@ -205,7 +210,7 @@ class Domain
     bool   hasDomainChangedFlag;      // a bool flag used to indicate if GeoTag needs to be ++
     int    theDbTag;                   // the Domains unique database tag == 0
     int    lastGeoSendTag;            // the value of currentGeoTag when sendSelf was last invoked
-    int dbEle, dbNod, dbSPs, dbMPs, dbLPs; // database tags for storing info
+    int dbEle, dbNod, dbSPs, dbMPs, dbLPs, dbParam; // database tags for storing info
 
     bool eleGraphBuiltFlag;
     bool nodeGraphBuiltFlag;
@@ -218,6 +223,7 @@ class Domain
     TaggedObjectStorage  *theSPs;    
     TaggedObjectStorage  *theMPs;    
     TaggedObjectStorage  *theLoadPatterns;        
+    TaggedObjectStorage  *theParameters;        
 
     SingleDomEleIter      *theEleIter;
     SingleDomNodIter  	  *theNodIter;

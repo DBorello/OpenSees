@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.34 $
-// $Date: 2006-04-13 20:11:22 $
+// $Revision: 1.35 $
+// $Date: 2006-09-05 23:03:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -48,6 +48,7 @@
 #include <NodalLoad.h>
 #include <ElementalLoad.h>
 #include <LoadPattern.h>
+#include <Parameter.h>
 
 #include <MapOfTaggedObjects.h>
 #include <MapOfTaggedObjectsIter.h>
@@ -71,7 +72,7 @@ Domain::Domain()
 :theRecorders(0), numRecorders(0),
  currentTime(0.0), committedTime(0.0), dT(0.0), currentGeoTag(0),
  hasDomainChangedFlag(false), theDbTag(0), lastGeoSendTag(-1),
- dbEle(0), dbNod(0), dbSPs(0), dbMPs(0), dbLPs(0),
+ dbEle(0), dbNod(0), dbSPs(0), dbMPs(0), dbLPs(0), dbParam(0),
  eleGraphBuiltFlag(false),  nodeGraphBuiltFlag(false), theNodeGraph(0), 
  theElementGraph(0), 
  theRegions(0), numRegions(0), commitTag(0),
@@ -84,6 +85,7 @@ Domain::Domain()
     theSPs      = new MapOfTaggedObjects();
     theMPs      = new MapOfTaggedObjects();    
     theLoadPatterns = new MapOfTaggedObjects();
+    theParameters   = new MapOfTaggedObjects();
 
     // init the iters    
     theEleIter = new SingleDomEleIter(theElements);    
@@ -98,7 +100,8 @@ Domain::Domain()
 	theSPs == 0 || theMPs == 0 || 
 	theEleIter == 0 || theNodIter == 0 || 
 	theMP_Iter == 0 || theSP_Iter == 0 ||
-	theLoadPatterns == 0 || theLoadPatternIter == 0) {	
+	theLoadPatterns == 0 || theLoadPatternIter == 0 ||
+	theParameters == 0) {	
 
       opserr << "Domain::Domain() - out of memory\n";
       exit(-1);
@@ -118,7 +121,7 @@ Domain::Domain(int numNodes, int numElements, int numSPs, int numMPs,
 :theRecorders(0), numRecorders(0),
  currentTime(0.0), committedTime(0.0), dT(0.0), currentGeoTag(0),
  hasDomainChangedFlag(false), theDbTag(0), lastGeoSendTag(-1),
- dbEle(0), dbNod(0), dbSPs(0), dbMPs(0), dbLPs(0),
+ dbEle(0), dbNod(0), dbSPs(0), dbMPs(0), dbLPs(0), dbParam(0),
  eleGraphBuiltFlag(false), nodeGraphBuiltFlag(false), theNodeGraph(0), 
  theElementGraph(0),
  theRegions(0), numRegions(0), commitTag(0),
@@ -130,6 +133,7 @@ Domain::Domain(int numNodes, int numElements, int numSPs, int numMPs,
     theSPs      = new MapOfTaggedObjects();
     theMPs      = new MapOfTaggedObjects();    
     theLoadPatterns = new MapOfTaggedObjects();
+    theParameters   = new MapOfTaggedObjects();
     
     // init the iters
     theEleIter = new SingleDomEleIter(theElements);    
@@ -144,7 +148,8 @@ Domain::Domain(int numNodes, int numElements, int numSPs, int numMPs,
 	theSPs == 0 || theMPs == 0 || 
 	theEleIter == 0 || theNodIter == 0 || 
 	theMP_Iter == 0 || theSP_Iter == 0 ||
-	theLoadPatterns == 0 || theLoadPatternIter == 0) {	
+	theLoadPatterns == 0 || theLoadPatternIter == 0 ||
+	theParameters == 0) {	
 
 	opserr << ("Domain::Domain(int, int, ...) - out of memory\n");
     }
@@ -166,7 +171,7 @@ Domain::Domain(TaggedObjectStorage &theNodesStorage,
 :theRecorders(0), numRecorders(0),
  currentTime(0.0), committedTime(0.0), dT(0.0), currentGeoTag(0),
  hasDomainChangedFlag(false), theDbTag(0), lastGeoSendTag(-1),
- dbEle(0), dbNod(0), dbSPs(0), dbMPs(0), dbLPs(0),
+ dbEle(0), dbNod(0), dbSPs(0), dbMPs(0), dbLPs(0), dbParam(0),
  eleGraphBuiltFlag(false), nodeGraphBuiltFlag(false), theNodeGraph(0), 
  theElementGraph(0), 
  theElements(&theElementsStorage),
@@ -221,7 +226,7 @@ Domain::Domain(TaggedObjectStorage &theStorage)
 :theRecorders(0), numRecorders(0),
  currentTime(0.0), committedTime(0.0), dT(0.0), currentGeoTag(0),
  hasDomainChangedFlag(false), theDbTag(0), lastGeoSendTag(-1),
- dbEle(0), dbNod(0), dbSPs(0), dbMPs(0), dbLPs(0),
+ dbEle(0), dbNod(0), dbSPs(0), dbMPs(0), dbLPs(0), dbParam(0),
  eleGraphBuiltFlag(false), nodeGraphBuiltFlag(false), theNodeGraph(0), 
  theElementGraph(0), 
  theRegions(0), numRegions(0), commitTag(0),
@@ -234,6 +239,7 @@ Domain::Domain(TaggedObjectStorage &theStorage)
     theSPs      = theStorage.getEmptyCopy();
     theMPs      = theStorage.getEmptyCopy();
     theLoadPatterns = theStorage.getEmptyCopy();    
+    theParameters   = theStorage.getEmptyCopy();    
 
     // init the iters    
     theEleIter = new SingleDomEleIter(theElements);    
@@ -248,7 +254,8 @@ Domain::Domain(TaggedObjectStorage &theStorage)
 	theSPs == 0 || theMPs == 0 || 
 	theEleIter == 0 || theNodIter == 0 ||
 	theMP_Iter == 0 || theSP_Iter == 0 ||
-	theLoadPatterns == 0 || theLoadPatternIter == 0) { 
+	theLoadPatterns == 0 || theLoadPatternIter == 0 ||
+	theParameters == 0) { 
 	
 	opserr << ("Domain::Domain(ObjectStorage &) - out of memory\n");	
     }
@@ -260,7 +267,7 @@ Domain::Domain(TaggedObjectStorage &theStorage)
     theBounds(4) = 0;    
     theBounds(5) = 0;            
 
-    dbEle =0; dbNod =0; dbSPs =0; dbMPs =0; dbLPs = 0;
+    dbEle =0; dbNod =0; dbSPs =0; dbMPs =0; dbLPs = 0; dbParam = 0;
 }
 
 
@@ -297,6 +304,9 @@ Domain::~Domain()
   
   if (theLoadPatterns != 0)
     delete theLoadPatterns;
+
+  if (theParameters != 0)
+    delete theParameters;
   
   if (theEleIter != 0)
     delete theEleIter;
@@ -566,6 +576,28 @@ Domain::addLoadPattern(LoadPattern *load)
     return result;
 }    
 
+bool
+Domain::addParameter(Parameter *param)
+{
+  int paramTag = param->getTag();
+
+  // check if a Parameter with a similar tag already exists in the Domain
+  TaggedObject *other = theParameters->getComponentPtr(paramTag);
+  if (other != 0) {
+    opserr << "Domain::addParameter - parameter with tag " << paramTag << "already exists in model\n"; 
+    return false;
+  }
+
+  // add the param to the container object for the parameters
+  bool result = theParameters->addComponent(param);
+  if (result == true) {
+    // mark the Domain as having been changed
+    this->domainChange();
+  } else 
+    opserr << "Domain::addParameter - parameter " << paramTag << "could not be added to container\n";      
+
+  return result;
+}
 
 bool
 Domain::addSP_Constraint(SP_Constraint *spConstraint, int pattern)
@@ -694,6 +726,7 @@ Domain::clearAll(void) {
   theSPs->clearAll();
   theMPs->clearAll();
   theLoadPatterns->clearAll();
+  theParameters->clearAll();
 
   // remove the recorders
   int i;
@@ -736,7 +769,7 @@ Domain::clearAll(void) {
   nodeGraphBuiltFlag = false;
   eleGraphBuiltFlag = false;
   
-  dbEle =0; dbNod =0; dbSPs =0; dbMPs =0; dbLPs = 0;
+  dbEle =0; dbNod =0; dbSPs =0; dbMPs =0; dbLPs = 0; dbParam = 0;
 
   currentGeoTag = 0;
   lastGeoSendTag = -1;
@@ -755,7 +788,7 @@ Domain::clearAll(void) {
     delete theElementGraph;
   theElementGraph = 0;
   
-  dbEle =0; dbNod =0; dbSPs =0; dbMPs =0; dbLPs = 0;
+  dbEle =0; dbNod =0; dbSPs =0; dbMPs =0; dbLPs = 0; dbParam = 0;
 }
 
 
@@ -841,6 +874,26 @@ Domain::removeMP_Constraint(int tag)
     // result->setDomain(0);
     return result;
 }    
+
+Parameter *
+Domain::removeParameter(int tag)
+{
+  // remove the object from the container    
+  TaggedObject *mc = theParameters->removeComponent(tag);
+  
+  // if not there return 0
+  if (mc == 0) 
+      return 0;
+
+  // otherwise mark the domain as having changed
+  this->domainChange();
+  
+  // perform a downward cast to an Element (safe as only Element added to
+  // this container, 0 the Elements DomainPtr and return the result of the cast  
+  Parameter *result = (Parameter *)mc;
+  //  result->setDomain(0);
+  return result;
+}
 
 LoadPattern *
 Domain::removeLoadPattern(int tag)
@@ -1040,6 +1093,18 @@ Domain::getMP_Constraint(int tag)
   return result;
 }
 
+Parameter *
+Domain::getParameter(int tag) 
+{
+  TaggedObject *mc = theParameters->getComponentPtr(tag);
+
+  // if not there return 0 otherwise perform a cast and return that
+  if (mc == 0) 
+      return 0;
+  Parameter *result = (Parameter *)mc;
+  return result;
+}
+
 LoadPattern *
 Domain::getLoadPattern(int tag) 
 {
@@ -1095,6 +1160,11 @@ Domain::getNumLoadPatterns(void) const
     return theLoadPatterns->getNumComponents();
 }
 
+int 
+Domain::getNumParameters(void) const
+{
+    return theParameters->getNumComponents();
+}
 
 const Vector &
 Domain::getPhysicalBounds(void)
@@ -1517,9 +1587,13 @@ Domain::Print(OPS_Stream &s, int flag)
   s << theMPs->getNumComponents() << "\n";
   theMPs->Print(s, flag);
 
-  s << "\nLOAD PATTERNS: num Patterns: ";
+  s << "\nLOAD PATTERNS: numPatterns: ";
   s << theLoadPatterns->getNumComponents() << "\n\n";
   theLoadPatterns->Print(s, flag);
+
+  s << "\nPARAMETERS: numParameters: ";
+  s << theParameters->getNumComponents() << "\n\n";
+  theParameters->Print(s, flag);
 }
 
 OPS_Stream &operator<<(OPS_Stream &s, Domain &M)
@@ -1858,14 +1932,15 @@ Domain::sendSelf(int cTag, Channel &theChannel)
 
   // first we send info about the current domain flag and the number of
   // elements, nodes, constraints and load patterns currently in the domain
-  int numEle, numNod, numSPs, numMPs, numLPs;
+  int numEle, numNod, numSPs, numMPs, numLPs, numParam;
   numNod = theNodes->getNumComponents();
   numEle = theElements->getNumComponents();
   numSPs = theSPs->getNumComponents();
   numMPs = theMPs->getNumComponents();  
   numLPs = theLoadPatterns->getNumComponents();
+  numParam = theParameters->getNumComponents();
 
-  ID domainData(11);
+  ID domainData(13);
   domainData(0) = currentGeoTag;
 
   domainData(1) = numNod;
@@ -1873,6 +1948,7 @@ Domain::sendSelf(int cTag, Channel &theChannel)
   domainData(3) = numSPs;
   domainData(4) = numMPs;
   domainData(5) = numLPs;
+  domainData(11) = numParam;
 
   // add the database tag for the ID's storing node, element, constraints
   // and loadpattern data into domainData
@@ -1883,6 +1959,7 @@ Domain::sendSelf(int cTag, Channel &theChannel)
     dbSPs = theChannel.getDbTag();
     dbMPs = theChannel.getDbTag();
     dbLPs = theChannel.getDbTag();
+    dbParam = theChannel.getDbTag();
   } 
 
   domainData(6) = dbNod;
@@ -1890,6 +1967,7 @@ Domain::sendSelf(int cTag, Channel &theChannel)
   domainData(8) = dbSPs;
   domainData(9) = dbMPs;
   domainData(10) = dbLPs;
+  domainData(12) = dbParam;
 
   if (theChannel.sendID(theDbTag, commitTag, domainData) < 0) {
     opserr << "Domain::send - channel failed to send the initial ID\n";
