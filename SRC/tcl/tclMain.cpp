@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.38 2006-08-23 23:36:28 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.39 2006-09-05 19:38:17 mhscott Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -68,13 +68,13 @@ int (*tclDummyLinkVarPtr)(Tcl_Interp *interp, char *a,
 typedef struct parameterValues {
   char *value;
   struct parameterValues *next;
-} ParameterValues;
+} OpenSeesTcl_ParameterValues;
 
 typedef struct parameter {
   char *name;
-  ParameterValues *values;
+  OpenSeesTcl_ParameterValues *values;
   struct parameter *next;
-} Parameter;
+} OpenSeesTcl_Parameter;
 
 
 #ifdef _WIN32
@@ -138,7 +138,7 @@ char *TclGetStartupScriptFileName()
 int
 EvalFileWithParameters(Tcl_Interp *interp, 
 		       char *tclStartupFileScript, 
-		       Parameter *theParameters, 
+		       OpenSeesTcl_Parameter *theParameters, 
 		       char **paramNames, 
 		       char **paramValues, 
 		       int numParam, 
@@ -147,12 +147,12 @@ EvalFileWithParameters(Tcl_Interp *interp,
 		       int np)
 {
   if (currentParam < numParam) {
-    Parameter *theCurrentParam = theParameters;
-    Parameter *theNextParam = theParameters->next;
+    OpenSeesTcl_Parameter *theCurrentParam = theParameters;
+    OpenSeesTcl_Parameter *theNextParam = theParameters->next;
     char *paramName = theCurrentParam->name;
     paramNames[currentParam] = paramName;
 
-    ParameterValues *theValue = theCurrentParam->values;
+    OpenSeesTcl_ParameterValues *theValue = theCurrentParam->values;
     int nextParam = currentParam+1;
     while (theValue != 0) {
       char *paramValue = theValue->value;
@@ -327,8 +327,8 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
      */
 
     if (tclStartupScriptFileName != NULL) {
-      Parameter *theParameters = 0;
-      Parameter *endParameters = 0;
+      OpenSeesTcl_Parameter *theParameters = 0;
+      OpenSeesTcl_Parameter *endParameters = 0;
       int numParam = 0;
 
       if (argc > 1) {
@@ -342,8 +342,8 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	      char *parName = argv[currentArg+1];
 	      char *parValue = argv[currentArg+2];
 	      
-	      // add a Parameter to end of list of parameters
-	      Parameter *nextParam = new Parameter;
+	      // add a OpenSeesTcl_Parameter to end of list of parameters
+	      OpenSeesTcl_Parameter *nextParam = new OpenSeesTcl_Parameter;
 	      nextParam->name = new char [strlen(parName)+1];
 	      strcpy(nextParam->name, parName);
 	      nextParam->values = 0;
@@ -359,11 +359,11 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	      char nextLine[1000];
 	      FILE *valueFP = fopen(parValue,"r");
 	      if (valueFP != 0) {
-		ParameterValues *endValues = 0;
+		OpenSeesTcl_ParameterValues *endValues = 0;
 		
 		while (fscanf(valueFP, "%s", nextLine) != EOF) {
 		  
-		  ParameterValues *nextValue = new ParameterValues;
+		  OpenSeesTcl_ParameterValues *nextValue = new OpenSeesTcl_ParameterValues;
 		  nextValue->value = new char [strlen(nextLine)+1];
 		  strcpy(nextValue->value, nextLine);
 		  
@@ -378,7 +378,7 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 		fclose(valueFP);
 	      } else {
 		
-		ParameterValues *nextValue = new ParameterValues;		
+		OpenSeesTcl_ParameterValues *nextValue = new OpenSeesTcl_ParameterValues;		
 		nextValue->value = new char [strlen(parValue)+1];
 		
 		strcpy(nextValue->value, parValue);
