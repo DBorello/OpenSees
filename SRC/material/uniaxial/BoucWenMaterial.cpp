@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-06 18:34:14 $
+// $Revision: 1.2 $
+// $Date: 2006-09-05 22:14:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/BoucWenMaterial.cpp,v $
 
 
@@ -37,6 +37,7 @@
 #include <math.h>
 #include <Matrix.h>
 #include <Information.h>
+#include <Parameter.h>
 
 BoucWenMaterial::BoucWenMaterial(int tag, 
 					double p_alpha,
@@ -308,47 +309,38 @@ BoucWenMaterial::Print(OPS_Stream &s, int flag)
 
 
 int
-BoucWenMaterial::setParameter(const char **argv, int argc, Information &info)
+BoucWenMaterial::setParameter(const char **argv, int argc, Parameter &param)
 {
 	if (argc < 1)
-		return -1;
+		return 0;
 
-	if (strcmp(argv[0],"alpha") == 0) {
-		info.theType = DoubleType;
-		return 1;
-	}
-	if (strcmp(argv[0],"ko") == 0) {
-		info.theType = DoubleType;
-		return 2;
-	}
-	if (strcmp(argv[0],"n") == 0) {
-		info.theType = DoubleType;
-		return 3;
-	}
-	if (strcmp(argv[0],"gamma") == 0) {
-		info.theType = DoubleType;
-		return 4;
-	}
-	if (strcmp(argv[0],"beta") == 0) {
-		info.theType = DoubleType;
-		return 5;
-	}
-	if (strcmp(argv[0],"Ao") == 0) {
-		info.theType = DoubleType;
-		return 6;
-	}
-	if (strcmp(argv[0],"deltaA") == 0) {
-		info.theType = DoubleType;
-		return 7;
-	}
-	if (strcmp(argv[0],"deltaNu") == 0) {
-		info.theType = DoubleType;
-		return 8;
-	}
-	if (strcmp(argv[0],"deltaEta") == 0) {
-		info.theType = DoubleType;
-		return 9;
-	}
+	if (strcmp(argv[0],"alpha") == 0)
+	  return param.addObject(1, this);
+
+	if (strcmp(argv[0],"ko") == 0)
+	  return param.addObject(2, this);
+
+	if (strcmp(argv[0],"n") == 0)
+	  return param.addObject(3, this);
+
+	if (strcmp(argv[0],"gamma") == 0)
+	  return param.addObject(4, this);
+
+	if (strcmp(argv[0],"beta") == 0)
+	  return param.addObject(5, this);
+
+	if (strcmp(argv[0],"Ao") == 0)
+	  return param.addObject(6, this);
+
+	if (strcmp(argv[0],"deltaA") == 0)
+	  return param.addObject(7, this);
+
+	if (strcmp(argv[0],"deltaNu") == 0)
+	  return param.addObject(8, this);
+
+	if (strcmp(argv[0],"deltaEta") == 0)
+	  return param.addObject(9, this);
+
 	else
 		opserr << "WARNING: Could not set parameter in BoucWenMaterial. " << endln;
                 
@@ -358,42 +350,37 @@ BoucWenMaterial::setParameter(const char **argv, int argc, Information &info)
 int
 BoucWenMaterial::updateParameter(int parameterID, Information &info)
 {
-
 	switch (parameterID) {
-	case -1:
-		return -1;
 	case 1:
 		this->alpha = info.theDouble;
-		break;
+		return 0;
 	case 2:
 		this->ko = info.theDouble;
-		break;
+		return 0;
 	case 3:
 		this->n = info.theDouble;
-		break;
+		return 0;
 	case 4:
 		this->gamma = info.theDouble;
-		break;
+		return 0;
 	case 5:
 		this->beta = info.theDouble;
-		break;
+		return 0;
 	case 6:
 		this->Ao = info.theDouble;
-		break;
+		return 0;
 	case 7:
 		this->deltaA = info.theDouble;
-		break;
+		return 0;
 	case 8:
 		this->deltaNu = info.theDouble;
-		break;
+		return 0;
 	case 9:
 		this->deltaEta = info.theDouble;
-		break;
+		return 0;
 	default:
 		return -1;
 	}
-
-	return 0;
 }
 
 
