@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2005-11-23 22:48:50 $
+// $Revision: 1.10 $
+// $Date: 2006-09-05 20:46:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.h,v $
                                                                         
                                                                         
@@ -136,7 +136,7 @@ class Node : public DomainComponent
     double getDispSensitivity(int dof, int gradNum);
     double getVelSensitivity(int dof, int gradNum);
     double getAccSensitivity(int dof, int gradNum);
-    int    setParameter(const char **argv, int argc, Information &info);
+    int setParameter(const char **argv, int argc, Parameter &param);
     int    updateParameter(int parameterID, Information &info);
     int    activateParameter(int parameterID);
 

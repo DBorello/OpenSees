@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2005-11-23 22:48:50 $
+// $Revision: 1.7 $
+// $Date: 2006-09-05 20:46:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/NodalLoad.cpp,v $
                                                                         
                                                                         
@@ -34,6 +34,7 @@
 #include <Domain.h>
 #include <Channel.h>
 #include <Information.h>
+#include <Parameter.h>
 
 // AddingSensitivity:BEGIN /////////////////////////////////////
 Vector NodalLoad::gradientVector(1);
@@ -212,46 +213,40 @@ NodalLoad::Print(OPS_Stream &s, int flag)
 
 // AddingSensitivity:BEGIN /////////////////////////////////////
 int
-NodalLoad::setParameter(const char **argv, int argc, Information &info)
+NodalLoad::setParameter(const char **argv, int argc, Parameter &param)
 {
-	if (argc < 1)
-		return -1;
+  if (argc < 1)
+    return -1;
 
-	if (strcmp(argv[0],"1") == 0) {
-		info.theType = DoubleType;
-		return 1;
-	}
-	if (strcmp(argv[0],"2") == 0) {
-		info.theType = DoubleType;
-		return 2;
-	}
-	if (strcmp(argv[0],"3") == 0) {
-		info.theType = DoubleType;
-		return 3;
-	}
-	else
-		return -1;
+  if (strcmp(argv[0],"1") == 0)
+    return param.addObject(1, this);
+
+  if (strcmp(argv[0],"2") == 0)
+    return param.addObject(2, this);
+
+  if (strcmp(argv[0],"3") == 0)
+    return param.addObject(3, this);
+
+  return -1;
 }
 
 int
 NodalLoad::updateParameter(int parameterID, Information &info)
 {
-  int nn; 
-  Domain *theDomain;
   switch (parameterID) {
-	case -1:
-		return -1;
-	case 1:
-		(*load)(0) = info.theDouble;
-		return 0;
-	case 2:
-		(*load)(1) = info.theDouble;
-		return 0;
-	case 3:
-		(*load)(2) = info.theDouble;
-		return 0;
-	default:
-		return -1;
+  case -1:
+    return -1;
+  case 1:
+    (*load)(0) = info.theDouble;
+    return 0;
+  case 2:
+    (*load)(1) = info.theDouble;
+    return 0;
+  case 3:
+    (*load)(2) = info.theDouble;
+    return 0;
+  default:
+    return -1;
   }
 }
 

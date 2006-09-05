@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-03-04 00:48:11 $
+// $Revision: 1.7 $
+// $Date: 2006-09-05 20:46:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/NodalLoad.h,v $
                                                                         
                                                                         
@@ -56,7 +56,7 @@ class NodalLoad : public Load
     virtual void Print(OPS_Stream &s, int flag =0);   
     
     // AddingSensitivity:BEGIN //////////////////////////////////////////
-    int            setParameter(const char **argv, int argc, Information &info);
+    int setParameter(const char **argv, int argc, Parameter &param);
     int            updateParameter(int parameterID, Information &info);
     int            activateParameter(int parameterID);
     const Vector & getExternalForceSensitivity(int gradNumber);
