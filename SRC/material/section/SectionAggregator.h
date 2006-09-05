@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2006-08-03 23:49:46 $
+// $Revision: 1.12 $
+// $Date: 2006-09-05 23:30:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.h,v $
                                                                         
                                                                         
@@ -91,6 +91,16 @@ class SectionAggregator : public SectionForceDeformation
     int setVariable(const char *argv);
     int getVariable(int variableID, double &info);
 
+    // AddingSensitivity:BEGIN //////////////////////////////////////////
+    int setParameter(const char **argv, int argc, Parameter &param);
+    const Vector & getStressResultantSensitivity(int gradNumber, bool conditional);
+    const Vector & getSectionDeformationSensitivity(int gradNumber);
+    const Matrix & getSectionTangentSensitivity(int gradNumber);
+    int   commitSensitivity(const Vector& sectionDeformationGradient, int gradNumber, int numGrads);
+
+    const Vector &getdedh(void); // MHS hack
+    // AddingSensitivity:END ///////////////////////////////////////////
+
   protected:
     
   private:
@@ -111,6 +121,13 @@ class SectionAggregator : public SectionForceDeformation
 
     static double workArea[];
     static int codeArea[];
+
+// AddingSensitivity:BEGIN //////////////////////////////////////////
+    int parameterID;
+
+    Vector dedh; // MHS hack
+// AddingSensitivity:END ///////////////////////////////////////////
+
 };
 
 #endif
