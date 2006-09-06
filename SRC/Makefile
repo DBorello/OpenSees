@@ -656,6 +656,9 @@ SECTION_LIBS = $(FE)/material/section/SectionForceDeformation.o \
 	$(FE)/material/section/MembranePlateFiberSection.o \
 	$(FE)/material/section/Bidirectional.o \
 	$(FE)/material/section/Isolator2spring.o \
+	$(FE)/material/section/integration/SectionIntegration.o \
+	$(FE)/material/section/integration/RCSectionIntegration.o \
+	$(FE)/material/section/integration/WideFlangeSectionIntegration.o \
 	$(FE)/material/section/repres/patch/Patch.o \
 	$(FE)/material/section/repres/patch/QuadPatch.o \
 	$(FE)/material/section/repres/patch/CircPatch.o \
@@ -741,6 +744,8 @@ MODEL_BUILDER_LIBS = $(FE)/modelbuilder/ModelBuilder.o \
 	$(FE)/modelbuilder/tcl/Block3D.o
 
 DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
+	$(FE)/domain/component/Parameter.o \
+	$(FE)/domain/component/TclParameterCommands.o \
 	$(FE)/domain/domain/Domain.o \
 	$(FE)/domain/domain/single/SingleDomEleIter.o \
 	$(FE)/domain/domain/single/SingleDomNodIter.o \
