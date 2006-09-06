@@ -18,23 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2006-09-05 21:27:47 $
+// $Revision: 1.10 $
+// $Date: 2006-09-06 20:17:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection2d.cpp,v $
-                                                                        
-                                                                        
-///////////////////////////////////////////////////////
-// File:  ~/Src/element/hinge/ElasticSection2d.cpp
-//
-// Written by Matthew Peavy
-//
-// Written:  Feb 13, 2000
-// Debugged: Feb 14, 2000
-// Revised:  May 2000 -- MHS (to include elastic shear)
-//
-//
-// Purpose:  This file contains the function definitions
-// for the ElasticSection2d class.
 
 #include <ElasticSection2d.h>
 #include <Matrix.h>
@@ -54,7 +40,7 @@ ID ElasticSection2d::code(2);
 
 ElasticSection2d::ElasticSection2d(void)
 :SectionForceDeformation(0, SEC_TAG_Elastic2d),
- E(0), A(0), I(0),
+ E(0.0), A(0.0), I(0.0),
  e(2), eCommit(2)
 {
     if (code(0) != SECTION_RESPONSE_P)
@@ -84,29 +70,6 @@ ElasticSection2d::ElasticSection2d
 		opserr << "ElasticSection2d::ElasticSection2d -- Input I <= 0.0 ... setting I to 1.0\n";
 		I = 1.0;
     }    
-	
-    if (code(0) != SECTION_RESPONSE_P)
-    {
-	code(0) = SECTION_RESPONSE_P;	// P is the first quantity
-	code(1) = SECTION_RESPONSE_MZ;	// Mz is the second
-    }
-}
-
-ElasticSection2d::ElasticSection2d
-(int tag, double EA_in, double EI_in)
-:SectionForceDeformation(tag, SEC_TAG_Elastic2d),
- E(1), A(EA_in), I(EI_in),
- e(2), eCommit(2)
-{
-    if (A <= 0.0)  {
-      opserr << "ElasticSection2d::ElasticSection2d -- Input EA <= 0.0 ... setting EA to 1.0\n";
-      A = 1.0;
-    }
-	
-    if (I <= 0.0)  {
-      opserr << "ElasticSection2d::ElasticSection2d -- Input EI <= 0.0 ... setting EI to 1.0\n";
-      I = 1.0;
-    }
 	
     if (code(0) != SECTION_RESPONSE_P)
     {
@@ -145,7 +108,7 @@ ElasticSection2d::revertToStart(void)
 }
 
 int
-ElasticSection2d::setTrialSectionDeformation (const Vector &def)
+ElasticSection2d::setTrialSectionDeformation(const Vector &def)
 {
     e = def;
 
@@ -153,13 +116,13 @@ ElasticSection2d::setTrialSectionDeformation (const Vector &def)
 }
 
 const Vector &
-ElasticSection2d::getSectionDeformation (void)
+ElasticSection2d::getSectionDeformation(void)
 {
     return e;
 }
 
 const Vector &
-ElasticSection2d::getStressResultant (void)
+ElasticSection2d::getStressResultant(void)
 {
   s(0) = E*A*e(0);
   s(1) = E*I*e(1);    
@@ -186,7 +149,7 @@ ElasticSection2d::getInitialTangent(void)
 }
 
 const Matrix &
-ElasticSection2d::getSectionFlexibility (void)
+ElasticSection2d::getSectionFlexibility(void)
 {
   ks(0,0) = 1.0/(E*A);
   ks(1,1) = 1.0/(E*I);
@@ -204,7 +167,7 @@ ElasticSection2d::getInitialFlexibility(void)
 }
 
 SectionForceDeformation*
-ElasticSection2d::getCopy ()
+ElasticSection2d::getCopy(void)
 {
     // Make a copy of the hinge
     ElasticSection2d *theCopy =
@@ -216,13 +179,13 @@ ElasticSection2d::getCopy ()
 }
 
 const ID&
-ElasticSection2d::getType ()
+ElasticSection2d::getType(void)
 {
     return code;
 }
 
 int
-ElasticSection2d::getOrder () const
+ElasticSection2d::getOrder(void) const
 {
     return 2;
 }
@@ -254,7 +217,7 @@ ElasticSection2d::sendSelf(int commitTag, Channel &theChannel)
 
 int
 ElasticSection2d::recvSelf(int commitTag, Channel &theChannel,
-					 FEM_ObjectBroker &theBroker)
+			   FEM_ObjectBroker &theBroker)
 {
 	int res = 0;
 
@@ -308,8 +271,6 @@ ElasticSection2d::setParameter(const char **argv, int argc, Parameter &param)
 int
 ElasticSection2d::updateParameter(int paramID, Information &info)
 {
-  //opserr << "ES: " << paramID << endln;
-
   if (paramID == 1)
     E = info.theDouble;
   if (paramID == 2)

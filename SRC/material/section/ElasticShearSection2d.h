@@ -18,12 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
+// $Revision: 1.1 $
 // $Date: 2006-09-06 20:17:34 $
-// $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection2d.h,v $
+// $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticShearSection2d.h,v $
 
-#ifndef ElasticSection2d_h
-#define ElasticSection2d_h
+#ifndef ElasticShearSection2d_h
+#define ElasticShearSection2d_h
 
 #include <SectionForceDeformation.h>
 #include <Matrix.h>
@@ -33,18 +33,19 @@ class Channel;
 class FEM_ObjectBroker;
 class Information;
 
-class ElasticSection2d: public SectionForceDeformation
+class ElasticShearSection2d: public SectionForceDeformation
 {
  public:
-  ElasticSection2d(int tag, double E, double A, double I);
-  ElasticSection2d(void);    
-  ~ElasticSection2d(void);
+  ElasticShearSection2d(int tag, double E, double A, double I,
+			double G, double alpha);
+  ElasticShearSection2d(void);    
+  ~ElasticShearSection2d(void);
   
   int commitState(void);
   int revertToLastCommit(void);
   int revertToStart(void);
   
-  const char *getClassType(void) const {return "ElasticSection2d";};
+  const char *getClassType(void) const {return "ElasticShearSection2d";};
   
   int setTrialSectionDeformation(const Vector&);
   const Vector &getSectionDeformation(void);
@@ -62,9 +63,9 @@ class ElasticSection2d: public SectionForceDeformation
   int sendSelf(int commitTag, Channel &theChannel);
   int recvSelf(int commitTag, Channel &theChannel,
 	       FEM_ObjectBroker &theBroker);
-    
+  
   void Print(OPS_Stream &s, int flag =0);
-
+  
   int setParameter(const char **argv, int argc, Parameter &param);
   int updateParameter(int parameterID, Information &info);
   int activateParameter(int parameterID);
@@ -79,7 +80,7 @@ class ElasticSection2d: public SectionForceDeformation
   
  private:
   
-  double E, A, I;
+  double E, A, I, G, alpha;
   
   Vector e;			// section trial deformations
   Vector eCommit;

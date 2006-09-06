@@ -18,20 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-12-12 18:41:09 $
+// $Revision: 1.8 $
+// $Date: 2006-09-06 20:17:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection3d.cpp,v $
-                                                                        
-                                                                        
-///////////////////////////////////////////////////////
-// File:  ~/Src/element/hinge/ElasticSection3d.cpp
-//
-// Written: MHS
-// Date: May 2000
-//
-//
-// Purpose:  This file contains the function definitions
-// for the ElasticSection3d class.
 
 #include <ElasticSection3d.h>
 #include <Matrix.h>
@@ -39,6 +28,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <MatrixUtil.h>
+#include <Parameter.h>
 #include <stdlib.h>
 
 #include <classTags.h>
@@ -49,7 +39,7 @@ ID ElasticSection3d::code(4);
 
 ElasticSection3d::ElasticSection3d(void)
 :SectionForceDeformation(0, SEC_TAG_Elastic3d),
- E(0), A(0), Iz(0), Iy(0), G(0), J(0),
+ E(0.0), A(0.0), Iz(0.0), Iy(0.0), G(0.0), J(0.0),
  e(4), eCommit(4)
 {
     if (code(0) != SECTION_RESPONSE_P)
@@ -94,41 +84,6 @@ ElasticSection3d::ElasticSection3d
     
     if (J <= 0.0)  {
       opserr << "ElasticSection3d::ElasticSection3d -- Input J <= 0.0 ... setting J to 1.0\n";
-      J = 1.0;
-    }
-    
-    if (code(0) != SECTION_RESPONSE_P)
-    {
-	code(0) = SECTION_RESPONSE_P;	// P is the first quantity
-	code(1) = SECTION_RESPONSE_MZ;	// Mz is the second
-	code(2) = SECTION_RESPONSE_MY;	// My is the third 
-	code(3) = SECTION_RESPONSE_T;	// T is the fourth
-    }
-}
-
-ElasticSection3d::ElasticSection3d
-(int tag, double EA_in, double EIz_in, double EIy_in, double GJ_in)
-:SectionForceDeformation(tag, SEC_TAG_Elastic3d),
- E(1), A(EA_in), Iz(EIz_in), Iy(EIy_in), G(1), J(GJ_in),
- e(4), eCommit(4)
-{
-    if (A <= 0.0)  {
-      opserr << "ElasticSection3d::ElasticSection3d -- Input EA <= 0.0 ... setting EA to 1.0\n";
-      A = 1.0;
-    }
-
-    if (Iz <= 0.0)  {
-      opserr << "ElasticSection3d::ElasticSection3d -- Input EIz <= 0.0 ... setting EIz to 1.0\n";
-      Iz = 1.0;
-    }
-    
-    if (Iy <= 0.0)  {
-      opserr << "ElasticSection3d::ElasticSection3d -- Input EIy <= 0.0 ... setting EIy to 1.0\n";
-      Iy = 1.0;
-    }
-
-    if (J <= 0.0)  {
-      opserr << "ElasticSection3d::ElasticSection3d -- Input GJ <= 0.0 ... setting GJ to 1.0\n";
       J = 1.0;
     }
     
@@ -338,4 +293,107 @@ ElasticSection3d::Print(OPS_Stream &s, int flag)
     s << "\t G: " << G << endln;
     s << "\t J: " << J << endln;
   }
+}
+
+int
+ElasticSection3d::setParameter(const char **argv, int argc, Parameter &param)
+{
+  if (argc < 1)
+    return -1;
+
+  if (strcmp(argv[0],"E") == 0)
+    return param.addObject(1, this);
+
+  if (strcmp(argv[0],"A") == 0)
+    return param.addObject(2, this);
+
+  if (strcmp(argv[0],"Iz") == 0)
+    return param.addObject(3, this);
+
+  if (strcmp(argv[0],"Iy") == 0)
+    return param.addObject(4, this);
+
+  if (strcmp(argv[0],"G") == 0)
+    return param.addObject(5, this);
+
+  if (strcmp(argv[0],"J") == 0)
+    return param.addObject(6, this);
+
+  return -1;
+}
+
+int
+ElasticSection3d::updateParameter(int paramID, Information &info)
+{
+  if (paramID == 1)
+    E = info.theDouble;
+  if (paramID == 2)
+    A = info.theDouble;
+  if (paramID == 3)
+    Iz = info.theDouble;
+  if (paramID == 4)
+    Iy = info.theDouble;
+  if (paramID == 5)
+    G = info.theDouble;
+  if (paramID == 6)
+    J = info.theDouble;
+
+  return 0;
+}
+
+int
+ElasticSection3d::activateParameter(int paramID)
+{
+  parameterID = paramID;
+
+  return 0;
+}
+
+const Vector&
+ElasticSection3d::getStressResultantSensitivity(int gradNumber,
+						bool conditional)
+{
+  s.Zero();
+
+  if (parameterID == 1) { // E
+    s(0) = A*e(0);
+    s(1) = Iz*e(1);
+    s(2) = Iy*e(2);
+  }
+  if (parameterID == 2) // A
+    s(0) = E*e(0);
+  if (parameterID == 3) // Iz
+    s(1) = E*e(1);
+  if (parameterID == 4) // Iy
+    s(2) = E*e(2);
+  if (parameterID == 5) // G
+    s(3) = J*e(3);
+  if (parameterID == 6) // J
+    s(3) = G*e(3);
+
+  return s;
+}
+
+const Vector&
+ElasticSection3d::getSectionDeformationSensitivity(int gradNumber)
+{
+  s.Zero();
+
+  return s;
+}
+
+const Matrix&
+ElasticSection3d::getInitialTangentSensitivity(int gradNumber)
+{
+  ks.Zero();
+
+  return ks;
+}
+
+int
+ElasticSection3d::commitSensitivity(const Vector& sectionDeformationGradient,
+				    int gradNumber, int numGrads)
+{
+  // Nothing to commit, path independent
+  return 0;
 }

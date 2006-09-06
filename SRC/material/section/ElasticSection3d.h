@@ -18,20 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-08-03 23:49:46 $
+// $Revision: 1.8 $
+// $Date: 2006-09-06 20:17:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection3d.h,v $
-                                                                        
-                                                                        
-///////////////////////////////////////////////////////
-// File:  ~/Src/element/hinge/ElasticSection3d.h
-//
-// Written: MHS
-// Date: May 2000
-//
-//
-// Purpose:  This header file contains the prototype
-// for the ElasticSection class.
 
 #ifndef ElasticSection3d_h
 #define ElasticSection3d_h
@@ -43,53 +32,65 @@
 class Channel;
 class FEM_ObjectBroker;
 class Information;
+class Parameter;
 
-class ElasticSection3d: public SectionForceDeformation
+class ElasticSection3d : public SectionForceDeformation
 {
-  public:
-	ElasticSection3d (int tag, double E, double A, double Iz, 
-		double Iy, double G, double J);
-    ElasticSection3d (int tag, double EA, double EIz, double EIy, double GJ);
-	ElasticSection3d (void);
-    ~ElasticSection3d (void);
+ public:
+  ElasticSection3d(int tag, double E, double A, double Iz, 
+		   double Iy, double G, double J);
+  ElasticSection3d(void);
+  ~ElasticSection3d(void);
+  
+  const char *getClassType(void) const {return "ElasticSection3d";};
+  
+  int commitState(void);
+  int revertToLastCommit(void);
+  int revertToStart(void);
+  
+  int setTrialSectionDeformation(const Vector&);
+  const Vector &getSectionDeformation(void);
+  
+  const Vector &getStressResultant(void);
+  const Matrix &getSectionTangent(void);
+  const Matrix &getInitialTangent(void);
+  const Matrix &getSectionFlexibility(void);
+  const Matrix &getInitialFlexibility(void);
+  
+  SectionForceDeformation *getCopy(void);
+  const ID &getType(void);
+  int getOrder(void) const;
+  
+  int sendSelf(int commitTag, Channel &theChannel);
+  int recvSelf(int commitTag, Channel &theChannel,
+	       FEM_ObjectBroker &theBroker);
+  
+  void Print(OPS_Stream &s, int flag = 0);
+  
+  int setParameter(const char **argv, int argc, Parameter &param);
+  int updateParameter(int parameterID, Information &info);
+  int activateParameter(int parameterID);
+  const Vector& getStressResultantSensitivity(int gradNumber,
+					      bool conditional);
+  const Vector& getSectionDeformationSensitivity(int gradNumber);
+  const Matrix& getInitialTangentSensitivity(int gradNumber);
+  int commitSensitivity(const Vector& sectionDeformationGradient,
+			int gradNumber, int numGrads);
 
-    const char *getClassType(void) const {return "ElasticSection3d";};
+ protected:
+  
+ private:
+  
+  double E, A, Iz, Iy, G, J;
+  
+  Vector e;			// section trial deformations
+  Vector eCommit;
+  
+  static Vector s;
+  static Matrix ks;
+  static ID code;
 
-    int commitState (void);
-    int revertToLastCommit (void);
-    int revertToStart (void);
-
-    int setTrialSectionDeformation (const Vector&);
-    const Vector &getSectionDeformation (void);
-
-    const Vector &getStressResultant (void);
-    const Matrix &getSectionTangent (void);
-    const Matrix &getInitialTangent (void);
-    const Matrix &getSectionFlexibility (void);
-    const Matrix &getInitialFlexibility(void);
-    
-    SectionForceDeformation *getCopy (void);
-    const ID &getType (void);
-    int getOrder (void) const;
-    
-    int sendSelf (int commitTag, Channel &theChannel);
-    int recvSelf (int commitTag, Channel &theChannel,
-		  FEM_ObjectBroker &theBroker);
-    
-    void Print (OPS_Stream &s, int flag = 0);
-
-  protected:
-
-  private:
-   
-    double E, A, Iz, Iy, G, J;
-
-    Vector e;			// section trial deformations
-    Vector eCommit;
-
-    static Vector s;
-    static Matrix ks;
-    static ID code;
+  int parameterID;
 };
 
 #endif
