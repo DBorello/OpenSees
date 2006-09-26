@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-09-01 00:49:09 $
+// $Revision: 1.4 $
+// $Date: 2006-09-26 21:29:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/mpiMain.cpp,v $
 
 /* 
@@ -35,7 +35,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: mpiMain.cpp,v 1.3 2006-09-01 00:49:09 fmk Exp $
+ * RCS: @(#) $Id: mpiMain.cpp,v 1.4 2006-09-26 21:29:35 fmk Exp $
  */
 
 extern "C" {
@@ -53,7 +53,7 @@ extern "C" {
  */
 
 #ifdef _KAI
-extern "C" int matherr();
+//extern "C" int matherr();
 #endif
 
 #ifdef _UNIX

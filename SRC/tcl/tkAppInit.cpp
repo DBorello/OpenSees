@@ -10,7 +10,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkAppInit.cpp,v 1.4 2006-03-24 20:11:59 fmk Exp $
+ * RCS: @(#) $Id: tkAppInit.cpp,v 1.5 2006-09-26 21:29:35 fmk Exp $
  */
 
 extern "C" {
@@ -30,8 +30,8 @@ Tk_MainOpenSees(int argc, char **argv, Tcl_AppInitProc *appInitProc, Tcl_Interp 
  */
 
 #ifdef _UNIX
-extern "C" int matherr();
-int *tclDummyMathPtr = (int *) matherr;
+//extern "C" int matherr();
+//int *tclDummyMathPtr = (int *) matherr;
 #endif
 
 

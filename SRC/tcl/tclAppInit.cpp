@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2006-08-23 23:36:28 $
+// $Revision: 1.9 $
+// $Date: 2006-09-26 21:29:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/tclAppInit.cpp,v $
 
 
@@ -36,7 +36,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclAppInit.cpp,v 1.8 2006-08-23 23:36:28 fmk Exp $
+ * RCS: @(#) $Id: tclAppInit.cpp,v 1.9 2006-09-26 21:29:35 fmk Exp $
  */
 
 extern "C" {
@@ -52,7 +52,7 @@ extern "C" {
  */
 
 #ifdef _UNIX
-extern "C" int matherr();
+//extern "C" int matherr();
 //int *tclDummyMathPtr = (int *) matherr;
 #endif
 
