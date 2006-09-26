@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-09-05 22:59:03 $
+// $Revision: 1.7 $
+// $Date: 2006-09-26 18:38:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/TclDispBeamColumnCommand.cpp,v $
                                                                         
 // Written: MHS
@@ -50,10 +50,10 @@
 #include <UserDefinedHingeIntegration.h>
 #include <DistHingeIntegration.h>
 
-#include <TrapezoidalBeamIntegration.h>
-#include <FixedLocationBeamIntegration.h>
-#include <LowOrderBeamIntegration.h>
-#include <MidDistanceBeamIntegration.h>
+//#include <TrapezoidalBeamIntegration.h>
+//#include <FixedLocationBeamIntegration.h>
+//#include <LowOrderBeamIntegration.h>
+//#include <MidDistanceBeamIntegration.h>
 
 #include <ElasticSection2d.h>
 #include <ElasticSection3d.h>
@@ -364,8 +364,8 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
       beamIntegr = new RadauBeamIntegration();
     else if (strcmp(argv[6],"NewtonCotes") == 0)
       beamIntegr = new NewtonCotesBeamIntegration();
-    else if (strcmp(argv[6],"Trapezoidal") == 0)
-      beamIntegr = new TrapezoidalBeamIntegration();
+    //else if (strcmp(argv[6],"Trapezoidal") == 0)
+    //  beamIntegr = new TrapezoidalBeamIntegration();
     else {
       opserr << "ERROR: invalid integration type: " << argv[6] << endln;
       return TCL_ERROR;
@@ -738,8 +738,8 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
       otherBeamInt = new RadauBeamIntegration();
     else if (strcmp(argv[7],"NewtonCotes") == 0)
       otherBeamInt = new NewtonCotesBeamIntegration();
-    else if (strcmp(argv[7],"Trapezoidal") == 0)
-      otherBeamInt = new TrapezoidalBeamIntegration();
+    //else if (strcmp(argv[7],"Trapezoidal") == 0)
+    //  otherBeamInt = new TrapezoidalBeamIntegration();
     else {
       opserr << "ERROR: invalid integration type: " << argv[7] << endln;
       return TCL_ERROR;
@@ -900,6 +900,7 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
       sections[i] = theSection;
     }
     
+    /*
     FixedLocationBeamIntegration beamIntegr(nIP, pts);
 
     if (ndm == 2)
@@ -908,7 +909,8 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
     else
       theElement = new DispBeamColumn3d(eleTag, iNode, jNode, nIP, sections,
 					*theTransf3d);
-    
+					*/
+
     delete [] sections;
   }
 
@@ -976,7 +978,7 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
       }
       sections[i] = theSection;
     }
-    
+    /*
     LowOrderBeamIntegration beamIntegr(nIP, pts, nc, wts);
 
     if (ndm == 2)
@@ -985,7 +987,8 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
     else
       theElement = new DispBeamColumn3d(eleTag, iNode, jNode, nIP, sections,
 					*theTransf3d);
-    
+					*/
+
     delete [] sections;
   }
 
@@ -1040,6 +1043,7 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
       sections[i] = theSection;
     }
     
+    /*
     MidDistanceBeamIntegration beamIntegr(nIP, pts);
 
     if (ndm == 2)
@@ -1048,7 +1052,8 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
     else
       theElement = new DispBeamColumn3d(eleTag, iNode, jNode, nIP, sections,
 					*theTransf3d);
-    
+					*/
+
     delete [] sections;
   }
 
