@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2005-12-15 00:30:38 $
+// $Revision: 1.4 $
+// $Date: 2006-09-26 18:22:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CrdTransf.cpp,v $
 
 
@@ -59,7 +59,9 @@ CrdTransf::getBasicDisplSensitivity(int gradNumber)
 }
 
 const Vector &
-CrdTransf::getGlobalResistingForceShapeSensitivity(const Vector &pb, const Vector &p0)
+CrdTransf::getGlobalResistingForceShapeSensitivity(const Vector &pb,
+						   const Vector &p0,
+						   int gradNumber)
 {
     opserr << "ERROR CrdTransf::getGlobalResistingForceSensitivity() - has not been"
         << " implemented yet for the chosen transformation." << endln;

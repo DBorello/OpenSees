@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.8 $
-// $Date: 2005-12-15 00:30:38 $
+// $Revision: 1.9 $
+// $Date: 2006-09-26 18:22:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf2d.h,v $
 
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
@@ -61,17 +61,24 @@ public:
     int revertToLastCommit(void);        
     int revertToStart(void);
     
+// AddingSensitivity:BEGIN //////////////////////////////////
+    const Vector &getBasicDisplSensitivity (int gradNumber);
+    const Vector &getGlobalResistingForceShapeSensitivity(const Vector &pb,
+							  const Vector &p0,
+							  int gradNumber = 0);
+    const Vector &getBasicTrialDispShapeSensitivity(void);
+    bool isShapeSensitivity(void);
+    double getdLdh(void);
+    double getd1overLdh(void);
+// AddingSensitivity:END //////////////////////////////////
+
     const Vector &getBasicTrialDisp(void);
     const Vector &getBasicIncrDisp(void);
     const Vector &getBasicIncrDeltaDisp(void);
-	const Vector &getBasicTrialVel(void);
-	const Vector &getBasicTrialAccel(void);
+    const Vector &getBasicTrialVel(void);
+    const Vector &getBasicTrialAccel(void);
     
-    // AddingSensitivity:BEGIN //////////////////////////////////
-    const Vector &getBasicDisplSensitivity(int gradNumber);
-    const Vector &getGlobalResistingForceShapeSensitivity(const Vector &basicForce, const Vector &p0);
-    const Vector &getBasicTrialDispShapeSensitivity(void);
-    // AddingSensitivity:END //////////////////////////////////
+
 
     const Vector &getGlobalResistingForce(const Vector &basicForce, const Vector &p0);
     const Matrix &getGlobalStiffMatrix(const Matrix &basicStiff, const Vector &basicForce);

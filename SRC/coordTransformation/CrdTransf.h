@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2005-12-15 00:30:38 $
+// $Revision: 1.5 $
+// $Date: 2006-09-26 18:22:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CrdTransf.h,v $
 
 
@@ -72,12 +72,17 @@ public:
     
     // AddingSensitivity:BEGIN //////////////////////////////////
     virtual const Vector &getBasicDisplSensitivity(int gradNumber);
-    virtual const Vector &getGlobalResistingForceShapeSensitivity(const Vector &basicForce, const Vector &uniformLoad);
+    //virtual const Vector &getGlobalResistingForceShapeSensitivity(const Vector &basicForce, const Vector &uniformLoad);
+    virtual const Vector &getGlobalResistingForceShapeSensitivity(const Vector &pb, const Vector &p0, int gradNumber);
     virtual const Vector &getBasicTrialDispShapeSensitivity(void);
+    virtual bool isShapeSensitivity(void) {return false;}
+    virtual double getdLdh(void) {return 0.0;}
+    virtual double getd1overLdh(void) {return 0.0;}
     // AddingSensitivity:END //////////////////////////////////
     
     virtual const Vector &getGlobalResistingForce(const Vector &basicForce, const Vector &uniformLoad) = 0;
     virtual const Matrix &getGlobalStiffMatrix(const Matrix &basicStiff, const Vector &basicForce) = 0;
+
     virtual const Matrix &getInitialGlobalStiffMatrix(const Matrix &basicStiff) = 0;
     
     // functions used in post-processing only    
