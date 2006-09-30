@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2006-09-05 23:24:12 $
+// $Revision: 1.22 $
+// $Date: 2006-09-30 19:27:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 #include <math.h>
@@ -2564,8 +2564,8 @@ ForceBeamColumn2d::commitSensitivity(int gradNumber, int numGrads)
     const Vector &dsdh = sections[i]->getStressResultantSensitivity(gradNumber,true);
     ds -= dsdh;
 
-    for (int j = 0; j < order; j++) {
-      switch (code(j)) {
+    for (int jj = 0; jj < order; jj++) {
+      switch (code(jj)) {
       case SECTION_RESPONSE_MZ:
 	ds(j) += dxLdh*(Se(1)+Se(2));
 	break;
@@ -2655,9 +2655,9 @@ ForceBeamColumn2d::computedqdh(int gradNumber)
     const Matrix &fs = sections[i]->getSectionFlexibility();
     dedh.addMatrixVector(0.0, fs, dsdh, 1.0);
 
-    for (int j = 0; j < order; j++) {
-      double dei = dedh(j)*wtL;
-      switch(code(j)) {
+    for (int jj = 0; jj < order; jj++) {
+      double dei = dedh(jj)*wtL;
+      switch(code(jj)) {
       case SECTION_RESPONSE_P:
 	dvdh(0) += dei; 
 	break;
@@ -2675,8 +2675,8 @@ ForceBeamColumn2d::computedqdh(int gradNumber)
     }
 
     const Vector &e = vs[i];
-    for (int j = 0; j < order; j++) {
-      switch(code(j)) {
+    for (int kk = 0; kk < order; kk++) {
+      switch(code(kk)) {
       case SECTION_RESPONSE_P:
 	dvdh(0) -= e(j)*dwtLdh;
 	break;
