@@ -200,6 +200,15 @@
 			<File
 				RelativePath="..\..\..\SRC\domain\component\DomainComponent.h">
 			</File>
+			<File
+				RelativePath="..\..\..\SRC\domain\component\Parameter.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\domain\component\Parameter.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\domain\component\TclParameterCommands.cpp">
+			</File>
 		</Filter>
 		<Filter
 			Name="load"
