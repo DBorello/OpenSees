@@ -203,6 +203,18 @@ SOURCE=..\..\..\SRC\domain\component\DomainComponent.cpp
 
 SOURCE=..\..\..\SRC\domain\component\DomainComponent.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\component\Parameter.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\component\Parameter.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\component\TclParameterCommands.cpp
+# End Source File
 # End Group
 # Begin Group "load"
 
