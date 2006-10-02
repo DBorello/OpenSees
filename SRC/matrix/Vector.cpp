@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2005-12-14 23:49:48 $
+// $Revision: 1.11 $
+// $Date: 2006-10-02 17:30:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.cpp,v $
                                                                         
                                                                         
-// File: ~/matrix/Vector.C
-//
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -1049,6 +1047,54 @@ Vector::operator/(const Matrix &M) const
 }
     
 	
+// Vector operator==(const Vector &V):
+//	The == operator checks the two vectors are of the same size if VECTOR_CHECK is defined.
+// 	Then returns 1 if all the components of the two vectors are equal and 0 otherwise.
+
+int 
+Vector::operator==(const Vector &V) const
+{
+#ifdef _G3DEBUG
+  if (sz != V.sz) {
+    opserr << "WARNING Vector::operator==(Vector):Vectors not of same sizes: " << sz << " != " << V.sz << endln;
+    return -1;
+  }
+#endif
+
+  double *dataThis = theData;
+  double *dataV = V.theData;
+
+  for (int i=0; i<sz; i++)
+    if (*dataThis++ != *dataV++)
+      return 0;
+
+  return 1;
+}
+
+
+// Vector operator!=(const Vector &V):
+//	The != operator checks the two vectors are of the same size if VECTOR_CHECK is defined.
+// 	Then returns 1 if any of the components of the two vectors are unequal and 0 otherwise.
+
+int 
+Vector::operator!=(const Vector &V) const
+{
+#ifdef _G3DEBUG
+  if (sz != V.sz) {
+    opserr << "WARNING Vector::operator!=(Vector):Vectors not of same sizes: " << sz << " != " << V.sz << endln;
+    return -1;
+  }
+#endif
+
+  double *dataThis = theData;
+  double *dataV = V.theData;
+
+  for (int i=0; i<sz; i++)
+    if (*dataThis++ == *dataV++)
+      return 0;
+
+  return 1;
+}
 
 	
 

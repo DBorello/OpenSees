@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2005-12-14 23:49:48 $
+// $Revision: 1.10 $
+// $Date: 2006-10-02 17:30:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.h,v $
 
-                                                                        
-// File: ~/matrix/Vector.h
-//
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -48,7 +45,6 @@ class Message;
 class SystemOfEqn;
 
 #include <Tensor.h> // cannot use class as Tensor is itself defined in Tensor.h
-
 
 class Vector
 {
@@ -100,7 +96,10 @@ class Vector
     Vector operator+(const Vector &V) const;
     Vector operator-(const Vector &V) const;
     double operator^(const Vector &V) const;
-    Vector operator/(const Matrix &M) const;    
+    Vector operator/(const Matrix &M) const;
+
+    int operator==(const Vector &V) const;
+    int operator!=(const Vector &V) const;
 
     // methods added by Remo
     int  Assemble(const Vector &V, int init_row, double fact = 1.0);
