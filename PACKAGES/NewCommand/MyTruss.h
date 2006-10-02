@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-06-14 18:50:30 $
+// $Revision: 1.2 $
+// $Date: 2006-10-02 20:12:32 $
 // $Source: /usr/local/cvs/OpenSees/PACKAGES/NewCommand/MyTruss.h,v $
                                                                         
 #ifndef MyTruss_h
@@ -91,7 +91,7 @@ class MyTruss : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(OPS_Stream &s, int flag =0);    
 
-    Response *setResponse(const char **argv, int argc, Information &eleInfo);
+    Response *setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &s);
     int getResponse(int responseID, Information &eleInformation);
 
   protected:

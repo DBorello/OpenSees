@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-06-14 18:50:31 $
+// $Revision: 1.2 $
+// $Date: 2006-10-02 20:12:32 $
 // $Source: /usr/local/cvs/OpenSees/PACKAGES/NewCommand/MyTrussPackage.cpp,v $
                                                                         
 // Written: fmk 
@@ -33,8 +33,8 @@
 #include <Domain.h>
 #include <TclModelBuilder.h>
 
-extern Domain theDomain;
-extern TclModelBuilder *theBuilder;
+static Domain *theDomain;
+static TclModelBuilder *theBuilder;
 
 static int OpenSees_MyTruss(ClientData clientData, 
 			    Tcl_Interp *interp, 
@@ -91,7 +91,7 @@ static int OpenSees_MyTruss(ClientData clientData,
     opserr << trussId << endln;
     return TCL_ERROR;
   }
-  if (theDomain.addElement(theTruss) == false) {
+  if (theDomain->addElement(theTruss) == false) {
     delete theTruss;
     opserr << "WARNING TclPlaneTruss - addTruss - could not add Truss to domain ";
     opserr << trussId << endln;
@@ -106,7 +106,7 @@ static int OpenSees_MyTruss(ClientData clientData,
 /*
  *----------------------------------------------------------------------
  *
- * mytruss_Init --
+ * mytruss
  *
  *	This is a package initialization procedure, which is called
  *	by Tcl when this package is to be added to an interpreter.
@@ -121,23 +121,31 @@ static int OpenSees_MyTruss(ClientData clientData,
  */
 
 extern "C" int
-Mytruss_Init(Tcl_Interp *interp)
+myTruss(ClientData clientData, 
+	Tcl_Interp *interp, 
+	int argc, 
+	TCL_Char **argv, 
+	Domain *theD, 
+	TclModelBuilder *theB)
 {
-    int code;
+  int code;
 
-    if (Tcl_InitStubs(interp, TCL_VERSION, 1) == NULL) {
-	return TCL_ERROR;
-    }
-    
-    // add the package to list of available packages
-    code = Tcl_PkgProvide(interp, "myTruss", "1.0");
-    if (code != TCL_OK) {
-	return code;
-    }
+  theBuilder = theB;
+  theDomain = theD;
 
-    // add the myTruss command to the interpreter
-    Tcl_CreateCommand(interp, "myTruss", OpenSees_MyTruss, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-
-    // done
-    return TCL_OK;
+  if (Tcl_InitStubs(interp, TCL_VERSION, 1) == NULL) {
+    return TCL_ERROR;
+  }
+  
+  // add the package to list of available packages
+  code = Tcl_PkgProvide(interp, "myTruss", "1.0");
+  if (code != TCL_OK) {
+    return code;
+  }
+  
+  // add the myTruss command to the interpreter
+  Tcl_CreateCommand(interp, "myTruss", OpenSees_MyTruss, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+  
+  // done
+  return TCL_OK;
 }
