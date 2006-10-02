@@ -2,8 +2,8 @@
 #
 # purpose: example1 in the manual with user defined element
 #
-# $Revision: 1.2 $
-# $Date: 2005-06-14 18:55:39 $
+# $Revision: 1.3 $
+# $Date: 2006-10-02 20:11:43 $
 # $Source: /usr/local/cvs/OpenSees/PACKAGES/NewElement/example2.tcl,v $
 
 
@@ -47,7 +47,7 @@ numberer RCM
 analysis Static 
 
 # create a Recorder object for the nodal displacements at node 4
-recorder Node Example.out disp -load -nodes 4 -dof 1 2
+recorder Node -file Example.out -load -nodes 4 -dof 1 2 disp
 
 # perform the analysis
 analyze 1

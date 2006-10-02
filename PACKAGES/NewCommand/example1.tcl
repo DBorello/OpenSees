@@ -2,8 +2,8 @@
 #
 # purpose: example1 in the manual with existing truss element
 #
-# $Revision: 1.1 $
-# $Date: 2005-06-14 18:50:31 $
+# $Revision: 1.2 $
+# $Date: 2006-10-02 20:13:46 $
 # $Source: /usr/local/cvs/OpenSees/PACKAGES/NewCommand/example1.tcl,v $
 
 #create the ModelBuilder object
@@ -46,7 +46,7 @@ numberer RCM
 analysis Static 
 
 # create a Recorder object for the nodal displacements at node 4
-recorder Node Example.out disp -load -nodes 4 -dof 1 2
+recorder Node -file Example.out -load -nodes 4 -dof 1 2 disp
 
 # perform the analysis
 analyze 1

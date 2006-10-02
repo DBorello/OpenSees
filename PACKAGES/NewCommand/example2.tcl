@@ -2,12 +2,9 @@
 #
 # purpose: example1 in the manual with user defined element
 #
-# $Revision: 1.1 $
-# $Date: 2005-06-14 18:50:31 $
+# $Revision: 1.2 $
+# $Date: 2006-10-02 20:13:46 $
 # $Source: /usr/local/cvs/OpenSees/PACKAGES/NewCommand/example2.tcl,v $
-
-#use package MyTruss
-load ./MyTruss.so myTruss
 
 #create the ModelBuilder object
 model basic -ndm 2 -ndf 2
@@ -22,6 +19,8 @@ node 4  72.0 96.0
 
 # add material - command: material <matType> matID <matArgs>
 uniaxialMaterial Elastic 1 3000
+
+loadPackage myTruss
 
 # add truss elements - command: truss trussID node1 node2 A matID
 myTruss 1 1 4 10.0 1
@@ -49,7 +48,7 @@ numberer RCM
 analysis Static 
 
 # create a Recorder object for the nodal displacements at node 4
-recorder Node Example.out disp -load -nodes 4 -dof 1 2
+recorder Node -file Example.out -load -nodes 4 -dof 1 2 disp
 
 # perform the analysis
 analyze 1
@@ -57,4 +56,3 @@ analyze 1
 # print the results at node and at all elements
 print node 4
 print ele
-playback 1
