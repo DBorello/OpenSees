@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-12-06 22:20:18 $
+// $Revision: 1.2 $
+// $Date: 2006-10-02 20:23:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenRowLinSOE.cpp,v $
                                                                         
 // Written: fmk 
@@ -555,7 +555,7 @@ DistributedSparseGenRowLinSOE::addB(const Vector &v, const ID &id, double fact)
 	for (int i=0; i<idSize; i++) {
 	    int pos = id(i);
 	    if (pos <n && pos >= 0)
-		B[pos] -= v(i) * fact;
+		B[pos] -= v(i);
 	}
     } else {
 	for (int i=0; i<idSize; i++) {

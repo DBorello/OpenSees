@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:02:02 $
+// $Revision: 1.3 $
+// $Date: 2006-10-02 20:23:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/itpack/ItpackLinSOE.cpp,v $
                                                                         
                                                                         
@@ -319,7 +319,7 @@ ItpackLinSOE::addB(const Vector &v, const ID &id, double fact)
     for (int i=0; i<idSize; i++) {
       int pos = id(i);
       if (pos <size && pos >= 0)
-	B[pos] -= v(i) * fact;
+	B[pos] -= v(i);
     }
   }
   else {

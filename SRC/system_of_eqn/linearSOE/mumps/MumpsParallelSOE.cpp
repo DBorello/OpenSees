@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-04-13 20:58:07 $
+// $Revision: 1.3 $
+// $Date: 2006-10-02 20:23:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsParallelSOE.cpp,v $
                                                                         
 // Written: fmk 
@@ -378,7 +378,7 @@ MumpsParallelSOE::addB(const Vector &v, const ID &id, double fact)
     for (int i=0; i<idSize; i++) {
       int pos = id(i);
       if (pos <size && pos >= 0)
-	myB[pos] -= v(i) * fact;
+	myB[pos] -= v(i);
     }
   } else {
     for (int i=0; i<idSize; i++) {
