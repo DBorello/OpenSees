@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2006-09-30 19:27:17 $
+// $Revision: 1.23 $
+// $Date: 2006-10-02 17:23:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 #include <math.h>
@@ -2544,7 +2544,8 @@ ForceBeamColumn2d::commitSensitivity(int gradNumber, int numGrads)
     double dxLdh  = dptsdh[i];    
 
     Vector ds(workArea, order);
-    for (int j = 0; j < order; j++) {
+    int j;
+    for (j = 0; j < order; j++) {
       switch(code(j)) {
       case SECTION_RESPONSE_P:
 	ds(j) = dqdh(0);
@@ -2564,8 +2565,8 @@ ForceBeamColumn2d::commitSensitivity(int gradNumber, int numGrads)
     const Vector &dsdh = sections[i]->getStressResultantSensitivity(gradNumber,true);
     ds -= dsdh;
 
-    for (int jj = 0; jj < order; jj++) {
-      switch (code(jj)) {
+    for (j = 0; jj < order; jj++) {
+      switch (code(j)) {
       case SECTION_RESPONSE_MZ:
 	ds(j) += dxLdh*(Se(1)+Se(2));
 	break;
@@ -2637,8 +2638,9 @@ ForceBeamColumn2d::computedqdh(int gradNumber)
     // Add sensitivity wrt element loads
     if (numEleLoads > 0)
       this->computeSectionForceSensitivity(dsdh, i, gradNumber);
-
-    for (int j = 0; j < order; j++) {
+    
+    int j;
+    for (j = 0; j < order; j++) {
       switch (code(j)) {
       case SECTION_RESPONSE_MZ:
 	dsdh(j) -= dxLdh*(Se(1)+Se(2));
@@ -2655,9 +2657,9 @@ ForceBeamColumn2d::computedqdh(int gradNumber)
     const Matrix &fs = sections[i]->getSectionFlexibility();
     dedh.addMatrixVector(0.0, fs, dsdh, 1.0);
 
-    for (int jj = 0; jj < order; jj++) {
-      double dei = dedh(jj)*wtL;
-      switch(code(jj)) {
+    for (j = 0; j < order; j++) {
+      double dei = dedh(j)*wtL;
+      switch(code(j)) {
       case SECTION_RESPONSE_P:
 	dvdh(0) += dei; 
 	break;
@@ -2675,8 +2677,8 @@ ForceBeamColumn2d::computedqdh(int gradNumber)
     }
 
     const Vector &e = vs[i];
-    for (int kk = 0; kk < order; kk++) {
-      switch(code(kk)) {
+    for (j = 0; j < order; j++) {
+      switch(code(j)) {
       case SECTION_RESPONSE_P:
 	dvdh(0) -= e(j)*dwtLdh;
 	break;
