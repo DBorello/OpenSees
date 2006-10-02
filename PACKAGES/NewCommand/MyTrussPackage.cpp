@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-10-02 20:12:32 $
+// $Revision: 1.3 $
+// $Date: 2006-10-02 22:24:32 $
 // $Source: /usr/local/cvs/OpenSees/PACKAGES/NewCommand/MyTrussPackage.cpp,v $
                                                                         
 // Written: fmk 
@@ -35,6 +35,13 @@
 
 static Domain *theDomain;
 static TclModelBuilder *theBuilder;
+
+
+#ifdef _WIN32
+#define DllExport _declspec(dllexport)
+#else
+#define DllExport
+#endif
 
 static int OpenSees_MyTruss(ClientData clientData, 
 			    Tcl_Interp *interp, 
@@ -120,7 +127,7 @@ static int OpenSees_MyTruss(ClientData clientData,
  *----------------------------------------------------------------------
  */
 
-extern "C" int
+extern "C" DllExport int 
 myTruss(ClientData clientData, 
 	Tcl_Interp *interp, 
 	int argc, 
