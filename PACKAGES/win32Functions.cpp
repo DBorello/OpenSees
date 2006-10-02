@@ -8,6 +8,9 @@
 
 #include <windows.h>
 
+#include <SimulationInformation.h>
+SimulationInformation simulationInfo;
+
 #define DllExport _declspec(dllexport)
 
 BOOL APIENTRY DllMain( HANDLE hModule, 
@@ -23,4 +26,11 @@ extern "C" DllExport
 void setGlobalPointers(OPS_Stream *theErrorStreamPtr)
 {
 	opserrPtr = theErrorStreamPtr;
+}
+
+int __cdecl OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+
+  Tcl_Exit(0);
+  return 0;
 }
