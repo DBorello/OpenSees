@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.32 $
-// $Date: 2006-09-05 23:11:08 $
+// $Revision: 1.33 $
+// $Date: 2006-10-02 20:09:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -93,12 +93,15 @@
 #include <HystereticBackbone.h>
 #endif
 
+#include <packages.h>
+
 //
 // SOME STATIC POINTERS USED IN THE FUNCTIONS INVOKED BY THE INTERPRETER
 //
 
 static Domain *theTclDomain =0;
 static TclModelBuilder *theTclBuilder =0;
+
 extern LoadPattern *theTclLoadPattern;
 extern MultiSupportPattern *theTclMultiSupportPattern;
 static int eleArgStart = 0;
@@ -323,6 +326,12 @@ extern int
 Tcl_RemoveLimitCurve(Tcl_Interp *interp);
 #endif
 
+
+
+int
+TclModelBuilder_Package(ClientData clientData, Tcl_Interp *interp, int argc, 
+			  TCL_Char **argv);
+
 //
 // CLASS CONSTRUCTOR & DESTRUCTOR
 //
@@ -501,6 +510,10 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   ///new command for LimitCurve
   Tcl_AddLimitCurveCommand(interp, &theDomain);
 #endif
+
+  Tcl_CreateCommand(interp, "loadPackage", TclModelBuilder_Package,
+		    (ClientData)NULL, NULL);
+
 
   // set the static pointers in this file
   theTclBuilder = this;
@@ -2901,3 +2914,37 @@ TclModelBuilder::getDamageModel(int tag)
   DamageModel *result = (DamageModel *)mc;
   return result;
 }
+
+int 
+TclModelBuilder_Package(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  
+  void *libHandle;
+  int (*funcPtr)(ClientData clientData, Tcl_Interp *interp,  int argc, 
+		 TCL_Char **argv, Domain*, TclModelBuilder*);       
+  
+  const char *funcName = 0;
+  int res = -1;
+  
+  if (argc == 2) {
+    res = getLibraryFunction(argv[1], argv[1], &libHandle, (void **)&funcPtr);
+  } else if (argc == 3) {
+    res = getLibraryFunction(argv[1], argv[2], &libHandle, (void **)&funcPtr);
+  }
+
+  if (res == 0) {
+    int result = (*funcPtr)(clientData, interp,
+			    argc, 
+			    argv,
+			    theTclDomain,
+			    theTclBuilder);	
+  } else {
+    opserr << "Error: Could not find function: " << argv[1] << res << endln;
+    return -1;
+  }
+
+  return res;
+}
+
+
+
