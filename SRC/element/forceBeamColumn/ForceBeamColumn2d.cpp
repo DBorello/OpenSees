@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2006-10-02 17:23:31 $
+// $Revision: 1.24 $
+// $Date: 2006-10-02 18:32:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 #include <math.h>
@@ -2565,7 +2565,7 @@ ForceBeamColumn2d::commitSensitivity(int gradNumber, int numGrads)
     const Vector &dsdh = sections[i]->getStressResultantSensitivity(gradNumber,true);
     ds -= dsdh;
 
-    for (j = 0; jj < order; jj++) {
+    for (j = 0; j < order; j++) {
       switch (code(j)) {
       case SECTION_RESPONSE_MZ:
 	ds(j) += dxLdh*(Se(1)+Se(2));
