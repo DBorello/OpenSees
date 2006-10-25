@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-11-23 23:43:47 $
+// $Revision: 1.5 $
+// $Date: 2006-10-25 20:58:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.cpp,v $
                                                                         
                                                                         
@@ -44,6 +44,8 @@
 static int GetHostAddr(char *host, char *IntAddr);
 static void inttoa(unsigned int no, char *string, int *cnt);
 
+static int numSockets = 0;
+
 // TCP_Socket(unsigned int other_Port, char *other_InetAddr): 
 // 	constructor to open a socket with my inet_addr and with a port number 
 //	given by the OS. 
@@ -51,6 +53,10 @@ static void inttoa(unsigned int no, char *string, int *cnt);
 TCP_Socket::TCP_Socket()
   :myPort(0), connectType(0)
 {
+  if (numSockets == 0)
+    startup_socket();
+  numSockets++;
+
     // set up my_Addr 
     bzero((char *) &my_Addr, sizeof(my_Addr));    
     my_Addr.addr_in.sin_family = AF_INET;
@@ -89,6 +95,11 @@ TCP_Socket::TCP_Socket()
 TCP_Socket::TCP_Socket(unsigned int port) 
   :myPort(0), connectType(0)
 {
+
+  if (numSockets == 0)
+    startup_socket();
+  numSockets++;
+
     // set up my_Addr.addr_in with address given by port and internet address of
     // machine on which the process that uses this routine is running.
 
@@ -130,6 +141,10 @@ TCP_Socket::TCP_Socket(unsigned int port)
 TCP_Socket::TCP_Socket(unsigned int other_Port, char *other_InetAddr)
   :myPort(0), connectType(1)
 {
+  if (numSockets == 0)
+    startup_socket();
+  numSockets++;
+
     // set up remote address
     bzero((char *) &other_Addr.addr_in, sizeof(other_Addr.addr_in));
     other_Addr.addr_in.sin_family      = AF_INET;
@@ -177,6 +192,11 @@ TCP_Socket::~TCP_Socket()
   #else
     close(sockfd);
   #endif
+
+  numSockets--;
+  if (numSockets == 0)
+    cleanup_socket();
+
 }
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-10-15 00:31:47 $
+// $Revision: 1.4 $
+// $Date: 2006-10-25 20:58:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/UDP_Socket.cpp,v $
                                                                         
                                                                         
@@ -43,6 +43,8 @@
 static int GetHostAddr(char *host, char *IntAddr);
 static void inttoa(unsigned int no, char *string, int *cnt);
 
+static int numSockets = 0;
+
 // UDP_Socket(): 
 //	constructor to open a socket with my inet_addr and with a port number 
 //	assigned by the OS from the available free port numbers.
@@ -50,6 +52,10 @@ static void inttoa(unsigned int no, char *string, int *cnt);
 UDP_Socket::UDP_Socket() 
   :sockfd(0), connectType(0), shadow_inetAddr(0), shadow_port(0) 
 {
+  if (numSockets == 0)
+    startup_socket();
+  numSockets++;
+
     // set up my_Addr 
     my_Addr.addr_in.sin_family = AF_INET;
     my_Addr.addr_in.sin_addr.s_addr = htonl(INADDR_ANY); 
@@ -79,6 +85,10 @@ UDP_Socket::UDP_Socket()
 UDP_Socket::UDP_Socket(unsigned int port) 
   :sockfd(0), connectType(0), shadow_inetAddr(0), shadow_port(0)
 {
+  if (numSockets == 0)
+    startup_socket();
+  numSockets++;
+
     // set up my_Addr.addr_in 
     my_Addr.addr_in.sin_family = AF_INET;
     my_Addr.addr_in.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -110,6 +120,10 @@ UDP_Socket::UDP_Socket(unsigned int port)
 UDP_Socket::UDP_Socket(unsigned int other_Port, char *other_InetAddr) 
 :sockfd(0), connectType(1), shadow_inetAddr(other_InetAddr), shadow_port(other_Port)
 {
+  if (numSockets == 0)
+    startup_socket();
+  numSockets++;
+
     // set up my_Addr.addr_in 
     my_Addr.addr_in.sin_family = AF_INET;
     my_Addr.addr_in.sin_addr.s_addr = htonl(INADDR_ANY); 
@@ -138,6 +152,9 @@ UDP_Socket::UDP_Socket(unsigned int other_Port, char *other_InetAddr)
 UDP_Socket::~UDP_Socket()
 {
     close(sockfd);
+  numSockets--;
+  if (numSockets == 0)
+    cleanup_socket();
 }
 
 
