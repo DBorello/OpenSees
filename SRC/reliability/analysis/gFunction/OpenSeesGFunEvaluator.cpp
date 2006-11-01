@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2006-09-05 23:36:48 $
+// $Revision: 1.11 $
+// $Date: 2006-11-01 00:12:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.cpp,v $
 
 
@@ -443,7 +443,7 @@ OpenSeesGFunEvaluator::rec_element_occurrence(char tempchar[100], bool createRec
 			line = 0;
 			col = sectionForceComponent+1;
 			if (createRecorder) {
-				sprintf(tclAssignment , "recorder Element %d -file %s.out -time section %d force",eleNumber, tempString, sectionNumber);
+				sprintf(tclAssignment , "recorder Element -ele %d -file %s.out -time section %d force",eleNumber, tempString, sectionNumber);
 				Tcl_Eval( theTclInterp, tclAssignment);
 			}
 		}
@@ -455,7 +455,7 @@ OpenSeesGFunEvaluator::rec_element_occurrence(char tempchar[100], bool createRec
 			line = 0;
 			col = sectionDeformationComponent+1;
 			if (createRecorder) {
-				sprintf(tclAssignment , "recorder Element %d -file %s.out -time section %d deformation",eleNumber, tempString, sectionNumber);
+				sprintf(tclAssignment , "recorder Element -ele %d -file %s.out -time section %d deformation",eleNumber, tempString, sectionNumber);
 				Tcl_Eval( theTclInterp, tclAssignment);
 			}
 		}
@@ -467,7 +467,7 @@ OpenSeesGFunEvaluator::rec_element_occurrence(char tempchar[100], bool createRec
 			line = 0;
 			col = sectionStiffnessComponent+1;
 			if (createRecorder) {
-				sprintf(tclAssignment , "recorder Element %d -file %s.out -time section %d stiffness",eleNumber, tempString, sectionNumber);
+				sprintf(tclAssignment , "recorder Element -ele %d -file %s.out -time section %d stiffness",eleNumber, tempString, sectionNumber);
 				Tcl_Eval( theTclInterp, tclAssignment);
 			}
 		}
@@ -478,7 +478,7 @@ OpenSeesGFunEvaluator::rec_element_occurrence(char tempchar[100], bool createRec
 			sprintf(tempString, "rec_element_%d_section_%d_fiber_%d_%d_%d_%d_stressStrain", eleNumber, sectionNumber, ya, yb, za, zb);
 			line = 0;
 			if (createRecorder) {
-				sprintf(tclAssignment , "recorder Element %d -file %s.out -time section %d fiber %d.%d %d.%d stressStrain",eleNumber, tempString, sectionNumber, ya, yb, za, zb);
+				sprintf(tclAssignment , "recorder Element -ele %d -file %s.out -time section %d fiber %d.%d %d.%d stressStrain",eleNumber, tempString, sectionNumber, ya, yb, za, zb);
 				Tcl_Eval( theTclInterp, tclAssignment);
 			}
 			if (strcmp(restString,"stress")==0) {
