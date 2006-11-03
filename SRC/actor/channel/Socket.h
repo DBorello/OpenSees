@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2005-11-23 23:43:47 $
+// $Revision: 1.7 $
+// $Date: 2006-11-03 18:24:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/Socket.h,v $
                                                                         
 // Written: fmk 11/95
@@ -65,22 +65,9 @@ extern "C" {
   typedef socklen_t socklen_type;
 #endif
 
-inline bool startup_socket()
-{
-  #ifdef _WIN32
-    WSADATA wsaData;
-    return WSAStartup(0x0002, &wsaData) == 0;
-  #else
-    return true;
-  #endif
-} 
-
-inline void cleanup_socket()
-{
-  #ifdef _WIN32
-    WSACleanup();
-  #endif
-}
+extern "C" int startup_sockets(void);
+extern "C" void cleanup_sockets(void);
+extern "C" int httpGet(const char *URL, const char *page, unsigned int port, char **dataPtr);
 
 #endif 
 
