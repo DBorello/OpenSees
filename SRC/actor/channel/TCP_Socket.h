@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-11-23 23:43:47 $
+// $Revision: 1.5 $
+// $Date: 2006-11-03 18:25:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.h,v $
                                                                         
                                                                         
@@ -47,7 +47,7 @@ class TCP_Socket : public Channel
   public:
     TCP_Socket();        
     TCP_Socket(unsigned int);    
-    TCP_Socket(unsigned int other_Port, char *other_InetAddr); 
+    TCP_Socket(unsigned int other_Port, const char *other_InetAddr); 
     ~TCP_Socket();
 
     char *addToProgram(void);
