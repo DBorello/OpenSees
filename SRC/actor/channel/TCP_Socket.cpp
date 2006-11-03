@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-10-25 20:58:24 $
+// $Revision: 1.6 $
+// $Date: 2006-11-03 18:24:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.cpp,v $
                                                                         
                                                                         
@@ -53,10 +53,17 @@ static int numSockets = 0;
 TCP_Socket::TCP_Socket()
   :myPort(0), connectType(0)
 {
+<<<<<<< TCP_Socket.cpp
+
+  // initilaize sockets
+  startup_sockets();
+
+=======
   if (numSockets == 0)
     startup_socket();
   numSockets++;
 
+>>>>>>> 1.5
     // set up my_Addr 
     bzero((char *) &my_Addr, sizeof(my_Addr));    
     my_Addr.addr_in.sin_family = AF_INET;
@@ -95,11 +102,18 @@ TCP_Socket::TCP_Socket()
 TCP_Socket::TCP_Socket(unsigned int port) 
   :myPort(0), connectType(0)
 {
+<<<<<<< TCP_Socket.cpp
+
+  // initilaize sockets
+  startup_sockets();
+
+=======
 
   if (numSockets == 0)
     startup_socket();
   numSockets++;
 
+>>>>>>> 1.5
     // set up my_Addr.addr_in with address given by port and internet address of
     // machine on which the process that uses this routine is running.
 
@@ -138,13 +152,20 @@ TCP_Socket::TCP_Socket(unsigned int port)
 //	given by the OS. Then to connect with a TCP_Socket whose address is
 //	given by other_Port and other_InetAddr. 
 
-TCP_Socket::TCP_Socket(unsigned int other_Port, char *other_InetAddr)
+
+TCP_Socket::TCP_Socket(unsigned int other_Port, const char *other_InetAddr)
   :myPort(0), connectType(1)
 {
+<<<<<<< TCP_Socket.cpp
+  // initilaize sockets
+  startup_sockets();
+
+=======
   if (numSockets == 0)
     startup_socket();
   numSockets++;
 
+>>>>>>> 1.5
     // set up remote address
     bzero((char *) &other_Addr.addr_in, sizeof(other_Addr.addr_in));
     other_Addr.addr_in.sin_family      = AF_INET;
@@ -192,11 +213,17 @@ TCP_Socket::~TCP_Socket()
   #else
     close(sockfd);
   #endif
+<<<<<<< TCP_Socket.cpp
+
+  // initilaize sockets
+  cleanup_sockets();
+=======
 
   numSockets--;
   if (numSockets == 0)
     cleanup_socket();
 
+>>>>>>> 1.5
 }
 
 
