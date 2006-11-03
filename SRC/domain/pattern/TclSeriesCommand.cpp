@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.13 $
-// $Date: 2005-12-15 00:36:19 $
+// $Revision: 1.14 $
+// $Date: 2006-11-03 18:30:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclSeriesCommand.cpp,v $
 
 // Written: fmk 
@@ -43,6 +43,7 @@
 #include <TriangleSeries.h>
 #include <PathTimeSeries.h>
 #include <PathSeries.h>
+#include <PeerMotion.h>
 #include <string.h>
 
 
@@ -188,6 +189,26 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
     }
 
     theSeries = new LinearSeries(cFactor);       	
+  }
+
+  else if ((strcmp(argv[0],"PeerDatabase") == 0) || (strcmp(argv[0],"PeerMotion") == 0)) {
+
+    if (argc < 5) {
+      opserr << "WARNING not enough TimeSeries args - ";
+      opserr << " PeerDatabase eqMotion station type factor\n";
+      cleanup(argv);
+      return 0;	
+    }	
+
+    double cFactor = 1.0;
+
+    if (Tcl_GetDouble(interp, argv[4], &cFactor) != TCL_OK) {
+      opserr << "WARNING invalid input: random process mean \n";
+      cleanup(argv);
+      return 0;
+    }
+    
+    theSeries = new PeerMotion(argv[1], argv[2], argv[3], cFactor);       	
   }
 
 
