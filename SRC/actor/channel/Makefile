@@ -1,6 +1,6 @@
 include ../../../Makefile.def
 
-OBJS	=	Channel.o TCP_Socket.o UDP_Socket.o 
+OBJS	=	Channel.o TCP_Socket.o UDP_Socket.o socket.o
 
 ifeq ($(PROGRAMMING_MODE), PARALLEL)
 
