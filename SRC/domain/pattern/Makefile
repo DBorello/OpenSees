@@ -7,7 +7,7 @@ OBJS       = EarthquakePattern.o PBowlLoading.o LinearSeries.o \
 	TimeSeriesIntegrator.o TrapezoidalTimeSeriesIntegrator.o \
 	DiscretizedRandomProcessSeries.o SimulatedRandomProcessSeries.o \
 	MultiSupportPattern.o TclSeriesCommand.o TclSeriesIntegratorCommand.o \
-	PulseSeries.o TriangleSeries.o
+	PulseSeries.o TriangleSeries.o PeerMotion.o
 
 # Compilation control
 
