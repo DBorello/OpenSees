@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-08-03 23:28:34 $
+// $Revision: 1.2 $
+// $Date: 2006-11-03 18:42:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/XmlFileStream.cpp,v $
 
 #include <XmlFileStream.h>
@@ -270,7 +270,7 @@ XmlFileStream::tag(const char *tagName, const char *value)
   // output the xml for it to the file
   numIndent++;
   this->indent();
-  theFile << "<" << tagName << ">" << value << "<" << tagName << "/>" << endln;
+  theFile << "<" << tagName << ">" << value << "</" << tagName << ">" << endln;
   numIndent--;
 
   attributeMode = false;
@@ -281,21 +281,26 @@ XmlFileStream::tag(const char *tagName, const char *value)
 int 
 XmlFileStream::endTag()
 {
-  if (attributeMode == true) {
-    theFile << "/>\n";
-    delete [] tags[numTag-1];
-    numTag--;
-  } else {
-    this->indent();
-    theFile << "</" << tags[numTag-1] << ">\n";
-    delete [] tags[numTag-1];
-    numTag--;
-  }    
+  if (numTag != 0) {
+    if (attributeMode == true) {
+      theFile << "/>\n";
+      delete [] tags[numTag-1];
+      numTag--;
+    } else {
+      this->indent();
+      theFile << "</" << tags[numTag-1] << ">\n";
+      delete [] tags[numTag-1];
+      numTag--;
+    }    
 
-  attributeMode = false;
-  numIndent--;
+    attributeMode = false;
+    numIndent--;
+    return 0;
+  }
 
-  return 0;
+  opserr << "XmlFileStream::endTag() - too many endTags have been called\n";
+  return -1;
+
 }
 
 int 
