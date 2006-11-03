@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-03-23 23:02:00 $
+// $Revision: 1.3 $
+// $Date: 2006-11-03 18:40:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel02.cpp,v $
                                                                       
 // Written: fmk
@@ -44,9 +44,10 @@
 Steel02::Steel02(int tag,
 		 double _Fy, double _E0, double _b,
 		 double _R0, double _cR1, double _cR2,
-		 double _a1, double _a2, double _a3, double _a4):
+		 double _a1, double _a2, double _a3, double _a4, double sigInit):
   UniaxialMaterial(tag, MAT_TAG_Steel02),
-  Fy(_Fy), E0(_E0), b(_b), R0(_R0), cR1(_cR1), cR2(_cR2), a1(_a1), a2(_a2), a3(_a3), a4(_a4)
+  Fy(_Fy), E0(_E0), b(_b), R0(_R0), cR1(_cR1), cR2(_cR2), a1(_a1), a2(_a2), a3(_a3), a4(_a4), 
+  sigini(sigInit)
 {
   konP = 0;
   kon = 0;
@@ -64,13 +65,18 @@ Steel02::Steel02(int tag,
   sigs0P = 0.0;
   epssrP = 0.0;
   sigsrP = 0.0;
+
+  if (sigini != 0.0) {
+	  epsP = sigini/E0;
+	  sigP = sigini;
+   } 
 }
 
 Steel02::Steel02(int tag,
 		 double _Fy, double _E0, double _b,
 		 double _R0, double _cR1, double _cR2):
   UniaxialMaterial(tag, MAT_TAG_Steel02),
-  Fy(_Fy), E0(_E0), b(_b), R0(_R0), cR1(_cR1), cR2(_cR2)
+  Fy(_Fy), E0(_E0), b(_b), R0(_R0), cR1(_cR1), cR2(_cR2), sigini(0.0)
 {
   konP = 0;
 
@@ -98,7 +104,7 @@ Steel02::Steel02(int tag,
 
 Steel02::Steel02(int tag, double _Fy, double _E0, double _b):
   UniaxialMaterial(tag, MAT_TAG_Steel02),
-  Fy(_Fy), E0(_E0), b(_b)
+  Fy(_Fy), E0(_E0), b(_b), sigini(0.0)
 {
   konP = 0;
 
@@ -143,7 +149,7 @@ Steel02::~Steel02(void)
 UniaxialMaterial*
 Steel02::getCopy(void)
 {
-  Steel02 *theCopy = new Steel02(this->getTag(), Fy, E0, b, R0, cR1, cR2, a1, a2, a3, a4);
+  Steel02 *theCopy = new Steel02(this->getTag(), Fy, E0, b, R0, cR1, cR2, a1, a2, a3, a4, sigini);
   
   return theCopy;
 }
@@ -160,9 +166,15 @@ Steel02::setTrialStrain(double trialStrain, double strainRate)
   double Esh = b * E0;
   double epsy = Fy / E0;
 
-  eps = trialStrain;
-  double deps = eps - epsP;
+  // modified C-P. Lamarche 2006
+  if (sigini != 0.0) {
+	  double epsini = sigini/E0;
+	  eps = trialStrain+epsini;
+   } else
+	   eps = trialStrain;
+   // modified C-P. Lamarche 2006
 
+  double deps = eps - epsP;
 
 
   epsmax = epsmaxP;
@@ -174,12 +186,14 @@ Steel02::setTrialStrain(double trialStrain, double strainRate)
   sigr   = sigsrP;  
   kon = konP;
 
-  if (kon == 0) {
+  if (kon == 0 || kon == 3) { // modified C-P. Lamarche 2006
+
 
     if (fabs(deps) < 10.0*DBL_EPSILON) {
 
       e = E0;
-      sig = 0.;
+      sig = sigini;                // modified C-P. Lamarche 2006
+      kon = 3;                     // modified C-P. Lamarche 2006 flag to impose initial stess/strain
       return 0;
 
     } else {
@@ -222,32 +236,30 @@ Steel02::setTrialStrain(double trialStrain, double strainRate)
     epss0 = (Fy * shft - Esh * epsy * shft - sigr + E0 * epsr) / (E0 - Esh);
     sigs0 = Fy * shft + Esh * (epss0 - epsy * shft);
     epspl = epsmax;
-  } else {
+
+  } else if (kon == 1 && deps < 0.0) {
     
-    // in case of load reversal from positive to negative strain increment 
     // update the maximum previous strain, store the last load reversal 
     // point and calculate the stress and strain (sigs0 and epss0) at the 
     // new intersection between elastic and strain hardening asymptote 
     // To include isotropic strain hardening shift the strain hardening 
     // asymptote by sigsft before calculating the intersection point 
     // Constants a1 and a2 control this stress shift on compression side 
+
+    kon = 2;
+    epsr = epsP;
+    sigr = sigP;
+    //      epsmax = max(epsP, epsmax);
+    if (epsP > epsmax)
+      epsmax = epsP;
     
-    if (kon == 1 && deps < 0.0) {
-
-      kon = 2;
-      epsr = epsP;
-      sigr = sigP;
-      //      epsmax = max(epsP, epsmax);
-      if (epsP > epsmax)
-	epsmax = epsP;
-
-      double d1 = (epsmax - epsmin) / (2.0*(a2 * epsy));
-      double shft = 1.0 + a1 * pow(d1, 0.8);
-      epss0 = (-Fy * shft + Esh * epsy * shft - sigr + E0 * epsr) / (E0 - Esh);
-      sigs0 = -Fy * shft + Esh * (epss0 + epsy * shft);
-      epspl = epsmin;
-    }
+    double d1 = (epsmax - epsmin) / (2.0*(a2 * epsy));
+    double shft = 1.0 + a1 * pow(d1, 0.8);
+    epss0 = (-Fy * shft + Esh * epsy * shft - sigr + E0 * epsr) / (E0 - Esh);
+    sigs0 = -Fy * shft + Esh * (epss0 + epsy * shft);
+    epspl = epsmin;
   }
+
   
   // calculate current stress sig and tangent modulus E 
 
@@ -342,13 +354,18 @@ Steel02::revertToStart(void)
   epssrP = 0.0;
   sigsrP = 0.0;
 
+  if (sigini != 0.0) {
+	  epsP = sigini/E0;
+	  sigP = sigini;
+   } 
+
   return 0;
 }
 
 int 
 Steel02::sendSelf(int commitTag, Channel &theChannel)
 {
-  static Vector data(22);
+  static Vector data(23);
   data(0) = Fy;
   data(1) = E0;
   data(2) = b;
@@ -371,6 +388,7 @@ Steel02::sendSelf(int commitTag, Channel &theChannel)
   data(19) = sigP;  
   data(20) = eP;    
   data(21) = this->getTag();
+  data(22) = sigini;
 
   if (theChannel.sendVector(this->getDbTag(), commitTag, data) < 0) {
     opserr << "Steel02::sendSelf() - failed to sendSelf\n";
@@ -384,7 +402,7 @@ Steel02::recvSelf(int commitTag, Channel &theChannel,
 	     FEM_ObjectBroker &theBroker)
 {
 
-  static Vector data(22);
+  static Vector data(23);
 
   if (theChannel.sendVector(this->getDbTag(), commitTag, data) < 0) {
     opserr << "Steel02::recvSelf() - failed to recvSelf\n";
@@ -413,6 +431,7 @@ Steel02::recvSelf(int commitTag, Channel &theChannel,
   sigP = data(19);   
   eP   = data(20);   
   this->setTag(data(21));
+  sigini = data(23);
 
   e = eP;
   sig = sigP;

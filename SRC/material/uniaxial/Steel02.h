@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-08-03 23:42:19 $
+// $Revision: 1.3 $
+// $Date: 2006-11-03 18:40:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel02.h,v $
                                                                       
 // Written: fmk
@@ -47,7 +47,7 @@ class Steel02 : public UniaxialMaterial
     Steel02(int tag,
 	    double fy, double E0, double b,
 	    double R0, double cR1, double cR2,
-	    double a1, double a2, double a3, double a4);
+	    double a1, double a2, double a3, double a4, double sigInit =0.0);
     
     // Constructor for no isotropic hardening
     Steel02(int tag,
@@ -96,6 +96,7 @@ class Steel02 : public UniaxialMaterial
     double a2;  //  = matpar(8)  : coefficient for isotropic hardening in compression
     double a3;  //  = matpar(9)  : coefficient for isotropic hardening in tension
     double a4;  //  = matpar(10) : coefficient for isotropic hardening in tension
+    double sigini; // initial 
     // hstvP : STEEL HISTORY VARIABLES
     double epsminP; //  = hstvP(1) : max eps in compression
     double epsmaxP; //  = hstvP(2) : max eps in tension

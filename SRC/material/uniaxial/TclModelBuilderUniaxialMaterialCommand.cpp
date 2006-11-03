@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.38 $
-// $Date: 2006-09-01 00:51:43 $
+// $Revision: 1.39 $
+// $Date: 2006-11-03 18:40:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -638,7 +638,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
       
       double fy, E, b;
       double R0, cR1, cR2;
-      double a1, a2, a3, a4;
+      double a1, a2, a3, a4, sigini;
 
       int tag;
       if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
@@ -698,6 +698,17 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	    printCommand(argc, argv);
 	    return 0;	
 	  }
+
+	  if (argc > 13) {
+	    if (Tcl_GetDouble(interp, argv[13], &sigini) != TCL_OK) {
+	      opserr << "WARNING invalid a1\n";
+	      printCommand(argc, argv);
+	      return 0;	
+	    }
+
+	    theMaterial = new Steel02(tag, fy, E, b, R0, cR1, cR2, a1, a2, a3, a4, sigini);
+
+	  } else
 	  theMaterial = new Steel02(tag, fy, E, b, R0, cR1, cR2, a1, a2, a3, a4);
 	}
 	else
