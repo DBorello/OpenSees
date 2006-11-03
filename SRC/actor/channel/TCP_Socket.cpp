@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-11-03 18:24:07 $
+// $Revision: 1.7 $
+// $Date: 2006-11-03 18:58:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.cpp,v $
                                                                         
                                                                         
@@ -44,7 +44,6 @@
 static int GetHostAddr(char *host, char *IntAddr);
 static void inttoa(unsigned int no, char *string, int *cnt);
 
-static int numSockets = 0;
 
 // TCP_Socket(unsigned int other_Port, char *other_InetAddr): 
 // 	constructor to open a socket with my inet_addr and with a port number 
@@ -53,17 +52,9 @@ static int numSockets = 0;
 TCP_Socket::TCP_Socket()
   :myPort(0), connectType(0)
 {
-<<<<<<< TCP_Socket.cpp
-
   // initilaize sockets
   startup_sockets();
 
-=======
-  if (numSockets == 0)
-    startup_socket();
-  numSockets++;
-
->>>>>>> 1.5
     // set up my_Addr 
     bzero((char *) &my_Addr, sizeof(my_Addr));    
     my_Addr.addr_in.sin_family = AF_INET;
@@ -102,18 +93,9 @@ TCP_Socket::TCP_Socket()
 TCP_Socket::TCP_Socket(unsigned int port) 
   :myPort(0), connectType(0)
 {
-<<<<<<< TCP_Socket.cpp
-
   // initilaize sockets
   startup_sockets();
 
-=======
-
-  if (numSockets == 0)
-    startup_socket();
-  numSockets++;
-
->>>>>>> 1.5
     // set up my_Addr.addr_in with address given by port and internet address of
     // machine on which the process that uses this routine is running.
 
@@ -156,16 +138,10 @@ TCP_Socket::TCP_Socket(unsigned int port)
 TCP_Socket::TCP_Socket(unsigned int other_Port, const char *other_InetAddr)
   :myPort(0), connectType(1)
 {
-<<<<<<< TCP_Socket.cpp
+
   // initilaize sockets
   startup_sockets();
 
-=======
-  if (numSockets == 0)
-    startup_socket();
-  numSockets++;
-
->>>>>>> 1.5
     // set up remote address
     bzero((char *) &other_Addr.addr_in, sizeof(other_Addr.addr_in));
     other_Addr.addr_in.sin_family      = AF_INET;
@@ -213,17 +189,9 @@ TCP_Socket::~TCP_Socket()
   #else
     close(sockfd);
   #endif
-<<<<<<< TCP_Socket.cpp
 
   // initilaize sockets
   cleanup_sockets();
-=======
-
-  numSockets--;
-  if (numSockets == 0)
-    cleanup_socket();
-
->>>>>>> 1.5
 }
 
 
