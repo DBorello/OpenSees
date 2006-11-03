@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.82 $
-// $Date: 2006-08-21 18:26:35 $
+// $Revision: 1.83 $
+// $Date: 2006-11-03 18:31:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -90,6 +90,7 @@
 #define TSERIES_TAG_SimulatedRandomProcessSeries 8
 #define TSERIES_TAG_PulseSeries       9
 #define TSERIES_TAG_TriangleSeries       10
+#define TSERIES_TAG_PeerMotion       11
 
 
 #define MAT_TAG_ElasticMaterial			1
@@ -125,6 +126,7 @@
 #define MAT_TAG_Steel02					26
 
 #define MAT_TAG_Bond_SP01  27
+#define MAT_TAG_Hysteretic2				28
 #define MAT_TAG_Concrete04 30
 #define MAT_TAG_SecantConcrete 31
 #define MAT_TAG_ContinuumUniaxial 32

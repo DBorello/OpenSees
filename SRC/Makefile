@@ -123,6 +123,7 @@ all:
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(SNAP_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(FMK_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(KJE_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(ACTOR_LIBS)
 	@$(RANLIB) $(RANLIBFLAGS) $(FE_LIBRARY)
 
 endif
@@ -531,6 +532,12 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/dispBeamColumn/DispBeamColumn2d.o \
 	$(FE)/element/dispBeamColumn/DispBeamColumn3d.o \
 	$(FE)/element/dispBeamColumn/TclDispBeamColumnCommand.o \
+	$(FE)/element/elasticBeamColumn/EEBeamColumn2d.o \
+	$(FE)/element/elasticBeamColumn/TclEEBeamColumnCommand.o \
+	$(FE)/element/truss/EETruss.o \
+	$(FE)/actor/channel/TCP_Socket.o \
+	$(FE)/actor/channel/socket.o \
+	$(FE)/element/truss/TclEETrussCommand.o \
 	$(FE)/element/elasticBeamColumn/ElasticBeam2d.o \
 	$(FE)/element/elasticBeamColumn/ElasticBeam3d.o \
 	$(FE)/element/elasticBeamColumn/TclElasticBeamCommand.o \
@@ -558,12 +565,15 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/ParallelMaterial.o \
 	$(FE)/material/uniaxial/SeriesMaterial.o \
 	$(FE)/material/uniaxial/Concrete01.o \
+	$(FE)/material/uniaxial/Concrete.o \
 	$(FE)/material/uniaxial/Concrete02.o \
 	$(FE)/material/uniaxial/Concrete04.o \
 	$(FE)/material/uniaxial/Steel01.o \
 	$(FE)/material/uniaxial/Steel02.o \
 	$(FE)/material/uniaxial/Steel03.o \
 	$(FE)/material/uniaxial/HystereticMaterial.o \
+	$(FE)/material/uniaxial/HystereticMaterial1.o \
+	$(FE)/material/uniaxial/HystereticMaterial2.o \
 	$(FE)/material/uniaxial/EPPGapMaterial.o \
 	$(FE)/material/uniaxial/ViscousMaterial.o \
 	$(FE)/material/uniaxial/PathIndependentMaterial.o \
@@ -610,6 +620,7 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 FEDEAS_LIBS = $(FE)/material/uniaxial/FedeasMaterial.o \
 	$(FE)/material/uniaxial/fedeas/FedeasHardeningMaterial.o \
 	$(FE)/material/uniaxial/fedeas/Hard1.o \
+	$(FE)/material/uniaxial/fedeas/Hyster2.o \
 	$(FE)/material/uniaxial/fedeas/FedeasBond1Material.o \
 	$(FE)/material/uniaxial/fedeas/FedeasBond2Material.o \
 	$(FE)/material/uniaxial/fedeas/FedeasConcr1Material.o \
@@ -787,6 +798,7 @@ DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/pattern/ConstantSeries.o \
 	$(FE)/domain/pattern/TrigSeries.o \
 	$(FE)/domain/pattern/PathSeries.o \
+	$(FE)/domain/pattern/PeerMotion.o \
 	$(FE)/domain/pattern/PathTimeSeries.o \
 	$(FE)/domain/pattern/PulseSeries.o \
 	$(FE)/domain/pattern/TriangleSeries.o \
