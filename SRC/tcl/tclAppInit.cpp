@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2006-09-26 21:29:35 $
+// $Revision: 1.10 $
+// $Date: 2006-11-08 20:12:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/tclAppInit.cpp,v $
 
 
@@ -36,7 +36,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclAppInit.cpp,v 1.9 2006-09-26 21:29:35 fmk Exp $
+ * RCS: @(#) $Id: tclAppInit.cpp,v 1.10 2006-11-08 20:12:20 fmk Exp $
  */
 
 extern "C" {
@@ -80,7 +80,7 @@ extern int		Tclxttest_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
 
 
-#include <FileStream.h>
+#include <XmlFileStream.h>
 #include <SimulationInformation.h>
 extern SimulationInformation simulationInfo;
 extern char *simulationInfoOutputFilename;
@@ -238,7 +238,7 @@ int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char *
 	
   if (simulationInfoOutputFilename != 0) {
     simulationInfo.end();
-    FileStream simulationInfoOutputFile;
+    XmlFileStream simulationInfoOutputFile;
     simulationInfoOutputFile.setFile(simulationInfoOutputFilename);
     simulationInfoOutputFile.open();
     simulationInfoOutputFile << simulationInfo;
