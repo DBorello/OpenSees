@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2005-03-11 22:08:00 $
+// $Revision: 1.7 $
+// $Date: 2006-11-08 20:10:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathSeries.cpp,v $
                                                                         
                                                                         
@@ -47,6 +47,12 @@ using std::ifstream;
 
 #include <iomanip>
 using std::ios;
+
+#ifdef _TCL84
+#include <SimulationInformation.h>
+extern SimulationInformation simulationInfo;
+#endif
+
 
 PathSeries::PathSeries()	
   :TimeSeries(TSERIES_TAG_PathSeries),
@@ -98,6 +104,13 @@ PathSeries::PathSeries(const char *fileName,
   }   
   theFile.close();
 
+#ifdef _TCL84
+  // keep record of file for o/p of simulation event information
+  opserr << "HELLO\n";
+  simulationInfo.Print(opserr);
+  simulationInfo.addInputFile(fileName);
+  simulationInfo.Print(opserr);
+#endif
 
   // create a vector and read in the data
   if (numDataPoints != 0) {

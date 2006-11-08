@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2005-10-20 21:58:54 $
+// $Revision: 1.9 $
+// $Date: 2006-11-08 20:10:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathTimeSeries.cpp,v $
                                                                         
                                                                         
@@ -45,6 +45,13 @@ using std::ifstream;
 
 #include <iomanip>
 using std::ios;
+
+#ifdef _TCL84
+#include <SimulationInformation.h>
+extern SimulationInformation simulationInfo;
+#endif
+
+
 
 PathTimeSeries::PathTimeSeries()	
   :TimeSeries(TSERIES_TAG_PathTimeSeries),
@@ -112,6 +119,11 @@ PathTimeSeries::PathTimeSeries(const char *filePathName,
       numDataPoints1++;
   }   
   theFile.close();
+  
+#ifdef _TCL84
+  // keep record of file for o/p of simulation event information
+  simulationInfo.addInputFile(filePathName);
+#endif
 
   // now open and go through file containg time
   ifstream theFile1;
@@ -124,6 +136,11 @@ PathTimeSeries::PathTimeSeries(const char *filePathName,
       numDataPoints2++;
   }   
   theFile1.close();
+
+#ifdef _TCL84
+  // keep record of file for o/p of simulation event information
+  simulationInfo.addInputFile(fileTimeName);
+#endif
 
   // check number of data entries in both are the same
   if (numDataPoints1 != numDataPoints2) {
@@ -204,73 +221,74 @@ PathTimeSeries::PathTimeSeries(const char *fileName,
 {
 
 
-	// determine the number of data points
-	int numDataPoints = 0;
-	double dataPoint;
-	ifstream theFile;
+  // determine the number of data points
+  int numDataPoints = 0;
+  double dataPoint;
+  ifstream theFile;
   
-	// first open and go through file counting entries
-	theFile.open(fileName, ios::in);
-	if (theFile.bad() || !theFile.is_open()) {
-	  opserr << "WARNING - PathTimeSeries::PathTimeSeries()";
-	  opserr << " - could not open file " << fileName << endln;
-	}
-	else {
-	  while (theFile >> dataPoint) {
-	    numDataPoints++;
-	    theFile >> dataPoint;	// Read in second value of pair
-	  }
-	}
-	theFile.close();
-
-
-
-	// create a vector and read in the data
-	if (numDataPoints != 0) {
-
-		// now create the two vector
-		thePath = new Vector(numDataPoints);
-		time = new Vector(numDataPoints);
-
-		// ensure did not run out of memory creating copies
-		if (thePath == 0 || thePath->Size() == 0 || time == 0 || time->Size() == 0) {
-	  
-			opserr << "WARNING PathTimeSeries::PathTimeSeries() - out of memory\n ";
-			if (thePath != 0)
-				delete thePath;
-			if (time != 0)
-				delete time;
-			thePath = 0;
-			time = 0;
-		}
-      
-		// first open the file and read in the data
-		ifstream theFile1;
-		theFile1.open(fileName, ios::in);
-		if (theFile1.bad() || !theFile1.is_open()) {
-
-			opserr << "WARNING - PathTimeSeries::PathTimeSeries()";
-			opserr << " - could not open file " << fileName << endln;
-			delete thePath;
-			delete time;
-			thePath = 0;
-			time =0;
-		}
-		else { // read in the time and then read the value
-			int count = 0;
-			while (theFile1 >> dataPoint) {
-				(*time)(count) = dataPoint;
-				theFile1 >> dataPoint;
-				(*thePath)(count) = dataPoint;
-				count++;
-			}
-
-			// finally close the file
-			theFile1.close();
-		} 
-	
-	}
+  // first open and go through file counting entries
+  theFile.open(fileName, ios::in);
+  if (theFile.bad() || !theFile.is_open()) {
+    opserr << "WARNING - PathTimeSeries::PathTimeSeries()";
+    opserr << " - could not open file " << fileName << endln;
+  }
+  else {
+    while (theFile >> dataPoint) {
+      numDataPoints++;
+      theFile >> dataPoint;	// Read in second value of pair
+    }
+  }
+  theFile.close();
+  
+#ifdef _TCL84
+  // keep record of file for o/p of simulation event information
+  simulationInfo.addInputFile(fileName);
+#endif
+  
+  // create a vector and read in the data
+  if (numDataPoints != 0) {
     
+    // now create the two vector
+    thePath = new Vector(numDataPoints);
+    time = new Vector(numDataPoints);
+    
+    // ensure did not run out of memory creating copies
+    if (thePath == 0 || thePath->Size() == 0 || time == 0 || time->Size() == 0) {
+      
+      opserr << "WARNING PathTimeSeries::PathTimeSeries() - out of memory\n ";
+      if (thePath != 0)
+	delete thePath;
+      if (time != 0)
+	delete time;
+      thePath = 0;
+      time = 0;
+    }
+    
+    // first open the file and read in the data
+    ifstream theFile1;
+    theFile1.open(fileName, ios::in);
+    if (theFile1.bad() || !theFile1.is_open()) {
+      
+      opserr << "WARNING - PathTimeSeries::PathTimeSeries()";
+      opserr << " - could not open file " << fileName << endln;
+      delete thePath;
+      delete time;
+      thePath = 0;
+      time =0;
+    }
+    else { // read in the time and then read the value
+      int count = 0;
+      while (theFile1 >> dataPoint) {
+	(*time)(count) = dataPoint;
+	theFile1 >> dataPoint;
+	(*thePath)(count) = dataPoint;
+	count++;
+      }
+      
+      // finally close the file
+      theFile1.close();
+    } 
+  }
 }
 
 PathTimeSeries::~PathTimeSeries()
