@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.39 $
-// $Date: 2006-08-17 22:25:43 $
+// $Revision: 1.40 $
+// $Date: 2006-11-08 20:14:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -239,7 +239,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	else if (strcmp(argv[loc],"-file") == 0) {
 	  fileName = argv[loc+1];
 	  eMode = DATA_STREAM;
-	  simulationInfo.addWriteFile(fileName);
+	  simulationInfo.addOutputFile(fileName);
 	  loc += 2;
 	  if (strcmp(argv[loc],"-xml") == 0) {
 	    eMode = XML_STREAM;
@@ -266,7 +266,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	else if ((strcmp(argv[loc],"-nees") == 0) || (strcmp(argv[loc],"-xml") == 0)) {
 	  // allow user to specify load pattern other than current
 	  fileName = argv[loc+1];
-	  simulationInfo.addWriteFile(fileName);
+	  simulationInfo.addOutputFile(fileName);
 	  eMode = XML_STREAM;
 	  loc += 2;
 	}	    
@@ -488,7 +488,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 
 	else if (strcmp(argv[pos],"-file") == 0) {
 	  fileName = argv[pos+1];
-	  simulationInfo.addWriteFile(fileName);
+	  simulationInfo.addOutputFile(fileName);
 	  eMode = DATA_STREAM;
 	  pos += 2;
 	}
@@ -508,7 +508,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	else if ((strcmp(argv[pos],"-nees") == 0) || (strcmp(argv[pos],"-xml") == 0)) {
 	  // allow user to specify load pattern other than current
 	  fileName = argv[pos+1];
-	  simulationInfo.addWriteFile(fileName);
+	  simulationInfo.addOutputFile(fileName);
 	  eMode = XML_STREAM;
 	  pos += 2;
 	}	    
@@ -721,7 +721,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	if (strcmp(argv[pos],"-file") == 0) {
 	  fileName = argv[pos+1];
 	  eMode = DATA_STREAM;
-	  simulationInfo.addWriteFile(fileName);
+	  simulationInfo.addOutputFile(fileName);
 	  pos += 2;
 	  if (strcmp(argv[pos],"-xml") == 0) {
 	    eMode = XML_STREAM;
@@ -748,7 +748,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	else if ((strcmp(argv[pos],"-nees") == 0) || (strcmp(argv[pos],"-xml") == 0)) {
 	  // allow user to specify load pattern other than current
 	  fileName = argv[pos+1];
-	  simulationInfo.addWriteFile(fileName);
+	  simulationInfo.addOutputFile(fileName);
 	  eMode = XML_STREAM;
 	  pos += 2;
 	}	    
