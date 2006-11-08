@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.79 $
-// $Date: 2006-09-01 00:49:09 $
+// $Revision: 1.80 $
+// $Date: 2006-11-08 20:13:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -540,7 +540,7 @@ OPS_SourceCmd(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **ar
 {
   int ok = TCL_OK;
   if (argc > 1) {
-    simulationInfo.addReadFile(argv[1]);
+    simulationInfo.addInputFile(argv[1]);
 
     ok = Tcl_EvalFile(interp, argv[1]);
   }
@@ -4675,7 +4675,7 @@ logFile(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
     opserr << "WARNING logFile " << argv[1] << " failed to set the file\n";
 
   
-  simulationInfo.addWriteFile(argv[1]);
+  simulationInfo.addOutputFile(argv[1]);
 
   return TCL_OK;
 }

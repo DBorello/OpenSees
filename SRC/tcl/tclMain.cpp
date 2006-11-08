@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.39 2006-09-05 19:38:17 mhscott Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.40 2006-11-08 20:13:23 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -186,11 +186,11 @@ EvalFileWithParameters(Tcl_Interp *interp,
 
       count++;
       
-   simulationInfo.addReadFile(tclStartupScriptFileName);
+      simulationInfo.addInputFile(tclStartupScriptFileName);
 
       int ok = Tcl_EvalFile(interp, tclStartupScriptFileName);
 
-     simulationInfo.end();
+      simulationInfo.end();
       
       return ok;
     }
@@ -259,6 +259,10 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 
     Tcl_FindExecutable(argv[0]);
     interp = Tcl_CreateInterp();
+
+    simulationInfo.addTclInformationCommands(interp);	      
+
+
 #ifdef TCL_MEM_DEBUG
     Tcl_InitMemory(interp);
 #endif
@@ -392,7 +396,6 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	    currentArg += 3;
 	  } else if ((strcmp(argv[currentArg], "-info") == 0) || (strcmp(argv[currentArg], "-INFO") == 0)) {
 	    if (argc > (currentArg+1)) {
-	      
 	      simulationInfoOutputFilename = argv[currentArg+1];	    
 	    }			   
 	    currentArg+=2;
@@ -426,7 +429,7 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 
       if (simulationInfoOutputFilename != 0) {
 	simulationInfo.start();
-	simulationInfo.addReadFile(tclStartupScriptFileName);
+	simulationInfo.addInputFile(tclStartupScriptFileName);
       }
 
       code = Tcl_EvalFile(interp, tclStartupScriptFileName);
@@ -461,8 +464,8 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
       while (currentArg < argc && argv[currentArg] != NULL) {
 	if ((strcmp(argv[currentArg], "-info") == 0) || (strcmp(argv[currentArg], "-INFO") == 0)) {
 	  if (argc > (currentArg+1)) {
-	    
-		simulationInfoOutputFilename = argv[currentArg+1];	    
+	    simulationInfo.addTclInformationCommands(interp);
+	    simulationInfoOutputFilename = argv[currentArg+1];	    
 	  }			   
 	  currentArg+=2;
 	} else 	
@@ -608,6 +611,7 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 	
+
   if (simulationInfoOutputFilename != 0) {
     simulationInfo.end();
     FileStream simulationInfoOutputFile;
