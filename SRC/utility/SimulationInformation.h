@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-04-28 17:54:28 $
+// $Revision: 1.2 $
+// $Date: 2006-11-08 20:08:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/SimulationInformation.h,v $
                                                                         
                                                                         
@@ -38,6 +38,8 @@
 #define SimulationInformation_h
 
 #include <OPS_Globals.h>
+#include <tcl.h>
+#include <StringContainer.h>
 
 class SimulationInformation
 {
@@ -46,26 +48,51 @@ class SimulationInformation
   ~SimulationInformation();
   int start(void);
   int end(void);
-  int addReadFile(const char *);
-  int addWriteFile(const char *);
-  int addParameter(const char *name, const char *value);
 
-  
+  int setTitle(const char *name);
+  int setDescription(const char *name);
+  int setContact(const char *name);
+  int setLengthUnit(const char *name);
+  int setForceUnit(const char *name);
+  int setTimeUnit(const char *name);
+
+  int addInputFile(const char *);
+  int addOutputFile(const char *);
+  int addParameter(const char *name, const char *value);
+  int addModelType(const char *type);
+  int addAnalysisType(const char *type);
+  int addLoadingType(const char *type);
+  int addElementType(const char *type);
+  int addMaterialType(const char *type);
+
+  int addTclInformationCommands(Tcl_Interp *interp);
+
   void Print(OPS_Stream &s) const;   
   friend OPS_Stream &operator<<(OPS_Stream &s, const SimulationInformation &E);    
   
  protected:
   
  private:
+  char *title;
+  char *description;
+  char *contactName;
+
+  char *lengthUnit;
+  char *forceUnit;
+  char *timeUnit;
+
   char startTime[30];
   char endTime[30];
-  char **filesRead;
-  char **filesWritten;
-  char **paramNames;
-  char **paramValues;
-  int numFilesWritten;
-  int numFilesRead;
-  int numParameters;
+
+  StringContainer inputFiles;
+  StringContainer outputFiles;
+  StringContainer paramNames;
+  StringContainer paramValues;
+  StringContainer analysisTypes;
+  StringContainer modelTypes;
+  StringContainer loadingTypes;
+  StringContainer elementTypes;
+  StringContainer materialTypes;
 };
 
 
