@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.14 $
-// $Date: 2006-11-03 18:30:55 $
+// $Revision: 1.15 $
+// $Date: 2006-11-21 23:46:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclSeriesCommand.cpp,v $
 
 // Written: fmk 
@@ -208,7 +208,31 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
       return 0;
     }
     
-    theSeries = new PeerMotion(argv[1], argv[2], argv[3], cFactor);       	
+    PeerMotion *thePeerMotion = new PeerMotion(argv[1], argv[2], argv[3], cFactor);       	
+    theSeries = thePeerMotion;
+
+    if (argc > 4 && theSeries != 0) {
+      int argCount = 4;
+
+      while (argCount+1 < argc) {
+	if ((strcmp(argv[argCount],"-dT") == 0) || (strcmp(argv[argCount],"-dt") == 0) || 
+	    (strcmp(argv[argCount],"-DT") == 0)) {
+	  const char *variableName = argv[argCount+1];
+	  double dT = thePeerMotion->getDt();
+	  char string[30];
+	  sprintf(string,"set %s %.18e", variableName, dT);   Tcl_Eval(interp, string);
+	  fprintf(stderr,"%s\n",string);
+	  argCount+=2;
+	} else if ((strcmp(argv[argCount],"-nPts") == 0) || (strcmp(argv[argCount],"-NPTS") == 0)) {
+	  const char *variableName = argv[argCount+1];
+	  int nPts = thePeerMotion->getNPts();
+	  char string[30];
+	  sprintf(string,"set %s %d", variableName, nPts);   Tcl_Eval(interp, string);
+	  argCount+=2;
+	} else
+	  argCount++;
+      }
+    }
   }
 
 

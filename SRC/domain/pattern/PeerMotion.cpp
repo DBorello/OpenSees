@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-11-03 18:30:23 $
+// $Revision: 1.2 $
+// $Date: 2006-11-21 23:46:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PeerMotion.cpp,v $                                                                        
 
 // Written: fmk 
@@ -201,6 +201,22 @@ PeerMotion::getPeakFactor()
   
   return (peak*cFactor);
 }
+
+
+double 
+PeerMotion::getDt()
+{
+  return dT;
+}
+int
+PeerMotion::getNPts()
+{
+  if (thePath == 0)
+    return 0;
+  else
+    return thePath->Size();
+}
+
 
 int
 PeerMotion::sendSelf(int commitTag, Channel &theChannel)

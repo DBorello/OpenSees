@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-11-03 18:30:23 $
+// $Revision: 1.2 $
+// $Date: 2006-11-21 23:46:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PeerMotion.h,v $
                                                                         
                                                                         
@@ -62,6 +62,9 @@ class PeerMotion : public TimeSeries
     double getDuration ();
     double getPeakFactor ();
     double getTimeIncr (double pseudoTime);
+    double getDt();
+    int getNPts();
+
     
     // methods for output
     int sendSelf(int commitTag, Channel &theChannel);
