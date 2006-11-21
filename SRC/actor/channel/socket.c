@@ -162,13 +162,11 @@ httpGet(const char *URL, const char *page, unsigned int port, char **dataPtr) {
     return -1;
   }
 
-  fprintf(stderr,"CONNECTION ESTABLISHED\n");
 
   sprintf(outBuf, "GET %s HTTP/1.1\nHost:%s\n",page,URL);
   strcat(outBuf, "Connection:close\n\n");
   nleft = strlen(outBuf);
 
-  fprintf(stderr,"%s",outBuf);
 
   //send the data
   // if o.k. get a ponter to the data in the message and 
