@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-11-08 20:10:52 $
+// $Revision: 1.8 $
+// $Date: 2006-11-30 00:59:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathSeries.cpp,v $
                                                                         
                                                                         
@@ -106,10 +106,7 @@ PathSeries::PathSeries(const char *fileName,
 
 #ifdef _TCL84
   // keep record of file for o/p of simulation event information
-  opserr << "HELLO\n";
-  simulationInfo.Print(opserr);
   simulationInfo.addInputFile(fileName);
-  simulationInfo.Print(opserr);
 #endif
 
   // create a vector and read in the data
