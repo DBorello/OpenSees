@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2006-09-05 21:15:19 $
+// $Revision: 1.27 $
+// $Date: 2006-11-30 22:17:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -945,8 +945,22 @@ Truss::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream
   // we compare argv[0] for known response types for the Truss
   //
 
-  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"axialForce") == 0) {
-    opserr << "HELLO\n";
+
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0){
+    char outputData[10];
+    int numDOFperNode = numDOF/2;
+    for (int i=0; i<numDOFperNode; i++) {
+      sprintf(outputData,"P1_%d", i+1);
+      output.tag("ResponseType", outputData);
+    }
+    for (int j=0; j<numDOFperNode; j++) {
+      sprintf(outputData,"P2_%d", j+1);
+      output.tag("ResponseType", outputData);
+    }
+    theResponse =  new ElementResponse(this, 1, this->getResistingForce());
+
+  } else if ((strcmp(argv[0],"axialForce") == 0) || (strcmp(argv[0],"localForce") == 0) || 
+	     (strcmp(argv[0],"localForce") == 0)) {
     output.tag("ResponseType", "N");
     theResponse =  new ElementResponse(this, 1, 0.0);
 
