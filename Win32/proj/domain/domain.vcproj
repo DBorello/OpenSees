@@ -39,6 +39,7 @@
 				ProgramDataBaseFileName=".\..\..\obj\domain\release/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
+				CallingConvention="0"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -422,6 +423,12 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\domain\pattern\PathTimeSeries.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\domain\pattern\PeerMotion.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\domain\pattern\PeerMotion.h">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\domain\pattern\PulseSeries.cpp">

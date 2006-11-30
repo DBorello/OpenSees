@@ -32,6 +32,7 @@
 				ProgramDataBaseFileName=".\..\..\obj\actor\release/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
+				CallingConvention="0"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -147,6 +148,12 @@
 		</File>
 		<File
 			RelativePath="..\..\..\SRC\actor\shadow\Shadow.h">
+		</File>
+		<File
+			RelativePath="..\..\..\SRC\actor\channel\Socket.cpp">
+		</File>
+		<File
+			RelativePath="..\..\..\SRC\actor\channel\Socket.h">
 		</File>
 		<File
 			RelativePath="..\..\..\SRC\actor\channel\TCP_Socket.cpp">
