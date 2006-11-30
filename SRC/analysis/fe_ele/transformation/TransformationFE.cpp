@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2006-02-08 20:20:00 $
+// $Revision: 1.18 $
+// $Date: 2006-11-30 00:15:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.cpp,v $
                                                                         
 // Written: fmk 
@@ -344,7 +344,8 @@ TransformationFE::getTangent(Integrator *theNewIntegrator)
 		noColsTransformed = Tj->noCols();
 		// CHECK SIZE OF BUFFFER
 		localTtKT.setData(dataBuffer, noRowsTransformed, noColsTransformed);
-		localTtKT = (*Ti) ^ localK * (*Tj);
+		//localTtKT = (*Ti) ^ localK * (*Tj);
+		localTtKT.addMatrixTripleProduct(0.0, *Ti, localK, *Tj, 1.0);
 	    } else if (Ti == 0 && Tj != 0) {
 		noRowsTransformed = numDOFi;
 		noColsTransformed = Tj->noCols();
@@ -355,9 +356,9 @@ TransformationFE::getTangent(Integrator *theNewIntegrator)
 	    } else if (Ti != 0 && Tj == 0) {
 		noRowsTransformed = Ti->noCols();
 		noColsTransformed = numDOFj;
-		// CHECK SIZE OF BUFFFER
 		localTtKT.setData(dataBuffer, noRowsTransformed, noColsTransformed);
-		localTtKT = (*Ti) ^ localK;
+		//		localTtKT = (*Ti) ^ localK;	
+		localTtKT.addMatrixTransposeProduct(0.0, *Ti, localK, 1.0);	
 	    } else {
 		noRowsTransformed = numDOFi;
 		noColsTransformed = numDOFj;
