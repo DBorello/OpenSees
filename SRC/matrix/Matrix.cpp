@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2003-04-02 22:02:46 $
+// $Revision: 1.13 $
+// $Date: 2006-11-30 00:13:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.cpp,v $
                                                                         
                                                                         
-// File: ~/matrix/Matrix.h
-//
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -761,6 +759,70 @@ Matrix::addMatrixProduct(double thisFact,
     return 0;
 }
 
+int
+Matrix::addMatrixTransposeProduct(double thisFact, 
+				  const Matrix &B, 
+				  const Matrix &C, 
+				  double otherFact)
+{
+  if (thisFact == 1.0 && otherFact == 0.0)
+    return 0;
+
+#ifdef _G3DEBUG
+  if ((B.numCols != numRows) || (C.numCols != numCols) || (B.numRows != C.numRows)) {
+    opserr << "Matrix::addMatrixProduct(): incompatable matrices, this\n";
+    return -1;
+  }
+#endif
+
+  if (thisFact == 1.0) {
+    int numMults = C.numRows;
+    double *aijPtr = data;
+    for (int i=0; i<numRows; i++) {
+      double *bkiPtr  = &(B.data)[0];
+      for (int j=0; j<numCols; j++) {
+	double *cjkPtr  = &(C.data)[j*numMults];
+	double sum = 0.0;
+	for (int j=0; j<numMults; j++) {
+	  sum += *bkiPtr++ * *cjkPtr++;
+	}
+	*aijPtr++ += sum * otherFact;
+      }
+    } 
+  } else if (thisFact == 0.0) {
+    int numMults = C.numRows;
+    double *aijPtr = data;
+    for (int i=0; i<numRows; i++) {
+      double *bkiPtr  = &(B.data)[0];
+      for (int j=0; j<numCols; j++) {
+	double *cjkPtr  = &(C.data)[j*numMults];
+	double sum = 0.0;
+	for (int j=0; j<numMults; j++) {
+	  sum += *bkiPtr++ * *cjkPtr++;
+	}
+	*aijPtr++ = sum * otherFact;
+      }
+    } 
+  } else {
+    int numMults = C.numRows;
+    double *aijPtr = data;
+    for (int i=0; i<numRows; i++) {
+      double *bkiPtr  = &(B.data)[0];
+      for (int j=0; j<numCols; j++) {
+	double *cjkPtr  = &(C.data)[j*numMults];
+	double sum = 0.0;
+	for (int j=0; j<numMults; j++) {
+	  sum += *bkiPtr++ * *cjkPtr++;
+	}
+	*aijPtr = *aijPtr * thisFact + sum * otherFact;
+	aijPtr++;
+      }
+    } 
+  }
+
+  return 0;
+}
+
 
 // to perform this += T' * B * T
 int
@@ -792,7 +854,7 @@ Matrix::addMatrixTripleProduct(double thisFact,
     double *matrixWorkPtr = matrixWork;
     for (int l=0; l<sizeWork; l++)
       *matrixWorkPtr++ = 0.0;
-
+    
     // now form B * T * fact store in matrixWork == A area
     // NOTE: looping as per blas3 dgemm_: j,k,i
 
@@ -847,6 +909,108 @@ Matrix::addMatrixTripleProduct(double thisFact,
 	  double aij = 0.0;
 	  for (int k=0; k< dimB; k++)
 	    aij += *ckiPtr++ * *workkjPtr++;
+	  double value = *dataPtr * thisFact + aij;
+	  *dataPtr++ = value;
+	}
+      }
+    }
+
+    return 0;
+}
+
+
+
+
+
+// to perform this += At * B * C
+int
+Matrix::addMatrixTripleProduct(double thisFact, 
+			       const Matrix &A, 
+			       const Matrix &B,
+			       const Matrix &C,
+			       double otherFact)
+{
+    if (thisFact == 1.0 && otherFact == 0.0)
+      return 0;
+#ifdef _G3DEBUG
+    if ((numRows != A.numRows) || (A.numCols != B.numRows) || (B.numCols != C.numRows) ||
+	(C.numCols != numCols)) {
+      opserr << "Matrix::addMatrixTripleProduct() - incompatable matrices\n";
+      return -1;
+    }
+#endif
+
+    // cheack work area can hold the temporary matrix
+    int sizeWork = B.numRows * numCols;
+
+    if (sizeWork > sizeDoubleWork) {
+      this->addMatrix(thisFact, A^B*C, otherFact);
+      return 0;
+    }
+
+    // zero out the work area
+    double *matrixWorkPtr = matrixWork;
+    for (int l=0; l<sizeWork; l++)
+      *matrixWorkPtr++ = 0.0;
+
+    // now form B * C * fact store in matrixWork == A area
+    // NOTE: looping as per blas3 dgemm_: j,k,i
+    
+    int rowsB = B.numRows;
+    int colsB = B.numCols;
+    int colsC = numCols;
+    double *ckjPtr  = &(C.data)[0];
+    for (int j=0; j<numCols; j++) {
+      double *aijPtrA = &matrixWork[j*rowsB];
+      for (int k=0; k<rowsB; k++) {
+	double tmp = *ckjPtr++ * otherFact;
+	double *aijPtr = aijPtrA;
+	double *bikPtr = &(B.data)[k*rowsB];
+	for (int i=0; i<rowsB; i++) 
+	  *aijPtr++ += *bikPtr++ * tmp;
+      }
+    }
+
+    // now form A' * matrixWork
+    // NOTE: looping as per blas3 dgemm_: j,i,k
+    int dimB = rowsB;
+    if (thisFact == 1.0) {
+      double *dataPtr = &data[0];
+      for (int j=0; j< numCols; j++) {
+	double *workkjPtrA = &matrixWork[j*dimB];
+	for (int i=0; i<numRows; i++) {
+	  double *akiPtr = &(A.data)[i*dimB];
+	  double *workkjPtr = workkjPtrA;
+	  double aij = 0.0;
+	  for (int k=0; k< dimB; k++)
+	    aij += *akiPtr++ * *workkjPtr++;
+	  *dataPtr++ += aij;
+	}
+      }
+    } else if (thisFact == 0.0) {
+      double *dataPtr = &data[0];
+      for (int j=0; j< numCols; j++) {
+	double *workkjPtrA = &matrixWork[j*dimB];
+	for (int i=0; i<numRows; i++) {
+	  double *akiPtr = &(A.data)[i*dimB];
+	  double *workkjPtr = workkjPtrA;
+	  double aij = 0.0;
+	  for (int k=0; k< dimB; k++)
+	    aij += *akiPtr++ * *workkjPtr++;
+	  *dataPtr++ = aij;
+	}
+      }
+
+    } else {
+      double *dataPtr = &data[0];
+      for (int j=0; j< numCols; j++) {
+	double *workkjPtrA = &matrixWork[j*dimB];
+	for (int i=0; i<numRows; i++) {
+	  double *akiPtr = &(A.data)[i*dimB];
+	  double *workkjPtr = workkjPtrA;
+	  double aij = 0.0;
+	  for (int k=0; k< dimB; k++)
+	    aij += *akiPtr++ * *workkjPtr++;
 	  double value = *dataPtr * thisFact + aij;
 	  *dataPtr++ = value;
 	}
