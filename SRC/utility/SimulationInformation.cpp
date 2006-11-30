@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-11-08 20:08:48 $
+// $Revision: 1.7 $
+// $Date: 2006-11-30 21:37:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/SimulationInformation.cpp,v $
 //
 // Description: This file contains the class definition for SimulationInformation.
@@ -302,6 +302,9 @@ SimulationInformation::addMaterialType(const char *theType)
 }
 
 
+// TclSimulationInformation_defaultUnits()
+// to define basic units. the following is based on code provided by S. Mazzoni
+
 int
 TclSimulationInformation_defaultUnits(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
@@ -544,12 +547,12 @@ SimulationInformation::Print(OPS_Stream &s) const
 
 
   // need anotherTime to get rid of /n
-  char *c = strchr(startTime,'\n');
+  char *c = (char *)strchr(startTime,'\n');
   if (c != 0)
     strcpy(c,"");
   s.tag("startDate",startTime);
 
-  c = strchr(endTime,'\n');
+  c = (char *)strchr(endTime,'\n');
   if (c != 0)
     strcpy(c,"");
   s.tag("endDate",endTime);
