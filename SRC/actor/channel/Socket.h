@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-11-03 18:24:30 $
+// $Revision: 1.8 $
+// $Date: 2006-11-30 23:51:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/Socket.h,v $
                                                                         
 // Written: fmk 11/95
@@ -65,9 +65,9 @@ extern "C" {
   typedef socklen_t socklen_type;
 #endif
 
-extern "C" int startup_sockets(void);
-extern "C" void cleanup_sockets(void);
-extern "C" int httpGet(const char *URL, const char *page, unsigned int port, char **dataPtr);
+extern int startup_sockets(void);
+extern void cleanup_sockets(void);
+extern int httpGet(const char *URL, const char *page, unsigned int port, char **dataPtr);
 
 #endif 
 
