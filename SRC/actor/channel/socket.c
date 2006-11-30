@@ -3,8 +3,9 @@
 #include <math.h>
 #include <string.h>
 
+
 #ifdef _WIN32
-  #include <winsock2.h>
+#include <winsock2.h>
 #else
   #include <sys/socket.h>
   #include <sys/types.h>
@@ -16,6 +17,7 @@
   #include <strings.h>
 #endif
 
+
 #define MAX_UDP_DATAGRAM 9126
 #define MAX_INET_ADDR 28
 
@@ -24,6 +26,7 @@
   typedef int socklen_type;
   #define bzero(s,n) memset((s),0,(n))
   #define bcmp(s1,s2,n) memcmp((s1),(s2),(n))
+  static int numSockets = 0;
 #else
   typedef int socket_type;
   typedef socklen_t socklen_type;
@@ -32,7 +35,7 @@
 int startup_sockets(void)
 {
   #ifdef _WIN32
-  static int numSockets = 0;
+  
   WSADATA wsaData;
   if (numSockets == 0) {
     numSockets++;
@@ -72,7 +75,7 @@ establishHTTPConnection(const char* URL, unsigned int port) {
   socket_type sockfd;
   socklen_type addrLength;
   struct hostent *hostEntry;
-
+ struct in_addr ip;
   unsigned int myPort;
 
   /* check inputs */
@@ -89,7 +92,7 @@ establishHTTPConnection(const char* URL, unsigned int port) {
   other_Addr.addr_in.sin_family      = AF_INET;
   other_Addr.addr_in.sin_port        = htons(port);
 
-  struct in_addr ip;
+ 
 	
   hostEntry = gethostbyname(URL);
   bcopy(hostEntry->h_addr, &(ip.s_addr), hostEntry->h_length);
@@ -141,8 +144,10 @@ establishHTTPConnection(const char* URL, unsigned int port) {
   return sockfd;
 }
 
+
 int
 httpGet(const char *URL, const char *page, unsigned int port, char **dataPtr) {
+
 
   int i, j, nleft, nwrite, sizeData, ok;
   char *gMsg, *data, *nextData;
