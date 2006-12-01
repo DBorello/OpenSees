@@ -534,7 +534,7 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/dispBeamColumn/DispBeamColumn3d.o \
 	$(FE)/element/dispBeamColumn/TclDispBeamColumnCommand.o \
 	$(FE)/actor/channel/TCP_Socket.o \
-	$(FE)/actor/channel/socket.o \
+	$(FE)/actor/channel/Socket.o \
 	$(FE)/element/elasticBeamColumn/ElasticBeam2d.o \
 	$(FE)/element/elasticBeamColumn/ElasticBeam3d.o \
 	$(FE)/element/elasticBeamColumn/TclElasticBeamCommand.o \
