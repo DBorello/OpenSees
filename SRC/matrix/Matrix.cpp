@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2006-11-30 00:13:40 $
+// $Revision: 1.14 $
+// $Date: 2006-12-01 18:09:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.cpp,v $
                                                                         
                                                                         
@@ -778,12 +778,12 @@ Matrix::addMatrixTransposeProduct(double thisFact,
   if (thisFact == 1.0) {
     int numMults = C.numRows;
     double *aijPtr = data;
-    for (int i=0; i<numRows; i++) {
-      double *bkiPtr  = &(B.data)[0];
-      for (int j=0; j<numCols; j++) {
+    for (int j=0; j<numCols; j++) {
+      for (int i=0; i<numRows; i++) {
+	double *bkiPtr  = &(B.data)[i*numMults];
 	double *cjkPtr  = &(C.data)[j*numMults];
 	double sum = 0.0;
-	for (int j=0; j<numMults; j++) {
+	for (int k=0; k<numMults; k++) {
 	  sum += *bkiPtr++ * *cjkPtr++;
 	}
 	*aijPtr++ += sum * otherFact;
@@ -792,12 +792,12 @@ Matrix::addMatrixTransposeProduct(double thisFact,
   } else if (thisFact == 0.0) {
     int numMults = C.numRows;
     double *aijPtr = data;
-    for (int i=0; i<numRows; i++) {
-      double *bkiPtr  = &(B.data)[0];
-      for (int j=0; j<numCols; j++) {
+    for (int j=0; j<numCols; j++) {
+      for (int i=0; i<numRows; i++) {
+	double *bkiPtr  = &(B.data)[i*numMults];
 	double *cjkPtr  = &(C.data)[j*numMults];
 	double sum = 0.0;
-	for (int j=0; j<numMults; j++) {
+	for (int k=0; k<numMults; k++) {
 	  sum += *bkiPtr++ * *cjkPtr++;
 	}
 	*aijPtr++ = sum * otherFact;
@@ -806,12 +806,12 @@ Matrix::addMatrixTransposeProduct(double thisFact,
   } else {
     int numMults = C.numRows;
     double *aijPtr = data;
-    for (int i=0; i<numRows; i++) {
-      double *bkiPtr  = &(B.data)[0];
-      for (int j=0; j<numCols; j++) {
+    for (int j=0; j<numCols; j++) {
+      for (int i=0; i<numRows; i++) {
+	double *bkiPtr  = &(B.data)[i*numMults];
 	double *cjkPtr  = &(C.data)[j*numMults];
 	double sum = 0.0;
-	for (int j=0; j<numMults; j++) {
+	for (int k=0; k<numMults; k++) {
 	  sum += *bkiPtr++ * *cjkPtr++;
 	}
 	*aijPtr = *aijPtr * thisFact + sum * otherFact;
