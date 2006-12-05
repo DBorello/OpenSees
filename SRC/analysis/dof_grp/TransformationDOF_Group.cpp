@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2005-11-29 23:31:10 $
+// $Revision: 1.17 $
+// $Date: 2006-12-05 20:05:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.cpp,v $
                                                                         
                                                                         
@@ -913,82 +913,117 @@ TransformationDOF_Group::getAccSensitivity(int gradNumber)
 }
 	
 	
-
-int 
-TransformationDOF_Group::saveSensitivity(Vector *u,Vector *udot,Vector *udotdot, int gradNum,int numGrads)
+int
+TransformationDOF_Group::saveDispSensitivity(const Vector &u,
+					     int gradNum, int numGrads)
 {
   // call base class method and return if no MP_Constraint
   if (theMP == 0) {
-    return this->DOF_Group::saveSensitivity(u, udot, udotdot, gradNum, numGrads);
+    return this->DOF_Group::saveDispSensitivity(u, gradNum, numGrads);
   }
   
-  // Get sensitivities for my dof out of vectors
-  Vector *myV = new Vector(modNumDOF);
-  Vector *myVdot = 0;
-  Vector *myVdotdot = 0;
-
-  
-	
   const ID &theID = this->getID();
   for (int i=0; i<modNumDOF; i++) {
     int loc = theID(i);
     if (loc >= 0)
-      (*modUnbalance)(i) = (*u)(loc);
+      (*modUnbalance)(i) = u(loc);
     // DO THE SP STUFF
   }    
   Matrix *T = this->getT();
   if (T != 0) {
     
     // *unbalance = (*T) * (*modUnbalance);
-    myV->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
+    unbalance->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
     
   } else
-    *myV = *modUnbalance;
+    *unbalance = *modUnbalance;
 
 
-  // Vel and Acc sensitivities only if they are being delivered
-  if ((udot != 0) && (udotdot != 0)) {
-    myVdot = new Vector(modNumDOF);
-    myVdotdot = new Vector(modNumDOF);
-    for (int i=0; i<modNumDOF; i++) {
-      int loc = theID(i);
-      if (loc >= 0)
-	(*modUnbalance)(i) = (*udot)(loc);
-      // DO THE SP STUFF
-    }    
-
-    if (T != 0) {
-      
-      // *unbalance = (*T) * (*modUnbalance);
-      myVdot->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
-    
-    } else
-      *myVdot = *modUnbalance;
-
-    for (int j=0; j<modNumDOF; j++) {
-      int loc = theID(j);
-      if (loc >= 0)
-	(*modUnbalance)(j) = (*udotdot)(loc);
-      // DO THE SP STUFF
-    }    
-
-    if (T != 0) {
-      
-      // *unbalance = (*T) * (*modUnbalance);
-      myVdotdot->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
-    
-    } else
-      *myVdotdot = *modUnbalance;
-
-  }
-
-  myNode->saveSensitivity(myV, myVdot, myVdotdot, gradNum, numGrads);
+  myNode->saveDispSensitivity(*unbalance, gradNum, numGrads);
   
-  if (myV != 0) delete myV;
-  if (myVdot != 0) delete myVdot;
-  if (myVdotdot != 0) delete myVdotdot;
-
   return 0;
+}
+
+int
+TransformationDOF_Group::saveVelSensitivity(const Vector &u,
+					    int gradNum, int numGrads)
+{
+  // call base class method and return if no MP_Constraint
+  if (theMP == 0) {
+    return this->DOF_Group::saveVelSensitivity(u, gradNum, numGrads);
+  }
+  
+  const ID &theID = this->getID();
+  for (int i=0; i<modNumDOF; i++) {
+    int loc = theID(i);
+    if (loc >= 0)
+      (*modUnbalance)(i) = u(loc);
+    // DO THE SP STUFF
+  }    
+  Matrix *T = this->getT();
+  if (T != 0) {
+    
+    // *unbalance = (*T) * (*modUnbalance);
+    unbalance->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
+    
+  } else
+    *unbalance = *modUnbalance;
+
+
+  myNode->saveVelSensitivity(*unbalance, gradNum, numGrads);
+  
+  return 0;
+}
+
+int
+TransformationDOF_Group::saveAccSensitivity(const Vector &u,
+					    int gradNum, int numGrads)
+{
+  // call base class method and return if no MP_Constraint
+  if (theMP == 0) {
+    return this->DOF_Group::saveAccSensitivity(u, gradNum, numGrads);
+  }
+  
+  const ID &theID = this->getID();
+  for (int i=0; i<modNumDOF; i++) {
+    int loc = theID(i);
+    if (loc >= 0)
+      (*modUnbalance)(i) = u(loc);
+    // DO THE SP STUFF
+  }    
+  Matrix *T = this->getT();
+  if (T != 0) {
+    
+    // *unbalance = (*T) * (*modUnbalance);
+    unbalance->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
+    
+  } else
+    *unbalance = *modUnbalance;
+
+
+  myNode->saveAccelSensitivity(*unbalance, gradNum, numGrads);
+  
+  return 0;
+}
+
+int 
+TransformationDOF_Group::saveSensitivity(const Vector &u,
+					 const Vector &udot,
+					 const Vector &udotdot,
+					 int gradNum, int numGrads)
+{
+  // call base class method and return if no MP_Constraint
+  if (theMP == 0) {
+    return this->DOF_Group::saveSensitivity(u, udot, udotdot, gradNum, numGrads);
+  }
+  
+  int ok;
+
+  ok += this->saveDispSensitivity(u, gradNum, numGrads);
+  ok += this->saveVelSensitivity(udot, gradNum, numGrads);
+  ok += this->saveAccSensitivity(udotdot, gradNum, numGrads);
+
+  return ok;
 }
 
 void  

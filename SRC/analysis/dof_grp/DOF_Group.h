@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2005-11-28 21:40:46 $
+// $Revision: 1.12 $
+// $Date: 2006-12-05 20:05:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.h,v $
                                                                         
                                                                         
@@ -112,7 +112,14 @@ class DOF_Group: public TaggedObject
     virtual const Vector & getDispSensitivity(int gradNumber);
     virtual const Vector & getVelSensitivity(int gradNumber);
     virtual const Vector & getAccSensitivity(int gradNumber);
-    virtual int saveSensitivity(Vector *v,Vector *vdot,Vector *vdotdot,int gradNum,int numGrads);
+    virtual int saveDispSensitivity(const Vector &v,
+				    int gradNum, int numGrads);
+    virtual int saveVelSensitivity(const Vector &vdot,
+				   int gradNum, int numGrads);
+    virtual int saveAccSensitivity(const Vector &vdotdot,
+				   int gradNum, int numGrads);
+    virtual int saveSensitivity(const Vector &v, const Vector &vdot,
+				const Vector &vdotdot, int gradNum, int numGrads);
 // AddingSensitivity:END //////////////////////////////////////
     virtual void  Print(OPS_Stream&, int = 0) {return;};
     virtual void resetNodePtr(void);

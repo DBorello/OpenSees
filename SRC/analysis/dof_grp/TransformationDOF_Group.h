@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-08-03 19:12:26 $
+// $Revision: 1.6 $
+// $Date: 2006-12-05 20:05:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.h,v $
                                                                         
                                                                         
@@ -98,7 +98,11 @@ class TransformationDOF_Group: public DOF_Group
     const Vector & getDispSensitivity(int gradNumber);
     const Vector & getVelSensitivity(int gradNumber);
     const Vector & getAccSensitivity(int gradNumber);
-    int saveSensitivity(Vector *v,Vector *vdot,Vector *vdotdot,int gradNum,int numGrads);
+    int saveDispSensitivity(const Vector &v, int gradNum, int numGrads);
+    int saveVelSensitivity(const Vector &vdot, int gradNum, int numGrads);
+    int saveAccSensitivity(const Vector &vdotdot, int gradNum, int numGrads);
+    int saveSensitivity(const Vector &v, const Vector &vdot,
+			const Vector &vdotdot, int gradNum, int numGrads);
 // AddingSensitivity:END //////////////////////////////////////
     
   protected:
