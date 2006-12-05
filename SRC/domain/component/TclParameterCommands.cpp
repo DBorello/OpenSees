@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2006-09-05 20:21:04 $
+// $Revision: 1.2 $
+// $Date: 2006-12-05 21:05:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/TclParameterCommands.cpp,v $
 
 #include <stdlib.h>
@@ -137,7 +137,7 @@ TclModelBuilderParameterCommand(ClientData clientData, Tcl_Interp *interp,
 	return TCL_ERROR;
       }
       else {
-	theParameter->addObject(theObject, &argv[argStart], argc-argStart);
+	theParameter->addComponent(theObject, &argv[argStart], argc-argStart);
       }
     }
 

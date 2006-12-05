@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-09-05 20:21:04 $
+// $Revision: 1.2 $
+// $Date: 2006-12-05 21:05:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/Parameter.cpp,v $
 
 #include <classTags.h>
@@ -31,17 +31,25 @@ Parameter::Parameter(int passedTag,
 		     const char **argv, int argc)
   :TaggedObject(passedTag),
    theObjects(0), parameterID(0),
+   numComponents(0), maxNumComponents(0),
    numObjects(0), maxNumObjects(0)
 {
   int ok = -1;
 
   maxNumObjects = initialSize;
+  maxNumComponents = initialSize;
+
+  theComponents = new DomainComponent *[maxNumComponents];
 
   theObjects = new MovableObject *[maxNumObjects];
   parameterID = new int[maxNumObjects];
 
-  if (parentObject != 0)
+  if (parentObject != 0) {
     ok = parentObject->setParameter(argv, argc, *this);
+    theComponents[0] = parentObject;
+    numComponents = 1;
+  }
+
   
   if (ok < 0)
     opserr << "Parameter::Parameter "<< this->getTag() <<" -- unable to set parameter" << endln;
@@ -51,12 +59,17 @@ Parameter::Parameter(const Parameter &param):
   TaggedObject(param.getTag())
 {
   theInfo = param.theInfo;
+  numComponents = param.numComponents;
+  maxNumComponents = param.maxNumComponents;
   numObjects = param.numObjects;
   maxNumObjects = param.maxNumObjects;
 
+  theComponents = new DomainComponent *[maxNumComponents];
+  for (int i = 0; i < numComponents; i++)
+    theComponents[i] = param.theComponents[i];
+
   theObjects = new MovableObject *[maxNumObjects];
   parameterID = new int[maxNumObjects];
-
   for (int i = 0; i < numObjects; i++) {
     theObjects[i] = param.theObjects[i];
     parameterID[i] = param.parameterID[i];
@@ -65,6 +78,9 @@ Parameter::Parameter(const Parameter &param):
 
 Parameter::~Parameter()
 {
+  if (theComponents != 0)
+    delete [] theComponents;
+
   if (theObjects != 0)
     delete [] theObjects;
 
@@ -73,9 +89,24 @@ Parameter::~Parameter()
 }
 
 int
-Parameter::addObject(DomainComponent *parentObject,
-		     const char **argv, int argc)
+Parameter::addComponent(DomainComponent *parentObject,
+			const char **argv, int argc)
 {
+  if (numComponents == maxNumComponents) {
+    maxNumComponents += expandSize;
+    DomainComponent **newComponents = new DomainComponent *[maxNumComponents];
+
+    for (int i = 0; i < numComponents; i++) 
+      newComponents[i] = theComponents[i];
+
+    delete [] theComponents;
+
+    theComponents = newComponents;
+  }
+
+  theComponents[numComponents] = parentObject;
+  numComponents++;
+
   return (parentObject != 0) ?
     parentObject->setParameter(argv, argc, *this) : -1;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-09-05 20:21:04 $
+// $Revision: 1.2 $
+// $Date: 2006-12-05 21:05:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/Parameter.h,v $
 
 #ifndef Parameter_h
@@ -39,7 +39,7 @@ class Parameter : public TaggedObject
   Parameter(const Parameter &param);
   ~Parameter();
 
-  int addObject(DomainComponent *theObject, const char **argv, int argc);
+  int addComponent(DomainComponent *theObject, const char **argv, int argc);
   
   void Print(OPS_Stream &s, int flag =0);
   
@@ -53,12 +53,19 @@ class Parameter : public TaggedObject
   
  private:
   Information theInfo;
+
   enum {initialSize = 100};
   enum {expandSize = 100};
+
+  DomainComponent **theComponents;
+  int numComponents;
+  int maxNumComponents;
+
   MovableObject **theObjects;
-  int *parameterID;
   int numObjects;
   int maxNumObjects;
+
+  int *parameterID;
 };
 
 #endif
