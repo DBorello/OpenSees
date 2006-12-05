@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-10-27 23:05:30 $
+// $Revision: 1.3 $
+// $Date: 2006-12-05 20:08:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/NewmarkSensitivityIntegrator.cpp,v $
 
 
@@ -173,8 +173,16 @@ NewmarkSensitivityIntegrator::formEleResidual(FE_Element *theEle)
 
 
 		// Pre-compute the vectors involving a2, a3, etc.
-		Vector tmp1 = V*a2 + Vdot*a3 + Vdotdot*a4;
-		Vector tmp2 = V*a6 + Vdot*a7 + Vdotdot*a8;
+		//Vector tmp1 = V*a2 + Vdot*a3 + Vdotdot*a4;
+		Vector tmp1(vectorSize);
+		tmp1.addVector(0.0, V, a2);
+		tmp1.addVector(1.0, Vdot, a3);
+		tmp1.addVector(1.0, Vdotdot, a4);
+		//Vector tmp2 = V*a6 + Vdot*a7 + Vdotdot*a8;
+		Vector tmp2(vectorSize);
+		tmp2.addVector(0.0, V, a6);
+		tmp2.addVector(1.0, Vdot, a7);
+		tmp2.addVector(1.0, Vdotdot, a8);
 
 		if (massMatrixMultiplicator == 0)
 			massMatrixMultiplicator = new Vector(tmp1.Size());
@@ -394,55 +402,56 @@ NewmarkSensitivityIntegrator::saveSensitivity(const Vector & vNew,int gradNum,in
 	DOF_GrpIter &theDOFs = myModel->getDOFs();
 	DOF_Group *dofPtr;
 	while ((dofPtr = theDOFs()) != 0) {
-
-		const ID &id = dofPtr->getID();
-		int idSize = id.Size();
-		const Vector &dispSens = dofPtr->getDispSensitivity(gradNumber);	
-		for (i=0; i < idSize; i++) {
-			loc = id(i);
-			if (loc >= 0) {
-				V(loc) = dispSens(i);		
-			}
-		}
-
-		const Vector &velSens = dofPtr->getVelSensitivity(gradNumber);
-		for (i=0; i < idSize; i++) {
-			loc = id(i);
-			if (loc >= 0) {
-				Vdot(loc) = velSens(i);
-			}
-		}
-
-		const Vector &accelSens = dofPtr->getAccSensitivity(gradNumber);	
-		for (i=0; i < idSize; i++) {
-			loc = id(i);
-			if (loc >= 0) {
-				Vdotdot(loc) = accelSens(i);
-			}
-		}
+	  
+	  const ID &id = dofPtr->getID();
+	  int idSize = id.Size();
+	  const Vector &dispSens = dofPtr->getDispSensitivity(gradNumber);	
+	  for (i=0; i < idSize; i++) {
+	    loc = id(i);
+	    if (loc >= 0) {
+	      V(loc) = dispSens(i);		
+	    }
+	  }
+	  
+	  const Vector &velSens = dofPtr->getVelSensitivity(gradNumber);
+	  for (i=0; i < idSize; i++) {
+	    loc = id(i);
+	    if (loc >= 0) {
+	      Vdot(loc) = velSens(i);
+	    }
+	  }
+	  
+	  const Vector &accelSens = dofPtr->getAccSensitivity(gradNumber);	
+	  for (i=0; i < idSize; i++) {
+	    loc = id(i);
+	    if (loc >= 0) {
+	      Vdotdot(loc) = accelSens(i);
+	    }
+	  }
 	}
 
 
 	// Compute new acceleration and velocity vectors:
-	Vector *vNewPtr = new Vector(vectorSize);
-	Vector *vdotNewPtr = new Vector(vectorSize);
-	Vector *vdotdotNewPtr = new Vector(vectorSize);
-	(*vdotdotNewPtr) = vNew*a1 + V*a2 + Vdot*a3 + Vdotdot*a4;
-	(*vdotNewPtr) = vNew*a5 + V*a6 + Vdot*a7 + Vdotdot*a8;
-	(*vNewPtr) = vNew;
-
+	Vector vdotNew(vectorSize);
+	Vector vdotdotNew(vectorSize);
+	//(*vdotdotNewPtr) = vNew*a1 + V*a2 + Vdot*a3 + Vdotdot*a4;
+	vdotdotNew.addVector(0.0, vNew, a1);
+	vdotdotNew.addVector(1.0, V, a2);
+	vdotdotNew.addVector(1.0, Vdot, a3);
+	vdotdotNew.addVector(1.0, Vdotdot, a4);
+	//(*vdotNewPtr) = vNew*a5 + V*a6 + Vdot*a7 + Vdotdot*a8;
+	vdotNew.addVector(0.0, vNew, a5);
+	vdotNew.addVector(1.0, V, a6);
+	vdotNew.addVector(1.0, Vdot, a7);
+	vdotNew.addVector(1.0, Vdotdot, a8);
 
 	// Now we can save vNew, vdotNew and vdotdotNew
-    DOF_GrpIter &theDOFGrps = myModel->getDOFs();
-    DOF_Group 	*dofPtr1;
-    while ( (dofPtr1 = theDOFGrps() ) != 0)  {
-		dofPtr1->saveSensitivity(vNewPtr,vdotNewPtr,vdotdotNewPtr,gradNum,numGrads);
+	DOF_GrpIter &theDOFGrps = myModel->getDOFs();
+	DOF_Group 	*dofPtr1;
+	while ( (dofPtr1 = theDOFGrps() ) != 0)  {
+	  dofPtr1->saveSensitivity(vNew,vdotNew,vdotdotNew,gradNum,numGrads);
 	}
-
-	delete vNewPtr;
-	delete vdotNewPtr;
-	delete vdotdotNewPtr;
-
+	
 	return 0;
 }
 

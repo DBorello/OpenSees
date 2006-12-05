@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-03-04 00:46:02 $
+// $Revision: 1.4 $
+// $Date: 2006-12-05 20:08:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/StaticSensitivityIntegrator.cpp,v $
 
 
@@ -138,19 +138,15 @@ StaticSensitivityIntegrator::formSensitivityRHS(int passedGradNumber)
 int
 StaticSensitivityIntegrator::saveSensitivity(const Vector &v, int gradNum, int numGrads)
 {
-
-    DOF_GrpIter &theDOFGrps = theAnalysisModel->getDOFs();
-    DOF_Group 	*dofPtr;
-
-	Vector *vNewPtr = new Vector(v.Size());
-	(*vNewPtr) = v;
-    while ( (dofPtr = theDOFGrps() ) != 0)  {
-		dofPtr->saveSensitivity(vNewPtr,0,0,gradNum,numGrads);
-	}
-
-	delete vNewPtr;
-    
-    return 0;
+  DOF_GrpIter &theDOFGrps = theAnalysisModel->getDOFs();
+  DOF_Group 	*dofPtr;
+  
+  while ( (dofPtr = theDOFGrps() ) != 0)  {
+    //dofPtr->saveSensitivity(vNewPtr,0,0,gradNum,numGrads);
+    dofPtr->saveDispSensitivity(v,gradNum,numGrads);
+  }
+  
+  return 0;
 }
 
 
