@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-11-30 22:12:13 $
+// $Revision: 1.4 $
+// $Date: 2006-12-05 22:07:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PeerMotion.cpp,v $                                                                        
 
 // Written: fmk 
@@ -109,9 +109,12 @@ PeerMotion::PeerMotion(const char *earthquake,
   
   nextData = strstr(eqData, "DT");
   if (nextData == NULL) {
-    opserr << "PeerMotion::PeerMotion() - could not find dt in record, send email opensees-support@berkeley.edu";
-    free(eqData);
-    return;
+    nextData = strstr(eqData, "dt");
+    if (nextData == NULL) {
+      opserr << "PeerMotion::PeerMotion() - could not find dt in record, send email opensees-support@berkeley.edu";
+      free(eqData);
+      return;
+    }
   }
 
   nextData+=4; //DT= dT UNIT
