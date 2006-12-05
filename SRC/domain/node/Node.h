@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2006-09-05 20:46:04 $
+// $Revision: 1.11 $
+// $Date: 2006-12-05 20:02:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.h,v $
                                                                         
                                                                         
@@ -132,7 +132,9 @@ class Node : public DomainComponent
     Matrix getMassSensitivity(void);
     virtual const Matrix &getDampSensitivity(void);
     int    getCrdsSensitivity(void);
-    int	   saveSensitivity(Vector *v, Vector *vdot, Vector *vdotdot, int gradNum, int numGrads);
+    int	   saveDispSensitivity(const Vector &v, int gradNum, int numGrads);
+    int	   saveVelSensitivity(const Vector &vdot, int gradNum, int numGrads);
+    int	   saveAccelSensitivity(const Vector &vdot, int gradNum, int numGrads);
     double getDispSensitivity(int dof, int gradNum);
     double getVelSensitivity(int dof, int gradNum);
     double getAccSensitivity(int dof, int gradNum);

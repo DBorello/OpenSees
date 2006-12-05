@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2006-09-05 20:46:04 $
+// $Revision: 1.23 $
+// $Date: 2006-12-05 20:02:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -1818,41 +1818,46 @@ Node::activateParameter(int passedParameterID)
 	return 0;
 }
 
+int 
+Node::saveDispSensitivity(const Vector &v, int gradNum, int numGrads)
+{
+  // If the sensitivity matrices are not already created:
+  if (dispSensitivity == 0) {
+    dispSensitivity = new Matrix( numberDOF, numGrads );
+  } 
 
+  for (int i=0; i<numberDOF; i++ )
+    (*dispSensitivity)(i,gradNum-1) = v(i);
+
+  return 0;
+}
 
 int 
-Node::saveSensitivity(Vector *v,Vector *vdot,Vector *vdotdot, int gradNum, int numGrads)
+Node::saveVelSensitivity(const Vector &vdot, int gradNum, int numGrads)
 {
-	// Initial declarations
-	int i;
+  // If the sensitivity matrices are not already created:
+  if (velSensitivity == 0) {
+    velSensitivity = new Matrix( numberDOF, numGrads );
+  } 
 
-	// If the sensitivity matrices are not already created:
-	if (dispSensitivity == 0) {
-		dispSensitivity = new Matrix( numberDOF, numGrads );
-	} 
-	if ( (vdot!=0) && (vdotdot!=0) ) {
-		if (velSensitivity == 0) {
-			velSensitivity = new Matrix( numberDOF, numGrads );
-		} 
-		if (accSensitivity == 0) {
-			accSensitivity = new Matrix( numberDOF, numGrads );
-		}
-	}
+  for (int i=0; i<numberDOF; i++ )
+    (*velSensitivity)(i,gradNum-1) = vdot(i);
 
-	// Put GRADIENT VECTORS into COLUMNS of matrices
-	for (i=0; i<numberDOF; i++ ) {
-		(*dispSensitivity)(i,gradNum-1) = (*v)(i);
-	}
-	if ( (vdot!=0) && (vdotdot!=0) ) {
-		for (i=0; i<numberDOF; i++ ) {
-			(*velSensitivity)(i,gradNum-1) = (*vdot)(i);
-		}
-		for (i=0; i<numberDOF; i++ ) {
-			(*accSensitivity)(i,gradNum-1) = (*vdotdot)(i);
-		}
-	}
+  return 0;
+}
 
-    return 0;
+int 
+Node::saveAccelSensitivity(const Vector &vdotdot, int gradNum, int numGrads)
+{
+  // If the sensitivity matrices are not already created:
+  if (accSensitivity == 0) {
+    accSensitivity = new Matrix( numberDOF, numGrads );
+  } 
+
+  for (int i=0; i<numberDOF; i++ )
+    (*accSensitivity)(i,gradNum-1) = vdotdot(i);
+
+  return 0;
 }
 
 double 
