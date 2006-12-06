@@ -15,7 +15,7 @@ public:
 						ReliabilityDomain *passedReliabilityDomain);
 	~TclMatlabGFunEvaluator();
 
-	int		evaluate_g(Vector passed_x);
+	int		evaluate_g(const Vector &passed_x);
 	double	get_g();
 
 protected:

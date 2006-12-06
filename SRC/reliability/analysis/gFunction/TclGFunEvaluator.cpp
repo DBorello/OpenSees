@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-10-27 23:45:43 $
+// $Revision: 1.4 $
+// $Date: 2006-12-06 23:14:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/TclGFunEvaluator.cpp,v $
 
 
@@ -37,6 +37,7 @@
 #include <ReliabilityDomain.h>
 #include <LimitStateFunction.h>
 #include <RandomVariablePositioner.h>
+#include <RandomVariablePositionerIter.h>
 //#include <fstream>
 #include <tcl.h>
 #include <string.h>
@@ -60,7 +61,7 @@ TclGFunEvaluator::~TclGFunEvaluator()
 
 
 int
-TclGFunEvaluator::runGFunAnalysis(Vector x)
+TclGFunEvaluator::runGFunAnalysis(const Vector &x)
 {	
 	// Initial declarations
 	char theCommand[100];
@@ -75,13 +76,13 @@ TclGFunEvaluator::runGFunAnalysis(Vector x)
 
 
 	// Put random variables into the structural domain according to the RandomVariablePositioners
-	int numberOfRandomVariablePositioners = theReliabilityDomain->getNumberOfRandomVariablePositioners();
-	RandomVariablePositioner *theRandomVariablePositioner;
 	int rvNumber;
-	for ( i=1 ; i<=numberOfRandomVariablePositioners ; i++ )  {
-		theRandomVariablePositioner = theReliabilityDomain->getRandomVariablePositionerPtr(i);
-		rvNumber				= theRandomVariablePositioner->getRvNumber();
-		theRandomVariablePositioner->update(x(rvNumber-1));
+	RandomVariablePositionerIter &rvPosIter =
+	  theReliabilityDomain->getRandomVariablePositioners();
+	RandomVariablePositioner *theRVPos;
+	while ((theRVPos = rvPosIter()) != 0) {
+	  rvNumber = theRVPos->getRvNumber();
+	  theRVPos->update(x(rvNumber-1));
 	}
 
 //////////////////////////////////////////////////////////////////////////

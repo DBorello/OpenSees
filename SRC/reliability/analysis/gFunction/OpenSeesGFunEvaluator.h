@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-10-27 23:45:43 $
+// $Revision: 1.8 $
+// $Date: 2006-12-06 23:14:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.h,v $
 
 
@@ -55,7 +55,7 @@ public:
 						int nsteps, double dt);
 	~OpenSeesGFunEvaluator();
 
-	int		runGFunAnalysis(Vector x);
+	int		runGFunAnalysis(const Vector &x);
 	int		tokenizeSpecials(TCL_Char *theExpression);
 
 	void    setNsteps(int nsteps);
@@ -68,7 +68,7 @@ private:
 	int removeRecorders();
 	char *rec_node_occurrence(char tempchar[100], bool createRecorders, int &line, int &column);
 	char *rec_element_occurrence(char tempchar[100], bool createRecorders, int &line, int &column);
-	char *fileName;
+	char fileName[256];
 	int nsteps;
 	double dt;
 

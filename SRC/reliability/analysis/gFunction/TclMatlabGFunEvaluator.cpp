@@ -30,7 +30,7 @@ TclMatlabGFunEvaluator::~TclMatlabGFunEvaluator()
 
 
 int
-TclMatlabGFunEvaluator::evaluate_g(Vector x)
+TclMatlabGFunEvaluator::evaluate_g(const Vector &x)
 {
 
 	// "Download" limit-state function from reliability domain

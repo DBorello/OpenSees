@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-10-27 23:45:43 $
+// $Revision: 1.7 $
+// $Date: 2006-12-06 23:14:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/BasicGFunEvaluator.cpp,v $
 
 
@@ -55,7 +55,7 @@ BasicGFunEvaluator::~BasicGFunEvaluator()
 
 
 int
-BasicGFunEvaluator::runGFunAnalysis(Vector x)
+BasicGFunEvaluator::runGFunAnalysis(const Vector &x)
 {
 	// Nothing to compute for this kind of gFunEvaluator
 	

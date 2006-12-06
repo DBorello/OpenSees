@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-10-27 23:45:43 $
+// $Revision: 1.5 $
+// $Date: 2006-12-06 23:14:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/GFunEvaluator.cpp,v $
 
 
@@ -76,7 +76,7 @@ GFunEvaluator::getNumberOfEvaluations()
 
 
 int 
-GFunEvaluator::evaluateG(Vector x)
+GFunEvaluator::evaluateG(const Vector &x)
 {
 	numberOfEvaluations++;
 

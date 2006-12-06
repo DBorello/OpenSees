@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2006-11-01 00:12:22 $
+// $Revision: 1.12 $
+// $Date: 2006-12-06 23:14:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.cpp,v $
 
 
@@ -37,6 +37,7 @@
 #include <ReliabilityDomain.h>
 #include <LimitStateFunction.h>
 #include <RandomVariablePositioner.h>
+#include <RandomVariablePositionerIter.h>
 
 #include <tcl.h>
 #include <string.h>
@@ -54,7 +55,6 @@ OpenSeesGFunEvaluator::OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
 					TCL_Char *passedFileName)
 :GFunEvaluator(passedTclInterp, passedReliabilityDomain)
 {
-	fileName = new char[256];
 	strcpy(fileName,passedFileName);
 	nsteps = 0;
 	dt = 0.0;
@@ -69,7 +69,7 @@ OpenSeesGFunEvaluator::OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
 					int p_nsteps, double p_dt)
 :GFunEvaluator(passedTclInterp, passedReliabilityDomain)
 {
-	fileName = 0;
+	fileName[0] = '\0';
 	nsteps = p_nsteps;
 	dt = p_dt;
 	// (here the user has specified number of steps and possibly dt)
@@ -79,13 +79,12 @@ OpenSeesGFunEvaluator::OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
 
 OpenSeesGFunEvaluator::~OpenSeesGFunEvaluator()
 {
-	if (fileName != 0)
-		delete [] fileName;
+  
 }
 
 
 int
-OpenSeesGFunEvaluator::runGFunAnalysis(Vector x)
+OpenSeesGFunEvaluator::runGFunAnalysis(const Vector &x)
 {
 	// Zero out the response in the structural domain to make ready for next analysis
 	char theRevertToStartCommand[10] = "reset";
@@ -93,14 +92,13 @@ OpenSeesGFunEvaluator::runGFunAnalysis(Vector x)
 
 
 	// Put random variables into the structural domain according to the RandomVariablePositioners
-	int numberOfRandomVariablePositioners = theReliabilityDomain->getNumberOfRandomVariablePositioners();
-	RandomVariablePositioner *theRandomVariablePositioner;
 	int rvNumber;
-	int i;
-	for ( i=1 ; i<=numberOfRandomVariablePositioners ; i++ )  {
-		theRandomVariablePositioner = theReliabilityDomain->getRandomVariablePositionerPtr(i);
-		rvNumber				= theRandomVariablePositioner->getRvNumber();
-		theRandomVariablePositioner->update(x(rvNumber-1));
+	RandomVariablePositionerIter &rvPosIter =
+	  theReliabilityDomain->getRandomVariablePositioners();
+	RandomVariablePositioner *theRVPos;
+	while ((theRVPos = rvPosIter()) != 0) {
+	  rvNumber = theRVPos->getRvNumber();
+	  theRVPos->update(x(rvNumber-1));
 	}
 
 
@@ -153,7 +151,7 @@ OpenSeesGFunEvaluator::tokenizeSpecials(TCL_Char *theExpression)
 
 
 	char separators[5] = "}{";
-	char *lsf_forTokenizing = new char[1000];
+	char lsf_forTokenizing[1000];
 	strcpy(lsf_forTokenizing,theExpression);
 	char lsf_expression[1000] = "";
 	char *dollarSign = "$";
@@ -238,14 +236,12 @@ OpenSeesGFunEvaluator::tokenizeSpecials(TCL_Char *theExpression)
 			sprintf(tclAssignment, "set %s  %25.20e", variableName, fileValue);
 			Tcl_Eval( theTclInterp, tclAssignment);
 
-			delete variableName;
+			delete [] variableName;
 
 		}
 
 		tokenPtr = strtok( NULL, separators);
 	}
-
-	delete [] lsf_forTokenizing;
 
 	// Re-create possible recorders for subsequent analyses
 	createRecorders();
@@ -287,7 +283,7 @@ OpenSeesGFunEvaluator::createRecorders()
 	// Initial declarations
 	char tempchar[100]="";
 	char separators[5] = "}{";
-	char *lsf_forTokenizing = new char[500];
+	char lsf_forTokenizing[500];
 	strcpy(lsf_forTokenizing,theExpression);
 
 	// Go through the limit-state function
@@ -307,8 +303,6 @@ OpenSeesGFunEvaluator::createRecorders()
 
 		tokenPtr = strtok( NULL, separators);
 	}
-
-	delete [] lsf_forTokenizing;
 
 	return 0;
 }
