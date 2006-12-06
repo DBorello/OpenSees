@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-09-05 22:49:36 $
+// $Revision: 1.7 $
+// $Date: 2006-12-06 23:03:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.cpp,v $
 
 
@@ -43,6 +43,10 @@
 #include <Filter.h>
 #include <Spectrum.h>
 
+#include <RandomVariableIter.h>
+#include <RandomVariablePositionerIter.h>
+#include <ParameterPositionerIter.h>
+#include <LimitStateFunctionIter.h>
 
 ReliabilityDomain::ReliabilityDomain()
 {
@@ -55,6 +59,11 @@ ReliabilityDomain::ReliabilityDomain()
 	theFiltersPtr = new ArrayOfTaggedObjects (256);
 	theSpectraPtr = new ArrayOfTaggedObjects (256);
 	tagOfActiveLimitStateFunction = 1;
+
+	theRVIter = new RandomVariableIter(theRandomVariablesPtr);
+	theRVPosIter = new RandomVariablePositionerIter(theRandomVariablePositionersPtr);
+	theParamPosIter = new ParameterPositionerIter(theParameterPositionersPtr);
+	theLSFIter = new LimitStateFunctionIter(theLimitStateFunctionsPtr);
 }
 
 ReliabilityDomain::~ReliabilityDomain()
@@ -75,6 +84,15 @@ ReliabilityDomain::~ReliabilityDomain()
 		delete theSpectraPtr;
 	if (!theFiltersPtr)
 		delete theFiltersPtr;
+
+	if (theRVIter != 0)
+	  delete theRVIter;
+	if (theRVPosIter != 0)
+	  delete theRVPosIter;
+	if (theParamPosIter != 0)
+	  delete theParamPosIter;
+	if (theLSFIter != 0)
+	  delete theLSFIter;
 }
 
 
@@ -136,6 +154,33 @@ ReliabilityDomain::addFilter(Filter *theFilter)
 
 
 
+RandomVariableIter &
+ReliabilityDomain::getRandomVariables(void)
+{
+  theRVIter->reset();
+  return *theRVIter;
+}
+
+RandomVariablePositionerIter &
+ReliabilityDomain::getRandomVariablePositioners(void)
+{
+  theRVPosIter->reset();
+  return *theRVPosIter;
+}
+
+ParameterPositionerIter &
+ReliabilityDomain::getParameterPositioners(void)
+{
+  theParamPosIter->reset();
+  return *theParamPosIter;
+}
+
+LimitStateFunctionIter &
+ReliabilityDomain::getLimitStateFunctions(void)
+{
+  theLSFIter->reset();
+  return *theLSFIter;
+}
 
 RandomVariable *
 ReliabilityDomain::getRandomVariablePtr(int tag)
