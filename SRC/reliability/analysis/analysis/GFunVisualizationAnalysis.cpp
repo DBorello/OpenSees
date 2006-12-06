@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-10-27 23:45:41 $
+// $Revision: 1.5 $
+// $Date: 2006-12-06 22:32:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/GFunVisualizationAnalysis.cpp,v $
 
 
@@ -71,10 +71,8 @@ GFunVisualizationAnalysis::GFunVisualizationAnalysis(
 	theReliabilityConvergenceCheck = 0;
 	theStartPoint = 0;
 
-	outputFileName = new char[256];
 	strcpy(outputFileName,passedOutputFileName);
 
-	convFileName = new char[256];
 	strcpy(convFileName,passedConvFileName);
 
 	convResults = passedConvResults;
@@ -96,10 +94,7 @@ GFunVisualizationAnalysis::GFunVisualizationAnalysis(
 
 GFunVisualizationAnalysis::~GFunVisualizationAnalysis()
 {
-	if (outputFileName != 0)
-		delete [] outputFileName;
-	if (convFileName != 0)
-		delete [] convFileName;
+
 }
 
 

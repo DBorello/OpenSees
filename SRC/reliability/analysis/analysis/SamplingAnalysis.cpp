@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-06-16 21:57:40 $
+// $Revision: 1.5 $
+// $Date: 2006-12-06 22:32:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SamplingAnalysis.cpp,v $
 
 
@@ -81,7 +81,6 @@ SamplingAnalysis::SamplingAnalysis(	ReliabilityDomain *passedReliabilityDomain,
 	targetCOV = passedTargetCOV;
 	samplingStdv = passedSamplingStdv;
 	printFlag = passedPrintFlag;
-	fileName = new char[256];
 	strcpy(fileName,passedFileName);
 	startPoint = pStartPoint;
 	analysisTypeTag = passedAnalysisTypeTag;
@@ -92,8 +91,7 @@ SamplingAnalysis::SamplingAnalysis(	ReliabilityDomain *passedReliabilityDomain,
 
 SamplingAnalysis::~SamplingAnalysis()
 {
-	if (fileName != 0)
-		delete [] fileName;
+
 }
 
 
@@ -125,18 +123,10 @@ SamplingAnalysis::analyze(void)
 	Vector u(numRV);
 	Vector randomArray(numRV);
 	LimitStateFunction *theLimitStateFunction = 0;
-	NormalRV *aStdNormRV = 0;
-	aStdNormRV = new NormalRV(1,0.0,1.0,0.0);
+	NormalRV aStdNormRV(1,0.0,1.0,0.0);
 //	ofstream *outputFile = 0;
 	bool failureHasOccured = false;
 	char myString[50];
-
-	
-	// Check if computer ran out of memory
-	if (aStdNormRV==0) {
-		opserr << "SamplingAnalysis::analyze() - out of memory while instantiating internal objects." << endln;
-		return -1;
-	}
 
 	
 	// Establish covariance matrix
@@ -152,43 +142,36 @@ SamplingAnalysis::analyze(void)
 
 
 	// Create object to do matrix operations on the covariance matrix
-	MatrixOperations *theMatrixOperations = 0;
-	theMatrixOperations = new MatrixOperations(covariance);
-	if (theMatrixOperations == 0) {
-		opserr << "SamplingAnalysis::analyze() - could not create" << endln
-			<< " the object to perform matrix operations." << endln;
-		return -1;
-	}
-
+	MatrixOperations theMatrixOperations(covariance);
 
 	// Cholesky decomposition of covariance matrix
-	result = theMatrixOperations->computeLowerCholesky();
+	result = theMatrixOperations.computeLowerCholesky();
 	if (result < 0) {
 		opserr << "SamplingAnalysis::analyze() - could not compute" << endln
 			<< " the Cholesky decomposition of the covariance matrix." << endln;
 		return -1;
 	}
-	chol_covariance = theMatrixOperations->getLowerCholesky();
+	chol_covariance = theMatrixOperations.getLowerCholesky();
 
 
 	// Inverse of covariance matrix
-	result = theMatrixOperations->computeInverse();
+	result = theMatrixOperations.computeInverse();
 	if (result < 0) {
 		opserr << "SamplingAnalysis::analyze() - could not compute" << endln
 			<< " the inverse of the covariance matrix." << endln;
 		return -1;
 	}
-	inv_covariance = theMatrixOperations->getInverse();
+	inv_covariance = theMatrixOperations.getInverse();
 
 
 	// Compute the determinant, knowing that this is a diagonal matrix
-	result = theMatrixOperations->computeTrace();
+	result = theMatrixOperations.computeTrace();
 	if (result < 0) {
 		opserr << "SamplingAnalysis::analyze() - could not compute" << endln
 			<< " the trace of the covariance matrix." << endln;
 		return -1;
 	}
-	det_covariance = theMatrixOperations->getTrace();
+	det_covariance = theMatrixOperations.getTrace();
 	
 
 	// Pre-compute some factors to minimize computations inside simulation loop
@@ -577,7 +560,7 @@ SamplingAnalysis::analyze(void)
 			
 				// Store results
 				if (analysisTypeTag == 1) {
-					beta_sim = -aStdNormRV->getInverseCDFvalue(q_bar(lsf-1));
+					beta_sim = -aStdNormRV.getInverseCDFvalue(q_bar(lsf-1));
 					pf_sim	 = q_bar(lsf-1);
 					cov_sim	 = cov_of_q_bar(lsf-1);
 					num_sim  = k;
@@ -661,8 +644,6 @@ SamplingAnalysis::analyze(void)
 
 	// Clean up
 	resultsOutputFile.close();
-	delete theMatrixOperations;
-	delete aStdNormRV;
 
 	return 0;
 }

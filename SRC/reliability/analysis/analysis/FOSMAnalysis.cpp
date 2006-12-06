@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-10-27 23:45:41 $
+// $Revision: 1.2 $
+// $Date: 2006-12-06 22:32:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FOSMAnalysis.cpp,v $
 
 
@@ -62,15 +62,13 @@ FOSMAnalysis::FOSMAnalysis(ReliabilityDomain *passedReliabilityDomain,
 	theGFunEvaluator		= passedGFunEvaluator;
 	theGradGEvaluator = passedGradGEvaluator;
 	theTclInterp			= passedTclInterp;
-	fileName = new char[256];
 	strcpy(fileName,passedFileName);
 }
 
 
 FOSMAnalysis::~FOSMAnalysis()
 {
-	if (fileName != 0)
-	delete [] fileName;
+
 }
 
 

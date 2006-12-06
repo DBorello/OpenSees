@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-10-27 23:45:41 $
+// $Revision: 1.4 $
+// $Date: 2006-12-06 22:32:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/OutCrossingAnalysis.h,v $
 
 //
@@ -74,7 +74,7 @@ private:
 	int stepsToEnd;
 	int sampleFreq;
 	double littleDeltaT;
-	char *fileName;
+	char fileName[256];
 
 	// A private method:
 	double functionToIntegrate(double rho, double beta1, double beta2);

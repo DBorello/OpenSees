@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-04-28 20:51:25 $
+// $Revision: 1.5 $
+// $Date: 2006-12-06 22:32:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FragilityAnalysis.cpp,v $
 
 
@@ -69,7 +69,6 @@ FragilityAnalysis::FragilityAnalysis(ReliabilityDomain *passedReliabilityDomain,
 	theFindDesignPointAlgorithm = passedFindDesignPointAlgorithm;
 	theGradGEvaluator = passedGradGEvaluator;
 
-	fileName = new char[256];
 	strcpy(fileName,passedFileName);
 
 	theTclInterp = passedTclInterp;
@@ -78,8 +77,7 @@ FragilityAnalysis::FragilityAnalysis(ReliabilityDomain *passedReliabilityDomain,
 
 FragilityAnalysis::~FragilityAnalysis()
 {
-	if (fileName != 0)
-	delete [] fileName;
+
 }
 
 
@@ -178,7 +176,7 @@ FragilityAnalysis::analyze(void)
 			else {
 				char separators[5] = "_}{";
 				char *theExpression = theLimitStateFunction->getExpression();
-				char *lsf_forTokenizing = new char[1000];
+				char lsf_forTokenizing[1000];
 				strcpy(lsf_forTokenizing,theExpression);
 				char *tokenPtr = strtok( lsf_forTokenizing, separators);
 				while ( tokenPtr != NULL ) {

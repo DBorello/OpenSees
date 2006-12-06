@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-10-27 23:45:41 $
+// $Revision: 1.8 $
+// $Date: 2006-12-06 22:32:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FORMAnalysis.cpp,v $
 
 
@@ -63,7 +63,6 @@ FORMAnalysis::FORMAnalysis(ReliabilityDomain *passedReliabilityDomain,
 	theReliabilityDomain = passedReliabilityDomain;
 	theFindDesignPointAlgorithm = passedFindDesignPointAlgorithm;
 	theProbabilityTransformation = passedProbabilityTransformation;
-	fileName = new char[256];
 	strcpy(fileName,passedFileName);
 	relSensTag = p_relSensTag;
 }
@@ -71,8 +70,7 @@ FORMAnalysis::FORMAnalysis(ReliabilityDomain *passedReliabilityDomain,
 
 FORMAnalysis::~FORMAnalysis()
 {
-	if (fileName != 0)
-		delete [] fileName;
+
 }
 
 
@@ -104,18 +102,10 @@ FORMAnalysis::analyze(void)
 	int numLsf = theReliabilityDomain->getNumberOfLimitStateFunctions();
 	RandomVariable *aRandomVariable;
 	LimitStateFunction *theLimitStateFunction;
-	NormalRV *aStdNormRV=0;
-	aStdNormRV = new NormalRV(1,0.0,1.0,0.0);
+	NormalRV aStdNormRV(1,0.0,1.0,0.0);
 	Vector delta(numRV); 
 	Vector eta(numRV);
 	Vector kappa(numRV);
-
-
-	// Check if computer ran out of memory
-	if (aStdNormRV==0) {
-		opserr << "FORMAnalysis::analyze() - out of memory while instantiating internal objects." << endln;
-		return -1;
-	}
 
 
 	// Open output file
@@ -175,7 +165,7 @@ FORMAnalysis::analyze(void)
 
 			// Postprocessing
 			beta = alpha ^ uStar;
-			pf1 = 1.0 - aStdNormRV->getCDFvalue(beta);
+			pf1 = 1.0 - aStdNormRV.getCDFvalue(beta);
 
 
 			// Reliability sensitivity analysis wrt. mean/stdv
@@ -310,7 +300,6 @@ FORMAnalysis::analyze(void)
 
 	// Clean up
 	outputFile.close();
-	delete aStdNormRV;
 
 	// Print summary of results to screen (more here!!!)
 	opserr << "FORMAnalysis completed." << endln;

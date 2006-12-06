@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-10-27 23:45:41 $
+// $Revision: 1.7 $
+// $Date: 2006-12-06 22:32:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SORMAnalysis.cpp,v $
 
 
@@ -57,15 +57,13 @@ SORMAnalysis::SORMAnalysis(	ReliabilityDomain *passedReliabilityDomain,
 {
 	theReliabilityDomain = passedReliabilityDomain;
 	theCurvaturesAlgorithm = passedCurvaturesAlgorithm;
-	fileName = new char[256];
 	strcpy(fileName,passedFileName);
 }
 
 
 SORMAnalysis::~SORMAnalysis()
 {
-	if (fileName != 0)
-		delete [] fileName;
+  
 }
 
 
@@ -88,15 +86,7 @@ SORMAnalysis::analyze(void)
 	double pf2Breitung;
 	double betaBreitung;
 	LimitStateFunction *theLimitStateFunction;
-	NormalRV *aStdNormRV = 0;
-	aStdNormRV = new NormalRV(1,0.0,1.0,0.0);
-
-
-	// Check if computer ran out of memory
-	if (aStdNormRV==0) {
-		opserr << "SORMAnalysis::analyze() - out of memory while instantiating internal objects." << endln;
-		return -1;
-	}
+	NormalRV aStdNormRV(1,0.0,1.0,0.0);
 
 
 	// Number of limit-state functions
@@ -149,13 +139,13 @@ SORMAnalysis::analyze(void)
 
 
 		// Compute failure probability by "Breitung"
-		double denominator = aStdNormRV->getCDFvalue(-beta);
+		double denominator = aStdNormRV.getCDFvalue(-beta);
 		if (denominator == 0.0) {
 			opserr << "SORMAnalysis::analyze() - denominator zero " << endln
 				<< " due to too large reliability index value." << endln;
 			return -1;
 		}
-		psi_beta = aStdNormRV->getPDFvalue(beta)/denominator;
+		psi_beta = aStdNormRV.getPDFvalue(beta)/denominator;
 		product = 1.0;
 		for (i=0; i<numberOfCurvatures; i++ ) {
 			product = product / sqrt(1.0+psi_beta*curvatures(i));
@@ -164,7 +154,7 @@ SORMAnalysis::analyze(void)
 
 
 		// Compute corresponding beta's
-		betaBreitung = -aStdNormRV->getInverseCDFvalue(pf2Breitung);
+		betaBreitung = -aStdNormRV.getInverseCDFvalue(pf2Breitung);
 
 
 		// Put results into reliability domain
@@ -198,7 +188,6 @@ SORMAnalysis::analyze(void)
 
 	// Clean up
 	outputFile.close();
-	delete aStdNormRV;
 
 	return 0;
 }

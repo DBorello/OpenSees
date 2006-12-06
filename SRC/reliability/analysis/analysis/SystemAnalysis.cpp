@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-10-27 23:45:41 $
+// $Revision: 1.7 $
+// $Date: 2006-12-06 22:32:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.cpp,v $
 
 
@@ -56,15 +56,13 @@ SystemAnalysis::SystemAnalysis(ReliabilityDomain *passedReliabilityDomain,
 :ReliabilityAnalysis()
 {
 	theReliabilityDomain = passedReliabilityDomain;
-	fileName = new char[256];
 	strcpy(fileName,passedFileName);
 }
 
 
 SystemAnalysis::~SystemAnalysis()
 {
-	if (fileName != 0)
-		delete [] fileName;
+  
 }
 
 

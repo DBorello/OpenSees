@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-10-27 23:45:41 $
+// $Revision: 1.6 $
+// $Date: 2006-12-06 22:32:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SORMAnalysis.h,v $
 
 
@@ -57,7 +57,7 @@ protected:
 private:
 	ReliabilityDomain *theReliabilityDomain;
 	FindCurvatures *theCurvaturesAlgorithm;
-	char *fileName;
+	char fileName[256];
 };
 
 #endif

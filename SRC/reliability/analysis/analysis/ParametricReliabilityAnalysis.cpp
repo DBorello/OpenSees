@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2004-08-27 17:55:37 $
+// $Revision: 1.3 $
+// $Date: 2006-12-06 22:32:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/ParametricReliabilityAnalysis.cpp,v $
 
 
@@ -69,7 +69,6 @@ ParametricReliabilityAnalysis::ParametricReliabilityAnalysis(ReliabilityDomain *
 	theFindDesignPointAlgorithm = passedFindDesignPointAlgorithm;
 	theGradGEvaluator = passedGradGEvaluator;
 
-	fileName = new char[256];
 	strcpy(fileName,passedFileName);
 
 	theTclInterp = passedTclInterp;
@@ -78,8 +77,7 @@ ParametricReliabilityAnalysis::ParametricReliabilityAnalysis(ReliabilityDomain *
 
 ParametricReliabilityAnalysis::~ParametricReliabilityAnalysis()
 {
-	if (fileName != 0)
-	delete [] fileName;
+
 }
 
 
@@ -179,7 +177,7 @@ ParametricReliabilityAnalysis::analyze(void)
 			else {
 				char separators[5] = "_}{";
 				char *theExpression = theLimitStateFunction->getExpression();
-				char *lsf_forTokenizing = new char[1000];
+				char lsf_forTokenizing[1000];
 				strcpy(lsf_forTokenizing,theExpression);
 				char *tokenPtr = strtok( lsf_forTokenizing, separators);
 				while ( tokenPtr != NULL ) {
