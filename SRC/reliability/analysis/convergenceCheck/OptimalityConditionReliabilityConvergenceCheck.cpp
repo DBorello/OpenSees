@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-10-27 23:45:42 $
+// $Revision: 1.3 $
+// $Date: 2006-12-06 22:50:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/convergenceCheck/OptimalityConditionReliabilityConvergenceCheck.cpp,v $
 
 
@@ -75,7 +75,7 @@ OptimalityConditionReliabilityConvergenceCheck::setScaleValue(double passedScale
 
 
 int	
-OptimalityConditionReliabilityConvergenceCheck::check(Vector u, double g, Vector gradG)
+OptimalityConditionReliabilityConvergenceCheck::check(const Vector &u, double g, const Vector &gradG)
 {
 	if (scaleValue == 0.0) {
 		opserr << "OptimalityConditionReliabilityConvergenceCheck::check() --" << endln

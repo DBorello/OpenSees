@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:38:54 $
+// $Revision: 1.2 $
+// $Date: 2006-12-06 22:50:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/convergenceCheck/ReliabilityConvergenceCheck.h,v $
 
 
@@ -43,7 +43,7 @@ public:
 	ReliabilityConvergenceCheck();
 	virtual ~ReliabilityConvergenceCheck();
 
-	virtual int	check(Vector u, double g, Vector gradG) = 0;
+	virtual int check(const Vector &u, double g, const Vector &gradG) = 0;
 	virtual int getNumberOfCriteria() = 0;
 	virtual double getCriteriaValue(int whichCriteria) = 0;
 	virtual int setScaleValue(double scaleValue) = 0;
