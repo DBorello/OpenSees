@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-10-27 23:45:42 $
+// $Revision: 1.5 $
+// $Date: 2006-12-06 22:53:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.h,v $
 
 
@@ -123,7 +123,7 @@ private:
 	Vector *designPoint_uStar;
 
 	int printFlag;
-	char *fileNamePrint;
+	char fileNamePrint[256];
 	int numberOfEvaluations;
 };
 

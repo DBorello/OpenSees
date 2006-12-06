@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-10-27 23:45:42 $
+// $Revision: 1.8 $
+// $Date: 2006-12-06 22:53:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.cpp,v $
 
 
@@ -85,7 +85,6 @@ SearchWithStepSizeAndStepDirection::SearchWithStepSizeAndStepDirection(
 	startPoint						= pStartPoint;
 	printFlag						= pprintFlag;
 	numberOfEvaluations =0;
-	fileNamePrint = new char[256];
 	if (printFlag != 0) {
 		strcpy(fileNamePrint,pFileNamePrint);
 	}
@@ -98,8 +97,7 @@ SearchWithStepSizeAndStepDirection::SearchWithStepSizeAndStepDirection(
 
 SearchWithStepSizeAndStepDirection::~SearchWithStepSizeAndStepDirection()
 {
-	if (fileNamePrint!=0)
-		delete [] fileNamePrint;
+  
 }
 
 
