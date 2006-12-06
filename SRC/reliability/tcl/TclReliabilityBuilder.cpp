@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2006-09-05 23:15:02 $
+// $Revision: 1.18 $
+// $Date: 2006-12-06 23:21:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -459,7 +459,7 @@ TclReliabilityModelBuilder_addRandomVariable(ClientData clientData,Tcl_Interp *i
 
 		if (strcmp(argv[3],"-list") == 0) {
 
-			numPoints = floor((argc-4)/2.0);
+		  numPoints = (argc-4) % 2;
 			Vector temp_xPoints(numPoints);
 			Vector temp_PDFpoints(numPoints);
 
@@ -5441,6 +5441,7 @@ TclReliabilityModelBuilder_inputCheck(ClientData clientData, Tcl_Interp *interp,
 		}
 	}
 	
+	/*
 	num = theReliabilityDomain->getNumberOfRandomVariablePositioners();
 	for (i=1; i<=num; i++) {
 		component = theReliabilityDomain->getRandomVariablePositionerPtr(i);
@@ -5449,7 +5450,8 @@ TclReliabilityModelBuilder_inputCheck(ClientData clientData, Tcl_Interp *interp,
 			return TCL_ERROR;
 		}
 	}
-	
+	*/
+
 	num = theReliabilityDomain->getNumberOfCorrelationCoefficients();
 	for (i=1; i<=num; i++) {
 		component = theReliabilityDomain->getCorrelationCoefficientPtr(i);
