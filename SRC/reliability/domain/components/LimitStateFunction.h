@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-10-27 23:04:38 $
+// $Revision: 1.7 $
+// $Date: 2006-12-07 01:45:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.h,v $
 
 
@@ -88,9 +88,9 @@ private:
 
 	int tokenizeIt(TCL_Char *expression);
 
-	char *originalExpression;
-	char *tokenizedExpression;
-	char *expressionWithAddition;
+	char originalExpression[500];
+	char tokenizedExpression[500];
+	char expressionWithAddition[500];
 
 };
 

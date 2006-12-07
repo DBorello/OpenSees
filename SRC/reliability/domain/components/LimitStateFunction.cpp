@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-10-27 23:04:38 $
+// $Revision: 1.8 $
+// $Date: 2006-12-07 01:45:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.cpp,v $
 
 
@@ -40,28 +40,17 @@ LimitStateFunction::LimitStateFunction(	int passedTag,
 									    TCL_Char *passedExpression)
 :ReliabilityDomainComponent(passedTag, LIMIT_STATE_FUNCTION)
 {
-	originalExpression = new char[500];
 	strcpy(originalExpression,passedExpression);
 
-	expressionWithAddition = new char[500];
 	strcpy(expressionWithAddition,passedExpression);
 
-	tokenizedExpression = new char[500];
 	tokenizeIt(passedExpression);
 }
 
 
 LimitStateFunction::~LimitStateFunction()
 {
-	if (originalExpression != 0) {
-		delete [] originalExpression;
-	}
-	if (expressionWithAddition != 0) {
-		delete [] expressionWithAddition;
-	}
-	if (tokenizedExpression != 0) {
-		delete [] tokenizedExpression;
-	}
+  
 }
 
 
@@ -110,7 +99,7 @@ int
 LimitStateFunction::tokenizeIt(TCL_Char *originalExpression)
 {
 	// Also store the tokenized expression (with dollar signs in front of variable names)
-	char *lsf_forTokenizing = new char[500];
+	char lsf_forTokenizing[500];
 	char separators[5] = "}{";
 	char *dollarSign = "$";
 	strcpy(lsf_forTokenizing,originalExpression);
@@ -151,7 +140,6 @@ LimitStateFunction::tokenizeIt(TCL_Char *originalExpression)
 		}
 		tokenPtr2 = strtok( NULL, separators);
 	}
-	delete [] lsf_forTokenizing;
 
 	strcpy(tokenizedExpression,lsf_expression);
 
