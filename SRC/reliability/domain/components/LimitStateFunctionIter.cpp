@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-12-06 23:03:50 $
+// $Revision: 1.2 $
+// $Date: 2006-12-07 00:43:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunctionIter.cpp,v $
 
 // Description: This file contains the method definitions for class 
@@ -53,7 +53,7 @@ LimitStateFunctionIter::reset(void)
 }    
 
 
-LimitStateFunctionIter *
+LimitStateFunction *
 LimitStateFunctionIter::operator()(void)
 {
     // check if we still have elements in the model
@@ -62,7 +62,7 @@ LimitStateFunctionIter::operator()(void)
     if (theComponent == 0)
 	return 0;
     else {
-	LimitStateFunctionIter *result = (LimitStateFunctionIter *)theComponent;
+	LimitStateFunction *result = (LimitStateFunction *)theComponent;
 	return result;
     }
 }

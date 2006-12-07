@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-12-06 23:03:50 $
+// $Revision: 1.2 $
+// $Date: 2006-12-07 00:43:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunctionIter.h,v $
 
 // Description: This file contains the class definition for RandomVariableIter.
@@ -33,7 +33,7 @@
 class TaggedObjectStorage;
 class TaggedObjectIter;
 
-class LimitStateFunctionIter;
+class LimitStateFunction;
 
 class LimitStateFunctionIter
 {
@@ -42,7 +42,7 @@ class LimitStateFunctionIter
     virtual ~LimitStateFunctionIter();
 
     virtual void reset(void);
-    virtual LimitStateFunctionIter *operator()(void);
+    virtual LimitStateFunction *operator()(void);
     
   private:
     TaggedObjectIter &myIter;
