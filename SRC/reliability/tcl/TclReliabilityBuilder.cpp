@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2006-12-06 23:21:56 $
+// $Revision: 1.19 $
+// $Date: 2006-12-13 14:23:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -54,7 +54,10 @@ using std::setiosflags;
 #include <CorrelationCoefficient.h>
 #include <LimitStateFunction.h>
 #include <RandomVariablePositioner.h>
+#include <Parameter.h>
+#include <ParameterIter.h>
 #include <ParameterPositioner.h>
+#include <ParameterPositionerIter.h>
 #include <NormalRV.h>
 #include <LognormalRV.h>
 #include <GammaRV.h>
@@ -5441,6 +5444,24 @@ TclReliabilityModelBuilder_inputCheck(ClientData clientData, Tcl_Interp *interp,
 		}
 	}
 	
+	// Clear out old parameter positioners so we don't produce a memory leak
+	theReliabilityDomain->removeAllParameterPositioners();
+
+	ParameterIter &paramIter = theStructuralDomain->getParameters();
+	Parameter *theParam;
+	i = 1;
+	while ((theParam = paramIter()) != 0) {
+	  ParameterPositioner *theParamPos = 
+	    new ParameterPositioner(i, *theParam);
+	  theParamPos->setGradNumber(i);
+	  if (theReliabilityDomain->addParameterPositioner(theParamPos) == false) {
+	    opserr << "ERROR: failed to add parameter positioner " << i << endln;
+	    delete theParamPos; // otherwise memory leak
+	    return TCL_ERROR;
+	  }
+	  i++;
+	}
+
 	/*
 	num = theReliabilityDomain->getNumberOfRandomVariablePositioners();
 	for (i=1; i<=num; i++) {
@@ -5470,6 +5491,7 @@ TclReliabilityModelBuilder_inputCheck(ClientData clientData, Tcl_Interp *interp,
 		}
 	}
 	
+	/*
 	num = theReliabilityDomain->getNumberOfLimitStateFunctions();
 	for (i=1; i<=num; i++) {
 		component = theReliabilityDomain->getLimitStateFunctionPtr(i);
@@ -5478,7 +5500,8 @@ TclReliabilityModelBuilder_inputCheck(ClientData clientData, Tcl_Interp *interp,
 			return TCL_ERROR;
 		}
 	}
-	
+	*/
+
 	num = theReliabilityDomain->getNumberOfModulatingFunctions();
 	for (i=1; i<=num; i++) {
 		component = theReliabilityDomain->getModulatingFunction(i);
