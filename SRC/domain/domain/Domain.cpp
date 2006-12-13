@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.35 $
-// $Date: 2006-09-05 23:03:33 $
+// $Revision: 1.36 $
+// $Date: 2006-12-13 14:31:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -59,6 +59,7 @@
 #include <SingleDomMP_Iter.h>
 #include <LoadPatternIter.h>
 #include <SingleDomAllSP_Iter.h>
+#include <SingleDomParamIter.h>
 
 #include <Vertex.h>
 #include <Graph.h>
@@ -94,6 +95,7 @@ Domain::Domain()
     theMP_Iter = new SingleDomMP_Iter(theMPs);
     theLoadPatternIter = new LoadPatternIter(theLoadPatterns);
     allSP_Iter = new SingleDomAllSP_Iter(*this);
+    theParamIter = new SingleDomParamIter(theParameters);
     
     // check that there was space to create the data structures    
     if (theElements ==0 || theNodes == 0 || 
@@ -142,6 +144,7 @@ Domain::Domain(int numNodes, int numElements, int numSPs, int numMPs,
     theMP_Iter = new SingleDomMP_Iter(theMPs);
     theLoadPatternIter = new LoadPatternIter(theLoadPatterns);
     allSP_Iter = new SingleDomAllSP_Iter(*this);
+    theParamIter = new SingleDomParamIter(theParameters);
     
     // check that there was space to create the data structures    
     if (theElements ==0 || theNodes == 0 || 
@@ -189,6 +192,7 @@ Domain::Domain(TaggedObjectStorage &theNodesStorage,
     theMP_Iter = new SingleDomMP_Iter(theMPs);
     theLoadPatternIter = new LoadPatternIter(theLoadPatterns);
     allSP_Iter = new SingleDomAllSP_Iter(*this);
+    theParamIter = new SingleDomParamIter(theParameters);
 
     // check that the containers are empty
     if (theElements->getNumComponents() != 0 ||
@@ -248,6 +252,7 @@ Domain::Domain(TaggedObjectStorage &theStorage)
     theMP_Iter = new SingleDomMP_Iter(theMPs);
     theLoadPatternIter = new LoadPatternIter(theLoadPatterns);
     allSP_Iter = new SingleDomAllSP_Iter(*this);
+    theParamIter = new SingleDomParamIter(theParameters);
 
     // check that there was space to create the data structures    
     if (theElements ==0 || theNodes == 0 || 
@@ -323,6 +328,9 @@ Domain::~Domain()
   if (allSP_Iter != 0)
     delete allSP_Iter;
   
+  if (theParamIter != 0)
+    delete theParamIter;
+
   if (theEigenvalues != 0)
     delete theEigenvalues;
   
@@ -719,7 +727,7 @@ Domain::clearAll(void) {
   LoadPattern *thePattern;
   while ((thePattern = thePatterns()) != 0)
     thePattern->clearAll();
-  
+
   // clean out the containers
   theElements->clearAll();
   theNodes->clearAll();
@@ -938,7 +946,7 @@ Domain::removeLoadPattern(int tag)
     // mark the domain has having changed if numSPs > 0
     // as the constraint handlers have to be redone
     if (numSPs > 0)
-	this->domainChange();
+      this->domainChange();
 
     // finally return the load pattern
     return result;    
@@ -1012,14 +1020,14 @@ SP_ConstraintIter &
 Domain::getSPs()
 {
     theSP_Iter->reset();
-    return *theSP_Iter;;
+    return *theSP_Iter;
 }
 
 SP_ConstraintIter &
 Domain::getDomainAndLoadPatternSPs()
 {
     allSP_Iter->reset();
-    return *allSP_Iter;;
+    return *allSP_Iter;
 }
 
 
@@ -1027,7 +1035,7 @@ MP_ConstraintIter &
 Domain::getMPs()
 {
     theMP_Iter->reset();
-    return *theMP_Iter;;
+    return *theMP_Iter;
 }
 
 
@@ -1035,7 +1043,14 @@ LoadPatternIter &
 Domain::getLoadPatterns()
 {
     theLoadPatternIter->reset();
-    return *theLoadPatternIter;;
+    return *theLoadPatternIter;
+}
+
+ParameterIter &
+Domain::getParameters()
+{
+    theParamIter->reset();
+    return *theParamIter;
 }
 
 /* GENERAL NOTE ON RETRIEVAL OF COMPONENT PTRs:
@@ -2221,6 +2236,18 @@ Domain::sendSelf(int cTag, Channel &theChannel)
     }
   }  
 
+  // send the parameters
+  Parameter *theParam;
+  ParameterIter &theParams = this->getParameters();
+  while ((theParam = theParams()) != 0) {
+    /*
+    if (theParam->sendSelf(commitTag, theChannel) < 0) {
+      opserr << "Domain::send - Parameter with tag " << theParam->getTag() << " failed in sendSelf\n";
+      return -12;
+    }
+    */
+  }  
+
   // if get here we were successfull
   return commitTag;
 }
@@ -2551,6 +2578,17 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 	opserr << "Domain::recv - LoadPattern with tag" << theLP->getTag() << " failed in recvSelf";
 	return -11;
       }
+    }  
+
+    Parameter *theParam;
+    ParameterIter &theParams = this->getParameters();
+    while ((theParam = theParams()) != 0) {
+      /*
+      if (theParam->recvSelf(commitTag, theChannel, theBroker) < 0) {
+	opserr << "Domain::recv - Parameter with tag" << theParam->getTag() << " failed in recvSelf";
+	return -12;
+      }
+      */
     }  
   } 
 
