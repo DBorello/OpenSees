@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-09-05 22:49:36 $
+// $Revision: 1.4 $
+// $Date: 2006-12-13 05:02:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ParameterPositioner.h,v $
 
 
@@ -55,10 +55,14 @@ public:
 	int update(double newValue); 
 	int activate(bool active);
 
+	void setGradNumber(int gradNum) {gradNumber = gradNum; return;}
+	int getGradNumber(void) {return gradNumber;}
+
 protected:
 
 private:
 	Parameter theParameter;
+	int gradNumber;
 };
 
 #endif

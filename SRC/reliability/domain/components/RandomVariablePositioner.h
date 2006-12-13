@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-09-05 22:49:36 $
+// $Revision: 1.8 $
+// $Date: 2006-12-13 05:02:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariablePositioner.h,v $
 
 
@@ -57,10 +57,14 @@ public:
 	int setNewTag(int newTag);
 	int setRvNumber(int newRvNumber);
 
+	void setGradNumber(int gradNum) {gradNumber = gradNum; return;}
+	int getGradNumber(void) {return gradNumber;}
+
 protected:
 
 private:
 	int rvNumber;
+	int gradNumber;
 
 	Parameter theParameter;
 };
