@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-12-06 23:03:50 $
+// $Revision: 1.8 $
+// $Date: 2006-12-13 14:21:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.cpp,v $
 
 
@@ -281,6 +281,14 @@ int
 ReliabilityDomain::removeParameterPositioner(int tag)
 {
 	theParameterPositionersPtr->removeComponent(tag);
+
+	return 0;
+}
+
+int
+ReliabilityDomain::removeAllParameterPositioners(void)
+{
+	theParameterPositionersPtr->clearAll();
 
 	return 0;
 }

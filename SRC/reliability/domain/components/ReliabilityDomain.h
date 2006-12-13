@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-12-06 23:03:50 $
+// $Revision: 1.8 $
+// $Date: 2006-12-13 14:21:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.h,v $
 
 
@@ -97,6 +97,8 @@ public:
 	int removeRandomVariable(int tag);
 	int removeCorrelationCoefficient(int tag);
 	int removePerformanceFunction(int tag);
+
+	int removeAllParameterPositioners(void);
 
 	RandomVariableIter &getRandomVariables(void);
 	RandomVariablePositionerIter &getRandomVariablePositioners(void);
