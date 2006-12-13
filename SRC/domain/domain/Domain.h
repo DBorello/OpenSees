@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2006-09-05 23:03:33 $
+// $Revision: 1.18 $
+// $Date: 2006-12-13 18:17:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
 // Written: fmk 
@@ -57,12 +57,14 @@ class NodeIter;
 class SP_ConstraintIter;
 class MP_ConstraintIter;
 class LoadPatternIter;
+class ParameterIter;
 
 class SingleDomEleIter;
 class SingleDomNodIter;
 class SingleDomSP_Iter;
 class SingleDomMP_Iter;
 class SingleDomAllSP_Iter;
+class SingleDomParamIter;
 
 class MeshRegion;
 class Recorder;
@@ -124,6 +126,7 @@ class Domain
     virtual  MP_ConstraintIter &getMPs();
     virtual  LoadPatternIter   &getLoadPatterns();
     virtual  SP_ConstraintIter &getDomainAndLoadPatternSPs();
+    virtual  ParameterIter     &getParameters();
     
     virtual  Element       *getElement(int tag);
     virtual  Node          *getNode(int tag);
@@ -231,6 +234,7 @@ class Domain
     SingleDomMP_Iter      *theMP_Iter;
     LoadPatternIter       *theLoadPatternIter;        
     SingleDomAllSP_Iter   *allSP_Iter;
+    SingleDomParamIter    *theParamIter;
     
     MeshRegion **theRegions;
     int numRegions;    
