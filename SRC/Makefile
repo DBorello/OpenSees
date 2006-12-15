@@ -535,6 +535,7 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/dispBeamColumn/TclDispBeamColumnCommand.o \
 	$(FE)/actor/channel/TCP_Socket.o \
 	$(FE)/actor/channel/Socket.o \
+	$(FE)/actor/channel/HTTP.o \
 	$(FE)/element/elasticBeamColumn/ElasticBeam2d.o \
 	$(FE)/element/elasticBeamColumn/ElasticBeam3d.o \
 	$(FE)/element/elasticBeamColumn/TclElasticBeamCommand.o \
@@ -756,6 +757,7 @@ DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/domain/single/SingleDomSP_Iter.o \
 	$(FE)/domain/domain/single/SingleDomAllSP_Iter.o \
 	$(FE)/domain/domain/single/SingleDomMP_Iter.o \
+	$(FE)/domain/domain/single/SingleDomParamIter.o \
 	$(FE)/domain/domain/partitioned/PartitionedDomain.o \
 	$(FE)/domain/domain/partitioned/PartitionedDomainEleIter.o \
 	$(FE)/domain/domain/partitioned/PartitionedDomainSubIter.o \
