@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $                                                              
-// $Date: 2006-01-13 01:07:48 $                                                                  
+// $Revision: 1.9 $                                                              
+// $Date: 2006-12-15 01:01:56 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CorotCrdTransf2d.h,v $ 
                                         
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
@@ -112,5 +112,6 @@ private:
     
     double *nodeIInitialDisp, *nodeJInitialDisp;
     bool initialDispChecked;
+    bool nodeOffsets;
 };
 #endif
