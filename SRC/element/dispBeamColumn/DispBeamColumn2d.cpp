@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2006-09-05 22:59:03 $
+// $Revision: 1.29 $
+// $Date: 2006-12-20 17:28:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -283,7 +283,7 @@ DispBeamColumn2d::update(void)
   double oneOverL = 1.0/L;
 
   //const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
-  double xi[10];
+  double xi[maxNumSections];
   beamInt->getSectionLocations(numSections, L, xi);
   
   // Loop over the integration points
@@ -330,9 +330,9 @@ DispBeamColumn2d::getTangentStiff()
   
   //const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
   //const Vector &wts = quadRule.getIntegrPointWeights(numSections);
-  double xi[10];
+  double xi[maxNumSections];
   beamInt->getSectionLocations(numSections, L, xi);
-  double wt[10];
+  double wt[maxNumSections];
   beamInt->getSectionWeights(numSections, L, wt);
 
   // Loop over the integration points
@@ -433,9 +433,9 @@ DispBeamColumn2d::getInitialBasicStiff()
   
   //const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
   //const Vector &wts = quadRule.getIntegrPointWeights(numSections);
-  double xi[10];
+  double xi[maxNumSections];
   beamInt->getSectionLocations(numSections, L, xi);
-  double wt[10];
+  double wt[maxNumSections];
   beamInt->getSectionWeights(numSections, L, wt);
 
   // Loop over the integration points
@@ -643,9 +643,9 @@ DispBeamColumn2d::getResistingForce()
   
   //const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
   //const Vector &wts = quadRule.getIntegrPointWeights(numSections);  
-  double xi[10];
+  double xi[maxNumSections];
   beamInt->getSectionLocations(numSections, L, xi);
-  double wt[10];
+  double wt[maxNumSections];
   beamInt->getSectionWeights(numSections, L, wt);
 
   // Zero for integration
@@ -1096,7 +1096,7 @@ DispBeamColumn2d::setResponse(const char **argv, int argc,
 
 	output.tag("GaussPointOutput");
 	output.attr("number",sectionNum);
-	double xi[10];
+	double xi[maxNumSections];
 	double L = crdTransf->getInitialLength();
 	beamInt->getSectionLocations(numSections, L, xi);
 	output.attr("eta",xi[sectionNum-1]*L);
@@ -1216,7 +1216,7 @@ DispBeamColumn2d::getResponse(int responseID, Information &eleInfo)
 
   else if (responseID == 7) {
     //const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
-    double xi[10];
+    double xi[maxNumSections];
     beamInt->getSectionLocations(numSections, L, xi);
     Vector locs(numSections);
     for (int i = 0; i < numSections; i++)
@@ -1226,7 +1226,7 @@ DispBeamColumn2d::getResponse(int responseID, Information &eleInfo)
 
   else if (responseID == 8) {
     //const Vector &wts = quadRule.getIntegrPointWeights(numSections);
-    double wt[10];
+    double wt[maxNumSections];
     beamInt->getSectionWeights(numSections, L, wt);
     Vector weights(numSections);
     for (int i = 0; i < numSections; i++)
@@ -1330,9 +1330,9 @@ DispBeamColumn2d::getResistingForceSensitivity(int gradNumber)
   
   //const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
   //const Vector &wts = quadRule.getIntegrPointWeights(numSections);
-  double xi[10];
+  double xi[maxNumSections];
   beamInt->getSectionLocations(numSections, L, xi);
-  double wt[10];
+  double wt[maxNumSections];
   beamInt->getSectionWeights(numSections, L, wt);
 
   // Zero for integration
@@ -1484,7 +1484,7 @@ DispBeamColumn2d::commitSensitivity(int gradNumber, int numGrads)
   double L = crdTransf->getInitialLength();
   double oneOverL = 1.0/L;
   //const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
-  double xi[10];
+  double xi[maxNumSections];
   beamInt->getSectionLocations(numSections, L, xi);
 
   // Some extra declarations
