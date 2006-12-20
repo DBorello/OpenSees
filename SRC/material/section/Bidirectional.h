@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-08-03 23:49:46 $
+// $Revision: 1.7 $
+// $Date: 2006-12-20 17:21:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/Bidirectional.h,v $
                                                                         
                                                                         
@@ -45,7 +45,9 @@
 class Bidirectional : public SectionForceDeformation
 {
   public:
-    Bidirectional(int tag, double E, double sigY, double Hiso, double Hkin);
+    Bidirectional(int tag, double E, double sigY, double Hiso, double Hkin,
+		  int code1 = SECTION_RESPONSE_VY,
+		  int code2 = SECTION_RESPONSE_P);
     Bidirectional();
     ~Bidirectional();
 
@@ -89,6 +91,8 @@ class Bidirectional : public SectionForceDeformation
 	double alpha_n;
 	double alpha_n1;
 	
+	int code1, code2;
+
 	static Vector s;
 	static Matrix ks;
 	static ID code;

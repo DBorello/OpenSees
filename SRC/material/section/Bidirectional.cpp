@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:33 $
+// $Revision: 1.7 $
+// $Date: 2006-12-20 17:21:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/Bidirectional.cpp,v $
 
 #include <Bidirectional.h>           
@@ -30,9 +30,9 @@ Matrix Bidirectional::ks(2,2);
 ID Bidirectional::code(2);
 
 Bidirectional::Bidirectional
-(int tag, double e, double sy, double Hi, double Hk) :
+(int tag, double e, double sy, double Hi, double Hk, int c1, int c2) :
  SectionForceDeformation(tag, SEC_TAG_Bidirectional),
-	 E(e), sigY(sy), Hiso(Hi), Hkin(Hk)
+ E(e), sigY(sy), Hiso(Hi), Hkin(Hk), code1(c1), code2(c2)
 {
 	for (int i = 0; i < 2; i++) {
 		eP_n[i]  = 0.0;
@@ -43,9 +43,6 @@ Bidirectional::Bidirectional
 
 	alpha_n  = 0.0;
 	alpha_n1 = 0.0;
-
-	code(0) = SECTION_RESPONSE_VY;
-	code(1) = SECTION_RESPONSE_P;
 }
 
 Bidirectional::Bidirectional():
@@ -62,8 +59,8 @@ Bidirectional::Bidirectional():
 	alpha_n  = 0.0;
 	alpha_n1 = 0.0;
 
-	code(0) = SECTION_RESPONSE_VY;
-	code(1) = SECTION_RESPONSE_P;
+	code1 = SECTION_RESPONSE_VY;
+	code2 = SECTION_RESPONSE_P;
 }
 
 Bidirectional::~Bidirectional()
@@ -270,7 +267,7 @@ SectionForceDeformation*
 Bidirectional::getCopy(void)
 {
 	Bidirectional *theCopy =
-		new Bidirectional (this->getTag(), E, sigY, Hiso, Hkin);
+		new Bidirectional (this->getTag(), E, sigY, Hiso, Hkin, code1, code2);
 
 	for (int i = 0; i < 2; i++) {
 		theCopy->eP_n[i]  = eP_n[i];
@@ -288,7 +285,10 @@ Bidirectional::getCopy(void)
 const ID&
 Bidirectional::getType(void)
 {
-	return code;
+  code(0) = code1;
+  code(1) = code2;
+
+  return code;
 }
 
 int
@@ -302,7 +302,7 @@ Bidirectional::sendSelf(int cTag, Channel &theChannel)
 {
   int res = 0;
   
-  static Vector data(10);
+  static Vector data(12);
   
   data(0) = this->getTag();
   data(1) = E;
@@ -314,6 +314,8 @@ Bidirectional::sendSelf(int cTag, Channel &theChannel)
   data(7) = q_n[0];
   data(8) = q_n[1];
   data(9) = alpha_n;
+  data(10) = code1;
+  data(11) = code2;
 
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
@@ -328,7 +330,7 @@ Bidirectional::recvSelf(int cTag, Channel &theChannel,
 {
   int res = 0;
   
-  static Vector data(10);
+  static Vector data(12);
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   
   if (res < 0) {
@@ -347,6 +349,8 @@ Bidirectional::recvSelf(int cTag, Channel &theChannel,
 	q_n[0]  = data(7);
 	q_n[1]  = data(8);
 	alpha_n = data(9);
+	code1 = (int)data(10);
+	code2 = (int)data(11);
 
     // Set the trial state variables
     revertToLastCommit();
