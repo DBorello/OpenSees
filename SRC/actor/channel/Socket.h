@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2006-12-15 00:12:32 $
+// $Revision: 1.10 $
+// $Date: 2006-12-20 21:28:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/Socket.h,v $
                                                                         
 // Written: fmk 11/95
@@ -59,7 +59,7 @@ extern "C" {
   typedef SOCKET socket_type;
   typedef int socklen_type;
   #define bzero(s,n) memset((s),0,(n))
-  #define bcmp(s1,s2,n) memcmp((s1),(s2),(n))
+  #define bcopy(s,d,len) memcpy((d),(s),(len))
   #define bcmp(s1,s2,n) memcmp((s1),(s2),(n))
 #else
   typedef int socket_type;
