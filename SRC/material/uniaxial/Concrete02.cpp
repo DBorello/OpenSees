@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-03-03 18:52:40 $
+// $Revision: 1.2 $
+// $Date: 2006-12-21 18:22:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete02.cpp,v $
                                                                       
 // Written: fmk
@@ -273,7 +273,7 @@ Concrete02::recvSelf(int commitTag, Channel &theChannel,
 
   static Vector data(13);
 
-  if (theChannel.sendVector(this->getDbTag(), commitTag, data) < 0) {
+  if (theChannel.recvVector(this->getDbTag(), commitTag, data) < 0) {
     opserr << "Concrete02::recvSelf() - failed to recvSelf\n";
     return -1;
   }

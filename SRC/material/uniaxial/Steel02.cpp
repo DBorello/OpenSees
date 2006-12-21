@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-11-03 18:40:20 $
+// $Revision: 1.4 $
+// $Date: 2006-12-21 18:22:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel02.cpp,v $
                                                                       
 // Written: fmk
@@ -401,10 +401,9 @@ int
 Steel02::recvSelf(int commitTag, Channel &theChannel, 
 	     FEM_ObjectBroker &theBroker)
 {
-
   static Vector data(23);
 
-  if (theChannel.sendVector(this->getDbTag(), commitTag, data) < 0) {
+  if (theChannel.recvVector(this->getDbTag(), commitTag, data) < 0) {
     opserr << "Steel02::recvSelf() - failed to recvSelf\n";
     return -1;
   }
@@ -431,7 +430,7 @@ Steel02::recvSelf(int commitTag, Channel &theChannel,
   sigP = data(19);   
   eP   = data(20);   
   this->setTag(data(21));
-  sigini = data(23);
+  sigini = data(22);
 
   e = eP;
   sig = sigP;
