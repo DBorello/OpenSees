@@ -65,6 +65,7 @@ SRCdir       = $(HOME)/OpenSees/SRC
 SUPERLUdir   = $(HOME)/OpenSees/OTHER/SuperLU_3.0/SRC
 SUPERLU_DISTdir   = $(HOME)/OpenSees/OTHER/SuperLU_DIST_2.0/SRC
 
+
 DIRS        = $(BLASdir) \
               $(CBLASdir) \
               $(SUPERLUdir) \
@@ -73,6 +74,20 @@ DIRS        = $(BLASdir) \
               $(UMFPACKdir) \
               $(METISdir) \
               $(SRCdir) 
+
+ifeq ($(PROGRAMMING_MODE), PARALLEL)
+
+DIRS        = $(BLASdir) \
+              $(CBLASdir) \
+              $(SUPERLUdir) \
+	      $(SUPERLU_DISTdir) \
+              $(LAPACKdir) \
+              $(ARPACKdir) \
+              $(UMFPACKdir) \
+              $(METISdir) \
+              $(SRCdir) 
+endif
+
 
 # %-------------------------------------------------------%
 # | SECTION 4: LIBRARIES                                  |
