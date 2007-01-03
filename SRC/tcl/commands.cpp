@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.80 $
-// $Date: 2006-11-08 20:13:23 $
+// $Revision: 1.81 $
+// $Date: 2007-01-03 22:46:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -1418,7 +1418,11 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	    opserr << " ProfileSPDLinSOE default will be used\n";
 	    ProfileSPDLinSolver *theSolver;
 	    theSolver = new ProfileSPDLinDirectSolver(); 	
+#ifdef _PARALLEL_PROCESSING
+	    theSOE = new DistributedProfileSPDLinSOE(*theSolver);
+#else
 	    theSOE = new ProfileSPDLinSOE(*theSolver);      
+#endif
 	}
     
 	theStaticAnalysis = new StaticAnalysis(theDomain,
@@ -1474,7 +1478,11 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	    opserr << " ProfileSPDLinSOE default will be used\n";
 	    ProfileSPDLinSolver *theSolver;
 	    theSolver = new ProfileSPDLinDirectSolver(); 	
+#ifdef _PARALLEL_PROCESSING
+	    theSOE = new DistributedProfileSPDLinSOE(*theSolver);
+#else
 	    theSOE = new ProfileSPDLinSOE(*theSolver);      
+#endif
 	}
     
 	theTransientAnalysis = new DirectIntegrationAnalysis(theDomain,
@@ -1536,7 +1544,11 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	    opserr << " ProfileSPDLinSOE default will be used\n";
 	    ProfileSPDLinSolver *theSolver;
 	    theSolver = new ProfileSPDLinDirectSolver(); 	
+#ifdef _PARALLEL_PROCESSING
+	    theSOE = new DistributedProfileSPDLinSOE(*theSolver);
+#else
 	    theSOE = new ProfileSPDLinSOE(*theSolver);      
+#endif
 	}
     
 	theVariableTimeStepTransientAnalysis = new VariableTimeStepDirectIntegrationAnalysis
@@ -2689,6 +2701,12 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	numIter = 1;
       }
 
+
+#ifdef _PARALLEL_PROCESSING
+
+      theStaticIntegrator = new DistributedDisplacementControl(node,dof-1,increment,
+							       numIter, minIncr, maxIncr);
+#else
       Node *theNode = theDomain.getNode(node);
       if (theNode == 0) {
 	opserr << "WARNING integrator DisplacementControl node dof dU : Node does not exist\n";
@@ -2696,10 +2714,6 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
       }
 
 
-#ifdef _PARALLEL_PROCESSING
-      theStaticIntegrator = new DistributedDisplacementControl(node,dof-1,increment,
-							       numIter, minIncr, maxIncr);
-#else
       int numDOF = theNode->getNumberDOF();
       if (dof <= 0 || dof > numDOF) {
 	opserr << "WARNING integrator DisplacementControl node dof dU : invalid dof given\n";
