@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2006-12-13 14:23:46 $
+// $Revision: 1.20 $
+// $Date: 2007-01-09 01:43:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -498,7 +498,7 @@ TclReliabilityModelBuilder_addRandomVariable(ClientData clientData,Tcl_Interp *i
 			// Open file where the vectors are given
 			ifstream inputFile( argv[4], ios::in );
 			if (inputFile.fail()) {
-				opserr << "File " << *argv[4] << " could not be opened. " << endln;
+				opserr << "File " << argv[4] << " could not be opened. " << endln;
 				return TCL_ERROR;
 			}
 
@@ -525,7 +525,7 @@ TclReliabilityModelBuilder_addRandomVariable(ClientData clientData,Tcl_Interp *i
 			// Open it again, now being ready to store the results in a matrix
 			ifstream inputFile2( argv[4], ios::in );
 			if (inputFile2.fail()) {
-				opserr << "File " << *argv[4] << " could not be opened. " << endln;
+				opserr << "File " << argv[4] << " could not be opened. " << endln;
 				return TCL_ERROR;
 			}
 
@@ -3558,7 +3558,7 @@ TclReliabilityModelBuilder_addgFunEvaluator(ClientData clientData, Tcl_Interp *i
 			// Try to open the file to make sure it exists
 			ifstream inputFile( argv[3], ios::in );
 			if (inputFile.fail()) {
-				opserr << "File " << *argv[3] << " could not be opened. " << endln;
+				opserr << "File " << argv[3] << " could not be opened. " << endln;
 				return TCL_ERROR;
 			}
 			inputFile.close();
@@ -3959,7 +3959,7 @@ TclReliabilityModelBuilder_addStartPoint(ClientData clientData, Tcl_Interp *inte
 
 		ifstream inputFile( argv[2], ios::in );
 		if (inputFile.fail()) {
-			opserr << "File " << *argv[2] << " could not be opened. " << endln;
+			opserr << "File " << argv[2] << " could not be opened. " << endln;
 			return TCL_ERROR;
 		}
 
@@ -4867,7 +4867,7 @@ TclReliabilityModelBuilder_runGFunVisualizationAnalysis(ClientData clientData, T
 				// Open file where the vectors are given
 				ifstream inputFile( argv[argvCounter], ios::in );
 				if (inputFile.fail()) {
-					opserr << "File " << *argv[argvCounter] << " could not be opened. " << endln;
+					opserr << "File " << argv[argvCounter] << " could not be opened. " << endln;
 					return TCL_ERROR;
 				}
 
@@ -4895,7 +4895,7 @@ TclReliabilityModelBuilder_runGFunVisualizationAnalysis(ClientData clientData, T
 				// Open it again, now being ready to store the results in a matrix
 				ifstream inputFile2( argv[argvCounter], ios::in );
 				if (inputFile2.fail()) {
-					opserr << "File " << *argv[argvCounter] << " could not be opened. " << endln;
+					opserr << "File " << argv[argvCounter] << " could not be opened. " << endln;
 					return TCL_ERROR;
 				}
 				argvCounter++;
@@ -5038,7 +5038,7 @@ TclReliabilityModelBuilder_runGFunVisualizationAnalysis(ClientData clientData, T
 			// Open file where the vectors are given
 			ifstream inputFile( argv[argvCounter], ios::in );
 			if (inputFile.fail()) {
-				opserr << "File " << *argv[argvCounter] << " could not be opened. " << endln;
+				opserr << "File " << argv[argvCounter] << " could not be opened. " << endln;
 				return TCL_ERROR;
 			}
 
@@ -5068,7 +5068,7 @@ TclReliabilityModelBuilder_runGFunVisualizationAnalysis(ClientData clientData, T
 			// Open it again, now being ready to store the results in a matrix
 			ifstream inputFile2( argv[argvCounter], ios::in );
 			if (inputFile2.fail()) {
-				opserr << "File " << *argv[argvCounter] << " could not be opened. " << endln;
+				opserr << "File " << argv[argvCounter] << " could not be opened. " << endln;
 				return TCL_ERROR;
 			}
 			argvCounter++;
@@ -5256,7 +5256,7 @@ TclReliabilityModelBuilder_rvReduction(ClientData clientData, Tcl_Interp *interp
 		Vector tempKeepRvs(numInList);
 		ifstream inputFile( argv[2], ios::in );
 		if (inputFile.fail()) {
-			opserr << "File " << *argv[2] << " could not be opened. " << endln;
+			opserr << "File " << argv[2] << " could not be opened. " << endln;
 			return TCL_ERROR;
 		}
 		for (int i=0; i<numInList; i++) {
