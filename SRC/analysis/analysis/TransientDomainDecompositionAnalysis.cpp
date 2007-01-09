@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-12-12 19:22:29 $
+// $Revision: 1.5 $
+// $Date: 2007-01-09 19:29:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/TransientDomainDecompositionAnalysis.cpp,v $
                                                                         
 // Written: fmk 
@@ -278,9 +278,12 @@ TransientDomainDecompositionAnalysis::domainChanged(void)
     return -2;
   }	    
   
+  result = theConstraintHandler->doneNumberingDOF();
+  
   // we invoke setSize() on the LinearSOE which
   // causes that object to determine its size
   Graph &theGraph = theAnalysisModel->getDOFGraph();
+
   result = theSOE->setSize(theGraph);
   if (result < 0) {
     opserr << "TransientDomainDecompositionAnalysis::handle() - ";

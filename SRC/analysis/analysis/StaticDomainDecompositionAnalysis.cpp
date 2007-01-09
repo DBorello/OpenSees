@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-12-12 19:22:29 $
+// $Revision: 1.5 $
+// $Date: 2007-01-09 19:29:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticDomainDecompositionAnalysis.cpp,v $
                                                                         
 // Written: fmk 
@@ -289,6 +289,8 @@ StaticDomainDecompositionAnalysis::domainChanged(void)
     opserr << "DOF_Numberer::numberDOF() failed";
     return -2;
   }	    
+    result = theConstraintHandler->doneNumberingDOF();
+
   
   // we invoke setSize() on the LinearSOE which
   // causes that object to determine its size
