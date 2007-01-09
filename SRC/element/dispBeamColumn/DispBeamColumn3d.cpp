@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2006-08-04 18:44:02 $
+// $Revision: 1.22 $
+// $Date: 2007-01-09 19:26:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.cpp,v $
 
 // Written: MHS
@@ -655,7 +655,7 @@ DispBeamColumn3d::addLoad(ElementalLoad *theLoad, double loadFactor)
     q0[4] -= M2;
   }
   else {
-    opserr << "DispBeamColumn2d::addLoad() -- load type unknown for element with tag: " << 
+    opserr << "DispBeamColumn3d::addLoad() -- load type unknown for element with tag: " << 
       this->getTag() << endln;
     return -1;
   }
@@ -814,14 +814,32 @@ DispBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
       crdTransf->setDbTag(crdTransfDbTag);
   }
   idData(5) = crdTransfDbTag;
+
+  if (alphaM != 0 || betaK != 0 || betaK0 != 0 || betaKc != 0) 
+    idData(6) = 1;
+  else
+    idData(6) = 0;
+
   
   if (theChannel.sendID(dbTag, commitTag, idData) < 0) {
     opserr << "DispBeamColumn3d::sendSelf() - failed to send ID data\n";
      return -1;
   }    
 
+  if (idData(6) == 1) {
+    // send damping coefficients
+    static Vector dData(4);
+    dData(0) = alphaM;
+    dData(1) = betaK;
+    dData(2) = betaK0;
+    dData(3) = betaKc;
+    if (theChannel.sendVector(dbTag, commitTag, dData) < 0) {
+      opserr << "DispBeamColumn3d::sendSelf() - failed to send double data\n";
+      return -1;
+    }    
+  }
+
   // send the coordinate transformation
-  
   if (crdTransf->sendSelf(commitTag, theChannel) < 0) {
      opserr << "DispBeamColumn3d::sendSelf() - failed to send crdTranf\n";
      return -1;
@@ -890,6 +908,19 @@ DispBeamColumn3d::recvSelf(int commitTag, Channel &theChannel,
   
   int crdTransfClassTag = idData(4);
   int crdTransfDbTag = idData(5);
+
+  if (idData(6) == 1) {
+    // recv damping coefficients
+    static Vector dData(4);
+    if (theChannel.recvVector(dbTag, commitTag, dData) < 0) {
+      opserr << "DispBeamColumn2d::sendSelf() - failed to recv double data\n";
+      return -1;
+    }    
+    alphaM = dData(0);
+    betaK = dData(1);
+    betaK0 = dData(2);
+    betaKc = dData(3);
+  }
 
   // create a new crdTransf object if one needed
   if (crdTransf == 0 || crdTransf->getClassTag() != crdTransfClassTag) {
@@ -1088,7 +1119,7 @@ DispBeamColumn3d::setResponse(const char **argv, int argc, Information &eleInfo,
     Response *theResponse = 0;
 
     output.tag("ElementOutput");
-    output.attr("eleType","DispBeamColumn2d");
+    output.attr("eleType","DispBeamColumn3d");
     output.attr("eleTag",this->getTag());
     output.attr("node1",connectedExternalNodes[0]);
     output.attr("node2",connectedExternalNodes[1]);

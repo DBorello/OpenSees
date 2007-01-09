@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2006-12-20 17:28:24 $
+// $Revision: 1.30 $
+// $Date: 2007-01-09 19:26:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -761,11 +761,29 @@ DispBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
       crdTransf->setDbTag(crdTransfDbTag);
   }
   idData(5) = crdTransfDbTag;
-  
+
+  if (alphaM != 0 || betaK != 0 || betaK0 != 0 || betaKc != 0) 
+    idData(6) = 1;
+  else
+    idData(6) = 0;
+
   if (theChannel.sendID(dbTag, commitTag, idData) < 0) {
     opserr << "DispBeamColumn2d::sendSelf() - failed to send ID data\n";
      return -1;
   }    
+
+  if (idData(6) == 1) {
+    // send damping coefficients
+    static Vector dData(4);
+    dData(0) = alphaM;
+    dData(1) = betaK;
+    dData(2) = betaK0;
+    dData(3) = betaKc;
+    if (theChannel.sendVector(dbTag, commitTag, dData) < 0) {
+      opserr << "DispBeamColumn2d::sendSelf() - failed to send double data\n";
+      return -1;
+    }    
+  }
 
   // send the coordinate transformation
   
@@ -773,7 +791,6 @@ DispBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
      opserr << "DispBeamColumn2d::sendSelf() - failed to send crdTranf\n";
      return -1;
   }      
-
   
   //
   // send an ID for the sections containing each sections dbTag and classTag
@@ -838,6 +855,20 @@ DispBeamColumn2d::recvSelf(int commitTag, Channel &theChannel,
   
   int crdTransfClassTag = idData(4);
   int crdTransfDbTag = idData(5);
+
+
+  if (idData(6) == 1) {
+    // recv damping coefficients
+    static Vector dData(4);
+    if (theChannel.recvVector(dbTag, commitTag, dData) < 0) {
+      opserr << "DispBeamColumn2d::sendSelf() - failed to recv double data\n";
+      return -1;
+    }    
+    alphaM = dData(0);
+    betaK = dData(1);
+    betaK0 = dData(2);
+    betaKc = dData(3);
+  }
 
   // create a new crdTransf object if one needed
   if (crdTransf == 0 || crdTransf->getClassTag() != crdTransfClassTag) {

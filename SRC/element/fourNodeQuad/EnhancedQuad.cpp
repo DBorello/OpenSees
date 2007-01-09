@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2006-08-04 19:07:15 $
+// $Revision: 1.14 $
+// $Date: 2007-01-09 19:26:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/EnhancedQuad.cpp,v $
 
 #include <stdio.h> 
@@ -1553,9 +1553,13 @@ int  EnhancedQuad::sendSelf (int commitTag, Channel &theChannel)
   // Now quad sends the ids of its materials
   int matDbTag;
   
-  static ID idData(13);
+  static ID idData(14);
 
   idData(12) = this->getTag();
+  if (alphaM != 0 || betaK != 0 || betaK0 != 0 || betaKc != 0) 
+    idData(13) = 1;
+  else
+    idData(13) = 0;
   
   int i;
   for (i = 0; i < 4; i++) {
@@ -1582,12 +1586,25 @@ int  EnhancedQuad::sendSelf (int commitTag, Channel &theChannel)
     return res;
   }
 
-
   res += theChannel.sendVector(dataTag, commitTag, alpha);
   if (res < 0) {
     opserr << "WARNING EnhancedQuad::sendSelf() - " << this->getTag() << " failed to send ID\n";
     return res;
   }
+
+  if (idData(13) == 1) {
+    // send damping coefficients
+    static Vector dData(5); // one larger than needed because of alpha
+    dData(0) = alphaM;
+    dData(1) = betaK;
+    dData(2) = betaK0;
+    dData(3) = betaKc;
+    if (theChannel.sendVector(dataTag, commitTag, dData) < 0) {
+      opserr << "EnahnacedQuad::sendSelf() - failed to send double data\n";
+      return -1;
+    }    
+  }
+
 
   // Finally, quad asks its material objects to send themselves
   for (i = 0; i < 4; i++) {
@@ -1609,7 +1626,7 @@ int  EnhancedQuad::recvSelf (int commitTag,
   
   int dataTag = this->getDbTag();
 
-  static ID idData(13);
+  static ID idData(14);
   // Quad now receives the tags of its four external nodes
   res += theChannel.recvID(dataTag, commitTag, idData);
   if (res < 0) {
@@ -1624,11 +1641,23 @@ int  EnhancedQuad::recvSelf (int commitTag,
   connectedExternalNodes(2) = idData(10);
   connectedExternalNodes(3) = idData(11);
   
-
   res += theChannel.recvVector(dataTag, commitTag, alpha);
   if (res < 0) {
     opserr << "WARNING EnhancedQuad::sendSelf() - " << this->getTag() << " failed to send ID\n";
     return res;
+  }
+
+  if (idData(13) == 1) {
+    // recv damping coefficients
+    static Vector dData(5);
+    if (theChannel.recvVector(dataTag, commitTag, dData) < 0) {
+      opserr << "EnahancesQuad::sendSelf() - failed to recv double data\n";
+      return -1;
+    }    
+    alphaM = dData(0);
+    betaK = dData(1);
+    betaK0 = dData(2);
+    betaKc = dData(3);
   }
 
   int i;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2006-09-05 23:24:12 $
+// $Revision: 1.22 $
+// $Date: 2007-01-09 19:26:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 #include <math.h>
@@ -1287,7 +1287,7 @@ ForceBeamColumn3d::getInitialStiff(void)
        secDefSize   += size;
     }
 
-    Vector dData(1+1+NEBD+NEBD*NEBD+secDefSize); 
+    Vector dData(1+1+NEBD+NEBD*NEBD+secDefSize + 4); 
     loc = 0;
 
     // place double variables into Vector
@@ -1312,6 +1312,12 @@ ForceBeamColumn3d::getInitialStiff(void)
        for (i=0; i<sections[k]->getOrder(); i++)
 	  dData(loc++) = (vscommit[k])(i);
 
+    // send damping coefficients
+    dData(loc++) = alphaM;
+    dData(loc++) = betaK;
+    dData(loc++) = betaK0;
+    dData(loc++) = betaKc;
+    
     if (theChannel.sendVector(dbTag, commitTag, dData) < 0) {
        opserr << "ForceBeamColumn3d::sendSelf() - failed to send Vector data\n";
 
@@ -1547,7 +1553,7 @@ ForceBeamColumn3d::getInitialStiff(void)
        secDefSize   += size;
     }
 
-    Vector dData(1+1+NEBD+NEBD*NEBD+secDefSize);   
+    Vector dData(1+1+NEBD+NEBD*NEBD+secDefSize+4);   
 
     if (theChannel.recvVector(dbTag, commitTag, dData) < 0)  {
       opserr << "ForceBeamColumn3d::sendSelf() - failed to send Vector data\n";
@@ -1585,6 +1591,12 @@ ForceBeamColumn3d::getInitialStiff(void)
 	(vscommit[k])(i) = dData(loc++);
     }
 
+    // set damping coefficients
+    alphaM = dData(loc++);
+    betaK = dData(loc++);
+    betaK0 = dData(loc++);
+    betaKc = dData(loc++);
+    
     initialFlag = 2;  
 
     return 0;

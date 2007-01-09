@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2006-08-04 19:08:07 $
+// $Revision: 1.18 $
+// $Date: 2007-01-09 19:26:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam3d.cpp,v $
                                                                         
                                                                         
@@ -321,7 +321,7 @@ ElasticBeam3d::getTangentStiff(void)
   kb(3,3) = kb(4,4) = EIyoverL4;
   kb(4,3) = kb(3,4) = EIyoverL2;
   kb(5,5) = GJoverL;
-  
+
   return theCoordTransf->getGlobalStiffMatrix(kb,q);
 }
 
@@ -585,7 +585,7 @@ ElasticBeam3d::sendSelf(int cTag, Channel &theChannel)
 {
     int res = 0;
 
-    static Vector data(12);
+    static Vector data(16);
     
     data(0) = A;
     data(1) = E; 
@@ -598,18 +598,23 @@ ElasticBeam3d::sendSelf(int cTag, Channel &theChannel)
     data(8) = connectedExternalNodes(0);
     data(9) = connectedExternalNodes(1);
     data(10) = theCoordTransf->getClassTag();    	
-	
-	int dbTag = theCoordTransf->getDbTag();
 
-	if (dbTag == 0) {
-		dbTag = theChannel.getDbTag();
-		if (dbTag != 0)
-			theCoordTransf->setDbTag(dbTag);
-	}
-
-	data(11) = dbTag;
-
-	// Send the data vector
+    int dbTag = theCoordTransf->getDbTag();
+    
+    if (dbTag == 0) {
+      dbTag = theChannel.getDbTag();
+      if (dbTag != 0)
+	theCoordTransf->setDbTag(dbTag);
+    }
+    
+    data(11) = dbTag;
+    
+    data(12) = alphaM;
+    data(13) = betaK;
+    data(14) = betaK0;
+    data(15) = betaKc;
+    
+    // Send the data vector
     res += theChannel.sendVector(this->getDbTag(), cTag, data);
     if (res < 0) {
       opserr << "ElasticBeam3d::sendSelf -- could not send data Vector\n";
@@ -629,60 +634,64 @@ ElasticBeam3d::sendSelf(int cTag, Channel &theChannel)
 int
 ElasticBeam3d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-	int res = 0;
-	
-	static Vector data(12);
+  int res = 0;
+  static Vector data(16);
 
-    res += theChannel.recvVector(this->getDbTag(), cTag, data);
-    if (res < 0) {
-      opserr << "ElasticBeam3d::recvSelf -- could not receive data Vector\n";
-      return res;
-    }
-
-    A = data(0);
-    E = data(1); 
-    G = data(2); 
-    Jx = data(3); 
-    Iy = data(4); 
-    Iz = data(5);     
-    rho = data(6);
-    this->setTag((int)data(7));
-    connectedExternalNodes(0) = (int)data(8);
-    connectedExternalNodes(1) = (int)data(9);
-
-    // Check if the CoordTransf is null; if so, get a new one
-    int crdTag = (int)data(10);
-    if (theCoordTransf == 0) {
-      theCoordTransf = theBroker.getNewCrdTransf3d(crdTag);
-      if (theCoordTransf == 0) {
-	opserr << "ElasticBeam3d::recvSelf -- could not get a CrdTransf3d\n";
-	exit(-1);
-      }
-    }
-
-    // Check that the CoordTransf is of the right type; if not, delete
-    // the current one and get a new one of the right type
-    if (theCoordTransf->getClassTag() != crdTag) {
-      delete theCoordTransf;
-      theCoordTransf = theBroker.getNewCrdTransf3d(crdTag);
-      if (theCoordTransf == 0) {
-	opserr << "ElasticBeam3d::recvSelf -- could not get a CrdTransf3d\n";
-	exit(-1);
-      }
-    }
-
-    // Now, receive the CoordTransf
-    theCoordTransf->setDbTag((int)data(11));
-    res += theCoordTransf->recvSelf(cTag, theChannel, theBroker);
-    if (res < 0) {
-      opserr << "ElasticBeam3d::recvSelf -- could not receive CoordTransf\n";
-      return res;
-    }
-
-    // Revert the crdtrasf to its last committed state
-    theCoordTransf->revertToLastCommit();
-
+  res += theChannel.recvVector(this->getDbTag(), cTag, data);
+  if (res < 0) {
+    opserr << "ElasticBeam3d::recvSelf -- could not receive data Vector\n";
     return res;
+  }
+  
+  A = data(0);
+  E = data(1); 
+  G = data(2); 
+  Jx = data(3); 
+  Iy = data(4); 
+  Iz = data(5);     
+  rho = data(6);
+  this->setTag((int)data(7));
+  connectedExternalNodes(0) = (int)data(8);
+  connectedExternalNodes(1) = (int)data(9);
+  
+  alphaM = data(12);
+  betaK = data(13);
+  betaK0 = data(14);
+  betaKc = data(15);
+  
+  // Check if the CoordTransf is null; if so, get a new one
+  int crdTag = (int)data(10);
+  if (theCoordTransf == 0) {
+    theCoordTransf = theBroker.getNewCrdTransf3d(crdTag);
+    if (theCoordTransf == 0) {
+      opserr << "ElasticBeam3d::recvSelf -- could not get a CrdTransf3d\n";
+      exit(-1);
+    }
+  }
+  
+  // Check that the CoordTransf is of the right type; if not, delete
+  // the current one and get a new one of the right type
+  if (theCoordTransf->getClassTag() != crdTag) {
+    delete theCoordTransf;
+    theCoordTransf = theBroker.getNewCrdTransf3d(crdTag);
+    if (theCoordTransf == 0) {
+      opserr << "ElasticBeam3d::recvSelf -- could not get a CrdTransf3d\n";
+      exit(-1);
+    }
+  }
+  
+  // Now, receive the CoordTransf
+  theCoordTransf->setDbTag((int)data(11));
+  res += theCoordTransf->recvSelf(cTag, theChannel, theBroker);
+  if (res < 0) {
+    opserr << "ElasticBeam3d::recvSelf -- could not receive CoordTransf\n";
+    return res;
+  }
+  
+  // Revert the crdtrasf to its last committed state
+  theCoordTransf->revertToLastCommit();
+  
+  return res;
 }
 
 void

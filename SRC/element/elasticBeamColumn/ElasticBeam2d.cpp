@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2006-09-05 21:10:13 $
+// $Revision: 1.21 $
+// $Date: 2007-01-09 19:26:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.cpp,v $
                                                                         
                                                                         
@@ -483,7 +483,7 @@ ElasticBeam2d::sendSelf(int cTag, Channel &theChannel)
 {
   int res = 0;
 
-    static Vector data(11);
+    static Vector data(15);
     
     data(0) = A;
     data(1) = E; 
@@ -506,7 +506,12 @@ ElasticBeam2d::sendSelf(int cTag, Channel &theChannel)
     data(9) = alpha;
     data(10) = d;
 
-	// Send the data vector
+    data(11) = alphaM;
+    data(12) = betaK;
+    data(13) = betaK0;
+    data(14) = betaKc;
+
+    // Send the data vector
     res += theChannel.sendVector(this->getDbTag(), cTag, data);
     if (res < 0) {
       opserr << "ElasticBeam2d::sendSelf -- could not send data Vector\n";
@@ -528,7 +533,7 @@ ElasticBeam2d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBrok
 {
     int res = 0;
 	
-    static Vector data(11);
+    static Vector data(15);
 
     res += theChannel.recvVector(this->getDbTag(), cTag, data);
     if (res < 0) {
@@ -541,6 +546,11 @@ ElasticBeam2d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBrok
     I = data(2); 
     alpha = data(9);
     d = data(10);
+
+    alphaM = data(11);
+    betaK = data(12);
+    betaK0 = data(13);
+    betaKc = data(14);
 
     rho = data(3);
     this->setTag((int)data(4));

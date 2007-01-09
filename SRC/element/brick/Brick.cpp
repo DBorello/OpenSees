@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2006-08-04 21:25:56 $
+// $Revision: 1.27 $
+// $Date: 2007-01-09 19:26:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.cpp,v $
 
 // Ed "C++" Love
@@ -1192,9 +1192,13 @@ int  Brick::sendSelf (int commitTag, Channel &theChannel)
   // Now quad sends the ids of its materials
   int matDbTag;
   
-  static ID idData(25);
+  static ID idData(26);
 
   idData(24) = this->getTag();
+  if (alphaM != 0 || betaK != 0 || betaK0 != 0 || betaKc != 0) 
+    idData(25) = 1;
+  else
+    idData(25) = 0;
   
   int i;
   for (i = 0; i < 8; i++) {
@@ -1219,10 +1223,25 @@ int  Brick::sendSelf (int commitTag, Channel &theChannel)
   idData(22) = connectedExternalNodes(6);
   idData(23) = connectedExternalNodes(7);
 
+
+
   res += theChannel.sendID(dataTag, commitTag, idData);
   if (res < 0) {
     opserr << "WARNING Brick::sendSelf() - " << this->getTag() << " failed to send ID\n";
     return res;
+  }
+
+  if (idData(25) == 1) {
+    // send damping coefficients
+    static Vector dData(4);
+    dData(0) = alphaM;
+    dData(1) = betaK;
+    dData(2) = betaK0;
+    dData(3) = betaKc;
+    if (theChannel.sendVector(dataTag, commitTag, dData) < 0) {
+      opserr << "Brick::sendSelf() - failed to send double data\n";
+      return -1;
+    }    
   }
 
 
@@ -1247,7 +1266,7 @@ int  Brick::recvSelf (int commitTag,
   
   int dataTag = this->getDbTag();
 
-  static ID idData(25);
+  static ID idData(26);
   res += theChannel.recvID(dataTag, commitTag, idData);
   if (res < 0) {
     opserr << "WARNING Brick::recvSelf() - " << this->getTag() << " failed to receive ID\n";
@@ -1255,6 +1274,20 @@ int  Brick::recvSelf (int commitTag,
   }
 
   this->setTag(idData(24));
+
+  if (idData(25) == 1) {
+    // recv damping coefficients
+    static Vector dData(4);
+    if (theChannel.recvVector(dataTag, commitTag, dData) < 0) {
+      opserr << "DispBeamColumn2d::sendSelf() - failed to recv double data\n";
+      return -1;
+    }    
+    alphaM = dData(0);
+    betaK = dData(1);
+    betaK0 = dData(2);
+    betaKc = dData(3);
+  }
+
 
   connectedExternalNodes(0) = idData(16);
   connectedExternalNodes(1) = idData(17);

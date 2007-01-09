@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2006-08-04 19:07:15 $
+// $Revision: 1.18 $
+// $Date: 2007-01-09 19:26:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/ConstantPressureVolumeQuad.cpp,v $
 
 // Ed "C++" Love
@@ -1447,7 +1447,7 @@ int ConstantPressureVolumeQuad :: sendSelf (int commitTag, Channel &theChannel)
   // Now quad sends the ids of its materials
   int matDbTag;
   
-  static ID idData(13);
+  static ID idData(14);
   
   int i;
   for (i = 0; i < 4; i++) {
@@ -1469,12 +1469,32 @@ int ConstantPressureVolumeQuad :: sendSelf (int commitTag, Channel &theChannel)
   idData(11) = connectedExternalNodes(2);
   idData(12) = connectedExternalNodes(3);
 
+  if (alphaM != 0 || betaK != 0 || betaK0 != 0 || betaKc != 0) 
+    idData(13) = 1;
+  else
+    idData(13) = 0;
+
+
   res += theChannel.sendID(dataTag, commitTag, idData);
   if (res < 0) {
     opserr << "WARNING ConstantPressureVolumeQuad::sendSelf() - " << this->getTag() << " failed to send ID\n"; 
 			    
     return res;
   }
+
+  if (idData(13) == 1) {
+    // send damping coefficients
+    static Vector dData(4); 
+    dData(0) = alphaM;
+    dData(1) = betaK;
+    dData(2) = betaK0;
+    dData(3) = betaKc;
+    if (theChannel.sendVector(dataTag, commitTag, dData) < 0) {
+      opserr << "EnahnacedQuad::sendSelf() - failed to send double data\n";
+      return -1;
+    }    
+  }
+
 
   // Finally, quad asks its material objects to send themselves
   for (i = 0; i < 4; i++) {
@@ -1496,7 +1516,7 @@ ConstantPressureVolumeQuad :: recvSelf (int commitTag,
   
   int dataTag = this->getDbTag();
 
-  static ID idData(13);
+  static ID idData(14);
   // Quad now receives the tags of its four external nodes
   res += theChannel.recvID(dataTag, commitTag, idData);
   if (res < 0) {
@@ -1511,6 +1531,20 @@ ConstantPressureVolumeQuad :: recvSelf (int commitTag,
   connectedExternalNodes(3) = idData(12);
 
   int i;
+
+  if (idData(13) == 1) {
+    // recv damping coefficients
+    static Vector dData(4);
+    if (theChannel.recvVector(dataTag, commitTag, dData) < 0) {
+      opserr << "EnahancesQuad::sendSelf() - failed to recv double data\n";
+      return -1;
+    }    
+    alphaM = dData(0);
+    betaK = dData(1);
+    betaK0 = dData(2);
+    betaKc = dData(3);
+  }
+
 
   if (materialPointers[0] == 0) {
     for (i = 0; i < 4; i++) {

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2006-03-21 22:19:12 $
+// $Revision: 1.15 $
+// $Date: 2007-01-09 19:26:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.cpp,v $
 
 // Ed "C++" Love
@@ -2054,7 +2054,6 @@ ShellMITC4::transpose( int dim1,
 
 int  ShellMITC4::sendSelf (int commitTag, Channel &theChannel)
 {
-
   int res = 0;
 
   // note: we don't check for dataTag == 0 for Element
@@ -2094,8 +2093,12 @@ int  ShellMITC4::sendSelf (int commitTag, Channel &theChannel)
     return res;
   }
 
-  static Vector vectData(1);
+  static Vector vectData(5);
   vectData(0) = Ktt;
+  vectData(1) = alphaM;
+  vectData(2) = betaK;
+  vectData(3) = betaK0;
+  vectData(4) = betaKc;
 
   res += theChannel.sendVector(dataTag, commitTag, vectData);
   if (res < 0) {
@@ -2137,7 +2140,7 @@ int  ShellMITC4::recvSelf (int commitTag,
   connectedExternalNodes(2) = idData(11);
   connectedExternalNodes(3) = idData(12);
 
-  static Vector vectData(1);
+  static Vector vectData(5);
   res += theChannel.recvVector(dataTag, commitTag, vectData);
   if (res < 0) {
     opserr << "WARNING ShellMITC4::sendSelf() - " << this->getTag() << " failed to send ID\n";
@@ -2145,6 +2148,10 @@ int  ShellMITC4::recvSelf (int commitTag,
   }
 
   Ktt = vectData(0);
+  alphaM = vectData(1);
+  betaK = vectData(2);
+  betaK0 = vectData(3);
+  betaKc = vectData(4);
 
   int i;
 

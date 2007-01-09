@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.27 $
-// $Date: 2006-09-05 21:11:21 $
+// $Revision: 1.28 $
+// $Date: 2007-01-09 19:26:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -638,13 +638,18 @@ FourNodeQuad::sendSelf(int commitTag, Channel &theChannel)
   
   // Quad packs its data into a Vector and sends this to theChannel
   // along with its dbTag and the commitTag passed in the arguments
-  static Vector data(6);
+  static Vector data(10);
   data(0) = this->getTag();
   data(1) = thickness;
   data(2) = rho;
   data(3) = b[0];
   data(4) = b[1];
   data(5) = pressure;
+
+  data(6) = alphaM;
+  data(7) = betaK;
+  data(8) = betaK0;
+  data(9) = betaKc;
   
   res += theChannel.sendVector(dataTag, commitTag, data);
   if (res < 0) {
@@ -705,7 +710,7 @@ FourNodeQuad::recvSelf(int commitTag, Channel &theChannel,
 
   // Quad creates a Vector, receives the Vector and then sets the 
   // internal data with the data in the Vector
-  static Vector data(6);
+  static Vector data(10);
   res += theChannel.recvVector(dataTag, commitTag, data);
   if (res < 0) {
     opserr << "WARNING FourNodeQuad::recvSelf() - failed to receive Vector\n";
@@ -718,6 +723,11 @@ FourNodeQuad::recvSelf(int commitTag, Channel &theChannel,
   b[0] = data(3);
   b[1] = data(4);
   pressure = data(5);
+
+  alphaM = data(6);
+  betaK = data(7);
+  betaK0 = data(8);
+  betaKc = data(9);
 
   static ID idData(12);
   // Quad now receives the tags of its four external nodes

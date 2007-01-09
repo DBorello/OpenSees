@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2006-08-04 21:25:56 $
+// $Revision: 1.19 $
+// $Date: 2007-01-09 19:26:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.cpp,v $
 
 // Ed "C++" Love
@@ -1082,9 +1082,13 @@ int  BbarBrick::sendSelf (int commitTag, Channel &theChannel)
   // Now quad sends the ids of its materials
   int matDbTag;
   
-  static ID idData(25);
+  static ID idData(26);
 
   idData(24) = this->getTag();
+  if (alphaM != 0 || betaK != 0 || betaK0 != 0 || betaKc != 0) 
+    idData(25) = 1;
+  else
+    idData(25) = 0;
   
   int i;
   for (i = 0; i < 8; i++) {
@@ -1114,7 +1118,18 @@ int  BbarBrick::sendSelf (int commitTag, Channel &theChannel)
     opserr << "WARNING BbarBrick::sendSelf() - " << this->getTag() << "failed to send ID\n";
     return res;
   }
-
+  if (idData(25) == 1) {
+    // send damping coefficients
+    static Vector dData(4);
+    dData(0) = alphaM;
+    dData(1) = betaK;
+    dData(2) = betaK0;
+    dData(3) = betaKc;
+    if (theChannel.sendVector(dataTag, commitTag, dData) < 0) {
+      opserr << "BbarBrick::sendSelf() - failed to send double data\n";
+      return -1;
+    }    
+  }
 
   // Finally, quad asks its material objects to send themselves
   for (i = 0; i < 8; i++) {
@@ -1136,7 +1151,7 @@ int  BbarBrick::recvSelf (int commitTag,
   
   int dataTag = this->getDbTag();
 
-  static ID idData(25);
+  static ID idData(26);
   // Quad now receives the tags of its four external nodes
   res += theChannel.recvID(dataTag, commitTag, idData);
   if (res < 0) {
@@ -1145,6 +1160,19 @@ int  BbarBrick::recvSelf (int commitTag,
   }
 
   this->setTag(idData(24));
+
+  if (idData(25) == 1) {
+    // recv damping coefficients
+    static Vector dData(4);
+    if (theChannel.recvVector(dataTag, commitTag, dData) < 0) {
+      opserr << "DispBeamColumn2d::sendSelf() - failed to recv double data\n";
+      return -1;
+    }    
+    alphaM = dData(0);
+    betaK = dData(1);
+    betaK0 = dData(2);
+    betaKc = dData(3);
+  }
 
   connectedExternalNodes(0) = idData(16);
   connectedExternalNodes(1) = idData(17);
