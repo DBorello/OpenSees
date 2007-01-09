@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-01-10 00:33:09 $
+// $Revision: 1.6 $
+// $Date: 2007-01-09 19:30:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.cpp,v $
                                                                         
                                                                         
@@ -210,6 +210,7 @@ PartitionedDomain::addElement(Element *elePtr)
     bool result = elements->addComponent(elePtr);
     if (result == true) {
 	elePtr->setDomain(this);
+	elePtr->update();
 	this->domainChange();
     }
     
