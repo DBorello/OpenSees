@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-11-23 18:27:24 $
+// $Revision: 1.5 $
+// $Date: 2007-01-09 19:32:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/MPI_Channel.cpp,v $
                                                                         
                                                                         
@@ -411,7 +411,7 @@ MPI_Channel::recvID(int dbTag, int commitTag, ID &theID, ChannelAddress *theAddr
 
     if (count != nleft) {
       opserr << "MPI_Channel::recvID() -";
-      opserr << " incorrect number of entries for ID received: " << count << "\n";
+      opserr << " incorrect number of entries for ID received: " << count << " exptected: " << theID.sz << endln;
       return -1;
     }
     else
