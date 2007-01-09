@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.81 $
-// $Date: 2007-01-03 22:46:54 $
+// $Revision: 1.82 $
+// $Date: 2007-01-09 19:33:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -932,7 +932,6 @@ partitionModel(void)
   // create some subdomains
   for (int i=1; i<=OPS_NUM_SUBDOMAINS; i++) {
     if (i != OPS_MAIN_DOMAIN_PARTITION_ID) {
-      opserr << "Creating SUBDOMAIN: " << i << endln;
       ShadowSubdomain *theSubdomain = new ShadowSubdomain(i, *OPS_MACHINE, *OPS_OBJECT_BROKER);
       theDomain.addSubdomain(theSubdomain);
       OPS_theChannels[i-1] = theSubdomain->getChannelPtr();
@@ -949,7 +948,7 @@ partitionModel(void)
   }
 
   theDomain.partition(OPS_NUM_SUBDOMAINS, OPS_USING_MAIN_DOMAIN, OPS_MAIN_DOMAIN_PARTITION_ID);
-  
+
   OPS_PARTITIONED = true;
   
   DomainDecompositionAnalysis *theSubAnalysis;
@@ -983,6 +982,7 @@ partitionModel(void)
     theSub->setDomainDecompAnalysis(*theSubAnalysis);
     //  delete theSubAnalysis;
   }
+
   return result;
 }
 
