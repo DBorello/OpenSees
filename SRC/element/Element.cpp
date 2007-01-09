@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2006-09-05 21:00:46 $
+// $Revision: 1.20 $
+// $Date: 2007-01-09 19:22:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
@@ -181,7 +181,7 @@ const Matrix &
 Element::getDamp(void) 
 {
   if (index  == -1) {
-    this->setRayleighDampingFactors(0.0, 0.0, 0.0, 0.0);
+    this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
   }
 
   // now compute the damping matrix
@@ -206,7 +206,7 @@ const Matrix &
 Element::getMass(void)
 {
   if (index  == -1) {
-    this->setRayleighDampingFactors(0.0, 0.0, 0.0, 0.0);
+    this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
   }
 
   // zero the matrix & return it
@@ -219,7 +219,7 @@ const Vector &
 Element::getResistingForceIncInertia(void) 
 {
   if (index == -1) {
-    this->setRayleighDampingFactors(0.0, 0.0, 0.0, 0.0);
+    this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
   }
 
   Matrix *theMatrix = theMatrices[index]; 
@@ -286,7 +286,7 @@ Element::getRayleighDampingForces(void)
 {
 
   if (index == -1) {
-    this->setRayleighDampingFactors(0.0, 0.0, 0.0, 0.0);
+    this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
   }
 
   Matrix *theMatrix = theMatrices[index]; 
@@ -472,7 +472,7 @@ const Matrix &
 Element::getDampSensitivity(int gradNumber) 
 {
   if (index  == -1) {
-    this->setRayleighDampingFactors(0.0, 0.0, 0.0, 0.0);
+    this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
   }
 
   // now compute the damping matrix
@@ -490,7 +490,7 @@ Element::getDampSensitivity(int gradNumber)
   }
   if (betaKc != 0.0) {
     theMatrix->addMatrix(1.0, *Kc, 0.0);      // Don't use this and DDM   
-	opserr << "Rayleigh damping with non-zero betaCommittedTangent is not compatible with DDM sensitivity analysis" << endln;
+    opserr << "Rayleigh damping with non-zero betaCommittedTangent is not compatible with DDM sensitivity analysis" << endln;
   }
 
   // return the computed matrix
