@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-10-27 23:45:44 $
+// $Revision: 1.4 $
+// $Date: 2007-01-09 19:14:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/GradGEvaluator.cpp,v $
 
 
@@ -90,7 +90,7 @@ GradGEvaluator::computeParameterDerivatives(double g)
 	LimitStateFunction *theLimitStateFunction = 
 		theReliabilityDomain->getLimitStateFunctionPtr(lsf);
 	char *theExpression = theLimitStateFunction->getExpression();
-	char *lsf_copy = new char[500];
+	char lsf_copy[500];
 	strcpy(lsf_copy,theExpression);
 	char *tokenPtr = strtok( lsf_copy, separators); 
 
@@ -145,8 +145,6 @@ GradGEvaluator::computeParameterDerivatives(double g)
 
 		tokenPtr = strtok( NULL, separators); 
 	}
-
-	delete [] lsf_copy;
 
 	return 0;
 }
