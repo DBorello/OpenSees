@@ -21,8 +21,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2006-08-11 23:36:00 $
+// $Revision: 1.10 $
+// $Date: 2007-01-10 22:10:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/OPS_Globals.h,v $
                                                                         
 // Written: fmk 
@@ -47,6 +47,9 @@ extern OPS_Stream *opserrPtr;
 // #define opserr cerr
 // #define OPS_Stream ostream
 // #define endln endl
+
+enum NodeResponseType { Disp, Vel, Accel};
+
 
 #define _stdcall BLAH
 
