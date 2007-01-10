@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2006-12-05 20:02:20 $
+// $Revision: 1.24 $
+// $Date: 2007-01-10 22:11:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -1956,4 +1956,20 @@ Node::resetReactionForce(bool inclInertia){
   }
 
   return 0;
+}
+
+const Vector *
+Node::getResponse(NodeResponseType responseType)
+{
+  const Vector *result = NULL;
+  if (responseType == Disp) 
+    result  = &(this->getDisp());
+  else if (responseType == Vel) 
+    return &(this->getVel());
+  else if (responseType == Accel) 
+    return &(this->getAccel());
+  else
+    return NULL;
+
+  return result;
 }

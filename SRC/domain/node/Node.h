@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2006-12-05 20:02:20 $
+// $Revision: 1.12 $
+// $Date: 2007-01-10 22:11:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.h,v $
                                                                         
                                                                         
@@ -39,6 +39,8 @@
 // What: "@(#) Node.h, revA"
 
 #include <DomainComponent.h>
+
+
 class Element;
 class Vector;
 class Matrix;
@@ -142,10 +144,12 @@ class Node : public DomainComponent
     int    updateParameter(int parameterID, Information &info);
     int    activateParameter(int parameterID);
 
+    // AddingSensitivity:END ///////////////////////////////////////////
+
     virtual const Vector &getReaction();
     virtual int   addReactionForce(const Vector &, double factor);
     virtual int   resetReactionForce(bool inclInertia);
-    // AddingSensitivity:END ///////////////////////////////////////////
+    virtual const Vector *getResponse(NodeResponseType);
     
   private:
     // priavte methods used to create the Vector objects 
