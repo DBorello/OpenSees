@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2007-01-10 22:11:11 $
+// $Revision: 1.25 $
+// $Date: 2007-01-10 23:12:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -1968,6 +1968,12 @@ Node::getResponse(NodeResponseType responseType)
     return &(this->getVel());
   else if (responseType == Accel) 
     return &(this->getAccel());
+  else if (responseType == IncrDisp) 
+    return &(this->getIncrDisp());
+  else if (responseType == IncrDeltaDisp) 
+    return &(this->getIncrDeltaDisp());
+  else if (responseType == Reaction) 
+    return &(this->getReaction());
   else
     return NULL;
 
