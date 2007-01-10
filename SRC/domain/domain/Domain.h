@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2006-12-13 18:17:37 $
+// $Revision: 1.19 $
+// $Date: 2007-01-10 22:12:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
 // Written: fmk 
@@ -145,6 +145,7 @@ class Domain
     virtual int getNumLoadPatterns(void) const;            
     virtual int getNumParameters(void) const;            
     virtual const Vector &getPhysicalBounds(void); 
+    virtual const Vector *getNodeResponse(int nodeTag, NodeResponseType responseType); 
 
 
     // methods to get element and node graphs

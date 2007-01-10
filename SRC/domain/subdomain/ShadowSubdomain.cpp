@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-11-30 23:47:00 $
+// $Revision: 1.6 $
+// $Date: 2007-01-10 22:12:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -1369,6 +1369,32 @@ ShadowSubdomain::setMass(const Matrix &mass, int nodeTag)
 
 
 
+const Vector *
+ShadowSubdomain::getNodeResponse(int tag, NodeResponseType responseType)
+{
+  if (theNodes.getLocation(tag) < 0)
+    return NULL;
 
+  static Vector data(0);
+    
+  msgData(0) = ShadowActorSubdomain_getNodeResponse;
+  msgData(1) = tag;
+  msgData(2) = responseType;
+  this->sendID(msgData);
+
+  this->recvID(msgData);
+  
+  if (msgData(0) != 0) {
+    int sizeVector = msgData(1);
+    if (data.Size() != sizeVector)
+      data.resize(sizeVector);
+    this->recvVector(data);
+    
+    return &data;
+  }
+  
+  return NULL;
+
+}
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-01-10 00:33:09 $
+// $Revision: 1.6 $
+// $Date: 2007-01-10 22:12:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.h,v $
                                                                         
                                                                         
@@ -84,7 +84,6 @@ class PartitionedDomain: public Domain
     // methods to access the elements
     virtual  ElementIter       &getElements();
     virtual  Element           *getElement(int tag);
-    
     virtual  int 		getNumElements(void) const;
 
     // public methods to update the domain
@@ -118,6 +117,7 @@ class PartitionedDomain: public Domain
     virtual Graph &getSubdomainGraph(void);
 
     // nodal methods required in domain interface for parallel interprter
+    virtual const Vector *getNodeResponse(int nodeTag, NodeResponseType); 
     virtual double getNodeDisp(int nodeTag, int dof, int &errorFlag);
     virtual int setMass(const Matrix &mass, int nodeTag);
     

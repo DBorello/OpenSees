@@ -18,12 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-11-30 23:47:00 $
+// $Revision: 1.6 $
+// $Date: 2007-01-10 22:12:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ActorSubdomain.cpp,v $
                                                                         
-                                                                        
-
 #include <ActorSubdomain.h>
 #include <FEM_ObjectBroker.h>
 #include <Element.h>
@@ -96,7 +94,7 @@ ActorSubdomain::run(void)
 	bool res;
 	double doubleRes;
 	int intRes;
-
+	NodeResponseType nodeResponseType;
 
 	const ID *theID;
 	
@@ -698,6 +696,25 @@ ActorSubdomain::run(void)
 	    this->sendID(msgData);
 	    break;
 
+
+	  case ShadowActorSubdomain_getNodeResponse:
+	    tag = msgData(1);  // nodeTag
+	    nodeResponseType = (NodeResponseType)msgData(2); 
+	    theVector = this->getNodeResponse(tag, nodeResponseType);
+
+	    if (theVector == 0)
+	      msgData(0) = 0;
+	    else {
+	      msgData(0) = 1;
+	      msgData(1) = theVector->Size();
+	    }
+	    this->sendID(msgData);
+
+	    if (theVector != 0)
+	      this->sendVector(*theVector);
+
+	    break;
+
          case ShadowActorSubdomain_setRayleighDampingFactors:
 	   theV = new Vector(4);
 	   this->recvVector(*theV);
@@ -781,9 +798,6 @@ ActorSubdomain::barrierCheck(int myResult)
 
   return data(0);
 }
-
-
-
 
 
 

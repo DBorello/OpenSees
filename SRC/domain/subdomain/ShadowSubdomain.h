@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-11-30 23:47:00 $
+// $Revision: 1.6 $
+// $Date: 2007-01-10 22:12:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.h,v $
                                                                         
                                                                         
@@ -156,6 +156,8 @@ class ShadowSubdomain: public Shadow, public Subdomain
     // nodal methods required in domain interface for parallel interprter
     virtual double getNodeDisp(int nodeTag, int dof, int &errorFlag);
     virtual int setMass(const Matrix &mass, int nodeTag);
+
+    virtual const Vector *getNodeResponse(int tag, NodeResponseType responseType);
     
   protected:    
     virtual int buildMap(void);

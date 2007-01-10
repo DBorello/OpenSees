@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-01-09 19:30:31 $
+// $Revision: 1.7 $
+// $Date: 2007-01-10 22:12:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.cpp,v $
                                                                         
                                                                         
@@ -1400,3 +1400,26 @@ PartitionedDomain::setMass(const Matrix &mass, int nodeTag)
   
   return result;
 }
+
+const Vector *
+PartitionedDomain::getNodeResponse(int nodeTag, NodeResponseType response)
+{
+  const Vector *res = this->Domain::getNodeResponse(nodeTag, response); 
+  if (res != 0)
+    return res;
+
+  // do the same for all the subdomains
+  if (theSubdomains != 0) {
+    ArrayOfTaggedObjectsIter theSubsIter(*theSubdomains);	
+    TaggedObject *theObject;
+    while ((theObject = theSubsIter()) != 0) {
+      Subdomain *theSub = (Subdomain *)theObject;	    
+      const Vector *result = theSub->getNodeResponse(nodeTag, response); 
+      if (result != 0)
+	return result;
+    }	    
+  }
+
+  return NULL;
+}
+
