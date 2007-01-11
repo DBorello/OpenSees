@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-01-10 22:12:41 $
+// $Revision: 1.7 $
+// $Date: 2007-01-11 00:57:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -1049,7 +1049,6 @@ ShadowSubdomain::setAnalysisConvergenceTest(ConvergenceTest &theTest)
     this->sendID(msgData);
     this->sendObject(theTest);
 
-    opserr << "ShadowSubdomain::setAnalysisConvergenceTest(ConvergenceTest &theTest)\n";
     return 0;
 }
 
@@ -1396,5 +1395,18 @@ ShadowSubdomain::getNodeResponse(int tag, NodeResponseType responseType)
   return NULL;
 
 }
+
+int
+ShadowSubdomain::calculateNodalReactions(bool incInertia)
+{
+  msgData(0) = ShadowActorSubdomain_calculateNodalReactions;
+  if (incInertia == true)
+    msgData(1) = 0;
+  else
+    msgData(1) = 1;
+  this->sendID(msgData);
+  return 0;
+}
+  
 
 

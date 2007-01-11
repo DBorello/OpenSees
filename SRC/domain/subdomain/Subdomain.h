@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2005-11-30 23:47:00 $
+// $Revision: 1.7 $
+// $Date: 2007-01-11 00:57:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.h,v $
                                                                         
                                                                         
 #ifndef Subdomain_h
 #define Subdomain_h
 
-// File: ~/domain/subdomain/Subdomain.h
-// 
 // Written: fmk 
 // Created:  11/96
 // Revision: A
@@ -151,7 +149,7 @@ class Subdomain: public Element, public Domain
 			 FEM_ObjectBroker &theBroker);
 
     virtual double getCost(void);
-
+    virtual int addResistingForceToNodalReaction(bool inclInertia);
     
   protected:    
     virtual int buildMap(void);

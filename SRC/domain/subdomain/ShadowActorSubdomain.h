@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-01-10 22:12:41 $
+// $Revision: 1.6 $
+// $Date: 2007-01-11 00:57:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowActorSubdomain.h,v $
                                                                         
                                                                         
@@ -90,3 +90,4 @@ static const int ShadowActorSubdomain_setRayleighDampingFactors = 94;
 static const int ShadowActorSubdomain_wipeAnalysis = 95;
 static const int ShadowActorSubdomain_clearAll = 96;
 static const int ShadowActorSubdomain_getNodeResponse = 97;
+static const int ShadowActorSubdomain_calculateNodalReactions = 98;

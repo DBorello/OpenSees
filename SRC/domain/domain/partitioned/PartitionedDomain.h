@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-01-10 22:12:40 $
+// $Revision: 1.7 $
+// $Date: 2007-01-11 00:57:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.h,v $
                                                                         
                                                                         
@@ -120,6 +120,8 @@ class PartitionedDomain: public Domain
     virtual const Vector *getNodeResponse(int nodeTag, NodeResponseType); 
     virtual double getNodeDisp(int nodeTag, int dof, int &errorFlag);
     virtual int setMass(const Matrix &mass, int nodeTag);
+
+    virtual int calculateNodalReactions(bool inclInertia);
     
     // friend classes
     friend class PartitionedDomainEleIter;

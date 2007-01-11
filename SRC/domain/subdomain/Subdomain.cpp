@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2006-04-13 20:12:08 $
+// $Revision: 1.9 $
+// $Date: 2007-01-11 00:57:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -48,6 +48,7 @@
 #include <classTags.h>
 #include <PartitionedModelBuilder.h>
 #include <DOF_Group.h>
+#include <ElementIter.h>
 
 #include <EquiSolnAlgo.h>
 #include <IncrementalIntegrator.h>
@@ -270,6 +271,7 @@ Subdomain::getNodePtrs(void)
   opserr << "Subdomain::getNodePtrs() - should not be called\n";
   return 0;
 }
+
 
 Node *
 Subdomain::getNode(int tag) 
@@ -878,4 +880,10 @@ DomainDecompositionAnalysis *
 Subdomain::getDDAnalysis(void)
 {
   return theAnalysis;
+}
+
+int 
+Subdomain::addResistingForceToNodalReaction(bool inclInertia)
+{
+  return 0;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-01-10 22:12:40 $
+// $Revision: 1.7 $
+// $Date: 2007-01-11 00:57:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ActorSubdomain.cpp,v $
                                                                         
 #include <ActorSubdomain.h>
@@ -713,6 +713,13 @@ ActorSubdomain::run(void)
 	    if (theVector != 0)
 	      this->sendVector(*theVector);
 
+	    break;
+
+	  case ShadowActorSubdomain_calculateNodalReactions:
+	    if (msgData(0) == 0)
+	      this->calculateNodalReactions(true);
+	    else
+	      this->calculateNodalReactions(false);
 	    break;
 
          case ShadowActorSubdomain_setRayleighDampingFactors:

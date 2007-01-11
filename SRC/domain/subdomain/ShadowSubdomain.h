@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-01-10 22:12:41 $
+// $Revision: 1.7 $
+// $Date: 2007-01-11 00:57:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.h,v $
                                                                         
                                                                         
@@ -158,6 +158,7 @@ class ShadowSubdomain: public Shadow, public Subdomain
     virtual int setMass(const Matrix &mass, int nodeTag);
 
     virtual const Vector *getNodeResponse(int tag, NodeResponseType responseType);
+    virtual int calculateNodalReactions(bool inclInertia);
     
   protected:    
     virtual int buildMap(void);
