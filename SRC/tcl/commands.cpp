@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.82 $
-// $Date: 2007-01-09 19:33:14 $
+// $Revision: 1.83 $
+// $Date: 2007-01-11 01:00:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -455,6 +455,12 @@ int g3AppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "nodeVel", &nodeVel, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
+    Tcl_CreateCommand(interp, "nodeAccel", &nodeAccel, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
+    Tcl_CreateCommand(interp, "nodeResponse", &nodeResponse, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
+    Tcl_CreateCommand(interp, "reactions", &calculateNodalReactions, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "nodeCoord", &nodeCoord, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "nodeBounds", &nodeBounds, 
@@ -470,6 +476,8 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "logFile", &logFile, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
     Tcl_CreateCommand(interp, "exit", &OpenSeesExit, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    Tcl_CreateCommand(interp, "quit", &OpenSeesExit, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
     Tcl_CreateCommand(interp, "getNP", &getNP, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
@@ -4371,7 +4379,6 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
 int 
 nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
-    
     // make sure at least one other argument to contain type of system
     if (argc < 3) {
 	opserr << "WARNING want - nodeDisp nodeTag? dof?\n";
@@ -4389,18 +4396,17 @@ nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 	return TCL_ERROR;	        
     }        
     
-    Node *theNode = theDomain.getNode(tag);
-    double value = 0.0;
-    if (theNode != 0) {
-	const Vector &disp = theNode->getTrialDisp();
-	if (disp.Size() >= dof && dof > 0) {
-	    value = disp(dof-1); // -1 for OpenSees vs C indexing
-	}
-    }
+    dof--;
+
+    const Vector *nodalResponse = theDomain.getNodeResponse(tag, Disp);
+
+    if (nodalResponse == 0 || nodalResponse->Size() < dof || dof < 0)
+      return TCL_ERROR;
+
+    double value = (*nodalResponse)(dof);
     
     // now we copy the value to the tcl string that is returned
     sprintf(interp->result,"%35.20f",value);
-    
 	
     return TCL_OK;
 }
@@ -4477,46 +4483,130 @@ nodeBounds(ClientData clientData, Tcl_Interp *interp, int argc,
   return TCL_OK;
 }
 
-
-// AddingSensitivity:BEGIN ////////////////////////////////////
 int 
 nodeVel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
-    
     // make sure at least one other argument to contain type of system
     if (argc < 3) {
-	interp->result = "WARNING want - nodeVel nodeTag? dof?\n";
+	opserr << "WARNING want - nodeDisp nodeTag? dof?\n";
 	return TCL_ERROR;
    }    
 
     int tag, dof;
 
     if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
-	opserr << "WARNING nodeDisp nodeTag? dof? - could not read nodeTag? ";
+	opserr << "WARNING nodeDisp nodeTag? dof? - could not read nodeTag? \n";
 	return TCL_ERROR;	        
     }    
     if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
-	opserr << "WARNING nodeDisp nodeTag? dof? - could not read dof? ";
+	opserr << "WARNING nodeDisp nodeTag? dof? - could not read dof? \n";
 	return TCL_ERROR;	        
     }        
     
-    Node *theNode = theDomain.getNode(tag);
-    double value = 0.0;
-    if (theNode != 0) {
-	const Vector &vel = theNode->getTrialVel();
-	if (vel.Size() >= dof && dof > 0) {
-	    value = vel(dof-1); // -1 for OpenSees vs C indexing
-	}
-    }
+    dof--;
+
+    const Vector *nodalResponse = theDomain.getNodeResponse(tag, Vel);
+    if (nodalResponse == 0 || nodalResponse->Size() < dof || dof < 0)
+      return TCL_ERROR;
+
+    double value = (*nodalResponse)(dof);
     
     // now we copy the value to the tcl string that is returned
     sprintf(interp->result,"%35.20f",value);
-    
 	
     return TCL_OK;
 }
 
 
+int 
+nodeAccel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+    // make sure at least one other argument to contain type of system
+    if (argc < 3) {
+	opserr << "WARNING want - nodeDisp nodeTag? dof?\n";
+	return TCL_ERROR;
+   }    
+
+    int tag, dof;
+
+    if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+	opserr << "WARNING nodeDisp nodeTag? dof? - could not read nodeTag? \n";
+	return TCL_ERROR;	        
+    }    
+    if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
+	opserr << "WARNING nodeDisp nodeTag? dof? - could not read dof? \n";
+	return TCL_ERROR;	        
+    }        
+    
+    dof--;
+
+    const Vector *nodalResponse = theDomain.getNodeResponse(tag, Accel);
+    if (nodalResponse == 0 || nodalResponse->Size() < dof || dof < 0)
+      return TCL_ERROR;
+
+    double value = (*nodalResponse)(dof);
+    
+    // now we copy the value to the tcl string that is returned
+    sprintf(interp->result,"%35.20f",value);
+	
+    return TCL_OK;
+}
+
+
+int 
+nodeResponse(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+    // make sure at least one other argument to contain type of system
+    if (argc < 4) {
+	opserr << "WARNING want - nodeResponse responseID? nodeTag? dof?\n";
+	return TCL_ERROR;
+   }    
+
+    int tag, dof, responseID;
+
+    if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+	opserr << "WARNING nodeDisp nodeTag? dof? - could not read nodeTag? \n";
+	return TCL_ERROR;	        
+    }    
+    if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
+	opserr << "WARNING nodeDisp nodeTag? dof? - could not read dof? \n";
+	return TCL_ERROR;	        
+    }        
+    if (Tcl_GetInt(interp, argv[3], &responseID) != TCL_OK) {
+	opserr << "WARNING nodeDisp nodeTag? dof? - could not read dof? \n";
+	return TCL_ERROR;	        
+    }        
+    
+    dof--;
+
+    const Vector *nodalResponse = theDomain.getNodeResponse(tag, (NodeResponseType)responseID);
+    if (nodalResponse == 0 || nodalResponse->Size() < dof || dof < 0)
+      return TCL_ERROR;
+
+    double value = (*nodalResponse)(dof);
+    
+    // now we copy the value to the tcl string that is returned
+    sprintf(interp->result,"%35.20f",value);
+	
+    return TCL_OK;
+}
+
+int 
+calculateNodalReactions(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+    // make sure at least one other argument to contain type of system
+  bool incInertia = false;
+  if (argc == 2) 
+    if ((strcmp(argv[1],"-incIneria") == 0) || strcmp(argv[1],"-incIneria") == 0)
+      incInertia = true;
+  
+
+  theDomain.calculateNodalReactions(incInertia);
+  return TCL_OK;
+}
+
+
+// AddingSensitivity:BEGIN ////////////////////////////////////
 int 
 sensNodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {

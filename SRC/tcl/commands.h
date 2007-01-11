@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2006-05-26 00:17:12 $
+// $Revision: 1.15 $
+// $Date: 2007-01-11 01:00:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
                                                                         
@@ -130,9 +130,20 @@ nodeCoord(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int 
 nodeBounds(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
-// AddingSensitivity:BEGIN /////////////////////////////////////////////////
 int 
 nodeVel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+nodeAccel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+nodeResponse(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+calculateNodalReactions(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+// AddingSensitivity:BEGIN /////////////////////////////////////////////////
+
 
 int 
 computeGradients(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
