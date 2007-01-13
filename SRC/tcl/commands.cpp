@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.83 $
-// $Date: 2007-01-11 01:00:07 $
+// $Revision: 1.84 $
+// $Date: 2007-01-13 00:31:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -312,6 +312,25 @@ FEM_ObjectBroker  *OPS_OBJECT_BROKER;
 MachineBroker     *OPS_MACHINE;
 Channel          **OPS_theChannels = 0;
 
+#elif _PARALLEL_INTERPRETERS
+
+// parallel analysis
+#include <ParallelNumberer.h>
+#include <DistributedDisplacementControl.h>
+
+//  parallel soe & solvers
+#include <DistributedBandSPDLinSOE.h>
+#include <DistributedSparseGenColLinSOE.h>
+#include <DistributedSparseGenRowLinSOE.h>
+#include <DistributedBandGenLinSOE.h>
+#include <DistributedDiagonalSOE.h>
+#include <DistributedDiagonalSolver.h>
+#define MPIPP_H
+#include <DistributedSuperLU.h>
+#include <DistributedProfileSPDLinSOE.h>
+
+Domain theDomain;
+
 #else
 
 Domain theDomain;
@@ -322,6 +341,10 @@ Domain theDomain;
 #ifdef _PARALLEL_INTERPRETERS
 #include <MachineBroker.h>
 extern MachineBroker *theMachineBroker;
+extern Channel **theChannels;
+extern int numChannels;
+extern int rank;
+extern int np;
 #endif
 
 
@@ -329,7 +352,6 @@ extern MachineBroker *theMachineBroker;
 #include <MachineBroker.h>
 extern MachineBroker *theMachineBroker;
 #endif
-
 
 
 static AnalysisModel *theAnalysisModel =0;
@@ -1747,6 +1769,17 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 #endif
   }
 
+#ifdef _PARALLEL_INTERPRETERS
+  else if (strcmp(argv[1],"ParallelProfileSPD") == 0) {
+    ProfileSPDLinSolver *theSolver = new ProfileSPDLinDirectSolver(); 	
+    DistributedProfileSPDLinSOE *theParallelSOE = new DistributedProfileSPDLinSOE(*theSolver);
+    theSOE = theParallelSOE;
+    theParallelSOE->setProcessID(rank);
+    theParallelSOE->setChannels(numChannels, theChannels);
+  }
+#endif
+
+
   // SPARSE GENERAL SOE * SOLVER
   else if ((strcmp(argv[1],"SparseGeneral") == 0) || (strcmp(argv[1],"SuperLU") == 0) ||
 	   (strcmp(argv[1],"SparseGEN") == 0)) {
@@ -2058,7 +2091,6 @@ specifyNumberer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **
     return TCL_ERROR;
   }    
 
-#else
 
   // check argv[1] for type of Numberer and create the object
   if (strcmp(argv[1],"Plain") == 0) {
@@ -2067,6 +2099,38 @@ specifyNumberer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **
     RCM *theRCM = new RCM(false);	
     theNumberer = new DOF_Numberer(*theRCM);    	
   } else {
+    opserr << "WARNING No Numberer type exists (Plain, RCM only) \n";
+    return TCL_ERROR;
+  }    
+
+#else
+
+  // check argv[1] for type of Numberer and create the object
+  if (strcmp(argv[1],"Plain") == 0) {
+    theNumberer = new PlainNumberer();       
+  } else if (strcmp(argv[1],"RCM") == 0) {
+    RCM *theRCM = new RCM(false);	
+    theNumberer = new DOF_Numberer(*theRCM);    	
+  } 
+
+#ifdef _PARALLEL_INTERPRETERS
+
+  else if (strcmp(argv[1],"ParallelPlain") == 0) {
+    ParallelNumberer *theParallelNumberer = new ParallelNumberer;
+    theNumberer = theParallelNumberer;       
+    theParallelNumberer->setProcessID(rank);
+    theParallelNumberer->setChannels(numChannels, theChannels);
+  } else if (strcmp(argv[1],"ParallelRCM") == 0) {
+    RCM *theRCM = new RCM(false);	
+    ParallelNumberer *theParallelNumberer = new ParallelNumberer(*theRCM);    	
+    theNumberer = theParallelNumberer;       
+    theParallelNumberer->setProcessID(rank);
+    theParallelNumberer->setChannels(numChannels, theChannels);
+  }   
+
+#endif
+
+  else {
     opserr << "WARNING No Numberer type exists (Plain, RCM only) \n";
     return TCL_ERROR;
   }    
