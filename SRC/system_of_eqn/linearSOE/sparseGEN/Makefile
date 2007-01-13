@@ -4,12 +4,6 @@ include ../../../../Makefile.def
 
 PROGRAM         = test
 
-OBJS       = SparseGenColLinSOE.o \
-	SparseGenColLinSolver.o \
-	SparseGenRowLinSOE.o \
-	SparseGenRowLinSolver.o \
-	SuperLU.o 
-
 ifeq ($(PROGRAMMING_MODE), PARALLEL)
 
 OBJS       = SparseGenColLinSOE.o \
@@ -21,7 +15,30 @@ OBJS       = SparseGenColLinSOE.o \
 	DistributedSparseGenColLinSOE.o \
 	DistributedSparseGenRowLinSOE.o
 
+else
+
+ifeq ($(PROGRAMMING_MODE), PARALLEL_INTERPRETERS)
+
+OBJS       = SparseGenColLinSOE.o \
+	SparseGenColLinSolver.o \
+	SparseGenRowLinSOE.o \
+	SparseGenRowLinSolver.o \
+	SuperLU.o \
+	DistributedSuperLU.o \
+	DistributedSparseGenColLinSOE.o \
+	DistributedSparseGenRowLinSOE.o
+
+else
+
+OBJS       = SparseGenColLinSOE.o \
+	SparseGenColLinSolver.o \
+	SparseGenRowLinSOE.o \
+	SparseGenRowLinSolver.o \
+	SuperLU.o 
+
 endif
+endif
+
 
 all:         $(OBJS)
 

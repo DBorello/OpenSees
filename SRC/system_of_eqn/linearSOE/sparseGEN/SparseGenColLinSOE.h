@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-12-06 22:11:37 $
+// $Revision: 1.4 $
+// $Date: 2007-01-13 00:28:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSOE.h,v $
                                                                         
                                                                         
@@ -76,7 +76,13 @@ class SparseGenColLinSOE : public LinearSOE
     friend class ThreadedSuperLU;        
     friend class DistributedSuperLU;        
 #else
+#ifdef _PARALLEL_INTERPRETERS
     friend class SuperLU;    
+    friend class ThreadedSuperLU;        
+    friend class DistributedSuperLU;        
+#else
+    friend class SuperLU;    
+#endif
 #endif
 
   protected:
