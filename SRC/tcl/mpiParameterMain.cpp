@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-09-01 00:49:09 $
+// $Revision: 1.3 $
+// $Date: 2007-01-13 00:29:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/mpiParameterMain.cpp,v $
 
 /* 
@@ -35,7 +35,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: mpiParameterMain.cpp,v 1.2 2006-09-01 00:49:09 fmk Exp $
+ * RCS: @(#) $Id: mpiParameterMain.cpp,v 1.3 2007-01-13 00:29:55 fmk Exp $
  */
 
 extern "C" {
@@ -68,8 +68,6 @@ extern "C" int matherr();
 extern "C" {
 #include "tclInt.h"
 }
-
-
 
 extern int		Procbodytest_Init _ANSI_ARGS_((Tcl_Interp *interp));
 extern int		Procbodytest_SafeInit _ANSI_ARGS_((Tcl_Interp *interp));
@@ -126,6 +124,10 @@ extern bool OPS_USING_MAIN_DOMAIN;
 extern int OPS_MAIN_DOMAIN_PARTITION_ID;
 
 MachineBroker *theMachineBroker = 0;
+Channel **theChannels = 0;
+int numChannels = 0;
+int rank = 0;
+int np = 0;
 
 int
 main(int argc, char **argv)
@@ -134,8 +136,16 @@ main(int argc, char **argv)
   MPI_MachineBroker theMachine(&theBroker, argc, argv);
   theMachineBroker = &theMachine;
 
-  int rank = theMachine.getPID();
-  int np = theMachine.getNP();
+  rank = theMachine.getPID();
+  np = theMachine.getNP();
+
+  if (rank == 0) {
+    theChannels = new Channel *[np-1];
+    numChannels = np-1;
+  } else {
+    theChannels = new Channel *[1];
+    numChannels = 1;
+  }
 
   //
   // if rank 0 we send all args
@@ -172,6 +182,7 @@ main(int argc, char **argv)
 
     for (int j=0; j<np-1; j++) {
       Channel *otherChannel = theMachine.getRemoteProcess();
+      theChannels[j] = otherChannel;
       otherChannel->sendID(0,0,data);
       otherChannel->sendMsg(0,0,msgChar);
     }
@@ -181,6 +192,7 @@ main(int argc, char **argv)
     static ID data(2);    
 
     Channel *myChannel = theMachine.getMyChannel();
+    theChannels[0] = myChannel;
     myChannel->recvID(0,0,data);
     numArg = data(0);
     sizeArg = data(1);
