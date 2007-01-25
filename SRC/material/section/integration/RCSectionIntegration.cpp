@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2007-01-25 18:36:02 $
+// $Revision: 1.3 $
+// $Date: 2007-01-25 19:53:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/integration/RCSectionIntegration.cpp,v $
 
 #include <RCSectionIntegration.h>
@@ -126,8 +126,10 @@ RCSectionIntegration::getFiberLocations(int nFibers, double *yi, double *zi)
       yi[loc++] = (-0.5*d+cover) + spacing*i;
   }
 
-  for (int i = 0; i < nFibers; i++)
-    zi[i] = 0.0;
+  if (zi != 0) {
+    for (int i = 0; i < nFibers; i++)
+      zi[i] = 0.0;
+  }
 
   return;
 }
@@ -281,8 +283,10 @@ RCSectionIntegration::getLocationsDeriv(int nFibers, double *dyidh, double *dzid
       dyidh[loc++] = (-0.5*dddh+dcoverdh) + dspacingdh*i;
   }
 
-  for (int i = 0; i < nFibers; i++)
-    dzidh[i] = 0.0;
+  if (dzidh != 0) {
+    for (int i = 0; i < nFibers; i++)
+      dzidh[i] = 0.0;
+  }
 
   return;
 }
