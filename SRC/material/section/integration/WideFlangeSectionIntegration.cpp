@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2006-08-11 18:32:56 $
+// $Revision: 1.2 $
+// $Date: 2007-01-25 18:36:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/integration/WideFlangeSectionIntegration.cpp,v $
 
 #include <WideFlangeSectionIntegration.h>
@@ -73,7 +73,7 @@ WideFlangeSectionIntegration::arrangeFibers(UniaxialMaterial **theMaterials,
 }
 
 void
-WideFlangeSectionIntegration::getFiberLocations(int nFibers, double *xi)
+WideFlangeSectionIntegration::getFiberLocations(int nFibers, double *yi, double *zi)
 {
   double dw = d-2*tf;
   
@@ -83,16 +83,19 @@ WideFlangeSectionIntegration::getFiberLocations(int nFibers, double *xi)
   double yStart = 0.5 * (d-yIncr);
   
   for (loc = 0; loc < Nftf; loc++) {
-    xi[loc] = yStart - yIncr*loc;
-    xi[nFibers-loc-1] = -xi[loc];
+    yi[loc] = yStart - yIncr*loc;
+    yi[nFibers-loc-1] = -yi[loc];
   }
   
   yIncr  = dw/Nfdw;
   yStart = 0.5 * (dw-yIncr);
   
   for (int count = 0; loc < nFibers-Nftf; loc++, count++) {
-    xi[loc] = yStart - yIncr*count;
+    yi[loc] = yStart - yIncr*count;
   }
+
+  for (int i = 0; i < nFibers; i++)
+    zi[i] = 0.0;
 
   return;
 }
@@ -178,7 +181,7 @@ WideFlangeSectionIntegration::activateParameter(int paramID)
 }
 
 void
-WideFlangeSectionIntegration::getLocationsDeriv(int nFibers, double *dptsdh)
+WideFlangeSectionIntegration::getLocationsDeriv(int nFibers, double *dyidh, double *dzidh)
 {
   double dw = d-2*tf;
   
@@ -209,10 +212,10 @@ WideFlangeSectionIntegration::getLocationsDeriv(int nFibers, double *dptsdh)
   int loc;
   
   for (loc = 0; loc < Nftf; loc++) {
-    //xi[loc] = yStart - yIncr*loc;
-    //xi[nFibers-loc-1] = -xi[loc];
-    dptsdh[loc] = dyStartdh - dyIncrdh*loc;
-    dptsdh[nFibers-loc-1] = -dptsdh[loc];
+    //yi[loc] = yStart - yIncr*loc;
+    //yi[nFibers-loc-1] = -yi[loc];
+    dyidh[loc] = dyStartdh - dyIncrdh*loc;
+    dyidh[nFibers-loc-1] = -dyidh[loc];
   }
   
   //yIncr  = dw/Nfdw;
@@ -221,19 +224,18 @@ WideFlangeSectionIntegration::getLocationsDeriv(int nFibers, double *dptsdh)
   dyStartdh = 0.5 * (ddwdh-dyIncrdh);
   
   for (int count = 0; loc < nFibers-Nftf; loc++, count++) {
-    //xi[loc] = yStart - yIncr*count;
-    dptsdh[loc] = dyStartdh - dyIncrdh*count;
+    //yi[loc] = yStart - yIncr*count;
+    dyidh[loc] = dyStartdh - dyIncrdh*count;
   }
 
-  //for (int i = 0; i < nFibers; i++)
-  //  opserr << dptsdh[i] << ' ';
-  //opserr << endln;
-
+  for (int i = 0; i < nFibers; i++)
+    dzidh[i] = 0.0;
+  
   return;
 }
 
 void
-WideFlangeSectionIntegration::getWeightsDeriv(int nFibers, double *dwtsdh)
+WideFlangeSectionIntegration::getWeightsDeriv(int nFibers, double *dwtdh)
 {
   double dw = d-2*tf;
   
@@ -259,12 +261,12 @@ WideFlangeSectionIntegration::getWeightsDeriv(int nFibers, double *dwtsdh)
   int loc = 0;
   
   for (loc = 0; loc < Nftf; loc++) {
-    dwtsdh[loc] = dAfdh;
-    dwtsdh[nFibers-loc-1] = dAfdh;
+    dwtdh[loc] = dAfdh;
+    dwtdh[nFibers-loc-1] = dAfdh;
   }
   
   for ( ; loc < nFibers-Nftf; loc++)
-    dwtsdh[loc] = dAwdh;
+    dwtdh[loc] = dAwdh;
 
   //for (int i = 0; i < nFibers; i++)
   //  opserr << dwtsdh[i] << ' ';

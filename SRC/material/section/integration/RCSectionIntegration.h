@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2006-09-05 22:08:05 $
+// $Revision: 1.3 $
+// $Date: 2007-01-25 18:36:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/integration/RCSectionIntegration.h,v $
 
 #ifndef RCSectionIntegration_h
@@ -32,14 +32,15 @@ class UniaxialMaterial;
 class RCSectionIntegration : public SectionIntegration
 {
  public:
-  RCSectionIntegration(double d, double b, double Amain, double Aside,
-		       double cover, int Nfcore, int Nfcover, int Nfs);
+  RCSectionIntegration(double d, double b, double Atop, double Abottom,
+		       double Aside, double cover,
+		       int Nfcore, int Nfcover, int Nfs);
   RCSectionIntegration();
   ~RCSectionIntegration();
 
   int getNumFibers(void);
 
-  void getFiberLocations(int nFibers, double *xi);
+  void getFiberLocations(int nFibers, double *yi, double *zi);
   void getFiberWeights(int nFibers, double *wt);
 
   SectionIntegration *getCopy(void);
@@ -51,8 +52,8 @@ class RCSectionIntegration : public SectionIntegration
   int updateParameter(int parameterID, Information &info);
   int activateParameter(int parameterID);
 
-  void getLocationsDeriv(int nFibers, double *dptsdh);
-  void getWeightsDeriv(int nFibers, double *dwtsdh);
+  void getLocationsDeriv(int nFibers, double *dyidh, double *dzidh);
+  void getWeightsDeriv(int nFibers, double *dwtdh);
 
   void Print(OPS_Stream &s, int flag = 0);
 
@@ -64,7 +65,8 @@ class RCSectionIntegration : public SectionIntegration
  private:
   double d;
   double b;
-  double Amain;
+  double Atop;
+  double Abottom;
   double Aside;
   double cover;
 
