@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2006-09-05 23:33:20 $
+// $Revision: 1.24 $
+// $Date: 2007-01-25 20:44:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -574,7 +574,7 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	    return TCL_ERROR;
 	}
 	
-	RCSectionIntegration rcsect(d, b, Amain, Aside, cover, nfcore, nfcover, nfs);
+	RCSectionIntegration rcsect(d, b, Amain, Amain, Aside, cover, nfcore, nfcover, nfs);
 
 	int numFibers = rcsect.getNumFibers();
 
