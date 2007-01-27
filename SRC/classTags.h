@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.83 $
-// $Date: 2006-11-03 18:31:56 $
+// $Revision: 1.84 $
+// $Date: 2007-01-27 01:04:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -195,6 +195,8 @@
 #define SEC_TAG_YieldSurface2d  30
 #define SEC_TAG_YieldSurface2D02  31
 #define SEC_TAG_YieldSurface2D01  32
+#define SEC_TAG_ElasticShear2d   33
+#define SEC_TAG_ElasticShear3d   34
 
 
 #define SECTION_INTEGRATION_TAG_WideFlange 1

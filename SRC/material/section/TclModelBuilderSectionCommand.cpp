@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2007-01-25 20:44:55 $
+// $Revision: 1.25 $
+// $Date: 2007-01-27 01:04:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -35,6 +35,8 @@
 
 #include <ElasticSection2d.h>
 #include <ElasticSection3d.h>
+#include <ElasticShearSection2d.h>
+#include <ElasticShearSection3d.h>
 #include <GenericSection1d.h>
 //#include <GenericSectionNd.h>
 #include <SectionAggregator.h>
@@ -100,6 +102,8 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
     // Pointer to a section that will be added to the model builder
     SectionForceDeformation *theSection = 0;
 
+    int NDM = theTclBuilder->getNDM();  
+    
     // Check argv[1] for section type
     if (strcmp(argv[1],"Elastic") == 0) {
 	if (argc < 5) {
@@ -111,7 +115,7 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	}
 	
 	int tag;
-	double E, A, Iz, Iy, G, J;
+	double E, A, Iz, Iy, G, J, alpha;
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
 	    opserr << "WARNING invalid section Elastic tag" << endln;
@@ -136,31 +140,57 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	    return TCL_ERROR;
 	}	
 	
-	if (argc > 8) {
-	    if (Tcl_GetDouble (interp, argv[6], &Iy) != TCL_OK) {
-		opserr << "WARNING invalid EIy" << endln;
-		opserr << "Elastic section: " << tag << endln;	    		
-		return TCL_ERROR;
-	    }
-		
-	    if (Tcl_GetDouble (interp, argv[7], &G) != TCL_OK) {
-		opserr << "WARNING invalid G" << endln;
-		opserr << "Elastic section: " << tag << endln;	    
-		return TCL_ERROR;
+	if (NDM == 2) {
+	  if (argc > 7) {
+	    if (Tcl_GetDouble (interp, argv[6], &G) != TCL_OK) {
+	      opserr << "WARNING invalid G" << endln;
+	      opserr << "Elastic section: " << tag << endln;	    	    
+	      return TCL_ERROR;
 	    }
 
-		if (Tcl_GetDouble (interp, argv[8], &J) != TCL_OK) {
-		opserr << "WARNING invalid J" << endln;
-		opserr << "Elastic section: " << tag << endln;	    
-		return TCL_ERROR;
+	    if (Tcl_GetDouble (interp, argv[7], &alpha) != TCL_OK) {
+	      opserr << "WARNING invalid G" << endln;
+	      opserr << "Elastic section: " << tag << endln;	    	    
+	      return TCL_ERROR;
 	    }
-		
-	    // Parsing was successful, allocate the section
-	    theSection = new ElasticSection3d (tag, E, A, Iz, Iy, G, J);
+
+	    theSection = new ElasticShearSection2d(tag, E, A, Iz, G, alpha);
+	  }
+	  else 
+	    theSection = new ElasticSection2d(tag, E, A, Iz);
 	}
-	else
-	    // Parsing was successful, allocate the section
-	    theSection = new ElasticSection2d (tag, E, A, Iz);
+	else {
+	  if (Tcl_GetDouble (interp, argv[6], &Iy) != TCL_OK) {
+	    opserr << "WARNING invalid EIy" << endln;
+	    opserr << "Elastic section: " << tag << endln;
+	    return TCL_ERROR;
+	  }
+	       
+	  if (Tcl_GetDouble (interp, argv[7], &G) != TCL_OK) {
+	    opserr << "WARNING invalid G" << endln;
+	    opserr << "Elastic section: " << tag << endln;	    
+	    return TCL_ERROR;
+	  }
+
+	  if (Tcl_GetDouble (interp, argv[8], &J) != TCL_OK) {
+	    opserr << "WARNING invalid J" << endln;
+	    opserr << "Elastic section: " << tag << endln;	    
+	    return TCL_ERROR;
+	  }
+
+	  if (argc > 9) {
+	    if (Tcl_GetDouble (interp, argv[9], &alpha) != TCL_OK) {
+	      opserr << "WARNING invalid J" << endln;
+	      opserr << "Elastic section: " << tag << endln;	    
+	      return TCL_ERROR;
+	    }
+
+	    theSection =
+	      new ElasticShearSection3d(tag, E, A, Iz, Iy, G, J, alpha);
+	  }
+	  else 
+	    theSection = new ElasticSection3d(tag, E, A, Iz, Iy, G, J);
+	}
     }	
 	
     else if (strcmp(argv[1],"Generic1D") == 0 ||
@@ -1400,8 +1430,6 @@ TclModelBuilder_addFiber(ClientData clientData, Tcl_Interp *interp, int argc,
     FiberSectionRepr *fiberSectionRepr = (FiberSectionRepr *) sectionRepres;
     int numFibers = fiberSectionRepr->getNumFibers();    
     
-    int NDM = theTclModelBuilder->getNDM();  
-    
     Fiber *theFiber =0;
       
     int matTag;
@@ -1427,7 +1455,9 @@ TclModelBuilder_addFiber(ClientData clientData, Tcl_Interp *interp, int argc,
      }                
     
     UniaxialMaterial *material = theTclModelBuilder->getUniaxialMaterial(matTag);
-    
+
+    int NDM = theTclModelBuilder->getNDM();  
+        
     // creates 2d section      
     if (NDM == 2) {
 

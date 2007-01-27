@@ -1,8 +1,8 @@
 include ../../../Makefile.def
 
 OBJS       = SectionForceDeformation.o \
-	ElasticSection2d.o \
-	ElasticSection3d.o \
+	ElasticSection2d.o ElasticSection3d.o \
+	ElasticShearSection2d.o ElasticShearSection3d.o \
 	GenericSection1d.o \
 	SectionAggregator.o \
 	ElasticPlateSection.o \
