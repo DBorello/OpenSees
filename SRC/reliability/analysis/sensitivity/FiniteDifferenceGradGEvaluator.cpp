@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-10-27 23:45:44 $
+// $Revision: 1.3 $
+// $Date: 2007-01-31 01:54:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/FiniteDifferenceGradGEvaluator.cpp,v $
 
 
@@ -320,7 +320,7 @@ FiniteDifferenceGradGEvaluator::getDgDdispl()
 	LimitStateFunction *theLimitStateFunction = 
 		theReliabilityDomain->getLimitStateFunctionPtr(lsf);
 	char *theExpression = theLimitStateFunction->getExpression();
-	char *lsf_copy = new char[500];
+	char lsf_copy[500];
 	strcpy(lsf_copy,theExpression);
 
 
@@ -389,8 +389,6 @@ FiniteDifferenceGradGEvaluator::getDgDdispl()
 
 		tokenPtr = strtok( NULL, separators);  // read next token and go up and check the while condition again
 	} 
-
-	delete [] lsf_copy;
 
 	return (*DgDdispl);
 }
