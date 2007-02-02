@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2007-01-09 19:26:57 $
+// $Revision: 1.23 $
+// $Date: 2007-02-02 03:00:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 #include <math.h>
@@ -2029,7 +2029,7 @@ ForceBeamColumn3d::getInitialStiff(void)
   }
 
   Response*
-  ForceBeamColumn3d::setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &output)
+  ForceBeamColumn3d::setResponse(const char **argv, int argc, OPS_Stream &output)
   {
 
     Response *theResponse = 0;
@@ -2128,7 +2128,7 @@ ForceBeamColumn3d::getInitialStiff(void)
 	output.tag("GaussPointOutput");
 	output.attr("number",sectionNum);
 	output.attr("eta",2.0*xi[sectionNum-1]-1.0);
-	theResponse =  sections[sectionNum-1]->setResponse(&argv[2], argc-2, eleInformation, output);
+	theResponse =  sections[sectionNum-1]->setResponse(&argv[2], argc-2, output);
 	
 	output.endTag();
       }

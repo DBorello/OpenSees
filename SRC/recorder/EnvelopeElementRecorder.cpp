@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2006-08-17 22:27:28 $
+// $Revision: 1.18 $
+// $Date: 2007-02-02 03:00:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -499,7 +499,6 @@ EnvelopeElementRecorder::initialize(void)
   for (int k=0; k<numEle; k++)
     theResponses[k] = 0;
 
-  Information eleInfo(1.0);
   int numDbColumns = 0;
 
   for (int ii=0; ii<numEle; ii++) {
@@ -507,7 +506,7 @@ EnvelopeElementRecorder::initialize(void)
     if (theEle == 0) {
       theResponses[ii] = 0;
     } else {
-      theResponses[ii] = theEle->setResponse((const char **)responseArgs, numArgs, eleInfo, *theHandler);
+      theResponses[ii] = theEle->setResponse((const char **)responseArgs, numArgs, *theHandler);
       if (theResponses[ii] != 0) {
 	// from the response type determine no of cols for each      
 	Information &eleInfo = theResponses[ii]->getInformation();

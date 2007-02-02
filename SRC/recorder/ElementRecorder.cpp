@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2006-08-04 22:33:53 $
+// $Revision: 1.27 $
+// $Date: 2007-02-02 03:00:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -417,7 +417,6 @@ ElementRecorder::initialize(void)
   for (int k=0; k<numEle; k++)
     theResponses[k] = 0;
 
-  Information eleInfo(1.0);
   int i;
 
   for (i=0; i<numEle; i++) {
@@ -425,7 +424,7 @@ ElementRecorder::initialize(void)
     if (theEle == 0) {
       theResponses[i] = 0;
     } else {
-      theResponses[i] = theEle->setResponse((const char **)responseArgs, numArgs, eleInfo, *theOutputHandler);
+      theResponses[i] = theEle->setResponse((const char **)responseArgs, numArgs, *theOutputHandler);
       if (theResponses[i] != 0) {
 	// from the response type determine no of cols for each
 	Information &eleInfo = theResponses[i]->getInformation();
