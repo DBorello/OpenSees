@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2006-09-05 22:28:08 $
+// $Revision: 1.16 $
+// $Date: 2007-02-02 01:19:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.cpp,v $
                                                                         
                                                                         
@@ -108,7 +108,8 @@ UniaxialMaterial::getCopy(SectionForceDeformation *s)
 }
 
 Response* 
-UniaxialMaterial::setResponse(const char **argv, int argc, Information &matInfo, OPS_Stream &theOutput)
+UniaxialMaterial::setResponse(const char **argv, int argc,
+			      OPS_Stream &theOutput)
 {
   Response *theResponse = 0;
 

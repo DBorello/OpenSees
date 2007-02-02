@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2006-09-05 21:39:33 $
+// $Revision: 1.13 $
+// $Date: 2007-02-02 01:18:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionForceDeformation.cpp,v $
                                                                         
                                                                         
@@ -133,7 +133,7 @@ SectionForceDeformation::getRho(void)
 
 Response*
 SectionForceDeformation::setResponse(const char **argv, int argc,
-				     Information &sectInfo, OPS_Stream &output)
+				     OPS_Stream &output)
 {
   const ID &type = this->getType();
   int typeSize = this->getOrder();

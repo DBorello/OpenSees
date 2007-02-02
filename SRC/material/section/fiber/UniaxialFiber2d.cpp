@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2006-09-05 22:06:39 $
+// $Revision: 1.11 $
+// $Date: 2007-02-02 01:18:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/UniaxialFiber2d.cpp,v $
                                                                         
                                                                         
@@ -318,7 +318,7 @@ void UniaxialFiber2d::Print(OPS_Stream &s, int flag)
 }
 
 Response*
-UniaxialFiber2d::setResponse(const char **argv, int argc, Information &info, OPS_Stream &s)
+UniaxialFiber2d::setResponse(const char **argv, int argc, OPS_Stream &s)
 {
   if (argc == 0)
     return 0;
@@ -327,7 +327,7 @@ UniaxialFiber2d::setResponse(const char **argv, int argc, Information &info, OPS
     return new FiberResponse(this, 1, Vector(2));
   
   else
-    return theMaterial->setResponse(argv, argc, info, s);
+    return theMaterial->setResponse(argv, argc, s);
 }
 
 int

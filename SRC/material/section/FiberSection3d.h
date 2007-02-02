@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2006-09-05 23:29:17 $
+// $Revision: 1.11 $
+// $Date: 2007-02-02 01:18:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.h,v $
                                                                         
 // Written: fmk
@@ -71,7 +71,6 @@ class FiberSection3d : public SectionForceDeformation
     void Print(OPS_Stream &s, int flag = 0);
 	    
     Response *setResponse(const char **argv, int argc, 
-			  Information &info,
 			  OPS_Stream &s);
     int getResponse(int responseID, Information &info);
 

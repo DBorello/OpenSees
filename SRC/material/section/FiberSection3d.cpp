@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2006-09-05 23:29:17 $
+// $Revision: 1.24 $
+// $Date: 2007-02-02 01:18:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -724,7 +724,7 @@ FiberSection3d::Print(OPS_Stream &s, int flag)
 }
 
 Response*
-FiberSection3d::setResponse(const char **argv, int argc, Information &sectInfo, OPS_Stream &output)
+FiberSection3d::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
 
   const ID &type = this->getType();
@@ -934,7 +934,7 @@ FiberSection3d::setResponse(const char **argv, int argc, Information &sectInfo, 
 	output.attr("zLoc",matData[2*key+1]);
 	output.attr("area",matData[2*key+2]);
 	
-	theResponse =  theMaterials[key]->setResponse(&argv[passarg], argc-passarg, sectInfo, output);
+	theResponse =  theMaterials[key]->setResponse(&argv[passarg], argc-passarg, output);
 	
 	output.endTag();
       }

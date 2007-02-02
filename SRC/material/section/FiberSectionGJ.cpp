@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-09-05 23:29:17 $
+// $Revision: 1.7 $
+// $Date: 2007-02-02 01:18:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSectionGJ.cpp,v $
                                                                         
 // Written: fmk
@@ -710,11 +710,11 @@ FiberSectionGJ::Print(OPS_Stream &s, int flag)
 }
 
 Response*
-FiberSectionGJ::setResponse(const char **argv, int argc, Information &sectInfo, OPS_Stream &output)
+FiberSectionGJ::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
 
   // See if the response is one of the defaults
-  Response *theResponse = SectionForceDeformation::setResponse(argv, argc, sectInfo, output);
+  Response *theResponse = SectionForceDeformation::setResponse(argv, argc, output);
   if (theResponse != 0)
     return theResponse;
 
@@ -801,7 +801,7 @@ FiberSectionGJ::setResponse(const char **argv, int argc, Information &sectInfo, 
     output.attr("zLoc",matData[2*key+1]);
     output.attr("area",matData[2*key+2]);
     
-    theResponse =  theMaterials[key]->setResponse(&argv[passarg], argc-passarg, sectInfo, output);
+    theResponse =  theMaterials[key]->setResponse(&argv[passarg], argc-passarg, output);
 
     output.endTag();
   }

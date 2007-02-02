@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-25 23:33:33 $
+// $Revision: 1.7 $
+// $Date: 2007-02-02 01:18:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection.cpp,v $
                                                                         
 // Written: MHS
@@ -529,10 +529,10 @@ FiberSection::Print(OPS_Stream &s, int flag)
 }
 
 Response*
-FiberSection::setResponse(const char **argv, int argc, Information &sectInfo)
+FiberSection::setResponse(const char **argv, int argc)
 {
 	// See if the response is one of the defaults
-	Response *res = SectionForceDeformation::setResponse(argv, argc, sectInfo);
+	Response *res = SectionForceDeformation::setResponse(argv, argc);
 	if (res != 0)
 		return res;
 
@@ -567,7 +567,8 @@ FiberSection::setResponse(const char **argv, int argc, Information &sectInfo)
 		}
 	
         if (key < numFibers)
-			return theFibers[key]->setResponse(&argv[passarg],argc-passarg,sectInfo);
+			return theFibers[key]->setResponse(&argv[passarg],argc-passarg
+);
         else
             return 0;
     }

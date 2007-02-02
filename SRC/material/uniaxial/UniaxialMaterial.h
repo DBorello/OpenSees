@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2006-09-05 22:28:08 $
+// $Revision: 1.11 $
+// $Date: 2007-02-02 01:19:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.h,v $
                                                                         
                                                                         
@@ -74,7 +74,6 @@ class UniaxialMaterial : public Material
     virtual UniaxialMaterial *getCopy(SectionForceDeformation *s);
     
     virtual Response *setResponse (const char **argv, int argc, 
-				   Information &matInformation, 
 				   OPS_Stream &theOutputStream);
     virtual int getResponse (int responseID, Information &matInformation);    
 

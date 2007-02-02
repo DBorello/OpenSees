@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2006-08-18 23:00:31 $
+// $Revision: 1.5 $
+// $Date: 2007-02-02 01:19:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FatigueMaterial.cpp,v $
 
 // Written: Patxi 
@@ -789,7 +789,7 @@ FatigueMaterial::Print(OPS_Stream &s, int flag)
 }
 
 Response* 
-FatigueMaterial::setResponse(const char **argv, int argc, Information &matInfo, OPS_Stream &theOutput)
+FatigueMaterial::setResponse(const char **argv, int argc, OPS_Stream &theOutput)
 {
   if (argc == 0) 
     return 0;

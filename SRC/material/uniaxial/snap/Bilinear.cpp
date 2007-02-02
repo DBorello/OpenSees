@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-09-05 22:47:26 $
+// $Revision: 1.3 $
+// $Date: 2007-02-02 01:19:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/snap/Bilinear.cpp,v $
 //
 //
@@ -543,7 +543,7 @@ int Bilinear::setTrialStrain( double d, double strainRate)
 }
 
 
-Response* Bilinear::setResponse(const char **argv, int argc, Information &matInfo)
+Response* Bilinear::setResponse(const char **argv, int argc)
 {
 	if ( argv == NULL || argc == 0 ) {
 		opserr << "Error: Bilinear::setResponse  : No argument specified\n" << "\a";

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-08-03 23:42:19 $
+// $Revision: 1.7 $
+// $Date: 2007-02-02 01:19:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SeriesMaterial.h,v $
 
 #ifndef SeriesMaterial_h
@@ -65,7 +65,6 @@ class SeriesMaterial : public UniaxialMaterial
     void Print(OPS_Stream &s, int flag =0);
 
     Response *setResponse(const char **argv, int argc, 
-			  Information &matInformation, 
 			  OPS_Stream &theOutputStream);
 			  
     int getResponse(int responseID, Information &matInformation);

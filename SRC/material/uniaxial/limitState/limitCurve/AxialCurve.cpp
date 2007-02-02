@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2006-09-05 22:39:58 $
+// $Revision: 1.4 $
+// $Date: 2007-02-02 01:19:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/limitState/limitCurve/AxialCurve.cpp,v $
                                                                         
 // Written: KJE
@@ -170,12 +170,10 @@ AxialCurve::checkElementState(double springForce)
 
 			const char *r[1] = {"basicDeformations"}; // must be implemented in element
 
-			Information	*rotInfoObject =0;   
-			
 			Vector *rotVec; //vector of chord rotations at beam-column ends
 
 			// set type of beam-column element response desired
-			theRotations = theElement->setResponse(r, 1, *rotInfoObject, dummy);
+			theRotations = theElement->setResponse(r, 1, dummy);
 
 			// put element response in the vector of "myInfo"
 			result = theRotations->getResponse();
@@ -210,12 +208,10 @@ AxialCurve::checkElementState(double springForce)
 			const char *f[1] = {"localForce"}; // does not include influence of P-delta
 										 // for P-delta use forType = 0
 
-			Information	*forInfoObject =0;
-
 			Vector *forceVec; //vector of basic forces from beam column
 
 			// set type of beam-column element response desired
-			theForces    = theElement->setResponse(f, 1, *forInfoObject, dummy);
+			theForces    = theElement->setResponse(f, 1, dummy);
 
 			// put element response in the vector of "myInfo"
 			result += theForces->getResponse();

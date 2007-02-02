@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2006-08-04 18:17:04 $
+// $Revision: 1.9 $
+// $Date: 2007-02-02 01:19:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SeriesMaterial.cpp,v $
 
 // Written: MHS
@@ -506,7 +506,7 @@ SeriesMaterial::Print(OPS_Stream &s, int flag)
 }
 
 Response*
-SeriesMaterial::setResponse(const char **argv, int argc, Information &info, OPS_Stream &theOutput)
+SeriesMaterial::setResponse(const char **argv, int argc, OPS_Stream &theOutput)
 {
 
   Response *theResponse = 0;
@@ -556,7 +556,7 @@ SeriesMaterial::setResponse(const char **argv, int argc, Information &info, OPS_
     if (argc > 1) {
       int matNum = atoi(argv[1]) - 1;
       if (matNum >= 0 && matNum < numMaterials)
-	theResponse =  theModels[matNum]->setResponse(&argv[2], argc-2, info, theOutput);
+	theResponse =  theModels[matNum]->setResponse(&argv[2], argc-2, theOutput);
     }
   }
 
