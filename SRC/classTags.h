@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.84 $
-// $Date: 2007-01-27 01:04:26 $
+// $Revision: 1.85 $
+// $Date: 2007-02-02 23:00:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -164,6 +164,11 @@
 #define MAT_TAG_SnapPinch		3003
 #define MAT_TAG_SnapCloughDamage	3004
 #define MAT_TAG_SnapPinchingDamage	3005
+
+
+#define MAT_TAG_ECC01 3010
+#define MAT_TAG_Concrete01WithSITC 3011
+
 
 #define MAT_TAG_Clough1	201
 #define MAT_TAG_Clough2	202

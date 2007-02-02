@@ -568,6 +568,8 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/Steel01.o \
 	$(FE)/material/uniaxial/Steel02.o \
 	$(FE)/material/uniaxial/Steel03.o \
+	$(FE)/material/uniaxial/Concrete01WithSITC.o \
+	$(FE)/material/uniaxial/ECC01.o \
 	$(FE)/material/uniaxial/HystereticMaterial.o \
 	$(FE)/material/uniaxial/EPPGapMaterial.o \
 	$(FE)/material/uniaxial/ViscousMaterial.o \

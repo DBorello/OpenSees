@@ -32,6 +32,8 @@ include ../../../Makefile.def
 	TclNewUnixialMaterial.o \
 	ReinforcingSteel.o \
 	TclReinforcingSteel.o\
+	Concrete01WithSITC.o \
+	ECC01.o \
         TclModelBuilderUniaxialMaterialCommand.o
 
 all:         $(OBJS)
