@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2007-02-02 03:00:24 $
+// $Revision: 1.24 $
+// $Date: 2007-02-02 04:11:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 #include <math.h>
@@ -1834,7 +1834,6 @@ ForceBeamColumn3d::getInitialStiff(void)
     else if (flag < -1) {
       int eleTag = this->getTag();
       int counter = (flag +1) * -1;
-      int i;
       double P  = Secommit(0);
       double MZ1 = Secommit(1);
       double MZ2 = Secommit(2);
