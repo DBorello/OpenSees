@@ -103,7 +103,7 @@ public:
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
     void Print(OPS_Stream &s, int flag =0);
 
-    Response *setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output);
+    Response *setResponse(const char **argv, int argc, OPS_Stream &output);
     int getResponse(int responseID, Information &eleInformation);
 
     //int setParameter (const char **argv, int argc, Information &info);

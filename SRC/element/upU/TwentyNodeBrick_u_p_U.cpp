@@ -531,7 +531,7 @@ int TwentyNodeBrick_u_p_U::displaySelf (Renderer &theViewer, int displayMode, fl
 
 
 //=============================================================================
-Response* TwentyNodeBrick_u_p_U::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
+Response* TwentyNodeBrick_u_p_U::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
   Response *theResponse = 0;
 
@@ -561,7 +561,7 @@ Response* TwentyNodeBrick_u_p_U::setResponse(const char **argv, int argc, Inform
       output.tag("GaussPoint");
       output.attr("number",pointNum);
 
-      theResponse =  theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+      theResponse =  theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, output);
 
       output.endTag(); // GaussPoint
     }

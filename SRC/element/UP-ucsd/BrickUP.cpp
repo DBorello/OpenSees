@@ -29,8 +29,8 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
                                                                            
-// $Revision: 1.2 $
-// $Date: 2006-08-04 22:32:17 $
+// $Revision: 1.3 $
+// $Date: 2007-02-02 01:44:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/BrickUP.cpp,v $
 
 // by Zhaohui Yang (Modified based on Ed "C++" Love's Brick element)
@@ -1441,7 +1441,7 @@ BrickUP::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-BrickUP::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
+BrickUP::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
 
   Response *theResponse = 0;
@@ -1487,7 +1487,7 @@ BrickUP::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stre
       output.tag("GaussPoint");
       output.attr("number",pointNum);
 
-      theResponse =  materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+      theResponse =  materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, output);
       
       output.endTag(); // GaussPoint
     }

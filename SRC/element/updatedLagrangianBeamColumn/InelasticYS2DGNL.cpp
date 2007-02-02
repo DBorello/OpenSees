@@ -1710,11 +1710,11 @@ int InelasticYS2DGNL::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBro
 }
 
 
-Response* InelasticYS2DGNL::setResponse(const char **argv, int argc, Information &eleInformation)
+Response* InelasticYS2DGNL::setResponse(const char **argv, int argc)
 {
 Response *suResponse=0;
 
-	suResponse = this->UpdatedLagrangianBeam2D::setResponse(argv, argc, eleInformation);
+	suResponse = this->UpdatedLagrangianBeam2D::setResponse(argv, argc);
 
 	if(suResponse != 0)
 		return suResponse;

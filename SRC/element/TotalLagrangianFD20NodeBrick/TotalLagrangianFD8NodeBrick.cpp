@@ -1494,7 +1494,7 @@ void TotalLagrangianFD8NodeBrick::Print(OPS_Stream &s, int flag)
 
 //=============================================================================
 
-Response * TotalLagrangianFD8NodeBrick::setResponse (const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
+Response * TotalLagrangianFD8NodeBrick::setResponse (const char **argv, int argc, OPS_Stream &output)
 
 {
 

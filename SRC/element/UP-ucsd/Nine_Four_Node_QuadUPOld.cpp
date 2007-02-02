@@ -10,8 +10,8 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.1 $
-// $Date: 2005-09-22 21:28:36 $
+// $Revision: 1.2 $
+// $Date: 2007-02-02 01:44:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/Nine_Four_Node_QuadUPOld.cpp,v $
 
 #include <Nine_Four_Node_QuadUP.h>
@@ -924,7 +924,7 @@ NineFourNodeQuadUP::displaySelf(Renderer &theViewer, int displayMode, float fact
 }
 
 Response*
-NineFourNodeQuadUP::setResponse(const char **argv, int argc, Information &eleInfo)
+NineFourNodeQuadUP::setResponse(const char **argv, int argc)
 {
     if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
 		return new ElementResponse(this, 1, P);
@@ -941,7 +941,7 @@ NineFourNodeQuadUP::setResponse(const char **argv, int argc, Information &eleInf
 	else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
 		int pointNum = atoi(argv[1]);
 		if (pointNum > 0 && pointNum <= nenu)
-			return theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo);
+			return theMaterial[pointNum-1]->setResponse(&argv[2], argc-2);
 	    else 
 			return 0;
 	}

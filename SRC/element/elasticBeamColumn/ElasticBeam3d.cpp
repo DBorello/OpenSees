@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2007-01-09 19:26:57 $
+// $Revision: 1.19 $
+// $Date: 2007-02-02 01:46:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam3d.cpp,v $
                                                                         
                                                                         
@@ -845,7 +845,7 @@ ElasticBeam3d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-ElasticBeam3d::setResponse(const char **argv, int argc, Information &info, OPS_Stream &output)
+ElasticBeam3d::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
 
   Response *theResponse = 0;

@@ -29,8 +29,8 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.2 $
-// $Date: 2006-08-04 22:32:17 $
+// $Revision: 1.3 $
+// $Date: 2007-02-02 01:44:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/BrickUP.h,v $
 
 // by Zhaohui Yang (Modified based on Ed "C++" Love's Brick element)
@@ -121,7 +121,7 @@ class BrickUP : public Element {
     int recvSelf (int commitTag, Channel &theChannel, FEM_ObjectBroker
 		  &theBroker);
 
-    Response *setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &s);
+    Response *setResponse(const char **argv, int argc, OPS_Stream &s);
     int getResponse(int responseID, Information &eleInformation);
 
     //plotting

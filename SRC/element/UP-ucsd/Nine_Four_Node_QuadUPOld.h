@@ -10,8 +10,8 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.1 $
-// $Date: 2005-09-22 21:28:36 $
+// $Revision: 1.2 $
+// $Date: 2007-02-02 01:44:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/Nine_Four_Node_QuadUPOld.h,v $
 
 #ifndef NineFourNodeQuadUP_h
@@ -74,7 +74,7 @@ class NineFourNodeQuadUP : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
     void Print(OPS_Stream &s, int flag =0);
 
-    Response *setResponse(const char **argv, int argc, Information &eleInformation);
+    Response *setResponse(const char **argv, int argc);
     int getResponse(int responseID, Information &eleInformation);
 
     int setParameter(const char **argv, int argc, Information &info);

@@ -9,8 +9,8 @@
 // based on FourNodeQuad element by Michael Scott		  	     //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.3 $
-// $Date: 2006-09-05 21:04:59 $
+// $Revision: 1.4 $
+// $Date: 2007-02-02 01:44:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/FourNodeQuadUP.cpp,v $
 
 #include <FourNodeQuadUP.h>
@@ -952,7 +952,7 @@ FourNodeQuadUP::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-FourNodeQuadUP::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
+FourNodeQuadUP::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
   Response *theResponse = 0;
 
@@ -991,7 +991,7 @@ FourNodeQuadUP::setResponse(const char **argv, int argc, Information &eleInfo, O
       output.tag("GaussPoint");
       output.attr("number",pointNum);
 
-      theResponse =  theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+      theResponse =  theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, output);
       
       output.endTag(); // GaussPoint
     }

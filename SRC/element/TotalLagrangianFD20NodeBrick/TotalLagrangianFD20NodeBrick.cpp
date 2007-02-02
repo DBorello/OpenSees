@@ -756,7 +756,7 @@ void TotalLagrangianFD20NodeBrick::Print(OPS_Stream &s, int flag)
 }
 
 //=============================================================================
-Response * TotalLagrangianFD20NodeBrick::setResponse (const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
+Response * TotalLagrangianFD20NodeBrick::setResponse (const char **argv, int argc, OPS_Stream &output)
 {
   Response *theResponse = 0;
 

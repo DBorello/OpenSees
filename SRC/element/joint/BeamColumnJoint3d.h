@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-08-04 22:22:37 $
+// $Revision: 1.4 $
+// $Date: 2007-02-02 01:44:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/BeamColumnJoint3d.h,v $
                                                                         
 // Written: NM (nmitra@u.washington.edu)
@@ -144,7 +144,7 @@ class BeamColumnJoint3d : public Element
   void Print(OPS_Stream &s, int flag =0);    
   
   // implemented to print into file
-  Response *setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &s);
+  Response *setResponse(const char **argv, int argc, OPS_Stream &s);
   int getResponse(int responseID, Information &eleInformation);
   
   int setParameter (char **argv, int argc, Information &info);

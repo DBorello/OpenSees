@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.27 $
-// $Date: 2007-01-09 19:26:57 $
+// $Revision: 1.28 $
+// $Date: 2007-02-02 01:44:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.cpp,v $
 
 // Ed "C++" Love
@@ -1637,7 +1637,7 @@ Brick::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-Brick::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
+Brick::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
   Response *theResponse = 0;
 
@@ -1673,7 +1673,7 @@ Brick::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream
       output.tag("GaussPoint");
       output.attr("number",pointNum);
 
-      theResponse =  materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+      theResponse =  materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, output);
 
       output.endTag(); // GaussPoint
     }

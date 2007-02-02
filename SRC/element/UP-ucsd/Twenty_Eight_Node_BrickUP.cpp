@@ -2365,7 +2365,7 @@ TwentyEightNodeBrickUP::displaySelf(Renderer &theViewer, int displayMode, float 
 
 
 Response*
-TwentyEightNodeBrickUP::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
+TwentyEightNodeBrickUP::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
 
   Response *theResponse = 0;
@@ -2425,7 +2425,7 @@ TwentyEightNodeBrickUP::setResponse(const char **argv, int argc, Information &el
       output.tag("GaussPoint");
       output.attr("number",pointNum);
 
-      theResponse =  materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+      theResponse =  materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, output);
       
       output.endTag(); // GaussPoint
     }

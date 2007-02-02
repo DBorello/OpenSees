@@ -22,9 +22,9 @@
 
 
 
-// $Revision: 1.4 $
+// $Revision: 1.5 $
 
-// $Date: 2006-09-05 21:04:59 $
+// $Date: 2007-02-02 01:44:56 $
 
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/Nine_Four_Node_QuadUP.cpp,v $
 
@@ -1850,7 +1850,7 @@ NineFourNodeQuadUP::displaySelf(Renderer &theViewer, int displayMode, float fact
 
 
 Response*
-NineFourNodeQuadUP::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
+NineFourNodeQuadUP::setResponse(const char **argv, int argc, OPS_Stream &output)
 
 {
   Response *theResponse = 0;
@@ -1906,7 +1906,7 @@ NineFourNodeQuadUP::setResponse(const char **argv, int argc, Information &eleInf
       output.tag("GaussPoint");
       output.attr("number",pointNum);
 
-      theResponse =  theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+      theResponse =  theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, output);
       
       output.endTag(); // GaussPoint
     }

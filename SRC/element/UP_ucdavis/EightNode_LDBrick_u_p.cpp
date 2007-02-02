@@ -445,7 +445,7 @@ int EightNode_LDBrick_u_p::displaySelf (Renderer &theViewer, int displayMode, fl
 }
 
 //=============================================================================
-Response* EightNode_LDBrick_u_p::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
+Response* EightNode_LDBrick_u_p::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
   Response *theResponse = 0;
 
@@ -476,7 +476,7 @@ Response* EightNode_LDBrick_u_p::setResponse(const char **argv, int argc, Inform
       output.tag("GaussPoint");
       output.attr("number",pointNum);
       
-      theResponse =  theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+      theResponse =  theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, output);
       
       output.endTag(); // GaussPoint
     }

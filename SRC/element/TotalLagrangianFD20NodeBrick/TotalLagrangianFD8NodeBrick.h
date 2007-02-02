@@ -202,7 +202,7 @@ class TotalLagrangianFD8NodeBrick: public Element
 
 
 
-    Response *setResponse (const char **argv, int argc, Information &eleInformation, OPS_Stream &s);
+    Response *setResponse (const char **argv, int argc, OPS_Stream &s);
 
     int getResponse (int responseID, Information &eleInformation);
 
