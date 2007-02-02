@@ -183,7 +183,7 @@ analysis Static
 # ------------------------------
 
 # Create a recorder to monitor nodal displacements
-recorder Node -file nodeGravity.out -time -node 3 4 -dof 1 2 3 disp
+recorder Node -xml nodeGravity.out -time -node 3 4 -dof 1 2 3 disp
 
 # --------------------------------
 # End of recorder generation

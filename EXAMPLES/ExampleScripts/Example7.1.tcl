@@ -85,7 +85,7 @@ recorder Node -file Node.out -time -node $mid -dof 2 disp
 recorder plot Node.out CenterNodeDisp 625 10 625 450 -columns 1 2
 
 recorder display shellDynamics 10 10 600 600 -wipe
-prp -100 20 30
+prp -0 0 1000
 vup 0 1 0 
 display 2 4 100
 
@@ -101,6 +101,7 @@ display 2 4 100
 # Remove the static analysis & reset the time to 0.0
 wipeAnalysis
 setTime 0.0
+
 
 # Now remove the loads and let the beam vibrate
 remove loadPattern 1

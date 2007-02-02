@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2006-09-26 18:51:37 $
+// $Revision: 1.12 $
+// $Date: 2007-02-02 23:02:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/TclForceBeamColumnCommand.cpp,v $
                                                                         
 // Written: MHS
@@ -199,7 +199,7 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     int argi = 8;
     int numIter = 0;
     double tol = 0.0;
-    if (argc > argi) {
+    while (argi < argc) {
       if (strcmp(argv[argi],"-iter") == 0) {
 	if (argc < argi+3) {
 	  opserr << "WARNING not enough -iter args need -iter numIter? tol?\n";
@@ -216,7 +216,9 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
 	  opserr << "forceBeamColumn element: " << eleTag << endln;
 	  return TCL_ERROR;
 	}
-      }
+	argi += 3;
+      } else
+	argi++;
     }
 	
       

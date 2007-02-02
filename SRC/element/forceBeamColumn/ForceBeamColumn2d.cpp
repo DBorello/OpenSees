@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2007-02-02 01:30:47 $
+// $Revision: 1.27 $
+// $Date: 2007-02-02 23:02:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 #include <math.h>
@@ -537,6 +537,7 @@ ForceBeamColumn2d::update()
   const Vector &v = crdTransf->getBasicTrialDisp();    
 
   static Vector dv(NEBD);
+
   dv = crdTransf->getBasicIncrDeltaDisp();    
 
   if (initialFlag != 0 && dv.Norm() <= DBL_EPSILON && numEleLoads == 0)
