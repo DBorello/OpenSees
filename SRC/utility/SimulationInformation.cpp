@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-11-30 21:37:01 $
+// $Revision: 1.8 $
+// $Date: 2007-02-02 23:41:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/SimulationInformation.cpp,v $
 //
 // Description: This file contains the class definition for SimulationInformation.
@@ -394,7 +394,7 @@ TclSimulationInformation_defaultUnits(ClientData clientData, Tcl_Interp *interp,
 
   msec = sec * 0.001;
 
-  char string[30];
+  char string[50];
 
 
   sprintf(string,"set in %.18e", in);   Tcl_Eval(interp, string);
