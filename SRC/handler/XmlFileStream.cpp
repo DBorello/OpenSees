@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-11-03 18:42:24 $
+// $Revision: 1.3 $
+// $Date: 2007-02-02 23:00:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/XmlFileStream.cpp,v $
 
 #include <XmlFileStream.h>
@@ -74,6 +74,9 @@ XmlFileStream::~XmlFileStream()
   }
 
   delete [] tags;
+
+
+  theFile << "</OpenSees>\n";
 
   if (fileOpen == 1)
     theFile.close();
