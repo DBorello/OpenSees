@@ -49,6 +49,16 @@ class PressureDependentElastic3D : public ElasticIsotropicMaterial
 
     const char *getClassType(void) const {return "PressureDependentElastic";};
 
+    int setTrialStrain (const Vector &v);
+    int setTrialStrain (const Vector &v, const Vector &r);
+    int setTrialStrainIncr (const Vector &v);
+    int setTrialStrainIncr (const Vector &v, const Vector &r);
+    const Matrix &getTangent (void);
+    const Matrix &getInitialTangent (void);
+
+    const Vector &getStress (void);
+    const Vector &getStrain (void);
+
     int setTrialStrain (const Tensor &v);
     int setTrialStrain (const Tensor &v, const Tensor &r);
     int setTrialStrainIncr (const Tensor &v);
@@ -65,8 +75,9 @@ class PressureDependentElastic3D : public ElasticIsotropicMaterial
     int revertToStart (void);
 
     NDMaterial *getCopy (void);
+    NDMaterial *getCopy(const char *type);
     const char *getType (void) const;
-    //int getOrder (void) const;
+    int getOrder (void) const;
 
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
@@ -90,6 +101,13 @@ class PressureDependentElastic3D : public ElasticIsotropicMaterial
     
     stresstensor CStrain;
     stresstensor CStress;
+
+    static Vector sigma;
+    static Matrix D;
+    Vector epsilon;
+
+    double p_n1; // trial pressure
+    double p_n; // committed pressure
 };
 
 #endif
