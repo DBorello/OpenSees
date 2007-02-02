@@ -448,10 +448,22 @@
 					RelativePath="..\..\..\SRC\reliability\domain\components\LimitStateFunction.h">
 				</File>
 				<File
+					RelativePath="..\..\..\SRC\reliability\domain\components\LimitStateFunctionIter.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\domain\components\LimitStateFunctionIter.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\reliability\domain\components\ParameterPositioner.cpp">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\reliability\domain\components\ParameterPositioner.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\domain\components\ParameterPositionerIter.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\domain\components\ParameterPositionerIter.h">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\reliability\domain\components\RandomVariable.cpp">
@@ -460,10 +472,22 @@
 					RelativePath="..\..\..\SRC\reliability\domain\components\RandomVariable.h">
 				</File>
 				<File
+					RelativePath="..\..\..\SRC\reliability\domain\components\RandomVariableIter.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\domain\components\RandomVariableIter.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\reliability\domain\components\RandomVariablePositioner.cpp">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\reliability\domain\components\RandomVariablePositioner.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\domain\components\RandomVariablePositionerIter.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\domain\components\RandomVariablePositionerIter.h">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\reliability\domain\components\ReliabilityDomain.cpp">

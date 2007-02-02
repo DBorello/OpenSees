@@ -171,6 +171,12 @@
 				RelativePath="..\..\..\SRC\domain\domain\single\SingleDomNodIter.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\domain\domain\single\SingleDomParamIter.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\domain\domain\single\SingleDomParamIter.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\domain\domain\single\SingleDomSP_Iter.cpp">
 			</File>
 			<File

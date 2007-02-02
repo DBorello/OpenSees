@@ -135,6 +135,12 @@
 				RelativePath="..\..\..\SRC\material\uniaxial\Concrete01.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\Concrete01WithSITC.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\Concrete01WithSITC.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\Concrete02.cpp">
 			</File>
 			<File
@@ -151,6 +157,12 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\DrainMaterial.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\ECC01.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\ECC01.h">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\ENTMaterial.cpp">
@@ -1253,6 +1265,18 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\material\section\ElasticSection3d.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\section\ElasticShearSection2d.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\section\ElasticShearSection2d.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\section\ElasticShearSection3d.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\section\ElasticShearSection3d.h">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\material\section\FiberSection2d.cpp">
