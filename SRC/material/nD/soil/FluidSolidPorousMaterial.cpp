@@ -1,5 +1,5 @@
-// $Revision: 1.21 $
-// $Date: 2006-08-04 18:29:48 $
+// $Revision: 1.22 $
+// $Date: 2007-02-02 01:03:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.cpp,v $
                                                                         
 // Written: ZHY
@@ -460,7 +460,7 @@ int FluidSolidPorousMaterial::recvSelf(int commitTag, Channel &theChannel,
 
 
 Response*
-FluidSolidPorousMaterial::setResponse (const char **argv, int argc, Information &matInfo, OPS_Stream &output)
+FluidSolidPorousMaterial::setResponse (const char **argv, int argc, OPS_Stream &output)
 {
   if (strcmp(argv[0],"stress") == 0 || strcmp(argv[0],"stresses") == 0)
     return new MaterialResponse(this, 1, this->getCommittedStress());
@@ -472,7 +472,7 @@ FluidSolidPorousMaterial::setResponse (const char **argv, int argc, Information 
     return new MaterialResponse(this, 3, this->getTangent());
   
   else if (strcmp(argv[0],"backbone") == 0)
-    return theSoilMaterial->setResponse(argv, argc, matInfo, output);
+    return theSoilMaterial->setResponse(argv, argc, output);
   
   else if (strcmp(argv[0],"pressure") == 0)
     return new MaterialResponse(this, 5, this->getCommittedPressure());

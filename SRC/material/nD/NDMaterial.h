@@ -23,8 +23,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.19 $
-// $Date: 2006-09-05 21:25:35 $
+// $Revision: 1.20 $
+// $Date: 2007-02-02 01:03:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.h,v $
 
 
@@ -111,7 +111,6 @@ class NDMaterial : public Material
     virtual int getOrder(void) const {return 0;};  //??
 
     virtual Response *setResponse (const char **argv, int argc, 
-				   Information &matInformation, 
 				   OPS_Stream &s);
     virtual int getResponse (int responseID, Information &matInformation);
 

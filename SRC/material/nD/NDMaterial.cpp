@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $                                                              
-// $Date: 2006-09-05 21:25:35 $                                                                  
+// $Revision: 1.21 $                                                              
+// $Date: 2007-02-02 01:03:48 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C
@@ -289,7 +289,7 @@ const straintensor& NDMaterial::getPlasticStrainTensor(void)
 
 Response*
 NDMaterial::setResponse (const char **argv, int argc, 
-			 Information &matInfo, OPS_Stream &output)
+			 OPS_Stream &output)
 {
   Response *theResponse =0;
   const char *matType = this->getType();

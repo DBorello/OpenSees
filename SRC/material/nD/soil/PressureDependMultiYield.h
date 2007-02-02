@@ -1,5 +1,5 @@
-// $Revision: 1.20 $
-// $Date: 2006-08-04 18:29:48 $
+// $Revision: 1.21 $
+// $Date: 2007-02-02 01:03:48 $
 //>>>>>>> 1.7
 
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.h,v $
@@ -113,7 +113,7 @@ public:
      int sendSelf(int commitTag, Channel &theChannel);  
      int recvSelf(int commitTag, Channel &theChannel, 
 		  FEM_ObjectBroker &theBroker);    
-     Response *setResponse (const char **argv, int argc, Information &matInfo, OPS_Stream &s);
+     Response *setResponse (const char **argv, int argc, OPS_Stream &s);
      int getResponse (int responseID, Information &matInformation);
      void Print(OPS_Stream &s, int flag =0);
      //void setCurrentStress(const Vector stress) { currentStress=T2Vector(stress); }
