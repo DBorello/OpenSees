@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $                                                              
-// $Date: 2006-09-05 21:21:52 $                                                                  
+// $Revision: 1.22 $                                                              
+// $Date: 2007-02-02 01:20:37 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
                                                                         
                                                                         
@@ -196,12 +196,7 @@ ElasticIsotropicMaterial::getTangent (void)
 const Matrix&
 ElasticIsotropicMaterial::getInitialTangent (void)
 {
-  opserr << "ElasticIsotropicMaterial::getInitialTangent -- subclass responsibility\n";
-  exit(-1);
-
-  // Just to make it compile
-  Matrix *ret = new Matrix();
-  return *ret;
+  return this->getTangent();
 }
 
 const Vector&
