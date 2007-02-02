@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2007-02-02 01:19:30 $
+// $Revision: 1.17 $
+// $Date: 2007-02-02 23:43:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.cpp,v $
                                                                         
                                                                         
@@ -141,6 +141,14 @@ UniaxialMaterial::setResponse(const char **argv, int argc,
     theOutput.tag("ResponseType", "eps11");
     theResponse =  new MaterialResponse(this, 4, Vector(2));
   }
+	    
+  else if ((strcmp(argv[0],"stressStrainTangent") == 0) || 
+	   (strcmp(argv[0],"stressANDstrainANDtangent") == 0)) {
+    theOutput.tag("ResponseType", "sig11");
+    theOutput.tag("ResponseType", "eps11");
+	theOutput.tag("ResponseType", "C11");
+    theResponse =  new MaterialResponse(this, 5, Vector(3));
+  }
 
   theOutput.endTag();
   return theResponse;
@@ -151,6 +159,7 @@ int
 UniaxialMaterial::getResponse(int responseID, Information &matInfo)
 {
   static Vector stressStrain(2);
+  static Vector stressStrainTangent(3);
   // each subclass must implement its own stuff    
   switch (responseID) {
     case 1:
@@ -171,6 +180,12 @@ UniaxialMaterial::getResponse(int responseID, Information &matInfo)
       matInfo.setVector(stressStrain);
       return 0;
       
+	  case 5:
+      stressStrainTangent(0) = this->getStress();
+      stressStrainTangent(1) = this->getStrain();
+	  stressStrainTangent(2) = this->getTangent();
+      matInfo.setVector(stressStrainTangent);
+	  return 0;
   default:      
     return -1;
   }
