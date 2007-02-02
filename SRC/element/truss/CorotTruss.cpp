@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2006-08-04 19:13:02 $
+// $Revision: 1.13 $
+// $Date: 2007-02-02 01:35:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.cpp,v $
                                                                         
 // Written: MHS 
@@ -694,7 +694,7 @@ CorotTruss::Print(OPS_Stream &s, int flag)
 }
 
 Response*
-CorotTruss::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
+CorotTruss::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
   Response *theResponse = 0;
 
@@ -722,7 +722,7 @@ CorotTruss::setResponse(const char **argv, int argc, Information &eleInfo, OPS_S
   // a material quantity    
   } else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"-material") == 0) {
 
-    theResponse =  theMaterial->setResponse(&argv[1], argc-1, eleInfo, output);
+    theResponse =  theMaterial->setResponse(&argv[1], argc-1, output);
   }
 
   output.endTag();

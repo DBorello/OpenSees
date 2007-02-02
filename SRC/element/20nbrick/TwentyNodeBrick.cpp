@@ -3570,7 +3570,7 @@ void TwentyNodeBrick::Print(OPS_Stream &s, int flag)
 
 //=============================================================================
 Response * 
-TwentyNodeBrick::setResponse (const char **argv, int argc, Information &eleInformation, OPS_Stream &output)
+TwentyNodeBrick::setResponse (const char **argv, int argc, OPS_Stream &output)
 {
 
   Response *theResponse = 0;

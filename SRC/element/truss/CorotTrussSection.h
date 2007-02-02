@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-08-04 19:13:02 $
+// $Revision: 1.8 $
+// $Date: 2007-02-02 01:35:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTrussSection.h,v $
 
 #ifndef CorotTrussSection_h
@@ -87,7 +87,7 @@ class CorotTrussSection : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(OPS_Stream &s, int flag =0);    
 
-    Response *setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &s);
+    Response *setResponse(const char **argv, int argc, OPS_Stream &s);
     int getResponse(int responseID, Information &eleInformation);
 
   protected:

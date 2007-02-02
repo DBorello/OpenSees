@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2007-01-09 19:26:57 $
+// $Revision: 1.31 $
+// $Date: 2007-02-02 01:30:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -1054,7 +1054,7 @@ DispBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 
 Response*
 DispBeamColumn2d::setResponse(const char **argv, int argc,
-			      Information &eleInfo, OPS_Stream &output)
+			      OPS_Stream &output)
 {
   Response *theResponse = 0;
 
@@ -1132,7 +1132,7 @@ DispBeamColumn2d::setResponse(const char **argv, int argc,
 	beamInt->getSectionLocations(numSections, L, xi);
 	output.attr("eta",xi[sectionNum-1]*L);
 
-	theResponse = theSections[sectionNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+	theResponse = theSections[sectionNum-1]->setResponse(&argv[2], argc-2, output);
 	
 	output.endTag();
       }

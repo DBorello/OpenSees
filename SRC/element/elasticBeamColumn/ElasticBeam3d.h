@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2006-08-04 19:08:07 $
+// $Revision: 1.10 $
+// $Date: 2007-02-02 01:30:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam3d.h,v $
                                                                         
                                                                         
@@ -88,7 +88,7 @@ class ElasticBeam3d : public Element
     void Print(OPS_Stream &s, int flag =0);    
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
 
-    Response *setResponse (const char **argv, int argc, Information &info, OPS_Stream &s);
+    Response *setResponse (const char **argv, int argc, OPS_Stream &s);
     int getResponse (int responseID, Information &info);
  
   private:

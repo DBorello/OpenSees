@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2006-09-05 21:15:19 $
+// $Revision: 1.12 $
+// $Date: 2007-02-02 01:35:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.h,v $
                                                                         
                                                                         
@@ -90,7 +90,7 @@ class TrussSection : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(OPS_Stream &s, int flag =0);    
     
-    Response *setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &s);
+    Response *setResponse(const char **argv, int argc, OPS_Stream &s);
     int getResponse(int responseID, Information &eleInformation);
     
     int setParameter (const char **argv, int argc, Parameter &param);

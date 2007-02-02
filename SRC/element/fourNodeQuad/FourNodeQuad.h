@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2006-09-05 21:11:21 $
+// $Revision: 1.13 $
+// $Date: 2007-02-02 01:35:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.h,v $
                                                                         
 // Written: MHS
@@ -89,7 +89,7 @@ class FourNodeQuad : public Element
     void Print(OPS_Stream &s, int flag =0);
 
     Response *setResponse(const char **argv, int argc, 
-			  Information &eleInformation, OPS_Stream &s);
+			  OPS_Stream &s);
 
     int getResponse(int responseID, Information &eleInformation);
 

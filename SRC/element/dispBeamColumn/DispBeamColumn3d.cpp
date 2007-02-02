@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2007-01-09 19:26:57 $
+// $Revision: 1.23 $
+// $Date: 2007-02-02 01:30:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.cpp,v $
 
 // Written: MHS
@@ -1113,7 +1113,7 @@ DispBeamColumn3d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-DispBeamColumn3d::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
+DispBeamColumn3d::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
 
     Response *theResponse = 0;
@@ -1203,7 +1203,7 @@ DispBeamColumn3d::setResponse(const char **argv, int argc, Information &eleInfo,
 	const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
 	output.attr("eta",2.0*pts(sectionNum-1,0)-1);
 
-	theResponse =  theSections[sectionNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+	theResponse =  theSections[sectionNum-1]->setResponse(&argv[2], argc-2, output);
 	
 	output.endTag();
       }

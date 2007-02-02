@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2007-01-09 19:26:57 $
+// $Revision: 1.29 $
+// $Date: 2007-02-02 01:35:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -928,7 +928,7 @@ FourNodeQuad::displaySelf(Renderer &theViewer, int displayMode, float fact)
 
 Response*
 FourNodeQuad::setResponse(const char **argv, int argc, 
-			  Information &eleInfo, OPS_Stream &output)
+			  OPS_Stream &output)
 {
   Response *theResponse =0;
 
@@ -960,7 +960,7 @@ FourNodeQuad::setResponse(const char **argv, int argc,
       output.attr("eta",pts[pointNum-1][0]);
       output.attr("neta",pts[pointNum-1][1]);
 
-      theResponse =  theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+      theResponse =  theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, output);
       
       output.endTag();
 

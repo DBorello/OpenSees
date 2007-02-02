@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2007-01-09 19:26:57 $
+// $Revision: 1.15 $
+// $Date: 2007-02-02 01:35:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/EnhancedQuad.cpp,v $
 
 #include <stdio.h> 
@@ -1443,7 +1443,7 @@ EnhancedQuad::transpose( const Matrix &M )
 
 Response*
 EnhancedQuad::setResponse(const char **argv, int argc, 
-			  Information &eleInfo, OPS_Stream &output)
+			  OPS_Stream &output)
 {
   Response *theResponse =0;
 
@@ -1475,7 +1475,7 @@ EnhancedQuad::setResponse(const char **argv, int argc,
       output.attr("eta",sg[pointNum-1]);
       output.attr("neta",tg[pointNum-1]);
 
-      theResponse =  materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+      theResponse =  materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, output);
       
       output.endTag();
 

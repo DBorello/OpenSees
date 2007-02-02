@@ -3256,7 +3256,7 @@ void EightNodeBrick::Print(OPS_Stream &s, int flag)
 }
 
 //=============================================================================
-Response * EightNodeBrick::setResponse (const char **argv, int argc, Information &eleInformation) 
+Response * EightNodeBrick::setResponse (const char **argv, int argc) 
 {
     //========================================================
     if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)

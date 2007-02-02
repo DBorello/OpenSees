@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2006-08-04 19:07:15 $
+// $Revision: 1.12 $
+// $Date: 2007-02-02 01:35:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/NineNodeMixedQuad.cpp,v $
 
 // Ed "C++" Love
@@ -1346,7 +1346,7 @@ NineNodeMixedQuad::displaySelf(Renderer &theViewer, int displayMode, float fact)
 
 Response*
 NineNodeMixedQuad::setResponse(const char **argv, int argc, 
-			  Information &eleInfo, OPS_Stream &output)
+			       OPS_Stream &output)
 {
   Response *theResponse =0;
 
@@ -1383,7 +1383,7 @@ NineNodeMixedQuad::setResponse(const char **argv, int argc,
       output.attr("eta",sg[pointNum-1]);
       output.attr("neta",sg[pointNum-1]);
 
-      theResponse =  materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo, output);
+      theResponse =  materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, output);
       
       output.endTag();
 

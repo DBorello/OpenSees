@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2006-09-05 21:00:46 $
+// $Revision: 1.15 $
+// $Date: 2007-02-02 01:30:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.h,v $
                                                                         
                                                                         
@@ -92,7 +92,6 @@ class Element : public DomainComponent
 
     // method for obtaining information specific to an element
     virtual Response *setResponse(const char **argv, int argc, 
-				  Information &eleInformation, 
 				  OPS_Stream &theHandler);
     virtual int getResponse(int responseID, Information &eleInformation);
     virtual int getResponseSensitivity(int responseID, int gradNumber,

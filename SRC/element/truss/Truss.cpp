@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.27 $
-// $Date: 2006-11-30 22:17:54 $
+// $Revision: 1.28 $
+// $Date: 2007-02-02 01:35:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -930,7 +930,7 @@ Truss::computeCurrentStrainRate(void) const
 }
 
 Response*
-Truss::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &output)
+Truss::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
 
   Response *theResponse = 0;
@@ -973,7 +973,7 @@ Truss::setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream
   // a material quantity    
   } else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"-material") == 0) {
 
-    theResponse =  theMaterial->setResponse(&argv[1], argc-1, eleInfo, output);
+    theResponse =  theMaterial->setResponse(&argv[1], argc-1, output);
   }
 
   output.endTag();

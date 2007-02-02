@@ -131,7 +131,7 @@ class TwentySevenNodeBrick: public Element
     void Print(OPS_Stream &s, int flag =0);
     //    Do nothing with void Print (OPS_Stream &s, int flag =0);
     //    use Brick3D report.  08/16/00
-    Response *setResponse (const char **argv, int argc, Information &eleInformation);
+    Response *setResponse (const char **argv, int argc);
     int getResponse (int responseID, Information &eleInformation);
 
   protected:

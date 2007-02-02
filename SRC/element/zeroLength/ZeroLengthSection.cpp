@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2006-08-04 21:50:27 $
+// $Revision: 1.11 $
+// $Date: 2007-02-02 01:30:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthSection.cpp,v $
                                                                         
 // Written: MHS
@@ -507,7 +507,7 @@ ZeroLengthSection::Print(OPS_Stream &s, int flag)
 }
 
 Response*
-ZeroLengthSection::setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &output)
+ZeroLengthSection::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
   Response *theResponse = 0;
 
@@ -538,7 +538,7 @@ ZeroLengthSection::setResponse(const char **argv, int argc, Information &eleInfo
     theResponse = new ElementResponse(this, 3, Vector(order));
 
   }  else if (strcmp(argv[0],"section") == 0) {
-    theResponse =  theSection->setResponse(&argv[1], argc-1, eleInformation, output);
+    theResponse =  theSection->setResponse(&argv[1], argc-1, output);
   }
   
   output.endTag();

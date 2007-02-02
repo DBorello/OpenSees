@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2006-08-07 22:15:49 $
+// $Revision: 1.19 $
+// $Date: 2007-02-02 01:30:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
                                                                         
                                                                         
@@ -821,7 +821,7 @@ ZeroLength::Print(OPS_Stream &s, int flag)
 }
 
 Response*
-ZeroLength::setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &output)
+ZeroLength::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
   Response *theResponse = 0;
 
@@ -871,7 +871,7 @@ ZeroLength::setResponse(const char **argv, int argc, Information &eleInformation
     if (argc > 2) {
       int matNum = atoi(argv[1]);
       if (matNum >= 1 && matNum <= numMaterials1d)
-	theResponse =  theMaterial1d[matNum-1]->setResponse(&argv[2], argc-2, eleInformation, output);
+	theResponse =  theMaterial1d[matNum-1]->setResponse(&argv[2], argc-2, output);
     }
   }
 

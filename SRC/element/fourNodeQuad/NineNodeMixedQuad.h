@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-08-04 19:07:15 $
+// $Revision: 1.7 $
+// $Date: 2007-02-02 01:35:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/NineNodeMixedQuad.h,v $
 
 // Ed "C++" Love
@@ -106,7 +106,7 @@ class NineNodeMixedQuad : public Element {
 
     // public methods for element output
     Response *setResponse(const char **argv, int argc, 
-			  Information &eleInformation, OPS_Stream &s);
+			  OPS_Stream &s);
 
     int getResponse(int responseID, Information &eleInformation);
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2007-01-09 19:26:57 $
+// $Revision: 1.26 $
+// $Date: 2007-02-02 01:30:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 #include <math.h>
@@ -2026,7 +2026,7 @@ ForceBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-ForceBeamColumn2d::setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &output)
+ForceBeamColumn2d::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
   Response *theResponse = 0;
 
@@ -2140,7 +2140,7 @@ ForceBeamColumn2d::setResponse(const char **argv, int argc, Information &eleInfo
 	output.attr("number",sectionNum);
 	output.attr("eta",xi[sectionNum-1]*L);
 
-	theResponse = sections[sectionNum-1]->setResponse(&argv[2], argc-2, eleInformation, output);
+	theResponse = sections[sectionNum-1]->setResponse(&argv[2], argc-2, output);
 	
 	output.endTag();
       }

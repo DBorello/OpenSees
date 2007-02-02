@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2006-09-05 21:15:19 $
+// $Revision: 1.19 $
+// $Date: 2007-02-02 01:35:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -871,7 +871,7 @@ TrussSection::computeCurrentStrain(void) const
 }
 
 Response*
-TrussSection::setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &output)
+TrussSection::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
   Response *theResponse = 0;
 
@@ -898,7 +898,7 @@ TrussSection::setResponse(const char **argv, int argc, Information &eleInformati
 
   // a section quantity    
   }  else if (strcmp(argv[0],"section") ==0) {
-    theResponse = theSection->setResponse(&argv[1], argc-1, eleInformation, output);
+    theResponse = theSection->setResponse(&argv[1], argc-1, output);
 
   }  
 
