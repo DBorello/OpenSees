@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-10-27 23:04:38 $
+// $Revision: 1.8 $
+// $Date: 2007-02-05 23:46:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariable.h,v $
 
 
@@ -58,9 +58,12 @@ public:
 	virtual double getStartValue() =0;
 
 	int setNewTag(int tag);
+	int setRVnumber(int number) {rvNumber = number;}
+	int getRVnumber(void) {return rvNumber;}
 
 protected:
-	int tag;
+	int tag; // identifier, can be any integer
+	int rvNumber; // in range 1,...,nrv
 	double startValue;
 
 private:
