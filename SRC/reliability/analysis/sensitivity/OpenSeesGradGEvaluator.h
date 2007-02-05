@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-10-27 23:45:44 $
+// $Revision: 1.3 $
+// $Date: 2007-02-05 23:28:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/OpenSeesGradGEvaluator.h,v $
 
 
@@ -52,8 +52,9 @@ public:
 				           bool doGradientCheck);
 	~OpenSeesGradGEvaluator();
 
-	int		computeGradG(double gFunValue, Vector passed_x);
-	int		computeAllGradG(Vector gFunValues, Vector passed_x);
+	int		computeGradG(double gFunValue, const Vector &passed_x);
+	int		computeAllGradG(const Vector &gFunValues,
+					const Vector &passed_x);
 
 	Vector	getGradG();
 	Matrix	getAllGradG();

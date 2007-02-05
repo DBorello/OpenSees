@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-01-09 19:14:38 $
+// $Revision: 1.4 $
+// $Date: 2007-02-05 23:28:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/OpenSeesGradGEvaluator.cpp,v $
 
 
@@ -103,7 +103,7 @@ OpenSeesGradGEvaluator::getAllGradG()
 
 
 int
-OpenSeesGradGEvaluator::computeGradG(double g, Vector passed_x)
+OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 {
 	// Zero out the previous result matrix
 	if (DgDdispl != 0) {
@@ -314,7 +314,8 @@ OpenSeesGradGEvaluator::computeGradG(double g, Vector passed_x)
 
 
 int
-OpenSeesGradGEvaluator::computeAllGradG(Vector gFunValues, Vector passed_x)
+OpenSeesGradGEvaluator::computeAllGradG(const Vector &gFunValues,
+					const Vector &passed_x)
 {
 
 	// Allocate result matrix
