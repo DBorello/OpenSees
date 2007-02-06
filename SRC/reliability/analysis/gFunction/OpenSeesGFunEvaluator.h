@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2006-12-06 23:14:26 $
+// $Revision: 1.9 $
+// $Date: 2007-02-06 01:17:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.h,v $
 
 
@@ -36,6 +36,7 @@
 
 #include <GFunEvaluator.h>
 #include <Vector.h>
+#include <Domain.h>
 #include <ReliabilityDomain.h>
 #include <tcl.h>
 
@@ -46,32 +47,34 @@ using std::ofstream;
 class OpenSeesGFunEvaluator : public GFunEvaluator
 {
 
-public:
-	OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
-						ReliabilityDomain *passedReliabilityDomain,
-						TCL_Char *fileName);
-	OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
-						ReliabilityDomain *passedReliabilityDomain,
-						int nsteps, double dt);
-	~OpenSeesGFunEvaluator();
-
-	int		runGFunAnalysis(const Vector &x);
-	int		tokenizeSpecials(TCL_Char *theExpression);
-
-	void    setNsteps(int nsteps);
-	double  getDt();
-
-protected:
-
-private:
-	int createRecorders();
-	int removeRecorders();
-	char *rec_node_occurrence(char tempchar[100], bool createRecorders, int &line, int &column);
-	char *rec_element_occurrence(char tempchar[100], bool createRecorders, int &line, int &column);
-	char fileName[256];
-	int nsteps;
-	double dt;
-
+ public:
+  OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
+			ReliabilityDomain *passedReliabilityDomain,
+			Domain *passedOpenSeesDomain,
+			TCL_Char *fileName);
+  OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
+			ReliabilityDomain *passedReliabilityDomain,
+			Domain *passedOpenSeesDomain,
+			int nsteps, double dt);
+  ~OpenSeesGFunEvaluator();
+  
+  int		runGFunAnalysis(const Vector &x);
+  int		tokenizeSpecials(TCL_Char *theExpression);
+  
+  void    setNsteps(int nsteps);
+  double  getDt();
+  
+ protected:
+  
+ private:
+  int createTclVariables();
+  int removeTclVariables();
+  int rec_nodeTclVariable(char tempchar[100], char *variableName);
+  int rec_elementTclVariable(char tempchar[100], char *variableName);
+  char fileName[256];
+  int nsteps;
+  double dt;
+  Domain *theOpenSeesDomain;
 };
 
 #endif

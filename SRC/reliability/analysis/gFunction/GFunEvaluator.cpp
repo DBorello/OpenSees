@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-12-06 23:14:26 $
+// $Revision: 1.6 $
+// $Date: 2007-02-06 01:17:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/GFunEvaluator.cpp,v $
 
 
@@ -146,7 +146,7 @@ GFunEvaluator::evaluateG(const Vector &x)
 				opserr << "Could not open file with quantities for limit-state function." << endln;
 			}
 			for (i=1; i<rowNum; i++) {
-				inputFile.getline(buf,120);
+				inputFile.getline(buf,120,'\n');
 			}
 			for (i=1; i<=colNum; i++) {
 				inputFile >> temp;
