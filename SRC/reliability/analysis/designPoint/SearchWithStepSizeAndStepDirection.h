@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-12-06 22:53:32 $
+// $Revision: 1.6 $
+// $Date: 2007-02-07 23:49:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.h,v $
 
 
@@ -71,17 +71,17 @@ public:
 	
 	int findDesignPoint(ReliabilityDomain *theReliabilityDomain);
 
-	Vector get_x();
-	Vector get_u();
-	Vector get_alpha();
-	Vector get_gamma();
+	const Vector &get_x();
+	const Vector &get_u();
+	const Vector &get_alpha();
+	const Vector &get_gamma();
 	int getNumberOfSteps();
-	Vector getSecondLast_u();
-	Vector getSecondLast_alpha();
-	Vector getLastSearchDirection();
+	const Vector &getSecondLast_u();
+	const Vector &getSecondLast_alpha();
+	const Vector &getLastSearchDirection();
 	double getFirstGFunValue();
 	double getLastGFunValue();
-	Vector getGradientInStandardNormalSpace();
+	const Vector &getGradientInStandardNormalSpace();
 	int    getNumberOfEvaluations();
 
 protected:

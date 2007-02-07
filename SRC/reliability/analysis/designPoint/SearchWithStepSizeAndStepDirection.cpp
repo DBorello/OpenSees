@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2006-12-06 22:53:32 $
+// $Revision: 1.9 $
+// $Date: 2007-02-07 23:49:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.cpp,v $
 
 
@@ -437,28 +437,31 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 
 
 
-Vector
+const Vector&
 SearchWithStepSizeAndStepDirection::get_x()
 {
 	return x;
 }
 
-Vector
+const Vector &
 SearchWithStepSizeAndStepDirection::get_u()
 {
 	return u;
 }
 
-Vector
+const Vector&
 SearchWithStepSizeAndStepDirection::get_alpha()
 {
 	return alpha;
 }
 
-Vector
+const Vector&
 SearchWithStepSizeAndStepDirection::get_gamma()
 {
-	return gamma*(1.0/gamma.Norm());
+  if (gamma.Norm() > 1.0)
+    gamma = gamma / gamma.Norm();
+
+  return gamma;
 }
 
 int
@@ -467,19 +470,19 @@ SearchWithStepSizeAndStepDirection::getNumberOfSteps()
 	return (i-1);
 }
 
-Vector
+const Vector&
 SearchWithStepSizeAndStepDirection::getSecondLast_u()
 {
 	return uSecondLast;
 }
 
-Vector
+const Vector&
 SearchWithStepSizeAndStepDirection::getSecondLast_alpha()
 {
 	return alphaSecondLast;
 }
 
-Vector
+const Vector&
 SearchWithStepSizeAndStepDirection::getLastSearchDirection()
 {
 	return searchDirection;
@@ -498,7 +501,7 @@ SearchWithStepSizeAndStepDirection::getLastGFunValue()
 }
 
 
-Vector
+const Vector&
 SearchWithStepSizeAndStepDirection::getGradientInStandardNormalSpace()
 {
 	return gradientInStandardNormalSpace;

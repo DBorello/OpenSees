@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-10-27 23:45:42 $
+// $Revision: 1.3 $
+// $Date: 2007-02-07 23:49:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/FindDesignPointAlgorithm.h,v $
 
 
@@ -46,17 +46,17 @@ public:
 
 	virtual int findDesignPoint(ReliabilityDomain *theReliabilityDomain) =0;
 
-	virtual Vector get_x() =0;
-	virtual Vector get_u() =0;
-	virtual Vector get_alpha() =0;
-	virtual Vector get_gamma() =0;
+	virtual const Vector &get_x() =0;
+	virtual const Vector &get_u() =0;
+	virtual const Vector &get_alpha() =0;
+	virtual const Vector &get_gamma() =0;
 	virtual int getNumberOfSteps() =0;
-	virtual Vector getSecondLast_u() =0;
-	virtual Vector getSecondLast_alpha() =0;
-	virtual Vector getLastSearchDirection() =0;
+	virtual const Vector &getSecondLast_u() =0;
+	virtual const Vector &getSecondLast_alpha() =0;
+	virtual const Vector &getLastSearchDirection() =0;
 	virtual double getFirstGFunValue() =0;
 	virtual double getLastGFunValue() =0;
-	virtual Vector getGradientInStandardNormalSpace() =0;
+	virtual const Vector &getGradientInStandardNormalSpace() =0;
 	virtual int getNumberOfEvaluations() = 0;
 
 protected:
