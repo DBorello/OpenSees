@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2006-12-07 01:45:22 $
+// $Revision: 1.9 $
+// $Date: 2007-02-08 01:25:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.cpp,v $
 
 
@@ -45,8 +45,49 @@ LimitStateFunction::LimitStateFunction(	int passedTag,
 	strcpy(expressionWithAddition,passedExpression);
 
 	tokenizeIt(passedExpression);
+
+	this->initializeFORMAnalysis();
+	this->initializeSimulationAnalysis();
+	this->initializeSORMAnalysis();
 }
 
+void
+LimitStateFunction::initializeFORMAnalysis(void)
+{
+  GFunValueAtStartPt = 0.0;
+  GFunValueAtEndPt = 0.0;
+  FORMReliabilityIndexBeta = 0.0;
+  FORMProbabilityOfFailure_pf1 = 0.0;
+  //Vector designPoint_x_inOriginalSpace;
+  //Vector designPoint_u_inStdNormalSpace;
+  //Vector normalizedNegativeGradientVectorAlpha;
+  //Vector importanceVectorGamma;
+  numberOfStepsToFindDesignPointAlgorithm = 0;
+}
+
+void
+LimitStateFunction::initializeSimulationAnalysis(void)
+{
+  SimulationReliabilityIndexBeta = 0.0;
+  SimulationProbabilityOfFailure_pfsim = 0.0;
+  CoefficientOfVariationOfPfFromSimulation = 0.0;
+  NumberOfSimulations = 0;
+}
+
+void
+LimitStateFunction::initializeSORMAnalysis(void)
+{
+  SORMCurvatureFittingBetaBreitung = 0.0;
+  SORMCurvatureFittingPf2Breitung = 0.0;
+  SORMPointFittingBetaBreitung = 0.0;
+  SORMPointFittingPf2Breitung = 0.0;
+  SORMUsingSearchBetaBreitung = 0.0;
+  SORMUsingSearchPf2Breitung = 0.0;
+  //Vector lastSearchDirection;
+  numberOfCurvatauresUsed = 0;
+  //Vector secondLast_u;
+  //Vector secondLastAlpha;
+}
 
 LimitStateFunction::~LimitStateFunction()
 {
