@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2007-01-09 01:43:52 $
+// $Revision: 1.21 $
+// $Date: 2007-02-09 00:31:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -3564,7 +3564,8 @@ TclReliabilityModelBuilder_addgFunEvaluator(ClientData clientData, Tcl_Interp *i
 			inputFile.close();
 
 			theGFunEvaluator = new OpenSeesGFunEvaluator(
-				interp, theReliabilityDomain, argv[3]);
+				interp, theReliabilityDomain,
+				theStructuralDomain, argv[3]);
 		}
 		else if (strcmp(argv[2],"-analyze") == 0) {
 
@@ -3582,7 +3583,9 @@ TclReliabilityModelBuilder_addgFunEvaluator(ClientData clientData, Tcl_Interp *i
 					return TCL_ERROR;
 				}
 			}
-			theGFunEvaluator = new OpenSeesGFunEvaluator(interp, theReliabilityDomain, nsteps, dt);
+			theGFunEvaluator = new OpenSeesGFunEvaluator(
+				interp, theReliabilityDomain,
+				theStructuralDomain, nsteps, dt);
 
 		}
 		else {
