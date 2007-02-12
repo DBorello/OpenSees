@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-08-03 23:42:19 $
+// $Revision: 1.7 $
+// $Date: 2007-02-12 20:37:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PathIndependentMaterial.h,v $
                                                       
 // Written: MHS
@@ -65,6 +65,15 @@ class PathIndependentMaterial : public UniaxialMaterial
     
     void Print(OPS_Stream &s, int flag =0);
     
+    // AddingSensitivity:BEGIN //////////////////////////////////////////
+    virtual double getStressSensitivity     (int gradNumber, bool conditional);
+    virtual double getStrainSensitivity     (int gradNumber);
+    virtual double getInitialTangentSensitivity(int gradNumber);
+    virtual double getDampTangentSensitivity(int gradNumber);
+    virtual double getRhoSensitivity        (int gradNumber);
+    virtual int    commitSensitivity        (double strainGradient, int gradNumber, int numGrads);
+    // AddingSensitivity:END ///////////////////////////////////////////
+
   protected:
     
   private:

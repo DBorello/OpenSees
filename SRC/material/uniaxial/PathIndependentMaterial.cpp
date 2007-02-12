@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-04-02 22:02:42 $
+// $Revision: 1.7 $
+// $Date: 2007-02-12 20:37:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PathIndependentMaterial.cpp,v $
 
 // Written: MHS
@@ -108,7 +108,7 @@ PathIndependentMaterial::getStrainRate(void)
 int 
 PathIndependentMaterial::commitState(void)
 {
-    return 0;
+  return 0; // commit nothing, path independent
 }
 
 int 
@@ -222,4 +222,41 @@ PathIndependentMaterial::Print(OPS_Stream &s, int flag)
 {
     s << "PathIndependentMaterial tag: " << this->getTag() << endln;
     s << "\tmaterial: " << theMaterial->getTag() << endln;
+}
+
+double
+PathIndependentMaterial::getStressSensitivity(int gradNumber, bool conditional)
+{
+  return theMaterial->getStressSensitivity(gradNumber, conditional);
+}
+
+double
+PathIndependentMaterial::getStrainSensitivity(int gradNumber)
+{
+  return theMaterial->getStrainSensitivity(gradNumber);
+}
+
+double
+PathIndependentMaterial::getInitialTangentSensitivity(int gradNumber)
+{
+  return theMaterial->getInitialTangentSensitivity(gradNumber);
+}
+
+double
+PathIndependentMaterial::getDampTangentSensitivity(int gradNumber)
+{
+  return theMaterial->getDampTangentSensitivity(gradNumber);
+}
+
+double
+PathIndependentMaterial::getRhoSensitivity(int gradNumber)
+{
+  return theMaterial->getRhoSensitivity(gradNumber);
+}
+
+int   
+PathIndependentMaterial::commitSensitivity(double strainGradient,
+					   int gradNumber, int numGrads)
+{
+  return 0; // commit nothing, path independent
 }
