@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.34 $
-// $Date: 2006-08-04 22:37:15 $
+// $Revision: 1.35 $
+// $Date: 2007-02-13 23:06:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -148,6 +148,9 @@
 #include <ElasticBeam3d.h>
 #include <ForceBeamColumn2d.h>
 #include <ForceBeamColumn3d.h>
+
+
+#include <FourNodeQuadUP.h>
 
 #include <DispBeamColumn2d.h>
 #include <DispBeamColumn3d.h>
@@ -450,6 +453,9 @@ FEM_ObjectBroker::getNewElement(int classTag)
 
 	     //case ELE_TAG_ZeroLengthND:  
 	     //return new ZeroLengthND(); 	     
+
+	case ELE_TAG_FourNodeQuadUP:  
+	     return new FourNodeQuadUP(); 	     
 	     
 	case ELE_TAG_FourNodeQuad:  
 	     return new FourNodeQuad(); 	     
