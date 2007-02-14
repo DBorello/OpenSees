@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-11-29 21:55:32 $
+// $Revision: 1.2 $
+// $Date: 2007-02-14 18:43:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/numberer/ParallelNumberer.cpp,v $                                                                        
 
 // Written: fmk 
@@ -40,9 +40,14 @@
 #include <Vertex.h>
 #include <VertexIter.h>
 #include <DOF_Group.h>
+#include <DOF_GrpIter.h>
 #include <GraphNumberer.h>
 #include <FE_Element.h>
 #include <FE_EleIter.h>
+#include <MP_Constraint.h>
+#include <MP_ConstraintIter.h>
+#include <Node.h>
+
 
 ParallelNumberer::ParallelNumberer(int dTag, int numSub, Channel **theC) 
   :DOF_Numberer(NUMBERER_TAG_ParallelNumberer), 
@@ -138,11 +143,6 @@ ParallelNumberer::numberDOF(int lastDOF)
     Channel *theChannel = theChannels[0];
     int numVertex = theGraph.getNumVertex();
 
-    /*
-    static ID test(2); test(0) = processID; test(1) = 25;
-    theChannel->recvID(0, 0, test);
-    */
-
     theGraph.sendSelf(0, *theChannel);
 
     // recv iD
@@ -163,7 +163,6 @@ ParallelNumberer::numberDOF(int lastDOF)
 	result = -4;
       } else {
 	const ID &theDOFID = dofPtr->getID();
-	//	opserr << "P: " << processID << " dofTag: " << dofTag << " " << "start: " << startID << " " << theDOFID;
 	int idSize = theDOFID.Size();
 	for (int j=0; j<idSize; j++)
 	  if (theDOFID(j) == -2 || theDOFID(j) == -3) dofPtr->setID(j, startID++);
@@ -206,17 +205,12 @@ ParallelNumberer::numberDOF(int lastDOF)
       Channel *theChannel = theChannels[j];
       Graph *theSubGraph = new Graph();
 
-      /*
-      static ID test(2); test(0) = processID; test(1) = 25;
-      theChannel->sendID(0, 0, test);
-      */
-
       theSubGraph->recvSelf(0, *theChannel, theBroker);
 
       theSubdomainIDs[j] = new ID(theSubGraph->getNumVertex()*2);
 
       this->mergeSubGraph(theGraph, *theSubGraph, vertexTags, vertexRefs, *theSubdomainIDs[j]);
-      
+
       delete theSubGraph;
     }
     
@@ -255,9 +249,7 @@ ParallelNumberer::numberDOF(int lastDOF)
 	if (theOrderedRefs->getLocation(refTagP0) == -1)
 	  (*theOrderedRefs)[loc++] = refTagP0;
       }	
-
     }
-
 
     int count = 0;
     for (int i=0; i<theOrderedRefs->Size(); i++) {
@@ -313,6 +305,46 @@ ParallelNumberer::numberDOF(int lastDOF)
       delete theSubdomainIDs[k];
     }      
     delete [] theSubdomainIDs;
+  }
+
+  // iterate through the DOFs one last time setting any -4 values
+  // iterate throgh  the DOFs second time setting -3 values
+  AnalysisModel *theAModel = this->getAnalysisModelPtr();
+  DOF_GrpIter &tDOFs = theAModel->getDOFs();
+
+  DOF_Group *dofPtr;
+  while ((dofPtr = tDOFs()) != 0) {
+    const ID &theID = dofPtr->getID();
+    int have4s = 0;
+    for (int i=0; i<theID.Size(); i++)
+      if (theID(i) == -4) have4s = 1;
+    
+    if (have4s == 1) {
+      int nodeID = dofPtr->getNodeTag();
+      // loop through the MP_Constraints to see if any of the
+      // DOFs are constrained, note constraint matrix must be diagonal
+      // with 1's on the diagonal
+      MP_ConstraintIter &theMPs = theDomain->getMPs();
+      MP_Constraint *mpPtr;
+      while ((mpPtr = theMPs()) != 0 ) {
+	// note keep looping over all in case multiple constraints
+	// are used to constrain a node -- can't assume intelli user
+	if (mpPtr->getNodeConstrained() == nodeID) {
+	  int nodeRetained = mpPtr->getNodeRetained();
+	  Node *nodeRetainedPtr = theDomain->getNode(nodeRetained);
+	  DOF_Group *retainedDOF = nodeRetainedPtr->getDOF_GroupPtr();
+	  const ID&retainedDOFIDs = retainedDOF->getID();
+	  const ID&constrainedDOFs = mpPtr->getConstrainedDOFs();
+	  const ID&retainedDOFs = mpPtr->getRetainedDOFs();
+	  for (int i=0; i<constrainedDOFs.Size(); i++) {
+	    int dofC = constrainedDOFs(i);
+	    int dofR = retainedDOFs(i);
+	    int dofID = retainedDOFIDs(dofR);
+	    dofPtr->setID(dofC, dofID);
+	  }
+	}
+      }		
+    }	
   }
 
   // iterate through the FE_Element getting them to set their IDs
@@ -470,9 +502,8 @@ ParallelNumberer::recvSelf(int cTag,
 int
 ParallelNumberer::numberDOF(ID &lastDOFs)
 {
-
   int result = 0;
-  
+
   // get a pointer to the model & check its not null
   AnalysisModel *theModel = this->getAnalysisModelPtr();
   Domain *theDomain = 0;
@@ -538,6 +569,7 @@ ParallelNumberer::numberDOF(ID &lastDOFs)
       Channel *theChannel = theChannels[j];
       Graph theSubGraph;
       theSubGraph.recvSelf(0, *theChannel, theBroker);
+      
       theSubdomainIDs[j] = new ID(theSubGraph.getNumVertex()*2);
       this->mergeSubGraph(theGraph, theSubGraph, vertexTags, vertexRefs, *theSubdomainIDs[j]);
     }
