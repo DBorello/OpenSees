@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2006-12-05 20:05:19 $
+// $Revision: 1.13 $
+// $Date: 2007-02-14 18:44:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.h,v $
                                                                         
                                                                         
 #ifndef DOF_Group_h
 #define DOF_Group_h
 
-// File: ~/analysis/dof_grp/DOF_Group.h
-// 
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -61,6 +59,7 @@ class DOF_Group: public TaggedObject
     virtual void setID(int dof, int value);
     virtual void setID(const ID &values);
     virtual const ID &getID(void) const;
+    virtual int doneID(void);    
 
     virtual int getNodeTag(void) const;
     virtual int getNumDOF(void) const;    

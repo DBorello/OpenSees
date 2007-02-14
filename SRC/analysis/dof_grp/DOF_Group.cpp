@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2006-12-06 00:47:36 $
+// $Revision: 1.17 $
+// $Date: 2007-02-14 18:44:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.cpp,v $
                                                                         
                                                                         
@@ -286,6 +286,14 @@ DOF_Group::getID(void) const
 
 
 int
+DOF_Group::doneID(void)
+{
+    return 0;
+}
+
+
+
+int
 DOF_Group::getNumDOF(void) const
 {
     return numDOF;
@@ -305,7 +313,7 @@ DOF_Group::getNumFreeDOF(void) const
 {
     int numFreeDOF = numDOF;
     for (int i=0; i<numDOF; i++)
-	if (myID(i) == -1)
+	if (myID(i) == -1 || myID(i) == -4)
 	    numFreeDOF--;
     
     return numFreeDOF;
