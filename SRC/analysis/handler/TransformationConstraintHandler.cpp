@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2005-11-29 22:04:40 $
+// $Revision: 1.13 $
+// $Date: 2007-02-14 18:45:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/TransformationConstraintHandler.cpp,v $
                                                                         
                                                                         
@@ -37,6 +37,7 @@
 #include <FE_Element.h>
 #include <FE_EleIter.h>
 #include <DOF_Group.h>
+#include <DOF_GrpIter.h>
 #include <Node.h>
 #include <Element.h>
 #include <NodeIter.h>
@@ -95,7 +96,6 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
     while ((theSP1 = theSP1s()) != 0) 
 	numSPConstraints++;
     
-
     numDOF = 0;
     ID transformedNode(0, 64);
 
@@ -186,7 +186,7 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 
 	  TransformationDOF_Group *tDofPtr = 
 	    new TransformationDOF_Group(numDofGrp++, nodPtr, mps[loc], this); 
-	  
+
 	  createdDOF = 1;
 	  dofPtr = tDofPtr;
 	  
@@ -211,7 +211,7 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 	  if (loc >= 0) {
 	    TransformationDOF_Group *tDofPtr = 
 	      new TransformationDOF_Group(numDofGrp++, nodPtr, this);
-	    
+
 	    int numSPs = 1;
 	    createdDOF = 1;
 	    dofPtr = tDofPtr;
@@ -474,19 +474,22 @@ TransformationConstraintHandler::enforceSPs(void)
 int 
 TransformationConstraintHandler::doneNumberingDOF(void)
 {
-    for (int i=1; i<=numConstrainedNodes; i++) {
-	// upward cast - safe as i put it in this location
-	TransformationDOF_Group *theDof  =
-	    (TransformationDOF_Group *)theDOFs[numDOF-i];
-	theDof->doneID();
+    // iterate through the DOF_Groups telling them that their ID has now been set
+    AnalysisModel *theModel1=this->getAnalysisModelPtr();
+    DOF_GrpIter &theDOFS = theModel1->getDOFs();
+    DOF_Group *dofPtr;
+    while ((dofPtr = theDOFS()) != 0) {
+       dofPtr->doneID();
     }
+
 
     // iterate through the FE_Element getting them to set their IDs
     AnalysisModel *theModel=this->getAnalysisModelPtr();
     FE_EleIter &theEle = theModel->getFEs();
     FE_Element *elePtr;
-    while ((elePtr = theEle()) != 0)
+    while ((elePtr = theEle()) != 0) {
       elePtr->setID();
+    }
 
     return 0;
 }
