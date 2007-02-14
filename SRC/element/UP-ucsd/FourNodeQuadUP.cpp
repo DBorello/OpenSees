@@ -9,8 +9,8 @@
 // based on FourNodeQuad element by Michael Scott		  	     //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.4 $
-// $Date: 2007-02-02 01:44:56 $
+// $Revision: 1.5 $
+// $Date: 2007-02-14 00:56:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/FourNodeQuadUP.cpp,v $
 
 #include <FourNodeQuadUP.h>
@@ -715,7 +715,7 @@ FourNodeQuadUP::sendSelf(int commitTag, Channel &theChannel)
   
   // Quad packs its data into a Vector and sends this to theChannel
 	// along with its dbTag and the commitTag passed in the arguments
-  static Vector data(10);
+  static Vector data(9);
   data(0) = this->getTag();
   data(1) = thickness;
   data(2) = rho;
@@ -725,8 +725,6 @@ FourNodeQuadUP::sendSelf(int commitTag, Channel &theChannel)
   data(6) = kc;
   data(7) = perm[0];
   data(8) = perm[1];
-  data(9) = 4;
-  
   
   res += theChannel.sendVector(dataTag, commitTag, data);
   if (res < 0) {
@@ -788,7 +786,7 @@ FourNodeQuadUP::recvSelf(int commitTag, Channel &theChannel,
   
   // Quad creates a Vector, receives the Vector and then sets the 
   // internal data with the data in the Vector
-  static Vector data(7);
+  static Vector data(9);
   res += theChannel.recvVector(dataTag, commitTag, data);
   if (res < 0) {
     opserr << "WARNING FourNodeQuadUP::recvSelf() - failed to receive Vector\n";
@@ -813,7 +811,7 @@ FourNodeQuadUP::recvSelf(int commitTag, Channel &theChannel,
   }
 
   // Quad now receives the ids of its materials
-  int newOrder = (int)data(9);
+  int newOrder = 4;
   int numMats = newOrder;
   ID classTags(2*numMats);
 
