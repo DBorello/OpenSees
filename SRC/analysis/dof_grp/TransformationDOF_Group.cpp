@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2006-12-05 20:05:19 $
+// $Revision: 1.18 $
+// $Date: 2007-02-14 18:44:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.cpp,v $
                                                                         
                                                                         
@@ -263,7 +263,7 @@ TransformationDOF_Group::~TransformationDOF_Group()
 const ID &
 TransformationDOF_Group::getID(void) const
 {
-    if (modID != 0)
+  if (modID != 0) 
 	return *modID;
     else
 	return this->DOF_Group::getID();
@@ -681,10 +681,9 @@ TransformationDOF_Group::getT(void)
 int
 TransformationDOF_Group::doneID(void)
 {
+  if (theMP == 0)
+    return 0;
 
-    if (theMP == 0)
-	return 0;
-    
     // get number of DOF & verify valid
     int numNodalDOF = myNode->getNumberDOF();
     const ID &retainedDOF = theMP->getRetainedDOFs();
@@ -705,7 +704,7 @@ TransformationDOF_Group::doneID(void)
 	int id = otherID(dof);
 	(*modID)(i+numRetainedDOF) = id;
     }
-    
+
     // if constraint is not time-varying determine the transformation matrix
     if (theMP->isTimeVarying() == false) {
 	Trans->Zero();
@@ -1017,7 +1016,7 @@ TransformationDOF_Group::saveSensitivity(const Vector &u,
     return this->DOF_Group::saveSensitivity(u, udot, udotdot, gradNum, numGrads);
   }
   
-  int ok;
+  int ok =0;
 
   ok += this->saveDispSensitivity(u, gradNum, numGrads);
   ok += this->saveVelSensitivity(udot, gradNum, numGrads);
