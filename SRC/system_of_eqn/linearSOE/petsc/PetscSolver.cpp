@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-01-13 00:02:03 $
+// $Revision: 1.6 $
+// $Date: 2007-02-14 20:12:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/PetscSolver.cpp,v $
                                                                         
 // Written: fmk & om
@@ -136,8 +136,10 @@ PetscSolver::solve(void)
   //
   // solve and mark as having been solved
   //
+  Vec &x = theSOE->x;
+  Vec &b = theSOE->b;
 
-  ierr = KSPSolve(ksp, theSOE->b, theSOE->x); CHKERRQ(ierr); 
+  ierr = KSPSolve(ksp, b, x); CHKERRQ(ierr); 
   theSOE->isFactored = 1;
 
   //

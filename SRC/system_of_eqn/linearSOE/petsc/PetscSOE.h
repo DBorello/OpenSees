@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-05-18 19:24:49 $
+// $Revision: 1.4 $
+// $Date: 2007-02-14 20:12:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/PetscSOE.h,v $
                                                                         
                                                                         
@@ -40,9 +40,9 @@
 #include <LinearSOE.h>
 #include <Vector.h>
 
-// extern "C" {
+//extern "C" {
 #include <petscksp.h>
-// }
+//}
 
 class PetscSolver;
 
@@ -107,4 +107,4 @@ class PetscSOE : public LinearSOE
 
 
 #endif
-
+ 

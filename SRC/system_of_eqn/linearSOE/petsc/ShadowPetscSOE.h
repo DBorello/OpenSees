@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:29 $
+// $Revision: 1.2 $
+// $Date: 2007-02-14 20:12:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/ShadowPetscSOE.h,v $
                                                                         
                                                                         
@@ -41,9 +41,9 @@
 #include <Vector.h>
 #include <PetscSOE.h>
 
-// extern "C" {
+extern "C" {
 #include <petsc.h>
-// }
+}
 
 class PetscSolver;
 
