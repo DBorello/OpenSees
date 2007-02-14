@@ -1,3 +1,4 @@
+
 ############################################################################
 #
 #  Program:  OpenSees
@@ -31,7 +32,7 @@ OpenSees_PROGRAM_MPI = $(HOME)/bin/OpenSeesMPI
 
 OPERATING_SYSTEM = LINUX
 #PROGRAMMING_MODE = PARALLEL, SEQUENTIAL, PARALLEL_INTERPRETERS
-PROGRAMMING_MODE = PARALLEL_INTERPRETERS
+PROGRAMMING_MODE = PARALLEL
 #DEBUG_MODE = DEBUG, NO_DEBUG
 DEBUG_MODE = NO_DEBUG
 RELIABILITY = NO_RELIABILITY
@@ -58,10 +59,13 @@ UMFPACKdir   = $(HOME)/OpenSees/OTHER/UMFPACK
 METISdir     = $(HOME)/OpenSees/OTHER/METIS
 SRCdir       = $(HOME)/OpenSees/SRC
 SUPERLUdir   = $(HOME)/OpenSees/OTHER/SuperLU_3.0/SRC
+SUPERLU_DISTdir   = $(HOME)/OpenSees/OTHER/SuperLU_DIST_2.0/SRC
+
 
 DIRS        = $(BLASdir) \
               $(CBLASdir) \
               $(SUPERLUdir) \
+	      $(SUPERLU_DISTdir) \
               $(LAPACKdir) \
               $(ARPACKdir) \
               $(UMFPACKdir) \
@@ -180,11 +184,10 @@ RELIABILITY_FLAG =
 #DEBUG_FLAG = -D_G3DEBUG 
 DEBUG_FLAG =
 
-OPT_FLAG = -O3 
+OPT_FLAG = -O2 -mp
 
 COMP_FLAG = 
 
-#-pg
 C++FLAGS         = -D_LINUX -D_UNIX  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(OPT_FLAG) $(COMP_FLAG)\
 		$(PROGRAMMING_FLAG)  -cpp -D_TCL84
 
@@ -260,23 +263,18 @@ SHELL           = /bin/sh
 MACHINE_LINKLIBS  = -L$(BASE)/lib \
                     -L$(HOME)/lib 
 
-PETSC_DIR = /usr/local/apps/petsc-2.2.1-64
-PETSC_ARCH = rs6000_64
+
+# PETSC
+PETSC_DIR = /usr/local/apps/petsc-2.2.1
+PETSC_ARCH = linux-gnu
 BOPT = O
-
-#-Wl,-rpath,$(PETSC_DIR)/lib/libg/$(PETSC_ARCH) \
-
-PETSC_LIB =  -L$(PETSC_DIR)/lib/libg/$(PETSC_ARCH) \
-	-lpetscsnes -lpetscksp -lpetscdm -lpetscmat -lpetscvec -lpetsc \
+PETSC_INC = -I$(PETSC_DIR)/include -I$(PETSC_DIR)/bmake/$(PETSC_ARCH) -D_PETSC 
+PETSC_LIB =  -L$(PETSC_DIR)/lib/libO_c++/$(PETSC_ARCH) \
 	$(FE)/system_of_eqn/linearSOE/petsc/PetscSOE.o \
 	$(FE)/system_of_eqn/linearSOE/petsc/PetscSolver.o \
-	$(FE)/system_of_eqn/linearSOE/petsc/PetscSparseSeqSolver.o 
-
-#	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSOE.o \
-#	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSolver.o \
-#
-
-
+	$(FE)/system_of_eqn/linearSOE/petsc/PetscSparseSeqSolver.o \
+	-lpetscsnes -lpetscksp -lpetscdm -lpetscmat -lpetscvec -lpetsc \
+	-L/usr/X11/lib -lX11 -lGL
 
 PARALLEL_LIB = 
 
@@ -289,15 +287,12 @@ MACHINE_NUMERICAL_LIBS  = -lm \
   $(UMFPACK_LIBRARY) \
   $(GRAPHIC_LIBRARY)\
   $(RELIABILITY_LIBRARY) \
-  $(METIS_LIBRARY) $(PARALLEL_LIB) 
-
-#  $(METIS_LIBRARY) $(PARALLEL_LIB) $(PETSC_LIB) $(MUMPS_LIB) $(HPM_LIB)
-
-
-
-#MACHINE_SPECIFIC_LIBS = -lpng -lessl -lGL -lX11 -lf
+  $(DISTRIBUTED_SUPERLU_LIBRARY) \
+  $(METIS_LIBRARY) $(PARALLEL_LIB) \
+  $(PETSC_LIB)
+ 
 MACHINE_SPECIFIC_LIBS =   -L${MKL_HOME}/lib/64 -lmkl_lapack -lmkl_ipf -lguide -lpthread \
-/usr/local/apps/intel/compiler8/lib/libifcoremt.a
+/usr/local/apps/intel/compiler8/lib/libifcoremt.a 
 
 # %---------------------------------------------------------%
 # | SECTION 8: INCLUDE FILES                                |
@@ -306,23 +301,14 @@ MACHINE_SPECIFIC_LIBS =   -L${MKL_HOME}/lib/64 -lmkl_lapack -lmkl_ipf -lguide -l
 # | compilation.                                            |
 # %---------------------------------------------------------%
 
-
-
-#PETSCINC = -I$(PETSC_DIR)/include -I$(PETSC_DIR)/bmake/$(PETSC_ARCH) -D_PETSC -DPETSC_USE_BOPT_g -DPETSC_USE_EXTERN_CXX
-PETSCINC = 
-
 MACHINE_INCLUDES        = -I/usr/local/BerkeleyDB.4.0/include \
 	-I/usr/include/mysql \
-	-I/usr/local/apps/hpm/include \
 	-I$(HOME)/include   \
 	-I$(UMFPACKdir) \
 	-I$(SUPERLUdir) \
 	-I$(SUPERLU_DISTdir) \
-	-I/usr/lpp/ppe.poe/include \
-	$(PETSCINC) \
+	$(PETSC_INC) \
 	-I$(HOME)/MUMPS_4.6/include
- 
-
 
 # this file contains all the OpenSees/SRC includes
 include $(FE)/Makefile.incl
