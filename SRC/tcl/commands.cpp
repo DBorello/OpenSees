@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.84 $
-// $Date: 2007-01-13 00:31:09 $
+// $Revision: 1.85 $
+// $Date: 2007-02-14 18:46:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -2079,25 +2079,12 @@ specifyNumberer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **
   }    
 
 #ifdef _PARALLEL_PROCESSING
-
   // check argv[1] for type of Numberer and create the object
   if (strcmp(argv[1],"Plain") == 0) {
     theNumberer = new ParallelNumberer();       
   } else if (strcmp(argv[1],"RCM") == 0) {
     RCM *theRCM = new RCM(false);	
     theNumberer = new ParallelNumberer(*theRCM);    	
-  } else {
-    opserr << "WARNING No Numberer type exists (Plain, RCM only) \n";
-    return TCL_ERROR;
-  }    
-
-
-  // check argv[1] for type of Numberer and create the object
-  if (strcmp(argv[1],"Plain") == 0) {
-    theNumberer = new PlainNumberer();       
-  } else if (strcmp(argv[1],"RCM") == 0) {
-    RCM *theRCM = new RCM(false);	
-    theNumberer = new DOF_Numberer(*theRCM);    	
   } else {
     opserr << "WARNING No Numberer type exists (Plain, RCM only) \n";
     return TCL_ERROR;
