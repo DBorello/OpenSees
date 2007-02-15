@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-02-15 23:43:56 $
+// $Revision: 1.14 $
+// $Date: 2007-02-15 23:48:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/TclForceBeamColumnCommand.cpp,v $
                                                                         
 // Written: MHS
@@ -50,10 +50,12 @@
 #include <UserDefinedHingeIntegration.h>
 #include <DistHingeIntegration.h>
 
+/*
 #include <TrapezoidalBeamIntegration.h>
 #include <FixedLocationBeamIntegration.h>
 #include <LowOrderBeamIntegration.h>
 #include <MidDistanceBeamIntegration.h>
+*/
 
 #include <ElasticSection2d.h>
 #include <ElasticSection3d.h>
@@ -366,8 +368,8 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
       beamIntegr = new RadauBeamIntegration();
     else if (strcmp(argv[6],"NewtonCotes") == 0)
       beamIntegr = new NewtonCotesBeamIntegration();
-    else if (strcmp(argv[6],"Trapezoidal") == 0)
-      beamIntegr = new TrapezoidalBeamIntegration();
+    //else if (strcmp(argv[6],"Trapezoidal") == 0)
+    //  beamIntegr = new TrapezoidalBeamIntegration();
     else {
       opserr << "ERROR: invalid integration type: " << argv[6] << endln;
       return TCL_ERROR;
@@ -714,8 +716,8 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
       otherBeamInt = new RadauBeamIntegration();
     else if (strcmp(argv[7],"NewtonCotes") == 0)
       otherBeamInt = new NewtonCotesBeamIntegration();
-    else if (strcmp(argv[7],"Trapezoidal") == 0)
-      otherBeamInt = new TrapezoidalBeamIntegration();
+    //else if (strcmp(argv[7],"Trapezoidal") == 0)
+    //  otherBeamInt = new TrapezoidalBeamIntegration();
     else {
       opserr << "ERROR: invalid integration type: " << argv[7] << endln;
       return TCL_ERROR;
@@ -799,6 +801,7 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     delete [] sections;
   }
 
+  /*
   else if (strcmp(argv[6],"FixedLocation") == 0) {
 
     if (argc < 9) {
@@ -1001,6 +1004,7 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
 
     delete [] sections;
   }
+  */
 
   else {
     opserr << "Unknown integration type: " << argv[6] << endln;
