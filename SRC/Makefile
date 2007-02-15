@@ -617,6 +617,8 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 FEDEAS_LIBS = $(FE)/material/uniaxial/FedeasMaterial.o \
 	$(FE)/material/uniaxial/fedeas/FedeasHardeningMaterial.o \
 	$(FE)/material/uniaxial/fedeas/Hard1.o \
+	$(FE)/material/uniaxial/fedeas/PlasticDamageMaterial.o \
+	$(FE)/material/uniaxial/fedeas/PD1.o \
 	$(FE)/material/uniaxial/fedeas/FedeasBond1Material.o \
 	$(FE)/material/uniaxial/fedeas/FedeasBond2Material.o \
 	$(FE)/material/uniaxial/fedeas/FedeasConcr1Material.o \

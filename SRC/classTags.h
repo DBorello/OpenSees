@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.85 $
-// $Date: 2007-02-02 23:00:03 $
+// $Revision: 1.86 $
+// $Date: 2007-02-15 23:40:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -118,6 +118,7 @@
 #define MAT_TAG_Steel03					23
 #define MAT_TAG_ReinforcingSteel					24
 
+
 // Terje:
 #define MAT_TAG_SmoothSteel01			21
 #define MAT_TAG_SmoothConcrete01		22
@@ -130,6 +131,7 @@
 #define MAT_TAG_Concrete04 30
 #define MAT_TAG_SecantConcrete 31
 #define MAT_TAG_ContinuumUniaxial 32
+
 
 //B Jeremic
 #define MAT_TAG_PySimple1        205
@@ -149,6 +151,10 @@
 #define MAT_TAG_FedeasHysteretic2       1008
 #define MAT_TAG_FedeasSteel1       1009
 #define MAT_TAG_FedeasSteel2       1010
+#define MAT_TAG_PlasticDamage			       1011
+
+
+
 
 #define MAT_TAG_DrainMaterial		2000
 #define MAT_TAG_DrainHardening		2001
