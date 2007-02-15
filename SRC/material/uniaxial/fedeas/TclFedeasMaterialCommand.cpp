@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.7 $
-// $Date: 2006-03-03 19:00:06 $
+// $Revision: 1.8 $
+// $Date: 2007-02-15 23:03:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/TclFedeasMaterialCommand.cpp,v $
 
 // Written: MHS
@@ -38,6 +38,7 @@
 #include <FedeasHyster2Material.h>
 #include <FedeasSteel2Material.h>
 #include <FedeasSteel1Material.h>
+#include <PlasticDamageMaterial.h>
 
 #include <TclModelBuilder.h>
 #include <Vector.h>
@@ -184,10 +185,11 @@ TclModelBuilder_addFedeasMaterial(ClientData clientData, Tcl_Interp *interp, int
 
 	else if (strcmp(argv[1],"Bond2") == 0 || strcmp(argv[1],"Bond02") == 0) {
 		if (argc < 17) {
-			opserr << "WARNING invalid number of arguments\n";
-			printCommand(argc,argv);
-			opserr << "Want: uniaxialMaterial Bond02 tag? u1p? q1p? u2p? u3p? q3p? u1n? q1n? u2n? u3n? q3n? s0? bb? alp? aln?" << endln;
-			return 0;
+		  
+		  opserr << "WARNING invalid number of arguments\n";
+		  printCommand(argc,argv);
+		  opserr << "Want: uniaxialMaterial Bond02 tag? u1p? q1p? u2p? u3p? q3p? u1n? q1n? u2n? u3n? q3n? s0? bb? alp? aln?" << endln;
+		  return 0;
 		}
 
 		double u1p, q1p, u2p, u3p, q3p;
@@ -716,6 +718,52 @@ TclModelBuilder_addFedeasMaterial(ClientData clientData, Tcl_Interp *interp, int
 		else
 			theMaterial = new FedeasSteel2Material(tag, fy, E, b);
 
+	}
+
+	else if (strcmp(argv[1],"ConcretePlasticDamage") == 0 || strcmp(argv[1],"PlasticDamage") == 0) {
+		if (argc < 11) {
+			opserr << "WARNING invalid number of arguments\n";
+			opserr << "Want: uniaxialMaterial ConcretePlasticDamage tag? $Ec $Gf $Gc $ft $fcy $fc $ktcr $relax" << endln;
+			return 0;
+		}    
+
+		double Ec, Ft, Fc, ft_max, fcy, fc, ktcr, relax;
+
+		if (Tcl_GetDouble(interp, argv[3], &Ec) != TCL_OK) {
+		  opserr << "WARNING uniaxialMaterial ConcretePlasticDamage tag? $Ec $Ft $Fc $ft_max $fcy $fc $ktcr $relax - invalid Ec\n";
+		  return 0;	
+		}
+		if (Tcl_GetDouble(interp, argv[4], &Ft) != TCL_OK) {
+		  opserr << "WARNING uniaxialMaterial ConcretePlasticDamage tag? $Ec $Ft $Fc $ft_max $fcy $fc $ktcr $relax - invalid Ft\n";
+		  return 0;	
+		}
+		if (Tcl_GetDouble(interp, argv[5], &Fc) != TCL_OK) {
+		  opserr << "WARNING uniaxialMaterial ConcretePlasticDamage tag? $Ec $Ft $Fc $ft_max $fcy $fc $ktcr $relax - invalid Fc\n";
+		  return 0;	
+		}
+		if (Tcl_GetDouble(interp, argv[6], &ft_max) != TCL_OK) {
+		  opserr << "WARNING uniaxialMaterial ConcretePlasticDamage tag? $Ec $Ft $Fc $ft_max $fcy $fc $ktcr $relax - invalid ft_max\n";
+		  return 0;	
+		}
+		if (Tcl_GetDouble(interp, argv[7], &fcy) != TCL_OK) {
+		  opserr << "WARNING uniaxialMaterial ConcretePlasticDamage tag? $Ec $Ft $Fc $ft_max $fcy $fc $ktcr $relax - invalid fcy\n";
+		  return 0;	
+		}
+		if (Tcl_GetDouble(interp, argv[8], &fc) != TCL_OK) {
+		  opserr << "WARNING uniaxialMaterial ConcretePlasticDamage tag? $Ec $Ft $Fc $ft_max $fcy $fc $ktcr $relax - invalid fc\n";
+		  return 0;	
+		}
+		if (Tcl_GetDouble(interp, argv[9], &ktcr) != TCL_OK) {
+		  opserr << "WARNING uniaxialMaterial ConcretePlasticDamage tag? $Ec $Ft $Fc $ft_max $fcy $fc $ktcr $relax - invalid Ktcr\n";
+		  return 0;	
+		}
+		if (Tcl_GetDouble(interp, argv[10], &relax) != TCL_OK) {
+		  opserr << "WARNING uniaxialMaterial ConcretePlasticDamage tag? $Ec $Ft $Fc $ft_max $fcy $fc $ktcr $relax - invalid relax\n";
+		  return 0;	
+		}
+
+		theMaterial = new PlasticDamageMaterial(tag, Ec, Ft, Fc, ft_max, fcy, fc, ktcr, relax);
+		
 	}
 
 	return theMaterial;

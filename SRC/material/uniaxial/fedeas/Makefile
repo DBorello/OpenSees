@@ -10,6 +10,7 @@ OBJS       = FedeasHardeningMaterial.o Hard1.o \
 	FedeasHyster2Material.o \
 	FedeasSteel1Material.o \
 	FedeasSteel2Material.o Steel2.o Concr2.o \
+	PD1.o PlasticDamageMaterial.o \
 	TclFedeasMaterialCommand.o
 
 all:         $(OBJS)
