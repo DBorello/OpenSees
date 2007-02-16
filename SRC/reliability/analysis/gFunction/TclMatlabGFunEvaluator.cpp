@@ -51,8 +51,10 @@ TclMatlabGFunEvaluator::evaluate_g(const Vector &x)
 		// Execute a Tcl file called 'tclgfun.tcl' (remember to "reset" analysis!)
 		char theTclCommand[30];
 		sprintf(theTclCommand,"source tclgfun.tcl");
-		Tcl_Eval( theTclInterp, theTclCommand );
-
+		if (Tcl_Eval(theTclInterp, theTclCommand) == TCL_ERROR) {
+		  opserr << "ERROR TclMatlabGFunEvaluator -- error in sourcing tclgfun.tcl" << endln;
+		  return -1;
+		}
 		
 		// Start a Matlab engine
 		Engine *ep;

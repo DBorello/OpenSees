@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-12-06 23:14:26 $
+// $Revision: 1.5 $
+// $Date: 2007-02-16 20:29:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/TclGFunEvaluator.cpp,v $
 
 
@@ -72,7 +72,10 @@ TclGFunEvaluator::runGFunAnalysis(const Vector &x)
 
 	// Zero out the response in the structural domain to make ready for next analysis
 	char theRevertToStartCommand[10] = "reset";
-	Tcl_Eval( theTclInterp, theRevertToStartCommand );
+	if (Tcl_Eval(theTclInterp, theRevertToStartCommand) == TCL_ERROR) {
+	  opserr << "ERROR TclGFunEvaluator -- error in Tcl_Eval for the reset command" << endln;
+	  return -1;
+	}
 
 
 	// Put random variables into the structural domain according to the RandomVariablePositioners
@@ -91,13 +94,19 @@ TclGFunEvaluator::runGFunAnalysis(const Vector &x)
 	// Set values of random variables in the Tcl intepreter
 	for (i=0; i<x.Size(); i++) {
 		sprintf(theCommand,"set x_%d %20.12e",(i+1),x(i));
-		Tcl_Eval( theTclInterp, theCommand );
+		if (Tcl_Eval(theTclInterp, theCommand) == TCL_ERROR) {
+		  opserr << "ERROR TclGFunEvaluator -- error in Tcl_Eval" << endln;
+		  return -1;
+		}
 	}
 
 
 	// Source the code file that the user has provided
 	sprintf(theCommand,"source %s",fileName);
-	Tcl_Eval( theTclInterp, theCommand );
+	if (Tcl_Eval(theTclInterp, theCommand) == TCL_ERROR) {
+	  opserr << "ERROR TclGFunEvaluator -- error in Tcl_Eval" << endln;
+	  return -1;
+	}
 
 
 	return 0;

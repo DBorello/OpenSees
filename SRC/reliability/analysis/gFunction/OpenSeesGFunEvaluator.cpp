@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-02-06 01:17:21 $
+// $Revision: 1.14 $
+// $Date: 2007-02-16 20:29:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.cpp,v $
 
 
@@ -98,7 +98,10 @@ OpenSeesGFunEvaluator::runGFunAnalysis(const Vector &x)
 {
 	// Zero out the response in the structural domain to make ready for next analysis
 	char theRevertToStartCommand[10] = "reset";
-	Tcl_Eval( theTclInterp, theRevertToStartCommand );
+	if (Tcl_Eval(theTclInterp, theRevertToStartCommand) == TCL_ERROR) {
+	  opserr << "ERROR OpenSeesGFunEvaluator -- error in Tcl_Eval for the reset command" << endln;
+	  return -1;
+	}
 
 
 	// Put random variables into the structural domain according to the RandomVariablePositioners
@@ -125,18 +128,30 @@ OpenSeesGFunEvaluator::runGFunAnalysis(const Vector &x)
 		// the flag returned by the analysis to see if it converged). 
 		char theAnalyzeCommand[30];
 		sprintf(theAnalyzeCommand,"[source %s]",fileName);
-		Tcl_ExprDouble( theTclInterp, theAnalyzeCommand, &result);
+		if (Tcl_ExprDouble( theTclInterp, theAnalyzeCommand, &result) == TCL_ERROR) {
+		  opserr << "ERROR OpenSeesGFunEvaluator -- error in Tcl_ExprDouble for the analyze file command" << endln;
+		  return -1;
+		}
+
 	}
 	else {
 		// User has given "nsteps" and possibly "dt"
 		char theAnalyzeCommand[30];
 		if (dt == 0.0) {
 			sprintf(theAnalyzeCommand,"[analyze %d]",nsteps);
-			Tcl_ExprDouble( theTclInterp, theAnalyzeCommand, &result);
+			
+			if (Tcl_ExprDouble( theTclInterp, theAnalyzeCommand, &result) == TCL_ERROR) {
+			  opserr << "ERROR OpenSeesGFunEvaluator -- error in Tcl_ExprDouble for the analyze command" << endln;
+			  return -1;
+			}
 		}
 		else {
 			sprintf(theAnalyzeCommand,"[analyze %d %10.5f]", nsteps, dt);
-			Tcl_ExprDouble( theTclInterp, theAnalyzeCommand, &result);
+			if (Tcl_ExprDouble( theTclInterp, theAnalyzeCommand, &result) == TCL_ERROR) {
+			  opserr << "ERROR OpenSeesGFunEvaluator -- error in Tcl_ExprDouble for the analyze command" << endln;
+			  return -1;
+			}
+			
 		}
 	
 	}
@@ -168,6 +183,7 @@ OpenSeesGFunEvaluator::tokenizeSpecials(TCL_Char *theExpression)
   char *dollarSign = "$";
   char *underscore = "_";
   char *tokenPtr = strtok( lsf_forTokenizing, separators);
+
   while ( tokenPtr != NULL ) {
     
     strcpy(tempchar,tokenPtr);
@@ -184,7 +200,10 @@ OpenSeesGFunEvaluator::tokenizeSpecials(TCL_Char *theExpression)
       // Assign value to the displacement quantity
       char tclAssignment[100];
       sprintf(tclAssignment,"set ud_%d_%d [nodeVel %d %d ]",nodeNumber,direction,nodeNumber,direction);
-      Tcl_Eval( theTclInterp, tclAssignment);
+      if (Tcl_Eval( theTclInterp, tclAssignment) == TCL_ERROR) {
+	opserr << "ERROR OpenSeesGFunEvaluator -- error in Tcl_Eval for tokenizeSpecials" << endln;
+	return -1;
+      }
     }
     // If a nodal displacement is detected
     else if ( strncmp(tokenPtr, "u", 1) == 0) {
@@ -196,7 +215,10 @@ OpenSeesGFunEvaluator::tokenizeSpecials(TCL_Char *theExpression)
       // Assign value to the displacement quantity
       char tclAssignment[100];
       sprintf(tclAssignment,"set u_%d_%d [nodeDisp %d %d ]",nodeNumber,direction,nodeNumber,direction);
-      Tcl_Eval( theTclInterp, tclAssignment);
+      if (Tcl_Eval( theTclInterp, tclAssignment) == TCL_ERROR) {
+	opserr << "ERROR OpenSeesGFunEvaluator -- error in Tcl_Eval for tokenizeSpecials" << endln;
+	return -1;
+      }
       
     }
     else if ( strncmp(tokenPtr, "rec",3) == 0) {
@@ -256,7 +278,10 @@ OpenSeesGFunEvaluator::createTclVariables()
 
     if ( strncmp(tokenPtr, "rec_node",8) == 0 ||
 	 strncmp(tokenPtr, "rec_element",11) == 0 ) {
-      Tcl_SetVar(theTclInterp, tokenPtr, "0.0", TCL_LIST_ELEMENT);
+      if (Tcl_SetVar(theTclInterp, tokenPtr, "0.0", TCL_LIST_ELEMENT) == 0) {
+	opserr << "ERROR OpenSeesGFunEvaluator -- error in Tcl_SetVar for createTclVariables" << endln;
+	return -1;
+      }
     }
     
     tokenPtr = strtok( NULL, separators);
@@ -287,7 +312,10 @@ OpenSeesGFunEvaluator::removeTclVariables()
 
     if ( strncmp(tokenPtr, "rec_node",8) == 0 ||
 	 strncmp(tokenPtr, "rec_element",11) == 0 ) {
-      Tcl_UnsetVar(theTclInterp, tokenPtr, TCL_LIST_ELEMENT);
+      if (Tcl_UnsetVar(theTclInterp, tokenPtr, TCL_LIST_ELEMENT) == TCL_ERROR) {
+	opserr << "ERROR OpenSeesGFunEvaluator -- error in Tcl_UnsetVar for removeTclVariables" << endln;
+	return -1;
+      }
     }
     
     tokenPtr = strtok( NULL, separators);
@@ -353,8 +381,11 @@ OpenSeesGFunEvaluator::rec_nodeTclVariable(char tempchar[100], char *variableNam
   
   char gString[80];
   sprintf(gString, "%25.20e", gFunValue);
-  Tcl_SetVar(theTclInterp, tempString, gString, TCL_LIST_ELEMENT);
-  
+  if (Tcl_SetVar(theTclInterp, tempString, gString, TCL_LIST_ELEMENT) == 0) {
+    opserr << "ERROR OpenSeesGFunEvaluator -- error in Tcl_SetVar for rec_nodeTclVariable" << endln;
+    return -1;
+  }
+
   return 0;
 }
 
@@ -457,7 +488,10 @@ OpenSeesGFunEvaluator::rec_elementTclVariable(char tempchar[100], char *variable
   
   char gString[80];
   sprintf(gString, "%25.20e", gFunValue);
-  Tcl_SetVar(theTclInterp, tempchar, gString, TCL_LIST_ELEMENT);
+  if (Tcl_SetVar(theTclInterp, tempchar, gString, TCL_LIST_ELEMENT) == 0) {
+    opserr << "ERROR OpenSeesGFunEvaluator -- error in Tcl_SetVar for rec_elementTclVariable" << endln;
+    return -1;
+  }
 
   return 0;
 }
