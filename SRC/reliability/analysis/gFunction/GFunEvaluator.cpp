@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-02-06 01:17:21 $
+// $Revision: 1.7 $
+// $Date: 2007-02-16 20:10:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/GFunEvaluator.cpp,v $
 
 
@@ -123,7 +123,10 @@ GFunEvaluator::evaluateG(const Vector &x)
 			int rvNum;
 			sscanf(tempchar,"x_%i",&rvNum);
 			sprintf(tclAssignment , "set x_%d  %15.5f", rvNum, x(rvNum-1) );
-			Tcl_Eval( theTclInterp, tclAssignment);
+			if (Tcl_Eval(theTclInterp, tclAssignment) == TCL_ERROR) {
+			  opserr << "ERROR GFunEvaluator -- Tcl_Eval returned error in limit state function" << endln;
+			  return -1;
+			}
 		}
 		else if ( strncmp(tokenPtr, "file",4) == 0) {
 			int rowNum = 0;
@@ -159,17 +162,22 @@ GFunEvaluator::evaluateG(const Vector &x)
 			inputFile.close();
 			sprintf(tclAssignment , "set file_%s_%d_%d  %15.5f",fileName,rowNum,colNum,fileValue);
 
-			Tcl_Eval( theTclInterp, tclAssignment);
+			if (Tcl_Eval(theTclInterp, tclAssignment) == TCL_ERROR) {
+			  opserr << "ERROR GFunEvaluator -- Tcl_Eval returned error in limit state function" << endln;
+			  return -1;
+			}
 		}
-		
+
 		tokenPtr = strtok( NULL, separators);
 	}
 
 	// Compute value of g-function
 	char *theTokenizedExpression = theLimitStateFunction->getTokenizedExpression();
 	g = 0.0;
-	Tcl_ExprDouble( theTclInterp, theTokenizedExpression, &g );
-
+	if (Tcl_ExprDouble(theTclInterp, theTokenizedExpression, &g) == TCL_ERROR) {
+	  opserr << "ERROR GFunEvaluator -- Tcl_ExprDouble returned error in limit state function" << endln;
+	  return -1;
+	}
 
 	return 0;
 }
