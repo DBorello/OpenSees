@@ -1,4 +1,4 @@
-      subroutine PD_ONE (d,hstvp,hstv,epsp,sigp,deps,str,dd,ist)
+      subroutine PD (d,hstvp,hstv,epsp,sigp,deps,str,dd,ist)
 
 c
 c       One-D version of (ElastoVisco) Plastic-Damage Model
