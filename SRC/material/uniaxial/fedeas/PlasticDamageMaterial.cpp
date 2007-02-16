@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-02-16 00:24:09 $
+// $Revision: 1.3 $
+// $Date: 2007-02-16 00:27:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/PlasticDamageMaterial.cpp,v $
                                                                       
 // Written: Jeeho Lee
@@ -120,9 +120,9 @@ extern "C" int PD_1(double *matpar, double *hstvP, double *hstv,
 
 #else
 
-extern "C" int pd_1_(double *matpar, double *hstvP, double *hstv,
-			 double *strainP, double *stressP, double *dStrain,
-			 double *tangent, double *stress, int *ist);
+extern "C" int pd_1__(double *matpar, double *hstvP, double *hstv,
+		      double *strainP, double *stressP, double *dStrain,
+		      double *tangent, double *stress, int *ist);
 
 // Add more declarations as needed
 
@@ -135,7 +135,7 @@ PlasticDamageMaterial::invokeSubroutine(int ist)
   // Compute strain increment
   double dEpsilon = epsilon-epsilonP;
   
-  pd_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, &sigma, &tangent, &ist);
+  pd_1__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, &sigma, &tangent, &ist);
 	   
   
   return 0;
