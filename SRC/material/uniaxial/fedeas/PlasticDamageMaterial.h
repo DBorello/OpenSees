@@ -14,13 +14,12 @@
 ** Developed by:                                                      **
 **   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
 **   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
-**   Jeeho Lee (jeeholee@berkeley.edu)                                **
-**                                                                    **
+**   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-02-15 23:02:54 $
+// $Revision: 1.2 $
+// $Date: 2007-02-16 00:24:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/PlasticDamageMaterial.h,v $
                                                                       
 // Written: Jeeho Lee
