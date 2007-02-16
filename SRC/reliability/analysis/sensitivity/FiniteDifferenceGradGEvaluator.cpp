@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-02-05 23:29:55 $
+// $Revision: 1.5 $
+// $Date: 2007-02-16 22:57:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/FiniteDifferenceGradGEvaluator.cpp,v $
 
 
@@ -174,9 +174,9 @@ FiniteDifferenceGradGEvaluator::computeGradG(double gFunValue,
 		}
 		result = theGFunEvaluator->evaluateG(perturbed_x);
 		if (result < 0) {
-			opserr << "FiniteDifferenceGradGEvaluator::evaluate_grad_g() - " << endln
-				<< " could not tokenize limit-state function. " << endln;
-			return -1;
+		  opserr << "FiniteDifferenceGradGEvaluator::evaluate_grad_g() - " << endln
+			 << " could not tokenize limit-state function. " << endln;
+		  return -1;
 		}
 		gFunValueAStepAhead = theGFunEvaluator->getG();
 
@@ -341,20 +341,32 @@ FiniteDifferenceGradGEvaluator::getDgDdispl()
 
 			// Evaluate the limit-state function again
 			char *theTokenizedExpression = theLimitStateFunction->getTokenizedExpression();
-			Tcl_ExprDouble( theTclInterp, theTokenizedExpression, &g );
+			if (Tcl_ExprDouble( theTclInterp, theTokenizedExpression, &g ) == TCL_ERROR) {
+			  opserr << "ERROR FiniteDifferenceGradGEvaluator -- Tcl_ExprDouble returned error" << endln;
+			  //return -1;
+			}
 			
 			// Keep the original displacement value
 			double originalValue;
 			sprintf(tclAssignment,"$u_%d_%d", nodeNumber, direction);
-			Tcl_ExprDouble( theTclInterp, tclAssignment, &originalValue);
+			if (Tcl_ExprDouble( theTclInterp, tclAssignment, &originalValue) == TCL_ERROR) {
+			  opserr << "ERROR FiniteDifferenceGradGEvaluator -- Tcl_ExprDouble returned error" << endln;
+			  //return -1;
+			}
 
 			// Set perturbed value in the Tcl workspace
 			double newValue = originalValue*(1.0+perturbationFactor);
 			sprintf(tclAssignment,"set u_%d_%d %35.20f", nodeNumber, direction, newValue);
-			Tcl_Eval( theTclInterp, tclAssignment);
+			if (Tcl_Eval( theTclInterp, tclAssignment) == TCL_ERROR) {
+			 opserr << "ERROR FiniteDifferenceGradGEvaluator -- Tcl_Eval returned error" << endln;
+			 //return -1; 
+			}
 
 			// Evaluate the limit-state function again
-			Tcl_ExprDouble( theTclInterp, theTokenizedExpression, &g_perturbed );
+			if (Tcl_ExprDouble( theTclInterp, theTokenizedExpression, &g_perturbed ) == TCL_ERROR) {
+			  opserr << "ERROR FiniteDifferenceGradGEvaluator -- Tcl_ExprDouble returned error" << endln;
+			  //return -1;
+			}
 
 			// Compute gradient
 			double onedgdu = (g_perturbed-g)/(originalValue*perturbationFactor);
@@ -384,8 +396,10 @@ FiniteDifferenceGradGEvaluator::getDgDdispl()
 
 			// Make assignment back to its original value
 			sprintf(tclAssignment,"set u_%d_%d %35.20f", nodeNumber, direction, originalValue);
-			Tcl_Eval( theTclInterp, tclAssignment);
-
+			if (Tcl_Eval( theTclInterp, tclAssignment) == TCL_ERROR) {
+			 opserr << "ERROR FiniteDifferenceGradGEvaluator -- Tcl_Eval returned error" << endln;
+			 //return -1; 
+			}
 
 		}
 
