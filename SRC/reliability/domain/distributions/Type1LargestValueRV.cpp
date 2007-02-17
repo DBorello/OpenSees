@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2004-08-27 17:51:50 $
+// $Revision: 1.8 $
+// $Date: 2007-02-17 21:27:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/Type1LargestValueRV.cpp,v $
 
 
@@ -41,14 +41,12 @@ Type1LargestValueRV::Type1LargestValueRV(int passedTag,
 		 double passedMean,
 		 double passedStdv,
 		 double passedStartValue)
-:RandomVariable(passedTag, RANDOM_VARIABLE_type1largestvalue)
+:RandomVariable(passedTag, RANDOM_VARIABLE_type1largestvalue, passedStartValue)
 {
-	tag = passedTag ;
 	double pi = 3.14159265358979;
 	double gamma = 0.5772156649;
 	u = passedMean - (gamma*sqrt(6.0)*passedStdv)/pi;
 	alpha = pi / ( sqrt(6.0) * passedStdv );
-	startValue = passedStartValue;
 }
 Type1LargestValueRV::Type1LargestValueRV(int passedTag, 
 		 double passedParameter1,
@@ -56,24 +54,20 @@ Type1LargestValueRV::Type1LargestValueRV(int passedTag,
 		 double passedParameter3,
 		 double passedParameter4,
 		 double passedStartValue)
-:RandomVariable(passedTag, RANDOM_VARIABLE_type1largestvalue)
+:RandomVariable(passedTag, RANDOM_VARIABLE_type1largestvalue, passedStartValue)
 {
-	tag = passedTag ;
 	u = passedParameter1;
 	alpha = passedParameter2;
-	startValue = passedStartValue;
 }
 Type1LargestValueRV::Type1LargestValueRV(int passedTag, 
 		 double passedMean,
 		 double passedStdv)
-:RandomVariable(passedTag, RANDOM_VARIABLE_type1largestvalue)
+:RandomVariable(passedTag, RANDOM_VARIABLE_type1largestvalue, passedMean)
 {
-	tag = passedTag ;
 	double pi = 3.14159265358979;
 	double gamma = 0.5772156649;
 	u = passedMean - (gamma*sqrt(6.0)*passedStdv)/pi;
 	alpha = pi / ( sqrt(6.0) * passedStdv );
-	startValue = getMean();
 }
 Type1LargestValueRV::Type1LargestValueRV(int passedTag, 
 		 double passedParameter1,
@@ -82,10 +76,9 @@ Type1LargestValueRV::Type1LargestValueRV(int passedTag,
 		 double passedParameter4)
 :RandomVariable(passedTag, RANDOM_VARIABLE_type1largestvalue)
 {
-	tag = passedTag ;
 	u = passedParameter1;
 	alpha = passedParameter2;
-	startValue = getMean();
+	this->setStartValue(getMean());
 }
 
 
@@ -145,14 +138,16 @@ Type1LargestValueRV::getStdv()
 }
 
 
-double 
-Type1LargestValueRV::getStartValue()
+
+
+double
+Type1LargestValueRV::getParameter1() 
 {
-	return startValue;
+  return u;
 }
 
-
-double Type1LargestValueRV::getParameter1()  {return u;}
-double Type1LargestValueRV::getParameter2()  {return alpha;}
-double Type1LargestValueRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
-double Type1LargestValueRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+double
+Type1LargestValueRV::getParameter2() 
+{
+  return alpha;
+}

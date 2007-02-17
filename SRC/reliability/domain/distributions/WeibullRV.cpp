@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-03-04 00:44:37 $
+// $Revision: 1.7 $
+// $Date: 2007-02-17 21:27:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/WeibullRV.cpp,v $
 
 
@@ -42,11 +42,9 @@ WeibullRV::WeibullRV(int passedTag,
 		 double passedMean,
 		 double passedStdv,
 		 double passedStartValue)
-:RandomVariable(passedTag, RANDOM_VARIABLE_weibull)
+:RandomVariable(passedTag, RANDOM_VARIABLE_weibull, passedStartValue)
 {
-	tag = passedTag;
 	setParameters(passedMean,passedStdv);
-	startValue = passedStartValue;
 }
 WeibullRV::WeibullRV(int passedTag, 
 		 double passedParameter1,
@@ -54,21 +52,17 @@ WeibullRV::WeibullRV(int passedTag,
 		 double passedParameter3,
 		 double passedParameter4,
 		 double passedStartValue)
-:RandomVariable(passedTag, RANDOM_VARIABLE_weibull)
+:RandomVariable(passedTag, RANDOM_VARIABLE_weibull, passedStartValue)
 {
-	tag = passedTag ;
 	u = passedParameter1;
 	k = passedParameter2;
-	startValue = passedStartValue;
 }
 WeibullRV::WeibullRV(int passedTag, 
 		 double passedMean,
 		 double passedStdv)
-:RandomVariable(passedTag, RANDOM_VARIABLE_weibull)
+:RandomVariable(passedTag, RANDOM_VARIABLE_weibull, passedMean)
 {
-	tag = passedTag;
 	setParameters(passedMean,passedStdv);
-	startValue = getMean();
 }
 WeibullRV::WeibullRV(int passedTag, 
 		 double passedParameter1,
@@ -77,10 +71,9 @@ WeibullRV::WeibullRV(int passedTag,
 		 double passedParameter4)
 :RandomVariable(passedTag, RANDOM_VARIABLE_weibull)
 {
-	tag = passedTag ;
 	u = passedParameter1;
 	k = passedParameter2;
-	startValue = getMean();
+	this->setStartValue(getMean());
 }
 
 
@@ -140,9 +133,8 @@ WeibullRV::getType()
 double 
 WeibullRV::getMean()
 {
-	GammaRV *aGammaRV = new GammaRV(1, 0.0, 1.0, 0.0);
-	double result = u * aGammaRV->gammaFunction(1.0+1.0/k);
-	delete aGammaRV;
+	GammaRV aGammaRV(1, 0.0, 1.0, 0.0);
+	double result = u * aGammaRV.gammaFunction(1.0+1.0/k);
 	return result;
 }
 
@@ -151,25 +143,25 @@ WeibullRV::getMean()
 double 
 WeibullRV::getStdv()
 {
-	GammaRV *aGammaRV = new GammaRV(1, 0.0, 1.0, 0.0);
-	double a = aGammaRV->gammaFunction(1.0+2.0/k);
-	double b = aGammaRV->gammaFunction(1.0+1.0/k);
-	delete aGammaRV;
+	GammaRV aGammaRV(1, 0.0, 1.0, 0.0);
+	double a = aGammaRV.gammaFunction(1.0+2.0/k);
+	double b = aGammaRV.gammaFunction(1.0+1.0/k);
 	double result = u*sqrt(a-b*b);
 	return result;
 }
 
 
-double 
-WeibullRV::getStartValue()
+double
+WeibullRV::getParameter1()
 {
-	return startValue;
+  return u;
 }
 
-double WeibullRV::getParameter1()  {return u;}
-double WeibullRV::getParameter2()  {return k;}
-double WeibullRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
-double WeibullRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+double
+WeibullRV::getParameter2()
+{
+  return k;
+}
 
 void
 WeibullRV::setParameters(double mean, double stdv)
@@ -183,13 +175,12 @@ WeibullRV::setParameters(double mean, double stdv)
 void
 WeibullRV::function141(double xk, double cov, double mean)
 {
-	GammaRV *aGammaRV = new GammaRV(1, 0.0, 1.0, 0.0);
+	GammaRV aGammaRV(1, 0.0, 1.0, 0.0);
 	xk = xk + 1.0;
 	double x1 = 1.0 + 1.0/xk;
 	double x2 = 1.0 + 2.0/xk;
-	double gm1 = aGammaRV->gammaFunction(x1);
-	double gm2 = aGammaRV->gammaFunction(x2);
-	delete aGammaRV;
+	double gm1 = aGammaRV.gammaFunction(x1);
+	double gm2 = aGammaRV.gammaFunction(x2);
 	double vy = sqrt(gm2/gm1/gm1 - 1.0);
 	if (cov-vy < 0.0) 
 		function141(xk,cov,mean);
@@ -204,10 +195,9 @@ WeibullRV::function142(double xk, double cov, double mean)
 	xk = xk - 0.1;
 	double x1 = 1.0 + 1.0/xk;
 	double x2 = 1.0 + 2.0/xk;
-	GammaRV *aGammaRV = new GammaRV(1, 0.0, 1.0, 0.0);
-	double gm1 = aGammaRV->gammaFunction(x1);
-	double gm2 = aGammaRV->gammaFunction(x2);
-	delete aGammaRV;
+	GammaRV aGammaRV(1, 0.0, 1.0, 0.0);
+	double gm1 = aGammaRV.gammaFunction(x1);
+	double gm2 = aGammaRV.gammaFunction(x2);
 	double vy = sqrt(gm2/gm1/gm1 - 1.0);
 	if (cov-vy < 0.0) 
 		function143(xk,cov,mean);
@@ -222,10 +212,9 @@ WeibullRV::function143(double xk, double cov, double mean)
 	xk = xk + 0.01;
 	double x1 = 1.0 + 1.0/xk;
 	double x2 = 1.0 + 2.0/xk;
-	GammaRV *aGammaRV = new GammaRV(1, 0.0, 1.0, 0.0);
-	double gm1 = aGammaRV->gammaFunction(x1);
-	double gm2 = aGammaRV->gammaFunction(x2);
-	delete aGammaRV;
+	GammaRV aGammaRV(1, 0.0, 1.0, 0.0);
+	double gm1 = aGammaRV.gammaFunction(x1);
+	double gm2 = aGammaRV.gammaFunction(x2);
 	double vy = sqrt(gm2/gm1/gm1 - 1.0);
 	if (cov-vy < 0.0) 
 		function143(xk,cov,mean);

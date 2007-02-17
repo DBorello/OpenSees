@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-10-27 23:04:39 $
+// $Revision: 1.2 $
+// $Date: 2007-02-17 21:27:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/UserDefinedRV.h,v $
 
 
@@ -41,8 +41,8 @@ class UserDefinedRV : public RandomVariable
 {
 
 public:
-	UserDefinedRV(int tag, Vector xPoints, Vector PDFpoints, double startValue);
-	UserDefinedRV(int tag, Vector xPoints, Vector PDFpoints);
+	UserDefinedRV(int tag, const Vector &xPoints, const Vector &PDFpoints, double startValue);
+	UserDefinedRV(int tag, const Vector &xPoints, const Vector &PDFpoints);
 	~UserDefinedRV();
 	void Print(OPS_Stream &s, int flag =0);
 	double getPDFvalue(double rvValue);
@@ -51,18 +51,12 @@ public:
 	const char * getType();
 	double getMean();
 	double getStdv();
-	double getParameter1();
-	double getParameter2();
-	double getParameter3();
-	double getParameter4();
-	double getStartValue();
-
 
 protected:
 
 private:
-	Vector *xPoints;
-	Vector *PDFpoints;
+	Vector xPoints;
+	Vector PDFpoints;
 };
 
 #endif

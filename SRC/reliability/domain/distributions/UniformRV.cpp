@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-03-04 00:44:37 $
+// $Revision: 1.7 $
+// $Date: 2007-02-17 21:27:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/UniformRV.cpp,v $
 
 
@@ -40,12 +40,10 @@ UniformRV::UniformRV(int passedTag,
 		 double passedMean,
 		 double passedStdv,
 		 double passedStartValue)
-:RandomVariable(passedTag, RANDOM_VARIABLE_uniform)
+:RandomVariable(passedTag, RANDOM_VARIABLE_uniform, passedStartValue)
 {
-	tag = passedTag;
 	a = passedMean - sqrt(3.0)*passedStdv;
 	b = passedMean + sqrt(3.0)*passedStdv;
-	startValue = passedStartValue;
 }
 UniformRV::UniformRV(int passedTag, 
 		 double passedParameter1,
@@ -53,22 +51,18 @@ UniformRV::UniformRV(int passedTag,
 		 double passedParameter3,
 		 double passedParameter4,
 		 double passedStartValue)
-:RandomVariable(passedTag,RANDOM_VARIABLE_uniform)
+:RandomVariable(passedTag,RANDOM_VARIABLE_uniform, passedStartValue)
 {
-	tag = passedTag ;
 	a = passedParameter1;
 	b = passedParameter2;
-	startValue = passedStartValue;
 }
 UniformRV::UniformRV(int passedTag, 
 		 double passedMean,
 		 double passedStdv)
-:RandomVariable(passedTag, RANDOM_VARIABLE_uniform)
+:RandomVariable(passedTag, RANDOM_VARIABLE_uniform, passedMean)
 {
-	tag = passedTag;
 	a = passedMean - sqrt(3.0)*passedStdv;
 	b = passedMean + sqrt(3.0)*passedStdv;
-	startValue = getMean();
 }
 UniformRV::UniformRV(int passedTag, 
 		 double passedParameter1,
@@ -77,10 +71,9 @@ UniformRV::UniformRV(int passedTag,
 		 double passedParameter4)
 :RandomVariable(passedTag,RANDOM_VARIABLE_uniform)
 {
-	tag = passedTag ;
 	a = passedParameter1;
 	b = passedParameter2;
-	startValue = getMean();
+	this->setStartValue(getMean());
 }
 
 
@@ -154,14 +147,16 @@ UniformRV::getStdv()
 }
 
 
+
+
 double 
-UniformRV::getStartValue()
+UniformRV::getParameter1()  
 {
-	return startValue;
+  return a;
 }
 
-
-double UniformRV::getParameter1()  {return a;}
-double UniformRV::getParameter2()  {return b;}
-double UniformRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
-double UniformRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+double
+UniformRV::getParameter2()  
+{
+  return b;
+}

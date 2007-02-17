@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-03-04 00:44:33 $
+// $Revision: 1.7 $
+// $Date: 2007-02-17 21:27:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/ExponentialRV.cpp,v $
 
 
@@ -41,7 +41,7 @@ ExponentialRV::ExponentialRV(int passedTag,
 		 double passedMean,
 		 double passedStdv,
 		 double passedStartValue)
-:RandomVariable(passedTag, RANDOM_VARIABLE_exponential)
+:RandomVariable(passedTag, RANDOM_VARIABLE_exponential, passedStartValue)
 {
 	// Note: this constructor is void.
 	opserr << "WARNING: This type of random variable is not uniquely defined by mean and stdv." << endln;
@@ -52,16 +52,14 @@ ExponentialRV::ExponentialRV(int passedTag,
 		 double passedParameter3,
 		 double passedParameter4,
 		 double passedStartValue)
-:RandomVariable(passedTag, RANDOM_VARIABLE_exponential)
+:RandomVariable(passedTag, RANDOM_VARIABLE_exponential, passedStartValue)
 {
-	tag = passedTag ;
 	lambda = passedParameter1;
-	startValue = passedStartValue;
 }
 ExponentialRV::ExponentialRV(int passedTag, 
 		 double passedMean,
 		 double passedStdv)
-:RandomVariable(passedTag, RANDOM_VARIABLE_exponential)
+:RandomVariable(passedTag, RANDOM_VARIABLE_exponential, passedMean)
 {
 	// Note: this constructor is void.
 	opserr << "WARNING: This type of random variable is not uniquely defined by mean and stdv." << endln;
@@ -73,9 +71,8 @@ ExponentialRV::ExponentialRV(int passedTag,
 		 double passedParameter4)
 :RandomVariable(passedTag, RANDOM_VARIABLE_exponential)
 {
-	tag = passedTag ;
 	lambda = passedParameter1;
-	startValue = getMean();
+	this->setStartValue(getMean());
 }
 
 
@@ -147,14 +144,8 @@ ExponentialRV::getStdv()
 }
 
 
-double 
-ExponentialRV::getStartValue()
+double
+ExponentialRV::getParameter1()
 {
-	return startValue;
+  return lambda;
 }
-
-
-double ExponentialRV::getParameter1()  {return lambda;}
-double ExponentialRV::getParameter2()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
-double ExponentialRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
-double ExponentialRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}

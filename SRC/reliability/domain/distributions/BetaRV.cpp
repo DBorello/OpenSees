@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-03-04 00:44:33 $
+// $Revision: 1.7 $
+// $Date: 2007-02-17 21:27:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/BetaRV.cpp,v $
 
 
@@ -44,14 +44,12 @@ BetaRV::BetaRV(int passedTag,
 		 double passedParameter3,
 		 double passedParameter4,
 		 double passedStartValue)
-:RandomVariable(passedTag, RANDOM_VARIABLE_beta)
+:RandomVariable(passedTag, RANDOM_VARIABLE_beta, passedStartValue)
 {
-	tag = passedTag ;
 	a = passedParameter1;
 	b = passedParameter2;
 	q = passedParameter3;
 	r = passedParameter4;
-	startValue = passedStartValue;
 }
 BetaRV::BetaRV(int passedTag, 
 		 double passedParameter1,
@@ -60,12 +58,12 @@ BetaRV::BetaRV(int passedTag,
 		 double passedParameter4)
 :RandomVariable(passedTag, RANDOM_VARIABLE_beta)
 {
-	tag = passedTag ;
 	a = passedParameter1;
 	b = passedParameter2;
 	q = passedParameter3;
 	r = passedParameter4;
-	startValue = getMean();
+
+	this->setStartValue(getMean());
 }
 
 
@@ -215,16 +213,29 @@ BetaRV::getStdv()
 }
 
 
-double 
-BetaRV::getStartValue()
+double
+BetaRV::getParameter1()
 {
-	return startValue;
+  return a;
 }
 
-double BetaRV::getParameter1()  {return a;}
-double BetaRV::getParameter2()  {return b;}
-double BetaRV::getParameter3()  {return q;}
-double BetaRV::getParameter4()  {return r;}
+double
+BetaRV::getParameter2()
+{
+  return b;
+}
+
+double
+BetaRV::getParameter3()
+{
+  return q;
+}
+
+double
+BetaRV::getParameter4()
+{
+  return r;
+}
 
 
 
@@ -245,12 +256,11 @@ BetaRV::betaFunction(double q, double r)
 	//    y = exp(gammaln(q)+gammaln(r)-gammaln(q+r));
 	//    ... where gammaln(.) = ln(gamma(.))
 	// So, try this instead:
-	GammaRV *aGammaRV = new GammaRV(1, 0.0, 1.0, 0.0);
+	GammaRV aGammaRV(1, 0.0, 1.0, 0.0);
 	double gammaq,gammar,gammaqpr;
-	gammaq = aGammaRV->gammaFunction(q);
-	gammar = aGammaRV->gammaFunction(r);
-	gammaqpr = aGammaRV->gammaFunction(q+r);
-	delete aGammaRV;
+	gammaq = aGammaRV.gammaFunction(q);
+	gammar = aGammaRV.gammaFunction(r);
+	gammaqpr = aGammaRV.gammaFunction(q+r);
 	double loggammaq,loggammar,loggammaqpr;
 	loggammaq = log(gammaq);
 	loggammar = log(gammar);

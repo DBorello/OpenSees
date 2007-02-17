@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-03-04 00:44:37 $
+// $Revision: 1.6 $
+// $Date: 2007-02-17 21:27:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/Type3SmallestValueRV.h,v $
 
 
@@ -69,9 +69,6 @@ public:
 	double getParameter1();
 	double getParameter2();
 	double getParameter3();
-	double getParameter4();
-	double getStartValue();
-
 
 protected:
 

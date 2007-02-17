@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-03-04 00:44:36 $
+// $Revision: 1.7 $
+// $Date: 2007-02-17 21:27:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/Type2LargestValueRV.cpp,v $
 
 
@@ -42,11 +42,9 @@ Type2LargestValueRV::Type2LargestValueRV(int passedTag,
 		 double passedMean,
 		 double passedStdv,
 		 double passedStartValue)
-:RandomVariable(passedTag, RANDOM_VARIABLE_type2largestvalue)
+:RandomVariable(passedTag, RANDOM_VARIABLE_type2largestvalue, passedStartValue)
 {
-	tag = passedTag ;
 	setParameters(passedMean,passedStdv);
-	startValue = passedStartValue;
 }
 Type2LargestValueRV::Type2LargestValueRV(int passedTag, 
 		 double passedParameter1,
@@ -54,21 +52,17 @@ Type2LargestValueRV::Type2LargestValueRV(int passedTag,
 		 double passedParameter3,
 		 double passedParameter4,
 		 double passedStartValue)
-:RandomVariable(passedTag, RANDOM_VARIABLE_type2largestvalue)
+:RandomVariable(passedTag, RANDOM_VARIABLE_type2largestvalue, passedStartValue)
 {
-	tag = passedTag ;
 	u = passedParameter1;
 	k = passedParameter2;
-	startValue = passedStartValue;
 }
 Type2LargestValueRV::Type2LargestValueRV(int passedTag, 
 		 double passedMean,
 		 double passedStdv)
-:RandomVariable(passedTag, RANDOM_VARIABLE_type2largestvalue)
+:RandomVariable(passedTag, RANDOM_VARIABLE_type2largestvalue, passedMean)
 {
-	tag = passedTag ;
 	setParameters(passedMean,passedStdv);
-	startValue = getMean();
 }
 Type2LargestValueRV::Type2LargestValueRV(int passedTag, 
 		 double passedParameter1,
@@ -77,10 +71,9 @@ Type2LargestValueRV::Type2LargestValueRV(int passedTag,
 		 double passedParameter4)
 :RandomVariable(passedTag, RANDOM_VARIABLE_type2largestvalue)
 {
-	tag = passedTag ;
 	u = passedParameter1;
 	k = passedParameter2;
-	startValue = getMean();
+	this->setStartValue(getMean());
 }
 
 
@@ -141,9 +134,8 @@ double
 Type2LargestValueRV::getMean()
 {
 	double result;
-	GammaRV *aGammaRV = new GammaRV(1, 0.0, 1.0, 0.0);
-	result = u * aGammaRV->gammaFunction(1.0-1.0/k);
-	delete aGammaRV;
+	GammaRV aGammaRV(1, 0.0, 1.0, 0.0);
+	result = u * aGammaRV.gammaFunction(1.0-1.0/k);
 	return result;
 }
 
@@ -152,26 +144,25 @@ Type2LargestValueRV::getMean()
 double 
 Type2LargestValueRV::getStdv()
 {
-	GammaRV *aGammaRV = new GammaRV(1, 0.0, 1.0, 0.0);
-	double a = aGammaRV->gammaFunction(1.0-2.0/k);
-	double b = aGammaRV->gammaFunction(1.0-1.0/k);
-	delete aGammaRV;
+	GammaRV aGammaRV(1, 0.0, 1.0, 0.0);
+	double a = aGammaRV.gammaFunction(1.0-2.0/k);
+	double b = aGammaRV.gammaFunction(1.0-1.0/k);
 	double result = u*sqrt(a-b*b);
 	return result;
 }
 
 
-double 
-Type2LargestValueRV::getStartValue()
+double
+Type2LargestValueRV::getParameter1()
 {
-	return startValue;
+  return u;
 }
 
-double Type2LargestValueRV::getParameter1()  {return u;}
-double Type2LargestValueRV::getParameter2()  {return k;}
-double Type2LargestValueRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
-double Type2LargestValueRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
-
+double
+Type2LargestValueRV::getParameter2()
+{
+  return k;
+}
 
 
 void
@@ -186,13 +177,12 @@ Type2LargestValueRV::setParameters(double mean, double stdv)
 void
 Type2LargestValueRV::function131(double xk, double cov, double mean)
 {
-	GammaRV *aGammaRV = new GammaRV(1, 0.0, 1.0, 0.0);
+	GammaRV aGammaRV(1, 0.0, 1.0, 0.0);
 	xk = xk + 1.0;
 	double x1 = 1.0 - 1.0/xk;
 	double x2 = 1.0 - 2.0/xk;
-	double gm1 = aGammaRV->gammaFunction(x1);
-	double gm2 = aGammaRV->gammaFunction(x2);
-	delete aGammaRV;
+	double gm1 = aGammaRV.gammaFunction(x1);
+	double gm2 = aGammaRV.gammaFunction(x2);
 	double vy = sqrt(gm2/gm1/gm1 - 1.0);
 	if (cov-vy < 0.0) 
 		function131(xk,cov,mean);
@@ -207,10 +197,9 @@ Type2LargestValueRV::function132(double xk, double cov, double mean)
 	xk = xk - 0.1;
 	double x1 = 1.0 - 1.0/xk;
 	double x2 = 1.0 - 2.0/xk;
-	GammaRV *aGammaRV = new GammaRV(1, 0.0, 1.0, 0.0);
-	double gm1 = aGammaRV->gammaFunction(x1);
-	double gm2 = aGammaRV->gammaFunction(x2);
-	delete aGammaRV;
+	GammaRV aGammaRV(1, 0.0, 1.0, 0.0);
+	double gm1 = aGammaRV.gammaFunction(x1);
+	double gm2 = aGammaRV.gammaFunction(x2);
 	double vy = sqrt(gm2/gm1/gm1 - 1.0);
 	if (cov-vy < 0.0) 
 		function133(xk,cov,mean);
@@ -225,10 +214,9 @@ Type2LargestValueRV::function133(double xk, double cov, double mean)
 	xk = xk + 0.01;
 	double x1 = 1.0 - 1.0/xk;
 	double x2 = 1.0 - 2.0/xk;
-	GammaRV *aGammaRV = new GammaRV(1, 0.0, 1.0, 0.0);
-	double gm1 = aGammaRV->gammaFunction(x1);
-	double gm2 = aGammaRV->gammaFunction(x2);
-	delete aGammaRV;
+	GammaRV aGammaRV(1, 0.0, 1.0, 0.0);
+	double gm1 = aGammaRV.gammaFunction(x1);
+	double gm2 = aGammaRV.gammaFunction(x2);
 	double vy = sqrt(gm2/gm1/gm1 - 1.0);
 	if (cov-vy < 0.0) 
 		function133(xk,cov,mean);

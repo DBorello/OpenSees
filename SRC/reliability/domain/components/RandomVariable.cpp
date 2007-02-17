@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-10-27 23:04:38 $
+// $Revision: 1.5 $
+// $Date: 2007-02-17 21:27:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariable.cpp,v $
 
 
@@ -33,12 +33,13 @@
 
 #include <RandomVariable.h>
 #include <classTags.h>
+#include <OPS_Globals.h>
 
-RandomVariable::RandomVariable(int tag, int classTag)
-:ReliabilityDomainComponent(tag,classTag)
+RandomVariable::RandomVariable(int tag, int classTag, double startVal)
+  :ReliabilityDomainComponent(tag,classTag), rvNumber(tag), startValue(startVal)
 {
-}
 
+}
 
 RandomVariable::~RandomVariable()
 {
@@ -49,6 +50,35 @@ RandomVariable::~RandomVariable()
 int 
 RandomVariable::setNewTag(int newTag)
 {
-	this->setTag(newTag);
-	return 0;
+  TaggedObject::setTag(newTag);
+  
+  return 0;
+}
+
+double
+RandomVariable::getParameter1()
+{
+  opserr << "No parameter 1 in r.v. #" << this->getTag() << endln;
+  return 0.0;
+}
+
+double
+RandomVariable::getParameter2()
+{
+  opserr << "No parameter 2 in r.v. #" << this->getTag() << endln;
+  return 0.0;
+}
+
+double
+RandomVariable::getParameter3()
+{
+  opserr << "No parameter 3 in r.v. #" << this->getTag() << endln;
+  return 0.0;
+}
+
+double
+RandomVariable::getParameter4()
+{
+  opserr << "No parameter 4 in r.v. #" << this->getTag() << endln;
+  return 0.0;  
 }

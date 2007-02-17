@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2004-08-27 17:51:50 $
+// $Revision: 1.8 $
+// $Date: 2007-02-17 21:27:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/GumbelRV.cpp,v $
 
 
@@ -41,14 +41,12 @@ GumbelRV::GumbelRV(int passedTag,
 		 double passedMean,
 		 double passedStdv,
 		 double passedStartValue)
-:RandomVariable(passedTag, RANDOM_VARIABLE_gumbel)
+:RandomVariable(passedTag, RANDOM_VARIABLE_gumbel, passedStartValue)
 {
-	tag = passedTag ;
 	double pi = 3.14159265358979;
 	double gamma = 0.5772156649;
 	u = passedMean - (gamma*sqrt(6.0)*passedStdv)/pi;
 	alpha = pi / ( sqrt(6.0) * passedStdv );
-	startValue = passedStartValue;
 }
 GumbelRV::GumbelRV(int passedTag, 
 		 double passedParameter1,
@@ -56,24 +54,20 @@ GumbelRV::GumbelRV(int passedTag,
 		 double passedParameter3,
 		 double passedParameter4,
 		 double passedStartValue)
-:RandomVariable(passedTag, RANDOM_VARIABLE_gumbel)
+:RandomVariable(passedTag, RANDOM_VARIABLE_gumbel, passedStartValue)
 {
-	tag = passedTag ;
 	u = passedParameter1;
 	alpha = passedParameter2;
-	startValue = passedStartValue;
 }
 GumbelRV::GumbelRV(int passedTag, 
 		 double passedMean,
 		 double passedStdv)
-:RandomVariable(passedTag, RANDOM_VARIABLE_gumbel)
+:RandomVariable(passedTag, RANDOM_VARIABLE_gumbel, passedMean)
 {
-	tag = passedTag ;
 	double pi = 3.14159265358979;
 	double gamma = 0.5772156649;
 	u = passedMean - (gamma*sqrt(6.0)*passedStdv)/pi;
 	alpha = pi / ( sqrt(6.0) * passedStdv );
-	startValue = getMean();
 }
 GumbelRV::GumbelRV(int passedTag, 
 		 double passedParameter1,
@@ -82,10 +76,9 @@ GumbelRV::GumbelRV(int passedTag,
 		 double passedParameter4)
 :RandomVariable(passedTag, RANDOM_VARIABLE_gumbel)
 {
-	tag = passedTag ;
 	u = passedParameter1;
 	alpha = passedParameter2;
-	startValue = getMean();
+	this->setStartValue(getMean());
 }
 
 
@@ -145,13 +138,14 @@ GumbelRV::getStdv()
 }
 
 
-double 
-GumbelRV::getStartValue()
+double
+GumbelRV::getParameter1()
 {
-	return startValue;
+  return u;
 }
 
-double GumbelRV::getParameter1()  {return u;}
-double GumbelRV::getParameter2()  {return alpha;}
-double GumbelRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
-double GumbelRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+double
+GumbelRV::getParameter2()
+{
+  return alpha;
+}

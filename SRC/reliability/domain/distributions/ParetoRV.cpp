@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-03-04 00:44:34 $
+// $Revision: 1.7 $
+// $Date: 2007-02-17 21:27:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/ParetoRV.cpp,v $
 
 
@@ -43,12 +43,10 @@ ParetoRV::ParetoRV(int passedTag,
 		 double passedParameter3,
 		 double passedParameter4,
 		 double passedStartValue)
-:RandomVariable(passedTag, RANDOM_VARIABLE_pareto)
+:RandomVariable(passedTag, RANDOM_VARIABLE_pareto, passedStartValue)
 {
-	tag = passedTag ;
 	k = passedParameter1;
 	u = passedParameter2;
-	startValue = passedStartValue;
 }
 ParetoRV::ParetoRV(int passedTag, 
 		 double passedParameter1,
@@ -57,10 +55,9 @@ ParetoRV::ParetoRV(int passedTag,
 		 double passedParameter4)
 :RandomVariable(passedTag, RANDOM_VARIABLE_pareto)
 {
-	tag = passedTag ;
 	k = passedParameter1;
 	u = passedParameter2;
-	startValue = getMean();
+	this->setStartValue(getMean());
 }
 
 
@@ -131,15 +128,14 @@ ParetoRV::getStdv()
 	return sqrt(k/(k-2))*(u/(k-1));
 }
 
-
-double 
-ParetoRV::getStartValue()
+double
+ParetoRV::getParameter1()
 {
-	return startValue;
+  return k;
 }
 
-double ParetoRV::getParameter1()  {return k;}
-double ParetoRV::getParameter2()  {return u;}
-double ParetoRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
-double ParetoRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
-
+double
+ParetoRV::getParameter2()  
+{
+  return u;
+}

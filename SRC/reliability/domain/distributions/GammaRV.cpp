@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-03-04 00:44:33 $
+// $Revision: 1.7 $
+// $Date: 2007-02-17 21:27:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/GammaRV.cpp,v $
 
 
@@ -41,12 +41,10 @@ GammaRV::GammaRV(int passedTag,
 		 double passedMean,
 		 double passedStdv,
 		 double passedStartValue)
-:RandomVariable(passedTag, RANDOM_VARIABLE_gamma)
+:RandomVariable(passedTag, RANDOM_VARIABLE_gamma, passedStartValue)
 {
-	tag = passedTag ;
 	k = (passedMean/passedStdv) * (passedMean/passedStdv);
 	lambda = passedMean / (passedStdv*passedStdv);
-	startValue = passedStartValue;
 }
 GammaRV::GammaRV(int passedTag, 
 		 double passedParameter1,
@@ -54,22 +52,18 @@ GammaRV::GammaRV(int passedTag,
 		 double passedParameter3,
 		 double passedParameter4,
 		 double passedStartValue)
-:RandomVariable(passedTag, RANDOM_VARIABLE_gamma)
+:RandomVariable(passedTag, RANDOM_VARIABLE_gamma, passedStartValue)
 {
-	tag = passedTag ;
 	k = passedParameter1;
 	lambda = passedParameter2;
-	startValue = passedStartValue;
 }
 GammaRV::GammaRV(int passedTag, 
 		 double passedMean,
 		 double passedStdv)
-:RandomVariable(passedTag, RANDOM_VARIABLE_gamma)
+:RandomVariable(passedTag, RANDOM_VARIABLE_gamma, passedMean)
 {
-	tag = passedTag ;
 	k = (passedMean/passedStdv) * (passedMean/passedStdv);
 	lambda = passedMean / (passedStdv*passedStdv);
-	startValue = getMean();
 }
 GammaRV::GammaRV(int passedTag, 
 		 double passedParameter1,
@@ -78,10 +72,9 @@ GammaRV::GammaRV(int passedTag,
 		 double passedParameter4)
 :RandomVariable(passedTag, RANDOM_VARIABLE_gamma)
 {
-	tag = passedTag ;
 	k = passedParameter1;
 	lambda = passedParameter2;
-	startValue = getMean();
+	this->setStartValue(getMean());
 }
 
 
@@ -194,19 +187,18 @@ GammaRV::getStdv()
 }
 
 
-double 
-GammaRV::getStartValue()
+
+double
+GammaRV::getParameter1()
 {
-	return startValue;
+  return k;
 }
 
-
-
-double GammaRV::getParameter1()  {return k;}
-double GammaRV::getParameter2()  {return lambda;}
-double GammaRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
-double GammaRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
-
+double
+GammaRV::getParameter2()
+{
+  return lambda;
+}
 
 
 
