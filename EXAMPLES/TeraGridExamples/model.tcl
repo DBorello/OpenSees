@@ -7,7 +7,7 @@ if {$ok == 0} {
 set width    360
 set height   144
 set P 180.0
-set g 386.4
+set G 386.4
 set m [expr $P/$G];       # expr command to evaluate an expression
 
 node  1       0.0     0.0 
