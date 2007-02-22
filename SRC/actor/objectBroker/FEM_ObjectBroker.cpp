@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.35 $
-// $Date: 2007-02-13 23:06:51 $
+// $Revision: 1.36 $
+// $Date: 2007-02-22 22:18:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -149,7 +149,9 @@
 #include <ForceBeamColumn2d.h>
 #include <ForceBeamColumn3d.h>
 
-
+#include <Nine_Four_Node_QuadUP.h>
+#include <BrickUP.h>
+#include <Twenty_Eight_Node_BrickUP.h>
 #include <FourNodeQuadUP.h>
 
 #include <DispBeamColumn2d.h>
@@ -498,7 +500,17 @@ FEM_ObjectBroker::getNewElement(int classTag)
 			
 	case ELE_TAG_Joint2D:				// Arash
 		return new Joint2D();			// Arash
-	
+
+
+	case ELE_TAG_Nine_Four_Node_QuadUP:
+	    return new NineFourNodeQuadUP();
+
+	case ELE_TAG_BrickUP:
+	    return new BrickUP();
+
+	case ELE_TAG_Twenty_Eight_Node_BrickUP:
+	    return new TwentyEightNodeBrickUP();
+
 	default:
 	     opserr << "FEM_ObjectBroker::getNewElement - ";
 	     opserr << " - no Element type exists for class tag " ;
