@@ -129,6 +129,12 @@
 				RelativePath="..\..\..\SRC\material\uniaxial\CableMaterial.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\Concrete.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\Concrete.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\Concrete01.cpp">
 			</File>
 			<File
@@ -225,6 +231,9 @@
 				RelativePath="..\..\..\SRC\material\uniaxial\NewUniaxialMaterial.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\fedeas\PD1.c">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\ParallelMaterial.cpp">
 			</File>
 			<File
@@ -241,6 +250,12 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\Pinching4Material.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\fedeas\PlasticDamageMaterial.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\fedeas\PlasticDamageMaterial.h">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\ReinforcingSteel.cpp">
