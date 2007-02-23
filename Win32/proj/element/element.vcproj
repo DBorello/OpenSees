@@ -583,34 +583,16 @@
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeMidpointBeamIntegration.h">
 				</File>
 				<File
-					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeMidpointBeamIntegration3d.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeMidpointBeamIntegration3d.h">
-				</File>
-				<File
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeRadauBeamIntegration.cpp">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeRadauBeamIntegration.h">
 				</File>
 				<File
-					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeRadauBeamIntegration3d.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeRadauBeamIntegration3d.h">
-				</File>
-				<File
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeRadauTwoBeamIntegration.cpp">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeRadauTwoBeamIntegration.h">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeRadauTwoBeamIntegration3d.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeRadauTwoBeamIntegration3d.h">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\LegendreBeamIntegration.cpp">
@@ -641,15 +623,6 @@
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\UserDefinedBeamIntegration.h">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\forceBeamColumn\UserDefinedHingeIntegration2d.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\forceBeamColumn\UserDefinedHingeIntegration2d.h">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\forceBeamColumn\UserDefinedHingeIntegration3d.cpp">
 				</File>
 			</Filter>
 		</Filter>
