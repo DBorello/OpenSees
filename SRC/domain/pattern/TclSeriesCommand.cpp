@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.15 $
-// $Date: 2006-11-21 23:46:18 $
+// $Revision: 1.16 $
+// $Date: 2007-02-23 19:05:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclSeriesCommand.cpp,v $
 
 // Written: fmk 
@@ -221,7 +221,6 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
 	  double dT = thePeerMotion->getDt();
 	  char string[30];
 	  sprintf(string,"set %s %.18e", variableName, dT);   Tcl_Eval(interp, string);
-	  fprintf(stderr,"%s\n",string);
 	  argCount+=2;
 	} else if ((strcmp(argv[argCount],"-nPts") == 0) || (strcmp(argv[argCount],"-NPTS") == 0)) {
 	  const char *variableName = argv[argCount+1];
