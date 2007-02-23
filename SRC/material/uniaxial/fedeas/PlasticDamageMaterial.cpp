@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-02-16 01:05:55 $
+// $Revision: 1.6 $
+// $Date: 2007-02-23 01:04:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/PlasticDamageMaterial.cpp,v $
                                                                       
 // Written: Jeeho Lee
@@ -110,13 +110,13 @@ PlasticDamageMaterial::getInitialTangent(void)
 
 #ifdef _WIN32
 
-extern "C" int PD(double *matpar, double *hstvP, double *hstv,
+extern "C" int pd_(double *matpar, double *hstvP, double *hstv,
 		  double *strainP, double *stressP, double *dStrain,
 		  double *tangent, double *stress, int *ist);
 
 // Add more declarations as needed
 
-#define pd_	PD
+//#define pd_	PD
 
 #else
 
