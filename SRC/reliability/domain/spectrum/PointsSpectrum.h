@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:44:51 $
+// $Revision: 1.2 $
+// $Date: 2007-02-24 01:38:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/spectrum/PointsSpectrum.h,v $
 
 
@@ -41,7 +41,7 @@ class PointsSpectrum : public Spectrum
 {
 
 public:
-	PointsSpectrum(int tag, Vector frequencies, Vector amplitudes);
+	PointsSpectrum(int tag, const Vector &frequencies, const Vector &amplitudes);
 	~PointsSpectrum();
 
 	void Print(OPS_Stream &s, int flag =0);
@@ -54,8 +54,8 @@ public:
 protected:
 
 private:
-	Vector *frequencies;
-	Vector *amplitudes;
+	Vector frequencies;
+	Vector amplitudes;
 };
 
 #endif

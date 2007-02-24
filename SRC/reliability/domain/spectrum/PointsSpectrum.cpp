@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:44:51 $
+// $Revision: 1.2 $
+// $Date: 2007-02-24 01:38:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/spectrum/PointsSpectrum.cpp,v $
 
 
@@ -37,8 +37,8 @@
 #include <classTags.h>
 
 
-PointsSpectrum::PointsSpectrum(int tag, Vector freq, Vector ampl)
-:Spectrum(tag,SPECTRUM_points)
+PointsSpectrum::PointsSpectrum(int tag, const Vector &freq, const Vector &ampl)
+  :Spectrum(tag,SPECTRUM_points), frequencies(freq), amplitudes(ampl)
 {
 	// Check that the frequency and the amplitude vectors have the same size
 	int numPoints = freq.Size();
@@ -53,17 +53,11 @@ PointsSpectrum::PointsSpectrum(int tag, Vector freq, Vector ampl)
 		}
 	}
 
-	frequencies = new Vector(freq);
-	amplitudes = new Vector(ampl);
-
 }
 
 PointsSpectrum::~PointsSpectrum()
 {
-	if (frequencies != 0) 
-		delete frequencies;
-	if (amplitudes != 0)
-		delete frequencies;
+
 }
 
 void
@@ -75,14 +69,14 @@ PointsSpectrum::Print(OPS_Stream &s, int flag)
 double
 PointsSpectrum::getMinFrequency()
 {
-	return (*frequencies)(0);
+	return frequencies(0);
 }
 
 
 double
 PointsSpectrum::getMaxFrequency()
 {
-	return (*frequencies)(frequencies->Size()-1);
+	return frequencies(frequencies.Size()-1);
 }
 
 
@@ -91,18 +85,18 @@ PointsSpectrum::getAmplitude(double frequency)
 {
 	double result;
 
-	if (frequency < (*frequencies)(0)  ||  frequency > (*frequencies)(frequencies->Size()-1) ) {
+	if (frequency < frequencies(0)  ||  frequency > frequencies(frequencies.Size()-1) ) {
 		result = 0.0;
 	}
 	else {
 		double dy, dx, a, b;
-		for (int i=1; i<frequencies->Size(); i++) {
-			if (frequency > (*frequencies)(i-1) && frequency < (*frequencies)(i)) {
-				dy = (*amplitudes)(i)  -  (*amplitudes)(i-1);
-				dx = (*frequencies)(i)  -  (*frequencies)(i-1);
+		for (int i=1; i<frequencies.Size(); i++) {
+			if (frequency > frequencies(i-1) && frequency < frequencies(i)) {
+				dy = amplitudes(i)  -  amplitudes(i-1);
+				dx = frequencies(i)  -  frequencies(i-1);
 				a = dy/dx;
-				b = (*amplitudes)(i-1);
-				result = a * (frequency-(*frequencies)(i-1)) + b;
+				b = amplitudes(i-1);
+				result = a * (frequency-frequencies(i-1)) + b;
 			}
 		}
 	}
