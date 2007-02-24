@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2005-03-21 21:35:56 $
+// $Revision: 1.8 $
+// $Date: 2007-02-24 01:31:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/randomNumber/CStdLibRandGenerator.cpp,v $
 
 
@@ -105,16 +105,7 @@ CStdLibRandGenerator::generate_nIndependentStdNormalNumbers(int n, int seedIn)
 	int randomNumberBetween0AndRAND_MAX;
 	double randomNumberBetween0And1;
 	Vector randomArray(n);
-	NormalRV *aStdNormRV = 0;
-	aStdNormRV = new NormalRV(1,0.0,1.0,0.0);
-
-
-	// Check if computer ran out of memory
-	if (aStdNormRV==0) {
-		opserr << "CStdLibRandGenerator::generate_nIndependentStdNormalNumbers() - " << endln
-			<< " out of memory while instantiating internal objects." << endln;
-		return -1;
-	}
+	NormalRV aStdNormRV(1,0.0,1.0,0.0);
 
 
 	// Create array of standard normal random numbers
@@ -144,7 +135,7 @@ CStdLibRandGenerator::generate_nIndependentStdNormalNumbers(int n, int seedIn)
 		//    z = invPhi( F(x) )
 		//       where F(x) for the uniform distribution 
 		//       from 0 to 1 in fact is equal to x itself.
-		randomArray(j) = aStdNormRV->getInverseCDFvalue(randomNumberBetween0And1); 
+		randomArray(j) = aStdNormRV.getInverseCDFvalue(randomNumberBetween0And1); 
 	}
 	seed = randomNumberBetween0AndRAND_MAX;
 
@@ -156,8 +147,6 @@ CStdLibRandGenerator::generate_nIndependentStdNormalNumbers(int n, int seedIn)
 		generatedNumbers = new Vector(n);
 	}
 	(*generatedNumbers) = randomArray;
-
-	delete aStdNormRV;
 
 	return 0;
 }
