@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:44:43 $
+// $Revision: 1.2 $
+// $Date: 2007-02-24 01:40:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/filter/Filter.h,v $
 
 
@@ -48,7 +48,6 @@ public:
 	virtual double getTimeOfMaxAmplitude() = 0;
 
 protected:
-	int tag;
 
 private:
 

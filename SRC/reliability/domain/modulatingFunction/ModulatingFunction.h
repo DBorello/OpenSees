@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:44:48 $
+// $Revision: 1.2 $
+// $Date: 2007-02-24 01:41:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/modulatingFunction/ModulatingFunction.h,v $
 
 
@@ -50,7 +50,6 @@ public:
 	virtual Filter *getFilter() = 0;
 
 protected:
-	int tag;
 
 private:
 
