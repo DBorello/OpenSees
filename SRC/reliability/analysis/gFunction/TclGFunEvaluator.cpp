@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-02-16 20:29:41 $
+// $Revision: 1.6 $
+// $Date: 2007-02-24 01:21:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/TclGFunEvaluator.cpp,v $
 
 
@@ -48,15 +48,13 @@ TclGFunEvaluator::TclGFunEvaluator(Tcl_Interp *passedTclInterp,
 					TCL_Char *passed_fileName)
 :GFunEvaluator(passedTclInterp, passedReliabilityDomain)
 {
-	fileName = new char[256];
 	strcpy(fileName,passed_fileName);
 }
 
 
 TclGFunEvaluator::~TclGFunEvaluator()
 {
-	if (fileName != 0)
-		delete [] fileName;
+
 }
 
 
