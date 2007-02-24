@@ -294,8 +294,6 @@ int plasto1_(double *d__, double *matpara, int *
 	     ck, double *dplas1, double *toler, int *maxitr)
 {
   /* Builtin functions */
-  //  int s_wsle(cilist *), do_lio(int *, int *, char *, ftnlen), e_wsle(void);
-  //  int s_stop(char *, ftnlen);
   
   /* Local variables */
   static double e, kpn;
@@ -306,10 +304,6 @@ int plasto1_(double *d__, double *matpara, int *
   static int switch__;
   
    /* Fortran I/O blocks */
-  // static cilist io___54 = { 0, 6, 0, 0, 0 };
-  // static cilist io___55 = { 0, 6, 0, 0, 0 };
-  // static cilist io___56 = { 0, 6, 0, 0, 0 };
-  
   
   /* plastic or viscoplastic loading case --------------------------------- */
   /* Parameter adjustments */
