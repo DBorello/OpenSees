@@ -237,9 +237,6 @@ int pd_(double *d__, double *hstvp, double *hstv,
   /* System generated locals */
   double d1, d2;
   
-  /* Builtin functions */
-  double sqrt(double), pow_dd(double *, double *), log(
-						       double);
   
   /* Local variables */
   static double deg_para1__, deg_para2__, deg_para3__;
@@ -258,7 +255,7 @@ int pd_(double *d__, double *hstvp, double *hstv,
   matpara[1] = temp * 2. - 1. + sqrt(temp * temp - temp) * 2.;
   d1 = 1. - deg_para1__;
   d2 = 1. / deg_para3__;
-  temp = pow_dd(&d1, &d2);
+  temp = pow(d1, d2);
   matpara[2] = deg_para3__;
   matpara[3] = log(1. - deg_para2__) / log(.5 / matpara[1] + .5);
   matpara[4] = (temp - .5) / (temp * temp - temp);
@@ -377,9 +374,6 @@ int vdtan1_(int *crmode, int *index, double *d__,
 	    tstr, double *estr, double *vdeg, double *degstr, 
 	    double *d2_eps__, double *dd)
 {
-  /* Builtin functions */
-  double pow_dd(double *, double *);
-  
   /* Local variables */
   static double e, temp, vdeg1, temp2;
   
@@ -395,7 +389,7 @@ int vdtan1_(int *crmode, int *index, double *d__,
   } else {
     temp = *mu / (*mu + *delt);
     temp2 = *delt / (*mu + *delt);
-    *tstr = temp * *tstr + pow_dd(&temp2, dplas1) * *estr;
+    *tstr = temp * *tstr + pow(temp2, *dplas1) * *estr;
     *dd = temp * vdeg1 * *dplas1 * e + temp2 * (vdeg1 - *tstr * *degstr) *
       *dd;
   }
@@ -450,9 +444,6 @@ int damg1_(int *flag__, int *index, double *d__,
   /* System generated locals */
   double d1, d2;
   
-  /* Builtin functions */
-  double sqrt(double), pow_dd(double *, double *);
-  
   /* Local variables */
   static double ac, at, rc, cy, rt, ty, phc, pht, rphc, temp, rpht;
   
@@ -475,14 +466,14 @@ int damg1_(int *flag__, int *index, double *d__,
     /* ----------- compute cohesions ----------------------------- */
     d1 = (at + 1. - rpht) / at;
     d2 = 1. - rt;
-    cohn[1] = ty * rpht * pow_dd(&d1, &d2);
+    cohn[1] = ty * rpht * pow(d1, d2);
     /* ----------- compute derivatives --------------------------- */
     *fkp = ty * (at + 2.) * ((at + 1.) / (sqrt(pht) * 2.) - 1.);
     temp = (at + 1. - rpht) / at;
     d1 = 1. - rt;
     d2 = -rt;
-    *ck = ty * .5 * at * (at + 2.) * (pow_dd(&temp, &d1) / rpht - (1. - 
-								   rt) * pow_dd(&temp, &d2) / at);
+    *ck = ty * .5 * at * (at + 2.) * (pow(temp, d1) / rpht - (1. - 
+								   rt) * pow(temp, d2) / at);
     /* --- Compressive Damage */
   } else {
     cy = d__[5];
@@ -492,14 +483,14 @@ int damg1_(int *flag__, int *index, double *d__,
     /* ----------- compute cohesions ----------------------------- */
     d1 = (ac + 1. - rphc) / ac;
     d2 = 1. - rc;
-    cohn[2] = -cy * rphc * pow_dd(&d1, &d2);
+    cohn[2] = -cy * rphc * pow(d1, d2);
     /* ----------- compute derivatives --------------------------- */
     *fkp = cy * (ac + 2.) * ((ac + 1.) / (sqrt(phc) * 2.) - 1.);
     temp = (ac + 1. - rphc) / ac;
     d1 = 1. - rc;
     d2 = -rc;
-    *ck = cy * -.5 * ac * (ac + 2.) * (pow_dd(&temp, &d1) / rphc - (1. 
-								    - rc) * pow_dd(&temp, &d2) / ac);
+    *ck = cy * -.5 * ac * (ac + 2.) * (pow(temp, d1) / rphc - (1. 
+								    - rc) * pow(temp, d2) / ac);
   }
   return 0;
 } /* damg1_ */
@@ -510,9 +501,6 @@ int degrad1_(int *flag__, int *index, double *
 {
   /* System generated locals */
   double d1;
-  
-  /* Builtin functions */
-  double sqrt(double), pow_dd(double *, double *);
   
   /* Local variables */
   static double s, ac, dc, rc, at, dt, rt, phi, phi2, dfac, temp, temp2,
@@ -530,10 +518,10 @@ int degrad1_(int *flag__, int *index, double *
   dfac = 1.;
   phi = sqrt(at * (at + 2.) * *kapa1 + 1.);
   temp = (at + 1. - phi) / at;
-  dt = 1. - pow_dd(&temp, &rt);
+  dt = 1. - pow(temp, rt);
   phi2 = sqrt(ac * (ac + 2.) * *kapa2 + 1.);
   temp2 = (ac + 1. - phi2) / ac;
-  dc = 1. - pow_dd(&temp2, &rc);
+  dc = 1. - pow(temp2, rc);
   if (*index == 1) {
     s = 1.;
   } else {
@@ -543,14 +531,13 @@ int degrad1_(int *flag__, int *index, double *
   if (*flag__ >= 1) {
     if (*index == 1) {
       d1 = rt - 1.;
-      degkp = s * .5 * (at + 2.) * (1. - dc) * rt * pow_dd(&temp, &d1)
+      degkp = s * .5 * (at + 2.) * (1. - dc) * rt * pow(temp, d1)
 	/ phi;
       degkp /= *ck;
       *degstr = (1. - dc) * degkp;
     } else {
       d1 = rc - 1.;
-      degkp = (ac + 2.) * .5 * (1. - s * dt) * rc * pow_dd(&temp2, &
-							   d1) / phi2;
+      degkp = (ac + 2.) * .5 * (1. - s * dt) * rc * pow(temp2, d1) / phi2;
       degkp = -degkp / *ck;
       *degstr = (1. - s * dt) * degkp;
     }
