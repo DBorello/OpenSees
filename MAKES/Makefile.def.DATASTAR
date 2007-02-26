@@ -88,6 +88,20 @@ DIRS        = $(BLASdir) \
               $(SRCdir) 
 endif
 
+ifeq ($(PROGRAMMING_MODE), PARALLEL_INTERPRETERS)
+
+DIRS        = $(BLASdir) \
+              $(CBLASdir) \
+              $(SUPERLUdir) \
+	      $(SUPERLU_DISTdir) \
+              $(LAPACKdir) \
+              $(ARPACKdir) \
+              $(UMFPACKdir) \
+              $(METISdir) \
+              $(SRCdir) 
+endif
+
+
 
 # %-------------------------------------------------------%
 # | SECTION 4: LIBRARIES                                  |
