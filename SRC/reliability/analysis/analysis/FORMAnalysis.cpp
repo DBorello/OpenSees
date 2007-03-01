@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2006-12-06 22:32:23 $
+// $Revision: 1.9 $
+// $Date: 2007-03-01 00:06:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FORMAnalysis.cpp,v $
 
 
@@ -146,6 +146,37 @@ FORMAnalysis::analyze(void)
 			outputFile << "#  No convergence!                                                    #" << endln;
 			outputFile << "#                                                                     #" << endln;
 			outputFile << "#######################################################################" << endln << endln << endln;
+
+			// Get results from the "find desingn point algorithm"
+			xStar				= theFindDesignPointAlgorithm->get_x();
+			uStar				= theFindDesignPointAlgorithm->get_u();
+			alpha				= theFindDesignPointAlgorithm->get_alpha();
+			gamma				= theFindDesignPointAlgorithm->get_gamma();
+			i					= theFindDesignPointAlgorithm->getNumberOfSteps();
+			Go					= theFindDesignPointAlgorithm->getFirstGFunValue();
+			Glast				= theFindDesignPointAlgorithm->getLastGFunValue();
+			uSecondLast			= theFindDesignPointAlgorithm->getSecondLast_u();
+			alphaSecondLast		= theFindDesignPointAlgorithm->getSecondLast_alpha();
+			lastSearchDirection	= theFindDesignPointAlgorithm->getLastSearchDirection();
+			numberOfEvaluations	= theFindDesignPointAlgorithm->getNumberOfEvaluations();
+
+			// Postprocessing
+			beta = alpha ^ uStar;
+			pf1 = 1.0 - aStdNormRV.getCDFvalue(beta);
+
+			// Store key results in the limit-state functions
+			theLimitStateFunction->FORMReliabilityIndexBeta = beta;
+			theLimitStateFunction->FORMProbabilityOfFailure_pf1 = pf1;
+			theLimitStateFunction->designPoint_x_inOriginalSpace = xStar;
+			theLimitStateFunction->designPoint_u_inStdNormalSpace= uStar;
+			theLimitStateFunction->normalizedNegativeGradientVectorAlpha = alpha;
+			theLimitStateFunction->importanceVectorGamma = gamma;
+			theLimitStateFunction->numberOfStepsToFindDesignPointAlgorithm	= i;
+			theLimitStateFunction->GFunValueAtStartPt = Go;
+			theLimitStateFunction->GFunValueAtEndPt = Glast;
+			theLimitStateFunction->secondLast_u = uSecondLast;
+			theLimitStateFunction->secondLastAlpha	= alphaSecondLast;
+			theLimitStateFunction->lastSearchDirection = lastSearchDirection;
 		}
 		else {
 		
