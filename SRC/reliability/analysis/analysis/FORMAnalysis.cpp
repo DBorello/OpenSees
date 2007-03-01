@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-03-01 00:06:01 $
+// $Revision: 1.10 $
+// $Date: 2007-03-01 17:56:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FORMAnalysis.cpp,v $
 
 
@@ -84,16 +84,9 @@ FORMAnalysis::analyze(void)
 
 
 	// Declare variables used in this method
-	Vector xStar;
-	Vector uStar;
-	Vector alpha;
-	Vector gamma;
 	double stdv,mean;
 	int i;
 	double Go, Glast;
-	Vector uSecondLast;
-	Vector alphaSecondLast;
-	Vector lastSearchDirection;
 	double beta;
 	double pf1;
 	int numberOfEvaluations;
@@ -148,16 +141,16 @@ FORMAnalysis::analyze(void)
 			outputFile << "#######################################################################" << endln << endln << endln;
 
 			// Get results from the "find desingn point algorithm"
-			xStar				= theFindDesignPointAlgorithm->get_x();
-			uStar				= theFindDesignPointAlgorithm->get_u();
-			alpha				= theFindDesignPointAlgorithm->get_alpha();
-			gamma				= theFindDesignPointAlgorithm->get_gamma();
+			const Vector &xStar = theFindDesignPointAlgorithm->get_x();
+			const Vector &uStar = theFindDesignPointAlgorithm->get_u();
+			const Vector &alpha = theFindDesignPointAlgorithm->get_alpha();
+			const Vector &gamma = theFindDesignPointAlgorithm->get_gamma();
 			i					= theFindDesignPointAlgorithm->getNumberOfSteps();
 			Go					= theFindDesignPointAlgorithm->getFirstGFunValue();
 			Glast				= theFindDesignPointAlgorithm->getLastGFunValue();
-			uSecondLast			= theFindDesignPointAlgorithm->getSecondLast_u();
-			alphaSecondLast		= theFindDesignPointAlgorithm->getSecondLast_alpha();
-			lastSearchDirection	= theFindDesignPointAlgorithm->getLastSearchDirection();
+			const Vector &uSecondLast = theFindDesignPointAlgorithm->getSecondLast_u();
+			const Vector &alphaSecondLast = theFindDesignPointAlgorithm->getSecondLast_alpha();
+			const Vector &lastSearchDirection = theFindDesignPointAlgorithm->getLastSearchDirection();
 			numberOfEvaluations	= theFindDesignPointAlgorithm->getNumberOfEvaluations();
 
 			// Postprocessing
@@ -179,20 +172,18 @@ FORMAnalysis::analyze(void)
 			theLimitStateFunction->lastSearchDirection = lastSearchDirection;
 		}
 		else {
-		
 			// Get results from the "find desingn point algorithm"
-			xStar				= theFindDesignPointAlgorithm->get_x();
-			uStar				= theFindDesignPointAlgorithm->get_u();
-			alpha				= theFindDesignPointAlgorithm->get_alpha();
-			gamma				= theFindDesignPointAlgorithm->get_gamma();
+			const Vector &xStar = theFindDesignPointAlgorithm->get_x();
+			const Vector &uStar = theFindDesignPointAlgorithm->get_u();
+			const Vector &alpha = theFindDesignPointAlgorithm->get_alpha();
+			const Vector &gamma = theFindDesignPointAlgorithm->get_gamma();
 			i					= theFindDesignPointAlgorithm->getNumberOfSteps();
 			Go					= theFindDesignPointAlgorithm->getFirstGFunValue();
 			Glast				= theFindDesignPointAlgorithm->getLastGFunValue();
-			uSecondLast			= theFindDesignPointAlgorithm->getSecondLast_u();
-			alphaSecondLast		= theFindDesignPointAlgorithm->getSecondLast_alpha();
-			lastSearchDirection	= theFindDesignPointAlgorithm->getLastSearchDirection();
+			const Vector &uSecondLast = theFindDesignPointAlgorithm->getSecondLast_u();
+			const Vector &alphaSecondLast = theFindDesignPointAlgorithm->getSecondLast_alpha();
+			const Vector &lastSearchDirection = theFindDesignPointAlgorithm->getLastSearchDirection();
 			numberOfEvaluations	= theFindDesignPointAlgorithm->getNumberOfEvaluations();
-
 
 			// Postprocessing
 			beta = alpha ^ uStar;
@@ -201,15 +192,15 @@ FORMAnalysis::analyze(void)
 
 			// Reliability sensitivity analysis wrt. mean/stdv
 			if (relSensTag == 1) {
-				Vector DuStarDmean;
-				Vector DuStarDstdv; 
 				double dBetaDmean;
 				double dBetaDstdv;
+				Vector DuStarDmean(numRV);
+				Vector DuStarDstdv(numRV);
 
 				for ( int j=1; j<=numRV; j++ )
 				{
-					DuStarDmean = theProbabilityTransformation->meanSensitivityOf_x_to_u(xStar,j);
-					DuStarDstdv = theProbabilityTransformation->stdvSensitivityOf_x_to_u(xStar,j);
+				  DuStarDmean = theProbabilityTransformation->meanSensitivityOf_x_to_u(xStar,j);
+				  DuStarDstdv = theProbabilityTransformation->stdvSensitivityOf_x_to_u(xStar,j);
 					dBetaDmean = alpha^DuStarDmean;
 					dBetaDstdv = alpha^DuStarDstdv;
 					aRandomVariable = theReliabilityDomain->getRandomVariablePtr(j);

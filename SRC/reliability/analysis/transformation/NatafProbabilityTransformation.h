@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-10-27 23:45:45 $
+// $Revision: 1.3 $
+// $Date: 2007-03-01 17:56:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.h,v $
 
 
@@ -47,20 +47,20 @@ public:
 						  int printFlag);
 	~NatafProbabilityTransformation();
 
-	int set_x(Vector x);
-	int set_u(Vector u);
+	int set_x(const Vector &x);
+	int set_u(const Vector &u);
 
 	int transform_x_to_u();
 	int transform_u_to_x();
 	int transform_u_to_x_andComputeJacobian();
 
-	Vector get_x();
-	Vector get_u();
-	Matrix getJacobian_x_u();
-	Matrix getJacobian_u_x();
+	const Vector &get_x();
+	const Vector &get_u();
+	const Matrix &getJacobian_x_u();
+	const Matrix &getJacobian_u_x();
 
-	Vector meanSensitivityOf_x_to_u(Vector &x, int gradNumber);
-	Vector stdvSensitivityOf_x_to_u(Vector &x, int gradNumber);
+	Vector meanSensitivityOf_x_to_u(const Vector &x, int gradNumber);
+	Vector stdvSensitivityOf_x_to_u(const Vector &x, int gradNumber);
 
 protected:
 
@@ -81,9 +81,9 @@ private:
 
 	// Private member functions
 	void setCorrelationMatrix(int pertMeanOfThisRV, int pertStdvOfThisRV, double h);
-	Matrix getJacobian_z_x(Vector x, Vector z);
-	Vector z_to_x(Vector z);
-	Vector x_to_z(Vector x);
+	Matrix getJacobian_z_x(const Vector &x, const Vector &z);
+	Vector z_to_x(const Vector &z);
+	Vector x_to_z(const Vector &x);
 
 	// Auxiliary member functions for manual evaluation of 
 	// the integral equation to find Nataf correlation
@@ -108,10 +108,10 @@ private:
 						  double rho);
 	double residualFunction(double rho_original, 
 						    double rho,
-						    double rv_i, 
+						    int rv_i, 
 						    double mean_i, 
 						    double stdv_i, 
-						    double rv_j, 
+						    int rv_j, 
 						    double mean_j, 
 						    double stdv_j);
 	double solveForCorrelation(int rv_i, int rv_j, double rho_original);

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2004-01-22 01:56:47 $
+// $Revision: 1.4 $
+// $Date: 2007-03-01 17:56:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.cpp,v $
 
 
@@ -112,14 +112,14 @@ NatafProbabilityTransformation::~NatafProbabilityTransformation()
 
 
 int 
-NatafProbabilityTransformation::set_x(Vector passedx)
+NatafProbabilityTransformation::set_x(const Vector &passedx)
 {
 	(*x) = passedx; // (later: check size of vector, etc.)
 	return 0;
 }
 
 int 
-NatafProbabilityTransformation::set_u(Vector passedu)
+NatafProbabilityTransformation::set_u(const Vector &passedu)
 {
 	(*u) = passedu; // (later: check size of vector, etc.)
 	return 0;
@@ -129,14 +129,15 @@ int
 NatafProbabilityTransformation::transform_x_to_u()
 {
 	Vector z = x_to_z(*x);
-	(*u) = (*inverseLowerCholesky) * z;
+	//(*u) = (*inverseLowerCholesky) * z;
+	u->addMatrixVector(0.0, *inverseLowerCholesky, z, 1.0);
 	
 	return 0;
 }
 
 
-Vector 
-NatafProbabilityTransformation::meanSensitivityOf_x_to_u(Vector &x, int rvNumber)
+Vector
+NatafProbabilityTransformation::meanSensitivityOf_x_to_u(const Vector &x, int rvNumber)
 {
 	// Returns the sensitivity of 'u' with respect to [mean, stdv]
 	// for the given random variable number (rvNumber)
@@ -212,17 +213,24 @@ NatafProbabilityTransformation::meanSensitivityOf_x_to_u(Vector &x, int rvNumber
 			<< " for the correlation matrix." << endln;
 	}
 	Matrix PerturbedInverseLowerCholesky = someMatrixOperations.getInverseLowerCholesky();
-	Matrix DinverseLowerCholeskyDmean = (OrigInverseLowerCholesky - PerturbedInverseLowerCholesky) * (1/h);
+	//Matrix DinverseLowerCholeskyDmean = (OrigInverseLowerCholesky - PerturbedInverseLowerCholesky) * (1/h);
+	Matrix DinverseLowerCholeskyDmean(OrigInverseLowerCholesky);
+	DinverseLowerCholeskyDmean.addMatrix(1.0, PerturbedInverseLowerCholesky, -1/h);
 	setCorrelationMatrix(0, 0, 0.0);
 
 	// Return the final result (the four factors)
-	return ( DinverseLowerCholeskyDmean * z + (*inverseLowerCholesky) * DzDmean );
+	//return ( DinverseLowerCholeskyDmean * z + (*inverseLowerCholesky) * DzDmean );
+
+	Vector returnVector(z);
+	returnVector.addMatrixVector(0.0, DinverseLowerCholeskyDmean, z, 1.0);
+	returnVector.addMatrixVector(1.0, (*inverseLowerCholesky), DzDmean, 1.0);
+	return returnVector;
 }
 
 
 
 Vector 
-NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(Vector &x, int rvNumber)
+NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(const Vector &x, int rvNumber)
 {
 	// Returns the sensitivity of 'u' with respect to [mean, stdv]
 	// for the given random variable number (rvNumber)
@@ -299,11 +307,17 @@ NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(Vector &x, int rvNumber
 			<< " for the correlation matrix." << endln;
 	}
 	Matrix PerturbedInverseLowerCholesky = someMatrixOperations.getInverseLowerCholesky();
-	Matrix DinverseLowerCholeskyDstdv = (OrigInverseLowerCholesky - PerturbedInverseLowerCholesky) * (1/h);
+	//Matrix DinverseLowerCholeskyDstdv = (OrigInverseLowerCholesky - PerturbedInverseLowerCholesky) * (1/h);
+	Matrix DinverseLowerCholeskyDstdv(OrigInverseLowerCholesky);
+	DinverseLowerCholeskyDstdv.addMatrix(1.0, PerturbedInverseLowerCholesky, -1/h);
 	setCorrelationMatrix(0, 0, 0.0);
 
 	// Return the final result (the four factors)
-	return ( DinverseLowerCholeskyDstdv * z + (*inverseLowerCholesky) * DzDstdv );
+	//return ( DinverseLowerCholeskyDstdv * z + (*inverseLowerCholesky) * DzDstdv );
+	Vector returnVector(z);
+	returnVector.addMatrixVector(0.0, DinverseLowerCholeskyDstdv, z, 1.0);
+	returnVector.addMatrixVector(1.0, (*inverseLowerCholesky), DzDstdv, 1.0);
+	return returnVector;
 }
 
 
@@ -312,9 +326,10 @@ NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(Vector &x, int rvNumber
 int 
 NatafProbabilityTransformation::transform_u_to_x()
 {
-
-	Vector z = (*lowerCholesky) * (*u);
-	(*x) = z_to_x(z);
+  //Vector z = (*lowerCholesky) * (*u);
+  Vector z(*u);
+  z.addMatrixVector(0.0, *lowerCholesky, *u, 1.0);
+  (*x) = z_to_x(z);
 
 
 	// If user has set print flag to '1' then print realization 
@@ -342,12 +357,15 @@ NatafProbabilityTransformation::transform_u_to_x()
 int 
 NatafProbabilityTransformation::transform_u_to_x_andComputeJacobian()
 {
-	Vector z = (*lowerCholesky) * (*u);
-	(*x) = z_to_x(z);
+  //Vector z = (*lowerCholesky) * (*u);
+  Vector z(*u);
+  z.addMatrixVector(0.0, *lowerCholesky, *u, 1.0);
+  (*x) = z_to_x(z);
 
 
-	Matrix Jzx = getJacobian_z_x((*x),z);
-	(*jacobian_u_x) = (*inverseLowerCholesky) * Jzx;
+  const Matrix &Jzx = getJacobian_z_x((*x),z);
+  //(*jacobian_u_x) = (*inverseLowerCholesky) * Jzx;
+  jacobian_u_x->addMatrixProduct(0.0, (*inverseLowerCholesky), Jzx, 1.0);
 
 
 	int result = theMatrixOperations->setMatrix((*jacobian_u_x));
@@ -393,7 +411,7 @@ NatafProbabilityTransformation::transform_u_to_x_andComputeJacobian()
 
 
 
-Vector 
+const Vector&
 NatafProbabilityTransformation::get_x()
 {
 	return (*x);
@@ -401,7 +419,7 @@ NatafProbabilityTransformation::get_x()
 
 
 
-Vector 
+const Vector&
 NatafProbabilityTransformation::get_u()
 {
 	return (*u);
@@ -409,7 +427,7 @@ NatafProbabilityTransformation::get_u()
 
 
 
-Matrix 
+const Matrix&
 NatafProbabilityTransformation::getJacobian_x_u()
 {
 	return (*jacobian_x_u);
@@ -417,7 +435,7 @@ NatafProbabilityTransformation::getJacobian_x_u()
 
 
 
-Matrix 
+const Matrix&
 NatafProbabilityTransformation::getJacobian_u_x()
 {
 	return (*jacobian_u_x);
@@ -430,7 +448,7 @@ NatafProbabilityTransformation::getJacobian_u_x()
 
 
 Matrix
-NatafProbabilityTransformation::getJacobian_z_x(Vector x, Vector z)
+NatafProbabilityTransformation::getJacobian_z_x(const Vector &x, const Vector &z)
 {	
 	RandomVariable *theRV;
 	NormalRV aStandardNormalRV(1, 0.0, 1.0, 0.0);
@@ -469,7 +487,7 @@ NatafProbabilityTransformation::getJacobian_z_x(Vector x, Vector z)
 
 
 Vector
-NatafProbabilityTransformation::z_to_x(Vector z)
+NatafProbabilityTransformation::z_to_x(const Vector &z)
 {
 	RandomVariable *theRV;
 	NormalRV aStandardNormalRV(1, 0.0, 1.0, 0.0);
@@ -504,7 +522,7 @@ NatafProbabilityTransformation::z_to_x(Vector z)
 
 
 Vector
-NatafProbabilityTransformation::x_to_z(Vector x)
+NatafProbabilityTransformation::x_to_z(const Vector &x)
 {
 	RandomVariable *theRV;
 	NormalRV aStandardNormalRV(1, 0.0, 1.0, 0.0);
@@ -1420,8 +1438,8 @@ NatafProbabilityTransformation::doubleIntegral(int rv_i,
 	double k = (z_jm-z_j0)/(2.0*m);
 
 	// Grid of integration points
-	Vector z_i(2.0*n);
-	Vector z_j(2.0*m);
+	Vector z_i(2*n);
+	Vector z_j(2*m);
 	for (i=1; i<=2*n; i++) {
 		z_i(i-1) = z_i0 + (i-1)*h;
 	}
@@ -1532,10 +1550,10 @@ NatafProbabilityTransformation::doubleIntegral(int rv_i,
 double
 NatafProbabilityTransformation::residualFunction(double rho_original, 
 												 double rho,
-												 double rv_i, 
+												 int rv_i, 
 												 double mean_i, 
 												 double stdv_i, 
-												 double rv_j, 
+												 int rv_j, 
 												 double mean_j, 
 												 double stdv_j)
 {
