@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2007-02-09 00:31:23 $
+// $Revision: 1.22 $
+// $Date: 2007-03-01 19:11:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -207,7 +207,8 @@ int TclReliabilityModelBuilder_inputCheck(ClientData clientData, Tcl_Interp *int
 int TclReliabilityModelBuilder_getMean(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_getStdv(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_rvReduction(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-
+int TclReliabilityModelBuilder_getBetaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_getGammaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 
 //
@@ -258,7 +259,8 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
   Tcl_CreateCommand(interp, "getMean",TclReliabilityModelBuilder_getMean,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "getStdv",TclReliabilityModelBuilder_getStdv,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "rvReduction",TclReliabilityModelBuilder_rvReduction,(ClientData)NULL, NULL);
-
+  Tcl_CreateCommand(interp, "betaFORM",TclReliabilityModelBuilder_getBetaFORM,(ClientData)NULL, NULL);
+  Tcl_CreateCommand(interp, "gammaFORM",TclReliabilityModelBuilder_getGammaFORM,(ClientData)NULL, NULL);
 
   // set the static pointers in this file
   theStructuralDomain	= &passedDomain;
@@ -376,6 +378,8 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
 	Tcl_DeleteCommand(theInterp, "inputCheck");
 	Tcl_DeleteCommand(theInterp, "getMean");
 	Tcl_DeleteCommand(theInterp, "getStdv");
+	Tcl_DeleteCommand(theInterp, "betaFORM");
+	Tcl_DeleteCommand(theInterp, "gammaFORM");
 }
 
 
@@ -5568,3 +5572,69 @@ TclReliabilityModelBuilder_tempCommand(ClientData clientData, Tcl_Interp *interp
 }
 
 
+int 
+TclReliabilityModelBuilder_getBetaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  if (argc < 2) {
+    opserr << "ERROR: Invalid number of arguments to getBetaFORM command." << endln;
+    return TCL_ERROR;
+  }
+
+  int lsfTag;
+  if (Tcl_GetInt(interp, argv[1], &lsfTag) != TCL_OK) {
+    opserr << "WARNING betaFORM lsfTag? - could not read lsfTag\n";
+    return TCL_ERROR;	        
+  }   
+
+  LimitStateFunction *theLSF =
+    theReliabilityDomain->getLimitStateFunctionPtr(lsfTag);
+
+  if (theLSF != 0) {
+    double beta = theLSF->FORMReliabilityIndexBeta;
+    sprintf(interp->result,"%35.20f",beta);
+    return TCL_OK;
+  }
+  else {
+    opserr << "WARNING betaFORM LSF with tag " << lsfTag << " not found\n";
+    return TCL_ERROR;	        
+  }
+}
+
+int 
+TclReliabilityModelBuilder_getGammaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  if (argc < 3) {
+    opserr << "ERROR: Invalid number of arguments to getGammaFORM command." << endln;
+    return TCL_ERROR;
+  }
+
+  int lsfTag, rvTag;
+  if (Tcl_GetInt(interp, argv[1], &lsfTag) != TCL_OK) {
+    opserr << "WARNING gammaFORM lsfTag? rvTag? - could not read lsfTag\n";
+    return TCL_ERROR;	        
+  }   
+  if (Tcl_GetInt(interp, argv[2], &rvTag) != TCL_OK) {
+    opserr << "WARNING gammaFORM lsfTag? rvTag? - could not read rvTag\n";
+    return TCL_ERROR;	        
+  }   
+
+  LimitStateFunction *theLSF =
+    theReliabilityDomain->getLimitStateFunctionPtr(lsfTag);
+
+  if (theLSF == 0) {
+    opserr << "WARNING gammaFORM LSF with tag " << lsfTag << " not found\n";
+    return TCL_ERROR;	        
+  }
+
+  RandomVariable *theRV =
+    theReliabilityDomain->getRandomVariablePtr(rvTag);
+
+  if (theRV == 0) {
+    opserr << "WARNING gammaFORM RV with tag " << rvTag << " not found\n";
+    return TCL_ERROR;	        
+  }
+
+  double gamma = theLSF->importanceVectorGamma(rvTag-1);
+  sprintf(interp->result,"%35.20f",gamma);
+  return TCL_OK;
+}
