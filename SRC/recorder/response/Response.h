@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:50 $
+// $Revision: 1.7 $
+// $Date: 2007-03-02 00:12:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/response/Response.h,v $
                                                                         
 // Written: MHS 
@@ -51,6 +51,7 @@ class Response
   virtual ~Response();
   
   virtual int getResponse(void) = 0;
+  virtual int getResponseSensitivity(int gradNumber) {return 0;}
   virtual Information &getInformation(void);
 
   virtual void Print(OPS_Stream &s, int flag = 0);

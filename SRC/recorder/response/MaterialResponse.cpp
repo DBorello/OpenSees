@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-31 18:26:59 $
+// $Revision: 1.4 $
+// $Date: 2007-03-02 00:12:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/response/MaterialResponse.cpp,v $
                                                                         
 // Written: MHS 
@@ -81,4 +81,10 @@ int
 MaterialResponse::getResponse(void)
 {
 	return theMaterial->getResponse(responseID, myInfo);
+}
+
+int
+MaterialResponse::getResponseSensitivity(int gradNumber)
+{
+  return theMaterial->getResponseSensitivity(responseID, gradNumber, myInfo);
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-13 00:14:44 $
+// $Revision: 1.5 $
+// $Date: 2007-03-02 00:12:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/response/MaterialResponse.h,v $
                                                                         
 // Written: MHS 
@@ -53,6 +53,7 @@ class MaterialResponse : public Response
   ~MaterialResponse();
   
   int getResponse(void);
+  int getResponseSensitivity(int gradNumber);
 
 private:
   Material *theMaterial;

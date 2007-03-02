@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-13 00:14:44 $
+// $Revision: 1.5 $
+// $Date: 2007-03-02 00:12:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/response/ElementResponse.cpp,v $
                                                                         
 // Written: MHS 
@@ -81,4 +81,10 @@ int
 ElementResponse::getResponse(void)
 {
   return theElement->getResponse(responseID, myInfo);
+}
+
+int
+ElementResponse::getResponseSensitivity(int gradNumber)
+{
+  return theElement->getResponseSensitivity(responseID, gradNumber, myInfo);
 }
