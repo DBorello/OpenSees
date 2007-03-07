@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-01-11 00:57:20 $
+// $Revision: 1.8 $
+// $Date: 2007-03-07 00:11:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -1010,6 +1010,7 @@ ShadowSubdomain::setAnalysisAlgorithm(EquiSolnAlgo &theAlgorithm)
     
     this->sendID(msgData);
     this->sendObject(theAlgorithm);
+
     return 0;
 }
 
@@ -1259,9 +1260,12 @@ ShadowSubdomain::newStep(double dT)
 {
     msgData(0) =  ShadowActorSubdomain_newStep;
     this->sendID(msgData);
+
     static Vector timeStep(4);
     timeStep(0) = dT;
+
     this->sendVector(timeStep);
+
     return 0;
 }
 

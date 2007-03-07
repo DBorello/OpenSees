@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-01-11 00:57:20 $
+// $Revision: 1.10 $
+// $Date: 2007-03-07 00:11:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -429,6 +429,7 @@ Subdomain::setAnalysisAlgorithm(EquiSolnAlgo &theAlgorithm)
 {
   if (theAnalysis != 0)
     return theAnalysis->setAlgorithm(theAlgorithm);
+
   return 0;
 }
 
@@ -445,6 +446,7 @@ Subdomain::setAnalysisLinearSOE(LinearSOE &theSOE)
 {
   if (theAnalysis != 0)
     return theAnalysis->setLinearSOE(theSOE);
+
   return 0;
 }
 

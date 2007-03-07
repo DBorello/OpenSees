@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-01-11 00:57:20 $
+// $Revision: 1.8 $
+// $Date: 2007-03-07 00:11:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ActorSubdomain.cpp,v $
                                                                         
 #include <ActorSubdomain.h>
@@ -104,13 +104,11 @@ ActorSubdomain::run(void)
 	    tag = msgData(1); // subdomain tag
 	    this->setTag(tag);
 	    this->Actor::setCommitTag(tag);
-
 	    break;
 
 	  case ShadowActorSubdomain_newStep:
 	    this->recvVector(theVect);
 	    this->newStep(theVect(0));
-
 	    break;
 
 	  case ShadowActorSubdomain_buildSubdomain:
@@ -560,6 +558,7 @@ ActorSubdomain::run(void)
 	case ShadowActorSubdomain_setAnalysisAlgorithm:
 	  theType = msgData(1);
 	  theAlgorithm = theBroker->getNewEquiSolnAlgo(theType);
+
 	  if (theAlgorithm != 0) {
 	    this->recvObject(*theAlgorithm);
 	    this->setAnalysisAlgorithm(*theAlgorithm);
@@ -585,7 +584,7 @@ ActorSubdomain::run(void)
 	  theType = msgData(1);
 	  theOtherType = msgData(2);
 	  theSOE = theBroker->getNewLinearSOE(theType, theOtherType);
-	  
+
 	  if (theSOE != 0) {
 	    this->recvObject(*theSOE);
 	    theSolver = theSOE->getSolver();
