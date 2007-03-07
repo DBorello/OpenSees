@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-01-09 19:32:37 $
+// $Revision: 1.6 $
+// $Date: 2007-03-07 00:10:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/MPI_Channel.cpp,v $
                                                                         
                                                                         
@@ -66,8 +66,6 @@ MPI_Channel::setUpConnection(void)
 ChannelAddress *
 MPI_Channel::getLastSendersAddress(void) 
 {
-  opserr << "MPI_Channel::getLastSendersAddress(void) - ";
-  opserr << " this should not be called - need MPI-2.0 to use\n";
   
   return 0;
 }    
