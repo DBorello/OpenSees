@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2005-11-29 23:36:47 $
+// $Revision: 1.9 $
+// $Date: 2007-03-07 00:07:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DirectIntegrationAnalysis.cpp,v $
                                                                         
                                                                         
@@ -176,6 +176,7 @@ DirectIntegrationAnalysis::analyze(int numSteps, double dT)
   Domain *the_Domain = this->getDomainPtr();
 
     for (int i=0; i<numSteps; i++) {
+
       if (theAnalysisModel->newStepDomain(dT) < 0) {
 	opserr << "DirectIntegrationAnalysis::analyze() - the AnalysisModel failed";
 	opserr << " at time " << the_Domain->getCurrentTime() << endln;
@@ -234,8 +235,6 @@ DirectIntegrationAnalysis::analyze(int numSteps, double dT)
 	theIntegrator->revertToLastStep();
 	return -4;
       } 
-      
-      // opserr << "DirectIntegrationAnalysis - time: " << the_Domain->getCurrentTime() << endln;
     }    
     return result;
 }
@@ -254,37 +253,14 @@ DirectIntegrationAnalysis::domainChanged(void)
     // now we invoke handle() on the constraint handler which
     // causes the creation of FE_Element and DOF_Group objects
     // and their addition to the AnalysisModel.
-
     theConstraintHandler->handle();
+
     // we now invoke number() on the numberer which causes
     // equation numbers to be assigned to all the DOFs in the
     // AnalysisModel.
-
-    // opserr << theAnalysisModel->getDOFGroupGraph();
-
-    /*
-    DOF_GrpIter &theDOFs = theAnalysisModel->getDOFs();
-    DOF_Group *dofPtr;
-    while ((dofPtr = theDOFs()) != 0) 
-      opserr << dofPtr->getID();
-    */
-
     theDOF_Numberer->numberDOF();
 
-
     theConstraintHandler->doneNumberingDOF();
-
-    /*
-    DOF_GrpIter &theDOFs1 = theAnalysisModel->getDOFs();
-    while ((dofPtr = theDOFs1()) != 0) 
-      opserr << dofPtr->getID();
-
-
-    FE_EleIter &theEles = theAnalysisModel->getFEs();    
-    FE_Element *elePtr;
-    while((elePtr = theEles()) != 0)     
-       opserr << elePtr->getID();
-    */
 
     // we invoke setGraph() on the LinearSOE which
     // causes that object to determine its size
@@ -294,7 +270,6 @@ DirectIntegrationAnalysis::domainChanged(void)
     // we invoke domainChange() on the integrator and algorithm
     theIntegrator->domainChanged();
     theAlgorithm->domainChanged();
-
 
     return 0;
 }    
@@ -333,15 +308,7 @@ DirectIntegrationAnalysis::setNumberer(DOF_Numberer &theNewNumberer)
     theDOF_Numberer->setLinks(*theAnalysisModel);
 
     // invoke domainChanged() either indirectly or directly
-    Domain *the_Domain = this->getDomainPtr();
-    int stamp = the_Domain->hasDomainChanged();
-    domainStamp = stamp;
-    result = this->domainChanged();    
-    if (result < 0) {
-      opserr << "StaticAnalysis::setNumberer() - setNumberer() failed";
-      return -1;
-    }	
-
+    domainStamp = 0;
     return 0;
 }
 
@@ -356,26 +323,17 @@ DirectIntegrationAnalysis::setAlgorithm(EquiSolnAlgo &theNewAlgorithm)
 
     // first set the links needed by the Algorithm
     theAlgorithm = &theNewAlgorithm;
+
+
+  if (theAnalysisModel != 0 && theIntegrator != 0 && theSOE != 0)
     theAlgorithm->setLinks(*theAnalysisModel,*theIntegrator,*theSOE);
 
-    // invoke domainChanged() either indirectly or directly
-    Domain *the_Domain = this->getDomainPtr();
-    // check if domain has undergone change
-    int stamp = the_Domain->hasDomainChanged();
-    if (stamp != domainStamp) {
-	domainStamp = stamp;	    
-	if (this->domainChanged() < 0) {
-	    opserr << "DirectIntegrationAnalysis::setAlgorithm() - ";
-	    opserr << "domainChanged failed";
-	    return -1;
-	}	
-    } else {
-	if (theAlgorithm->domainChanged() < 0) {
-	    opserr << "DirectIntegrationAnalysis::setAlgorithm() - ";
-	    opserr << "algorithm::domainChanged() failed";
-	    return -2;
-	}
-    }
+  if (theTest != 0)
+    theAlgorithm->setConvergenceTest(theTest);
+
+  // invoke domainChanged() either indirectly or directly
+  // domainStamp = 0;
+  theAlgorithm->domainChanged();
 
     return 0;
 }
@@ -391,23 +349,9 @@ DirectIntegrationAnalysis::setIntegrator(TransientIntegrator &theNewIntegrator)
   theConstraintHandler->setLinks(*the_Domain,*theAnalysisModel,*theIntegrator);
   theAlgorithm->setLinks(*theAnalysisModel,*theIntegrator,*theSOE);
 
-  // invoke domainChanged() either indirectly or directly
-    int stamp = the_Domain->hasDomainChanged();
-    if (stamp != domainStamp) {
-	domainStamp = stamp;	    
-	if (this->domainChanged() < 0) {
-	  opserr << "DirectIntegrationAnalysis::setAlgorithm() - ";
-	  opserr << "domainChanged failed";
-	  return -1;
-      }	
-  }
-  else {
-      if (theIntegrator->domainChanged() < 0) {
-	  opserr << "DirectIntegrationAnalysis::setAlgorithm() - ";
-	  opserr << "Integrator::domainChanged failed";
-	  return -1;
-      }	
-  }
+  // cause domainChanged to be invoked on next analyze
+  //  domainStamp = 0;
+  theIntegrator->domainChanged();
    
   return 0;
 }
@@ -423,24 +367,8 @@ DirectIntegrationAnalysis::setLinearSOE(LinearSOE &theNewSOE)
   theIntegrator->setLinks(*theAnalysisModel,*theSOE);
   theAlgorithm->setLinks(*theAnalysisModel,*theIntegrator,*theSOE);
 
-  // set the size either indirectly or directly
-  Domain *the_Domain = this->getDomainPtr();
-  int stamp = the_Domain->hasDomainChanged();
-  if (stamp != domainStamp) {
-      domainStamp = stamp;	    
-      if (this->domainChanged() < 0) {
-	  opserr << "DirectIntegrationAnalysis::setAlgorithm() - ";
-	  opserr << "domainChanged failed";
-	  return -1;
-      }	
-  } else {
-      Graph &theGraph = theAnalysisModel->getDOFGraph();
-      if (theSOE->setSize(theGraph) < 0) {
-	  opserr << "DirectIntegrationAnalysis::setAlgorithm() - ";
-	  opserr << "LinearSOE::setSize() failed";
-	  return -2;	
-      }
-  }
+  // cause domainChanged to be invoked on next analyze
+  domainStamp = 0;
   
   return 0;
 }

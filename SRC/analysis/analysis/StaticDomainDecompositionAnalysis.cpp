@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-01-09 19:29:13 $
+// $Revision: 1.6 $
+// $Date: 2007-03-07 00:08:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticDomainDecompositionAnalysis.cpp,v $
                                                                         
 // Written: fmk 
@@ -564,7 +564,6 @@ StaticDomainDecompositionAnalysis::recvSelf(int commitTag, Channel &theChannel,
   }
   theIntegrator->recvSelf(commitTag, theChannel,theBroker);
 
-
   if (theTest == 0 || theTest->getClassTag() != data(7)) {
     if (theTest != 0)
       delete theIntegrator;
@@ -601,15 +600,16 @@ StaticDomainDecompositionAnalysis::setAlgorithm(EquiSolnAlgo &theNewAlgorithm)
   
   // first set the links needed by the Algorithm
   theAlgorithm = &theNewAlgorithm;
+
   if (theAnalysisModel != 0 && theIntegrator != 0 && theSOE != 0)
     theAlgorithm->setLinks(*theAnalysisModel,*theIntegrator,*theSOE);
 
   if (theTest != 0)
     theAlgorithm->setConvergenceTest(theTest);
-  
+
   // invoke domainChanged() either indirectly or directly
-  domainStamp = 0;
-  
+  // domainStamp = 0;
+  theAlgorithm->domainChanged();  
   return 0;
 }
 
@@ -632,8 +632,9 @@ StaticDomainDecompositionAnalysis::setIntegrator(IncrementalIntegrator &theNewIn
   }
 
   // cause domainChanged to be invoked on next analyze
-  domainStamp = 0;
-  
+  //  domainStamp = 0;
+  theIntegrator->domainChanged();  
+
   return 0;
 }
 

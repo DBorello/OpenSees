@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2005-11-29 23:36:47 $
+// $Revision: 1.11 $
+// $Date: 2007-03-07 00:07:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.cpp,v $
                                                                         
                                                                         
@@ -313,6 +313,7 @@ StaticAnalysis::domainChanged(void)
     // finally we invoke domainChanged on the Integrator and Algorithm
     // objects .. informing them that the model has changed
 
+
     result = theIntegrator->domainChanged();
     if (result < 0) {
 	opserr << "StaticAnalysis::setAlgorithm() - ";
@@ -386,7 +387,8 @@ StaticAnalysis::setAlgorithm(EquiSolnAlgo &theNewAlgorithm)
       theTest = theAlgorithm->getConvergenceTest();
     
     // invoke domainChanged() either indirectly or directly
-    domainStamp = 0;
+    //    domainStamp = 0;
+    theAlgorithm->domainChanged();
 
     return 0;
 }
@@ -408,8 +410,9 @@ StaticAnalysis::setIntegrator(StaticIntegrator &theNewIntegrator)
     theAlgorithm->setLinks(*theAnalysisModel,*theIntegrator,*theSOE);
     
     // cause domainChanged to be invoked on next analyze
-    domainStamp = 0;
-  
+    //    domainStamp = 0;
+    theIntegrator->domainChanged();
+
   return 0;
 
 }
