@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.85 $
-// $Date: 2007-02-14 18:46:49 $
+// $Revision: 1.86 $
+// $Date: 2007-03-07 00:09:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -2040,16 +2040,6 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       theStaticAnalysis->setLinearSOE(*theSOE);
     if (theTransientAnalysis != 0)
       theTransientAnalysis->setLinearSOE(*theSOE);
-    
-    return TCL_OK;
-  }
-
-
-  // if the analysis exists - we want to change the SOE
-  if (theStaticAnalysis != 0)
-    theStaticAnalysis->setLinearSOE(*theSOE);
-  else if (theTransientAnalysis != 0)
-    theTransientAnalysis->setLinearSOE(*theSOE);  
 
 #ifdef _PARALLEL_PROCESSING
     if (theStaticAnalysis != 0 || theTransientAnalysis != 0) {
@@ -2060,6 +2050,9 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       }
     }
 #endif
+    
+    return TCL_OK;
+  }
 
   return TCL_ERROR;
 }
@@ -3874,7 +3867,7 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
     }
   } else if (theTransientAnalysis != 0 && theTransientIntegrator != 0) {
     IncrementalIntegrator *theIntegrator;
-    theIntegrator = theStaticIntegrator;
+    theIntegrator = theTransientIntegrator;
     
     SubdomainIter &theSubdomains = theDomain.getSubdomains();
     Subdomain *theSub;
