@@ -11,6 +11,8 @@ foreach gMotion [split [read $recordsFileID] \n] {
 	source analysis.tcl
 	
 	set ok [doGravity]
+
+	loadConst -time 0.0
 	
 	if {$ok == 0} {
 	    set gMotionList [split $gMotion "/"]
@@ -23,10 +25,7 @@ foreach gMotion [split [read $recordsFileID] \n] {
 	    
 	    if {$nPts != 0} {
 		
-		#recorder EnvelopeDrift -file $gMotionDir$gMotionName.out -iNode 1 8 -jNode 8 15 -dof 1 -perpDirn 2
 		recorder EnvelopeNode -file $gMotionDir$gMotionName.out -node 3 4 -dof 1 2 3 disp
-		
-		loadConst -time 0.0;
 		
 		doDynamic [expr $dT*$nPts] $dT
 		
