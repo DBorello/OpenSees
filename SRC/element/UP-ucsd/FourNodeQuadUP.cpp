@@ -9,8 +9,8 @@
 // based on FourNodeQuad element by Michael Scott		  	     //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.5 $
-// $Date: 2007-02-14 00:56:30 $
+// $Revision: 1.6 $
+// $Date: 2007-03-12 21:55:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/FourNodeQuadUP.cpp,v $
 
 #include <FourNodeQuadUP.h>
@@ -41,8 +41,8 @@ Node *FourNodeQuadUP::theNodes[4];
 FourNodeQuadUP::FourNodeQuadUP(int tag, int nd1, int nd2, int nd3, int nd4,
 	NDMaterial &m, const char *type, double t, double bulk, double r,
 		  double p1, double p2, double b1, double b2, double p)
-:Element (tag, ELE_TAG_FourNodeQuadUP), 
-  theMaterial(0), connectedExternalNodes(4), 
+:Element (tag, ELE_TAG_FourNodeQuadUP),
+  theMaterial(0), connectedExternalNodes(4),
   nd1Ptr(0), nd2Ptr(0), nd3Ptr(0), nd4Ptr(0), Ki(0),
   Q(12), pressureLoad(12), thickness(t), kc(bulk), rho(r), pressure(p)
 {
@@ -69,17 +69,17 @@ FourNodeQuadUP::FourNodeQuadUP(int tag, int nd1, int nd2, int nd3, int nd4,
 
     // Allocate arrays of pointers to NDMaterials
     theMaterial = new NDMaterial *[4];
-    
+
     if (theMaterial == 0) {
       opserr << "FourNodeQuadUP::FourNodeQuadUP - failed allocate material model pointer\n";
       exit(-1);
     }
 
     for (int i = 0; i < 4; i++) {
-      
+
       // Get copies of the material model for each integration point
       theMaterial[i] = m.getCopy(type);
-      
+
       // Check allocation
       if (theMaterial[i] == 0) {
 	opserr << "FourNodeQuadUP::FourNodeQuadUP -- failed to get a copy of material model\n";
@@ -93,10 +93,10 @@ FourNodeQuadUP::FourNodeQuadUP(int tag, int nd1, int nd2, int nd3, int nd4,
     connectedExternalNodes(2) = nd3;
     connectedExternalNodes(3) = nd4;
 }
- 
+
 FourNodeQuadUP::FourNodeQuadUP()
 :Element (0,ELE_TAG_FourNodeQuadUP),
-  theMaterial(0), connectedExternalNodes(4), 
+  theMaterial(0), connectedExternalNodes(4),
  nd1Ptr(0), nd2Ptr(0), nd3Ptr(0), nd4Ptr(0), Ki(0),
   Q(12), pressureLoad(12), thickness(0.0), kc(0.0), rho(0.0), pressure(0.0)
 {
@@ -116,7 +116,7 @@ FourNodeQuadUP::FourNodeQuadUP()
 }
 
 FourNodeQuadUP::~FourNodeQuadUP()
-{    
+{
     for (int i = 0; i < 4; i++) {
 		if (theMaterial[i])
 			delete theMaterial[i];
@@ -184,7 +184,7 @@ FourNodeQuadUP::setDomain(Domain *theDomain)
     if (nd1Ptr == 0 || nd2Ptr == 0 || nd3Ptr == 0 || nd4Ptr == 0) {
 	//opserr << "FATAL ERROR FourNodeQuadUP (tag: %d), node not found in domain",
 	//	this->getTag());
-	
+
 	return;
     }
 
@@ -192,11 +192,11 @@ FourNodeQuadUP::setDomain(Domain *theDomain)
     int dofNd2 = nd2Ptr->getNumberDOF();
     int dofNd3 = nd3Ptr->getNumberDOF();
     int dofNd4 = nd4Ptr->getNumberDOF();
-    
+
     if (dofNd1 != 3 || dofNd2 != 3 || dofNd3 != 3 || dofNd4 != 3) {
 	//opserr << "FATAL ERROR FourNodeQuadUP (tag: %d), has differing number of DOFs at its nodes",
 	//	this->getTag());
-	
+
 	return;
     }
     this->DomainComponent::setDomain(theDomain);
@@ -213,7 +213,7 @@ FourNodeQuadUP::commitState()
     // call element commitState to do any base class stuff
     if ((retVal = this->Element::commitState()) != 0) {
       opserr << "FourNodeQuad_UP::commitState () - failed in base class";
-    }    
+    }
 
     // Loop over the integration points and commit the material states
     for (int i = 0; i < 4; i++)
@@ -253,7 +253,7 @@ FourNodeQuadUP::update()
 	const Vector &disp2 = nd2Ptr->getTrialDisp();
 	const Vector &disp3 = nd3Ptr->getTrialDisp();
 	const Vector &disp4 = nd4Ptr->getTrialDisp();
-	  
+
 	static double u[2][4];
 
 	u[0][0] = disp1(0);
@@ -303,32 +303,32 @@ FourNodeQuadUP::getTangentStiff()
 
   // Determine Jacobian for this integration point
   this->shapeFunction();
-  
+
   // Loop over the integration points
   for (int i = 0; i < 4; i++) {
-    
+
     // Get the material tangent
     const Matrix &D = theMaterial[i]->getTangent();
-    
+
     // Perform numerical integration
     //K = K + (B^ D * B) * intWt(i)*intWt(j) * detJ;
     //K.addMatrixTripleProduct(1.0, B, D, intWt(i)*intWt(j)*detJ);
     for (int alpha = 0, ia = 0; alpha < 4; alpha++, ia += 3) {
-      
+
       for (int beta = 0, ib = 0; beta < 4; beta++, ib += 3) {
-	
+
 	DB[0][0] = dvol[i] * (D(0,0)*shp[0][beta][i] + D(0,2)*shp[1][beta][i]);
 	DB[1][0] = dvol[i] * (D(1,0)*shp[0][beta][i] + D(1,2)*shp[1][beta][i]);
 	DB[2][0] = dvol[i] * (D(2,0)*shp[0][beta][i] + D(2,2)*shp[1][beta][i]);
 	DB[0][1] = dvol[i] * (D(0,1)*shp[1][beta][i] + D(0,2)*shp[0][beta][i]);
 	DB[1][1] = dvol[i] * (D(1,1)*shp[1][beta][i] + D(1,2)*shp[0][beta][i]);
 	DB[2][1] = dvol[i] * (D(2,1)*shp[1][beta][i] + D(2,2)*shp[0][beta][i]);
-	
+
 	K(ia,ib) += shp[0][alpha][i]*DB[0][0] + shp[1][alpha][i]*DB[2][0];
 	K(ia,ib+1) += shp[0][alpha][i]*DB[0][1] + shp[1][alpha][i]*DB[2][1];
 	K(ia+1,ib) += shp[1][alpha][i]*DB[1][0] + shp[0][alpha][i]*DB[2][0];
 	K(ia+1,ib+1) += shp[1][alpha][i]*DB[1][1] + shp[0][alpha][i]*DB[2][1];
-	
+
       }
     }
   }
@@ -336,7 +336,7 @@ FourNodeQuadUP::getTangentStiff()
 }
 
 
-const Matrix &FourNodeQuadUP::getInitialStiff () 
+const Matrix &FourNodeQuadUP::getInitialStiff ()
 {
   if (Ki != 0) return *Ki;
 
@@ -346,32 +346,32 @@ const Matrix &FourNodeQuadUP::getInitialStiff ()
 
   // Determine Jacobian for this integration point
   this->shapeFunction();
-  
+
   // Loop over the integration points
   for (int i = 0; i < 4; i++) {
-    
+
     // Get the material tangent
     const Matrix &D = theMaterial[i]->getInitialTangent();
-    
+
     // Perform numerical integration
     //K = K + (B^ D * B) * intWt(i)*intWt(j) * detJ;
     //K.addMatrixTripleProduct(1.0, B, D, intWt(i)*intWt(j)*detJ);
     for (int alpha = 0, ia = 0; alpha < 4; alpha++, ia += 3) {
-      
+
       for (int beta = 0, ib = 0; beta < 4; beta++, ib += 3) {
-	
+
 	DB[0][0] = dvol[i] * (D(0,0)*shp[0][beta][i] + D(0,2)*shp[1][beta][i]);
 	DB[1][0] = dvol[i] * (D(1,0)*shp[0][beta][i] + D(1,2)*shp[1][beta][i]);
 	DB[2][0] = dvol[i] * (D(2,0)*shp[0][beta][i] + D(2,2)*shp[1][beta][i]);
 	DB[0][1] = dvol[i] * (D(0,1)*shp[1][beta][i] + D(0,2)*shp[0][beta][i]);
 	DB[1][1] = dvol[i] * (D(1,1)*shp[1][beta][i] + D(1,2)*shp[0][beta][i]);
 	DB[2][1] = dvol[i] * (D(2,1)*shp[1][beta][i] + D(2,2)*shp[0][beta][i]);
-	
+
 	K(ia,ib) += shp[0][alpha][i]*DB[0][0] + shp[1][alpha][i]*DB[2][0];
 	K(ia,ib+1) += shp[0][alpha][i]*DB[0][1] + shp[1][alpha][i]*DB[2][1];
 	K(ia+1,ib) += shp[1][alpha][i]*DB[1][0] + shp[0][alpha][i]*DB[2][0];
 	K(ia+1,ib+1) += shp[1][alpha][i]*DB[1][1] + shp[0][alpha][i]*DB[2][1];
-	
+
       }
     }
   }
@@ -381,8 +381,8 @@ const Matrix &FourNodeQuadUP::getInitialStiff ()
     opserr << "FATAL FourNodeQuadUP::getInitialStiff() -";
     opserr << "ran out of memory\n";
     exit(-1);
-  }  
-    
+  }
+
   return *Ki;
 }
 
@@ -391,13 +391,13 @@ FourNodeQuadUP::getDamp()
 {
   static Matrix Kdamp(12,12);
   Kdamp.Zero();
-  
+
   if (betaK != 0.0)
-    Kdamp.addMatrix(1.0, this->getTangentStiff(), betaK);      
+    Kdamp.addMatrix(1.0, this->getTangentStiff(), betaK);
   if (betaK0 != 0.0)
-    Kdamp.addMatrix(1.0, this->getInitialStiff(), betaK0);      
+    Kdamp.addMatrix(1.0, this->getInitialStiff(), betaK0);
   if (betaKc != 0.0)
-    Kdamp.addMatrix(1.0, *Kc, betaKc);      
+    Kdamp.addMatrix(1.0, *Kc, betaKc);
 
   int i, j, m, i1, j1;
 
@@ -408,7 +408,7 @@ FourNodeQuadUP::getDamp()
         Kdamp(i,j) += K(i,j)*alphaM;
         Kdamp(i+1,j+1) += K(i+1,j+1)*alphaM;
 	  }
-    }  
+    }
   }
 
   // Determine Jacobian for this integration point
@@ -430,13 +430,13 @@ FourNodeQuadUP::getDamp()
       Kdamp(j,i+1) = Kdamp(i+1,j);
     }
   }
-  
+
   // Compute permeability matrix
   for (i = 2; i < 12; i += 3) {
     int i1 = (i-2) / 3;
     for (j = 2; j < 12; j += 3) {
       int j1 = (j-2) / 3;
-      //K(i,j) = - (vol*perm[0]*shpBar[0][i1]*shpBar[0][j1] + 
+      //K(i,j) = - (vol*perm[0]*shpBar[0][i1]*shpBar[0][j1] +
 		//  vol*perm[1]*shpBar[1][i1]*shpBar[1][j1]);
       for (m = 0; m < 4; m++) {
 	    Kdamp(i,j) += - dvol[m]*(perm[0]*shp[0][i1][m]*shp[0][j1][m] +
@@ -453,26 +453,26 @@ const Matrix&
 FourNodeQuadUP::getMass()
 {
   K.Zero();
-  
+
   int i, j, m, i1, j1;
   double Nrho;
-  
+
   // Determine Jacobian for this integration point
   this->shapeFunction();
-  
-  
+
+
   // Compute an ad hoc lumped mass matrix
   /*for (i = 0; i < 4; i++) {
-    
-    // average material density 
+
+    // average material density
     tmp = mixtureRho(i);
-    
+
     for (int alpha = 0, ia = 0; alpha < 4; alpha++, ia += 3) {
       Nrho = shp[2][alpha][i]*dvol[i]*tmp;
       K(ia,ia) += Nrho;
       K(ia+1,ia+1) += Nrho;
     }
-  }*/ 
+  }*/
 
     // Compute consistent mass matrix
   for (i = 0, i1 = 0; i < 12; i += 3, i1++) {
@@ -484,11 +484,11 @@ FourNodeQuadUP::getMass()
     }
     }
   }
-  
+
   // Compute compressibility matrix
   double vol = dvol[0] + dvol[1] + dvol[2] + dvol[3];
   double oneOverKc = 1./kc;
-  
+
   for (i = 2; i < 12; i += 3) {
     i1 = (i-2) / 3;
     for (j = 2; j < 12; j += 3) {
@@ -515,7 +515,7 @@ FourNodeQuadUP::zeroLoad(void)
 	return;
 }
 
-int 
+int
 FourNodeQuadUP::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
   opserr << "FourNodeQuadUP::addLoad - load type unknown for ele with tag: " << this->getTag() << "\n";
@@ -523,7 +523,7 @@ FourNodeQuadUP::addLoad(ElementalLoad *theLoad, double loadFactor)
 }
 
 
-int 
+int
 FourNodeQuadUP::addInertiaLoadToUnbalance(const Vector &accel)
 {
   // accel = uDotDotG (see EarthquakePattern.cpp)
@@ -532,15 +532,15 @@ FourNodeQuadUP::addInertiaLoadToUnbalance(const Vector &accel)
   const Vector &Raccel2 = nd2Ptr->getRV(accel);
   const Vector &Raccel3 = nd3Ptr->getRV(accel);
   const Vector &Raccel4 = nd4Ptr->getRV(accel);
-  
+
   if (3 != Raccel1.Size() || 3 != Raccel2.Size() || 3 != Raccel3.Size() ||
       3 != Raccel4.Size()) {
     opserr << "FourNodeQuadUP::addInertiaLoadToUnbalance matrix and vector sizes are incompatable\n";
     return -1;
   }
-  
+
   double ra[12];
-  
+
   ra[0] = Raccel1(0);
   ra[1] = Raccel1(1);
   ra[2] = 0.;
@@ -556,15 +556,15 @@ FourNodeQuadUP::addInertiaLoadToUnbalance(const Vector &accel)
 
   // Compute mass matrix
   this->getMass();
-  
+
   // Want to add ( - fact * M R * accel ) to unbalance
   int i, j;
-  
+
   for (i = 0; i < 12; i++) {
     for (j = 0; j < 12; j++)
       Q(i) += -K(i,j)*ra[j];
   }
-  
+
   return 0;
 }
 
@@ -572,7 +572,7 @@ const Vector&
 FourNodeQuadUP::getResistingForce()
 {
   P.Zero();
-  
+
   // Determine Jacobian for this integration point
   this->shapeFunction();
   double vol = dvol[0] + dvol[1] + dvol[2] + dvol[3];
@@ -583,26 +583,26 @@ FourNodeQuadUP::getResistingForce()
 
     // Get material stress response
     const Vector &sigma = theMaterial[i]->getStress();
-    
+
     // Perform numerical integration on internal force
     //P = P + (B^ sigma) * intWt(i)*intWt(j) * detJ;
     //P.addMatrixTransposeVector(1.0, B, sigma, intWt(i)*intWt(j)*detJ);
     for (int alpha = 0, ia = 0; alpha < 4; alpha++, ia += 3) {
-      
+
       P(ia) += dvol[i]*(shp[0][alpha][i]*sigma(0) + shp[1][alpha][i]*sigma(2));
-      
+
       P(ia+1) += dvol[i]*(shp[1][alpha][i]*sigma(1) + shp[0][alpha][i]*sigma(2));
-      
+
       // Subtract equiv. body forces from the nodes
       //P = P - (N^ b) * intWt(i)*intWt(j) * detJ;
       //P.addMatrixTransposeVector(1.0, N, b, -intWt(i)*intWt(j)*detJ);
-      
+
       double r = mixtureRho(i);
       P(ia) -= dvol[i]*(shp[2][alpha][i]*r*b[0]);
       P(ia+1) -= dvol[i]*(shp[2][alpha][i]*r*b[1]);
     }
   }
-  
+
   // Subtract fluid body force
   for (int alpha = 0, ia = 0; alpha < 4; alpha++, ia += 3) {
     //P(ia+2) += vol*rho*(perm[0]*b[0]*shpBar[0][alpha]
@@ -612,17 +612,17 @@ FourNodeQuadUP::getResistingForce()
       perm[1]*b[1]*shp[1][alpha][i]);
     }
   }
-  
+
   // Subtract pressure loading from resisting force
   if (pressure != 0.0) {
     //P = P + pressureLoad;
     P.addVector(1.0, pressureLoad, -1.0);
   }
-  
+
   // Subtract other external nodal loads ... P_res = P_int - P_ext
   //P = P - Q;
   P.addVector(1.0, Q, -1.0);
-  
+
   return P;
 }
 
@@ -630,14 +630,14 @@ const Vector&
 FourNodeQuadUP::getResistingForceIncInertia()
 {
   int i, j, k;
-  
+
   const Vector &accel1 = nd1Ptr->getTrialAccel();
   const Vector &accel2 = nd2Ptr->getTrialAccel();
   const Vector &accel3 = nd3Ptr->getTrialAccel();
   const Vector &accel4 = nd4Ptr->getTrialAccel();
-	
+
   static double a[12];
-  
+
   a[0] = accel1(0);
   a[1] = accel1(1);
   a[2] = accel1(2);
@@ -650,20 +650,20 @@ FourNodeQuadUP::getResistingForceIncInertia()
   a[9] = accel4(0);
   a[10] = accel4(1);
   a[11] = accel4(2);
-  
+
   // Compute the current resisting force
   this->getResistingForce();
   //opserr<<"K "<<P<<endln;
-  
+
   // Compute the mass matrix
   this->getMass();
-  
+
   for (i = 0; i < 12; i++) {
     for (j = 0; j < 12; j++)
       P(i) += K(i,j)*a[j];
   }
-  //opserr<<"K+M "<<P<<endln; 
-   
+  //opserr<<"K+M "<<P<<endln;
+
   // dynamic seepage force
   /*for (i = 0, k = 0; i < 4; i++, k += 3) {
     // loop over integration points
@@ -673,12 +673,12 @@ FourNodeQuadUP::getResistingForceIncInertia()
     }
   }*/
   //opserr<<"K+M+fb "<<P<<endln;
-  
+
   const Vector &vel1 = nd1Ptr->getTrialVel();
   const Vector &vel2 = nd2Ptr->getTrialVel();
   const Vector &vel3 = nd3Ptr->getTrialVel();
   const Vector &vel4 = nd4Ptr->getTrialVel();
-  
+
   a[0] = vel1(0);
   a[1] = vel1(1);
   a[2] = vel1(2);
@@ -691,9 +691,9 @@ FourNodeQuadUP::getResistingForceIncInertia()
   a[9] = vel4(0);
   a[10] = vel4(1);
   a[11] = vel4(2);
-  
+
   this->getDamp();
-  
+
   for (i = 0; i < 12; i++) {
     for (j = 0; j < 12; j++) {
       P(i) += K(i,j)*a[j];
@@ -707,63 +707,67 @@ int
 FourNodeQuadUP::sendSelf(int commitTag, Channel &theChannel)
 {
   int res = 0;
-  
+
   // note: we don't check for dataTag == 0 for Element
   // objects as that is taken care of in a commit by the Domain
   // object - don't want to have to do the check if sending data
   int dataTag = this->getDbTag();
-  
+
   // Quad packs its data into a Vector and sends this to theChannel
 	// along with its dbTag and the commitTag passed in the arguments
-  static Vector data(9);
+  static Vector data(13);
   data(0) = this->getTag();
   data(1) = thickness;
   data(2) = rho;
   data(3) = b[0];
   data(4) = b[1];
   data(5) = pressure;
-  data(6) = kc;
-  data(7) = perm[0];
-  data(8) = perm[1];
-  
+
+  data(6) = alphaM;
+  data(7) = betaK;
+  data(8) = betaK0;
+  data(9) = betaKc;
+
+  data(10) = kc;
+  data(11) = perm[0];
+  data(12) = perm[1];
+
   res += theChannel.sendVector(dataTag, commitTag, data);
   if (res < 0) {
     opserr << "WARNING FourNodeQuadUP::sendSelf() - " << this->getTag() << " failed to send Vector\n";
     return res;
-  }	      
-  
-  // Quad then sends the tags of its four end nodes
-  res += theChannel.sendID(dataTag, commitTag, connectedExternalNodes);
-  if (res < 0) {
-    opserr << "WARNING FourNodeQuadUP::sendSelf() - " << this->getTag() << " failed to send ID\n";
-    return res;
   }
-  
+
   // Now quad sends the ids of its materials
   int matDbTag;
-  int numMats = 4;
-  ID classTags(2*numMats);
-  
+
+  static ID idData(12);
+
   int i;
   for (i = 0; i < 4; i++) {
-    classTags(i) = theMaterial[i]->getClassTag();
+    idData(i) = theMaterial[i]->getClassTag();
     matDbTag = theMaterial[i]->getDbTag();
     // NOTE: we do have to ensure that the material has a database
     // tag if we are sending to a database channel.
     if (matDbTag == 0) {
       matDbTag = theChannel.getDbTag();
-      if (matDbTag != 0)
-	theMaterial[i]->setDbTag(matDbTag);
+			if (matDbTag != 0)
+			  theMaterial[i]->setDbTag(matDbTag);
     }
-    classTags(i+numMats) = matDbTag;
+    idData(i+4) = matDbTag;
   }
-  
-  res += theChannel.sendID(dataTag, commitTag, classTags);
+
+  idData(8) = connectedExternalNodes(0);
+  idData(9) = connectedExternalNodes(1);
+  idData(10) = connectedExternalNodes(2);
+  idData(11) = connectedExternalNodes(3);
+
+  res += theChannel.sendID(dataTag, commitTag, idData);
   if (res < 0) {
     opserr << "WARNING FourNodeQuadUP::sendSelf() - " << this->getTag() << " failed to send ID\n";
     return res;
   }
-  
+
   // Finally, quad asks its material objects to send themselves
   for (i = 0; i < 4; i++) {
     res += theMaterial[i]->sendSelf(commitTag, theChannel);
@@ -772,7 +776,7 @@ FourNodeQuadUP::sendSelf(int commitTag, Channel &theChannel)
       return res;
     }
   }
-  
+
   return res;
 }
 
@@ -781,108 +785,100 @@ FourNodeQuadUP::recvSelf(int commitTag, Channel &theChannel,
 						FEM_ObjectBroker &theBroker)
 {
   int res = 0;
-  
+
   int dataTag = this->getDbTag();
-  
-  // Quad creates a Vector, receives the Vector and then sets the 
+
+  // Quad creates a Vector, receives the Vector and then sets the
   // internal data with the data in the Vector
-  static Vector data(9);
+  static Vector data(13);
   res += theChannel.recvVector(dataTag, commitTag, data);
   if (res < 0) {
     opserr << "WARNING FourNodeQuadUP::recvSelf() - failed to receive Vector\n";
     return res;
   }
-  
+
   this->setTag((int)data(0));
   thickness = data(1);
   rho = data(2);
   b[0] = data(3);
   b[1] = data(4);
   pressure = data(5);
-  kc = data(6);
-  perm[0] = data(7);
-  perm[1] = data(8);
 
+  alphaM = data(6);
+  betaK = data(7);
+  betaK0 = data(8);
+  betaKc = data(9);
+
+  kc = data(10);
+  perm[0] = data(11);
+  perm[1] = data(12);
+
+  static ID idData(12);
   // Quad now receives the tags of its four external nodes
-  res += theChannel.recvID(dataTag, commitTag, connectedExternalNodes);
+  res += theChannel.recvID(dataTag, commitTag, idData);
   if (res < 0) {
     opserr << "WARNING FourNodeQuadUP::recvSelf() - " << this->getTag() << " failed to receive ID\n";
     return res;
   }
 
-  // Quad now receives the ids of its materials
-  int newOrder = 4;
-  int numMats = newOrder;
-  ID classTags(2*numMats);
+  connectedExternalNodes(0) = idData(8);
+  connectedExternalNodes(1) = idData(9);
+  connectedExternalNodes(2) = idData(10);
+  connectedExternalNodes(3) = idData(11);
 
-  res += theChannel.recvID(dataTag, commitTag, classTags);
-  if (res < 0)  {
-    opserr << "FourNodeQuadUP::recvSelf() - failed to recv ID data\n";
-    return res;
-  }    
 
-  int i;
-  
-  // If the number of materials (quadrature order) is not the same,
-  // delete the old materials, allocate new ones and then receive
-  if (4 != newOrder) {
-		// Delete the materials
-    for (i = 0; i < 4; i++) {
-      if (theMaterial[i])
-	delete theMaterial[i];
-		}
-    if (theMaterial)
-      delete [] theMaterial;
-    
+  if (theMaterial == 0) {
     // Allocate new materials
     theMaterial = new NDMaterial *[4];
     if (theMaterial == 0) {
       opserr << "FourNodeQuadUP::recvSelf() - Could not allocate NDMaterial* array\n";
       return -1;
     }
-    for (i = 0; i < 4; i++) {
-      int matClassTag = classTags(i);
-      int matDbTag = classTags(i+numMats);
+    for (int i = 0; i < 4; i++) {
+      int matClassTag = idData(i);
+      int matDbTag = idData(i+4);
       // Allocate new material with the sent class tag
       theMaterial[i] = theBroker.getNewNDMaterial(matClassTag);
       if (theMaterial[i] == 0) {
-	opserr << "FourNodeQuadUP::recvSelf() - Broker could not create NDMaterial of class type" << matClassTag << endln;
+	opserr << "FourNodeQuadUP::recvSelf() - Broker could not create NDMaterial of class type " << matClassTag << endln;
 	return -1;
       }
       // Now receive materials into the newly allocated space
       theMaterial[i]->setDbTag(matDbTag);
       res += theMaterial[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	opserr << "NLBeamColumn3d::recvSelf() - material " << i << "failed to recv itself\n";
+opserr << "FourNodeQuadUP::recvSelf() - material " << i << "failed to recv itself\n";
 	return res;
       }
     }
   }
-  // Number of materials is the same, receive materials into current space
+
+  // materials exist , ensure materials of correct type and recvSelf on them
   else {
-    for (i = 0; i < 4; i++) {
-      int matClassTag = classTags(i);
-      int matDbTag = classTags(i+numMats);
+    for (int i = 0; i < 4; i++) {
+      int matClassTag = idData(i);
+      int matDbTag = idData(i+4);
       // Check that material is of the right type; if not,
       // delete it and create a new one of the right type
       if (theMaterial[i]->getClassTag() != matClassTag) {
 	delete theMaterial[i];
 	theMaterial[i] = theBroker.getNewNDMaterial(matClassTag);
 	if (theMaterial[i] == 0) {
-	  opserr << "FourNodeQuadUP::recvSelf() - Broker could not create NDMaterial of class type " << matClassTag << endln;
-	  exit(-1);
+opserr << "FourNodeQuadUP::recvSelf() - material " << i << "failed to create\n";
+
+	  return -1;
 	}
       }
       // Receive the material
       theMaterial[i]->setDbTag(matDbTag);
       res += theMaterial[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	opserr << "FourNodeQuadUP::recvSelf() - material " << i << "failed to recv itself\n";
+opserr << "FourNodeQuadUP::recvSelf() - material " << i << "failed to recv itself\n";
 	return res;
       }
     }
   }
-  
+
   return res;
 }
 
@@ -923,9 +919,9 @@ FourNodeQuadUP::displaySelf(Renderer &theViewer, int displayMode, float fact)
     // the display factor (a measure of the distorted image)
     // store this information in 4 3d vectors v1 through v4
     const Vector &end1Crd = nd1Ptr->getCrds();
-    const Vector &end2Crd = nd2Ptr->getCrds();	
-    const Vector &end3Crd = nd3Ptr->getCrds();	
-    const Vector &end4Crd = nd4Ptr->getCrds();	
+    const Vector &end2Crd = nd2Ptr->getCrds();
+    const Vector &end3Crd = nd3Ptr->getCrds();
+    const Vector &end4Crd = nd4Ptr->getCrds();
 
     const Vector &end1Disp = nd1Ptr->getDisp();
     const Vector &end2Disp = nd2Ptr->getDisp();
@@ -936,9 +932,9 @@ FourNodeQuadUP::displaySelf(Renderer &theViewer, int displayMode, float fact)
 
     for (int i = 0; i < 2; i++) {
       coords(0,i) = end1Crd(i) + end1Disp(i)*fact;
-      coords(1,i) = end2Crd(i) + end2Disp(i)*fact;    
-      coords(2,i) = end3Crd(i) + end3Disp(i)*fact;    
-      coords(3,i) = end4Crd(i) + end4Disp(i)*fact;    
+      coords(1,i) = end2Crd(i) + end2Disp(i)*fact;
+      coords(2,i) = end3Crd(i) + end3Disp(i)*fact;
+      coords(3,i) = end4Crd(i) + end4Disp(i)*fact;
     }
 
     int error = 0;
@@ -990,7 +986,7 @@ FourNodeQuadUP::setResponse(const char **argv, int argc, OPS_Stream &output)
       output.attr("number",pointNum);
 
       theResponse =  theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, output);
-      
+
       output.endTag(); // GaussPoint
     }
   }
@@ -999,22 +995,22 @@ FourNodeQuadUP::setResponse(const char **argv, int argc, OPS_Stream &output)
   return theResponse;
 }
 
-int 
+int
 FourNodeQuadUP::getResponse(int responseID, Information &eleInfo)
 {
   switch (responseID) {
-    
+
   case 1:
     return eleInfo.setVector(this->getResistingForce());
-      
+
   case 2:
     return eleInfo.setMatrix(this->getTangentStiff());
-    
-  default: 
+
+  default:
     return -1;
   }
 }
- 
+
 int
 FourNodeQuadUP::setParameter(const char **argv, int argc, Parameter &param)
 {
@@ -1031,30 +1027,30 @@ FourNodeQuadUP::setParameter(const char **argv, int argc, Parameter &param)
 
   // a material parameter
   else if (strstr(argv[0],"material") != 0) {
-    
+
     if (argc < 3)
       return -1;
-    
+
     int pointNum = atoi(argv[1]);
     if (pointNum > 0 && pointNum <= 4)
       return theMaterial[pointNum-1]->setParameter(&argv[2], argc-2, param);
-    else 
+    else
       return -1;
   }
-  
+
   // otherwise parameter is unknown for the Truss class
   else
     return -1;
-  
+
 }
-    
+
 int
 FourNodeQuadUP::updateParameter(int parameterID, Information &info)
 {
   switch (parameterID) {
     case -1:
       return -1;
-      
+
 	case 1:
 		rho = info.theDouble;
 		this->getMass();	// update mass matrix
@@ -1063,7 +1059,7 @@ FourNodeQuadUP::updateParameter(int parameterID, Information &info)
 		pressure = info.theDouble;
 		this->setPressureLoadAtNodes();	// update consistent nodal loads
 		return 0;
-	default: 
+	default:
 		if (parameterID >= 100) { // material parameter
 			int pointNum = parameterID/100;
 			if (pointNum > 0 && pointNum <= 4)
@@ -1092,8 +1088,8 @@ void FourNodeQuadUP::shapeFunction(void)
 
 	// loop over integration points
 	for (int i=0; i<4; i++) {
-		xi = pts[i][0]; 
-		eta = pts[i][1]; 
+		xi = pts[i][0];
+		eta = pts[i][1];
 	  const Vector &nd1Crds = nd1Ptr->getCrds();
 	  const Vector &nd2Crds = nd2Ptr->getCrds();
 	  const Vector &nd3Crds = nd3Ptr->getCrds();
@@ -1134,7 +1130,7 @@ void FourNodeQuadUP::shapeFunction(void)
     L10 = 0.25*L[1][0];
     L01 = 0.25*L[0][1];
     L11 = 0.25*L[1][1];
-	
+
 	  L00oneMinuseta = L00*oneMinuseta;
 	  L00onePluseta  = L00*onePluseta;
 	  L01oneMinusxi  = L01*oneMinusxi;
@@ -1150,7 +1146,7 @@ void FourNodeQuadUP::shapeFunction(void)
     shp[0][1][i] =  L00oneMinuseta - L01onePlusxi;		// N_2,1
     shp[0][2][i] =  L00onePluseta  + L01onePlusxi;		// N_3,1
     shp[0][3][i] = -L00onePluseta  + L01oneMinusxi;	// N_4,1
-	
+
     shp[1][0][i] = -L10oneMinuseta - L11oneMinusxi;	// N_1,2
     shp[1][1][i] =  L10oneMinuseta - L11onePlusxi;		// N_2,2
     shp[1][2][i] =  L10onePluseta  + L11onePlusxi;		// N_3,2
@@ -1158,7 +1154,7 @@ void FourNodeQuadUP::shapeFunction(void)
 
 		dvol[i] = detJ * thickness * wts[i];
     vol += dvol[i];
-      
+
 	  for (k=0; k<3; k++) {
 		  for (l=0; l<4; l++) {
 		    shpBar[k][l] += shp[k][l][i] * dvol[i];

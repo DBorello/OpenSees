@@ -114,27 +114,27 @@ const int TwentyEightNodeBrickUP::nenu=20;
 
 const int TwentyEightNodeBrickUP::nenp=8;
 
-double TwentyEightNodeBrickUP::shgu[4][20][27];	
+double TwentyEightNodeBrickUP::shgu[4][20][27];
 
 double TwentyEightNodeBrickUP::shgp[4][8][8];
 
-double TwentyEightNodeBrickUP::shgq[4][20][8];	
+double TwentyEightNodeBrickUP::shgq[4][20][8];
 
-double TwentyEightNodeBrickUP::shlu[4][20][27];	
+double TwentyEightNodeBrickUP::shlu[4][20][27];
 
 double TwentyEightNodeBrickUP::shlp[4][8][8];
 
-double TwentyEightNodeBrickUP::shlq[4][20][8];	
+double TwentyEightNodeBrickUP::shlq[4][20][8];
 
-double TwentyEightNodeBrickUP::wu[27];	
+double TwentyEightNodeBrickUP::wu[27];
 
-double TwentyEightNodeBrickUP::wp[8];	
+double TwentyEightNodeBrickUP::wp[8];
 
-double TwentyEightNodeBrickUP::dvolu[27]; 
+double TwentyEightNodeBrickUP::dvolu[27];
 
-double TwentyEightNodeBrickUP::dvolp[8];  
+double TwentyEightNodeBrickUP::dvolp[8];
 
-double TwentyEightNodeBrickUP::dvolq[8];  
+double TwentyEightNodeBrickUP::dvolq[8];
 
 
 
@@ -142,7 +142,7 @@ double TwentyEightNodeBrickUP::dvolq[8];
 
 TwentyEightNodeBrickUP::TwentyEightNodeBrickUP( ) :
 
-Element( 0, ELE_TAG_Twenty_Eight_Node_BrickUP ),
+Element( 0, ELE_TAG_Twenty_Eight_Node_BrickUP ), materialPointers(0),
 
 connectedExternalNodes(20), load(0), Ki(0), kc(0), rho(0)
 
@@ -158,7 +158,7 @@ connectedExternalNodes(20), load(0), Ki(0), kc(0), rho(0)
 
   perm[0] = perm[1] = perm[2] = 0.;
 
-  
+
 
   // calculate local shape functions and derivatives
 
@@ -266,7 +266,7 @@ connectedExternalNodes(20), load(0), Ki(0), kc(bulk), rho(rhof)
 
 	connectedExternalNodes(19) = node20 ;
 
-	
+
 
 	int i ;
 
@@ -274,7 +274,7 @@ connectedExternalNodes(20), load(0), Ki(0), kc(bulk), rho(rhof)
 
     materialPointers = new NDMaterial *[nintu];
 
-    
+
 
     if (materialPointers == 0) {
 
@@ -286,11 +286,11 @@ connectedExternalNodes(20), load(0), Ki(0), kc(bulk), rho(rhof)
 
     for ( i=0; i<nintu; i++ ) {
 
-      
+
 
       materialPointers[i] = theMaterial.getCopy("ThreeDimensional") ;
 
-      
+
 
       if (materialPointers[i] == 0) {
 
@@ -300,11 +300,11 @@ connectedExternalNodes(20), load(0), Ki(0), kc(bulk), rho(rhof)
 
       } //end if
 
-      
+
 
     } //end for i
 
-    
+
 
     // Body forces
 
@@ -328,7 +328,7 @@ connectedExternalNodes(20), load(0), Ki(0), kc(bulk), rho(rhof)
 
     compuLocalShapeFunction();
 
-    
+
 
 }
 
@@ -354,7 +354,7 @@ TwentyEightNodeBrickUP::~TwentyEightNodeBrickUP( )
 
   }
 
-  
+
 
   // Delete the array of pointers to NDMaterial pointer arrays
 
@@ -362,21 +362,21 @@ TwentyEightNodeBrickUP::~TwentyEightNodeBrickUP( )
 
     delete [] materialPointers;
 
-  
 
-  for ( i=0 ; i<nenu; i++ ) {		
 
-    nodePointers[i] = 0 ;		
+  for ( i=0 ; i<nenu; i++ ) {
+
+    nodePointers[i] = 0 ;
 
   } //end for i
 
-  
+
 
   if (load != 0)
 
     delete load;
 
-  
+
 
   if (Ki != 0)
 
@@ -396,7 +396,7 @@ void  TwentyEightNodeBrickUP::setDomain( Domain *theDomain )
 
   int i,dof ;
 
-  
+
 
   // Check Domain is not null - invoked when object removed from a domain
 
@@ -410,7 +410,7 @@ void  TwentyEightNodeBrickUP::setDomain( Domain *theDomain )
 
   }
 
-  
+
 
   //node pointers
 
@@ -426,7 +426,7 @@ void  TwentyEightNodeBrickUP::setDomain( Domain *theDomain )
 
     }
 
-    
+
 
     dof = nodePointers[i]->getNumberDOF();
 
@@ -512,7 +512,7 @@ int  TwentyEightNodeBrickUP::commitState( )
 
 	int success = 0 ;
 
-	
+
 
 	// call element commitState to do any base class stuff
 
@@ -522,13 +522,13 @@ int  TwentyEightNodeBrickUP::commitState( )
 
 	}
 
-	
+
 
 	for (int i=0; i<nintu; i++ )
 
 		success += materialPointers[i]->commitState( ) ;
 
-	
+
 
 	return success ;
 
@@ -550,13 +550,13 @@ int  TwentyEightNodeBrickUP::revertToLastCommit( )
 
 	int success = 0 ;
 
-	
+
 
 	for ( i=0; i<nintu; i++ )
 
 		success += materialPointers[i]->revertToLastCommit( ) ;
 
-	
+
 
 	return success ;
 
@@ -576,13 +576,13 @@ int  TwentyEightNodeBrickUP::revertToStart( )
 
 	int success = 0 ;
 
-	
+
 
 	for ( i=0; i<nintu; i++ )
 
 		success += materialPointers[i]->revertToStart( ) ;
 
-	
+
 
 	return success ;
 
@@ -596,15 +596,15 @@ void  TwentyEightNodeBrickUP::Print( OPS_Stream &s, int flag )
 
 {
 
-	
+
 
 	if (flag == 2) {
 
-		
+
 
 		s << "#20_8_BrickUP\n";
 
-		
+
 
 		int i;
 
@@ -612,7 +612,7 @@ void  TwentyEightNodeBrickUP::Print( OPS_Stream &s, int flag )
 
 		const int nstress = 6 ;
 
-		
+
 
 		for (i=0; i<numNodes; i++) {
 
@@ -626,13 +626,13 @@ void  TwentyEightNodeBrickUP::Print( OPS_Stream &s, int flag )
 
 		}
 
-		
+
 
 		// spit out the section location & invoke print on the scetion
 
 		const int numMaterials = nintu;
 
-		
+
 
 		static Vector avgStress(7);
 
@@ -654,7 +654,7 @@ void  TwentyEightNodeBrickUP::Print( OPS_Stream &s, int flag )
 
 		avgStrain /= numMaterials;
 
-		
+
 
 		s << "#AVERAGE_STRESS ";
 
@@ -664,7 +664,7 @@ void  TwentyEightNodeBrickUP::Print( OPS_Stream &s, int flag )
 
 		s << endln;
 
-		
+
 
 		s << "#AVERAGE_STRAIN ";
 
@@ -674,7 +674,7 @@ void  TwentyEightNodeBrickUP::Print( OPS_Stream &s, int flag )
 
 		s << endln;
 
-		
+
 
 		/*
 
@@ -690,11 +690,11 @@ void  TwentyEightNodeBrickUP::Print( OPS_Stream &s, int flag )
 
 		*/
 
-		
+
 
 	} else {
 
-		
+
 
 		s << endln ;
 
@@ -742,13 +742,13 @@ void  TwentyEightNodeBrickUP::Print( OPS_Stream &s, int flag )
 
 		s << "Node 20 : " << connectedExternalNodes(19) << endln ;
 
-		
+
 
 		s << "Material Information : \n " ;
 
 		materialPointers[0]->Print( s, flag ) ;
 
-		
+
 
 		s << endln ;
 
@@ -802,13 +802,13 @@ TwentyEightNodeBrickUP::update()
 
 	computeBasis( ) ;
 
-	
+
 
 	for( i = 0; i < nintu; i++ ) {
 
 		// compute Jacobian and global shape functions
 
-		Jacobian3d(i, xsj, 0);		
+		Jacobian3d(i, xsj, 0);
 
 		//volume element to also be saved
 
@@ -882,9 +882,9 @@ TwentyEightNodeBrickUP::update()
 
 			//BJ = computeB( j, shp ) ;
 
-			
 
-			//nodal displacements 
+
+			//nodal displacements
 
 			const Vector &ul = nodePointers[j]->getTrialDisp( ) ;
 
@@ -898,11 +898,11 @@ TwentyEightNodeBrickUP::update()
 
 			//compute the strain
 
-			//strain += (BJ*ul) ; 
+			//strain += (BJ*ul) ;
 
 			eps.addMatrixVector(1.0,B,ul3,1.0 ) ;
 
-			
+
 
 			/* for( k = 0; k < 6; k++) {
 
@@ -972,19 +972,19 @@ const Matrix&  TwentyEightNodeBrickUP::getStiff( int flag )
 
 		exit(-1);
 
-	}  
+	}
 
-	
+
 
 	if (flag == 0 && Ki != 0)
 
 		return *Ki;
 
-	
+
 
 	int i, j ;
 
-	
+
 
 	static double xsj ;  // determinant jacaobian matrix
 
@@ -1000,25 +1000,25 @@ const Matrix&  TwentyEightNodeBrickUP::getStiff( int flag )
 
 	static Matrix D(6, 6);
 
-	B.Zero(); 
+	B.Zero();
 
 	BTDB.Zero();
 
 	stiff.Zero();
 
-	
+
 
 	//compute basis vectors and local nodal coordinates
 
 	computeBasis( ) ;
 
-	
+
 
 	for( i = 0; i < nintu; i++ ) {
 
 		// compute Jacobian and global shape functions
 
-		Jacobian3d(i, xsj, 0);		
+		Jacobian3d(i, xsj, 0);
 
 		//volume element to also be saved
 
@@ -1036,7 +1036,7 @@ const Matrix&  TwentyEightNodeBrickUP::getStiff( int flag )
 
 //		for(int j = 0; j < nenu; j++ ) {
 
-//			printf("%5d %5d %15.6e %15.6e %15.6e %15.6e\n", i,j, 
+//			printf("%5d %5d %15.6e %15.6e %15.6e %15.6e\n", i,j,
 
 //				shgu[0][j][i], shgu[1][j][i], shgu[2][j][i], shgu[3][j][i]);
 
@@ -1052,7 +1052,7 @@ const Matrix&  TwentyEightNodeBrickUP::getStiff( int flag )
 
 	for (i = 0; i < nintu; i++) {
 
-		
+
 
 		// Get the material tangent
 
@@ -1066,13 +1066,13 @@ const Matrix&  TwentyEightNodeBrickUP::getStiff( int flag )
 
 		//const Matrix &D = materialPointers[i]->getTangent();
 
-		
 
-		
+
+
 
 		for (j=0; j<nenu; j++) {
 
-			
+
 
 			j3   = 3*j+2;
 
@@ -1080,7 +1080,7 @@ const Matrix&  TwentyEightNodeBrickUP::getStiff( int flag )
 
 			j3m2 = j3 - 2;
 
-			
+
 
 			B(0,j3m2) = shgu[0][j][i];
 
@@ -1096,7 +1096,7 @@ const Matrix&  TwentyEightNodeBrickUP::getStiff( int flag )
 
 			B(1,j3  ) = 0.;
 
-			
+
 
 			B(2,j3m2) = 0.;
 
@@ -1104,7 +1104,7 @@ const Matrix&  TwentyEightNodeBrickUP::getStiff( int flag )
 
 			B(2,j3  ) = shgu[2][j][i];
 
-			
+
 
 			B(3,j3m2) = shgu[1][j][i];
 
@@ -1112,7 +1112,7 @@ const Matrix&  TwentyEightNodeBrickUP::getStiff( int flag )
 
 			B(3,j3  ) = 0.;
 
-			
+
 
 			B(4,j3m2) = 0.;
 
@@ -1120,7 +1120,7 @@ const Matrix&  TwentyEightNodeBrickUP::getStiff( int flag )
 
 			B(4,j3  ) = shgu[1][j][i];
 
-			
+
 
 			B(5,j3m2) = shgu[2][j][i];
 
@@ -1128,11 +1128,11 @@ const Matrix&  TwentyEightNodeBrickUP::getStiff( int flag )
 
 			B(5,j3  ) = shgu[0][j][i];
 
-			
+
 
 		}
 
-		
+
 
 		// Perform numerical integration
 
@@ -1142,11 +1142,11 @@ const Matrix&  TwentyEightNodeBrickUP::getStiff( int flag )
 
 	}
 
-	
+
 
 	for (i = 0; i < nenu; i++) {
 
-		if (i<nenp) 
+		if (i<nenp)
 
 			ik = i*4;
 
@@ -1156,7 +1156,7 @@ const Matrix&  TwentyEightNodeBrickUP::getStiff( int flag )
 
 		ib = i*3;
 
-		
+
 
 		for (j = 0; j < nenu; j++) {
 
@@ -1198,9 +1198,9 @@ const Matrix&  TwentyEightNodeBrickUP::getStiff( int flag )
 
 		exit(-1);
 
-	}  
+	}
 
-    
+
 
 	return *Ki;
 
@@ -1218,11 +1218,11 @@ const Matrix&  TwentyEightNodeBrickUP::getMass( )
 
 	int tangFlag = 1 ;
 
-	
+
 
 	formInertiaTerms( tangFlag ) ;
 
-	
+
 
 	return mass ;
 
@@ -1240,11 +1240,11 @@ const Matrix&  TwentyEightNodeBrickUP::getDamp( )
 
 	int tangFlag = 1 ;
 
-	
+
 
 	formDampingTerms( tangFlag ) ;
 
-	
+
 
 	return damp ;
 
@@ -1266,7 +1266,7 @@ void TwentyEightNodeBrickUP::formDampingTerms( int tangFlag )
 
 	damp.Zero( ) ;
 
-	
+
 
 	if (betaK != 0.0)
 
@@ -1278,9 +1278,9 @@ void TwentyEightNodeBrickUP::formDampingTerms( int tangFlag )
 
 	if (betaKc != 0.0)
 
-		damp.addMatrix(1.0, *Kc, betaKc);	
+		damp.addMatrix(1.0, *Kc, betaKc);
 
-	
+
 
 	if (alphaM != 0.0) {
 
@@ -1288,7 +1288,7 @@ void TwentyEightNodeBrickUP::formDampingTerms( int tangFlag )
 
 		for( i = 0; i < nenu; i++ ) {
 
-			if( i < nenp) 
+			if( i < nenp)
 
 				ik = i*4;
 
@@ -1298,7 +1298,7 @@ void TwentyEightNodeBrickUP::formDampingTerms( int tangFlag )
 
 			for( j = 0; j < nenu; j++) {
 
-				if( j < nenp) 
+				if( j < nenp)
 
 					jk = j * 4;
 
@@ -1312,15 +1312,15 @@ void TwentyEightNodeBrickUP::formDampingTerms( int tangFlag )
 
 			}
 
-		}				
+		}
 
 	}
 
-	
+
 
 	//compute basis vectors and local nodal coordinates
 
-	computeBasis( ) ;	
+	computeBasis( ) ;
 
 	//gauss loop to compute and save shape functions
 
@@ -1328,7 +1328,7 @@ void TwentyEightNodeBrickUP::formDampingTerms( int tangFlag )
 
 		// compute Jacobian and global shape functions
 
-		Jacobian3d(i, xsj, 1);		
+		Jacobian3d(i, xsj, 1);
 
 		//volume element to also be saved
 
@@ -1340,7 +1340,7 @@ void TwentyEightNodeBrickUP::formDampingTerms( int tangFlag )
 
 	//printf("volume = %f\n", volume);
 
-	
+
 
 	volume = 0.;
 
@@ -1348,11 +1348,11 @@ void TwentyEightNodeBrickUP::formDampingTerms( int tangFlag )
 
 		// compute Jacobian and global shape functions
 
-		Jacobian3d(i, xsj, 2);		
+		Jacobian3d(i, xsj, 2);
 
 		//volume element to also be saved
 
-		dvolq[i] = wp[i] * xsj ;	
+		dvolq[i] = wp[i] * xsj ;
 
 		volume += dvolq[i];
 
@@ -1366,7 +1366,7 @@ void TwentyEightNodeBrickUP::formDampingTerms( int tangFlag )
 
 	for( i = 0; i < nenu; i++ ) {
 
-		if( i < nenp) 
+		if( i < nenp)
 
 			ik = i * 4;
 
@@ -1436,7 +1436,7 @@ void  TwentyEightNodeBrickUP::zeroLoad( )
 
 		load->Zero();
 
-	
+
 
 	return ;
 
@@ -1472,7 +1472,7 @@ TwentyEightNodeBrickUP::addInertiaLoadToUnbalance(const Vector &accel)
 
 	ra.Zero();
 
-	
+
 
 	for( i = 0; i < nenu; i++) {
 
@@ -1486,9 +1486,9 @@ TwentyEightNodeBrickUP::addInertiaLoadToUnbalance(const Vector &accel)
 
 		}
 
-		
 
-		if (i<nenp) 
+
+		if (i<nenp)
 
 			ik = i*4;
 
@@ -1496,7 +1496,7 @@ TwentyEightNodeBrickUP::addInertiaLoadToUnbalance(const Vector &accel)
 
 			ik = nenp*4 + (i-nenp)*3;
 
-		
+
 
 		ra[ik] = Raccel(0);
 
@@ -1506,7 +1506,7 @@ TwentyEightNodeBrickUP::addInertiaLoadToUnbalance(const Vector &accel)
 
 	}
 
-	
+
 
 	// Compute mass matrix
 
@@ -1514,7 +1514,7 @@ TwentyEightNodeBrickUP::addInertiaLoadToUnbalance(const Vector &accel)
 
 	formInertiaTerms( tangFlag ) ;
 
-	
+
 
 	// create the load vector if one does not exist
 
@@ -1522,7 +1522,7 @@ TwentyEightNodeBrickUP::addInertiaLoadToUnbalance(const Vector &accel)
 
 	  load = new Vector(68);
 
-	
+
 
 	// add -M * RV(accel) to the load vector
 
@@ -1530,13 +1530,13 @@ TwentyEightNodeBrickUP::addInertiaLoadToUnbalance(const Vector &accel)
 
 	//for( i = 0; i < 68; i++) {
 
-	//	for( j = 0; j < 68; j++)			
+	//	for( j = 0; j < 68; j++)
 
 	//				load(i) += -mass(i,j)*ra[j];
 
 	//}
 
-	
+
 
 	return 0;
 
@@ -1560,17 +1560,17 @@ const Vector&  TwentyEightNodeBrickUP::getResistingForce( )
 
 	double volume = 0.;
 
-	
+
 
 //	printf("calling getResistingForce()\n");
 
 	resid.Zero();
 
-	
+
 
 	//compute basis vectors and local nodal coordinates
 
-	computeBasis( ) ;	
+	computeBasis( ) ;
 
 	//gauss loop to compute and save shape functions
 
@@ -1578,7 +1578,7 @@ const Vector&  TwentyEightNodeBrickUP::getResistingForce( )
 
 		// compute Jacobian and global shape functions
 
-		Jacobian3d(i, xsj, 0);		
+		Jacobian3d(i, xsj, 0);
 
 		//volume element to also be saved
 
@@ -1596,11 +1596,11 @@ const Vector&  TwentyEightNodeBrickUP::getResistingForce( )
 
 		// compute Jacobian and global shape functions
 
-		Jacobian3d(i, xsj, 1);		
+		Jacobian3d(i, xsj, 1);
 
 		//volume element to also be saved
 
-		dvolp[i] = wp[i] * xsj ;	
+		dvolp[i] = wp[i] * xsj ;
 
 		volume += dvolp[i];
 
@@ -1608,19 +1608,19 @@ const Vector&  TwentyEightNodeBrickUP::getResistingForce( )
 
 	//printf("volume = %f\n", volume);
 
-	
+
 
 	// Loop over the integration points
 
 	for (i = 0; i < nintu; i++) {
 
-		
+
 
 		// Get material stress response
 
 		const Vector &sigma = materialPointers[i]->getStress();
 
-		
+
 
 		// Perform numerical integration on internal force
 
@@ -1630,7 +1630,7 @@ const Vector&  TwentyEightNodeBrickUP::getResistingForce( )
 
 		for (j = 0; j < nenu; j++) {
 
-			if (j<nenp) 
+			if (j<nenp)
 
 				jk = j*4;
 
@@ -1638,7 +1638,7 @@ const Vector&  TwentyEightNodeBrickUP::getResistingForce( )
 
 				jk = nenp*4 + (j-nenp)*3;
 
-			
+
 
 			B(0,0) = shgu[0][j][i];
 
@@ -1676,9 +1676,9 @@ const Vector&  TwentyEightNodeBrickUP::getResistingForce( )
 
 			B(5,2) = shgu[0][j][i];
 
-			
 
-			
+
+
 
 			for(k = 0; k < 3; k++) {
 
@@ -1706,7 +1706,7 @@ const Vector&  TwentyEightNodeBrickUP::getResistingForce( )
 
 	}
 
-	
+
 
 	// Subtract fluid body force
 
@@ -1724,11 +1724,11 @@ const Vector&  TwentyEightNodeBrickUP::getResistingForce( )
 
 	}
 
-	
+
 
 	// Subtract other external nodal loads ... P_res = P_int - P_ext
 
-//	opserr<<"resid before:"<<resid<<endln; 
+//	opserr<<"resid before:"<<resid<<endln;
 
 
 
@@ -1738,9 +1738,9 @@ const Vector&  TwentyEightNodeBrickUP::getResistingForce( )
 
 
 
-//	opserr<<"resid "<<resid<<endln; 
+//	opserr<<"resid "<<resid<<endln;
 
-	
+
 
 	return resid ;
 
@@ -1758,13 +1758,13 @@ const Vector&  TwentyEightNodeBrickUP::getResistingForceIncInertia( )
 
 	static Vector res(68);
 
-	
+
 
 	int i, j, ik;
 
 	static double a[68];
 
-	
+
 
 	for (i=0; i<nenu; i++) {
 
@@ -1778,9 +1778,9 @@ const Vector&  TwentyEightNodeBrickUP::getResistingForceIncInertia( )
 
 		}
 
-		
 
-		if (i<nenp) 
+
+		if (i<nenp)
 
 			ik = i*4;
 
@@ -1804,7 +1804,7 @@ const Vector&  TwentyEightNodeBrickUP::getResistingForceIncInertia( )
 
 //	opserr<<"K "<<resid<<endln;
 
-	
+
 
 	// Compute the mass matrix
 
@@ -1824,11 +1824,11 @@ const Vector&  TwentyEightNodeBrickUP::getResistingForceIncInertia( )
 
 //	printf("\n");
 
-	//opserr<<"K+M "<<P<<endln; 
+	//opserr<<"K+M "<<P<<endln;
 
-	
 
-	
+
+
 
 	for (i=0; i<nenu; i++) {
 
@@ -1842,7 +1842,7 @@ const Vector&  TwentyEightNodeBrickUP::getResistingForceIncInertia( )
 
 		}
 
-		
+
 
 		if (i<nenp)
 
@@ -1862,11 +1862,11 @@ const Vector&  TwentyEightNodeBrickUP::getResistingForceIncInertia( )
 
 	}
 
-	
+
 
 	this->getDamp();
 
-	
+
 
 	for (i = 0; i < 68; i++) {
 
@@ -1878,13 +1878,13 @@ const Vector&  TwentyEightNodeBrickUP::getResistingForceIncInertia( )
 
 	}
 
-	
+
 
 	res = resid;
 
-//	opserr<<"res "<<res<<endln; 
+//	opserr<<"res "<<res<<endln;
 
-	
+
 
 	return res;
 
@@ -1910,13 +1910,13 @@ void   TwentyEightNodeBrickUP::formInertiaTerms( int tangFlag )
 
 	double Nrho;
 
-	
+
 
 	//zero mass
 
 	mass.Zero( ) ;
 
-	
+
 
 	//compute basis vectors and local nodal coordinates
 
@@ -1928,11 +1928,11 @@ void   TwentyEightNodeBrickUP::formInertiaTerms( int tangFlag )
 
 		// compute Jacobian and global shape functions
 
-		Jacobian3d(i, xsj, 0);		
+		Jacobian3d(i, xsj, 0);
 
 		//volume element to also be saved
 
-		dvolu[i] = wu[i] * xsj ;	
+		dvolu[i] = wu[i] * xsj ;
 
 	} // end for i
 
@@ -1940,21 +1940,21 @@ void   TwentyEightNodeBrickUP::formInertiaTerms( int tangFlag )
 
 		// compute Jacobian and global shape functions
 
-		Jacobian3d(i, xsj, 1);		
+		Jacobian3d(i, xsj, 1);
 
 		//volume element to also be saved
 
-		dvolp[i] = wp[i] * xsj ;	
+		dvolp[i] = wp[i] * xsj ;
 
 	} // end for i
 
-	
+
 
 	// Compute consistent mass matrix
 
 	for (i = 0; i < nenu; i++) {
 
-		if (i<nenp) 
+		if (i<nenp)
 
 			ik = i*4;
 
@@ -1962,11 +1962,11 @@ void   TwentyEightNodeBrickUP::formInertiaTerms( int tangFlag )
 
 			ik = nenp*4 + (i-nenp)*3;
 
-		
+
 
 		for (j = 0; j < nenu; j++) {
 
-			if (j<nenp) 
+			if (j<nenp)
 
 				jk = j*4;
 
@@ -1974,7 +1974,7 @@ void   TwentyEightNodeBrickUP::formInertiaTerms( int tangFlag )
 
 				jk = nenp*4 + (j-nenp)*3;
 
-			
+
 
 			for (m = 0; m < nintu; m++) {
 
@@ -1992,7 +1992,7 @@ void   TwentyEightNodeBrickUP::formInertiaTerms( int tangFlag )
 
 	}
 
-	
+
 
 	// Compute compressibility matrix
 
@@ -2002,13 +2002,13 @@ void   TwentyEightNodeBrickUP::formInertiaTerms( int tangFlag )
 
 		ik = i*4+3;
 
-		
+
 
 		for (j = 0; j < nenp; j++) {
 
 			jk = j*4+3;
 
-			
+
 
 			for (m = 0; m < nintp; m++) {
 
@@ -2032,7 +2032,7 @@ double TwentyEightNodeBrickUP::mixtureRho(int i)
 
 	double rhoi;
 
-	
+
 
 	rhoi= materialPointers[i]->getRho();
 
@@ -2058,21 +2058,21 @@ void   TwentyEightNodeBrickUP::computeBasis( )
 
 {
 
-	
+
 
 	//nodal coordinates
 
-	
+
 
 	int i ;
 
 	for ( i = 0; i < nenu; i++ ) {
 
-		
+
 
 		const Vector &coorI = nodePointers[i]->getCrds( ) ;
 
-		
+
 
 		xl[0][i] = coorI(0) ;
 
@@ -2080,11 +2080,11 @@ void   TwentyEightNodeBrickUP::computeBasis( )
 
 		xl[2][i] = coorI(2) ;
 
-		
+
 
 	}  //end for i
 
-	
+
 
 }
 
@@ -2099,110 +2099,76 @@ void   TwentyEightNodeBrickUP::computeBasis( )
 int  TwentyEightNodeBrickUP::sendSelf (int commitTag, Channel &theChannel)
 
 {
-
-	int res = 0;
-
-
-
-	// note: we don't check for dataTag == 0 for Element
-
-	// objects as that is taken care of in a commit by the Domain
-
-	// object - don't want to have to do the check if sending data
-
-	int dataTag = this->getDbTag();
-
-
-
-	// Quad packs its data into a Vector and sends this to theChannel
-
-	// along with its dbTag and the commitTag passed in the arguments
-
-
-
-	// Now quad sends the ids of its materials
-
-	int matDbTag;
-
-
-
-	static ID idData(75);
-
-
-
-	idData(74) = this->getTag();
-
-
-
-	int i;
-
-	for (i = 0; i < nintu; i++) {
-
-		idData(i) = materialPointers[i]->getClassTag();
-
-		matDbTag = materialPointers[i]->getDbTag();
-
-		// NOTE: we do have to ensure that the material has a database
-
-		// tag if we are sending to a database channel.
-
-		if (matDbTag == 0) {
-
-			matDbTag = theChannel.getDbTag();
-
-			if (matDbTag != 0)
-
-				materialPointers[i]->setDbTag(matDbTag);
-
-		}
-
-		idData(i+nintu) = matDbTag;
-
-	}
-
-	for( i = 0; i < 20; i++)
-
-		idData(54+i) = connectedExternalNodes(i);
-
-
-
-
-
-	res += theChannel.sendID(dataTag, commitTag, idData);
-
-	if (res < 0) {
-
-		opserr << "WARNING TwentyEightNodeBrickUP::sendSelf() - " << this->getTag() << " failed to send ID\n";
-
-		return res;
-
-	}
-
-
-
-
-
-	// Finally, this element asks its material objects to send themselves
-
-	for (i = 0; i < nintu ; i++) {
-
-		res += materialPointers[i]->sendSelf(commitTag, theChannel);
-
-		if (res < 0) {
-
-			opserr << "WARNING TwentyEightNodeBrickUP::sendSelf() - " << this->getTag() << " failed to send its Material\n";
-
-			return res;
-
-		}
-
-	}
-
-
-
-	return res;
-
-
+  int res = 0;
+
+  // note: we don't check for dataTag == 0 for Element
+  // objects as that is taken care of in a commit by the Domain
+  // object - don't want to have to do the check if sending data
+  int dataTag = this->getDbTag();
+
+  // TwentyEightNodeBrickUP packs its data into a Vector and sends this to theChannel
+  // along with its dbTag and the commitTag passed in the arguments
+  static Vector data(13);
+  data(0) = this->getTag();
+  data(1) = rho;
+  data(2) = b[0];
+  data(3) = b[1];
+  data(4) = b[2];
+
+  data(5) = alphaM;
+  data(6) = betaK;
+  data(7) = betaK0;
+  data(8) = betaKc;
+
+  data(9) = kc;
+  data(10) = perm[0];
+  data(11) = perm[1];
+  data(12) = perm[2];
+
+  res += theChannel.sendVector(dataTag, commitTag, data);
+  if (res < 0) {
+    opserr << "WARNING TwentyEightNodeBrickUP::sendSelf() - " << this->getTag() << " failed to send Vector\n";
+    return res;
+  }
+
+  // Now TwentyEightNodeBrickUP sends the ids of its materials
+  int matDbTag;
+
+  static ID idData(74);
+
+  int i;
+  for (i = 0; i < nintu; i++) {
+    idData(i) = materialPointers[i]->getClassTag();
+    matDbTag = materialPointers[i]->getDbTag();
+    // NOTE: we do have to ensure that the material has a database
+    // tag if we are sending to a database channel.
+    if (matDbTag == 0) {
+      matDbTag = theChannel.getDbTag();
+		if (matDbTag != 0)
+		  materialPointers[i]->setDbTag(matDbTag);
+    }
+    idData(i+nintu) = matDbTag;
+ }
+
+ for( i = 0; i < 20; i++)
+   idData(54+i) = connectedExternalNodes(i);
+
+ res += theChannel.sendID(dataTag, commitTag, idData);
+ if (res < 0) {
+   opserr << "WARNING TwentyEightNodeBrickUP::sendSelf() - " << this->getTag() << " failed to send ID\n";
+   return res;
+ }
+
+ // Finally, TwentyEightNodeBrickUP asks its material objects to send themselves
+ for (i = 0; i < nintu; i++) {
+   res += materialPointers[i]->sendSelf(commitTag, theChannel);
+   if (res < 0) {
+     opserr << "WARNING TwentyEightNodeBrickUP::sendSelf() - " << this->getTag() << " failed to send its Material\n";
+     return res;
+   }
+ }
+
+ return res;
 
 }
 
@@ -2215,136 +2181,100 @@ int  TwentyEightNodeBrickUP::recvSelf (int commitTag,
 									   FEM_ObjectBroker &theBroker)
 
 {
-
-	int res = 0;
-
-
-
-	int dataTag = this->getDbTag();
-
-
-
-	static ID idData(75);
-
-	//  now receives the tags of its 20 external nodes
-
-	res += theChannel.recvID(dataTag, commitTag, idData);
-
-	if (res < 0) {
-
-		opserr << "WARNING TwentyEightNodeBrickUP::recvSelf() - " << this->getTag() << " failed to receive ID\n";
-
-		return res;
-
-	}
-
-
-
-	this->setTag(idData(74));
-
-
-
-	int i;
-
-	for( i = 0; i < 20; i++)
-
-		connectedExternalNodes(i) = idData(54+i);
-
-
-
-	if (materialPointers[0] == 0) {
-
-		for (i = 0; i < nintu; i++) {
-
-			int matClassTag = idData(i);
-
-			int matDbTag = idData(i+nintu);
-
-			// Allocate new material with the sent class tag
-
-			materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
-
-			if (materialPointers[i] == 0) {
-
-				opserr << "TwentyEightNodeBrickUP::recvSelf() - Broker could not create NDMaterial of class type " << matClassTag << endln;
-
-				return -1;
-
-			}
-
-			// Now receive materials into the newly allocated space
-
-			materialPointers[i]->setDbTag(matDbTag);
-
-			res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
-
-			if (res < 0) {
-
-				opserr << "TwentyEightNodeBrickUP::recvSelf() - material " << i << "failed to recv itself\n";
-
-				return res;
-
-			}
-
-		}
-
-	}
-
-	// materials exist , ensure materials of correct type and recvSelf on them
-
-	else {
-
-		for (i = 0; i < nintu; i++) {
-
-			int matClassTag = idData(i);
-
-			int matDbTag = idData(i+nintu);
-
-			// Check that material is of the right type; if not,
-
-			// delete it and create a new one of the right type
-
-			if (materialPointers[i]->getClassTag() != matClassTag) {
-
-				delete materialPointers[i];
-
-				materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
-
-				if (materialPointers[i] == 0) {
-
-					opserr << "TwentyEightNodeBrickUP::recvSelf() - Broker could not create NDMaterial of class type " <<
-
-						matClassTag << endln;
-
-					exit(-1);
-
-				}
-
-				materialPointers[i]->setDbTag(matDbTag);
-
-			}
-
-			// Receive the material
-
-
-
-			res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
-
-			if (res < 0) {
-
-				opserr << "TwentyEightNodeBrickUP::recvSelf() - material " << i << "failed to recv itself\n";
-
-				return res;
-
-			}
-
-		}
-
-	}
-
-
-
-	return res;
+  int res = 0;
+
+  int dataTag = this->getDbTag();
+
+  // TwentyEightNodeBrickUP creates a Vector, receives the Vector and then sets the
+  // internal data with the data in the Vector
+  static Vector data(13);
+  res += theChannel.recvVector(dataTag, commitTag, data);
+  if (res < 0) {
+    opserr << "WARNING TwentyEightNodeBrickUP::recvSelf() - failed to receive Vector\n";
+    return res;
+  }
+
+  this->setTag((int)data(0));
+  rho = data(1);
+  b[0] = data(2);
+  b[1] = data(3);
+  b[2] = data(4);
+
+  alphaM = data(5);
+  betaK = data(6);
+  betaK0 = data(7);
+  betaKc = data(8);
+
+  kc = data(9);
+  perm[0] = data(10);
+  perm[1] = data(11);
+  perm[2] = data(12);
+
+  static ID idData(74);
+  // TwentyEightNodeBrickUP now receives the tags of its four external nodes
+  res += theChannel.recvID(dataTag, commitTag, idData);
+  if (res < 0) {
+    opserr << "WARNING TwentyEightNodeBrickUP::recvSelf() - " << this->getTag() << " failed to receive ID\n";
+    return res;
+  }
+
+  int i;
+
+  for( i = 0; i < 20; i++)
+    connectedExternalNodes(i) = idData(54+i);
+
+  if (materialPointers == 0) {
+    // Allocate new materials
+    materialPointers = new NDMaterial* [nintu];
+    if (materialPointers == 0) {
+      opserr << "TwentyEightNodeBrickUP::recvSelf() - Could not allocate NDMaterial array\n";
+      return -1;
+    }
+    for (i = 0; i < nintu; i++) {
+      int matClassTag = idData(i);
+      int matDbTag = idData(i+nintu);
+      // Allocate new material with the sent class tag
+      materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
+      if (materialPointers[i] == 0) {
+	    opserr << "TwentyEightNodeBrickUP::recvSelf() - Broker could not create NDMaterial of class type " << matClassTag << endln;
+	    return -1;
+      }
+      // Now receive materials into the newly allocated space
+      materialPointers[i]->setDbTag(matDbTag);
+      res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
+      if (res < 0) {
+	    opserr << "TwentyEightNodeBrickUP::recvSelf() - material " << i << "failed to recv itself\n";
+	    return res;
+      }
+    }
+  }
+  // materials exist , ensure materials of correct type and recvSelf on them
+  else {
+    for (i = 0; i < nintu; i++) {
+      int matClassTag = idData(i);
+      int matDbTag = idData(i+nintu);
+      // Check that material is of the right type; if not,
+      // delete it and create a new one of the right type
+      if (materialPointers[i]->getClassTag() != matClassTag) {
+	    delete materialPointers[i];
+	    materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
+	    if (materialPointers[i] == 0) {
+	      opserr << "TwentyEightNodeBrickUP::recvSelf() - Broker could not create NDMaterial of class type " <<
+	      matClassTag << endln;
+	      exit(-1);
+	    }
+      }
+      // Receive the material
+      materialPointers[i]->setDbTag(matDbTag);
+      res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
+      if (res < 0) {
+	    opserr << "TwentyEightNodeBrickUP::recvSelf() - material " << i << "failed to recv itself\n";
+	    return res;
+      }
+    }
+  }
+
+  return res;
 
 }
 
@@ -2397,36 +2327,36 @@ TwentyEightNodeBrickUP::setResponse(const char **argv, int argc, OPS_Stream &out
     }
 
     theResponse = new ElementResponse(this, 1, resid);
-    
-  } else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
-    
-    theResponse = new ElementResponse(this, 2, stiff);
-    
-  
-  
-  else if (strcmp(argv[0],"mass") == 0)
-    
-    theResponse = new ElementResponse(this, 3, mass);
-  
-  
-  
-  else if (strcmp(argv[0],"damp") == 0)
-    
-    theResponse = new ElementResponse(this, 4, damp);
-  
 
-  
+  } else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
+
+    theResponse = new ElementResponse(this, 2, stiff);
+
+
+
+  else if (strcmp(argv[0],"mass") == 0)
+
+    theResponse = new ElementResponse(this, 3, mass);
+
+
+
+  else if (strcmp(argv[0],"damp") == 0)
+
+    theResponse = new ElementResponse(this, 4, damp);
+
+
+
   else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
-    
+
     int pointNum = atoi(argv[1]);
-    
+
     if (pointNum > 0 && pointNum <= nintu) {
 
       output.tag("GaussPoint");
       output.attr("number",pointNum);
 
       theResponse =  materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, output);
-      
+
       output.endTag(); // GaussPoint
     }
   } else if (strcmp(argv[0],"stresses") ==0) {
@@ -2443,17 +2373,17 @@ TwentyEightNodeBrickUP::setResponse(const char **argv, int argc, OPS_Stream &out
       output.tag("ResponseType","sigma33");
       output.tag("ResponseType","sigma12");
       output.tag("ResponseType","sigma13");
-      output.tag("ResponseType","sigma23");      
+      output.tag("ResponseType","sigma23");
 
       output.endTag(); // NdMaterialOutput
       output.endTag(); // GaussPoint
-    }	       
-    
+    }
+
     theResponse = new ElementResponse(this, 5, Vector(nintu*6));
-    
+
   }
-  
-  
+
+
   output.endTag(); // ElementOutput
   return theResponse;
 }
@@ -2468,13 +2398,13 @@ TwentyEightNodeBrickUP::getResponse(int responseID, Information &eleInfo)
 
 	static Vector stresses(nintu*6);
 
-	
+
 
 	if (responseID == 1)
 
 		return eleInfo.setVector(this->getResistingForce());
 
-	
+
 
 	else if (responseID == 2)
 
@@ -2492,11 +2422,11 @@ TwentyEightNodeBrickUP::getResponse(int responseID, Information &eleInfo)
 
         return eleInfo.setMatrix(this->getDamp());
 
-    
+
 
 	else if (responseID == 5) {
 
-		
+
 
 		// Loop over the integration points
 
@@ -2524,13 +2454,13 @@ TwentyEightNodeBrickUP::getResponse(int responseID, Information &eleInfo)
 
 		return eleInfo.setVector(stresses);
 
-		
+
 
 	}
 
 	else
 
-		
+
 
 		return -1;
 
@@ -2544,7 +2474,7 @@ void
 
 TwentyEightNodeBrickUP::compuLocalShapeFunction() {
 
-	
+
 
 	int i, k, j;
 
@@ -2598,7 +2528,7 @@ TwentyEightNodeBrickUP::compuLocalShapeFunction() {
 
 	}
 
-	
+
 
 }
 
@@ -2620,7 +2550,7 @@ TwentyEightNodeBrickUP::Jacobian3d(int gaussPoint, double& xsj, int mode)
 
 	static double shp[4][20];
 
-	
+
 
 	if( mode == 0 ) { // solid
 
@@ -2654,13 +2584,13 @@ TwentyEightNodeBrickUP::Jacobian3d(int gaussPoint, double& xsj, int mode)
 
 	} //end if
 
-	
+
 
 	for( j = 0; j < nen; j++) {
 
 		for( i = 0; i < 4; i++) {
 
-			if( mode == 0 ) 
+			if( mode == 0 )
 
 				shp[i][j] = shlu[i][j][gaussPoint];
 
@@ -2684,17 +2614,17 @@ TwentyEightNodeBrickUP::Jacobian3d(int gaussPoint, double& xsj, int mode)
 
 	}
 
-	
 
-	
 
-	
 
-	
+
+
+
+
 
 	//Compute jacobian transformation
 
-	
+
 
 	for ( j=0; j<3; j++ ) {
 
@@ -2712,13 +2642,13 @@ TwentyEightNodeBrickUP::Jacobian3d(int gaussPoint, double& xsj, int mode)
 
 	}
 
-	
 
-	
+
+
 
 	//Compute adjoint to jacobian
 
-	
+
 
 	ad[0][0] = xs[1][1]*xs[2][2] - xs[1][2]*xs[2][1] ;
 
@@ -2726,7 +2656,7 @@ TwentyEightNodeBrickUP::Jacobian3d(int gaussPoint, double& xsj, int mode)
 
 	ad[0][2] = xs[0][1]*xs[1][2] - xs[0][2]*xs[1][1] ;
 
-	
+
 
 	ad[1][0] = xs[1][2]*xs[2][0] - xs[1][0]*xs[2][2] ;
 
@@ -2734,19 +2664,19 @@ TwentyEightNodeBrickUP::Jacobian3d(int gaussPoint, double& xsj, int mode)
 
 	ad[1][2] = xs[0][2]*xs[1][0] - xs[0][0]*xs[1][2] ;
 
-	
+
 
 	ad[2][0] = xs[1][0]*xs[2][1] - xs[1][1]*xs[2][0] ;
 
-	ad[2][1] = xs[2][0]*xs[0][1] - xs[2][1]*xs[0][0] ; 
+	ad[2][1] = xs[2][0]*xs[0][1] - xs[2][1]*xs[0][0] ;
 
 	ad[2][2] = xs[0][0]*xs[1][1] - xs[0][1]*xs[1][0] ;
 
-	
+
 
 	//Compute determinant of jacobian
 
-	
+
 
 	xsj  = xs[0][0]*ad[0][0] + xs[0][1]*ad[1][0] + xs[0][2]*ad[2][0] ;
 
@@ -2756,7 +2686,7 @@ TwentyEightNodeBrickUP::Jacobian3d(int gaussPoint, double& xsj, int mode)
 
 		for( i = 0; i < nen; i++ ) {
 
-			printf("%5d %15.6e %15.6e %15.6e %15.6e\n", i, 
+			printf("%5d %15.6e %15.6e %15.6e %15.6e\n", i,
 
 				shp[0][i], shp[1][i], shp[2][i], shp[3][i]);
 
@@ -2768,39 +2698,39 @@ TwentyEightNodeBrickUP::Jacobian3d(int gaussPoint, double& xsj, int mode)
 
 	}
 
-	
+
 
 	rxsj = 1.0/xsj ;
 
-	
+
 
 	//Compute jacobian inverse
 
-	
+
 
 	for ( j=0; j<3; j++ ) {
 
-		
 
-        for ( i=0; i<3; i++ ) 
+
+        for ( i=0; i<3; i++ )
 
 			xs[i][j] = ad[i][j]*rxsj ;
 
-		
+
 
 	} //end for j
 
-	
 
-	
+
+
 
 	//Compute derivatives with repect to global coords.
 
-	
+
 
 	for ( k=0; k<nen; k++) {
 
-		
+
 
 		c1 = shp[0][k]*xs[0][0] + shp[1][k]*xs[1][0] + shp[2][k]*xs[2][0] ;
 
@@ -2808,7 +2738,7 @@ TwentyEightNodeBrickUP::Jacobian3d(int gaussPoint, double& xsj, int mode)
 
         c3 = shp[0][k]*xs[0][2] + shp[1][k]*xs[1][2] + shp[2][k]*xs[2][2] ;
 
-		
+
 
         shp[0][k] = c1 ;
 
@@ -2816,23 +2746,23 @@ TwentyEightNodeBrickUP::Jacobian3d(int gaussPoint, double& xsj, int mode)
 
         shp[2][k] = c3 ;
 
-		
+
 
 	} //end for k
 
-	
+
 
 	for( j = 0; j < nen; j++) {
 
 		for( i = 0; i < 4; i++) {
 
-			if( mode == 0 ) 
+			if( mode == 0 )
 
 				shgu[i][j][gaussPoint] = shp[i][j];
 
 			else if( mode == 1 )
 
-				shgp[i][j][gaussPoint] = shp[i][j]; 
+				shgp[i][j][gaussPoint] = shp[i][j];
 
 			else if( mode == 2 )
 
@@ -2850,9 +2780,9 @@ TwentyEightNodeBrickUP::Jacobian3d(int gaussPoint, double& xsj, int mode)
 
 	}
 
-	
 
-	
+
+
 
 }
 

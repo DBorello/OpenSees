@@ -17,7 +17,7 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-  
+
 ///////////////////////////////////////////////////////////////////////////////
 // Description: This file contains the class declaration for                 //
 // BrickUP, an 8-node cubic element for solid-fluid fully coupled analysis.  //
@@ -28,9 +28,9 @@
 // Written by Zhaohui Yang	(March 2004)                                     //
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
-                                                                           
-// $Revision: 1.3 $
-// $Date: 2007-02-02 01:44:56 $
+
+// $Revision: 1.4 $
+// $Date: 2007-03-12 21:55:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/BrickUP.cpp,v $
 
 // by Zhaohui Yang (Modified based on Ed "C++" Love's Brick element)
@@ -38,11 +38,11 @@
 // Eight node BrickUP element
 //
 
-#include <stdio.h> 
-#include <stdlib.h> 
-#include <math.h> 
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
-#include <ID.h> 
+#include <ID.h>
 #include <Vector.h>
 #include <Matrix.h>
 #include <Element.h>
@@ -65,24 +65,24 @@ Matrix  BrickUP::stiff(32,32) ;
 Vector  BrickUP::resid(32) ;
 Matrix  BrickUP::mass(32,32) ;
 Matrix  BrickUP::damp(32,32) ;
-    
+
 //quadrature data
 const double  BrickUP::root3 = sqrt(3.0) ;
 const double  BrickUP::one_over_root3 = 1.0 / root3 ;
 
-const double  BrickUP::sg[] = { -one_over_root3,  
+const double  BrickUP::sg[] = { -one_over_root3,
 			       one_over_root3  } ;
 
-const double  BrickUP::wg[] = { 1.0, 1.0, 1.0, 1.0, 
+const double  BrickUP::wg[] = { 1.0, 1.0, 1.0, 1.0,
                               1.0, 1.0, 1.0, 1.0  } ;
 
-  
+
 
 //null constructor
 BrickUP::BrickUP( ) :
 Element( 0, ELE_TAG_BrickUP ),
 connectedExternalNodes(8), load(0), Ki(0), kc(0), rho(0)
-{ 
+{
   for (int i=0; i<8; i++ ) {
     materialPointers[i] = 0;
     nodePointers[i] = 0;
@@ -94,7 +94,7 @@ connectedExternalNodes(8), load(0), Ki(0), kc(0), rho(0)
 
 //*********************************************************************
 //full constructor
-BrickUP::BrickUP(  int tag, 
+BrickUP::BrickUP(  int tag,
                          int node1,
                          int node2,
    	                     int node3,
@@ -103,7 +103,7 @@ BrickUP::BrickUP(  int tag,
                          int node6,
                          int node7,
 			             int node8,
-			 NDMaterial &theMaterial, double bulk, double rhof, 
+			 NDMaterial &theMaterial, double bulk, double rhof,
 			double p1, double p2, double p3,
 		   double b1, double b2, double b3) :
 Element( tag, ELE_TAG_BrickUP ),
@@ -128,8 +128,8 @@ connectedExternalNodes(8), load(0), Ki(0), kc(bulk), rho(rhof)
 	  opserr <<"BrickUP::constructor - failed to get a material of type: ThreeDimensional\n";
 	  exit(-1);
       } //end if
-      
-  } //end for i 
+
+  } //end for i
 
 	// Body forces
 	b[0] = b1;
@@ -143,35 +143,35 @@ connectedExternalNodes(8), load(0), Ki(0), kc(bulk), rho(rhof)
 //******************************************************************
 
 
-//destructor 
+//destructor
 BrickUP::~BrickUP( )
 {
   int i ;
   for ( i=0 ; i<8; i++ ) {
 
     delete materialPointers[i] ;
-    materialPointers[i] = 0 ; 
+    materialPointers[i] = 0 ;
 
     nodePointers[i] = 0 ;
 
   } //end for i
-  
+
   if (load != 0)
     delete load;
-  
+
   if (Ki != 0)
     delete Ki;
 }
 
 
 //set domain
-void  BrickUP::setDomain( Domain *theDomain ) 
-{  
+void  BrickUP::setDomain( Domain *theDomain )
+{
   int i,dof ;
 
   // Check Domain is not null - invoked when object removed from a domain
   if (theDomain == 0) {
-    for ( i=0; i<8; i++ ) 
+    for ( i=0; i<8; i++ )
     nodePointers[i] = 0;
 	return;
   }
@@ -183,7 +183,7 @@ void  BrickUP::setDomain( Domain *theDomain )
 	   opserr << "FATAL ERROR BrickUP ("<<this->getTag()<<"): node not found in domain"<<endln;
 	   return;
      }
-     
+
      dof = nodePointers[i]->getNumberDOF();
      if (dof != 4) {
 	   opserr << "FATAL ERROR BrickUP ("<<this->getTag()<<"): has differing number of DOFs at its nodes"<<endln;
@@ -199,25 +199,25 @@ void  BrickUP::setDomain( Domain *theDomain )
 int  BrickUP::getNumExternalNodes( ) const
 {
   return 8 ;
-} 
- 
+}
+
 
 //return connected external nodes
-const ID&  BrickUP::getExternalNodes( ) 
+const ID&  BrickUP::getExternalNodes( )
 {
   return connectedExternalNodes ;
-} 
+}
 
 //return connected external node
-Node **  
-BrickUP::getNodePtrs(void) 
+Node **
+BrickUP::getNodePtrs(void)
 {
   return nodePointers ;
-} 
+}
 
 
 //return number of dofs
-int  BrickUP::getNumDOF( ) 
+int  BrickUP::getNumDOF( )
 {
   return 32 ;
 }
@@ -231,38 +231,38 @@ int  BrickUP::commitState( )
   // call element commitState to do any base class stuff
   if ((success = this->Element::commitState()) != 0) {
     opserr << "BrickUP::commitState () - failed in base class";
-  }    
+  }
 
-  for (int i=0; i<8; i++ ) 
+  for (int i=0; i<8; i++ )
     success += materialPointers[i]->commitState( ) ;
-  
+
   return success ;
 }
- 
 
 
-//revert to last commit 
-int  BrickUP::revertToLastCommit( ) 
+
+//revert to last commit
+int  BrickUP::revertToLastCommit( )
 {
   int i ;
   int success = 0 ;
 
-  for ( i=0; i<8; i++ ) 
+  for ( i=0; i<8; i++ )
     success += materialPointers[i]->revertToLastCommit( ) ;
-  
+
   return success ;
 }
-    
 
-//revert to start 
-int  BrickUP::revertToStart( ) 
+
+//revert to start
+int  BrickUP::revertToStart( )
 {
   int i ;
   int success = 0 ;
 
-  for ( i=0; i<8; i++ ) 
+  for ( i=0; i<8; i++ )
     success += materialPointers[i]->revertToStart( ) ;
-  
+
   return success ;
 }
 
@@ -273,18 +273,18 @@ void  BrickUP::Print( OPS_Stream &s, int flag )
   if (flag == 2) {
 
     s << "#Brick\n";
-    
+
     int i;
     const int numNodes = 8;
     const int nstress = 6 ;
-    
+
     for (i=0; i<numNodes; i++) {
       const Vector &nodeCrd = nodePointers[i]->getCrds();
       const Vector &nodeDisp = nodePointers[i]->getDisp();
       s << "#NODE " << nodeCrd(0) << " " << nodeCrd(1) << " " << nodeCrd(2)
 	<< " " << nodeDisp(0) << " " << nodeDisp(1) << " " << nodeDisp(2) << endln;
      }
-    
+
     // spit out the section location & invoke print on the scetion
     const int numMaterials = 8;
 
@@ -312,8 +312,8 @@ void  BrickUP::Print( OPS_Stream &s, int flag )
     /*
     for (i=0; i<numMaterials; i++) {
       s << "#MATERIAL\n";
-      //      materialPointers[i]->Print(s, flag); 
-      s << materialPointers[i]->getStress(); 
+      //      materialPointers[i]->Print(s, flag);
+      s << materialPointers[i]->getStress();
     }
     */
 
@@ -330,39 +330,39 @@ void  BrickUP::Print( OPS_Stream &s, int flag )
     s << "Node 6 : " << connectedExternalNodes(5) << endln ;
     s << "Node 7 : " << connectedExternalNodes(6) << endln ;
     s << "Node 8 : " << connectedExternalNodes(7) << endln ;
-    
+
     s << "Material Information : \n " ;
     materialPointers[0]->Print( s, flag ) ;
-    
+
     s << endln ;
   }
 }
- 
- 
-//return stiffness matrix 
-const Matrix&  BrickUP::getTangentStiff( ) 
+
+
+//return stiffness matrix
+const Matrix&  BrickUP::getTangentStiff( )
 {
-  int tang_flag = 1 ; //get the tangent 
+  int tang_flag = 1 ; //get the tangent
 
   //do tangent and residual here
-  formResidAndTangent( tang_flag ) ;  
+  formResidAndTangent( tang_flag ) ;
 
   return stiff ;
-}    
+}
 
 
-//return secant matrix 
-//const Matrix&  BrickUP::getSecantStiff( ) 
+//return secant matrix
+//const Matrix&  BrickUP::getSecantStiff( )
 
-const Matrix&  BrickUP::getInitialStiff( ) 
+const Matrix&  BrickUP::getInitialStiff( )
 {
   if (Ki != 0)
     return *Ki;
 
-  //strains ordered : eps11, eps22, eps33, 2*eps12, 2*eps23, 2*eps31 
+  //strains ordered : eps11, eps22, eps33, 2*eps12, 2*eps23, 2*eps31
   static const int ndm = 3 ;
-  static const int ndf = 3 ; 
-  static const int ndff = 4 ; 
+  static const int ndf = 3 ;
+  static const int ndff = 4 ;
   static const int nstress = 6 ;
   static const int numberNodes = 8 ;
   static const int numberGauss = 8 ;
@@ -372,13 +372,13 @@ const Matrix&  BrickUP::getInitialStiff( )
   int jj, kk ;
 
   static double volume ;
-  static double xsj ;  // determinant jacaobian matrix 
+  static double xsj ;  // determinant jacaobian matrix
   static double dvol[numberGauss] ; //volume element
   static double gaussPoint[ndm] ;
   static Vector strain(nstress) ;  //strain
   static double shp[nShape][numberNodes] ;  //shape functions at a gauss point
   static double Shape[nShape][numberNodes][numberGauss] ; //all the shape functions
-  static Matrix stiffJK(ndf,ndf) ; //nodeJK stiffness 
+  static Matrix stiffJK(ndf,ndf) ; //nodeJK stiffness
   static Matrix dd(nstress,nstress) ;  //material tangent
 
 
@@ -394,14 +394,14 @@ const Matrix&  BrickUP::getInitialStiff( )
 
   //-------------------------------------------------------
 
-  
-  //zero stiffness and residual 
+
+  //zero stiffness and residual
   stiff.Zero( ) ;
 
   //compute basis vectors and local nodal coordinates
   computeBasis( ) ;
 
-  //gauss loop to compute and save shape functions 
+  //gauss loop to compute and save shape functions
 
   int count = 0 ;
   volume = 0.0 ;
@@ -410,11 +410,11 @@ const Matrix&  BrickUP::getInitialStiff( )
     for ( j = 0; j < 2; j++ ) {
       for ( k = 0; k < 2; k++ ) {
 
-        gaussPoint[0] = sg[i] ;        
-	gaussPoint[1] = sg[j] ;        
+        gaussPoint[0] = sg[i] ;
+	gaussPoint[1] = sg[j] ;
 	gaussPoint[2] = sg[k] ;
 
-	//get shape functions    
+	//get shape functions
 	shp3d( gaussPoint, xsj, shp, xl ) ;
 
 	//save shape functions
@@ -425,7 +425,7 @@ const Matrix&  BrickUP::getInitialStiff( )
 
 
 	//volume element to also be saved
-	dvol[count] = wg[count] * xsj ;  
+	dvol[count] = wg[count] * xsj ;
 
 	//volume += dvol[count] ;
 
@@ -433,10 +433,10 @@ const Matrix&  BrickUP::getInitialStiff( )
 
       } //end for k
     } //end for j
-  } // end for i 
-  
+  } // end for i
 
-  //gauss loop 
+
+  //gauss loop
   for ( i = 0; i < numberGauss; i++ ) {
 
     //extract shape functions from saved array
@@ -448,31 +448,31 @@ const Matrix&  BrickUP::getInitialStiff( )
 
     dd = materialPointers[i]->getInitialTangent( ) ;
     dd *= dvol[i] ;
-    
+
     jj = 0;
     for ( j = 0; j < numberNodes; j++ ) {
 
       BJ = computeB( j, shp ) ;
-   
-      //transpose 
+
+      //transpose
       //BJtran = transpose( nstress, ndf, BJ ) ;
       for (p=0; p<ndf; p++) {
-	for (q=0; q<nstress; q++) 
+	for (q=0; q<nstress; q++)
 	  BJtran(p,q) = BJ(q,p) ;
       }//end for p
 
       //BJtranD = BJtran * dd ;
       BJtranD.addMatrixProduct(0.0,  BJtran, dd, 1.0) ;
-      
+
       kk = 0 ;
       for ( k = 0; k < numberNodes; k++ ) {
-	
+
 	BK = computeB( k, shp ) ;
-	
-	
+
+
 	//stiffJK =  BJtranD * BK  ;
 	stiffJK.addMatrixProduct(0.0,  BJtranD, BK, 1.0) ;
-	
+
 	for ( p = 0; p < ndf; p++ )  {
 	  for ( q = 0; q < ndf; q++ )
 	    stiff( jj+p, kk+q ) += stiffJK( p, q ) ;
@@ -485,46 +485,46 @@ const Matrix&  BrickUP::getInitialStiff( )
       jj += ndff ;
 
     } // end for j loop
-  } //end for i gauss loop 
+  } //end for i gauss loop
 
   Ki = new Matrix(stiff);
 
   return stiff ;
-}    
+}
 
 
 //return mass matrix
-const Matrix&  BrickUP::getMass( ) 
+const Matrix&  BrickUP::getMass( )
 {
   int tangFlag = 1 ;
 
   formInertiaTerms( tangFlag ) ;
 
   return mass ;
-} 
+}
 
 
 //return mass matrix
-const Matrix&  BrickUP::getDamp( ) 
+const Matrix&  BrickUP::getDamp( )
 {
   int tangFlag = 1 ;
 
   formDampingTerms( tangFlag ) ;
 
   return damp ;
-} 
+}
 
 void BrickUP::formDampingTerms( int tangFlag )
 {
   static const int ndm = 3 ;
-  static const int ndf = 3 ; 
+  static const int ndf = 3 ;
   static const int ndff = 4 ;
   static const int numberNodes = 8 ;
   static const int numberGauss = 8 ;
   static const int numberDOFs = 32 ;
   static const int nShape = 4 ;
   static double volume ;
-  static double xsj ;  // determinant jacaobian matrix 
+  static double xsj ;  // determinant jacaobian matrix
   static double dvol[numberGauss] ; //volume element
   static double shp[nShape][numberNodes] ;  //shape functions at a gauss point
   static double Shape[nShape][numberNodes][numberGauss] ; //all the shape functions
@@ -536,7 +536,7 @@ void BrickUP::formDampingTerms( int tangFlag )
   //double temp, rhot, massJK ;
 
 
-  //zero damp 
+  //zero damp
   damp.Zero( ) ;
 
   //compute basis vectors and local nodal coordinates
@@ -545,7 +545,7 @@ void BrickUP::formDampingTerms( int tangFlag )
   //zero volume
   volume = 0.0 ;
 
-  //gauss loop to compute and save shape functions 
+  //gauss loop to compute and save shape functions
 
   int count = 0 ;
 
@@ -553,11 +553,11 @@ void BrickUP::formDampingTerms( int tangFlag )
     for ( j = 0; j < 2; j++ ) {
       for ( k = 0; k < 2; k++ ) {
 
-        gaussPoint[0] = sg[i] ;        
-	gaussPoint[1] = sg[j] ;        
+        gaussPoint[0] = sg[i] ;
+	gaussPoint[1] = sg[j] ;
 	gaussPoint[2] = sg[k] ;
 
-	//get shape functions    
+	//get shape functions
 	shp3d( gaussPoint, xsj, shp, xl ) ;
 
 	//save shape functions
@@ -568,7 +568,7 @@ void BrickUP::formDampingTerms( int tangFlag )
 
 
 	//volume element to also be saved
-	dvol[count] = wg[count] * xsj ;  
+	dvol[count] = wg[count] * xsj ;
 
         //add to volume
 	volume += dvol[count] ;
@@ -577,14 +577,14 @@ void BrickUP::formDampingTerms( int tangFlag )
 
       } //end for k
     } //end for j
-  } // end for i 
+  } // end for i
 
   if (betaK != 0.0)
-    damp.addMatrix(1.0, this->getTangentStiff(), betaK);      
+    damp.addMatrix(1.0, this->getTangentStiff(), betaK);
   if (betaK0 != 0.0)
-    damp.addMatrix(1.0, this->getInitialStiff(), betaK0);      
+    damp.addMatrix(1.0, this->getInitialStiff(), betaK0);
   if (betaKc != 0.0)
-    damp.addMatrix(1.0, *Kc, betaKc);      
+    damp.addMatrix(1.0, *Kc, betaKc);
 
 
   if (alphaM != 0.0) {
@@ -595,7 +595,7 @@ void BrickUP::formDampingTerms( int tangFlag )
         damp(i+1,j+1) += mass(i+1,j+1)*alphaM;
         damp(i+2,j+2) += mass(i+2,j+2)*alphaM;
 	  }
-    }  
+    }
   }
 
   // Compute coupling matrix
@@ -613,7 +613,7 @@ void BrickUP::formDampingTerms( int tangFlag )
       damp(j,i+2) = damp(i+2,j);
     }
   }
-  
+
   // Compute permeability matrix
   for (i = 3; i < numberDOFs; i += ndff) {
     int i1 = (i-3) / ndff;
@@ -631,14 +631,14 @@ void BrickUP::formDampingTerms( int tangFlag )
     for ( k = 0; k < numberNodes; k++ ) {
       const Vector &vel = nodePointers[k]->getTrialVel();
 	  for ( p = 0; p < ndff; p++ )
-		  a( k*ndff+p ) = vel(p); 
+		  a( k*ndff+p ) = vel(p);
 	} // end for k loop
 
     resid.addMatrixVector(1.0,damp,a,1.0);
-  } // end if tang_flag 
+  } // end if tang_flag
 
   return ;
-} 
+}
 
 
 void  BrickUP::zeroLoad( )
@@ -650,7 +650,7 @@ void  BrickUP::zeroLoad( )
 }
 
 
-int 
+int
 BrickUP::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
   opserr << "BrickUP::addLoad - load type unknown for truss with tag: " << this->getTag() << endln;
@@ -662,8 +662,8 @@ BrickUP::addInertiaLoadToUnbalance(const Vector &accel)
 {
   static const int numberNodes = 8 ;
   static const int numberGauss = 8 ;
-  static const int ndf = 3 ; 
-  static const int ndff = 4 ; 
+  static const int ndf = 3 ;
+  static const int ndff = 4 ;
 
   int i;
 
@@ -678,22 +678,22 @@ BrickUP::addInertiaLoadToUnbalance(const Vector &accel)
     for (int j=0; j<ndf; j++)
       resid(count++) = Raccel(j);
 
-	resid(count++) = 0.0;  
+	resid(count++) = 0.0;
   }
 
   // create the load vector if one does not exist
-  if (load == 0) 
+  if (load == 0)
     load = new Vector(numberNodes*ndff);
 
   // add -M * RV(accel) to the load vector
   load->addMatrixVector(1.0, mass, resid, -1.0);
-  
+
   return 0;
 }
 
 
 //get residual
-const Vector&  BrickUP::getResistingForce( ) 
+const Vector&  BrickUP::getResistingForce( )
 {
   int tang_flag = 0 ; //don't get the tangent
 
@@ -702,7 +702,7 @@ const Vector&  BrickUP::getResistingForce( )
   if (load != 0)
     resid -= *load;
 
-  return resid ;   
+  return resid ;
 }
 
 
@@ -713,7 +713,7 @@ const Vector&  BrickUP::getResistingForceIncInertia( )
 
   int tang_flag = 0 ; //don't get the tangent
 
-  //do tangent and residual here 
+  //do tangent and residual here
   formResidAndTangent( tang_flag ) ;
 
   formInertiaTerms( tang_flag ) ;
@@ -732,17 +732,17 @@ const Vector&  BrickUP::getResistingForceIncInertia( )
 //*********************************************************************
 //form inertia terms
 
-void   BrickUP::formInertiaTerms( int tangFlag ) 
+void   BrickUP::formInertiaTerms( int tangFlag )
 {
   static const int ndm = 3 ;
-  static const int ndf = 3 ; 
+  static const int ndf = 3 ;
   static const int ndff = 4 ;
   static const int numberNodes = 8 ;
   static const int numberGauss = 8 ;
   static const int nShape = 4 ;
   static const int massIndex = nShape - 1 ;
   static double volume ;
-  static double xsj ;  // determinant jacaobian matrix 
+  static double xsj ;  // determinant jacaobian matrix
   static double dvol[numberGauss] ; //volume element
   static double shp[nShape][numberNodes] ;  //shape functions at a gauss point
   static double Shape[nShape][numberNodes][numberGauss] ; //all the shape functions
@@ -755,7 +755,7 @@ void   BrickUP::formInertiaTerms( int tangFlag )
   double temp, rhot, massJK ;
 
 
-  //zero mass 
+  //zero mass
   mass.Zero( ) ;
 
   //compute basis vectors and local nodal coordinates
@@ -764,7 +764,7 @@ void   BrickUP::formInertiaTerms( int tangFlag )
   //zero volume
   volume = 0.0 ;
 
-  //gauss loop to compute and save shape functions 
+  //gauss loop to compute and save shape functions
 
   int count = 0 ;
 
@@ -772,11 +772,11 @@ void   BrickUP::formInertiaTerms( int tangFlag )
     for ( j = 0; j < 2; j++ ) {
       for ( k = 0; k < 2; k++ ) {
 
-        gaussPoint[0] = sg[i] ;        
-	gaussPoint[1] = sg[j] ;        
+        gaussPoint[0] = sg[i] ;
+	gaussPoint[1] = sg[j] ;
 	gaussPoint[2] = sg[k] ;
 
-	//get shape functions    
+	//get shape functions
 	shp3d( gaussPoint, xsj, shp, xl ) ;
 
 	//save shape functions
@@ -787,7 +787,7 @@ void   BrickUP::formInertiaTerms( int tangFlag )
 
 
 	//volume element to also be saved
-	dvol[count] = wg[count] * xsj ;  
+	dvol[count] = wg[count] * xsj ;
 
         //add to volume
 	volume += dvol[count] ;
@@ -796,9 +796,9 @@ void   BrickUP::formInertiaTerms( int tangFlag )
 
       } //end for k
     } //end for j
-  } // end for i 
+  } // end for i
 
-  //gauss loop 
+  //gauss loop
   for ( i = 0; i < numberGauss; i++ ) {
 
     //extract shape functions from saved array
@@ -807,7 +807,7 @@ void   BrickUP::formInertiaTerms( int tangFlag )
 	  shp[p][q]  = Shape[p][q][i] ;
     } // end for p
 
-    // average material density 
+    // average material density
       rhot = mixtureRho(i);
 
     //mass and compressibility calculations node loops
@@ -825,9 +825,9 @@ void   BrickUP::formInertiaTerms( int tangFlag )
 
 	    massJK = temp * shp[massIndex][k] ;
 
-            for ( p = 0; p < ndf; p++ )  
+            for ( p = 0; p < ndf; p++ )
 	          mass( jj+p, kk+p ) += massJK ;
-            
+
             // Compute compressibility terms
             mass( jj+3, kk+3 ) += -dvol[i]*Shape[3][j][i]*Shape[3][k][i]/kc;
 
@@ -837,29 +837,29 @@ void   BrickUP::formInertiaTerms( int tangFlag )
       jj += ndff ;
     } // end for j loop
 
-  } //end for i gauss loop 
+  } //end for i gauss loop
 
   if ( tangFlag == 0 ) {
     for ( k = 0; k < numberNodes; k++ ) {
       const Vector &acc = nodePointers[k]->getTrialAccel();
 	  for ( p = 0; p < ndff; p++ )
-		  a( k*ndff+p ) = acc(p); 
+		  a( k*ndff+p ) = acc(p);
 	} // end for k loop
 
     resid.addMatrixVector(1.0,mass,a,1.0);
-  } // end if tang_flag 
+  } // end if tang_flag
 }
 
 //*********************************************************************
 //form residual and tangent
-void  BrickUP::formResidAndTangent( int tang_flag ) 
+void  BrickUP::formResidAndTangent( int tang_flag )
 {
 
-  //strains ordered : eps11, eps22, eps33, 2*eps12, 2*eps23, 2*eps31 
+  //strains ordered : eps11, eps22, eps33, 2*eps12, 2*eps23, 2*eps31
 
   static const int ndm = 3 ;
-  static const int ndf = 3 ; 
-  static const int ndff = 4 ; 
+  static const int ndf = 3 ;
+  static const int ndff = 4 ;
   static const int nstress = 6 ;
   static const int numberNodes = 8 ;
   static const int numberGauss = 8 ;
@@ -869,16 +869,16 @@ void  BrickUP::formResidAndTangent( int tang_flag )
   int jj, kk ;
 
   int success ;
-  
+
   static double volume ;
-  static double xsj ;  // determinant jacaobian matrix 
+  static double xsj ;  // determinant jacaobian matrix
   static double dvol[numberGauss] ; //volume element
   static double gaussPoint[ndm] ;
   static Vector strain(nstress) ;  //strain
   static double shp[nShape][numberNodes] ;  //shape functions at a gauss point
   static double Shape[nShape][numberNodes][numberGauss] ; //all the shape functions
-  static Vector residJ(ndf) ; //nodeJ residual 
-  static Matrix stiffJK(ndf,ndf) ; //nodeJK stiffness 
+  static Vector residJ(ndf) ; //nodeJ residual
+  static Matrix stiffJK(ndf,ndf) ; //nodeJK stiffness
   static Vector stress(nstress) ;  //stress
   static Matrix dd(nstress,nstress) ;  //material tangent
 
@@ -890,15 +890,15 @@ void  BrickUP::formResidAndTangent( int tang_flag )
     static Matrix BJtranD(ndf,nstress) ;
   //-------------------------------------------------------
 
-  
-  //zero stiffness and residual 
+
+  //zero stiffness and residual
   stiff.Zero( ) ;
   resid.Zero( ) ;
 
   //compute basis vectors and local nodal coordinates
   computeBasis( ) ;
 
-  //gauss loop to compute and save shape functions 
+  //gauss loop to compute and save shape functions
 
   int count = 0 ;
   volume = 0.0 ;
@@ -907,11 +907,11 @@ void  BrickUP::formResidAndTangent( int tang_flag )
     for ( j = 0; j < 2; j++ ) {
       for ( k = 0; k < 2; k++ ) {
 
-        gaussPoint[0] = sg[i] ;        
-	gaussPoint[1] = sg[j] ;        
+        gaussPoint[0] = sg[i] ;
+	gaussPoint[1] = sg[j] ;
 	gaussPoint[2] = sg[k] ;
 
-	//get shape functions    
+	//get shape functions
 	shp3d( gaussPoint, xsj, shp, xl ) ;
 
 	//save shape functions
@@ -922,7 +922,7 @@ void  BrickUP::formResidAndTangent( int tang_flag )
 
 
 	//volume element to also be saved
-	dvol[count] = wg[count] * xsj ;  
+	dvol[count] = wg[count] * xsj ;
 
 	//volume += dvol[count] ;
 
@@ -930,10 +930,10 @@ void  BrickUP::formResidAndTangent( int tang_flag )
 
       } //end for k
     } //end for j
-  } // end for i 
-  
+  } // end for i
 
-  //gauss loop 
+
+  //gauss loop
   for ( i = 0; i < numberGauss; i++ ) {
 
     //extract shape functions from saved array
@@ -948,26 +948,26 @@ void  BrickUP::formResidAndTangent( int tang_flag )
     //zero the strains
     strain.Zero( ) ;
 
-    // j-node loop to compute strain 
+    // j-node loop to compute strain
     for ( j = 0; j < numberNodes; j++ )  {
 
-      //compute B matrix 
+      //compute B matrix
       BJ = computeB( j, shp ) ;
-      
-      //nodal displacements 
+
+      //nodal displacements
       const Vector &ul = nodePointers[j]->getTrialDisp( ) ;
       Vector ul3(3);
 	  ul3(0) = ul(0);
       ul3(1) = ul(1);
 	  ul3(2) = ul(2);
       //compute the strain
-      //strain += (BJ*ul) ; 
+      //strain += (BJ*ul) ;
       strain.addMatrixVector(1.0,BJ,ul3,1.0 ) ;
 
     } // end for j
-  
-    //send the strain to the material 
-    success = materialPointers[i]->setTrialStrain( strain ) ;  
+
+    //send the strain to the material
+    success = materialPointers[i]->setTrialStrain( strain ) ;
 
 
     //residual and tangent calculations node loops
@@ -992,11 +992,11 @@ void  BrickUP::formResidAndTangent( int tang_flag )
     for ( j = 0; j < numberNodes; j++ ) {
 
       BJ = computeB( j, shp ) ;
-   
-      //transpose 
+
+      //transpose
       //BJtran = transpose( nstress, ndf, BJ ) ;
       for (p=0; p<ndf; p++) {
-	    for (q=0; q<nstress; q++) 
+	    for (q=0; q<nstress; q++)
 	      BJtran(p,q) = BJ(q,p) ;
       }//end for p
 
@@ -1026,7 +1026,7 @@ void  BrickUP::formResidAndTangent( int tang_flag )
          for ( k = 0; k < numberNodes; k++ ) {
 
             BK = computeB( k, shp ) ;
-  
+
             //stiffJK =  BJtranD * BK  ;
 	        stiffJK.addMatrixProduct(0.0,  BJtranD,BK,1.0) ;
 
@@ -1038,14 +1038,14 @@ void  BrickUP::formResidAndTangent( int tang_flag )
             kk += ndff ;
           } // end for k loop
 
-      } // end if tang_flag 
+      } // end if tang_flag
 
       jj += ndff ;
     } // end for j loop
 
-  } //end for i gauss loop 
+  } //end for i gauss loop
 
-  
+
   return ;
 }
 
@@ -1063,10 +1063,10 @@ double BrickUP::mixtureRho(int i)
 //************************************************************************
 //compute local coordinates and basis
 
-void   BrickUP::computeBasis( ) 
+void   BrickUP::computeBasis( )
 {
 
-  //nodal coordinates 
+  //nodal coordinates
 
   int i ;
   for ( i = 0; i < 8; i++ ) {
@@ -1077,14 +1077,14 @@ void   BrickUP::computeBasis( )
        xl[1][i] = coorI(1) ;
        xl[2][i] = coorI(2) ;
 
-  }  //end for i 
+  }  //end for i
 
 }
 
 //*************************************************************************
 //compute B
 
-const Matrix&   
+const Matrix&
 BrickUP::computeB( int node, const double shp[4][8] )
 {
 
@@ -1093,13 +1093,13 @@ BrickUP::computeB( int node, const double shp[4][8] )
 //---B Matrix in standard {1,2,3} mechanics notation---------
 //
 //                -                   -
-//               | N,1      0     0    | 
+//               | N,1      0     0    |
 //   B       =   |   0     N,2    0    |
 //               |   0      0     N,3  |   (6x3)
 //               | N,2     N,1     0   |
 //               |   0     N,3    N,2  |
 //               | N,3      0     N,1  |
-//                -                   -       
+//                -                   -
 //
 //-------------------------------------------------------------------
 
@@ -1125,9 +1125,9 @@ BrickUP::computeB( int node, const double shp[4][8] )
 
 //***********************************************************************
 
-Matrix  BrickUP::transpose( int dim1, 
-                                       int dim2, 
-		                       const Matrix &M ) 
+Matrix  BrickUP::transpose( int dim1,
+                                       int dim2,
+		                       const Matrix &M )
 {
   int i ;
   int j ;
@@ -1135,7 +1135,7 @@ Matrix  BrickUP::transpose( int dim1,
   Matrix Mtran( dim2, dim1 ) ;
 
   for ( i = 0; i < dim1; i++ ) {
-     for ( j = 0; j < dim2; j++ ) 
+     for ( j = 0; j < dim2; j++ )
          Mtran(j,i) = M(i,j) ;
   } // end for i
 
@@ -1147,22 +1147,42 @@ Matrix  BrickUP::transpose( int dim1,
 int  BrickUP::sendSelf (int commitTag, Channel &theChannel)
 {
   int res = 0;
-  
+
   // note: we don't check for dataTag == 0 for Element
   // objects as that is taken care of in a commit by the Domain
   // object - don't want to have to do the check if sending data
   int dataTag = this->getDbTag();
-  
-  // Quad packs its data into a Vector and sends this to theChannel
+
+  // BrickUP packs its data into a Vector and sends this to theChannel
   // along with its dbTag and the commitTag passed in the arguments
+  static Vector data(13);
+  data(0) = this->getTag();
+  data(1) = rho;
+  data(2) = b[0];
+  data(3) = b[1];
+  data(4) = b[2];
 
-  // Now quad sends the ids of its materials
+  data(5) = alphaM;
+  data(6) = betaK;
+  data(7) = betaK0;
+  data(8) = betaKc;
+
+  data( 9) = kc;
+  data(10) = perm[0];
+  data(11) = perm[1];
+  data(12) = perm[2];
+
+  res += theChannel.sendVector(dataTag, commitTag, data);
+  if (res < 0) {
+    opserr << "WARNING BrickUP::sendSelf() - " << this->getTag() << " failed to send Vector\n";
+    return res;
+  }
+
+  // Now BrickUP sends the ids of its materials
   int matDbTag;
-  
-  static ID idData(25);
 
-  idData(24) = this->getTag();
-  
+  static ID idData(24);
+
   int i;
   for (i = 0; i < 8; i++) {
     idData(i) = materialPointers[i]->getClassTag();
@@ -1176,7 +1196,7 @@ int  BrickUP::sendSelf (int commitTag, Channel &theChannel)
     }
     idData(i+8) = matDbTag;
   }
-  
+
   idData(16) = connectedExternalNodes(0);
   idData(17) = connectedExternalNodes(1);
   idData(18) = connectedExternalNodes(2);
@@ -1193,7 +1213,7 @@ int  BrickUP::sendSelf (int commitTag, Channel &theChannel)
   }
 
 
-  // Finally, quad asks its material objects to send themselves
+  // Finally, BrickUP asks its material objects to send themselves
   for (i = 0; i < 8; i++) {
     res += materialPointers[i]->sendSelf(commitTag, theChannel);
     if (res < 0) {
@@ -1201,28 +1221,51 @@ int  BrickUP::sendSelf (int commitTag, Channel &theChannel)
       return res;
     }
   }
-  
+
   return res;
 
 }
-    
-int  BrickUP::recvSelf (int commitTag, 
-		       Channel &theChannel, 
+
+int  BrickUP::recvSelf (int commitTag,
+		       Channel &theChannel,
 		       FEM_ObjectBroker &theBroker)
 {
   int res = 0;
-  
+
   int dataTag = this->getDbTag();
 
-  static ID idData(25);
-  // Quad now receives the tags of its four external nodes
+  // BrickUP creates a Vector, receives the Vector and then sets the
+  // internal data with the data in the Vector
+  static Vector data(13);
+  res += theChannel.recvVector(dataTag, commitTag, data);
+  if (res < 0) {
+    opserr << "WARNING FourNodeQuadUP::recvSelf() - failed to receive Vector\n";
+    return res;
+  }
+
+  this->setTag((int)data(0));
+  rho = data(1);
+  b[0] = data(2);
+  b[1] = data(3);
+  b[2] = data(4);
+
+  alphaM = data(5);
+  betaK = data(6);
+  betaK0 = data(7);
+  betaKc = data(8);
+
+  kc = data(9);
+  perm[0] = data(10);
+  perm[1] = data(11);
+  perm[2] = data(12);
+
+  static ID idData(24);
+  // brickUP now receives the tags of its four external nodes
   res += theChannel.recvID(dataTag, commitTag, idData);
   if (res < 0) {
     opserr << "WARNING BrickUP::recvSelf() - " << this->getTag() << " failed to receive ID\n";
     return res;
   }
-
-  this->setTag(idData(24));
 
   connectedExternalNodes(0) = idData(16);
   connectedExternalNodes(1) = idData(17);
@@ -1232,10 +1275,17 @@ int  BrickUP::recvSelf (int commitTag,
   connectedExternalNodes(5) = idData(21);
   connectedExternalNodes(6) = idData(22);
   connectedExternalNodes(7) = idData(23);
-  
+
 
   int i;
+
   if (materialPointers[0] == 0) {
+    // Allocate new materials
+    //materialPointers = new NDMaterial[8];
+    //if (materialPointers == 0) {
+    //  opserr << "BrickUP::recvSelf() - Could not allocate NDMaterial array\n";
+    //  return -1;
+    //}
     for (i = 0; i < 8; i++) {
       int matClassTag = idData(i);
       int matDbTag = idData(i+8);
@@ -1249,7 +1299,7 @@ int  BrickUP::recvSelf (int commitTag,
       materialPointers[i]->setDbTag(matDbTag);
       res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	opserr << "NLBeamColumn3d::recvSelf() - material " << i << "failed to recv itself\n";
+	opserr << "BrickUP::recvSelf() - material " << i << "failed to recv itself\n";
 	return res;
       }
     }
@@ -1269,10 +1319,9 @@ int  BrickUP::recvSelf (int commitTag,
 	    matClassTag << endln;
 	  exit(-1);
 	}
-      materialPointers[i]->setDbTag(matDbTag);
       }
       // Receive the material
-
+      materialPointers[i]->setDbTag(matDbTag);
       res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
 	opserr << "BrickUP::recvSelf() - material " << i << "failed to recv itself\n";
@@ -1290,14 +1339,14 @@ BrickUP::displaySelf(Renderer &theViewer, int displayMode, float fact)
 {
 
     const Vector &end1Crd = nodePointers[0]->getCrds();
-    const Vector &end2Crd = nodePointers[1]->getCrds();	
-    const Vector &end3Crd = nodePointers[2]->getCrds();	
-    const Vector &end4Crd = nodePointers[3]->getCrds();	
+    const Vector &end2Crd = nodePointers[1]->getCrds();
+    const Vector &end3Crd = nodePointers[2]->getCrds();
+    const Vector &end4Crd = nodePointers[3]->getCrds();
 
     const Vector &end5Crd = nodePointers[4]->getCrds();
-    const Vector &end6Crd = nodePointers[5]->getCrds();	
-    const Vector &end7Crd = nodePointers[6]->getCrds();	
-    const Vector &end8Crd = nodePointers[7]->getCrds();	
+    const Vector &end6Crd = nodePointers[5]->getCrds();
+    const Vector &end7Crd = nodePointers[6]->getCrds();
+    const Vector &end8Crd = nodePointers[7]->getCrds();
 
     const Vector &end1Disp = nodePointers[0]->getDisp();
     const Vector &end2Disp = nodePointers[1]->getDisp();
@@ -1337,8 +1386,8 @@ BrickUP::displaySelf(Renderer &theViewer, int displayMode, float fact)
     int i;
     for (i = 0; i < 3; i++) {
       coords(0,i) = end1Crd(i) + end1Disp(i)*fact;
-      coords(1,i) = end2Crd(i) + end2Disp(i)*fact;    
-      coords(2,i) = end3Crd(i) + end3Disp(i)*fact;    
+      coords(1,i) = end2Crd(i) + end2Disp(i)*fact;
+      coords(2,i) = end3Crd(i) + end3Disp(i)*fact;
       coords(3,i) = end4Crd(i) + end4Disp(i)*fact;
     }
 
@@ -1470,16 +1519,16 @@ BrickUP::setResponse(const char **argv, int argc, OPS_Stream &output)
     }
 
     theResponse = new ElementResponse(this, 1, resid);
-    
+
   }   else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0) {
     theResponse = new ElementResponse(this, 2, stiff);
-    
+
   }   else if (strcmp(argv[0],"mass") == 0) {
     theResponse = new ElementResponse(this, 3, mass);
-    
+
   }   else if (strcmp(argv[0],"damp") == 0) {
     theResponse = new ElementResponse(this, 4, damp);
-    
+
   } else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
     int pointNum = atoi(argv[1]);
     if (pointNum > 0 && pointNum <= 8) {
@@ -1488,7 +1537,7 @@ BrickUP::setResponse(const char **argv, int argc, OPS_Stream &output)
       output.attr("number",pointNum);
 
       theResponse =  materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, output);
-      
+
       output.endTag(); // GaussPoint
     }
 
@@ -1506,20 +1555,20 @@ BrickUP::setResponse(const char **argv, int argc, OPS_Stream &output)
       output.tag("ResponseType","sigma33");
       output.tag("ResponseType","sigma12");
       output.tag("ResponseType","sigma13");
-      output.tag("ResponseType","sigma23");      
+      output.tag("ResponseType","sigma23");
 
       output.endTag(); // NdMaterialOutput
       output.endTag(); // GaussPoint
     }
     theResponse = new ElementResponse(this, 5, Vector(48));
   }
-  
+
   output.endTag(); // ElementOutput
   return theResponse;
 
 }
 
-int 
+int
 BrickUP::getResponse(int responseID, Information &eleInfo)
 {
   static Vector stresses(48);
@@ -1535,13 +1584,13 @@ BrickUP::getResponse(int responseID, Information &eleInfo)
 
   else if (responseID == 4)
     return eleInfo.setMatrix(this->getDamp());
-    
+
   else if (responseID == 5) {
-    
+
     // Loop over the integration points
     int cnt = 0;
     for (int i = 0; i < 8; i++) {
-      
+
       // Get material stress response
       const Vector &sigma = materialPointers[i]->getStress();
       stresses(cnt++) = sigma(0);
@@ -1552,9 +1601,9 @@ BrickUP::getResponse(int responseID, Information &eleInfo)
       stresses(cnt++) = sigma(5);
     }
     return eleInfo.setVector(stresses);
-    
+
   }
   else
-    
+
     return -1;
 }
