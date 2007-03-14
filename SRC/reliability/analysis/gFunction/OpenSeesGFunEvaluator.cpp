@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2007-02-16 20:29:41 $
+// $Revision: 1.15 $
+// $Date: 2007-03-14 00:35:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.cpp,v $
 
 
@@ -167,11 +167,9 @@ OpenSeesGFunEvaluator::tokenizeSpecials(TCL_Char *theExpression)
 {
   // Set value of OpenSees finite element response quantities 
   // appearing in the limit-state function in the Tcl domain
-  char buf[500]="";
-  char tempchar[100]="";
+  char tempchar[100];
   int i;
   double fileValue = 0.0;
-  char tclAssignment[500]="";
   
   //opserr << "OSGFE:: " << theExpression << endln;
   
