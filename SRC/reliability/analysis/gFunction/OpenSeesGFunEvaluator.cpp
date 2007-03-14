@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2007-03-14 00:35:23 $
+// $Revision: 1.16 $
+// $Date: 2007-03-14 00:38:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.cpp,v $
 
 
@@ -276,7 +276,7 @@ OpenSeesGFunEvaluator::createTclVariables()
 
     if ( strncmp(tokenPtr, "rec_node",8) == 0 ||
 	 strncmp(tokenPtr, "rec_element",11) == 0 ) {
-      if (Tcl_SetVar(theTclInterp, tokenPtr, "0.0", TCL_LIST_ELEMENT) == 0) {
+      if (Tcl_SetVar(theTclInterp, tokenPtr, "0.0", TCL_LIST_ELEMENT) == TCL_ERROR) {
 	opserr << "ERROR OpenSeesGFunEvaluator -- error in Tcl_SetVar for createTclVariables" << endln;
 	return -1;
       }
@@ -379,7 +379,7 @@ OpenSeesGFunEvaluator::rec_nodeTclVariable(char tempchar[100], char *variableNam
   
   char gString[80];
   sprintf(gString, "%25.20e", gFunValue);
-  if (Tcl_SetVar(theTclInterp, tempString, gString, TCL_LIST_ELEMENT) == 0) {
+  if (Tcl_SetVar(theTclInterp, tempString, gString, TCL_LIST_ELEMENT) == TCL_ERROR) {
     opserr << "ERROR OpenSeesGFunEvaluator -- error in Tcl_SetVar for rec_nodeTclVariable" << endln;
     return -1;
   }
@@ -486,7 +486,7 @@ OpenSeesGFunEvaluator::rec_elementTclVariable(char tempchar[100], char *variable
   
   char gString[80];
   sprintf(gString, "%25.20e", gFunValue);
-  if (Tcl_SetVar(theTclInterp, tempchar, gString, TCL_LIST_ELEMENT) == 0) {
+  if (Tcl_SetVar(theTclInterp, tempchar, gString, TCL_LIST_ELEMENT) == TCL_ERROR) {
     opserr << "ERROR OpenSeesGFunEvaluator -- error in Tcl_SetVar for rec_elementTclVariable" << endln;
     return -1;
   }
