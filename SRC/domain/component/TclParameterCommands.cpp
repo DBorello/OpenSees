@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-01-02 22:09:26 $
+// $Revision: 1.4 $
+// $Date: 2007-03-21 20:10:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/TclParameterCommands.cpp,v $
 
 #include <stdlib.h>
@@ -66,7 +66,7 @@ TclModelBuilderParameterCommand(ClientData clientData, Tcl_Interp *interp,
 
     DomainComponent *theObject;
 
-    if (strcmp(argv[2],"element") == 0) {
+    if (strstr(argv[2],"element") != 0) {
 
       if (argc < 4) {
 	opserr << "WARNING parameter -- insufficient number of arguments for parameter with tag " << paramTag << '\n';
@@ -84,10 +84,10 @@ TclModelBuilderParameterCommand(ClientData clientData, Tcl_Interp *interp,
 
       argStart = 4;
     }
-    else if (strcmp(argv[2],"node") == 0) {
+    else if (strstr(argv[2],"node") != 0) {
 
     }
-    else if (strcmp(argv[2],"loadPattern") == 0) {
+    else if (strstr(argv[2],"loadPattern") != 0) {
       if (argc < 4) {
 	opserr << "WARNING parameter -- insufficient number of arguments for parameter with tag " << paramTag << '\n';
 	return TCL_ERROR;
