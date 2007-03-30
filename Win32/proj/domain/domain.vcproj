@@ -208,6 +208,12 @@
 				RelativePath="..\..\..\SRC\domain\component\DomainComponent.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\domain\component\MaterialStageParameter.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\domain\component\MaterialStageParameter.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\domain\component\Parameter.cpp">
 			</File>
 			<File
