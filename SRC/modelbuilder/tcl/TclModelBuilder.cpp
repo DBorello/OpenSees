@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.33 $
-// $Date: 2006-10-02 20:09:08 $
+// $Revision: 1.34 $
+// $Date: 2007-03-30 01:53:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -2863,7 +2863,8 @@ TclModelBuilderUpdateMaterialStageCommand(ClientData clientData,
 					  Tcl_Interp *interp, 
 					  int argc, 
 					  TCL_Char **argv, 
-					  TclModelBuilder *theTclBuilder);
+					  TclModelBuilder *theTclBuilder,
+					  Domain *theDomain);
 int
 TclModelBuilder_UpdateMaterialStage(ClientData clientData, 
 				    Tcl_Interp *interp,  
@@ -2871,7 +2872,7 @@ TclModelBuilder_UpdateMaterialStage(ClientData clientData,
 				    TCL_Char **argv)
 {
   return TclModelBuilderUpdateMaterialStageCommand(clientData, interp, 
-				       argc, argv, theTclBuilder);
+						   argc, argv, theTclBuilder, theTclDomain);
 }
 
 /// added by ZHY
