@@ -1,6 +1,6 @@
 include ../../../Makefile.def
 
-OBJS       = DomainComponent.o Parameter.o TclParameterCommands.o
+OBJS       = DomainComponent.o Parameter.o TclParameterCommands.o MaterialStageParameter.o
 
 # Compilation control
 all:         $(OBJS)
