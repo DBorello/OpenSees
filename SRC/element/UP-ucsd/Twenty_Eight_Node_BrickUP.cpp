@@ -2293,6 +2293,30 @@ TwentyEightNodeBrickUP::displaySelf(Renderer &theViewer, int displayMode, float 
 }
 
 
+int
+TwentyEightNodeBrickUP::setParameter(const char **argv, int argc, Parameter &param)
+{
+  if (argc < 1)
+    return -1;
+
+  int res = -1;
+
+  int matRes = res;
+  for (int i=0; i<27; i++) {
+    matRes = materialPointers[i]->setParameter(argv, argc, param);
+    if (matRes != -1)
+      res = matRes;
+  }
+
+  return res;
+}
+    
+int
+TwentyEightNodeBrickUP::updateParameter(int parameterID, Information &info)
+{
+  return -1;
+}
+
 
 Response*
 TwentyEightNodeBrickUP::setResponse(const char **argv, int argc, OPS_Stream &output)

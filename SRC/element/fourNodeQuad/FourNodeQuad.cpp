@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2007-02-02 01:35:22 $
+// $Revision: 1.30 $
+// $Date: 2007-03-30 01:50:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -1027,6 +1027,8 @@ FourNodeQuad::setParameter(const char **argv, int argc, Parameter &param)
   if (argc < 1)
     return -1;
 
+  int res = -1;
+
   // quad mass density per unit volume
   if (strcmp(argv[0],"rho") == 0)
     return param.addObject(1, this);
@@ -1048,9 +1050,17 @@ FourNodeQuad::setParameter(const char **argv, int argc, Parameter &param)
       return -1;
   }
   
-  // otherwise parameter is unknown for the FourNodeQuad class
-  else
-    return -1;
+  // otherwise it could be just a forall material parameter
+  else {
+    int matRes = res;
+    for (int i=0; i<4; i++) {
+      matRes =  theMaterial[i]->setParameter(argv, argc, param);
+      if (matRes != -1)
+	res = matRes;
+    }
+  }
+  
+  return res;
 }
     
 int

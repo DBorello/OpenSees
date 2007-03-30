@@ -22,9 +22,9 @@
 
 
 
-// $Revision: 1.6 $
+// $Revision: 1.7 $
 
-// $Date: 2007-03-12 21:55:37 $
+// $Date: 2007-03-30 01:50:11 $
 
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/Nine_Four_Node_QuadUP.cpp,v $
 
@@ -1781,6 +1781,8 @@ NineFourNodeQuadUP::setParameter(const char **argv, int argc, Parameter &param)
   if (argc < 1)
     return -1;
 
+  int res = -1;
+
   // quad mass density per unit volume
   if (strcmp(argv[0],"rho") == 0)
     return param.addObject(1, this);
@@ -1798,9 +1800,16 @@ NineFourNodeQuadUP::setParameter(const char **argv, int argc, Parameter &param)
       return -1;
   }
 
-  // otherwise parameter is unknown for the Truss class
-  else
-    return -1;
+  // otherwise it could be just a forall material parameter
+  else {
+    int matRes = res;
+    for (int i=0; i<nenu; i++) {
+      matRes =  theMaterial[i]->setParameter(argv, argc, param);
+      if (matRes != -1)
+	res = matRes;
+    }
+  }
+  return res;
 }
 
 int
