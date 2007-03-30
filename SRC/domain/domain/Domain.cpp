@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.37 $
-// $Date: 2007-01-10 22:12:40 $
+// $Revision: 1.38 $
+// $Date: 2007-03-30 01:45:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -603,6 +603,9 @@ Domain::addParameter(Parameter *param)
     this->domainChange();
   } else 
     opserr << "Domain::addParameter - parameter " << paramTag << "could not be added to container\n";      
+
+
+  param->setDomain(this);
 
   return result;
 }
@@ -1504,6 +1507,34 @@ Domain::update(double newTime, double dT)
   return 0;
 }
 
+
+int
+Domain::updateParameter(int tag, int value)
+{
+  // remove the object from the container    
+  TaggedObject *mc = theParameters->removeComponent(tag);
+  
+  // if not there return 0
+  if (mc == 0) 
+      return 0;
+
+  Parameter *result = (Parameter *)mc;
+  return result->update(value);
+}
+
+int
+Domain::updateParameter(int tag, double value)
+{
+  // remove the object from the container    
+  TaggedObject *mc = theParameters->removeComponent(tag);
+  
+  // if not there return 0
+  if (mc == 0) 
+      return 0;
+
+  Parameter *result = (Parameter *)mc;
+  return result->update(value);
+}
 
 
 int

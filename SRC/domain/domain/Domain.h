@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2007-01-10 22:12:40 $
+// $Revision: 1.20 $
+// $Date: 2007-03-30 01:45:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
 // Written: fmk 
@@ -160,14 +160,16 @@ class Domain
     virtual  void setLoadConstant(void);    
     virtual  int  initialize(void);    
     virtual  int  setRayleighDampingFactors(double alphaM, double betaK, double betaK0, double betaKc);
-    
+
     virtual  int  commit(void);
     virtual  int  revertToLastCommit(void);
     virtual  int  revertToStart(void);    
     virtual  int  update(void);
     virtual  int  update(double newTime, double dT);
+    virtual  int  updateParameter(int tag, int value);
+    virtual  int  updateParameter(int tag, double value);    
+    
     virtual  int  newStep(double dT);
-
     
     // methods for eigenvalue analysis
     virtual int setEigenvalues(const Vector &theEigenvalues);
