@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.86 $
-// $Date: 2007-02-15 23:40:58 $
+// $Revision: 1.87 $
+// $Date: 2007-03-30 01:54:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -91,6 +91,9 @@
 #define TSERIES_TAG_PulseSeries       9
 #define TSERIES_TAG_TriangleSeries       10
 #define TSERIES_TAG_PeerMotion       11
+
+#define PARAMETER_TAG_Parameter			1
+#define PARAMETER_TAG_MaterialStageParameter       2
 
 
 #define MAT_TAG_ElasticMaterial			1
