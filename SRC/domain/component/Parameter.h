@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-12-05 21:05:12 $
+// $Revision: 1.3 $
+// $Date: 2007-03-30 01:47:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/Parameter.h,v $
 
 #ifndef Parameter_h
@@ -30,32 +30,40 @@
 
 class DomainComponent;
 class MovableObject;
+class Channel;
+class FEM_ObjectBroker;
+class Domain;
 
-class Parameter : public TaggedObject
+class Parameter : public TaggedObject, public MovableObject
 {
  public:
   Parameter(int tag, DomainComponent *theObject,
 	    const char **argv, int argc);
   Parameter(const Parameter &param);
-  ~Parameter();
+  Parameter(int tag, int classTag = PARAMETER_TAG_Parameter);
+  Parameter();
+  virtual ~Parameter();
+  
+  virtual void Print(OPS_Stream &s, int flag =0);
+  
+  virtual int update(int newValue); 
+  virtual int update(double newValue); 
+  virtual int activate(bool active);
 
-  int addComponent(DomainComponent *theObject, const char **argv, int argc);
-  
-  void Print(OPS_Stream &s, int flag =0);
-  
-  int update(int newValue); 
-  int update(double newValue); 
-  int activate(bool active);
-  
-  int addObject(int parameterID, MovableObject *object);
+  virtual int addComponent(DomainComponent *theObject, const char **argv, int argc);  
+  virtual int addObject(int parameterID, MovableObject *object);
+
+  virtual int setDomain(Domain *theDomain);
+  virtual int sendSelf(int commitTag, Channel &theChannel);  
+  virtual int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
 
  protected:
   
  private:
   Information theInfo;
 
-  enum {initialSize = 100};
-  enum {expandSize = 100};
+  enum {initialSize = 64};
+  enum {expandSize = 128};
 
   DomainComponent **theComponents;
   int numComponents;

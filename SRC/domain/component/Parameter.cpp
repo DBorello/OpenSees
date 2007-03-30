@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-12-05 21:05:12 $
+// $Revision: 1.3 $
+// $Date: 2007-03-30 01:47:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/Parameter.cpp,v $
 
 #include <classTags.h>
@@ -29,10 +29,10 @@
 Parameter::Parameter(int passedTag,
 		     DomainComponent *parentObject,
 		     const char **argv, int argc)
-  :TaggedObject(passedTag),
-   theObjects(0), parameterID(0),
+  :TaggedObject(passedTag), MovableObject(PARAMETER_TAG_Parameter),
+   theObjects(0), 
    numComponents(0), maxNumComponents(0),
-   numObjects(0), maxNumObjects(0)
+   numObjects(0), maxNumObjects(0), parameterID(0)
 {
   int ok = -1;
 
@@ -56,7 +56,7 @@ Parameter::Parameter(int passedTag,
 }
 
 Parameter::Parameter(const Parameter &param):
-  TaggedObject(param.getTag())
+  TaggedObject(param.getTag()), MovableObject(PARAMETER_TAG_Parameter)
 {
   theInfo = param.theInfo;
   numComponents = param.numComponents;
@@ -75,6 +75,38 @@ Parameter::Parameter(const Parameter &param):
     parameterID[i] = param.parameterID[i];
   }
 }
+
+Parameter::Parameter(int tag, int classTag)
+  :TaggedObject(tag), MovableObject(classTag),
+   theObjects(0), 
+   numComponents(0), maxNumComponents(0),
+   numObjects(0), maxNumObjects(0), parameterID(0)
+{
+  maxNumObjects = 1;
+  maxNumComponents = 1;
+
+  theComponents = new DomainComponent *[maxNumComponents];
+  theObjects = new MovableObject *[maxNumObjects];
+  parameterID = new int[maxNumObjects];
+}
+
+
+Parameter::Parameter()
+  :TaggedObject(0), MovableObject(PARAMETER_TAG_Parameter), 
+   theObjects(0), 
+   numComponents(0), maxNumComponents(0),
+   numObjects(0), maxNumObjects(0), parameterID(0)
+{
+  maxNumObjects = 0;
+  maxNumComponents = 0;
+
+  theComponents = 0;
+
+  theObjects = 0;
+  parameterID = 0;
+}
+
+
 
 Parameter::~Parameter()
 {
@@ -99,7 +131,8 @@ Parameter::addComponent(DomainComponent *parentObject,
     for (int i = 0; i < numComponents; i++) 
       newComponents[i] = theComponents[i];
 
-    delete [] theComponents;
+    if (theComponents != 0) 
+      delete [] theComponents;
 
     theComponents = newComponents;
   }
@@ -170,8 +203,8 @@ Parameter::addObject(int paramID, MovableObject *object)
       newParameterID[i] = parameterID[i];
     }
 
-    delete [] theObjects;
-    delete [] parameterID;
+    if (theObjects != 0) delete [] theObjects;
+    if (parameterID != 0) delete [] parameterID;
 
     theObjects = newObjects;
     parameterID = newParameterID;
@@ -182,4 +215,23 @@ Parameter::addObject(int paramID, MovableObject *object)
   numObjects++;
 
   return 0;
+}
+
+int
+Parameter::setDomain(Domain *theDomain)
+{
+  return 0;
+}
+
+int 
+Parameter::sendSelf(int commitTag, Channel &theChannel)
+{
+  return 0;
+}
+
+int 
+Parameter::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  return 0;
+
 }
