@@ -1,5 +1,5 @@
-// $Revision: 1.8 $
-// $Date: 2007-02-02 01:03:48 $
+// $Revision: 1.9 $
+// $Date: 2007-03-30 01:52:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield02.h,v $
 
 // Written: ZHY
@@ -117,6 +117,7 @@ public:
      int getResponse (int responseID, Information &matInformation);
      void Print(OPS_Stream &s, int flag =0);
      //void setCurrentStress(const Vector stress) { currentStress=T2Vector(stress); }
+     int setParameter(const char **argv, int argc, Parameter &param);
      int updateParameter(int responseID, Information &eleInformation);
 
 

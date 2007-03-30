@@ -24,6 +24,8 @@
 #include <Vector.h>
 #include <Channel.h>
 #include <math.h>
+#include <Parameter.h>
+
 
 // Controls on internal iteration between spring components
 const int TZmaxIterations = 20;
@@ -374,28 +376,51 @@ TzLiq1::getEffectiveStress(void)
 	return meanStress;
 }
 
+int TzLiq1::setParameter(const char **argv, int argc, Parameter &param)
+{
+  if (argc < 1)
+    return -1;
+  
+  if (strcmp(argv[0],"updateMaterialStage") == 0) {
+    if (argc < 2)
+      return -1;
+    int matTag = atoi(argv[1]);
+    if (this->getTag() == matTag)
+      return param.addObject(1, this);  
+    else
+      return -1;
+  }
+
+  return -1;
+}
+
 /////////////////////////////////////////////////////////////////////
 int 
-TzLiq1::updateParameter(int snum,Information &eleInformation)
+TzLiq1::updateParameter(int responseID,Information &eleInformation)
 {
-	// TclUpdateMaterialStageCommand will call this routine with the
-	// command:
-	//
-	//      updateMaterialStage - material tag -stage snum
-	//
-	// If snum = 0; running linear elastic for soil elements,
-	//              so excess pore pressure should be zero.
+  
+  if (responseID == 1) {
+    int snum = eleInformation.theInt; 
+
+    // TclUpdateMaterialStageCommand will call this routine with the
+    // command:
+    //
+    //      updateMaterialStage - material tag -stage snum
+    //
+    // If snum = 0; running linear elastic for soil elements,
+    //              so excess pore pressure should be zero.
 	// If snum = 1; running plastic soil element behavior,
 	//              so this marks the end of the "consol" gravity loading.
+    
+    if(snum !=0 && snum !=1){
+      opserr << "WARNING updateMaterialStage for TzLiq1 material must be 0 or 1";
+      opserr << endln;
+      return -1;
+    }
+    loadStage = snum;
+  }
 
-	if(snum !=0 && snum !=1){
-		opserr << "WARNING updateMaterialStage for TzLiq1 material must be 0 or 1";
-		opserr << endln;
-		exit(-1);
-	}
-	loadStage = snum;
-
-	return 0;
+  return 0;
 }
 
 /////////////////////////////////////////////////////////////////////

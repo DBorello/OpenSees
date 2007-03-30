@@ -1,5 +1,5 @@
-// $Revision: 1.32 $
-// $Date: 2007-02-02 01:03:48 $
+// $Revision: 1.33 $
+// $Date: 2007-03-30 01:52:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -15,6 +15,7 @@
 #include <Information.h>
 #include <ID.h>
 #include <MaterialResponse.h>
+ #include <Parameter.h>
 
 Matrix PressureIndependMultiYield::theTangent(6,6);
 T2Vector PressureIndependMultiYield::subStrainRate;
@@ -532,10 +533,28 @@ int PressureIndependMultiYield::getOrder (void) const
 }
 
 
+int PressureIndependMultiYield::setParameter(const char **argv, int argc, Parameter &param)
+{
+  if (argc < 1)
+    return -1;
+  
+  if (strcmp(argv[0],"updateMaterialStage") == 0) {
+    if (argc < 2)
+      return -1;
+    int matTag = atoi(argv[1]);
+    if (this->getTag() == matTag)
+      return param.addObject(1, this);  
+    else
+      return -1;
+  }
+
+  return -1;
+}
+
 int PressureIndependMultiYield::updateParameter(int responseID, Information &info)
 {
-	if (responseID<10)
-		loadStagex[matN] = responseID;
+  if (responseID == 1)
+    loadStagex[matN] = info.theInt;
 
   return 0;
 }

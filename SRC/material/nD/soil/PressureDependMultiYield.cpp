@@ -1,5 +1,5 @@
-// $Revision: 1.37 $
-// $Date: 2007-02-02 01:03:48 $
+// $Revision: 1.38 $
+// $Date: 2007-03-30 01:52:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -16,6 +16,7 @@
 #include <Information.h>
 #include <ID.h>
 #include <MaterialResponse.h>
+#include <Parameter.h>
 
 int PressureDependMultiYield::matCount=0;
 int* PressureDependMultiYield::loadStagex = 0;  //=0 if elastic; =1 if plastic
@@ -792,17 +793,41 @@ PressureDependMultiYield::getOrder (void) const
   return (ndm == 2) ? 3 : 6;
 }
 
+int PressureDependMultiYield::setParameter(const char **argv, int argc, Parameter &param)
+{
+  if (argc < 1)
+    return -1;
+
+  if (strcmp(argv[0],"updateMaterialStage") == 0) {
+    if (argc < 2)
+      return -1;
+    int matTag = atoi(argv[1]);
+    if (this->getTag() == matTag)
+      return param.addObject(1, this);  
+    else
+      return -1;
+  }
+
+  else if (strcmp(argv[0],"shearModulus") == 0)
+    return param.addObject(10, this);  
+  else if (strcmp(argv[0],"bulkModulus") == 0)
+    return param.addObject(11, this);  
+
+  return -1;
+}
+
 int 
 PressureDependMultiYield::updateParameter(int responseID, Information &info)
 {
-	if (responseID<10) 
-		loadStagex[matN] = responseID;
+  if (responseID == 1)
+    loadStagex[matN] = info.theInt;
 
-	else {
-		if (responseID==10) refShearModulusx[matN]=info.theDouble;
-		if (responseID==11) refBulkModulusx[matN]=info.theDouble;
-	}
-
+  else if (responseID==10) 
+    refShearModulusx[matN]=info.theDouble;
+  
+  else if (responseID==11) 
+    refBulkModulusx[matN]=info.theDouble;
+  
   return 0;
 }
 
@@ -1706,11 +1731,11 @@ PressureDependMultiYield::isCriticalState(const T2Vector & stress)
  
 	double ecr1, ecr2;
 	if (volLimit3 != 0.) {
-		ecr1 = volLimit1 - volLimit2*pow(abs(-stress.volume()/pAtm), volLimit3);
-	  ecr2 = volLimit1 - volLimit2*pow(abs(-currentStress.volume()/pAtm), volLimit3);
+		ecr1 = volLimit1 - volLimit2*pow(fabs(-stress.volume()/pAtm), volLimit3);
+	  ecr2 = volLimit1 - volLimit2*pow(fabs(-currentStress.volume()/pAtm), volLimit3);
 	} else {
-		ecr1 = volLimit1 - volLimit2*log(abs(-stress.volume()/pAtm));
-	  ecr2 = volLimit1 - volLimit2*log(abs(-currentStress.volume()/pAtm));
+		ecr1 = volLimit1 - volLimit2*log(fabs(-stress.volume()/pAtm));
+	  ecr2 = volLimit1 - volLimit2*log(fabs(-currentStress.volume()/pAtm));
   }
 
 	if (ecurr < ecr2 && etria < ecr1) return 0;

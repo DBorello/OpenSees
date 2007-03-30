@@ -1,5 +1,5 @@
-// $Revision: 1.10 $
-// $Date: 2007-02-02 01:03:48 $
+// $Revision: 1.11 $
+// $Date: 2007-03-30 01:52:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield02.cpp,v $
 
 // Written: ZHY
@@ -16,6 +16,7 @@
 #include <Information.h>
 #include <ID.h>
 #include <MaterialResponse.h>
+#include <Parameter.h>
 
 int PressureDependMultiYield02::matCount=0;
 int* PressureDependMultiYield02::loadStagex = 0;  //=0 if elastic; =1 if plastic
@@ -842,57 +843,84 @@ int PressureDependMultiYield02::getOrder (void) const
 }
 
 
+int PressureDependMultiYield02::setParameter(const char **argv, int argc, Parameter &param)
+{
+  if (argc < 1)
+    return -1;
+  
+  if (strcmp(argv[0],"updateMaterialStage") == 0) {
+    if (argc < 2)
+      return -1;
+    int matTag = atoi(argv[1]);
+    if (this->getTag() == matTag)
+      return param.addObject(1, this);  
+    else
+      return -1;
+  }
+
+  else if (strcmp(argv[0],"shearModulus") == 0)
+    return param.addObject(10, this);  
+  else if (strcmp(argv[0],"bulkModulus") == 0)
+    return param.addObject(11, this);  
+
+  return -1;
+}
+
 int PressureDependMultiYield02::updateParameter(int responseID, Information &info)
 {
-	if (responseID<10)
-		loadStagex[matN] = responseID;
+  /*
+  if (responseID<10)
+    loadStagex[matN] = responseID;
+  */
 
-	else {
-		if (responseID==10) refShearModulusx[matN]=info.theDouble;
-		if (responseID==11) refBulkModulusx[matN]=info.theDouble;
-	}
-
+  if (responseID == 1)
+    loadStagex[matN] = info.theInt;
+  else if (responseID==10) 
+    refShearModulusx[matN]=info.theDouble;
+  else if (responseID==11) 
+    refBulkModulusx[matN]=info.theDouble;
+  
   return 0;
 }
 
 
 int PressureDependMultiYield02::sendSelf(int commitTag, Channel &theChannel)
 {
-    int loadStage = loadStagex[matN];
-    int ndm = ndmx[matN];
-	double rho = rhox[matN];
-    double residualPress = residualPressx[matN];
-    int numOfSurfaces = numOfSurfacesx[matN];
-    double refPressure = refPressurex[matN];
-    double pressDependCoeff =pressDependCoeffx[matN];
-    double refShearModulus = refShearModulusx[matN];
-	double refBulkModulus = refBulkModulusx[matN];
-    double frictionAngle = frictionAnglex[matN];
-	double cohesion = cohesionx[matN];
-    double peakShearStrain = peakShearStrainx[matN];
-    double phaseTransfAngle = phaseTransfAnglex[matN];
-	double stressRatioPT = stressRatioPTx[matN];
-	double contractParam1 = contractParam1x[matN];
-	double contractParam2 = contractParam2x[matN];
-    double dilateParam1 = dilateParam1x[matN];
-    double dilateParam2 = dilateParam2x[matN];
-	double liquefyParam1 = liquefyParam1x[matN];
-	double liquefyParam2 = liquefyParam2x[matN];
-	double dilateParam3 = dilateParam3x[matN];
-	double einit = einitx[matN];
-	double volLimit1 = volLimit1x[matN];
-	double volLimit2 = volLimit2x[matN];
-	double volLimit3 = volLimit3x[matN];
-
+  int loadStage = loadStagex[matN];
+  int ndm = ndmx[matN];
+  double rho = rhox[matN];
+  double residualPress = residualPressx[matN];
+  int numOfSurfaces = numOfSurfacesx[matN];
+  double refPressure = refPressurex[matN];
+  double pressDependCoeff =pressDependCoeffx[matN];
+  double refShearModulus = refShearModulusx[matN];
+  double refBulkModulus = refBulkModulusx[matN];
+  double frictionAngle = frictionAnglex[matN];
+  double cohesion = cohesionx[matN];
+  double peakShearStrain = peakShearStrainx[matN];
+  double phaseTransfAngle = phaseTransfAnglex[matN];
+  double stressRatioPT = stressRatioPTx[matN];
+  double contractParam1 = contractParam1x[matN];
+  double contractParam2 = contractParam2x[matN];
+  double dilateParam1 = dilateParam1x[matN];
+  double dilateParam2 = dilateParam2x[matN];
+  double liquefyParam1 = liquefyParam1x[matN];
+  double liquefyParam2 = liquefyParam2x[matN];
+  double dilateParam3 = dilateParam3x[matN];
+  double einit = einitx[matN];
+  double volLimit1 = volLimit1x[matN];
+  double volLimit2 = volLimit2x[matN];
+  double volLimit3 = volLimit3x[matN];
+  
   int i, res = 0;
-
+  
   static ID idData(5);
   idData(0) = this->getTag();
   idData(1) = numOfSurfaces;
   idData(2) = loadStage;
   idData(3) = ndm;
   idData(4) = matN;
-
+  
   res += theChannel.sendID(this->getDbTag(), commitTag, idData);
   if (res < 0) {
     opserr << "PressureDependMultiYield02::sendSelf -- could not send ID\n";
@@ -1762,11 +1790,11 @@ int PressureDependMultiYield02::isCriticalState(const T2Vector & stress)
 
 	double ecr1, ecr2;
 	if (volLimit3 != 0.) {
-		ecr1 = volLimit1 - volLimit2*pow(abs(-stress.volume()/pAtm), volLimit3);
-	  ecr2 = volLimit1 - volLimit2*pow(abs(-updatedTrialStress.volume()/pAtm), volLimit3);
+		ecr1 = volLimit1 - volLimit2*pow(fabs(-stress.volume()/pAtm), volLimit3);
+	  ecr2 = volLimit1 - volLimit2*pow(fabs(-updatedTrialStress.volume()/pAtm), volLimit3);
 	} else {
-		ecr1 = volLimit1 - volLimit2*log(abs(-stress.volume()/pAtm));
-	  ecr2 = volLimit1 - volLimit2*log(abs(-updatedTrialStress.volume()/pAtm));
+		ecr1 = volLimit1 - volLimit2*log(fabs(-stress.volume()/pAtm));
+	  ecr2 = volLimit1 - volLimit2*log(fabs(-updatedTrialStress.volume()/pAtm));
 	}
 
 	if (ecurr < ecr2 && etria < ecr1) return 0;

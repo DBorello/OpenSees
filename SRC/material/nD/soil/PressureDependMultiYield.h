@@ -1,5 +1,5 @@
-// $Revision: 1.21 $
-// $Date: 2007-02-02 01:03:48 $
+// $Revision: 1.22 $
+// $Date: 2007-03-30 01:52:10 $
 //>>>>>>> 1.7
 
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.h,v $
@@ -117,6 +117,7 @@ public:
      int getResponse (int responseID, Information &matInformation);
      void Print(OPS_Stream &s, int flag =0);
      //void setCurrentStress(const Vector stress) { currentStress=T2Vector(stress); }
+     int setParameter(const char **argv, int argc, Parameter &param);
      int updateParameter(int responseID, Information &eleInformation);
     // RWB; PyLiq1 & TzLiq1 need to see the excess pore pressure and initial stresses.    friend class PyLiq1;    friend class TzLiq1;
 protected:
