@@ -33,6 +33,7 @@ include ../../../Makefile.def
 	ReinforcingSteel.o \
 	TclReinforcingSteel.o\
 	Concrete01WithSITC.o \
+	Concrete05.o \
 	ECC01.o \
         TclModelBuilderUniaxialMaterialCommand.o
 
