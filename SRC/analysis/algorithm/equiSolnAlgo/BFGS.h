@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-11-29 22:42:41 $
+// $Revision: 1.5 $
+// $Date: 2007-04-02 23:41:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/BFGS.h,v $
                                                                         
 #ifndef BFGS_h
@@ -50,6 +50,11 @@ class BFGS: public EquiSolnAlgo
 
     int solveCurrentStep(void);    
 
+    void setLinks(AnalysisModel &theModel, 
+		  IncrementalIntegrator &theIntegrator,
+		  LinearSOE &theSOE,
+		  ConvergenceTest *theTest);
+
     int setConvergenceTest(ConvergenceTest *theNewTest);
     ConvergenceTest *getConvergenceTest(void);     
     
@@ -62,9 +67,6 @@ class BFGS: public EquiSolnAlgo
   protected:
     
   private:
-
-    ConvergenceTest *theTest;
-
     ConvergenceTest *localTest;
     int tangent;
 

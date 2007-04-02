@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-11-29 22:42:41 $
+// $Revision: 1.6 $
+// $Date: 2007-04-02 23:41:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/ModifiedNewton.h,v $
                                                                         
                                                                         
@@ -53,8 +53,6 @@ class ModifiedNewton: public EquiSolnAlgo
     ~ModifiedNewton();
 
     int solveCurrentStep(void);    
-    ConvergenceTest *getConvergenceTest(void);         
-    int setConvergenceTest(ConvergenceTest *theNewTest);
 
     virtual int sendSelf(int commitTag, Channel &theChannel);
     virtual int recvSelf(int commitTag, Channel &theChannel, 
@@ -65,7 +63,6 @@ class ModifiedNewton: public EquiSolnAlgo
   protected:
     
   private:
-    ConvergenceTest *theTest;
     int tangent;
 };
 

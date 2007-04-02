@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2005-11-29 22:42:42 $
+// $Revision: 1.10 $
+// $Date: 2007-04-02 23:41:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/NewtonRaphson.cpp,v $
                                                                         
                                                                         
@@ -51,7 +51,7 @@
 // Constructor
 NewtonRaphson::NewtonRaphson(int theTangentToUse)
 :EquiSolnAlgo(EquiALGORITHM_TAGS_NewtonRaphson),
- theTest(0), tangent(theTangentToUse)
+ tangent(theTangentToUse)
 {
 
 }
@@ -59,7 +59,7 @@ NewtonRaphson::NewtonRaphson(int theTangentToUse)
 
 NewtonRaphson::NewtonRaphson(ConvergenceTest &theT, int theTangentToUse)
 :EquiSolnAlgo(EquiALGORITHM_TAGS_NewtonRaphson),
- theTest(&theT), tangent(theTangentToUse)
+ tangent(theTangentToUse)
 {
 
 }
@@ -70,14 +70,6 @@ NewtonRaphson::~NewtonRaphson()
   
 
 }
-
-int
-NewtonRaphson::setConvergenceTest(ConvergenceTest *newTest)
-{
-  theTest = newTest;
-  return 0;
-}
-
 
 
 int 
@@ -169,11 +161,6 @@ NewtonRaphson::solveCurrentStep(void)
     return result;
 }
 
-ConvergenceTest *
-NewtonRaphson::getConvergenceTest(void)
-{
-  return theTest;
-}
 
 int
 NewtonRaphson::sendSelf(int cTag, Channel &theChannel)

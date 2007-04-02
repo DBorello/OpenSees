@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-11-29 22:42:41 $
+// $Revision: 1.4 $
+// $Date: 2007-04-02 23:41:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/EquiSolnAlgo.cpp,v $
                                                                         
                                                                         
@@ -43,11 +43,11 @@
 #include <AnalysisModel.h>
 #include <IncrementalIntegrator.h>
 #include <LinearSOE.h>
-
+#include <ConvergenceTest.h>
 
 EquiSolnAlgo::EquiSolnAlgo(int clasTag)
 :SolutionAlgorithm(clasTag),
- theModel(0), theIntegrator(0), theSysOfEqn(0)
+ theModel(0), theIntegrator(0), theSysOfEqn(0), theTest(0)
 {
 
 }
@@ -60,19 +60,30 @@ EquiSolnAlgo::~EquiSolnAlgo()
 void 
 EquiSolnAlgo::setLinks(AnalysisModel &theNewModel, 
 		       IncrementalIntegrator &theNewIntegrator,
-		       LinearSOE &theSOE)
+		       LinearSOE &theSOE,
+		       ConvergenceTest *theConvergenceTest)
 {
     theModel = &theNewModel;
     theIntegrator = &theNewIntegrator;
     theSysOfEqn = &theSOE;
+    theTest = theConvergenceTest;
 }
 
+
+int 
+EquiSolnAlgo::setConvergenceTest(ConvergenceTest *theConvergenceTest)
+{
+  theTest = theConvergenceTest;
+  return 0;
+}
 
 ConvergenceTest *
 EquiSolnAlgo::getConvergenceTest(void)
 {
-  return 0;
+  return theTest;
 }
+
+
 
 
 AnalysisModel *

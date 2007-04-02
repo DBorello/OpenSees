@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-09-05 23:01:06 $
+// $Revision: 1.7 $
+// $Date: 2007-04-02 23:41:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/EquiSolnAlgo.h,v $
                                                                         
                                                                         
@@ -55,14 +55,16 @@ class EquiSolnAlgo: public SolutionAlgorithm
     virtual ~EquiSolnAlgo();
 
     // public functions defined for subclasses
-    void setLinks(AnalysisModel &theModel, 
+    virtual void setLinks(AnalysisModel &theModel, 
 		  IncrementalIntegrator &theIntegrator,
-		  LinearSOE &theSOE);
+		  LinearSOE &theSOE,
+		  ConvergenceTest *theTest);
     
     // virtual functions
     virtual int solveCurrentStep(void) =0;
-    virtual int setConvergenceTest(ConvergenceTest *theNewTest) =0;    
+    virtual int setConvergenceTest(ConvergenceTest *theNewTest);    
     virtual ConvergenceTest *getConvergenceTest(void);     
+
     virtual void Print(OPS_Stream &s, int flag =0) =0;    
 
     virtual int getNumFactorizations(void) {return 0;}
@@ -80,12 +82,12 @@ class EquiSolnAlgo: public SolutionAlgorithm
     LinearSOE	            *getLinearSOEptr(void) const;
 
   protected:
+    ConvergenceTest *theTest;
     
   private:
     AnalysisModel 	  *theModel;
     IncrementalIntegrator *theIntegrator;
     LinearSOE 		  *theSysOfEqn;
-    
 };
 
 #endif

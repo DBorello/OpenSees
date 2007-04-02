@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-11-29 22:42:41 $
+// $Revision: 1.6 $
+// $Date: 2007-04-02 23:41:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/BFGS.cpp,v $
                                                                         
 // Written: Ed Love
@@ -40,7 +40,7 @@
 // Constructor
 BFGS::BFGS(int theTangentToUse, int n )
 :EquiSolnAlgo(EquiALGORITHM_TAGS_BFGS),
- theTest(0), tangent(theTangentToUse), numberLoops(n) 
+ tangent(theTangentToUse), numberLoops(n) 
 {
   s  = new Vector*[numberLoops+3];
 
@@ -70,7 +70,7 @@ BFGS::BFGS(int theTangentToUse, int n )
 //Constructor
 BFGS::BFGS(ConvergenceTest &theT, int theTangentToUse, int n)
 :EquiSolnAlgo(EquiALGORITHM_TAGS_BFGS),
- theTest(&theT), tangent(theTangentToUse), numberLoops(n) 
+ tangent(theTangentToUse), numberLoops(n) 
 {
   s  = new Vector*[numberLoops+3];
 
@@ -141,6 +141,22 @@ BFGS::~BFGS()
   
 }
 
+void 
+BFGS::setLinks(AnalysisModel &theModel, 
+	       IncrementalIntegrator &theIntegrator,
+	       LinearSOE &theSOE,
+	       ConvergenceTest *theTest)
+{
+  this->EquiSolnAlgo::setLinks(theModel, theIntegrator, theSOE, theTest);
+
+    if ( localTest != 0 )  
+      delete localTest ;
+
+    localTest = theTest->getCopy( this->numberLoops ) ;
+    if (localTest == 0) {
+      opserr << "BFGS::setLinks() - could not get a copy\n";
+    } 
+}  
 
 int
 BFGS::setConvergenceTest(ConvergenceTest *newTest)

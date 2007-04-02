@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2005-11-29 22:42:42 $
+// $Revision: 1.4 $
+// $Date: 2007-04-02 23:41:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/PeriodicNewton.h,v $
 
 #ifndef PeriodicNewton_h
@@ -47,8 +47,6 @@ class PeriodicNewton: public EquiSolnAlgo
     ~PeriodicNewton();
 
     int solveCurrentStep(void);    
-    ConvergenceTest *getConvergenceTest(void);         
-    int setConvergenceTest(ConvergenceTest *theNewTest);
 
     virtual int sendSelf(int commitTag, Channel &theChannel);
     virtual int recvSelf(int commitTag, Channel &theChannel, 
@@ -59,10 +57,9 @@ class PeriodicNewton: public EquiSolnAlgo
   protected:
     
   private:
-    ConvergenceTest *theTest;
     int tangent;
 
-	int maxCount;
+    int maxCount;
 };
 
 #endif

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-11-29 22:42:41 $
+// $Revision: 1.5 $
+// $Date: 2007-04-02 23:41:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/Broyden.cpp,v $
                                                                         
                                                                         
@@ -45,7 +45,7 @@
 // Constructor
 Broyden::Broyden(int theTangentToUse, int n )
 :EquiSolnAlgo(EquiALGORITHM_TAGS_Broyden),
- theTest(0), tangent(theTangentToUse), numberLoops(n) 
+ tangent(theTangentToUse), numberLoops(n) 
 {
   s  = new Vector*[numberLoops+3] ;
 
@@ -69,7 +69,7 @@ Broyden::Broyden(int theTangentToUse, int n )
 //Constructor
 Broyden::Broyden(ConvergenceTest &theT, int theTangentToUse, int n)
 :EquiSolnAlgo(EquiALGORITHM_TAGS_Broyden),
- theTest(&theT), tangent(theTangentToUse), numberLoops(n) 
+ tangent(theTangentToUse), numberLoops(n) 
 {
   s  = new Vector*[numberLoops+3] ;
 
@@ -84,9 +84,8 @@ Broyden::Broyden(ConvergenceTest &theT, int theTangentToUse, int n)
     s[i] = 0 ;
     z[i] = 0 ;
   }
-  
-  localTest = theTest->getCopy( this->numberLoops ) ;
 
+  localTest= 0;
 }
 
 // Destructor
@@ -120,17 +119,30 @@ Broyden::~Broyden()
 
   if ( localTest != 0 )
      delete localTest ;
-
-  localTest = 0 ;
-
 }
+
+
+void 
+Broyden::setLinks(AnalysisModel &theModel, 
+		  IncrementalIntegrator &theIntegrator,
+		  LinearSOE &theSOE,
+		  ConvergenceTest *theTest)
+{
+  this->EquiSolnAlgo::setLinks(theModel, theIntegrator, theSOE, theTest);
+
+    if ( localTest != 0 )  
+      delete localTest ;
+
+    localTest = theTest->getCopy( this->numberLoops ) ;
+    if (localTest == 0) {
+      opserr << "Broyden::setTest() - could not get a copy\n";
+    } 
+}  
 
 
 int
 Broyden::setConvergenceTest(ConvergenceTest *newTest)
 {
-    theTest = newTest;
-
     if ( localTest != 0 )  
       delete localTest ;
 
