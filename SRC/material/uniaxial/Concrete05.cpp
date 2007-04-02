@@ -2301,7 +2301,10 @@ void Concrete05::Enewnf(double eunn, double funn)
 {
 	fnewnf(eunn,funn);
 	esplnf(eunn,funn);
-	Enewn=__min(Ec,(fnewn/(eunn-espln)));
+	Enewn = fnewn/(eunn-espln);
+
+	if (Enewn < Ec)
+	  Enewn=Ec;
 }
 
 void Concrete05::esrenf(double eunn)
@@ -2449,7 +2452,9 @@ void Concrete05::Enewpf(double eunp, double funp, double e0, double espln)
 {
 	fnewpf(funp,eunp,e0);
 	esplpf(eunp,funp,e0,espln);
-	Enewp=__min(Ec,(fnewp/(eunp-esplp)));
+	Enewp = fnewp/(eunp-esplp);
+	if (Enewp <  Ec)
+	  Enewp = Ec;	  
 }
 
 void Concrete05::esrepf(double eunp, double e0)
