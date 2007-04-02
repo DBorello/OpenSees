@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:48 $
+// $Revision: 1.3 $
+// $Date: 2007-04-02 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/LoadPath.cpp,v $
                                                                         
                                                                         
@@ -73,7 +73,7 @@ LoadPath::~LoadPath()
 int 
 LoadPath::newStep(void)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();    
+    AnalysisModel *theModel = this->getAnalysisModel();    
     if (theModel == 0) {
 	opserr << "LoadPath::newStep() - no associated AnalysisModel\n";
 	return -1;
@@ -113,7 +113,7 @@ LoadPath::newStep(void)
 int
 LoadPath::update(const Vector &deltaU)
 {
-    AnalysisModel *myModel = this->getAnalysisModelPtr();
+    AnalysisModel *myModel = this->getAnalysisModel();
     if (myModel == 0) {
 	opserr << "WARNING LoadPath::update() ";
 	opserr << "No AnalysisModel has been set\n";
@@ -178,7 +178,7 @@ LoadPath::recvSelf(int cTag,
 void
 LoadPath::Print(OPS_Stream &s, int flag)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0) {
 	double currentLambda = theModel->getCurrentDomainTime();
 	s << "\t LoadPath - currentLambda: " << currentLambda << endln;

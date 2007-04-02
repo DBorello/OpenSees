@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2005-10-19 21:53:57 $
+// $Revision: 1.11 $
+// $Date: 2007-04-02 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/DisplacementControl.cpp,v $
                                                                         
                                                                         
@@ -91,8 +91,8 @@ int
 DisplacementControl::newStep(void)
 {
     // get pointers to AnalysisModel and LinearSOE
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();    
+    AnalysisModel *theModel = this->getAnalysisModel();
+    LinearSOE *theLinSOE = this->getLinearSOE();    
     if (theModel == 0 || theLinSOE == 0) {
 	opserr << "WARNING DisplacementControl::newStep() ";
 	opserr << "No AnalysisModel or LinearSOE has been set\n";
@@ -160,8 +160,8 @@ DisplacementControl::newStep(void)
 int
 DisplacementControl::update(const Vector &dU)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();    
+    AnalysisModel *theModel = this->getAnalysisModel();
+    LinearSOE *theLinSOE = this->getLinearSOE();    
     if (theModel == 0 || theLinSOE == 0) {
 	opserr << "WARNING DisplacementControl::update() ";
 	opserr << "No AnalysisModel or LinearSOE has been set\n";
@@ -218,8 +218,8 @@ int
 DisplacementControl::domainChanged(void)
 {
     // we first create the Vectors needed
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();    
+    AnalysisModel *theModel = this->getAnalysisModel();
+    LinearSOE *theLinSOE = this->getLinearSOE();    
     if (theModel == 0 || theLinSOE == 0) {
 	opserr << "WARNING DisplacementControl::update() ";
 	opserr << "No AnalysisModel or LinearSOE has been set\n";

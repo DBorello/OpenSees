@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2005-12-19 22:43:36 $
+// $Revision: 1.6 $
+// $Date: 2007-04-02 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/CentralDifference.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -95,7 +95,7 @@ int CentralDifference::newStep(double _deltaT)
     }
     
     // get a pointer to the AnalysisModel
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     
     // set the constants
     c2 = 0.5/deltaT;
@@ -152,8 +152,8 @@ int CentralDifference::formNodTangent(DOF_Group *theDof)
 
 int CentralDifference::domainChanged()
 {
-    AnalysisModel *myModel = this->getAnalysisModelPtr();
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();
+    AnalysisModel *myModel = this->getAnalysisModel();
+    LinearSOE *theLinSOE = this->getLinearSOE();
     const Vector &x = theLinSOE->getX();
     int size = x.Size();
     
@@ -268,7 +268,7 @@ int CentralDifference::update(const Vector &U)
         return -1;
     }
     
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel == 0)  {
         opserr << "WARNING CentralDifference::update() - no AnalysisModel set\n";
         return -1;
@@ -314,7 +314,7 @@ int CentralDifference::update(const Vector &U)
 
 int CentralDifference::commit(void)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel == 0) {
         opserr << "WARNING CentralDifference::commit() - no AnalysisModel set\n";
         return -1;
@@ -365,7 +365,7 @@ int CentralDifference::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker 
 
 void CentralDifference::Print(OPS_Stream &s, int flag)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0) {
         double currentTime = theModel->getCurrentDomainTime();
         s << "\t CentralDifference - currentTime: " << currentTime << endln;

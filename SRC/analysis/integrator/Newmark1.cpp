@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-14 23:00:49 $
+// $Revision: 1.9 $
+// $Date: 2007-04-02 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark1.cpp,v $
                                                                         
                                                                         
@@ -121,7 +121,7 @@ Newmark1::newStep(double deltaT)
 
 
   // set the new trial response quantities
-  AnalysisModel *theModel = this->getAnalysisModelPtr();
+  AnalysisModel *theModel = this->getAnalysisModel();
 
   if (U == 0) {
     opserr << "Newton::newStep() - domainChange() failed or hasn't been called\n";
@@ -193,8 +193,8 @@ Newmark1::formNodTangent(DOF_Group *theDof)
 int 
 Newmark1::domainChanged()
 {
-  AnalysisModel *myModel = this->getAnalysisModelPtr();
-  LinearSOE *theLinSOE = this->getLinearSOEPtr();
+  AnalysisModel *myModel = this->getAnalysisModel();
+  LinearSOE *theLinSOE = this->getLinearSOE();
   const Vector &x = theLinSOE->getX();
   int size = x.Size();
 
@@ -306,7 +306,7 @@ Newmark1::domainChanged()
 int
 Newmark1::update(const Vector &deltaU)
 {
-  AnalysisModel *theModel = this->getAnalysisModelPtr();
+  AnalysisModel *theModel = this->getAnalysisModel();
   if (theModel == 0) {
     opserr << "WARNING Newmark1::update() - no AnalysisModel set\n";
     return -1;
@@ -388,7 +388,7 @@ Newmark1::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 void
 Newmark1::Print(OPS_Stream &s, int flag)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0) {
 	double currentTime = theModel->getCurrentDomainTime();
 	s << "\t Newmark1 - currentTime: " << currentTime;

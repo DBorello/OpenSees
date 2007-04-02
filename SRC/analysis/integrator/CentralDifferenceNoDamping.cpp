@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-02-28 19:34:01 $
+// $Revision: 1.3 $
+// $Date: 2007-04-02 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/CentralDifferenceNoDamping.cpp,v $
 
 // Written: fmk 
@@ -73,7 +73,7 @@ CentralDifferenceNoDamping::newStep(double _deltaT)
     return -2;	
   }
 
-  AnalysisModel *theModel = this->getAnalysisModelPtr();
+  AnalysisModel *theModel = this->getAnalysisModel();
   double time = theModel->getCurrentDomainTime();
   theModel->applyLoadDomain(time);
 
@@ -117,8 +117,8 @@ CentralDifferenceNoDamping::formNodUnbalance(DOF_Group *theDof)
 int 
 CentralDifferenceNoDamping::domainChanged()
 {
-  AnalysisModel *myModel = this->getAnalysisModelPtr();
-  LinearSOE *theLinSOE = this->getLinearSOEPtr();
+  AnalysisModel *myModel = this->getAnalysisModel();
+  LinearSOE *theLinSOE = this->getLinearSOE();
   const Vector &x = theLinSOE->getX();
   int size = x.Size();
   
@@ -199,7 +199,7 @@ CentralDifferenceNoDamping::update(const Vector &X)
     return -1;
   }
   
-  AnalysisModel *theModel = this->getAnalysisModelPtr();
+  AnalysisModel *theModel = this->getAnalysisModel();
 
   if (theModel == 0) {
     opserr << "ERROR CentralDifferenceNoDamping::update() - no AnalysisModel set\n";
@@ -238,7 +238,7 @@ CentralDifferenceNoDamping::update(const Vector &X)
 int
 CentralDifferenceNoDamping::commit(void)
 {
-  AnalysisModel *theModel = this->getAnalysisModelPtr();
+  AnalysisModel *theModel = this->getAnalysisModel();
   if (theModel == 0) {
     opserr << "WARNING CentralDifferenceNoDamping::commit() - no AnalysisModel set\n";
     return -1;
@@ -268,7 +268,7 @@ CentralDifferenceNoDamping::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBr
 void
 CentralDifferenceNoDamping::Print(OPS_Stream &s, int flag)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0) {
 	double currentTime = theModel->getCurrentDomainTime();
 	s << "\t CentralDifferenceNoDamping - currentTime: " << currentTime;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2005-12-19 22:39:21 $
+// $Revision: 1.2 $
+// $Date: 2007-04-02 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Collocation.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -152,7 +152,7 @@ int Collocation::newStep(double _deltaT)
     }
     
     // get a pointer to the AnalysisModel
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
 
     // set the constants
     c1 = 1.0;
@@ -238,8 +238,8 @@ int Collocation::formNodTangent(DOF_Group *theDof)
 
 int Collocation::domainChanged()
 {
-    AnalysisModel *myModel = this->getAnalysisModelPtr();
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();
+    AnalysisModel *myModel = this->getAnalysisModel();
+    LinearSOE *theLinSOE = this->getLinearSOE();
     const Vector &x = theLinSOE->getX();
     int size = x.Size();
     
@@ -344,7 +344,7 @@ int Collocation::domainChanged()
 
 int Collocation::update(const Vector &deltaU)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel == 0)  {
         opserr << "WARNING Collocation::update() - no AnalysisModel set\n";
         return -1;
@@ -384,7 +384,7 @@ int Collocation::update(const Vector &deltaU)
 int Collocation::commit(void)
 {
     
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel == 0)  {
         opserr << "WARNING Collocation::commit() - no AnalysisModel set\n";
         return -1;
@@ -460,7 +460,7 @@ int Collocation::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBr
 
 void Collocation::Print(OPS_Stream &s, int flag)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0)  {
         double currentTime = theModel->getCurrentDomainTime();
         s << "\t Collocation - currentTime: " << currentTime << endln;

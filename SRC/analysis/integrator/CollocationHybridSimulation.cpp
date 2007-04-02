@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2005-12-19 22:39:21 $
+// $Revision: 1.2 $
+// $Date: 2007-04-02 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/CollocationHybridSimulation.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -157,7 +157,7 @@ int CollocationHybridSimulation::newStep(double _deltaT)
     }
     
     // get a pointer to the AnalysisModel
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
 
     // set the constants
     c1 = 1.0;
@@ -243,8 +243,8 @@ int CollocationHybridSimulation::formNodTangent(DOF_Group *theDof)
 
 int CollocationHybridSimulation::domainChanged()
 {
-    AnalysisModel *myModel = this->getAnalysisModelPtr();
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();
+    AnalysisModel *myModel = this->getAnalysisModel();
+    LinearSOE *theLinSOE = this->getLinearSOE();
     const Vector &x = theLinSOE->getX();
     int size = x.Size();
     
@@ -349,7 +349,7 @@ int CollocationHybridSimulation::domainChanged()
 
 int CollocationHybridSimulation::update(const Vector &deltaU)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel == 0)  {
         opserr << "WARNING CollocationHybridSimulation::update() - no AnalysisModel set\n";
         return -1;
@@ -392,7 +392,7 @@ int CollocationHybridSimulation::update(const Vector &deltaU)
 int CollocationHybridSimulation::commit(void)
 {
     
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel == 0)  {
         opserr << "WARNING CollocationHybridSimulation::commit() - no AnalysisModel set\n";
         return -1;
@@ -484,7 +484,7 @@ int CollocationHybridSimulation::recvSelf(int cTag, Channel &theChannel, FEM_Obj
 
 void CollocationHybridSimulation::Print(OPS_Stream &s, int flag)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0)  {
         double currentTime = theModel->getCurrentDomainTime();
         s << "\t CollocationHybridSimulation - currentTime: " << currentTime << endln;

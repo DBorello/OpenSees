@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-10-19 21:53:57 $
+// $Revision: 1.6 $
+// $Date: 2007-04-02 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/LoadControl.cpp,v $
                                                                         
                                                                         
@@ -66,7 +66,7 @@ LoadControl::~LoadControl()
 int 
 LoadControl::newStep(void)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();    
+    AnalysisModel *theModel = this->getAnalysisModel();    
     if (theModel == 0) {
 	opserr << "LoadControl::newStep() - no associated AnalysisModel\n";
 	return -1;
@@ -94,8 +94,8 @@ LoadControl::newStep(void)
 int
 LoadControl::update(const Vector &deltaU)
 {
-    AnalysisModel *myModel = this->getAnalysisModelPtr();
-    LinearSOE *theSOE = this->getLinearSOEPtr();
+    AnalysisModel *myModel = this->getAnalysisModel();
+    LinearSOE *theSOE = this->getLinearSOE();
     if (myModel == 0 || theSOE == 0) {
 	opserr << "WARNING LoadControl::update() ";
 	opserr << "No AnalysisModel or LinearSOE has been set\n";
@@ -168,7 +168,7 @@ LoadControl::recvSelf(int cTag,
 void
 LoadControl::Print(OPS_Stream &s, int flag)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0) {
 	double currentLambda = theModel->getCurrentDomainTime();
 	s << "\t LoadControl - currentLambda: " << currentLambda;

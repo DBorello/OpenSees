@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2005-12-19 22:39:21 $
+// $Revision: 1.2 $
+// $Date: 2007-04-02 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/NewmarkHybridSimulation.cpp,v $
 
 
@@ -109,7 +109,7 @@ int NewmarkHybridSimulation::newStep(double deltaT)
     }
 
     // get a pointer to the AnalysisModel
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     
     // set the constants
     c1 = 1.0;
@@ -188,8 +188,8 @@ int NewmarkHybridSimulation::formNodTangent(DOF_Group *theDof)
 
 int NewmarkHybridSimulation::domainChanged()
 {
-    AnalysisModel *myModel = this->getAnalysisModelPtr();
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();
+    AnalysisModel *myModel = this->getAnalysisModel();
+    LinearSOE *theLinSOE = this->getLinearSOE();
     const Vector &x = theLinSOE->getX();
     int size = x.Size();
     
@@ -293,7 +293,7 @@ int NewmarkHybridSimulation::domainChanged()
 
 int NewmarkHybridSimulation::update(const Vector &deltaU)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel == 0)  {
         opserr << "WARNING NewmarkHybridSimulation::update() - no AnalysisModel set\n";
         return -1;
@@ -387,7 +387,7 @@ int NewmarkHybridSimulation::recvSelf(int cTag, Channel &theChannel, FEM_ObjectB
 
 void NewmarkHybridSimulation::Print(OPS_Stream &s, int flag)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0) {
         double currentTime = theModel->getCurrentDomainTime();
         s << "\t NewmarkHybridSimulation - currentTime: " << currentTime;

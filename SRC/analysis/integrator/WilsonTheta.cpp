@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:00:49 $
+// $Revision: 1.5 $
+// $Date: 2007-04-02 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/WilsonTheta.cpp,v $
                                                                         
                                                                         
@@ -133,7 +133,7 @@ WilsonTheta::newStep(double _deltaT)
     
 
   // set the new trial response quantities
-  AnalysisModel *theModel = this->getAnalysisModelPtr();
+  AnalysisModel *theModel = this->getAnalysisModel();
   theModel->setResponse(*U,*Udot,*Udotdot);        
 
   // increment the time and apply the load
@@ -171,8 +171,8 @@ WilsonTheta::formNodTangent(DOF_Group *theDof)
 int 
 WilsonTheta::domainChanged()
 {
-  AnalysisModel *myModel = this->getAnalysisModelPtr();
-  LinearSOE *theLinSOE = this->getLinearSOEPtr();
+  AnalysisModel *myModel = this->getAnalysisModel();
+  LinearSOE *theLinSOE = this->getLinearSOE();
   const Vector &x = theLinSOE->getX();
   int size = x.Size();
 
@@ -263,7 +263,7 @@ WilsonTheta::domainChanged()
 int
 WilsonTheta::update(const Vector &deltaU)
 {
-  AnalysisModel *theModel = this->getAnalysisModelPtr();
+  AnalysisModel *theModel = this->getAnalysisModel();
   if (theModel == 0) {
     opserr << "WARNING WilsonTheta::update() - no AnalysisModel set\n";
     return -1;
@@ -299,7 +299,7 @@ int
 WilsonTheta::commit(void)
 {
 
-  AnalysisModel *theModel = this->getAnalysisModelPtr();
+  AnalysisModel *theModel = this->getAnalysisModel();
   if (theModel == 0) {
     opserr << "WARNING WilsonTheta::commit() - no AnalysisModel set\n";
     return -1;
@@ -388,7 +388,7 @@ WilsonTheta::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
 void
 WilsonTheta::Print(OPS_Stream &s, int flag)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0) {
 	double currentTime = theModel->getCurrentDomainTime();
 	s << "\t WilsonTheta - currentTime: " << currentTime;

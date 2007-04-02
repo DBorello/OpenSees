@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2005-12-21 00:32:57 $
+// $Revision: 1.3 $
+// $Date: 2007-04-02 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/NewmarkExplicit.cpp,v $
 
 
@@ -114,7 +114,7 @@ int NewmarkExplicit::newStep(double deltaT)
     }
     
     // get a pointer to the AnalysisModel
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
 
     // set the constants
     c2 = gamma*deltaT;
@@ -197,8 +197,8 @@ int NewmarkExplicit::formNodTangent(DOF_Group *theDof)
 
 int NewmarkExplicit::domainChanged()
 {
-    AnalysisModel *myModel = this->getAnalysisModelPtr();
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();
+    AnalysisModel *myModel = this->getAnalysisModel();
+    LinearSOE *theLinSOE = this->getLinearSOE();
     const Vector &x = theLinSOE->getX();
     int size = x.Size();
     
@@ -310,7 +310,7 @@ int NewmarkExplicit::update(const Vector &aiPlusOne)
         return -1;
     }
     
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel == 0)  {
         opserr << "WARNING NewmarkExplicit::update() - no AnalysisModel set\n";
         return -1;
@@ -381,7 +381,7 @@ int NewmarkExplicit::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &t
 
 void NewmarkExplicit::Print(OPS_Stream &s, int flag)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0)  {
         double currentTime = theModel->getCurrentDomainTime();
         s << "\t NewmarkExplicit - currentTime: " << currentTime << endln;

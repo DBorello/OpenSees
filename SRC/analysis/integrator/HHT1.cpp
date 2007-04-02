@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-14 23:00:48 $
+// $Revision: 1.8 $
+// $Date: 2007-04-02 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHT1.cpp,v $
                                                                         
                                                                         
@@ -126,7 +126,7 @@ HHT1::newStep(double deltaT)
   c3 = 1.0/(beta*deltaT*deltaT);
 
 
-  AnalysisModel *theModel = this->getAnalysisModelPtr();
+  AnalysisModel *theModel = this->getAnalysisModel();
 
   if (U == 0) {
     opserr << "HHT1::newStep() - domainChange() failed or hasn't been called\n";
@@ -206,8 +206,8 @@ HHT1::formNodTangent(DOF_Group *theDof)
 int 
 HHT1::domainChanged()
 {
-  AnalysisModel *myModel = this->getAnalysisModelPtr();
-  LinearSOE *theLinSOE = this->getLinearSOEPtr();
+  AnalysisModel *myModel = this->getAnalysisModel();
+  LinearSOE *theLinSOE = this->getLinearSOE();
   const Vector &x = theLinSOE->getX();
   int size = x.Size();
 
@@ -337,7 +337,7 @@ HHT1::domainChanged()
 int
 HHT1::update(const Vector &deltaU)
 {
-  AnalysisModel *theModel = this->getAnalysisModelPtr();
+  AnalysisModel *theModel = this->getAnalysisModel();
   if (theModel == 0) {
     opserr << "WARNING HHT1::update() - no AnalysisModel set\n";
     return -1;
@@ -376,7 +376,7 @@ HHT1::update(const Vector &deltaU)
 int
 HHT1::commit(void)
 {
-  AnalysisModel *theModel = this->getAnalysisModelPtr();
+  AnalysisModel *theModel = this->getAnalysisModel();
   if (theModel == 0) {
     opserr << "WARNING HHT1::commit() - no AnalysisModel set\n";
     return -1;
@@ -436,7 +436,7 @@ HHT1::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 void
 HHT1::Print(OPS_Stream &s, int flag)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0) {
 	double currentTime = theModel->getCurrentDomainTime();
 	s << "\t HHT1 - currentTime: " << currentTime << " alpha: ";

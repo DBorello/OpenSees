@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2006-02-27 23:31:50 $
+// $Revision: 1.16 $
+// $Date: 2007-04-02 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark.cpp,v $
                                                                         
                                                                         
@@ -114,7 +114,7 @@ Newmark::newStep(double deltaT)
 
 
   // get a pointer to the AnalysisModel
-  AnalysisModel *theModel = this->getAnalysisModelPtr();
+  AnalysisModel *theModel = this->getAnalysisModel();
 
   if (displ == true) {
     if (deltaT <= 0.0) {
@@ -232,8 +232,8 @@ Newmark::formNodTangent(DOF_Group *theDof)
 int 
 Newmark::domainChanged()
 {
-  AnalysisModel *myModel = this->getAnalysisModelPtr();
-  LinearSOE *theLinSOE = this->getLinearSOEPtr();
+  AnalysisModel *myModel = this->getAnalysisModel();
+  LinearSOE *theLinSOE = this->getLinearSOE();
   const Vector &x = theLinSOE->getX();
   int size = x.Size();
 
@@ -350,7 +350,7 @@ Newmark::domainChanged()
 int
 Newmark::update(const Vector &deltaU)
 {
-  AnalysisModel *theModel = this->getAnalysisModelPtr();
+  AnalysisModel *theModel = this->getAnalysisModel();
   if (theModel == 0) {
     opserr << "WARNING Newmark::update() - no AnalysisModel set\n";
     return -1;
@@ -442,7 +442,7 @@ Newmark::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 void
 Newmark::Print(OPS_Stream &s, int flag)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0) {
 	double currentTime = theModel->getCurrentDomainTime();
 	s << "\t Newmark - currentTime: " << currentTime;

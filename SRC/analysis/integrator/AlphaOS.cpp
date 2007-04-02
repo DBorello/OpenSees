@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2005-12-21 00:31:57 $
+// $Revision: 1.3 $
+// $Date: 2007-04-02 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/AlphaOS.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -148,7 +148,7 @@ int AlphaOS::newStep(double _deltaT)
     }
     
     // get a pointer to the AnalysisModel
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     
     // set the constants
     c1 = 1.0;
@@ -244,8 +244,8 @@ int AlphaOS::formNodTangent(DOF_Group *theDof)
 
 int AlphaOS::domainChanged()
 {
-    AnalysisModel *myModel = this->getAnalysisModelPtr();
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();
+    AnalysisModel *myModel = this->getAnalysisModel();
+    LinearSOE *theLinSOE = this->getLinearSOE();
     const Vector &x = theLinSOE->getX();
     int size = x.Size();
     
@@ -383,7 +383,7 @@ int AlphaOS::update(const Vector &deltaU)
         return -1;
     }
     
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel == 0)  {
         opserr << "WARNING AlphaOS::update() - no AnalysisModel set\n";
         return -1;
@@ -426,7 +426,7 @@ int AlphaOS::update(const Vector &deltaU)
 
 int AlphaOS::commit(void)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel == 0)  {
         opserr << "WARNING AlphaOS::commit() - no AnalysisModel set\n";
         return -1;
@@ -483,7 +483,7 @@ int AlphaOS::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
 
 void AlphaOS::Print(OPS_Stream &s, int flag)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0)  {
         double currentTime = theModel->getCurrentDomainTime();
         s << "\t AlphaOS - currentTime: " << currentTime << endln;
@@ -499,8 +499,8 @@ void AlphaOS::Print(OPS_Stream &s, int flag)
 int AlphaOS::formElementResidual(void)
 {
     // calculate Residual Force     
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
-    LinearSOE *theSOE = this->getLinearSOEPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
+    LinearSOE *theSOE = this->getLinearSOE();
     
     // loop through the FE_Elements and add the residual
     FE_Element *elePtr;

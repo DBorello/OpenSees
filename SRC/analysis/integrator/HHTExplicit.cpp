@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2005-12-21 00:32:57 $
+// $Revision: 1.3 $
+// $Date: 2007-04-02 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHTExplicit.cpp,v $
 
 
@@ -147,7 +147,7 @@ int HHTExplicit::newStep(double _deltaT)
     }
     
     // get a pointer to the AnalysisModel
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
 
     // set the constants
     c2 = gamma*deltaT;
@@ -237,8 +237,8 @@ int HHTExplicit::formNodTangent(DOF_Group *theDof)
 
 int HHTExplicit::domainChanged()
 {
-    AnalysisModel *myModel = this->getAnalysisModelPtr();
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();
+    AnalysisModel *myModel = this->getAnalysisModel();
+    LinearSOE *theLinSOE = this->getLinearSOE();
     const Vector &x = theLinSOE->getX();
     int size = x.Size();
     
@@ -363,7 +363,7 @@ int HHTExplicit::update(const Vector &aiPlusOne)
         return -1;
     }
 
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel == 0)  {
         opserr << "WARNING HHTExplicit::update() - no AnalysisModel set\n";
         return -1;
@@ -397,7 +397,7 @@ int HHTExplicit::update(const Vector &aiPlusOne)
 
 int HHTExplicit::commit(void)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel == 0)  {
         opserr << "WARNING HHTExplicit::commit() - no AnalysisModel set\n";
         return -1;
@@ -452,7 +452,7 @@ int HHTExplicit::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBr
 
 void HHTExplicit::Print(OPS_Stream &s, int flag)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0)  {
         double currentTime = theModel->getCurrentDomainTime();
         s << "\t HHTExplicit - currentTime: " << currentTime << endln ;

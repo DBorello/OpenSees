@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:00:46 $
+// $Revision: 1.5 $
+// $Date: 2007-04-02 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/ArcLength1.cpp,v $
                                                                         
                                                                         
@@ -75,8 +75,8 @@ int
 ArcLength1::newStep(void)
 {
     // get pointers to AnalysisModel and LinearSOE
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();    
+    AnalysisModel *theModel = this->getAnalysisModel();
+    LinearSOE *theLinSOE = this->getLinearSOE();    
     if (theModel == 0 || theLinSOE == 0) {
 	opserr << "WARNING ArcLength1::newStep() ";
 	opserr << "No AnalysisModel or LinearSOE has been set\n";
@@ -121,8 +121,8 @@ ArcLength1::newStep(void)
 int
 ArcLength1::update(const Vector &dU)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();    
+    AnalysisModel *theModel = this->getAnalysisModel();
+    LinearSOE *theLinSOE = this->getLinearSOE();    
     if (theModel == 0 || theLinSOE == 0) {
 	opserr << "WARNING ArcLength1::update() ";
 	opserr << "No AnalysisModel or LinearSOE has been set\n";
@@ -172,8 +172,8 @@ int
 ArcLength1::domainChanged(void)
 {
     // we first create the Vectors needed
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();    
+    AnalysisModel *theModel = this->getAnalysisModel();
+    LinearSOE *theLinSOE = this->getLinearSOE();    
     if (theModel == 0 || theLinSOE == 0) {
 	opserr << "WARNING ArcLength1::update() ";
 	opserr << "No AnalysisModel or LinearSOE has been set\n";
@@ -292,7 +292,7 @@ ArcLength1::recvSelf(int cTag,
 void
 ArcLength1::Print(OPS_Stream &s, int flag)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0) {
 	double cLambda = theModel->getCurrentDomainTime();
 	s << "\t ArcLength1 - currentLambda: " << cLambda;

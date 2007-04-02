@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-03-06 20:32:01 $
+// $Revision: 1.8 $
+// $Date: 2007-04-02 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/TransientIntegrator.cpp,v $
                                                                         
                                                                         
@@ -62,8 +62,8 @@ TransientIntegrator::formTangent(int statFlag)
     int result = 0;
     statusFlag = statFlag;
 
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    LinearSOE *theLinSOE = this->getLinearSOE();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theLinSOE == 0 || theModel == 0) {
 	opserr << "WARNING TransientIntegrator::formTangent() ";
 	opserr << "no LinearSOE or AnalysisModel has been set\n";

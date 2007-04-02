@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2005-12-19 22:43:36 $
+// $Revision: 1.8 $
+// $Date: 2007-04-02 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/IncrementalIntegrator.cpp,v $
                                                                         
 // Written: fmk 
@@ -42,7 +42,7 @@
 IncrementalIntegrator::IncrementalIntegrator(int clasTag)
 :Integrator(clasTag),
  statusFlag(CURRENT_TANGENT),
- theSOE(0),theAnalysisModel(0)
+ theSOE(0), theAnalysisModel(0), theTest(0)
 {
 
 }
@@ -53,10 +53,11 @@ IncrementalIntegrator::~IncrementalIntegrator()
 }
 
 void
-IncrementalIntegrator::setLinks(AnalysisModel &theModel, LinearSOE &theLinSOE)
+IncrementalIntegrator::setLinks(AnalysisModel &theModel, LinearSOE &theLinSOE, ConvergenceTest *theConvergenceTest)
 {
     theAnalysisModel = &theModel;
     theSOE = &theLinSOE;
+    theTest = theConvergenceTest;
 }
 
 
@@ -191,13 +192,19 @@ IncrementalIntegrator::revertToStart()
 }    
 
 LinearSOE *
-IncrementalIntegrator::getLinearSOEPtr(void) const
+IncrementalIntegrator::getLinearSOE(void) const
 {
     return theSOE;
 }   
 
+ConvergenceTest *
+IncrementalIntegrator::getConvergenceTest(void) const
+{
+    return theTest;
+}   
+
 AnalysisModel *
-IncrementalIntegrator::getAnalysisModelPtr(void) const
+IncrementalIntegrator::getAnalysisModel(void) const
 {
     return theAnalysisModel;
 }

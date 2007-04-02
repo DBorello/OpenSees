@@ -71,8 +71,8 @@ int
 HSConstraint::newStep(void)
 {
     // get pointers to AnalysisModel and LinearSOE
-    AnalysisModel *theModel = this->getAnalysisModelPtr();//method defined in Incremental Integrator
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();//method defined in Incremental Integrator
+    LinearSOE *theLinSOE = this->getLinearSOE();
     if (theModel == 0 || theLinSOE == 0) {
 	opserr << "WARNING HSConstraint::newStep() ";
 	opserr << "No AnalysisModel or LinearSOE has been set\n";
@@ -128,8 +128,8 @@ HSConstraint::newStep(void)
 int
 HSConstraint::update(const Vector &dU)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
+    LinearSOE *theLinSOE = this->getLinearSOE();
     if (theModel == 0 || theLinSOE == 0) {
 	opserr << "WARNING ArcLength::update() ";
 	opserr << "No AnalysisModel or LinearSOE has been set\n";
@@ -236,8 +236,8 @@ int
 HSConstraint::domainChanged(void)
 {
     // we first create the Vectors needed
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
+    LinearSOE *theLinSOE = this->getLinearSOE();
     if (theModel == 0 || theLinSOE == 0) {
 	opserr << "WARNING HSConstraint::domainChanged() ";
 	opserr << "No AnalysisModel or LinearSOE has been set\n";
@@ -371,7 +371,7 @@ HSConstraint::recvSelf(int cTag,
 void
 HSConstraint::Print(OPS_Stream &s, int flag)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0) {
 	double cLambda = theModel->getCurrentDomainTime();
 	s << "\t HSConstraint - currentLambda: " << cLambda;

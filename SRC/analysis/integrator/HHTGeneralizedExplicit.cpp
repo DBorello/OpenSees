@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2005-12-21 00:32:57 $
+// $Revision: 1.3 $
+// $Date: 2007-04-02 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHTGeneralizedExplicit.cpp,v $
 
 
@@ -163,7 +163,7 @@ int HHTGeneralizedExplicit::newStep(double _deltaT)
     }
     
     // get a pointer to the AnalysisModel
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
 
     // set the constants
     c1 = beta*deltaT*deltaT;
@@ -254,8 +254,8 @@ int HHTGeneralizedExplicit::formNodTangent(DOF_Group *theDof)
 
 int HHTGeneralizedExplicit::domainChanged()
 {
-    AnalysisModel *myModel = this->getAnalysisModelPtr();
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();
+    AnalysisModel *myModel = this->getAnalysisModel();
+    LinearSOE *theLinSOE = this->getLinearSOE();
     const Vector &x = theLinSOE->getX();
     int size = x.Size();
     
@@ -386,7 +386,7 @@ int HHTGeneralizedExplicit::update(const Vector &aiPlusOne)
         return -1;
     }
 
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel == 0)  {
         opserr << "WARNING HHTGeneralizedExplicit::update() - no AnalysisModel set\n";
         return -1;
@@ -425,7 +425,7 @@ int HHTGeneralizedExplicit::update(const Vector &aiPlusOne)
 
 int HHTGeneralizedExplicit::commit(void)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel == 0)  {
         opserr << "WARNING HHTGeneralizedExplicit::commit() - no AnalysisModel set\n";
         return -1;
@@ -484,7 +484,7 @@ int HHTGeneralizedExplicit::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBr
 
 void HHTGeneralizedExplicit::Print(OPS_Stream &s, int flag)
 {
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
+    AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0)  {
         double currentTime = theModel->getCurrentDomainTime();
         s << "\t HHTGeneralizedExplicit - currentTime: " << currentTime << endln ;

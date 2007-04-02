@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-11-29 21:59:49 $
+// $Revision: 1.2 $
+// $Date: 2007-04-02 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/DistributedDisplacementControl.cpp,v $
                                                                         
 // Written: fmk 
@@ -104,8 +104,8 @@ int
 DistributedDisplacementControl::newStep(void)
 {
     // get pointers to AnalysisModel and LinearSOE
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();    
+    AnalysisModel *theModel = this->getAnalysisModel();
+    LinearSOE *theLinSOE = this->getLinearSOE();    
     if (theModel == 0 || theLinSOE == 0) {
 	opserr << "WARNING DistributedDisplacementControl::newStep() ";
 	opserr << "No AnalysisModel or LinearSOE has been set\n";
@@ -175,8 +175,8 @@ int
 DistributedDisplacementControl::update(const Vector &dU)
 {
 
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();    
+    AnalysisModel *theModel = this->getAnalysisModel();
+    LinearSOE *theLinSOE = this->getLinearSOE();    
     if (theModel == 0 || theLinSOE == 0) {
 	opserr << "WARNING DistributedDisplacementControl::update() ";
 	opserr << "No AnalysisModel or LinearSOE has been set\n";
@@ -240,8 +240,8 @@ DistributedDisplacementControl::domainChanged(void)
 {
 
     // we first create the Vectors needed
-    AnalysisModel *theModel = this->getAnalysisModelPtr();
-    LinearSOE *theLinSOE = this->getLinearSOEPtr();    
+    AnalysisModel *theModel = this->getAnalysisModel();
+    LinearSOE *theLinSOE = this->getLinearSOE();    
     if (theModel == 0 || theLinSOE == 0) {
 	opserr << "WARNING DistributedDisplacementControl::update() ";
 	opserr << "No AnalysisModel or LinearSOE has been set\n";
