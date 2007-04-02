@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.87 $
-// $Date: 2007-03-30 01:54:32 $
+// $Revision: 1.88 $
+// $Date: 2007-04-02 23:43:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -134,7 +134,7 @@
 #define MAT_TAG_Concrete04 30
 #define MAT_TAG_SecantConcrete 31
 #define MAT_TAG_ContinuumUniaxial 32
-
+#define MAT_TAG_Concrete05 33
 
 //B Jeremic
 #define MAT_TAG_PySimple1        205
@@ -155,8 +155,6 @@
 #define MAT_TAG_FedeasSteel1       1009
 #define MAT_TAG_FedeasSteel2       1010
 #define MAT_TAG_PlasticDamage			       1011
-
-
 
 
 #define MAT_TAG_DrainMaterial		2000
