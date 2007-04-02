@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2005-11-29 23:36:47 $
+// $Revision: 1.7 $
+// $Date: 2007-04-02 23:43:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DomainDecompositionAnalysis.cpp,v $
                                                                         
                                                                         
@@ -102,7 +102,8 @@ DomainDecompositionAnalysis::DomainDecompositionAnalysis(Subdomain &the_Domain,
 							 DomainDecompAlgo &theSolnAlgo,
 							 IncrementalIntegrator &integrator,
 							 LinearSOE &theLinSOE,
-							 DomainSolver &theDDSolver)
+							 DomainSolver &theDDSolver,
+							 ConvergenceTest *theTest)
 
 
 :Analysis(the_Domain),
@@ -120,7 +121,7 @@ DomainDecompositionAnalysis::DomainDecompositionAnalysis(Subdomain &the_Domain,
     theModel->setLinks(the_Domain, handler);
     theHandler->setLinks(*theSubdomain,*theModel,*theIntegrator);
     theNumberer->setLinks(*theModel);
-    theIntegrator->setLinks(*theModel,*theSOE);
+    theIntegrator->setLinks(*theModel,*theSOE, theTest);
     theAlgorithm->setLinks(*theModel,*theIntegrator,*theSOE,
 			   *theSolver,*theSubdomain);
 
@@ -658,7 +659,7 @@ DomainDecompositionAnalysis::recvSelf(int commitTag,
     theModel->setLinks(*theSubdomain, *theHandler);
     theHandler->setLinks(*theSubdomain,*theModel,*theIntegrator);
     theNumberer->setLinks(*theModel);
-    theIntegrator->setLinks(*theModel,*theSOE);
+    theIntegrator->setLinks(*theModel,*theSOE, theTest);
     theAlgorithm->setLinks(*theModel,*theIntegrator,*theSOE,
 			   *theSolver,*theSubdomain);
 

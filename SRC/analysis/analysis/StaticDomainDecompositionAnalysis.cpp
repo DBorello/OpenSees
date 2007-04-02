@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-03-07 00:08:21 $
+// $Revision: 1.7 $
+// $Date: 2007-04-02 23:43:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticDomainDecompositionAnalysis.cpp,v $
                                                                         
 // Written: fmk 
@@ -97,13 +97,11 @@ StaticDomainDecompositionAnalysis::StaticDomainDecompositionAnalysis(Subdomain &
   if (setLinks == true) {
     // set up the links needed by the elements in the aggregation
     theAnalysisModel->setLinks(the_Domain, theHandler);
-    theConstraintHandler->setLinks(the_Domain,theModel,theStaticIntegrator);
+    theConstraintHandler->setLinks(the_Domain, theModel, theStaticIntegrator);
     theDOF_Numberer->setLinks(theModel);
-    theIntegrator->setLinks(theModel,theLinSOE);
-    theAlgorithm->setLinks(theModel,theStaticIntegrator,theLinSOE);
-    theAlgorithm->setConvergenceTest(theTest);
+    theIntegrator->setLinks(theModel, theLinSOE, theTest);
+    theAlgorithm->setLinks(theModel, theStaticIntegrator, theLinSOE, theTest);
   }
-
 }    
 
 
@@ -584,9 +582,8 @@ StaticDomainDecompositionAnalysis::recvSelf(int commitTag, Channel &theChannel,
   theAnalysisModel->setLinks(*the_Domain, *theConstraintHandler);
   theConstraintHandler->setLinks(*the_Domain, *theAnalysisModel, *theIntegrator);
   theDOF_Numberer->setLinks(*theAnalysisModel);
-  theIntegrator->setLinks(*theAnalysisModel, *theSOE);
-  theAlgorithm->setLinks(*theAnalysisModel, *theIntegrator, *theSOE);
-  theAlgorithm->setConvergenceTest(theTest);
+  theIntegrator->setLinks(*theAnalysisModel, *theSOE, theTest);
+  theAlgorithm->setLinks(*theAnalysisModel, *theIntegrator, *theSOE, theTest);
 
   return 0;
 }
@@ -602,7 +599,7 @@ StaticDomainDecompositionAnalysis::setAlgorithm(EquiSolnAlgo &theNewAlgorithm)
   theAlgorithm = &theNewAlgorithm;
 
   if (theAnalysisModel != 0 && theIntegrator != 0 && theSOE != 0)
-    theAlgorithm->setLinks(*theAnalysisModel,*theIntegrator,*theSOE);
+    theAlgorithm->setLinks(*theAnalysisModel, *theIntegrator, *theSOE, theTest);
 
   if (theTest != 0)
     theAlgorithm->setConvergenceTest(theTest);
@@ -626,9 +623,9 @@ StaticDomainDecompositionAnalysis::setIntegrator(IncrementalIntegrator &theNewIn
   
   theIntegrator = (StaticIntegrator *)(&theNewIntegrator);
   if (theIntegrator != 0 && theConstraintHandler != 0 && theAlgorithm != 0 && theAnalysisModel != 0 && theSOE != 0) {
-    theIntegrator->setLinks(*theAnalysisModel,*theSOE);
-    theConstraintHandler->setLinks(*the_Domain,*theAnalysisModel,*theIntegrator);
-    theAlgorithm->setLinks(*theAnalysisModel,*theIntegrator,*theSOE);
+    theIntegrator->setLinks(*theAnalysisModel, *theSOE, theTest);
+    theConstraintHandler->setLinks(*the_Domain, *theAnalysisModel, *theIntegrator);
+    theAlgorithm->setLinks(*theAnalysisModel, *theIntegrator, *theSOE, theTest);
   }
 
   // cause domainChanged to be invoked on next analyze
@@ -649,8 +646,8 @@ StaticDomainDecompositionAnalysis::setLinearSOE(LinearSOE &theNewSOE)
     // set the links needed by the other objects in the aggregation
     theSOE = &theNewSOE;
     if (theIntegrator != 0 && theAlgorithm != 0 && theAnalysisModel != 0 && theSOE != 0) {
-      theIntegrator->setLinks(*theAnalysisModel,*theSOE);
-      theAlgorithm->setLinks(*theAnalysisModel,*theIntegrator,*theSOE);
+      theIntegrator->setLinks(*theAnalysisModel, *theSOE, theTest);
+      theAlgorithm->setLinks(*theAnalysisModel, *theIntegrator, *theSOE, theTest);
     }
     
     // cause domainChanged to be invoked on next analyze

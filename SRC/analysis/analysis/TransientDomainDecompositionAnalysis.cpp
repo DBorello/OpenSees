@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-03-07 00:08:21 $
+// $Revision: 1.7 $
+// $Date: 2007-04-02 23:43:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/TransientDomainDecompositionAnalysis.cpp,v $
                                                                         
 // Written: fmk 
@@ -100,9 +100,8 @@ TransientDomainDecompositionAnalysis::TransientDomainDecompositionAnalysis(Subdo
     theAnalysisModel->setLinks(the_Domain, theHandler);
     theConstraintHandler->setLinks(the_Domain,theModel,theTransientIntegrator);
     theDOF_Numberer->setLinks(theModel);
-    theIntegrator->setLinks(theModel,theLinSOE);
-    theAlgorithm->setLinks(theModel,theTransientIntegrator,theLinSOE);
-    theAlgorithm->setConvergenceTest(theTest);
+    theIntegrator->setLinks(theModel,theLinSOE, theTest);
+    theAlgorithm->setLinks(theModel,theTransientIntegrator,theLinSOE, theTest);
   }
 
 }    
@@ -570,8 +569,8 @@ TransientDomainDecompositionAnalysis::recvSelf(int commitTag, Channel &theChanne
   theAnalysisModel->setLinks(*the_Domain, *theConstraintHandler);
   theConstraintHandler->setLinks(*the_Domain, *theAnalysisModel, *theIntegrator);
   theDOF_Numberer->setLinks(*theAnalysisModel);
-  theIntegrator->setLinks(*theAnalysisModel, *theSOE);
-  theAlgorithm->setLinks(*theAnalysisModel, *theIntegrator, *theSOE);
+  theIntegrator->setLinks(*theAnalysisModel, *theSOE, theTest);
+  theAlgorithm->setLinks(*theAnalysisModel, *theIntegrator, *theSOE, theTest);
   theAlgorithm->setConvergenceTest(theTest);
 
   return 0;
@@ -588,7 +587,7 @@ TransientDomainDecompositionAnalysis::setAlgorithm(EquiSolnAlgo &theNewAlgorithm
   theAlgorithm = &theNewAlgorithm;
 
   if (theAnalysisModel != 0 && theIntegrator != 0 && theSOE != 0)
-    theAlgorithm->setLinks(*theAnalysisModel,*theIntegrator,*theSOE);
+    theAlgorithm->setLinks(*theAnalysisModel,*theIntegrator,*theSOE, theTest);
 
   if (theTest != 0)
     theAlgorithm->setConvergenceTest(theTest);
@@ -614,9 +613,9 @@ TransientDomainDecompositionAnalysis::setIntegrator(IncrementalIntegrator &theNe
   theIntegrator = (TransientIntegrator *)(&theNewIntegrator);
 
   if (theIntegrator != 0 && theConstraintHandler != 0 && theAlgorithm != 0 && theAnalysisModel != 0 && theSOE != 0) {
-    theIntegrator->setLinks(*theAnalysisModel,*theSOE);
-    theConstraintHandler->setLinks(*the_Domain,*theAnalysisModel,*theIntegrator);
-    theAlgorithm->setLinks(*theAnalysisModel,*theIntegrator,*theSOE);
+    theIntegrator->setLinks(*theAnalysisModel,*theSOE, theTest);
+    theConstraintHandler->setLinks(*the_Domain, *theAnalysisModel, *theIntegrator);
+    theAlgorithm->setLinks(*theAnalysisModel, *theIntegrator, *theSOE, theTest);
   }
 
   // cause domainChanged to be invoked on next analyze
@@ -637,8 +636,8 @@ TransientDomainDecompositionAnalysis::setLinearSOE(LinearSOE &theNewSOE)
     // set the links needed by the other objects in the aggregation
     theSOE = &theNewSOE;
     if (theIntegrator != 0 && theAlgorithm != 0 && theAnalysisModel != 0 && theSOE != 0) {
-      theIntegrator->setLinks(*theAnalysisModel,*theSOE);
-      theAlgorithm->setLinks(*theAnalysisModel,*theIntegrator,*theSOE);
+      theIntegrator->setLinks(*theAnalysisModel, *theSOE, theTest);
+      theAlgorithm->setLinks(*theAnalysisModel, *theIntegrator, *theSOE, theTest);
     }
 
     // cause domainChanged to be invoked on next analyze

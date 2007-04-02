@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2005-11-29 23:36:47 $
+// $Revision: 1.3 $
+// $Date: 2007-04-02 23:43:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/SubstructuringAnalysis.h,v $
                                                                         
                                                                         
@@ -62,7 +62,8 @@ class SubstructuringAnalysis: public DomainDecompositionAnalysis
 			   DomainDecompAlgo &theSolnAlgo,		   
 			   IncrementalIntegrator &theIntegrator,	
 			   LinearSOE &theSOE,
-			   DomainSolver &theSolver);
+			   DomainSolver &theSolver,
+			   ConvergenceTest *theTest);
 
     virtual int analyze(void);
     virtual ~SubstructuringAnalysis();

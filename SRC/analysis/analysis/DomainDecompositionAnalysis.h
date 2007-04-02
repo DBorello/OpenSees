@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-11-29 23:36:47 $
+// $Revision: 1.5 $
+// $Date: 2007-04-02 23:43:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DomainDecompositionAnalysis.h,v $
                                                                         
                                                                         
@@ -74,7 +74,8 @@ class DomainDecompositionAnalysis: public Analysis, public MovableObject
 				DomainDecompAlgo &theSolnAlgo,		   
 				IncrementalIntegrator &theIntegrator,	
 				LinearSOE &theSOE,
-				DomainSolver &theSolver);
+				DomainSolver &theSolver,
+				ConvergenceTest *theTest);
 
 
 
@@ -120,8 +121,6 @@ class DomainDecompositionAnalysis: public Analysis, public MovableObject
     LinearSOE 		*getLinSOEPtr(void) const;
     DomainSolver        *getDomainSolverPtr(void) const;
     
-
-    
   private:
     Subdomain 		     *theSubdomain;
     ConstraintHandler 	     *theHandler;    
@@ -132,6 +131,7 @@ class DomainDecompositionAnalysis: public Analysis, public MovableObject
 
     LinearSOE 		     *theSOE;
     DomainSolver	     *theSolver;
+    ConvergenceTest          *theTest;
 
     Vector 		     *theResidual;
     int numEqn;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-11-29 23:36:47 $
+// $Revision: 1.4 $
+// $Date: 2007-04-02 23:43:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/SubstructuringAnalysis.cpp,v $
                                                                         
                                                                         
@@ -61,7 +61,8 @@ SubstructuringAnalysis::SubstructuringAnalysis(Subdomain &the_Domain,
 					       DomainDecompAlgo &theSolnAlgo,
 					       IncrementalIntegrator &integrator,
 					       LinearSOE &theLinSOE,
-					       DomainSolver &theDDSolver)
+					       DomainSolver &theDDSolver,
+					       ConvergenceTest *theTest)
 :DomainDecompositionAnalysis(the_Domain,
 			     handler,
 			     numberer,
@@ -69,7 +70,8 @@ SubstructuringAnalysis::SubstructuringAnalysis(Subdomain &the_Domain,
 			     theSolnAlgo,
 			     integrator,
 			     theLinSOE,
-			     theDDSolver)
+			     theDDSolver,
+			     theTest)
 {
 
 }    
