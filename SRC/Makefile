@@ -1,6 +1,9 @@
 # Makefile for fe objects
+ifndef SHARED
 
 include ../Makefile.def
+
+endif
 
 ifeq ($(RELIABILITY), YES_RELIABILITY)
 
@@ -358,7 +361,6 @@ ELEMENT_BJ_LIBS = $(FE)/element/8nbrick/EightNodeBrick.o \
                   $(FE)/element/upU/TwentyNodeBrick_u_p_U.o \
                   $(FE)/element/upU/TclEightNodeBrick_u_p_U.o \
                   $(FE)/element/upU/TclTwentyNodeBrick_u_p_U.o \
-		  $(FE)/element/upU/TclTwentyNodeBrick_u_p_U.o \
 		  $(FE)/element/UP_ucdavis/EightNode_LDBrick_u_p.o \
 		  $(FE)/element/UP_ucdavis/EightNode_Brick_u_p.o \
 		  $(FE)/element/UP_ucdavis/TclBrick_u_p.o
@@ -531,9 +533,6 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/dispBeamColumn/DispBeamColumn2d.o \
 	$(FE)/element/dispBeamColumn/DispBeamColumn3d.o \
 	$(FE)/element/dispBeamColumn/TclDispBeamColumnCommand.o \
-	$(FE)/actor/channel/TCP_Socket.o \
-	$(FE)/actor/channel/Socket.o \
-	$(FE)/actor/channel/HTTP.o \
 	$(FE)/element/elasticBeamColumn/ElasticBeam2d.o \
 	$(FE)/element/elasticBeamColumn/ElasticBeam3d.o \
 	$(FE)/element/elasticBeamColumn/TclElasticBeamCommand.o \
@@ -706,7 +705,6 @@ endif
 #endif
 
 
-
 SysOfEqn_LIBS = $(FE)/system_of_eqn/SystemOfEqn.o \
 	$(FE)/system_of_eqn/Solver.o \
 	$(FE)/system_of_eqn/linearSOE/LinearSOE.o \
@@ -732,13 +730,10 @@ SysOfEqn_LIBS = $(FE)/system_of_eqn/SystemOfEqn.o \
 	$(FE)/system_of_eqn/linearSOE/profileSPD/DistributedProfileSPDLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinSolver.o \
 	$(FE)/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinDirectSolver.o \
-	$(FE)/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinDirectSkypackSolver.o \
-	$(FE)/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinDirectBlockSolver.o \
 	$(FE)/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinSubstrSolver.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSOE.o \
-	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSolver.o \
-        $(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSOE.o \
+	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSOE.o \
         $(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSolver.o \
 	$(SUPER_LU_OBJ) \
 	$(FE)/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSOE.o \
@@ -907,6 +902,8 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 
 ACTOR_LIBS = $(FE)/actor/channel/Channel.o \
 	$(FE)/actor/channel/TCP_Socket.o \
+	$(FE)/actor/channel/Socket.o \
+	$(FE)/actor/channel/HTTP.o \
 	$(FE)/actor/message/Message.o \
 	$(FE)/actor/machineBroker/MachineBroker.o \
 	$(FE)/actor/objectBroker/FEM_ObjectBroker.o \
