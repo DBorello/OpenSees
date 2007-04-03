@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-12-05 20:08:29 $
+// $Revision: 1.4 $
+// $Date: 2007-04-03 22:31:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/NewmarkSensitivityIntegrator.cpp,v $
 
 
@@ -139,7 +139,7 @@ NewmarkSensitivityIntegrator::formEleResidual(FE_Element *theEle)
 		Vector Vdotdot(vectorSize);
 		int i, loc;
 
-		AnalysisModel *myModel = this->getAnalysisModelPtr();
+		AnalysisModel *myModel = this->getAnalysisModel();
 		DOF_GrpIter &theDOFs = myModel->getDOFs();
 		DOF_Group *dofPtr;
 		while ((dofPtr = theDOFs()) != 0) {
@@ -267,7 +267,7 @@ NewmarkSensitivityIntegrator::formSensitivityRHS(int passedGradNumber)
 	gradNumber = passedGradNumber;
 
 	// Get pointer to the SOE
-	LinearSOE *theSOE = this->getLinearSOEPtr();
+	LinearSOE *theSOE = this->getLinearSOE();
 
 
 	// Possibly set the independent part of the RHS
@@ -276,7 +276,7 @@ NewmarkSensitivityIntegrator::formSensitivityRHS(int passedGradNumber)
 	}
 
 	// Get the analysis model
-	AnalysisModel *theModel = this->getAnalysisModelPtr();
+	AnalysisModel *theModel = this->getAnalysisModel();
 
 
 
@@ -398,7 +398,7 @@ NewmarkSensitivityIntegrator::saveSensitivity(const Vector & vNew,int gradNum,in
 	Vector Vdotdot(vectorSize);
 	int i, loc;
 
-	AnalysisModel *myModel = this->getAnalysisModelPtr();
+	AnalysisModel *myModel = this->getAnalysisModel();
 	DOF_GrpIter &theDOFs = myModel->getDOFs();
 	DOF_Group *dofPtr;
 	while ((dofPtr = theDOFs()) != 0) {
@@ -462,7 +462,7 @@ NewmarkSensitivityIntegrator::commitSensitivity(int gradNum, int numGrads)
 {
 
 	// Loop through the FE_Elements and set unconditional sensitivities
-	AnalysisModel *theAnalysisModel = this->getAnalysisModelPtr();
+  AnalysisModel *theAnalysisModel = this->getAnalysisModel();
     FE_Element *elePtr;
     FE_EleIter &theEles = theAnalysisModel->getFEs();    
     while((elePtr = theEles()) != 0) {
