@@ -1,7 +1,7 @@
-// $Revision: 1.38 $
-// $Date: 2007-03-30 01:52:10 $
+// $Revision: 1.39 $
+// $Date: 2007-04-04 23:12:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
-                                                                        
+
 // Written: ZHY
 // Created: August 2000
 
@@ -30,7 +30,7 @@ double* PressureDependMultiYield::refPressurex=0;
 double* PressureDependMultiYield::cohesionx=0;
 double* PressureDependMultiYield::pressDependCoeffx=0;
 int*    PressureDependMultiYield::numOfSurfacesx=0;
-double* PressureDependMultiYield::phaseTransfAnglex=0; 
+double* PressureDependMultiYield::phaseTransfAnglex=0;
 double* PressureDependMultiYield::contractParam1x=0;
 double* PressureDependMultiYield::dilateParam1x=0;
 double* PressureDependMultiYield::dilateParam2x=0;
@@ -55,19 +55,19 @@ T2Vector PressureDependMultiYield::workT2V;
 
 const	double pi = 3.14159265358979;
 
-PressureDependMultiYield::PressureDependMultiYield (int tag, int nd, 
+PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
 						    double r, double refShearModul,
 						    double refBulkModul, double frictionAng,
-						    double peakShearStra, double refPress, 
+						    double peakShearStra, double refPress,
 						    double pressDependCoe,
-						    double phaseTransformAng, 
+						    double phaseTransformAng,
 						    double contractionParam1,
 						    double dilationParam1,
 						    double dilationParam2,
 						    double liquefactionParam1,
 						    double liquefactionParam2,
 						    double liquefactionParam4,
-						    int numberOfYieldSurf, 
+						    int numberOfYieldSurf,
 								double * gredu,
 						    double ei,
 						    double volLim1, double volLim2, double volLim3,
@@ -75,8 +75,8 @@ PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
 							double hv, double pv)
  : NDMaterial(tag,ND_TAG_PressureDependMultiYield), currentStress(),
    trialStress(), currentStrain(), strainRate(),
-   reversalStress(), PPZPivot(), PPZCenter(), 
-   lockStress(), reversalStressCommitted(), 
+   reversalStress(), PPZPivot(), PPZCenter(),
+   lockStress(), reversalStressCommitted(),
    PPZPivotCommitted(), PPZCenterCommitted(),
    lockStressCommitted()
 {
@@ -114,7 +114,7 @@ PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
     opserr << "WARNING:PressureDependMultiYield:: cohesion < 0" << endln;
     opserr << "Will reset cohesion to zero." << endln;
     cohesi = 0.;
-  } 
+  }
   if (peakShearStra <= 0) {
     opserr << "FATAL:PressureDependMultiYield:: peakShearStra <= 0" << endln;
    exit(-1);
@@ -165,7 +165,7 @@ PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
      double * temp10 = pressDependCoeffx;
 	 int * temp11 = numOfSurfacesx;
      double * temp12 = residualPressx;
-     double * temp13 = phaseTransfAnglex; 
+     double * temp13 = phaseTransfAnglex;
      double * temp14 = contractParam1x;
      double * temp15 = dilateParam1x;
      double * temp16 = dilateParam2x;
@@ -192,7 +192,7 @@ PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
      pressDependCoeffx = new double[matCount+20];
      numOfSurfacesx = new int[matCount+20];
      residualPressx = new double[matCount+20];
-     phaseTransfAnglex = new double[matCount+20]; 
+     phaseTransfAnglex = new double[matCount+20];
      contractParam1x = new double[matCount+20];
      dilateParam1x = new double[matCount+20];
      dilateParam2x = new double[matCount+20];
@@ -220,7 +220,7 @@ PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
          pressDependCoeffx[i] = temp10[i];
          numOfSurfacesx[i] = temp11[i];
          residualPressx[i] = temp12[i];
-         phaseTransfAnglex[i] = temp13[i]; 
+         phaseTransfAnglex[i] = temp13[i];
          contractParam1x[i] = temp14[i];
          dilateParam1x[i] = temp15[i];
          dilateParam2x[i] = temp16[i];
@@ -235,15 +235,15 @@ PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
 		 Hvx[i] = temp25[i];
 		 Pvx[i] = temp26[i];
      }
-     
+
 	 if (matCount > 0) {
-	     delete [] temp1; delete [] temp2; delete [] temp3; delete [] temp4; 
-	     delete [] temp5; delete [] temp6; delete [] temp7; delete [] temp8; 
-	     delete [] temp9; delete [] temp10; delete [] temp11; delete [] temp12; 
-	     delete [] temp13; delete [] temp14; delete [] temp15; delete [] temp16; 
-	     delete [] temp17; delete [] temp18; delete [] temp19; delete [] temp20; 
-	     delete [] temp21; delete [] temp22; delete [] temp23; delete [] temp24; 
-         delete [] temp25; delete [] temp26; 
+	     delete [] temp1; delete [] temp2; delete [] temp3; delete [] temp4;
+	     delete [] temp5; delete [] temp6; delete [] temp7; delete [] temp8;
+	     delete [] temp9; delete [] temp10; delete [] temp11; delete [] temp12;
+	     delete [] temp13; delete [] temp14; delete [] temp15; delete [] temp16;
+	     delete [] temp17; delete [] temp18; delete [] temp19; delete [] temp20;
+	     delete [] temp21; delete [] temp22; delete [] temp23; delete [] temp24;
+         delete [] temp25; delete [] temp26;
      }
   }
 
@@ -279,8 +279,8 @@ PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
   int numOfSurfaces = numOfSurfacesx[matN];
   initPress = refPressurex[matN];
 
-  e2p = committedActiveSurf = activeSurfaceNum = 0; 
-  onPPZCommitted = onPPZ = -1 ; 
+  e2p = committedActiveSurf = activeSurfaceNum = 0;
+  onPPZCommitted = onPPZ = -1 ;
   PPZSizeCommitted = PPZSize = 0.;
   pressureDCommitted = pressureD = modulusFactor = 0.;
   cumuDilateStrainOctaCommitted    = cumuDilateStrainOcta = 0.;
@@ -291,17 +291,17 @@ PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
   maxPress = 0.;
 
   theSurfaces = new MultiYieldSurface[numOfSurfaces+1]; //first surface not used
-  committedSurfaces = new MultiYieldSurface[numOfSurfaces+1]; 
+  committedSurfaces = new MultiYieldSurface[numOfSurfaces+1];
 
   setUpSurfaces(gredu);  // residualPress and stressRatioPT are calculated inside.
 }
-   
 
-PressureDependMultiYield::PressureDependMultiYield () 
- : NDMaterial(0,ND_TAG_PressureDependMultiYield), 
-   currentStress(), trialStress(), currentStrain(), 
-  strainRate(), reversalStress(), PPZPivot(), 
-  PPZCenter(), lockStress(), reversalStressCommitted(), 
+
+PressureDependMultiYield::PressureDependMultiYield ()
+ : NDMaterial(0,ND_TAG_PressureDependMultiYield),
+   currentStress(), trialStress(), currentStrain(),
+  strainRate(), reversalStress(), PPZPivot(),
+  PPZCenter(), lockStress(), reversalStressCommitted(),
   PPZPivotCommitted(), PPZCenterCommitted(),
   lockStressCommitted(), theSurfaces(0), committedSurfaces(0)
 {
@@ -309,12 +309,12 @@ PressureDependMultiYield::PressureDependMultiYield ()
 }
 
 PressureDependMultiYield::PressureDependMultiYield (const PressureDependMultiYield & a)
- : NDMaterial(a.getTag(),ND_TAG_PressureDependMultiYield), 
-   currentStress(a.currentStress), trialStress(a.trialStress), 
-  currentStrain(a.currentStrain), strainRate(a.strainRate), 
-   reversalStress(a.reversalStress), PPZPivot(a.PPZPivot), PPZCenter(a.PPZCenter), 
-  lockStress(a.lockStress), reversalStressCommitted(a.reversalStressCommitted), 
-  PPZPivotCommitted(a.PPZPivotCommitted), 
+ : NDMaterial(a.getTag(),ND_TAG_PressureDependMultiYield),
+   currentStress(a.currentStress), trialStress(a.trialStress),
+  currentStrain(a.currentStrain), strainRate(a.strainRate),
+   reversalStress(a.reversalStress), PPZPivot(a.PPZPivot), PPZCenter(a.PPZCenter),
+  lockStress(a.lockStress), reversalStressCommitted(a.reversalStressCommitted),
+  PPZPivotCommitted(a.PPZPivotCommitted),
   PPZCenterCommitted(a.PPZCenterCommitted),
   lockStressCommitted(a.lockStressCommitted)
 {
@@ -328,7 +328,7 @@ PressureDependMultiYield::PressureDependMultiYield (const PressureDependMultiYie
   activeSurfaceNum = a.activeSurfaceNum;
   committedActiveSurf = a.committedActiveSurf;
   pressureDCommitted     = a.pressureDCommitted;
-  onPPZCommitted = a.onPPZCommitted; 
+  onPPZCommitted = a.onPPZCommitted;
   PPZSizeCommitted      = a.PPZSizeCommitted;
   cumuDilateStrainOctaCommitted    = a.cumuDilateStrainOctaCommitted;
   maxCumuDilateStrainOctaCommitted = a.maxCumuDilateStrainOctaCommitted;
@@ -336,7 +336,7 @@ PressureDependMultiYield::PressureDependMultiYield (const PressureDependMultiYie
   prePPZStrainOctaCommitted        = a.prePPZStrainOctaCommitted;
   oppoPrePPZStrainOctaCommitted    = a.oppoPrePPZStrainOctaCommitted;
   pressureD     = a.pressureD;
-  onPPZ = a.onPPZ; 
+  onPPZ = a.onPPZ;
   PPZSize      = a.PPZSize;
   cumuDilateStrainOcta    = a.cumuDilateStrainOcta;
   maxCumuDilateStrainOcta = a.maxCumuDilateStrainOcta;
@@ -347,10 +347,10 @@ PressureDependMultiYield::PressureDependMultiYield (const PressureDependMultiYie
   maxPress = a.maxPress;
 
   theSurfaces = new MultiYieldSurface[numOfSurfaces+1];  //first surface not used
-  committedSurfaces = new MultiYieldSurface[numOfSurfaces+1];  
+  committedSurfaces = new MultiYieldSurface[numOfSurfaces+1];
   for(int i=1; i<=numOfSurfaces; i++) {
-    committedSurfaces[i] = a.committedSurfaces[i];  
-    theSurfaces[i] = a.theSurfaces[i];  
+    committedSurfaces[i] = a.committedSurfaces[i];
+    theSurfaces[i] = a.theSurfaces[i];
   }
 }
 
@@ -360,7 +360,7 @@ PressureDependMultiYield::~PressureDependMultiYield ()
   if (committedSurfaces != 0) delete [] committedSurfaces;
 }
 
-void 
+void
 PressureDependMultiYield::elast2Plast(void)
 {
   int loadStage = loadStagex[matN];
@@ -385,19 +385,19 @@ PressureDependMultiYield::elast2Plast(void)
       initSurfaceUpdate();
       return;
     }
-  } 
+  }
 
   committedActiveSurf--;
   initSurfaceUpdate();
 }
 
- 
-int 
+
+int
 PressureDependMultiYield::setTrialStrain (const Vector &strain)
 {
   int ndm = ndmx[matN];
 
-  if (ndm==3 && strain.Size()==6) 
+  if (ndm==3 && strain.Size()==6)
     workV6 = strain;
   else if (ndm==2 && strain.Size()==3) {
     workV6[0] = strain[0];
@@ -420,18 +420,18 @@ PressureDependMultiYield::setTrialStrain (const Vector &strain)
   return 0;
 }
 
-int 
+int
 PressureDependMultiYield::setTrialStrain (const Vector &strain, const Vector &rate)
 {
   return setTrialStrain (strain);
 }
 
-int 
+int
 PressureDependMultiYield::setTrialStrainIncr (const Vector &strain)
 {
   int ndm = ndmx[matN];
 
-  if (ndm==3 && strain.Size()==6) 
+  if (ndm==3 && strain.Size()==6)
     workV6 = strain;
   else if (ndm==2 && strain.Size()==3) {
     workV6[0] = strain[0];
@@ -451,13 +451,13 @@ PressureDependMultiYield::setTrialStrainIncr (const Vector &strain)
   return 0;
 }
 
-int 
+int
 PressureDependMultiYield::setTrialStrainIncr (const Vector &strain, const Vector &rate)
 {
   return setTrialStrainIncr(strain);
 }
 
-const Matrix & 
+const Matrix &
 PressureDependMultiYield::getTangent (void)
 {
   int loadStage = loadStagex[matN];
@@ -469,7 +469,7 @@ PressureDependMultiYield::getTangent (void)
   int ndm = ndmx[matN];
 
   if (loadStage == 1 && e2p == 0) elast2Plast();
-  if (loadStage==2 && initPress==refPressure) 
+  if (loadStage==2 && initPress==refPressure)
 	  initPress = currentStress.volume();
 
   if (loadStage==0 || loadStage==2) {  //linear elastic
@@ -481,7 +481,7 @@ PressureDependMultiYield::getTangent (void)
 		else factor = pow(factor, pressDependCoeff);
 		factor = (1.e-10>factor) ? 1.e-10 : factor;
 	}
-    for (int i=0;i<6;i++) 
+    for (int i=0;i<6;i++)
       for (int j=0;j<6;j++) {
 	    theTangent(i,j) = 0.;
         if (i==j) theTangent(i,j) += refShearModulus*factor;
@@ -493,14 +493,14 @@ PressureDependMultiYield::getTangent (void)
     double coeff1, coeff2, coeff3, coeff4;
     double factor = getModulusFactor(currentStress);
     double shearModulus = factor*refShearModulus;
-    double bulkModulus = factor*refBulkModulus;		
+    double bulkModulus = factor*refBulkModulus;
 
 	// volumetric plasticity
 	if (Hvx[matN] != 0. && trialStress.volume()<=maxPress && strainRate.volume()<0.) {
 	  double tp = fabs(trialStress.volume() - residualPress);
       bulkModulus = (bulkModulus*Hvx[matN]*pow(tp,Pvx[matN]))/(bulkModulus+Hvx[matN]*pow(tp,Pvx[matN]));
 	}
-	
+
     if (loadStage!=0 && committedActiveSurf > 0) {
       getSurfaceNormal(currentStress, workT2V);
       workV6 = workT2V.deviator();
@@ -508,12 +508,12 @@ PressureDependMultiYield::getTangent (void)
       double Ho = 9.*bulkModulus*volume*volume + 2.*shearModulus*(workV6 && workV6);
       double plastModul = factor*committedSurfaces[committedActiveSurf].modulus();
       coeff1 = 9.*bulkModulus*bulkModulus*volume*volume/(Ho+plastModul);
-      coeff2 = 4.*shearModulus*shearModulus/(Ho+plastModul); 
+      coeff2 = 4.*shearModulus*shearModulus/(Ho+plastModul);
       /* non-symmetric stiffness
       getSurfaceNormal(currentStress, workT2V);
       workV6 = workT2V.deviator();
       double qq = workT2V.volume();
-			double pp=getPlasticPotential(currentStress, workT2V); 
+			double pp=getPlasticPotential(currentStress, workT2V);
       double Ho = 9.*bulkModulus*pp*qq + 2.*shearModulus*(workV6 && workV6);
       double plastModul = factor*committedSurfaces[committedActiveSurf].modulus();
       coeff1 = 9.*bulkModulus*bulkModulus*pp*qq/(Ho+plastModul);
@@ -527,7 +527,7 @@ PressureDependMultiYield::getTangent (void)
       workV6.Zero();
     }
 
-    for (int i=0;i<6;i++) 
+    for (int i=0;i<6;i++)
       for (int j=0;j<6;j++) {
 	      theTangent(i,j) = - coeff2*workV6[i]*workV6[j];
         if (i==j) theTangent(i,j) += shearModulus;
@@ -537,7 +537,7 @@ PressureDependMultiYield::getTangent (void)
 				if (i<3) theTangent(i,j) -= coeff3 * workV6[j];
 				if (j<3) theTangent(i,j) -= coeff4 * workV6[i];*/
       }
-  }  if (ndm==3) 
+  }  if (ndm==3)
     return theTangent;
   else {
     static Matrix workM(3,3);
@@ -547,10 +547,10 @@ PressureDependMultiYield::getTangent (void)
 
     workM(1,0) = theTangent(1,0);
     workM(1,1) = theTangent(1,1);
-    workM(1,2) = 0.; 
+    workM(1,2) = 0.;
 
-    workM(2,0) = 0.; 
-    workM(2,1) = 0.; 
+    workM(2,0) = 0.;
+    workM(2,1) = 0.;
     workM(2,2) = theTangent(3,3);
 
     /* non-symmetric stiffness
@@ -563,7 +563,7 @@ PressureDependMultiYield::getTangent (void)
   }
 }
 
-const Matrix & 
+const Matrix &
 PressureDependMultiYield::getInitialTangent (void)
 {
   int loadStage = loadStagex[matN];
@@ -574,9 +574,9 @@ PressureDependMultiYield::getInitialTangent (void)
   double residualPress = residualPressx[matN];
   int ndm = ndmx[matN];
 
-  if (loadStage==2 && initPress==refPressure) 
+  if (loadStage==2 && initPress==refPressure)
 	  initPress = currentStress.volume();
-  double factor; 
+  double factor;
   if (loadStage==0)
 	  factor = 1.;
   else if (loadStage==2) {
@@ -587,8 +587,8 @@ PressureDependMultiYield::getInitialTangent (void)
   }
   else if (loadStage==1)
 	  factor = getModulusFactor(currentStress);
-  
-  for (int i=0;i<6;i++) 
+
+  for (int i=0;i<6;i++)
     for (int j=0;j<6;j++) {
       theTangent(i,j) = 0.;
       if (i==j) theTangent(i,j) += refShearModulus*factor;
@@ -596,7 +596,7 @@ PressureDependMultiYield::getInitialTangent (void)
       if (i<3 && j<3) theTangent(i,j) += (refBulkModulus - 2.*refShearModulus/3.)*factor;
     }
 
-  if (ndm==3) 
+  if (ndm==3)
     return theTangent;
   else {
     static Matrix workM(3,3);
@@ -606,10 +606,10 @@ PressureDependMultiYield::getInitialTangent (void)
 
     workM(1,0) = theTangent(1,0);
     workM(1,1) = theTangent(1,1);
-    workM(1,2) = 0.; 
+    workM(1,2) = 0.;
 
-    workM(2,0) = 0.; 
-    workM(2,1) = 0.; 
+    workM(2,0) = 0.;
+    workM(2,1) = 0.;
     workM(2,2) = theTangent(3,3);
 
 /* non-symmetric stiffness
@@ -629,7 +629,7 @@ PressureDependMultiYield::getStress (void)
   int ndm = ndmx[matN];
 
   int i, is;
-  if (loadStage == 1 && e2p == 0) 
+  if (loadStage == 1 && e2p == 0)
     elast2Plast();
 
   if (loadStage!=1) {  //linear elastic
@@ -671,7 +671,7 @@ PressureDependMultiYield::getStress (void)
       int numSubIncre = setSubStrainRate();
 
       for (i=0; i<numSubIncre; i++) {
-//      trialStrain.setData(currentStrain.t2Vector() 
+//      trialStrain.setData(currentStrain.t2Vector()
 //			     + subStrainRate.t2Vector()*(i+1));
  	      workV6 = currentStrain.t2Vector();
 	      workV6.addVector(1.0, subStrainRate.t2Vector(), (i+1));
@@ -680,10 +680,10 @@ PressureDependMultiYield::getStress (void)
 		if (i==0)  {
 			  setTrialStress(currentStress);
               is = isLoadReversal(currentStress);
-		}  
+		}
 		else {
 			workT2V.setData(trialStress.t2Vector());
-			setTrialStress(trialStress); 
+			setTrialStress(trialStress);
             is = isLoadReversal(workT2V);
 		}
         if (activeSurfaceNum>0 && is) {
@@ -710,13 +710,13 @@ PressureDependMultiYield::getStress (void)
   }
 }
 
-const Vector & 
+const Vector &
 PressureDependMultiYield::getStrain (void)
 {
   return getCommittedStrain();
 }
 
-int 
+int
 PressureDependMultiYield::commitState (void)
 {
   int loadStage = loadStagex[matN];
@@ -752,20 +752,20 @@ PressureDependMultiYield::commitState (void)
   return 0;
 }
 
-int 
+int
 PressureDependMultiYield::revertToLastCommit (void)
 {
   return 0;
 }
 
-NDMaterial * 
+NDMaterial *
 PressureDependMultiYield::getCopy (void)
 {
   PressureDependMultiYield * copy = new PressureDependMultiYield(*this);
   return copy;
 }
 
-NDMaterial * 
+NDMaterial *
 PressureDependMultiYield::getCopy (const char *code)
 {
   if (strcmp(code,"PlaneStrain") == 0 ||
@@ -777,7 +777,7 @@ PressureDependMultiYield::getCopy (const char *code)
   return 0;
 }
 
-const char * 
+const char *
 PressureDependMultiYield::getType (void) const
 {
   int ndm = ndmx[matN];
@@ -785,7 +785,7 @@ PressureDependMultiYield::getType (void) const
   return (ndm == 2) ? "PlaneStrain" : "ThreeDimensional";
 }
 
-int 
+int
 PressureDependMultiYield::getOrder (void) const
 {
   int ndm = ndmx[matN];
@@ -803,35 +803,35 @@ int PressureDependMultiYield::setParameter(const char **argv, int argc, Paramete
       return -1;
     int matTag = atoi(argv[1]);
     if (this->getTag() == matTag)
-      return param.addObject(1, this);  
+      return param.addObject(1, this);
     else
       return -1;
   }
 
   else if (strcmp(argv[0],"shearModulus") == 0)
-    return param.addObject(10, this);  
+    return param.addObject(10, this);
   else if (strcmp(argv[0],"bulkModulus") == 0)
-    return param.addObject(11, this);  
+    return param.addObject(11, this);
 
   return -1;
 }
 
-int 
+int
 PressureDependMultiYield::updateParameter(int responseID, Information &info)
 {
   if (responseID == 1)
     loadStagex[matN] = info.theInt;
 
-  else if (responseID==10) 
+  else if (responseID==10)
     refShearModulusx[matN]=info.theDouble;
-  
-  else if (responseID==11) 
+
+  else if (responseID==11)
     refBulkModulusx[matN]=info.theDouble;
-  
+
   return 0;
 }
 
-int 
+int
 PressureDependMultiYield::sendSelf(int commitTag, Channel &theChannel)
 {
     int loadStage = loadStagex[matN];
@@ -896,8 +896,8 @@ PressureDependMultiYield::sendSelf(int commitTag, Channel &theChannel)
   data(18) = liquefyParam2;
   data(19) = liquefyParam4;
   data(20) = residualPress;
-  data(21) = stressRatioPT;   
-  data(22) = e2p; 
+  data(21) = stressRatioPT;
+  data(22) = e2p;
   data(23) = committedActiveSurf;
   data(24) = strainPTOcta;
   data(25) = pressureDCommitted;
@@ -915,7 +915,7 @@ PressureDependMultiYield::sendSelf(int commitTag, Channel &theChannel)
 
   workV6 = currentStrain.t2Vector();
   for(i = 0; i < 6; i++) data(i+39) = workV6[i];
-	  
+
   workV6 = PPZPivotCommitted.t2Vector();
   for(i = 0; i < 6; i++) data(i+45) = workV6[i];
 
@@ -924,10 +924,10 @@ PressureDependMultiYield::sendSelf(int commitTag, Channel &theChannel)
 
   workV6 = lockStressCommitted.t2Vector();
   for(i = 0; i < 6; i++) data(i+57) = workV6[i];
-	
+
   workV6 = reversalStressCommitted.t2Vector();
   for(i = 0; i < 6; i++) data(i+63) = workV6[i];
-	
+
   for(i = 0; i < numOfSurfaces; i++) {
     int k = 70 + i*8;
     data(k) = committedSurfaces[i+1].size();
@@ -950,9 +950,9 @@ PressureDependMultiYield::sendSelf(int commitTag, Channel &theChannel)
   return res;
 }
 
-int 
-PressureDependMultiYield::recvSelf(int commitTag, Channel &theChannel, 
-				       FEM_ObjectBroker &theBroker)    
+int
+PressureDependMultiYield::recvSelf(int commitTag, Channel &theChannel,
+				       FEM_ObjectBroker &theBroker)
 {
   int i, res = 0;
 
@@ -960,7 +960,7 @@ PressureDependMultiYield::recvSelf(int commitTag, Channel &theChannel,
   res += theChannel.recvID(this->getDbTag(), commitTag, idData);
   if (res < 0) {
     opserr << "PressureDependMultiYield::recvelf -- could not recv ID\n";
-			    
+
     return res;
   }
 
@@ -998,8 +998,8 @@ PressureDependMultiYield::recvSelf(int commitTag, Channel &theChannel,
   double liquefyParam2 = data(18);
   double liquefyParam4 = data(19);
   double residualPress = data(20);
-  double stressRatioPT = data(21);   
-  e2p = data(22); 
+  double stressRatioPT = data(21);
+  e2p = data(22);
   committedActiveSurf = data(23);
   strainPTOcta = data(24);
   pressureDCommitted = data(25);
@@ -1017,16 +1017,16 @@ PressureDependMultiYield::recvSelf(int commitTag, Channel &theChannel,
 
   for(i = 0; i < 6; i++) workV6[i] = data(i+39);
   currentStrain.setData(workV6);
-  
+
   for(i = 0; i < 6; i++) workV6[i] = data(i+45);
   PPZPivotCommitted.setData(workV6);
 
   for(i = 0; i < 6; i++) workV6[i] = data(i+51);
   PPZCenterCommitted.setData(workV6);
-  
+
   for(i = 0; i < 6; i++) workV6[i] = data(i+57);
   lockStressCommitted.setData(workV6);
-  
+
   for(i = 0; i < 6; i++) workV6[i] = data(i+63);
   reversalStressCommitted.setData(workV6);  if (committedSurfaces != 0) {
       delete [] committedSurfaces;
@@ -1034,9 +1034,7 @@ PressureDependMultiYield::recvSelf(int commitTag, Channel &theChannel,
   }
 
   theSurfaces = new MultiYieldSurface[numOfSurfaces+1]; //first surface not used
-  committedSurfaces = new MultiYieldSurface[numOfSurfaces+1]; 
-  for (i=1; i<=numOfSurfaces; i++) 
-      committedSurfaces[i] = MultiYieldSurface();    
+  committedSurfaces = new MultiYieldSurface[numOfSurfaces+1];
 
   for(i = 0; i < numOfSurfaces; i++) {
     int k = 70 + i*8;
@@ -1049,23 +1047,126 @@ PressureDependMultiYield::recvSelf(int commitTag, Channel &theChannel,
     committedSurfaces[i+1].setData(workV6, data(k), data(k+1));
   }
 
-    loadStagex[matN] = loadStage;
-    ndmx[matN] = ndm;
+  int *temp1, *temp2, *temp11;
+  double *temp3, *temp4, *temp5, *temp6, *temp7, *temp8, *temp9, *temp10, *temp12;
+  double *temp13, *temp14, *temp15, *temp16, *temp17, *temp18, *temp19, *temp20;
+  double *temp21, *temp22, *temp23, *temp24, *temp25, *temp26;
+
+  if( matCount < matN )
+  	matCount = matN;
+  if (matCount%20 == 0) {  // allocate memory once every 20 materials
+     temp1 = loadStagex;
+	 temp2 = ndmx;
+	 temp3 = rhox;
+     temp4 = refShearModulusx;
+     temp5 = refBulkModulusx;
+     temp6 = frictionAnglex;
+     temp7 = peakShearStrainx;
+     temp8 = refPressurex;
+     temp9 = cohesionx;
+     temp10 = pressDependCoeffx;
+	 temp11 = numOfSurfacesx;
+     temp12 = residualPressx;
+     temp13 = phaseTransfAnglex;
+     temp14 = contractParam1x;
+     temp15 = dilateParam1x;
+     temp16 = dilateParam2x;
+     temp17 = liquefyParam1x;
+     temp18 = liquefyParam2x;
+     temp19 = liquefyParam4x;
+     temp20 = einitx;    //initial void ratio
+     temp21 = volLimit1x;
+     temp22 = volLimit2x;
+     temp23 = volLimit3x;
+     temp24 = stressRatioPTx;
+	 temp25 = Hvx;
+	 temp26 = Pvx;
+
+     loadStagex = new int[matCount+20];
+     ndmx = new int[matCount+20];
+     rhox = new double[matCount+20];
+     refShearModulusx = new double[matCount+20];
+     refBulkModulusx = new double[matCount+20];
+     frictionAnglex = new double[matCount+20];
+     peakShearStrainx = new double[matCount+20];
+     refPressurex = new double[matCount+20];
+	 cohesionx = new double[matCount+20];
+     pressDependCoeffx = new double[matCount+20];
+     numOfSurfacesx = new int[matCount+20];
+     residualPressx = new double[matCount+20];
+     phaseTransfAnglex = new double[matCount+20];
+     contractParam1x = new double[matCount+20];
+     dilateParam1x = new double[matCount+20];
+     dilateParam2x = new double[matCount+20];
+     liquefyParam1x = new double[matCount+20];
+     liquefyParam2x = new double[matCount+20];
+     liquefyParam4x = new double[matCount+20];
+     einitx = new double[matCount+20];    //initial void ratio
+     volLimit1x = new double[matCount+20];
+     volLimit2x = new double[matCount+20];
+     volLimit3x = new double[matCount+20];
+     stressRatioPTx = new double[matCount+20];
+	 Hvx = new double[matCount+20];
+	 Pvx = new double[matCount+20];
+
+     if( matCount > 0 ) {
+		 for (int i=0; i<matCount; i++) {
+			 loadStagex[i] = temp1[i];
+			 ndmx[i] = temp2[i];
+			 rhox[i] = temp3[i];
+			 refShearModulusx[i] = temp4[i];
+			 refBulkModulusx[i] = temp5[i];
+			 frictionAnglex[i] = temp6[i];
+			 peakShearStrainx[i] = temp7[i];
+			 refPressurex[i] = temp8[i];
+			 cohesionx[i] = temp9[i];
+			 pressDependCoeffx[i] = temp10[i];
+			 numOfSurfacesx[i] = temp11[i];
+			 residualPressx[i] = temp12[i];
+			 phaseTransfAnglex[i] = temp13[i];
+			 contractParam1x[i] = temp14[i];
+			 dilateParam1x[i] = temp15[i];
+			 dilateParam2x[i] = temp16[i];
+			 liquefyParam1x[i] = temp17[i];
+			 liquefyParam2x[i] = temp18[i];
+			 liquefyParam4x[i] = temp19[i];
+			 einitx[i] = temp20[i];    //initial void ratio
+			 volLimit1x[i] = temp21[i];
+			 volLimit2x[i] = temp22[i];
+			 volLimit3x[i] = temp23[i];
+			 stressRatioPTx[i] = temp24[i];
+			 Hvx[i] = temp25[i];
+			 Pvx[i] = temp26[i];
+		 }
+
+	     delete [] temp1; delete [] temp2; delete [] temp3; delete [] temp4;
+	     delete [] temp5; delete [] temp6; delete [] temp7; delete [] temp8;
+	     delete [] temp9; delete [] temp10; delete [] temp11; delete [] temp12;
+	     delete [] temp13; delete [] temp14; delete [] temp15; delete [] temp16;
+	     delete [] temp17; delete [] temp18; delete [] temp19; delete [] temp20;
+	     delete [] temp21; delete [] temp22; delete [] temp23; delete [] temp24;
+         delete [] temp25; delete [] temp26;
+     }
+  }
+  matCount ++;
+
+	loadStagex[matN] = loadStage;
+	ndmx[matN] = ndm;
 	rhox[matN] = rho;
-    residualPressx[matN] = residualPress;
-    numOfSurfacesx[matN] = numOfSurfaces;
-    refPressurex[matN] = refPressure;
-    pressDependCoeffx[matN] =pressDependCoeff;
-    refShearModulusx[matN] = refShearModulus;
+	residualPressx[matN] = residualPress;
+	numOfSurfacesx[matN] = numOfSurfaces;
+	refPressurex[matN] = refPressure;
+	pressDependCoeffx[matN] =pressDependCoeff;
+	refShearModulusx[matN] = refShearModulus;
 	refBulkModulusx[matN] = refBulkModulus;
-    frictionAnglex[matN] = frictionAngle;
+	frictionAnglex[matN] = frictionAngle;
 	cohesionx[matN] = cohesion;
-    peakShearStrainx[matN] = peakShearStrain;
-    phaseTransfAnglex[matN] = phaseTransfAngle;
+	peakShearStrainx[matN] = peakShearStrain;
+	phaseTransfAnglex[matN] = phaseTransfAngle;
 	stressRatioPTx[matN] = stressRatioPT;
 	contractParam1x[matN] = contractParam1;
-    dilateParam1x[matN] = dilateParam1;
-    dilateParam2x[matN] = dilateParam2;
+	dilateParam1x[matN] = dilateParam1;
+	dilateParam2x[matN] = dilateParam2;
 	liquefyParam1x[matN] = liquefyParam1;
 	liquefyParam2x[matN] = liquefyParam2;
 	liquefyParam4x[matN] = liquefyParam4;
@@ -1085,10 +1186,10 @@ PressureDependMultiYield::setResponse (const char **argv, int argc, OPS_Stream &
 
   else if (strcmp(argv[0],"strain") == 0 || strcmp(argv[0],"strains") == 0)
 		return new MaterialResponse(this, 2, this->getCommittedStrain());
-    
+
 	else if (strcmp(argv[0],"tangent") == 0)
 		return new MaterialResponse(this, 3, this->getTangent());
-    
+
 	else if (strcmp(argv[0],"backbone") == 0) {
 	    int numOfSurfaces = numOfSurfacesx[matN];
         static Matrix curv(numOfSurfaces+1,(argc-1)*2);
@@ -1100,7 +1201,7 @@ PressureDependMultiYield::setResponse (const char **argv, int argc, OPS_Stream &
 		return 0;
 }
 
-void 
+void
 PressureDependMultiYield::getBackbone (Matrix & bb)
 {
   double residualPress = residualPressx[matN];
@@ -1109,7 +1210,7 @@ PressureDependMultiYield::getBackbone (Matrix & bb)
   double refShearModulus = refShearModulusx[matN];
   int numOfSurfaces = numOfSurfacesx[matN];
 
-  double vol, conHeig, scale, factor, shearModulus, stress1, 
+  double vol, conHeig, scale, factor, shearModulus, stress1,
 		     stress2, strain1, strain2, plastModulus, elast_plast, gre;
 
 	for (int k=0; k<bb.noCols()/2; k++) {
@@ -1121,7 +1222,7 @@ PressureDependMultiYield::getBackbone (Matrix & bb)
 		}
 		conHeig = vol + residualPress;
 		scale = -conHeig / (refPressure-residualPress);
-		factor = pow(scale, pressDependCoeff); 
+		factor = pow(scale, pressDependCoeff);
 		shearModulus = factor*refShearModulus;
 
 		for (int i=1; i<=numOfSurfaces; i++) {
@@ -1143,7 +1244,7 @@ PressureDependMultiYield::getBackbone (Matrix & bb)
 
 }
 
-int 
+int
 PressureDependMultiYield::getResponse (int responseID, Information &matInfo)
 {
   switch (responseID) {
@@ -1162,7 +1263,7 @@ PressureDependMultiYield::getResponse (int responseID, Information &matInfo)
       *(matInfo.theMatrix) = getTangent();
     return 0;
   case 4:
-    if (matInfo.theMatrix != 0) 
+    if (matInfo.theMatrix != 0)
       getBackbone(*(matInfo.theMatrix));
     return 0;
   default:
@@ -1170,13 +1271,13 @@ PressureDependMultiYield::getResponse (int responseID, Information &matInfo)
   }
 }
 
-void 
+void
 PressureDependMultiYield::Print(OPS_Stream &s, int flag )
 {
   s << "PressureDependMultiYield" << endln;
 }
 
-const Vector & 
+const Vector &
 PressureDependMultiYield::getCommittedStress (void)
 {
 	int ndm = ndmx[matN];
@@ -1199,7 +1300,7 @@ PressureDependMultiYield::getCommittedStress (void)
 	}
 
   else {
-    static Vector temp5(5);  
+    static Vector temp5(5);
 		workV6 = currentStress.t2Vector();
     temp5[0] = workV6[0];
     temp5[1] = workV6[1];
@@ -1219,7 +1320,7 @@ PressureDependMultiYield::getCommittedStress (void)
   }
 }
 
-const 
+const
 Vector & PressureDependMultiYield::getCommittedStrain (void)
 {
 	int ndm = ndmx[matN];
@@ -1234,12 +1335,12 @@ Vector & PressureDependMultiYield::getCommittedStrain (void)
     workV[2] = workV6[3];
     return workV;
   }
-}// NOTE: surfaces[0] is not used 
+}// NOTE: surfaces[0] is not used
 
 
-void 
+void
 PressureDependMultiYield::setUpSurfaces (double * gredu)
-{ 
+{
     double residualPress = residualPressx[matN];
     double refPressure = refPressurex[matN];
     double pressDependCoeff =pressDependCoeffx[matN];
@@ -1254,7 +1355,7 @@ PressureDependMultiYield::setUpSurfaces (double * gredu)
     double refStrain, peakShear, coneHeight;
     double stress1, stress2, strain1, strain2, size, elasto_plast_modul, plast_modul;
     double ratio1, ratio2;
-  
+
 	if (gredu==0) {
 	  double sinPhi = sin(frictionAngle * pi/180.);
     double Mnys = 6.*sinPhi/(3.-sinPhi);
@@ -1263,22 +1364,22 @@ PressureDependMultiYield::setUpSurfaces (double * gredu)
 		// tao = cohesion * sqrt(8.0)/3.
     residualPress = 2 * cohesion / Mnys;
     // a small nonzero residualPress for numerical purpose only
-    if (residualPress < 0.01) residualPress = 0.01; 
+    if (residualPress < 0.01) residualPress = 0.01;
     coneHeight = - (refPressure - residualPress);
-    peakShear = sqrt(2.) * coneHeight * Mnys / 3.; 
-    refStrain = (peakShearStrain * peakShear) 
+    peakShear = sqrt(2.) * coneHeight * Mnys / 3.;
+    refStrain = (peakShearStrain * peakShear)
 		  	        / (refShearModulus * peakShearStrain - peakShear);
 
     double stressInc = peakShear / numOfSurfaces;
 
     for (int ii=1; ii<=numOfSurfaces; ii++){
-      stress1 = ii * stressInc; 
+      stress1 = ii * stressInc;
       stress2 = stress1 + stressInc;
       ratio1 = 3. * stress1 / sqrt(2.) / coneHeight;
       ratio2 = 3. * stress2 / sqrt(2.) / coneHeight;
       strain1 = stress1 * refStrain / (refShearModulus * refStrain - stress1);
       strain2 = stress2 * refStrain / (refShearModulus * refStrain - stress2);
-    
+
       if (ratio1 <= stressRatioPT && ratio2 >= stressRatioPT) {
         double ratio = (ratio2 - stressRatioPT)/(ratio2 - ratio1);
         strainPTOcta = strain2 - ratio * (strain2 - strain1);
@@ -1286,9 +1387,9 @@ PressureDependMultiYield::setUpSurfaces (double * gredu)
 
       size = ratio1;
       elasto_plast_modul = 2.*(stress2 - stress1)/(strain2 - strain1);
-      if ( (2.*refShearModulus - elasto_plast_modul) <= 0) 
+      if ( (2.*refShearModulus - elasto_plast_modul) <= 0)
         plast_modul = UP_LIMIT;
-      else 
+      else
         plast_modul = (2.*refShearModulus * elasto_plast_modul)/
 	                    (2.*refShearModulus - elasto_plast_modul);
       if (plast_modul < 0) plast_modul = 0;
@@ -1297,26 +1398,26 @@ PressureDependMultiYield::setUpSurfaces (double * gredu)
       workV6.Zero();
 	  //opserr<<size<<endln;
       committedSurfaces[ii] = MultiYieldSurface(workV6,size,plast_modul);
-		}  // ii  
-	} 
-	else {  //user defined surfaces   
+		}  // ii
+	}
+	else {  //user defined surfaces
 		int ii = 2*(numOfSurfaces-1);
 		double tmax = refShearModulus*gredu[ii]*gredu[ii+1];
 		double Mnys = -(sqrt(3.) * tmax - 2.* cohesion) / refPressure;
     residualPress = 2 * cohesion / Mnys;
-    if (residualPress < 0.01) residualPress = 0.01; 
+    if (residualPress < 0.01) residualPress = 0.01;
     coneHeight = - (refPressure - residualPress);
 
     double sinPhi = 3*Mnys /(6+Mnys);
 		if (sinPhi<0. || sinPhi>1.) {
 			opserr <<"\nNDMaterial " <<this->getTag()<<": Invalid friction angle, please modify ref. pressure or G/Gmax curve."<<endln;
      exit(-1);
-		} 
+		}
 
 		frictionAngle = asin(sinPhi)*180/pi;
 		opserr << "\nNDMaterial " <<this->getTag()<<": Friction angle is "<<frictionAngle<<"\n"<<endln;
     if (phaseTransfAngle > frictionAngle) {
-			opserr << "\nNDMaterial " <<this->getTag()<<": phase Transformation Angle > friction Angle," 
+			opserr << "\nNDMaterial " <<this->getTag()<<": phase Transformation Angle > friction Angle,"
 				   << "will set phase Transformation Angle = friction Angle.\n" <<endln;
 			phaseTransfAngle = frictionAngle;
 		}
@@ -1325,13 +1426,13 @@ PressureDependMultiYield::setUpSurfaces (double * gredu)
 
 		for (int i=1; i<numOfSurfaces; i++) {
 			int ii = 2*(i-1);
-			strain1 = gredu[ii]; 
-      stress1 = refShearModulus*gredu[ii+1]*strain1; 
-			strain2 = gredu[ii+2]; 
-      stress2 = refShearModulus*gredu[ii+3]*strain2; 
+			strain1 = gredu[ii];
+      stress1 = refShearModulus*gredu[ii+1]*strain1;
+			strain2 = gredu[ii+2];
+      stress2 = refShearModulus*gredu[ii+3]*strain2;
 
       ratio1 = sqrt(3.) * stress1 / coneHeight;
-      ratio2 = sqrt(3.) * stress2 / coneHeight;  
+      ratio2 = sqrt(3.) * stress2 / coneHeight;
       if (ratio1 <= stressRatioPT && ratio2 >= stressRatioPT) {
         double ratio = (ratio2 - stressRatioPT)/(ratio2 - ratio1);
 			  // gamma_oct = sqrt(6.0)/3*gamma12
@@ -1340,14 +1441,14 @@ PressureDependMultiYield::setUpSurfaces (double * gredu)
 
       size = ratio1;
       elasto_plast_modul = 2.*(stress2 - stress1)/(strain2 - strain1);
-        
-			if ( (2.*refShearModulus - elasto_plast_modul) <= 0) 
+
+			if ( (2.*refShearModulus - elasto_plast_modul) <= 0)
 					plast_modul = UP_LIMIT;
-      else 
+      else
 					plast_modul = (2.*refShearModulus * elasto_plast_modul)/
                         (2.*refShearModulus - elasto_plast_modul);
       if (plast_modul <= 0) {
-				opserr << "\nNDMaterial " <<this->getTag()<<": Surface " << i 
+				opserr << "\nNDMaterial " <<this->getTag()<<": Surface " << i
 					   << " has plastic modulus < 0.\n Please modify G/Gmax curve.\n"<<endln;
        exit(-1);
       }
@@ -1364,7 +1465,7 @@ PressureDependMultiYield::setUpSurfaces (double * gredu)
         committedSurfaces[i+1] = MultiYieldSurface(workV6,size,plast_modul);
 			}
 		}
-  }  
+  }
 
   residualPressx[matN] = residualPress;
   frictionAnglex[matN] = frictionAngle;
@@ -1373,9 +1474,9 @@ PressureDependMultiYield::setUpSurfaces (double * gredu)
   stressRatioPTx[matN] = stressRatioPT;
 }
 
-double 
-PressureDependMultiYield::yieldFunc(const T2Vector & stress, 
-					   const MultiYieldSurface * surfaces, 
+double
+PressureDependMultiYield::yieldFunc(const T2Vector & stress,
+					   const MultiYieldSurface * surfaces,
 					   int surfaceNum)
 {
   double residualPress = residualPressx[matN];
@@ -1390,9 +1491,9 @@ PressureDependMultiYield::yieldFunc(const T2Vector & stress,
   return 3./2.*(workV6 && workV6) - sz * sz;
 }
 
-void 
-PressureDependMultiYield::deviatorScaling(T2Vector & stress, 
-					       const MultiYieldSurface * surfaces, 
+void
+PressureDependMultiYield::deviatorScaling(T2Vector & stress,
+					       const MultiYieldSurface * surfaces,
 					       int surfaceNum)
 {
   double residualPress = residualPressx[matN];
@@ -1405,7 +1506,7 @@ PressureDependMultiYield::deviatorScaling(T2Vector & stress,
     double sz = -surfaces[surfaceNum].size()*coneHeight;
     double deviaSz = sqrt(sz*sz + diff);
     static Vector devia(6);
-    devia = stress.deviator(); 
+    devia = stress.deviator();
     workV6 = devia;
     workV6.addVector(1.0, surfaces[surfaceNum].center(), -coneHeight);
     double coeff = (sz-deviaSz) / deviaSz;
@@ -1425,23 +1526,23 @@ PressureDependMultiYield::deviatorScaling(T2Vector & stress,
   }
 }
 
-void 
+void
 PressureDependMultiYield::initSurfaceUpdate(void)
 {
   double residualPress = residualPressx[matN];
   int numOfSurfaces = numOfSurfacesx[matN];
 
-  if (committedActiveSurf == 0) return; 
-  
+  if (committedActiveSurf == 0) return;
+
   double coneHeight = - (currentStress.volume() - residualPress);
-  static Vector devia(6); 
+  static Vector devia(6);
   devia = currentStress.deviator();
   double Ms = sqrt(3./2.*(devia && devia));
 
   if (committedActiveSurf < numOfSurfaces) { // failure surface can't move
     //workV6 = devia * (1. - committedSurfaces[committedActiveSurf].size()*coneHeight / Ms);
     workV6.addVector(0.0, devia, (1. - committedSurfaces[committedActiveSurf].size()*coneHeight / Ms));
-	 
+
     //workV6 = workV6 / -coneHeight;
     workV6 /= -coneHeight;
     committedSurfaces[committedActiveSurf].setCenter(workV6);
@@ -1452,13 +1553,13 @@ PressureDependMultiYield::initSurfaceUpdate(void)
     workV6.addVector(0.0, devia, (1. - committedSurfaces[i].size()*coneHeight / Ms));
     //workV6 = workV6 / -coneHeight;
     workV6 /= -coneHeight;
-    committedSurfaces[i].setCenter(workV6); 
+    committedSurfaces[i].setCenter(workV6);
     theSurfaces[i] = committedSurfaces[i];
   }
   activeSurfaceNum = committedActiveSurf;
 }
 
-void 
+void
 PressureDependMultiYield::initStrainUpdate(void)
 {
     double residualPress = residualPressx[matN];
@@ -1482,7 +1583,7 @@ PressureDependMultiYield::initStrainUpdate(void)
   // modified fmk as discussed with z.yang
   workV6.addVector(0.0, currentStress.deviator(), shearCoeff);
   currentStrain.setData(workV6, currentStress.volume()*bulkCoeff);
-	
+
   double octalStrain = currentStrain.octahedralShear(1);
   if (octalStrain <= LOW_LIMIT) octalStrain = LOW_LIMIT;
 
@@ -1506,7 +1607,7 @@ PressureDependMultiYield::initStrainUpdate(void)
   PPZPivot = currentStrain;
 }
 
-double 
+double
 PressureDependMultiYield::getModulusFactor(T2Vector & stress)
 {
     double residualPress = residualPressx[matN];
@@ -1514,38 +1615,38 @@ PressureDependMultiYield::getModulusFactor(T2Vector & stress)
     double pressDependCoeff =pressDependCoeffx[matN];
 
   double conHeig = stress.volume() - residualPress;
-  double scale = conHeig / (refPressure-residualPress);  
+  double scale = conHeig / (refPressure-residualPress);
   scale = pow(scale, pressDependCoeff);
-	
-  return (1.e-10>scale) ? 1.e-10 : scale; 
+
+  return (1.e-10>scale) ? 1.e-10 : scale;
 }
 
-void 
+void
 PressureDependMultiYield::setTrialStress(T2Vector & stress)
 {
     double refShearModulus = refShearModulusx[matN];
 	double refBulkModulus = refBulkModulusx[matN];
 
   modulusFactor = getModulusFactor(stress);
-  //workV6 = stress.deviator() 
+  //workV6 = stress.deviator()
   //	             + subStrainRate.deviator()*2.*refShearModulus*modulusFactor;
   workV6 = stress.deviator();
   workV6.addVector(1.0, subStrainRate.deviator(), 2*refShearModulus*modulusFactor);
-  
+
   double B = refBulkModulus*modulusFactor;
-  
+
   if (Hvx[matN] != 0. && trialStress.volume()<=maxPress && subStrainRate.volume()<0.) {
      double tp = fabs(trialStress.volume() - residualPressx[matN]);
      B = (B*Hvx[matN]*pow(tp,Pvx[matN]))/(B+Hvx[matN]*pow(tp,Pvx[matN]));
   }
-  
+
   double volume = stress.volume() + subStrainRate.volume()*3.*B;
 
   if (volume > 0.) volume = 0.;
   trialStress.setData(workV6, volume);
 }
 
-int 
+int
 PressureDependMultiYield::setSubStrainRate(void)
 {
     double residualPress = residualPressx[matN];
@@ -1553,16 +1654,16 @@ PressureDependMultiYield::setSubStrainRate(void)
 	int numOfSurfaces = numOfSurfacesx[matN];
 
   if (activeSurfaceNum==numOfSurfaces) return 1;
-  if (strainRate.isZero()) return 0;  
+  if (strainRate.isZero()) return 0;
 
   double elast_plast_modulus;
   double conHeig = -(currentStress.volume() - residualPress);
   double factor = getModulusFactor(currentStress);
-  if (activeSurfaceNum==0) 
+  if (activeSurfaceNum==0)
     elast_plast_modulus = 2*refShearModulus*factor;
   else {
     double plast_modulus = theSurfaces[activeSurfaceNum].modulus()*factor;
-    elast_plast_modulus = 2*refShearModulus*factor*plast_modulus 
+    elast_plast_modulus = 2*refShearModulus*factor*plast_modulus
       / (2*refShearModulus*factor+plast_modulus);
   }
   //workV6 = strainRate.deviator()*elast_plast_modulus;
@@ -1573,7 +1674,7 @@ PressureDependMultiYield::setSubStrainRate(void)
   double totalCross = 3.*workT2V.octahedralShear() / sqrt(2.);
   int numOfSub = totalCross/singleCross + 1;
   if (numOfSub > numOfSurfaces) numOfSub = numOfSurfaces;
-	
+
   int numOfSub1 = strainRate.octahedralShear(1) / 1.0e-4;
   int numOfSub2 = strainRate.volume() / 1.e-5;
   if (numOfSub1 > numOfSub) numOfSub = numOfSub1;
@@ -1593,32 +1694,32 @@ PressureDependMultiYield::getContactStress(T2Vector &contactStress)
 
   double conHeig = trialStress.volume() - residualPress;
   static Vector center(6);
-  center = theSurfaces[activeSurfaceNum].center(); 
+  center = theSurfaces[activeSurfaceNum].center();
   //workV6 = trialStress.deviator() - center*conHeig;
   workV6 = trialStress.deviator();
   workV6.addVector(1.0, center, -conHeig);
   double Ms = sqrt(3./2.*(workV6 && workV6));
   //workV6 = workV6 * theSurfaces[activeSurfaceNum].size()*(-conHeig) / Ms + center*conHeig;
   workV6.addVector(theSurfaces[activeSurfaceNum].size()*(-conHeig) / Ms, center, conHeig);
-  //return T2Vector(workV6,trialStress.volume()); 
-  contactStress.setData(workV6,trialStress.volume()); 
+  //return T2Vector(workV6,trialStress.volume());
+  contactStress.setData(workV6,trialStress.volume());
 }
 
-int 
+int
 PressureDependMultiYield::isLoadReversal(const T2Vector & stress)
 {
   if(activeSurfaceNum == 0) return 0;
 
   getSurfaceNormal(stress, workT2V);
 
-  //if (((trialStress.t2Vector() - currentStress.t2Vector()) 
+  //if (((trialStress.t2Vector() - currentStress.t2Vector())
   //	&& workT2V.t2Vector()) < 0) return 1;
   workV6 = trialStress.t2Vector();
   workV6 -= currentStress.t2Vector();
- 
-  if ((workV6 && workT2V.t2Vector()) < 0) return 1; 
 
-  return 0;   
+  if ((workV6 && workT2V.t2Vector()) < 0) return 1;
+
+  return 0;
 }
 
 void
@@ -1629,18 +1730,18 @@ PressureDependMultiYield::getSurfaceNormal(const T2Vector & stress, T2Vector &no
   double conHeig = stress.volume() - residualPress;
   workV6 = stress.deviator();
   static Vector center(6);
-  center = theSurfaces[activeSurfaceNum].center(); 
+  center = theSurfaces[activeSurfaceNum].center();
   double sz = theSurfaces[activeSurfaceNum].size();
   double volume = conHeig*((center && center) - 2./3.*sz*sz) - (workV6 && center);
   //workT2V.setData((workV6-center*conHeig)*3., volume);
   workV6.addVector(1.0, center, -conHeig);
   workV6 *= 3.0;
   workT2V.setData(workV6, volume);
-  
+
   normal.setData(workT2V.unitT2Vector());
 }
 
-double 
+double
 PressureDependMultiYield::getPlasticPotential(const T2Vector & contactStress,
 					      const T2Vector & surfaceNormal)
 {
@@ -1664,21 +1765,21 @@ PressureDependMultiYield::getPlasticPotential(const T2Vector & contactStress,
   if (temp >= 0.) unloadRule = 0.;
   else {
     double conHeiD = pressureD-residualPress;
-    double temp1 = sqrt(3./2.)*currentStress.deviatorLength() 
+    double temp1 = sqrt(3./2.)*currentStress.deviatorLength()
       + stressRatioPT*conHeiD;
     temp = temp1/(-temp);
-    if (temp < theSurfaces[numOfSurfaces].size()) 
+    if (temp < theSurfaces[numOfSurfaces].size())
       temp = theSurfaces[numOfSurfaces].size();
     temp1 = (reversalStress.volume()-residualPress)/conHeiD;
     unloadRule = -sqrt(3./2.)*surfaceNormal.deviatorLength()*temp1/temp;
   }
-	  
+
   double currentRatio = currentStress.deviatorRatio(residualPress);
   double trialRatio = trialStress.deviatorRatio(residualPress);
   shearLoading = currentStress.deviator() && trialStress.deviator();
 
   if (factorPT < 0.) {  //below PT
-    if (pressureD == 0.) 
+    if (pressureD == 0.)
       plasticPotential = contractRule;
     else if (trialStress.volume() >= pressureD) {
       pressureD = 0.;
@@ -1688,14 +1789,14 @@ PressureDependMultiYield::getPlasticPotential(const T2Vector & contactStress,
       plasticPotential = contractRule;
     else  plasticPotential = unloadRule;
   }
-  
+
   else {  //above PT
     if (trialRatio > currentRatio && shearLoading >= 0.) {  //dilation
       if (pressureD == 0.) pressureD = currentStress.volume();
       reversalStress = currentStress;
-      updatePPZ(contactStress);  
-      if (onPPZ==-1 || onPPZ==1) return LOCK_VALUE; 
-      if (isCriticalState(contactStress))  
+      updatePPZ(contactStress);
+      if (onPPZ==-1 || onPPZ==1) return LOCK_VALUE;
+      if (isCriticalState(contactStress))
 	      dilateRule = 0;
       else
         dilateRule = factorPT*dilateParam1*exp(dilateParam2*cumuDilateStrainOcta);
@@ -1711,12 +1812,12 @@ PressureDependMultiYield::getPlasticPotential(const T2Vector & contactStress,
   }
 
   if (onPPZ > 0) onPPZ = 0;
-  if (onPPZ != -1) PPZTranslation(contactStress);  
+  if (onPPZ != -1) PPZTranslation(contactStress);
   if (isCriticalState(contactStress)) return 0.;
   return plasticPotential;
 }
 
-int 
+int
 PressureDependMultiYield::isCriticalState(const T2Vector & stress)
 {
 	double einit = einitx[matN];
@@ -1728,7 +1829,7 @@ PressureDependMultiYield::isCriticalState(const T2Vector & stress)
 	double etria = einit + vol + vol*einit;
 	vol = currentStrain.volume()*3.0;
 	double ecurr = einit + vol + vol*einit;
- 
+
 	double ecr1, ecr2;
 	if (volLimit3 != 0.) {
 		ecr1 = volLimit1 - volLimit2*pow(fabs(-stress.volume()/pAtm), volLimit3);
@@ -1739,11 +1840,11 @@ PressureDependMultiYield::isCriticalState(const T2Vector & stress)
   }
 
 	if (ecurr < ecr2 && etria < ecr1) return 0;
-	if (ecurr > ecr2 && etria > ecr1) return 0;	
+	if (ecurr > ecr2 && etria > ecr1) return 0;
 	return 1;
 }
 
-void 
+void
 PressureDependMultiYield::updatePPZ(const T2Vector & contactStress)
 {
   double liquefyParam1 = liquefyParam1x[matN];
@@ -1773,7 +1874,7 @@ PressureDependMultiYield::updatePPZ(const T2Vector & contactStress)
     workT2V.setData(workV6);
     //cumuDilateStrainOcta = workT2V.octahedralShear(1) - PPZSize;
 		cumuDilateStrainOcta += subStrainRate.octahedralShear(1);
-    if (cumuDilateStrainOcta > maxCumuDilateStrainOcta) 
+    if (cumuDilateStrainOcta > maxCumuDilateStrainOcta)
       maxCumuDilateStrainOcta = cumuDilateStrainOcta;
     return;
   }
@@ -1797,18 +1898,18 @@ PressureDependMultiYield::updatePPZ(const T2Vector & contactStress)
       if (oppoPrePPZStrainOcta == 0.) oppoPrePPZStrainOcta = prePPZStrainOcta;
 		}
   }
-  if (onPPZ > -1) PPZSize = PPZLimit 
+  if (onPPZ > -1) PPZSize = PPZLimit
     + (prePPZStrainOcta+oppoPrePPZStrainOcta+TransLimit+maxCumuDilateStrainOcta)/2.;
-	else PPZSize = PPZLimit 
+	else PPZSize = PPZLimit
     + (prePPZStrainOcta+oppoPrePPZStrainOcta+maxCumuDilateStrainOcta)/2.;
 
   // calc. new PPZ center.
-  if (onPPZ==0 || onPPZ==1) { 
+  if (onPPZ==0 || onPPZ==1) {
     //workT2V.setData(PPZPivot.t2Vector() - PPZCenter.t2Vector());
     workV6 = PPZPivot.t2Vector();
     workV6 -= PPZCenter.t2Vector();
     workT2V.setData(workV6);
-    
+
     double coeff = (PPZSize-cumuTranslateStrainOcta)/workT2V.octahedralShear(1);
     //PPZCenter.setData(PPZPivot.t2Vector() - workT2V.t2Vector()*coeff);
     workV6 = PPZPivot.t2Vector();
@@ -1842,7 +1943,7 @@ PressureDependMultiYield::updatePPZ(const T2Vector & contactStress)
   }
 }
 
-void 
+void
 PressureDependMultiYield::PPZTranslation(const T2Vector & contactStress)
 {
 	double liquefyParam1 = liquefyParam1x[matN];
@@ -1858,7 +1959,7 @@ PressureDependMultiYield::PPZTranslation(const T2Vector & contactStress)
   workV6 = trialStrain.deviator();
   workV6 -= PPZPivot.deviator();
   workT2V.setData(workV6);
-  
+
   double temp = workT2V.octahedralShear(1);
   if (cumuTranslateStrainOcta < temp) cumuTranslateStrainOcta = temp;
 	if (maxCumuDilateStrainOcta == 0.) temp = PPZTransLimit;
@@ -1866,7 +1967,7 @@ PressureDependMultiYield::PPZTranslation(const T2Vector & contactStress)
   if (cumuTranslateStrainOcta > temp) cumuTranslateStrainOcta = temp;
 }
 
-double 
+double
 PressureDependMultiYield::getPPZLimits(int which, const T2Vector & contactStress)
 {
 	double liquefyParam1 = liquefyParam1x[matN];
@@ -1882,10 +1983,10 @@ PressureDependMultiYield::getPPZLimits(int which, const T2Vector & contactStress
 		// liquefyParam3 = 3.0 default
     PPZLimit = liquefyParam2 * pow(cos(temp), 3.);
   }
-  
-  if (which==1) 
+
+  if (which==1)
     return PPZLimit;
-  else if (which==2) 
+  else if (which==2)
     return liquefyParam4 * PPZLimit;
   else {
     opserr << "FATAL:PressureDependMultiYield::getPPZLimits: unknown argument value" << endln;
@@ -1894,8 +1995,8 @@ PressureDependMultiYield::getPPZLimits(int which, const T2Vector & contactStress
   }
 }
 
-double 
-PressureDependMultiYield::getLoadingFunc(const T2Vector & contactStress, 
+double
+PressureDependMultiYield::getLoadingFunc(const T2Vector & contactStress,
 					 const T2Vector & surfaceNormal,
 					 double plasticPotential,
 					 int crossedSurface)
@@ -1906,30 +2007,30 @@ PressureDependMultiYield::getLoadingFunc(const T2Vector & contactStress,
 
   double loadingFunc, limit;
   double modul = theSurfaces[activeSurfaceNum].modulus();
-  double temp1 = 2. * refShearModulus * modulusFactor 
+  double temp1 = 2. * refShearModulus * modulusFactor
     * (surfaceNormal.deviator() && surfaceNormal.deviator()) ;
-  double temp2 = 9. * refBulkModulus * modulusFactor 
+  double temp2 = 9. * refBulkModulus * modulusFactor
     * surfaceNormal.volume() * plasticPotential ;
-	
-  //for the first crossing 
+
+  //for the first crossing
   double temp = temp1 + temp2 + modul * modulusFactor;
-  if (activeSurfaceNum == numOfSurfaces) 
+  if (activeSurfaceNum == numOfSurfaces)
     limit = theSurfaces[activeSurfaceNum-1].modulus() * modulusFactor /2.;
   else limit = modul * modulusFactor /2.;
   if (temp < limit) {
-    plasticPotential = (temp2 + limit - temp)/(9. * refBulkModulus * modulusFactor 
+    plasticPotential = (temp2 + limit - temp)/(9. * refBulkModulus * modulusFactor
 					       * surfaceNormal.volume());
     temp = limit;
   }
-  //loadingFunc = (surfaceNormal.t2Vector() 
+  //loadingFunc = (surfaceNormal.t2Vector()
   //	             && (trialStress.deviator()-contactStress.deviator()))/temp;
   workV6 = trialStress.deviator();
-  workV6 -= contactStress.deviator();  
+  workV6 -= contactStress.deviator();
   loadingFunc = (surfaceNormal.t2Vector() && workV6) /temp;
-  
+
   if (loadingFunc < 0.) loadingFunc = 0;
 
-  //for more than one crossing 
+  //for more than one crossing
   if(crossedSurface) {
     temp = (theSurfaces[activeSurfaceNum-1].modulus() - modul)
       /theSurfaces[activeSurfaceNum-1].modulus();
@@ -1939,7 +2040,7 @@ PressureDependMultiYield::getLoadingFunc(const T2Vector & contactStress,
   return loadingFunc;
 }
 
-int 
+int
 PressureDependMultiYield::stressCorrection(int crossedSurface)
 {
     double refShearModulus = refShearModulusx[matN];
@@ -1956,14 +2057,14 @@ PressureDependMultiYield::stressCorrection(int crossedSurface)
   }
 
 	double tVolume = trialStress.volume();
-  double loadingFunc = getLoadingFunc(contactStress, surfNormal, 
+  double loadingFunc = getLoadingFunc(contactStress, surfNormal,
 				      plasticPotential, crossedSurface);
   double volume = tVolume - plasticPotential*3*refBulkModulus*modulusFactor*loadingFunc;
 
-  //workV6 = trialStress.deviator() 
+  //workV6 = trialStress.deviator()
   //	         - surfNormal.deviator()*2*refShearModulus*modulusFactor*loadingFunc;
   workV6 = trialStress.deviator();
-	
+
   if (volume > 0. && volume != tVolume) {
 		double coeff = tVolume / (tVolume - volume);
     coeff *= -2*refShearModulus*modulusFactor*loadingFunc;
@@ -1990,7 +2091,7 @@ PressureDependMultiYield::stressCorrection(int crossedSurface)
   return 0;
 }
 
-void 
+void
 PressureDependMultiYield::updateActiveSurface(void)
 {
     double residualPress = residualPressx[matN];
@@ -2016,7 +2117,7 @@ PressureDependMultiYield::updateActiveSurface(void)
   t2 = center;
   t2 -= outcenter;
   t2 *=conHeig;
- 
+
   A = t1 && t1;
   B = 2. * (t1 && t2);
   C = (t2 && t2) - 2./3.* outsize * outsize * conHeig * conHeig;
@@ -2028,18 +2129,18 @@ PressureDependMultiYield::updateActiveSurface(void)
     //t2 = trialStress.deviator() - outcenter*conHeig;
     t2 = trialStress.deviator();
     t2.addVector(1.0, outcenter, -conHeig);
-    
+
     double xx1 = (t2 && t2) - 2./3.* outsize * outsize * conHeig * conHeig;
     double xx2 = (t1 && t1) - 2./3.* size * size * conHeig * conHeig;
-    opserr << "FATAL:PressureDependMultiYield::updateActiveSurface(): error in Direction of surface motion." << endln; 
+    opserr << "FATAL:PressureDependMultiYield::updateActiveSurface(): error in Direction of surface motion." << endln;
     opserr << "X-1= " << X-1 <<" A= "<<A<<" B= "<<B<<" C= "<<C <<" M= "<<activeSurfaceNum<<" low_limit="<<LOW_LIMIT<< endln;
-    opserr << "diff1= "<<xx1 <<" diff2= "<<xx2 <<" p= "<<conHeig<<" size= "<<size<<" outs= "<<outsize<<endln; 
+    opserr << "diff1= "<<xx1 <<" diff2= "<<xx2 <<" p= "<<conHeig<<" size= "<<size<<" outs= "<<outsize<<endln;
    exit(-1);
   }
 
-  //workV6 = (t1 * X + center*conHeig) * (1. - size / outsize) 
+  //workV6 = (t1 * X + center*conHeig) * (1. - size / outsize)
   //	     - (center - outcenter * size / outsize) * conHeig;
-  
+
   workV6.addVector(0.0, t1, X);
   workV6.addVector(1.0, center, conHeig);
   workV6 *= (1.0 - size / outsize);
@@ -2051,24 +2152,24 @@ PressureDependMultiYield::updateActiveSurface(void)
   workT2V.setData(workV6);
   if (workT2V.deviatorLength() < LOW_LIMIT) return;
 
-  workV6 = workT2V.deviator();  
+  workV6 = workT2V.deviator();
   A = conHeig * conHeig * (workV6 && workV6);
   B = 2 * conHeig * (t1 && workV6);
-  if (fabs(B) < LOW_LIMIT) B = 0.; 
+  if (fabs(B) < LOW_LIMIT) B = 0.;
   C = (t1 && t1) - 2./3.* size * size * conHeig * conHeig;
   if ( fabs(C) < LOW_LIMIT || fabs(C)/(t1 && t1) < LOW_LIMIT ) return;
   if (B > 0. || C < 0.) {
-    opserr << "FATAL:PressureDependMultiYield::updateActiveSurface(): error in surface motion.\n" 
-	 << "A= " <<A <<" B= " <<B <<" C= "<<C <<" (t1&&t1)= "<<(t1&&t1) <<endln; 
+    opserr << "FATAL:PressureDependMultiYield::updateActiveSurface(): error in surface motion.\n"
+	 << "A= " <<A <<" B= " <<B <<" C= "<<C <<" (t1&&t1)= "<<(t1&&t1) <<endln;
    exit(-1);
   }
-  X = secondOrderEqn(A,B,C,1);  
+  X = secondOrderEqn(A,B,C,1);
 
   center.addVector(1.0, workV6, -X);
   theSurfaces[activeSurfaceNum].setCenter(center);
-}      
+}
 
-void 
+void
 PressureDependMultiYield::updateInnerSurface(void)
 {
     double residualPress = residualPressx[matN];
@@ -2089,20 +2190,20 @@ PressureDependMultiYield::updateInnerSurface(void)
 		workV6 += devia;
 
 		//workV6 = devia - (devia - center*conHeig) * theSurfaces[i].size() / size;
-		
+
 		workV6 /= conHeig;
 		theSurfaces[i].setCenter(workV6);
 	}
 }
 
-int 
+int
 PressureDependMultiYield:: isCrossingNextSurface(void)
 {
     int numOfSurfaces = numOfSurfacesx[matN];
 
-  if (activeSurfaceNum == numOfSurfaces) return 0;  
+  if (activeSurfaceNum == numOfSurfaces) return 0;
 
   if(yieldFunc(trialStress, theSurfaces, activeSurfaceNum+1) > 0) return 1;
-  
+
   return 0;
 }

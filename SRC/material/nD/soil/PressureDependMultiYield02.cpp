@@ -1,5 +1,5 @@
-// $Revision: 1.11 $
-// $Date: 2007-03-30 01:52:10 $
+// $Revision: 1.12 $
+// $Date: 2007-04-04 23:12:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield02.cpp,v $
 
 // Written: ZHY
@@ -847,21 +847,21 @@ int PressureDependMultiYield02::setParameter(const char **argv, int argc, Parame
 {
   if (argc < 1)
     return -1;
-  
+
   if (strcmp(argv[0],"updateMaterialStage") == 0) {
     if (argc < 2)
       return -1;
     int matTag = atoi(argv[1]);
     if (this->getTag() == matTag)
-      return param.addObject(1, this);  
+      return param.addObject(1, this);
     else
       return -1;
   }
 
   else if (strcmp(argv[0],"shearModulus") == 0)
-    return param.addObject(10, this);  
+    return param.addObject(10, this);
   else if (strcmp(argv[0],"bulkModulus") == 0)
-    return param.addObject(11, this);  
+    return param.addObject(11, this);
 
   return -1;
 }
@@ -875,52 +875,52 @@ int PressureDependMultiYield02::updateParameter(int responseID, Information &inf
 
   if (responseID == 1)
     loadStagex[matN] = info.theInt;
-  else if (responseID==10) 
+  else if (responseID==10)
     refShearModulusx[matN]=info.theDouble;
-  else if (responseID==11) 
+  else if (responseID==11)
     refBulkModulusx[matN]=info.theDouble;
-  
+
   return 0;
 }
 
 
 int PressureDependMultiYield02::sendSelf(int commitTag, Channel &theChannel)
 {
-  int loadStage = loadStagex[matN];
-  int ndm = ndmx[matN];
-  double rho = rhox[matN];
-  double residualPress = residualPressx[matN];
-  int numOfSurfaces = numOfSurfacesx[matN];
-  double refPressure = refPressurex[matN];
-  double pressDependCoeff =pressDependCoeffx[matN];
-  double refShearModulus = refShearModulusx[matN];
-  double refBulkModulus = refBulkModulusx[matN];
-  double frictionAngle = frictionAnglex[matN];
-  double cohesion = cohesionx[matN];
-  double peakShearStrain = peakShearStrainx[matN];
-  double phaseTransfAngle = phaseTransfAnglex[matN];
-  double stressRatioPT = stressRatioPTx[matN];
-  double contractParam1 = contractParam1x[matN];
-  double contractParam2 = contractParam2x[matN];
-  double dilateParam1 = dilateParam1x[matN];
-  double dilateParam2 = dilateParam2x[matN];
-  double liquefyParam1 = liquefyParam1x[matN];
-  double liquefyParam2 = liquefyParam2x[matN];
-  double dilateParam3 = dilateParam3x[matN];
-  double einit = einitx[matN];
-  double volLimit1 = volLimit1x[matN];
-  double volLimit2 = volLimit2x[matN];
-  double volLimit3 = volLimit3x[matN];
-  
+    int loadStage = loadStagex[matN];
+    int ndm = ndmx[matN];
+	double rho = rhox[matN];
+    double residualPress = residualPressx[matN];
+    int numOfSurfaces = numOfSurfacesx[matN];
+    double refPressure = refPressurex[matN];
+    double pressDependCoeff =pressDependCoeffx[matN];
+    double refShearModulus = refShearModulusx[matN];
+	double refBulkModulus = refBulkModulusx[matN];
+    double frictionAngle = frictionAnglex[matN];
+	double cohesion = cohesionx[matN];
+    double peakShearStrain = peakShearStrainx[matN];
+    double phaseTransfAngle = phaseTransfAnglex[matN];
+	double stressRatioPT = stressRatioPTx[matN];
+	double contractParam1 = contractParam1x[matN];
+	double contractParam2 = contractParam2x[matN];
+    double dilateParam1 = dilateParam1x[matN];
+    double dilateParam2 = dilateParam2x[matN];
+	double liquefyParam1 = liquefyParam1x[matN];
+	double liquefyParam2 = liquefyParam2x[matN];
+	double dilateParam3 = dilateParam3x[matN];
+	double einit = einitx[matN];
+	double volLimit1 = volLimit1x[matN];
+	double volLimit2 = volLimit2x[matN];
+	double volLimit3 = volLimit3x[matN];
+
   int i, res = 0;
-  
+
   static ID idData(5);
   idData(0) = this->getTag();
   idData(1) = numOfSurfaces;
   idData(2) = loadStage;
   idData(3) = ndm;
   idData(4) = matN;
-  
+
   res += theChannel.sendID(this->getDbTag(), commitTag, idData);
   if (res < 0) {
     opserr << "PressureDependMultiYield02::sendSelf -- could not send ID\n";
@@ -1080,8 +1080,6 @@ int PressureDependMultiYield02::recvSelf(int commitTag, Channel &theChannel,
 
   theSurfaces = new MultiYieldSurface[numOfSurfaces+1]; //first surface not used
   committedSurfaces = new MultiYieldSurface[numOfSurfaces+1];
-  for (i=1; i<=numOfSurfaces; i++)
-      committedSurfaces[i] = MultiYieldSurface();
 
   for(i = 0; i < numOfSurfaces; i++) {
     int k = 58 + i*8;
@@ -1093,6 +1091,115 @@ int PressureDependMultiYield02::recvSelf(int commitTag, Channel &theChannel,
     workV6(5) = data(k+7);
     committedSurfaces[i+1].setData(workV6, data(k), data(k+1));
   }
+
+  int *temp1, *temp2, *temp11;
+  double *temp3, *temp4, *temp5, *temp6, *temp7, *temp8, *temp9, *temp10, *temp12;
+  double *temp13, *temp14, *temp15, *temp16, *temp17, *temp18, *temp19, *temp20;
+  double *temp14a;
+  double *temp21, *temp22, *temp23, *temp24, *temp25, *temp26;
+
+  if( matCount < matN )
+  	matCount = matN;
+  if (matCount%20 == 0) {  // allocate memory once every 20 materials
+     temp1 = loadStagex;
+	 temp2 = ndmx;
+	 temp3 = rhox;
+     temp4 = refShearModulusx;
+     temp5 = refBulkModulusx;
+     temp6 = frictionAnglex;
+     temp7 = peakShearStrainx;
+     temp8 = refPressurex;
+     temp9 = cohesionx;
+     temp10 = pressDependCoeffx;
+	 temp11 = numOfSurfacesx;
+     temp12 = residualPressx;
+     temp13 = phaseTransfAnglex;
+     temp14 = contractParam1x;
+     temp14a = contractParam2x;
+     temp15 = dilateParam1x;
+     temp16 = dilateParam2x;
+     temp17 = liquefyParam1x;
+     temp18 = liquefyParam2x;
+     temp19 = dilateParam3x;
+     temp20 = einitx;    //initial void ratio
+     temp21 = volLimit1x;
+     temp22 = volLimit2x;
+     temp23 = volLimit3x;
+     temp24 = stressRatioPTx;
+	 temp25 = Hvx;
+	 temp26 = Pvx;
+
+     loadStagex = new int[matCount+20];
+     ndmx = new int[matCount+20];
+     rhox = new double[matCount+20];
+     refShearModulusx = new double[matCount+20];
+     refBulkModulusx = new double[matCount+20];
+     frictionAnglex = new double[matCount+20];
+     peakShearStrainx = new double[matCount+20];
+     refPressurex = new double[matCount+20];
+	 cohesionx = new double[matCount+20];
+     pressDependCoeffx = new double[matCount+20];
+     numOfSurfacesx = new int[matCount+20];
+     residualPressx = new double[matCount+20];
+     phaseTransfAnglex = new double[matCount+20];
+     contractParam1x = new double[matCount+20];
+     contractParam2x = new double[matCount+20];
+     dilateParam1x = new double[matCount+20];
+     dilateParam2x = new double[matCount+20];
+     liquefyParam1x = new double[matCount+20];
+     liquefyParam2x = new double[matCount+20];
+     dilateParam3x = new double[matCount+20];
+     einitx = new double[matCount+20];    //initial void ratio
+     volLimit1x = new double[matCount+20];
+     volLimit2x = new double[matCount+20];
+     volLimit3x = new double[matCount+20];
+     stressRatioPTx = new double[matCount+20];
+	 Hvx = new double[matCount+20];
+	 Pvx = new double[matCount+20];
+
+     if( matCount > 0 ) {
+		 for (int i=0; i<matCount; i++) {
+			 loadStagex[i] = temp1[i];
+			 ndmx[i] = temp2[i];
+			 rhox[i] = temp3[i];
+			 refShearModulusx[i] = temp4[i];
+			 refBulkModulusx[i] = temp5[i];
+			 frictionAnglex[i] = temp6[i];
+			 peakShearStrainx[i] = temp7[i];
+			 refPressurex[i] = temp8[i];
+			 cohesionx[i] = temp9[i];
+			 pressDependCoeffx[i] = temp10[i];
+			 numOfSurfacesx[i] = temp11[i];
+			 residualPressx[i] = temp12[i];
+			 phaseTransfAnglex[i] = temp13[i];
+			 contractParam1x[i] = temp14[i];
+	         contractParam2x[i] = temp14a[i];
+			 dilateParam1x[i] = temp15[i];
+			 dilateParam2x[i] = temp16[i];
+			 liquefyParam1x[i] = temp17[i];
+			 liquefyParam2x[i] = temp18[i];
+	         dilateParam3x[i] = temp19[i];
+			 einitx[i] = temp20[i];    //initial void ratio
+			 volLimit1x[i] = temp21[i];
+			 volLimit2x[i] = temp22[i];
+			 volLimit3x[i] = temp23[i];
+			 stressRatioPTx[i] = temp24[i];
+			 Hvx[i] = temp25[i];
+			 Pvx[i] = temp26[i];
+		 }
+
+	     delete [] temp1; delete [] temp2; delete [] temp3; delete [] temp4;
+	     delete [] temp5; delete [] temp6; delete [] temp7; delete [] temp8;
+	     delete [] temp9; delete [] temp10; delete [] temp11; delete [] temp12;
+	     delete [] temp13; delete [] temp14; delete [] temp15; delete [] temp16;
+	     delete [] temp14a;
+	     delete [] temp17; delete [] temp18; delete [] temp19; delete [] temp20;
+	     delete [] temp21; delete [] temp22; delete [] temp23; delete [] temp24;
+         delete [] temp25; delete [] temp26;
+     }
+  }
+  matCount ++;
+
 
     loadStagex[matN] = loadStage;
     ndmx[matN] = ndm;
