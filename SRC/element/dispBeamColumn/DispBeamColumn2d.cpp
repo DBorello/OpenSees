@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.31 $
-// $Date: 2007-02-02 01:30:47 $
+// $Revision: 1.32 $
+// $Date: 2007-04-04 00:47:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -1307,10 +1307,7 @@ DispBeamColumn2d::setParameter(const char **argv, int argc, Parameter &param)
     return beamInt->setParameter(&argv[1], argc-1, param);
   }
 
-  else {
-    opserr << "DispBeamColumn2d::setParameter() - could not set parameter. " << endln;
-    return -1;
-  }
+  return -1;
 }
 
 int
