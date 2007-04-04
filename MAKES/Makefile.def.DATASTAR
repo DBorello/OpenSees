@@ -214,7 +214,7 @@ C++FLAGS         = -D_LINUX -D_UNIX  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG
 
 CFLAGS          = -qarch=pwr4 -qtune=pwr4  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG)  -D_KAI -D_PARALLEL_PROCESSING $(OPT_FLAG) $(COMP_FLAG)
 FFLAGS          = -qarch=pwr4 -qtune=pwr4   -qextname $(OPT_FLAG) $(COMP_FLAG)
-LINKFLAGS       = -bnoquiet
+LINKFLAGS       = -bnoquiet -bbigtoc
 
 
 # Misc
@@ -294,8 +294,6 @@ PETSC_LIB =  -L$(PETSC_DIR)/lib/libg/$(PETSC_ARCH) \
 	-lpetscsnes -lpetscksp -lpetscdm -lpetscmat -lpetscvec -lpetsc \
 	$(FE)/system_of_eqn/linearSOE/petsc/PetscSOE.o \
 	$(FE)/system_of_eqn/linearSOE/petsc/PetscSolver.o \
-	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSOE.o \
-	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSolver.o \
 	$(FE)/system_of_eqn/linearSOE/petsc/PetscSparseSeqSolver.o 
 
 
