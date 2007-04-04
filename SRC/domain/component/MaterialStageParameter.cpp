@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-03-30 01:47:55 $
+// $Revision: 1.2 $
+// $Date: 2007-04-04 00:45:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/MaterialStageParameter.cpp,v $
 
 #include <classTags.h>
@@ -35,14 +35,14 @@ MaterialStageParameter::MaterialStageParameter(int theTag, int materialTag)
 :Parameter(theTag, PARAMETER_TAG_MaterialStageParameter),
  theMaterialTag(materialTag)
 {
-  
+
 }
 
 MaterialStageParameter::MaterialStageParameter()
   :Parameter(), 
    theMaterialTag(0)
 {
-  
+
 }
 
 MaterialStageParameter::~MaterialStageParameter()
@@ -75,13 +75,15 @@ MaterialStageParameter::setDomain(Domain *theDomain)
   // note because of the way this parameter is updated only need to find one in the domain
   while (((theEle = theEles()) != 0) && (theResult == -1)) 
     theResult = theEle->setParameter(theString, 2, *this);
-
+  
+  if (theResult == -1) opserr << "MaterialStageParameter::setDomain(Domain *theDomain) - NO RESULT\n";
   return theResult;
 }
 
 int 
 MaterialStageParameter::sendSelf(int commitTag, Channel &theChannel)
 {
+
   static ID theData(2);
   theData[0] = this->getTag();
   theData[1] = theMaterialTag;
@@ -97,7 +99,6 @@ MaterialStageParameter::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectB
   theChannel.recvID(commitTag, 0, theData);
   this->setTag(theData[0]);
   theMaterialTag = theData[1];
-
   return 0;
 }
 
