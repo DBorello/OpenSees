@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-01-11 00:57:20 $
+// $Revision: 1.8 $
+// $Date: 2007-04-04 00:44:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.h,v $
                                                                         
                                                                         
@@ -49,6 +49,7 @@ class  ArrayOfTaggedObjects;
 class  PartitionedDomainSubIter;
 class  PartitionedDomainEleIter;
 class SingleDomEleIter;
+class Parameter;
 
 class PartitionedDomain: public Domain
 {
@@ -104,6 +105,12 @@ class PartitionedDomain: public Domain
     virtual int  removeRecorders(void);
     
     virtual  void Print(OPS_Stream &s, int flag =0);    
+
+    // methods dealing with Parameters
+    virtual  bool           addParameter(Parameter *);            
+    virtual  Parameter     *removeParameter(int tag);
+    virtual  int  updateParameter(int tag, int value);
+    virtual  int  updateParameter(int tag, double value);    
 
     // public member functions in addition to the standard domain
     virtual int setPartitioner(DomainPartitioner *thePartitioner);

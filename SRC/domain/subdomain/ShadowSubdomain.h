@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-01-11 00:57:20 $
+// $Revision: 1.8 $
+// $Date: 2007-04-04 00:44:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.h,v $
                                                                         
                                                                         
@@ -101,6 +101,12 @@ class ShadowSubdomain: public Shadow, public Subdomain
     
     virtual  Graph &getElementGraph(void);
     virtual  Graph &getNodeGraph(void);
+
+    // methods dealing with Parameters
+    virtual  bool           addParameter(Parameter *);            
+    virtual  Parameter     *removeParameter(int tag);
+    virtual  int  updateParameter(int tag, int value);
+    virtual  int  updateParameter(int tag, double value);    
 
     // methods to update the domain
     virtual  void setCommitTag(int newTag);    	

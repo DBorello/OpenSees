@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-03-07 00:11:25 $
+// $Revision: 1.11 $
+// $Date: 2007-04-04 00:44:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -888,4 +888,15 @@ int
 Subdomain::addResistingForceToNodalReaction(bool inclInertia)
 {
   return 0;
+}
+
+int  
+Subdomain::updateParameter(int tag, int value){
+  return this->Domain::updateParameter(tag, value);
+}
+
+int  
+Subdomain::updateParameter(int tag, double value)
+{
+  return this->Domain::updateParameter(tag, value);
 }

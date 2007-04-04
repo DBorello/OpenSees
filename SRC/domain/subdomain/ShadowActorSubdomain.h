@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-01-11 00:57:20 $
+// $Revision: 1.7 $
+// $Date: 2007-04-04 00:44:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowActorSubdomain.h,v $
                                                                         
                                                                         
@@ -91,3 +91,7 @@ static const int ShadowActorSubdomain_wipeAnalysis = 95;
 static const int ShadowActorSubdomain_clearAll = 96;
 static const int ShadowActorSubdomain_getNodeResponse = 97;
 static const int ShadowActorSubdomain_calculateNodalReactions = 98;
+static const int ShadowActorSubdomain_addParameter = 99;
+static const int ShadowActorSubdomain_removeParameter = 100;
+static const int ShadowActorSubdomain_updateParameterINT = 101;
+static const int ShadowActorSubdomain_updateParameterDOUBLE = 102;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-03-07 00:11:25 $
+// $Revision: 1.9 $
+// $Date: 2007-04-04 00:44:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -60,6 +60,7 @@
 #include <LinearSOESolver.h>
 #include <ConvergenceTest.h>
 #include <Recorder.h>
+#include <Parameter.h>
 
 #include <FE_Element.h>
 
@@ -1413,4 +1414,53 @@ ShadowSubdomain::calculateNodalReactions(bool incInertia)
 }
   
 
+bool
+ShadowSubdomain::addParameter(Parameter *param)
+{
+  msgData(0) = ShadowActorSubdomain_addParameter;
+  msgData(1) = param->getClassTag();
+  this->sendID(msgData);
+  
+  this->sendObject(*param);
+  
+  return true;
+}
 
+
+
+Parameter *
+ShadowSubdomain::removeParameter(int tag)
+{
+    msgData(0) = ShadowActorSubdomain_removeParameter;
+    msgData(1) = tag;
+    this->sendID(msgData);
+
+    return 0;
+}
+
+int
+ShadowSubdomain::updateParameter(int tag, int value)
+{
+    msgData(0) = ShadowActorSubdomain_updateParameterINT;
+    msgData(1) = tag;
+    msgData(2) = value;
+    this->sendID(msgData);
+
+    return 0;
+}
+
+
+int
+ShadowSubdomain::updateParameter(int tag, double value)
+{
+    msgData(0) = ShadowActorSubdomain_updateParameterDOUBLE;
+    msgData(1) = tag;
+    this->sendID(msgData);
+
+
+    static Vector data(1); 
+    data(0) = value;
+    this->sendVector(data);
+
+    return 0;
+}

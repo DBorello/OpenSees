@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-01-11 00:57:20 $
+// $Revision: 1.9 $
+// $Date: 2007-04-04 00:44:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.cpp,v $
                                                                         
                                                                         
@@ -59,6 +59,7 @@
 #include <ElementalLoad.h>
 #include <SP_Constraint.h>
 #include <Recorder.h>
+#include <Parameter.h>
 
 PartitionedDomain::PartitionedDomain()
 :Domain(),
@@ -1437,6 +1438,81 @@ PartitionedDomain::calculateNodalReactions(bool inclInertia)
       res += theSub->calculateNodalReactions(inclInertia); 
     }
   }
+  return res;
+}
+
+bool 
+PartitionedDomain::addParameter(Parameter *param)
+{
+    bool res = this->Domain::addParameter(param);
+
+    // do the same for all the subdomains
+    if (theSubdomains != 0) {
+      ArrayOfTaggedObjectsIter theSubsIter(*theSubdomains);	
+      TaggedObject *theObject;
+      while ((theObject = theSubsIter()) != 0) {
+	Subdomain *theSub = (Subdomain *)theObject;	    
+	theSub->addParameter(param);
+      }
+    }
+
+    return res;
+}
+
+Parameter *
+PartitionedDomain::removeParameter(int tag)
+{
+  Parameter *res = this->Domain::removeParameter(tag);
+
+  // do the same for all the subdomains
+  if (theSubdomains != 0) {
+    ArrayOfTaggedObjectsIter theSubsIter(*theSubdomains);	
+    TaggedObject *theObject;
+    while ((theObject = theSubsIter()) != 0) {
+      Subdomain *theSub = (Subdomain *)theObject;	    
+      theSub->removeParameter(tag);
+    }
+  }
+
+  return res;
+}
+
+
+int 
+PartitionedDomain::updateParameter(int tag, int value)
+{
+  int res = this->Domain::updateParameter(tag, value);
+
+  // do the same for all the subdomains
+  if (theSubdomains != 0) {
+    ArrayOfTaggedObjectsIter theSubsIter(*theSubdomains);	
+    TaggedObject *theObject;
+    while ((theObject = theSubsIter()) != 0) {
+
+      Subdomain *theSub = (Subdomain *)theObject;	    
+      theSub->updateParameter(tag, value);
+    }
+  }
+
+  return res;
+}
+
+
+int 
+PartitionedDomain::updateParameter(int tag, double value)
+{
+  int res = this->Domain::updateParameter(tag, value);
+
+  // do the same for all the subdomains
+  if (theSubdomains != 0) {
+    ArrayOfTaggedObjectsIter theSubsIter(*theSubdomains);	
+    TaggedObject *theObject;
+    while ((theObject = theSubsIter()) != 0) {
+      Subdomain *theSub = (Subdomain *)theObject;	    
+      theSub->updateParameter(tag, value);
+    }
+  }
+
   return res;
 }
 

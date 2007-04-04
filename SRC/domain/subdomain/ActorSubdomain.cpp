@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-03-07 00:11:25 $
+// $Revision: 1.9 $
+// $Date: 2007-04-04 00:44:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ActorSubdomain.cpp,v $
                                                                         
 #include <ActorSubdomain.h>
@@ -42,6 +42,8 @@
 #include <LinearSOE.h>
 #include <LinearSOESolver.h>
 #include <Recorder.h>
+#include <Parameter.h>
+
 
 #include <ArrayOfTaggedObjects.h>
 #include <ShadowActorSubdomain.h>
@@ -95,6 +97,7 @@ ActorSubdomain::run(void)
 	double doubleRes;
 	int intRes;
 	NodeResponseType nodeResponseType;
+	Parameter *theParameter;
 
 	const ID *theID;
 	
@@ -209,9 +212,6 @@ ActorSubdomain::run(void)
 		msgData(0) = -1;
 	    //	    opserr << "ActorSubdomain::add node: " << *theNod;
 	    break;
-
-
-
 
 
 	  case ShadowActorSubdomain_addExternalNode:
@@ -728,6 +728,49 @@ ActorSubdomain::run(void)
 (3));
 	   delete theV;
 	   break;
+
+
+         case ShadowActorSubdomain_addParameter:
+	    theType = msgData(1);
+	    dbTag = msgData(2);
+
+	    theParameter = theBroker->getParameter(theType);
+
+	    if (theParameter != 0) {
+		theParameter->setDbTag(dbTag);		
+		this->recvObject(*theParameter);
+		bool result = this->addParameter(theParameter);
+		if (result == true)
+		    msgData(0) = 0;
+		else
+		    msgData(0) = -1;
+	    } else
+		msgData(0) = -1;
+
+	   break;
+
+         case ShadowActorSubdomain_removeParameter:
+	   theType = msgData(1);
+	   this->removeParameter(theType);
+	   break;
+
+         case ShadowActorSubdomain_updateParameterINT:
+	   theType = msgData(1);  // tag
+	   dbTag = msgData(2);    // value
+	   this->Domain::updateParameter(theType, dbTag);
+	   break;
+
+         case ShadowActorSubdomain_updateParameterDOUBLE:
+	   theType = msgData(1);  // tag
+	   theV = new Vector(1);
+	   this->recvVector(*theV);
+	   this->Domain::updateParameter(theType, (*theV)(0));
+	   delete theV;
+	   break;
+
+
+
+
 
 	  case ShadowActorSubdomain_DIE:
 	    exitYet = true;
