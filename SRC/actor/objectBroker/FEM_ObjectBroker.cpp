@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.37 $
-// $Date: 2007-02-24 00:38:44 $
+// $Revision: 1.38 $
+// $Date: 2007-04-04 00:43:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -283,6 +283,9 @@
 #include <MultiSupportPattern.h>
 #include <GroundMotion.h>
 #include <InterpolatedGroundMotion.h>
+
+#include <Parameter.h>
+#include <MaterialStageParameter.h>
 
 // time series
 #include <LinearSeries.h>
@@ -1775,3 +1778,26 @@ FEM_ObjectBroker::addUniaxialMaterial(int classTag,
   return 0;
 
 }
+
+
+Parameter *
+FEM_ObjectBroker::getParameter(int classTag)
+{
+  Parameter *theRes = 0;
+
+  switch(classTag) {
+  case  PARAMETER_TAG_Parameter:
+    theRes = new Parameter;
+    break;
+
+  case PARAMETER_TAG_MaterialStageParameter:
+    theRes = new MaterialStageParameter();
+    break;
+
+  default:
+    ;
+  }
+
+  return theRes;
+}
+

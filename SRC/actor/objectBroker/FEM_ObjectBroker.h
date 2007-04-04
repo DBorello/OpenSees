@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-08-04 22:37:15 $
+// $Revision: 1.7 $
+// $Date: 2007-04-04 00:43:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.h,v $
                                                                         
                                                                         
@@ -82,6 +82,7 @@ class SectionForceDeformation;
 class GroundMotion;
 class OPS_Stream;
 class Recorder;
+class Parameter;
 
 class Actor;
 
@@ -156,6 +157,7 @@ class FEM_ObjectBroker
 
     virtual Subdomain  *getSubdomainPtr(int classTag);
 
+    virtual Parameter *getParameter(int classTag);
 
     virtual int addUniaxialMaterial(int classTag, const char *lib, const char *funcName, UniaxialMaterial *(*)(void));
     
