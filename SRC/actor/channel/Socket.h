@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2006-12-20 21:28:34 $
+// $Revision: 1.11 $
+// $Date: 2007-04-05 01:34:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/Socket.h,v $
                                                                         
 // Written: fmk 11/95
@@ -40,6 +40,7 @@ extern "C" {
 #else
   #include <sys/socket.h>
   #include <sys/types.h>
+  #include <sys/ioctl.h>
   #include <netinet/in.h>
   #include <netinet/tcp.h>
   #include <arpa/inet.h>
