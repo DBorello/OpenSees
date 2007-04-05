@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2006-05-26 18:19:16 $
+// $Revision: 1.12 $
+// $Date: 2007-04-05 01:14:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.cpp,v $
                                                                         
                                                                         
@@ -417,7 +417,54 @@ ID::operator=(const ID &V)
 }
 
 
+// ID operator==(const ID &V):
+//	The == operator checks the two IDs are of the same size.
+// 	Then returns 1 if all the components of the two IDs are equal and 0 otherwise.
 
+int 
+ID::operator==(const ID &V) const
+{
+#ifdef _G3DEBUG
+  if (sz != V.sz) {
+    opserr << "WARNING Vector::operator==(ID):IDs not of same sizes: " << sz << " != " << V.sz << endln;
+    return -1;
+  }
+#endif
+
+  int *dataThis = data;
+  int *dataV = V.data;
+
+  for (int i=0; i<sz; i++)
+    if (*dataThis++ != *dataV++)
+      return 0;
+
+  return 1;
+}
+
+
+// ID operator!=(const ID &V):
+//	The != operator checks the two IDs are of the same size.
+// 	Then returns 1 if any of the components of the two IDs are unequal and 0 otherwise.
+
+int 
+ID::operator!=(const ID &V) const
+{
+#ifdef _G3DEBUG
+  if (sz != V.sz) {
+    opserr << "WARNING ID::operator!=(ID):IDs not of same sizes: " << sz << " != " << V.sz << endln;
+    return -1;
+  }
+#endif
+
+  int *dataThis = data;
+  int *dataV = V.data;
+
+  for (int i=0; i<sz; i++)
+    if (*dataThis++ != *dataV++)
+      return 1;
+
+  return 0;
+}
 
 
 // friend OPS_Stream &operator<<(OPS_Stream &s, const ID &V)
