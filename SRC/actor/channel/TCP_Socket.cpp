@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-11-03 18:58:09 $
+// $Revision: 1.8 $
+// $Date: 2007-04-05 01:15:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.cpp,v $
                                                                         
                                                                         
@@ -373,7 +373,7 @@ TCP_Socket::recvMsg(int dbTag, int commitTag,
 	}
     }
 
-    // if o.k. get a ponter to the data in the message and 
+    // if o.k. get a pointer to the data in the message and 
     // place the incoming data there
     int nleft,nread;
     char *gMsg;
@@ -384,6 +384,58 @@ TCP_Socket::recvMsg(int dbTag, int commitTag,
 	nread = recv(sockfd,gMsg,nleft,0);
 	nleft -= nread;
 	gMsg +=  nread;
+    }
+    return 0;
+}
+
+
+// void Recv(Message &):
+// 	Method to receive a message, also sets other_Addr.addr_in to that of sender
+
+int 
+TCP_Socket::recvMsgUnknownSize(int dbTag, int commitTag,
+		    Message &msg, ChannelAddress *theAddress)
+{	
+    // first check address is the only address a TCP_socket can send to
+    SocketAddress *theSocketAddress = 0;
+    if (theAddress != 0) {
+	if (theAddress->getType() == SOCKET_TYPE) 
+	    theSocketAddress = (SocketAddress *)theAddress;
+	else {
+	    opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+	    opserr << "can only communicate with a TCP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
+	    return -1;	    
+	}		    
+	if (bcmp((char *) &other_Addr.addr_in, (char *) &theSocketAddress->address.addr_in, 
+	     theSocketAddress->addrLength) != 0) {
+
+	    opserr << "TCP_Socket::recvMsg() - a TCP_Socket ";
+	    opserr << "can only communicate with one other TCP_Socket\n"; 
+	    return -1;
+	}
+    }
+
+    // if o.k. get a pointer to the data in the message and 
+    // place the incoming data there
+    int nleft, nread;
+    bool eol = false;
+    char *gMsg;
+    gMsg = msg.data;
+
+    while (!eol) {
+        nleft = this->getBytesAvailable();
+        while (nleft > 0) {
+	        nread = recv(sockfd,gMsg,nleft,0);
+	        nleft -= nread;
+	        gMsg +=  nread;
+        }
+        if (*(gMsg-1) == '\0')
+            eol = true;
+        else if (*(gMsg-1) == '\n') {
+            eol = true;
+            *gMsg = '\0';
+        }
     }
     return 0;
 }
@@ -416,7 +468,7 @@ TCP_Socket::sendMsg(int dbTag, int commitTag,
 	}
     }
 
-    // if o.k. get a ponter to the data in the message and 
+    // if o.k. get a pointer to the data in the message and 
     // place the incoming data there
     int nwrite, nleft;    
     char *gMsg;
@@ -459,7 +511,7 @@ TCP_Socket::recvMatrix(int dbTag, int commitTag,
 	}
     }
 
-    // if o.k. get a ponter to the data in the Matrix and 
+    // if o.k. get a pointer to the data in the Matrix and 
     // place the incoming data there
     int nleft,nread;
     double *data = theMatrix.data;
@@ -503,7 +555,7 @@ TCP_Socket::sendMatrix(int dbTag, int commitTag,
 	}
     }
 
-    // if o.k. get a ponter to the data in the Matrix and 
+    // if o.k. get a pointer to the data in the Matrix and 
     // place the incoming data there
     int nwrite, nleft;    
     double *data = theMatrix.data;
@@ -551,7 +603,7 @@ TCP_Socket::recvVector(int dbTag, int commitTag,
 	}
     }
 
-    // if o.k. get a ponter to the data in the Vector and 
+    // if o.k. get a pointer to the data in the Vector and 
     // place the incoming data there
     int nleft,nread;
     double *data = theVector.theData;
@@ -594,7 +646,7 @@ TCP_Socket::sendVector(int dbTag, int commitTag,
 	}
     }
 
-    // if o.k. get a ponter to the data in the Vector and 
+    // if o.k. get a pointer to the data in the Vector and 
     // place the incoming data there
     int nwrite, nleft;    
     double *data = theVector.theData;
@@ -637,7 +689,7 @@ TCP_Socket::recvID(int dbTag, int commitTag,
 	}
     }
 
-    // if o.k. get a ponter to the data in the ID and 
+    // if o.k. get a pointer to the data in the ID and 
     // place the incoming data there
     int nleft,nread;
     int *data = theID.data;
@@ -680,7 +732,7 @@ TCP_Socket::sendID(int dbTag, int commitTag,
 	}
     }
 
-    // if o.k. get a ponter to the data in the ID and 
+    // if o.k. get a pointer to the data in the ID and 
     // place the incoming data there
     int nwrite, nleft;    
     int *data = theID.data;
@@ -704,6 +756,21 @@ unsigned int
 TCP_Socket::getPortNumber(void) const
 {
     return myPort;
+}
+
+
+unsigned int
+TCP_Socket::getBytesAvailable(void)
+{
+    unsigned long bytesAvailable;
+
+    #ifdef _WIN32
+        ioctlsocket(sockfd,FIONREAD,&bytesAvailable);
+    #else
+        ioctl(sockfd,FIONREAD,&bytesAvailable);
+    #endif
+
+    return bytesAvailable;
 }
 
 

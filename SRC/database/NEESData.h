@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-01-10 18:16:20 $
+// $Revision: 1.4 $
+// $Date: 2007-04-05 01:15:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/NEESData.h,v $
                                                                         
                                                                         
@@ -80,6 +80,9 @@ class NEESData: public FE_Datastore
 		const Message &, 
 		ChannelAddress *theAddress =0);    
     int recvMsg(int dbTag, int commitTag, 
+		Message &, 
+		ChannelAddress *theAddress =0);        
+    int recvMsgUnknownSize(int dbTag, int commitTag, 
 		Message &, 
 		ChannelAddress *theAddress =0);        
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-11-03 18:25:40 $
+// $Revision: 1.6 $
+// $Date: 2007-04-05 01:15:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.h,v $
                                                                         
                                                                         
@@ -71,6 +71,9 @@ class TCP_Socket : public Channel
     int recvMsg(int dbTag, int commitTag, 
 		Message &, 
 		ChannelAddress *theAddress =0);        
+    int recvMsgUnknownSize(int dbTag, int commitTag, 
+		Message &, 
+		ChannelAddress *theAddress =0);        
 
     int sendMatrix(int dbTag, int commitTag, 
 		   const Matrix &theMatrix, 
@@ -80,7 +83,8 @@ class TCP_Socket : public Channel
 		   ChannelAddress *theAddress =0);
     
     int sendVector(int dbTag, int commitTag, 
-		   const Vector &theVector, ChannelAddress *theAddress =0);
+		   const Vector &theVector,
+           ChannelAddress *theAddress =0);
     int recvVector(int dbTag, int commitTag, 
 		   Vector &theVector, 
 		   ChannelAddress *theAddress =0);
@@ -94,6 +98,7 @@ class TCP_Socket : public Channel
     
   protected:
     unsigned int getPortNumber(void) const;
+    unsigned int getBytesAvailable(void);
     
   private:
     socket_type sockfd;

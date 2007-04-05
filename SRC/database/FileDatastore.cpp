@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2006-01-12 23:25:31 $
+// $Revision: 1.20 $
+// $Date: 2007-04-05 01:15:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.cpp,v $
                                                                         
                                                                         
@@ -185,6 +185,14 @@ FileDatastore::recvMsg(int dataTag, int commitTag,
   return -1;
 }		       
 
+int 
+FileDatastore::recvMsgUnknownSize(int dataTag, int commitTag, 
+		       Message &, 
+		       ChannelAddress *theAddress)
+{
+  opserr << "FileDatastore::recvMsgUnknownSize() - not yet implemented\n";
+  return -1;
+}		       
 
 
 int 

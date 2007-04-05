@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-01-10 18:16:20 $
+// $Revision: 1.6 $
+// $Date: 2007-04-05 01:15:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/NEESData.cpp,v $
                                                                         
 // Written: fmk 
@@ -105,6 +105,15 @@ NEESData::recvMsg(int dataTag, int commitTag,
 		       ChannelAddress *theAddress)
 {
   opserr << "NEESData::recvMsg(int dataTag, int commitTag,  - should not be called\n";
+  return -1;
+}		       
+
+int 
+NEESData::recvMsgUnknownSize(int dataTag, int commitTag, 
+		       Message &, 
+		       ChannelAddress *theAddress)
+{
+  opserr << "NEESData::recvMsgUnknownSize(int dataTag, int commitTag,  - should not be called\n";
   return -1;
 }		       
 

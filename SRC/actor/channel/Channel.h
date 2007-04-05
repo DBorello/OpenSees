@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-11-23 18:27:24 $
+// $Revision: 1.6 $
+// $Date: 2007-04-05 01:15:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/Channel.h,v $
                                                                         
                                                                         
@@ -66,44 +66,48 @@ class Channel
     // methods to send/receive messages and objects on channels.
     virtual int sendObj(int commitTag,
 			MovableObject &theObject, 
-		        ChannelAddress *theAddress =0) =0;
+		    ChannelAddress *theAddress =0) =0;
 
     virtual int recvObj(int commitTag,
 			MovableObject &theObject, 
 			FEM_ObjectBroker &theBroker, 
-		        ChannelAddress *theAddress =0) =0; 
+		    ChannelAddress *theAddress =0) =0; 
 
     virtual int sendMsg(int dbTag, int commitTag, 
 			const Message &theMessage, 
-		        ChannelAddress *theAddress =0) =0;  
+		    ChannelAddress *theAddress =0) =0;  
 
     virtual int recvMsg(int dbTag, int commitTag, 
 			Message &theMessage, 
 			ChannelAddress *theAddress =0) =0;  
     
+    virtual int recvMsgUnknownSize(int dbTag, int commitTag, 
+			Message &theMessage, 
+			ChannelAddress *theAddress =0) =0;  
+
     virtual int sendMatrix(int dbTag, int commitTag, 
-			   const Matrix &theMatrix, 
-			   ChannelAddress *theAddress =0) =0;  
+			const Matrix &theMatrix, 
+			ChannelAddress *theAddress =0) =0;  
 
     virtual int recvMatrix(int dbTag, int commitTag, 
-			   Matrix &theMatrix, 
-			   ChannelAddress *theAddress =0) =0;  
+			Matrix &theMatrix, 
+			ChannelAddress *theAddress =0) =0;  
     
     virtual int sendVector(int dbTag, int commitTag, 
-			   const Vector &theVector, 
-			   ChannelAddress *theAddress =0) =0;  
+			const Vector &theVector, 
+			ChannelAddress *theAddress =0) =0;  
 
     virtual int recvVector(int dbTag, int commitTag, 
-			   Vector &theVector, 
-			   ChannelAddress *theAddress =0) =0;  
+			Vector &theVector, 
+			ChannelAddress *theAddress =0) =0;  
     
     virtual int sendID(int dbTag, int commitTag, 
-		       const ID &theID, 
-		       ChannelAddress *theAddress =0) =0;  
+		    const ID &theID, 
+		    ChannelAddress *theAddress =0) =0;  
 
     virtual int recvID(int dbTag, int commitTag, 
-		       ID &theID, 
-		       ChannelAddress *theAddress =0) =0;      
+		    ID &theID, 
+		    ChannelAddress *theAddress =0) =0;      
 
   protected:
     
