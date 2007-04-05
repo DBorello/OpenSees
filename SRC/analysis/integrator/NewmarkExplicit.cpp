@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-04-02 23:42:26 $
+// $Revision: 1.4 $
+// $Date: 2007-04-05 01:29:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/NewmarkExplicit.cpp,v $
 
-
-// File: ~/analysis/integrator/NewmarkExplicit.cpp
-// 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
 // Created: 02/05
 // Revision: A
@@ -49,7 +46,7 @@ NewmarkExplicit::NewmarkExplicit()
     : TransientIntegrator(INTEGRATOR_TAGS_NewmarkExplicit),
     gamma(0), 
     alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
-    c2(0.0), c3(0.0),
+    updateCount(0), c2(0.0), c3(0.0),
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0)
 {
     
@@ -60,7 +57,7 @@ NewmarkExplicit::NewmarkExplicit(double _gamma)
     : TransientIntegrator(INTEGRATOR_TAGS_NewmarkExplicit),
     gamma(_gamma), 
     alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
-    c2(0.0), c3(0.0),
+    updateCount(0), c2(0.0), c3(0.0),
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0)
 {
     
@@ -72,7 +69,7 @@ NewmarkExplicit::NewmarkExplicit(double _gamma,
     : TransientIntegrator(INTEGRATOR_TAGS_NewmarkExplicit),
     gamma(_gamma), 
     alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
-    c2(0.0), c3(0.0),
+    updateCount(0), c2(0.0), c3(0.0),
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0)
 {
     
@@ -130,32 +127,27 @@ int NewmarkExplicit::newStep(double deltaT)
     (*Utdot) = *Udot;
     (*Utdotdot) = *Udotdot;
 
-    // determine new displacements and velocities at time t+deltaT
+    // determine new response at time t+deltaT
     U->addVector(1.0, *Utdot, deltaT);
     double a1 = 0.5*deltaT*deltaT;
     U->addVector(1.0, *Utdotdot, a1);
     
     double a2 = deltaT*(1.0 - gamma);
     Udot->addVector(1.0, *Utdotdot, a2);
+
+    Udotdot->Zero();
+
+    // set the trial response quantities
+    theModel->setResponse(*U,*Udot,*Udotdot);
     
-    // set the trial response quantities for the elements
-    theModel->setDisp(*U);
-    theModel->setVel(*Udot);
-    
-    // increment the time and apply the load
+    // increment the time to t+deltaT and apply the load
     double time = theModel->getCurrentDomainTime();
     time += deltaT;
     if (theModel->updateDomain(time, deltaT) < 0)  {
         opserr << "NewmarkExplicit::newStep() - failed to update the domain\n";
         return -4;
     }
-    
-    // determine the accelerations at t+deltaT
-    Udotdot->Zero();
         
-    // set the trial response quantities for the nodes
-    theModel->setAccel(*Udotdot);
-    
     return 0;
 }
 
@@ -263,10 +255,9 @@ int NewmarkExplicit::domainChanged()
     }        
     
     // now go through and populate U, Udot and Udotdot by iterating through
-    // the DOF_Groups and getting the last committed velocity and acceleration
+    // the DOF_Groups and getting the last committed velocity and accel
     DOF_GrpIter &theDOFs = myModel->getDOFs();
     DOF_Group *dofPtr;
-    
     while ((dofPtr = theDOFs()) != 0)  {
         const ID &id = dofPtr->getID();
         int idSize = id.Size();
@@ -294,8 +285,8 @@ int NewmarkExplicit::domainChanged()
             if (loc >= 0)  {
                 (*Udotdot)(loc) = accel(i);
             }
-        }        
-    }  
+        }
+    }    
     
     return 0;
 }
@@ -337,6 +328,10 @@ int NewmarkExplicit::update(const Vector &aiPlusOne)
     // update the response at the DOFs
     theModel->setVel(*Udot);
     theModel->setAccel(*Udotdot);
+    //if (theModel->updateDomain() < 0)  {
+    //    opserr << "NewmarkExplicit::update() - failed to update the domain\n";
+    //    return -4;
+    //}
     
     return 0;
 }    
@@ -386,14 +381,9 @@ void NewmarkExplicit::Print(OPS_Stream &s, int flag)
         double currentTime = theModel->getCurrentDomainTime();
         s << "\t NewmarkExplicit - currentTime: " << currentTime << endln;
         s << "  gamma: " << gamma << endln;
-        s << "  c2: " << c2 << " c3: " << c3 << endln;
-        s << "  Rayleigh Damping - alphaM: " << alphaM;
-        s << "  betaK: " << betaK << "  betaKi: " << betaKi << endln;	    
+        s << "  c2: " << c2 << "  c3: " << c3 << endln;
+        s << "  Rayleigh Damping - alphaM: " << alphaM << "  betaK: " << betaK;
+        s << "  betaKi: " << betaKi << "  betaKc: " << betaKc << endln;	    
     } else 
         s << "\t NewmarkExplicit - no associated AnalysisModel\n";
 }
-
-
-
-
-

@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-04-02 23:42:26 $
+// $Revision: 1.4 $
+// $Date: 2007-04-05 01:29:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHTGeneralizedExplicit.cpp,v $
 
-
-// File: ~/analysis/integrator/HHTGeneralizedExplicit.cpp
-// 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
 // Created: 10/05
 // Revision: A
@@ -48,10 +45,9 @@
 
 HHTGeneralizedExplicit::HHTGeneralizedExplicit()
     : TransientIntegrator(INTEGRATOR_TAGS_HHTGeneralizedExplicit),
-    alphaI(1.0), alphaF(1.0),
-    gamma(0.0), deltaT(0.0),
-    alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
-    c1(0.0), c2(0.0), c3(0.0), 
+    alphaI(1.0), alphaF(1.0), beta(0.0), gamma(0.0),
+    deltaT(0.0), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+    updateCount(0), c1(0.0), c2(0.0), c3(0.0), 
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0), Ualphadotdot(0)
 {
@@ -67,7 +63,7 @@ HHTGeneralizedExplicit::HHTGeneralizedExplicit(double _rhoB, double _alphaF)
     /((-1.0+_alphaF)*(-2.0+_rhoB)*pow(1.0+_rhoB,2))),
     gamma(0.5+alphaI-_alphaF),
     deltaT(0.0), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
-    c1(0.0), c2(0.0), c3(0.0), 
+    updateCount(0), c1(0.0), c2(0.0), c3(0.0), 
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0), Ualphadotdot(0)
 {
@@ -84,7 +80,7 @@ HHTGeneralizedExplicit::HHTGeneralizedExplicit(double _rhoB, double _alphaF,
     /((-1.0+_alphaF)*(-2.0+_rhoB)*pow(1.0+_rhoB,2))),
     gamma(0.5+alphaI-_alphaF),
     deltaT(0.0), alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
-    c1(0.0), c2(0.0), c3(0.0),
+    updateCount(0), c1(0.0), c2(0.0), c3(0.0),
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0), Ualphadotdot(0)
 {
@@ -95,10 +91,9 @@ HHTGeneralizedExplicit::HHTGeneralizedExplicit(double _rhoB, double _alphaF,
 HHTGeneralizedExplicit::HHTGeneralizedExplicit(double _alphaI, double _alphaF,
     double _beta, double _gamma)
     : TransientIntegrator(INTEGRATOR_TAGS_HHTGeneralizedExplicit),
-    alphaI(_alphaI), alphaF(_alphaF),
-    beta(_beta), gamma(_gamma), deltaT(0.0),
-    alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
-    c1(0.0), c2(0.0), c3(0.0), 
+    alphaI(_alphaI), alphaF(_alphaF), beta(_beta), gamma(_gamma),
+    deltaT(0.0), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+    updateCount(0), c1(0.0), c2(0.0), c3(0.0), 
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0), Ualphadotdot(0)
 {
@@ -110,10 +105,9 @@ HHTGeneralizedExplicit::HHTGeneralizedExplicit(double _alphaI, double _alphaF,
     double _beta, double _gamma,
     double _alphaM, double _betaK, double _betaKi, double _betaKc)
     : TransientIntegrator(INTEGRATOR_TAGS_HHTGeneralizedExplicit),
-    alphaI(_alphaI), alphaF(_alphaF),
-    beta(_beta), gamma(_gamma), deltaT(0.0),
-    alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
-    c1(0.0), c2(0.0), c3(0.0), 
+    alphaI(_alphaI), alphaF(_alphaF), beta(_beta), gamma(_gamma),
+    deltaT(0.0), alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
+    updateCount(0), c1(0.0), c2(0.0), c3(0.0), 
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0), Ualphadotdot(0)
 {
@@ -188,16 +182,17 @@ int HHTGeneralizedExplicit::newStep(double _deltaT)
     double a2 = deltaT*(1.0 - gamma);
     Udot->addVector(1.0, *Utdotdot, a2);
 
-    // determine the displacements and velocities at t+alphaF*deltaT
+    // determine the response at t+alphaF*deltaT
     (*Ualpha) = *Ut;
     Ualpha->addVector((1.0-alphaF), *U, alphaF);
     
     (*Ualphadot) = *Utdot;
     Ualphadot->addVector((1.0-alphaF), *Udot, alphaF);
+
+    (*Ualphadotdot) = (1.0-alphaI)*(*Utdotdot);
         
     // set the trial response quantities for the elements
-    theModel->setDisp(*Ualpha);
-    theModel->setVel(*Ualphadot);
+    theModel->setResponse(*Ualpha,*Ualphadot,*Ualphadotdot);
 
     // increment the time to t+alphaF*deltaT and apply the load
     double time = theModel->getCurrentDomainTime();
@@ -206,12 +201,6 @@ int HHTGeneralizedExplicit::newStep(double _deltaT)
         opserr << "HHTGeneralizedExplicit::newStep() - failed to update the domain\n";
         return -4;
     }
-    
-    // determine the accelerations at t+alphaI*deltaT
-    (*Ualphadotdot) = (1.0-alphaI)*(*Utdotdot);
-    
-    // set the new trial response quantities for the nodes
-    theModel->setAccel(*Ualphadotdot);
     
     return 0;
 }
@@ -342,7 +331,6 @@ int HHTGeneralizedExplicit::domainChanged()
     // the DOF_Groups and getting the last committed velocity and accel
     DOF_GrpIter &theDOFs = myModel->getDOFs();
     DOF_Group *dofPtr;
-    
     while ((dofPtr = theDOFs()) != 0)  {
         const ID &id = dofPtr->getID();
         int idSize = id.Size();
@@ -414,10 +402,10 @@ int HHTGeneralizedExplicit::update(const Vector &aiPlusOne)
         
     // update the response at the DOFs
     theModel->setResponse(*U,*Udot,*Udotdot);        
-//    if (theModel->updateDomain() < 0)  {
-//        opserr << "HHTGeneralizedExplicit::update() - failed to update the domain\n";
-//        return -4;
-//    }
+    //if (theModel->updateDomain() < 0)  {
+    //    opserr << "HHTGeneralizedExplicit::update() - failed to update the domain\n";
+    //    return -4;
+    //}
     
     return 0;
 }
@@ -488,10 +476,10 @@ void HHTGeneralizedExplicit::Print(OPS_Stream &s, int flag)
     if (theModel != 0)  {
         double currentTime = theModel->getCurrentDomainTime();
         s << "\t HHTGeneralizedExplicit - currentTime: " << currentTime << endln ;
-        s << "  alphaI: " << alphaI << " alphaF: " << alphaF  << " beta: " << beta  << " gamma: " << gamma << endln;
-        s << "  c1: " << c1 << " c2: " << c2 << " c3: " << c3 << endln;
-        s << "  Rayleigh Damping - alphaM: " << alphaM;
-        s << "  betaK: " << betaK << "   betaKi: " << betaKi << endln;	    
+        s << "  alphaI: " << alphaI << "  alphaF: " << alphaF  << "  beta: " << beta  << "  gamma: " << gamma << endln;
+        s << "  c1: " << c1 << "  c2: " << c2 << "  c3: " << c3 << endln;
+        s << "  Rayleigh Damping - alphaM: " << alphaM << "  betaK: " << betaK;
+        s << "  betaKi: " << betaKi << "  betaKc: " << betaKc << endln;	    
     } else 
         s << "\t HHTGeneralizedExplicit - no associated AnalysisModel\n";
 }

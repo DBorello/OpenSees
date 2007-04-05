@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-04-02 23:42:26 $
+// $Revision: 1.4 $
+// $Date: 2007-04-05 01:29:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHTExplicit.cpp,v $
 
-
-// File: ~/analysis/integrator/HHTExplicit.cpp
-// 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
 // Created: 10/05
 // Revision: A
@@ -49,7 +46,7 @@ HHTExplicit::HHTExplicit()
     : TransientIntegrator(INTEGRATOR_TAGS_HHTExplicit),
     alpha(1.0), gamma(0.0), deltaT(0.0),
     alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
-    c2(0.0), c3(0.0), 
+    updateCount(0), c2(0.0), c3(0.0), 
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0)
 {
@@ -61,7 +58,7 @@ HHTExplicit::HHTExplicit(double _alpha)
     : TransientIntegrator(INTEGRATOR_TAGS_HHTExplicit),
     alpha(_alpha), gamma(0.5), deltaT(0.0),
     alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
-    c2(0.0), c3(0.0), 
+    updateCount(0), c2(0.0), c3(0.0), 
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0)
 {
@@ -74,7 +71,7 @@ HHTExplicit::HHTExplicit(double _alpha,
     : TransientIntegrator(INTEGRATOR_TAGS_HHTExplicit),
     alpha(_alpha), gamma(0.5), deltaT(0.0),
     alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
-    c2(0.0), c3(0.0),
+    updateCount(0), c2(0.0), c3(0.0),
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0)
 {
@@ -86,7 +83,7 @@ HHTExplicit::HHTExplicit(double _alpha, double _gamma)
     : TransientIntegrator(INTEGRATOR_TAGS_HHTExplicit),
     alpha(_alpha), gamma(_gamma), deltaT(0.0),
     alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
-    c2(0.0), c3(0.0), 
+    updateCount(0), c2(0.0), c3(0.0), 
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0)
 {
@@ -99,7 +96,7 @@ HHTExplicit::HHTExplicit(double _alpha, double _gamma,
     : TransientIntegrator(INTEGRATOR_TAGS_HHTExplicit),
     alpha(_alpha), gamma(_gamma), deltaT(0.0),
     alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
-    c2(0.0), c3(0.0), 
+    updateCount(0), c2(0.0), c3(0.0), 
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0)
 {
@@ -171,16 +168,17 @@ int HHTExplicit::newStep(double _deltaT)
     double a2 = deltaT*(1.0 - gamma);
     Udot->addVector(1.0, *Utdotdot, a2);
 
-    // determine the displacements and velocities at t+alpha*deltaT
+    // determine the response at t+alpha*deltaT
     (*Ualpha) = *Ut;
     Ualpha->addVector((1.0-alpha), *U, alpha);
     
     (*Ualphadot) = *Utdot;
     Ualphadot->addVector((1.0-alpha), *Udot, alpha);
+
+    Udotdot->Zero();
         
     // set the trial response quantities for the elements
-    theModel->setDisp(*Ualpha);
-    theModel->setVel(*Ualphadot);
+    theModel->setResponse(*Ualpha,*Ualphadot,*Udotdot);
 
     // increment the time to t+alpha*deltaT and apply the load
     double time = theModel->getCurrentDomainTime();
@@ -189,13 +187,7 @@ int HHTExplicit::newStep(double _deltaT)
         opserr << "HHTExplicit::newStep() - failed to update the domain\n";
         return -4;
     }
-    
-    // determine the accelerations at t+alpha*deltaT
-    Udotdot->Zero();
-    
-    // set the new trial response quantities for the nodes
-    theModel->setAccel(*Udotdot);
-    
+        
     return 0;
 }
 
@@ -319,7 +311,6 @@ int HHTExplicit::domainChanged()
     // the DOF_Groups and getting the last committed velocity and accel
     DOF_GrpIter &theDOFs = myModel->getDOFs();
     DOF_Group *dofPtr;
-    
     while ((dofPtr = theDOFs()) != 0)  {
         const ID &id = dofPtr->getID();
         int idSize = id.Size();
@@ -390,6 +381,10 @@ int HHTExplicit::update(const Vector &aiPlusOne)
     // update the response at the DOFs
     theModel->setVel(*Udot);
     theModel->setAccel(*Udotdot);
+    //if (theModel->updateDomain() < 0)  {
+    //    opserr << "HHTExplicit::update() - failed to update the domain\n";
+    //    return -4;
+    //}
     
     return 0;
 }
@@ -463,6 +458,3 @@ void HHTExplicit::Print(OPS_Stream &s, int flag)
     } else 
         s << "\t HHTExplicit - no associated AnalysisModel\n";
 }
-
-
-

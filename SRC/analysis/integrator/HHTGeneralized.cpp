@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2007-04-02 23:42:26 $
+// $Revision: 1.3 $
+// $Date: 2007-04-05 01:29:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHTGeneralized.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -44,9 +44,8 @@
 
 HHTGeneralized::HHTGeneralized()
     : TransientIntegrator(INTEGRATOR_TAGS_HHTGeneralized),
-    alphaI(1.0), alphaF(1.0),
-    beta(0.0), gamma(0.0), deltaT(0.0),
-    alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+    alphaI(0.5), alphaF(0.5), beta(0.0), gamma(0.0),
+    deltaT(0.0), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
     c1(0.0), c2(0.0), c3(0.0),
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0), Ualphadotdot(0)
@@ -85,9 +84,8 @@ HHTGeneralized::HHTGeneralized(double _rhoInf,
 HHTGeneralized::HHTGeneralized(double _alphaI, double _alphaF,
     double _beta, double _gamma)
     : TransientIntegrator(INTEGRATOR_TAGS_HHTGeneralized),
-    alphaI(_alphaI), alphaF(_alphaF),
-    beta(_beta), gamma(_gamma), deltaT(0.0),
-    alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+    alphaI(_alphaI), alphaF(_alphaF), beta(_beta), gamma(_gamma),
+    deltaT(0.0), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
     c1(0.0), c2(0.0), c3(0.0), 
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0), Ualphadotdot(0)
@@ -100,9 +98,8 @@ HHTGeneralized::HHTGeneralized(double _alphaI, double _alphaF,
     double _beta, double _gamma,
     double _alphaM, double _betaK, double _betaKi, double _betaKc)
     : TransientIntegrator(INTEGRATOR_TAGS_HHTGeneralized),
-    alphaI(_alphaI), alphaF(_alphaF),
-    beta(_beta), gamma(_gamma), deltaT(0.0),
-    alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
+    alphaI(_alphaI), alphaF(_alphaF), beta(_beta), gamma(_gamma),
+    deltaT(0.0), alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
     c1(0.0), c2(0.0), c3(0.0), 
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0), Ualphadotdot(0)
@@ -168,15 +165,6 @@ int HHTGeneralized::newStep(double _deltaT)
     (*Utdot) = *Udot;  
     (*Utdotdot) = *Udotdot;
 
-    // increment the time to t+alpha*deltaT and apply the load
-    double time = theModel->getCurrentDomainTime();
-    time += alphaF*deltaT;
-//    theModel->applyLoadDomain(time);
-    if (theModel->updateDomain(time, deltaT) < 0)  {
-        opserr << "HHTGeneralized::newStep() - failed to update the domain\n";
-        return -4;
-    }
-
     // determine new velocities and accelerations at t+deltaT
     double a1 = (1.0 - gamma/beta);
     double a2 = deltaT*(1.0 - 0.5*gamma/beta);
@@ -193,10 +181,18 @@ int HHTGeneralized::newStep(double _deltaT)
     (*Ualphadotdot) = *Utdotdot;
     Ualphadotdot->addVector((1.0-alphaI), *Udotdot, alphaI);
 
-    // set the trial response quantities for the nodes
+    // set the trial response quantities
     theModel->setVel(*Ualphadot);
     theModel->setAccel(*Ualphadotdot);
         
+    // increment the time to t+alpha*deltaT and apply the load
+    double time = theModel->getCurrentDomainTime();
+    time += alphaF*deltaT;
+    if (theModel->updateDomain(time, deltaT) < 0)  {
+        opserr << "HHTGeneralized::newStep() - failed to update the domain\n";
+        return -4;
+    }
+
     return 0;
 }
 
@@ -332,7 +328,6 @@ int HHTGeneralized::domainChanged()
     // the DOF_Groups and getting the last committed velocity and accel
     DOF_GrpIter &theDOFs = myModel->getDOFs();
     DOF_Group *dofPtr;
-    
     while ((dofPtr = theDOFs()) != 0)  {
         const ID &id = dofPtr->getID();
         int idSize = id.Size();
@@ -395,7 +390,7 @@ int HHTGeneralized::update(const Vector &deltaU)
     
     Udotdot->addVector(1.0, deltaU, c3);
 
-    // determine displacement and velocity at t+alpha*deltaT
+    // determine response at t+alpha*deltaT
     (*Ualpha) = *Ut;
     Ualpha->addVector((1.0-alphaF), *U, alphaF);
 
@@ -426,10 +421,10 @@ int HHTGeneralized::commit(void)
     
     // update the response at the DOFs
     theModel->setResponse(*U,*Udot,*Udotdot);
-//    if (theModel->updateDomain() < 0)  {
-//        opserr << "HHTGeneralized::commit() - failed to update the domain\n";
-//        return -4;
-//    }
+    if (theModel->updateDomain() < 0)  {
+        opserr << "HHTGeneralized::commit() - failed to update the domain\n";
+        return -4;
+    }
     
     // set the time to be t+deltaT
     double time = theModel->getCurrentDomainTime();
@@ -488,10 +483,10 @@ void HHTGeneralized::Print(OPS_Stream &s, int flag)
     if (theModel != 0)  {
         double currentTime = theModel->getCurrentDomainTime();
         s << "\t HHTGeneralized - currentTime: " << currentTime << endln;
-        s << "  alphaI: " << alphaI << " alphaF: " << alphaF  << " beta: " << beta  << " gamma: " << gamma << endln;
-        s << "  c1: " << c1 << " c2: " << c2 << " c3: " << c3 << endln;
-        s << "  Rayleigh Damping - alphaM: " << alphaM;
-        s << "  betaK: " << betaK << "   betaKi: " << betaKi << endln;	    
+        s << "  alphaI: " << alphaI << "  alphaF: " << alphaF  << "  beta: " << beta  << "  gamma: " << gamma << endln;
+        s << "  c1: " << c1 << "  c2: " << c2 << "  c3: " << c3 << endln;
+        s << "  Rayleigh Damping - alphaM: " << alphaM << "  betaK: " << betaK;
+        s << "  betaKi: " << betaKi << "  betaKc: " << betaKc << endln;	    
     } else 
         s << "\t HHTGeneralized - no associated AnalysisModel\n";
 }
