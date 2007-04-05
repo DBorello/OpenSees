@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.86 $
-// $Date: 2007-03-07 00:09:58 $
+// $Revision: 1.87 $
+// $Date: 2007-04-05 01:44:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -2869,9 +2869,10 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 
   else if (strcmp(argv[1],"NewmarkHybridSimulation") == 0) {
       double beta, gamma;
+      int argi = 4, polyOrder = 1;
       double alphaM, betaK, betaKi, betaKc;
-      if (argc != 4 && argc != 8) {
-	opserr << "WARNING integrator NewmarkHybridSimulation gamma beta <alphaM betaK betaKi betaKc>\n";
+      if (argc < 4 || argc > 10) {
+	opserr << "WARNING integrator NewmarkHybridSimulation gamma beta <alphaM betaK betaKi betaKc> <-polyOrder O>\n";
 	return TCL_ERROR;
       }    
       if (Tcl_GetDouble(interp, argv[2], &gamma) != TCL_OK) {
@@ -2882,32 +2883,40 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	  opserr << "WARNING integrator NewmarkHybridSimulation gamma beta - undefined beta\n";
 	  return TCL_ERROR;	
       }
+      for (int i=argi; i<argc; i++) {
+      if (strcmp(argv[i],"-polyOrder") == 0) {
+      argc -= 2;
+      if (Tcl_GetInt(interp, argv[i+1], &polyOrder) != TCL_OK) {
+	  opserr << "WARNING integrator NewmarkHybridSimulation gamma beta - undefined polyOrder\n";	  
+	  return TCL_ERROR;	
+      }
+      }
+      }
       if (argc == 8) {
-	  if (Tcl_GetDouble(interp, argv[4], &alphaM) != TCL_OK) {
+	  if (Tcl_GetDouble(interp, argv[argi], &alphaM) != TCL_OK) {
 	      opserr << "WARNING integrator NewmarkHybridSimulation gamma beta alphaM betaK betaKi betaKc - alphaM\n";	  
 	      return TCL_ERROR;	
 	  }
-	  if (Tcl_GetDouble(interp, argv[5], &betaK) != TCL_OK) {
+      argi++;
+	  if (Tcl_GetDouble(interp, argv[argi], &betaK) != TCL_OK) {
 	      opserr << "WARNING integrator NewmarkHybridSimulation gamma beta alphaM betaK betaKi betaKc - betaK\n";
 	      return TCL_ERROR;	
 	  }
-	  if (Tcl_GetDouble(interp, argv[6], &betaKi) != TCL_OK) {
+      argi++;
+	  if (Tcl_GetDouble(interp, argv[argi], &betaKi) != TCL_OK) {
 	      opserr << "WARNING integrator NewmarkHybridSimulation gamma beta alphaM betaK betaKi betaKc - betaKi\n";
 	      return TCL_ERROR;	
 	  }
-	  if (Tcl_GetDouble(interp, argv[7], &betaKc) != TCL_OK) {
+      argi++;
+	  if (Tcl_GetDouble(interp, argv[argi], &betaKc) != TCL_OK) {
 	    opserr << "WARNING integrator NewmarkHybridSimulation gamma beta alphaM betaK betaKi betaKc - betaKc\n";
 	    return TCL_ERROR;	
 	  }
       }
-      if (theTest == 0) {
-        opserr << "WARNING no ConvergenceTest specified yet\n";
-        return TCL_ERROR;	  
-      }
       if (argc == 4)
-	  theTransientIntegrator = new NewmarkHybridSimulation(gamma, beta, *theTest);       
+	  theTransientIntegrator = new NewmarkHybridSimulation(gamma, beta, polyOrder);       
       else
-	  theTransientIntegrator = new NewmarkHybridSimulation(gamma, beta, *theTest, alphaM, betaK, betaKi, betaKc);
+	  theTransientIntegrator = new NewmarkHybridSimulation(gamma, beta, polyOrder, alphaM, betaK, betaKi, betaKc);
 
       // if the analysis exists - we want to change the Integrator
 	  if (theTransientAnalysis != 0)
@@ -3317,84 +3326,80 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
   
   else if (strcmp(argv[1],"HHTHybridSimulation") == 0) {
       double rhoInf, alphaI, alphaF, beta, gamma;
+      int argi = 2, polyOrder = 1;
       double alphaM, betaK, betaKi, betaKc;
-      if (argc != 3 && argc != 6 && argc != 7 && argc != 10) {
-	opserr << "WARNING integrator HHTHybridSimulation rhoInf <alphaM betaK betaKi betaKc>\n";
-    opserr << "     or integrator HHTHybridSimulation alphaI alphaF beta gamma <alphaM betaK betaKi betaKc>\n";
+      if (argc < 3 || argc > 12) {
+	opserr << "WARNING integrator HHTHybridSimulation rhoInf <alphaM betaK betaKi betaKc> <-polyOrder O>\n";
+    opserr << "     or integrator HHTHybridSimulation alphaI alphaF beta gamma <alphaM betaK betaKi betaKc> <-polyOrder O>\n";
 	return TCL_ERROR;
       }
+      for (int i=argi; i<argc; i++) {
+      if (strcmp(argv[i],"-polyOrder") == 0) {
+      argc -= 2;
+      if (Tcl_GetInt(interp, argv[i+1], &polyOrder) != TCL_OK) {
+	  opserr << "WARNING integrator HHTHybridSimulation rhoInf - undefined polyOrder\n";	  
+	  return TCL_ERROR;	
+      }
+      }
+      }
       if (argc == 3 || argc == 7) {
-      if (Tcl_GetDouble(interp, argv[2], &rhoInf) != TCL_OK) {
+      if (Tcl_GetDouble(interp, argv[argi], &rhoInf) != TCL_OK) {
 	  opserr << "WARNING integrator HHTHybridSimulation rhoInf - undefined rhoInf\n";	  
 	  return TCL_ERROR;	
       }
+      argi++;
       }
-      if (argc == 6 || argc == 10) {
-      if (Tcl_GetDouble(interp, argv[2], &alphaI) != TCL_OK) {
+      else if (argc == 6 || argc == 10) {
+      if (Tcl_GetDouble(interp, argv[argi], &alphaI) != TCL_OK) {
 	  opserr << "WARNING integrator HHTHybridSimulation alphaI alphaF beta gamma - undefined alphaI\n";	  
 	  return TCL_ERROR;	
       }
-      if (Tcl_GetDouble(interp, argv[3], &alphaF) != TCL_OK) {
+      argi++;
+      if (Tcl_GetDouble(interp, argv[argi], &alphaF) != TCL_OK) {
 	  opserr << "WARNING integrator HHTHybridSimulation alphaI alphaF beta gamma - undefined alphaF\n";	  
 	  return TCL_ERROR;	
       }
-      if (Tcl_GetDouble(interp, argv[4], &beta) != TCL_OK) {
+      argi++;
+      if (Tcl_GetDouble(interp, argv[argi], &beta) != TCL_OK) {
 	  opserr << "WARNING integrator HHTHybridSimulation alphaI alphaF beta gamma - undefined beta\n";	  
 	  return TCL_ERROR;	
       }
-      if (Tcl_GetDouble(interp, argv[5], &gamma) != TCL_OK) {
+      argi++;
+      if (Tcl_GetDouble(interp, argv[argi], &gamma) != TCL_OK) {
 	  opserr << "WARNING integrator HHTHybridSimulation alphaI alphaF beta gamma - undefined gamma\n";	  
 	  return TCL_ERROR;	
       }
+      argi++;
       }
-      if (argc == 7) {
-	  if (Tcl_GetDouble(interp, argv[3], &alphaM) != TCL_OK) {
+      if (argc == 7 || argc == 10) {
+	  if (Tcl_GetDouble(interp, argv[argi], &alphaM) != TCL_OK) {
 	      opserr << "WARNING integrator HHTHybridSimulation rhoInf alphaM betaK betaKi betaKc - alphaM\n";	  
 	      return TCL_ERROR;	
 	  }
-	  if (Tcl_GetDouble(interp, argv[4], &betaK) != TCL_OK) {
+      argi++;
+	  if (Tcl_GetDouble(interp, argv[argi], &betaK) != TCL_OK) {
 	      opserr << "WARNING integrator HHTHybridSimulation rhoInf alphaM betaK betaKi betaKc - betaK\n";
 	      return TCL_ERROR;	
 	  }
-	  if (Tcl_GetDouble(interp, argv[5], &betaKi) != TCL_OK) {
+      argi++;
+	  if (Tcl_GetDouble(interp, argv[argi], &betaKi) != TCL_OK) {
 	      opserr << "WARNING integrator HHTHybridSimulation rhoInf alphaM betaK betaKi betaKc - betaKi\n";
 	      return TCL_ERROR;	
 	  }
-	  if (Tcl_GetDouble(interp, argv[6], &betaKc) != TCL_OK) {
+      argi++;
+	  if (Tcl_GetDouble(interp, argv[argi], &betaKc) != TCL_OK) {
 	    opserr << "WARNING integrator HHTHybridSimulation rhoInf alphaM betaK betaKi betaKc - betaKi\n";
 	    return TCL_ERROR;	
 	  }
-      } 
-      if (argc == 10) {
-	  if (Tcl_GetDouble(interp, argv[6], &alphaM) != TCL_OK) {
-	      opserr << "WARNING integrator HHTHybridSimulation alphaI alphaF beta gamma alphaM betaK betaKi betaKc - alphaM\n";	  
-	      return TCL_ERROR;	
-	  }
-	  if (Tcl_GetDouble(interp, argv[7], &betaK) != TCL_OK) {
-	      opserr << "WARNING integrator HHTHybridSimulation alphaI alphaF beta gamma alphaM betaK betaKi betaKc - betaK\n";
-	      return TCL_ERROR;	
-	  }
-	  if (Tcl_GetDouble(interp, argv[8], &betaKi) != TCL_OK) {
-	      opserr << "WARNING integrator HHTHybridSimulation alphaI alphaF beta gamma alphaM betaK betaKi betaKc - betaKi\n";
-	      return TCL_ERROR;	
-	  }
-	  if (Tcl_GetDouble(interp, argv[9], &betaKc) != TCL_OK) {
-	    opserr << "WARNING integrator HHTHybridSimulation alphaI alphaF beta gamma alphaM betaK betaKi betaKc - betaKc\n";
-	    return TCL_ERROR;	
-	  }
-      }      
-      if (theTest == 0) {
-        opserr << "WARNING no ConvergenceTest specified yet\n";
-        return TCL_ERROR;	  
       }
       if (argc == 3)
-	  theTransientIntegrator = new HHTHybridSimulation(rhoInf, *theTest);       
+	  theTransientIntegrator = new HHTHybridSimulation(rhoInf, polyOrder);       
       else if (argc == 6)
-      theTransientIntegrator = new HHTHybridSimulation(alphaI, alphaF, beta, gamma, *theTest);
+      theTransientIntegrator = new HHTHybridSimulation(alphaI, alphaF, beta, gamma, polyOrder);
       else if (argc == 7)
-	  theTransientIntegrator = new HHTHybridSimulation(rhoInf, *theTest, alphaM, betaK, betaKi, betaKc);
+	  theTransientIntegrator = new HHTHybridSimulation(rhoInf, polyOrder, alphaM, betaK, betaKi, betaKc);
       else if (argc == 10)
-	  theTransientIntegrator = new HHTHybridSimulation(alphaI, alphaF, beta, gamma, *theTest, alphaM, betaK, betaKi, betaKc);
+	  theTransientIntegrator = new HHTHybridSimulation(alphaI, alphaF, beta, gamma, polyOrder, alphaM, betaK, betaKi, betaKc);
 
       // if the analysis exists - we want to change the Integrator
 	  if (theTransientAnalysis != 0)
@@ -3629,74 +3634,67 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
  
   else if (strcmp(argv[1],"CollocationHybridSimulation") == 0) {
       double theta, beta, gamma;
+      int argi = 3, polyOrder = 1;
       double alphaM, betaK, betaKi, betaKc;
-      if (argc != 3 && argc != 5 && argc != 7 && argc != 9) {
-	opserr << "WARNING integrator CollocationHybridSimulation theta <alphaM betaK betaKi betaKc>\n";
-	opserr << "     or integrator CollocationHybridSimulation theta beta gamma <alphaM betaK betaKi betaKc>\n";
+      if (argc < 3 || argc > 11) {
+	opserr << "WARNING integrator CollocationHybridSimulation theta <alphaM betaK betaKi betaKc> <-polyOrder O>\n";
+	opserr << "     or integrator CollocationHybridSimulation theta beta gamma <alphaM betaK betaKi betaKc> <-polyOrder O>\n";
 	return TCL_ERROR;
       }    
       if (Tcl_GetDouble(interp, argv[2], &theta) != TCL_OK) {
 	  opserr << "WARNING integrator CollocationHybridSimulation theta - undefined theta\n";	  
 	  return TCL_ERROR;	
       }
+      for (int i=argi; i<argc; i++) {
+      if (strcmp(argv[i],"-polyOrder") == 0) {
+      argc -= 2;
+      if (Tcl_GetInt(interp, argv[i+1], &polyOrder) != TCL_OK) {
+	  opserr << "WARNING integrator CollocationHybridSimulation theta - undefined polyOrder\n";	  
+	  return TCL_ERROR;	
+      }
+      }
+      }
       if (argc == 5 || argc == 9) {
-      if (Tcl_GetDouble(interp, argv[3], &beta) != TCL_OK) {
+      if (Tcl_GetDouble(interp, argv[argi], &beta) != TCL_OK) {
 	  opserr << "WARNING integrator CollocationHybridSimulation theta beta gamma - undefined beta\n";	  
 	  return TCL_ERROR;	
       }
-      if (Tcl_GetDouble(interp, argv[4], &gamma) != TCL_OK) {
+      argi++;
+      if (Tcl_GetDouble(interp, argv[argi], &gamma) != TCL_OK) {
 	  opserr << "WARNING integrator CollocationHybridSimulation theta beta gamma - undefined gamma\n";	  
 	  return TCL_ERROR;	
       }
+      argi++;
       }
-      if (argc == 7) {
-	  if (Tcl_GetDouble(interp, argv[3], &alphaM) != TCL_OK) {
+      if (argc == 7 || argc == 9) {
+	  if (Tcl_GetDouble(interp, argv[argi], &alphaM) != TCL_OK) {
 	      opserr << "WARNING integrator CollocationHybridSimulation theta alphaM betaK betaKi betaKc - alphaM\n";	  
 	      return TCL_ERROR;	
 	  }
-	  if (Tcl_GetDouble(interp, argv[4], &betaK) != TCL_OK) {
+      argi++;
+	  if (Tcl_GetDouble(interp, argv[argi], &betaK) != TCL_OK) {
 	      opserr << "WARNING integrator CollocationHybridSimulation theta alphaM betaK betaKi betaKc - betaK\n";
 	      return TCL_ERROR;	
 	  }
-	  if (Tcl_GetDouble(interp, argv[5], &betaKi) != TCL_OK) {
+      argi++;
+	  if (Tcl_GetDouble(interp, argv[argi], &betaKi) != TCL_OK) {
 	      opserr << "WARNING integrator CollocationHybridSimulation theta alphaM betaK betaKi betaKc - betaKi\n";
 	      return TCL_ERROR;	
 	  }
-	  if (Tcl_GetDouble(interp, argv[6], &betaKc) != TCL_OK) {
+      argi++;
+	  if (Tcl_GetDouble(interp, argv[argi], &betaKc) != TCL_OK) {
 	    opserr << "WARNING integrator CollocationHybridSimulation theta alphaM betaK betaKi betaKc - betaKi\n";
 	    return TCL_ERROR;	
 	  }
       } 
-      if (argc == 9) {
-	  if (Tcl_GetDouble(interp, argv[5], &alphaM) != TCL_OK) {
-	      opserr << "WARNING integrator CollocationHybridSimulation theta beta gamma alphaM betaK betaKi betaKc - alphaM\n";	  
-	      return TCL_ERROR;	
-	  }
-	  if (Tcl_GetDouble(interp, argv[6], &betaK) != TCL_OK) {
-	      opserr << "WARNING integrator CollocationHybridSimulation theta beta gamma alphaM betaK betaKi betaKc - betaK\n";
-	      return TCL_ERROR;	
-	  }
-	  if (Tcl_GetDouble(interp, argv[7], &betaKi) != TCL_OK) {
-	      opserr << "WARNING integrator CollocationHybridSimulation theta beta gamma alphaM betaK betaKi betaKc - betaKi\n";
-	      return TCL_ERROR;	
-	  }
-	  if (Tcl_GetDouble(interp, argv[8], &betaKc) != TCL_OK) {
-	    opserr << "WARNING integrator CollocationHybridSimulation theta beta gamma alphaM betaK betaKi betaKc - betaKi\n";
-	    return TCL_ERROR;	
-	  }
-      } 
-      if (theTest == 0) {
-        opserr << "WARNING no ConvergenceTest specified yet\n";
-        return TCL_ERROR;	  
-      }
       if (argc == 3)
-	  theTransientIntegrator = new CollocationHybridSimulation(theta, *theTest);       
+	  theTransientIntegrator = new CollocationHybridSimulation(theta, polyOrder);       
       else if (argc == 5)
-	  theTransientIntegrator = new CollocationHybridSimulation(theta, beta, gamma, *theTest);       
+	  theTransientIntegrator = new CollocationHybridSimulation(theta, beta, gamma, polyOrder);       
       else if (argc == 7)
-	  theTransientIntegrator = new CollocationHybridSimulation(theta, *theTest, alphaM, betaK, betaKi, betaKc);       
+	  theTransientIntegrator = new CollocationHybridSimulation(theta, polyOrder, alphaM, betaK, betaKi, betaKc);       
       else if (argc == 9)
-	  theTransientIntegrator = new CollocationHybridSimulation(theta, beta, gamma, *theTest, alphaM, betaK, betaKi, betaKc);       
+	  theTransientIntegrator = new CollocationHybridSimulation(theta, beta, gamma, polyOrder, alphaM, betaK, betaKi, betaKc);       
 
       // if the analysis exists - we want to change the Integrator
 	  if (theTransientAnalysis != 0)
