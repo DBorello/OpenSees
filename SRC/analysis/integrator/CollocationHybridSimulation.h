@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2005-12-19 22:39:21 $
+// $Revision: 1.2 $
+// $Date: 2007-04-05 01:20:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/CollocationHybridSimulation.h,v $
 
 #ifndef CollocationHybridSimulation_h
@@ -40,20 +40,19 @@
 class DOF_Group;
 class FE_Element;
 class Vector;
-class ConvergenceTest;
 
 class CollocationHybridSimulation : public TransientIntegrator
 {
 public:
     // constructors
     CollocationHybridSimulation();
-    CollocationHybridSimulation(double theta, ConvergenceTest &theTest);
-    CollocationHybridSimulation(double theta, ConvergenceTest &theTest,
+    CollocationHybridSimulation(double theta, int polyOrder);
+    CollocationHybridSimulation(double theta, int polyOrder,
         double alphaM, double betaK, double betaKi, double betaKc);
     CollocationHybridSimulation(double theta,
-        double beta, double gamma, ConvergenceTest &theTest);
+        double beta, double gamma, int polyOrder);
     CollocationHybridSimulation(double theta,
-        double beta, double gamma, ConvergenceTest &theTest,
+        double beta, double gamma, int polyOrder,
         double alphaM, double betaK, double betaKi, double betaKc);
     
     // destructor
@@ -81,6 +80,7 @@ private:
     double theta;
     double beta;
     double gamma;
+    int polyOrder;
     double deltaT;
     
     // rayleigh damping factors
@@ -89,11 +89,12 @@ private:
     double betaKi;
     double betaKc;
 
-    ConvergenceTest *theTest;       // convergence test
-    double rFact;                   // displacement increment reduction factor
     double c1, c2, c3;              // some constants we need to keep
+    double x;                       // interpolation location 0<=x<=1
     Vector *Ut, *Utdot, *Utdotdot;  // response quantities at time t
     Vector *U, *Udot, *Udotdot;     // response quantities at time t+deltaT
+    Vector *Utm1, *Utm2;            // disp at time t-deltaT and t-2*deltaT
+    Vector *scaledDeltaU;           // scaled displacement increment
 };
 
 #endif

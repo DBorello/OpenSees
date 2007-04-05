@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2005-12-19 22:39:21 $
+// $Revision: 1.2 $
+// $Date: 2007-04-05 01:20:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/NewmarkHybridSimulation.h,v $
 
 #ifndef NewmarkHybridSimulation_h
@@ -40,15 +40,14 @@
 class DOF_Group;
 class FE_Element;
 class Vector;
-class ConvergenceTest;
 
 class NewmarkHybridSimulation : public TransientIntegrator
 {
 public:
     // constructors
     NewmarkHybridSimulation();
-    NewmarkHybridSimulation(double gamma, double beta, ConvergenceTest &theTest);
-    NewmarkHybridSimulation(double gamma, double beta, ConvergenceTest &theTest,
+    NewmarkHybridSimulation(double gamma, double beta, int polyOrder);
+    NewmarkHybridSimulation(double gamma, double beta, int polyOrder,
         double alphaM, double betaK, double betaKi, double betaKc); 
     
     // destructor
@@ -74,6 +73,7 @@ protected:
 private:
     double gamma;
     double beta;
+    int polyOrder;
 
     // rayleigh damping factors
     double alphaM;
@@ -81,11 +81,12 @@ private:
     double betaKi;
     double betaKc;
 
-    ConvergenceTest *theTest;       // convergence test
-    double rFact;                   // displacement increment reduction factor
     double c1, c2, c3;              // some constants we need to keep
+    double x;                       // interpolation location 0<=x<=1
     Vector *Ut, *Utdot, *Utdotdot;  // response quantities at time t
     Vector *U, *Udot, *Udotdot;     // response quantities at time t+deltaT
+    Vector *Utm1, *Utm2;            // disp at time t-deltaT and t-2*deltaT
+    Vector *scaledDeltaU;           // scaled displacement increment
 };
 
 #endif
