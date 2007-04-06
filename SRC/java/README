@@ -2,6 +2,7 @@
 to make a simple OpenSees java interpreter.
 
 1. in OpenSees/Makefile.def set DEBUG_MODE = SHARED
+(if your Makefile.def does not have this option change the -O2, -03 and -0 flagsin the C++FLAGS, CFLAGS and FFLAGS to -fPIC)
 2. cd OpenSees
 3. make wipe; make
 4. cd OpenSees/SRC/java
