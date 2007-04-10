@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-10-15 00:26:32 $
+// $Revision: 1.3 $
+// $Date: 2007-04-10 18:53:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/MPI_Channel.h,v $
                                                                         
                                                                         
@@ -61,6 +61,9 @@ class MPI_Channel : public Channel
 
     int recvMsg(int dbTag, int commitTag, Message &, ChannelAddress *theAddress =0);       
     int sendMsg(int dbTag, int commitTag, const Message &, ChannelAddress *theAddress =0);    
+    int recvMsgUnknownSize(int dbTag, int commitTag, 
+			   Message &, 
+			   ChannelAddress *theAddress =0);        
 
     int sendMatrix(int dbTag, int commitTag, const Matrix &theMatrix, ChannelAddress *theAddress =0);
     int recvMatrix(int dbTag, int commitTag, Matrix &theMatrix, ChannelAddress *theAddress =0);

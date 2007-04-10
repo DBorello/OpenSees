@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-03-07 00:10:26 $
+// $Revision: 1.7 $
+// $Date: 2007-04-10 18:53:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/MPI_Channel.cpp,v $
                                                                         
                                                                         
@@ -179,6 +179,16 @@ MPI_Channel::recvMsg(int dbTag, int commitTag, Message &msg, ChannelAddress *the
     else
       return 0;
 }
+
+
+int 
+MPI_Channel::recvMsgUnknownSize(int dbTag, int commitTag, Message &msg, ChannelAddress *theAddress)
+{	
+    opserr << "MPI_Channel::recvMsgUnknownSize() -";
+    opserr << " not yet implemented ";
+    return -1;
+}
+
 
 
 // void Send(Message &):
