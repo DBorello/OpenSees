@@ -29,8 +29,8 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.4 $
-// $Date: 2007-03-12 21:55:37 $
+// $Revision: 1.5 $
+// $Date: 2007-04-13 22:42:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/BrickUP.cpp,v $
 
 // by Zhaohui Yang (Modified based on Ed "C++" Love's Brick element)
@@ -1606,4 +1606,28 @@ BrickUP::getResponse(int responseID, Information &eleInfo)
   else
 
     return -1;
+}
+
+int
+BrickUP::setParameter(const char **argv, int argc, Parameter &param)
+{
+  if (argc < 1)
+    return -1;
+
+  int res = -1;
+
+  int matRes = res;
+  for (int i=0; i<8; i++) {
+    matRes =  materialPointers[i]->setParameter(argv, argc, param);
+    if (matRes != -1)
+      res = matRes;
+  }
+
+  return res;
+}
+
+int
+BrickUP::updateParameter(int parameterID, Information &info)
+{
+  return -1;
 }

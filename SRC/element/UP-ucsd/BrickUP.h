@@ -29,8 +29,8 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.3 $
-// $Date: 2007-02-02 01:44:56 $
+// $Revision: 1.4 $
+// $Date: 2007-04-13 22:42:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/BrickUP.h,v $
 
 // by Zhaohui Yang (Modified based on Ed "C++" Love's Brick element)
@@ -124,6 +124,9 @@ class BrickUP : public Element {
     Response *setResponse(const char **argv, int argc, OPS_Stream &s);
     int getResponse(int responseID, Information &eleInformation);
 
+    int setParameter(const char **argv, int argc, Parameter &param);
+    int updateParameter(int parameterID, Information &info);
+
     //plotting
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
 
@@ -135,6 +138,8 @@ class BrickUP : public Element {
   private :
 
     //static data
+    
+
     static Matrix stiff ;
     static Vector resid ;
     static Matrix mass ;
