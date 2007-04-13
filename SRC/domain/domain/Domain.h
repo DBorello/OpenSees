@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2007-03-30 01:45:49 $
+// $Revision: 1.21 $
+// $Date: 2007-04-13 22:32:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
 // Written: fmk 
@@ -97,6 +97,8 @@ class Domain
     virtual  bool addElement(Element *);
     virtual  bool addNode(Node *);
     virtual  bool addSP_Constraint(SP_Constraint *);
+    virtual  int  addSP_Constraint(int startTag, int axisDirn, double axisValue, 
+				   const ID &fixityCodes, double tol=1e-10);
     virtual  bool addMP_Constraint(MP_Constraint *); 
     virtual  bool addLoadPattern(LoadPattern *);            
     virtual  bool addParameter(Parameter *);            
@@ -111,6 +113,7 @@ class Domain
     virtual Element       *removeElement(int tag);
     virtual Node          *removeNode(int tag);    
     virtual SP_Constraint *removeSP_Constraint(int tag);
+    virtual SP_Constraint *removeSP_Constraint(int nodeTag, int dof, int loadPatternTag);
     virtual MP_Constraint *removeMP_Constraint(int tag);    
     virtual LoadPattern   *removeLoadPattern(int tag);
     virtual Parameter     *removeParameter(int tag);
@@ -177,10 +180,12 @@ class Domain
     virtual double getTimeEigenvaluesSet(void);
     
     // methods for other objects to determine if model has changed
-    virtual void domainChange(void);    
     virtual int hasDomainChanged(void);
+    virtual bool getDomainChangeFlag(void);    
+    virtual void domainChange(void);    
     virtual void setDomainChangeStamp(int newStamp);
-    
+
+
     // methods for output
     virtual int  addRecorder(Recorder &theRecorder);    	
     virtual int  removeRecorders(void);
@@ -202,6 +207,7 @@ class Domain
     virtual int calculateNodalReactions(bool inclInertia);
 
   protected:    
+
     virtual int buildEleGraph(Graph *theEleGraph);
     virtual int buildNodeGraph(Graph *theNodeGraph);
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.38 $
-// $Date: 2007-03-30 01:45:49 $
+// $Revision: 1.39 $
+// $Date: 2007-04-13 22:32:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -509,6 +509,49 @@ Domain::addSP_Constraint(SP_Constraint *spConstraint)
 }
 
 
+int
+Domain::addSP_Constraint(int tag, int axisDirn, double axisValue, 
+			 const ID &fixityConditions, double tol)
+{
+  if (axisDirn < 0)
+    return -1;
+
+  int spTag = tag;
+  NodeIter &theNodes = this->getNodes();
+  Node *theNode;
+
+  // for each node in the domain
+  while ((theNode = theNodes()) != 0) {
+    const Vector &theCrds = theNode->getCrds();
+    int sizeCrds = theCrds.Size();
+    int numDOF = theNode->getNumberDOF();
+
+    // check it has crds in axis specified
+    if (axisDirn < sizeCrds) {
+      double nodeCrdDirn = theCrds(axisDirn);
+
+      // check if coordinate is within tol of value given
+      if (fabs(nodeCrdDirn-axisValue) <= tol) {
+
+	// foreach dof to be constrained create an SP & add to domain
+	for (int i=0; i<fixityConditions.Size(); i++) {
+	  if ((i < numDOF) && (fixityConditions(i) == 1)) {
+	    SP_Constraint *theSP = new SP_Constraint(spTag, theNode->getTag(), i, 0.0);
+	    if (this->addSP_Constraint(theSP) == false) {
+	      opserr << "WARNING could not add SP_Constraint to domain for node " << theNode->getTag();
+	      delete theSP;
+	    }
+	    spTag++;
+	  }
+	}
+      }
+    }
+  }
+
+  return spTag;
+}
+
+
 // void addMP_Constraint(MP_Constraint *);
 //	Method to add a constraint to the model.
 //
@@ -600,7 +643,8 @@ Domain::addParameter(Parameter *param)
   bool result = theParameters->addComponent(param);
   if (result == true) {
     // mark the Domain as having been changed
-    this->domainChange();
+    //    this->domainChange();
+    ;
   } else 
     opserr << "Domain::addParameter - parameter " << paramTag << "could not be added to container\n";      
 
@@ -843,6 +887,50 @@ Domain::removeNode(int tag)
   return result;
 }
 
+
+SP_Constraint *
+Domain::removeSP_Constraint(int theNode, int theDOF, int loadPatternTag)
+{
+
+  SP_Constraint *theSP =0;
+  bool found = false;
+  int spTag = 0;
+
+  if (loadPatternTag == -1) {
+    SP_ConstraintIter &theSPs = this->getSPs();
+    while ((found == false) && ((theSP = theSPs()) != 0)) {
+      int nodeTag = theSP->getNodeTag();
+      int dof = theSP->getDOF_Number();
+      if (nodeTag == theNode && dof == theDOF) {
+	spTag = theSP->getTag();
+	found = true;
+      }
+    }
+
+    if (found == true)
+      return this->removeSP_Constraint(spTag);
+    
+  } else {
+    LoadPattern *thePattern = this->getLoadPattern(loadPatternTag);
+    if (thePattern != 0) {
+      SP_ConstraintIter &theSPs = thePattern->getSPs();
+      while ((found == false) && ((theSP = theSPs()) != 0)) {
+	int nodeTag = theSP->getNodeTag();
+	int dof = theSP->getDOF_Number();
+	if (nodeTag == theNode && dof == theDOF) {
+	  spTag = theSP->getTag();
+	  found = true;
+	}
+      }
+
+      if (found == true)
+	return thePattern->removeSP_Constraint(spTag);
+
+    }
+  }
+   
+  return 0;
+}
 
 SP_Constraint *
 Domain::removeSP_Constraint(int tag)
@@ -1599,6 +1687,13 @@ void
 Domain::domainChange(void)
 {
     hasDomainChangedFlag = true;
+}
+
+
+bool 
+Domain::getDomainChangeFlag(void)
+{
+  return hasDomainChangedFlag;
 }
 
 
