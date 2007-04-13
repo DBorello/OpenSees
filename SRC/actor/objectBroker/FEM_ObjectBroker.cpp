@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.38 $
-// $Date: 2007-04-04 00:43:10 $
+// $Revision: 1.39 $
+// $Date: 2007-04-13 22:27:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -241,6 +241,7 @@
 #include <EquiSolnAlgo.h>
 #include <Linear.h>
 #include <NewtonRaphson.h>
+#include <KrylovNewton.h>
 #include <ModifiedNewton.h>
 
 // domain decomp soln algo header files
@@ -1285,7 +1286,9 @@ FEM_ObjectBroker::getNewEquiSolnAlgo(int classTag)
 	     
 	case EquiALGORITHM_TAGS_NewtonRaphson:  
 	     return new NewtonRaphson();
-	     
+
+	case EquiALGORITHM_TAGS_KrylovNewton:  
+	     return new KrylovNewton();
 	     
 	case EquiALGORITHM_TAGS_ModifiedNewton:  
 	     return new ModifiedNewton();
