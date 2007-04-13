@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2007-01-11 01:00:07 $
+// $Revision: 1.16 $
+// $Date: 2007-04-13 22:40:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
                                                                         
@@ -106,11 +106,6 @@ playbackAlgorithmRecorders(ClientData clientData, Tcl_Interp *interp, int argc, 
 
 int 
 groundExcitation(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-int 
-rigidLink(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-
-int 
-rigidDiaphragm(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
 eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);

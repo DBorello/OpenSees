@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.87 $
-// $Date: 2007-04-05 01:44:30 $
+// $Revision: 1.88 $
+// $Date: 2007-04-13 22:39:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -68,9 +68,6 @@ OPS_Stream *opserrPtr = &sserr;
 #include <packages.h>
 
 #include <FEM_ObjectBroker.h>
-#include <RigidRod.h>
-#include <RigidBeam.h>
-#include <RigidDiaphragm.h>
 
 #include <Timer.h>
 #include <ModelBuilder.h>
@@ -463,10 +460,6 @@ int g3AppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
     Tcl_CreateCommand(interp, "database", &addDatabase, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-    Tcl_CreateCommand(interp, "rigidLink", &rigidLink, 
-		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);                
-    Tcl_CreateCommand(interp, "rigidDiaphragm", &rigidDiaphragm, 
-		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);   
     Tcl_CreateCommand(interp, "eigen", &eigenAnalysis, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "video", &videoPlayer, 
@@ -3964,79 +3957,6 @@ groundExcitation(ClientData clientData, Tcl_Interp *interp, int argc,
 }
 */
 
-int 
-rigidLink(ClientData clientData, Tcl_Interp *interp, int argc, 
-	  TCL_Char **argv)
-{
-  if (argc < 4) {
-      opserr << "WARNING rigidLink linkType? rNode? cNode?\n";
-      return TCL_ERROR;
-  }    
-
-  int numMPs = theDomain.getNumMPs();
-  int rNode, cNode;
-  if (Tcl_GetInt(interp, argv[2], &rNode) != TCL_OK) {
-      opserr << "WARNING rigidLink linkType? rNode? cNode? - could not read rNode \n";
-      return TCL_ERROR;	        
-  }
-  if (Tcl_GetInt(interp, argv[3], &cNode) != TCL_OK) {
-      opserr << "WARNING rigidLink linkType? rNode? cNode? - could not read CNode \n";
-      return TCL_ERROR;	        
-  }
-
-  // construct a rigid rod or beam depending on 1st arg
-  if ((strcmp(argv[1],"-bar") == 0) || (strcmp(argv[1],"bar") == 0)) {
-    RigidRod theLink(theDomain, rNode, cNode, numMPs);
-  } else if ((strcmp(argv[1],"-beam") == 0) || (strcmp(argv[1],"beam") == 0)) {
-    RigidBeam theLink(theDomain, rNode, cNode, numMPs);
-  } else {
-      opserr << "WARNING rigidLink linkType? rNode? cNode? - unrecognised link type (-bar, -beam) \n";
-      return TCL_ERROR;	        
-  }
-
-  return TCL_OK;
-}
-
-
-
-int 
-rigidDiaphragm(ClientData clientData, Tcl_Interp *interp, int argc, 
-	   TCL_Char **argv)
-{
-  if (argc < 3) {
-      opserr << "WARNING rigidLink perpDirn? rNode? <cNodes?>\n";
-      return TCL_ERROR;
-  }    
-
-  int rNode, perpDirn;
-  if (Tcl_GetInt(interp, argv[1], &perpDirn) != TCL_OK) {
-      opserr << "WARNING rigidLink perpDirn rNode cNodes - could not read perpDirn? \n";
-      return TCL_ERROR;	        
-  }
-
-  if (Tcl_GetInt(interp, argv[2], &rNode) != TCL_OK) {
-      opserr << "WARNING rigidLink perpDirn rNode cNodes - could not read rNode \n";
-      return TCL_ERROR;	        
-  }
-  
-  // read in the constrained Nodes
-  int numConstrainedNodes = argc - 3;
-  ID constrainedNodes(numConstrainedNodes);
-  for (int i=0; i<numConstrainedNodes; i++) {
-      int cNode;
-      if (Tcl_GetInt(interp, argv[3+i], &cNode) != TCL_OK) {
-	  opserr << "WARNING rigidLink perpDirn rNode cNodes - could not read a cNode\n";
-	  return TCL_ERROR;	        
-      }
-      constrainedNodes(i) = cNode;
-  }
-  int numMPs = theDomain.getNumMPs();
-  RigidDiaphragm theLink(theDomain, rNode, constrainedNodes, 
-	perpDirn-1, numMPs);
-
-  return TCL_OK;
-}
-
 
 int 
 eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, 
@@ -4173,12 +4093,6 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
     
     return TCL_OK;
 }
-
-
-
-
-
-
 
 
 int 
