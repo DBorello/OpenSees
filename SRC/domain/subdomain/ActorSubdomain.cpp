@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-04-04 00:44:39 $
+// $Revision: 1.10 $
+// $Date: 2007-04-13 22:38:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ActorSubdomain.cpp,v $
                                                                         
 #include <ActorSubdomain.h>
@@ -67,13 +67,21 @@ ActorSubdomain::run(void)
 {
     Vector theVect(4);
     bool exitYet = false;
+    int res = 0;
 
     while (exitYet == false) {
+      int action;
+      res = this->recvID(msgData);
+      if (res != 0) {
+	opserr << "ActorSubdomain::run - error receiving msgData\n";
+	exitYet = true;
+        action = ShadowActorSubdomain_DIE;
+      } else {
+	action = msgData(0);
+      }
 
-  	this->recvID(msgData);
-	int action = msgData(0);
-
-	int theType, theOtherType, tag, dbTag, loadPatternTag;
+      bool change;
+      int theType, theOtherType, tag, dbTag, loadPatternTag, startTag, endTag, axisDirn, numSP, i;
 	Element *theEle;
 	Node *theNod;
 	SP_Constraint *theSP;
@@ -86,6 +94,7 @@ ActorSubdomain::run(void)
 	const Vector *theVector;
 	Matrix *theM;
 	Vector *theV;
+	ID     *theI;
 	PartitionedModelBuilder *theBuilder;
 	IncrementalIntegrator *theIntegrator;
 	EquiSolnAlgo *theAlgorithm;
@@ -100,6 +109,8 @@ ActorSubdomain::run(void)
 	Parameter *theParameter;
 
 	const ID *theID;
+
+	//	opserr << "ActorSubdomain action: " << action << endln;
 	
 	switch (action) {
 
@@ -257,6 +268,42 @@ ActorSubdomain::run(void)
 		    msgData(0) = -1;
 	    } else
 		msgData(0) = -1;
+
+	    break;	    
+
+
+	  case ShadowActorSubdomain_addSP_ConstraintAXIS:
+
+	    startTag = msgData(1);
+	    axisDirn = msgData(2);
+	    theI = new ID(msgData(3));
+	    theV = new Vector(2);
+	    this->recvID(*theI);
+	    this->recvVector(*theV);
+
+	    msgData(0) = 0;				 
+	    endTag = this->addSP_Constraint(startTag, axisDirn, (*theV)(0), *theI, (*theV)(1));
+	    msgData(1) = endTag;
+	    this->sendID(msgData);
+
+	    delete theV;
+	    delete theI;
+
+	    numSP = endTag - startTag;
+	    
+	    if (numSP > 0) {
+	      theI = new ID(numSP);
+	      for (i = 0; i<numSP; i++) {
+		theSP = this->getSP_Constraint(i+startTag);
+		(*theI)(i) = theSP->getClassTag();
+	      }
+	      this->sendID(*theI);	      
+	      for (i = 0; i<numSP; i++) {
+		theSP = this->getSP_Constraint(i+startTag);
+		this->sendObject(*theSP);	      
+	      }
+	      delete theI;
+	    }
 
 	    break;	    
 	    
@@ -469,6 +516,27 @@ ActorSubdomain::run(void)
 	    break;	    	    	    	    
 
 
+	  case ShadowActorSubdomain_getNode:
+	    tag = msgData(1);
+
+	    theNod = this->getNode(tag);
+
+	    if (theNod != 0) 
+		msgData(0) = theNod->getClassTag();
+	    else
+		msgData(0) = -1;
+
+	    this->sendID(msgData);
+
+	    if (theNod != 0) {
+		this->sendObject(*theNod);
+	    }
+
+	    msgData(0) = 0;
+
+	    break;	    	    	    	    
+
+
 	  case ShadowActorSubdomain_Print:
 	    this->Print(opserr);
 	    this->sendID(msgData);
@@ -489,7 +557,7 @@ ActorSubdomain::run(void)
 	  case ShadowActorSubdomain_setLoadConstant:
 	    this->setLoadConstant();
 	    break;	    
-	    
+
 	  case ShadowActorSubdomain_update:
 	    this->update();
 	    break;
@@ -613,12 +681,23 @@ ActorSubdomain::run(void)
 	    this->domainChange();
 
 	    tag = this->getNumDOF();
-	    if (lastResponse == 0)
+	    if (tag != 0) {
+	      if (lastResponse == 0)
 		lastResponse = new Vector(tag);
-	    else if (lastResponse->Size() != tag) {
+	      else if (lastResponse->Size() != tag) {
 		delete lastResponse;
 		lastResponse = new Vector(tag);
+	      }
 	    }
+	    break;
+
+	  case ShadowActorSubdomain_getDomainChangeFlag:
+	    change = this->getDomainChangeFlag();
+	    if (change == true)
+	      msgData(0) = 0;
+	    else
+	      msgData(0) = 1;
+	    this->sendID(msgData);
 	    
 	    break;
 
@@ -767,9 +846,6 @@ ActorSubdomain::run(void)
 	   this->Domain::updateParameter(theType, (*theV)(0));
 	   delete theV;
 	   break;
-
-
-
 
 
 	  case ShadowActorSubdomain_DIE:

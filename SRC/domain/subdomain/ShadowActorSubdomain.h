@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-04-04 00:44:39 $
+// $Revision: 1.8 $
+// $Date: 2007-04-13 22:38:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowActorSubdomain.h,v $
                                                                         
                                                                         
@@ -79,8 +79,6 @@ static const int ShadowActorSubdomain_setCommitTag = 25;
 static const int ShadowActorSubdomain_setCurrentTime = 26;
 static const int ShadowActorSubdomain_setCommittedTime = 27;
 static const int ShadowActorSubdomain_DIE = 0;
-static const int ShadowActorSubdomain_getElementPtr = 90;
-static const int ShadowActorSubdomain_getNodePtr = 91;
 static const int ShadowActorSubdomain_Print = 150;
 static const int ShadowActorSubdomain_addRecorder = 151;
 static const int ShadowActorSubdomain_removeRecorders = 152;
@@ -95,3 +93,5 @@ static const int ShadowActorSubdomain_addParameter = 99;
 static const int ShadowActorSubdomain_removeParameter = 100;
 static const int ShadowActorSubdomain_updateParameterINT = 101;
 static const int ShadowActorSubdomain_updateParameterDOUBLE = 102;
+static const int ShadowActorSubdomain_addSP_ConstraintAXIS = 103;
+static const int ShadowActorSubdomain_getDomainChangeFlag = 104;

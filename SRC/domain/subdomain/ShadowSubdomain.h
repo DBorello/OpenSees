@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-04-04 00:44:39 $
+// $Revision: 1.9 $
+// $Date: 2007-04-13 22:38:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.h,v $
                                                                         
                                                                         
@@ -65,6 +65,8 @@ class ShadowSubdomain: public Shadow, public Subdomain
     virtual  bool addNode(Node *);
     virtual  bool addExternalNode(Node *);
     virtual  bool addSP_Constraint(SP_Constraint *);
+    virtual  int  addSP_Constraint(int startTag, int axisDirn, double axisValue, 
+				   const ID &fixityCodes, double tol=1e-10);
     virtual  bool addMP_Constraint(MP_Constraint *);    
     virtual  bool addLoadPattern(LoadPattern *);            
     virtual  bool addNodalLoad(NodalLoad *, int loadPattern);
@@ -79,6 +81,7 @@ class ShadowSubdomain: public Shadow, public Subdomain
     virtual Element 	  *removeElement(int tag);
     virtual Node 	  *removeNode(int tag);    
     virtual SP_Constraint *removeSP_Constraint(int tag);
+    virtual SP_Constraint *removeSP_Constraint(int nodeTag, int dof, int loadPatternTag);
     virtual MP_Constraint *removeMP_Constraint(int tag);
     virtual LoadPattern   *removeLoadPattern(int tag);
     virtual NodalLoad     *removeNodalLoad(int tag, int loadPattern);
@@ -90,8 +93,8 @@ class ShadowSubdomain: public Shadow, public Subdomain
     virtual  NodeIter	       &getInternalNodeIter(void);
     virtual  NodeIter	       &getExternalNodeIter(void);    
     
-    virtual  Element       *getElementPtr(int tag);
-    virtual  Node          *getNodePtr(int tag);
+    virtual  Element       *getElement(int tag);
+    virtual  Node          *getNode(int tag);
 
     virtual int getNumElements(void) const;
     virtual int getNumNodes(void) const;
@@ -114,6 +117,7 @@ class ShadowSubdomain: public Shadow, public Subdomain
     virtual  void setCommittedTime(double newTime);        
     virtual  void applyLoad(double pseudoTime);
     virtual  void setLoadConstant(void);    
+    virtual  int  setRayleighDampingFactors(double alphaM, double betaK, double betaK0, double betaKc);
 
     virtual  int update(void);    
     virtual  int update(double newTime, double dT);    
@@ -122,8 +126,6 @@ class ShadowSubdomain: public Shadow, public Subdomain
     virtual  int revertToStart(void);    
     virtual  int barrierCheckIN(void);    
     virtual  int barrierCheckOUT(int);    
-
-    virtual int setRayleighDampingFactors(double alphaM, double betaK, double betaK0, double betaKc);
 
     virtual int  addRecorder(Recorder &theRecorder);    	
     virtual int  removeRecorders(void);
@@ -136,6 +138,7 @@ class ShadowSubdomain: public Shadow, public Subdomain
     virtual int setAnalysisConvergenceTest(ConvergenceTest &theTest);
     virtual void clearAnalysis(void);
     virtual void domainChange(void);
+    virtual bool getDomainChangeFlag(void);    
     
     virtual int 	getNumExternalNodes(void) const;    
     virtual const ID   &getExternalNodes(void);
@@ -167,6 +170,8 @@ class ShadowSubdomain: public Shadow, public Subdomain
     virtual int calculateNodalReactions(bool inclInertia);
     
   protected:    
+
+
     virtual int buildMap(void);
     virtual int buildEleGraph(Graph *theEleGraph);
     virtual int buildNodeGraph(Graph *theNodeGraph);    

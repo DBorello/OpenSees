@@ -1,3 +1,4 @@
+
 /* ****************************************************************** **
 **    OpenSees - Open System for Earthquake Engineering Simulation    **
 **          Pacific Earthquake Engineering Research Center            **
@@ -18,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-04-04 00:44:39 $
+// $Revision: 1.10 $
+// $Date: 2007-04-13 22:38:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -63,6 +64,7 @@
 #include <Parameter.h>
 
 #include <FE_Element.h>
+#include <SP_ConstraintIter.h>
 
 #include <ShadowActorSubdomain.h>
 
@@ -189,7 +191,7 @@ ShadowSubdomain::buildSubdomain(int numSubdomains, PartitionedModelBuilder &theB
   this->sendObject(theBuilder);
 
   // mark the domain as having been modified
-  this->domainChange();
+  this->Domain::domainChange();
   return 0;  
 }
 
@@ -237,7 +239,7 @@ ShadowSubdomain::addElement(Element *theEle)
     this->sendObject(*theEle);
     theElements[numElements] = tag;
     numElements++;
-    //    this->domainChange();
+    //    this->Domain::domainChange();
 
     /*
     msgData(0) = 5;
@@ -268,7 +270,7 @@ ShadowSubdomain::addNode(Node *theNode)
     this->sendObject(*theNode);
     theNodes[numNodes] = tag;
     numNodes++;    
-    // this->domainChange();
+    // this->Domain::domainChange();
 
     delete theNode;
     
@@ -294,7 +296,7 @@ ShadowSubdomain::addExternalNode(Node *theNode)
     numExternalNodes++;        
     numDOF += theNode->getNumberDOF();
 
-    //    this->domainChange();
+    //    this->Domain::domainChange();
 
     return true;    
 }
@@ -302,7 +304,6 @@ ShadowSubdomain::addExternalNode(Node *theNode)
 bool 
 ShadowSubdomain::addSP_Constraint(SP_Constraint *theSP)
 {
-
 #ifdef _G3DEBUG
 	// do all the checking stuff
 #endif
@@ -312,12 +313,59 @@ ShadowSubdomain::addSP_Constraint(SP_Constraint *theSP)
     this->sendID(msgData);
     this->sendObject(*theSP);
     numSPs++;    
-    // this->domainChange();
+    // this->Domain::domainChange();
     
     theShadowSPs->addComponent(theSP);
 
     return true;    
 }
+
+
+int
+ShadowSubdomain::addSP_Constraint(int startTag, int axisDirn, double axisValue, 
+				  const ID &fixityCodes, double tol)
+{
+
+#ifdef _G3DEBUG
+	// do all the checking stuff
+#endif
+
+    msgData(0) = ShadowActorSubdomain_addSP_ConstraintAXIS;
+    msgData(1) = startTag;
+    msgData(2) = axisDirn;
+    msgData(3) = fixityCodes.Size();
+
+    this->sendID(msgData);
+
+    this->sendID(fixityCodes);
+    static Vector data(2);
+    data(0) = axisValue;
+    data(1) = tol;
+    this->sendVector(data);
+    // this->Domain::domainChange();
+
+    this->recvID(msgData);   
+
+    // now if we have crated any in the actor we have to add them here
+    int endTag = msgData(1);
+    int numSP = endTag - startTag;
+    if (numSP != 0) {
+      ID theID(numSP);
+      this->recvID(theID);
+      for (int i=0; i<numSP; i++) {
+	SP_Constraint *theSP = theBroker->getNewSP(theID(i));
+	if (theSP != 0) {
+	  this->recvObject(*theSP);
+	  numSPs++;    
+	  theShadowSPs->addComponent(theSP);	  
+	}
+      }
+    }
+    return endTag;
+}
+
+
+
 
 bool 
 ShadowSubdomain::addMP_Constraint(MP_Constraint *theMP)    
@@ -331,7 +379,7 @@ ShadowSubdomain::addMP_Constraint(MP_Constraint *theMP)
     this->sendID(msgData);
     this->sendObject(*theMP);
     numMPs++;    
-    // // this->domainChange();
+    // // this->Domain::domainChange();
 
     theShadowMPs->addComponent(theMP);    
     return true;    
@@ -349,7 +397,7 @@ ShadowSubdomain::addLoadPattern(LoadPattern *thePattern)
     msgData(2) = thePattern->getDbTag();
     this->sendID(msgData);
     this->sendObject(*thePattern);
-    //    this->domainChange();
+    //    this->Domain::domainChange();
 
 
     theShadowLPs->addComponent(thePattern);    
@@ -382,7 +430,7 @@ ShadowSubdomain::addSP_Constraint(SP_Constraint *theSP, int loadPattern)
   this->sendID(msgData);
   this->sendObject(*theSP);
   numSPs++;    
-  // this->domainChange();
+  // this->Domain::domainChange();
   
   return true;    
 }
@@ -475,7 +523,7 @@ ShadowSubdomain::removeElement(int tag)
 	this->sendID(msgData);
 
 	numElements--;
-	// this->domainChange();	
+	// this->Domain::domainChange();	
 
 	// get the element from the actor
 	this->recvID(msgData);
@@ -506,7 +554,7 @@ ShadowSubdomain::removeNode(int tag)
 
 
 	numNodes--;
-	// this->domainChange();	
+	// this->Domain::domainChange();	
 	// remove from external as well
 	loc = theExternalNodes.removeValue(tag);
 	if (loc >= 0)
@@ -544,6 +592,54 @@ ShadowSubdomain::removeSP_Constraint(int tag)
   
   SP_Constraint *result = (SP_Constraint *)mc;    
   return result;
+}
+
+
+SP_Constraint *
+ShadowSubdomain::removeSP_Constraint(int theNode, int theDOF, int loadPatternTag)
+{
+  SP_Constraint *theSP =0;
+  bool found = false;
+  int spTag = 0;
+
+  if (loadPatternTag == -1) {
+    // if not return 0, indicating we are done
+    TaggedObject *theComponent;
+    TaggedObjectIter &theSPs = theShadowSPs->getComponents();
+
+    while ((found == false) && ((theComponent = theSPs()) != 0)) {
+      SP_Constraint *theSP = (SP_Constraint *)theComponent;
+      int nodeTag = theSP->getNodeTag();
+      int dof = theSP->getDOF_Number();
+      if (nodeTag == theNode && dof == theDOF) {
+	spTag = theSP->getTag();
+	found = true;
+      }
+    }
+
+    if (found == true)
+      return this->removeSP_Constraint(spTag);
+    
+  } else {
+    LoadPattern *thePattern = this->getLoadPattern(loadPatternTag);
+    if (thePattern != 0) {
+      SP_ConstraintIter &theSPs = thePattern->getSPs();
+      while ((found == false) && ((theSP = theSPs()) != 0)) {
+	int nodeTag = theSP->getNodeTag();
+	int dof = theSP->getDOF_Number();
+	if (nodeTag == theNode && dof == theDOF) {
+	  spTag = theSP->getTag();
+	  found = true;
+	}
+      }
+
+      if (found == true)
+	return this->removeSP_Constraint(spTag, loadPatternTag);
+
+    }
+  }
+   
+  return 0;
 }
 
 MP_Constraint *
@@ -700,12 +796,12 @@ ShadowSubdomain::getExternalNodeIter(void)
 
     
 Element *
-ShadowSubdomain::getElementPtr(int tag) 
+ShadowSubdomain::getElement(int tag) 
 {
     if (theElements.getLocation(tag) < 0)
 	return 0;
     
-    msgData(0) = ShadowActorSubdomain_getElementPtr;
+    msgData(0) = ShadowActorSubdomain_getElement;
     msgData(1) = tag;
     this->sendID(msgData);
     this->recvID(msgData);
@@ -715,32 +811,32 @@ ShadowSubdomain::getElementPtr(int tag)
     if (theEle != 0) {
 	this->recvObject(*theEle);
     }
-    opserr << "ShadowSubdomain::getElementPtr() ";
-    opserr << " - SHOULD BE AVOIDED IF POSSIBLE \n";
     
     return theEle;
 }
 
 Node  *
-ShadowSubdomain::getNodePtr(int tag)
+ShadowSubdomain::getNode(int tag)
 {
-    if (theNodes.getLocation(tag) < 0)
-	return 0;
+  Node *theNod = 0;
+
+  if (theNodes.getLocation(tag) < 0)
+    return 0;
+
+  msgData(0) = ShadowActorSubdomain_getNode;
+  msgData(1) = tag;
+  this->sendID(msgData);
+  this->recvID(msgData);
+  int theType = msgData(0);
+  if (theType != -1) {
+    theNod = theBroker->getNewNode(theType);
     
-    msgData(0) = ShadowActorSubdomain_getNodePtr;
-    msgData(1) = tag;
-    this->sendID(msgData);
-    this->recvID(msgData);
-    int theType = msgData(0);
-    
-    Node *theNod = theBroker->getNewNode(theType);
     if (theNod != 0) {
-	this->recvObject(*theNod);
+      this->recvObject(*theNod);
     }
-    opserr << "ShadowSubdomain::getNodPtr() ";
-    opserr << " - SHOULD BE AVOIDED IF POSSIBLE \n";
-    
-    return theNod;
+  }
+
+  return theNod;
 }
 
 int 
@@ -858,6 +954,24 @@ ShadowSubdomain::setLoadConstant(void)
 
 
 int
+ShadowSubdomain::setRayleighDampingFactors(double alphaM, double betaK, double betaK0, double betaKc)
+{
+    msgData(0) = ShadowActorSubdomain_setRayleighDampingFactors;
+    
+    this->sendID(msgData);
+
+    static Vector data(4);
+    data(0) = alphaM;
+    data(1) = betaK;
+    data(2) = betaK0;
+    data(3) = betaKc;
+    this->sendVector(data);
+    return 0;
+}
+
+
+
+int
 ShadowSubdomain::update(void)
 {
   DomainDecompositionAnalysis *theDDA = this->getDDAnalysis();
@@ -905,27 +1019,11 @@ ShadowSubdomain::barrierCheckOUT(int result)
 
 
 
-int
-ShadowSubdomain::setRayleighDampingFactors(double alphaM, double betaK, double betaK0, double betaKc)
-{
-  msgData(0) = ShadowActorSubdomain_setRayleighDampingFactors;
-  this->sendID(msgData);
-  static Vector data(4);
-  data(0) = alphaM;
-  data(1) = betaK;
-  data(2) = betaK0;
-  data(3) = betaKc;
-  this->sendVector(data);
-
-  return 0;
-}
-
-
-
-
 void
 ShadowSubdomain::clearAll(void)
 {
+  opserr << "ShadowSubdomain::clearAll(void)\n";
+
   msgData(0) = ShadowActorSubdomain_clearAll;
   this->sendID(msgData);
   this->recvID(msgData);
@@ -1055,26 +1153,41 @@ ShadowSubdomain::setAnalysisConvergenceTest(ConvergenceTest &theTest)
 }
 
 
+bool
+ShadowSubdomain::getDomainChangeFlag(void)
+{
+    msgData(0) = ShadowActorSubdomain_getDomainChangeFlag;
+    this->sendID(msgData);
+    this->recvID(msgData);
+
+    if (msgData(0) == 0)
+      return true;
+    else
+      return false;
+}
+
 
 void
 ShadowSubdomain::domainChange(void)
 {
     msgData(0) = ShadowActorSubdomain_domainChange;
     this->sendID(msgData);
-    
-    if (theVector == 0)
+
+    if (numDOF != 0) {
+      if (theVector == 0)
 	theVector = new Vector(numDOF);
-    else if (theVector->Size() != numDOF) {
+      else if (theVector->Size() != numDOF) {
 	delete theVector;
 	theVector = new Vector(numDOF);
-    }
-    
-    if (theMatrix == 0)
+      }
+      
+      if (theMatrix == 0)
 	theMatrix = new Matrix(numDOF,numDOF);
-    else if (theMatrix->noRows() != numDOF) {
+      else if (theMatrix->noRows() != numDOF) {
 	delete theMatrix;
 	theMatrix = new Matrix(numDOF,numDOF);
-    }    
+      }    
+    }
 }
 
 void 
