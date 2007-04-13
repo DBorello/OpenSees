@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.17 $
-// $Date: 2007-04-05 01:29:04 $
+// $Revision: 1.18 $
+// $Date: 2007-04-13 22:29:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark.cpp,v $
 
 // Written : fmk
@@ -77,7 +77,7 @@ Newmark::Newmark(double _gamma, double _beta,
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     determiningMass(false) 
 {
-    
+
 }
 
 
@@ -377,17 +377,14 @@ int Newmark::update(const Vector &deltaU)
 
 int Newmark::sendSelf(int cTag, Channel &theChannel)
 {
-    Vector data(7);
+    Vector data(3);
     data(0) = gamma;
     data(1) = beta;
     if (displ == true) 
         data(2) = 1.0;
     else
         data(2) = 0.0;
-    data(3) = alphaM;
-    data(4) = betaK;
-    data(5) = betaKi;
-    data(6) = betaKc;
+
     
     if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0)  {
         opserr << "WARNING Newmark::sendSelf() - could not send data\n";
@@ -400,7 +397,7 @@ int Newmark::sendSelf(int cTag, Channel &theChannel)
 
 int Newmark::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-    Vector data(7);
+    Vector data(3);
     if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0)  {
         opserr << "WARNING Newmark::recvSelf() - could not receive data\n";
         gamma = 0.5; beta = 0.25; 
@@ -413,11 +410,7 @@ int Newmark::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
         displ = true;
     else
         displ = false;
-    alphaM = data(3);
-    betaK  = data(4);
-    betaKi = data(5);
-    betaKc = data(6);
-    
+
     return 0;
 }
 
