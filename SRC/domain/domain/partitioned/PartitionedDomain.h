@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-04-04 00:44:01 $
+// $Revision: 1.9 $
+// $Date: 2007-04-13 22:34:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.h,v $
                                                                         
                                                                         
@@ -70,7 +70,11 @@ class PartitionedDomain: public Domain
 
     virtual  bool addLoadPattern(LoadPattern *);            
     virtual  bool addSP_Constraint(SP_Constraint *); 
+    virtual  int  addSP_Constraint(int startTag, int axisDirn, double axisValue, 
+				   const ID &fixityCodes, double tol=1e-10);
     virtual  bool addSP_Constraint(SP_Constraint *, int loadPatternTag); 
+    virtual  bool addMP_Constraint(MP_Constraint *); 
+
     virtual  bool addNodalLoad(NodalLoad *, int loadPatternTag);
     virtual  bool addElementalLoad(ElementalLoad *, int loadPatternTag);
 
@@ -88,11 +92,14 @@ class PartitionedDomain: public Domain
     virtual  int 		getNumElements(void) const;
 
     // public methods to update the domain
+    virtual int hasDomainChanged(void);
+
     virtual  void setCommitTag(int newTag);    	
     virtual  void setCurrentTime(double newTime);    
     virtual  void setCommittedTime(double newTime);        
     virtual  void applyLoad(double pseudoTime);
     virtual  void setLoadConstant(void);    
+    virtual  int  setRayleighDampingFactors(double alphaM, double betaK, double betaK0, double betaKc);
 
     virtual  int commit(void);    
     virtual  int revertToLastCommit(void);        

@@ -18,10 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-04-04 00:44:01 $
+// $Revision: 1.10 $
+// $Date: 2007-04-13 22:34:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.cpp,v $
-                                                                        
                                                                         
 // Written: fmk 
 // Revision: A
@@ -38,6 +37,8 @@
 
 #include <PartitionedDomain.h>
 #include <stdlib.h>
+
+#include <Matrix.h>
 
 #include <DomainPartitioner.h>
 #include <Element.h>
@@ -220,6 +221,7 @@ PartitionedDomain::addElement(Element *elePtr)
 
 
 
+
 bool 
 PartitionedDomain::addNode(Node *nodePtr)
 {
@@ -257,14 +259,33 @@ PartitionedDomain::addSP_Constraint(SP_Constraint *load)
       return theSub->addSP_Constraint(load);
   }
 
-    
   // if no subdomain .. node not in model .. error message and return failure
   opserr << "PartitionedDomain::addSP_Constraint - cannot add as node with tag" <<
     nodeTag << "does not exist in model\n"; 
 
   return false;
-
 }
+
+
+
+int
+PartitionedDomain::addSP_Constraint(int startTag, int axisDirn, double axisValue, 
+				   const ID &fixityCodes, double tol)
+{
+  int spTag = startTag;
+
+  spTag = this->Domain::addSP_Constraint(spTag, axisDirn, axisValue, fixityCodes, tol);
+
+  // find subdomain with node and add it .. break if find as internal node
+  SubdomainIter &theSubdomains = this->getSubdomains();
+  Subdomain *theSub;
+  while ((theSub = theSubdomains()) != 0) {
+    spTag = theSub->addSP_Constraint(spTag, axisDirn, axisValue, fixityCodes, tol);
+  }
+
+  return spTag;
+}
+
 
 bool
 PartitionedDomain::addSP_Constraint(SP_Constraint *load, int pattern)
@@ -294,8 +315,169 @@ PartitionedDomain::addSP_Constraint(SP_Constraint *load, int pattern)
     nodeTag << "does not exist in model\n"; 
 
   return false;
+}
+
+
+bool
+PartitionedDomain::addMP_Constraint(MP_Constraint *load)
+{
+  bool res = true;
+  bool getRetained = false;
+  bool addedMain = false;
+
+  // to every domain with the constrained node we must
+  // 1. add the retained node if not already there & any sp constraints on that node
+  // 2. add the constraint.
+
+  int retainedNodeTag = load->getNodeRetained();
+  int constrainedNodeTag = load->getNodeConstrained();
+
+  //
+  // first we check the main domain
+  // if has the constrained but not retained we mark as needing retained
+  //
+
+  Node *retainedNodePtr = this->Domain::getNode(retainedNodeTag);
+  Node *constrainedNodePtr = this->Domain::getNode(constrainedNodeTag);
+  if (constrainedNodePtr != 0) {
+    if (retainedNodePtr != 0) {
+
+      res = this->Domain::addMP_Constraint(load);    
+      if (res == false) {
+	opserr << "PartitionedDomain::addMP_Constraint - problems adding to main domain\n";
+	return res;
+      }
+      addedMain = true;
+    } else {
+      getRetained = true;
+    }
+  }
+
+  //
+  // now we check all subdomains
+  // if a subdomain has both nodes we add the constraint, if only the
+  // constrained node we mark as needing retained
+  //
+
+  SubdomainIter &theSubdomains = this->getSubdomains();
+  Subdomain *theSub;
+  while ((theSub = theSubdomains()) != 0) {
+
+    bool hasConstrained = theSub->hasNode(constrainedNodeTag);
+
+    if (hasConstrained == true) {
+
+      bool hasRestrained = theSub->hasNode(retainedNodeTag);
+
+      if (hasRestrained == true) {
+
+	res = theSub->addMP_Constraint(load);
+
+	if (res == false) {
+	  opserr << "PartitionedDomain::addMP_Constraint - problems adding to subdomain with retained\n";
+	  return res;
+	}
+      } else
+	getRetained = true;
+    }
+  }
+
+  //
+  // if getRetained is true, a subdomain or main domain has the constrained node
+  // but no retained node .. we must go get it && SP constraints as well
+  // 1. we first go get it
+  // 2. then we add to main domain
+  // 3. then we add to any subdomain
+  // 
+
+  if (getRetained == true) {
+
+    // we get a copy of the retained Node, set mass equal 0 (don't want to double it)
+    if (retainedNodePtr == 0) {
+      SubdomainIter &theSubdomains2 = this->getSubdomains();
+      while ((theSub = theSubdomains2()) != 0 && retainedNodePtr == 0) {
+	
+	bool hasRestrained = theSub->hasNode(retainedNodeTag);
+
+	if (hasRestrained == true) {
+	  retainedNodePtr = theSub->getNode(retainedNodeTag);
+
+	  Matrix mass(retainedNodePtr->getNumberDOF(), retainedNodePtr->getNumberDOF());
+	  mass.Zero();
+	  retainedNodePtr->setMass(mass);
+	}
+      }
+
+    } else {
+      // get a copy & zero the mass
+      retainedNodePtr = new Node(*retainedNodePtr, false);
+    }
+
+    if (retainedNodePtr == 0) {
+      opserr << "partitionedDomain::addMP_Constraint - can't find retained node anywhere!\n";
+      return false;
+    }
+
+    //
+    // if main has it we add the retained to main & constraint
+    //
+
+    if (constrainedNodePtr != 0 && addedMain == false) {
+      res = this->Domain::addNode(retainedNodePtr);
+
+      if (res == false) {
+	opserr << "PartitionedDomain::addMP_Constraint - problems adding retained to main domain\n";
+	return res;
+      } 
+      res = this->Domain::addMP_Constraint(load);
+
+      if (res == false) {
+	opserr << "PartitionedDomain::addMP_Constraint - problems adding constraint to main domain after adding node\n";
+	return res;
+      } 
+    }
+
+    //
+    // to subdmains that have the constrained but no retained
+    // 1. we add a copy of retained
+    // 2. we add the constraint
+    //
+
+    SubdomainIter &theSubdomains3 = this->getSubdomains();
+    while ((theSub = theSubdomains3()) != 0 && retainedNodePtr == 0) {
+      bool hasConstrained = theSub->hasNode(constrainedNodeTag);
+      if (hasConstrained == true) {
+	bool hasRestrained = theSub->hasNode(retainedNodeTag);
+	if (hasRestrained == false) {
+	  res = theSub->addNode(retainedNodePtr);
+
+	  if (res == false) {
+	    opserr << "PartitionedDomain::addMP_Constraint - problems adding retained to subdomain\n";
+	    return res;
+	  } 
+	  res = theSub->addMP_Constraint(load);
+
+	  if (res == false) {
+	    opserr << "PartitionedDomain::addMP_Constraint - problems adding constraint to subdomain after adding node\n";
+	    return res;
+	  } 
+	}
+      }
+    }
+
+    // clean up memory
+
+    if (constrainedNodePtr != 0 && addedMain == false) 
+      ; 
+    else
+      delete retainedNodePtr;
+    
+  }
+
+  return res;
 
 }
+
 
 bool 
 PartitionedDomain::addLoadPattern(LoadPattern *loadPattern)
@@ -635,6 +817,24 @@ PartitionedDomain::setLoadConstant(void)
 
 
 int
+PartitionedDomain::setRayleighDampingFactors(double alphaM, double betaK, double betaK0, double betaKc)
+{
+    this->Domain::setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
+
+    // do the same for all the subdomains
+    if (theSubdomains != 0) {
+	ArrayOfTaggedObjectsIter theSubsIter(*theSubdomains);	
+	TaggedObject *theObject;
+	while ((theObject = theSubsIter()) != 0) {
+	    Subdomain *theSub = (Subdomain *)theObject;	    
+	    theSub->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
+	}
+    }
+    return 0;
+}
+
+
+int
 PartitionedDomain::update(void)
 {
   int res = this->Domain::update();
@@ -737,11 +937,42 @@ PartitionedDomain::update(double newTime, double dT)
 }
 
 
+int
+PartitionedDomain::hasDomainChanged(void)
+{
+  return this->Domain::hasDomainChanged();
+}
 
 int
 PartitionedDomain::newStep(double dT)
 {
-    this->Domain::newStep(dT);
+  // first we need to see if any subdomain has changed & mark the change in domain
+  bool domainChangedAnySubdomain = this->getDomainChangeFlag();
+  if (domainChangedAnySubdomain == false) {
+    // do the same for all the subdomains
+    if (theSubdomains != 0) {
+	ArrayOfTaggedObjectsIter theSubsIter(*theSubdomains);	
+	TaggedObject *theObject;
+	while (((theObject = theSubsIter()) != 0) && (domainChangedAnySubdomain == false)) {
+	    Subdomain *theSub = (Subdomain *)theObject;	    
+	    domainChangedAnySubdomain = theSub->getDomainChangeFlag();
+	}
+    }
+  }
+
+  if (domainChangedAnySubdomain == true) {
+    this->Domain::domainChange();
+    if (theSubdomains != 0) {
+	ArrayOfTaggedObjectsIter theSubsIter(*theSubdomains);	
+	TaggedObject *theObject;
+	while (((theObject = theSubsIter()) != 0) && (domainChangedAnySubdomain == false)) {
+	    Subdomain *theSub = (Subdomain *)theObject;	    
+	    theSub->domainChange();
+	}
+    }
+  }
+
+  this->Domain::newStep(dT);
 
     int res = 0;
     // do the same for all the subdomains
