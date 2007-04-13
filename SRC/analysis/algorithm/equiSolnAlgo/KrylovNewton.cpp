@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.12 $
-// $Date: 2007-04-02 23:41:13 $
+// $Revision: 1.13 $
+// $Date: 2007-04-13 22:27:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/KrylovNewton.cpp,v $
 
 // Written: MHS
@@ -235,14 +235,28 @@ KrylovNewton::solveCurrentStep(void)
 int
 KrylovNewton::sendSelf(int cTag, Channel &theChannel)
 {
-  return -1;
+  static ID data(2);
+  data(0) = tangent;
+  data(1) = maxDimension;
+  if (theChannel.sendID(cTag, 0, data) < 0) {
+    opserr << "KrylovNewton::sendSelf() - failed\n";
+    return -1;
+  }
+  return 0;
 }
 
 int
 KrylovNewton::recvSelf(int cTag, Channel &theChannel, 
 					   FEM_ObjectBroker &theBroker)
 {
-  return -1;
+  static ID data(2);
+  if (theChannel.recvID(cTag, 0, data) <  0) {
+    opserr << "KrylovNewton::recvSelf() - failed\n";
+    return -1;
+  }
+  tangent = data(0);
+  maxDimension = data(1);
+  return 0;
 }
 
 void
