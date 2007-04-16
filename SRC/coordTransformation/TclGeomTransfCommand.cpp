@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-04-02 22:02:34 $
+// $Revision: 1.5 $
+// $Date: 2007-04-16 18:40:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/TclGeomTransfCommand.cpp,v $
 #include <string.h>
 #include <TclModelBuilder.h>
@@ -38,10 +38,10 @@ static TclModelBuilder *theTclModelBuilder = 0;
 // to create a coordinate transformation 
 //
 int
-TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
-			      int argc, TCL_Char **argv,
-			      Domain *theDomain,
-			      TclModelBuilder *theBuilder)
+TclCommand_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
+			 int argc, TCL_Char **argv,
+			 Domain *theDomain,
+			 TclModelBuilder *theBuilder)
   
 {
   // Make sure there is a minimum number of arguments
@@ -50,21 +50,21 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
     opserr << "Want: geomTransf type? tag? <specific transf args>" << endln;
     return TCL_ERROR;
   }   
-	
+  
   theTclModelBuilderDomain = theDomain;
   theTclModelBuilder = theBuilder;
-    
+  
   int NDM, NDF;
      
   NDM = theTclModelBuilder->getNDM();   // dimension of the structure (1d, 2d, or 3d)
   NDF = theTclModelBuilder->getNDF();   // number of degrees of freedom per node
-
+  
   // create 2d coordinate transformation
   if (NDM == 2 && NDF == 3) {
-
+    
     int crdTransfTag;
     Vector jntOffsetI(2), jntOffsetJ(2);
-	 
+    
     if (argc < 3) {
       opserr << "WARNING insufficient arguments - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>\n"; 
       return TCL_ERROR;

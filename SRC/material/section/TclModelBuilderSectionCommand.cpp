@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2007-01-27 01:04:59 $
+// $Revision: 1.26 $
+// $Date: 2007-04-16 18:41:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -83,11 +83,11 @@ static void printCommand(int argc, TCL_Char **argv)
 } 
 
 int
-TclModelBuilder_addFiberSection (ClientData clientData, Tcl_Interp *interp, int argc,
+TclCommand_addFiberSection (ClientData clientData, Tcl_Interp *interp, int argc,
 				 TCL_Char **argv, TclModelBuilder *theBuilder);
 
 int
-TclModelBuilder_addUCFiberSection (ClientData clientData, Tcl_Interp *interp, int argc,
+TclCommand_addUCFiberSection (ClientData clientData, Tcl_Interp *interp, int argc,
 				   TCL_Char **argv, TclModelBuilder *theBuilder);
 
 
@@ -722,11 +722,11 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
     }		
     
     else if (strcmp(argv[1],"Fiber") == 0 || strcmp(argv[1],"fiberSec") == 0)
-	return TclModelBuilder_addFiberSection (clientData, interp, argc, argv,
+	return TclCommand_addFiberSection (clientData, interp, argc, argv,
 						theTclBuilder);
 
     else if (strcmp(argv[1],"UCFiber") == 0)
-	return TclModelBuilder_addUCFiberSection (clientData, interp, argc, argv,
+	return TclCommand_addUCFiberSection (clientData, interp, argc, argv,
 						  theTclBuilder);
 
     else if (strcmp(argv[1],"ElasticPlateSection") == 0) {
@@ -988,7 +988,7 @@ buildSection(Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder,
 	     int secTag, bool isTorsion, double GJ);
 
 int
-TclModelBuilder_addFiberSection (ClientData clientData, Tcl_Interp *interp, int argc,
+TclCommand_addFiberSection (ClientData clientData, Tcl_Interp *interp, int argc,
 				 TCL_Char **argv, TclModelBuilder *theTclModelBuilder)
 {
     int secTag;
@@ -1054,7 +1054,7 @@ TclModelBuilder_addFiberSection (ClientData clientData, Tcl_Interp *interp, int 
 
 // add patch to fiber section
 int
-TclModelBuilder_addPatch(ClientData clientData, Tcl_Interp *interp, int argc, 
+TclCommand_addPatch(ClientData clientData, Tcl_Interp *interp, int argc, 
 			     TCL_Char **argv, TclModelBuilder *theTclModelBuilder)
 {
     // check if a section is being processed
@@ -1399,7 +1399,7 @@ TclModelBuilder_addPatch(ClientData clientData, Tcl_Interp *interp, int argc,
 
 // add patch to fiber section
 int
-TclModelBuilder_addFiber(ClientData clientData, Tcl_Interp *interp, int argc, 
+TclCommand_addFiber(ClientData clientData, Tcl_Interp *interp, int argc, 
 			 TCL_Char **argv, TclModelBuilder *theTclModelBuilder)
 {
     // check if a section is being processed
@@ -1508,7 +1508,7 @@ TclModelBuilder_addFiber(ClientData clientData, Tcl_Interp *interp, int argc,
 // add layers of reinforcing bars to fiber section
           
 int
-TclModelBuilder_addReinfLayer(ClientData clientData, Tcl_Interp *interp, int argc, 
+TclCommand_addReinfLayer(ClientData clientData, Tcl_Interp *interp, int argc, 
 				  TCL_Char **argv, TclModelBuilder *theTclModelBuilder)
 {
    //opserr << "\nreading layer:\n";
@@ -2040,7 +2040,7 @@ buildSection(Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder,
 
 
 int
-TclModelBuilder_addUCFiberSection (ClientData clientData, Tcl_Interp *interp, int argc,
+TclCommand_addUCFiberSection (ClientData clientData, Tcl_Interp *interp, int argc,
 				   TCL_Char **argv, TclModelBuilder *theTclModelBuilder)
 {
     int secTag;
