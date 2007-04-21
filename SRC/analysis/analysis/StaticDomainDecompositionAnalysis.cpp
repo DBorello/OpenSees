@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-04-02 23:43:18 $
+// $Revision: 1.8 $
+// $Date: 2007-04-21 00:06:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticDomainDecompositionAnalysis.cpp,v $
                                                                         
 // Written: fmk 
@@ -606,7 +606,8 @@ StaticDomainDecompositionAnalysis::setAlgorithm(EquiSolnAlgo &theNewAlgorithm)
 
   // invoke domainChanged() either indirectly or directly
   // domainStamp = 0;
-  theAlgorithm->domainChanged();  
+  if (domainStamp != 0)
+    theAlgorithm->domainChanged();  
   return 0;
 }
 
@@ -630,7 +631,8 @@ StaticDomainDecompositionAnalysis::setIntegrator(IncrementalIntegrator &theNewIn
 
   // cause domainChanged to be invoked on next analyze
   //  domainStamp = 0;
-  theIntegrator->domainChanged();  
+  if (domainStamp != 0)
+    theIntegrator->domainChanged();  
 
   return 0;
 }
@@ -665,6 +667,8 @@ StaticDomainDecompositionAnalysis::setConvergenceTest(ConvergenceTest &theConver
     delete theTest;
   }
   theTest = &theConvergenceTest;
+
+  theIntegrator->setLinks(*theAnalysisModel, *theSOE, theTest);
 
   if (theAlgorithm != 0)
     return theAlgorithm->setConvergenceTest(theTest);

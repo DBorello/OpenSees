@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-04-02 23:43:18 $
+// $Revision: 1.11 $
+// $Date: 2007-04-21 00:06:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DirectIntegrationAnalysis.cpp,v $
                                                                         
                                                                         
@@ -297,8 +297,6 @@ DirectIntegrationAnalysis::setSensitivityAlgorithm(SensitivityAlgorithm *passedS
 int 
 DirectIntegrationAnalysis::setNumberer(DOF_Numberer &theNewNumberer) 
 {
-    int result = 0;
-
     // invoke the destructor on the old one
     if (theDOF_Numberer != 0)
 	delete theDOF_Numberer;
@@ -328,7 +326,8 @@ DirectIntegrationAnalysis::setAlgorithm(EquiSolnAlgo &theNewAlgorithm)
     theAlgorithm->setLinks(*theAnalysisModel, *theIntegrator, *theSOE, theTest);
   // invoke domainChanged() either indirectly or directly
   // domainStamp = 0;
-  theAlgorithm->domainChanged();
+  if (domainStamp != 0)
+    theAlgorithm->domainChanged();
 
   return 0;
 }
@@ -346,7 +345,8 @@ DirectIntegrationAnalysis::setIntegrator(TransientIntegrator &theNewIntegrator)
 
   // cause domainChanged to be invoked on next analyze
   //  domainStamp = 0;
-  theIntegrator->domainChanged();
+  if (domainStamp != 0)
+    theIntegrator->domainChanged();
    
   return 0;
 }
@@ -378,7 +378,12 @@ DirectIntegrationAnalysis::setConvergenceTest(ConvergenceTest &theNewTest)
   
   // set the links needed by the other objects in the aggregation
   theTest = &theNewTest;
-  theAlgorithm->setConvergenceTest(theTest);
+
+  if (theIntegrator != 0)
+    theIntegrator->setLinks(*theAnalysisModel, *theSOE, theTest);
+
+  if (theAlgorithm != 0)
+    theAlgorithm->setConvergenceTest(theTest);
   
   return 0;
 }

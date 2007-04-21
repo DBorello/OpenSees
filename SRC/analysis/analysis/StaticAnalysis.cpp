@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2007-04-02 23:43:18 $
+// $Revision: 1.13 $
+// $Date: 2007-04-21 00:06:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.cpp,v $
                                                                         
                                                                         
@@ -388,7 +388,8 @@ StaticAnalysis::setAlgorithm(EquiSolnAlgo &theNewAlgorithm)
     
     // invoke domainChanged() either indirectly or directly
     //    domainStamp = 0;
-    theAlgorithm->domainChanged();
+    if (domainStamp != 0)
+      theAlgorithm->domainChanged();
 
     return 0;
 }
@@ -408,10 +409,11 @@ StaticAnalysis::setIntegrator(StaticIntegrator &theNewIntegrator)
     theIntegrator->setLinks(*theAnalysisModel, *theSOE, theTest);
     theConstraintHandler->setLinks(*the_Domain, *theAnalysisModel, *theIntegrator);
     theAlgorithm->setLinks(*theAnalysisModel, *theIntegrator, *theSOE, theTest);
-    
     // cause domainChanged to be invoked on next analyze
     //    domainStamp = 0;
-    theIntegrator->domainChanged();
+
+    if (domainStamp != 0)
+      theIntegrator->domainChanged();
 
   return 0;
 
@@ -445,6 +447,8 @@ StaticAnalysis::setConvergenceTest(ConvergenceTest &theNewTest)
 
     // set the links needed by the other objects in the aggregation
     theTest = &theNewTest;
+
+    theIntegrator->setLinks(*theAnalysisModel, *theSOE, theTest);
     return theAlgorithm->setConvergenceTest(theTest);
 }
 
