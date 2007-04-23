@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2007-01-09 19:26:58 $
+// $Revision: 1.16 $
+// $Date: 2007-04-23 19:19:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.cpp,v $
 
 // Ed "C++" Love
@@ -42,7 +42,7 @@
 #include <ShellMITC4.h>
 #include <R3vectors.h>
 #include <Renderer.h>
-
+#include <ElementResponse.h>
 
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
@@ -460,6 +460,119 @@ void  ShellMITC4::Print( OPS_Stream &s, int flag )
     s << endln ;
   }
 }
+
+Response*
+ShellMITC4::setResponse(const char **argv, int argc, OPS_Stream &output)
+{
+  Response *theResponse = 0;
+
+  output.tag("ElementOutput");
+  output.attr("eleType", "ShellMITC4");
+  output.attr("eleTag",this->getTag());
+  int numNodes = this->getNumExternalNodes();
+  const ID &nodes = this->getExternalNodes();
+  static char nodeData[32];
+
+  for (int i=0; i<numNodes; i++) {
+    sprintf(nodeData,"node%d",i+1);
+    output.attr(nodeData,nodes(i));
+  }
+
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 ||
+      strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0) {
+    const Vector &force = this->getResistingForce();
+    int size = force.Size();
+    for (int i=0; i<size; i++) {
+      sprintf(nodeData,"P%d",i+1);
+      output.tag("ResponseType",nodeData);
+    }
+    theResponse = new ElementResponse(this, 1, this->getResistingForce());
+  } 
+
+  else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"Material") == 0) {
+    if (argc < 2) {
+      opserr << "ShellMITC4::setResponse() - need to specify more data\n";
+      return 0;
+    }
+    int pointNum = atoi(argv[1]);
+    if (pointNum > 0 && pointNum <= 4) {
+      
+      output.tag("GaussPoint");
+      output.attr("number",pointNum);
+      output.attr("eta",sg[pointNum-1]);
+      output.attr("neta",tg[pointNum-1]);
+      
+      theResponse =  materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, output);
+      
+      output.endTag();
+    }
+
+  } else if (strcmp(argv[0],"stresses") ==0) {
+
+    for (int i=0; i<4; i++) {
+      output.tag("GaussPoint");
+      output.attr("number",i+1);
+      output.attr("eta",sg[i]);
+      output.attr("neta",tg[i]);
+      
+      output.tag("SectionForceDeformation");
+      output.attr("classType", materialPointers[i]->getClassTag());
+      output.attr("tag", materialPointers[i]->getTag());
+      
+      output.tag("ResponseType","p11");
+      output.tag("ResponseType","p22");
+      output.tag("ResponseType","p1212");
+      output.tag("ResponseType","m11");
+      output.tag("ResponseType","m22");
+      output.tag("ResponseType","m12");
+      output.tag("ResponseType","q1");
+      output.tag("ResponseType","q2");
+      
+      output.endTag(); // GaussPoint
+      output.endTag(); // NdMaterialOutput
+    }
+    
+    theResponse =  new ElementResponse(this, 2, Vector(84));
+  }
+
+  output.endTag();
+  return theResponse;
+}
+
+int
+ShellMITC4::getResponse(int responseID, Information &eleInfo)
+{
+  int cnt = 0;
+
+  switch (responseID) {
+  case 1: // global forces
+    return eleInfo.setVector(this->getResistingForce());
+    break;
+
+  case 2: // stresses
+    static Vector stresses(84);
+    for (int i = 0; i < 4; i++) {
+
+      // Get material stress response
+      const Vector &sigma = materialPointers[i]->getStressResultant();
+      stresses(cnt) = sigma(0);
+      stresses(cnt+1) = sigma(1);
+      stresses(cnt+2) = sigma(2);
+      stresses(cnt+3) = sigma(3);
+      stresses(cnt+4) = sigma(4);
+      stresses(cnt+5) = sigma(5);
+      stresses(cnt+6) = sigma(6);
+      stresses(cnt+7) = sigma(7);
+      cnt += 8;
+    }
+    return eleInfo.setVector(stresses);
+    break;
+
+  default:
+    return -1;
+  }
+}
+
 
 //return stiffness matrix 
 const Matrix&  ShellMITC4::getTangentStiff( ) 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-02-25 23:33:01 $
+// $Revision: 1.10 $
+// $Date: 2007-04-23 19:19:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.h,v $
 
 // Ed "C++" Love
@@ -102,6 +102,10 @@ class ShellMITC4 : public Element {
     int sendSelf (int commitTag, Channel &theChannel);
     int recvSelf (int commitTag, Channel &theChannel, FEM_ObjectBroker 
 		  &theBroker);
+
+
+    Response* setResponse(const char **argv, int argc, OPS_Stream &output);
+    int getResponse(int responseID, Information &eleInfo);
       
     //plotting 
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
