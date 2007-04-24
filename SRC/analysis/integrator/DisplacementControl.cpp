@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-04-02 23:42:26 $
+// $Revision: 1.12 $
+// $Date: 2007-04-24 21:06:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/DisplacementControl.cpp,v $
                                                                         
                                                                         
@@ -57,7 +57,7 @@ DisplacementControl::DisplacementControl(int node, int dof,
 					 double min, double max) 
 :StaticIntegrator(INTEGRATOR_TAGS_DisplacementControl),
  theNode(node), theDof(dof), theIncrement(increment), theDomain(domain),
- theDofID(0),
+ theDofID(-1),
  deltaUhat(0), deltaUbar(0), deltaU(0), deltaUstep(0), 
  phat(0), deltaLambdaStep(0.0), currentLambda(0.0),
  specNumIncrStep(numIncr), numIncrLastStep(numIncr),
@@ -90,6 +90,11 @@ DisplacementControl::~DisplacementControl()
 int
 DisplacementControl::newStep(void)
 {
+	if (theDofID == -1) {
+		opserr << "DisplacementControl::newStep() - domainChanged has not been called\n";
+		return -1;
+	}
+
     // get pointers to AnalysisModel and LinearSOE
     AnalysisModel *theModel = this->getAnalysisModel();
     LinearSOE *theLinSOE = this->getLinearSOE();    
@@ -160,6 +165,10 @@ DisplacementControl::newStep(void)
 int
 DisplacementControl::update(const Vector &dU)
 {
+	if (theDofID == -1) {
+		opserr << "DisplacementControl::newStep() - domainChanged has not been called\n";
+		return -1;
+	} 
     AnalysisModel *theModel = this->getAnalysisModel();
     LinearSOE *theLinSOE = this->getLinearSOE();    
     if (theModel == 0 || theLinSOE == 0) {
@@ -311,7 +320,15 @@ DisplacementControl::domainChanged(void)
     // EXTRA CODE TO DO SOME ERROR CHECKING REQUIRED
     
     Node *theNodePtr = theDomain->getNode(theNode);
+	if (theNodePtr == 0) {
+		opserr << "DisplacementControl::domainChanged - no node\n";
+		return -1;
+	}
+
     DOF_Group *theGroup = theNodePtr->getDOF_GroupPtr();
+	if (theGroup == 0) {
+	   return 0;
+	}
     const ID &theID = theGroup->getID();
     theDofID = theID(theDof);
     
