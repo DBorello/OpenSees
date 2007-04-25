@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.88 $
-// $Date: 2007-04-13 22:39:59 $
+// $Revision: 1.89 $
+// $Date: 2007-04-25 23:43:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -713,6 +713,9 @@ sensitivityIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, TCL_C
 int 
 wipeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
+  wipeAnalysis(clientData, interp, argc, argv);
+
+  /*
   // to build the model make sure the ModelBuilder has been constructed
   // and that the model has not already been constructed
   if (theBuilder != 0) {
@@ -730,7 +733,7 @@ wipeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       theTransientAnalysis->clearAll();
       delete theTransientAnalysis;  
   }
-
+  */
 
   // NOTE : DON'T do the above on theVariableTimeStepAnalysis
   // as it and theTansientAnalysis are one in the same
@@ -787,7 +790,6 @@ wipeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 int 
 wipeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
-
 #ifdef _PARALLEL_PROCESSING
   if (OPS_PARTITIONED == true && OPS_NUM_SUBDOMAINS > 1) {
     SubdomainIter &theSubdomains = theDomain.getSubdomains();
@@ -1013,9 +1015,6 @@ partitionModel(void)
 
 
 
-
-
-
 //
 // command invoked to build the model, i.e. to invoke analyze() 
 // on the Analysis object
@@ -1135,6 +1134,7 @@ printModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 	   (strcmp(argv[1],"-integrator") == 0)) 
     return printIntegrator(clientData, interp, argc, argv, 3, opserr);  
   
+
   // if 'print algorithm flag' print out the algorithm
   else if ((strcmp(argv[1],"algorithm") == 0) || 
 	   (strcmp(argv[1],"-algorithm") == 0))
@@ -1247,18 +1247,23 @@ printNode(ClientData clientData, Tcl_Interp *interp, int argc,
     return TCL_OK;
   } else { 
     // otherwise print out the specified nodes i j k .. with flag
-    for (int i= nodeArg-1; i<argc; i++) {
+    int numNodes = argc-nodeArg +1;
+    ID *theNodes = new ID(numNodes);
+    for (int i= 0; i<numNodes; i++) {
       int nodeTag;
-      if (Tcl_GetInt(interp, argv[i], &nodeTag) != TCL_OK) {
+      if (Tcl_GetInt(interp, argv[i+nodeArg-1], &nodeTag) != TCL_OK) {
 	opserr << "WARNING print node failed to get integer: " << argv[i] << endln;
 	return TCL_ERROR;
       }
-      Node *theNode = theDomain.getNode(nodeTag);
-      if (theNode != 0)
-	theNode->Print(output,flag);
+      (*theNodes)(i) = nodeTag;
     }
-    return TCL_OK;
-  }
+
+    theDomain.Print(opserr, theNodes, 0, flag);
+    delete theNodes;
+  }    
+
+  return TCL_OK;
+
 }
 
 
@@ -1306,19 +1311,24 @@ printElement(ClientData clientData, Tcl_Interp *interp, int argc,
       theElement->Print(output, flag);
     return TCL_OK;
   } else { 
-    // otherwise print out the specified Elements i j k .. with flag
-    for (int i= eleArg-1; i<argc; i++) {
-      int ElementTag;
-      if (Tcl_GetInt(interp, argv[i], &ElementTag) != TCL_OK) {
+
+    // otherwise print out the specified nodes i j k .. with flag
+    int numEle = argc-eleArg+1;
+    ID *theEle = new ID(numEle);
+    for (int i= 0; i<numEle; i++) {
+      int eleTag;
+      if (Tcl_GetInt(interp, argv[i+eleArg-1], &eleTag) != TCL_OK) {
 	opserr << "WARNING print ele failed to get integer: " << argv[i] << endln;
 	return TCL_ERROR;
       }
-      Element *theElement = theDomain.getElement(ElementTag);
-      if (theElement != 0)
-	theElement->Print(output,flag);
+      (*theEle)(i) = eleTag;
     }
-    return TCL_OK;
+
+    theDomain.Print(opserr, 0, theEle, flag);
+    delete theEle;
   }
+
+  return TCL_OK;
 }
 
 
