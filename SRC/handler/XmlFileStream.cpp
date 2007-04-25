@@ -18,14 +18,15 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-02-02 23:00:43 $
+// $Revision: 1.4 $
+// $Date: 2007-04-25 23:47:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/XmlFileStream.cpp,v $
 
 #include <XmlFileStream.h>
 #include <Vector.h>
 #include <iostream>
 #include <iomanip>
+#include <string>
 #include <ID.h>
 #include <Channel.h>
 #include <Message.h>
@@ -33,20 +34,18 @@
 using std::cerr;
 using std::ios;
 using std::setiosflags;
+using std::string;
+using std::ifstream;
 
 XmlFileStream::XmlFileStream(int indent)
   :OPS_Stream(OPS_STREAM_TAGS_XmlFileStream), 
    fileOpen(0), fileName(0), indentSize(indent), numIndent(-1),
    attributeMode(false), numTag(0), sizeTags(0), tags(0)
 {
-  opserr << "XmlFileStream::" << endln;
   if (indentSize < 1) indentSize = 1;
   indentString = new char[indentSize+1];
-  //  for (int i=0; i<indentSize; i++)
-  //    strcpy(indentString, " ");
-
-  indentString = "  ";
-
+  for (int i=0; i<indentSize; i++)
+    strcpy(&indentString[i]," ");
 }
 
 XmlFileStream::XmlFileStream(const char *name, openMode mode, int indent)
@@ -56,31 +55,144 @@ XmlFileStream::XmlFileStream(const char *name, openMode mode, int indent)
 {
   if (indentSize < 1) indentSize = 1;
   indentString = new char[indentSize+1];
-  //  for (int i=0; i<indentSize; i++)
-  //    strcat(indentString," ");
-  indentString = "  ";
+  for (int i=0; i<indentSize; i++)
+    strcpy(&indentString[i]," ");
 
   this->setFile(name, mode);
-
 }
 
 XmlFileStream::~XmlFileStream()
 {
-  for (int i=numTag; i>0; i--) {
-    this->indent();
-    theFile << "</" << tags[i] << ">\n";
-    delete [] tags[i];
-    numTag--;
+  if (fileOpen == 1) {
+    for (int i=0; i<numTag; i++) {
+      this->endTag();
+    }
+
+    theFile << "</OpenSees>\n";
+    theFile.close();
   }
 
-  delete [] tags;
+  if (sendSelfCount != 0) {
 
+    int fileNameLength = strlen(fileName);
+    sprintf(&fileName[fileNameLength-2],"");
+    
+    theFile.open(fileName, ios::out);
+    
+    ifstream **theFiles = new ifstream *[sendSelfCount+1];
+    string s;
+    
+    // open up the files
+    for (int i=0; i<=sendSelfCount; i++) {
+      theFiles[i] = new ifstream;
+      sprintf(&fileName[fileNameLength-2],".%d",i+1);
+      theFiles[i]->open(fileName, ios::in);
+      if (theFiles[i]->bad()) {
+	theFiles[i] = 0;
+	opserr << "XmlFileStream::~XmlFileStrream - trouble opening file: " << fileName << endln;
+      }      
 
-  theFile << "</OpenSees>\n";
+      else {
+	// read and throw away the first six lines from all but 0 (to first tag)
+	for (int j=0; j<6; j++) {
+	  getline(*(theFiles[i]), s);	
+	  if (i == 0) 
+	    theFile << s << "\n";
+	}
+      }
 
-  if (fileOpen == 1)
+    }
+
+    // go through each file, reading a line & sending to the output file
+    bool done = false;
+    bool hasData = false;
+
+    // read the xml stuff for each file up until DATA
+    for (int j=0; j<=sendSelfCount; j++) {
+      if (theFiles[j] != 0) {
+	bool  foundData = false;
+	while (foundData == false) {
+	  getline(*(theFiles[j]), s);	
+	  if (theFiles[j]->eof()) {
+	    foundData = true;
+	    theFiles[j]->close();
+	    delete theFiles[j];
+	    theFiles[j] = 0;
+	    done = true;
+	  }
+	      
+	  string::size_type loc = s.find( "<Data>", 0 );
+	  
+	  if( loc != string::npos ) {
+	    foundData = true;
+	  } else {
+	    theFile << s << "\n";
+	  }
+	}
+      }
+    }
+
+    if (done == false)
+      theFile << "  <Data>\n";
+
+    while (done == false) {
+      char c;
+      for (int i=0; i<=sendSelfCount; i++) {
+	if (theFiles[i] != 0) {
+	  bool eoline = false;
+	  getline(*(theFiles[i]), s);	
+	  
+	  string::size_type loc = s.find( "</Data>", 0 );
+	  
+	  if( loc != string::npos ) {
+	    done = true;
+	  } else {
+	    theFile << s;
+	  }
+	  
+	  if (theFiles[i]->eof()) {
+	    done = true;
+	    theFiles[i]->close();
+	    delete theFiles[i];
+	    theFiles[i] = 0;
+	  }
+	}
+      }
+      if (done == false) 
+	theFile << "\n";
+    }
+
+    theFile << "  </Data>\n";
+
+    done = false;
+    while (done == false) {
+      if (theFiles[0] == 0)
+	done = true;
+      else {
+	getline(*(theFiles[0]), s);	
+	theFile << s << "\n";
+	if (theFiles[0]->eof())
+	  done = true;
+      }
+    }
+
+    for (int l=0; l<=sendSelfCount; l++) {
+      if (theFiles[l] != 0) {
+	theFiles[l]->close();
+	delete theFiles[l];
+      }
+    }
+
+    delete [] theFiles;
     theFile.close();
-  
+  }
+
+  if (tags != 0)
+    delete [] tags;
+
+  if (indentString != 0)
+    delete [] indentString;
+
   if (fileName != 0)
     delete [] fileName;
 }
@@ -116,31 +228,10 @@ XmlFileStream::setFile(const char *name, openMode mode)
     fileOpen = 0;
   }
 
-  if (mode == OVERWRITE) 
-    theFile.open(fileName, ios::out);
-  else
-    theFile.open(fileName, ios::out| ios::app);
-
-  if (theFile.bad()) {
-    std::cerr << "WARNING - XmlFileStream::setFile()";
-    std::cerr << " - could not open file " << fileName << std::endl;
-
-    return -1;
-  } else
-    fileOpen = 1;
-
   if (mode == 0)
     theOpenMode = OVERWRITE;
   else
     theOpenMode = APPEND;
-
-  theFile << setiosflags(ios::fixed);
-
-
-  theFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-  theFile << " <OpenSees\n";
-  theFile << "  xmlns:xsi = \"http://www.w3.org/2001/XMLSchema-instance\"\n";
-  theFile << "  xsi:noNamespaceSchemaLocation = \"http://OpenSees.berkeley.edu//xml-schema/xmlns/OpenSees.xsd\">\n";
 
   return 0;
 }
@@ -160,16 +251,28 @@ XmlFileStream::open(void)
   }
 
   // open file
-  theFile.open(fileName, ios::out| ios::app);
+  if (theOpenMode == OVERWRITE) 
+    theFile.open(fileName, ios::out);
+  else
+    theFile.open(fileName, ios::out| ios::app);
+
+  theOpenMode = APPEND;
+
   if (theFile.bad()) {
     std::cerr << "WARNING - XmlFileStream::open()";
     std::cerr << " - could not open file " << fileName << std::endl;
-
+    fileOpen = 0;
     return -1;
   } else
     fileOpen = 1;
 
+  theFile << setiosflags(ios::fixed);
 
+  theFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+  theFile << " <OpenSees\n";
+  theFile << "  xmlns:xsi = \"http://www.w3.org/2001/XMLSchema-instance\"\n";
+  theFile << "  xsi:noNamespaceSchemaLocation = \"http://OpenSees.berkeley.edu/xml-schema/xmlns/OpenSees.xsd\">\n";
+  numIndent++;
 
   return 0;
 }
@@ -179,6 +282,7 @@ XmlFileStream::close(void)
 {
   if (fileOpen != 0)
     theFile.close();
+
   fileOpen = 0;
   return 0;
 }
@@ -187,6 +291,9 @@ XmlFileStream::close(void)
 int 
 XmlFileStream::setPrecision(int prec)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (fileOpen != 0)
     theFile << std::setprecision(prec);
 
@@ -196,6 +303,9 @@ XmlFileStream::setPrecision(int prec)
 int 
 XmlFileStream::setFloatField(floatField field)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (field == FIXEDD) {
     if (fileOpen != 0)
       theFile << setiosflags(ios::fixed);
@@ -212,6 +322,9 @@ XmlFileStream::setFloatField(floatField field)
 int 
 XmlFileStream::tag(const char *tagName)
 {
+  if (fileOpen == 0)
+    this->open();
+
   //
   // copy tagName to end of list of tags
   //
@@ -219,6 +332,7 @@ XmlFileStream::tag(const char *tagName)
   // if tags array not large enough, expand
   if (numTag == sizeTags) {
     int nextSize = 2*sizeTags;
+
     if (nextSize == 0) nextSize = 32;
     char **nextTags = new char *[nextSize];
     if (nextTags != 0) {
@@ -266,6 +380,9 @@ XmlFileStream::tag(const char *tagName)
 int 
 XmlFileStream::tag(const char *tagName, const char *value)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << ">\n";
   }
@@ -301,7 +418,7 @@ XmlFileStream::endTag()
     return 0;
   }
 
-  opserr << "XmlFileStream::endTag() - too many endTags have been called\n";
+  opserr << "XmlFileStream::endTag() - too many endTags have been called on file: " << fileName << endln;
   return -1;
 
 }
@@ -309,6 +426,9 @@ XmlFileStream::endTag()
 int 
 XmlFileStream::attr(const char *name, int value)
 {
+  if (fileOpen == 0)
+    this->open();
+
   theFile << " " << name << "=\"" << value << "\"";
   
   return 0;
@@ -317,6 +437,9 @@ XmlFileStream::attr(const char *name, int value)
 int 
 XmlFileStream::attr(const char *name, double value)
 {
+  if (fileOpen == 0)
+    this->open();
+
   theFile << " " << name << "=\"" << value << "\"";
 
   return 0;
@@ -325,6 +448,9 @@ XmlFileStream::attr(const char *name, double value)
 int 
 XmlFileStream::attr(const char *name, const char *value)
 {
+  if (fileOpen == 0)
+    this->open();
+
   theFile << " " << name << "=\"" << value << "\"";
 
   return 0;
@@ -333,6 +459,9 @@ XmlFileStream::attr(const char *name, const char *value)
 int 
 XmlFileStream::write(Vector &data)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << ">\n";
     attributeMode = false;
@@ -350,6 +479,9 @@ XmlFileStream::write(Vector &data)
 OPS_Stream& 
 XmlFileStream::write(const char *s,int n)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << "/>\n";
     attributeMode = false;
@@ -364,6 +496,9 @@ XmlFileStream::write(const char *s,int n)
 OPS_Stream& 
 XmlFileStream::write(const unsigned char*s,int n)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << "/>\n";
     attributeMode = false;
@@ -377,6 +512,9 @@ XmlFileStream::write(const unsigned char*s,int n)
 OPS_Stream& 
 XmlFileStream::write(const signed char*s,int n)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << "/>\n";
     attributeMode = false;
@@ -390,6 +528,9 @@ XmlFileStream::write(const signed char*s,int n)
 OPS_Stream& 
 XmlFileStream::write(const void *s, int n)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << "/>\n";
     attributeMode = false;
@@ -403,6 +544,9 @@ XmlFileStream::write(const void *s, int n)
 OPS_Stream& 
 XmlFileStream::operator<<(char c)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << "/>\n";
     attributeMode = false;
@@ -416,6 +560,9 @@ XmlFileStream::operator<<(char c)
 OPS_Stream& 
 XmlFileStream::operator<<(unsigned char c)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << "/>\n";
     attributeMode = false;
@@ -429,6 +576,9 @@ XmlFileStream::operator<<(unsigned char c)
 OPS_Stream& 
 XmlFileStream::operator<<(signed char c)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << "/>\n";
     attributeMode = false;
@@ -442,6 +592,9 @@ XmlFileStream::operator<<(signed char c)
 OPS_Stream& 
 XmlFileStream::operator<<(const char *s)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << "/>\n";
     attributeMode = false;
@@ -459,6 +612,9 @@ XmlFileStream::operator<<(const char *s)
 OPS_Stream& 
 XmlFileStream::operator<<(const unsigned char *s)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << "/>\n";
     attributeMode = false;
@@ -472,6 +628,9 @@ XmlFileStream::operator<<(const unsigned char *s)
 OPS_Stream& 
 XmlFileStream::operator<<(const signed char *s)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << "/>\n";
     attributeMode = false;
@@ -485,6 +644,9 @@ XmlFileStream::operator<<(const signed char *s)
 OPS_Stream& 
 XmlFileStream::operator<<(const void *p)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << "/>\n";
     attributeMode = false;
@@ -499,6 +661,9 @@ XmlFileStream::operator<<(const void *p)
 OPS_Stream& 
 XmlFileStream::operator<<(int n)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << "/>\n";
     attributeMode = false;
@@ -512,6 +677,9 @@ XmlFileStream::operator<<(int n)
 OPS_Stream& 
 XmlFileStream::operator<<(unsigned int n)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << "/>\n";
     attributeMode = false;
@@ -525,6 +693,9 @@ XmlFileStream::operator<<(unsigned int n)
 OPS_Stream& 
 XmlFileStream::operator<<(long n)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << "/>\n";
     attributeMode = false;
@@ -539,6 +710,9 @@ XmlFileStream::operator<<(long n)
 OPS_Stream& 
 XmlFileStream::operator<<(unsigned long n)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << "/>\n";
     attributeMode = false;
@@ -553,6 +727,9 @@ XmlFileStream::operator<<(unsigned long n)
 OPS_Stream& 
 XmlFileStream::operator<<(short n)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << "/>\n";
     attributeMode = false;
@@ -567,6 +744,9 @@ XmlFileStream::operator<<(short n)
 OPS_Stream& 
 XmlFileStream::operator<<(unsigned short n)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << "/>\n";
     attributeMode = false;
@@ -581,6 +761,9 @@ XmlFileStream::operator<<(unsigned short n)
 OPS_Stream& 
 XmlFileStream::operator<<(bool b)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << "/>\n";
     attributeMode = false;
@@ -595,6 +778,9 @@ XmlFileStream::operator<<(bool b)
 OPS_Stream& 
 XmlFileStream::operator<<(double n)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << "/>\n";
     attributeMode = false;
@@ -608,6 +794,9 @@ XmlFileStream::operator<<(double n)
 OPS_Stream& 
 XmlFileStream::operator<<(float n)
 {
+  if (fileOpen == 0)
+    this->open();
+
   if (attributeMode == true) {
     theFile << "/>\n";
     attributeMode = false;
@@ -646,6 +835,11 @@ XmlFileStream::sendSelf(int commitTag, Channel &theChannel)
       opserr << "XmlFileStream::sendSelf() - failed to send message\n";
       return -1;
     }
+  }
+
+  if (sendSelfCount == 0) {
+    sprintf(&fileName[fileNameLength],".%d",1);
+    sendSelfCount++;
   }
 
   return 0;
