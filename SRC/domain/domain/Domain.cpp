@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.39 $
-// $Date: 2007-04-13 22:32:03 $
+// $Revision: 1.40 $
+// $Date: 2007-04-25 23:44:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -1716,10 +1716,10 @@ Domain::hasDomainChanged(void)
     return currentGeoTag;
 }
 
+
 void
 Domain::Print(OPS_Stream &s, int flag) 
 {
-
   s << "Current Domain Information\n";
   s << "\tCurrent Time: " << currentTime;
   s << "\ntCommitted Time: " << committedTime << endln;
@@ -1745,6 +1745,32 @@ Domain::Print(OPS_Stream &s, int flag)
   s << "\nPARAMETERS: numParameters: ";
   s << theParameters->getNumComponents() << "\n\n";
   theParameters->Print(s, flag);
+}
+
+
+void Domain::Print(OPS_Stream &s, ID *nodeTags, ID *eleTags, int flag)
+{
+  if (nodeTags != 0) {
+    opserr << "Domain::Print nodeTags : " << *nodeTags;
+    int numNodes = nodeTags->Size();
+    for (int i=0; i<numNodes; i++) {
+      int nodeTag = (*nodeTags)(i);
+      TaggedObject *theNode = theNodes->getComponentPtr(nodeTag);
+      if (theNode != 0)
+	theNode->Print(s, flag);
+    }
+  }
+
+  if (eleTags != 0) {
+    opserr << "Domain::Print eleTags : " << *eleTags;
+    int numEle = eleTags->Size();
+    for (int i=0; i<numEle; i++) {
+      int eleTag = (*eleTags)(i);
+      TaggedObject *theEle = theElements->getComponentPtr(eleTag);
+      if (theEle != 0)
+	theEle->Print(s, flag);
+    }
+  }
 }
 
 OPS_Stream &operator<<(OPS_Stream &s, Domain &M)

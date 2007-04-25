@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-04-13 22:34:17 $
+// $Revision: 1.11 $
+// $Date: 2007-04-25 23:44:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -703,6 +703,7 @@ PartitionedDomain::getElement(int tag)
 	return result;
     }
 
+    /*
     // go through the other subdomains until we find it or we run out of subdomains
     if (theSubdomains != 0) {
 	ArrayOfTaggedObjectsIter theSubsIter(*theSubdomains);
@@ -714,7 +715,8 @@ PartitionedDomain::getElement(int tag)
 		return result;
 	}
     }
-    
+    */
+
     // its not there
     return 0;
 }
@@ -1145,6 +1147,36 @@ PartitionedDomain::Print(OPS_Stream &s, int flag)
     }
   }
 }
+
+
+void 
+PartitionedDomain::Print(OPS_Stream &s, ID *nodeTags, ID *eleTags, int flag)
+{
+  if (nodeTags != 0)
+    this->Domain::Print(s, nodeTags, 0, flag);
+
+  if (eleTags != 0) {
+    int numEle = eleTags->Size();
+    for (int i=0; i<numEle; i++) {
+      int eleTag = (*eleTags)(i);
+      TaggedObject *theEle = elements->getComponentPtr(eleTag);
+      if (theEle != 0)
+	theEle->Print(s, flag);
+    }
+  }
+  
+
+  // print all the subdomains
+  if (theSubdomains != 0) {
+    ArrayOfTaggedObjectsIter theSubsIter(*theSubdomains);
+    TaggedObject *theObject;
+    while ((theObject = theSubsIter()) != 0) {
+      Subdomain *theSub = (Subdomain *)theObject;	    
+      theSub->Print(s, nodeTags, eleTags, flag);
+    }
+  }
+}
+
 
 
 int 

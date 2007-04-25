@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-04-13 22:38:13 $
+// $Revision: 1.11 $
+// $Date: 2007-04-25 23:45:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ActorSubdomain.cpp,v $
                                                                         
 #include <ActorSubdomain.h>
@@ -94,7 +94,7 @@ ActorSubdomain::run(void)
 	const Vector *theVector;
 	Matrix *theM;
 	Vector *theV;
-	ID     *theI;
+	ID     *theI, *theNodeTags, *theEleTags;
 	PartitionedModelBuilder *theBuilder;
 	IncrementalIntegrator *theIntegrator;
 	EquiSolnAlgo *theAlgorithm;
@@ -538,7 +538,31 @@ ActorSubdomain::run(void)
 
 
 	  case ShadowActorSubdomain_Print:
-	    this->Print(opserr);
+	    this->Print(opserr, msgData(3));
+	    this->sendID(msgData);
+
+	    break;	    	    	    	    
+
+	  case ShadowActorSubdomain_PrintNodeAndEle:
+	    
+	    theNodeTags = 0;
+	    theEleTags = 0;
+	    if (msgData(1) != 0) {
+	      theNodeTags = new ID(msgData(1));
+	      this->recvID(*theNodeTags);
+	    }
+	    if (msgData(2) != 0) {
+	      theEleTags = new ID(msgData(2));
+	      this->recvID(*theEleTags);
+	    }
+	      
+	    this->Print(opserr, theNodeTags, theEleTags, msgData(3));
+	    
+	    if (theNodeTags != 0)
+	      delete theNodeTags;
+	    if (theEleTags != 0)
+	      delete theEleTags;
+
 	    this->sendID(msgData);
 
 	    break;	    	    	    	    

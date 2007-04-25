@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-04-13 22:34:17 $
+// $Revision: 1.10 $
+// $Date: 2007-04-25 23:44:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.h,v $
                                                                         
                                                                         
@@ -112,6 +112,7 @@ class PartitionedDomain: public Domain
     virtual int  removeRecorders(void);
     
     virtual  void Print(OPS_Stream &s, int flag =0);    
+    virtual void Print(OPS_Stream &s, ID *nodeTags, ID *eleTags, int flag =0);
 
     // methods dealing with Parameters
     virtual  bool           addParameter(Parameter *);            

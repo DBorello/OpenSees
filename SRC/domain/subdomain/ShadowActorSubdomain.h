@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-04-13 22:38:13 $
+// $Revision: 1.9 $
+// $Date: 2007-04-25 23:45:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowActorSubdomain.h,v $
                                                                         
                                                                         
@@ -82,6 +82,7 @@ static const int ShadowActorSubdomain_DIE = 0;
 static const int ShadowActorSubdomain_Print = 150;
 static const int ShadowActorSubdomain_addRecorder = 151;
 static const int ShadowActorSubdomain_removeRecorders = 152;
+static const int ShadowActorSubdomain_PrintNodeAndEle = 153;
 static const int ShadowActorSubdomain_getNodeDisp = 92;
 static const int ShadowActorSubdomain_setMass = 93;
 static const int ShadowActorSubdomain_setRayleighDampingFactors = 94;

@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-04-13 22:38:13 $
+// $Revision: 1.11 $
+// $Date: 2007-04-25 23:45:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -798,19 +798,30 @@ ShadowSubdomain::getExternalNodeIter(void)
 Element *
 ShadowSubdomain::getElement(int tag) 
 {
+  opserr << "ShadowSubdomain::getElement(int tag) START \n";
     if (theElements.getLocation(tag) < 0)
 	return 0;
-    
+
+
+  opserr << "ShadowSubdomain::getElement(int tag) 2\n";    
     msgData(0) = ShadowActorSubdomain_getElement;
     msgData(1) = tag;
     this->sendID(msgData);
     this->recvID(msgData);
     int theType = msgData(0);
+
+    opserr << "ShadowSubdomain::getElement(int tag) 3 type: " << theType << endln;   
     
     Element *theEle = theBroker->getNewElement(theType);
+
+
     if (theEle != 0) {
-	this->recvObject(*theEle);
+      opserr << *theEle;
+      this->recvObject(*theEle);
     }
+
+    opserr << *theEle;
+    opserr << "ShadowSubdomain::getElement(int tag) DONE\n";   
     
     return theEle;
 }
@@ -1084,6 +1095,8 @@ ShadowSubdomain::revertToStart(void)
 void 
 ShadowSubdomain::wipeAnalysis(void)
 {
+  opserr << "ShadowActorSubdomain_wipeAnalysis\n";
+
   msgData(0) = ShadowActorSubdomain_wipeAnalysis;
     
   this->sendID(msgData);
@@ -1421,10 +1434,40 @@ void
 ShadowSubdomain::Print(OPS_Stream &s, int flag)
 {
     msgData(0) = ShadowActorSubdomain_Print;
-    
+    msgData(1) = flag;
+
     this->sendID(msgData);
     this->recvID(msgData);
 }
+
+
+void 
+ShadowSubdomain::Print(OPS_Stream &s, ID *nodeTags, ID *eleTags, int flag)
+{
+    msgData(0) = ShadowActorSubdomain_PrintNodeAndEle;
+    if (nodeTags != 0)
+      msgData(1) = nodeTags->Size();
+    else
+      msgData(1) = 0;
+    if (eleTags != 0)
+      msgData(2) = eleTags->Size();
+    else
+      msgData(2) = 0;
+    msgData(3) = flag;
+
+    this->sendID(msgData);
+
+    opserr << "ShadowSubdomain::Print() " << msgData;
+
+    if (nodeTags != 0)
+      this->sendID(*nodeTags);
+    if (eleTags != 0)
+      this->sendID(*eleTags);
+
+    this->recvID(msgData);
+}
+
+
 
 
 int 

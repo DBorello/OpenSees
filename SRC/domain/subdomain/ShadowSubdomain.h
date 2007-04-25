@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-04-13 22:38:13 $
+// $Revision: 1.10 $
+// $Date: 2007-04-25 23:45:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.h,v $
                                                                         
                                                                         
@@ -161,6 +161,7 @@ class ShadowSubdomain: public Shadow, public Subdomain
     virtual double getCost(void);
     
     virtual  void Print(OPS_Stream &s, int flag =0);
+    virtual void Print(OPS_Stream &s, ID *nodeTags, ID *eleTags, int flag =0);
 
     // nodal methods required in domain interface for parallel interprter
     virtual double getNodeDisp(int nodeTag, int dof, int &errorFlag);

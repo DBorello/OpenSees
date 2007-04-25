@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2007-04-13 22:32:03 $
+// $Revision: 1.22 $
+// $Date: 2007-04-25 23:44:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
 // Written: fmk 
@@ -194,6 +194,8 @@ class Domain
     virtual MeshRegion *getRegion(int region);    	
 
     virtual void Print(OPS_Stream &s, int flag =0);
+    virtual void Print(OPS_Stream &s, ID *nodeTags, ID *eleTags, int flag =0);
+
     friend OPS_Stream &operator<<(OPS_Stream &s, Domain &M);    
 
     virtual int sendSelf(int commitTag, Channel &theChannel);  

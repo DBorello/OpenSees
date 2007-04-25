@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-04-04 00:44:39 $
+// $Revision: 1.12 $
+// $Date: 2007-04-25 23:45:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -386,6 +386,27 @@ Subdomain::Print(OPS_Stream &s, int flag)
 
   this->Domain::Print(s);
   s << "\nEnd Subdomain Information\n";
+}
+
+
+void Subdomain::Print(OPS_Stream &s, ID *nodeTags, ID *eleTags, int flag)
+{
+  if (nodeTags != 0) {
+    int numNodes = nodeTags->Size();
+    for (int i=0; i<numNodes; i++) {
+      int nodeTag = (*nodeTags)(i);
+      TaggedObject *theNode = internalNodes->getComponentPtr(nodeTag);
+      if (theNode != 0)
+	theNode->Print(s, flag);
+      else {
+	TaggedObject *theNode = externalNodes->getComponentPtr(nodeTag);
+	if (theNode != 0)
+	  theNode->Print(s, flag);
+      }
+    }
+  }
+
+  this->Domain::Print(s, 0, eleTags, flag);
 }
 
 
