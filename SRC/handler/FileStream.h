@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-08-03 23:24:56 $
+// $Revision: 1.5 $
+// $Date: 2007-04-25 23:47:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/FileStream.h,v $
 
 #ifndef _FileStream
@@ -92,6 +92,7 @@ class FileStream : public OPS_Stream
   int indentSize;
   int numIndent;
   char *indentString;
+  int sendSelfCount;
 };
 
 #endif
