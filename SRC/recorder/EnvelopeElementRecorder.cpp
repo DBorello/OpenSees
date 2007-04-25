@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2007-02-02 03:00:35 $
+// $Revision: 1.19 $
+// $Date: 2007-04-25 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -32,6 +32,7 @@
 #include <EnvelopeElementRecorder.h>
 #include <Domain.h>
 #include <Element.h>
+#include <ElementIter.h>
 #include <Matrix.h>
 #include <Vector.h>
 #include <ID.h>
@@ -54,18 +55,26 @@ EnvelopeElementRecorder::EnvelopeElementRecorder()
 }
 
 
-EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &theEleID, 
+EnvelopeElementRecorder::EnvelopeElementRecorder(const ID *ele, 
 						 const char **argv, 
 						 int argc,
 						 Domain &theDom, 
 						 OPS_Stream &theOutputHandler,
 						 double dT, bool echoTime)
 :Recorder(RECORDER_TAGS_EnvelopeElementRecorder),
- numEle(theEleID.Size()), eleID(theEleID), theResponses(0), theDomain(&theDom),
+ numEle(0), eleID(0), theResponses(0), theDomain(&theDom),
  theHandler(&theOutputHandler), deltaT(dT), nextTimeStampToRecord(0.0), 
  data(0), currentData(0), first(true),
  initializationDone(false), responseArgs(0), numArgs(0), echoTimeFlag(echoTime)
 {
+
+  if (ele != 0) {
+    numEle = ele->Size();
+    eleID = new ID(*ele);
+    if (eleID == 0 || eleID->Size() != numEle)
+      opserr << "ElementRecorder::ElementRecorder() - out of memory\n";
+  }
+
   //
   // create a copy of the response request
   //
@@ -95,6 +104,8 @@ EnvelopeElementRecorder::~EnvelopeElementRecorder()
   // write the data
   //
 
+  if (eleID != 0)
+    delete eleID;
 
   if (theHandler != 0 && currentData != 0) {
 
@@ -290,8 +301,12 @@ EnvelopeElementRecorder::sendSelf(int commitTag, Channel &theChannel)
   // into an ID, place & send eleID size, numArgs and length of all responseArgs
   //
 
-  static ID idData(4);
-  idData(0) = eleID.Size();
+  static ID idData(5);
+  if (eleID != 0)
+    idData(0) = eleID->Size();
+  else
+    idData(0) = 0;
+
   idData(1) = numArgs;
 
   int msgLength = 0;
@@ -299,10 +314,16 @@ EnvelopeElementRecorder::sendSelf(int commitTag, Channel &theChannel)
     msgLength += strlen(responseArgs[i])+1;
   idData(2) = msgLength;
 
+
   if (theHandler != 0) {
     idData(3) = theHandler->getClassTag();
   } else 
     idData(3) = 0;
+
+  if (echoTimeFlag == true)
+    idData(4) = 1;
+  else
+    idData(4) = 0;
 
   if (theChannel.sendID(0, commitTag, idData) < 0) {
     opserr << "EnvelopeElementRecorder::sendSelf() - failed to send idData\n";
@@ -313,10 +334,11 @@ EnvelopeElementRecorder::sendSelf(int commitTag, Channel &theChannel)
   // send the eleID
   //
 
-  if (eleID.Size() == 0 || theChannel.sendID(0, commitTag, eleID) < 0) {
-    opserr << "EnvelopeElementRecorder::sendSelf() - failed to send idData\n";
-    return -1;
-  }
+  if (eleID != 0)
+    if (theChannel.sendID(0, commitTag, *eleID) < 0) {
+      opserr << "EnvelopeElementRecorder::sendSelf() - failed to send idData\n";
+      return -1;
+    }
 
   //
   // create a single char array holding all strings
@@ -378,19 +400,31 @@ EnvelopeElementRecorder::recvSelf(int commitTag, Channel &theChannel,
     return -1;
   }
 
+  if (responseArgs != 0) {
+    for (int i=0; i<numArgs; i++)
+      delete [] responseArgs[i];
+  
+    delete [] responseArgs;
+  }
+
   //
   // into an ID of size 2 recv eleID size and length of all responseArgs
   //
 
-  static ID idData(4);
+  static ID idData(5);
   if (theChannel.recvID(0, commitTag, idData) < 0) {
     opserr << "EnvelopeElementRecorder::recvSelf() - failed to recv idData\n";
     return -1;
   }
 
   int eleSize = idData(0);
-  int numArgs = idData(1);
+  numArgs = idData(1);
   int msgLength = idData(2);
+
+  if (idData(4) == 1)
+    echoTimeFlag = true;
+  else
+    echoTimeFlag = false;    
 
   numEle = eleSize;
 
@@ -398,16 +432,16 @@ EnvelopeElementRecorder::recvSelf(int commitTag, Channel &theChannel,
   // resize & recv the eleID
   //
 
-  if (eleSize == 0) {
-    opserr << "EnvelopeElementRecorder::recvSelf() - 0 sized eleID\n";
-    return -1;
-  }
-
-  int *eleData = new int [eleSize];
-  eleID.setData(eleData, eleSize, true);
-  if (theChannel.recvID(0, commitTag, eleID) < 0) {
-    opserr << "EnvelopeElementRecorder::recvSelf() - failed to recv idData\n";
-    return -1;
+  if (eleSize != 0) {
+    eleID = new ID(eleSize);
+    if (eleID == 0) {
+      opserr << "ElementRecorder::recvSelf() - failed to recv idData\n";
+      return -1;
+    }
+    if (theChannel.recvID(0, commitTag, *eleID) < 0) {
+      opserr << "ElementRecorder::recvSelf() - failed to recv idData\n";
+      return -1;
+    }
   }
 
   //
@@ -443,13 +477,15 @@ EnvelopeElementRecorder::recvSelf(int commitTag, Channel &theChannel,
 
   char *currentLoc = allResponseArgs;
   for (int j=0; j<numArgs; j++) {
+
     int argLength = strlen(currentLoc)+1;
+
     responseArgs[j] = new char[argLength];
     if (responseArgs[j] == 0) {
       opserr << "EnvelopeElementRecorder::recvSelf() - out of memory\n";
       return -1;
     }
-    opserr << argLength << responseArgs[j] << endln;
+
     strcpy(responseArgs[j], currentLoc);
     currentLoc += argLength;
   }
@@ -485,33 +521,106 @@ EnvelopeElementRecorder::recvSelf(int commitTag, Channel &theChannel,
 int 
 EnvelopeElementRecorder::initialize(void) 
 {
-  if (numEle == 0 || theDomain == 0)
+  if (theDomain == 0)
     return 0;
+
+  if (theResponses != 0) {
+    delete theResponses;
+    theResponses = 0;
+    numEle = 0;
+  }
 
   theHandler->tag("OpenSeesOutput");
 
+  int numDbColumns = 0;
+
+  //
   // Set the response objects:
   //   1. create an array of pointers for them
   //   2. iterate over the elements invoking setResponse() to get the new objects & determine size of data
   //
 
-  theResponses = new Response *[numEle];
-  for (int k=0; k<numEle; k++)
-    theResponses[k] = 0;
+  if (eleID != 0) {
 
-  int numDbColumns = 0;
+    //
+    // if we have an eleID we know Reponse size so allocate Response holder & loop over & ask each element
+    //
 
-  for (int ii=0; ii<numEle; ii++) {
-    Element *theEle = theDomain->getElement(eleID(ii));
-    if (theEle == 0) {
-      theResponses[ii] = 0;
-    } else {
-      theResponses[ii] = theEle->setResponse((const char **)responseArgs, numArgs, *theHandler);
-      if (theResponses[ii] != 0) {
-	// from the response type determine no of cols for each      
-	Information &eleInfo = theResponses[ii]->getInformation();
+    // allocate memory for Reponses & set to 0
+    theResponses = new Response *[numEle];
+    if (theResponses == 0) {
+      opserr << "ElementRecorder::initialize() - out of memory\n";
+      return -1;
+    }
+
+    for (int ii=0; ii<numEle; ii++) {
+      Element *theEle = theDomain->getElement((*eleID)(ii));
+      if (theEle == 0) {
+	theResponses[ii] = 0;
+      } else {
+	theResponses[ii] = theEle->setResponse((const char **)responseArgs, numArgs, *theHandler);
+	if (theResponses[ii] != 0) {
+	  // from the response type determine no of cols for each      
+	  Information &eleInfo = theResponses[ii]->getInformation();
+	  const Vector &eleData = eleInfo.getData();
+	  numDbColumns += eleData.Size();
+	  
+	  if (echoTimeFlag == true) {
+	    for (int i=0; i<eleData.Size(); i++) {
+	      theHandler->tag("TimeOutput");
+	      theHandler->attr("ResponseType", "time");
+	      theHandler->endTag();
+	    }
+	  }
+	}
+      }
+    }
+
+  } else {
+
+    //
+    // if no eleID we don't know response size so make initial guess & loop over & ask ele
+    // if guess to small, we enlarge
+    //
+
+
+    // initial size & allocation
+    int numResponse = 0;
+    numEle = 12;
+    theResponses = new Response *[numEle];
+
+    if (theResponses == 0) {
+      opserr << "ElementRecorder::initialize() - out of memory\n";
+      return -1;
+    }
+
+    for (int k=0; k<numEle; k++)
+      theResponses[k] = 0;
+
+    // loop over ele & set Reponses
+    ElementIter &theElements = theDomain->getElements();
+    Element *theEle;
+
+    while ((theEle = theElements()) != 0) {
+      Response *theResponse = theEle->setResponse((const char **)responseArgs, numArgs, *theHandler);
+      if (theResponse != 0) {
+	if (numResponse == numEle) {
+	  Response **theNextResponses = new Response *[numEle*2];
+	  if (theNextResponses != 0) {
+	    for (int i=0; i<numEle; i++)
+	      theNextResponses[i] = theResponses[i];
+	    for (int j=numEle; j<2*numEle; j++)
+	      theNextResponses[j] = 0;
+	  }
+	  numEle = 2*numEle;
+	}
+	theResponses[numResponse] = theResponse;
+
+	// from the response type determine no of cols for each
+	Information &eleInfo = theResponses[numResponse]->getInformation();
 	const Vector &eleData = eleInfo.getData();
 	numDbColumns += eleData.Size();
+	numResponse++;
 
 	if (echoTimeFlag == true) {
 	  for (int i=0; i<eleData.Size(); i++) {
@@ -522,6 +631,7 @@ EnvelopeElementRecorder::initialize(void)
 	}
       }
     }
+    numEle = numResponse;
   }
 
   //

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.40 $
-// $Date: 2006-11-08 20:14:12 $
+// $Revision: 1.41 $
+// $Date: 2007-04-25 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -127,7 +127,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       int flags = 0;
       int eleData = 0;
       outputMode eMode = STANDARD_STREAM; 
-      ID eleIDs(0,32);
+      ID *eleIDs = 0;
 
       while (flags == 0 && loc < argc) {
 	
@@ -146,22 +146,22 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  //
 	  loc++;
 	  int eleTag;
+	  eleIDs = new ID(0, 32);
 	  while (loc < argc && Tcl_GetInt(interp, argv[loc], &eleTag) == TCL_OK) {
-	    eleIDs[numEle++] = eleTag;
+	    (*eleIDs)[numEle] = eleTag;
+	    numEle++;
 	    loc++;
 	  }
 	  Tcl_ResetResult(interp);
 	  
 	  if (loc == argc) {
 	    opserr << "ERROR: No response type specified for element recorder. " << endln;
+	    delete eleIDs;
 	    return TCL_ERROR;
 	  }
 	  
 	  if (strcmp(argv[loc],"all") == 0) {
-	    ElementIter &theEleIter = theDomain.getElements();
-	    Element *theEle;
-	    while ((theEle = theEleIter()) != 0)
-	      eleIDs[numEle++] = theEle->getTag();
+	    eleIDs = 0;
 	    loc++;
 	  }
 	  
@@ -191,9 +191,14 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    end = start;
 	    start = swap;
 	  }
-	  
+
+	  eleIDs = new ID(end-start);	  
+	  if (eleIDs == 0) {
+	    opserr << "WARNING recorder Element -eleRange start? end? - out of memory\n";
+	    return TCL_ERROR;
+	  }
 	  for (int i=start; i<=end; i++)
-	    eleIDs[numEle++] = i;	    
+	    (*eleIDs)[numEle++] = i;	    
 	  
 	  loc += 3;
 	} 
@@ -216,6 +221,13 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    return TCL_OK;
 	  }      
 	  const ID &eleRegion = theRegion->getElements();
+
+	  eleIDs = new ID(eleRegion.Size());	  
+	  if (eleIDs == 0) {
+	    opserr << "WARNING recorder Element -eleRange start? end? - out of memory\n";
+	    return TCL_ERROR;
+	  }
+
 	  for (int i=0; i<eleRegion.Size(); i++)
 	    eleIDs[numEle++] = eleRegion(i);
 	  
@@ -279,14 +291,6 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	}
       }
       
-      // if user has specified no element tags lets assume he wants them all
-      if (numEle == 0) {
-	ElementIter &theEleIter = theDomain.getElements();
-	Element *theEle;
-	while ((theEle = theEleIter()) != 0)
-	  eleIDs[numEle++] = theEle->getTag();
-      }
-      
       if (eleData >= argc) {
 	opserr << "ERROR: No response type specified for element recorder. " << endln;
 	return TCL_ERROR;
@@ -326,6 +330,9 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 						     *theOutputStream,
 						     dT, echoTime);
       
+      if (eleIDs != 0)
+	delete eleIDs;
+
       delete [] data;
     }
     
@@ -471,7 +478,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       int numNodes = 0;
 
       // create ID's to contain the node tags & the dofs
-      ID theNodes(0,16);
+      ID *theNodes = 0;
       ID theDofs(0, 6);
 
       while (flags == 0 && pos < argc) {
@@ -526,24 +533,17 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  
 	  // read in the node tags or 'all' can be used
 	  if (strcmp(argv[pos],"all") == 0) {
-	    numNodes = theDomain.getNumNodes();
-	    
-	    NodeIter &theNodeIter = theDomain.getNodes();
-	    Node *theNode;
-	    int loc=0;
-	    while ((theNode= theNodeIter()) != 0) {
-	      int tag = theNode->getTag();
-	      theNodes[loc++] = tag;
-	    }
+	    theNodes = 0;
 	    pos++;
 	  } else {
+	    theNodes = new ID(0,16);
 	    int node;
 	    for (int j=pos; j< argc; j++) 
 	      if (Tcl_GetInt(interp, argv[pos], &node) != TCL_OK) {
 		j = argc;
 		Tcl_ResetResult(interp);
 	      } else {
-		theNodes[numNodes] = node;
+		(*theNodes)[numNodes] = node;
 		numNodes++;
 		pos++;
 	      }
@@ -576,9 +576,10 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    end = start;
 	    start = swap;
 	  }
-	  
+
+	  theNodes = new ID(end-start+1);
 	  for (int i=start; i<=end; i++)
-	    theNodes[numNodes++] = i;	    
+	    (*theNodes)[numNodes++] = i;	    
 	  pos += 3;
 	}
 
@@ -600,8 +601,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    return TCL_OK;
 	  }      
 	  const ID &nodeRegion = theRegion->getNodes();
-	  for (int i=0; i<nodeRegion.Size(); i++)
-	    theNodes[numNodes++] = nodeRegion(i);
+	  theNodes = new ID(nodeRegion);
 	  
 	  pos += 2;
 	} 
@@ -642,15 +642,6 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	responseID  = argv[pos];
       }
 
-      if (numNodes == 0) {
-	NodeIter &theNodeIter = theDomain.getNodes();
-	Node *theNode;
-	while ((theNode= theNodeIter()) != 0) {
-	  int tag = theNode->getTag();
-	  theNodes[numNodes++] = tag;
-	}
-      }
-
       // construct the DataHandler
       if (eMode == DATA_STREAM && fileName != 0) {
 	theOutputStream = new DataFileStream(fileName);
@@ -679,6 +670,10 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 						  theDomain,
 						  *theOutputStream,
 						  dT, echoTimeFlag);
+
+     
+      if (theNodes != 0)
+	delete theNodes;
     }
 
     else if (strcmp(argv[1],"Pattern") == 0) {

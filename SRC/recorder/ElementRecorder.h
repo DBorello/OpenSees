@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2006-08-04 22:33:53 $
+// $Revision: 1.13 $
+// $Date: 2007-04-25 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.h,v $
                                                                         
                                                                         
@@ -52,7 +52,7 @@ class ElementRecorder: public Recorder
 {
   public:
     ElementRecorder();
-    ElementRecorder(const ID &eleID, 
+    ElementRecorder(const ID *eleID, 
 		    const char **argv, 
 		    int argc,
 		    bool echoTime, 
@@ -77,7 +77,7 @@ class ElementRecorder: public Recorder
     int initialize(void);
 
     int numEle;
-    ID eleID;
+    ID *eleID;
 
     Response **theResponses;
 

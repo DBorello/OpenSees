@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2006-08-04 22:33:53 $
+// $Revision: 1.9 $
+// $Date: 2007-04-25 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.h,v $
                                                                         
 #ifndef EnvelopeElementRecorder_h
@@ -46,7 +46,7 @@ class EnvelopeElementRecorder: public Recorder
 {
   public:
   EnvelopeElementRecorder();
-    EnvelopeElementRecorder(const ID &eleID, 
+    EnvelopeElementRecorder(const ID *eleID, 
 			    const char **argv, 
 			    int argc,
 			    Domain &theDomain, 
@@ -71,7 +71,7 @@ class EnvelopeElementRecorder: public Recorder
     int initialize(void);
 
     int numEle;
-    ID eleID;
+    ID *eleID;
     Response **theResponses;
 
     Domain *theDomain;

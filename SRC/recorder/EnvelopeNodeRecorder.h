@@ -19,8 +19,8 @@
 ** ****************************************************************** */
                                                                         
 
-// $Revision: 1.8 $
-// $Date: 2006-08-04 22:33:53 $
+// $Revision: 1.9 $
+// $Date: 2007-04-25 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.h,v $
                                                                         
 
@@ -52,7 +52,7 @@ class EnvelopeNodeRecorder: public Recorder
   public:
     EnvelopeNodeRecorder();
     EnvelopeNodeRecorder(const ID &theDof, 
-			 const ID &theNodes, 
+			 const ID *theNodes, 
 			 const char *dataToStore,
 			 Domain &theDomain,
 			 OPS_Stream &theOutputHandler,

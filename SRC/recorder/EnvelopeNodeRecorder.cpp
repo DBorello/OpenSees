@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.13 $
-// $Date: 2006-08-17 22:27:28 $
+// $Revision: 1.14 $
+// $Date: 2007-04-25 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -38,6 +38,7 @@
 #include <EnvelopeNodeRecorder.h>
 #include <Domain.h>
 #include <Node.h>
+#include <NodeIter.h>
 #include <Vector.h>
 #include <ID.h>
 #include <Matrix.h>
@@ -58,7 +59,7 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder()
 }
 
 EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID &dofs, 
-					   const ID &nodes, 
+					   const ID *nodes, 
 					   const char *dataToStore,
 					   Domain &theDom,
 					   OPS_Stream &theOutputHandler,
@@ -92,14 +93,15 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID &dofs,
   // create memory to hold nodal ID's (neeed parallel)
   //
 
-  int numNode = nodes.Size();
-  if (numNode != 0) {
-    theNodalTags = new ID(nodes);
-    
-    if (theNodalTags == 0) {
-      opserr << "EnvelopeNodeRecorder::EnvelopeNodeRecorder - out of memory\n";
+  if (nodes != 0) {
+    int numNode = nodes->Size();
+    if (numNode != 0) {
+      theNodalTags = new ID(*nodes);
+      if (theNodalTags == 0 || theNodalTags->Size() != nodes->Size()) {
+	opserr << "NodeRecorder::NodeRecorder - out of memory\n";
+      }
     }
-  }
+  } 
 
   //
   // set the data flag used as a switch to get the response in a record
@@ -177,7 +179,7 @@ EnvelopeNodeRecorder::~EnvelopeNodeRecorder()
 int 
 EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
 {
-  if (theDomain == 0 || theNodalTags == 0 || theDofs == 0) {
+  if (theDomain == 0 || theDofs == 0) {
     return 0;
   }
 
@@ -533,7 +535,7 @@ EnvelopeNodeRecorder::recvSelf(int commitTag, Channel &theChannel,
 int
 EnvelopeNodeRecorder::initialize(void)
 {
-  if (theDofs == 0 || theNodalTags == 0 || theDomain == 0) {
+  if (theDofs == 0 || theDomain == 0) {
     opserr << "EnvelopeNodeRecorder::initialize() - either nodes, dofs or domain has not been set\n";
     return -1;
   }
@@ -548,32 +550,39 @@ EnvelopeNodeRecorder::initialize(void)
     delete [] theNodes;
   
   numValidNodes = 0;
-  int i;
-  int numNode = theNodalTags->Size();
-  for (i=0; i<numNode; i++) {
-    int nodeTag = (*theNodalTags)(i);
-    Node *theNode = theDomain->getNode(nodeTag);
-    if (theNode != 0) {
+
+  if (theNodalTags != 0) {
+    int numNode = theNodalTags->Size();
+    theNodes = new Node *[numValidNodes];
+    if (theNodes == 0) {
+      opserr << "EnvelopeNodeRecorder::domainChanged - out of memory\n";
+      return -1;
+    }
+
+    for (int i=0; i<numNode; i++) {
+      int nodeTag = (*theNodalTags)(i);
+      Node *theNode = theDomain->getNode(nodeTag);
+      if (theNode != 0) {
+	theNodes[numValidNodes] = theNode;
+	numValidNodes++;
+      }
+    }
+  } else {
+
+    int numNodes = theDomain->getNumNodes();
+    theNodes = new Node *[numNodes];
+    if (theNodes == 0) {
+      opserr << "NodeRecorder::domainChanged - out of memory\n";
+      return -1;
+    }
+    NodeIter &theDomainNodes = theDomain->getNodes();
+    Node *theNode;
+    numValidNodes = 0;
+    while (((theNode = theDomainNodes()) != 0) && (numValidNodes < numNodes)) {
+      theNodes[numValidNodes] = theNode;
       numValidNodes++;
     }
   }
-
-  theNodes = new Node *[numValidNodes];
-  if (theNodes == 0) {
-    opserr << "EnvelopeNodeRecorder::domainChanged - out of memory\n";
-    return -1;
-  }
-
-  int count = 0;
-  for (i=0; i<numNode; i++) {
-    int nodeTag = (*theNodalTags)(i);
-    Node *theNode = theDomain->getNode(nodeTag);
-    if (theNode != 0) {
-      theNodes[count] = theNode;
-      count++;
-    }
-  }
-
 
   //
   // need to create the data description, i.e. what each column of data is
@@ -609,7 +618,7 @@ EnvelopeNodeRecorder::initialize(void)
   } else
     strcpy(dataType,"Unknown");
 
-  for (i=0; i<numValidNodes; i++) {
+  for (int i=0; i<numValidNodes; i++) {
     int nodeTag = theNodes[i]->getTag();
 
     theHandler->tag("NodeOutput");

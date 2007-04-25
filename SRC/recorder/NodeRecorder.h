@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2006-08-04 22:33:53 $
+// $Revision: 1.14 $
+// $Date: 2007-04-25 23:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.h,v $
                                                                         
 #ifndef NodeRecorder_h
@@ -49,7 +49,7 @@ class NodeRecorder: public Recorder
   public:
     NodeRecorder();
     NodeRecorder(const ID &theDof, 
-		 const ID &theNodes, 
+		 const ID *theNodes, 
 		 int sensitivity,
 		 const char *dataToStore,
 		 Domain &theDomain,
