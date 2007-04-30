@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-02-06 01:17:21 $
+// $Revision: 1.10 $
+// $Date: 2007-04-30 20:03:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.h,v $
 
 
@@ -69,8 +69,8 @@ class OpenSeesGFunEvaluator : public GFunEvaluator
  private:
   int createTclVariables();
   int removeTclVariables();
-  int rec_nodeTclVariable(char tempchar[100], char *variableName);
-  int rec_elementTclVariable(char tempchar[100], char *variableName);
+  int rec_nodeTclVariable(char *tempchar, char *variableName);
+  int rec_elementTclVariable(char *tempchar, char *variableName);
   char fileName[256];
   int nsteps;
   double dt;

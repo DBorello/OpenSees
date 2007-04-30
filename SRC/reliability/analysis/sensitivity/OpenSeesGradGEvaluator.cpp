@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-04-11 20:39:56 $
+// $Revision: 1.8 $
+// $Date: 2007-04-30 20:04:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/OpenSeesGradGEvaluator.cpp,v $
 
 
@@ -117,14 +117,14 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 
 	// Initial declaractions
 	double perturbationFactor = 0.001; // (is multiplied by stdv and added to others...)
-	char tclAssignment[500];
+	char tclAssignment[1000];
 	char *dollarSign = "$";
 	char *underscore = "_";
-	char lsf_expression[500] = "";
+	char lsf_expression[1000];
 	char separators[5] = "}{";
 	int nrv = theReliabilityDomain->getNumberOfRandomVariables();
 	RandomVariable *theRandomVariable;
-	char tempchar[100]="";
+	char tempchar[1000];
 	char newSeparators[5] = "_";
 	double g_perturbed;
 	int i;
@@ -151,7 +151,7 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 	LimitStateFunction *theLimitStateFunction = 
 		theReliabilityDomain->getLimitStateFunctionPtr(lsf);
 	char *theExpression = theLimitStateFunction->getExpression();
-	char lsf_copy[500];
+	char lsf_copy[1000];
 	strcpy(lsf_copy,theExpression);
 
 

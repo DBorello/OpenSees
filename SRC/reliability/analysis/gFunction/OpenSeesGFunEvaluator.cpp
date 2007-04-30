@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2007-03-14 01:10:56 $
+// $Revision: 1.18 $
+// $Date: 2007-04-30 20:03:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.cpp,v $
 
 
@@ -167,7 +167,7 @@ OpenSeesGFunEvaluator::tokenizeSpecials(TCL_Char *theExpression)
 {
   // Set value of OpenSees finite element response quantities 
   // appearing in the limit-state function in the Tcl domain
-  char tempchar[100];
+  char tempchar[1000];
   double fileValue = 0.0;
   
   //opserr << "OSGFE:: " << theExpression << endln;
@@ -322,7 +322,7 @@ OpenSeesGFunEvaluator::removeTclVariables()
 }
 
 int
-OpenSeesGFunEvaluator::rec_nodeTclVariable(char tempchar[100], char *variableName)
+OpenSeesGFunEvaluator::rec_nodeTclVariable(char *tempchar, char *variableName)
 {
   // Get node and dof number etc.
   int nodeNumber, direction;
@@ -387,7 +387,7 @@ OpenSeesGFunEvaluator::rec_nodeTclVariable(char tempchar[100], char *variableNam
 }
 
 int
-OpenSeesGFunEvaluator::rec_elementTclVariable(char tempchar[100], char *variableName)
+OpenSeesGFunEvaluator::rec_elementTclVariable(char *tempchar, char *variableName)
 {
   // Initial declarations
   char restString[100];
