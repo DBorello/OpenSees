@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-04-25 23:45:02 $
+// $Revision: 1.12 $
+// $Date: 2007-05-01 23:23:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -169,8 +169,6 @@ ShadowSubdomain::~ShadowSubdomain()
   delete theShadowSPs;
   delete theShadowMPs;
   delete theShadowLPs;
-
-  opserr << "ShadowSubdomain::~ShadowSubdomain()\n";
 }
 
 
@@ -207,7 +205,6 @@ ShadowSubdomain::getRemoteData(void)
     numExternalNodes = msgData(0);
     numDOF = msgData(1);
 
-opserr << "ShadowSubdomain::getRemoteData numExtNodes " << numExternalNodes << endln;    
     if (theExternalNodes.Size() != numExternalNodes)
       theExternalNodes[numExternalNodes-1] = 0; // this will resize
     if (theExternalNodes.Size() != numExternalNodes) {
@@ -216,7 +213,6 @@ opserr << "ShadowSubdomain::getRemoteData numExtNodes " << numExternalNodes << e
     }
     if (numExternalNodes != 0)
       this->recvID(theExternalNodes);
-opserr << "ShadowSubdomain::getREmoteData " << theExternalNodes;    
   }
 
   gotRemoteData = true;
@@ -1033,8 +1029,6 @@ ShadowSubdomain::barrierCheckOUT(int result)
 void
 ShadowSubdomain::clearAll(void)
 {
-  opserr << "ShadowSubdomain::clearAll(void)\n";
-
   msgData(0) = ShadowActorSubdomain_clearAll;
   this->sendID(msgData);
   this->recvID(msgData);
@@ -1095,8 +1089,6 @@ ShadowSubdomain::revertToStart(void)
 void 
 ShadowSubdomain::wipeAnalysis(void)
 {
-  opserr << "ShadowActorSubdomain_wipeAnalysis\n";
-
   msgData(0) = ShadowActorSubdomain_wipeAnalysis;
     
   this->sendID(msgData);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-04-25 23:45:02 $
+// $Revision: 1.12 $
+// $Date: 2007-05-01 23:23:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ActorSubdomain.cpp,v $
                                                                         
 #include <ActorSubdomain.h>
@@ -769,7 +769,6 @@ ActorSubdomain::run(void)
 	    this->clearAll();
 	    this->sendID(msgData);
 	    break;
-
 
 	  case ShadowActorSubdomain_getNodeDisp:
 	    tag = msgData(1);  // nodeTag

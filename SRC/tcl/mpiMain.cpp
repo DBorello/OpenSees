@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-09-26 21:29:35 $
+// $Revision: 1.5 $
+// $Date: 2007-05-01 23:24:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/mpiMain.cpp,v $
 
 /* 
@@ -35,7 +35,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: mpiMain.cpp,v 1.4 2006-09-26 21:29:35 fmk Exp $
+ * RCS: @(#) $Id: mpiMain.cpp,v 1.5 2007-05-01 23:24:59 fmk Exp $
  */
 
 extern "C" {
@@ -143,16 +143,15 @@ main(int argc, char **argv)
     //
     // on slave processes we spin waiting to create & run actors
     //
-    fprintf(stderr, "Slave Process Running\n");
+    fprintf(stderr, "Slave Process Running %d\n", rank);
     theMachine.runActors();
-    fprintf(stderr, "Slave Process DONE %d\n", rank);
 
   } else {
 
     //
     // on process 0 we create some ShadowSubdomains & then start the OpenSees interpreter
     //
-    fprintf(stderr, "Master Process Running OpenSees Interpreter\n");   
+    fprintf(stderr, "Master Process Running OpenSees Interpreter %d\n", rank);   
 
     //
     // set some global parameters
@@ -219,7 +218,6 @@ main(int argc, char **argv)
   //
   // mpi clean up
   //
-  
 
   fprintf(stderr, "Process Terminating %d\n", rank);
   
