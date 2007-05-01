@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-10-02 20:23:21 $
+// $Revision: 1.4 $
+// $Date: 2007-05-01 23:19:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsParallelSOE.cpp,v $
                                                                         
 // Written: fmk 
@@ -139,7 +139,8 @@ MumpsParallelSOE::setSize(Graph &theGraph)
 
   size+=1; // vertices numbered 0 through n-1
 
-  if (nnz > Asize) { // we have to get more space for A and rowA
+  if (nnz > Asize) { // we have to get more space for A and rowA and colA
+
     if (A != 0) delete [] A;
     if (rowA != 0) delete [] rowA;
     if (colA != 0) delete [] colA;
@@ -160,7 +161,6 @@ MumpsParallelSOE::setSize(Graph &theGraph)
 
   
   if (size > Bsize) { // we have to get space for the vectors
-
 
     if (B != 0) delete [] B;
     if (X != 0) delete [] X;    
@@ -184,6 +184,7 @@ MumpsParallelSOE::setSize(Graph &theGraph)
     }
     else
       Bsize = size;
+
   }
   
   // zero the vectors
@@ -192,7 +193,7 @@ MumpsParallelSOE::setSize(Graph &theGraph)
     X[j] = 0;
     myB[j] = 0;
   }
-  
+
   // create new Vectors objects
   if (size != oldSize) {
     if (vectX != 0) delete vectX;

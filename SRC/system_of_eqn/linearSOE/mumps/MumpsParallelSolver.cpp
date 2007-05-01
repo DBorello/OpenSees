@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2006-04-13 20:58:07 $
+// $Revision: 1.3 $
+// $Date: 2007-05-01 23:19:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsParallelSolver.cpp,v $
 
 // Written: fmk 
@@ -183,7 +183,7 @@ MumpsParallelSolver::setSize()
     opserr << " Error " << info << " returned in substitution dmumps()\n";
     return info;
   }
-  
+
   return info;
 }
 
