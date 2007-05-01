@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.40 $
-// $Date: 2007-04-25 23:44:37 $
+// $Revision: 1.41 $
+// $Date: 2007-05-01 23:22:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -274,9 +274,6 @@ Domain::Domain(TaggedObjectStorage &theStorage)
 
     dbEle =0; dbNod =0; dbSPs =0; dbMPs =0; dbLPs = 0; dbParam = 0;
 }
-
-
-
 
 
 // ~Domain();    
@@ -787,6 +784,7 @@ Domain::clearAll(void) {
   int i;
   for (i=0; i<numRecorders; i++)
     delete theRecorders[i];
+
   numRecorders = 0; 
   
   if (theRecorders != 0) {

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-04-25 23:44:37 $
+// $Revision: 1.12 $
+// $Date: 2007-05-01 23:22:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -157,15 +157,16 @@ PartitionedDomain::~PartitionedDomain()
 void
 PartitionedDomain::clearAll(void)
 {
-  this->Domain::clearAll();
-  elements->clearAll();
-
   SubdomainIter &mySubdomains = this->getSubdomains();
   Subdomain *theSub;
   while ((theSub = mySubdomains()) != 0) 
     theSub->clearAll();
 
   theSubdomains->clearAll();
+
+
+  this->Domain::clearAll();
+  elements->clearAll();
 }
     
 
