@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2005-11-23 18:33:33 $
+// $Revision: 1.3 $
+// $Date: 2007-05-01 23:24:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/machineBroker/MachineBroker.cpp,v $
                                                                         
 // Written: fmk
@@ -54,22 +54,24 @@ int
 MachineBroker::shutdown(void)
 {  
   // send the termination notice to all machineBrokers running actorProcesses
-  for (int i=0; i<numActorChannels; i++) {
-    ID idData(1);
-    idData(0) = 0;
-    Channel *theChannel = actorChannels[i];
-    if (theChannel->sendID(0, 0, idData) < 0) {
-      opserr << "MachineBroker::shutdown(void) - failed to send ID\n";
-    }
-
-    if (theChannel->recvID(0, 0, idData) < 0) {
-      opserr << "MachineBroker::shutdown(void) - failed to recv ID\n";
-    }
-
-    this->freeProcess(theChannel);
-  }
-
   if (actorChannels != 0) {
+
+    for (int i=0; i<numActorChannels; i++) {
+      ID idData(1);
+      idData(0) = 0;
+      Channel *theChannel = actorChannels[i];
+      if (theChannel->sendID(0, 0, idData) < 0) {
+      opserr << "MachineBroker::shutdown(void) - failed to send ID\n";
+      }
+      
+      if (theChannel->recvID(0, 0, idData) < 0) {
+	opserr << "MachineBroker::shutdown(void) - failed to recv ID\n";
+      }
+      
+      this->freeProcess(theChannel);
+    }
+    
+    
     delete [] actorChannels;
     delete activeChannels;
     actorChannels = 0;
@@ -77,7 +79,7 @@ MachineBroker::shutdown(void)
     numActorChannels = 0;
     numActiveChannels = 0;
   }
-
+  
   return 0;
 }
 
