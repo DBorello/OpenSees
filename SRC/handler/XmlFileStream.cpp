@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-04-25 23:47:01 $
+// $Revision: 1.5 $
+// $Date: 2007-05-01 23:20:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/XmlFileStream.cpp,v $
 
 #include <XmlFileStream.h>
@@ -248,6 +248,11 @@ XmlFileStream::open(void)
   // if file already open, return
   if (fileOpen == 1) {
     return 0;
+  }
+
+  if (sendSelfCount != 0) {
+    int fileNameLength = strlen(fileName);
+    sprintf(&fileName[fileNameLength],".%d",1);
   }
 
   // open file
@@ -837,11 +842,8 @@ XmlFileStream::sendSelf(int commitTag, Channel &theChannel)
     }
   }
 
-  if (sendSelfCount == 0) {
-    sprintf(&fileName[fileNameLength],".%d",1);
-    sendSelfCount++;
-  }
-
+  sendSelfCount++;
+ 
   return 0;
 }
 
