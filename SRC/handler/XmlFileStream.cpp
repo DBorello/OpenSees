@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-05-01 23:20:24 $
+// $Revision: 1.6 $
+// $Date: 2007-05-02 17:35:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/XmlFileStream.cpp,v $
 
 #include <XmlFileStream.h>
@@ -40,7 +40,7 @@ using std::ifstream;
 XmlFileStream::XmlFileStream(int indent)
   :OPS_Stream(OPS_STREAM_TAGS_XmlFileStream), 
    fileOpen(0), fileName(0), indentSize(indent), numIndent(-1),
-   attributeMode(false), numTag(0), sizeTags(0), tags(0)
+   attributeMode(false), numTag(0), sizeTags(0), tags(0), sendSelfCount(0)
 {
   if (indentSize < 1) indentSize = 1;
   indentString = new char[indentSize+1];
@@ -51,7 +51,7 @@ XmlFileStream::XmlFileStream(int indent)
 XmlFileStream::XmlFileStream(const char *name, openMode mode, int indent)
   :OPS_Stream(OPS_STREAM_TAGS_XmlFileStream), 
    fileOpen(0), fileName(0), indentSize(indent), numIndent(-1),
-   attributeMode(false), numTag(0), sizeTags(0), tags(0)
+   attributeMode(false), numTag(0), sizeTags(0), tags(0), sendSelfCount(0)
 {
   if (indentSize < 1) indentSize = 1;
   indentString = new char[indentSize+1];
