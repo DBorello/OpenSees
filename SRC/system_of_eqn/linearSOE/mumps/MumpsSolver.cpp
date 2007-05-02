@@ -20,8 +20,8 @@
                                                                         
 // Description: This file contains the implementation of MumpsSolver
 
-// $Revision: 1.3 $
-// $Date: 2006-04-04 22:59:50 $
+// $Revision: 1.4 $
+// $Date: 2007-05-02 00:17:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsSolver.cpp,v $
 
 // Written: fmk 
@@ -35,9 +35,7 @@
 
 #define ICNTL(I) icntl[(I)-1] /* macro s.t. indices match documentation */
 
-extern "C" {
 #include <mpi.h>
-}
 
 MumpsSolver::MumpsSolver()
   :LinearSOESolver(SOLVER_TAGS_MumpsSolver),

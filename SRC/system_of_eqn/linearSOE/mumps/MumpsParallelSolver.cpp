@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-05-01 23:19:24 $
+// $Revision: 1.4 $
+// $Date: 2007-05-02 00:17:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsParallelSolver.cpp,v $
 
 // Written: fmk 
@@ -35,9 +35,7 @@
 
 #define ICNTL(I) icntl[(I)-1] /* macro s.t. indices match documentation */
 
-extern "C" {
 #include <mpi.h>
-}
 
 MumpsParallelSolver::MumpsParallelSolver()
   :LinearSOESolver(SOLVER_TAGS_MumpsParallelSolver),

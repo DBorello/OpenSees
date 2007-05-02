@@ -1,0 +1,73 @@
+# Makefile.inc for building MUMPS VERSION 4.6.4 on SDSC datastar
+# written: fmk
+
+# This file is part of MUMPS VERSION 4.6
+# This Version was built on Tue Jan 24 09:35:01 2006
+#
+#
+#Begin orderings
+
+# NOTE that PORD is distributed within MUMPS by default. If you would like to
+# use other orderings, you need to obtain the corresponding package and modify
+# the variables below accordingly.
+
+#LSCOTCHDIR = $(HOME)/JY/emilio/bin/generic
+#LSCOTCH   = -L$(LSCOTCHDIR) -lesmumps  -lfax -lorder -lscotch -lsymbol -ldof -lgraph -lcommon -lm
+
+LPORDDIR = ../PORD/lib/
+IPORD    = -I../PORD/include/
+LPORD    = -L$(LPORDDIR) -lpord
+
+#LMETISDIR = /local/metis/
+#IMETIS    = # Metis doesn't need include files (Fortran interface avail.)
+#LMETIS    = -L$(LMETISDIR) -lmetis
+
+# Corresponding variables reused later
+#ORDERINGSF = -Dscotch -Dmetis -Dpord
+#ORDERINGSC = -Dscotch -Dmetis -Dpord
+ORDERINGSF  = -WF,-Dpord
+ORDERINGSC  = -Dpord
+LORDERINGS = $(LMETIS) $(LPORD) $(LSCOTCH)
+IORDERINGS = $(IMETIS) $(IPORD) $(ISCOTCH)
+
+#End orderings
+########################################################################
+########################################################################
+
+RM      = /bin/rm -f
+CC      = mpiCC
+FC      = mpif90
+FL      = mpif90
+AR      = ar vr
+RANLIB  = ranlib
+
+SCALAP = /usr/local/apps/intel/compiler8/lib/libifcoremt.a -q64 -pessl \
+/usr/local/apps/scalapack/1.7/intel8/libscalapack-MPICHGM-INTEL80.a \
+/usr/local/apps/blacs/1.0/intel8/blacs_MPI-MPICHGM-INTEL80-0.a \
+/usr/local/apps/blacs/1.0/intel8/blacsCinit_MPI-MPICHGM-INTEL80-0.a \
+/usr/local/apps/blacs/1.0/intel8/SRC/MPI/INTERNAL/bi_f77_get_constants.o \
+-L${MKL_HOME}/lib/64 -lmkl_lapack -lmkl_ipf -lguide -lpthread \
+
+#SCALAP  = -lessl -pesslsmp -lblacssmp -lf
+#/usr/local/apps/blacs/1.0/intel8/blacsCinit_MPI-MPICHGM-INTEL80-0.a \
+
+
+INCPAR  = 
+LIBPAR  = $(SCALAP) 
+INCSEQ  = -I../libseq
+LIBSEQ  =  -L../libseq -lmpiseq
+LIBBLAS = 
+LIBOTHERS = -lpthread
+#Preprocessor defs for calling Fortran from C (-DAdd_ or -DAdd__ or -DUPPER)
+CDEFS = -DAdd_
+
+#Begin Optimization options
+OPTF    = -O 
+OPTC    = -O -I.
+OPTL    = -O
+#End Optimization options
+ 
+
+INC = $(INCPAR)
+LIB = $(LIBPAR)
+LIBSEQNEEDED =
