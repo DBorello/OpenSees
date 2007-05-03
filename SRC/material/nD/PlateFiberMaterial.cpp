@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:26 $
+// $Revision: 1.6 $
+// $Date: 2007-05-03 23:03:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/PlateFiberMaterial.cpp,v $
 
 //
@@ -409,7 +409,7 @@ PlateFiberMaterial::sendSelf(int commitTag, Channel &theChannel)
     theMaterial->setDbTag(matDbTag);
   }
   idData(2) = matDbTag;
-
+  
   res = theChannel.sendID(this->getDbTag(), commitTag, idData);
   if (res < 0) {
     opserr << "PlateFiberMaterial::sendSelf() - failed to send id data\n";
@@ -441,9 +441,9 @@ PlateFiberMaterial::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroke
 
   // recv an id containg the tag and associated materials class and db tags
   static ID idData(3);
-  res = theChannel.sendID(this->getDbTag(), commitTag, idData);
+  res = theChannel.recvID(this->getDbTag(), commitTag, idData);
   if (res < 0) {
-    opserr << "BeamFiberMaterial::sendSelf() - failed to send id data\n";
+    opserr << "PlateFiberMaterial::sendSelf() - failed to send id data\n";
     return res;
   }
 
@@ -457,7 +457,7 @@ PlateFiberMaterial::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroke
       delete theMaterial;
     theMaterial = theBroker.getNewNDMaterial(matClassTag);
     if (theMaterial == 0) {
-      opserr << "BeamFiberMaterial::recvSelf() - failed to get a material of type: " << matClassTag << endln;
+      opserr << "PlateFiberMaterial::recvSelf() - failed to get a material of type: " << matClassTag << endln;
       return -1;
     }
   }
@@ -467,7 +467,7 @@ PlateFiberMaterial::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroke
   static Vector vecData(1);
   res = theChannel.recvVector(this->getDbTag(), commitTag, vecData);
   if (res < 0) {
-    opserr << "BeamFiberMaterial::sendSelf() - failed to send vector data\n";
+    opserr << "PlateFiberMaterial::sendSelf() - failed to send vector data\n";
     return res;
   }
 
@@ -477,7 +477,7 @@ PlateFiberMaterial::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroke
   // now receive the assocaited materials data
   res = theMaterial->recvSelf(commitTag, theChannel, theBroker);
   if (res < 0) 
-    opserr << "BeamFiberMaterial::sendSelf() - failed to send vector material\n";
+    opserr << "PlateFiberMaterial::sendSelf() - failed to send vector material\n";
   
   return res;
 }
