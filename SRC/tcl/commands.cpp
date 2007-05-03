@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.89 $
-// $Date: 2007-04-25 23:43:41 $
+// $Revision: 1.90 $
+// $Date: 2007-05-03 18:24:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -410,12 +410,59 @@ extern int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL
 
 extern int myCommands(Tcl_Interp *interp);
 
+extern "C" int Tcl_InterpObjCmd(ClientData clientData,  Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]);
+
+int Tcl_InterpOpenSeesObjCmd(ClientData clientData,  Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[])
+{
+   int index;
+   static CONST char *options[] = {
+     "alias",	"aliases",	"create",	"delete", 
+     "eval",		"exists",	"expose",	"hide", 
+     "hidden",	"issafe",	"invokehidden",	"marktrusted", 
+     "recursionlimit",		"slaves",	"share",
+     "target",	"transfer",
+     NULL
+    };
+   enum option {
+     OPT_ALIAS,	OPT_ALIASES,	OPT_CREATE,	OPT_DELETE,
+     OPT_EVAL,	OPT_EXISTS,	OPT_EXPOSE,	OPT_HIDE,
+     OPT_HIDDEN,	OPT_ISSAFE,	OPT_INVOKEHID,	OPT_MARKTRUSTED,
+     OPT_RECLIMIT,			OPT_SLAVES,	OPT_SHARE,
+     OPT_TARGET,	OPT_TRANSFER
+   };
+
+  int ok = Tcl_InterpObjCmd(clientData, interp, objc, objv);
+  if (ok != TCL_OK) 
+    return ok;
+
+  if (Tcl_GetIndexFromObj(interp, objv[1], options, "option", 0, &index) != TCL_OK) {
+    return TCL_ERROR;
+  }
+  
+  switch ((enum option) index) {
+  case OPT_CREATE: {
+    const char *theInterpreterName = Tcl_GetStringResult(interp);
+    Tcl_Interp *slaveInterp = Tcl_GetSlave(interp, theInterpreterName);
+    ok = g3AppInit(slaveInterp);
+    return ok;
+    break;
+  }
+  default:
+    return ok;
+  }
+
+  return ok;
+}
+
+
 int g3AppInit(Tcl_Interp *interp) {
+
 
 #ifndef _LINUX  
     opserr.setFloatField(SCIENTIFIC);
     opserr.setFloatField(FIXEDD);
 #endif
+    Tcl_CreateObjCommand(interp, "interp", Tcl_InterpOpenSeesObjCmd, NULL, NULL);
     Tcl_CreateObjCommand(interp, "pset", &OPS_SetObjCmd,
 			 (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
     Tcl_CreateCommand(interp, "source", &OPS_SourceCmd,
