@@ -1,5 +1,5 @@
-// $Revision: 1.34 $
-// $Date: 2007-04-04 23:12:26 $
+// $Revision: 1.35 $
+// $Date: 2007-05-03 21:15:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
 
 // Written: ZHY
@@ -700,53 +700,51 @@ int PressureIndependMultiYield::recvSelf(int commitTag, Channel &theChannel,
 
   int *temp1, *temp2, *temp11;
   double *temp3, *temp6, *temp7, *temp8, *temp9, *temp10, *temp12;
-  if( matCount < matN )
-  	matCount = matN;
-  if (matCount%20 == 0) {  // allocate memory once every 20 materials
-	  if( matCount > 0 ) {
-		 temp1 = loadStagex;
-		 temp2 = ndmx;
-		 temp3 = rhox;
-		 temp6 = frictionAnglex;
-		 temp7 = peakShearStrainx;
-		 temp8 = refPressurex;
-		 temp9 = cohesionx;
-		 temp10 = pressDependCoeffx;
-		 temp11 = numOfSurfacesx;
-		 temp12 = residualPressx;
-     }
 
-     loadStagex = new int[matCount+20];
-     ndmx = new int[matCount+20];
-     rhox = new double[matCount+20];
-     frictionAnglex = new double[matCount+20];
-     peakShearStrainx = new double[matCount+20];
-     refPressurex = new double[matCount+20];
-	 cohesionx = new double[matCount+20];
-     pressDependCoeffx = new double[matCount+20];
-     numOfSurfacesx = new int[matCount+20];
-     residualPressx = new double[matCount+20];
+  if (matN >= matCount*20) {  // allocate memory if not enough
 
+	 temp1 = loadStagex;
+	 temp2 = ndmx;
+	 temp3 = rhox;
+	 temp6 = frictionAnglex;
+	 temp7 = peakShearStrainx;
+	 temp8 = refPressurex;
+	 temp9 = cohesionx;
+	 temp10 = pressDependCoeffx;
+	 temp11 = numOfSurfacesx;
+	 temp12 = residualPressx;
+
+     loadStagex = new int[(matCount+1)*20];
+     ndmx = new int[(matCount+1)*20];
+     rhox = new double[(matCount+1)*20];
+     frictionAnglex = new double[(matCount+1)*20];
+     peakShearStrainx = new double[(matCount+1)*20];
+     refPressurex = new double[(matCount+1)*20];
+	 cohesionx = new double[(matCount+1)*20];
+     pressDependCoeffx = new double[(matCount+1)*20];
+     numOfSurfacesx = new int[(matCount+1)*20];
+     residualPressx = new double[(matCount+1)*20];
+
+	 for (int i=0; i<matCount*20; i++) {
+		 loadStagex[i] = temp1[i];
+		 ndmx[i] = temp2[i];
+		 rhox[i] = temp3[i];
+		 frictionAnglex[i] = temp6[i];
+		 peakShearStrainx[i] = temp7[i];
+		 refPressurex[i] = temp8[i];
+		 cohesionx[i] = temp9[i];
+		 pressDependCoeffx[i] = temp10[i];
+		 numOfSurfacesx[i] = temp11[i];
+		 residualPressx[i] = temp12[i];
+	 }
      if( matCount > 0 ) {
-		 for (int i=0; i<matCount; i++) {
-			 loadStagex[i] = temp1[i];
-			 ndmx[i] = temp2[i];
-			 rhox[i] = temp3[i];
-			 frictionAnglex[i] = temp6[i];
-			 peakShearStrainx[i] = temp7[i];
-			 refPressurex[i] = temp8[i];
-			 cohesionx[i] = temp9[i];
-			 pressDependCoeffx[i] = temp10[i];
-			 numOfSurfacesx[i] = temp11[i];
-			 residualPressx[i] = temp12[i];
-		 }
 	     delete [] temp1; delete [] temp2; delete [] temp3;
 	     delete [] temp6; delete [] temp7; delete [] temp8;
 	     delete [] temp9; delete [] temp10; delete [] temp11;
 		 delete [] temp12;
      }
+     matCount += 1;
   }
-  matCount ++;
 
   loadStagex[matN] = loadStage;
   ndmx[matN] = ndm;
@@ -758,6 +756,7 @@ int PressureIndependMultiYield::recvSelf(int commitTag, Channel &theChannel,
   cohesionx[matN] = cohesion;
   pressDependCoeffx[matN] = pressDependCoeff;
   residualPressx[matN] = residualPress;
+
 
   return res;
 }
