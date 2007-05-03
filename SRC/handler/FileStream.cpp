@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-04-25 23:47:22 $
+// $Revision: 1.10 $
+// $Date: 2007-05-03 21:24:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/FileStream.cpp,v $
 
 
@@ -140,6 +140,12 @@ FileStream::open(void)
   if (fileOpen == 1) {
     return 0;
   }
+
+  if (sendSelfCount != 0) {
+    int fileNameLength = strlen(fileName);
+    sprintf(&fileName[fileNameLength],".%d",1);
+  }
+
 
   if (theOpenMode == OVERWRITE) 
     theFile.open(fileName, ios::out);
@@ -534,12 +540,7 @@ FileStream::sendSelf(int commitTag, Channel &theChannel)
     }
   }
 
-  if (sendSelfCount == 0) {
-    sprintf(&fileName[fileNameLength],".%d",1);
-    sendSelfCount++;
-  }
-
-  opserr << fileName << endln;
+  sendSelfCount++;
 
   return 0;
 }

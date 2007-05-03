@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-04-25 23:47:22 $
+// $Revision: 1.3 $
+// $Date: 2007-05-03 21:24:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/DataFileStream.cpp,v $
 
 
@@ -165,6 +165,11 @@ DataFileStream::open(void)
   // if file already open, return
   if (fileOpen == 1) {
     return 0;
+  }
+
+  if (sendSelfCount != 0) {
+    int fileNameLength = strlen(fileName);
+    sprintf(&fileName[fileNameLength],".%d",1);
   }
 
   if (theOpenMode == OVERWRITE) 
@@ -538,10 +543,7 @@ DataFileStream::sendSelf(int commitTag, Channel &theChannel)
     }
   }
 
-  if (sendSelfCount == 0) {
-    sprintf(&fileName[fileNameLength],".%d",1);
-    sendSelfCount++;
-  }
+  sendSelfCount++;
   
   return 0;
 }
