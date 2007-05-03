@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:34 $
+// $Revision: 1.7 $
+// $Date: 2007-05-03 18:26:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/MembranePlateFiberSection.cpp,v $
 
 // Ed "C++" Love
@@ -463,7 +463,9 @@ void  MembranePlateFiberSection::Print( OPS_Stream &s, int flag )
   s << "MembranePlateFiberSection: \n " ;
   s <<  "  Thickness h = "        <<  h  <<  endln ;
 
-  theFibers[0]->Print( s, flag ) ;
+  for (int i = 0; i < 5; i++) {
+    theFibers[i]->Print( s, flag ) ;
+  }
 
   return ;
 }
