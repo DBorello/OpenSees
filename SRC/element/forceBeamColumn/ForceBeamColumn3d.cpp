@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2007-02-16 00:11:49 $
+// $Revision: 1.26 $
+// $Date: 2007-05-03 23:02:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 /*
@@ -1803,11 +1803,11 @@ ForceBeamColumn3d::getInitialStiff(void)
 		 sectionKey2 = j;
 	 }
 	 if (sectionKey1 == 0) {
-	   opserr << "FATAL NLBeamColumn3d::compSectionResponse - section does not provide Mz response\n";
+	   opserr << "FATAL ForceBeamColumn3d::compSectionResponse - section does not provide Mz response\n";
 	   exit(-1);
 	 }
 	 if (sectionKey2 == 0) {
-	   opserr << "FATAL NLBeamColumn3d::compSectionResponse - section does not provide My response\n";
+	   opserr << "FATAL ForceBeamColumn3d::compSectionResponse - section does not provide My response\n";
 	   exit(-1);
 	 }
 
@@ -1957,7 +1957,7 @@ ForceBeamColumn3d::getInitialStiff(void)
 	 displs = new Vector [numSections];
 
 	 if (!coords) {
-	   opserr << "NLBeamColumn3d::Print() -- failed to allocate coords array";   
+	   opserr << "ForceBeamColumn3d::Print() -- failed to allocate coords array";   
 	   exit(-1);
 	 }
 
@@ -1966,7 +1966,7 @@ ForceBeamColumn3d::getInitialStiff(void)
 	   coords[i] = Vector(NDM);
 
 	 if (!displs) {
-	   opserr << "NLBeamColumn3d::Print() -- failed to allocate coords array";   
+	   opserr << "ForceBeamColumn3d::Print() -- failed to allocate coords array";   
 	   exit(-1);
 	 }
 

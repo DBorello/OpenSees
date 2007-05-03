@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2007-04-25 23:50:15 $
+// $Revision: 1.18 $
+// $Date: 2007-05-03 23:02:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.cpp,v $
 
 // Ed "C++" Love
@@ -2282,8 +2282,7 @@ int  ShellMITC4::recvSelf (int commitTag,
       materialPointers[i]->setDbTag(matDbTag);
       res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	opserr << "NLBeamColumn3d::recvSelf() - material " << i <<
-	  "failed to recv itself\n";
+	opserr << "ShellMITC4::recvSelf() - material " << i << "failed to recv itself\n";
 	return res;
       }
     }
