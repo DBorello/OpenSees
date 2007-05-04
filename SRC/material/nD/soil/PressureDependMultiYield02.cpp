@@ -1,5 +1,5 @@
-// $Revision: 1.12 $
-// $Date: 2007-04-04 23:12:26 $
+// $Revision: 1.13 $
+// $Date: 2007-05-04 23:00:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield02.cpp,v $
 
 // Written: ZHY
@@ -1098,9 +1098,7 @@ int PressureDependMultiYield02::recvSelf(int commitTag, Channel &theChannel,
   double *temp14a;
   double *temp21, *temp22, *temp23, *temp24, *temp25, *temp26;
 
-  if( matCount < matN )
-  	matCount = matN;
-  if (matCount%20 == 0) {  // allocate memory once every 20 materials
+  if (matN >= matCount*20) {  // allocate memory if not enough
      temp1 = loadStagex;
 	 temp2 = ndmx;
 	 temp3 = rhox;
@@ -1129,36 +1127,36 @@ int PressureDependMultiYield02::recvSelf(int commitTag, Channel &theChannel,
 	 temp25 = Hvx;
 	 temp26 = Pvx;
 
-     loadStagex = new int[matCount+20];
-     ndmx = new int[matCount+20];
-     rhox = new double[matCount+20];
-     refShearModulusx = new double[matCount+20];
-     refBulkModulusx = new double[matCount+20];
-     frictionAnglex = new double[matCount+20];
-     peakShearStrainx = new double[matCount+20];
-     refPressurex = new double[matCount+20];
-	 cohesionx = new double[matCount+20];
-     pressDependCoeffx = new double[matCount+20];
-     numOfSurfacesx = new int[matCount+20];
-     residualPressx = new double[matCount+20];
-     phaseTransfAnglex = new double[matCount+20];
-     contractParam1x = new double[matCount+20];
-     contractParam2x = new double[matCount+20];
-     dilateParam1x = new double[matCount+20];
-     dilateParam2x = new double[matCount+20];
-     liquefyParam1x = new double[matCount+20];
-     liquefyParam2x = new double[matCount+20];
-     dilateParam3x = new double[matCount+20];
-     einitx = new double[matCount+20];    //initial void ratio
-     volLimit1x = new double[matCount+20];
-     volLimit2x = new double[matCount+20];
-     volLimit3x = new double[matCount+20];
-     stressRatioPTx = new double[matCount+20];
-	 Hvx = new double[matCount+20];
-	 Pvx = new double[matCount+20];
+     loadStagex = new int[(matCount+1)*20];
+     ndmx = new int[(matCount+1)*20];
+     rhox = new double[(matCount+1)*20];
+     refShearModulusx = new double[(matCount+1)*20];
+     refBulkModulusx = new double[(matCount+1)*20];
+     frictionAnglex = new double[(matCount+1)*20];
+     peakShearStrainx = new double[(matCount+1)*20];
+     refPressurex = new double[(matCount+1)*20];
+	 cohesionx = new double[(matCount+1)*20];
+     pressDependCoeffx = new double[(matCount+1)*20];
+     numOfSurfacesx = new int[(matCount+1)*20];
+     residualPressx = new double[(matCount+1)*20];
+     phaseTransfAnglex = new double[(matCount+1)*20];
+     contractParam1x = new double[(matCount+1)*20];
+     contractParam2x = new double[(matCount+1)*20];
+     dilateParam1x = new double[(matCount+1)*20];
+     dilateParam2x = new double[(matCount+1)*20];
+     liquefyParam1x = new double[(matCount+1)*20];
+     liquefyParam2x = new double[(matCount+1)*20];
+     dilateParam3x = new double[(matCount+1)*20];
+     einitx = new double[(matCount+1)*20];    //initial void ratio
+     volLimit1x = new double[(matCount+1)*20];
+     volLimit2x = new double[(matCount+1)*20];
+     volLimit3x = new double[(matCount+1)*20];
+     stressRatioPTx = new double[(matCount+1)*20];
+	 Hvx = new double[(matCount+1)*20];
+	 Pvx = new double[(matCount+1)*20];
 
      if( matCount > 0 ) {
-		 for (int i=0; i<matCount; i++) {
+		 for (int i=0; i<matCount*20; i++) {
 			 loadStagex[i] = temp1[i];
 			 ndmx[i] = temp2[i];
 			 rhox[i] = temp3[i];
@@ -1197,8 +1195,8 @@ int PressureDependMultiYield02::recvSelf(int commitTag, Channel &theChannel,
 	     delete [] temp21; delete [] temp22; delete [] temp23; delete [] temp24;
          delete [] temp25; delete [] temp26;
      }
+	 matCount ++;
   }
-  matCount ++;
 
 
     loadStagex[matN] = loadStage;
