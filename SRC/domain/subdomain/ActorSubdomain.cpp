@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2007-05-01 23:23:03 $
+// $Revision: 1.13 $
+// $Date: 2007-05-04 02:04:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ActorSubdomain.cpp,v $
                                                                         
 #include <ActorSubdomain.h>
@@ -918,7 +918,7 @@ ActorSubdomain::update(void)
 {
   int res = this->Domain::update();
 
-  this->barrierCheck(res);
+  res = this->barrierCheck(res);
 
   return res;
 }
