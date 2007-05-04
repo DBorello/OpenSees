@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2005-11-29 22:42:42 $
+// $Revision: 1.6 $
+// $Date: 2007-05-04 06:59:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/NewtonLineSearch.cpp,v $
 
 // Written: fmk 
@@ -180,7 +180,19 @@ NewtonLineSearch::getConvergenceTest(void)
 int
 NewtonLineSearch::sendSelf(int cTag, Channel &theChannel)
 {
-  return -1;
+  static ID data(1);
+  data(0) = theLineSearch->getClassTag();
+  if (theChannel.sendID(0, cTag, data) < 0) {
+    opserr << "NewtonLineSearch::sendSelf(int cTag, Channel &theChannel)   - failed to send date\n";
+    return -1;
+  }
+
+  if (theLineSearch->sendSelf(cTag, theChannel) < 0) {
+    opserr << "NewtonLineSearch::sendSelf(int cTag, Channel &theChannel)   - failed to send line search\n";
+    return -1;
+  }
+
+  return 0;
 }
 
 int
@@ -188,7 +200,32 @@ NewtonLineSearch::recvSelf(int cTag,
 			Channel &theChannel, 
 			FEM_ObjectBroker &theBroker)
 {
-  return -1;
+  static ID data(1);
+  if (theChannel.recvID(0, cTag, data) < 0) {
+    opserr << "NewtonLineSearch::recvSelf(int cTag, Channel &theChannel) - failed to recv data\n";
+    return -1;
+  }
+
+  int lineSearchClassTag = data(0);
+
+  if (theLineSearch == 0 || theLineSearch->getClassTag() != lineSearchClassTag) {
+    if (theLineSearch != 0)
+      delete theLineSearch;
+
+    theLineSearch = theBroker.getLineSearch(lineSearchClassTag);
+    if (theLineSearch == 0) {
+      opserr << "NewtonLineSearch::recvSelf(int cTag, Channel &theChannel) - failed to obtain a LineSerach object\n";
+      return -1;
+    }
+  }
+
+  if (theLineSearch->recvSelf(cTag, theChannel, theBroker) < 0) {
+      opserr << "NewtonLineSearch::recvSelf(int cTag, Channel &theChannel) - failed to recv the LineSerach object\n";
+      return -1;
+  }
+
+  return 0;
+
 }
 
 
