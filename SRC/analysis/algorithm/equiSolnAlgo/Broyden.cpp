@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-04-02 23:41:13 $
+// $Revision: 1.6 $
+// $Date: 2007-05-04 23:41:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/Broyden.cpp,v $
                                                                         
                                                                         
@@ -72,7 +72,6 @@ Broyden::Broyden(ConvergenceTest &theT, int theTangentToUse, int n)
  tangent(theTangentToUse), numberLoops(n) 
 {
   s  = new Vector*[numberLoops+3] ;
-
   z  = new Vector*[numberLoops+3] ;
 
   residOld = 0 ;
@@ -419,15 +418,52 @@ Broyden::getConvergenceTest(void)
 int
 Broyden::sendSelf(int cTag, Channel &theChannel)
 {
-  return -1;
+  static ID data(2);
+  data(0) = tangent;
+  data(1) = numberLoops;
+  if (theChannel.sendID(0, cTag, data) < 0) {
+    opserr << "Broyden::sendSelf() - failed to send data\n";
+    return -1;
+  }
+  return 0;
 }
 
 int
 Broyden::recvSelf(int cTag, 
-			Channel &theChannel, 
-			FEM_ObjectBroker &theBroker)
+		  Channel &theChannel, 
+		  FEM_ObjectBroker &theBroker)
 {
+  static ID data(2);
+  if (theChannel.recvID(0, cTag, data) < 0) {
+    opserr << "Broyden::recvSelf() - failed to recv data\n";
     return -1;
+  }
+  tangent = data(0);
+
+  if (numberLoops != data(1)) {
+
+    // remove old
+    if (s != 0 && z != 0) {
+      for ( int i =0; i < numberLoops+3; i++ ) {
+	if ( s[i] != 0 ) delete s[i] ;
+	if ( z[i] != 0 ) delete z[i] ;
+      }
+      delete [] s;
+      delete [] z;
+    }
+
+    numberLoops = data(1);
+
+    // create new
+    s  = new Vector*[numberLoops+3] ;
+    z  = new Vector*[numberLoops+3] ;
+    for ( int i =0; i < numberLoops+3; i++ ) {
+      s[i] = 0 ;
+      z[i] = 0 ;
+    }
+  }
+
+  return 0;
 }
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-04-02 23:41:13 $
+// $Revision: 1.5 $
+// $Date: 2007-05-04 23:41:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/Broyden.h,v $
                                                                         
 #ifndef Broyden_h
@@ -48,7 +48,6 @@ class Broyden: public EquiSolnAlgo
   public:
 
     Broyden(int tangent = CURRENT_TANGENT, int n = 10 );    
-
     Broyden(ConvergenceTest &theTest, int tangent = CURRENT_TANGENT, int n = 10 );
 
     ~Broyden();
