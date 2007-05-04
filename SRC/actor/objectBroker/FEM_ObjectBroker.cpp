@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.39 $
-// $Date: 2007-04-13 22:27:16 $
+// $Revision: 1.40 $
+// $Date: 2007-05-04 06:59:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -241,8 +241,15 @@
 #include <EquiSolnAlgo.h>
 #include <Linear.h>
 #include <NewtonRaphson.h>
+#include <NewtonLineSearch.h>
 #include <KrylovNewton.h>
 #include <ModifiedNewton.h>
+
+
+#include <BisectionLineSearch.h>
+#include <InitialInterpolatedLineSearch.h>
+#include <RegulaFalsiLineSearch.h>
+#include <SecantLineSearch.h>
 
 // domain decomp soln algo header files
 #include <DomainDecompAlgo.h>
@@ -1287,6 +1294,9 @@ FEM_ObjectBroker::getNewEquiSolnAlgo(int classTag)
 	case EquiALGORITHM_TAGS_NewtonRaphson:  
 	     return new NewtonRaphson();
 
+	case EquiALGORITHM_TAGS_NewtonLineSearch:  
+	     return new NewtonLineSearch();
+
 	case EquiALGORITHM_TAGS_KrylovNewton:  
 	     return new KrylovNewton();
 	     
@@ -1301,6 +1311,31 @@ FEM_ObjectBroker::getNewEquiSolnAlgo(int classTag)
 	     return 0;
 	     
 	 }        
+}
+
+
+LineSearch        *
+FEM_ObjectBroker::getLineSearch(int classTag)
+{
+    switch(classTag) {
+
+    case LINESEARCH_TAGS_BisectionLineSearch:
+      return new BisectionLineSearch();
+
+    case LINESEARCH_TAGS_InitialInterpolatedLineSearch:
+      return new InitialInterpolatedLineSearch();
+
+    case  LINESEARCH_TAGS_RegulaFalsiLineSearch:
+      return new RegulaFalsiLineSearch();
+    
+    case  LINESEARCH_TAGS_SecantLineSearch:
+      return new SecantLineSearch();
+    default:
+      opserr << "FEM_ObjectBroker::getNewEquiSolnAlgo - ";
+      opserr << " - no EquiSolnAlgo type exists for class tag ";
+      opserr << classTag << endln;
+      return 0;
+    }        
 }
 
 

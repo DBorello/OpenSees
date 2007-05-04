@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-04-04 00:43:11 $
+// $Revision: 1.8 $
+// $Date: 2007-05-04 06:59:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.h,v $
                                                                         
                                                                         
@@ -49,6 +49,7 @@ class LoadPattern;
 class TimeSeries;
 class TimeSeriesIntegrator;
 
+
 class Matrix;
 class Vector;
 class ID;
@@ -57,6 +58,7 @@ class ConstraintHandler;
 class DOF_Numberer;   
 class AnalysisModel;    
 class EquiSolnAlgo;
+class LineSearch;
 class DomainDecompAlgo;
 class StaticIntegrator;
 class TransientIntegrator;
@@ -140,6 +142,7 @@ class FEM_ObjectBroker
     virtual DOF_Numberer        *getNewNumberer(int classTag);
     virtual AnalysisModel       *getNewAnalysisModel(int classTag);
     virtual EquiSolnAlgo        *getNewEquiSolnAlgo(int classTag);
+    virtual LineSearch          *getLineSearch(int classTag);
     virtual DomainDecompAlgo    *getNewDomainDecompAlgo(int classTag);
     virtual StaticIntegrator    *getNewStaticIntegrator(int classTag);
     virtual TransientIntegrator *getNewTransientIntegrator(int classTag);
