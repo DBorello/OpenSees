@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2007-05-01 23:22:24 $
+// $Revision: 1.13 $
+// $Date: 2007-05-04 06:58:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -61,6 +61,17 @@
 #include <SP_Constraint.h>
 #include <Recorder.h>
 #include <Parameter.h>
+
+#include <MapOfTaggedObjects.h>
+#include <MapOfTaggedObjectsIter.h>
+
+typedef map<int, int>         MAP_INT;
+typedef MAP_INT::value_type   MAP_INT_TYPE;
+typedef MAP_INT::iterator     MAP_INT_ITERATOR;
+
+typedef map<int, ID *> MAP_ID;
+typedef MAP_ID::value_type   MAP_ID_TYPE;
+typedef MAP_ID::iterator     MAP_ID_ITERATOR;
 
 PartitionedDomain::PartitionedDomain()
 :Domain(),
@@ -1282,162 +1293,164 @@ PartitionedDomain::getPartitioner(void) const
 	
 
 
-
 int 
 PartitionedDomain::buildEleGraph(Graph *theEleGraph)
 {
-    int numVertex = elements->getNumComponents();
+   // see if quick return
+    int numVertex = this->getNumElements();
+    if (numVertex == 0)
+        return 0;
 
-    // see if quick return
+    //
+    // iterate over the lements of the domain
+    //  create a vertex with a unique tag for each element
+    //  also create a map to hold element tag - vertex tag mapping
+    //
 
-    if (numVertex == 0) 
-	return 0;
-    
-    // create another vertices array which aids in adding edges
-    
-    int *theElementTagVertices = 0;
-    int maxEleNum = 0;
-    
-    TaggedObject *tagdObjPtr;
-    TaggedObjectIter &theEles = elements->getComponents();
-    while ((tagdObjPtr = theEles()) != 0)
-	if (tagdObjPtr->getTag() > maxEleNum)
-	    maxEleNum = tagdObjPtr->getTag();
+    MAP_INT theEleToVertexMap;
+    MAP_INT_ITERATOR theEleToVertexMapEle;
 
-    theElementTagVertices = new int[maxEleNum+1];
 
-    if (theElementTagVertices == 0) {
-	opserr << "WARNING Domain::buildEleGraph ";
-	opserr << " - Not Enough Memory for ElementTagVertices\n";
-	return -1;
-    }
-
-    for (int j=0; j<=maxEleNum; j++) theElementTagVertices[j] = -1;
-
-    // now create the vertices with a reference equal to the element number.
-    // and a tag which ranges from 0 through numVertex-1
-    
-    TaggedObjectIter &theEles2 = elements->getComponents();
-    
+    TaggedObject *theTagged;
+    TaggedObjectIter &theElements = elements->getComponents();
     int count = START_VERTEX_NUM;
-    while ((tagdObjPtr = theEles2()) != 0) {
-	int ElementTag = tagdObjPtr->getTag();
-	Vertex *vertexPtr = new Vertex(count,ElementTag);
+    while ((theTagged = theElements()) != 0) {
+      int eleTag = theTagged->getTag();
+      Vertex *vertexPtr = new Vertex(count, eleTag);
 
-	if (vertexPtr == 0) {
-	    opserr << "WARNING Domain::buildEleGraph";
-	    opserr << " - Not Enough Memory to create ";
-	    opserr << count << "th Vertex\n";
-	    delete [] theElementTagVertices;
-	    return -1;
-	}
+      if (vertexPtr == 0) {
+        opserr << "WARNING Domain::buildEleGraph - Not Enough Memory to create the " << count << " vertex\n";
+        return -1;
+      }
 
-	theEleGraph->addVertex(vertexPtr);
-	theElementTagVertices[ElementTag] = count++;
-	
+      theEleGraph->addVertex(vertexPtr);
+      theEleToVertexMapEle = theEleToVertexMap.find(eleTag);
+      if (theEleToVertexMapEle == theEleToVertexMap.end()) {
+        theEleToVertexMap.insert(MAP_INT_TYPE(eleTag, count));
+
+        // check if sucessfully added
+        theEleToVertexMapEle = theEleToVertexMap.find(eleTag);
+        if (theEleToVertexMapEle == theEleToVertexMap.end()) {
+          opserr << "Domain::buildEleGraph - map STL failed to add object with tag : " << eleTag << endln;
+          return false;
+        }
+
+        count++;
+      }
     }
 
+    //
     // We now need to determine which elements are asssociated with each node.
-    // As this info is not in the Node interface we must build it; which we
+    // As this info is not in the Node interface we must build it;
+    //
+    // again we will use an stl map, index will be nodeTag, object will be Vertex
     // do using vertices for each node, when we addVertex at thes nodes we
     // will not be adding vertices but element tags.
+    //
 
-    Vertex **theNodeTagVertices = 0;
-    int maxNodNum = 0;
+    MAP_ID theNodeToVertexMap;
+    MAP_ID_ITERATOR theNodeEle;
+
     Node *nodPtr;
-    NodeIter &nodeIter = this->getNodes();
-    while ((nodPtr = nodeIter()) != 0)
-	if (nodPtr->getTag() > maxNodNum)
-	    maxNodNum = nodPtr->getTag();
-
-    theNodeTagVertices = new Vertex *[maxNodNum+1];
-
-    if (theNodeTagVertices == 0) {
-	opserr << "WARNING Domain::buildEleGraph ";
-	opserr << " - Not Enough Memory for NodeTagVertices\n";
-	return -1;
-    }
-
-    for (int l=0; l<=maxNodNum; l++) theNodeTagVertices[l] = 0;
 
     // now create the vertices with a reference equal to the node number.
     // and a tag which ranges from 0 through numVertex-1 and placed in
     // theNodeTagVertices at a position equal to the node's tag.
 
-    NodeIter &nodeIter2 = this->getNodes();
-    count = START_VERTEX_NUM;
-    while ((nodPtr = nodeIter2()) != 0) {
-	int nodeTag = nodPtr->getTag();
-	Vertex *vertexPtr = new Vertex(count++,nodeTag);
-	theNodeTagVertices[nodeTag] = vertexPtr;
+    NodeIter &theNodes = this->getNodes();
+    while ((nodPtr = theNodes()) != 0) {
+      int nodeTag = nodPtr->getTag();
+      ID *eleTags = new ID(0, 4);
 
-	if (vertexPtr == 0) {
-	    opserr << "WARNING Domain::buildEleGraph";
-	    opserr << " - Not Enough Memory to create ";
-	    opserr << count << "th Node Vertex\n";
-	    delete [] theNodeTagVertices;
-	    return -1;
-	}
+      if (eleTags == 0) {
+        opserr << "WARNING Domain::buildEleGraph - Not Enough Memory to create the " << count << " vertex\n";
+        return -1;
+      }
+
+      theNodeEle = theNodeToVertexMap.find(nodeTag);
+      if (theNodeEle == theNodeToVertexMap.end()) {
+        theNodeToVertexMap.insert(MAP_ID_TYPE(nodeTag, eleTags));
+
+        // check if sucessfully added
+        theNodeEle = theNodeToVertexMap.find(nodeTag);
+        if (theNodeEle == theNodeToVertexMap.end()) {
+          opserr << "Domain::buildEleGraph - map STL failed to add object with tag : " << nodeTag << endln;
+          return false;
+        }
+      }
     }
 
-    // now add the the Elements to the nodes
-    Element *elePtr;
-    TaggedObjectIter &theEles3 = elements->getComponents();
-    
-    while((tagdObjPtr = theEles3()) != 0) {
-	elePtr = (Element *)tagdObjPtr;
-	int eleTag = elePtr->getTag();
-	const ID &id = elePtr->getExternalNodes();
+    // now add the the Elements to the node vertices
+    Element *theEle;
+    TaggedObjectIter &theEle3 = elements->getComponents();
 
-	int size = id.Size();
-	for (int i=0; i<size; i++) 
-	    theNodeTagVertices[id(i)]->addEdge(eleTag);
+    while((theTagged = theEle3()) != 0) {
+      theEle = (Element *)theTagged;
+      int eleTag = theEle->getTag();
+      const ID &id = theEle->getExternalNodes();
+
+      int size = id.Size();
+      for (int i=0; i<size; i++) {
+        int nodeTag = id(i);
+
+        MAP_ID_ITERATOR theNodeEle;
+        theNodeEle = theNodeToVertexMap.find(nodeTag);
+        if (theNodeEle == theNodeToVertexMap.end()) {
+          return -1;
+        } else {
+          ID *theNodeEleTags = (*theNodeEle).second;
+          theNodeEleTags->insert(eleTag);
+        }
+      }
     }
 
+    //
     // now add the edges to the vertices of our element graph;
-    // this is done by looping over the Node vertices, getting their 
+    // this is done by looping over the Node vertices, getting their
     // Adjacenecy and adding edges between elements with common nodes
+    //
 
+    MAP_ID_ITERATOR currentComponent;
+    currentComponent = theNodeToVertexMap.begin();
+    while (currentComponent != theNodeToVertexMap.end()) {
+      ID *id = (*currentComponent).second;
 
-    Vertex *vertexPtr;
-    for (int k=0; k<=maxNodNum; k++)
-	if ((vertexPtr = theNodeTagVertices[k]) != 0) {
+      int size = id->Size();
+      for (int i=0; i<size; i++) {
+        int eleTag1 = (*id)(i);
 
-	    const ID &id = vertexPtr->getAdjacency();
+        theEleToVertexMapEle = theEleToVertexMap.find(eleTag1);
+        if (theEleToVertexMapEle != theEleToVertexMap.end()) {
+          int vertexTag1 = (*theEleToVertexMapEle).second;
 
-	    int size = id.Size();
-	    for (int i=0; i<size; i++) {
-		int Element1 = id(i);
+          for (int j=0; j<size; j++)
+            if (i != j) {
+	      int eleTag2 = (*id)(j);
+              theEleToVertexMapEle = theEleToVertexMap.find(eleTag2);
+              if (theEleToVertexMapEle != theEleToVertexMap.end()) {
+                int vertexTag2 = (*theEleToVertexMapEle).second;
 
-		int vertexTag1 = theElementTagVertices[Element1];
+                // addEdge() adds for both vertices - do only once
 
-		for (int j=0; j<size; j++) 
-		    if (i != j) {
+                if (vertexTag1 > vertexTag2) {
+                  theEleGraph->addEdge(vertexTag1,vertexTag2);
+		  theEleGraph->addEdge(vertexTag2,vertexTag1);
+		}
+              }
+            }
+        }
+      }
+      currentComponent++;
+    }
 
-			int Element2 = id(j);
-			int vertexTag2 = theElementTagVertices[Element2];
-
-			// addEdge() adds for both vertices - do only once
-			if (vertexTag1 > vertexTag2) 
-			    theEleGraph->addEdge(vertexTag1,vertexTag2);
-			    theEleGraph->addEdge(vertexTag2,vertexTag1);			
-		    }
-	    }
-	}
-
-    // done now delete theElementTagVertices, the node Vertices and
-    // theNodeTagVertices
-   
-    delete [] theElementTagVertices;    
-    
-    for (int i=0; i<=maxNodNum; i++)
-	if ((vertexPtr = theNodeTagVertices[i]) != 0) 
-	    delete vertexPtr;
+    // clean up - delete the ID's associated with the nodes
+    currentComponent = theNodeToVertexMap.begin();
+    while (currentComponent != theNodeToVertexMap.end()) {
+      delete (*currentComponent).second;
+      currentComponent++;
+    }
 	    
-    delete [] theNodeTagVertices;
-
-    return 0;
-    
+    return 0;    
 }
 
 
