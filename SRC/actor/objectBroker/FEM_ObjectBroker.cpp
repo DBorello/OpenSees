@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.40 $
-// $Date: 2007-05-04 06:59:08 $
+// $Revision: 1.41 $
+// $Date: 2007-05-04 23:41:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -241,6 +241,7 @@
 #include <EquiSolnAlgo.h>
 #include <Linear.h>
 #include <NewtonRaphson.h>
+#include <Broyden.h>
 #include <NewtonLineSearch.h>
 #include <KrylovNewton.h>
 #include <ModifiedNewton.h>
@@ -1290,7 +1291,6 @@ FEM_ObjectBroker::getNewEquiSolnAlgo(int classTag)
 	case EquiALGORITHM_TAGS_Linear:  
 	     return new Linear();
 	     
-	     
 	case EquiALGORITHM_TAGS_NewtonRaphson:  
 	     return new NewtonRaphson();
 
@@ -1302,7 +1302,9 @@ FEM_ObjectBroker::getNewEquiSolnAlgo(int classTag)
 	     
 	case EquiALGORITHM_TAGS_ModifiedNewton:  
 	     return new ModifiedNewton();
-	     
+
+	case EquiALGORITHM_TAGS_Broyden:  
+	     return new Broyden();
 	     
 	default:
 	     opserr << "FEM_ObjectBroker::getNewEquiSolnAlgo - ";
