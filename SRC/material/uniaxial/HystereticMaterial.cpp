@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2006-10-03 20:37:41 $
+// $Revision: 1.16 $
+// $Date: 2007-05-04 23:40:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HystereticMaterial.cpp,v $
 
 // Written: MHS
@@ -526,6 +526,7 @@ HystereticMaterial::recvSelf(int commitTag, Channel &theChannel,
     damfc1 = data(15);
     damfc2 = data(16);
     beta = data(17);
+
     CrotMax = data(18);
     CrotMin = data(19);
     CrotPu = data(20);
@@ -545,9 +546,11 @@ HystereticMaterial::recvSelf(int commitTag, Channel &theChannel,
     TloadIndicator = CloadIndicator;
     Tstress = Cstress;
     Tstrain = Cstrain;
-
   }
 
+  // Set envelope slopes
+  this->setEnvelope();
+  
   return 0;
 }
     
