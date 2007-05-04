@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-02-14 18:45:46 $
+// $Revision: 1.14 $
+// $Date: 2007-05-04 07:00:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/TransformationConstraintHandler.cpp,v $
                                                                         
                                                                         
@@ -152,14 +152,13 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
     }
 
     // create an array for the DOF_Groups and zero it
-    if ((numDOF <= 0) || ((theDOFs = new DOF_Group *[numDOF]) == 0)) {
+    if ((numDOF != 0) && ((theDOFs = new DOF_Group *[numDOF]) == 0)) {
 	opserr << "WARNING TransformationConstraintHandler::handle() - ";
         opserr << "ran out of memory for DOF_Groups";
 	opserr << " array of size " << numDOF << endln;
 	return -3;    
     }    
     for (i=0; i<numDOF; i++) theDOFs[i] = 0;
-
 
     //create a DOF_Group for each Node and add it to the AnalysisModel.
     //    :must of course set the initial IDs
@@ -298,7 +297,7 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
     }
     
     // create an array for the FE_elements and zero it
-    if ((numFE <= 0) || ((theFEs  = new FE_Element *[numFE]) == 0)) {
+    if ((numFE != 0) && ((theFEs  = new FE_Element *[numFE]) == 0)) {
       opserr << "WARNING TransformationConstraintHandler::handle() - ";
       opserr << "ran out of memory for FE_elements"; 
       opserr << " array of size " << numFE << endln;
