@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-02-02 01:19:30 $
+// $Revision: 1.6 $
+// $Date: 2007-05-07 21:30:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FatigueMaterial.h,v $
                                                       
 // Written: Patxi
@@ -101,7 +101,7 @@ class FatigueMaterial : public UniaxialMaterial
 	       cycles did not flag a complete cycle */
   int   R1F; //Flag for first  peak count
   int   R2F; //Flag for second peak count
-  double CS; //Current Slope
+  double cSlope; //Current Slope
   double PS; //Previous slope
   double EP; //Previous Strain
   int    SF; /*Start Flag = 0 if very first strain, 
