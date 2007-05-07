@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2006-09-05 22:27:12 $
+// $Revision: 1.17 $
+// $Date: 2007-05-07 21:21:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.cpp,v $
                                                                         
 // Written: MHS 
@@ -509,9 +509,6 @@ Steel01::setParameter(const char **argv, int argc, Parameter &param)
   if (strcmp(argv[0],"a4") == 0)
     return param.addObject(7, this);
 
-  else
-    opserr << "WARNING: Could not set parameter in Steel01. " << endln;
-  
   return 0;
 }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2006-09-05 22:14:55 $
+// $Revision: 1.16 $
+// $Date: 2007-05-07 21:21:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.cpp,v $
                                                                         
 // Written: MHS 
@@ -526,10 +526,8 @@ Concrete01::setParameter(const char **argv, int argc, Parameter &param)
   if (strcmp(argv[0],"epscu") == 0) {// Strain at crushing strength
     return param.addObject(4, this);
   }
-  else {
-    opserr << "WARNING: Could not set parameter in Concrete01! " << endln;
-    return 0;
-  }
+
+  return 0;
 }
     
                             
