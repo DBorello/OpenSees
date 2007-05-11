@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-01-13 18:19:43 $
+// $Revision: 1.8 $
+// $Date: 2007-05-11 22:18:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclVideoPlayer.cpp,v $
                                                                         
                                                                         
@@ -40,6 +40,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <Renderer.h>
+
+#ifndef _NOGRAPHICS
+
 #ifdef _WGL
 #include <OpenGLRenderer.h>
 #elif _GLX
@@ -48,11 +52,11 @@
 #include <X11Renderer.h>
 #endif
 
+#endif
 
 #include <PlainMap.h>
 #include "TclVideoPlayer.h"
 #include <Vector.h>
-
 
 #include <iomanip>
 using std::ios;
@@ -61,11 +65,8 @@ using std::ios;
 // some static variables used in the functions
 //
 
-#ifdef _NOGRAPHICS
 
-#else
 extern TclVideoPlayer *theTclVideoPlayer;
-#endif
 
 
 int
@@ -106,6 +107,9 @@ TclVideoPlayer::TclVideoPlayer(const char *title, const char *fileName, const ch
 
 	// create the map and renderer
 	theMap = new PlainMap();
+
+#ifndef _NOGRAPHICS
+
 #ifdef _WGL
 	if (imageName == 0)
 	  theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap);
@@ -117,12 +121,16 @@ TclVideoPlayer::TclVideoPlayer(const char *title, const char *fileName, const ch
 #else
 	theRenderer = new X11Renderer(title, xLoc, yLoc, width, height, *theMap);
 #endif
+
+#endif
 	if (theMap == 0 || theRenderer == 0) 
 	  opserr << "WARNING TclVideoPlayer::TclVideoPlayer() - could not create renderer\n";
 
 	theFile.close();
       }
     }
+
+
 
     // see if a file containing rigid offsets has been supplied,
     // if so - make space, copy the string and try opeing the file
@@ -160,6 +168,10 @@ TclVideoPlayer::~TclVideoPlayer() {
 int 
 TclVideoPlayer::play(void)
 {
+#ifdef _NOGRAPHICS
+  return 0;
+#else
+  
   // rigid body offsets
 
   double dX, dY, dZ;
@@ -269,6 +281,7 @@ TclVideoPlayer::play(void)
     theOffsetFile.close();	
 
   return 0;
+#endif
 }
 
 int
@@ -276,7 +289,7 @@ TclVideoPlayer_play(ClientData clientData, Tcl_Interp *interp, int argc,
 		    TCL_Char **argv)
 {
 #ifdef _NOGRAPHICS
-
+  
 #else
   if (theTclVideoPlayer != 0)
     theTclVideoPlayer->play();
