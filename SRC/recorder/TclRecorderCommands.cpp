@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.41 $
-// $Date: 2007-04-25 23:42:26 $
+// $Revision: 1.42 $
+// $Date: 2007-05-11 22:20:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -74,13 +74,15 @@ enum outputMode  {STANDARD_STREAM, DATA_STREAM, XML_STREAM, DATABASE_STREAM};
 
 
 #include <EquiSolnAlgo.h>
+#include <TclFeViewer.h>
 
 #ifdef _NOGRAPHICS
 
 #else
-#include <TclFeViewer.h>
+
 #include <FilePlotter.h>
 #include <AlgorithmIncrements.h>
+
 #endif
 
 
@@ -670,7 +672,6 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 						  theDomain,
 						  *theOutputStream,
 						  dT, echoTimeFlag);
-
      
       if (theNodes != 0)
 	delete theNodes;
@@ -853,14 +854,10 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    wipeFlag = 1;
 
 
-#ifdef _NOGRAPHICS
-      return TCL_OK;
-#else
 	if (argc == 7 || argc == 8)
 	  (*theRecorder) = new TclFeViewer(argv[2], xLoc, yLoc, width, height, theDomain, wipeFlag, interp);
 	else if (argc == 9)
 	  (*theRecorder) = new TclFeViewer(argv[2], xLoc, yLoc, width, height, argv[8], theDomain, interp);
-#endif
     }
 
     else if (strcmp(argv[1],"plot") == 0) {
@@ -1139,19 +1136,17 @@ int
 TclAddRecorder(ClientData clientData, Tcl_Interp *interp, int argc, 
 	       TCL_Char **argv, Domain &theDomain)
 {
-	Recorder *theRecorder;
-	TclCreateRecorder(clientData, interp, argc, argv, theDomain, &theRecorder);
-	
-	if ((theRecorder == 0) || (theDomain.addRecorder(*theRecorder)) < 0) {
-		opserr << "WARNING could not add to domain - recorder " << argv[1]<< endln;
-		if (theRecorder == 0) 
-			opserr << "could not create recorder\n";
-		else
-			delete theRecorder;
-		return TCL_ERROR;
-	} 
-	return TCL_OK;
-	
+  Recorder *theRecorder;
+  TclCreateRecorder(clientData, interp, argc, argv, theDomain, &theRecorder);
+
+  if (theRecorder != 0)
+    if ((theDomain.addRecorder(*theRecorder)) < 0) {
+      opserr << "WARNING could not add to domain - recorder " << argv[1]<< endln;
+      delete theRecorder;
+      return TCL_ERROR;
+    }
+  
+  return TCL_OK;
 }
 
 
@@ -1159,21 +1154,23 @@ int
 TclAddAlgorithmRecorder(ClientData clientData, Tcl_Interp *interp, int argc, 
 			TCL_Char **argv, Domain &theDomain, EquiSolnAlgo *theAlgo)
 {
-	Recorder *theRecorder = 0;
-	theAlgorithm = theAlgo;
-	if (TclCreateRecorder(clientData, interp, argc, argv, theDomain,
+  Recorder *theRecorder = 0;
+  theAlgorithm = theAlgo;
+  if (TclCreateRecorder(clientData, interp, argc, argv, theDomain,
 			&theRecorder) == TCL_ERROR) {
-		return TCL_ERROR;
-	} else {
-		// add the recorder to the domain, 
-		// NOTE: will not be called with theALgo == 0
-		// see ~/g3/SRC/tcl/commands.C file
-		if (theRecorder == 0 || theAlgo->addRecorder(*theRecorder) < 0) {
-			opserr << "WARNING could not add to algorithm - recorder " << argv[1]<< endln;
-			delete theRecorder;
-			return TCL_ERROR;
-		} 
-		return TCL_OK;
-	}
+    return TCL_ERROR;
+  } else {
+    // add the recorder to the domain, 
+    // NOTE: will not be called with theALgo == 0
+    // see ~/g3/SRC/tcl/commands.C file
+    if (theRecorder != 0)
+      if ((theDomain.addRecorder(*theRecorder)) < 0) {
+	opserr << "WARNING could not add to domain - recorder " << argv[1]<< endln;
+	delete theRecorder;
+	return TCL_ERROR;
+      }
+    
+    return TCL_OK;
+  }
 }
 
