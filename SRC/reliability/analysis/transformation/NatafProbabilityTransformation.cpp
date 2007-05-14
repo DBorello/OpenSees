@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-03-01 17:56:09 $
+// $Revision: 1.5 $
+// $Date: 2007-05-14 23:19:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.cpp,v $
 
 
@@ -34,6 +34,7 @@
 #include <ProbabilityTransformation.h>
 #include <NatafProbabilityTransformation.h>
 #include <RandomVariable.h>
+#include <RandomVariableIter.h>
 #include <CorrelationCoefficient.h>
 #include <NormalRV.h>
 #include <Vector.h>
@@ -334,19 +335,26 @@ NatafProbabilityTransformation::transform_u_to_x()
 
 	// If user has set print flag to '1' then print realization 
 	if (printFlag == 1) {
-		RandomVariable *theRV;
 		double mean, stdv, dist; 
 		char theString[80];
 		sprintf(theString," CURRENT REALIZATION OF RANDOM VARIABLES:");
 		opserr << theString << endln;
-		for ( int i=0 ; i<nrv ; i++ )
-		{
-			theRV = theReliabilityDomain->getRandomVariablePtr(i+1);
-			mean = theRV->getMean();
-			stdv = theRV->getStdv();
-			dist = ((*x)(i)-mean)/stdv; 
-			sprintf(theString," x_%d: %5.2e (%5.2f standard deviations away from the mean)",(i+1),(*x)(i),dist);
-			opserr << theString << endln;
+
+		RandomVariable *theRV;
+		/*
+		RandomVariableIter &rvIter = 
+		  theReliabilityDomain->getRandomVariables();
+		while ((theRV = rvIter()) != 0) {
+		  int i = theRV->getGradNumber() - 1;
+		  int rvTag = theRV->getTag();
+		*/
+		for ( int i=0 ; i<nrv ; i++ ) {
+		  theRV = theReliabilityDomain->getRandomVariablePtr(i+1);
+		  mean = theRV->getMean();
+		  stdv = theRV->getStdv();
+		  dist = ((*x)(i)-mean)/stdv; 
+		  sprintf(theString," x_%d: %5.2e (%5.2f standard deviations away from the mean)",i+1,(*x)(i),dist);
+		  opserr << theString << endln;
 		}
 	}
 
@@ -386,19 +394,27 @@ NatafProbabilityTransformation::transform_u_to_x_andComputeJacobian()
 
 	// If user has set print flag to '1' then print realization 
 	if (printFlag == 1) {
-		RandomVariable *theRV;
 		double mean, stdv, dist; 
 		char theString[80];
 		sprintf(theString," CURRENT REALIZATION OF RANDOM VARIABLES:");
 		opserr << theString << endln;
-		for ( int i=0 ; i<nrv ; i++ )
-		{
-			theRV = theReliabilityDomain->getRandomVariablePtr(i+1);
-			mean = theRV->getMean();
-			stdv = theRV->getStdv();
-			dist = ((*x)(i)-mean)/stdv; 
-			sprintf(theString," x_%d: %5.2e (%5.2f standard deviations away from the mean)",(i+1),(*x)(i),dist);
-			opserr << theString << endln;
+
+		RandomVariable *theRV;
+		/*
+		RandomVariableIter &rvIter = 
+		  theReliabilityDomain->getRandomVariables();
+		while ((theRV = rvIter()) != 0) {
+		  int i = theRV->getGradNumber() - 1;
+		  opserr << "NATAF " << i << endln;
+		  int rvTag = theRV->getTag();
+		*/
+		for ( int i=0 ; i<nrv ; i++ ) {
+		  theRV = theReliabilityDomain->getRandomVariablePtr(i+1);
+		  mean = theRV->getMean();
+		  stdv = theRV->getStdv();
+		  dist = ((*x)(i)-mean)/stdv; 
+		  sprintf(theString," x_%d: %5.2e (%5.2f standard deviations away from the mean)",i+1,(*x)(i),dist);
+		  opserr << theString << endln;
 		}
 	}
 
@@ -450,36 +466,42 @@ NatafProbabilityTransformation::getJacobian_u_x()
 Matrix
 NatafProbabilityTransformation::getJacobian_z_x(const Vector &x, const Vector &z)
 {	
-	RandomVariable *theRV;
 	NormalRV aStandardNormalRV(1, 0.0, 1.0, 0.0);
 	Matrix jacobianMatrix_z_x(nrv,nrv);
-	for ( int i=0 ; i<nrv ; i++ )
-	{
-		theRV = theReliabilityDomain->getRandomVariablePtr(i+1);
-		if (strcmp(theRV->getType(),"NORMAL")==0) {
-			double sigma = theRV->getParameter2();
-			jacobianMatrix_z_x(i,i) = 1.0 / sigma;
-		}
-		else if (strcmp(theRV->getType(),"LOGNORMAL")==0) {
-			double zeta = fabs(theRV->getParameter2());
-			if (x(i) == 0.0) {
-				opserr << "NatafProbabilityTransformation::getJacobian_z_x() -- Error: value " << endln
-				    << "of lognormal random variable is zero in original space. " << endln;
-			}
-			jacobianMatrix_z_x(i,i) = 1.0 / ( zeta * x(i)  );
-		}
-		else {
-			double pdf = aStandardNormalRV.getPDFvalue(z(i));
-			if (pdf == 0.0) {
-				opserr << "ERROR: NatafProbabilityTransformation::getJacobian_z_x() -- " << endln
-					<< " the PDF value is zero, probably due to too large step. " << endln;
-			}
-			jacobianMatrix_z_x(i,i) = theRV->getPDFvalue(x(i)) / pdf;
-			if (jacobianMatrix_z_x(i,i)==0.0) {
-			}
-		}
-	}
 
+	RandomVariable *theRV;
+	/*
+	RandomVariableIter &rvIter = 
+	  theReliabilityDomain->getRandomVariables();
+	while ((theRV = rvIter()) != 0) {
+	  int i = theRV->getGradNumber() - 1;
+	*/
+	for ( int i=0 ; i<nrv ; i++ ) {
+	  theRV = theReliabilityDomain->getRandomVariablePtr(i+1);
+	  if (strcmp(theRV->getType(),"NORMAL")==0) {
+	    double sigma = theRV->getParameter2();
+	    jacobianMatrix_z_x(i,i) = 1.0 / sigma;
+	  }
+	  else if (strcmp(theRV->getType(),"LOGNORMAL")==0) {
+	    double zeta = fabs(theRV->getParameter2());
+	    if (x(i) == 0.0) {
+	      opserr << "NatafProbabilityTransformation::getJacobian_z_x() -- Error: value " << endln
+		     << "of lognormal random variable is zero in original space. " << endln;
+	    }
+	    jacobianMatrix_z_x(i,i) = 1.0 / ( zeta * x(i)  );
+	  }
+	  else {
+	    double pdf = aStandardNormalRV.getPDFvalue(z(i));
+	    if (pdf == 0.0) {
+	      opserr << "ERROR: NatafProbabilityTransformation::getJacobian_z_x() -- " << endln
+		     << " the PDF value is zero, probably due to too large step. " << endln;
+	    }
+	    jacobianMatrix_z_x(i,i) = theRV->getPDFvalue(x(i)) / pdf;
+	    if (jacobianMatrix_z_x(i,i)==0.0) {
+	    }
+	  }
+	}
+	
 	return jacobianMatrix_z_x;
 }
 
@@ -489,31 +511,38 @@ NatafProbabilityTransformation::getJacobian_z_x(const Vector &x, const Vector &z
 Vector
 NatafProbabilityTransformation::z_to_x(const Vector &z)
 {
-	RandomVariable *theRV;
 	NormalRV aStandardNormalRV(1, 0.0, 1.0, 0.0);
 	Vector x(nrv);
-	for ( int i=0 ; i<nrv ; i++ )
-	{
-		theRV = theReliabilityDomain->getRandomVariablePtr(i+1);
-		if (strcmp(theRV->getType(),"NORMAL")==0) {
-			double mju = theRV->getParameter1();
-			double sigma = theRV->getParameter2();
-			x(i) = z(i) * sigma + mju;
-		}
-		else if (strcmp(theRV->getType(),"LOGNORMAL")==0) {
-			double lambda = theRV->getParameter1();
-			double zeta = theRV->getParameter2();
-			if (zeta < 0.0) { // interpret this as negative lognormal random variable
-				x(i) = -exp ( -z(i) * zeta + lambda );
-			}
-			else {
-				x(i) = exp ( z(i) * zeta + lambda );
-			}
-		}
-		else {
-			x(i) = theRV->getInverseCDFvalue(  aStandardNormalRV.getCDFvalue(z(i))  );
-		}
+
+	RandomVariable *theRV;
+	/*
+	RandomVariableIter &rvIter = 
+	  theReliabilityDomain->getRandomVariables();
+	while ((theRV = rvIter()) != 0) {
+	  int i = theRV->getGradNumber() - 1;
+	*/
+	for ( int i=0 ; i<nrv ; i++ ) {
+	  theRV = theReliabilityDomain->getRandomVariablePtr(i+1);
+	  if (strcmp(theRV->getType(),"NORMAL")==0) {
+	    double mju = theRV->getParameter1();
+	    double sigma = theRV->getParameter2();
+	    x(i) = z(i) * sigma + mju;
+	  }
+	  else if (strcmp(theRV->getType(),"LOGNORMAL")==0) {
+	    double lambda = theRV->getParameter1();
+	    double zeta = theRV->getParameter2();
+	    if (zeta < 0.0) { // interpret this as negative lognormal random variable
+	      x(i) = -exp ( -z(i) * zeta + lambda );
+	    }
+	    else {
+	      x(i) = exp ( z(i) * zeta + lambda );
+	    }
+	  }
+	  else {
+	    x(i) = theRV->getInverseCDFvalue(  aStandardNormalRV.getCDFvalue(z(i))  );
+	  }
 	}
+
 	return x;
 }
 
@@ -524,31 +553,38 @@ NatafProbabilityTransformation::z_to_x(const Vector &z)
 Vector
 NatafProbabilityTransformation::x_to_z(const Vector &x)
 {
-	RandomVariable *theRV;
 	NormalRV aStandardNormalRV(1, 0.0, 1.0, 0.0);
 	Vector z(nrv);
-	for ( int i=0 ; i<nrv ; i++ )
-	{
-		theRV = theReliabilityDomain->getRandomVariablePtr(i+1);
-		if (strcmp(theRV->getType(),"NORMAL")==0) {
-			double mju = theRV->getParameter1();
-			double sigma = theRV->getParameter2();
-			z(i) =   ( x(i) - mju ) / sigma;
-		}
-		else if (strcmp(theRV->getType(),"LOGNORMAL")==0) {
-			double lambda = theRV->getParameter1();
-			double zeta = theRV->getParameter2();
-			if (zeta < 0.0) { /// interpret this as a negative lognormal random variable
-				z(i) = -( log ( fabs(x(i)) ) - lambda ) / zeta;
-			}
-			else {
-				z(i) = ( log ( x(i) ) - lambda ) / zeta;
-			}
-		}
-		else {
-			z(i) = aStandardNormalRV.getInverseCDFvalue(theRV->getCDFvalue(x(i)));
-		}
+
+	RandomVariable *theRV;
+	/*
+	RandomVariableIter &rvIter = 
+	  theReliabilityDomain->getRandomVariables();
+	while ((theRV = rvIter()) != 0) {
+	  int i = theRV->getGradNumber() - 1;
+	*/
+	for ( int i=0 ; i<nrv ; i++ ) {
+	  theRV = theReliabilityDomain->getRandomVariablePtr(i+1);
+	  if (strcmp(theRV->getType(),"NORMAL")==0) {
+	    double mju = theRV->getParameter1();
+	    double sigma = theRV->getParameter2();
+	    z(i) =   ( x(i) - mju ) / sigma;
+	  }
+	  else if (strcmp(theRV->getType(),"LOGNORMAL")==0) {
+	    double lambda = theRV->getParameter1();
+	    double zeta = theRV->getParameter2();
+	    if (zeta < 0.0) { /// interpret this as a negative lognormal random variable
+	      z(i) = -( log ( fabs(x(i)) ) - lambda ) / zeta;
+	    }
+	    else {
+	      z(i) = ( log ( x(i) ) - lambda ) / zeta;
+	    }
+	  }
+	  else {
+	    z(i) = aStandardNormalRV.getInverseCDFvalue(theRV->getCDFvalue(x(i)));
+	  }
 	}
+
 	return z;
 }
 
@@ -833,26 +869,26 @@ NatafProbabilityTransformation::setCorrelationMatrix(int pertMeanOfThisRV, int p
 			newCorrelation = (temp-0.006*correlation*cov1+0.003*cov1*cov2-0.111*correlation*cov2)*correlation;
 		}
 		/////////////////////////////////////////////////////////////////////////////////
-		else if ( (strcmp(typeRv2,"EXPONENTIAL") == 0 || strcmp(typeRv2,"SHIFTEDEXPONENTIAL") == 0 )  &&  strcmp(typeRv2,"NORMAL") == 0  ) {
+		else if ( (strcmp(typeRv1,"EXPONENTIAL") == 0 || strcmp(typeRv1,"SHIFTEDEXPONENTIAL") == 0 )  &&  strcmp(typeRv2,"NORMAL") == 0  ) {
 			newCorrelation = 1.107 * correlation;
 		}
-		else if ( (strcmp(typeRv2,"EXPONENTIAL") == 0 || strcmp(typeRv2,"SHIFTEDEXPONENTIAL") == 0 )  &&  strcmp(typeRv2,"LOGNORMAL") == 0  ) {
+		else if ( (strcmp(typeRv1,"EXPONENTIAL") == 0 || strcmp(typeRv1,"SHIFTEDEXPONENTIAL") == 0 )  &&  strcmp(typeRv2,"LOGNORMAL") == 0  ) {
 			newCorrelation = (1.098 + 0.003*correlation + 0.019*cov2 + 0.025*correlation*correlation
 				+ 0.303*cov2*cov2 - 0.437*correlation*cov2) * correlation;
 		}
-		else if ( (strcmp(typeRv2,"EXPONENTIAL") == 0 || strcmp(typeRv2,"SHIFTEDEXPONENTIAL") == 0 )  &&  strcmp(typeRv2,"GAMMA") == 0  ) {
+		else if ( (strcmp(typeRv1,"EXPONENTIAL") == 0 || strcmp(typeRv1,"SHIFTEDEXPONENTIAL") == 0 )  &&  strcmp(typeRv2,"GAMMA") == 0  ) {
 			newCorrelation = (1.104+0.003*correlation-0.008*cov2+0.014*correlation*correlation+0.173*cov2*cov2-0.296*correlation*cov2)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"EXPONENTIAL") == 0 || strcmp(typeRv2,"SHIFTEDEXPONENTIAL") == 0 )  &&  (strcmp(typeRv2,"EXPONENTIAL") == 0 || strcmp(typeRv2,"SHIFTEDEXPONENTIAL") == 0 ) ) {
+		else if ( (strcmp(typeRv1,"EXPONENTIAL") == 0 || strcmp(typeRv1,"SHIFTEDEXPONENTIAL") == 0 )  &&  (strcmp(typeRv2,"EXPONENTIAL") == 0 || strcmp(typeRv2,"SHIFTEDEXPONENTIAL") == 0 ) ) {
 			newCorrelation = (1.229-0.367*correlation+0.153*correlation*correlation)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"EXPONENTIAL") == 0 || strcmp(typeRv2,"SHIFTEDEXPONENTIAL") == 0 )  &&  (strcmp(typeRv2,"RAYLEIGH") == 0 || strcmp(typeRv2,"SHIFTEDRAYLEIGH") == 0 ) ) {
+		else if ( (strcmp(typeRv1,"EXPONENTIAL") == 0 || strcmp(typeRv1,"SHIFTEDEXPONENTIAL") == 0 )  &&  (strcmp(typeRv2,"RAYLEIGH") == 0 || strcmp(typeRv2,"SHIFTEDRAYLEIGH") == 0 ) ) {
 			newCorrelation = (1.123-0.100*correlation+0.021*correlation*correlation)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"EXPONENTIAL") == 0 || strcmp(typeRv2,"SHIFTEDEXPONENTIAL") == 0 )  &&  strcmp(typeRv2,"UNIFORM") == 0  ) {
+		else if ( (strcmp(typeRv1,"EXPONENTIAL") == 0 || strcmp(typeRv1,"SHIFTEDEXPONENTIAL") == 0 )  &&  strcmp(typeRv2,"UNIFORM") == 0  ) {
 			newCorrelation = (1.133+0.029*correlation*correlation)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"EXPONENTIAL") == 0 || strcmp(typeRv2,"SHIFTEDEXPONENTIAL") == 0 )  &&  strcmp(typeRv2,"BETA") == 0  ) {
+		else if ( (strcmp(typeRv1,"EXPONENTIAL") == 0 || strcmp(typeRv1,"SHIFTEDEXPONENTIAL") == 0 )  &&  strcmp(typeRv2,"BETA") == 0  ) {
 			double ba = rv2Ptr->getParameter4() - rv2Ptr->getParameter3();
 			double u2 = ( rv2Ptr->getMean() - rv2Ptr->getParameter3() ) / ba; 
 			double s2 = rv2Ptr->getStdv() / ba;
@@ -866,39 +902,39 @@ NatafProbabilityTransformation::setCorrelationMatrix(int pertMeanOfThisRV, int p
 				- 19.741*ss*s2+0.135*correlation*xs+5.338*uu*s2+3.397*correlation*us;
 			newCorrelation = temp*correlation;
 		}
-		else if ( (strcmp(typeRv2,"EXPONENTIAL") == 0 || strcmp(typeRv2,"SHIFTEDEXPONENTIAL") == 0 )  &&  (strcmp(typeRv2,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv2,"GUMBEL") == 0)  ) {
+		else if ( (strcmp(typeRv1,"EXPONENTIAL") == 0 || strcmp(typeRv1,"SHIFTEDEXPONENTIAL") == 0 )  &&  (strcmp(typeRv2,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv2,"GUMBEL") == 0)  ) {
 			newCorrelation = (1.142-0.154*correlation+0.031*correlation*correlation)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"EXPONENTIAL") == 0 || strcmp(typeRv2,"SHIFTEDEXPONENTIAL") == 0 )  &&  strcmp(typeRv2,"TYPE1SMALLESTVALAUE") == 0  ) {
+		else if ( (strcmp(typeRv1,"EXPONENTIAL") == 0 || strcmp(typeRv1,"SHIFTEDEXPONENTIAL") == 0 )  &&  strcmp(typeRv2,"TYPE1SMALLESTVALAUE") == 0  ) {
 			newCorrelation = (1.142+0.154*correlation+0.031*correlation*correlation)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"EXPONENTIAL") == 0 || strcmp(typeRv2,"SHIFTEDEXPONENTIAL") == 0 )  &&  strcmp(typeRv2,"TYPE2LARGESTVALUE") == 0  ) {
+		else if ( (strcmp(typeRv1,"EXPONENTIAL") == 0 || strcmp(typeRv1,"SHIFTEDEXPONENTIAL") == 0 )  &&  strcmp(typeRv2,"TYPE2LARGESTVALUE") == 0  ) {
 			newCorrelation = (1.109-0.152*correlation+0.361*cov2+0.130*correlation*correlation+0.455*cov2*cov2-0.728*correlation*cov2)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"EXPONENTIAL") == 0 || strcmp(typeRv2,"SHIFTEDEXPONENTIAL") == 0 )  &&  (strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv2,"WEIBULL") == 0) ) {
+		else if ( (strcmp(typeRv1,"EXPONENTIAL") == 0 || strcmp(typeRv1,"SHIFTEDEXPONENTIAL") == 0 )  &&  (strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv2,"WEIBULL") == 0) ) {
 			newCorrelation = (1.147+0.145*correlation-0.271*cov2+0.010*correlation*correlation+0.459*cov2*cov2-0.467*correlation*cov2)*correlation;
 		}
 		/////////////////////////////////////////////////////////////////////////////////
-		else if ( (strcmp(typeRv2,"RAYLEIGH") == 0 || strcmp(typeRv2,"SHIFTEDRAYLEIGH") == 0 )  &&  strcmp(typeRv2,"NORMAL") == 0  ) {
+		else if ( (strcmp(typeRv1,"RAYLEIGH") == 0 || strcmp(typeRv1,"SHIFTEDRAYLEIGH") == 0 )  &&  strcmp(typeRv2,"NORMAL") == 0  ) {
 			newCorrelation = 1.014 * correlation;
 		}
-		else if ( (strcmp(typeRv2,"RAYLEIGH") == 0 || strcmp(typeRv2,"SHIFTEDRAYLEIGH") == 0 )  &&  strcmp(typeRv2,"LOGNORMAL") == 0  ) {
+		else if ( (strcmp(typeRv1,"RAYLEIGH") == 0 || strcmp(typeRv1,"SHIFTEDRAYLEIGH") == 0 )  &&  strcmp(typeRv2,"LOGNORMAL") == 0  ) {
 			newCorrelation = (1.011 + 0.001*correlation + 0.014*cov2 + 0.004*correlation*correlation 
 				+ 0.231*cov2*cov2 - 0.130*correlation*cov2) * correlation;
 		}
-		else if ( (strcmp(typeRv2,"RAYLEIGH") == 0 || strcmp(typeRv2,"SHIFTEDRAYLEIGH") == 0 )  &&  strcmp(typeRv2,"GAMMA") == 0  ) {
+		else if ( (strcmp(typeRv1,"RAYLEIGH") == 0 || strcmp(typeRv1,"SHIFTEDRAYLEIGH") == 0 )  &&  strcmp(typeRv2,"GAMMA") == 0  ) {
 			newCorrelation = (1.014+0.001*correlation-0.007*cov2+0.002*correlation*correlation+0.126*cov2*cov2-0.090*correlation*cov2)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"RAYLEIGH") == 0 || strcmp(typeRv2,"SHIFTEDRAYLEIGH") == 0 )  &&  (strcmp(typeRv2,"EXPONENTIAL") == 0 || strcmp(typeRv2,"SHIFTEDEXPONENTIAL") == 0 ) ) {
+		else if ( (strcmp(typeRv1,"RAYLEIGH") == 0 || strcmp(typeRv1,"SHIFTEDRAYLEIGH") == 0 )  &&  (strcmp(typeRv2,"EXPONENTIAL") == 0 || strcmp(typeRv2,"SHIFTEDEXPONENTIAL") == 0 ) ) {
 			newCorrelation = (1.123-0.100*correlation+0.021*correlation*correlation)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"RAYLEIGH") == 0 || strcmp(typeRv2,"SHIFTEDRAYLEIGH") == 0 )  &&  (strcmp(typeRv2,"RAYLEIGH") == 0 || strcmp(typeRv2,"SHIFTEDRAYLEIGH") == 0 ) ) {
+		else if ( (strcmp(typeRv1,"RAYLEIGH") == 0 || strcmp(typeRv1,"SHIFTEDRAYLEIGH") == 0 )  &&  (strcmp(typeRv2,"RAYLEIGH") == 0 || strcmp(typeRv2,"SHIFTEDRAYLEIGH") == 0 ) ) {
 			newCorrelation = (1.028-0.029*correlation)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"RAYLEIGH") == 0 || strcmp(typeRv2,"SHIFTEDRAYLEIGH") == 0 )  &&  strcmp(typeRv2,"UNIFORM") == 0  ) {
+		else if ( (strcmp(typeRv1,"RAYLEIGH") == 0 || strcmp(typeRv1,"SHIFTEDRAYLEIGH") == 0 )  &&  strcmp(typeRv2,"UNIFORM") == 0  ) {
 			newCorrelation = (1.038-0.008*correlation*correlation)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"RAYLEIGH") == 0 || strcmp(typeRv2,"SHIFTEDRAYLEIGH") == 0 )  &&  strcmp(typeRv2,"BETA") == 0  ) {
+		else if ( (strcmp(typeRv1,"RAYLEIGH") == 0 || strcmp(typeRv1,"SHIFTEDRAYLEIGH") == 0 )  &&  strcmp(typeRv2,"BETA") == 0  ) {
 			double ba = rv2Ptr->getParameter4() - rv2Ptr->getParameter3();
 			double u2 = ( rv2Ptr->getMean() - rv2Ptr->getParameter3() ) / ba; 
 			double s2 = rv2Ptr->getStdv() / ba;
@@ -906,16 +942,16 @@ NatafProbabilityTransformation::setCorrelationMatrix(int pertMeanOfThisRV, int p
 				+0.182*u2*u2-1.150*s2*s2+0.084*correlation*u2;
 			newCorrelation = temp*correlation;
 		}
-		else if ( (strcmp(typeRv2,"RAYLEIGH") == 0 || strcmp(typeRv2,"SHIFTEDRAYLEIGH") == 0 )  &&  (strcmp(typeRv2,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv2,"GUMBEL") == 0)  ) {
+		else if ( (strcmp(typeRv1,"RAYLEIGH") == 0 || strcmp(typeRv1,"SHIFTEDRAYLEIGH") == 0 )  &&  (strcmp(typeRv2,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv2,"GUMBEL") == 0)  ) {
 			newCorrelation = (1.046-0.045*correlation+0.006*correlation*correlation)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"RAYLEIGH") == 0 || strcmp(typeRv2,"SHIFTEDRAYLEIGH") == 0 )  &&  strcmp(typeRv2,"TYPE1SMALLESTVALAUE") == 0  ) {
+		else if ( (strcmp(typeRv1,"RAYLEIGH") == 0 || strcmp(typeRv1,"SHIFTEDRAYLEIGH") == 0 )  &&  strcmp(typeRv2,"TYPE1SMALLESTVALAUE") == 0  ) {
 			newCorrelation = (1.046+0.045*correlation+0.006*correlation*correlation)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"RAYLEIGH") == 0 || strcmp(typeRv2,"SHIFTEDRAYLEIGH") == 0 )  &&  strcmp(typeRv2,"TYPE2LARGESTVALUE") == 0  ) {
+		else if ( (strcmp(typeRv1,"RAYLEIGH") == 0 || strcmp(typeRv1,"SHIFTEDRAYLEIGH") == 0 )  &&  strcmp(typeRv2,"TYPE2LARGESTVALUE") == 0  ) {
 			newCorrelation = (1.036-0.038*correlation+0.266*cov2+0.028*correlation*correlation+0.383*cov2*cov2-0.229*correlation*cov2)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"RAYLEIGH") == 0 || strcmp(typeRv2,"SHIFTEDRAYLEIGH") == 0 )  &&  (strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv2,"WEIBULL") == 0) ) {
+		else if ( (strcmp(typeRv1,"RAYLEIGH") == 0 || strcmp(typeRv1,"SHIFTEDRAYLEIGH") == 0 )  &&  (strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv2,"WEIBULL") == 0) ) {
 			newCorrelation = (1.047+0.042*correlation-0.212*cov2+0.353*cov2*cov2-0.136*correlation*cov2)*correlation;
 		}
 		/////////////////////////////////////////////////////////////////////////////////
@@ -1148,26 +1184,26 @@ NatafProbabilityTransformation::setCorrelationMatrix(int pertMeanOfThisRV, int p
 			newCorrelation = temp * correlation;
 		}
 		/////////////////////////////////////////////////////////////////////////////////
-		else if ( (strcmp(typeRv2,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv2,"GUMBEL") == 0)  &&  strcmp(typeRv2,"NORMAL") == 0  ) {
+		else if ( (strcmp(typeRv1,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv1,"GUMBEL") == 0)  &&  strcmp(typeRv2,"NORMAL") == 0  ) {
 			newCorrelation = 1.031 * correlation;
 		}
-		else if ( (strcmp(typeRv2,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv2,"GUMBEL") == 0)  &&  strcmp(typeRv2,"LOGNORMAL") == 0  ) {
+		else if ( (strcmp(typeRv1,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv1,"GUMBEL") == 0)  &&  strcmp(typeRv2,"LOGNORMAL") == 0  ) {
 			newCorrelation = (1.029 + 0.001*correlation + 0.014*cov2 + 0.004*correlation*correlation
 				+ 0.233*cov2*cov2 - 0.197*correlation*cov2)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv2,"GUMBEL") == 0)  &&  strcmp(typeRv2,"GAMMA") == 0  ) {
+		else if ( (strcmp(typeRv1,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv1,"GUMBEL") == 0)  &&  strcmp(typeRv2,"GAMMA") == 0  ) {
 			newCorrelation = (1.031+0.001*correlation-0.007*cov2+0.003*correlation*correlation+0.131*cov2*cov2-0.132*correlation*cov2)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv2,"GUMBEL") == 0)  &&  (strcmp(typeRv2,"EXPONENTIAL") == 0 || strcmp(typeRv2,"SHIFTEDEXPONENTIAL") == 0 ) ) {
+		else if ( (strcmp(typeRv1,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv1,"GUMBEL") == 0)  &&  (strcmp(typeRv2,"EXPONENTIAL") == 0 || strcmp(typeRv2,"SHIFTEDEXPONENTIAL") == 0 ) ) {
 			newCorrelation = (1.142-0.154*correlation+0.031*correlation*correlation)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv2,"GUMBEL") == 0)  &&  (strcmp(typeRv2,"RAYLEIGH") == 0 || strcmp(typeRv2,"SHIFTEDRAYLEIGH") == 0 ) ) {
+		else if ( (strcmp(typeRv1,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv1,"GUMBEL") == 0)  &&  (strcmp(typeRv2,"RAYLEIGH") == 0 || strcmp(typeRv2,"SHIFTEDRAYLEIGH") == 0 ) ) {
 			newCorrelation = (1.046-0.045*correlation+0.006*correlation*correlation)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv2,"GUMBEL") == 0)  &&  strcmp(typeRv2,"UNIFORM") == 0  ) {
+		else if ( (strcmp(typeRv1,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv1,"GUMBEL") == 0)  &&  strcmp(typeRv2,"UNIFORM") == 0  ) {
 			newCorrelation = (1.055+0.015*correlation*correlation)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv2,"GUMBEL") == 0)  &&  strcmp(typeRv2,"BETA") == 0  ) {
+		else if ( (strcmp(typeRv1,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv1,"GUMBEL") == 0)  &&  strcmp(typeRv2,"BETA") == 0  ) {
 			double ba = rv2Ptr->getParameter4() - rv2Ptr->getParameter3();
 			double u2 = ( rv2Ptr->getMean() - rv2Ptr->getParameter3() ) / ba; 
 			double s2 = rv2Ptr->getStdv() / ba;
@@ -1175,16 +1211,16 @@ NatafProbabilityTransformation::setCorrelationMatrix(int pertMeanOfThisRV, int p
 				+0.194*u2*u2-1.134*s2*s2+0.130*correlation*u2+0.003*correlation*s2;
 			newCorrelation = temp * correlation;
 		}
-		else if ( (strcmp(typeRv2,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv2,"GUMBEL") == 0)  &&  (strcmp(typeRv2,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv2,"GUMBEL") == 0)  ) {
+		else if ( (strcmp(typeRv1,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv1,"GUMBEL") == 0)  &&  (strcmp(typeRv2,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv2,"GUMBEL") == 0)  ) {
 			newCorrelation = (1.064-0.069*correlation+0.005*correlation*correlation)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv2,"GUMBEL") == 0)  &&  strcmp(typeRv2,"TYPE1SMALLESTVALAUE") == 0  ) {
+		else if ( (strcmp(typeRv1,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv1,"GUMBEL") == 0)  &&  strcmp(typeRv2,"TYPE1SMALLESTVALAUE") == 0  ) {
 			newCorrelation = (1.064+0.069*correlation+0.005*correlation*correlation)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv2,"GUMBEL") == 0)  &&  strcmp(typeRv2,"TYPE2LARGESTVALUE") == 0  ) {
+		else if ( (strcmp(typeRv1,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv1,"GUMBEL") == 0)  &&  strcmp(typeRv2,"TYPE2LARGESTVALUE") == 0  ) {
 			newCorrelation = (1.056-0.060*correlation+0.263*cov2+0.020*correlation*correlation+0.383*cov2*cov2-0.332*correlation*cov1)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv2,"GUMBEL") == 0)  &&  (strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv2,"WEIBULL") == 0) ) {
+		else if ( (strcmp(typeRv1,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv1,"GUMBEL") == 0)  &&  (strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv2,"WEIBULL") == 0) ) {
 			newCorrelation = (1.064+0.065*correlation-0.210*cov2+0.003*correlation*correlation+0.356*cov2*cov2-0.211*correlation*cov2)*correlation;
 		}
 		/////////////////////////////////////////////////////////////////////////////////
@@ -1289,27 +1325,27 @@ NatafProbabilityTransformation::setCorrelationMatrix(int pertMeanOfThisRV, int p
 			newCorrelation = (temp+0.005*correlation*cov1+0.034*cov1*cov2-0.481*correlation*cov2)*correlation;
 		}
 		/////////////////////////////////////////////////////////////////////////////////
-		else if ( (strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv2,"WEIBULL") == 0)  &&  strcmp(typeRv2,"NORMAL") == 0  ) {
+		else if ( (strcmp(typeRv1,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv1,"WEIBULL") == 0)  &&  strcmp(typeRv2,"NORMAL") == 0  ) {
 			newCorrelation = (1.031 - 0.195*cov1 + 0.328*cov1*cov1) * correlation;
 		}
-		else if ( (strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv2,"WEIBULL") == 0)  &&  strcmp(typeRv2,"LOGNORMAL") == 0  ) {
+		else if ( (strcmp(typeRv1,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv1,"WEIBULL") == 0)  &&  strcmp(typeRv2,"LOGNORMAL") == 0  ) {
 			double temp = 1.031+0.052*correlation+0.011*cov2-0.210*cov1+0.002*correlation*correlation+0.220*cov2*cov2+0.350*cov1*cov1;
 			newCorrelation = (temp+0.005*correlation*cov2+0.009*cov2*cov1-0.174*correlation*cov1)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv2,"WEIBULL") == 0)  &&  strcmp(typeRv2,"GAMMA") == 0  ) {
+		else if ( (strcmp(typeRv1,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv1,"WEIBULL") == 0)  &&  strcmp(typeRv2,"GAMMA") == 0  ) {
 			double temp = 1.032+0.034*correlation-0.007*cov2-0.202*cov1+0.000*correlation*correlation+0.121*cov2*cov2+0.339*cov1*cov1;
 			newCorrelation = (temp-0.006*correlation*cov2+0.003*cov2*cov1-0.111*correlation*cov1)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv2,"WEIBULL") == 0)  &&  (strcmp(typeRv2,"EXPONENTIAL") == 0 || strcmp(typeRv2,"SHIFTEDEXPONENTIAL") == 0 ) ) {
+		else if ( (strcmp(typeRv1,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv1,"WEIBULL") == 0)  &&  (strcmp(typeRv2,"EXPONENTIAL") == 0 || strcmp(typeRv2,"SHIFTEDEXPONENTIAL") == 0 ) ) {
 			newCorrelation = (1.147+0.145*correlation-0.271*cov1+0.010*correlation*correlation+0.459*cov1*cov1-0.467*correlation*cov1)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv2,"WEIBULL") == 0)  &&  (strcmp(typeRv2,"RAYLEIGH") == 0 || strcmp(typeRv2,"SHIFTEDRAYLEIGH") == 0 ) ) {
+		else if ( (strcmp(typeRv1,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv1,"WEIBULL") == 0)  &&  (strcmp(typeRv2,"RAYLEIGH") == 0 || strcmp(typeRv2,"SHIFTEDRAYLEIGH") == 0 ) ) {
 			newCorrelation = (1.047+0.042*correlation-0.212*cov1+0.353*cov1*cov1-0.136*correlation*cov1)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv2,"WEIBULL") == 0)  &&  strcmp(typeRv2,"UNIFORM") == 0  ) {
+		else if ( (strcmp(typeRv1,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv1,"WEIBULL") == 0)  &&  strcmp(typeRv2,"UNIFORM") == 0  ) {
 			newCorrelation = (1.061-0.237*cov1-0.005*correlation*correlation+0.379*cov1*cov1)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv2,"WEIBULL") == 0)  &&  strcmp(typeRv2,"BETA") == 0  ) {
+		else if ( (strcmp(typeRv1,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv1,"WEIBULL") == 0)  &&  strcmp(typeRv2,"BETA") == 0  ) {
 			double ba = rv2Ptr->getParameter4() - rv2Ptr->getParameter3();
 			double u2 = ( rv2Ptr->getMean() - rv2Ptr->getParameter3() ) / ba; 
 			double s2 = rv2Ptr->getStdv() / ba;
@@ -1318,19 +1354,19 @@ NatafProbabilityTransformation::setCorrelationMatrix(int pertMeanOfThisRV, int p
 				-0.004*correlation*u2-0.029*s2*cov1;
 			newCorrelation = temp * correlation;
 		}
-		else if ( (strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv2,"WEIBULL") == 0)  &&  (strcmp(typeRv2,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv2,"GUMBEL") == 0)  ) {
+		else if ( (strcmp(typeRv1,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv1,"WEIBULL") == 0)  &&  (strcmp(typeRv2,"TYPE1LARGESTVALUE") == 0 || strcmp(typeRv2,"GUMBEL") == 0)  ) {
 			newCorrelation = (1.064+0.065*correlation-0.210*cov1+0.003*correlation*correlation+0.356*cov1*cov1-0.211*correlation*cov1)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv2,"WEIBULL") == 0)  &&  strcmp(typeRv2,"TYPE1SMALLESTVALAUE") == 0  ) {
+		else if ( (strcmp(typeRv1,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv1,"WEIBULL") == 0)  &&  strcmp(typeRv2,"TYPE1SMALLESTVALAUE") == 0  ) {
 			newCorrelation = (1.064-0.065*correlation-0.210*cov1+0.003*correlation*correlation+0.356*cov1*cov1+0.211*correlation*cov1)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv2,"WEIBULL") == 0)  &&  strcmp(typeRv2,"TYPE2LARGESTVALUE") == 0  ) {
+		else if ( (strcmp(typeRv1,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv1,"WEIBULL") == 0)  &&  strcmp(typeRv2,"TYPE2LARGESTVALUE") == 0  ) {
 			double temp = 1.065+0.146*correlation+0.241*cov2-0.259*cov1+0.013*correlation*correlation+0.372*cov2*cov2+0.435*cov1*cov1;
 			newCorrelation = (temp+0.005*correlation*cov2+0.034*cov1*cov2-0.481*correlation*cov1)*correlation;
 		}
 #ifndef _WIN32
 		// VC++.net has a limit of 128 on number of nested conditionals!!!!!!!!
-		else if ( (strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv2,"WEIBULL") == 0)  &&  ( strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0  || strcmp(typeRv2,"WEIBULL") == 0 ) ) {
+		else if ( (strcmp(typeRv1,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv1,"WEIBULL") == 0)  &&  ( strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0  || strcmp(typeRv2,"WEIBULL") == 0 ) ) {
 			double temp = 1.063-0.004*correlation-0.200*(cov1+cov2)-0.001*correlation*correlation+0.337*(cov1*cov1+cov2*cov2);
 			newCorrelation = (temp+0.007*(correlation*cov1+correlation*cov2)-0.007*cov1*cov2)*correlation;
 		}
