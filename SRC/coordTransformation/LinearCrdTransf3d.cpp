@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.13 $
-// $Date: 2005-12-15 00:30:38 $
+// $Revision: 1.14 $
+// $Date: 2007-05-15 22:21:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf3d.cpp,v $
 
 
