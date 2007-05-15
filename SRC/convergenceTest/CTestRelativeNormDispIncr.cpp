@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2005-12-15 00:19:28 $
+// $Revision: 1.4 $
+// $Date: 2007-05-15 21:55:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/convergenceTest/CTestRelativeNormDispIncr.cpp,v $
 
 
