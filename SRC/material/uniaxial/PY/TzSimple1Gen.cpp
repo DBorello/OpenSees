@@ -10,11 +10,12 @@
 //              December 2, 2003									//
 //////////////////////////////////////////////////////////////////////
 
-//$Revision: 1.4 $
-//$Date: 2004-06-30 00:27:40 $
+//$Revision: 1.5 $
+//$Date: 2007-05-15 21:56:29 $
 //$Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PY/TzSimple1Gen.cpp,v $
 
 #include "TzSimple1Gen.h"
+#include <stdlib.h>
 
 using namespace std;
 
