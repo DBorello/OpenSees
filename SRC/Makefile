@@ -68,6 +68,66 @@ all:
 
 else
 
+ifeq ($(GRAPHICS), NONE)
+all:
+	@$(RM) $(RMFLAGS) $(FE_LIBRARY);
+	@$(CD) $(FE)/matrix; $(MAKE);
+	@$(CD) $(FE)/nDarray; $(MAKE);
+	@$(CD) $(FE)/database; $(MAKE);
+	@$(CD) $(FE)/system_of_eqn; $(MAKE);
+	@$(CD) $(FE)/modelbuilder; $(MAKE);
+	@$(CD) $(FE)/tagged; $(MAKE);
+	@$(CD) $(FE)/material; $(MAKE);
+	@$(CD) $(FE)/analysis; $(MAKE);
+	@$(CD) $(FE)/graph; $(MAKE);
+	@$(CD) $(FE)/utility; $(MAKE);
+	@$(CD) $(FE)/convergenceTest; $(MAKE);
+	@$(CD) $(FE)/recorder; $(MAKE);
+	@$(CD) $(FE)/tcl; $(MAKE);
+	@$(CD) $(FE)/renderer; $(MAKE);
+	@$(CD) $(FE)/domain; $(MAKE);
+	@$(CD) $(FE)/handler; $(MAKE);
+	@$(CD) $(FE)/actor; $(MAKE);
+	@$(CD) $(FE)/machine; $(MAKE);
+	@$(CD) $(FE)/element; $(MAKE);
+	@$(CD) $(FE)/coordTransformation; $(MAKE);
+	@$(CD) $(FE)/package; $(MAKE);
+	@$(CD) $(FE)/damage; $(MAKE);
+	@$(CD) $(FE)/package; $(MAKE);
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATRIX_LIBS) 
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(ELE_LIBS) 
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATERIAL_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(SECTION_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(DATABASE_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(FEDEAS_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MODEL_BUILDER_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(DOMAIN_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATMOD_BJ_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(NDARRAY_BJ_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(ELEMENT_BJ_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(FINITE_DEFORMATION_BJ_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(PY_SJB_RWB_BJ_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(ANALYSIS_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(SysOfEqn_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(GRAPH_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(TAGGED_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(UTILITY_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(ACTOR_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(RECORDER_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(LAW_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(GGD_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(REMO_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(GLF_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(ZHY_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(ERRORHANDLER_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(DRAIN_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(SNAP_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(FMK_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(KJE_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(ACTOR_LIBS)
+	@$(RANLIB) $(RANLIBFLAGS) $(FE_LIBRARY)
+else
+
 all:
 	@$(RM) $(RMFLAGS) $(FE_LIBRARY);
 	@$(CD) $(FE)/matrix; $(MAKE);
@@ -126,6 +186,7 @@ all:
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(KJE_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(ACTOR_LIBS)
 	@$(RANLIB) $(RANLIBFLAGS) $(FE_LIBRARY)
+endif
 
 endif
 
