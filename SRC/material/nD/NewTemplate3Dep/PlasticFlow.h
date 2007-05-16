@@ -41,7 +41,7 @@ class PlasticFlow
 {
   public:
   
-    virtual ~PlasticFlow() {};
+    virtual ~PlasticFlow();
     
     virtual PlasticFlow *newObj() = 0;
     
