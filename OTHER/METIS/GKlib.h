@@ -4,18 +4,15 @@
  * George's library of most frequently used routines
  *
  * Started 4/10/95
- * $Id: GKlib.h,v 1.1.1.1 2000-09-15 08:23:12 fmk Exp $
+ * $Id: GKlib.h,v 1.2 2007-05-16 16:19:57 fmk Exp $
  *
  */
 
 #ifndef _GKLIB_H_
 #define _GKLIB_H_
 
-#include <rename.h>
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <malloc.h>
 #include <string.h>
 #include <ctype.h>
 #include <math.h>

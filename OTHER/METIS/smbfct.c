@@ -1,5 +1,5 @@
 
-#include <GKlib.h>
+#include "GKlib.h"
 
 /*****************************************************************          
 **********     SMBFCT ..... SYMBOLIC FACTORIZATION       ********* 

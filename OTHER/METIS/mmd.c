@@ -13,10 +13,9 @@
  * The meaning of invperm, and perm vectors is different from that
  * in genqmd_ of SparsPak
  *
- * $Id: mmd.c,v 1.1.1.1 2000-09-15 08:23:12 fmk Exp $
+ * $Id: mmd.c,v 1.2 2007-05-16 16:19:57 fmk Exp $
  */
 
-#include <rename.h>
 #include <stdio.h>
 #include <math.h>
 #include <string.h>

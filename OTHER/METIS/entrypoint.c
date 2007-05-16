@@ -9,11 +9,11 @@
  * Started 8/22/95
  * George
  *
- * $Id: entrypoint.c,v 1.1.1.1 2000-09-15 08:23:12 fmk Exp $
+ * $Id: entrypoint.c,v 1.2 2007-05-16 16:19:57 fmk Exp $
  *
  */
 
-#include <multilevel.h>
+#include "multilevel.h"
 
 static EdgeType *__edges;
 static VertexType *__vtxs;
