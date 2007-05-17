@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2004-11-24 23:58:15 $
+// $Revision: 1.8 $
+// $Date: 2007-05-17 05:17:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclFeViewer.h,v $
                                                                         
                                                                         
@@ -56,7 +56,8 @@ class TclFeViewer : public Recorder
     TclFeViewer(const char *title, int xLoc, int yLoc, int width, int height, const char *fileName,
 		Domain &theDomain, 
 		Tcl_Interp *interp);
-    
+
+    TclFeViewer();
     ~TclFeViewer();    
 
     int buildFE_Model(void);
@@ -89,6 +90,10 @@ class TclFeViewer : public Recorder
     int clearImage(void);
     int saveImage(const char *fileName);
     int saveImage(const char *imageName, const char *fileName);
+
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, 
+		 FEM_ObjectBroker &theBroker);
 
   protected:
 

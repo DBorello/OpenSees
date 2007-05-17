@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-05-11 22:18:47 $
+// $Revision: 1.11 $
+// $Date: 2007-05-17 05:17:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclFeViewer.cpp,v $
                                                                         
 // Written: fmk 
@@ -106,7 +106,19 @@ TclFeViewer_clearImage(ClientData clientData, Tcl_Interp *interp, int argc,
 		  TCL_Char **argv);		 
 //
 // the class constructor, destructor and methods
+
+
 //
+
+TclFeViewer::TclFeViewer()
+  :Recorder(RECORDER_TAGS_TclFeViewer),
+  theMap(0),theRenderer(0), theDomain(0), 
+  theEleMode(-1), theNodeMode(-1), theDisplayFact(1), wipeFlag(0),
+  vrpSet(0),vpwindowSet(0),clippingPlaneDistancesSet(0)
+{
+  theTclFeViewer = 0;
+  theMap = 0;
+}
 
 TclFeViewer::TclFeViewer(const char *title, int xLoc, int yLoc, int width, int height,
 			 Domain &_theDomain, int WipeFlag,
@@ -259,6 +271,10 @@ TclFeViewer::record(int cTag, double timeStamp)
   // if no graphics .. just return 0
   return 0;
 #else
+
+  if (theRenderer == 0)
+    return 0;
+
 
   //  theRenderer->displayModel(thetheEleMode, theNodeMode, theDisplayFact);
 
@@ -966,5 +982,14 @@ TclFeViewer_saveImage(ClientData clientData, Tcl_Interp *interp, int argc,
 }
 
 
+int 
+TclFeViewer::sendSelf(int commitTag, Channel &theChannel)
+{
+  return 0;
+}     
 
-
+int 
+TclFeViewer::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  return 0;
+}
