@@ -15,7 +15,7 @@ endif
 
 ifeq ($(GRAPHICS), NONE)
 
-OBJS = 
+OBJS = PlainMap.o
 
 endif
 

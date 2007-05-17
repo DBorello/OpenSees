@@ -74,7 +74,8 @@ GRAPHIC_LIBS_TCL = $(FE)/tcl/TclFeViewer.o \
 
 ifeq ($(GRAPHICS), NONE)
 
-GRAPHIC_LIBS_TCL = 
+GRAPHIC_LIBS_TCL = $(FE)/tcl/TclFeViewer.o \
+	$(FE)/renderer/PlainMap.o
 
 endif
 
@@ -90,7 +91,7 @@ INTERPRETER_LIBS_MPI = $(FE)/tcl/tclMain.o \
 	$(FE)/actor/channel/MPI_Channel.o \
 	$(FE)/actor/machineBroker/MPI_MachineBroker.o \
 	$(FE)/domain/subdomain/ActorSubdomain.o \
-	$(FE)/domain/subdomain/ShadowSubdomain.o 
+	$(FE)/domain/subdomain/ShadowSubdomain.o $(GRAPHIC_LIBS_TCL)
 
 INTERPRETER_LIBS_MPI_PARAMETERS = $(FE)/tcl/tclMain.o \
 	$(FE)/tcl/mpiParameterMain.o \
@@ -99,7 +100,7 @@ INTERPRETER_LIBS_MPI_PARAMETERS = $(FE)/tcl/tclMain.o \
 	$(FE)/actor/channel/MPI_Channel.o \
 	$(FE)/actor/machineBroker/MPI_MachineBroker.o \
 	$(FE)/domain/subdomain/ActorSubdomain.o \
-	$(FE)/domain/subdomain/ShadowSubdomain.o 
+	$(FE)/domain/subdomain/ShadowSubdomain.o $(GRAPHIC_LIBS_TCL)
 
 
 INTERPRETER_LIBS_TK = $(FE)/tcl/tkMain.o \
