@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.41 $
-// $Date: 2007-05-04 23:41:28 $
+// $Revision: 1.42 $
+// $Date: 2007-05-17 05:15:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -194,6 +194,7 @@
 #include <EnvelopeNodeRecorder.h>
 #include <EnvelopeElementRecorder.h>
 
+
 // mp_constraint header files
 #include <MP_Constraint.h>
 #include <MP_Joint2D.h>
@@ -338,6 +339,8 @@
 #include <DistributedDiagonalSOE.h>
 #include <DistributedDiagonalSolver.h>
 #endif
+
+#include <TclFeViewer.h>
 
 #include <packages.h>
 
@@ -1195,6 +1198,10 @@ FEM_ObjectBroker::getPtrNewRecorder(int classTag)
 
 	case RECORDER_TAGS_EnvelopeElementRecorder:  
 	     return new EnvelopeElementRecorder();
+
+
+        case RECORDER_TAGS_TclFeViewer:  
+             return new TclFeViewer();
 	     
 	default:
 	     opserr << "FEM_ObjectBroker::getNewConstraintHandler - ";
