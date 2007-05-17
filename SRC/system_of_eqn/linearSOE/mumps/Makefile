@@ -11,8 +11,6 @@ ifdef MUMPS
 OBJS       = MumpsSOE.o \
 	MumpsSolver.o 
 
-endif
-
 ifeq ($(PROGRAMMING_MODE), PARALLEL)
 
 OBJS       = MumpsSOE.o \
@@ -21,6 +19,9 @@ OBJS       = MumpsSOE.o \
 	MumpsParallelSolver.o 
 
 endif
+endif
+
+
 
 all:         $(OBJS)
 
