@@ -31,7 +31,7 @@ OpenSees_PROGRAM_MPI = $(HOME)/bin/OpenSeesMPI
 
 OPERATING_SYSTEM = LINUX
 #GRAPHICS = UsingOpenGL
-GRAPHICS = 
+GRAPHICS = NONE
 PROGRAMMING_MODE = PARALLEL
 
 #DEBUG_MODE = DEBUG, NO_DEBUG
@@ -207,10 +207,13 @@ DEBUG_FLAG =
 
 OPT_FLAG = -O3 -qstrict  -q64 
 
+MUMPS_FLAG = 
+PETSC_FLAG =
+
 COMP_FLAG = -qnoipa
 #-pg
 C++FLAGS         = -D_LINUX -D_UNIX  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(OPT_FLAG) $(COMP_FLAG)\
-		$(PROGRAMMING_FLAG) -qarch=pwr4 -qtune=pwr4  -D_KAI -D_PARALLEL_PROCESSING -cpp
+		$(PROGRAMMING_FLAG) $(PETSC_FLAG) $(MUMPS_FLAG) -qarch=pwr4 -qtune=pwr4  -D_KAI -D_PARALLEL_PROCESSING -cpp 
 
 CFLAGS          = -qarch=pwr4 -qtune=pwr4  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG)  -D_KAI -D_PARALLEL_PROCESSING $(OPT_FLAG) $(COMP_FLAG)
 FFLAGS          = -qarch=pwr4 -qtune=pwr4   -qextname $(OPT_FLAG) $(COMP_FLAG)
@@ -275,20 +278,28 @@ SHELL           = /bin/sh
 	$(FC90) $(FFLAGS) -c $<
 
 # %---------------------------------------------------------%
-# | SECTION 7: OTHER LIBRARIES                              |
+# | SECTION 7 OTHER OPTIONAL SOFTWARE                      |
 # |                                                         |
 # | The following macros specify other libraries that must  |
 # | be linked with when creating executables. These are     |
 # | platform specific and typically order does matter!!     |
 # %---------------------------------------------------------%
-MACHINE_LINKLIBS  = -L$(BASE)/lib \
-                    -L$(HOME)/lib 
+
+#-Wl,-rpath,$(PETSC_DIR)/lib/libg/$(PETSC_ARCH) \
+
+HAVEPETSC = YES
+PETSCINC =
+PETSC_LIB = 
+
+ifeq ($(HAVEPETSC), YES)
 
 PETSC_DIR = /usr/local/apps/petsc-2.2.1-64
 PETSC_ARCH = rs6000_64
 BOPT = O
 
-#-Wl,-rpath,$(PETSC_DIR)/lib/libg/$(PETSC_ARCH) \
+PETSC = YES
+PETSC_FLAG = -D_PETSC
+PETSCINC = -I$(PETSC_DIR)/include -I$(PETSC_DIR)/bmake/$(PETSC_ARCH) -D_PETSC -DPETSC_USE_BOPT_g -DPETSC_USE_EXTERN_CXX
 
 PETSC_LIB =  -L$(PETSC_DIR)/lib/libg/$(PETSC_ARCH) \
 	-lpetscsnes -lpetscksp -lpetscdm -lpetscmat -lpetscvec -lpetsc \
@@ -296,14 +307,43 @@ PETSC_LIB =  -L$(PETSC_DIR)/lib/libg/$(PETSC_ARCH) \
 	$(FE)/system_of_eqn/linearSOE/petsc/PetscSolver.o \
 	$(FE)/system_of_eqn/linearSOE/petsc/PetscSparseSeqSolver.o 
 
+endif
+
+HAVEMUMPS = NO
+MUMPS_INCLUDE =
+MUMPS_LIB = 
+
+ifeq ($(HAVEMUMPS), YES)
+
+MUMPS = YES
+MUMPS_FLAG = -D_MUMPS
+MUMPS_LIB = -L/gpfs/fmk/MUMPS_4.6.4/lib \
+	-ldmumps -lpord  -lpesslsmp -lblacssmp \
+	$(FE)/system_of_eqn/linearSOE/mumps/MumpsSOE.o \
+	$(FE)/system_of_eqn/linearSOE/mumps/MumpsSolver.o \
+	$(FE)/system_of_eqn/linearSOE/mumps/MumpsParallelSOE.o \
+	$(FE)/system_of_eqn/linearSOE/mumps/MumpsParallelSolver.o
+
+MUMPS_INCLUDE = -I/gpfs/fmk/MUMPS_4.6.4/include
+
+endif
+
+# %---------------------------------------------------------%
+# | SECTION 8  OTHER LIBRARIES                              |
+# |                                                         |
+# | The following macros specify other libraries that must  |
+# | be linked with when creating executables. These are     |
+# | platform specific and typically order does matter!!     |
+# %---------------------------------------------------------%
+
+MACHINE_LINKLIBS  = -L$(BASE)/lib \
+                    -L$(HOME)/lib 
 
 PARALLEL_LIB = 	$(FE)/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSOE.o \
 	$(FE)/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSolver.o \
 	$(FE)/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSolver.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSuperLU.o 
-	
-
 
 HPM_LIB = -L/usr/local/apps/hpm/lib/pwr4/ \
 	-lhpm_r -lpmapi -lm 
@@ -318,7 +358,7 @@ MACHINE_NUMERICAL_LIBS  = -lm \
   $(GRAPHIC_LIBRARY)\
   $(RELIABILITY_LIBRARY) \
   $(DISTRIBUTED_SUPERLU_LIBRARY) \
-  $(METIS_LIBRARY) $(PARALLEL_LIB) $(PETSC_LIB) $(HPM_LIB)
+  $(METIS_LIBRARY) $(PARALLEL_LIB) $(PETSC_LIB) $(MUMPS_LIB) $(HPM_LIB)
 
 
 
@@ -336,7 +376,6 @@ MACHINE_SPECIFIC_LIBS = -lessl -lGL -lX11 -lf
 
 
 
-PETSCINC = -I$(PETSC_DIR)/include -I$(PETSC_DIR)/bmake/$(PETSC_ARCH) -D_PETSC -DPETSC_USE_BOPT_g -DPETSC_USE_EXTERN_CXX
 
 MACHINE_INCLUDES        = -I/usr/local/BerkeleyDB.4.0/include \
 	-I/usr/include/mysql \
@@ -345,8 +384,8 @@ MACHINE_INCLUDES        = -I/usr/local/BerkeleyDB.4.0/include \
 	-I$(UMFPACKdir) \
 	-I$(SUPERLUdir) \
 	-I$(SUPERLU_DISTdir) \
-	-I/usr/lpp/ppe.poe/include \
-	$(PETSCINC)
+	-I/usr/lpp/ppe.poe/include $(PETSCINC) $(MUMPS_INCLUDE) 
+
  
 
 
