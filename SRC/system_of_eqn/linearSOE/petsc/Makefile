@@ -4,7 +4,11 @@ include ../../../../Makefile.def
 
 PROGRAM       = test
 
+OBJS       = 
+
+ifdef MUMPS
 OBJS       = PetscSOE.o PetscSolver.o PetscSparseSeqSolver.o 
+endif
 
 all:    $(OBJS)
 

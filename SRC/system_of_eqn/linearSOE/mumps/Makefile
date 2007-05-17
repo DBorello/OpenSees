@@ -4,8 +4,14 @@ include ../../../../Makefile.def
 
 PROGRAM         = test
 
+OBJS = 
+
+ifdef MUMPS
+
 OBJS       = MumpsSOE.o \
 	MumpsSolver.o 
+
+endif
 
 ifeq ($(PROGRAMMING_MODE), PARALLEL)
 
