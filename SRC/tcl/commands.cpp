@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.90 $
-// $Date: 2007-05-03 18:24:52 $
+// $Revision: 1.91 $
+// $Date: 2007-05-17 05:19:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -415,7 +415,7 @@ extern "C" int Tcl_InterpObjCmd(ClientData clientData,  Tcl_Interp *interp, int 
 int Tcl_InterpOpenSeesObjCmd(ClientData clientData,  Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[])
 {
    int index;
-   static CONST char *options[] = {
+   static TCL_Char *options[] = {
      "alias",	"aliases",	"create",	"delete", 
      "eval",		"exists",	"expose",	"hide", 
      "hidden",	"issafe",	"invokehidden",	"marktrusted", 
@@ -441,7 +441,7 @@ int Tcl_InterpOpenSeesObjCmd(ClientData clientData,  Tcl_Interp *interp, int obj
   
   switch ((enum option) index) {
   case OPT_CREATE: {
-    const char *theInterpreterName = Tcl_GetStringResult(interp);
+    TCL_Char *theInterpreterName = Tcl_GetStringResult(interp);
     Tcl_Interp *slaveInterp = Tcl_GetSlave(interp, theInterpreterName);
     ok = g3AppInit(slaveInterp);
     return ok;
