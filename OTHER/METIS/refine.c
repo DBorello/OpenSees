@@ -8,7 +8,7 @@
  * Started 8/31/94
  * George
  *
- * $Id: refine.c,v 1.1.1.1 2000-09-15 08:23:12 fmk Exp $
+ * $Id: refine.c,v 1.2 2007-05-17 05:23:30 fmk Exp $
  */
 
 #include "multilevel.h"
@@ -17,15 +17,6 @@
 * External Variables
 **************************************************************************/
 extern CtrlType *__Ctrl;	/* mlevelpart.c */
-#ifndef METISLIB
-extern timer GreedyTmr;		/* main.c */
-extern timer GreedyInitTmr;	/* main.c */
-extern timer GreedyIterTmr;	/* main.c */
-extern timer GreedyWrapUpTmr;	/* main.c */
-extern timer InitPartTmr;	/* main.c */
-extern timer ProjectTmr;	/* main.c */
-extern timer UncrsTmr;		/* main.c */
-#endif
 
 
 /*************************************************************************
@@ -41,7 +32,6 @@ void Refine(CoarseGraphType *orggraph, CoarseGraphType *graph, int zeropwgt)
 
   InitPartition(graph, zeropwgt);
 
-  starttimer(&UncrsTmr);
 
   if (__Ctrl->OpType != OP_MLND)
     FastInitBalance(graph, zeropwgt);
@@ -56,7 +46,6 @@ void Refine(CoarseGraphType *orggraph, CoarseGraphType *graph, int zeropwgt)
 
     ASSERT(CheckBndSize(fgraph));
 
-    starttimer(&GreedyTmr);
     switch (__Ctrl->RefineType) {
       case REFINE_GR:
         FMR_Refine(fgraph, zeropwgt, 1);
@@ -112,15 +101,12 @@ void Refine(CoarseGraphType *orggraph, CoarseGraphType *graph, int zeropwgt)
     if (fgraph->finer == NULL && __Ctrl->OpType != OP_MLND && __Ctrl->RefineType >= 10) 
       BFMR_Refine_EqWgt(fgraph, zeropwgt);
 
-    stoptimer(&GreedyTmr);
-
     if (fgraph != orggraph)
       ProjectPartition(fgraph, limit);
     else
       break;
   }
 
-  stoptimer(&UncrsTmr);
 
 }
 
@@ -191,8 +177,6 @@ void ProjectPartition(CoarseGraphType *cgraph, int limit)
 
   if (cgraph->finer == NULL)
     return;
-
-  starttimer(&ProjectTmr);
 
   cwhere = cgraph->where;
   cid = cgraph->id;
@@ -268,8 +252,6 @@ void ProjectPartition(CoarseGraphType *cgraph, int limit)
   fgraph->coarser = NULL;
 
   FreeGraph(cgraph);
-
-  stoptimer(&ProjectTmr);
 
   ASSERT(CheckBndSize(fgraph));
 }

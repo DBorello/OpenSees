@@ -6,7 +6,7 @@
  * This file contains code that does a fast balancing .
  *
  * Started 1/10/95
- * $Id: balpart.c,v 1.1.1.1 2000-09-15 08:23:12 fmk Exp $
+ * $Id: balpart.c,v 1.2 2007-05-17 05:23:30 fmk Exp $
  *
  */
 
@@ -17,9 +17,7 @@
 * External Variables
 **************************************************************************/
 extern CtrlType *__Ctrl;        /* mlevelpart.c */
-#ifndef METISLIB
-extern timer BalanceTmr;        /* main.c */
-#endif
+
 
 
 /*************************************************************************
@@ -55,7 +53,6 @@ void FastInitBalance(CoarseGraphType *graph, int zeropwgt)
       return;
   }
 
-  starttimer(&BalanceTmr);
 
   id = graph->id;
   ed = graph->ed;
@@ -134,7 +131,6 @@ void FastInitBalance(CoarseGraphType *graph, int zeropwgt)
       }
     }
   }
-  stoptimer(&BalanceTmr);
 
   graph->nbnd = htable->nelem;
 
@@ -179,8 +175,6 @@ void FastBalance(CoarseGraphType *graph, int zeropwgt, int frac)
     frac = frac/2;
   if (diff <= frac)
     return;
-
-  starttimer(&BalanceTmr);
 
   id = graph->id;
   ed = graph->ed;
@@ -262,7 +256,6 @@ void FastBalance(CoarseGraphType *graph, int zeropwgt, int frac)
       }
     }
   }
-  stoptimer(&BalanceTmr);
 
   graph->nbnd = htable->nelem;
 
@@ -292,8 +285,6 @@ void FastBalance2(CoarseGraphType *graph, int zeropwgt)
 
   if (graph->pwgts[0] == zeropwgt)
     return;
-
-  starttimer(&BalanceTmr);
 
   pwgts = graph->pwgts;
 
@@ -363,7 +354,6 @@ void FastBalance2(CoarseGraphType *graph, int zeropwgt)
       INC_DEC(id[k], ed[k], kwgt);
     }
   }
-  stoptimer(&BalanceTmr);
 
   if (__Ctrl->dbglvl&DBG_BALCUT) 
     printf(" [%7d %7d %5d] FC: %5d [B]\n",pwgts[0], pwgts[1], nswaps, graph->mincut);

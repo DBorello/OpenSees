@@ -8,7 +8,7 @@
  * Started 8/28/94
  * George
  *
- * $Id: coarsen.c,v 1.1.1.1 2000-09-15 08:23:12 fmk Exp $
+ * $Id: coarsen.c,v 1.2 2007-05-17 05:23:30 fmk Exp $
  *
  */
 
@@ -18,10 +18,6 @@
 * External Variables
 **************************************************************************/
 extern CtrlType *__Ctrl;	/* mlevelpart.c.c */
-#ifndef METISLIB
-extern timer CoarsenTmr;	/* main.c */
-#endif
-
 
 /*************************************************************************
 * This function takes a graph and creates the link list of coarser graphs
@@ -31,8 +27,6 @@ CoarseGraphType *Coarsen(CoarseGraphType *graph, int CoarsenTo)
   CoarseGraphType *cgraph;
   int i;
   int switchlvl, maxvwgt;
-
-  starttimer(&CoarsenTmr);
 
   cgraph = graph;
   cgraph->level = 0;
@@ -105,8 +99,6 @@ CoarseGraphType *Coarsen(CoarseGraphType *graph, int CoarsenTo)
   if (__Ctrl->dbglvl&DBG_PROGRESS) 
     printf("\n");
 
-  stoptimer(&CoarsenTmr);
-
   return cgraph;
 }
 
@@ -119,8 +111,6 @@ CoarseGraphType *KwayCoarsen(CoarseGraphType *graph, int CoarsenTo)
   CoarseGraphType *cgraph;
   int i;
   int switchlvl, maxvwgt;
-
-  starttimer(&CoarsenTmr);
 
   cgraph = graph;
   cgraph->level = 0;
@@ -194,8 +184,6 @@ CoarseGraphType *KwayCoarsen(CoarseGraphType *graph, int CoarsenTo)
   }
   if (__Ctrl->dbglvl&DBG_PROGRESS) 
     printf("\n");
-
-  stoptimer(&CoarsenTmr);
 
   return cgraph;
 }

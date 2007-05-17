@@ -8,7 +8,7 @@
  * Started 6/6/95
  * George
  *
- * $Id: kwaypart.c,v 1.2 2001-10-05 00:51:05 fmk Exp $
+ * $Id: kwaypart.c,v 1.3 2007-05-17 05:23:30 fmk Exp $
  *
  */
 
@@ -18,16 +18,6 @@
 * External Global Variables
 **************************************************************************/
 extern CtrlType *__Ctrl;   	/* mlevelpart.c */
-#ifndef METISLIB
-extern timer CoarsenTmr;	/* main.c */
-extern timer GreedyTmr;		/* main.c */
-extern timer GreedyInitTmr;	/* main.c */
-extern timer GreedyIterTmr;	/* main.c */
-extern timer GreedyWrapUpTmr;	/* main.c */
-extern timer InitPartTmr;	/* main.c */
-extern timer ProjectTmr;	/* main.c */
-extern timer UncrsTmr;		/* main.c */
-#endif
 
 
 /*************************************************************************
@@ -40,7 +30,6 @@ int KWayPart(CoarseGraphType *graph, int nparts, int CoarsenTo, int MatchType,
   CtrlType *ctrl, *oldctrl;
   CoarseGraphType *cgraph, *fgraph;
   int *cpart, *ccuts, *ckpwgts;
-  timer Tmr1, Tmr2;
 
   ctrl = (CtrlType *)GKmalloc(sizeof(CtrlType), "MultilevelPart: ctrl");
 
@@ -69,10 +58,7 @@ int KWayPart(CoarseGraphType *graph, int nparts, int CoarsenTo, int MatchType,
   oldctrl = __Ctrl;
   __Ctrl = ctrl;
 
-  cleartimer(&Tmr1);
-  starttimer(&Tmr1);
   cgraph = KwayCoarsen(graph, amax(CoarsenTo, NPARTS_FACTOR*nparts));
-  stoptimer(&Tmr1);
 
   if (cgraph->finer != NULL) {
     i = amax(CoarsenTo, NPARTS_FACTOR*nparts);
@@ -90,8 +76,6 @@ int KWayPart(CoarseGraphType *graph, int nparts, int CoarsenTo, int MatchType,
   ckpwgts = ismalloc(nparts, 0, "KWayPart: ckpwgts");
   ccuts = ismalloc(cgraph->nvtxs, -1, "KWayPart: ccuts");
 
-  cleartimer(&Tmr2);
-  starttimer(&Tmr2);
 
   if (cgraph->label == NULL) {
     cgraph->label = imalloc(cgraph->nvtxs, "KWayPart: cgraph->label");
@@ -102,39 +86,21 @@ int KWayPart(CoarseGraphType *graph, int nparts, int CoarsenTo, int MatchType,
   cgraph->mincut = MultiLevelPart(cgraph, nparts, 100, MATCH_HEM, INITPART_GGPKL, REFINE_BGKLR, dbglvl, 1, cpart, ccuts, ckpwgts);
   cgraph->where = cpart;	/* No need to free cpart anymore */
 
-  stoptimer(&Tmr2);
-
   GKfree(ckpwgts, ccuts, -1);
 
-  cleartimer(&CoarsenTmr);
-  cleartimer(&GreedyTmr);
-  cleartimer(&GreedyInitTmr);
-  cleartimer(&GreedyIterTmr);
-  cleartimer(&InitPartTmr);
-  cleartimer(&ProjectTmr);
-  cleartimer(&UncrsTmr);
-
 #ifndef METISLIB
-  CoarsenTmr = Tmr1;
-  InitPartTmr = Tmr2;
 #endif
   
-  starttimer(&UncrsTmr);
-  starttimer(&ProjectTmr);
   fgraph = cgraph->finer;
   if (fgraph != NULL) { /* Take care the no k-way refinement */
     KWayProjectPartition(cgraph);
     KWayComputePartitionParams(fgraph, nparts, 1);
   }
-  stoptimer(&ProjectTmr);
-
 
   if (fgraph != NULL)   /* If fgraph = NULL, no k-way refinement */
     KWayRefine(graph, fgraph, nparts, kpwgts);
 
   icopy(graph->nvtxs, graph->where, part);
-
-  stoptimer(&UncrsTmr);
 
   FreeRootGraph(graph);
   FreePools(ctrl);
@@ -163,7 +129,6 @@ void KWayRefine(CoarseGraphType *orggraph, CoarseGraphType *graph, int nparts, i
     KWay_BalanceFM(fgraph, nparts, 1);
     ASSERT(KWayCheckDegrees(fgraph));
 
-    starttimer(&GreedyTmr);
     switch (__Ctrl->RefineType) {
       case REFINE_BGR:
         KWay_RefineGreedy(fgraph, nparts, KWAY_REF_GREEDY_NITER);
@@ -176,7 +141,6 @@ void KWayRefine(CoarseGraphType *orggraph, CoarseGraphType *graph, int nparts, i
       default:
         errexit("Unsupported Refine Type: %d", __Ctrl->RefineType);
     }
-    stoptimer(&GreedyTmr);
 
     ASSERT(KWayCheckDegrees(fgraph));
 
@@ -185,10 +149,8 @@ void KWayRefine(CoarseGraphType *orggraph, CoarseGraphType *graph, int nparts, i
     if (fgraph == NULL) 
       break;
 
-    starttimer(&ProjectTmr);
     KWayProjectPartition(fgraph->coarser); 
     KWayComputePartitionParams(fgraph, nparts, 0);
-    stoptimer(&ProjectTmr);
   }
 
   icopy(nparts, orggraph->kpwgts, kpwgts);

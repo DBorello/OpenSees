@@ -9,7 +9,7 @@
  * Started 11/22/94
  * George
  *
- * $Id: initpart.c,v 1.1.1.1 2000-09-15 08:23:12 fmk Exp $
+ * $Id: initpart.c,v 1.2 2007-05-17 05:23:30 fmk Exp $
  */
 
 #include "multilevel.h"
@@ -18,10 +18,6 @@
 * External Variables
 **************************************************************************/
 extern CtrlType *__Ctrl;        /* mlevelpart.c */
-#ifndef METISLIB
-extern timer InitPartTmr;	/* main.c */
-#endif
-
 
 /*************************************************************************
 * This function randomly selects a node among the large vertex-weight nodes
@@ -30,9 +26,6 @@ extern timer InitPartTmr;	/* main.c */
 **************************************************************************/
 void InitPartition(CoarseGraphType *graph, int zeropwgt)
 {
-
-  starttimer(&InitPartTmr);
-
   switch (__Ctrl->InitPartType) {
     case INITPART_GGP:
       GGPPartition(graph, zeropwgt, 0);
@@ -56,8 +49,6 @@ void InitPartition(CoarseGraphType *graph, int zeropwgt)
 
   if (__Ctrl->dbglvl&DBG_INITCUT) 
     printf("[%5d, %5d, %5d, %5d]\n", graph->pwgts[0], graph->pwgts[1], zeropwgt, graph->mincut);
-
-  stoptimer(&InitPartTmr);
 
 }
 

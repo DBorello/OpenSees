@@ -11,7 +11,7 @@
  * Started 6/30/95
  * George
  *
- * $Id: kwayfm.c,v 1.1.1.1 2000-09-15 08:23:12 fmk Exp $
+ * $Id: kwayfm.c,v 1.2 2007-05-17 05:23:30 fmk Exp $
  *
  */
 
@@ -21,13 +21,6 @@
 * External Variables
 **************************************************************************/
 extern CtrlType *__Ctrl;	/* mlevelpart.c */
-#ifndef METISLIB
-extern timer GreedyTmr;		/* main.c */
-extern timer GreedyInitTmr;	/* main.c */
-extern timer GreedyIterTmr;	/* main.c */
-extern timer GreedyWrapUpTmr;	/* main.c */
-#endif
-
 
 
 /*************************************************************************
@@ -50,8 +43,6 @@ void KWay_RefineFM(CoarseGraphType *graph, int nparts, int npasses)
   int from, to, limit, vwgt;
   int minpwgt, maxpwgt, badmaxpwgt;
 
-  starttimer(&GreedyInitTmr);
-
   initbucket(&buckets, graph->tvwgt, graph->nvtxs, graph->nvtxs, graph->level);
 
   moved = icoremalloc(graph->nvtxs, "KWay_RefineFM: moved", 0);
@@ -63,10 +54,7 @@ void KWay_RefineFM(CoarseGraphType *graph, int nparts, int npasses)
 
   badmaxpwgt = UNBALANCE_FRACTION*graph->tvwgt/nparts;
 
-  stoptimer(&GreedyInitTmr);
-
   for (pass=0; pass<npasses; pass++) {
-    starttimer(&GreedyInitTmr);
 
     resetbucket(&buckets);
 
@@ -87,7 +75,6 @@ void KWay_RefineFM(CoarseGraphType *graph, int nparts, int npasses)
         }
       }
     }
-    stoptimer(&GreedyInitTmr);
 
     if (__Ctrl->dbglvl&DBG_KWAYREF && pass == 0)
         printf("Partitions: Nvtxs: %6d, Npart: %6d, InitCut: %8d, [%6d, %6d]\n",
@@ -97,7 +84,6 @@ void KWay_RefineFM(CoarseGraphType *graph, int nparts, int npasses)
     /******************************************************
     * Get into the FM loop
     *******************************************************/
-    starttimer(&GreedyIterTmr);
     nswaps = 0;
     for (;;) {
       if ((higain = GetMaxGainVtx(&buckets)) == -1) 
@@ -144,7 +130,6 @@ void KWay_RefineFM(CoarseGraphType *graph, int nparts, int npasses)
       else 
         moved[higain] = -3;
     }
-    stoptimer(&GreedyIterTmr);
 
     if (__Ctrl->dbglvl&DBG_KWAYREF)
       printf("Minimum Cut: %8d at %5d [%5d], [%5d, %5d] (%d)\n", mincut, mincutorder, nswaps, pwgts[iamin(nparts, pwgts)], pwgts[iamax(nparts, pwgts)], higain);
@@ -152,14 +137,13 @@ void KWay_RefineFM(CoarseGraphType *graph, int nparts, int npasses)
     /****************************************************************
     * Roll back computation 
     *****************************************************************/
-    starttimer(&GreedyWrapUpTmr);
+
     for (nswaps--; nswaps>=mincutorder; nswaps--) {
       higain = swaps[nswaps];
       to = moved[higain];
 
       KWayFMUpdateDegreesI(graph, higain, to, &buckets, moved, 0);
     }
-    stoptimer(&GreedyWrapUpTmr);
 
     ASSERT(KWayCheckDegrees(graph));
 
@@ -275,7 +259,6 @@ void KWay_BalanceFM(CoarseGraphType *graph, int nparts, int npasses)
   int from, to, vwgt;
   int oldmaxpwgt, maxpwgt, goodsize, lastmax;
 
-  starttimer(&GreedyInitTmr);
 
   rinfo = graph->rinfo;
   where = graph->where;
@@ -284,8 +267,6 @@ void KWay_BalanceFM(CoarseGraphType *graph, int nparts, int npasses)
   goodsize = UNBALANCE_FRACTION*graph->tvwgt;
   maxpwgt = pwgts[iamax(nparts, pwgts)];
 
-  stoptimer(&GreedyInitTmr);
-
   if (maxpwgt*nparts <= goodsize)
     return;
 
@@ -293,7 +274,6 @@ void KWay_BalanceFM(CoarseGraphType *graph, int nparts, int npasses)
   moved = icoremalloc(graph->nvtxs, "KWay_BalanceFM: moved", 0);
 
   for (pass=0; pass<npasses; pass++) {
-    starttimer(&GreedyInitTmr);
 
     resetbucket(&buckets);
 
@@ -305,7 +285,6 @@ void KWay_BalanceFM(CoarseGraphType *graph, int nparts, int npasses)
         moved[i] = -1;
       }
     }
-    stoptimer(&GreedyInitTmr);
 
     if (__Ctrl->dbglvl&DBG_KWAYREF) {
       if (pass == 0)
@@ -316,7 +295,6 @@ void KWay_BalanceFM(CoarseGraphType *graph, int nparts, int npasses)
     /******************************************************
     * Get into the FM loop
     *******************************************************/
-    starttimer(&GreedyIterTmr);
     nswaps = 0;
     oldmaxpwgt = maxpwgt;
     while (maxpwgt*nparts > goodsize) {
@@ -365,7 +343,6 @@ void KWay_BalanceFM(CoarseGraphType *graph, int nparts, int npasses)
           break;
       }
     }
-    stoptimer(&GreedyIterTmr);
 
     if (__Ctrl->dbglvl&DBG_KWAYREF)
       printf("Cut: %6d, Maxpwgt: %4d, [%4d] [%4d] (%d)\n", graph->mincut, maxpwgt, pwgts[iamin(nparts, pwgts)], buckets.nnodes, higain);
