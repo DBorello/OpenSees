@@ -6,7 +6,7 @@ PROGRAM       = test
 
 OBJS       = 
 
-ifdef MUMPS
+ifdef PETSC
 OBJS       = PetscSOE.o PetscSolver.o PetscSparseSeqSolver.o 
 endif
 
