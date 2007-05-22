@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-09-05 22:20:15 $
+// $Revision: 1.7 $
+// $Date: 2007-05-22 18:18:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ElasticMaterial.cpp,v $
                                                                         
                                                                         
@@ -171,7 +171,7 @@ int
 ElasticMaterial::setParameter(const char **argv, int argc, Parameter &param)
 {
   if (argc < 1)
-    return -1;
+    return 0;
 
   if (strcmp(argv[0],"E") == 0)
     return param.addObject(1, this);
@@ -180,7 +180,7 @@ ElasticMaterial::setParameter(const char **argv, int argc, Parameter &param)
     return param.addObject(2, this);
 
   else
-    return -1;
+    return 0;
 }
 
 int 

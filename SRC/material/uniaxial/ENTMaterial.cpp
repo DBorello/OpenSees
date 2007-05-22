@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-09-05 22:19:04 $
+// $Revision: 1.5 $
+// $Date: 2007-05-22 18:18:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ENTMaterial.cpp,v $
                                                                         
                                                                         
@@ -162,13 +162,13 @@ int
 ENTMaterial::setParameter(const char **argv, int argc, Parameter &param)
 {
   if (argc < 1)
-    return -1;
+    return 0;
 
   if (strcmp(argv[0],"E") == 0)
     return param.addObject(1, this);
 
   else
-    return -1;
+    return 0;
 }
 
 int 
