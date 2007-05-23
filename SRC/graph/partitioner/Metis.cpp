@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-01-12 23:37:19 $
+// $Revision: 1.4 $
+// $Date: 2007-05-23 20:11:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/partitioner/Metis.cpp,v $
                                                                         
                                                                         
@@ -45,7 +45,7 @@
 /* stuff needed to get the program working on the clump & NOW machines*/
 #include <bool.h>
 
-//int IsWeighted;
+int IsWeighted =0;
 
 extern "C" 
 int PMETIS(int *, int *, int *, int *, int *, int *, int *, int *, int *, int *, int *);
