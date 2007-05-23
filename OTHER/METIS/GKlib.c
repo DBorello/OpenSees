@@ -10,7 +10,7 @@
  * Started 9/15/94
  * George
  *
- * $Id: GKlib.c,v 1.1.1.1 2000-09-15 08:23:12 fmk Exp $
+ * $Id: GKlib.c,v 1.2 2007-05-23 19:06:46 fmk Exp $
  *
  */
 
@@ -30,6 +30,14 @@ int iasum(int n, int *x)
   return sum;
 }
 
+void icopy(int n, int *x, int *y)
+{
+  memcpy((void *)y, (void *)x, sizeof(int)*n);
+}
+
+
+#ifndef _BLAS
+
 float sasum(int n, float *x)
 {
   float sum = 0.0;
@@ -40,6 +48,7 @@ float sasum(int n, float *x)
 
   return sum;
 }
+
 
 double dasum(int n, double *x)
 {
@@ -68,10 +77,6 @@ void daxpy(int n, double a, double *x, double *y)
 /*************************************************************************
 * These functions copies a vector x to y
 **************************************************************************/
-void icopy(int n, int *x, int *y)
-{
-  memcpy((void *)y, (void *)x, sizeof(int)*n);
-}
 
 void dcopy(int n, double *x, double *y)
 {
@@ -137,6 +142,7 @@ void dswap(int n, double *x, double *y)
 
 }
 
+#endif
 
 /*************************************************************************
 * These functions set the values of a vector
@@ -187,7 +193,7 @@ int iamin(int n, int *x)
  * This file contains some simple io functions
  *
  * Started 4/10/95
- * $Id: GKlib.c,v 1.1.1.1 2000-09-15 08:23:12 fmk Exp $
+ * $Id: GKlib.c,v 1.2 2007-05-23 19:06:46 fmk Exp $
  *
  */
 
@@ -221,7 +227,7 @@ void GKfclose(FILE *fp)
  * Started 8/27/94
  * George
  *
- * $Id: GKlib.c,v 1.1.1.1 2000-09-15 08:23:12 fmk Exp $
+ * $Id: GKlib.c,v 1.2 2007-05-23 19:06:46 fmk Exp $
  *
  */
 
@@ -449,7 +455,7 @@ double seconds(void)
  * Started 8/28/94
  * George
  *
- * $Id: GKlib.c,v 1.1.1.1 2000-09-15 08:23:12 fmk Exp $
+ * $Id: GKlib.c,v 1.2 2007-05-23 19:06:46 fmk Exp $
  *
  */
 
