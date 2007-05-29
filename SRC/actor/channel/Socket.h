@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-04-05 01:34:12 $
+// $Revision: 1.12 $
+// $Date: 2007-05-29 23:19:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/Socket.h,v $
                                                                         
 // Written: fmk 11/95
@@ -38,11 +38,25 @@ extern "C" {
 #ifdef _WIN32
   #include <winsock2.h>
 #else
+  #include <netinet/in.h>
+
+#ifdef _NETINET_PROBLEMS_INTEL
+#undef htons
+#undef ntohs
+#undef htonl
+#undef ntohl
+#define htons(x) __bswap_constant_16(x)
+#define ntohs(x) __bswap_constant_16(x)
+#define htonl(x) __bswap_constant_32(x)
+#define ntohl(x) __bswap_constant_32(x)
+#endif
+
+  #include <netinet/tcp.h>
+
   #include <sys/socket.h>
   #include <sys/types.h>
   #include <sys/ioctl.h>
-  #include <netinet/in.h>
-  #include <netinet/tcp.h>
+
   #include <arpa/inet.h>
   #include <netdb.h>
   #include <unistd.h>
