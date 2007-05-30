@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-04-13 20:58:45 $
+// $Revision: 1.2 $
+// $Date: 2007-05-30 01:57:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/example.cpp,v $
 
 #include <Matrix.h>
@@ -36,9 +36,12 @@
 #include <OPS_Globals.h>
 #include <StandardStream.h>
 #include <mpi.h>
+#include <SimulationInformation.h>
+
 
 StandardStream sserr;
 OPS_Stream *opserrPtr = &sserr;
+SimulationInformation simulationInfo;
  
 double        ops_Dt = 0;
 Domain       *ops_TheActiveDomain = 0;
@@ -54,7 +57,9 @@ int main(int argc, char ** argv)
 
   ID *myID = 0;
   FEM_ObjectBroker theBroker;
+
   MumpsParallelSolver *theSolver = new MumpsParallelSolver();
+
   MumpsParallelSOE *theSOE = new MumpsParallelSOE(*theSolver, soeType);
 
   if (rank == 0) {
@@ -104,6 +109,7 @@ int main(int argc, char ** argv)
       }
 
     theSOE->setSize(graph);
+
     theSOE->zeroA();
     theSOE->zeroB();
     theSOE->addA(a, *myID);
@@ -138,11 +144,14 @@ int main(int argc, char ** argv)
 	a(i,j) = a(j,i);
       }
 
+
     theSOE->setSize(graph);
+
     theSOE->zeroA();
     theSOE->zeroB();
     theSOE->addA(a, *myID);
     theSOE->addB(b, *myID);
+
   }
 
   Matrix a(6,6);
@@ -177,6 +186,7 @@ int main(int argc, char ** argv)
   Vector b(6),x(6);
 
   b= theSOE->getB();  
+
   theSOE->solve();
   x = theSOE->getX();
   
