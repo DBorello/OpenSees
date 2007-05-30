@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-03-15 00:26:02 $
+// $Revision: 1.2 $
+// $Date: 2007-05-30 01:56:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsParallelSolver.h,v $
                                                                         
                                                                         
@@ -72,11 +72,12 @@ class MumpsParallelSolver : public LinearSOESolver
 
  private:
   bool init;
-  DMUMPS_STRUC_C id;
   MumpsParallelSOE *theMumpsSOE;
 
   int rank;
   int np;
+
+  DMUMPS_STRUC_C id;
 };
 
 #endif

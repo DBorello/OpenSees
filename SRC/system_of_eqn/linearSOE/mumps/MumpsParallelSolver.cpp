@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2007-05-02 00:17:24 $
+// $Revision: 1.5 $
+// $Date: 2007-05-30 01:56:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsParallelSolver.cpp,v $
 
 // Written: fmk 
@@ -39,14 +39,14 @@
 
 MumpsParallelSolver::MumpsParallelSolver()
   :LinearSOESolver(SOLVER_TAGS_MumpsParallelSolver),
-   theMumpsSOE(0)
+   theMumpsSOE(0), rank(0), np(0)
 {
   init = false;
 }
 
 MumpsParallelSolver::MumpsParallelSolver(int mpi_comm, int ICNTL7)
   :LinearSOESolver(SOLVER_TAGS_MumpsParallelSolver),
-   theMumpsSOE(0)
+   theMumpsSOE(0), rank(0), np(0)
 {
   init = false;
 }
@@ -135,23 +135,26 @@ MumpsParallelSolver::setSize()
     id.sym=theMumpsSOE->matType; 
     
     id.comm_fortran=MPI_COMM_WORLD;
+    id.ICNTL(5)=0; id.ICNTL(18)=3; 
+
     dmumps_c(&id);
-    
+
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &np);
+
     init = true;
   }
-
+  
   // parallel solver; distributed i/p matrix A
   id.ICNTL(5)=0; id.ICNTL(18)=3; 
 
   // No outputs 
-  id.ICNTL(1)=-1; id.ICNTL(2)=-1; id.ICNTL(3)=-1; id.ICNTL(4)=0;
-
-  int nnz = theMumpsSOE->nnz;
-  int *rowA = theMumpsSOE->rowA;
-  int *colA = theMumpsSOE->colA;
+  id.ICNTL(1)=-1; id.ICNTL(2)=-1; id.ICNTL(3)=-1; id.ICNTL(4)=0; 
   
+  int nnz = theMumpsSOE->nnz;
+  int *colA = theMumpsSOE->colA;
+  int *rowA = theMumpsSOE->rowA;
+
   // increment row and col A values by 1 for mumps fortran indexing
   for (int i=0; i<nnz; i++) {
     rowA[i]++;

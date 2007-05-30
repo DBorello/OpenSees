@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-04-04 22:59:50 $
+// $Revision: 1.4 $
+// $Date: 2007-05-30 01:56:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsSOE.h,v $
                                                                         
 #ifndef MumpsSOE_h
@@ -43,6 +43,7 @@
 #include <Vector.h>
 
 class MumpsSolver;
+class MumpsParallelSolver;
 class LinearSOESolver;
 
 class MumpsSOE : public LinearSOE
@@ -74,7 +75,7 @@ class MumpsSOE : public LinearSOE
     virtual int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
 
     friend class MumpsSolver;    
-
+    friend class MumpsParallelSolver;    
 
   protected:
     int size;            // order of A
