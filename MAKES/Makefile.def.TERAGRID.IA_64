@@ -184,14 +184,19 @@ RELIABILITY_FLAG =
 #DEBUG_FLAG = -D_G3DEBUG 
 DEBUG_FLAG =
 
+MUMPS_FLAG = 
+PETSC_FLAG =
+
 OPT_FLAG = -O2 -mp
 
 COMP_FLAG = 
 
 C++FLAGS         = -D_LINUX -D_UNIX  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(OPT_FLAG) $(COMP_FLAG)\
-		$(PROGRAMMING_FLAG)  -cpp -D_TCL84
+		$(PROGRAMMING_FLAG)  $(PETSC_FLAG) $(MUMPS_FLAG) \
+		-D_TCL84 -D_BLAS -D_NETINET_PROBLEMS_INTEL
+		
 
-CFLAGS          =  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG) $(OPT_FLAG) $(COMP_FLAG) -D_TCL84
+CFLAGS          =  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG)$(PROGRAMMING_FLAG) $(OPT_FLAG) $(COMP_FLAG) -D_TCL84 -D_BLAS
 FFLAGS          =  -qextname $(OPT_FLAG) $(COMP_FLAG)
 LINKFLAGS       = 
 
@@ -265,9 +270,18 @@ MACHINE_LINKLIBS  = -L$(BASE)/lib \
 
 
 # PETSC
+HAVEPETSC = YES
+PETSCINC =
+PETSC_LIB = 
+
+ifeq ($(HAVEPETSC), YES)
+
+PETSC = YES
+PETSC_FLAG = -D_PETSC
 PETSC_DIR = /usr/local/apps/petsc-2.2.1
 PETSC_ARCH = linux-gnu
 BOPT = O
+
 PETSC_INC = -I$(PETSC_DIR)/include -I$(PETSC_DIR)/bmake/$(PETSC_ARCH) -D_PETSC 
 PETSC_LIB =  -L$(PETSC_DIR)/lib/libO_c++/$(PETSC_ARCH) \
 	$(FE)/system_of_eqn/linearSOE/petsc/PetscSOE.o \
@@ -275,6 +289,50 @@ PETSC_LIB =  -L$(PETSC_DIR)/lib/libO_c++/$(PETSC_ARCH) \
 	$(FE)/system_of_eqn/linearSOE/petsc/PetscSparseSeqSolver.o \
 	-lpetscsnes -lpetscksp -lpetscdm -lpetscmat -lpetscvec -lpetsc \
 	-L/usr/X11/lib -lX11 -lGL
+
+endif
+
+
+HAVEMUMPS = YES
+MUMPS_INCLUDE =
+MUMPS_LIB = 
+
+ifeq ($(HAVEMUMPS), YES)
+
+MUMPS = YES
+MUMPS_FLAG = -D_MUMPS
+MUMPS_DIR = /gpfs/fmk/MUMPS_4.6.4
+
+PLAT    = MPICHGM-INTEL80
+
+BLACSdir      = /usr/local/apps/blacs/1.0/intel8
+
+BLACSDBGLVL   = 0
+BLACSFINIT    = $(BLACSdir)/blacsF77init_MPI-$(PLAT)-$(BLACSDBGLVL).a
+BLACSCINIT    = $(BLACSdir)/blacsCinit_MPI-$(PLAT)-$(BLACSDBGLVL).a
+BLACSLIB      = $(BLACSdir)/blacs_MPI-$(PLAT)-$(BLACSDBGLVL).a 	$(BLACSdir)/SRC/MPI/INTERNAL/bi_f77_get_constants.o
+CBLACSLIB     = $(BLACSLIB) $(BLACSCINIT)
+FBLACSLIB     = $(BLACSLIB) $(BLACSFINIT)
+
+BLACSlib = $(CBLACSLIB)
+
+SCALAPdir      = /usr/local/apps/scalapack/1.7/intel8
+SCALAPlib = $(SCALAPdir)/libscalapack-$(PLAT).a
+
+SCALAP  = $(BLACSlib) $(SCALAPlib) $(BLACSlib)
+
+MUMPS_LIB = -L/$(MUMPS_DIR)/lib \
+	  -ldmumps$(PLAT) \
+	  -lpord$(PLAT) \
+	  $(SCALAP) \
+	$(FE)/system_of_eqn/linearSOE/mumps/MumpsSOE.o \
+	$(FE)/system_of_eqn/linearSOE/mumps/MumpsSolver.o \
+	$(FE)/system_of_eqn/linearSOE/mumps/MumpsParallelSOE.o \
+	$(FE)/system_of_eqn/linearSOE/mumps/MumpsParallelSolver.o
+
+MUMPS_INCLUDE = -I/gpfs/fmk/MUMPS_4.6.4/include
+
+endif
 
 PARALLEL_LIB = 
 
@@ -288,8 +346,8 @@ MACHINE_NUMERICAL_LIBS  = -lm \
   $(GRAPHIC_LIBRARY)\
   $(RELIABILITY_LIBRARY) \
   $(DISTRIBUTED_SUPERLU_LIBRARY) \
-  $(METIS_LIBRARY) $(PARALLEL_LIB) \
-  $(PETSC_LIB)
+  $(METIS_LIBRARY) $(PARALLEL_LIB) $(PETSC_LIB) $(MUMPS_LIB)
+  
  
 MACHINE_SPECIFIC_LIBS =   -L${MKL_HOME}/lib/64 -lmkl_lapack -lmkl_ipf -lguide -lpthread \
 /usr/local/apps/intel/compiler8/lib/libifcoremt.a 
@@ -307,8 +365,8 @@ MACHINE_INCLUDES        = -I/usr/local/BerkeleyDB.4.0/include \
 	-I$(UMFPACKdir) \
 	-I$(SUPERLUdir) \
 	-I$(SUPERLU_DISTdir) \
-	$(PETSC_INC) \
-	-I$(HOME)/MUMPS_4.6/include
+	$(PETSC_INC) $(MUMPS_INCLUDE)
+
 
 # this file contains all the OpenSees/SRC includes
 include $(FE)/Makefile.incl
