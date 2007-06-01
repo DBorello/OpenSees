@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-05-30 01:57:23 $
+// $Revision: 1.3 $
+// $Date: 2007-06-01 17:06:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/example.cpp,v $
 
 #include <Matrix.h>
@@ -50,7 +50,7 @@ Element      *ops_TheActiveElement = 0;
 int main(int argc, char ** argv)
 {
   int ierr, rank, np;
-  int soeType =2;  // 0 - unsymmetric, 1 - symmetric positive definite, 2 - symmetric
+  int soeType =0;  // 0 - unsymmetric, 1 - symmetric positive definite, 2 - symmetric
   ierr = MPI_Init(&argc, &argv);
   ierr = MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   ierr = MPI_Comm_size(MPI_COMM_WORLD, &np);
@@ -61,6 +61,8 @@ int main(int argc, char ** argv)
   MumpsParallelSolver *theSolver = new MumpsParallelSolver();
 
   MumpsParallelSOE *theSOE = new MumpsParallelSOE(*theSolver, soeType);
+
+    double numP = np * 1.0;
 
   if (rank == 0) {
     for (int i=1; i<np; i++) {
@@ -75,20 +77,21 @@ int main(int argc, char ** argv)
       (*myID)(i) = i;
     }
 
+
     Matrix a(6,6);
     a.Zero();
-    a(0,0) = 4169.95/np;
+    a(0,0) = 4169.95/numP;
     a(1,0) = 0.0;
-    a(2,0) = 10075/np;
+    a(2,0) = 10075/numP;
     a(3,0) = -4030.0;
     a(4,0) = 0.0;
     a(5,0) = 0.0;
-    a(1,1) = 10084/np;
-    a(2,1) = -1612/np;
+    a(1,1) = 10084/numP;
+    a(2,1) = -1612/numP;
     a(3,1) = 0.0;
     a(4,1) = -8.9556;
     a(5,1) = -1612;
-    a(2,2) = 1354080.0/np;
+    a(2,2) = 1354080.0/numP;
     a(3,2) = 0.0;
     a(4,2) = 1612;
     a(5,2) = 193440.0;
@@ -130,12 +133,12 @@ int main(int argc, char ** argv)
 
     Matrix a(3,3);
     Vector b(3);
-    a(0,0) = 4169.95/np;
+    a(0,0) = 4169.95/numP;
     a(1,0) = 0.0;
-    a(2,0) = 10075.0/np;
-    a(1,1) = 10084.0/np;
-    a(2,1) = -1612.0/np;
-    a(2,2) = 1354080.0/np;
+    a(2,0) = 10075.0/numP;
+    a(1,1) = 10084.0/numP;
+    a(2,1) = -1612.0/numP;
+    a(2,2) = 1354080.0/numP;
 
 
     for (int i=0; i<3; i++)
@@ -200,11 +203,11 @@ int main(int argc, char ** argv)
   theSOE->zeroB();
   if (rank == 0) {
     Vector b(6);
-    b += 2.0/np;
+    b += 2.0/numP;
     theSOE->addB(b, *myID);
   } else {
     Vector b(3);
-    b += 2.0/np;
+    b += 2.0/numP;
     theSOE->addB(b, *myID);
   }
 
