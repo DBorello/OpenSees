@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.89 $
-// $Date: 2007-06-06 19:37:07 $
+// $Revision: 1.90 $
+// $Date: 2007-06-06 19:53:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -185,7 +185,7 @@
 #define MAT_TAG_Pinching	205
 
 #define MAT_TAG_LimitState	1972
-
+#define MAT_TAG_Elastic2Material	1973
 
 
 #define SEC_TAG_Elastic2d   3

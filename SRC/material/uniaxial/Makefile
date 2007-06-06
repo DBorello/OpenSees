@@ -2,6 +2,7 @@ include ../../../Makefile.def
 
  OBJS       = UniaxialMaterial.o \
 	ElasticMaterial.o \
+	Elastic2Material.o \
         ElasticPPMaterial.o \
 	ParallelMaterial.o \
         HardeningMaterial.o \
