@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.42 $
-// $Date: 2007-05-17 05:15:38 $
+// $Revision: 1.43 $
+// $Date: 2007-06-06 19:54:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -52,6 +52,7 @@
 
 // uniaxial material model header files
 #include <ElasticMaterial.h>
+#include <Elastic2Material.h>
 #include <ElasticPPMaterial.h>
 #include <ParallelMaterial.h>
 #include <Concrete01.h>
@@ -296,6 +297,7 @@
 
 #include <Parameter.h>
 #include <MaterialStageParameter.h>
+#include <MatParameter.h>
 
 // time series
 #include <LinearSeries.h>
@@ -730,6 +732,9 @@ FEM_ObjectBroker::getNewUniaxialMaterial(int classTag)
     switch(classTag) {
 	case MAT_TAG_ElasticMaterial:  
 	     return new ElasticMaterial(); // values set in recvSelf
+
+	case MAT_TAG_Elastic2Material:  
+	     return new Elastic2Material(); 
 	     
 	case MAT_TAG_ElasticPPMaterial:  
 	     return new ElasticPPMaterial(); // values set in recvSelf
@@ -1839,6 +1844,10 @@ FEM_ObjectBroker::getParameter(int classTag)
 
   case PARAMETER_TAG_MaterialStageParameter:
     theRes = new MaterialStageParameter();
+    break;
+
+  case PARAMETER_TAG_MatParameter:
+    theRes = new MatParameter();
     break;
 
   default:
