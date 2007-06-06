@@ -614,6 +614,7 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/UniaxialMaterial.o \
 	$(FE)/material/uniaxial/ElasticMaterial.o \
+	$(FE)/material/uniaxial/Elastic2Material.o \
 	$(FE)/material/uniaxial/ReinforcingSteel.o \
 	$(FE)/material/uniaxial/TclReinforcingSteel.o \
 	$(FE)/material/uniaxial/ElasticPPMaterial.o \
@@ -811,6 +812,8 @@ MODEL_BUILDER_LIBS = $(FE)/modelbuilder/ModelBuilder.o \
 DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/component/Parameter.o \
 	$(FE)/domain/component/MaterialStageParameter.o \
+	$(FE)/domain/component/TclUpdateMaterialCommand.o \
+	$(FE)/domain/component/MatParameter.o \
 	$(FE)/domain/component/TclParameterCommands.o \
 	$(FE)/domain/domain/Domain.o \
 	$(FE)/domain/domain/single/SingleDomEleIter.o \

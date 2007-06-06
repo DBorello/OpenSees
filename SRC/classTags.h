@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.88 $
-// $Date: 2007-04-02 23:43:37 $
+// $Revision: 1.89 $
+// $Date: 2007-06-06 19:37:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -94,6 +94,7 @@
 
 #define PARAMETER_TAG_Parameter			1
 #define PARAMETER_TAG_MaterialStageParameter       2
+#define PARAMETER_TAG_MatParameter       3
 
 
 #define MAT_TAG_ElasticMaterial			1
