@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-03-30 01:47:00 $
+// $Revision: 1.4 $
+// $Date: 2007-06-06 19:36:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/Parameter.h,v $
 
 #ifndef Parameter_h
@@ -53,7 +53,7 @@ class Parameter : public TaggedObject, public MovableObject
   virtual int addComponent(DomainComponent *theObject, const char **argv, int argc);  
   virtual int addObject(int parameterID, MovableObject *object);
 
-  virtual int setDomain(Domain *theDomain);
+  virtual void setDomain(Domain *theDomain);
   virtual int sendSelf(int commitTag, Channel &theChannel);  
   virtual int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-03-30 01:47:00 $
+// $Revision: 1.4 $
+// $Date: 2007-06-06 19:36:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/Parameter.cpp,v $
 
 #include <classTags.h>
@@ -217,10 +217,10 @@ Parameter::addObject(int paramID, MovableObject *object)
   return 0;
 }
 
-int
+void
 Parameter::setDomain(Domain *theDomain)
 {
-  return 0;
+  return;
 }
 
 int 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-03-30 01:47:55 $
+// $Revision: 1.2 $
+// $Date: 2007-06-06 19:36:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/MaterialStageParameter.h,v $
 
 #ifndef MaterialStageParameter_h
@@ -40,7 +40,7 @@ class MaterialStageParameter : public Parameter
   virtual int sendSelf(int commitTag, Channel &theChannel);  
   virtual int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
 
-  virtual int setDomain(Domain *theDomain);
+  virtual void setDomain(Domain *theDomain);
 
  protected:
   

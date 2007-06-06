@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-04-13 22:38:49 $
+// $Revision: 1.4 $
+// $Date: 2007-06-06 19:36:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/MaterialStageParameter.cpp,v $
 
 #include <classTags.h>
@@ -56,7 +56,7 @@ MaterialStageParameter::Print(OPS_Stream &s, int flag)
   s << "MaterialStageParameter, tag = " << this->getTag() << endln;
 }
 
-int
+void
 MaterialStageParameter::setDomain(Domain *theDomain)  
 {
   Element *theEle;
@@ -79,7 +79,7 @@ MaterialStageParameter::setDomain(Domain *theDomain)
   if (theResult == -1) 
     opserr << "MaterialStageParameter::setDomain(Domain *theDomain) - NO RESULT\n";
 
-  return theResult;
+  return;
 }
 
 int 
