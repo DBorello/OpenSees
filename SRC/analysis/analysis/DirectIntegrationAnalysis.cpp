@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-04-21 00:06:20 $
+// $Revision: 1.12 $
+// $Date: 2007-06-06 22:39:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DirectIntegrationAnalysis.cpp,v $
                                                                         
                                                                         
@@ -412,6 +412,12 @@ EquiSolnAlgo *
 DirectIntegrationAnalysis::getAlgorithm(void)
 {
   return theAlgorithm;
+}
+
+AnalysisModel *
+DirectIntegrationAnalysis::getModel(void)
+{
+  return theAnalysisModel;
 }
 
 

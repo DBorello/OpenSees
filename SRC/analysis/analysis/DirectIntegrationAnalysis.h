@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-11-29 23:36:47 $
+// $Revision: 1.5 $
+// $Date: 2007-06-06 22:39:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DirectIntegrationAnalysis.h,v $
                                                                         
                                                                         
@@ -83,6 +83,7 @@ class DirectIntegrationAnalysis: public TransientAnalysis
     EquiSolnAlgo *getAlgorithm(void);
     TransientIntegrator *getIntegrator(void);
     ConvergenceTest *getConvergenceTest(void);
+    AnalysisModel *getModel(void);
 
     // AddingSensitivity:BEGIN ///////////////////////////////
 #ifdef _RELIABILITY
