@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-12-06 18:20:22 $
+// $Revision: 1.6 $
+// $Date: 2007-06-06 22:40:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/VariableTimeStepDirectIntegrationAnalysis.cpp,v $
                                                                         
                                                                         
@@ -40,6 +40,7 @@
 #include <Domain.h>
 #include <ConvergenceTest.h>
 #include <float.h>
+#include <AnalysisModel.h>
 
 // Constructor
 VariableTimeStepDirectIntegrationAnalysis::VariableTimeStepDirectIntegrationAnalysis(
@@ -63,7 +64,6 @@ VariableTimeStepDirectIntegrationAnalysis::~VariableTimeStepDirectIntegrationAna
 
 }    
 
-
 int 
 VariableTimeStepDirectIntegrationAnalysis::analyze(int numSteps, double dT, double dtMin, double dtMax, int Jd)
 {
@@ -72,15 +72,24 @@ VariableTimeStepDirectIntegrationAnalysis::analyze(int numSteps, double dT, doub
   EquiSolnAlgo *theAlgo = this->getAlgorithm();
   TransientIntegrator *theIntegratr = this->getIntegrator();
   ConvergenceTest *theTest = theAlgo->getConvergenceTest();
+  AnalysisModel *theModel = this->getModel();
+
 
   // set some variables
   int result = 0;  
   double totalTimeIncr = numSteps * dT;
   double currentTimeIncr = 0.0;
   double currentDt = dT;
-  
+
   // loop until analysis has performed the total time incr requested
   while (currentTimeIncr < totalTimeIncr) {
+
+    if (theModel->newStepDomain(currentDt) < 0) {
+      opserr << "DirectIntegrationAnalysis::analyze() - the AnalysisModel failed in newStepDomain";
+      opserr << " at time " << theDom->getCurrentTime() << endln;
+      theDom->revertToLastCommit();
+      return -2;
+    }
 
     if (this->checkDomainChange() != 0) {
       opserr << "VariableTimeStepDirectIntegrationAnalysis::analyze() - failed checkDomainChange\n";
@@ -96,7 +105,8 @@ VariableTimeStepDirectIntegrationAnalysis::analyze(int numSteps, double dT, doub
     if (theIntegratr->newStep(currentDt) < 0) {
       result = -2;
     }
-    
+
+
     if (result >= 0) {
       result = theAlgo->solveCurrentStep();
       if (result < 0) 
@@ -126,6 +136,7 @@ VariableTimeStepDirectIntegrationAnalysis::analyze(int numSteps, double dT, doub
 	opserr << " failed at time " << theDom->getCurrentTime() << endln;
 	return result;
       }
+
       
       // if still here reset result for next loop
       result = 0;
@@ -134,6 +145,7 @@ VariableTimeStepDirectIntegrationAnalysis::analyze(int numSteps, double dT, doub
     // now we determine a new delta T for next loop
     currentDt = this->determineDt(currentDt, dtMin, dtMax, Jd, theTest);
   }
+
 
   return 0;
 }
