@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.35 $
-// $Date: 2007-04-13 22:41:36 $
+// $Revision: 1.36 $
+// $Date: 2007-06-06 19:55:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -297,6 +297,12 @@ TclCommand_UpdateMaterialStage(ClientData clientData,
 			       int argc,
 			       TCL_Char **argv);
 
+int
+TclCommand_UpdateMaterials(ClientData clientData, 
+			   Tcl_Interp *interp,  
+			   int argc,
+			   TCL_Char **argv);
+
 
 /// added by ZHY			   
 int
@@ -506,6 +512,10 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   ///new command for elast2plast in Multi-yield plasticity, by ZHY
   Tcl_CreateCommand(interp, "updateMaterialStage", 
 		    TclCommand_UpdateMaterialStage,
+		    (ClientData)NULL, NULL);
+
+  Tcl_CreateCommand(interp, "updateMaterials", 
+		    TclCommand_UpdateMaterials,
 		    (ClientData)NULL, NULL);
   
   ///new command for updating properties of soil materials, by ZHY
@@ -2972,6 +2982,24 @@ TclCommand_UpdateMaterialStage(ClientData clientData,
 {
   return TclModelBuilderUpdateMaterialStageCommand(clientData, interp, 
 						   argc, argv, theTclBuilder, theTclDomain);
+}
+
+/// added by ZHY
+extern int 
+TclCommand_UpdateMaterialsCommand(ClientData clientData, 
+				  Tcl_Interp *interp, 
+				  int argc, 
+				  TCL_Char **argv, 
+				  TclModelBuilder *theTclBuilder,
+				  Domain *theDomain);
+int
+TclCommand_UpdateMaterials(ClientData clientData, 
+			   Tcl_Interp *interp,  
+			   int argc, 
+			   TCL_Char **argv)
+{
+  return TclCommand_UpdateMaterialsCommand(clientData, interp, 
+					   argc, argv, theTclBuilder, theTclDomain);
 }
 
 /// added by ZHY
