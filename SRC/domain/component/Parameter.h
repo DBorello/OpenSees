@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-06-06 19:36:19 $
+// $Revision: 1.5 $
+// $Date: 2007-06-07 21:30:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/Parameter.h,v $
 
 #ifndef Parameter_h
@@ -49,6 +49,7 @@ class Parameter : public TaggedObject, public MovableObject
   virtual int update(int newValue); 
   virtual int update(double newValue); 
   virtual int activate(bool active);
+  virtual double getValue(void) {return theInfo.theDouble;}
 
   virtual int addComponent(DomainComponent *theObject, const char **argv, int argc);  
   virtual int addObject(int parameterID, MovableObject *object);
@@ -61,6 +62,7 @@ class Parameter : public TaggedObject, public MovableObject
   
  private:
   Information theInfo;
+  double currentValue;
 
   enum {initialSize = 64};
   enum {expandSize = 128};
