@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-03-02 00:19:08 $
+// $Revision: 1.7 $
+// $Date: 2007-06-08 00:40:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/Material.h,v $
                                                                         
                                                                         
@@ -50,8 +50,6 @@ class Material : public TaggedObject, public MovableObject
     Material(int tag, int classTag);    
     virtual ~Material();
 
-    virtual int setVariable(const char *argv);
-    virtual int getVariable(int variableID, double &info);
 
     virtual Response *setResponse(const char **argv, int argc, OPS_Stream &s);
     virtual int getResponse(int responseID, Information &info);

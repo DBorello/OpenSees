@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-03-02 00:19:08 $
+// $Revision: 1.7 $
+// $Date: 2007-06-08 00:40:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/Material.cpp,v $
                                                                         
                                                                         
@@ -45,18 +45,6 @@ Material::~Material()
   // does nothing
 
 
-}
-
-int
-Material::setVariable(const char *argv)
-{
-	return -1;
-}
-
-int
-Material::getVariable(int variableID, double &info)
-{
-	return -1;
 }
 
 Response*
