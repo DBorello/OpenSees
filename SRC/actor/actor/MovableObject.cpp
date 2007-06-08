@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-09-05 20:25:56 $
+// $Revision: 1.5 $
+// $Date: 2007-06-08 00:39:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/actor/MovableObject.cpp,v $
                                                                         
                                                                         
@@ -95,4 +95,16 @@ int
 MovableObject::activateParameter(int parameterID)
 {
   return 0;
+}
+
+int 
+MovableObject::setVariable(const char *variable, Information &theInfo)
+{
+  return -1;
+}
+
+int 
+MovableObject::getVariable(const char *variable, Information &theInfo)
+{
+  return -1;
 }

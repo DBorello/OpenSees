@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-09-05 20:25:56 $
+// $Revision: 1.5 $
+// $Date: 2007-06-08 00:39:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/actor/MovableObject.h,v $
                                                                         
                                                                         
@@ -65,6 +65,9 @@ class MovableObject
     virtual int setParameter(const char **argv, int argc, Parameter &param);
     virtual int updateParameter(int parameterID, Information &info);
     virtual int activateParameter(int parameterID);
+
+    virtual int setVariable(const char *variable, Information &);
+    virtual int getVariable(const char *variable, Information &);
     
   protected:
     
