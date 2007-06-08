@@ -8,6 +8,7 @@ include ../../../Makefile.def
         HardeningMaterial.o \
 	Concrete01.o \
 	Concrete04.o \
+	Concrete06.o \
 	Steel01.o \
         HystereticMaterial.o \
 	EPPGapMaterial.o \
