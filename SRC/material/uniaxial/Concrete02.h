@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-08-03 23:42:19 $
+// $Revision: 1.3 $
+// $Date: 2007-06-08 00:38:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete02.h,v $
                                                                       
 // Written: fmk
@@ -70,6 +70,8 @@ class Concrete02 : public UniaxialMaterial
 		 FEM_ObjectBroker &theBroker);    
     
     void Print(OPS_Stream &s, int flag =0);
+
+    int getVariable(const char *variable, Information &);
     
  protected:
     

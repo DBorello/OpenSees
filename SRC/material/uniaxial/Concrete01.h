@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2006-09-05 22:14:55 $
+// $Revision: 1.12 $
+// $Date: 2007-06-08 00:38:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.h,v $
                                                                         
                                                                         
@@ -76,6 +76,8 @@ class Concrete01 : public UniaxialMaterial
   double getStressSensitivity     (int gradNumber, bool conditional);
   int    commitSensitivity        (double strainGradient, int gradNumber, int numGrads);
   // AddingSensitivity:END ///////////////////////////////////////////
+
+  int getVariable(const char *variable, Information &);
 
  protected:
 

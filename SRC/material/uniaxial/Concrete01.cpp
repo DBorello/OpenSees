@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2007-05-07 21:21:49 $
+// $Revision: 1.17 $
+// $Date: 2007-06-08 00:38:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.cpp,v $
                                                                         
 // Written: MHS 
@@ -1027,3 +1027,13 @@ Concrete01::commitSensitivity(double TstrainSensitivity, int gradNumber, int num
 }
 */
 // AddingSensitivity:END /////////////////////////////////////////////
+
+int
+Concrete01::getVariable(const char *varName, Information &theInfo)
+{
+  if (strcmp(varName,"ec") == 0) {
+    theInfo.theDouble = epsc0;
+    return 0;
+  } else
+    return -1;
+}
