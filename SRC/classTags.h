@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.90 $
-// $Date: 2007-06-06 19:53:49 $
+// $Revision: 1.91 $
+// $Date: 2007-06-09 03:49:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -136,6 +136,7 @@
 #define MAT_TAG_SecantConcrete 31
 #define MAT_TAG_ContinuumUniaxial 32
 #define MAT_TAG_Concrete05 33
+#define MAT_TAG_Concrete06 34
 
 //B Jeremic
 #define MAT_TAG_PySimple1        205
