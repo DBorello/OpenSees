@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.16 $
-// $Date: 2007-06-09 03:36:25 $
+// $Revision: 1.17 $
+// $Date: 2007-06-09 16:03:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -183,6 +183,7 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
     return 0;
   }
 
+
   if (theHandler == 0) {
     opserr << "EnvelopeNodeRecorder::record() - no DataOutputHandler has been set\n";
     return -1;
@@ -195,8 +196,9 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
       return -1;
     }
 
+
   int numDOF = theDofs->Size();
-  
+
   if (deltaT == 0.0 || timeStamp >= nextTimeStampToRecord) {
     
     if (deltaT != 0.0) 
@@ -205,6 +207,7 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
     for (int i=0; i<numValidNodes; i++) {
       int cnt = i*numDOF;
       Node *theNode = theNodes[i];
+
       if (dataFlag == 0) {
 	const Vector &response = theNode->getTrialDisp();
 	for (int j=0; j<numDOF; j++) {
@@ -294,7 +297,7 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
       }
     }
   }
-    
+
   // check if currentData modifies the saved data
   int sizeData = currentData->Size();
   if (echoTimeFlag == false) {
@@ -366,6 +369,7 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
       }
     }
   }
+
   return 0;
 }
 
@@ -398,6 +402,7 @@ EnvelopeNodeRecorder::sendSelf(int commitTag, Channel &theChannel)
 
   static ID idData(5); 
   idData.Zero();
+
   if (theDofs != 0)
     idData(0) = theDofs->Size();
   if (theNodalTags != 0)
@@ -564,7 +569,7 @@ EnvelopeNodeRecorder::initialize(void)
 
   if (theNodalTags != 0) {
     int numNode = theNodalTags->Size();
-    theNodes = new Node *[numValidNodes];
+    theNodes = new Node *[numNode];
     if (theNodes == 0) {
       opserr << "EnvelopeNodeRecorder::domainChanged - out of memory\n";
       return -1;
@@ -576,23 +581,27 @@ EnvelopeNodeRecorder::initialize(void)
       if (theNode != 0) {
 	theNodes[numValidNodes] = theNode;
 	numValidNodes++;
-      }
+      } 
     }
   } else {
 
     int numNodes = theDomain->getNumNodes();
-    theNodes = new Node *[numNodes];
-    if (theNodes == 0) {
-      opserr << "NodeRecorder::domainChanged - out of memory\n";
-      return -1;
-    }
-    NodeIter &theDomainNodes = theDomain->getNodes();
-    Node *theNode;
-    numValidNodes = 0;
-    while (((theNode = theDomainNodes()) != 0) && (numValidNodes < numNodes)) {
-      theNodes[numValidNodes] = theNode;
-      numValidNodes++;
-    }
+    if (numNodes != 0) {
+      theNodes = new Node *[numNodes];
+      
+      if (theNodes == 0) {
+	opserr << "NodeRecorder::domainChanged - out of memory\n";
+	return -1;
+      }
+      NodeIter &theDomainNodes = theDomain->getNodes();
+      Node *theNode;
+      numValidNodes = 0;
+      while (((theNode = theDomainNodes()) != 0) && (numValidNodes < numNodes)) {
+	theNodes[numValidNodes] = theNode;
+	numValidNodes++;
+      }
+    } else
+      numValidNodes = 0;
   }
 
   //
@@ -602,7 +611,7 @@ EnvelopeNodeRecorder::initialize(void)
   //
   // need to create the data description, i.e. what each column of data is
   //
-  
+
   char outputData[32];
   char dataType[10];
 
