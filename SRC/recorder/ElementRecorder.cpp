@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2007-06-09 00:48:33 $
+// $Revision: 1.30 $
+// $Date: 2007-06-09 03:36:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -101,6 +101,12 @@ ElementRecorder::ElementRecorder(const ID *ele,
 
 ElementRecorder::~ElementRecorder()
 {
+  theOutputHandler->endTag(); // Data
+  theOutputHandler->endTag(); // OpenSeesOutput
+
+  if (theOutputHandler != 0)
+    delete theOutputHandler;
+
   //
   // invoke the destructor on the response objects
   //
@@ -125,11 +131,6 @@ ElementRecorder::~ElementRecorder()
     delete [] responseArgs[i];
   delete [] responseArgs;
 
-  theOutputHandler->endTag(); // Data
-  theOutputHandler->endTag(); // OpenSeesOutput
-
-  if (theOutputHandler != 0)
-    delete theOutputHandler;
 }
 
 

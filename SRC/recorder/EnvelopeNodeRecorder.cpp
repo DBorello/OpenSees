@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.15 $
-// $Date: 2007-06-09 00:49:14 $
+// $Revision: 1.16 $
+// $Date: 2007-06-09 03:36:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -518,13 +518,13 @@ EnvelopeNodeRecorder::recvSelf(int commitTag, Channel &theChannel,
 
 
   static Vector data(2);
-  data(0) = deltaT;
-  data(1) = nextTimeStampToRecord;
   if (theChannel.recvVector(0, commitTag, data) < 0) {
     opserr << "EnvelopeNodeRecorder::sendSelf() - failed to receive data\n";
     return -1;
   }
-
+  deltaT = data(0);
+  nextTimeStampToRecord = data(1);
+ 
   if (theHandler != 0)
     delete theHandler;
 

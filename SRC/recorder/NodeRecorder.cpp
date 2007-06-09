@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.27 $
-// $Date: 2007-04-25 23:42:26 $
+// $Revision: 1.28 $
+// $Date: 2007-06-09 03:36:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -567,12 +567,13 @@ NodeRecorder::recvSelf(int commitTag, Channel &theChannel,
 
 
   static Vector data(2);
-  data(0) = deltaT;
-  data(1) = nextTimeStampToRecord;
   if (theChannel.recvVector(0, commitTag, data) < 0) {
     opserr << "NodeRecorder::sendSelf() - failed to receive data\n";
     return -1;
   }
+  deltaT = data(0);
+  nextTimeStampToRecord = data(1);
+
 
   if (theOutputHandler != 0)
     delete theOutputHandler;
@@ -596,10 +597,12 @@ NodeRecorder::recvSelf(int commitTag, Channel &theChannel,
 int
 NodeRecorder::initialize(void)
 {
+
   if (theDofs == 0 || theDomain == 0) {
     opserr << "NodeRecorder::initialize() - either nodes, dofs or domain has not been set\n";
     return -1;
   }
+
 
   theOutputHandler->tag("OpenSeesOutput");
 
