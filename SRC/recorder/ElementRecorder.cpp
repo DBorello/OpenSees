@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2007-04-25 23:42:26 $
+// $Revision: 1.29 $
+// $Date: 2007-06-09 00:48:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -243,6 +243,13 @@ ElementRecorder::sendSelf(int commitTag, Channel &theChannel)
     return -1;
   }
 
+  static Vector dData(1);
+  dData(1) = deltaT;
+  if (theChannel.sendVector(0, commitTag, dData) < 0) {
+    opserr << "ElementRecorder::sendSelf() - failed to send dData\n";
+    return -1;
+  }
+  
   //
   // send the eleID
   //
@@ -341,6 +348,14 @@ ElementRecorder::recvSelf(int commitTag, Channel &theChannel,
     echoTimeFlag = false;    
 
   numEle = eleSize;
+
+  static Vector dData(1);
+  if (theChannel.recvVector(0, commitTag, dData) < 0) {
+    opserr << "ElementRecorder::sendSelf() - failed to send dData\n";
+    return -1;
+  }
+  deltaT = dData(1);
+
 
   //
   // resize & recv the eleID
