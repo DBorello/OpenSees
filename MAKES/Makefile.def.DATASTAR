@@ -66,23 +66,19 @@ SUPERLUdir   = $(HOME)/OpenSees/OTHER/SuperLU_3.0/SRC
 SUPERLU_DISTdir   = $(HOME)/OpenSees/OTHER/SuperLU_DIST_2.0/SRC
 
 
-DIRS        = $(BLASdir) \
-              $(CBLASdir) \
-              $(SUPERLUdir) \
-              $(LAPACKdir) \
+DIRS        = $(SUPERLUdir) \
               $(ARPACKdir) \
+              $(LAPACKdir) \
               $(UMFPACKdir) \
               $(METISdir) \
               $(SRCdir) 
 
 ifeq ($(PROGRAMMING_MODE), PARALLEL)
 
-DIRS        = $(BLASdir) \
-              $(CBLASdir) \
-              $(SUPERLUdir) \
+DIRS        = $(SUPERLUdir) \
 	      $(SUPERLU_DISTdir) \
+	      $(ARPACKdir) \
               $(LAPACKdir) \
-              $(ARPACKdir) \
               $(UMFPACKdir) \
               $(METISdir) \
               $(SRCdir) 
@@ -90,9 +86,7 @@ endif
 
 ifeq ($(PROGRAMMING_MODE), PARALLEL_INTERPRETERS)
 
-DIRS        = $(BLASdir) \
-              $(CBLASdir) \
-              $(SUPERLUdir) \
+DIRS        = $(SUPERLUdir) \
 	      $(SUPERLU_DISTdir) \
               $(LAPACKdir) \
               $(ARPACKdir) \
@@ -122,8 +116,9 @@ FE_LIBRARY          = $(HOME)/lib/libOpenSees.a
 NDARRAY_LIBRARY     = $(HOME)/lib/libndarray.a  # BJ_UCD jeremic@ucdavis.edu 
 MATMOD_LIBRARY      = $(HOME)/lib/libmatmod.a   # BJ_UCD jeremic@ucdavis.edu 
 BJMISC_LIBRARY      = $(HOME)/lib/libBJmisc.a  # BJ_UCD jeremic@ucdavis.edu
+#LAPACK_LIBRARY      =  -L/usr/local/apps/LAPACK -llapack
 LAPACK_LIBRARY      = $(HOME)/lib/libLapack.a
-BLAS_LIBRARY        = $(HOME)/lib/libBlas.a
+BLAS_LIBRARY        = -lessl
 SUPERLU_LIBRARY     = $(HOME)/lib/libSuperLU.a
 CBLAS_LIBRARY       = $(HOME)/lib/libCBlas.a
 ARPACK_LIBRARY      = $(HOME)/lib/libArpack.a
@@ -202,23 +197,20 @@ PROGRAMMING_FLAG =
 #RELIABILITY_FLAG = -D_RELIABILITY
 RELIABILITY_FLAG =
 
-#DEBUG_FLAG = -D_G3DEBUG 
-DEBUG_FLAG =
-
 OPT_FLAG = -O3 -qstrict  -q64 
+#OPT_FLAG = -g -qstrict  -q64  -D_G3DEBUG
 
 MUMPS_FLAG = 
 PETSC_FLAG =
 
 COMP_FLAG = -qnoipa
 #-pg
-C++FLAGS         = -D_LINUX -D_UNIX  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(OPT_FLAG) $(COMP_FLAG)\
+C++FLAGS         = -D_LINUX -D_UNIX  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(OPT_FLAG) $(COMP_FLAG)\
 		$(PROGRAMMING_FLAG) $(PETSC_FLAG) $(MUMPS_FLAG) -qarch=pwr4 -qtune=pwr4  -D_KAI -D_PARALLEL_PROCESSING -cpp 
 
-CFLAGS          = -qarch=pwr4 -qtune=pwr4  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG)  -D_KAI -D_PARALLEL_PROCESSING $(OPT_FLAG) $(COMP_FLAG)
-FFLAGS          = -qarch=pwr4 -qtune=pwr4   -qextname $(OPT_FLAG) $(COMP_FLAG)
+CFLAGS          = -qarch=pwr4 -qtune=pwr4  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(PROGRAMMING_FLAG)  -D_KAI -D_PARALLEL_PROCESSING $(OPT_FLAG) $(COMP_FLAG) 
+FFLAGS          = -qarch=pwr4 -qtune=pwr4 -qextname $(OPT_FLAG) $(COMP_FLAG) 
 LINKFLAGS       = -bnoquiet -bbigtoc
-
 
 # Misc
 MAKE            = /usr/bin/gmake
@@ -263,7 +255,7 @@ SHELL           = /bin/sh
 
 .c.o:
 	@$(ECHO) Making $@ from $<
-	$(CC) $(CFLAGS) -c  $< 
+	$(CC) $(CFLAGS) $(INCLUDES) -c  $< 
 
 .f.o:      
 	@$(ECHO) Making $@ from $<
@@ -309,22 +301,23 @@ PETSC_LIB =  -L$(PETSC_DIR)/lib/libg/$(PETSC_ARCH) \
 
 endif
 
-HAVEMUMPS = NO
+HAVEMUMPS = YES
 MUMPS_INCLUDE =
 MUMPS_LIB = 
 
 ifeq ($(HAVEMUMPS), YES)
 
+MUMPS_DIR = /users/ucb/ux455280/MUMPS_4.7.3
 MUMPS = YES
 MUMPS_FLAG = -D_MUMPS
-MUMPS_LIB = -L/gpfs/fmk/MUMPS_4.6.4/lib \
+MUMPS_LIB = -L$(MUMPS_DIR)/lib \
 	-ldmumps -lpord  -lpesslsmp -lblacssmp \
 	$(FE)/system_of_eqn/linearSOE/mumps/MumpsSOE.o \
 	$(FE)/system_of_eqn/linearSOE/mumps/MumpsSolver.o \
 	$(FE)/system_of_eqn/linearSOE/mumps/MumpsParallelSOE.o \
 	$(FE)/system_of_eqn/linearSOE/mumps/MumpsParallelSolver.o
 
-MUMPS_INCLUDE = -I/gpfs/fmk/MUMPS_4.6.4/include
+MUMPS_INCLUDE = -I$(MUMPS_DIR)/include
 
 endif
 
@@ -349,16 +342,16 @@ HPM_LIB = -L/usr/local/apps/hpm/lib/pwr4/ \
 	-lhpm_r -lpmapi -lm 
 
 MACHINE_NUMERICAL_LIBS  = -lm \
+  $(BLAS_LIBRARY) \
+  $(LAPACK_LIBRARY) \
   $(ARPACK_LIBRARY) \
   $(SUPERLU_LIBRARY) \
   $(UMFPACK_LIBRARY) \
-  $(LAPACK_LIBRARY)  \
-  $(BLAS_LIBRARY) \
-  $(CBLAS_LIBRARY) \
+  $(PETSC_LIB) $(MUMPS_LIB) \
   $(GRAPHIC_LIBRARY)\
   $(RELIABILITY_LIBRARY) \
   $(DISTRIBUTED_SUPERLU_LIBRARY) \
-  $(METIS_LIBRARY) $(PARALLEL_LIB) $(PETSC_LIB) $(MUMPS_LIB) $(HPM_LIB)
+  $(METIS_LIBRARY) $(PARALLEL_LIB) $(HPM_LIB) 
 
 
 
