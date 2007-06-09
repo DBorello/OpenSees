@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2007-02-16 00:11:49 $
+// $Revision: 1.30 $
+// $Date: 2007-06-09 17:16:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 /*
@@ -2522,7 +2522,6 @@ ForceBeamColumn2d::setParameter(const char **argv, int argc, Parameter &param)
   }
 
   else {
-    opserr << "ForceBeamColumn2d::setParameter() - could not set parameter. " << endln;
     return -1;
   }
 }
