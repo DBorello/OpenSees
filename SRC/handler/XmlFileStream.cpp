@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-05-02 17:35:26 $
+// $Revision: 1.7 $
+// $Date: 2007-06-09 03:32:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/XmlFileStream.cpp,v $
 
 #include <XmlFileStream.h>
@@ -59,10 +59,14 @@ XmlFileStream::XmlFileStream(const char *name, openMode mode, int indent)
     strcpy(&indentString[i]," ");
 
   this->setFile(name, mode);
+
+  int fileNameLength = strlen(fileName);
 }
 
 XmlFileStream::~XmlFileStream()
 {
+    int fileNameLength = strlen(fileName);
+
   if (fileOpen == 1) {
     for (int i=0; i<numTag; i++) {
       this->endTag();
@@ -75,6 +79,7 @@ XmlFileStream::~XmlFileStream()
   if (sendSelfCount != 0) {
 
     int fileNameLength = strlen(fileName);
+ 
     sprintf(&fileName[fileNameLength-2],"");
     
     theFile.open(fileName, ios::out);
@@ -211,8 +216,9 @@ XmlFileStream::setFile(const char *name, openMode mode)
       delete [] fileName;
     fileName = 0;
   }
+
   if (fileName == 0) {
-    fileName = new char[strlen(name)+1];
+    fileName = new char[strlen(name)+5];
     if (fileName == 0) {
       std::cerr << "XmlFileStream::setFile() - out of memory copying name: " << name << std::endl;
       return -1;
@@ -251,9 +257,9 @@ XmlFileStream::open(void)
   }
 
   if (sendSelfCount != 0) {
-    int fileNameLength = strlen(fileName);
-    sprintf(&fileName[fileNameLength],".%d",1);
+    strcat(fileName,".1");
   }
+
 
   // open file
   if (theOpenMode == OVERWRITE) 

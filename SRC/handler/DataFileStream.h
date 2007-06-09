@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-04-25 23:47:22 $
+// $Revision: 1.3 $
+// $Date: 2007-06-09 03:32:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/DataFileStream.h,v $
 
 #ifndef _DataFileStream
@@ -94,6 +94,7 @@ class DataFileStream : public OPS_Stream
   char *indentString;
 
   int sendSelfCount;
+  int originalFileNameLength;
 };
 
 #endif

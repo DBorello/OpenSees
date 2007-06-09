@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-04-25 23:47:01 $
+// $Revision: 1.3 $
+// $Date: 2007-06-09 03:32:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/XmlFileStream.h,v $
 
 #ifndef _XmlFileStream
@@ -98,6 +98,7 @@ class XmlFileStream : public OPS_Stream
   int numTag;    
   int sizeTags;
   char **tags;
+
   int sendSelfCount;
 };
 
