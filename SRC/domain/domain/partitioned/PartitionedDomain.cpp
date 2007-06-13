@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-05-04 06:58:34 $
+// $Revision: 1.14 $
+// $Date: 2007-06-13 18:02:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -150,7 +150,7 @@ PartitionedDomain::PartitionedDomain(int numNodes, int numElements,
 
 PartitionedDomain::~PartitionedDomain()
 {
-  this->clearAll();
+  this->PartitionedDomain::clearAll();
 
   if (elements != 0)
     delete elements;
@@ -419,7 +419,6 @@ PartitionedDomain::addMP_Constraint(MP_Constraint *load)
 	  retainedNodePtr->setMass(mass);
 	}
       }
-
     } else {
       // get a copy & zero the mass
       retainedNodePtr = new Node(*retainedNodePtr, false);
@@ -456,17 +455,20 @@ PartitionedDomain::addMP_Constraint(MP_Constraint *load)
     //
 
     SubdomainIter &theSubdomains3 = this->getSubdomains();
-    while ((theSub = theSubdomains3()) != 0 && retainedNodePtr == 0) {
+    while ((theSub = theSubdomains3()) != 0) {
       bool hasConstrained = theSub->hasNode(constrainedNodeTag);
       if (hasConstrained == true) {
+
 	bool hasRestrained = theSub->hasNode(retainedNodeTag);
 	if (hasRestrained == false) {
+
 	  res = theSub->addNode(retainedNodePtr);
 
 	  if (res == false) {
 	    opserr << "PartitionedDomain::addMP_Constraint - problems adding retained to subdomain\n";
 	    return res;
 	  } 
+
 	  res = theSub->addMP_Constraint(load);
 
 	  if (res == false) {
@@ -478,12 +480,9 @@ PartitionedDomain::addMP_Constraint(MP_Constraint *load)
     }
 
     // clean up memory
-
-    if (constrainedNodePtr != 0 && addedMain == false) 
-      ; 
-    else
+    if (addedMain == true && getRetained == true) 
       delete retainedNodePtr;
-    
+
   }
 
   return res;
