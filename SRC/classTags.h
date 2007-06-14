@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.91 $
-// $Date: 2007-06-09 03:49:25 $
+// $Revision: 1.92 $
+// $Date: 2007-06-14 21:13:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -211,7 +211,7 @@
 #define SEC_TAG_YieldSurface2D01  32
 #define SEC_TAG_ElasticShear2d   33
 #define SEC_TAG_ElasticShear3d   34
-
+#define SEC_TAG_FiberSection2dInt		35
 
 #define SECTION_INTEGRATION_TAG_WideFlange 1
 #define SECTION_INTEGRATION_TAG_RC 2
@@ -370,6 +370,8 @@
 #define ELE_TAG_ForceBeamColumn2d 9878
 #define ELE_TAG_ForceBeamColumn3d 9879
 
+#define ELE_TAG_DispBeamColumn2dInt 9880
+
 #define ELE_TAG_InternalSpring   9900
 #define ELE_TAG_SimpleJoint2D    9901
 #define ELE_TAG_Joint2D    9902
@@ -417,6 +419,7 @@
 #define CRDTR_TAG_LinearCrdTransf3d 4
 #define CRDTR_TAG_PDeltaCrdTransf3d 5
 #define CRDTR_TAG_CorotCrdTransf3d  6
+#define CRDTR_TAG_LinearCrdTransf2dIncr 7
 
 #define NOD_TAG_Node      	1
 #define NOD_TAG_DummyNode 	2
