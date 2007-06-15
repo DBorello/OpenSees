@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-06-06 19:52:53 $
+// $Revision: 1.2 $
+// $Date: 2007-06-15 20:22:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Elastic2Material.cpp,v $
                                                                         
                                                                         
@@ -63,36 +63,36 @@ Elastic2Material::~Elastic2Material()
 int 
 Elastic2Material::setTrialStrain(double strain, double strainRate)
 {
-	if (initialStrain == 99999.99) initialStrain = strain;
-    trialStrain     = strain - initialStrain;
-    trialStrainRate = strainRate;
-    return 0;
+  if (initialStrain == 99999.99) initialStrain = strain;
+  trialStrain     = strain - initialStrain;
+  trialStrainRate = strainRate;
+  return 0;
 }
 
 
 int 
 Elastic2Material::setTrial(double strain, double &stress, double &tangent, double strainRate)
 {
-	if (initialStrain == 99999.99) initialStrain = strain;
-    trialStrain     = strain - initialStrain;
-    trialStrainRate = strainRate;
-
-    stress = E*trialStrain + eta*trialStrainRate;
-    tangent = E;
-
-		if (zeroE==1) {
-			stress = eta*trialStrainRate;
-			tangent = 0;
-		}
-
-    return 0;
+  if (initialStrain == 99999.99) initialStrain = strain;
+  trialStrain     = strain - initialStrain;
+  trialStrainRate = strainRate;
+  
+  stress = E*trialStrain + eta*trialStrainRate;
+  tangent = E;
+  
+  if (zeroE==1) {
+    stress = eta*trialStrainRate;
+    tangent = 0;
+  }
+  
+  return 0;
 }
 
 double 
 Elastic2Material::getStress(void)
 {
-		if (zeroE==1) return eta*trialStrainRate;
-    return E*trialStrain + eta*trialStrainRate;
+  if (zeroE==1) return eta*trialStrainRate;
+  return E*trialStrain + eta*trialStrainRate;
 }
 
 
@@ -186,8 +186,12 @@ Elastic2Material::setParameter(const char **argv, int argc, Parameter &param)
   if (argc > 1) {
     int theMaterialTag;
     theMaterialTag = atoi(argv[1]);
-    if (theMaterialTag != this->getTag())
-      return 0;
+    if (theMaterialTag != this->getTag()) {
+      if (strcmp(argv[0],"zeroE") == 0)
+	return param.addObject(3, this);
+      else
+	return 0;
+    }
   }
 
   if (strcmp(argv[0],"E") == 0)

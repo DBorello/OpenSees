@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-06-06 19:52:53 $
+// $Revision: 1.2 $
+// $Date: 2007-06-15 20:22:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Elastic2Material.h,v $
                                                                         
                                                                         
@@ -79,7 +79,7 @@ class Elastic2Material : public UniaxialMaterial
     double trialStrainRate;
     double E;
     double eta;
-	double initialStrain;
+    double initialStrain;
     static int zeroE;
 };
 
