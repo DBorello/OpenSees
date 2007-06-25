@@ -177,6 +177,12 @@
 				RelativePath="..\..\..\SRC\material\uniaxial\EPPGapMaterial.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\Elastic2Material.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\Elastic2Material.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\ElasticMaterial.cpp">
 			</File>
 			<File
