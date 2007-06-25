@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-06-09 03:32:10 $
+// $Revision: 1.8 $
+// $Date: 2007-06-25 21:18:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/XmlFileStream.cpp,v $
 
 #include <XmlFileStream.h>
@@ -36,6 +36,7 @@ using std::ios;
 using std::setiosflags;
 using std::string;
 using std::ifstream;
+using std::getline;
 
 XmlFileStream::XmlFileStream(int indent)
   :OPS_Stream(OPS_STREAM_TAGS_XmlFileStream), 
@@ -100,7 +101,7 @@ XmlFileStream::~XmlFileStream()
       else {
 	// read and throw away the first six lines from all but 0 (to first tag)
 	for (int j=0; j<6; j++) {
-	  getline(*(theFiles[i]), s);	
+		getline(*(theFiles[i]), s);	
 	  if (i == 0) 
 	    theFile << s << "\n";
 	}
@@ -117,7 +118,7 @@ XmlFileStream::~XmlFileStream()
       if (theFiles[j] != 0) {
 	bool  foundData = false;
 	while (foundData == false) {
-	  getline(*(theFiles[j]), s);	
+		getline(*(theFiles[j]), s);	
 	  if (theFiles[j]->eof()) {
 	    foundData = true;
 	    theFiles[j]->close();
@@ -174,7 +175,7 @@ XmlFileStream::~XmlFileStream()
       if (theFiles[0] == 0)
 	done = true;
       else {
-	getline(*(theFiles[0]), s);	
+		  getline(*(theFiles[0]), s);	
 	theFile << s << "\n";
 	if (theFiles[0]->eof())
 	  done = true;

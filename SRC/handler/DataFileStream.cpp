@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-06-09 03:32:10 $
+// $Revision: 1.5 $
+// $Date: 2007-06-25 21:18:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/DataFileStream.cpp,v $
 
 
@@ -37,6 +37,7 @@ using std::ios;
 using std::setiosflags;
 using std::ifstream;
 using std::string;
+using std::getline;
 
 DataFileStream::DataFileStream(int indent)
   :OPS_Stream(OPS_STREAM_TAGS_DataFileStream), 
@@ -88,7 +89,6 @@ DataFileStream::~DataFileStream()
     string s;
 
     while (done == false) {
-      char c;
       for (int i=0; i<=sendSelfCount; i++) {
 	bool eoline = false;
 	getline(*(theFiles[i]), s);	
