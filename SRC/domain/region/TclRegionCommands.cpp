@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2005-01-24 18:59:49 $
+// $Revision: 1.7 $
+// $Date: 2007-06-26 20:13:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/region/TclRegionCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -31,7 +31,6 @@
 // What: "@(#) Region.h, revA"
 
 #include <tcl.h>
-#include <tk.h>
 
 #include <stdio.h>
 #include <stdlib.h>

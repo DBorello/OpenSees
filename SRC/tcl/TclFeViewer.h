@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-05-17 05:17:51 $
+// $Revision: 1.9 $
+// $Date: 2007-06-26 20:13:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclFeViewer.h,v $
                                                                         
                                                                         
@@ -43,7 +43,6 @@ class ColorMap;
 
 extern "C" {
 #include <tcl.h>
-#include <tk.h>
 }
 
 class TclFeViewer : public Recorder

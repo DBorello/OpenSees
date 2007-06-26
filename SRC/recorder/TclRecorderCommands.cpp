@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.42 $
-// $Date: 2007-05-11 22:20:21 $
+// $Revision: 1.43 $
+// $Date: 2007-06-26 20:13:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -35,7 +35,6 @@
 
 
 #include <tcl.h>
-#include <tk.h>
 
 #include <stdio.h>
 #include <stdlib.h>

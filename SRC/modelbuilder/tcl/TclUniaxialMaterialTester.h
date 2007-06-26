@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-24 18:28:31 $
+// $Revision: 1.4 $
+// $Date: 2007-06-26 20:13:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclUniaxialMaterialTester.h,v $
                                                                         
 // File: ~/modelbuilder/tcl/TclUniaxialMaterialTester.h
@@ -48,7 +48,6 @@ class CrdTransf2d;
 class CrdTransf3d;
 
 #include <tcl.h>
-#include <tk.h>
 
 class TclUniaxialMaterialTester : public TclModelBuilder
 {

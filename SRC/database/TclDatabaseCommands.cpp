@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2005-07-25 18:05:02 $
+// $Revision: 1.9 $
+// $Date: 2007-06-26 20:13:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/TclDatabaseCommands.cpp,v $
                                                                         
                                                                         
@@ -34,7 +34,6 @@
 // What: "@(#) commands.C, revA"
 
 #include <tcl.h>
-#include <tk.h>
 
 #include <OPS_Globals.h>
 #include <stdio.h>

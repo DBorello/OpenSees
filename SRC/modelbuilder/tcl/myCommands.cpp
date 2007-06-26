@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-25 23:34:26 $
+// $Revision: 1.7 $
+// $Date: 2007-06-26 20:13:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/myCommands.cpp,v $
                                                                         
                                                                         
@@ -40,7 +40,6 @@
 #include "TclUniaxialMaterialTester.h"
 
 #include <tcl.h>
-#include <tk.h>
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-25 23:34:46 $
+// $Revision: 1.5 $
+// $Date: 2007-06-26 20:13:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclVideoPlayer.h,v $
                                                                         
                                                                         
@@ -45,7 +45,6 @@ class ColorMap;
 
 extern "C" {
 #include <tcl.h>
-#include <tk.h>
 }
 
 class TclVideoPlayer

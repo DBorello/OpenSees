@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-09-05 23:11:08 $
+// $Revision: 1.7 $
+// $Date: 2007-06-26 20:13:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.h,v $
                                                                         
 // Written: fmk 
@@ -60,7 +60,6 @@ class CrdTransf2d;
 class CrdTransf3d;
 
 #include <tcl.h>
-#include <tk.h>
 
 class TclModelBuilder : public ModelBuilder
 {
