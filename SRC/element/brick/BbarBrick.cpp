@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.21 $
-// $Date: 2007-05-03 21:13:37 $
+// $Revision: 1.22 $
+// $Date: 2007-06-27 00:24:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.cpp,v $
 
 // Ed "C++" Love
@@ -1563,3 +1563,43 @@ BbarBrick::getResponse(int responseID, Information &eleInfo)
 
     return -1;
 }
+
+int
+BbarBrick::setParameter(const char **argv, int argc, Parameter &param)
+{
+  if (argc < 1)
+    return -1;
+
+  int res = -1;
+
+  if (strstr(argv[0],"material") != 0) {
+
+    if (argc < 3)
+      return -1;
+
+    int pointNum = atoi(argv[1]);
+    if (pointNum > 0 && pointNum <= 8)
+      return materialPointers[pointNum-1]->setParameter(&argv[2], argc-2, param);
+    else 
+      return -1;
+  }
+  
+  // otherwise it could be just a forall material parameter
+  else {
+    int matRes = res;
+    for (int i=0; i<8; i++) {
+      matRes =  materialPointers[i]->setParameter(argv, argc, param);
+      if (matRes != -1)
+	res = matRes;
+    }
+  }
+  
+  return res;
+}
+    
+int
+BbarBrick::updateParameter(int parameterID, Information &info)
+{
+  return -1;
+}
+

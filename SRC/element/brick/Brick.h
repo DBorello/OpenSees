@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-02-02 01:44:56 $
+// $Revision: 1.14 $
+// $Date: 2007-06-27 00:24:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.h,v $
 
 // Ed "C++" Love
@@ -113,6 +113,10 @@ class Brick : public Element {
       
     Response *setResponse(const char **argv, int argc, OPS_Stream &s);
     int getResponse(int responseID, Information &eleInformation);
+
+
+    int setParameter(const char **argv, int argc, Parameter &param);
+    int updateParameter(int parameterID, Information &info);
 
     //plotting 
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
