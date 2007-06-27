@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-06-06 19:36:19 $
+// $Revision: 1.5 $
+// $Date: 2007-06-27 00:26:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/MaterialStageParameter.cpp,v $
 
 #include <classTags.h>
@@ -78,6 +78,8 @@ MaterialStageParameter::setDomain(Domain *theDomain)
   
   if (theResult == -1) 
     opserr << "MaterialStageParameter::setDomain(Domain *theDomain) - NO RESULT\n";
+
+  delete [] theString;
 
   return;
 }
