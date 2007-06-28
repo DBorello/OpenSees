@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-06-28 20:47:12 $
+// $Revision: 1.2 $
+// $Date: 2007-06-28 21:46:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete07.cpp,v $
 
 // Written: Jon Waugh, Iowa State University
