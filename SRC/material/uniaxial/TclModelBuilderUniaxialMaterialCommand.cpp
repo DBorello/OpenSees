@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.41 $
-// $Date: 2007-06-06 19:53:13 $
+// $Revision: 1.42 $
+// $Date: 2007-06-28 20:47:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -47,6 +47,7 @@
 #include <ECC01.h>                      // Won Lee
 #include <Concrete02.h>			// MHS
 #include <Concrete04.h>
+#include <Concrete07.h>			// JDW
 #include <HystereticMaterial.h>	// MHS
 #include <EPPGapMaterial.h>		// Mackie
 #include <ViscousMaterial.h>	// Sasani
@@ -1256,6 +1257,82 @@ ft, etu);
          theMaterial = new Concrete04(tag, fpc, epsc0, epscu, Ec0);
      }
    }
+
+
+    else if (strcmp(argv[1], "Concrete07") == 0) {
+		// Check to see if there are enough arquements
+		if (argc < 11) {
+			opserr << "WARNING: Insufficient arguements\n";
+			printCommand(argc, argv);
+			opserr << "Want: uniaxialMaterial Concrete06 tag? fpc? epsc0? Ec? fpt? epst0? xcrp? xcrn? r?\n";
+			return TCL_ERROR;
+		}
+
+		int tag;
+
+		if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+			opserr << "WARNING: Invalid uniaxial Concrete06 tag\n";
+			return TCL_ERROR;
+		}
+
+		// Read in the faluves required for the model
+		double fpc, epsc0, Ec, fpt, epst0, xcrp, xcrn, r;
+
+		if (Tcl_GetDouble(interp, argv[3], &fpc) != TCL_OK) {
+			opserr << "WARNING: Invalid peak compression stress\n";
+			opserr << "uniaxialMaterial Concrete06: " << tag << endln;
+			return TCL_ERROR;
+		}
+
+		if (Tcl_GetDouble(interp, argv[4], &epsc0) != TCL_OK) {
+			opserr << "WARNING: Invalid peak compression strain\n";
+			opserr << "uniaxialMaterial Concrete06: " << tag <<endln;
+			return TCL_ERROR;
+		}
+
+		if (Tcl_GetDouble(interp, argv[5], &Ec) != TCL_OK) {
+			opserr << "WARNING: Invalid Young's Modulus\n";
+			opserr << "uniaxialMaterial Concrete06: " << tag << endln;
+			return TCL_ERROR;
+		}
+
+		if (Tcl_GetDouble(interp, argv[6], &fpt) != TCL_OK) {
+			opserr << "WARNING: Invalid peak tension stress\n";
+			opserr << "uniaxialMaterial Concrete06: " << tag << endln;
+			return TCL_ERROR;
+		}
+
+		if (Tcl_GetDouble(interp, argv[7], &epst0) != TCL_OK) {
+			opserr << "WARNING: Invalid peak tension strain\n";
+			opserr << "uniaxialMaterial Concrete06: " << tag << endln;
+			return TCL_ERROR;
+		}
+
+		if (Tcl_GetDouble(interp, argv[8], &xcrp) != TCL_OK) {
+			opserr << "WARNING: Invalid critical nondimensional strain in tension\n";
+			opserr << "uniaxialMaterial Concrete06: " << tag << endln;
+			return TCL_ERROR;
+		}
+
+		if (Tcl_GetDouble(interp, argv[9], &xcrn) != TCL_OK) {
+			opserr << "WARNING: Invalid critical nondimensional strain in compression\n";
+			opserr << "uniaxialMaterial Concrete06: " << tag << endln;
+			return TCL_ERROR;
+		}
+
+		if (Tcl_GetDouble(interp, argv[10], &r) != TCL_OK) {
+			opserr << "WARNING: Invalid value for r\n";
+			opserr << "uniaxialMaterial Concrete06: " << tag << endln;
+		}
+
+//		opserr << "fpc: " << fpc << endln << "epsc0: " << epsc0 << endln << "Ec: " << Ec << endln;
+//		opserr << "fpt: " << fpt << endln << "epst0: " << epst0 << endln << "xcrp: " << xcrp << endln;
+//		opserr << "xcrn: " << xcrn << endln << "r: " << r << endln;
+
+		// Parsing was successful, allocate the material
+
+		theMaterial = new Concrete07(tag, fpc, epsc0, Ec, fpt, epst0, xcrp, xcrn, r);
+	}
 
 	else if (strcmp(argv[1],"Viscous") == 0) {
 		if (argc < 5)
