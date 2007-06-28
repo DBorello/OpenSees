@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.43 $
-// $Date: 2007-06-28 21:46:43 $
+// $Revision: 1.44 $
+// $Date: 2007-06-28 22:40:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -47,11 +47,8 @@
 #include <ECC01.h>                      // Won Lee
 #include <Concrete02.h>			// MHS
 #include <Concrete04.h>
-<<<<<<< TclModelBuilderUniaxialMaterialCommand.cpp
 #include <Concrete05.h>
-=======
 #include <Concrete07.h>			// JDW
->>>>>>> 1.42
 #include <HystereticMaterial.h>	// MHS
 #include <EPPGapMaterial.h>		// Mackie
 #include <ViscousMaterial.h>	// Sasani
