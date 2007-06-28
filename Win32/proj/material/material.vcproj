@@ -153,6 +153,12 @@
 				RelativePath="..\..\..\SRC\material\uniaxial\Concrete04.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\Concrete07.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\Concrete07.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\DrainMaterial.cpp">
 			</File>
 			<File
