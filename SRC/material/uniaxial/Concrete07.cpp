@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-06-28 21:46:43 $
+// $Revision: 1.3 $
+// $Date: 2007-06-28 22:16:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete07.cpp,v $
 
 // Written: Jon Waugh, Iowa State University
@@ -36,7 +36,7 @@
 #include <Channel.h>
 #include <Information.h>
 #include <float.h>
-#include <iostream.h>
+#include <iostream>
 
 Concrete07::Concrete07 (int tag, double FPC, double EPSC0, double EC, double FPT, double EPST0, double XCRP, double XCRN, double R)
 :UniaxialMaterial(tag, MAT_TAG_Concrete07), fpc(FPC), epsc0(EPSC0), Ec(EC), fpt(FPT), epst0(EPST0), xcrp(XCRP), xcrn(XCRN), r(R) {
