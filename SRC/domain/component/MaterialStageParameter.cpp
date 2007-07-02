@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-06-27 00:26:05 $
+// $Revision: 1.6 $
+// $Date: 2007-07-02 21:56:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/MaterialStageParameter.cpp,v $
 
 #include <classTags.h>
@@ -76,9 +76,6 @@ MaterialStageParameter::setDomain(Domain *theDomain)
   while (((theEle = theEles()) != 0) && (theResult == -1)) 
     theResult = theEle->setParameter(theString, 2, *this);
   
-  if (theResult == -1) 
-    opserr << "MaterialStageParameter::setDomain(Domain *theDomain) - NO RESULT\n";
-
   delete [] theString;
 
   return;
