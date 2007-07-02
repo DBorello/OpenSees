@@ -813,12 +813,8 @@ MODEL_BUILDER_LIBS = $(FE)/modelbuilder/ModelBuilder.o \
 DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/component/Parameter.o \
 	$(FE)/domain/component/MaterialStageParameter.o \
-<<<<<<< Makefile
-	$(FE)/domain/component/MatParameter.o \
-=======
 	$(FE)/domain/component/TclUpdateMaterialCommand.o \
 	$(FE)/domain/component/MatParameter.o \
->>>>>>> 1.152
 	$(FE)/domain/component/TclParameterCommands.o \
 	$(FE)/domain/domain/Domain.o \
 	$(FE)/domain/domain/single/SingleDomEleIter.o \
