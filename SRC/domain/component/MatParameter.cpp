@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-06-06 19:34:31 $
+// $Revision: 1.2 $
+// $Date: 2007-07-02 21:55:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/MatParameter.cpp,v $
 
 // written: fmk
@@ -85,6 +85,8 @@ MatParameter::setDomain(Domain *theDomain)
   while ((theEle = theEles()) != 0) {
     theResult = theEle->setParameter(theString, 2, *this);
   }
+
+  delete [] theString;
   
   if (theResult == -1) 
     opserr << "MatParameter::setDomain(Domain *theDomain) - NO RESULT\n";
