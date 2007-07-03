@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-03-04 00:39:26 $
+// $Revision: 1.6 $
+// $Date: 2007-07-03 18:20:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/misc/MatrixOperations.cpp,v $
 
 
@@ -445,7 +445,9 @@ MatrixOperations::computeSquareRoot()
 int
 MatrixOperations::computeInverse()
 {
+  theMatrix->Invert(*theInverse);
 
+  /*
 	Matrix &A = (*theMatrix);
 
 	// Return the invers matrix B such that A*B=I
@@ -527,6 +529,7 @@ MatrixOperations::computeInverse()
 	(*theInverse) = B;
 	
 	return 0;
+	*/
 }
 
 
