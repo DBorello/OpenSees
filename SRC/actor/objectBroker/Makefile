@@ -1,6 +1,7 @@
 include ../../../Makefile.def
 
-OBJS	=   FEM_ObjectBroker.o
+OBJS	=   FEM_ObjectBroker.o \
+	FEM_ObjectBrokerAllClasses.o
 
 all:   $(OBJS)
 
