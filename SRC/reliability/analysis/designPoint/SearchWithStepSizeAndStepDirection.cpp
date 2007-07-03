@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-03-01 19:20:41 $
+// $Revision: 1.11 $
+// $Date: 2007-07-03 19:33:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.cpp,v $
 
 
@@ -342,7 +342,7 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 					<< " could not compute transpose of jacobian matrix. " << endln;
 				return -1;
 			}
-			Matrix transposeOfJacobian_x_u = theMatrixOperations.getTranspose();
+			const Matrix &transposeOfJacobian_x_u = theMatrixOperations.getTranspose();
 
 			//Matrix jacobianProduct = jacobian_x_u * transposeOfJacobian_x_u;
 			Matrix jacobianProduct(numberOfRandomVariables,numberOfRandomVariables);

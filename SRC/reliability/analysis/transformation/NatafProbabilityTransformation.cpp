@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-05-14 23:19:34 $
+// $Revision: 1.6 $
+// $Date: 2007-07-03 19:33:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.cpp,v $
 
 
@@ -213,7 +213,7 @@ NatafProbabilityTransformation::meanSensitivityOf_x_to_u(const Vector &x, int rv
 			<< " compute the Cholesky decomposition and its inverse " << endln
 			<< " for the correlation matrix." << endln;
 	}
-	Matrix PerturbedInverseLowerCholesky = someMatrixOperations.getInverseLowerCholesky();
+	const Matrix &PerturbedInverseLowerCholesky = someMatrixOperations.getInverseLowerCholesky();
 	//Matrix DinverseLowerCholeskyDmean = (OrigInverseLowerCholesky - PerturbedInverseLowerCholesky) * (1/h);
 	Matrix DinverseLowerCholeskyDmean(OrigInverseLowerCholesky);
 	DinverseLowerCholeskyDmean.addMatrix(1.0, PerturbedInverseLowerCholesky, -1/h);
@@ -307,7 +307,7 @@ NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(const Vector &x, int rv
 			<< " compute the Cholesky decomposition and its inverse " << endln
 			<< " for the correlation matrix." << endln;
 	}
-	Matrix PerturbedInverseLowerCholesky = someMatrixOperations.getInverseLowerCholesky();
+	const Matrix &PerturbedInverseLowerCholesky = someMatrixOperations.getInverseLowerCholesky();
 	//Matrix DinverseLowerCholeskyDstdv = (OrigInverseLowerCholesky - PerturbedInverseLowerCholesky) * (1/h);
 	Matrix DinverseLowerCholeskyDstdv(OrigInverseLowerCholesky);
 	DinverseLowerCholeskyDstdv.addMatrix(1.0, PerturbedInverseLowerCholesky, -1/h);
