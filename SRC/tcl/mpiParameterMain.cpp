@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-01-13 00:29:55 $
+// $Revision: 1.4 $
+// $Date: 2007-07-03 18:55:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/mpiParameterMain.cpp,v $
 
 /* 
@@ -35,7 +35,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: mpiParameterMain.cpp,v 1.3 2007-01-13 00:29:55 fmk Exp $
+ * RCS: @(#) $Id: mpiParameterMain.cpp,v 1.4 2007-07-03 18:55:37 fmk Exp $
  */
 
 extern "C" {
@@ -109,7 +109,7 @@ extern void g3TclMain(int argc, char **argv, Tcl_AppInitProc *appInitProc, int r
 #include <MPI_MachineBroker.h>
 #include <ShadowSubdomain.h>
 #include <ActorSubdomain.h>
-#include <FEM_ObjectBroker.h>
+#include <FEM_ObjectBrokerAllClasses.h>
 #include <Channel.h>
 #include <Message.h>
 
@@ -132,7 +132,7 @@ int np = 0;
 int
 main(int argc, char **argv)
 {
-  FEM_ObjectBroker theBroker;
+  FEM_ObjectBrokerAllClasses theBroker;
   MPI_MachineBroker theMachine(&theBroker, argc, argv);
   theMachineBroker = &theMachine;
 

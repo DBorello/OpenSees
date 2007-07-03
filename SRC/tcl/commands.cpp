@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.91 $
-// $Date: 2007-05-17 05:19:07 $
+// $Revision: 1.92 $
+// $Date: 2007-07-03 18:55:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -67,7 +67,7 @@ OPS_Stream *opserrPtr = &sserr;
 
 #include <packages.h>
 
-#include <FEM_ObjectBroker.h>
+#include <FEM_ObjectBrokerAllClasses.h>
 
 #include <Timer.h>
 #include <ModelBuilder.h>
@@ -273,7 +273,7 @@ ModelBuilder *theBuilder =0;
 #include <ShedHeaviest.h>
 #include <DomainPartitioner.h>
 #include <GraphPartitioner.h>
-#include <FEM_ObjectBroker.h>
+#include <FEM_ObjectBrokerAllClasses.h>
 #include <Subdomain.h>
 #include <SubdomainIter.h>
 #include <MachineBroker.h>
@@ -380,7 +380,7 @@ static int resDataSize = 0;
 static Timer *theTimer = 0;
 
 FE_Datastore *theDatabase  =0;
-FEM_ObjectBroker theBroker;
+FEM_ObjectBrokerAllClasses theBroker;
 
 // init the global variabled defined in OPS_Globals.h
 double        ops_Dt = 1.0;
