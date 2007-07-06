@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2007-02-02 01:18:13 $
+// $Revision: 1.15 $
+// $Date: 2007-07-06 17:18:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.cpp,v $
                                                                         
                                                                         
@@ -908,12 +908,13 @@ SectionAggregator::setParameter(const char **argv, int argc, Parameter &param)
     return ok;
   } 
   
-  else if (theSection != 0)
-    return theSection->setParameter(argv, argc, param);
-
-  else {
-    opserr << "SectionAggregator::setParameter() - could not set parameter. " << endln;
-    return -1;
+  else { // Default -- send to everything
+    int ok = 0;
+    for (int i = 0; i < numMats; i++)
+      ok += theAdditions[i]->setParameter(argv, argc, param);
+    if (theSection != 0)
+      ok += theSection->setParameter(argv, argc, param);
+    return ok;
   }
 }
 
