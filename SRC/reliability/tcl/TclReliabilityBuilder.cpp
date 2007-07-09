@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2007-03-01 19:11:35 $
+// $Revision: 1.23 $
+// $Date: 2007-07-09 18:50:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -209,6 +209,7 @@ int TclReliabilityModelBuilder_getStdv(ClientData clientData, Tcl_Interp *interp
 int TclReliabilityModelBuilder_rvReduction(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_getBetaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_getGammaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_invNormalCDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 
 //
@@ -261,6 +262,7 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
   Tcl_CreateCommand(interp, "rvReduction",TclReliabilityModelBuilder_rvReduction,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "betaFORM",TclReliabilityModelBuilder_getBetaFORM,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "gammaFORM",TclReliabilityModelBuilder_getGammaFORM,(ClientData)NULL, NULL);
+  Tcl_CreateCommand(interp, "invNormalCDF",TclReliabilityModelBuilder_invNormalCDF,(ClientData)NULL, NULL);
 
   // set the static pointers in this file
   theStructuralDomain	= &passedDomain;
@@ -380,6 +382,7 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
 	Tcl_DeleteCommand(theInterp, "getStdv");
 	Tcl_DeleteCommand(theInterp, "betaFORM");
 	Tcl_DeleteCommand(theInterp, "gammaFORM");
+	Tcl_DeleteCommand(theInterp, "invNormalCDF");
 }
 
 
@@ -5636,5 +5639,39 @@ TclReliabilityModelBuilder_getGammaFORM(ClientData clientData, Tcl_Interp *inter
 
   double gamma = theLSF->importanceVectorGamma(rvTag-1);
   sprintf(interp->result,"%35.20f",gamma);
+  return TCL_OK;
+}
+
+int
+TclReliabilityModelBuilder_invNormalCDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  static NormalRV aStdNormal(0, 0.0, 1.0);
+
+  double x;
+  if (Tcl_GetDouble(interp, argv[1], &x) != TCL_OK) {
+    opserr << "WARNING invNormalCDF x? <mean? stdev?>- could not read x\n";
+    return TCL_ERROR;	        
+  }
+
+  char buffer[40];
+
+  if (argc < 4) {
+    sprintf(buffer,"%35.20f", aStdNormal.getInverseCDFvalue(x));
+  }
+  else {
+    double mean, stdev;
+    if (Tcl_GetDouble(interp, argv[2], &mean) != TCL_OK) {
+      opserr << "WARNING invNormalCDF x? mean? stdev? - could not read mean\n";
+      return TCL_ERROR;	        
+    }
+    if (Tcl_GetDouble(interp, argv[3], &stdev) != TCL_OK) {
+      opserr << "WARNING invNormalCDF x? mean? stdev? - could not read stdev\n";
+      return TCL_ERROR;	        
+    }
+    sprintf(buffer,"%35.20f", mean + stdev*aStdNormal.getInverseCDFvalue(x));
+  }
+
+  Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+
   return TCL_OK;
 }
