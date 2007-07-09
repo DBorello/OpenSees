@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-06-06 19:36:19 $
+// $Revision: 1.5 $
+// $Date: 2007-07-09 19:05:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/Parameter.cpp,v $
 
 #include <classTags.h>
@@ -44,15 +44,23 @@ Parameter::Parameter(int passedTag,
   theObjects = new MovableObject *[maxNumObjects];
   parameterID = new int[maxNumObjects];
 
+  for (int i =0; i < maxNumObjects; i++) {
+    theObjects[i] = 0;
+    parameterID[i] = 0;
+  }
+
   if (parentObject != 0) {
     ok = parentObject->setParameter(argv, argc, *this);
     theComponents[0] = parentObject;
     numComponents = 1;
   }
 
-  
-  if (ok < 0)
-    opserr << "Parameter::Parameter "<< this->getTag() <<" -- unable to set parameter" << endln;
+  if (numObjects == 0) {
+    opserr << "Parameter::Parameter "<< this->getTag() <<" -- no objects were able to identify parameter" << endln;
+    for (int i = 0; i < argc; i++)
+      opserr << argv[i] << ' ';
+    opserr << endln;
+  }
 }
 
 Parameter::Parameter(const Parameter &param):
@@ -70,9 +78,14 @@ Parameter::Parameter(const Parameter &param):
 
   theObjects = new MovableObject *[maxNumObjects];
   parameterID = new int[maxNumObjects];
-  for (int i = 0; i < numObjects; i++) {
+  int i;
+  for (i = 0; i < numObjects; i++) {
     theObjects[i] = param.theObjects[i];
     parameterID[i] = param.parameterID[i];
+  }
+  for ( ; i < maxNumObjects; i++) {
+    theObjects[i] = 0;
+    parameterID[i] = 0;
   }
 }
 
@@ -140,8 +153,21 @@ Parameter::addComponent(DomainComponent *parentObject,
   theComponents[numComponents] = parentObject;
   numComponents++;
 
-  return (parentObject != 0) ?
-    parentObject->setParameter(argv, argc, *this) : -1;
+  //return (parentObject != 0) ?
+  //  parentObject->setParameter(argv, argc, *this) : -1;
+
+  int oldNumObjects = numObjects;
+  if (parentObject != 0)
+    parentObject->setParameter(argv, argc, *this);
+
+  if (numObjects == oldNumObjects) {
+    opserr << "Parameter::addComponent "<< this->getTag() <<" -- no objects were able to identify parameter" << endln;
+    for (int i = 0; i < argc; i++)
+      opserr << argv[i] << ' ';
+    opserr << endln;
+    return -1;
+  }
+  return 0;
 }
 
 int
@@ -191,8 +217,6 @@ Parameter::Print(OPS_Stream &s, int flag)
 int
 Parameter::addObject(int paramID, MovableObject *object)
 {
-  //opserr << "Parameter::addObject " << numObjects << endln;
-
   if (numObjects == maxNumObjects) {
     maxNumObjects += expandSize;
     MovableObject **newObjects = new MovableObject*[maxNumObjects];
