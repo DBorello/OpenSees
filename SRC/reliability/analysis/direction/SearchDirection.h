@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-03-04 00:39:06 $
+// $Revision: 1.4 $
+// $Date: 2007-07-11 23:51:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/direction/SearchDirection.h,v $
 
 
@@ -45,10 +45,10 @@ public:
 
 	virtual int computeSearchDirection(	
 			int stepNumber,
-			Vector passed_u, 
+			const Vector &passed_u, 
 			double passed_gFunctionValue, 
-			Vector passedGradientInStandardNormalSpace) =0;
-	virtual Vector getSearchDirection() =0;
+			const Vector &passedGradientInStandardNormalSpace) =0;
+	virtual const Vector &getSearchDirection() =0;
 
 protected:
 

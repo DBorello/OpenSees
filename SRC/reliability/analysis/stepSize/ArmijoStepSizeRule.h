@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-10-27 23:45:44 $
+// $Revision: 1.3 $
+// $Date: 2007-07-11 23:52:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/ArmijoStepSizeRule.h,v $
 
 
@@ -60,7 +60,8 @@ public:
 		
 	~ArmijoStepSizeRule();
 
-	int		computeStepSize(Vector u, Vector grad_G, double G, Vector d, int stepNumber);
+	int computeStepSize(const Vector &u, const Vector &grad_G,
+			    double G, const Vector &d, int stepNumber);
 	double	getStepSize();
 	double	getInitialStepSize();
 	double  getGFunValue();

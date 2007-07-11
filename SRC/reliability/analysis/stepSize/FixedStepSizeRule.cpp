@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-10-27 23:45:44 $
+// $Revision: 1.7 $
+// $Date: 2007-07-11 23:52:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/FixedStepSizeRule.cpp,v $
 
 
@@ -52,11 +52,11 @@ FixedStepSizeRule::~FixedStepSizeRule()
 
 
 int
-FixedStepSizeRule::computeStepSize(Vector u, 
-									Vector grad_G, 
-									double G, 
-									Vector d,
-									int stepNumber)
+FixedStepSizeRule::computeStepSize(const Vector &u, 
+				   const Vector &grad_G, 
+				   double G, 
+				   const Vector &d,
+				   int stepNumber)
 {
 	// This method is in fact not neccesary 
 	// for the fixed step size rule. The 

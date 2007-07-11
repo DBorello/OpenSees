@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:23 $
+// $Revision: 1.2 $
+// $Date: 2007-07-11 23:52:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/meritFunction/CriteriaReductionMeritFunctionCheck.h,v $
 
 
@@ -44,15 +44,17 @@ public:
 	CriteriaReductionMeritFunctionCheck(ReliabilityConvergenceCheck *theReliabilityConvergenceCheck);
 	~CriteriaReductionMeritFunctionCheck();
 
-	int	check(Vector u_old, 
-			  double g_old, 
-			  Vector grad_G_old, 
-			  double stepSize,
-			  Vector stepDirection,
-			  double g_new, 
-			  Vector grad_G_new);
-	double getMeritFunctionValue(Vector u, double g, Vector grad_G);
-	int updateMeritParameters(Vector u, double g, Vector grad_G);
+	int check(const Vector &u_old, 
+		  double g_old, 
+		  const Vector &grad_G_old, 
+		  double stepSize,
+		  const Vector &stepDirection,
+		  double g_new, 
+		  const Vector &grad_G_new);
+	double getMeritFunctionValue(const Vector &u, double g,
+				     const Vector &grad_G);
+	int updateMeritParameters(const Vector &u, double g,
+				  const Vector &grad_G);
 
 protected:
 

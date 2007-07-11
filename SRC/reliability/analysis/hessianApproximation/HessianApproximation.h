@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:20 $
+// $Revision: 1.2 $
+// $Date: 2007-07-11 23:51:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/hessianApproximation/HessianApproximation.h,v $
 
 
@@ -43,15 +43,15 @@ public:
 	HessianApproximation();
 	virtual ~HessianApproximation();
 
-	virtual Matrix  getHessianApproximation() = 0;
-	virtual int     setHessianToIdentity(int size) = 0;
-	virtual int     updateHessianApproximation(Vector u_old,
-											   double g_old,
-											   Vector gradG_old,
-											   double stepSize,
-											   Vector searchDirection,
-											   double g_new,
-											   Vector gradG_new) = 0;
+	virtual const Matrix &getHessianApproximation() = 0;
+	virtual int setHessianToIdentity(int size) = 0;
+	virtual int updateHessianApproximation(const Vector &u_old,
+					       double g_old,
+					       const Vector &gradG_old,
+					       double stepSize,
+					       const Vector &searchDirection,
+					       double g_new,
+					       const Vector &gradG_new) = 0;
 
 protected:
 

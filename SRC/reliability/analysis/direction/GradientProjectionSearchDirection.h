@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:04 $
+// $Revision: 1.2 $
+// $Date: 2007-07-11 23:51:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/direction/GradientProjectionSearchDirection.h,v $
 
 
@@ -51,8 +51,9 @@ public:
 									  RootFinding *theRootFindingAlgorithm);
 	~GradientProjectionSearchDirection();
 
-	int computeSearchDirection(int stepNumber, Vector u, double g, Vector gradG);
-	Vector getSearchDirection();
+	int computeSearchDirection(int stepNumber, const Vector &u,
+				   double g, const Vector &gradG);
+	const Vector &getSearchDirection();
 
 protected:
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:03 $
+// $Revision: 1.2 $
+// $Date: 2007-07-11 23:51:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/direction/GradientProjectionSearchDirection.cpp,v $
 
 
@@ -61,7 +61,7 @@ GradientProjectionSearchDirection::~GradientProjectionSearchDirection()
 
 
 
-Vector
+const Vector&
 GradientProjectionSearchDirection::getSearchDirection()
 {
 	return searchDirection;
@@ -71,9 +71,9 @@ GradientProjectionSearchDirection::getSearchDirection()
 
 int
 GradientProjectionSearchDirection::computeSearchDirection(int stepNumber, 
-														  Vector u, 
-														  double passed_g, 
-														  Vector gradG)
+							  const Vector &u, 
+							  double passed_g, 
+							  const Vector &gradG)
 {
 
 

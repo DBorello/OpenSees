@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:23 $
+// $Revision: 1.2 $
+// $Date: 2007-07-11 23:52:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/meritFunction/CriteriaReductionMeritFunctionCheck.cpp,v $
 
 
@@ -55,16 +55,18 @@ CriteriaReductionMeritFunctionCheck::~CriteriaReductionMeritFunctionCheck()
 
 
 int
-CriteriaReductionMeritFunctionCheck::check(Vector u_old, 
-								  double g_old, 
-								  Vector grad_G_old, 
-								  double stepSize,
-								  Vector stepDirection,
-								  double g_new, 
-								  Vector grad_G_new)
+CriteriaReductionMeritFunctionCheck::check(const Vector &u_old, 
+					   double g_old, 
+					   const Vector &grad_G_old, 
+					   double stepSize,
+					   const Vector &stepDirection,
+					   double g_new, 
+					   const Vector &grad_G_new)
 {
 	// New point in standard normal space
-	Vector u_new = u_old + stepSize*stepDirection;
+	//Vector u_new = u_old + stepSize*stepDirection;
+  Vector u_new(u_old);
+  u_new.addVector(1.0, stepDirection, stepSize);
 
 
 	// Number of convergence criteria
@@ -114,9 +116,9 @@ CriteriaReductionMeritFunctionCheck::check(Vector u_old,
 
 
 double
-CriteriaReductionMeritFunctionCheck::getMeritFunctionValue(Vector u, 
-												  double g, 
-												  Vector grad_G)
+CriteriaReductionMeritFunctionCheck::getMeritFunctionValue(const Vector &u, 
+							   double g, 
+							   const Vector &grad_G)
 {
 	opserr << "CriteriaReductionMeritFunctionCheck::getMeritFunctionValue() -- this method" << endln
 		<< " is not implemented in this specific class." << endln;
@@ -125,9 +127,9 @@ CriteriaReductionMeritFunctionCheck::getMeritFunctionValue(Vector u,
 }
 
 int
-CriteriaReductionMeritFunctionCheck::updateMeritParameters(Vector u, 
-												  double g, 
-												  Vector grad_G)
+CriteriaReductionMeritFunctionCheck::updateMeritParameters(const Vector &u, 
+							   double g, 
+							   const Vector &grad_G)
 {
 	opserr << "CriteriaReductionMeritFunctionCheck::updateMeritParameters() -- this method" << endln
 		<< " is not implemented in this specific class." << endln;

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-03-04 00:39:04 $
+// $Revision: 1.5 $
+// $Date: 2007-07-11 23:51:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/direction/HLRFSearchDirection.h,v $
 
 
@@ -44,11 +44,11 @@ public:
 	HLRFSearchDirection();
 	~HLRFSearchDirection();
 
-	int computeSearchDirection(	int stepNumber,
-								Vector passed_u, 
-								double passed_gFunctionValue, 
-								Vector passedGradientInStandardNormalSpace);
-	Vector getSearchDirection();
+	int computeSearchDirection(int stepNumber,
+				   const Vector &passed_u, 
+				   double passed_gFunctionValue, 
+				   const Vector &passedGradientInStandardNormalSpace);
+	const Vector &getSearchDirection();
 
 protected:
 

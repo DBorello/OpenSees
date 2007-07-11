@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-10-27 23:45:42 $
+// $Revision: 1.3 $
+// $Date: 2007-07-11 23:51:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/direction/PolakHeSearchDirectionAndMeritFunction.h,v $
 
 
@@ -45,20 +45,22 @@ public:
 	PolakHeSearchDirectionAndMeritFunction(double gamma, double delta);
 	~PolakHeSearchDirectionAndMeritFunction();
 
-	int computeSearchDirection(	int stepNumber, 
-								Vector passed_u, 
-								double passed_gFunctionValue, 
-								Vector passedGradientInStandardNormalSpace);
-	Vector getSearchDirection();
+	int computeSearchDirection(int stepNumber, 
+				   const Vector &passed_u, 
+				   double passed_gFunctionValue, 
+				   const Vector &passedGradientInStandardNormalSpace);
+	const Vector &getSearchDirection();
 
-	int	check(Vector u_old, 
-			  double g_old, 
-			  Vector grad_G_old, 
-			  double stepSize,
-			  Vector stepDirection,
-			  double g_new);
-	double getMeritFunctionValue(Vector u, double g, Vector grad_G);
-	int updateMeritParameters(Vector u, double g, Vector grad_G);
+	int check(const Vector &u_old, 
+		  double g_old, 
+		  const Vector &grad_G_old, 
+		  double stepSize,
+		  const Vector &stepDirection,
+		  double g_new);
+	double getMeritFunctionValue(const Vector &u, double g,
+				     const Vector &grad_G);
+	int updateMeritParameters(const Vector &u, double g,
+				  const Vector &grad_G);
 
 	int setAlpha(double alpha);
 

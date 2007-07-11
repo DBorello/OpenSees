@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-10-27 23:45:44 $
+// $Revision: 1.3 $
+// $Date: 2007-07-11 23:52:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/ArmijoStepSizeRule.cpp,v $
 
 
@@ -109,20 +109,20 @@ ArmijoStepSizeRule::getGFunValue()
 
 
 int
-ArmijoStepSizeRule::computeStepSize(Vector u_old, 
-									Vector grad_G_old, 
-									double g_old, 
-									Vector dir_old,
-									int stepNumber)
+ArmijoStepSizeRule::computeStepSize(const Vector &u_old, 
+				    const Vector &grad_G_old, 
+				    double g_old, 
+				    const Vector &dir_old,
+				    int stepNumber)
 {
 
 	// Initial declarations
 	bool isOutsideSphere;
 	bool isSecondTime;
-	bool FEconvergence;
+	bool FEconvergence = false;
 	double result;
-	Vector x_new;
-	Matrix jacobian_x_u;
+	//Vector x_new;
+	//Matrix jacobian_x_u;
 
 
 	// Inform user through log file
@@ -160,7 +160,9 @@ ArmijoStepSizeRule::computeStepSize(Vector u_old,
 	
 
 	// Take a trial step in standard normal space
-	Vector u_new = u_old + dir_old * lambda_new;
+	//Vector u_new = u_old + dir_old * lambda_new;
+	Vector u_new(u_old);
+	u_new.addVector(1.0, dir_old, lambda_new);
 
 
 	// Inform the user
@@ -173,7 +175,7 @@ ArmijoStepSizeRule::computeStepSize(Vector u_old,
 
 
 	double g_new;
-	Vector grad_G_new;
+	//Vector grad_G_new(grad_G_old);
 	if (u_new.Norm()>radius) {
 
 		isOutsideSphere = true;
@@ -182,7 +184,7 @@ ArmijoStepSizeRule::computeStepSize(Vector u_old,
 		// that the merit functions then will be 'wrong'; the step will
 		// fail in any case because it is outside the sphere. 
 		g_new = g_old;
-		grad_G_new = grad_G_old;
+		//grad_G_new = grad_G_old;
 
 
 		// Inform the user
@@ -225,8 +227,8 @@ ArmijoStepSizeRule::computeStepSize(Vector u_old,
 				<< " transform u to x. " << endln;
 			return -1;
 		}
-		x_new = theProbabilityTransformation->get_x();
-		jacobian_x_u = theProbabilityTransformation->getJacobian_x_u();
+		Vector x_new(theProbabilityTransformation->get_x());
+		Matrix jacobian_x_u(theProbabilityTransformation->getJacobian_x_u());
 
 
 		// Evaluate the limit-state function
@@ -287,7 +289,9 @@ ArmijoStepSizeRule::computeStepSize(Vector u_old,
 		else {
 			lambda_new = pow(base,i);
 		}
-		u_new = u_old + dir_old * lambda_new;
+		//u_new = u_old + dir_old * lambda_new;
+		u_new = u_old;
+		u_new.addVector(1.0, dir_old, lambda_new);
 
 
 		// Check if we are beyond the bounding sphere
@@ -338,8 +342,8 @@ ArmijoStepSizeRule::computeStepSize(Vector u_old,
 					<< " transform u to x. " << endln;
 				return -1;
 			}
-			x_new = theProbabilityTransformation->get_x();
-			jacobian_x_u = theProbabilityTransformation->getJacobian_x_u();
+			Vector x_new(theProbabilityTransformation->get_x());
+			Matrix jacobian_x_u(theProbabilityTransformation->getJacobian_x_u());
 
 
 			// Evaluate the limit-state function

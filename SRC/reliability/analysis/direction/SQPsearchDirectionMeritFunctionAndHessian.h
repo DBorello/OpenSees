@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-10-27 23:45:42 $
+// $Revision: 1.3 $
+// $Date: 2007-07-11 23:51:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/direction/SQPsearchDirectionMeritFunctionAndHessian.h,v $
 
 
@@ -47,35 +47,37 @@ public:
 	~SQPsearchDirectionMeritFunctionAndHessian();
 
 	// METHODS FOR SEARCH DIRECTION
-	int computeSearchDirection(	int stepNumber, 
-								Vector passed_u, 
-								double passed_gFunctionValue, 
-								Vector passedGradientInStandardNormalSpace);
-	Vector getSearchDirection();
+	int computeSearchDirection(int stepNumber, 
+				   const Vector &passed_u, 
+				   double passed_gFunctionValue, 
+				   const Vector &passedGradientInStandardNormalSpace);
+	const Vector &getSearchDirection();
 
 	// METHODS FOR MERIT FUNCTION CHECK
-	int	check(Vector u_old, 
-			  double g_old, 
-			  Vector grad_G_old, 
-			  double stepSize,
-			  Vector stepDirection,
-			  double g_new);
-	double getMeritFunctionValue(Vector u, double g, Vector grad_G);
-	int updateMeritParameters(Vector u, double g, Vector grad_G);
+	int check(const Vector &u_old, 
+		  double g_old, 
+		  const Vector &grad_G_old, 
+		  double stepSize,
+		  const Vector &stepDirection,
+		  double g_new);
+	double getMeritFunctionValue(const Vector &u, double g,
+				     const Vector &grad_G);
+	int updateMeritParameters(const Vector &u, double g,
+				  const Vector &grad_G);
 
 	int setAlpha(double alpha);
 
 	// METHODS FOR HESSIAN APPROXIMATION
-	Matrix  getHessianApproximation();
+	const Matrix &getHessianApproximation();
 	int     setHessianToIdentity(int size);
 	int     setHessianApproximation(HessianApproximation *theHessianApproximation);
-	int     updateHessianApproximation(Vector u_old,
-									   double g_old,
-									   Vector gradG_old,
-									   double stepSize,
-									   Vector searchDirection,
-									   double g_new,
-									   Vector grad_G_new);
+	int     updateHessianApproximation(const Vector &u_old,
+					   double g_old,
+					   const Vector &gradG_old,
+					   double stepSize,
+					   const Vector &searchDirection,
+					   double g_new,
+					   const Vector &grad_G_new);
 
 protected:
 
