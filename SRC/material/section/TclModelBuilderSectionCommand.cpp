@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2007-04-16 18:41:15 $
+// $Revision: 1.27 $
+// $Date: 2007-07-11 23:29:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -498,15 +498,15 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
     }
 
     else if (strcmp(argv[1],"RCSection2d") == 0) {
-	if (argc < 14) {
+	if (argc < 15) {
 	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    opserr << "Want: section RCSection2d tag? coreTag? coverTag? steelTag? d? b? cover? Amain? Aside? nfcore? nfcover? nfs?" << endln;
+	    opserr << "Want: section RCSection2d tag? coreTag? coverTag? steelTag? d? b? cover? Atop? Abottom? Aside? nfcore? nfcover? nfs?" << endln;
 	    return TCL_ERROR;
 	}
 	
 	int tag, coreTag, coverTag, steelTag;
-	double d, b, cover, Amain, Aside;
+	double d, b, cover, Atop, Abottom, Aside;
 	int nfcore, nfcover, nfs;
 
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
@@ -547,31 +547,37 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	    return TCL_ERROR;
 	}	
 
-	if (Tcl_GetDouble (interp, argv[9], &Amain) != TCL_OK) {
-	    opserr << "WARNING invalid Amain" << endln;
+	if (Tcl_GetDouble (interp, argv[9], &Atop) != TCL_OK) {
+	    opserr << "WARNING invalid Atop" << endln;
 	    opserr << "RCSection2d section: " << tag << endln;	    	    
 	    return TCL_ERROR;
 	}	
 
-	if (Tcl_GetDouble (interp, argv[10], &Aside) != TCL_OK) {
+	if (Tcl_GetDouble (interp, argv[10], &Abottom) != TCL_OK) {
+	    opserr << "WARNING invalid Abottom" << endln;
+	    opserr << "RCSection2d section: " << tag << endln;	    	    
+	    return TCL_ERROR;
+	}
+
+	if (Tcl_GetDouble (interp, argv[11], &Aside) != TCL_OK) {
 	    opserr << "WARNING invalid Aside" << endln;
 	    opserr << "RCSection2d section: " << tag << endln;	    	    
 	    return TCL_ERROR;
 	}	
 
-	if (Tcl_GetInt (interp, argv[11], &nfcore) != TCL_OK) {
+	if (Tcl_GetInt (interp, argv[12], &nfcore) != TCL_OK) {
 	    opserr << "WARNING invalid nfcore" << endln;
 	    opserr << "RCSection2d section: " << tag << endln;	    	    
 	    return TCL_ERROR;
 	}	
 
-	if (Tcl_GetInt (interp, argv[12], &nfcover) != TCL_OK) {
+	if (Tcl_GetInt (interp, argv[13], &nfcover) != TCL_OK) {
 	    opserr << "WARNING invalid nfcover" << endln;
 	    opserr << "RCSection2d section: " << tag << endln;	    	    
 	    return TCL_ERROR;
 	}	
 
-	if (Tcl_GetInt (interp, argv[13], &nfs) != TCL_OK) {
+	if (Tcl_GetInt (interp, argv[14], &nfs) != TCL_OK) {
 	    opserr << "WARNING invalid nfs" << endln;
 	    opserr << "RCSection2d section: " << tag << endln;	    	    
 	    return TCL_ERROR;
@@ -604,7 +610,7 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	    return TCL_ERROR;
 	}
 	
-	RCSectionIntegration rcsect(d, b, Amain, Amain, Aside, cover, nfcore, nfcover, nfs);
+	RCSectionIntegration rcsect(d, b, Atop, Abottom, Aside, cover, nfcore, nfcover, nfs);
 
 	int numFibers = rcsect.getNumFibers();
 
