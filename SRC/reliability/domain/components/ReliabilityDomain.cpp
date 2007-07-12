@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2006-12-13 14:21:17 $
+// $Revision: 1.9 $
+// $Date: 2007-07-12 17:26:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.cpp,v $
 
 
@@ -186,8 +186,8 @@ RandomVariable *
 ReliabilityDomain::getRandomVariablePtr(int tag)
 {
 	TaggedObject *theComponent = theRandomVariablesPtr->getComponentPtr(tag);
-//	if ( *theComponent == 0 )
-//		return 0;
+	if ( theComponent == 0 )
+		return 0;
 	RandomVariable *result = (RandomVariable *) theComponent;
 	return result;
 }
@@ -197,8 +197,8 @@ CorrelationCoefficient *
 ReliabilityDomain::getCorrelationCoefficientPtr(int tag)
 {
 	TaggedObject *theComponent = theCorrelationCoefficientsPtr->getComponentPtr(tag);
-//	if ( *theComponent == 0 )
-//		return 0;
+	if ( theComponent == 0 )
+		return 0;
 	CorrelationCoefficient *result = (CorrelationCoefficient *) theComponent;
 	return result;
 }
@@ -207,11 +207,11 @@ ReliabilityDomain::getCorrelationCoefficientPtr(int tag)
 LimitStateFunction *
 ReliabilityDomain::getLimitStateFunctionPtr(int tag)
 {
-	TaggedObject *theComponent = theLimitStateFunctionsPtr->getComponentPtr(tag);
-//	if ( *theComponent == 0 )
-//		return 0;
-	LimitStateFunction *result = (LimitStateFunction *) theComponent;
-	return result;
+  TaggedObject *theComponent = theLimitStateFunctionsPtr->getComponentPtr(tag);
+  if (theComponent == 0)
+    return 0;
+  LimitStateFunction *result = (LimitStateFunction *) theComponent;
+  return result;
 }
 
 
@@ -219,8 +219,8 @@ RandomVariablePositioner *
 ReliabilityDomain::getRandomVariablePositionerPtr(int tag)
 {
 	TaggedObject *theComponent = theRandomVariablePositionersPtr->getComponentPtr(tag);
-//	if ( *theComponent == 0 )
-//		return 0;
+	if ( theComponent == 0 )
+		return 0;
 	RandomVariablePositioner *result = (RandomVariablePositioner *) theComponent;
 	return result;
 }
@@ -229,8 +229,8 @@ ParameterPositioner *
 ReliabilityDomain::getParameterPositionerPtr(int tag)
 {
 	TaggedObject *theComponent = theParameterPositionersPtr->getComponentPtr(tag);
-//	if ( *theComponent == 0 )
-//		return 0;
+	if ( theComponent == 0 )
+		return 0;
 	ParameterPositioner *result = (ParameterPositioner *) theComponent;
 	return result;
 }
@@ -240,8 +240,8 @@ ModulatingFunction *
 ReliabilityDomain::getModulatingFunction(int tag)
 {
 	TaggedObject *theComponent = theModulatingFunctionsPtr->getComponentPtr(tag);
-//	if ( *theComponent == 0 )
-//		return 0;
+	if ( theComponent == 0 )
+		return 0;
 	ModulatingFunction *result = (ModulatingFunction *) theComponent;
 	return result;
 }
@@ -251,8 +251,8 @@ Spectrum *
 ReliabilityDomain::getSpectrum(int tag)
 {
 	TaggedObject *theComponent = theSpectraPtr->getComponentPtr(tag);
-//	if ( *theComponent == 0 )
-//		return 0;
+	if ( theComponent == 0 )
+		return 0;
 	Spectrum *result = (Spectrum *) theComponent;
 	return result;
 }
@@ -262,8 +262,8 @@ Filter *
 ReliabilityDomain::getFilter(int tag)
 {
 	TaggedObject *theComponent = theFiltersPtr->getComponentPtr(tag);
-//	if ( *theComponent == 0 )
-//		return 0;
+	if ( theComponent == 0 )
+		return 0;
 	Filter *result = (Filter *) theComponent;
 	return result;
 }
