@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-05-22 18:18:14 $
+// $Revision: 1.6 $
+// $Date: 2007-07-12 00:16:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ENTMaterial.cpp,v $
                                                                         
                                                                         
@@ -42,14 +42,14 @@
 
 ENTMaterial::ENTMaterial(int tag, double e)
 :UniaxialMaterial(tag,MAT_TAG_ENTMaterial),
- E(e), trialStrain(0.0) 
+ E(e), trialStrain(0.0), parameterID(0)
 {
 
 }
 
 ENTMaterial::ENTMaterial()
 :UniaxialMaterial(0,MAT_TAG_ENTMaterial),
- E(0.0), trialStrain(0.0)
+ E(0.0), trialStrain(0.0), parameterID(0)
 {
 
 }
@@ -113,6 +113,7 @@ ENTMaterial::getCopy(void)
 {
     ENTMaterial *theCopy = new ENTMaterial(this->getTag(),E);
     theCopy->trialStrain = trialStrain;
+    theCopy->parameterID = parameterID;
     return theCopy;
 }
 
@@ -181,4 +182,35 @@ ENTMaterial::updateParameter(int parameterID, Information &info)
   default:
     return -1;
   }
+}
+
+int
+ENTMaterial::activateParameter(int paramID)
+{
+  parameterID = paramID;
+  
+  return 0;
+}
+
+double
+ENTMaterial::getStressSensitivity(int gradNumber, bool conditional)
+{
+  if (parameterID == 1 && trialStrain < 0.0)
+    return trialStrain;
+  else
+    return 0.0;
+}
+
+double
+ENTMaterial::getInitialTangentSensitivity(int gradNumber)
+{
+  return 0.0;
+}
+
+int
+ENTMaterial::commitSensitivity(double strainGradient,
+			       int gradNumber, int numGrads)
+{
+  // Nothing to commit ... path independent
+  return 0.0;
 }

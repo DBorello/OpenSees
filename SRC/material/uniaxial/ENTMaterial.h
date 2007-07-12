@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-09-05 22:19:04 $
+// $Revision: 1.7 $
+// $Date: 2007-07-12 00:16:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ENTMaterial.h,v $
                                                                         
                                                                         
@@ -70,11 +70,22 @@ class ENTMaterial : public UniaxialMaterial
     int setParameter(const char **argv, int argc, Parameter &param);
     int updateParameter(int parameterID, Information &info);
 
+    // AddingSensitivity:BEGIN //////////////////////////////////////////
+    int activateParameter(int parameterID);
+    double getStressSensitivity(int gradNumber, bool conditional);
+    double getInitialTangentSensitivity(int gradNumber);
+    int commitSensitivity(double strainGradient, int gradNumber, int numGrads);
+    // AddingSensitivity:END ///////////////////////////////////////////
+
   protected:
     
   private:
     double E;
     double trialStrain;
+
+    // AddingSensitivity:BEGIN //////////////////////////////////////////
+    int parameterID;
+    // AddingSensitivity:END ///////////////////////////////////////////
 };
 
 
