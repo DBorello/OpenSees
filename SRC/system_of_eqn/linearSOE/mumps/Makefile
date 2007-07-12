@@ -19,6 +19,15 @@ OBJS       = MumpsSOE.o \
 	MumpsParallelSolver.o mumps.o
 
 endif
+
+ifeq ($(PROGRAMMING_MODE), PARALLEL_INTERPRETERS)
+
+OBJS       = MumpsSOE.o \
+	MumpsSolver.o \
+	MumpsParallelSOE.o \
+	MumpsParallelSolver.o mumps.o
+
+endif
 endif
 
 
