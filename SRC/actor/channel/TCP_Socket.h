@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-04-05 01:15:16 $
+// $Revision: 1.7 $
+// $Date: 2007-07-12 22:56:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.h,v $
                                                                         
                                                                         
@@ -118,6 +118,7 @@ class TCP_Socket : public Channel
     int connectType;
 
     char add[40];
+    int endianessProblem;
 };
 
 
