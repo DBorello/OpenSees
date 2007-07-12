@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2007-07-06 17:18:56 $
+// $Revision: 1.16 $
+// $Date: 2007-07-12 21:15:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.cpp,v $
                                                                         
                                                                         
@@ -890,8 +890,8 @@ SectionAggregator::setParameter(const char **argv, int argc, Parameter &param)
   if (argc < 1)
     return -1;
 
-  // Check if the parameter belongs to the material (only option for now)
-  if (strstr(argv[0],"material") != 0) {
+  // Check if the parameter belongs to only an aggregated material
+  if (strstr(argv[0],"addition") != 0) {
     
     if (argc < 3)
       return -1;
@@ -908,6 +908,17 @@ SectionAggregator::setParameter(const char **argv, int argc, Parameter &param)
     return ok;
   } 
   
+  // Check if the parameter belongs to only the section
+  else if (strstr(argv[0],"section") != 0) {
+    
+    if (argc < 2) {
+      opserr << "SectionAggregator::setParameter() - insufficient argc < 2 for section option. " << endln;
+      return -1;
+    }
+
+    return theSection->setParameter(&argv[1], argc-1, param);
+  } 
+
   else { // Default -- send to everything
     int ok = 0;
     for (int i = 0; i < numMats; i++)

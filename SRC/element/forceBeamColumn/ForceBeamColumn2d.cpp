@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2007-06-09 17:16:04 $
+// $Revision: 1.31 $
+// $Date: 2007-07-12 21:14:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 /*
@@ -2521,8 +2521,13 @@ ForceBeamColumn2d::setParameter(const char **argv, int argc, Parameter &param)
     return beamIntegr->setParameter(&argv[1], argc-1, param);
   }
 
+  // Default, send to everything
   else {
-    return -1;
+    int ok = 0;
+    for (int i = 0; i < numSections; i++)
+      ok += sections[i]->setParameter(argv, argc, param);
+    ok += beamIntegr->setParameter(argv, argc, param);
+    return ok;
   }
 }
 
