@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-03-01 17:56:09 $
+// $Revision: 1.4 $
+// $Date: 2007-07-13 22:13:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.h,v $
 
 
@@ -81,7 +81,8 @@ private:
 
 	// Private member functions
 	void setCorrelationMatrix(int pertMeanOfThisRV, int pertStdvOfThisRV, double h);
-	Matrix getJacobian_z_x(const Vector &x, const Vector &z);
+	// Representing diag matrix as vector
+	Vector getJacobian_z_x(const Vector &x, const Vector &z);
 	Vector z_to_x(const Vector &z);
 	Vector x_to_z(const Vector &x);
 

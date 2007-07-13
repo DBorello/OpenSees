@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-07-03 19:33:36 $
+// $Revision: 1.7 $
+// $Date: 2007-07-13 22:13:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.cpp,v $
 
 
@@ -370,10 +370,16 @@ NatafProbabilityTransformation::transform_u_to_x_andComputeJacobian()
   z.addMatrixVector(0.0, *lowerCholesky, *u, 1.0);
   (*x) = z_to_x(z);
 
-
-  const Matrix &Jzx = getJacobian_z_x((*x),z);
+  // Jzx is diagonal!
+  const Vector &Jzx = getJacobian_z_x((*x),z);
   //(*jacobian_u_x) = (*inverseLowerCholesky) * Jzx;
-  jacobian_u_x->addMatrixProduct(0.0, (*inverseLowerCholesky), Jzx, 1.0);
+  // Multiply ith column of invLowChol by ith diagonal entry of Jzx
+  for (int i = 0; i < nrv; i++) {
+    double Jzxi = Jzx(i);
+    for (int j = i /*lower diag*/; j < nrv; j++) {
+      (*jacobian_u_x)(j,i) = (*inverseLowerCholesky)(j,i) * Jzxi;
+    }
+  }
 
 
 	int result = theMatrixOperations->setMatrix((*jacobian_u_x));
@@ -463,11 +469,11 @@ NatafProbabilityTransformation::getJacobian_u_x()
 
 
 
-Matrix
+Vector
 NatafProbabilityTransformation::getJacobian_z_x(const Vector &x, const Vector &z)
 {	
 	NormalRV aStandardNormalRV(1, 0.0, 1.0, 0.0);
-	Matrix jacobianMatrix_z_x(nrv,nrv);
+	Vector jacobianMatrix_z_x(nrv);
 
 	RandomVariable *theRV;
 	/*
@@ -480,7 +486,7 @@ NatafProbabilityTransformation::getJacobian_z_x(const Vector &x, const Vector &z
 	  theRV = theReliabilityDomain->getRandomVariablePtr(i+1);
 	  if (strcmp(theRV->getType(),"NORMAL")==0) {
 	    double sigma = theRV->getParameter2();
-	    jacobianMatrix_z_x(i,i) = 1.0 / sigma;
+	    jacobianMatrix_z_x(i) = 1.0 / sigma;
 	  }
 	  else if (strcmp(theRV->getType(),"LOGNORMAL")==0) {
 	    double zeta = fabs(theRV->getParameter2());
@@ -488,7 +494,7 @@ NatafProbabilityTransformation::getJacobian_z_x(const Vector &x, const Vector &z
 	      opserr << "NatafProbabilityTransformation::getJacobian_z_x() -- Error: value " << endln
 		     << "of lognormal random variable is zero in original space. " << endln;
 	    }
-	    jacobianMatrix_z_x(i,i) = 1.0 / ( zeta * x(i)  );
+	    jacobianMatrix_z_x(i) = 1.0 / ( zeta * x(i)  );
 	  }
 	  else {
 	    double pdf = aStandardNormalRV.getPDFvalue(z(i));
@@ -496,8 +502,8 @@ NatafProbabilityTransformation::getJacobian_z_x(const Vector &x, const Vector &z
 	      opserr << "ERROR: NatafProbabilityTransformation::getJacobian_z_x() -- " << endln
 		     << " the PDF value is zero, probably due to too large step. " << endln;
 	    }
-	    jacobianMatrix_z_x(i,i) = theRV->getPDFvalue(x(i)) / pdf;
-	    if (jacobianMatrix_z_x(i,i)==0.0) {
+	    jacobianMatrix_z_x(i) = theRV->getPDFvalue(x(i)) / pdf;
+	    if (jacobianMatrix_z_x(i)==0.0) {
 	    }
 	  }
 	}
