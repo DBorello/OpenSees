@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-07-11 23:52:53 $
+// $Revision: 1.4 $
+// $Date: 2007-07-13 17:56:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/ArmijoStepSizeRule.cpp,v $
 
 
@@ -227,8 +227,8 @@ ArmijoStepSizeRule::computeStepSize(const Vector &u_old,
 				<< " transform u to x. " << endln;
 			return -1;
 		}
-		Vector x_new(theProbabilityTransformation->get_x());
-		Matrix jacobian_x_u(theProbabilityTransformation->getJacobian_x_u());
+		const Vector &x_new = theProbabilityTransformation->get_x();
+		//Matrix jacobian_x_u(theProbabilityTransformation->getJacobian_x_u());
 
 
 		// Evaluate the limit-state function
@@ -342,8 +342,8 @@ ArmijoStepSizeRule::computeStepSize(const Vector &u_old,
 					<< " transform u to x. " << endln;
 				return -1;
 			}
-			Vector x_new(theProbabilityTransformation->get_x());
-			Matrix jacobian_x_u(theProbabilityTransformation->getJacobian_x_u());
+			const Vector &x_new = theProbabilityTransformation->get_x();
+			//Matrix jacobian_x_u(theProbabilityTransformation->getJacobian_x_u());
 
 
 			// Evaluate the limit-state function
