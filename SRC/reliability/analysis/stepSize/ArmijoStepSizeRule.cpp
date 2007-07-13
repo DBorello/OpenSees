@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-07-13 17:56:12 $
+// $Revision: 1.5 $
+// $Date: 2007-07-13 18:10:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/ArmijoStepSizeRule.cpp,v $
 
 
@@ -221,7 +221,8 @@ ArmijoStepSizeRule::computeStepSize(const Vector &u_old,
 				<< " vector u in the xu-transformation. " << endln;
 			return -1;
 		}
-		result = theProbabilityTransformation->transform_u_to_x_andComputeJacobian();
+		//result = theProbabilityTransformation->transform_u_to_x_andComputeJacobian();
+		result = theProbabilityTransformation->transform_u_to_x();
 		if (result < 0) {
 			opserr << "ArmijoStepSizeRule::computeStepSize() - could not  " << endln
 				<< " transform u to x. " << endln;
@@ -336,7 +337,8 @@ ArmijoStepSizeRule::computeStepSize(const Vector &u_old,
 					<< " vector u in the xu-transformation. " << endln;
 				return -1;
 			}
-			result = theProbabilityTransformation->transform_u_to_x_andComputeJacobian();
+			//result = theProbabilityTransformation->transform_u_to_x_andComputeJacobian();
+			result = theProbabilityTransformation->transform_u_to_x();
 			if (result < 0) {
 				opserr << "ArmijoStepSizeRule::computeStepSize() - could not  " << endln
 					<< " transform u to x. " << endln;
