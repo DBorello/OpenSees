@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.92 $
-// $Date: 2007-07-03 18:55:37 $
+// $Revision: 1.93 $
+// $Date: 2007-07-13 19:15:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -4692,22 +4692,9 @@ sensNodeVel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv
 int 
 computeGradients(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
-	// Comment to the developer:
-	// This Tcl command is meant to be called only for
-	// path-independent problems.  In such cases the 
-	// gradients can be computed AFTER the complete
-	// structural analysis is completed.
-	// No error messages is returned if the user tries to invoke this command
-	// during a path-dependent analysis.  The reason is that the reliability
-	// analysis will call this method BOTH for path dependent and independent problems. 
-
 #ifdef _RELIABILITY
-	if (theSensitivityAlgorithm->shouldComputeAtEachStep()) {
-	}
-	else {
-
-		theSensitivityAlgorithm->computeSensitivities();
-	}
+  if (theSensitivityAlgorithm != 0)
+    theSensitivityAlgorithm->computeSensitivities();
 #endif
     return TCL_OK;
 }
