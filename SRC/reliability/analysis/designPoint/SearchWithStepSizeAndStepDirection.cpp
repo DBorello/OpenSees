@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-07-03 19:33:06 $
+// $Revision: 1.12 $
+// $Date: 2007-07-13 19:54:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.cpp,v $
 
 
@@ -128,7 +128,7 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 	Vector gradientInStandardNormalSpace_old(numberOfRandomVariables);
 	double normOfGradient =0;
 	double stepSize;
-	Matrix jacobian_x_u(numberOfRandomVariables,numberOfRandomVariables);
+	//Matrix jacobian_x_u(numberOfRandomVariables,numberOfRandomVariables);
 	int evaluationInStepSize = 0;
 	int result;
 	theGFunEvaluator->initializeNumberOfEvaluations();
@@ -192,7 +192,7 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 			return -1;
 		}
 		x = theProbabilityTransformation->get_x();
-		jacobian_x_u = theProbabilityTransformation->getJacobian_x_u();
+		const Matrix &jacobian_x_u = theProbabilityTransformation->getJacobian_x_u();
 
 
 		// Possibly print the point to output file
@@ -334,36 +334,22 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 
 
 			// Compute the gamma vector
-			MatrixOperations theMatrixOperations(jacobian_x_u);
-
-			result = theMatrixOperations.computeTranspose();
-			if (result < 0) {
-				opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
-					<< " could not compute transpose of jacobian matrix. " << endln;
-				return -1;
-			}
-			const Matrix &transposeOfJacobian_x_u = theMatrixOperations.getTranspose();
-
-			//Matrix jacobianProduct = jacobian_x_u * transposeOfJacobian_x_u;
-			Matrix jacobianProduct(numberOfRandomVariables,numberOfRandomVariables);
-			jacobianProduct.addMatrixProduct(0.0, jacobian_x_u, transposeOfJacobian_x_u, 1.0);
-
-			// D_prime appears to be diagonal
-			//Matrix D_prime(numberOfRandomVariables,numberOfRandomVariables);
-			//for (j=0; j<numberOfRandomVariables; j++) {
-			//D_prime(j,j) = sqrt(jacobianProduct(j,j));
-			//}
-			
 			const Matrix &jacobian_u_x = theProbabilityTransformation->getJacobian_u_x();
 
 			//Vector tempProduct = jacobian_u_x ^ alpha;
 			Vector tempProduct(numberOfRandomVariables);
 			tempProduct.addMatrixTransposeVector(0.0, jacobian_u_x, alpha, 1.0);
 
-			// D_prime appears to be diagonal
-			//gamma = D_prime ^ tempProduct;
-			for (j = 0; j < numberOfRandomVariables; j++)
-			  gamma(j) = sqrt(jacobianProduct(j,j)) * tempProduct(j);
+			// Only diagonal elements of (J_xu*J_xu^T) are used
+			for (j = 0; j < numberOfRandomVariables; j++) {
+			  double sum = 0.0;
+			  double jk;
+			  for (int k = 0; k < numberOfRandomVariables; k++) {
+			    jk = jacobian_x_u(j,k);
+			    sum += jk*jk;
+			  }
+			  gamma(j) = sqrt(sum) * tempProduct(j);
+			}
 			
 			Glast = gFunctionValue;
 
