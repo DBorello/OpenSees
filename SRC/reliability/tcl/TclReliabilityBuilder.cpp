@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2007-07-09 18:50:10 $
+// $Revision: 1.24 $
+// $Date: 2007-07-13 19:25:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -3705,7 +3705,7 @@ TclReliabilityModelBuilder_addGradGEvaluator(ClientData clientData, Tcl_Interp *
 			return TCL_ERROR;
 		}
 
-		theGradGEvaluator = new OpenSeesGradGEvaluator(interp, theReliabilityDomain,doGradientCheck);
+		theGradGEvaluator = new OpenSeesGradGEvaluator(interp, theReliabilityDomain, theSensitivityAlgorithm, doGradientCheck);
 	}
 	else {
 		opserr << "ERROR: unrecognized type of GradGEvaluator \n";

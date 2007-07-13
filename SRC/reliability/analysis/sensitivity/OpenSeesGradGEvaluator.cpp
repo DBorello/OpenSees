@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-04-30 20:04:50 $
+// $Revision: 1.9 $
+// $Date: 2007-07-13 19:25:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/OpenSeesGradGEvaluator.cpp,v $
 
 
@@ -39,6 +39,7 @@
 #include <LimitStateFunction.h>
 #include <RandomVariable.h>
 #include <RandomVariableIter.h>
+#include <SensitivityAlgorithm.h>
 #include <tcl.h>
 #include <string.h>
 
@@ -52,14 +53,15 @@ using std::setprecision;
 using std::setiosflags;
 
 
-OpenSeesGradGEvaluator::OpenSeesGradGEvaluator(
-					Tcl_Interp *passedTclInterp,
-					ReliabilityDomain *passedReliabilityDomain,
-					bool PdoGradientCheck)
+OpenSeesGradGEvaluator::OpenSeesGradGEvaluator(Tcl_Interp *passedTclInterp,
+					       ReliabilityDomain *passedReliabilityDomain,
+					       SensitivityAlgorithm *theAlgo,
+					       bool PdoGradientCheck)
 :GradGEvaluator(passedReliabilityDomain, passedTclInterp)
 {
 	theReliabilityDomain = passedReliabilityDomain;
 	doGradientCheck = PdoGradientCheck;
+	theSensAlgo = theAlgo;
 
 	int nrv = passedReliabilityDomain->getNumberOfRandomVariables();
 	grad_g = new Vector(nrv);
@@ -134,13 +136,8 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 
 	// Compute gradients if this is a path-INdependent analysis
 	// (This command only has effect if it IS path-independent.)
-	sprintf(tclAssignment,"computeGradients");
-	if (Tcl_Eval( theTclInterp, tclAssignment ) == TCL_ERROR) {
-	  opserr << "ERROR OpenSeesGradGEvaluator -- Tcl_Eval returned error" << endln;
-	  opserr << theTclInterp->result << endln;
-	  return -1;
-	}
-
+	if (theSensAlgo != 0 && !(theSensAlgo->shouldComputeAtEachStep()) )
+	  theSensAlgo->computeSensitivities();
 
 	// Initialize gradient vector
 	grad_g->Zero();
