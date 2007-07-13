@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-07-11 23:52:10 $
+// $Revision: 1.4 $
+// $Date: 2007-07-13 18:26:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/meritFunction/AdkZhangMeritFunctionCheck.cpp,v $
 
 
@@ -89,12 +89,18 @@ AdkZhangMeritFunctionCheck::check(const Vector &u_old,
 		signumG = 1.0;
 	}
 	//Vector gradM_old = u_old + c * signumG * grad_G_old;
-	Vector gradM_old(u_old);
-	gradM_old.addVector(1.0, grad_G_old, c*signumG);
+	//Vector gradM_old(u_old);
+	//gradM_old.addVector(1.0, grad_G_old, c*signumG);
 
+
+	// Without forming temporary Vector object
+	double checkValue = u_old^stepDirection;
+	checkValue += c*signumG*(grad_G_old^stepDirection);
+	checkValue *= a*stepSize;
 
 	// Do the check
-	if (  (merit_new-merit_old)  <=  a*stepSize*(gradM_old^stepDirection)  ) {
+	//if (  (merit_new-merit_old)  <=  a*stepSize*(gradM_old^stepDirection)  ) {
+	if (  (merit_new-merit_old)  <=  checkValue  ) {
 		return 0;  // ok
 	}
 	else {
