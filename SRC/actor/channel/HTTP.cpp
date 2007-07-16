@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-12-15 00:11:49 $
+// $Revision: 1.2 $
+// $Date: 2007-07-16 22:52:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/HTTP.cpp,v $
                                                                         
 // Written: fmk 11/06
@@ -347,7 +347,11 @@ httpsGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
 
 
   SSL_shutdown(ssl);
+#ifdef _WIN32
+  closesocket(sockfd);
+#else
   close(sockfd);
+#endif
   SSL_free(ssl);
   SSL_CTX_free(ctx);
 
@@ -388,13 +392,13 @@ httpsPOST(const char *URL,
 
   /* 
    * init SSL library 
-   * code taken from O'Reiily book: 'http: the definitive guide'
+   * code taken from O'Reilly book: 'http: the definitive guide'
    */
   SSLeay_add_ssl_algorithms();
   client_method = SSLv2_client_method();
   SSL_load_error_strings();
   ctx = SSL_CTX_new(client_method);
-  /* end of code taken from http:the definitive guide */  
+  /* end of code taken from http: the definitive guide */  
 
   // invoke startup sockets
   startup_sockets();
@@ -408,12 +412,12 @@ httpsPOST(const char *URL,
 
   /* 
    * SSL handshake
-   * code taken from O'Reiily book: 'http: the definitive guide'
+   * code taken from O'Reilly book: 'http: the definitive guide'
    */
   ssl = SSL_new(ctx);
   SSL_set_fd(ssl, sockfd);
   err = SSL_connect(ssl);
-  /* end of code taken from http:the definitive guide */  
+  /* end of code taken from http: the definitive guide */  
 
   sprintf(outBuf, "POST %s HTTP/1.1\nHost: %s\n", page, URL);  
   if (cookie != 0)
@@ -504,7 +508,11 @@ httpsPOST(const char *URL,
    */
 
   SSL_shutdown(ssl);
+#ifdef _WIN32
+  closesocket(sockfd);
+#else
   close(sockfd);
+#endif
   SSL_free(ssl);
   SSL_CTX_free(ctx);
   cleanup_sockets();
