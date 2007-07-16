@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-04-05 01:14:01 $
+// $Revision: 1.12 $
+// $Date: 2007-07-16 22:57:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.h,v $
                                                                         
                                                                         
@@ -76,6 +76,7 @@ class ID
 
     friend class UDP_Socket;
     friend class TCP_Socket;
+    friend class TCP_SocketSSL;
     friend class TCP_SocketNoDelay;
     friend class MPI_Channel;
     friend class MySqlDatastore;

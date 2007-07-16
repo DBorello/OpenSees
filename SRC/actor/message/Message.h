@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2007-07-16 22:56:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/message/Message.h,v $
                                                                         
                                                                         
@@ -46,9 +46,10 @@ class Message
     virtual const char *getData(void);
     virtual int getSize(void);
 
-    friend class TCP_Socket;
-    friend class TCP_SocketNoDelay;
     friend class UDP_Socket;
+    friend class TCP_Socket;
+    friend class TCP_SocketSSL;
+    friend class TCP_SocketNoDelay;
     friend class MPI_Channel;
     
   private:

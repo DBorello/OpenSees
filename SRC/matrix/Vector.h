@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2006-10-02 17:30:05 $
+// $Revision: 1.11 $
+// $Date: 2007-07-16 22:57:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.h,v $
 
 // Written: fmk 
@@ -112,9 +112,10 @@ class Vector
     friend class Message;
     friend class SystemOfEqn;
     friend class Matrix;
-    friend class TCP_SocketNoDelay;    
-    friend class TCP_Socket;
     friend class UDP_Socket;
+    friend class TCP_Socket;
+    friend class TCP_SocketSSL;
+    friend class TCP_SocketNoDelay;    
     friend class MPI_Channel;
     friend class MySqlDatastore;
     friend class BerkeleyDbDatastore;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-10-15 00:32:53 $
+// $Revision: 1.3 $
+// $Date: 2007-07-16 22:56:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/address/SocketAddress.h,v $
                                                                         
 // Written: fmk 11/95
@@ -53,6 +53,7 @@ class SocketAddress: public ChannelAddress
 
     friend class UDP_Socket;
     friend class TCP_Socket;
+    friend class TCP_SocketSSL;
     friend class TCP_SocketNoDelay;
 };
 
