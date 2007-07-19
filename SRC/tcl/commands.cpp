@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.93 $
-// $Date: 2007-07-13 19:15:17 $
+// $Revision: 1.94 $
+// $Date: 2007-07-19 19:09:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -512,6 +512,8 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "video", &videoPlayer, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "remove", &removeObject, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
+    Tcl_CreateCommand(interp, "eleForce", &eleForce, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "nodeDisp", &nodeDisp, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
@@ -4417,6 +4419,43 @@ nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       return TCL_ERROR;
 
     double value = (*nodalResponse)(dof);
+    
+    // now we copy the value to the tcl string that is returned
+    sprintf(interp->result,"%35.20f",value);
+	
+    return TCL_OK;
+}
+
+
+
+int 
+eleForce(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+    // make sure at least one other argument to contain type of system
+    if (argc < 3) {
+	opserr << "WARNING want - nodeDisp nodeTag? dof?\n";
+	return TCL_ERROR;
+   }    
+
+    int tag, dof;
+
+    if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+	opserr << "WARNING eleForce eleTag? dof? - could not read nodeTag? \n";
+	return TCL_ERROR;	        
+    }    
+    if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
+	opserr << "WARNING eleForce eleTag? dof? - could not read dof? \n";
+	return TCL_ERROR;	        
+    }        
+    
+    dof--;
+    Element *theEle = theDomain.getElement(tag);
+    const Vector &force = theEle->getResistingForce();
+
+    if (force.Size() < dof || dof < 0)
+      return TCL_ERROR;
+
+    double value = force(dof);
     
     // now we copy the value to the tcl string that is returned
     sprintf(interp->result,"%35.20f",value);

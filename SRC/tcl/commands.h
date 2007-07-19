@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2007-04-13 22:40:00 $
+// $Revision: 1.17 $
+// $Date: 2007-07-19 19:09:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
                                                                         
@@ -115,6 +115,9 @@ videoPlayer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv
 
 int 
 removeObject(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+eleForce(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
 nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
