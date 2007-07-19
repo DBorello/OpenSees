@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2007-07-19 19:09:11 $
+// $Revision: 1.18 $
+// $Date: 2007-07-19 21:19:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
                                                                         
@@ -121,6 +121,9 @@ eleForce(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
 nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+nodeEigenvector(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
 nodeCoord(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);

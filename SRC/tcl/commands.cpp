@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.94 $
-// $Date: 2007-07-19 19:09:11 $
+// $Revision: 1.95 $
+// $Date: 2007-07-19 21:19:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -41,6 +41,8 @@ EXTERN int      Tcl_SetObjCmd _ANSI_ARGS_((ClientData clientData,
 
 #include <OPS_Globals.h>
 #include <SimulationInformation.h>
+#include <Matrix.h>
+
 extern SimulationInformation simulationInfo;
 
 // the following is a little kludgy but it works!
@@ -516,6 +518,8 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "eleForce", &eleForce, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "nodeDisp", &nodeDisp, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
+    Tcl_CreateCommand(interp, "nodeEigenvector", &nodeEigenvector, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "nodeVel", &nodeVel, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
@@ -4419,6 +4423,43 @@ nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       return TCL_ERROR;
 
     double value = (*nodalResponse)(dof);
+    
+    // now we copy the value to the tcl string that is returned
+    sprintf(interp->result,"%35.20f",value);
+	
+    return TCL_OK;
+}
+
+int 
+nodeEigenvector(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+    // make sure at least one other argument to contain type of system
+    if (argc < 3) {
+	opserr << "WARNING want - nodeDisp nodeTag? dof?\n";
+	return TCL_ERROR;
+   }    
+
+    int tag, dof, eigenvector;
+
+    if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+	opserr << "WARNING nodeDisp nodeTag? dof? - could not read nodeTag? \n";
+	return TCL_ERROR;	        
+    }    
+    if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
+	opserr << "WARNING nodeDisp nodeTag? dof? - could not read dof? \n";
+	return TCL_ERROR;	        
+    }        
+    if (Tcl_GetInt(interp, argv[3], &eigenvector) != TCL_OK) {
+	opserr << "WARNING nodeDisp nodeTag? dof? - could not read dof? \n";
+	return TCL_ERROR;	        
+    }        
+    
+    dof--; eigenvector--;
+
+    Node *theNode = theDomain.getNode(tag);
+    const Matrix &theEigenvectors = theNode->getEigenvectors();
+
+    double value = theEigenvectors(dof, eigenvector);
     
     // now we copy the value to the tcl string that is returned
     sprintf(interp->result,"%35.20f",value);
