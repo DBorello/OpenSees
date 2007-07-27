@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.41 $
-// $Date: 2006-08-11 17:19:24 $
+// $Revision: 1.42 $
+// $Date: 2007-07-27 17:52:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -144,6 +144,10 @@ TclModelBuilder_addFourNodeQuad(ClientData, Tcl_Interp *, int, TCL_Char **,
 extern int 
 TclModelBuilder_addDispBeamColumn(ClientData, Tcl_Interp *, int, TCL_Char **,
 				  Domain*, TclModelBuilder *);
+extern int 
+TclModelBuilder_addDispBeamColumnInt(ClientData, Tcl_Interp *, int, TCL_Char **,
+				  Domain*, TclModelBuilder *);
+
 extern int 
 TclModelBuilder_addForceBeamColumn(ClientData, Tcl_Interp *, int, TCL_Char **,
 				   Domain*, TclModelBuilder *);
@@ -291,6 +295,12 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
     int result = TclModelBuilder_addDispBeamColumn(clientData, interp, argc, argv,
 						   theTclDomain, theTclBuilder);
     return result;
+
+  } else if (strcmp(argv[1],"dispBeamColumnInt") == 0) {
+    int result = TclModelBuilder_addDispBeamColumnInt(clientData, interp, argc, argv,
+						   theTclDomain, theTclBuilder);
+    return result;
+
   } else if (strcmp(argv[1],"forceBeamColumn") == 0) {
     int result = TclModelBuilder_addForceBeamColumn(clientData, interp, argc, argv,
 						    theTclDomain, theTclBuilder);
