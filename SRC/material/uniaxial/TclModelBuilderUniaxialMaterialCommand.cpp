@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.44 $
-// $Date: 2007-06-28 22:40:41 $
+// $Revision: 1.45 $
+// $Date: 2007-07-27 18:06:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -48,6 +48,7 @@
 #include <Concrete02.h>			// MHS
 #include <Concrete04.h>
 #include <Concrete05.h>
+#include <Concrete06.h>			// LMS
 #include <Concrete07.h>			// JDW
 #include <HystereticMaterial.h>	// MHS
 #include <EPPGapMaterial.h>		// Mackie
@@ -178,8 +179,6 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
       
       // Parsing was successful, allocate the material
       theMaterial = new ElasticMaterial(tag, E, eta);       
-      //dum << tag " << tag << " E " << E << " eta " << eta <<endln;
-
 
     } else if (strcmp(argv[1],"Elastic2") == 0) {
 	if (argc < 4 || argc > 5) {
@@ -346,7 +345,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
       theMaterial = new EPPGapMaterial(tag, E, fy, gap, eta, damage); 
       
     }
-    
+
     else if (strcmp(argv[1],"Hardening") == 0) {
       if (argc < 7) {
 	opserr << "WARNING insufficient arguments\n";
@@ -484,7 +483,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
       theMaterial = new BoucWenMaterial(tag, alpha, ko, n, gamma, beta, 
 					Ao, deltaA, deltaNu, deltaEta,tolerance,maxNumIter);       
     }
-    
+
     else if (strcmp(argv[1],"Parallel") == 0) {
 	if (argc < 4) {
 	    opserr << "WARNING insufficient arguments\n";
@@ -759,7 +758,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	theMaterial = new Steel02(tag, fy, E, b);
       
     }
-    
+
 
     else if (strcmp(argv[1],"Steel03") == 0) {
       // Check that there is the minimum number of arguments
@@ -971,21 +970,22 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 
     else if (strcmp(argv[1],"Concrete2") == 0 || strcmp(argv[1],"Concrete02") == 0) {
       if (argc < 10) {
-	opserr << "WARNING invalid number of arguments\n";
+	opserr << "WARNING invalid number of arguments\n";	
 	printCommand(argc,argv);
 	opserr << "Want: uniaxialMaterial Concrete02 tag? fpc? epsc0? fpcu? epscu? rat? ft? Ets?" << endln;
 	return 0;
-      }    
-      
+      }
+    
       double fpc, epsc0, fpcu, epscu;
       double rat, ft, Ets;
       int tag;
-      
+
+ 
       if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
 	opserr << "WARNING invalid uniaxialMaterial Concrete02 tag" << endln;
 	return TCL_ERROR;
       }      
-
+      
       if (Tcl_GetDouble(interp, argv[3], &fpc) != TCL_OK) {
 	opserr << "WARNING invalid fpc\n";
 	printCommand(argc, argv);
@@ -1035,341 +1035,421 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
     
     else if (strcmp(argv[1],"Hysteretic") == 0) {
       if (argc != 20 && argc != 19 && argc != 16 && argc != 15) {
-			opserr << "WARNING insufficient arguments\n";
-			printCommand(argc,argv);
-			opserr << "Want: uniaxialMaterial Hysteretic tag? mom1p? rot1p? mom2p? rot2p? <mom3p? rot3p?> "
-				<< "\nmom1n? rot1n? mom2n? rot2n? <mom3n? rot3n?> pinchX? pinchY? damfc1? damfc2? <beta?>";
-			return TCL_ERROR;
-		}
-
-		int tag;
-		double mom1p, mom2p, mom3p;
-		double rot1p, rot2p, rot3p;
-		double mom1n, mom2n, mom3n;
-		double rot1n, rot2n, rot3n;
-		double pinchX, pinchY;
-		double damfc1, damfc2;
-		double beta = 0.0;
-
-		int i = 2;
-
-		if (Tcl_GetInt(interp, argv[i++], &tag) != TCL_OK) {
-			opserr << "WARNING invalid uniaxialMaterial Hysteretic tag" << endln;
-			return TCL_ERROR;
-		}
-
-		if (Tcl_GetDouble(interp, argv[i++], &mom1p) != TCL_OK) {
-			opserr << "WARNING invalid mom1p\n";
-			opserr << "Hysteretic material: " << tag << endln;
-			return TCL_ERROR;
-		}
-
-		if (Tcl_GetDouble(interp, argv[i++], &rot1p) != TCL_OK) {
-			opserr << "WARNING invalid rot1p\n";
-			opserr << "Hysteretic material: " << tag << endln;
-			return TCL_ERROR;
-		}
-
-		if (Tcl_GetDouble(interp, argv[i++], &mom2p) != TCL_OK) {
-			opserr << "WARNING invalid mom2p\n";
-			opserr << "Hysteretic material: " << tag << endln;
-			return TCL_ERROR;
-		}
-
-		if (Tcl_GetDouble(interp, argv[i++], &rot2p) != TCL_OK) {
-			opserr << "WARNING invalid rot2p\n";
-			opserr << "Hysteretic material: " << tag << endln;
-			return TCL_ERROR;
-		}
-
-		if (argc > 16) {
-			if (Tcl_GetDouble(interp, argv[i++], &mom3p) != TCL_OK) {
-				opserr << "WARNING invalid mom3p\n";
-				opserr << "Hysteretic material: " << tag << endln;
-				return TCL_ERROR;
-			}
-			
-			if (Tcl_GetDouble(interp, argv[i++], &rot3p) != TCL_OK) {
-				opserr << "WARNING invalid rot3p\n";
-				opserr << "Hysteretic material: " << tag << endln;
-				return TCL_ERROR;
-			}
-		}
-
-		if (Tcl_GetDouble(interp, argv[i++], &mom1n) != TCL_OK) {
-			opserr << "WARNING invalid mom1n\n";
-			opserr << "Hysteretic material: " << tag << endln;
-			return TCL_ERROR;
-		}
-
-		if (Tcl_GetDouble(interp, argv[i++], &rot1n) != TCL_OK) {
-			opserr << "WARNING invalid rot1n\n";
-			opserr << "Hysteretic material: " << tag << endln;
-			return TCL_ERROR;
-		}
-
-		if (Tcl_GetDouble(interp, argv[i++], &mom2n) != TCL_OK) {
-			opserr << "WARNING invalid mom2n\n";
-			opserr << "Hysteretic material: " << tag << endln;
-			return TCL_ERROR;
-		}
-
-		if (Tcl_GetDouble(interp, argv[i++], &rot2n) != TCL_OK) {
-			opserr << "WARNING invalid rot2n\n";
-			opserr << "Hysteretic material: " << tag << endln;
-			return TCL_ERROR;
-		}
-
-		if (argc > 16) {
-			if (Tcl_GetDouble(interp, argv[i++], &mom3n) != TCL_OK) {
-				opserr << "WARNING invalid mom3n\n";
-				opserr << "Hysteretic material: " << tag << endln;
-				return TCL_ERROR;
-			}
+	opserr << "WARNING insufficient arguments\n";
+	printCommand(argc,argv);
+	opserr << "Want: uniaxialMaterial Hysteretic tag? mom1p? rot1p? mom2p? rot2p? <mom3p? rot3p?> "
+	       << "\nmom1n? rot1n? mom2n? rot2n? <mom3n? rot3n?> pinchX? pinchY? damfc1? damfc2? <beta?>";
+	return TCL_ERROR;
+      }
+      
+      int tag;
+      double mom1p, mom2p, mom3p;
+      double rot1p, rot2p, rot3p;
+      double mom1n, mom2n, mom3n;
+      double rot1n, rot2n, rot3n;
+      double pinchX, pinchY;
+      double damfc1, damfc2;
+      double beta = 0.0;
+      
+      int i = 2;
+      
+      if (Tcl_GetInt(interp, argv[i++], &tag) != TCL_OK) {
+	opserr << "WARNING invalid uniaxialMaterial Hysteretic tag" << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &mom1p) != TCL_OK) {
+	opserr << "WARNING invalid mom1p\n";
+	opserr << "Hysteretic material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &rot1p) != TCL_OK) {
+	opserr << "WARNING invalid rot1p\n";
+	opserr << "Hysteretic material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &mom2p) != TCL_OK) {
+	opserr << "WARNING invalid mom2p\n";
+	opserr << "Hysteretic material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &rot2p) != TCL_OK) {
+	opserr << "WARNING invalid rot2p\n";
+	opserr << "Hysteretic material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (argc > 16) {
+	if (Tcl_GetDouble(interp, argv[i++], &mom3p) != TCL_OK) {
+	  opserr << "WARNING invalid mom3p\n";
+	  opserr << "Hysteretic material: " << tag << endln;
+	  return TCL_ERROR;
+	}
 	
-			if (Tcl_GetDouble(interp, argv[i++], &rot3n) != TCL_OK) {
-				opserr << "WARNING invalid rot3n\n";
-				opserr << "Hysteretic material: " << tag << endln;
-				return TCL_ERROR;
-			}
-		}
+	if (Tcl_GetDouble(interp, argv[i++], &rot3p) != TCL_OK) {
+	  opserr << "WARNING invalid rot3p\n";
+	  opserr << "Hysteretic material: " << tag << endln;
+	  return TCL_ERROR;
+	}
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &mom1n) != TCL_OK) {
+	opserr << "WARNING invalid mom1n\n";
+	opserr << "Hysteretic material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &rot1n) != TCL_OK) {
+	opserr << "WARNING invalid rot1n\n";
+	opserr << "Hysteretic material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &mom2n) != TCL_OK) {
+	opserr << "WARNING invalid mom2n\n";
+	opserr << "Hysteretic material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &rot2n) != TCL_OK) {
+	opserr << "WARNING invalid rot2n\n";
+	opserr << "Hysteretic material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (argc > 16) {
+	if (Tcl_GetDouble(interp, argv[i++], &mom3n) != TCL_OK) {
+	  opserr << "WARNING invalid mom3n\n";
+	  opserr << "Hysteretic material: " << tag << endln;
+	  return TCL_ERROR;
+	}
+	
+	if (Tcl_GetDouble(interp, argv[i++], &rot3n) != TCL_OK) {
+	  opserr << "WARNING invalid rot3n\n";
+	  opserr << "Hysteretic material: " << tag << endln;
+	  return TCL_ERROR;
+	}
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &pinchX) != TCL_OK) {
+	opserr << "WARNING invalid pinchX\n";
+	opserr << "Hysteretic material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &pinchY) != TCL_OK) {
+	opserr << "WARNING invalid pinchY\n";
+	opserr << "Hysteretic material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &damfc1) != TCL_OK) {
+	opserr << "WARNING invalid damfc1\n";
+	opserr << "Hysteretic material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &damfc2) != TCL_OK) {
+	opserr << "WARNING invalid damfc2\n";
+	opserr << "Hysteretic material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (argc == 20 || argc == 16) {
+	if (Tcl_GetDouble(interp, argv[i++], &beta) != TCL_OK) {
+	  opserr << "WARNING invalid beta\n";
+	  opserr << "Hysteretic material: " << tag << endln;
+	  return TCL_ERROR;
+	}
+      }
+      
+      // Parsing was successful, allocate the material
+      
+      if (argc > 16)		
+	theMaterial = new HystereticMaterial (tag, 
+					      mom1p, rot1p, mom2p, rot2p, mom3p, rot3p,
+					      mom1n, rot1n, mom2n, rot2n, mom3n, rot3n,
+					      pinchX, pinchY, damfc1, damfc2, beta);
+      
+      else
+	theMaterial = new HystereticMaterial (tag,
+					      mom1p, rot1p, mom2p, rot2p,
+					      mom1n, rot1n, mom2n, rot2n,
+					      pinchX, pinchY, damfc1, damfc2, beta);
+    }
+    
+    else if (strcmp(argv[1],"Concrete04") == 0) {
+      //        opserr << argc << endln;
+      if (argc != 10 && argc != 9 && argc != 7) {
+	opserr << "WARNING insufficient arguments\n";
+	printCommand(argc,argv);
+	opserr << "Want: uniaxialMaterial Concrete04 tag? fpc? epsc0? epscu? Ec0? <ft? etu? <beta?> >" << endln;
+	return TCL_ERROR;
+      }
+      
+      int tag;
+      
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	opserr << "WARNING invalid uniaxialMaterial Concrete04 tag"  
+	       << endln;
+	return TCL_ERROR;
+      }
+      
+      // Read required Concrete04 material parameters
+      double fpc, epsc0, ft, epscu, Ec0, etu, beta;
+      
+      if (Tcl_GetDouble(interp, argv[3], &fpc) != TCL_OK) {
+	opserr << "WARNING invalid fpc\n";
+	opserr << "Concrete04 material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[4], &epsc0) != TCL_OK) {
+	opserr << "WARNING invalid epsc0\n";
+	opserr << "Concrete04 material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[5], &epscu) != TCL_OK) {
+	opserr << "WARNING invalid epscu\n";
+	opserr << "Concrete04 material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[6], &Ec0) != TCL_OK) {
+	opserr << "WARNING invalid Ec0\n";
+	opserr << "Concrete04 material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      if (argc == 9 || argc == 10) {
+	if (Tcl_GetDouble(interp, argv[7], &ft) != TCL_OK) {
+	  opserr << "WARNING invalid ft\n";
+	  opserr << "Concrete04 material: " << tag << endln;
+	  return TCL_ERROR;
+	}
+	if (Tcl_GetDouble(interp, argv[8], &etu) != TCL_OK) {
+	  opserr << "WARNING invalid etu\n";
+	  opserr << "Concrete04 material: " << tag << endln;
+	  return TCL_ERROR;
+	}
+      }
+      if (argc == 10) {
+	if (Tcl_GetDouble(interp, argv[9], &beta) != TCL_OK) {
+	  opserr << "WARNING invalid beta\n";
+	  opserr << "Concrete04 material: " << tag << endln;
+	  return TCL_ERROR;
+	}
+      }
+      
+      
+      // Parsing was successful, allocate the material
+      if (argc == 10) {
+	theMaterial = new Concrete04(tag, fpc, epsc0, epscu, Ec0,  
+				     ft, etu, beta);
+      }
+      else if (argc == 9) {
+	theMaterial = new Concrete04(tag, fpc, epsc0, epscu, Ec0,  
+				     ft, etu);
+      }
+      else if (argc == 7) {
+	theMaterial = new Concrete04(tag, fpc, epsc0, epscu, Ec0);
+      }
+    }
 
-		if (Tcl_GetDouble(interp, argv[i++], &pinchX) != TCL_OK) {
-			opserr << "WARNING invalid pinchX\n";
-			opserr << "Hysteretic material: " << tag << endln;
-			return TCL_ERROR;
-		}
 
-		if (Tcl_GetDouble(interp, argv[i++], &pinchY) != TCL_OK) {
-			opserr << "WARNING invalid pinchY\n";
-			opserr << "Hysteretic material: " << tag << endln;
-			return TCL_ERROR;
-		}
 
-		if (Tcl_GetDouble(interp, argv[i++], &damfc1) != TCL_OK) {
-			opserr << "WARNING invalid damfc1\n";
-			opserr << "Hysteretic material: " << tag << endln;
-			return TCL_ERROR;
-		}
-
-		if (Tcl_GetDouble(interp, argv[i++], &damfc2) != TCL_OK) {
-			opserr << "WARNING invalid damfc2\n";
-			opserr << "Hysteretic material: " << tag << endln;
-			return TCL_ERROR;
-		}
-
-		if (argc == 20 || argc == 16) {
-			if (Tcl_GetDouble(interp, argv[i++], &beta) != TCL_OK) {
-				opserr << "WARNING invalid beta\n";
-				opserr << "Hysteretic material: " << tag << endln;
-				return TCL_ERROR;
-			}
-		}
-
-		// Parsing was successful, allocate the material
-
-		if (argc > 16)		
-       			theMaterial = new HystereticMaterial (tag, 
-				mom1p, rot1p, mom2p, rot2p, mom3p, rot3p,
-				mom1n, rot1n, mom2n, rot2n, mom3n, rot3n,
-				pinchX, pinchY, damfc1, damfc2, beta);
-
-		else
-			theMaterial = new HystereticMaterial (tag,
-				mom1p, rot1p, mom2p, rot2p,
-				mom1n, rot1n, mom2n, rot2n,
-				pinchX, pinchY, damfc1, damfc2, beta);
+    else if (strcmp(argv[1],"Concrete06") == 0) {
+	if (argc < 12) {
+	    opserr << "WARNING insufficient arguments\n";
+	    printCommand(argc,argv);
+	    opserr << "Want: uniaxialMaterial Concrete06 tag? fc? eo? r? k? alphaC? fcr? ecr? b? alphaT?" << endln;
+	    return TCL_ERROR;
 	}
 
-     else if (strcmp(argv[1],"Concrete04") == 0) {
-//        opserr << argc << endln;
-     if (argc != 10 && argc != 9 && argc != 7) {
-         opserr << "WARNING insufficient arguments\n";
-         printCommand(argc,argv);
-         opserr << "Want: uniaxialMaterial Concrete04 tag? fpc? epsc0? epscu? Ec0? <ft? etu? <beta?> >" << endln;
-         return TCL_ERROR;
-     }
+	int tag;
 
-     int tag;
+	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	    opserr << "WARNING invalid uniaxialMaterial Concrete06 tag" << endln;
+	    return TCL_ERROR;
+	}
 
-     if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-         opserr << "WARNING invalid uniaxialMaterial Concrete04 tag"  
-<< endln;
-         return TCL_ERROR;
-     }
+	// Read required Concrete01 material parameters
+	double fc, eo, r, k, fcr, ecr, b, alphaC, alphaT;
 
-     // Read required Concrete04 material parameters
-     double fpc, epsc0, ft, epscu, Ec0, etu, beta;
+	if (Tcl_GetDouble(interp, argv[3], &fc) != TCL_OK) {
+	    opserr << "WARNING invalid fc\n";
+	    opserr << "Concrete06 material: " << tag << endln;
+	    return TCL_ERROR;
+	}
 
-     if (Tcl_GetDouble(interp, argv[3], &fpc) != TCL_OK) {
-         opserr << "WARNING invalid fpc\n";
-         opserr << "Concrete04 material: " << tag << endln;
-         return TCL_ERROR;
-     }
+	if (Tcl_GetDouble(interp, argv[4], &eo) != TCL_OK) {
+	    opserr << "WARNING invalid eo\n";
+	    opserr << "Concrete06 material: " << tag << endln;
+	    return TCL_ERROR;
+	}
+	
+	if (Tcl_GetDouble(interp, argv[5], &r) != TCL_OK) {
+	    opserr << "WARNING invalid r\n";
+	    opserr << "Concrete06 material: " << tag << endln;
+	    return TCL_ERROR;
+	}
 
-     if (Tcl_GetDouble(interp, argv[4], &epsc0) != TCL_OK) {
-         opserr << "WARNING invalid epsc0\n";
-         opserr << "Concrete04 material: " << tag << endln;
-         return TCL_ERROR;
-     }
+	if (Tcl_GetDouble(interp, argv[6], &k) != TCL_OK) {
+	    opserr << "WARNING invalid k\n";
+	    opserr << "Concrete06 material: " << tag << endln;
+	    return TCL_ERROR;
+	}
+	
+	if (Tcl_GetDouble(interp, argv[7], &alphaC) != TCL_OK) {
+	  opserr << "WARNING invalid alphaC\n";
+	  opserr << "Concrete06 material: " << tag << endln;
+	  return TCL_ERROR;
+	}
+	
+	if (Tcl_GetDouble(interp, argv[8], &fcr) != TCL_OK) {
+	  opserr << "WARNING invalid fcr\n";
+	  opserr << "Concrete06 material: " << tag << endln;
+	  return TCL_ERROR;
+	}
 
-     if (Tcl_GetDouble(interp, argv[5], &epscu) != TCL_OK) {
-         opserr << "WARNING invalid epscu\n";
-         opserr << "Concrete04 material: " << tag << endln;
-         return TCL_ERROR;
-     }
+	if (Tcl_GetDouble(interp, argv[9], &ecr) != TCL_OK) {
+	  opserr << "WARNING invalid ecr\n";
+	  opserr << "Concrete06 material: " << tag << endln;
+	  return TCL_ERROR;
+	}
+	
+	if (Tcl_GetDouble(interp, argv[10], &b) != TCL_OK) {
+	  opserr << "WARNING invalid b\n";
+	  opserr << "Concrete06 material: " << tag << endln;
+	  return TCL_ERROR;
+	}
+	
+	if (Tcl_GetDouble(interp, argv[11], &alphaT) != TCL_OK) {
+	  opserr << "WARNING invalid alphaT\n";
+	  opserr << "Concrete06 material: " << tag << endln;
+	  return TCL_ERROR;
+	}
+	
+	// Parsing was successful, allocate the material
+	theMaterial = new Concrete06(tag, fc, eo, r, k, alphaC, fcr, ecr, b, alphaT);
+    }
 
-     if (Tcl_GetDouble(interp, argv[6], &Ec0) != TCL_OK) {
-         opserr << "WARNING invalid Ec0\n";
-         opserr << "Concrete04 material: " << tag << endln;
-         return TCL_ERROR;
-     }
-     if (argc == 9 || argc == 10) {
-         if (Tcl_GetDouble(interp, argv[7], &ft) != TCL_OK) {
-             opserr << "WARNING invalid ft\n";
-             opserr << "Concrete04 material: " << tag << endln;
-             return TCL_ERROR;
-         }
-         if (Tcl_GetDouble(interp, argv[8], &etu) != TCL_OK) {
-             opserr << "WARNING invalid etu\n";
-             opserr << "Concrete04 material: " << tag << endln;
-             return TCL_ERROR;
-         }
-     }
-     if (argc == 10) {
-         if (Tcl_GetDouble(interp, argv[9], &beta) != TCL_OK) {
-             opserr << "WARNING invalid beta\n";
-             opserr << "Concrete04 material: " << tag << endln;
-             return TCL_ERROR;
-         }
-     }
-
-
-     // Parsing was successful, allocate the material
-     if (argc == 10) {
-         theMaterial = new Concrete04(tag, fpc, epsc0, epscu, Ec0,  
-ft, etu, beta);
-     }
-     else if (argc == 9) {
-         theMaterial = new Concrete04(tag, fpc, epsc0, epscu, Ec0,  
-ft, etu);
-     }
-     else if (argc == 7) {
-         theMaterial = new Concrete04(tag, fpc, epsc0, epscu, Ec0);
-     }
-   }
-
-
+    
+    
     else if (strcmp(argv[1], "Concrete07") == 0) {
-		// Check to see if there are enough arquements
-		if (argc < 11) {
-			opserr << "WARNING: Insufficient arguements\n";
-			printCommand(argc, argv);
-			opserr << "Want: uniaxialMaterial Concrete06 tag? fpc? epsc0? Ec? fpt? epst0? xcrp? xcrn? r?\n";
-			return TCL_ERROR;
-		}
+      // Check to see if there are enough arquements
+      if (argc < 11) {
+	opserr << "WARNING: Insufficient arguements\n";
+	printCommand(argc, argv);
+	opserr << "Want: uniaxialMaterial Concrete07 tag? fpc? epsc0? Ec? fpt? epst0? xcrp? xcrn? r?\n";
+	return TCL_ERROR;
+      }
+      
+      int tag;
 
-		int tag;
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	opserr << "WARNING: Invalid uniaxial Concrete07 tag\n";
+	return TCL_ERROR;
+      }
+      
+      // Read in the faluves required for the model
+      double fpc, epsc0, Ec, fpt, epst0, xcrp, xcrn, r;
+      
+      if (Tcl_GetDouble(interp, argv[3], &fpc) != TCL_OK) {
+	opserr << "WARNING: Invalid peak compression stress\n";
+	opserr << "uniaxialMaterial Concrete07: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[4], &epsc0) != TCL_OK) {
+	opserr << "WARNING: Invalid peak compression strain\n";
+	opserr << "uniaxialMaterial Concrete07: " << tag <<endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[5], &Ec) != TCL_OK) {
+	opserr << "WARNING: Invalid Young's Modulus\n";
+	opserr << "uniaxialMaterial Concrete07: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[6], &fpt) != TCL_OK) {
+	opserr << "WARNING: Invalid peak tension stress\n";
+	opserr << "uniaxialMaterial Concrete07: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[7], &epst0) != TCL_OK) {
+	opserr << "WARNING: Invalid peak tension strain\n";
+	opserr << "uniaxialMaterial Concrete07: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[8], &xcrp) != TCL_OK) {
+	opserr << "WARNING: Invalid critical nondimensional strain in tension\n";
+	opserr << "uniaxialMaterial Concrete07: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[9], &xcrn) != TCL_OK) {
+	opserr << "WARNING: Invalid critical nondimensional strain in compression\n";
+	opserr << "uniaxialMaterial Concrete07: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[10], &r) != TCL_OK) {
+	opserr << "WARNING: Invalid value for r\n";
+	opserr << "uniaxialMaterial Concrete07: " << tag << endln;
+      }
+      
+      //		opserr << "fpc: " << fpc << endln << "epsc0: " << epsc0 << endln << "Ec: " << Ec << endln;
+      //		opserr << "fpt: " << fpt << endln << "epst0: " << epst0 << endln << "xcrp: " << xcrp << endln;
+      //		opserr << "xcrn: " << xcrn << endln << "r: " << r << endln;
+      
+      // Parsing was successful, allocate the material
+      
+      theMaterial = new Concrete07(tag, fpc, epsc0, Ec, fpt, epst0, xcrp, xcrn, r);
+    }
 
-		if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-			opserr << "WARNING: Invalid uniaxial Concrete06 tag\n";
-			return TCL_ERROR;
-		}
-
-		// Read in the faluves required for the model
-		double fpc, epsc0, Ec, fpt, epst0, xcrp, xcrn, r;
-
-		if (Tcl_GetDouble(interp, argv[3], &fpc) != TCL_OK) {
-			opserr << "WARNING: Invalid peak compression stress\n";
-			opserr << "uniaxialMaterial Concrete06: " << tag << endln;
-			return TCL_ERROR;
-		}
-
-		if (Tcl_GetDouble(interp, argv[4], &epsc0) != TCL_OK) {
-			opserr << "WARNING: Invalid peak compression strain\n";
-			opserr << "uniaxialMaterial Concrete06: " << tag <<endln;
-			return TCL_ERROR;
-		}
-
-		if (Tcl_GetDouble(interp, argv[5], &Ec) != TCL_OK) {
-			opserr << "WARNING: Invalid Young's Modulus\n";
-			opserr << "uniaxialMaterial Concrete06: " << tag << endln;
-			return TCL_ERROR;
-		}
-
-		if (Tcl_GetDouble(interp, argv[6], &fpt) != TCL_OK) {
-			opserr << "WARNING: Invalid peak tension stress\n";
-			opserr << "uniaxialMaterial Concrete06: " << tag << endln;
-			return TCL_ERROR;
-		}
-
-		if (Tcl_GetDouble(interp, argv[7], &epst0) != TCL_OK) {
-			opserr << "WARNING: Invalid peak tension strain\n";
-			opserr << "uniaxialMaterial Concrete06: " << tag << endln;
-			return TCL_ERROR;
-		}
-
-		if (Tcl_GetDouble(interp, argv[8], &xcrp) != TCL_OK) {
-			opserr << "WARNING: Invalid critical nondimensional strain in tension\n";
-			opserr << "uniaxialMaterial Concrete06: " << tag << endln;
-			return TCL_ERROR;
-		}
-
-		if (Tcl_GetDouble(interp, argv[9], &xcrn) != TCL_OK) {
-			opserr << "WARNING: Invalid critical nondimensional strain in compression\n";
-			opserr << "uniaxialMaterial Concrete06: " << tag << endln;
-			return TCL_ERROR;
-		}
-
-		if (Tcl_GetDouble(interp, argv[10], &r) != TCL_OK) {
-			opserr << "WARNING: Invalid value for r\n";
-			opserr << "uniaxialMaterial Concrete06: " << tag << endln;
-		}
-
-//		opserr << "fpc: " << fpc << endln << "epsc0: " << epsc0 << endln << "Ec: " << Ec << endln;
-//		opserr << "fpt: " << fpt << endln << "epst0: " << epst0 << endln << "xcrp: " << xcrp << endln;
-//		opserr << "xcrn: " << xcrn << endln << "r: " << r << endln;
-
-		// Parsing was successful, allocate the material
-
-		theMaterial = new Concrete07(tag, fpc, epsc0, Ec, fpt, epst0, xcrp, xcrn, r);
+    
+    else if (strcmp(argv[1],"Viscous") == 0) {
+      if (argc < 5)
+	{
+	  opserr << "WARNING insufficient arguments\n";
+	  printCommand(argc,argv);
+	  opserr << "Want: uniaxialMaterial Viscous tag? C? alpha?" << endln;
+	  return TCL_ERROR;
 	}
-
-	else if (strcmp(argv[1],"Viscous") == 0) {
-		if (argc < 5)
-		{
-			opserr << "WARNING insufficient arguments\n";
-			printCommand(argc,argv);
-			opserr << "Want: uniaxialMaterial Viscous tag? C? alpha?" << endln;
-			return TCL_ERROR;
-		}
-
-		int tag;
-		double C, a;
-
-		if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
-		{
-			opserr << "WARNING invalid tag\n";
-			opserr << "Viscous material: " << tag << endln;
-			return TCL_ERROR;
-		}
-		if (Tcl_GetDouble(interp, argv[3], &C) != TCL_OK)
-		{
-			opserr << "WARNING invalid C\n";
-			opserr << "Viscous material: " << tag << endln;
-			return TCL_ERROR;
-		}
-		if (Tcl_GetDouble(interp, argv[4], &a) != TCL_OK)
-		{
-			opserr << "WARNING invalid alpha\n";
-			opserr << "Viscous material: " << tag << endln;
-			return TCL_ERROR;
-		}
-
-		theMaterial = new ViscousMaterial (tag, C, a);
+      
+      int tag;
+      double C, a;
+      
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
+	{
+	  opserr << "WARNING invalid tag\n";
+	  opserr << "Viscous material: " << tag << endln;
+	  return TCL_ERROR;
 	}
-
-	else if (strcmp(argv[1],"PathIndependent") == 0) {
+      if (Tcl_GetDouble(interp, argv[3], &C) != TCL_OK)
+	{
+	  opserr << "WARNING invalid C\n";
+	  opserr << "Viscous material: " << tag << endln;
+	  return TCL_ERROR;
+	}
+      if (Tcl_GetDouble(interp, argv[4], &a) != TCL_OK)
+	{
+	  opserr << "WARNING invalid alpha\n";
+	  opserr << "Viscous material: " << tag << endln;
+	  return TCL_ERROR;
+	}
+      
+      theMaterial = new ViscousMaterial (tag, C, a);
+    }
+    
+    else if (strcmp(argv[1],"PathIndependent") == 0) {
 		if (argc < 4)
 		{
 			opserr << "WARNING insufficient arguments\n";
@@ -2245,94 +2325,99 @@ ft, etu);
 
     else if (strcmp(argv[1],"ECC01") == 0) {
       if (argc < 16) {
-	  opserr << "WARNING insufficient arguments\n";
-	  printCommand(argc,argv);
-	  opserr << "Want: uniaxialMaterial ECC01 TAG? SIGT0? EPST0? SIGT1? EPST1? EPST2? SIGC0? EPSC0? EPSC1? ";
-	  opserr << "ALPHAT1? ALPHAT2? ALPHAC? ALPHACU? BETAT? BETAC\n";
-	  return TCL_ERROR;
-	}
-
-	int tag;
-	double SIGT0, EPST0, SIGT1, EPST1, EPST2, SIGC0, EPSC0, EPSC1, ALPHAT1, ALPHAT2, ALPHAC, ALPHACU, BETAT, BETAC;
-
-	
-	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    opserr << "WARNING invalid uniaxialMaterial ECC01 tag" << endln;
-	    return TCL_ERROR;
-	}
-
-
-	if (Tcl_GetDouble(interp, argv[3], &EPST0) != TCL_OK) {
-	    opserr << "WARNING invalid EPSTO\n";
-	    opserr << "ECC01 material: " << tag << endln;
-	    return TCL_ERROR;
-	}
-
-	if (Tcl_GetDouble(interp, argv[4], &SIGT1) != TCL_OK) {
-	    opserr << "WARNING invalid SIGT1\n";
-	    opserr << "ECC01 material: " << tag << endln;
-	    return TCL_ERROR;
-	}
-	
-	if (Tcl_GetDouble(interp, argv[5], &EPST1) != TCL_OK) {
-	    opserr << "WARNING invalid EPST1\n";
-	    opserr << "ECC01 material: " << tag << endln;
-	    return TCL_ERROR;
-	}
-
-	if (Tcl_GetDouble(interp, argv[6], &EPST2) != TCL_OK) {
-	    opserr << "WARNING invalid epscu\n";
-	    opserr << "ECC01 material: " << tag << endln;
-	    return TCL_ERROR;
-	}
-	if (Tcl_GetDouble(interp, argv[7], &SIGC0) != TCL_OK) {
-	    opserr << "WARNING invalid epscu\n";
-	    opserr << "ECC01 material: " << tag << endln;
-	    return TCL_ERROR;
-	}
-	if (Tcl_GetDouble(interp, argv[8], &EPSC0) != TCL_OK) {
-	    opserr << "WARNING invalid epscu\n";
-	    opserr << "ECC01 material: " << tag << endln;
-	    return TCL_ERROR;
-	}
-	if (Tcl_GetDouble(interp, argv[9], &EPSC1) != TCL_OK) {
-	    opserr << "WARNING invalid epscu\n";
-	    opserr << "ECC01 material: " << tag << endln;
-	    return TCL_ERROR;
-	}
-	if (Tcl_GetDouble(interp, argv[10], &ALPHAT1) != TCL_OK) {
-	    opserr << "WARNING invalid epscu\n";
-	    opserr << "ECC01 material: " << tag << endln;
-	    return TCL_ERROR;
-	}
-	if (Tcl_GetDouble(interp, argv[11], &ALPHAT2) != TCL_OK) {
-	    opserr << "WARNING invalid epscu\n";
-	    opserr << "ECC01 material: " << tag << endln;
-	    return TCL_ERROR;
-	}
-	if (Tcl_GetDouble(interp, argv[12], &ALPHAC) != TCL_OK) {
-	    opserr << "WARNING invalid epscu\n";
-	    opserr << "ECC01 material: " << tag << endln;
-	    return TCL_ERROR;
-	}
-	if (Tcl_GetDouble(interp, argv[13], &ALPHACU) != TCL_OK) {
-	    opserr << "WARNING invalid epscu\n";
-	    opserr << "ECC01 material: " << tag << endln;
-	    return TCL_ERROR;
-	}
-	if (Tcl_GetDouble(interp, argv[14], &BETAT) != TCL_OK) {
-	    opserr << "WARNING invalid epscu\n";
-	    opserr << "ECC01 material: " << tag << endln;
-	    return TCL_ERROR;
-	}
-	if (Tcl_GetDouble(interp, argv[15], &BETAC) != TCL_OK) {
-	    opserr << "WARNING invalid epscu\n";
-	    opserr << "ECC01 material: " << tag << endln;
-	    return TCL_ERROR;
-	}
-
-	theMaterial = new ECC01(tag, SIGT0, EPST0, SIGT1, EPST1, EPST2, SIGC0, EPSC0, EPSC1, 
-				ALPHAT1, ALPHAT2, ALPHAC, ALPHACU, BETAT, BETAC);
+	opserr << "WARNING insufficient arguments\n";
+	printCommand(argc,argv);
+	opserr << "Want: uniaxialMaterial ECC01 TAG? SIGT0? EPST0? SIGT1? EPST1? EPST2? SIGC0? EPSC0? EPSC1? ";
+	opserr << "ALPHAT1? ALPHAT2? ALPHAC? ALPHACU? BETAT? BETAC\n";
+	return TCL_ERROR;
+      }
+      
+      int tag;
+      double SIGT0, EPST0, SIGT1, EPST1, EPST2, SIGC0, EPSC0, EPSC1, ALPHAT1, ALPHAT2, ALPHAC, ALPHACU, BETAT, BETAC;
+      
+      
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	opserr << "WARNING invalid uniaxialMaterial ECC01 tag" << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[3], &SIGT0) != TCL_OK) {
+	opserr << "WARNING invalid SIGTO\n";
+	opserr << "ECC01 material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[4], &EPST0) != TCL_OK) {
+	opserr << "WARNING invalid EPSTO\n";
+	opserr << "ECC01 material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[5], &SIGT1) != TCL_OK) {
+	opserr << "WARNING invalid SIGT1\n";
+	opserr << "ECC01 material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[6], &EPST1) != TCL_OK) {
+	opserr << "WARNING invalid EPST1\n";
+	opserr << "ECC01 material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[7], &EPST2) != TCL_OK) {
+	opserr << "WARNING invalid epscu\n";
+	opserr << "ECC01 material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      if (Tcl_GetDouble(interp, argv[8], &SIGC0) != TCL_OK) {
+	opserr << "WARNING invalid epscu\n";
+	opserr << "ECC01 material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      if (Tcl_GetDouble(interp, argv[9], &EPSC0) != TCL_OK) {
+	opserr << "WARNING invalid epscu\n";
+	opserr << "ECC01 material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      if (Tcl_GetDouble(interp, argv[10], &EPSC1) != TCL_OK) {
+	opserr << "WARNING invalid epscu\n";
+	opserr << "ECC01 material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      if (Tcl_GetDouble(interp, argv[11], &ALPHAT1) != TCL_OK) {
+	opserr << "WARNING invalid epscu\n";
+	opserr << "ECC01 material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      if (Tcl_GetDouble(interp, argv[12], &ALPHAT2) != TCL_OK) {
+	opserr << "WARNING invalid epscu\n";
+	opserr << "ECC01 material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      if (Tcl_GetDouble(interp, argv[13], &ALPHAC) != TCL_OK) {
+	opserr << "WARNING invalid epscu\n";
+	opserr << "ECC01 material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      if (Tcl_GetDouble(interp, argv[14], &ALPHACU) != TCL_OK) {
+	opserr << "WARNING invalid epscu\n";
+	opserr << "ECC01 material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      if (Tcl_GetDouble(interp, argv[15], &BETAT) != TCL_OK) {
+	opserr << "WARNING invalid epscu\n";
+	opserr << "ECC01 material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      if (Tcl_GetDouble(interp, argv[16], &BETAC) != TCL_OK) {
+	opserr << "WARNING invalid epscu\n";
+	opserr << "ECC01 material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      theMaterial = new ECC01(tag, SIGT0, EPST0, SIGT1, EPST1, EPST2, SIGC0, EPSC0, EPSC1, 
+			      ALPHAT1, ALPHAT2, ALPHAC, ALPHACU, BETAT, BETAC);
     }
     
     
@@ -2351,33 +2436,33 @@ ft, etu);
       // Py, Tz, Qz models
       if (theMaterial == 0)
 	theMaterial = TclModelBuilder_addPyTzQzMaterial(clientData, interp, argc, argv, theTclBuilder, theDomain);
-
+      
 #ifdef _LIMITSTATEMATERIAL
       // LimitState
       if (theMaterial == 0)
 	theMaterial = Tcl_AddLimitStateMaterial(clientData, interp, argc, argv);
 #endif
     }
-
+    
     if (theMaterial == 0) {
-
+      
       //
       // maybe element in a package already loaded
       //  loop through linked list of loaded functions comparing names & if find call it
       //
-
+      
       UniaxialPackageCommand *matCommands = theUniaxialPackageCommands;
       bool found = false;
       while (matCommands != NULL && found == false) {
 	if (strcmp(argv[1], matCommands->funcName) == 0) {
-
+	  
 	  int result = (*(matCommands->funcPtr))(clientData, interp, argc, argv, theTclBuilder);
 	  return result;
 	} else
 	  matCommands = matCommands->next;
       }
-
-
+      
+      
       //
       // maybe element command exists in a dll in library path
       //  so try loading package of same name as material name containg
@@ -2392,11 +2477,11 @@ ft, etu);
       strcpy(tclFuncName, "TclCommand_");
       strcpy(&tclFuncName[11], argv[1]);    
       int res = getLibraryFunction(argv[1], tclFuncName, &libHandle, (void **)&funcPtr);
-
+      
       delete [] tclFuncName;
-
+      
       if (res == 0) {
-
+	
 	//
 	// add loaded function to list of functions
 	//
@@ -2411,11 +2496,11 @@ ft, etu);
 	int result = (*funcPtr)(clientData, interp,
 				argc, argv,
 				theTclBuilder);	
-
+	
 	return result;
       }
     }
-
+    
     //
     // if still here the element command does not exist
     //
@@ -2432,6 +2517,6 @@ ft, etu);
       delete theMaterial; // invoke the material objects destructor, otherwise mem leak
       return TCL_ERROR;
     }
-
+    
     return TCL_OK;
 }
