@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2007-07-27 18:13:42 $
+// $Revision: 1.29 $
+// $Date: 2007-07-27 18:52:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -1625,6 +1625,111 @@ TclCommand_addFiber(ClientData clientData, Tcl_Interp *interp, int argc,
     return TCL_OK;
 }
 
+// add Hfiber to fiber section
+int
+TclCommand_addHFiber(ClientData clientData, Tcl_Interp *interp, int argc, 
+			 TCL_Char **argv, TclModelBuilder *theTclModelBuilder)
+{
+    // check if a section is being processed
+    if (currentSectionTag == 0) {
+	opserr <<  "WARNING subcommand 'Hfiber' is only valid inside a 'section' command\n";
+	return TCL_ERROR;
+    }	   
+    
+    // make sure at least one other argument to contain patch type
+    if (argc < 5) {
+	opserr <<  "WARNING invalid num args: Hfiber yLoc zLoc area matTag\n";
+	return TCL_ERROR;
+    }    
+
+	SectionRepres *sectionHRepres = 
+	theTclModelBuilder->getSectionRepres(currentSectionTag);
+
+	
+	if (sectionHRepres == 0) {
+	opserr <<  "WARNING cannot retrieve section\n";
+	return TCL_ERROR;
+    }    
+	
+    if (sectionHRepres->getType() != SEC_TAG_FiberSection) {
+	opserr <<  "WARNING section invalid: patch can only be added to fiber sections\n";
+	return TCL_ERROR;
+    }
+
+    FiberSectionRepr *fiberSectionHRepr = (FiberSectionRepr *) sectionHRepres;
+    int numHFibers = fiberSectionHRepr->getNumHFibers();    
+    
+    int HNDM = theTclModelBuilder->getNDM();  
+    
+    Fiber *theHFiber =0;
+      
+    int matHTag;
+    double yHLoc, zHLoc, Harea;
+
+    
+    if (Tcl_GetDouble(interp, argv[1], &yHLoc) != TCL_OK) {
+         opserr <<  "WARNING invalid yLoc: Hfiber yLoc zLoc area matTag\n";
+         return TCL_ERROR;
+     }    
+    if (Tcl_GetDouble(interp, argv[2], &zHLoc) != TCL_OK) {
+         opserr <<  "WARNING invalid zLoc: Hfiber yLoc zLoc area matTag\n";
+         return TCL_ERROR;
+     }        
+    if (Tcl_GetDouble(interp, argv[3], &Harea) != TCL_OK) {
+         opserr <<  "WARNING invalid area: Hfiber yLoc zLoc area matTag\n";
+         return TCL_ERROR;
+     }            
+    
+    if (Tcl_GetInt(interp, argv[4], &matHTag) != TCL_OK) {
+         opserr <<  "WARNING invalid matTag: Hfiber yLoc zLoc area matTag\n";
+         return TCL_ERROR;
+     }                
+    
+    UniaxialMaterial *Hmaterial = theTclModelBuilder->getUniaxialMaterial(matHTag);
+    
+    // creates 2d section      
+    if (HNDM == 2) {
+
+	if (Hmaterial == 0) {
+	    opserr <<  "WARNING invalid Hmaterial ID for patch\n";
+	    return TCL_ERROR;
+	}   
+
+	theHFiber = new UniaxialFiber2d(numHFibers, *Hmaterial, Harea, yHLoc);
+	if (theHFiber == 0) {
+	    opserr <<  "WARNING unable to allocate Hfiber \n";
+	    return TCL_ERROR;
+	}    
+    }
+
+    else if (HNDM == 3) {
+
+      static Vector fiberHPosition(2);
+	fiberHPosition(0) = yHLoc;
+	fiberHPosition(1) = zHLoc;
+	    
+	theHFiber = new UniaxialFiber3d(numHFibers, *Hmaterial, Harea, fiberHPosition);
+	if (theHFiber == 0) {
+	    opserr <<  "WARNING unable to allocate Hfiber \n";
+	    return TCL_ERROR;
+	}    
+    }
+
+    else {
+	opserr <<  "WARNING Hfiber command for FiberSection only fo 2 or 3d \n";
+	return TCL_ERROR;
+    }    
+	
+    // add patch to section representation
+    int error = fiberSectionHRepr->addHFiber(*theHFiber);
+
+    if (error) {
+	opserr <<  "WARNING cannot add patch to section\n";
+	return TCL_ERROR;
+    }  
+
+    return TCL_OK;
+}
 
 
 
