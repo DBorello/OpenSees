@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-11-22 19:41:17 $
+// $Revision: 1.6 $
+// $Date: 2007-07-27 23:14:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/ImposedMotionSP.cpp,v $
                                                                         
 // Written: fmk 
@@ -131,7 +131,7 @@ ImposedMotionSP::applyConstraint(double time)
 bool
 ImposedMotionSP::isHomogeneous(void) const
 {
-  return true;
+  return false;
 }
 
 
