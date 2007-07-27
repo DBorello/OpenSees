@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2004-10-06 19:21:12 $
+// $Revision: 1.3 $
+// $Date: 2007-07-27 19:01:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/BarSlipMaterial.cpp,v $
                                                                         
                                                                         
@@ -165,11 +165,11 @@ void BarSlipMaterial::getBondStrength(void)
 	{
 		if (bsflag == 1)   // bond strength -- weak
 		{
-			tauYT = 0.6*pow(fc,0.5);
-			tauET = 21*pow(fc,0.5);
-			tauEC = 26*pow(fc,0.5);
-			tauYC = 43*pow(fc,0.5);
-			tauR =  1.8*pow(fc,0.5);
+			tauYT = 0.6*pow(fc,0.5); //0.6*pow(fc,0.5);  I have changed the values dec 03 2005 to see any effect of change
+			tauET = 10*pow(fc,0.5); //21*pow(fc,0.5);
+			tauEC = 13*pow(fc,0.5); //26*pow(fc,0.5);
+			tauYC = 21*pow(fc,0.5); //43*pow(fc,0.5);
+			tauR =  0.6*pow(fc,0.5); //1.8*pow(fc,0.5);
 		}
 		else if (bsflag == 0)  // bond strength -- strong
 		{
@@ -336,18 +336,21 @@ void BarSlipMaterial::getBarSlipEnvelope(void)
 	}
 
 
-	eP(2,0) = (delta<(fy*As/k1 + (fu-fy)*As/k2))? delta:(fy*As/k1 + (fu-fy)*As/k2);
-	
-	if (eP(2,0) == delta)
-	{
-		eP(2,1) = fy*As + (delta - fy*As/k1)*k2;
-	}
-	else
-	{
+//	eP(2,0) = (delta<(fy*As/k1 + (fu-fy)*As/k2))? delta:(fy*As/k1 + (fu-fy)*As/k2);
+	eP(2,0) = (fy*As/k1 + (fu-fy)*As/k2);
+//	if (eP(2,0) == delta)
+//	{
+//		eP(2,1) = fy*As + (delta - fy*As/k1)*k2;
+//	}
+//	else
+//	{
 		eP(2,1) = fu*As;
-	}
+//	}
 
-	eP(3,0) = del_ult;
+//	opserr << tagMat << " " << eP(2,0) << " " << eP(2,1) << endln;
+
+//eP(3,0) = del_ult;
+		eP(3,0) = 10.0*eP(2,0);
 	eP(3,1) = eP(2,1) + (eP(2,1) - eP(1,1))*(eP(3,0) - eP(2,0))/(eP(2,0) - eP(1,0));
 
 	gammaFLimit = 1.0 - frP/eP(2,1);
@@ -405,8 +408,16 @@ void BarSlipMaterial::getBarSlipEnvelope(void)
 	{
 		j = 0.75;
 	}
+	else if (type == 3) // member type -- same (force displacement envelope identical for tension and compression region)
+	{
+		j = 1.0;
+	}
 
-	cForce = 1 + (beta*fc*dth*width*2*(1-j)/(Es*As*0.003*beta1*(1-dd*beta1/(2*dth*(1-j)))));
+	if (j == 1.0) {
+		cForce = 1.0;
+	} else {
+		cForce = 1 + (beta*fc*dth*width*2*(1-j)/(Es*As*0.003*beta1*(1-dd*beta1/(2*dth*(1-j)))));
+	}
 	As = As*cForce;
 	k1 = 2*Es*(tauEC/fy)*geo*As;
 
@@ -453,10 +464,16 @@ void BarSlipMaterial::getBarSlipEnvelope(void)
 	uForceP = unloadPForce/eP(2,1);
 	uForceN = unloadNForce/eN(2,1);
 
-	double ratio = 2.0;  //(research underway to induce more pinching in the material)
-	rForceP = (uForceP>uForceN) ? ratio*uForceP:ratio*uForceN;
-	rForceN = (uForceP>uForceN) ? ratio*uForceP:ratio*uForceN;
+	double ratio = 1.1;  //(research underway to induce more pinching in the material) // changed feb 13 2006
+//	rForceP = (uForceP>uForceN) ? ratio*uForceP:ratio*uForceN;
+//	rForceN = (uForceP>uForceN) ? ratio*uForceP:ratio*uForceN;
 //	rForceP = 0.25; rForceN = 0.25;
+
+// change incorporated feb 13 2006
+//	rForceP = (ratio*uForceP<0.25) ? ratio*uForceP:0.25;
+	rForceP = 0.25;
+	rForceN = ratio*uForceN*eN(3,1)/eN(0,1);
+	// rForceN has been specified as rForceP*eP(2,1)/eN(2,1) in the paper, this value is approx same as the value in here
 
 }
 
@@ -1509,8 +1526,10 @@ void BarSlipMaterial::updateDmg(double strain)
 
 		if (damage == 1) {
 			if (umaxAbs >= envlpPosStrain(3)) {
-				double a = gammaFLimit/0.7;
-				double b = -gammaFLimit*3.0/7.0;
+				//double a = gammaFLimit/0.7;
+				//double b = -gammaFLimit*3.0/7.0;
+				double a = gammaFLimit*eP(3,0)*uultAbs/(eP(3,0)-eP(2,0));
+				double b = -gammaFLimit*eP(2,0)*uultAbs/(eP(3,0)-eP(2,0));
 				double x = (umaxAbs/uultAbs);
 				TgammaF = a*x + b;
 			}

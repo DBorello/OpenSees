@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2004-10-06 19:21:12 $
+// $Revision: 1.3 $
+// $Date: 2007-07-27 19:01:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Pinching4Material.h,v $
                                                                         
                                                                         
@@ -187,6 +187,10 @@ private:
 	double Envlp4Tangent(Vector , Vector , double);
 	double Envlp4Stress(Vector , Vector , double);
 	void updateDmg(double, double);
+
+#ifdef _G3DEBUG
+	FileStream* fg;
+#endif
 
 };
 #endif
