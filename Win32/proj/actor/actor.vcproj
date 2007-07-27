@@ -126,6 +126,12 @@
 			RelativePath="..\..\..\SRC\actor\objectBroker\FEM_ObjectBroker.h">
 		</File>
 		<File
+			RelativePath="..\..\..\SRC\actor\objectBroker\FEM_ObjectBrokerAllClasses.cpp">
+		</File>
+		<File
+			RelativePath="..\..\..\SRC\actor\objectBroker\FEM_ObjectBrokerAllClasses.h">
+		</File>
+		<File
 			RelativePath="..\..\..\SRC\actor\channel\HTTP.cpp">
 		</File>
 		<File
