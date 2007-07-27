@@ -2,6 +2,7 @@ include ../../../Makefile.def
 
 OBJS       = DispBeamColumn2dInt.o \
 	FiberSection2dInt.o \
+	LinearCrdTransf2dInt.o \
 	TclDispBeamColumnIntCommand.o
 
 

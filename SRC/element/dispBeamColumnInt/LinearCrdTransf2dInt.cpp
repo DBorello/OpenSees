@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-06-08 00:28:21 $
+// $Revision: 1.2 $
+// $Date: 2007-07-27 17:50:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumnInt/LinearCrdTransf2dInt.cpp,v $
                                                                         
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
@@ -42,9 +42,10 @@
 
 #include <LinearCrdTransf2dInt.h>
 
+
 // constructor:
 LinearCrdTransf2dInt::LinearCrdTransf2dInt(int tag):
-  CrdTransf2dInt(tag, CRDTR_TAG_LinearCrdTransf2dInt),
+  CrdTransf2d(tag, CRDTR_TAG_LinearCrdTransf2dInt),
   nodeIPtr(0), nodeJPtr(0),
   nodeIOffset(0), nodeJOffset(0),
   cosTheta(0), sinTheta(0), L(0)
@@ -56,7 +57,7 @@ LinearCrdTransf2dInt::LinearCrdTransf2dInt(int tag):
 LinearCrdTransf2dInt::LinearCrdTransf2dInt(int tag,
 				     const Vector &rigJntOffset1,
 				     const Vector &rigJntOffset2):
-  CrdTransf2dInt(tag, CRDTR_TAG_LinearCrdTransf2dInt),
+  CrdTransf2d(tag, CRDTR_TAG_LinearCrdTransf2dInt),
   nodeIPtr(0), nodeJPtr(0),
   nodeIOffset(0), nodeJOffset(0),
   cosTheta(0), sinTheta(0), L(0)
@@ -90,7 +91,7 @@ LinearCrdTransf2dInt::LinearCrdTransf2dInt(int tag,
 // constructor:
 // invoked by a FEM_ObjectBroker, recvSelf() needs to be invoked on this object.
 LinearCrdTransf2dInt::LinearCrdTransf2dInt():
-  CrdTransf2dInt(0, CRDTR_TAG_LinearCrdTransf2dInt),
+  CrdTransf2d(0, CRDTR_TAG_LinearCrdTransf2dInt),
   nodeIPtr(0), nodeJPtr(0),
   nodeIOffset(0), nodeJOffset(0),
   cosTheta(0), sinTheta(0), L(0)
@@ -326,7 +327,7 @@ LinearCrdTransf2dInt::getBasicTrialDispShapeSensitivity (void)
 		   << " conjunction with random nodal coordinates." << endln;
 	  }
 	 
-	  double dcosdh, dsindh, dsldh, dcldh;
+	  double dcosdh =0.0, dsindh =0.0, dsldh =0.0, dcldh =0.0;
 
 	  double dx = cosTheta*L; 
 	  double dy = sinTheta*L;	
@@ -587,11 +588,12 @@ LinearCrdTransf2dInt::getGlobalResistingForceShapeSensitivity(const Vector &pb, 
 			 << " conjunction with random nodal coordinates." << endln;
 		}
 	 
-		double dcosdh, dsindh, d1oLdh;
+		double dcosdh =0.0, dsindh =0.0, d1oLdh =0.0;
 
 		double dx = cosTheta*L;
-		double dy = sinTheta*L;	
-
+		double dy = sinTheta*L;
+	
+		
 		if (nodeParameterID(0) == 1) { // here x1 is random
 		  dcosdh = (-L+dx*dx/L)/(L*L);
 		  dsindh = dx*dy/(L*L*L);
@@ -1253,3 +1255,94 @@ LinearCrdTransf2dInt::getBasicDisplSensitivity(int gradNumber)
 	return ub;
 }
 // AddingSensitivity:END /////////////////////////////////////
+
+const Vector &
+LinearCrdTransf2dInt::getBasicTrialVel(void)
+{
+	// determine global velocities
+	const Vector &vel1 = nodeIPtr->getTrialVel();
+	const Vector &vel2 = nodeJPtr->getTrialVel();
+	
+	static double vg[6];
+	for (int i = 0; i < 3; i++) {
+		vg[i]   = vel1(i);
+		vg[i+3] = vel2(i);
+	}
+	
+	static Vector vb(3);
+	
+	double oneOverL = 1.0/L;
+	double sl = sinTheta*oneOverL;
+	double cl = cosTheta*oneOverL;
+	
+	vb(0) = -cosTheta*vg[0] - sinTheta*vg[1] +
+		cosTheta*vg[3] + sinTheta*vg[4];
+	
+	vb(1) = -sl*vg[0] + cl*vg[1] + vg[2] +
+		sl*vg[3] - cl*vg[4];
+	
+	if (nodeIOffset != 0) {
+		double t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
+		double t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
+		vb(0) -= t02*vg[2];
+		vb(1) += oneOverL*t12*vg[2];
+	}
+	
+	if (nodeJOffset != 0) {
+		double t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
+		double t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
+		vb(0) += t35*vg[5];
+		vb(1) -= oneOverL*t45*vg[5];
+	}
+	
+	vb(2) = vb(1) + vg[5] - vg[2];
+	
+	return vb;
+}
+
+
+const Vector &
+LinearCrdTransf2dInt::getBasicTrialAccel(void)
+{
+	// determine global accelerations
+	const Vector &accel1 = nodeIPtr->getTrialAccel();
+	const Vector &accel2 = nodeJPtr->getTrialAccel();
+	
+	static double ag[6];
+	for (int i = 0; i < 3; i++) {
+		ag[i]   = accel1(i);
+		ag[i+3] = accel2(i);
+	}
+	
+	static Vector ab(3);
+	
+	double oneOverL = 1.0/L;
+	double sl = sinTheta*oneOverL;
+	double cl = cosTheta*oneOverL;
+	
+	ab(0) = -cosTheta*ag[0] - sinTheta*ag[1] +
+		cosTheta*ag[3] + sinTheta*ag[4];
+	
+	ab(1) = -sl*ag[0] + cl*ag[1] + ag[2] +
+		sl*ag[3] - cl*ag[4];
+	
+	if (nodeIOffset != 0) {
+		double t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
+		double t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
+		ab(0) -= t02*ag[2];
+		ab(1) += oneOverL*t12*ag[2];
+	}
+	
+	if (nodeJOffset != 0) {
+		double t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
+		double t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
+		ab(0) += t35*ag[5];
+		ab(1) -= oneOverL*t45*ag[5];
+	}
+	
+	ab(2) = ab(1) + ag[5] - ag[2];
+	
+	return ab;
+}
+
+

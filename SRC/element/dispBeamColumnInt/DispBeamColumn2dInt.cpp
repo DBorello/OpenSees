@@ -1,6 +1,6 @@
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumnInt/DispBeamColumn2dInt.cpp,v $
 // $Version$
-// $Date: 2007-06-08 00:28:21 $
+// $Date: 2007-07-27 17:50:59 $
 
 // Created: 07/04
 // Modified by: LMS 
@@ -60,8 +60,12 @@ DispBeamColumn2dInt::DispBeamColumn2dInt(int tag,
   }
 
   CrdTransf2d *theCoord = coordTransf.getCopy();
-  if (theCoord == 0 || theCoord->getClassTag() != CRDTR_TAG_LinearCrdTransf2dIncr) {
+  if (theCoord == 0 || theCoord->getClassTag() != CRDTR_TAG_LinearCrdTransf2dInt) {
     opserr << "DispBeamColumn2dInt::DispBeamColumn2dInt -- failed to get a copy of coordinate transformation\n";
+    if (theCoord == 0)
+      opserr << "COPY ZERO\n";
+    else
+      opserr << "COPY NON _ZERO CLASTAG " << theCoord->getClassTag() << endln;
     exit(-1);
   } 
   

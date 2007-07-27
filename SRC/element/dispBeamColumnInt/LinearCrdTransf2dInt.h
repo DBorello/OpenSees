@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-06-08 00:28:21 $
+// $Revision: 1.2 $
+// $Date: 2007-07-27 17:50:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumnInt/LinearCrdTransf2dInt.h,v $
                                                                         
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
@@ -33,8 +33,8 @@
 
 // What: "@(#) LinearCrdTransf2d.h, revA"
 
-#ifndef LinearCrdTransf2d_h
-#define LinearCrdTransf2d_h
+#ifndef LinearCrdTransf2dInt_h
+#define LinearCrdTransf2dInt_h
 
 #include <CrdTransf2d.h>
 #include <Vector.h>
@@ -70,7 +70,7 @@ class LinearCrdTransf2dInt: public CrdTransf2d
   // AddingSensitivity:END //////////////////////////////////
   const Vector &getBasicTrialDisp(void);
   const Vector &getBasicTrialDispInt(void);
-  const Vector &getBasicTrialVel(void);;
+  const Vector &getBasicTrialVel(void);
   const Vector &getBasicTrialAccel(void);
   
   const Vector &getBasicIncrDisp      (void);
