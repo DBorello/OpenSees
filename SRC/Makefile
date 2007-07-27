@@ -594,6 +594,10 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/dispBeamColumn/DispBeamColumn2d.o \
 	$(FE)/element/dispBeamColumn/DispBeamColumn3d.o \
 	$(FE)/element/dispBeamColumn/TclDispBeamColumnCommand.o \
+	$(FE)/element/dispBeamColumnInt/DispBeamColumn2dInt.o \
+	$(FE)/element/dispBeamColumnInt/FiberSection2dInt.o \
+	$(FE)/element/dispBeamColumnInt/LinearCrdTransf2dInt.o \
+	$(FE)/element/dispBeamColumnInt/TclDispBeamColumnIntCommand.o \
 	$(FE)/element/elasticBeamColumn/ElasticBeam2d.o \
 	$(FE)/element/elasticBeamColumn/ElasticBeam3d.o \
 	$(FE)/element/elasticBeamColumn/TclElasticBeamCommand.o \
@@ -624,6 +628,7 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/Concrete01.o \
 	$(FE)/material/uniaxial/Concrete02.o \
 	$(FE)/material/uniaxial/Concrete04.o \
+	$(FE)/material/uniaxial/Concrete06.o \
 	$(FE)/material/uniaxial/Concrete07.o \
 	$(FE)/material/uniaxial/Steel01.o \
 	$(FE)/material/uniaxial/Steel02.o \

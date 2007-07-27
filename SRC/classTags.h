@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.93 $
-// $Date: 2007-06-28 20:48:30 $
+// $Revision: 1.94 $
+// $Date: 2007-07-27 17:54:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -420,7 +420,7 @@
 #define CRDTR_TAG_LinearCrdTransf3d 4
 #define CRDTR_TAG_PDeltaCrdTransf3d 5
 #define CRDTR_TAG_CorotCrdTransf3d  6
-#define CRDTR_TAG_LinearCrdTransf2dIncr 7
+#define CRDTR_TAG_LinearCrdTransf2dInt 7
 
 #define NOD_TAG_Node      	1
 #define NOD_TAG_DummyNode 	2
