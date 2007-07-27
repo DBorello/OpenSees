@@ -18,13 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-04-16 18:40:01 $
+// $Revision: 1.6 $
+// $Date: 2007-07-27 17:54:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/TclGeomTransfCommand.cpp,v $
 #include <string.h>
 #include <TclModelBuilder.h>
 
 #include <LinearCrdTransf2d.h>
+#include <LinearCrdTransf2dInt.h>
 #include <LinearCrdTransf3d.h>
 #include <PDeltaCrdTransf2d.h>
 #include <PDeltaCrdTransf3d.h>
@@ -106,10 +107,14 @@ TclCommand_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
 
     // construct the transformation object
     
-    CrdTransf2d *crdTransf2d;
+    CrdTransf2d *crdTransf2d =0;
     
     if (strcmp(argv[1],"Linear") == 0)
       crdTransf2d = new LinearCrdTransf2d(crdTransfTag, jntOffsetI, jntOffsetJ);
+
+    else if (strcmp(argv[1],"LinearInt") ==0)
+      //      crdTransf2d = new LinearCrdTransf2dInt(crdTransfTag, jntOffsetI, jntOffsetJ);
+      crdTransf2d = new LinearCrdTransf2dInt(crdTransfTag, jntOffsetI, jntOffsetJ);
     
     else if (strcmp(argv[1],"PDelta") == 0 || strcmp(argv[1],"LinearWithPDelta") == 0)
       crdTransf2d = new PDeltaCrdTransf2d(crdTransfTag, jntOffsetI, jntOffsetJ);

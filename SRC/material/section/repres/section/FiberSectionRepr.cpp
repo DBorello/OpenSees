@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2005-03-25 00:32:11 $
+// $Revision: 1.7 $
+// $Date: 2007-07-27 17:56:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/section/FiberSectionRepr.cpp,v $
                                                                         
                                                                         
@@ -43,15 +43,19 @@
 FiberSectionRepr::FiberSectionRepr(int sectionID, int maxNumPatches, int maxNumReinfLayers)
   :SectionRepres(sectionID), 
   sectID(sectionID), 
-  maxNPatches(maxNumPatches),
-  maxNReinfLayers(maxNumReinfLayers),
+  maxNPatches (maxNumPatches),
+  maxNReinfLayers (maxNumReinfLayers),
   patch(0), 
   reinfLayer(0), 
   nPatches(0), 
   nReinfLayers(0), 
   numFibers(0), 
-  theFibers(0), 
-  sizeFibers(32)
+  theFibers(0),
+  sizeFibers(32),
+  numHFibers(0), 
+  theHFibers(0), 
+  sizeHFibers(32)
+  
 {
 
     theFibers = new Fiber *[sizeFibers];
@@ -61,6 +65,17 @@ FiberSectionRepr::FiberSectionRepr(int sectionID, int maxNumPatches, int maxNumR
 			      
 	sizeFibers = 0;
     }
+
+
+    theHFibers = new Fiber *[sizeFibers];
+
+    if (theHFibers == 0) {
+      opserr << "FiberSectionRepr::FiberSectionRepr -- failed to allocate Fiber pointers\n";
+			      
+	sizeHFibers = 0;
+    }
+
+
 
    patch      = new Patch*[maxNumPatches];
    if (!patch)
@@ -72,7 +87,7 @@ FiberSectionRepr::FiberSectionRepr(int sectionID, int maxNumPatches, int maxNumR
    
    for (i=0; i< maxNumPatches; i++)
        patch[i] = 0;
-
+      
    reinfLayer = new ReinfLayer*[maxNumReinfLayers];
    if (!reinfLayer)
    {
@@ -125,7 +140,7 @@ FiberSectionRepr::~FiberSectionRepr(void)
    if (patch)
    {
       for (i = 0; i < maxNPatches; i++)
-         if (patch[i] != 0)
+         if (patch[i])
               delete patch[i];
 
       delete [] patch;
@@ -134,15 +149,19 @@ FiberSectionRepr::~FiberSectionRepr(void)
    if (reinfLayer)
    { 
       for (i = 0; i < maxNReinfLayers; i++)
-	if (reinfLayer[i] != 0) 
+         if (reinfLayer[i])
             delete reinfLayer[i];
-
+      
       delete [] reinfLayer;
    } 
    
    if (theFibers != 0)
        delete [] theFibers;  // NOTE: don't delete fiber objects themselves
                              //       leave this to FiberSection destructor
+
+      if (theHFibers != 0)
+       delete [] theHFibers;  // NOTE: don't delete fiber objects themselves
+
 }
         
  
@@ -191,8 +210,6 @@ int FiberSectionRepr::addPatch (const Patch & aPatch)
      }
      for (int i=0; i<nPatches; i++)
        patches[i] = patch[i];
-     for (int j=nPatches; j<maxNPatches; j++)
-       patches[j] = 0;
      
      delete [] patch;
      patch = patches;
@@ -220,8 +237,6 @@ int FiberSectionRepr::addReinfLayer (const ReinfLayer & aReinfLayer)
      }
      for (int i=0; i<nReinfLayers; i++)
        reinfLayers[i] = reinfLayer[i];
-     for (int j=nReinfLayers; j<maxNReinfLayers; j++)
-       reinfLayers[j] = 0;
 
      delete [] reinfLayer;
      reinfLayer = reinfLayers;
@@ -332,6 +347,55 @@ FiberSectionRepr::addFiber(Fiber &newFiber)
 }
 
 
+
+
+int
+FiberSectionRepr::addHFiber(Fiber &newFiber)
+{
+    if (numHFibers < sizeHFibers) {
+	// space available in array .. set new pointer and increment number
+	theHFibers[numHFibers] = &newFiber;
+	numHFibers++;
+    }
+    else {
+	// need to create a larger array
+	int newSize = 2*numHFibers;
+	if (newSize == 0) 
+	    newSize = 2; // in case failed in constructor
+	
+	Fiber **newArray = new Fiber *[newSize]; 
+	
+	if (newArray == 0) {
+	  opserr << "FiberSection::addFiber -- failed to allocate Fiber pointers\n";
+	    return -1;
+	}
+	    
+	// set the new size of the array
+	sizeFibers = newSize;
+	
+	// copy the old pointers
+	for (int i = 0; i < numHFibers; i++)
+	    newArray[i] = theHFibers[i];
+	
+	// add the new pointer
+	newArray[numHFibers] = &newFiber;
+	numHFibers++;
+	
+	// zero the last elements of the array
+	for (int j = numHFibers; j < newSize; j++) 
+	    newArray[j] = 0;
+	
+	delete [] theHFibers;
+	
+	theHFibers = newArray;
+    }
+  
+    return 0;
+}
+
+
+
+
 int
 FiberSectionRepr::getNumFibers(void) const
 {
@@ -342,4 +406,17 @@ Fiber **
 FiberSectionRepr::getFibers(void) const
 {
     return theFibers;
+}
+
+
+int
+FiberSectionRepr::getNumHFibers(void) const
+{
+    return numHFibers;
+}
+
+Fiber **
+FiberSectionRepr::getHFibers(void) const
+{
+    return theHFibers;
 }
