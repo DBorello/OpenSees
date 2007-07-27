@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.36 $
-// $Date: 2007-06-06 19:55:15 $
+// $Revision: 1.37 $
+// $Date: 2007-07-27 18:15:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -256,6 +256,14 @@ TclCommand_addRemoFiber(ClientData clientData,
 			int argc,    
 			TCL_Char **argv);   
 
+
+//Leo
+int
+TclModelBuilder_addRemoHFiber(ClientData clientData, 
+			     Tcl_Interp *interp, 
+			     int argc,    
+			     TCL_Char **argv);  
+
 int
 TclCommand_addRemoGeomTransf(ClientData clientData, 
 			     Tcl_Interp *interp, 
@@ -322,6 +330,12 @@ extern int
 TclCommand_addFiber (ClientData clientData, Tcl_Interp *interp,
 		     int argc, TCL_Char **argv,
 		     TclModelBuilder *theTclBuilder);
+
+
+extern int
+TclCommand_addHFiber (ClientData clientData, Tcl_Interp *interp,
+			  int argc, TCL_Char **argv,
+			  TclModelBuilder *theTclBuilder);
 
 
 extern int
@@ -488,6 +502,10 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   Tcl_CreateCommand(interp, "fiber", TclCommand_addRemoFiber,
 		    (ClientData)NULL, NULL);    
 
+  //LEO
+  Tcl_CreateCommand(interp, "Hfiber", TclModelBuilder_addRemoHFiber,
+		    (ClientData)NULL, NULL);
+
   Tcl_CreateCommand(interp, "geomTransf", TclCommand_addRemoGeomTransf,
 		    (ClientData)NULL, NULL);    
 
@@ -620,6 +638,7 @@ TclModelBuilder::~TclModelBuilder()
   Tcl_DeleteCommand(theInterp, "layer");
 
   Tcl_DeleteCommand(theInterp, "fiber");
+  Tcl_DeleteCommand(theInterp, "Hfiber"); //LEO
   Tcl_DeleteCommand(theInterp, "geomTransf");
   Tcl_DeleteCommand(theInterp, "updateMaterialStage");
   Tcl_DeleteCommand(theInterp, "updateParameter");
@@ -2883,6 +2902,14 @@ TclCommand_addRemoFiber(ClientData clientData, Tcl_Interp *interp, int argc,
 {
   return TclCommand_addFiber(clientData, interp, argc,argv,
 				  theTclBuilder);
+}
+
+int				
+TclModelBuilder_addRemoHFiber(ClientData clientData, Tcl_Interp *interp, int argc,   
+			   TCL_Char **argv)
+{
+  return TclCommand_addHFiber(clientData, interp, argc,argv,theTclBuilder);
+				  
 }
 
 int
