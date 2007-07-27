@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.45 $
-// $Date: 2007-07-27 18:06:09 $
+// $Revision: 1.46 $
+// $Date: 2007-07-27 19:12:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -61,6 +61,7 @@
 #include <CableMaterial.h>	// CC
 #include <BoucWenMaterial.h>	// Terje
 #include <Pinching4Material.h>   // NM
+#include <ShearPanelMaterial.h>  // NM
 #include <BarSlipMaterial.h>     // NM
 #include <Bond_SP01.h>	// JZ
 
@@ -2165,7 +2166,284 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
      }
      
    } 
-
+    
+    
+    
+  else if (strcmp(argv[1],"ShearPanel") == 0) {
+    if (argc != 42 && argc != 31 ) {
+      opserr << "WARNING insufficient arguments\n";
+      printCommand(argc,argv);
+      opserr << "Want: uniaxialMaterial ShearPanel tag? stress1p? strain1p? stress2p? strain2p? stress3p? strain3p? stress4p? strain4p? "
+	     << "\n<stress1n? strain1n? stress2n? strain2n? stress3n? strain3n? stress4n? strain4n?> rDispP? rForceP? uForceP? "
+	     << "\n<rDispN? rForceN? uForceN?> gammaK1? gammaK2? gammaK3? gammaK4? gammaKLimit? gammaD1? gammaD2? gammaD3? gammaD4? "
+	     << "\ngammaDLimit? gammaF1? gammaF2? gammaF3? gammaF4? gammaFLimit? gammaE? YieldStress? ";
+      return TCL_ERROR;
+    }
+    
+    int tag;
+    double stress1p, stress2p, stress3p, stress4p;
+    double strain1p, strain2p, strain3p, strain4p;
+    double stress1n, stress2n, stress3n, stress4n;
+    double strain1n, strain2n, strain3n, strain4n;
+    double rDispP, rForceP, uForceP, rDispN, rForceN, uForceN;
+    double gammaK1, gammaK2, gammaK3, gammaK4, gammaKLimit;
+    double gammaD1, gammaD2, gammaD3, gammaD4, gammaDLimit;
+    double gammaF1, gammaF2, gammaF3, gammaF4, gammaFLimit;
+    double gammaE, yStr;
+    
+    int i = 2;
+    
+    if (Tcl_GetInt(interp, argv[i++], &tag) != TCL_OK) {
+      opserr << "WARNING invalid uniaxialMaterial ShearPanel tag" << endln;
+      return TCL_ERROR;
+    }
+    
+    if (Tcl_GetDouble(interp, argv[i++], &stress1p) != TCL_OK) {
+      opserr << "WARNING invalid stress1p\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    
+    if (Tcl_GetDouble(interp, argv[i++], &strain1p) != TCL_OK) {
+      opserr << "WARNING invalid strain1p\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    
+    if (Tcl_GetDouble(interp, argv[i++], &stress2p) != TCL_OK) {
+      opserr << "WARNING invalid stress2p\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    
+    if (Tcl_GetDouble(interp, argv[i++], &strain2p) != TCL_OK) {
+      opserr << "WARNING invalid strain2p\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    
+    if (Tcl_GetDouble(interp, argv[i++], &stress3p) != TCL_OK) {
+      opserr << "WARNING invalid stress3p\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    
+    if (Tcl_GetDouble(interp, argv[i++], &strain3p) != TCL_OK) {
+      opserr << "WARNING invalid strain3p\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    
+    if (Tcl_GetDouble(interp, argv[i++], &stress4p) != TCL_OK) {
+      opserr << "WARNING invalid stress4p\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    
+    if (Tcl_GetDouble(interp, argv[i++], &strain4p) != TCL_OK) {
+      opserr << "WARNING invalid strain4p\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    
+    if (argc == 42) {
+      if (Tcl_GetDouble(interp, argv[i++], &stress1n) != TCL_OK) {
+	opserr << "WARNING invalid stress1n\n";
+	opserr << "ShearPanel material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &strain1n) != TCL_OK) {
+	opserr << "WARNING invalid strain1n\n";
+	opserr << "ShearPanel material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &stress2n) != TCL_OK) {
+	opserr << "WARNING invalid stress2n\n";
+	opserr << "ShearPanel material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &strain2n) != TCL_OK) {
+	opserr << "WARNING invalid strain2n\n";
+	opserr << "ShearPanel material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &stress3n) != TCL_OK) {
+	opserr << "WARNING invalid stress3n\n";
+	opserr << "ShearPanel material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &strain3n) != TCL_OK) {
+	opserr << "WARNING invalid strain3n\n";
+	opserr << "ShearPanel material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &stress4n) != TCL_OK) {
+	opserr << "WARNING invalid stress4n\n";
+	opserr << "ShearPanel material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &strain4n) != TCL_OK) {
+	opserr << "WARNING invalid strain4n\n";
+	opserr << "ShearPanel material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+    }
+    
+    
+    if (Tcl_GetDouble(interp, argv[i++], &rDispP) != TCL_OK) {
+      opserr << "WARNING invalid rDispP\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    
+    if (Tcl_GetDouble(interp, argv[i++], &rForceP) != TCL_OK) {
+      opserr << "WARNING invalid rForceP\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    
+    if (Tcl_GetDouble(interp, argv[i++], &uForceP) != TCL_OK) {
+      opserr << "WARNING invalid uForceP\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    
+    if (argc == 42) {
+      if (Tcl_GetDouble(interp, argv[i++], &rDispN) != TCL_OK) {
+	opserr << "WARNING invalid rDispN\n";
+	opserr << "ShearPanel material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &rForceN) != TCL_OK) {
+	opserr << "WARNING invalid rForceN\n";
+	opserr << "ShearPanel material: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[i++], &uForceN) != TCL_OK) {
+	opserr << "WARNING invalid uForceN\n";
+	opserr << "ShearPanel material: " << tag << endln;
+	return TCL_ERROR;
+      }
+    }
+    
+    if (Tcl_GetDouble(interp, argv[i++], &gammaK1) != TCL_OK) {
+      opserr << "WARNING invalid gammaK1\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetDouble(interp, argv[i++], &gammaK2) != TCL_OK) {
+      opserr << "WARNING invalid gammaK2\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetDouble(interp, argv[i++], &gammaK3) != TCL_OK) {
+      opserr << "WARNING invalid gammaK3\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetDouble(interp, argv[i++], &gammaK4) != TCL_OK) {
+      opserr << "WARNING invalid gammaK4\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetDouble(interp, argv[i++], &gammaKLimit) != TCL_OK) {
+      opserr << "WARNING invalid gammaKLimit\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetDouble(interp, argv[i++], &gammaD1) != TCL_OK) {
+      opserr << "WARNING invalid gammaD1\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }										   
+    if (Tcl_GetDouble(interp, argv[i++], &gammaD2) != TCL_OK) {
+      opserr << "WARNING invalid gammaD2\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetDouble(interp, argv[i++], &gammaD3) != TCL_OK) {
+      opserr << "WARNING invalid gammaD3\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetDouble(interp, argv[i++], &gammaD4) != TCL_OK) {
+      opserr << "WARNING invalid gammaD4\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetDouble(interp, argv[i++], &gammaDLimit) != TCL_OK) {
+      opserr << "WARNING invalid gammaDLimit\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetDouble(interp, argv[i++], &gammaF1) != TCL_OK) {
+      opserr << "WARNING invalid gammaF1\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetDouble(interp, argv[i++], &gammaF2) != TCL_OK) {
+      opserr << "WARNING invalid gammaF2\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetDouble(interp, argv[i++], &gammaF3) != TCL_OK) {
+      opserr << "WARNING invalid gammaF3\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetDouble(interp, argv[i++], &gammaF4) != TCL_OK) {
+      opserr << "WARNING invalid gammaF4\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetDouble(interp, argv[i++], &gammaFLimit) != TCL_OK) {
+      opserr << "WARNING invalid gammaFLimit\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    
+    if (Tcl_GetDouble(interp, argv[i++], &gammaE) != TCL_OK) {
+      opserr << "WARNING invalid gammaE\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    
+    if (Tcl_GetDouble(interp, argv[i++], &yStr) != TCL_OK) {
+      opserr << "WARNING invalid yield stress\n";
+      opserr << "ShearPanel material: " << tag << endln;
+      return TCL_ERROR;
+    }
+    
+    // allocate the pinching material
+    if (argc == 42) {
+      theMaterial = new ShearPanelMaterial (tag,
+					    stress1p, strain1p, stress2p, strain2p, stress3p, strain3p, stress4p, strain4p,
+					    stress1n, strain1n, stress2n, strain2n, stress3n, strain3n, stress4n, strain4n,
+					    rDispP, rForceP, uForceP, rDispN, rForceN, uForceN, 
+					    gammaK1, gammaK2, gammaK3, gammaK4, gammaKLimit,
+					    gammaD1, gammaD2, gammaD3, gammaD4, gammaDLimit,
+					    gammaF1, gammaF2, gammaF3, gammaF4, gammaFLimit, gammaE, yStr);
+    }
+    if (argc == 31) {
+      theMaterial = new ShearPanelMaterial (tag,
+					    stress1p, strain1p, stress2p, strain2p, stress3p, strain3p, stress4p, strain4p,
+					    rDispP, rForceP, uForceP,  
+					    gammaK1, gammaK2, gammaK3, gammaK4, gammaKLimit,
+					    gammaD1, gammaD2, gammaD3, gammaD4, gammaDLimit,
+					    gammaF1, gammaF2, gammaF3, gammaF4, gammaFLimit, gammaE, yStr);		
+    }
+  }
+    
   else if ((strcmp(argv[1],"Bond_SP01") == 0) || (strcmp(argv[1],"Bond") == 0)) {  //%strain penetration material
       // Check that there is the minimum number of arguments
       if (argc < 9) {

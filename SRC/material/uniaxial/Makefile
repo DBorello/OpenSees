@@ -38,6 +38,7 @@ include ../../../Makefile.def
 	Concrete01WithSITC.o \
 	Concrete05.o \
 	ECC01.o \
+	ShearPanelMaterial.o \
         TclModelBuilderUniaxialMaterialCommand.o
 
 all:         $(OBJS)
