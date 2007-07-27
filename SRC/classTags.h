@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.94 $
-// $Date: 2007-07-27 17:54:12 $
+// $Revision: 1.95 $
+// $Date: 2007-07-27 19:13:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -121,7 +121,7 @@
 #define MAT_TAG_Fatigue			20
 #define MAT_TAG_Steel03					23
 #define MAT_TAG_ReinforcingSteel					24
-
+#define MAT_TAG_ShearPanelMaterial					40
 
 // Terje:
 #define MAT_TAG_SmoothSteel01			21
