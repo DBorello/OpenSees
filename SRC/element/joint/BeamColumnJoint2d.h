@@ -18,18 +18,20 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-02-02 01:44:57 $
+// $Revision: 1.5 $
+// $Date: 2007-07-27 19:23:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/BeamColumnJoint2d.h,v $
                                                                         
-// Written: NM (nmitra@u.washington.edu)
+// Written: NM (nmitra@calpoly.edu)
 // Created: April 2002
-// Revised: August 2004
+// Last Revised: January 2007
 //
-// Description: This file contains the class defination for beam-column joint.
-// This element is a 4 noded 12 dof (3 dof at each node) finite area super-element introduced by
-// Prof. Lowes and Arash. The element takes in 13 different material types in order to simulate
+// Description: This file contains the class implementation for beam-column joint.
+// This element is a 4 noded 12 dof (3 dof at each node) finite area super-element.
+// The element takes in 13 different material types in order to simulate
 // the inelastic action observed in a reinforced beam column joint.
+// Details about this element can be found in 
+// Mitra and Lowes, J. Struct. Eng. ASCE, Volume 133, Number 1 (January 2007), pp. 105-120
 // Updates: Several concerning Joint formulation (presently a revised formulation for joints)
                                                                         
 #ifndef BeamColumnJoint2d_h
@@ -51,8 +53,8 @@ class UniaxialMaterial;
 
 class BeamColumnJoint2d : public Element
 {
-  public:
-    // default constructor
+ public:
+  // default constructor
   BeamColumnJoint2d(); 
   
   // defined constructor
@@ -78,8 +80,7 @@ class BeamColumnJoint2d : public Element
   ~BeamColumnJoint2d();
 
 
-  const char *getClassType(void) const {return "BeamColumnJoint2d";};
-
+  
   ////////////// public methods to obtain information about dof & connectivity    
   bool	isSubdomain(void) { return false; } ;
   
@@ -144,6 +145,8 @@ class BeamColumnJoint2d : public Element
   void Print(OPS_Stream &s, int flag =0);    
   
   // implemented to print into file
+  const char *getClassType(void) const {return "BeamColumnJoint2d";};
+
   Response *setResponse(const char **argv, int argc, OPS_Stream &s);
   int getResponse(int responseID, Information &eleInformation);
   
