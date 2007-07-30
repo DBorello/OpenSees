@@ -101,6 +101,8 @@ class nDarray_rep
 
     friend class Cosseratstresstensor;
     friend class Cosseratstraintensor;
+    friend class FileChannel;
+
 
   private:
     double *pd_nDdata;  // nD array as 1D array
@@ -138,6 +140,7 @@ class nDarray
 
     friend class Cosseratstresstensor;
     friend class Cosseratstraintensor;
+    friend class FileChannel;
 
 //.. no need    friend class GaussPoint;
           // explanation why this one should be a friend instead
