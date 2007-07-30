@@ -122,11 +122,22 @@ FileChannel::~FileChannel(){
   closeFile();
 }
 
-char * FileChannel::addToProgram(void) {}
+char * 
+FileChannel::addToProgram(void) 
+{
+  return 0;
+}
 
-int FileChannel::setUpConnection(void){}
+int 
+FileChannel::setUpConnection(void)
+{
+  return 0;
+}
 
-int FileChannel::setNextAddress(const ChannelAddress &otherChannelAddress){}
+int FileChannel::setNextAddress(const ChannelAddress &otherChannelAddress)
+{
+  return 0;
+}
 
 
 int  FileChannel::sendDomain( int commitTag, Domain * theDomain ) 
@@ -134,24 +145,20 @@ int  FileChannel::sendDomain( int commitTag, Domain * theDomain )
   if ( !theFile )
 	return -1;
 
-    return theDomain->saveStateToFile(commitTag, *this); 
-
-
+  return theDomain->sendSelf(commitTag, *this);
 }
 
 int  FileChannel::recvDomain( int commitTag, Domain * theDomain )
 {
-					
   FEM_ObjectBroker theBroker;
-
+  
   if ( !theFile ) {
     printf("FileChannel::recvDomain, File is not open\n");
     return -1;
   }
   
   setCommitStep( commitTag );
-  return theDomain->readStateFromFile(commitTag, *this, theBroker);
-  
+  return theDomain->recvSelf(commitTag, *this, theBroker);  
 }
 
 
@@ -178,16 +185,21 @@ int FileChannel::recvObj(int commitTag,
 }
 
 
-int FileChannel::sendMsg(int dbTag, int commitTag, 
-			const Message &, ChannelAddress *theAddress) {}  
+int FileChannel::sendMsg(int dbTag, int commitTag, const Message &, ChannelAddress *theAddress) 
+{
+  return 0;
+}  
   
-int FileChannel::recvMsg(int dbTag, int commitTag, 
-  Message &, ChannelAddress *theAddress) {}     
+int FileChannel::recvMsg(int dbTag, int commitTag, Message &, ChannelAddress *theAddress) 
+			 
+{
+  return 0;
+}     
    
 
 int FileChannel::sendMatrix(int dbTag, int commitTag, 
-			   const Matrix &theMatrix, 
-							 ChannelAddress *theAddress)
+			    const Matrix &theMatrix, 
+			    ChannelAddress *theAddress)
 {
     // if o.k. get a ponter to the data in the Matrix and 
     // place the incoming data there
@@ -218,7 +230,7 @@ int FileChannel::recvMatrix(int dbTag, int commitTag,
 {
    // if o.k. get a ponter to the data in the Matrix and 
     // place the incoming data there
-    int  nleft, rows, cols, i,j;
+    int  nleft, rows, cols;
     rows = theMatrix.noRows();
     cols = theMatrix.noCols();
 
@@ -266,8 +278,7 @@ int FileChannel::recvVector(int dbTag, int commitTag,
 		   Vector &theVector, 
 			   ChannelAddress *theAddress)
 {
-
-    int  nleft, size, i;
+    int  nleft, size;
     size = theVector.Size();
     double *data = new double[size];
     void *gMsg = (void *)data;
@@ -348,8 +359,6 @@ FileChannel::sendnDarray(int dbTag, int commitTag, const nDarray &theNDarray,Cha
 {
   int i,j;
 
-  double db;
-  
   double *data = (theNDarray.pc_nDarray_rep)->pd_nDdata;
   int *dim =  (theNDarray.pc_nDarray_rep)->dim;
   int rank =  (theNDarray.pc_nDarray_rep)->nDarray_rank;
