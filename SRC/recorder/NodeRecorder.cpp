@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2007-06-09 03:36:25 $
+// $Revision: 1.29 $
+// $Date: 2007-08-03 00:29:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -126,11 +126,14 @@ NodeRecorder::NodeRecorder(const ID &dofs,
     dataFlag = 4;
   } else if ((strcmp(dataToStore, "unbalance") == 0)) {
     dataFlag = 5;
-  } else if ((strcmp(dataToStore, "unbalanceInclInertia") == 0)) {
+  } else if ((strcmp(dataToStore, "unbalanceInclInertia") == 0) ||
+	     (strcmp(dataToStore, "unbalanceIncInertia") == 0) ||
+	     (strcmp(dataToStore, "unbalanceIncludingInertia") == 0))  {
     dataFlag = 6;
   } else if ((strcmp(dataToStore, "reaction") == 0)) {
     dataFlag = 7;
   } else if (((strcmp(dataToStore, "reactionIncInertia") == 0))
+	     || ((strcmp(dataToStore, "reactionInclInertia") == 0))
 	     || ((strcmp(dataToStore, "reactionIncludingInertia") == 0))) {
     dataFlag = 8;
   } else if ((strncmp(dataToStore, "eigen",5) == 0)) {
