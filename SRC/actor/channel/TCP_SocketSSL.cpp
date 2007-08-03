@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2007-08-03 00:12:08 $
+// $Revision: 1.3 $
+// $Date: 2007-08-03 00:21:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_SocketSSL.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
