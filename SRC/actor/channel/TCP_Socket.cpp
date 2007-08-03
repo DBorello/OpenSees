@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-07-27 19:42:21 $
+// $Revision: 1.11 $
+// $Date: 2007-08-03 00:12:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.cpp,v $
 
 
@@ -34,6 +34,35 @@
 // What: "@(#) TCP_Socket.C, revA"
                                                                         
                                                                         
+void byte_swap(void *array, long long nArray,int size)
+{
+
+  long long i;
+  int j;
+  unsigned char *p= (unsigned char *) array;
+  int half = size/2;
+  unsigned char temp;
+  unsigned char *out;
+  
+  if(size < 2)
+    return;
+
+  for(i=0; i < nArray;i++) {
+    out = p + size -1;
+    for (j = 0; j < half; ++j)
+      {
+        temp = *out;
+        *out = *p;
+        *p = temp;
+        /*process next byte*/
+        ++p;
+        --out;
+      }
+    p += half;
+  }
+}
+
+
 #include "TCP_Socket.h"
 #include <string.h>
 #include <Matrix.h>
@@ -46,16 +75,13 @@
 static int GetHostAddr(char *host, char *IntAddr);
 static void inttoa(unsigned int no, char *string, int *cnt);
 
-#ifndef _WIN32
-static void byte_swap(void *array, long long nArray,int size);
-#endif
 
 // TCP_Socket(unsigned int other_Port, char *other_InetAddr): 
 // 	constructor to open a socket with my inet_addr and with a port number 
 //	given by the OS. 
 
 TCP_Socket::TCP_Socket()
-  :myPort(0), connectType(0), endianessProblem(0)
+  :myPort(0), connectType(0)
 {
   // initilaize sockets
   startup_sockets();
@@ -96,7 +122,7 @@ TCP_Socket::TCP_Socket()
 //	constructor to open a socket with my inet_addr and with a port number port.
 
 TCP_Socket::TCP_Socket(unsigned int port) 
-  :myPort(0), connectType(0), endianessProblem(0)
+  :myPort(0), connectType(0)
 {
   // initilaize sockets
   startup_sockets();
@@ -141,7 +167,7 @@ TCP_Socket::TCP_Socket(unsigned int port)
 
 
 TCP_Socket::TCP_Socket(unsigned int other_Port, const char *other_InetAddr)
-  :myPort(0), connectType(1), endianessProblem(0)
+  :myPort(0), connectType(1)
 {
 
   // initilaize sockets
@@ -216,26 +242,6 @@ TCP_Socket::setUpConnection(void)
     // get my_address info
     getsockname(sockfd, &my_Addr.addr, &addrLength);
     
-    // check for endianees problem
-    int i = 1;
-    int j;
-    
-    int *data = &i;
-    char *gMsg = (char *)data;
-    send(sockfd, gMsg, sizeof(int), 0);
-
-    data = &j;
-    gMsg = (char *)data;
-    recv(sockfd, gMsg, sizeof(int), 0);
-
-    if (i != j) {
-      int k = 0x41424344;
-      char *c = (char *)&k;
-
-      if (*c == 0x41) {
-	endianessProblem = 1;
-      }
-    }       
 
   } else {
     
@@ -262,25 +268,6 @@ TCP_Socket::setUpConnection(void)
     // get my_address info
     getsockname(sockfd, &my_Addr.addr, &addrLength);
     myPort = ntohs(my_Addr.addr_in.sin_port);    
-
-
-    int i;
-    int j = 1;
-    
-    int *data = &i;
-    char *gMsg = (char *)data;
-    recv(sockfd, gMsg, sizeof(int), 0);
-
-    data = &j;
-    gMsg = (char *)data;
-    send(sockfd, gMsg, sizeof(int), 0);
-
-    if (i != j) {
-      int k = 0x41424344;
-      char *c = (char *)&k;
-      if (*c == 0x41)
-	endianessProblem = 1;
-    }       
   }    
 
   // set socket so no delay    
@@ -300,7 +287,6 @@ TCP_Socket::setUpConnection(void)
     }	        
     opserr << "TCP_Socket::TCP_Socket - " << optlen << " flag " << flag <<  endln;
   */
-
     
 
   return 0;
@@ -568,13 +554,6 @@ TCP_Socket::recvMatrix(int dbTag, int commitTag,
 	nleft -= nread;
 	gMsg +=  nread;
     }
-
-#ifndef _WIN32
-    if (endianessProblem != 0) {
-      void *array = (void *)data;
-      byte_swap(array, theMatrix.dataSize, sizeof(double));
-    }
-#endif
     return 0;
 }
 
@@ -613,25 +592,22 @@ TCP_Socket::sendMatrix(int dbTag, int commitTag,
     double *data = theMatrix.data;
     char *gMsg = (char *)data;
     nleft =  theMatrix.dataSize * sizeof(double);
-#ifndef _WIN32
-    if (endianessProblem != 0) {
-      void *array = (void *)data;
-      byte_swap(array, theMatrix.dataSize,  sizeof(double));
-    }
-#endif
+
     while (nleft > 0) {
 	nwrite = send(sockfd,gMsg,nleft,0);
 	nleft -= nwrite;
+	
 	gMsg +=  nwrite;
     }
-#ifndef _WIN32
-    if (endianessProblem != 0) {
-      void *array = (void *)data;
-      byte_swap(array, theMatrix.dataSize,  sizeof(double));
-    }
-#endif
     return 0;
 }
+
+
+
+
+
+
+
 
 int 
 TCP_Socket::recvVector(int dbTag, int commitTag,
@@ -670,12 +646,10 @@ TCP_Socket::recvVector(int dbTag, int commitTag,
 	nleft -= nread;
 	gMsg +=  nread;
     }
-#ifndef _WIN32
-    if (endianessProblem != 0) {
-      void *array = (void *)data;
-      byte_swap(array, theVector.sz,  sizeof(double));
-    }
-#endif
+
+    void *array = (void *)data;
+    byte_swap(array, theVector.sz,  8);
+
     return 0;
 }
 
@@ -713,23 +687,17 @@ TCP_Socket::sendVector(int dbTag, int commitTag,
     double *data = theVector.theData;
     char *gMsg = (char *)data;
     nleft =  theVector.sz * sizeof(double);
-#ifndef _WIN32
-    if (endianessProblem != 0) {
-      void *array = (void *)data;
-      byte_swap(array, theVector.sz,  sizeof(double));
-    }
-#endif
+
+    void *array = (void *)data;
+    byte_swap(array, theVector.sz,  8);
+    
     while (nleft > 0) {
 	nwrite = send(sockfd,gMsg,nleft,0);
 	nleft -= nwrite;
 	gMsg +=  nwrite;
     }
-#ifndef _WIN32
-    if (endianessProblem != 0) {
-      void *array = (void *)data;
-      byte_swap(array, theVector.sz,  sizeof(double));
-    }
-#endif
+    byte_swap(array, theVector.sz,  8);
+
     return 0;
 }
 
@@ -773,12 +741,10 @@ TCP_Socket::recvID(int dbTag, int commitTag,
 	nleft -= nread;
 	gMsg +=  nread;
     }
-#ifndef _WIN32
-    if (endianessProblem != 0) {
-      void *array = (void *)data;
-      byte_swap(array, theID.sz, sizeof(int));
-    }
-#endif
+
+    void *array = (void *)data;
+    byte_swap(array, theID.sz, 4);
+
     return 0;
 }
 
@@ -816,23 +782,18 @@ TCP_Socket::sendID(int dbTag, int commitTag,
     int *data = theID.data;
     char *gMsg = (char *)data;
     nleft =  theID.sz * sizeof(int);
-#ifndef _WIN32
-    if (endianessProblem != 0) {
-      void *array = (void *)data;
-      byte_swap(array, theID.sz,  sizeof(int));
-    }
-#endif
+
+    void *array = (void *)data;
+    byte_swap(array, theID.sz,  4);
+   
     while (nleft > 0) {
 	nwrite = send(sockfd,gMsg,nleft,0);
 	nleft -= nwrite;
 	gMsg +=  nwrite;
     }
-#ifndef _WIN32
-    if (endianessProblem != 0) {
-      void *array = (void *)data;
-      byte_swap(array, theID.sz,  sizeof(int));
-    }
-#endif
+
+    byte_swap(array, theID.sz, 4);
+
     return 0;
 }
 
@@ -901,6 +862,12 @@ TCP_Socket::addToProgram(void)
     return newStuff;
 }
 
+
+// G e t H o s t A d d r
+//     	GetHostAddr is a function to get the internet address of a host
+// 	Takes machine name host & Returns 0 if o.k,  -1 if gethostbyname 
+//	error, -2 otherwise. The internet address is returned in IntAddr
+
 static int GetHostAddr(char *host, char *IntAddr)
 {
     register struct hostent *hostptr;
@@ -919,6 +886,13 @@ static int GetHostAddr(char *host, char *IntAddr)
 }
 
     
+/*
+ *  i n t t o a
+ *
+ *  Function to convert int to ascii
+ *  
+ */
+
 static void inttoa(unsigned int no, char *string, int *cnt) {
     if (no /10) {
         inttoa(no/10, string, cnt);
@@ -927,34 +901,3 @@ static void inttoa(unsigned int no, char *string, int *cnt) {
     string[*cnt] = no % 10 + '0';
 }
 
-#ifndef _WIN32
-
-static void byte_swap(void *array, long long nArray,int size)
-{
-
-  long long i;
-  int j;
-  unsigned char *p= (unsigned char *) array;
-  int half = size/2;
-  unsigned char temp;
-  unsigned char *out;
-  
-  if(size < 2)
-    return;
-
-  for(i=0; i < nArray;i++) {
-    out = p + size -1;
-    for (j = 0; j < half; ++j)
-      {
-        temp = *out;
-        *out = *p;
-        *p = temp;
-        /*process next byte*/
-        ++p;
-        --out;
-      }
-    p += half;
-  }
-}
-
-#endif
