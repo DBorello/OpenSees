@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2007-04-05 01:14:01 $
+// $Revision: 1.13 $
+// $Date: 2007-08-03 00:17:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.cpp,v $
                                                                         
                                                                         
@@ -252,6 +252,28 @@ ID::removeValue(int value)
     }
   return place;
 }    
+
+
+int
+ID::unique(void)
+{
+    // find unique values and number thereof
+    int i = 0;
+    while (i < sz-1)  {
+        int j = i+1;
+        while (j < sz)  {
+            if (data[i] == data[j])  {
+                for (int k=j; k<sz-1; k++)
+	                data[k] = data[k+1];
+                sz--;
+            } else  {
+                j++;
+            }
+        }
+        i++;
+    }
+    return sz;
+}
 
 
 int &

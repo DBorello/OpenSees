@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2007-07-16 22:57:03 $
+// $Revision: 1.13 $
+// $Date: 2007-08-03 00:17:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.h,v $
                                                                         
                                                                         
@@ -70,6 +70,7 @@ class ID
     int getLocation(int value) const;
     int getLocationOrdered(int value) const; // for when insert was used to add elements
     int removeValue(int value);
+    int unique(void);
 
     friend OPS_Stream &operator<<(OPS_Stream &s, const ID &V);
     //    friend istream &operator>>(istream &s, ID &V);    
