@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-08-03 00:12:08 $
+// $Revision: 1.12 $
+// $Date: 2007-08-03 00:15:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.cpp,v $
 
 
@@ -34,35 +34,6 @@
 // What: "@(#) TCP_Socket.C, revA"
                                                                         
                                                                         
-void byte_swap(void *array, long long nArray,int size)
-{
-
-  long long i;
-  int j;
-  unsigned char *p= (unsigned char *) array;
-  int half = size/2;
-  unsigned char temp;
-  unsigned char *out;
-  
-  if(size < 2)
-    return;
-
-  for(i=0; i < nArray;i++) {
-    out = p + size -1;
-    for (j = 0; j < half; ++j)
-      {
-        temp = *out;
-        *out = *p;
-        *p = temp;
-        /*process next byte*/
-        ++p;
-        --out;
-      }
-    p += half;
-  }
-}
-
-
 #include "TCP_Socket.h"
 #include <string.h>
 #include <Matrix.h>
@@ -74,17 +45,18 @@ void byte_swap(void *array, long long nArray,int size)
 
 static int GetHostAddr(char *host, char *IntAddr);
 static void inttoa(unsigned int no, char *string, int *cnt);
-
+static void byte_swap(void *array, long long nArray,int size);
 
 // TCP_Socket(unsigned int other_Port, char *other_InetAddr): 
 // 	constructor to open a socket with my inet_addr and with a port number 
 //	given by the OS. 
 
 TCP_Socket::TCP_Socket()
-  :myPort(0), connectType(0)
+    :myPort(0), connectType(0),
+    checkEndianness(false), endiannessProblem(false)
 {
-  // initilaize sockets
-  startup_sockets();
+    // initialize sockets
+    startup_sockets();
 
     // set up my_Addr 
     bzero((char *) &my_Addr, sizeof(my_Addr));    
@@ -121,11 +93,12 @@ TCP_Socket::TCP_Socket()
 // TCP_Socket(unsigned int port): 
 //	constructor to open a socket with my inet_addr and with a port number port.
 
-TCP_Socket::TCP_Socket(unsigned int port) 
-  :myPort(0), connectType(0)
+TCP_Socket::TCP_Socket(unsigned int port, bool checkendianness) 
+    :myPort(0), connectType(0),
+    checkEndianness(checkendianness), endiannessProblem(false)
 {
-  // initilaize sockets
-  startup_sockets();
+    // initialize sockets
+    startup_sockets();
 
     // set up my_Addr.addr_in with address given by port and internet address of
     // machine on which the process that uses this routine is running.
@@ -166,12 +139,14 @@ TCP_Socket::TCP_Socket(unsigned int port)
 //	given by other_Port and other_InetAddr. 
 
 
-TCP_Socket::TCP_Socket(unsigned int other_Port, const char *other_InetAddr)
-  :myPort(0), connectType(1)
+TCP_Socket::TCP_Socket(unsigned int other_Port, const char *other_InetAddr,
+    bool checkendianness)
+    :myPort(0), connectType(1),
+    checkEndianness(checkendianness), endiannessProblem(false)
 {
 
-  // initilaize sockets
-  startup_sockets();
+    // initialize sockets
+    startup_sockets();
 
     // set up remote address
     bzero((char *) &other_Addr.addr_in, sizeof(other_Addr.addr_in));
@@ -221,7 +196,7 @@ TCP_Socket::~TCP_Socket()
     close(sockfd);
   #endif
 
-  // initilaize sockets
+  // cleanup sockets
   cleanup_sockets();
 }
 
@@ -230,66 +205,109 @@ TCP_Socket::~TCP_Socket()
 int 
 TCP_Socket::setUpConnection(void)
 {
-  if (connectType == 1) {
+    if (connectType == 1) {
 
-    // now try to connect to socket with remote address.
-    if (connect(sockfd, (struct sockaddr *) &other_Addr.addr_in, 
-		sizeof(other_Addr.addr_in))< 0) {
-      
-	opserr << "TCP_Socket::TCP_Socket - could not connect\n";
-	return -1;
-    }
-    // get my_address info
-    getsockname(sockfd, &my_Addr.addr, &addrLength);
-    
+        // now try to connect to socket with remote address.
+        if (connect(sockfd, (struct sockaddr *) &other_Addr.addr_in, 
+            sizeof(other_Addr.addr_in))< 0) {
 
-  } else {
-    
-    // wait for other process to contact me & set up connection
-    socket_type newsockfd;
-    listen(sockfd, 1);    
-    newsockfd = accept(sockfd, (struct sockaddr *) &other_Addr.addr_in, &addrLength);
-    
-    if (newsockfd < 0) {
-      opserr << "TCP_Socket::TCP_Socket - could not accept connection\n";
-      return -1;
+                opserr << "TCP_Socket::TCP_Socket - could not connect\n";
+                return -1;
+        }
+        // get my_address info
+        getsockname(sockfd, &my_Addr.addr, &addrLength);
+
+        // check for endianness problem if requested
+        if (checkEndianness) {
+            int i = 1;
+            int j;
+
+            int *data = &i;
+            char *gMsg = (char *)data;
+            send(sockfd, gMsg, sizeof(int), 0);
+
+            data = &j;
+            gMsg = (char *)data;
+            recv(sockfd, gMsg, sizeof(int), 0);
+
+            if (i != j) {
+                int k = 0x41424344;
+                char *c = (char *)&k;
+
+                if (*c == 0x41) {
+                    endiannessProblem = true;
+                }
+            }
+        }
+
+    } else {
+
+        // wait for other process to contact me & set up connection
+        socket_type newsockfd;
+        listen(sockfd, 1);    
+        newsockfd = accept(sockfd, (struct sockaddr *) &other_Addr.addr_in, &addrLength);
+
+        if (newsockfd < 0) {
+            opserr << "TCP_Socket::TCP_Socket - could not accept connection\n";
+            return -1;
+        }    
+
+        // close old socket & reset sockfd
+        // we can close as we are not going to wait for others to connect
+#ifdef _WIN32
+        closesocket(sockfd);
+#else
+        close(sockfd);
+#endif
+
+        sockfd = newsockfd;
+
+        // get my_address info
+        getsockname(sockfd, &my_Addr.addr, &addrLength);
+        myPort = ntohs(my_Addr.addr_in.sin_port);    
+
+
+        // check for endianness problem if requested
+        if (checkEndianness) {
+            int i;
+            int j = 1;
+
+            int *data = &i;
+            char *gMsg = (char *)data;
+            recv(sockfd, gMsg, sizeof(int), 0);
+
+            data = &j;
+            gMsg = (char *)data;
+            send(sockfd, gMsg, sizeof(int), 0);
+
+            if (i != j) {
+                int k = 0x41424344;
+                char *c = (char *)&k;
+                if (*c == 0x41)
+                    endiannessProblem = true;
+            }
+        }
     }    
-    
-    // close old socket & reset sockfd
-    // we can close as we are not going to wait for others to connect
-    #ifdef _WIN32
-      closesocket(sockfd);
-    #else
-      close(sockfd);
-    #endif
 
-    sockfd = newsockfd;
-    
-    // get my_address info
-    getsockname(sockfd, &my_Addr.addr, &addrLength);
-    myPort = ntohs(my_Addr.addr_in.sin_port);    
-  }    
-
-  // set socket so no delay    
-  /*
+    // set socket so no delay    
+    /*
     int optlen;
     optlen = 1;
     if ((setsockopt(sockfd,IPPROTO_TCP, TCP_NODELAY, 
     (char *) &optlen, sizeof(int))) < 0) { 
     opserr << "TCP_Socket::TCP_Socket - could not set TCP_NODELAY\n";
     }	  
-  */
-  /*
+    */
+    /*
     int flag=sizeof(int);
     if ((getsockopt(sockfd,IPPROTO_TCP, TCP_NODELAY, 
     (char *) &optlen, &flag)) < 0) { 
     opserr << "TCP_Socket::TCP_Socket - could not set TCP_NODELAY\n";
     }	        
     opserr << "TCP_Socket::TCP_Socket - " << optlen << " flag " << flag <<  endln;
-  */
-    
+    */
 
-  return 0;
+    return 0;
 }    
 
 int
@@ -554,6 +572,11 @@ TCP_Socket::recvMatrix(int dbTag, int commitTag,
 	nleft -= nread;
 	gMsg +=  nread;
     }
+
+    if (endiannessProblem) {
+      void *array = (void *)data;
+      byte_swap(array, theMatrix.dataSize, sizeof(double));
+    }
     return 0;
 }
 
@@ -593,21 +616,24 @@ TCP_Socket::sendMatrix(int dbTag, int commitTag,
     char *gMsg = (char *)data;
     nleft =  theMatrix.dataSize * sizeof(double);
 
+    if (endiannessProblem) {
+      void *array = (void *)data;
+      byte_swap(array, theMatrix.dataSize,  sizeof(double));
+    }
+   
     while (nleft > 0) {
 	nwrite = send(sockfd,gMsg,nleft,0);
 	nleft -= nwrite;
-	
 	gMsg +=  nwrite;
     }
+
+    if (endiannessProblem) {
+      void *array = (void *)data;
+      byte_swap(array, theMatrix.dataSize,  sizeof(double));
+    }
+
     return 0;
 }
-
-
-
-
-
-
-
 
 int 
 TCP_Socket::recvVector(int dbTag, int commitTag,
@@ -647,8 +673,10 @@ TCP_Socket::recvVector(int dbTag, int commitTag,
 	gMsg +=  nread;
     }
 
-    void *array = (void *)data;
-    byte_swap(array, theVector.sz,  8);
+    if (endiannessProblem) {
+      void *array = (void *)data;
+      byte_swap(array, theVector.sz,  sizeof(double));
+    }
 
     return 0;
 }
@@ -688,15 +716,21 @@ TCP_Socket::sendVector(int dbTag, int commitTag,
     char *gMsg = (char *)data;
     nleft =  theVector.sz * sizeof(double);
 
-    void *array = (void *)data;
-    byte_swap(array, theVector.sz,  8);
-    
+    if (endiannessProblem) {
+      void *array = (void *)data;
+      byte_swap(array, theVector.sz,  sizeof(double));
+    }
+   
     while (nleft > 0) {
 	nwrite = send(sockfd,gMsg,nleft,0);
 	nleft -= nwrite;
 	gMsg +=  nwrite;
     }
-    byte_swap(array, theVector.sz,  8);
+
+    if (endiannessProblem) {
+      void *array = (void *)data;
+      byte_swap(array, theVector.sz,  sizeof(double));
+    }
 
     return 0;
 }
@@ -742,8 +776,10 @@ TCP_Socket::recvID(int dbTag, int commitTag,
 	gMsg +=  nread;
     }
 
-    void *array = (void *)data;
-    byte_swap(array, theID.sz, 4);
+    if (endiannessProblem) {
+      void *array = (void *)data;
+      byte_swap(array, theID.sz, sizeof(int));
+    }
 
     return 0;
 }
@@ -783,8 +819,10 @@ TCP_Socket::sendID(int dbTag, int commitTag,
     char *gMsg = (char *)data;
     nleft =  theID.sz * sizeof(int);
 
-    void *array = (void *)data;
-    byte_swap(array, theID.sz,  4);
+    if (endiannessProblem) {
+      void *array = (void *)data;
+      byte_swap(array, theID.sz,  sizeof(int));
+    }
    
     while (nleft > 0) {
 	nwrite = send(sockfd,gMsg,nleft,0);
@@ -792,7 +830,10 @@ TCP_Socket::sendID(int dbTag, int commitTag,
 	gMsg +=  nwrite;
     }
 
-    byte_swap(array, theID.sz, 4);
+    if (endiannessProblem) {
+      void *array = (void *)data;
+      byte_swap(array, theID.sz,  sizeof(int));
+    }
 
     return 0;
 }
@@ -862,12 +903,6 @@ TCP_Socket::addToProgram(void)
     return newStuff;
 }
 
-
-// G e t H o s t A d d r
-//     	GetHostAddr is a function to get the internet address of a host
-// 	Takes machine name host & Returns 0 if o.k,  -1 if gethostbyname 
-//	error, -2 otherwise. The internet address is returned in IntAddr
-
 static int GetHostAddr(char *host, char *IntAddr)
 {
     register struct hostent *hostptr;
@@ -886,13 +921,6 @@ static int GetHostAddr(char *host, char *IntAddr)
 }
 
     
-/*
- *  i n t t o a
- *
- *  Function to convert int to ascii
- *  
- */
-
 static void inttoa(unsigned int no, char *string, int *cnt) {
     if (no /10) {
         inttoa(no/10, string, cnt);
@@ -900,4 +928,34 @@ static void inttoa(unsigned int no, char *string, int *cnt) {
     }
     string[*cnt] = no % 10 + '0';
 }
+
+
+static void byte_swap(void *array, long long nArray,int size)
+{
+
+  long long i;
+  int j;
+  unsigned char *p= (unsigned char *) array;
+  int half = size/2;
+  unsigned char temp;
+  unsigned char *out;
+  
+  if(size < 2)
+    return;
+
+  for(i=0; i < nArray;i++) {
+    out = p + size -1;
+    for (j = 0; j < half; ++j)
+      {
+        temp = *out;
+        *out = *p;
+        *p = temp;
+        /*process next byte*/
+        ++p;
+        --out;
+      }
+    p += half;
+  }
+}
+
 

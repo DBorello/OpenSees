@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2007-07-16 22:52:30 $
+// $Revision: 1.2 $
+// $Date: 2007-08-03 00:12:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_SocketSSL.h,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -54,8 +54,9 @@ class TCP_SocketSSL : public Channel
 {
 public:
     TCP_SocketSSL();        
-    TCP_SocketSSL(unsigned int);    
-    TCP_SocketSSL(unsigned int other_Port, const char *other_InetAddr); 
+    TCP_SocketSSL(unsigned int port, bool checkEndianness = false);    
+    TCP_SocketSSL(unsigned int other_Port, const char *other_InetAddr,
+        bool checkEndianness = false);
     
     ~TCP_SocketSSL();
 
@@ -130,7 +131,8 @@ private:
 
     unsigned int myPort;
     int connectType;
-    int endiannessProblem;
+    bool checkEndianness;
+    bool endiannessProblem;
 };
 
 #endif 

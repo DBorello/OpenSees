@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-07-12 22:56:33 $
+// $Revision: 1.8 $
+// $Date: 2007-08-03 00:15:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.h,v $
                                                                         
                                                                         
@@ -46,8 +46,9 @@ class TCP_Socket : public Channel
 {
   public:
     TCP_Socket();        
-    TCP_Socket(unsigned int);    
-    TCP_Socket(unsigned int other_Port, const char *other_InetAddr); 
+    TCP_Socket(unsigned int port, bool checkEndianness = false);    
+    TCP_Socket(unsigned int other_Port, const char *other_InetAddr,
+        bool checkEndianness = false); 
     ~TCP_Socket();
 
     char *addToProgram(void);
@@ -116,18 +117,8 @@ class TCP_Socket : public Channel
 
     unsigned int myPort;
     int connectType;
-
-    char add[40];
-    int endianessProblem;
+    bool checkEndianness;
+    bool endiannessProblem;
 };
 
-
 #endif 
-
-
-
-
-
-
- 
-

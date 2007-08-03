@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2007-07-16 22:52:30 $
+// $Revision: 1.2 $
+// $Date: 2007-08-03 00:12:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_SocketSSL.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -52,7 +52,8 @@ static void byte_swap(void *array, long long nArray, int size);
 // 	constructor to open a socket with my inet_addr and with a port number 
 //	given by the OS.
 TCP_SocketSSL::TCP_SocketSSL()
-    : myPort(0), connectType(0), endiannessProblem(0)
+    : myPort(0), connectType(0),
+    checkEndianness(false), endiannessProblem(false)
 {
     // initialize SSL library and context object
     SSL_library_init();
@@ -121,8 +122,9 @@ TCP_SocketSSL::TCP_SocketSSL()
 
 // TCP_SocketSSL(unsigned int port): 
 //	constructor to open a socket with my inet_addr and with a port number port.
-TCP_SocketSSL::TCP_SocketSSL(unsigned int port) 
-    : myPort(0), connectType(0), endiannessProblem(0)
+TCP_SocketSSL::TCP_SocketSSL(unsigned int port, bool checkendianness) 
+    : myPort(0), connectType(0),
+    checkEndianness(checkendianness), endiannessProblem(false)
 {
     // initialize SSL library and context object
     SSL_library_init();
@@ -196,8 +198,10 @@ TCP_SocketSSL::TCP_SocketSSL(unsigned int port)
 // 	constructor to open a socket with my inet_addr and with a port number 
 //	given by the OS. Then to connect with a TCP_SocketSSL whose address is
 //	given by other_Port and other_InetAddr.
-TCP_SocketSSL::TCP_SocketSSL(unsigned int other_Port, const char *other_InetAddr)
-    : myPort(0), connectType(1), endiannessProblem(0)
+TCP_SocketSSL::TCP_SocketSSL(unsigned int other_Port,
+    const char *other_InetAddr, bool checkendianness)
+    : myPort(0), connectType(1),
+    checkEndianness(checkendianness), endiannessProblem(false)
 {
     // initialize SSL library and context object
     SSL_library_init();
@@ -335,24 +339,26 @@ TCP_SocketSSL::setUpConnection(void)
             opserr << "\nSSL Server has no certificate\n";
         }
 
-        // check for endianness problem
-        int i = 1;
-        int j;
+        // check for endianness problem if requested
+        if (checkEndianness) {
+            int i = 1;
+            int j;
 
-        int *data = &i;
-        char *gMsg = (char *)data;
-        SSL_write(ssl, gMsg, sizeof(int));
+            int *data = &i;
+            char *gMsg = (char *)data;
+            SSL_write(ssl, gMsg, sizeof(int));
 
-        data = &j;
-        gMsg = (char *)data;
-        SSL_read(ssl, gMsg, sizeof(int));
+            data = &j;
+            gMsg = (char *)data;
+            SSL_read(ssl, gMsg, sizeof(int));
 
-        if (i != j) {
-            int k = 0x41424344;
-            char *c = (char *)&k;
-            if (*c == 0x41)
-                endiannessProblem = 1;
-        }       
+            if (i != j) {
+                int k = 0x41424344;
+                char *c = (char *)&k;
+                if (*c == 0x41)
+                    endiannessProblem = true;
+            }
+        }
 
     } else {
 
@@ -410,24 +416,26 @@ TCP_SocketSSL::setUpConnection(void)
             }
         }
 
-        // check for endianness problem
-        int i;
-        int j = 1;
+        // check for endianness problem if requested
+        if (checkEndianness) {
+            int i;
+            int j = 1;
 
-        int *data = &i;
-        char *gMsg = (char *)data;
-        SSL_read(ssl, gMsg, sizeof(int));
+            int *data = &i;
+            char *gMsg = (char *)data;
+            SSL_read(ssl, gMsg, sizeof(int));
 
-        data = &j;
-        gMsg = (char *)data;
-        SSL_write(ssl, gMsg, sizeof(int));
+            data = &j;
+            gMsg = (char *)data;
+            SSL_write(ssl, gMsg, sizeof(int));
 
-        if (i != j) {
-            int k = 0x41424344;
-            char *c = (char *)&k;
-            if (*c == 0x41)
-                endiannessProblem = 1;
-        }       
+            if (i != j) {
+                int k = 0x41424344;
+                char *c = (char *)&k;
+                if (*c == 0x41)
+                    endiannessProblem = true;
+            }
+        }
     }
 
     return 0;
@@ -462,8 +470,7 @@ TCP_SocketSSL::setNextAddress(const ChannelAddress &theAddress)
 
 int 
 TCP_SocketSSL::sendObj(int commitTag,
-                       MovableObject &theObject, 
-                       ChannelAddress *theAddress) 
+    MovableObject &theObject, ChannelAddress *theAddress) 
 {
     // first check address is the only address a TCP_socket can send to
     SocketAddress *theSocketAddress = 0;
@@ -493,9 +500,8 @@ TCP_SocketSSL::sendObj(int commitTag,
 
 int 
 TCP_SocketSSL::recvObj(int commitTag,
-                       MovableObject &theObject, 
-                       FEM_ObjectBroker &theBroker, 
-                       ChannelAddress *theAddress)
+    MovableObject &theObject, FEM_ObjectBroker &theBroker, 
+    ChannelAddress *theAddress)
 {
     // first check address is the only address a TCP_socket can send to
     SocketAddress *theSocketAddress = 0;
@@ -525,7 +531,7 @@ TCP_SocketSSL::recvObj(int commitTag,
 // 	Method to receive a message, also sets other_Addr.addr_in to that of sender
 int 
 TCP_SocketSSL::recvMsg(int dbTag, int commitTag,
-                       Message &msg, ChannelAddress *theAddress)
+    Message &msg, ChannelAddress *theAddress)
 {	
     // first check address is the only address a TCP_socket can send to
     SocketAddress *theSocketAddress = 0;
@@ -576,7 +582,7 @@ TCP_SocketSSL::recvMsg(int dbTag, int commitTag,
 // 	Method to receive a message, also sets other_Addr.addr_in to that of sender
 int 
 TCP_SocketSSL::recvMsgUnknownSize(int dbTag, int commitTag,
-                                  Message &msg, ChannelAddress *theAddress)
+    Message &msg, ChannelAddress *theAddress)
 {	
     // first check address is the only address a TCP_socket can send to
     SocketAddress *theSocketAddress = 0;
@@ -631,7 +637,7 @@ TCP_SocketSSL::recvMsgUnknownSize(int dbTag, int commitTag,
 // 	Method to send a message to an address given by other_Addr.addr_in.
 int 
 TCP_SocketSSL::sendMsg(int dbTag, int commitTag,
-                       const Message &msg, ChannelAddress *theAddress)
+    const Message &msg, ChannelAddress *theAddress)
 {	
     // first check address is the only address a TCP_socket can send to
     SocketAddress *theSocketAddress = 0;
@@ -675,7 +681,7 @@ TCP_SocketSSL::sendMsg(int dbTag, int commitTag,
 
 int 
 TCP_SocketSSL::recvMatrix(int dbTag, int commitTag,
-                          Matrix &theMatrix, ChannelAddress *theAddress)
+    Matrix &theMatrix, ChannelAddress *theAddress)
 {	
     // first check address is the only address a TCP_socket can send to
     SocketAddress *theSocketAddress = 0;
@@ -718,7 +724,7 @@ TCP_SocketSSL::recvMatrix(int dbTag, int commitTag,
         gMsg  += nread;
     }
 
-    if (endiannessProblem != 0) {
+    if (endiannessProblem) {
         void *array = (void *)data;
         byte_swap(array, theMatrix.dataSize, sizeof(double));
     }
@@ -731,7 +737,7 @@ TCP_SocketSSL::recvMatrix(int dbTag, int commitTag,
 // 	Method to send a Matrix to an address given by other_Addr.addr_in.
 int 
 TCP_SocketSSL::sendMatrix(int dbTag, int commitTag,
-                          const Matrix &theMatrix, ChannelAddress *theAddress)
+    const Matrix &theMatrix, ChannelAddress *theAddress)
 {	
     // first check address is the only address a TCP_socket can send to
     SocketAddress *theSocketAddress = 0;
@@ -761,7 +767,7 @@ TCP_SocketSSL::sendMatrix(int dbTag, int commitTag,
     char *gMsg = (char *)data;
     nleft = theMatrix.dataSize * sizeof(double);
 
-    if (endiannessProblem != 0) {
+    if (endiannessProblem) {
         void *array = (void *)data;
         byte_swap(array, theMatrix.dataSize, sizeof(double));
     }
@@ -775,7 +781,7 @@ TCP_SocketSSL::sendMatrix(int dbTag, int commitTag,
         return -2;
     }
 
-    if (endiannessProblem != 0) {
+    if (endiannessProblem) {
         void *array = (void *)data;
         byte_swap(array, theMatrix.dataSize, sizeof(double));
     }
@@ -786,7 +792,7 @@ TCP_SocketSSL::sendMatrix(int dbTag, int commitTag,
 
 int 
 TCP_SocketSSL::recvVector(int dbTag, int commitTag,
-                          Vector &theVector, ChannelAddress *theAddress)
+    Vector &theVector, ChannelAddress *theAddress)
 {	
     // first check address is the only address a TCP_socket can send to
     SocketAddress *theSocketAddress = 0;
@@ -829,7 +835,7 @@ TCP_SocketSSL::recvVector(int dbTag, int commitTag,
         gMsg  += nread;
     }
 
-    if (endiannessProblem != 0) {
+    if (endiannessProblem) {
         void *array = (void *)data;
         byte_swap(array, theVector.sz, sizeof(double));
     }
@@ -842,7 +848,7 @@ TCP_SocketSSL::recvVector(int dbTag, int commitTag,
 // 	Method to send a Vector to an address given by other_Addr.addr_in.
 int 
 TCP_SocketSSL::sendVector(int dbTag, int commitTag,
-                          const Vector &theVector, ChannelAddress *theAddress)
+    const Vector &theVector, ChannelAddress *theAddress)
 {	
     // first check address is the only address a TCP_socket can send to
     SocketAddress *theSocketAddress = 0;
@@ -871,7 +877,7 @@ TCP_SocketSSL::sendVector(int dbTag, int commitTag,
     char *gMsg = (char *)data;
     nleft = theVector.sz * sizeof(double);
 
-    if (endiannessProblem != 0) {
+    if (endiannessProblem) {
         void *array = (void *)data;
         byte_swap(array, theVector.sz, sizeof(double));
     }
@@ -885,7 +891,7 @@ TCP_SocketSSL::sendVector(int dbTag, int commitTag,
         return -2;
     }
 
-    if (endiannessProblem != 0) {
+    if (endiannessProblem) {
         void *array = (void *)data;
         byte_swap(array, theVector.sz, sizeof(double));
     }
@@ -896,7 +902,7 @@ TCP_SocketSSL::sendVector(int dbTag, int commitTag,
 
 int 
 TCP_SocketSSL::recvID(int dbTag, int commitTag,
-                      ID &theID, ChannelAddress *theAddress)
+    ID &theID, ChannelAddress *theAddress)
 {	
     // first check address is the only address a TCP_socket can send to
     SocketAddress *theSocketAddress = 0;
@@ -939,7 +945,7 @@ TCP_SocketSSL::recvID(int dbTag, int commitTag,
         gMsg  += nread;
     }
 
-    if (endiannessProblem != 0) {
+    if (endiannessProblem) {
         void *array = (void *)data;
         byte_swap(array, theID.sz, sizeof(int));
     }
@@ -952,7 +958,7 @@ TCP_SocketSSL::recvID(int dbTag, int commitTag,
 // 	Method to send a ID to an address given by other_Addr.addr_in.
 int 
 TCP_SocketSSL::sendID(int dbTag, int commitTag,
-                      const ID &theID, ChannelAddress *theAddress)
+    const ID &theID, ChannelAddress *theAddress)
 {	
     // first check address is the only address a TCP_socket can send to
     SocketAddress *theSocketAddress = 0;
@@ -981,7 +987,7 @@ TCP_SocketSSL::sendID(int dbTag, int commitTag,
     char *gMsg = (char *)data;
     nleft = theID.sz * sizeof(int);
  
-    if (endiannessProblem != 0) {
+    if (endiannessProblem) {
         void *array = (void *)data;
         byte_swap(array, theID.sz, sizeof(int));
     }
@@ -995,7 +1001,7 @@ TCP_SocketSSL::sendID(int dbTag, int commitTag,
         return -2;
     }
 
-    if (endiannessProblem != 0) {
+    if (endiannessProblem) {
         void *array = (void *)data;
         byte_swap(array, theID.sz, sizeof(int));
     }
