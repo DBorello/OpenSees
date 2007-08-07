@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-08-03 00:21:28 $
+// $Revision: 1.14 $
+// $Date: 2007-08-07 17:55:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.cpp,v $
 
 
@@ -45,7 +45,10 @@
 
 static int GetHostAddr(char *host, char *IntAddr);
 static void inttoa(unsigned int no, char *string, int *cnt);
+
+#ifndef _WIN32
 static void byte_swap(void *array, long long nArray,int size);
+#endif
 
 // TCP_Socket(unsigned int other_Port, char *other_InetAddr): 
 // 	constructor to open a socket with my inet_addr and with a port number 
@@ -573,10 +576,12 @@ TCP_Socket::recvMatrix(int dbTag, int commitTag,
 	gMsg +=  nread;
     }
 
+#ifndef _WIN32
     if (endiannessProblem) {
       void *array = (void *)data;
       byte_swap(array, theMatrix.dataSize, sizeof(double));
     }
+#endif
     return 0;
 }
 
@@ -616,22 +621,23 @@ TCP_Socket::sendMatrix(int dbTag, int commitTag,
     char *gMsg = (char *)data;
     nleft =  theMatrix.dataSize * sizeof(double);
 
+#ifndef _WIN32
     if (endiannessProblem) {
       void *array = (void *)data;
       byte_swap(array, theMatrix.dataSize,  sizeof(double));
     }
-   
+#endif
     while (nleft > 0) {
 	nwrite = send(sockfd,gMsg,nleft,0);
 	nleft -= nwrite;
 	gMsg +=  nwrite;
     }
-
+#ifndef _WIN32
     if (endiannessProblem) {
       void *array = (void *)data;
       byte_swap(array, theMatrix.dataSize,  sizeof(double));
     }
-
+#endif
     return 0;
 }
 
@@ -672,12 +678,12 @@ TCP_Socket::recvVector(int dbTag, int commitTag,
 	nleft -= nread;
 	gMsg +=  nread;
     }
-
+#ifndef _WIN32
     if (endiannessProblem) {
       void *array = (void *)data;
       byte_swap(array, theVector.sz,  sizeof(double));
     }
-
+#endif
     return 0;
 }
 
@@ -715,23 +721,23 @@ TCP_Socket::sendVector(int dbTag, int commitTag,
     double *data = theVector.theData;
     char *gMsg = (char *)data;
     nleft =  theVector.sz * sizeof(double);
-
+#ifndef _WIN32
     if (endiannessProblem) {
       void *array = (void *)data;
       byte_swap(array, theVector.sz,  sizeof(double));
     }
-   
+#endif
     while (nleft > 0) {
 	nwrite = send(sockfd,gMsg,nleft,0);
 	nleft -= nwrite;
 	gMsg +=  nwrite;
     }
-
+#ifndef _WIN32
     if (endiannessProblem) {
       void *array = (void *)data;
       byte_swap(array, theVector.sz,  sizeof(double));
     }
-
+#endif
     return 0;
 }
 
@@ -775,12 +781,12 @@ TCP_Socket::recvID(int dbTag, int commitTag,
 	nleft -= nread;
 	gMsg +=  nread;
     }
-
+#ifndef _WIN32
     if (endiannessProblem) {
       void *array = (void *)data;
       byte_swap(array, theID.sz, sizeof(int));
     }
-
+#endif
     return 0;
 }
 
@@ -818,23 +824,23 @@ TCP_Socket::sendID(int dbTag, int commitTag,
     int *data = theID.data;
     char *gMsg = (char *)data;
     nleft =  theID.sz * sizeof(int);
-
+#ifndef _WIN32
     if (endiannessProblem) {
       void *array = (void *)data;
       byte_swap(array, theID.sz,  sizeof(int));
     }
-   
+#endif
     while (nleft > 0) {
 	nwrite = send(sockfd,gMsg,nleft,0);
 	nleft -= nwrite;
 	gMsg +=  nwrite;
     }
-
+#ifndef _WIN32
     if (endiannessProblem) {
       void *array = (void *)data;
       byte_swap(array, theID.sz,  sizeof(int));
     }
-
+#endif
     return 0;
 }
 
@@ -930,6 +936,7 @@ static void inttoa(unsigned int no, char *string, int *cnt) {
 }
 
 
+#ifndef _WIN32
 static void byte_swap(void *array, long long nArray,int size)
 {
 
@@ -957,5 +964,5 @@ static void byte_swap(void *array, long long nArray,int size)
     p += half;
   }
 }
-
+#endif
 
