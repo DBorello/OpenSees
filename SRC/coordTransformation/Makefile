@@ -3,11 +3,11 @@ include ../../Makefile.def
 
 
 OBJS       = CrdTransf.o \
-	CrdTransf2d.o 
+	CrdTransf2d.o \
 	CrdTransf3d.o \
 	LinearCrdTransf2d.o \
 	LinearCrdTransf3d.o \
-	PDeltaCrdTransf2d.o 
+	PDeltaCrdTransf2d.o \
 	PDeltaCrdTransf3d.o \
 	CorotCrdTransf2d.o \
 	CorotCrdTransf3d.o \
