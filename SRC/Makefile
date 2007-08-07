@@ -244,9 +244,9 @@ REMO_LIBS = $(FE)/element/nonlinearBeamColumn/quadrule/QuadRule.o \
 	$(FE)/coordTransformation/CrdTransf3d.o \
 	$(FE)/coordTransformation/LinearCrdTransf2d.o \
 	$(FE)/coordTransformation/PDeltaCrdTransf2d.o \
+	$(FE)/coordTransformation/CorotCrdTransf2d.o \
 	$(FE)/coordTransformation/LinearCrdTransf3d.o \
 	$(FE)/coordTransformation/PDeltaCrdTransf3d.o \
-	$(FE)/coordTransformation/CorotCrdTransf3d.o \
 	$(FE)/coordTransformation/CorotCrdTransf3d.o \
 	$(FE)/coordTransformation/TclGeomTransfCommand.o
 
