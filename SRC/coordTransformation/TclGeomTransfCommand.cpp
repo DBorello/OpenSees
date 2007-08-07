@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-07-27 17:54:52 $
+// $Revision: 1.7 $
+// $Date: 2007-08-07 16:40:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/TclGeomTransfCommand.cpp,v $
 #include <string.h>
 #include <TclModelBuilder.h>
@@ -119,10 +119,9 @@ TclCommand_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
     else if (strcmp(argv[1],"PDelta") == 0 || strcmp(argv[1],"LinearWithPDelta") == 0)
       crdTransf2d = new PDeltaCrdTransf2d(crdTransfTag, jntOffsetI, jntOffsetJ);
     
-#ifdef _COROTATIONAL
     else if (strcmp(argv[1],"Corotational") == 0)
       crdTransf2d = new CorotCrdTransf2d(crdTransfTag, jntOffsetI, jntOffsetJ);
-#endif
+
     else {
       opserr << "WARNING TclElmtBuilder - addGeomTransf - invalid Type\n";
       opserr << argv[1] << endln;
@@ -209,10 +208,8 @@ TclCommand_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
     else if (strcmp(argv[1],"PDelta") == 0 || strcmp(argv[1],"LinearWithPDelta") == 0)
       crdTransf3d = new PDeltaCrdTransf3d(crdTransfTag, vecxzPlane, jntOffsetI, jntOffsetJ);
     
-#ifdef _COROTATIONAL
     else if (strcmp(argv[1],"Corotational") == 0)
       crdTransf3d = new CorotCrdTransf3d(crdTransfTag, vecxzPlane, jntOffsetI, jntOffsetJ);
-#endif
     
     else {
       opserr << "WARNING TclElmtBuilder - addGeomTransf - invalid Type\n";
