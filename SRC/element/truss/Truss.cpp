@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2007-02-02 01:35:22 $
+// $Revision: 1.29 $
+// $Date: 2007-08-07 18:05:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -854,6 +854,7 @@ Truss::displaySelf(Renderer &theViewer, int displayMode, float fact)
 	  v2(i) = end2Crd(i);
 	}    
       }
+      return theViewer.drawLine(v1, v2, 1.0, 1.0);	
     }
     return 0;
 }
