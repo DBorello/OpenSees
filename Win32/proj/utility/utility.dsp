@@ -94,6 +94,14 @@ SOURCE=..\..\..\SRC\utility\SimulationInformation.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\utility\StringContainer.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\utility\StringContainer.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\utility\Timer.cpp
 # End Source File
 # Begin Source File

@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Target_Dir ""
 F90=df.exe
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\src\element\up_ucdavis" /I "..\..\..\src\element\up-ucsd" /I "..\..\..\src\package" /I "..\..\..\src\element\TotalLagrangianFD20NodeBrick" /I "..\..\..\src\element\27nbrick" /I "..\..\..\src\element\upU" /I "..\..\..\src\element\dispBeamColumn" /I "..\..\..\src\element\brick" /I "..\..\..\src\element\shell" /I "..\..\..\src\element\8nbrick" /I "..\..\..\src\recorder\response" /I "..\..\..\src\element\nonlinearBeamColumn\quadRule" /I "..\..\..\src\material\nD" /I "..\..\..\src\element\fourNodeQuad" /I "..\..\..\src\element\damper" /I "..\..\..\src\coordTransformation" /I "..\..\..\src\element\beamWithHinges" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\element\zeroLength" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\element\feap" /I "..\..\..\src\handler" /I "..\..\..\src\element" /I "..\..\..\src\element\truss" /I "..\..\..\src\material\section" /I "..\..\..\src\element\beam3d" /I "..\..\..\src\element\beam2d" /I "..\..\..\src\material" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\load" /I "..\..\..\src\renderer" /I "..\..\..\src\actor\channel" /I "..\..\..\src\domain\node" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\domain\component" /I "..\..\..\src" /I "..\..\..\src\domain\domain" /I "..\..\..\src\material\nd\template3dep" /I "..\..\..\src\nDarray" /I "..\..\..\src\element\20nbrick" /I "..\..\..\src\element\elasticBeamColumn" /I "..\..\..\src\element\joint" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\element\updatedLagrangianBeamColumn" /I "..\..\..\src\material\yieldSurface\yieldSurfaceBC" /I "..\..\..\src\material\yieldSurface\evolution" /I "..\..\..\src\element\forceBeamColumn" /I "..\..\..\src\element\nonlinearBeamColumn\element" /I "..\..\..\src\damage" /I "..\..\..\src\element\nonlinearBeamColumn\matrixUtil" /I "c:\Program Files\tcl\\" /I "c:\Program Files\tcl\include" /D "NDEBUG" /D "WIN32" /D "_LIB" /D "_WGL" /D "_COROTATIONAL" /D "_MBCS" /D "_TCL84" /D "_VC6" /FD /c
+# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\element\dispbeamcolumnInt" /I "..\..\..\src\element\up_ucdavis" /I "..\..\..\src\element\up-ucsd" /I "..\..\..\src\package" /I "..\..\..\src\element\TotalLagrangianFD20NodeBrick" /I "..\..\..\src\element\27nbrick" /I "..\..\..\src\element\upU" /I "..\..\..\src\element\dispBeamColumn" /I "..\..\..\src\element\brick" /I "..\..\..\src\element\shell" /I "..\..\..\src\element\8nbrick" /I "..\..\..\src\recorder\response" /I "..\..\..\src\element\nonlinearBeamColumn\quadRule" /I "..\..\..\src\material\nD" /I "..\..\..\src\element\fourNodeQuad" /I "..\..\..\src\element\damper" /I "..\..\..\src\coordTransformation" /I "..\..\..\src\element\beamWithHinges" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\element\zeroLength" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\element\feap" /I "..\..\..\src\handler" /I "..\..\..\src\element" /I "..\..\..\src\element\truss" /I "..\..\..\src\material\section" /I "..\..\..\src\element\beam3d" /I "..\..\..\src\element\beam2d" /I "..\..\..\src\material" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\load" /I "..\..\..\src\renderer" /I "..\..\..\src\actor\channel" /I "..\..\..\src\domain\node" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\domain\component" /I "..\..\..\src" /I "..\..\..\src\domain\domain" /I "..\..\..\src\material\nd\template3dep" /I "..\..\..\src\nDarray" /I "..\..\..\src\element\20nbrick" /I "..\..\..\src\element\elasticBeamColumn" /I "..\..\..\src\element\joint" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\element\updatedLagrangianBeamColumn" /I "..\..\..\src\material\yieldSurface\yieldSurfaceBC" /I "..\..\..\src\material\yieldSurface\evolution" /I "..\..\..\src\element\forceBeamColumn" /I "..\..\..\src\element\nonlinearBeamColumn\element" /I "..\..\..\src\damage" /I "..\..\..\src\element\nonlinearBeamColumn\matrixUtil" /I "c:\Program Files\tcl\\" /I "c:\Program Files\tcl\include" /D "NDEBUG" /D "WIN32" /D "_LIB" /D "_WGL" /D "_COROTATIONAL" /D "_MBCS" /D "_TCL84" /D "_VC6" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -67,7 +67,7 @@ LIB32=link.exe -lib
 # PROP Target_Dir ""
 F90=df.exe
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\element\material\nd\template3dep" /I "..\..\..\src\element\up_ucdavis" /I "..\..\..\src\element\up-ucsd" /I "..\..\..\src\package" /I "..\..\..\src\element\TotalLagrangianFD20NodeBrick" /I "..\..\..\src\element\27nbrick" /I "..\..\..\src\element\upU" /I "..\..\..\src\element\dispBeamColumn" /I "..\..\..\src\element\brick" /I "..\..\..\src\element\shell" /I "..\..\..\src\element\8nbrick" /I "..\..\..\src\recorder\response" /I "..\..\..\src\element\nonlinearBeamColumn\quadRule" /I "..\..\..\src\material\nD" /I "..\..\..\src\element\fourNodeQuad" /I "..\..\..\src\element\damper" /I "..\..\..\src\coordTransformation" /I "..\..\..\src\element\beamWithHinges" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\element\zeroLength" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\element\feap" /I "..\..\..\src\handler" /I "..\..\..\src\element" /I "..\..\..\src\element\truss" /I "..\..\..\src\material\section" /I "..\..\..\src\element\beam3d" /I "..\..\..\src\element\beam2d" /I "..\..\..\src\material" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\load" /I "..\..\..\src\renderer" /I "..\..\..\src\actor\channel" /I "..\..\..\src\domain\node" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\domain\component" /I "..\..\..\src" /I "..\..\..\src\domain\domain" /I "..\..\..\src\material\nd\template3dep" /I "..\..\..\src\nDarray" /I "..\..\..\src\element\20nbrick" /I "..\..\..\src\element\elasticBeamColumn" /I "..\..\..\src\element\joint" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\element\updatedLagrangianBeamColumn" /I "..\..\..\src\material\yieldSurface\yieldSurfaceBC" /I "..\..\..\src\material\yieldSurface\evolution" /I "..\..\..\src\element\forceBeamColumn" /I "..\..\..\src\element\nonlinearBeamColumn\element" /I "..\..\..\src\damage" /I "..\..\..\src\element\nonlinearBeamColumn\matrixUtil" /I "c:\Program Files\tcl\\" /I "c:\Program Files\tcl\include" /D "_DEBUG" /D "WIN32" /D "_LIB" /D "_WGL" /D "_COROTATIONAL" /D "_MBCS" /D "_TCL84" /D "_VC6" /FR /FD /GZ /c
+# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\element\material\nd\template3dep" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\element\dispbeamcolumnInt" /I "..\..\..\src\element\up_ucdavis" /I "..\..\..\src\element\up-ucsd" /I "..\..\..\src\package" /I "..\..\..\src\element\TotalLagrangianFD20NodeBrick" /I "..\..\..\src\element\27nbrick" /I "..\..\..\src\element\upU" /I "..\..\..\src\element\dispBeamColumn" /I "..\..\..\src\element\brick" /I "..\..\..\src\element\shell" /I "..\..\..\src\element\8nbrick" /I "..\..\..\src\recorder\response" /I "..\..\..\src\element\nonlinearBeamColumn\quadRule" /I "..\..\..\src\material\nD" /I "..\..\..\src\element\fourNodeQuad" /I "..\..\..\src\element\damper" /I "..\..\..\src\coordTransformation" /I "..\..\..\src\element\beamWithHinges" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\element\zeroLength" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\element\feap" /I "..\..\..\src\handler" /I "..\..\..\src\element" /I "..\..\..\src\element\truss" /I "..\..\..\src\material\section" /I "..\..\..\src\element\beam3d" /I "..\..\..\src\element\beam2d" /I "..\..\..\src\material" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\load" /I "..\..\..\src\renderer" /I "..\..\..\src\actor\channel" /I "..\..\..\src\domain\node" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\domain\component" /I "..\..\..\src" /I "..\..\..\src\domain\domain" /I "..\..\..\src\material\nd\template3dep" /I "..\..\..\src\nDarray" /I "..\..\..\src\element\20nbrick" /I "..\..\..\src\element\elasticBeamColumn" /I "..\..\..\src\element\joint" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\element\updatedLagrangianBeamColumn" /I "..\..\..\src\material\yieldSurface\yieldSurfaceBC" /I "..\..\..\src\material\yieldSurface\evolution" /I "..\..\..\src\element\forceBeamColumn" /I "..\..\..\src\element\nonlinearBeamColumn\element" /I "..\..\..\src\damage" /I "..\..\..\src\element\nonlinearBeamColumn\matrixUtil" /I "c:\Program Files\tcl\\" /I "c:\Program Files\tcl\include" /D "_DEBUG" /D "WIN32" /D "_LIB" /D "_WGL" /D "_COROTATIONAL" /D "_MBCS" /D "_TCL84" /D "_VC6" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
@@ -219,6 +219,14 @@ SOURCE=..\..\..\SRC\element\beamWithHinges\TclBeamWithHingesBuilder.cpp
 # Begin Group "crdTransf"
 
 # PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\SRC\coordTransformation\CorotCrdTransf2d.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\coordTransformation\CorotCrdTransf3d.cpp
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\..\SRC\coordTransformation\CrdTransf.cpp
@@ -700,30 +708,6 @@ SOURCE=..\..\..\SRC\element\forceBeamColumn\BeamIntegration.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeMidpointBeamIntegration3d.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeMidpointBeamIntegration3d.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeRadauBeamIntegration3d.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeRadauBeamIntegration3d.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeRadauTwoBeamIntegration3d.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeRadauTwoBeamIntegration3d.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\SRC\element\forceBeamColumn\LobattoBeamIntegration.cpp
 # End Source File
 # Begin Source File
@@ -737,18 +721,6 @@ SOURCE=..\..\..\SRC\element\forceBeamColumn\UserDefinedBeamIntegration.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\element\forceBeamColumn\UserDefinedBeamIntegration.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\element\forceBeamColumn\UserDefinedHingeIntegration2d.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\element\forceBeamColumn\UserDefinedHingeIntegration2d.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\element\forceBeamColumn\UserDefinedHingeIntegration3d.cpp
 # End Source File
 # End Group
 # Begin Source File
@@ -950,6 +922,38 @@ SOURCE="..\..\..\SRC\element\UP-ucsd\Twenty_Eight_Node_BrickUP.cpp"
 # Begin Source File
 
 SOURCE="..\..\..\SRC\element\UP-ucsd\Twenty_Eight_Node_BrickUP.h"
+# End Source File
+# End Group
+# Begin Group "dispBeamColumnInt"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\dispBeamColumnInt\DispBeamColumn2dInt.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\dispBeamColumnInt\DispBeamColumn2dInt.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\dispBeamColumnInt\FiberSection2dInt.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\dispBeamColumnInt\FiberSection2dInt.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\dispBeamColumnInt\LinearCrdTransf2dInt.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\dispBeamColumnInt\LinearCrdTransf2dInt.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\dispBeamColumnInt\TclDispBeamColumnIntCommand.cpp
 # End Source File
 # End Group
 # Begin Source File

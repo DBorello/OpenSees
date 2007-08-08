@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Target_Dir ""
 F90=df.exe
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\src\reliability\domain\component" /I "..\..\..\src\reliability\domain\filter" /I "..\..\..\src\handler" /I "..\..\..\src\domain\groundMotion" /I "..\..\..\src\analysis\fe_ele" /I "..\..\..\src\utility" /I "..\..\..\src\domain\subdomain" /I "..\..\..\src\database" /I "..\..\..\src\analysis\analysis" /I "..\..\..\src\recorder" /I "..\..\..\src\graph\graph" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\domain\single" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\tagged\storage" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\domain\pattern" /I "..\..\..\src\matrix" /I "..\..\..\src\analysis\dof_grp" /I "..\..\..\src\domain\domain" /I "..\..\..\src\actor\channel" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\tagged" /I "..\..\..\src\domain\component" /I "..\..\..\src\domain\load" /I "..\..\..\src\domain\node" /I "..\..\..\src\element" /I "..\..\..\src\renderer" /I "..\..\..\src\nDarray" /I "..\..\..\src\domain\region" /I "..\..\..\src\reliability\domain\modulatingFunction" /I "..\..\..\src\reliability\domain\components" /I "..\..\..\src\reliability\domain\spectrum" /I "..\..\..\src\reliability\analysis\randomNumber" /I "..\..\..\src\analysis\algorithm\equiSolnAlgo" /I "..\..\..\src\analysis\algorithm" /I "..\..\..\src\analysis\integrator" /I "..\..\..\src\system_of_eqn\linearSOE" /I "..\..\..\src\system_of_eqn" /I "c:\Program Files\tcl\\" /I "c:\Program Files\tcl\include" /D "NDEBUG" /D "WIN32" /D "_LIB" /D "_RELIABILITY" /D "_MBCS" /D "_TCL84" /D "_VC6" /FD /c
+# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\src\reliability\domain\component" /I "..\..\..\src\actor\message" /I "..\..\..\src\reliability\domain\filter" /I "..\..\..\src\handler" /I "..\..\..\src\domain\groundMotion" /I "..\..\..\src\analysis\fe_ele" /I "..\..\..\src\utility" /I "..\..\..\src\domain\subdomain" /I "..\..\..\src\database" /I "..\..\..\src\analysis\analysis" /I "..\..\..\src\recorder" /I "..\..\..\src\graph\graph" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\domain\single" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\tagged\storage" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\domain\pattern" /I "..\..\..\src\matrix" /I "..\..\..\src\analysis\dof_grp" /I "..\..\..\src\domain\domain" /I "..\..\..\src\actor\channel" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\tagged" /I "..\..\..\src\domain\component" /I "..\..\..\src\domain\load" /I "..\..\..\src\domain\node" /I "..\..\..\src\element" /I "..\..\..\src\renderer" /I "..\..\..\src\nDarray" /I "..\..\..\src\domain\region" /I "..\..\..\src\reliability\domain\modulatingFunction" /I "..\..\..\src\reliability\domain\components" /I "..\..\..\src\reliability\domain\spectrum" /I "..\..\..\src\reliability\analysis\randomNumber" /I "..\..\..\src\analysis\algorithm\equiSolnAlgo" /I "..\..\..\src\analysis\algorithm" /I "..\..\..\src\analysis\integrator" /I "..\..\..\src\system_of_eqn\linearSOE" /I "..\..\..\src\system_of_eqn" /I "c:\Program Files\tcl\\" /I "c:\Program Files\tcl\include" /D "NDEBUG" /D "WIN32" /D "_LIB" /D "_RELIABILITY" /D "_MBCS" /D "_TCL84" /D "_VC6" /FD /c
 # SUBTRACT CPP /Fr /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -67,7 +67,7 @@ LIB32=link.exe -lib
 # PROP Target_Dir ""
 F90=df.exe
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\reliability\domain\filter" /I "..\..\..\src\handler" /I "..\..\..\src\domain\groundMotion" /I "..\..\..\src\analysis\fe_ele" /I "..\..\..\src\utility" /I "..\..\..\src\domain\subdomain" /I "..\..\..\src\database" /I "..\..\..\src\analysis\analysis" /I "..\..\..\src\recorder" /I "..\..\..\src\graph\graph" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\domain\single" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\tagged\storage" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\domain\pattern" /I "..\..\..\src\matrix" /I "..\..\..\src\analysis\dof_grp" /I "..\..\..\src\domain\domain" /I "..\..\..\src\actor\channel" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\tagged" /I "..\..\..\src\domain\component" /I "..\..\..\src\domain\load" /I "..\..\..\src\domain\node" /I "..\..\..\src\element" /I "..\..\..\src\renderer" /I "..\..\..\src\nDarray" /I "..\..\..\src\domain\region" /I "..\..\..\src\reliability\domain\modulatingFunction" /I "..\..\..\src\reliability\domain\components" /I "..\..\..\src\reliability\domain\spectrum" /I "..\..\..\src\reliability\analysis\randomNumber" /I "..\..\..\src\analysis\algorithm\equiSolnAlgo" /I "..\..\..\src\analysis\algorithm" /I "..\..\..\src\analysis\integrator" /I "..\..\..\src\system_of_eqn\linearSOE" /I "..\..\..\src\system_of_eqn" /I "c:\Program Files\tcl\\" /I "c:\Program Files\tcl\include" /D "_DEBUG" /D "WIN32" /D "_LIB" /D "_RELIABILITY" /D "_MBCS" /D "_TCL84" /D "_VC6" /FR /FD /GZ /c
+# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\actor\message" /I "..\..\..\src\reliability\domain\filter" /I "..\..\..\src\handler" /I "..\..\..\src\domain\groundMotion" /I "..\..\..\src\analysis\fe_ele" /I "..\..\..\src\utility" /I "..\..\..\src\domain\subdomain" /I "..\..\..\src\database" /I "..\..\..\src\analysis\analysis" /I "..\..\..\src\recorder" /I "..\..\..\src\graph\graph" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\domain\single" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\tagged\storage" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\domain\pattern" /I "..\..\..\src\matrix" /I "..\..\..\src\analysis\dof_grp" /I "..\..\..\src\domain\domain" /I "..\..\..\src\actor\channel" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\tagged" /I "..\..\..\src\domain\component" /I "..\..\..\src\domain\load" /I "..\..\..\src\domain\node" /I "..\..\..\src\element" /I "..\..\..\src\renderer" /I "..\..\..\src\nDarray" /I "..\..\..\src\domain\region" /I "..\..\..\src\reliability\domain\modulatingFunction" /I "..\..\..\src\reliability\domain\components" /I "..\..\..\src\reliability\domain\spectrum" /I "..\..\..\src\reliability\analysis\randomNumber" /I "..\..\..\src\analysis\algorithm\equiSolnAlgo" /I "..\..\..\src\analysis\algorithm" /I "..\..\..\src\analysis\integrator" /I "..\..\..\src\system_of_eqn\linearSOE" /I "..\..\..\src\system_of_eqn" /I "c:\Program Files\tcl\\" /I "c:\Program Files\tcl\include" /D "_DEBUG" /D "WIN32" /D "_LIB" /D "_RELIABILITY" /D "_MBCS" /D "_TCL84" /D "_VC6" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
@@ -161,6 +161,10 @@ SOURCE=..\..\..\SRC\domain\domain\single\SingleDomNodIter.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\domain\domain\single\SingleDomParamIter.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\domain\domain\single\SingleDomSP_Iter.cpp
 # End Source File
 # Begin Source File
@@ -205,6 +209,22 @@ SOURCE=..\..\..\SRC\domain\component\DomainComponent.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\domain\component\MaterialStageParameter.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\component\MaterialStageParameter.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\component\MatParameter.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\component\MatParameter.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\domain\component\Parameter.cpp
 # End Source File
 # Begin Source File
@@ -214,6 +234,10 @@ SOURCE=..\..\..\SRC\domain\component\Parameter.h
 # Begin Source File
 
 SOURCE=..\..\..\SRC\domain\component\TclParameterCommands.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\component\TclUpdateMaterialCommand.cpp
 # End Source File
 # End Group
 # Begin Group "load"
@@ -402,6 +426,14 @@ SOURCE=..\..\..\SRC\domain\pattern\PBowlLoading.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\domain\pattern\PBowlLoading.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\pattern\PeerMotion.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\pattern\PeerMotion.h
 # End Source File
 # Begin Source File
 
