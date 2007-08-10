@@ -21,8 +21,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-06-25 21:21:24 $
+// $Revision: 1.14 $
+// $Date: 2007-08-10 16:08:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/OPS_Globals.h,v $
                                                                         
 // Written: fmk 
@@ -31,7 +31,7 @@
 // Description: This file contains global variables used in OpenSees files.
 // if you change some of the variables, you must recompile ALL the code.
 
-#define OPS_VERSION "1.7.4.beta"
+#define OPS_VERSION "1.7.4"
 
 #define _USING_OpenSees_STREAMS
 #include <OPS_Stream.h>
