@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2007-03-30 01:50:11 $
+// $Revision: 1.31 $
+// $Date: 2007-08-17 17:50:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -942,7 +942,7 @@ FourNodeQuad::setResponse(const char **argv, int argc,
 
   char dataOut[10];
   if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0) {
-    
+
     for (int i=1; i<=4; i++) {
       sprintf(dataOut,"P1_%d",i);
       output.tag("ResponseType",dataOut);
@@ -951,10 +951,13 @@ FourNodeQuad::setResponse(const char **argv, int argc,
     }
     
     theResponse =  new ElementResponse(this, 1, P);
-  }   else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
+  }   
+
+  else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
+    
     int pointNum = atoi(argv[1]);
     if (pointNum > 0 && pointNum <= 4) {
-
+      
       output.tag("GaussPoint");
       output.attr("number",pointNum);
       output.attr("eta",pts[pointNum-1][0]);
@@ -964,30 +967,29 @@ FourNodeQuad::setResponse(const char **argv, int argc,
       
       output.endTag();
 
-  } else if (strcmp(argv[0],"stresses") ==0) {
-
-      for (int i=0; i<4; i++) {
-	output.tag("GaussPoint");
-	output.attr("number",i+1);
-	output.attr("eta",pts[i][0]);
-	output.attr("neta",pts[i][1]);
-
-	output.tag("NdMaterialOutput");
-	output.attr("classType", theMaterial[i]->getClassTag());
-	output.attr("tag", theMaterial[i]->getTag());
-
-	output.tag("ResponseType","sigma11");
-	output.tag("ResponseType","sigma22");
-	output.tag("ResponseType","sigma12");
-
-	output.endTag(); // GaussPoint
-	output.endTag(); // NdMaterialOutput
-      }
-
-      theResponse =  new ElementResponse(this, 3, Vector(12));
     }
   }
-	
+  else if ((strcmp(argv[0],"stresses") ==0) || (strcmp(argv[0],"stress") ==0)) {
+    for (int i=0; i<4; i++) {
+      output.tag("GaussPoint");
+      output.attr("number",i+1);
+      output.attr("eta",pts[i][0]);
+      output.attr("neta",pts[i][1]);
+
+      output.tag("NdMaterialOutput");
+      output.attr("classType", theMaterial[i]->getClassTag());
+      output.attr("tag", theMaterial[i]->getTag());
+      
+      output.tag("ResponseType","sigma11");
+      output.tag("ResponseType","sigma22");
+      output.tag("ResponseType","sigma12");
+      
+      output.endTag(); // GaussPoint
+      output.endTag(); // NdMaterialOutput
+      }
+    theResponse =  new ElementResponse(this, 3, Vector(12));
+  }
+
   output.endTag(); // ElementOutput
 
   return theResponse;
