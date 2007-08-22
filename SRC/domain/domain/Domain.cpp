@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.42 $
-// $Date: 2007-05-04 05:23:31 $
+// $Revision: 1.43 $
+// $Date: 2007-08-22 16:48:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -2126,7 +2126,6 @@ Domain::sendSelf(int cTag, Channel &theChannel)
 
   ID domainData(13);
   domainData(0) = currentGeoTag;
-
   domainData(1) = numNod;
   domainData(2) = numEle;
   domainData(3) = numSPs;
@@ -2312,6 +2311,7 @@ Domain::sendSelf(int cTag, Channel &theChannel)
     // we do the same for LoadPatterns as we did for Nodes above .. see comments
     // for nodes if you can't figure whats going on!    
 
+
     if (numLPs != 0) {
       ID lpData(numLPs*2);
       LoadPattern *theLP;
@@ -2338,7 +2338,31 @@ Domain::sendSelf(int cTag, Channel &theChannel)
       }    
     }
 
+    if (numParam != 0) {
+      ID paramData(numParam*2);
+      Parameter *theP;
+      ParameterIter &theParameters = this->getParameters();
+      int loc = 0;
+    
+      while ((theP = theParameters()) != 0) {
+	paramData(loc) = theP->getClassTag();
+	int dbTag = theP->getDbTag();
 
+	if (dbTag == 0) {// go get a new tag and setDbTag in ele if this not 0 
+	  dbTag = theChannel.getDbTag();
+	  if (dbTag != 0)
+	    theP->setDbTag(dbTag);
+	}
+      
+	paramData(loc+1) = dbTag;
+	loc+=2;
+      }    
+
+      if (theChannel.sendID(dbLPs, currentGeoTag, paramData) < 0) {
+	opserr << "Domain::send - channel failed to send the LoadPattern ID\n";
+	return -6;
+      }    
+  }
     // now so that we don't do this next time if nothing in the domain has changed
     lastGeoSendTag = currentGeoTag;
     /*
@@ -2409,12 +2433,10 @@ Domain::sendSelf(int cTag, Channel &theChannel)
   Parameter *theParam;
   ParameterIter &theParams = this->getParameters();
   while ((theParam = theParams()) != 0) {
-    /*
     if (theParam->sendSelf(commitTag, theChannel) < 0) {
       opserr << "Domain::send - Parameter with tag " << theParam->getTag() << " failed in sendSelf\n";
       return -12;
     }
-    */
   }  
 
   // if get here we were successfull
@@ -2430,7 +2452,7 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
   this->hasDomainChanged();
 
   // first we get the data about the state of the domain for this commitTag
-  ID domainData(11);
+  ID domainData(13);
   if (theChannel.recvID(theDbTag, commitTag, domainData) < 0) {
     opserr << "Domain::recv - channel failed to recv the initial ID\n";
     return -1;
@@ -2691,6 +2713,45 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
       }
     }
 
+
+    int numParameters = domainData(11);
+    int dbParameters = domainData(12);
+
+    if (numParameters != 0) {
+      ID paramData(2*numParameters);
+      
+      if (theChannel.recvID(dbParameters, geoTag, paramData) < 0) {
+	opserr << "Domain::recv - channel failed to recv the MP_Constraints ID\n";
+	return -2;
+      }
+
+      loc = 0;
+      for (i=0; i<numParameters; i++) {
+	int classTag = paramData(loc);
+	int dbTag = paramData(loc+1);
+
+	Parameter *theParameter = theBroker.getParameter(classTag);
+	if (theParameter == 0) {
+	  opserr << "Domain::recv - cannot create MP_Constraint with classTag  " << classTag << endln;
+	  return -2;
+	}			
+	theParameter->setDbTag(dbTag);
+      
+	if (theParameter->recvSelf(commitTag, theChannel, theBroker) < 0) {
+	  opserr << "Domain::recv - Parameter with dbTag " << dbTag << " failed in recvSelf\n";
+	  return -2;
+	}			
+
+	if (this->addParameter(theParameter) == false) {
+	  opserr << "Domain::recv - could not add LoadPattern with tag " << theParameter->getTag() <<  " into the Domain\n";
+	  return -3;
+	}			
+
+	loc+=2;
+      }
+    }
+
+
     // set the currentGeoTag & mark domainChangeFlag as false
     // this way if restoring froma a database and domain has not changed for the analysis
     // the analysis will not have to to do a domainChanged() operation
@@ -2752,12 +2813,10 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
     Parameter *theParam;
     ParameterIter &theParams = this->getParameters();
     while ((theParam = theParams()) != 0) {
-      /*
       if (theParam->recvSelf(commitTag, theChannel, theBroker) < 0) {
 	opserr << "Domain::recv - Parameter with tag" << theParam->getTag() << " failed in recvSelf";
 	return -12;
       }
-      */
     }  
   } 
 
