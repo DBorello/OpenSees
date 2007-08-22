@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2005-03-25 00:32:11 $
+// $Revision: 1.10 $
+// $Date: 2007-08-22 21:05:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2Plasticity.cpp,v $
 
 // Written: Ed "C++" Love
@@ -152,6 +152,8 @@ strain(3,3)
   IIdev [2][2] [0][0] = -one3 ; //-0.333333 
   IIdev [2][2] [1][1] = -one3 ; //-0.333333 
   IIdev [2][2] [2][2] =  two3 ; // 0.666667 
+
+  plastic_integrator();
 }
 
 
@@ -235,6 +237,8 @@ J2Plasticity :: J2Plasticity(int    tag,
   IIdev [2][2] [0][0] = -one3 ; //-0.333333 
   IIdev [2][2] [1][1] = -one3 ; //-0.333333 
   IIdev [2][2] [2][2] =  two3 ; // 0.666667 
+
+  plastic_integrator();
 }
 
 
