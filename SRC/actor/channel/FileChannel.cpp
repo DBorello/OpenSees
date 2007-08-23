@@ -195,8 +195,20 @@ int FileChannel::recvMsg(int dbTag, int commitTag, Message &, ChannelAddress *th
 {
   return 0;
 }     
-   
 
+
+   
+/**
+* Implemented to match Channel superclass API, returns -1 for error.
+*/
+int FileChannel::recvMsgUnknownSize(int dbTag, int commitTag,
+
+                Message & theMessage, ChannelAddress *theAddress)
+{
+opserr << "FileChannel::recvMsgUnknownSize, error, a FileChannel should not "
+                                << "receive a message\n";
+        return -1;
+}
 int FileChannel::sendMatrix(int dbTag, int commitTag, 
 			    const Matrix &theMatrix, 
 			    ChannelAddress *theAddress)

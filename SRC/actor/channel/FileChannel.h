@@ -73,6 +73,10 @@ class FileChannel : public Channel
     int recvMsg(int dbTag, int commitTag, 
 		Message &, 
 		ChannelAddress *theAddress =0);        
+    int recvMsgUnknownSize(int dbTag, int commitTag,
+			   Message & theMessage,
+			   ChannelAddress *theAddress =0);
+
 
     int sendMatrix(int dbTag, int commitTag, 
 		   const Matrix &theMatrix, 
