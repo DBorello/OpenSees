@@ -460,7 +460,7 @@ endif
 
 ifeq ($(GRAPHICS), NONE)
 
-RENDERER_LIBS = 
+RENDERER_LIBS = $(FE)/renderer/PlainMap.o
 
 endif
 
