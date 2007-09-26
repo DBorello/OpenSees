@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2007-02-14 18:44:43 $
+// $Revision: 1.18 $
+// $Date: 2007-09-26 23:18:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.cpp,v $
                                                                         
                                                                         
@@ -864,7 +864,7 @@ int
 DOF_Group::saveSensitivity(const Vector &v, const Vector &vdot,
 			   const Vector &vdotdot, int gradNum, int numGrads)
 {
-  int ok;
+  int ok = 0;
 
   ok += this->saveDispSensitivity(v, gradNum, numGrads);
   ok += this->saveVelSensitivity(vdot, gradNum, numGrads);
