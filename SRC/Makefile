@@ -497,6 +497,9 @@ TAGGED_LIBS =   $(FE)/tagged/TaggedObject.o \
 
 UTILITY_LIBS = $(FE)/utility/Timer.o \
 	$(FE)/utility/SimulationInformation.o \
+	$(FE)/utility/File.o \
+	$(FE)/utility/FileIter.o \
+	$(FE)/utility/NeesCentral.o \
 	$(FE)/utility/StringContainer.o 
 
 
