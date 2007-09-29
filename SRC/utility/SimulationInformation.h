@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-11-08 20:08:48 $
+// $Revision: 1.3 $
+// $Date: 2007-09-29 01:58:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/SimulationInformation.h,v $
                                                                         
                                                                         
@@ -40,12 +40,14 @@
 #include <OPS_Globals.h>
 #include <tcl.h>
 #include <StringContainer.h>
+#include <File.h>
 
 class SimulationInformation
 {
   public:
   SimulationInformation();    
   ~SimulationInformation();
+
   int start(void);
   int end(void);
 
@@ -56,8 +58,10 @@ class SimulationInformation
   int setForceUnit(const char *name);
   int setTimeUnit(const char *name);
 
-  int addInputFile(const char *);
-  int addOutputFile(const char *);
+  int addInputFile(const char *filename, const char *path);
+  int addOutputFile(const char *filename, const char *path);
+  int addDir(const char *path);
+
   int addParameter(const char *name, const char *value);
   int addModelType(const char *type);
   int addAnalysisType(const char *type);
@@ -65,11 +69,13 @@ class SimulationInformation
   int addElementType(const char *type);
   int addMaterialType(const char *type);
 
-  int addTclInformationCommands(Tcl_Interp *interp);
+  /*  int addTclInformationCommands(Tcl_Interp *interp); */
 
   void Print(OPS_Stream &s) const;   
   friend OPS_Stream &operator<<(OPS_Stream &s, const SimulationInformation &E);    
   
+  int neesUpload(const char *username, const char *passwd, int projID, int expID);
+
  protected:
   
  private:
@@ -84,8 +90,9 @@ class SimulationInformation
   char startTime[30];
   char endTime[30];
 
-  StringContainer inputFiles;
-  StringContainer outputFiles;
+  File *theFiles;
+  int numInputFiles;
+
   StringContainer paramNames;
   StringContainer paramValues;
   StringContainer analysisTypes;
