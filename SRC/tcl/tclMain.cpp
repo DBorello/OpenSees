@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.40 2006-11-08 20:13:23 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.41 2007-09-29 01:52:46 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -31,6 +31,8 @@ extern "C" {
 EXTERN int		TclFormatInt _ANSI_ARGS_((char *buffer, long n));
 EXTERN int		TclObjCommandComplete _ANSI_ARGS_((Tcl_Obj *cmdPtr));
 }
+
+const char * getInterpPWD(Tcl_Interp *interp);
 
 #include <OPS_Globals.h>
 
@@ -89,6 +91,10 @@ static char *tclStartupScriptFileName = NULL;
 SimulationInformation simulationInfo;
 
 char *simulationInfoOutputFilename = 0;
+char *neesCentralProjID =0;
+char * neesCentralExpID =0;
+char *neesCentralUser =0;
+char *neesCentralPasswd =0;
 
 
 /*
@@ -185,8 +191,9 @@ EvalFileWithParameters(Tcl_Interp *interp,
      }
 
       count++;
-      
-      simulationInfo.addInputFile(tclStartupScriptFileName);
+
+      const char *pwd = getInterpPWD(interp);
+      simulationInfo.addInputFile(tclStartupScriptFileName, pwd);
 
       int ok = Tcl_EvalFile(interp, tclStartupScriptFileName);
 
@@ -259,8 +266,6 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 
     Tcl_FindExecutable(argv[0]);
     interp = Tcl_CreateInterp();
-
-    simulationInfo.addTclInformationCommands(interp);	      
 
 
 #ifdef TCL_MEM_DEBUG
@@ -399,6 +404,36 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	      simulationInfoOutputFilename = argv[currentArg+1];	    
 	    }			   
 	    currentArg+=2;
+	  } else if ((strcmp(argv[currentArg], "-upload") == 0) || (strcmp(argv[currentArg], "-UPLOAD") == 0)) {
+	    bool more = true;
+	    currentArg++;
+	    while (more == true && currentArg < argc) {
+	      
+	      if (strcmp(argv[currentArg],"-user") == 0) {
+		neesCentralUser = argv[currentArg+1];
+		currentArg += 2;
+
+	      } else if (strcmp(argv[currentArg],"-pass") == 0) {
+		neesCentralPasswd = argv[currentArg+1];
+		currentArg += 2;
+	      } else if (strcmp(argv[currentArg],"-projID") == 0) {
+		neesCentralProjID = argv[currentArg+1];
+		currentArg += 2;
+		
+	      } else if (strcmp(argv[currentArg],"-expID") == 0) {
+		neesCentralExpID = argv[currentArg+1];
+		currentArg += 2;
+    
+	      } else if (strcmp(argv[currentArg],"-title") == 0) {
+		simulationInfo.setTitle(argv[currentArg+1]);	
+		currentArg += 2;
+      
+	      } else if (strcmp(argv[currentArg],"-description") == 0) {
+		simulationInfo.setDescription(argv[currentArg+1]);	
+		currentArg += 2;      
+	      } else
+		more = false;
+	    }
 	  } else 
 	    currentArg++;
 	}
@@ -427,10 +462,11 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	}
       }
 
-      if (simulationInfoOutputFilename != 0) {
-	simulationInfo.start();
-	simulationInfo.addInputFile(tclStartupScriptFileName);
-      }
+      //      if (simulationInfoOutputFilename != 0) {
+
+      const char *pwd = getInterpPWD(interp);
+      simulationInfo.start();
+      simulationInfo.addInputFile(tclStartupScriptFileName, pwd);
 
       code = Tcl_EvalFile(interp, tclStartupScriptFileName);
 
@@ -464,7 +500,6 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
       while (currentArg < argc && argv[currentArg] != NULL) {
 	if ((strcmp(argv[currentArg], "-info") == 0) || (strcmp(argv[currentArg], "-INFO") == 0)) {
 	  if (argc > (currentArg+1)) {
-	    simulationInfo.addTclInformationCommands(interp);
 	    simulationInfoOutputFilename = argv[currentArg+1];	    
 	  }			   
 	  currentArg+=2;
@@ -576,7 +611,6 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 #endif
       }
     }
-      
 
  done:
     
@@ -605,24 +639,3 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
     return;
 }
 
-
-/*
-
-int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
-{
-	
-
-  if (simulationInfoOutputFilename != 0) {
-    simulationInfo.end();
-    FileStream simulationInfoOutputFile;
-    simulationInfoOutputFile.setFile(simulationInfoOutputFilename);
-    simulationInfoOutputFile.open();
-    simulationInfoOutputFile << simulationInfo;
-    simulationInfoOutputFile.close();
-  }
-
-  Tcl_Exit(0);
-  return 0;
-}
-
-*/    

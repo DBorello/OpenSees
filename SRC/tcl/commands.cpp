@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.95 $
-// $Date: 2007-07-19 21:19:08 $
+// $Revision: 1.96 $
+// $Date: 2007-09-29 01:52:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -40,10 +40,7 @@ EXTERN int      Tcl_SetObjCmd _ANSI_ARGS_((ClientData clientData,
 }
 
 #include <OPS_Globals.h>
-#include <SimulationInformation.h>
 #include <Matrix.h>
-
-extern SimulationInformation simulationInfo;
 
 // the following is a little kludgy but it works!
 #ifdef _USING_STL_STREAMS
@@ -265,6 +262,12 @@ int reliability(ClientData, Tcl_Interp *, int, TCL_Char **);
 int wipeReliability(ClientData, Tcl_Interp *, int, TCL_Char **);
 #endif
 
+
+const char * getInterpPWD(Tcl_Interp *interp);
+
+#include <SimulationInformation.h>
+extern SimulationInformation simulationInfo;
+
 ModelBuilder *theBuilder =0;
 
 // some global variables 
@@ -407,6 +410,16 @@ getPID(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
 getNP(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int
+neesUpload(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int
+defaultUnits(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int
+neesMetaData(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
 
 extern int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
@@ -552,6 +565,11 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "getPID", &getPID, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateCommand(interp, "metaData",     neesMetaData,(ClientData)NULL, NULL);
+    Tcl_CreateCommand(interp, "defaultUnits", defaultUnits,(ClientData)NULL, NULL);
+    Tcl_CreateCommand(interp, "neesUpload", neesUpload,(ClientData)NULL, NULL);
+
+
 #ifdef _RELIABILITY
     Tcl_CreateCommand(interp, "wipeReliability", wipeReliability, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
@@ -616,7 +634,8 @@ OPS_SourceCmd(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **ar
 {
   int ok = TCL_OK;
   if (argc > 1) {
-    simulationInfo.addInputFile(argv[1]);
+    const char *pwd = getInterpPWD(interp);
+    simulationInfo.addInputFile(argv[1], pwd);
 
     ok = Tcl_EvalFile(interp, argv[1]);
   }
@@ -4858,8 +4877,8 @@ logFile(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
   if (opserr.setFile(argv[1], mode) < 0) 
     opserr << "WARNING logFile " << argv[1] << " failed to set the file\n";
 
-  
-  simulationInfo.addOutputFile(argv[1]);
+  const char *pwd = getInterpPWD(interp);  
+  simulationInfo.addOutputFile(argv[1], pwd);
 
   return TCL_OK;
 }
@@ -4913,3 +4932,273 @@ getNP(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 }
 
 
+int
+neesMetaData(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  if (argc < 2)
+    return -1;
+  
+  int count = 1;
+  while (count < argc) {
+    if ((strcmp(argv[count],"-title") == 0) || (strcmp(argv[count],"-Title") == 0) 
+	|| (strcmp(argv[count],"-TITLE") == 0)) {
+      if (count+1 < argc) {
+	simulationInfo.setTitle(argv[count+1]);	
+	count += 2;
+      }
+    } else if ((strcmp(argv[count],"-contact") == 0) || (strcmp(argv[count],"-Contact") == 0) 
+	       || (strcmp(argv[count],"-CONTACT") == 0)) {
+      if (count+1 < argc) {
+	simulationInfo.setContact(argv[count+1]);	
+	count += 2;
+      }
+    } else if ((strcmp(argv[count],"-description") == 0) || (strcmp(argv[count],"-Description") == 0) 
+	       || (strcmp(argv[count],"-DESCRIPTION") == 0)) {
+      if (count+1 < argc) {
+	simulationInfo.setDescription(argv[count+1]);	
+	count += 2;
+      }
+    } else if ((strcmp(argv[count],"-modelType") == 0) || (strcmp(argv[count],"-ModelType") == 0) 
+	       || (strcmp(argv[count],"-MODELTYPE") == 0)) {
+      if (count+1 < argc) {
+	simulationInfo.addModelType(argv[count+1]);
+	count += 2;
+      }
+    } else if ((strcmp(argv[count],"-analysisType") == 0) || (strcmp(argv[count],"-AnalysisType") == 0) 
+	       || (strcmp(argv[count],"-ANALYSISTYPE") == 0)) {
+      if (count+1 < argc) {
+	simulationInfo.addAnalysisType(argv[count+1]);
+	count += 2;
+      }
+    } else if ((strcmp(argv[count],"-elementType") == 0) || (strcmp(argv[count],"-ElementType") == 0) 
+	       || (strcmp(argv[count],"-ELEMENTTYPE") == 0)) {
+      if (count+1 < argc) {
+	simulationInfo.addElementType(argv[count+1]);
+	count += 2;
+      }
+    } else if ((strcmp(argv[count],"-materialType") == 0) || (strcmp(argv[count],"-MaterialType") == 0) 
+	       || (strcmp(argv[count],"-MATERIALTYPE") == 0)) {
+      if (count+1 < argc) {
+	simulationInfo.addMaterialType(argv[count+1]);
+	count += 2;
+      }
+    } else if ((strcmp(argv[count],"-loadingType") == 0) || (strcmp(argv[count],"-LoadingType") == 0) 
+	       || (strcmp(argv[count],"-LOADINGTYPE") == 0)) {
+      if (count+1 < argc) {
+	simulationInfo.addLoadingType(argv[count+1]);
+	count += 2;
+      }
+    } else {
+      opserr << "WARNING unknown arg type: " << argv[count] << endln;
+      count++;
+    }
+  }
+  return TCL_OK;
+}
+
+
+
+int
+defaultUnits(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  if (argc < 7)
+    return -1;
+
+  const char *length = 0;
+  const char *force = 0;
+  const char *time = 0;
+  
+  int count = 1;
+  while (count < 7) {
+    if ((strcmp(argv[count],"-force") == 0) || (strcmp(argv[count],"-Force") == 0) 
+	|| (strcmp(argv[count],"-FORCE") == 0)) {
+      force = argv[count+1];
+    } else if ((strcmp(argv[count],"-time") == 0) || (strcmp(argv[count],"-Time") == 0) 
+	       || (strcmp(argv[count],"-TIME") == 0)) {
+      time = argv[count+1];
+    } else if ((strcmp(argv[count],"-length") == 0) || (strcmp(argv[count],"-Length") == 0) 
+	       || (strcmp(argv[count],"-LENGTH") == 0)) {
+      length = argv[count+1];
+    } else {
+      opserr << "units - unrecognized unit: " << argv[count] << " want: units -Force type? -Length type? - Time type\n";
+      return -1;
+    }
+    count += 2;
+  }
+
+  if (length == 0 || force == 0 || time == 0) {
+    opserr << "defaultUnits - missing a unit type want: units -Force type? -Length type? - Time type\n";
+    return -1;
+  }
+
+  double in, ft, mm, cm, m;
+  double lb, kip, n, kn;
+  double sec, msec;
+  
+
+  if ((strcmp(length,"in") == 0) || (strcmp(length,"inch") == 0)) {
+    in = 1.0;
+  } else if ((strcmp(length,"ft") == 0) || (strcmp(length,"feet") == 0)) {
+    in = 1.0 / 12.0;
+  } else if ((strcmp(length,"mm") == 0)) {
+    in = 25.4;
+  } else if ((strcmp(length,"cm") == 0)) {
+    in = 2.54;
+  } else if ((strcmp(length,"m") == 0)) {
+    in = 0.0254;
+  } else {
+    in = 1.0;
+    opserr << "defaultUnits - unknown length type, valid options: in, ft, mm, cm, m\n";
+    return TCL_ERROR;
+  }
+
+  if ((strcmp(force,"lb") == 0) || (strcmp(force,"lbs") == 0)) {
+    lb = 1.0;
+  } else if ((strcmp(force,"kip") == 0) || (strcmp(force,"kips") == 0)) {
+    lb = 0.001;
+  } else if ((strcmp(force,"N") == 0)) {
+    lb = 4.4482216152605;
+  } else if ((strcmp(force,"kN") == 0) || (strcmp(force,"KN") == 0) || (strcmp(force,"kn") == 0)) {
+    lb = 0.0044482216152605;
+  } else {
+    lb = 1.0;
+    opserr << "defaultUnits - unknown force type, valid options: lb, kip, N, kN\n";
+    return TCL_ERROR;
+  }
+
+  if ((strcmp(time,"sec") == 0) || (strcmp(time,"sec") == 0)) {
+    sec = 1.0;
+  } else if ((strcmp(time,"msec") == 0) || (strcmp(time,"mSec") == 0)) {
+    sec = 1000.0;
+  } else {
+    sec = 1.0;
+    opserr << "defaultUnits - unknown time type, valid options: sec, msec\n";
+    return TCL_ERROR;
+  }
+
+  ft = in * 12.0;
+  mm = in / 25.44;
+  cm = in / 2.54;
+  m  = in / 0.0254;
+
+  kip = lb / 0.001;
+  n =   lb / 4.4482216152605;
+  kn  = lb / 0.0044482216152605;
+
+  msec = sec * 0.001;
+
+  char string[50];
+
+
+  sprintf(string,"set in %.18e", in);   Tcl_Eval(interp, string);
+  sprintf(string,"set inch %.18e", in);   Tcl_Eval(interp, string);
+  sprintf(string,"set ft %.18e", ft);   Tcl_Eval(interp, string);
+  sprintf(string,"set mm %.18e", mm);   Tcl_Eval(interp, string);
+  sprintf(string,"set cm %.18e", cm);   Tcl_Eval(interp, string);
+  sprintf(string,"set m  %.18e", m);   Tcl_Eval(interp, string);
+  sprintf(string,"set meter  %.18e", m);   Tcl_Eval(interp, string);
+
+  sprintf(string,"set lb %.18e", lb);   Tcl_Eval(interp, string);
+  sprintf(string,"set lbf %.18e", lb);   Tcl_Eval(interp, string);
+  sprintf(string,"set kip %.18e", kip);   Tcl_Eval(interp, string);
+  sprintf(string,"set N %.18e", n);   Tcl_Eval(interp, string);
+  sprintf(string,"set kN %.18e", kn);   Tcl_Eval(interp, string);
+  sprintf(string,"set Newton %.18e", n);   Tcl_Eval(interp, string);
+  sprintf(string,"set kNewton %.18e", kn);   Tcl_Eval(interp, string);
+
+  sprintf(string,"set sec %.18e", sec);   Tcl_Eval(interp, string);
+  sprintf(string,"set msec %.18e", msec);   Tcl_Eval(interp, string);
+
+  double g = 32.174049*ft/(sec*sec);
+  sprintf(string,"set g %.18e", g);   Tcl_Eval(interp, string);
+  sprintf(string,"set Pa %.18e",n/(m*m));   Tcl_Eval(interp, string);
+  sprintf(string,"set MPa %.18e",1e6*n/(m*m));   Tcl_Eval(interp, string);
+  sprintf(string,"set ksi %.18e",kip/(in*in));   Tcl_Eval(interp, string);
+  sprintf(string,"set psi %.18e",lb/(in*in));   Tcl_Eval(interp, string);
+  sprintf(string,"set pcf %.18e",lb/(ft*ft*ft));   Tcl_Eval(interp, string);
+  sprintf(string,"set psf %.18e",lb/(ft*ft));   Tcl_Eval(interp, string);
+  sprintf(string,"set in2 %.18e",in*in);   Tcl_Eval(interp, string);
+  sprintf(string,"set m2 %.18e", m*m);   Tcl_Eval(interp, string);
+  sprintf(string,"set mm2 %.18e",mm*mm);   Tcl_Eval(interp, string);
+  sprintf(string,"set cm2 %.18e",cm*cm);   Tcl_Eval(interp, string);
+  sprintf(string,"set in4 %.18e",in*in*in*in);   Tcl_Eval(interp, string);
+  sprintf(string,"set mm4 %.18e",mm*mm*mm*mm);   Tcl_Eval(interp, string);
+  sprintf(string,"set cm4 %.18e",cm*cm*cm*cm);   Tcl_Eval(interp, string);
+  sprintf(string,"set m4 %.18e",m*m*m*m);   Tcl_Eval(interp, string);
+  sprintf(string,"set pi %.18e",2.0*asin(1.0));   Tcl_Eval(interp, string);
+  sprintf(string,"set PI %.18e",2.0*asin(1.0));   Tcl_Eval(interp, string);
+
+  int res = simulationInfo.setLengthUnit(length);
+  res += simulationInfo.setTimeUnit(time);
+  res += simulationInfo.setForceUnit(force);
+
+  return res;
+}
+
+
+
+int 
+neesUpload(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  if (argc < 10) { 
+    opserr << "WARNING neesUpload -user isername? -pass passwd? -proj projID? -exp expID?\n";
+    return TCL_ERROR;
+  }
+  int projID =0;
+  int expID =0;
+  const char *userName =0;
+  const char *userPasswd =0;
+
+  int currentArg = 1;
+  while (currentArg+1 < argc) {
+    if (strcmp(argv[currentArg],"-user") == 0) {
+      userName = argv[currentArg+1];
+      
+    } else if (strcmp(argv[currentArg],"-pass") == 0) {
+      userPasswd = argv[currentArg+1];
+
+    } else if (strcmp(argv[currentArg],"-projID") == 0) {
+      if (Tcl_GetInt(interp, argv[currentArg+1], &projID) != TCL_OK) {
+	opserr << "WARNING neesUpload -invalid expID\n";
+	return TCL_ERROR;	        
+      }
+      
+    } else if (strcmp(argv[currentArg],"-expID") == 0) {
+      if (Tcl_GetInt(interp, argv[currentArg+1], &expID) != TCL_OK) {
+	opserr << "WARNING neesUpload -invalid expID\n";
+	return TCL_ERROR;	        
+      }
+    
+    } else if (strcmp(argv[currentArg],"-title") == 0) {
+      simulationInfo.setTitle(argv[currentArg+1]);	
+      
+    } else if (strcmp(argv[currentArg],"-description") == 0) {
+      simulationInfo.setDescription(argv[currentArg+1]);	
+      
+    }
+
+    currentArg+=2;
+  }        
+
+  simulationInfo.neesUpload(userName, userPasswd, projID, expID);
+
+  return TCL_OK;
+}
+
+
+const char * getInterpPWD(Tcl_Interp *interp) {
+  static char *pwd = 0;
+
+  if (pwd != 0)
+    delete [] pwd;
+
+  Tcl_Obj *cwd = Tcl_FSGetCwd(interp);
+  if (cwd != NULL) {
+    int length;
+    const char *objPWD = Tcl_GetStringFromObj(cwd, &length);
+    pwd = new char[length+1];
+    strcpy(pwd, objPWD);
+    Tcl_DecrRefCount(cwd);	
+  }
+  return pwd;
+}
