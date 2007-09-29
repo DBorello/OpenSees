@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-07-16 22:52:56 $
+// $Revision: 1.3 $
+// $Date: 2007-09-29 01:57:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/HTTP.cpp,v $
                                                                         
 // Written: fmk 11/06
@@ -29,6 +29,9 @@
 
 #include <Socket.h>
 
+#include <stdio.h>
+#include <sys/stat.h>
+
 #ifdef _HTTPS
 #include <openssl/crypto.h>
 #include <openssl/x509.h>
@@ -37,6 +40,10 @@
 #include <openssl/err.h>
 #endif
 
+#define OUTBUF_SIZE 4096
+
+static char outBuf[OUTBUF_SIZE];
+static char inBuf[OUTBUF_SIZE];
 
 socket_type
 establishHTTPConnection(const char* URL, unsigned int port) {
@@ -131,7 +138,6 @@ httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
 
   int i, j, nleft, nwrite, sizeData, ok;
   char *gMsg, *data, *nextData;
-  char outBuf[4096], inBuf[4096];
   socket_type sockfd;
 
   // in case we fail, set return pointer to 0
@@ -224,19 +230,17 @@ int __cdecl
 #else
 int
 #endif
-httpsGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
+httpsGet(char const *URL, char const *page, char const *cookie, unsigned int port, char **dataPtr) {
 
   int i, j, nleft, nwrite, sizeData, ok;
   char *gMsg, *data, *nextData;
-  char outBuf[4096], inBuf[4096];
+  char outBuf[OUTBUF_SIZE], inBuf[OUTBUF_SIZE];
   socket_type sockfd;
 
   SSL *ssl;
   SSL_CTX *ctx;
   SSL_METHOD *client_method;
-  X509 *server_cert;
-
-  int sd, err;
+  int err;
 
   /* ******************************************************
    * init SSL library from http: the definitive guide
@@ -260,9 +264,6 @@ httpsGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
     return -1;
   }
 
-  fprintf(stderr,"CONNECTION ESTABLISHED\n");
-
-
   /* ******************************************************
    * init SSL handshake from http: the definitive guide
    * **************************************************** */
@@ -270,32 +271,15 @@ httpsGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
   SSL_set_fd(ssl, sockfd);
   err = SSL_connect(ssl);
 
-  fprintf(stderr,"endpoint create & handshake completed\n");
-  fprintf(stderr,"cipher: %s\n\n",SSL_get_cipher(ssl));
   /* ********************* from http:the definitive guide */
 
   sprintf(outBuf, "GET %s HTTP/1.1\nHost:%s\n",page,URL);
+  if (cookie != 0) 
+    strcat(outBuf, cookie);
   strcat(outBuf, "Connection:close\n\n");
   nleft = strlen(outBuf);
 
-  fprintf(stderr,"%s",outBuf);
-
   err = SSL_write(ssl, outBuf, nleft);
-
-  /*
-  //send the data
-  // if o.k. get a ponter to the data in the message and 
-  // place the incoming data there
-  nwrite = 0;    
-  gMsg = outBuf;
-  
-  while (nleft > 0) {
-    nwrite = send(sockfd, gMsg, nleft, 0);
-    nleft -= nwrite;
-    gMsg +=  nwrite;
-  }
-  */
-
 
   ok = 1;
   nleft = 4095;
@@ -366,26 +350,26 @@ int __cdecl
 #else
 int
 #endif
-httpsPOST(const char *URL, 
-	 const char *page, 
-	 const char *cookie, 
-	 const char *contentType,
-	 const char *dataToPost,
-	 unsigned int port, 
-	 bool returnHeader, 
-	 char **resPtr) {
+httpsSEND(const char *URL, 
+	  const char *page, 
+	  const char *cookie, 
+	  const char *contentType,
+	  const char *dataToPost,
+	  unsigned int port, 
+	  bool returnHeader, 
+	  bool doPOST,
+	  char **resPtr) {
 
   int i, j, nleft, nwrite, sizeData, ok;
   char *gMsg, *data, *oldData, *nextData;
-  char outBuf[4096], inBuf[4096];
+  char outBuf[OUTBUF_SIZE], inBuf[OUTBUF_SIZE];
   socket_type sockfd;
 
   SSL *ssl;
   SSL_CTX *ctx;
   SSL_METHOD *client_method;
-  X509 *server_cert;
 
-  int sd, err;
+  int err;
 
   // in case we fail, set return pointer to 0
   *resPtr = 0;
@@ -419,9 +403,14 @@ httpsPOST(const char *URL,
   err = SSL_connect(ssl);
   /* end of code taken from http: the definitive guide */  
 
-  sprintf(outBuf, "POST %s HTTP/1.1\nHost: %s\n", page, URL);  
-  if (cookie != 0)
+  if (doPOST == true)
+    sprintf(outBuf, "POST %s HTTP/1.1\nHost: %s\n", page, URL);  
+  else
+    sprintf(outBuf, "PUT %s HTTP/1.1\nHost: %s\n", page, URL);  
+
+  if (cookie != 0) 
     strcat(outBuf, cookie);
+
   if (contentType == 0)
     strcat(outBuf, "Content-Type:text/plain\n");
   else {
@@ -435,9 +424,7 @@ httpsPOST(const char *URL,
   strcat(outBuf, dataToPost);
 
   nleft = strlen(outBuf);
-  err = SSL_write(ssl, outBuf, nleft);
 
-  /*
   //send the data
   // if o.k. get a ponter to the data in the message and 
   // place the incoming data there
@@ -445,11 +432,12 @@ httpsPOST(const char *URL,
   gMsg = outBuf;
   
   while (nleft > 0) {
-    nwrite = send(sockfd, gMsg, nleft, 0);
+    nwrite = SSL_write(ssl, gMsg, nleft);
     nleft -= nwrite;
     gMsg +=  nwrite;
   }
-  */
+
+  // read the response
 
   ok = 1;
   nleft = 4095;
@@ -478,6 +466,213 @@ httpsPOST(const char *URL,
 	strcpy(&data[sizeData],"");
       }
     }
+    if (ok < 4095)
+      ok = 0;
+  }
+
+  // now we need to strip off the response header 
+  if (returnHeader == false) {
+    oldData = data;
+    gMsg = data;
+    nextData = strstr(data,"Content-Type");
+    if (nextData != NULL) {
+      nextData = strchr(nextData,'\n');
+      nextData += 3;
+      
+      nwrite = sizeData+1-(nextData-data);
+      
+      data = (char *)malloc((sizeData+1)*sizeof(char));
+      for (i=0; i<nwrite; i++)
+	data[i]=nextData[i];
+
+      free(oldData);
+    }
+    
+  }
+
+  *resPtr = data;
+
+  /*
+   * shut-down ssl, close socket & free related memory
+   */
+
+  SSL_shutdown(ssl);
+#ifdef _WIN32
+  closesocket(sockfd);
+#else
+  close(sockfd);
+#endif
+  SSL_free(ssl);
+  SSL_CTX_free(ctx);
+  cleanup_sockets();
+  
+  return 0;
+}
+
+
+#ifdef _WIN32
+int __cdecl
+#else
+int
+#endif
+httpsSEND_File(const char *URL, 
+	       const char *page, 
+	       const char *cookie, 
+	       const char *contentType,
+	       const char *filename,
+	       unsigned int port, 
+	       bool returnHeader, 
+	       bool doPOST,
+	       char **resPtr) 
+{
+  int i, j, nleft, nwrite, sizeData, ok;
+  char *gMsg, *data, *oldData, *nextData;
+  char outBuf[OUTBUF_SIZE], inBuf[OUTBUF_SIZE];
+  socket_type sockfd;
+
+  struct stat statResults;
+  FILE *fp;
+  
+  SSL *ssl;
+  SSL_CTX *ctx;
+  SSL_METHOD *client_method;
+
+  int err;
+
+  // in case we fail, set return pointer to 0
+  *resPtr = 0;
+
+
+  // get filesize
+  int fileSize = 0;
+
+  if (stat(filename, &statResults) == 0)
+    fileSize =  statResults.st_size;
+
+  if (fileSize == 0) {
+    fprintf(stderr, "file %s has 0 fileSize; either no data or file does not exist!\n", filename);
+    return -1;
+  }
+
+  fp = fopen(filename,"rb");
+  if (fp == 0) {
+    fprintf(stderr, "cannot open file %s for reading - is it still open for writing!\n", filename);
+    return -1;
+  }
+
+     
+  /* 
+   * init SSL library 
+   * code taken from O'Reilly book: 'http: the definitive guide'
+   */
+  SSLeay_add_ssl_algorithms();
+  client_method = SSLv2_client_method();
+  SSL_load_error_strings();
+  ctx = SSL_CTX_new(client_method);
+  /* end of code taken from http: the definitive guide */  
+
+  // invoke startup sockets
+  startup_sockets();
+  
+  // open a socket
+  sockfd = establishHTTPConnection(URL, port);
+  if (sockfd < 0) {
+    fprintf(stderr, "postData: failed to establis connection\n");
+    return -1;
+  }
+
+  /* 
+   * SSL handshake
+   * code taken from O'Reilly book: 'http: the definitive guide'
+   */
+  ssl = SSL_new(ctx);
+  SSL_set_fd(ssl, sockfd);
+  err = SSL_connect(ssl);
+  /* end of code taken from http: the definitive guide */  
+
+  if (doPOST == true)
+    sprintf(outBuf, "POST %s HTTP/1.1\nHost: %s\n", page, URL);  
+  else
+    sprintf(outBuf, "PUT %s HTTP/1.1\nHost: %s\n", page, URL);  
+
+  if (cookie != 0) 
+    strcat(outBuf, cookie);
+
+  if (contentType == 0)
+    strcat(outBuf, "Content-Type:text/plain\n");
+  else {
+    sprintf(inBuf, "Content-Type: %s\n", contentType);
+    strcat(outBuf, inBuf);
+  }
+
+  sprintf(inBuf, "Content-Length: %d\n\n", fileSize);
+  strcat(outBuf, inBuf);
+
+  //  strcat(outBuf, dataToPost);
+
+  nleft = strlen(outBuf);
+
+  //send the heading
+  // if o.k. get a ponter to the data in the message and 
+  // place the incoming data there
+  nwrite = 0;    
+  gMsg = outBuf;
+  
+  while (nleft > 0) {
+    nwrite = SSL_write(ssl, gMsg, nleft);
+    nleft -= nwrite;
+    gMsg +=  nwrite;
+  }
+
+
+  int done = 0;
+  while (done == 0) {
+    nleft = fread((void *)outBuf, 1, OUTBUF_SIZE, fp);
+    gMsg = outBuf;
+    if (nleft < OUTBUF_SIZE)
+      done = 1;
+    while (nleft > 0) {
+      nwrite = SSL_write(ssl, gMsg, nleft);
+      nleft -= nwrite;
+      gMsg +=  nwrite;
+    }
+    if (feof(fp) != 0)
+      done = 1;
+  }
+  
+  fclose(fp);
+
+  //  err = SSL_write(ssl, outBuf, nleft);
+
+  ok = 1;
+  nleft = 4095;
+
+  sizeData = 0;
+  oldData = 0;
+  data = 0;
+
+  while (ok > 0) {
+
+    gMsg = inBuf;
+    ok = SSL_read(ssl, gMsg, nleft);
+
+    if (ok > 0) {
+      oldData = data;
+      data = (char *)malloc((sizeData+ok+1)*sizeof(char));
+      if (data != 0) {
+	if (oldData != 0) {
+	  for (i=0; i<sizeData; i++)
+	    data[i]=oldData[i];
+	  free(oldData);
+	}
+	for (i=0, j=sizeData; i<ok; i++, j++)
+	  data[j]=inBuf[i];
+	sizeData += ok;
+	strcpy(&data[sizeData],"");
+      }
+    }
+    if (ok < 4095)
+      ok = 0;
   }
 
   // now we need to strip off the response header 
@@ -520,85 +715,7 @@ httpsPOST(const char *URL,
   return 0;
 }
 
+#endif // _HTTPS
 
-#ifdef _WIN32
-int __cdecl
-#else
-int
-#endif
-neesPOST(const char *user,
-	 const char *pass,
-	 const char *page, 
-	 const char *postData, 
-	 const char *contentType) {
 
-  char *res = 0;
-  char *URL="central.nees.org";
-  char *loginPage = "/login.php";
-  char *loginType="application/x-www-form-urlencoded";
-  char *cookie = 0;
-  char loginData[512];
 
-  sprintf(loginData,"redirect=https%s3A%s2F%s2Fcentral.nees.org%s2Findex.php%s3F&user=%s&pass=%s","%","%","%","%","%",user,pass);  
-
-  /*
-   * login & get GAsession cookie
-   */
-
-  httpsPOST(URL, loginPage, cookie, loginType, loginData,  443, true, &res);
-
-  // make sure GAsession in cookie
-  char *GAsession = strstr(res,"GAsession");  
-  if (GAsession == 0) {
-    fprintf(stderr, "neesPOST: could not login, check username, password or central.nees.org availability\n");
-    return -1;
-  }
-
-  /*
-   * set the coookie data for next call
-   */
-
-  cookie = (char *)malloc(8*sizeof(char));
-  int sizeCookie = 8;
-  strcpy(cookie, "Cookie:");
-
-  char *startNextCookie = strstr(res,"Set-Cookie");
-  while (startNextCookie != 0) {
-
-    startNextCookie += 11; // "Set-Cookie:");
-    char *endNextCookie = strstr(startNextCookie, ";");
-    int sizeNextCookie = endNextCookie-startNextCookie+1;
-
-    char *nextCookie = (char *)malloc((sizeNextCookie+sizeCookie+1)*sizeof(char));
-    
-    strncpy(nextCookie, cookie, sizeCookie-1);
-    strncpy(&nextCookie[sizeCookie-1], startNextCookie, sizeNextCookie);
-
-    free(cookie);
-    cookie = nextCookie;
-    sizeCookie += sizeNextCookie;
-
-    strcpy(&cookie[sizeCookie],"");
-
-    startNextCookie++;
-    startNextCookie = strstr(startNextCookie,"Set-Cookie");
-  }
-  strcpy(&cookie[sizeCookie-2],"");
-
-  free(res);
-  
-  httpsPOST(URL, page, cookie, contentType, postData,  443, true, &res);
-  
-  char *success = strstr(res,"HTTP/1.1 201 Success");
-
-  if (success != 0) {
-    free(res);
-    return 0;
-  } else {
-    fprintf(stderr, "neesPOST: could not post\n NEES ERROR: %s\n", res);
-    free(res);
-    return -1;
-  }
-}
-
-#endif
