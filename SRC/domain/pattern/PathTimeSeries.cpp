@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2006-11-08 20:10:52 $
+// $Revision: 1.10 $
+// $Date: 2007-09-29 01:55:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathTimeSeries.cpp,v $
                                                                         
                                                                         
@@ -45,13 +45,6 @@ using std::ifstream;
 
 #include <iomanip>
 using std::ios;
-
-#ifdef _TCL84
-#include <SimulationInformation.h>
-extern SimulationInformation simulationInfo;
-#endif
-
-
 
 PathTimeSeries::PathTimeSeries()	
   :TimeSeries(TSERIES_TAG_PathTimeSeries),
@@ -98,6 +91,7 @@ PathTimeSeries::PathTimeSeries(const Vector &theLoadPath,
 PathTimeSeries::PathTimeSeries(const char *filePathName, 
 			       const char *fileTimeName, 
 			       double theFactor)
+			       
   :TimeSeries(TSERIES_TAG_PathTimeSeries),
    thePath(0), time(0), currentTimeLoc(0), 
    cFactor(theFactor), dbTag1(0), dbTag2(0), lastSendCommitTag(-1), lastChannel(0)
@@ -119,11 +113,6 @@ PathTimeSeries::PathTimeSeries(const char *filePathName,
       numDataPoints1++;
   }   
   theFile.close();
-  
-#ifdef _TCL84
-  // keep record of file for o/p of simulation event information
-  simulationInfo.addInputFile(filePathName);
-#endif
 
   // now open and go through file containg time
   ifstream theFile1;
@@ -136,11 +125,6 @@ PathTimeSeries::PathTimeSeries(const char *filePathName,
       numDataPoints2++;
   }   
   theFile1.close();
-
-#ifdef _TCL84
-  // keep record of file for o/p of simulation event information
-  simulationInfo.addInputFile(fileTimeName);
-#endif
 
   // check number of data entries in both are the same
   if (numDataPoints1 != numDataPoints2) {
@@ -239,12 +223,7 @@ PathTimeSeries::PathTimeSeries(const char *fileName,
     }
   }
   theFile.close();
-  
-#ifdef _TCL84
-  // keep record of file for o/p of simulation event information
-  simulationInfo.addInputFile(fileName);
-#endif
-  
+
   // create a vector and read in the data
   if (numDataPoints != 0) {
     
