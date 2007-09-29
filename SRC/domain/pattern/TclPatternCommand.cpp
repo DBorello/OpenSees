@@ -18,12 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.12 $
-// $Date: 2006-02-08 19:29:10 $
+// $Revision: 1.13 $
+// $Date: 2007-09-29 01:54:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclPatternCommand.cpp,v $
 
-// File: ~/domain/pattern/TclPatternComand.C
-//
 // Written: fmk
 // Created: 07/99
 //
@@ -39,6 +37,7 @@
 // valid Pattern types are:
 
 // What: "@(#) TclPatternCommand.C, revA"
+
 
 #include <TclModelBuilder.h>
 
@@ -60,7 +59,9 @@
 
 #include <string.h>
 
-
+#include <SimulationInformation.h>
+extern SimulationInformation simulationInfo;
+extern const char * getInterpPWD(Tcl_Interp *interp);  // commands.cpp
 
 LoadPattern *theTclLoadPattern =0;
 MultiSupportPattern *theTclMultiSupportPattern =0;
@@ -227,7 +228,7 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
       }
       
       GroundMotion *theMotion = new GroundMotion(dispSeries, velSeries,
-             accelSeries, seriesIntegrator);
+						 accelSeries, seriesIntegrator);
 
       if (theMotion == 0) {
     opserr << "WARNING ran out of memory creating ground motion - pattern UniformExcitation ";
@@ -322,21 +323,23 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
 
 
     // read in the ground motion
-  if (accelFileName == 0)
-  {
-    opserr << "WARNING -- No ground motion data provided\n";
-    opserr << "UniformExcitation tag: " << patternID << endln;
-    return TCL_ERROR;
-  }
-
-    theMotion = new GroundMotionRecord(accelFileName, dt, factor);
-
-  if (theMotion == 0) {
-    opserr << "WARNING ran out of memory creating ground motion - pattern UniformExcitation ";
-    opserr << patternID << endln;
-
-    return TCL_ERROR;
+    if (accelFileName == 0) {
+      opserr << "WARNING -- No ground motion data provided\n";
+      opserr << "UniformExcitation tag: " << patternID << endln;
+      return TCL_ERROR;
     }
+
+    
+    theMotion = new GroundMotionRecord(accelFileName, dt, factor);
+    
+    if (theMotion == 0) {
+      opserr << "WARNING ran out of memory creating ground motion - pattern UniformExcitation ";
+      opserr << patternID << endln;
+      return TCL_ERROR;
+    }
+
+    const char *pwd = getInterpPWD(interp);
+    simulationInfo.addInputFile(accelFileName, pwd);  
 
     // create the UniformExcitation Pattern
     thePattern = new UniformExcitation(*theMotion, dir, patternID);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.16 $
-// $Date: 2007-02-23 19:05:11 $
+// $Revision: 1.17 $
+// $Date: 2007-09-29 01:54:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclSeriesCommand.cpp,v $
 
 // Written: fmk 
@@ -56,6 +56,11 @@
 extern ReliabilityDomain *theReliabilityDomain;
 extern RandomNumberGenerator *theRandomNumberGenerator;
 #endif
+
+
+#include <SimulationInformation.h>
+extern SimulationInformation simulationInfo;
+extern const char * getInterpPWD(Tcl_Interp *interp);  // commands.cpp
 
 // little function to free memory after invoke Tcl_SplitList
 //   note Tcl_Split list stores the array of pointers and the strings in 
@@ -667,16 +672,23 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
     
 
     if (filePathName != 0 && fileTimeName == 0 && timeIncr != 0.0) {
+      const char *pwd = getInterpPWD(interp);
+      simulationInfo.addInputFile(argv[filePathName], pwd);  
       theSeries = new PathSeries(argv[filePathName], timeIncr, cFactor);
     }
 
     else if (fileName != 0) {
+      const char *pwd = getInterpPWD(interp);
+      simulationInfo.addInputFile(argv[fileName], pwd);  
       theSeries = new PathTimeSeries(argv[fileName], cFactor);
 
-    } else if (filePathName != 0 && fileTimeName != 0)
+    } else if (filePathName != 0 && fileTimeName != 0) {
+      const char *pwd = getInterpPWD(interp);
+      simulationInfo.addInputFile(argv[filePathName], pwd);  
+      simulationInfo.addInputFile(argv[fileTimeName], pwd);  
       theSeries = new PathTimeSeries(argv[filePathName], argv[fileTimeName], cFactor); 
 
-    else if (dataPath != 0 && dataTime == 0 && timeIncr != 0.0) {
+    } else if (dataPath != 0 && dataTime == 0 && timeIncr != 0.0) {
       theSeries = new PathSeries(*dataPath, timeIncr, cFactor); 
       delete dataPath;
 
