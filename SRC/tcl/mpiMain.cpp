@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-07-03 18:55:37 $
+// $Revision: 1.7 $
+// $Date: 2007-10-01 21:59:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/mpiMain.cpp,v $
 
 /* 
@@ -35,7 +35,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: mpiMain.cpp,v 1.6 2007-07-03 18:55:37 fmk Exp $
+ * RCS: @(#) $Id: mpiMain.cpp,v 1.7 2007-10-01 21:59:49 fmk Exp $
  */
 
 extern "C" {
@@ -306,22 +306,4 @@ int Tcl_AppInit(Tcl_Interp *interp)
     return TCL_OK;
 }
 
-
-int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
-{
-  theDomain.clearAll();
-
-  //
-  // mpi clean up
-  //
-
-  if (theMachineBroker != 0) {
-    theMachineBroker->shutdown();
-    fprintf(stderr, "Process Terminating\n");
-  }
-
-  Tcl_Exit(0);
-
-  return 0;
-}
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2007-10-01 21:39:08 $
+// $Revision: 1.13 $
+// $Date: 2007-10-01 21:59:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/tclAppInit.cpp,v $
 
 
@@ -36,7 +36,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclAppInit.cpp,v 1.12 2007-10-01 21:39:08 fmk Exp $
+ * RCS: @(#) $Id: tclAppInit.cpp,v 1.13 2007-10-01 21:59:49 fmk Exp $
  */
 
 extern "C" {
@@ -77,16 +77,6 @@ extern int		TclThread_Init _ANSI_ARGS_((Tcl_Interp *interp));
 extern void		XtToolkitInitialize _ANSI_ARGS_((void));
 extern int		Tclxttest_Init _ANSI_ARGS_((Tcl_Interp *interp));
 #endif
-
-
-#include <XmlFileStream.h>
-#include <SimulationInformation.h>
-extern SimulationInformation simulationInfo;
-extern char *simulationInfoOutputFilename;
-extern char *neesCentralProjID;
-extern char *neesCentralExpID;
-extern char *neesCentralUser;
-extern char *neesCentralPasswd;
 
 
 /*
@@ -232,37 +222,4 @@ int Tcl_AppInit(Tcl_Interp *interp)
     return TCL_OK;
 }
 
-
-int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
-{
-	
-  if (simulationInfoOutputFilename != 0) {
-    simulationInfo.end();
-    XmlFileStream simulationInfoOutputFile;
-    simulationInfoOutputFile.setFile(simulationInfoOutputFilename);
-    simulationInfoOutputFile.open();
-    simulationInfoOutputFile << simulationInfo;
-    simulationInfoOutputFile.close();
-  }
-
-  if (neesCentralProjID != 0) {
-    opserr << "UPLOADING To NEEScentral ...\n";
-    int pid =0;
-    int expid =0;
-    if (Tcl_GetInt(interp, neesCentralProjID, &pid) != TCL_OK) {
-      opserr << "WARNING neesUpload -invalid projID\n";
-      return TCL_ERROR;	        
-    }
-    if (neesCentralExpID != 0) 
-      if (Tcl_GetInt(interp, neesCentralExpID, &expid) != TCL_OK) {
-	opserr << "WARNING neesUpload -invalid projID\n";
-	return TCL_ERROR;	        
-      }
-    
-    simulationInfo.neesUpload(neesCentralUser, neesCentralPasswd, pid, expid);
-  }
-
-  Tcl_Exit(0);
-  return 0;
-}
 

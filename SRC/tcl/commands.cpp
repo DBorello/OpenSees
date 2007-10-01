@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.97 $
-// $Date: 2007-10-01 21:39:08 $
+// $Revision: 1.98 $
+// $Date: 2007-10-01 21:59:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -265,8 +265,19 @@ int wipeReliability(ClientData, Tcl_Interp *, int, TCL_Char **);
 
 const char * getInterpPWD(Tcl_Interp *interp);
 
+#include <XmlFileStream.h>
 #include <SimulationInformation.h>
 extern SimulationInformation simulationInfo;
+extern char *simulationInfoOutputFilename;
+extern char *neesCentralProjID;
+extern char *neesCentralExpID;
+extern char *neesCentralUser;
+extern char *neesCentralPasswd;
+
+
+
+
+
 
 ModelBuilder *theBuilder =0;
 
@@ -5202,3 +5213,62 @@ const char * getInterpPWD(Tcl_Interp *interp) {
   }
   return pwd;
 }
+
+
+int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  theDomain.clearAll();
+
+#ifdef _PARALLEL_PROCESSING
+  //
+  // mpi clean up
+  //
+
+  if (theMachineBroker != 0) {
+    theMachineBroker->shutdown();
+    fprintf(stderr, "Process Terminating\n");
+  }
+#endif
+
+#ifdef _PARALLEL_INTERPRETERS
+  //
+  // mpi clean up
+  //
+
+  if (theMachineBroker != 0) {
+    theMachineBroker->shutdown();
+    fprintf(stderr, "Process Terminating\n");
+  }
+#endif
+
+  if (simulationInfoOutputFilename != 0) {
+    simulationInfo.end();
+    XmlFileStream simulationInfoOutputFile;
+    simulationInfoOutputFile.setFile(simulationInfoOutputFilename);
+    simulationInfoOutputFile.open();
+    simulationInfoOutputFile << simulationInfo;
+    simulationInfoOutputFile.close();
+  }
+
+  if (neesCentralProjID != 0) {
+    opserr << "UPLOADING To NEEScentral ...\n";
+    int pid =0;
+    int expid =0;
+    if (Tcl_GetInt(interp, neesCentralProjID, &pid) != TCL_OK) {
+      opserr << "WARNING neesUpload -invalid projID\n";
+      return TCL_ERROR;	        
+    }
+    if (neesCentralExpID != 0) 
+      if (Tcl_GetInt(interp, neesCentralExpID, &expid) != TCL_OK) {
+	opserr << "WARNING neesUpload -invalid projID\n";
+	return TCL_ERROR;	        
+      }
+    
+    simulationInfo.neesUpload(neesCentralUser, neesCentralPasswd, pid, expid);
+  }
+
+  Tcl_Exit(0);
+
+  return 0;
+}
+
