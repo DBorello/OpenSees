@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.41 2007-09-29 01:52:46 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.42 2007-10-01 21:39:08 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -335,6 +335,7 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
      * and quit.
      */
 
+
     if (tclStartupScriptFileName != NULL) {
       OpenSeesTcl_Parameter *theParameters = 0;
       OpenSeesTcl_Parameter *endParameters = 0;
@@ -463,13 +464,12 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
       }
 
       //      if (simulationInfoOutputFilename != 0) {
-
       const char *pwd = getInterpPWD(interp);
       simulationInfo.start();
       simulationInfo.addInputFile(tclStartupScriptFileName, pwd);
-
+      
       code = Tcl_EvalFile(interp, tclStartupScriptFileName);
-
+      
       if (code != TCL_OK) {
 	errChannel = Tcl_GetStdChannel(TCL_STDERR);
 	if (errChannel) {
@@ -486,7 +486,6 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	exitCode = 1;
       }
       goto done;
-
     } else {
 
     /*
@@ -503,8 +502,38 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	    simulationInfoOutputFilename = argv[currentArg+1];	    
 	  }			   
 	  currentArg+=2;
-	} else 	
+	} else if ((strcmp(argv[currentArg], "-upload") == 0) || (strcmp(argv[currentArg], "-UPLOAD") == 0)) {
+	  bool more = true;
 	  currentArg++;
+	  while (more == true && currentArg < argc) {
+	    
+	    if (strcmp(argv[currentArg],"-user") == 0) {
+	      neesCentralUser = argv[currentArg+1];
+	      currentArg += 2;
+	      
+	    } else if (strcmp(argv[currentArg],"-pass") == 0) {
+	      neesCentralPasswd = argv[currentArg+1];
+	      currentArg += 2;
+	    } else if (strcmp(argv[currentArg],"-projID") == 0) {
+	      neesCentralProjID = argv[currentArg+1];
+	      currentArg += 2;
+	      
+	    } else if (strcmp(argv[currentArg],"-expID") == 0) {
+	      neesCentralExpID = argv[currentArg+1];
+	      currentArg += 2;
+	      
+	    } else if (strcmp(argv[currentArg],"-title") == 0) {
+	      simulationInfo.setTitle(argv[currentArg+1]);	
+	      currentArg += 2;
+	      
+	    } else if (strcmp(argv[currentArg],"-description") == 0) {
+	      simulationInfo.setDescription(argv[currentArg+1]);	
+	      currentArg += 2;      
+	    } else
+	      more = false;
+	  }
+	} else 
+	  currentArg++; 	
       }
 
       Tcl_SourceRCFile(interp);

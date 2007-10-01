@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.96 $
-// $Date: 2007-09-29 01:52:46 $
+// $Revision: 1.97 $
+// $Date: 2007-10-01 21:39:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -555,7 +555,7 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "region", &addRegion, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
     Tcl_CreateCommand(interp, "logFile", &logFile, 
-		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
     Tcl_CreateCommand(interp, "exit", &OpenSeesExit, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
     Tcl_CreateCommand(interp, "quit", &OpenSeesExit, 

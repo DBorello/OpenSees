@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-09-29 01:52:46 $
+// $Revision: 1.12 $
+// $Date: 2007-10-01 21:39:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/tclAppInit.cpp,v $
 
 
@@ -36,7 +36,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclAppInit.cpp,v 1.11 2007-09-29 01:52:46 fmk Exp $
+ * RCS: @(#) $Id: tclAppInit.cpp,v 1.12 2007-10-01 21:39:08 fmk Exp $
  */
 
 extern "C" {
@@ -231,7 +231,6 @@ int Tcl_AppInit(Tcl_Interp *interp)
     Tcl_SetVar(interp, "tcl_rcFileName", "~/.tclshrc", TCL_GLOBAL_ONLY);
     return TCL_OK;
 }
-
 
 
 int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
