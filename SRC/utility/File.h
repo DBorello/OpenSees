@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-09-29 01:59:20 $
+// $Revision: 1.2 $
+// $Date: 2007-10-02 20:53:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/File.h,v $
                                                                         
                                                                         
@@ -46,16 +46,25 @@ class File
   ~File();
 
   int clear(void);
+
   int addFile(File *);
+  int addFile(const char *name, const char *path, const char *description);
+
   const char *getName(void);
   const char *getDescription(void);
+
+  void setParentDir(File *dir);
+  File *getParentDir(void);
+
   bool isDir(void);
+  File *getFile(const char *name);
   FileIter getFiles(void);
 
   friend class FileIter;
 
  private:
   bool isDirectory;
+  File *parentDir;
   string name;
   string description;
   map<string, File *> dirFiles; 
