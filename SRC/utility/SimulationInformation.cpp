@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-09-29 01:58:46 $
+// $Revision: 1.10 $
+// $Date: 2007-10-02 18:29:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/SimulationInformation.cpp,v $
 //
 // Description: This file contains the class definition for SimulationInformation.
@@ -53,7 +53,7 @@ SimulationInformation::SimulationInformation()
 
   theLastSimulationInformation = this;
 
-  theFiles = new File("/", "", true);
+  theFiles = new File("", "", true);
 
   this->start();
 }
@@ -62,6 +62,9 @@ SimulationInformation::SimulationInformation()
 
 SimulationInformation::~SimulationInformation()
 { 
+
+  opserr << "SimulationInformation::~SimulationInformation()\n";
+
   if (strcmp(endTime," ") == 0)
     this->end();
 
@@ -91,6 +94,8 @@ SimulationInformation::~SimulationInformation()
 int
 SimulationInformation::start(void)
 {
+  opserr << "SimulationInformation::start()\n";
+
   paramNames.clear();
   paramValues.clear();
   analysisTypes.clear();
@@ -253,22 +258,94 @@ SimulationInformation::setTimeUnit(const char *name)
 }
 
 
+void 
+PrintFiles(OPS_Stream &s, File *theFile) 
+{
+  if (theFile == 0)
+    return;
+  
+  const char *fileName = theFile->getName();
+
+  if (theFile->isDir() == true) {
+    s << fileName << " " << theFile->getDescription() << endln;
+    FileIter theDirFiles = theFile->getFiles();
+    File *theDirFile;
+    while ((theDirFile = theDirFiles()) != 0)
+      PrintFiles(s, theDirFile);
+  } else
+    s << "  " << fileName << endln;
+
+}
+
 int 
 SimulationInformation::addInputFile(const char *fileName, const char *path)
 {
   if (strstr(fileName,"history.tcl") != 0)
     return 0;
 
+  static char dirName[128];
+
+  File *currentDir = theFiles;
+
+  if (path != NULL) {
+    const char *pathCurrent = strstr(path, "/");
+
+    if (pathCurrent != NULL) {
+      pathCurrent+=1;      
+      opserr << strlen(theFiles->getDescription()) << endln;
+      if (strlen(theFiles->getDescription()) == 0) {
+	int rootPathLength = pathCurrent-path+1;
+	char *rootPath = new char[pathCurrent-path+1];
+	strncpy(rootPath, path, rootPathLength);
+	strcat(&rootPath[pathCurrent-path],"/");
+	theFiles->setDescription(rootPath);
+      }
+
+    }
+    
+    while (pathCurrent != NULL) {
+      const char *prev = pathCurrent;
+      const char *next = strstr(prev,"/");
+      
+      int dirNameLength = 0;
+      if ((next == 0) && (strlen(dirName) != 0)) {
+	strcpy(dirName, prev);
+	pathCurrent = 0;
+      } else {
+	dirNameLength = next-prev;
+	strncpy(dirName, prev, dirNameLength);
+	strcpy(&dirName[dirNameLength],"");
+	pathCurrent = next+1;
+      }
+      
+      File *nextDir = currentDir->getFile(dirName);
+      if (nextDir == 0) {
+	const char *prevPath = currentDir->getDescription();
+	char *newPath = new char[strlen(prevPath)+2+dirNameLength]; // / + '\0';
+	strcpy(newPath, prevPath);
+	strcat(newPath, dirName);
+	strcat(newPath,"/");
+	
+	File *theNextDir = new File(dirName, newPath, true);
+	currentDir->addFile(theNextDir);
+	currentDir = theNextDir;
+      } else
+	currentDir = nextDir;
+    }
+  }
+  
   File *file = 0;
   if (numInputFiles == 0)
     file = new File(fileName, path, false);
   else
     file = new File(fileName, path, false);
 
+
   numInputFiles++;
 
-  theFiles->addFile(file);
-
+  currentDir->addFile(file);
+  
+  PrintFiles(opserr, theFiles);
 
   return 0;
 }
@@ -331,6 +408,7 @@ SimulationInformation::addMaterialType(const char *theType)
 
 // TclSimulationInformation_defaultUnits()
 // to define basic units. the following is based on code provided by S. Mazzoni
+
 
 
 
@@ -420,6 +498,8 @@ SimulationInformation::Print(OPS_Stream &s) const
 
 }    
 
+#ifdef _HTTTPS
+
 extern int neesLogin(const char *user,
 		     const char *pass,
 		     char **cookieRes);
@@ -448,12 +528,16 @@ extern int neesADD_TrialAnalysisDir(const char *cookie,
 				    const char *path,
 				    const char *dirName);
 
+#endif
+
 int 
 SimulationInformation::neesUpload(const char *username, 
 				  const char *passwd, 
 				  int projID, 
 				  int expID)
 {
+#ifdef _HTTTPS
+
   // call endTime if not already called
   if (strcmp(endTime, " ") == 0)
     this->end();
@@ -461,6 +545,10 @@ SimulationInformation::neesUpload(const char *username,
   int res;
   int trialID;
   char *cookie = 0;
+
+  opserr << "SimulationInformation::neesUpload\n";
+  opserr << *this;
+  return 0;
 
   res = neesLogin(username, passwd, &cookie);
   if (res != 0) {
@@ -499,6 +587,12 @@ SimulationInformation::neesUpload(const char *username,
   
   free(cookie);
   return res;
+#else
+  
+  opserr << "ERROR: SimulationInformation::neesUpload() - not available in this build\n";
+  return -1;
+
+#endif
 }
 
 

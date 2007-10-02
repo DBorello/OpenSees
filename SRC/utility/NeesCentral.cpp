@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-09-29 01:59:20 $
+// $Revision: 1.2 $
+// $Date: 2007-10-02 18:29:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/NeesCentral.cpp,v $
                                                                         
                                                                         
@@ -34,6 +34,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef _HTTPS
 
 #ifdef _WIN32
 extern int __cdecl
@@ -549,5 +551,5 @@ int neesADD_TrialAnalysisDir(const char *cookie,
   return 0;
 }
 
-
+#endif
 
