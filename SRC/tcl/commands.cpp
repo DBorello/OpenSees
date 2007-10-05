@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.98 $
-// $Date: 2007-10-01 21:59:49 $
+// $Revision: 1.99 $
+// $Date: 2007-10-05 22:11:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -4311,6 +4311,7 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
       }      
       LoadPattern *thePattern = theDomain.removeLoadPattern(tag);
       if (thePattern != 0) {
+	thePattern->clearAll();
 	delete thePattern;
       }
     }
