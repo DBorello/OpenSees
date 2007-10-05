@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-10-02 20:53:30 $
+// $Revision: 1.12 $
+// $Date: 2007-10-05 22:08:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/SimulationInformation.cpp,v $
 //
 // Description: This file contains the class definition for SimulationInformation.
@@ -253,25 +253,6 @@ SimulationInformation::setTimeUnit(const char *name)
 }
 
 
-void 
-PrintFiles(OPS_Stream &s, File *theFile) 
-{
-  if (theFile == 0)
-    return;
-  
-  const char *fileName = theFile->getName();
-
-  if (theFile->isDir() == true) {
-    s << fileName << endln;
-    FileIter theDirFiles = theFile->getFiles();
-    File *theDirFile;
-    while ((theDirFile = theDirFiles()) != 0)
-      PrintFiles(s, theDirFile);
-  } else
-    s << "  " << fileName << endln;
-
-}
-
 int 
 SimulationInformation::addInputFile(const char *fileName, const char *path)
 {
@@ -280,8 +261,6 @@ SimulationInformation::addInputFile(const char *fileName, const char *path)
   else
     theFiles->addFile(fileName, path, "Input File");
 
-
-  //  PrintFiles(opserr, theFiles);
   numInputFiles++;
 
   return 0;
@@ -293,7 +272,7 @@ int
 SimulationInformation::addOutputFile(const char *fileName, const char *path)
 {
   theFiles->addFile(fileName, path, "Output File");
-  //  PrintFiles(opserr, theFiles);
+
   return 0;
 }
 
@@ -345,18 +324,28 @@ SimulationInformation::addMaterialType(const char *theType)
 }
 
 
-// TclSimulationInformation_defaultUnits()
-// to define basic units. the following is based on code provided by S. Mazzoni
+void 
+PrintFiles(OPS_Stream &s, File *theFile) 
+{
 
+  if (theFile == 0)
+    return;
+  
+  const char *fileName = theFile->getName();
 
-
+  if (theFile->isDir() == true) {
+    s << fileName << endln;
+    FileIter theDirFiles = theFile->getFiles();
+    File *theDirFile;
+    while ((theDirFile = theDirFiles()) != 0)
+      PrintFiles(s, theDirFile);
+  } else
+    s << "  " << fileName << endln;
+}
 
 void 
 SimulationInformation::Print(OPS_Stream &s) const
 {
-  //  char version[10];
-  //  strcpy(version,OPS_VERSION);
-
   s.tag("Central");
   s.tag("SimulationRun");
 
@@ -423,28 +412,21 @@ SimulationInformation::Print(OPS_Stream &s) const
   s.tag("machine","local");
   s.endTag(); // Computer
 
-  FileIter theFileIter = theFiles->getFiles();
-  File *theFile;
-  while ((theFile = theFileIter()) != 0) {
-    s.tag("DataFile");
-    s.attr("name",theFile->getName());
-    s.attr("description",theFile->getDescription());
-    s.endTag();
-  }
+  PrintFiles(s, theFiles);
 
   s.endTag(); // SimulationRun
   s.endTag(); // Central
 
 }    
 
-#ifdef _HTTTPS
+#ifdef _HTTPS
 
 extern int neesLogin(const char *user,
 		     const char *pass,
 		     char **cookieRes);
 
 
-extern int neesSENDTrial(const char *cookie,
+extern int neesADD_Trial(const char *cookie,
 			 int projID,
 			 int expID,
 			 const char *name,
@@ -457,6 +439,7 @@ extern int neesADD_TrialAnalysisFile(const char *cookie,
 				     int expID,
 				     int trialID,
 				     const char *path,
+				     int basePath,
 				     const char *name,
 				     const char *description);
 
@@ -467,7 +450,67 @@ extern int neesADD_TrialAnalysisDir(const char *cookie,
 				    const char *path,
 				    const char *dirName);
 
+
+//
+// simple recursive procedure to upload a file to nees central
+//
+
+int
+UploadFiles(const char *cookie, int projID, int expID, int trialID, File *theFile, const char *path, int basePath) 
+{
+  int res =0;
+
+  if (theFile == 0)
+    return 0;
+
+
+
+  const char *fileName = theFile->getName();
+
+  if (theFile->isDir() == true) {
+
+    res = neesADD_TrialAnalysisDir(cookie, projID, expID, trialID, &path[basePath], fileName);
+
+    FileIter theDirFiles = theFile->getFiles();
+    File *theDirFile;
+
+    if (res < 0) {
+      opserr << "ERROR: SimulationInformation.cpp - uploadFiles() - failed to add directory: " << fileName 
+	     << " to path: " << &path[basePath] << endln;
+      return res;
+    }
+
+    while ((theDirFile = theDirFiles()) != 0) {
+      res = UploadFiles(cookie, projID, expID, trialID, theDirFile, theFile->getDescription(), basePath);
+      if (res < 0)
+	return res;
+    }      
+
+  } else {
+
+    res =  neesADD_TrialAnalysisFile(cookie,
+				     projID,
+				     expID,
+				     trialID,
+				     path,
+				     basePath,
+				     theFile->getName(),
+				     theFile->getDescription());    
+
+    if (res < 0) {
+      opserr << "ERROR: SimulationInformation.cpp - uploadFiles() - failed to add file: " << fileName 
+	     << " to path: " << &path[basePath] << endln;
+      return res;
+    }
+  }
+
+  return 0;
+}
+
 #endif
+
+
+
 
 int 
 SimulationInformation::neesUpload(const char *username, 
@@ -475,59 +518,89 @@ SimulationInformation::neesUpload(const char *username,
 				  int projID, 
 				  int expID)
 {
-#ifdef _HTTTPS
+#ifdef _HTTPS
 
   // call endTime if not already called
   if (strcmp(endTime, " ") == 0)
     this->end();
 
-  int res;
-  int trialID;
+  int res =0;
+  int trialID =0;
   char *cookie = 0;
 
-  opserr << "SimulationInformation::neesUpload\n";
-  opserr << *this;
-  return 0;
+  //
+  // we first need to login
+  //
+
+  if (username == 0 || passwd== 0) {
+    opserr << "ERROR: SimulationInformation::neesUpload()  could not login to nees central no username or passwd provided\n";
+    return -1;
+  }
 
   res = neesLogin(username, passwd, &cookie);
   if (res != 0) {
     if (cookie != 0)
       free(cookie);
 
+    opserr << "ERROR: SimulationInformation::neesUpload() - failed to login check username: " << username 
+	   << " & password: " << passwd << "\n";
     return -1;
   }
 
-  trialID = neesSENDTrial(cookie, projID, expID, title, title, " ", description);
+  if (cookie != 0) 
+    opserr << "SimulationInformation::neesUpload() - information about cookie: " << cookie << endln;
+  
+  //
+  // we first add trial to the projects experiment
+  //
+
+  trialID = neesADD_Trial(cookie, projID, expID, title, title, " ", description);
 
   if (trialID < 0) {
-    if (cookie != 0)
-      opserr << "SimulationInformation::neesUpload() - failed to send Trial information\n";
+    if (cookie != 0) 
       free(cookie);
+    
+    opserr << "SimulationInformation::neesUpload() - failed to create new Trial in project: "
+	   << projID << " experiment: " << expID << "\n";
 
     return -2;
   }
 
-  FileIter theFileIter = theFiles->getFiles();
-  File *theFile;
-  while ((res == 0) && ((theFile = theFileIter()) != 0)) {
+  //
+  // we now add the files
+  // first determine root dir for project in nees central, lowest branch with multiple dir os a file
+  //
 
-    res =  neesADD_TrialAnalysisFile(cookie,
-				     projID,
-				     expID,
-				     trialID,
-				     "/",
-				     theFile->getName(),
-				     theFile->getDescription());    
-    if (res < 0) {
-      opserr << "SimulationInformation::neesUpload() - failed to send file: " << theFile->getName() << endln;
-    }
+  File *startLoadingDir = theFiles;
+
+  int foundRoot = false;
+  while (foundRoot == false) {
+    if (startLoadingDir->isDir() == true && startLoadingDir->getNumFiles() == 1) {
+      FileIter theDirFiles = startLoadingDir->getFiles();
+      startLoadingDir = theDirFiles();
+    } else
+      foundRoot = true;
   }
 
-  
+  if (startLoadingDir->isDir() == false)
+    startLoadingDir = startLoadingDir->getParentDir();
+
+  //
+  // now call UploadFiles on this root directory
+  //
+
+  const char *path = startLoadingDir->getDescription();
+  int pathLength = strlen(path)-1;
+
+  FileIter theDirFiles = startLoadingDir->getFiles();
+  File *theDirFile;
+  while ((theDirFile = theDirFiles()) != 0) 
+      res += UploadFiles(cookie, projID, expID, trialID, theDirFile, startLoadingDir->getDescription(), pathLength);
+
   free(cookie);
   return res;
+
 #else
-  
   opserr << "ERROR: SimulationInformation::neesUpload() - not available in this build\n";
   return -1;
 
