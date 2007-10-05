@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-10-02 20:53:30 $
+// $Revision: 1.3 $
+// $Date: 2007-10-05 22:06:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/File.cpp,v $
                                                                         
                                                                         
@@ -48,7 +48,13 @@ File::File(const char *theName, const char *theDescription, bool isDir)
 
 File::~File()
 {
+  if (isDirectory == true) {
 
+    FileIter theDirFiles = this->getFiles();
+    File *aDirFile =0;
+    while ((aDirFile = theDirFiles()) != 0)
+      delete aDirFile;
+  } 
 }
 
 int 
@@ -156,17 +162,21 @@ File::addFile(const char *fileName, const char *path, const char *fileDescriptio
   return 0;
 }
 
-
-
 const char *
 File::getName(void)
 {
+  if (name.length() == 0)
+    return 0;
+
   return name.c_str();
 }
 
 const char *
 File::getDescription(void)
 {
+  if (description.length() == 0)
+    return 0;
+
   return description.c_str();
 }
 
@@ -224,5 +234,11 @@ FileIter
 File::getFiles(void)
 {
   return FileIter(*this);
+}
+
+int
+File::getNumFiles(void)
+{
+  return dirFiles.size();
 }
 

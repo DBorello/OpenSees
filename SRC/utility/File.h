@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-10-02 20:53:30 $
+// $Revision: 1.3 $
+// $Date: 2007-10-05 22:06:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/File.h,v $
                                                                         
                                                                         
@@ -59,6 +59,7 @@ class File
   bool isDir(void);
   File *getFile(const char *name);
   FileIter getFiles(void);
+  int getNumFiles(void);
 
   friend class FileIter;
 
