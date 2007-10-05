@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.44 $
-// $Date: 2007-09-29 02:00:59 $
+// $Revision: 1.45 $
+// $Date: 2007-10-05 22:14:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -233,7 +233,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  }
 
 	  for (int i=0; i<eleRegion.Size(); i++)
-	    eleIDs[numEle++] = eleRegion(i);
+	    (*eleIDs)[numEle++] = eleRegion(i);
 	  
 	  loc += 2;
 	} 
