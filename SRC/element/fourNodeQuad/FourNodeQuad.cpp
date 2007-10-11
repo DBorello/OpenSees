@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.31 $
-// $Date: 2007-08-17 17:50:46 $
+// $Revision: 1.32 $
+// $Date: 2007-10-11 21:54:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -1036,7 +1036,7 @@ FourNodeQuad::setParameter(const char **argv, int argc, Parameter &param)
     return param.addObject(1, this);
 
   // quad pressure loading
-  if (strcmp(argv[0],"pressure") == 0)
+  else if (strcmp(argv[0],"pressure") == 0)
     return param.addObject(2, this);
 
   // a material parameter
@@ -1051,12 +1051,15 @@ FourNodeQuad::setParameter(const char **argv, int argc, Parameter &param)
     else 
       return -1;
   }
-  
+
   // otherwise it could be just a forall material parameter
   else {
+
     int matRes = res;
     for (int i=0; i<4; i++) {
+
       matRes =  theMaterial[i]->setParameter(argv, argc, param);
+
       if (matRes != -1)
 	res = matRes;
     }
