@@ -1,5 +1,5 @@
-// $Revision: 1.40 $
-// $Date: 2007-05-04 23:00:20 $
+// $Revision: 1.41 $
+// $Date: 2007-10-11 21:56:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
 
 // Written: ZHY
@@ -795,23 +795,19 @@ PressureDependMultiYield::getOrder (void) const
 
 int PressureDependMultiYield::setParameter(const char **argv, int argc, Parameter &param)
 {
-  if (argc < 1)
+
+  if (argc < 2)
     return -1;
 
-  if (strcmp(argv[0],"updateMaterialStage") == 0) {
-    if (argc < 2)
-      return -1;
-    int matTag = atoi(argv[1]);
-    if (this->getTag() == matTag)
+  int matTag = atoi(argv[1]);
+  if (this->getTag() == matTag) {
+    if (strcmp(argv[0],"updateMaterialStage") == 0) 
       return param.addObject(1, this);
-    else
-      return -1;
+    else if (strcmp(argv[0],"shearModulus") == 0)
+      return param.addObject(10, this);
+    else if (strcmp(argv[0],"bulkModulus") == 0)
+      return param.addObject(11, this);
   }
-
-  else if (strcmp(argv[0],"shearModulus") == 0)
-    return param.addObject(10, this);
-  else if (strcmp(argv[0],"bulkModulus") == 0)
-    return param.addObject(11, this);
 
   return -1;
 }
@@ -819,14 +815,20 @@ int PressureDependMultiYield::setParameter(const char **argv, int argc, Paramete
 int
 PressureDependMultiYield::updateParameter(int responseID, Information &info)
 {
-  if (responseID == 1)
+  if (responseID == 1) {
+    //    opserr << "PressureDependMultiYield::updateParameter() - materialStage " << info.theInt << endln;
     loadStagex[matN] = info.theInt;
+  }
 
-  else if (responseID==10)
+  else if (responseID==10) {
+    //    opserr << "PressureDependMultiYield::updateParameter() - shearModulus " << info.theDouble << endln;
     refShearModulusx[matN]=info.theDouble;
+  }
 
-  else if (responseID==11)
+  else if (responseID==11) {
+    //    opserr << "PressureDependMultiYield::updateParameter() - bulkModulus " << info.theDouble << endln;
     refBulkModulusx[matN]=info.theDouble;
+  }
 
   return 0;
 }

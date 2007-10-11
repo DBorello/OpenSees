@@ -1,5 +1,5 @@
-// $Revision: 1.23 $
-// $Date: 2007-03-30 01:52:10 $
+// $Revision: 1.24 $
+// $Date: 2007-10-11 21:56:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.cpp,v $
                                                                         
 // Written: ZHY
@@ -40,21 +40,21 @@ FluidSolidPorousMaterial::FluidSolidPorousMaterial (int tag, int nd, NDMaterial 
 
   if (matCount%20 == 0) {
      int * temp1 = loadStagex;
-	 int * temp2 = ndmx;
-	 double * temp3 = combinedBulkModulusx;
+     int * temp2 = ndmx;
+     double * temp3 = combinedBulkModulusx;
      loadStagex = new int[matCount+20];
      ndmx = new int[matCount+20];
-	 combinedBulkModulusx = new double[matCount+20];
-	 for (int i=0; i<matCount; i++) {
-         loadStagex[i] = temp1[i];
-		 ndmx[i] = temp2[i];
-		 combinedBulkModulusx[i] = temp3[i];
-	 }
-	 if (matCount > 0) {
-	     delete [] temp1; delete [] temp2; delete [] temp3;
-	 }
+     combinedBulkModulusx = new double[matCount+20];
+     for (int i=0; i<matCount; i++) {
+       loadStagex[i] = temp1[i];
+       ndmx[i] = temp2[i];
+       combinedBulkModulusx[i] = temp3[i];
+     }
+     if (matCount > 0) {
+       delete [] temp1; delete [] temp2; delete [] temp3;
+     }
   }
-
+  
   ndmx[matCount] = nd;
   loadStagex[matCount] = 0;  //default
   combinedBulkModulusx[matCount] = combinedBulkModul;
@@ -83,37 +83,37 @@ FluidSolidPorousMaterial::FluidSolidPorousMaterial ()
 FluidSolidPorousMaterial::FluidSolidPorousMaterial (const FluidSolidPorousMaterial & a)
  : NDMaterial(a.getTag(),ND_TAG_FluidSolidPorousMaterial)
 {
-	matN = a.matN;
-    theSoilMaterial = a.theSoilMaterial->getCopy();
-    trialExcessPressure = a.trialExcessPressure;
-	currentExcessPressure = a.currentExcessPressure;
-	trialVolumeStrain = a.trialVolumeStrain;
-	currentVolumeStrain = a.currentVolumeStrain;
-	initMaxPress = a.initMaxPress;
-	e2p = a.e2p;
+  matN = a.matN;
+  theSoilMaterial = a.theSoilMaterial->getCopy();
+  trialExcessPressure = a.trialExcessPressure;
+  currentExcessPressure = a.currentExcessPressure;
+  trialVolumeStrain = a.trialVolumeStrain;
+  currentVolumeStrain = a.currentVolumeStrain;
+  initMaxPress = a.initMaxPress;
+  e2p = a.e2p;
 }
 
 
 FluidSolidPorousMaterial::~FluidSolidPorousMaterial ()
 {
-	if (theSoilMaterial != 0)
-		delete theSoilMaterial;
+  if (theSoilMaterial != 0)
+    delete theSoilMaterial;
 }
 
 
 int FluidSolidPorousMaterial::setTrialStrain (const Vector &strain)
 {
-	int ndm = ndmx[matN];
-
-	if (ndm==2 && strain.Size()==3)
-		trialVolumeStrain = strain[0]+strain[1];
-	else if (ndm==3 && strain.Size()==6)
+  int ndm = ndmx[matN];
+  
+  if (ndm==2 && strain.Size()==3)
+    trialVolumeStrain = strain[0]+strain[1];
+  else if (ndm==3 && strain.Size()==6)
 		trialVolumeStrain = strain[0]+strain[1]+strain[2];
-	else {
-		opserr << "Fatal:FluidSolidPorousMaterial:: Material dimension is: " << ndm << endln;
-		opserr << "But strain vector size is: " << strain.Size() << endln;
-		exit(-1);;
-	}
+  else {
+    opserr << "Fatal:FluidSolidPorousMaterial:: Material dimension is: " << ndm << endln;
+    opserr << "But strain vector size is: " << strain.Size() << endln;
+    exit(-1);;
+  }
 
   return theSoilMaterial->setTrialStrain(strain);
 }
@@ -210,69 +210,63 @@ double FluidSolidPorousMaterial::getRho(void)
 
 const Vector & FluidSolidPorousMaterial::getStress (void)
 {
-	int ndm = ndmx[matN];
-	int loadStage = loadStagex[matN];
-	double combinedBulkModulus = combinedBulkModulusx[matN];
-
-	Vector *workV = (ndm == 2) ? &workV3 : &workV6;
-
-	*workV = theSoilMaterial->getStress();
-
-	if (loadStage != 0) { 
-		if (e2p==0) {
-			e2p = 1;
-			initMaxPress = ((*workV)[0] < (*workV)[1]) ? (*workV)[0] : (*workV)[1]; 
-			if (ndm == 3)
-				initMaxPress = (initMaxPress < (*workV)[2]) ? initMaxPress : (*workV)[2];
-		}
-		trialExcessPressure = currentExcessPressure;
-        trialExcessPressure += 
-			       (trialVolumeStrain - currentVolumeStrain) * combinedBulkModulus;
-		if (trialExcessPressure > pAtm-initMaxPress) 
-			trialExcessPressure = pAtm-initMaxPress;
-		//if (trialExcessPressure < initMaxPress)
-		//	trialExcessPressure = initMaxPress;
-	  for (int i=0; i<ndm; i++) 
+  int ndm = ndmx[matN];
+  int loadStage = loadStagex[matN];
+  double combinedBulkModulus = combinedBulkModulusx[matN];
+  
+  Vector *workV = (ndm == 2) ? &workV3 : &workV6;
+  
+  *workV = theSoilMaterial->getStress();
+  
+  if (loadStage != 0) { 
+    if (e2p==0) {
+      e2p = 1;
+      initMaxPress = ((*workV)[0] < (*workV)[1]) ? (*workV)[0] : (*workV)[1]; 
+      if (ndm == 3)
+	initMaxPress = (initMaxPress < (*workV)[2]) ? initMaxPress : (*workV)[2];
+    }
+    trialExcessPressure = currentExcessPressure;
+    trialExcessPressure += 
+      (trialVolumeStrain - currentVolumeStrain) * combinedBulkModulus;
+    if (trialExcessPressure > pAtm-initMaxPress) 
+      trialExcessPressure = pAtm-initMaxPress;
+    //if (trialExcessPressure < initMaxPress)
+    //	trialExcessPressure = initMaxPress;
+    for (int i=0; i<ndm; i++) 
       (*workV)[i] += trialExcessPressure;
-	}
-
+  }
+  
   return *workV;
 }
 
 
 int FluidSolidPorousMaterial::setParameter(const char **argv, int argc, Parameter &param)
 {
-  if (argc < 1)
-    return -1;
+  if (argc < 2)
+    return theSoilMaterial->setParameter(argv, argc, param);
   
-  if (strcmp(argv[0],"updateMaterialStage") == 0) {
-    if (argc < 2)
-      return -1;
-    int matTag = atoi(argv[1]);
-    if (this->getTag() == matTag)
-      return param.addObject(1, this);  
-    else
-      return -1;
+  int matTag = atoi(argv[1]);
+  if (this->getTag() == matTag) {
+
+    if (strcmp(argv[0],"updateMaterialStage") == 0) 
+    	return param.addObject(1, this);  
+    else if (strcmp(argv[0],"combinedBulkModulus") == 0) 
+      return param.addObject(2, this);  
   }
 
-  else if (strcmp(argv[0],"combinedBulkModulus") == 0)
-    return param.addObject(11, this);  
-
-  return -1;
+  return theSoilMaterial->setParameter(argv, argc, param);
 }
 
 int FluidSolidPorousMaterial::updateParameter(int responseID, Information &info)
 {
-  /*
-  if (responseID<10)
-    loadStagex[matN] = responseID;
-  */
-
-  if (responseID == 1)
+  if (responseID == 1) {
+    //    opserr << "FluidSolidPorousMaterial updateMaterialStage" << info.theInt << endln;
     loadStagex[matN] = info.theInt;
-
-  else if (responseID==11) 
+  }
+  else if (responseID == 2) {
+    //    opserr << "FluidSolidPorousMaterial combinedBulk" << info.theDouble << endln;
     combinedBulkModulusx[matN]=info.theDouble;
+  }
 
   return 0;
 }
@@ -336,7 +330,7 @@ int FluidSolidPorousMaterial::revertToStart (void)
 NDMaterial * FluidSolidPorousMaterial::getCopy (void)
 {
   FluidSolidPorousMaterial * copy = new FluidSolidPorousMaterial(*this);
-	return copy;
+  return copy;
 }
 
 
@@ -444,7 +438,7 @@ int FluidSolidPorousMaterial::recvSelf(int commitTag, Channel &theChannel,
 	double combinedBulkModulus = data(3);
 	currentExcessPressure = data(4);
 	currentVolumeStrain = data(5);
-    matN = data(6);
+	matN = data(6);
 
 	ndmx[matN] = ndm;
 	loadStagex[matN] = loadStage;
