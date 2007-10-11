@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2007-10-05 22:08:17 $
+// $Revision: 1.13 $
+// $Date: 2007-10-11 23:21:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/SimulationInformation.cpp,v $
 //
 // Description: This file contains the class definition for SimulationInformation.
@@ -256,6 +256,11 @@ SimulationInformation::setTimeUnit(const char *name)
 int 
 SimulationInformation::addInputFile(const char *fileName, const char *path)
 {
+
+  // windows throws this one in if nothing provided on the cmd line
+ if (strstr(fileName,"history.tcl") != 0)
+    return 0;
+
   if (numInputFiles == 0)
     theFiles->addFile(fileName, path, "Main Input File");
   else
@@ -596,6 +601,10 @@ SimulationInformation::neesUpload(const char *username,
   File *theDirFile;
   while ((theDirFile = theDirFiles()) != 0) 
       res += UploadFiles(cookie, projID, expID, trialID, theDirFile, startLoadingDir->getDescription(), pathLength);
+
+
+
+
 
   free(cookie);
   return res;
