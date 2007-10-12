@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.43 $
-// $Date: 2007-08-22 16:48:11 $
+// $Revision: 1.44 $
+// $Date: 2007-10-12 17:21:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -192,6 +192,7 @@ Domain::Domain(TaggedObjectStorage &theNodesStorage,
     theMP_Iter = new SingleDomMP_Iter(theMPs);
     theLoadPatternIter = new LoadPatternIter(theLoadPatterns);
     allSP_Iter = new SingleDomAllSP_Iter(*this);
+    theParameters   = new MapOfTaggedObjects();    
     theParamIter = new SingleDomParamIter(theParameters);
 
     // check that the containers are empty
@@ -625,9 +626,9 @@ Domain::addLoadPattern(LoadPattern *load)
 }    
 
 bool
-Domain::addParameter(Parameter *param)
+Domain::addParameter(Parameter *theParam)
 {
-  int paramTag = param->getTag();
+  int paramTag = theParam->getTag();
 
   // check if a Parameter with a similar tag already exists in the Domain
   TaggedObject *other = theParameters->getComponentPtr(paramTag);
@@ -637,7 +638,7 @@ Domain::addParameter(Parameter *param)
   }
 
   // add the param to the container object for the parameters
-  bool result = theParameters->addComponent(param);
+  bool result = theParameters->addComponent(theParam);
   if (result == true) {
     // mark the Domain as having been changed
     //    this->domainChange();
@@ -646,8 +647,7 @@ Domain::addParameter(Parameter *param)
     opserr << "Domain::addParameter - parameter " << paramTag << "could not be added to container\n";      
 
 
-  param->setDomain(this);
-
+  theParam->setDomain(this);
   return result;
 }
 
@@ -1599,7 +1599,7 @@ int
 Domain::updateParameter(int tag, int value)
 {
   // remove the object from the container    
-  TaggedObject *mc = theParameters->removeComponent(tag);
+  TaggedObject *mc = theParameters->getComponentPtr(tag);
   
   // if not there return 0
   if (mc == 0) 
@@ -1613,7 +1613,7 @@ int
 Domain::updateParameter(int tag, double value)
 {
   // remove the object from the container    
-  TaggedObject *mc = theParameters->removeComponent(tag);
+  TaggedObject *mc = theParameters->getComponentPtr(tag);
   
   // if not there return 0
   if (mc == 0) 
