@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-10-05 22:06:01 $
+// $Revision: 1.4 $
+// $Date: 2007-10-12 00:43:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/File.cpp,v $
                                                                         
                                                                         
@@ -55,6 +55,22 @@ File::~File()
     while ((aDirFile = theDirFiles()) != 0)
       delete aDirFile;
   } 
+  dirFiles.clear();
+}
+
+File::clear()
+{
+  if (isDirectory == true) {
+
+    FileIter theDirFiles = this->getFiles();
+    File *aDirFile =0;
+    while ((aDirFile = theDirFiles()) != 0)
+      delete aDirFile;
+  } 
+  dirFiles.clear();
+  name.clear();
+  description.clear();
+  return 0;
 }
 
 int 
@@ -74,7 +90,6 @@ File::addFile(File *theFile)
 int
 File::addFile(const char *fileName, const char *path, const char *fileDescription)
 {
-
   static char dirName[128];
   
   char *combined = 0;     // combined array of path + fileName
@@ -89,23 +104,27 @@ File::addFile(const char *fileName, const char *path, const char *fileDescriptio
     combined = new char[strlen(fileName)+1];
     strcpy(combined, fileName);
   }
+  
 
   File *currentDir = this;
 
   const char *pathCurrent = strstr(combined, "/");
+
+
 
   if (pathCurrent != NULL) {
 
     if (description.length() == 0) {
 
       int rootPathLength = pathCurrent-combined;
-      char *rootPath = new char[rootPathLength+1];
-      
+      char *rootPath = new char[rootPathLength+2];
+     
       if (rootPathLength > 0) {
-	strncpy(rootPath, combined, rootPathLength-1);
-	strcat(&rootPath[rootPathLength],"/");
+		strncpy(rootPath, combined, rootPathLength);
+		strcpy(&rootPath[rootPathLength],"/");
+	
       } else
-	strcpy(rootPath, "/");
+		strcpy(rootPath, "/");
 
       description.assign(rootPath);      
       delete [] rootPath;
@@ -131,10 +150,17 @@ File::addFile(const char *fileName, const char *path, const char *fileDescriptio
 	if (nextDir == 0) {
 	
 	  const char *prevPath = currentDir->getDescription();
-	
-	  char *newPath = new char[strlen(prevPath)+2+dirNameLength]; // / + '\0';
-	  strcpy(newPath, prevPath);
-	  strcat(newPath, dirName);
+	  char *newPath = 0;
+	  if (prevPath != 0)
+	     newPath = new char[strlen(prevPath)+2+dirNameLength]; // / + '\0';
+	  else
+		  newPath = new char[2+dirNameLength]; // / + '\0'
+	  
+	  if (prevPath != 0) {
+	     strcpy(newPath, prevPath);
+	     strcat(newPath, dirName);
+	  } else
+		  strcpy(newPath, dirName);
 	  strcat(newPath,"/");
 	  
 	  File *theNextDir = new File(dirName, newPath, true);
@@ -158,6 +184,8 @@ File::addFile(const char *fileName, const char *path, const char *fileDescriptio
 
   currentDir->addFile(file);
   
+
+
   delete [] combined;
   return 0;
 }

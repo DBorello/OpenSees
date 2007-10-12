@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-10-11 23:21:21 $
+// $Revision: 1.14 $
+// $Date: 2007-10-12 00:43:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/SimulationInformation.cpp,v $
 //
 // Description: This file contains the class definition for SimulationInformation.
@@ -64,10 +64,8 @@ SimulationInformation::~SimulationInformation()
 { 
   if (strcmp(endTime," ") == 0)
     this->end();
-
-  XmlFileStream b("test.out");
-  b << *this;
-
+  opserr << "SimulationInformation::~SimulationInformation\n";
+ 
   if (title != 0)
     delete [] title;
   if (description != 0)
@@ -261,6 +259,7 @@ SimulationInformation::addInputFile(const char *fileName, const char *path)
  if (strstr(fileName,"history.tcl") != 0)
     return 0;
 
+ 
   if (numInputFiles == 0)
     theFiles->addFile(fileName, path, "Main Input File");
   else
@@ -339,7 +338,9 @@ PrintFiles(OPS_Stream &s, File *theFile)
   const char *fileName = theFile->getName();
 
   if (theFile->isDir() == true) {
-    s << fileName << endln;
+    if (fileName != 0)
+		s << fileName << endln;
+
     FileIter theDirFiles = theFile->getFiles();
     File *theDirFile;
     while ((theDirFile = theDirFiles()) != 0)
