@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-10-12 13:42:28 $
+// $Revision: 1.8 $
+// $Date: 2007-10-12 23:04:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/MaterialStageParameter.cpp,v $
 
 #include <classTags.h>
@@ -65,20 +65,23 @@ MaterialStageParameter::setDomain(Domain *theDomain)
   int theResult = -1;
 
   const char **theString = new const char*[2];
-  char parameterName[20];
+  char parameterName[21];
   char materialIdTag[10];
   sprintf(parameterName,"updateMaterialStage");
   sprintf(materialIdTag,"%d",theMaterialTag);
   theString[0] = parameterName;
   theString[1] = materialIdTag;
-
+ 
   // note because of the way this parameter is updated only need to find one in the domain
-  while (((theEle = theEles()) != 0) && (theResult == -1)) 
+  while (((theEle = theEles()) != 0) && (theResult == -1)) {
     theResult = theEle->setParameter(theString, 2, *this);
+  }
 
-  if (theResult ==-1)
+  if (theResult == -1)
     opserr << "WARNING: updateMaterialStage - MaterialStageParameter::setDomain() - no effect with material tag " << theMaterialTag << endln;
-  
+
+  theResult = 0;
+
   delete [] theString;
 
   return;
