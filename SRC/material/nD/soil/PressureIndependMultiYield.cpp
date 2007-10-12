@@ -1,5 +1,5 @@
-// $Revision: 1.35 $
-// $Date: 2007-05-03 21:15:54 $
+// $Revision: 1.36 $
+// $Date: 2007-10-12 23:01:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
 
 // Written: ZHY
@@ -535,19 +535,19 @@ int PressureIndependMultiYield::getOrder (void) const
 
 int PressureIndependMultiYield::setParameter(const char **argv, int argc, Parameter &param)
 {
-  if (argc < 1)
+  if (argc < 2)
     return -1;
 
-  if (strcmp(argv[0],"updateMaterialStage") == 0) {
-    if (argc < 2)
-      return -1;
-    int matTag = atoi(argv[1]);
-    if (this->getTag() == matTag)
-      return param.addObject(1, this);
-    else
-      return -1;
-  }
+  int theMaterialTag;
+  theMaterialTag = atoi(argv[1]);
 
+  // check for material tag
+  if (theMaterialTag == this->getTag()) {
+
+    if (strcmp(argv[0],"updateMaterialStage") == 0) {
+      return param.addObject(1, this);
+    }
+  }
   return -1;
 }
 

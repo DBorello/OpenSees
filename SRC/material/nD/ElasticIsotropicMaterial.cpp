@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $                                                              
-// $Date: 2007-02-02 01:20:37 $                                                                  
+// $Revision: 1.23 $                                                              
+// $Date: 2007-10-12 23:01:50 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
                                                                         
                                                                         
@@ -405,20 +405,22 @@ int
 ElasticIsotropicMaterial::setParameter(const char **argv, int argc,
 				      Parameter &param)
 {
-  if (argc < 1)
-    return -1;
+  int theMaterialTag;
+  theMaterialTag = atoi(argv[1]);
 
-  if (strcmp(argv[0],"E") == 0)
-    return param.addObject(1, this);
+  // check for material tag
+  if (theMaterialTag == this->getTag()) {
+    if (strcmp(argv[0],"E") == 0)
+      return param.addObject(1, this);
+    
+    else if (strcmp(argv[0],"nu") == 0 || strcmp(argv[0],"v") == 0)
+      return param.addObject(2, this);
+    
+    else if (strcmp(argv[0],"rho") == 0)
+      return param.addObject(3, this);
+  }
 
-  else if (strcmp(argv[0],"nu") == 0 || strcmp(argv[0],"v") == 0)
-    return param.addObject(2, this);
-
-  else if (strcmp(argv[0],"rho") == 0)
-    return param.addObject(3, this);
-
-  else
-    return 0;
+  return 1;
 }
 
 int 
