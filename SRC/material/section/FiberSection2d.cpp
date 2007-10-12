@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2007-07-12 21:15:04 $
+// $Revision: 1.29 $
+// $Date: 2007-10-12 23:49:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.cpp,v $
                                                                         
 // Written: fmk
@@ -1071,20 +1071,26 @@ FiberSection2d::getStressResultantSensitivity(int gradNumber, bool conditional)
     ds(0) += stressGradient;
     ds(1) += stressGradient * -y;
 
-    stress = theMaterials[i]->getStress();
-    sig_dAdh = stress*areaDeriv[i];
+    if (areaDeriv[i] != 0.0 || locsDeriv[i] != 0.0)
+      stress = theMaterials[i]->getStress();
 
-    ds(0) += sig_dAdh;
-    ds(1) += sig_dAdh * -y;
+    if (areaDeriv[i] != 0.0) {
+      sig_dAdh = stress*areaDeriv[i];
+      
+      ds(0) += sig_dAdh;
+      ds(1) += sig_dAdh * -y;
+    }
 
-    //ds(0) += 0.0;
-    ds(1) += (stress*A) * -locsDeriv[i];
-
-    tangent = theMaterials[i]->getTangent();
-    tangent = tangent * A * e(1);
-
-    ds(0) += -locsDeriv[i]*tangent;
-    ds(1) += fiberLocs[i]*locsDeriv[i]*tangent;
+    if (locsDeriv[i] != 0.0) {
+      //ds(0) += 0.0;
+      ds(1) += (stress*A) * -locsDeriv[i];
+      
+      tangent = theMaterials[i]->getTangent();
+      tangent = tangent * A * e(1);
+      
+      ds(0) += -locsDeriv[i]*tangent;
+      ds(1) += fiberLocs[i]*locsDeriv[i]*tangent;
+    }
 
     //opserr << locsDeriv[i] << ' ' << areaDeriv[i] << endln;
   }

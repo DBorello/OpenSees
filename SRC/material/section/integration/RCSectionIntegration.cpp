@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-01-25 19:53:17 $
+// $Revision: 1.4 $
+// $Date: 2007-10-12 23:51:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/integration/RCSectionIntegration.cpp,v $
 
 #include <RCSectionIntegration.h>
@@ -175,7 +175,7 @@ RCSectionIntegration::setParameter(const char **argv, int argc,
 				   Parameter &param)
 {
   if (argc < 1)
-    return -1;
+    return 0;
 
   if (strcmp(argv[0],"d") == 0)
     return param.addObject(1, this);
@@ -198,7 +198,7 @@ RCSectionIntegration::setParameter(const char **argv, int argc,
   if (strcmp(argv[0],"cover") == 0)
     return param.addObject(6, this);
 
-  return -1;
+  return 0;
 }
 
 int
@@ -248,39 +248,46 @@ RCSectionIntegration::getLocationsDeriv(int nFibers, double *dyidh, double *dzid
   
   if (parameterID == 1) // d
     dddh  = 1.0;
-  if (parameterID == 6) // cover
+  else if (parameterID == 6) // cover
     dcoverdh =  1.0;
-
-  int loc;
-  int i;
-
-  double dyIncrdh  = (dddh-2*dcoverdh)/Nfcore;
-  double dyStartdh = 0.5 * ((dddh-2*dcoverdh)-dyIncrdh);
-  
-  for (loc = 0; loc < Nfcore; loc++) {
-    dyidh[loc] = dyStartdh - dyIncrdh*loc;
-    dyidh[loc+Nfcore] = dyidh[loc];
+  else {
+    for (int i = 0; i < nFibers; i++)
+      dyidh[i] = 0.0;
   }
 
-  loc += Nfcore;
-  
-  dyIncrdh = dcoverdh/Nfcover;
-  dyStartdh = 0.5 * (dddh-dyIncrdh);
+  if (parameterID == 1 || parameterID == 6) {
 
-  for (i = 0; i < Nfcover; i++, loc++) {
-    dyidh[loc] = dyStartdh - dyIncrdh*i;
-    dyidh[loc+Nfcover] = -dyidh[loc];
-  }
-
-  loc += Nfcover;
-
-  dyidh[loc++] =  0.5*dddh-dcoverdh;
-  dyidh[loc++] = -0.5*dddh+dcoverdh;
-
-  if (Nfs > 2) {
-    double dspacingdh = (dddh-2*dcoverdh)/(Nfs-1);
-    for (int i = 1; i <= Nfs-2; i++)
-      dyidh[loc++] = (-0.5*dddh+dcoverdh) + dspacingdh*i;
+    int loc;
+    int i;
+    
+    double dyIncrdh  = (dddh-2*dcoverdh)/Nfcore;
+    double dyStartdh = 0.5 * ((dddh-2*dcoverdh)-dyIncrdh);
+    
+    for (loc = 0; loc < Nfcore; loc++) {
+      dyidh[loc] = dyStartdh - dyIncrdh*loc;
+      dyidh[loc+Nfcore] = dyidh[loc];
+    }
+    
+    loc += Nfcore;
+    
+    dyIncrdh = dcoverdh/Nfcover;
+    dyStartdh = 0.5 * (dddh-dyIncrdh);
+    
+    for (i = 0; i < Nfcover; i++, loc++) {
+      dyidh[loc] = dyStartdh - dyIncrdh*i;
+      dyidh[loc+Nfcover] = -dyidh[loc];
+    }
+    
+    loc += Nfcover;
+    
+    dyidh[loc++] =  0.5*dddh-dcoverdh;
+    dyidh[loc++] = -0.5*dddh+dcoverdh;
+    
+    if (Nfs > 2) {
+      double dspacingdh = (dddh-2*dcoverdh)/(Nfs-1);
+      for (int i = 1; i <= Nfs-2; i++)
+	dyidh[loc++] = (-0.5*dddh+dcoverdh) + dspacingdh*i;
+    }
   }
 
   if (dzidh != 0) {
@@ -301,47 +308,54 @@ RCSectionIntegration::getWeightsDeriv(int nFibers, double *dwtsdh)
   double dAsidedh = 0.0;
   double dcoverdh = 0.0;
   
-  if (parameterID == 1) // d
-    dddh  = 1.0;
-  if (parameterID == 2) // b
-    dbdh = 1.0;
-  if (parameterID == 3) // Atop
-    dAtopdh = 1.0;
-  if (parameterID == 7) // Abottom
-    dAbottomdh = 1.0;
-  if (parameterID == 4) // Aside
-    dAsidedh = 1.0;
-  if (parameterID == 5) // Amain and Aside
-    dAtopdh = dAbottomdh = dAsidedh = 1.0;
-  if (parameterID == 6) // cover
-    dcoverdh =  1.0;
-    
   int loc;
   int i;
 
-  double dAcoredh = ((b-2*cover)*(dddh-2*dcoverdh) +
-		     (dbdh-2*dcoverdh)*(d-2*cover)) / Nfcore;
-  double dAcoverdh = ((2*cover)*(dddh-2*dcoverdh) + 
-		      (2*dcoverdh)*(d-2*cover)) / Nfcore;
+  if (parameterID == 1) { // d --> 
+    dddh  = 1.0;
+  }
+  else if (parameterID == 2) { // b -->
+    dbdh = 1.0;
+  }
+  else if (parameterID == 3) // Atop
+    dAtopdh = 1.0;
+  else if (parameterID == 7) // Abottom
+    dAbottomdh = 1.0;
+  else if (parameterID == 4) // Aside
+    dAsidedh = 1.0;
+  else if (parameterID == 5) // Amain and Aside
+    dAtopdh = dAbottomdh = dAsidedh = 1.0;
+  else if (parameterID == 6) // cover
+    dcoverdh =  1.0;
+  else {
+    for (i = 0; i < nFibers; i++)
+      dwtsdh[i] = 0.0;
+  }
+
+  if (parameterID >= 1 && parameterID <= 7) {
     
-  for (loc = 0; loc < Nfcore; loc++)
-    dwtsdh[loc] = dAcoredh;
-
-  for (i = 0; i < Nfcore; i++, loc++)
-    dwtsdh[loc] = dAcoverdh;
-
-  dAcoverdh = (cover*dbdh+dcoverdh*b)/Nfcover;
-
-  for (i = 0; i < 2*Nfcover; i++, loc++)
-    dwtsdh[loc] = dAcoverdh;
-  
-  dwtsdh[loc++] = Nfs*dAtopdh;
-  dwtsdh[loc++] = Nfs*dAbottomdh;
-
-  for ( ; loc < nFibers; loc++)
-    dwtsdh[loc] = 2*dAsidedh;
-
-  return;
+    double dAcoredh = ((b-2*cover)*(dddh-2*dcoverdh) +
+		       (dbdh-2*dcoverdh)*(d-2*cover)) / Nfcore;
+    double dAcoverdh = ((2*cover)*(dddh-2*dcoverdh) + 
+			(2*dcoverdh)*(d-2*cover)) / Nfcore;
+    
+    for (loc = 0; loc < Nfcore; loc++)
+      dwtsdh[loc] = dAcoredh;
+    
+    for (i = 0; i < Nfcore; i++, loc++)
+      dwtsdh[loc] = dAcoverdh;
+    
+    dAcoverdh = (cover*dbdh+dcoverdh*b)/Nfcover;
+    
+    for (i = 0; i < 2*Nfcover; i++, loc++)
+      dwtsdh[loc] = dAcoverdh;
+    
+    dwtsdh[loc++] = Nfs*dAtopdh;
+    dwtsdh[loc++] = Nfs*dAbottomdh;
+    
+    for ( ; loc < nFibers; loc++)
+      dwtsdh[loc] = 2*dAsidedh;
+  }
 
   //for (int i = 0; i < nFibers; i++)
   //  opserr << dwtsdh[i] << ' ';
