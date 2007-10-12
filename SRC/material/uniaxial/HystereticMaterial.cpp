@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2007-05-04 23:40:24 $
+// $Revision: 1.17 $
+// $Date: 2007-10-12 22:57:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HystereticMaterial.cpp,v $
 
 // Written: MHS
@@ -187,6 +187,10 @@ HystereticMaterial::setTrialStrain(double strain, double strainRate)
   }
   
   TenergyD = CenergyD + 0.5*(Cstress+Tstress)*dStrain;
+
+
+  //  if (this->getTag() == 40)
+  //    opserr << "setTrial: " << Tstrain << " " << Ttangent << " " << Tstress << endln;
   
   return 0;
 }
@@ -207,7 +211,7 @@ HystereticMaterial::getStress(void)
 double
 HystereticMaterial::getTangent(void)
 {
-	return Ttangent;
+  return Ttangent;
 }
 
 void

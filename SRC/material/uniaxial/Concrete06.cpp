@@ -475,14 +475,14 @@ void Concrete06::Print (OPS_Stream& s, int flag)
 int
 Concrete06::setParameter(const char **argv, int argc, Information &info)
 {
-	return -1;
+  return -1;
 }
    
 
 int
 Concrete06::updateParameter(int parameterID, Information &info)
 {
-	return 0;
+  return -1;  // should never be called
 }
 
 

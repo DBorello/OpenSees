@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2007-06-08 00:38:39 $
+// $Revision: 1.18 $
+// $Date: 2007-10-12 22:57:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.cpp,v $
                                                                         
 // Written: MHS 
@@ -511,23 +511,30 @@ void Concrete01::Print (OPS_Stream& s, int flag)
 int
 Concrete01::setParameter(const char **argv, int argc, Parameter &param)
 {
-  if (argc < 1)
-    return 0;
+  if (argc < 2)
+    return -1;
 
-  if (strcmp(argv[0],"fc") == 0) {// Compressive strength
-    return param.addObject(1, this);
-  }
-  if (strcmp(argv[0],"epsco") == 0) {// Strain at compressive strength
-    return param.addObject(2, this);
-  }
-  if (strcmp(argv[0],"fcu") == 0) {// Crushing strength
-    return param.addObject(3, this);
-  }
-  if (strcmp(argv[0],"epscu") == 0) {// Strain at crushing strength
-    return param.addObject(4, this);
+  int theMaterialTag;
+  theMaterialTag = atoi(argv[1]);
+
+  // check for material tag
+  if (theMaterialTag == this->getTag()) {
+
+    if (strcmp(argv[0],"fc") == 0) {// Compressive strength
+      return param.addObject(1, this);
+    }
+    else if (strcmp(argv[0],"epsco") == 0) {// Strain at compressive strength
+      return param.addObject(2, this);
+    }
+    else if (strcmp(argv[0],"fcu") == 0) {// Crushing strength
+      return param.addObject(3, this);
+    }
+    else if (strcmp(argv[0],"epscu") == 0) {// Strain at crushing strength
+      return param.addObject(4, this);
+    }
   }
 
-  return 0;
+  return -1;
 }
     
                             

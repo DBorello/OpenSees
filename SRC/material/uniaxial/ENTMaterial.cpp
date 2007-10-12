@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-07-12 00:16:10 $
+// $Revision: 1.7 $
+// $Date: 2007-10-12 22:57:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ENTMaterial.cpp,v $
                                                                         
                                                                         
@@ -162,14 +162,19 @@ ENTMaterial::Print(OPS_Stream &s, int flag)
 int
 ENTMaterial::setParameter(const char **argv, int argc, Parameter &param)
 {
-  if (argc < 1)
-    return 0;
+  if (argc < 2)
+    return -1;
 
-  if (strcmp(argv[0],"E") == 0)
-    return param.addObject(1, this);
+  int theMaterialTag;
+  theMaterialTag = atoi(argv[1]);
 
-  else
-    return 0;
+  // check for material tag
+  if (theMaterialTag == this->getTag()) {
+
+    if (strcmp(argv[0],"E") == 0)
+      return param.addObject(1, this);
+  } 
+  return -1;
 }
 
 int 

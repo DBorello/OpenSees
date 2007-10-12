@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2007-05-07 21:21:49 $
+// $Revision: 1.18 $
+// $Date: 2007-10-12 22:57:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.cpp,v $
                                                                         
 // Written: MHS 
@@ -485,31 +485,38 @@ void Steel01::Print (OPS_Stream& s, int flag)
 int
 Steel01::setParameter(const char **argv, int argc, Parameter &param)
 {
-  if (argc < 1)
-    return 0;
+  if (argc < 2)
+    return -1;
 
-  if (strcmp(argv[0],"sigmaY") == 0 || strcmp(argv[0],"fy") == 0)
-    return param.addObject(1, this);
+  int theMaterialTag;
+  theMaterialTag = atoi(argv[1]);
 
-  if (strcmp(argv[0],"E") == 0)
-    return param.addObject(2, this);
+  // check for material tag
+  if (theMaterialTag == this->getTag()) {
 
-  if (strcmp(argv[0],"b") == 0)
-    return param.addObject(3, this);
+    if (strcmp(argv[0],"sigmaY") == 0 || strcmp(argv[0],"fy") == 0)
+      return param.addObject(1, this);
 
-  if (strcmp(argv[0],"a1") == 0)
-    return param.addObject(4, this);
+    if (strcmp(argv[0],"E") == 0)
+      return param.addObject(2, this);
+    
+    if (strcmp(argv[0],"b") == 0)
+      return param.addObject(3, this);
+    
+    if (strcmp(argv[0],"a1") == 0)
+      return param.addObject(4, this);
 
-  if (strcmp(argv[0],"a2") == 0)
-    return param.addObject(5, this);
+    if (strcmp(argv[0],"a2") == 0)
+      return param.addObject(5, this);
+    
+    if (strcmp(argv[0],"a3") == 0)
+      return param.addObject(6, this);
+    
+    if (strcmp(argv[0],"a4") == 0)
+      return param.addObject(7, this);
+  }
 
-  if (strcmp(argv[0],"a3") == 0)
-    return param.addObject(6, this);
-
-  if (strcmp(argv[0],"a4") == 0)
-    return param.addObject(7, this);
-
-  return 0;
+  return -1;
 }
 
 

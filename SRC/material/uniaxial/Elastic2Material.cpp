@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-06-15 20:22:40 $
+// $Revision: 1.3 $
+// $Date: 2007-10-12 22:57:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Elastic2Material.cpp,v $
                                                                         
                                                                         
@@ -179,34 +179,31 @@ Elastic2Material::Print(OPS_Stream &s, int flag)
 int
 Elastic2Material::setParameter(const char **argv, int argc, Parameter &param)
 {
-  if (argc < 1)
-    return 0;
+  if (argc < 2)
+    return -1;
+
+  int theMaterialTag;
+  theMaterialTag = atoi(argv[1]);
 
   // check for material tag
-  if (argc > 1) {
-    int theMaterialTag;
-    theMaterialTag = atoi(argv[1]);
-    if (theMaterialTag != this->getTag()) {
-      if (strcmp(argv[0],"zeroE") == 0)
-	return param.addObject(3, this);
-      else
-	return 0;
-    }
+  if (theMaterialTag == this->getTag()) {
+
+    if (strcmp(argv[0],"zeroE") == 0)
+      return param.addObject(3, this);
+    else if (strcmp(argv[0],"E") == 0)
+      return param.addObject(1, this);
+  
+    else if (strcmp(argv[0],"eta") == 0)
+      return param.addObject(2, this);
+  
+    else if (strcmp(argv[0],"zeroE") == 0)
+      return param.addObject(3, this);
+  
   }
 
-  if (strcmp(argv[0],"E") == 0)
-    return param.addObject(1, this);
-  
-  else if (strcmp(argv[0],"eta") == 0)
-    return param.addObject(2, this);
-  
-  else if (strcmp(argv[0],"zeroE") == 0)
-    return param.addObject(3, this);
-  
-  else
-    return 0;
+  return -1;
 }
-
+  
 int 
 Elastic2Material::updateParameter(int parameterID, Information &info)
 {
