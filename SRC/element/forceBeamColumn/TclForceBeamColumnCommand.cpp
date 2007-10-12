@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2007-10-12 21:15:33 $
+// $Revision: 1.16 $
+// $Date: 2007-10-12 21:20:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/TclForceBeamColumnCommand.cpp,v $
                                                                         
 // Written: MHS
@@ -257,15 +257,17 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
 
     if (ndm == 2) {
       if (strcmp(argv[1],"elasticForceBeamColumn") == 0)
-	theElement = new ElasticForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections,
-						  beamIntegr, *theTransf2d);
+	//theElement = new ElasticForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections, beamIntegr, *theTransf2d);
+	theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections,
+					   beamIntegr, *theTransf2d);
       else 
 	theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections,
 					   beamIntegr, *theTransf2d);
     }
     else {
       if (strcmp(argv[1],"elasticForceBeamColumn") == 0)
-	theElement = new ElasticForceBeamColumn3d(eleTag, iNode, jNode, nIP, sections,
+	//theElement = new ElasticForceBeamColumn3d(eleTag, iNode, jNode, nIP, sections, beamIntegr, *theTransf3d);
+	theElement = new ForceBeamColumn3d(eleTag, iNode, jNode, nIP, sections,
 					   beamIntegr, *theTransf3d);
       else
 	theElement = new ForceBeamColumn3d(eleTag, iNode, jNode, nIP, sections,
