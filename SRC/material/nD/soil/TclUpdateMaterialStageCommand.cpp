@@ -1,5 +1,5 @@
-// $Revision: 1.13 $
-// $Date: 2007-03-30 01:52:10 $
+// $Revision: 1.14 $
+// $Date: 2007-10-12 14:02:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/TclUpdateMaterialStageCommand.cpp,v $
 
 // Written: ZHY 
@@ -18,8 +18,6 @@
 #include <string.h>
 
 // by ZHY
-
-static int parTag = 0;
 
 int
 TclModelBuilderUpdateMaterialStageCommand(ClientData clientData, 
@@ -47,6 +45,7 @@ TclModelBuilderUpdateMaterialStageCommand(ClientData clientData,
     return TCL_ERROR;		
   }
 
+  int parTag = theDomain->getNumParameters();
   parTag++;
 
   if (argc > 6) {
