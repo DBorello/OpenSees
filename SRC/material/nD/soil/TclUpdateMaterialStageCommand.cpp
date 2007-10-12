@@ -1,5 +1,5 @@
-// $Revision: 1.14 $
-// $Date: 2007-10-12 14:02:34 $
+// $Revision: 1.15 $
+// $Date: 2007-10-12 23:01:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/TclUpdateMaterialStageCommand.cpp,v $
 
 // Written: ZHY 
@@ -75,64 +75,6 @@ TclModelBuilderUpdateMaterialStageCommand(ClientData clientData,
   }	
 
   theDomain->updateParameter(parTag, value);
-
-
-  /* *********************************
-  // Use the tag to get pointers (zero if not valid) to acceptable materials.
-  //
-  
-  NDMaterial * a = theTclBuilder->getNDMaterial(tag);
-  UniaxialMaterial * b = theTclBuilder->getUniaxialMaterial(tag);
-  
-  if (a==0 && b==0) {
-    opserr << "WARNING UpdateMaterialStage: couldn't get NDmaterial tagged: " << tag << endln;
-    opserr << "        or appropriate UniaxialMaterial tagged: " << tag << endln;
-    return TCL_ERROR;		
-  }
-  
-  if (strcmp(argv[3],"-stage") != 0) {
-    opserr << "WARNING UpdateMaterialStage: Only accept parameter '-stage' for now" << endln;
-    return TCL_ERROR;		
-  }		
-  
-  
-  if (Tcl_GetInt(interp, argv[4], &value) != TCL_OK) {
-    opserr << "WARNING UpdateMaterialStage: invalid parameter value" << endln;
-    return TCL_ERROR;		
-  }	
-  
-  // If the pointer is for an NDMaterial, check that it is an acceptable pointer.
-  if(a){
-    const char * c = a->getType();
-    if (strcmp(c, "PlaneStrain") == 0 || strcmp(c, "ThreeDimensional") == 0 ) {
-      Information info;
-      a->updateParameter(value,info); 
-    }
-    else {
-      opserr << "WARNING UpdateMaterialStage: The tagged is not a "<<endln;
-      opserr << "PressureDependMultiYield/PressureIndependMultiYield/FluidSolidPorous material. " << endln;
-      return TCL_ERROR;		
-    }
-  }
-  
-  // If the pointer is for an UniaxialMaterial, check that is is an acceptable pointer. 
-  if(b){
-    PyLiq1 *thePyLiq1 = dynamic_cast<PyLiq1*>(b);
-    TzLiq1 *theTzLiq1 = dynamic_cast<TzLiq1*>(b);
-    if(thePyLiq1 == 0 && theTzLiq1 == 0){
-      opserr << "WARNING UpdateMaterialStage: The tagged UniaxialMaterial is not a "<<endln;
-      opserr << "PyLiq1 or TzLiq1 material. " << endln;
-      return TCL_ERROR;
-    }
-    Information info;
-    if(thePyLiq1) b->updateParameter(value,info);
-    if(theTzLiq1) b->updateParameter(value,info);
-  }
-
-
-  *************************************************************************** */
-
-
 
   return TCL_OK;
 }
