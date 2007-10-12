@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-10-12 00:43:01 $
+// $Revision: 1.5 $
+// $Date: 2007-10-12 14:56:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/File.cpp,v $
                                                                         
                                                                         
@@ -58,7 +58,8 @@ File::~File()
   dirFiles.clear();
 }
 
-File::clear()
+int
+File::clear(void)
 {
   if (isDirectory == true) {
 
