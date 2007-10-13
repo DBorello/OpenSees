@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2007-02-02 01:30:47 $
+// $Revision: 1.19 $
+// $Date: 2007-10-13 00:53:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.h,v $
 
 // Written: MHS
@@ -129,7 +129,7 @@ class DispBeamColumn2d : public Element
 
     double rho;			// Mass density per unit length
 
-    enum {maxNumSections = 100};
+    enum {maxNumSections = 20};
 
     static double workArea[];
 

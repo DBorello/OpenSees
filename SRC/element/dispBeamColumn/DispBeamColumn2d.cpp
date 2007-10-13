@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.32 $
-// $Date: 2007-04-04 00:47:16 $
+// $Revision: 1.33 $
+// $Date: 2007-10-13 00:53:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -55,7 +55,7 @@ DispBeamColumn2d::DispBeamColumn2d(int tag, int nd1, int nd2,
 :Element (tag, ELE_TAG_DispBeamColumn2d), 
  numSections(numSec), theSections(0), crdTransf(0), beamInt(0),
   connectedExternalNodes(2),
-  Q(6), q(3), rho(r)
+  Q(6), q(3), rho(r), parameterID(0)
 {
   // Allocate arrays of pointers to SectionForceDeformations
   theSections = new SectionForceDeformation *[numSections];
@@ -105,17 +105,13 @@ DispBeamColumn2d::DispBeamColumn2d(int tag, int nd1, int nd2,
   p0[0] = 0.0;
   p0[1] = 0.0;
   p0[2] = 0.0;
-  
-// AddingSensitivity:BEGIN /////////////////////////////////////
-	parameterID = 0;
-// AddingSensitivity:END //////////////////////////////////////
 }
 
 DispBeamColumn2d::DispBeamColumn2d()
 :Element (0, ELE_TAG_DispBeamColumn2d),
  numSections(0), theSections(0), crdTransf(0), beamInt(0),
  connectedExternalNodes(2),
-  Q(6), q(3), rho(0.0)
+  Q(6), q(3), rho(0.0), parameterID(0)
 {
     q0[0] = 0.0;
     q0[1] = 0.0;
@@ -127,10 +123,6 @@ DispBeamColumn2d::DispBeamColumn2d()
 
     theNodes[0] = 0;
     theNodes[1] = 0;
-
-// AddingSensitivity:BEGIN /////////////////////////////////////
-	parameterID = 0;
-// AddingSensitivity:END //////////////////////////////////////
 }
 
 DispBeamColumn2d::~DispBeamColumn2d()
@@ -1120,7 +1112,35 @@ DispBeamColumn2d::setResponse(const char **argv, int argc,
     theResponse =  new ElementResponse(this, 4, Vector(3));
 
   // section response -
-  } else if (strstr(argv[0],"section") != 0) {
+  } 
+    // section response -
+  else if (strstr(argv[0],"sectionX") != 0) {
+    if (argc > 2) {
+      float sectionLoc = atof(argv[1]);
+
+      double xi[maxNumSections];
+      double L = crdTransf->getInitialLength();
+      beamInt->getSectionLocations(numSections, L, xi);
+      
+      sectionLoc /= L;
+
+      float minDistance = fabs(xi[0]-sectionLoc);
+      int sectionNum = 0;
+      for (int i = 1; i < numSections; i++) {
+	if (fabs(xi[i]-sectionLoc) < minDistance) {
+	  minDistance = fabs(xi[i]-sectionLoc);
+	  sectionNum = i;
+	}
+	  }
+
+      output.tag("GaussPointOutput");
+      output.attr("number",sectionNum+1);
+      output.attr("eta",xi[sectionNum]*L);
+      
+	theResponse = theSections[sectionNum]->setResponse(&argv[2], argc-2, output);
+	}
+  }
+  else if (strstr(argv[0],"section") != 0) {
     if (argc > 2) {
       int sectionNum = atoi(argv[1]);
       if (sectionNum > 0 && sectionNum <= numSections) {
@@ -1281,7 +1301,29 @@ DispBeamColumn2d::setParameter(const char **argv, int argc, Parameter &param)
   if (strcmp(argv[0],"rho") == 0)
     return param.addObject(1, this);
   
-  // If the parameter is belonging to a section or lower
+  if (strstr(argv[0],"sectionX") != 0) {
+    if (argc < 3)
+		return -1;
+      
+	float sectionLoc = atof(argv[1]);
+
+      double xi[maxNumSections];
+      double L = crdTransf->getInitialLength();
+      beamInt->getSectionLocations(numSections, L, xi);
+      
+      sectionLoc /= L;
+
+      float minDistance = fabs(xi[0]-sectionLoc);
+      int sectionNum = 0;
+      for (int i = 1; i < numSections; i++) {
+	if (fabs(xi[i]-sectionLoc) < minDistance) {
+	  minDistance = fabs(xi[i]-sectionLoc);
+	  sectionNum = i;
+	}
+	  }  
+	return theSections[sectionNum]->setParameter(&argv[2], argc-2, param);
+  }
+  // If the parameter belongs to a section or lower
   if (strstr(argv[0],"section") != 0) {
     
     if (argc < 3)
@@ -1307,7 +1349,12 @@ DispBeamColumn2d::setParameter(const char **argv, int argc, Parameter &param)
     return beamInt->setParameter(&argv[1], argc-1, param);
   }
 
-  return -1;
+  // Default, send to every object
+  int ok = 0;
+  for (int i = 0; i < numSections; i++)
+    ok += theSections[i]->setParameter(argv, argc, param);
+  ok += beamInt->setParameter(argv, argc, param);
+  return ok;
 }
 
 int
