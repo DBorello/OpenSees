@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2006-01-24 18:51:53 $
+// $Revision: 1.15 $
+// $Date: 2007-10-13 00:51:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/TclBeamWithHingesBuilder.cpp,v $
                                                                         
                                                                         
@@ -230,7 +230,7 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	SectionForceDeformation *sections[10];
 	BeamIntegration *theBeamIntegr = 0;
 
-	ElasticSection2d elastic(0, E, A, I);
+	ElasticSection2d elastic(8, E, A, I);
 
 	if (strcmp(argv[1],"beamWithHinges1") == 0) {
 	  theBeamIntegr =
