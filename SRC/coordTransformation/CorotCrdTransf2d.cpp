@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2007-08-07 16:52:17 $
+// $Revision: 1.3 $
+// $Date: 2007-10-13 00:16:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CorotCrdTransf2d.cpp,v $
 
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
@@ -33,6 +33,18 @@
 // transformation for a planar frame between the global 
 // and basic coordinate systems.
 
+/*
+ * References
+ *
+
+General Formulation and Analytical Response Sensitivity
+---
+Scott, M. H. and F. C. Filippou (2007).
+"Response Gradients for Nonlinear Beam-Column Elements under Large Displacements."
+Journal of Structural Engineering, 133(2):155-165.
+
+ *
+ */
 
 #include <math.h>
 #include <Vector.h>
@@ -1080,3 +1092,347 @@ CorotCrdTransf2d::Print(OPS_Stream &s, int flag)
     s << "\tnodeI Offset: " << nodeIOffset;
     s << "\tnodeJ Offset: " << nodeJOffset;
 }
+
+const Vector &
+CorotCrdTransf2d::getGlobalResistingForceShapeSensitivity(const Vector &q,
+							  const Vector &p0,
+							  int gradNumber)
+{
+  static Vector dpgdh(6);
+  dpgdh.Zero();
+
+  int nodeIid = nodeIPtr->getCrdsSensitivity();
+  int nodeJid = nodeJPtr->getCrdsSensitivity();
+  
+  if (nodeIid == 0 && nodeJid == 0)
+    return dpgdh;
+    
+  this->update();
+
+  if (nodeIOffset.Norm() != 0.0 || nodeJOffset.Norm() != 0.0) {
+    opserr << "ERROR: Currently a node offset cannot be used in " << endln
+	   << " conjunction with random nodal coordinates." << endln;
+  }
+  
+  double dcosThetadh = 0.0;
+  double dsinThetadh = 0.0;
+
+  double dx = cosTheta*L;
+  double dy = sinTheta*L;	
+  
+  double dLdh = this->getdLdh();
+
+  if (nodeIid == 1) { // here x1 is random
+    //dcosThetadh = (-L+dx*dx/L)/(L*L);
+    //dsinThetadh = dx*dy/(L*L*L);
+    dcosThetadh = -1/L-cosTheta/L*dLdh;
+    dsinThetadh = -sinTheta/L*dLdh;
+  }
+  if (nodeIid == 2) { // here y1 is random
+    //dsinThetadh = (-L+dy*dy/L)/(L*L);
+    //dcosThetadh = dx*dy/(L*L*L);
+    dcosThetadh = -cosTheta/L*dLdh;
+    dsinThetadh = -1/L-sinTheta/L*dLdh;
+  }
+  
+  if (nodeJid == 1) { // here x2 is random
+    //dcosThetadh = (L-dx*dx/L)/(L*L);
+    //dsinThetadh = -dx*dy/(L*L*L);
+    dcosThetadh = 1/L-cosTheta/L*dLdh;
+    dsinThetadh = -sinTheta/L*dLdh;
+  }
+  if (nodeJid == 2) { // here y2 is random
+    //dsinThetadh = (L-dy*dy/L)/(L*L);
+    //dcosThetadh = -dx*dy/(L*L*L);
+    dcosThetadh = -cosTheta/L*dLdh;
+    dsinThetadh = 1/L-sinTheta/L*dLdh;
+  }
+  
+  const Vector &disp1 = nodeIPtr->getTrialDisp();
+  const Vector &disp2 = nodeJPtr->getTrialDisp();
+
+  static Vector U(6);
+  for (int i = 0; i < 3; i++) {
+    U(i)   = disp1(i);
+    U(i+3) = disp2(i);
+  }
+  
+  static Vector u(6);
+
+  double dux =  cosTheta*(U(3)-U(0)) + sinTheta*(U(4)-U(1));
+  double duy = -sinTheta*(U(3)-U(0)) + cosTheta*(U(4)-U(1));
+
+  //double dLdh = this->getdLdh();
+
+  double dcosAlphadh =  sinAlpha*sinAlpha/Ln;
+  double dsinAlphadh = -cosAlpha*sinAlpha/Ln;
+
+  double dcosAlphaOverLndh = (2*sinAlpha*sinAlpha-1.0)/(Ln*Ln) ;
+  double dsinAlphaOverLndh = -2*cosAlpha*sinAlpha/(Ln*Ln);
+
+  double q0 = q(0);
+  double q1 = q(1);
+  double q2 = q(2);
+
+  static Vector dpldh(6);
+  dpldh.Zero();
+
+  dpldh(0) = (-dcosAlphadh*q0 - dsinAlphaOverLndh*(q1+q2) )*dLdh;
+  dpldh(1) = (-dsinAlphadh*q0 + dcosAlphaOverLndh*(q1+q2) )*dLdh;
+  dpldh(2) = 0.0;
+  dpldh(3) = ( dcosAlphadh*q0 + dsinAlphaOverLndh*(q1+q2) )*dLdh;
+  dpldh(4) = ( dsinAlphadh*q0 - dcosAlphaOverLndh*(q1+q2) )*dLdh;
+  dpldh(5) = 0.0;
+
+  this->getTransfMatrixLocalGlobal(Tlg);     // OPTIMIZE LATER
+  dpgdh.addMatrixTransposeVector(0.0, Tlg, dpldh, 1.0);   // pg = Tlg ^ pl; residual
+
+  static Vector pl(6);
+  pl.Zero();
+
+  static Matrix Abl(3,6);
+  this->getTransfMatrixBasicLocal(Abl);
+
+  pl.addMatrixTransposeVector(0.0, Abl, q, 1.0); // OPTIMIZE LATER
+
+  dpgdh(0) += dcosThetadh*pl(0)-dsinThetadh*pl(1);
+  dpgdh(1) += dsinThetadh*pl(0)+dcosThetadh*pl(1);
+  dpgdh(2) += 0.0;
+  dpgdh(3) += dcosThetadh*pl(3)-dsinThetadh*pl(4);
+  dpgdh(4) += dsinThetadh*pl(3)+dcosThetadh*pl(4);
+  dpgdh(5) += 0.0;
+
+  return dpgdh;
+}
+
+const Vector&
+CorotCrdTransf2d::getBasicDisplSensitivity(int gradNumber)
+{
+  static Vector dvdh(3);
+  dvdh.Zero();
+
+  int nodeIid = nodeIPtr->getCrdsSensitivity();
+  int nodeJid = nodeJPtr->getCrdsSensitivity();
+  
+  this->update();
+
+  double dcosThetadh = 0.0;
+  double dsinThetadh = 0.0;
+
+  double dx = cosTheta*L;
+  double dy = sinTheta*L;	
+  
+  double dLdh = this->getdLdh();
+
+  if (nodeIid == 1) { // here x1 is random
+    //dcosThetadh = (-L+dx*dx/L)/(L*L);
+    //dsinThetadh = dx*dy/(L*L*L);
+    dcosThetadh = -1/L-cosTheta/L*dLdh;
+    dsinThetadh = -sinTheta/L*dLdh;
+  }
+  if (nodeIid == 2) { // here y1 is random
+    //dsinThetadh = (-L+dy*dy/L)/(L*L);
+    //dcosThetadh = dx*dy/(L*L*L);
+    dcosThetadh = -cosTheta/L*dLdh;
+    dsinThetadh = -1/L-sinTheta/L*dLdh;
+  }
+  
+  if (nodeJid == 1) { // here x2 is random
+    //dcosThetadh = (L-dx*dx/L)/(L*L);
+    //dsinThetadh = -dx*dy/(L*L*L);
+    dcosThetadh = 1/L-cosTheta/L*dLdh;
+    dsinThetadh = -sinTheta/L*dLdh;
+  }
+  if (nodeJid == 2) { // here y2 is random
+    //dsinThetadh = (L-dy*dy/L)/(L*L);
+    //dcosThetadh = -dx*dy/(L*L*L);
+    dcosThetadh = -cosTheta/L*dLdh;
+    dsinThetadh = 1/L-sinTheta/L*dLdh;
+  }
+  
+  static Vector U(6);
+  static Vector dUdh(6);
+
+  const Vector &disp1 = nodeIPtr->getTrialDisp();
+  const Vector &disp2 = nodeJPtr->getTrialDisp();
+  for (int i = 0; i < 3; i++) {
+    U(i)   = disp1(i);
+    U(i+3) = disp2(i);
+    dUdh(i)   = nodeIPtr->getDispSensitivity((i+1),gradNumber);
+    dUdh(i+3) = nodeJPtr->getDispSensitivity((i+1),gradNumber);
+  }
+
+  static Vector dudh(6);
+
+  dudh(0) =  cosTheta*dUdh(0) + sinTheta*dUdh(1);
+  dudh(1) = -sinTheta*dUdh(0) + cosTheta*dUdh(1);
+  dudh(2) =  dUdh(2);
+  dudh(3) =  cosTheta*dUdh(3) + sinTheta*dUdh(4);
+  dudh(4) = -sinTheta*dUdh(3) + cosTheta*dUdh(4);
+  dudh(5) =  dUdh(5);
+
+  if (nodeIid != 0 || nodeJid != 0) {
+    dudh(0) +=  dcosThetadh*U(0) + dsinThetadh*U(1);
+    dudh(1) += -dsinThetadh*U(0) + dcosThetadh*U(1);
+    dudh(3) +=  dcosThetadh*U(3) + dsinThetadh*U(4);
+    dudh(4) += -dsinThetadh*U(3) + dcosThetadh*U(4);
+  }
+
+  double duxdh = dudh(3)-dudh(0);
+  double duydh = dudh(4)-dudh(1);
+
+  //double dLdh  = this->getdLdh();
+  double dLndh = cosAlpha*(dLdh+duxdh) + sinAlpha*duydh;
+
+  double dalphadh = (cosAlpha*duydh - sinAlpha*(dLdh+duxdh))/Ln;
+
+  // direct differentiation of v(u) wrt theta
+  dvdh(0) = dLndh-dLdh;
+  dvdh(1) = dudh(2)-dalphadh;
+  dvdh(2) = dudh(5)-dalphadh;
+
+  return dvdh;
+}
+
+const Vector&
+CorotCrdTransf2d::getBasicTrialDispShapeSensitivity(void)
+{
+  static Vector dvdh(3);
+  dvdh.Zero();
+
+  int nodeIid = nodeIPtr->getCrdsSensitivity();
+  int nodeJid = nodeJPtr->getCrdsSensitivity();
+  
+  if (nodeIid == 0 && nodeJid == 0)
+    return dvdh;
+
+  static Matrix Abl(3,6);
+
+  this->update();
+  this->getTransfMatrixBasicLocal(Abl);
+
+  double dcosThetadh = 0.0;
+  double dsinThetadh = 0.0;
+
+  double dx = cosTheta*L;
+  double dy = sinTheta*L;	
+  
+  double dLdh = this->getdLdh();
+
+  if (nodeIid == 1) { // here x1 is random
+    //dcosThetadh = (-L+dx*dx/L)/(L*L);
+    //dsinThetadh = dx*dy/(L*L*L);
+    dcosThetadh = -1/L-cosTheta/L*dLdh;
+    dsinThetadh = -sinTheta/L*dLdh;
+  }
+  if (nodeIid == 2) { // here y1 is random
+    //dsinThetadh = (-L+dy*dy/L)/(L*L);
+    //dcosThetadh = dx*dy/(L*L*L);
+    dcosThetadh = -cosTheta/L*dLdh;
+    dsinThetadh = -1/L-sinTheta/L*dLdh;
+  }
+  
+  if (nodeJid == 1) { // here x2 is random
+    //dcosThetadh = (L-dx*dx/L)/(L*L);
+    //dsinThetadh = -dx*dy/(L*L*L);
+    dcosThetadh = 1/L-cosTheta/L*dLdh;
+    dsinThetadh = -sinTheta/L*dLdh;
+  }
+  if (nodeJid == 2) { // here y2 is random
+    //dsinThetadh = (L-dy*dy/L)/(L*L);
+    //dcosThetadh = -dx*dy/(L*L*L);
+    dcosThetadh = -cosTheta/L*dLdh;
+    dsinThetadh = 1/L-sinTheta/L*dLdh;
+  }
+  
+  const Vector &disp1 = nodeIPtr->getTrialDisp();
+  const Vector &disp2 = nodeJPtr->getTrialDisp();
+
+  static Vector U(6);
+  for (int i = 0; i < 3; i++) {
+    U(i)   = disp1(i);
+    U(i+3) = disp2(i);
+  }
+
+  dvdh(0) = (cosAlpha-1.0)*dLdh;
+  dvdh(1) =  (sinAlpha/Ln)*dLdh;
+  dvdh(2) =  (sinAlpha/Ln)*dLdh;
+
+  static Vector dAdh_U(6);
+  // dAdh * U
+  dAdh_U(0) =  dcosThetadh*U(0) + dsinThetadh*U(1);
+  dAdh_U(1) = -dsinThetadh*U(0) + dcosThetadh*U(1);
+  dAdh_U(2) = 0.0;
+  dAdh_U(3) =  dcosThetadh*U(3) + dsinThetadh*U(4);
+  dAdh_U(4) = -dsinThetadh*U(3) + dcosThetadh*U(4);
+  dAdh_U(5) = 0.0;
+
+  dvdh += Abl*dAdh_U;
+
+  return dvdh;
+}
+
+bool
+CorotCrdTransf2d::isShapeSensitivity(void)
+{
+  int nodeIid = nodeIPtr->getCrdsSensitivity();
+  int nodeJid = nodeJPtr->getCrdsSensitivity();
+  
+  return (nodeIid != 0 || nodeJid != 0);
+}
+
+double
+CorotCrdTransf2d::getdLdh(void)
+{
+  int nodeIid = nodeIPtr->getCrdsSensitivity();
+  int nodeJid = nodeJPtr->getCrdsSensitivity();
+  
+  if (nodeIid == 0 && nodeJid == 0) 
+    return 0.0;
+    
+  if (nodeIOffset.Norm() != 0.0 || nodeJOffset.Norm() != 0.0) {
+    opserr << "ERROR: Currently a node offset cannot be used in " << endln
+	   << " conjunction with random nodal coordinates." << endln;
+  }
+  
+  if (nodeIid == 1) // here x1 is random
+    return -cosTheta;
+  if (nodeIid == 2) // here y1 is random
+    return -sinTheta;
+  
+  if (nodeJid == 1) // here x2 is random
+    return cosTheta;
+  if (nodeJid == 2) // here y2 is random
+    return sinTheta;
+
+  return 0.0;
+}
+
+double
+CorotCrdTransf2d::getd1overLdh(void)
+{
+  int nodeIid = nodeIPtr->getCrdsSensitivity();
+  int nodeJid = nodeJPtr->getCrdsSensitivity();
+  
+  if (nodeIid == 0 && nodeJid == 0)
+    return 0.0;
+    
+  if (nodeIOffset.Norm() != 0.0 || nodeJOffset.Norm() != 0.0) {
+    opserr << "ERROR: Currently a node offset cannot be used in " << endln
+	   << " conjunction with random nodal coordinates." << endln;
+  }
+  
+  if (nodeIid == 1) // here x1 is random
+    return cosTheta/(L*L);
+  if (nodeIid == 2) // here y1 is random
+    return sinTheta/(L*L);
+  
+  if (nodeJid == 1) // here x2 is random
+    return -cosTheta/(L*L);
+  if (nodeJid == 2) // here y2 is random
+    return -sinTheta/(L*L);
+
+  return 0.0;
+}
+
+// AddingSensitivity:END /////////////////////////////////////

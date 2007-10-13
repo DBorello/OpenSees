@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $                                                              
-// $Date: 2006-12-15 01:01:56 $                                                                  
+// $Revision: 1.10 $                                                              
+// $Date: 2007-10-13 00:16:03 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CorotCrdTransf2d.h,v $ 
                                         
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
@@ -59,13 +59,24 @@ public:
     const Vector &getBasicTrialDisp(void);
     const Vector &getBasicIncrDisp(void);
     const Vector &getBasicIncrDeltaDisp(void);
-	const Vector &getBasicTrialVel(void);
-	const Vector &getBasicTrialAccel(void);
+    const Vector &getBasicTrialVel(void);
+    const Vector &getBasicTrialAccel(void);
     
     const Vector &getGlobalResistingForce(const Vector &basicForce, const Vector &uniformLoad);
     const Matrix &getGlobalStiffMatrix(const Matrix &basicStiff, const Vector &basicForce);
     const Matrix &getInitialGlobalStiffMatrix(const Matrix &basicStiff);
     
+// AddingSensitivity:BEGIN //////////////////////////////////
+    const Vector &getBasicDisplSensitivity(int gradNumber);
+    const Vector &getGlobalResistingForceShapeSensitivity(const Vector &q,
+							  const Vector &p0,
+							  int gradNumber);
+    const Vector &getBasicTrialDispShapeSensitivity(void);
+    bool isShapeSensitivity(void);
+    double getdLdh(void);
+    double getd1overLdh(void);
+// AddingSensitivity:END //////////////////////////////////
+
     CrdTransf2d *getCopy(void);
     
     int sendSelf(int cTag, Channel &theChannel);
