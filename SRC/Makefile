@@ -155,16 +155,11 @@ GLF_LIBS = $(FE)/element/zeroLength/ZeroLength.o \
 	$(FE)/element/zeroLength/ZeroLengthSection.o \
 	$(FE)/element/zeroLength/TclZeroLength.o
 
-REMO_LIBS = $(FE)/element/nonlinearBeamColumn/quadrule/QuadRule.o \
-	$(FE)/element/nonlinearBeamColumn/quadrule/QuadRule1d.o \
-	$(FE)/element/nonlinearBeamColumn/quadrule/QuadRule1d01.o \
-	$(FE)/element/nonlinearBeamColumn/quadrule/GaussQuadRule1d.o \
-	$(FE)/element/nonlinearBeamColumn/quadrule/GaussQuadRule1d01.o \
-	$(FE)/element/nonlinearBeamColumn/quadrule/GaussLobattoQuadRule1d01.o \
-	$(FE)/element/nonlinearBeamColumn/matrixutil/MatrixUtil.o \
-	$(FE)/element/nonlinearBeamColumn/element/TclNLBeamColumnCommand.o \
+REMO_LIBS = $(FE)/element/nonlinearBeamColumn/matrixutil/MatrixUtil.o \
 	$(FE)/element/forceBeamColumn/ForceBeamColumn2d.o \
 	$(FE)/element/forceBeamColumn/ForceBeamColumn3d.o \
+	$(FE)/element/forceBeamColumn/ElasticForceBeamColumn2d.o \
+	$(FE)/element/forceBeamColumn/ElasticForceBeamColumn3d.o \
 	$(FE)/element/forceBeamColumn/TclForceBeamColumnCommand.o \
 	$(FE)/element/forceBeamColumn/BeamIntegration.o \
 	$(FE)/element/forceBeamColumn/LobattoBeamIntegration.o \
@@ -178,6 +173,10 @@ REMO_LIBS = $(FE)/element/nonlinearBeamColumn/quadrule/QuadRule.o \
 	$(FE)/element/forceBeamColumn/UserDefinedBeamIntegration.o \
 	$(FE)/element/forceBeamColumn/UserDefinedHingeIntegration.o \
 	$(FE)/element/forceBeamColumn/DistHingeIntegration.o \
+	$(FE)/element/forceBeamColumn/MidDistanceBeamIntegration.o \
+	$(FE)/element/forceBeamColumn/TrapezoidalBeamIntegration.o \
+	$(FE)/element/forceBeamColumn/FixedLocationBeamIntegration.o \
+	$(FE)/element/forceBeamColumn/LowOrderBeamIntegration.o \
 	$(FE)/coordTransformation/CrdTransf.o \
 	$(FE)/coordTransformation/CrdTransf2d.o \
 	$(FE)/coordTransformation/CrdTransf3d.o \
