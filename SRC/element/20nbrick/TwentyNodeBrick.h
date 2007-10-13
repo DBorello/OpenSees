@@ -39,8 +39,6 @@
 #include <Domain.h>
 #include <string.h>
 
-#include <GaussQuadRule1d.h>
-
 #include <OPS_Globals.h>
 
 #include <Matrix.h>
