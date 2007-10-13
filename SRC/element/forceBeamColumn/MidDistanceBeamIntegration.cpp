@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2007-07-12 20:49:08 $
+// $Revision: 1.2 $
+// $Date: 2007-10-13 00:45:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/MidDistanceBeamIntegration.cpp,v $
 
 #include <MidDistanceBeamIntegration.h>
@@ -42,6 +42,19 @@ MidDistanceBeamIntegration::MidDistanceBeamIntegration(int nIP,
     pts(i) = pt(i);
   }
 
+  for (int i = 0; i < nIP; i++) {
+    int key = i;
+    for (int j = i+1; j < nIP; j++) {
+      if (pts(j) < pts(key)) {
+	key = j;
+	opserr << "MidDistanceBeamIntegration::MidDistanceBeamIntegration -- point are not sorted; sort before calling constructor" << endln;
+      }
+    }
+    //double temp = pts(i);
+    //pts(i) = pts(key);
+    //pts(key) = temp;
+  }
+
   Vector mids(nIP-1);
 
   for (int i = 0; i < nIP-1; i++) {
@@ -58,7 +71,7 @@ MidDistanceBeamIntegration::MidDistanceBeamIntegration(int nIP,
 MidDistanceBeamIntegration::MidDistanceBeamIntegration():
   BeamIntegration(BEAM_INTEGRATION_TAG_MidDistance)
 {
- 
+
 }
 
 MidDistanceBeamIntegration::~MidDistanceBeamIntegration()
