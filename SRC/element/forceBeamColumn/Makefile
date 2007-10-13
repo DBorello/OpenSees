@@ -1,6 +1,7 @@
 include ../../../Makefile.def
 
 OBJS       = ForceBeamColumn2d.o ForceBeamColumn3d.o \
+	ElasticForceBeamColumn2d.o ElasticForceBeamColumn3d.o \
 	TclForceBeamColumnCommand.o \
 	BeamIntegration.o \
 	LobattoBeamIntegration.o \
