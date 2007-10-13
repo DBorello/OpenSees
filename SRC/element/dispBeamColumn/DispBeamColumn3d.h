@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-02-02 01:30:47 $
+// $Revision: 1.14 $
+// $Date: 2007-10-13 00:03:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.h,v $
 
 // Written: MHS
@@ -40,11 +40,11 @@
 #include <Matrix.h>
 #include <Vector.h>
 #include <ID.h>
-#include <GaussQuadRule1d01.h>
 
 class Node;
 class SectionForceDeformation;
 class CrdTransf3d;
+class BeamIntegration;
 class Response;
 
 class DispBeamColumn3d : public Element
@@ -52,6 +52,7 @@ class DispBeamColumn3d : public Element
   public:
     DispBeamColumn3d(int tag, int nd1, int nd2,
 		     int numSections, SectionForceDeformation **s,
+			 BeamIntegration &bi,
 		     CrdTransf3d &coordTransf, double rho = 0.0);
     DispBeamColumn3d();
     ~DispBeamColumn3d();
@@ -93,6 +94,16 @@ class DispBeamColumn3d : public Element
     Response *setResponse(const char **argv, int argc, OPS_Stream &s);
     int getResponse(int responseID, Information &eleInfo);
 
+    // AddingSensitivity:BEGIN //////////////////////////////////////////
+    int setParameter(const char **argv, int argc, Parameter &param);
+    int            updateParameter(int parameterID, Information &info);
+    int            activateParameter(int parameterID);
+    const Vector & getResistingForceSensitivity(int gradNumber);
+    const Matrix & getKiSensitivity(int gradNumber);
+    const Matrix & getMassSensitivity(int gradNumber);
+    int            commitSensitivity(int gradNumber, int numGrads);
+    // AddingSensitivity:END ///////////////////////////////////////////
+
   protected:
     
   private:
@@ -101,6 +112,8 @@ class DispBeamColumn3d : public Element
     int numSections;
     SectionForceDeformation **theSections; // pointer to the ND material objects
     CrdTransf3d *crdTransf;        // pointer to coordinate tranformation object 
+
+    BeamIntegration *beamInt;
 
     ID connectedExternalNodes; // Tags of quad nodes
 
@@ -116,9 +129,11 @@ class DispBeamColumn3d : public Element
 
     double rho;			// Mass density per unit length
 
-    static double workArea[];
+	int parameterID;
 
-    static GaussQuadRule1d01 quadRule;
+    enum {maxNumSections = 20};
+
+    static double workArea[];
 };
 
 #endif

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2007-02-02 01:30:47 $
+// $Revision: 1.24 $
+// $Date: 2007-10-13 00:03:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.cpp,v $
 
 // Written: MHS
@@ -42,19 +42,21 @@
 #include <FEM_ObjectBroker.h>
 #include <ElementResponse.h>
 #include <ElementalLoad.h>
+#include <BeamIntegration.h>
+#include <Parameter.h>
 
 Matrix DispBeamColumn3d::K(12,12);
 Vector DispBeamColumn3d::P(12);
 double DispBeamColumn3d::workArea[200];
-GaussQuadRule1d01 DispBeamColumn3d::quadRule;
 
 DispBeamColumn3d::DispBeamColumn3d(int tag, int nd1, int nd2,
 				   int numSec, SectionForceDeformation **s,
+				   BeamIntegration &bi,
 				   CrdTransf3d &coordTransf, double r)
 :Element (tag, ELE_TAG_DispBeamColumn3d),
-numSections(numSec), theSections(0), crdTransf(0),
+numSections(numSec), theSections(0), crdTransf(0), beamInt(0),
 connectedExternalNodes(2), 
-Q(12), q(6), rho(r)
+Q(12), q(6), rho(r), parameterID(0)
 {
   // Allocate arrays of pointers to SectionForceDeformations
   theSections = new SectionForceDeformation *[numSections];
@@ -76,6 +78,13 @@ Q(12), q(6), rho(r)
     }
   }
   
+  beamInt = bi.getCopy();
+  
+  if (beamInt == 0) {
+    opserr << "DispBeamColumn3d::DispBeamColumn3d - failed to copy beam integration\n";
+    exit(-1);
+  }
+
   crdTransf = coordTransf.getCopy();
   
   if (crdTransf == 0) {
@@ -106,9 +115,9 @@ Q(12), q(6), rho(r)
 
 DispBeamColumn3d::DispBeamColumn3d()
 :Element (0, ELE_TAG_DispBeamColumn3d),
-numSections(0), theSections(0), crdTransf(0),
+numSections(0), theSections(0), crdTransf(0), beamInt(0),
 connectedExternalNodes(2), 
-Q(12), q(6), rho(0.0)
+Q(12), q(6), rho(0.0), parameterID(0)
 {
   q0[0] = 0.0;
   q0[1] = 0.0;
@@ -139,6 +148,9 @@ DispBeamColumn3d::~DispBeamColumn3d()
   
   if (crdTransf)
     delete crdTransf;
+
+  if (beamInt != 0)
+    delete beamInt;
 }
 
 int
@@ -272,7 +284,10 @@ DispBeamColumn3d::update(void)
   
   double L = crdTransf->getInitialLength();
   double oneOverL = 1.0/L;
-  const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+
+  //const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+  double xi[maxNumSections];
+  beamInt->getSectionLocations(numSections, L, xi);
   
   // Loop over the integration points
   for (int i = 0; i < numSections; i++) {
@@ -282,7 +297,7 @@ DispBeamColumn3d::update(void)
 
     Vector e(workArea, order);
       
-    double xi6 = 6.0*pts(i,0);
+    double xi6 = 6.0*xi[i];
     
     int j;
     for (j = 0; j < order; j++) {
@@ -321,12 +336,16 @@ DispBeamColumn3d::getTangentStiff()
   kb.Zero();
   q.Zero();
   
-  const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
-  const Vector &wts = quadRule.getIntegrPointWeights(numSections);
-  
   double L = crdTransf->getInitialLength();
   double oneOverL = 1.0/L;
-  
+
+  //const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+  //const Vector &wts = quadRule.getIntegrPointWeights(numSections);
+  double xi[maxNumSections];
+  beamInt->getSectionLocations(numSections, L, xi);
+  double wt[maxNumSections];
+  beamInt->getSectionWeights(numSections, L, wt);
+
   // Loop over the integration points
   for (int i = 0; i < numSections; i++) {
     
@@ -336,7 +355,7 @@ DispBeamColumn3d::getTangentStiff()
     Matrix ka(workArea, order, 6);
     ka.Zero();
 
-    double xi6 = 6.0*pts(i,0);
+    double xi6 = 6.0*xi[i];
 
     // Get the section tangent stiffness and stress resultant
     const Matrix &ks = theSections[i]->getSectionTangent();
@@ -344,7 +363,7 @@ DispBeamColumn3d::getTangentStiff()
         
     // Perform numerical integration
     //kb.addMatrixTripleProduct(1.0, *B, ks, wts(i)/L);
-    double wti = wts(i)*oneOverL;
+    double wti = wt[i]*oneOverL;
     double tmp;
     int j, k;
     for (j = 0; j < order; j++) {
@@ -407,7 +426,7 @@ DispBeamColumn3d::getTangentStiff()
     //q.addMatrixTransposeVector(1.0, *B, s, wts(i));
     double si;
     for (j = 0; j < order; j++) {
-      si = s(j)*wts(i);
+      si = s(j)*wt[i];
       switch(code(j)) {
       case SECTION_RESPONSE_P:
 	q(0) += si;
@@ -448,11 +467,15 @@ DispBeamColumn3d::getInitialBasicStiff()
   // Zero for integral
   kb.Zero();
   
-  const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
-  const Vector &wts = quadRule.getIntegrPointWeights(numSections);
-  
   double L = crdTransf->getInitialLength();
   double oneOverL = 1.0/L;
+
+  //const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+  //const Vector &wts = quadRule.getIntegrPointWeights(numSections);
+  double xi[maxNumSections];
+  beamInt->getSectionLocations(numSections, L, xi);
+  double wt[maxNumSections];
+  beamInt->getSectionWeights(numSections, L, wt);
   
   // Loop over the integration points
   for (int i = 0; i < numSections; i++) {
@@ -463,14 +486,14 @@ DispBeamColumn3d::getInitialBasicStiff()
     Matrix ka(workArea, order, 6);
     ka.Zero();
     
-    double xi6 = 6.0*pts(i,0);
+    double xi6 = 6.0*xi[i];
     
     // Get the section tangent stiffness and stress resultant
     const Matrix &ks = theSections[i]->getInitialTangent();
     
     // Perform numerical integration
     //kb.addMatrixTripleProduct(1.0, *B, ks, wts(i)/L);
-    double wti = wts(i)*oneOverL;
+    double wti = wt[i]*oneOverL;
     double tmp;
     int j, k;
     for (j = 0; j < order; j++) {
@@ -697,9 +720,15 @@ DispBeamColumn3d::addInertiaLoadToUnbalance(const Vector &accel)
 const Vector&
 DispBeamColumn3d::getResistingForce()
 {
-  const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
-  const Vector &wts = quadRule.getIntegrPointWeights(numSections);
-  
+  double L = crdTransf->getInitialLength();
+
+  //const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+  //const Vector &wts = quadRule.getIntegrPointWeights(numSections);
+  double xi[maxNumSections];
+  beamInt->getSectionLocations(numSections, L, xi);
+  double wt[maxNumSections];
+  beamInt->getSectionWeights(numSections, L, wt);
+
   // Zero for integration
   q.Zero();
   
@@ -709,7 +738,7 @@ DispBeamColumn3d::getResistingForce()
     int order = theSections[i]->getOrder();
     const ID &code = theSections[i]->getType();
 
-    double xi6 = 6.0*pts(i,0);
+    double xi6 = 6.0*xi[i];
     
     // Get section stress resultant
     const Vector &s = theSections[i]->getStressResultant();
@@ -719,7 +748,7 @@ DispBeamColumn3d::getResistingForce()
     
     double si;
     for (int j = 0; j < order; j++) {
-      si = s(j)*wts(i);
+      si = s(j)*wt[i];
       switch(code(j)) {
       case SECTION_RESPONSE_P:
 	q(0) += si;
@@ -913,7 +942,7 @@ DispBeamColumn3d::recvSelf(int commitTag, Channel &theChannel,
     // recv damping coefficients
     static Vector dData(4);
     if (theChannel.recvVector(dbTag, commitTag, dData) < 0) {
-      opserr << "DispBeamColumn2d::sendSelf() - failed to recv double data\n";
+      opserr << "DispBeamColumn3d::sendSelf() - failed to recv double data\n";
       return -1;
     }    
     alphaM = dData(0);
@@ -1192,16 +1221,46 @@ DispBeamColumn3d::setResponse(const char **argv, int argc, OPS_Stream &output)
     theResponse = new ElementResponse(this, 4, Vector(6));
   
   // section response -
-  } else if (strcmp(argv[0],"section") ==0) { 
+  } 
+	else if (strstr(argv[0],"sectionX") != 0) {
+    if (argc > 2) {
+      float sectionLoc = atof(argv[1]);
+
+      double xi[maxNumSections];
+      double L = crdTransf->getInitialLength();
+      beamInt->getSectionLocations(numSections, L, xi);
+      
+      sectionLoc /= L;
+
+      float minDistance = fabs(xi[0]-sectionLoc);
+      int sectionNum = 0;
+      for (int i = 1; i < numSections; i++) {
+	if (fabs(xi[i]-sectionLoc) < minDistance) {
+	  minDistance = fabs(xi[i]-sectionLoc);
+	  sectionNum = i;
+	}
+	  }
+
+      output.tag("GaussPointOutput");
+      output.attr("number",sectionNum+1);
+      output.attr("eta",xi[sectionNum]*L);
+      
+	theResponse = theSections[sectionNum]->setResponse(&argv[2], argc-2, output);
+	}
+  }
+	  else if (strcmp(argv[0],"section") ==0) { 
     if (argc > 2) {
     
       int sectionNum = atoi(argv[1]);
       if (sectionNum > 0 && sectionNum <= numSections) {
 	
+      double xi[maxNumSections];
+      double L = crdTransf->getInitialLength();
+      beamInt->getSectionLocations(numSections, L, xi);
+  
 	output.tag("GaussPointOutput");
 	output.attr("number",sectionNum);
-	const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
-	output.attr("eta",2.0*pts(sectionNum-1,0)-1);
+	output.attr("eta",xi[sectionNum-1]*L);
 
 	theResponse =  theSections[sectionNum-1]->setResponse(&argv[2], argc-2, output);
 	
@@ -1274,3 +1333,356 @@ DispBeamColumn3d::getResponse(int responseID, Information &eleInfo)
   else
     return -1;
 }
+
+// AddingSensitivity:BEGIN ///////////////////////////////////
+int
+DispBeamColumn3d::setParameter(const char **argv, int argc, Parameter &param)
+{
+  if (argc < 1)
+    return -1;
+  
+  // If the parameter belongs to the element itself
+  if (strcmp(argv[0],"rho") == 0)
+    return param.addObject(1, this);
+  
+  if (strstr(argv[0],"sectionX") != 0) {
+    if (argc < 3)
+		return -1;
+      
+	float sectionLoc = atof(argv[1]);
+
+      double xi[maxNumSections];
+      double L = crdTransf->getInitialLength();
+      beamInt->getSectionLocations(numSections, L, xi);
+      
+      sectionLoc /= L;
+
+      float minDistance = fabs(xi[0]-sectionLoc);
+      int sectionNum = 0;
+      for (int i = 1; i < numSections; i++) {
+	if (fabs(xi[i]-sectionLoc) < minDistance) {
+	  minDistance = fabs(xi[i]-sectionLoc);
+	  sectionNum = i;
+	}
+	  }  
+	return theSections[sectionNum]->setParameter(&argv[2], argc-2, param);
+  }
+  // If the parameter belongs to a section or lower
+  if (strstr(argv[0],"section") != 0) {
+    
+    if (argc < 3)
+      return -1;
+    
+    // Get section and material tag numbers from user input
+    int paramSectionTag = atoi(argv[1]);
+    
+    // Find the right section and call its setParameter method
+    int ok = 0;
+    for (int i = 0; i < numSections; i++)
+      if (paramSectionTag == theSections[i]->getTag())
+	ok += theSections[i]->setParameter(&argv[2], argc-2, param);
+
+    return ok;
+  }
+  
+  else if (strstr(argv[0],"integration") != 0) {
+    
+    if (argc < 2)
+      return -1;
+
+    return beamInt->setParameter(&argv[1], argc-1, param);
+  }
+
+  // Default, send to every object
+  int ok = 0;
+  for (int i = 0; i < numSections; i++)
+    ok += theSections[i]->setParameter(argv, argc, param);
+  ok += beamInt->setParameter(argv, argc, param);
+  return ok;
+}
+
+int
+DispBeamColumn3d::updateParameter (int parameterID, Information &info)
+{
+  if (parameterID == 1) {
+    rho = info.theDouble;
+    return 0;
+  }
+  else
+    return -1;  
+}
+
+
+
+
+int
+DispBeamColumn3d::activateParameter(int passedParameterID)
+{
+  parameterID = passedParameterID;
+  
+  return 0;
+}
+
+const Matrix &
+DispBeamColumn3d::getKiSensitivity(int gradNumber)
+{
+	K.Zero();
+	return K;
+}
+
+const Matrix &
+DispBeamColumn3d::getMassSensitivity(int gradNumber)
+{
+	K.Zero();
+	return K;
+}
+
+
+
+const Vector &
+DispBeamColumn3d::getResistingForceSensitivity(int gradNumber)
+{
+  double L = crdTransf->getInitialLength();
+  double oneOverL = 1.0/L;
+  
+  //const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+  //const Vector &wts = quadRule.getIntegrPointWeights(numSections);
+  double xi[maxNumSections];
+  beamInt->getSectionLocations(numSections, L, xi);
+  double wt[maxNumSections];
+  beamInt->getSectionWeights(numSections, L, wt);
+
+  // Zero for integration
+  static Vector dqdh(6);
+  dqdh.Zero();
+  
+  // Loop over the integration points
+  for (int i = 0; i < numSections; i++) {
+    
+    int order = theSections[i]->getOrder();
+    const ID &code = theSections[i]->getType();
+    
+    //double xi6 = 6.0*pts(i,0);
+    double xi6 = 6.0*xi[i];
+    //double wti = wts(i);
+    double wti = wt[i];
+    
+    // Get section stress resultant gradient
+    const Vector &dsdh = theSections[i]->getStressResultantSensitivity(gradNumber,true);
+    
+    // Perform numerical integration on internal force gradient
+    double sensi;
+    for (int j = 0; j < order; j++) {
+      sensi = dsdh(j)*wti;
+      switch(code(j)) {
+      case SECTION_RESPONSE_P:
+	dqdh(0) += sensi; 
+	break;
+      case SECTION_RESPONSE_MZ:
+	dqdh(1) += (xi6-4.0)*sensi; 
+	dqdh(2) += (xi6-2.0)*sensi; 
+	break;
+      case SECTION_RESPONSE_MY:
+	dqdh(3) += (xi6-4.0)*sensi; 
+	dqdh(4) += (xi6-2.0)*sensi; 
+	break;
+      case SECTION_RESPONSE_T:
+	dqdh(5) += sensi; 
+	break;
+      default:
+	break;
+      }
+    }
+  }
+  
+  // Transform forces
+  static Vector dp0dh(6);		// No distributed loads
+
+  P.Zero();
+
+  //////////////////////////////////////////////////////////////
+
+  if (crdTransf->isShapeSensitivity()) {
+    
+    // Perform numerical integration to obtain basic stiffness matrix
+    // Some extra declarations
+    static Matrix kbmine(6,6);
+    kbmine.Zero();
+    q.Zero();
+    
+    double tmp;
+    
+    int j, k;
+    
+    for (int i = 0; i < numSections; i++) {
+      
+      int order = theSections[i]->getOrder();
+      const ID &code = theSections[i]->getType();
+      
+      //double xi6 = 6.0*pts(i,0);
+      double xi6 = 6.0*xi[i];
+      //double wti = wts(i);
+      double wti = wt[i];
+      
+      const Vector &s = theSections[i]->getStressResultant();
+      const Matrix &ks = theSections[i]->getSectionTangent();
+      
+      Matrix ka(workArea, order, 6);
+      ka.Zero();
+      
+      double si;
+      for (j = 0; j < order; j++) {
+	si = s(j)*wti;
+	switch(code(j)) {
+	case SECTION_RESPONSE_P:
+	  q(0) += si;
+	  for (k = 0; k < order; k++) {
+	    ka(k,0) += ks(k,j)*wti;
+	  }
+	  break;
+	case SECTION_RESPONSE_MZ:
+	  q(1) += (xi6-4.0)*si; 
+	  q(2) += (xi6-2.0)*si;
+	  for (k = 0; k < order; k++) {
+	    tmp = ks(k,j)*wti;
+	    ka(k,1) += (xi6-4.0)*tmp;
+	    ka(k,2) += (xi6-2.0)*tmp;
+	  }
+	  break;
+	case SECTION_RESPONSE_MY:
+	  q(3) += (xi6-4.0)*si; 
+	  q(4) += (xi6-2.0)*si;
+	  for (k = 0; k < order; k++) {
+	    tmp = ks(k,j)*wti;
+	    ka(k,3) += (xi6-4.0)*tmp;
+	    ka(k,4) += (xi6-2.0)*tmp;
+	  }
+	  break;
+	case SECTION_RESPONSE_T:
+	  q(5) += si;
+	  for (k = 0; k < order; k++) {
+	    ka(k,5) += ks(k,j)*wti;
+	  }
+	  break;
+	default:
+	  break;
+	}
+      }
+      for (j = 0; j < order; j++) {
+	switch (code(j)) {
+	case SECTION_RESPONSE_P:
+	  for (k = 0; k < 6; k++) {
+	    kbmine(0,k) += ka(j,k);
+	  }
+	  break;
+	case SECTION_RESPONSE_MZ:
+	  for (k = 0; k < 6; k++) {
+	    tmp = ka(j,k);
+	    kbmine(1,k) += (xi6-4.0)*tmp;
+	    kbmine(2,k) += (xi6-2.0)*tmp;
+	  }
+	  break;
+	case SECTION_RESPONSE_MY:
+	  for (k = 0; k < 6; k++) {
+	    tmp = ka(j,k);
+	    kbmine(3,k) += (xi6-4.0)*tmp;
+	    kbmine(4,k) += (xi6-2.0)*tmp;
+	  }
+	  break;
+	case SECTION_RESPONSE_T:
+	  for (k = 0; k < 6; k++) {
+	    kbmine(5,k) += ka(j,k);
+	  }
+	  break;
+	default:
+	  break;
+	}
+      }
+    }      
+    
+    const Vector &A_u = crdTransf->getBasicTrialDisp();
+    double dLdh = crdTransf->getdLdh();
+    double d1overLdh = -dLdh/(L*L);
+    // a^T k_s dadh v
+    dqdh.addMatrixVector(1.0, kbmine, A_u, d1overLdh);
+
+    // k dAdh u
+    const Vector &dAdh_u = crdTransf->getBasicTrialDispShapeSensitivity();
+    dqdh.addMatrixVector(1.0, kbmine, dAdh_u, oneOverL);
+
+    // dAdh^T q
+    P += crdTransf->getGlobalResistingForceShapeSensitivity(q, dp0dh, gradNumber);
+  }
+  
+  // A^T (dqdh + k dAdh u)
+  P += crdTransf->getGlobalResistingForce(dqdh, dp0dh);
+  
+  return P;
+}
+
+
+
+// NEW METHOD
+int
+DispBeamColumn3d::commitSensitivity(int gradNumber, int numGrads)
+{
+  // Get basic deformation and sensitivities
+  const Vector &v = crdTransf->getBasicTrialDisp();
+  
+  static Vector dvdh(6);
+  dvdh = crdTransf->getBasicDisplSensitivity(gradNumber);
+  
+  double L = crdTransf->getInitialLength();
+  double oneOverL = 1.0/L;
+  //const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+  double xi[maxNumSections];
+  beamInt->getSectionLocations(numSections, L, xi);
+
+  // Some extra declarations
+  double d1oLdh = crdTransf->getd1overLdh();
+  
+  // Loop over the integration points
+  for (int i = 0; i < numSections; i++) {
+    
+    int order = theSections[i]->getOrder();
+    const ID &code = theSections[i]->getType();
+    
+    Vector e(workArea, order);
+    
+    //double xi6 = 6.0*pts(i,0);
+    double xi6 = 6.0*xi[i];
+    
+    for (int j = 0; j < order; j++) {
+      switch(code(j)) {
+      case SECTION_RESPONSE_P:
+	e(j) = oneOverL*dvdh(0)
+	  + d1oLdh*v(0); 
+	break;
+      case SECTION_RESPONSE_MZ:
+	e(j) = oneOverL*((xi6-4.0)*dvdh(1) + (xi6-2.0)*dvdh(2))
+	  + d1oLdh*((xi6-4.0)*v(1) + (xi6-2.0)*v(2)); 
+	break;
+      case SECTION_RESPONSE_MY:
+	e(j) = oneOverL*((xi6-4.0)*dvdh(3) + (xi6-2.0)*dvdh(4))
+	  + d1oLdh*((xi6-4.0)*v(3) + (xi6-2.0)*v(4)); 
+	break;
+      case SECTION_RESPONSE_T:
+	e(j) = oneOverL*dvdh(5)
+	  + d1oLdh*v(5); 
+	break;
+      default:
+	e(j) = 0.0; 
+	break;
+      }
+    }
+    
+    // Set the section deformations
+    theSections[i]->commitSensitivity(e,gradNumber,numGrads);
+  }
+  
+  return 0;
+}
+
+
+// AddingSensitivity:END /////////////////////////////////////////////
+
