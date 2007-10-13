@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.95 $
-// $Date: 2007-07-27 19:13:09 $
+// $Revision: 1.96 $
+// $Date: 2007-10-13 01:24:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -370,6 +370,8 @@
 
 #define ELE_TAG_ForceBeamColumn2d 9878
 #define ELE_TAG_ForceBeamColumn3d 9879
+#define ELE_TAG_ElasticForceBeamColumn2d 98781
+#define ELE_TAG_ElasticForceBeamColumn3d 98791
 
 #define ELE_TAG_DispBeamColumn2dInt 9880
 
@@ -476,6 +478,8 @@
 #define EquiALGORITHM_TAGS_SecantNewton         10
 #define EquiALGORITHM_TAGS_AcceleratedNewton          11
 #define EquiALGORITHM_TAGS_AcceleratedNewtonLineSearch          12
+#define EquiALGORITHM_TAGS_InitialNewton          13
+#define EquiALGORITHM_TAGS_ElasticAlgorithm 14
 
 #define ACCELERATOR_TAGS_Krylov		1
 #define ACCELERATOR_TAGS_Secant		2
