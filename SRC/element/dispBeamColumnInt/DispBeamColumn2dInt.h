@@ -1,6 +1,6 @@
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumnInt/DispBeamColumn2dInt.h,v $
-// $Revision: 1.1 $
-// $Date: 2007-06-08 00:28:21 $
+// $Revision: 1.2 $
+// $Date: 2007-10-13 01:53:28 $
 
 // Created: 07/04
 // Modified by: LMS 
@@ -18,8 +18,7 @@
 #include <Matrix.h>
 #include <Vector.h>
 #include <ID.h>
-#include <GaussQuadRule1d01.h>
-
+#include <LegendreBeamIntegration.h>
 class Node;
 class SectionForceDeformation;
 class FiberSection2dInt;
@@ -115,7 +114,7 @@ class DispBeamColumn2dInt : public Element
 
     static double workArea[];
 
-    static GaussQuadRule1d01 quadRule;
+    static LegendreBeamIntegration quadRule;
 
     // AddingSensitivity:BEGIN //////////////////////////////////////////
     int parameterID;

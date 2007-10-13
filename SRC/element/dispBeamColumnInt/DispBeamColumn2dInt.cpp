@@ -1,6 +1,6 @@
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumnInt/DispBeamColumn2dInt.cpp,v $
 // $Version$
-// $Date: 2007-07-27 17:50:59 $
+// $Date: 2007-10-13 01:53:28 $
 
 // Created: 07/04
 // Modified by: LMS 
@@ -22,11 +22,12 @@
 #include <FEM_ObjectBroker.h>
 #include <ElementResponse.h>
 #include <ElementalLoad.h>
+#include <LegendreBeamIntegration.h>
 
 Matrix DispBeamColumn2dInt::K(6,6);
 Vector DispBeamColumn2dInt::P(6);
 double DispBeamColumn2dInt::workArea[100];
-GaussQuadRule1d01 DispBeamColumn2dInt::quadRule;
+LegendreBeamIntegration DispBeamColumn2dInt::quadRule;
 
 DispBeamColumn2dInt::DispBeamColumn2dInt(int tag, 
 					 int nd1, 
@@ -262,8 +263,9 @@ DispBeamColumn2dInt::update(void)
   const Vector &v = crdTransf->getBasicTrialDispInt();		
   double L = crdTransf->getInitialLength();
   double oneOverL = 1.0/L;
-  const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
-  
+  double pts[20];
+  quadRule.getSectionLocations(numSections, L, pts);
+
   // Loop over the integration points
   for (int i = 0; i < numSections; i++) {
     
@@ -272,7 +274,7 @@ DispBeamColumn2dInt::update(void)
 														
     Vector e(workArea, order);
     
-    double xi = 2.0*pts(i,0)-1.0;						
+    double xi = 2.0*pts[i]-1.0;						
 
     int j;
     for (j = 0; j < order; j++) {
@@ -306,11 +308,13 @@ DispBeamColumn2dInt::getTangentStiff()
   kb.Zero();
   q.Zero();
   
-  const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
-  const Vector &wts = quadRule.getIntegrPointWeights(numSections);
-  
   double L = crdTransf->getInitialLength();
   double oneOverL = 1.0/L;
+  
+  double pts[20];
+  quadRule.getSectionLocations(numSections, L, pts);
+  double wts[20];
+  quadRule.getSectionWeights(numSections, L, wts);
   
   // Loop over the integration points
   for (int i = 0; i < numSections; i++) {
@@ -318,14 +322,14 @@ DispBeamColumn2dInt::getTangentStiff()
     int order = theSections[i]->getOrder();
     const ID &code = theSections[i]->getType();
 
-    double xi = 2.0*pts(i,0)-1.0;
+    double xi = 2.0*pts[i]-1.0;
 
     // Get the section tangent stiffness and stress resultant
     const Matrix &ks = theSections[i]->getSectionTangent();			
     const Vector &s = theSections[i]->getStressResultant();			
         
     // Perform numerical integration
-    double wti = wts(i)*oneOverL;
+    double wti = wts[i]*oneOverL;
  
 	double d11, d12, d13, d21, d22, d23, d31, d32, d33;
 	
@@ -376,7 +380,7 @@ DispBeamColumn2dInt::getTangentStiff()
 	kb(5,5) +=wti*(d22*(1.0 + (-3.0 + 6.0*C1)*xi)*(1.0 + (-3.0 + 6.0*C1)*xi) + (-1.0 + C1)*L*((-1.0 + C1)*d33*L + d32*(1.0 - 3.0*xi + 6.0*C1*xi) + d23*(1.0 + (-3.0 + 6.0*C1)*xi)));
    
     double s1, s2, s3;
-    double wto = wts(i);
+    double wto = wts[i];
 
 	s1=s(0);	s2=s(1);	s3=s(2);
 
@@ -411,11 +415,13 @@ DispBeamColumn2dInt::getInitialBasicStiff()
   // Zero for integral
   kb.Zero();
   
-  const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
-  const Vector &wts = quadRule.getIntegrPointWeights(numSections);
-  
   double L = crdTransf->getInitialLength();
   double oneOverL = 1.0/L;
+  
+  double pts[20];
+  quadRule.getSectionLocations(numSections, L, pts);
+  double wts[20];
+  quadRule.getSectionWeights(numSections, L, wts);
   
   // Loop over the integration points
   for (int i = 0; i < numSections; i++) {
@@ -423,14 +429,14 @@ DispBeamColumn2dInt::getInitialBasicStiff()
     int order = theSections[i]->getOrder();
     const ID &code = theSections[i]->getType();
   
-    double xi = 2.0*pts(i,0)-1.0;
+    double xi = 2.0*pts[i]-1.0;
     
     // Get the section tangent stiffness and stress resultant
     const Matrix &ks = theSections[i]->getInitialTangent();
     
     // Perform numerical integration
     
-    double wti = wts(i)*oneOverL;
+    double wti = wts[i]*oneOverL;
   
 	double d11, d12, d13, d21, d22, d23, d31, d32, d33;
 	
@@ -604,8 +610,12 @@ DispBeamColumn2dInt::addInertiaLoadToUnbalance(const Vector &accel)
 const Vector&
 DispBeamColumn2dInt::getResistingForce()
 {
-  const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
-  const Vector &wts = quadRule.getIntegrPointWeights(numSections);
+  double L = crdTransf->getInitialLength();
+
+  double pts[20];
+  quadRule.getSectionLocations(numSections, L, pts);
+  double wts[20];
+  quadRule.getSectionWeights(numSections, L, wts);
   
   // Zero for integration
   q.Zero();
@@ -616,7 +626,7 @@ DispBeamColumn2dInt::getResistingForce()
     int order = theSections[i]->getOrder();
     const ID &code = theSections[i]->getType();
   
-    double xi = 2.0*pts(i,0)-1.0;
+    double xi = 2.0*pts[i]-1.0;
 
     // Get section stress resultant
     const Vector &s = theSections[i]->getStressResultant();
@@ -624,7 +634,7 @@ DispBeamColumn2dInt::getResistingForce()
     // Perform numerical integration on internal force
        
     double s1, s2, s3;
-    double wto = wts(i);
+    double wto = wts[i];
 	double L = crdTransf->getInitialLength();
 	
 	s1=s(0);	s2=s(1);	s3=s(2);
