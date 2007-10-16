@@ -378,6 +378,7 @@ TzLiq1::getEffectiveStress(void)
 
 int TzLiq1::setParameter(const char **argv, int argc, Parameter &param)
 {
+	
   if (argc < 2)
     return -1;
 
@@ -401,6 +402,7 @@ TzLiq1::updateParameter(int responseID,Information &eleInformation)
 {
   
   if (responseID == 1) {
+	
     int snum = eleInformation.theInt; 
 
     // TclUpdateMaterialStageCommand will call this routine with the

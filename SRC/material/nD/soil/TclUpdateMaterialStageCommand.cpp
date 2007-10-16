@@ -1,5 +1,5 @@
-// $Revision: 1.15 $
-// $Date: 2007-10-12 23:01:21 $
+// $Revision: 1.16 $
+// $Date: 2007-10-16 00:15:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/TclUpdateMaterialStageCommand.cpp,v $
 
 // Written: ZHY 
@@ -58,7 +58,7 @@ TclModelBuilderUpdateMaterialStageCommand(ClientData clientData,
   }	
 
   MaterialStageParameter *theParameter = new MaterialStageParameter(parTag, materialTag);
-  if (theDomain->addParameter(theParameter) < 0) {
+  if (theDomain->addParameter(theParameter) == false) {
     opserr << "WARNING could not add updateMaterialStage - MaterialStageParameter to domain" << endln;
     return TCL_ERROR;		
   }

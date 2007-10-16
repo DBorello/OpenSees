@@ -1,5 +1,5 @@
-// $Revision: 1.1 $
-// $Date: 2007-06-06 19:34:31 $
+// $Revision: 1.2 $
+// $Date: 2007-10-16 00:11:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/TclUpdateMaterialCommand.cpp,v $
 
 // fmk
@@ -18,7 +18,6 @@ TclCommand_UpdateMaterialsCommand(ClientData clientData,
 				  TclModelBuilder *theTclBuilder,
 				  Domain *theDomain)
 {
-  opserr << "TclCommand_UpdateMaterialsCommand()\n";
 
   if (argc < 5) {
     opserr << "WARNING insufficient number of UpdateMaterialStage arguments\n";
@@ -53,7 +52,7 @@ TclCommand_UpdateMaterialsCommand(ClientData clientData,
 
   MatParameter *theParameter = new MatParameter(parTag, materialTag, argv[3]);
 
-  if (theDomain->addParameter(theParameter) < 0) {
+  if (theDomain->addParameter(theParameter) == false) {
     opserr << "WARNING could not add updateMaterialStage - MaterialStageParameter to domain" << endln;
     return TCL_ERROR;		
   }

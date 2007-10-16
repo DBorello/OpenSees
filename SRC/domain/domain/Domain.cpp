@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.44 $
-// $Date: 2007-10-12 17:21:37 $
+// $Revision: 1.45 $
+// $Date: 2007-10-16 00:11:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -629,16 +629,17 @@ bool
 Domain::addParameter(Parameter *theParam)
 {
   int paramTag = theParam->getTag();
-
+ 
   // check if a Parameter with a similar tag already exists in the Domain
   TaggedObject *other = theParameters->getComponentPtr(paramTag);
   if (other != 0) {
     opserr << "Domain::addParameter - parameter with tag " << paramTag << "already exists in model\n"; 
     return false;
   }
-
+  
   // add the param to the container object for the parameters
   bool result = theParameters->addComponent(theParam);
+ 
   if (result == true) {
     // mark the Domain as having been changed
     //    this->domainChange();

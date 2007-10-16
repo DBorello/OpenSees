@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-07-02 21:55:55 $
+// $Revision: 1.3 $
+// $Date: 2007-10-16 00:11:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/MatParameter.cpp,v $
 
 // written: fmk
@@ -39,7 +39,7 @@ MatParameter::MatParameter(int theTag, int materialTag, const char *materialPara
  theParameterName(0), theMaterialTag(materialTag), theParameterID(-1)
 {
   if (materialParameterName != 0) {
-    theParameterName = new char(strlen(materialParameterName) +1);
+    theParameterName = new char[strlen(materialParameterName) +1];
     if (theParameterName == 0) {
       opserr << "MatParameter::MatParameter - out of memory for parameter: ";
       opserr << materialParameterName << endln;
@@ -75,7 +75,8 @@ MatParameter::setDomain(Domain *theDomain)
 
   int theResult = -1;
 
-  const char **theString = new const char*[2];
+  
+  const char *theString[2]; 
   char materialIdTag[10];
   sprintf(materialIdTag,"%d",theMaterialTag);
   theString[0] = theParameterName;
@@ -83,11 +84,9 @@ MatParameter::setDomain(Domain *theDomain)
 
   // note because of the way this parameter is updated only need to find one in the domain
   while ((theEle = theEles()) != 0) {
-    theResult = theEle->setParameter(theString, 2, *this);
+      theResult = theEle->setParameter(theString, 2, *this);
   }
-
-  delete [] theString;
-  
+	
   if (theResult == -1) 
     opserr << "MatParameter::setDomain(Domain *theDomain) - NO RESULT\n";
 }
