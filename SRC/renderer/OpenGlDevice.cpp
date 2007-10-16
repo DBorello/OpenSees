@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2007-10-16 00:15:57 $
+// $Revision: 1.18 $
+// $Date: 2007-10-16 23:39:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.cpp,v $
                                                                         
                                                                         
@@ -324,11 +324,11 @@ static const char *FontName = "fixed";
 
 
 OpenGlDevice::OpenGlDevice()
-  :FontBase(0), winOpen(1), width(0), height(0), windowTitle(0), bits(0)
+  :FontBase(0), winOpen(1), width(0), height(0), windowTitle(0)
 {
 
 #ifdef _WGL
-
+  bits = 0;
 #elif _GLX
   fontInfo = 0;
 #else
