@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2007-06-26 20:13:24 $
+// $Revision: 1.17 $
+// $Date: 2007-10-16 00:15:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.cpp,v $
                                                                         
                                                                         
@@ -324,7 +324,7 @@ static const char *FontName = "fixed";
 
 
 OpenGlDevice::OpenGlDevice()
-  :FontBase(0), winOpen(1), width(0), height(0), windowTitle(0)
+  :FontBase(0), winOpen(1), width(0), height(0), windowTitle(0), bits(0)
 {
 
 #ifdef _WGL
@@ -782,7 +782,10 @@ OpenGlDevice::saveImageAsBMP(const char *fileName)
     glPixelStorei(GL_PACK_SKIP_ROWS, 0);
     glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
 
-    if (bits == 0) opserr << "BITS ZERO\n";
+	if (bits == 0) {
+		opserr << "OpenGLDEvice::saveImage - BITS ZERO\n";
+		return -1;
+	}
 
     glReadPixels(0, 0, info.bmiHeader.biWidth, info.bmiHeader.biHeight,
 		GL_BGR_EXT, GL_UNSIGNED_BYTE, bits);
