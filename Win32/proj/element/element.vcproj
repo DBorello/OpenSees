@@ -385,9 +385,6 @@
 			<File
 				RelativePath="..\..\..\SRC\element\dispBeamColumn\DispBeamColumn3d.h">
 			</File>
-			<File
-				RelativePath="..\..\..\SRC\element\dispBeamColumn\TclDispBeamColumnCommand.cpp">
-			</File>
 		</Filter>
 		<Filter
 			Name="twentyNodeBrick"
@@ -559,6 +556,18 @@
 			Name="forceBeamColumn"
 			Filter="">
 			<File
+				RelativePath="..\..\..\SRC\element\forceBeamColumn\ElasticForceBeamColumn2d.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\forceBeamColumn\ElasticForceBeamColumn2d.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\forceBeamColumn\ElasticForceBeamColumn3d.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\forceBeamColumn\ElasticForceBeamColumn3d.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\element\forceBeamColumn\ForceBeamColumn2d.cpp">
 			</File>
 			<File
@@ -581,6 +590,12 @@
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\BeamIntegration.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\FixedLocationBeamIntegration.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\FixedLocationBeamIntegration.h">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\HingeEndpointBeamIntegration.cpp">
@@ -619,6 +634,18 @@
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\LobattoBeamIntegration.h">
 				</File>
 				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\LowOrderBeamIntegration.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\LowOrderBeamIntegration.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\MidDistanceBeamIntegration.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\MidDistanceBeamIntegration.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\NewtonCotesBeamIntegration.cpp">
 				</File>
 				<File
@@ -631,6 +658,12 @@
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\RadauBeamIntegration.h">
 				</File>
 				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\TrapezoidalBeamIntegration.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\TrapezoidalBeamIntegration.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\UserDefinedBeamIntegration.cpp">
 				</File>
 				<File
@@ -641,9 +674,6 @@
 		<Filter
 			Name="nonlinearBeamColumn"
 			Filter="">
-			<File
-				RelativePath="..\..\..\SRC\element\nonlinearBeamColumn\element\TclNLBeamColumnCommand.cpp">
-			</File>
 			<Filter
 				Name="matrixutil"
 				Filter="">
@@ -657,42 +687,6 @@
 			<Filter
 				Name="quadrule"
 				Filter="">
-				<File
-					RelativePath="..\..\..\SRC\element\nonlinearBeamColumn\quadrule\GaussLobattoQuadRule1d01.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\nonlinearBeamColumn\quadrule\GaussLobattoQuadRule1d01.h">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\nonlinearBeamColumn\quadrule\GaussQuadRule1d.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\nonlinearBeamColumn\quadrule\GaussQuadRule1d.h">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\nonlinearBeamColumn\quadrule\GaussQuadRule1d01.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\nonlinearBeamColumn\quadrule\GaussQuadRule1d01.h">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\nonlinearBeamColumn\quadrule\QuadRule.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\nonlinearBeamColumn\quadrule\QuadRule.h">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\nonlinearBeamColumn\quadrule\QuadRule1d.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\nonlinearBeamColumn\quadrule\QuadRule1d.h">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\nonlinearBeamColumn\quadrule\QuadRule1d01.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\SRC\element\nonlinearBeamColumn\quadrule\QuadRule1d01.h">
-				</File>
 			</Filter>
 		</Filter>
 		<Filter

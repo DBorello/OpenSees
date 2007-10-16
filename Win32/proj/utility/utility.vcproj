@@ -102,6 +102,21 @@
 	</Configurations>
 	<Files>
 		<File
+			RelativePath="..\..\..\SRC\utility\File.cpp">
+		</File>
+		<File
+			RelativePath="..\..\..\SRC\utility\File.h">
+		</File>
+		<File
+			RelativePath="..\..\..\SRC\utility\FileIter.cpp">
+		</File>
+		<File
+			RelativePath="..\..\..\SRC\utility\FileIter.h">
+		</File>
+		<File
+			RelativePath="..\..\..\SRC\utility\NeesCentral.cpp">
+		</File>
+		<File
 			RelativePath="..\..\..\SRC\utility\SimulationInformation.cpp">
 		</File>
 		<File
