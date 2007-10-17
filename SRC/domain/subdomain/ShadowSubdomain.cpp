@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2007-05-01 23:23:03 $
+// $Revision: 1.13 $
+// $Date: 2007-10-17 23:32:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -463,11 +463,15 @@ ShadowSubdomain::addElementalLoad(ElementalLoad *theLoad, int loadPattern)
 #ifdef _G3DEBUG
 	// do all the checking stuff
 #endif
+
+  /*
   LoadPattern *thePattern = this->Subdomain::getLoadPattern(loadPattern);
   if ((thePattern == 0) || (thePattern->addElementalLoad(theLoad) == false)) {
     opserr << "ShadowSubdomain::addElementalLoad() - could not add the load: " << *theLoad;
     return false;
   }
+  */
+
   msgData(0) = ShadowActorSubdomain_addElementalLoadToPattern;
   msgData(1) = theLoad->getClassTag();
   msgData(2) = theLoad->getDbTag();
