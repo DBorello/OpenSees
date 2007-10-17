@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-10-07 18:59:16 $
+// $Revision: 1.4 $
+// $Date: 2007-10-17 22:11:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dTempLoad.h,v $
                                                                         
 #ifndef Beam2dTempLoad_h
@@ -39,17 +39,17 @@ class Beam2dTempLoad : public ElementalLoad
   Beam2dTempLoad(int tag, 
 		 double Ttop1, double Tbot1, double Ttop2, 
 		 double Tbot2, 
-		 const ID &theElementTags);
+		 int theElementTag);
 
   Beam2dTempLoad(int tag, 
 		 double Tuniform, 
-		 const ID &theElementTags);
+		 int theElementTag);
 
   Beam2dTempLoad(int tag, 
 		 double Ttop, double Tbot, 
-		 const ID &theElementTags);
+		 int theElementTag);
 
-  Beam2dTempLoad(int tag, const ID &theElementTags);
+  Beam2dTempLoad(int tag, int theElementTag);
 
   Beam2dTempLoad();    
 

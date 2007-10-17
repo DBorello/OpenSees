@@ -11,7 +11,7 @@
 class BrickSelfWeight : public ElementalLoad
 {
   public:
-    BrickSelfWeight(int tag, const ID &theElementTags);
+    BrickSelfWeight(int tag, int eleTag);
     BrickSelfWeight();    
     ~BrickSelfWeight();
 

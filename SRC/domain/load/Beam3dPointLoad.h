@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:57 $
+// $Revision: 1.3 $
+// $Date: 2007-10-17 22:11:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam3dPointLoad.h,v $
                                                                         
 #ifndef Beam3dPointLoad_h
@@ -34,8 +34,7 @@
 class Beam3dPointLoad : public ElementalLoad
 {
   public:
-    Beam3dPointLoad(int tag, double Py, double Pz, double x,
-		    const ID &theElementTags, double Pa = 0.0);
+    Beam3dPointLoad(int tag, double Py, double Pz, double x, int eleTag, double Pa = 0.0);
     Beam3dPointLoad();    
     ~Beam3dPointLoad();
 

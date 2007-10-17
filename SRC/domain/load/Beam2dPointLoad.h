@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-09-05 23:08:00 $
+// $Revision: 1.5 $
+// $Date: 2007-10-17 22:11:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dPointLoad.h,v $
                                                                         
 #ifndef Beam2dPointLoad_h
@@ -36,8 +36,7 @@ class Information;
 class Beam2dPointLoad : public ElementalLoad
 {
   public:
-    Beam2dPointLoad(int tag, double Pt, double x,
-		    const ID &theElementTags, double Pa = 0.0);
+    Beam2dPointLoad(int tag, double Pt, double x, int eleTag, double Pa = 0.0);
     Beam2dPointLoad();    
     ~Beam2dPointLoad();
 

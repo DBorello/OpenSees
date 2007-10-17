@@ -35,8 +35,8 @@
 
 Vector BrickSelfWeight::data(1);
 
-BrickSelfWeight::BrickSelfWeight(int tag, const ID &theElementTags)
-  :ElementalLoad(tag, LOAD_TAG_BrickSelfWeight, theElementTags)
+BrickSelfWeight::BrickSelfWeight(int tag, int theElementTag)
+  :ElementalLoad(tag, LOAD_TAG_BrickSelfWeight, theElementTag)
 {
 
 }
@@ -77,7 +77,7 @@ void
 BrickSelfWeight::Print(OPS_Stream &s, int flag)
 {
   s << "BrickSelfWeight...";
-  s << "  elements acted on: " << this->getElementTags();
+  s << "  element acted on: " << eleTag << endln;;
 }
 
 #endif

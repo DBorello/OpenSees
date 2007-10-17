@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-09-05 23:08:00 $
+// $Revision: 1.7 $
+// $Date: 2007-10-17 22:11:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dUniformLoad.cpp,v $
                                                                         
 
@@ -37,8 +37,8 @@
 Vector Beam2dUniformLoad::data(2);
 
 Beam2dUniformLoad::Beam2dUniformLoad(int tag, double wt, double wa,
-				     const ID &theElementTags)
-  :ElementalLoad(tag, LOAD_TAG_Beam2dUniformLoad, theElementTags),
+				     int theElementTag)
+  :ElementalLoad(tag, LOAD_TAG_Beam2dUniformLoad, theElementTag),
    wTrans(wt), wAxial(wa), parameterID(0)
 {
 
@@ -70,12 +70,11 @@ int
 Beam2dUniformLoad::sendSelf(int commitTag, Channel &theChannel)
 {
   int dbTag = this->getDbTag();
-  const ID &theElements = this->getElementTags();
 
   static Vector vectData(3);
   vectData(0) = wTrans;
   vectData(1) = wAxial;
-  vectData(2) = theElements.Size();
+  vectData(2) = eleTag;
 
   int result = theChannel.sendVector(dbTag, commitTag, vectData);
   if (result < 0) {
@@ -83,12 +82,6 @@ Beam2dUniformLoad::sendSelf(int commitTag, Channel &theChannel)
     return result;
   }
 
-  result = theChannel.sendID(dbTag, commitTag, theElements);
-  if (result < 0) {
-    opserr << "Beam2dUniformLoad::sendSelf - failed to send element tags\n";
-    return result;
-  }
-  
   return 0;
 }
 
@@ -107,24 +100,8 @@ Beam2dUniformLoad::recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroke
 
   wTrans = vectData(0);;
   wAxial = vectData(1);;
-  int numEle = vectData(2);
+  eleTag = vectData(2);
 
-  if (theElementTags == 0 || theElementTags->Size() != numEle) {
-    if (theElementTags != 0)
-      delete theElementTags;
-    theElementTags = new ID(numEle);
-    if (theElementTags == 0) {
-      opserr << "Beam2dUniformLoad::sendSelf - failed to create an ID\n";
-      return -3;
-    }
-  }
-
-  result = theChannel.recvID(dbTag, commitTag, *theElementTags);
-  if (result < 0) {
-    opserr << "Beam2dUniformLoad::sendSelf - failed to send element tags\n";
-    return result;
-  }
-  
   return 0;
 }
 
@@ -134,7 +111,7 @@ Beam2dUniformLoad::Print(OPS_Stream &s, int flag)
   s << "Beam2dUniformLoad - Reference load" << endln;
   s << "  Transverse: " << wTrans << endln;
   s << "  Axial:      " << wAxial << endln;
-  s << "  Elements acted on: " << this->getElementTags();
+  s << "  Element acted on: " << eleTag;
 }
 
 int

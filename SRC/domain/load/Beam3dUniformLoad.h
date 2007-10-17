@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:57 $
+// $Revision: 1.3 $
+// $Date: 2007-10-17 22:11:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam3dUniformLoad.h,v $
                                                                         
 #ifndef Beam3dUniformLoad_h
@@ -34,8 +34,8 @@
 class Beam3dUniformLoad : public ElementalLoad
 {
   public:
-    Beam3dUniformLoad(int tag, double wy, double wz, double wx,
-		      const ID &theElementTags);
+    Beam3dUniformLoad(int tag, double wy, double wz, double wx, int eleTag);
+		      
     Beam3dUniformLoad();    
     ~Beam3dUniformLoad();
 

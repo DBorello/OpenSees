@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-10-07 18:59:16 $
+// $Revision: 1.5 $
+// $Date: 2007-10-17 22:11:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dTempLoad.cpp,v $
                                                                         
 // Written: Scott R. Hamilton 15 July 2002
@@ -35,31 +35,31 @@ Vector Beam2dTempLoad::data(4);
 Beam2dTempLoad::Beam2dTempLoad(int tag, 
 			       double temp1, double temp2, 
 			       double temp3, double temp4, 
-			       const ID &theElementTags)
-  :ElementalLoad(tag, LOAD_TAG_Beam2dTempLoad, theElementTags), 
-  Ttop1(temp1),  Tbot1(temp2), Ttop2(temp3), Tbot2(temp4)
+			       int theElementTag)
+  :ElementalLoad(tag, LOAD_TAG_Beam2dTempLoad, theElementTag), 
+   Ttop1(temp1),  Tbot1(temp2), Ttop2(temp3), Tbot2(temp4)
 {
 
 }
 Beam2dTempLoad::Beam2dTempLoad(int tag, 
 			       double temp1, 
-			       const ID &theElementTags)
-  :ElementalLoad(tag, LOAD_TAG_Beam2dTempLoad, theElementTags), 
-  Ttop1(temp1),  Tbot1(temp1), Ttop2(temp1), Tbot2(temp1)
+			       int theElementTag)
+  :ElementalLoad(tag, LOAD_TAG_Beam2dTempLoad, theElementTag), 
+   Ttop1(temp1),  Tbot1(temp1), Ttop2(temp1), Tbot2(temp1)
 {
 
 }
 
 Beam2dTempLoad::Beam2dTempLoad(int tag, 
 			       double temp1, double temp2, 
-			       const ID &theElementTags)
-  :ElementalLoad(tag, LOAD_TAG_Beam2dTempLoad, theElementTags), 
+			       int theElementTag)
+  :ElementalLoad(tag, LOAD_TAG_Beam2dTempLoad, theElementTag), 
   Ttop1(temp1),  Tbot1(temp2), Ttop2(temp1), Tbot2(temp2)
 {
 
 }
-Beam2dTempLoad::Beam2dTempLoad(int tag, const ID &theElementTags)
-  :ElementalLoad(tag, LOAD_TAG_Beam2dTempLoad, theElementTags), 
+Beam2dTempLoad::Beam2dTempLoad(int tag, int theElementTag)
+  :ElementalLoad(tag, LOAD_TAG_Beam2dTempLoad, theElementTag), 
   Ttop1(0.0), Tbot1(0.0), Ttop2(0.0), Tbot2(0.0)
 {
 
@@ -104,5 +104,5 @@ Beam2dTempLoad::Print(OPS_Stream &s, int flag)
 {
   s << "Beam2dTempLoad - reference load : " << Ttop1 << " change in temp at top of node 1 : " << Tbot1 << " change in temp at bottom of node 1\n";
   s <<  Ttop2 << " change in temp at top of node 2 : " << Tbot2 << " change in temp at bottom of node 2\n";
-  s << "  elements acted on: " << this->getElementTags();
+  s << "  element acted on: " << eleTag << endln;
 }

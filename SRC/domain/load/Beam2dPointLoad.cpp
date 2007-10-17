@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-09-05 23:08:00 $
+// $Revision: 1.7 $
+// $Date: 2007-10-17 22:11:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dPointLoad.cpp,v $
                                                                         
 // Written: fmk 
@@ -36,8 +36,8 @@
 Vector Beam2dPointLoad::data(3);
 
 Beam2dPointLoad::Beam2dPointLoad(int tag, double Pt, double dist,
-				 const ID &theElementTags, double Pa)
-  :ElementalLoad(tag, LOAD_TAG_Beam2dPointLoad, theElementTags),
+				 int theElementTag, double Pa)
+  :ElementalLoad(tag, LOAD_TAG_Beam2dPointLoad, theElementTag),
    Ptrans(Pt), Paxial(Pa), x(dist), parameterID(0)
 {
 
@@ -69,23 +69,16 @@ int
 Beam2dPointLoad::sendSelf(int commitTag, Channel &theChannel)
 {
   int dbTag = this->getDbTag();
-  const ID &theElements = this->getElementTags();
 
   static Vector vectData(4);
   vectData(0) = Ptrans;
   vectData(1) = Paxial;
   vectData(2) = x;  
-  vectData(3) = theElements.Size();
+  vectData(3) = eleTag;
 
   int result = theChannel.sendVector(dbTag, commitTag, vectData);
   if (result < 0) {
     opserr << "Beam2dPointLoad::sendSelf - failed to send data\n";
-    return result;
-  }
-
-  result = theChannel.sendID(dbTag, commitTag, theElements);
-  if (result < 0) {
-    opserr << "Beam2dPointLoad::sendSelf - failed to send element tags\n";
     return result;
   }
   
@@ -108,24 +101,7 @@ Beam2dPointLoad::recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroker 
   Ptrans = vectData(0);
   Paxial = vectData(1);
   x      = vectData(2);  
-  int numEle = (int)vectData(3);
-
-
-  if (theElementTags == 0 || theElementTags->Size() != numEle) {
-    if (theElementTags != 0)
-      delete theElementTags;
-    theElementTags = new ID(numEle);
-    if (theElementTags == 0) {
-      opserr << "Beam2dPointLoad::sendSelf - failed to create an ID\n";
-      return -3;
-    }
-  }
-
-  result = theChannel.recvID(dbTag, commitTag, *theElementTags);
-  if (result < 0) {
-    opserr << "Beam2dPointLoad::sendSelf - failed to send element tags\n";
-    return result;
-  }
+  eleTag = (int)vectData(3);
   
   return 0;
 }
@@ -135,7 +111,7 @@ Beam2dPointLoad::Print(OPS_Stream &s, int flag)
 {
   s << "Beam2dPointLoad - reference load : (" << Ptrans
     << ", " << Paxial << ") acting at : " << x << " relative to length\n";
-  s << "  elements acted on: " << this->getElementTags();
+  s << "  element acted on: " << eleTag << endln;
 }
 
 int

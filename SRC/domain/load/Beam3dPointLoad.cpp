@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:00:57 $
+// $Revision: 1.4 $
+// $Date: 2007-10-17 22:11:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam3dPointLoad.cpp,v $
                                                                         
 // Written: fmk 
@@ -34,8 +34,8 @@
 Vector Beam3dPointLoad::data(4);
 
 Beam3dPointLoad::Beam3dPointLoad(int tag, double py, double pz, double dist,
-				 const ID &theElementTags, double px)
-  :ElementalLoad(tag, LOAD_TAG_Beam3dPointLoad, theElementTags),
+				 int theElementTag, double px)
+  :ElementalLoad(tag, LOAD_TAG_Beam3dPointLoad, theElementTag),
    Py(py), Pz(pz), Px(px), x(dist)
 {
 
@@ -68,14 +68,13 @@ int
 Beam3dPointLoad::sendSelf(int commitTag, Channel &theChannel)
 {
   int dbTag = this->getDbTag();
-  const ID &theElements = this->getElementTags();
 
   static Vector vectData(5);
   vectData(0) = Px;
   vectData(1) = Py;
   vectData(2) = Pz;
   vectData(3) = x;  
-  vectData(4) = theElements.Size();
+  vectData(4) = eleTag;
 
   int result = theChannel.sendVector(dbTag, commitTag, vectData);
   if (result < 0) {
@@ -83,12 +82,6 @@ Beam3dPointLoad::sendSelf(int commitTag, Channel &theChannel)
     return result;
   }
 
-  result = theChannel.sendID(dbTag, commitTag, theElements);
-  if (result < 0) {
-    opserr << "Beam3dPointLoad::sendSelf - failed to send element tags\n";
-    return result;
-  }
-  
   return 0;
 }
 
@@ -109,25 +102,8 @@ Beam3dPointLoad::recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroker 
   Py = vectData(1);;
   Pz = vectData(2);;
   x  = vectData(3);  
-  int numEle = vectData(4);
+  eleTag = (int)vectData(4);
 
-
-  if (theElementTags == 0 || theElementTags->Size() != numEle) {
-    if (theElementTags != 0)
-      delete theElementTags;
-    theElementTags = new ID(numEle);
-    if (theElementTags == 0) {
-      opserr << "Beam3dPointLoad::sendSelf - failed to create an ID\n";
-      return -3;
-    }
-  }
-
-  result = theChannel.recvID(dbTag, commitTag, *theElementTags);
-  if (result < 0) {
-    opserr << "Beam3dPointLoad::sendSelf - failed to send element tags\n";
-    return result;
-  }
-  
   return 0;
 }
 
@@ -138,5 +114,5 @@ Beam3dPointLoad::Print(OPS_Stream &s, int flag)
   s << "  Transverse (y): " << Py << endln;
   s << "  Transverse (z): " << Pz << endln;
   s << "  Axial (x):      " << Px << endln;
-  s << "  Elements acted on: " << this->getElementTags();
+  s << "  Element: " << eleTag << endln;;
 }
