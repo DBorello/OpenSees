@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.37 $
-// $Date: 2007-07-27 18:15:06 $
+// $Revision: 1.38 $
+// $Date: 2007-10-17 22:15:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -1520,7 +1520,29 @@ TclCommand_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int argc,
 	opserr << "WARNING eleLoad - invalid wa for beamUniform \n";
 	return TCL_ERROR;
       }
-      theLoad = new Beam2dUniformLoad(eleLoadTag, wt, wa, theEleTags);    
+      
+      for (int i=0; i<theEleTags.Size(); i++) {
+	theLoad = new Beam2dUniformLoad(eleLoadTag, wt, wa, theEleTags(i));    
+
+	if (theLoad == 0) {
+	  opserr << "WARNING eleLoad - out of memory creating load of type " << argv[count] ;
+	  return TCL_ERROR;
+	}
+
+	// get the current pattern tag if no tag given in i/p
+	int loadPatternTag = theTclLoadPattern->getTag();
+	
+	// add the load to the domain
+	if (theTclDomain->addElementalLoad(theLoad, loadPatternTag) == false) {
+	  opserr << "WARNING eleLoad - could not add following load to domain:\n ";
+	  opserr << theLoad;
+	  delete theLoad;
+	  return TCL_ERROR;
+	}
+	eleLoadTag++;
+      }
+      
+      return 0;
     }
     else if (ndm == 3) {
       double wy, wz;
@@ -1539,12 +1561,36 @@ TclCommand_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int argc,
 	opserr << "WARNING eleLoad - invalid wx for beamUniform \n";
 	return TCL_ERROR;
       }
-      theLoad = new Beam3dUniformLoad(eleLoadTag, wy, wz, wx, theEleTags);    
+
+      for (int i=0; i<theEleTags.Size(); i++) {
+	theLoad = new Beam3dUniformLoad(eleLoadTag, wy, wz, wx, theEleTags(i));    
+
+	if (theLoad == 0) {
+	  opserr << "WARNING eleLoad - out of memory creating load of type " << argv[count] ;
+	  return TCL_ERROR;
+	}
+
+	// get the current pattern tag if no tag given in i/p
+	int loadPatternTag = theTclLoadPattern->getTag();
+	
+	// add the load to the domain
+	if (theTclDomain->addElementalLoad(theLoad, loadPatternTag) == false) {
+	  opserr << "WARNING eleLoad - could not add following load to domain:\n ";
+	  opserr << theLoad;
+	  delete theLoad;
+	  return TCL_ERROR;
+	}
+	eleLoadTag++;
+      }
+      
+      return 0;
+
     }
     else { 
       opserr << "WARNING eleLoad beamUniform currently only valid only for ndm=2 or 3\n";     
       return TCL_ERROR;
     }
+
   } else if (strcmp(argv[count],"-beamPoint") == 0 ||
 	     strcmp(argv[count],"beamPoint") == 0 ) {
     count++;
@@ -1570,7 +1616,30 @@ TclCommand_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int argc,
 	return TCL_ERROR;
       }
 
-      theLoad = new Beam2dPointLoad(eleLoadTag, P, x, theEleTags, N);    
+
+      for (int i=0; i<theEleTags.Size(); i++) {
+	theLoad = new Beam2dPointLoad(eleLoadTag, P, x, theEleTags(i), N);    
+
+	if (theLoad == 0) {
+	  opserr << "WARNING eleLoad - out of memory creating load of type " << argv[count] ;
+	  return TCL_ERROR;
+	}
+
+	// get the current pattern tag if no tag given in i/p
+	int loadPatternTag = theTclLoadPattern->getTag();
+	
+	// add the load to the domain
+	if (theTclDomain->addElementalLoad(theLoad, loadPatternTag) == false) {
+	  opserr << "WARNING eleLoad - could not add following load to domain:\n ";
+	  opserr << theLoad;
+	  delete theLoad;
+	  return TCL_ERROR;
+	}
+	eleLoadTag++;
+      }
+      
+      return 0;
+
     }
     else if (ndm == 3) {
       double Py, Pz, x;
@@ -1598,7 +1667,27 @@ TclCommand_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int argc,
 	return TCL_ERROR;
       }
 
-      theLoad = new Beam3dPointLoad(eleLoadTag, Py, Pz, x, theEleTags, N);    
+      for (int i=0; i<theEleTags.Size(); i++) {
+	theLoad = new Beam3dPointLoad(eleLoadTag, Py, Pz, x, theEleTags(i), N);    
+
+	if (theLoad == 0) {
+	  opserr << "WARNING eleLoad - out of memory creating load of type " << argv[count] ;
+	  return TCL_ERROR;
+	}
+
+	// get the current pattern tag if no tag given in i/p
+	int loadPatternTag = theTclLoadPattern->getTag();
+	
+	// add the load to the domain
+	if (theTclDomain->addElementalLoad(theLoad, loadPatternTag) == false) {
+	  opserr << "WARNING eleLoad - could not add following load to domain:\n ";
+	  opserr << theLoad;
+	  delete theLoad;
+	  return TCL_ERROR;
+	}
+	eleLoadTag++;
+      }
+      return 0;
     }
     else {
       opserr << "WARNING eleLoad beamPoint type currently only valid only for ndm=2 or 3\n";
@@ -1607,7 +1696,28 @@ TclCommand_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int argc,
   }
   // Added Joey Yang UC Davis
   else if (strcmp(argv[count],"-BrickW") == 0) {
-      theLoad = new BrickSelfWeight(eleLoadTag, theEleTags);
+
+      for (int i=0; i<theEleTags.Size(); i++) {
+	theLoad = new BrickSelfWeight(eleLoadTag, theEleTags(i));
+
+	if (theLoad == 0) {
+	  opserr << "WARNING eleLoad - out of memory creating load of type " << argv[count] ;
+	  return TCL_ERROR;
+	}
+
+	// get the current pattern tag if no tag given in i/p
+	int loadPatternTag = theTclLoadPattern->getTag();
+	
+	// add the load to the domain
+	if (theTclDomain->addElementalLoad(theLoad, loadPatternTag) == false) {
+	  opserr << "WARNING eleLoad - could not add following load to domain:\n ";
+	  opserr << theLoad;
+	  delete theLoad;
+	  return TCL_ERROR;
+	}
+	eleLoadTag++;
+      }
+      return 0;
   }
 
   // Added by Scott R. Hamilton   - Stanford
@@ -1622,7 +1732,7 @@ TclCommand_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int argc,
 	  opserr << "WARNING eleLoad - invalid Ttop1 " << argv[count] << " for -beamTemp\n";		
 	  return TCL_ERROR;
 	} 
-      
+	
 	if (Tcl_GetDouble(interp, argv[count+1],&temp2 ) != TCL_OK) {
 	  opserr << "WARNING eleLoad - invalid Tbot1 " << argv[count+1] << " for -beamTemp\n";	
 	  return TCL_ERROR;
@@ -1636,8 +1746,29 @@ TclCommand_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int argc,
 	  return TCL_ERROR;
 	} 
 	
-	theLoad=0;
-	theLoad = new Beam2dTempLoad(eleLoadTag, temp1, temp2, temp3, temp4, theEleTags);
+	for (int i=0; i<theEleTags.Size(); i++) {
+	  theLoad = new Beam2dTempLoad(eleLoadTag, temp1, temp2, temp3, temp4, theEleTags(i));
+	  
+	  if (theLoad == 0) {
+	    opserr << "WARNING eleLoad - out of memory creating load of type " << argv[count] ;
+	  return TCL_ERROR;
+	  }
+	  
+	  // get the current pattern tag if no tag given in i/p
+	  int loadPatternTag = theTclLoadPattern->getTag();
+	  
+	  // add the load to the domain
+	  if (theTclDomain->addElementalLoad(theLoad, loadPatternTag) == false) {
+	    opserr << "WARNING eleLoad - could not add following load to domain:\n ";
+	    opserr << theLoad;
+	    delete theLoad;
+	    return TCL_ERROR;
+	  }
+	  eleLoadTag++;
+	}
+	
+	return 0;
+
       }
       // Two temps given, temp change at top, temp at bottom of element
       else if (argc-count == 2) {
@@ -1650,8 +1781,31 @@ TclCommand_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int argc,
 	  opserr << "WARNING eleLoad - invalid Tbot " << argv[count+1] << " for -beamTemp\n";	
 	  return TCL_ERROR;
 	}
-	theLoad=0;
-	theLoad = new Beam2dTempLoad(eleLoadTag, temp1, temp2, theEleTags);
+
+
+
+
+
+	for (int i=0; i<theEleTags.Size(); i++) {
+	  theLoad = new Beam2dTempLoad(eleLoadTag, temp1, temp2, theEleTags(i));
+	  
+	  if (theLoad == 0) {
+	    opserr << "WARNING eleLoad - out of memory creating load of type " << argv[count] ;
+	    return TCL_ERROR;
+	  }
+	  
+	  // get the current pattern tag if no tag given in i/p
+	  int loadPatternTag = theTclLoadPattern->getTag();
+	  
+	  // add the load to the domain
+	  if (theTclDomain->addElementalLoad(theLoad, loadPatternTag) == false) {
+	    opserr << "WARNING eleLoad - could not add following load to domain:\n ";
+	    opserr << theLoad;
+	    delete theLoad;
+	    return TCL_ERROR;
+	  }
+	  eleLoadTag++;
+	}
       }
       // One twmp change give, uniform temp change in element
       else if (argc-count == 1) {
@@ -1660,13 +1814,32 @@ TclCommand_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int argc,
 	  return TCL_ERROR;
 	}
 	theLoad=0;
-	theLoad = new Beam2dTempLoad(eleLoadTag, temp1, theEleTags);
+
+	for (int i=0; i<theEleTags.Size(); i++) {
+	  theLoad = new Beam2dTempLoad(eleLoadTag, temp1, theEleTags(i));
+
+	  if (theLoad == 0) {
+	    opserr << "WARNING eleLoad - out of memory creating load of type " << argv[count] ;
+	    return TCL_ERROR;
+	  }	  
+
+	  // get the current pattern tag if no tag given in i/p
+	  int loadPatternTag = theTclLoadPattern->getTag();
+	  
+	  // add the load to the domain
+	  if (theTclDomain->addElementalLoad(theLoad, loadPatternTag) == false) {
+	    opserr << "WARNING eleLoad - could not add following load to domain:\n ";
+	    opserr << theLoad;
+	    delete theLoad;
+	    return TCL_ERROR;
+	  }
+	  eleLoadTag++;
+	}
+	
+	return 0;
+
       }
-      // No temps, no change in temp in element--not a case likely to be used
-      else if (argc-count == 0){
-	theLoad=0;
-	theLoad = new Beam2dTempLoad(eleLoadTag, theEleTags);
-      }
+
       else {
 	opserr << "WARNING eleLoad -beamTempLoad invalid number of temperature aguments,/n looking for 0, 1, 2 or 4 arguments.\n";
       }
@@ -1675,23 +1848,6 @@ TclCommand_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int argc,
       return TCL_ERROR;
     }  
   }
-
-  if (theLoad == 0) {
-    opserr << "WARNING eleLoad - out of memory creating load of type " << argv[count] ;
-    return TCL_ERROR;
-  }
-
-  // get the current pattern tag if no tag given in i/p
-  int loadPatternTag = theTclLoadPattern->getTag();
-
-  // add the load to the domain
-  if (theTclDomain->addElementalLoad(theLoad, loadPatternTag) == false) {
-    opserr << "WARNING eleLoad - could not add following load to domain:\n ";
-    opserr << theLoad;
-    delete theLoad;
-    return TCL_ERROR;
-  }
-  eleLoadTag++;
 
   // if get here we have sucessfully created the load and added it to the domain
   return TCL_OK;
