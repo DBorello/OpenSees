@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2006-09-05 20:50:24 $
+// $Revision: 1.15 $
+// $Date: 2007-10-17 22:12:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.cpp,v $
                                                                         
 // Written: fmk 07/99
@@ -961,11 +961,10 @@ LoadPattern::setParameter(const char **argv, int argc, Parameter &param)
       ElementalLoad *theEleLoad = 0;
       ElementalLoadIter &theEleLoadIter = this->getElementalLoads();
       while ((theEleLoad = theEleLoadIter()) != 0) {
-	const ID &eleTags = theEleLoad->getElementTags();
-	for (int i = 0; i < eleTags.Size(); i++)
-	  if (eleNumber == eleTags(i)) {
-	    return theEleLoad->setParameter(&argv[2], argc-2, param);
-	  }
+	int eleTag = theEleLoad->getElementTag();
+	if (eleNumber == eleTag) {
+	  return theEleLoad->setParameter(&argv[2], argc-2, param);
+	}
       }
 
       return -1;
