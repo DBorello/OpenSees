@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2007-10-12 00:43:01 $
+// $Revision: 1.15 $
+// $Date: 2007-10-17 21:16:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/SimulationInformation.cpp,v $
 //
 // Description: This file contains the class definition for SimulationInformation.
@@ -62,10 +62,6 @@ SimulationInformation::SimulationInformation()
 
 SimulationInformation::~SimulationInformation()
 { 
-  if (strcmp(endTime," ") == 0)
-    this->end();
-  opserr << "SimulationInformation::~SimulationInformation\n";
- 
   if (title != 0)
     delete [] title;
   if (description != 0)

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-10-12 14:56:47 $
+// $Revision: 1.6 $
+// $Date: 2007-10-17 21:16:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/File.cpp,v $
                                                                         
                                                                         
@@ -51,7 +51,7 @@ File::~File()
   if (isDirectory == true) {
 
     FileIter theDirFiles = this->getFiles();
-    File *aDirFile =0;
+    File *aDirFile;
     while ((aDirFile = theDirFiles()) != 0)
       delete aDirFile;
   } 
@@ -68,9 +68,11 @@ File::clear(void)
     while ((aDirFile = theDirFiles()) != 0)
       delete aDirFile;
   } 
+
   dirFiles.clear();
   name.clear();
   description.clear();
+
   return 0;
 }
 
