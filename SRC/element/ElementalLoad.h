@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-09-05 23:25:24 $
+// $Revision: 1.5 $
+// $Date: 2007-10-17 22:10:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/ElementalLoad.h,v $
                                                                         
                                                                         
@@ -39,7 +39,7 @@ class Element;
 class ElementalLoad : public Load
 {
   public:
-    ElementalLoad(int tag, int classTag, const ID &theElementTags);
+    ElementalLoad(int tag, int classTag, int eleTag);
     ElementalLoad(int tag, int classTag);
     ElementalLoad(int classTag);    
     ~ElementalLoad();
@@ -49,16 +49,13 @@ class ElementalLoad : public Load
     virtual const Vector &getData(int &type, double loadFactor) = 0;
     virtual const Vector &getSensitivityData(int gradNumber);
 
-    virtual const ID &getElementTags(void);
-    virtual int removeElement(int tag); // returns -1 if fails, 
-                                        // numElements left if removed
+    virtual int getElementTag(void);
+
   protected:
-    int setElementTags(const ID &theEleTags);
-    ID *theElementTags;     // copy of element tags, removed in setDomain
+    int eleTag;
 
   private:
-    Element **theElements;  // pointer to associated elements
-    int numElements;        // number of associated elements
+    Element *theElement;  // pointer to associated elements
 };
 
 #endif
