@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2007-06-13 18:02:12 $
+// $Revision: 1.15 $
+// $Date: 2007-10-17 22:13:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -554,7 +554,32 @@ PartitionedDomain::addNodalLoad(NodalLoad *load, int pattern)
 bool 
 PartitionedDomain::addElementalLoad(ElementalLoad *load, int pattern)
 {
-  opserr << "PartitionedDomain::addElementalLoad - not yet implemented\n";
+  int eleTag = load->getElementTag();
+  
+  // check the Node exists in the Domain or one of Subdomains
+
+  // if in Domain add it as external .. ignore Subdomains
+  Element *elePtr = this->getElement(eleTag);
+  if (elePtr != 0) {
+    return (this->Domain::addElementalLoad(load, pattern));    
+  }
+
+
+  // find subdomain with node and add it .. break if find as internal node
+  SubdomainIter &theSubdomains = this->getSubdomains();
+  Subdomain *theSub;
+  while ((theSub = theSubdomains()) != 0) {
+    bool res = theSub->hasElement(eleTag);
+    if (res == true) {
+      // opserr << "PartitionedDomain::addLoadPattern(LoadPattern *loadPattern) SUB " << theSub->getTag() << *load;
+      return theSub->addElementalLoad(load, pattern);
+    }
+  }
+
+  // if no subdomain .. node not in model
+  opserr << "PartitionedDomain::addElementalLoad - cannot add as element with tag" <<
+    eleTag << "does not exist in model\n"; 
+
   return false;
 }
 
