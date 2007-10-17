@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.99 $
-// $Date: 2007-10-05 22:11:00 $
+// $Revision: 1.100 $
+// $Date: 2007-10-17 23:32:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -5204,6 +5204,7 @@ const char * getInterpPWD(Tcl_Interp *interp) {
   if (pwd != 0)
     delete [] pwd;
 
+#ifdef _TCL84
   Tcl_Obj *cwd = Tcl_FSGetCwd(interp);
   if (cwd != NULL) {
     int length;
@@ -5212,6 +5213,17 @@ const char * getInterpPWD(Tcl_Interp *interp) {
     strcpy(pwd, objPWD);
     Tcl_DecrRefCount(cwd);	
   }
+#else
+
+  Tcl_DString buf;
+  const char *objPWD = Tcl_GetCwd(interp, &buf);
+
+  pwd = new char[strlen(objPWD)+1];
+  strcpy(pwd, objPWD);
+
+  Tcl_DStringFree(&buf);
+
+#endif
   return pwd;
 }
 
