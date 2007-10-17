@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-01-10 18:17:25 $
+// $Revision: 1.8 $
+// $Date: 2007-10-17 22:14:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/partitioner/DomainPartitioner.cpp,v $
                                                                         
 // Written: fmk 
@@ -423,11 +423,45 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
     ElementalLoadIter &theLoads = theLoadPattern->getElementalLoads();
     ElementalLoad *theLoad;
     while ((theLoad = theLoads()) != 0) {
-      opserr << "DomainPartitioner::partition - REMOVE ELEMENTAL LOADS\n";
-      // opserr << "DomainPartitioner::partition - REMOVE ELEMENTAL LOADS\n";
-      //	if (theLoad->getElementTag() == eleTag)
-      //	  theLoadPattern->removeElementalLoad(theLoad->getTag());
-      // theSubdomain->addElementalLoad(theLoad, loadPatternTag);
+      int loadEleTag = theLoad->getElementTag();
+
+      // find subdomain with node and add it .. break if find as internal node
+      SubdomainIter &theSubdomains = myDomain->getSubdomains();
+      Subdomain *theSub;
+      bool added = false;
+      while (((theSub = theSubdomains()) != 0) && (added == false)) {
+	bool res = theSub->hasElement(loadEleTag);
+	if (res == true) {
+	  // opserr << "PartitionedDomain::addLoadPattern(LoadPattern *loadPattern) SUB " << theSub->getTag() << *load;
+	  int res = theSub->addElementalLoad(theLoad, loadPatternTag);
+	  if (res < 0)
+	    opserr << "DomainPartitioner::partition() - failed to add ElementalLoad\n";
+	  added = true;
+	}
+      }     
+
+      /*
+      int partition = -1;
+      VertexIter &theVertices = theElementGraph->getVertices();
+      while (((vertexPtr = theVertices()) != 0) && partition == -1) {
+	int eleTag = vertexPtr->getRef();      
+	if (eleTag == loadEleTag) 
+	  partition = vertexPtr->getColor();
+      }
+      
+      if (partition == -1) {
+	opserr << "DomainPartitioner::partition() - failed to find corresponding Element for ElementalLoad\n";
+      } else {
+	if (partition != mainPartition) {
+	  Subdomain *theSubdomain = myDomain->getSubdomainPtr(partition); 
+	  theLoadPattern->removeElementalLoad(theLoad->getTag());
+	  int res = theSubdomain->addSP_Constraint(spPtr, loadPatternTag);
+	  if (res < 0)
+	    opserr << "DomainPartitioner::partition() - failed to add ElementalLoad\n";
+	}
+      }
+      */
+
     }
   }
 
