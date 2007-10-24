@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-02-17 21:27:23 $
+// $Revision: 1.9 $
+// $Date: 2007-10-24 18:22:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/NormalRV.cpp,v $
 
 
@@ -86,21 +86,34 @@ NormalRV::~NormalRV()
 void
 NormalRV::Print(OPS_Stream &s, int flag)
 {
+  s << "Normal random variable" << endln;
+  s << "\ttag = " << this->getTag() << endln;
+  s << "\tgrad num = " << this->getGradNumber() << endln;
+  s << "\tmean = " << mju << endln;
+  s << "\tst.dev. = " << sigma << endln;
 }
 
 
 double
 NormalRV::getPDFvalue(double rvValue)
 {
-	double pi = 3.14159265358979;
-	return 1 / sqrt ( 2.0 * pi ) * exp ( - 0.5 * pow ( ( ( rvValue - mju ) / sigma ), 2.0 ) );
+	static const double pi = 3.14159265358979;
+	static const double oneOverRootTwoPi = 1.0/sqrt(2.0*pi);
+
+	//return 1 / sqrt ( 2.0 * pi ) * exp ( - 0.5 * pow ( ( ( rvValue - mju ) / sigma ), 2.0 ) );
+	return oneOverRootTwoPi * exp ( - 0.5 * pow ( ( ( rvValue - mju ) / sigma ), 2.0 ) );
 }
 
 
 double
 NormalRV::getCDFvalue(double rvValue)
 {
-	double result = 0.5 + errorFunction( ((rvValue-mju)/sigma)/sqrt(2.0) )/2.0;
+  static const double oneOverRootTwo = 1.0/sqrt(2.0);
+  //double result = 0.5 + errorFunction( ((rvValue-mju)/sigma)/sqrt(2.0) )/2.0;
+
+  //Phi(x) = 0.5 * erfc(-x/sqrt(2))
+  double result = 0.5 * (1.0 + errorFunction( ((rvValue-mju)/sigma)*oneOverRootTwo ));
+
 	return result;
 }
 
@@ -111,7 +124,9 @@ NormalRV::getInverseCDFvalue(double probValue)
 	if (probValue < 0.0 || probValue > 1.0) {
 		opserr << "WARNING: Illegal probability value input to NormalRV::getInverseCDFvalue()" << endln;
 	}
-	double result = getMean() + getStdv() * sqrt(2.0) * inverseErrorFunction(2*probValue-1.0);
+	static const double rootTwo = sqrt(2.0);
+	//double result = getMean() + getStdv() * sqrt(2.0) * inverseErrorFunction(2*probValue-1.0);
+	double result = mju + sigma * rootTwo * inverseErrorFunction(2*probValue-1.0);
 	return result;
 }
 
@@ -150,13 +165,10 @@ NormalRV::getParameter2()
   return sigma;
 }
 
-
+/*
 double 
 NormalRV::errorFunction(double x)
 {
-
-	// ErrorFunction(x) = 2/sqrt(pi) * integral from 0 to x of exp(-t^2) dt.
-
 	double a1,a2,a3,a4,a5;
 	double b1,b2,b3,b4;
 	double c1,c2,c3,c4,c5,c6,c7,c8,c9;
@@ -279,6 +291,7 @@ NormalRV::errorFunction(double x)
 
 	return result;
 }
+*/
 
 double 
 NormalRV::inverseErrorFunction(double y)
@@ -288,7 +301,6 @@ NormalRV::inverseErrorFunction(double y)
 	double c1,c2,c3,c4;
 	double d1,d2;
 	double x,z;
-	double pi = 3.14159265358979;
 
 	// Coefficients in rational approximations.
 	a1 = 0.886226899; 
@@ -327,11 +339,15 @@ NormalRV::inverseErrorFunction(double y)
 	}
 
 
+	static const double pi = 3.14159265358979;
+	static const double twoOverRootPi = 2.0/sqrt(pi);
 	// Two steps of Newton-Raphson correction to full accuracy.
 	// Without these steps, erfinv(y) would be about 3 times
 	// faster to compute, but accurate to only about 6 digits.
-	x = x - (errorFunction(x) - y) / (2.0/sqrt(pi) * exp(-pow(x,2.0)));
-	x = x - (errorFunction(x) - y) / (2.0/sqrt(pi) * exp(-pow(x,2.0)));
+	//x = x - (errorFunction(x) - y) / (2.0/sqrt(pi) * exp(-pow(x,2.0)));
+	//x = x - (errorFunction(x) - y) / (2.0/sqrt(pi) * exp(-pow(x,2.0)));
+	x = x - (errorFunction(x) - y) / (twoOverRootPi * exp(-pow(x,2.0)));
+	x = x - (errorFunction(x) - y) / (twoOverRootPi * exp(-pow(x,2.0)));
 
 	// Exceptional cases not treated for now
 	// k = find(y == -1);
