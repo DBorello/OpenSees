@@ -703,11 +703,11 @@ ifeq ($(PROGRAMMING_MODE), THREADS)
 SUPER_LU_OBJ = $(FE)/system_of_eqn/linearSOE/sparseGEN/ThreadedSuperLU.o
 endif
 
-ifeq ($(PROGRAMMING_MODE), PARALLEL)
-SUPER_LU_OBJ = $(FE)/system_of_eqn/linearSOE/sparseGEN/SuperLU.o \
-	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSuperLU.o \
-	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLinSOE.o 
-endif
+##ifeq ($(PROGRAMMING_MODE), PARALLEL)
+#SUPER_LU_OBJ = $(FE)/system_of_eqn/linearSOE/sparseGEN/SuperLU.o \
+#	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSuperLU.o \
+#	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLinSOE.o 
+#endif
 
 #ifeq ($(PROGRAMMING_MODE), PARALLEL_INTERPRETERS)
 #SUPER_LU_OBJ = $(FE)/system_of_eqn/linearSOE/sparseGEN/SuperLU.o \
