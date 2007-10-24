@@ -39,6 +39,10 @@ include Makefile.def
 ############################################################################
 
 all: 
+ifdef MKDIR
+	$(MKDIR) $(HOME)/bin
+	$(MKDIR) $(HOME)/lib
+endif
 	@( \
 	for f in $(DIRS); \
 	do \
@@ -53,6 +57,10 @@ all:
 OpenSees: tcl
 
 tcl:
+ifdef MKDIR
+	$(MKDIR) $(HOME)/bin
+	$(MKDIR) $(HOME)/lib
+endif
 	@$(ECHO) Building OpenSees Program ..;
 	@$(CD) $(FE)/tcl;  $(MAKE) tcl;
 	@$(CD) $(FE)/modelbuilder/tcl;  $(MAKE) tcl;
