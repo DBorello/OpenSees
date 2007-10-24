@@ -186,6 +186,7 @@ endif
 
 LINKER          =  $(CC++)
 
+MKDIR           = mkdir -p
 AR		= ar 
 ARCH		= ar 
 
