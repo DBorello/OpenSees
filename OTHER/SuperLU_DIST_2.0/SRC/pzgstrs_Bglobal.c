@@ -26,6 +26,12 @@ _fcd ftcs2;
 _fcd ftcs3;
 #endif
 
+static void gather_diag_to_all(int_t, int_t, doublecomplex [],
+			       Glu_persist_t *, LocalLU_t *, gridinfo_t *,
+			       int_t, int_t [], int_t [], doublecomplex [],
+			       int_t, doublecomplex []);
+
+
 
 void
 pzgstrs_Bglobal(int_t n, LUstruct_t *LUstruct, gridinfo_t *grid,
@@ -135,11 +141,6 @@ pzgstrs_Bglobal(int_t n, LUstruct_t *LUstruct, gridinfo_t *grid,
     int_t Ublocks = 0;
 #endif
     /*-- Function prototypes --*/
-    static void gather_diag_to_all(int_t, int_t, doublecomplex [],
-				   Glu_persist_t *, LocalLU_t *, gridinfo_t *,
-				   int_t, int_t [], int_t [], doublecomplex [],
-				   int_t, doublecomplex []);
-
     t = SuperLU_timer_();
 
     /* Test input parameters. */

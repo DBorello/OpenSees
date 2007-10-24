@@ -55,6 +55,16 @@ typedef int shortint;
 
 /* *************************************************************** */
 
+    static /* Subroutine */ int mmdelm_(int *, int *, shortint *, 
+	    shortint *, shortint *, shortint *, shortint *, shortint *, 
+	    shortint *, int *, int *), mmdupd_(int *, int *, 
+	    int *, shortint *, int *, int *, shortint *, shortint 
+	    *, shortint *, shortint *, shortint *, shortint *, int *, 
+	    int *), mmdint_(int *, int *, shortint *, shortint *, 
+	    shortint *, shortint *, shortint *, shortint *, shortint *), 
+	    mmdnum_(int *, shortint *, shortint *, shortint *);
+
+
 /* Subroutine */ int genmmd_dist_(int *neqns, int *xadj, shortint *adjncy, 
 	shortint *invp, shortint *perm, int *delta, shortint *dhead, 
 	shortint *qsize, shortint *llist, shortint *marker, int *maxint, 
@@ -65,14 +75,6 @@ typedef int shortint;
 
     /* Local variables */
     static int mdeg, ehead, i, mdlmt, mdnode;
-    extern /* Subroutine */ int mmdelm_(int *, int *, shortint *, 
-	    shortint *, shortint *, shortint *, shortint *, shortint *, 
-	    shortint *, int *, int *), mmdupd_(int *, int *, 
-	    int *, shortint *, int *, int *, shortint *, shortint 
-	    *, shortint *, shortint *, shortint *, shortint *, int *, 
-	    int *), mmdint_(int *, int *, shortint *, shortint *, 
-	    shortint *, shortint *, shortint *, shortint *, shortint *), 
-	    mmdnum_(int *, shortint *, shortint *, shortint *);
     static int nextmd, tag, num;
 
 

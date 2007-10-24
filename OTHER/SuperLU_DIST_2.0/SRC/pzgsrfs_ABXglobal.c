@@ -8,6 +8,14 @@
 #include <math.h>
 #include "superlu_zdefs.h"
 
+static void	gather_1rhs_diag_to_all(int_t, doublecomplex[], Glu_persist_t*,
+					LocalLU_t *, gridinfo_t *, int_t,
+					int_t [], int_t [],
+					doublecomplex [], doublecomplex []);
+static void redist_all_to_diag(int_t, doublecomplex [], Glu_persist_t *,
+			       LocalLU_t *, gridinfo_t *, int_t [],
+			       doublecomplex []);
+
 
 void
 pzgsrfs_ABXglobal(int_t n, SuperMatrix *A, double anorm, LUstruct_t *LUstruct,
@@ -131,13 +139,6 @@ pzgsrfs_ABXglobal(int_t n, SuperMatrix *A, double anorm, LUstruct_t *LUstruct,
     int_t *diag_len; /* Length of the X vector on diagonal processes. */
 
     /*-- Function prototypes --*/
-    static void	gather_1rhs_diag_to_all(int_t, doublecomplex[], Glu_persist_t*,
-					LocalLU_t *, gridinfo_t *, int_t,
-					int_t [], int_t [],
-					doublecomplex [], doublecomplex []);
-    static void redist_all_to_diag(int_t, doublecomplex [], Glu_persist_t *,
-				   LocalLU_t *, gridinfo_t *, int_t [],
-				   doublecomplex []);
     extern void pzgstrs1(int_t, LUstruct_t *, gridinfo_t *,
 			 doublecomplex *, int, SuperLUStat_t *, int *);
     extern double dlamch_(char *);
