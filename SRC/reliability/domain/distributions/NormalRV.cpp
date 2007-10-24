@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-10-24 18:22:40 $
+// $Revision: 1.10 $
+// $Date: 2007-10-24 18:27:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/NormalRV.cpp,v $
 
 
@@ -88,7 +88,6 @@ NormalRV::Print(OPS_Stream &s, int flag)
 {
   s << "Normal random variable" << endln;
   s << "\ttag = " << this->getTag() << endln;
-  s << "\tgrad num = " << this->getGradNumber() << endln;
   s << "\tmean = " << mju << endln;
   s << "\tst.dev. = " << sigma << endln;
 }
