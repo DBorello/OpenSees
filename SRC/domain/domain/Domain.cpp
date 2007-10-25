@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.45 $
-// $Date: 2007-10-16 00:11:55 $
+// $Revision: 1.46 $
+// $Date: 2007-10-25 22:54:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -1751,7 +1751,6 @@ Domain::Print(OPS_Stream &s, int flag)
 void Domain::Print(OPS_Stream &s, ID *nodeTags, ID *eleTags, int flag)
 {
   if (nodeTags != 0) {
-    opserr << "Domain::Print nodeTags : " << *nodeTags;
     int numNodes = nodeTags->Size();
     for (int i=0; i<numNodes; i++) {
       int nodeTag = (*nodeTags)(i);
@@ -1762,7 +1761,6 @@ void Domain::Print(OPS_Stream &s, ID *nodeTags, ID *eleTags, int flag)
   }
 
   if (eleTags != 0) {
-    opserr << "Domain::Print eleTags : " << *eleTags;
     int numEle = eleTags->Size();
     for (int i=0; i<numEle; i++) {
       int eleTag = (*eleTags)(i);
