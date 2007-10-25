@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-02-17 21:27:23 $
+// $Revision: 1.8 $
+// $Date: 2007-10-25 16:32:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/UniformRV.cpp,v $
 
 
@@ -45,6 +45,7 @@ UniformRV::UniformRV(int passedTag,
 	a = passedMean - sqrt(3.0)*passedStdv;
 	b = passedMean + sqrt(3.0)*passedStdv;
 }
+
 UniformRV::UniformRV(int passedTag, 
 		 double passedParameter1,
 		 double passedParameter2,
@@ -56,6 +57,7 @@ UniformRV::UniformRV(int passedTag,
 	a = passedParameter1;
 	b = passedParameter2;
 }
+
 UniformRV::UniformRV(int passedTag, 
 		 double passedMean,
 		 double passedStdv)
@@ -64,6 +66,7 @@ UniformRV::UniformRV(int passedTag,
 	a = passedMean - sqrt(3.0)*passedStdv;
 	b = passedMean + sqrt(3.0)*passedStdv;
 }
+
 UniformRV::UniformRV(int passedTag, 
 		 double passedParameter1,
 		 double passedParameter2,
@@ -85,6 +88,9 @@ UniformRV::~UniformRV()
 void
 UniformRV::Print(OPS_Stream &s, int flag)
 {
+  s << "Uniform random variable" << endln;
+  s << "\ttag = " << this->getTag() << endln;
+  s << "\ta = " << a << ", b = " << b << endln;
 }
 
 
@@ -93,7 +99,7 @@ UniformRV::getPDFvalue(double rvValue)
 {
 	double result;
 	if ( rvValue >= a && rvValue <= b ) {
-		result = 1/(b-a);
+		result = 1.0/(b-a);
 	}
 	else {
 		result = 0.0;
@@ -121,7 +127,8 @@ UniformRV::getCDFvalue(double rvValue)
 double
 UniformRV::getInverseCDFvalue(double probValue)
 {
-	return probValue * b - probValue * a + a;
+  //return probValue * b - probValue * a + a;
+  return probValue * (b-a) + a;
 }
 
 
@@ -135,17 +142,19 @@ UniformRV::getType()
 double 
 UniformRV::getMean()
 {
-	return (a+b)/2.0;
+  //return (a+b)/2.0;
+  return 0.5*(a+b);
 }
-
 
 
 double 
 UniformRV::getStdv()
 {
-	return (b-a)/(2.0*sqrt(3.0));
-}
+  static const double oneOverTwoRootThree = 1.0/(2.0*sqrt(3.0));
 
+  //return (b-a)/(2.0*sqrt(3.0));
+  return (b-a)*oneOverTwoRootThree;
+}
 
 
 
