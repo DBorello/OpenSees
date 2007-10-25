@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.100 $
-// $Date: 2007-10-17 23:32:58 $
+// $Revision: 1.101 $
+// $Date: 2007-10-25 22:53:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -1179,107 +1179,97 @@ analyzeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
 
 int 
 printElement(ClientData clientData, Tcl_Interp *interp, int argc, 
-	     TCL_Char **argv, int nodeArg, OPS_Stream &output);
+	     TCL_Char **argv, OPS_Stream &output);
 
 
 int 
-printNode(ClientData clientData, Tcl_Interp *interp, int argc, 
-	  TCL_Char **argv, int nodeArg, OPS_Stream &output);
+printNode(ClientData clientData, Tcl_Interp *interp, int argc,  
+	  TCL_Char **argv, OPS_Stream &output);
 	  
 int 
 printIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, 
-		TCL_Char **argv, int nodeArg, OPS_Stream &output);	  
+		TCL_Char **argv, OPS_Stream &output);	  
 		
 int 
 printAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, 
-	       TCL_Char **argv, int nodeArg, OPS_Stream &output);	  		
+	       TCL_Char **argv, OPS_Stream &output);	  		
 
 
 int 
 printModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
+  int currentArg = 1;
+  int res = 0;
+
+  FileStream outputFile;
+  OPS_Stream *output = &opserr;
+  bool done = false;
+
   // if just 'print' then print out the entire domain
-  if (argc == 1) {
+  if (argc == currentArg) {
     opserr << theDomain;
     return TCL_OK;
   }    
 
-  // if 'print ele i j k..' print out some elements
-  if ((strcmp(argv[1],"-ele") == 0) || (strcmp(argv[1],"ele") == 0))
-    return printElement(clientData, interp, argc, argv, 3, opserr);    
-
-  // if 'print node i j k ..' print out some nodes
-  else if ((strcmp(argv[1],"-node") == 0) || (strcmp(argv[1],"node") == 0)) 
-      return printNode(clientData, interp, argc, argv, 3, opserr);
+  while(done == false) {
+    // if 'print ele i j k..' print out some elements
+    if ((strcmp(argv[currentArg],"-ele") == 0) || (strcmp(argv[currentArg],"ele") == 0)) {
+      currentArg++;
+      res = printElement(clientData, interp, argc-currentArg, argv+currentArg, *output);    
+      done = true;
+    }
+    // if 'print node i j k ..' print out some nodes
+    else if ((strcmp(argv[currentArg],"-node") == 0) || (strcmp(argv[currentArg],"node") == 0)) {
+      currentArg++;      
+      res = printNode(clientData, interp, argc-currentArg, argv+currentArg, *output);
+      done = true;
+    }
   
-  // if 'print integrator flag' print out the integrator
-  else if ((strcmp(argv[1],"integrator") == 0) || 
-	   (strcmp(argv[1],"-integrator") == 0)) 
-    return printIntegrator(clientData, interp, argc, argv, 3, opserr);  
-  
-
-  // if 'print algorithm flag' print out the algorithm
-  else if ((strcmp(argv[1],"algorithm") == 0) || 
-	   (strcmp(argv[1],"-algorithm") == 0))
-    return printAlgorithm(clientData, interp, argc, argv, 3, opserr);    
-
-  else { // it must be a file we are going to print to
-    
-#ifdef _USING_OpenSees_STREAMS
-    FileStream output;
-    if (output.setFile(argv[1], APPEND) != 0) {
-      opserr << "print <filename> .. - failed to open file: " << argv[1] << endln;
-      return TCL_ERROR;
-    }
-#else
-    ofstream output(argv[1],ios::app); // open for appending to
-    if (!output) {
-      opserr << "print <filename> .. - failed to open file: " << argv[1] << endln;
-      return TCL_ERROR;
-    }
-#endif
-
-    // if just 'print <filename>' then print out the entire domain to eof
-    if (argc == 2) {
-      output << theDomain;
-      return TCL_OK;
-    }    
-
-    int pos = 2;
-    if ((strcmp(argv[pos],"string") == 0) || 
-	(strcmp(argv[pos],"-string") == 0)) {
-	output << argv[3] << endln;
-	pos +=2;
-    }
-    int res = TCL_OK;    
-
-    // if 'print <filename> ele i j k..' print out some elements
-    if ((strcmp(argv[pos],"ele") == 0) || 
-	(strcmp(argv[pos],"-ele") == 0))
-      res = printElement(clientData, interp, argc, argv, pos+2, output);    
-
-    // if 'print <filename> node i j k ..' print out some nodes
-    else if ((strcmp(argv[pos],"node") == 0) || (strcmp(argv[pos],"-node") == 0))
-      res = printNode(clientData, interp, argc, argv, pos+2, output);
-    
     // if 'print integrator flag' print out the integrator
-    else if ((strcmp(argv[pos],"integrator") == 0) 
-	     || (strcmp(argv[pos],"-integrator") == 0))
-	return printIntegrator(clientData, interp, argc, argv, pos+2, opserr);  
-  
+    else if ((strcmp(argv[currentArg],"integrator") == 0) || 
+	     (strcmp(argv[currentArg],"-integrator") == 0)) {
+      currentArg++;
+      res = printIntegrator(clientData, interp, argc-currentArg, argv+currentArg, *output);  
+      done = true;
+    }
+
     // if 'print algorithm flag' print out the algorithm
-    else if ((strcmp(argv[pos],"-algorithm") == 0)|| 
-	     (strcmp(argv[pos],"algorithm") == 0))
-	return printAlgorithm(clientData, interp, argc, argv, pos+2, opserr);    
+    else if ((strcmp(argv[currentArg],"algorithm") == 0) || 
+	     (strcmp(argv[currentArg],"-algorithm") == 0)) {
+      currentArg++;
+      res = printAlgorithm(clientData, interp, argc-currentArg, argv+currentArg, *output);    
+      done = true;
+    }
 
+    else {
 
-    // close the output file
-    output.close();
-    return res;
+      if ((strcmp(argv[currentArg],"file") == 0) || 
+	  (strcmp(argv[currentArg],"-file") == 0)) 
+	currentArg++;
+	
+      if (outputFile.setFile(argv[currentArg], APPEND) != 0) {
+	opserr << "print <filename> .. - failed to open file: " << argv[currentArg] << endln;
+	return TCL_ERROR;
+      }
+      currentArg++;
+
+      // if just 'print <filename>' then print out the entire domain to eof
+      if (argc == currentArg) {
+	outputFile << theDomain;
+	return TCL_OK;
+      }  
+
+      output = &outputFile;
+
+    }
   }
-  
+
+  // close the output file
+  outputFile.close();
+  return res;
 }
 
+								   
 
 // printNode():
 // function to print out the nodal information conatined in line
@@ -1289,28 +1279,29 @@ printModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 // 
 int 
 printNode(ClientData clientData, Tcl_Interp *interp, int argc, 
-	  TCL_Char **argv, int nodeArg, OPS_Stream &output)
+	  TCL_Char **argv, OPS_Stream &output)
 {
   int flag = 0; // default flag sent to a nodes Print() method
+  int nodeArg = 0;
 
   // if just 'print <filename> node' print all the nodes - no flag
-  if (argc < nodeArg) { 
-      NodeIter &theNodes = theDomain.getNodes();
-      Node *theNode;
-      while ((theNode = theNodes()) != 0)
-	theNode->Print(output);
-      return TCL_OK;
+  if (argc == 0) { 
+    NodeIter &theNodes = theDomain.getNodes();
+    Node *theNode;
+    while ((theNode = theNodes()) != 0)
+      theNode->Print(output);
+    return TCL_OK;
   }    
 
   // if 'print <filename> node flag int <int int ..>' get the flag
-  if ((strcmp(argv[nodeArg-1],"flag") == 0) ||
-      (strcmp(argv[nodeArg-1],"-flag") == 0)) { 
+  if ((strcmp(argv[0],"flag") == 0) ||
+      (strcmp(argv[0],"-flag") == 0)) { 
       // get the specified flag
     if (argc <= nodeArg) {
       opserr << "WARNING print <filename> node <flag int> no int specified \n";
       return TCL_ERROR;
     }    
-    if (Tcl_GetInt(interp, argv[nodeArg], &flag) != TCL_OK) {
+    if (Tcl_GetInt(interp, argv[1], &flag) != TCL_OK) {
       opserr << "WARNING print node failed to get integer flag: \n";
       opserr << argv[nodeArg] << endln; 
       return TCL_ERROR;
@@ -1322,7 +1313,7 @@ printNode(ClientData clientData, Tcl_Interp *interp, int argc,
 
   // if 'print <filename> node flag' 
   //     print out all the nodes in the domain with flag
-  if (argc < nodeArg) { 
+  if (nodeArg == argc) { 
     NodeIter &theNodes = theDomain.getNodes();
     Node *theNode;
     while ((theNode = theNodes()) != 0)
@@ -1330,18 +1321,19 @@ printNode(ClientData clientData, Tcl_Interp *interp, int argc,
     return TCL_OK;
   } else { 
     // otherwise print out the specified nodes i j k .. with flag
-    int numNodes = argc-nodeArg +1;
+    int numNodes = argc-nodeArg;
     ID *theNodes = new ID(numNodes);
     for (int i= 0; i<numNodes; i++) {
       int nodeTag;
-      if (Tcl_GetInt(interp, argv[i+nodeArg-1], &nodeTag) != TCL_OK) {
-	opserr << "WARNING print node failed to get integer: " << argv[i] << endln;
+      if (Tcl_GetInt(interp, argv[nodeArg], &nodeTag) != TCL_OK) {
+	opserr << "WARNING print node failed to get integer: " << argv[nodeArg] << endln;
 	return TCL_ERROR;
       }
       (*theNodes)(i) = nodeTag;
+      nodeArg++;
     }
 
-    theDomain.Print(opserr, theNodes, 0, flag);
+    theDomain.Print(output, theNodes, 0, flag);
     delete theNodes;
   }    
 
@@ -1352,27 +1344,28 @@ printNode(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int 
 printElement(ClientData clientData, Tcl_Interp *interp, int argc, 
-	  TCL_Char **argv, int eleArg, OPS_Stream &output)
+	  TCL_Char **argv, OPS_Stream &output)
 {
   int flag = 0; // default flag sent to a nodes Print() method
+  int eleArg = 0;
 
   // if just 'print <filename> node' print all the nodes - no flag
-  if (argc < eleArg) { 
-      ElementIter &theElements = theDomain.getElements();
-      Element *theElement;
-      while ((theElement = theElements()) != 0)
-	theElement->Print(output);
-      return TCL_OK;
+  if (argc == 0) { 
+    ElementIter &theElements = theDomain.getElements();
+    Element *theElement;
+    while ((theElement = theElements()) != 0)
+      theElement->Print(output);
+    return TCL_OK;
   }    
 
   // if 'print <filename> Element flag int <int int ..>' get the flag
-  if ((strcmp(argv[eleArg-1],"flag") == 0) ||
-      (strcmp(argv[eleArg-1],"-flag")) == 0) { // get the specified flag
-    if (argc <= eleArg) {
+  if ((strcmp(argv[0],"flag") == 0) ||
+      (strcmp(argv[0],"-flag")) == 0) { // get the specified flag
+    if (argc < 2) {
       opserr << "WARNING print <filename> ele <flag int> no int specified \n";
       return TCL_ERROR;
     }    
-    if (Tcl_GetInt(interp, argv[eleArg], &flag) != TCL_OK) {
+    if (Tcl_GetInt(interp, argv[1], &flag) != TCL_OK) {
       opserr << "WARNING print ele failed to get integer flag: \n";
       opserr << argv[eleArg] << endln; 
       return TCL_ERROR;
@@ -1381,13 +1374,7 @@ printElement(ClientData clientData, Tcl_Interp *interp, int argc,
   }
 
   // now print the Elements with the specified flag, 0 by default
-
-  // if 'print <filename> Element flag' 
-  //     print out all the Elements in the domain with flag
-  if (flag == 2)
-    output << "#FRAME\n";
-  
-  if (argc < eleArg) { 
+  if (argc == eleArg) { 
     ElementIter &theElements = theDomain.getElements();
     Element *theElement;
     while ((theElement = theElements()) != 0)      
@@ -1396,18 +1383,18 @@ printElement(ClientData clientData, Tcl_Interp *interp, int argc,
   } else { 
 
     // otherwise print out the specified nodes i j k .. with flag
-    int numEle = argc-eleArg+1;
+    int numEle = argc-eleArg;
     ID *theEle = new ID(numEle);
     for (int i= 0; i<numEle; i++) {
       int eleTag;
-      if (Tcl_GetInt(interp, argv[i+eleArg-1], &eleTag) != TCL_OK) {
+      if (Tcl_GetInt(interp, argv[i+eleArg], &eleTag) != TCL_OK) {
 	opserr << "WARNING print ele failed to get integer: " << argv[i] << endln;
 	return TCL_ERROR;
       }
       (*theEle)(i) = eleTag;
     }
 
-    theDomain.Print(opserr, 0, theEle, flag);
+    theDomain.Print(output, 0, theEle, flag);
     delete theEle;
   }
 
@@ -1417,21 +1404,21 @@ printElement(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int 
 printAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, 
-	       TCL_Char **argv, int eleArg, OPS_Stream &output)
+	       TCL_Char **argv, OPS_Stream &output)
 {
-
+  int eleArg = 0;
   if (theAlgorithm == 0)
       return TCL_OK;
 
   // if just 'print <filename> algorithm'- no flag
-  if (argc < eleArg) { 
+  if (argc == 0) { 
       theAlgorithm->Print(output);
       return TCL_OK;
   }    
 
   // if 'print <filename> Algorithm flag' get the flag
   int flag;  
-  if (Tcl_GetInt(interp, argv[eleArg-1], &flag) != TCL_OK) {  
+  if (Tcl_GetInt(interp, argv[eleArg], &flag) != TCL_OK) {  
       opserr << "WARNING print algorithm failed to get integer flag: \n";
       opserr << argv[eleArg] << endln; 
       return TCL_ERROR;
@@ -1443,9 +1430,9 @@ printAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int 
 printIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, 
-		TCL_Char **argv, int eleArg, OPS_Stream &output)
+		TCL_Char **argv, OPS_Stream &output)
 {
-
+  int eleArg = 0;
   if (theStaticIntegrator == 0 && theTransientIntegrator == 0)
       return TCL_OK;
   
@@ -1456,14 +1443,14 @@ printIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
       theIntegrator = theTransientIntegrator;
 
   // if just 'print <filename> algorithm'- no flag
-  if (argc < eleArg) { 
+  if (argc == 0) { 
       theIntegrator->Print(output);
       return TCL_OK;
   }    
 
   // if 'print <filename> Algorithm flag' get the flag
   int flag;  
-  if (Tcl_GetInt(interp, argv[eleArg-1], &flag) != TCL_OK) {  
+  if (Tcl_GetInt(interp, argv[eleArg], &flag) != TCL_OK) {  
       opserr << "WARNING print algorithm failed to get integer flag: \n";
       opserr << argv[eleArg] << endln; 
       return TCL_ERROR;
