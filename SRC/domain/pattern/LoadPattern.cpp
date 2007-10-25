@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2007-10-17 22:12:31 $
+// $Revision: 1.16 $
+// $Date: 2007-10-25 22:53:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.cpp,v $
                                                                         
 // Written: fmk 07/99
@@ -849,11 +849,11 @@ LoadPattern::Print(OPS_Stream &s, int flag)
     s << "Load Pattern: " << this->getTag() << "\n";
     if (theSeries != 0)
       theSeries->Print(s,flag);
-    opserr << "  Nodal Loads: \n";
+    s << "  Nodal Loads: \n";
     theNodalLoads->Print(s,flag);
-    opserr << "\n  Elemental Loads: \n";
+    s << "\n  Elemental Loads: \n";
     theElementalLoads->Print(s, flag);
-    opserr << "\n  Single Point Constraints: \n";
+    s << "\n  Single Point Constraints: \n";
     theSPs->Print(s, flag);
 }
 
