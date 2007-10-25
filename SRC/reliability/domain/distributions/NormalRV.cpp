@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-10-24 18:27:49 $
+// $Revision: 1.11 $
+// $Date: 2007-10-25 16:26:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/NormalRV.cpp,v $
 
 
@@ -35,6 +35,7 @@
 #include <math.h>
 #include <string.h>
 #include <classTags.h>
+#include <float.h>
 #include <OPS_Globals.h>
 
 NormalRV::NormalRV(int passedTag, 
@@ -96,9 +97,9 @@ NormalRV::Print(OPS_Stream &s, int flag)
 double
 NormalRV::getPDFvalue(double rvValue)
 {
-	static const double pi = 3.14159265358979;
+	static const double pi = acos(-1.0);
 	static const double oneOverRootTwoPi = 1.0/sqrt(2.0*pi);
-
+	
 	//return 1 / sqrt ( 2.0 * pi ) * exp ( - 0.5 * pow ( ( ( rvValue - mju ) / sigma ), 2.0 ) );
 	return oneOverRootTwoPi * exp ( - 0.5 * pow ( ( ( rvValue - mju ) / sigma ), 2.0 ) );
 }
@@ -107,11 +108,11 @@ NormalRV::getPDFvalue(double rvValue)
 double
 NormalRV::getCDFvalue(double rvValue)
 {
-  static const double oneOverRootTwo = 1.0/sqrt(2.0);
-  //double result = 0.5 + errorFunction( ((rvValue-mju)/sigma)/sqrt(2.0) )/2.0;
+	static const double oneOverRootTwo = 1.0/sqrt(2.0);
+	//double result = 0.5 + errorFunction( ((rvValue-mju)/sigma)/sqrt(2.0) )/2.0;
 
-  //Phi(x) = 0.5 * erfc(-x/sqrt(2))
-  double result = 0.5 * (1.0 + errorFunction( ((rvValue-mju)/sigma)*oneOverRootTwo ));
+	//Phi(x) = 0.5 * erfc(-x/sqrt(2))
+	double result = 0.5 * (1.0 + errorFunction( ((rvValue-mju)/sigma)*oneOverRootTwo ));
 
 	return result;
 }
@@ -120,12 +121,16 @@ NormalRV::getCDFvalue(double rvValue)
 double
 NormalRV::getInverseCDFvalue(double probValue)
 {
-	if (probValue < 0.0 || probValue > 1.0) {
-		opserr << "WARNING: Illegal probability value input to NormalRV::getInverseCDFvalue()" << endln;
+	double trval = probValue;
+	if (trval <= 0.0) {
+		//opserr << "WARNING: Invalid probability value (" << trval << ") input <= 0 to NormalRV::getInverseCDFvalue()" << endln;
+		trval = 2.0*DBL_EPSILON;
+	} else if (trval >= 1.0) {
+		//opserr << "WARNING: Invalid probability value (" << trval << ") input >= 1 to NormalRV::getInverseCDFvalue()" << endln;
+		trval = 1.0-2.0*DBL_EPSILON;
 	}
 	static const double rootTwo = sqrt(2.0);
-	//double result = getMean() + getStdv() * sqrt(2.0) * inverseErrorFunction(2*probValue-1.0);
-	double result = mju + sigma * rootTwo * inverseErrorFunction(2*probValue-1.0);
+	double result = getMean() + getStdv() * rootTwo * inverseErrorFunction(2.0*trval-1.0);
 	return result;
 }
 
@@ -168,6 +173,8 @@ NormalRV::getParameter2()
 double 
 NormalRV::errorFunction(double x)
 {
+
+	// ErrorFunction(x) = 2/sqrt(pi) * integral from 0 to x of exp(-t^2) dt.
 	double a1,a2,a3,a4,a5;
 	double b1,b2,b3,b4;
 	double c1,c2,c3,c4,c5,c6,c7,c8,c9;
@@ -175,8 +182,7 @@ NormalRV::errorFunction(double x)
 	double p1,p2,p3,p4,p5,p6;
 	double q1,q2,q3,q4,q5;
 	double y,z,xnum,xden,del,result;
-	double pi = 3.14159265358979;
-
+	double pi = acos(-1.0);
 
 	// Evaluate  errorFunction  for  |x| <= 0.46875
     if ( fabs(x) <= 0.46875 )
@@ -279,6 +285,14 @@ NormalRV::errorFunction(double x)
 		z = floor(y*16)/16;
 		del = (y-z) * (y+z);
 		result = exp(-z * z) * exp(-del) * result;
+		if ( isnan(result) )
+			result = 0;
+	}
+	
+	else {
+		// should never reach here unless the input argument was nan
+		opserr << "NormalRV::errorFunction WARNING: invalid input (" << x << ")" << endln;
+		result = 0;
 	}
 
 
@@ -325,20 +339,39 @@ NormalRV::inverseErrorFunction(double y)
 	}
 
 	// Near end-points of range
-	if ( y > 0.7  &&  y < 1 )
+	else if ( y > 0.7  &&  y < 1 )
 	{
 		z = sqrt(-log((1-y)/2));
 		x = (((c4*z+c3)*z+c2)*z+c1) / ((d2*z+d1)*z+1);
 	}
 
-	if ( y < -0.7  &&  y > -1 )
+	else if ( y < -0.7  &&  y > -1 )
 	{
 		z = sqrt(-log((1+y)/2));
 		x = -(((c4*z+c3)*z+c2)*z+c1) / ((d2*z+d1)*z+1);
 	}
+	
+	// domain input errors: either abs(y) >= 1, or nan was input
+	else 
+	{
+		// this is the -1 limit
+		if ( y < 0 )
+			x = -DBL_MAX;
+			
+		// this is the +1 limit
+		else if ( y > 0 )
+			x = DBL_MAX;
+			
+		else {
+			opserr << "NormalRV::inverseErrorFunction WARNING: input (" << y << ") outside of [-1,1] domain." << endln;
+			x = 0;
+		}
+		
+		// do not perform Newton on these boundary values
+		return x;
+	}
 
-
-	static const double pi = 3.14159265358979;
+	static const double pi = acos(-1.0);
 	static const double twoOverRootPi = 2.0/sqrt(pi);
 	// Two steps of Newton-Raphson correction to full accuracy.
 	// Without these steps, erfinv(y) would be about 3 times
@@ -348,13 +381,6 @@ NormalRV::inverseErrorFunction(double y)
 	x = x - (errorFunction(x) - y) / (twoOverRootPi * exp(-pow(x,2.0)));
 	x = x - (errorFunction(x) - y) / (twoOverRootPi * exp(-pow(x,2.0)));
 
-	// Exceptional cases not treated for now
-	// k = find(y == -1);
-	// if ~isempty(k), x(k) = -inf*k; end
-	// k = find(y == 1);
-	// if ~isempty(k), x(k) = inf*k; end
-	// k = find(abs(y) > 1);
-	// if ~isempty(k), x(k) = NaN; end
 	return x;
 
 }
