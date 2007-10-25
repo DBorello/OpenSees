@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.43 $
-// $Date: 2007-10-13 20:43:57 $
+// $Revision: 1.44 $
+// $Date: 2007-10-25 18:19:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -116,6 +116,16 @@ TclModelBuilder_addNineNodeMixedQuad(ClientData, Tcl_Interp *, int, TCL_Char **,
 // GLF			       
 extern int 
 TclModelBuilder_addZeroLength(ClientData, Tcl_Interp *, int, TCL_Char **,
+			      Domain*, TclModelBuilder *);
+
+// add by Gang Wang for Contact Element
+extern int
+TclModelBuilder_addZeroLengthContact2D(ClientData, Tcl_Interp *, int, TCL_Char **,
+			      Domain*, TclModelBuilder *);
+
+// add by Gang Wang for Contact Element
+extern int
+TclModelBuilder_addZeroLengthContact3D(ClientData, Tcl_Interp *, int, TCL_Char **,
 			      Domain*, TclModelBuilder *);
 
 // MHS			       
@@ -503,6 +513,17 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
     int result = TclModelBuilder_addZeroLengthSection(clientData, interp, argc, argv,
 					       theTclDomain, theTclBuilder);
     return result;
+
+  } else if (strcmp(argv[1],"zeroLengthContact2D") == 0) {
+    int result = TclModelBuilder_addZeroLengthContact2D(clientData, interp, argc, argv,
+							theTclDomain, theTclBuilder);
+    return result;
+    
+  } else if (strcmp(argv[1],"zeroLengthContact3D") == 0) {
+    int result = TclModelBuilder_addZeroLengthContact3D(clientData, interp, argc, argv,
+							theTclDomain, theTclBuilder);
+    return result;
+    
   } else if (strcmp(argv[1],"zeroLengthND") == 0) {
     opserr << "element zeroLengthND is no longer available, please use "
 	 << "the zeroLengthSection element instead" << endln;
