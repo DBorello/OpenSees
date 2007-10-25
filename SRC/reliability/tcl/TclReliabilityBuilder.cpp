@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2007-07-13 19:25:20 $
+// $Revision: 1.25 $
+// $Date: 2007-10-25 17:07:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -274,8 +274,6 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
 TclReliabilityBuilder::~TclReliabilityBuilder()
 {
   // Delete objects
-  if (theReliabilityDomain != 0) 
-    delete theReliabilityDomain;
   if (theGFunEvaluator != 0)
     delete theGFunEvaluator;
   if (theGradGEvaluator != 0)
@@ -318,9 +316,10 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
     delete theSamplingAnalysis;
   if (theSystemAnalysis != 0)
     delete theSystemAnalysis;
+  if (theReliabilityDomain != 0) 
+    delete theReliabilityDomain;
 
 
-  theReliabilityDomain = 0;
   theReliabilityDomain =0;
   theGFunEvaluator =0;
   theGradGEvaluator =0;
@@ -464,18 +463,18 @@ TclReliabilityModelBuilder_addRandomVariable(ClientData clientData,Tcl_Interp *i
 
 		Vector xPoints;
 		Vector PDFpoints;
-		int numPoints;
+		int numPoints = 0;
 		int i;
 
 		if (strcmp(argv[3],"-list") == 0) {
 
-		  numPoints = (argc-4) % 2;
+			numPoints = (argc-4) % 2;
 			Vector temp_xPoints(numPoints);
 			Vector temp_PDFpoints(numPoints);
 
 			double x = 0.0;
 			double pdf = 0.0;
-			double x_old;
+			double x_old = 0.0;
 
 			// Read the points
 			for (i=0; i<numPoints; i++) {
@@ -3201,9 +3200,6 @@ TclReliabilityModelBuilder_addMeritFunctionCheck(ClientData clientData, Tcl_Inte
 
 
 
-
-
-
 //////////////////////////////////////////////////////////////////
 int 
 TclReliabilityModelBuilder_addReliabilityConvergenceCheck(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
@@ -4176,8 +4172,7 @@ TclReliabilityModelBuilder_runFORMAnalysis(ClientData clientData, Tcl_Interp *in
 		= new FORMAnalysis( theReliabilityDomain, 
 							theFindDesignPointAlgorithm, 
 							theProbabilityTransformation, 
-							argv[1] , 
-							relSensTag);
+							interp, argv[1], relSensTag);
 
 
 	// Check that it really was created
@@ -4622,6 +4617,7 @@ TclReliabilityModelBuilder_runSamplingAnalysis(ClientData clientData, Tcl_Interp
 									theProbabilityTransformation, 
 									theGFunEvaluator, 
 									theRandomNumberGenerator, 
+									interp,
 									numberOfSimulations, 
 									targetCOV,
 									samplingVariance,
@@ -5286,7 +5282,7 @@ TclReliabilityModelBuilder_rvReduction(ClientData clientData, Tcl_Interp *interp
 	ArrayOfTaggedObjects aListOfRandomVariables(256);
 	int nrv = theReliabilityDomain->getNumberOfRandomVariables();
 	RandomVariable *aRandomVariable;
-	int newTag;
+	int newTag = 1;
 	for (i=1; i<=nrv; i++) {
 		isInList = false;
 		for (j=1; j<=numInList; j++) {
@@ -5313,18 +5309,13 @@ TclReliabilityModelBuilder_rvReduction(ClientData clientData, Tcl_Interp *interp
 
 
 
-
-
-
-
-
 	// Handle the re-creation of correlation coefficients
 	int nCorr = theReliabilityDomain->getNumberOfCorrelationCoefficients();
 	int count = 1;
 	ArrayOfTaggedObjects aListOfCorrelationCoefficients(256);
 	CorrelationCoefficient *aCorrelationCoefficient;
 	CorrelationCoefficient *aNewCorrelationCoefficient;
-	int rv1, rv2, newRv1, newRv2;
+	int rv1, rv2, newRv1 = 1, newRv2 = 1;
 	double rho;
 	for (i=1; i<=nCorr; i++) {
 
