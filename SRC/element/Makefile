@@ -27,6 +27,7 @@ all:         $(OBJS)
 	@$(CD) $(FE)/element/updatedLagrangianBeamColumn; $(MAKE);
 	@$(CD) $(FE)/element/forceBeamColumn; $(MAKE);
 	@$(CD) $(FE)/element/dispBeamColumnInt; $(MAKE);
+	@$(CD) $(FE)/element/generic; $(MAKE);
 
 # Miscellaneous
 tidy:	
@@ -59,6 +60,7 @@ spotless: clean
 	@$(CD) $(FE)/element/updatedLagrangianBeamColumn; $(MAKE) wipe;
 	@$(CD) $(FE)/element/forceBeamColumn; $(MAKE) wipe;
 	@$(CD) $(FE)/element/dispBeamColumnInt; $(MAKE) wipe;
+	@$(CD) $(FE)/element/generic; $(MAKE) wipe;
 
 wipe: spotless
 
