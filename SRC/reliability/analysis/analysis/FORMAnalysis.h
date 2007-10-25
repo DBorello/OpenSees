@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-12-06 22:32:23 $
+// $Revision: 1.7 $
+// $Date: 2007-10-25 16:49:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FORMAnalysis.h,v $
 
 
@@ -40,6 +40,7 @@
 #include <ReliabilityDomain.h>
 
 #include <fstream>
+#include <tcl.h>
 using std::ofstream;
 
 class FORMAnalysis : public ReliabilityAnalysis
@@ -49,11 +50,10 @@ public:
 	FORMAnalysis(ReliabilityDomain *passedReliabilityDomain,
 				 FindDesignPointAlgorithm *passedFindDesignPointAlgorithm,
 				 ProbabilityTransformation *passedProbabilityTransformation,
-				 TCL_Char *fileName,
-				 int relSensTag);
+				 Tcl_Interp *passedInterp, TCL_Char *fileName, int relSensTag);
 	virtual ~FORMAnalysis();
 
-	int analyze(void);
+	int analyze();
 
 protected:
 
@@ -61,6 +61,7 @@ private:
 	ReliabilityDomain *theReliabilityDomain;
 	FindDesignPointAlgorithm *theFindDesignPointAlgorithm;
 	ProbabilityTransformation *theProbabilityTransformation;
+	Tcl_Interp *interp;
 	char fileName[256];
 	int relSensTag;
 };

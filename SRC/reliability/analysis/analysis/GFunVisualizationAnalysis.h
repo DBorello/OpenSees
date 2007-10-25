@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-12-06 22:32:23 $
+// $Revision: 1.5 $
+// $Date: 2007-10-25 16:49:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/GFunVisualizationAnalysis.h,v $
 
 
@@ -33,6 +33,9 @@
 
 #ifndef GFunVisualizationAnalysis_h
 #define GFunVisualizationAnalysis_h
+
+#include <fstream>
+using std::ifstream;
 
 #include <ReliabilityAnalysis.h>
 #include <GFunEvaluator.h>
@@ -87,10 +90,6 @@ private:
 	double findGSurface(Vector thePoint);
 	double evaluateGFunction(Vector thePoint, bool printDivision);
 
-
-
-
-
 	ReliabilityDomain *theReliabilityDomain;
 	GFunEvaluator *theGFunEvaluator;
 	ProbabilityTransformation *theProbabilityTransformation;
@@ -118,8 +117,9 @@ private:
 	int numLinePts;
 
 	int nrv;
-
 	double scaleValue;
+	
+	ofstream convFile;
 };
 
 #endif

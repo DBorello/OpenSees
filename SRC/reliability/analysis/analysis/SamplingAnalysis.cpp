@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-12-06 22:32:23 $
+// $Revision: 1.6 $
+// $Date: 2007-10-25 16:49:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SamplingAnalysis.cpp,v $
 
 
@@ -64,6 +64,7 @@ SamplingAnalysis::SamplingAnalysis(	ReliabilityDomain *passedReliabilityDomain,
 										ProbabilityTransformation *passedProbabilityTransformation,
 										GFunEvaluator *passedGFunEvaluator,
 										RandomNumberGenerator *passedRandomNumberGenerator,
+										Tcl_Interp *passedInterp,
 										int passedNumberOfSimulations,
 										double passedTargetCOV,
 										double passedSamplingStdv,
@@ -77,6 +78,7 @@ SamplingAnalysis::SamplingAnalysis(	ReliabilityDomain *passedReliabilityDomain,
 	theProbabilityTransformation = passedProbabilityTransformation;
 	theGFunEvaluator = passedGFunEvaluator;
 	theRandomNumberGenerator = passedRandomNumberGenerator;
+	interp = passedInterp;
 	numberOfSimulations = passedNumberOfSimulations;
 	targetCOV = passedTargetCOV;
 	samplingStdv = passedSamplingStdv;
@@ -105,14 +107,8 @@ SamplingAnalysis::analyze(void)
 
 	// Declaration of some of the data used in the algorithm
 	double gFunctionValue;
-	int result;
-	int I, i, j;
-	int k = 1;
-	int seed = 1;
-	double det_covariance;
-	double phi;
-	double h;
-	double q;
+	int result, I, i, j, k = 1, seed = 1;
+	double det_covariance, phi, h, q;
 	int numRV = theReliabilityDomain->getNumberOfRandomVariables();
 	Matrix covariance(numRV, numRV);
 	Matrix chol_covariance(numRV, numRV);
@@ -124,17 +120,14 @@ SamplingAnalysis::analyze(void)
 	Vector randomArray(numRV);
 	LimitStateFunction *theLimitStateFunction = 0;
 	NormalRV aStdNormRV(1,0.0,1.0,0.0);
-//	ofstream *outputFile = 0;
 	bool failureHasOccured = false;
-	char myString[50];
 
 	
 	// Establish covariance matrix
 	for (i=0;  i<numRV;  i++) {
 		for (j=0;  j<numRV;  j++) {
-			if (i==j) {
+			if (i==j)
 				covariance(i,j) = samplingStdv*samplingStdv;
-			}
 			else
 				covariance(i,j) = 0.0;
 		}
@@ -175,15 +168,13 @@ SamplingAnalysis::analyze(void)
 	
 
 	// Pre-compute some factors to minimize computations inside simulation loop
-	double pi = 3.14159265358979;
+	double pi = acos(-1.0);
 	double factor1 = 1.0 / ( pow((2.0*pi),((double)numRV/2.0)) );
 	double factor2 = 1.0 / ( pow((2.0*pi),((double)numRV/2.0)) * sqrt(det_covariance) );
 
 
 	// Number of limit-state functions
 	int numLsf = theReliabilityDomain->getNumberOfLimitStateFunctions();
-
-
 
 
 	Vector sum_q(numLsf);
@@ -200,7 +191,7 @@ SamplingAnalysis::analyze(void)
 			ifstream inputFile( restartFileName, ios::in );
 			inputFile >> k;
 			inputFile >> seed;
-			if (k==1 && seed==1) {
+			if (k == 1 && seed == 1) {
 			}
 			else { 
 				for (int i=1; i<=numLsf; i++) {
@@ -211,7 +202,7 @@ SamplingAnalysis::analyze(void)
 					inputFile >> CovIn;
 					sum_q(i-1) = pfIn*k;
 					var_qbar = (CovIn*pfIn)*(CovIn*pfIn);
-					if (k<1.0e-6) {
+					if (k < 1.0e-6) {
 						opserr << "WARNING: Zero number of samples read from restart file" << endln;
 					}
 					sum_q_squared(i-1) = k*( k*var_qbar + pow(sum_q(i-1)/k,2.0) );
@@ -256,13 +247,12 @@ SamplingAnalysis::analyze(void)
 	Vector sum_of_g_minus_mean_squared(numLsf);
 	Matrix crossSums(numLsf,numLsf);
 	Matrix responseCorrelation(numLsf,numLsf);
-	char string[60];
+	char myString[60];
 	Vector pf(numLsf);
 	Vector cov(numLsf);
 	double govCov = 999.0;
 	Vector temp1;
-	double temp2;
-	double denumerator;
+	double temp2, denumerator;
 	bool FEconvergence;
 
 
@@ -300,16 +290,14 @@ SamplingAnalysis::analyze(void)
 		// Transform into original space
 		result = theProbabilityTransformation->set_u(u);
 		if (result < 0) {
-			opserr << "SamplingAnalysis::analyze() - could not " << endln
-				<< " set the u-vector for xu-transformation. " << endln;
+			opserr << "SamplingAnalysis::analyze() - could not set the u-vector for xu-transformation. " << endln;
 			return -1;
 		}
 
 		
 		result = theProbabilityTransformation->transform_u_to_x();
 		if (result < 0) {
-			opserr << "SamplingAnalysis::analyze() - could not " << endln
-				<< " transform u to x. " << endln;
+			opserr << "SamplingAnalysis::analyze() - could not transform u to x. " << endln;
 			return -1;
 		}
 		x = theProbabilityTransformation->get_x();
@@ -330,13 +318,14 @@ SamplingAnalysis::analyze(void)
 
 			// Set tag of "active" limit-state function
 			theReliabilityDomain->setTagOfActiveLimitStateFunction(lsf+1);
-
+			
+			// set namespace variable for tcl procedures
+			Tcl_SetVar2Ex(interp,"RELIABILITY_lsf",NULL,Tcl_NewIntObj(lsf),TCL_NAMESPACE_ONLY);
 
 			// Get value of limit-state function
 			result = theGFunEvaluator->evaluateG(x);
 			if (result < 0) {
-				opserr << "SamplingAnalysis::analyze() - could not " << endln
-					<< " tokenize limit-state function. " << endln;
+				opserr << "SamplingAnalysis::analyze() - could not tokenize limit-state function. " << endln;
 				return -1;
 			}
 			gFunctionValue = theGFunEvaluator->getG();
@@ -378,9 +367,8 @@ SamplingAnalysis::analyze(void)
 					q_bar(lsf) = 1.0/(double)k * sum_q(lsf);
 					variance_of_q_bar(lsf) = 1.0/(double)k * 
 						( 1.0/(double)k * sum_q_squared(lsf) - (sum_q(lsf)/(double)k)*(sum_q(lsf)/(double)k));
-					if (variance_of_q_bar(lsf) < 0.0) {
+					if (variance_of_q_bar(lsf) < 0.0)
 						variance_of_q_bar(lsf) = 0.0;
-					}
 					cov_of_q_bar(lsf) = sqrt(variance_of_q_bar(lsf)) / q_bar(lsf);
 				}
 
@@ -409,15 +397,13 @@ SamplingAnalysis::analyze(void)
 					cov_of_q_bar(lsf) = sqrt(variance_of_q_bar(lsf)) / q_bar(lsf);
 
 					// Compute variance and standard deviation
-					if (k>1) {
+					if (k > 1)
 						responseVariance(lsf) = 1.0/((double)k-1) * (  sum_q_squared(lsf) - 1.0/((double)k) * sum_q(lsf) * sum_q(lsf)  );
-					}
-					else {
+					else
 						responseVariance(lsf) = 1.0;
-					}
 
 					if (responseVariance(lsf) <= 0.0) {
-						opserr << "ERROR: Response variance of limit-state function number "<< lsf << endln
+						opserr << "ERROR: Response variance of limit-state function number "<< lsf
 							<< " is zero! " << endln;
 					}
 					else {
@@ -427,8 +413,8 @@ SamplingAnalysis::analyze(void)
 			}
 			else if (analysisTypeTag == 3) {
 				// Store g-function values to file (one in each column)
-				sprintf(myString,"%12.6e",gFunctionValue);
-				resultsOutputFile << myString << "  ";
+				//sprintf(myString,"%12.6e",gFunctionValue);
+				resultsOutputFile << setiosflags(ios::scientific) << setprecision(6) << gFunctionValue << "  ";
 				resultsOutputFile.flush();
 			}
 			else {
@@ -436,9 +422,9 @@ SamplingAnalysis::analyze(void)
 			}
 
 			// Keep the user posted
-			if ( (printFlag == 1 || printFlag == 2) && analysisTypeTag!=3) {
-				sprintf(string," GFun #%d, estimate:%15.10f, cov:%15.10f",lsf+1,q_bar(lsf),cov_of_q_bar(lsf));
-				opserr << string << endln;
+			if ( (printFlag == 1 || printFlag == 2) && analysisTypeTag != 3) {
+				sprintf(myString," GFun #%d, estimate:%15.10f, cov:%15.10f",lsf+1,q_bar(lsf),cov_of_q_bar(lsf));
+				opserr << myString << endln;
 			}
 		}
 
@@ -461,13 +447,10 @@ SamplingAnalysis::analyze(void)
 					denumerator = 	(sum_q_squared(i)-1.0/(double)k*sum_q(i)*sum_q(i))
 									*(sum_q_squared(j)-1.0/(double)k*sum_q(j)*sum_q(j));
 
-					if (denumerator <= 0.0) {
+					if (denumerator <= 0.0)
 						responseCorrelation(i,j) = 0.0;
-					}
-					else {
-						responseCorrelation(i,j) = (crossSums(i,j)-1.0/(double)k*sum_q(i)*sum_q(j))
-							/(sqrt(denumerator));
-					}
+					else
+						responseCorrelation(i,j) = (crossSums(i,j)-1.0/(double)k*sum_q(i)*sum_q(j)) / sqrt(denumerator);
 				}
 			}
 		}
@@ -500,10 +483,10 @@ SamplingAnalysis::analyze(void)
 			outputFile << k << endln;
 			outputFile << seed << endln;
 			for (int lsf=0; lsf<numLsf; lsf++ ) {
-				sprintf(string,"%15.10f  %15.10f",q_bar(lsf),cov_of_q_bar(lsf));
-				outputFile << string << " " << endln;
+				sprintf(myString,"%15.10f  %15.10f",q_bar(lsf),cov_of_q_bar(lsf));
+				outputFile << myString << " " << endln;
 			}
-                        outputFile.close();
+			outputFile.close();
 		}
 
 		// Increment k (the simulation number counter)

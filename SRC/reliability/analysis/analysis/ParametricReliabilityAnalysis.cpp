@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-12-06 22:32:23 $
+// $Revision: 1.4 $
+// $Date: 2007-10-25 16:49:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/ParametricReliabilityAnalysis.cpp,v $
 
 
@@ -106,25 +106,22 @@ ParametricReliabilityAnalysis::analyze(void)
 	Vector pf(numIntervals+1);
 	Vector pdf(numIntervals+1);
 	Vector uStar, alpha;
-	double beta;
 	NormalRV aStdNormRV(1,0.0,1.0,0.0);
 	Matrix dGdPar;
-	int numPars;
-	double thedGdPar;
+	int numPars, lsf, numPos;
+	double thedGdPar = 0, currentValue, beta;
 	Vector gradient;
-	double currentValue;
 	Vector currentValues(numIntervals+1);
-	int numPos;
 	ParameterPositioner *theParameterPositioner = 0;
 
 
 	// Loop over number of limit-state functions and perform FORM analysis
-	for (int lsf=1; lsf<=numLsf; lsf++ ) {
+	for (lsf=1; lsf <= numLsf; lsf++ ) {
 
 
 		// Inform the user which limit-state function is being evaluated
 		opserr << "Limit-state function number: " << lsf << endln;
-
+		Tcl_SetVar2Ex(theTclInterp,"RELIABILITY_lsf",NULL,Tcl_NewIntObj(lsf),TCL_NAMESPACE_ONLY);
 
 		// Set tag of "active" limit-state function
 		theReliabilityDomain->setTagOfActiveLimitStateFunction(lsf);
@@ -134,7 +131,7 @@ ParametricReliabilityAnalysis::analyze(void)
 		// fmk to Terje: you just set it so why do you need the tag again
 		//     also you can't do a redef inside a loop with the same def as loop variable!!!!
 		// => changing int lst to int newLsf in line below
-		int newLsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
+		//int newLsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
 		LimitStateFunction *theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
 		if (theLimitStateFunction == 0) {
 			opserr << "ParametricReliabilityAnalysis::analyze() - could not find" << endln

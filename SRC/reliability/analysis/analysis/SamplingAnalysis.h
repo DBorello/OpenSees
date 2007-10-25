@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-12-06 22:32:23 $
+// $Revision: 1.5 $
+// $Date: 2007-10-25 16:49:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SamplingAnalysis.h,v $
 
 
@@ -41,6 +41,7 @@
 #include <GFunEvaluator.h>
 
 #include <fstream>
+#include <tcl.h>
 using std::ofstream;
 
 class SamplingAnalysis : public ReliabilityAnalysis
@@ -51,6 +52,7 @@ public:
 						ProbabilityTransformation *passedProbabilityTransformation,
 						GFunEvaluator *passedGFunEvaluator,
 						RandomNumberGenerator *passedRandomNumberGenerator,
+						Tcl_Interp *passedInterp,
 						int passedNumberOfSimulations,
 						double passedTargetCOV,
 						double samplingStdv,
@@ -70,6 +72,7 @@ private:
 	ProbabilityTransformation *theProbabilityTransformation;
 	GFunEvaluator *theGFunEvaluator;
 	RandomNumberGenerator *theRandomNumberGenerator;
+	Tcl_Interp *interp;
 	int numberOfSimulations;
 	double targetCOV;
 	double samplingStdv;

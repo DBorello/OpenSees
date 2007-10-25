@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-03-01 17:56:09 $
+// $Revision: 1.11 $
+// $Date: 2007-10-25 16:49:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FORMAnalysis.cpp,v $
 
 
@@ -56,8 +56,7 @@ using std::setiosflags;
 FORMAnalysis::FORMAnalysis(ReliabilityDomain *passedReliabilityDomain,
 						   FindDesignPointAlgorithm *passedFindDesignPointAlgorithm,
 						   ProbabilityTransformation *passedProbabilityTransformation,
-						   TCL_Char *passedFileName,
-						   int p_relSensTag)
+						   Tcl_Interp *passedInterp, TCL_Char *passedFileName, int p_relSensTag)
 :ReliabilityAnalysis()
 {
 	theReliabilityDomain = passedReliabilityDomain;
@@ -65,6 +64,7 @@ FORMAnalysis::FORMAnalysis(ReliabilityDomain *passedReliabilityDomain,
 	theProbabilityTransformation = passedProbabilityTransformation;
 	strcpy(fileName,passedFileName);
 	relSensTag = p_relSensTag;
+	interp = passedInterp;
 }
 
 
@@ -76,21 +76,15 @@ FORMAnalysis::~FORMAnalysis()
 
 
 int 
-FORMAnalysis::analyze(void)
+FORMAnalysis::analyze()
 {
 
 	// Alert the user that the FORM analysis has started
 	opserr << "FORM Analysis is running ... " << endln;
 
-
 	// Declare variables used in this method
-	double stdv,mean;
-	int i;
-	double Go, Glast;
-	double beta;
-	double pf1;
-	int numberOfEvaluations;
-	int lsf;
+	double stdv, mean, Go, Glast, beta, pf1;
+	int i, numberOfEvaluations, lsf;
 	int numRV = theReliabilityDomain->getNumberOfRandomVariables();
 	int numLsf = theReliabilityDomain->getNumberOfLimitStateFunctions();
 	RandomVariable *aRandomVariable;
@@ -104,29 +98,26 @@ FORMAnalysis::analyze(void)
 	// Open output file
 	ofstream outputFile( fileName, ios::out );
 
-
 	// Loop over number of limit-state functions and perform FORM analysis
 	for (lsf=1; lsf<=numLsf; lsf++ ) {
 
-
 		// Inform the user which limit-state function is being evaluated
 		opserr << "Limit-state function number: " << lsf << endln;
-
+		Tcl_SetVar2Ex(interp,"RELIABILITY_lsf",NULL,Tcl_NewIntObj(lsf),TCL_NAMESPACE_ONLY);
 
 		// Set tag of "active" limit-state function
 		theReliabilityDomain->setTagOfActiveLimitStateFunction(lsf);
 
-
 		// Get the limit-state function pointer
 		theLimitStateFunction = 0;
-		lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
+		//should not be overwriting loop variable with a get() immediately following a set()
+		//lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
 		theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
 		if (theLimitStateFunction == 0) {
 			opserr << "FORMAnalysis::analyze() - could not find" << endln
 				<< " limit-state function with tag #" << lsf << "." << endln;
 			return -1;
 		}
-
 
 		// Find the design point
 		if (theFindDesignPointAlgorithm->findDesignPoint(theReliabilityDomain) < 0){
@@ -216,10 +207,11 @@ FORMAnalysis::analyze(void)
 						kappa(j-1) = 0.0;
 					}
 				}
-				// Don't scale them:
-//				delta = delta * (1.0/delta.Norm());
-//				eta = eta * (1.0/eta.Norm());
-//				kappa = kappa * (1.0/kappa.Norm());
+				
+				// Don't scale them: WHY????? they give gibberish otherwise
+				delta = delta * (1.0/delta.Norm());
+				eta = eta * (1.0/eta.Norm());
+				kappa = kappa * (1.0/kappa.Norm());
 			}
 
 

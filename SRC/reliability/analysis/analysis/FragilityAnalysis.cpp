@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-12-06 22:32:23 $
+// $Revision: 1.6 $
+// $Date: 2007-10-25 16:49:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FragilityAnalysis.cpp,v $
 
 
@@ -106,34 +106,30 @@ FragilityAnalysis::analyze(void)
 	Vector pf(numIntervals+1);
 	Vector pdf(numIntervals+1);
 	Vector uStar, alpha;
-	double beta;
 	NormalRV aStdNormRV(1,0.0,1.0,0.0);
 	Matrix dGdPar;
-	int numPars;
-	double thedGdPar;
+	int numPars, lsf, numPos;
+	double thedGdPar = 0, currentValue, beta;
 	Vector gradient;
-	double currentValue;
 	Vector currentValues(numIntervals+1);
-	int numPos;
 	ParameterPositioner *theParameterPositioner = 0;
 
 
 	// Loop over number of limit-state functions and perform FORM analysis
-	int lsf = 1; // Boris Jeremic moved this out of the loop since it is
-              // non-portable (C++ standard is violated) to change loop counter in the loop (lsf)
- for ( ; lsf<=numLsf; lsf++ ) {
+	for (lsf = 1 ; lsf <= numLsf; lsf++ ) {
 
 
 		// Inform the user which limit-state function is being evaluated
 		opserr << "Limit-state function number: " << lsf << endln;
-
+		Tcl_SetVar2Ex(theTclInterp,"RELIABILITY_lsf",NULL,Tcl_NewIntObj(lsf),TCL_NAMESPACE_ONLY);
 
 		// Set tag of "active" limit-state function
 		theReliabilityDomain->setTagOfActiveLimitStateFunction(lsf);
 
 
 		// "Download" limit-state function from reliability domain
-		int lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
+		//should not be overwriting loop variable with a get() immediately following a set()
+		//lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
 		LimitStateFunction *theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
 		if (theLimitStateFunction == 0) {
 			opserr << "FragilityAnalysis::analyze() - could not find" << endln
@@ -157,7 +153,7 @@ FragilityAnalysis::analyze(void)
 
 		// Range over parameter values
 		currentValue = first;
-		for (int counter=0; counter<(numIntervals+1); counter++) {
+		for (int counter=0; counter < numIntervals+1; counter++) {
 
 			currentValues(counter) = currentValue;
 

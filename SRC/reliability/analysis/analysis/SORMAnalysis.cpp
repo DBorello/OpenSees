@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-12-06 22:32:23 $
+// $Revision: 1.8 $
+// $Date: 2007-10-25 16:49:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SORMAnalysis.cpp,v $
 
 
@@ -111,7 +111,8 @@ SORMAnalysis::analyze(void)
 
 		// Get the limit-state function pointer
 		theLimitStateFunction = 0;
-		lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
+		// this doesn't make any sense!!!
+		//lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
 		theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
 		if (theLimitStateFunction == 0) {
 			opserr << "SORMAnalysis::analyze() - could not find" << endln
@@ -121,7 +122,7 @@ SORMAnalysis::analyze(void)
 
 
 		// Compute curvature(s)
-		if (theCurvaturesAlgorithm->computeCurvatures(theReliabilityDomain) < 0){
+		if (theCurvaturesAlgorithm->computeCurvatures(theReliabilityDomain) < 0) {
 			opserr << "SORMAnalysis::analyze() - failed while finding " << endln
 				<< " curvatures for limit-state function number " << lsf << "." << endln;
 			return -1;

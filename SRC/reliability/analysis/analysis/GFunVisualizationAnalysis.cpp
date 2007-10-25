@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-12-06 22:32:23 $
+// $Revision: 1.6 $
+// $Date: 2007-10-25 16:49:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/GFunVisualizationAnalysis.cpp,v $
 
 
@@ -43,9 +43,10 @@
 #include <NormalRV.h>
 #include <RandomVariable.h>
 #include <math.h>
-//#include <fstream>
+#include <fstream>
 #include <iomanip>
 using std::ios;
+using std::ifstream;
 #include <ProbabilityTransformation.h>
 #include <ReliabilityConvergenceCheck.h>
 #include <RootFinding.h>
@@ -72,7 +73,6 @@ GFunVisualizationAnalysis::GFunVisualizationAnalysis(
 	theStartPoint = 0;
 
 	strcpy(outputFileName,passedOutputFileName);
-
 	strcpy(convFileName,passedConvFileName);
 
 	convResults = passedConvResults;
@@ -85,8 +85,8 @@ GFunVisualizationAnalysis::GFunVisualizationAnalysis(
 
 	scaleValue = 1.0;
 
-	if (convResults==1) {
-		static ofstream convFile( convFileName, ios::out );
+	if (convResults == 1) {
+		convFile.open( convFileName, ios::out );
 	}
 
 
@@ -94,7 +94,9 @@ GFunVisualizationAnalysis::GFunVisualizationAnalysis(
 
 GFunVisualizationAnalysis::~GFunVisualizationAnalysis()
 {
-
+	if (convResults == 1) {
+		convFile.close( );
+	}
 }
 
 
@@ -120,11 +122,11 @@ GFunVisualizationAnalysis::analyze(void)
 	// Initial declarations
 	int i,j;
 	Vector thePoint;
-	double result;
+	double result = 0;
 
 
 	// Determine number of points to be plotted
-	int numPoints1, numPoints2;
+	int numPoints1 = 1, numPoints2 = 1;
 	if (axes==1) {
 		numPoints1 = numPts1;
 		numPoints2 = 1;
@@ -269,9 +271,8 @@ GFunVisualizationAnalysis::getCurrentAxes12Point(int i, int j)
 	// Now we have the point in the space we want it, 
 	// So, set the random variables to be 'ranged'
 	thePoint(rv1-1) = from1+(i-1)*interval1; 
-	if (axes==2) {
-	thePoint(rv2-1) = from2+(j-1)*interval2;
-	}
+	if (axes==2)
+		thePoint(rv2-1) = from2+(j-1)*interval2;
 	
 	return thePoint;
 }
@@ -335,7 +336,7 @@ GFunVisualizationAnalysis::setAxes(Vector axesVector)
 	double to1  =      axesVector(2);
 	numPts1     = (int)axesVector(3);
 
-	double to2;
+	double to2 = 0;
 	if (axesVector.Size() > 4 ) {
 		rv2         = (int)axesVector(4);
 		from2       =      axesVector(5);
@@ -426,10 +427,9 @@ GFunVisualizationAnalysis::findGSurface(Vector thePoint)
 
 	// Find direction; in whichever space user wants
 	Direction.Zero();
-	if (dir==1) {
+	if (dir == 1)
 		Direction(rvDir-1) = 1.0;
-	}
-	else if (dir==2) {
+	else if (dir == 2) {
 		if (nrv != theDirectionVector.Size()) {
 			opserr << "ERROR: There is something wrong with the size of the direction" << endln
 				<< " vector of the visualization analysis object." << endln;
@@ -523,10 +523,6 @@ GFunVisualizationAnalysis::evaluateGFunction(Vector thePoint, bool isFirstPoint)
 
 	// Possibly compute and print out more comprehensive results
 	if (convResults==1) {
-
-		// Open file for these results
-		static ofstream convFile( convFileName, ios::out );
-
 
 		// Initial declarations
 		char myString[300];

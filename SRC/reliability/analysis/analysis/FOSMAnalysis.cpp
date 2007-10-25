@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-12-06 22:32:23 $
+// $Revision: 1.3 $
+// $Date: 2007-10-25 16:49:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FOSMAnalysis.cpp,v $
 
 
@@ -130,6 +130,10 @@ FOSMAnalysis::analyze(void)
 	}
 	for (lsf=1; lsf<=numLsf; lsf++ ) {
 		theReliabilityDomain->setTagOfActiveLimitStateFunction(lsf);
+		
+		// set namespace variable for tcl functions
+		Tcl_SetVar2Ex(theTclInterp,"RELIABILITY_lsf",NULL,Tcl_NewIntObj(lsf),TCL_NAMESPACE_ONLY);
+		
 		result = theGFunEvaluator->evaluateG(meanVector);
 		if (result < 0) {
 			opserr << "FOSMAnalysis::analyze() - " << endln
@@ -191,7 +195,7 @@ FOSMAnalysis::analyze(void)
 		// Estimate of standard deviation of response
 		responseVariance = (covMatrix^gradient)^gradient;
 		if (responseVariance <= 0.0) {
-			opserr << "ERROR: Response variance of limit-state function number "<< lsf << endln
+			opserr << "ERROR: Response variance of limit-state function number "<< lsf
 				<< " is zero! " << endln;
 		}
 		else {
@@ -205,9 +209,8 @@ FOSMAnalysis::analyze(void)
 			importance(i-1) = gradient(i-1) * aRandomVariable->getStdv();
 		}
 		double imptNorm = importance.Norm();
-		for (i=1 ; i<=nrv ; i++) {
+		for (i=1 ; i<=nrv ; i++)
 			importance(i-1) = importance(i-1)/imptNorm;
-		}
 
 	
 		// Print FOSM results to the output file
@@ -228,12 +231,10 @@ FOSMAnalysis::analyze(void)
 		for (int i=0;  i<nrv; i++) {
 			outputFile << "#       " <<setw(3)<<(i+1)<<"              ";
 			outputFile << "";
-			if (importance(i)<0.0) { 
+			if (importance(i) < 0.0)
 				outputFile << "-"; 
-			}
-			else { 
+			else
 				outputFile << " "; 
-			}
 			outputFile <<setprecision(3)<<setw(11)<<fabs(importance(i));
 			outputFile << "                                 #" << endln;
 		}
