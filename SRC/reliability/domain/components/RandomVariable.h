@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-02-17 21:27:23 $
+// $Revision: 1.10 $
+// $Date: 2007-10-25 16:34:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariable.h,v $
 
 
@@ -44,23 +44,23 @@ public:
 	RandomVariable(int tag, int classTag, double startValue = 0.0);
 	virtual ~RandomVariable();
 
-	virtual void Print(OPS_Stream &s, int flag =0) =0;
-	virtual double getPDFvalue(double rvValue) =0;
-	virtual double getCDFvalue(double rvValue) =0;
-	virtual double getInverseCDFvalue(double rvValue) =0;    
-	virtual const char* getType() =0;
-	virtual double getMean() =0;
-	virtual double getStdv() =0;
+	virtual void Print(OPS_Stream &s, int flag =0) = 0;
+	virtual double getPDFvalue(double rvValue) = 0;
+	virtual double getCDFvalue(double rvValue) = 0;
+	virtual double getInverseCDFvalue(double rvValue) = 0; 
+	virtual const char* getType() = 0;
+	virtual double getMean() = 0;
+	virtual double getStdv() = 0;
 	virtual double getParameter1();
 	virtual double getParameter2();
 	virtual double getParameter3();
 	virtual double getParameter4();
 
-	virtual void setStartValue(double newVal) {startValue = newVal;}
+	virtual int setStartValue(double newVal) {startValue = newVal;return 0;}
 	virtual double getStartValue() {return startValue;}
 
-	int setRVnumber(int number) {rvNumber = number;}
-	int getRVnumber(void) {return rvNumber;}
+	int setRVnumber(int number) {rvNumber = number;return 0;}
+	int getRVnumber() {return rvNumber;}
 
 	int setNewTag(int tag);
 
@@ -69,8 +69,6 @@ protected:
 private:
 	int rvNumber; // in range 1,...,nrv
 	double startValue;
-
-
 };
 
 #endif
