@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2007-04-30 20:03:42 $
+// $Revision: 1.19 $
+// $Date: 2007-10-25 20:50:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.cpp,v $
 
 
@@ -262,6 +262,12 @@ OpenSeesGFunEvaluator::createTclVariables()
   // Download active limit-state function
   int lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
   LimitStateFunction *theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
+  if (theLimitStateFunction == 0) {
+    opserr << "ERROR OpenSeesGFunEvaluation::createTclVariables -- limit state function with tag "
+	   << lsf << " not found in reliability domain" << endln;
+    return -1;
+
+  }
   char *theExpression = theLimitStateFunction->getExpression();
 
   // Initial declarations
@@ -296,6 +302,12 @@ OpenSeesGFunEvaluator::removeTclVariables()
   // Download active limit-state function
   int lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
   LimitStateFunction *theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
+  if (theLimitStateFunction == 0) {
+    opserr << "ERROR OpenSeesGFunEvaluation::removeTclVariables -- limit state function with tag "
+	   << lsf << " not found in reliability domain" << endln;
+    return -1;
+
+  }
   char *theExpression = theLimitStateFunction->getExpression();
 
   // Initial declarations

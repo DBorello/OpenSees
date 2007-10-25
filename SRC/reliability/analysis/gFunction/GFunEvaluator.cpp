@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-02-16 20:10:48 $
+// $Revision: 1.8 $
+// $Date: 2007-10-25 20:50:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/GFunEvaluator.cpp,v $
 
 
@@ -36,6 +36,7 @@
 #include <tcl.h>
 
 #include <fstream>
+#include <limits>
 #include <iomanip>
 #include <iostream>
 using std::ifstream;
@@ -80,32 +81,30 @@ GFunEvaluator::evaluateG(const Vector &x)
 {
 	numberOfEvaluations++;
 
-
 	// "Download" limit-state function from reliability domain
 	int lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
 	LimitStateFunction *theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
-
+	if (theLimitStateFunction == 0) {
+	  opserr << "ERROR GFunEvaluator::evaluateG -- limit state function with tag "
+		 << lsf << " not found in reliability domain" << endln;
+	  return -1;
+	}
 
 	// Get the limit-state function expression
 	char *theExpression = theLimitStateFunction->getExpression();
 
-
 	// Set value of GFun-specific parameters in the limit-state function
 	int result = this->tokenizeSpecials(theExpression);
-
-
+	
 	// Initial declarations
 	int i;
 	double fileValue = 0.0;
 
-	char buf[500]="";
-	char tclAssignment[500]="";
-	char tempchar[100]="";
+	char tclAssignment[500] = "";
+	char tempchar[100] = "";
 	char temp[120];
 
 	char separators[5] = "}{";
-	char *dollarSign = "$";
-	char *underscore = "_";
 
 	char lsf_forTokenizing[500];
 	strcpy(lsf_forTokenizing,theExpression);
@@ -149,16 +148,24 @@ GFunEvaluator::evaluateG(const Vector &x)
 				opserr << "Could not open file with quantities for limit-state function." << endln;
 			}
 			for (i=1; i<rowNum; i++) {
-				inputFile.getline(buf,120,'\n');
+				// requires limits, just skips the lines that are not needed
+				inputFile.ignore(INT_MAX,'\n');
 			}
 			for (i=1; i<=colNum; i++) {
+				// read data up to desired column
 				inputFile >> temp;
 			}
-			fileValue = (double)atof(temp);
-			if (fileValue == 0.0) {
-				opserr << "ERROR: Could not find quantity in performance function file." << endln;
-				return -1;
+			
+			// check for error in stream
+			if ( inputFile.fail() ) {
+				opserr << "ERROR: Could not find quantity (" << rowNum << ", " << colNum 
+					   << ") in performance function file." << endln;
+				fileValue = 0.0;
+			} else {
+				fileValue = atof(temp);
+				//opserr << "Found quantity (" << rowNum << ", " << colNum << ") = " << fileValue << endln;
 			}
+			
 			inputFile.close();
 			sprintf(tclAssignment , "set file_%s_%d_%d  %15.5f",fileName,rowNum,colNum,fileValue);
 
@@ -184,9 +191,6 @@ GFunEvaluator::evaluateG(const Vector &x)
 
 
 
-
-
-
 void
 GFunEvaluator::setNsteps(int nsteps)
 {
@@ -202,8 +206,4 @@ GFunEvaluator::getDt()
 		<< " implemented for the chosen type of GFunEvaluator." << endln;
 	return 0;
 }
-
-
-
-
 
