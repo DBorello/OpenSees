@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2007-07-13 19:54:41 $
+// $Revision: 1.13 $
+// $Date: 2007-10-25 22:34:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.cpp,v $
 
 
@@ -143,7 +143,6 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 
 
 	if (startPoint == 0) {
-
 		// Here we want to start at the origin in the standard normal space. 
 		// Hence, just leave 'u' as being initialized to zero. 
 		// (Note; this is slightly different from the mean point, as done earlier)
@@ -291,7 +290,7 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 
 		// Check convergence
 		result = theReliabilityConvergenceCheck->check(u,gFunctionValue,gradientInStandardNormalSpace);
-		if (result > 0)  {
+		if (result > 0 || i == maxNumberOfIterations)  {
 		
 
 			// Inform the user of the happy news!
