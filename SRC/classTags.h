@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.96 $
-// $Date: 2007-10-13 01:24:13 $
+// $Revision: 1.97 $
+// $Date: 2007-10-25 18:19:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -309,6 +309,7 @@
 #define ELE_TAG_cont2d02    	2102	// provisional
 #define ELE_TAG_CST	    	4050
 
+
 #define ELE_TAG_Subdomain     	1
 #define ELE_TAG_ElasticBeam2d   2000
 #define ELE_TAG_ElasticBeam3d   3000
@@ -328,6 +329,8 @@
 #define ELE_TAG_ZeroLength	 5000
 #define ELE_TAG_ZeroLengthSection	 5001
 #define ELE_TAG_ZeroLengthND	 5002
+#define ELE_TAG_ZeroLengthContact2D	 5003
+#define ELE_TAG_ZeroLengthContact3D	 5004
 #define ELE_TAG_NLBeamColumn2d	 6000
 #define ELE_TAG_NLBeamColumn3d	 6001
 #define ELE_TAG_LargeDispBeamColumn3d	 6002
@@ -379,6 +382,10 @@
 #define ELE_TAG_SimpleJoint2D    9901
 #define ELE_TAG_Joint2D    9902
 #define ELE_TAG_Joint3D    9903
+
+
+#define ELE_TAG_GenericClient    2103
+#define ELE_TAG_GenericCopy      2104
 
 
 // Terje:
