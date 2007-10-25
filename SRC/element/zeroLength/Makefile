@@ -1,6 +1,10 @@
 include ../../../Makefile.def
 
-OBJS       = ZeroLength.o ZeroLengthSection.o TclZeroLength.o
+OBJS       = ZeroLength.o \
+	ZeroLengthSection.o \
+	ZeroLengthContact2D.o \
+	ZeroLengthContact3D.o \
+	TclZeroLength.o
 
 all:         $(OBJS)
 

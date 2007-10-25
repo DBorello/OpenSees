@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:33:12 $
+// $Revision: 1.6 $
+// $Date: 2007-10-25 18:18:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/TclZeroLength.cpp,v $
                                                                         
                                                                         
@@ -39,6 +39,8 @@
 #include <ZeroLength.h>
 //#include <ZeroLengthND.h>
 #include <ZeroLengthSection.h>
+#include <ZeroLengthContact2D.h>
+#include <ZeroLengthContact3D.h>
 #include <TclModelBuilder.h>
 #include <ID.h>
 #include <Vector.h>
@@ -426,6 +428,253 @@ TclModelBuilder_addZeroLengthSection(ClientData clientData, Tcl_Interp *interp,
     
     return TCL_OK;
 }
+
+
+// add by Gang Wang for Contact Element
+// Tcl parse of zeroLengthContact2D command
+
+// Command:
+//
+// element zeroLengthContact2D $tag $slaveNd $masterNd $Kn $Kt $fs $ContactDirction
+//
+//
+
+int
+TclModelBuilder_addZeroLengthContact2D(ClientData clientData, Tcl_Interp *interp,
+				       int argc, TCL_Char **argv,
+				       Domain *theDomain,
+				       TclModelBuilder *theBuilder) {
+  
+  
+  
+  // need to write here.
+  int ndm = theBuilder->getNDM(); // the spatial dimension of the problem
+  
+  //
+  // first scan the command line to obtain eleID, SlaveNode, MasterNode,
+  
+  int eleTag, iNode, jNode;
+  
+  
+  //opserr << argc;
+  
+  // a quick check on number of args
+  if (argc < 11) {
+    opserr << "ZeroLengthContact2D::WARNING too few arguments " <<
+      "want - element ZeroLengthContact2D eleTag? iNode? jNode? Kn? Kt? fs? -normal Nx? Ny?" ;
+    return TCL_ERROR;
+  }
+  
+  // get the ele tag
+  if (Tcl_GetInt(interp, argv[2], &eleTag) != TCL_OK) {
+    opserr << "ZeroLengthContact2D::WARNING invalied eleTag " << argv[2] << "\n";
+    return TCL_ERROR;
+  }
+  
+  
+  // get the two end nodes
+  if (Tcl_GetInt(interp, argv[3], &iNode) != TCL_OK) {
+    opserr << "ZeroLengthContact2D::WARNING invalied iNode " << argv[3] <<  "\n";
+    
+    return TCL_ERROR;
+  }
+  
+  if (Tcl_GetInt(interp, argv[4], &jNode) != TCL_OK) {
+    opserr << "ZeroLengthContact2D::WARNING invalid jNode " << argv[4] << "\n" ;
+    return TCL_ERROR;
+  }
+  
+  double Kn, Kt, fs;
+  
+  // read the material properties
+  if (Tcl_GetDouble(interp, argv[5], &Kn) != TCL_OK) {
+    opserr << "ZeroLengthContact2D::WARNING invalid Kn " << argv[5] << "\n" ;
+    return TCL_ERROR;
+  }
+  
+  if (Tcl_GetDouble(interp, argv[6], &Kt) != TCL_OK) {
+    opserr << "ZeroLengthContact2D::WARNING invalid Kt " << argv[6] << "\n" ;
+    return TCL_ERROR;
+  }
+  
+  if (Tcl_GetDouble(interp, argv[7], &fs) != TCL_OK) {
+    opserr << "ZeroLengthContact2D::WARNING invalid fs " << argv[7] << "\n" ;
+    return TCL_ERROR;
+  }
+  
+  ///// changed to specify any contact normal direction
+  if (strcmp(argv[8],"-normal") != 0) {
+    opserr << "ZeroLengthContact2D:: expecting "<<
+      "- element ZeroLengthContact2D eleTag? iNode? jNode? Kn? Kt? fs? -normal Nx? Ny? \n" ;
+    return TCL_ERROR;
+  }
+  
+  Vector  NormalDir(2);
+  
+  int argi=9;
+  
+  double value;
+  // read the NormalDir values
+  for (int i=0; i<2; i++)  {
+    if (Tcl_GetDouble(interp, argv[argi], &value) != TCL_OK) {
+      opserr << "ZeroLengthContact2D:: invalid -normal value for ele " <<
+	eleTag <<
+	"- element ZeroLengthContact2D eleTag? iNode? jNode? Kn? Kt? fs? -normal Nx? Ny? \n" ;
+      
+      return TCL_ERROR;
+    } else {
+      argi++;
+      NormalDir(i) = value;
+    }
+  }
+  
+  
+  //
+  // now we create the element and add it to the domain
+  //
+  
+  Element *theEle;
+  
+  
+  theEle = new ZeroLengthContact2D(eleTag, iNode, jNode, Kn, Kt,
+				   fs, NormalDir);
+  
+  if (theEle == 0) {
+    return TCL_ERROR;
+  }
+  
+  if (theDomain->addElement(theEle) == false) {
+    return TCL_ERROR;
+  }
+  
+  // return the memory we stole and return OK
+  return TCL_OK;
+}
+
+
+// add by Gang Wang for Contact Element
+// Tcl parse of zeroLengthContact3D command
+
+// Command:
+//
+// element zeroLengthContact3D $tag $slaveNd $masterNd $Kn $Kt $fs $c $ContactDir
+//
+//
+
+int
+TclModelBuilder_addZeroLengthContact3D(ClientData clientData, Tcl_Interp *interp,
+				       int argc, TCL_Char **argv,
+				       Domain *theDomain,
+				       TclModelBuilder *theBuilder) {
+  
+  
+  int ndm = theBuilder->getNDM(); // the spatial dimension of the problem
+  
+  //
+  // first scan the command line to obtain eleID, SlaveNode, MasterNode,
+  
+  int eleTag, iNode, jNode;
+  
+  
+  //opserr << argc;
+  
+  // a quick check on number of args
+  if (argc < 10) {
+    opserr << "ZeroLengthContact3D::WARNING too few arguments " <<
+      "want - element ZeroLengthContact3D eleTag? iNode? jNode? Kn? Kt? fs? c? dir?" ;
+    return TCL_ERROR;
+  }
+  
+  // get the ele tag
+  if (Tcl_GetInt(interp, argv[2], &eleTag) != TCL_OK) {
+    opserr << "ZeroLengthContact3D::WARNING invalied eleTag " << argv[2] << "\n";
+    return TCL_ERROR;
+  }
+  
+  
+  // get the two end nodes
+  if (Tcl_GetInt(interp, argv[3], &iNode) != TCL_OK) {
+    opserr << "ZeroLengthContact3D::WARNING invalied iNode " << argv[3] <<  "\n";
+    
+    return TCL_ERROR;
+  }
+  
+  if (Tcl_GetInt(interp, argv[4], &jNode) != TCL_OK) {
+    opserr << "ZeroLengthContact3D::WARNING invalid jNode " << argv[4] << "\n" ;
+    return TCL_ERROR;
+  }
+  
+  double Kn, Kt, fs, c;
+  
+  // read the material properties
+  if (Tcl_GetDouble(interp, argv[5], &Kn) != TCL_OK) {
+    opserr << "ZeroLengthContact3D::WARNING invalid Kn " << argv[5] << "\n" ;
+    return TCL_ERROR;
+  }
+  
+  if (Tcl_GetDouble(interp, argv[6], &Kt) != TCL_OK) {
+    opserr << "ZeroLengthContact3D::WARNING invalid Kt " << argv[6] << "\n" ;
+    return TCL_ERROR;
+  }
+  
+  if (Tcl_GetDouble(interp, argv[7], &fs) != TCL_OK) {
+    opserr << "ZeroLengthContact3D::WARNING invalid fs " << argv[7] << "\n" ;
+    return TCL_ERROR;
+  }
+  
+  if (Tcl_GetDouble(interp, argv[8], &c) != TCL_OK) {
+    opserr << "ZeroLengthContact3D::WARNING invalid c " << argv[8] << "\n" ;
+    return TCL_ERROR;
+  }
+  
+  int dir;
+  
+  if (Tcl_GetInt(interp, argv[9], &dir) != TCL_OK) {
+    opserr << "ZeroLengthContact3D::WARNING invalid direction " << argv[9] << "\n" ;
+    return TCL_ERROR;
+  }
+  
+  //
+  // now we create the element and add it to the domain
+  //
+  
+  Element *theEle;
+  
+  double originX, originY;
+  originX=0;
+  originY=0;
+  
+  if (dir==0) {
+    if (argc == 12) {
+      if (Tcl_GetDouble(interp, argv[10], &originX) != TCL_OK) {
+	opserr << "ZeroLengthContact3D::WARNING invalid originX " << argv[9] << "\n" ;
+	return TCL_ERROR;
+      }
+      if (Tcl_GetDouble(interp, argv[11], &originY) != TCL_OK) {
+	opserr << "ZeroLengthContact3D::WARNING invalid originY " << argv[10] << "\n" ;
+	return TCL_ERROR;
+      }
+    }
+  }
+  
+  
+  theEle = new ZeroLengthContact3D(eleTag, iNode, jNode, dir, Kn, Kt,
+				   fs, c, originX, originY);
+  
+  if (theEle == 0) {
+    return TCL_ERROR;
+  }
+  
+  if (theDomain->addElement(theEle) == false) {
+    return TCL_ERROR;
+  }
+  
+  // return the memory we stole and return OK
+  return TCL_OK;
+}
+
+
+
 
 /*
 int
