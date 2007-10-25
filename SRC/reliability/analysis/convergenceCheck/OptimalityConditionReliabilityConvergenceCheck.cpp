@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-12-06 22:50:12 $
+// $Revision: 1.4 $
+// $Date: 2007-10-25 16:37:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/convergenceCheck/OptimalityConditionReliabilityConvergenceCheck.cpp,v $
 
 
@@ -55,10 +55,12 @@ OptimalityConditionReliabilityConvergenceCheck::OptimalityConditionReliabilityCo
 	criterium2 = 0.0;
 	scaleValue = pscaleValue;
 	printFlag = print;
+	logfile.open("ConvergenceCheckLog.txt", ios::out);
 }
 
 OptimalityConditionReliabilityConvergenceCheck::~OptimalityConditionReliabilityConvergenceCheck()
 {
+	logfile.close();
 }
 
 
@@ -84,18 +86,17 @@ OptimalityConditionReliabilityConvergenceCheck::check(const Vector &u, double g,
 
 	// Convergence criteria
 	criterium1 = fabs(g / scaleValue);
-	criterium2 = 1.0-1.0/(gradG.Norm()*u.Norm()) * (gradG^u);
+	criterium2 = 1.0 - fabs(1.0/(gradG.Norm()*u.Norm()) * (gradG^u));
 
 
 	// Inform user about convergence status 
-	static ofstream logfile( "SearchLog.out", ios::out );
 	char outputString[100];
 	sprintf(outputString,"check1=(%11.3e), check2=(%10.3e), dist=%16.14f",criterium1,criterium2,u.Norm());
-	if (printFlag!=0) {
+	if (printFlag != 0) {
 		opserr << outputString << endln;
 	}
 	logfile << outputString << endln;
-
+	logfile.flush();
 
 	// Return '1' if the analysis converged ('-1' otherwise)
 	if ( ( criterium1 < e1 ) && ( criterium2 < e2 ) ) {

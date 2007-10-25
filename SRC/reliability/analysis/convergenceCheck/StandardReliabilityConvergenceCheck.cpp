@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-12-06 22:50:12 $
+// $Revision: 1.4 $
+// $Date: 2007-10-25 16:37:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/convergenceCheck/StandardReliabilityConvergenceCheck.cpp,v $
 
 
@@ -58,10 +58,12 @@ StandardReliabilityConvergenceCheck::StandardReliabilityConvergenceCheck(double 
 	criterium2 = 0.0;
 	scaleValue = pscaleValue;
 	printFlag = print;
+	logfile.open("ConvergenceCheckLog.txt", ios::out);
 }
 
 StandardReliabilityConvergenceCheck::~StandardReliabilityConvergenceCheck()
 {
+	logfile.close();
 }
 
 
@@ -108,10 +110,9 @@ StandardReliabilityConvergenceCheck::check(const Vector &u, double g, const Vect
 
 
 	// Inform user about convergence status 
-	static ofstream logfile( "ConvergenceCheckLog.txt", ios::out );
 	char outputString[100];
 	sprintf(outputString,"check1=(%11.3e), check2=(%10.3e), dist=%16.14f",criterium1,criterium2,u.Norm());
-	if (printFlag!=0) {
+	if (printFlag != 0) {
 		opserr << outputString << endln;
 	}
 	logfile << outputString << endln;

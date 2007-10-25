@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-12-06 22:50:12 $
+// $Revision: 1.4 $
+// $Date: 2007-10-25 16:37:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/convergenceCheck/StandardReliabilityConvergenceCheck.h,v $
 
 
@@ -58,6 +58,7 @@ private:
 	double criterium1, criterium2;
 	double scaleValue;
 	int printFlag;
+	ofstream logfile;
 };
 
 #endif
