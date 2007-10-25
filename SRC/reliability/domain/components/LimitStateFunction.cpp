@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-02-08 01:25:47 $
+// $Revision: 1.10 $
+// $Date: 2007-10-25 20:10:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.cpp,v $
 
 
@@ -38,7 +38,7 @@
 
 LimitStateFunction::LimitStateFunction(	int passedTag, 
 									    TCL_Char *passedExpression)
-:ReliabilityDomainComponent(passedTag, LIMIT_STATE_FUNCTION)
+  :ReliabilityDomainComponent(passedTag, LIMIT_STATE_FUNCTION), lsfIndex(-1)
 {
 	strcpy(originalExpression,passedExpression);
 

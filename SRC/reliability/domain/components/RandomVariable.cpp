@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-02-17 21:27:23 $
+// $Revision: 1.6 $
+// $Date: 2007-10-25 20:10:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariable.cpp,v $
 
 
@@ -36,7 +36,7 @@
 #include <OPS_Globals.h>
 
 RandomVariable::RandomVariable(int tag, int classTag, double startVal)
-  :ReliabilityDomainComponent(tag,classTag), rvNumber(tag), startValue(startVal)
+  :ReliabilityDomainComponent(tag,classTag), rvIndex(-1), startValue(startVal)
 {
 
 }

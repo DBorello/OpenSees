@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-02-08 01:25:47 $
+// $Revision: 1.9 $
+// $Date: 2007-10-25 20:10:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.h,v $
 
 
@@ -42,8 +42,7 @@ class LimitStateFunction : public ReliabilityDomainComponent
 {
 
 public:
-	LimitStateFunction(	int tag, 
-						TCL_Char *expression);
+	LimitStateFunction(int tag, TCL_Char *expression);
 	~LimitStateFunction();
 	void Print(OPS_Stream &s, int flag =0);
 
@@ -52,6 +51,9 @@ public:
 	char *getTokenizedExpression();
 	int addExpression(char *expression);
 	int removeAddedExpression();
+
+	int setIndex(int index) {lsfIndex = index;return 0;}
+	int getIndex() {return lsfIndex;}
 
 	// FORM analysis:
 	double GFunValueAtStartPt;
@@ -85,6 +87,7 @@ public:
 protected:
 
 private:
+	int lsfIndex; // in range 0,...,nlsf-1 regardless of tag
 
 	void initializeFORMAnalysis(void);
 	void initializeSimulationAnalysis(void);

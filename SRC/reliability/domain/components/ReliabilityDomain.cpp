@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-07-12 17:26:38 $
+// $Revision: 1.10 $
+// $Date: 2007-10-25 20:10:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.cpp,v $
 
 
@@ -48,7 +48,9 @@
 #include <ParameterPositionerIter.h>
 #include <LimitStateFunctionIter.h>
 
-ReliabilityDomain::ReliabilityDomain()
+ReliabilityDomain::ReliabilityDomain():
+  numRandomVariables(0), numRandomVariablePositioners(0),
+  numParameterPositioners(0), numLimitStateFunctions(0)
 {
 	theRandomVariablesPtr = new ArrayOfTaggedObjects (256);
 	theCorrelationCoefficientsPtr = new ArrayOfTaggedObjects (256);
@@ -99,8 +101,11 @@ ReliabilityDomain::~ReliabilityDomain()
 bool
 ReliabilityDomain::addRandomVariable(RandomVariable *theRandomVariable)
 {
-	bool result = theRandomVariablesPtr->addComponent(theRandomVariable);
-	return result;
+  theRandomVariable->setIndex(numRandomVariables);
+  numRandomVariables++;
+
+  bool result = theRandomVariablesPtr->addComponent(theRandomVariable);
+  return result;
 }
 
 bool
@@ -113,8 +118,11 @@ ReliabilityDomain::addCorrelationCoefficient(CorrelationCoefficient *theCorrelat
 bool
 ReliabilityDomain::addLimitStateFunction(LimitStateFunction *theLimitStateFunction)
 {
-	bool result = theLimitStateFunctionsPtr->addComponent(theLimitStateFunction);
-	return result;
+  theLimitStateFunction->setIndex(numLimitStateFunctions);
+  numLimitStateFunctions++;
+
+  bool result = theLimitStateFunctionsPtr->addComponent(theLimitStateFunction);
+  return result;
 }
 
 bool
@@ -296,9 +304,26 @@ ReliabilityDomain::removeAllParameterPositioners(void)
 int
 ReliabilityDomain::removeRandomVariable(int tag)
 {
-	theRandomVariablesPtr->removeComponent(tag);
+  RandomVariable *theRV = (RandomVariable*) theRandomVariablesPtr->getComponentPtr(tag);
+  int indexToRemove = theRV->getIndex();
 
-	return 0;
+  // shift indices down by one
+  for (int i = indexToRemove; i < numRandomVariables-1; i++) {
+    // find rv with index equal to i+1
+    theRVIter->reset();
+    while ((theRV = (*theRVIter)()) != 0) {
+      if (theRV->getIndex() == i+1)
+	break;
+    }
+    // now set its index to i
+    theRV->setIndex(i);
+  }
+
+  // Now remove the component
+  theRandomVariablesPtr->removeComponent(tag);
+  numRandomVariables--;
+
+  return 0;
 }
 
 
@@ -313,9 +338,26 @@ ReliabilityDomain::removeCorrelationCoefficient(int tag)
 int
 ReliabilityDomain::removePerformanceFunction(int tag)
 {
-	theLimitStateFunctionsPtr->removeComponent(tag);
+  LimitStateFunction *theLSF = (LimitStateFunction*) theLimitStateFunctionsPtr->getComponentPtr(tag);
+  int indexToRemove = theLSF->getIndex();
 
-	return 0;
+  // shift indices down by one
+  for (int i = indexToRemove; i < numLimitStateFunctions-1; i++) {
+    // find rv with index equal to i+1
+    theLSFIter->reset();
+    while ((theLSF = (*theLSFIter)()) != 0) {
+      if (theLSF->getIndex() == i+1)
+	break;
+    }
+    // now set its index to i
+    theLSF->setIndex(i);
+  }
+
+  // Now remove the component
+  theLimitStateFunctionsPtr->removeComponent(tag);
+  numLimitStateFunctions--;
+
+  return 0;
 }
 
 

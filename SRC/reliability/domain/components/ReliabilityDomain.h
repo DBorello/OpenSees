@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2006-12-13 14:21:17 $
+// $Revision: 1.9 $
+// $Date: 2007-10-25 20:10:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.h,v $
 
 
@@ -88,8 +88,8 @@ public:
 	int getNumberOfSpectra(void);
 
 	// Member functions to set/get active limit-state function
-	int getTagOfActiveLimitStateFunction(void);
-	void setTagOfActiveLimitStateFunction(int tag);
+	int getTagOfActiveLimitStateFunction(void); // Probably not need anymore -- MHS
+	void setTagOfActiveLimitStateFunction(int tag); // Probably not need anymore -- MHS
 
 	// Member functions to remove single components from the domain
 	int removeRandomVariablePositioner(int tag);
@@ -116,12 +116,16 @@ private:
 	TaggedObjectStorage *theModulatingFunctionsPtr;
 	TaggedObjectStorage *theFiltersPtr;
 	TaggedObjectStorage *theSpectraPtr;
-	int tagOfActiveLimitStateFunction;
+	int tagOfActiveLimitStateFunction; // Probably not need anymore -- MHS
 
 	RandomVariableIter *theRVIter;
+	int numRandomVariables;
 	RandomVariablePositionerIter *theRVPosIter;
+	int numRandomVariablePositioners;
 	ParameterPositionerIter *theParamPosIter;
+	int numParameterPositioners;
 	LimitStateFunctionIter *theLSFIter;
+	int numLimitStateFunctions;
 };
 
 #endif
