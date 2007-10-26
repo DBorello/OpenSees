@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-02-15 23:43:56 $
+// $Revision: 1.4 $
+// $Date: 2007-10-26 04:47:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/HingeEndpointBeamIntegration.cpp,v $
 
 /*
@@ -69,10 +69,12 @@ HingeEndpointBeamIntegration::getSectionLocations(int numSections, double L,
   xi[0] = 0.0;
   xi[3] = 1.0;
 
+  static const double oneRoot3 = 1.0/sqrt(3.0);
+
   double alpha = 0.5-(lpI+lpJ)*halfOneOverL;
   double beta  = 0.5+(lpI-lpJ)*halfOneOverL;
-  xi[1] = alpha*(-1/sqrt(3.0)) + beta;
-  xi[2] = alpha*(1/sqrt(3.0)) + beta;
+  xi[1] = alpha*(-oneRoot3) + beta;
+  xi[2] = alpha*(oneRoot3) + beta;
 
   for (int i = 4; i < numSections; i++)
     xi[i] = 0.0;
@@ -203,20 +205,22 @@ HingeEndpointBeamIntegration::getLocationsDeriv(int numSections, double L,
   for (int i = 0; i < numSections; i++)
     dptsdh[i] = 0.0;
 
+  static const double oneRoot3 = 1.0/sqrt(3.0);
+
   if (parameterID == 1) { // lpI
     dptsdh[0] = 0.0;
-    dptsdh[1] = -0.5*(1.0-1/sqrt(3.0))*oneOverL + oneOverL;
-    dptsdh[2] = -0.5*(1.0+1/sqrt(3.0))*oneOverL + oneOverL;
+    dptsdh[1] = -0.5*(1.0-oneRoot3)*oneOverL + oneOverL;
+    dptsdh[2] = -0.5*(1.0+oneRoot3)*oneOverL + oneOverL;
   }
   if (parameterID == 2) { // lpJ
-    dptsdh[1] = -0.5*(1.0-1/sqrt(3.0))*oneOverL;
-    dptsdh[2] = -0.5*(1.0+1/sqrt(3.0))*oneOverL;
+    dptsdh[1] = -0.5*(1.0-oneRoot3)*oneOverL;
+    dptsdh[2] = -0.5*(1.0+oneRoot3)*oneOverL;
     dptsdh[3] = 0.0;
   }
   if (parameterID == 3) { // lpI and lpJ
     dptsdh[0] = 0.0;
-    dptsdh[1] = -(1.0-1/sqrt(3.0))*oneOverL + oneOverL;
-    dptsdh[2] = -(1.0+1/sqrt(3.0))*oneOverL + oneOverL;
+    dptsdh[1] = -(1.0-oneRoot3)*oneOverL + oneOverL;
+    dptsdh[2] = -(1.0+oneRoot3)*oneOverL + oneOverL;
     dptsdh[3] = 0.0;
   }
 
