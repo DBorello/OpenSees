@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2007-10-25 17:07:59 $
+// $Revision: 1.26 $
+// $Date: 2007-10-26 16:42:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -107,6 +107,10 @@ using std::setiosflags;
 #include <CurvaturesBySearchAlgorithm.h>
 #include <SORMAnalysis.h>
 #include <SystemAnalysis.h>
+#include <PCM.h>
+#include <IPCM.h>
+#include <SCIS.h>
+#include <MVNcdf.h>
 #include <Filter.h>
 #include <KooFilter.h>
 #include <StandardLinearOscillatorDisplacementFilter.h>
@@ -4415,35 +4419,46 @@ TclReliabilityModelBuilder_runSystemAnalysis(ClientData clientData, Tcl_Interp *
 		theSystemAnalysis = 0;
 	}
 
-
 	// Do input check
 	char theCommand[15] = "inputCheck";
 	Tcl_Eval( interp, theCommand );
+	int aType = 1;
 
-
-	if (argc != 3)  {
+	if (argc != 4)  {
 		opserr << "ERROR: Wrong number of arguments to System Reliability analysis" << endln;
+		opserr << "Want: runSystemAnalysis fileName? analysisMethod? (allInParallel | allInSeries)" << endln;
+		opserr << "analysisMethod options are: PCM, IPCM, MVN, and SCIS" << endln;
 		return TCL_ERROR;
 	}
 
+	// GET INPUT PARAMETER (string)
+	if (strcmp(argv[3],"allInParallel") == 0)
+		aType = 0;
+	else if (strcmp(argv[3],"allInSeries") == 0)
+		aType = 1;
+	else {
+		opserr << "ERROR: Invalid system reliability analysis type input:" << argv[3] << endln;
+		return TCL_ERROR;
+	}
 
 	// GET INPUT PARAMETER (string) AND CREATE THE OBJECT
-	if (strcmp(argv[2],"allInSeries") == 0) {
-
-		theSystemAnalysis = new SystemAnalysis(theReliabilityDomain, argv[1]);
-
-	}
+	if (strcmp(argv[2],"PCM") == 0)
+		theSystemAnalysis = new PCM(theReliabilityDomain, argv[1], aType);
+	else if (strcmp(argv[2],"IPCM") == 0)
+		theSystemAnalysis = new IPCM(theReliabilityDomain, argv[1], aType);
+	else if (strcmp(argv[2],"MVN") == 0)
+		theSystemAnalysis = new MVNcdf(theReliabilityDomain, argv[1], aType);
+	else if (strcmp(argv[2],"SCIS") == 0)
+		theSystemAnalysis = new SCIS(theReliabilityDomain, argv[1], aType);
 	else {
-		opserr << "ERROR: Invalid input to system reliability analysis" << endln;
+		opserr << "ERROR: Invalid system reliability analysis type input:" << argv[2] << endln;
 		return TCL_ERROR;
 	}
-
-
+	
 	if (theSystemAnalysis == 0) {
 		opserr << "ERROR: Could not create theSystemAnalysis. " << endln;
 		return TCL_ERROR;
 	}
-
 
 	// Now run the analysis
 	theSystemAnalysis->analyze();
