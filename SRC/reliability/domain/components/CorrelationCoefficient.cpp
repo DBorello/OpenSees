@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-10-26 17:37:36 $
+// $Revision: 1.7 $
+// $Date: 2007-10-26 17:44:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/CorrelationCoefficient.cpp,v $
 
 
@@ -38,11 +38,10 @@ CorrelationCoefficient::CorrelationCoefficient(int passedTag,
 							int passedRv1,
 							int passedRv2,
 							double passedCorrelation)
-  :ReliabilityDomainComponent(passedTag, CORRELATION_COEFFICIENT), ccIndex(-1)
+  :ReliabilityDomainComponent(passedTag, CORRELATION_COEFFICIENT),
+   rv1(passedRv1), rv2(passedRv2), correlation(passedCorrelation), ccIndex(-1)
 {
-	rv1 = passedRv1;
-	rv2 = passedRv2;
-	correlation = passedCorrelation;
+
 }
 
 
