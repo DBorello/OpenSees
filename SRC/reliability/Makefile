@@ -49,6 +49,7 @@ RELIABILITY_OBJS = $(FE)/reliability/analysis/analysis/FORMAnalysis.o \
 		$(FE)/reliability/analysis/transformation/NatafProbabilityTransformation.o \
 		$(FE)/reliability/analysis/transformation/ProbabilityTransformation.o \
 		$(FE)/reliability/domain/components/CorrelationCoefficient.o \
+		$(FE)/reliability/domain/components/CorrelationCoefficientIter.o \
 		$(FE)/reliability/domain/components/ParameterPositioner.o \
 		$(FE)/reliability/domain/components/ParameterPositionerIter.o \
 		$(FE)/reliability/domain/components/LimitStateFunction.o \

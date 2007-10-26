@@ -3,7 +3,7 @@
 **          Pacific Earthquake Engineering Research Center            **
 **                                                                    **
 **                                                                    **
-** (C) Copyright 2001, The Regents of the University of California    **
+** (C) Copyright 1999, The Regents of the University of California    **
 ** All Rights Reserved.                                               **
 **                                                                    **
 ** Commercial use of this program without express permission of the   **
@@ -16,63 +16,53 @@
 **   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
-** Reliability module developed by:                                   **
-**   Terje Haukaas (haukaas@ce.berkeley.edu)                          **
-**   Armen Der Kiureghian (adk@ce.berkeley.edu)                       **
-**                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
+// $Revision: 1.1 $
 // $Date: 2007-10-26 17:37:36 $
-// $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/CorrelationCoefficient.cpp,v $
+// $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/CorrelationCoefficientIter.cpp,v $
+
+// Description: This file contains the method definitions for class 
+// CorrelationCoefficientIter. CorrelationCoefficientIter is a class for iterating through the 
+// elements of a domain. 
+
+#include <CorrelationCoefficientIter.h>
+
+#include <Element.h>
+#include <TaggedObjectIter.h>
+#include <TaggedObjectStorage.h>
 
 
-//
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
-//
+// CorrelationCoefficientIter(SingleDomain &theDomain):
+//	constructor that takes the model, just the basic iter
 
-#include <CorrelationCoefficient.h>
-#include <classTags.h>
-
-CorrelationCoefficient::CorrelationCoefficient(int passedTag,
-							int passedRv1,
-							int passedRv2,
-							double passedCorrelation)
-  :ReliabilityDomainComponent(passedTag, CORRELATION_COEFFICIENT), ccIndex(-1)
-{
-	rv1 = passedRv1;
-	rv2 = passedRv2;
-	correlation = passedCorrelation;
-}
-
-
-CorrelationCoefficient::~CorrelationCoefficient()
+CorrelationCoefficientIter::CorrelationCoefficientIter(TaggedObjectStorage *theStorage)
+  :myIter(theStorage->getComponents())
 {
 }
 
 
+CorrelationCoefficientIter::~CorrelationCoefficientIter()
+{
+}    
 
 void
-CorrelationCoefficient::Print(OPS_Stream &s, int flag)  
+CorrelationCoefficientIter::reset(void)
 {
-}
+    myIter.reset();
+}    
 
 
-
-int
-CorrelationCoefficient::getRv1()
+CorrelationCoefficient *
+CorrelationCoefficientIter::operator()(void)
 {
-	return rv1;
-}
-
-int
-CorrelationCoefficient::getRv2()
-{
-	return rv2;
-}
-
-double
-CorrelationCoefficient::getCorrelation()
-{
-	return correlation;
+    // check if we still have elements in the model
+    // if not return 0, indicating we are done
+    TaggedObject *theComponent = myIter();
+    if (theComponent == 0)
+	return 0;
+    else {
+	CorrelationCoefficient *result = (CorrelationCoefficient *)theComponent;
+	return result;
+    }
 }

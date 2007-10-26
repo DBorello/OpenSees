@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-10-25 20:10:21 $
+// $Revision: 1.10 $
+// $Date: 2007-10-26 17:37:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.h,v $
 
 
@@ -49,6 +49,7 @@ class RandomVariableIter;
 class RandomVariablePositionerIter;
 class ParameterPositionerIter;
 class LimitStateFunctionIter;
+class CorrelationCoefficientIter;
 
 class ReliabilityDomain
 {
@@ -104,6 +105,7 @@ public:
 	RandomVariablePositionerIter &getRandomVariablePositioners(void);
 	ParameterPositionerIter &getParameterPositioners(void);
 	LimitStateFunctionIter &getLimitStateFunctions(void);
+	CorrelationCoefficientIter &getCorrelationCoefficients(void);
 
 protected:
 
@@ -126,6 +128,8 @@ private:
 	int numParameterPositioners;
 	LimitStateFunctionIter *theLSFIter;
 	int numLimitStateFunctions;
+	CorrelationCoefficientIter *theCCIter;
+	int numCorrelationCoefficients;
 };
 
 #endif

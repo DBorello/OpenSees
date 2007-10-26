@@ -3,7 +3,7 @@
 **          Pacific Earthquake Engineering Research Center            **
 **                                                                    **
 **                                                                    **
-** (C) Copyright 2001, The Regents of the University of California    **
+** (C) Copyright 1999, The Regents of the University of California    **
 ** All Rights Reserved.                                               **
 **                                                                    **
 ** Commercial use of this program without express permission of the   **
@@ -16,63 +16,41 @@
 **   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
-** Reliability module developed by:                                   **
-**   Terje Haukaas (haukaas@ce.berkeley.edu)                          **
-**   Armen Der Kiureghian (adk@ce.berkeley.edu)                       **
-**                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
+// $Revision: 1.1 $
 // $Date: 2007-10-26 17:37:36 $
-// $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/CorrelationCoefficient.cpp,v $
+// $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/CorrelationCoefficientIter.h,v $
 
+// Description: This file contains the class definition for RandomVariableIter.
+// CorrelationCoefficientIter is an iter for returning the elements of an object of class
+// SingleDomain. CorrelationCoefficientIters must be written for each subclass of 
+// SingleDomain, wherin the elements are stored differently.
 
-//
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
-//
+#ifndef CorrelationCoefficientIter_h
+#define CorrelationCoefficientIter_h
 
-#include <CorrelationCoefficient.h>
-#include <classTags.h>
+class TaggedObjectStorage;
+class TaggedObjectIter;
 
-CorrelationCoefficient::CorrelationCoefficient(int passedTag,
-							int passedRv1,
-							int passedRv2,
-							double passedCorrelation)
-  :ReliabilityDomainComponent(passedTag, CORRELATION_COEFFICIENT), ccIndex(-1)
+class CorrelationCoefficient;
+
+class CorrelationCoefficientIter
 {
-	rv1 = passedRv1;
-	rv2 = passedRv2;
-	correlation = passedCorrelation;
-}
+  public:
+    CorrelationCoefficientIter(TaggedObjectStorage *theStorage);
+    virtual ~CorrelationCoefficientIter();
 
+    virtual void reset(void);
+    virtual CorrelationCoefficient *operator()(void);
+    
+  private:
+    TaggedObjectIter &myIter;
+};
 
-CorrelationCoefficient::~CorrelationCoefficient()
-{
-}
-
-
-
-void
-CorrelationCoefficient::Print(OPS_Stream &s, int flag)  
-{
-}
+#endif
 
 
 
-int
-CorrelationCoefficient::getRv1()
-{
-	return rv1;
-}
 
-int
-CorrelationCoefficient::getRv2()
-{
-	return rv2;
-}
 
-double
-CorrelationCoefficient::getCorrelation()
-{
-	return correlation;
-}

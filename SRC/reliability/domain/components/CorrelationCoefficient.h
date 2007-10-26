@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-10-27 23:04:38 $
+// $Revision: 1.6 $
+// $Date: 2007-10-26 17:37:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/CorrelationCoefficient.h,v $
 
 
@@ -49,6 +49,8 @@ public:
 	
 	void Print(OPS_Stream &s, int flag =0);
 
+	int setIndex(int index) {ccIndex = index;return 0;}
+	int getIndex() {return ccIndex;}
 
 protected:
 
@@ -57,7 +59,7 @@ private:
 	int rv2;
 	double correlation;
 
-
+	int ccIndex; // in range 0,...,ncc-1 regardless of tag
 };
 
 #endif

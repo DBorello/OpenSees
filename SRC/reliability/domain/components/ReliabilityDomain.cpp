@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-10-25 20:10:21 $
+// $Revision: 1.11 $
+// $Date: 2007-10-26 17:37:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.cpp,v $
 
 
@@ -47,10 +47,12 @@
 #include <RandomVariablePositionerIter.h>
 #include <ParameterPositionerIter.h>
 #include <LimitStateFunctionIter.h>
+#include <CorrelationCoefficientIter.h>
 
 ReliabilityDomain::ReliabilityDomain():
   numRandomVariables(0), numRandomVariablePositioners(0),
-  numParameterPositioners(0), numLimitStateFunctions(0)
+  numParameterPositioners(0), numLimitStateFunctions(0),
+  numCorrelationCoefficients(0)
 {
 	theRandomVariablesPtr = new ArrayOfTaggedObjects (256);
 	theCorrelationCoefficientsPtr = new ArrayOfTaggedObjects (256);
@@ -66,6 +68,7 @@ ReliabilityDomain::ReliabilityDomain():
 	theRVPosIter = new RandomVariablePositionerIter(theRandomVariablePositionersPtr);
 	theParamPosIter = new ParameterPositionerIter(theParameterPositionersPtr);
 	theLSFIter = new LimitStateFunctionIter(theLimitStateFunctionsPtr);
+	theCCIter = new CorrelationCoefficientIter(theCorrelationCoefficientsPtr);
 }
 
 ReliabilityDomain::~ReliabilityDomain()
@@ -95,6 +98,8 @@ ReliabilityDomain::~ReliabilityDomain()
 	  delete theParamPosIter;
 	if (theLSFIter != 0)
 	  delete theLSFIter;
+	if (theCCIter != 0)
+	  delete theCCIter;
 }
 
 
@@ -111,8 +116,11 @@ ReliabilityDomain::addRandomVariable(RandomVariable *theRandomVariable)
 bool
 ReliabilityDomain::addCorrelationCoefficient(CorrelationCoefficient *theCorrelationCoefficient)
 {
-	bool result = theCorrelationCoefficientsPtr->addComponent(theCorrelationCoefficient);
-	return result;
+  theCorrelationCoefficient->setIndex(numCorrelationCoefficients);
+  numCorrelationCoefficients++;
+
+  bool result = theCorrelationCoefficientsPtr->addComponent(theCorrelationCoefficient);
+  return result;
 }
 
 bool
@@ -188,6 +196,13 @@ ReliabilityDomain::getLimitStateFunctions(void)
 {
   theLSFIter->reset();
   return *theLSFIter;
+}
+
+CorrelationCoefficientIter &
+ReliabilityDomain::getCorrelationCoefficients(void)
+{
+  theCCIter->reset();
+  return *theCCIter;
 }
 
 RandomVariable *
@@ -330,9 +345,26 @@ ReliabilityDomain::removeRandomVariable(int tag)
 int
 ReliabilityDomain::removeCorrelationCoefficient(int tag)
 {
-	theCorrelationCoefficientsPtr->removeComponent(tag);
+  CorrelationCoefficient *theCC = (CorrelationCoefficient*) theCorrelationCoefficientsPtr->getComponentPtr(tag);
+  int indexToRemove = theCC->getIndex();
 
-	return 0;
+  // shift indices down by one
+  for (int i = indexToRemove; i < numCorrelationCoefficients-1; i++) {
+    // find rv with index equal to i+1
+    theCCIter->reset();
+    while ((theCC = (*theCCIter)()) != 0) {
+      if (theCC->getIndex() == i+1)
+	break;
+    }
+    // now set its index to i
+    theCC->setIndex(i);
+  }
+
+  // Now remove the component
+  theCorrelationCoefficientsPtr->removeComponent(tag);
+  numCorrelationCoefficients--;
+
+  return 0;
 }
 
 int

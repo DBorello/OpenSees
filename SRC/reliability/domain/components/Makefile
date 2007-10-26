@@ -1,6 +1,6 @@
 include ../../../../Makefile.def
 
-OBJS       = 	CorrelationCoefficient.o \
+OBJS       = 	CorrelationCoefficient.o CorrelationCoefficientIter.o \
 		LimitStateFunction.o LimitStateFunctionIter.o \
 		RandomVariable.o RandomVariableIter.o \
 		RandomVariablePositioner.o RandomVariablePositionerIter.o \
