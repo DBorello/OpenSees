@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2006-09-05 22:57:36 $
+// $Revision: 1.3 $
+// $Date: 2007-10-26 04:50:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/DistHingeIntegration.cpp,v $
 
 #include <DistHingeIntegration.h>
@@ -35,8 +35,8 @@
 DistHingeIntegration::DistHingeIntegration(double lpi,
 					   double lpj,
 					   BeamIntegration &bi):
-  BeamIntegration(BEAM_INTEGRATION_TAG_HingeMidpoint),
-  lpI(lpi), lpJ(lpj), beamInt(0)
+  BeamIntegration(BEAM_INTEGRATION_TAG_DistHinge),
+  lpI(lpi), lpJ(lpj), beamInt(0), parameterID(0)
 {
   beamInt = bi.getCopy();
   if (beamInt == 0) {
@@ -45,8 +45,8 @@ DistHingeIntegration::DistHingeIntegration(double lpi,
 }
 
 DistHingeIntegration::DistHingeIntegration():
-  BeamIntegration(BEAM_INTEGRATION_TAG_HingeMidpoint),
-  lpI(0.0), lpJ(0.0), beamInt(0)
+  BeamIntegration(BEAM_INTEGRATION_TAG_DistHinge),
+  lpI(0.0), lpJ(0.0), beamInt(0), parameterID(0)
 {
 
 }
@@ -61,7 +61,7 @@ void
 DistHingeIntegration::getSectionLocations(int numSections, double L,
 					  double *xi)
 {
-  int numPerHinge = numSections/2;
+  int numPerHinge = (numSections-2)/2;
 
   beamInt->getSectionLocations(numPerHinge, L, xi);
 
@@ -70,18 +70,28 @@ DistHingeIntegration::getSectionLocations(int numSections, double L,
   
   // Map from [0,L] to [L-lpJ,L]
   for (int i = 0; i < numPerHinge; i++) {
-    xi[numSections-1-i] = 1.0-betaJ*xi[i];
+    xi[numSections-3-i] = 1.0-betaJ*xi[i];
     xi[i] *= betaI;
   }
 
-  opserr << "DistHingeIntegration::getSectionLocations -- implementation for interior not yet finished" << endln;
+  static const double oneRoot3 = 1.0/sqrt(3.0);
+
+  double alpha = 0.5*(1.0-betaI-betaJ);
+  double beta  = 0.5*(1.0+betaI-betaJ);
+  xi[numSections-2] = alpha*(-oneRoot3) + beta;
+  xi[numSections-1] = alpha*(oneRoot3) + beta;
+
+  //for (int i = 0; i < numSections; i++) {
+  //  opserr << xi[i] << ' ';
+  //}
+  //opserr << endln;
 }
 
 void
 DistHingeIntegration::getSectionWeights(int numSections, double L,
 					double *wt)
 {
-  int numPerHinge = numSections/2;
+  int numPerHinge = (numSections-2)/2;
 
   beamInt->getSectionWeights(numPerHinge, L, wt);
 
@@ -90,11 +100,17 @@ DistHingeIntegration::getSectionWeights(int numSections, double L,
   
   // Map from [0,lpI] to [L-lpJ,L]
   for (int i = 0; i < numPerHinge; i++) {
-    wt[numSections-1-i] = betaJ*wt[i];
+    wt[numSections-3-i] = betaJ*wt[i];
     wt[i] *= betaI;
   }
 
-  opserr << "DistHingeIntegration::getSectionWeights -- implementation for interior not yet finished" << endln;
+  wt[numSections-2] = 0.5*(1.0-betaI-betaJ);
+  wt[numSections-1] = wt[numSections-2];
+
+  //for (int i = 0; i < numSections; i++) {
+  //  opserr << wt[i] << ' ';
+  //}
+  //opserr << endln;
 }
 
 BeamIntegration*
@@ -201,7 +217,7 @@ void
 DistHingeIntegration::getLocationsDeriv(int numSections, double L,
 					double dLdh, double *dptsdh)
 {
-  int numPerHinge = numSections/2;
+  int numPerHinge = (numSections-2)/2;
 
   double oneOverL = 1/L;
   double betaI = lpI*oneOverL;
@@ -209,21 +225,23 @@ DistHingeIntegration::getLocationsDeriv(int numSections, double L,
 
   beamInt->getSectionLocations(numPerHinge, L, dptsdh);
 
+  opserr << "DistHingeIntegration::getLocationsDeriv -- implementation for interior not yet finished" << endln;
+
   if (parameterID == 1) { // lpI
     for (int i = 0; i < numPerHinge; i++) {
       dptsdh[i] = oneOverL*dptsdh[i];
-      dptsdh[numSections-1-i] = 0.0;
+      dptsdh[numSections-3-i] = 0.0;
     }
   }
   else if (parameterID == 2) { // lpJ
     for (int i = 0; i < numPerHinge; i++) {
-      dptsdh[numSections-1-i] = -oneOverL*dptsdh[i];
+      dptsdh[numSections-3-i] = -oneOverL*dptsdh[i];
       dptsdh[i] = 0.0;
     }
   }
   else if (dLdh != 0.0) {
     for (int i = 0; i < numPerHinge; i++) {
-      dptsdh[numSections-1-i] = betaJ*oneOverL*dLdh*dptsdh[i];
+      dptsdh[numSections-3-i] = betaJ*oneOverL*dLdh*dptsdh[i];
       dptsdh[i] = -betaI*oneOverL*dLdh*dptsdh[i];
     }
   }
@@ -239,7 +257,7 @@ void
 DistHingeIntegration::getWeightsDeriv(int numSections, double L,
 					double dLdh, double *dwtsdh)
 {
-  int numPerHinge = numSections/2;
+  int numPerHinge = (numSections-2)/2;
 
   double oneOverL = 1/L;
   double betaI = lpI*oneOverL;
@@ -247,21 +265,23 @@ DistHingeIntegration::getWeightsDeriv(int numSections, double L,
 
   beamInt->getSectionWeights(numPerHinge, L, dwtsdh);
 
+  opserr << "DistHingeIntegration::getWeightsDeriv -- implementation for interior not yet finished" << endln;
+
   if (parameterID == 1) { // lpI
     for (int i = 0; i < numPerHinge; i++) {
       dwtsdh[i] = oneOverL*dwtsdh[i];
-      dwtsdh[numSections-1-i] = 0.0;
+      dwtsdh[numSections-3-i] = 0.0;
     }
   }
   else if (parameterID == 2) { // lpJ
     for (int i = 0; i < numPerHinge; i++) {
-      dwtsdh[numSections-1-i] = oneOverL*dwtsdh[i];
+      dwtsdh[numSections-3-i] = oneOverL*dwtsdh[i];
       dwtsdh[i] = 0.0;
     }
   }
   else if (dLdh != 0.0) {
     for (int i = 0; i < numPerHinge; i++) {
-      dwtsdh[numSections-1-i] = -betaJ*oneOverL*dLdh*dwtsdh[i];
+      dwtsdh[numSections-3-i] = -betaJ*oneOverL*dLdh*dwtsdh[i];
       dwtsdh[i] = -betaI*oneOverL*dLdh*dwtsdh[i];
     }
   }
