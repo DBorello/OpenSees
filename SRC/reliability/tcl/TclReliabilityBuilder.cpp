@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.27 $
-// $Date: 2007-10-26 17:08:27 $
+// $Revision: 1.28 $
+// $Date: 2007-10-26 17:50:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -3968,7 +3968,6 @@ TclReliabilityModelBuilder_addStartPoint(ClientData clientData, Tcl_Interp *inte
 		}
 
 		// Loop through file to see how many entries there are
-		int numRVs = theReliabilityDomain->getNumberOfRandomVariables();
 		double dummy;
 		int numEntries = 0;
 		while (inputFile >> dummy) {
@@ -3978,7 +3977,7 @@ TclReliabilityModelBuilder_addStartPoint(ClientData clientData, Tcl_Interp *inte
 			opserr << "ERROR: No entries in the file read by startPoint!" << endln;
 			return TCL_ERROR;
 		}
-		if (numEntries != numRVs) {
+		if (numEntries != nrv) {
 			opserr << "ERROR: Wrong number of entries in the file read by startPoint." << endln;
 			return TCL_ERROR;
 		}
@@ -4557,15 +4556,12 @@ TclReliabilityModelBuilder_runSamplingAnalysis(ClientData clientData, Tcl_Interp
 				if (theStartPoint == 0) {
 					theStartPoint = new Vector(nrv);
 				}
-				for ( int i=1; i<=nrv; i++ )
-				{
-					aRandomVariable = theReliabilityDomain->getRandomVariablePtr(i);
-					if (aRandomVariable == 0) {
-						opserr << "ERROR: when creating theStartPoint - could not find" << endln
-							<< " random variable with tag #" << i << "." << endln;
-						return TCL_ERROR;
-					}
-					(*theStartPoint)(i-1) = aRandomVariable->getMean();
+				RandomVariableIter rvIter =
+				  theReliabilityDomain->getRandomVariables();
+				//for ( int i=1; i<=nrv; i++ ) {
+				while ((aRandomVariable = rvIter()) != 0) {
+				  int i = aRandomVariable->getIndex();
+				  (*theStartPoint)(i) = aRandomVariable->getMean();
 				}
 				opserr << "NOTE: The startPoint is set to the Mean due to the selected sampling analysis type." << endln;
 			}
