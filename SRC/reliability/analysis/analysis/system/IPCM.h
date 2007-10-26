@@ -22,60 +22,40 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-10-26 15:55:35 $
-// $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.h,v $
+// $Revision: 1.1 $
+// $Date: 2007-10-26 15:55:14 $
+// $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/system/IPCM.h,v $
 
 
 //
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
-#ifndef SystemAnalysis_h
-#define SystemAnalysis_h
+#ifndef IPCM_h
+#define IPCM_h
 
-#include <ReliabilityAnalysis.h>
+#include <SystemAnalysis.h>
 #include <ReliabilityDomain.h>
-#include <RandomNumberGenerator.h>
-
-#include <Matrix.h>
 #include <Vector.h>
+#include <Matrix.h>
 
-class SystemAnalysis : public ReliabilityAnalysis
+class IPCM : public SystemAnalysis
 {
 
 public:
-	SystemAnalysis(ReliabilityDomain *passedReliabilityDomain);
-	virtual ~SystemAnalysis();
-	virtual int analyze(void) =0;
-	
-	int		computeBounds(int);
-	double	getLowerBound();
-	double	getUpperBound();
-	int		getNumberLimitStateFunctions();
-	int		getNumberRandomVariables();
-	const Vector getBeta();
-	const Matrix getRho();
+	IPCM(ReliabilityDomain *passedReliabilityDomain,
+				   TCL_Char *fileName, int analysisType);
+	~IPCM();
+
+	int		analyze(void);
 
 protected:
-	double twoComponent(double, double, double);
 
 private:
-   	int		initialize(void);
-	long int factorial(int);
-	const Vector arrange(double, RandomNumberGenerator*);
-	double functionToIntegrate(double, double, double);
-	double Simpson(double, double, double, double, double);
+	double	IPCMfunc(const Vector&, const Matrix&, double);
+	char fileName[256];
+    int analysisType;
 	
-	int numLsf;
-	int nrv;
-	double minLowerBound;
-	double maxUpperBound;
-	ReliabilityDomain *theReliabilityDomain;
-	Vector *allBetas;
-	Matrix *rhos;
-	Vector *allPf1s;
-	Matrix *Pmn;
 };
 
 #endif

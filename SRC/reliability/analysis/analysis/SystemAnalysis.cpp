@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-12-06 22:32:23 $
+// $Revision: 1.8 $
+// $Date: 2007-10-26 15:55:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.cpp,v $
 
 
@@ -35,78 +35,59 @@
 #include <ReliabilityDomain.h>
 #include <ReliabilityAnalysis.h>
 #include <LimitStateFunction.h>
-#include <MatrixOperations.h>
+#include <RandomNumberGenerator.h>
+#include <CStdLibRandGenerator.h>
 #include <NormalRV.h>
-#include <Vector.h>
-#include <Matrix.h>
+
 #include <math.h>
-#include <string.h>
+#include <float.h>
+#include <time.h>
+#include <stdlib.h>
 
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-using std::ifstream;
-using std::ios;
-using std::setw;
-using std::setprecision;
-using std::setiosflags;
-
-SystemAnalysis::SystemAnalysis(ReliabilityDomain *passedReliabilityDomain,
-							   TCL_Char *passedFileName)
-:ReliabilityAnalysis()
+SystemAnalysis::SystemAnalysis(ReliabilityDomain *passedReliabilityDomain)
+	:ReliabilityAnalysis()
 {
 	theReliabilityDomain = passedReliabilityDomain;
-	strcpy(fileName,passedFileName);
+	
+	minLowerBound = 1.0;
+	maxUpperBound = 0.0;
+	
+	initialize();
 }
-
 
 SystemAnalysis::~SystemAnalysis()
 {
-  
+	if (allBetas != 0)
+		delete allBetas;
+	if (rhos != 0 )
+		delete rhos;
+	if (allPf1s != 0)
+		delete allPf1s;
+	if (Pmn != 0 )
+		delete Pmn;
 }
 
 
-double 
-SystemAnalysis::getLowerBound(void)
-{
-	return minLowerBound;
-}
-
-
-
-double 
-SystemAnalysis::getUpperBound(void)
-{
-	return maxUpperBound;
-}
-
-
-
-int 
-SystemAnalysis::analyze(void)
+int
+SystemAnalysis::initialize()
 {
 
-	// Alert the user that the system analysis has started
-	opserr << "System Reliability Analysis is running ... " << endln;
-
-	
 	// Initial declarations
 	double beta;
 	double pf1;
 	Vector alpha;
 	LimitStateFunction *theLimitStateFunction;
-	NormalRV aStdNormalRV(1, 0.0, 1.0, 0.0);
 	int i, j, k, m, n;
 
 	// Number of limit-state functions
-	int numLsf = theReliabilityDomain->getNumberOfLimitStateFunctions();
+	numLsf = theReliabilityDomain->getNumberOfLimitStateFunctions();
 
 	// Number of random variables
-	int nrv = theReliabilityDomain->getNumberOfRandomVariables();
+	nrv = theReliabilityDomain->getNumberOfRandomVariables();
 
 	// Allocate vectors to store ALL the betas and alphas
-	Vector allBetas(numLsf);
-	Vector allPf1s(numLsf);
+	allBetas = new Vector(numLsf);
+	allPf1s = new Vector(numLsf);
 	Matrix allAlphas(nrv,numLsf);
 
 	// Loop over number of limit-state functions and collect results
@@ -120,165 +101,190 @@ SystemAnalysis::analyze(void)
 
 		// Put FORM results into vector of all betas and alphas
 		// Note that the first index of 'allAlphas' here denote 'nrv'
-		allBetas(i) = beta;
-		allPf1s(i) = pf1;
+		(*allBetas)(i) = beta;
+		(*allPf1s)(i) = pf1;
 		for (j=0; j<nrv; j++ ) {
 			allAlphas(j,i) = alpha(j);
 		}
 	}
-
-
+	
 	// Compute vector of 'rhos', that is, dot products between the alphas
-	// Note that only the upper diagonal is covered
-	Matrix rhos(numLsf,numLsf);
+	rhos = new Matrix(numLsf,numLsf);
+	
 	double dotProduct;
 	for (i=0; i<numLsf; i++ ) {
 		for (j=i+1; j<numLsf; j++ ) {
-			dotProduct = 1.0;
+			dotProduct = 0.0;
 			for (k=0; k<nrv; k++ ) {
-				dotProduct=dotProduct*allAlphas(k,i)*allAlphas(k,j);
+				dotProduct += allAlphas(k,i)*allAlphas(k,j);
 			}
-			rhos(i,j) = dotProduct;
+			(*rhos)(i,j) = dotProduct;
+			(*rhos)(j,i) = dotProduct;
 		}
 	}
 
-
-	// Compute the bi-variate normal distribution for all the pairs
-	double beta1, beta2, integral;
-	double a = 0.0;
-	double h, fa, fb, sum_fx2j, sum_fx2j_1;
-	int n_2;
-	Matrix Pmn(numLsf,numLsf);
-	for (m=0; m<numLsf; m++ ) {
-		for (n=m+1; n<numLsf; n++ ) {
-			beta1 = allBetas(m);
-			beta2 = allBetas(n);
-			// Composite Simpson's numerical integration
-			n_2 = 400; // (half the number of intervals)
-			h = rhos(m,n)/(2.0*n_2);
-			fa = functionToIntegrate(a,beta1,beta2);
-			fb = functionToIntegrate(rhos(m,n),beta1,beta2);
-			sum_fx2j = 0.0;
-			sum_fx2j_1 = 0.0;
-			for (int j=1;  j<=n_2;  j++) {
-				sum_fx2j   = sum_fx2j   + functionToIntegrate((a+(j*2.0)*h)    ,beta1,beta2);
-				sum_fx2j_1 = sum_fx2j_1 + functionToIntegrate((a+(j*2.0-1.0)*h),beta1,beta2);
-			}
-			sum_fx2j = sum_fx2j - fb;
-			integral = h/3.0*(fa + 2.0*sum_fx2j + 4.0*sum_fx2j_1 + fb);
-			Pmn(m,n) = aStdNormalRV.getCDFvalue(-beta1)
-				*aStdNormalRV.getCDFvalue(-beta2) + integral;
-		}
-	}
-
-	// Arrange-envelope
-	minLowerBound = 1.0;
-	maxUpperBound = 0.0;
-	Vector arrangement(numLsf);
-	Matrix Pmn_arranged = Pmn;
-	Vector allPf1s_arranged = allPf1s;
-
-	for (i=0; i<(factorial(numLsf)); i++) {
-
-		arrangement = arrange(numLsf);
-
-		for (j=0; j<numLsf; j++) {
-			allPf1s_arranged(j) = allPf1s(((int)arrangement(j)-1));
-		}
-		for (j=0; j<numLsf; j++) {
-			for (k=0; k<numLsf; k++) {
-				Pmn_arranged(j,k) = Pmn(((int)arrangement(j)-1),((int)arrangement(k)-1));
-			}
-		}
-
-		// Compute lower probability bound
-		double lowerBound = allPf1s_arranged(0);
-		double temp1, temp2;
-		for (m=2; m<=numLsf; m++) {
-			temp1 = 0.0;
-			for (n=1; n<=n-1; n++) {
-				temp1 += Pmn_arranged(m-1,n-1);
-			}
-			temp2 = allPf1s_arranged(m-1) - temp1;
-			if (temp2 < 0.0) {
-				temp2 = 0.0;
-			}
-			lowerBound += temp2;
-		}
-
-
-		// Compute upper probability bound
-		double upperBound = allPf1s_arranged(0);
-		double maximus;
-		for (m=2; m<=numLsf; m++) {
-			maximus = 0.0;
-			for (n=1; n<=m-1; n++) {
-				if (Pmn_arranged(m-1,n-1) > maximus) {
-					maximus = Pmn(m-1,n-1);
-				}
-			}
-			upperBound += allPf1s_arranged(m-1) - maximus;
-		}
-
-		// Update bounds
-		if (lowerBound < minLowerBound) {
-			minLowerBound = lowerBound;
-		}
-		if (upperBound > maxUpperBound) {
-			maxUpperBound = upperBound;
-		}
-	}
-
-
-	// Print results  (should do this over all defined systems)
-	ofstream outputFile( fileName, ios::out );
+	opserr << "B vector:" << *allBetas;
+	opserr << "R matrix:" << *rhos;
 	
-	outputFile << "#######################################################################" << endln;
-	outputFile << "#                                                                     #" << endln;
-	outputFile << "#  SYSTEM ANALYSIS RESULTS                                            #" << endln;
-	outputFile << "#                                                                     #" << endln;
-	outputFile.setf(ios::scientific, ios::floatfield);
-	outputFile << "#  Lower probability bound: ........................... " 
-		<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<minLowerBound
-		<< "  #" << endln;
-	outputFile << "#  Upper probability bound: ........................... " 
-		<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<maxUpperBound
-		<< "  #" << endln;
-	outputFile << "#                                                                     #" << endln;
-	outputFile << "#  Warning: All permutations of the limit-state functions should      #" << endln;
-	outputFile << "#           be checked. Currently, this is not done automatically.    #" << endln;
-	outputFile << "#           The user is therefore advised to do this manually.        #" << endln;
-	outputFile << "#           Contact the developer for further details/plans.          #" << endln;
-	outputFile << "#                                                                     #" << endln;
-	outputFile << "#######################################################################" << endln << endln << endln;
-
-	outputFile.close();
-
-
-	// INform the user on screen
-	opserr << "System reliability analysis completed." <<endln;
-
+	// Compute the bi-variate parallel probability for all the pairs
+	// Note this is upper-diagonal only
+	Pmn = new Matrix(numLsf,numLsf);
+	for (m=0; m<numLsf; m++ ) {
+		for (n=m+1; n<numLsf; n++ )
+			(*Pmn)(m,n) = twoComponent(-(*allBetas)(m),-(*allBetas)(n),(*rhos)(m,n));
+	}
+	
 	return 0;
 }
 
 
+int
+SystemAnalysis::computeBounds(int aType)
+{	
+	double estimate, lowerBound, upperBound;
+	int i, j, result;
+			
+	if (aType == 0) {
+		// parallel system
+		
+		// uni-component lower bound from Boole parallel system
+		estimate = 0;
+		for (i=0; i<numLsf; i++)
+			estimate += (*allPf1s)(i);
+		estimate -= numLsf-1;
+		if (estimate > 0)
+			minLowerBound = estimate;
+
+		// uni-component upper bound from Boole parallel system
+		upperBound = (*allPf1s)(0);
+		for (i=1; i<numLsf; i++) {
+			if ((*allPf1s)(i) < upperBound)
+				upperBound = (*allPf1s)(i);
+		}
+		maxUpperBound = upperBound;
+
+		if (minLowerBound < 0.0)
+			minLowerBound = 0;
+		if (maxUpperBound > 1.0)
+			maxUpperBound = 1;
+		
+	} else if (aType == 1) {
+		// series system
+
+		// use simulation approach to limit factorial possibilities for the ordering
+		RandomNumberGenerator *theRandomNumberGenerator = new CStdLibRandGenerator();
+		result = theRandomNumberGenerator->generate_nIndependentUniformNumbers(numLsf,0,numLsf-1,time(NULL));
+		if (result < 0)
+			opserr << "SystemAnalysis::initialize() - could not generate random numbers for simulation." << endln;
+
+		long int numPerms = factorial(numLsf+1);
+		int multiplicationFactor = 500;
+		if (numPerms > multiplicationFactor*numLsf)
+			numPerms = multiplicationFactor*numLsf;
+		Vector permute(numLsf);
+		
+		for (long int arr = 1; arr <= numPerms; arr++ ) {
+			permute = arrange(numLsf,theRandomNumberGenerator);
+			
+			// bi-component lower bound from KHD series system
+			lowerBound = (*allPf1s)(permute(0));
+			for (i=2; i <= numLsf; i++) {
+				estimate = (*allPf1s)(permute(i-1));
+				
+				for (j=1; j <= i-1; j++)
+					estimate -= (*Pmn)(permute(i-1),permute(j-1));
+				
+				if (estimate > 0)
+					lowerBound += estimate;
+			}
+
+			// bi-component upper bound from KHD series system
+			upperBound = (*allPf1s)(permute(0));
+			for (i=2; i<= numLsf; i++) {
+				estimate = 0;
+				
+				for (j=1; j < i; j++) {
+					if ((*Pmn)(permute(i-1),permute(j-1)) > estimate)
+						estimate = (*Pmn)(permute(i-1),permute(j-1));
+				}
+				
+				upperBound += (*allPf1s)(permute(i-1)) - estimate;
+			}
+
+			// Update bounds
+			if (lowerBound < minLowerBound && lowerBound >= 0.0)
+				minLowerBound = lowerBound;
+			if (upperBound > maxUpperBound && upperBound <= 1.0)
+				maxUpperBound = upperBound;
+		}
+		
+		delete theRandomNumberGenerator;
+	
+	} else {
+	
+	}
+	
+	return 0;
+		
+}
+
+double 
+SystemAnalysis::getLowerBound(void)
+{
+	return minLowerBound;
+}
+
+
+double 
+SystemAnalysis::getUpperBound(void)
+{
+	return maxUpperBound;
+}
+
+int 
+SystemAnalysis::getNumberLimitStateFunctions(void)
+{
+	return numLsf;
+}
+
+int 
+SystemAnalysis::getNumberRandomVariables(void)
+{
+	return nrv;
+}
+
+const Vector 
+SystemAnalysis::getBeta(void)
+{
+	return *allBetas;
+}
+
+const Matrix
+SystemAnalysis::getRho(void)
+{
+	return *rhos;
+}
 
 double
 SystemAnalysis::functionToIntegrate(double rho, double beta1, double beta2)
 {
-	double pi = 3.14159265358979;
-	return 1.0/(2.0*pi*sqrt(1.0-rho*rho)) 
-		* exp(-(beta1*beta1+beta2*beta2-2*rho*beta1*beta2)
-		/(2.0*(1.0-rho*rho)));
+	double pi = acos(-1.0);
+	if ( 1 - fabs(rho) < DBL_EPSILON ) {
+		opserr << "SystemAnalysis::functionToIntegrate warning rho approx. 1 or -1" << endln;
+		return 0.0;
+	}
+	else
+		return 1.0/(2.0*pi*sqrt(1.0-rho*rho)) *
+			exp(-(beta1*beta1+beta2*beta2-2.0*rho*beta1*beta2)/(2.0*(1.0-rho*rho)));
 }
 
-int
+long int
 SystemAnalysis::factorial(int num)
 {
 	int i = num-1;
-	int result = num;
+	long int result = num;
 
-	while (i>0) {
+	while (i > 0) {
 		result = result * i;
 		i--;
 	}
@@ -286,16 +292,81 @@ SystemAnalysis::factorial(int num)
 	return result;
 }
 
-Vector
-SystemAnalysis::arrange(int num)
+const Vector
+SystemAnalysis::arrange(double num, RandomNumberGenerator *randNum)
 {
-	Vector arrang(num);
-
-	// This is not yet implemented
+	// randomly arranges the input pf and Pmn matrix entries
+	int result;
+	
+	Vector randomArray(num);
+	Vector index(num);
+	Vector permutation(num);
+	
+	randNum->generate_nIndependentUniformNumbers(num,0,num-1);
+	randomArray = randNum->getGeneratedNumbers();
 
 	for (int i=0; i<num; i++) {
-		arrang(i) = i+1;
+		result = (int)round(randomArray(i));
+		if (index(result) > 0) {
+			// repeat found
+			for (int j=0; j<num; j++) {
+				if (index(j) == 0.0) {
+					result = j;
+					break;
+				}
+			}
+		} 
+		// unique assignment
+		permutation(i) = result;
+		index(result) = 1;
 	}
+	
+	return permutation;
+}
 
-	return arrang;
+double SystemAnalysis::twoComponent(double beta1, double beta2, double rho2)
+{
+	NormalRV uRV(1, 0.0, 1.0, 0.0);
+	
+	double thresh = 0.99;
+	double integral = 0;
+	
+	if ( rho2 > thresh ) {
+		// create a refined domain near +1
+		integral = Simpson(0,thresh,beta1,beta2,rho2);
+		integral += Simpson(thresh,rho2,beta1,beta2,rho2);
+	} else if ( rho2 < -thresh ) {
+		// create a refined domain near -1
+		integral = Simpson(0,-thresh,beta1,beta2,rho2);
+		integral += Simpson(-thresh,rho2,beta1,beta2,rho2);
+	} else {
+		integral = Simpson(0,rho2,beta1,beta2,rho2);
+	}
+	
+	return uRV.getCDFvalue(beta1)*uRV.getCDFvalue(beta2) + integral;
+}
+
+double
+SystemAnalysis::Simpson(double a, double b, double beta1, double beta2, double rho)
+{
+	// Composite Simpson's numerical integration
+	// n must be even, endpoints a and b
+	int n = 1600;
+	double h, fa, fb;
+	double integral = 0;
+	
+	h = (b-a)/n;
+	fa = functionToIntegrate(a,beta1,beta2);
+	fb = functionToIntegrate(b,beta1,beta2);
+	
+	double sum_fx2j_1 = 0.0;
+	double sum_fx2j_2 = 0.0;
+	for (int j=2; j <= n/2;  j++)
+		sum_fx2j_1 = sum_fx2j_1 + functionToIntegrate(a+h*(2*j-2),beta1,beta2);
+	for (int j=1; j <= n/2;  j++)
+		sum_fx2j_2 = sum_fx2j_2 + functionToIntegrate(a+h*(2*j-1),beta1,beta2);
+
+	integral = h/3.0*(fa + 2.0*sum_fx2j_1 + 4.0*sum_fx2j_2 + fb);
+
+	return integral;
 }
