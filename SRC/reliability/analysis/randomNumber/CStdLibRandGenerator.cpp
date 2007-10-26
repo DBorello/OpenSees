@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-02-24 01:31:01 $
+// $Revision: 1.9 $
+// $Date: 2007-10-26 16:33:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/randomNumber/CStdLibRandGenerator.cpp,v $
 
 
@@ -60,7 +60,15 @@ CStdLibRandGenerator::generate_nIndependentUniformNumbers(int n, double lower, d
 	int j;
 	int randomNumberBetween0AndRAND_MAX;
 	double randomNumberBetween0And1;
-	Vector randomArray(n);
+
+	if (generatedNumbers == 0) {
+		generatedNumbers = new Vector(n);
+	}
+	else if (generatedNumbers->Size() != n) {
+		delete generatedNumbers;
+		generatedNumbers = new Vector(n);
+	}
+	Vector &randomArray = *generatedNumbers;
 
 
 	// Create array of standard normal random numbers
@@ -81,16 +89,6 @@ CStdLibRandGenerator::generate_nIndependentUniformNumbers(int n, double lower, d
 
 	seed = randomNumberBetween0AndRAND_MAX;
 	
-	if (generatedNumbers == 0) {
-		generatedNumbers = new Vector(n);
-	}
-	else if (generatedNumbers->Size() != n) {
-		delete generatedNumbers;
-		generatedNumbers = new Vector(n);
-	}
-	(*generatedNumbers) = randomArray;
-
-
 	return 0;
 }
 
@@ -104,9 +102,16 @@ CStdLibRandGenerator::generate_nIndependentStdNormalNumbers(int n, int seedIn)
 	int j;
 	int randomNumberBetween0AndRAND_MAX;
 	double randomNumberBetween0And1;
-	Vector randomArray(n);
-	NormalRV aStdNormRV(1,0.0,1.0,0.0);
+	static NormalRV aStdNormRV(1,0.0,1.0,0.0);
 
+	if (generatedNumbers == 0) {
+		generatedNumbers = new Vector(n);
+	}
+	else if (generatedNumbers->Size() != n) {
+		delete generatedNumbers;
+		generatedNumbers = new Vector(n);
+	}
+	Vector &randomArray = *generatedNumbers;
 
 	// Create array of standard normal random numbers
 	if (seedIn != 0) {
@@ -139,21 +144,12 @@ CStdLibRandGenerator::generate_nIndependentStdNormalNumbers(int n, int seedIn)
 	}
 	seed = randomNumberBetween0AndRAND_MAX;
 
-	if (generatedNumbers == 0) {
-		generatedNumbers = new Vector(n);
-	}
-	else if (generatedNumbers->Size() != n) {
-		delete generatedNumbers;
-		generatedNumbers = new Vector(n);
-	}
-	(*generatedNumbers) = randomArray;
-
 	return 0;
 }
 
 
 
-Vector
+const Vector&
 CStdLibRandGenerator::getGeneratedNumbers()
 {
 	return (*generatedNumbers);

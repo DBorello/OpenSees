@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-03-04 00:39:28 $
+// $Revision: 1.4 $
+// $Date: 2007-10-26 16:36:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/randomNumber/RandomNumberGenerator.h,v $
 
 
@@ -45,7 +45,7 @@ public:
 
 	virtual int		generate_nIndependentStdNormalNumbers(int n, int seed=0) =0;
 	virtual int     generate_nIndependentUniformNumbers(int n, double lower, double upper, int seed=0) =0;
-	virtual Vector	getGeneratedNumbers() =0;
+	virtual const Vector &getGeneratedNumbers() =0;
 	virtual int     getSeed() =0;
 
 protected:
