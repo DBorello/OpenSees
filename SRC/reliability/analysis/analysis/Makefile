@@ -1,6 +1,6 @@
 include ../../../../Makefile.def
 
-OBJS       = 	FORMAnalysis.o\
+OBJS       = 	FORMAnalysis.o \
 	FOSMAnalysis.o \
 	FragilityAnalysis.o \
 	GFunVisualizationAnalysis.o \
@@ -13,7 +13,8 @@ OBJS       = 	FORMAnalysis.o\
 
 
 # Compilation control
-all:         $(OBJS)
+all:    $(OBJS)
+	@$(CD) $(FE)/reliability/analysis/analysis/system; $(MAKE);
 
 # Miscellaneous
 tidy:	
@@ -23,6 +24,7 @@ clean: tidy
 	@$(RM) $(RMFLAGS) $(OBJS) *.o
 
 spotless: clean
+	@$(CD) $(FE)/reliability/analysis/analysis/system; $(MAKE) wipe;
 
 wipe: spotless
 
