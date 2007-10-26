@@ -146,6 +146,7 @@ FE_INCLUDES  = -I$(FE)/matrix \
                -I$(FE)/coordTransformation \
                -I$(FE)/reliability/analysis \
                -I$(FE)/reliability/analysis/analysis \
+               -I$(FE)/reliability/analysis/analysis/system \
                -I$(FE)/reliability/analysis/convergenceCheck \
                -I$(FE)/reliability/analysis/curvature \
                -I$(FE)/reliability/analysis/designPoint \
