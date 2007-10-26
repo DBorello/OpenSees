@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2007-10-26 16:42:28 $
+// $Revision: 1.27 $
+// $Date: 2007-10-26 17:08:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -51,8 +51,10 @@ using std::setiosflags;
 
 #include <ReliabilityDomain.h>
 #include <RandomVariable.h>
+#include <RandomVariableIter.h>
 #include <CorrelationCoefficient.h>
 #include <LimitStateFunction.h>
+#include <LimitStateFunctionIter.h>
 #include <RandomVariablePositioner.h>
 #include <Parameter.h>
 #include <ParameterIter.h>
@@ -3933,15 +3935,11 @@ TclReliabilityModelBuilder_addStartPoint(ClientData clientData, Tcl_Interp *inte
 
 		theStartPoint = new Vector(nrv);
 
-		for ( int i=1; i<=nrv; i++ )
-		{
-			aRandomVariable = theReliabilityDomain->getRandomVariablePtr(i);
-			if (aRandomVariable == 0) {
-				opserr << "ERROR: when creating theStartPoint - could not find" << endln
-					<< " random variable with tag #" << i << "." << endln;
-				return TCL_ERROR;
-			}
-			(*theStartPoint)(i-1) = aRandomVariable->getMean();
+		RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
+		//for ( int i=1; i<=nrv; i++ ) {
+		while ((aRandomVariable = rvIter()) != 0) {
+		  int i = aRandomVariable->getIndex();
+		  (*theStartPoint)(i) = aRandomVariable->getMean();
 		}
 	}
 	else if (strcmp(argv[1],"Origin") == 0) {
@@ -3952,15 +3950,11 @@ TclReliabilityModelBuilder_addStartPoint(ClientData clientData, Tcl_Interp *inte
 
 		theStartPoint = new Vector(nrv);
 
-		for ( int i=1; i<=nrv; i++ )
-		{
-			aRandomVariable = theReliabilityDomain->getRandomVariablePtr(i);
-			if (aRandomVariable == 0) {
-				opserr << "ERROR: when creating theStartPoint - could not find" << endln
-					<< " random variable with tag #" << i << "." << endln;
-				return TCL_ERROR;
-			}
-			(*theStartPoint)(i-1) = aRandomVariable->getStartValue();
+		RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
+		//for ( int i=1; i<=nrv; i++ ) {
+		while ((aRandomVariable = rvIter()) != 0) {
+		  int i = aRandomVariable->getIndex();
+		  (*theStartPoint)(i) = aRandomVariable->getStartValue();
 		}
 	}
 	else if (strcmp(argv[1],"-file") == 0) {
