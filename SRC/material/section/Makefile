@@ -3,6 +3,7 @@ include ../../../Makefile.def
 OBJS       = SectionForceDeformation.o \
 	ElasticSection2d.o ElasticSection3d.o \
 	ElasticShearSection2d.o ElasticShearSection3d.o \
+	ElasticBDShearSection2d.o \
 	GenericSection1d.o \
 	SectionAggregator.o \
 	ElasticPlateSection.o \
@@ -12,14 +13,24 @@ OBJS       = SectionForceDeformation.o \
 	FiberSection2d.o \
 	FiberSection3d.o \
 	Bidirectional.o \
+	Elliptical.o \
 	FiberSectionGJ.o \
-	Isolator2spring.o
+	WSection2d.o \
+	TimoshenkoSection3d.o \
+	Isolator2spring.o \
+	ParallelSection.o
 
 all:         $(OBJS)
 	@$(CD) $(FE)/material/section/repres; $(MAKE);
 	@$(CD) $(FE)/material/section/fiber; $(MAKE);
 	@$(CD) $(FE)/material/section/yieldSurface; $(MAKE);
 	@$(CD) $(FE)/material/section/integration; $(MAKE);
+
+test: main.o
+	@$(LINKER) $(LINKFLAGS) main.o $(INTERPRETER_LIBS_MPI) \
+	$(FE_LIBRARY) $(MACHINE_LINKLIBS) $(PARALLEL_LIB) \
+	$(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY)  \
+	$(MACHINE_SPECIFIC_LIBS) -o section_tst
 
 # Miscellaneous
 

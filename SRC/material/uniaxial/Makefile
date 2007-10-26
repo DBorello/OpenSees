@@ -22,6 +22,8 @@ include ../../../Makefile.def
 	FedeasMaterial.o \
 	DrainMaterial.o \
 	BoucWenMaterial.o \
+	SecantConcrete.o \
+	HardeningMaterial2.o \
 	Pinching4Material.o \
 	BarSlipMaterial.o \
 	FatigueMaterial.o \
@@ -34,10 +36,16 @@ include ../../../Makefile.def
 	NewUniaxialMaterial.o \
 	TclNewUnixialMaterial.o \
 	ReinforcingSteel.o \
-	TclReinforcingSteel.o\
+	TclReinforcingSteel.o \
+	PenaltyMaterial.o \
+	ContinuumUniaxial.o \
+	WrappedMaterial.o \
+	SecantMaterial.o \
 	Concrete01WithSITC.o \
 	Concrete05.o \
 	ECC01.o \
+	PrestressedSteelMaterial.o \
+	ElasticBDMaterial.o \
 	ShearPanelMaterial.o \
         TclModelBuilderUniaxialMaterialCommand.o
 
