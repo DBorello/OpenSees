@@ -18,7 +18,9 @@ OBJS       = ForceBeamColumn2d.o ForceBeamColumn3d.o \
 	TrapezoidalBeamIntegration.o \
 	FixedLocationBeamIntegration.o \
 	LowOrderBeamIntegration.o \
-	MidDistanceBeamIntegration.o
+	MidDistanceBeamIntegration.o \
+	ElasticForceBeamColumn2d.o \
+	ElasticForceBeamColumn3d.o
 
 # Compilation control
 
