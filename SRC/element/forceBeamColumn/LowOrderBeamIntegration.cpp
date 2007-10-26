@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2007-10-12 21:03:29 $
+// $Revision: 1.2 $
+// $Date: 2007-10-26 04:45:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/LowOrderBeamIntegration.cpp,v $
 
 #include <LowOrderBeamIntegration.h>
@@ -73,23 +73,6 @@ LowOrderBeamIntegration::LowOrderBeamIntegration(int nIP,
   }
   else
     wts = wc;
-
-
-  for (int i = 0; i < nIP; i++) {
-    int key = i;
-    for (int j = i+1; j < nIP; j++) {
-      if (pts(j) < pts(key)) {
-	key = j;
-      }
-    }
-    double temp = pts(i);
-    pts(i) = pts(key);
-    pts(key) = temp;
-    temp = wts(i);
-    wts(i) = wts(key);
-    wts(key) = temp;
-  }
-
 }
 
 LowOrderBeamIntegration::LowOrderBeamIntegration():
