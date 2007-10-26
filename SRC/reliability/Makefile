@@ -10,6 +10,10 @@ RELIABILITY_OBJS = $(FE)/reliability/analysis/analysis/FORMAnalysis.o \
 		$(FE)/reliability/analysis/analysis/ReliabilityAnalysis.o \
 		$(FE)/reliability/analysis/analysis/SORMAnalysis.o \
 		$(FE)/reliability/analysis/analysis/SystemAnalysis.o \
+		$(FE)/reliability/analysis/analysis/system/IPCM.o \
+		$(FE)/reliability/analysis/analysis/system/PCM.o \
+		$(FE)/reliability/analysis/analysis/system/SCIS.o \
+		$(FE)/reliability/analysis/analysis/system/MVNcdf.o \
 		$(FE)/reliability/analysis/convergenceCheck/OptimalityConditionReliabilityConvergenceCheck.o \
 		$(FE)/reliability/analysis/convergenceCheck/ReliabilityConvergenceCheck.o \
 		$(FE)/reliability/analysis/convergenceCheck/StandardReliabilityConvergenceCheck.o \
