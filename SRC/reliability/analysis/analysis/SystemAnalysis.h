@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-10-26 15:55:35 $
+// $Revision: 1.8 $
+// $Date: 2007-10-26 16:23:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.h,v $
 
 
@@ -40,6 +40,7 @@
 
 #include <Matrix.h>
 #include <Vector.h>
+#include <ID.h>
 
 class SystemAnalysis : public ReliabilityAnalysis
 {
@@ -54,8 +55,8 @@ public:
 	double	getUpperBound();
 	int		getNumberLimitStateFunctions();
 	int		getNumberRandomVariables();
-	const Vector getBeta();
-	const Matrix getRho();
+	const Vector& getBeta();
+	const Matrix& getRho();
 
 protected:
 	double twoComponent(double, double, double);
@@ -63,7 +64,7 @@ protected:
 private:
    	int		initialize(void);
 	long int factorial(int);
-	const Vector arrange(double, RandomNumberGenerator*);
+	int arrange(int, RandomNumberGenerator*, ID&);
 	double functionToIntegrate(double, double, double);
 	double Simpson(double, double, double, double, double);
 	

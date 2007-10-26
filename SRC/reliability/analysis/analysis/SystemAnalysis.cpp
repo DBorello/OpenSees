@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-10-26 15:55:35 $
+// $Revision: 1.9 $
+// $Date: 2007-10-26 16:23:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.cpp,v $
 
 
@@ -75,7 +75,6 @@ SystemAnalysis::initialize()
 	// Initial declarations
 	double beta;
 	double pf1;
-	Vector alpha;
 	LimitStateFunction *theLimitStateFunction;
 	int i, j, k, m, n;
 
@@ -97,7 +96,7 @@ SystemAnalysis::initialize()
 		theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(i+1);
 		beta = theLimitStateFunction->FORMReliabilityIndexBeta;
 		pf1 = theLimitStateFunction->FORMProbabilityOfFailure_pf1;
-		alpha = theLimitStateFunction->normalizedNegativeGradientVectorAlpha;
+		const Vector &alpha = theLimitStateFunction->normalizedNegativeGradientVectorAlpha;
 
 		// Put FORM results into vector of all betas and alphas
 		// Note that the first index of 'allAlphas' here denote 'nrv'
@@ -181,10 +180,10 @@ SystemAnalysis::computeBounds(int aType)
 		int multiplicationFactor = 500;
 		if (numPerms > multiplicationFactor*numLsf)
 			numPerms = multiplicationFactor*numLsf;
-		Vector permute(numLsf);
+		ID permute(numLsf);
 		
 		for (long int arr = 1; arr <= numPerms; arr++ ) {
-			permute = arrange(numLsf,theRandomNumberGenerator);
+			arrange(numLsf,theRandomNumberGenerator,permute);
 			
 			// bi-component lower bound from KHD series system
 			lowerBound = (*allPf1s)(permute(0));
@@ -253,13 +252,13 @@ SystemAnalysis::getNumberRandomVariables(void)
 	return nrv;
 }
 
-const Vector 
+const Vector &
 SystemAnalysis::getBeta(void)
 {
 	return *allBetas;
 }
 
-const Matrix
+const Matrix &
 SystemAnalysis::getRho(void)
 {
 	return *rhos;
@@ -292,18 +291,16 @@ SystemAnalysis::factorial(int num)
 	return result;
 }
 
-const Vector
-SystemAnalysis::arrange(double num, RandomNumberGenerator *randNum)
+int
+SystemAnalysis::arrange(int num, RandomNumberGenerator *randNum, ID &permutation)
 {
 	// randomly arranges the input pf and Pmn matrix entries
 	int result;
 	
-	Vector randomArray(num);
 	Vector index(num);
-	Vector permutation(num);
 	
 	randNum->generate_nIndependentUniformNumbers(num,0,num-1);
-	randomArray = randNum->getGeneratedNumbers();
+	const Vector &randomArray = randNum->getGeneratedNumbers();
 
 	for (int i=0; i<num; i++) {
 		result = (int)round(randomArray(i));
@@ -321,12 +318,12 @@ SystemAnalysis::arrange(double num, RandomNumberGenerator *randNum)
 		index(result) = 1;
 	}
 	
-	return permutation;
+	return 0;
 }
 
 double SystemAnalysis::twoComponent(double beta1, double beta2, double rho2)
 {
-	NormalRV uRV(1, 0.0, 1.0, 0.0);
+	static NormalRV uRV(1, 0.0, 1.0, 0.0);
 	
 	double thresh = 0.99;
 	double integral = 0;
