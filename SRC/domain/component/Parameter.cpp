@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-07-09 19:05:37 $
+// $Revision: 1.6 $
+// $Date: 2007-10-26 04:55:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/Parameter.cpp,v $
 
 #include <classTags.h>
@@ -73,12 +73,13 @@ Parameter::Parameter(const Parameter &param):
   maxNumObjects = param.maxNumObjects;
 
   theComponents = new DomainComponent *[maxNumComponents];
-  for (int i = 0; i < numComponents; i++)
+  int i;
+  for (i = 0; i < numComponents; i++)
     theComponents[i] = param.theComponents[i];
 
   theObjects = new MovableObject *[maxNumObjects];
   parameterID = new int[maxNumObjects];
-  int i;
+
   for (i = 0; i < numObjects; i++) {
     theObjects[i] = param.theObjects[i];
     parameterID[i] = param.parameterID[i];
