@@ -520,6 +520,8 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/truss/TrussSection.o \
 	$(FE)/element/truss/CorotTruss.o \
 	$(FE)/element/truss/CorotTrussSection.o \
+	$(FE)/element/zeroLength/ZeroLengthContact2D.o \
+	$(FE)/element/zeroLength/ZeroLengthContact3D.o \
 	$(FE)/element/feap/elmt01.o \
 	$(FE)/element/feap/elmt02.o \
 	$(FE)/element/feap/elmt03.o \
@@ -554,7 +556,11 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/brick/Brick.o \
 	$(FE)/element/brick/BbarBrick.o \
 	$(FE)/element/brick/shp3d.o \
-	$(FE)/element/brick/TclBrickCommand.o
+	$(FE)/element/brick/TclBrickCommand.o \
+	$(FE)/element/generic/GenericClient.o \
+	$(FE)/element/generic/GenericCopy.o \
+	$(FE)/element/generic/TclGenericClientCommand.o \
+	$(FE)/element/generic/TclGenericCopyCommand.o
 
 
 MATERIAL_LIBS   =  $(FE)/material/Material.o \
