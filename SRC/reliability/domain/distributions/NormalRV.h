@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-10-24 18:22:40 $
+// $Revision: 1.8 $
+// $Date: 2007-10-26 03:22:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/NormalRV.h,v $
 
 
@@ -35,7 +35,6 @@
 #define NormalRV_h
 
 #include <RandomVariable.h>
-#include <math.h>
 
 class NormalRV : public RandomVariable
 {
@@ -73,7 +72,7 @@ public:
 protected:
 
 private:
-	double errorFunction(double x) {return erf(x);}
+	double errorFunction(double x);
 	double inverseErrorFunction(double y);
 	double mju;
 	double sigma;

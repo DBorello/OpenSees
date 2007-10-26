@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-10-25 16:26:53 $
+// $Revision: 1.12 $
+// $Date: 2007-10-26 03:22:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/NormalRV.cpp,v $
 
 
@@ -169,11 +169,12 @@ NormalRV::getParameter2()
   return sigma;
 }
 
-/*
 double 
 NormalRV::errorFunction(double x)
 {
-
+#ifdef _LINUX
+	return erf(x);
+#endif
 	// ErrorFunction(x) = 2/sqrt(pi) * integral from 0 to x of exp(-t^2) dt.
 	double a1,a2,a3,a4,a5;
 	double b1,b2,b3,b4;
@@ -304,7 +305,6 @@ NormalRV::errorFunction(double x)
 
 	return result;
 }
-*/
 
 double 
 NormalRV::inverseErrorFunction(double y)

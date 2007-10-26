@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-10-24 18:22:40 $
+// $Revision: 1.8 $
+// $Date: 2007-10-26 03:22:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/GammaRV.h,v $
 
 
@@ -35,7 +35,6 @@
 #define GammaRV_h
 
 #include <RandomVariable.h>
-#include <math.h>
 
 class GammaRV : public RandomVariable
 {
@@ -69,7 +68,7 @@ public:
 	double getStdv();
 	double getParameter1();
 	double getParameter2();
-	double gammaFunction(double x) {return tgamma(x);}
+	double gammaFunction(double x);
 	double incompleteGammaFunction(double x, double a);
 
 

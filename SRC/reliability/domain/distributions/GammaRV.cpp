@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-10-24 18:22:40 $
+// $Revision: 1.9 $
+// $Date: 2007-10-26 03:22:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/GammaRV.cpp,v $
 
 
@@ -202,10 +202,12 @@ GammaRV::getParameter2()
 
 
 
-/*
 double
 GammaRV::gammaFunction(double x)
 {
+#ifdef _LINUX
+	return tgamma(x);
+#endif
 	double res;
 
 	if (x==0 || ( x < 0.0 && floor(x)==x ) )  {
@@ -330,9 +332,6 @@ GammaRV::gammaFunction(double x)
 	
 	return res;
 }
-*/
-
-
 
 double 
 GammaRV::incompleteGammaFunction(double x, double a)
