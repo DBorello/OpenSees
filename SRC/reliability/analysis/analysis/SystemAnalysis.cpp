@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-10-26 16:23:00 $
+// $Revision: 1.10 $
+// $Date: 2007-10-29 20:49:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.cpp,v $
 
 
@@ -303,7 +303,7 @@ SystemAnalysis::arrange(int num, RandomNumberGenerator *randNum, ID &permutation
 	const Vector &randomArray = randNum->getGeneratedNumbers();
 
 	for (int i=0; i<num; i++) {
-		result = (int)round(randomArray(i));
+	  result = int(randomArray(i) + 0.5); // rounds to nearest int
 		if (index(result) > 0) {
 			// repeat found
 			for (int j=0; j<num; j++) {
