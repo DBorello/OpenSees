@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-07-13 22:13:43 $
+// $Revision: 1.5 $
+// $Date: 2007-10-31 20:20:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.h,v $
 
 
@@ -59,8 +59,8 @@ public:
 	const Matrix &getJacobian_x_u();
 	const Matrix &getJacobian_u_x();
 
-	Vector meanSensitivityOf_x_to_u(const Vector &x, int gradNumber);
-	Vector stdvSensitivityOf_x_to_u(const Vector &x, int gradNumber);
+	Vector meanSensitivityOf_x_to_u(const Vector &x, int rvTag);
+	Vector stdvSensitivityOf_x_to_u(const Vector &x, int rvTag);
 
 protected:
 

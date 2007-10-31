@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-07-13 22:13:43 $
+// $Revision: 1.8 $
+// $Date: 2007-10-31 20:20:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.cpp,v $
 
 
@@ -138,7 +138,7 @@ NatafProbabilityTransformation::transform_x_to_u()
 
 
 Vector
-NatafProbabilityTransformation::meanSensitivityOf_x_to_u(const Vector &x, int rvNumber)
+NatafProbabilityTransformation::meanSensitivityOf_x_to_u(const Vector &x, int rvTag)
 {
 	// Returns the sensitivity of 'u' with respect to [mean, stdv]
 	// for the given random variable number (rvNumber)
@@ -152,12 +152,17 @@ NatafProbabilityTransformation::meanSensitivityOf_x_to_u(const Vector &x, int rv
 
 	// 3) DzDmean and DzDstdv = a vector of zeros and then:
 	Vector DzDmean(x.Size());
-	NormalRV aStandardNormalRV(1,0.0,1.0,0.0); 
-	RandomVariable *theRV = theReliabilityDomain->getRandomVariablePtr(rvNumber);
+	static NormalRV aStandardNormalRV(1,0.0,1.0,0.0); 
+	RandomVariable *theRV = theReliabilityDomain->getRandomVariablePtr(rvTag);
+	if (theRV == 0) {
+	  opserr << "NatafProbTransf::meanSensitivityOf_x_to_u -- r.v. with tag " << rvTag
+		 << " not found in reliability domain" << endln;
+	}
+	int rvIndex = theRV->getIndex();
 	if (strcmp(theRV->getType(),"NORMAL")==0) {
-		double mu = theRV->getParameter1();
-		double sigma = theRV->getParameter2();
-		DzDmean(rvNumber-1) = -1.0 / sigma;
+	  double mu = theRV->getParameter1();
+	  double sigma = theRV->getParameter2();
+	  DzDmean(rvIndex) = -1.0 / sigma;
 	}
 	else if (strcmp(theRV->getType(),"LOGNORMAL")==0) {
 		double lambda = theRV->getParameter1();
@@ -166,7 +171,7 @@ NatafProbabilityTransformation::meanSensitivityOf_x_to_u(const Vector &x, int rv
 		double stdv = theRV->getStdv();
 
 		double a = mean*mean+stdv*stdv;
-		DzDmean(rvNumber-1) = 0.5*(-2.0*mean*mean*log(a)+4.0*mean*mean*log(mean)-3.0*stdv*stdv*log(a)+4.0*stdv*stdv*log(mean)+2.0*stdv*stdv*log(fabs(x(rvNumber-1))))
+		DzDmean(rvIndex) = 0.5*(-2.0*mean*mean*log(a)+4.0*mean*mean*log(mean)-3.0*stdv*stdv*log(a)+4.0*stdv*stdv*log(mean)+2.0*stdv*stdv*log(fabs(x(rvIndex))))
 			/(pow(log(a)-2.0*log(mean),1.5)*mean*a);
 		
 //		double z = ( log ( fabs(x(rvNumber-1)) ) - lambda ) / zeta; // more here for negative lognormal?
@@ -176,15 +181,15 @@ NatafProbabilityTransformation::meanSensitivityOf_x_to_u(const Vector &x, int rv
 //		DzDmean(rvNumber-1) = f*(-d-e+e*z/zeta);
 	}
 	else if (strcmp(theRV->getType(),"UNIFORM")==0) {
-		double pz = 0.39894228048*exp(-z(rvNumber-1)*z(rvNumber-1)/2.0);
+		double pz = 0.39894228048*exp(-z(rvIndex)*z(rvIndex)/2.0);
 		double a = theRV->getParameter1();
 		double b = theRV->getParameter2();
-		DzDmean(rvNumber-1) = -1.0/(pz*(b-a));
+		DzDmean(rvIndex) = -1.0/(pz*(b-a));
 	}
 	else {
 		opserr << "WARNING: Cannot compute reliability sensitivity results for " << endln
-			<< " type of random variable number " << rvNumber << endln;
-		DzDmean(rvNumber-1) = 0.0; //aStandardNormalRV.getInverseCDFvalue(theRV->getCDFMeanSensitivity(x(rvNumber-1)));
+			<< " type of random variable number " << rvTag << endln;
+		DzDmean(rvIndex) = 0.0; //aStandardNormalRV.getInverseCDFvalue(theRV->getCDFMeanSensitivity(x(rvIndex)));
 	}
 
 	// 4) The hardest part: DinverseLowerCholeskyDmean
@@ -200,10 +205,10 @@ NatafProbabilityTransformation::meanSensitivityOf_x_to_u(const Vector &x, int rv
 	//    For now: do this by finite difference
 	Matrix OrigInverseLowerCholesky = (*inverseLowerCholesky);
 	RandomVariable *aRandomVariable;
-	aRandomVariable = theReliabilityDomain->getRandomVariablePtr(rvNumber);
+	aRandomVariable = theReliabilityDomain->getRandomVariablePtr(rvTag);
 	double stdv = aRandomVariable->getStdv();
 	double h = stdv/200.0;
-	setCorrelationMatrix(rvNumber, 0, h);
+	setCorrelationMatrix(rvTag, 0, h);  // rvTag or rvIndex ... does it matter? -- MHS
 
 	MatrixOperations someMatrixOperations(*correlationMatrix);
 
@@ -231,7 +236,7 @@ NatafProbabilityTransformation::meanSensitivityOf_x_to_u(const Vector &x, int rv
 
 
 Vector 
-NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(const Vector &x, int rvNumber)
+NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(const Vector &x, int rvTag)
 {
 	// Returns the sensitivity of 'u' with respect to [mean, stdv]
 	// for the given random variable number (rvNumber)
@@ -245,12 +250,17 @@ NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(const Vector &x, int rv
 
 	// 3) DzDmean and DzDstdv = a vector of zeros and then:
 	Vector DzDstdv(x.Size());
-	NormalRV aStandardNormalRV(1,0.0,1.0,0.0); 
-	RandomVariable *theRV = theReliabilityDomain->getRandomVariablePtr(rvNumber);
+	static NormalRV aStandardNormalRV(1,0.0,1.0,0.0); 
+	RandomVariable *theRV = theReliabilityDomain->getRandomVariablePtr(rvTag);
+	if (theRV == 0) {
+	  opserr << "NatafProbTransf::stdvSensitivityOf_x_to_u -- r.v. with tag " << rvTag
+		 << " not found in reliability domain" << endln;
+	}
+	int rvIndex = theRV->getIndex();
 	if (strcmp(theRV->getType(),"NORMAL")==0) {
 		double mu = theRV->getParameter1();
 		double sigma = theRV->getParameter2();
-		DzDstdv(rvNumber-1) = - (x(rvNumber-1)-mu) / (sigma*sigma);
+		DzDstdv(rvIndex) = - (x(rvIndex)-mu) / (sigma*sigma);
 	}
 	else if (strcmp(theRV->getType(),"LOGNORMAL")==0) {
 		double lambda = theRV->getParameter1();
@@ -259,7 +269,7 @@ NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(const Vector &x, int rv
 		double stdv = theRV->getStdv();
 
 		double a = mean*mean+stdv*stdv;
-		DzDstdv(rvNumber-1) = 0.5*stdv*(log(a)-2.0*log(fabs(x(rvNumber-1))))/(pow(log(a)-2.0*log(mean),1.5)*a);
+		DzDstdv(rvIndex) = 0.5*stdv*(log(a)-2.0*log(fabs(x(rvIndex))))/(pow(log(a)-2.0*log(mean),1.5)*a);
 		
 //		double z = ( log ( fabs(x(rvNumber-1)) ) - lambda ) / zeta; // more here for negative lognormal?
 //		double e = (stdv/mean)*(stdv/mean);
@@ -268,17 +278,17 @@ NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(const Vector &x, int rv
 //		DzDstdv(rvNumber-1) = stdv*((1.0-z/zeta)*f/mean);
 	}
 	else if (strcmp(theRV->getType(),"UNIFORM")==0) {
-		double pz = 0.39894228048*exp(-z(rvNumber-1)*z(rvNumber-1)/2.0);
+		double pz = 0.39894228048*exp(-z(rvIndex)*z(rvIndex)/2.0);
 		double a = theRV->getParameter1();
 		double b = theRV->getParameter2();
 		double DzDmean = -1.0/(pz*(b-a));
 		double e = -DzDmean/(b-a);
-		DzDstdv(rvNumber-1) = 1.732050807*(a+b-2.0*x(rvNumber-1))*e;
+		DzDstdv(rvIndex) = 1.732050807*(a+b-2.0*x(rvIndex))*e;
 	}
 	else {
 		opserr << "WARNING: Cannot compute reliability sensitivity results for " << endln
-			<< " type of random variable number " << rvNumber << endln;
-		DzDstdv(rvNumber-1) = 0.0; //aStandardNormalRV.getInverseCDFvalue(theRV->getCDFStdvSensitivity(x(rvNumber-1)));
+			<< " type of random variable number " << rvTag << endln;
+		DzDstdv(rvIndex) = 0.0; //aStandardNormalRV.getInverseCDFvalue(theRV->getCDFStdvSensitivity(x(rvNumber-1)));
 	}
 
 	// 4) The hardest part: DinverseLowerCholeskyDmean
@@ -294,10 +304,10 @@ NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(const Vector &x, int rv
 	//    For now: do this by finite difference
 	Matrix OrigInverseLowerCholesky = (*inverseLowerCholesky);
 	RandomVariable *aRandomVariable;
-	aRandomVariable = theReliabilityDomain->getRandomVariablePtr(rvNumber);
+	aRandomVariable = theReliabilityDomain->getRandomVariablePtr(rvTag);
 	double stdv = aRandomVariable->getStdv();
 	double h = stdv/200.0;
-	setCorrelationMatrix(0, rvNumber, h);
+	setCorrelationMatrix(0, rvTag, h); // rvTag or rvIndex ... does it matter? -- MHS
 
 	MatrixOperations someMatrixOperations(*correlationMatrix);
 
@@ -341,19 +351,16 @@ NatafProbabilityTransformation::transform_u_to_x()
 		opserr << theString << endln;
 
 		RandomVariable *theRV;
-		/*
 		RandomVariableIter &rvIter = 
 		  theReliabilityDomain->getRandomVariables();
+		//for ( int i=0 ; i<nrv ; i++ ) {
 		while ((theRV = rvIter()) != 0) {
-		  int i = theRV->getGradNumber() - 1;
+		  int i = theRV->getIndex();
 		  int rvTag = theRV->getTag();
-		*/
-		for ( int i=0 ; i<nrv ; i++ ) {
-		  theRV = theReliabilityDomain->getRandomVariablePtr(i+1);
 		  mean = theRV->getMean();
 		  stdv = theRV->getStdv();
 		  dist = ((*x)(i)-mean)/stdv; 
-		  sprintf(theString," x_%d: %5.2e (%5.2f standard deviations away from the mean)",i+1,(*x)(i),dist);
+		  sprintf(theString," x_%d: %5.2e (%5.2f standard deviations away from the mean)",rvTag,(*x)(i),dist);
 		  opserr << theString << endln;
 		}
 	}
@@ -406,20 +413,16 @@ NatafProbabilityTransformation::transform_u_to_x_andComputeJacobian()
 		opserr << theString << endln;
 
 		RandomVariable *theRV;
-		/*
 		RandomVariableIter &rvIter = 
 		  theReliabilityDomain->getRandomVariables();
+		//for ( int i=0 ; i<nrv ; i++ ) {
 		while ((theRV = rvIter()) != 0) {
-		  int i = theRV->getGradNumber() - 1;
-		  opserr << "NATAF " << i << endln;
+		  int i = theRV->getIndex();
 		  int rvTag = theRV->getTag();
-		*/
-		for ( int i=0 ; i<nrv ; i++ ) {
-		  theRV = theReliabilityDomain->getRandomVariablePtr(i+1);
 		  mean = theRV->getMean();
 		  stdv = theRV->getStdv();
 		  dist = ((*x)(i)-mean)/stdv; 
-		  sprintf(theString," x_%d: %5.2e (%5.2f standard deviations away from the mean)",i+1,(*x)(i),dist);
+		  sprintf(theString," x_%d: %5.2e (%5.2f standard deviations away from the mean)",rvTag,(*x)(i),dist);
 		  opserr << theString << endln;
 		}
 	}
@@ -472,18 +475,15 @@ NatafProbabilityTransformation::getJacobian_u_x()
 Vector
 NatafProbabilityTransformation::getJacobian_z_x(const Vector &x, const Vector &z)
 {	
-	NormalRV aStandardNormalRV(1, 0.0, 1.0, 0.0);
+	static NormalRV aStandardNormalRV(1, 0.0, 1.0, 0.0);
 	Vector jacobianMatrix_z_x(nrv);
 
 	RandomVariable *theRV;
-	/*
 	RandomVariableIter &rvIter = 
 	  theReliabilityDomain->getRandomVariables();
+	//for ( int i=0 ; i<nrv ; i++ ) {
 	while ((theRV = rvIter()) != 0) {
-	  int i = theRV->getGradNumber() - 1;
-	*/
-	for ( int i=0 ; i<nrv ; i++ ) {
-	  theRV = theReliabilityDomain->getRandomVariablePtr(i+1);
+	  int i = theRV->getIndex();
 	  if (strcmp(theRV->getType(),"NORMAL")==0) {
 	    double sigma = theRV->getParameter2();
 	    jacobianMatrix_z_x(i) = 1.0 / sigma;
@@ -517,18 +517,15 @@ NatafProbabilityTransformation::getJacobian_z_x(const Vector &x, const Vector &z
 Vector
 NatafProbabilityTransformation::z_to_x(const Vector &z)
 {
-	NormalRV aStandardNormalRV(1, 0.0, 1.0, 0.0);
+  static NormalRV aStandardNormalRV(1, 0.0, 1.0, 0.0);
 	Vector x(nrv);
 
 	RandomVariable *theRV;
-	/*
 	RandomVariableIter &rvIter = 
 	  theReliabilityDomain->getRandomVariables();
+	//for ( int i=0 ; i<nrv ; i++ ) {
 	while ((theRV = rvIter()) != 0) {
-	  int i = theRV->getGradNumber() - 1;
-	*/
-	for ( int i=0 ; i<nrv ; i++ ) {
-	  theRV = theReliabilityDomain->getRandomVariablePtr(i+1);
+	  int i = theRV->getIndex();
 	  if (strcmp(theRV->getType(),"NORMAL")==0) {
 	    double mju = theRV->getParameter1();
 	    double sigma = theRV->getParameter2();
@@ -559,18 +556,14 @@ NatafProbabilityTransformation::z_to_x(const Vector &z)
 Vector
 NatafProbabilityTransformation::x_to_z(const Vector &x)
 {
-	NormalRV aStandardNormalRV(1, 0.0, 1.0, 0.0);
+	static NormalRV aStandardNormalRV(1, 0.0, 1.0, 0.0);
 	Vector z(nrv);
-
 	RandomVariable *theRV;
-	/*
 	RandomVariableIter &rvIter = 
 	  theReliabilityDomain->getRandomVariables();
+	//for ( int i=0 ; i<nrv ; i++ ) {
 	while ((theRV = rvIter()) != 0) {
-	  int i = theRV->getGradNumber() - 1;
-	*/
-	for ( int i=0 ; i<nrv ; i++ ) {
-	  theRV = theReliabilityDomain->getRandomVariablePtr(i+1);
+	  int i = theRV->getIndex();
 	  if (strcmp(theRV->getType(),"NORMAL")==0) {
 	    double mju = theRV->getParameter1();
 	    double sigma = theRV->getParameter2();
@@ -1390,9 +1383,11 @@ NatafProbabilityTransformation::setCorrelationMatrix(int pertMeanOfThisRV, int p
 		}
 		
 		
+		int i1 = rv1Ptr->getIndex();
+		int i2 = rv2Ptr->getIndex();
 		// Put the coefficient into the correlation matrix
-		(*correlationMatrix)( ( rv1-1 ) , ( rv2-1 ) ) = newCorrelation;
-		(*correlationMatrix)( ( rv2-1 ) , ( rv1-1 ) ) = newCorrelation;
+		(*correlationMatrix)(i1, i2) = newCorrelation;
+		(*correlationMatrix)(i2, i1) = newCorrelation;
 	}
 
 	// Here the correlation matrix should be checked for validity
@@ -1437,7 +1432,7 @@ NatafProbabilityTransformation::integrand(int rv_i,
 {
 	RandomVariable *theRv_i = theReliabilityDomain->getRandomVariablePtr(rv_i);
 	RandomVariable *theRv_j = theReliabilityDomain->getRandomVariablePtr(rv_j);
-	NormalRV aStandardNormalRV(1,0.0,1.0,0.0); 
+	static NormalRV aStandardNormalRV(1,0.0,1.0,0.0); 
 
 	double x_i = theRv_i->getInverseCDFvalue(aStandardNormalRV.getCDFvalue(z_i));
 	double x_j = theRv_j->getInverseCDFvalue(aStandardNormalRV.getCDFvalue(z_j));

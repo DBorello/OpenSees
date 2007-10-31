@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-03-01 17:56:09 $
+// $Revision: 1.3 $
+// $Date: 2007-10-31 20:20:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/ProbabilityTransformation.h,v $
 
 
@@ -56,8 +56,8 @@ public:
 	virtual const Matrix &getJacobian_x_u() =0;
 	virtual const Matrix &getJacobian_u_x() =0;
 
-	virtual Vector meanSensitivityOf_x_to_u(const Vector &x, int gradNumber) = 0;
-	virtual Vector stdvSensitivityOf_x_to_u(const Vector &x, int gradNumber) = 0;
+	virtual Vector meanSensitivityOf_x_to_u(const Vector &x, int rvTag) = 0;
+	virtual Vector stdvSensitivityOf_x_to_u(const Vector &x, int rvTag) = 0;
 
 protected:
 
