@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2006-12-13 14:25:13 $
+// $Revision: 1.9 $
+// $Date: 2007-10-31 21:36:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/SensitivityAlgorithm.cpp,v $
 
 
@@ -133,8 +133,8 @@ SensitivityAlgorithm::computeSensitivities(void)
 	    }
 	    rvPosIter.reset();
 	    while ((theRVPos = rvPosIter()) != 0) {
-	      int rvNumber = theRVPos->getRvNumber();
-	      if ( rvNumber==gradNumber ) {
+	      int rvIndex = theRVPos->getRvIndex();
+	      if ( rvIndex==gradNumber ) {
 		// Set sensitivity flag so that this one contributes to the RHS
 		theRVPos->activate(true);
 	      } // End if rv# == gradient#

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2007-10-31 16:53:11 $
+// $Revision: 1.21 $
+// $Date: 2007-10-31 21:37:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.cpp,v $
 
 
@@ -107,13 +107,13 @@ OpenSeesGFunEvaluator::runGFunAnalysis(const Vector &x)
 
 
 	// Put random variables into the structural domain according to the RandomVariablePositioners
-	int rvNumber;
+	int rvIndex;
 	RandomVariablePositionerIter &rvPosIter =
 	  theReliabilityDomain->getRandomVariablePositioners();
 	RandomVariablePositioner *theRVPos;
 	while ((theRVPos = rvPosIter()) != 0) {
-	  rvNumber = theRVPos->getRvNumber();
-	  theRVPos->update(x(rvNumber-1));
+	  rvIndex = theRVPos->getRvIndex();
+	  theRVPos->update(x(rvIndex));
 	}
 
 

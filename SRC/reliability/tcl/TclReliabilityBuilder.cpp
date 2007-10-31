@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2007-10-31 15:40:25 $
+// $Revision: 1.30 $
+// $Date: 2007-10-31 21:37:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -1981,6 +1981,13 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 		return TCL_ERROR;
 	}
 	
+	RandomVariable *theRV = theReliabilityDomain->getRandomVariablePtr(rvNumber);
+	if (theRV == 0){
+	  opserr << "ERROR:: RandomVariable " << rvNumber << " not found in the reliability domain " << endln;
+	  return TCL_ERROR;
+	}
+	int rvIndex = theRV->getIndex();
+
 	if (strcmp(argv[argvCounter],"-parameter") == 0) {
 	  argvCounter++;
 	  int paramTag;
@@ -1998,7 +2005,7 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 	  }
 	  else {
 	    theRandomVariablePositioner =
-	      new RandomVariablePositioner(tag, rvNumber, *theParameter);
+	      new RandomVariablePositioner(tag, rvIndex, *theParameter);
 	  }
 	}
 
@@ -2016,7 +2023,7 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 
 		theRandomVariablePositioner =
 		  new RandomVariablePositioner(tag,
-					       rvNumber,
+					       rvIndex,
 					       theObject,
 					       &argv[argvCounter],
 					       argc-argvCounter);
@@ -2043,14 +2050,14 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 //				opserr << "ERROR: invalid input: factor \n";
 //				return TCL_ERROR;
 //			}
-//			theRandomVariablePositioner = new RandomVariablePositioner(tag,rvNumber,theObject,&argv[5],argc-5,factor);
+//			theRandomVariablePositioner = new RandomVariablePositioner(tag,rvIndex,theObject,&argv[5],argc-5,factor);
 //		}
 //		else {
-//			theRandomVariablePositioner = new RandomVariablePositioner(tag,rvNumber,theObject,&argv[5],argc-5);
+//			theRandomVariablePositioner = new RandomVariablePositioner(tag,rvIndex,theObject,&argv[5],argc-5);
 //		}
 		theRandomVariablePositioner =
 		  new RandomVariablePositioner(tag,
-					       rvNumber,
+					       rvIndex,
 					       theObject,
 					       &argv[argvCounter],
 					       argc-argvCounter);
@@ -2068,7 +2075,7 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 
 		theRandomVariablePositioner =
 		  new RandomVariablePositioner(tag,
-					       rvNumber,
+					       rvIndex,
 					       theObject,
 					       &argv[argvCounter],
 					       argc-argvCounter);
@@ -5395,15 +5402,15 @@ TclReliabilityModelBuilder_rvReduction(ClientData clientData, Tcl_Interp *interp
 	RandomVariablePositioner *aRvPositioner;
 	ArrayOfTaggedObjects aListOfPositioners(256);
 	count =1;
-	int newRvNum;
+	int newRvIndex;
 	for (i=1; i<=nPos; i++) {
 		aRvPositioner = theReliabilityDomain->getRandomVariablePositionerPtr(i);
-		rvNum = aRvPositioner->getRvNumber();
+		rvNum = aRvPositioner->getRvIndex();
 		isInList = false;
 		for (j=1; j<=numInList; j++) {
 			if (keepRvs(j-1)==rvNum) {
 				isInList = true;
-				newRvNum = j;
+				newRvIndex = j;
 				break;
 			}
 		}
@@ -5412,7 +5419,7 @@ TclReliabilityModelBuilder_rvReduction(ClientData clientData, Tcl_Interp *interp
 		}
 		else {
 			aRvPositioner->setNewTag(count);
-			aRvPositioner->setRvNumber(newRvNum);
+			aRvPositioner->setRvIndex(newRvIndex);
 			aListOfPositioners.addComponent(aRvPositioner);
 			count++;
 		}
