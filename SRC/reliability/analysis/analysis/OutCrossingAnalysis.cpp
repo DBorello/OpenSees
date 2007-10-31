@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-12-06 22:32:23 $
+// $Revision: 1.6 $
+// $Date: 2007-10-31 22:24:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/OutCrossingAnalysis.cpp,v $
 
 //
@@ -40,6 +40,7 @@
 #include <tcl.h>
 #include <string.h>
 #include <NormalRV.h>
+#include <LimitStateFunctionIter.h>
 
 #include <fstream>
 #include <iomanip>
@@ -90,13 +91,10 @@ OutCrossingAnalysis::analyze(void)
 
 	// Declare variables used in this method
 	int numRV = theReliabilityDomain->getNumberOfRandomVariables();
-	int numLsf = theReliabilityDomain->getNumberOfLimitStateFunctions();
-	LimitStateFunction *theLimitStateFunction;
-	NormalRV aStdNormRV(1,0.0,1.0,0.0);
-	Matrix DgDdispl;
+	static NormalRV aStdNormRV(1,0.0,1.0,0.0);
 	int numVel, i, j, k, kk, nodeNumber, dofNumber, lsf; 
 	double dgduValue, accuSum;
-	Vector uStar, uStar2;
+	Vector uStar2(numRV);
 	Vector alpha(numRV), alpha2(numRV), alpha_k(numRV), alpha_kk(numRV);
 	double beta1, beta2;
 	double pf1, pf2;
@@ -128,8 +126,12 @@ OutCrossingAnalysis::analyze(void)
 
 
 	// Loop over number of limit-state functions and perform analysis
-	for (lsf=1; lsf<=numLsf; lsf++ ) {
+	LimitStateFunctionIter lsfIter = theReliabilityDomain->getLimitStateFunctions();
+	LimitStateFunction *theLimitStateFunction;
+	//for (lsf=1; lsf<=numLsf; lsf++ ) {
+	while ((theLimitStateFunction = lsfIter()) != 0) {
 
+	  int lsf = theLimitStateFunction->getTag();
 
 		// Inform the user which limit-state function is being evaluated
 		opserr << "Limit-state function number: " << lsf << endln;
@@ -145,17 +147,6 @@ OutCrossingAnalysis::analyze(void)
 
 		// Set tag of "active" limit-state function
 		theReliabilityDomain->setTagOfActiveLimitStateFunction(lsf);
-
-
-		// Get the limit-state function pointer
-		theLimitStateFunction = 0;
-		lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
-		theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
-		if (theLimitStateFunction == 0) {
-			opserr << "OutCrossingAnalysis::analyze() - could not find" << endln
-				<< " limit-state function with tag #" << lsf << "." << endln;
-			return -1;
-		}
 
 
 		// Loop over the intervals where probabilities are to be computed
@@ -204,7 +195,7 @@ OutCrossingAnalysis::analyze(void)
 
 
 				// Get results from the "find design point algorithm"
-				uStar = theFindDesignPointAlgorithm->get_u();
+				const Vector &uStar = theFindDesignPointAlgorithm->get_u();
 				alpha = theFindDesignPointAlgorithm->get_alpha();
 
 
@@ -224,7 +215,7 @@ OutCrossingAnalysis::analyze(void)
 				if (analysisType == 1) {
 					// Get the 'dgdu' vector from the sensitivity evaluator
 					// (The returned matrix containes 'node#' 'dir#' 'dgdu' in rows)
-					DgDdispl = theGradGEvaluator->getDgDdispl();
+					const Matrix &DgDdispl = theGradGEvaluator->getDgDdispl();
 
 
 					// Add extra term to limit-state function
