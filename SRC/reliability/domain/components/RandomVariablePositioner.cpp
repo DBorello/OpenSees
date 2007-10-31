@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-09-05 22:49:36 $
+// $Revision: 1.8 $
+// $Date: 2007-10-31 21:36:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariablePositioner.cpp,v $
 
 
@@ -35,19 +35,19 @@
 #include <classTags.h>
 
 RandomVariablePositioner::RandomVariablePositioner(int passedTag,
-		int passedRVnumber,
+		int passedRVindex,
 		DomainComponent *object,
 		const char **argv, int argc)
   :ReliabilityDomainComponent(passedTag, RANDOM_VARIABLE_POSITIONER),
-   rvNumber(passedRVnumber), theParameter(passedTag, object, argv, argc)
+   rvIndex(passedRVindex), theParameter(passedTag, object, argv, argc)
 {
 
 }
 
 RandomVariablePositioner::RandomVariablePositioner(int passedTag,
-		int passedRVnumber, Parameter &param)
+		int passedRVindex, Parameter &param)
   :ReliabilityDomainComponent(passedTag, RANDOM_VARIABLE_POSITIONER),
-   rvNumber(passedRVnumber), theParameter(param)
+   rvIndex(passedRVindex), theParameter(param)
 {
 
 }
@@ -73,14 +73,14 @@ void
 RandomVariablePositioner::Print(OPS_Stream &s, int flag)  
 {
   s << "RandomVariablePositoner, tag = " << this->getTag() << '\n';
-  s << "\trvNumber = " << rvNumber << '\n';
+  s << "\trvIndex = " << rvIndex << '\n';
   theParameter.Print(s, flag);
 }
 
 int 
-RandomVariablePositioner::getRvNumber(void)
+RandomVariablePositioner::getRvIndex(void)
 {
-  return rvNumber;
+  return rvIndex;
 }
 
 int 
@@ -92,9 +92,9 @@ RandomVariablePositioner::setNewTag(int newTag)
 }
 
 int 
-RandomVariablePositioner::setRvNumber(int newRvNumber)
+RandomVariablePositioner::setRvIndex(int newRvIndex)
 {
-  rvNumber = newRvNumber;
+  rvIndex = newRvIndex;
   
   return 0;
 }
