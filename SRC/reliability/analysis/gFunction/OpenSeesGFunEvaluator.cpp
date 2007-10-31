@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2007-10-25 20:50:22 $
+// $Revision: 1.20 $
+// $Date: 2007-10-31 16:53:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.cpp,v $
 
 
@@ -36,6 +36,8 @@
 #include <GFunEvaluator.h>
 #include <ReliabilityDomain.h>
 #include <LimitStateFunction.h>
+#include <LimitStateFunctionIter.h>
+#include <RandomVariableIter.h>
 #include <RandomVariablePositioner.h>
 #include <RandomVariablePositionerIter.h>
 
@@ -259,35 +261,44 @@ OpenSeesGFunEvaluator::getDt()
 int
 OpenSeesGFunEvaluator::createTclVariables()
 {
-  // Download active limit-state function
-  int lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
-  LimitStateFunction *theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
-  if (theLimitStateFunction == 0) {
-    opserr << "ERROR OpenSeesGFunEvaluation::createTclVariables -- limit state function with tag "
-	   << lsf << " not found in reliability domain" << endln;
-    return -1;
-
+  char theIndex[20];
+  // Set values of random variables in the Tcl intepreter
+  RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
+  RandomVariable *theRV;
+  while ((theRV = rvIter()) != 0) {
+    sprintf(theIndex,"%d",theRV->getTag());
+    if (Tcl_SetVar2(theTclInterp, "xrv", theIndex, "0.0", TCL_LIST_ELEMENT) == 0) {
+      opserr << "ERROR OpenSeesGFunEvaluator -- error in Tcl_SetVar2" << endln;
+      opserr << theTclInterp->result << endln;
+      return -1;
+    }
   }
-  char *theExpression = theLimitStateFunction->getExpression();
 
   // Initial declarations
   char separators[5] = "}{";
-  char lsf_forTokenizing[500];
-  strcpy(lsf_forTokenizing,theExpression);
+  char lsf_forTokenizing[1000];
 
-  // Go through the limit-state function
-  char *tokenPtr = strtok( lsf_forTokenizing, separators);
-  while ( tokenPtr != NULL ) {
+  LimitStateFunctionIter lsfIter = theReliabilityDomain->getLimitStateFunctions();
+  LimitStateFunction *theLSF;
+  while ((theLSF = lsfIter()) != 0) {
+    char *theExpression = theLSF->getExpression();
+    strcpy(lsf_forTokenizing,theExpression);
+
+    // Go through the limit-state function
+    char *tokenPtr = strtok( lsf_forTokenizing, separators);
+    while ( tokenPtr != NULL ) {
 
     if ( strncmp(tokenPtr, "rec_node",8) == 0 ||
 	 strncmp(tokenPtr, "rec_element",11) == 0 ) {
       if (Tcl_SetVar(theTclInterp, tokenPtr, "0.0", TCL_LIST_ELEMENT) == NULL) {
 	opserr << "ERROR OpenSeesGFunEvaluator -- error in Tcl_SetVar for createTclVariables" << endln;
+	opserr << theTclInterp->result << endln;
 	return -1;
       }
     }
     
     tokenPtr = strtok( NULL, separators);
+	}
   }
 
   return 0;
@@ -299,35 +310,38 @@ OpenSeesGFunEvaluator::createTclVariables()
 int
 OpenSeesGFunEvaluator::removeTclVariables()
 {
-  // Download active limit-state function
-  int lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
-  LimitStateFunction *theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
-  if (theLimitStateFunction == 0) {
-    opserr << "ERROR OpenSeesGFunEvaluation::removeTclVariables -- limit state function with tag "
-	   << lsf << " not found in reliability domain" << endln;
+  // Remove random variables from Tcl
+  if (Tcl_UnsetVar(theTclInterp, "xrv", TCL_LIST_ELEMENT) == TCL_ERROR) {
+    opserr << "ERROR OpenSeesGFunEvaluator -- error in Tcl_UnsetVar" << endln;
+    opserr << theTclInterp->result << endln;
     return -1;
-
   }
-  char *theExpression = theLimitStateFunction->getExpression();
 
   // Initial declarations
   char separators[5] = "}{";
-  char lsf_forTokenizing[500];
-  strcpy(lsf_forTokenizing,theExpression);
+  char lsf_forTokenizing[1000];
 
-  // Go through the limit-state function
-  char *tokenPtr = strtok( lsf_forTokenizing, separators);
-  while ( tokenPtr != NULL ) {
+  LimitStateFunctionIter lsfIter = theReliabilityDomain->getLimitStateFunctions();
+  LimitStateFunction *theLSF;
+  while ((theLSF = lsfIter()) != 0) {
+    char *theExpression = theLSF->getExpression();
+    strcpy(lsf_forTokenizing,theExpression);
+
+    // Go through the limit-state function
+    char *tokenPtr = strtok( lsf_forTokenizing, separators);
+    while ( tokenPtr != NULL ) {
 
     if ( strncmp(tokenPtr, "rec_node",8) == 0 ||
 	 strncmp(tokenPtr, "rec_element",11) == 0 ) {
       if (Tcl_UnsetVar(theTclInterp, tokenPtr, TCL_LIST_ELEMENT) == TCL_ERROR) {
 	opserr << "ERROR OpenSeesGFunEvaluator -- error in Tcl_UnsetVar for removeTclVariables" << endln;
+	opserr << theTclInterp->result << endln;
 	return -1;
       }
-    }
+	 }
     
     tokenPtr = strtok( NULL, separators);
+	}
   }
 
   return 0;
