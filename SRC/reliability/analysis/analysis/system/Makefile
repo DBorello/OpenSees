@@ -1,7 +1,6 @@
 include ../../../../../Makefile.def
 
-OBJS       = 	SystemAnalysis.o \
-	PCM.o IPCM.o MVNcdf.o SCIS.o
+OBJS       = PCM.o IPCM.o MVNcdf.o SCIS.o
 
 
 # Compilation control
