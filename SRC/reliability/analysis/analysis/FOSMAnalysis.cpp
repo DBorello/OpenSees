@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-10-25 16:49:13 $
+// $Revision: 1.4 $
+// $Date: 2007-10-31 16:41:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FOSMAnalysis.cpp,v $
 
 
@@ -40,6 +40,9 @@
 #include <Matrix.h>
 #include <Vector.h>
 #include <tcl.h>
+
+#include <RandomVariableIter.h>
+#include <LimitStateFunctionIter.h>
 
 #include <fstream>
 #include <iomanip>
@@ -82,7 +85,7 @@ FOSMAnalysis::analyze(void)
 
 
 	// Initial declarations
-	int i,j,k;
+	int i;
 
 
 	// Open output file
@@ -95,28 +98,18 @@ FOSMAnalysis::analyze(void)
 
 	
 	// Get mean point
-	RandomVariable *aRandomVariable;
 	Vector meanVector(nrv);
-	for (i=1; i<=nrv; i++)
-	{
-		aRandomVariable = theReliabilityDomain->getRandomVariablePtr(i);
-		if (aRandomVariable == 0) {
-			opserr << "FOSMAnalysis::analyze() -- Could not find" << endln
-				<< " random variable with tag #" << i << "." << endln;
-			return -1;
-		}
-		meanVector(i-1) = aRandomVariable->getMean();
-	}
-
-
 	// Establish vector of standard deviations
 	Vector stdvVector(nrv);
-	for (i=1; i<=nrv; i++)
-	{
-		aRandomVariable = theReliabilityDomain->getRandomVariablePtr(i);
-		stdvVector(i-1) = aRandomVariable->getStdv();
-	}
 
+	RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
+	RandomVariable *aRandomVariable;
+	//for (i=1; i<=nrv; i++) {
+	while ((aRandomVariable = rvIter()) != 0) {
+	  int i = aRandomVariable->getIndex();
+	  meanVector(i) = aRandomVariable->getMean();
+	  stdvVector(i) = aRandomVariable->getStdv();
+	}
 
 	// Evaluate limit-state functions
 	Vector meanEstimates(numLsf);
@@ -128,19 +121,25 @@ FOSMAnalysis::analyze(void)
 			<< " could not run analysis to evaluate limit-state function. " << endln;
 		return -1;
 	}
-	for (lsf=1; lsf<=numLsf; lsf++ ) {
-		theReliabilityDomain->setTagOfActiveLimitStateFunction(lsf);
+	LimitStateFunctionIter lsfIter = theReliabilityDomain->getLimitStateFunctions();
+	LimitStateFunction *theLSF;
+	//for (lsf=1; lsf<=numLsf; lsf++ ) {
+	while ((theLSF = lsfIter()) != 0) {
+	  
+	  int lsf = theLSF->getTag();
+	  theReliabilityDomain->setTagOfActiveLimitStateFunction(lsf);
 		
-		// set namespace variable for tcl functions
-		Tcl_SetVar2Ex(theTclInterp,"RELIABILITY_lsf",NULL,Tcl_NewIntObj(lsf),TCL_NAMESPACE_ONLY);
+	  // set namespace variable for tcl functions
+	  Tcl_SetVar2Ex(theTclInterp,"RELIABILITY_lsf",NULL,Tcl_NewIntObj(lsf),TCL_NAMESPACE_ONLY);
 		
-		result = theGFunEvaluator->evaluateG(meanVector);
-		if (result < 0) {
-			opserr << "FOSMAnalysis::analyze() - " << endln
-				<< " could not tokenize limit-state function. " << endln;
-			return -1;
-		}
-		meanEstimates(lsf-1) = theGFunEvaluator->getG();
+	  result = theGFunEvaluator->evaluateG(meanVector);
+	  if (result < 0) {
+	    opserr << "FOSMAnalysis::analyze() - " << endln
+		   << " could not tokenize limit-state function. " << endln;
+	    return -1;
+	  }
+	  int i = theLSF->getIndex();
+	  meanEstimates(i) = theGFunEvaluator->getG();
 	}
 
 
@@ -157,21 +156,35 @@ FOSMAnalysis::analyze(void)
 
 	// Establish covariance matrix
 	Matrix covMatrix(nrv,nrv);
-	for (i=1; i<=nrv; i++) {
-		covMatrix(i-1,i-1) = stdvVector(i-1)*stdvVector(i-1);
+	for (i = 0; i < nrv; i++) {
+	  covMatrix(i,i) = stdvVector(i)*stdvVector(i);
 	}
 	int ncorr = theReliabilityDomain->getNumberOfCorrelationCoefficients();
 	CorrelationCoefficient *theCorrelationCoefficient;
 	double covariance, correlation;
 	int rv1, rv2;
+	RandomVariable *rv1Ptr;
+	RandomVariable *rv2Ptr;
 	for (i=1 ; i<=ncorr ; i++) {
 		theCorrelationCoefficient = theReliabilityDomain->getCorrelationCoefficientPtr(i);
 		correlation = theCorrelationCoefficient->getCorrelation();
 		rv1 = theCorrelationCoefficient->getRv1();
 		rv2 = theCorrelationCoefficient->getRv2();
-		covariance = correlation*stdvVector(rv1-1)*stdvVector(rv2-1);
-		covMatrix(rv1-1,rv2-1) = covariance;
-		covMatrix(rv2-1,rv1-1) = covariance;
+		rv1Ptr = theReliabilityDomain->getRandomVariablePtr(rv1);
+		if (rv1Ptr == 0) {
+		  opserr << "FOSMAnalysis::analyze -- random variable with tag " << rv1 << " not found in domain" << endln;
+		  return -1;
+		}
+		rv2Ptr = theReliabilityDomain->getRandomVariablePtr(rv2);
+		if (rv2Ptr == 0) {
+		  opserr << "FOSMAnalysis::analyze -- random variable with tag " << rv2 << " not found in domain" << endln;
+		  return -1;
+		}
+		int i1 = rv1Ptr->getIndex();
+		int i2 = rv2Ptr->getIndex();
+		covariance = correlation*stdvVector(i1)*stdvVector(i2);
+		covMatrix(i1,i2) = covariance;
+		covMatrix(i2,i1) = covariance;
 	}
 
 
@@ -179,7 +192,12 @@ FOSMAnalysis::analyze(void)
 	Vector responseStdv(numLsf);
 	Vector gradient(nrv);
 	double responseVariance;
-	for (lsf=1; lsf<=numLsf; lsf++ ) {
+	lsfIter.reset();
+	//for (lsf=1; lsf<=numLsf; lsf++ ) {
+	while ((theLSF = lsfIter()) != 0) {
+
+	  int j = theLSF->getIndex();
+	  int lsf = theLSF->getTag();
 
 
 		// Set tag of active limit-state function
@@ -188,7 +206,7 @@ FOSMAnalysis::analyze(void)
 
 		// Extract relevant gradient
 		for (i=0; i<nrv; i++) {
-			gradient(i) = matrixOfGradientVectors(i,lsf-1);
+			gradient(i) = matrixOfGradientVectors(i,j);
 		}
 
 
@@ -199,19 +217,18 @@ FOSMAnalysis::analyze(void)
 				<< " is zero! " << endln;
 		}
 		else {
-			responseStdv(lsf-1) = sqrt(responseVariance);
+			responseStdv(j) = sqrt(responseVariance);
 		}
 
 		// Compute importance measure (dgdx*stdv)
 		Vector importance(nrv);
-		for (i=1 ; i<=nrv ; i++) {
-			aRandomVariable = theReliabilityDomain->getRandomVariablePtr(i);
-			importance(i-1) = gradient(i-1) * aRandomVariable->getStdv();
+		for (i = 0; i < nrv ; i++) {
+		  importance(i) = gradient(i) * stdvVector(i);
 		}
 		double imptNorm = importance.Norm();
-		for (i=1 ; i<=nrv ; i++)
-			importance(i-1) = importance(i-1)/imptNorm;
-
+		rvIter.reset();
+		for (i = 0; i < nrv ; i++)
+		  importance(i) = importance(i)/imptNorm;
 	
 		// Print FOSM results to the output file
 		outputFile << "#######################################################################" << endln;
@@ -226,17 +243,20 @@ FOSMAnalysis::analyze(void)
 			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<responseStdv(lsf-1) 
 			<< "  #" << endln;
 		outputFile << "#                                                                     #" << endln;
-		outputFile << "#      R.v.         Importance measure (dgdx*stdv)                    #" << endln;
+		outputFile << "#      Rvtag        Importance measure (dgdx*stdv)                    #" << endln;
 		outputFile.setf( ios::scientific, ios::floatfield );
-		for (int i=0;  i<nrv; i++) {
-			outputFile << "#       " <<setw(3)<<(i+1)<<"              ";
-			outputFile << "";
-			if (importance(i) < 0.0)
-				outputFile << "-"; 
-			else
-				outputFile << " "; 
-			outputFile <<setprecision(3)<<setw(11)<<fabs(importance(i));
-			outputFile << "                                 #" << endln;
+		rvIter.reset();
+		//for (int i=0;  i<nrv; i++) {
+		while ((aRandomVariable = rvIter()) != 0) {
+		  int i = aRandomVariable->getIndex();
+		  outputFile << "#       " <<setw(3)<<aRandomVariable->getTag()<<"              ";
+		  outputFile << "";
+		  if (importance(i) < 0.0)
+		    outputFile << "-"; 
+		  else
+		    outputFile << " "; 
+		  outputFile <<setprecision(3)<<setw(11)<<fabs(importance(i));
+		  outputFile << "                                 #" << endln;
 		}
 		outputFile << "#                                                                     #" << endln;
 		outputFile << "#######################################################################" << endln << endln << endln;
@@ -249,36 +269,36 @@ FOSMAnalysis::analyze(void)
 	Matrix responseCovMatrix(numLsf,numLsf);
 	double responseCovariance;
 	Vector gradientVector1(nrv), gradientVector2(nrv);
-	for (i=1; i<=numLsf; i++) {
-		for (k=0; k<nrv; k++) {
-			gradientVector1(k) = matrixOfGradientVectors(k,i-1);
-		}
-		for (j=i+1; j<=numLsf; j++) {
-			for (k=0; k<nrv; k++) {
-				gradientVector2(k) = matrixOfGradientVectors(k,j-1);
-			}
-			responseCovariance = (covMatrix^gradientVector1)^gradientVector2;
-			responseCovMatrix(i-1,j-1) = responseCovariance;
-		}
+	for (i = 0; i < numLsf; i++) {
+	  for (int k = 0; k < nrv; k++) {
+	    gradientVector1(k) = matrixOfGradientVectors(k,i);
+	  }
+	  for (int j = i; j < numLsf; j++) {
+	    for (int k = 0; k < nrv; k++) {
+	      gradientVector2(k) = matrixOfGradientVectors(k,j);
+	    }
+	    responseCovariance = (covMatrix^gradientVector1)^gradientVector2;
+	    responseCovMatrix(i,j) = responseCovariance;
+	  }
 	}
-	for (i=1; i<=numLsf; i++) {
-		for (j=1; j<i; j++) {
-			responseCovMatrix(i-1,j-1) = responseCovMatrix(j-1,i-1);
-		}
+	for (i = 0 ; i < numLsf; i++) {
+	  for (int j = 0; j < i; j++) {
+	    responseCovMatrix(i,j) = responseCovMatrix(j,i);
+	  }
 	}
 
 
 	// Corresponding correlation matrix
 	Matrix correlationMatrix(numLsf,numLsf);
-	for (i=1; i<=numLsf; i++) {
-		for (j=i+1; j<=numLsf; j++) {
-			correlationMatrix(i-1,j-1) = responseCovMatrix(i-1,j-1)/(responseStdv(i-1)*responseStdv(j-1));
-		}
+	for (i = 0; i < numLsf; i++) {
+	  for (int j = i; j < numLsf; j++) {
+	    correlationMatrix(i,j) = responseCovMatrix(i,j)/(responseStdv(i)*responseStdv(j));
+	  }
 	}
-	for (i=1; i<=numLsf; i++) {
-		for (j=1; j<i; j++) {
-			correlationMatrix(i-1,j-1) = correlationMatrix(j-1,i-1);
-		}
+	for (i = 0; i < numLsf; i++) {
+	  for (int j = 0; j < i; j++) {
+	    correlationMatrix(i,j) = correlationMatrix(j,i);
+	  }
 	}
 
 	
@@ -292,16 +312,27 @@ FOSMAnalysis::analyze(void)
 	else {
 		outputFile << "#   gFun   gFun     Correlation                                       #" << endln;
 		outputFile.setf(ios::fixed, ios::floatfield);
-		for (i=0; i<numLsf; i++) {
-			for (j=i+1; j<numLsf; j++) {
-//				outputFile.setf(ios::fixed, ios::floatfield);
-				outputFile << "#    " <<setw(3)<<(i+1)<<"    "<<setw(3)<<(j+1)<<"     ";
-				if (correlationMatrix(i,j)<0.0) { outputFile << "-"; }
-				else { outputFile << " "; }
-//				outputFile.setf(ios::scientific, ios::floatfield);
-				outputFile <<setprecision(7)<<setw(11)<<fabs(correlationMatrix(i,j));
-				outputFile << "                                      #" << endln;
-			}
+
+		LimitStateFunctionIter lsfIter2 = lsfIter;
+		LimitStateFunction *theLSF2;
+		lsfIter.reset();
+		//for (i=0; i<numLsf; i++) {
+		while ((theLSF = lsfIter()) != 0) {
+		  int i = theLSF->getIndex();
+		  int iTag = theLSF->getTag();
+		  lsfIter2.reset();
+		  //for (j=i+1; j<numLsf; j++) {
+		  while ((theLSF2 = lsfIter2()) != 0) {
+		    int j = theLSF2->getIndex();
+		    int jTag = theLSF2->getTag();
+		    //				outputFile.setf(ios::fixed, ios::floatfield);
+		    outputFile << "#    " <<setw(3)<<iTag<<"    "<<setw(3)<<jTag<<"     ";
+		    if (correlationMatrix(i,j)<0.0) { outputFile << "-"; }
+		    else { outputFile << " "; }
+		    //				outputFile.setf(ios::scientific, ios::floatfield);
+		    outputFile <<setprecision(7)<<setw(11)<<fabs(correlationMatrix(i,j));
+		    outputFile << "                                      #" << endln;
+		  }
 		}
 	}
 	outputFile << "#                                                                     #" << endln;
