@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-02-16 22:57:29 $
+// $Revision: 1.6 $
+// $Date: 2007-10-31 21:38:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/FiniteDifferenceGradGEvaluator.cpp,v $
 
 
@@ -40,6 +40,9 @@
 #include <GFunEvaluator.h>
 #include <RandomVariable.h>
 #include <tcl.h>
+
+#include <RandomVariableIter.h>
+#include <LimitStateFunctionIter.h>
 
 #include <fstream>
 #include <iomanip>
@@ -144,12 +147,13 @@ FiniteDifferenceGradGEvaluator::computeGradG(double gFunValue,
 	double gFunValueAStepAhead;
 	double stdv;
 
+	RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
 
 	// For each random variable: perturb and run analysis again
-	for ( i=0 ; i<numberOfRandomVariables ; i++ )
-	{
-		// Get random variable from domain
-		theRandomVariable = theReliabilityDomain->getRandomVariablePtr(i+1);
+	//for ( i=0 ; i<numberOfRandomVariables ; i++ ) {
+	while ((theRandomVariable = rvIter()) != 0) {
+	  
+	  int i = theRandomVariable->getIndex();
 
 
 		// Get the standard deviation
@@ -236,12 +240,13 @@ FiniteDifferenceGradGEvaluator::computeAllGradG(const Vector &gFunValues,
 
 
 	// For each random variable: perturb and run analysis again
+	RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
 
-	for (int i=1; i<=nrv; i++) {
+	// For each random variable: perturb and run analysis again
+	//for (int i=1; i<=nrv; i++) {
+	while ((theRandomVariable = rvIter()) != 0) {
 
-		// Get random variable from domain
-		theRandomVariable = theReliabilityDomain->getRandomVariablePtr(i);
-
+	  int i = theRandomVariable->getIndex();
 
 		// Get the standard deviation
 		stdv = theRandomVariable->getStdv();
@@ -253,7 +258,7 @@ FiniteDifferenceGradGEvaluator::computeAllGradG(const Vector &gFunValues,
 
 		// Compute perturbed vector of random variables realization
 		perturbed_x = passed_x;
-		perturbed_x(i-1) = perturbed_x(i-1) + h;
+		perturbed_x(i) = perturbed_x(i) + h;
 
 
 		// Evaluate limit-state function
@@ -264,12 +269,17 @@ FiniteDifferenceGradGEvaluator::computeAllGradG(const Vector &gFunValues,
 			return -1;
 		}
 
-		
+		LimitStateFunctionIter lsfIter = theReliabilityDomain->getLimitStateFunctions();
+		LimitStateFunction *theLSF;
 		// Now loop over limit-state functions
-		for (int j=1; j<=lsf; j++) {
+		//for (int j=1; j<=lsf; j++) {
+		while ((theLSF = lsfIter()) != 0) {
+		  
+		  int lsfTag = theLSF->getTag();
+		  int j = theLSF->getIndex();
 
 			// Set tag of active limit-state function
-			theReliabilityDomain->setTagOfActiveLimitStateFunction(j);
+			theReliabilityDomain->setTagOfActiveLimitStateFunction(lsfTag);
 
 			// Limit-state function value
 			result = theGFunEvaluator->evaluateG(perturbed_x);
@@ -281,7 +291,7 @@ FiniteDifferenceGradGEvaluator::computeAllGradG(const Vector &gFunValues,
 			gFunValueAStepAhead = theGFunEvaluator->getG();
 
 			// Compute the derivative by finite difference
-			(*grad_g_matrix)(i-1,j-1) = (gFunValueAStepAhead - gFunValues(j-1)) / h;
+			(*grad_g_matrix)(i,j) = (gFunValueAStepAhead - gFunValues(j)) / h;
 
 		}
 	}
