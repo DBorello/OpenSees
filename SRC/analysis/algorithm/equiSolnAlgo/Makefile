@@ -9,6 +9,7 @@ OBJS       = EquiSolnAlgo.o Linear.o NewtonRaphson.o \
 # Compilation control
 
 all:         $(OBJS)
+	@$(CD) $(FE)/analysis/algorithm/equiSolnAlgo/accelerator; $(MAKE);
 
 # Miscellaneous
 tidy:	
@@ -20,5 +21,6 @@ clean: tidy
 spotless: clean
 
 wipe: spotless
+	@$(CD) $(FE)/analysis/algorithm/equiSolnAlgo/accelerator; $(MAKE) wipe;
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
