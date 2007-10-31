@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-10-31 15:37:12 $
+// $Revision: 1.12 $
+// $Date: 2007-10-31 20:17:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.cpp,v $
 
 
@@ -35,6 +35,7 @@
 #include <ReliabilityDomain.h>
 #include <ReliabilityAnalysis.h>
 #include <LimitStateFunction.h>
+#include <LimitStateFunctionIter.h>
 #include <RandomNumberGenerator.h>
 #include <CStdLibRandGenerator.h>
 #include <NormalRV.h>
@@ -148,10 +149,12 @@ SystemAnalysis::initialize()
 		Matrix allAlphas(nrv,numLsf);
 
 		// Loop over number of limit-state functions and collect results
-		for (i=0; i<numLsf; i++ ) {
+		LimitStateFunction *theLimitStateFunction;
+		LimitStateFunctionIter &lsfIter = theReliabilityDomain->getLimitStateFunctions();
+		//for (i=0; i<numLsf; i++ ) {
+		while ((theLimitStateFunction = lsfIter()) != 0) {
+		  int i = theLimitStateFunction->getIndex();
 
-			// Get FORM results from the limit-state function
-			theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(i+1);
 			beta = theLimitStateFunction->FORMReliabilityIndexBeta;
 			pf1 = theLimitStateFunction->FORMProbabilityOfFailure_pf1;
 			const Vector &alpha = theLimitStateFunction->normalizedNegativeGradientVectorAlpha;
