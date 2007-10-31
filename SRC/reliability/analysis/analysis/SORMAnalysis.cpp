@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-10-25 16:49:13 $
+// $Revision: 1.9 $
+// $Date: 2007-10-31 22:50:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SORMAnalysis.cpp,v $
 
 
@@ -36,6 +36,7 @@
 #include <ReliabilityAnalysis.h>
 #include <FindCurvatures.h>
 #include <LimitStateFunction.h>
+#include <LimitStateFunctionIter.h>
 #include <NormalRV.h>
 #include <math.h>
 #include <Vector.h>
@@ -76,7 +77,6 @@ SORMAnalysis::analyze(void)
 
 
 	// Declare variables used in this method
-	Vector curvatures;
 	int numberOfCurvatures;
 	double beta;
 	double pf1;
@@ -85,8 +85,7 @@ SORMAnalysis::analyze(void)
 	int i;
 	double pf2Breitung;
 	double betaBreitung;
-	LimitStateFunction *theLimitStateFunction;
-	NormalRV aStdNormRV(1,0.0,1.0,0.0);
+	static NormalRV aStdNormRV(1,0.0,1.0,0.0);
 
 
 	// Number of limit-state functions
@@ -96,30 +95,20 @@ SORMAnalysis::analyze(void)
 	// Open output file
 	ofstream outputFile( fileName, ios::out );
 
+	LimitStateFunctionIter &lsfIter = theReliabilityDomain->getLimitStateFunctions();
+	LimitStateFunction *theLimitStateFunction;
 
 	// Loop over number of limit-state functions
-	for (int lsf=1; lsf<=numLsf; lsf++ ) {
+	//for (int lsf=1; lsf<=numLsf; lsf++ ) {
+	while ((theLimitStateFunction = lsfIter()) != 0) {
 
-
+	  int lsf = theLimitStateFunction->getTag();
 		// Inform the user which limit-state function is being evaluated
 		opserr << "Limit-state function number: " << lsf << endln;
 
 
 		// Set tag of "active" limit-state function
 		theReliabilityDomain->setTagOfActiveLimitStateFunction(lsf);
-
-
-		// Get the limit-state function pointer
-		theLimitStateFunction = 0;
-		// this doesn't make any sense!!!
-		//lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
-		theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
-		if (theLimitStateFunction == 0) {
-			opserr << "SORMAnalysis::analyze() - could not find" << endln
-				<< " limit-state function with tag #" << lsf << "." << endln;
-			return -1;
-		}
-
 
 		// Compute curvature(s)
 		if (theCurvaturesAlgorithm->computeCurvatures(theReliabilityDomain) < 0) {
@@ -130,7 +119,7 @@ SORMAnalysis::analyze(void)
 
 
 		// Get results
-		curvatures = theCurvaturesAlgorithm->getCurvatures();
+		const Vector &curvatures = theCurvaturesAlgorithm->getCurvatures();
 		numberOfCurvatures = curvatures.Size();
 			
 

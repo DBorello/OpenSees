@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-10-25 16:49:13 $
+// $Revision: 1.7 $
+// $Date: 2007-10-31 22:50:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SamplingAnalysis.cpp,v $
 
 
@@ -35,6 +35,7 @@
 #include <ReliabilityDomain.h>
 #include <ReliabilityAnalysis.h>
 #include <LimitStateFunction.h>
+#include <LimitStateFunctionIter.h>
 #include <ProbabilityTransformation.h>
 #include <NatafProbabilityTransformation.h>
 #include <GFunEvaluator.h>
@@ -110,6 +111,7 @@ SamplingAnalysis::analyze(void)
 	int result, I, i, j, k = 1, seed = 1;
 	double det_covariance, phi, h, q;
 	int numRV = theReliabilityDomain->getNumberOfRandomVariables();
+	int numLsf = theReliabilityDomain->getNumberOfLimitStateFunctions();
 	Matrix covariance(numRV, numRV);
 	Matrix chol_covariance(numRV, numRV);
 	Matrix inv_covariance(numRV, numRV);
@@ -118,24 +120,21 @@ SamplingAnalysis::analyze(void)
 	Vector z(numRV);
 	Vector u(numRV);
 	Vector randomArray(numRV);
-	LimitStateFunction *theLimitStateFunction = 0;
-	NormalRV aStdNormRV(1,0.0,1.0,0.0);
+	static NormalRV aStdNormRV(1,0.0,1.0,0.0);
 	bool failureHasOccured = false;
 
 	
 	// Establish covariance matrix
 	for (i=0;  i<numRV;  i++) {
-		for (j=0;  j<numRV;  j++) {
-			if (i==j)
-				covariance(i,j) = samplingStdv*samplingStdv;
-			else
-				covariance(i,j) = 0.0;
-		}
+	  covariance(i,i) = samplingStdv*samplingStdv;
 	}
 
 
 	// Create object to do matrix operations on the covariance matrix
 	MatrixOperations theMatrixOperations(covariance);
+
+	// Terje -- why are you doing these matrix operations on a matrix
+	// that is a scalar times the identity????
 
 	// Cholesky decomposition of covariance matrix
 	result = theMatrixOperations.computeLowerCholesky();
@@ -171,10 +170,6 @@ SamplingAnalysis::analyze(void)
 	double pi = acos(-1.0);
 	double factor1 = 1.0 / ( pow((2.0*pi),((double)numRV/2.0)) );
 	double factor2 = 1.0 / ( pow((2.0*pi),((double)numRV/2.0)) * sqrt(det_covariance) );
-
-
-	// Number of limit-state functions
-	int numLsf = theReliabilityDomain->getNumberOfLimitStateFunctions();
 
 
 	Vector sum_q(numLsf);
@@ -312,15 +307,20 @@ SamplingAnalysis::analyze(void)
 		}
 
 
+		LimitStateFunctionIter &lsfIter = theReliabilityDomain->getLimitStateFunctions();
+		LimitStateFunction *theLimitStateFunction;
 		// Loop over number of limit-state functions
-		for (int lsf=0; lsf<numLsf; lsf++ ) {
+		//for (int lsf=0; lsf<numLsf; lsf++ ) {
+		while ((theLimitStateFunction = lsfIter()) != 0) {
+		  int lsf = theLimitStateFunction->getIndex();
+		  int lsfTag = theLimitStateFunction->getTag();
 
 
 			// Set tag of "active" limit-state function
-			theReliabilityDomain->setTagOfActiveLimitStateFunction(lsf+1);
+			theReliabilityDomain->setTagOfActiveLimitStateFunction(lsfTag);
 			
 			// set namespace variable for tcl procedures
-			Tcl_SetVar2Ex(interp,"RELIABILITY_lsf",NULL,Tcl_NewIntObj(lsf),TCL_NAMESPACE_ONLY);
+			Tcl_SetVar2Ex(interp,"RELIABILITY_lsf",NULL,Tcl_NewIntObj(lsfTag),TCL_NAMESPACE_ONLY);
 
 			// Get value of limit-state function
 			result = theGFunEvaluator->evaluateG(x);
@@ -423,7 +423,7 @@ SamplingAnalysis::analyze(void)
 
 			// Keep the user posted
 			if ( (printFlag == 1 || printFlag == 2) && analysisTypeTag != 3) {
-				sprintf(myString," GFun #%d, estimate:%15.10f, cov:%15.10f",lsf+1,q_bar(lsf),cov_of_q_bar(lsf));
+				sprintf(myString," GFun #%d, estimate:%15.10f, cov:%15.10f",lsfTag,q_bar(lsf),cov_of_q_bar(lsf));
 				opserr << myString << endln;
 			}
 		}
@@ -506,10 +506,14 @@ SamplingAnalysis::analyze(void)
 			opserr << "WARNING: Failure did not occur for any of the limit-state functions. " << endln;
 		}
 
-		
-		for (int lsf=1; lsf<=numLsf; lsf++ ) {
+		LimitStateFunctionIter &lsfIter = theReliabilityDomain->getLimitStateFunctions();
+		LimitStateFunction *theLimitStateFunction;
+		//for (int lsf=1; lsf<=numLsf; lsf++ ) {
+		while ((theLimitStateFunction = lsfIter()) != 0) {
+		  int lsfIndex = theLimitStateFunction->getIndex();
+		  int lsf = theLimitStateFunction->getTag();
 
-			if ( q_bar(lsf-1) == 0.0 ) {
+			if ( q_bar(lsfIndex) == 0.0 ) {
 
 				resultsOutputFile << "#######################################################################" << endln;
 				resultsOutputFile << "#  SAMPLING ANALYSIS RESULTS, LIMIT-STATEFUNCDTION NUMBER   "
@@ -530,17 +534,6 @@ SamplingAnalysis::analyze(void)
 				theReliabilityDomain->setTagOfActiveLimitStateFunction(lsf);
 
 
-				// Get the limit-state function pointer
-				theLimitStateFunction = 0;
-				//lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
-				theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
-				if (theLimitStateFunction == 0) {
-					opserr << "SamplingAnalysis::analyze() - could not find" << endln
-						<< " limit-state function with tag #" << lsf << "." << endln;
-					return -1;
-				}
-
-			
 				// Store results
 				if (analysisTypeTag == 1) {
 					beta_sim = -aStdNormRV.getInverseCDFvalue(q_bar(lsf-1));
@@ -602,14 +595,24 @@ SamplingAnalysis::analyze(void)
 			else {
 				resultsOutputFile << "#   gFun   gFun     Correlation                                       #" << endln;
 				resultsOutputFile.setf(ios::fixed, ios::floatfield);
-				for (i=0; i<numLsf; i++) {
-					for (int j=i+1; j<numLsf; j++) {
-						resultsOutputFile << "#    " <<setw(3)<<(i+1)<<"    "<<setw(3)<<(j+1)<<"     ";
-						if (responseCorrelation(i,j)<0.0) { resultsOutputFile << "-"; }
-						else { resultsOutputFile << " "; }
-						resultsOutputFile <<setprecision(7)<<setw(11)<<fabs(responseCorrelation(i,j));
-						resultsOutputFile << "                                      #" << endln;
-					}
+				LimitStateFunctionIter lsfIterI = theReliabilityDomain->getLimitStateFunctions();
+				LimitStateFunctionIter lsfIterJ = theReliabilityDomain->getLimitStateFunctions();
+				LimitStateFunction *lsfI, *lsfJ;
+				//for (i=0; i<numLsf; i++) {
+				while ((lsfI = lsfIterI()) != 0) {
+				  int iTag = lsfI->getTag();
+				  int i = lsfI->getIndex();
+				  lsfIterJ.reset();
+				  //for (int j=i+1; j<numLsf; j++) {
+				  while ((lsfJ = lsfIterJ()) != 0) {
+				    int jTag = lsfJ->getTag();
+				    int j = lsfJ->getIndex();
+				    resultsOutputFile << "#    " <<setw(3)<< iTag <<"    "<<setw(3)<< jTag <<"     ";
+				    if (responseCorrelation(i,j)<0.0) { resultsOutputFile << "-"; }
+				    else { resultsOutputFile << " "; }
+				    resultsOutputFile <<setprecision(7)<<setw(11)<<fabs(responseCorrelation(i,j));
+				    resultsOutputFile << "                                      #" << endln;
+				  }
 				}
 			}
 			resultsOutputFile << "#                                                                     #" << endln;
