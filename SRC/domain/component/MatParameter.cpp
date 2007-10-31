@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-10-16 00:11:55 $
+// $Revision: 1.4 $
+// $Date: 2007-10-31 17:49:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/MatParameter.cpp,v $
 
 // written: fmk
@@ -84,7 +84,9 @@ MatParameter::setDomain(Domain *theDomain)
 
   // note because of the way this parameter is updated only need to find one in the domain
   while ((theEle = theEles()) != 0) {
-      theResult = theEle->setParameter(theString, 2, *this);
+      int result = theEle->setParameter(theString, 2, *this);
+      if (result != -1)
+	theResult = result;
   }
 	
   if (theResult == -1) 
