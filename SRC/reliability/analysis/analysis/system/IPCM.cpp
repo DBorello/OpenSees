@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-10-31 15:39:09 $
+// $Revision: 1.3 $
+// $Date: 2007-10-31 20:12:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/system/IPCM.cpp,v $
 
 
@@ -66,8 +66,8 @@ IPCM::analyze(void)
 	opserr << "System Reliability Analysis (IPCM) is running ... " << endln;
 	
 	// Allocate beta and rho
-	Vector allBetas = getBeta();
-	Matrix rhos = getRho();
+	const Vector &allBetas = getBeta();
+	const Matrix &rhos = getRho();
 	
 	// compute and get bounds
 	int result = computeBounds(analysisType);
@@ -128,7 +128,7 @@ double
 IPCM::IPCMfunc(const Vector &allbeta, const Matrix &rhoin, double modifier)
 {
 	int n = allbeta.Size();
-	NormalRV uRV(1, 0.0, 1.0, 0.0);
+	static NormalRV uRV(1, 0.0, 1.0, 0.0);
 	Vector beta(n);
 	Matrix rho(n,n);
 	int i,ic,ir,j,k;

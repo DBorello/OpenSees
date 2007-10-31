@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-10-31 15:39:09 $
+// $Revision: 1.3 $
+// $Date: 2007-10-31 20:12:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/system/MVNcdf.cpp,v $
 
 
@@ -74,7 +74,8 @@ void MVNcdf::checkvals(long int passedN, double passedTol) {
 		Nmax = LONG_MAX;
 	}
 	else
-		Nmax = 2e5;
+	  //Nmax = 2e5;
+	  Nmax = 200000;
 
 	if (passedTol > DBL_EPSILON && passedTol < 1)
 		errMax = passedTol;
@@ -94,8 +95,8 @@ MVNcdf::analyze(void)
 	opserr << "System Reliability Analysis (MVNcdf) is running ... " << endln;
 
 	// Allocate beta and rho
-	Vector allBetas = getBeta();
-	Matrix rhos = getRho();
+	const Vector &allBetas = getBeta();
+	const Matrix &rhos = getRho();
 	
 	// compute and get bounds
 	int result = computeBounds(analysisType);
@@ -156,7 +157,7 @@ double
 MVNcdf::MVNcdffunc(const Vector &allbeta, const Matrix &rhoin, double modifier)
 {
 	int m = allbeta.Size();
-	NormalRV uRV(1, 0.0, 1.0, 0.0);
+	static NormalRV uRV(1, 0.0, 1.0, 0.0);
 	Vector beta(m);
 	Matrix rho(m,m);
 	int i,j,result;
