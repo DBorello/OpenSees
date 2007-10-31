@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2007-10-31 16:01:19 $
+// $Revision: 1.13 $
+// $Date: 2007-10-31 21:39:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FORMAnalysis.cpp,v $
 
 
@@ -159,9 +159,9 @@ FORMAnalysis::analyze()
 	    //for ( int j=1; j<=numRV; j++ ) {
 	    while ((theRV = rvIter()) != 0) {
 	      int j = theRV->getIndex();
-	      // Need to make sure these become j instead of j+1 -- MHS
-	      DuStarDmean = theProbabilityTransformation->meanSensitivityOf_x_to_u(xStar,j+1);
-	      DuStarDstdv = theProbabilityTransformation->stdvSensitivityOf_x_to_u(xStar,j+1);
+	      int rvTag = theRV->getTag();
+	      DuStarDmean = theProbabilityTransformation->meanSensitivityOf_x_to_u(xStar,rvTag);
+	      DuStarDstdv = theProbabilityTransformation->stdvSensitivityOf_x_to_u(xStar,rvTag);
 	      dBetaDmean = alpha^DuStarDmean;
 	      dBetaDstdv = alpha^DuStarDstdv;
 	      stdv = theRV->getStdv();
