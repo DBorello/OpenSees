@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-10-25 16:49:13 $
+// $Revision: 1.7 $
+// $Date: 2007-10-31 22:01:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FragilityAnalysis.cpp,v $
 
 
@@ -39,6 +39,8 @@
 #include <ParameterPositioner.h>
 #include <NormalRV.h>
 #include <tcl.h>
+
+#include <LimitStateFunctionIter.h>
 
 #include <fstream>
 #include <iomanip>
@@ -99,25 +101,22 @@ FragilityAnalysis::analyze(void)
 	ofstream outputFile( fileName, ios::out );
 
 
-	// Get number of limit-state functions
-	int numLsf = theReliabilityDomain->getNumberOfLimitStateFunctions();
-
 	// Initial declarations
 	Vector pf(numIntervals+1);
 	Vector pdf(numIntervals+1);
-	Vector uStar, alpha;
-	NormalRV aStdNormRV(1,0.0,1.0,0.0);
-	Matrix dGdPar;
-	int numPars, lsf, numPos;
+	static NormalRV aStdNormRV(1,0.0,1.0,0.0);
+	int numPars, numPos;
 	double thedGdPar = 0, currentValue, beta;
-	Vector gradient;
 	Vector currentValues(numIntervals+1);
 	ParameterPositioner *theParameterPositioner = 0;
 
 
 	// Loop over number of limit-state functions and perform FORM analysis
-	for (lsf = 1 ; lsf <= numLsf; lsf++ ) {
-
+	LimitStateFunctionIter &lsfIter = theReliabilityDomain->getLimitStateFunctions();
+	LimitStateFunction *theLimitStateFunction;
+	//for (lsf = 1 ; lsf <= numLsf; lsf++ ) {
+	while ((theLimitStateFunction = lsfIter()) != 0) {
+	  int lsf = theLimitStateFunction->getTag();
 
 		// Inform the user which limit-state function is being evaluated
 		opserr << "Limit-state function number: " << lsf << endln;
@@ -125,18 +124,6 @@ FragilityAnalysis::analyze(void)
 
 		// Set tag of "active" limit-state function
 		theReliabilityDomain->setTagOfActiveLimitStateFunction(lsf);
-
-
-		// "Download" limit-state function from reliability domain
-		//should not be overwriting loop variable with a get() immediately following a set()
-		//lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
-		LimitStateFunction *theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
-		if (theLimitStateFunction == 0) {
-			opserr << "FragilityAnalysis::analyze() - could not find" << endln
-				<< " limit-state function with tag #" << lsf << "." << endln;
-			return -1;
-		}
-
 
 		// Print results to output file
 		outputFile << "#######################################################################" << endln;
@@ -211,13 +198,13 @@ FragilityAnalysis::analyze(void)
 			else {
 
 				// Store probability of failure
-				uStar				= theFindDesignPointAlgorithm->get_u();
-				alpha				= theFindDesignPointAlgorithm->get_alpha();
+				const Vector &uStar				= theFindDesignPointAlgorithm->get_u();
+				const Vector &alpha				= theFindDesignPointAlgorithm->get_alpha();
 				beta = alpha ^ uStar;
 				pf(counter) = 1.0 - aStdNormRV.getCDFvalue(beta);
 
 				// Compute PDF, first; derivative of lsf wrt. parameter
-				dGdPar = theGradGEvaluator->getDgDpar();
+				const Matrix &dGdPar = theGradGEvaluator->getDgDpar();
 
 				// Find the right element
 				numPars = dGdPar.noRows();
@@ -228,7 +215,7 @@ FragilityAnalysis::analyze(void)
 				}
 
 				// Gradient of limit-state function
-				gradient = theFindDesignPointAlgorithm->getGradientInStandardNormalSpace();
+				const Vector &gradient = theFindDesignPointAlgorithm->getGradientInStandardNormalSpace();
 
 				// Compute PDF value
 				pdf(counter) = aStdNormRV.getPDFvalue(-beta) / gradient.Norm() * thedGdPar;
