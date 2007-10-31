@@ -22,13 +22,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-10-29 20:49:27 $
+// $Revision: 1.11 $
+// $Date: 2007-10-31 15:37:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.cpp,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
+// Written by Kevin Mackie (kmackie@mail.ucf.edu)
 //
 
 #include <SystemAnalysis.h>
@@ -42,17 +42,29 @@
 #include <math.h>
 #include <float.h>
 #include <time.h>
+#include <string.h>
 #include <stdlib.h>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+using std::ifstream;
+using std::ios;
 
-SystemAnalysis::SystemAnalysis(ReliabilityDomain *passedReliabilityDomain)
+SystemAnalysis::SystemAnalysis(ReliabilityDomain *passedReliabilityDomain, TCL_Char *passedBeta, TCL_Char *passedRho)
 	:ReliabilityAnalysis()
 {
 	theReliabilityDomain = passedReliabilityDomain;
+	strcpy(betaFile,passedBeta);
+	strcpy(rhoFile,passedRho);
 	
 	minLowerBound = 1.0;
 	maxUpperBound = 0.0;
 	
-	initialize();
+	int result = initialize();
+	if (result < 0) {
+		opserr << "SystemAnalysis::SystemAnalysis() ERROR - SystemAnalysis failed to initialize" << endln;
+		exit(-1);
+	}
 }
 
 SystemAnalysis::~SystemAnalysis()
@@ -71,54 +83,101 @@ SystemAnalysis::~SystemAnalysis()
 int
 SystemAnalysis::initialize()
 {
-
 	// Initial declarations
 	double beta;
 	double pf1;
 	LimitStateFunction *theLimitStateFunction;
 	int i, j, k, m, n;
-
-	// Number of limit-state functions
-	numLsf = theReliabilityDomain->getNumberOfLimitStateFunctions();
-
-	// Number of random variables
-	nrv = theReliabilityDomain->getNumberOfRandomVariables();
-
-	// Allocate vectors to store ALL the betas and alphas
-	allBetas = new Vector(numLsf);
-	allPf1s = new Vector(numLsf);
-	Matrix allAlphas(nrv,numLsf);
-
-	// Loop over number of limit-state functions and collect results
-	for (i=0; i<numLsf; i++ ) {
-
-		// Get FORM results from the limit-state function
-		theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(i+1);
-		beta = theLimitStateFunction->FORMReliabilityIndexBeta;
-		pf1 = theLimitStateFunction->FORMProbabilityOfFailure_pf1;
-		const Vector &alpha = theLimitStateFunction->normalizedNegativeGradientVectorAlpha;
-
-		// Put FORM results into vector of all betas and alphas
-		// Note that the first index of 'allAlphas' here denote 'nrv'
-		(*allBetas)(i) = beta;
-		(*allPf1s)(i) = pf1;
-		for (j=0; j<nrv; j++ ) {
-			allAlphas(j,i) = alpha(j);
+	
+	if (strlen(betaFile) > 1 && strlen(rhoFile) > 1) {
+		// read data for beta and rho from file, do not take from reliability domain
+		ifstream inputBeta( betaFile, ios::in );
+		if (!inputBeta) {
+			opserr << "SystemAnalysis::initialize ERROR - could not open beta file " << betaFile << endln;
+			return -1;
 		}
-	}
-	
-	// Compute vector of 'rhos', that is, dot products between the alphas
-	rhos = new Matrix(numLsf,numLsf);
-	
-	double dotProduct;
-	for (i=0; i<numLsf; i++ ) {
-		for (j=i+1; j<numLsf; j++ ) {
-			dotProduct = 0.0;
-			for (k=0; k<nrv; k++ ) {
-				dotProduct += allAlphas(k,i)*allAlphas(k,j);
+		ifstream inputRho( rhoFile, ios::in );
+		if (!inputRho) {
+			opserr << "SystemAnalysis::initialize ERROR - could not open rho file " << rhoFile << endln;
+			return -1;
+		}
+		
+		numLsf = 0;
+		while (inputBeta >> beta)
+			numLsf++;
+		inputBeta.clear();
+		inputBeta.seekg(0);
+		
+		// allocate arrays
+		allBetas = new Vector(numLsf);
+		allPf1s = new Vector(numLsf);
+		rhos = new Matrix(numLsf,numLsf);
+		NormalRV uRV(1, 0.0, 1.0, 0.0);
+		
+		// read data from file into arrays
+		for (i=0; i < numLsf; i++ ) {
+			inputBeta >> (*allBetas)(i);
+			(*allPf1s)(i) = 1.0 - uRV.getCDFvalue( (*allBetas)(i) );
+			
+			for (j=0; j < numLsf; j++ ) {
+				if (!inputRho.eof() )
+					inputRho >> (*rhos)(i,j);
+				else {
+					opserr << "SystemAnalysis::initialize ERROR - rho file does not contain the same data size as the beta file"
+						   << endln;
+					return -1;
+				}
 			}
-			(*rhos)(i,j) = dotProduct;
-			(*rhos)(j,i) = dotProduct;
+		}
+		
+		inputBeta.close();
+		inputRho.close();
+		
+	} else {
+		// proceed with reliability domain data, requires previous FORM analysis objects
+
+		// Number of limit-state functions
+		numLsf = theReliabilityDomain->getNumberOfLimitStateFunctions();
+
+		// Number of random variables
+		int nrv = theReliabilityDomain->getNumberOfRandomVariables();
+
+		// Allocate vectors to store ALL the betas and alphas
+		allBetas = new Vector(numLsf);
+		allPf1s = new Vector(numLsf);
+		Matrix allAlphas(nrv,numLsf);
+
+		// Loop over number of limit-state functions and collect results
+		for (i=0; i<numLsf; i++ ) {
+
+			// Get FORM results from the limit-state function
+			theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(i+1);
+			beta = theLimitStateFunction->FORMReliabilityIndexBeta;
+			pf1 = theLimitStateFunction->FORMProbabilityOfFailure_pf1;
+			const Vector &alpha = theLimitStateFunction->normalizedNegativeGradientVectorAlpha;
+
+			// Put FORM results into vector of all betas and alphas
+			// Note that the first index of 'allAlphas' here denote 'nrv'
+			(*allBetas)(i) = beta;
+			(*allPf1s)(i) = pf1;
+			for (j=0; j<nrv; j++ ) {
+				allAlphas(j,i) = alpha(j);
+			}
+		}
+		
+		// Compute vector of 'rhos', that is, dot products between the alphas
+		rhos = new Matrix(numLsf,numLsf);
+		
+		double dotProduct;
+		for (i=0; i<numLsf; i++ ) {
+			for (j=i+1; j<numLsf; j++ ) {
+				dotProduct = 0.0;
+				for (k=0; k<nrv; k++ ) {
+					dotProduct += allAlphas(k,i)*allAlphas(k,j);
+				}
+				(*rhos)(i,j) = dotProduct;
+				(*rhos)(j,i) = dotProduct;
+			}
 		}
 	}
 
@@ -151,8 +210,7 @@ SystemAnalysis::computeBounds(int aType)
 		for (i=0; i<numLsf; i++)
 			estimate += (*allPf1s)(i);
 		estimate -= numLsf-1;
-		if (estimate > 0)
-			minLowerBound = estimate;
+		minLowerBound = estimate;
 
 		// uni-component upper bound from Boole parallel system
 		upperBound = (*allPf1s)(0);
@@ -174,7 +232,7 @@ SystemAnalysis::computeBounds(int aType)
 		RandomNumberGenerator *theRandomNumberGenerator = new CStdLibRandGenerator();
 		result = theRandomNumberGenerator->generate_nIndependentUniformNumbers(numLsf,0,numLsf-1,time(NULL));
 		if (result < 0)
-			opserr << "SystemAnalysis::initialize() - could not generate random numbers for simulation." << endln;
+			opserr << "SystemAnalysis::computeBounds() - could not generate random numbers for simulation." << endln;
 
 		long int numPerms = factorial(numLsf+1);
 		int multiplicationFactor = 500;
@@ -246,12 +304,6 @@ SystemAnalysis::getNumberLimitStateFunctions(void)
 	return numLsf;
 }
 
-int 
-SystemAnalysis::getNumberRandomVariables(void)
-{
-	return nrv;
-}
-
 const Vector &
 SystemAnalysis::getBeta(void)
 {
@@ -267,7 +319,7 @@ SystemAnalysis::getRho(void)
 double
 SystemAnalysis::functionToIntegrate(double rho, double beta1, double beta2)
 {
-	double pi = acos(-1.0);
+	static const double pi = acos(-1.0);
 	if ( 1 - fabs(rho) < DBL_EPSILON ) {
 		opserr << "SystemAnalysis::functionToIntegrate warning rho approx. 1 or -1" << endln;
 		return 0.0;

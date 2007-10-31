@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-10-26 15:55:14 $
+// $Revision: 1.2 $
+// $Date: 2007-10-31 15:39:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/system/PCM.cpp,v $
 
 
@@ -45,8 +45,9 @@ using std::setw;
 using std::setprecision;
 using std::setiosflags;
 
-PCM::PCM(ReliabilityDomain *passedReliabilityDomain, TCL_Char *passedFileName, int aType)
-	:SystemAnalysis(passedReliabilityDomain)
+PCM::PCM(ReliabilityDomain *passedReliabilityDomain, TCL_Char *passedFileName, int aType, 
+		 TCL_Char *passedBeta, TCL_Char *passedRho)
+	:SystemAnalysis(passedReliabilityDomain, passedBeta, passedRho)
 {
 	strcpy(fileName,passedFileName);
 	analysisType = aType;

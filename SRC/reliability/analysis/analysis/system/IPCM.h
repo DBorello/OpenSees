@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-10-26 15:55:14 $
+// $Revision: 1.2 $
+// $Date: 2007-10-31 15:39:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/system/IPCM.h,v $
 
 
@@ -44,7 +44,8 @@ class IPCM : public SystemAnalysis
 
 public:
 	IPCM(ReliabilityDomain *passedReliabilityDomain,
-				   TCL_Char *fileName, int analysisType);
+				   TCL_Char *fileName, int analysisType, 
+				   TCL_Char *betaName, TCL_Char *rhoName);
 	~IPCM();
 
 	int		analyze(void);

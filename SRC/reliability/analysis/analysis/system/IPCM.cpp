@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-10-26 15:55:14 $
+// $Revision: 1.2 $
+// $Date: 2007-10-31 15:39:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/system/IPCM.cpp,v $
 
 
@@ -45,8 +45,9 @@ using std::setw;
 using std::setprecision;
 using std::setiosflags;
 
-IPCM::IPCM(ReliabilityDomain *passedReliabilityDomain, TCL_Char *passedFileName, int aType)
-	:SystemAnalysis(passedReliabilityDomain)
+IPCM::IPCM(ReliabilityDomain *passedReliabilityDomain, TCL_Char *passedFileName, int aType, 
+		 TCL_Char *passedBeta, TCL_Char *passedRho)
+	:SystemAnalysis(passedReliabilityDomain, passedBeta, passedRho)
 {
 	strcpy(fileName,passedFileName);
 	analysisType = aType;
@@ -80,10 +81,10 @@ IPCM::analyze(void)
 	double pf = 0;
 	if (analysisType == 0) {
 		// parallel system
-		pf = IPCMfunc(allBetas,rhos,-1.0);
+		pf = 1.0 - IPCMfunc(allBetas,rhos,-1.0);
 	} else {
 		// series system
-		pf = 1.0 - IPCMfunc(allBetas,rhos,1.0);
+		pf = IPCMfunc(allBetas,rhos,1.0);
 	}
 	
 	// Print results  (should do this over all defined systems)

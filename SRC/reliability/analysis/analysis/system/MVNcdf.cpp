@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-10-26 15:55:14 $
+// $Revision: 1.2 $
+// $Date: 2007-10-31 15:39:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/system/MVNcdf.cpp,v $
 
 
@@ -40,6 +40,8 @@
 #include <CStdLibRandGenerator.h>
 
 #include <fstream>
+#include <limits.h>
+#include <float.h>
 #include <iomanip>
 #include <iostream>
 using std::ifstream;
@@ -48,17 +50,41 @@ using std::setw;
 using std::setprecision;
 using std::setiosflags;
 
-MVNcdf::MVNcdf(ReliabilityDomain *passedReliabilityDomain, TCL_Char *passedFileName, int aType)
-	:SystemAnalysis(passedReliabilityDomain)
+MVNcdf::MVNcdf(ReliabilityDomain *passedReliabilityDomain, TCL_Char *passedFileName, int aType, 
+		 TCL_Char *passedBeta, TCL_Char *passedRho, long int passedN, double passedTol)
+	:SystemAnalysis(passedReliabilityDomain, passedBeta, passedRho)
 {
 	strcpy(fileName,passedFileName);
 	analysisType = aType;
+	
+	checkvals(passedN,passedTol);
 }
+
 
 MVNcdf::~MVNcdf()
 {
 }
 
+
+void MVNcdf::checkvals(long int passedN, double passedTol) {
+	if (passedN < LONG_MAX && passedN > 1)
+		Nmax = passedN;
+	else if (passedN >= LONG_MAX) {
+		opserr << "MVNcdf::MVNcdf WARNING - MVN Nmax input must be smaller than " << LONG_MAX << endln;
+		Nmax = LONG_MAX;
+	}
+	else
+		Nmax = 2e5;
+
+	if (passedTol > DBL_EPSILON && passedTol < 1)
+		errMax = passedTol;
+	else if (passedTol <= DBL_EPSILON && passedTol > 0) {
+		opserr << "MVNcdf::MVNcdf WARNING - MVN tol input must be greater than " << DBL_EPSILON << endln;
+		errMax = DBL_EPSILON*2.0;
+	}
+	else
+		errMax = 1.0e-6;
+}
 
 int 
 MVNcdf::analyze(void)
@@ -142,8 +168,6 @@ MVNcdf::MVNcdffunc(const Vector &allbeta, const Matrix &rhoin, double modifier)
 	}
 	
 	Vector x = beta;
-	long int Nmax = 2e5;
-	double errMax = 1.0e-6;
 	double ci = 99.9;
 
 	// Cholesky decomposition of correlation matrix

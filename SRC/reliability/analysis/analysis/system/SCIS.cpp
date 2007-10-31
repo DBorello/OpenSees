@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-10-26 15:55:14 $
+// $Revision: 1.2 $
+// $Date: 2007-10-31 15:39:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/system/SCIS.cpp,v $
 
 
@@ -43,23 +43,48 @@
 #include <iomanip>
 #include <iostream>
 #include <float.h>
+#include <limits.h>
 using std::ifstream;
 using std::ios;
 using std::setw;
 using std::setprecision;
 using std::setiosflags;
 
-SCIS::SCIS(ReliabilityDomain *passedReliabilityDomain, TCL_Char *passedFileName, int aType)
-	:SystemAnalysis(passedReliabilityDomain)
+SCIS::SCIS(ReliabilityDomain *passedReliabilityDomain, TCL_Char *passedFileName, int aType, 
+		 TCL_Char *passedBeta, TCL_Char *passedRho, long int passedN, double passedTol)
+	:SystemAnalysis(passedReliabilityDomain, passedBeta, passedRho)
 {
 	strcpy(fileName,passedFileName);
 	analysisType = aType;
+	
+	checkvals(passedN,passedTol);
 }
 
 SCIS::~SCIS()
 {
 }
 
+
+void SCIS::checkvals(long int passedN, double passedTol) {
+	// note that Nmax is limited to maximum size of Vector class (currently int)
+	if (passedN < INT_MAX && passedN > 1)
+		Nmax = (int)passedN;
+	else if (passedN >= INT_MAX) {
+		opserr << "SCIS::SCIS WARNING - SCIS Nmax input must be smaller than " << INT_MAX << endln;
+		Nmax = INT_MAX;
+	}
+	else
+		Nmax = 1e4;
+
+	if (passedTol > DBL_EPSILON && passedTol < 1)
+		errMax = passedTol;
+	else if (passedTol <= DBL_EPSILON && passedTol > 0) {
+		opserr << "SCIS::SCIS WARNING - SCIS tol input must be greater than " << DBL_EPSILON << endln;
+		errMax = DBL_EPSILON*2.0;
+	}
+	else
+		errMax = 1.0e-6;
+}
 
 int 
 SCIS::analyze(void)
@@ -134,7 +159,7 @@ SCIS::SCISfunc(const Vector &allbeta, const Matrix &rhoin, double modifier)
 	NormalRV uRV(1, 0.0, 1.0, 0.0);
 	Vector beta(n);
 	Matrix rho(n,n);
-	int i,ii,j,k,result;
+	int i,ii,j,k,result,N;
 	
 	rho = rhoin;
 	for (i=0; i < n; i++) {
@@ -144,8 +169,6 @@ SCIS::SCISfunc(const Vector &allbeta, const Matrix &rhoin, double modifier)
 	
 	// SCIS allocation, note that Nmax is limited to maximum size of Vector class (currently int)
 	srand ( time(NULL) );
-	int Nmax = 1e4, N;
-	double errMax = 1.0e-6;
 	Matrix Dk(n,n);
 	Matrix d(n,n);
 	Vector y(Nmax);

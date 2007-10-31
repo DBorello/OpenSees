@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-10-26 16:23:00 $
+// $Revision: 1.9 $
+// $Date: 2007-10-31 15:37:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.h,v $
 
 
@@ -46,7 +46,7 @@ class SystemAnalysis : public ReliabilityAnalysis
 {
 
 public:
-	SystemAnalysis(ReliabilityDomain *passedReliabilityDomain);
+	SystemAnalysis(ReliabilityDomain *passedReliabilityDomain, TCL_Char *passedBeta, TCL_Char *passedRho);
 	virtual ~SystemAnalysis();
 	virtual int analyze(void) =0;
 	
@@ -54,7 +54,6 @@ public:
 	double	getLowerBound();
 	double	getUpperBound();
 	int		getNumberLimitStateFunctions();
-	int		getNumberRandomVariables();
 	const Vector& getBeta();
 	const Matrix& getRho();
 
@@ -68,8 +67,9 @@ private:
 	double functionToIntegrate(double, double, double);
 	double Simpson(double, double, double, double, double);
 	
+	char rhoFile[256];
+	char betaFile[256];
 	int numLsf;
-	int nrv;
 	double minLowerBound;
 	double maxUpperBound;
 	ReliabilityDomain *theReliabilityDomain;

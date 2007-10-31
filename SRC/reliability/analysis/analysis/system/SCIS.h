@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-10-26 15:55:14 $
+// $Revision: 1.2 $
+// $Date: 2007-10-31 15:39:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/system/SCIS.h,v $
 
 
@@ -43,8 +43,8 @@ class SCIS : public SystemAnalysis
 {
 
 public:
-	SCIS(ReliabilityDomain *passedReliabilityDomain,
-				   TCL_Char *fileName, int analysisType);
+	SCIS(ReliabilityDomain*, TCL_Char*, int, TCL_Char*, TCL_Char*, 
+				   long int Nmax = 1e4, double errMax = 1.0e-6);
 	~SCIS();
 
 	int		analyze(void);
@@ -52,9 +52,12 @@ public:
 protected:
 
 private:
+	void	checkvals(long int, double);
 	double	SCISfunc(const Vector&, const Matrix&, double);
 	char fileName[256];
     int analysisType;
+	int Nmax;
+	double errMax;
 	
 };
 

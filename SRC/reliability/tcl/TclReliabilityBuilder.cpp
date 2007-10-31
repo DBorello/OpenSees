@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2007-10-26 17:50:13 $
+// $Revision: 1.29 $
+// $Date: 2007-10-31 15:40:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -4415,15 +4415,44 @@ TclReliabilityModelBuilder_runSystemAnalysis(ClientData clientData, Tcl_Interp *
 	// Do input check
 	char theCommand[15] = "inputCheck";
 	Tcl_Eval( interp, theCommand );
+	
 	int aType = 1;
+	char betaFile[MAX_FILENAMELENGTH] = "";
+	char rhoFile[MAX_FILENAMELENGTH] = "";
+	long int nMax = 0;
+	double tol = 0;
 
-	if (argc != 4)  {
+	if (argc < 4 || argc % 2 > 0 )  {
 		opserr << "ERROR: Wrong number of arguments to System Reliability analysis" << endln;
-		opserr << "Want: runSystemAnalysis fileName? analysisMethod? (allInParallel | allInSeries)" << endln;
+		opserr << "Want: runSystemAnalysis fileName? analysisMethod? (allInParallel | allInSeries) <-Nmax val?> <-tol val?> <B_fileName R_fileName>" << endln;
 		opserr << "analysisMethod options are: PCM, IPCM, MVN, and SCIS" << endln;
 		return TCL_ERROR;
+	} else {		
+		int argi = 4;
+		while (argi < argc) {
+			if (strcmp(argv[argi],"-Nmax") == 0) {
+				nMax = atol(argv[argi+1]);
+				if ( nMax <= 0 ) {
+					opserr << "WARNING invalid Nmax = " << argv[argi+1] << endln;
+					return TCL_ERROR;
+				}
+			}
+			else if (strcmp(argv[argi],"-tol") == 0) {
+				if (Tcl_GetDouble(interp, argv[argi+1], &tol) != TCL_OK) {
+					opserr << "WARNING invalid tol = " << argv[argi+1] << endln;
+					return TCL_ERROR;
+				}
+			}
+			else {
+				// option of specifying files with beta and rho instead of using information in the reliability domain
+				strcpy(betaFile,argv[argi]);
+				strcpy(rhoFile,argv[argi+1]);
+			}
+			
+			argi += 2;
+		}
 	}
-
+	
 	// GET INPUT PARAMETER (string)
 	if (strcmp(argv[3],"allInParallel") == 0)
 		aType = 0;
@@ -4436,13 +4465,13 @@ TclReliabilityModelBuilder_runSystemAnalysis(ClientData clientData, Tcl_Interp *
 
 	// GET INPUT PARAMETER (string) AND CREATE THE OBJECT
 	if (strcmp(argv[2],"PCM") == 0)
-		theSystemAnalysis = new PCM(theReliabilityDomain, argv[1], aType);
+		theSystemAnalysis = new PCM(theReliabilityDomain, argv[1], aType, betaFile, rhoFile);
 	else if (strcmp(argv[2],"IPCM") == 0)
-		theSystemAnalysis = new IPCM(theReliabilityDomain, argv[1], aType);
+		theSystemAnalysis = new IPCM(theReliabilityDomain, argv[1], aType, betaFile, rhoFile);
 	else if (strcmp(argv[2],"MVN") == 0)
-		theSystemAnalysis = new MVNcdf(theReliabilityDomain, argv[1], aType);
+		theSystemAnalysis = new MVNcdf(theReliabilityDomain, argv[1], aType, betaFile, rhoFile, nMax, tol);
 	else if (strcmp(argv[2],"SCIS") == 0)
-		theSystemAnalysis = new SCIS(theReliabilityDomain, argv[1], aType);
+		theSystemAnalysis = new SCIS(theReliabilityDomain, argv[1], aType, betaFile, rhoFile, nMax, tol);
 	else {
 		opserr << "ERROR: Invalid system reliability analysis type input:" << argv[2] << endln;
 		return TCL_ERROR;
