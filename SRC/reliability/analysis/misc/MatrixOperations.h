@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-07-03 19:31:48 $
+// $Revision: 1.5 $
+// $Date: 2007-11-01 17:40:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/misc/MatrixOperations.h,v $
 
 
@@ -50,7 +50,6 @@ public:
 	int computeInverseLowerCholesky();
 	int computeCholeskyAndItsInverse();
 	int computeMatrixNorm();
-	int computeInverse();
 	int computeTranspose();
 	int computeSquareRoot();
 	int computeTrace();
@@ -59,7 +58,6 @@ public:
 	const Matrix& getMatrix();
 	const Matrix& getLowerCholesky();
 	const Matrix& getInverseLowerCholesky();
-	const Matrix& getInverse();
 	const Matrix& getTranspose();
 	const Matrix& getSquareRoot();
 	double getMatrixNorm();
@@ -71,7 +69,6 @@ private:
 	Matrix *theMatrix;
 	Matrix *theLowerCholesky;
 	Matrix *theInverseLowerCholesky;
-	Matrix *theInverse;
 	Matrix *theTranspose;
 	Matrix *theSquareRoot;
 	double theMatrixNorm;

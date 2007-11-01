@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-07-03 19:31:48 $
+// $Revision: 1.8 $
+// $Date: 2007-11-01 17:40:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/misc/MatrixOperations.cpp,v $
 
 
@@ -48,7 +48,6 @@ MatrixOperations::MatrixOperations(const Matrix &passedMatrix)
 
 	theLowerCholesky = new Matrix(rows,cols);
 	theInverseLowerCholesky = new Matrix(rows,cols);
-	theInverse = new Matrix(rows,cols);
 	theTranspose = new Matrix(rows,cols);
 	theSquareRoot = new Matrix(rows,cols);
 
@@ -63,7 +62,6 @@ MatrixOperations::~MatrixOperations()
 	delete theMatrix;
 	delete theLowerCholesky;
 	delete theInverseLowerCholesky;
-	delete theInverse;
 	delete theTranspose;
 	delete theSquareRoot;
 }
@@ -80,7 +78,6 @@ MatrixOperations::setMatrix(const Matrix &passedMatrix)
 	delete theMatrix;
 	delete theLowerCholesky;
 	delete theInverseLowerCholesky;
-	delete theInverse;
 	delete theTranspose;
 	delete theSquareRoot;
 
@@ -89,7 +86,6 @@ MatrixOperations::setMatrix(const Matrix &passedMatrix)
 	(*theMatrix) = passedMatrix;
 	theLowerCholesky = new Matrix(rows,cols);
 	theInverseLowerCholesky = new Matrix(rows,cols);
-	theInverse = new Matrix(rows,cols);
 	theTranspose = new Matrix(rows,cols);
 	theSquareRoot = new Matrix(rows,cols);
 
@@ -128,20 +124,6 @@ MatrixOperations::getInverseLowerCholesky()
 
 	return (*theInverseLowerCholesky);
 }
-
-
-const Matrix& 
-MatrixOperations::getInverse()
-{
-	if (theInverse == 0) {
-		opserr << "MatrixOperations::getInverse() - this" << endln
-			<< " matrix has not been computed." << endln;
-		return (*theMatrix);
-	}
-	
-	return (*theInverse);
-}
-
 
 const Matrix& 
 MatrixOperations::getTranspose()
@@ -445,100 +427,6 @@ MatrixOperations::computeSquareRoot()
 
 	return 0;
 }
-
-
-
-int
-MatrixOperations::computeInverse()
-{
-  return theMatrix->Invert(*theInverse);
-
-  /*
-	Matrix &A = (*theMatrix);
-
-	// Return the invers matrix B such that A*B=I
-	int sizeOfA = A.noCols();
-	Matrix B ( sizeOfA, sizeOfA );
-	Matrix AB ( sizeOfA, 2*sizeOfA );
-	int i, j, k;
-
-	// Set up the AB matrix
-	for ( i=0 ; i<sizeOfA ; i++ )
-	{
-		for ( j=0 ; j<(sizeOfA*2) ; j++ )
-		{
-			if ( j < sizeOfA )
-			{
-				AB(i,j) = A(i,j);
-			}
-			else
-			{
-				if ( j == (sizeOfA+i) )
-				{
-					AB(i,j) = 1.0;
-				}
-				else
-				{
-					AB(i,j) = 0.0;
-				}
-			}
-		}
-	}
-
-	// The Gauss-Jordan method
-	double pivot;
-	double ABii;
-
-	for ( k=0 ; k<sizeOfA ; k++ )
-	{
-		for ( i=k ; i<sizeOfA ; i++ )
-		{
-			ABii = AB(i,i);
-			pivot = AB(i,k);
-			for ( j=k ; j<(sizeOfA*2) ; j++ )
-			{
-				if ( i == k )
-				{
-					AB(i,j) = AB(i,j) / ABii;
-				}
-				else
-				{
-					AB(i,j) = AB(i,j) - pivot * AB(k,j);
-				}
-			}
-		}
-	}
-	for ( k=1 ; k<sizeOfA ; k++ )
-	{
-		for ( i=k ; i<sizeOfA ; i++ )
-		{
-			pivot = AB( (sizeOfA-i-1), (sizeOfA-k) );
-			for ( j=(sizeOfA-k) ; j<(sizeOfA*2) ; j++ )
-			{
-					AB((sizeOfA-i-1),(j)) = 
-						AB((sizeOfA-i-1),(j)) - 
-						pivot * AB((sizeOfA-k),(j));
-			}
-		}
-	}
-
-
-	// Collect the B matrix
-	for ( i=0 ; i<sizeOfA ; i++ )
-	{
-		for ( j=sizeOfA ; j<(sizeOfA*2) ; j++ )
-		{
-			B(i,(j-sizeOfA)) = AB(i,j);
-		}
-	}
-
-	(*theInverse) = B;
-	
-	return 0;
-  */
-}
-
-
 
 int
 MatrixOperations::computeMatrixNorm()
