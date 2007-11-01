@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-10-31 21:36:50 $
+// $Revision: 1.10 $
+// $Date: 2007-11-01 00:32:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/SensitivityAlgorithm.cpp,v $
 
 
@@ -101,17 +101,6 @@ SensitivityAlgorithm::computeSensitivities(void)
 		return -1;
 	}
 
-	int numGrads;
-	// Get number of random variables and random variable positioners
-	if (analysisTypeTag==1 || analysisTypeTag==3) {
-	  //numPos = theReliabilityDomain->getNumberOfRandomVariablePositioners();
-	}
-	else {
-	  //numPos = theReliabilityDomain->getNumberOfParameterPositioners();
-	  //numGrads = numPos;
-
-	}
-
 	// Zero out the old right-hand side of the SOE
 	theSOE->zeroB();
 		
@@ -122,7 +111,7 @@ SensitivityAlgorithm::computeSensitivities(void)
 
 	if (analysisTypeTag == 1 || analysisTypeTag == 3) {
 
-	  numGrads = theReliabilityDomain->getNumberOfRandomVariables();
+	  int numGrads = theReliabilityDomain->getNumberOfRandomVariables();
 
 	  for (int gradNumber = 1; gradNumber <= numGrads; gradNumber++ )  {
 	    RandomVariablePositionerIter &rvPosIter =
@@ -158,7 +147,7 @@ SensitivityAlgorithm::computeSensitivities(void)
 	}
 	else {
 
-	  numGrads = theReliabilityDomain->getNumberOfParameterPositioners();
+	  int numGrads = theReliabilityDomain->getNumberOfParameterPositioners();
 
 	  ParameterPositionerIter &paramPosIter =
 	    theReliabilityDomain->getParameterPositioners();
