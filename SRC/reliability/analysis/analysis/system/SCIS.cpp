@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-10-31 20:12:27 $
+// $Revision: 1.4 $
+// $Date: 2007-11-01 17:11:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/system/SCIS.cpp,v $
 
 
@@ -35,7 +35,6 @@
 #include <SystemAnalysis.h>
 #include <ReliabilityDomain.h>
 #include <NormalRV.h>
-#include <MatrixOperations.h>
 #include <RandomNumberGenerator.h>
 #include <CStdLibRandGenerator.h>
 
@@ -180,18 +179,15 @@ SCIS::SCISfunc(const Vector &allbeta, const Matrix &rhoin, double modifier)
 	// d : Matrix containing parts of inverse of covariance matrix 
 	//     (Note) d(k,1:k) - k-th row of inverse matrix of C(1:k,1:k)
 	for (ii = 1; ii <= n; ii++) {
-		Matrix *tempMat = new Matrix(ii,ii);
+		Matrix tempMat(ii,ii);
 		for (i = 0; i < ii; i++) {
 			for (j = 0; j < ii; j++)
-				(*tempMat)(i,j) = rho(i,j);
+				tempMat(i,j) = rho(i,j);
 		}
-		
-		MatrixOperations *theMat = new MatrixOperations(*tempMat);
-		result = theMat->computeInverse();
-		if (result < 0)
-			opserr << "SystemAnalysis::SCIS() - could not invert the correlation matrix." << endln;
-		Matrix Cinv = theMat->getInverse();
-		
+
+		Matrix Cinv(ii,ii);
+		tempMat.Invert(Cinv);
+
 		for (i = 0; i < ii; i++) {
 			for (j = 0; j < ii; j++)
 				Dk(i,j) = Cinv(i,j);
@@ -199,9 +195,6 @@ SCIS::SCISfunc(const Vector &allbeta, const Matrix &rhoin, double modifier)
 		
 		for (j = 1; j <= ii; j++)
 			d(ii-1,j-1) = Dk(ii-1,j-1); 
-		
-		delete theMat;
-		delete tempMat;
 	}
 
 	// ICIS algorithm (Ambartzumian and Der Kiureghian)
