@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-10-31 20:20:41 $
+// $Revision: 1.9 $
+// $Date: 2007-11-01 17:39:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.cpp,v $
 
 
@@ -388,22 +388,9 @@ NatafProbabilityTransformation::transform_u_to_x_andComputeJacobian()
     }
   }
 
-
-	int result = theMatrixOperations->setMatrix((*jacobian_u_x));
-	if (result < 0) {
-		opserr << "NatafProbabilityTransformation::transform_u_to_x() - could not set " << endln
-			<< " the matrix in the object to perform matrix operations." << endln;
-		return -1;
-	}
-	
-	result = theMatrixOperations->computeInverse();
-	if (result < 0) {
-		opserr << "NatafProbabilityTransformation::transform_u_to_x() - could not " << endln
-			<< " invert Jacobian_u_x." << endln;
-		return -1;
-	}
-	(*jacobian_x_u) = theMatrixOperations->getInverse();
-
+  // Jacobian is still lower triangular and this can be improved,
+  // but it's better than calling MatrixOperations to do inverse -- MHS
+  jacobian_u_x->Invert(*jacobian_x_u);
 
 	// If user has set print flag to '1' then print realization 
 	if (printFlag == 1) {
