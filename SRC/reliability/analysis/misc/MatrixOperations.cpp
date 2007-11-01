@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-11-01 17:46:20 $
+// $Revision: 1.10 $
+// $Date: 2007-11-01 17:57:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/misc/MatrixOperations.cpp,v $
 
 
@@ -48,11 +48,6 @@ MatrixOperations::MatrixOperations(const Matrix &passedMatrix)
 
 	theLowerCholesky = new Matrix(rows,cols);
 	theInverseLowerCholesky = new Matrix(rows,cols);
-	theSquareRoot = new Matrix(rows,cols);
-
-	theMatrixNorm = 0;
-	theTrace = 0; 
-
 }
 
 
@@ -61,7 +56,6 @@ MatrixOperations::~MatrixOperations()
 	delete theMatrix;
 	delete theLowerCholesky;
 	delete theInverseLowerCholesky;
-	delete theSquareRoot;
 }
 
 
@@ -76,14 +70,12 @@ MatrixOperations::setMatrix(const Matrix &passedMatrix)
 	delete theMatrix;
 	delete theLowerCholesky;
 	delete theInverseLowerCholesky;
-	delete theSquareRoot;
 
 	// reallocate
 	theMatrix = new Matrix(rows,cols);
 	(*theMatrix) = passedMatrix;
 	theLowerCholesky = new Matrix(rows,cols);
 	theInverseLowerCholesky = new Matrix(rows,cols);
-	theSquareRoot = new Matrix(rows,cols);
 
 	return 0;
 }
@@ -120,33 +112,6 @@ MatrixOperations::getInverseLowerCholesky()
 
 	return (*theInverseLowerCholesky);
 }
-
-const Matrix& 
-MatrixOperations::getSquareRoot()
-{
-	if (theSquareRoot == 0) {
-		opserr << "MatrixOperations::getSquareRoot() - this" << endln
-			<< " matrix has not been computed." << endln;
-		return (*theMatrix);
-	}
-	
-	return (*theSquareRoot);
-}
-
-
-double
-MatrixOperations::getMatrixNorm()
-{
-	return theMatrixNorm;
-}
-
-
-double
-MatrixOperations::getTrace()
-{
-	return theTrace;
-}
-
 
 int
 MatrixOperations::computeLowerCholesky()
@@ -359,124 +324,3 @@ MatrixOperations::computeCholeskyAndItsInverse()
 
 	return 0;
 }
-
-int
-MatrixOperations::computeSquareRoot()
-{
-	const Matrix &A = (*theMatrix);
-
-	int sizeOfA = A.noCols();
-
-	//Matrix B(sizeOfA,sizeOfA);
-	Matrix &B = *theSquareRoot;
-
-	for (int i=0; i<sizeOfA; i++) {
-		for (int j=0; j<sizeOfA; j++) {
-			B(i,j) = sqrt( A(i,j) );
-		}
-	}
-
-	//(*theSquareRoot) = B;
-
-	return 0;
-}
-
-int
-MatrixOperations::computeMatrixNorm()
-{
-	const Matrix &passedMatrix = (*theMatrix);
-
-	int numberOfColumns = passedMatrix.noCols();
-	int numberOfRows = passedMatrix.noRows();
-	double sum = 0;
-	for ( int i=0 ; i<numberOfRows ; i++ )
-	{
-		for ( int j=0 ; j<numberOfColumns ; j++ )
-		{
-			sum += passedMatrix(i,j) * passedMatrix(i,j);
-		}
-	}
-
-	theMatrixNorm = sqrt(sum);
-
-	return 0;
-}
-
-
-int
-MatrixOperations::computeTrace()
-{
-	const Matrix &passedMatrix = (*theMatrix);
-
-	int numberOfColumns = passedMatrix.noCols();
-	int numberOfRows = passedMatrix.noRows();
-	
-	if (numberOfColumns != numberOfRows) {
-		opserr << "MatrixOperations::computeTrace() - can not" << endln
-			<< " compute the trace of a non-quadratic matrix." << endln;
-		return -1;
-	}
-
-	double product = 1.0;
-	for ( int i=0 ; i<numberOfRows ; i++ )
-	{
-		product = product * passedMatrix(i,i);
-	}
-
-	theTrace = product;
-
-	return 0;
-}
-
-
-
-
-
-/*
-double
-MatrixOperations::vectorDotProduct(Vector vector1, Vector vector2)
-{
-	int sizeOfVector1 = vector1.Size();
-	int sizeOfVector2 = vector2.Size();
-	double sum = 0;
-
-	if ( sizeOfVector1 != sizeOfVector2 )
-	{
-		opserr << "vectorDotProduct can not be performed" << endln;
-	}
-	else
-	{
-		for ( int i=0 ; i<sizeOfVector1 ; i++ )
-		{
-			sum += vector1(i) * vector2(i);
-		}
-	}
-
-	return sum;
-}
-*/
-
-
-/*
-Vector 
-MatrixOperations::matrixTimesVector(Matrix passedMatrix, Vector passedVector)
-{
-	int numberOfMatrixRows = passedMatrix.noRows();
-	int sizeOfPassedVector = passedVector.Size();
-	Vector result(numberOfMatrixRows);
-	int i, j;
-	double sum;
-
-	for ( i=0 ; i<numberOfMatrixRows ; i++ )
-	{
-		sum = 0.0;
-		for ( j=0 ; j<sizeOfPassedVector ; j++ )
-		{
-			sum += passedMatrix(i,j) * passedVector(j);
-		}
-		result(i) = sum;
-	}
-
-	return result;
-}
-*/
