@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-11-01 17:40:10 $
+// $Revision: 1.9 $
+// $Date: 2007-11-01 17:46:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/misc/MatrixOperations.cpp,v $
 
 
@@ -48,7 +48,6 @@ MatrixOperations::MatrixOperations(const Matrix &passedMatrix)
 
 	theLowerCholesky = new Matrix(rows,cols);
 	theInverseLowerCholesky = new Matrix(rows,cols);
-	theTranspose = new Matrix(rows,cols);
 	theSquareRoot = new Matrix(rows,cols);
 
 	theMatrixNorm = 0;
@@ -62,7 +61,6 @@ MatrixOperations::~MatrixOperations()
 	delete theMatrix;
 	delete theLowerCholesky;
 	delete theInverseLowerCholesky;
-	delete theTranspose;
 	delete theSquareRoot;
 }
 
@@ -78,7 +76,6 @@ MatrixOperations::setMatrix(const Matrix &passedMatrix)
 	delete theMatrix;
 	delete theLowerCholesky;
 	delete theInverseLowerCholesky;
-	delete theTranspose;
 	delete theSquareRoot;
 
 	// reallocate
@@ -86,7 +83,6 @@ MatrixOperations::setMatrix(const Matrix &passedMatrix)
 	(*theMatrix) = passedMatrix;
 	theLowerCholesky = new Matrix(rows,cols);
 	theInverseLowerCholesky = new Matrix(rows,cols);
-	theTranspose = new Matrix(rows,cols);
 	theSquareRoot = new Matrix(rows,cols);
 
 	return 0;
@@ -124,19 +120,6 @@ MatrixOperations::getInverseLowerCholesky()
 
 	return (*theInverseLowerCholesky);
 }
-
-const Matrix& 
-MatrixOperations::getTranspose()
-{
-	if (theTranspose == 0) {
-		opserr << "MatrixOperations::getTranspose() - this" << endln
-			<< " matrix has not been computed." << endln;
-		return (*theMatrix);
-	}
-	
-	return (*theTranspose);
-}
-
 
 const Matrix& 
 MatrixOperations::getSquareRoot()
@@ -376,36 +359,6 @@ MatrixOperations::computeCholeskyAndItsInverse()
 
 	return 0;
 }
-
-
-
-
-
-
-int
-MatrixOperations::computeTranspose()
-{
-	const Matrix &A = (*theMatrix);
-
-	int sizeOfA = A.noCols();
-
-	//Matrix B(sizeOfA,sizeOfA);
-	Matrix &B = *theTranspose;
-
-	for (int i=0; i<sizeOfA; i++) {
-		for (int j=0; j<sizeOfA; j++) {
-			B(i,j) = A(j,i);
-		}
-	}
-
-	//(*theTranspose) = B;
-
-	return 0;
-}
-
-
-
-
 
 int
 MatrixOperations::computeSquareRoot()
