@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-07-11 23:51:29 $
+// $Revision: 1.5 $
+// $Date: 2007-11-01 17:32:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/direction/SQPsearchDirectionMeritFunctionAndHessian.cpp,v $
 
 
@@ -35,7 +35,6 @@
 #include <SearchDirection.h>
 #include <MeritFunctionCheck.h>
 #include <HessianApproximation.h>
-#include <MatrixOperations.h>
 #include <Vector.h>
 
 
@@ -165,11 +164,13 @@ SQPsearchDirectionMeritFunctionAndHessian::computeSearchDirection(
 
 
 	// Solve the system of equations by computing inverse (this should be done more efficiently!)
-	MatrixOperations theMatrixOperations(A);
-	theMatrixOperations.computeInverse();
-	Matrix invA = theMatrixOperations.getInverse();
-	Vector dAndKappa = invA ^ b;
+	//MatrixOperations theMatrixOperations(A);
+	//theMatrixOperations.computeInverse();
+	//Matrix invA = theMatrixOperations.getInverse();
+	//Vector dAndKappa = invA ^ b; // why transpose A?  According to PEER report, this must be a bug -- MHS
 
+	Vector dAndKappa(nrv+1);
+	A.Solve(b, dAndKappa);
 
 	// Separate out direction vector and kappa value
 	Vector d(nrv);
