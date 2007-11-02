@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-11-02 01:59:39 $
+// $Revision: 1.9 $
+// $Date: 2007-11-02 15:51:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SamplingAnalysis.cpp,v $
 
 
@@ -120,7 +120,7 @@ SamplingAnalysis::analyze(void)
 	static NormalRV aStdNormRV(1,0.0,1.0,0.0);
 	bool failureHasOccured = false;
 
-	det_covariance = numRV*samplingStdv*samplingStdv;
+	det_covariance = pow(samplingStdv, numRV);
 
 	// Pre-compute some factors to minimize computations inside simulation loop
 	double pi = acos(-1.0);
