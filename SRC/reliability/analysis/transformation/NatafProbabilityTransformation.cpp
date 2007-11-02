@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-11-01 17:39:41 $
+// $Revision: 1.10 $
+// $Date: 2007-11-02 02:12:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.cpp,v $
 
 
@@ -129,7 +129,8 @@ NatafProbabilityTransformation::set_u(const Vector &passedu)
 int 
 NatafProbabilityTransformation::transform_x_to_u()
 {
-	Vector z = x_to_z(*x);
+	Vector z(nrv);
+	this->x_to_z(*x, z);
 	//(*u) = (*inverseLowerCholesky) * z;
 	u->addMatrixVector(0.0, *inverseLowerCholesky, z, 1.0);
 	
@@ -148,7 +149,8 @@ NatafProbabilityTransformation::meanSensitivityOf_x_to_u(const Vector &x, int rv
 	// 1) (*inverseLowerCholesky)    DONE
 
 	// 2) Vector z = x_to_z(x); 
-	Vector z = x_to_z(x);
+	Vector z(nrv);
+	this->x_to_z(x, z);
 
 	// 3) DzDmean and DzDstdv = a vector of zeros and then:
 	Vector DzDmean(x.Size());
@@ -246,7 +248,8 @@ NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(const Vector &x, int rv
 	// 1) (*inverseLowerCholesky)    DONE
 
 	// 2) Vector z = x_to_z(x); 
-	Vector z = x_to_z(x);
+	Vector z(nrv);
+	this->x_to_z(x, z);
 
 	// 3) DzDmean and DzDstdv = a vector of zeros and then:
 	Vector DzDstdv(x.Size());
@@ -340,7 +343,7 @@ NatafProbabilityTransformation::transform_u_to_x()
   //Vector z = (*lowerCholesky) * (*u);
   Vector z(*u);
   z.addMatrixVector(0.0, *lowerCholesky, *u, 1.0);
-  (*x) = z_to_x(z);
+  this->z_to_x(z, *x);
 
 
 	// If user has set print flag to '1' then print realization 
@@ -375,10 +378,11 @@ NatafProbabilityTransformation::transform_u_to_x_andComputeJacobian()
   //Vector z = (*lowerCholesky) * (*u);
   Vector z(*u);
   z.addMatrixVector(0.0, *lowerCholesky, *u, 1.0);
-  (*x) = z_to_x(z);
+  this->z_to_x(z, *x);
 
   // Jzx is diagonal!
-  const Vector &Jzx = getJacobian_z_x((*x),z);
+  Vector Jzx(nrv);
+  this->getJacobian_z_x((*x), z, Jzx);
   //(*jacobian_u_x) = (*inverseLowerCholesky) * Jzx;
   // Multiply ith column of invLowChol by ith diagonal entry of Jzx
   for (int i = 0; i < nrv; i++) {
@@ -459,8 +463,10 @@ NatafProbabilityTransformation::getJacobian_u_x()
 
 
 
-Vector
-NatafProbabilityTransformation::getJacobian_z_x(const Vector &x, const Vector &z)
+int
+NatafProbabilityTransformation::getJacobian_z_x(const Vector &x, 
+						const Vector &z, 
+						Vector &Jzx)
 {	
 	static NormalRV aStandardNormalRV(1, 0.0, 1.0, 0.0);
 	Vector jacobianMatrix_z_x(nrv);
@@ -473,7 +479,7 @@ NatafProbabilityTransformation::getJacobian_z_x(const Vector &x, const Vector &z
 	  int i = theRV->getIndex();
 	  if (strcmp(theRV->getType(),"NORMAL")==0) {
 	    double sigma = theRV->getParameter2();
-	    jacobianMatrix_z_x(i) = 1.0 / sigma;
+	    Jzx(i) = 1.0 / sigma;
 	  }
 	  else if (strcmp(theRV->getType(),"LOGNORMAL")==0) {
 	    double zeta = fabs(theRV->getParameter2());
@@ -481,7 +487,7 @@ NatafProbabilityTransformation::getJacobian_z_x(const Vector &x, const Vector &z
 	      opserr << "NatafProbabilityTransformation::getJacobian_z_x() -- Error: value " << endln
 		     << "of lognormal random variable is zero in original space. " << endln;
 	    }
-	    jacobianMatrix_z_x(i) = 1.0 / ( zeta * x(i)  );
+	    Jzx(i) = 1.0 / ( zeta * x(i)  );
 	  }
 	  else {
 	    double pdf = aStandardNormalRV.getPDFvalue(z(i));
@@ -489,23 +495,22 @@ NatafProbabilityTransformation::getJacobian_z_x(const Vector &x, const Vector &z
 	      opserr << "ERROR: NatafProbabilityTransformation::getJacobian_z_x() -- " << endln
 		     << " the PDF value is zero, probably due to too large step. " << endln;
 	    }
-	    jacobianMatrix_z_x(i) = theRV->getPDFvalue(x(i)) / pdf;
-	    if (jacobianMatrix_z_x(i)==0.0) {
+	    Jzx(i) = theRV->getPDFvalue(x(i)) / pdf;
+	    if (Jzx(i)==0.0) {
 	    }
 	  }
 	}
 	
-	return jacobianMatrix_z_x;
+	return 0;
 }
 
 
 
 
-Vector
-NatafProbabilityTransformation::z_to_x(const Vector &z)
+int
+NatafProbabilityTransformation::z_to_x(const Vector &z, Vector &x)
 {
   static NormalRV aStandardNormalRV(1, 0.0, 1.0, 0.0);
-	Vector x(nrv);
 
 	RandomVariable *theRV;
 	RandomVariableIter &rvIter = 
@@ -533,18 +538,17 @@ NatafProbabilityTransformation::z_to_x(const Vector &z)
 	  }
 	}
 
-	return x;
+	return 0;
 }
 
 
 
 
 
-Vector
-NatafProbabilityTransformation::x_to_z(const Vector &x)
+int
+NatafProbabilityTransformation::x_to_z(const Vector &x, Vector &z)
 {
 	static NormalRV aStandardNormalRV(1, 0.0, 1.0, 0.0);
-	Vector z(nrv);
 	RandomVariable *theRV;
 	RandomVariableIter &rvIter = 
 	  theReliabilityDomain->getRandomVariables();
@@ -571,7 +575,7 @@ NatafProbabilityTransformation::x_to_z(const Vector &x)
 	  }
 	}
 
-	return z;
+	return 0;
 }
 
 
