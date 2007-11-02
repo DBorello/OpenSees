@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.31 $
-// $Date: 2007-11-02 22:13:36 $
+// $Revision: 1.32 $
+// $Date: 2007-11-02 22:29:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -5475,10 +5475,10 @@ TclReliabilityModelBuilder_inputCheck(ClientData clientData, Tcl_Interp *interp,
 {
 	// Check that tagged objects are consequtive
 	int i, num;
+	ReliabilityDomainComponent *component;
 
 	/*
 	num = theReliabilityDomain->getNumberOfRandomVariables();
-	ReliabilityDomainComponent *component;
 	for (i=1; i<=num; i++) {
 		component = theReliabilityDomain->getRandomVariablePtr(i);
 		if (component == 0) {
