@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2007-11-02 18:07:37 $
+// $Revision: 1.13 $
+// $Date: 2007-11-02 22:02:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.cpp,v $
 
 
@@ -36,6 +36,7 @@
 #include <RandomVariable.h>
 #include <RandomVariableIter.h>
 #include <CorrelationCoefficient.h>
+#include <CorrelationCoefficientIter.h>
 #include <NormalRV.h>
 #include <Vector.h>
 #include <Matrix.h>
@@ -738,12 +739,12 @@ NatafProbabilityTransformation::setCorrelationMatrix(int pertMeanOfThisRV, int p
 	int numberOfCorrelationCoefficients = 
 		theReliabilityDomain->getNumberOfCorrelationCoefficients();
 
+	CorrelationCoefficient *theCorrelationCoefficient;
+	CorrelationCoefficientIter ccIter =
+	  theReliabilityDomain->getCorrelationCoefficients();
 	// Modify each coefficient at a time and put it into the correlation matrix
-	for ( int j=1 ; j<=numberOfCorrelationCoefficients ; j++ )
-	{
-		// Get a pointer to the correlation coefficient with tag 'j'
-		CorrelationCoefficient *theCorrelationCoefficient = 
-			theReliabilityDomain->getCorrelationCoefficientPtr(j);
+	//for ( int j=1 ; j<=numberOfCorrelationCoefficients ; j++ ) {
+	while ((theCorrelationCoefficient = ccIter()) != 0) {
 
 		// Get tags for the two involved random variables
 		rv1 = theCorrelationCoefficient->getRv1();
@@ -754,7 +755,15 @@ NatafProbabilityTransformation::setCorrelationMatrix(int pertMeanOfThisRV, int p
 
 		// Get pointers to the two random variables
 		rv1Ptr = theReliabilityDomain->getRandomVariablePtr(rv1);
+		if (rv1Ptr == 0) {
+		  opserr << "NatafTransformation::setCorrelationMatrix -- rv with tag " << rv1 << " not found in reliability domain" << endln;
+		  return;
+		}
 		rv2Ptr = theReliabilityDomain->getRandomVariablePtr(rv2);
+		if (rv2Ptr == 0) {
+		  opserr << "NatafTransformation::setCorrelationMatrix -- rv with tag " << rv2 << " not found in reliability domain" << endln;
+		  return;
+		}
 
 		// Get the types of the two random variables
 		const char *typeRv1 = rv1Ptr->getType();

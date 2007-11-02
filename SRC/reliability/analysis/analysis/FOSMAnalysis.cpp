@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-10-31 16:41:40 $
+// $Revision: 1.5 $
+// $Date: 2007-11-02 22:06:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FOSMAnalysis.cpp,v $
 
 
@@ -43,6 +43,7 @@
 
 #include <RandomVariableIter.h>
 #include <LimitStateFunctionIter.h>
+#include <CorrelationCoefficientIter.h>
 
 #include <fstream>
 #include <iomanip>
@@ -159,14 +160,16 @@ FOSMAnalysis::analyze(void)
 	for (i = 0; i < nrv; i++) {
 	  covMatrix(i,i) = stdvVector(i)*stdvVector(i);
 	}
-	int ncorr = theReliabilityDomain->getNumberOfCorrelationCoefficients();
-	CorrelationCoefficient *theCorrelationCoefficient;
+
 	double covariance, correlation;
 	int rv1, rv2;
 	RandomVariable *rv1Ptr;
 	RandomVariable *rv2Ptr;
-	for (i=1 ; i<=ncorr ; i++) {
-		theCorrelationCoefficient = theReliabilityDomain->getCorrelationCoefficientPtr(i);
+	CorrelationCoefficient *theCorrelationCoefficient;
+	CorrelationCoefficientIter ccIter =
+	  theReliabilityDomain->getCorrelationCoefficients();
+	//for (i=1 ; i<=ncorr ; i++) {
+	while ((theCorrelationCoefficient = ccIter()) != 0) {
 		correlation = theCorrelationCoefficient->getCorrelation();
 		rv1 = theCorrelationCoefficient->getRv1();
 		rv2 = theCorrelationCoefficient->getRv2();
