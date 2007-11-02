@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2007-10-31 21:37:18 $
+// $Revision: 1.31 $
+// $Date: 2007-11-02 22:13:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -5476,6 +5476,7 @@ TclReliabilityModelBuilder_inputCheck(ClientData clientData, Tcl_Interp *interp,
 	// Check that tagged objects are consequtive
 	int i, num;
 
+	/*
 	num = theReliabilityDomain->getNumberOfRandomVariables();
 	ReliabilityDomainComponent *component;
 	for (i=1; i<=num; i++) {
@@ -5485,7 +5486,8 @@ TclReliabilityModelBuilder_inputCheck(ClientData clientData, Tcl_Interp *interp,
 			return TCL_ERROR;
 		}
 	}
-	
+	*/
+
 	// Clear out old parameter positioners so we don't produce a memory leak
 	theReliabilityDomain->removeAllParameterPositioners();
 
@@ -5514,7 +5516,7 @@ TclReliabilityModelBuilder_inputCheck(ClientData clientData, Tcl_Interp *interp,
 		}
 	}
 	*/
-
+	/*
 	num = theReliabilityDomain->getNumberOfCorrelationCoefficients();
 	for (i=1; i<=num; i++) {
 		component = theReliabilityDomain->getCorrelationCoefficientPtr(i);
@@ -5523,7 +5525,8 @@ TclReliabilityModelBuilder_inputCheck(ClientData clientData, Tcl_Interp *interp,
 			return TCL_ERROR;
 		}
 	}
-	
+	*/
+
 	num = theReliabilityDomain->getNumberOfFilters();
 	for (i=1; i<=num; i++) {
 		component = theReliabilityDomain->getFilter(i);
