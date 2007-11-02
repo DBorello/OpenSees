@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-11-02 02:12:27 $
+// $Revision: 1.7 $
+// $Date: 2007-11-02 04:27:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.h,v $
 
 
@@ -72,11 +72,16 @@ private:
 	Matrix *jacobian_x_u;
 	Matrix *jacobian_u_x;
 	ReliabilityDomain *theReliabilityDomain;
-	MatrixOperations *theMatrixOperations;
 	int nrv;
 	Matrix *correlationMatrix;
-	Matrix *lowerCholesky;
-	Matrix *inverseLowerCholesky;
+	
+	// LAPACK representation from DPOTRF
+	// Use DPOTRS to get "inverse"
+	double *lapackA;
+	double *lapackB;
+	int lapackCholesky(void);
+	bool isFactorized;
+
 	int printFlag;
 
 	// Private member functions

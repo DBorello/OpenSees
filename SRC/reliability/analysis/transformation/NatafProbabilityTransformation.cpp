@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-11-02 02:12:27 $
+// $Revision: 1.11 $
+// $Date: 2007-11-02 04:27:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.cpp,v $
 
 
@@ -61,43 +61,70 @@ NatafProbabilityTransformation::NatafProbabilityTransformation(ReliabilityDomain
 	u = new Vector(nrv);
 	jacobian_x_u = new Matrix(nrv,nrv);
 	jacobian_u_x = new Matrix(nrv,nrv);
-	lowerCholesky = new Matrix(nrv,nrv);
-	inverseLowerCholesky = new Matrix(nrv,nrv);
 	correlationMatrix = new Matrix(nrv,nrv);
-
 
 	// Establish correlation matrix according to the Nataf assumption
 	setCorrelationMatrix(0, 0, 0.0);
 
 
-	// Create object to do matrix operations on the correlation matrix
-	theMatrixOperations = 0;
-	theMatrixOperations = new MatrixOperations(*correlationMatrix);
-	if (theMatrixOperations == 0) {
-		opserr << "NatafProbabilityTransformation::NatafProbabilityTransformation() - could " << endln
-			<< " not create the object to perform matrix operations." << endln;
+	lapackA = new double[nrv*nrv];
+	lapackB = new double[nrv];
+	for (int j = 0; j < nrv; j++) {
+	  for (int i = 0; i < nrv; i++)
+	    lapackA[j*nrv + i] = (*correlationMatrix)(i,j);
+	  lapackB[j] = 0.0;
 	}
+	isFactorized = false;
 
+	this->lapackCholesky();
+}
 
-	// Cholesky decomposition of correlation matrix
-	int result = theMatrixOperations->computeCholeskyAndItsInverse();
-	if (result < 0) {
-		opserr << "NatafProbabilityTransformation::NatafProbabilityTransformation() - could not" << endln
-			<< " compute the Cholesky decomposition and its inverse " << endln
-			<< " for the correlation matrix." << endln;
-	}
-	(*lowerCholesky) = theMatrixOperations->getLowerCholesky();
-	(*inverseLowerCholesky) = theMatrixOperations->getInverseLowerCholesky();
+#ifdef _WIN32
+
+extern "C" int DPOTRF(char *UPLO, int *N, double *A, int *LDA, int *INFO);
+
+extern "C" int DTRTRS(char *UPLO,  char *TRANS, char *DIAG, 
+		      int *N, int *NRHS, double *A, int *LDA,
+		      double *B, int *LDB, int *INFO );
+
+#else
+
+extern "C" int dpotrf_(char *UPLO, int *N, double *A, int *LDA, int *INFO);
+ 
+extern "C" int dtrtrs_(char *UPLO, char *TRANS, char *DIAG, 
+		       int *N, int *NRHS, double *A, int *LDA,
+		       double *B, int *LDB, int *INFO );
+
+#endif
+
+int
+NatafProbabilityTransformation::lapackCholesky(void)
+{
+  char UPLO = 'L';
+  int N = nrv;
+  int LDA = nrv;
+  int INFO;
+
+#ifdef _WIN32
+  DPOTRF(&UPLO, &N, lapackA, &LDA, &INFO);
+#else
+  dpotrf_(&UPLO, &N, lapackA, &LDA, &INFO);
+#endif
+
+  if (INFO != 0) {
+    opserr << "NatafProbabilityTransformation::lapackCholesky -- error code "
+	   << INFO << " returned from LAPACK DPOTRF" << endln;
+  }
+
+  isFactorized = true;
+
+  return INFO;
 }
 
 NatafProbabilityTransformation::~NatafProbabilityTransformation()
 {
 	if (correlationMatrix != 0) 
 		delete correlationMatrix;
-	if (lowerCholesky != 0) 
-		delete lowerCholesky;
-	if (inverseLowerCholesky != 0) 
-		delete inverseLowerCholesky;
 	if (jacobian_x_u != 0) 
 		delete jacobian_x_u;
 	if (jacobian_u_x != 0) 
@@ -106,8 +133,10 @@ NatafProbabilityTransformation::~NatafProbabilityTransformation()
 		delete x;
 	if (u != 0) 
 		delete u;
-	if (theMatrixOperations != 0) 
-		delete theMatrixOperations;
+	if (lapackA != 0)
+	  delete [] lapackA;
+	if (lapackB != 0)
+	  delete [] lapackB;
 }
 
 
@@ -129,12 +158,36 @@ NatafProbabilityTransformation::set_u(const Vector &passedu)
 int 
 NatafProbabilityTransformation::transform_x_to_u()
 {
-	Vector z(nrv);
-	this->x_to_z(*x, z);
-	//(*u) = (*inverseLowerCholesky) * z;
-	u->addMatrixVector(0.0, *inverseLowerCholesky, z, 1.0);
-	
-	return 0;
+  //Vector z = x_to_z(*x);
+  //u->addMatrixVector(0.0, *inverseLowerCholesky, z, 1.0);
+
+  char UPLO = 'L';
+  char TRANS = 'N';
+  char DIAG = 'N';
+  int NRHS = 1;
+  int N = nrv;
+  int LDA = nrv;
+  int LDB = nrv;
+  int INFO;
+
+  Vector z(lapackB, nrv);
+  this->x_to_z(*x, z);
+
+#ifdef _WIN32
+  DTRTRS(&UPLO, &TRANS, &DIAG, &N, &NRHS, lapackA, &LDA, lapackB, &LDB, &INFO);
+#else
+  dtrtrs_(&UPLO, &TRANS, &DIAG, &N, &NRHS, lapackA, &LDA, lapackB, &LDB, &INFO);
+#endif
+
+  if (INFO != 0) {
+    opserr << "NatafProbabilityTransformation::transform_x_to_u -- error code "
+	   << INFO << " returned from LAPACK DTRTRS" << endln;
+  }
+
+  for (int i = 0; i < nrv; i++)
+    (*u)(i) = lapackB[i];
+
+  return INFO;
 }
 
 
@@ -153,7 +206,7 @@ NatafProbabilityTransformation::meanSensitivityOf_x_to_u(const Vector &x, int rv
 	this->x_to_z(x, z);
 
 	// 3) DzDmean and DzDstdv = a vector of zeros and then:
-	Vector DzDmean(x.Size());
+	double DzDmean = 0.0;
 	static NormalRV aStandardNormalRV(1,0.0,1.0,0.0); 
 	RandomVariable *theRV = theReliabilityDomain->getRandomVariablePtr(rvTag);
 	if (theRV == 0) {
@@ -164,7 +217,7 @@ NatafProbabilityTransformation::meanSensitivityOf_x_to_u(const Vector &x, int rv
 	if (strcmp(theRV->getType(),"NORMAL")==0) {
 	  double mu = theRV->getParameter1();
 	  double sigma = theRV->getParameter2();
-	  DzDmean(rvIndex) = -1.0 / sigma;
+	  DzDmean = -1.0 / sigma;
 	}
 	else if (strcmp(theRV->getType(),"LOGNORMAL")==0) {
 		double lambda = theRV->getParameter1();
@@ -173,25 +226,25 @@ NatafProbabilityTransformation::meanSensitivityOf_x_to_u(const Vector &x, int rv
 		double stdv = theRV->getStdv();
 
 		double a = mean*mean+stdv*stdv;
-		DzDmean(rvIndex) = 0.5*(-2.0*mean*mean*log(a)+4.0*mean*mean*log(mean)-3.0*stdv*stdv*log(a)+4.0*stdv*stdv*log(mean)+2.0*stdv*stdv*log(fabs(x(rvIndex))))
+		DzDmean = 0.5*(-2.0*mean*mean*log(a)+4.0*mean*mean*log(mean)-3.0*stdv*stdv*log(a)+4.0*stdv*stdv*log(mean)+2.0*stdv*stdv*log(fabs(x(rvIndex))))
 			/(pow(log(a)-2.0*log(mean),1.5)*mean*a);
 		
 //		double z = ( log ( fabs(x(rvNumber-1)) ) - lambda ) / zeta; // more here for negative lognormal?
 //		double e = (stdv/mean)*(stdv/mean);
 //		double d = 1 + e;
 //		double f = 1.0 / (mean*d*zeta);
-//		DzDmean(rvNumber-1) = f*(-d-e+e*z/zeta);
+//		DzDmean = f*(-d-e+e*z/zeta);
 	}
 	else if (strcmp(theRV->getType(),"UNIFORM")==0) {
 		double pz = 0.39894228048*exp(-z(rvIndex)*z(rvIndex)/2.0);
 		double a = theRV->getParameter1();
 		double b = theRV->getParameter2();
-		DzDmean(rvIndex) = -1.0/(pz*(b-a));
+		DzDmean = -1.0/(pz*(b-a));
 	}
 	else {
 		opserr << "WARNING: Cannot compute reliability sensitivity results for " << endln
 			<< " type of random variable number " << rvTag << endln;
-		DzDmean(rvIndex) = 0.0; //aStandardNormalRV.getInverseCDFvalue(theRV->getCDFMeanSensitivity(x(rvIndex)));
+		DzDmean = 0.0; //aStandardNormalRV.getInverseCDFvalue(theRV->getCDFMeanSensitivity(x(rvIndex)));
 	}
 
 	// 4) The hardest part: DinverseLowerCholeskyDmean
@@ -205,7 +258,15 @@ NatafProbabilityTransformation::meanSensitivityOf_x_to_u(const Vector &x, int rv
 	//            dL = 0.5 * dR * L^(-T)
 	//
 	//    For now: do this by finite difference
-	Matrix OrigInverseLowerCholesky = (*inverseLowerCholesky);
+	Matrix OrigLowerCholesky(nrv,nrv);
+	for (int j = 0; j < nrv; j++) {
+	  int jnrv = j*nrv;
+	  for (int i = j; i < nrv; j++)
+	    OrigLowerCholesky(i,j) = lapackA[jnrv+i];
+	}
+	Matrix OrigInverseLowerCholesky(nrv,nrv);
+	OrigLowerCholesky.Invert(OrigInverseLowerCholesky);
+
 	RandomVariable *aRandomVariable;
 	aRandomVariable = theReliabilityDomain->getRandomVariablePtr(rvTag);
 	double stdv = aRandomVariable->getStdv();
@@ -227,11 +288,16 @@ NatafProbabilityTransformation::meanSensitivityOf_x_to_u(const Vector &x, int rv
 	setCorrelationMatrix(0, 0, 0.0);
 
 	// Return the final result (the four factors)
-	//return ( DinverseLowerCholeskyDmean * z + (*inverseLowerCholesky) * DzDmean );
+	//return ( DinverseLowerCholeskyDmean * z + OrigInverseLowerCholesky * DzDmean );
 
 	Vector returnVector(z);
 	returnVector.addMatrixVector(0.0, DinverseLowerCholeskyDmean, z, 1.0);
-	returnVector.addMatrixVector(1.0, (*inverseLowerCholesky), DzDmean, 1.0);
+	//returnVector.addMatrixVector(1.0, OrigInverseLowerCholesky, DzDmean, 1.0);
+	// Unroll for lower triangular
+	for (int i = rvIndex; i < nrv; i++) {
+	  returnVector(i) += OrigInverseLowerCholesky(i,rvIndex)*DzDmean;
+	}
+
 	return returnVector;
 }
 
@@ -252,7 +318,7 @@ NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(const Vector &x, int rv
 	this->x_to_z(x, z);
 
 	// 3) DzDmean and DzDstdv = a vector of zeros and then:
-	Vector DzDstdv(x.Size());
+	double DzDstdv = 0.0;
 	static NormalRV aStandardNormalRV(1,0.0,1.0,0.0); 
 	RandomVariable *theRV = theReliabilityDomain->getRandomVariablePtr(rvTag);
 	if (theRV == 0) {
@@ -263,7 +329,7 @@ NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(const Vector &x, int rv
 	if (strcmp(theRV->getType(),"NORMAL")==0) {
 		double mu = theRV->getParameter1();
 		double sigma = theRV->getParameter2();
-		DzDstdv(rvIndex) = - (x(rvIndex)-mu) / (sigma*sigma);
+		DzDstdv = - (x(rvIndex)-mu) / (sigma*sigma);
 	}
 	else if (strcmp(theRV->getType(),"LOGNORMAL")==0) {
 		double lambda = theRV->getParameter1();
@@ -272,13 +338,13 @@ NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(const Vector &x, int rv
 		double stdv = theRV->getStdv();
 
 		double a = mean*mean+stdv*stdv;
-		DzDstdv(rvIndex) = 0.5*stdv*(log(a)-2.0*log(fabs(x(rvIndex))))/(pow(log(a)-2.0*log(mean),1.5)*a);
+		DzDstdv = 0.5*stdv*(log(a)-2.0*log(fabs(x(rvIndex))))/(pow(log(a)-2.0*log(mean),1.5)*a);
 		
 //		double z = ( log ( fabs(x(rvNumber-1)) ) - lambda ) / zeta; // more here for negative lognormal?
 //		double e = (stdv/mean)*(stdv/mean);
 //		double d = 1 + e;
 //		double f = 1.0 / (mean*d*zeta);
-//		DzDstdv(rvNumber-1) = stdv*((1.0-z/zeta)*f/mean);
+//		DzDstdv = stdv*((1.0-z/zeta)*f/mean);
 	}
 	else if (strcmp(theRV->getType(),"UNIFORM")==0) {
 		double pz = 0.39894228048*exp(-z(rvIndex)*z(rvIndex)/2.0);
@@ -286,12 +352,12 @@ NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(const Vector &x, int rv
 		double b = theRV->getParameter2();
 		double DzDmean = -1.0/(pz*(b-a));
 		double e = -DzDmean/(b-a);
-		DzDstdv(rvIndex) = 1.732050807*(a+b-2.0*x(rvIndex))*e;
+		DzDstdv = 1.732050807*(a+b-2.0*x(rvIndex))*e;
 	}
 	else {
 		opserr << "WARNING: Cannot compute reliability sensitivity results for " << endln
 			<< " type of random variable number " << rvTag << endln;
-		DzDstdv(rvIndex) = 0.0; //aStandardNormalRV.getInverseCDFvalue(theRV->getCDFStdvSensitivity(x(rvNumber-1)));
+		DzDstdv = 0.0; //aStandardNormalRV.getInverseCDFvalue(theRV->getCDFStdvSensitivity(x(rvNumber-1)));
 	}
 
 	// 4) The hardest part: DinverseLowerCholeskyDmean
@@ -305,7 +371,15 @@ NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(const Vector &x, int rv
 	//            dL = 0.5 * dR * L^(-T)
 	//
 	//    For now: do this by finite difference
-	Matrix OrigInverseLowerCholesky = (*inverseLowerCholesky);
+	Matrix OrigLowerCholesky(nrv,nrv);
+	for (int j = 0; j < nrv; j++) {
+	  int jnrv = j*nrv;
+	  for (int i = j; i < nrv; j++)
+	    OrigLowerCholesky(i,j) = lapackA[jnrv+i];
+	}
+	Matrix OrigInverseLowerCholesky(nrv,nrv);
+	OrigLowerCholesky.Invert(OrigInverseLowerCholesky);
+
 	RandomVariable *aRandomVariable;
 	aRandomVariable = theReliabilityDomain->getRandomVariablePtr(rvTag);
 	double stdv = aRandomVariable->getStdv();
@@ -327,10 +401,15 @@ NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(const Vector &x, int rv
 	setCorrelationMatrix(0, 0, 0.0);
 
 	// Return the final result (the four factors)
-	//return ( DinverseLowerCholeskyDstdv * z + (*inverseLowerCholesky) * DzDstdv );
+	//return ( DinverseLowerCholeskyDstdv * z + OrigInverseLowerCholesky * DzDstdv );
 	Vector returnVector(z);
 	returnVector.addMatrixVector(0.0, DinverseLowerCholeskyDstdv, z, 1.0);
-	returnVector.addMatrixVector(1.0, (*inverseLowerCholesky), DzDstdv, 1.0);
+	//returnVector.addMatrixVector(1.0, OrigInverseLowerCholesky, DzDstdv, 1.0);
+	// Unroll for lower triangular
+	for (int i = rvIndex; i < nrv; i++) {
+	  returnVector(i) += OrigInverseLowerCholesky(i,rvIndex)*DzDstdv;
+	}
+
 	return returnVector;
 }
 
@@ -342,9 +421,17 @@ NatafProbabilityTransformation::transform_u_to_x()
 {
   //Vector z = (*lowerCholesky) * (*u);
   Vector z(*u);
-  z.addMatrixVector(0.0, *lowerCholesky, *u, 1.0);
-  this->z_to_x(z, *x);
+  //z.addMatrixVector(0.0, *lowerCholesky, *u, 1.0);
 
+  // Unrolled for lower triangular matrix
+  for (int i = 0; i < nrv; i++) {
+    double sum = 0.0;
+    for (int j = 0; j < i+1; j++)
+      sum += lapackA[i+j*nrv]*(*u)(j);
+    z(i) = sum;
+  }
+
+  this->z_to_x(z, *x);
 
 	// If user has set print flag to '1' then print realization 
 	if (printFlag == 1) {
@@ -376,25 +463,66 @@ int
 NatafProbabilityTransformation::transform_u_to_x_andComputeJacobian()
 {
   //Vector z = (*lowerCholesky) * (*u);
-  Vector z(*u);
-  z.addMatrixVector(0.0, *lowerCholesky, *u, 1.0);
+  Vector z(nrv);
+  //z.addMatrixVector(0.0, *lowerCholesky, *u, 1.0);
+
+  // Unrolled for lower triangular matrix
+  for (int i = 0; i < nrv; i++) {
+    double sum = 0.0;
+    for (int j = 0; j < i+1; j++)
+      sum += lapackA[i+j*nrv]*(*u)(j);
+    z(i) = sum;
+  }
+
   this->z_to_x(z, *x);
 
   // Jzx is diagonal!
   Vector Jzx(nrv);
   this->getJacobian_z_x((*x), z, Jzx);
-  //(*jacobian_u_x) = (*inverseLowerCholesky) * Jzx;
-  // Multiply ith column of invLowChol by ith diagonal entry of Jzx
-  for (int i = 0; i < nrv; i++) {
-    double Jzxi = Jzx(i);
-    for (int j = i /*lower diag*/; j < nrv; j++) {
-      (*jacobian_u_x)(j,i) = (*inverseLowerCholesky)(j,i) * Jzxi;
+  
+  // Do Jux = inv(L) * Jzx
+  // by solving lower triangular system for each RHS
+  for (int j = 0; j < nrv; j++) {
+
+    char UPLO = 'L';
+    char TRANS = 'N';
+    char DIAG = 'N';
+    int NRHS = 1;
+    int N = nrv;
+    int LDA = nrv;
+    int LDB = nrv;
+    int INFO;
+
+    for (int i = 0; i < nrv; i++)
+      lapackB[i] = 0.0;
+    
+    lapackB[j] = Jzx(j);
+    
+#ifdef _WIN32
+    DTRTRS(&UPLO, &TRANS, &DIAG, &N, &NRHS, lapackA, &LDA, lapackB, &LDB, &INFO);
+#else
+    dtrtrs_(&UPLO, &TRANS, &DIAG, &N, &NRHS, lapackA, &LDA, lapackB, &LDB, &INFO);
+#endif
+    
+    if (INFO != 0) {
+      opserr << "NatafProbabilityTransformation::transform_x_to_u -- error code "
+	     << INFO << " returned from LAPACK DTRTRS" << endln;
     }
+    
+    for (int i = 0; i < nrv; i++)
+      (*jacobian_u_x)(i,j) = lapackB[i];
   }
 
-  // Jacobian is still lower triangular and this can be improved,
-  // but it's better than calling MatrixOperations to do inverse -- MHS
-  jacobian_u_x->Invert(*jacobian_x_u);
+  // Do Jxu = inv(Jzx) * L
+  // Divide jth column of lowChol by jth diagonal entry of Jzx
+  for (int j = 0; j < nrv; j++) {
+    for (int i = 0; i < j; i++)
+      (*jacobian_x_u)(i,j) = 0.0; // Don't need to do this more than once
+    int jnrv = j*nrv;
+    double oneJzxj = 1.0/Jzx(j);
+    for (int i = j /*lower diag*/; i < nrv; i++)
+      (*jacobian_x_u)(i,j) = lapackA[jnrv+i] * oneJzxj;
+  }
 
 	// If user has set print flag to '1' then print realization 
 	if (printFlag == 1) {
