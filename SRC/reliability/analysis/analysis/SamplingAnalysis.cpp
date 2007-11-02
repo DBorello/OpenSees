@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-10-31 22:50:42 $
+// $Revision: 1.8 $
+// $Date: 2007-11-02 01:59:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SamplingAnalysis.cpp,v $
 
 
@@ -112,9 +112,6 @@ SamplingAnalysis::analyze(void)
 	double det_covariance, phi, h, q;
 	int numRV = theReliabilityDomain->getNumberOfRandomVariables();
 	int numLsf = theReliabilityDomain->getNumberOfLimitStateFunctions();
-	Matrix covariance(numRV, numRV);
-	Matrix chol_covariance(numRV, numRV);
-	Matrix inv_covariance(numRV, numRV);
 	Vector startValues(numRV);
 	Vector x(numRV);
 	Vector z(numRV);
@@ -123,48 +120,7 @@ SamplingAnalysis::analyze(void)
 	static NormalRV aStdNormRV(1,0.0,1.0,0.0);
 	bool failureHasOccured = false;
 
-	
-	// Establish covariance matrix
-	for (i=0;  i<numRV;  i++) {
-	  covariance(i,i) = samplingStdv*samplingStdv;
-	}
-
-
-	// Create object to do matrix operations on the covariance matrix
-	MatrixOperations theMatrixOperations(covariance);
-
-	// Terje -- why are you doing these matrix operations on a matrix
-	// that is a scalar times the identity????
-
-	// Cholesky decomposition of covariance matrix
-	result = theMatrixOperations.computeLowerCholesky();
-	if (result < 0) {
-		opserr << "SamplingAnalysis::analyze() - could not compute" << endln
-			<< " the Cholesky decomposition of the covariance matrix." << endln;
-		return -1;
-	}
-	chol_covariance = theMatrixOperations.getLowerCholesky();
-
-
-	// Inverse of covariance matrix
-	result = theMatrixOperations.computeInverse();
-	if (result < 0) {
-		opserr << "SamplingAnalysis::analyze() - could not compute" << endln
-			<< " the inverse of the covariance matrix." << endln;
-		return -1;
-	}
-	inv_covariance = theMatrixOperations.getInverse();
-
-
-	// Compute the determinant, knowing that this is a diagonal matrix
-	result = theMatrixOperations.computeTrace();
-	if (result < 0) {
-		opserr << "SamplingAnalysis::analyze() - could not compute" << endln
-			<< " the trace of the covariance matrix." << endln;
-		return -1;
-	}
-	det_covariance = theMatrixOperations.getTrace();
-	
+	det_covariance = numRV*samplingStdv*samplingStdv;
 
 	// Pre-compute some factors to minimize computations inside simulation loop
 	double pi = acos(-1.0);
@@ -246,7 +202,7 @@ SamplingAnalysis::analyze(void)
 	Vector pf(numLsf);
 	Vector cov(numLsf);
 	double govCov = 999.0;
-	Vector temp1;
+	//Vector temp1;
 	double temp2, denumerator;
 	bool FEconvergence;
 
@@ -280,8 +236,10 @@ SamplingAnalysis::analyze(void)
 		randomArray = theRandomNumberGenerator->getGeneratedNumbers();
 
 		// Compute the point in standard normal space
-		u = startPointY + chol_covariance * randomArray;
-                
+		//u = startPointY + chol_covariance * randomArray;
+                u = startPointY;
+		u.addVector(1.0, randomArray, samplingStdv);
+
 		// Transform into original space
 		result = theProbabilityTransformation->set_u(u);
 		if (result < 0) {
@@ -350,8 +308,14 @@ SamplingAnalysis::analyze(void)
 
 				// Compute values of joint distributions at the u-point
 				phi = factor1 * exp( -0.5 * (u ^ u) );
-				temp1 = inv_covariance ^ (u-startPointY);
-				temp2 = temp1 ^ (u-startPointY);
+				//temp1 = inv_covariance ^ (u-startPointY);
+				//temp2 = temp1 ^ (u-startPointY);
+				temp2 = 0.0;
+				for (int i = 0; i < numRV; i++) {
+				  double uy = u(i)-startPointY(i);
+				  temp2 += uy*uy;
+				}
+				temp2 /= samplingStdv*samplingStdv;
 				h   = factor2 * exp( -0.5 * temp2 );
 
 
@@ -442,7 +406,8 @@ SamplingAnalysis::analyze(void)
 			for (int i=0; i<numLsf; i++) {
 				for (int j=i+1; j<numLsf; j++) {
 
-					crossSums(i,j) = crossSums(i,j) + g_storage(i) * g_storage(j);
+				  //crossSums(i,j) = crossSums(i,j) + g_storage(i) * g_storage(j);
+				  crossSums(i,j) = g_storage(i) * g_storage(j);
 
 					denumerator = 	(sum_q_squared(i)-1.0/(double)k*sum_q(i)*sum_q(i))
 									*(sum_q_squared(j)-1.0/(double)k*sum_q(j)*sum_q(j));
@@ -536,9 +501,9 @@ SamplingAnalysis::analyze(void)
 
 				// Store results
 				if (analysisTypeTag == 1) {
-					beta_sim = -aStdNormRV.getInverseCDFvalue(q_bar(lsf-1));
-					pf_sim	 = q_bar(lsf-1);
-					cov_sim	 = cov_of_q_bar(lsf-1);
+					beta_sim = -aStdNormRV.getInverseCDFvalue(q_bar(lsfIndex));
+					pf_sim	 = q_bar(lsfIndex);
+					cov_sim	 = cov_of_q_bar(lsfIndex);
 					num_sim  = k;
 					theLimitStateFunction->SimulationReliabilityIndexBeta = beta_sim;
 					theLimitStateFunction->SimulationProbabilityOfFailure_pfsim = pf_sim;
@@ -574,10 +539,10 @@ SamplingAnalysis::analyze(void)
 						<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<lsf <<"      #" << endln;
 					resultsOutputFile << "#                                                                     #" << endln;
 					resultsOutputFile << "#  Estimated mean: .................................... " 
-						<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<q_bar(lsf-1) 
+						<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<q_bar(lsfIndex) 
 						<< "  #" << endln;
 					resultsOutputFile << "#  Estimated standard deviation: ...................... " 
-						<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<responseStdv(lsf-1) 
+						<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<responseStdv(lsfIndex) 
 						<< "  #" << endln;
 					resultsOutputFile << "#                                                                     #" << endln;
 					resultsOutputFile << "#######################################################################" << endln << endln << endln;
