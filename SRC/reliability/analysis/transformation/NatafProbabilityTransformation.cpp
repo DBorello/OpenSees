@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-11-02 22:02:15 $
+// $Revision: 1.14 $
+// $Date: 2007-11-05 18:21:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.cpp,v $
 
 
@@ -553,7 +553,7 @@ NatafProbabilityTransformation::meanSensitivityOf_x_to_u(const Vector &x, int rv
 	Matrix OrigLowerCholesky(nrv,nrv);
 	for (int j = 0; j < nrv; j++) {
 	  int jnrv = j*nrv;
-	  for (int i = j; i < nrv; j++)
+	  for (int i = j; i < nrv; i++)
 	    OrigLowerCholesky(i,j) = lapackA[jnrv+i];
 	}
 	Matrix OrigInverseLowerCholesky(nrv,nrv);
@@ -666,7 +666,7 @@ NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(const Vector &x, int rv
 	Matrix OrigLowerCholesky(nrv,nrv);
 	for (int j = 0; j < nrv; j++) {
 	  int jnrv = j*nrv;
-	  for (int i = j; i < nrv; j++)
+	  for (int i = j; i < nrv; i++)
 	    OrigLowerCholesky(i,j) = lapackA[jnrv+i];
 	}
 	Matrix OrigInverseLowerCholesky(nrv,nrv);
