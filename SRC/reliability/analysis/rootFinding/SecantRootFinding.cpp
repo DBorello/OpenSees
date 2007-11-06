@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:31 $
+// $Revision: 1.2 $
+// $Date: 2007-11-06 19:32:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/rootFinding/SecantRootFinding.cpp,v $
 
 
@@ -78,11 +78,11 @@ SecantRootFinding::findLimitStateSurface(int space, double g, Vector pDirection,
 	// (only if the user has specified to "walk" in original space)
 	double perturbation;
 	double realMaxStepLength = maxStepLength;
+	int nrv = theReliabilityDomain->getNumberOfRandomVariables();
 	if (space == 1) {
 
 		// Go through direction vector and see which element is biggest
 		// compared to its standard deviation
-		int nrv = theReliabilityDomain->getNumberOfRandomVariables();
 		RandomVariable *theRV;
 		double stdv, theStdv;
 		int theBiggest;
@@ -105,7 +105,7 @@ SecantRootFinding::findLimitStateSurface(int space, double g, Vector pDirection,
 		perturbation = maxStepLength;
 	}
 
-	Vector theTempPoint;
+	Vector theTempPoint(nrv);
 	double g_old, g_new;
 	bool didNotConverge=true;
 	double result;
@@ -123,6 +123,7 @@ SecantRootFinding::findLimitStateSurface(int space, double g, Vector pDirection,
 
 			// Transform the point into x-space if the user has given it in 2-space
 			if (space==2) {
+			  /*
 				result = theProbabilityTransformation->set_u(thePoint);
 				if (result < 0) {
 					opserr << "GFunVisualizationAnalysis::analyze() - " << endln
@@ -137,6 +138,13 @@ SecantRootFinding::findLimitStateSurface(int space, double g, Vector pDirection,
 					return -1;
 				}
 				theTempPoint = theProbabilityTransformation->get_x();
+			  */
+			  result = theProbabilityTransformation->transform_u_to_x(thePoint, theTempPoint);
+			  if (result < 0) {
+			    opserr << "GFunVisualizationAnalysis::analyze() - " << endln
+				   << " could not transform from u to x and compute Jacobian." << endln;
+			    return -1;
+			  }
 			}
 			else {
 				theTempPoint = thePoint;

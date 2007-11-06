@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-10-25 16:49:13 $
+// $Revision: 1.7 $
+// $Date: 2007-11-06 19:32:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/GFunVisualizationAnalysis.cpp,v $
 
 
@@ -121,7 +121,8 @@ GFunVisualizationAnalysis::analyze(void)
 	
 	// Initial declarations
 	int i,j;
-	Vector thePoint;
+	Vector iPoint(nrv);
+	Vector fPoint(nrv);
 	double result = 0;
 
 
@@ -150,10 +151,10 @@ GFunVisualizationAnalysis::analyze(void)
 
 			// Get the current point in relevant space
 			if (axes==1 || axes==2) {
-				thePoint = this->getCurrentAxes12Point(i,j);
+				iPoint = this->getCurrentAxes12Point(i,j);
 			}
 			else if (axes==3) {
-				thePoint = this->getCurrentAxes3Point(i,j);
+				iPoint = this->getCurrentAxes3Point(i,j);
 			}
 
 			// Evaluate G or find the surface
@@ -161,6 +162,7 @@ GFunVisualizationAnalysis::analyze(void)
 
 				// Transform the point into x-space (1-space) if the user has specified in 2-space
 				if (space==2) {
+				  /*
 					result = theProbabilityTransformation->set_u(thePoint);
 					if (result < 0) {
 						opserr << "GFunVisualizationAnalysis::analyze() - " << endln
@@ -175,20 +177,27 @@ GFunVisualizationAnalysis::analyze(void)
 						return -1;
 					}
 					thePoint = theProbabilityTransformation->get_x();
+				  */
+				  result = theProbabilityTransformation->transform_u_to_x(iPoint, fPoint);
+				  if (result < 0) {
+				    opserr << "GFunVisualizationAnalysis::analyze() - " << endln
+					   << " could not transform from u to x and compute Jacobian." << endln;
+				    return -1;
+				  }
 				}
 
 				// Evaluate g
 				if (j==1) {
-					result = this->evaluateGFunction(thePoint,true);
+					result = this->evaluateGFunction(fPoint,true);
 				}
 				else {
-					result = this->evaluateGFunction(thePoint,false);
+					result = this->evaluateGFunction(fPoint,false);
 				}
 			}
 			else if (funSurf==2) {
 
 				// Find surface in relevant space
-				result = this->findGSurface(thePoint);
+				result = this->findGSurface(iPoint);
 			}
 
 			// Print the result (g or distance) to file
@@ -211,7 +220,8 @@ Vector
 GFunVisualizationAnalysis::getCurrentAxes12Point(int i, int j)
 {
 	// Initial declarations
-	Vector thePoint;
+	Vector iPoint(nrv);
+	Vector fPoint(nrv);
 	int result;
 
 	// Find the start point in the space which the user 
@@ -220,13 +230,12 @@ GFunVisualizationAnalysis::getCurrentAxes12Point(int i, int j)
 		
 
 		// This indicates the origin in the standard normal space
-		Vector dummy(nrv);
-		dummy.Zero();
-		thePoint = dummy;
+	  iPoint.Zero();
 
 
 		// If the user wants to visualize in the x-space; transform it into the x-space
 		if (space==1) {
+		  /*
 			result = theProbabilityTransformation->set_u(thePoint);
 			if (result < 0) {
 				opserr << "GFunVisualizationAnalysis::analyze() - " << endln
@@ -241,16 +250,24 @@ GFunVisualizationAnalysis::getCurrentAxes12Point(int i, int j)
 				return -1;
 			}
 			thePoint = theProbabilityTransformation->get_x();
+		  */
+		  result = theProbabilityTransformation->transform_u_to_x(iPoint, fPoint);
+		  if (result < 0) {
+		    opserr << "GFunVisualizationAnalysis::analyze() - " << endln
+			   << " could not transform from u to x and compute Jacobian." << endln;
+		    return -1;
+		  }
 		}
 	}
 	else {
 
 		// Here the start point is actually given in the orginal space
 
-		thePoint = (*theStartPoint);
+		iPoint = (*theStartPoint);
 
 		// Transform it into the u-space if that's where the user wants to be
 		if (space==2) {
+		  /*
 			result = theProbabilityTransformation->set_x(thePoint);
 			if (result < 0) {
 				opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
@@ -265,16 +282,23 @@ GFunVisualizationAnalysis::getCurrentAxes12Point(int i, int j)
 				return -1;
 			}
 			thePoint = theProbabilityTransformation->get_u();
+		  */
+		  result = theProbabilityTransformation->transform_x_to_u(iPoint, fPoint);
+		  if (result < 0) {
+		    opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+			   << " could not transform from x to u." << endln;
+		    return -1;
+		  }
 		}
 	}
 
 	// Now we have the point in the space we want it, 
 	// So, set the random variables to be 'ranged'
-	thePoint(rv1-1) = from1+(i-1)*interval1; 
+	fPoint(rv1-1) = from1+(i-1)*interval1; 
 	if (axes==2)
-		thePoint(rv2-1) = from2+(j-1)*interval2;
+		fPoint(rv2-1) = from2+(j-1)*interval2;
 	
-	return thePoint;
+	return fPoint;
 }
 
 
@@ -424,7 +448,6 @@ GFunVisualizationAnalysis::findGSurface(Vector thePoint)
 	double scalarDist;
 	double a;
 
-
 	// Find direction; in whichever space user wants
 	Direction.Zero();
 	if (dir == 1)
@@ -439,6 +462,7 @@ GFunVisualizationAnalysis::findGSurface(Vector thePoint)
 
 	// Transform the point into x-space if the user has given it in 2-space
 	if (space==2) {
+	  /*
 		result = theProbabilityTransformation->set_u(thePoint);
 		if (result < 0) {
 			opserr << "GFunVisualizationAnalysis::analyze() - " << endln
@@ -453,6 +477,13 @@ GFunVisualizationAnalysis::findGSurface(Vector thePoint)
 			return -1;
 		}
 		theTempPoint = theProbabilityTransformation->get_x();
+	  */
+	  result = theProbabilityTransformation->transform_u_to_x(thePoint, theTempPoint);
+	  if (result < 0) {
+	    opserr << "GFunVisualizationAnalysis::analyze() - " << endln
+		   << " could not transform from u to x and compute Jacobian." << endln;
+	    return -1;
+	  }
 	}
 	else {
 		theTempPoint = thePoint;
@@ -503,6 +534,9 @@ GFunVisualizationAnalysis::evaluateGFunction(Vector thePoint, bool isFirstPoint)
 	double g;
 	int result;
 
+	Vector uPoint(thePoint);
+	int nrv = thePoint.Size();
+	Matrix Jxu(nrv, nrv);
 
 	// Evaluate limit-state function
 	result = theGFunEvaluator->runGFunAnalysis(thePoint);
@@ -554,6 +588,7 @@ GFunVisualizationAnalysis::evaluateGFunction(Vector thePoint, bool isFirstPoint)
 
 
 		// Transform the x-point into u-space
+		/*
 		result = theProbabilityTransformation->set_x(thePoint);
 		if (result < 0) {
 			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
@@ -568,8 +603,16 @@ GFunVisualizationAnalysis::evaluateGFunction(Vector thePoint, bool isFirstPoint)
 			return -1;
 		}
 		u = theProbabilityTransformation->get_u();
+		*/
 
+		result = theProbabilityTransformation->transform_x_to_u(thePoint, uPoint);
+		if (result < 0) {
+			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+				<< " could not transform from x to u." << endln;
+			return -1;
+		}
 	
+		/*
 		// And back to the x-space again, just to get the jacobian...
 		result = theProbabilityTransformation->set_u(u);
 		if (result < 0) {
@@ -585,7 +628,8 @@ GFunVisualizationAnalysis::evaluateGFunction(Vector thePoint, bool isFirstPoint)
 		}
 		theProbabilityTransformation->get_x();
 		Matrix jacobian_x_u = theProbabilityTransformation->getJacobian_x_u();
-
+		*/
+		result = theProbabilityTransformation->getJacobian_x_to_u(thePoint, Jxu);
 
 		// Print limit-state fnc value and distance to origin to file
 		sprintf(myString,"%20.14e  %20.14e  ", g,u.Norm());
@@ -599,7 +643,8 @@ GFunVisualizationAnalysis::evaluateGFunction(Vector thePoint, bool isFirstPoint)
 			return -1;
 		}
 		Vector gradientOfgFunction = theGradGEvaluator->getGradG();
-		gradientOfgFunction = jacobian_x_u ^ gradientOfgFunction;
+		//gradientOfgFunction = jacobian_x_u ^ gradientOfgFunction;
+		gradientOfgFunction = Jxu ^ gradientOfgFunction;
 
 		
 		// Evaluate the merit function

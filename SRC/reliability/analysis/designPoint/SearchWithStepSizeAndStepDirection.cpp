@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-10-25 22:34:58 $
+// $Revision: 1.14 $
+// $Date: 2007-11-06 19:32:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.cpp,v $
 
 
@@ -152,7 +152,7 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 		// Get starting point
 		x = (*startPoint);
 
-
+		/*
 		// Transform starting point into standard normal space
 		result = theProbabilityTransformation->set_x(x);
 		if (result < 0) {
@@ -169,13 +169,25 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 			return -1;
 		}
 		u = theProbabilityTransformation->get_u();
+		*/
+
+		// Transform starting point into standard normal space
+		result = theProbabilityTransformation->transform_x_to_u(x, u);
+		if (result < 0) {
+		  opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+			 << " could not transform from x to u." << endln;
+		  return -1;
+		}
 	}
+
+	Matrix Jxu(numberOfRandomVariables, numberOfRandomVariables);
+	Matrix Jux(numberOfRandomVariables, numberOfRandomVariables);
 
 	// Loop to find design point
 	i = 1;
 	while ( i <= maxNumberOfIterations )
 	{
-
+	  /*
 		// Transform from u to x space
 		result = theProbabilityTransformation->set_u(u);
 		if (result < 0) {
@@ -192,6 +204,22 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 		}
 		x = theProbabilityTransformation->get_x();
 		const Matrix &jacobian_x_u = theProbabilityTransformation->getJacobian_x_u();
+	  */
+		// Transform to x-space
+		result = theProbabilityTransformation->transform_u_to_x(u, x);
+		if (result < 0) {
+		  opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+			 << " could not transform from u to x." << endln;
+		  return -1;
+		}
+		// Get Jacobian x-space to u-space
+		result = theProbabilityTransformation->getJacobian_x_to_u(x, Jxu);
+		if (result < 0) {
+		  opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+			 << " could not transform from u to x." << endln;
+		  return -1;
+		}
+
 
 
 		// Possibly print the point to output file
@@ -269,7 +297,8 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 		// Gradient in standard normal space
 		gradientInStandardNormalSpace_old = gradientInStandardNormalSpace;
 		//gradientInStandardNormalSpace = jacobian_x_u ^ gradientOfgFunction;
-		gradientInStandardNormalSpace.addMatrixTransposeVector(0.0, jacobian_x_u, gradientOfgFunction, 1.0);
+		//gradientInStandardNormalSpace.addMatrixTransposeVector(0.0, jacobian_x_u, gradientOfgFunction, 1.0);
+		gradientInStandardNormalSpace.addMatrixTransposeVector(0.0, Jxu, gradientOfgFunction, 1.0);
 
 
 		// Compute the norm of the gradient in standard normal space
@@ -301,7 +330,7 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 			int iii;
 			if (printFlag != 0) {
 				if (printFlag == 3) {
-
+				  /*
 					result = theProbabilityTransformation->set_u(u);
 					if (result < 0) {
 						opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
@@ -316,6 +345,13 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 						return -1;
 					}
 					x = theProbabilityTransformation->get_x();
+				  */
+				  result = theProbabilityTransformation->transform_u_to_x(u, x);
+				  if (result < 0) {
+				    opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+					   << " could not transform from u to x." << endln;
+				    return -1;
+				  }
 
 					outputFile2.setf(ios::scientific, ios::floatfield);
 					for (iii=0; iii<x.Size(); iii++) {
@@ -333,18 +369,27 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 
 
 			// Compute the gamma vector
-			const Matrix &jacobian_u_x = theProbabilityTransformation->getJacobian_u_x();
+			//const Matrix &jacobian_u_x = theProbabilityTransformation->getJacobian_u_x();
+			// Get Jacobian u-space to x-space
+			result = theProbabilityTransformation->getJacobian_u_to_x(u, Jux);
+			if (result < 0) {
+			  opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+				 << " could not transform from u to x." << endln;
+			  return -1;
+			}
 
 			//Vector tempProduct = jacobian_u_x ^ alpha;
 			Vector tempProduct(numberOfRandomVariables);
-			tempProduct.addMatrixTransposeVector(0.0, jacobian_u_x, alpha, 1.0);
+			//tempProduct.addMatrixTransposeVector(0.0, jacobian_u_x, alpha, 1.0);
+			tempProduct.addMatrixTransposeVector(0.0, Jux, alpha, 1.0);
 
 			// Only diagonal elements of (J_xu*J_xu^T) are used
 			for (j = 0; j < numberOfRandomVariables; j++) {
 			  double sum = 0.0;
 			  double jk;
 			  for (int k = 0; k < numberOfRandomVariables; k++) {
-			    jk = jacobian_x_u(j,k);
+			    //jk = jacobian_x_u(j,k);
+			    jk = Jxu(j,k);
 			    sum += jk*jk;
 			  }
 			  gamma(j) = sqrt(sum) * tempProduct(j);

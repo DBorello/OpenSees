@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-11-06 01:56:27 $
+// $Revision: 1.5 $
+// $Date: 2007-11-06 19:32:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/ProbabilityTransformation.h,v $
 
 
@@ -44,20 +44,10 @@ public:
 	ProbabilityTransformation();
 	virtual ~ProbabilityTransformation();
 
-	virtual int set_x(const Vector &x) =0;
-	virtual int set_u(const Vector &u) =0;
-
-	virtual int transform_x_to_u() =0;
 	virtual int transform_x_to_u(const Vector &x, Vector &u) = 0;
-	virtual int transform_u_to_x() =0;
 	virtual int transform_u_to_x(const Vector &u, Vector &x) = 0;
-	virtual int transform_u_to_x_andComputeJacobian() =0;
-	virtual int transform_u_to_x_andComputeJacobian(const Vector &u, Vector &x, Matrix &Jux, Matrix &Jxu) = 0;
-
-	virtual const Vector &get_x() =0;
-	virtual const Vector &get_u() =0;
-	virtual const Matrix &getJacobian_x_u() =0;
-	virtual const Matrix &getJacobian_u_x() =0;
+	virtual int getJacobian_x_to_u(const Vector &x, Matrix &Jxu) = 0;
+	virtual int getJacobian_u_to_x(const Vector &u, Matrix &Jux) = 0;
 
 	virtual Vector meanSensitivityOf_x_to_u(const Vector &x, int rvTag) = 0;
 	virtual Vector stdvSensitivityOf_x_to_u(const Vector &x, int rvTag) = 0;

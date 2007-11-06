@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-07-13 18:10:28 $
+// $Revision: 1.6 $
+// $Date: 2007-11-06 19:32:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/ArmijoStepSizeRule.cpp,v $
 
 
@@ -121,7 +121,7 @@ ArmijoStepSizeRule::computeStepSize(const Vector &u_old,
 	bool isSecondTime;
 	bool FEconvergence = false;
 	double result;
-	//Vector x_new;
+	Vector x_new(u_old);
 	//Matrix jacobian_x_u;
 
 
@@ -213,7 +213,7 @@ ArmijoStepSizeRule::computeStepSize(const Vector &u_old,
 			isCloseToSphere = false;
 		}
 
-
+		/*
 		// Transform the trial point into original space
 		result = theProbabilityTransformation->set_u(u_new);
 		if (result < 0) {
@@ -230,7 +230,15 @@ ArmijoStepSizeRule::computeStepSize(const Vector &u_old,
 		}
 		const Vector &x_new = theProbabilityTransformation->get_x();
 		//Matrix jacobian_x_u(theProbabilityTransformation->getJacobian_x_u());
+		*/
 
+		// Transform the trial point into original space
+		result = theProbabilityTransformation->transform_u_to_x(u_new, x_new);
+		if (result < 0) {
+		  opserr << "ArmijoStepSizeRule::computeStepSize() - could not  " << endln
+			 << " transform u to x. " << endln;
+		  return -1;
+		}
 
 		// Evaluate the limit-state function
 		FEconvergence = true;
@@ -330,6 +338,7 @@ ArmijoStepSizeRule::computeStepSize(const Vector &u_old,
 			}
 			logfile << "Armijo starting gFun evaluation at distance " << u_new.Norm() << "..." << endln;
 
+			/*
 			// Transform the trial point into original space
 			double result = theProbabilityTransformation->set_u(u_new);
 			if (result < 0) {
@@ -346,7 +355,15 @@ ArmijoStepSizeRule::computeStepSize(const Vector &u_old,
 			}
 			const Vector &x_new = theProbabilityTransformation->get_x();
 			//Matrix jacobian_x_u(theProbabilityTransformation->getJacobian_x_u());
+			*/
 
+			// Transform the trial point into original space
+			result = theProbabilityTransformation->transform_u_to_x(u_new, x_new);
+			if (result < 0) {
+				opserr << "ArmijoStepSizeRule::computeStepSize() - could not  " << endln
+					<< " transform u to x. " << endln;
+				return -1;
+			}
 
 			// Evaluate the limit-state function
 			FEconvergence = true;

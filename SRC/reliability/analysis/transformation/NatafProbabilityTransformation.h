@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-11-06 01:45:40 $
+// $Revision: 1.9 $
+// $Date: 2007-11-06 19:32:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.h,v $
 
 
@@ -47,20 +47,10 @@ public:
 						  int printFlag);
 	~NatafProbabilityTransformation();
 
-	int set_x(const Vector &x);
-	int set_u(const Vector &u);
-
-	int transform_x_to_u();
 	int transform_x_to_u(const Vector &x, Vector &u);
-	int transform_u_to_x();
 	int transform_u_to_x(const Vector &u, Vector &x);
-	int transform_u_to_x_andComputeJacobian();
-	int transform_u_to_x_andComputeJacobian(const Vector &u, Vector &x, Matrix &Jux, Matrix &Jxu);
-
-	const Vector &get_x();
-	const Vector &get_u();
-	const Matrix &getJacobian_x_u();
-	const Matrix &getJacobian_u_x();
+	int getJacobian_x_to_u(const Vector &x, Matrix &Jxu);
+	int getJacobian_u_to_x(const Vector &u, Matrix &Jux);
 
 	Vector meanSensitivityOf_x_to_u(const Vector &x, int rvTag);
 	Vector stdvSensitivityOf_x_to_u(const Vector &x, int rvTag);
@@ -70,10 +60,6 @@ protected:
 private:
 
 	// Private data members
-	Vector *x;
-	Vector *u;
-	Matrix *jacobian_x_u;
-	Matrix *jacobian_u_x;
 	ReliabilityDomain *theReliabilityDomain;
 	int nrv;
 	Matrix *correlationMatrix;

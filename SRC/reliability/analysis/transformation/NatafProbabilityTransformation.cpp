@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2007-11-06 01:45:40 $
+// $Revision: 1.16 $
+// $Date: 2007-11-06 19:32:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.cpp,v $
 
 
@@ -58,10 +58,6 @@ NatafProbabilityTransformation::NatafProbabilityTransformation(ReliabilityDomain
 
 
 	// Create/initialize vectors and matrices
-	x = new Vector(nrv);
-	u = new Vector(nrv);
-	jacobian_x_u = new Matrix(nrv,nrv);
-	jacobian_u_x = new Matrix(nrv,nrv);
 	correlationMatrix = new Matrix(nrv,nrv);
 
 	// Establish correlation matrix according to the Nataf assumption
@@ -126,69 +122,10 @@ NatafProbabilityTransformation::~NatafProbabilityTransformation()
 {
 	if (correlationMatrix != 0) 
 		delete correlationMatrix;
-	if (jacobian_x_u != 0) 
-		delete jacobian_x_u;
-	if (jacobian_u_x != 0) 
-		delete jacobian_u_x;
-	if (x != 0) 
-		delete x;
-	if (u != 0) 
-		delete u;
 	if (lapackA != 0)
 	  delete [] lapackA;
 	if (lapackB != 0)
 	  delete [] lapackB;
-}
-
-
-
-int 
-NatafProbabilityTransformation::set_x(const Vector &passedx)
-{
-	(*x) = passedx; // (later: check size of vector, etc.)
-	return 0;
-}
-
-int 
-NatafProbabilityTransformation::set_u(const Vector &passedu)
-{
-	(*u) = passedu; // (later: check size of vector, etc.)
-	return 0;
-}
-
-int 
-NatafProbabilityTransformation::transform_x_to_u()
-{
-  //Vector z = x_to_z(*x);
-  //u->addMatrixVector(0.0, *inverseLowerCholesky, z, 1.0);
-
-  char UPLO = 'L';
-  char TRANS = 'N';
-  char DIAG = 'N';
-  int NRHS = 1;
-  int N = nrv;
-  int LDA = nrv;
-  int LDB = nrv;
-  int INFO;
-
-  Vector z(lapackB, nrv);
-  this->x_to_z(*x, z);
-
-#ifdef _WIN32
-  DTRTRS(&UPLO, &TRANS, &DIAG, &N, &NRHS, lapackA, &LDA, lapackB, &LDB, &INFO);
-#else
-  dtrtrs_(&UPLO, &TRANS, &DIAG, &N, &NRHS, lapackA, &LDA, lapackB, &LDB, &INFO);
-#endif
-
-  if (INFO != 0) {
-    opserr << "NatafProbabilityTransformation::transform_x_to_u -- error code "
-	   << INFO << " returned from LAPACK DTRTRS" << endln;
-  }
-
-  for (int i = 0; i < nrv; i++)
-    (*u)(i) = lapackB[i];
-
-  return INFO;
 }
 
 int 
@@ -224,52 +161,6 @@ NatafProbabilityTransformation::transform_x_to_u(const Vector &x, Vector &u)
     u(i) = lapackB[i];
 
   return INFO;
-}
-
-
-
-
-
-int 
-NatafProbabilityTransformation::transform_u_to_x()
-{
-  //Vector z = (*lowerCholesky) * (*u);
-  Vector z(*u);
-  //z.addMatrixVector(0.0, *lowerCholesky, *u, 1.0);
-
-  // Unrolled for lower triangular matrix
-  for (int i = 0; i < nrv; i++) {
-    double sum = 0.0;
-    for (int j = 0; j < i+1; j++)
-      sum += lapackA[i+j*nrv]*(*u)(j);
-    z(i) = sum;
-  }
-
-  this->z_to_x(z, *x);
-
-	// If user has set print flag to '1' then print realization 
-	if (printFlag == 1) {
-		double mean, stdv, dist; 
-		char theString[80];
-		sprintf(theString," CURRENT REALIZATION OF RANDOM VARIABLES:");
-		opserr << theString << endln;
-
-		RandomVariable *theRV;
-		RandomVariableIter &rvIter = 
-		  theReliabilityDomain->getRandomVariables();
-		//for ( int i=0 ; i<nrv ; i++ ) {
-		while ((theRV = rvIter()) != 0) {
-		  int i = theRV->getIndex();
-		  int rvTag = theRV->getTag();
-		  mean = theRV->getMean();
-		  stdv = theRV->getStdv();
-		  dist = ((*x)(i)-mean)/stdv; 
-		  sprintf(theString," x_%d: %5.2e (%5.2f standard deviations away from the mean)",rvTag,(*x)(i),dist);
-		  opserr << theString << endln;
-		}
-	}
-
-	return 0;
 }
 
 int 
@@ -313,94 +204,27 @@ NatafProbabilityTransformation::transform_u_to_x(const Vector &u, Vector &x)
 }
 
 int 
-NatafProbabilityTransformation::transform_u_to_x_andComputeJacobian()
+NatafProbabilityTransformation::getJacobian_x_to_u(const Vector &x, Matrix &Jxu)
 {
-  //Vector z = (*lowerCholesky) * (*u);
   Vector z(nrv);
-  //z.addMatrixVector(0.0, *lowerCholesky, *u, 1.0);
 
-  // Unrolled for lower triangular matrix
-  for (int i = 0; i < nrv; i++) {
-    double sum = 0.0;
-    for (int j = 0; j < i+1; j++)
-      sum += lapackA[i+j*nrv]*(*u)(j);
-    z(i) = sum;
-  }
-
-  this->z_to_x(z, *x);
-
+  this->x_to_z(x, z);
+  
   // Jzx is diagonal!
   Vector Jzx(nrv);
-  this->getJacobian_z_x((*x), z, Jzx);
-
-  // Do Jux = inv(L) * Jzx
-  // by solving lower triangular system for each RHS
-  for (int j = 0; j < nrv; j++) {
-
-    char UPLO = 'L';
-    char TRANS = 'N';
-    char DIAG = 'N';
-    int NRHS = 1;
-    int N = nrv;
-    int LDA = nrv;
-    int LDB = nrv;
-    int INFO;
-
-    for (int i = 0; i < nrv; i++)
-      lapackB[i] = 0.0;
-    
-    lapackB[j] = Jzx(j);
-
-#ifdef _WIN32
-    DTRTRS(&UPLO, &TRANS, &DIAG, &N, &NRHS, lapackA, &LDA, lapackB, &LDB, &INFO);
-#else
-    dtrtrs_(&UPLO, &TRANS, &DIAG, &N, &NRHS, lapackA, &LDA, lapackB, &LDB, &INFO);
-#endif
-    
-    if (INFO != 0) {
-      opserr << "NatafProbabilityTransformation::transform_x_to_u -- error code "
-	     << INFO << " returned from LAPACK DTRTRS" << endln;
-    }
-    
-    for (int i = 0; i < nrv; i++)
-      (*jacobian_u_x)(i,j) = lapackB[i];
-  }
+  this->getJacobian_z_x(x, z, Jzx);
 
   // Do Jxu = inv(Jzx) * L
   // Divide ith row of lowChol by ith diagonal entry of Jzx
   for (int i = 0; i < nrv; i++) {
     double oneJzxi = 1.0/Jzx(i);
     for (int j = 0; j <= i; j++)
-      (*jacobian_x_u)(i,j) = lapackA[j*nrv+i] * oneJzxi;
+      Jxu(i,j) = lapackA[j*nrv+i] * oneJzxi;
   }
-
-	// If user has set print flag to '1' then print realization 
-	if (printFlag == 1) {
-		double mean, stdv, dist; 
-		char theString[80];
-		sprintf(theString," CURRENT REALIZATION OF RANDOM VARIABLES:");
-		opserr << theString << endln;
-
-		RandomVariable *theRV;
-		RandomVariableIter &rvIter = 
-		  theReliabilityDomain->getRandomVariables();
-		//for ( int i=0 ; i<nrv ; i++ ) {
-		while ((theRV = rvIter()) != 0) {
-		  int i = theRV->getIndex();
-		  int rvTag = theRV->getTag();
-		  mean = theRV->getMean();
-		  stdv = theRV->getStdv();
-		  dist = ((*x)(i)-mean)/stdv; 
-		  sprintf(theString," x_%d: %5.2e (%5.2f standard deviations away from the mean)",rvTag,(*x)(i),dist);
-		  opserr << theString << endln;
-		}
-	}
-
-	return 0;
 }
 
-int 
-NatafProbabilityTransformation::transform_u_to_x_andComputeJacobian(const Vector &u, Vector &x, Matrix &Jux, Matrix &Jxu)
+int
+NatafProbabilityTransformation::getJacobian_u_to_x(const Vector &u, Matrix &Jux)
 {
   Vector z(nrv);
 
@@ -412,6 +236,7 @@ NatafProbabilityTransformation::transform_u_to_x_andComputeJacobian(const Vector
     z(i) = sum;
   }
 
+  Vector x(nrv);
   this->z_to_x(z, x);
 
   // Jzx is diagonal!
@@ -450,79 +275,7 @@ NatafProbabilityTransformation::transform_u_to_x_andComputeJacobian(const Vector
     for (int i = 0; i < nrv; i++)
       Jux(i,j) = lapackB[i];
   }
-
-  // Do Jxu = inv(Jzx) * L
-  // Divide ith row of lowChol by ith diagonal entry of Jzx
-  for (int i = 0; i < nrv; i++) {
-    double oneJzxi = 1.0/Jzx(i);
-    for (int j = 0; j <= i; j++)
-      Jxu(i,j) = lapackA[j*nrv+i] * oneJzxi;
-  }
-
-  // If user has set print flag to '1' then print realization 
-  if (printFlag == 1) {
-    double mean, stdv, dist; 
-    char theString[80];
-    sprintf(theString," CURRENT REALIZATION OF RANDOM VARIABLES:");
-    opserr << theString << endln;
-    
-    RandomVariable *theRV;
-    RandomVariableIter &rvIter = 
-      theReliabilityDomain->getRandomVariables();
-    //for ( int i=0 ; i<nrv ; i++ ) {
-    while ((theRV = rvIter()) != 0) {
-      int i = theRV->getIndex();
-      int rvTag = theRV->getTag();
-      mean = theRV->getMean();
-      stdv = theRV->getStdv();
-      dist = (x(i)-mean)/stdv; 
-      sprintf(theString," x_%d: %5.2e (%5.2f standard deviations away from the mean)",rvTag,x(i),dist);
-      opserr << theString << endln;
-    }
-  }
-  
-  return 0;
 }
-
-
-
-
-
-const Vector&
-NatafProbabilityTransformation::get_x()
-{
-	return (*x);
-}
-
-
-
-const Vector&
-NatafProbabilityTransformation::get_u()
-{
-	return (*u);
-}
-
-
-
-const Matrix&
-NatafProbabilityTransformation::getJacobian_x_u()
-{
-	return (*jacobian_x_u);
-}
-
-
-
-const Matrix&
-NatafProbabilityTransformation::getJacobian_u_x()
-{
-	return (*jacobian_u_x);
-}
-
-
-
-
-
-
 
 int
 NatafProbabilityTransformation::getJacobian_z_x(const Vector &x, 

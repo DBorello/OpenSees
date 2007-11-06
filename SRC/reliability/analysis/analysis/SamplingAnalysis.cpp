@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-11-06 02:09:21 $
+// $Revision: 1.11 $
+// $Date: 2007-11-06 19:32:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SamplingAnalysis.cpp,v $
 
 
@@ -174,6 +174,7 @@ SamplingAnalysis::analyze(void)
 		// Do nothing; keep it as zero
 	}
 	else {
+	  /*
 		result = theProbabilityTransformation->set_x(*startPoint);
 		if (result < 0) {
 			opserr << "SamplingAnalysis::analyze() - could not " << endln
@@ -187,6 +188,13 @@ SamplingAnalysis::analyze(void)
 			return -1;
 		}
 		startPointY = theProbabilityTransformation->get_u();
+	  */
+	  result = theProbabilityTransformation->transform_x_to_u(*startPoint, startPointY);
+	  if (result < 0) {
+	    opserr << "SamplingAnalysis::analyze() - could not " << endln
+		   << " transform x to u. " << endln;
+	    return -1;
+	  }
 	}
 
 	// Initial declarations
@@ -242,6 +250,7 @@ SamplingAnalysis::analyze(void)
 		u.addVector(1.0, randomArray, samplingStdv);
 
 		// Transform into original space
+		/*
 		result = theProbabilityTransformation->set_u(u);
 		if (result < 0) {
 			opserr << "SamplingAnalysis::analyze() - could not set the u-vector for xu-transformation. " << endln;
@@ -255,7 +264,13 @@ SamplingAnalysis::analyze(void)
 			return -1;
 		}
 		x = theProbabilityTransformation->get_x();
-
+		*/
+		result = theProbabilityTransformation->transform_u_to_x(u, x);
+		if (result < 0) {
+		  opserr << "SamplingAnalysis::analyze() - could not transform u to x. " << endln;
+		  return -1;
+		}
+		
 		// Evaluate limit-state function
 		FEconvergence = true;
 		result = theGFunEvaluator->runGFunAnalysis(x);
