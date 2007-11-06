@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-10-25 20:50:22 $
+// $Revision: 1.9 $
+// $Date: 2007-11-06 23:09:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/GFunEvaluator.cpp,v $
 
 
@@ -33,6 +33,7 @@
 
 #include <GFunEvaluator.h>
 #include <ReliabilityDomain.h>
+#include <RandomVariableIter.h>
 #include <tcl.h>
 
 #include <fstream>
@@ -121,7 +122,20 @@ GFunEvaluator::evaluateG(const Vector &x)
 		if ( strncmp(tokenPtr, "x",1) == 0) {
 			int rvNum;
 			sscanf(tempchar,"x_%i",&rvNum);
-			sprintf(tclAssignment , "set x_%d  %15.5f", rvNum, x(rvNum-1) );
+			RandomVariableIter &rvIter = theReliabilityDomain->getRandomVariables();
+			RandomVariable *theRV;
+			int index = -1;
+			while ((theRV = rvIter()) != 0) {
+			  if (theRV->getTag() == rvNum) {
+			    index = theRV->getIndex();
+			    break;
+			  }
+			}
+			if (index < 0) {
+			  opserr << "ERROR GFunEvaluator -- RV with tag " << rvNum << " not found in reliability domain" << endln;
+			  return -1;
+			}
+			sprintf(tclAssignment , "set x_%d  %15.5f", rvNum, x(index) );
 			if (Tcl_Eval(theTclInterp, tclAssignment) == TCL_ERROR) {
 			  opserr << "ERROR GFunEvaluator -- Tcl_Eval returned error in limit state function" << endln;
 			  return -1;
