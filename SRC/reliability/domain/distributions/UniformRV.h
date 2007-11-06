@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-02-17 21:27:23 $
+// $Revision: 1.7 $
+// $Date: 2007-11-06 01:00:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/UniformRV.h,v $
 
 
@@ -62,8 +62,6 @@ public:
 	void Print(OPS_Stream &s, int flag =0);
 	double getPDFvalue(double rvValue);
 	double getCDFvalue(double rvValue);
-	double getCDFMeanSensitivity(double rvValue);
-	double getCDFStdvSensitivity(double rvValue);
 	double getInverseCDFvalue(double probValue);
 	const char * getType();
 	double getMean();

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2007-11-05 20:38:08 $
+// $Revision: 1.13 $
+// $Date: 2007-11-06 01:00:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariable.h,v $
 
 
@@ -48,8 +48,8 @@ public:
 	virtual double getPDFvalue(double rvValue) = 0;
 	virtual double getCDFvalue(double rvValue) = 0;
 	virtual double getInverseCDFvalue(double rvValue) = 0; 
-	virtual double getCDFMeanSenstivity(double x) {return 0.0;}
-	virtual double getCDFStdvSenstivity(double x) {return 0.0;}
+	virtual double getCDFMeanSensitivity(double x) {return 0.0;}
+	virtual double getCDFStdvSensitivity(double x) {return 0.0;}
 	virtual const char* getType() = 0;
 	virtual double getMean() = 0;
 	virtual double getStdv() = 0;
