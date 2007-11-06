@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-10-31 20:20:41 $
+// $Revision: 1.4 $
+// $Date: 2007-11-06 01:56:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/ProbabilityTransformation.h,v $
 
 
@@ -48,8 +48,11 @@ public:
 	virtual int set_u(const Vector &u) =0;
 
 	virtual int transform_x_to_u() =0;
+	virtual int transform_x_to_u(const Vector &x, Vector &u) = 0;
 	virtual int transform_u_to_x() =0;
+	virtual int transform_u_to_x(const Vector &u, Vector &x) = 0;
 	virtual int transform_u_to_x_andComputeJacobian() =0;
+	virtual int transform_u_to_x_andComputeJacobian(const Vector &u, Vector &x, Matrix &Jux, Matrix &Jxu) = 0;
 
 	virtual const Vector &get_x() =0;
 	virtual const Vector &get_u() =0;
