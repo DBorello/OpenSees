@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2007-11-06 19:32:36 $
+// $Revision: 1.17 $
+// $Date: 2007-11-06 20:51:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.cpp,v $
 
 
@@ -221,6 +221,8 @@ NatafProbabilityTransformation::getJacobian_x_to_u(const Vector &x, Matrix &Jxu)
     for (int j = 0; j <= i; j++)
       Jxu(i,j) = lapackA[j*nrv+i] * oneJzxi;
   }
+
+  return 0;
 }
 
 int
@@ -275,6 +277,8 @@ NatafProbabilityTransformation::getJacobian_u_to_x(const Vector &u, Matrix &Jux)
     for (int i = 0; i < nrv; i++)
       Jux(i,j) = lapackB[i];
   }
+
+  return INFO;
 }
 
 int
