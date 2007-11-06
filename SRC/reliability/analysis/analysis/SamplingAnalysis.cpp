@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-11-02 15:51:46 $
+// $Revision: 1.10 $
+// $Date: 2007-11-06 02:09:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SamplingAnalysis.cpp,v $
 
 
@@ -108,7 +108,7 @@ SamplingAnalysis::analyze(void)
 
 	// Declaration of some of the data used in the algorithm
 	double gFunctionValue;
-	int result, I, i, j, k = 1, seed = 1;
+	int result, I, k = 1, seed = 1;
 	double det_covariance, phi, h, q;
 	int numRV = theReliabilityDomain->getNumberOfRandomVariables();
 	int numLsf = theReliabilityDomain->getNumberOfLimitStateFunctions();
@@ -123,9 +123,10 @@ SamplingAnalysis::analyze(void)
 	det_covariance = pow(samplingStdv, numRV);
 
 	// Pre-compute some factors to minimize computations inside simulation loop
-	double pi = acos(-1.0);
-	double factor1 = 1.0 / ( pow((2.0*pi),((double)numRV/2.0)) );
-	double factor2 = 1.0 / ( pow((2.0*pi),((double)numRV/2.0)) * sqrt(det_covariance) );
+	static const double twopi = 2.0*acos(-1.0);
+	double factor1 = 1.0 / ( pow(twopi,0.5*numRV));
+	//double factor2 = 1.0 / ( pow(twopi,0.5*numRV) * sqrt(det_covariance) );
+	double factor2 = factor1 / sqrt(det_covariance);
 
 
 	Vector sum_q(numLsf);
@@ -168,6 +169,7 @@ SamplingAnalysis::analyze(void)
 	// Transform start point into standard normal space, 
 	// unless it is the origin that is to be sampled around
 	Vector startPointY(numRV);
+
 	if (startPoint == 0) {
 		// Do nothing; keep it as zero
 	}
@@ -186,7 +188,6 @@ SamplingAnalysis::analyze(void)
 		}
 		startPointY = theProbabilityTransformation->get_u();
 	}
-
 
 	// Initial declarations
 	Vector cov_of_q_bar(numLsf);
@@ -328,9 +329,8 @@ SamplingAnalysis::analyze(void)
 
 				if (sum_q(lsf) > 0.0) {
 					// Compute coefficient of variation (of pf)
-					q_bar(lsf) = 1.0/(double)k * sum_q(lsf);
-					variance_of_q_bar(lsf) = 1.0/(double)k * 
-						( 1.0/(double)k * sum_q_squared(lsf) - (sum_q(lsf)/(double)k)*(sum_q(lsf)/(double)k));
+					q_bar(lsf) = sum_q(lsf)/k;
+					variance_of_q_bar(lsf) = ( sum_q_squared(lsf)/k - (sum_q(lsf)/k)*(sum_q(lsf)/k)) / k;
 					if (variance_of_q_bar(lsf) < 0.0)
 						variance_of_q_bar(lsf) = 0.0;
 					cov_of_q_bar(lsf) = sqrt(variance_of_q_bar(lsf)) / q_bar(lsf);
@@ -352,9 +352,11 @@ SamplingAnalysis::analyze(void)
 				if (sum_q(lsf) > 0.0) {
 					
 					// Compute coefficient of variation (of mean)
-					q_bar(lsf) = 1.0/(double)k * sum_q(lsf);
-					variance_of_q_bar(lsf) = 1.0/(double)k * 
-						( 1.0/(double)k * sum_q_squared(lsf) - (sum_q(lsf)/(double)k)*(sum_q(lsf)/(double)k));
+					//q_bar(lsf) = 1.0/(double)k * sum_q(lsf);
+					q_bar(lsf) = sum_q(lsf)/k;
+					//variance_of_q_bar(lsf) = 1.0/(double)k * 
+					//	( 1.0/(double)k * sum_q_squared(lsf) - (sum_q(lsf)/(double)k)*(sum_q(lsf)/(double)k));
+					variance_of_q_bar(lsf) = ( sum_q_squared(lsf)/k - (sum_q(lsf)/k)*(sum_q(lsf)/k) ) / k;
 					if (variance_of_q_bar(lsf) < 0.0) {
 						variance_of_q_bar(lsf) = 0.0;
 					}
@@ -362,7 +364,8 @@ SamplingAnalysis::analyze(void)
 
 					// Compute variance and standard deviation
 					if (k > 1)
-						responseVariance(lsf) = 1.0/((double)k-1) * (  sum_q_squared(lsf) - 1.0/((double)k) * sum_q(lsf) * sum_q(lsf)  );
+					  //responseVariance(lsf) = 1.0/((double)k-1) * (  sum_q_squared(lsf) - 1.0/((double)k) * sum_q(lsf) * sum_q(lsf)  );
+					  responseVariance(lsf) = (  sum_q_squared(lsf) - sum_q(lsf)/k * sum_q(lsf) ) / (k-1);
 					else
 						responseVariance(lsf) = 1.0;
 
@@ -409,13 +412,14 @@ SamplingAnalysis::analyze(void)
 				  //crossSums(i,j) = crossSums(i,j) + g_storage(i) * g_storage(j);
 				  crossSums(i,j) = g_storage(i) * g_storage(j);
 
-					denumerator = 	(sum_q_squared(i)-1.0/(double)k*sum_q(i)*sum_q(i))
-									*(sum_q_squared(j)-1.0/(double)k*sum_q(j)*sum_q(j));
+				  //denumerator = 	(sum_q_squared(i)-1.0/(double)k*sum_q(i)*sum_q(i))
+				  //*(sum_q_squared(j)-1.0/(double)k*sum_q(j)*sum_q(j));
+				  denumerator = 	(sum_q_squared(i)-sum_q(i)/k*sum_q(i))*(sum_q_squared(j)-sum_q(j)/k*sum_q(j));
 
 					if (denumerator <= 0.0)
 						responseCorrelation(i,j) = 0.0;
 					else
-						responseCorrelation(i,j) = (crossSums(i,j)-1.0/(double)k*sum_q(i)*sum_q(j)) / sqrt(denumerator);
+						responseCorrelation(i,j) = (crossSums(i,j)-sum_q(i)/k*sum_q(j)) / sqrt(denumerator);
 				}
 			}
 		}
