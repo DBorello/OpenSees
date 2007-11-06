@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-10-31 22:24:20 $
+// $Revision: 1.7 $
+// $Date: 2007-11-06 01:58:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/OutCrossingAnalysis.cpp,v $
 
 //
@@ -92,7 +92,7 @@ OutCrossingAnalysis::analyze(void)
 	// Declare variables used in this method
 	int numRV = theReliabilityDomain->getNumberOfRandomVariables();
 	static NormalRV aStdNormRV(1,0.0,1.0,0.0);
-	int numVel, i, j, k, kk, nodeNumber, dofNumber, lsf; 
+	int numVel, i, j, k, kk, nodeNumber, dofNumber; 
 	double dgduValue, accuSum;
 	Vector uStar2(numRV);
 	Vector alpha(numRV), alpha2(numRV), alpha_k(numRV), alpha_kk(numRV);

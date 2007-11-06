@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2007-10-31 20:17:07 $
+// $Revision: 1.13 $
+// $Date: 2007-11-06 01:58:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.cpp,v $
 
 
@@ -87,7 +87,6 @@ SystemAnalysis::initialize()
 	// Initial declarations
 	double beta;
 	double pf1;
-	LimitStateFunction *theLimitStateFunction;
 	int i, j, k, m, n;
 	
 	if (strlen(betaFile) > 1 && strlen(rhoFile) > 1) {

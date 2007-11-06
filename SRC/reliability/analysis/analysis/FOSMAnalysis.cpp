@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-11-02 22:06:14 $
+// $Revision: 1.6 $
+// $Date: 2007-11-06 01:58:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FOSMAnalysis.cpp,v $
 
 
@@ -115,7 +115,6 @@ FOSMAnalysis::analyze(void)
 	// Evaluate limit-state functions
 	Vector meanEstimates(numLsf);
 	int result;
-	int lsf;
 	result = theGFunEvaluator->runGFunAnalysis(meanVector);
 	if (result < 0) {
 		opserr << "FOSMAnalysis::analyze() - " << endln

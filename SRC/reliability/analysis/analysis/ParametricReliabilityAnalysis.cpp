@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-10-31 22:27:28 $
+// $Revision: 1.6 $
+// $Date: 2007-11-06 01:59:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/ParametricReliabilityAnalysis.cpp,v $
 
 
@@ -104,7 +104,7 @@ ParametricReliabilityAnalysis::analyze(void)
 	Vector pf(numIntervals+1);
 	Vector pdf(numIntervals+1);
 	static NormalRV aStdNormRV(1,0.0,1.0,0.0);
-	int numPars, lsf, numPos;
+	int numPars, numPos;
 	double thedGdPar = 0, currentValue, beta;
 	Vector currentValues(numIntervals+1);
 	ParameterPositioner *theParameterPositioner = 0;
