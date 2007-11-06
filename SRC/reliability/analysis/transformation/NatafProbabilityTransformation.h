@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-11-02 04:27:07 $
+// $Revision: 1.8 $
+// $Date: 2007-11-06 01:45:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.h,v $
 
 
@@ -51,8 +51,11 @@ public:
 	int set_u(const Vector &u);
 
 	int transform_x_to_u();
+	int transform_x_to_u(const Vector &x, Vector &u);
 	int transform_u_to_x();
+	int transform_u_to_x(const Vector &u, Vector &x);
 	int transform_u_to_x_andComputeJacobian();
+	int transform_u_to_x_andComputeJacobian(const Vector &u, Vector &x, Matrix &Jux, Matrix &Jxu);
 
 	const Vector &get_x();
 	const Vector &get_u();

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2007-11-05 18:21:30 $
+// $Revision: 1.15 $
+// $Date: 2007-11-06 01:45:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.cpp,v $
 
 
@@ -191,7 +191,40 @@ NatafProbabilityTransformation::transform_x_to_u()
   return INFO;
 }
 
+int 
+NatafProbabilityTransformation::transform_x_to_u(const Vector &x, Vector &u)
+{
+  //Vector z = x_to_z(*x);
+  //u->addMatrixVector(0.0, *inverseLowerCholesky, z, 1.0);
 
+  char UPLO = 'L';
+  char TRANS = 'N';
+  char DIAG = 'N';
+  int NRHS = 1;
+  int N = nrv;
+  int LDA = nrv;
+  int LDB = nrv;
+  int INFO;
+
+  Vector z(lapackB, nrv);
+  this->x_to_z(x, z);
+
+#ifdef _WIN32
+  DTRTRS(&UPLO, &TRANS, &DIAG, &N, &NRHS, lapackA, &LDA, lapackB, &LDB, &INFO);
+#else
+  dtrtrs_(&UPLO, &TRANS, &DIAG, &N, &NRHS, lapackA, &LDA, lapackB, &LDB, &INFO);
+#endif
+
+  if (INFO != 0) {
+    opserr << "NatafProbabilityTransformation::transform_x_to_u -- error code "
+	   << INFO << " returned from LAPACK DTRTRS" << endln;
+  }
+
+  for (int i = 0; i < nrv; i++)
+    u(i) = lapackB[i];
+
+  return INFO;
+}
 
 
 
@@ -239,6 +272,45 @@ NatafProbabilityTransformation::transform_u_to_x()
 	return 0;
 }
 
+int 
+NatafProbabilityTransformation::transform_u_to_x(const Vector &u, Vector &x)
+{
+  Vector z(nrv);
+
+  // Unrolled for lower triangular matrix
+  for (int i = 0; i < nrv; i++) {
+    double sum = 0.0;
+    for (int j = 0; j < i+1; j++)
+      sum += lapackA[i+j*nrv]*u(j);
+    z(i) = sum;
+  }
+
+  this->z_to_x(z, x);
+
+  // If user has set print flag to '1' then print realization 
+  if (printFlag == 1) {
+    double mean, stdv, dist; 
+    char theString[80];
+    sprintf(theString," CURRENT REALIZATION OF RANDOM VARIABLES:");
+    opserr << theString << endln;
+    
+    RandomVariable *theRV;
+    RandomVariableIter &rvIter = 
+      theReliabilityDomain->getRandomVariables();
+    //for ( int i=0 ; i<nrv ; i++ ) {
+    while ((theRV = rvIter()) != 0) {
+      int i = theRV->getIndex();
+      int rvTag = theRV->getTag();
+      mean = theRV->getMean();
+      stdv = theRV->getStdv();
+      dist = (x(i)-mean)/stdv; 
+      sprintf(theString," x_%d: %5.2e (%5.2f standard deviations away from the mean)",rvTag,x(i),dist);
+      opserr << theString << endln;
+    }
+  }
+  
+  return 0;
+}
 
 int 
 NatafProbabilityTransformation::transform_u_to_x_andComputeJacobian()
@@ -327,7 +399,90 @@ NatafProbabilityTransformation::transform_u_to_x_andComputeJacobian()
 	return 0;
 }
 
+int 
+NatafProbabilityTransformation::transform_u_to_x_andComputeJacobian(const Vector &u, Vector &x, Matrix &Jux, Matrix &Jxu)
+{
+  Vector z(nrv);
 
+  // Unrolled for lower triangular matrix
+  for (int i = 0; i < nrv; i++) {
+    double sum = 0.0;
+    for (int j = 0; j < i+1; j++)
+      sum += lapackA[i+j*nrv]*u(j);
+    z(i) = sum;
+  }
+
+  this->z_to_x(z, x);
+
+  // Jzx is diagonal!
+  Vector Jzx(nrv);
+  this->getJacobian_z_x(x, z, Jzx);
+
+  // Do Jux = inv(L) * Jzx
+  // by solving lower triangular system for each RHS
+  for (int j = 0; j < nrv; j++) {
+
+    char UPLO = 'L';
+    char TRANS = 'N';
+    char DIAG = 'N';
+    int NRHS = 1;
+    int N = nrv;
+    int LDA = nrv;
+    int LDB = nrv;
+    int INFO;
+
+    for (int i = 0; i < nrv; i++)
+      lapackB[i] = 0.0;
+    
+    lapackB[j] = Jzx(j);
+
+#ifdef _WIN32
+    DTRTRS(&UPLO, &TRANS, &DIAG, &N, &NRHS, lapackA, &LDA, lapackB, &LDB, &INFO);
+#else
+    dtrtrs_(&UPLO, &TRANS, &DIAG, &N, &NRHS, lapackA, &LDA, lapackB, &LDB, &INFO);
+#endif
+    
+    if (INFO != 0) {
+      opserr << "NatafProbabilityTransformation::transform_x_to_u -- error code "
+	     << INFO << " returned from LAPACK DTRTRS" << endln;
+    }
+    
+    for (int i = 0; i < nrv; i++)
+      Jux(i,j) = lapackB[i];
+  }
+
+  // Do Jxu = inv(Jzx) * L
+  // Divide ith row of lowChol by ith diagonal entry of Jzx
+  for (int i = 0; i < nrv; i++) {
+    double oneJzxi = 1.0/Jzx(i);
+    for (int j = 0; j <= i; j++)
+      Jxu(i,j) = lapackA[j*nrv+i] * oneJzxi;
+  }
+
+  // If user has set print flag to '1' then print realization 
+  if (printFlag == 1) {
+    double mean, stdv, dist; 
+    char theString[80];
+    sprintf(theString," CURRENT REALIZATION OF RANDOM VARIABLES:");
+    opserr << theString << endln;
+    
+    RandomVariable *theRV;
+    RandomVariableIter &rvIter = 
+      theReliabilityDomain->getRandomVariables();
+    //for ( int i=0 ; i<nrv ; i++ ) {
+    while ((theRV = rvIter()) != 0) {
+      int i = theRV->getIndex();
+      int rvTag = theRV->getTag();
+      mean = theRV->getMean();
+      stdv = theRV->getStdv();
+      dist = (x(i)-mean)/stdv; 
+      sprintf(theString," x_%d: %5.2e (%5.2f standard deviations away from the mean)",rvTag,x(i),dist);
+      opserr << theString << endln;
+    }
+  }
+  
+  return 0;
+}
 
 
 
@@ -479,7 +634,6 @@ NatafProbabilityTransformation::x_to_z(const Vector &x, Vector &z)
 	    z(i) = aStandardNormalRV.getInverseCDFvalue(theRV->getCDFvalue(x(i)));
 	  }
 	}
-
 	return 0;
 }
 
@@ -521,7 +675,7 @@ NatafProbabilityTransformation::meanSensitivityOf_x_to_u(const Vector &x, int rv
 		DzDmean = 0.5*(-2.0*mean*mean*log(a)+4.0*mean*mean*log(mean)-3.0*stdv*stdv*log(a)+4.0*stdv*stdv*log(mean)+2.0*stdv*stdv*log(fabs(x(rvIndex))))
 			/(pow(log(a)-2.0*log(mean),1.5)*mean*a);
 		
-//		double z = ( log ( fabs(x(rvNumber-1)) ) - lambda ) / zeta; // more here for negative lognormal?
+//		double z = ( log ( fabs(x(rvIndex)) ) - lambda ) / zeta; // more here for negative lognormal?
 //		double e = (stdv/mean)*(stdv/mean);
 //		double d = 1 + e;
 //		double f = 1.0 / (mean*d*zeta);
@@ -536,7 +690,8 @@ NatafProbabilityTransformation::meanSensitivityOf_x_to_u(const Vector &x, int rv
 	else {
 		opserr << "WARNING: Cannot compute reliability sensitivity results for " << endln
 			<< " type of random variable number " << rvTag << endln;
-		DzDmean = 0.0; //aStandardNormalRV.getInverseCDFvalue(theRV->getCDFMeanSensitivity(x(rvIndex)));
+		//DzDmean = 0.0;
+		DzDmean = aStandardNormalRV.getInverseCDFvalue(theRV->getCDFMeanSensitivity(x(rvIndex)));
 	}
 
 	// 4) The hardest part: DinverseLowerCholeskyDmean
@@ -632,7 +787,7 @@ NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(const Vector &x, int rv
 		double a = mean*mean+stdv*stdv;
 		DzDstdv = 0.5*stdv*(log(a)-2.0*log(fabs(x(rvIndex))))/(pow(log(a)-2.0*log(mean),1.5)*a);
 		
-//		double z = ( log ( fabs(x(rvNumber-1)) ) - lambda ) / zeta; // more here for negative lognormal?
+//		double z = ( log ( fabs(x(rvIndex)) ) - lambda ) / zeta; // more here for negative lognormal?
 //		double e = (stdv/mean)*(stdv/mean);
 //		double d = 1 + e;
 //		double f = 1.0 / (mean*d*zeta);
@@ -649,7 +804,8 @@ NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(const Vector &x, int rv
 	else {
 		opserr << "WARNING: Cannot compute reliability sensitivity results for " << endln
 			<< " type of random variable number " << rvTag << endln;
-		DzDstdv = 0.0; //aStandardNormalRV.getInverseCDFvalue(theRV->getCDFStdvSensitivity(x(rvNumber-1)));
+		//DzDstdv = 0.0;
+		DzDstdv = aStandardNormalRV.getInverseCDFvalue(theRV->getCDFStdvSensitivity(x(rvIndex)));
 	}
 
 	// 4) The hardest part: DinverseLowerCholeskyDmean
