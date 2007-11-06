@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2007-11-06 20:51:53 $
+// $Revision: 1.18 $
+// $Date: 2007-11-06 20:53:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.cpp,v $
 
 
@@ -272,13 +272,14 @@ NatafProbabilityTransformation::getJacobian_u_to_x(const Vector &u, Matrix &Jux)
     if (INFO != 0) {
       opserr << "NatafProbabilityTransformation::transform_x_to_u -- error code "
 	     << INFO << " returned from LAPACK DTRTRS" << endln;
+      return INFO;
     }
     
     for (int i = 0; i < nrv; i++)
       Jux(i,j) = lapackB[i];
   }
 
-  return INFO;
+  return 0;
 }
 
 int
