@@ -1,5 +1,5 @@
-// $Revision: 1.41 $
-// $Date: 2007-10-11 21:56:04 $
+// $Revision: 1.42 $
+// $Date: 2007-11-07 23:31:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
 
 // Written: ZHY
@@ -800,6 +800,7 @@ int PressureDependMultiYield::setParameter(const char **argv, int argc, Paramete
     return -1;
 
   int matTag = atoi(argv[1]);
+
   if (this->getTag() == matTag) {
     if (strcmp(argv[0],"updateMaterialStage") == 0) 
       return param.addObject(1, this);
