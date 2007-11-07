@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-10-31 21:38:32 $
+// $Revision: 1.7 $
+// $Date: 2007-11-07 22:47:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/FiniteDifferenceGradGEvaluator.cpp,v $
 
 
@@ -142,19 +142,16 @@ FiniteDifferenceGradGEvaluator::computeGradG(double gFunValue,
 	int numberOfRandomVariables = passed_x.Size();
 	Vector perturbed_x(numberOfRandomVariables);
 	RandomVariable *theRandomVariable;
-	int i;
 	double h;
 	double gFunValueAStepAhead;
 	double stdv;
 
 	RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
-
 	// For each random variable: perturb and run analysis again
 	//for ( i=0 ; i<numberOfRandomVariables ; i++ ) {
 	while ((theRandomVariable = rvIter()) != 0) {
 	  
 	  int i = theRandomVariable->getIndex();
-
 
 		// Get the standard deviation
 		stdv = theRandomVariable->getStdv();
@@ -241,7 +238,6 @@ FiniteDifferenceGradGEvaluator::computeAllGradG(const Vector &gFunValues,
 
 	// For each random variable: perturb and run analysis again
 	RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
-
 	// For each random variable: perturb and run analysis again
 	//for (int i=1; i<=nrv; i++) {
 	while ((theRandomVariable = rvIter()) != 0) {
