@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2007-11-06 20:53:37 $
+// $Revision: 1.19 $
+// $Date: 2007-11-07 23:06:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.cpp,v $
 
 
@@ -171,7 +171,7 @@ NatafProbabilityTransformation::transform_u_to_x(const Vector &u, Vector &x)
   // Unrolled for lower triangular matrix
   for (int i = 0; i < nrv; i++) {
     double sum = 0.0;
-    for (int j = 0; j < i+1; j++)
+    for (int j = 0; j <= i; j++)
       sum += lapackA[i+j*nrv]*u(j);
     z(i) = sum;
   }
@@ -233,7 +233,7 @@ NatafProbabilityTransformation::getJacobian_u_to_x(const Vector &u, Matrix &Jux)
   // Unrolled for lower triangular matrix
   for (int i = 0; i < nrv; i++) {
     double sum = 0.0;
-    for (int j = 0; j < i+1; j++)
+    for (int j = 0; j <= i; j++)
       sum += lapackA[i+j*nrv]*u(j);
     z(i) = sum;
   }
@@ -245,18 +245,18 @@ NatafProbabilityTransformation::getJacobian_u_to_x(const Vector &u, Matrix &Jux)
   Vector Jzx(nrv);
   this->getJacobian_z_x(x, z, Jzx);
 
+  char UPLO = 'L';
+  char TRANS = 'N';
+  char DIAG = 'N';
+  int NRHS = 1;
+  int N = nrv;
+  int LDA = nrv;
+  int LDB = nrv;
+  int INFO;
+  
   // Do Jux = inv(L) * Jzx
   // by solving lower triangular system for each RHS
   for (int j = 0; j < nrv; j++) {
-
-    char UPLO = 'L';
-    char TRANS = 'N';
-    char DIAG = 'N';
-    int NRHS = 1;
-    int N = nrv;
-    int LDA = nrv;
-    int LDB = nrv;
-    int INFO;
 
     for (int i = 0; i < nrv; i++)
       lapackB[i] = 0.0;
