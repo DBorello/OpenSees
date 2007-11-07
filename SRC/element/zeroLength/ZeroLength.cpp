@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2007-06-06 19:38:22 $
+// $Revision: 1.21 $
+// $Date: 2007-11-07 23:24:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
                                                                         
                                                                         
@@ -937,8 +937,9 @@ ZeroLength::setParameter(const char **argv, int argc, Parameter &param)
 
   for (int i=0; i<numMaterials1d; i++) {
     int res = theMaterial1d[i]->setParameter(argv, argc, param);
-    if (res != -1)
+	if (res != -1) {
       result = res;
+	}
   }  
   return result;
 }
