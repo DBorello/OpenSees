@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-11-01 17:11:49 $
+// $Revision: 1.5 $
+// $Date: 2007-11-08 20:12:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/system/SCIS.cpp,v $
 
 
@@ -48,6 +48,10 @@ using std::ios;
 using std::setw;
 using std::setprecision;
 using std::setiosflags;
+
+#ifndef isfinite
+#define isfinite(x) ((x)-(x) == 0)
+#endif
 
 SCIS::SCIS(ReliabilityDomain *passedReliabilityDomain, TCL_Char *passedFileName, int aType, 
 		 TCL_Char *passedBeta, TCL_Char *passedRho, long int passedN, double passedTol)

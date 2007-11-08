@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2007-10-26 03:22:40 $
+// $Revision: 1.13 $
+// $Date: 2007-11-08 20:12:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/NormalRV.cpp,v $
 
 
@@ -174,6 +174,8 @@ NormalRV::errorFunction(double x)
 {
 #ifdef _LINUX
 	return erf(x);
+#else
+#define isnan(x) ((x)!=(x))
 #endif
 	// ErrorFunction(x) = 2/sqrt(pi) * integral from 0 to x of exp(-t^2) dt.
 	double a1,a2,a3,a4,a5;

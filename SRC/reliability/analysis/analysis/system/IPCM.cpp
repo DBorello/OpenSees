@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-10-31 20:12:27 $
+// $Revision: 1.4 $
+// $Date: 2007-11-08 20:12:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/system/IPCM.cpp,v $
 
 
@@ -44,6 +44,11 @@ using std::ios;
 using std::setw;
 using std::setprecision;
 using std::setiosflags;
+
+
+#ifndef isnan
+#define isnan(x) ((x)!=(x))
+#endif
 
 IPCM::IPCM(ReliabilityDomain *passedReliabilityDomain, TCL_Char *passedFileName, int aType, 
 		 TCL_Char *passedBeta, TCL_Char *passedRho)
