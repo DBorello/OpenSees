@@ -195,6 +195,18 @@
 				RelativePath="..\..\..\SRC\element\zeroLength\ZeroLength.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\element\zeroLength\ZeroLengthContact2D.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\zeroLength\ZeroLengthContact2D.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\zeroLength\ZeroLengthContact3D.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\zeroLength\ZeroLengthContact3D.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\element\zeroLength\ZeroLengthSection.cpp">
 			</File>
 			<File
