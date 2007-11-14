@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2007-10-12 23:49:10 $
+// $Revision: 1.30 $
+// $Date: 2007-11-14 20:34:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.cpp,v $
                                                                         
 // Written: fmk
@@ -253,7 +253,6 @@ FiberSection2d::addFiber(Fiber &newFiber)
 
   return 0;
 }
-
 
 
 // destructor:
@@ -759,7 +758,6 @@ Response*
 FiberSection2d::setResponse(const char **argv, int argc,
 			    OPS_Stream &output)
 {
-
   const ID &type = this->getType();
   int typeSize = this->getOrder();
 
@@ -899,6 +897,7 @@ FiberSection2d::setResponse(const char **argv, int argc,
 	
 	int matTag = atoi(argv[3]);
 	double yCoord = atof(argv[1]);
+
 	double closestDist;
 	double ySearch, dy;
 	double distance;
@@ -906,7 +905,7 @@ FiberSection2d::setResponse(const char **argv, int argc,
 	// Find first fiber with specified material tag
 	for (j = 0; j < numFibers; j++) {
 	  if (matTag == theMaterials[j]->getTag()) {
-	    ySearch = -matData[2*j];
+	    ySearch = matData[2*j];
 	    dy = ySearch-yCoord;
 	    closestDist = fabs(dy);
 	    key = j;
@@ -916,7 +915,7 @@ FiberSection2d::setResponse(const char **argv, int argc,
 	// Search the remaining fibers
 	for ( ; j < numFibers; j++) {
 	  if (matTag == theMaterials[j]->getTag()) {
-	    ySearch = -matData[2*j];
+	    ySearch = matData[2*j];
 	    dy = ySearch-yCoord;
 	    distance = fabs(dy);
 	    if (distance < closestDist) {
@@ -929,17 +928,20 @@ FiberSection2d::setResponse(const char **argv, int argc,
       }
       
       else {                  // fiber near-to coordinate specified
+
 	double yCoord = atof(argv[1]);
 	double closestDist;
 	double ySearch, dy;
 	double distance;
-	ySearch = -matData[0];
+
+	ySearch = matData[0];
 	dy = ySearch-yCoord;
 	closestDist = fabs(dy);
 	key = 0;
 	for (int j = 1; j < numFibers; j++) {
-	  ySearch = -matData[2*j];
+	  ySearch = matData[2*j];
 	  dy = ySearch-yCoord;
+
 	  distance = fabs(dy);
 	  if (distance < closestDist) {
 	    closestDist = distance;
@@ -949,10 +951,9 @@ FiberSection2d::setResponse(const char **argv, int argc,
 	passarg = 3;
       }
       
-      
       if (key < numFibers && key >= 0) {
 	output.tag("FiberOutput");
-	output.attr("yLoc",-matData[2*key]);
+	output.attr("yLoc",matData[2*key]);
 	output.attr("zLoc",0.0);
 	output.attr("area",matData[2*key+1]);
 	
