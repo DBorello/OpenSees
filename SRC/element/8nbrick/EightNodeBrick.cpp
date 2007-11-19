@@ -3256,19 +3256,32 @@ void EightNodeBrick::Print(OPS_Stream &s, int flag)
 }
 
 //=============================================================================
-Response * EightNodeBrick::setResponse (const char **argv, int argc) 
+Response * EightNodeBrick::setResponse (const char **argv, int argc, OPS_Stream &output)
 {
+  Response *theResponse = 0;
+
+  char outputData[32];
+
+  output.tag("ElementOutput");
+  output.attr("eleType","Brick");
+  output.attr("eleTag",this->getTag());
+  for (int i=1; i<=8; i++) {
+    sprintf(outputData,"node%d",i);
+    output.attr(outputData,theNodes[i-1]->getTag());
+  }
+
     //========================================================
     if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
-    return new ElementResponse(this, 1, P);
+    theResponse =  new ElementResponse(this, 1, P);
     
     //========================================================
     else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
-        return new ElementResponse(this, 2, K);
+      theResponse =  new ElementResponse(this, 2, K);
 
     //========================================================
     else if (strcmp(argv[0],"plasticGPC") == 0 || strcmp(argv[0],"plastifiedGPC") == 0)
     {
+      
        //checking if element plastified
        //int count  = r_integration_order* s_integration_order * t_integration_order;
        //straintensor pl_stn;
@@ -3284,54 +3297,55 @@ Response * EightNodeBrick::setResponse (const char **argv, int argc)
        //   }
        //}
   
-       return new ElementResponse(this, 3, InfoP);
+       theResponse =  new ElementResponse(this, 3, InfoP);
     } 
     //========================================================
     else if (strcmp(argv[0],"plastic") == 0 || strcmp(argv[0],"plastified") == 0)
     {  
-       return new ElementResponse(this, 31, InfoP1);
+       theResponse =  new ElementResponse(this, 31, InfoP1);
     } 
     //========================================================
     else if (strcmp(argv[0],"stress") == 0 || strcmp(argv[0],"stresses") == 0)
     {
-       return new ElementResponse(this, 4, InfoS);
+       theResponse =  new ElementResponse(this, 4, InfoS);
     } 
     //========================================================
     else if (strcmp(argv[0],"pq") == 0 || strcmp(argv[0],"PQ") == 0)
     {
-       return new ElementResponse(this, 41, InfoSpq);
+       theResponse =  new ElementResponse(this, 41, InfoSpq);
     } 
     //Added 06-27-02 for p-q
     //========================================================
     else if (strcmp(argv[0],"stresspq") == 0 || strcmp(argv[0],"stressespq") == 0)
     {
-       return new ElementResponse(this, 41, InfoSpq);
+       theResponse =  new ElementResponse(this, 41, InfoSpq);
     } 
     //Added 07-22-02 for all p-q, e_v_pl, xi
     //========================================================
     else if (strcmp(argv[0],"pqall") == 0 )
     {
-       return new ElementResponse(this, 42, InfoSpq_all);
+       theResponse =  new ElementResponse(this, 42, InfoSpq_all);
     } 
 
     //========================================================
     else if (strcmp(argv[0],"gausspoint") == 0 || strcmp(argv[0],"GaussPoint") == 0)
     {
-       return new ElementResponse(this, 5, Gsc8);
+       theResponse =  new ElementResponse(this, 5, Gsc8);
     } 
 
     //========================================================
     /*else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
       int pointNum = atoi(argv[1]);
       if (pointNum > 0 && pointNum <= 4)
-        return theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo); 
+        theResponse =  theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo); 
         else 
         return 0;
     }*/
  
     // otherwise response quantity is unknown for the quad class
-    else
-   return 0;
+    
+    output.endTag(); // ElementOutput
+    return theResponse;
 }
 
 //=============================================================================
