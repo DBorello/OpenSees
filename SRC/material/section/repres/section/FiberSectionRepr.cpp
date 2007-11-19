@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-07-27 17:56:53 $
+// $Revision: 1.8 $
+// $Date: 2007-11-19 22:34:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/section/FiberSectionRepr.cpp,v $
                                                                         
                                                                         
@@ -208,6 +208,9 @@ int FiberSectionRepr::addPatch (const Patch & aPatch)
        opserr << "FiberSectionRepr::addPatch() - out of memory\n";
        return 1;
      }
+	 for (int i=0; i< maxNPatches; i++)
+       patches[i] = 0;
+	   
      for (int i=0; i<nPatches; i++)
        patches[i] = patch[i];
      
@@ -235,6 +238,9 @@ int FiberSectionRepr::addReinfLayer (const ReinfLayer & aReinfLayer)
        opserr << "FiberSectionRepr::addReinLayer() - out of memory\n";
        return 1;
      }
+	 for (int i=0; i< maxNReinfLayers; i++)
+       reinfLayers[i] = 0;
+	   
      for (int i=0; i<nReinfLayers; i++)
        reinfLayers[i] = reinfLayer[i];
 
@@ -371,7 +377,7 @@ FiberSectionRepr::addHFiber(Fiber &newFiber)
 	}
 	    
 	// set the new size of the array
-	sizeFibers = newSize;
+	sizeHFibers = newSize;
 	
 	// copy the old pointers
 	for (int i = 0; i < numHFibers; i++)

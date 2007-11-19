@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-07-27 17:56:53 $
+// $Revision: 1.5 $
+// $Date: 2007-11-19 22:34:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/section/FiberSectionRepr.h,v $
                                                                         
                                                                         
@@ -102,7 +102,6 @@ class FiberSectionRepr: public SectionRepres
     Fiber **theHFibers;   // array of pointers to fibers
                          // that form the section
     int sizeHFibers;      // size of the fibers array
-
 };
 
 
