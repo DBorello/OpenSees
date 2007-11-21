@@ -39,12 +39,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 /FORCE:MULTIPLE"
-				AdditionalDependencies="OpenGL32.lib glu32.lib GlAux.lib damage.lib wsock32.lib fedeas.lib drain.lib reliability.lib database.lib renderer.lib blas.lib lapack.lib feap.lib arpack.lib umfpack.lib openSeesFortran.lib actor.lib analysis.lib cblas.lib convergence.lib domain.lib element.lib graph.lib material.lib matrix.lib modelbuilder.lib recorder.lib superLU.lib system.lib tagged.lib tcl.lib utility.lib tcl84.lib tk84.lib odbc32.lib odbccp32.lib"
+				AdditionalDependencies="tcl.lib wsock32.lib OpenGL32.lib glu32.lib GlAux.lib damage.lib fedeas.lib drain.lib reliability.lib database.lib renderer.lib blas.lib lapack.lib feap.lib arpack.lib umfpack.lib actor.lib analysis.lib cblas.lib convergence.lib domain.lib element.lib graph.lib material.lib matrix.lib modelbuilder.lib recorder.lib superLU.lib system.lib tagged.lib utility.lib tcl84.lib tk84.lib libm.lib ifconsol.lib libifcore.lib odbc32.lib odbccp32.lib"
 				OutputFile=".\..\..\bin/openSeesTk.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="c:\program files\tcl\lib;..\..\lib\release;..\..\lib;..\..\lib\release"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\..\..\bin/openSeesTk.pdb"
 				SubSystem="1"/>
 			<Tool
@@ -94,7 +94,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 /FORCE:MULTIPLE"
-				AdditionalDependencies="OpenGL32.lib wsock32.lib glu32.lib GlAux.lib damage.lib wsock32.lib fedeas.lib drain.lib reliability.lib database.lib renderer.lib blas.lib lapack.lib feap.lib arpack.lib umfpack.lib openSeesFortran.lib actor.lib analysis.lib cblas.lib convergence.lib domain.lib element.lib graph.lib material.lib matrix.lib modelbuilder.lib recorder.lib superLU.lib system.lib tagged.lib tcl.lib utility.lib tcl84.lib tk84.lib odbc32.lib odbccp32.lib"
+				AdditionalDependencies="tcl.lib wsock32.lib OpenGL32.lib glu32.lib GlAux.lib damage.lib fedeas.lib drain.lib reliability.lib database.lib renderer.lib blas.lib lapack.lib feap.lib arpack.lib umfpack.lib actor.lib analysis.lib cblas.lib convergence.lib domain.lib element.lib graph.lib material.lib matrix.lib modelbuilder.lib recorder.lib superLU.lib system.lib tagged.lib utility.lib tcl84.lib tk84.lib libm.lib ifconsol.lib libifcore.lib odbc32.lib odbccp32.lib"
 				OutputFile=".\..\..\bin/openSeesTk.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
@@ -126,9 +126,6 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
-			<File
-				RelativePath="..\..\VC2005errno.cpp">
-			</File>
 			<File
 				RelativePath="..\..\..\SRC\tcl\tkMain.cpp">
 			</File>
