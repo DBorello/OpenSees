@@ -14,7 +14,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkMain.cpp,v 1.19 2006-09-26 18:58:12 fmk Exp $
+ * RCS: @(#) $Id: tkMain.cpp,v 1.20 2007-11-27 23:40:30 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -48,6 +48,10 @@ extern "C" {
 SimulationInformation simulationInfo;
 char *simulationInfoOutputFilename = 0;
 
+char *neesCentralProjID =0;
+char * neesCentralExpID =0;
+char *neesCentralUser =0;
+char *neesCentralPasswd =0;
 
 typedef struct ThreadSpecificData {
     Tcl_Interp *interp;         /* Interpreter for this thread. */
@@ -499,9 +503,4 @@ Prompt(Tcl_Interp *interp, int partial)
 }
 
 
-int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
-{
-  Tcl_Exit(0);
-  return 0;
-}
 
