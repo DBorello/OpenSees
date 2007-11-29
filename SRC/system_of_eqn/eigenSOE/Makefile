@@ -1,8 +1,15 @@
 include ../../../Makefile.def
 
-OBJS       = EigenSOE.o EigenSolver.o BandArpackSOE.o  BandArpackSolver.o \
-	     SymArpackSOE.o  SymArpackSolver.o \
-	SymBandEigenSOE.o SymBandEigenSolver.o
+OBJS       = EigenSOE.o \
+	EigenSolver.o \
+	BandArpackSOE.o  \
+	BandArpackSolver.o \
+	SymArpackSOE.o \
+	SymArpackSolver.o \
+	SymBandEigenSOE.o \
+	SymBandEigenSolver.o \
+	FullGenEigenSOE.o \
+	FullGenEigenSolver.o
 
 all:    $(OBJS)
 
