@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-04-05 01:29:04 $
+// $Revision: 1.4 $
+// $Date: 2007-11-29 18:22:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/CollocationHybridSimulation.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -32,6 +32,7 @@
 
 #include <CollocationHybridSimulation.h>
 #include <FE_Element.h>
+#include <FE_EleIter.h>
 #include <LinearSOE.h>
 #include <AnalysisModel.h>
 #include <Vector.h>
@@ -207,10 +208,7 @@ int CollocationHybridSimulation::newStep(double _deltaT)
     // increment the time to t+theta*deltaT and apply the load
     double time = theModel->getCurrentDomainTime();
     time += theta*deltaT;
-    if (theModel->updateDomain(time, deltaT) < 0)  {
-        opserr << "CollocationHybridSimulation::newStep() - failed to update the domain\n";
-        return -4;
-    }
+    theModel->applyLoadDomain(time);
 
     return 0;
 }
@@ -381,7 +379,7 @@ int CollocationHybridSimulation::domainChanged()
         }        
     }    
     
-    opserr << "WARNING: CollocationHybridSimulation::domainChanged() - assuming Ut-2 = Ut-1 = Ut\n";
+    opserr << "\nWARNING: CollocationHybridSimulation::domainChanged() - assuming Ut-2 = Ut-1 = Ut\n";
 
     return 0;
 }
@@ -413,14 +411,6 @@ int CollocationHybridSimulation::update(const Vector &deltaU)
         return -3;
     }
     
-/*    // determine the displacement increment reduction factor
-    x = 1.0/(theTest->getMaxNumTests() - theTest->getNumTests() + 1.0);
-    // determine the response at t+theta*deltaT
-    U->addVector(1.0, deltaU, x*c1);
-    Udot->addVector(1.0, deltaU, x*c2);
-    Udotdot->addVector(1.0, deltaU, x*c3);
-*/    
-
     // get interpolation location and scale displacement increment 
     x = (double) theTest->getNumTests()/theTest->getMaxNumTests();
     if (polyOrder == 1)  {
@@ -438,7 +428,7 @@ int CollocationHybridSimulation::update(const Vector &deltaU)
         opserr << "WARNING CollocationHybridSimulation::update() - polyOrder > 3 not supported\n";
     }
 
-    //  determine the response at t+deltaT
+    // determine the response at t+theta*deltaT
     U->addVector(1.0, *scaledDeltaU, c1);
     
     Udot->addVector(1.0, *scaledDeltaU, c2);
@@ -465,6 +455,26 @@ int CollocationHybridSimulation::commit(void)
         return -1;
     }	  
         
+    LinearSOE *theSOE = this->getLinearSOE();
+    if (theSOE == 0)  {
+        opserr << "WARNING CollocationHybridSimulation::commit() - no LinearSOE set\n";
+        return -1;
+    }
+
+    if (theSOE->solve() < 0)  {
+        opserr << "WARNING CollocationHybridSimulation::commit() - "
+            << "the LinearSysOfEqn failed in solve()\n";	
+        return -2;
+    }
+    const Vector &deltaU = theSOE->getX();
+
+    // determine the response at t+theta*deltaT
+    U->addVector(1.0, deltaU, c1);
+    
+    Udot->addVector(1.0, deltaU, c2);
+
+    Udotdot->addVector(1.0, deltaU, c3);
+
     // determine response quantities at t+deltaT
     Udotdot->addVector(1.0/theta, *Utdotdot, (theta-1.0)/theta);
     
@@ -483,10 +493,6 @@ int CollocationHybridSimulation::commit(void)
 
     // update the response at the DOFs
     theModel->setResponse(*U,*Udot,*Udotdot);        
-    if (theModel->updateDomain() < 0)  {
-        opserr << "CollocationHybridSimulation::commit() - failed to update the domain\n";
-        return -4;
-    }
     
     // set the time to be t+deltaT
     double time = theModel->getCurrentDomainTime();

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-04-05 01:29:04 $
+// $Revision: 1.4 $
+// $Date: 2007-11-29 18:22:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHTHybridSimulation.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -32,6 +32,7 @@
 
 #include <HHTHybridSimulation.h>
 #include <FE_Element.h>
+#include <FE_EleIter.h>
 #include <LinearSOE.h>
 #include <AnalysisModel.h>
 #include <Vector.h>
@@ -206,10 +207,7 @@ int HHTHybridSimulation::newStep(double _deltaT)
     // increment the time to t+alpha*deltaT and apply the load
     double time = theModel->getCurrentDomainTime();
     time += alphaF*deltaT;
-    if (theModel->updateDomain(time, deltaT) < 0)  {
-        opserr << "HHTHybridSimulation::newStep() - failed to update the domain\n";
-        return -4;
-    }
+    theModel->applyLoadDomain(time);
 
     return 0;
 }
@@ -399,7 +397,7 @@ int HHTHybridSimulation::domainChanged()
         }        
     }    
     
-    opserr << "WARNING: HHTHybridSimulation::domainChanged() - assuming Ut-2 = Ut-1 = Ut\n";
+    opserr << "\nWARNING: HHTHybridSimulation::domainChanged() - assuming Ut-2 = Ut-1 = Ut\n";
 
     return 0;
 }
@@ -431,14 +429,6 @@ int HHTHybridSimulation::update(const Vector &deltaU)
         return -3;
     }
     
-/*    // determine the displacement increment reduction factor
-    x = 1.0/(theTest->getMaxNumTests() - theTest->getNumTests() + 1.0);
-    //  determine the response at t+deltaT
-    U->addVector(1.0, deltaU, x*c1);
-    Udot->addVector(1.0, deltaU, x*c2);
-    Udotdot->addVector(1.0, deltaU, x*c3);
-*/
-
     // get interpolation location and scale displacement increment 
     x = (double) theTest->getNumTests()/theTest->getMaxNumTests();
     if (polyOrder == 1)  {
@@ -492,12 +482,28 @@ int HHTHybridSimulation::commit(void)
         return -1;
     }	  
     
+    LinearSOE *theSOE = this->getLinearSOE();
+    if (theSOE == 0)  {
+        opserr << "WARNING HHTHybridSimulation::commit() - no LinearSOE set\n";
+        return -1;
+    }
+
+    if (theSOE->solve() < 0)  {
+        opserr << "WARNING HHTHybridSimulation::commit() - "
+            << "the LinearSysOfEqn failed in solve()\n";	
+        return -2;
+    }
+    const Vector &deltaU = theSOE->getX();
+
+    //  determine the response at t+deltaT
+    U->addVector(1.0, deltaU, c1);
+    
+    Udot->addVector(1.0, deltaU, c2);
+
+    Udotdot->addVector(1.0, deltaU, c3);
+
     // update the response at the DOFs
     theModel->setResponse(*U,*Udot,*Udotdot);
-    if (theModel->updateDomain() < 0)  {
-        opserr << "HHTHybridSimulation::commit() - failed to update the domain\n";
-        return -4;
-    }
     
     // set the time to be t+deltaT
     double time = theModel->getCurrentDomainTime();

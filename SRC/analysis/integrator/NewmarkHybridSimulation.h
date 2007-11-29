@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2007-04-05 01:20:49 $
+// $Revision: 1.3 $
+// $Date: 2007-11-29 18:22:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/NewmarkHybridSimulation.h,v $
 
 #ifndef NewmarkHybridSimulation_h
@@ -62,6 +62,7 @@ public:
     int newStep(double deltaT);
     int revertToLastStep(void);
     int update(const Vector &deltaU);
+    int commit(void);
     
     virtual int sendSelf(int commitTag, Channel &theChannel);
     virtual int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
@@ -69,6 +70,7 @@ public:
     void Print(OPS_Stream &s, int flag = 0);
     
 protected:
+    //virtual int formElementResidual(void);
     
 private:
     double gamma;
@@ -87,6 +89,8 @@ private:
     Vector *U, *Udot, *Udotdot;     // response quantities at time t+deltaT
     Vector *Utm1, *Utm2;            // disp at time t-deltaT and t-2*deltaT
     Vector *scaledDeltaU;           // scaled displacement increment
+
+    //bool correctForce;
 };
 
 #endif

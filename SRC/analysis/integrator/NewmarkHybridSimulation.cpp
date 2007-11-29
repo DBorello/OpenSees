@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-04-05 01:29:04 $
+// $Revision: 1.4 $
+// $Date: 2007-11-29 18:22:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/NewmarkHybridSimulation.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -32,6 +32,7 @@
 
 #include <NewmarkHybridSimulation.h>
 #include <FE_Element.h>
+#include <FE_EleIter.h>
 #include <LinearSOE.h>
 #include <AnalysisModel.h>
 #include <Vector.h>
@@ -156,10 +157,9 @@ int NewmarkHybridSimulation::newStep(double deltaT)
     // increment the time to t+deltaT and apply the load
     double time = theModel->getCurrentDomainTime();
     time += deltaT;
-    if (theModel->updateDomain(time, deltaT) < 0)  {
-        opserr << "NewmarkHybridSimulation::newStep() - failed to update the domain\n";
-        return -4;
-    }
+    theModel->applyLoadDomain(time);
+
+    //correctForce = true;
 
     return 0;
 }
@@ -331,7 +331,7 @@ int NewmarkHybridSimulation::domainChanged()
         }
     }
 
-    opserr << "WARNING: NewmarkHybridSimulation::domainChanged() - assuming Ut-2 = Ut-1 = Ut\n";
+    opserr << "\nWARNING: NewmarkHybridSimulation::domainChanged() - assuming Ut-2 = Ut-1 = Ut\n";
     
     return 0;
 }
@@ -362,14 +362,6 @@ int NewmarkHybridSimulation::update(const Vector &deltaU)
         opserr << " expecting " << U->Size() << " obtained " << deltaU.Size() << endln;
         return -3;
     }
-    
-/*    // determine the displacement increment reduction factor
-    x = 1.0/(theTest->getMaxNumTests() - theTest->getNumTests() + 1.0);
-    // determine the response at t+deltaT
-    U->addVector(1.0, deltaU, x*c1);
-    Udot->addVector(1.0, deltaU, x*c2);
-    Udotdot->addVector(1.0, deltaU, x*c3);
-*/
     
     // get interpolation location and scale displacement increment 
     x = (double) theTest->getNumTests()/theTest->getMaxNumTests();
@@ -404,6 +396,41 @@ int NewmarkHybridSimulation::update(const Vector &deltaU)
     
     return 0;
 }    
+
+
+int NewmarkHybridSimulation::commit(void)
+{
+    AnalysisModel *theModel = this->getAnalysisModel();
+    if (theModel == 0)  {
+        opserr << "WARNING NewmarkHybridSimulation::commit() - no AnalysisModel set\n";
+        return -1;
+    }
+        
+    LinearSOE *theSOE = this->getLinearSOE();
+    if (theSOE == 0)  {
+        opserr << "WARNING NewmarkHybridSimulation::commit() - no LinearSOE set\n";
+        return -1;
+    }
+
+    if (theSOE->solve() < 0)  {
+        opserr << "WARNING NewmarkHybridSimulation::commit() - "
+            << "the LinearSysOfEqn failed in solve()\n";	
+        return -2;
+    }
+    const Vector &deltaU = theSOE->getX();
+
+    //  determine the response at t+deltaT
+    U->addVector(1.0, deltaU, c1);
+    
+    Udot->addVector(1.0, deltaU, c2);
+
+    Udotdot->addVector(1.0, deltaU, c3);
+
+    // update the response at the DOFs
+    theModel->setResponse(*U,*Udot,*Udotdot);        
+
+    return theModel->commitDomain();
+}
 
 
 int NewmarkHybridSimulation::sendSelf(int cTag, Channel &theChannel)
@@ -461,3 +488,45 @@ void NewmarkHybridSimulation::Print(OPS_Stream &s, int flag)
     } else 
         s << "\t NewmarkHybridSimulation - no associated AnalysisModel\n";
 }
+
+
+/* force correction does not work if numIter = 1, yields slightly
+// improved results if numIter = 2 and has no effect if numIter >= 3
+int NewmarkHybridSimulation::formElementResidual(void)
+{
+    // calculate Residual Force     
+    AnalysisModel *theModel = this->getAnalysisModel();
+    LinearSOE *theSOE = this->getLinearSOE();
+    
+    // loop through the FE_Elements and add the residual
+    int res = 0;    
+    FE_Element *elePtr;
+    FE_EleIter &theEles = theModel->getFEs();
+    while ((elePtr = theEles()) != 0)  {
+        if (theSOE->addB(elePtr->getResidual(this),elePtr->getID()) < 0)  {
+            opserr << "WARNING NewmarkHybridSimulation::formElementResidual -";
+            opserr << " failed in addB for ID " << elePtr->getID();
+            res = -2;
+        }
+        if (correctForce)  {
+            const Vector &deltaU = theSOE->getX();
+            if (statusFlag == CURRENT_TANGENT)  {
+                if (theSOE->addB(elePtr->getK_Force(deltaU), elePtr->getID()) < 0)  {
+                    opserr << "WARNING NewmarkHybridSimulation::formElementResidual -";
+                    opserr << " failed in addB for ID " << elePtr->getID();
+                    res = -2;
+                }
+            } else if (statusFlag == INITIAL_TANGENT)  {
+                if (theSOE->addB(elePtr->getKi_Force(deltaU), elePtr->getID()) < 0)  {
+                    opserr << "WARNING NewmarkHybridSimulation::formElementResidual -";
+                    opserr << " failed in addB for ID " << elePtr->getID();
+                    res = -2;
+                }
+            }
+        }
+    }
+
+    correctForce = false;
+
+    return res;
+}*/
