@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.15 $
-// $Date: 2007-11-29 19:02:22 $
+// $Revision: 1.16 $
+// $Date: 2007-11-29 19:58:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.cpp,v $
 
 // Written: fmk
@@ -142,7 +142,10 @@ TCP_Socket::TCP_Socket(unsigned int other_Port,
 #ifdef _WIN32
     other_Addr.addr_in.sin_addr.S_un.S_addr = inet_addr(other_InetAddr);
 #else
-    other_Addr.addr_in.sin_addr.s_addr = inet_aton(other_InetAddr);
+    // int inet_aton (__const char *__cp, struct in_addr *__inp
+    //other_Addr.addr_in.sin_addr.s_addr = inet_aton(other_InetAddr);
+
+    other_Addr.addr_in.sin_addr.s_addr = inet_addr(other_InetAddr);
 #endif
 
     // set up my_Addr.addr_in 
