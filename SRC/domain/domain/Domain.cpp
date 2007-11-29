@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.46 $
-// $Date: 2007-10-25 22:54:13 $
+// $Revision: 1.47 $
+// $Date: 2007-11-29 23:26:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -1809,7 +1809,8 @@ int
 Domain::removeRecorders(void)
 {
     for (int i=0; i<numRecorders; i++)  
-      delete theRecorders[i];
+      if (theRecorders[i] != 0)
+	delete theRecorders[i];
     
     if (theRecorders != 0) {
       delete [] theRecorders;
@@ -1819,6 +1820,25 @@ Domain::removeRecorders(void)
     numRecorders = 0;
     return 0;
 }
+
+int
+Domain::removeRecorder(int tag)
+{
+  for (int i=0; i<numRecorders; i++) {
+    if (theRecorders[i] != 0) {
+      if (theRecorders[i]->getClassTag() == tag) {
+	delete theRecorders[i];
+	theRecorders[i] = 0;
+	return 0;
+      }
+    }    
+  }
+  
+  return -1;
+}
+
+
+
 
 int  
 Domain::addRegion(MeshRegion &theRegion)

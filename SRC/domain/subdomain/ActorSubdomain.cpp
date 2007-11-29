@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-05-04 02:04:52 $
+// $Revision: 1.14 $
+// $Date: 2007-11-29 23:26:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ActorSubdomain.cpp,v $
                                                                         
 #include <ActorSubdomain.h>
@@ -626,6 +626,12 @@ ActorSubdomain::run(void)
 
 	  case ShadowActorSubdomain_removeRecorders:
 	    this->removeRecorders();
+	    break;	    	    
+
+
+	  case ShadowActorSubdomain_removeRecorder:
+	    theType = msgData(1);
+	    this->removeRecorder(theType);
 	    break;	    	    
 	    
 

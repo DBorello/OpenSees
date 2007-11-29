@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2007-04-25 23:44:37 $
+// $Revision: 1.23 $
+// $Date: 2007-11-29 23:26:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
 // Written: fmk 
@@ -189,6 +189,7 @@ class Domain
     // methods for output
     virtual int  addRecorder(Recorder &theRecorder);    	
     virtual int  removeRecorders(void);
+    virtual int  removeRecorder(int tag);
 
     virtual int  addRegion(MeshRegion &theRegion);    	
     virtual MeshRegion *getRegion(int region);    	

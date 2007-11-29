@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-10-17 23:32:27 $
+// $Revision: 1.14 $
+// $Date: 2007-11-29 23:26:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -1053,6 +1053,16 @@ int
 ShadowSubdomain::removeRecorders(void)
 {
   msgData(0) = ShadowActorSubdomain_removeRecorders;
+  this->sendID(msgData);
+  return 0;
+}
+
+int  
+ShadowSubdomain::removeRecorder(int tag)
+{
+  msgData(0) = ShadowActorSubdomain_removeRecorder;
+  msgData(1) = tag;
+
   this->sendID(msgData);
   return 0;
 }

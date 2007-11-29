@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-04-25 23:45:02 $
+// $Revision: 1.11 $
+// $Date: 2007-11-29 23:26:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.h,v $
                                                                         
                                                                         
@@ -129,6 +129,7 @@ class ShadowSubdomain: public Shadow, public Subdomain
 
     virtual int  addRecorder(Recorder &theRecorder);    	
     virtual int  removeRecorders(void);
+    virtual int  removeRecorder(int tag);
 
     virtual void wipeAnalysis(void);
     virtual void setDomainDecompAnalysis(DomainDecompositionAnalysis &theAnalysis);

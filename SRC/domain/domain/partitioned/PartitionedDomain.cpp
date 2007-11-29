@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2007-10-17 22:13:25 $
+// $Revision: 1.16 $
+// $Date: 2007-11-29 23:26:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -1157,8 +1157,32 @@ PartitionedDomain::removeRecorders(void)
       Subdomain *theSub = (Subdomain *)theObject;	    
       int res = theSub->removeRecorders();
       if (res < 0) {
-	opserr << "PartitionedDomain::revertToLastCommit(void)";
-	opserr << " - failed in Subdomain::revertToLastCommit()\n";
+	opserr << "PartitionedDomain::removeRecorders(void)";
+	opserr << " - failed in Subdomain::removeRecorders()\n";
+	return res;
+      }	    
+    }
+  }
+  return 0;
+}
+
+
+int  
+PartitionedDomain::removeRecorder(int tag)
+{
+  if (this->Domain::removeRecorder(tag) < 0)
+    return -1;
+
+  // do the same for all the subdomains
+  if (theSubdomains != 0) {
+    ArrayOfTaggedObjectsIter theSubsIter(*theSubdomains);	
+    TaggedObject *theObject;
+    while ((theObject = theSubsIter()) != 0) {
+      Subdomain *theSub = (Subdomain *)theObject;	    
+      int res = theSub->removeRecorder(tag);
+      if (res < 0) {
+	opserr << "PartitionedDomain::removeRecorder(void)";
+	opserr << " - failed in Subdomain::removeRecorder()\n";
 	return res;
       }	    
     }
