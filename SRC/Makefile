@@ -754,7 +754,9 @@ SysOfEqn_LIBS = $(FE)/system_of_eqn/SystemOfEqn.o \
         $(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenRowLinSolver.o \
 	$(SUPER_LU_OBJ) \
 	$(FE)/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSOE.o \
-	$(FE)/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSolver.o
+	$(FE)/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSolver.o \
+	$(FE)/system_of_eqn/eigenSOE/FullGenEigenSOE.o \
+	$(FE)/system_of_eqn/eigenSOE/FullGenEigenSolver.o 
 
 
 MODEL_BUILDER_LIBS = $(FE)/modelbuilder/ModelBuilder.o \
