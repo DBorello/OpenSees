@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.101 $
-// $Date: 2007-10-25 22:53:19 $
+// $Revision: 1.102 $
+// $Date: 2007-11-29 20:30:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -230,6 +230,8 @@ OPS_Stream *opserrPtr = &sserr;
 #include <BandArpackSolver.h>
 #include <SymBandEigenSOE.h>
 #include <SymBandEigenSolver.h>
+#include <FullGenEigenSOE.h>
+#include <FullGenEigenSolver.h>
 
 
 // graph
@@ -999,6 +1001,7 @@ getTime(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   double time = theDomain.getCurrentTime();
   // now we copy the value to the tcl string that is returned
+
   sprintf(interp->result,"%f",time);
   return TCL_OK;
 }
@@ -4077,6 +4080,10 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	  (strcmp(argv[loc],"-genBandArpack") == 0))
 	typeSolver = 2;
 
+      else if ((strcmp(argv[loc],"fullGenLapack") == 0) || 
+	  (strcmp(argv[loc],"-fullGenLapack") == 0))
+	typeSolver = 3;
+
       else {
 	opserr << "eigen - unknown option specified " << argv[loc] << endln;
 	return TCL_ERROR;
@@ -4122,7 +4129,10 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
       } else if (typeSolver == 2) {  
 	BandArpackSolver *theEigenSolver = new BandArpackSolver(numEigen); 
 	theEigenSOE = new BandArpackSOE(*theEigenSolver, *theEigenModel);    
-      }      
+      } else if (typeSolver == 3) {
+	FullGenEigenSolver *theEigenSolver = new FullGenEigenSolver();
+	theEigenSOE = new FullGenEigenSOE(*theEigenSolver, *theEigenModel);
+      }
     }
     // create the rest of components of an eigen analysis
     EigenIntegrator  *theEigenIntegrator = new EigenIntegrator();    
@@ -4323,6 +4333,20 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
     else if (strcmp(argv[1],"recorders") == 0) {
       theDomain.removeRecorders();
     }
+
+    else if ((strcmp(argv[1],"recorder") == 0)) {
+      if (argc < 3) {
+	opserr << "WARNING want - remove recorder recorderTag?\n";
+	return TCL_ERROR;
+      }    
+
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	opserr << "WARNING remove element tag? failed to read tag: " << argv[2] << endln;
+	return TCL_ERROR;
+      }      
+      return theDomain.removeRecorder(tag);
+    }
+
 
     //Boris Jeremic and Joey Yang -- UC Davis
     else if ((strcmp(argv[1],"SPconstraint") == 0) || (strcmp(argv[1],"sp") == 0)) {
