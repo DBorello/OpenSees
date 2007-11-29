@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.44 $
-// $Date: 2007-10-25 18:19:23 $
+// $Revision: 1.45 $
+// $Date: 2007-11-29 18:29:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -118,6 +118,7 @@ extern int
 TclModelBuilder_addZeroLength(ClientData, Tcl_Interp *, int, TCL_Char **,
 			      Domain*, TclModelBuilder *);
 
+
 // add by Gang Wang for Contact Element
 extern int
 TclModelBuilder_addZeroLengthContact2D(ClientData, Tcl_Interp *, int, TCL_Char **,
@@ -203,6 +204,15 @@ extern int TclModelBuilder_addTwentySevenNodeBrick(ClientData,
                                                    TclModelBuilder *, 
                                                    int);
 
+
+// Andreas Schellenberg
+extern int
+TclModelBuilder_addGenericClient(ClientData , Tcl_Interp *,  int, TCL_Char **,
+				 Domain*, TclModelBuilder *, int argStart); 
+
+extern int
+TclModelBuilder_addGenericCopy(ClientData , Tcl_Interp *,  int, TCL_Char **,
+				 Domain*, TclModelBuilder *, int argStart); 
 
 
 //Rohit Kraul
@@ -357,6 +367,19 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
           int result = TclModelBuilder_addTwentyNodeBrick(clientData, interp, argc, argv,
 						       theTclDomain, theTclBuilder);
 	  return result;
+
+  } else if (strcmp(argv[1],"genericClient") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addGenericClient(clientData, interp, argc, argv,
+						  theTclDomain, theTclBuilder, eleArgStart);
+    return result;
+
+  } else if (strcmp(argv[1],"genericCopy") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addGenericCopy(clientData, interp, argc, argv,
+						theTclDomain, theTclBuilder, eleArgStart);
+    return result;
+
   } else if ((strcmp(argv[1],"shell") == 0) || (strcmp(argv[1],"shellMITC4") == 0) ||
 	     (strcmp(argv[1],"Shell") == 0) || (strcmp(argv[1],"ShellMITC4") == 0)) {
 
@@ -367,6 +390,21 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
 					       theTclDomain, 
 					       theTclBuilder, 
 					       eleArgStart);
+    return result;
+  }
+
+  // Andreas Schellenberg
+  else if (strcmp(argv[1],"genericClient") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addGenericClient(clientData, interp, argc, argv,
+						theTclDomain, theTclBuilder, eleArgStart);    
+    return result;
+  }
+  
+  else if (strcmp(argv[1],"genericCopy") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addGenericCopy(clientData, interp, argc, argv,
+						theTclDomain, theTclBuilder, eleArgStart);    
     return result;
   }
 
