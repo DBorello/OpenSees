@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.16 $
-// $Date: 2007-11-29 19:58:07 $
+// $Revision: 1.17 $
+// $Date: 2007-11-30 00:02:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.cpp,v $
 
 // Written: fmk
@@ -37,6 +37,7 @@
 #include <Message.h>
 #include <ChannelAddress.h>
 #include <MovableObject.h>
+#include <SocketAddress.h>
 
 static int GetHostAddr(char *host, char *IntAddr);
 static void inttoa(unsigned int no, char *string, int *cnt);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-08-03 00:21:28 $
+// $Revision: 1.10 $
+// $Date: 2007-11-30 00:02:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.h,v $
                                                                         
                                                                         
@@ -40,7 +40,7 @@
 #include <bool.h>
 #include <Socket.h>
 #include <Channel.h>
-#include <SocketAddress.h>
+//#include <SocketAddress.h>
 
 class TCP_Socket : public Channel
 {
