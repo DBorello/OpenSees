@@ -38,7 +38,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 /FORCE:MULTIPLE"
-				AdditionalDependencies="tcl.lib wsock32.lib OpenGL32.lib glu32.lib GlAux.lib damage.lib fedeas.lib drain.lib reliability.lib database.lib renderer.lib blas.lib lapack.lib feap.lib arpack.lib umfpack.lib actor.lib analysis.lib cblas.lib convergence.lib domain.lib element.lib graph.lib material.lib matrix.lib modelbuilder.lib recorder.lib superLU.lib system.lib tagged.lib utility.lib tcl84.lib tk84.lib libm.lib ifconsol.lib libifcore.lib odbc32.lib odbccp32.lib"
+				AdditionalDependencies="tcl.lib wsock32.lib OpenGL32.lib glu32.lib GlAux.lib damage.lib fedeas.lib drain.lib reliability.lib database.lib renderer.lib blas.lib lapack.lib feap.lib arpack.lib umfpack.lib actor.lib analysis.lib cblas.lib convergence.lib domain.lib element.lib graph.lib material.lib matrix.lib modelbuilder.lib recorder.lib superLU.lib system.lib tagged.lib utility.lib tcl84.lib tk84.lib libm.lib IFCONSOL.lib LIBIFCORE.lib odbc32.lib odbccp32.lib"
 				OutputFile=".\..\..\bin/openSees.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
