@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2007-10-26 04:32:06 $
+// $Revision: 1.2 $
+// $Date: 2007-11-30 23:34:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SecantConcrete.cpp,v $
 
 // Written: MHS
@@ -243,8 +243,8 @@ SecantConcrete::setParameter(const char **argv, int argc, Information &info)
     info.theType = DoubleType;
     return 7;
   }
-  else
-    return -1;
+
+  return -1;
 }
 
 int 

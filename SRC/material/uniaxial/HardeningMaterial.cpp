@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.13 $
-// $Date: 2007-05-22 18:18:14 $
+// $Revision: 1.14 $
+// $Date: 2007-11-30 23:34:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HardeningMaterial.cpp,v $
 
 // Written: MHS
@@ -292,9 +292,6 @@ HardeningMaterial::Print(OPS_Stream &s, int flag)
 int
 HardeningMaterial::setParameter(const char **argv, int argc, Parameter &param)
 {
-  if (argc < 1)
-    return 0;
-
   if (strcmp(argv[0],"sigmaY") == 0 || strcmp(argv[0],"fy") == 0)
     return param.addObject(1, this);
 
@@ -307,9 +304,7 @@ HardeningMaterial::setParameter(const char **argv, int argc, Parameter &param)
   if (strcmp(argv[0],"H_iso") == 0)
     return param.addObject(4, this);
 
-  else
-    opserr << "WARNING: Could not set parameter in HardeningMaterial. " << endln;
-  return 0;
+  return -1;
 }
 
 int

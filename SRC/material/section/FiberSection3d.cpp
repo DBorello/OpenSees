@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2007-02-02 01:18:13 $
+// $Revision: 1.25 $
+// $Date: 2007-11-30 23:34:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -960,6 +960,9 @@ FiberSection3d::setParameter(const char **argv, int argc, Parameter &param)
   if (argc < 3)
     return -1;
 
+
+  int result = 0;
+
   // A material parameter
   if (strstr(argv[0],"material") != 0) {
 
@@ -969,12 +972,11 @@ FiberSection3d::setParameter(const char **argv, int argc, Parameter &param)
     // Loop over fibers to find the right material(s)
     int ok = 0;
     for (int i = 0; i < numFibers; i++)
-      if (paramMatTag == theMaterials[i]->getTag())
-	ok += theMaterials[i]->setParameter(&argv[2], argc-2, param);
-
-    return ok;
-  }
-
-  else
-    return -1;
+      if (paramMatTag == theMaterials[i]->getTag()) {
+	ok = theMaterials[i]->setParameter(&argv[2], argc-2, param);
+	if (ok != -1)
+	  result = ok;
+      }
+  }    
+  return result;
 }

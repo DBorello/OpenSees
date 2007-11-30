@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-10-26 04:30:14 $
+// $Revision: 1.2 $
+// $Date: 2007-11-30 23:34:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ElasticBDMaterial.cpp,v $
                                                                         
                                                                         
@@ -173,8 +173,6 @@ ElasticBDMaterial::Print(OPS_Stream &s, int flag)
 int
 ElasticBDMaterial::setParameter(const char **argv, int argc, Parameter &param)
 {
-  if (argc < 1)
-    return 0;
 
   if (strcmp(argv[0],"E") == 0)
     return param.addObject(1, this);
@@ -184,13 +182,14 @@ ElasticBDMaterial::setParameter(const char **argv, int argc, Parameter &param)
 
   else if (strcmp(argv[0],"b") == 0)
     return param.addObject(3, this);
+
   else if (strcmp(argv[0],"d") == 0)
     return param.addObject(4, this);
+
   else if (strcmp(argv[0],"a") == 0)
     return param.addObject(5, this);
 
-  else
-    return 0;
+  return -1;
 }
 
 int 

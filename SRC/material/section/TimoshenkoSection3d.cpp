@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-10-26 04:42:10 $
+// $Revision: 1.2 $
+// $Date: 2007-11-30 23:34:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TimoshenkoSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -786,6 +786,8 @@ TimoshenkoSection3d::setParameter(const char **argv, int argc,
   if (argc < 1)
     return -1;
 
+  int result = -1;
+
   // A material parameter
   if (strstr(argv[0],"material") != 0) {
 
@@ -798,11 +800,12 @@ TimoshenkoSection3d::setParameter(const char **argv, int argc,
     // Loop over fibers to find the right material(s)
     int ok = 0;
     for (int i = 0; i < numFibers; i++)
-      if (paramMatTag == theMaterials[i]->getTag())
-	ok += theMaterials[i]->setParameter(&argv[2], argc-2, param);
-
-    return ok;
+      if (paramMatTag == theMaterials[i]->getTag()) {
+	ok = theMaterials[i]->setParameter(&argv[2], argc-2, param);
+	if (ok != -1)
+	  result = ok;
+      }
   } 
-  else
-    return -1;
+
+  return result;
 }

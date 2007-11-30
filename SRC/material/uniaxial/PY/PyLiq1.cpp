@@ -388,18 +388,9 @@ PyLiq1::getEffectiveStress(void)
 
 int PyLiq1::setParameter(const char **argv, int argc, Parameter &param)
 {
-  if (argc < 2)
-    return -1;
-
-  int theMaterialTag;
-  theMaterialTag = atoi(argv[1]);
-
-  // check for material tag
-  if (theMaterialTag == this->getTag()) {
   
-    if (strcmp(argv[0],"updateMaterialStage") == 0) {
-      return param.addObject(1, this);  
-    }
+  if (strcmp(argv[0],"updateMaterialStage") == 0) {
+    return param.addObject(1, this);  
   }
 
   return -1;

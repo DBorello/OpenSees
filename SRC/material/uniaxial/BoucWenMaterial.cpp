@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-10-12 22:57:07 $
+// $Revision: 1.4 $
+// $Date: 2007-11-30 23:34:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/BoucWenMaterial.cpp,v $
 
 
@@ -311,42 +311,32 @@ BoucWenMaterial::Print(OPS_Stream &s, int flag)
 int
 BoucWenMaterial::setParameter(const char **argv, int argc, Parameter &param)
 {
-  if (argc < 2)
-    return -1;
-
-  int theMaterialTag;
-  theMaterialTag = atoi(argv[1]);
-
-  // check for material tag
-  if (theMaterialTag == this->getTag()) {
-
-    if (strcmp(argv[0],"alpha") == 0)
-      return param.addObject(1, this);
+  if (strcmp(argv[0],"alpha") == 0)
+    return param.addObject(1, this);
+  
+  if (strcmp(argv[0],"ko") == 0)
+    return param.addObject(2, this);
+  
+  if (strcmp(argv[0],"n") == 0)
+    return param.addObject(3, this);
+  
+  if (strcmp(argv[0],"gamma") == 0)
+    return param.addObject(4, this);
     
-    if (strcmp(argv[0],"ko") == 0)
-      return param.addObject(2, this);
+  if (strcmp(argv[0],"beta") == 0)
+    return param.addObject(5, this);
+  
+  if (strcmp(argv[0],"Ao") == 0)
+    return param.addObject(6, this);
+  
+  if (strcmp(argv[0],"deltaA") == 0)
+    return param.addObject(7, this);
     
-    if (strcmp(argv[0],"n") == 0)
-      return param.addObject(3, this);
-    
-    if (strcmp(argv[0],"gamma") == 0)
-      return param.addObject(4, this);
-    
-    if (strcmp(argv[0],"beta") == 0)
-      return param.addObject(5, this);
-    
-    if (strcmp(argv[0],"Ao") == 0)
-      return param.addObject(6, this);
-    
-    if (strcmp(argv[0],"deltaA") == 0)
-      return param.addObject(7, this);
-    
-    if (strcmp(argv[0],"deltaNu") == 0)
-      return param.addObject(8, this);
-    
-    if (strcmp(argv[0],"deltaEta") == 0)
-      return param.addObject(9, this);
-  }
+  if (strcmp(argv[0],"deltaNu") == 0)
+    return param.addObject(8, this);
+  
+  if (strcmp(argv[0],"deltaEta") == 0)
+    return param.addObject(9, this);
 
   return -1;
 }

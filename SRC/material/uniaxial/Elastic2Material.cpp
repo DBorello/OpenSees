@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-10-12 22:57:07 $
+// $Revision: 1.4 $
+// $Date: 2007-11-30 23:34:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Elastic2Material.cpp,v $
                                                                         
                                                                         
@@ -179,28 +179,17 @@ Elastic2Material::Print(OPS_Stream &s, int flag)
 int
 Elastic2Material::setParameter(const char **argv, int argc, Parameter &param)
 {
-  if (argc < 2)
-    return -1;
-
-  int theMaterialTag;
-  theMaterialTag = atoi(argv[1]);
-
-  // check for material tag
-  if (theMaterialTag == this->getTag()) {
-
-    if (strcmp(argv[0],"zeroE") == 0)
-      return param.addObject(3, this);
-    else if (strcmp(argv[0],"E") == 0)
-      return param.addObject(1, this);
+  if (strcmp(argv[0],"zeroE") == 0)
+    return param.addObject(3, this);
+  else if (strcmp(argv[0],"E") == 0)
+    return param.addObject(1, this);
   
-    else if (strcmp(argv[0],"eta") == 0)
-      return param.addObject(2, this);
+  else if (strcmp(argv[0],"eta") == 0)
+    return param.addObject(2, this);
   
-    else if (strcmp(argv[0],"zeroE") == 0)
-      return param.addObject(3, this);
+  else if (strcmp(argv[0],"zeroE") == 0)
+    return param.addObject(3, this);
   
-  }
-
   return -1;
 }
   

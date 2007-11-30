@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2007-07-12 21:15:04 $
+// $Revision: 1.17 $
+// $Date: 2007-11-30 23:34:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.cpp,v $
                                                                         
                                                                         
@@ -890,6 +890,8 @@ SectionAggregator::setParameter(const char **argv, int argc, Parameter &param)
   if (argc < 1)
     return -1;
 
+  int result = -1;
+
   // Check if the parameter belongs to only an aggregated material
   if (strstr(argv[0],"addition") != 0) {
     
@@ -902,10 +904,13 @@ SectionAggregator::setParameter(const char **argv, int argc, Parameter &param)
     // Loop to find the right material
     int ok = 0;
     for (int i = 0; i < numMats; i++)
-      if (materialTag == theAdditions[i]->getTag())
-	ok += theAdditions[i]->setParameter(&argv[2], argc-2, param);
-
-    return ok;
+      if (materialTag == theAdditions[i]->getTag()) {
+	ok = theAdditions[i]->setParameter(&argv[2], argc-2, param);
+	if (ok != -1)
+	  result = ok;
+      }
+    
+    return result;
   } 
   
   // Check if the parameter belongs to only the section
@@ -921,12 +926,19 @@ SectionAggregator::setParameter(const char **argv, int argc, Parameter &param)
 
   else { // Default -- send to everything
     int ok = 0;
-    for (int i = 0; i < numMats; i++)
-      ok += theAdditions[i]->setParameter(argv, argc, param);
-    if (theSection != 0)
-      ok += theSection->setParameter(argv, argc, param);
-    return ok;
+    for (int i = 0; i < numMats; i++) {
+      ok = theAdditions[i]->setParameter(argv, argc, param);
+      if (ok != -1)
+	result = ok;
+    }
+    if (theSection != 0) {
+      ok = theSection->setParameter(argv, argc, param);
+      if (ok != -1)
+	result = ok;
+    }
   }
+
+  return result;
 }
 
 const Vector &

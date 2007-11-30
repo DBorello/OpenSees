@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-02-02 01:18:13 $
+// $Revision: 1.8 $
+// $Date: 2007-11-30 23:34:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSectionGJ.cpp,v $
                                                                         
 // Written: fmk
@@ -824,6 +824,8 @@ FiberSectionGJ::setParameter (const char **argv, int argc, Parameter &param)
   if (argc < 3)
     return 0;
 
+  int result = -1;
+
   // A material parameter
   if (strstr(argv[0],"material") != 0) {
 
@@ -833,12 +835,12 @@ FiberSectionGJ::setParameter (const char **argv, int argc, Parameter &param)
     // Loop over fibers to find the right material(s)
     int ok = 0;
     for (int i = 0; i < numFibers; i++) 
-      if (paramMatTag == theMaterials[i]->getTag())
-	ok += theMaterials[i]->setParameter(&argv[2], argc-2, param);
-
-    return ok;
+      if (paramMatTag == theMaterials[i]->getTag()) {
+	ok = theMaterials[i]->setParameter(&argv[2], argc-2, param);
+	if (ok != -1)
+	  result = ok;
+      }
   }
 
-  else
-    return -1;
+  return result;
 }

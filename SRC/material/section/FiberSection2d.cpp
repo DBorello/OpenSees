@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2007-11-14 20:34:55 $
+// $Revision: 1.31 $
+// $Date: 2007-11-30 23:34:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.cpp,v $
                                                                         
 // Written: fmk
@@ -986,6 +986,8 @@ FiberSection2d::setParameter(const char **argv, int argc, Parameter &param)
   if (argc < 1)
     return -1;
 
+  int result = -1;
+
   // Check if the parameter belongs to the material (only option for now)
   if (strstr(argv[0],"material") != 0) {
     
@@ -996,12 +998,13 @@ FiberSection2d::setParameter(const char **argv, int argc, Parameter &param)
     int materialTag = atoi(argv[1]);
     
     // Loop over fibers to find the right material
-    int ok = 0;
     for (int i = 0; i < numFibers; i++)
-      if (materialTag == theMaterials[i]->getTag())
-	ok += theMaterials[i]->setParameter(&argv[2], argc-2, param);
-
-    return ok;
+      if (materialTag == theMaterials[i]->getTag()) {
+	int ok = theMaterials[i]->setParameter(&argv[2], argc-2, param);
+	if (ok != -1)
+	  result = ok;
+      }
+    return result;
   } 
   // Check if it belongs to the section integration
   else if (strstr(argv[0],"integration") != 0)
@@ -1010,11 +1013,17 @@ FiberSection2d::setParameter(const char **argv, int argc, Parameter &param)
   // Default, send it to everything
   else {
     int ok = 0;
-    for (int i = 0; i < numFibers; i++)
-      ok += theMaterials[i]->setParameter(argv, argc, param);
-    ok += sectionIntegr->setParameter(argv, argc, param);
-    return ok;
-  }  
+    for (int i = 0; i < numFibers; i++) {
+      ok = theMaterials[i]->setParameter(argv, argc, param);
+      if (ok != -1)
+	result = ok;
+    }
+    ok = sectionIntegr->setParameter(argv, argc, param);
+    if (ok != -1)
+      result = ok;
+  } 
+
+  return result;
 }
 
 const Vector &
