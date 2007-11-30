@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2004-11-24 22:41:22 $
+// $Revision: 1.6 $
+// $Date: 2007-11-30 19:24:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/Recorder.h,v $
                                                                         
                                                                         
@@ -38,8 +38,10 @@
 
 class Domain;
 #include <MovableObject.h>
+#include <TaggedObject.h>
 
-class Recorder: public MovableObject
+
+class Recorder: public MovableObject, public TaggedObject
 {
   public:
     Recorder(int classTag);
@@ -53,9 +55,13 @@ class Recorder: public MovableObject
     virtual int sendSelf(int commitTag, Channel &theChannel);  
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker);
+
+    virtual void Print(OPS_Stream &s, int flag); 
+
   protected:
     
   private:	
+    static int lastRecorderTag;
 };
 
 

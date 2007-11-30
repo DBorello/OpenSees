@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2005-01-10 21:58:47 $
+// $Revision: 1.3 $
+// $Date: 2007-11-30 19:24:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/Recorder.cpp,v $
                                                                         
 
@@ -34,10 +34,12 @@
 #include <Recorder.h>
 #include <OPS_Globals.h>
 
-Recorder::Recorder(int classTag)
-  :MovableObject(classTag)
-{
+int Recorder::lastRecorderTag(0);
 
+Recorder::Recorder(int classTag)
+  :MovableObject(classTag), TaggedObject(lastRecorderTag)
+{
+  lastRecorderTag++;
 }
 
 Recorder::~Recorder() 
@@ -70,4 +72,10 @@ Recorder::recvSelf(int commitTag, Channel &theChannel,
 {
   opserr << "Recorder::recvSelf() - not yet implemented\n";
   return 0;
+}
+
+void
+Recorder::Print(OPS_Stream &s, int flag)
+{
+  return;
 }
