@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.15 $
-// $Date: 2006-08-17 22:26:33 $
+// $Revision: 1.16 $
+// $Date: 2007-11-30 19:24:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DriftRecorder.cpp,v $
 
 // Written: MHS
@@ -177,7 +177,7 @@ DriftRecorder::setDomain(Domain &theDom)
 int
 DriftRecorder::sendSelf(int commitTag, Channel &theChannel)
 {
-  static ID idData(6); 
+  static ID idData(7); 
   idData.Zero();
   if (ndI != 0 && ndI->Size() != 0)
     idData(0) = ndI->Size();
@@ -192,6 +192,8 @@ DriftRecorder::sendSelf(int commitTag, Channel &theChannel)
     idData(5) = 0;
   else
     idData(5) = 1;    
+
+  idData(6) = this->getTag();
 
   if (theChannel.sendID(0, commitTag, idData) < 0) {
     opserr << "DriftRecorder::sendSelf() - failed to send idData\n";
@@ -223,7 +225,7 @@ int
 DriftRecorder::recvSelf(int commitTag, Channel &theChannel, 
 			FEM_ObjectBroker &theBroker)
 {
-  static ID idData(5); 
+  static ID idData(7); 
   if (theChannel.recvID(0, commitTag, idData) < 0) {
     opserr << "DriftRecorder::sendSelf() - failed to send idData\n";
     return -1;
@@ -261,6 +263,8 @@ DriftRecorder::recvSelf(int commitTag, Channel &theChannel,
     echoTimeFlag = true;
   else
     echoTimeFlag = false;
+
+  this->setTag(idData(6));
 
   if (theOutputHandler != 0)
     delete theOutputHandler;

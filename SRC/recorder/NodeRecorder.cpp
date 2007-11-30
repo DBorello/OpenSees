@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2007-08-03 00:29:19 $
+// $Revision: 1.30 $
+// $Date: 2007-11-30 19:24:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -445,7 +445,7 @@ NodeRecorder::sendSelf(int commitTag, Channel &theChannel)
     return -1;
   }
 
-  static ID idData(6); 
+  static ID idData(7); 
   idData.Zero();
   if (theDofs != 0)
     idData(0) = theDofs->Size();
@@ -462,6 +462,8 @@ NodeRecorder::sendSelf(int commitTag, Channel &theChannel)
 
   idData(4) = dataFlag;
   idData(5) = sensitivity;
+
+  idData(6) = this->getTag();
 
   if (theChannel.sendID(0, commitTag, idData) < 0) {
     opserr << "NodeRecorder::sendSelf() - failed to send idData\n";
@@ -507,14 +509,17 @@ NodeRecorder::recvSelf(int commitTag, Channel &theChannel,
     return -1;
   }
 
-  static ID idData(6); 
+  static ID idData(7); 
   if (theChannel.recvID(0, commitTag, idData) < 0) {
     opserr << "NodeRecorder::recvSelf() - failed to send idData\n";
     return -1;
   }
 
+
   int numDOFs = idData(0);
   int numNodes = idData(1);
+
+  this->setTag(idData(6));
 
   if (idData(3) == 1)
     echoTimeFlag = true;

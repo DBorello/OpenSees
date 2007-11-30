@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2007-06-09 00:48:33 $
+// $Revision: 1.21 $
+// $Date: 2007-11-30 19:24:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -301,13 +301,15 @@ EnvelopeElementRecorder::sendSelf(int commitTag, Channel &theChannel)
   // into an ID, place & send eleID size, numArgs and length of all responseArgs
   //
 
-  static ID idData(5);
+  static ID idData(6);
   if (eleID != 0)
     idData(0) = eleID->Size();
   else
     idData(0) = 0;
 
   idData(1) = numArgs;
+
+  idData(5) = this->getTag();
 
   int msgLength = 0;
   for (int i=0; i<numArgs; i++) 
@@ -419,7 +421,7 @@ EnvelopeElementRecorder::recvSelf(int commitTag, Channel &theChannel,
   // into an ID of size 2 recv eleID size and length of all responseArgs
   //
 
-  static ID idData(5);
+  static ID idData(6);
   if (theChannel.recvID(0, commitTag, idData) < 0) {
     opserr << "EnvelopeElementRecorder::recvSelf() - failed to recv idData\n";
     return -1;
@@ -428,6 +430,8 @@ EnvelopeElementRecorder::recvSelf(int commitTag, Channel &theChannel,
   int eleSize = idData(0);
   numArgs = idData(1);
   int msgLength = idData(2);
+
+  this->setTag(idData(5));
 
   if (idData(4) == 1)
     echoTimeFlag = true;

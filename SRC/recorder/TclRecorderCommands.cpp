@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.45 $
-// $Date: 2007-10-05 22:14:30 $
+// $Revision: 1.46 $
+// $Date: 2007-11-30 19:24:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -1153,6 +1153,9 @@ TclAddRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       delete theRecorder;
       return TCL_ERROR;
     }
+
+  int recorderTag = theRecorder->getTag();
+  sprintf(interp->result,"%d",recorderTag);
   
   return TCL_OK;
 }

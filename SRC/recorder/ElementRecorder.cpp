@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2007-06-09 03:36:25 $
+// $Revision: 1.31 $
+// $Date: 2007-11-30 19:24:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -215,7 +215,7 @@ ElementRecorder::sendSelf(int commitTag, Channel &theChannel)
   // into an ID, place & send (*eleID) size, numArgs and length of all responseArgs
   //
 
-  static ID idData(5);
+  static ID idData(6);
   if (eleID != 0)
     idData(0) = eleID->Size();
   else
@@ -238,6 +238,9 @@ ElementRecorder::sendSelf(int commitTag, Channel &theChannel)
     idData(4) = 1;
   else
     idData(4) = 0;
+
+
+  idData(5) = this->getTag();
 
   if (theChannel.sendID(0, commitTag, idData) < 0) {
     opserr << "ElementRecorder::sendSelf() - failed to send idData\n";
@@ -332,7 +335,7 @@ ElementRecorder::recvSelf(int commitTag, Channel &theChannel,
   // into an ID of size 2 recv eleID size and length of all responseArgs
   //
 
-  static ID idData(5);
+  static ID idData(6);
   if (theChannel.recvID(0, commitTag, idData) < 0) {
     opserr << "ElementRecorder::recvSelf() - failed to recv idData\n";
     return -1;
@@ -342,6 +345,7 @@ ElementRecorder::recvSelf(int commitTag, Channel &theChannel,
   numArgs = idData(1);
   int msgLength = idData(2);
 
+  this->setTag(idData(5));
 
   if (idData(4) == 1)
     echoTimeFlag = true;

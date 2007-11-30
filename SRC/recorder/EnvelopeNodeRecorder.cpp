@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.17 $
-// $Date: 2007-06-09 16:03:36 $
+// $Revision: 1.18 $
+// $Date: 2007-11-30 19:24:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -400,7 +400,7 @@ EnvelopeNodeRecorder::sendSelf(int commitTag, Channel &theChannel)
     return -1;
   }
 
-  static ID idData(5); 
+  static ID idData(6); 
   idData.Zero();
 
   if (theDofs != 0)
@@ -417,6 +417,9 @@ EnvelopeNodeRecorder::sendSelf(int commitTag, Channel &theChannel)
     idData(4) = 1;
   else
     idData(4) = 0;
+
+  idData(5) = this->getTag();
+
 
   if (theChannel.sendID(0, commitTag, idData) < 0) {
     opserr << "EnvelopeNodeRecorder::sendSelf() - failed to send idData\n";
@@ -460,7 +463,7 @@ EnvelopeNodeRecorder::recvSelf(int commitTag, Channel &theChannel,
     return -1;
   }
 
-  static ID idData(5); 
+  static ID idData(6); 
   if (theChannel.recvID(0, commitTag, idData) < 0) {
     opserr << "EnvelopeNodeRecorder::recvSelf() - failed to send idData\n";
     return -1;
@@ -470,6 +473,8 @@ EnvelopeNodeRecorder::recvSelf(int commitTag, Channel &theChannel,
   int numNodes = idData(1);
 
   dataFlag = idData(3);
+
+  this->setTag(idData(5));
 
   if (idData(4) == 1)
     echoTimeFlag = true;
