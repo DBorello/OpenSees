@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-08-03 00:21:28 $
+// $Revision: 1.4 $
+// $Date: 2007-11-30 00:11:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_SocketSSL.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -45,7 +45,10 @@
 
 static int GetHostAddr(char *host, char *IntAddr);
 static void inttoa(unsigned int no, char *string, int *cnt);
+
+#ifndef _WIN32
 static void byte_swap(void *array, long long nArray, int size);
+#endif
 
 
 // TCP_SocketSSL(unsigned int other_Port, char *other_InetAddr): 
@@ -93,8 +96,7 @@ TCP_SocketSSL::TCP_SocketSSL()
     startup_sockets();
 
     // set up my_Addr
-    addrLength = sizeof(my_Addr.addr_in);
-    bzero((char *) &my_Addr.addr_in, addrLength);    
+    bzero((char *) &my_Addr, sizeof(my_Addr));    
     my_Addr.addr_in.sin_family = AF_INET;
     my_Addr.addr_in.sin_port = htons(0);
 
@@ -110,12 +112,12 @@ TCP_SocketSSL::TCP_SocketSSL()
     }
 
     // bind local address to it
-    if (bind(sockfd, (struct sockaddr *) &my_Addr.addr_in, addrLength) < 0) {
+    if (bind(sockfd, &my_Addr.addr, sizeof(my_Addr.addr)) < 0) {
         opserr << "TCP_SocketSSL::TCP_SocketSSL() - could not bind local address\n";
     }
 
     // get my_address info
-    getsockname(sockfd, &my_Addr.addr, &addrLength);
+    addrLength = sizeof(my_Addr.addr);
     myPort = ntohs(my_Addr.addr_in.sin_port);
 }    
 
@@ -167,8 +169,7 @@ TCP_SocketSSL::TCP_SocketSSL(unsigned int port, bool checkendianness)
     // machine on which the process that uses this routine is running.
 
     // set up my_Addr
-    addrLength = sizeof(my_Addr.addr_in);
-    bzero((char *) &my_Addr.addr_in, addrLength);
+    bzero((char *) &my_Addr, sizeof(my_Addr));
     my_Addr.addr_in.sin_family = AF_INET;
     my_Addr.addr_in.sin_port = htons(port);
 
@@ -184,12 +185,12 @@ TCP_SocketSSL::TCP_SocketSSL(unsigned int port, bool checkendianness)
     }
 
     // bind local address to it
-    if (bind(sockfd, &my_Addr.addr, addrLength) < 0) {
+    if (bind(sockfd, &my_Addr.addr, sizeof(my_Addr.addr)) < 0) {
         opserr << "TCP_SocketSSL::TCP_SocketSSL() - could not bind local address\n";
     }    
 
     // get my_address info
-    getsockname(sockfd, &my_Addr.addr, &addrLength);
+    addrLength = sizeof(my_Addr.addr);
     myPort = ntohs(my_Addr.addr_in.sin_port);
 }
 
@@ -241,19 +242,18 @@ TCP_SocketSSL::TCP_SocketSSL(unsigned int other_Port,
     startup_sockets();
 
     // set up remote address
-    bzero((char *) &other_Addr.addr_in, sizeof(other_Addr.addr_in));
+    bzero((char *) &other_Addr, sizeof(other_Addr));
     other_Addr.addr_in.sin_family = AF_INET;
     other_Addr.addr_in.sin_port = htons(other_Port);
 
 #ifdef _WIN32
     other_Addr.addr_in.sin_addr.S_un.S_addr = inet_addr(other_InetAddr);
 #else
-    other_Addr.addr_in.sin_addr.s_addr = inet_addr(other_InetAddr);
+    other_Addr.addr_in.sin_addr.s_addr = inet_aton(other_InetAddr);
 #endif
 
     // set up my_Addr.addr_in
-    addrLength = sizeof(my_Addr.addr_in);
-    bzero((char *) &my_Addr.addr_in, addrLength);    
+    bzero((char *) &my_Addr, sizeof(my_Addr));    
     my_Addr.addr_in.sin_family = AF_INET;
     my_Addr.addr_in.sin_port = htons(0);
 
@@ -269,10 +269,12 @@ TCP_SocketSSL::TCP_SocketSSL(unsigned int other_Port,
     }
 
     // bind local address to it
-    if (bind(sockfd, (struct sockaddr *) &my_Addr.addr_in, addrLength) < 0) {
+    if (bind(sockfd, &my_Addr.addr, sizeof(my_Addr.addr)) < 0) {
         opserr << "TCP_SocketSSL::TCP_SocketSSL() - could not bind local address\n";
     }
 
+    addrLength = sizeof(my_Addr.addr);
+    getsockname(sockfd, &my_Addr.addr, &addrLength);
     myPort = ntohs(my_Addr.addr_in.sin_port);
 }
 
@@ -302,12 +304,11 @@ TCP_SocketSSL::setUpConnection(void)
     if (connectType == 1) {
 
         // now try to connect to socket with remote address.
-        if (connect(sockfd, (struct sockaddr *) &other_Addr.addr_in, 
-            addrLength)< 0) {
-
+        if (connect(sockfd, &other_Addr.addr, sizeof(other_Addr.addr))< 0) {
                 opserr << "TCP_SocketSSL::setUpConnection() - could not connect\n";
                 return -1;
         }
+
         // get my_address info
         getsockname(sockfd, &my_Addr.addr, &addrLength);
 
@@ -365,12 +366,11 @@ TCP_SocketSSL::setUpConnection(void)
         // wait for other process to contact me & set up connection
         socket_type newsockfd;
         listen(sockfd, 1);    
-        newsockfd = accept(sockfd, (struct sockaddr *) &other_Addr.addr_in, &addrLength);
-
+        newsockfd = accept(sockfd, &other_Addr.addr, &addrLength);
         if (newsockfd < 0) {
             opserr << "TCP_SocketSSL::setUpConnection() - could not accept connection\n";
             return -1;
-        }    
+        }
 
         // close old socket & reset sockfd
         // we can close as we are not going to wait for others to connect
@@ -379,12 +379,10 @@ TCP_SocketSSL::setUpConnection(void)
 #else
         close(sockfd);
 #endif
-
         sockfd = newsockfd;
 
         // get my_address info
         getsockname(sockfd, &my_Addr.addr, &addrLength);
-        myPort = ntohs(my_Addr.addr_in.sin_port);
 
         // initiate SSL handshake with client
         ssl = SSL_new(ctx);
@@ -724,10 +722,12 @@ TCP_SocketSSL::recvMatrix(int dbTag, int commitTag,
         gMsg  += nread;
     }
 
+#ifndef _WIN32
     if (endiannessProblem) {
         void *array = (void *)data;
         byte_swap(array, theMatrix.dataSize, sizeof(double));
     }
+#endif
 
     return 0;
 }
@@ -767,10 +767,12 @@ TCP_SocketSSL::sendMatrix(int dbTag, int commitTag,
     char *gMsg = (char *)data;
     nleft = theMatrix.dataSize * sizeof(double);
 
+#ifndef _WIN32
     if (endiannessProblem) {
         void *array = (void *)data;
         byte_swap(array, theMatrix.dataSize, sizeof(double));
     }
+#endif
 
     if (SSL_write(ssl, gMsg, nleft) != nleft) {
         opserr << "TCP_SocketSSL::sendMatrix() - could not write data\n";
@@ -781,10 +783,12 @@ TCP_SocketSSL::sendMatrix(int dbTag, int commitTag,
         return -2;
     }
 
+#ifndef _WIN32
     if (endiannessProblem) {
         void *array = (void *)data;
         byte_swap(array, theMatrix.dataSize, sizeof(double));
     }
+#endif
 
     return 0;
 }
@@ -835,10 +839,12 @@ TCP_SocketSSL::recvVector(int dbTag, int commitTag,
         gMsg  += nread;
     }
 
+#ifndef _WIN32
     if (endiannessProblem) {
         void *array = (void *)data;
         byte_swap(array, theVector.sz, sizeof(double));
     }
+#endif
 
     return 0;
 }
@@ -877,10 +883,12 @@ TCP_SocketSSL::sendVector(int dbTag, int commitTag,
     char *gMsg = (char *)data;
     nleft = theVector.sz * sizeof(double);
 
+#ifndef _WIN32
     if (endiannessProblem) {
         void *array = (void *)data;
         byte_swap(array, theVector.sz, sizeof(double));
     }
+#endif
 
     if (SSL_write(ssl, gMsg, nleft) != nleft) {
         opserr << "TCP_SocketSSL::sendVector() - could not write data\n";
@@ -891,10 +899,12 @@ TCP_SocketSSL::sendVector(int dbTag, int commitTag,
         return -2;
     }
 
+#ifndef _WIN32
     if (endiannessProblem) {
         void *array = (void *)data;
         byte_swap(array, theVector.sz, sizeof(double));
     }
+#endif
 
     return 0;
 }
@@ -945,10 +955,12 @@ TCP_SocketSSL::recvID(int dbTag, int commitTag,
         gMsg  += nread;
     }
 
+#ifndef _WIN32
     if (endiannessProblem) {
         void *array = (void *)data;
         byte_swap(array, theID.sz, sizeof(int));
     }
+#endif
 
     return 0;
 }
@@ -987,10 +999,12 @@ TCP_SocketSSL::sendID(int dbTag, int commitTag,
     char *gMsg = (char *)data;
     nleft = theID.sz * sizeof(int);
  
+#ifndef _WIN32
     if (endiannessProblem) {
         void *array = (void *)data;
         byte_swap(array, theID.sz, sizeof(int));
     }
+#endif
 
     if (SSL_write(ssl, gMsg, nleft) != nleft) {
         opserr << "TCP_SocketSSL::sendID() - could not write data\n";
@@ -1001,10 +1015,12 @@ TCP_SocketSSL::sendID(int dbTag, int commitTag,
         return -2;
     }
 
+#ifndef _WIN32
     if (endiannessProblem) {
         void *array = (void *)data;
         byte_swap(array, theID.sz, sizeof(int));
     }
+#endif
 
     return 0;
 }
@@ -1101,6 +1117,7 @@ inttoa(unsigned int no, char *string, int *cnt)
 }
 
 
+#ifndef _WIN32
 static void
 byte_swap(void *array, long long nArray,int size)
 {
@@ -1128,3 +1145,4 @@ byte_swap(void *array, long long nArray,int size)
         p += half;
     }
 }
+#endif
