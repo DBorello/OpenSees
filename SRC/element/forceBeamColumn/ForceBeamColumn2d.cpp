@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.32 $
-// $Date: 2007-07-12 21:43:07 $
+// $Revision: 1.33 $
+// $Date: 2007-12-01 01:05:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 /*
@@ -2492,6 +2492,8 @@ ForceBeamColumn2d::setParameter(const char **argv, int argc, Parameter &param)
   if (argc < 1)
     return -1;
 
+  int result = -1;
+
   if (strcmp(argv[0],"rho") == 0)
     return param.addObject(1, this);
   
@@ -2508,17 +2510,7 @@ ForceBeamColumn2d::setParameter(const char **argv, int argc, Parameter &param)
       return sections[sectionNum-1]->setParameter(&argv[2], argc-2, param);
 
     else
-      return 0;
-
-    /*
-    // Find the right section and call its setParameter method
-    int ok = 0;
-    for (int i = 0; i < numSections; i++)
-      if (paramSectionTag == sections[i]->getTag())
-	ok += sections[i]->setParameter(&argv[2], argc-2, param);
-
-    return ok;
-    */
+      return -1;
   }
   
   else if (strstr(argv[0],"integration") != 0) {
@@ -2530,14 +2522,21 @@ ForceBeamColumn2d::setParameter(const char **argv, int argc, Parameter &param)
   }
 
   // Default, send to everything
-  else {
-    int ok = 0;
-    for (int i = 0; i < numSections; i++)
-      ok += sections[i]->setParameter(argv, argc, param);
-    ok += beamIntegr->setParameter(argv, argc, param);
-    return ok;
+  int ok;
+
+  for (int i = 0; i < numSections; i++) {
+    ok = sections[i]->setParameter(argv, argc, param);
+    if (ok != -1)
+      result = ok;
   }
+  
+  ok = beamIntegr->setParameter(argv, argc, param);
+  if (ok != -1)
+    result = ok;
+  return result;
 }
+
+
 
 int
 ForceBeamColumn2d::updateParameter (int parameterID, Information &info)

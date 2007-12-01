@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.31 $
-// $Date: 2007-11-30 23:34:45 $
+// $Revision: 1.32 $
+// $Date: 2007-12-01 01:03:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.cpp,v $
                                                                         
 // Written: fmk
@@ -1005,23 +1005,28 @@ FiberSection2d::setParameter(const char **argv, int argc, Parameter &param)
 	  result = ok;
       }
     return result;
-  } 
+  }
+
   // Check if it belongs to the section integration
   else if (strstr(argv[0],"integration") != 0)
-    return sectionIntegr->setParameter(&argv[1], argc-1, param);
+    if (sectionIntegr != 0)
+      return sectionIntegr->setParameter(&argv[1], argc-1, param);
+    else
+      return -1;
 
-  // Default, send it to everything
-  else {
-    int ok = 0;
-    for (int i = 0; i < numFibers; i++) {
-      ok = theMaterials[i]->setParameter(argv, argc, param);
-      if (ok != -1)
-	result = ok;
-    }
+  int ok = 0;
+  
+  for (int i = 0; i < numFibers; i++) {
+    ok = theMaterials[i]->setParameter(argv, argc, param);
+    if (ok != -1)
+      result = ok;
+  }
+
+  if (sectionIntegr != 0) {
     ok = sectionIntegr->setParameter(argv, argc, param);
     if (ok != -1)
       result = ok;
-  } 
+  }
 
   return result;
 }

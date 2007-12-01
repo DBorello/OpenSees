@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2007-10-12 23:51:20 $
+// $Revision: 1.5 $
+// $Date: 2007-12-01 01:03:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/integration/RCSectionIntegration.cpp,v $
 
 #include <RCSectionIntegration.h>
@@ -175,7 +175,7 @@ RCSectionIntegration::setParameter(const char **argv, int argc,
 				   Parameter &param)
 {
   if (argc < 1)
-    return 0;
+    return -1;
 
   if (strcmp(argv[0],"d") == 0)
     return param.addObject(1, this);
@@ -198,7 +198,7 @@ RCSectionIntegration::setParameter(const char **argv, int argc,
   if (strcmp(argv[0],"cover") == 0)
     return param.addObject(6, this);
 
-  return 0;
+  return -1;
 }
 
 int
