@@ -15,7 +15,9 @@ DOBJ  = dgeqr2.o dlabad.o dlacon.o dlacpy.o dladiv.o dlae2.o dlaev2.o\
 	dlartv.o dsbevx.o dsbtrd.o dstebz.o dstein.o dsterf.o\
 	dgetri.o dtrtri.o dtrti2.o dgebak.o dgebal.o dgeev.o\
 	dgehd2.o dgehrd.o dhseqr.o dlahrd.o \
-	dorg2r.o dorghr.o dorgqr.o dpotrf.o dpotrs.o dtrtrs.o
+	dorg2r.o dorghr.o dorgqr.o dpotrf.o dpotrs.o dtrtrs.o \
+	dggbak.o dggbal.o dggev.o dgghrd.o dhgeqz.o dlag2.o dlasv2.o dtgevc.o
+
 
 
 IOBJ  = ilaenv.o lsame.o lsamen.o xerbla.o xlaenv.o ieeeck.o
