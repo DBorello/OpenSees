@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2007-11-29 19:31:09 $
+// $Revision: 1.2 $
+// $Date: 2007-12-04 22:29:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/FullGenEigenSolver.h,v $
 
 
@@ -59,11 +59,14 @@ public:
 protected:
 
 private:
+    void sort(int length, double *x, int *id);
+
     FullGenEigenSOE *theSOE;
     int numEigen;
 
     double *eigenvalue;
     double *eigenvector;
+    int *sortingID;
     Vector *eigenV;
 };
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2007-11-29 19:31:09 $
+// $Revision: 1.2 $
+// $Date: 2007-12-04 22:29:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/FullGenEigenSolver.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -61,7 +61,8 @@ extern "C" int dggev_(char *JOBVL, char *JOBVR, int *N, double *A, int *LDA,
 
 FullGenEigenSolver::FullGenEigenSolver()
     : EigenSolver(EigenSOLVER_TAGS_FullGenEigenSolver),
-    theSOE(0), numEigen(0), eigenvalue(0), eigenvector(0), eigenV(0)
+    theSOE(0), numEigen(0), eigenvalue(0),
+    eigenvector(0), sortingID(0), eigenV(0)
 {
 
 }
@@ -71,9 +72,11 @@ FullGenEigenSolver::~FullGenEigenSolver()
 {
     if (eigenvalue != 0)
         delete [] eigenvalue;
-    if (eigenvector !=0)
+    if (eigenvector != 0)
         delete [] eigenvector;
-    if (eigenV !=0)
+    if (sortingID != 0)
+        delete [] sortingID;
+    if (eigenV != 0)
         delete eigenV;
 }
 
@@ -123,6 +126,11 @@ int FullGenEigenSolver::solve(int nEigen)
     if (eigenvalue != 0)
         delete [] eigenvalue;
     eigenvalue = new double [n];
+
+    // allocate memory for sorting index array
+    if (sortingID != 0)
+        delete [] sortingID;
+    sortingID = new int [n];
 
     // dummy left eigenvectors
     double vl[1];
@@ -179,22 +187,26 @@ int FullGenEigenSolver::solve(int nEigen)
             else {
                 eigenvalue[i] = -mag/beta[i];
                 opserr << "FullGenEigenSolver::solve() - the eigenvalue "
-                    << numEigen-i << " is complex with magnitude "
+                    << i+1 << " is complex with magnitude "
                     << -eigenvalue[i] << endln;
             }
         }
         else {
-            eigenvalue[i] = 0.0;
+            eigenvalue[i] = DBL_MAX;
             if (beta[i] == 0.0) {
                 opserr << "FullGenEigenSolver::solve() - the eigenvalue "
-                    << numEigen-i << " is numerically undetermined\n";
+                    << i+1 << " is numerically undetermined\n";
             }
             else {
                 opserr << "FullGenEigenSolver::solve() - the eigenvalue "
-                    << numEigen-i << " is numerically infinite\n";
+                    << i+1 << " is numerically infinite\n";
             }
         }
+        sortingID[i] = i;
     }
+
+    // sort eigenvalues in ascending order and return sorting ID
+    this->sort(numEigen, eigenvalue, sortingID);
 
     int lworkOpt = (int) work[0];
     if (lwork < lworkOpt) {
@@ -252,7 +264,7 @@ const Vector& FullGenEigenSolver::getEigenvector(int mode)
     }
 
     int size = theSOE->size;
-    int index = (numEigen-mode)*size;  // vectors are in reverse order
+    int index = size*sortingID[mode-1];
 
     if (eigenvector != 0) {
         for (int i=0; i<size; i++) {
@@ -278,7 +290,7 @@ double FullGenEigenSolver::getEigenvalue(int mode)
     }
 
     if (eigenvalue != 0) {
-        return eigenvalue[numEigen-mode];  // values are in reverse order
+        return eigenvalue[mode-1];
     }
     else {
         opserr << "FullGenEigenSolver::getEigenvalue() - "
@@ -298,4 +310,32 @@ int FullGenEigenSolver::recvSelf(int commitTag, Channel &theChannel,
     FEM_ObjectBroker &theBroker)
 {
     return 0;
+}
+
+
+void FullGenEigenSolver::sort(int length, double *x, int *id)
+{
+    // this is an implementation of shell sort that
+    // additionally keeps track of the sorting order
+    int flag = 1;
+    int d = length;
+    int i, idTmp;
+    double xTmp;
+    
+    while (flag || d>1) {
+        flag = 0;
+        d = (d+1)/2;
+        for (i=0; i<(length-d); i++) {
+            if (x[i+d] < x[i]) {
+                // swap items at positions i+d and d
+                xTmp = x[i+d];  idTmp = id[i+d];
+                x[i+d] = x[i];  id[i+d] = id[i];
+                x[i] = xTmp;    id[i] = idTmp;
+                // indicate that a swap has occurred
+                flag = 1;
+            }
+        }
+    }
+
+    return;
 }
