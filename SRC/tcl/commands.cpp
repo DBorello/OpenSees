@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.102 $
-// $Date: 2007-11-29 20:30:17 $
+// $Revision: 1.103 $
+// $Date: 2007-12-06 00:49:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -433,6 +433,8 @@ defaultUnits(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
 int
 neesMetaData(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
+int
+stripOpenSeesXML(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 extern int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
@@ -581,7 +583,7 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "metaData",     neesMetaData,(ClientData)NULL, NULL);
     Tcl_CreateCommand(interp, "defaultUnits", defaultUnits,(ClientData)NULL, NULL);
     Tcl_CreateCommand(interp, "neesUpload", neesUpload,(ClientData)NULL, NULL);
-
+    Tcl_CreateCommand(interp, "stripXML", stripOpenSeesXML,(ClientData)NULL, NULL);
 
 #ifdef _RELIABILITY
     Tcl_CreateCommand(interp, "wipeReliability", wipeReliability, 
@@ -5292,6 +5294,78 @@ int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char *
   }
 
   Tcl_Exit(0);
+
+  return 0;
+}
+
+
+
+int stripOpenSeesXML(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+
+  if (argc < 3) {
+    opserr << "ERROR incorrect # args - stripXML input.xml output.dat <output.xml>\n";
+    return -1;
+  }
+
+  const char *inputFile = argv[1];
+  const char *outputDataFile = argv[2];
+  const char *outputDescriptiveFile = 0;
+
+  if (argc == 4)
+    outputDescriptiveFile = argv[3];
+  
+
+  // open files
+  ifstream theInputFile; 
+  theInputFile.open(inputFile, ios::in);  
+  if (theInputFile.bad()) {
+    opserr << "stripXML - error opening input file: " << inputFile << endln;
+    return -1;
+  }
+
+  ofstream theOutputDataFile; 
+  theOutputDataFile.open(outputDataFile, ios::out);  
+  if (theOutputDataFile.bad()) {
+    opserr << "stripXML - error opening input file: " << outputDataFile << endln;
+    return -1;
+  }
+
+  ofstream theOutputDescriptiveFile;
+  if (outputDescriptiveFile != 0) {
+    theOutputDescriptiveFile.open(outputDescriptiveFile, ios::out);  
+    if (theOutputDescriptiveFile.bad()) {
+      opserr << "stripXML - error opening input file: " << outputDescriptiveFile << endln;
+      return -1;
+    }
+  }
+
+  string line;
+  bool spitData = false;
+  while (! theInputFile.eof() ) {
+    getline(theInputFile, line);
+    const char *inputLine = line.c_str();
+    opserr << inputLine << endln;
+
+    if (spitData == true) {
+      if (strstr(inputLine,"</Data>") != 0) 
+	spitData = false;
+      else 
+	theOutputDataFile << line << endln;
+    } else {
+      const char *inputLine = line.c_str();
+      if (strstr(inputLine,"<Data>") != 0) 
+	spitData = true;
+      else if (outputDescriptiveFile != 0)
+	theOutputDescriptiveFile << line << endln;
+    }
+  }      
+  
+  theInputFile.close();
+  theOutputDataFile.close();
+
+  if (outputDescriptiveFile != 0)
+    theOutputDescriptiveFile.close();
 
   return 0;
 }
