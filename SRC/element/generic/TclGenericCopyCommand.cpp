@@ -1,25 +1,43 @@
 /* ****************************************************************** **
+
 **    OpenSees - Open System for Earthquake Engineering Simulation    **
+
 **          Pacific Earthquake Engineering Research Center            **
+
 **                                                                    **
+
 **                                                                    **
+
 ** (C) Copyright 1999, The Regents of the University of California    **
+
 ** All Rights Reserved.                                               **
+
 **                                                                    **
+
 ** Commercial use of this program without express permission of the   **
+
 ** University of California, Berkeley, is strictly prohibited.  See   **
+
 ** file 'COPYRIGHT'  in main directory for information on usage and   **
+
 ** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
+
 **                                                                    **
+
 ** Developed by:                                                      **
+
 **   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
+
 **   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
+
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
+
 **                                                                    **
+
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2007-10-19 17:53:32 $
+// $Revision: 1.2 $
+// $Date: 2007-12-06 20:33:18 $
 // $URL: $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -41,8 +59,11 @@
 extern void printCommand(int argc, TCL_Char **argv);
 
 int TclModelBuilder_addGenericCopy(ClientData clientData, Tcl_Interp *interp,  int argc, 
+
     TCL_Char **argv, Domain*theTclDomain,
+
     TclModelBuilder *theTclBuilder, int eleArgStart)
+
 {
 	// ensure the destructor has not been called
 	if (theTclBuilder == 0)  {
