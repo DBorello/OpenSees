@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.103 $
-// $Date: 2007-12-06 00:49:20 $
+// $Revision: 1.104 $
+// $Date: 2007-12-06 01:45:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -5345,7 +5345,6 @@ int stripOpenSeesXML(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Ch
   while (! theInputFile.eof() ) {
     getline(theInputFile, line);
     const char *inputLine = line.c_str();
-    opserr << inputLine << endln;
 
     if (spitData == true) {
       if (strstr(inputLine,"</Data>") != 0) 
