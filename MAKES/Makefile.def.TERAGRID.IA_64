@@ -22,7 +22,6 @@
 # that will be created (if this all works!)
 
 OpenSees_PROGRAM = $(HOME)/bin/OpenSees
-OpenSees_PROGRAM_MPI = $(HOME)/bin/OpenSeesMPI
 
 # %---------------------------------%
 # |  SECTION 2: MAKEFILE CONSTANTS  |
@@ -32,7 +31,7 @@ OpenSees_PROGRAM_MPI = $(HOME)/bin/OpenSeesMPI
 
 OPERATING_SYSTEM = LINUX
 #PROGRAMMING_MODE = PARALLEL, SEQUENTIAL, PARALLEL_INTERPRETERS
-PROGRAMMING_MODE = PARALLEL
+PROGRAMMING_MODE = PARALLEL_INTERPRETERS
 #DEBUG_MODE = DEBUG, NO_DEBUG
 DEBUG_MODE = NO_DEBUG
 RELIABILITY = NO_RELIABILITY
@@ -301,7 +300,8 @@ ifeq ($(HAVEMUMPS), YES)
 
 MUMPS = YES
 MUMPS_FLAG = -D_MUMPS
-MUMPS_DIR = /gpfs/fmk/MUMPS_4.6.4
+#MUMPS_DIR = /gpfs/fmk/MUMPS_4.6.4
+MUMPS_DIR = /users/ux455280/MUMPS_4.7.3
 
 PLAT    = MPICHGM-INTEL80
 
@@ -321,7 +321,7 @@ SCALAPlib = $(SCALAPdir)/libscalapack-$(PLAT).a
 
 SCALAP  = $(BLACSlib) $(SCALAPlib) $(BLACSlib)
 
-MUMPS_LIB = -L/$(MUMPS_DIR)/lib \
+MUMPS_LIB = -L$(MUMPS_DIR)/lib \
 	  -ldmumps$(PLAT) \
 	  -lpord$(PLAT) \
 	  $(SCALAP) \
@@ -330,11 +330,15 @@ MUMPS_LIB = -L/$(MUMPS_DIR)/lib \
 	$(FE)/system_of_eqn/linearSOE/mumps/MumpsParallelSOE.o \
 	$(FE)/system_of_eqn/linearSOE/mumps/MumpsParallelSolver.o
 
-MUMPS_INCLUDE = -I/gpfs/fmk/MUMPS_4.6.4/include
+MUMPS_INCLUDE = -I$(MUMPS_DIR)/include
 
 endif
 
-PARALLEL_LIB = 
+PARALLEL_LIB = $(FE)/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSOE.o \
+        $(FE)/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSolver.o \
+        $(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLinSOE.o \
+        $(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSuperLU.o
+
 
 HPM_LIB = -L/usr/local/apps/hpm/lib/pwr4/ \
 	-lhpm_r -lpmapi -lm 
