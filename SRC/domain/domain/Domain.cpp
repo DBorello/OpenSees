@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.48 $
-// $Date: 2007-12-07 01:01:57 $
+// $Revision: 1.49 $
+// $Date: 2007-12-07 01:58:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -333,7 +333,8 @@ Domain::~Domain()
     delete theEigenvalues;
   
   int i;
-  for (i=0; i<numRecorders; i++)  
+  for (i=0; i<numRecorders; i++) 
+	  if (theRecorders[i] != 0)
     delete theRecorders[i];
   
   if (theRecorders != 0) {
@@ -785,6 +786,7 @@ Domain::clearAll(void) {
   // remove the recorders
   int i;
   for (i=0; i<numRecorders; i++)
+	  if (theRecorders[i] != 0)
     delete theRecorders[i];
 
   numRecorders = 0; 
@@ -1491,6 +1493,7 @@ Domain::commit(void)
 
     // invoke record on all recorders
     for (int i=0; i<numRecorders; i++)
+		if (theRecorders[i] != 0)
 	theRecorders[i]->record(commitTag, currentTime);
 
     // update the commitTag
@@ -1548,6 +1551,7 @@ Domain::revertToStart(void)
 // ADDED BY TERJE //////////////////////////////////
     // invoke 'restart' on all recorders
     for (int i=0; i<numRecorders; i++) 
+		if (theRecorders[i] != 0)
 		theRecorders[i]->restart();
 /////////////////////////////////////////////////////
 
