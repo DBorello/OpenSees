@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.47 $
-// $Date: 2007-11-29 23:26:36 $
+// $Revision: 1.48 $
+// $Date: 2007-12-07 01:01:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -1826,7 +1826,7 @@ Domain::removeRecorder(int tag)
 {
   for (int i=0; i<numRecorders; i++) {
     if (theRecorders[i] != 0) {
-      if (theRecorders[i]->getClassTag() == tag) {
+      if (theRecorders[i]->getTag() == tag) {
 	delete theRecorders[i];
 	theRecorders[i] = 0;
 	return 0;
