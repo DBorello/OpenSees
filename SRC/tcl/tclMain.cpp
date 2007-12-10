@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.42 2007-10-01 21:39:08 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.43 2007-12-10 23:31:06 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -31,6 +31,12 @@ extern "C" {
 EXTERN int		TclFormatInt _ANSI_ARGS_((char *buffer, long n));
 EXTERN int		TclObjCommandComplete _ANSI_ARGS_((Tcl_Obj *cmdPtr));
 }
+
+
+#ifdef _PARALLEL_INTERPRETERS
+#include <MachineBroker.h>
+extern MachineBroker *theMachineBroker;
+#endif
 
 const char * getInterpPWD(Tcl_Interp *interp);
 
@@ -246,23 +252,22 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
     Tcl_Interp *interp;
     Tcl_DString argString;
 
+#ifdef _PARALLEL_INTERPRETERS
+    if (theMachineBroker->getPID() == 0) {
+#endif
 
-    /* fmk - beginning of modifications for OpenSees */
-    fprintf(stderr,"\n\n\t OpenSees -- Open System For Earthquake Engineering Simulation");
-    fprintf(stderr,"\n\tPacific Earthquake Engineering Research Center -- %s\n\n", OPS_VERSION);
-    
-    fprintf(stderr,"\t    (c) Copyright 1999,2000 The Regents of the University of California");
-    fprintf(stderr,"\n\t\t\t\t All Rights Reserved\n");    
-    fprintf(stderr,"    (Copyright and Disclaimer @ http://www.berkeley.edu/OpenSees/copyright.html)\n\n\n");
+	/* fmk - beginning of modifications for OpenSees */
+	fprintf(stderr,"\n\n\t OpenSees -- Open System For Earthquake Engineering Simulation");
+	fprintf(stderr,"\n\tPacific Earthquake Engineering Research Center -- %s\n\n", OPS_VERSION);
+	
+	fprintf(stderr,"\t    (c) Copyright 1999,2000 The Regents of the University of California");
+	fprintf(stderr,"\n\t\t\t\t All Rights Reserved\n");    
+	fprintf(stderr,"    (Copyright and Disclaimer @ http://www.berkeley.edu/OpenSees/copyright.html)\n\n\n");
+	
 
-    /* fmk - end of modifications for OpenSees */
-    // Boris Jeremic additions
-# ifdef _UNIX
-    //   #include "version.txt"
-    //   fprintf(stderr,"\n %s \n\n\n", version);    
-# endif
-// Boris Jeremic additions
-
+#ifdef _PARALLEL_INTERPRETERS
+    }
+#endif
 
     Tcl_FindExecutable(argv[0]);
     interp = Tcl_CreateInterp();
