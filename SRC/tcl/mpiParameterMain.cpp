@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-10-24 22:07:28 $
+// $Revision: 1.6 $
+// $Date: 2007-12-11 22:27:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/mpiParameterMain.cpp,v $
 
 /* 
@@ -35,7 +35,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: mpiParameterMain.cpp,v 1.5 2007-10-24 22:07:28 fmk Exp $
+ * RCS: @(#) $Id: mpiParameterMain.cpp,v 1.6 2007-12-11 22:27:48 fmk Exp $
  */
 
 extern "C" {
@@ -53,11 +53,11 @@ extern "C" {
  */
 
 #ifdef _KAI
-extern "C" int matherr();
+//extern "C" int matherr();
 #endif
 
 #ifdef _UNIX
-#include <math.h>
+//#include <math.h>
 
 //int *tclDummyMathPtr = (int *)matherr;
 #endif
