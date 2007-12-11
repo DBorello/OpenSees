@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.104 $
-// $Date: 2007-12-06 01:45:46 $
+// $Revision: 1.105 $
+// $Date: 2007-12-11 22:27:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -31,6 +31,13 @@
 // see tkAppInit.C for command names.
 //
 // What: "@(#) commands.C, revA"
+
+
+#ifdef _PARALLEL_PROCESSING
+#include <mpi.h>
+#elif _PARALLEL_INTERPRETERS
+#include <mpi.h>
+#endif
 
 extern "C" {
 #include <tcl.h>
