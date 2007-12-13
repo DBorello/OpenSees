@@ -1,44 +1,26 @@
 /* ****************************************************************** **
-
 **    OpenSees - Open System for Earthquake Engineering Simulation    **
-
 **          Pacific Earthquake Engineering Research Center            **
-
 **                                                                    **
-
 **                                                                    **
-
 ** (C) Copyright 1999, The Regents of the University of California    **
-
 ** All Rights Reserved.                                               **
-
 **                                                                    **
-
 ** Commercial use of this program without express permission of the   **
-
 ** University of California, Berkeley, is strictly prohibited.  See   **
-
 ** file 'COPYRIGHT'  in main directory for information on usage and   **
-
 ** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
-
 **                                                                    **
-
 ** Developed by:                                                      **
-
 **   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
-
 **   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
-
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
-
 **                                                                    **
-
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2007-12-06 20:33:18 $
-// $URL: $
+// $Revision: 1.3 $
+// $Date: 2007-12-13 22:05:32 $
+// $Source: /usr/local/cvs/OpenSees/SRC/element/generic/TclGenericCopyCommand.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
 // Created: 11/06
@@ -59,11 +41,8 @@
 extern void printCommand(int argc, TCL_Char **argv);
 
 int TclModelBuilder_addGenericCopy(ClientData clientData, Tcl_Interp *interp,  int argc, 
-
     TCL_Char **argv, Domain*theTclDomain,
-
     TclModelBuilder *theTclBuilder, int eleArgStart)
-
 {
 	// ensure the destructor has not been called
 	if (theTclBuilder == 0)  {
