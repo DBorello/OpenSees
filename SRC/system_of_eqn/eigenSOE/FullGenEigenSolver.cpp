@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2007-12-04 22:29:05 $
+// $Revision: 1.3 $
+// $Date: 2007-12-14 20:14:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/FullGenEigenSolver.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -95,11 +95,12 @@ int FullGenEigenSolver::solve(int nEigen)
         return 0;
     }
 
+
     // get the number of equations
     int n  = theSOE->size;
 
     // set the number of eigenvalues
-    numEigen = n;
+    numEigen = nEigen;
 
     // do not compute left eigenvalues and eigenvectors
     char *jobvl = "N";
@@ -123,8 +124,10 @@ int FullGenEigenSolver::solve(int nEigen)
     double *alphaR = new double [n];
     double *alphaI = new double [n];
     double *beta   = new double [n];
+
     if (eigenvalue != 0)
         delete [] eigenvalue;
+
     eigenvalue = new double [n];
 
     // allocate memory for sorting index array
@@ -178,7 +181,7 @@ int FullGenEigenSolver::solve(int nEigen)
 
     theSOE->factored = true;
 
-    for (int i=0; i<numEigen; i++) {
+    for (int i=0; i<n; i++) {
         double mag = sqrt(alphaR[i]*alphaR[i]+alphaI[i]*alphaI[i]);
         if (mag*DBL_EPSILON < fabs(beta[i])) {
             if (alphaI[i] == 0.0) {
@@ -192,21 +195,21 @@ int FullGenEigenSolver::solve(int nEigen)
             }
         }
         else {
-            eigenvalue[i] = DBL_MAX;
-            if (beta[i] == 0.0) {
-                opserr << "FullGenEigenSolver::solve() - the eigenvalue "
-                    << i+1 << " is numerically undetermined\n";
-            }
-            else {
-                opserr << "FullGenEigenSolver::solve() - the eigenvalue "
-                    << i+1 << " is numerically infinite\n";
-            }
-        }
+	  eigenvalue[i] = DBL_MAX;
+	}
         sortingID[i] = i;
     }
 
+
     // sort eigenvalues in ascending order and return sorting ID
-    this->sort(numEigen, eigenvalue, sortingID);
+    this->sort(n, eigenvalue, sortingID);
+
+    for (int i=0; i<numEigen; i++) {
+      if (eigenvalue[i] == DBL_MAX) {
+	  opserr << "FullGenEigenSolver::solve() - the eigenvalue "
+		 << i+1 << " is numerically undetermined or infinite\n";
+      }
+    }
 
     int lworkOpt = (int) work[0];
     if (lwork < lworkOpt) {
@@ -328,11 +331,11 @@ void FullGenEigenSolver::sort(int length, double *x, int *id)
         for (i=0; i<(length-d); i++) {
             if (x[i+d] < x[i]) {
                 // swap items at positions i+d and d
-                xTmp = x[i+d];  idTmp = id[i+d];
-                x[i+d] = x[i];  id[i+d] = id[i];
-                x[i] = xTmp;    id[i] = idTmp;
-                // indicate that a swap has occurred
-                flag = 1;
+	      xTmp = x[i+d];  idTmp = id[i+d]; 
+	      x[i+d] = x[i];  id[i+d] = id[i]; 
+	      x[i] = xTmp;    id[i] = idTmp; 
+	      // indicate that a swap has occurred
+	      flag = 1;
             }
         }
     }
