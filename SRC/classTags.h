@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.98 $
-// $Date: 2007-11-29 19:45:52 $
+// $Revision: 1.99 $
+// $Date: 2008-01-14 21:52:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -190,6 +190,10 @@
 
 #define MAT_TAG_LimitState	1972
 #define MAT_TAG_Elastic2Material	1973
+
+
+#define MAT_TAG_SMA 51
+
 
 
 #define SEC_TAG_Elastic2d   3
