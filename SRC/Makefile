@@ -591,6 +591,7 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/FatigueMaterial.o \
 	$(FE)/material/uniaxial/CableMaterial.o \
 	$(FE)/material/uniaxial/ENTMaterial.o \
+	$(FE)/material/uniaxial/SMAMaterial.o \
 	$(FE)/material/uniaxial/BoucWenMaterial.o \
 	$(FE)/material/uniaxial/Pinching4Material.o \
 	$(FE)/material/uniaxial/ShearPanelMaterial.o \
