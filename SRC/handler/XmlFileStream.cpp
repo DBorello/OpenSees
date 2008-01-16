@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-06-25 21:18:37 $
+// $Revision: 1.9 $
+// $Date: 2008-01-16 00:19:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/XmlFileStream.cpp,v $
 
 #include <XmlFileStream.h>
@@ -61,7 +61,6 @@ XmlFileStream::XmlFileStream(const char *name, openMode mode, int indent)
 
   this->setFile(name, mode);
 
-  int fileNameLength = strlen(fileName);
 }
 
 XmlFileStream::~XmlFileStream()

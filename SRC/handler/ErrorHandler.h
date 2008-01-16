@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-08-11 23:36:00 $
+// $Revision: 1.4 $
+// $Date: 2008-01-16 00:19:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/ErrorHandler.h,v $
                                                                         
                                                                         
@@ -40,6 +40,7 @@
 
 #include <iostream>
 //using std::ostream;
+
 class ostream;
 #include <stdarg.h>
 
@@ -52,7 +53,7 @@ class ErrorHandler {
 	virtual void fatal(const char *, ...) =0;
 
   protected:
-    void outputMessage(ostream &theStream, const char *msg, va_list args);
+	void outputMessage(ostream &theStream, const char *msg, va_list args);
     
   private:    
 

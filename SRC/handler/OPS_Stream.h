@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-08-03 23:23:20 $
+// $Revision: 1.4 $
+// $Date: 2008-01-16 00:19:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/OPS_Stream.h,v $
 
 #ifndef _OPS_Stream
@@ -50,7 +50,7 @@ class OPS_Stream:  public MovableObject
   virtual int attr(const char *name, int value) =0;
   virtual int attr(const char *name, double value) =0;
   virtual int attr(const char *name, const char *value) =0;
-  virtual int write(Vector &data) =0;
+  virtual int write(Vector &data) =0; 
 
   // regular stuff
   virtual OPS_Stream& write(const char *s, int n) {return *this;};
@@ -81,10 +81,10 @@ class OPS_Stream:  public MovableObject
 
 
  private:
-
   void indent(void);
   int numIndent;
-  char *indentString;
+
+
 };
 
 #endif

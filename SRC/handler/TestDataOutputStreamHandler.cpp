@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-11-13 00:54:54 $
+// $Revision: 1.2 $
+// $Date: 2008-01-16 00:19:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/TestDataOutputStreamHandler.cpp,v $
                                                                         
                                                                         
@@ -40,10 +40,13 @@
 
 // global variables
 StandardStream sserr;
-OPS_Stream &opserr = sserr;
-double   ops_Dt =0;                
-Domain  *ops_TheActiveDomain  =0;   
-Element *ops_TheActiveElement =0;  
+OPS_Stream *opserrPtr = &sserr;
+
+
+
+double        ops_Dt = 0;
+Domain       *ops_TheActiveDomain = 0;
+Element      *ops_TheActiveElement = 0;
 
 int main(int argc, char **argv)
 {

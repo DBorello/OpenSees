@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:24 $
+// $Revision: 1.5 $
+// $Date: 2008-01-16 00:19:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/ErrorHandler.cpp,v $
                                                                         
                                                                         
-// File: ~/handler/ErrorHandler.C
-//
 // Written: fmk 
 // Created: 11/99
 // Revision: A

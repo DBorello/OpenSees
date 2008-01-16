@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-08-03 23:24:56 $
+// $Revision: 1.7 $
+// $Date: 2008-01-16 00:19:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/StandardStream.cpp,v $
 
 #include <StandardStream.h>
@@ -32,12 +32,13 @@ using std::setiosflags;
 
 StandardStream::StandardStream(int indent)
   :OPS_Stream(OPS_STREAM_TAGS_FileStream), 
-   fileOpen(0),  indentSize(indent)
+   fileOpen(0),  indentSize(indent), numIndent(-1)
 {
   if (indentSize < 1) indentSize = 1;
   indentString = new char[indentSize+1];
   for (int i=0; i<indentSize; i++)
     strcpy(indentString, " ");
+
 }
 StandardStream::~StandardStream()
 {
