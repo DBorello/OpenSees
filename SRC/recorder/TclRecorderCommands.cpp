@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.46 $
-// $Date: 2007-11-30 19:24:53 $
+// $Revision: 1.47 $
+// $Date: 2008-01-16 00:19:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -65,6 +65,7 @@
 #include <StandardStream.h>
 #include <DataFileStream.h>
 #include <XmlFileStream.h>
+#include <BinaryFileStream.h>
 #include <DatabaseStream.h>
 
 
@@ -72,7 +73,7 @@ extern const char * getInterpPWD(Tcl_Interp *interp);  // commands.cpp
 
 extern TclModelBuilder *theDamageTclModelBuilder;
 
-enum outputMode  {STANDARD_STREAM, DATA_STREAM, XML_STREAM, DATABASE_STREAM};
+enum outputMode  {STANDARD_STREAM, DATA_STREAM, XML_STREAM, DATABASE_STREAM, BINARY_STREAM};
 
 
 #include <EquiSolnAlgo.h>
@@ -288,6 +289,15 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  eMode = XML_STREAM;
 	  loc += 2;
 	}	    
+
+	else if ((strcmp(argv[loc],"-binary") == 0)) {
+	  // allow user to specify load pattern other than current
+	  fileName = argv[loc+1];
+	  const char *pwd = getInterpPWD(interp);
+	  simulationInfo.addOutputFile(fileName, pwd);
+	  eMode = BINARY_STREAM;
+	  loc += 2;
+	}	    
 	
 	else {
 	  // first unknown string then is assumed to start 
@@ -316,6 +326,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	theOutputStream = new XmlFileStream(fileName);
       } else if (eMode == DATABASE_STREAM && tableName != 0) {
 	theOutputStream = new DatabaseStream(theDatabase, tableName);
+      } else if (eMode == BINARY_STREAM && fileName != 0) {
+	theOutputStream = new BinaryFileStream(fileName);
       } else
 	theOutputStream = new StandardStream();
       
@@ -519,6 +531,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 
 	  pos += 2;
 	}
+
 	else if ((strcmp(argv[pos],"-nees") == 0) || (strcmp(argv[pos],"-xml") == 0)) {
 	  // allow user to specify load pattern other than current
 	  fileName = argv[pos+1];
@@ -527,6 +540,16 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  eMode = XML_STREAM;
 	  pos += 2;
 	}	    
+
+	else if ((strcmp(argv[pos],"-binary") == 0)) {
+	  // allow user to specify load pattern other than current
+	  fileName = argv[pos+1];
+	  const char *pwd = getInterpPWD(interp);
+	  simulationInfo.addOutputFile(fileName, pwd);
+	  eMode = BINARY_STREAM;
+	  pos += 2;
+	}	    
+
 
 	else if (strcmp(argv[pos],"-dT") == 0) {
 	  pos ++;
@@ -657,6 +680,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	theOutputStream = new XmlFileStream(fileName);
       } else if (eMode == DATABASE_STREAM && tableName != 0) {
 	theOutputStream = new DatabaseStream(theDatabase, tableName);
+      } else if (eMode == BINARY_STREAM && fileName != 0) {
+	theOutputStream = new BinaryFileStream(fileName);
       } else {
 	theOutputStream = new StandardStream();
       }
