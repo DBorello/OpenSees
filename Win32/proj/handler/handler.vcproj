@@ -105,6 +105,9 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
+				RelativePath="..\..\..\SRC\handler\BinaryFileStream.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\handler\DataFileStream.cpp">
 			</File>
 			<File
@@ -129,6 +132,9 @@
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
+			<File
+				RelativePath="..\..\..\SRC\handler\BinaryFileStream.h">
+			</File>
 			<File
 				RelativePath="..\..\..\SRC\handler\DataFileStream.h">
 			</File>
