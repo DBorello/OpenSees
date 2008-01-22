@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-10-02 22:36:58 $
+// $Revision: 1.3 $
+// $Date: 2008-01-22 23:41:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/address/ChannelAddress.h,v $
                                                                         
                                                                         
@@ -38,12 +38,22 @@
 
 #define SOCKET_TYPE 1
 
-#ifdef _UNIX
+#ifdef _PARALLEL_INTERPRETERS
 // #include "Socket.h"
 
 #define MPI_TYPE    2
 
 #endif
+
+#ifdef _PARALLEL_PROCESSING
+// #include "Socket.h"
+
+#define MPI_TYPE    2
+
+#endif
+
+
+
 
 class ChannelAddress
 {
