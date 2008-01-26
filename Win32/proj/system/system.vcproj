@@ -155,6 +155,12 @@
 			Name="profileSPD"
 			Filter="">
 			<File
+				RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\profileSPD\DistributedProfileSPDLinSOE.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\profileSPD\DistributedProfileSPDLinSOE.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\profileSPD\ProfileSPDLinDirectSolver.cpp">
 			</File>
 			<File
@@ -252,6 +258,12 @@
 			<File
 				RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\bandGEN\BandGenLinSolver.h">
 			</File>
+			<File
+				RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\bandGEN\DistributedBandGenLinSOE.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\bandGEN\DistributedBandGenLinSOE.h">
+			</File>
 		</Filter>
 		<Filter
 			Name="bandSPD"
@@ -273,6 +285,12 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\bandSPD\BandSPDLinSolver.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\bandSPD\DistributedBandSPDLinSOE.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\bandSPD\DistributedBandSPDLinSOE.h">
 			</File>
 		</Filter>
 		<Filter
@@ -411,6 +429,18 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\diagonal\DiagonalSolver.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\diagonal\DistributedDiagonalSOE.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\diagonal\DistributedDiagonalSOE.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\diagonal\DistributedDiagonalSolver.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\diagonal\DistributedDiagonalSolver.h">
 			</File>
 		</Filter>
 	</Files>
