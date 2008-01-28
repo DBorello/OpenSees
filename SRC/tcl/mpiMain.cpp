@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-12-11 22:27:48 $
+// $Revision: 1.9 $
+// $Date: 2008-01-28 19:21:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/mpiMain.cpp,v $
 
 /* 
@@ -35,7 +35,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: mpiMain.cpp,v 1.8 2007-12-11 22:27:48 fmk Exp $
+ * RCS: @(#) $Id: mpiMain.cpp,v 1.9 2008-01-28 19:21:22 fmk Exp $
  */
 
 extern "C" {
@@ -113,17 +113,23 @@ extern void g3TclMain(int argc, char **argv, Tcl_AppInitProc *appInitProc, int r
 #include <ActorSubdomain.h>
 #include <FEM_ObjectBrokerAllClasses.h>
 
-extern PartitionedDomain theDomain;
+#include <DomainPartitioner.h>
+MachineBroker *theMachineBroker = 0;
 
-extern int OPS_PARALLEL_PROCESSING;
-extern int OPS_NUM_SUBDOMAINS;
-extern bool OPS_PARTITIONED;
-extern FEM_ObjectBroker *OPS_OBJECT_BROKER;
-extern MachineBroker    *OPS_MACHINE;
-extern bool OPS_USING_MAIN_DOMAIN;
-extern int OPS_MAIN_DOMAIN_PARTITION_ID;
+PartitionedDomain theDomain;
+int OPS_PARALLEL_PROCESSING =0;
+int OPS_NUM_SUBDOMAINS      =0;
+bool OPS_PARTITIONED        =false;
+bool OPS_USING_MAIN_DOMAIN  = false;
+int OPS_MAIN_DOMAIN_PARTITION_ID =0;
 
-MPI_MachineBroker *theMachineBroker = 0;
+DomainPartitioner *OPS_DOMAIN_PARTITIONER =0;
+GraphPartitioner  *OPS_GRAPH_PARTITIONER =0;
+LoadBalancer      *OPS_BALANCER = 0;
+FEM_ObjectBroker  *OPS_OBJECT_BROKER;
+MachineBroker     *OPS_MACHINE;
+Channel          **OPS_theChannels = 0;
+
 
 int
 main(int argc, char **argv)

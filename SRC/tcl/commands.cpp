@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.105 $
-// $Date: 2007-12-11 22:27:35 $
+// $Revision: 1.106 $
+// $Date: 2008-01-28 19:21:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -283,15 +283,11 @@ extern char *neesCentralExpID;
 extern char *neesCentralUser;
 extern char *neesCentralPasswd;
 
-
-
-
-
-
 ModelBuilder *theBuilder =0;
 
 // some global variables 
 #ifdef _PARALLEL_PROCESSING
+
 #include <DistributedDisplacementControl.h>
 #include <ShadowSubdomain.h>
 #include <Metis.h>
@@ -320,6 +316,22 @@ ModelBuilder *theBuilder =0;
 #include <DistributedSuperLU.h>
 #include <DistributedProfileSPDLinSOE.h>
 
+extern PartitionedDomain theDomain;
+extern int OPS_PARALLEL_PROCESSING;
+extern int OPS_NUM_SUBDOMAINS;
+extern bool OPS_PARTITIONED;
+extern FEM_ObjectBroker *OPS_OBJECT_BROKER;
+extern MachineBroker    *OPS_MACHINE;
+extern bool OPS_USING_MAIN_DOMAIN;
+extern int OPS_MAIN_DOMAIN_PARTITION_ID;
+
+extern DomainPartitioner *OPS_DOMAIN_PARTITIONER;
+extern GraphPartitioner  *OPS_GRAPH_PARTITIONER;
+extern LoadBalancer      *OPS_BALANCER;
+extern FEM_ObjectBroker  *OPS_OBJECT_BROKER;
+extern MachineBroker     *OPS_MACHINE;
+extern Channel          **OPS_theChannels;
+/*
 PartitionedDomain theDomain;
 int OPS_PARALLEL_PROCESSING =0;
 int OPS_NUM_SUBDOMAINS      =0;
@@ -333,6 +345,8 @@ LoadBalancer      *OPS_BALANCER = 0;
 FEM_ObjectBroker  *OPS_OBJECT_BROKER;
 MachineBroker     *OPS_MACHINE;
 Channel          **OPS_theChannels = 0;
+*/
+
 
 #elif _PARALLEL_INTERPRETERS
 
