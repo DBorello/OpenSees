@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-06-26 20:13:24 $
+// $Revision: 1.8 $
+// $Date: 2008-01-28 19:22:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/myCommands.cpp,v $
                                                                         
                                                                         
@@ -46,7 +46,13 @@
 #include <string.h>
 
 extern ModelBuilder *theBuilder;
+
+#ifdef _PARALLEL_PROCESSING
+#include <PartitionedDomain.h>
+extern PartitionedDomain theDomain;
+#else
 extern Domain theDomain;
+#endif
 
 int
 specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
