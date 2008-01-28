@@ -4,7 +4,7 @@
  * George's library of most frequently used routines
  *
  * Started 4/10/95
- * $Id: GKlib.h,v 1.2 2007-05-16 16:19:57 fmk Exp $
+ * $Id: GKlib.h,v 1.3 2008-01-28 19:26:34 fmk Exp $
  *
  */
 
@@ -17,9 +17,17 @@
 #include <ctype.h>
 #include <math.h>
 #include <stdarg.h>
+
+#ifdef _WIN32
+
+#include <winsock.h>
+#else
+
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <unistd.h>
+
+#endif
 
 #define TMR_CLEAR   10
 #define TMR_START   20

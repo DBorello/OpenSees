@@ -66,6 +66,8 @@
 #define mc64id_         MC64ID
 #define mc64ad_         MC64AD
 #define dlamch_         DLAMCH
+#define dtrsm_          DTRSM
+#define dgemm_          DGEMM
 #endif
 
 #if (F77_CALL_C == NOCHANGE)

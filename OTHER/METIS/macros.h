@@ -6,7 +6,7 @@
  * Started 9/25/94
  * George
  *
- * $Id: macros.h,v 1.1.1.1 2000-09-15 08:23:12 fmk Exp $
+ * $Id: macros.h,v 1.2 2008-01-28 19:24:41 fmk Exp $
  *
  */
 
@@ -17,8 +17,16 @@
 #define RandomInRange(u) ((rand()>>2)%(u))
 */
 
+#ifdef _WIN32
+
+#define drand48(x) ((double)(rand()/RAND_MAX))
 #define RandomInRange(u) ((int)(drand48()*((double)(u))))
 
+#else
+
+#define RandomInRange(u) ((int)(drand48()*((double)(u))))
+
+#endif
 
 #define HTVALUE(k, n) ((k)%(n))
 
