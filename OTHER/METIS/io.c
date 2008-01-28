@@ -8,13 +8,15 @@
  * Started 8/28/94
  * George
  *
- * $Id: io.c,v 1.2 2007-05-17 05:23:30 fmk Exp $
+ * $Id: io.c,v 1.3 2008-01-28 19:25:54 fmk Exp $
  *
  */
 
 #include "multilevel.h"
 
-extern int IsWeighted;	/* main.c */
+
+int IsWeighted;	/* main.c */
+
 
 /*************************************************************************
 * This function reads the spd matrix
