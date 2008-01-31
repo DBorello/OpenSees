@@ -591,6 +591,9 @@ Response* TwentyNodeBrick_u_p_U::setResponse(const char **argv, int argc, OPS_St
 
   } else if (strcmp(argv[0],"gausspoint") == 0 || strcmp(argv[0],"GaussPoint") == 0) {
      theResponse = new ElementResponse(this, 6, Vector(Num_TotalGaussPts*Num_Dim) );
+
+  } else if (strcmp(argv[0],"pq") == 0) {
+     theResponse = new ElementResponse(this, 7, Vector(Num_TotalGaussPts*Num_Dim) );
   }
   output.endTag(); // ElementOutput
 
