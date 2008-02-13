@@ -18,7 +18,12 @@ OBJS       = $(NDARRAY)
 ################### TARGETS ########################
 all: $(OBJS)
 	@$(RM) $(RMFLAGS) $(NDARRAY_LIBRARY);
-	$(AR) $(ARFLAGS) $(NDARRAY_LIBRARY) $(NDARRAY)
+	for X in $(NDARRAY) ; do \
+		echo $$X;  \
+		$(AR) $(ARFLAGS) $(NDARRAY_LIBRARY) $(AROPTIONS) $$X; \
+	done;
+
+#$(AR) $(ARFLAGS) $(NDARRAY_LIBRARY) $(AROPTIONS) $(NDARRAY); 
 
 libndarray.a: $(NDARRAY)
 	$(AR) $(ARFLAGS) $(NDARRAY_LIBRARY) $(NDARRAY)
