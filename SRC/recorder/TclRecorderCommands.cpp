@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.47 $
-// $Date: 2008-01-16 00:19:56 $
+// $Revision: 1.48 $
+// $Date: 2008-02-15 23:34:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -111,8 +111,6 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
     // check argv[1] for type of Recorder, parse in rest of arguments
     // needed for the type of Recorder, create the object and add to Domain
     //
-    (*theRecorder) = 0;
-    (*theRecorder) = 0;
     FE_Datastore *theRecorderDatabase = 0;
     OPS_Stream *theOutputStream = 0;
 
@@ -772,6 +770,15 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  
 	  pos += 2;
 	}
+
+	else if ((strcmp(argv[pos],"-binary") == 0)) {
+	  // allow user to specify load pattern other than current
+	  fileName = argv[pos+1];
+	  const char *pwd = getInterpPWD(interp);
+	  simulationInfo.addOutputFile(fileName, pwd);
+	  eMode = BINARY_STREAM;
+	  pos += 2;
+	}	    
 	
 	else if ((strcmp(argv[pos],"-nees") == 0) || (strcmp(argv[pos],"-xml") == 0)) {
 	  // allow user to specify load pattern other than current
@@ -849,6 +856,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	theOutputStream = new XmlFileStream(fileName);
       } else if (eMode == DATABASE_STREAM && tableName != 0) {
 	theOutputStream = new DatabaseStream(theDatabase, tableName);
+      } else if (eMode == BINARY_STREAM) {
+	theOutputStream = new BinaryFileStream(fileName);
       } else
 	theOutputStream = new StandardStream();
       
@@ -895,60 +904,61 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 
     else if (strcmp(argv[1],"plot") == 0) {
 
-	int xLoc, yLoc, width, height;
-	if (argc < 9) {
-	    opserr << "WARNING recorder display fileName? windowTitle? xLoc yLoc pixelsX pixelsY -columns colX1 colY1 -columns colX2 ...";
+      int xLoc, yLoc, width, height;
+      if (argc < 9) {
+	opserr << "WARNING recorder display fileName? windowTitle? xLoc yLoc pixelsX pixelsY -columns colX1 colY1 -columns colX2 ...";
+	return TCL_ERROR;
+      }    
+
+      if (Tcl_GetInt(interp, argv[4], &xLoc) != TCL_OK)	
+	return TCL_ERROR;	
+      if (Tcl_GetInt(interp, argv[5], &yLoc) != TCL_OK)	
+	return TCL_ERROR;	      
+      if (Tcl_GetInt(interp, argv[6], &width) != TCL_OK)	
+	return TCL_ERROR;	
+      if (Tcl_GetInt(interp, argv[7], &height) != TCL_OK)	
+	return TCL_ERROR;	      
+      
+      int loc = 8;
+      
+      double dT = 0.0;
+      loc = 8;
+      ID cols(0,16);
+      int numCols = 0;
+      while (loc < argc) {
+	if ((strcmp(argv[loc],"-columns") == 0) ||
+	    (strcmp(argv[loc],"-cols") == 0) ||
+	    (strcmp(argv[loc],"-col") == 0)) {
+	  if (argc < loc+2)
 	    return TCL_ERROR;
-	}    
-	if (Tcl_GetInt(interp, argv[4], &xLoc) != TCL_OK)	
+	  
+	  int colX, colY;
+	  if (Tcl_GetInt(interp, argv[loc+1], &colX) != TCL_OK)	
 	    return TCL_ERROR;	
-	if (Tcl_GetInt(interp, argv[5], &yLoc) != TCL_OK)	
-	    return TCL_ERROR;	      
-	if (Tcl_GetInt(interp, argv[6], &width) != TCL_OK)	
+	  
+	  if (Tcl_GetInt(interp, argv[loc+2], &colY) != TCL_OK)	
 	    return TCL_ERROR;	
-	if (Tcl_GetInt(interp, argv[7], &height) != TCL_OK)	
-	    return TCL_ERROR;	      
-
-	int loc = 8;
-
-	double dT = 0.0;
-	loc = 0;
-	ID cols(0,16);
-	int numCols = 0;
-	while (loc < argc) {
-	  if ((strcmp(argv[loc],"-columns") == 0) ||
-	      (strcmp(argv[loc],"-cols") == 0) ||
-	      (strcmp(argv[loc],"-col") == 0)) {
-	    if (argc < loc+2)
-	      return TCL_ERROR;
-
-	    int colX, colY;
-	    if (Tcl_GetInt(interp, argv[loc+1], &colX) != TCL_OK)	
-	      return TCL_ERROR;	
-
-	    if (Tcl_GetInt(interp, argv[loc+2], &colY) != TCL_OK)	
-	      return TCL_ERROR;	
-
-	    cols[numCols++] = colX;
-	    cols[numCols++] = colY;
-	    loc += 3;
-	  } 
-	  else if (strcmp(argv[loc],"-dT") == 0) {
-
-	    if (Tcl_GetDouble(interp, argv[loc+1], &dT) != TCL_OK)	
-	      return TCL_ERROR;	
-	    loc += 2;	    
-	  }
-	  else
-	    loc++;
+	  
+	  cols[numCols++] = colX;
+	  cols[numCols++] = colY;
+	  loc += 3;
+	} 
+	else if (strcmp(argv[loc],"-dT") == 0) {
+	  
+	  if (Tcl_GetDouble(interp, argv[loc+1], &dT) != TCL_OK)	
+	    return TCL_ERROR;	
+	  loc += 2;	    
 	}
+	else
+	  loc++;
+      }
 
 #ifdef _NOGRAPHICS
-	return TCL_OK;
+      return TCL_OK;
 #else
-	FilePlotter *thePlotter = new FilePlotter(argv[2], argv[3], xLoc, yLoc, width, height, dT);
-	(*theRecorder) = thePlotter;    
-	thePlotter->setCol(cols);
+      FilePlotter *thePlotter = new FilePlotter(argv[2], argv[3], xLoc, yLoc, width, height, dT);
+      (*theRecorder) = thePlotter;    
+      thePlotter->setCol(cols);
 #endif
     }
 
@@ -1169,18 +1179,20 @@ int
 TclAddRecorder(ClientData clientData, Tcl_Interp *interp, int argc, 
 	       TCL_Char **argv, Domain &theDomain)
 {
-  Recorder *theRecorder;
-  TclCreateRecorder(clientData, interp, argc, argv, theDomain, &theRecorder);
+  Recorder *theRecorder =0;
 
-  if (theRecorder != 0)
+  TclCreateRecorder(clientData, interp, argc, argv, theDomain, &theRecorder);
+  
+  if (theRecorder != 0) {
     if ((theDomain.addRecorder(*theRecorder)) < 0) {
       opserr << "WARNING could not add to domain - recorder " << argv[1]<< endln;
       delete theRecorder;
       return TCL_ERROR;
     }
 
-  int recorderTag = theRecorder->getTag();
-  sprintf(interp->result,"%d",recorderTag);
+    int recorderTag = theRecorder->getTag();
+    sprintf(interp->result,"%d",recorderTag);
+  }
   
   return TCL_OK;
 }
