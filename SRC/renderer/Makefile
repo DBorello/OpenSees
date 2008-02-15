@@ -1,10 +1,22 @@
 include ../../Makefile.def
 
+
+ifeq ($(GRAPHICS_GLAG), -D_AGL)
+
+AGL_OBJS = AGL_Device.o
+
+else
+
+AGL_OBJS = 
+
+endif
+
+
 ifeq ($(GRAPHICS), UsingOpenGL)
 
 OBJS       = Renderer.o \
 	DofColorMap.o PlainMap.o \
-	OpenGlDevice.o OpenGlRenderer.o
+	$(AGL_OBJS) OpenGlDevice.o OpenGlRenderer.o AGL_Device.o
 else
 
 OBJS       = Renderer.o WindowRenderer.o View.o Projection.o Clipping.o \
@@ -24,7 +36,12 @@ all:         $(OBJS)
 
 
 test:  main.o $(OBJS)
-	$(LINKER) $(LINKFLAGS) main.o $(OBJS) $(FE_LIBRARY) \
+	$(LINKER) $(LINKFLAGS) main.o $(FE_LIBRARY) \
+	$(MACHINE_LINKLIBS) $(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY) \
+	$(MACHINE_SPECIFIC_LIBS) -o go
+
+test1:  main1.o 
+	$(LINKER) $(LINKFLAGS) main1.o \
 	$(MACHINE_LINKLIBS) $(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY) \
 	$(MACHINE_SPECIFIC_LIBS) -o go
 
@@ -38,6 +55,12 @@ index:  index.o
 	$(MACHINE_LINKLIBS) $(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY) \
 	$(MACHINE_SPECIFIC_LIBS) $(FE_INCLUDES) -lglut -lpng -o go
 
+
+agl:    aglMain.o
+	$(LINKER) $(LINKFLAGS) aglMain.o -L/usr/local/lib -framework AGL -framework OpenGL -framework Carbon
+
+agl1:    aglClipBuffer.o
+	$(LINKER) $(LINKFLAGS) aglClipBuffer.o -L/usr/local/lib -framework AGL -framework OpenGL -framework Carbon
 
 # Miscellaneous
 tidy:	
