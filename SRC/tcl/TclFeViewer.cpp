@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-05-17 05:17:51 $
+// $Revision: 1.12 $
+// $Date: 2008-02-15 23:46:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclFeViewer.cpp,v $
                                                                         
 // Written: fmk 
@@ -47,6 +47,8 @@
 #ifdef _WGL
 #include <OpenGLRenderer.h>
 #elif _GLX
+#include <OpenGLRenderer.h>
+#elif _AGL
 #include <OpenGLRenderer.h>
 #else
 #include <X11Renderer.h>
@@ -139,6 +141,8 @@ TclFeViewer::TclFeViewer(const char *title, int xLoc, int yLoc, int width, int h
   theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap);
 #elif _GLX
   theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap);
+#elif _AGL
+  theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap);
 #else
   theRenderer = new X11Renderer(title, xLoc, yLoc, width, height, *theMap);
 #endif
@@ -204,6 +208,8 @@ TclFeViewer::TclFeViewer(const char *title, int xLoc, int yLoc, int width, int h
 #ifdef _WGL
   theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap, 0, fileName);
 #elif _GLX
+  theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap, fileName, 0);
+#elif _AGL
   theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap, fileName, 0);
 #else
   theRenderer = new X11Renderer(title, xLoc, yLoc, width, height, *theMap, fileName);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-05-11 22:18:47 $
+// $Revision: 1.9 $
+// $Date: 2008-02-15 23:46:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclVideoPlayer.cpp,v $
                                                                         
                                                                         
@@ -47,6 +47,8 @@
 #ifdef _WGL
 #include <OpenGLRenderer.h>
 #elif _GLX
+#include <OpenGLRenderer.h>
+#elif _AGL
 #include <OpenGLRenderer.h>
 #else
 #include <X11Renderer.h>
@@ -116,7 +118,8 @@ TclVideoPlayer::TclVideoPlayer(const char *title, const char *fileName, const ch
 	else
 	  theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap,0,imageName);
 #elif _GLX
-
+	theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap);
+#elif _AGL
 	theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap);
 #else
 	theRenderer = new X11Renderer(title, xLoc, yLoc, width, height, *theMap);
