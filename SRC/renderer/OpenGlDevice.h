@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-06-26 20:13:24 $
+// $Revision: 1.9 $
+// $Date: 2008-02-15 23:42:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.h,v $
                                                                         
                                                                         
@@ -28,13 +28,7 @@
 
 #include <Device.h>
 
-
 #ifdef _GLX
-
-#ifdef _MACOSX
-#include <OpenGL/gl.h>
-#include <OpenGL/glx.h>
-#else
 
 #include <GL/gl.h>
 #include <GL/glx.h>
@@ -47,15 +41,15 @@
 
 #define X11_MAX_COLORS 256
 
-#endif
-
 #elif _WGL
 
 #include <windows.h>
 #include <gl\gl.h>
 #include <gl\glaux.h>
 
-#else
+#elif _AGL
+
+class AGL_Device;
 
 #endif
 
@@ -112,6 +106,8 @@ class OpenGlDevice
 
   //  static XFontStruct *fontInfo;
   XFontStruct *fontInfo;
+  //  static GLuint FontBase;
+  GLuint FontBase;
 
 #elif _WGL
 
@@ -126,12 +122,18 @@ class OpenGlDevice
   long	      currentBitSize;
   int xLoc;
   int yLoc;
+  //  static GLuint FontBase;
+  GLuint FontBase;
+
+#elif _AGL
+
+  AGL_Device *theDevice; 
+
 #else
 
 #endif
 
-  //  static GLuint FontBase;
-  GLuint FontBase;
+
 
   static int numWindows;
   int winOpen;

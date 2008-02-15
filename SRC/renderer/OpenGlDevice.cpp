@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2007-10-16 23:39:06 $
+// $Revision: 1.19 $
+// $Date: 2008-02-15 23:42:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.cpp,v $
                                                                         
                                                                         
@@ -310,28 +310,29 @@ static const char *FontName = "fixed";
 
 //XFontStruct *OpenGlDevice::fontInfo(0);
 
+#elif _AGL
+
+#include "AGL_Device.h"
+
 #else
 
 #endif
 
 
-
-
-
-
-
-
-
-
 OpenGlDevice::OpenGlDevice()
-  :FontBase(0), winOpen(1), width(0), height(0), windowTitle(0)
+  :winOpen(1), width(0), height(0), windowTitle(0)
 {
-
+  
 #ifdef _WGL
+  FontBase = 0;
   bits = 0;
 #elif _GLX
+  FontBase = 0;
   fontInfo = 0;
-#else
+
+#elif _AGL
+
+  theDevice = new AGL_Device();
 
 #endif
 
@@ -376,6 +377,10 @@ OpenGlDevice::~OpenGlDevice()
 
   if (windowTitle != 0)
     delete [] windowTitle;
+
+#elif _AGL
+
+  delete theDevice;
 
 #else
 
@@ -529,6 +534,10 @@ OpenGlDevice::WINOPEN(const char *_title, int _xLoc, int _yLoc, int _width, int 
 
   glXUseXFont(id, first, last - first + 1, FontBase + first);
 
+#elif _AGL
+
+  theDevice->WINOPEN(_title, _xLoc, _yLoc, _width, _height);
+
 #else
 
 #endif
@@ -548,6 +557,11 @@ OpenGlDevice::CLEAR()
 
 #elif _GLX
     glXMakeCurrent(theDisplay, theWindow, cx);
+
+#elif _AGL
+
+    theDevice->CLEAR();
+    
 #else
 
 #endif
@@ -561,6 +575,8 @@ OpenGlDevice::STARTIMAGE()
     wglMakeCurrent(theHDC, theHRC);
 #elif _GLX
     glXMakeCurrent(theDisplay, theWindow, cx);
+#elif _AGL
+    theDevice->STARTIMAGE();
 #else
 
 #endif
@@ -576,8 +592,8 @@ OpenGlDevice::ENDIMAGE()
     if (swap_flag == GL_TRUE)
       glXSwapBuffers(theDisplay, theWindow);
     glXMakeCurrent(theDisplay, theWindow, cx);
-#else
-
+#elif _AGL
+    theDevice->ENDIMAGE();
 #endif
 }
 
@@ -604,7 +620,8 @@ OpenGlDevice::initWindow(void) {
 
 #elif _GLX
 
-#else
+#elif _AGL
+  theDevice->initWindow();
 
 #endif
 }    
@@ -656,7 +673,8 @@ OpenGlDevice::drawText(float x, float y, float z, char *text, int length,
   // finally draw the text
   glListBase(FontBase);
   glCallLists(strlen(text), GL_UNSIGNED_BYTE, text);
-#else
+#elif _AGL
+  theDevice->drawText(x, y, z, text, length, horizontalJustify, verticalJustify);
 
 #endif
 }
@@ -670,7 +688,7 @@ OpenGlDevice::saveImage(const char *fileName, int type)
   return this->saveImageAsBMP(fileName);
 #elif _GLX
   return this->saveImageAsPNG(fileName);
-#else
+#elif _AGL
 
 #endif
 
@@ -685,7 +703,7 @@ OpenGlDevice::saveImageAsBMP(const char *fileName)
     wglMakeCurrent(theHDC, theHRC);
 #elif _GLX
     glXMakeCurrent(theDisplay, theWindow, cx);
-#else
+#elif _AGL
 
 #endif
 
