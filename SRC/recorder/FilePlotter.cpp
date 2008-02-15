@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2005-07-06 22:00:20 $
+// $Revision: 1.13 $
+// $Date: 2008-02-15 23:37:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/FilePlotter.cpp,v $
                                                                         
                                                                         
@@ -50,6 +50,8 @@ using std::ios;
 #include <OpenGLRenderer.h>
 #elif _GLX
 #include <OpenGLRenderer.h>
+#elif _AGL
+#include <OpenGLRenderer.h>
 #else
 #include <X11Renderer.h>
 #endif
@@ -72,6 +74,8 @@ FilePlotter::FilePlotter(const char *_fileName1,
 #ifdef _WGL
   theRenderer = new OpenGLRenderer(windowTitle, xLoc, yLoc, width, height, *theMap);
 #elif _GLX
+  theRenderer = new OpenGLRenderer(windowTitle, xLoc, yLoc, width, height, *theMap);
+#elif _AGL
   theRenderer = new OpenGLRenderer(windowTitle, xLoc, yLoc, width, height, *theMap);
 #else
   theRenderer = new X11Renderer(windowTitle, xLoc, yLoc, width, height, *theMap);
@@ -112,6 +116,8 @@ FilePlotter::FilePlotter(const char *_fileName1,
 #ifdef _WGL
   theRenderer = new OpenGLRenderer(windowTitle, xLoc, yLoc, width, height, *theMap);
 #elif _GLX
+  theRenderer = new OpenGLRenderer(windowTitle, xLoc, yLoc, width, height, *theMap);
+#elif _AGL
   theRenderer = new OpenGLRenderer(windowTitle, xLoc, yLoc, width, height, *theMap);
 #else
   theRenderer = new X11Renderer(windowTitle, xLoc, yLoc, width, height, *theMap);
