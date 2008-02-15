@@ -1,7 +1,7 @@
 include ../../Makefile.def
 
 
-ifeq ($(GRAPHICS_GLAG), -D_AGL)
+ifeq ($(GRAPHICS_FLAG),-D_AGL)
 
 AGL_OBJS = AGL_Device.o
 
@@ -16,7 +16,7 @@ ifeq ($(GRAPHICS), UsingOpenGL)
 
 OBJS       = Renderer.o \
 	DofColorMap.o PlainMap.o \
-	$(AGL_OBJS) OpenGlDevice.o OpenGlRenderer.o AGL_Device.o
+	$(AGL_OBJS) OpenGlDevice.o OpenGlRenderer.o
 else
 
 OBJS       = Renderer.o WindowRenderer.o View.o Projection.o Clipping.o \
