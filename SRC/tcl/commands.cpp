@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.107 $
-// $Date: 2008-02-15 23:47:15 $
+// $Revision: 1.108 $
+// $Date: 2008-02-15 23:49:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -463,6 +463,13 @@ extern int myCommands(Tcl_Interp *interp);
 
 extern "C" int Tcl_InterpObjCmd(ClientData clientData,  Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]);
 
+int
+convertBinaryToText(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int
+convertTextToBinary(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+
 int Tcl_InterpOpenSeesObjCmd(ClientData clientData,  Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[])
 {
    int index;
@@ -605,6 +612,8 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "defaultUnits", defaultUnits,(ClientData)NULL, NULL);
     Tcl_CreateCommand(interp, "neesUpload", neesUpload,(ClientData)NULL, NULL);
     Tcl_CreateCommand(interp, "stripXML", stripOpenSeesXML,(ClientData)NULL, NULL);
+    Tcl_CreateCommand(interp, "convertBinaryToText", convertBinaryToText,(ClientData)NULL, NULL);
+    Tcl_CreateCommand(interp, "convertTextToBinary", convertTextToBinary,(ClientData)NULL, NULL);
 
 #ifdef _RELIABILITY
     Tcl_CreateCommand(interp, "wipeReliability", wipeReliability, 
@@ -4074,7 +4083,7 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	return TCL_ERROR;
     }    
 
-    int typeAlgo = 0; // 0 - frequency/generalized (default), 2 - standard, 2 - buckling
+    int typeAlgo = 0; // 0 - frequency/generalized (default),1 - standard, 2 - buckling
     int typeSolver = 2; // 0 - SymmBandLapack, 1 - SymmSparseArpack, 2 - GenBandArpack (default)
     int loc = 1;
 
@@ -5393,3 +5402,32 @@ int stripOpenSeesXML(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Ch
   return 0;
 }
 
+extern int binaryToText(const char *inputFilename, const char *outputFilename);
+extern int textToBinary(const char *inputFilename, const char *outputFilename);
+
+int convertBinaryToText(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  if (argc < 3) {
+    opserr << "ERROR incorrect # args - convertBinaryToText inputFile outputFile\n";
+    return -1;
+  }
+
+  const char *inputFile = argv[1];
+  const char *outputFile = argv[2];
+
+  return binaryToText(inputFile, outputFile);
+}
+
+
+int convertTextToBinary(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  if (argc < 3) {
+    opserr << "ERROR incorrect # args - convertTextToBinary inputFile outputFile\n";
+    return -1;
+  }
+
+  const char *inputFile = argv[1];
+  const char *outputFile = argv[2];
+
+  return textToBinary(inputFile, outputFile);
+}
