@@ -18,84 +18,110 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:58 $
+// $Revision: 1.3 $
+// $Date: 2008-02-15 23:43:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/main.cpp,v $
                                                                         
                                                                         
-// File: ~/model/main.C
-//
-// Written: fmk 12/95
-// Revised:
-//
-// Purpose: This file is a driver to create a 2d plane-frame
-// model and to perform a linear static analysis on that model.
-// 
-//
-
 #include <stdlib.h>
-#include <iOPS_Stream.h>
+#include <iostream>
+using std::cin;
 
-#include <View.h>
-#include <Viewport.h>
-#include <Scan.h>
-#include <Device.h>
-#include <Projection.h>
-#include <Clipping.h>
-#include <db.H>
+#include <OPS_Globals.h>
+#include <StandardStream.h>
+#include <OPS_Stream.h>
 
-#include <FilePlotter.h>
+StandardStream sserr;
+OPS_Stream *opserrPtr  = &sserr;
+
+double        ops_Dt = 0;
+Domain       *ops_TheActiveDomain = 0;
+Element      *ops_TheActiveElement = 0;
+
+#include <OpenGLRenderer.h>
+#include <PlainMap.h>
+
+#ifdef _AGL
+
+#include <OpenGL/glu.h>
+#include <OpenGL/gl.h>
+
+#elif _GLX
+
+#include <GL/glu.h>
+
+#endif
+
+static void init(void)
+{
+  
+   glEnable (GL_BLEND);
+   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   /*
+   glShadeModel (GL_FLAT);
+   glClearColor (0.0, 0.0, 0.0, 0.0);
+   */
+}
+
+static void drawLeftTriangle(void)
+{
+   /* draw yellow triangle on LHS of screen */
+
+   glBegin (GL_TRIANGLES);
+      glColor4f(1.0, 1.0, 0.0, 0.75);
+      glVertex3f(0.1, 0.9, 0.0); 
+      glVertex3f(0.1, 0.1, 0.0); 
+      glVertex3f(0.7, 0.5, 0.0); 
+   glEnd();
+}
+
+static void drawRightTriangle(void)
+{
+   /* draw cyan triangle on RHS of screen */
+
+   glBegin (GL_TRIANGLES);
+      glColor4f(0.0, 1.0, 1.0, 0.75);
+      glVertex3f(0.9, 0.9, 0.0); 
+      glVertex3f(0.3, 0.5, 0.0); 
+      glVertex3f(0.9, 0.1, 0.0); 
+   glEnd();
+}
+
+
+int doImage(Renderer &theRenderer) {
+
+  theRenderer.startImage();
+
+  init();
+  drawLeftTriangle();
+  drawRightTriangle();
+
+  theRenderer.doneImage();
+  return 0;
+}
 
 int main(int argc, char **argv)
 {
-
-  Recorder *thePlotter = new FilePlotter("test","g3",10,10,300,300);
-  thePlotter->record(0);
-
-  /*
-  theDevice.WINOPEN(600,300);
-  theScan.update();
-
-  FACE *theFace = new FACE();
-  POINT *point = new POINT(1,10.0,10.0,0.0);
-  point->r = 0.5;
-  point->g = 0.5;
-  point->b = 0.5;
-  theFace->AddPoint(*point);
-
-  point = new POINT(1,100.0,100.0,0.0);
-  point->r = 0.3;
-  point->g = 0.3;
-  point->b = 0.3;
-  theFace->AddPoint(*point);
-
-  point = new POINT(1,200.0,50.0,0.0);
-  point->r = 0.6;
-  point->g = 0.6;
-  point->b = 0.6;
-  theFace->AddPoint(*point);
-  */
-
-  /***************
-  FACE &theVFace = theView.transform(theFace);
-  FACE &thePFace = theProjection.transform(theVFace);
-  FACE &theCFace = theClipping.transform(thePFace);
-  FACE &theVPFace = theViewport.transform(theCFace);
-  theScan.transform(theVPFace);
-
-  ******************/
-
-  /*
-  theScan.setFillMode(1);
-  theScan.transform(*theFace);
-  theDevice.ENDIMAGE();
+  PlainMap theMap;
+  OpenGLRenderer theRenderer1("ONE", 10 , 10 , 100, 200, theMap);
+  OpenGLRenderer theRenderer2("TWO", 100 , 100 , 300, 400, theMap);
 
 
-  */
+  theRenderer2.setFillMode("fill");
+  doImage(theRenderer1);
+  doImage(theRenderer2);
 
+  char d;
+  opserr << "Enter a char: " ;
+  cin >> d;
 
-  int tag;
-  cin >> tag;
+  theRenderer2.setFillMode("wire");
+  theRenderer1.setFillMode("fill");
+  doImage(theRenderer1);
+  doImage(theRenderer2);
+
+  opserr << "Enter a char: " ;
+  cin >> d;
 
   exit(0);
   return 0;
