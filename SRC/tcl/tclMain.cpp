@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.43 2007-12-10 23:31:06 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.44 2008-02-15 23:36:24 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -666,8 +666,7 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
      * users can replace "exit" with some other command to do additional
      * cleanup on exit.  The Tcl_Eval call should never return.
      */
-    
-    sprintf(buffer, "exit %d", exitCode);
+
     Tcl_Eval(interp, buffer);
     
     return;
