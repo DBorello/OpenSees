@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2006-01-10 22:52:53 $
+// $Revision: 1.19 $
+// $Date: 2008-02-15 23:45:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlRenderer.cpp,v $
                                                                         
                                                                         
@@ -47,7 +47,14 @@ using std::ios;
 
 #elif _GLX
 
+#include <GL/gl.h>
+#include <GL/glx.h>
 #include <GL/glu.h>
+
+#elif _AGL
+
+#include <OpenGL/glu.h>
+#include <OpenGL/gl.h>
 
 #endif
 
@@ -85,11 +92,16 @@ OpenGLRenderer::OpenGLRenderer(const char *_title, int _xLoc, int _yLoc,
   theDevice->WINOPEN(_title, _xLoc, _yLoc, _width, _height);
 
   theDevice->CLEAR();
+
+  // glEnable (GL_BLEND);
+  // glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
   glClearColor(1.0f,1.0f,1.0f,1.0f);
 
   glEnable(GL_DEPTH_TEST);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  glEnd();
   glFlush();
   theDevice->ENDIMAGE();
 }
@@ -177,7 +189,6 @@ OpenGLRenderer::clearImage(void)
   glClearColor(1.0f,1.0f,1.0f,1.0f);
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
- 
   glFlush();
  
 #ifdef _UNIX
@@ -197,6 +208,7 @@ OpenGLRenderer::saveImage(const char *imageName)
 int 
 OpenGLRenderer::startImage(void)
 {
+
   theMap->startImage();
 
   theDevice->STARTIMAGE();
