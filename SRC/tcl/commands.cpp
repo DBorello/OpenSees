@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.106 $
-// $Date: 2008-01-28 19:21:22 $
+// $Revision: 1.107 $
+// $Date: 2008-02-15 23:47:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -1972,7 +1972,7 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
     //   3 -- RCM
     int lSparse = 1;
     if (argc == 3) {
-      if (Tcl_GetInt(interp, argv[3], &lSparse) != TCL_OK)
+      if (Tcl_GetInt(interp, argv[2], &lSparse) != TCL_OK)
 	return TCL_ERROR;
     }
 
@@ -5264,6 +5264,9 @@ const char * getInterpPWD(Tcl_Interp *interp) {
 
 int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
+
+  opserr << "OpenSeesExit::START\n";
+  
   theDomain.clearAll();
 
 #ifdef _PARALLEL_PROCESSING

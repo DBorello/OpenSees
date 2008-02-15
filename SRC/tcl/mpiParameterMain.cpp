@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-12-11 22:27:48 $
+// $Revision: 1.7 $
+// $Date: 2008-02-15 23:47:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/mpiParameterMain.cpp,v $
 
 /* 
@@ -35,12 +35,11 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: mpiParameterMain.cpp,v 1.6 2007-12-11 22:27:48 fmk Exp $
+ * RCS: @(#) $Id: mpiParameterMain.cpp,v 1.7 2008-02-15 23:47:15 fmk Exp $
  */
 
 extern "C" {
 #include <tcl.h>
-#include <tk.h>
 }
 
 
