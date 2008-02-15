@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2004-06-07 23:09:32 $
+// $Revision: 1.10 $
+// $Date: 2008-02-15 23:45:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGLRenderer.h,v $
                                                                         
                                                                         
@@ -39,18 +39,8 @@
 #include <Renderer.h>
 #include <fstream>
 using std::ofstream;
+
 #include <OpenGlDevice.h>
-
-#ifdef _GLX
-#include <GL/gl.h>
-#include <GL/glx.h>
-
-#else 
-#include <windows.h>
-#include <gl\gl.h>
-#include <gl\glaux.h>
-// include open gl stuff for win32
-#endif
 
 #include <db.H>
 #include <Matrix.h>
@@ -58,7 +48,7 @@ using std::ofstream;
 
 class OpenGLRenderer : public Renderer
 {
- public:
+  public:
     OpenGLRenderer(const char *title, int xLoc, int yLoc, int width, int height,
 		   ColorMap &theMap);
     OpenGLRenderer(const char *title, int xLoc, int yLoc, int width, int height,
