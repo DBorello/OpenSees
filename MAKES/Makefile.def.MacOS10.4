@@ -16,6 +16,20 @@
 # Works on intel machine running Mac OS X.4.10 with XCode 2.4.1 with gFortran install from
 # http://www.macresearch.org/xcode_gfortran_plugin_update
 
+#for parallel
+#1.  install openmpi (i used  openmpi-v1.2.3.tar.gz, configured with:
+#     configure --anable-static --disable-shared --prefix=/usr/local
+#2. install blas (i used goto blas from tacc v1.17)
+#      make F_COMPILER=gfortran BINARY32=1 SMP=1
+#      ATLAS ~/Desktop/ATLAS/configure -b 32 -t 0
+#      make; make install (installed in /usr/local/atlas)
+#     
+#3. install lapack
+#     netlib lapack-3.1.1 (used Make.inc.gfortran libBlas set tp atlas in Makefile)
+#4. insall  blacs
+#5. install scalapack
+#6. install mumps
+
 # %---------------------------------%
 # |  SECTION 1: PROGRAM             |
 # %---------------------------------%
@@ -26,12 +40,15 @@
 OpenSees_PROGRAM = $(HOME)/bin/OpenSees
 
 OPERATING_SYSTEM = LINUX
-GRAPHICS = NONE
 
 PROGRAMMING_MODE = SEQUENTIAL
-DEBUG_MODE = NO_DEBUG
-RELIABILITY = NO_RELIABILITY
+#PROGRAMMING_MODE = PARALLLEL
+#PROGRAMMING_MODE = PARALLEL_INTERPRETERS
 
+DEBUG_MODE = NO_DEBUG
+#DEBUG_MODE = DEBUG
+
+RELIABILITY = NO_RELIABILITY
 
 # %---------------------------------%
 # |  SECTION 2: PATHS               |
@@ -54,9 +71,47 @@ UMFPACKdir   = $(HOME)/OpenSees/OTHER/UMFPACK
 METISdir       = $(HOME)/OpenSees/OTHER/METIS
 SRCdir       = $(HOME)/OpenSees/SRC
 
-
 DIRS        = $(BLASdir) $(CBLASdir) $(LAPACKdir) \
 	$(SUPERLUdir) $(ARPACKdir) $(UMFPACKdir) $(SRCdir) $(METISdir)
+
+GRAPHICS = UsingOpenGL
+GRAPHIC_FLAG = -D_AGL
+GRAPHIC_LIBRARY     = -framework AGL -framework OpenGL -framework Carbon
+
+ifeq ($(PROGRAMMING_MODE), PARALLEL)
+
+GRAPHICS = UsingOpenGL
+GRAPHIC_FLAG = -D_NOGRAPHICS
+GRAPHIC_LIBRARY     = 
+
+PROGRAMMING_FLAG = -D_PARALLEL
+
+DIRS        = $(SUPERLUdir) \
+	      $(SUPERLU_DISTdir) \
+	      $(ARPACKdir) \
+              $(LAPACKdir) \
+              $(UMFPACKdir) \
+              $(METISdir) \
+              $(SRCdir) 
+endif
+
+ifeq ($(PROGRAMMING_MODE), PARALLEL_INTERPRETERS)
+
+PROGRAMMING_FLAG = -D_PARALLEL_INTERPRETERS
+
+GRAPHICS = NONE
+GRAPHIC_FLAG = -D_NOGRAPHICS
+GRAPHIC_LIBRARY     = 
+
+DIRS        = $(SUPERLUdir) \
+	      $(SUPERLU_DISTdir) \
+              $(LAPACKdir) \
+              $(ARPACKdir) \
+              $(UMFPACKdir) \
+              $(METISdir) \
+              $(SRCdir) 
+endif
+
 
 # %-------------------------------------------------------%
 # | SECTION 3: LIBRARIES                                  |
@@ -85,9 +140,6 @@ ARPACK_LIBRARY  = $(HOME)/lib/libArpack.a
 UMFPACK_LIBRARY = $(HOME)/lib/libUmfpack.a
 METIS_LIBRARY   = $(HOME)/lib/libMetis.a
 TCL_LIBRARY = -framework Tcl 
-BLITZ_LIBRARY = $(HOME)/blitz/lib/libblitz.a
-#GRAPHIC_LIBRARY     = -L/usr/X11/R6/lib -lGL -lGLU 
-GRAPHIC_LIBRARY     = 
 
 # WATCH OUT .. These libraries are removed when 'make wipe' is invoked.
 WIPE_LIBS	= $(FE_LIBRARY) \
@@ -108,9 +160,15 @@ WIPE_LIBS	= $(FE_LIBRARY) \
 # %---------------------------------------------------------%
 
 # Compilers
+ifeq ($(PROGRAMMING_MODE), SEQUENTIAL)
 CC++	= g++
 CC      = gcc
 FC	= /usr/local/bin/gfortran
+else
+CC++	= /usr/local/bin/mpic++
+CC      = /usr/local/bin/mpicc
+FC	= /usr/local/bin/mpif77
+endif
 
 AR		= ar 
 ARFLAGS		= cqls
@@ -155,8 +213,6 @@ LINKFLAGS       =  -Wl
 endif
 
 
-#GRAPHIC_FLAG = -D_GLX
-GRAPHIC_FLAG = -D_NOGRAPHICS
 
 # Misc
 MAKE		= make
@@ -221,7 +277,8 @@ MACHINE_NUMERICAL_LIBS  = -lm \
 		$(GRAPHIC_LIBRARY)\
 		-ldl -lgfortran 
 
-MACHINE_SPECIFIC_LIBS = 
+MACHINE_SPECIFIC_LIBS = $(FE)/renderer/AGL_Device.o
+#MACHINE_SPECIFIC_LIBS = 
 
 
 
@@ -231,10 +288,21 @@ MACHINE_SPECIFIC_LIBS =
 # | The following macros specify include files needed for   |
 # | compilation.                                            |
 # %---------------------------------------------------------%
+
+#ifeq (($PROGRAMMING_MODE) SEQUENTIAL)
 MACHINE_INCLUDES        = -I/usr/include \
+			  -I/usr/local/include \
 			  -I$(BASE)/include \
 			  -I/usr/include/cxx \
 			  -I$(HOME)/include -I$(HOME)/blitz
+#else
+MACHINE_INCLUDES        = -I/usr/include \
+			  -I/usr/local/include \
+			  -I$(BASE)/include \
+			  -I/usr/include/cxx \
+			  -I$(FE)/../OTHER/SuperLU_DIST_2.0/SRC \
+			  -I$(HOME)/include -I$(HOME)/blitz
+#endif
 
 # this file contains all the OpenSees/SRC includes
 include $(FE)/Makefile.incl
