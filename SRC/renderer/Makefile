@@ -1,7 +1,7 @@
 include ../../Makefile.def
 
 
-ifeq ($(GRAPHICS_FLAG),-D_AGL)
+ifeq ($(GRAPHIC_FLAG), -D_AGL)
 
 AGL_OBJS = AGL_Device.o
 
