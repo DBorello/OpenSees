@@ -952,7 +952,7 @@ ScalarEvolution** EvaluateSE(ClientData clientData, Tcl_Interp *interp, TCL_Char
              exit (1);
            }
          }   
-         ISS[i] = new CC_Ev(a[0], a[1], a[2], a[4]);
+         ISS[i] = new CC_Ev(a[0], a[1], a[2], a[3]);
          loc++;
        }
 
