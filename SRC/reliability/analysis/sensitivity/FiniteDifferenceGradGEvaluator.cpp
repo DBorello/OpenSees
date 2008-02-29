@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-11-07 22:47:05 $
+// $Revision: 1.8 $
+// $Date: 2008-02-29 19:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/FiniteDifferenceGradGEvaluator.cpp,v $
 
 
@@ -115,6 +115,9 @@ int
 FiniteDifferenceGradGEvaluator::computeGradG(double gFunValue,
 					     const Vector &passed_x)
 {
+	
+	numberOfEvalIncSens++;///// added by K Fujimura /////
+
 	// Call base class method
 	computeParameterDerivatives(gFunValue);
 
@@ -212,6 +215,8 @@ int
 FiniteDifferenceGradGEvaluator::computeAllGradG(const Vector &gFunValues,
 						const Vector &passed_x)
 {
+
+	numberOfEvalIncSens++;///// added by K Fujimura /////
 
 	// Get number of random variables and performance functions
 	int nrv = theReliabilityDomain->getNumberOfRandomVariables();

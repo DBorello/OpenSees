@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-12-06 22:50:12 $
+// $Revision: 1.3 $
+// $Date: 2008-02-29 19:47:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/convergenceCheck/ReliabilityConvergenceCheck.h,v $
 
 
@@ -48,6 +48,14 @@ public:
 	virtual double getCriteriaValue(int whichCriteria) = 0;
 	virtual int setScaleValue(double scaleValue) = 0;
 
+	//S Modified by K Fujimura 10/10/2004
+	virtual double getScaleValue() = 0;
+	virtual void Scalefix(bool) = 0;
+	virtual bool getScfix()=0;
+	virtual double getCheck1()=0;
+	virtual double getCheck2()=0;
+	virtual int	checkG(double g) = 0;
+	//E Modified by K Fujimura 10/10/2004
 protected:
 
 private:

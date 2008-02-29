@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-03-04 00:46:02 $
+// $Revision: 1.5 $
+// $Date: 2008-02-29 19:47:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/SensitivityAlgorithm.h,v $
 
 
@@ -34,30 +34,31 @@
 #ifndef SensitivityAlgorithm_h
 #define SensitivityAlgorithm_h
 
-#include <ReliabilityDomain.h>
-#include <EquiSolnAlgo.h>
-#include <SensitivityIntegrator.h>
-
+class ReliabilityDomain;
+class EquiSolnAlgo;
+class SensitivityIntegrator;
 
 class SensitivityAlgorithm
 {
-  public:
-	SensitivityAlgorithm::SensitivityAlgorithm(ReliabilityDomain *passedReliabilityDomain,
-										   EquiSolnAlgo *passedAlgorithm,
-										   SensitivityIntegrator *passedSensitivityIntegrator,
-										   int analysisTypeTag);
-    ~SensitivityAlgorithm();
-	int computeSensitivities(void);
-	bool shouldComputeAtEachStep(void);
-    
-  protected:
-    
-  private:
+ public:
+  SensitivityAlgorithm(ReliabilityDomain *passedReliabilityDomain,
+		       EquiSolnAlgo *passedAlgorithm,
+		       SensitivityIntegrator *passedSensitivityIntegrator,
+		       int analysisTypeTag);
+
+  ~SensitivityAlgorithm();
+  int computeSensitivities(void);
+  bool shouldComputeAtEachStep(void);
+  int sensitivityDomainChanged(void) {return 0;}
+  bool newAlgorithm(void) {return true;};
+  
+ protected:
+  
+ private:
     ReliabilityDomain *theReliabilityDomain;
-	EquiSolnAlgo *theAlgorithm;
-	SensitivityIntegrator *theSensitivityIntegrator;
-	int analysisTypeTag; 
-;
+    EquiSolnAlgo *theAlgorithm;
+    SensitivityIntegrator *theSensitivityIntegrator;
+    int analysisTypeTag; 
 };
 
 #endif

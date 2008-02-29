@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-07-11 23:52:53 $
+// $Revision: 1.7 $
+// $Date: 2008-02-29 19:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/FixedStepSizeRule.h,v $
 
 
@@ -42,17 +42,23 @@ class FixedStepSizeRule : public StepSizeRule
 public:
 	FixedStepSizeRule(double stepSize);
 	~FixedStepSizeRule();
-
-	int		computeStepSize(const Vector &u, const Vector &grad_G, double G, const Vector &d, int stepNumber);
+	/////S added by K Fujimura /////
+	/*int		computeStepSize(Vector u, Vector grad_G, double G, Vector d, int stepNumber,
+		int reschk=0);*/
+	int		computeStepSize(const Vector &u, const Vector &grad_G, double G, const Vector &d, int stepNumber, int reschk=0);
+	/////E added by K Fujimura /////
 	double	getStepSize();
 	double	getInitialStepSize();
 	double getGFunValue();
+	int getNumReductions();	///// added by K Fujimura /////
+
 
 protected:
 
 private:
 	double stepSize;
 	double gFunValue;
+	int numReducntion;	///// added by K Fujimura /////
 
 };
 

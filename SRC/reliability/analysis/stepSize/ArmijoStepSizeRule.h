@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-07-11 23:52:53 $
+// $Revision: 1.4 $
+// $Date: 2008-02-29 19:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/ArmijoStepSizeRule.h,v $
 
 
@@ -59,12 +59,16 @@ public:
 		int printFlag);
 		
 	~ArmijoStepSizeRule();
-
+/////S added by K Fujimura /////
+	/*int		computeStepSize(Vector u, Vector grad_G, double G, Vector d, int stepNumber,     
+		int reschk=0); */
 	int computeStepSize(const Vector &u, const Vector &grad_G,
-			    double G, const Vector &d, int stepNumber);
+			    double G, const Vector &d, int stepNumber, int reschk =0);
+/////E added by K Fujimura /////
 	double	getStepSize();
 	double	getInitialStepSize();
 	double  getGFunValue();
+	int getNumReductions();	///// added by K Fujimura /////
 
 protected:
 
@@ -85,6 +89,7 @@ private:
 	double evolution;
 	bool isCloseToSphere;
 	int printFlag;
+	int numReduction;	///// added by K Fujimura /////
 
 };
 

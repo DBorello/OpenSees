@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-01-09 19:14:38 $
+// $Revision: 1.5 $
+// $Date: 2008-02-29 19:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/GradGEvaluator.cpp,v $
 
 
@@ -42,6 +42,10 @@ GradGEvaluator::GradGEvaluator(ReliabilityDomain *passedReliabilityDomain,
 	theTclInterp = passedTclInterp;
 	theReliabilityDomain = passedReliabilityDomain;
 	DgDpar = 0;
+	/////S added by K Fujimura /////
+    finitedifference= false;
+	numberOfEvalIncSens=0;
+	/////E added by K Fujimura /////
 }
 
 GradGEvaluator::~GradGEvaluator()
@@ -156,3 +160,25 @@ GradGEvaluator::getDgDpar()
 {
 	return (*DgDpar);
 }
+
+int
+GradGEvaluator::initializeNumberOfEvaluations()
+{
+	numberOfEvalIncSens = 0;
+	return 0;
+}
+int
+GradGEvaluator::getNumberOfEvaluations()
+{
+	return numberOfEvalIncSens;
+}
+
+void GradGEvaluator::setPerformFuncCoeffs(TaggedObjectStorage* a){
+	opserr << "GFunEvaluator::setPerformFuncCoeffs() -- This method is not " << endln
+		<< " implemented for the chosen type of GradgEvaluator." << endln;
+}
+void GradGEvaluator::setPerformFuncCoeffIter(PerformanceFunctionCoefficientIter* a){
+	opserr << "GFunEvaluator::setPerformFuncCoeffIter() -- This method is not " << endln
+		<< " implemented for the chosen type of GradgEvaluator." << endln;
+}
+

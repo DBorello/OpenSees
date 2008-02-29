@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-10-25 16:37:16 $
+// $Revision: 1.5 $
+// $Date: 2008-02-29 19:47:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/convergenceCheck/OptimalityConditionReliabilityConvergenceCheck.h,v $
 
 
@@ -50,7 +50,18 @@ public:
 	int getNumberOfCriteria();
 	double getCriteriaValue(int whichCriteria);
 	int setScaleValue(double scaleValue);
-
+/////////////////////////////////////
+// S Modified by K Fujimura 10/10/2004
+/////////////////////////////////////
+	double getScaleValue(){ return scaleValue; }
+	void Scalefix(bool);
+	bool getScfix(){ return fixscale; }
+	double getCheck1();
+	double getCheck2();
+	int	checkG(double g);
+/////////////////////////////////////
+//E  Modified by K Fujimura 10/10/2004
+/////////////////////////////////////
 protected:
 
 private:
@@ -58,7 +69,8 @@ private:
 	double criterium1, criterium2;
 	double scaleValue;
 	int printFlag;
-	ofstream logfile;
+	ofstream logfile;//not in K.F.
+	bool fixscale; //added by K.F.
 };
 
 #endif

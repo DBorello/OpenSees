@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-10-25 16:37:16 $
+// $Revision: 1.5 $
+// $Date: 2008-02-29 19:47:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/convergenceCheck/StandardReliabilityConvergenceCheck.cpp,v $
 
 
@@ -58,12 +58,21 @@ StandardReliabilityConvergenceCheck::StandardReliabilityConvergenceCheck(double 
 	criterium2 = 0.0;
 	scaleValue = pscaleValue;
 	printFlag = print;
-	logfile.open("ConvergenceCheckLog.txt", ios::out);
+ 	/////////////////////////////////////
+ 	// S Modified by K Fujimura 10/10/2004
+ 	/////////////////////////////////////
+ 	fixscale = false;
+ 	if(scaleValue != 0.0) 	fixscale = true;
+ 	/////////////////////////////////////
+ 	//E  Modified by K Fujimura 10/10/2004
+ 	/////////////////////////////////////
+	logfile.open("ConvergenceCheckLog.txt", ios::out);//not in K.F.
+
 }
 
 StandardReliabilityConvergenceCheck::~StandardReliabilityConvergenceCheck()
 {
-	logfile.close();
+	logfile.close();//not in K.F.
 }
 
 
@@ -71,9 +80,17 @@ StandardReliabilityConvergenceCheck::~StandardReliabilityConvergenceCheck()
 int	
 StandardReliabilityConvergenceCheck::setScaleValue(double passedScaleValue)
 {
-	if (scaleValue == 0.0) {
+ 	/////////////////////////////////////
+ 	//S  Modified by K Fujimura 10/10/2004
+ 	/////////////////////////////////////
+ 	if (!fixscale){
 		scaleValue = passedScaleValue;
 	}
+
+	//if (scaleValue == 0.0) {
+	//	scaleValue = passedScaleValue;
+	//}
+	//E  Modified by K Fujimura 10/10/2004
 
 	return 0;
 }
@@ -124,7 +141,16 @@ StandardReliabilityConvergenceCheck::check(const Vector &u, double g, const Vect
 		return 1;
 	}
 	else {
-		return -1;
+		/////S modified by K Fujimura /////
+ 		if(criterium2 < e2 ){
+ 			return -1;
+ 		}else if(criterium1 < e1 ){
+ 			return -2;
+ 		}else{
+ 			return -3;
+ 		}
+/////		return -1;
+		/////E modified by K Fujimura /////
 	}
 }
 
@@ -150,3 +176,35 @@ StandardReliabilityConvergenceCheck::getCriteriaValue(int whichCriteria)
 	}
 
 }
+////////////////////////////////////
+//S Modified by K Fujimura 10/10/2004
+////////////////////////////////////
+void
+StandardReliabilityConvergenceCheck::Scalefix(bool fix)
+{
+	fixscale=fix;
+}
+double 
+StandardReliabilityConvergenceCheck::getCheck1()
+{ return criterium1;}
+double 
+StandardReliabilityConvergenceCheck::getCheck2()
+{ return criterium2;}
+int	
+StandardReliabilityConvergenceCheck::checkG(double g)
+{
+	if (scaleValue == 0.0) {
+		opserr << "StandardReliabilityConvergenceCheck::check() --" << endln
+			<< " scale value has not been set!" << endln;
+	}
+	criterium1 = fabs(g / scaleValue);
+	// Return '1' if the analysis converged ('-1' otherwise)
+	if ( criterium1 < e1 ) {
+		return 1;
+	}else {
+		return -1;
+	}
+}
+////////////////////////////////////
+//E Modified by K Fujimura 10/10/2004
+////////////////////////////////////

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-10-31 21:36:22 $
+// $Revision: 1.9 $
+// $Date: 2008-02-29 19:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariablePositioner.cpp,v $
 
 
@@ -37,17 +37,19 @@
 RandomVariablePositioner::RandomVariablePositioner(int passedTag,
 		int passedRVindex,
 		DomainComponent *object,
-		const char **argv, int argc)
+		const char **argv, int argc,
+		RandomVariable *theRVptr)
   :ReliabilityDomainComponent(passedTag, RANDOM_VARIABLE_POSITIONER),
-   rvIndex(passedRVindex), theParameter(passedTag, object, argv, argc)
+   rvIndex(passedRVindex), theParameter(passedTag, object, argv, argc), 
+   theRV(theRVptr)
 {
 
 }
 
 RandomVariablePositioner::RandomVariablePositioner(int passedTag,
-		int passedRVindex, Parameter &param)
+		int passedRVindex, Parameter &param, RandomVariable *theRVptr)
   :ReliabilityDomainComponent(passedTag, RANDOM_VARIABLE_POSITIONER),
-   rvIndex(passedRVindex), theParameter(param)
+   rvIndex(passedRVindex), theParameter(param), theRV(theRVptr)
 {
 
 }

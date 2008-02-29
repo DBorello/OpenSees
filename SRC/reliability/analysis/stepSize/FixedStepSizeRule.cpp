@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-07-11 23:52:53 $
+// $Revision: 1.8 $
+// $Date: 2008-02-29 19:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/FixedStepSizeRule.cpp,v $
 
 
@@ -52,11 +52,20 @@ FixedStepSizeRule::~FixedStepSizeRule()
 
 
 int
+/////S added by K Fujimura /////
 FixedStepSizeRule::computeStepSize(const Vector &u, 
 				   const Vector &grad_G, 
 				   double G, 
 				   const Vector &d,
-				   int stepNumber)
+				   int stepNumber,
+									int reschk)
+/*FixedStepSizeRule::computeStepSize(const Vector &u, 
+				   const Vector &grad_G, 
+				   double G, 
+				   const Vector &d,
+				   int stepNumber)*/
+/////E added by K Fujimura /////
+
 {
 	// This method is in fact not neccesary 
 	// for the fixed step size rule. The 
@@ -88,3 +97,10 @@ FixedStepSizeRule::getGFunValue()
 	return 0.0;
 }
 
+///// added by K Fujimura /////
+int
+FixedStepSizeRule::getNumReductions()
+{
+	return 0;
+
+}

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-10-26 16:33:44 $
+// $Revision: 1.10 $
+// $Date: 2008-02-29 19:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/randomNumber/CStdLibRandGenerator.cpp,v $
 
 
@@ -41,6 +41,15 @@ CStdLibRandGenerator::CStdLibRandGenerator()
 :RandomNumberGenerator()
 {
 	generatedNumbers = 0;
+	/////S added by K Fujimura /////
+	aStdNormRV = 0;
+	aStdNormRV = new NormalRV(1,0.0,1.0,0.0);
+	if (aStdNormRV==0) {
+		opserr << "CStdLibRandGenerator::generate_nIndependentStdNormalNumbers() - " << endln
+ 			<< " out of memory while instantiating internal objects." << endln;
+ 		exit(-1);
+ 	}
+	/////E added by K Fujimura /////
 }
 
 CStdLibRandGenerator::~CStdLibRandGenerator()
@@ -161,3 +170,57 @@ CStdLibRandGenerator::getSeed()
 {
 	return seed;
 }
+
+void
+CStdLibRandGenerator::setSeed(int passedSeed)
+{
+	if(passedSeed!=0){
+		srand(passedSeed);
+		seed=passedSeed;
+	}else{
+		seed=time(NULL);
+		srand(seed);
+	}
+}
+double 
+CStdLibRandGenerator::generate_singleUniformNumber(double lower, double upper)
+{
+	// Initial declarations
+	if(seed==0) {
+		seed=time(NULL);
+		srand(seed);
+	}
+
+	randomNumberBetween0AndRAND_MAX = rand();
+	randomNumberBetween0And1 = (double)randomNumberBetween0AndRAND_MAX/RAND_MAX;
+	randomNumber=randomNumberBetween0And1;
+ 	if(lower!=0.0||upper!=1.0) 
+ 		randomNumber = (upper-lower)*randomNumberBetween0And1 + lower;
+ 	return randomNumber;
+}
+double
+CStdLibRandGenerator::generate_singleStdNormalNumber(void)
+{
+	if(seed==0) {
+		seed=time(NULL);
+		srand(seed);
+	}
+	randomNumberBetween0AndRAND_MAX = rand();
+	// Modify it so that the value lies between 0 and 1
+	randomNumberBetween0And1 = (double)randomNumberBetween0AndRAND_MAX/RAND_MAX;
+ 	// Treat two special cases
+ 	if (randomNumberBetween0And1 == 0.0) {
+ 		randomNumberBetween0And1 = 0.0000001;
+ 	}
+ 	if (randomNumberBetween0And1 == 1.0) {
+ 		randomNumberBetween0And1 = 0.9999999;
+ 	}
+ 	// Transform that number into a standard normal variable
+ 	//    Phi(z) = F(x)
+ 	//    z = invPhi( F(x) )
+ 	//       where F(x) for the uniform distribution 
+ 	//       from 0 to 1 in fact is equal to x itself.
+ 	randomNumber=aStdNormRV->getInverseCDFvalue(randomNumberBetween0And1); 
+ 	return randomNumber;
+}
+

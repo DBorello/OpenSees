@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.32 $
-// $Date: 2007-11-02 22:29:08 $
+// $Revision: 1.33 $
+// $Date: 2008-02-29 19:47:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -140,9 +140,46 @@ using std::setiosflags;
 #include <RootFinding.h>
 #include <SecantRootFinding.h>
 
-
 #include <TclReliabilityBuilder.h>
+/////////////////////////////////////////////////////////
+///S added by K Fujimura for Random Vibration Analysis ///
+/////////////////////////////////////////////////////////
+#include <analyzer.h>
+#include <staticanalyzer.h>
+#include <dynamicanalyzer.h>
+#include <initialStaticAnalysis.h>
+#include <SelectLoadinitialStaticAnalysis.h>
+#include <AnalyzerGfunEvaluator.h>
+#include <AnalyzerGradGEvaluator.h>
+#include <NewWhitenoiseFilter.h>
+#include <NewStandardLinearOscillatorAccelerationFilter.h>
+#include <NewSearchWithStepSizeAndStepDirection.h>
+#include <InitialPointBuilder.h>
+#include <ThresholdIncInitialPointBuilder.h>
+#include <CrossingRateAnalyzer.h>
+#include <FOSeriesSimulation.h>
+#include <FirstPassageAnalyzer.h>
+#include <StatFirstPassageAnalyzer.h>
+#include <NonStatFirstPassageAnalyzer.h>
+#include <RandomVibrationSimulation.h>
+#include <StatRandomVibrationSimulation.h>
+#include <NonStatRandomVibrationSimulation.h>
+#include <RandomVibrationAnalysis.h>
+#include <AllIndependentTransformation.h>
+/////////////////////////////////////////////////////////
+/////E Modified by K Fujimura /////////////////////////////
+/////////////////////////////////////////////////////////
+
 extern SensitivityAlgorithm *theSensitivityAlgorithm;
+/////////////////////////////////////////////////////////
+/////S Modified by K Fujimura /////////////////////////////
+/////////////////////////////////////////////////////////
+extern ReliabilityStaticAnalysis* theReliabilityStaticAnalysis;
+extern ReliabilityDirectIntegrationAnalysis* theReliabilityTransientAnalysis;
+extern SensitivityIntegrator* theSensitivityIntegrator;
+/////////////////////////////////////////////////////////
+/////E Modified by K Fujimura /////////////////////////////
+/////////////////////////////////////////////////////////
 
 //
 // SOME STATIC POINTERS USED IN THE FUNCTIONS INVOKED BY THE INTERPRETER
@@ -164,6 +201,7 @@ static Vector *theStartPoint = 0;
 static RootFinding *theRootFindingAlgorithm = 0;
 RandomNumberGenerator *theRandomNumberGenerator = 0;
 static FindDesignPointAlgorithm *theFindDesignPointAlgorithm = 0;
+static NewSearchWithStepSizeAndStepDirection *theNewSearchWithStepSizeAndStepDirection = 0;
 static FindCurvatures *theFindCurvatures = 0;
 static GFunVisualizationAnalysis *theGFunVisualizationAnalysis = 0;
 static FORMAnalysis *theFORMAnalysis = 0;
@@ -173,6 +211,20 @@ static OutCrossingAnalysis *theOutCrossingAnalysis = 0;
 static SORMAnalysis *theSORMAnalysis = 0;
 static SamplingAnalysis *theSamplingAnalysis = 0;
 static SystemAnalysis *theSystemAnalysis = 0;
+/////////////////////////////////////////////////////////
+///S added by K Fujimura for Random Vibration Analysis ///
+/////////////////////////////////////////////////////////
+static Analyzer *theAnalyzer=0;
+static InitialStaticAnalysis *theInitialStaticAnalysis=0;
+static InitialPointBuilder *theInitialPointBuilder=0;
+static CrossingRateAnalyzer *theCrossingRateAnalyzer=0;
+static FOSeriesSimulation *theFOSeriesSimulation= 0;
+static FirstPassageAnalyzer *theFirstPassageAnalyzer= 0;
+static RandomVibrationSimulation *theRandomVibrationSimulation= 0;
+static RandomVibrationAnalysis *theRandomVibrationAnalysis = 0;
+/////////////////////////////////////////////////////////
+///E added by K Fujimura for Random Vibration Analysis ///
+/////////////////////////////////////////////////////////
 
 // 
 // THE PROTOTYPES OF THE FUNCTIONS INVOKED BY THE INTERPRETER
@@ -213,9 +265,23 @@ int TclReliabilityModelBuilder_inputCheck(ClientData clientData, Tcl_Interp *int
 int TclReliabilityModelBuilder_getMean(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_getStdv(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_rvReduction(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-int TclReliabilityModelBuilder_getBetaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-int TclReliabilityModelBuilder_getGammaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-int TclReliabilityModelBuilder_invNormalCDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_getBetaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
+int TclReliabilityModelBuilder_getGammaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
+int TclReliabilityModelBuilder_invNormalCDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
+/////////////////////////////////////////////////////////
+///S added by K Fujimura for Random Vibration Analysis ///
+/////////////////////////////////////////////////////////
+int TclReliabilityModelBuilder_addAnalyzer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_addInitialStaticAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_addInitialPointBuilder(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_addCrossingRateAnalyzer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_addFOSeriesSimulation(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_addFirstPassageAnalyzer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_addRandomVibrationSimulation(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_runRandomVibrationAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+/////////////////////////////////////////////////////////
+///E added by K Fujimura for Random Vibration Analysis ///
+/////////////////////////////////////////////////////////
 
 
 //
@@ -266,9 +332,24 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
   Tcl_CreateCommand(interp, "getMean",TclReliabilityModelBuilder_getMean,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "getStdv",TclReliabilityModelBuilder_getStdv,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "rvReduction",TclReliabilityModelBuilder_rvReduction,(ClientData)NULL, NULL);
-  Tcl_CreateCommand(interp, "betaFORM",TclReliabilityModelBuilder_getBetaFORM,(ClientData)NULL, NULL);
-  Tcl_CreateCommand(interp, "gammaFORM",TclReliabilityModelBuilder_getGammaFORM,(ClientData)NULL, NULL);
-  Tcl_CreateCommand(interp, "invNormalCDF",TclReliabilityModelBuilder_invNormalCDF,(ClientData)NULL, NULL);
+  Tcl_CreateCommand(interp, "betaFORM",TclReliabilityModelBuilder_getBetaFORM,(ClientData)NULL, NULL); //not in K.F.
+  Tcl_CreateCommand(interp, "gammaFORM",TclReliabilityModelBuilder_getGammaFORM,(ClientData)NULL, NULL);//not in K.F.
+  Tcl_CreateCommand(interp, "invNormalCDF",TclReliabilityModelBuilder_invNormalCDF,(ClientData)NULL, NULL);//not in K.F.
+/////////////////////////////////////////////////////////
+///S added by K Fujimura for Random Vibration Analysis ///
+/////////////////////////////////////////////////////////
+  Tcl_CreateCommand(interp, "analyzer",TclReliabilityModelBuilder_addAnalyzer,(ClientData)NULL, NULL);
+  Tcl_CreateCommand(interp, "initialstaticanalysis",TclReliabilityModelBuilder_addInitialStaticAnalysis,(ClientData)NULL, NULL);
+  Tcl_CreateCommand(interp, "initialpoint",TclReliabilityModelBuilder_addInitialPointBuilder,(ClientData)NULL, NULL);
+  Tcl_CreateCommand(interp, "crossingrateanalyzer",TclReliabilityModelBuilder_addCrossingRateAnalyzer,(ClientData)NULL, NULL);
+  Tcl_CreateCommand(interp, "foseries",TclReliabilityModelBuilder_addFOSeriesSimulation,(ClientData)NULL, NULL);
+  Tcl_CreateCommand(interp, "firstpassage",TclReliabilityModelBuilder_addFirstPassageAnalyzer,(ClientData)NULL, NULL);
+  Tcl_CreateCommand(interp, "randomvibrationsimulation",TclReliabilityModelBuilder_addRandomVibrationSimulation,(ClientData)NULL, NULL);
+  Tcl_CreateCommand(interp, "randomvibrationanalysis",TclReliabilityModelBuilder_runRandomVibrationAnalysis,(ClientData)NULL, NULL);
+/////////////////////////////////////////////////////////
+///E added by K Fujimura for Random Vibration Analysis ///
+/////////////////////////////////////////////////////////
+
 
   // set the static pointers in this file
   theStructuralDomain	= &passedDomain;
@@ -322,9 +403,26 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
     delete theSamplingAnalysis;
   if (theSystemAnalysis != 0)
     delete theSystemAnalysis;
-  if (theReliabilityDomain != 0) 
+  if (theReliabilityDomain != 0) //not in K.F.
     delete theReliabilityDomain;
-
+  /////S added by K Fujimura /////
+  if (theAnalyzer != 0)
+    delete theAnalyzer;
+  if (theInitialStaticAnalysis != 0)
+    delete theInitialStaticAnalysis;
+  if (theInitialPointBuilder != 0)
+	delete theInitialPointBuilder;
+  if (theCrossingRateAnalyzer != 0)
+	delete theCrossingRateAnalyzer;
+  if (theFOSeriesSimulation !=0)
+	delete theFOSeriesSimulation ;
+  if (theFirstPassageAnalyzer !=0)
+	delete theFirstPassageAnalyzer ;
+  if (theRandomVibrationSimulation !=0)
+	delete theRandomVibrationSimulation ;
+  if (theRandomVibrationAnalysis !=0)
+	delete theRandomVibrationAnalysis ;
+  /////E added by K Fujimura /////
 
   theReliabilityDomain =0;
   theGFunEvaluator =0;
@@ -348,7 +446,16 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
   theSORMAnalysis =0;
   theSamplingAnalysis =0;
   theSystemAnalysis =0;
-
+ /////S added by K Fujimura /////
+  theAnalyzer=0;
+  theInitialStaticAnalysis=0;
+  theInitialPointBuilder = 0;
+  theCrossingRateAnalyzer=0;
+  theFOSeriesSimulation= 0;
+  theFirstPassageAnalyzer= 0;
+  theRandomVibrationSimulation= 0;
+  theRandomVibrationAnalysis = 0;
+ /////E added by K Fujimura /////
 
 	// Delete commands
 	Tcl_DeleteCommand(theInterp, "randomVariable");
@@ -388,6 +495,16 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
 	Tcl_DeleteCommand(theInterp, "betaFORM");
 	Tcl_DeleteCommand(theInterp, "gammaFORM");
 	Tcl_DeleteCommand(theInterp, "invNormalCDF");
+/////S added by K Fujimura /////
+	Tcl_DeleteCommand(theInterp, "analyzer");
+	Tcl_DeleteCommand(theInterp, "initialstaticanalysis");
+	Tcl_DeleteCommand(theInterp, "initialpoint");
+	Tcl_DeleteCommand(theInterp, "crossingrateanalyzer");
+	Tcl_DeleteCommand(theInterp, "foseries");
+	Tcl_DeleteCommand(theInterp, "firstpassage");
+	Tcl_DeleteCommand(theInterp, "randomvibrationsimulation");
+	Tcl_DeleteCommand(theInterp, "randomvibrationanalysis");
+/////E added by K Fujimura /////
 }
 
 
@@ -2005,7 +2122,7 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 	  }
 	  else {
 	    theRandomVariablePositioner =
-	      new RandomVariablePositioner(tag, rvIndex, *theParameter);
+	      new RandomVariablePositioner(tag, rvIndex, *theParameter, theRV);
 	  }
 	}
 
@@ -2026,7 +2143,8 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 					       rvIndex,
 					       theObject,
 					       &argv[argvCounter],
-					       argc-argvCounter);
+					       argc-argvCounter,
+						   theRV);
 
 		//int rvnumber = theRandomVariablePositioner->getRvNumber();
 	}
@@ -2060,7 +2178,8 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 					       rvIndex,
 					       theObject,
 					       &argv[argvCounter],
-					       argc-argvCounter);
+					       argc-argvCounter,
+						   theRV);
 	}
 
 	// IF UNCERTAIN *NODE* PROPERTY
@@ -2078,7 +2197,8 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 					       rvIndex,
 					       theObject,
 					       &argv[argvCounter],
-					       argc-argvCounter);
+					       argc-argvCounter,
+						   theRV);
 	}
 	else {
 		opserr << "ERROR: Unknown parameter in randomVariablePositioner" << endln;
@@ -2529,6 +2649,100 @@ int
 TclReliabilityModelBuilder_addFilter(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 	Filter *theFilter = 0;
+	int tag;
+	double period_Tn, damping, dtpulse;
+
+	if ( (strcmp(argv[2],"standard") == 0) || (strcmp(argv[2],"standardDisplacement") == 0) 
+		|| ( strcmp(argv[2],"Koo") == 0 ) || (strcmp(argv[2],"standardVelocity")==0)
+		|| (strcmp(argv[2],"standardAcceleration")==0)) {	
+		if (argc != 5) {
+			opserr << "ERROR: Wrong number of arguments to filter command." << endln;
+			return TCL_ERROR;
+		}
+		// GET INPUT PARAMETER (integer)
+		if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+			opserr << "ERROR: invalid input: tag \n";
+			return TCL_ERROR;
+		}
+		// GET INPUT PARAMETER (double)
+		if (Tcl_GetDouble(interp, argv[3], &period_Tn) != TCL_OK) {
+			opserr << "ERROR: invalid input: freq_wn \n";
+			return TCL_ERROR;
+		}
+		// GET INPUT PARAMETER (double)
+		if (Tcl_GetDouble(interp, argv[4], &damping) != TCL_OK) {
+			opserr << "ERROR: invalid input: damping \n";
+			return TCL_ERROR;
+		}
+		if ( (strcmp(argv[2],"standard") == 0) || (strcmp(argv[2],"standardDisplacement") == 0) ) {
+			theFilter = new StandardLinearOscillatorDisplacementFilter(tag,period_Tn,damping);
+		}else if ( strcmp(argv[2],"Koo") == 0 ) {
+			theFilter = new KooFilter(tag,period_Tn,damping);
+		}else if (strcmp(argv[2],"standardVelocity") == 0) {
+			theFilter = new StandardLinearOscillatorVelocityFilter(tag,period_Tn,damping);
+		}else if (strcmp(argv[2],"standardAcceleration") == 0) {
+			theFilter = new StandardLinearOscillatorAccelerationFilter(tag,period_Tn,damping);
+		}else {
+			opserr << "ERROR:: Unknown type of filter. " << endln;
+			return TCL_ERROR;
+		}
+	}else if ((strcmp(argv[2],"whitenoise") == 0) 
+		|| (strcmp(argv[2],"NewStandardLinearOscillatorAcceleration") == 0) ){
+		if ( strcmp(argv[2],"whitenoise") == 0){
+			if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+				opserr << "ERROR: invalid input: tag \n";
+				return TCL_ERROR;
+			}
+			// GET INPUT PARAMETER (double)
+			if (Tcl_GetDouble(interp, argv[3], &period_Tn) != TCL_OK) {
+				opserr << "ERROR: invalid input: freq_wn \n";
+				return TCL_ERROR;
+			}
+			theFilter = new NewWhitenoiseFilter(tag,period_Tn);
+		}else{
+			if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+				opserr << "ERROR: invalid input: tag \n";
+				return TCL_ERROR;
+			}
+			if (Tcl_GetDouble(interp, argv[3], &period_Tn) != TCL_OK) {
+				opserr << "ERROR: invalid input: freq_wn \n";
+				return TCL_ERROR;
+			}
+			if (Tcl_GetDouble(interp, argv[4], &damping) != TCL_OK) {
+				opserr << "ERROR: invalid input: damping \n";
+				return TCL_ERROR;
+			}
+			if (Tcl_GetDouble(interp, argv[4], &dtpulse) != TCL_OK) {
+				opserr << "ERROR: invalid input: damping \n";
+				return TCL_ERROR;
+			}
+			theFilter = new NewStandardLinearOscillatorAccelerationFilter
+				(tag, period_Tn, damping, dtpulse);
+		}
+	}else{
+		opserr << "ERROR:: Unknown type of filter. " << endln;
+		return TCL_ERROR;
+	}
+	if (theFilter == 0) {
+		opserr << "ERROR: ran out of memory creating filter \n";
+		opserr << "filter: " << tag << endln;
+		return TCL_ERROR;
+	}
+	// ADD THE OBJECT TO THE DOMAIN
+	if (theReliabilityDomain->addFilter(theFilter) == false) {
+		opserr << "ERROR: failed to add filter to the domain\n";
+		opserr << "filter: " << tag << endln;
+		delete theFilter; // otherwise memory leak
+		return TCL_ERROR;
+	}
+	return TCL_OK;
+}
+
+/*
+int 
+TclReliabilityModelBuilder_addFilter(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+	Filter *theFilter = 0;
 
 	if (argc != 5) {
 		opserr << "ERROR: Wrong number of arguments to filter command." << endln;
@@ -2598,6 +2812,7 @@ TclReliabilityModelBuilder_addFilter(ClientData clientData, Tcl_Interp *interp, 
 
 	return TCL_OK;
 }
+*/
 
 //////////////////////////////////////////////////////////////////
 int 
@@ -3613,6 +3828,42 @@ TclReliabilityModelBuilder_addgFunEvaluator(ClientData clientData, Tcl_Interp *i
 	else if (strcmp(argv[1],"Basic") == 0) {
 		theGFunEvaluator = new BasicGFunEvaluator(interp, theReliabilityDomain);
 	}
+
+/////////////////////////////////////////
+////////S modified by K Fujimura 10/10/2004
+/////////////////////////////////////////
+	else if (strcmp(argv[1],"Analyzer") == 0) {
+
+		// There are several alternatives for this command:
+		// gFunEvaluator  OpenSees  -file <filename>
+		// gFunEvaluator  OpenSees  -runToMaxTimeInGFun
+		// gFunEvaluator  OpenSees  -analyze <numSteps> <dt(optional)>
+
+		if (theAnalyzer == 0 ){
+			opserr << "Fatalerror \n";
+			opserr << "Analyzer must be defined before \n";
+			opserr << "AnalyzerGfunEvaluator \n";
+			return TCL_ERROR;
+		}
+		if (theReliabilityDomain == 0 ){
+			opserr << "Fatalerror \n";
+			opserr << "theReliabilityDomain must be defined before \n";
+			opserr << "AnalyzerGfunEvaluator \n";
+			return TCL_ERROR;
+		}
+		if (theReliabilityDomain == 0 ){
+			opserr << "Fatalerror \n";
+			opserr << "theStructuralDomain must be defined before \n";
+			opserr << "AnalyzerGfunEvaluator \n";
+			return TCL_ERROR;
+		}
+		theGFunEvaluator = new AnalyzerGFunEvaluator
+					       (interp, theReliabilityDomain,
+						   theStructuralDomain,theAnalyzer);
+	}
+/////////////////////////////////////////
+////////E modified by K Fujimura 10/10/2004
+/////////////////////////////////////////
 	else {
 		opserr << "ERROR: unrecognized type of GFunEvaluator \n";
 		return TCL_ERROR;
@@ -3716,6 +3967,45 @@ TclReliabilityModelBuilder_addGradGEvaluator(ClientData clientData, Tcl_Interp *
 
 		theGradGEvaluator = new OpenSeesGradGEvaluator(interp, theReliabilityDomain, theSensitivityAlgorithm, doGradientCheck);
 	}
+	////////////////////////////////////////
+	//////S modified by K Fujimura 10/10/2004
+	////////////////////////////////////////
+	else if (strcmp(argv[1],"Analyzer") == 0) {
+
+		bool doGradientCheck = false;
+
+		if (theAnalyzer == 0) {
+			opserr << "Need Analyzer before a Analyzer sensitivity evaluator can be created" << endln;
+			return TCL_ERROR;
+		}
+		if (theSensitivityAlgorithm == 0) {
+			opserr << "Need a DDM sensitivity algorithm before a Analyzer sensitivity evaluator can be created" << endln;
+			return TCL_ERROR;
+		}
+
+		if (argc==2) {
+			// Do nothing
+		}
+		else if (argc==3) {
+			if (strcmp(argv[2],"-check") == 0) {
+				doGradientCheck = true;
+			}
+		}
+		else {
+			opserr << "ERROR: Wrong number of arguments to gradGEvaluator. " << endln;
+			return TCL_ERROR;
+		}
+
+		theGradGEvaluator = new AnalyzerGradGEvaluator
+			                (interp, theReliabilityDomain,
+							 theStructuralDomain,
+							 doGradientCheck);
+	}
+	////////////////////////////////////////
+	//////E modified by K Fujimura 10/10/2004
+	////////////////////////////////////////
+
+
 	else {
 		opserr << "ERROR: unrecognized type of GradGEvaluator \n";
 		return TCL_ERROR;
@@ -3816,8 +4106,18 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 			return TCL_ERROR;
 		}
 		if (theProbabilityTransformation == 0 ) {
+//////////////////////////////////////////////////////////////////////////////////
+/////////////S Modified by K Fujimura /////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+			opserr << "Assume all RV's are independent" << endln;
+			theProbabilityTransformation = 
+			new AllIndependentTransformation(theReliabilityDomain,0);
+//////////////////////////////////////////////////////////////////////////////////
+/////////////E Modified by K Fujimura /////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+
 			opserr << "Need theProbabilityTransformation before a FindDesignPointAlgorithm can be created" << endln;
-			return TCL_ERROR;
+			// return TCL_ERROR; //commented by K.F.
 		}
 //		if (theStartPoint == 0 ) {
 //			opserr << "Need theStartPoint before a FindDesignPointAlgorithm can be created" << endln;
@@ -3887,7 +4187,7 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 			}
 		}
 		
-		theFindDesignPointAlgorithm = new SearchWithStepSizeAndStepDirection(
+		theNewSearchWithStepSizeAndStepDirection = new NewSearchWithStepSizeAndStepDirection(
 					maxNumIter, 
 					theGFunEvaluator,
 					theGradGEvaluator,
@@ -3899,6 +4199,8 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 					printFlag,
 					fileNamePrint,
 					theStartPoint);
+		 
+		theFindDesignPointAlgorithm = theNewSearchWithStepSizeAndStepDirection;
 
 	}
 	else {
@@ -4045,7 +4347,16 @@ TclReliabilityModelBuilder_addRootFinding(ClientData clientData, Tcl_Interp *int
 
 	if (theProbabilityTransformation == 0 ) {
 		opserr << "Need theProbabilityTransformation before a root-finding algorithm can be created" << endln;
-		return TCL_ERROR;
+		//////////////////////////////////////////////////////////////////////////////////
+/////////////S Modified by K Fujimura /////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+		opserr << "Assume all RV's are independent" << endln;
+		theProbabilityTransformation = 
+		new AllIndependentTransformation(theReliabilityDomain,0);
+//		return TCL_ERROR;
+//////////////////////////////////////////////////////////////////////////////////
+/////////////E Modified by K Fujimura /////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 	}
 
 
@@ -4151,7 +4462,17 @@ TclReliabilityModelBuilder_runFORMAnalysis(ClientData clientData, Tcl_Interp *in
 	}
 	if (theProbabilityTransformation == 0 ) {
 		opserr << "Need theProbabilityTransformation before a FORMAnalysis can be created" << endln;
-		return TCL_ERROR;
+	//////////////////////////////////////////////////////////////////////////////////
+/////////////S Modified by K Fujimura /////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+		opserr << "Assume all RV's are independent" << endln;
+		theProbabilityTransformation = 
+		new AllIndependentTransformation(theReliabilityDomain,0);
+//		return TCL_ERROR;
+//////////////////////////////////////////////////////////////////////////////////
+/////////////E Modified by K Fujimura /////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+
 	}
 
 
@@ -4514,7 +4835,17 @@ TclReliabilityModelBuilder_runSamplingAnalysis(ClientData clientData, Tcl_Interp
 	// Check for essential tools
 	if (theProbabilityTransformation == 0 ) {
 		opserr << "Need theProbabilityTransformation before a SimulationAnalyis can be created" << endln;
-		return TCL_ERROR;
+		//////////////////////////////////////////////////////////////////////////////////
+/////////////S Modified by K Fujimura /////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+		opserr << "Assume all RV's are independent" << endln;
+		theProbabilityTransformation = 
+		new AllIndependentTransformation(theReliabilityDomain,0);
+//		return TCL_ERROR;
+//////////////////////////////////////////////////////////////////////////////////
+/////////////E Modified by K Fujimura /////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+
 	}
 	if (theGFunEvaluator == 0 ) {
 		opserr << "Need theGFunEvaluator before a SimulationAnalyis can be created" << endln;
@@ -4815,7 +5146,18 @@ TclReliabilityModelBuilder_runGFunVisualizationAnalysis(ClientData clientData, T
 
 	if (theProbabilityTransformation == 0 ) {
 		opserr << "Need theProbabilityTransformation before a GFunVisualizationAnalysis can be created" << endln;
-		return TCL_ERROR;
+		//////////////////////////////////////////////////////////////////////////////////
+///////////// Modified by K Fujimura /////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+		opserr << "Assume all RV's are independent" << endln;
+		theProbabilityTransformation = 
+		new AllIndependentTransformation(theReliabilityDomain,0);
+//		return TCL_ERROR;
+//////////////////////////////////////////////////////////////////////////////////
+///////////// Modified by K Fujimura /////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+
+		
 	}
 
 
@@ -5610,6 +5952,9 @@ TclReliabilityModelBuilder_tempCommand(ClientData clientData, Tcl_Interp *interp
 }
 
 
+
+
+///getBetaFORM is not in K.F.
 int 
 TclReliabilityModelBuilder_getBetaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
@@ -5638,6 +5983,7 @@ TclReliabilityModelBuilder_getBetaFORM(ClientData clientData, Tcl_Interp *interp
   }
 }
 
+///getGammaFORM is not in K.F.
 int 
 TclReliabilityModelBuilder_getGammaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
@@ -5677,6 +6023,8 @@ TclReliabilityModelBuilder_getGammaFORM(ClientData clientData, Tcl_Interp *inter
   return TCL_OK;
 }
 
+
+///invNormalCDF is not in K.F.
 int
 TclReliabilityModelBuilder_invNormalCDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
@@ -5709,4 +6057,1216 @@ TclReliabilityModelBuilder_invNormalCDF(ClientData clientData, Tcl_Interp *inter
   Tcl_SetResult(interp, buffer, TCL_VOLATILE);
 
   return TCL_OK;
+}
+/////////////////////////////////////////////////////////
+/// (from here to the end) added by K Fujimura for Random Vibration Analysis ///
+/////////////////////////////////////////////////////////
+int 
+TclReliabilityModelBuilder_addAnalyzer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+	int argvCounter;
+	int nstep;
+	double delta;
+	bool print=false;
+	bool defined=false;
+	bool initialstat=false;
+
+	if(theAnalyzer!=0){
+		delete theAnalyzer;
+		theAnalyzer = 0;
+	}
+	argvCounter=1;
+	while(argvCounter<argc){
+		if (strcmp(argv[argvCounter],"-definedabove") == 0) {
+			defined=true;
+			argvCounter++;
+		}
+		else if(strcmp(argv[argvCounter],"-print") == 0) {
+			print=true;
+			argvCounter++;
+		}
+		else if(strcmp(argv[argvCounter],"-initialstatic") == 0) {
+			initialstat=true;
+			argvCounter++;
+		}
+		else if(strcmp(argv[argvCounter],"-delta") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &delta) != TCL_OK) {
+				opserr << "Invalid Input for ratio \n";
+				opserr << "for FreeVibration in tclModelbuidler \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if(strcmp(argv[argvCounter],"-step") == 0) {
+			argvCounter++;
+			if (Tcl_GetInt(interp, argv[argvCounter], &nstep) != TCL_OK) {
+				opserr << "Invalid Input for ratio \n";
+				opserr << "for FreeVibration in tclModelbuidler \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else{
+			opserr << "ERROR: Invalid argument to FreeVibration " << endln;
+			return TCL_ERROR;
+		}
+	}
+	if(initialstat){
+		if(theInitialStaticAnalysis==0){
+			opserr << "Need to define InitialShapeAnalysis \n";
+			opserr << "before defining Analyzer with -initialstat\n";
+			return TCL_ERROR;
+		}
+	}
+	if (theReliabilityDomain == 0 ) {
+		opserr << "Need ReliabilityDomain before an Analyzer can be created" << endln;
+		return TCL_ERROR;
+	}
+	if (theStructuralDomain == 0 ) {
+		opserr << "Need StructuralDomain before an Analyzer can be created" << endln;
+		return TCL_ERROR;
+	}
+	if (theReliabilityTransientAnalysis == 0 && theReliabilityStaticAnalysis==0  ) {
+		opserr << "Need Analysis before an Analyzer can be created" << endln;
+		return TCL_ERROR;
+	}
+//	if (theSensitivityAlgorithm== 0 ) {
+//		opserr << "Need SensitivityAlgorithm before an Analyzer can be created" << endln;
+//		return TCL_ERROR;
+//	}
+//	if (theSensitivityIntegrator== 0 ) {
+//		opserr << "Need SensitivityIntegrator before an Analyzer can be created" << endln;
+//		return TCL_ERROR;
+//	}
+	if(defined){
+		int numLoadPatterns=0;
+		int *LoadPatterns=0;
+		if(theReliabilityTransientAnalysis !=0){
+			theAnalyzer = new DynamicAnalyzer
+						  (theReliabilityDomain,
+						   theStructuralDomain,
+						   theInitialStaticAnalysis,
+						   theReliabilityTransientAnalysis,
+						   theSensitivityAlgorithm,
+						   theSensitivityIntegrator,
+						   nstep,
+						   delta,
+						   numLoadPatterns,
+						   LoadPatterns,
+						   print);
+		}
+		else
+		{
+			theAnalyzer = new StaticAnalyzer
+						  (theReliabilityDomain,
+						   theStructuralDomain,
+						   theInitialStaticAnalysis,
+						   theReliabilityStaticAnalysis,
+						   theSensitivityAlgorithm,
+						   theSensitivityIntegrator,
+						   nstep,
+						   delta,
+						   numLoadPatterns,
+						   LoadPatterns,
+						   print);
+		}
+	}
+	else {
+		opserr << "ERROR: Invalid argument to Analyzer " << endln;
+		opserr << "-definedabove is required " << endln;
+		return TCL_ERROR;
+	}
+	return TCL_OK;
+}
+int 
+TclReliabilityModelBuilder_addInitialStaticAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+	int* StaticLoadPatterns=0;
+	int* temploads=0;
+	int numLoadPatterns=0;
+	int nstep=0;
+	int loadtag=0;
+    LoadPattern *thePattern=0;
+	bool loadfound= false;
+	int nfound=0;
+	int argvCounter = 1;
+	bool print = false;
+	temploads= new int[100];
+
+	if(theInitialStaticAnalysis!=0){
+		delete theInitialStaticAnalysis;
+		theInitialStaticAnalysis=0;
+	}
+
+	if (strcmp(argv[argvCounter],"-selectLoad") == 0) {  
+		argvCounter++;
+		while(argvCounter<argc){
+			if (strcmp(argv[argvCounter],"-print") == 0) {
+				print=true;
+				argvCounter++;
+			}
+			else if (strcmp(argv[argvCounter],"-nstep") == 0) {
+				argvCounter++;
+				if (Tcl_GetInt(interp, argv[argvCounter], &nstep) != TCL_OK) {
+				opserr << "ERROR: Invalid input";
+				opserr << " nstep for initial static analysis" << endln;
+				return TCL_ERROR;
+				}
+				argvCounter++;
+			}
+			else if (strcmp(argv[argvCounter],"-loads") == 0) {
+				argvCounter++;
+				numLoadPatterns=0;
+				while(argvCounter<argc){
+					if(argv[argvCounter][0]!= '-'){		
+						if (Tcl_GetInt(interp, argv[argvCounter], &loadtag) != TCL_OK) {
+						opserr << "Error invalid input for";
+						opserr << " LoadPattern ID for the initial static analysis";
+						opserr << endln;
+						return TCL_ERROR;
+						}
+						argvCounter++;
+						LoadPatternIter& thePatterns = theStructuralDomain->getLoadPatterns();
+						loadfound = false;
+						while((thePattern = thePatterns()) != 0){
+							int tag=thePattern->getTag();
+							if( tag == loadtag ) {
+								loadfound = true;
+								break;
+							}
+						}
+						if(loadfound){
+							numLoadPatterns++;
+							temploads[numLoadPatterns-1]=loadtag;
+						}
+					}
+					else break;
+				}
+				if( numLoadPatterns != 0 ){
+					StaticLoadPatterns = new int[numLoadPatterns];
+					for (int i=0; i<numLoadPatterns; i++) {
+						StaticLoadPatterns[i]=temploads[i];
+					}
+				}
+			}
+		}
+		if (theStructuralDomain== 0 ) {
+			opserr << "Need StructuralDomain before a InitialStaticAnalysis can be created" << endln;
+			return TCL_ERROR;
+		}
+		if (theReliabilityDomain== 0 ) {
+			opserr << "Need ReliabilityDomain before a InitialStaticAnalysis can be created" << endln;
+			return TCL_ERROR;
+		}
+		theInitialStaticAnalysis = new SelectLoadInitialStaticAnalysis 
+									(theReliabilityDomain,
+									 theStructuralDomain,
+									 nstep,
+									 numLoadPatterns,
+									 StaticLoadPatterns,
+									 print);
+
+	} else if (strcmp(argv[argvCounter],"-file") == 0) {  
+
+		opserr << " FATAL error \n";
+		opserr << " -file option for InitialShapeBuilder ";
+		opserr << " is not yete implemented \n";
+		exit(-1);
+//		argvCounter++;
+//		ifstream inputFile( argv[argvCounter], ios::in );
+//		if (inputFile.fail()) {
+//			opserr << "File " << *argv[2] << " could not be opened. " << endln;
+//			return TCL_ERROR;
+//		}
+//		argvCounter++;
+//		inputFile.close();
+//		if(argvCounter<argc){
+//			if (strcmp(argv[argvCounter],"-print") == 0) print=true;
+//			else{
+//				opserr << "Error invalid input";
+//			}
+//		}
+//
+//		theInitialStaticAnalysis = new tclStaticAnalysis
+//									  (interp,
+//									   theReliabilityDomain,
+//									   theStructuralDomain,
+//									   argv[argvCounter],
+//									   print);
+	} else {
+		opserr << "ERROR: Invalid argument to Initial Static Analysis. " << endln;
+		return TCL_ERROR;
+	}
+	delete [] StaticLoadPatterns; 
+	StaticLoadPatterns=0;
+	delete [] temploads;
+	temploads=0;
+	return TCL_OK;
+}
+/////////////////////////////////////////////////////////
+/// added by K Fujimura for Random Vibration Analysis ///
+/////////////////////////////////////////////////////////
+int 
+TclReliabilityModelBuilder_addInitialPointBuilder(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+	bool print=false;
+	double eps=0.01;
+	int MaxLineSearch=20;
+
+	if(theInitialPointBuilder!=0){
+		delete theInitialPointBuilder;
+		theInitialPointBuilder=0;
+	}
+	if (theReliabilityDomain == 0 ) {
+		opserr << "Need ReliabilityDomain before an RandomVibrationAnalysis can be created" << endln;
+		return TCL_ERROR;
+	}
+	if(theGFunEvaluator==0){
+		opserr << "Need to define GFunEvaluator \n";
+		opserr << "before defining MirrorImageBuilder\n";
+		return TCL_ERROR;
+	}
+
+ 	if (strcmp(argv[1],"-mirror") == 0) {
+		// mirror image initial point builder //
+		opserr << "Invalid Input for Initialpoint \n";
+		opserr << "-mirror can not be selected \n";
+		return TCL_ERROR;
+//		argvCounter=2;
+//		while(argvCounter<argc){
+//			if (strcmp(argv[argvCounter],"-print") == 0) {
+//				print=true;
+//				argvCounter++;
+//			}
+//			else if (strcmp(argv[argvCounter],"-eps") == 0) {
+//				argvCounter++;
+//				if (Tcl_GetDouble(interp, argv[argvCounter], &eps) != TCL_OK) {
+//					opserr << "Invalid Input for threshold \n";
+//					opserr << "for InitialPointBuilder in tclModelbuidler \n";
+//					return TCL_ERROR;
+//				}
+//				argvCounter++;
+//			}
+//			else if (strcmp(argv[argvCounter],"-maxlinesearch") == 0) {
+//				argvCounter++;
+//				if (Tcl_GetInt(interp, argv[argvCounter], &MaxLineSearch) != TCL_OK) {
+//					opserr << "Invalid Input for MaxLineSearch \n";
+//					opserr << "for InitialPointBuilder in tclModelbuidler \n";
+//					return TCL_ERROR;
+//				}
+//				argvCounter++;
+//			}
+//			else{
+//				opserr << "ERROR: Invalid argument to InitialPointBuilder " << endln;
+//				return TCL_ERROR;
+//			}
+//		}
+//		theInitialPointBuilder = new MirrorImageInitialPointBuilder
+//								(theReliabilityDomain,
+//								 theGFunEvaluator,
+//								 eps,
+//								 MaxLineSearch,
+//								 print);
+//
+	} else if (strcmp(argv[1],"-threshold") == 0) {
+
+		int maxDivide=10;
+		bool start_mirror=true;
+		double mirroreps=0.01;
+		int argvCounter=2;
+		while(argvCounter<argc){
+			if (strcmp(argv[argvCounter],"-print") == 0) {
+				print=true;
+				argvCounter++;
+			}
+			else if (strcmp(argv[argvCounter],"-eps") == 0) {
+				argvCounter++;
+				if (Tcl_GetDouble(interp, argv[argvCounter], &eps) != TCL_OK) {
+					opserr << "Invalid Input for threshold \n";
+					opserr << "for InitialPointBuilder in tclModelbuidler \n";
+					return TCL_ERROR;
+				}
+				argvCounter++;
+			}
+			else if (strcmp(argv[argvCounter],"-maxdivide") == 0) {
+				argvCounter++;
+				if (Tcl_GetInt(interp, argv[argvCounter], &maxDivide) != TCL_OK) {
+					opserr << "Invalid Input for threshold \n";
+					opserr << "for InitialPointBuilder in tclModelbuidler \n";
+					return TCL_ERROR;
+				}
+				argvCounter++;
+			}
+			else if (strcmp(argv[argvCounter],"-startpoint") == 0) {
+				argvCounter++;
+				if(strcmp(argv[argvCounter],"none")==0){
+					start_mirror=false;
+				}else if(strcmp(argv[argvCounter],"mirror")==0){
+					opserr << "Invalid Input for -stattpoint for initialpoint \n";
+					opserr << "mirror can not be selected\n";
+					return TCL_ERROR;
+					start_mirror=true;
+					argvCounter++;
+					if (Tcl_GetDouble(interp, argv[argvCounter], &mirroreps) != TCL_OK) {
+						opserr << "Invalid Input for threshold \n";
+						opserr << "for InitialPointBuilder in tclModelbuidler \n";
+						return TCL_ERROR;
+					}
+					argvCounter++;
+					if (Tcl_GetInt(interp, argv[argvCounter], &MaxLineSearch) != TCL_OK) {
+						opserr << "Invalid Input for threshold \n";
+						opserr << "for InitialPointBuilder in tclModelbuidler \n";
+						return TCL_ERROR;
+					}
+				}else{
+					opserr << "Invalid Input for threshold \n";
+					opserr << "for InitialPointBuilder in tclModelbuidler \n";
+					return TCL_ERROR;
+				}
+				argvCounter++;
+			}
+			else{
+				opserr << "ERROR: Invalid argument to InitialPointBuilder " << endln;
+				return TCL_ERROR;
+			}
+		}
+
+		if (theNewSearchWithStepSizeAndStepDirection == 0 ) {
+			opserr << "Need theFindDesignPointAlgorithm before a ThresholdIncInitialPointBuilder can be created" << endln;
+			return TCL_ERROR;
+		}
+
+		theInitialPointBuilder = new ThresholdIncInitialPointBuilder
+								(theReliabilityDomain,
+								 theGFunEvaluator,
+								 theNewSearchWithStepSizeAndStepDirection,
+								 maxDivide,
+								 eps,
+								 start_mirror,
+								 MaxLineSearch,
+								 mirroreps, 
+								 print);
+	}else{
+		opserr << "ERROR: Invalid argument to InitialPointBuilder " << endln;
+		opserr << argv[1]<< endln;
+		return TCL_ERROR;
+	}
+	return TCL_OK;
+}
+int 
+TclReliabilityModelBuilder_addCrossingRateAnalyzer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+	if (theCrossingRateAnalyzer != 0) {
+		delete theCrossingRateAnalyzer;
+		theCrossingRateAnalyzer = 0;
+	}
+
+	int analysisType=2;
+	double littleDt=0.1;
+	bool print=false;
+
+	int argvCounter = 1;
+	while (argc > argvCounter) {
+		if (strcmp(argv[argvCounter],"-littledt") == 0) {
+			argvCounter++;
+			  // GET INPUT PARAMETER (double)
+			if (Tcl_GetDouble(interp, argv[argvCounter], &littleDt) != TCL_OK) {
+				opserr << "ERROR: invalid input littleDt to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-koo") == 0) {
+			argvCounter++;
+			analysisType = 2;
+		}
+		else if (strcmp(argv[argvCounter],"-twosearches") == 0) {
+			argvCounter++;
+			analysisType = 1;
+		}
+		else if (strcmp(argv[argvCounter],"-print") == 0) {
+			argvCounter++;
+			print=true;
+		}
+		else {
+			opserr << "ERROR: Invalid input to theOutCrossingAnalysis." << endln;
+			return TCL_ERROR;
+		}
+	}
+	if(analysisType==1){
+		if (theReliabilityDomain== 0 ) {
+		opserr << "Need ReliabilityDomain before a CrossingRateAnalyzer can be created" << endln;
+		return TCL_ERROR;
+		}
+		if (theFindDesignPointAlgorithm== 0 ) {
+		opserr << "Need FindDesignPointAlgorithm before a CrossingRateAnalyzer can be created" << endln;
+		return TCL_ERROR;
+		}
+		if (theGFunEvaluator == 0 ) {
+		opserr << "Need theGFunEvaluator before an CrossingRateAnalyzer can be created" << endln;
+		return TCL_ERROR;
+		}
+	}
+	theCrossingRateAnalyzer = new CrossingRateAnalyzer
+								(theReliabilityDomain,
+								 theFindDesignPointAlgorithm,
+								 theGFunEvaluator,
+								 analysisType,
+						         littleDt,
+  								 print);
+
+	if (theCrossingRateAnalyzer == 0) {
+		opserr << "ERROR: could not create theCrossingRateAnalyzer\n";
+		return TCL_ERROR;
+	}
+	return TCL_OK;
+}
+int 
+TclReliabilityModelBuilder_addFOSeriesSimulation(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+	if (theFOSeriesSimulation != 0) {
+		delete theFOSeriesSimulation;
+		theFOSeriesSimulation = 0;
+	}
+
+	int MaxSim=10000;
+	int Interval=100;
+	double Eps=0.05;
+	bool twoside=false;
+	int analysis=-1;
+	bool print=false;
+
+	int argvCounter = 1;
+	while (argc > argvCounter) {
+		if (strcmp(argv[argvCounter],"-maxsim") == 0) {
+			argvCounter++;
+			if (Tcl_GetInt(interp, argv[argvCounter], &MaxSim) != TCL_OK) {
+				opserr << "ERROR: invalid input maxsim to FOSeriesSimulation \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-interval") == 0) {
+			argvCounter++;
+			if (Tcl_GetInt(interp, argv[argvCounter], &Interval) != TCL_OK) {
+				opserr << "ERROR: invalid input interval to FOSeriesSimulation \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-analysis") == 0) {
+			argvCounter++;
+			if (Tcl_GetInt(interp, argv[argvCounter], &analysis) != TCL_OK) {
+				opserr << "ERROR: invalid input analysis to FOSeriesSimulation \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-eps") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &Eps) != TCL_OK) {
+				opserr << "ERROR: invalid input eps to FOSeriesSimulation \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-twoside") == 0) {
+			argvCounter++;
+			twoside=true;
+		}
+		else if (strcmp(argv[argvCounter],"-print") == 0) {
+			argvCounter++;
+			print=true;
+		}
+		else {
+			opserr << "ERROR: Invalid input to theOutCrossingAnalysis." << endln;
+			return TCL_ERROR;
+		}
+	}
+
+	if(analysis!=0&&analysis!=1&&analysis!=2){
+		opserr << "ERROR: analysisType must be either of 0, 1, or 2" << endln;
+		return TCL_ERROR;
+	}
+
+	theFOSeriesSimulation= new FOSeriesSimulation(MaxSim,
+												  Interval,
+												  Eps,
+												  twoside,
+												  analysis,
+												  print);
+
+
+	if (theFOSeriesSimulation == 0) {
+		opserr << "ERROR: could not create theFOSeriesSimulation\n";
+		return TCL_ERROR;
+	}
+	return TCL_OK;
+}
+int 
+TclReliabilityModelBuilder_addFirstPassageAnalyzer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+	if (theFirstPassageAnalyzer != 0) {
+		delete theFirstPassageAnalyzer;
+		theFirstPassageAnalyzer= 0;
+	}
+
+	int analysis=1;
+	int interpolation=1;
+	bool print=false;
+	bool twoside=true;
+	int stationary=0;
+
+	int argvCounter = 1;
+	while (argc > argvCounter) {
+		if (strcmp(argv[argvCounter],"-analysis") == 0) {
+			argvCounter++;
+			if (Tcl_GetInt(interp, argv[argvCounter], &analysis) != TCL_OK) {
+				opserr << "ERROR: invalid input analysis to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-interpolation") == 0) {
+			argvCounter++;
+			if (Tcl_GetInt(interp, argv[argvCounter], &interpolation) != TCL_OK) {
+				opserr << "ERROR: invalid input interpolation to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-stationary") == 0) {
+			stationary=1;
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-nonstationary") == 0) {
+			stationary=2;
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-twoside") == 0) {
+			argvCounter++;
+			int ind;
+			if (Tcl_GetInt(interp, argv[argvCounter], &ind) != TCL_OK) {
+				opserr << "ERROR: invalid input twoside to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			if(ind==0) twoside=false;
+			else twoside=true;
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-print") == 0) {
+			argvCounter++;
+			print=true;
+		}
+		else {
+			opserr << "ERROR: Invalid input to theFirstPassageAnalyzer" << endln;
+			return TCL_ERROR;
+		}
+	}
+	if(stationary==0){
+			opserr << "ERROR: Need to specify stationary/nonstationary" << endln;
+			opserr << "for FirstPassageAnalyzer" << endln;
+			return TCL_ERROR;
+	}
+
+	if (theReliabilityDomain == 0) {
+		opserr << "Need theReliabilityDomain before an FirstPassageAnalyzer can be created" << endln;
+		return TCL_ERROR;
+	}
+	if (theFindDesignPointAlgorithm == 0 ) {
+		opserr << "Need theGFunEvaluator before an FirstPassageAnalyzer can be created" << endln;
+		return TCL_ERROR;
+	}
+	if (theGFunEvaluator == 0 ) {
+		opserr << "Need theGFunEvaluator before an FirstPassageAnalyzer can be created" << endln;
+		return TCL_ERROR;
+	}
+
+	if(stationary==1){
+		theFirstPassageAnalyzer=new StatFirstPassageAnalyzer
+									(theReliabilityDomain,
+									 theFindDesignPointAlgorithm,
+									 theGFunEvaluator,
+									 theFOSeriesSimulation,
+									 analysis,
+									 twoside,
+									 print);
+	}else{
+		theFirstPassageAnalyzer=new NonStatFirstPassageAnalyzer
+								   (theReliabilityDomain,
+									theFindDesignPointAlgorithm,
+									theGFunEvaluator,
+									theFOSeriesSimulation,
+									analysis,
+									interpolation,
+									twoside,
+									print);
+	}
+
+	if (theFirstPassageAnalyzer == 0) {
+		opserr << "ERROR: could not create theFirstPassageAnalyzer\n";
+		return TCL_ERROR;
+	}
+	return TCL_OK;
+}
+int 
+TclReliabilityModelBuilder_addRandomVibrationSimulation(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+	// In case this is a replacement
+	if (theRandomVibrationSimulation != 0) {
+		delete theRandomVibrationSimulation;
+		theRandomVibrationSimulation = 0;
+	}
+	if (theReliabilityDomain == 0 ) {
+		opserr << "Need ReliabilityDomain before an RandomVibrationAnalysis can be created" << endln;
+		return TCL_ERROR;
+	}
+	if (theStructuralDomain == 0 ) {
+		opserr << "Need StructuralDomain before an RandomVibrationAnalysis can be created" << endln;
+		return TCL_ERROR;
+	}
+	if (theGFunEvaluator == 0 ) {
+		opserr << "Need theGFunEvaluator before an OutCrossingAnalysis can be created" << endln;
+		return TCL_ERROR;
+	}
+	if (theProbabilityTransformation == 0 ) {
+		opserr << "Need theProbabilityTransformation before a Outcrossing can be created" << endln;
+		///////////// Modified by K Fujimura /////////////////////////////////////////////
+		opserr << "Assume all RV's are independent" << endln;
+		theProbabilityTransformation = 
+		new AllIndependentTransformation(theReliabilityDomain,0);
+		///////////// Modified by K Fujimura /////////////////////////////////////////////
+	}
+	double StartTime=1.0;
+	double EndTime=20.0;
+	double TimeInterval=1.0;
+	double FragMin=1.0;
+	double FragInt=0.0;
+	int nFrag=1;
+
+	int maxSim=100000;
+	int intervalSim=200;
+	double eps=0.05;
+
+	int instantaneous=0;
+	int firstpassage=0;
+
+	int istationary=0;
+	bool stationary;
+	double stationaryTime=0.0;
+	char *fileBinary=new char[100];
+	double sampleAmp=0.0;
+	double sampleTime=0.0;
+	bool print=false;
+	bool twoside=false;
+	bool system=false;
+
+	// Loop through arguments
+	int argvCounter = 2;
+
+	while (argc > argvCounter) {
+		if (strcmp(argv[argvCounter],"-starttime") == 0) {
+			argvCounter++;
+			// GET INPUT PARAMETER (integer)
+			if (Tcl_GetDouble(interp, argv[argvCounter], &StartTime) != TCL_OK) {
+				opserr << "ERROR: invalid input stepsToStart to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-endtime") == 0) {
+			argvCounter++;
+			// GET INPUT PARAMETER (integer)
+			if (Tcl_GetDouble(interp, argv[argvCounter], &EndTime) != TCL_OK) {
+				opserr << "ERROR: invalid input stepsToEnd to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-interval") == 0) {
+			argvCounter++;
+			// GET INPUT PARAMETER (integer)
+			if (Tcl_GetDouble(interp, argv[argvCounter], &TimeInterval) != TCL_OK) {
+				opserr << "ERROR: invalid input sampleFreq to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-fragility") == 0) {
+			argvCounter++;
+			  // GET INPUT PARAMETER (double)
+			if (Tcl_GetDouble(interp, argv[argvCounter], &FragMin) != TCL_OK) {
+				opserr << "ERROR: invalid input littleDt to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &FragInt) != TCL_OK) {
+				opserr << "ERROR: invalid input littleDt to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+			if (Tcl_GetInt(interp, argv[argvCounter], &nFrag) != TCL_OK) {
+				opserr << "ERROR: invalid input littleDt to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-maxsim") == 0) {
+			argvCounter++;
+			if (Tcl_GetInt(interp, argv[argvCounter], &maxSim) != TCL_OK) {
+				opserr << "ERROR: invalid input littleDt to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-intervalsim") == 0) {
+			argvCounter++;
+			if (Tcl_GetInt(interp, argv[argvCounter], &intervalSim) != TCL_OK) {
+				opserr << "ERROR: invalid input littleDt to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-instantaneous") == 0) {
+			argvCounter++;
+			if (Tcl_GetInt(interp, argv[argvCounter], &instantaneous) != TCL_OK) {
+				opserr << "ERROR: invalid input littleDt to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-firstpassage") == 0) {
+			argvCounter++;
+			if (Tcl_GetInt(interp, argv[argvCounter], &firstpassage) != TCL_OK) {
+				opserr << "ERROR: invalid input littleDt to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-eps") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &eps) != TCL_OK) {
+				opserr << "ERROR: invalid input littleDt to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-stationarytime") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &stationaryTime) != TCL_OK) {
+				opserr << "ERROR: invalid input littleDt to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-print") == 0) {
+			argvCounter++;
+			print=true;
+		}
+		else if (strcmp(argv[argvCounter],"-sample") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &sampleAmp) != TCL_OK) {
+				opserr << "ERROR: invalid input samplAmp theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &sampleTime) != TCL_OK) {
+				opserr << "ERROR: invalid input samplAmp theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-twoside") == 0) {
+			argvCounter++;
+			twoside=true;
+		}
+		else if (strcmp(argv[argvCounter],"-system") == 0) {
+			argvCounter++;
+			system=true;
+		}
+		else if (strcmp(argv[argvCounter],"-stationary") == 0) {
+			istationary=1;
+			stationary=true;
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-nonstationary") == 0) {
+			istationary=2;
+			stationary=false;
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-binary") == 0) {
+			argvCounter++;
+			strcpy(fileBinary,argv[argvCounter]);
+			argvCounter++;
+		}
+		else {
+			opserr << "ERROR: Invalid input to theOutCrossingAnalysis." << endln;
+			return TCL_ERROR;
+		}
+	}
+
+	if(istationary==0){
+		opserr << "ERROR: Need to specify stationary" << endln;
+		opserr << "for RandomVibrationSimulation" << endln;
+		return TCL_ERROR;
+	}
+	if(instantaneous==0&&firstpassage==0){
+		opserr << "ERROR: Need to specify either instantaneous or firstpassage" << endln;
+		opserr << "for RandomVibrationSimulation" << endln;
+		return TCL_ERROR;
+	}
+	if(stationary&&stationaryTime<0.0){
+		opserr << "ERROR: Need to specify stationaryTime" << endln;
+		opserr << "for RandomVibrationSimulator" << endln;
+		return TCL_ERROR;
+	}
+
+	opserr << "=========================================\n";
+	opserr << "\n";
+	opserr << "     RandomVibrationSimulation  \n";
+	opserr << "\n";
+	opserr << "=========================================\n";
+	opserr << "\n";
+	opserr << " StartTime.........................." << StartTime << "\n";
+	opserr << " EndTime............................" << EndTime << "\n";
+	opserr << " Interval..........................." << TimeInterval << "\n";
+	opserr << "\n";
+	opserr << " FragMin............................" << FragMin << "\n";
+	opserr << " FragInt............................" << FragInt << "\n";
+	opserr << " nFrag.............................." << nFrag << "\n";
+	opserr << "\n";
+	opserr << " instantaneous......................" << instantaneous<< "\n";
+	opserr << " firstpassage......................." << firstpassage << "\n";
+	opserr << "\n";
+	opserr << " stationary........................." << stationary << "\n";
+	opserr << " stationaryTime....................." << stationaryTime<< "\n";
+	opserr << "\n";
+	opserr << " maxSim............................." << maxSim<< "\n";
+	opserr << " siminterval........................" << intervalSim<< "\n";
+	opserr << " eps................................" << eps<< "\n";
+//  check for analysis
+
+	if (theGFunEvaluator == 0 ) {
+		opserr << "Need theGFunEvaluator before an OutCrossingAnalysis can be created" << endln;
+		return TCL_ERROR;
+	}
+
+	if(stationary==1){
+	 	theRandomVibrationSimulation=new StatRandomVibrationSimulation
+								(theReliabilityDomain,
+								 theStructuralDomain,
+						         theGFunEvaluator,
+							     theProbabilityTransformation,
+						         StartTime,EndTime,TimeInterval,
+						         FragMin,FragInt,nFrag,
+                                 stationaryTime,
+								 twoside,
+								 system,
+						         maxSim,intervalSim,eps,
+						         instantaneous,
+						         firstpassage,
+	  				             argv[1],
+						         fileBinary,
+	                             interp,
+								 print,
+								 sampleAmp,
+								 sampleTime);
+//							 theStartPoint);
+	}else{
+		theRandomVibrationSimulation=new NonStatRandomVibrationSimulation
+								(theReliabilityDomain,
+								 theStructuralDomain,
+						         theGFunEvaluator,
+							     theProbabilityTransformation,
+						         StartTime,EndTime,TimeInterval,
+						         FragMin,FragInt,nFrag,
+								 twoside,
+								 system,
+						         maxSim,intervalSim,eps,
+						         instantaneous,
+						         firstpassage,
+	  				             argv[1],
+						         fileBinary,
+	                             interp,
+								 print);
+	}
+
+	if (theRandomVibrationSimulation == 0) {
+		opserr << "ERROR: could not create theRandomVibrationSimulation\n";
+		return TCL_ERROR;
+	}
+	theRandomVibrationSimulation->analyze();
+	return TCL_OK;
+}
+int 
+TclReliabilityModelBuilder_runRandomVibrationAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+	// In case this is a replacement
+	if (theRandomVibrationAnalysis != 0) {
+		delete theRandomVibrationAnalysis;
+		theRandomVibrationAnalysis = 0;
+	}
+	if (theReliabilityDomain == 0 ) {
+		opserr << "Need ReliabilityDomain before an RandomVibrationAnalysis can be created" << endln;
+		return TCL_ERROR;
+	}
+	if (theStructuralDomain == 0 ) {
+		opserr << "Need StructuralDomain before an RandomVibrationAnalysis can be created" << endln;
+		return TCL_ERROR;
+	}
+	if (theGFunEvaluator == 0 ) {
+		opserr << "Need theGFunEvaluator before an OutCrossingAnalysis can be created" << endln;
+		return TCL_ERROR;
+	}
+	if (theProbabilityTransformation == 0 ) {
+		opserr << "Need theProbabilityTransformation before a Outcrossing can be created" << endln;
+		///////////// Modified by K Fujimura /////////////////////////////////////////////
+		opserr << "Assume all RV's are independent" << endln;
+		theProbabilityTransformation = 
+		new AllIndependentTransformation(theReliabilityDomain,0);
+		///////////// Modified by K Fujimura /////////////////////////////////////////////
+	}
+	double StartTime=1.0;
+	double EndTime=20.0;
+	double TimeInterval=1.0;
+//	double StartAnalysis=-999.9;
+	double StartAnalysis=12.0;
+	double FragMin=1.0;
+	double FragInt=0.0;
+	int nFrag=1;
+	int designPoint=1;
+	char *fileBinary=new char[100];
+	
+//  indicator for design-point analysis
+//	=0 : No design-point Analysis
+//	=1 : design-point Analysis and outcrossing rate analysis 
+//	=2 : design-point Analysis and outcrossing rate analysis
+//							   and FO system first passage		
+	bool stationary = true;  // ture - stationary problem
+	bool print=false;
+	bool mirrorimage = false;
+	bool initialpoint = true;
+	bool firstpassage = true;
+//  indicator for the first-passage analysis
+//	=0 : no first passage analysis;
+//  =1 : first passage analysis with first passage analyzer 
+
+	// Loop through arguments
+	int argvCounter = 2;
+	while (argc > argvCounter) {
+		if (strcmp(argv[argvCounter],"-starttime") == 0) {
+			argvCounter++;
+			// GET INPUT PARAMETER (integer)
+			if (Tcl_GetDouble(interp, argv[argvCounter], &StartTime) != TCL_OK) {
+				opserr << "ERROR: invalid input stepsToStart to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-endtime") == 0) {
+			argvCounter++;
+			// GET INPUT PARAMETER (integer)
+			if (Tcl_GetDouble(interp, argv[argvCounter], &EndTime) != TCL_OK) {
+				opserr << "ERROR: invalid input stepsToEnd to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-interval") == 0) {
+			argvCounter++;
+			// GET INPUT PARAMETER (integer)
+			if (Tcl_GetDouble(interp, argv[argvCounter], &TimeInterval) != TCL_OK) {
+				opserr << "ERROR: invalid input sampleFreq to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-startanalysis") == 0) {
+			argvCounter++;
+			// GET INPUT PARAMETER (integer)
+			if (Tcl_GetDouble(interp, argv[argvCounter], &StartAnalysis) != TCL_OK) {
+				opserr << "ERROR: invalid input stepsToEnd to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-stationary") == 0) {
+			argvCounter++;
+			stationary=true;
+		}
+		else if (strcmp(argv[argvCounter],"-print") == 0) {
+			argvCounter++;
+			print=true;
+		}
+		else if (strcmp(argv[argvCounter],"-fragility") == 0) {
+			argvCounter++;
+			  // GET INPUT PARAMETER (double)
+			if (Tcl_GetDouble(interp, argv[argvCounter], &FragMin) != TCL_OK) {
+				opserr << "ERROR: invalid input littleDt to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &FragInt) != TCL_OK) {
+				opserr << "ERROR: invalid input littleDt to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+			if (Tcl_GetInt(interp, argv[argvCounter], &nFrag) != TCL_OK) {
+				opserr << "ERROR: invalid input littleDt to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-designpoint") == 0) {
+			argvCounter++;
+			  // GET INPUT PARAMETER (double)
+			if (Tcl_GetInt(interp, argv[argvCounter], &designPoint) != TCL_OK) {
+				opserr << "ERROR: invalid input littleDt to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-mirrorimage") == 0) {
+			opserr << "Invalid Input for randomvibrationanalysis\n";
+			opserr << "-mirrorimage can not be selected \n";
+			return TCL_ERROR;
+//			argvCounter++;
+//			  // GET INPUT PARAMETER (double)
+//			int ind;
+//			if (Tcl_GetInt(interp, argv[argvCounter], &ind) != TCL_OK) {
+//				opserr << "ERROR: invalid input littleDt to theOutCrossingAnalysis \n";
+//				return TCL_ERROR;
+//			}
+//			if(ind==0) mirrorimage=false;
+//			else mirrorimage=true;
+//			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-binary") == 0) {
+			argvCounter++;
+			strcpy(fileBinary,argv[argvCounter]);
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-initialpoint") == 0) {
+			argvCounter++;
+			  // GET INPUT PARAMETER (double)
+			int ind;
+			if (Tcl_GetInt(interp, argv[argvCounter], &ind) != TCL_OK) {
+				opserr << "ERROR: invalid input littleDt to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			if(ind==0) initialpoint=false;
+			else initialpoint=true;
+			argvCounter++;
+		}
+		else if (strcmp(argv[argvCounter],"-firstpassage") == 0) {
+			argvCounter++;
+			  // GET INPUT PARAMETER (double)
+			int ind;
+			if (Tcl_GetInt(interp, argv[argvCounter], &ind) != TCL_OK) {
+				opserr << "ERROR: invalid input littleDt to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			if(ind==0) firstpassage=false;
+			else firstpassage=true;
+			argvCounter++;
+		}
+		else {
+			opserr << "ERROR: Invalid input to theOutCrossingAnalysis." << endln;
+			return TCL_ERROR;
+		}
+	}
+	if(designPoint!=0){
+		if (theFindDesignPointAlgorithm == 0 ) {
+		opserr << "Need theFindDesignPointAlgorithm before an OutCrossingAnalysis can be created" << endln;
+		return TCL_ERROR;
+		}
+		if (theGradGEvaluator == 0 ) {
+		opserr << "Need theGradGEvaluator before an OutCrossingAnalysis can be created" << endln;
+		return TCL_ERROR;
+		}
+	}
+
+	opserr << "=========================================\n";
+	opserr << "\n";
+	opserr << "     OutCrossingAnalysis  \n";
+	opserr << "\n";
+	opserr << "=========================================\n";
+	opserr << "\n";
+	opserr << " StartTime.........................." << StartTime << "\n";
+	opserr << " EndTime............................" << EndTime << "\n";
+	opserr << " Interval..........................." << TimeInterval << "\n";
+	opserr << "\n";
+	opserr << " StartAnalysis......................" << StartAnalysis << "\n";
+	opserr << "\n";
+	opserr << " FragMin............................" << FragMin << "\n";
+	opserr << " FragInt............................" << FragInt << "\n";
+	opserr << " nFrag.............................." << nFrag << "\n";
+	opserr << "\n";
+	opserr << " designpoint........................" << designPoint << "\n";
+	opserr << "\n";
+	opserr << " stationary........................." << stationary << "\n";
+	opserr << " mirrorimage........................" << mirrorimage << "\n";
+	opserr << " initialpoint......................." << initialpoint << "\n";
+	opserr << "\n";
+//  check for analysis
+
+	if(mirrorimage){
+//		if (theMirrorImageBuilder== 0 ) {
+//		opserr << "Need MirrorImageBuilder before a RANDOMVIBRATION can be created" << endln;
+//		return TCL_ERROR;
+//		}
+	}
+	if(initialpoint){
+		if (theInitialPointBuilder== 0 ) {
+		opserr << "InitialPointBuilder is not specified before randomvibration \n"; 
+		opserr << "default object is initiated\n"; 
+//		theInitialPointBuilder = new MirrorImageInitialPointBuilder
+//									 (theReliabilityDomain,
+//									  theGFunEvaluator);
+		}
+	}
+	if(abs(designPoint)>1){
+		if (theCrossingRateAnalyzer== 0 ) {
+		opserr << "Need CrossingRateAnalyzer before a RANDOMVIBRATION can be created" << endln;
+		return TCL_ERROR;
+		}
+	}
+	if(firstpassage){
+		if (theFirstPassageAnalyzer== 0 ) {
+		opserr << "Need FirstPassageAnalyzer before a RANDOMVIBRATION can be created" << endln;
+		return TCL_ERROR;
+		}
+	}
+
+	theRandomVibrationAnalysis = new RandomVibrationAnalysis
+								(theReliabilityDomain,
+								 theNewSearchWithStepSizeAndStepDirection,
+								 theStructuralDomain,
+//								 theMirrorImageBuilder,
+								 theInitialPointBuilder,
+								 theCrossingRateAnalyzer,
+								 theFirstPassageAnalyzer,
+								 theGFunEvaluator,
+								 theGradGEvaluator,
+								 StartTime,EndTime,TimeInterval,StartAnalysis,	
+								 FragMin,FragInt,nFrag,
+								 designPoint,
+								 stationary,
+								 mirrorimage,
+								 initialpoint,
+								 firstpassage,
+								 argv[1],
+								 fileBinary,
+								 interp,
+								 print);
+
+
+	if (theRandomVibrationAnalysis == 0) {
+		opserr << "ERROR: could not create theRandomVibrationAnalysis\n";
+		return TCL_ERROR;
+	}
+	theRandomVibrationAnalysis->analyze();
+
+	return TCL_OK;
 }

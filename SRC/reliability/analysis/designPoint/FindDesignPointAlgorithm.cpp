@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:00 $
+// $Revision: 1.2 $
+// $Date: 2008-02-29 19:47:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/FindDesignPointAlgorithm.cpp,v $
 
 
@@ -42,3 +42,33 @@ FindDesignPointAlgorithm::~FindDesignPointAlgorithm()
 }
 
 
+void
+FindDesignPointAlgorithm::set_u(Vector& v)
+{
+	opserr << "FindDesignPointAlgorithm::set_u() - " << endln
+           << " this function is for newalgorithm" << endln;
+}
+GradGEvaluator*
+FindDesignPointAlgorithm::getGradGEvaluator()
+{
+	opserr << "FindDesignPointAlgorithm::getGradGEvaluator() - " << endln
+           << " this function is for newalgorithm" << endln;
+	return 0;
+}
+
+double
+FindDesignPointAlgorithm::get_beta()
+{
+	opserr << "FindDesignPointAlgorithm::get_beta() - " << endln
+           << " this function is for newalgorithm" << endln;
+	return 0;
+}
+
+Matrix
+FindDesignPointAlgorithm::getJacobian_x_u()
+{
+	opserr << "FindDesignPointAlgorithm::getJacobian_x_u() - " << endln
+           << " this function is for newalgorithm" << endln;
+	Matrix* zero=0;
+	return (*zero);
+}

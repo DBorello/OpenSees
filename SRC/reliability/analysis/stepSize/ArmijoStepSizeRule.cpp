@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-11-06 19:32:36 $
+// $Revision: 1.7 $
+// $Date: 2008-02-29 19:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/ArmijoStepSizeRule.cpp,v $
 
 
@@ -113,7 +113,9 @@ ArmijoStepSizeRule::computeStepSize(const Vector &u_old,
 				    const Vector &grad_G_old, 
 				    double g_old, 
 				    const Vector &dir_old,
-				    int stepNumber)
+				    int stepNumber,
+					int reschk//// added by K Fujimura /////
+					)
 {
 
 	// Initial declarations
@@ -122,8 +124,8 @@ ArmijoStepSizeRule::computeStepSize(const Vector &u_old,
 	bool FEconvergence = false;
 	double result;
 	Vector x_new(u_old);
-	//Matrix jacobian_x_u;
-
+	//Matrix jacobian_x_u;  //was active in K.F.
+	numReduction=0;/// added by K.F.
 
 	// Inform user through log file
 	static ofstream logfile( "ArmijoRuleLog.txt", ios::out );
@@ -242,6 +244,7 @@ ArmijoStepSizeRule::computeStepSize(const Vector &u_old,
 
 		// Evaluate the limit-state function
 		FEconvergence = true;
+		theGFunEvaluator->inactivateSensitivty(); ///added by K.F.
 		result = theGFunEvaluator->runGFunAnalysis(x_new);
 /*		if (result < 0) {
 			// In this case the FE analysis did not converge
@@ -266,6 +269,8 @@ ArmijoStepSizeRule::computeStepSize(const Vector &u_old,
 	///////////////////////////////////////////
 	int i = 1;
 	bool mustGoOn = false;
+	
+	numReduction=i;///// added by K Fujimura /////
 
 	if (theMeritFunctionCheck->check(u_old, g_old, grad_G_old, lambda_new, dir_old, g_new)<0) {
 		mustGoOn = true;
@@ -283,6 +288,7 @@ ArmijoStepSizeRule::computeStepSize(const Vector &u_old,
 
 	while ( mustGoOn ) {
 
+		theGFunEvaluator->inactivateSensitivty();////added by K.F.
 		
 		// Notify user that step sizes are being reduced
 		opserr << "Armijo trial point rejected; reducing step size..." << endln
@@ -399,6 +405,8 @@ ArmijoStepSizeRule::computeStepSize(const Vector &u_old,
 
 		// Increment counter
 		i++;
+		
+		numReduction=i;///// added by k fujimura /////
 
 		// Check if we need to go on
 		mustGoOn = false;
@@ -425,3 +433,11 @@ ArmijoStepSizeRule::computeStepSize(const Vector &u_old,
 	return 1;
 
 }
+/////S added by K Fujimura /////
+int
+ArmijoStepSizeRule::getNumReductions()
+{
+	return numReduction;
+
+}
+/////E added by K Fujimura /////

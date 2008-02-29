@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-07-11 23:52:53 $
+// $Revision: 1.7 $
+// $Date: 2008-02-29 19:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/StepSizeRule.h,v $
 
 
@@ -42,11 +42,16 @@ class StepSizeRule
 public:
 	StepSizeRule();
 	virtual ~StepSizeRule();
-
-	virtual int		computeStepSize(const Vector &u, const Vector &grad_G, double G, const Vector &d, int stepNumber) =0;
+        /////S added by K Fujimura /////
+	/*virtual int		computeStepSize(Vector u, Vector grad_G, double G, Vector d, int stepNumber,
+		int reschk=0) =0; */
+	virtual int		computeStepSize(const Vector &u, const Vector &grad_G, double G, const Vector &d, int stepNumber, int reschk =0) =0;
+	   /////E added by K Fujimura /////
 	virtual double	getStepSize() =0;
 	virtual double	getInitialStepSize() =0;
 	virtual double getGFunValue() =0;
+	virtual int getNumReductions() =0;
+	///// added by K Fujimura /////
 
 protected:
 

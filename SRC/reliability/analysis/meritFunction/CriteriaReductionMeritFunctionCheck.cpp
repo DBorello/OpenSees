@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-07-11 23:52:10 $
+// $Revision: 1.3 $
+// $Date: 2008-02-29 19:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/meritFunction/CriteriaReductionMeritFunctionCheck.cpp,v $
 
 
@@ -61,9 +61,11 @@ CriteriaReductionMeritFunctionCheck::check(const Vector &u_old,
 					   double stepSize,
 					   const Vector &stepDirection,
 					   double g_new, 
-					   const Vector &grad_G_new)
+					   const Vector &grad_G_new,
+					   /// added by K Fujimura /////
+								  int reschk)
 {
-	// New point in standard normal space
+	// New point in standard normal space    (// not in K.F. version)
 	//Vector u_new = u_old + stepSize*stepDirection;
   Vector u_new(u_old);
   u_new.addVector(1.0, stepDirection, stepSize);
@@ -129,7 +131,7 @@ CriteriaReductionMeritFunctionCheck::getMeritFunctionValue(const Vector &u,
 int
 CriteriaReductionMeritFunctionCheck::updateMeritParameters(const Vector &u, 
 							   double g, 
-							   const Vector &grad_G)
+							   const Vector &grad_G, int reschk)
 {
 	opserr << "CriteriaReductionMeritFunctionCheck::updateMeritParameters() -- this method" << endln
 		<< " is not implemented in this specific class." << endln;

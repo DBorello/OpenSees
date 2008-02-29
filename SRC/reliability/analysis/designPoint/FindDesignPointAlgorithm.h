@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-02-07 23:49:11 $
+// $Revision: 1.4 $
+// $Date: 2008-02-29 19:47:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/FindDesignPointAlgorithm.h,v $
 
 
@@ -36,6 +36,10 @@
 
 #include <ReliabilityDomain.h>
 #include <Vector.h>
+/////S added by K Fujimura /////
+#include <ReliabilityConvergenceCheck.h>
+#include <GradGEvaluator.h>
+/////E added by K Fujimura /////
 
 class FindDesignPointAlgorithm
 {
@@ -58,6 +62,14 @@ public:
 	virtual double getLastGFunValue() =0;
 	virtual const Vector &getGradientInStandardNormalSpace() =0;
 	virtual int getNumberOfEvaluations() = 0;
+
+	/////S added by K Fujimura /////
+	//virtual ReliabilityConvergenceCheck* getReliabilityConvergenceCheck();
+	virtual void set_u(Vector&);
+	virtual GradGEvaluator* getGradGEvaluator();
+	virtual double get_beta();
+	virtual Matrix getJacobian_x_u();
+	/////E added by K Fujimura /////
 
 protected:
 

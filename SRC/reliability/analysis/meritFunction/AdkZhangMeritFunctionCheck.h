@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-07-11 23:52:10 $
+// $Revision: 1.4 $
+// $Date: 2008-02-29 19:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/meritFunction/AdkZhangMeritFunctionCheck.h,v $
 
 
@@ -48,11 +48,18 @@ public:
 		      const Vector &grad_G_old, 
 		      double stepSize,
 		      const Vector &stepDirection,
-		      double g_new);
-	double getMeritFunctionValue(const Vector &u, double g,
+		      double g_new,
+/////S added byt K Fujimura
+			  int reschk=0);
+	double getMeritFunctionValue(const Vector &u, double g, const Vector &grad_G);
+	int updateMeritParameters(const Vector &u, double g, const Vector &grad_G,
+		int reschk);
+ 
+	/*double getMeritFunctionValue(const Vector &u, double g,
 				     const Vector &grad_G);
 	int updateMeritParameters(const Vector &u, double g,
-				  const Vector &grad_G);
+				  const Vector &grad_G);*/
+ /////E added byt K Fujimura
 
 protected:
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-03-04 00:46:02 $
+// $Revision: 1.4 $
+// $Date: 2008-02-29 19:47:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/SensitivityIntegrator.h,v $
 
 
@@ -49,7 +49,12 @@ public:
 	virtual int formIndependentSensitivityRHS() = 0;
 	virtual int saveSensitivity   (const Vector &v, int gradNum, int numGrads) = 0;
     virtual int commitSensitivity (int gradNum, int numGrads) = 0;
-
+	///////S added by K Fujimura ////////////////
+	virtual int updateGradNumber(int passedGradNumber)=0;
+	virtual int sensitivityDomainChanged(int NumGrads)=0;
+	virtual bool staticSensitivity(void)=0;
+	virtual bool NewSensitivity(void)=0;
+	///////E added by K Fujimura ////////////////
 protected:
     
 private:

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-02-05 23:28:12 $
+// $Revision: 1.4 $
+// $Date: 2008-02-29 19:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/GradGEvaluator.h,v $
 
 
@@ -38,6 +38,8 @@
 #include <Matrix.h>
 #include <ReliabilityDomain.h>
 #include <tcl.h>
+
+class PerformanceFunctionCoefficientIter;
 
 class GradGEvaluator
 {
@@ -59,13 +61,30 @@ public:
 	virtual Matrix  getDgDdispl();
 	virtual Matrix  getDgDpar();
 
+    //////S added by K Fujimura ///////////
+	int initializeNumberOfEvaluations();
+	int getNumberOfEvaluations();
+	virtual void setPerformFuncCoeffs(TaggedObjectStorage*);
+	virtual void setPerformFuncCoeffIter(PerformanceFunctionCoefficientIter*);
+	virtual bool getfinitedifference(){ return finitedifference; }
+	virtual void setfinitedifference(bool fdf){finitedifference=fdf;}
+    //////E added by K Fujimura ///////////
+
 protected:
 	int computeParameterDerivatives(double g);
 	ReliabilityDomain *theReliabilityDomain;
 	Tcl_Interp *theTclInterp;
 
+	/////S added by K Fujimura /////
+	int numberOfEvalIncSens;
+	/////E added by K Fujimura /////
+
 private:
 	Matrix *DgDpar;
+
+   /////S added by K Fujimura /////
+	bool finitedifference;
+	/////E added by K Fujimura ////
 
 };
 

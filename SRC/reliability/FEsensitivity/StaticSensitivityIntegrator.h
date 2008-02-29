@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-03-04 00:46:02 $
+// $Revision: 1.3 $
+// $Date: 2008-02-29 19:47:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/StaticSensitivityIntegrator.h,v $
 
 
@@ -60,6 +60,12 @@ class StaticSensitivityIntegrator : public SensitivityIntegrator,
 	int formIndependentSensitivityRHS();
 	int saveSensitivity(const Vector &v, int gradNum, int numGrads);
 	int commitSensitivity(int gradNum, int numGrads);
+ /////S added by K Fujimura /////
+	int updateGradNumber(int passedGradNumber);
+	int sensitivityDomainChanged(int NumGrads);
+	bool staticSensitivity(void);
+	bool NewSensitivity(void);
+ /////E added by K Fujimura /////
 
   protected:
     

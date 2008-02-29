@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-11-01 17:32:22 $
+// $Revision: 1.6 $
+// $Date: 2008-02-29 19:47:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/direction/SQPsearchDirectionMeritFunctionAndHessian.cpp,v $
 
 
@@ -240,7 +240,7 @@ SQPsearchDirectionMeritFunctionAndHessian::getMeritFunctionValue(const Vector &u
 int
 SQPsearchDirectionMeritFunctionAndHessian::updateMeritParameters(const Vector &u,
 								 double g,
-								 const Vector &grad_G)
+								 const Vector &grad_G, int reschk)
 {
 	opserr << "WARNING: SQPsearchDirectionMeritFunctionAndHessian::updateMeritParameters() --" << endln
 		<< " no explicit merit function value is computed." << endln;
@@ -256,7 +256,7 @@ SQPsearchDirectionMeritFunctionAndHessian::check(const Vector &u_old,
 						 const Vector &grad_G_old, 
 						 double stepSize,
 						 const Vector &stepDirection,
-						 double g_new)
+						 double g_new, int reschk)
 {
 	// Have 'c' and 'delta' and 'lambda' as history parameters
 	// and 'kappa' stored to be used in this method

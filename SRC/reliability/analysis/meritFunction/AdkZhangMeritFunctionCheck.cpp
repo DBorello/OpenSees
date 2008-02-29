@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-07-13 18:26:03 $
+// $Revision: 1.5 $
+// $Date: 2008-02-29 19:47:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/meritFunction/AdkZhangMeritFunctionCheck.cpp,v $
 
 
@@ -61,14 +61,20 @@ AdkZhangMeritFunctionCheck::check(const Vector &u_old,
 				  const Vector &grad_G_old, 
 				  double stepSize,
 				  const Vector &stepDirection,
-				  double g_new)
+				  double g_new,
+			      int reschk  ///// added by K Fujimura /////							 				  
+				  )
+
 {
 
 	// Update penalty parameter 'c' (should remain constant along the search direction)
-	this->updateMeritParameters(u_old,g_old,grad_G_old);
+		/////S added by K Fujimura /////
+	//this->updateMeritParameters(u_old,g_old,grad_G_old);
+	this->updateMeritParameters(u_old,g_old,grad_G_old,reschk);
+		/////E added by K Fujimura /////
 
-	
-	// New point in standard normal space
+
+	// New point in standard normal space    (//different from K.F.)
 	//Vector u_new = u_old + stepSize*stepDirection;
 	Vector u_new(u_old);
 	u_new.addVector(1.0, stepDirection, stepSize);
@@ -116,12 +122,28 @@ AdkZhangMeritFunctionCheck::check(const Vector &u_old,
 int
 AdkZhangMeritFunctionCheck::updateMeritParameters(const Vector &u, 
 						  double g,
-						  const Vector &grad_G)
+							/////S added by K Fujimura /////
+						  /*const Vector &grad_G,*/ 
+						  const Vector &grad_G,
+						  int reschk 
+						  /////E added by K Fujimura /////
+						  )
 {
+	   /////S modificed by K Fujimura /////
 	// Update penalty factor 'c'
-	c = (u.Norm() / grad_G.Norm()) * multi + add;
+	if(reschk==-2){
+		c = (u.Norm() / grad_G.Norm());
+	}else{
+		c = (u.Norm() / grad_G.Norm()) * multi + add;
+	}
+	return 0;
+
+//	// Update penalty factor 'c'
+//	c = (u.Norm() / grad_G.Norm()) * multi + add;
 
 	return 0;
+	/////E modificed by K Fujimura /////
+
 }
 
 

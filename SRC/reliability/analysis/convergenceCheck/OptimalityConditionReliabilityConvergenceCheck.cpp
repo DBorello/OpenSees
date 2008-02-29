@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-10-25 16:37:16 $
+// $Revision: 1.5 $
+// $Date: 2008-02-29 19:47:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/convergenceCheck/OptimalityConditionReliabilityConvergenceCheck.cpp,v $
 
 
@@ -55,12 +55,18 @@ OptimalityConditionReliabilityConvergenceCheck::OptimalityConditionReliabilityCo
 	criterium2 = 0.0;
 	scaleValue = pscaleValue;
 	printFlag = print;
-	logfile.open("ConvergenceCheckLog.txt", ios::out);
+
+ 	//S  Modified by K Fujimura 10/10/2004
+ 	fixscale = false;
+ 	if(scaleValue != 0.0) 	fixscale = true;
+ 	//E  Modified by K Fujimura 10/10/2004
+ 	
+	logfile.open("ConvergenceCheckLog.txt", ios::out);//not in K.F.
 }
 
 OptimalityConditionReliabilityConvergenceCheck::~OptimalityConditionReliabilityConvergenceCheck()
 {
-	logfile.close();
+	logfile.close();//not in K.F.
 }
 
 
@@ -68,9 +74,14 @@ OptimalityConditionReliabilityConvergenceCheck::~OptimalityConditionReliabilityC
 int	
 OptimalityConditionReliabilityConvergenceCheck::setScaleValue(double passedScaleValue)
 {
-	if (scaleValue == 0.0) {
+	/////S modified by K Fujimura /////
+	if(!fixscale){
 		scaleValue = passedScaleValue;
 	}
+	//if (scaleValue == 0.0) {
+	//	scaleValue = passedScaleValue;
+	//}
+	/////E modified by K Fujimura /////
 
 	return 0;
 }
@@ -87,23 +98,38 @@ OptimalityConditionReliabilityConvergenceCheck::check(const Vector &u, double g,
 	// Convergence criteria
 	criterium1 = fabs(g / scaleValue);
 	criterium2 = 1.0 - fabs(1.0/(gradG.Norm()*u.Norm()) * (gradG^u));
+	
+ 	/////S Modified by K Fujimura///////
+ 	if(u.Norm()!=0.0){
+ 		criterium2 = 1.0+1.0/(gradG.Norm()*u.Norm()) * (gradG^u);
+ 	}else criterium2 = 1.0;
+	/////E Modified by K Fujimura///////
 
 
 	// Inform user about convergence status 
+	static ofstream logfile( "SearchLog.out", ios::out );///// Modified by K Fujimura
 	char outputString[100];
 	sprintf(outputString,"check1=(%11.3e), check2=(%10.3e), dist=%16.14f",criterium1,criterium2,u.Norm());
 	if (printFlag != 0) {
 		opserr << outputString << endln;
 	}
 	logfile << outputString << endln;
-	logfile.flush();
+	logfile.flush();//not in K.F.
 
 	// Return '1' if the analysis converged ('-1' otherwise)
 	if ( ( criterium1 < e1 ) && ( criterium2 < e2 ) ) {
 		return 1;
 	}
 	else {
-		return -1;
+/////S Modified by K Fujimura///////
+		if(criterium2 < e2 ){
+ 			return -1;
+ 		}else if(criterium1 < e1 ){
+ 			return -2;
+ 		}else{
+ 			return -3;
+		}
+/////E Modified by K Fujimura///////
 	}
 }
 
@@ -129,3 +155,35 @@ OptimalityConditionReliabilityConvergenceCheck::getCriteriaValue(int whichCriter
 	}
 
 }
+
+/////S added by K Fujimura /////
+
+double 
+OptimalityConditionReliabilityConvergenceCheck::getCheck1()
+{ return criterium1;}
+double 
+OptimalityConditionReliabilityConvergenceCheck::getCheck2()
+{ return criterium2;}
+void
+OptimalityConditionReliabilityConvergenceCheck::Scalefix(bool fix)
+{
+	fixscale=fix;
+}
+int	
+OptimalityConditionReliabilityConvergenceCheck::checkG(double g)
+{
+	if (scaleValue == 0.0) {
+		opserr << "OptimalityConditionReliabilityConvergenceCheck::check() --" << endln
+			<< " scale value has not been set!" << endln;
+	}
+	// Convergence criteria
+	criterium1 = fabs(g / scaleValue);
+	// Return '1' if the analysis converged ('-1' otherwise)
+	if (  criterium1 < e1 ) {
+		return 1;
+	}else {
+		return -1;
+	}
+}
+
+/////E added by K Fujimura /////

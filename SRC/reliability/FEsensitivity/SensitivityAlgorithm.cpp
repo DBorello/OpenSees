@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-11-01 00:32:31 $
+// $Revision: 1.11 $
+// $Date: 2008-02-29 19:47:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/SensitivityAlgorithm.cpp,v $
 
 
@@ -32,6 +32,13 @@
 //
 
 #include <SensitivityAlgorithm.h>
+
+#include <ReliabilityDomain.h>
+#include <EquiSolnAlgo.h>
+#include <SensitivityIntegrator.h>
+
+
+
 #include <LinearSOE.h>
 #include <Vector.h>
 #include <EquiSolnAlgo.h>

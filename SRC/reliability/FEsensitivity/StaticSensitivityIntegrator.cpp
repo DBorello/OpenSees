@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-12-05 20:08:29 $
+// $Revision: 1.5 $
+// $Date: 2008-02-29 19:47:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/StaticSensitivityIntegrator.cpp,v $
 
 
@@ -197,6 +197,35 @@ StaticSensitivityIntegrator::recvSelf(int commitTag, Channel &theChannel, FEM_Ob
 void 
 StaticSensitivityIntegrator::Print(OPS_Stream &s, int flag)  
 {
+}
+
+int 
+StaticSensitivityIntegrator::updateGradNumber(int passedGradNumber)
+{
+		opserr << "Fatal NewmarkSensitivityIntegrator::updateGradNumber";
+		opserr << "This function should not be called from this object\n";
+		opserr << "This function should be called from NewNewmarkSensitivityIntegrator\n";
+		return -1;
+}
+int 
+StaticSensitivityIntegrator::sensitivityDomainChanged(int NumGrads)
+{
+		opserr << "Fatal NewmarkSensitivityIntegrator::updateGradNumber";
+		opserr << "This function should not be called from this object\n";
+		opserr << "This function should be called from NewNewmarkSensitivityIntegrator\n";
+		return -1;
+}
+
+
+bool 
+StaticSensitivityIntegrator::staticSensitivity(void)
+{
+	return true;
+}
+bool 
+StaticSensitivityIntegrator::NewSensitivity(void)
+{
+	return false;
 }
 
 

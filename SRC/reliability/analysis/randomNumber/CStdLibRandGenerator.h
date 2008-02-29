@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-10-26 16:33:44 $
+// $Revision: 1.5 $
+// $Date: 2008-02-29 19:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/randomNumber/CStdLibRandGenerator.h,v $
 
 
@@ -34,6 +34,8 @@
 #ifndef CStdLibRandGenerator_h
 #define CStdLibRandGenerator_h
 
+#include <NormalRV.h>
+
 class CStdLibRandGenerator : public RandomNumberGenerator
 {
 
@@ -43,14 +45,28 @@ public:
 
 	int		generate_nIndependentStdNormalNumbers(int n, int seed=0);
 	int     generate_nIndependentUniformNumbers(int n, double lower, double upper, int seed=0);
-	const Vector& getGeneratedNumbers();
+	const Vector& getGeneratedNumbers();//added by K.F.
+	//const Vector& getGeneratedNumbers();
 	int     getSeed();
+	/////S added By K Fujimura /////
+ 	double  generate_singleStdNormalNumber();		
+ 	double  generate_singleUniformNumber(double lower=0.0, double upper=1.0);		
+ 	void setSeed(int passedSeed=0);
+    /////E added By K Fujimura /////
 
 protected:
 
 private:
 	Vector *generatedNumbers;
 	int seed;
+
+    /////S added by K Fujimrua /////
+	NormalRV *aStdNormRV;
+// 	int	randomNumberBetween0And32767;
+ 	int	randomNumberBetween0AndRAND_MAX;
+ 	double randomNumberBetween0And1;
+ 	double randomNumber;
+   /////E added by K Fujimrua /////
 };
 
 #endif

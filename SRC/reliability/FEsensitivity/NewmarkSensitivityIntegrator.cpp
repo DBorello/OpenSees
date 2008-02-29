@@ -1,3 +1,4 @@
+
 /* ****************************************************************** **
 **    OpenSees - Open System for Earthquake Engineering Simulation    **
 **          Pacific Earthquake Engineering Research Center            **
@@ -22,8 +23,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-04-03 22:31:00 $
+// $Revision: 1.5 $
+// $Date: 2008-02-29 19:47:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/NewmarkSensitivityIntegrator.cpp,v $
 
 
@@ -520,6 +521,32 @@ NewmarkSensitivityIntegrator::activateParameter (int passedParameterID)
 }
 
 
+int 
+NewmarkSensitivityIntegrator::updateGradNumber(int passedGradNumber)
+{
+		opserr << "Fatal NewmarkSensitivityIntegrator::updateGradNumber";
+		opserr << "This function should not be called from this object\n";
+		opserr << "This function should be called from NewNewmarkSensitivityIntegrator\n";
+		return -1;
+}
+int 
+NewmarkSensitivityIntegrator::sensitivityDomainChanged(int NumGrads)
+{
+		opserr << "Fatal NewmarkSensitivityIntegrator::updateGradNumber";
+		opserr << "This function should not be called from this object\n";
+		opserr << "This function should be called from NewNewmarkSensitivityIntegrator\n";
+		return -1;
+}
+bool 
+NewmarkSensitivityIntegrator::staticSensitivity(void)
+{
+	return false;
+}
+bool 
+NewmarkSensitivityIntegrator::NewSensitivity(void)
+{
+	return false;
+}
 
 
 

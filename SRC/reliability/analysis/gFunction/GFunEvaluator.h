@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-12-06 23:14:26 $
+// $Revision: 1.6 $
+// $Date: 2008-02-29 19:47:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/GFunEvaluator.h,v $
 
 
@@ -37,7 +37,9 @@
 #include <Vector.h>
 #include <ReliabilityDomain.h>
 #include <tcl.h>
-
+///// added buy K Fujimura /////
+#include <GFunEachStepEvaluator.h>
+#include <PerformanceFunctionCoefficientIter.h>
 #include <fstream>
 using std::ofstream;
 
@@ -49,7 +51,8 @@ public:
 	virtual ~GFunEvaluator();
 
 	// Methods provided by base class
-	int		evaluateG(const Vector &x);
+	///// changed by K Fujimura /////
+	virtual int		evaluateG(const Vector &x);
 	double	getG();
 	int     initializeNumberOfEvaluations();
 	int     getNumberOfEvaluations();
@@ -61,7 +64,22 @@ public:
 	// Methods implemented by SOME specific classes (random vibrations stuff)
 	virtual void    setNsteps(int nsteps);
 	virtual double  getDt();
-	
+
+	//////////////////////////////////////////////////////////
+	//// added by K Fujimura /////////////////////////////////
+	//////////////////////////////////////////////////////////
+	virtual void activateSensitivty(void);
+	virtual void inactivateSensitivty(void);
+	virtual void setGFunEachStepEvaluator(GFunEachStepEvaluator *pGFunEachStepEvaluator);
+	virtual void inactivateGFunEachStepEvaluator();
+	virtual	void setThreshold(double value);
+	virtual	double getThreshold();
+	virtual Matrix* getEachStepResult();
+	virtual Matrix* getEachStepConvFlag();
+	virtual void setPerformFuncCoeffs(TaggedObjectStorage*);
+	virtual void setPerformFuncCoeffIter(PerformanceFunctionCoefficientIter*);
+
+
 protected:
 	Tcl_Interp *theTclInterp;
 	ReliabilityDomain *theReliabilityDomain;

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-07-11 23:51:29 $
+// $Revision: 1.4 $
+// $Date: 2008-02-29 19:47:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/direction/SQPsearchDirectionMeritFunctionAndHessian.h,v $
 
 
@@ -59,13 +59,20 @@ public:
 		  const Vector &grad_G_old, 
 		  double stepSize,
 		  const Vector &stepDirection,
-		  double g_new);
+		  double g_new,
+			  /////S added by K Fujimura ////
+			  int reschk=0);
+	//double getMeritFunctionValue(Vector u, double g, Vector grad_G);
+	//int updateMeritParameters(Vector u, double g, Vector grad_G, int reschk=0);
+
+	int setAlpha(double alpha);
+
 	double getMeritFunctionValue(const Vector &u, double g,
 				     const Vector &grad_G);
 	int updateMeritParameters(const Vector &u, double g,
-				  const Vector &grad_G);
+				  const Vector &grad_G, int reschk=0);
+			  /////E added by K Fujimura ////
 
-	int setAlpha(double alpha);
 
 	// METHODS FOR HESSIAN APPROXIMATION
 	const Matrix &getHessianApproximation();

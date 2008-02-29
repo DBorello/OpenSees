@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-07-11 23:51:29 $
+// $Revision: 1.4 $
+// $Date: 2008-02-29 19:47:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/direction/PolakHeSearchDirectionAndMeritFunction.cpp,v $
 
 
@@ -189,7 +189,7 @@ PolakHeSearchDirectionAndMeritFunction::getMeritFunctionValue(const Vector &u,
 int 
 PolakHeSearchDirectionAndMeritFunction::updateMeritParameters(const Vector &u,
 							      double g,
-							      const Vector &grad_G)
+							      const Vector &grad_G, int reschk)
 {
 	opserr << "WARNING: PolakHeSearchDirectionAndMeritFunction::updateMeritParameters() --" << endln
 		<< " no explicit merit function value is computed." << endln;
@@ -206,7 +206,7 @@ PolakHeSearchDirectionAndMeritFunction::check(const Vector &u_old,
 					      const Vector &grad_G_old, 
 					      double stepSize,
 					      const Vector &stepDirection,
-					      double g_new)
+					      double g_new, int rechk)
 {
 	// New point in standard normal space
 	Vector u_new = u_old + stepSize*stepDirection;

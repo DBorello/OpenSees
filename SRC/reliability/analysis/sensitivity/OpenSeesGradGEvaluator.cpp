@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-10-31 16:49:56 $
+// $Revision: 1.11 $
+// $Date: 2008-02-29 19:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/OpenSeesGradGEvaluator.cpp,v $
 
 
@@ -71,6 +71,11 @@ OpenSeesGradGEvaluator::OpenSeesGradGEvaluator(Tcl_Interp *passedTclInterp,
 	grad_g_matrix = 0;
 
 	DgDdispl = 0;
+
+	/////S added by K Fujimura /////
+	bool fdf=true;
+	this->setfinitedifference(fdf);
+	/////E added by K Fujimura /////
 }
 
 OpenSeesGradGEvaluator::~OpenSeesGradGEvaluator()
@@ -111,6 +116,8 @@ OpenSeesGradGEvaluator::getAllGradG()
 int
 OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 {
+	numberOfEvalIncSens++;///// added by K Fujimura /////
+
 	// Zero out the previous result matrix
 	if (DgDdispl != 0) {
 		delete DgDdispl;
@@ -488,6 +495,9 @@ int
 OpenSeesGradGEvaluator::computeAllGradG(const Vector &gFunValues,
 					const Vector &passed_x)
 {
+	
+	numberOfEvalIncSens++;///// added by K Fujimura /////
+
   int sizeX = passed_x.Size();
 	// Allocate result matrix
 	Vector gradG(sizeX);

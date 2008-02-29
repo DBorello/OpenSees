@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-11-06 01:00:59 $
+// $Revision: 1.14 $
+// $Date: 2008-02-29 19:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariable.h,v $
 
 
@@ -61,14 +61,15 @@ public:
 	virtual int setStartValue(double newVal) {startValue = newVal;return 0;}
 	virtual double getStartValue() {return startValue;}
 
-	int setIndex(int index) {rvIndex = index;return 0;}
-	int getIndex() {return rvIndex;}
+	int setIndex(int index) {rvIndex = index;return 0;}//not in K.F.
+	int getIndex() {return rvIndex;}//not in K.F.
 
 	int setNewTag(int tag); // Probably not needed anymore -- MHS
+	//void setStartValue(double val){startValue=val;}////added by K.F.
 
-protected:
+protected:   //different from K.F.
 
-private:
+private:	//different from K.F.
 	int rvIndex; // in range 0,...,nrv-1 regardless of tag
 	double startValue;
 };

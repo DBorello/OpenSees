@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-10-31 21:36:22 $
+// $Revision: 1.10 $
+// $Date: 2008-02-29 19:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariablePositioner.h,v $
 
 
@@ -36,7 +36,7 @@
 
 #include <ReliabilityDomainComponent.h>
 #include <Parameter.h>
-
+class RandomVariable;
 class DomainComponent;
 
 class RandomVariablePositioner : public ReliabilityDomainComponent
@@ -44,8 +44,10 @@ class RandomVariablePositioner : public ReliabilityDomainComponent
 
 public:
 
-	RandomVariablePositioner(int tag, int RVindex, DomainComponent *theObject, const char **argv, int argc);
-	RandomVariablePositioner(int tag, int RVindex, Parameter &param);
+	RandomVariablePositioner(int tag, int RVindex, DomainComponent *theObject,
+						const char **argv, int argc,
+						RandomVariable *theRVptr);
+	RandomVariablePositioner(int tag, int RVindex, Parameter &param, RandomVariable *theRV);
 	~RandomVariablePositioner();
 
 	void Print(OPS_Stream &s, int flag =0);
@@ -56,11 +58,14 @@ public:
 	int setNewTag(int newTag); // Do we really need this anymore? -- MHS
 	int setRvIndex(int newRvIndex);
 	int getRvIndex(void);
+	RandomVariable *getRandomVariable(void) const {return theRV;}
 
 protected:
 
 private:
 	int rvIndex;
+
+	RandomVariable *theRV;
 
 	Parameter theParameter;
 };

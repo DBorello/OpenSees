@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-02-24 01:40:29 $
+// $Revision: 1.3 $
+// $Date: 2008-02-29 19:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/filter/Filter.h,v $
 
 
@@ -46,6 +46,7 @@ public:
 	virtual double getAmplitude(double time) = 0;
 	virtual double getMaxAmplitude() = 0;
 	virtual double getTimeOfMaxAmplitude() = 0;
+	virtual void setKickTime(double time);	///// added by K Fujimura /////
 
 protected:
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:44:42 $
+// $Revision: 1.2 $
+// $Date: 2008-02-29 19:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/filter/Filter.cpp,v $
 
 
@@ -43,3 +43,11 @@ Filter::~Filter()
 {
 }
 
+/////S added by K Fujimura /////
+void Filter::setKickTime(double time)
+{
+//	opserr << "ERROR: Filter::setKickTime\n" << endln;
+//	opserr << "Assumed filter is not implemented with setKickTime\n" << endln;
+//	opserr << "called from TELM\n" << endln;
+}
+/////E added by K Fujimura /////
