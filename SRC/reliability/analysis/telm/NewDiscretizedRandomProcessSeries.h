@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:53 $
+// $Revision: 1.2 $
+// $Date: 2008-02-29 23:04:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/NewDiscretizedRandomProcessSeries.h,v $
                                                                        
 
@@ -73,7 +73,7 @@ public:
     
     
     // AddingSensitivity:BEGIN //////////////////////////////////////////
-    int setParameter     (const char **argv, int argc, Information &info);
+    int setParameter     (const char **argv, int argc, Parameter &param);
     int updateParameter  (int parameterID, Information &info);
     int activateParameter(int parameterID);
     double getFactorSensitivity(double time);
@@ -96,12 +96,7 @@ public:
     ModulatingFunction **theModulatingFunctions;
     Vector *randomVariables;	// current random pulses in this class;
     Vector *kickInTimes;		// launching time of each random pulses;
-    int* arrayID;     // array of seq no. of random variable in this class
-    // to refer by random variable ID#
-    // i.e. arryID(i)=j means the jth random variables in
-    // this class is the RandomVariable with id# i.
     int numRandVar;	  // number of random variable 
-    int MaxRanVarID;  // Maximu RV ID
     int parameterID;	
     bool* active;
     ofstream output;
