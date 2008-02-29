@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-10-26 04:42:10 $
+// $Revision: 1.2 $
+// $Date: 2008-02-29 01:18:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/WFFiberSection2d.h,v $
                                                                         
 // Written: MHS
