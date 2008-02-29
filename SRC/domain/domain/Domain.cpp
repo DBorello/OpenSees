@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.49 $
-// $Date: 2007-12-07 01:58:49 $
+// $Revision: 1.50 $
+// $Date: 2008-02-29 20:44:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -1434,6 +1434,17 @@ Domain::setLoadConstant(void)
       thePattern->setLoadConstant();
 }
 
+
+void
+Domain::unsetLoadConstant(void)
+{
+    // loop over all the load patterns that are currently added to the domain
+    // getting them to set their loads as now constant
+    LoadPattern *thePattern;
+    LoadPatternIter &thePatterns = this->getLoadPatterns();
+    while((thePattern = thePatterns()) != 0)
+      thePattern->unsetLoadConstant();
+}
 
 
 int
