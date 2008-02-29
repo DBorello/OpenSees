@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.33 $
-// $Date: 2008-02-29 19:47:04 $
+// $Revision: 1.34 $
+// $Date: 2008-02-29 20:38:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -144,12 +144,12 @@ using std::setiosflags;
 /////////////////////////////////////////////////////////
 ///S added by K Fujimura for Random Vibration Analysis ///
 /////////////////////////////////////////////////////////
-#include <analyzer.h>
-#include <staticanalyzer.h>
-#include <dynamicanalyzer.h>
-#include <initialStaticAnalysis.h>
-#include <SelectLoadinitialStaticAnalysis.h>
-#include <AnalyzerGfunEvaluator.h>
+#include <Analyzer.h>
+#include <StaticAnalyzer.h>
+#include <DynamicAnalyzer.h>
+#include <InitialStaticAnalysis.h>
+#include <SelectLoadInitialStaticAnalysis.h>
+#include <AnalyzerGFunEvaluator.h>
 #include <AnalyzerGradGEvaluator.h>
 #include <NewWhitenoiseFilter.h>
 #include <NewStandardLinearOscillatorAccelerationFilter.h>

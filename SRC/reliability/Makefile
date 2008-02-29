@@ -48,6 +48,49 @@ RELIABILITY_OBJS = $(FE)/reliability/analysis/analysis/FORMAnalysis.o \
 		$(FE)/reliability/analysis/stepSize/StepSizeRule.o \
 		$(FE)/reliability/analysis/transformation/NatafProbabilityTransformation.o \
 		$(FE)/reliability/analysis/transformation/ProbabilityTransformation.o \
+		$(FE)/reliability/analysis/telm/AllIndependentTransformation.o \
+		$(FE)/reliability/analysis/telm/NewNewmarkSensitivityIntegrator.o \
+		$(FE)/reliability/analysis/telm/RandomVibrationSimulatorResult.o \
+		$(FE)/reliability/analysis/telm/Analyzer.o \
+		$(FE)/reliability/analysis/telm/NewSearchWithStepSizeAndStepDirection.o \
+		$(FE)/reliability/analysis/telm/ranrotb.o \
+		$(FE)/reliability/analysis/telm/AnalyzerGFunEvaluator.o \
+		$(FE)/reliability/analysis/telm/NewSensitivityAlgorithm.o \
+		$(FE)/reliability/analysis/telm/ranrotw.o \
+		$(FE)/reliability/analysis/telm/AnalyzerGradGEvaluator.o \
+		$(FE)/reliability/analysis/telm/NewStandardLinearOscillatorAccelerationFilter.o \
+		$(FE)/reliability/analysis/telm/ReliabilityDirectIntegrationAnalysis.o \
+		$(FE)/reliability/analysis/telm/CrossingRateAnalyzer.o \
+		$(FE)/reliability/analysis/telm/NewStaticSensitivityIntegrator.o \
+		$(FE)/reliability/analysis/telm/ReliabilityStaticAnalysis.o \
+		$(FE)/reliability/analysis/telm/DynamciAnalyzer.o \
+		$(FE)/reliability/analysis/telm/NewWhitenoiseFilter.o \
+		$(FE)/reliability/analysis/telm/SelectLoadInitialStaticAnalysis.o \
+		$(FE)/reliability/analysis/telm/FirstPassageAnalyzer.o \
+		$(FE)/reliability/analysis/telm/NonStatFirstPassageAnalyzer.o \
+		$(FE)/reliability/analysis/telm/SmoothConcrete02.o \
+		$(FE)/reliability/analysis/telm/FOSeriesSimulation.o \
+		$(FE)/reliability/analysis/telm/NonStatRandomVibrationSimulation.o \
+		$(FE)/reliability/analysis/telm/StatFirstPassageAnalyzer.o \
+		$(FE)/reliability/analysis/telm/GeneralRandGenerator.o \
+		$(FE)/reliability/analysis/telm/OutCrossingResults.o \
+		$(FE)/reliability/analysis/telm/StaticAnalyzer.o \
+		$(FE)/reliability/analysis/telm/GFunEachstepEvaluator.o \
+		$(FE)/reliability/analysis/telm/PerformanceFunctionCoeff.o \
+		$(FE)/reliability/analysis/telm/StatRandomVibrationSimulation.o \
+		$(FE)/reliability/analysis/telm/InitialPointBuilder.o \
+		$(FE)/reliability/analysis/telm/PerformanceFunctionCoefficientIter.o \
+		$(FE)/reliability/analysis/telm/ThresholdIncInitialPointBuilder.o \
+		$(FE)/reliability/analysis/telm/InitialStaticAnalysis.o \
+		$(FE)/reliability/analysis/telm/rancombi.o \
+		$(FE)/reliability/analysis/telm/TimePoints.o \
+		$(FE)/reliability/analysis/telm/mersenne.o \
+		$(FE)/reliability/analysis/telm/RandomProcess.o \
+		$(FE)/reliability/analysis/telm/UniformGenerator.o \
+		$(FE)/reliability/analysis/telm/mother.o \
+		$(FE)/reliability/analysis/telm/RandomVibrationAnalysis.o \
+		$(FE)/reliability/analysis/telm/NewDiscretizedRandomProcessSeries.o \
+		$(FE)/reliability/analysis/telm/RandomVibrationSimulation.o \
 		$(FE)/reliability/domain/components/CorrelationCoefficient.o \
 		$(FE)/reliability/domain/components/CorrelationCoefficientIter.o \
 		$(FE)/reliability/domain/components/ParameterPositioner.o \
