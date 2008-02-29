@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-03-04 00:48:12 $
+// $Revision: 1.7 $
+// $Date: 2008-02-29 20:47:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/UniformExcitation.h,v $
                                                                         
                                                                         
@@ -48,19 +48,23 @@ class UniformExcitation : public EarthquakePattern
     void setDomain(Domain *theDomain);    
     void applyLoad(double time);
     void Print(OPS_Stream &s, int flag =0);
-
+    int getDirection(void) {return theDof;}
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker);    
-
+    
     LoadPattern *getCopy(void);
+
+    virtual int setParameter(const char **argv, int argc, Parameter &param);
 
     // AddingSensitivity:BEGIN /////////////////////////////////
     void applyLoadSensitivity(double time);
     // AddingSensitivity:END ///////////////////////////////////
-
+    
+    const GroundMotion *getGroundMotion(void);
+    
  protected:
-
+    
  private:
     GroundMotion *theMotion; // the ground motion
     int theDof;      // the dof corrseponding to the ground motion

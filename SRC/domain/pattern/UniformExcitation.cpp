@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2005-11-07 21:36:34 $
+// $Revision: 1.8 $
+// $Date: 2008-02-29 20:47:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/UniformExcitation.cpp,v $
                                                                         
                                                                         
@@ -64,6 +64,32 @@ UniformExcitation::~UniformExcitation()
 
 }
 
+
+const GroundMotion *
+UniformExcitation::getGroundMotion(void)
+{
+  return theMotion;
+}
+
+int
+UniformExcitation::setParameter(const char **argv, int argc, Parameter &param)
+{
+  return theMotion->setParameter(argv, argc, param);
+}
+
+/*
+int
+UniformExcitation::updateParameter(int parameterID, Information &info)
+{
+  return theMotion->updateParameter(parameterID, info);
+}
+
+int
+UniformExcitation::activateParameter(int pparameterID)
+{
+  return theMotion->activateParameter(pparameterID);
+}
+*/
 
 void
 UniformExcitation::setDomain(Domain *theDomain) 
