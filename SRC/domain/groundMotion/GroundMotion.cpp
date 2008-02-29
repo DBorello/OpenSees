@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2006-09-05 20:54:46 $
+// $Revision: 1.11 $
+// $Date: 2008-02-29 22:35:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/groundMotion/GroundMotion.cpp,v $
                                                                         
 // Written: fmk 
@@ -483,6 +483,7 @@ GroundMotion::setParameter(const char **argv, int argc, Parameter &param)
   return theAccelSeries->setParameter(argv, argc, param);
 }
 
+/*
 int
 GroundMotion::updateParameter(int parameterID, Information &info)
 {
@@ -494,6 +495,7 @@ GroundMotion::activateParameter(int pparameterID)
 {
   return theAccelSeries->activateParameter(pparameterID);
 }
+*/
 // AddingSensitivity:END ////////////////////////////////////
 
 
