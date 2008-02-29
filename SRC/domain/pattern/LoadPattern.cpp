@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2007-10-25 22:53:57 $
+// $Revision: 1.17 $
+// $Date: 2008-02-29 20:45:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.cpp,v $
                                                                         
 // Written: fmk 07/99
@@ -363,6 +363,13 @@ void
 LoadPattern::setLoadConstant(void) 
 {
   isConstant = 0;
+}
+
+
+void
+LoadPattern::unsetLoadConstant(void) 
+{
+  isConstant = 1;
 }
 
 double
