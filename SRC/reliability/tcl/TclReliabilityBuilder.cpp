@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.34 $
-// $Date: 2008-02-29 20:38:14 $
+// $Revision: 1.35 $
+// $Date: 2008-03-03 21:28:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -4107,17 +4107,16 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 		}
 		if (theProbabilityTransformation == 0 ) {
 //////////////////////////////////////////////////////////////////////////////////
-/////////////S Modified by K Fujimura /////////////////////////////////////////////
+///////////// Modified by K Fujimura /////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
 			opserr << "Assume all RV's are independent" << endln;
 			theProbabilityTransformation = 
 			new AllIndependentTransformation(theReliabilityDomain,0);
 //////////////////////////////////////////////////////////////////////////////////
-/////////////E Modified by K Fujimura /////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////
-
+///////////// Modified by K Fujimura /////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 			opserr << "Need theProbabilityTransformation before a FindDesignPointAlgorithm can be created" << endln;
-			// return TCL_ERROR; //commented by K.F.
+//			return TCL_ERROR;
 		}
 //		if (theStartPoint == 0 ) {
 //			opserr << "Need theStartPoint before a FindDesignPointAlgorithm can be created" << endln;
@@ -4129,7 +4128,8 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 		}
 
 		int printFlag=0;
-		char fileNamePrint[256];
+		char *fileNamePrint;
+		fileNamePrint = new char[256];
 		strcpy(fileNamePrint,"initialized");
 
 
@@ -4187,7 +4187,7 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 			}
 		}
 		
-		theNewSearchWithStepSizeAndStepDirection = new NewSearchWithStepSizeAndStepDirection(
+		theFindDesignPointAlgorithm = new SearchWithStepSizeAndStepDirection(
 					maxNumIter, 
 					theGFunEvaluator,
 					theGradGEvaluator,
@@ -4199,9 +4199,127 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 					printFlag,
 					fileNamePrint,
 					theStartPoint);
-		 
-		theFindDesignPointAlgorithm = theNewSearchWithStepSizeAndStepDirection;
 
+		delete [] fileNamePrint;
+		
+	}
+	else if (strcmp(argv[argvCounter],"NewStepSearch") == 0) {
+		argvCounter++;
+
+		// Check that the necessary ingredients are present
+		if (theGFunEvaluator == 0 ) {
+			opserr << "Need theGFunEvaluator before a FindDesignPointAlgorithm can be created" << endln;
+			return TCL_ERROR;
+		}
+		if (theGradGEvaluator == 0 ) {
+			opserr << "Need theGradGEvaluator before a FindDesignPointAlgorithm can be created" << endln;
+			return TCL_ERROR;
+		}
+		if (theStepSizeRule == 0 ) {
+			opserr << "Need theStepSizeRule before a FindDesignPointAlgorithm can be created" << endln;
+			return TCL_ERROR;
+		}
+		if (theSearchDirection == 0 ) {
+			opserr << "Need theSearchDirection before a FindDesignPointAlgorithm can be created" << endln;
+			return TCL_ERROR;
+		}
+		if (theProbabilityTransformation == 0 ) {
+			opserr << "Need theProbabilityTransformation before a FindDesignPointAlgorithm can be created" << endln;
+//////////////////////////////////////////////////////////////////////////////////
+///////////// Modified by K Fujimura /////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+			opserr << "Assume all RV's are independent" << endln;
+			theProbabilityTransformation = 
+			new AllIndependentTransformation(theReliabilityDomain,0);
+//////////////////////////////////////////////////////////////////////////////////
+///////////// Modified by K Fujimura /////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+//			return TCL_ERROR;
+		}
+//		if (theStartPoint == 0 ) {
+//			opserr << "Need theStartPoint before a FindDesignPointAlgorithm can be created" << endln;
+//			return TCL_ERROR;
+//		}
+		if (theReliabilityConvergenceCheck == 0 ) {
+			opserr << "Need theReliabilityConvergenceCheck before a FindDesignPointAlgorithm can be created" << endln;
+			return TCL_ERROR;
+		}
+
+		int printFlag=0;
+		char *fileNamePrint;
+		fileNamePrint = new char[256];
+		strcpy(fileNamePrint,"initialized");
+
+
+		int maxNumIter = 100;
+		while (argvCounter < argc) {
+
+			if (strcmp(argv[argvCounter],"-maxNumIter") == 0) {
+				argvCounter++;
+
+				if (Tcl_GetInt(interp, argv[argvCounter], &maxNumIter) != TCL_OK) {
+					opserr << "ERROR: invalid input: maxNumIter \n";
+					return TCL_ERROR;
+				}
+				argvCounter++;
+			}
+			else if (strcmp(argv[argvCounter],"-printAllPointsX") == 0) {
+				argvCounter++;
+				printFlag = 1;
+				strcpy(fileNamePrint,argv[argvCounter]);
+				argvCounter++;
+			}
+			else if (strcmp(argv[argvCounter],"-printAllPointsY") == 0) {
+				argvCounter++;
+				printFlag = 2;
+				strcpy(fileNamePrint,argv[argvCounter]);
+				argvCounter++;
+			}
+			else if (strcmp(argv[argvCounter],"-printDesignPointX") == 0) {
+				argvCounter++;
+				printFlag = 3;
+				strcpy(fileNamePrint,argv[argvCounter]);
+				argvCounter++;
+			}
+			else if (strcmp(argv[argvCounter],"-printDesignPointY") == 0) {
+				argvCounter++;
+				printFlag = 4;
+				strcpy(fileNamePrint,argv[argvCounter]);
+				argvCounter++;
+			}
+			else if (strcmp(argv[argvCounter],"-printCurrentPointX") == 0) {
+				argvCounter++;
+				printFlag = 5;
+				strcpy(fileNamePrint,argv[argvCounter]);
+				argvCounter++;
+			}
+			else if (strcmp(argv[argvCounter],"-printCurrentPointY") == 0) {
+				argvCounter++;
+				printFlag = 6;
+				strcpy(fileNamePrint,argv[argvCounter]);
+				argvCounter++;
+			}
+			else {
+				opserr << "ERROR: Invalid input to SearchWithStepSizeAndStepDirection. " << endln;
+				return TCL_ERROR;
+			}
+		}
+		
+		theFindDesignPointAlgorithm = new NewSearchWithStepSizeAndStepDirection(
+					maxNumIter, 
+					theGFunEvaluator,
+					theGradGEvaluator,
+					theStepSizeRule,
+					theSearchDirection,
+					theProbabilityTransformation,
+					theHessianApproximation,
+					theReliabilityConvergenceCheck,
+					printFlag,
+					fileNamePrint,
+					theStartPoint);
+
+		delete [] fileNamePrint;
+		
 	}
 	else {
 		opserr << "ERROR: unrecognized type of FindDesignPointAlgorithm Algorithm \n";
@@ -4214,9 +4332,6 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 	}
 	return TCL_OK;
 }
-
-
-
 
 //////////////////////////////////////////////////////////////////
 int 
