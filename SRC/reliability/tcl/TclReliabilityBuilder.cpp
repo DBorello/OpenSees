@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.36 $
-// $Date: 2008-03-03 21:41:36 $
+// $Revision: 1.37 $
+// $Date: 2008-03-03 22:27:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -4212,6 +4212,7 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 		
 	}
 	else if (strcmp(argv[argvCounter],"NewStepSearch") == 0) {
+		
 		argvCounter++;
 
 		// Check that the necessary ingredients are present
@@ -4312,8 +4313,8 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 				return TCL_ERROR;
 			}
 		}
-		
-		theFindDesignPointAlgorithm = new NewSearchWithStepSizeAndStepDirection(
+	
+		theNewSearchWithStepSizeAndStepDirection = new NewSearchWithStepSizeAndStepDirection(
 					maxNumIter, 
 					theGFunEvaluator,
 					theGradGEvaluator,
@@ -4325,6 +4326,7 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 					printFlag,
 					fileNamePrint,
 					theStartPoint);
+		theFindDesignPointAlgorithm = theNewSearchWithStepSizeAndStepDirection;
 
 		delete [] fileNamePrint;
 		
@@ -4337,8 +4339,11 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 	if (theFindDesignPointAlgorithm == 0) {
 		opserr << "ERROR: could not create theFindDesignPointAlgorithm \n";
 		return TCL_ERROR;
-	}
+	} 
+
 	return TCL_OK;
+
+	
 }
 
 //////////////////////////////////////////////////////////////////
@@ -6556,7 +6561,7 @@ TclReliabilityModelBuilder_addInitialPointBuilder(ClientData clientData, Tcl_Int
 		}
 
 		if (theNewSearchWithStepSizeAndStepDirection == 0 ) {
-			opserr << "Need theFindDesignPointAlgorithm before a ThresholdIncInitialPointBuilder can be created" << endln;
+			opserr << "Need theNewSearchWithStepSizeAndStepDirection before a ThresholdIncInitialPointBuilder can be created" << endln;
 			return TCL_ERROR;
 		}
 
