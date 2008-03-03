@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.35 $
-// $Date: 2008-03-03 21:28:45 $
+// $Revision: 1.36 $
+// $Date: 2008-03-03 21:41:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -3162,8 +3162,9 @@ TclReliabilityModelBuilder_addSearchDirection(ClientData clientData, Tcl_Interp 
 
 		// Check that a transformation has been created
 		if (theProbabilityTransformation == 0 ) {
-			opserr << "Need theProbabilityTransformation before a GradientProjectionSearchDirection can be created" << endln;
-			return TCL_ERROR;
+		  opserr << "Assume all RV's are independent" << endln;
+		  theProbabilityTransformation = 
+		    new AllIndependentTransformation(theReliabilityDomain,0);
 		}
 
 		// Check that a gfun evaluator has been created
@@ -3592,8 +3593,15 @@ TclReliabilityModelBuilder_addStepSizeRule(ClientData clientData, Tcl_Interp *in
 			return TCL_ERROR;
 		}
 		if (theProbabilityTransformation == 0 ) {
-			opserr << "Need theProbabilityTransformation before a ArmijoStepSizeRule can be created" << endln;
-			return TCL_ERROR;
+//////////////////////////////////////////////////////////////////////////////////
+///////////// Modified by K Fujimura /////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+			opserr << "Assume all RV's are independent" << endln;
+			theProbabilityTransformation = 
+			new AllIndependentTransformation(theReliabilityDomain,0);
+//////////////////////////////////////////////////////////////////////////////////
+///////////// Modified by K Fujimura /////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 		}
 		if (theMeritFunctionCheck == 0 ) {
 			opserr << "Need theMeritFunctionCheck before a ArmijoStepSizeRule can be created" << endln;
