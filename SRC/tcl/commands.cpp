@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.109 $
-// $Date: 2008-02-29 20:42:27 $
+// $Revision: 1.110 $
+// $Date: 2008-03-04 23:48:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -41,9 +41,6 @@
 
 extern "C" {
 #include <tcl.h>
-EXTERN int      Tcl_SetObjCmd _ANSI_ARGS_((ClientData clientData,
-					   Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
-
 }
 
 #include <OPS_Globals.h>
@@ -460,6 +457,16 @@ getPID(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int 
 getNP(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
+int 
+opsBarrier(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+opsSend(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+opsRecv(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+
 int
 neesUpload(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
@@ -476,7 +483,10 @@ extern int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL
 
 extern int myCommands(Tcl_Interp *interp);
 
-extern "C" int Tcl_InterpObjCmd(ClientData clientData,  Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]);
+//extern "C" int Tcl_InterpObjCmd(ClientData clientData,  
+//			Tcl_Interp *interp, 
+//		int objc, 
+//	Tcl_Obj *const objv[]);
 
 int
 convertBinaryToText(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
@@ -487,27 +497,28 @@ convertTextToBinary(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Cha
 
 int Tcl_InterpOpenSeesObjCmd(ClientData clientData,  Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[])
 {
-   int index;
-   static TCL_Char *options[] = {
-     "alias",	"aliases",	"create",	"delete", 
-     "eval",		"exists",	"expose",	"hide", 
-     "hidden",	"issafe",	"invokehidden",	"marktrusted", 
-     "recursionlimit",		"slaves",	"share",
-     "target",	"transfer",
-     NULL
-    };
-   enum option {
-     OPT_ALIAS,	OPT_ALIASES,	OPT_CREATE,	OPT_DELETE,
-     OPT_EVAL,	OPT_EXISTS,	OPT_EXPOSE,	OPT_HIDE,
-     OPT_HIDDEN,	OPT_ISSAFE,	OPT_INVOKEHID,	OPT_MARKTRUSTED,
-     OPT_RECLIMIT,			OPT_SLAVES,	OPT_SHARE,
-     OPT_TARGET,	OPT_TRANSFER
-   };
+  int index;
+  static TCL_Char *options[] = {
+    "alias",	"aliases",	"create",	"delete", 
+    "eval",		"exists",	"expose",	"hide", 
+    "hidden",	"issafe",	"invokehidden",	"marktrusted", 
+    "recursionlimit",		"slaves",	"share",
+    "target",	"transfer",
+    NULL
+  };
+  enum option {
+    OPT_ALIAS,	OPT_ALIASES,	OPT_CREATE,	OPT_DELETE,
+    OPT_EVAL,	OPT_EXISTS,	OPT_EXPOSE,	OPT_HIDE,
+    OPT_HIDDEN,	OPT_ISSAFE,	OPT_INVOKEHID,	OPT_MARKTRUSTED,
+    OPT_RECLIMIT,			OPT_SLAVES,	OPT_SHARE,
+    OPT_TARGET,	OPT_TRANSFER
+  };
 
-  int ok = Tcl_InterpObjCmd(clientData, interp, objc, objv);
-  if (ok != TCL_OK) 
-    return ok;
-
+  int ok = TCL_OK;
+  //int ok = Tcl_InterpObjCmd(clientData, interp, objc, objv);
+  //if (ok != TCL_OK) 
+  //return ok;
+  
   if (Tcl_GetIndexFromObj(interp, objv[1], options, "option", 0, &index) != TCL_OK) {
     return TCL_ERROR;
   }
@@ -523,7 +534,7 @@ int Tcl_InterpOpenSeesObjCmd(ClientData clientData,  Tcl_Interp *interp, int obj
   default:
     return ok;
   }
-
+  
   return ok;
 }
 
@@ -622,6 +633,12 @@ int g3AppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
     Tcl_CreateCommand(interp, "getPID", &getPID, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    Tcl_CreateCommand(interp, "barrier", &opsBarrier, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    Tcl_CreateCommand(interp, "send", &opsSend, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    Tcl_CreateCommand(interp, "recv", &opsRecv, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
     Tcl_CreateCommand(interp, "metaData",     neesMetaData,(ClientData)NULL, NULL);
     Tcl_CreateCommand(interp, "defaultUnits", defaultUnits,(ClientData)NULL, NULL);
@@ -680,15 +697,36 @@ int g3AppInit(Tcl_Interp *interp) {
 }
 
 int 
-OPS_SetObjCmd(ClientData clientData, Tcl_Interp *interp, int argc, Tcl_Obj * const *argv)
+OPS_SetObjCmd(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj * const objv[])
 {
-  
-  if (argc > 2)
-    simulationInfo.addParameter(Tcl_GetString(argv[1]), Tcl_GetString(argv[2]));
 
+    if (objc > 2)
+    simulationInfo.addParameter(Tcl_GetString(objv[1]), Tcl_GetString(objv[2]));
 
-  Tcl_SetObjCmd(clientData, interp, argc, argv);
-  return 0;
+    Tcl_Obj *varValueObj;
+    
+    if (objc == 2) {
+      varValueObj = Tcl_ObjGetVar2(interp, objv[1], NULL,TCL_LEAVE_ERR_MSG);
+      if (varValueObj == NULL) {
+	return TCL_ERROR;
+      }
+      Tcl_SetObjResult(interp, varValueObj);
+      return TCL_OK;
+    } else if (objc == 3) {
+      varValueObj = Tcl_ObjSetVar2(interp, objv[1], NULL, objv[2],
+				   TCL_LEAVE_ERR_MSG);
+      if (varValueObj == NULL) {
+	return TCL_ERROR;
+      }
+      Tcl_SetObjResult(interp, varValueObj);
+      return TCL_OK;
+    } else {
+      Tcl_WrongNumArgs(interp, 1, objv, "varName ?newValue?");
+      return TCL_ERROR;
+    }
+
+    //    Tcl_SetObjCmd(clientData, interp, objc, objv);
+    return 0;
 }
 
 int 
@@ -5283,6 +5321,121 @@ getNP(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
   sprintf(interp->result,"%d",np);
   return TCL_OK;  
 }
+
+
+int 
+opsBarrier(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  int pid = 0;
+#ifdef _PARALLEL_INTERPRETERS
+  return MPI_Barrier();
+#endif
+
+  return TCL_OK;  
+}
+
+
+int 
+opsSend(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  int pid = 0;
+#ifdef _PARALLEL_INTERPRETERS
+  if (argv < 2)
+    return TCL_OK;
+
+  int otherPID = -1;
+  int myPID =  theMachineBroker->getPID();
+  int np =  theMachineBroker->getNP();
+  const char *dataToSend = argv[argc-1];
+  int msgLength = strlen(dataToSend)+1;
+
+  if (strcmp(argv[1], "-pid") == 0 && argv > 3) {
+
+    if (Tcl_GetInt(interp, argv[2], &otherPID) != TCL_OK) {
+      opserr << "send -pid pid? data? - pid: " << argv[2] << " invalid\n";
+      return TCL_ERROR;
+    }
+
+    if (otherPID > -1 && otherPID != myPID && otherPID < np) {
+      
+      char *gMsg = new char [msgLength];
+      strcpy(dataToSend, gMsg);
+      
+      MPI_Send((void *)(&msgLength), 1, MPI_INT, otherPID, 0, MPI_COMM_WORLD);
+      MPI_Send((void *)gMsg, msgLength, MPI_CHAR, otherPID, 0, MPI_COMM_WORLD);
+
+    } else {
+      opserr << "send -pid pid? data? - pid: " << otherPID << " invalid\n";
+      return TCL_ERROR;
+    }
+
+  } else {
+    if (pid == 0) {
+      MPI_BCAST((void *)(&msgLength), 1, MPI_INT,  myPID, MPI_COMM_WORLD);
+      MPI_BCAST((void *)gMsg, msgLength, MPI_CHAR, myPID, 0, MPI_COMM_WORLD);
+    } else {
+      opserr << "send data - only process 0 can do a broadcast - you may need to kill the application";
+      return TCL_ERROR;
+    }
+  }
+
+#endif
+
+  return TCL_OK;  
+}
+
+
+int 
+opsRecv(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  int pid = 0;
+#ifdef _PARALLEL_INTERPRETERS
+  if (argv < 2)
+    return TCL_OK;
+
+  int otherPID = 0;
+  int myPID =  theMachineBroker->getPID();
+  int np =  theMachineBroker->getNP();
+  const char *varToSet = argv[argc-1];
+  if (strcmp(argv[1], "-pid") == 0 && argv > 3) {
+
+    if (Tcl_GetInt(interp, argv[2], &otherPID) != TCL_OK) {
+      opserr << "recv -pid pid? data? - pid: " << argv[2] << " invalid\n";
+      return TCL_ERROR;
+    }
+
+    if (otherPID > -1 && otherPID != pid && otherPID < np) {
+
+      int msgLength;
+      MPI_Recv((void *)(&msgLength), 1, MPI_INT, otherPID, 0, MPI_COMM_WORLD);
+
+      char *gMsg = new char [msgLength];
+
+      MPI_Recv((void *)gMsg, msgLength, MPI_CHAR, otherPID, 0, MPI_COMM_WORLD);
+
+      Tcl_SetVar(interp, varToSet, gMsg, TCL_LEAVE_ERR_MSG);
+
+    } else {
+      opserr << "send -pid pid? data? - " << otherPID << " invalid\n";
+      return TCL_ERROR;
+    }
+  } else {
+
+    if (myPID != 0) {
+      MPI_BCAST((void *)(&msgLength), 1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_BCAST((void *)gMsg, msgLength, MPI_CHAR, 0, MPI_COMM_WORLD);
+    } else {
+      opserr << "send data - only process 0 can do a broadcast - you may need to kill the application";
+      return TCL_ERROR;
+    }
+  }
+
+#endif
+
+  return TCL_OK;  
+}
+
+
 
 
 int
