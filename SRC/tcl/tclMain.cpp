@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.44 2008-02-15 23:36:24 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.45 2008-03-04 23:48:21 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -28,8 +28,12 @@
 extern "C" {
 #include <tcl.h>
 #include <tclDecls.h>
-EXTERN int		TclFormatInt _ANSI_ARGS_((char *buffer, long n));
-EXTERN int		TclObjCommandComplete _ANSI_ARGS_((Tcl_Obj *cmdPtr));
+#ifdef _TCL85
+#define TclFormatInt(buf, n)   sprintf((buf),"%ld", (long)(n))
+#else
+EXTERN int  TclFormatInt _ANSI_ARGS_((char *buffer, long n));
+#endif
+EXTERN int  TclObjCommandComplete _ANSI_ARGS_((Tcl_Obj *cmdPtr));
 }
 
 
