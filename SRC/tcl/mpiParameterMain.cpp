@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2008-02-15 23:47:15 $
+// $Revision: 1.8 $
+// $Date: 2008-03-06 19:39:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/mpiParameterMain.cpp,v $
 
 /* 
@@ -35,7 +35,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: mpiParameterMain.cpp,v 1.7 2008-02-15 23:47:15 fmk Exp $
+ * RCS: @(#) $Id: mpiParameterMain.cpp,v 1.8 2008-03-06 19:39:41 fmk Exp $
  */
 
 extern "C" {
@@ -112,18 +112,36 @@ extern void g3TclMain(int argc, char **argv, Tcl_AppInitProc *appInitProc, int r
 #include <Channel.h>
 #include <Message.h>
 
-extern PartitionedDomain theDomain;
+#include <GraphPartitioner.h>
+#include <LoadBalancer.h>
 
-extern int OPS_PARALLEL_PROCESSING;
+PartitionedDomain theDomain;
+
+/*extern int OPS_PARALLEL_PROCESSING;
 extern int OPS_NUM_SUBDOMAINS;
 extern bool OPS_PARTITIONED;
 extern FEM_ObjectBroker *OPS_OBJECT_BROKER;
 extern MachineBroker    *OPS_MACHINE;
 extern bool OPS_USING_MAIN_DOMAIN;
 extern int OPS_MAIN_DOMAIN_PARTITION_ID;
+*/
+
+int OPS_PARALLEL_PROCESSING =0;
+int OPS_NUM_SUBDOMAINS      =0;
+bool OPS_PARTITIONED        =false;
+bool OPS_USING_MAIN_DOMAIN  = false;
+int OPS_MAIN_DOMAIN_PARTITION_ID =0;
+
+DomainPartitioner *OPS_DOMAIN_PARTITIONER =0;
+GraphPartitioner  *OPS_GRAPH_PARTITIONER =0;
+LoadBalancer      *OPS_BALANCER = 0;
+FEM_ObjectBroker  *OPS_OBJECT_BROKER =0;
+MachineBroker     *OPS_MACHINE =0;
+Channel          **OPS_theChannels = 0;
 
 MachineBroker *theMachineBroker = 0;
-Channel **theChannels = 0;
+//Channel **theChannels = 0;
+
 int numChannels = 0;
 int rank = 0;
 int np = 0;
@@ -134,15 +152,16 @@ main(int argc, char **argv)
   FEM_ObjectBrokerAllClasses theBroker;
   MPI_MachineBroker theMachine(&theBroker, argc, argv);
   theMachineBroker = &theMachine;
+  OPS_MACHINE = &theMachine;
 
   rank = theMachine.getPID();
   np = theMachine.getNP();
 
   if (rank == 0) {
-    theChannels = new Channel *[np-1];
+    OPS_theChannels = new Channel *[np-1];
     numChannels = np-1;
   } else {
-    theChannels = new Channel *[1];
+    OPS_theChannels = new Channel *[1];
     numChannels = 1;
   }
 
@@ -181,7 +200,7 @@ main(int argc, char **argv)
 
     for (int j=0; j<np-1; j++) {
       Channel *otherChannel = theMachine.getRemoteProcess();
-      theChannels[j] = otherChannel;
+      OPS_theChannels[j] = otherChannel;
       otherChannel->sendID(0,0,data);
       otherChannel->sendMsg(0,0,msgChar);
     }
@@ -191,7 +210,7 @@ main(int argc, char **argv)
     static ID data(2);    
 
     Channel *myChannel = theMachine.getMyChannel();
-    theChannels[0] = myChannel;
+    OPS_theChannels[0] = myChannel;
     myChannel->recvID(0,0,data);
     numArg = data(0);
     sizeArg = data(1);
