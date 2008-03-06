@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2008-03-06 19:39:41 $
+// $Revision: 1.9 $
+// $Date: 2008-03-06 22:36:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/mpiParameterMain.cpp,v $
 
 /* 
@@ -35,7 +35,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: mpiParameterMain.cpp,v 1.8 2008-03-06 19:39:41 fmk Exp $
+ * RCS: @(#) $Id: mpiParameterMain.cpp,v 1.9 2008-03-06 22:36:18 fmk Exp $
  */
 
 extern "C" {
@@ -115,9 +115,11 @@ extern void g3TclMain(int argc, char **argv, Tcl_AppInitProc *appInitProc, int r
 #include <GraphPartitioner.h>
 #include <LoadBalancer.h>
 
-PartitionedDomain theDomain;
 
-/*extern int OPS_PARALLEL_PROCESSING;
+
+/*
+PartitionedDomain theDomain;
+extern int OPS_PARALLEL_PROCESSING;
 extern int OPS_NUM_SUBDOMAINS;
 extern bool OPS_PARTITIONED;
 extern FEM_ObjectBroker *OPS_OBJECT_BROKER;
@@ -140,7 +142,7 @@ MachineBroker     *OPS_MACHINE =0;
 Channel          **OPS_theChannels = 0;
 
 MachineBroker *theMachineBroker = 0;
-//Channel **theChannels = 0;
+Channel **theChannels = 0;
 
 int numChannels = 0;
 int rank = 0;
@@ -159,9 +161,11 @@ main(int argc, char **argv)
 
   if (rank == 0) {
     OPS_theChannels = new Channel *[np-1];
+    theChannels = OPS_theChannels;
     numChannels = np-1;
   } else {
     OPS_theChannels = new Channel *[1];
+    theChannels = OPS_theChannels;
     numChannels = 1;
   }
 
