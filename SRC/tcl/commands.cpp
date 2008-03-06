@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.111 $
-// $Date: 2008-03-05 19:13:56 $
+// $Revision: 1.112 $
+// $Date: 2008-03-06 22:36:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -5337,7 +5337,6 @@ opsBarrier(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 int 
 opsSend(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
-  int pid = 0;
 #ifdef _PARALLEL_INTERPRETERS
   if (argc < 2)
     return TCL_OK;
@@ -5369,7 +5368,7 @@ opsSend(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
     }
 
   } else {
-    if (pid == 0) {
+    if (myPID == 0) {
       MPI_Bcast((void *)(&msgLength), 1, MPI_INT,  0, MPI_COMM_WORLD);
       MPI_Bcast((void *)gMsg, msgLength, MPI_CHAR, 0, MPI_COMM_WORLD);
     } else {
@@ -5387,7 +5386,6 @@ opsSend(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 int 
 opsRecv(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
-  int pid = 0;
 #ifdef _PARALLEL_INTERPRETERS
   if (argc < 2)
     return TCL_OK;
@@ -5414,10 +5412,10 @@ opsRecv(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       }
     }
 
-    if (otherPID > -1 && otherPID != pid && otherPID < np) {
+    if (otherPID > -1 && otherPID != myPID && otherPID < np) {
       MPI_Status status;
       
-      if (fromAny = false)
+      if (fromAny == false)
 	MPI_Recv((void *)(&msgLength), 1, MPI_INT, otherPID, 0, MPI_COMM_WORLD, &status);
       else
 	MPI_Recv((void *)(&msgLength), 1, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
@@ -5426,7 +5424,7 @@ opsRecv(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       if (msgLength > 0) {
 	gMsg = new char [msgLength];
 
-	if (fromAny = false)
+	if (fromAny == false)
 	  MPI_Recv((void *)gMsg, msgLength, MPI_CHAR, otherPID, 1, MPI_COMM_WORLD, &status);
 	else
 	  MPI_Recv((void *)gMsg, msgLength, MPI_CHAR, MPI_ANY_SOURCE, 1, MPI_COMM_WORLD, &status);
@@ -5435,7 +5433,7 @@ opsRecv(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       }
 
     } else {
-      opserr << "send -pid pid? data? - " << otherPID << " invalid\n";
+      opserr << "recv -pid pid? data? - " << otherPID << " invalid\n";
       return TCL_ERROR;
     }
   } else {
@@ -5452,7 +5450,7 @@ opsRecv(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       }
 
     } else {
-      opserr << "send data - only process 0 can do a broadcast - you may need to kill the application";
+      opserr << "recv data - only process 0 can do a broadcast - you may need to kill the application";
       return TCL_ERROR;
     }
   }
