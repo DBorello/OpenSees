@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2007-11-30 23:34:33 $
+// $Revision: 1.20 $
+// $Date: 2008-03-10 19:12:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.cpp,v $
                                                                         
 // Written: MHS 
@@ -403,6 +403,10 @@ int Concrete01::revertToStart ()
    // Reset trial variables and state
    this->revertToLastCommit();
 
+   // Quan April 2006---
+   if (SHVs !=0) {SHVs->Zero();}
+   parameterID=0;
+
    return 0;
 }
 
@@ -568,6 +572,7 @@ Concrete01::updateParameter(int parameterID, Information &info)
 	Ctangent = Ec0;
 	CunloadSlope = Ec0;
 	Ttangent = Ec0;
+   	TunloadSlope = CunloadSlope;
 
 	return 0;
 }
