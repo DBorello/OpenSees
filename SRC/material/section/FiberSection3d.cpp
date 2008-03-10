@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2007-12-01 01:03:49 $
+// $Revision: 1.27 $
+// $Date: 2008-03-10 19:52:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -108,6 +108,11 @@ FiberSection3d::FiberSection3d(int tag, int num, Fiber **fibers):
   code(0) = SECTION_RESPONSE_P;
   code(1) = SECTION_RESPONSE_MZ;
   code(2) = SECTION_RESPONSE_MY;
+
+ // AddingSensitivity:BEGIN ////////////////////////////////////
+  parameterID = 0;
+  SHVs=0;
+  // AddingSensitivity:END //////////////////////////////////////
 }
 
 // constructor for blank object that recvSelf needs to be invoked upon
@@ -130,6 +135,10 @@ FiberSection3d::FiberSection3d():
   code(1) = SECTION_RESPONSE_MZ;
   code(2) = SECTION_RESPONSE_MY;
 
+ // AddingSensitivity:BEGIN ////////////////////////////////////
+  parameterID = 0;
+  SHVs=0;
+  // AddingSensitivity:END //////////////////////////////////////
 }
 
 int
@@ -992,3 +1001,133 @@ FiberSection3d::setParameter(const char **argv, int argc, Parameter &param)
 
   return result;
 }
+
+int
+FiberSection3d::activateParameter(int passedParameterID)
+{
+	// Note that the parameteID that is stored here at the 
+	// section level contains all information about section
+	// and material tag number:
+
+
+	parameterID = passedParameterID;
+
+	if (passedParameterID == 0 ) {
+
+		// "Zero out" the identifier in all materials
+		for (int i=0; i<numFibers; i++) {
+			theMaterials[i]->activateParameter(passedParameterID);
+		}
+	}
+
+	else {
+
+		// Extract section and material tags
+		int activeSectionTag = (int)( floor((double)passedParameterID) / (100000) );
+		passedParameterID -= activeSectionTag*100000;
+		int activeMaterialTag = (int)( floor((double)passedParameterID) / (1000) );
+		passedParameterID -= activeMaterialTag*1000;
+
+		// Go down to the sections and set appropriate flags
+		for (int i=0; i<numFibers; i++) {
+			if (activeMaterialTag == theMaterials[i]->getTag()) {
+				theMaterials[i]->activateParameter(passedParameterID);
+			}
+		}
+	}
+
+	return 0;
+}
+
+const Vector &
+FiberSection3d::getSectionDeformationSensitivity(int gradNumber)
+{
+	static Vector dummy(3);
+	dummy.Zero();
+	if (SHVs !=0) {
+		dummy(0) = (*SHVs)(0,(gradNumber-1));
+		dummy(1) = (*SHVs)(1,(gradNumber-1));
+		dummy(2) = (*SHVs)(2,(gradNumber-1));
+	}
+	return dummy;
+}
+
+   
+
+const Vector &
+FiberSection3d::getStressResultantSensitivity(int gradNumber, bool conditional)
+{
+  
+  static Vector ds(3);
+  
+  ds.Zero();
+  
+  double  stressGradient;
+  int loc = 0;
+  
+  
+  for (int i = 0; i < numFibers; i++) {
+    UniaxialMaterial *theMat = theMaterials[i];
+    double y = matData[loc++] - yBar;
+    double z = matData[loc++] - zBar;
+    double A = matData[loc++];
+    stressGradient = theMaterials[i]->getStressSensitivity(gradNumber,conditional);
+    stressGradient *=  A;
+    ds(0) += stressGradient;
+    ds(1) += stressGradient * y;
+    ds(2) += stressGradient * z;
+    
+  }  //for
+  
+  return ds;
+}
+
+const Matrix &
+FiberSection3d::getSectionTangentSensitivity(int gradNumber)
+{
+  static Matrix something(2,2);
+  
+  something.Zero();
+  
+  return something;
+}
+
+int
+FiberSection3d::commitSensitivity(const Vector& defSens, int gradNumber, int numGrads)
+{
+
+  // here add SHVs to store the strain sensitivity.
+
+  if (SHVs == 0) {
+    SHVs = new Matrix(3,numGrads);
+  }
+  
+  (*SHVs)(0,(gradNumber-1)) = defSens(0);
+  (*SHVs)(1,(gradNumber-1)) = defSens(1);
+  (*SHVs)(2,(gradNumber-1)) = defSens(2);
+
+  int loc = 0;
+
+  double d0 = defSens(0);
+  double d1 = defSens(1);
+  double d2 = defSens(2);
+
+  for (int i = 0; i < numFibers; i++) {
+    UniaxialMaterial *theMat = theMaterials[i];
+   	double y = matData[loc++] - yBar;
+	double z = matData[loc++] - zBar;
+	loc++;   // skip A data.
+
+	double strainSens = d0 + y*d1 + z*d2;
+
+
+    
+	theMat->commitSensitivity(strainSens,gradNumber,numGrads);
+  }
+
+  return 0;
+}
+
+// AddingSensitivity:END ///////////////////////////////////
+
+
