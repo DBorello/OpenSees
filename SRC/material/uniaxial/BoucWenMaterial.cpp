@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-11-30 23:34:33 $
+// $Revision: 1.5 $
+// $Date: 2008-03-10 19:07:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/BoucWenMaterial.cpp,v $
 
 
@@ -213,6 +213,7 @@ BoucWenMaterial::getInitialTangent(void)
     return ( alpha*ko + (1-alpha)*ko*Ao );
 }
 
+
 double 
 BoucWenMaterial::getTangent(void)
 {
@@ -399,10 +400,17 @@ BoucWenMaterial::getStressSensitivity(int gradNumber, bool conditional)
 
 
 	// Issue warning if response is zero (then an error will occur)
+	// changed by Quan & Michele 02-07-2006
 	if (Tz == 0.0)  {
+		if (Tstrain == 0.0) {
+			sensitivity = 0.0;
+			return sensitivity;
+		}
+		else {
 		opserr << "ERROR: BoucWenMaterial::getStressSensitivity() is called " << endln
 			<< " is called with zero hysteretic deformation Tz." << endln;
-	}
+		}
+	} // end changes by  Quan & Michele 02-07-2006
 
 	// First set values depending on what is random
 	double Dalpha = 0.0;
@@ -512,6 +520,8 @@ BoucWenMaterial::getRhoSensitivity(int gradNumber)
 int
 BoucWenMaterial::commitSensitivity(double TstrainSensitivity, int gradNumber, int numGrads)
 {
+//  Quan & Michele Apr. 2006
+	if (Tz == 0){return 0;}
 	if (SHVs == 0) {
 		SHVs = new Matrix(3,numGrads);
 	}
@@ -596,6 +606,32 @@ BoucWenMaterial::commitSensitivity(double TstrainSensitivity, int gradNumber, in
 	(*SHVs)(2,(gradNumber-1)) = DTstrain;
 
 	return 0;
+}
+
+
+double
+BoucWenMaterial::getInitialTangentSensitivity(int gradNumber)
+{
+
+	double dAlphadh =0.0;
+	double dKodh =0.0;
+	double dAodh=0.0;
+
+	if (parameterID == 1) {
+		dAlphadh = 1.0;
+	}
+	if (parameterID == 2) {
+		dKodh =1.0;
+	}
+	
+	if (parameterID == 6) {
+		dAodh=1.0;
+	}
+
+    //return ( alpha*ko + (1-alpha)*ko*Ao );
+	
+	return dAlphadh*ko +alpha*dKodh -dAlphadh*ko*Ao+ (1-alpha)*dKodh*Ao+ (1-alpha)*ko*dAodh;
+	
 }
 
 
