@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2007-01-10 23:12:49 $
+// $Revision: 1.26 $
+// $Date: 2008-03-10 18:25:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -1760,9 +1760,20 @@ Node::setParameter(const char **argv, int argc, Parameter &param)
   if (argc < 2)
     return -1;
 
-  if (strstr(argv[0],"mass") != 0) {
-    int direction = atoi(argv[1]);
-    if (direction >= 1 && direction <= 3)
+  if ((strstr(argv[0],"mass") != 0) || (strstr(argv[0],"-mass") != 0)) { 
+    int direction = 0; // atoi(argv[1]);
+    if ((strcmp(argv[1],"x") == 0)||(strcmp(argv[1],"X") == 0)||(strcmp(argv[1],"1") == 0))
+      direction = 1;
+    else if ((strcmp(argv[1],"y") == 0)||(strcmp(argv[1],"Y") == 0)||(strcmp(argv[1],"2") == 0))
+      direction = 2;
+    else if ((strcmp(argv[1],"z") == 0)||(strcmp(argv[1],"Z") == 0)||(strcmp(argv[1],"3") == 0))					
+      direction = 3;
+    else if ((strcmp(argv[1],"xy") == 0)||(strcmp(argv[1],"XY") == 0))
+      direction = 7;
+    else if ((strcmp(argv[1],"xyz") == 0)||(strcmp(argv[1],"XYZ") == 0))
+      direction = 8;
+    
+    if ((direction >= 1 && direction <= 3) || direction == 7 || direction == 8)
       return param.addObject(direction, this);
   }
   else if (strstr(argv[0],"coord") != 0) {
@@ -1783,6 +1794,15 @@ Node::updateParameter(int pparameterID, Information &info)
 {
   if (pparameterID >= 1 && pparameterID <= 3)
     (*mass)(pparameterID-1,pparameterID-1) = info.theDouble;
+
+  else if (pparameterID == 7) {
+    (*mass)(0,0) = info.theDouble;
+    (*mass)(1,1) = info.theDouble;
+  } else if (pparameterID == 8) {
+    (*mass)(0,0) = info.theDouble;
+    (*mass)(1,1) = info.theDouble;
+    (*mass)(2,2) = info.theDouble;
+  }
 
   else if (pparameterID >= 4 && pparameterID <= 6) {
 

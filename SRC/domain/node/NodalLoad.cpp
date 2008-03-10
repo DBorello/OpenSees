@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-09-05 20:46:04 $
+// $Revision: 1.8 $
+// $Date: 2008-03-10 18:25:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/NodalLoad.cpp,v $
                                                                         
                                                                         
@@ -227,6 +227,15 @@ NodalLoad::setParameter(const char **argv, int argc, Parameter &param)
   if (strcmp(argv[0],"3") == 0)
     return param.addObject(3, this);
 
+  if (strcmp(argv[0],"4") == 0)
+    return param.addObject(4, this);
+
+  if (strcmp(argv[0],"5") == 0)
+    return param.addObject(5, this);
+
+  if (strcmp(argv[0],"6") == 0)
+    return param.addObject(6, this);
+
   return -1;
 }
 
@@ -245,6 +254,16 @@ NodalLoad::updateParameter(int parameterID, Information &info)
   case 3:
     (*load)(2) = info.theDouble;
     return 0;
+  case 4:
+    (*load)(3) = info.theDouble;
+    return 0;
+  case 5:
+    (*load)(4) = info.theDouble;
+    return 0;
+  case 6:
+    (*load)(5) = info.theDouble;
+    return 0;
+
   default:
     return -1;
   }
