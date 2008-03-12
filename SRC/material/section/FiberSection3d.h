@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2008-03-10 19:52:33 $
+// $Revision: 1.13 $
+// $Date: 2008-03-12 23:39:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.h,v $
                                                                         
 // Written: fmk
@@ -78,8 +78,7 @@ class FiberSection3d : public SectionForceDeformation
 
     // AddingSensitivity:BEGIN //////////////////////////////////////////
     int setParameter(const char **argv, int argc, Parameter &param);
-    int   updateParameter(int parameterID, Information &info);
-    int   activateParameter(int parameterID);
+
     const Vector & getStressResultantSensitivity(int gradNumber, bool conditional);
     const Matrix & getSectionTangentSensitivity(int gradNumber);
     int   commitSensitivity(const Vector& sectionDeformationGradient, int gradNumber, int numGrads);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.27 $
-// $Date: 2008-03-10 19:52:33 $
+// $Revision: 1.28 $
+// $Date: 2008-03-12 23:39:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -1002,43 +1002,6 @@ FiberSection3d::setParameter(const char **argv, int argc, Parameter &param)
   return result;
 }
 
-int
-FiberSection3d::activateParameter(int passedParameterID)
-{
-	// Note that the parameteID that is stored here at the 
-	// section level contains all information about section
-	// and material tag number:
-
-
-	parameterID = passedParameterID;
-
-	if (passedParameterID == 0 ) {
-
-		// "Zero out" the identifier in all materials
-		for (int i=0; i<numFibers; i++) {
-			theMaterials[i]->activateParameter(passedParameterID);
-		}
-	}
-
-	else {
-
-		// Extract section and material tags
-		int activeSectionTag = (int)( floor((double)passedParameterID) / (100000) );
-		passedParameterID -= activeSectionTag*100000;
-		int activeMaterialTag = (int)( floor((double)passedParameterID) / (1000) );
-		passedParameterID -= activeMaterialTag*1000;
-
-		// Go down to the sections and set appropriate flags
-		for (int i=0; i<numFibers; i++) {
-			if (activeMaterialTag == theMaterials[i]->getTag()) {
-				theMaterials[i]->activateParameter(passedParameterID);
-			}
-		}
-	}
-
-	return 0;
-}
-
 const Vector &
 FiberSection3d::getSectionDeformationSensitivity(int gradNumber)
 {
@@ -1053,7 +1016,6 @@ FiberSection3d::getSectionDeformationSensitivity(int gradNumber)
 }
 
    
-
 const Vector &
 FiberSection3d::getStressResultantSensitivity(int gradNumber, bool conditional)
 {
