@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-03-04 00:38:56 $
+// $Revision: 1.4 $
+// $Date: 2008-03-13 22:29:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/curvature/FindCurvatures.h,v $
 
 //
@@ -40,13 +40,14 @@ class FindCurvatures
 {
 
 public:
-	FindCurvatures();
-	virtual ~FindCurvatures();
-
-	virtual int		computeCurvatures(ReliabilityDomain *theReliabilityDomain) =0;
-	virtual Vector	getCurvatures() =0;
-
-protected:
+  FindCurvatures();
+  virtual ~FindCurvatures();
+  
+  virtual int		computeCurvatures(ReliabilityDomain *theReliabilityDomain) =0;
+  virtual const Vector	&getCurvatures() =0;
+  virtual const Vector	&getPrincipalAxes() =0;
+  
+ protected:
 
 private:
 

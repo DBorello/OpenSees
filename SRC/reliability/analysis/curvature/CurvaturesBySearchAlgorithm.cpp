@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-03-04 00:38:55 $
+// $Revision: 1.5 $
+// $Date: 2008-03-13 22:29:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/curvature/CurvaturesBySearchAlgorithm.cpp,v $
 
 
@@ -141,7 +141,7 @@ CurvaturesBySearchAlgorithm::computeCurvatures(ReliabilityDomain *theReliability
 
 
 
-Vector
+const Vector &
 CurvaturesBySearchAlgorithm::getCurvatures()
 {
 	return curvatures;
@@ -149,3 +149,8 @@ CurvaturesBySearchAlgorithm::getCurvatures()
 
 
 
+const Vector &
+CurvaturesBySearchAlgorithm::getPrincipalAxes()
+{
+	return principalAxes;
+}

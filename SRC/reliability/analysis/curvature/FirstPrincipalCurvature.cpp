@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-03-04 00:38:57 $
+// $Revision: 1.6 $
+// $Date: 2008-03-13 22:29:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/curvature/FirstPrincipalCurvature.cpp,v $
 
 //
@@ -35,6 +35,7 @@
 #include <LimitStateFunction.h>
 #include <Vector.h>
 
+#include <iostream.h> 
 
 FirstPrincipalCurvature::FirstPrincipalCurvature()
 :FindCurvatures(), curvatures(1)
@@ -65,6 +66,22 @@ FirstPrincipalCurvature::computeCurvatures(ReliabilityDomain *theReliabilityDoma
 
 	// Initial computations
 	Vector uLastMinus_u = last_u - secondLast_u;
+    Vector principalAxes = uLastMinus_u;
+
+//	opserr<<"last_u    "<<last_u<<endln;
+//	opserr<<"secondLast_u  "<<secondLast_u<<endln;
+//	opserr<<"principalAxes"<<principalAxes<<endln;
+
+
+    char fileName[30];
+    strcpy (fileName, "principalAxes_.out");
+    ofstream resultsOutputFile( fileName, ios::out );
+    for ( int m=0; m<principalAxes.Size(); m++ ) {
+        resultsOutputFile<<principalAxes(m)<<endln;
+	}
+
+    resultsOutputFile.close();
+
 	double signumProduct = secondLastAlpha ^ uLastMinus_u;
 	double alphaProduct = secondLastAlpha ^ lastAlpha;
 	double sumSquared = 0.0;
@@ -84,14 +101,31 @@ FirstPrincipalCurvature::computeCurvatures(ReliabilityDomain *theReliabilityDoma
 		curvatures(0) = -acos(alphaProduct) / norm_uLastMinus_u;
 	}
 
+
+
+    strcpy (fileName, "principalCurvatures_.out");
+    ofstream resultsOutputFile1( fileName, ios::out );
+    
+	resultsOutputFile1.precision(16);
+    resultsOutputFile1<<curvatures(0)<<endln;
+	
+
+    resultsOutputFile1.close();
+
+
 	return 0;
 }
 
 
-Vector
+const Vector &
 FirstPrincipalCurvature::getCurvatures()
 {
-	return curvatures;
+  return curvatures;
 }
 
+const Vector &
+FirstPrincipalCurvature::getPrincipalAxes()
+{
+  return principalAxes;
+}
 

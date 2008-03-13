@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-03-04 00:38:56 $
+// $Revision: 1.5 $
+// $Date: 2008-03-13 22:29:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/curvature/CurvaturesBySearchAlgorithm.h,v $
 
 
@@ -43,19 +43,20 @@ class CurvaturesBySearchAlgorithm : public FindCurvatures
 {
 
 public:
-	CurvaturesBySearchAlgorithm(int numberOfCurvatures, FindDesignPointAlgorithm *theFindDesignPointAlgorithm);
-	~CurvaturesBySearchAlgorithm();
-
-	int		computeCurvatures(ReliabilityDomain *theReliabilityDomain);
-	Vector	getCurvatures();
-
+  CurvaturesBySearchAlgorithm(int numberOfCurvatures, FindDesignPointAlgorithm *theFindDesignPointAlgorithm);
+  ~CurvaturesBySearchAlgorithm();
+  
+  int		computeCurvatures(ReliabilityDomain *theReliabilityDomain);
+  const Vector	&getCurvatures();
+  const Vector	&getPrincipalAxes();
+  
 protected:
 
 private:	
-	Vector curvatures;
-	int numberOfCurvatures;
-	FindDesignPointAlgorithm *theFindDesignPointAlgorithm;
-
+  Vector curvatures;
+  Vector principalAxes;
+  int numberOfCurvatures;
+  FindDesignPointAlgorithm *theFindDesignPointAlgorithm;
 };
 
 #endif

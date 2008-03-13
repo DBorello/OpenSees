@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-03-04 00:38:57 $
+// $Revision: 1.5 $
+// $Date: 2008-03-13 22:29:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/curvature/FirstPrincipalCurvature.h,v $
 
 
@@ -42,16 +42,18 @@ class FirstPrincipalCurvature : public FindCurvatures
 {
 
 public:
-	FirstPrincipalCurvature();
-	~FirstPrincipalCurvature();
-
-	int		computeCurvatures(ReliabilityDomain *theReliabilityDomain);
-	Vector	getCurvatures();
+  FirstPrincipalCurvature();
+  ~FirstPrincipalCurvature();
+  
+  int		computeCurvatures(ReliabilityDomain *theReliabilityDomain);
+  const Vector	&getCurvatures();
+  const Vector	&getPrincipalAxes();
 
 protected:
 
 private:	
-	Vector curvatures;
+  Vector curvatures;
+  Vector principalAxes;
 
 };
 
