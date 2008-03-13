@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-07-11 23:51:51 $
+// $Revision: 1.3 $
+// $Date: 2008-03-13 22:31:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/hessianApproximation/HessianApproximation.h,v $
 
 
@@ -35,6 +35,7 @@
 #define HessianApproximation_h
 
 #include <Matrix.h>
+#include <Vector.h>
 
 class HessianApproximation
 {
@@ -52,7 +53,6 @@ public:
 					       const Vector &searchDirection,
 					       double g_new,
 					       const Vector &gradG_new) = 0;
-
 protected:
 
 private:
