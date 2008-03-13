@@ -42,7 +42,8 @@ OBJS       = AllIndependentTransformation.o \
 	mother.o \
 	RandomVibrationAnalysis.o \
 	NewDiscretizedRandomProcessSeries.o \
-	RandomVibrationSimulation.o
+	RandomVibrationSimulation.o \
+	localMath.o
 
 # Compilation control
 all:         $(OBJS)
