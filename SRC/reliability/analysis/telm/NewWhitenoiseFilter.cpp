@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:53 $
+// $Revision: 1.2 $
+// $Date: 2008-03-13 22:25:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/NewWhitenoiseFilter.cpp,v $
 
 #include <NewWhitenoiseFilter.h>
@@ -44,7 +44,7 @@ NewWhitenoiseFilter::~NewWhitenoiseFilter()
 }
 
 double
-NewWhitenoiseFilter::getAmplitude(double time)
+NewWhitenoiseFilter::getAmplitude(double time, double dt)
 {
 	if (time<-1.0e-7) {
 		return 0.0;

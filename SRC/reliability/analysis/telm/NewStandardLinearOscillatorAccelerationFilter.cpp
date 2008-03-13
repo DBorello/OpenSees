@@ -22,8 +22,8 @@
 **                                                                    **
 ** ******  ************************************************************ */
 
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:53 $
+// $Revision: 1.2 $
+// $Date: 2008-03-13 22:25:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/NewStandardLinearOscillatorAccelerationFilter.cpp,v $
 
 #include <NewStandardLinearOscillatorAccelerationFilter.h>
@@ -57,7 +57,7 @@ NewStandardLinearOscillatorAccelerationFilter::~NewStandardLinearOscillatorAccel
 }
 
 double
-NewStandardLinearOscillatorAccelerationFilter::getAmplitude(double time)
+NewStandardLinearOscillatorAccelerationFilter::getAmplitude(double time, double dt)
 {
 /*	if (time<0.0) {
 		return 0.0;

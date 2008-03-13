@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:53 $
+// $Revision: 1.2 $
+// $Date: 2008-03-13 22:25:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/NewWhitenoiseFilter.h,v $
 
 #ifndef NewWhitenoiseFilter_h
@@ -37,7 +37,7 @@ class NewWhitenoiseFilter : public Filter
 public:
 	NewWhitenoiseFilter(int tag, double );
 	~NewWhitenoiseFilter();
-	double getAmplitude(double time);
+	double getAmplitude(double time, double dT = 0.0);
 	double getMaxAmplitude();
 	double getTimeOfMaxAmplitude();
 
