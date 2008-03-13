@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2008-02-29 19:47:20 $
+// $Revision: 1.12 $
+// $Date: 2008-03-13 22:33:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/OpenSeesGradGEvaluator.cpp,v $
 
 
@@ -223,7 +223,15 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 			}
 
 			// Set perturbed value in the Tcl workspace
-			double newValue = originalValue*(1.0+perturbationFactor);
+
+			// ---------------------- Quan and michele 
+			double newValue;
+			
+			//if (originalValue ==0 ) newValue = 0.0001;
+			if (fabs(originalValue)<1.0e-14 ) newValue = 0.0001;  //---  Quan Jan 2007 ---
+
+			else newValue = originalValue*(1.0+perturbationFactor);
+
 			sprintf(tclAssignment,"set ud_%d_%d %35.20f", nodeNumber, direction, newValue);
 			if (Tcl_Eval( theTclInterp, tclAssignment) == TCL_ERROR) {
 			  opserr << "ERROR OpenSeesGradGEvaluator -- Tcl_Eval returned error" << endln;
@@ -239,7 +247,9 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 			}
 
 			// Compute gradient
-			double onedgdu = (g_perturbed-g)/(originalValue*perturbationFactor);
+			double onedgdu = (g_perturbed-g)/(newValue-originalValue);
+
+			//double onedgdu = (g_perturbed-g)/(originalValue*perturbationFactor);
 
 			// Make assignment back to its original value
 			sprintf(tclAssignment,"set ud_%d_%d %35.20f", nodeNumber, direction, originalValue);
@@ -283,6 +293,8 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 			sscanf(tempchar,"u_%i_%i", &nodeNumber, &direction);
 
 			// Keep the original value
+
+
 			double originalValue;
 			sprintf(tclAssignment,"$u_%d_%d", nodeNumber, direction);
 			if (Tcl_ExprDouble( theTclInterp, tclAssignment, &originalValue) == TCL_ERROR) {
@@ -292,7 +304,14 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 			}
 
 			// Set perturbed value in the Tcl workspace
-			double newValue = originalValue*(1.0+perturbationFactor);
+
+			// ---------------------- Quan and michele   
+
+			double newValue;
+			//if (originalValue ==0 ) newValue = 0.0001;
+			if (fabs(originalValue)<1.0e-14 ) newValue = 0.0001;  //---  Quan Jan 2006 ---
+			else 	newValue = originalValue*(1.0+perturbationFactor);
+
 			sprintf(tclAssignment,"set u_%d_%d %35.20f", nodeNumber, direction, newValue);
 			if (Tcl_Eval( theTclInterp, tclAssignment) == TCL_ERROR) {
 			  opserr << "ERROR OpenSeesGradGEvaluator -- Tcl_Eval returned error" << endln;
@@ -309,7 +328,9 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 			}
 
 			// Compute gradient
-			double onedgdu = (g_perturbed-g)/(originalValue*perturbationFactor);
+
+
+			double onedgdu = (g_perturbed-g)/(newValue - originalValue);
 
 			// Store the DgDdispl in a matrix
 			if (DgDdispl == 0) {
