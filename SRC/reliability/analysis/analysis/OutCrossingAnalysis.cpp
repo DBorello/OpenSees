@@ -22,13 +22,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-11-06 01:58:19 $
+// $Revision: 1.8 $
+// $Date: 2008-03-13 22:21:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/OutCrossingAnalysis.cpp,v $
 
 //
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
+// Quan and Michele Feb 2006
 
 #include <OutCrossingAnalysis.h>
 #include <ReliabilityAnalysis.h>
@@ -51,7 +52,6 @@ using std::setw;
 using std::setprecision;
 using std::setiosflags;
 
-
 OutCrossingAnalysis::OutCrossingAnalysis(
 				ReliabilityDomain *theRelDom,
 				GFunEvaluator *theGFunEval,
@@ -61,8 +61,11 @@ OutCrossingAnalysis::OutCrossingAnalysis(
 				int p_stepsToStart,
 				int p_stepsToEnd,
 				int p_sampleFreq,
+				int p_impulseFreq,
 				double p_littleDeltaT,
-				TCL_Char *passedFileName)
+				TCL_Char *passedFileName,
+				double p_integralTolerance,
+				bool p_useFirstDesignPt)
 :ReliabilityAnalysis()
 {
 	theFindDesignPointAlgorithm = theFindDesPt;
@@ -70,11 +73,15 @@ OutCrossingAnalysis::OutCrossingAnalysis(
 	theGFunEvaluator = theGFunEval;
 	theGradGEvaluator = theSensEval;
 	analysisType = pAnalysisType;
-	stepsToStart = p_stepsToStart;
-	stepsToEnd = p_stepsToEnd;
-	sampleFreq = p_sampleFreq;
+	stepsToStart = p_stepsToStart;  //  integration time steps
+	stepsToEnd = p_stepsToEnd;    // integration time steps
+	sampleFreq = p_sampleFreq;   // number of integration time steps between two meanOutcrossingAnalysis.
 	littleDeltaT = p_littleDeltaT;
 	strcpy(fileName,passedFileName);
+	impulseFreq = p_impulseFreq;
+
+	integralTolerance = p_integralTolerance; // default value. 
+	useFirstDesignPt = p_useFirstDesignPt; // default 
 }
 
 OutCrossingAnalysis::~OutCrossingAnalysis()
@@ -98,18 +105,19 @@ OutCrossingAnalysis::analyze(void)
 	Vector alpha(numRV), alpha2(numRV), alpha_k(numRV), alpha_kk(numRV);
 	double beta1, beta2;
 	double pf1, pf2;
-	int n_2;
-	double a, b, integral, h, fa, fb, sum_fx2j, sum_fx2j_1, Pmn1;
+//	int n_2;
+//	double a, b, integral, h, fa, fb, sum_fx2j, sum_fx2j_1, Pmn1;
+	double a, b, c, integral, fa, fb, fc,  Pmn1;
 	char string[500];
 
 
 	// Determine number of points
-	double nsteps = stepsToEnd-stepsToStart;
-	int numPoints = (int)floor(nsteps/sampleFreq);
-	numPoints++;
-	double dt = theGFunEvaluator->getDt();
-	double Dt = dt*sampleFreq;
-	double T = dt*sampleFreq*numPoints;
+	double nsteps = stepsToEnd-stepsToStart;       //total integration steps
+	int numPoints = (int)floor(nsteps/sampleFreq);  //  how many time points of computation of outcrossingRate
+	numPoints++;   
+	double dt = theGFunEvaluator->getDt();  // integration time step
+	double Dt = dt*impulseFreq;              // time between impuses.
+	double T = dt*sampleFreq*numPoints;     // total time of last analysis
 
 
 	// Allocate reult vectors
@@ -162,8 +170,8 @@ OutCrossingAnalysis::analyze(void)
 
 
 			// Inform the user
-			char printTime[10];
-			sprintf(printTime, "%5.3f", ((stepsToStart+(i-1)*sampleFreq)*dt) );
+			char printTime[23];
+			sprintf(printTime, "%14.8f", ((stepsToStart+(i-1)*sampleFreq)*dt) );
 			if (analysisType == 1) {
 				strcpy(string,theLimitStateFunction->getExpression());
 				opserr << " ...evaluating -G1=" << string << " at time " << printTime << " ..." << endln;
@@ -213,6 +221,23 @@ OutCrossingAnalysis::analyze(void)
 
 
 				if (analysisType == 1) {
+
+				//  ====== possible options: using first design point as the beginning of this second search.. 
+
+					if (useFirstDesignPt){
+						
+							
+						Vector xStar = theFindDesignPointAlgorithm->get_x();
+
+						theFindDesignPointAlgorithm->setStartPt(&xStar);
+						
+					}
+
+
+
+				 // ============ by default,start from origin of the standard normal space ====================	
+
+
 					// Get the 'dgdu' vector from the sensitivity evaluator
 					// (The returned matrix containes 'node#' 'dir#' 'dgdu' in rows)
 					const Matrix &DgDdispl = theGradGEvaluator->getDgDdispl();
@@ -223,21 +248,22 @@ OutCrossingAnalysis::analyze(void)
 					// (... because this works only when g is linear in u)
 					numVel = DgDdispl.noRows();
 					accuSum = 0.0;
-					char expressionPtr[100];
+
+					char expressionPtr[200];
+
 					for (j=0; j<numVel; j++) {
 
 						nodeNumber = (int)DgDdispl(j,0);
 						dofNumber = (int)DgDdispl(j,1);
 						dgduValue = DgDdispl(j,2);
 
-						char expression[100];
-						sprintf(expression,"+(%10.8f)*(%8.5f)*{ud_%d_%d}",littleDeltaT, dgduValue, nodeNumber, dofNumber);
+						char expression[200];
+						sprintf(expression,"+(%20.14e)*(%20.14e)*{ud_%d_%d}",littleDeltaT, dgduValue, nodeNumber, dofNumber);
 						strcpy(expressionPtr,expression);
 
 						// Add it to the limit-state function
 						theLimitStateFunction->addExpression(expressionPtr);
 					}
-
 
 					// Inform the user
 					strcpy(string,theLimitStateFunction->getExpression());
@@ -265,7 +291,7 @@ OutCrossingAnalysis::analyze(void)
 
 
 						// Postprocessing (remember; here is an assumption that the mean point is in the safe domain)
-						beta2 = (alpha2 ^ uStar2);
+						beta2 = (alpha2 ^ uStar2);  /////// ??????????????????????????
 						pf2 = 1.0 - aStdNormRV.getCDFvalue(beta2);
 					}
 					else {
@@ -273,21 +299,21 @@ OutCrossingAnalysis::analyze(void)
 					}
 				
 					// Post-processing to find parallel system probability
-					a = -(alpha ^ alpha2);	// Interval start
-					b = 0.0;				// Interval end
-					n_2 = 600;				// Half the number of intervals
-					h = b-a;
+
+
+
+
+ 
+					//Quan & Michele January '06
+					a = -(alpha ^ alpha2);	// Interval start  ??????????????????????
+					c = 0.0;				// Interval end
+					b = (c+a)/2.0;
 					fa = functionToIntegrate(a,beta1,beta2);
 					fb = functionToIntegrate(b,beta1,beta2);
-					sum_fx2j = 0.0;
-					sum_fx2j_1 = 0.0;
-					for (int j=1;  j<=n_2;  j++) {
-						sum_fx2j = sum_fx2j + functionToIntegrate(   (double) (a+(j*2)*h/(2*n_2)) ,beta1, beta2  );
-						sum_fx2j_1 = sum_fx2j_1 + functionToIntegrate(   (double)(a+(j*2-1)*h/(2*n_2)) , beta1, beta2  );
-					}
-					sum_fx2j = sum_fx2j - functionToIntegrate((double)(b),beta1,beta2);
-					integral = h/(2*n_2)/3.0*(fa + 2.0*sum_fx2j + 4.0*sum_fx2j_1 + fb);
+					fc = functionToIntegrate(c,beta1,beta2);
+					integral = this->getAdaptiveIntegralValue(integralTolerance,a,c,fa,fb,fc,beta1,beta2);
 					Pmn1 = aStdNormRV.getCDFvalue(-beta1)*aStdNormRV.getCDFvalue(-beta2) - integral;
+
 				
 				}
 				else {
@@ -297,9 +323,14 @@ OutCrossingAnalysis::analyze(void)
 					for (j=1; j<alpha.Size(); j++) {
 						alpha2(j) = alpha(j) - littleDeltaT/Dt * ( alpha(j)-alpha(j-1) );
 					}
-
+					
 					// Post-processing to find parallel system probability
-					a = -1.0*(alpha ^ alpha2);
+					
+					a = -1.0*(alpha ^ alpha2)/alpha2.Norm();  
+					
+		
+
+
 					double pi = 3.14159265358979;
 					Pmn1 = 1.0/(2.0*pi) * exp(-beta2*beta2*0.5) * (asin(a)+1.570796326794897);
 				
@@ -315,7 +346,8 @@ OutCrossingAnalysis::analyze(void)
 						<< " The correlation is probably too high! " << endln;
 				}
 				nu(i-1) = Pmn1 / littleDeltaT;
-
+				
+				opserr<<"nu(i-1) is:" <<nu(i-1)<<endln;
 
 				// Duration of single excursion
 				if (fabs(nu(i-1))<1.0e-9) {
@@ -333,7 +365,7 @@ OutCrossingAnalysis::analyze(void)
 				
 				if (beta(i-1)<0.0) { outputFile << "-"; }
 				else { outputFile << " "; }
-				outputFile <<setprecision(2)<<setw(11)<<fabs(beta(i-1));
+				outputFile <<setprecision(7)<<setw(11)<<fabs(beta(i-1));
 				
 				outputFile.setf( ios::scientific, ios::floatfield );
 				if (pf(i-1)<0.0) { outputFile << "-"; }
@@ -354,8 +386,8 @@ OutCrossingAnalysis::analyze(void)
 
 
 				// Inform the user
-				char mystring[200];
-				sprintf(mystring, " ... beta(G1)=%5.3f, beta(G2)=%5.3f, rate=%10.3e, rho=%10.4e",beta1,beta2,nu(i-1),a);
+				char mystring[400];
+				sprintf(mystring, " ... beta(G1)=%16.8f, beta(G2)=%16.8f, rate=%16.8e, rho=%16.8e",beta1,beta2,nu(i-1),a);
 				opserr << mystring << endln;
 
 			}
@@ -401,20 +433,18 @@ OutCrossingAnalysis::analyze(void)
 						alpha_k(j) = allAlphas(j,k);
 						alpha_kk(j) = allAlphas(j,kk);
 					}
-					a = 0.0;				// Interval start
-					b = (alpha_k ^ alpha_kk);	// Interval end
-					n_2 = 100;					// Half the number of intervals
-					h = b-a;
-					fa = functionToIntegrate(a, beta(k), beta(kk));
-					fb = functionToIntegrate(b, beta(k), beta(kk));
-					sum_fx2j = 0.0;
-					sum_fx2j_1 = 0.0;
-					for (int j=1;  j<=n_2;  j++) {
-						sum_fx2j = sum_fx2j + functionToIntegrate(   (double) (a+(j*2)*h/(2*n_2)) , beta(k), beta(kk) );
-						sum_fx2j_1 = sum_fx2j_1 + functionToIntegrate(   (double)(a+(j*2-1)*h/(2*n_2)) , beta(k), beta(kk)  );
-					}
-					sum_fx2j = sum_fx2j - functionToIntegrate((double)(b), beta(k), beta(kk));
-					integral = h/(2*n_2)/3.0*(fa + 2.0*sum_fx2j + 4.0*sum_fx2j_1 + fb);
+
+
+					
+		//Quan & Michele January '06
+					a = 0.0;
+					c = (alpha_k ^ alpha_kk);				// Interval end
+					b = (c+a)/2.0;
+					fa = functionToIntegrate(a,beta(k),beta(kk));
+					fb = functionToIntegrate(b,beta(k),beta(kk));
+					fc = functionToIntegrate(c,beta(k),beta(kk));
+					integral = this->getAdaptiveIntegralValue(integralTolerance, a,c,fa,fb,fc,beta(k),beta(kk));
+
 					Pmn2(k,kk) = aStdNormRV.getCDFvalue(-beta(k))*aStdNormRV.getCDFvalue(-beta(kk)) + integral;
 				
 				}
@@ -476,6 +506,26 @@ OutCrossingAnalysis::analyze(void)
 	return 0;
 }
 
+
+	//Quan & Michele January '06
+double 
+OutCrossingAnalysis::getAdaptiveIntegralValue(double tol, double lowerBound, double upperBound, double fa, double fb, double fc, double beta1, double beta2 ){
+	double b= (lowerBound+upperBound)/2.0;
+	double fd = functionToIntegrate((lowerBound+b)/2.0, beta1, beta2);
+	double fe = functionToIntegrate((upperBound+b)/2.0, beta1, beta2);
+//	numOfEvaluations +=2;
+	double S1 = (upperBound-lowerBound)*(fa+4*fb+fc)/6.0;
+	double S2 = (upperBound-lowerBound)*(fa+4*fd+2*fb+4*fe+fc)/12.0;
+	if (fabs(S2-S1)/15.0 <= tol) 
+		return (16.0*S2-S1)/15.0;
+	else {
+		
+		double int1 = getAdaptiveIntegralValue( tol/2.0,lowerBound, b, fa, fd, fb, beta1, beta2);
+		double int2 = getAdaptiveIntegralValue(  tol/2.0, b, upperBound, fb, fe, fc, beta1, beta2);
+		return int1+int2;
+	
+	}
+}
 
 
 double
