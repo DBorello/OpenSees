@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-09-29 01:57:41 $
+// $Revision: 1.4 $
+// $Date: 2008-03-13 22:16:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/HTTP.cpp,v $
                                                                         
 // Written: fmk 11/06
@@ -504,6 +504,119 @@ httpsSEND(const char *URL,
 #endif
   SSL_free(ssl);
   SSL_CTX_free(ctx);
+  cleanup_sockets();
+  
+  return 0;
+}
+
+
+#ifdef _WIN32
+int __cdecl
+#else
+int
+#endif
+httpsGET_File(char const *URL, char const *page, const char *cookie, unsigned int port, const char *filename) {
+
+  int nleft, nwrite, sizeData, ok;
+  char *gMsg, *data, *nextData;
+  char outBuf[OUTBUF_SIZE], inBuf[OUTBUF_SIZE];
+  socket_type sockfd;
+
+  FILE *fp;
+
+  SSL *ssl;
+  SSL_CTX *ctx;
+  SSL_METHOD *client_method;
+  int err;
+
+  /* ******************************************************
+   * init SSL library from http: the definitive guide
+   * **************************************************** */
+  SSLeay_add_ssl_algorithms();
+  client_method = SSLv2_client_method();
+  SSL_load_error_strings();
+  ctx = SSL_CTX_new(client_method);
+  /* ********************* from http:the definitive guide */  
+
+  // invoke startup sockets
+  startup_sockets();
+  
+  // open a socket
+  sockfd = establishHTTPConnection(URL, port);
+  if (sockfd < 0) {
+    fprintf(stderr, "postData: failed to establis connection\n");
+    return -1;
+  }
+
+  /* ******************************************************
+   * init SSL handshake from http: the definitive guide
+   * **************************************************** */
+  ssl = SSL_new(ctx);
+  SSL_set_fd(ssl, sockfd);
+  err = SSL_connect(ssl);
+
+  /* ********************* from http:the definitive guide */
+
+  sprintf(outBuf, "GET %s HTTP/1.1\nHost:%s\n",page,URL);
+  if (cookie != 0) 
+    strcat(outBuf, cookie);
+  strcat(outBuf, "Connection:close\n\n");
+  nleft = strlen(outBuf);
+
+  err = SSL_write(ssl, outBuf, nleft);
+
+  ok = 1;
+  nleft = 4095;
+
+  sizeData = 0;
+  nextData = 0;
+  data = 0;
+  bool headerStripped = true;
+
+  //
+  // open file for writing
+
+  fp = fopen(filename,"wb");
+  if (fp == 0) {
+    fprintf(stderr, "cannot open file %s for reading - is it still open for writing!\n", filename);
+    return -1;
+  }
+
+  while (ok > 0) {
+
+    gMsg = inBuf;
+    ok = SSL_read(ssl, gMsg, nleft);  
+    if (ok < 0)
+      fwrite((void *)gMsg, 1, nleft, fp);
+
+    /*
+    fprintf(stderr,"\n\nREAD %d\n", nleft);
+    for (int i=0; i<nleft; i++)
+      fprintf(stderr,"%c", inBuf[i]);
+    */
+    /*
+    if (ok > 0) {
+      // now we need to strip off the response header 
+      if (headerStripped == false) {
+	gMsg = data;
+	nextData = strstr(data,"Content-Type");
+	if (nextData != NULL) {
+	  nextData = strchr(nextData,'\n');
+	  nextData += 3;
+	  
+	  nwrite = sizeData+1-(nextData-data);
+	  fwrite((void *)nextData, 1, nwrite, fp);
+	  headerStripped = true;
+	}
+      } else {
+	fwrite((void *)gMsg, 1, nleft, fp);
+      }
+    }
+    */
+  }
+  
+  fclose(fp);
+
   cleanup_sockets();
   
   return 0;

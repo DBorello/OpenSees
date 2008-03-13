@@ -1,6 +1,6 @@
 include ../../../Makefile.def
 
-OBJS	=	Channel.o TCP_Socket.o UDP_Socket.o Socket.o HTTP.o
+OBJS	=	Channel.o TCP_Socket.o UDP_Socket.o Socket.o HTTP.o 
 
 ifeq ($(PROGRAMMING_MODE), PARALLEL)
 
@@ -23,6 +23,9 @@ all:       $(OBJS)
 mpi: MPI_Channel.o
 
 tcp: TCP_Socket.o UDP_Socket.o
+
+test: Test.o HTTP.o Socket.o	
+	$(LINKER) Test.o Socket.o HTTP.o $(FE)/utility/NeesCentral.o -l ssl -o a.out
 
 # Miscellaneous
 tidy:
