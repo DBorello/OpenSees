@@ -1,6 +1,6 @@
 include ../../../../Makefile.def
 
-OBJS       = HessianApproximation.o
+OBJS       = HessianApproximation.o Hessian.o
 
 
 # Compilation control

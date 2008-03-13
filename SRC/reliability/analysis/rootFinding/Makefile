@@ -1,7 +1,9 @@
 include ../../../../Makefile.def
 
 OBJS       = RootFinding.o \
-	SecantRootFinding.o
+	SecantRootFinding.o \
+	SafeGuardedZeroFindingAlgorithm.o \
+	ZeroFindingAlgorithm.o
 
 
 
