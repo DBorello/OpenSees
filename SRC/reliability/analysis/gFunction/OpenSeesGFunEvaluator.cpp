@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2007-10-31 21:37:48 $
+// $Revision: 1.22 $
+// $Date: 2008-03-13 22:32:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.cpp,v $
 
 
@@ -517,4 +517,121 @@ OpenSeesGFunEvaluator::rec_elementTclVariable(char *tempchar, char *variableName
   }
 
   return 0;
+}
+
+double OpenSeesGFunEvaluator::getG2(double g, double littleDeltaT)
+{
+	 
+ 
+	// Initial declaractions
+	double perturbationFactor = 0.001; // (is multiplied by stdv and added to others...)
+	char tclAssignment[500];
+	char *dollarSign = "$";
+	char *underscore = "_";
+	char lsf_expression[500] = "";
+	char separators[5] = "}{";
+	int nrv = theReliabilityDomain->getNumberOfRandomVariables();
+//	RandomVariable *theRandomVariable;
+	char tempchar[100]="";
+	char newSeparators[5] = "_";
+	double g_perturbed;
+	Vector dudx(nrv);
+	
+
+
+ 
+
+	// "Download" limit-state function from reliability domain
+	int lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
+	LimitStateFunction *theLimitStateFunction = 
+	theReliabilityDomain->getLimitStateFunctionPtr(lsf);
+	char *theExpression = theLimitStateFunction->getExpression();
+	char lsf_copy[500]="";
+	strcpy(lsf_copy,theExpression);
+
+	double g2FunctionValue = g;
+
+	// Tokenize the limit-state function and COMPUTE GRADIENTS
+	char *tokenPtr = strtok( lsf_copy, separators); 
+	while ( tokenPtr != NULL ) {
+
+		strcpy(tempchar,tokenPtr);
+
+		if ( strncmp(tokenPtr, "x",1) == 0) {
+
+			opserr<<"Fatal: can not deal with x in limit state function"<<endln; exit(-1);
+		}
+		// If a nodal velocity is detected
+		else if ( strncmp(tokenPtr, "ud", 2) == 0) {
+
+			opserr<<"Fatal: can not deal with ud in limit state function"<<endln; exit(-1);
+		}
+		// If a nodal displacement is detected
+		else if ( strncmp(tokenPtr, "u", 1) == 0) {
+
+			// Get node number and dof number
+			int nodeNumber, direction;
+			sscanf(tempchar,"u_%i_%i", &nodeNumber, &direction);
+
+			// Keep the original value
+
+
+			double originalValue;
+			sprintf(tclAssignment,"$u_%d_%d", nodeNumber, direction);
+			Tcl_ExprDouble( theTclInterp, tclAssignment, &originalValue);
+
+			// Set perturbed value in the Tcl workspace
+
+			// ---------------------- Quan and michele   
+
+			double newValue;
+			//if (originalValue ==0 ) newValue = 0.0001;
+			if (fabs(originalValue)<1.0e-14 ) newValue = 0.0001;  //---  Quan Jan 2006 ---
+			else 	newValue = originalValue*(1.0+perturbationFactor);
+
+			sprintf(tclAssignment,"set u_%d_%d %35.20f", nodeNumber, direction, newValue);
+			Tcl_Eval( theTclInterp, tclAssignment);
+
+			// Evaluate the limit-state function again
+			char *theTokenizedExpression = theLimitStateFunction->getTokenizedExpression();
+			Tcl_ExprDouble( theTclInterp, theTokenizedExpression, &g_perturbed );
+
+			// Compute gradient
+
+
+			double onedgdu = (g_perturbed-g)/(newValue - originalValue);
+
+			// Make assignment back to its original value
+			sprintf(tclAssignment,"set u_%d_%d %35.20f", nodeNumber, direction, originalValue);
+			Tcl_Eval( theTclInterp, tclAssignment);
+
+	
+			double ud_=0.0;
+					
+			//sprintf(expression,"$ud_%d_%d",nodeNumberAndDOFNumber[0], nodeNumberAndDOFNumber[1]);		
+			sprintf(tclAssignment,"set udot [nodeVel  %d  %d]",nodeNumber, direction);		
+			if (Tcl_Eval( theTclInterp, tclAssignment) !=TCL_OK ){opserr<<"wrong.."<<endln; exit(-1);};
+					
+			const char * myStr;
+			myStr = Tcl_GetVar(theTclInterp, "udot",TCL_GLOBAL_ONLY );
+
+
+			ud_ = atof(myStr);			
+			if (fabs(ud_) <1.e-14) {
+				opserr<<"warning:OpenSeesGFunEvaluator::getSecondG() velocity is 0! probabily because you are running static case!"<<endln;
+				
+			}
+
+	
+			g2FunctionValue += onedgdu*ud_*littleDeltaT;
+
+
+		}
+
+		tokenPtr = strtok( NULL, separators);  // read next token and go up and check the while condition again
+	} 
+
+	
+	return g2FunctionValue;
+
 }

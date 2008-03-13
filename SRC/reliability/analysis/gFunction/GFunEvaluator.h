@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-02-29 19:47:19 $
+// $Revision: 1.7 $
+// $Date: 2008-03-13 22:32:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/GFunEvaluator.h,v $
 
 
@@ -78,6 +78,10 @@ public:
 	virtual Matrix* getEachStepConvFlag();
 	virtual void setPerformFuncCoeffs(TaggedObjectStorage*);
 	virtual void setPerformFuncCoeffIter(PerformanceFunctionCoefficientIter*);
+
+
+	virtual double getG2(double g, double littleDt);
+
 
 
 protected:

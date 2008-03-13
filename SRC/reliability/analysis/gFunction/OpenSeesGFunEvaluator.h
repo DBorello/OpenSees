@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-04-30 20:03:42 $
+// $Revision: 1.11 $
+// $Date: 2008-03-13 22:32:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.h,v $
 
 
@@ -63,6 +63,9 @@ class OpenSeesGFunEvaluator : public GFunEvaluator
   
   void    setNsteps(int nsteps);
   double  getDt();
+
+  double getG2(double g, double littleDt);
+	
   
  protected:
   

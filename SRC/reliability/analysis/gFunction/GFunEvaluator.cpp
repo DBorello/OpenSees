@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2008-02-29 19:47:19 $
+// $Revision: 1.12 $
+// $Date: 2008-03-13 22:32:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/GFunEvaluator.cpp,v $
 
 
@@ -249,3 +249,11 @@ void GFunEvaluator::setPerformFuncCoeffIter(PerformanceFunctionCoefficientIter* 
 
 
 
+
+
+double GFunEvaluator::getG2(double g, double littleDt)   //Quan
+{
+	opserr<<"Fatal::GFunEvaluator::getG2() not implemented yet!"<<endln; exit(-1);
+
+	return 0.0;
+}
