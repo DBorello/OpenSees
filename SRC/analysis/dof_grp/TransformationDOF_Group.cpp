@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2007-02-14 18:44:17 $
+// $Revision: 1.19 $
+// $Date: 2008-03-13 22:14:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.cpp,v $
                                                                         
                                                                         
@@ -453,25 +453,23 @@ TransformationDOF_Group::setNodeDisp(const Vector &u)
     return;
   }
 
-   const ID &theID = this->getID();
-   for (int i=0; i<modNumDOF; i++) {
-	int loc = theID(i);
-	if (loc >= 0)
-	    (*modUnbalance)(i) = u(loc);
-	else
-	    (*modUnbalance)(i) = 0.0;
-	  
-
-    }    
-    Matrix *T = this->getT();
-    if (T != 0) {
-
-	// *unbalance = (*T) * (*modUnbalance);
-	unbalance->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
+  const ID &theID = this->getID();
+  for (int i=0; i<modNumDOF; i++) {
+    int loc = theID(i);
+    if (loc >= 0)
+      (*modUnbalance)(i) = u(loc);
+    else
+      (*modUnbalance)(i) = 0.0;
+  }    
+  Matrix *T = this->getT();
+  if (T != 0) {
+    
+    // *unbalance = (*T) * (*modUnbalance);
+    unbalance->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
 	myNode->setTrialDisp(*unbalance);
-
-    } else
-	myNode->setTrialDisp(*modUnbalance);
+	
+  } else
+    myNode->setTrialDisp(*modUnbalance);
 }
 
 void
