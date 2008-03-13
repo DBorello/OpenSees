@@ -1,6 +1,8 @@
 include ../../Makefile.def
 
-RELIABILITY_OBJS = $(FE)/reliability/analysis/analysis/FORMAnalysis.o \
+RELIABILITY_OBJS = $(FE)/domain/pattern/DiscretizedRandomProcessSeries.o \
+		$(FE)/domain/pattern/SimulatedRandomProcessSeries.o \
+		$(FE)/reliability/analysis/analysis/FORMAnalysis.o \
 		$(FE)/reliability/analysis/analysis/FragilityAnalysis.o \
 		$(FE)/reliability/analysis/analysis/GFunVisualizationAnalysis.o \
 		$(FE)/reliability/analysis/analysis/FOSMAnalysis.o \
@@ -14,6 +16,20 @@ RELIABILITY_OBJS = $(FE)/reliability/analysis/analysis/FORMAnalysis.o \
 		$(FE)/reliability/analysis/analysis/system/PCM.o \
 		$(FE)/reliability/analysis/analysis/system/SCIS.o \
 		$(FE)/reliability/analysis/analysis/system/MVNcdf.o \
+		$(FE)/reliability/analysis/analysis/BivariateDecomposition.o \
+		$(FE)/reliability/analysis/analysis/DP_RSM_Sim.o \
+		$(FE)/reliability/analysis/analysis/DP_RSM_Sim_TimeVariant.o \
+		$(FE)/reliability/analysis/analysis/ExperimentalPointRule1D.o \
+		$(FE)/reliability/analysis/analysis/GridPlane.o \
+		$(FE)/reliability/analysis/analysis/ImportanceSamplingAnalysis.o \
+		$(FE)/reliability/analysis/analysis/MonteCarloResponseAnalysis.o \
+		$(FE)/reliability/analysis/analysis/MultiDimVisPrincPlane.o \
+		$(FE)/reliability/analysis/analysis/OrthogonalPlaneSamplingAnalysis.o \
+		$(FE)/reliability/analysis/analysis/PrincipalAxis.o \
+		$(FE)/reliability/analysis/analysis/RespSurfaceSimulation.o \
+		$(FE)/reliability/analysis/analysis/SurfaceDesign.o \
+		$(FE)/reliability/analysis/analysis/UniformExperimentalPointRule1D.o \
+		$(FE)/reliability/analysis/analysis/UnivariateDecomposition.o \
 		$(FE)/reliability/analysis/convergenceCheck/OptimalityConditionReliabilityConvergenceCheck.o \
 		$(FE)/reliability/analysis/convergenceCheck/ReliabilityConvergenceCheck.o \
 		$(FE)/reliability/analysis/convergenceCheck/StandardReliabilityConvergenceCheck.o \
@@ -32,6 +48,7 @@ RELIABILITY_OBJS = $(FE)/reliability/analysis/analysis/FORMAnalysis.o \
 		$(FE)/reliability/analysis/gFunction/OpenSeesGFunEvaluator.o \
 		$(FE)/reliability/analysis/gFunction/TclGFunEvaluator.o \
 		$(FE)/reliability/analysis/hessianApproximation/HessianApproximation.o \
+		$(FE)/reliability/analysis/hessianApproximation/Hessian.o \
 		$(FE)/reliability/analysis/meritFunction/AdkZhangMeritFunctionCheck.o \
 		$(FE)/reliability/analysis/meritFunction/CriteriaReductionMeritFunctionCheck.o \
 		$(FE)/reliability/analysis/meritFunction/MeritFunctionCheck.o \
@@ -40,6 +57,8 @@ RELIABILITY_OBJS = $(FE)/reliability/analysis/analysis/FORMAnalysis.o \
 		$(FE)/reliability/analysis/randomNumber/RandomNumberGenerator.o \
 		$(FE)/reliability/analysis/rootFinding/RootFinding.o \
 		$(FE)/reliability/analysis/rootFinding/SecantRootFinding.o \
+		$(FE)/reliability/analysis/rootFinding/SafeGuardedZeroFindingAlgorithm.o \
+		$(FE)/reliability/analysis/rootFinding/ZeroFindingAlgorithm.o \
 		$(FE)/reliability/analysis/sensitivity/OpenSeesGradGEvaluator.o \
 		$(FE)/reliability/analysis/sensitivity/FiniteDifferenceGradGEvaluator.o \
 		$(FE)/reliability/analysis/sensitivity/GradGEvaluator.o \
@@ -91,6 +110,7 @@ RELIABILITY_OBJS = $(FE)/reliability/analysis/analysis/FORMAnalysis.o \
 		$(FE)/reliability/analysis/telm/RandomVibrationAnalysis.o \
 		$(FE)/reliability/analysis/telm/NewDiscretizedRandomProcessSeries.o \
 		$(FE)/reliability/analysis/telm/RandomVibrationSimulation.o \
+		$(FE)/reliability/analysis/telm/localMath.o \
 		$(FE)/reliability/domain/components/CorrelationCoefficient.o \
 		$(FE)/reliability/domain/components/CorrelationCoefficientIter.o \
 		$(FE)/reliability/domain/components/ParameterPositioner.o \
@@ -103,6 +123,7 @@ RELIABILITY_OBJS = $(FE)/reliability/analysis/analysis/FORMAnalysis.o \
 		$(FE)/reliability/domain/components/RandomVariablePositionerIter.o \
 		$(FE)/reliability/domain/components/ReliabilityDomainComponent.o \
 		$(FE)/reliability/domain/components/ReliabilityDomain.o \
+		$(FE)/reliability/domain/components/PrincipalPlane.o \
 		$(FE)/reliability/domain/distributions/BetaRV.o \
 		$(FE)/reliability/domain/distributions/GumbelRV.o \
 		$(FE)/reliability/domain/distributions/ParetoRV.o \
@@ -136,13 +157,22 @@ RELIABILITY_OBJS = $(FE)/reliability/analysis/analysis/FORMAnalysis.o \
 		$(FE)/reliability/domain/filter/StandardLinearOscillatorDisplacementFilter.o \
 		$(FE)/reliability/domain/filter/StandardLinearOscillatorVelocityFilter.o \
 		$(FE)/reliability/domain/filter/KooFilter.o \
+		$(FE)/reliability/domain/filter/DeltaFilter.o \
 		$(FE)/reliability/FEsensitivity/SensitivityAlgorithm.o \
 		$(FE)/reliability/FEsensitivity/SensitivityIntegrator.o \
 		$(FE)/reliability/FEsensitivity/StaticSensitivityIntegrator.o \
 		$(FE)/reliability/FEsensitivity/NewmarkSensitivityIntegrator.o \
 		$(FE)/reliability/tcl/TclReliabilityBuilder.o \
-		$(FE)/domain/pattern/SimulatedRandomProcessSeries.o \
-		$(FE)/domain/pattern/DiscretizedRandomProcessSeries.o 
+		$(FE)/reliability/optimization/ConstraintFunction.o \
+		$(FE)/reliability/optimization/DesignVariable.o \
+		$(FE)/reliability/optimization/DesignVariablePositioner.o \
+		$(FE)/reliability/optimization/ObjectiveFunction.o \
+		$(FE)/reliability/optimization/ToyFunction.o \
+		$(FE)/reliability/optimization/ToyOptFunction.o 
+
+#		$(FE)/reliability/optimization/SnoptAnalysis.o \
+#		$(FE)/reliability/optimization/SnoptProblem.o \
+#		$(FE)/reliability/optimization/SnoptWrapper.o \
 
 
 # Compilation control
@@ -151,6 +181,7 @@ all:
 	     @$(CD) $(FE)/reliability/domain; $(MAKE);
 	     @$(CD) $(FE)/reliability/FEsensitivity; $(MAKE);
 	     @$(CD) $(FE)/reliability/tcl; $(MAKE);
+	     @$(CD) $(FE)/reliability/optimization; $(MAKE);
 	     $(AR) $(ARFLAGS) $(RELIABILITY_LIBRARY) $(RELIABILITY_OBJS)
 
 # Miscellaneous
@@ -167,5 +198,6 @@ wipe: spotless
 	     @$(CD) $(FE)/reliability/domain; $(MAKE) wipe;
 	     @$(CD) $(FE)/reliability/FEsensitivity; $(MAKE) wipe;
 	     @$(CD) $(FE)/reliability/tcl; $(MAKE) wipe;
+	     @$(CD) $(FE)/reliability/optimization; $(MAKE) wipe;
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
