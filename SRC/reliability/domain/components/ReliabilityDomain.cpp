@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-10-26 17:37:36 $
+// $Revision: 1.12 $
+// $Date: 2008-03-13 22:35:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.cpp,v $
 
 
@@ -62,6 +62,12 @@ ReliabilityDomain::ReliabilityDomain():
 	theModulatingFunctionsPtr = new ArrayOfTaggedObjects (256);
 	theFiltersPtr = new ArrayOfTaggedObjects (256);
 	theSpectraPtr = new ArrayOfTaggedObjects (256);
+
+	theDesignVariablesPtr = new ArrayOfTaggedObjects (256);
+	theDesignVariablePositionersPtr = new ArrayOfTaggedObjects (256);
+	theObjectiveFunctionsPtr = new ArrayOfTaggedObjects (256);
+	theConstraintFunctionsPtr = new ArrayOfTaggedObjects (256);
+
 	tagOfActiveLimitStateFunction = 1;
 
 	theRVIter = new RandomVariableIter(theRandomVariablesPtr);
@@ -89,6 +95,15 @@ ReliabilityDomain::~ReliabilityDomain()
 		delete theSpectraPtr;
 	if (!theFiltersPtr)
 		delete theFiltersPtr;
+
+	if (!theDesignVariablesPtr)
+		delete theDesignVariablesPtr;
+	if (!theDesignVariablePositionersPtr)
+		delete theDesignVariablePositionersPtr;
+	if (!theConstraintFunctionsPtr)
+		delete theConstraintFunctionsPtr;
+	if (!theObjectiveFunctionsPtr)
+		delete theObjectiveFunctionsPtr;
 
 	if (theRVIter != 0)
 	  delete theRVIter;
@@ -170,6 +185,39 @@ ReliabilityDomain::addFilter(Filter *theFilter)
 
 
 
+//- Quan
+bool
+ReliabilityDomain::addDesignVariable(DesignVariable *theDesignVariable)
+{
+	bool result = theDesignVariablesPtr->addComponent(theDesignVariable);
+	return result;
+}
+
+
+bool
+ReliabilityDomain::addDesignVariablePositioner(DesignVariablePositioner *theDesignVariablePositioner)
+{
+	bool result = theDesignVariablePositionersPtr->addComponent(theDesignVariablePositioner);
+	return result;
+}
+
+
+bool
+ReliabilityDomain::addConstraintFunction(ConstraintFunction *theConstraintFunction)
+{
+	bool result = theConstraintFunctionsPtr->addComponent(theConstraintFunction);
+	return result;
+}
+
+
+bool
+ReliabilityDomain::addObjectiveFunction(ObjectiveFunction *theObjectiveFunction)
+{
+	bool result = theObjectiveFunctionsPtr->addComponent(theObjectiveFunction);
+	return result;
+}
+
+
 RandomVariableIter &
 ReliabilityDomain::getRandomVariables(void)
 {
@@ -204,6 +252,7 @@ ReliabilityDomain::getCorrelationCoefficients(void)
   theCCIter->reset();
   return *theCCIter;
 }
+
 
 RandomVariable *
 ReliabilityDomain::getRandomVariablePtr(int tag)
@@ -290,6 +339,43 @@ ReliabilityDomain::getFilter(int tag)
 	Filter *result = (Filter *) theComponent;
 	return result;
 }
+
+//- Quan
+DesignVariable *
+ReliabilityDomain::getDesignVariablePtr(int tag)
+{
+	TaggedObject *theComponent = theDesignVariablesPtr->getComponentPtr(tag);
+	
+	DesignVariable *result = (DesignVariable *) theComponent;
+	return result;
+	
+}
+
+DesignVariablePositioner *
+ReliabilityDomain::getDesignVariablePositionerPtr(int tag)
+{
+	TaggedObject *theComponent = theDesignVariablePositionersPtr->getComponentPtr(tag);
+	DesignVariablePositioner *result = (DesignVariablePositioner *) theComponent;
+	return result;
+}
+
+ConstraintFunction *
+ReliabilityDomain::getConstraintFunctionPtr(int tag)
+{
+	TaggedObject *theComponent = theConstraintFunctionsPtr->getComponentPtr(tag);
+	ConstraintFunction *result = (ConstraintFunction *) theComponent;
+	return result;
+}
+
+ObjectiveFunction *
+ReliabilityDomain::getObjectiveFunctionPtr(int tag)
+{
+	TaggedObject *theComponent = theObjectiveFunctionsPtr->getComponentPtr(tag);
+	ObjectiveFunction *result = (ObjectiveFunction *) theComponent;
+	return result;
+}
+
+
 
 
 int
@@ -392,12 +478,61 @@ ReliabilityDomain::removePerformanceFunction(int tag)
   return 0;
 }
 
+//-Quan
+
+int
+ReliabilityDomain::removeDesignVariable(int tag)
+{
+	theDesignVariablesPtr->removeComponent(tag);
+
+	return 0;
+}
+
+int
+ReliabilityDomain::removeDesignVariablePositioner(int tag)
+{
+	theDesignVariablePositionersPtr->removeComponent(tag);
+
+	return 0;
+}
+
+int
+ReliabilityDomain::removeConstraintFunction(int tag)
+{
+	theConstraintFunctionsPtr->removeComponent(tag);
+
+	return 0;
+}
+
+int
+ReliabilityDomain::removeObjectiveFunction(int tag)
+{
+	theObjectiveFunctionsPtr->removeComponent(tag);
+
+	return 0;
+}
+
+
+
+
+
+
 
 int
 ReliabilityDomain::getNumberOfRandomVariables()
 {
 	return theRandomVariablesPtr->getNumComponents();
 }
+
+
+// Quan --
+
+int ReliabilityDomain::setNumberOfRandomVariables( int pNum){
+  opserr << "ReliabilityDomain::setNumberOfRandomVariables() - SHOULD NOT BE CALLED\n";
+  return -1;
+};
+
+// --Quan
 int
 ReliabilityDomain::getNumberOfCorrelationCoefficients()
 {
@@ -434,7 +569,31 @@ ReliabilityDomain::getNumberOfSpectra()
 	return theSpectraPtr->getNumComponents();
 }
 
+// -Quan
 
+int
+ReliabilityDomain::getNumberOfDesignVariables()
+{
+	return theDesignVariablesPtr->getNumComponents();
+}
+
+int
+ReliabilityDomain::getNumberOfDesignVariablePositioners()
+{
+	return theDesignVariablePositionersPtr->getNumComponents();
+}
+
+int
+ReliabilityDomain::getNumberOfConstraintFunctions()
+{
+	return theConstraintFunctionsPtr->getNumComponents();
+}
+
+int
+ReliabilityDomain::getNumberOfObjectiveFunctions()
+{
+	return theObjectiveFunctionsPtr->getNumComponents();
+}
 
 
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-10-26 17:37:36 $
+// $Revision: 1.11 $
+// $Date: 2008-03-13 22:35:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.h,v $
 
 
@@ -43,7 +43,23 @@
 #include <Filter.h>
 #include <Spectrum.h>
 
+#include <DesignVariable.h>
+#include <DesignVariablePositioner.h>
+#include <ConstraintFunction.h>
+#include <ObjectiveFunction.h>
+
+//Quan
+#include <DesignVariable.h>
+#include <DesignVariablePositioner.h>
+#include <ConstraintFunction.h>
+#include <ObjectiveFunction.h>
+
+
 class TaggedObjectStorage;
+class ConstraintFunction;
+class ObjectiveFunction;
+class DesignVariable;
+class DesignVariablePositioner;
 
 class RandomVariableIter;
 class RandomVariablePositionerIter;
@@ -68,6 +84,11 @@ public:
 	virtual bool addFilter(Filter *theFilter);
 	virtual bool addSpectrum(Spectrum *theSpectrum);
 
+	virtual bool addDesignVariable(DesignVariable *theDesignVariable);
+	virtual bool addDesignVariablePositioner(DesignVariablePositioner *theDesignVariablePositioner);
+	virtual bool addObjectiveFunction(ObjectiveFunction *theObjectiveFunction);
+	virtual bool addConstraintFunction(ConstraintFunction *theConstraintFunction);
+
 	// Member functions to get components from the domain
 	RandomVariable *getRandomVariablePtr(int tag);
 	CorrelationCoefficient *getCorrelationCoefficientPtr(int tag);
@@ -77,6 +98,12 @@ public:
 	ModulatingFunction *getModulatingFunction(int tag);
 	Filter *getFilter(int tag);
 	Spectrum *getSpectrum(int tag);
+
+	DesignVariable *getDesignVariablePtr(int tag);
+	DesignVariablePositioner *getDesignVariablePositionerPtr(int tag);
+	ObjectiveFunction *getObjectiveFunctionPtr(int tag);
+	ConstraintFunction *getConstraintFunctionPtr(int tag);
+	int setNumberOfRandomVariables( int num);
 
 	// Member functions giving information about the domain
 	int getNumberOfRandomVariables(void);
@@ -88,6 +115,11 @@ public:
 	int getNumberOfFilters(void);
 	int getNumberOfSpectra(void);
 
+	int getNumberOfDesignVariables(void);
+	int getNumberOfDesignVariablePositioners(void);
+	int getNumberOfObjectiveFunctions(void);
+	int getNumberOfConstraintFunctions(void);
+
 	// Member functions to set/get active limit-state function
 	int getTagOfActiveLimitStateFunction(void); // Probably not need anymore -- MHS
 	void setTagOfActiveLimitStateFunction(int tag); // Probably not need anymore -- MHS
@@ -98,6 +130,11 @@ public:
 	int removeRandomVariable(int tag);
 	int removeCorrelationCoefficient(int tag);
 	int removePerformanceFunction(int tag);
+
+	int removeDesignVariable(int tag);
+       	int removeDesignVariablePositioner(int tag);
+	int removeObjectiveFunction(int tag);
+	int removeConstraintFunction(int tag);
 
 	int removeAllParameterPositioners(void);
 
@@ -119,6 +156,11 @@ private:
 	TaggedObjectStorage *theFiltersPtr;
 	TaggedObjectStorage *theSpectraPtr;
 	int tagOfActiveLimitStateFunction; // Probably not need anymore -- MHS
+
+	TaggedObjectStorage *theDesignVariablesPtr;
+	TaggedObjectStorage *theObjectiveFunctionsPtr;
+	TaggedObjectStorage *theConstraintFunctionsPtr;
+	TaggedObjectStorage *theDesignVariablePositionersPtr;
 
 	RandomVariableIter *theRVIter;
 	int numRandomVariables;
