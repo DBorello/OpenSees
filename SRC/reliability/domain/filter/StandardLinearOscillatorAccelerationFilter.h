@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:44:43 $
+// $Revision: 1.2 $
+// $Date: 2008-03-13 22:36:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/filter/StandardLinearOscillatorAccelerationFilter.h,v $
 
 
@@ -42,7 +42,7 @@ class StandardLinearOscillatorAccelerationFilter : public Filter
 public:
 	StandardLinearOscillatorAccelerationFilter(int tag, double period, double dampingRatio);
 	~StandardLinearOscillatorAccelerationFilter();
-	double getAmplitude(double time);
+	double getAmplitude(double time, double dT = 0.0);
 	double getMaxAmplitude();
 	double getTimeOfMaxAmplitude();
 

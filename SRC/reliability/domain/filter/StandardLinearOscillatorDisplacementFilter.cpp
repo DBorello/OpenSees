@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-10-27 23:04:40 $
+// $Revision: 1.4 $
+// $Date: 2008-03-13 22:36:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/filter/StandardLinearOscillatorDisplacementFilter.cpp,v $
 
 
@@ -49,7 +49,7 @@ StandardLinearOscillatorDisplacementFilter::~StandardLinearOscillatorDisplacemen
 }
 
 double
-StandardLinearOscillatorDisplacementFilter::getAmplitude(double time)
+StandardLinearOscillatorDisplacementFilter::getAmplitude(double time, double dT)
 {
 	if (time<0.0) {
 		return 0.0;

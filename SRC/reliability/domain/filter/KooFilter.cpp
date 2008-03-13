@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-10-27 23:04:40 $
+// $Revision: 1.2 $
+// $Date: 2008-03-13 22:36:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/filter/KooFilter.cpp,v $
 
 
@@ -49,7 +49,7 @@ KooFilter::~KooFilter()
 }
 
 double
-KooFilter::getAmplitude(double time)
+KooFilter::getAmplitude(double time, double dT)
 {
 	if (time<0.0) {
 

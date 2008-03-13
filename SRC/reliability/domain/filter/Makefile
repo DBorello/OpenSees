@@ -4,7 +4,7 @@ OBJS       = 	Filter.o \
 	StandardLinearOscillatorDisplacementFilter.o \
 	StandardLinearOscillatorAccelerationFilter.o \
 	StandardLinearOscillatorVelocityFilter.o \
-	KooFilter.o
+	KooFilter.o DeltaFilter.o
 
 # Compilation control
 all:         $(OBJS)

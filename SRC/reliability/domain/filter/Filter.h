@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2008-02-29 19:47:20 $
+// $Revision: 1.4 $
+// $Date: 2008-03-13 22:36:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/filter/Filter.h,v $
 
 
@@ -43,7 +43,8 @@ class Filter : public ReliabilityDomainComponent
 public:
 	Filter(int tag, int classtag);
 	virtual ~Filter();
-	virtual double getAmplitude(double time) = 0;
+//	virtual double getAmplitude(double time) = 0;
+	virtual double getAmplitude(double time,double dT =0.0) = 0;
 	virtual double getMaxAmplitude() = 0;
 	virtual double getTimeOfMaxAmplitude() = 0;
 	virtual void setKickTime(double time);	///// added by K Fujimura /////
