@@ -2,6 +2,7 @@ include ../../../../Makefile.def
 
 OBJS       = 	FORMAnalysis.o \
 	FOSMAnalysis.o \
+	BivariateDecomposition.o \
 	FragilityAnalysis.o \
 	GFunVisualizationAnalysis.o \
 	OutCrossingAnalysis.o \
@@ -9,7 +10,21 @@ OBJS       = 	FORMAnalysis.o \
 	SamplingAnalysis.o \
 	ReliabilityAnalysis.o \
 	SORMAnalysis.o \
-	SystemAnalysis.o
+	SystemAnalysis.o \
+	DP_RSM_Sim.o \
+	DP_RSM_Sim_TimeVariant.o \
+	ExperimentalPointRule1D.o \
+	GridPlane.o \
+	MonteCarloResponseAnalysis.o \
+	MultiDimVisPrincPlane.o \
+	OrthogonalPlaneSamplingAnalysis.o \
+	PrincipalAxis.o \
+	RespSurfaceSimulation.o \
+	SurfaceDesign.o \
+	UnivariateDecomposition.o \
+	UniformExperimentalPointRule1D.o \
+	ImportanceSamplingAnalysis.o \
+	UniformExperimentalPointRule2D.o 
 
 
 # Compilation control
