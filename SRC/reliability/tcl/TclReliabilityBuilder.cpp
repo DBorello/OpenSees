@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.37 $
-// $Date: 2008-03-03 22:27:33 $
+// $Revision: 1.38 $
+// $Date: 2008-03-13 22:37:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -101,7 +101,7 @@ using std::setiosflags;
 #include <ParametricReliabilityAnalysis.h>
 #include <GFunVisualizationAnalysis.h>
 #include <OutCrossingAnalysis.h>
-#include <SamplingAnalysis.h>
+#include <ImportanceSamplingAnalysis.h>
 #include <RandomNumberGenerator.h>
 #include <CStdLibRandGenerator.h>
 #include <FindCurvatures.h>
@@ -118,6 +118,8 @@ using std::setiosflags;
 #include <StandardLinearOscillatorDisplacementFilter.h>
 #include <StandardLinearOscillatorVelocityFilter.h>
 #include <StandardLinearOscillatorAccelerationFilter.h>
+#include <DeltaFilter.h>
+
 #include <ModulatingFunction.h>
 #include <GammaModulatingFunction.h>
 #include <ConstantModulatingFunction.h>
@@ -139,6 +141,25 @@ using std::setiosflags;
 #include <GradientProjectionSearchDirection.h>
 #include <RootFinding.h>
 #include <SecantRootFinding.h>
+
+//Quan---
+#ifdef _SNOPT
+#include <SnoptProblem.h>  
+#include <SnoptAnalysis.h>   
+#endif
+
+#include <DesignVariable.h>
+#include <DesignVariablePositioner.h>
+#include <ConstraintFunction.h>
+#include <ObjectiveFunction.h>
+#include <MonteCarloResponseAnalysis.h>
+#include <OrthogonalPlaneSamplingAnalysis.h>
+
+#include <Hessian.h>
+#include <MultiDimVisPrincPlane.h>
+#include <DP_RSM_Sim.h>
+#include <DP_RSM_Sim_TimeVariant.h>
+//---Quan
 
 #include <TclReliabilityBuilder.h>
 /////////////////////////////////////////////////////////
@@ -184,6 +205,18 @@ extern SensitivityIntegrator* theSensitivityIntegrator;
 //
 // SOME STATIC POINTERS USED IN THE FUNCTIONS INVOKED BY THE INTERPRETER
 //
+
+// Quan --
+// ---------------- define global pointer for SNOPT ----------
+#ifdef _SNOPT
+SnoptProblem * theSNOPT=0;
+SNOPTAnalysis * theSNOPTAnalysis=0;
+#endif
+MonteCarloResponseAnalysis * theMonteCarloResponseAnalysis=0;
+SamplingAnalysis * theSamplingAnalysis =0;
+// --- Quan
+
+
 ReliabilityDomain *theReliabilityDomain = 0;
 static Domain *theStructuralDomain = 0;
 
@@ -209,7 +242,7 @@ static FOSMAnalysis *theFOSMAnalysis = 0;
 static ParametricReliabilityAnalysis *theParametricReliabilityAnalysis = 0;
 static OutCrossingAnalysis *theOutCrossingAnalysis = 0;
 static SORMAnalysis *theSORMAnalysis = 0;
-static SamplingAnalysis *theSamplingAnalysis = 0;
+static ImportanceSamplingAnalysis *theImportanceSamplingAnalysis = 0;
 static SystemAnalysis *theSystemAnalysis = 0;
 /////////////////////////////////////////////////////////
 ///S added by K Fujimura for Random Vibration Analysis ///
@@ -259,7 +292,7 @@ int TclReliabilityModelBuilder_runGFunVisualizationAnalysis(ClientData clientDat
 int TclReliabilityModelBuilder_runOutCrossingAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_runSORMAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_runSystemAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-int TclReliabilityModelBuilder_runSamplingAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_runImportanceSamplingAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_tempCommand(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_inputCheck(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_getMean(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
@@ -282,6 +315,22 @@ int TclReliabilityModelBuilder_runRandomVibrationAnalysis(ClientData clientData,
 /////////////////////////////////////////////////////////
 ///E added by K Fujimura for Random Vibration Analysis ///
 /////////////////////////////////////////////////////////
+
+//--Quan --
+int TclReliabilityModelBuilder_addDesignVariable(ClientData clientData,Tcl_Interp *interp,int argc,TCL_Char **argv);
+int TclReliabilityModelBuilder_addDesignVariablePositioner(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_addObjectiveFunction(ClientData clientData,Tcl_Interp *interp,int argc,TCL_Char **argv);
+int TclReliabilityModelBuilder_addConstraintFunction(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_runSNOPTAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_runMonteCarloResponseAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_updateParameter(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_runOrthogonalPlaneSamplingAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_computeHessian(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_MultiDimVisPrincPlane(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_transformXtoU(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_transformUtoX(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_runDP_RSM_SimTimeInvariantAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_runDP_RSM_SimTimeVariantAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 
 //
@@ -326,7 +375,7 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
   Tcl_CreateCommand(interp, "runOutCrossingAnalysis",TclReliabilityModelBuilder_runOutCrossingAnalysis,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "runSORMAnalysis",TclReliabilityModelBuilder_runSORMAnalysis,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "runSystemAnalysis",TclReliabilityModelBuilder_runSystemAnalysis,(ClientData)NULL, NULL);
-  Tcl_CreateCommand(interp, "runSamplingAnalysis",TclReliabilityModelBuilder_runSamplingAnalysis,(ClientData)NULL, NULL);
+  Tcl_CreateCommand(interp, "runImportanceSamplingAnalysis",TclReliabilityModelBuilder_runImportanceSamplingAnalysis,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "tempCommand",TclReliabilityModelBuilder_tempCommand,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "inputCheck",TclReliabilityModelBuilder_inputCheck,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "getMean",TclReliabilityModelBuilder_getMean,(ClientData)NULL, NULL);
@@ -351,7 +400,28 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
 /////////////////////////////////////////////////////////
 
 
-  // set the static pointers in this file
+
+  // Quan --
+
+   Tcl_CreateCommand(interp, "runMonteCarloResponseAnalysis", TclReliabilityModelBuilder_runMonteCarloResponseAnalysis,(ClientData)NULL, NULL);
+   Tcl_CreateCommand(interp, "designVariablePositioner",TclReliabilityModelBuilder_addDesignVariablePositioner,(ClientData)NULL, NULL);
+   Tcl_CreateCommand(interp, "constraintFunction", TclReliabilityModelBuilder_addConstraintFunction,(ClientData)NULL, NULL);
+   Tcl_CreateCommand(interp, "objectiveFunction", TclReliabilityModelBuilder_addObjectiveFunction,(ClientData)NULL, NULL);
+   Tcl_CreateCommand(interp, "runSNOPTAnalysis", TclReliabilityModelBuilder_runSNOPTAnalysis,(ClientData)NULL, NULL);
+   Tcl_CreateCommand(interp, "updateParameter", TclReliabilityModelBuilder_updateParameter,(ClientData)NULL, NULL);
+   Tcl_CreateCommand(interp, "designVariable", TclReliabilityModelBuilder_addDesignVariable,(ClientData)NULL, NULL);
+   Tcl_CreateCommand(interp, "runOrthogonalPlaneSamplingAnalysis",TclReliabilityModelBuilder_runOrthogonalPlaneSamplingAnalysis,(ClientData)NULL, NULL);
+   Tcl_CreateCommand(interp, "computeHessian",TclReliabilityModelBuilder_computeHessian,(ClientData)NULL, NULL);
+   Tcl_CreateCommand(interp, "runMultiDimVisualPrinPlane",TclReliabilityModelBuilder_MultiDimVisPrincPlane,(ClientData)NULL, NULL);
+   Tcl_CreateCommand(interp, "transformXtoU",TclReliabilityModelBuilder_transformXtoU,(ClientData)NULL, NULL);
+   Tcl_CreateCommand(interp, "transformUtoX",TclReliabilityModelBuilder_transformUtoX,(ClientData)NULL, NULL);
+   Tcl_CreateCommand(interp, "runDP_RSM_SimTimeInvariantAnalysis",TclReliabilityModelBuilder_runDP_RSM_SimTimeInvariantAnalysis,(ClientData)NULL, NULL);
+   Tcl_CreateCommand(interp, "runDP_RSM_SimTimeVariantAnalysis",TclReliabilityModelBuilder_runDP_RSM_SimTimeVariantAnalysis,(ClientData)NULL, NULL);
+
+
+   //--Quan
+	
+	// set the static pointers in this file
   theStructuralDomain	= &passedDomain;
   theReliabilityDomain	= new ReliabilityDomain();
 
@@ -360,9 +430,15 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
 
 TclReliabilityBuilder::~TclReliabilityBuilder()
 {
+
   // Delete objects
-  if (theGFunEvaluator != 0)
+  if (theReliabilityDomain != 0)
+    delete theReliabilityDomain;
+
+  if (theGFunEvaluator != 0) {
     delete theGFunEvaluator;
+    theGFunEvaluator = 0;
+  }
   if (theGradGEvaluator != 0)
     delete theGradGEvaluator;
   if (theStepSizeRule != 0)
@@ -399,12 +475,11 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
     delete theParametricReliabilityAnalysis;
   if (theSORMAnalysis != 0)
     delete theSORMAnalysis;
-  if (theSamplingAnalysis != 0)
-    delete theSamplingAnalysis;
+  if (theImportanceSamplingAnalysis != 0)
+    delete theImportanceSamplingAnalysis;
   if (theSystemAnalysis != 0)
     delete theSystemAnalysis;
-  if (theReliabilityDomain != 0) //not in K.F.
-    delete theReliabilityDomain;
+  
   /////S added by K Fujimura /////
   if (theAnalyzer != 0)
     delete theAnalyzer;
@@ -424,6 +499,18 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
 	delete theRandomVibrationAnalysis ;
   /////E added by K Fujimura /////
 
+  // Quan ---
+ #ifdef _SNOPT
+  if (theSNOPTAnalysis != 0)
+    delete theSNOPTAnalysis;
+  if (theMonteCarloResponseAnalysis != 0)
+    delete theMonteCarloResponseAnalysis;
+  if (theSNOPT != 0)
+    delete theSNOPT;
+#endif
+  // ---Quan 
+
+  theReliabilityDomain = 0;
   theReliabilityDomain =0;
   theGFunEvaluator =0;
   theGradGEvaluator =0;
@@ -444,7 +531,7 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
   theFOSMAnalysis =0;
   theParametricReliabilityAnalysis =0;
   theSORMAnalysis =0;
-  theSamplingAnalysis =0;
+  theImportanceSamplingAnalysis =0;
   theSystemAnalysis =0;
  /////S added by K Fujimura /////
   theAnalyzer=0;
@@ -457,54 +544,68 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
   theRandomVibrationAnalysis = 0;
  /////E added by K Fujimura /////
 
-	// Delete commands
-	Tcl_DeleteCommand(theInterp, "randomVariable");
-	Tcl_DeleteCommand(theInterp, "correlate");
-	Tcl_DeleteCommand(theInterp, "correlateGroup");
-	Tcl_DeleteCommand(theInterp, "correlationStructure");
-	Tcl_DeleteCommand(theInterp, "limitState");
-	Tcl_DeleteCommand(theInterp, "randomVariablePositioner");
-	Tcl_DeleteCommand(theInterp, "positionerPositioner");
-	Tcl_DeleteCommand(theInterp, "modulatingFunction");
-	Tcl_DeleteCommand(theInterp, "filter");
-	Tcl_DeleteCommand(theInterp, "spectrum");
-	Tcl_DeleteCommand(theInterp, "findDesignPoint");
-	Tcl_DeleteCommand(theInterp, "gFunEvaluator");
-	Tcl_DeleteCommand(theInterp, "GradGEvaluator");
-	Tcl_DeleteCommand(theInterp, "stepSizeRule");
-	Tcl_DeleteCommand(theInterp, "searchDirection");
-	Tcl_DeleteCommand(theInterp, "HessianApproximation");
-	Tcl_DeleteCommand(theInterp, "meritFunctionCheck");
-	Tcl_DeleteCommand(theInterp, "reliabilityConvergenceCheck");
-	Tcl_DeleteCommand(theInterp, "ProbabilityTransformation");
-	Tcl_DeleteCommand(theInterp, "startPoint");
-	Tcl_DeleteCommand(theInterp, "rootFinding");
-	Tcl_DeleteCommand(theInterp, "findCurvatures");
-	Tcl_DeleteCommand(theInterp, "randomNumberGenerator");
-	Tcl_DeleteCommand(theInterp, "runFORMAnalysis");
-	Tcl_DeleteCommand(theInterp, "runFOSMAnalysis");
-	Tcl_DeleteCommand(theInterp, "runParametricReliabilityAnalysis");
-	Tcl_DeleteCommand(theInterp, "runGFunVizAnalysis");
-	Tcl_DeleteCommand(theInterp, "runSORMAnalysis");
-	Tcl_DeleteCommand(theInterp, "runSystemAnalysis");
-	Tcl_DeleteCommand(theInterp, "runSamplingAnalysis");
-	Tcl_DeleteCommand(theInterp, "tempCommand");
-	Tcl_DeleteCommand(theInterp, "inputCheck");
-	Tcl_DeleteCommand(theInterp, "getMean");
-	Tcl_DeleteCommand(theInterp, "getStdv");
-	Tcl_DeleteCommand(theInterp, "betaFORM");
-	Tcl_DeleteCommand(theInterp, "gammaFORM");
-	Tcl_DeleteCommand(theInterp, "invNormalCDF");
-/////S added by K Fujimura /////
-	Tcl_DeleteCommand(theInterp, "analyzer");
-	Tcl_DeleteCommand(theInterp, "initialstaticanalysis");
-	Tcl_DeleteCommand(theInterp, "initialpoint");
-	Tcl_DeleteCommand(theInterp, "crossingrateanalyzer");
-	Tcl_DeleteCommand(theInterp, "foseries");
-	Tcl_DeleteCommand(theInterp, "firstpassage");
-	Tcl_DeleteCommand(theInterp, "randomvibrationsimulation");
-	Tcl_DeleteCommand(theInterp, "randomvibrationanalysis");
-/////E added by K Fujimura /////
+  // Delete commands
+  Tcl_DeleteCommand(theInterp, "randomVariable");
+  Tcl_DeleteCommand(theInterp, "correlate");
+  Tcl_DeleteCommand(theInterp, "correlateGroup");
+  Tcl_DeleteCommand(theInterp, "correlationStructure");
+  Tcl_DeleteCommand(theInterp, "limitState");
+  Tcl_DeleteCommand(theInterp, "randomVariablePositioner");
+  Tcl_DeleteCommand(theInterp, "positionerPositioner");
+  Tcl_DeleteCommand(theInterp, "modulatingFunction");
+  Tcl_DeleteCommand(theInterp, "filter");
+  Tcl_DeleteCommand(theInterp, "spectrum");
+  Tcl_DeleteCommand(theInterp, "findDesignPoint");
+  Tcl_DeleteCommand(theInterp, "gFunEvaluator");
+  Tcl_DeleteCommand(theInterp, "GradGEvaluator");
+  Tcl_DeleteCommand(theInterp, "stepSizeRule");
+  Tcl_DeleteCommand(theInterp, "searchDirection");
+  Tcl_DeleteCommand(theInterp, "HessianApproximation");
+  Tcl_DeleteCommand(theInterp, "meritFunctionCheck");
+  Tcl_DeleteCommand(theInterp, "reliabilityConvergenceCheck");
+  Tcl_DeleteCommand(theInterp, "ProbabilityTransformation");
+  Tcl_DeleteCommand(theInterp, "startPoint");
+  Tcl_DeleteCommand(theInterp, "rootFinding");
+  Tcl_DeleteCommand(theInterp, "findCurvatures");
+  Tcl_DeleteCommand(theInterp, "randomNumberGenerator");
+  Tcl_DeleteCommand(theInterp, "runFORMAnalysis");
+  Tcl_DeleteCommand(theInterp, "runFOSMAnalysis");
+  Tcl_DeleteCommand(theInterp, "runParametricReliabilityAnalysis");
+  Tcl_DeleteCommand(theInterp, "runGFunVizAnalysis");
+  Tcl_DeleteCommand(theInterp, "runSORMAnalysis");
+  Tcl_DeleteCommand(theInterp, "runSystemAnalysis");
+  Tcl_DeleteCommand(theInterp, "runImportanceSamplingAnalysis");
+  Tcl_DeleteCommand(theInterp, "tempCommand");
+  Tcl_DeleteCommand(theInterp, "inputCheck");
+  Tcl_DeleteCommand(theInterp, "getMean");
+  Tcl_DeleteCommand(theInterp, "getStdv");
+
+  Tcl_DeleteCommand(theInterp, "designVariable");
+  Tcl_DeleteCommand(theInterp, "designVariablePositioner");
+  Tcl_DeleteCommand(theInterp, "constraintFunction");
+  Tcl_DeleteCommand(theInterp, "objectiveFunction");
+  Tcl_DeleteCommand(theInterp, "runSNOPTAnalysis");
+  Tcl_DeleteCommand(theInterp, "runMonteCarloResponseAnalysis");
+  Tcl_DeleteCommand(theInterp, "updateParameter");
+  Tcl_DeleteCommand(theInterp, "runOrthogonalPlaneSamplingAnalysis");
+  Tcl_DeleteCommand(theInterp, "computeHessian");
+  Tcl_DeleteCommand(theInterp, "runMultiDimVisualPrinPlane");
+  Tcl_DeleteCommand(theInterp, "runDP_RSM_SimTimeInvariantAnalysis");
+  Tcl_DeleteCommand(theInterp, "runDP_RSM_SimTimeVariantAnalysis");
+  
+  Tcl_DeleteCommand(theInterp, "betaFORM");
+  Tcl_DeleteCommand(theInterp, "gammaFORM");
+  Tcl_DeleteCommand(theInterp, "invNormalCDF");
+  /////S added by K Fujimura /////
+  Tcl_DeleteCommand(theInterp, "analyzer");
+  Tcl_DeleteCommand(theInterp, "initialstaticanalysis");
+  Tcl_DeleteCommand(theInterp, "initialpoint");
+  Tcl_DeleteCommand(theInterp, "crossingrateanalyzer");
+  Tcl_DeleteCommand(theInterp, "foseries");
+  Tcl_DeleteCommand(theInterp, "firstpassage");
+  Tcl_DeleteCommand(theInterp, "randomvibrationsimulation");
+  Tcl_DeleteCommand(theInterp, "randomvibrationanalysis");
+  /////E added by K Fujimura /////
 }
 
 
@@ -2215,73 +2316,7 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 	return TCL_OK;
 
 
-
-
-
-
-
-/*
-// THE OLD VERSION OF THIS FUNCTION:
-
-  RandomVariablePositioner *theRandomVariablePositioner = 0;
-  int tag;
-  int rvNumber;
-  int typeOfObject;
-  int tagOfObject;
-  int typeOfParameterInObject;
-
-  // GET INPUT PARAMETER (integer)
-  if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
-	opserr << "ERROR: invalid input: tag \n";
-	return TCL_ERROR;
-  }
-
-  // GET INPUT PARAMETER (integer)
-  if (Tcl_GetInt(interp, argv[2], &rvNumber) != TCL_OK) {
-	opserr << "ERROR: invalid input: rvNumber \n";
-	return TCL_ERROR;
-  }
-
-  // GET INPUT PARAMETER (integer)
-  if (Tcl_GetInt(interp, argv[3], &typeOfObject) != TCL_OK) {
-	opserr << "ERROR: invalid input: typeOfObject \n";
-	return TCL_ERROR;
-  }
-
-  // GET INPUT PARAMETER (integer)
-  if (Tcl_GetInt(interp, argv[4], &tagOfObject) != TCL_OK) {
-	opserr << "ERROR: invalid input: tagOfObject \n";
-	return TCL_ERROR;
-  }
-
-  // GET INPUT PARAMETER (integer)
-  if (Tcl_GetInt(interp, argv[5], &typeOfParameterInObject) != TCL_OK) {
-	opserr << "ERROR: invalid input: typeOfParameterInObject \n";
-	return TCL_ERROR;
-  }
-
-
-  // CREATE THE OBJECT
-  theRandomVariablePositioner = new RandomVariablePositioner(tag, rvNumber, typeOfObject, tagOfObject, typeOfParameterInObject);
-
-  if (theRandomVariablePositioner == 0) {
-	opserr << "ERROR: ran out of memory creating random variable identificator \n";
-	opserr << "randomVariableID: " << tag << endln;
-	return TCL_ERROR;
-  }
-
-  // ADD THE OBJECT TO THE DOMAIN
-  if (theReliabilityDomain->addRandomVariablePositioner(theRandomVariablePositioner) == false) {
-	opserr << "ERROR: failed to add random variable identificator to the domain\n";
-	opserr << "randomvariableID: " << tag << endln;
-	delete theRandomVariablePositioner; // otherwise memory leak
-	return TCL_ERROR;
-  }
-
-  return TCL_OK;
-*/
 }
-
 
 
 
@@ -2744,12 +2779,6 @@ TclReliabilityModelBuilder_addFilter(ClientData clientData, Tcl_Interp *interp, 
 {
 	Filter *theFilter = 0;
 
-	if (argc != 5) {
-		opserr << "ERROR: Wrong number of arguments to filter command." << endln;
-		return TCL_ERROR;
-	}
-
-
 	int tag;
 	double period_Tn, damping;
 
@@ -2758,6 +2787,30 @@ TclReliabilityModelBuilder_addFilter(ClientData clientData, Tcl_Interp *interp, 
 		opserr << "ERROR: invalid input: tag \n";
 		return TCL_ERROR;
 	}
+// Quan and Michele
+	if ( (strcmp(argv[2],"delta") == 0) || (strcmp(argv[2],"Delta") == 0) ) {
+
+			theFilter = new DeltaFilter(tag);
+			
+			if (theFilter == 0) {
+				opserr << "ERROR: ran out of memory creating filter \n";
+				opserr << "filter: " << tag << endln;
+				return TCL_ERROR;
+			}
+
+			// ADD THE OBJECT TO THE DOMAIN
+			if (theReliabilityDomain->addFilter(theFilter) == false) {
+				opserr << "ERROR: failed to add filter to the domain\n";
+				opserr << "filter: " << tag << endln;
+				delete theFilter; // otherwise memory leak
+				return TCL_ERROR;
+			}
+
+
+			return TCL_OK;
+
+	}    // if "constant"
+
 
 	// GET INPUT PARAMETER (double)
 	if (Tcl_GetDouble(interp, argv[3], &period_Tn) != TCL_OK) {
@@ -3783,7 +3836,7 @@ TclReliabilityModelBuilder_addgFunEvaluator(ClientData clientData, Tcl_Interp *i
 	else if (strcmp(argv[1],"OpenSees") == 0) {
 
 		// There are several alternatives for this command:
-		// gFunEvaluator  OpenSees  -file <filename>
+		// gFunEvaluator  OpenSees  -file <filename> <dT (optional for outcrossing only)> 
 		// gFunEvaluator  OpenSees  -runToMaxTimeInGFun
 		// gFunEvaluator  OpenSees  -analyze <numSteps> <dt(optional)>
 
@@ -3795,6 +3848,7 @@ TclReliabilityModelBuilder_addgFunEvaluator(ClientData clientData, Tcl_Interp *i
 		if (strcmp(argv[2],"-file") == 0) {
 
 			// Try to open the file to make sure it exists
+			double dt = 0.0;
 			ifstream inputFile( argv[3], ios::in );
 			if (inputFile.fail()) {
 				opserr << "File " << argv[3] << " could not be opened. " << endln;
@@ -3802,9 +3856,16 @@ TclReliabilityModelBuilder_addgFunEvaluator(ClientData clientData, Tcl_Interp *i
 			}
 			inputFile.close();
 
+			if (argc ==5) {
+				if (Tcl_GetDouble(interp, argv[4], &dt) != TCL_OK) {
+					opserr << "ERROR: invalid input: dt for OpenSees GFunEvaluator \n";
+					return TCL_ERROR;
+				}
+			}
+			//				interp, theReliabilityDomain, argv[3], dt);
 			theGFunEvaluator = new OpenSeesGFunEvaluator(
-				interp, theReliabilityDomain,
-				theStructuralDomain, argv[3]);
+								     interp, theReliabilityDomain,
+								     theStructuralDomain, argv[3]);
 		}
 		else if (strcmp(argv[2],"-analyze") == 0) {
 
@@ -3955,9 +4016,10 @@ TclReliabilityModelBuilder_addGradGEvaluator(ClientData clientData, Tcl_Interp *
 
 		bool doGradientCheck = false;
 
+	//Quan Apr. 2006	
 		if (theSensitivityAlgorithm == 0) {
-			opserr << "Need a DDM sensitivity algorithm before a OpenSees sensitivity evaluator can be created" << endln;
-			return TCL_ERROR;
+			opserr << "Warning:Need a DDM sensitivity algorithm before a OpenSees sensitivity evaluator can be created" << endln;
+	//		return TCL_ERROR;
 		}
 
 		if (argc==2) {
@@ -4038,10 +4100,14 @@ TclReliabilityModelBuilder_addFindCurvatures(ClientData clientData, Tcl_Interp *
 	}
 
 
-	// GET INPUT PARAMETER (string) AND CREATE THE OBJECT
+	// GET INPUT PARAMETER (string) AND CREATE THE OBJECT   // modified by Quan Gu July 2006
 	if (strcmp(argv[1],"firstPrincipal") == 0) {
 
 		theFindCurvatures = new FirstPrincipalCurvature();
+		if (argc>=3){
+			if (strcmp(argv[2],"-exe") == 0)
+				theFindCurvatures->computeCurvatures(theReliabilityDomain);
+		}
 	}
 	else if (strcmp(argv[1],"bySearchAlgorithm") == 0) {
 
@@ -4076,6 +4142,7 @@ TclReliabilityModelBuilder_addFindCurvatures(ClientData clientData, Tcl_Interp *
 
 
 //////////////////////////////////////////////////////////////////
+
 int 
 TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
@@ -4210,7 +4277,133 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 
 		delete [] fileNamePrint;
 		
+	}   //if stepSize
+
+	// Quan SNOPT interface ----
+#ifdef _SNOPT
+	else if (strcmp(argv[argvCounter],"SNOPT") == 0) {
+		argvCounter++;
+
+		// Check that the necessary ingredients are present
+		if (theGFunEvaluator == 0 ) {
+			opserr << "Need theGFunEvaluator before a FindDesignPointAlgorithm can be created" << endln;
+			return TCL_ERROR;
+		}
+		if (theGradGEvaluator == 0 ) {
+			opserr << "Need theGradGEvaluator before a FindDesignPointAlgorithm can be created" << endln;
+			return TCL_ERROR;
+		}
+/*		if (theStepSizeRule == 0 ) {
+			opserr << "Need theStepSizeRule before a FindDesignPointAlgorithm can be created" << endln;
+			return TCL_ERROR;
+		} 
+		if (theSearchDirection == 0 ) {
+			opserr << "Need theSearchDirection before a FindDesignPointAlgorithm can be created" << endln;
+			return TCL_ERROR;
+		}  */
+		if (theProbabilityTransformation == 0 ) {
+			opserr << "Need theProbabilityTransformation before a FindDesignPointAlgorithm can be created" << endln;
+			return TCL_ERROR;
+		}
+//		if (theStartPoint == 0 ) {
+//			opserr << "Need theStartPoint before a FindDesignPointAlgorithm can be created" << endln;
+//			return TCL_ERROR;
+//		}
+/*		if (theReliabilityConvergenceCheck == 0 ) {
+			opserr << "Need theReliabilityConvergenceCheck before a FindDesignPointAlgorithm can be created" << endln;
+			return TCL_ERROR;
+		}
+*/
+		int printFlag=0;
+		char *fileNamePrint1;
+		fileNamePrint1 = new char[256];
+		strcpy(fileNamePrint1,"initialized");
+
+
+		int maxNumIter = 250;
+		while (argvCounter < argc) {
+
+			if (strcmp(argv[argvCounter],"-maxNumIter") == 0) {
+				argvCounter++;
+
+				if (Tcl_GetInt(interp, argv[argvCounter], &maxNumIter) != TCL_OK) {
+					opserr << "ERROR: invalid input: maxNumIter \n";
+					return TCL_ERROR;
+				}
+				argvCounter++;
+			}
+			else if (strcmp(argv[argvCounter],"-printAllPointsX") == 0) {
+				argvCounter++;
+				printFlag = 1;
+				strcpy(fileNamePrint1,argv[argvCounter]);
+				argvCounter++;
+			}
+			else if (strcmp(argv[argvCounter],"-printAllPointsY") == 0) {
+				argvCounter++;
+				printFlag = 2;
+				strcpy(fileNamePrint1,argv[argvCounter]);
+				argvCounter++;
+			}
+			else if (strcmp(argv[argvCounter],"-printDesignPointX") == 0) {
+				argvCounter++;
+				printFlag = 3;
+				strcpy(fileNamePrint1,argv[argvCounter]);
+				argvCounter++;
+			}
+			else if (strcmp(argv[argvCounter],"-printDesignPointY") == 0) {
+				argvCounter++;
+				printFlag = 4;
+				strcpy(fileNamePrint1,argv[argvCounter]);
+				argvCounter++;
+			}
+			else if (strcmp(argv[argvCounter],"-printCurrentPointX") == 0) {
+				argvCounter++;
+				printFlag = 5;
+				strcpy(fileNamePrint1,argv[argvCounter]);
+				argvCounter++;
+			}
+			else if (strcmp(argv[argvCounter],"-printCurrentPointY") == 0) {
+				argvCounter++;
+				printFlag = 6;
+				strcpy(fileNamePrint1,argv[argvCounter]);
+				argvCounter++;
+			}
+			else {
+				opserr << "ERROR: Invalid input to SearchWithStepSizeAndStepDirection. " << endln;
+				return TCL_ERROR;
+			}
+		}
+
+		char *ProbType = new char[256];
+		strcpy(ProbType,"reliability");
+
+		
+		theSNOPT = new snoptProblem(
+					maxNumIter, 
+					theGFunEvaluator,
+					theGradGEvaluator,
+					theProbabilityTransformation,
+					printFlag,
+					fileNamePrint1,
+					theStartPoint,
+					ProbType,theReliabilityDomain);
+		
+		theFindDesignPointAlgorithm=theSNOPT;  // is this transfer correct 
+/*
+   snoptProblem::snoptProblem(int passedMaxNumberOfIterations, 
+					GFunEvaluator *passedGFunEvaluator,
+					GradGEvaluator *passedGradGEvaluator,
+					ProbabilityTransformation *passedProbabilityTransformation,
+					int pPrintFlag,
+					char *pFileNamePrint,
+					Vector *pStartPoint, char * probType):
+   
+   */
+		delete [] fileNamePrint1;  // something wrong here
+		
+	//if SNOPT  ---- Quan
 	}
+#endif // _SNOPT
 	else if (strcmp(argv[argvCounter],"NewStepSearch") == 0) {
 		
 		argvCounter++;
@@ -4342,8 +4535,6 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 	} 
 
 	return TCL_OK;
-
-	
 }
 
 //////////////////////////////////////////////////////////////////
@@ -4431,23 +4622,24 @@ TclReliabilityModelBuilder_addStartPoint(ClientData clientData, Tcl_Interp *inte
 
 	}
 	else {
-		opserr << "ERROR: Invalid type of start point is given. " << endln;
-		return TCL_ERROR;
+	  opserr << "ERROR: Invalid type of start point is given. " << endln;
+	  return TCL_ERROR;
 	}
+
 
 	// Check that the vector is of correct size
 	if (theStartPoint==0) {
-//		opserr << "ERROR: Could not create the start point. " << endln;
-//		return TCL_ERROR;
+	  //		opserr << "ERROR: Could not create the start point. " << endln;
+	  //		return TCL_ERROR;
 	}
 	else {
-		if (theStartPoint->Size() != nrv) {
-			opserr << "ERROR: The size of the start point vector is NOT equal " << endln
-				<< " to the number of random variables in the model! " << endln;
-			return TCL_ERROR;
-		}
+	  if (theStartPoint->Size() != nrv) {
+	    opserr << "ERROR: The size of the start point vector is NOT equal " << endln
+		   << " to the number of random variables in the model! " << endln;
+	    return TCL_ERROR;
+	  }
 	}
-
+	
 	return TCL_OK;
 }
 
@@ -4946,12 +5138,12 @@ TclReliabilityModelBuilder_runSystemAnalysis(ClientData clientData, Tcl_Interp *
 
 //////////////////////////////////////////////////////////////////
 int 
-TclReliabilityModelBuilder_runSamplingAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+TclReliabilityModelBuilder_runImportanceSamplingAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 	// In case this is a replacement
-	if (theSamplingAnalysis != 0) {
-		delete theSamplingAnalysis;
-		theSamplingAnalysis = 0;
+	if (theImportanceSamplingAnalysis != 0) {
+		delete theImportanceSamplingAnalysis;
+		theImportanceSamplingAnalysis = 0;
 	}
 
 
@@ -5032,6 +5224,20 @@ TclReliabilityModelBuilder_runSamplingAnalysis(ClientData clientData, Tcl_Interp
 //					return TCL_ERROR;
 //				}
 			}
+
+// Michele and Quan -------------------------
+			else if (strcmp(argv[i+1],"outCrossingFailureProbability") == 0) {
+
+				analysisTypeTag = 4;
+
+//				if (theStartPoint == 0 ) {
+//					opserr << "Need theStartPoint before a SimulationAnalyis can be created" << endln;
+//					return TCL_ERROR;
+//				}
+			}
+
+
+
 			else if ( (strcmp(argv[i+1],"responseStatistics") == 0) || (strcmp(argv[i+1],"saveGvalues") == 0) ) {
 
 				if (strcmp(argv[i+1],"responseStatistics") == 0) {
@@ -5112,33 +5318,41 @@ TclReliabilityModelBuilder_runSamplingAnalysis(ClientData clientData, Tcl_Interp
 	}
 	
 	
-	theSamplingAnalysis 
-			= new SamplingAnalysis(theReliabilityDomain, 
-									theProbabilityTransformation, 
-									theGFunEvaluator, 
-									theRandomNumberGenerator, 
-									interp,
-									numberOfSimulations, 
-									targetCOV,
-									samplingVariance,
-									printFlag,
-									argv[1],
-									theStartPoint,
-									analysisTypeTag);
+	theImportanceSamplingAnalysis 
+			= new ImportanceSamplingAnalysis(theReliabilityDomain, 
+							 theProbabilityTransformation, 
+							 theGFunEvaluator, 
+							 theRandomNumberGenerator, 
+							 interp,
+							 numberOfSimulations, 
+							 targetCOV,
+							 samplingVariance,
+							 printFlag,
+							 argv[1],
+							 theStartPoint,
+							 analysisTypeTag);
 
-	if (theSamplingAnalysis == 0) {
-		opserr << "ERROR: could not create theSamplingAnalysis \n";
+	if (theImportanceSamplingAnalysis == 0) {
+		opserr << "ERROR: could not create theImportanceSamplingAnalysis \n";
 		return TCL_ERROR;
 	}
 
 	// Now run analysis
-	theSamplingAnalysis->analyze();
+	theImportanceSamplingAnalysis->analyze();
 
 	return TCL_OK;
 
 }
 
 //////////////////////////////////////////////////////////////////
+
+
+// Quan and Michele Feb 2006
+
+// command "runOutCrossingAnalysis  filename?  -results stepsToStart?  stepsToEnd?  samplefreq? impulseFreq?   -littleDt dt? -analysisType 
+// option for analysisType 1:   -twoSearches   <-integralTolerance  tol? -useFirstDesignPoint>
+//            analysisType 2:    -Koo
+//                                       
 int 
 TclReliabilityModelBuilder_runOutCrossingAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
@@ -5172,6 +5386,13 @@ TclReliabilityModelBuilder_runOutCrossingAnalysis(ClientData clientData, Tcl_Int
 	int sampleFreq = 1;
 	double littleDt = 0.01;
 	int analysisType = 1;
+	
+	int impulseFreq;
+
+	double integralTolerance=1.e-10;
+	bool useFirstDesignPt = false;
+
+
 
 	// Loop through arguments
 	int argvCounter = 2;
@@ -5199,6 +5420,12 @@ TclReliabilityModelBuilder_runOutCrossingAnalysis(ClientData clientData, Tcl_Int
 				return TCL_ERROR;
 			}
 			argvCounter++;
+
+			if (Tcl_GetInt(interp, argv[argvCounter], &impulseFreq) != TCL_OK) {
+				opserr << "ERROR: invalid input impulseFreq to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
 		}
 		else if (strcmp(argv[argvCounter],"-littleDt") == 0) {
 			argvCounter++;
@@ -5217,6 +5444,20 @@ TclReliabilityModelBuilder_runOutCrossingAnalysis(ClientData clientData, Tcl_Int
 		else if (strcmp(argv[argvCounter],"-twoSearches") == 0) {
 			argvCounter++;
 			analysisType = 1;
+			if (strcmp(argv[argvCounter],"-integralTolerance") == 0) {
+				argvCounter++;
+				if (Tcl_GetDouble(interp, argv[argvCounter], &integralTolerance) != TCL_OK) {
+					opserr << "ERROR: invalid input littleDt to theOutCrossingAnalysis \n";
+					return TCL_ERROR;
+				}
+				argvCounter++;
+			 }
+			if (strcmp(argv[argvCounter],"-useFirstDesignPoint") == 0) {
+				argvCounter++;
+				useFirstDesignPt =true;
+				
+			 }
+
 		}
 		else {
 			opserr << "ERROR: Invalid input to theOutCrossingAnalysis." << endln;
@@ -5235,8 +5476,11 @@ TclReliabilityModelBuilder_runOutCrossingAnalysis(ClientData clientData, Tcl_Int
 				stepsToStart,
 				stepsToEnd,
 				sampleFreq,
+				impulseFreq,
 				littleDt,
-				argv[1]);
+				argv[1],
+				integralTolerance,
+				useFirstDesignPt);
 
 	if (theOutCrossingAnalysis == 0) {
 		opserr << "ERROR: could not create theOutCrossingAnalysis \n";
@@ -5252,6 +5496,231 @@ TclReliabilityModelBuilder_runOutCrossingAnalysis(ClientData clientData, Tcl_Int
 
 
 //////////////////////////////////////////////////////////////////
+// Quan and Michele April 2006
+
+// command "runOrthogonalPlaneSamplingAnalysis  -fileName filename?  -maxNum number?   -type  analysisType? -targetCOV cov? -print printFlag? 
+// -funcTol tol1? -varTol tol2? -maxIter iter? -littleDt littleDt?....
+// option for analysisType  "failureProbability"   ---1:   failure probability.
+//            analysisType "outCrossing"           ---2:   upcrossing problem.
+//                                       
+// Not finish yet ????????????????????????????????????????????????????????????????????????????
+int 
+TclReliabilityModelBuilder_runOrthogonalPlaneSamplingAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+	// In case this is a replacement
+	if (theSamplingAnalysis != 0) {
+		delete theSamplingAnalysis;
+		theSamplingAnalysis = 0;
+	}
+
+
+	// Do input check
+	char theCommand[15] = "inputCheck";
+	Tcl_Eval( interp, theCommand );
+
+
+	// Check for essential tools
+	if (theProbabilityTransformation == 0 ) {
+		opserr << "Need theProbabilityTransformation before a SimulationAnalyis can be created" << endln;
+		return TCL_ERROR;
+	}
+	if (theGFunEvaluator == 0 ) {
+		opserr << "Need theGFunEvaluator before a SimulationAnalyis can be created" << endln;
+		return TCL_ERROR;
+	}
+	if (theRandomNumberGenerator == 0 ) {
+		opserr << "Need theRandomNumberGenerator before a SimulationAnalyis can be created" << endln;
+		return TCL_ERROR;
+	}
+
+	
+	// The following switches are available (default values are provided)
+	// (The sampling is performed around theStartPoint, except 
+	// for response statistics sampling; then the mean is used together
+	// with unit sampling variance.)
+	//
+	//     -type  failureProbability (1)......... this is the default
+	//     -type  outcrossing (2)
+	//     -type  saveGvalues (3) .... not yet
+    //
+	//     -maxNum 1000  ........................ this is the default
+	//
+	//     -targetCOV 0.05  ..................... this is the default
+	//
+	//     -print 0   (print nothing) 
+	//     -print 1   failure prob. and cov  .... this is the default
+	//     -print 2   ............................ restart file  // 2007 Feb. Quan
+	//     -print 5    recorder the surface ......this is for visualization
+	//     -funcTol  1.e-5 ....................... this is the default
+	//     -varTol   1.e-3........................ this is the default
+	//     -maxIter   20  .........................this is the default
+
+	if (argc<3) {
+		opserr << "command: runOrthogonalPlaneSamplingAnalysis  -fileName filename?  -maxNum number?   -type  analysisType? -targetCOV cov? -print printFlag? ";
+		opserr<<" -funcTol tol1? -varTol tol2? -maxIter iter?" << endln;
+		return TCL_ERROR;
+	}
+
+	// Declaration of input parameters
+	int numberOfSimulations	= 1000;
+	double targetCOV		= 0.05;
+	int printFlag			= 1;
+	double funcTol = 1.e-5;
+	double varTol = 1.e-3;
+	int maxIter = 20;
+	int analysisTypeTag		= 1;
+	char name[50];
+	Vector * theDesignPoint;
+	double littleDt = 1.0e-3;
+
+	if (theStartPoint == 0 ) {
+		opserr << "orthogonalPlaneSamplingAnalysis can not run. Need StartPoint !" << endln;
+		return TCL_ERROR;
+	}
+	else theDesignPoint = theStartPoint;
+
+	int argvCounter = 1;
+	while (argc > argvCounter) {
+		if ((strcmp(argv[argvCounter],"-fileName") == 0)||(strcmp(argv[argvCounter],"-filename") == 0)) {
+			argvCounter++;
+			strcpy(name,argv[argvCounter]);
+			argvCounter++;
+		}// if
+
+		else if ((strcmp(argv[argvCounter],"-maxNum")==0) ||(strcmp(argv[argvCounter],"-maxnum") == 0)) {
+			argvCounter++;
+			if (Tcl_GetInt(interp, argv[argvCounter], &numberOfSimulations) != TCL_OK) {
+			opserr << "ERROR: invalid input: numberOfSimulations \n";
+			return TCL_ERROR;
+			}
+			argvCounter++;
+		}// else if
+		
+		else if (strcmp(argv[argvCounter],"-type") == 0) {
+			argvCounter++;
+			if (strcmp(argv[argvCounter],"failureProbability") == 0) {
+				analysisTypeTag = 1;
+			}
+			else if (strcmp(argv[argvCounter],"outCrossing") == 0) {
+				analysisTypeTag = 2;
+			}
+			argvCounter++;
+		}
+
+		else if (strcmp(argv[argvCounter],"-targetCOV") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter++], &targetCOV) != TCL_OK) {
+				opserr << "ERROR: invalid input: targetCOV \n";
+				return TCL_ERROR;
+			}
+		}
+		else if (strcmp(argv[argvCounter],"-print") == 0) {
+			argvCounter++;
+			if (Tcl_GetInt(interp, argv[argvCounter++], &printFlag) != TCL_OK) {
+				opserr << "ERROR: invalid input: printFlag \n";
+				return TCL_ERROR;
+			}
+		}
+ 
+		else if (strcmp(argv[argvCounter],"-funcTol") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter++], &funcTol) != TCL_OK) {
+				opserr << "ERROR: invalid input: funcTol \n";
+				return TCL_ERROR;
+			}
+		}
+				
+		else if (strcmp(argv[argvCounter],"-varTol") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter++], &varTol) != TCL_OK) {
+				opserr << "ERROR: invalid input: varTol \n";
+				return TCL_ERROR;
+			}
+		}
+		
+		else if (strcmp(argv[argvCounter],"-maxIter") == 0) {
+			argvCounter++;
+			if (Tcl_GetInt(interp, argv[argvCounter++], &maxIter) != TCL_OK) {
+				opserr << "ERROR: invalid input: maxIter \n";
+				return TCL_ERROR;
+			}
+		}
+		else if (strcmp(argv[argvCounter],"-littleDt") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter++], &littleDt) != TCL_OK) {
+				opserr << "ERROR: invalid input: littleDt \n";
+				return TCL_ERROR;
+			}
+		}
+		
+		else {
+			opserr << "ERROR: invalid input to sampling analysis. " << endln;
+			return TCL_ERROR;
+		}
+	}
+
+
+	/*
+		OrthogonalPlaneSamplingAnalysis(   Tcl_Interp *interp,
+		                ReliabilityDomain *passedReliabilityDomain,
+						ProbabilityTransformation *passedProbabilityTransformation,
+						GFunEvaluator *passedGFunEvaluator,
+						RandomNumberGenerator *passedRandomNumberGenerator,
+						int passedNumberOfSimulations,
+						int passedMaxNumOfIterations,
+						double passedTargetCOV,
+						double samplingStdv,
+						int printFlag,
+						TCL_Char *fileName,
+						Vector * pDesignPoint,
+						int analysisTypeTag,
+						int zeroFindingType);
+	
+	*/
+
+	
+	// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxxx
+	theSamplingAnalysis 
+			= new OrthogonalPlaneSamplingAnalysis(interp, 
+									theReliabilityDomain, 
+									theProbabilityTransformation, 
+									theGFunEvaluator, 
+									theRandomNumberGenerator, 
+									numberOfSimulations,
+									maxIter,
+									targetCOV,
+     								printFlag,
+									name,
+									theDesignPoint,
+									analysisTypeTag,
+									1,
+									funcTol,
+									varTol,
+									maxIter,
+									littleDt);
+
+	if (theSamplingAnalysis == 0) {
+		opserr << "ERROR: could not create theOrthogonalSamplingAnalysis \n";
+		return TCL_ERROR;
+	}
+
+	// Now run analysis
+	theSamplingAnalysis->analyze();
+
+ 
+	return TCL_OK;
+
+}
+
+
+//////////////////////////////////////////////////////////////////
+
+
+// Quan & Michele: add command for visualization of another zerofinding algorithm
+//  command: runGFunVizAnalysis outputfile -space y    -funSurf surface     -dir file designpoint.out -file filename numPts? -zeroFindingAlgorithm safeguardedZeroFinding
+
+
+
 int 
 TclReliabilityModelBuilder_runGFunVisualizationAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
@@ -5290,6 +5759,8 @@ TclReliabilityModelBuilder_runGFunVisualizationAnalysis(ClientData clientData, T
 
 
 	// Initial declarations
+	int zeroFindingAlg =0;
+
 	int rv1 = 0;
 	int rv2 = 0;
 	int numPts1 = 0;
@@ -5426,7 +5897,7 @@ TclReliabilityModelBuilder_runGFunVisualizationAnalysis(ClientData clientData, T
 
 				theDirectionVector = dummyDirectionVector;
 
-				argvCounter++;
+			//	argvCounter++;   -- wrong  Quan
 			}
 			else {
 				opserr << "ERROR: Invalid input to visualization analysis. " << endln;
@@ -5608,6 +6079,14 @@ TclReliabilityModelBuilder_runGFunVisualizationAnalysis(ClientData clientData, T
 			}
 			argvCounter++;
 		}
+		else if (strcmp(argv[argvCounter],"-zeroFindingAlgorithm") == 0) {
+			argvCounter++;
+			if (strcmp(argv[argvCounter],"safeguardedZeroFinding") == 0){
+				zeroFindingAlg = 1;
+				argvCounter++;
+			}
+
+		}
 		else {
 			opserr << "ERROR: invalid input to theGFunVisualizationAnalysis." << endln;
 			return TCL_ERROR;
@@ -5631,7 +6110,8 @@ TclReliabilityModelBuilder_runGFunVisualizationAnalysis(ClientData clientData, T
 		return TCL_ERROR;
 	}
 
-	theGFunVisualizationAnalysis = new GFunVisualizationAnalysis(
+	if (zeroFindingAlg ==0) 
+	   theGFunVisualizationAnalysis = new GFunVisualizationAnalysis(
 											theReliabilityDomain, 
 											theGFunEvaluator, 
 											theProbabilityTransformation, 
@@ -5642,8 +6122,21 @@ TclReliabilityModelBuilder_runGFunVisualizationAnalysis(ClientData clientData, T
 											funSurf,
 											axes,
 											dir);
+/*	else if (zeroFindingAlg ==1) 
+	   theGFunVisualizationAnalysis = new GFunVisualizationSamplingAnalysis(
+											theReliabilityDomain, 
+											theGFunEvaluator, 
+											theProbabilityTransformation, 
+											argv[1],
+											argv[convFileArgv],
+											convResults,
+											space,
+											funSurf,
+											axes,
+											dir,
+											1);
 
-
+*/
 	// Pass stuff to the analysis object
 	if (dir == 1) {
 		theGFunVisualizationAnalysis->setDirection(rvDir);
@@ -6080,6 +6573,2224 @@ TclReliabilityModelBuilder_tempCommand(ClientData clientData, Tcl_Interp *interp
 }
 
 
+// ---------- Quan Gu ------------------------
+// command: designVariable  1 -name E  < -startPt $E   -lowerBound [expr $E*0.8] -upperBound [expr $E*1.2] >
+int 
+TclReliabilityModelBuilder_addDesignVariable(ClientData clientData,Tcl_Interp *interp,int argc,TCL_Char **argv)
+{
+  DesignVariable *theDesignVariable = 0;
+  int tag;
+  char name[20]="";
+  char valueString[20]="";
+  double value=0;
+  double lowerBound=0;
+  double upperBound=0;
+  int numberOfArguments = argc;
+
+  // CHECK THAT AT LEAST ENOUGH ARGUMENTS ARE GIVEN
+  if (numberOfArguments < 3) {
+		opserr << "ERROR: invalid number of arguments to designVariable command \n";
+		return TCL_ERROR;
+  }
+
+
+  // GET TAG NUMBER
+  if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+	opserr << "ERROR: invalid input: tag \n";
+	return TCL_ERROR;
+  }
+
+
+	// Loop through arguments
+	int argvCounter = 2;
+	while (argc > argvCounter) {
+		if ((strcmp(argv[argvCounter],"-name") == 0)||(strcmp(argv[argvCounter],"-Name") == 0)) {
+			argvCounter++;
+			strcpy(name,argv[argvCounter]);
+			argvCounter++;
+		}// if
+
+		else if (strcmp(argv[argvCounter],"-startPt") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &value) != TCL_OK) {
+			opserr << "ERROR: invalid input: startPt \n";
+			return TCL_ERROR;
+			}
+			strcpy(valueString,argv[argvCounter]);
+			lowerBound=value;
+			upperBound=value;
+				argvCounter++;
+		}// else if
+
+		else if (strcmp(argv[argvCounter],"-lowerBound") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &lowerBound) != TCL_OK) {
+			opserr << "ERROR: invalid input: startPt \n";
+			return TCL_ERROR;
+			}
+				argvCounter++;
+		}// else if
+
+		else if (strcmp(argv[argvCounter],"-upperBound") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &upperBound) != TCL_OK) {
+			opserr << "ERROR: invalid input: startPt \n";
+			return TCL_ERROR;
+			}
+				argvCounter++;
+		}// else if
+		
+		else {
+			opserr<<"warning: unknown command: "<<argv[argvCounter]<<endln;
+			argvCounter++;
+		
+		}
+
+	};  // while
+
+
+// in tcl, run 'set name value'
+  char tclAssignment[50];
+  strcpy (tclAssignment, "set ");
+  strcat (tclAssignment, name);
+  strcat (tclAssignment, " ");
+
+   
+ // _gcvt( value, 7, buffer );
+   strcat (tclAssignment, valueString);
+  
+   
+   if (Tcl_GetVar(interp, name, TCL_GLOBAL_ONLY) !=NULL)
+   {
+		opserr<<"Fatal::the variable with name: "<<name <<" is already in system, please use another name!"<<endln;   
+		exit(-1);
+   }
+
+   if (Tcl_Eval(interp,tclAssignment) !=TCL_OK ){
+   		opserr<<"Fatal::can not set varuable with name: "<<name <<"in tcl command!"<<endln;   
+		exit(-1);
+   }
+
+// here tag ;
+  theDesignVariable = new DesignVariable(tag, 
+			 name,
+			 value,
+			 upperBound,
+			 lowerBound,
+			 interp,
+			 theReliabilityDomain,
+			 0);
+
+  if (theDesignVariable == 0) {
+		opserr << "ERROR: could not create random theDesignVariable number " << tag << endln;
+		return TCL_ERROR;
+	  }
+  
+
+  // ADD THE OBJECT TO THE DOMAIN
+  if (theReliabilityDomain->addDesignVariable(theDesignVariable) == false) {
+	opserr << "ERROR: failed to add theDesignVariable variable to the domain (wrong number of arguments?)\n";
+	opserr << "theDesignVariable variable: " << tag << endln;
+	delete theDesignVariable; // otherwise memory leak
+	return TCL_ERROR;
+  }
+
+  return TCL_OK;
+}
+					   
+
+// command designVariablePositioner 1   -dvNum 1 -element 1     -material E  
+int 
+TclReliabilityModelBuilder_addDesignVariablePositioner(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+	DesignVariablePositioner *theDesignVariablePositioner = 0;
+	int tag;
+	int dvNumber;
+	int tagOfObject;
+	DomainComponent *theObject;
+	int argvCounter = 1;
+
+
+	// READ THE TAG NUMBER
+	if (Tcl_GetInt(interp, argv[argvCounter++], &tag) != TCL_OK) {
+		opserr << "ERROR: Invalid input tag to design variable positioner." << endln;
+		return TCL_ERROR;
+	}
+
+
+	if (strcmp(argv[argvCounter],"-dvNum") == 0) {
+		argvCounter++;
+		
+		// READ THE RANDOM VARIABLE NUMBER
+		if (Tcl_GetInt(interp, argv[argvCounter++], &dvNumber) != TCL_OK) {
+			opserr << "ERROR: invalid input: dvNumber \n";
+			return TCL_ERROR;
+		}
+
+		// CHECK THAT THE RANDOM VARIABLE ACTUALLY EXISTS
+		DesignVariable *theDesignVariable = 0;
+		theDesignVariable = theReliabilityDomain->getDesignVariablePtr(dvNumber);
+		if (theDesignVariable == 0){
+			opserr << "ERROR:: A non-existing design variable number " << dvNumber << " is being positioned in the model " << endln;
+			return TCL_ERROR;
+		}
+	}
+	else {
+		opserr << "ERROR: Illegal design variable specification in  " << endln
+			<< " design variable positioner command. " << endln;
+		return TCL_ERROR;
+	}
+	
+
+	const char **data = new const char *[argc-argvCounter-2];
+	int ii,jj;
+	for (ii=argvCounter+2, jj=0; ii<argc; ii++, jj++)
+	  data[jj] = argv[ii];
+
+	// IF UNCERTAIN *ELEMENT* PROPERTY
+	if (strcmp(argv[argvCounter],"-element") == 0) {
+		argvCounter++;
+
+		if (Tcl_GetInt(interp, argv[argvCounter++], &tagOfObject) != TCL_OK) {
+			argvCounter++;
+			opserr << "ERROR: invalid input: tagOfObject \n";
+			return TCL_ERROR;
+		}
+
+		theObject = (DomainComponent *)theStructuralDomain->getElement(tagOfObject);
+
+		theDesignVariablePositioner = new DesignVariablePositioner(tag,
+									   theReliabilityDomain,
+									   dvNumber,
+									   theObject,
+									   data,
+									   argc-argvCounter);
+
+
+		int dvnumber = theDesignVariablePositioner->getDVNumber();
+	}
+
+	// IF UNCERTAIN *LOAD*
+	else if (strcmp(argv[argvCounter],"-loadPattern") == 0) {
+		argvCounter++;
+
+		if (Tcl_GetInt(interp, argv[argvCounter++], &tagOfObject) != TCL_OK) {
+			opserr << "ERROR: invalid input: tagOfObject \n";
+			return TCL_ERROR;
+		}
+		theObject = (DomainComponent *)theStructuralDomain->getLoadPattern(tagOfObject);
+
+
+		theDesignVariablePositioner = new DesignVariablePositioner(tag,
+									   theReliabilityDomain,
+									   dvNumber,
+									   theObject,
+									   data,
+									   argc-argvCounter);
+	}
+
+	// IF UNCERTAIN *NODE* PROPERTY
+	else if (strcmp(argv[argvCounter],"-node") == 0) {
+		argvCounter++;
+
+		if (Tcl_GetInt(interp, argv[argvCounter++], &tagOfObject) != TCL_OK) {
+			opserr << "ERROR: invalid input: tagOfObject \n";
+			return TCL_ERROR;
+		}
+		theObject = (DomainComponent *)theStructuralDomain->getNode(tagOfObject);
+
+		theDesignVariablePositioner = new DesignVariablePositioner(tag,
+							           theReliabilityDomain,
+									   dvNumber,
+									   theObject,
+									   data,
+									   argc-argvCounter);
+	}
+	else {
+		opserr << "ERROR: Unknown parameter in designVariablePositioner" << endln;
+		return TCL_ERROR;
+	}
+
+	delete [] data;
+
+	// ADD THE RANDOMVARIABLEPOSITIONER TO THE DOMAIN
+	if (theReliabilityDomain->addDesignVariablePositioner(theDesignVariablePositioner) == false) {
+		opserr << "ERROR: failed to add random variable positioner number " << tag << " to the domain." << endln;
+		delete theDesignVariablePositioner; // otherwise memory leak
+		return TCL_ERROR;
+	}
+
+	return TCL_OK;
+
+}
+
+
+// command: objectiveFunction 1  -name F  -GradientName G -tclFile objective.tcl  ; # -lowerBound -1.e20 -upperBound 1.e20  - multiplier $E -state 0 -linearAdd A ;
+int 
+TclReliabilityModelBuilder_addObjectiveFunction(ClientData clientData,Tcl_Interp *interp,int argc,TCL_Char **argv)
+{
+  ObjectiveFunction *theObjectiveFunction = 0;
+  int tag;
+  char name[25] = "" ;
+  char * gradientName = 0;
+  char tclFileName[35] = "";
+  double lowerBound= -1.e20;;
+  double upperBound=1.e20;
+  double multiplier = 0; 
+  double state = 0; 
+  int numberOfArguments = argc;
+
+  Vector *linearAdd=0;
+
+  bool isGradProvided=false;
+
+  // CHECK THAT AT LEAST ENOUGH ARGUMENTS ARE GIVEN
+  if (numberOfArguments < 7) {
+		opserr << "ERROR: invalid number of arguments to designVariable command "<<endln;
+	    opserr <<"command: objectiveFunction 1  -name F  -GradientName G  -tclFile objective.tcl  ; # -lowerBound -1.e20 -upperBound 1.e20 - multiplier $E -state 0 -linearAdd A"<<endln;
+		return TCL_ERROR;
+  }
+
+
+  // GET TAG NUMBER
+  if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+	opserr << "ERROR: invalid input: tag \n";
+	return TCL_ERROR;
+  }
+
+
+	// Loop through arguments
+	int argvCounter = 2;
+	while (argc > argvCounter) {
+		if ((strcmp(argv[argvCounter],"-name") == 0)||(strcmp(argv[argvCounter],"-Name") == 0)) {
+
+			argvCounter++;
+			strcpy(name,argv[argvCounter]);
+
+			if ((Tcl_GetVar(interp, name, TCL_GLOBAL_ONLY ) != NULL)||(Tcl_GetVar2(interp, name,"1",TCL_GLOBAL_ONLY ) != NULL)||(Tcl_GetVar2(interp, name,"1,1",TCL_GLOBAL_ONLY ) != NULL)){
+				opserr<<"Fatal: objectiveFunction Name "<< name << " is already been used, please change another name"<<endln; 
+				exit(-1);
+			}
+				
+			
+			argvCounter++;
+		}// if
+
+		else if ((strcmp(argv[argvCounter],"-GradientName") == 0)||(strcmp(argv[argvCounter],"-gradientName") == 0)) {
+			
+			argvCounter++;
+			
+			gradientName = new char[30];
+
+			strcpy(gradientName,argv[argvCounter]);
+			
+			if ((Tcl_GetVar(interp, gradientName, TCL_GLOBAL_ONLY ) != NULL)||(Tcl_GetVar2(interp, gradientName,"1",TCL_GLOBAL_ONLY ) != NULL)||(Tcl_GetVar2(interp, gradientName,"1,1",TCL_GLOBAL_ONLY ) != NULL)){
+				opserr<<"Fatal: objectiveFunction gradient Name "<< gradientName << " is already been used, please change another name"<<endln; 
+				exit(-1);
+			}
+				
+			isGradProvided = true;
+			argvCounter++;
+		}// else if
+		
+		else if ((strcmp(argv[argvCounter],"-tclFile") == 0)||(strcmp(argv[argvCounter],"-TclFile") == 0)) {
+			argvCounter++;
+			strcpy(tclFileName,argv[argvCounter]);
+			argvCounter++;
+		}// else if
+		
+		else if (strcmp(argv[argvCounter],"-lowerBound") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &lowerBound) != TCL_OK) {
+			opserr << "ERROR: invalid input: lowerBound \n";
+			return TCL_ERROR;
+			}
+				argvCounter++;
+		}// else if
+
+		else if (strcmp(argv[argvCounter],"-upperBound") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &upperBound) != TCL_OK) {
+			opserr << "ERROR: invalid input: upperBound \n";
+			return TCL_ERROR;
+			}
+				argvCounter++;
+		}// else if
+
+		else if (strcmp(argv[argvCounter],"-multiplier") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &multiplier) != TCL_OK) {
+			opserr << "ERROR: invalid input: multiplier \n";
+			return TCL_ERROR;
+			}
+				argvCounter++;
+		}// else if		
+
+		else if (strcmp(argv[argvCounter],"-state") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &state) != TCL_OK) {
+			opserr << "ERROR: invalid input: state \n";
+			return TCL_ERROR;
+			}
+				argvCounter++;
+		}// else if		
+
+		else if (strcmp(argv[argvCounter],"-linearAdd") == 0) {
+			char linearAddName[20];
+
+			argvCounter++;
+			strcpy(linearAddName,argv[argvCounter]);
+
+
+         if( Tcl_GetVar2(interp, linearAddName,"1",TCL_GLOBAL_ONLY ) != NULL)  {
+
+			int numOfDV = theReliabilityDomain ->getNumberOfDesignVariables();
+			linearAdd = new Vector(numOfDV);
+
+			const char *  theValue;	
+			char index[5];
+			for(int i=0; i<numOfDV; i++){
+				sprintf(index,"%d",i+1);   // begin with 1
+				theValue = Tcl_GetVar2(interp, linearAddName,index,TCL_GLOBAL_ONLY );
+				(*linearAdd)(i) = atof(theValue);
+			};
+			
+		 }  //if 
+		  else {
+			opserr<<"warning: the linearAdd with name "<<linearAddName<< " does not exit"<<endln;
+		 } // else
+
+				argvCounter++;
+		}// else if	"-linearAdd"
+
+		else {
+			opserr<<"warning: unknown command: "<<argv[argvCounter]<<endln;
+			argvCounter++;
+		
+		}
+
+	};  // while
+
+
+// here tag ;
+  theObjectiveFunction = new ObjectiveFunction(   tag,
+												  theReliabilityDomain,
+												  interp,
+												  isGradProvided,
+											      linearAdd,
+												  tclFileName,
+												  name, 
+												  gradientName, 
+												  lowerBound, 
+												  upperBound, 
+												  multiplier, 									   
+												  state		   
+												  );
+
+
+
+
+  if (theObjectiveFunction == 0) {
+		opserr << "ERROR: could not create random theObjectiveFunction "<< endln;
+		return TCL_ERROR;
+	  }
+ // release memory 
+	if (gradientName !=0) delete gradientName;
+	if (linearAdd !=0)	 delete linearAdd;
+
+
+  // ADD THE OBJECT TO THE DOMAIN
+  if (theReliabilityDomain->addObjectiveFunction(theObjectiveFunction) == false) {
+	opserr << "ERROR: failed to add theObjectiveFunction  to the domain (wrong number of arguments?)\n";
+
+	delete theObjectiveFunction; // otherwise memory leak
+
+	return TCL_ERROR;
+  }
+
+  return TCL_OK;
+}
+
+
+
+/*  command 
+
+array set lBound1{1  -2.0  2  -3.0 }
+array set uBound1{1   2.0  2   3.0 }
+
+array set M1 {1 0.0  2  0.0 }
+array set S1{1  0.0  2    0.0 }
+
+for {set i 1} {$i <=10} {incr i} {
+   for {set j 1} {$j < 10} {incr j} {
+     set A1($i,$j) [expr $i*10+$j]
+   }
+ }
+
+
+constraintFunction 1  -name F1  -GradientName G1 -lowerBound  lBound1 -upperBound uBound1 -tclFile constraint1.tcl -multiplier M1 -state S1 -linearAdd A1 ;
+
+
+
+  */
+int 
+TclReliabilityModelBuilder_addConstraintFunction(ClientData clientData,Tcl_Interp *interp,int argc,TCL_Char **argv){
+
+  ConstraintFunction *theConstraintFunction = 0;
+  int tag;
+  int numberOfConstraints;
+
+  char name[25] = "" ;
+  char * gradientName = 0;
+  char tclFileName[35] = "";
+
+  Vector * lowerBound = 0;
+  Vector * upperBound = 0;
+  Vector * multiplier = 0; 
+  Vector * state = 0; 
+  Matrix *linearAdd=0;
+
+  int numberOfArguments = argc;
+  bool isGradProvided=false;
+
+
+
+  /* refer
+  ConstraintFunction(int passedTag, int passedNumberOfConstraint,
+									   ReliabilityDomain * passedReliabilityDomain, 
+									   Tcl_Interp *passedTclInterp, 
+
+									   bool passedIsGradProvided, 
+									   Matrix * passedLinearAdd,
+									   char * passedTclFileName,
+									   char * passedName, 
+									   char * passedGradientName, 
+									   
+									   Vector * passedLowerBound, 
+									   Vector * passedUpperBound, 
+									   Vector * passedMultiplier, 									   
+									   Vector * passedState
+									   );  */
+
+  // CHECK THAT AT LEAST ENOUGH ARGUMENTS ARE GIVEN
+  if (numberOfArguments < 6) {
+		opserr << "ERROR: invalid number of arguments to designVariable command "<<endln;
+	    opserr <<"command: constraintFunction 1  -name F1  -GradientName G1 -lowerBound  lBound1 -upperBound uBound1 -tclFile constraint1.tcl -multiplier M1 -state S1 -linearAdd A1 "<<endln;
+		return TCL_ERROR;
+  }
+
+
+  // GET TAG NUMBER
+  if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+	opserr << "ERROR: invalid input: tag \n";
+	return TCL_ERROR;
+  }
+
+
+	// Loop through arguments
+	int argvCounter = 2;
+	while (argc > argvCounter) {
+		if ((strcmp(argv[argvCounter],"-name") == 0)||(strcmp(argv[argvCounter],"-Name") == 0)) {
+
+			argvCounter++;
+			strcpy(name,argv[argvCounter]);
+
+			if ((Tcl_GetVar(interp, name, TCL_GLOBAL_ONLY ) != NULL)||(Tcl_GetVar2(interp, name,"1",TCL_GLOBAL_ONLY ) != NULL)||(Tcl_GetVar2(interp, name,"1,1",TCL_GLOBAL_ONLY ) != NULL)){
+				opserr<<"Fatal: ConstraintFunction Name "<< name << " is already been used, please change another name"<<endln; 
+				exit(-1);
+			}
+				
+			
+			argvCounter++;
+		}// if
+
+		else if ((strcmp(argv[argvCounter],"-GradientName") == 0)||(strcmp(argv[argvCounter],"-gradientName") == 0)) {
+			
+			argvCounter++;
+			
+			gradientName = new char[30];
+
+			strcpy(gradientName,argv[argvCounter]);
+			
+			if ((Tcl_GetVar(interp, gradientName, TCL_GLOBAL_ONLY ) != NULL)||(Tcl_GetVar2(interp, gradientName,"1",TCL_GLOBAL_ONLY ) != NULL)||(Tcl_GetVar2(interp, gradientName,"1,1",TCL_GLOBAL_ONLY ) != NULL)){
+				opserr<<"Fatal: ConstraintFunction gradient Name "<< gradientName << " is already been used, please change another name"<<endln; 
+				exit(-1);
+			}
+				
+			isGradProvided = true;
+			argvCounter++;
+		}// else if
+		
+		else if ((strcmp(argv[argvCounter],"-tclFile") == 0)||(strcmp(argv[argvCounter],"-TclFile") == 0)) {
+			argvCounter++;
+			strcpy(tclFileName,argv[argvCounter]);
+			argvCounter++;
+		}// else if
+		
+
+		else if (strcmp(argv[argvCounter],"-lowerBound") == 0) {
+			char lowerBoundName[20];
+			argvCounter++;
+			strcpy(lowerBoundName,argv[argvCounter]);
+
+			// get Number of constraintFunction
+			
+			int ii=1;
+			char index[5];
+			sprintf(index,"%d",ii);
+			while ( Tcl_GetVar2(interp, lowerBoundName,index,TCL_GLOBAL_ONLY ) != NULL)  {
+				ii++;
+				sprintf(index,"%d",ii);
+			}
+			
+			numberOfConstraints = ii-1;
+			if (numberOfConstraints ==0){opserr<<"Fatal: lowerBound error!"<<endln; exit(-1);}
+//			int numOfDV = theReliabilityDomain ->getNumberOfDesignVariables();
+			
+			lowerBound = new Vector(numberOfConstraints);
+
+			const char *  theValue;	
+			
+			for(int i=0; i<numberOfConstraints; i++){
+				sprintf(index,"%d",i+1);   // begin with 1
+				theValue = Tcl_GetVar2(interp, lowerBoundName,index,TCL_GLOBAL_ONLY );
+				(*lowerBound)(i) = atof(theValue);
+			};
+
+				argvCounter++;
+		}// else if "-lowerBound"
+
+
+		else if (strcmp(argv[argvCounter],"-upperBound") == 0) {
+			char upperBoundName[20];
+			argvCounter++;
+			strcpy(upperBoundName,argv[argvCounter]);
+
+			// get Number of constraintFunction
+			
+			int ii=1;
+			char index[5];
+			sprintf(index,"%d",ii);
+			while ( Tcl_GetVar2(interp, upperBoundName,index,TCL_GLOBAL_ONLY ) != NULL)  {
+				ii++;
+				sprintf(index,"%d",ii);
+			}
+			
+			numberOfConstraints = ii-1;
+			if (numberOfConstraints ==0){opserr<<"Fatal: upperBound error!"<<endln; exit(-1);}
+//			int numOfDV = theReliabilityDomain ->getNumberOfDesignVariables();
+			
+			upperBound = new Vector(numberOfConstraints);
+
+			const char *  theValue;	
+			
+			for(int i=0; i<numberOfConstraints; i++){
+				sprintf(index,"%d",i+1);   // begin with 1
+				theValue = Tcl_GetVar2(interp, upperBoundName,index,TCL_GLOBAL_ONLY );
+				(*upperBound)(i) = atof(theValue);
+			};
+
+				argvCounter++;
+		}// else if "-upperBound"
+
+
+		else if (strcmp(argv[argvCounter],"-state") == 0) {
+			char stateName[20];
+			argvCounter++;
+			strcpy(stateName,argv[argvCounter]);
+
+			// get Number of constraintFunction
+			
+			int ii=1;
+			char index[5];
+			sprintf(index,"%d",ii);
+			while ( Tcl_GetVar2(interp, stateName,index,TCL_GLOBAL_ONLY ) != NULL)  {
+				ii++;
+				sprintf(index,"%d",ii);
+			}
+			
+			numberOfConstraints = ii-1;
+			if (numberOfConstraints ==0){opserr<<"Fatal: state error!"<<endln; exit(-1);}
+//			int numOfDV = theReliabilityDomain ->getNumberOfDesignVariables();
+			
+			state = new Vector(numberOfConstraints);
+
+			const char *  theValue;	
+			
+			for(int i=0; i<numberOfConstraints; i++){
+				sprintf(index,"%d",i+1);   // begin with 1
+				theValue = Tcl_GetVar2(interp, stateName,index,TCL_GLOBAL_ONLY );
+				(*state)(i) = atof(theValue);
+			};
+
+				argvCounter++;
+		}// else if "-state"
+
+
+
+		else if (strcmp(argv[argvCounter],"-multiplier") == 0) {
+			char multiplierName[20];
+			argvCounter++;
+			strcpy(multiplierName,argv[argvCounter]);
+
+			// get Number of constraintFunction
+			
+			int ii=1;
+			char index[5];
+			sprintf(index,"%d",ii);
+			while ( Tcl_GetVar2(interp, multiplierName,index,TCL_GLOBAL_ONLY ) != NULL)  {
+				ii++;
+				sprintf(index,"%d",ii);
+			}
+			
+			numberOfConstraints = ii-1;
+			if (numberOfConstraints ==0){opserr<<"Fatal: lmultiplier error!"<<endln; exit(-1);}
+//			int numOfDV = theReliabilityDomain ->getNumberOfDesignVariables();
+			
+			multiplier = new Vector(numberOfConstraints);
+
+			const char *  theValue;	
+			
+			for(int i=0; i<numberOfConstraints; i++){
+				sprintf(index,"%d",i+1);   // begin with 1
+				theValue = Tcl_GetVar2(interp, multiplierName,index,TCL_GLOBAL_ONLY );
+				(*multiplier)(i) = atof(theValue);
+			};
+
+				argvCounter++;
+		}// else if "-multiplier"
+
+		
+		
+		else if (strcmp(argv[argvCounter],"-linearAdd") == 0) {
+			char linearAddName[20];
+
+			argvCounter++;
+			strcpy(linearAddName,argv[argvCounter]);
+
+// get Number of constraintFunction
+		
+			int ii=1;
+			char index[10];
+			sprintf(index,"%d",ii);
+			strcat(index,",1");
+
+			while ( Tcl_GetVar2(interp, linearAddName,index,TCL_GLOBAL_ONLY ) != NULL)  {
+				ii++;
+				sprintf(index,"%d",ii);
+				strcat(index,",1");
+			}
+			
+			numberOfConstraints = ii-1;
+			if (numberOfConstraints ==0){opserr<<"Fatal: linearAdd error!"<<endln; exit(-1);}
+
+			int numOfDVs = theReliabilityDomain ->getNumberOfDesignVariables();
+
+ ////////////////////////////////////////////////
+         if( Tcl_GetVar2(interp, linearAddName,"1,1",TCL_GLOBAL_ONLY ) != NULL)  {
+
+			linearAdd = new Matrix(numberOfConstraints,numOfDVs);
+
+			const char *  theValue;	
+			char temp[5];
+
+			for(int i=0;i<numberOfConstraints; i++){
+				for(int j=0; j<numOfDVs; j++){
+
+			       sprintf(temp,"%d",i+1);   // begin with 1
+				   strcpy(index,temp);
+				   sprintf(temp,"%d",j+1);   // begin with 1
+				   strcat(index,",");
+				   strcat(index,temp);
+					
+				   theValue = Tcl_GetVar2(interp, linearAddName,index,TCL_GLOBAL_ONLY );
+				   (*linearAdd)(i,j) = atof(theValue);
+				}; //for
+			} //for
+
+
+		 }  //if 
+		  else {
+			opserr<<"warning: the linearAdd with name "<<linearAddName<< " does not exit"<<endln;
+		 } // else
+
+				argvCounter++;
+		}// else if	"-linearAdd"
+
+
+
+		else {
+			opserr<<"warning: unknown command: "<<argv[argvCounter]<<endln;
+			argvCounter++;
+		
+		}
+
+	};  // while
+
+
+// here tag ;
+/*
+  ConstraintFunction *theConstraintFunction = 0;
+  int tag;
+  int numberOfConstraints;
+
+  char name[25] = "" ;
+  char * gradientName = 0;
+  char tclFileName[35] = "";
+
+  Vector * lowerBound = 0;
+  Vector * upperBound = 0;
+  Vector * multiplier = 0; 
+  Vector * state = 0; 
+  Matrix *linearAdd=0;
+
+  int numberOfArguments = argc;
+  bool isGradProvided=false;
+
+
+
+   refer
+  ConstraintFunction(int passedTag, int passedNumberOfConstraint,
+									   ReliabilityDomain * passedReliabilityDomain, 
+									   Tcl_Interp *passedTclInterp, 
+
+									   bool passedIsGradProvided, 
+									   Matrix * passedLinearAdd,
+									   char * passedTclFileName,
+									   char * passedName, 
+									   char * passedGradientName, 
+									   
+									   Vector * passedLowerBound, 
+									   Vector * passedUpperBound, 
+									   Vector * passedMultiplier, 									   
+									   Vector * passedState
+									   );  */
+  theConstraintFunction = new ConstraintFunction(tag, 
+									   numberOfConstraints,
+									   theReliabilityDomain, 
+									   interp, 
+
+									   isGradProvided, 
+									   linearAdd,
+									   tclFileName,
+									   name, 
+									   gradientName, 
+									   
+									   lowerBound, 
+									   upperBound, 
+									   multiplier, 									   
+									   state
+									   ); 
+
+
+
+
+  if (theConstraintFunction == 0) {
+		opserr << "ERROR: could not create random theConstraintFunction "<< endln;
+		return TCL_ERROR;
+	  }
+  
+// delete 
+
+if (gradientName !=0) delete gradientName;
+if (linearAdd !=0)	 delete linearAdd;
+if (lowerBound !=0) delete lowerBound;
+if (upperBound !=0) delete upperBound;
+if (multiplier !=0) delete multiplier;
+if (state !=0) delete state;
+
+
+
+  // ADD THE OBJECT TO THE DOMAIN
+  if (theReliabilityDomain->addConstraintFunction(theConstraintFunction) == false) {
+	opserr << "ERROR: failed to add theConstraintFunction  to the domain (wrong number of arguments?)\n";
+
+	delete theConstraintFunction; // otherwise memory leak
+ 
+
+
+	return TCL_ERROR;
+  }
+
+
+
+
+  return TCL_OK;
+
+}
+
+
+
+
+
+
+// command: runSNOPTAnalysis -maxNumIter 100 -printOptPointX OptX.out -tclFileToRun tclFileToRun.tcl -printFlag 1
+int 
+TclReliabilityModelBuilder_runSNOPTAnalysis(ClientData clientData,Tcl_Interp *interp,int argc,TCL_Char **argv)
+{
+
+#ifndef _SNOPT
+  opserr << "TclReliabilityModelBuilder_runSNOPTAnalysis() - NO SNOPT LINKED\n";
+  return TCL_ERROR;
+#else
+
+  int maxNumberOfIterations=100;
+  int printFlag=0;
+  char fileNamePrint[25]="";
+  char probType[25]="SNOPTAnalysis";
+  char * tclFileName=0;
+
+  int numberOfArguments = argc;
+  
+  // CHECK THAT AT LEAST ENOUGH ARGUMENTS ARE GIVEN
+  if (numberOfArguments < 3) {
+		opserr << "ERROR: invalid number of arguments to designVariable command "<<endln;
+	    opserr <<"command: runSNOPTAnalysis -maxNumIter 100 -printOptPointX OptX.out -tclFileToRun tclFileToRun.tcl"<<endln;
+		return TCL_ERROR;
+  }
+
+
+	// Loop through arguments
+	int argvCounter = 1;
+	while (argc > argvCounter) {
+		if ((strcmp(argv[argvCounter],"-maxNumIter") == 0)||(strcmp(argv[argvCounter],"-maxnumiter") == 0)) {
+
+			argvCounter++;
+			
+			if (Tcl_GetInt(interp, argv[argvCounter], &maxNumberOfIterations) != TCL_OK) {
+			opserr << "ERROR: invalid input: maxNumberOfIterations \n";
+			return TCL_ERROR;
+			}
+
+			argvCounter++;
+		}// if
+
+		else if ((strcmp(argv[argvCounter],"-printFlag") == 0)||(strcmp(argv[argvCounter],"-printflag") == 0)) {
+
+			argvCounter++;
+			
+			if (Tcl_GetInt(interp, argv[argvCounter], &printFlag) != TCL_OK) {
+			opserr << "ERROR: invalid input: printFlag \n";
+			return TCL_ERROR;
+			}
+
+			argvCounter++;
+		}// if
+		else if ((strcmp(argv[argvCounter],"-printOptPointX") == 0)||(strcmp(argv[argvCounter],"-printoptpointx") == 0)) {
+			
+			argvCounter++;
+			
+//  		gradientName = new char[30];
+
+			strcpy(fileNamePrint,argv[argvCounter]);
+			
+			argvCounter++;
+		}// else if
+		
+		else if ((strcmp(argv[argvCounter],"-tclFileToRun") == 0)||(strcmp(argv[argvCounter],"-TclFileToRun") == 0)) {
+			argvCounter++;
+			tclFileName = new char[30];
+			strcpy(tclFileName,argv[argvCounter]);
+			argvCounter++;
+		}// else if
+		
+	
+		else {
+			opserr<<"warning: unknown command: "<<argv[argvCounter]<<endln;
+			argvCounter++;
+		
+		}
+
+	};  // while
+
+
+// here tag ;
+  theSNOPTAnalysis = new SNOPTAnalysis(maxNumberOfIterations, 
+					printFlag,
+					fileNamePrint,
+					probType, 
+					theReliabilityDomain,
+					interp,
+					tclFileName
+					);
+
+
+
+
+  if (theSNOPTAnalysis == 0) {
+		opserr << "ERROR: could not create random theSNOPTAnalysis "<< endln;
+		return TCL_ERROR;
+	  }
+
+
+	theSNOPTAnalysis->runOptAnalysis(theReliabilityDomain);
+
+	if (tclFileName !=0) delete tclFileName;
+  return TCL_OK;
+#endif 
+}
+
+
+
+///Command:  runMonteCarloResponseAnalysis  -outPutFile  m.out -maxNum 1000 -print 1 -tclFileToRun test.tcl <-seed 1>
+int 
+TclReliabilityModelBuilder_runMonteCarloResponseAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+	// In case this is a replacement
+	if (theMonteCarloResponseAnalysis != 0) {
+		delete theMonteCarloResponseAnalysis;
+		theMonteCarloResponseAnalysis = 0;
+	}
+	
+	int seed=1;
+
+	// Do input check
+	char theCommand[15] = "inputCheck";
+	Tcl_Eval( interp, theCommand );
+
+
+	// Check for essential tools
+	if (theProbabilityTransformation == 0 ) {
+		opserr << "Need theProbabilityTransformation before a SimulationAnalyis can be created" << endln;
+		return TCL_ERROR;
+	}
+
+	if (theRandomNumberGenerator == 0 ) {
+		opserr << "Need theRandomNumberGenerator before a SimulationAnalyis can be created" << endln;
+		return TCL_ERROR;
+	}
+
+  int numberOfArguments = argc;
+  if (numberOfArguments < 4) {
+		opserr << "ERROR: invalid number of arguments to designVariable command "<<endln;
+	    opserr <<"command: runMonteCarloResponseAnalysis  -outPutFile  m.out -maxNum 1000 -print 1 -tclFileToRun test.tcl"<<endln;
+		return TCL_ERROR;
+  }	
+
+/* refer 
+			MonteCarloResponseAnalysis(
+						ReliabilityDomain *passedReliabilityDomain,
+						ProbabilityTransformation *passedProbabilityTransformation,
+						RandomNumberGenerator *passedRandomNumberGenerator,
+						int passedNumberOfSimulations,
+						int printFlag,
+						TCL_Char *outputFileName,
+						TCL_Char *tclFileToRunFileName)
+{
+  
+  */
+	// Declaration of input parameters
+	int numberOfSimulations	= 1000;
+	int printFlag			= 0;
+	char outPutFile[25]="";
+	char * tclFileName = 0;
+
+	int argvCounter = 1;
+	while (argc > argvCounter) {
+		if ((strcmp(argv[argvCounter],"-maxNum") == 0)||(strcmp(argv[argvCounter],"-maxnum") == 0)) {
+
+			argvCounter++;
+			
+			if (Tcl_GetInt(interp, argv[argvCounter], &numberOfSimulations) != TCL_OK) {
+			opserr << "ERROR: invalid input: numberOfSimulations \n";
+			return TCL_ERROR;
+			}
+
+			argvCounter++;
+		}// if
+
+		else if ((strcmp(argv[argvCounter],"-print") == 0)||(strcmp(argv[argvCounter],"-printFlag") == 0)) {
+
+			argvCounter++;
+			
+			if (Tcl_GetInt(interp, argv[argvCounter], &printFlag) != TCL_OK) {
+			opserr << "ERROR: invalid input: printFlag \n";
+			return TCL_ERROR;
+			}
+
+			argvCounter++;
+		}// if
+		else if ((strcmp(argv[argvCounter],"-outPutFile") == 0)||(strcmp(argv[argvCounter],"-outputfile") == 0)) {
+			
+			argvCounter++;
+			
+			strcpy(outPutFile,argv[argvCounter]);
+			
+			argvCounter++;
+		}// else if
+		
+		else if ((strcmp(argv[argvCounter],"-tclFileToRun") == 0)||(strcmp(argv[argvCounter],"-TclFileToRun") == 0)) {
+			argvCounter++;
+			tclFileName = new char[25];
+			strcpy(tclFileName,argv[argvCounter]);
+			argvCounter++;
+		}// else if
+
+		else if (strcmp(argv[argvCounter],"-seed") == 0) {
+			argvCounter++;
+			
+			if (Tcl_GetInt(interp, argv[argvCounter], &seed) != TCL_OK) {
+			opserr << "ERROR: invalid input: seed \n";
+			return TCL_ERROR;
+			}
+			argvCounter++;
+		}// else if
+
+		else {
+			opserr<<"warning: unknown command: "<<argv[argvCounter]<<endln;
+			argvCounter++;
+		
+		} //else
+
+	};  // while
+
+
+	
+	theMonteCarloResponseAnalysis
+			= new MonteCarloResponseAnalysis(theReliabilityDomain,
+						interp,
+						theProbabilityTransformation,
+						theRandomNumberGenerator,
+						numberOfSimulations,
+						printFlag,
+						outPutFile,
+						tclFileName,
+						seed);
+			
+			
+	if (theMonteCarloResponseAnalysis == 0) {
+		opserr << "ERROR: could not create theMonteCarloResponseAnalysis \n";
+		return TCL_ERROR;
+	}
+
+	if (tclFileName !=0) delete [] tclFileName;
+
+	// Now run analysis
+	theMonteCarloResponseAnalysis->analyze();
+	
+	return TCL_OK;
+
+}
+
+
+
+///////
+///  Command:  updateParameter  -rv 1 -value 20.0  or updateParameter   -startPoint 
+///            updateParameter  -dv 3 -value 20.0
+int 
+TclReliabilityModelBuilder_updateParameter(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+	// Do input check
+	char theCommand[15] = "inputCheck";
+	Tcl_Eval( interp, theCommand );
+
+
+	// Declaration of input parameters
+	int numberOfRVDVPositioners;
+
+	int dvrv;
+	double value;
+	bool usingStartPt = false;
+
+	int dvrvMark = 0; // by default, is randomvariable 0
+	int argvCounter = 1;
+	while (argc > argvCounter) {
+		if ((strcmp(argv[argvCounter],"-dv") == 0)||(strcmp(argv[argvCounter],"-dvNum") == 0)) {
+
+			argvCounter++;
+	
+			if (Tcl_GetInt(interp, argv[argvCounter], &dvrv) != TCL_OK) {
+				opserr << "ERROR: invalid input: dv number \n";
+				return TCL_ERROR;
+			}
+			dvrvMark=1; // dv
+			argvCounter++;
+		}// if
+
+		else if ((strcmp(argv[argvCounter],"-rv") == 0)||(strcmp(argv[argvCounter],"-rvNum") == 0)) {
+
+			argvCounter++;
+			
+			if (Tcl_GetInt(interp, argv[argvCounter], &dvrv) != TCL_OK) {
+				opserr << "ERROR: invalid input: rv Number \n";
+				return TCL_ERROR;
+			}
+			dvrvMark=0; // rv
+			argvCounter++;
+		}// if
+		else if ((strcmp(argv[argvCounter],"-value") == 0)||(strcmp(argv[argvCounter],"-VALUE") == 0)) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &value) != TCL_OK) {
+				opserr << "ERROR: invalid input: value \n";
+				return TCL_ERROR;
+			}
+//			opserr<<"value is:"<<value<<endln;
+			
+			argvCounter++;
+		}
+
+		else if ((strcmp(argv[argvCounter],"-startPoint") == 0)||(strcmp(argv[argvCounter],"-startpoint") == 0)) {
+			argvCounter++;
+			usingStartPt = true;
+		}
+
+		else {
+			opserr<<"warning: unknown command: updateparameter" <<argv[argvCounter]<<endln;
+			argvCounter++;
+		
+		} //else
+
+	};  // while
+
+	/*** FMK MHS QUAN
+	if (! usingStartPt) {
+		if (dvrvMark==0) { // rv
+
+			RandomVariablePositioner * theRandomVariablePositioner =0;
+			numberOfRVDVPositioners = theReliabilityDomain->getNumberOfRandomVariablePositioners();
+			if (numberOfRVDVPositioners==0) {opserr<<"warnning: updateParameter no randomVariablePositioner"<<endln;  }
+			else {
+				int rvNumber; 
+				for (int i=1 ; i<=numberOfRVDVPositioners ; i++ )  {
+					theRandomVariablePositioner = theReliabilityDomain->getRandomVariablePositionerPtr(i);
+					rvNumber = theRandomVariablePositioner->getRvNumber();
+					if (rvNumber == dvrv )  theRandomVariablePositioner->update(value);
+				}	
+			}
+		} 
+		else if (dvrvMark==1) { // dv
+			DesignVariable * theDesignVariable = theReliabilityDomain->getDesignVariablePtr(dvrv);
+			theDesignVariable->update(value);
+
+		}
+	}
+	
+	else if (usingStartPt){ // only rv is possible
+	
+			RandomVariablePositioner * theRandomVariablePositioner =0;
+			int numberOfRVDVPositioners = theReliabilityDomain->getNumberOfRandomVariablePositioners();
+			for (int i=1 ; i<=numberOfRVDVPositioners ; i++ )  {
+				theRandomVariablePositioner = theReliabilityDomain->getRandomVariablePositionerPtr(i);
+				int rvNumber = theRandomVariablePositioner->getRvNumber();
+				value = (*theStartPoint)(rvNumber-1);
+				theRandomVariablePositioner->update(value);
+			}
+	
+				
+	}	
+
+	*/
+	
+
+	return TCL_OK;
+
+}
+
+
+/*
+Hessian::Hessian(int pSize,ReliabilityDomain *passedReliabilityDomain, 
+				 ProbabilityTransformation *passedProbabilityTransformation,
+				 GFunEvaluator *passedGFunEvaluator,
+				 GradGEvaluator *passedGradGEvaluator)
+				 */
+
+///////
+///  Command:  computeHessian -FDM -file $filename1 -designPoint $fileName -perturbation $pTol
+//////
+
+
+int 
+TclReliabilityModelBuilder_computeHessian(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+	char fileName[20]="HessianByFDM.out";
+	char designPointFile[20] = "theDesignPoint.out";
+	int argvCounter = 1;
+	bool FDM = false;
+	double pTol = 1.0e-5; // default
+	
+	while (argc > argvCounter) {
+
+		if ((strcmp(argv[argvCounter],"-FDM") == 0)||(strcmp(argv[argvCounter],"-FFD") == 0)) {
+
+			argvCounter++;
+			FDM =true;
+	
+		}// if
+
+		else if ((strcmp(argv[argvCounter],"-file") == 0)||(strcmp(argv[argvCounter],"-File") == 0)) {
+			argvCounter++;
+			strcpy(fileName,argv[argvCounter]);
+			argvCounter++;
+		}// else if
+
+		else if ((strcmp(argv[argvCounter],"-designPoint") == 0)||(strcmp(argv[argvCounter],"-designpoint") == 0)) {
+			argvCounter++;
+			strcpy(designPointFile,argv[argvCounter]);
+			argvCounter++;
+		}// else if
+		else if ((strcmp(argv[argvCounter],"-perturbation") == 0)||(strcmp(argv[argvCounter],"-perturbationTolerance") == 0)) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &pTol) != TCL_OK) {
+				opserr << "ERROR: invalid input: perturbationTolerance \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+		}// else if
+		else {
+		
+			opserr<< "unknown command: "<<argv[argvCounter]<<endln;
+			argvCounter++;
+		
+		}
+	}
+
+	int size = theReliabilityDomain->getNumberOfRandomVariables();
+	Vector * designPoint = new Vector(size);
+
+	ofstream resultsOutputFile( fileName, ios::out);
+    ifstream inputFile( designPointFile, ios::in);
+
+	if (inputFile.good()){
+		int ii=0;
+		double tmp;
+		while(!inputFile.eof() && ii<size){ 
+			inputFile >> tmp;
+			(*designPoint)(ii)=tmp;
+			ii++;
+		}
+	} 
+	else {
+		opserr<<"ERROR: designpoint can not read from file "<<designPointFile<<endln;
+		exit(-1);
+	}
+	
+
+	Hessian * theHessian = new Hessian(size,theReliabilityDomain,theProbabilityTransformation,theGFunEvaluator,theGradGEvaluator,pTol);
+ 
+	if (FDM) { 
+		theHessian->formReducedHessian(designPoint);
+		
+		
+		Matrix hessian=	theHessian->getHessianApproximation();
+
+//		resultsOutputFile <<"Hessian in U space: \n";
+		for (int i=0; i<size; i++){
+			for (int j=0; j<size; j++){
+				resultsOutputFile <<hessian(i,j)<<"   ";
+			}
+			resultsOutputFile <<"\n";
+		}
+	
+	//	opserr<<"------ theHessian: ------- \n"<<hessian<<endln;
+
+	//	opserr<<"\n---------DesignPoint:   ----------\n "<<*designPoint<<endln;
+
+
+	//	Matrix reducedHessian = theHessian->getReducedHessian();
+	//	opserr<<"\n -------- theReducedHessian: ---------\n"<<reducedHessian<<endln;
+
+
+		delete designPoint;	
+	} 
+
+	return 0;
+
+}
+
+
+
+
+
+
+// MultiDimVisualPrinPlane -funSurf function -designPt dp.out  -ndir $n -output vis.out <-gridInfo {0  minY  maxY nPts0 1 minX1  maxX1 nPts1 2 minX2  maxX2 nPts2 ...}  -timeVariant -littleDt 0.001> <-saveHessian $filename>
+
+int 
+TclReliabilityModelBuilder_MultiDimVisPrincPlane(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+	int argvCounter = 1;
+	int type =1;
+	int nrv = theReliabilityDomain->getNumberOfRandomVariables();
+	int numPPlane = 1;
+	Vector * designPoint = new Vector(nrv);
+	Vector * gridInfo = 0;
+    Matrix * passedHessian =0;
+	char outputFile[25];
+	char * hessianFileName=0;
+	int analysisType = 0;  // 
+	double littleDt  =1.0e-3;
+ 
+	while (argc > argvCounter) {
+
+		if ((strcmp(argv[argvCounter],"-funSurf") == 0)||(strcmp(argv[argvCounter],"-FunSurf") == 0)) {
+			argvCounter++;
+			if (strcmp(argv[argvCounter],"function") == 0)
+				type = 1;
+			else if (strcmp(argv[argvCounter],"surface") == 0)
+				type =0;
+			argvCounter++;
+			
+	
+		}// if
+
+		else if ((strcmp(argv[argvCounter],"-designPt") == 0)||(strcmp(argv[argvCounter],"-designPoint") == 0)) {
+			char fileName[20];
+			argvCounter++;
+			strcpy(fileName,argv[argvCounter]);
+			argvCounter++;
+			ifstream inputFile( fileName, ios::in);
+
+			if (inputFile.good()){
+				int ii=0;
+				double tmp;
+				while(!inputFile.eof() && ii<nrv){ 
+					inputFile >> tmp;
+					(*designPoint)(ii)=tmp;
+					ii++;
+				}
+				inputFile.close();
+			} 
+			else {
+				opserr<<"ERROR: designpoint can not read from file "<<fileName<<endln;
+				exit(-1);
+			}
+						
+		}// else if
+
+		else if (strcmp(argv[argvCounter],"-ndir") == 0) {
+			argvCounter++;
+			if (Tcl_GetInt(interp, argv[argvCounter], &numPPlane) != TCL_OK) {
+				opserr << "ERROR: invalid input: numPPlane \n";
+				return TCL_ERROR;
+			}
+
+			argvCounter++;
+		}// else if
+		else if (strcmp(argv[argvCounter],"-output") == 0) {
+			argvCounter++;
+			strcpy(outputFile,argv[argvCounter]);
+			argvCounter++;
+		}// else if
+		else if (strcmp(argv[argvCounter],"-gridInfo") == 0) {
+			argvCounter++;
+
+			int pathSize;
+		    TCL_Char **pathStrings;
+		  
+		    if (Tcl_SplitList(interp, argv[argvCounter], 
+					&pathSize, &pathStrings) != TCL_OK) {
+				  
+			  opserr << "WARNING problem splitting path list in gridInfo\n";
+			  return 0;
+			}
+		  
+		    gridInfo = new Vector(pathSize);
+
+		    for (int i=0; i<pathSize; i++) {
+			  double value;
+			  if ( Tcl_GetDouble(interp, pathStrings[i], &value) != TCL_OK) {
+			    opserr << "WARNING problem reading path data value " << pathStrings[i] << "\n";
+
+			    return 0;
+			  }
+			  (*gridInfo)(i) = value;
+		  }  //for
+		  // free up the array of pathsStrings .. see tcl man pages as to why
+//		  cleanup(pathStrings);
+
+			argvCounter++;
+		}// else if
+		else if (strcmp(argv[argvCounter],"-saveHessian") == 0){
+			argvCounter++;	
+			hessianFileName = new char[30];
+			strcpy(hessianFileName,argv[argvCounter]);
+			argvCounter++;
+			
+			ifstream inputFile( hessianFileName, ios::in);
+
+			if (inputFile.good()){
+				passedHessian = new Matrix(nrv,nrv);
+				int ii=0;
+				int jj=0;
+				double tmp;
+				while(ii<nrv){ 
+					for (jj=0; jj<nrv;jj++){
+						if (!inputFile.eof()){
+							inputFile >> tmp;
+							(*passedHessian)(ii,jj)=tmp;
+						}
+						else{
+							opserr<<"-saveHessian, size of Hessian in file: "<<hessianFileName<< "is wrong"<<endln;
+							exit(-1);
+						}
+					}	
+					
+					ii++;
+				}// while 
+				inputFile.close();
+
+			} 
+			
+			else {
+				opserr<<"warning: no data in hessianfrom file: "<<hessianFileName<<endln;
+				
+			}
+		
+		} //else if hessian
+		else if (strcmp(argv[argvCounter],"-timeVariant") == 0) {
+			argvCounter++;
+			analysisType =1;
+		}// else if
+		else if (strcmp(argv[argvCounter],"-littleDt") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &littleDt) != TCL_OK) {
+				opserr << "ERROR: invalid input: littleDt \n";
+				return TCL_ERROR;
+			}
+
+			argvCounter++;
+		}// else if
+		else {
+		
+			opserr<< "unknown command: "<<argv[argvCounter]<<endln;
+			argvCounter++;
+		
+		}
+	} //while
+
+
+    MultiDimVisPrincPlane * theMultiDimVisPrincPlane = new MultiDimVisPrincPlane(
+		            theReliabilityDomain,
+					theGFunEvaluator,
+					theProbabilityTransformation,
+					outputFile,
+					theGradGEvaluator,
+					designPoint, numPPlane, type, gridInfo,interp, passedHessian, hessianFileName, analysisType, littleDt);
+
+	if (passedHessian !=0) delete passedHessian;
+	if (hessianFileName !=0) delete hessianFileName;
+	theMultiDimVisPrincPlane->analyze();
+
+
+    delete designPoint;
+	return 0;
+
+}
+
+
+
+
+///////
+///  Command:  transformXtoU  -fileX pointx.out   -fileU pointu.out   
+///            
+
+
+
+int 
+TclReliabilityModelBuilder_transformXtoU(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+
+
+    if (theProbabilityTransformation ==0){
+		opserr<<"Fatal: theProbabilityTransformation does not exist!"<<endln;
+		exit(-1);
+	}
+	
+	
+	
+	int nrv = theReliabilityDomain->getNumberOfRandomVariables();
+
+	
+	char filenameX[30]="pointx.out";
+	char filenameU[30]="pointu.out";
+
+	int argvCounter = 1;
+	while (argc > argvCounter) {
+		if (strcmp(argv[argvCounter],"-fileX") == 0) {
+
+			argvCounter++;
+			strcpy(filenameX,argv[argvCounter]);
+			argvCounter++;
+		}// if
+
+		else if (strcmp(argv[argvCounter],"-fileU") == 0) {
+
+			argvCounter++;
+			strcpy(filenameU,argv[argvCounter]);
+			argvCounter++;
+		}// if
+
+
+		else {
+			opserr<<"warning: unknown command: updateparameter" <<argv[argvCounter]<<endln;
+			argvCounter++;
+		
+		} //else
+
+	};  // while
+	
+
+	ifstream inputFile( filenameX, ios::in);
+
+	Vector pointX(nrv);
+
+	if (inputFile.good()){
+		int ii=0;
+		double tmp;
+		while(ii<nrv){ 
+			if (!inputFile.eof()){
+				inputFile >> tmp;
+				pointX(ii)=tmp;
+			}
+			else{
+				opserr<<"file" <<filenameX<<" has different size than numRV"<<endln;
+				exit(-1);
+			}
+			ii++;
+		}// while 
+		inputFile.close();
+
+	} 
+	else {
+		opserr<<"warning: no data in file: "<<filenameX<<endln;
+		exit(-1);			
+	}
+
+	/*
+	theProbabilityTransformation->set_x(pointX);
+	theProbabilityTransformation->transform_x_to_u();
+	Vector pointU = theProbabilityTransformation->get_u();
+	*/
+	Vector pointU;
+	theProbabilityTransformation->transform_x_to_u(pointX, pointU);
+
+	ofstream outputFile( filenameU, ios::out);
+	outputFile.precision(16);
+
+	for (int ii =0; ii<nrv; ii++){
+
+		outputFile << pointU(ii)<<endln;
+	}// for
+ 
+	outputFile.close();
+
+
+
+	return TCL_OK;
+
+}
+
+///////
+///  Command:  transformUtoX  -fileX pointx.out   -fileU pointu.out   
+///            
+
+
+int 
+TclReliabilityModelBuilder_transformUtoX(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+
+
+    if (theProbabilityTransformation ==0){
+		opserr<<"Fatal: theProbabilityTransformation does not exist!"<<endln;
+		exit(-1);
+	}
+	
+	
+	
+	int nrv = theReliabilityDomain->getNumberOfRandomVariables();
+
+	
+//	double value;
+	char filenameX[30]="pointx.out";
+	char filenameU[30]="pointu.out";
+
+	int argvCounter = 1;
+	while (argc > argvCounter) {
+		if (strcmp(argv[argvCounter],"-fileX") == 0) {
+
+			argvCounter++;
+			strcpy(filenameX,argv[argvCounter]);
+			argvCounter++;
+		}// if
+
+		else if (strcmp(argv[argvCounter],"-fileU") == 0) {
+
+			argvCounter++;
+			strcpy(filenameU,argv[argvCounter]);
+			argvCounter++;
+		}// if
+
+
+		else {
+			opserr<<"warning: unknown command: updateparameter" <<argv[argvCounter]<<endln;
+			argvCounter++;
+		
+		} //else
+
+	};  // while
+	
+
+	ifstream inputFile( filenameU, ios::in);
+
+	Vector pointU(nrv);
+
+	if (inputFile.good()){
+		int ii=0;
+		double tmp;
+		while(ii<nrv){ 
+			if (!inputFile.eof()){
+				inputFile >> tmp;
+				pointU(ii)=tmp;
+			}
+			else{
+				opserr<<"file" <<filenameX<<" has different size than numRV"<<endln;
+				exit(-1);
+			}
+			ii++;
+		}// while 
+		inputFile.close();
+
+	} 
+	else {
+		opserr<<"warning: no data in file: "<<filenameX<<endln;
+		exit(-1);			
+	}
+	/*
+	theProbabilityTransformation->set_u(pointU);
+	theProbabilityTransformation->transform_u_to_x();
+	Vector pointX = theProbabilityTransformation->get_x();
+	*/
+	Vector pointX;
+	theProbabilityTransformation->transform_u_to_x(pointU, pointX);
+
+	ofstream outputFile( filenameX, ios::out);
+	outputFile.precision(16);
+
+	for (int ii =0; ii<nrv; ii++){
+
+		outputFile << pointX(ii)<<endln;
+	}// for
+ 
+	outputFile.close();
+
+
+
+	return TCL_OK;
+
+}
+
+
+
+
+
+// command: runDP_RSM_SimTimeInvariantAnalysis -designPt dp.out  -output results.out  -ndir $n <-experimentalPointRule Uniform -gridInfo {-1  minY  maxY nPts 0  minY  maxY nPts0 1 minX1  maxX1 nPts1 2 minX2  maxX2 nPts2 ...}> 
+//  -saveHessian hession.out <-surfaceDesign UnivariateDecomposition -simulation ImportanceSampling -tarCOV 0.1 -numSimulation 100000>
+
+
+/*ReliabilityDomain *passedReliabilityDomain,
+					GFunEvaluator *passedGFunEvaluator,
+					ProbabilityTransformation *passedProbabilityTransformation,
+					char *passedOutputFileName,
+					GradGEvaluator * passedGradGEvaluator, Vector * pDesignPt, int numAxis, 
+					char * typeExpPtRule,Tcl_Interp *passedTclInterp, 
+					Matrix * passedHessian, char * passedHessianFile, char * typeSurfaceDesign, 
+					char * typeRespSurfaceSimulation, Vector * gridInfo,
+					RandomNumberGenerator * pRandomNumberGenerator,
+					double pTargetCOV,
+					int pNumberOfSimulations*/
+int 
+TclReliabilityModelBuilder_runDP_RSM_SimTimeInvariantAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+ 
+
+	if ((theRandomNumberGenerator ==0)||(theGFunEvaluator==0)||(theProbabilityTransformation==0) ||(theGradGEvaluator==0)) {
+	
+		opserr<<"theRandomNumberGenerator ==0)||(theGFunEvaluator)||(theProbabilityTransformation==0) ||(theGradGEvaluator==0)"<<endln;
+		exit(-1);
+	
+	}
+	int argvCounter = 1;
+	
+	int nrv = theReliabilityDomain->getNumberOfRandomVariables();
+	
+	int numPPlane = 1;
+	Vector * designPoint = new Vector(nrv);
+	Vector * gridInfo = 0;
+    Matrix * passedHessian =0;
+	char outputFile[25];
+	char * hessianFileName=0;
+	char surfDesign[50] = "UnivariateDecomposition";
+	char typeRespSurfaceSimulation[50]= "ImportanceSampling";
+	double tarCov = 0.1;
+	int numberOfSimulations = 1000000;
+	char experimentalPointRule[40]="Uniform";
+
+
+
+
+	while (argc > argvCounter) {
+
+		if ((strcmp(argv[argvCounter],"-designPt") == 0)||(strcmp(argv[argvCounter],"-designPoint") == 0)) {
+			char fileName[20];
+			argvCounter++;
+			strcpy(fileName,argv[argvCounter]);
+			argvCounter++;
+			ifstream inputFile( fileName, ios::in);
+
+			if (inputFile.good()){
+				int ii=0;
+				double tmp;
+				while(!inputFile.eof() && ii<nrv){ 
+					inputFile >> tmp;
+					(*designPoint)(ii)=tmp;
+					ii++;
+				}
+				inputFile.close();
+			} 
+			else {
+				opserr<<"ERROR: designpoint can not read from file "<<fileName<<endln;
+				exit(-1);
+			}
+						
+		}// else if
+
+		else if (strcmp(argv[argvCounter],"-ndir") == 0) {
+			argvCounter++;
+			if (Tcl_GetInt(interp, argv[argvCounter], &numPPlane) != TCL_OK) {
+				opserr << "ERROR: invalid input: numPPlane \n";
+				return TCL_ERROR;
+			}
+
+			argvCounter++;
+		}// else if
+
+		//====  <-surfaceDesign UnivariateDecomposition -simulation ImportanceSampling -tarCOV 0.1 -numSimulation 100000>
+		else if (strcmp(argv[argvCounter],"-surfaceDesign") == 0) {
+			argvCounter++;
+			strcpy(surfDesign,argv[argvCounter]);
+			argvCounter++;
+		}// else if
+		
+		else if (strcmp(argv[argvCounter],"-experimentalPointRule") == 0) {
+			argvCounter++;
+			strcpy(experimentalPointRule,argv[argvCounter]);
+			argvCounter++;
+		}// else if
+
+
+		else if (strcmp(argv[argvCounter],"-simulation") == 0) {
+			argvCounter++;
+			strcpy(typeRespSurfaceSimulation,argv[argvCounter]);
+			argvCounter++;
+		}// else if
+
+		else if (strcmp(argv[argvCounter],"-tarCOV") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &tarCov) != TCL_OK) {
+				opserr << "ERROR: invalid input: tarCov \n";
+				return TCL_ERROR;
+			}
+
+			argvCounter++;
+		}// else if
+
+		else if (strcmp(argv[argvCounter],"-numSimulation") == 0) {
+			argvCounter++;
+			if (Tcl_GetInt(interp, argv[argvCounter], &numberOfSimulations) != TCL_OK) {
+				opserr << "ERROR: invalid input: numOfSimulations \n";
+				return TCL_ERROR;
+			}
+
+			argvCounter++;
+		}// else if
+
+ 
+
+// ---------
+		else if (strcmp(argv[argvCounter],"-output") == 0) {
+			argvCounter++;
+			strcpy(outputFile,argv[argvCounter]);
+			argvCounter++;
+		}// else if
+		
+		else if (strcmp(argv[argvCounter],"-gridInfo") == 0) {
+			argvCounter++;
+
+			int pathSize;
+		    TCL_Char **pathStrings;
+		  
+		    if (Tcl_SplitList(interp, argv[argvCounter], 
+					&pathSize, &pathStrings) != TCL_OK) {
+				  
+			  opserr << "WARNING problem splitting path list in gridInfo\n";
+			  return 0;
+			}
+		  
+		    gridInfo = new Vector(pathSize);
+
+		    for (int i=0; i<pathSize; i++) {
+			  double value;
+			  if ( Tcl_GetDouble(interp, pathStrings[i], &value) != TCL_OK) {
+			    opserr << "WARNING problem reading path data value " << pathStrings[i] << "\n";
+
+			    return 0;
+			  }
+			  (*gridInfo)(i) = value;
+		  }  //for
+		  // free up the array of pathsStrings .. see tcl man pages as to why
+//		  cleanup(pathStrings);
+
+			argvCounter++;
+		}// else if
+		else if (strcmp(argv[argvCounter],"-saveHessian") == 0){
+			argvCounter++;	
+			hessianFileName = new char[30];
+			strcpy(hessianFileName,argv[argvCounter]);
+			argvCounter++;
+			
+			ifstream inputFile( hessianFileName, ios::in);
+
+			if (inputFile.good()){
+				passedHessian = new Matrix(nrv,nrv);
+				int ii=0;
+				int jj=0;
+				double tmp;
+				while(ii<nrv){ 
+					for (jj=0; jj<nrv;jj++){
+						if (!inputFile.eof()){
+							inputFile >> tmp;
+							(*passedHessian)(jj,ii)=tmp;
+						}
+						else{
+							opserr<<"-saveHessian, size of Hessian in file: "<<hessianFileName<< "is wrong"<<endln;
+							exit(-1);
+						}
+					}	
+					
+					ii++;
+				}// while 
+				inputFile.close();
+
+			} 
+			else {
+				opserr<<"warning: no data in hessianfrom file: "<<hessianFileName<<endln;
+				
+			}
+		
+		}
+		else {
+		
+			opserr<< "unknown command: "<<argv[argvCounter]<<endln;
+			argvCounter++;
+		
+		}
+	} //while
+
+	
+ 
+
+
+    DP_RSM_Sim * theDP_RSM_Sim = new DP_RSM_Sim(theReliabilityDomain,
+					theGFunEvaluator,
+					theProbabilityTransformation,
+					outputFile,
+					theGradGEvaluator, 
+					designPoint, 
+					numPPlane, 
+					experimentalPointRule,
+					interp, 
+					passedHessian, 
+					hessianFileName, 
+					surfDesign, 
+					typeRespSurfaceSimulation, 
+					gridInfo,
+					theRandomNumberGenerator,
+					tarCov,
+					numberOfSimulations);
+
+	if (passedHessian !=0) delete passedHessian;
+	if (hessianFileName !=0) delete hessianFileName;
+	theDP_RSM_Sim->analyze();
+
+	if (gridInfo !=0) delete gridInfo;
+
+    delete designPoint;
+	return 0;
+
+}
+
+
+
+
+
+
+// command: runDP_RSM_SimTimeVariantAnalysis -designPt dp.out  -output results.out  -ndir $n <-experimentalPointRule Uniform -gridInfo {-1  minY  maxY nPts 0  minY  maxY nPts0 1 minX1  maxX1 nPts1 ..}> 
+//  -saveHessian hession.out <-surfaceDesign UnivariateDecomposition -simulation ImportanceSampling -tarCOV 0.1 -numSimulation 100000 -littleDt dt -ImpulseInterval Dt>
+
+
+int 
+TclReliabilityModelBuilder_runDP_RSM_SimTimeVariantAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+ 
+
+	if ((theRandomNumberGenerator ==0)||(theGFunEvaluator==0)||(theProbabilityTransformation==0) ||(theGradGEvaluator==0)) {
+	
+		opserr<<"theRandomNumberGenerator ==0)||(theGFunEvaluator)||(theProbabilityTransformation==0) ||(theGradGEvaluator==0)"<<endln;
+		exit(-1);
+	
+	}
+	int argvCounter = 1;
+	
+	int nrv = theReliabilityDomain->getNumberOfRandomVariables();
+	
+	int numPPlane = 1;
+	Vector * designPoint = new Vector(nrv);
+	Vector * gridInfo = 0;
+    Matrix * passedHessian =0;
+	char outputFile[25];
+	char * hessianFileName=0;
+	char surfDesign[50] = "UnivariateDecomposition";
+	char typeRespSurfaceSimulation[50]= "ImportanceSampling";
+	double tarCov = 0.1;
+	int numberOfSimulations = 1000000;
+	char experimentalPointRule[40]="Uniform";
+
+	double littleDt = 0.0;
+	double ImpulseInterval =0.0;
+
+
+	while (argc > argvCounter) {
+
+		if ((strcmp(argv[argvCounter],"-designPt") == 0)||(strcmp(argv[argvCounter],"-designPoint") == 0)) {
+			char fileName[20];
+			argvCounter++;
+			strcpy(fileName,argv[argvCounter]);
+			argvCounter++;
+			ifstream inputFile( fileName, ios::in);
+
+			if (inputFile.good()){
+				int ii=0;
+				double tmp;
+				while(!inputFile.eof() && ii<nrv){ 
+					inputFile >> tmp;
+					(*designPoint)(ii)=tmp;
+					ii++;
+				}
+				inputFile.close();
+			} 
+			else {
+				opserr<<"ERROR: designpoint can not read from file "<<fileName<<endln;
+				exit(-1);
+			}
+						
+		}// else if
+
+		else if (strcmp(argv[argvCounter],"-ndir") == 0) {
+			argvCounter++;
+			if (Tcl_GetInt(interp, argv[argvCounter], &numPPlane) != TCL_OK) {
+				opserr << "ERROR: invalid input: numPPlane \n";
+				return TCL_ERROR;
+			}
+
+			argvCounter++;
+		}// else if
+
+		//====  <-surfaceDesign UnivariateDecomposition -simulation ImportanceSampling -tarCOV 0.1 -numSimulation 100000>
+		else if (strcmp(argv[argvCounter],"-surfaceDesign") == 0) {
+			argvCounter++;
+			strcpy(surfDesign,argv[argvCounter]);
+			argvCounter++;
+		}// else if
+		
+		else if (strcmp(argv[argvCounter],"-experimentalPointRule") == 0) {
+			argvCounter++;
+			strcpy(experimentalPointRule,argv[argvCounter]);
+			argvCounter++;
+		}// else if
+
+
+		else if (strcmp(argv[argvCounter],"-simulation") == 0) {
+			argvCounter++;
+			strcpy(typeRespSurfaceSimulation,argv[argvCounter]);
+			argvCounter++;
+		}// else if
+
+		else if (strcmp(argv[argvCounter],"-tarCOV") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &tarCov) != TCL_OK) {
+				opserr << "ERROR: invalid input: tarCov \n";
+				return TCL_ERROR;
+			}
+
+			argvCounter++;
+		}// else if
+
+		else if (strcmp(argv[argvCounter],"-numSimulation") == 0) {
+			argvCounter++;
+			if (Tcl_GetInt(interp, argv[argvCounter], &numberOfSimulations) != TCL_OK) {
+				opserr << "ERROR: invalid input: numOfSimulations \n";
+				return TCL_ERROR;
+			}
+
+			argvCounter++;
+		}// else if
+
+ 
+
+// ---------
+		else if (strcmp(argv[argvCounter],"-output") == 0) {
+			argvCounter++;
+			strcpy(outputFile,argv[argvCounter]);
+			argvCounter++;
+		}// else if
+		
+		else if (strcmp(argv[argvCounter],"-gridInfo") == 0) {
+			argvCounter++;
+
+			int pathSize;
+		    TCL_Char **pathStrings;
+		  
+		    if (Tcl_SplitList(interp, argv[argvCounter], 
+					&pathSize, &pathStrings) != TCL_OK) {
+				  
+			  opserr << "WARNING problem splitting path list in gridInfo\n";
+			  return 0;
+			}
+		  
+		    gridInfo = new Vector(pathSize);
+
+		    for (int i=0; i<pathSize; i++) {
+			  double value;
+			  if ( Tcl_GetDouble(interp, pathStrings[i], &value) != TCL_OK) {
+			    opserr << "WARNING problem reading path data value " << pathStrings[i] << "\n";
+
+			    return 0;
+			  }
+			  (*gridInfo)(i) = value;
+		  }  //for
+		  // free up the array of pathsStrings .. see tcl man pages as to why
+//		  cleanup(pathStrings);
+
+			argvCounter++;
+		}// else if
+		else if (strcmp(argv[argvCounter],"-saveHessian") == 0){
+			argvCounter++;	
+			hessianFileName = new char[30];
+			strcpy(hessianFileName,argv[argvCounter]);
+			argvCounter++;
+			
+			ifstream inputFile( hessianFileName, ios::in);
+
+			if (inputFile.good()){
+				passedHessian = new Matrix(nrv,nrv);
+				int ii=0;
+				int jj=0;
+				double tmp;
+				while(ii<nrv){ 
+					for (jj=0; jj<nrv;jj++){
+						if (!inputFile.eof()){
+							inputFile >> tmp;
+							(*passedHessian)(jj,ii)=tmp;
+						}
+						else{
+							opserr<<"-saveHessian, size of Hessian in file: "<<hessianFileName<< "is wrong"<<endln;
+							exit(-1);
+						}
+					}	
+					
+					ii++;
+				}// while 
+				inputFile.close();
+
+			} 
+			else {
+				opserr<<"warning: no data in hessianfrom file: "<<hessianFileName<<endln;
+				
+			}
+		
+		}
+		
+		else if (strcmp(argv[argvCounter],"-littleDt") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &littleDt) != TCL_OK) {
+				opserr << "ERROR: invalid input: littleDt \n";
+				return TCL_ERROR;
+			}
+
+			argvCounter++;
+		}// else if
+		
+		else if (strcmp(argv[argvCounter],"-ImpulseInterval") == 0) {
+			argvCounter++;
+			if (Tcl_GetDouble(interp, argv[argvCounter], &ImpulseInterval) != TCL_OK) {
+				opserr << "ERROR: invalid input: ImpulseInterval \n";
+				return TCL_ERROR;
+			}
+
+			argvCounter++;
+		}// else if
+		else {
+		
+			opserr<< "unknown command: "<<argv[argvCounter]<<endln;
+			argvCounter++;
+		
+		}
+	} //while
+
+	
+ 
+	if ((littleDt ==0) ||(ImpulseInterval ==0) ){
+		opserr<< "not enough parameters. command: "<<endln;
+		opserr<<"runDP_RSM_SimTimeVariantAnalysis -designPt dp.out  -output results.out  -ndir $n <-experimentalPointRule Uniform -gridInfo {-1  minY  maxY nPts 0  minY  maxY nPts0 1 minX1  maxX1 nPts1 ..}>"<<endln; 
+        opserr<<"-saveHessian hession.out <-surfaceDesign UnivariateDecomposition -simulation ImportanceSampling -tarCOV 0.1 -numSimulation 100000> -littleDt dt -ImpulseInterval Dt" <<endln;
+		exit(-1);
+	}
+
+
+    DP_RSM_Sim_TimeVariant * theDP_RSM_Sim_TimeVariant = new DP_RSM_Sim_TimeVariant(theReliabilityDomain,
+					theGFunEvaluator,
+					theProbabilityTransformation,
+					outputFile,
+					theGradGEvaluator, 
+					designPoint, 
+					numPPlane, 
+					experimentalPointRule,
+					interp, 
+					passedHessian, 
+					hessianFileName, 
+					surfDesign, 
+					typeRespSurfaceSimulation, 
+					gridInfo,
+					theRandomNumberGenerator,
+					tarCov,
+					numberOfSimulations,
+					littleDt,
+					ImpulseInterval);
+
+
+
+				/*  ReliabilityDomain *passedReliabilityDomain,
+					GFunEvaluator *passedGFunEvaluator,
+					ProbabilityTransformation *passedProbabilityTransformation,
+					char *passedOutputFileName,
+					GradGEvaluator * passedGradGEvaluator, Vector * pDesignPt, int numAxis, 
+					char * typeExpPtRule,Tcl_Interp *passedTclInterp, 
+					Matrix * passedHessian, char * passedHessianFile, char * typeSurfaceDesign, 
+					char * typeRespSurfaceSimulation, Vector * gridInfo,
+					RandomNumberGenerator * pRandomNumberGenerator,
+					double pTargetCOV,
+					int pNumberOfSimulations, double pLittleDt,
+					double ImpulseInterval*/
+
+	if (passedHessian !=0) delete passedHessian;
+	if (hessianFileName !=0) delete hessianFileName;
+	theDP_RSM_Sim_TimeVariant->analyze();
+
+
+    delete designPoint;
+	if (gridInfo !=0) delete gridInfo;
+	return 0;
+
+}
 
 
 ///getBetaFORM is not in K.F.
