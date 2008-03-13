@@ -21,7 +21,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\src\reliability\analysis\analysis\system;..\..\..\SRC\recorder\response;&quot;c:\Program Files\tcl\include&quot;;\..\..\src\analysis\fe_ele;..\..\..\src\analysis\fe_ele;..\..\..\src\analysis\dof_grp;..\..\..\src\reliability\fesensitivity;..\..\..\src\reliability\tcl;..\..\..\src\reliability\domain;..\..\..\src\reliability\domain\components;..\..\..\src\reliability\domain\distributions;..\..\..\src\reliability\analysis;..\..\..\src\reliability\analysis\analysis;..\..\..\src\reliability\analysis\curvature;..\..\..\src\reliability\analysis\designPoint;..\..\..\src\reliability\analysis\direction;..\..\..\src\reliability\analysis\gFunction;..\..\..\src\reliability\analysis\misc;..\..\..\src\reliability\analysis\randomNumber;..\..\..\src\reliability\analysis\sensitivity;..\..\..\src\reliability\analysis\stepSize;..\..\..\src\reliability\analysis\transformation;..\..\..\src;..\..\..\src\matrix;..\..\..\src\handler;..\..\..\src\coordTransformation;..\..\..\src\material\section\repres\section;..\..\..\src\analysis\algorithm\equiSolnAlgo;..\..\..\src\system_of_eqn\eigenSOE;..\..\..\src\analysis\algorithm\eigenAlgo;..\..\..\src\material\nD;..\..\..\src\material\uniaxial;..\..\..\src\tcl;..\..\..\src\actor\objectBroker;..\..\..\src\system_of_eqn\linearSOE\umfGEN;..\..\..\src\system_of_eqn\linearSOE\fullGEN;..\..\..\src\system_of_eqn\linearSOE\sparseGEN;..\..\..\src\system_of_eqn\linearSOE\bandSPD;..\..\..\src\system_of_eqn\linearSOE\bandGEN;..\..\..\src\element\nonlinearBeamColumn\tcl\repres\section;..\..\..\src\recorder;..\..\..\src\graph\numberer;..\..\..\src\material\section;..\..\..\src\graph\graph;..\..\..\src\element\beam2d;..\..\..\src\element\beam3d;..\..\..\src\system_of_eqn;..\..\..\src\system_of_eqn\linearSOE;..\..\..\src\system_of_eqn\linearSOE\profileSPD;..\..\..\src\system_of_eqn\linearSOE\sparseSYM;..\..\..\src\domain\pattern;..\..\..\src\analysis\analysis;..\..\..\src\analysis\integrator;..\..\..\src\analysis\numberer;..\..\..\src\analysis\handler;..\..\..\src\renderer;..\..\..\src\material;..\..\..\src\analysis\algorithm;..\..\..\src\convergenceTest;..\..\..\src\analysis\model\simple;..\..\..\src\domain\load;..\..\..\src\analysis\model;..\..\..\src\element\truss;..\..\..\src\actor\channel;..\..\..\src\utility;..\..\..\src\actor\actor;..\..\..\src\modelbuilder;..\..\..\src\modelbuilder\tcl;..\..\..\src\domain\constraints;..\..\..\src\domain\component;..\..\..\src\element;..\..\..\src\domain\node;..\..\..\src\domain\domain;..\..\..\src\tagged\storage;..\..\..\src\tagged;..\..\..\src\nDarray;..\..\..\src\reliability\domain\modulatingFunction;..\..\..\src\reliability\domain\spectrum;..\..\..\src\reliability\domain\filter;..\..\..\src\reliability\analysis\hessianApproximation;..\..\..\src\reliability\analysis\convergenceCheck;..\..\..\src\reliability\analysis\meritFunction;..\..\..\src\reliability\analysis\rootFinding;&quot;c:\Program Files\tcl&quot;"
+				AdditionalIncludeDirectories="..\..\..\src\reliability\optimization;..\..\..\src\domain\groundmotion;..\..\..\src\reliability\analysis\telm;..\..\..\src\reliability\analysis\analysis\system;..\..\..\SRC\recorder\response;&quot;c:\Program Files\tcl\include&quot;;\..\..\src\analysis\fe_ele;..\..\..\src\analysis\fe_ele;..\..\..\src\analysis\dof_grp;..\..\..\src\reliability\fesensitivity;..\..\..\src\reliability\tcl;..\..\..\src\reliability\domain;..\..\..\src\reliability\domain\components;..\..\..\src\reliability\domain\distributions;..\..\..\src\reliability\analysis;..\..\..\src\reliability\analysis\analysis;..\..\..\src\reliability\analysis\curvature;..\..\..\src\reliability\analysis\designPoint;..\..\..\src\reliability\analysis\direction;..\..\..\src\reliability\analysis\gFunction;..\..\..\src\reliability\analysis\misc;..\..\..\src\reliability\analysis\randomNumber;..\..\..\src\reliability\analysis\sensitivity;..\..\..\src\reliability\analysis\stepSize;..\..\..\src\reliability\analysis\transformation;..\..\..\src;..\..\..\src\matrix;..\..\..\src\handler;..\..\..\src\coordTransformation;..\..\..\src\material\section\repres\section;..\..\..\src\analysis\algorithm\equiSolnAlgo;..\..\..\src\system_of_eqn\eigenSOE;..\..\..\src\analysis\algorithm\eigenAlgo;..\..\..\src\material\nD;..\..\..\src\material\uniaxial;..\..\..\src\tcl;..\..\..\src\actor\objectBroker;..\..\..\src\system_of_eqn\linearSOE\umfGEN;..\..\..\src\system_of_eqn\linearSOE\fullGEN;..\..\..\src\system_of_eqn\linearSOE\sparseGEN;..\..\..\src\system_of_eqn\linearSOE\bandSPD;..\..\..\src\system_of_eqn\linearSOE\bandGEN;..\..\..\src\element\nonlinearBeamColumn\tcl\repres\section;..\..\..\src\recorder;..\..\..\src\graph\numberer;..\..\..\src\material\section;..\..\..\src\graph\graph;..\..\..\src\element\beam2d;..\..\..\src\element\beam3d;..\..\..\src\system_of_eqn;..\..\..\src\system_of_eqn\linearSOE;..\..\..\src\system_of_eqn\linearSOE\profileSPD;..\..\..\src\system_of_eqn\linearSOE\sparseSYM;..\..\..\src\domain\pattern;..\..\..\src\analysis\analysis;..\..\..\src\analysis\integrator;..\..\..\src\analysis\numberer;..\..\..\src\analysis\handler;..\..\..\src\renderer;..\..\..\src\material;..\..\..\src\analysis\algorithm;..\..\..\src\convergenceTest;..\..\..\src\analysis\model\simple;..\..\..\src\domain\load;..\..\..\src\analysis\model;..\..\..\src\element\truss;..\..\..\src\actor\channel;..\..\..\src\utility;..\..\..\src\actor\actor;..\..\..\src\modelbuilder;..\..\..\src\modelbuilder\tcl;..\..\..\src\domain\constraints;..\..\..\src\domain\component;..\..\..\src\element;..\..\..\src\domain\node;..\..\..\src\domain\domain;..\..\..\src\tagged\storage;..\..\..\src\tagged;..\..\..\src\nDarray;..\..\..\src\reliability\domain\modulatingFunction;..\..\..\src\reliability\domain\spectrum;..\..\..\src\reliability\domain\filter;..\..\..\src\reliability\analysis\hessianApproximation;..\..\..\src\reliability\analysis\convergenceCheck;..\..\..\src\reliability\analysis\meritFunction;..\..\..\src\reliability\analysis\rootFinding;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="WIN32,_DEBUG,_LIB,_TCL84"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
@@ -66,7 +66,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\src\reliability\analysis\analysis\system;..\..\..\SRC\recorder\response;&quot;c:\Program Files\tcl\include&quot;;..\..\..\src\analysis\fe_ele;..\..\..\src\analysis\dof_grp;..\..\..\src\reliability\fesensitivity;..\..\..\src\reliability\tcl;..\..\..\src\reliability\domain;..\..\..\src\reliability\domain\components;..\..\..\src\reliability\domain\distributions;..\..\..\src\reliability\analysis;..\..\..\src\reliability\analysis\analysis;..\..\..\src\reliability\analysis\curvature;..\..\..\src\reliability\analysis\designPoint;..\..\..\src\reliability\analysis\direction;..\..\..\src\reliability\analysis\gFunction;..\..\..\src\reliability\analysis\misc;..\..\..\src\reliability\analysis\randomNumber;..\..\..\src\reliability\analysis\sensitivity;..\..\..\src\reliability\analysis\stepSize;..\..\..\src\reliability\analysis\transformation;..\..\..\src;..\..\..\src\matrix;..\..\..\src\handler;..\..\..\src\coordTransformation;..\..\..\src\material\section\repres\section;..\..\..\src\analysis\algorithm\equiSolnAlgo;..\..\..\src\system_of_eqn\eigenSOE;..\..\..\src\analysis\algorithm\eigenAlgo;..\..\..\src\material\nD;..\..\..\src\material\uniaxial;..\..\..\src\tcl;..\..\..\src\actor\objectBroker;..\..\..\src\system_of_eqn\linearSOE\umfGEN;..\..\..\src\system_of_eqn\linearSOE\fullGEN;..\..\..\src\system_of_eqn\linearSOE\sparseGEN;..\..\..\src\system_of_eqn\linearSOE\bandSPD;..\..\..\src\system_of_eqn\linearSOE\bandGEN;..\..\..\src\element\nonlinearBeamColumn\tcl\repres\section;..\..\..\src\recorder;..\..\..\src\graph\numberer;..\..\..\src\material\section;..\..\..\src\graph\graph;..\..\..\src\element\beam2d;..\..\..\src\element\beam3d;..\..\..\src\system_of_eqn;..\..\..\src\system_of_eqn\linearSOE;..\..\..\src\system_of_eqn\linearSOE\profileSPD;..\..\..\src\system_of_eqn\linearSOE\sparseSYM;..\..\..\src\domain\pattern;..\..\..\src\analysis\analysis;..\..\..\src\analysis\integrator;..\..\..\src\analysis\numberer;..\..\..\src\analysis\handler;..\..\..\src\renderer;..\..\..\src\material;..\..\..\src\analysis\algorithm;..\..\..\src\convergenceTest;..\..\..\src\analysis\model\simple;..\..\..\src\domain\load;..\..\..\src\analysis\model;..\..\..\src\element\truss;..\..\..\src\actor\channel;..\..\..\src\utility;..\..\..\src\actor\actor;..\..\..\src\modelbuilder;..\..\..\src\modelbuilder\tcl;..\..\..\src\domain\constraints;..\..\..\src\domain\component;..\..\..\src\element;..\..\..\src\domain\node;..\..\..\src\domain\domain;..\..\..\src\tagged\storage;..\..\..\src\tagged;..\..\..\src\nDarray;..\..\..\src\reliability\domain\modulatingFunction;..\..\..\src\reliability\domain\spectrum;..\..\..\src\reliability\domain\filter;..\..\..\src\reliability\analysis\hessianApproximation;..\..\..\src\reliability\analysis\convergenceCheck;..\..\..\src\reliability\analysis\meritFunction;..\..\..\src\reliability\analysis\rootFinding;&quot;c:\Program Files\tcl&quot;"
+				AdditionalIncludeDirectories="..\..\..\src\domain\groundMotion;..\..\..\src\reliability\analysis\telm;..\..\..\src\reliability\analysis\analysis\system;..\..\..\SRC\recorder\response;&quot;c:\Program Files\tcl\include&quot;;..\..\..\src\analysis\fe_ele;..\..\..\src\analysis\dof_grp;..\..\..\src\reliability\fesensitivity;..\..\..\src\reliability\tcl;..\..\..\src\reliability\domain;..\..\..\src\reliability\domain\components;..\..\..\src\reliability\domain\distributions;..\..\..\src\reliability\analysis;..\..\..\src\reliability\analysis\analysis;..\..\..\src\reliability\analysis\curvature;..\..\..\src\reliability\analysis\designPoint;..\..\..\src\reliability\analysis\direction;..\..\..\src\reliability\analysis\gFunction;..\..\..\src\reliability\analysis\misc;..\..\..\src\reliability\analysis\randomNumber;..\..\..\src\reliability\analysis\sensitivity;..\..\..\src\reliability\analysis\stepSize;..\..\..\src\reliability\analysis\transformation;..\..\..\src;..\..\..\src\matrix;..\..\..\src\handler;..\..\..\src\coordTransformation;..\..\..\src\material\section\repres\section;..\..\..\src\analysis\algorithm\equiSolnAlgo;..\..\..\src\system_of_eqn\eigenSOE;..\..\..\src\analysis\algorithm\eigenAlgo;..\..\..\src\material\nD;..\..\..\src\material\uniaxial;..\..\..\src\tcl;..\..\..\src\actor\objectBroker;..\..\..\src\system_of_eqn\linearSOE\umfGEN;..\..\..\src\system_of_eqn\linearSOE\fullGEN;..\..\..\src\system_of_eqn\linearSOE\sparseGEN;..\..\..\src\system_of_eqn\linearSOE\bandSPD;..\..\..\src\system_of_eqn\linearSOE\bandGEN;..\..\..\src\element\nonlinearBeamColumn\tcl\repres\section;..\..\..\src\recorder;..\..\..\src\graph\numberer;..\..\..\src\material\section;..\..\..\src\graph\graph;..\..\..\src\element\beam2d;..\..\..\src\element\beam3d;..\..\..\src\system_of_eqn;..\..\..\src\system_of_eqn\linearSOE;..\..\..\src\system_of_eqn\linearSOE\profileSPD;..\..\..\src\system_of_eqn\linearSOE\sparseSYM;..\..\..\src\domain\pattern;..\..\..\src\analysis\analysis;..\..\..\src\analysis\integrator;..\..\..\src\analysis\numberer;..\..\..\src\analysis\handler;..\..\..\src\renderer;..\..\..\src\material;..\..\..\src\analysis\algorithm;..\..\..\src\convergenceTest;..\..\..\src\analysis\model\simple;..\..\..\src\domain\load;..\..\..\src\analysis\model;..\..\..\src\element\truss;..\..\..\src\actor\channel;..\..\..\src\utility;..\..\..\src\actor\actor;..\..\..\src\modelbuilder;..\..\..\src\modelbuilder\tcl;..\..\..\src\domain\constraints;..\..\..\src\domain\component;..\..\..\src\element;..\..\..\src\domain\node;..\..\..\src\domain\domain;..\..\..\src\tagged\storage;..\..\..\src\tagged;..\..\..\src\nDarray;..\..\..\src\reliability\domain\modulatingFunction;..\..\..\src\reliability\domain\spectrum;..\..\..\src\reliability\domain\filter;..\..\..\src\reliability\analysis\hessianApproximation;..\..\..\src\reliability\analysis\convergenceCheck;..\..\..\src\reliability\analysis\meritFunction;..\..\..\src\reliability\analysis\rootFinding;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,_TCL84"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
@@ -295,6 +295,30 @@
 				Name="analysis"
 				Filter="">
 				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\BivariateDecomposition.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\BivariateDecomposition.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\DP_RSM_Sim.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\DP_RSM_Sim.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\DP_RSM_Sim_TimeVariant.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\DP_RSM_Sim_TimeVariant.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\ExperimentalPointRule1D.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\ExperimentalPointRule1D.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\reliability\analysis\analysis\FORMAnalysis.cpp">
 				</File>
 				<File
@@ -302,6 +326,9 @@
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\reliability\analysis\analysis\FOSMAnalysis.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\FOSMAnalysis.h">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\reliability\analysis\analysis\FragilityAnalysis.cpp">
@@ -316,6 +343,36 @@
 					RelativePath="..\..\..\SRC\reliability\analysis\analysis\GFunVisualizationAnalysis.h">
 				</File>
 				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\GridPlane.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\GridPlane.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\ImportanceSamplingAnalysis.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\ImportanceSamplingAnalysis.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\MonteCarloResponseAnalysis.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\MonteCarloResponseAnalysis.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\MultiDimVisPrincPlane.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\MultiDimVisPrincPlane.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\OrthogonalPlaneSamplingAnalysis.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\OrthogonalPlaneSamplingAnalysis.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\reliability\analysis\analysis\OutCrossingAnalysis.cpp">
 				</File>
 				<File
@@ -328,10 +385,22 @@
 					RelativePath="..\..\..\SRC\reliability\analysis\analysis\ParametricReliabilityAnalysis.h">
 				</File>
 				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\PrincipalAxis.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\PrincipalAxis.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\reliability\analysis\analysis\ReliabilityAnalysis.cpp">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\reliability\analysis\analysis\ReliabilityAnalysis.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\RespSurfaceSimulation.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\RespSurfaceSimulation.h">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\reliability\analysis\analysis\SORMAnalysis.cpp">
@@ -346,10 +415,28 @@
 					RelativePath="..\..\..\SRC\reliability\analysis\analysis\SamplingAnalysis.h">
 				</File>
 				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\SurfaceDesign.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\SurfaceDesign.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\reliability\analysis\analysis\SystemAnalysis.cpp">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\reliability\analysis\analysis\SystemAnalysis.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\UniformExperimentalPointRule1D.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\UniformExperimentalPointRule1D.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\UnivariateDecomposition.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\analysis\UnivariateDecomposition.h">
 				</File>
 				<Filter
 					Name="system"
@@ -406,6 +493,12 @@
 				Name="hessianApproximation"
 				Filter="">
 				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\hessianApproximation\Hessian.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\hessianApproximation\Hessian.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\reliability\analysis\hessianApproximation\HessianApproximation.cpp">
 				</File>
 				<File
@@ -438,16 +531,287 @@
 				Name="rootFinding"
 				Filter="">
 				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\rootFinding\ModNewtonRootFinding.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\rootFinding\ModNewtonRootFinding.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\reliability\analysis\rootFinding\RootFinding.cpp">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\reliability\analysis\rootFinding\RootFinding.h">
 				</File>
 				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\rootFinding\SafeGuardedZeroFindingAlgorithm.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\rootFinding\SafeGuardedZeroFindingAlgorithm.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\reliability\analysis\rootFinding\SecantRootFinding.cpp">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\reliability\analysis\rootFinding\SecantRootFinding.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\rootFinding\ZeroFindingAlgorithm.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\rootFinding\ZeroFindingAlgorithm.h">
+				</File>
+			</Filter>
+			<Filter
+				Name="telm"
+				Filter="">
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\AllIndependentTransformation.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\AllIndependentTransformation.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\Analyzer.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\Analyzer.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\AnalyzerGFunEvaluator.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\AnalyzerGFunEvaluator.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\AnalyzerGradGEvaluator.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\AnalyzerGradGEvaluator.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\CrossingRateAnalyzer.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\CrossingRateAnalyzer.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\DynamciAnalyzer.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\DynamicAnalyzer.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\FOSeriesSimulation.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\FOSeriesSimulation.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\FirstPassageAnalyzer.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\FirstPassageAnalyzer.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\GFunEachStepEvaluator.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\GFunEachstepEvaluator.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\GeneralRandGenerator.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\GeneralRandGenerator.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\InitialPointBuilder.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\InitialPointBuilder.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\InitialStaticAnalysis.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\InitialStaticAnalysis.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\NewDiscretizedRandomProcessSeries.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\NewDiscretizedRandomProcessSeries.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\NewNewmarkSensitivityIntegrator.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\NewNewmarkSensitivityIntegrator.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\NewSearchWithStepSizeAndStepDirection.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\NewSearchWithStepSizeAndStepDirection.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\NewSensitivityAlgorithm.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\NewSensitivityAlgorithm.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\NewStandardLinearOscillatorAccelerationFilter.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\NewStandardLinearOscillatorAccelerationFilter.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\NewStaticSensitivityIntegrator.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\NewStaticSensitivityIntegrator.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\NewWhitenoiseFilter.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\NewWhitenoiseFilter.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\NonStatFirstPassageAnalyzer.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\NonStatFirstPassageAnalyzer.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\NonStatRandomVibrationSimulation.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\NonStatRandomVibrationSimulation.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\OutCrossingResults.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\OutCrossingResults.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\PerformanceFunctionCoeff.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\PerformanceFunctionCoeff.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\PerformanceFunctionCoefficientIter.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\PerformanceFunctionCoefficientIter.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\RandomProcess.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\RandomProcess.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\RandomVibrationAnalysis.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\RandomVibrationAnalysis.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\RandomVibrationSimulation.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\RandomVibrationSimulation.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\RandomVibrationSimulatorResult.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\RandomVibrationSimulatorResult.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\ReliabilityDirectIntegrationAnalysis.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\ReliabilityDirectIntegrationAnalysis.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\ReliabilityStaticAnalysis.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\ReliabilityStaticAnalysis.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\SelectLoadInitialStaticAnalysis.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\SelectLoadInitialStaticAnalysis.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\SmoothConcrete02.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\SmoothConcrete02.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\StatFirstPassageAnalyzer.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\StatFirstPassageAnalyzer.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\StatRandomVibrationSimulation.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\StatRandomVibrationSimulation.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\StaticAnalyzer.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\StaticAnalyzer.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\ThresholdIncInitialPointBuilder.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\ThresholdIncInitialPointBuilder.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\TimePoints.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\TimePoints.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\UniformGenerator.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\localMath.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\localMath.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\mersenne.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\mother.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\rancombi.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\randomc.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\ranrotb.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\telm\ranrotw.cpp">
 				</File>
 			</Filter>
 		</Filter>
@@ -498,6 +862,12 @@
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\reliability\domain\components\ParameterPositionerIter.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\domain\components\PrincipalPlane.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\domain\components\PrincipalPlane.h">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\reliability\domain\components\RandomVariable.cpp">
@@ -781,6 +1151,70 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\reliability\FEsensitivity\StaticSensitivityIntegrator.h">
+			</File>
+		</Filter>
+		<Filter
+			Name="optimization"
+			Filter="">
+			<File
+				RelativePath="..\..\..\SRC\reliability\optimization\ConstraintFunction.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\reliability\optimization\ConstraintFunction.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\reliability\optimization\DesignVariable.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\reliability\optimization\DesignVariable.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\reliability\optimization\DesignVariablePositioner.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\reliability\optimization\DesignVariablePositioner.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\reliability\optimization\ObjectiveFunction.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\reliability\optimization\ObjectiveFunction.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\reliability\optimization\SnoptAnalysis.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\reliability\optimization\SnoptAnalysis.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\reliability\optimization\SnoptProblem.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\reliability\optimization\SnoptProblem.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\reliability\optimization\SnoptWrapper.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\reliability\optimization\SnoptWrapper.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\reliability\optimization\ToyFunction.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\reliability\optimization\ToyFunction.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\reliability\optimization\ToyOptFunction.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\reliability\optimization\ToyOptFunction.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\reliability\optimization\snopt.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\reliability\optimization\snoptfilewrapper.h">
 			</File>
 		</Filter>
 	</Files>
