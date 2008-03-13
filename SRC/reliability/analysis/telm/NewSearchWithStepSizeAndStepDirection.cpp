@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:53 $
+// $Revision: 1.2 $
+// $Date: 2008-03-13 22:26:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/NewSearchWithStepSizeAndStepDirection.cpp,v $
                                                                      
 
@@ -1246,3 +1246,9 @@ NewSearchWithStepSizeAndStepDirection::lineSearch()
 }
 
 
+int 
+NewSearchWithStepSizeAndStepDirection::setStartPt(Vector *s)
+{
+  opserr << "NewSearchWithStepSizeAndStepDirection::setStartPt(Vector *s)  - not implemented yet\n";
+  return 0;
+}

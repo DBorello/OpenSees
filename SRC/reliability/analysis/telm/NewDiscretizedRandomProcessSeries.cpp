@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-02-29 23:04:15 $
+// $Revision: 1.3 $
+// $Date: 2008-03-13 22:26:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/NewDiscretizedRandomProcessSeries.cpp,v $
 
 #include <NewDiscretizedRandomProcessSeries.h>
@@ -178,7 +178,7 @@ NewDiscretizedRandomProcessSeries::getFactor(double time)
 	// Get value of filter for argument (t-ti)
 	dtime=time-(*kickInTimes)(i);
 	theFilter->setKickTime((*kickInTimes)(i));
-	filterAmplitude = theFilter->getAmplitude(dtime);
+	filterAmplitude = theFilter->getAmplitude(dtime, 0.0);
 	
 	// Add contribution 'ui * hi'
 	sum2 += (*randomVariables)(i) * filterAmplitude;
@@ -247,7 +247,7 @@ NewDiscretizedRandomProcessSeries::getFactorSensitivity(double time)
 			// Loop over all rv's (even though some may be zero at this time)
 			dtime=time-(*kickInTimes)(parameterID);
 //			if(fabs(dtime)<=1.0e-7) dtime=0.0;
-			sum2 = theFilter->getAmplitude(dtime);
+			sum2 = theFilter->getAmplitude(dtime, 0.0);
 			sum1 += sum2*modFuncAmplitude;
 		}
 

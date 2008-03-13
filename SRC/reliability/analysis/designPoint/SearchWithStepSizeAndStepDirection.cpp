@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2007-11-06 19:32:35 $
+// $Revision: 1.15 $
+// $Date: 2008-03-13 22:30:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.cpp,v $
 
 
@@ -556,7 +556,13 @@ SearchWithStepSizeAndStepDirection::getNumberOfEvaluations()
 }
 
 
+// Quan and Michele
 
+int SearchWithStepSizeAndStepDirection::setStartPt(Vector * pStartPt)
+{
+	startPoint->addVector(0.0,(*pStartPt),1.0);
+	return 0;
+}
 
 
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2008-02-29 19:47:19 $
+// $Revision: 1.5 $
+// $Date: 2008-03-13 22:30:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/FindDesignPointAlgorithm.h,v $
 
 
@@ -62,6 +62,12 @@ public:
 	virtual double getLastGFunValue() =0;
 	virtual const Vector &getGradientInStandardNormalSpace() =0;
 	virtual int getNumberOfEvaluations() = 0;
+// Quan and Michele Jan 2006 
+	virtual int setStartPt(Vector *) =0;
+	
+	
+	ofstream * outputFile;
+	
 
 	/////S added by K Fujimura /////
 	//virtual ReliabilityConvergenceCheck* getReliabilityConvergenceCheck();
@@ -72,6 +78,7 @@ public:
 	/////E added by K Fujimura /////
 
 protected:
+
 
 private:
 

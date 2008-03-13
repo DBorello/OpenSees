@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-02-29 19:47:19 $
+// $Revision: 1.3 $
+// $Date: 2008-03-13 22:30:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/FindDesignPointAlgorithm.cpp,v $
 
 
@@ -33,8 +33,10 @@
 
 #include <FindDesignPointAlgorithm.h>
 
+ 
 FindDesignPointAlgorithm::FindDesignPointAlgorithm()
 {
+	outputFile =0;
 }
 
 FindDesignPointAlgorithm::~FindDesignPointAlgorithm()

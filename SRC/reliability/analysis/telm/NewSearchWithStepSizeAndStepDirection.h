@@ -23,8 +23,8 @@
 ** ****************************************************************** */
 
 
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:53 $
+// $Revision: 1.2 $
+// $Date: 2008-03-13 22:26:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/NewSearchWithStepSizeAndStepDirection.h,v $
 
 
@@ -81,14 +81,14 @@ public:
 	double getLastGFunValue();
 	const Vector &getGradientInStandardNormalSpace();
 	int    getNumberOfEvaluations();
-  	int	   getNumberOfSensAna();
+  	int    getNumberOfSensAna();
 	double get_check1_init();
 	double get_check2_init();
 	double get_check1_conv();
 	double get_check2_conv();
 
 
-//  Modified by K Fujimura 10/10/2004
+	//  Modified by K Fujimura 10/10/2004
 	ReliabilityConvergenceCheck* getReliabilityConvergenceCheck()
 	{ return theReliabilityConvergenceCheck;}
 	void set_x(Vector&);
@@ -98,7 +98,8 @@ public:
 	virtual double get_beta();
 	Matrix getJacobian_x_u(){ return (*jacobian_x_u);}
 
-//  Modified by K Fujimura 10/10/2004
+	int setStartPt(Vector *s);	
+	//  Modified by K Fujimura 10/10/2004
 
 protected:
 

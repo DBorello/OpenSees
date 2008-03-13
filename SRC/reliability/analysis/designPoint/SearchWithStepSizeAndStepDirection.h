@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-02-07 23:49:11 $
+// $Revision: 1.7 $
+// $Date: 2008-03-13 22:30:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.h,v $
 
 
@@ -83,7 +83,8 @@ public:
 	double getLastGFunValue();
 	const Vector &getGradientInStandardNormalSpace();
 	int    getNumberOfEvaluations();
-
+  // Quan and Michele Jan 2006  
+	int setStartPt(Vector *);
 protected:
 
 private:	
