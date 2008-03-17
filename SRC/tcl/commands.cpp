@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.112 $
-// $Date: 2008-03-06 22:36:42 $
+// $Revision: 1.113 $
+// $Date: 2008-03-17 23:29:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -334,22 +334,6 @@ extern LoadBalancer      *OPS_BALANCER;
 extern FEM_ObjectBroker  *OPS_OBJECT_BROKER;
 extern MachineBroker     *OPS_MACHINE;
 extern Channel          **OPS_theChannels;
-/*
-PartitionedDomain theDomain;
-int OPS_PARALLEL_PROCESSING =0;
-int OPS_NUM_SUBDOMAINS      =0;
-bool OPS_PARTITIONED        =false;
-bool OPS_USING_MAIN_DOMAIN  = false;
-int OPS_MAIN_DOMAIN_PARTITION_ID =0;
-
-DomainPartitioner *OPS_DOMAIN_PARTITIONER =0;
-GraphPartitioner  *OPS_GRAPH_PARTITIONER =0;
-LoadBalancer      *OPS_BALANCER = 0;
-FEM_ObjectBroker  *OPS_OBJECT_BROKER;
-MachineBroker     *OPS_MACHINE;
-Channel          **OPS_theChannels = 0;
-*/
-
 
 #elif _PARALLEL_INTERPRETERS
 
@@ -5412,11 +5396,16 @@ opsRecv(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       }
     }
 
-    if (otherPID > -1 && otherPID != myPID && otherPID < np) {
+    if (otherPID > -1 && otherPID < np) {
       MPI_Status status;
       
       if (fromAny == false)
-	MPI_Recv((void *)(&msgLength), 1, MPI_INT, otherPID, 0, MPI_COMM_WORLD, &status);
+	if (myPID != otherPID)
+	  MPI_Recv((void *)(&msgLength), 1, MPI_INT, otherPID, 0, MPI_COMM_WORLD, &status);
+        else {
+	  opserr << "recv -pid pid? data? - " << otherPID << " cant receive from self!\n";
+	  return TCL_ERROR;
+	}
       else
 	MPI_Recv((void *)(&msgLength), 1, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
 
@@ -5424,7 +5413,7 @@ opsRecv(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       if (msgLength > 0) {
 	gMsg = new char [msgLength];
 
-	if (fromAny == false)
+	if (fromAny == false && msgLength != 0)
 	  MPI_Recv((void *)gMsg, msgLength, MPI_CHAR, otherPID, 1, MPI_COMM_WORLD, &status);
 	else
 	  MPI_Recv((void *)gMsg, msgLength, MPI_CHAR, MPI_ANY_SOURCE, 1, MPI_COMM_WORLD, &status);
