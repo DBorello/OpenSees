@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2007-05-30 01:56:55 $
+// $Revision: 1.6 $
+// $Date: 2008-03-20 22:03:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsParallelSolver.cpp,v $
 
 // Written: fmk 
@@ -133,8 +133,12 @@ MumpsParallelSolver::setSize()
     id.job=-1; 
     id.par=1; 
     id.sym=theMumpsSOE->matType; 
-    
+
+#ifdef _OPENMPI    
+    id.comm_fortran=-987654;
+#else
     id.comm_fortran=MPI_COMM_WORLD;
+#endif
     id.ICNTL(5)=0; id.ICNTL(18)=3; 
 
     dmumps_c(&id);
