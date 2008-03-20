@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2008-01-28 19:21:22 $
+// $Revision: 1.10 $
+// $Date: 2008-03-20 22:05:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/mpiMain.cpp,v $
 
 /* 
@@ -35,12 +35,11 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: mpiMain.cpp,v 1.9 2008-01-28 19:21:22 fmk Exp $
+ * RCS: @(#) $Id: mpiMain.cpp,v 1.10 2008-03-20 22:05:00 fmk Exp $
  */
 
 extern "C" {
 #include <tcl.h>
-#include <tk.h>
 }
 
 
