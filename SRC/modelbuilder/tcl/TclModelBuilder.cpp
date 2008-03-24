@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.38 $
-// $Date: 2007-10-17 22:15:38 $
+// $Revision: 1.39 $
+// $Date: 2008-03-24 17:52:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -649,6 +649,12 @@ TclModelBuilder::~TclModelBuilder()
   Tcl_DeleteCommand(theInterp, "strengthDegradation");
   Tcl_DeleteCommand(theInterp, "hystereticBackbone");
 #endif
+
+  Tcl_DeleteCommand(theInterp, "yieldSurface_BC");
+  Tcl_DeleteCommand(theInterp, "ysEvolutionModel");
+  Tcl_DeleteCommand(theInterp, "plasticMaterial");
+  Tcl_DeleteCommand(theInterp, "cyclicModel");
+  Tcl_DeleteCommand(theInterp, "damageModel");
 
 #ifdef _LIMITSTATE
   Tcl_removeLimitCurve(Tcl_Interp *interp);
