@@ -1332,7 +1332,7 @@ double DP_RSM_Sim::FEDivergenceCorrection(int numGridPlane, int startPtX, int st
 			v_y_0 = theGridPlanes[ii]->getSavedValueOnGrid(i_x, i_y-2);
 			v_y_1 = theGridPlanes[ii]->getSavedValueOnGrid(i_x, i_y-1);
 
-			if (fabs(incr_i_x)<m){
+			if (abs(incr_i_x)<m){
 				v_x_2 = theGridPlanes[ii]->getSavedValueOnGrid(i_x-1, i_y);
 				if (fabs(v_x_2)<1.0e19) { // this is a 'hole' and need to be 'filled'
 					x_2 = rule_1->getPointCoordinate(i_x-1);
@@ -1340,7 +1340,7 @@ double DP_RSM_Sim::FEDivergenceCorrection(int numGridPlane, int startPtX, int st
 					return v;
 				} 
 			}
-			if (fabs(incr_i_y)<n){
+			if (abs(incr_i_y)<n){
 				v_y_2 = theGridPlanes[ii]->getSavedValueOnGrid(i_x, i_y+1);
 				if (fabs(v_y_2)<1.0e19) { // this is a 'hole' and need to be 'filled'
 					y_2 = rule_2->getPointCoordinate(i_y+1);
@@ -1379,7 +1379,7 @@ double DP_RSM_Sim::FEDivergenceCorrection(int numGridPlane, int startPtX, int st
 			v_y_0 = theGridPlanes[ii]->getSavedValueOnGrid(i_x, i_y+2);
 			v_y_1 = theGridPlanes[ii]->getSavedValueOnGrid(i_x, i_y+1);
 
-			if (fabs(incr_i_x)<m){
+			if (abs(incr_i_x)<m){
 				v_x_2 = theGridPlanes[ii]->getSavedValueOnGrid(i_x-1, i_y);
 				if (fabs(v_x_2)<1.0e19) { // this is a 'hole' and need to be 'filled'
 					x_2 = rule_1->getPointCoordinate(i_x-1);
@@ -1387,7 +1387,7 @@ double DP_RSM_Sim::FEDivergenceCorrection(int numGridPlane, int startPtX, int st
 					return v;
 				} 
 			}
-			if (fabs(incr_i_y)<n){
+			if (abs(incr_i_y)<n){
 				v_y_2 = theGridPlanes[ii]->getSavedValueOnGrid(i_x, i_y-1);
 				if (fabs(v_y_2)<1.0e19) { // this is a 'hole' and need to be 'filled'
 					y_2 = rule_2->getPointCoordinate(i_y-1);
@@ -1427,7 +1427,7 @@ double DP_RSM_Sim::FEDivergenceCorrection(int numGridPlane, int startPtX, int st
 			v_y_0 = theGridPlanes[ii]->getSavedValueOnGrid(i_x, i_y+2);
 			v_y_1 = theGridPlanes[ii]->getSavedValueOnGrid(i_x, i_y+1);
 
-			if (fabs(incr_i_x)<m){
+			if (abs(incr_i_x)<m){
 				v_x_2 = theGridPlanes[ii]->getSavedValueOnGrid(i_x+1, i_y);
 				if (fabs(v_x_2)<1.0e19) { // this is a 'hole' and need to be 'filled'
 					x_2 = rule_1->getPointCoordinate(i_x+1);
@@ -1435,7 +1435,7 @@ double DP_RSM_Sim::FEDivergenceCorrection(int numGridPlane, int startPtX, int st
 					return v;
 				} 
 			}
-			if (fabs(incr_i_y)<n){
+			if (abs(incr_i_y)<n){
 				v_y_2 = theGridPlanes[ii]->getSavedValueOnGrid(i_x, i_y-1);
 				if (fabs(v_y_2)<1.0e19) { // this is a 'hole' and need to be 'filled'
 					y_2 = rule_2->getPointCoordinate(i_y-1);

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-03-13 22:29:28 $
+// $Revision: 1.7 $
+// $Date: 2008-03-24 03:19:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/curvature/FirstPrincipalCurvature.cpp,v $
 
 //
@@ -35,7 +35,8 @@
 #include <LimitStateFunction.h>
 #include <Vector.h>
 
-#include <iostream.h> 
+#include <iostream> 
+using std::ios;
 
 FirstPrincipalCurvature::FirstPrincipalCurvature()
 :FindCurvatures(), curvatures(1)

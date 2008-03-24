@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2008-03-13 22:35:13 $
+// $Revision: 1.12 $
+// $Date: 2008-03-24 03:19:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.h,v $
 
 
@@ -42,11 +42,6 @@
 #include <ModulatingFunction.h>
 #include <Filter.h>
 #include <Spectrum.h>
-
-#include <DesignVariable.h>
-#include <DesignVariablePositioner.h>
-#include <ConstraintFunction.h>
-#include <ObjectiveFunction.h>
 
 //Quan
 #include <DesignVariable.h>
