@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.39 $
-// $Date: 2008-03-24 17:52:02 $
+// $Revision: 1.40 $
+// $Date: 2008-03-24 20:34:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -641,7 +641,7 @@ TclModelBuilder::~TclModelBuilder()
   Tcl_DeleteCommand(theInterp, "Hfiber"); //LEO
   Tcl_DeleteCommand(theInterp, "geomTransf");
   Tcl_DeleteCommand(theInterp, "updateMaterialStage");
-  Tcl_DeleteCommand(theInterp, "updateParameter");
+  Tcl_DeleteCommand(theInterp, "updateMaterials");
 
 #ifdef OO_HYSTERETIC
   Tcl_DeleteCommand(theInterp, "unloadingRule");
@@ -655,6 +655,8 @@ TclModelBuilder::~TclModelBuilder()
   Tcl_DeleteCommand(theInterp, "plasticMaterial");
   Tcl_DeleteCommand(theInterp, "cyclicModel");
   Tcl_DeleteCommand(theInterp, "damageModel");
+
+  Tcl_DeleteCommand(theInterp, "loadPackage");
 
 #ifdef _LIMITSTATE
   Tcl_removeLimitCurve(Tcl_Interp *interp);
