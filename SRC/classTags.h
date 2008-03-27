@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.100 $
-// $Date: 2008-01-16 21:03:41 $
+// $Revision: 1.101 $
+// $Date: 2008-03-27 19:41:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -193,7 +193,7 @@
 
 
 #define MAT_TAG_SMA 51
-
+#define MAT_TAG_SelfCentering 52
 
 
 #define SEC_TAG_Elastic2d   3
