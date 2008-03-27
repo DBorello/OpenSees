@@ -48,6 +48,7 @@ include ../../../Makefile.def
 	PrestressedSteelMaterial.o \
 	ElasticBDMaterial.o \
 	ShearPanelMaterial.o \
+	SelfCenteringMaterial.o \
         TclModelBuilderUniaxialMaterialCommand.o
 
 all:         $(OBJS)
