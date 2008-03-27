@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.47 $
-// $Date: 2008-01-14 21:52:10 $
+// $Revision: 1.48 $
+// $Date: 2008-03-27 19:42:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -64,6 +64,8 @@
 #include <ShearPanelMaterial.h>  // NM
 #include <BarSlipMaterial.h>     // NM
 #include <Bond_SP01.h>	// JZ
+
+#include <SelfCenteringMaterial.h> //JAE
 
 #include <Domain.h>			    // RWB bringing in Domain for PyLiq
 #include <PySimple1.h>			// RWB
@@ -2761,7 +2763,85 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
       theMaterial = new ECC01(tag, SIGT0, EPST0, SIGT1, EPST1, EPST2, SIGC0, EPSC0, EPSC1, 
 			      ALPHAT1, ALPHAT2, ALPHAC, ALPHACU, BETAT, BETAC);
     }
+
+
+    else if (strcmp(argv[1],"SelfCentering") == 0) {
+      if (argc < 7) {
+	opserr << "WARNING insufficient arguments\n";
+	printCommand(argc,argv);
+	opserr << "Want: uniaxialMaterial SelfCentering tag? k1? k2? ActF? beta? <SlipDef? BearDef? rBear?>" << endln;
+	return TCL_ERROR;
+      }
+      
+      int tag;
+      double k1, k2, ActF, beta, rBear, SlipDef, BearDef;
+      
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	opserr << "WARNING invalid uniaxialMaterial SelfCentering tag" << endln;
+	return TCL_ERROR;		
+      }
+      
+      if (Tcl_GetDouble(interp, argv[3], &k1) != TCL_OK) {
+	opserr << "WARNING invalid k1\n";
+	opserr << "uniaxialMaterial SelfCentering: " << tag << endln;
+	return TCL_ERROR;	
+      }
+      
+      if (Tcl_GetDouble(interp, argv[4], &k2) != TCL_OK) {
+	opserr << "WARNING invalid k2\n";
+	opserr << "uniaxialMaterial SelfCentering: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[5], &ActF) != TCL_OK) {
+	opserr << "WARNING invalid ActF\n";
+	opserr << "uniaxialMaterial SelfCentering: " << tag << endln;
+	return TCL_ERROR;	
+      }
+      
+      if (Tcl_GetDouble(interp, argv[6], &beta) != TCL_OK) {
+	opserr << "WARNING invalid beta\n";
+	opserr << "uniaxialMaterial SelfCentering: " << tag << endln;
+	return TCL_ERROR;	
+      }
+      
+      if (argc == 8) {
+	if (Tcl_GetDouble(interp, argv[7], &SlipDef) != TCL_OK) {
+	  opserr << "WARNING invalid SlipDef\n";
+	  opserr << "uniaxialMaterial SelfCentering: " << tag << endln;
+	  return TCL_ERROR;	
+	}
+	// Parsing was successful, allocate the material
+	theMaterial = new SelfCenteringMaterial (tag, k1, k2, ActF, beta, SlipDef, 0, 0);
+      }
+      
+      else if (argc > 8) {
+	if (Tcl_GetDouble(interp, argv[7], &SlipDef) != TCL_OK) {
+	  opserr << "WARNING invalid SlipDef\n";
+	  opserr << "uniaxialMaterial SelfCentering: " << tag << endln;
+	  return TCL_ERROR;	
+	}
+	if (Tcl_GetDouble(interp, argv[8], &BearDef) != TCL_OK) {
+	  opserr << "WARNING invalid BearDef\n";
+	  opserr << "uniaxialMaterial SelfCentering: " << tag << endln;
+	  return TCL_ERROR;	
+	}
+	if (Tcl_GetDouble(interp, argv[9], &rBear) != TCL_OK) {
+	  opserr << "WARNING invalid rBear\n";
+	  opserr << "uniaxialMaterial SelfCentering: " << tag << endln;
+	  return TCL_ERROR;	
+	}
+	// Parsing was successful, allocate the material
+	theMaterial = new SelfCenteringMaterial (tag, k1, k2, ActF, beta, SlipDef, BearDef, rBear);
+      }
+      
+      else {
+	// Parsing was successful, allocate the material
+	theMaterial = new SelfCenteringMaterial (tag, k1, k2, ActF, beta, 0, 0, 0);
+      }
+    }
     
+        
     
     else {
       // Fedeas
