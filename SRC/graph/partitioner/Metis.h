@@ -18,18 +18,20 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-01-12 23:37:19 $
+// $Revision: 1.3 $
+// $Date: 2008-03-31 21:02:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/partitioner/Metis.h,v $
                                                                         
                                                                         
 // Written: fmk 
+// Created: Sun Sept 15 11:47:47: 1996
+// Revision: A
 //
 // Description: This file contains the class definition for Metis.
 // Metis is a type of GraphPartitioner which uses 'METIS - Unstructured
 // Graph Partitioning And Sparse Matrix Ordering System', developed by
 // G. Karypis and V. Kumar at the University of Minnesota. The metis
-// files are found in metis-2.0 which were downloaded.
+// files are found in OTHER/METIS which were downloaded.
 //     This class provides the C++ interface for metis which will allow
 // it to fit seamlessly into our system.
 //
@@ -64,8 +66,13 @@ class Metis : public GraphPartitioner, public GraphNumberer
 		    int IPtype);
 
     bool setDefaultOptions(void);
-    
+    int partitionHexMesh(int* elmnts, int* epart, int* npart, int ne, int nn, int nparts, bool whichToUse);
+
     int partition(Graph &theGraph, int numPart);
+
+    int partitionGraph(int *nvtxs, int *xadj, int *adjncy, int *vwgt, 
+		       int *adjwgt, int *wgtflag, int *numflag, int *nparts, 
+		       int *options, int *edgecut, int *part, bool whichToUse);
 
     // the follwing methods are if the object is to be used as a numberer
     const ID &number(Graph &theGraph, int lastVertex = -1);
@@ -75,7 +82,6 @@ class Metis : public GraphPartitioner, public GraphNumberer
 		 Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker);
-
     
   protected:
 

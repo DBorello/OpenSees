@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-05-23 20:11:46 $
+// $Revision: 1.5 $
+// $Date: 2008-03-31 21:02:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/partitioner/Metis.cpp,v $
                                                                         
                                                                         
@@ -31,7 +31,7 @@
 // Metis is a type of GraphPartitioner which uses 'METIS - Unstructured
 // Graph Partitioning And Sparse Matrix Ordering System', developed by
 // G. Karypis and V. Kumar at the University of Minnesota. The metis
-// files are found in metis-2.0 which were downloaded.
+// files are found in OTHER/METIS.
 //     This class provides the C++ interface for metis which will allow
 // it to fit seamlessly into our system.
 //
@@ -40,18 +40,23 @@
 #include <Metis.h>
 #include <Graph.h>
 #include <Vertex.h>
-#include <VertexIter.h>
 
 /* stuff needed to get the program working on the clump & NOW machines*/
 #include <bool.h>
 
-int IsWeighted =0;
+extern "C" 
+int METIS_PartGraphRecursive(int *, int *, int *, int *, int *, int *, int *, int *, int *, int *, int *);
 
 extern "C" 
-int PMETIS(int *, int *, int *, int *, int *, int *, int *, int *, int *, int *, int *);
+int METIS_PartGraphKway(int *, int *, int *, int *, int *, int *, int *, int *, int *, int *, int *);
 
-extern "C" 
-int KMETIS(int *, int *, int *, int *, int *, int *, int *, int *, int *, int *, int *);
+extern "C"
+int METIS_PartMeshDual(int *, int *, int *, int *, int *, int *, int *, int *, int *);
+//int METIS_PartMeshDual(&ne, &nn, elmnts, &etype, &numflag, &nparts, &edgecut, epart, npart);
+
+extern "C"
+int METIS_PartMeshNodal(int *, int *, int *, int *, int *, int *, int *, int *, int *);
+//int METIS_PartMeshNodal(&ne, &nn, elmnts, &etype, &numflag, &nparts, &edgecut, epart, npart);
 
 Metis::Metis(int numParts) 
 :GraphNumberer(GraphNUMBERER_TAG_Metis),
@@ -188,16 +193,6 @@ Metis::setDefaultOptions(void)
 int
 Metis::partition(Graph &theGraph, int numPart)
 {
-  if (theGraph.getNumVertex() == numPart) {
-    Vertex *vertex;
-    int current = 1;
-    VertexIter &theVertices = theGraph.getVertices();
-    while ((vertex = theVertices()) != 0)
-	   vertex->setColor(current++);
-    
-    return 0;
-  }
-
     // first we check that the options are valid
     if (checkOptions() == false)
 	return -1;
@@ -206,7 +201,7 @@ Metis::partition(Graph &theGraph, int numPart)
 
     int numVertex = theGraph.getNumVertex();
     int numEdge = theGraph.getNumEdge();
-
+    //    opserr << " Metis::partition --- numVertex: " << numVertex << " numEdge: "<<  numEdge << "\n";
     int *options = new int [5];
     int *partition = new int [numVertex+1];    
     int *xadj = new int [numVertex+2];
@@ -215,7 +210,7 @@ Metis::partition(Graph &theGraph, int numPart)
     int *ewgts = 0;
     int numbering = 0;
     int weightflag = 0; // no weights on our graphs yet
-
+    opserr << " Metis::partition --- space allocated \n";
     if (START_VERTEX_NUM == 0)
 	numbering = 0;	
     else if (START_VERTEX_NUM == 1)
@@ -266,7 +261,8 @@ Metis::partition(Graph &theGraph, int numPart)
 	
 	xadj[vertex+1] = indexEdge;
     }
-
+    
+    
     if (defaultOptions == true) 
 	options[0] = 0;
     else {
@@ -277,15 +273,34 @@ Metis::partition(Graph &theGraph, int numPart)
 	options[4] = myRtype;
     }
     
+    
     // we now the metis routines
+    //
 
-    if (myPtype == 1)
-	PMETIS(&numVertex, xadj, adjncy, vwgts, ewgts, &weightflag, &numPart,
-	       options, &numbering, &edgecut, partition);
-    else		
-	KMETIS(&numVertex, xadj, adjncy, vwgts, ewgts, &weightflag, &numPart,
-	       options, &numbering, &edgecut, partition);
-
+    
+    if (myPtype == 1) {
+      //opserr << " Metis::partition PartGraphRecursive \n";
+      METIS_PartGraphRecursive(&numVertex, xadj, adjncy, vwgts, ewgts, &weightflag,&numbering, &numPart,options, &edgecut, partition);
+    }
+    else {		
+      //opserr << " Metis::partition PartGraphKway w/ \n";
+      /*
+      for (int i=0 ; i<numVertex; i++){
+	opserr << " list of node :" << i ;
+	opserr << " contains:  " ;
+	for (int j=xadj[i]; j<=xadj[i+1]-1; j++){
+	  opserr << adjncy[j] << " " ;
+	}
+	opserr << "\n";
+      }
+      opserr << " numpart " << numPart;
+      opserr << " numbering " << numbering << "\n";
+      */
+      METIS_PartGraphKway(&numVertex, xadj, adjncy, vwgts, ewgts, &weightflag, &numbering, &numPart,options, &edgecut, partition);
+    }
+    //
+    //opserr << " Metis::partition returned ok \n";
+    
     // we set the vertex colors to correspond to the partitioned scheme
     for (int vert =0; vert<numVertex; vert++) {
 	vertexPtr = theGraph.getVertexPtr(vert+START_VERTEX_NUM);
@@ -298,14 +313,48 @@ Metis::partition(Graph &theGraph, int numPart)
     delete [] partition;
     delete [] xadj;
     delete [] adjncy;
-
+    
     return 0;
+}
+
+int
+Metis::partitionGraph(int *nvtxs, int *xadj, int *adjncy, int *vwgt, 
+		      int *adjwgt, int *wgtflag, int *numflag, int *nparts, 
+		      int *options, int *edgecut, int *part, bool whichToUse)
+{
+  // which to use -> if true use edge cut partitinioning, else uses communication
+  // based partition, standard aplications , uniformly mesh regions need use the edge-cut
+  // first one works fine second is weird
+  if (whichToUse) {
+    METIS_PartGraphRecursive(nvtxs, xadj, adjncy, vwgt, adjwgt, wgtflag,numflag, nparts,options, edgecut, part);
+  }
+  else {
+    METIS_PartGraphKway(nvtxs, xadj, adjncy, vwgt, adjwgt, wgtflag,numflag, nparts,options, edgecut, part);
+  }
+  return 0;
 }
 
 
 
-
-
+int
+Metis::partitionHexMesh(int* elmnts, int* epart, int* npart, int ne, int nn, int nparts, bool whichToUse)
+{
+  // which to use -> if true use edge cut partitinioning, else uses communication
+  // based partition, standard aplications , uniformly mesh regions need use the edge-cut
+  // first one works fine second is weird
+  int numflag =0;
+  int edgecut =0;
+  int etype = 3;
+  
+  if (whichToUse)
+    METIS_PartMeshNodal(&ne, &nn, elmnts, &etype, &numflag, &nparts, &edgecut, epart, npart);
+  else
+    METIS_PartMeshDual(&ne, &nn, elmnts, &etype, &numflag, &nparts, &edgecut, epart, npart);
+  
+  return 0;
+}
+  
+		       
 
 const ID &
 Metis::number(Graph &theGraph, int lastVertex)
@@ -406,7 +455,15 @@ Metis::number(Graph &theGraph, int lastVertex)
     
     
     // we now the metis routines
+    //
+    if (myPtype == 1) 
 
+      METIS_PartGraphRecursive(&numVertex, xadj, adjncy, vwgts, ewgts, &weightflag,&numbering, &numPartitions, options, &edgecut, partition);
+    else		
+      METIS_PartGraphKway(&numVertex, xadj, adjncy, vwgts, ewgts, &weightflag, 
+	     &numbering, &numPartitions, options, &edgecut, partition);
+    //
+    /*
     if (myPtype == 1)
 
       PMETIS(&numVertex, xadj, adjncy, vwgts, ewgts, &weightflag, 
@@ -414,7 +471,7 @@ Metis::number(Graph &theGraph, int lastVertex)
     else		
       KMETIS(&numVertex, xadj, adjncy, vwgts, ewgts, &weightflag, 
 	     &numPartitions, options, &numbering, &edgecut, partition);
-
+    */
 opserr << "Metis::number -2\n";
     // we assign numbers now based on the partitions returned.
     // each vertex in partion i is assigned a number less than
