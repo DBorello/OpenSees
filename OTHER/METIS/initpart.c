@@ -1,406 +1,422 @@
 /*
- * Copyright 1995, Regents of the University of Minnesota
+ * Copyright 1997, Regents of the University of Minnesota
  *
  * initpart.c
  *
- * This file contains code that implements the BFS based initial partition
- * algorithm
+ * This file contains code that performs the initial partition of the
+ * coarsest graph
  *
- * Started 11/22/94
+ * Started 7/23/97
  * George
  *
- * $Id: initpart.c,v 1.2 2007-05-17 05:23:30 fmk Exp $
+ * $Id: initpart.c,v 1.3 2008-03-31 21:07:06 fmk Exp $
+ *
  */
 
-#include "multilevel.h"
+#include <metis.h>
 
 /*************************************************************************
-* External Variables
+* This function computes the initial bisection of the coarsest graph
 **************************************************************************/
-extern CtrlType *__Ctrl;        /* mlevelpart.c */
-
-/*************************************************************************
-* This function randomly selects a node among the large vertex-weight nodes
-* and grows a region around it, by doing a gready BFS that minimizes the 
-* edges crossed.
-**************************************************************************/
-void InitPartition(CoarseGraphType *graph, int zeropwgt)
+void Init2WayPartition(CtrlType *ctrl, GraphType *graph, int *tpwgts, float ubfactor) 
 {
-  switch (__Ctrl->InitPartType) {
-    case INITPART_GGP:
-      GGPPartition(graph, zeropwgt, 0);
+  int dbglvl;
+
+  dbglvl = ctrl->dbglvl;
+  IFSET(ctrl->dbglvl, DBG_REFINE, ctrl->dbglvl -= DBG_REFINE);
+  IFSET(ctrl->dbglvl, DBG_MOVEINFO, ctrl->dbglvl -= DBG_MOVEINFO);
+
+  IFSET(ctrl->dbglvl, DBG_TIME, starttimer(ctrl->InitPartTmr));
+
+  switch (ctrl->IType) {
+    case IPART_GGPKL:
+      GrowBisection(ctrl, graph, tpwgts, ubfactor);
       break;
-    case INITPART_GGGP:
-      if (graph->nvtxs < 2000)
-        GGGPPartition(graph, zeropwgt); 
-      else
-        GGPPartition(graph, zeropwgt, 0); 
-      break;
-    case INITPART_EIG:
-      EigPartition(graph, zeropwgt);
-      break;
-    case INITPART_GGPKL:
-      GGPPartition(graph, zeropwgt, 1);
+    case 3:
+      RandomBisection(ctrl, graph, tpwgts, ubfactor);
       break;
     default:
-      errexit("Unsupported Initial Partition Type: %d", __Ctrl->InitPartType);
+      errexit("Unknown initial partition type: %d\n", ctrl->IType);
   }
-  ComputePartitionParams(graph);
 
-  if (__Ctrl->dbglvl&DBG_INITCUT) 
-    printf("[%5d, %5d, %5d, %5d]\n", graph->pwgts[0], graph->pwgts[1], zeropwgt, graph->mincut);
+  IFSET(ctrl->dbglvl, DBG_IPART, printf("Initial Cut: %d\n", graph->mincut));
+  IFSET(ctrl->dbglvl, DBG_TIME, stoptimer(ctrl->InitPartTmr));
+  ctrl->dbglvl = dbglvl;
+
+/*
+  IsConnectedSubdomain(ctrl, graph, 0);
+  IsConnectedSubdomain(ctrl, graph, 1);
+*/
+}
+
+/*************************************************************************
+* This function computes the initial bisection of the coarsest graph
+**************************************************************************/
+void InitSeparator(CtrlType *ctrl, GraphType *graph, float ubfactor) 
+{
+  int dbglvl;
+
+  dbglvl = ctrl->dbglvl;
+  IFSET(ctrl->dbglvl, DBG_REFINE, ctrl->dbglvl -= DBG_REFINE);
+  IFSET(ctrl->dbglvl, DBG_MOVEINFO, ctrl->dbglvl -= DBG_MOVEINFO);
+
+  IFSET(ctrl->dbglvl, DBG_TIME, starttimer(ctrl->InitPartTmr));
+
+  GrowBisectionNode(ctrl, graph, ubfactor);
+  Compute2WayNodePartitionParams(ctrl, graph);
+
+  IFSET(ctrl->dbglvl, DBG_IPART, printf("Initial Sep: %d\n", graph->mincut));
+  IFSET(ctrl->dbglvl, DBG_TIME, stoptimer(ctrl->InitPartTmr));
+
+  ctrl->dbglvl = dbglvl;
 
 }
 
 
 
 /*************************************************************************
-* This function randomly selects a node among the large vertex-weight nodes
-* and grows a region around it, by doing a gready BFS that minimizes the 
-* edges crossed.
+* This function takes a graph and produces a bisection by using a region
+* growing algorithm. The resulting partition is returned in
+* graph->where
 **************************************************************************/
-void GGPPartition(CoarseGraphType *graph, int zeropwgt, int usekl)
+void GrowBisection(CtrlType *ctrl, GraphType *graph, int *tpwgts, float ubfactor)
 {
-  int ii, j, k, ntrials;
-  int *touched;
-  int higain;
-  int imaxvwgt;
-  int partwgt, partcut;
-  VertexType *vtx;
-  int *where, *bestwhere, *tmpptr;
-  int bestcut, bestwgt;
-  int *queue;
-  int qhead, qtail;
-  int orgvwgt, growp, shrinkp;
-
-  ntrials = amin((usekl ? GGPKL_NTRIALS : GGP_NTRIALS), graph->nvtxs);
-
-  if (graph->tvwgt/graph->nvtxs < 6)
-    ntrials = amax(1, ntrials/2);
-
-  if (__Ctrl->dbglvl&DBG_INITCUT) {
-    if (!usekl)
-      printf("GGP-%d (%5d %5d) ", ntrials, graph->tvwgt, zeropwgt);
-    else
-      printf("GGPKL-%d (%5d %5d) ", ntrials, graph->tvwgt, zeropwgt);
-    fflush(stdout);
-  }
-
-  bestwhere = imalloc(graph->nvtxs, "BFSPartition: bestwhere");
-  where = imalloc(graph->nvtxs, "BFSPartition: graph->where");
-  touched = icoremalloc(graph->nvtxs, "BFSPartition: touched", 0);
-  queue = icoremalloc(graph->nvtxs, "TrueBFSPartition: queue", 0);
-
-  growp = 1; shrinkp = 0;
-  orgvwgt = graph->tvwgt - zeropwgt;
-  bestcut = orgvwgt*2000;
-
-  imaxvwgt = RandomInRange(graph->nvtxs);
-  for (ii=0; ii<ntrials; ii++) {
-    iset(graph->nvtxs, shrinkp, where);
-    iset(graph->nvtxs, 0, touched);
-
-    queue[0] = imaxvwgt;
-    qhead = 0;
-    qtail = 1;
-
-    partwgt = 0;
-    touched[imaxvwgt] = 1;
-
-    while (partwgt <= orgvwgt) {
-      if (qtail == qhead) { /* Disconnected graph */
-        for (;;) {
-          higain = RandomInRange(graph->nvtxs);
-          if (where[higain] == shrinkp)
-            break;
-        }
-      }
-      else
-        higain = queue[qhead++];
-
-      vtx = graph->vtxs[higain];
-
-      if (orgvwgt < partwgt + vtx->vwgt)
-        break;
-
-      partwgt += vtx->vwgt;
-      where[higain] = growp;
-
-      for (j=0; j<vtx->nedges; j++) {
-        k = vtx->edges[j].edge;
-        if (touched[k] == 0) {  /* Look only the untouched nodes */
-          queue[qtail++] = k;
-          touched[k] = 1;
-        }
-      }
-    }
-
-    graph->where = where;
-    if (usekl) {
-      ComputePartitionParams(graph);
-      if (!__Ctrl->IsWeighted)
-        BFMR_Refine(graph, zeropwgt, SMART, 3);
-      else
-        BFMR_Refine_Weighted(graph, zeropwgt, SMART, 3);
-      GKfree(graph->id, graph->ed, graph->htable.ht, -1);
-      partcut = graph->mincut;
-    }
-    else
-      partcut = ComputeCut(graph);
-
-    if (__Ctrl->dbglvl&DBG_INITCUT) {
-      printf("(%4d, %5d %5d) ",queue[0], partcut, graph->pwgts[0]);
-      fflush(stdout);
-    }
-
-    if (partcut < bestcut) {
-      SWAP(bestwhere, where, tmpptr);
-      bestcut = partcut;
-      bestwgt = partwgt;
-    }
-
-    if (bestcut == 0)
-      break;
-
-    tmpptr = (ii == 0 ? bestwhere : where);
-    for (;;) {
-      imaxvwgt = RandomInRange(graph->nvtxs);
-      if (tmpptr[imaxvwgt] == shrinkp)
-        break;
-    }
-  }
-
-  graph->mincut = bestcut;
-  graph->where = bestwhere;
-
-  free(where);
-  icorefree(2*graph->nvtxs);
-}
+  int i, j, k, nvtxs, drain, nleft, first, last, pwgts[2], minpwgt[2], maxpwgt[2], from, bestcut, icut, mincut, me, pass, nbfs;
+  idxtype *xadj, *vwgt, *adjncy, *adjwgt, *where;
+  idxtype *queue, *touched, *gain, *bestwhere;
 
 
+  nvtxs = graph->nvtxs;
+  xadj = graph->xadj;
+  vwgt = graph->vwgt;
+  adjncy = graph->adjncy;
+  adjwgt = graph->adjwgt;
 
-
-
-
-/*************************************************************************
-* This function randomly selects a node among the large vertex-weight nodes
-* and grows a region around it, by doing a gready BFS that minimizes the 
-* edges crossed.
-**************************************************************************/
-void GGGPPartition(CoarseGraphType *graph, int zeropwgt)
-{
-  int ii, i, j, k, ntrials;
-  int *touched;
-  int oldgain;
-  int higain;
-  int *id, *ed;
-  int partwgt, partcut;
-  BucketListType part;
-  VertexType *vtx;
-  int *where, *tmpptr, *bestwhere;
-  int kwgt, bestcut, bestwgt;
-  int orgvwgt, growp, shrinkp;
-
-  ntrials = amin(GGGP_NTRIALS, graph->nvtxs);
-
-  if (graph->tvwgt/graph->nvtxs < 6)
-    ntrials = amax(1, ntrials/2);
-
-  if (__Ctrl->dbglvl&DBG_INITCUT) {
-    printf("GGGP-%d ", ntrials);
-    fflush(stdout);
-  }
-
-  bestwhere = imalloc(graph->nvtxs, "BFSPartition: bestwhere");
-  where = imalloc(graph->nvtxs, "BFSPartition: graph->where");
-  touched = icoremalloc(graph->nvtxs, "BFSPartition: touched", 0);
-  id = icoremalloc(graph->nvtxs, "BFSPartition: graph->id", 0);
-  ed = icoremalloc(graph->nvtxs, "BFSPartition: graph->ed", 0);
-
-  growp = 1; shrinkp = 0;
-  orgvwgt = graph->tvwgt - zeropwgt;
-  bestcut = orgvwgt*2000;
-
-  initbucket(&part, 2*orgvwgt, graph->nvtxs, graph->nvtxs, -1);
-
-  higain = RandomInRange(graph->nvtxs);
-  for (ii=0; ii<ntrials; ii++) {
-    if (__Ctrl->dbglvl&DBG_INITCUT) {
-      printf("(%4d, ",graph->vtxs[higain]->vwgt);
-      fflush(stdout);
-    }
-
-    for (i=0; i<graph->nvtxs; i++) 
-      id[i] = graph->vtxs[i]->ewgtsum;
-    iset(graph->nvtxs, shrinkp, where);
-    iset(graph->nvtxs, 0, ed);
-    iset(graph->nvtxs, 0, touched);
-
-    resetbucket(&part);
-
-    partwgt = 0;
-    partcut = 0;
-    touched[higain] = 1;
-    Add2Part(&part, higain, ed[higain] - id[higain]);
-
-    while (partwgt <= orgvwgt) {
-      higain = GetMaxGainVtx(&part);
-      if (higain == -1)  { /* Disconnected graph */
-        for (;;) {
-          higain = RandomInRange(graph->nvtxs);
-          if (where[higain] == shrinkp)
-            break;
-        }
-        touched[higain] = 1;
-      }
-
-      vtx = graph->vtxs[higain];
-
-      if (orgvwgt < partwgt+vtx->vwgt)
-        break;
-
-      partwgt += vtx->vwgt;
-      partcut -= (ed[higain] - id[higain]);
-      where[higain] = growp;
-
-      for (j=0; j<vtx->nedges; j++) {
-        k = vtx->edges[j].edge;
-        kwgt = vtx->edges[j].ewgt;
-        if (where[k] == shrinkp) {  /* Look only the un inserted nodes */
-          oldgain = ed[k] - id[k];
-          id[k] -= kwgt;
-          ed[k] += kwgt;
-
-          if (touched[k] == 0) 
-            Add2Part(&part, k, ed[k]-id[k]);
-          else
-            UpdatePart(&part, k, oldgain, ed[k]-id[k]);
-          touched[k] = 1;
-        }
-      }
-    }
-
-    if (__Ctrl->dbglvl&DBG_INITCUT) {
-      printf("%5d) ",partcut);
-      fflush(stdout);
-    }
-
-    if (partcut < bestcut) {
-      SWAP(bestwhere, where, tmpptr);
-      bestcut = partcut;
-      bestwgt = partwgt;
-    }
-
-    if (bestcut == 0)
-      break;
-
-    tmpptr = (ii == 0 ? bestwhere : where);
-    for (;;) {
-      higain = RandomInRange(graph->nvtxs);
-      if (tmpptr[higain] == shrinkp)
-        break;
-    }
-  }
-
-  graph->mincut = bestcut;
-  graph->where = bestwhere;
-
-  freebucket(&part);
-  icorefree(3*graph->nvtxs);
-  free(where);
-}
-
-
-
-/*************************************************************************
-* This function bisects a graph using the 2nd evector
-**************************************************************************/
-void EigPartition(CoarseGraphType *graph, int zeropwgt)
-{
-  int i;
-  double *evec;
-  int errstatus, sum;
-  EvecWgtType *y;
-  int *where;
-
-  evec = (double *)GKmalloc(graph->nvtxs*sizeof(double), "EigPartition: evec");
-  errstatus = lanczos(graph, evec);
-
-  if (errstatus != 0) {
-    printf("Something wrong with Lanczos... Switching to BFSPartition\n");
-    GGGPPartition(graph, zeropwgt);
-    return;
-  }
-
-  y = (EvecWgtType *)GKmalloc(graph->nvtxs*sizeof(EvecWgtType), "EigPartition: y");
-  for (i=0; i<graph->nvtxs; i++) {
-    y[i].ei = evec[i];
-    y[i].wgt = graph->vtxs[i]->vwgt;
-    y[i].index = i;
-  }
-
-  qsort((void *)y, (size_t)graph->nvtxs, (size_t)sizeof(EvecWgtType), inccompeinz);
-
-  where = graph->where = imalloc(graph->nvtxs, "EigPartition: graph->where");
-  sum = 0;
-  for (i=0; i<graph->nvtxs; i++) {
-    sum += y[i].wgt;
-    if (sum > zeropwgt) {
-      if (abs(sum-zeropwgt) > abs(sum-y[i].wgt-zeropwgt))
-        i--;
-      break;
-    }
-    where[y[i].index] = 0;
-  }
-
-  for (; i<graph->nvtxs; i++)
-    where[y[i].index] = 1;
-
-  GKfree(evec, y, -1);
-}
-
-
-/*************************************************************************
-* This function is used by qsort to sort doubles in increasing order 
-**************************************************************************/
-int inccompeinz(const void *v1, const void *v2)
-{
-  if (((EvecWgtType *)v1)->ei < ((EvecWgtType *)v2)->ei)
-    return -1;
-  else if (((EvecWgtType *)v1)->ei > ((EvecWgtType *)v2)->ei)
-    return 1;
-  else  {
-    if (((EvecWgtType *)v1)->wgt < ((EvecWgtType *)v2)->wgt)
-      return -1;
-    else if (((EvecWgtType *)v1)->wgt > ((EvecWgtType *)v2)->wgt)
-      return 1;
-    else
-      return 0;
-  }
-}
-
-
-/*************************************************************************
-* This function computes the cut of a given partition
-**************************************************************************/
-int ComputeCut(CoarseGraphType *graph)
-{
-  int cut;
-  int i, j;
-  VertexType *vtx;
-  int *where;
-
+  Allocate2WayPartitionMemory(ctrl, graph);
   where = graph->where;
-  cut = 0;
 
-  for (i=0; i<graph->nvtxs; i++) {
-    vtx = graph->vtxs[i];
-    for (j=0; j<vtx->nedges; j++) 
-      if (where[vtx->edges[j].edge] != where[i]) 
-        cut += vtx->edges[j].ewgt;
+  bestwhere = idxmalloc(nvtxs, "BisectGraph: bestwhere");
+  queue = idxmalloc(nvtxs, "BisectGraph: queue");
+  touched = idxmalloc(nvtxs, "BisectGraph: touched");
+
+  ASSERTP(tpwgts[0]+tpwgts[1] == idxsum(nvtxs, vwgt), ("%d %d\n", tpwgts[0]+tpwgts[1], idxsum(nvtxs, vwgt)));
+
+  maxpwgt[0] = ubfactor*tpwgts[0];
+  maxpwgt[1] = ubfactor*tpwgts[1];
+  minpwgt[0] = (1.0/ubfactor)*tpwgts[0];
+  minpwgt[1] = (1.0/ubfactor)*tpwgts[1];
+
+  nbfs = (nvtxs <= ctrl->CoarsenTo ? SMALLNIPARTS : LARGENIPARTS);
+  bestcut = idxsum(nvtxs, graph->adjwgtsum)+1;  /* The +1 is for the 0 edges case */
+  for (; nbfs>0; nbfs--) {
+    idxset(nvtxs, 0, touched);
+
+    pwgts[1] = tpwgts[0]+tpwgts[1];
+    pwgts[0] = 0;
+
+    idxset(nvtxs, 1, where);
+
+    queue[0] = RandomInRange(nvtxs);
+    touched[queue[0]] = 1;
+    first = 0; last = 1;
+    nleft = nvtxs-1;
+    drain = 0;
+
+    /* Start the BFS from queue to get a partition */
+    for (;;) {
+      if (first == last) { /* Empty. Disconnected graph! */
+        if (nleft == 0 || drain)
+          break;
+
+        k = RandomInRange(nleft);
+        for (i=0; i<nvtxs; i++) {
+          if (touched[i] == 0) {
+            if (k == 0)
+              break;
+            else
+              k--;
+          }
+        }
+
+        queue[0] = i;
+        touched[i] = 1;
+        first = 0; last = 1;;
+        nleft--;
+      }
+
+      i = queue[first++];
+      if (pwgts[0] > 0 && pwgts[1]-vwgt[i] < minpwgt[1]) {
+        drain = 1;
+        continue;
+      }
+
+      where[i] = 0;
+      INC_DEC(pwgts[0], pwgts[1], vwgt[i]);
+      if (pwgts[1] <= maxpwgt[1])
+        break;
+
+      drain = 0;
+      for (j=xadj[i]; j<xadj[i+1]; j++) {
+        k = adjncy[j];
+        if (touched[k] == 0) {
+          queue[last++] = k;
+          touched[k] = 1;
+          nleft--;
+        }
+      }
+    }
+
+    /* Check to see if we hit any bad limiting cases */
+    if (pwgts[1] == 0) { 
+      i = RandomInRange(nvtxs);
+      where[i] = 1;
+      INC_DEC(pwgts[1], pwgts[0], vwgt[i]);
+    }
+
+    /*************************************************************
+    * Do some partition refinement 
+    **************************************************************/
+    Compute2WayPartitionParams(ctrl, graph);
+    /*printf("IPART: %3d [%5d %5d] [%5d %5d] %5d\n", graph->nvtxs, pwgts[0], pwgts[1], graph->pwgts[0], graph->pwgts[1], graph->mincut); */
+
+    Balance2Way(ctrl, graph, tpwgts, ubfactor);
+    /*printf("BPART: [%5d %5d] %5d\n", graph->pwgts[0], graph->pwgts[1], graph->mincut);*/
+
+    FM_2WayEdgeRefine(ctrl, graph, tpwgts, 4);
+    /*printf("RPART: [%5d %5d] %5d\n", graph->pwgts[0], graph->pwgts[1], graph->mincut);*/
+
+    if (bestcut > graph->mincut) {
+      bestcut = graph->mincut;
+      idxcopy(nvtxs, where, bestwhere);
+      if (bestcut == 0)
+        break;
+    }
   }
 
-  return cut/2;
+  graph->mincut = bestcut;
+  idxcopy(nvtxs, bestwhere, where);
+
+  GKfree(&bestwhere, &queue, &touched, LTERM);
 }
+
+
+
+
+/*************************************************************************
+* This function takes a graph and produces a bisection by using a region
+* growing algorithm. The resulting partition is returned in
+* graph->where
+**************************************************************************/
+void GrowBisectionNode(CtrlType *ctrl, GraphType *graph, float ubfactor)
+{
+  int i, j, k, nvtxs, drain, nleft, first, last, pwgts[2], tpwgts[2], minpwgt[2], maxpwgt[2], from, bestcut, icut, mincut, me, pass, nbfs;
+  idxtype *xadj, *vwgt, *adjncy, *adjwgt, *where, *bndind;
+  idxtype *queue, *touched, *gain, *bestwhere;
+
+  nvtxs = graph->nvtxs;
+  xadj = graph->xadj;
+  vwgt = graph->vwgt;
+  adjncy = graph->adjncy;
+  adjwgt = graph->adjwgt;
+
+  bestwhere = idxmalloc(nvtxs, "BisectGraph: bestwhere");
+  queue = idxmalloc(nvtxs, "BisectGraph: queue");
+  touched = idxmalloc(nvtxs, "BisectGraph: touched");
+
+  tpwgts[0] = idxsum(nvtxs, vwgt);
+  tpwgts[1] = tpwgts[0]/2;
+  tpwgts[0] -= tpwgts[1];
+
+  maxpwgt[0] = ubfactor*tpwgts[0];
+  maxpwgt[1] = ubfactor*tpwgts[1];
+  minpwgt[0] = (1.0/ubfactor)*tpwgts[0];
+  minpwgt[1] = (1.0/ubfactor)*tpwgts[1];
+
+  /* Allocate memory for graph->rdata. Allocate sufficient memory for both edge and node */
+  graph->rdata = idxmalloc(5*nvtxs+3, "GrowBisectionNode: graph->rdata");
+  graph->pwgts    = graph->rdata;
+  graph->where    = graph->rdata + 3;
+  graph->bndptr   = graph->rdata + nvtxs + 3;
+  graph->bndind   = graph->rdata + 2*nvtxs + 3;
+  graph->nrinfo   = (NRInfoType *)(graph->rdata + 3*nvtxs + 3);
+  graph->id       = graph->rdata + 3*nvtxs + 3;
+  graph->ed       = graph->rdata + 4*nvtxs + 3;
+  
+  where = graph->where;
+  bndind = graph->bndind;
+
+  nbfs = (nvtxs <= ctrl->CoarsenTo ? SMALLNIPARTS : LARGENIPARTS);
+  bestcut = tpwgts[0]+tpwgts[1];
+  for (nbfs++; nbfs>0; nbfs--) {
+    idxset(nvtxs, 0, touched);
+
+    pwgts[1] = tpwgts[0]+tpwgts[1];
+    pwgts[0] = 0;
+
+    idxset(nvtxs, 1, where);
+
+    queue[0] = RandomInRange(nvtxs);
+    touched[queue[0]] = 1;
+    first = 0; last = 1;
+    nleft = nvtxs-1;
+    drain = 0;
+
+    /* Start the BFS from queue to get a partition */
+    if (nbfs >= 1) {
+      for (;;) {
+        if (first == last) { /* Empty. Disconnected graph! */
+          if (nleft == 0 || drain)
+            break;
+  
+          k = RandomInRange(nleft);
+          for (i=0; i<nvtxs; i++) {
+            if (touched[i] == 0) {
+              if (k == 0)
+                break;
+              else
+                k--;
+            }
+          }
+
+          queue[0] = i;
+          touched[i] = 1;
+          first = 0; last = 1;;
+          nleft--;
+        }
+
+        i = queue[first++];
+        if (pwgts[1]-vwgt[i] < minpwgt[1]) {
+          drain = 1;
+          continue;
+        }
+
+        where[i] = 0;
+        INC_DEC(pwgts[0], pwgts[1], vwgt[i]);
+        if (pwgts[1] <= maxpwgt[1])
+          break;
+
+        drain = 0;
+        for (j=xadj[i]; j<xadj[i+1]; j++) {
+          k = adjncy[j];
+          if (touched[k] == 0) {
+            queue[last++] = k;
+            touched[k] = 1;
+            nleft--;
+          }
+        }
+      }
+    }
+
+    /*************************************************************
+    * Do some partition refinement 
+    **************************************************************/
+    Compute2WayPartitionParams(ctrl, graph);
+    Balance2Way(ctrl, graph, tpwgts, ubfactor);
+    FM_2WayEdgeRefine(ctrl, graph, tpwgts, 4);
+
+    /* Construct and refine the vertex separator */
+    for (i=0; i<graph->nbnd; i++) 
+      where[bndind[i]] = 2;
+
+    Compute2WayNodePartitionParams(ctrl, graph); 
+    FM_2WayNodeRefine(ctrl, graph, ubfactor, 6);
+
+    /* printf("ISep: [%d %d %d] %d\n", graph->pwgts[0], graph->pwgts[1], graph->pwgts[2], bestcut); */
+
+    if (bestcut > graph->mincut) {
+      bestcut = graph->mincut;
+      idxcopy(nvtxs, where, bestwhere);
+    }
+  }
+
+  graph->mincut = bestcut;
+  idxcopy(nvtxs, bestwhere, where);
+
+  Compute2WayNodePartitionParams(ctrl, graph); 
+
+  GKfree(&bestwhere, &queue, &touched, LTERM);
+}
+
+
+/*************************************************************************
+* This function takes a graph and produces a bisection by using a region
+* growing algorithm. The resulting partition is returned in
+* graph->where
+**************************************************************************/
+void RandomBisection(CtrlType *ctrl, GraphType *graph, int *tpwgts, float ubfactor)
+{
+  int i, ii, j, k, nvtxs, pwgts[2], minpwgt[2], maxpwgt[2], from, bestcut, icut, mincut, me, pass, nbfs;
+  idxtype *xadj, *vwgt, *adjncy, *adjwgt, *where;
+  idxtype *perm, *bestwhere;
+
+  nvtxs = graph->nvtxs;
+  xadj = graph->xadj;
+  vwgt = graph->vwgt;
+  adjncy = graph->adjncy;
+  adjwgt = graph->adjwgt;
+
+  Allocate2WayPartitionMemory(ctrl, graph);
+  where = graph->where;
+
+  bestwhere = idxmalloc(nvtxs, "BisectGraph: bestwhere");
+  perm = idxmalloc(nvtxs, "BisectGraph: queue");
+
+  ASSERTP(tpwgts[0]+tpwgts[1] == idxsum(nvtxs, vwgt), ("%d %d\n", tpwgts[0]+tpwgts[1], idxsum(nvtxs, vwgt)));
+
+  maxpwgt[0] = ubfactor*tpwgts[0];
+  maxpwgt[1] = ubfactor*tpwgts[1];
+  minpwgt[0] = (1.0/ubfactor)*tpwgts[0];
+  minpwgt[1] = (1.0/ubfactor)*tpwgts[1];
+
+  nbfs = (nvtxs <= ctrl->CoarsenTo ? SMALLNIPARTS : LARGENIPARTS);
+  bestcut = idxsum(nvtxs, graph->adjwgtsum)+1;  /* The +1 is for the 0 edges case */
+  for (; nbfs>0; nbfs--) {
+    RandomPermute(nvtxs, perm, 1);
+
+    idxset(nvtxs, 1, where);
+    pwgts[1] = tpwgts[0]+tpwgts[1];
+    pwgts[0] = 0;
+
+
+    if (nbfs != 1) {
+      for (ii=0; ii<nvtxs; ii++) {
+        i = perm[ii];
+        if (pwgts[0]+vwgt[i] < maxpwgt[0]) {
+          where[i] = 0;
+          pwgts[0] += vwgt[i];
+          pwgts[1] -= vwgt[i];
+          if (pwgts[0] > minpwgt[0])
+            break;
+        }
+      }
+    }
+
+    /*************************************************************
+    * Do some partition refinement 
+    **************************************************************/
+    Compute2WayPartitionParams(ctrl, graph);
+    /* printf("IPART: %3d [%5d %5d] [%5d %5d] %5d\n", graph->nvtxs, pwgts[0], pwgts[1], graph->pwgts[0], graph->pwgts[1], graph->mincut); */
+
+    Balance2Way(ctrl, graph, tpwgts, ubfactor);
+    /* printf("BPART: [%5d %5d] %5d\n", graph->pwgts[0], graph->pwgts[1], graph->mincut); */
+
+    FM_2WayEdgeRefine(ctrl, graph, tpwgts, 4);
+    /* printf("RPART: [%5d %5d] %5d\n", graph->pwgts[0], graph->pwgts[1], graph->mincut); */
+
+    if (bestcut > graph->mincut) {
+      bestcut = graph->mincut;
+      idxcopy(nvtxs, where, bestwhere);
+      if (bestcut == 0)
+        break;
+    }
+  }
+
+  graph->mincut = bestcut;
+  idxcopy(nvtxs, bestwhere, where);
+
+  GKfree(&bestwhere, &perm, LTERM);
+}
+
+
 
 

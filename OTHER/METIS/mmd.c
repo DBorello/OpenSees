@@ -1,11 +1,14 @@
 /*
  * mmd.c
  *
- * mmd (Liu's Multiple Minimum Degree) 
- * Code received from Alex Pothen, April 2, 1990 
  * **************************************************************
- * These routines are the min degree ordering codes--they are
- * C versions of the mmd code in Sparspak.
+ * The following C function was developed from a FORTRAN subroutine
+ * in SPARSPAK written by Eleanor Chu, Alan George, Joseph Liu
+ * and Esmond Ng.
+ * 
+ * The FORTRAN-to-C transformation and modifications such as dynamic
+ * memory allocation and deallocation were performed by Chunguang
+ * Sun.
  * ************************************************************** 
  *
  * Taken from SMMS, George 12/13/94
@@ -13,27 +16,11 @@
  * The meaning of invperm, and perm vectors is different from that
  * in genqmd_ of SparsPak
  *
- * $Id: mmd.c,v 1.2 2007-05-16 16:19:57 fmk Exp $
+ * $Id: mmd.c,v 1.3 2008-03-31 21:07:06 fmk Exp $
  */
 
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
-#include <time.h>
-#include <stdlib.h>
+#include <metis.h>
 
-
-void genmmd(int neqns,int xadj[],int adjncy[],int invp[],int perm[],
-     int delta,int head[],int qsize[],int list[],int marker[],
-     int maxint,int *ncsub);
-void mmdelm(int mdeg_node,int xadj[],int adjncy[],int head[],int forward[],
-     int backward[],int qsize[],int list[],int marker[],int maxint,int tag);
-int  mmdint(int neqns,int xadj[],int adjncy[],int head[],int forward[],
-     int backward[],int qsize[],int list[],int marker[]);
-void mmdnum(int neqns,int perm[],int invp[],int qsize[]);
-void mmdupd(int ehead,int neqns,int xadj[],int adjncy[],int delta,int *mdeg,
-     int head[],int forward[],int backward[],int qsize[],int list[],
-     int marker[],int maxint,int *tag);
 
 /*************************************************************************
 *  genmmd  -- multiple minimum external degree
@@ -63,44 +50,47 @@ void mmdupd(int ehead,int neqns,int xadj[],int adjncy[],int delta,int *mdeg,
 *     marker -- a temporary marker vector.
 *  Subroutines used -- mmdelm, mmdint, mmdnum, mmdupd.
 **************************************************************************/
-void genmmd(int neqns,int xadj[],int adjncy[],int invp[],int perm[],
-     int delta,int head[],int qsize[],int list[],int marker[],
-     int maxint,int *ncsub)
+void genmmd(int neqns, idxtype *xadj, idxtype *adjncy, idxtype *invp, idxtype *perm,
+     int delta, idxtype *head, idxtype *qsize, idxtype *list, idxtype *marker,
+     int maxint, int *ncsub)
 {
     int  ehead, i, mdeg, mdlmt, mdeg_node, nextmd, num, tag;
-    if ( neqns <= 0 )  return;
+
+    if (neqns <= 0)  
+      return;
 
     /* Adjust from C to Fortran */
     xadj--; adjncy--; invp--; perm--; head--; qsize--; list--; marker--;
 
     /* initialization for the minimum degree algorithm. */
     *ncsub = 0;
-    mmdint( neqns, xadj, adjncy, head, invp, perm,
-            qsize, list, marker );
+    mmdint(neqns, xadj, adjncy, head, invp, perm, qsize, list, marker);
 
     /*  'num' counts the number of ordered nodes plus 1. */
     num = 1;
 
     /* eliminate all isolated nodes. */
     nextmd = head[1];
-    while  ( nextmd > 0 ) {
-        mdeg_node = nextmd;
-        nextmd = invp[mdeg_node];
-        marker[mdeg_node] = maxint;
-        invp[mdeg_node] = -num;
-        num = num + 1;
+    while (nextmd > 0) {
+      mdeg_node = nextmd;
+      nextmd = invp[mdeg_node];
+      marker[mdeg_node] = maxint;
+      invp[mdeg_node] = -num;
+      num = num + 1;
     }
 
     /* search for node of the minimum degree. 'mdeg' is the current */
     /* minimum degree; 'tag' is used to facilitate marking nodes.   */
-    if ( num > neqns ) goto n1000;
+    if (num > neqns) 
+      goto n1000;
     tag = 1;
     head[1] = 0;
     mdeg = 2;
 
     /* infinite loop here ! */
-    while ( 1 ) {
-       while ( head[mdeg] <= 0 ) mdeg++;
+    while (1) {
+      while (head[mdeg] <= 0) 
+        mdeg++;
 
       /* use value of 'delta' to set up 'mdlmt', which governs */
       /* when a degree update is to be performed.              */
@@ -109,42 +99,48 @@ void genmmd(int neqns,int xadj[],int adjncy[],int invp[],int perm[],
 
 n500:
       mdeg_node = head[mdeg];
-      while ( mdeg_node <= 0 )  {
-         mdeg++;
+      while (mdeg_node <= 0) {
+        mdeg++;
 
-         if ( mdeg > mdlmt ) goto n900;
-         mdeg_node = head[mdeg];
+        if (mdeg > mdlmt) 
+          goto n900;
+        mdeg_node = head[mdeg];
       };
 
       /*  remove 'mdeg_node' from the degree structure. */
       nextmd = invp[mdeg_node];
       head[mdeg] = nextmd;
-      if ( nextmd > 0 )  perm[nextmd] = -mdeg;
+      if (nextmd > 0)  
+        perm[nextmd] = -mdeg;
       invp[mdeg_node] = -num;
       *ncsub += mdeg + qsize[mdeg_node] - 2;
-      if ( (num+qsize[mdeg_node]) > neqns )  goto n1000;
+      if ((num+qsize[mdeg_node]) > neqns)  
+        goto n1000;
 
       /*  eliminate 'mdeg_node' and perform quotient graph */
       /*  transformation. reset 'tag' value if necessary.    */
       tag++;
-      if ( tag >= maxint )  {
-           tag = 1;
-           for ( i = 1; i <= neqns; i++ )
-               if ( marker[i] < maxint )  marker[i] = 0;
+      if (tag >= maxint) {
+        tag = 1;
+        for (i = 1; i <= neqns; i++)
+          if (marker[i] < maxint)  
+            marker[i] = 0;
       };
-      mmdelm( mdeg_node, xadj, adjncy, head, invp,
-              perm, qsize, list, marker, maxint, tag );
+
+      mmdelm(mdeg_node, xadj, adjncy, head, invp, perm, qsize, list, marker, maxint, tag);
+
       num += qsize[mdeg_node];
       list[mdeg_node] = ehead;
       ehead = mdeg_node;
-      if ( delta >= 0 ) goto n500;
+      if (delta >= 0) 
+        goto n500;
 
  n900:
       /* update degrees of the nodes involved in the  */
       /* minimum degree nodes elimination.            */
-      if ( num > neqns )  goto n1000;
-      mmdupd( ehead, neqns, xadj, adjncy, delta, &mdeg,
-              head, invp, perm, qsize, list, marker, maxint, &tag );
+      if (num > neqns)  
+        goto n1000;
+      mmdupd( ehead, neqns, xadj, adjncy, delta, &mdeg, head, invp, perm, qsize, list, marker, maxint, &tag);
     }; /* end of -- while ( 1 ) -- */
 
 n1000:
@@ -172,8 +168,8 @@ n1000:
 *     marker -- marker vector.
 *     list -- temporary linked list of eliminated nabors.
 ***************************************************************************/
-void mmdelm(int mdeg_node,int xadj[],int adjncy[],int head[],int forward[],
-     int backward[],int qsize[],int list[],int marker[],int maxint,int tag)
+void mmdelm(int mdeg_node, idxtype *xadj, idxtype *adjncy, idxtype *head, idxtype *forward,
+     idxtype *backward, idxtype *qsize, idxtype *list, idxtype *marker, int maxint,int tag)
 {
     int   element, i,   istop, istart, j,
           jstop, jstart, link,
@@ -306,8 +302,8 @@ n1100:
 *       list -- linked list.
 *       marker -- marker vector.
 ****************************************************************************/
-int  mmdint(int neqns,int xadj[],int adjncy[],int head[],int forward[],
-     int backward[],int qsize[],int list[],int marker[])
+int  mmdint(int neqns, idxtype *xadj, idxtype *adjncy, idxtype *head, idxtype *forward,
+     idxtype *backward, idxtype *qsize, idxtype *list, idxtype *marker)
 {
     int  fnode, ndeg, node;
 
@@ -349,7 +345,7 @@ int  mmdint(int neqns,int xadj[],int adjncy[],int head[],int forward[],
 * output parameters --
 *     perm -- the permutation vector.
 ****************************************************************************/
-void mmdnum(int neqns,int perm[],int invp[],int qsize[])
+void mmdnum(int neqns, idxtype *perm, idxtype *invp, idxtype *qsize)
 {
   int father, nextf, node, nqsize, num, root;
 
@@ -413,9 +409,9 @@ void mmdnum(int neqns,int perm[],int invp[],int qsize[])
 *    list -- marker vector for degree update.
 *    *tag   -- tag value.
 ****************************************************************************/
-void mmdupd(int ehead,int neqns,int xadj[],int adjncy[],int delta,int *mdeg,
-     int head[],int forward[],int backward[],int qsize[],int list[],
-     int marker[],int maxint,int *tag)
+void mmdupd(int ehead, int neqns, idxtype *xadj, idxtype *adjncy, int delta, int *mdeg,
+     idxtype *head, idxtype *forward, idxtype *backward, idxtype *qsize, idxtype *list,
+     idxtype *marker, int maxint,int *tag)
 {
  int  deg, deg0, element, enode, fnode, i, iq2, istop,
       istart, j, jstop, jstart, link, mdeg0, mtag, nabor,

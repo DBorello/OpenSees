@@ -1,259 +1,204 @@
 /*
- * Copyright 1995, Regents of the University of Minnesota
+ * Copyright 1997, Regents of the University of Minnesota
  *
  * refine.c
  *
- * This file contains code for the incremental refinement of the coarsergraphs
+ * This file contains the driving routines for multilevel refinement
  *
- * Started 8/31/94
+ * Started 7/24/97
  * George
  *
- * $Id: refine.c,v 1.2 2007-05-17 05:23:30 fmk Exp $
+ * $Id: refine.c,v 1.3 2008-03-31 21:07:06 fmk Exp $
  */
 
-#include "multilevel.h"
-
-/*************************************************************************
-* External Variables
-**************************************************************************/
-extern CtrlType *__Ctrl;	/* mlevelpart.c */
+#include <metis.h>
 
 
 /*************************************************************************
-* This function is the driver of the iterative refinment
+* This function is the entry point of refinement
 **************************************************************************/
-void Refine(CoarseGraphType *orggraph, CoarseGraphType *graph, int zeropwgt)
+void Refine2Way(CtrlType *ctrl, GraphType *orggraph, GraphType *graph, int *tpwgts, float ubfactor)
 {
-  CoarseGraphType *fgraph;
-  int limit = 0.02*orggraph->nvtxs;
 
-  if (limit < 400)
-    limit = 400;
+  IFSET(ctrl->dbglvl, DBG_TIME, starttimer(ctrl->UncoarsenTmr));
 
-  InitPartition(graph, zeropwgt);
+  /* Compute the parameters of the coarsest graph */
+  Compute2WayPartitionParams(ctrl, graph);
 
+  for (;;) {
+    ASSERT(CheckBnd(graph));
 
-  if (__Ctrl->OpType != OP_MLND)
-    FastInitBalance(graph, zeropwgt);
-
-  for (fgraph = graph; ; fgraph = fgraph->finer) {
-    ASSERT(CheckBndSize(fgraph));
-
-    if (__Ctrl->OpType != OP_MLND && __Ctrl->RefineType != REFINE_NONE) 
-      if (orggraph->nvtxs/fgraph->nvtxs < 15) 
-        FastBalance(fgraph, zeropwgt, 5*fgraph->tvwgt/fgraph->nvtxs);
-
-
-    ASSERT(CheckBndSize(fgraph));
-
-    switch (__Ctrl->RefineType) {
-      case REFINE_GR:
-        FMR_Refine(fgraph, zeropwgt, 1);
-        break;
-      case REFINE_KLR:
-        FMR_Refine(fgraph, zeropwgt, 20);
-        break;
-      case REFINE_GKLR:
-        if (fgraph->nvtxs < 2*limit)  /* Small graph, do 2*greedy */
-          FMR_Refine(fgraph, zeropwgt, 20);
-        else  /* All other graphs do single Greedy */
-          FMR_Refine(fgraph, zeropwgt, 1);
-        break;
-      case REFINE_BGR:
-        if (!__Ctrl->IsWeighted)
-          BFMR_Refine(fgraph, zeropwgt, SMART, 2);
-        else
-          BFMR_Refine_Weighted(fgraph, zeropwgt, SMART, 2);
-        break;
-      case REFINE_BKLR:
-        if (!__Ctrl->IsWeighted)
-          BFMR_Refine(fgraph, zeropwgt, SMART, 20);
-        else
-          BFMR_Refine_Weighted(fgraph, zeropwgt, SMART, 20);
-        break;
-      case REFINE_BGKLR:
-        if (fgraph->nbnd < limit) 
-          if (!__Ctrl->IsWeighted)
-            BFMR_Refine(fgraph, zeropwgt, SMART, 20);
-          else
-            BFMR_Refine_Weighted(fgraph, zeropwgt, SMART, 20);
-        else 
-          if (!__Ctrl->IsWeighted)
-            BFMR_Refine(fgraph, zeropwgt, SMART, 2);
-          else
-            BFMR_Refine_Weighted(fgraph, zeropwgt, SMART, 2);
-        break;
-      case 14:
-        if (fgraph->nbnd < limit) 
-          BFMR_Refine(fgraph, zeropwgt, STUPID, 20);
-        else
-          BFMR_Refine(fgraph, zeropwgt, STUPID, 2);
-        break;
-      case 15:
-        Greedy_Refine(fgraph, 10);
-        break;
-      case REFINE_NONE:
+    IFSET(ctrl->dbglvl, DBG_TIME, starttimer(ctrl->RefTmr));
+    switch (ctrl->RType) {
+      case 1:
+        Balance2Way(ctrl, graph, tpwgts, ubfactor);
+        FM_2WayEdgeRefine(ctrl, graph, tpwgts, 8); 
         break;
       default:
-        errexit("Unsupported Refine Type: %d", __Ctrl->RefineType);
+        errexit("Unknown refinement type: %d\n", ctrl->RType);
     }
+    IFSET(ctrl->dbglvl, DBG_TIME, stoptimer(ctrl->RefTmr));
 
-    if (fgraph->finer == NULL && __Ctrl->OpType != OP_MLND && __Ctrl->RefineType >= 10) 
-      BFMR_Refine_EqWgt(fgraph, zeropwgt);
-
-    if (fgraph != orggraph)
-      ProjectPartition(fgraph, limit);
-    else
+    if (graph == orggraph)
       break;
+
+    graph = graph->finer;
+    IFSET(ctrl->dbglvl, DBG_TIME, starttimer(ctrl->ProjectTmr));
+    Project2WayPartition(ctrl, graph);
+    IFSET(ctrl->dbglvl, DBG_TIME, stoptimer(ctrl->ProjectTmr));
   }
 
-
+  IFSET(ctrl->dbglvl, DBG_TIME, stoptimer(ctrl->UncoarsenTmr));
 }
 
 
+/*************************************************************************
+* This function allocates memory for 2-way edge refinement
+**************************************************************************/
+void Allocate2WayPartitionMemory(CtrlType *ctrl, GraphType *graph)
+{
+  int nvtxs;
+
+  nvtxs = graph->nvtxs;
+
+  graph->rdata = idxmalloc(5*nvtxs+2, "Allocate2WayPartitionMemory: rdata");
+  graph->pwgts 		= graph->rdata;
+  graph->where		= graph->rdata + 2;
+  graph->id		= graph->rdata + nvtxs + 2;
+  graph->ed		= graph->rdata + 2*nvtxs + 2;
+  graph->bndptr		= graph->rdata + 3*nvtxs + 2;
+  graph->bndind		= graph->rdata + 4*nvtxs + 2;
+}
 
 
 /*************************************************************************
-* This function computes the id/ed, the partition weights and the boundary
+* This function computes the initial id/ed 
 **************************************************************************/
-void ComputePartitionParams(CoarseGraphType *graph)
+void Compute2WayPartitionParams(CtrlType *ctrl, GraphType *graph)
 {
-  int i, j, nedges, me;
-  int *id, *ed, *where, *pwgts;
-  HTableType *htable;
-  int cut;
-  VertexType *vtx;
-  EdgeType *edges;
+  int i, j, k, l, nvtxs, nbnd, mincut;
+  idxtype *xadj, *vwgt, *adjncy, *adjwgt, *pwgts;
+  idxtype *id, *ed, *where;
+  idxtype *bndptr, *bndind;
+  int me, other;
 
-  pwgts = graph->pwgts;
+  nvtxs = graph->nvtxs;
+  xadj = graph->xadj;
+  vwgt = graph->vwgt;
+  adjncy = graph->adjncy;
+  adjwgt = graph->adjwgt;
+
   where = graph->where;
-  id = graph->id = ismalloc(graph->nvtxs, 0, "ComputePartitionParams: id");
-  ed = graph->ed = ismalloc(graph->nvtxs, 0, "ComputePartitionParams: id");
+  pwgts = idxset(2, 0, graph->pwgts);
+  id = idxset(nvtxs, 0, graph->id);
+  ed = idxset(nvtxs, 0, graph->ed);
+  bndptr = idxset(nvtxs, -1, graph->bndptr);
+  bndind = graph->bndind;
 
-  htable = &(graph->htable);
-  CreateHTable(htable, graph->nvtxs);
 
-  pwgts[0] = pwgts[1] = 0;
-  cut = 0;
-  for (i=0; i<graph->nvtxs; i++) {
+  /*------------------------------------------------------------
+  / Compute now the id/ed degrees
+  /------------------------------------------------------------*/
+  nbnd = mincut = 0;
+  for (i=0; i<nvtxs; i++) {
+    ASSERT(where[i] >= 0 && where[i] <= 1);
     me = where[i];
-    vtx = graph->vtxs[i];
-    pwgts[me] += vtx->vwgt;
-    nedges = vtx->nedges;
-    edges = vtx->edges;
-    for (j=0; j<nedges; j++) {
-      if (me == where[edges[j].edge]) 
-        id[i] += edges[j].ewgt;
+    pwgts[me] += vwgt[i];
+
+    for (j=xadj[i]; j<xadj[i+1]; j++) {
+      if (me == where[adjncy[j]])
+        id[i] += adjwgt[j];
       else
-        ed[i] += edges[j].ewgt;
+        ed[i] += adjwgt[j];
     }
-    if (ed[i] > 0) {
-      AddHTable(htable, i);
-      cut += ed[i];
+
+    if (ed[i] > 0 || xadj[i] == xadj[i+1]) {
+      mincut += ed[i];
+      bndptr[i] = nbnd;
+      bndind[nbnd++] = i;
     }
   }
 
-  graph->mincut = cut/2;
-  graph->nbnd = htable->nelem;
+  graph->mincut = mincut/2;
+  graph->nbnd = nbnd;
 
-  ASSERT(CheckBndSize(graph));
+  ASSERT(pwgts[0]+pwgts[1] == idxsum(nvtxs, vwgt));
 }
 
 
 
 /*************************************************************************
-* This function takes a graph with a partition and projects the partition
-* to the finer graph
+* This function projects a partition, and at the same time computes the
+* parameters for refinement.
 **************************************************************************/
-void ProjectPartition(CoarseGraphType *cgraph, int limit)
+void Project2WayPartition(CtrlType *ctrl, GraphType *graph)
 {
-  int i, v, u, mapped;
-  CoarseGraphType *fgraph;
-  int *fid, *fed, *cid, *ced, *fwhere, *cwhere;
-  HTableType *fhtable;
-  int me;
-  int *cmap;
-  VertexType *vtx;
+  int i, j, k, nvtxs, nbnd, me;
+  idxtype *xadj, *adjncy, *adjwgt, *adjwgtsum;
+  idxtype *cmap, *where, *id, *ed, *bndptr, *bndind;
+  idxtype *cwhere, *cid, *ced, *cbndptr;
+  GraphType *cgraph;
 
-  if (cgraph->finer == NULL)
-    return;
-
+  cgraph = graph->coarser;
   cwhere = cgraph->where;
   cid = cgraph->id;
   ced = cgraph->ed;
+  cbndptr = cgraph->bndptr;
 
-  fgraph = cgraph->finer;
-  cmap = fgraph->cmap;
-  fwhere = fgraph->where = imalloc(fgraph->nvtxs, "ProjectPartition: fgraph->where");
-  fid = fgraph->id = imalloc(fgraph->nvtxs, "ProjectPartition1: fgraph->id");
-  fed = fgraph->ed = imalloc(fgraph->nvtxs, "ProjectPartition1: fgraph->ed");
+  nvtxs = graph->nvtxs;
+  cmap = graph->cmap;
+  xadj = graph->xadj;
+  adjncy = graph->adjncy;
+  adjwgt = graph->adjwgt;
+  adjwgtsum = graph->adjwgtsum;
 
-  fhtable = &(fgraph->htable);
-  CreateHTable(fhtable, SelHTSize(2*cgraph->nbnd));
+  Allocate2WayPartitionMemory(ctrl, graph);
 
-  for (v=0; v<fgraph->nvtxs; v++) {
-    if (v <= fgraph->match[v]) {
-      u = fgraph->match[v];
+  where = graph->where;
+  id = idxset(nvtxs, 0, graph->id);
+  ed = idxset(nvtxs, 0, graph->ed);
+  bndptr = idxset(nvtxs, -1, graph->bndptr);
+  bndind = graph->bndind;
 
-      mapped = cmap[v];
-      fwhere[u] = fwhere[v] = cwhere[mapped];
 
-      if (u == v) {
-        fid[v] = cid[mapped];
-        fed[v] = ced[mapped];
-        if (fed[v] > 0) 
-          AddHTable(fhtable, v);
-      }
-      else {
-        if (ced[mapped] == 0) {
-          fed[u] = fed[v] = 0;
-          fid[u] = fgraph->vtxs[u]->ewgtsum;
-          fid[v] = fgraph->vtxs[v]->ewgtsum;
+  /* Go through and project partition and compute id/ed for the nodes */
+  for (i=0; i<nvtxs; i++) {
+    k = cmap[i];
+    where[i] = cwhere[k];
+    cmap[i] = cbndptr[k];
+  }
+
+  for (nbnd=0, i=0; i<nvtxs; i++) {
+    me = where[i];
+
+    id[i] = adjwgtsum[i];
+
+    if (xadj[i] == xadj[i+1]) {
+      bndptr[i] = nbnd;
+      bndind[nbnd++] = i;
+    }
+    else {
+      if (cmap[i] != -1) { /* If it is an interface node. Note that cmap[i] = cbndptr[cmap[i]] */
+        for (j=xadj[i]; j<xadj[i+1]; j++) {
+          if (me != where[adjncy[j]])
+            ed[i] += adjwgt[j];
         }
-        else if (cid[mapped] == 0) {
-          fid[u] = fid[v] = (fgraph->vtxs[u]->ewgtsum + fgraph->vtxs[v]->ewgtsum - cgraph->vtxs[mapped]->ewgtsum)>>1;
-          fed[u] = fgraph->vtxs[u]->ewgtsum - fid[u];
-          fed[v] = fgraph->vtxs[v]->ewgtsum - fid[v];
-          if (fed[v] > 0) 
-            AddHTable(fhtable, v);
-          if (fed[u] > 0) 
-            AddHTable(fhtable, u);
-        }
-        else { /* Time to do some work */
-          fid[u] = fed[u] = 0;
-          me = fwhere[u];
+        id[i] -= ed[i];
 
-          vtx = fgraph->vtxs[u];
-          for (i=0; i<vtx->nedges; i++) {
-            if (me == cwhere[cmap[vtx->edges[i].edge]])
-              fid[u] += vtx->edges[i].ewgt;
-            else
-              fed[u] += vtx->edges[i].ewgt;
-          }
-
-          fid[v] = cid[mapped] - fid[u] + 
-                     (vtx->ewgtsum + fgraph->vtxs[v]->ewgtsum - cgraph->vtxs[mapped]->ewgtsum);
-          fed[v] = ced[mapped] - fed[u];
-
-          if (fed[v] > 0) 
-            AddHTable(fhtable, v);
-          if (fed[u] > 0) 
-            AddHTable(fhtable, u);
+        if (ed[i] > 0 || xadj[i] == xadj[i+1]) {
+          bndptr[i] = nbnd;
+          bndind[nbnd++] = i;
         }
       }
     }
   }
 
-  fgraph->nbnd = fhtable->nelem;
+  graph->mincut = cgraph->mincut;
+  graph->nbnd = nbnd;
+  idxcopy(2, cgraph->pwgts, graph->pwgts);
 
-  fgraph->pwgts[0] = cgraph->pwgts[0];
-  fgraph->pwgts[1] = cgraph->pwgts[1];
-  fgraph->mincut = cgraph->mincut;
-  fgraph->coarser = NULL;
+  FreeGraph(graph->coarser);
+  graph->coarser = NULL;
 
-  FreeGraph(cgraph);
-
-  ASSERT(CheckBndSize(fgraph));
 }
-
 

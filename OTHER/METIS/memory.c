@@ -1,76 +1,161 @@
 /*
- * Copyright 1995, Regents of the University of Minnesota
+ * Copyright 1997, Regents of the University of Minnesota
  *
  * memory.c
  *
  * This file contains routines that deal with memory allocation
  *
- * Started 8/27/94
+ * Started 2/24/96
  * George
  *
- * $Id: memory.c,v 1.1.1.1 2000-09-15 08:23:12 fmk Exp $
+ * $Id: memory.c,v 1.2 2008-03-31 21:07:06 fmk Exp $
  *
  */
 
-#include "multilevel.h"
-
-/*************************************************************************
-* External Global Variables
-**************************************************************************/
-extern CtrlType *__Ctrl;		/* mlevelpart.c */
+#include <metis.h>
 
 
 /*************************************************************************
-* This function allocate various pools of memory
+* This function allocates memory for the workspace
 **************************************************************************/
-void AllocatePools(CtrlType *ctrl)
+void AllocateWorkSpace(CtrlType *ctrl, GraphType *graph, int nparts)
 {
+  ctrl->wspace.pmat = NULL;
 
-  /* Edge pool + icore pool */
-  ctrl->edgepool = (EdgeType *)GKmalloc(sizeof(EdgeType)*ctrl->maxedges + sizeof(int)*ctrl->maxicore, "AllocatePools: ctrl->edgepool");
-  ctrl->lastedge = 0;
+  if (ctrl->optype == OP_KMETIS) {
+    ctrl->wspace.edegrees = (EDegreeType *)GKmalloc(graph->nedges*sizeof(EDegreeType), "AllocateWorkSpace: edegrees");
+    ctrl->wspace.vedegrees = NULL;
+    ctrl->wspace.auxcore = (idxtype *)ctrl->wspace.edegrees;
 
-  /* External Degree pool */
-  ctrl->degrees = NULL;
-  ctrl->lastdegree = 0;
-  ctrl->maxdegrees = 0;
+    ctrl->wspace.pmat = idxmalloc(nparts*nparts, "AllocateWorkSpace: pmat");
 
-  /* Integer pool starts at the end of the edge pool and moves backwards */
-  ctrl->icore = (int *)ctrl->edgepool;
-  ctrl->icore += (sizeof(EdgeType)/sizeof(int))*ctrl->maxedges + ctrl->maxicore;
-  ctrl->cicore = 0;
+    /* Memory requirements for different phases
+          Coarsening
+                    Matching: 4*nvtxs vectors
+                 Contraction: 2*nvtxs vectors (from the above 4), 1*nparts, 1*Nedges
+            Total = MAX(4*nvtxs, 2*nvtxs+nparts+nedges)
 
-  /* Gain pool */
-  ctrl->gaincore = (ListNodeType *)GKmalloc(ctrl->maxgain*sizeof(ListNodeType), "InitBucketPools: ctrl->gaincore");
-  ctrl->cgain = 0;
+          Refinement
+                Random Refinement/Balance: 5*nparts + 1*nvtxs + 2*nedges
+                Greedy Refinement/Balance: 5*nparts + 2*nvtxs + 2*nedges + 1*PQueue(==Nvtxs)
+            Total = 5*nparts + 3*nvtxs + 2*nedges
 
-  /* bucket pool */
-  ctrl->gbcore = (GainBucketType *)GKmalloc(ctrl->maxbucket*sizeof(GainBucketType), "InitBucketPools: ctrl->gbcore");
-  ctrl->cbucket = 0;
+         Total = 5*nparts + 3*nvtxs + 2*nedges 
+    */
+    ctrl->wspace.maxcore = 3*(graph->nvtxs+1) +                 /* Match/Refinement vectors */
+                           5*(nparts+1) +                       /* Partition weights etc */
+                           graph->nvtxs*(sizeof(ListNodeType)/sizeof(idxtype)) + /* Greedy k-way balance/refine */
+                           20  /* padding for 64 bit machines */
+                           ;
+  }
+  else if (ctrl->optype == OP_KVMETIS) {
+    ctrl->wspace.edegrees = NULL;
+    ctrl->wspace.vedegrees = (VEDegreeType *)GKmalloc(graph->nedges*sizeof(VEDegreeType), "AllocateWorkSpace: vedegrees");
+    ctrl->wspace.auxcore = (idxtype *)ctrl->wspace.vedegrees;
 
+    ctrl->wspace.pmat = idxmalloc(nparts*nparts, "AllocateWorkSpace: pmat");
+
+    /* Memory requirements for different phases are identical to KMETIS */
+    ctrl->wspace.maxcore = 3*(graph->nvtxs+1) +                 /* Match/Refinement vectors */
+                           3*(nparts+1) +                       /* Partition weights etc */
+                           graph->nvtxs*(sizeof(ListNodeType)/sizeof(idxtype)) + /* Greedy k-way balance/refine */
+                           20  /* padding for 64 bit machines */
+                           ;
+  }
+  else {
+    ctrl->wspace.edegrees = (EDegreeType *)idxmalloc(graph->nedges, "AllocateWorkSpace: edegrees");
+    ctrl->wspace.vedegrees = NULL;
+    ctrl->wspace.auxcore = (idxtype *)ctrl->wspace.edegrees;
+
+    ctrl->wspace.maxcore = 5*(graph->nvtxs+1) +                 /* Refinement vectors */
+                           4*(nparts+1) +                       /* Partition weights etc */
+                           2*graph->ncon*graph->nvtxs*(sizeof(ListNodeType)/sizeof(idxtype)) + /* 2-way refinement */
+                           2*graph->ncon*(NEG_GAINSPAN+PLUS_GAINSPAN+1)*(sizeof(ListNodeType *)/sizeof(idxtype)) + /* 2-way refinement */
+                           20  /* padding for 64 bit machines */
+                           ;
+  }
+
+  ctrl->wspace.maxcore += HTLENGTH;
+  ctrl->wspace.core = idxmalloc(ctrl->wspace.maxcore, "AllocateWorkSpace: maxcore");
+  ctrl->wspace.ccore = 0;
+}
+
+
+/*************************************************************************
+* This function allocates memory for the workspace
+**************************************************************************/
+void FreeWorkSpace(CtrlType *ctrl, GraphType *graph)
+{
+  GKfree(&ctrl->wspace.edegrees, &ctrl->wspace.vedegrees, &ctrl->wspace.core, &ctrl->wspace.pmat, LTERM);
 }
 
 /*************************************************************************
-* This function de-allocate various pools of memory
+* This function returns how may words are left in the workspace
 **************************************************************************/
-void FreePools(CtrlType *ctrl)
+int WspaceAvail(CtrlType *ctrl)
 {
-  GKfree(ctrl->edgepool, ctrl->gaincore, ctrl->gbcore, -1);
-  ctrl->maxedges = ctrl->lastedge = ctrl->cicore = ctrl->maxicore = 0;
-  ctrl->cgain = ctrl->maxgain = ctrl->cbucket = ctrl->maxbucket = 0;
-  ctrl->maxdegrees = ctrl->lastdegree = 0;
+  return ctrl->wspace.maxcore - ctrl->wspace.ccore;
 }
+
+
+/*************************************************************************
+* This function allocate space from the core 
+**************************************************************************/
+idxtype *idxwspacemalloc(CtrlType *ctrl, int n)
+{
+  n += n%2; /* This is a fix for 64 bit machines that require 8-byte pointer allignment */
+
+  ctrl->wspace.ccore += n;
+  ASSERT(ctrl->wspace.ccore <= ctrl->wspace.maxcore);
+  return ctrl->wspace.core + ctrl->wspace.ccore - n;
+}
+
+/*************************************************************************
+* This function frees space from the core 
+**************************************************************************/
+void idxwspacefree(CtrlType *ctrl, int n)
+{
+  n += n%2; /* This is a fix for 64 bit machines that require 8-byte pointer allignment */
+
+  ctrl->wspace.ccore -= n;
+  ASSERT(ctrl->wspace.ccore >= 0);
+}
+
+
+/*************************************************************************
+* This function allocate space from the core 
+**************************************************************************/
+float *fwspacemalloc(CtrlType *ctrl, int n)
+{
+  n += n%2; /* This is a fix for 64 bit machines that require 8-byte pointer allignment */
+
+  ctrl->wspace.ccore += n;
+  ASSERT(ctrl->wspace.ccore <= ctrl->wspace.maxcore);
+  return (float *) (ctrl->wspace.core + ctrl->wspace.ccore - n);
+}
+
+/*************************************************************************
+* This function frees space from the core 
+**************************************************************************/
+void fwspacefree(CtrlType *ctrl, int n)
+{
+  n += n%2; /* This is a fix for 64 bit machines that require 8-byte pointer allignment */
+
+  ctrl->wspace.ccore -= n;
+  ASSERT(ctrl->wspace.ccore >= 0);
+}
+
 
 
 /*************************************************************************
 * This function creates a CoarseGraphType data structure and initializes
 * the various fields
 **************************************************************************/
-CoarseGraphType *CreateGraph(void)
+GraphType *CreateGraph(void)
 {
-  CoarseGraphType *graph;
+  GraphType *graph;
 
-  graph = (CoarseGraphType *)GKmalloc(sizeof(CoarseGraphType), "CreateCoarseGraph: graph");
+  graph = (GraphType *)GKmalloc(sizeof(GraphType), "CreateCoarseGraph: graph");
 
   InitGraph(graph);
 
@@ -79,193 +164,45 @@ CoarseGraphType *CreateGraph(void)
 
 
 /*************************************************************************
-* This function takes the head of a coarsened graph list and frees memory
-* stored in its arrays. It also frees the memory for the edges/ewgts of
-* the head of the list.
-**************************************************************************/
-void FreeRootGraph(CoarseGraphType *graph)
-{
-  GKfree(graph->vtxs, graph->cmap, graph->match,
-         graph->where, graph->id, graph->ed,
-         graph->htable.ht, 
-         graph->label,
-         graph->rinfo, graph->kpwgts,
-         -1);
-
-  graph->vtxs = NULL;
-  graph->cmap = NULL;
-  graph->match = NULL;
-  graph->where = NULL;
-  graph->id = NULL;
-  graph->ed = NULL;
-  graph->htable.ht = NULL;
-  graph->label = NULL;
-  graph->rinfo = NULL;
-  graph->kpwgts = NULL;
-
-  ASSERT(graph->coarser == NULL);
-}
-
-
-/*************************************************************************
-* This function frees a graph minus its edges
-**************************************************************************/
-void FreeGraph(CoarseGraphType *graph)
-{
-  int i;
-
-  FreeEdgePool(graph->nedges);
-
-  GKfree(graph->vtxs, graph->allvtxs, graph->cmap, graph->match,
-         graph->where, graph->id, graph->ed,
-         graph->htable.ht, 
-         graph->label,
-         graph->rinfo, graph->kpwgts,
-         -1);
-
-  free(graph);
-}
-
-
-/*************************************************************************
 * This function creates a CoarseGraphType data structure and initializes
 * the various fields
 **************************************************************************/
-void InitGraph(CoarseGraphType *graph) 
+void InitGraph(GraphType *graph) 
 {
-  graph->tvwgt = -1;
-  graph->nvtxs = -1;
-  graph->nedges = -1;
-  graph->allvtxs = NULL;
-  graph->vtxs = NULL;
-  graph->cmap = NULL;
-  graph->match = NULL;
-  graph->coarser = NULL;
-  graph->finer = NULL;
-  graph->level = -1;
+  graph->gdata = graph->rdata = NULL;
 
-  graph->where = NULL;
-  graph->id = NULL;
-  graph->ed = NULL;
-  graph->pwgts[0] = graph->pwgts[0] = graph->mincut = -1;
+  graph->nvtxs = graph->nedges = -1;
+  graph->mincut = graph->minvol = -1;
 
-  graph->kpwgts = NULL;
-  graph->rinfo = NULL;
-
-  graph->nbnd = -1;
-  graph->htable.size = -1;
-  graph->htable.nelem = -1;
-  graph->htable.ht = NULL;
-
+  graph->xadj = graph->vwgt = graph->adjncy = graph->adjwgt = NULL;
+  graph->adjwgtsum = NULL;
   graph->label = NULL;
+  graph->cmap = NULL;
 
-}
+  graph->where = graph->pwgts = NULL;
+  graph->id = graph->ed = NULL;
+  graph->bndptr = graph->bndind = NULL;
+  graph->rinfo = NULL;
+  graph->vrinfo = NULL;
+  graph->nrinfo = NULL;
 
+  graph->ncon = -1;
+  graph->nvwgt = NULL;
+  graph->npwgts = NULL;
 
+  graph->vsize = NULL;
 
-/*************************************************************************
-* This function initializes the space for edges and ewgts
-**************************************************************************/
-void ResetPools(void)
-{
-  __Ctrl->lastedge = 0;
-}
+  graph->coarser = graph->finer = NULL;
 
-
-/*************************************************************************
-* This function returns a pointer to the current edge in edges
-**************************************************************************/
-EdgeType *GetEdgePool(void)
-{
-  return __Ctrl->edgepool + __Ctrl->lastedge;
-}
-
-
-/*************************************************************************
-* This function sets the end of the edge pool
-**************************************************************************/
-int SetEdgePool(int added)
-{
-  __Ctrl->lastedge += added;
-
-  if (__Ctrl->lastedge > __Ctrl->maxedges) { /* An error condition */
-    if (2*(__Ctrl->lastedge-__Ctrl->maxedges) < (__Ctrl->maxicore-__Ctrl->cicore)) {
-      /* We are at the free memory of icore, no need to exit */
-      return 0;
-    }
-    errexit("\nedgepool and ewgtpool have been exhusted! Used %d Had %d (%d %d)", 
-       __Ctrl->lastedge, __Ctrl->maxedges, __Ctrl->cicore, __Ctrl->maxicore);
-  }
-  return 1;
 }
 
 /*************************************************************************
-* This function sets the end of the edge pool
+* This function deallocates any memory stored in a graph
 **************************************************************************/
-void FreeEdgePool(int freed)
+void FreeGraph(GraphType *graph) 
 {
-  __Ctrl->lastedge -= freed;
 
-  if (__Ctrl->lastedge < 0)
-    errexit("You are freeing the edgepool faster than you fill it up!\n");
+  GKfree(&graph->gdata, &graph->nvwgt, &graph->rdata, &graph->npwgts, LTERM);
+  free(graph);
 }
 
-
-/*************************************************************************
-* This function returns the number of edges left in the pool
-**************************************************************************/
-int EdgePoolSizeLeft(void)
-{
-  return __Ctrl->maxedges - __Ctrl->lastedge;
-}
-
-
-/*************************************************************************
-* This function returns a pointer to k ext degrees
-**************************************************************************/
-EdgeType *GetnExtDegrees(int n)
-{
-  __Ctrl->lastdegree += n;
-  if (__Ctrl->lastdegree > __Ctrl->maxdegrees)
-    errexit("Run out of External Degrees: %d %d\n", __Ctrl->lastdegree, __Ctrl->maxdegrees);
-
-  return __Ctrl->degrees + (__Ctrl->lastdegree-n);
-}
-
-/*************************************************************************
-* This function initializes the space for edges and ewgts
-**************************************************************************/
-void ResetExtDegrees()
-{
-  __Ctrl->maxdegrees = __Ctrl->maxedges - __Ctrl->lastedge;
-  __Ctrl->lastdegree = 0;
-  __Ctrl->degrees = __Ctrl->edgepool + __Ctrl->lastedge;
-}
-
-
-/*************************************************************************
-* This function allocates n words from icore
-**************************************************************************/
-int *icoremalloc(int n, char *msg, int flag)
-{
-  if (n > 2*__Ctrl->maxedges+__Ctrl->maxicore - (2*__Ctrl->lastedge+__Ctrl->cicore)) {
-    if (flag)
-      return NULL;
-    else 
-      errexit("Memory allocation failed for %s, requested %d, had %d", msg, n, __Ctrl->maxicore-__Ctrl->cicore);
-  }
-
-  __Ctrl->cicore += n;
-  return (__Ctrl->icore - __Ctrl->cicore);
-}
-
-/*************************************************************************
-* This function frees n words from icore
-**************************************************************************/
-void icorefree(int n)
-{
-  if (__Ctrl->cicore - n < 0)
-    errexit("You are freeing icore faster than you are filling it up!");
-
-  __Ctrl->cicore -= n;
-}

@@ -1,16 +1,17 @@
 /*
+ * Copyright 1997, Regents of the University of Minnesota
+ *
  * mincover.c
  *
  * This file implements the minimum cover algorithm
  *
- * Started 11/2/94
+ * Started 8/1/97
  * George
  *
- * $Id: mincover.c,v 1.1.1.1 2000-09-15 08:23:12 fmk Exp $
- *
+ * $Id: mincover.c,v 1.2 2008-03-31 21:07:06 fmk Exp $
  */
 
-#include "multilevel.h"
+#include <metis.h>
 
 /*************************************************************************
 * Constants used by mincover algorithm
@@ -38,18 +39,18 @@
 *  cover : the actual cover (array)
 *  csize : the size of the cover
 **************************************************************************/
-void MinCover(int *xadj, int *adjncy, int asize, int bsize, int *cover, int *csize)
+void MinCover(idxtype *xadj, idxtype *adjncy, int asize, int bsize, idxtype *cover, int *csize)
 {
   int i, j;
-  int *mate, *queue, *flag, *level, *lst;
+  idxtype *mate, *queue, *flag, *level, *lst;
   int fptr, rptr, lstptr;
   int row, maxlevel, col;
 
-  mate = ismalloc(bsize, -1, "MinCover: mate");
-  flag = imalloc(bsize, "MinCover: flag");
-  level = imalloc(bsize, "MinCover: level");
-  queue = imalloc(bsize, "MinCover: queue");
-  lst = imalloc(bsize, "MinCover: lst");
+  mate = idxsmalloc(bsize, -1, "MinCover: mate");
+  flag = idxmalloc(bsize, "MinCover: flag");
+  level = idxmalloc(bsize, "MinCover: level");
+  queue = idxmalloc(bsize, "MinCover: queue");
+  lst = idxmalloc(bsize, "MinCover: lst");
 
   /* Get a cheap matching */
   for (i=0; i<asize; i++) {
@@ -114,7 +115,7 @@ void MinCover(int *xadj, int *adjncy, int asize, int bsize, int *cover, int *csi
 
   MinCover_Decompose(xadj, adjncy, asize, bsize, mate, cover, csize);
 
-  GKfree(mate, flag, level, queue, lst, -1);
+  GKfree(&mate, &flag, &level, &queue, &lst, LTERM);
 
 }
 
@@ -122,7 +123,7 @@ void MinCover(int *xadj, int *adjncy, int asize, int bsize, int *cover, int *csi
 /*************************************************************************
 * This function perfoms a restricted DFS and augments matchings
 **************************************************************************/
-int MinCover_Augment(int *xadj, int *adjncy, int col, int *mate, int *flag, int *level, int maxlevel)
+int MinCover_Augment(idxtype *xadj, idxtype *adjncy, int col, idxtype *mate, idxtype *flag, idxtype *level, int maxlevel)
 {
   int i;
   int row = -1;
@@ -159,13 +160,13 @@ int MinCover_Augment(int *xadj, int *adjncy, int col, int *mate, int *flag, int 
 * min-cover.
 * REF: Pothen ACMTrans. on Amth Software
 **************************************************************************/
-void MinCover_Decompose(int *xadj, int *adjncy, int asize, int bsize, int *mate, int *cover, int *csize)
+void MinCover_Decompose(idxtype *xadj, idxtype *adjncy, int asize, int bsize, idxtype *mate, idxtype *cover, int *csize)
 {
   int i, k;
-  int *where;
+  idxtype *where;
   int card[10];
 
-  where = imalloc(bsize, "MinCover_Decompose: where");
+  where = idxmalloc(bsize, "MinCover_Decompose: where");
   for (i=0; i<10; i++)
     card[i] = 0;
 
@@ -208,7 +209,7 @@ void MinCover_Decompose(int *xadj, int *adjncy, int asize, int bsize, int *mate,
 * This function perfoms a dfs starting from an unmatched col node
 * forming alternate paths
 **************************************************************************/
-void MinCover_ColDFS(int *xadj, int *adjncy, int root, int *mate, int *where, int flag)
+void MinCover_ColDFS(idxtype *xadj, idxtype *adjncy, int root, idxtype *mate, idxtype *where, int flag)
 {
   int i;
 
@@ -233,7 +234,7 @@ void MinCover_ColDFS(int *xadj, int *adjncy, int root, int *mate, int *where, in
 * This function perfoms a dfs starting from an unmatched col node
 * forming alternate paths
 **************************************************************************/
-void MinCover_RowDFS(int *xadj, int *adjncy, int root, int *mate, int *where, int flag)
+void MinCover_RowDFS(idxtype *xadj, idxtype *adjncy, int root, idxtype *mate, idxtype *where, int flag)
 {
   int i;
 
