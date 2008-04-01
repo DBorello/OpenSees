@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.113 $
-// $Date: 2008-03-17 23:29:40 $
+// $Revision: 1.114 $
+// $Date: 2008-04-01 00:35:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -2301,12 +2301,21 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 #ifdef _MUMPS
 
   else if (strcmp(argv[1],"Mumps") == 0) {
+
+    int icntl14 = 20;    
+
+    if (argc > 3) {
+      if (strcmp(argv[2],"-ICNTL14") == 0) {
+	if (Tcl_GetInt(interp, argv[3], &icntl14) != TCL_OK)	
+	  ;
+      }
+    }    
     
 #ifdef _PARALLEL_PROCESSING
-    MumpsParallelSolver *theSolver = new MumpsParallelSolver();
+    MumpsParallelSolver *theSolver = new MumpsParallelSolver(icntl14);
     theSOE = new MumpsParallelSOE(*theSolver);
 #else
-    MumpsSolver *theSolver = new MumpsSolver();
+    MumpsSolver *theSolver = new MumpsSolver(icntl14);
     theSOE = new MumpsSOE(*theSolver);
 
 #endif
