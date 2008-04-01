@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-05-30 01:56:55 $
+// $Revision: 1.3 $
+// $Date: 2008-04-01 00:35:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsParallelSolver.h,v $
                                                                         
                                                                         
@@ -54,9 +54,10 @@ class MumpsParallelSOE;
 class MumpsParallelSolver : public LinearSOESolver
 {
   public:
-  MumpsParallelSolver();
-  MumpsParallelSolver(int MPI_COMM,
-		      int ICNTL7 =7);
+  MumpsParallelSolver(int ICNTL14 = 20);
+  MumpsParallelSolver(int MPI_COMM, 		      
+		      int ICNTL7,
+		      int ICNTL14 = 20);
 
   virtual ~MumpsParallelSolver();
   
@@ -76,6 +77,7 @@ class MumpsParallelSolver : public LinearSOESolver
 
   int rank;
   int np;
+  int icntl14;
 
   DMUMPS_STRUC_C id;
 };

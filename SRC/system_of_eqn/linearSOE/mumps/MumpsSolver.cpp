@@ -20,8 +20,8 @@
                                                                         
 // Description: This file contains the implementation of MumpsSolver
 
-// $Revision: 1.5 $
-// $Date: 2008-03-20 22:03:33 $
+// $Revision: 1.6 $
+// $Date: 2008-04-01 00:35:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsSolver.cpp,v $
 
 // Written: fmk 
@@ -37,13 +37,15 @@
 
 #include <mpi.h>
 
-MumpsSolver::MumpsSolver()
+MumpsSolver::MumpsSolver(int ICNTL14)
   :LinearSOESolver(SOLVER_TAGS_MumpsSolver),
    theMumpsSOE(0)
 {
   init = false;
   id.job=-1; 
   id.par=1; 
+  id.ICNTL(14) = ICNTL14;
+
 #ifdef _OPENMPI
   id.comm_fortran=-987654;
 #else
@@ -52,7 +54,7 @@ MumpsSolver::MumpsSolver()
 }
 
 
-MumpsSolver::MumpsSolver(int ICNTL7)
+MumpsSolver::MumpsSolver(int ICNTL7, int ICNTL14)
   :LinearSOESolver(SOLVER_TAGS_MumpsSolver),
    theMumpsSOE(0)
 {
@@ -66,6 +68,7 @@ MumpsSolver::MumpsSolver(int ICNTL7)
   id.comm_fortran=MPI_COMM_WORLD;
 #endif
 
+  id.ICNTL(14) = ICNTL14;
   id.ICNTL(7)=ICNTL7;;
 }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.6 $
-// $Date: 2008-03-20 22:03:33 $
+// $Revision: 1.7 $
+// $Date: 2008-04-01 00:35:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsParallelSolver.cpp,v $
 
 // Written: fmk 
@@ -32,22 +32,25 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <OPS_Globals.h>
+#include <ID.h>
 
 #define ICNTL(I) icntl[(I)-1] /* macro s.t. indices match documentation */
 
 #include <mpi.h>
 
-MumpsParallelSolver::MumpsParallelSolver()
+MumpsParallelSolver::MumpsParallelSolver(int ICNTL14)
   :LinearSOESolver(SOLVER_TAGS_MumpsParallelSolver),
    theMumpsSOE(0), rank(0), np(0)
 {
+  icntl14 = ICNTL14;
   init = false;
 }
 
-MumpsParallelSolver::MumpsParallelSolver(int mpi_comm, int ICNTL7)
+MumpsParallelSolver::MumpsParallelSolver(int mpi_comm, int ICNTL7, int ICNTL14)
   :LinearSOESolver(SOLVER_TAGS_MumpsParallelSolver),
    theMumpsSOE(0), rank(0), np(0)
 {
+  icntl14 = ICNTL14;
   init = false;
 }
 
@@ -74,6 +77,8 @@ MumpsParallelSolver::solve(void)
 
   // No outputs 
   id.ICNTL(1)=-1; id.ICNTL(2)=-1; id.ICNTL(3)=-1; id.ICNTL(4)=0;
+
+  id.ICNTL(14)=icntl14; 
   
   // increment row and col A values by 1 for mumps fortran indexing
   for (int i=0; i<nnz; i++) {
@@ -154,6 +159,8 @@ MumpsParallelSolver::setSize()
 
   // No outputs 
   id.ICNTL(1)=-1; id.ICNTL(2)=-1; id.ICNTL(3)=-1; id.ICNTL(4)=0; 
+
+  id.ICNTL(14)=icntl14; 
   
   int nnz = theMumpsSOE->nnz;
   int *colA = theMumpsSOE->colA;
@@ -196,6 +203,11 @@ int
 MumpsParallelSolver::sendSelf(int cTag, Channel &theChannel)
 {
   // nothing to do
+  ID icntlData(2);
+
+  icntlData(1) = icntl14;
+  theChannel.sendID(0, cTag, icntlData);
+
   return 0;
 }
 
@@ -205,6 +217,11 @@ MumpsParallelSolver::recvSelf(int ctag,
 		      FEM_ObjectBroker &theBroker)
 {
   // nothing to do
+  ID icntlData(2);
+
+  theChannel.recvID(0, ctag, icntlData);
+
+  icntl14 = icntlData(1);
   return 0;
 }
 
