@@ -94,7 +94,7 @@ RELIABILITY_OBJS = $(FE)/domain/pattern/DiscretizedRandomProcessSeries.o \
 		$(FE)/reliability/analysis/telm/GeneralRandGenerator.o \
 		$(FE)/reliability/analysis/telm/OutCrossingResults.o \
 		$(FE)/reliability/analysis/telm/StaticAnalyzer.o \
-		$(FE)/reliability/analysis/telm/GFunEachstepEvaluator.o \
+		$(FE)/reliability/analysis/telm/GFunEachStepEvaluator.o \
 		$(FE)/reliability/analysis/telm/PerformanceFunctionCoeff.o \
 		$(FE)/reliability/analysis/telm/StatRandomVibrationSimulation.o \
 		$(FE)/reliability/analysis/telm/InitialPointBuilder.o \
