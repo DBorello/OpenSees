@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2008-03-13 22:32:30 $
+// $Revision: 1.13 $
+// $Date: 2008-04-09 23:15:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/GFunEvaluator.cpp,v $
 
 
@@ -199,57 +199,52 @@ GFunEvaluator::getDt()
 
 void GFunEvaluator::activateSensitivty(void)
 {
-	opserr << "GFunEvaluator::activateSensitivty() -- This method is not " << endln
-		<< " implemented for the chosen type of GFunEvaluator." << endln;
+
 }
+
 void GFunEvaluator::inactivateSensitivty(void)
 {
-	opserr << "GFunEvaluator::inactivateSensitivty() -- This method is not " << endln
-		<< " implemented for the chosen type of GFunEvaluator." << endln;
+
 }
+
 void GFunEvaluator::setGFunEachStepEvaluator(GFunEachStepEvaluator *pGFunEachStepEvaluator)
 {
-	opserr << "GFunEvaluator::setGFunEachStepEvaluator() -- This method is not " << endln
-		<< " implemented for the chosen type of GFunEvaluator." << endln;
+
 }
+
 void GFunEvaluator::inactivateGFunEachStepEvaluator()
 {
-	opserr << "GFunEvaluator::inactivateGFunEachStepEvaluator() -- This method is not " << endln
-		<< " implemented for the chosen type of GFunEvaluator." << endln;
+
 }
+
 Matrix * GFunEvaluator::getEachStepResult()
 {
-	opserr << "GFunEvaluator::getEachStepResult() -- This method is not " << endln
-		<< " implemented for the chosen type of GFunEvaluator." << endln;
 	return NULL;
 }
+
 Matrix * GFunEvaluator::getEachStepConvFlag()
 {
-	opserr << "GFunEvaluator::getEachStepResult() -- This method is not " << endln
-		<< " implemented for the chosen type of GFunEvaluator." << endln;
 	return NULL;
 }
-void GFunEvaluator::setThreshold(double a){
-	opserr << "GFunEvaluator::setThreshold() -- This method is not " << endln
-		<< " implemented for the chosen type of GFunEvaluator." << endln;
-}
-double GFunEvaluator::getThreshold(){
-	opserr << "GFunEvaluator::getThreshold() -- This method is not " << endln
-		<< " implemented for the chosen type of GFunEvaluator." << endln;
-	return NULL;
-}
-void GFunEvaluator::setPerformFuncCoeffs(TaggedObjectStorage* a){
-	opserr << "GFunEvaluator::setPerformFuncCoeffs() -- This method is not " << endln
-		<< " implemented for the chosen type of GFunEvaluator." << endln;
-}
-void GFunEvaluator::setPerformFuncCoeffIter(PerformanceFunctionCoefficientIter* a){
-	opserr << "GFunEvaluator::setPerformFuncCoeffIter() -- This method is not " << endln
-		<< " implemented for the chosen type of GFunEvaluator." << endln;
+
+void GFunEvaluator::setThreshold(double a)
+{
+
 }
 
+double GFunEvaluator::getThreshold()
+{
+	return 0.0;
+}
+void GFunEvaluator::setPerformFuncCoeffs(TaggedObjectStorage* a) 
+{
 
+}
 
+void GFunEvaluator::setPerformFuncCoeffIter(PerformanceFunctionCoefficientIter* a)
+{
 
+}
 
 double GFunEvaluator::getG2(double g, double littleDt)   //Quan
 {
