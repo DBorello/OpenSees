@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.38 $
-// $Date: 2008-03-13 22:37:51 $
+// $Revision: 1.39 $
+// $Date: 2008-04-10 16:22:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -293,7 +293,7 @@ int TclReliabilityModelBuilder_runOutCrossingAnalysis(ClientData clientData, Tcl
 int TclReliabilityModelBuilder_runSORMAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_runSystemAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_runImportanceSamplingAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-int TclReliabilityModelBuilder_tempCommand(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_printReliability(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_inputCheck(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_getMean(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_getStdv(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
@@ -376,7 +376,7 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
   Tcl_CreateCommand(interp, "runSORMAnalysis",TclReliabilityModelBuilder_runSORMAnalysis,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "runSystemAnalysis",TclReliabilityModelBuilder_runSystemAnalysis,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "runImportanceSamplingAnalysis",TclReliabilityModelBuilder_runImportanceSamplingAnalysis,(ClientData)NULL, NULL);
-  Tcl_CreateCommand(interp, "tempCommand",TclReliabilityModelBuilder_tempCommand,(ClientData)NULL, NULL);
+  Tcl_CreateCommand(interp, "printReliability",TclReliabilityModelBuilder_printReliability,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "inputCheck",TclReliabilityModelBuilder_inputCheck,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "getMean",TclReliabilityModelBuilder_getMean,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "getStdv",TclReliabilityModelBuilder_getStdv,(ClientData)NULL, NULL);
@@ -575,7 +575,7 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
   Tcl_DeleteCommand(theInterp, "runSORMAnalysis");
   Tcl_DeleteCommand(theInterp, "runSystemAnalysis");
   Tcl_DeleteCommand(theInterp, "runImportanceSamplingAnalysis");
-  Tcl_DeleteCommand(theInterp, "tempCommand");
+  Tcl_DeleteCommand(theInterp, "printReliability");
   Tcl_DeleteCommand(theInterp, "inputCheck");
   Tcl_DeleteCommand(theInterp, "getMean");
   Tcl_DeleteCommand(theInterp, "getStdv");
@@ -2204,7 +2204,8 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 	  opserr << "ERROR:: RandomVariable " << rvNumber << " not found in the reliability domain " << endln;
 	  return TCL_ERROR;
 	}
-	int rvIndex = theRV->getIndex();
+	//int rvIndex = theRV->getIndex();
+	int rvIndex = theReliabilityDomain->getRandomVariableIndex(rvNumber);
 
 	if (strcmp(argv[argvCounter],"-parameter") == 0) {
 	  argvCounter++;
@@ -4566,7 +4567,9 @@ TclReliabilityModelBuilder_addStartPoint(ClientData clientData, Tcl_Interp *inte
 		RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
 		//for ( int i=1; i<=nrv; i++ ) {
 		while ((aRandomVariable = rvIter()) != 0) {
-		  int i = aRandomVariable->getIndex();
+		  //int i = aRandomVariable->getIndex();
+		  int tag = aRandomVariable->getTag();
+		  int i = theReliabilityDomain->getRandomVariableIndex(tag);
 		  (*theStartPoint)(i) = aRandomVariable->getMean();
 		}
 	}
@@ -4581,7 +4584,9 @@ TclReliabilityModelBuilder_addStartPoint(ClientData clientData, Tcl_Interp *inte
 		RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
 		//for ( int i=1; i<=nrv; i++ ) {
 		while ((aRandomVariable = rvIter()) != 0) {
-		  int i = aRandomVariable->getIndex();
+		  //int i = aRandomVariable->getIndex();
+		  int tag = aRandomVariable->getTag();
+		  int i = theReliabilityDomain->getRandomVariableIndex(tag);
 		  (*theStartPoint)(i) = aRandomVariable->getStartValue();
 		}
 	}
@@ -5261,7 +5266,9 @@ TclReliabilityModelBuilder_runImportanceSamplingAnalysis(ClientData clientData, 
 				  theReliabilityDomain->getRandomVariables();
 				//for ( int i=1; i<=nrv; i++ ) {
 				while ((aRandomVariable = rvIter()) != 0) {
-				  int i = aRandomVariable->getIndex();
+				  //int i = aRandomVariable->getIndex();
+				  int tag = aRandomVariable->getTag();
+				  int i = theReliabilityDomain->getRandomVariableIndex(tag);
 				  (*theStartPoint)(i) = aRandomVariable->getMean();
 				}
 				opserr << "NOTE: The startPoint is set to the Mean due to the selected sampling analysis type." << endln;
@@ -6541,35 +6548,14 @@ TclReliabilityModelBuilder_inputCheck(ClientData clientData, Tcl_Interp *interp,
 
 //////////////////////////////////////////////////////////////////
 int 
-TclReliabilityModelBuilder_tempCommand(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+TclReliabilityModelBuilder_printReliability(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
-//	opserr << "The temp command does nothing now!" << endln;
-//	return TCL_OK;
+  if (argc > 1)
+    theReliabilityDomain->Print(opserr, 1);
+  else
+    theReliabilityDomain->Print(opserr);
 
-
-	int tag;
-	RandomVariable *rv;
-	if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
-		opserr << "ERROR: Invalid random variable number tag to inverse CDF command." << endln;
-		return TCL_ERROR;
-	}
-	rv = theReliabilityDomain->getRandomVariablePtr(tag);
-	if (rv == 0) {
-		opserr << "ERROR: Invalid tag number to inverse CDF command. " << endln;
-		return TCL_ERROR;
-	}
-
-	double x = 0.25;
-	double p = 0.25;
-
-	opserr << "PDF:    " << rv->getPDFvalue(x)        << endln;
-	opserr << "CDF:    " << rv->getCDFvalue(x)        << endln;
-	opserr << "invCDF: " << rv->getInverseCDFvalue(p) << endln;
-	
-	return TCL_OK;
-
-
-
+  return TCL_OK;
 }
 
 
