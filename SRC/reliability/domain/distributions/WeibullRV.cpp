@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-02-17 21:27:23 $
+// $Revision: 1.8 $
+// $Date: 2008-04-10 22:11:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/WeibullRV.cpp,v $
 
 
@@ -185,7 +185,7 @@ WeibullRV::function141(double xk, double cov, double mean)
 	if (cov-vy < 0.0) 
 		function141(xk,cov,mean);
 	else if (cov-vy == 0.0) 
-		function144(xk,cov,mean);
+		function144(xk,gm1,mean);
 	else 
 		function142(xk,cov,mean);
 }
@@ -202,7 +202,7 @@ WeibullRV::function142(double xk, double cov, double mean)
 	if (cov-vy < 0.0) 
 		function143(xk,cov,mean);
 	else if (cov-vy == 0.0) 
-		function144(xk,cov,mean);
+		function144(xk,gm1,mean);
 	else 
 		function142(xk,cov,mean);
 }
@@ -219,9 +219,9 @@ WeibullRV::function143(double xk, double cov, double mean)
 	if (cov-vy < 0.0) 
 		function143(xk,cov,mean);
 	else if (cov-vy == 0.0) 
-		function144(xk,cov,mean);
+		function144(xk,gm1,mean);
 	else 
-		function144(xk,cov,mean);
+		function144(xk,gm1,mean);
 
 
 }
