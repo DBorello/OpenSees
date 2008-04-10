@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2008-04-10 00:02:58 $
+// $Revision: 1.14 $
+// $Date: 2008-04-10 00:29:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.cpp,v $
 
 
@@ -297,11 +297,14 @@ ReliabilityDomain::getRandomVariablePtr(int tag)
 RandomVariable *
 ReliabilityDomain::getRandomVariablePtrFromIndex(int index)
 {
-  TaggedObject *theComponent = theRandomVariablesPtr->getComponentPtr(rvIndex[index]);
-  if ( theComponent == 0 )
+  if (index >= 0 && index < numRandomVariables)
+    return this->getRandomVariablePtr(rvIndex[index]);
+
+  else {
+    opserr << "ReliabilityDomain::getRandomVariablePtrFromIndex -- index " << index << " out of bounds 0 ... " << numRandomVariables-1 << endln;
     return 0;
-  RandomVariable *result = (RandomVariable *) theComponent;
-  return result;
+  }
+
 }
 
 int
@@ -313,6 +316,11 @@ ReliabilityDomain::getRandomVariableIndex(int tag)
   for (index = 0; index < numRandomVariables; index++) {
     if (rvIndex[index] == tag)
       break;
+  }
+
+  if (index == numRandomVariables) {
+    opserr << "ReliabilityDomain::getRandomVariableIndex -- rv with tag " << tag << " not found" << endln;
+    return -1;
   }
 
   return index;
