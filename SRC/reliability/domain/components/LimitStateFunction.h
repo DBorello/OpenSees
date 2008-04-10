@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-10-25 20:10:21 $
+// $Revision: 1.10 $
+// $Date: 2008-04-10 16:24:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.h,v $
 
 
@@ -51,9 +51,6 @@ public:
 	char *getTokenizedExpression();
 	int addExpression(char *expression);
 	int removeAddedExpression();
-
-	int setIndex(int index) {lsfIndex = index;return 0;}
-	int getIndex() {return lsfIndex;}
 
 	// FORM analysis:
 	double GFunValueAtStartPt;
@@ -87,8 +84,6 @@ public:
 protected:
 
 private:
-	int lsfIndex; // in range 0,...,nlsf-1 regardless of tag
-
 	void initializeFORMAnalysis(void);
 	void initializeSimulationAnalysis(void);
 	void initializeSORMAnalysis(void);

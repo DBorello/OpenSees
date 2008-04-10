@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-10-26 17:44:42 $
+// $Revision: 1.8 $
+// $Date: 2008-04-10 16:24:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/CorrelationCoefficient.cpp,v $
 
 
@@ -33,13 +33,14 @@
 
 #include <CorrelationCoefficient.h>
 #include <classTags.h>
+#include <OPS_Globals.h>
 
 CorrelationCoefficient::CorrelationCoefficient(int passedTag,
-							int passedRv1,
-							int passedRv2,
-							double passedCorrelation)
+					       int passedRv1,
+					       int passedRv2,
+					       double passedCorrelation)
   :ReliabilityDomainComponent(passedTag, CORRELATION_COEFFICIENT),
-   rv1(passedRv1), rv2(passedRv2), correlation(passedCorrelation), ccIndex(-1)
+   rv1(passedRv1), rv2(passedRv2), correlation(passedCorrelation)
 {
 
 }
@@ -54,6 +55,10 @@ CorrelationCoefficient::~CorrelationCoefficient()
 void
 CorrelationCoefficient::Print(OPS_Stream &s, int flag)  
 {
+  s << "Correlation Coefficient, tag: " << this->getTag() << endln;
+  s << "\ttag, RV i: " << rv1 << endln;
+  s << "\ttag, RV j: " << rv2 << endln;
+  s << "\tcorrelation: " << correlation << endln;
 }
 
 

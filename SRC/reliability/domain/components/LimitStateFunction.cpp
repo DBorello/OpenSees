@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-10-25 20:10:21 $
+// $Revision: 1.11 $
+// $Date: 2008-04-10 16:24:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.cpp,v $
 
 
@@ -38,7 +38,7 @@
 
 LimitStateFunction::LimitStateFunction(	int passedTag, 
 									    TCL_Char *passedExpression)
-  :ReliabilityDomainComponent(passedTag, LIMIT_STATE_FUNCTION), lsfIndex(-1)
+  :ReliabilityDomainComponent(passedTag, LIMIT_STATE_FUNCTION)
 {
 	strcpy(originalExpression,passedExpression);
 
@@ -98,6 +98,10 @@ LimitStateFunction::~LimitStateFunction()
 void
 LimitStateFunction::Print(OPS_Stream &s, int flag)  
 {
+  s << "Limit State Function #" << this->getTag() << endln;
+  s << "Expression: " << this->getExpression() << endln;
+  s << "Tokenized Expression: " << this->getTokenizedExpression() << endln;
+  s << endln;
 }
 
 
