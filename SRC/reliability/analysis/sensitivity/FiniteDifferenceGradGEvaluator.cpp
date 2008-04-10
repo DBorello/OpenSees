@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2008-02-29 19:47:20 $
+// $Revision: 1.9 $
+// $Date: 2008-04-10 00:05:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/FiniteDifferenceGradGEvaluator.cpp,v $
 
 
@@ -154,7 +154,11 @@ FiniteDifferenceGradGEvaluator::computeGradG(double gFunValue,
 	//for ( i=0 ; i<numberOfRandomVariables ; i++ ) {
 	while ((theRandomVariable = rvIter()) != 0) {
 	  
-	  int i = theRandomVariable->getIndex();
+	  int rvTag = theRandomVariable->getTag();
+	  //int i = theRandomVariable->getIndex();
+	  int i = theReliabilityDomain->getRandomVariableIndex(rvTag);
+
+	  //opserr << "tag: " << rvTag << ", index: " << i << endln;
 
 		// Get the standard deviation
 		stdv = theRandomVariable->getStdv();
@@ -247,7 +251,9 @@ FiniteDifferenceGradGEvaluator::computeAllGradG(const Vector &gFunValues,
 	//for (int i=1; i<=nrv; i++) {
 	while ((theRandomVariable = rvIter()) != 0) {
 
-	  int i = theRandomVariable->getIndex();
+	  int rvTag = theRandomVariable->getTag();
+	  //int i = theRandomVariable->getIndex();
+	  int i = theReliabilityDomain->getRandomVariableIndex(rvTag);
 
 		// Get the standard deviation
 		stdv = theRandomVariable->getStdv();

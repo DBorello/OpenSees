@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-10-31 21:39:58 $
+// $Revision: 1.14 $
+// $Date: 2008-04-10 00:05:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FORMAnalysis.cpp,v $
 
 
@@ -158,8 +158,9 @@ FORMAnalysis::analyze()
 	    RandomVariable *theRV;
 	    //for ( int j=1; j<=numRV; j++ ) {
 	    while ((theRV = rvIter()) != 0) {
-	      int j = theRV->getIndex();
+	      //int j = theRV->getIndex();
 	      int rvTag = theRV->getTag();
+	      int j = theReliabilityDomain->getRandomVariableIndex(rvTag);
 	      DuStarDmean = theProbabilityTransformation->meanSensitivityOf_x_to_u(xStar,rvTag);
 	      DuStarDstdv = theProbabilityTransformation->stdvSensitivityOf_x_to_u(xStar,rvTag);
 	      dBetaDmean = alpha^DuStarDmean;
@@ -225,8 +226,10 @@ FORMAnalysis::analyze()
 	  RandomVariable *theRV;
 	  //for (int i=0;  i<xStar.Size(); i++) {
 	  while ((theRV = rvIter()) != 0) {
-	    int i = theRV->getIndex();
-	    outputFile << "#  " <<setw(3)<<theRV->getTag()<<" ";
+	    //int i = theRV->getIndex();
+	    int tag = theRV->getTag();
+	    int i = theReliabilityDomain->getRandomVariableIndex(tag);
+	    outputFile << "#  " <<setw(3)<<tag<<" ";
 	    outputFile.setf(ios::scientific, ios::floatfield);
 	    if (xStar(i)<0.0) { outputFile << "-"; }
 	    else { outputFile << " "; }

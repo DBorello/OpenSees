@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-11-06 01:58:00 $
+// $Revision: 1.7 $
+// $Date: 2008-04-10 00:05:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FOSMAnalysis.cpp,v $
 
 
@@ -107,7 +107,8 @@ FOSMAnalysis::analyze(void)
 	RandomVariable *aRandomVariable;
 	//for (i=1; i<=nrv; i++) {
 	while ((aRandomVariable = rvIter()) != 0) {
-	  int i = aRandomVariable->getIndex();
+	  int tag = aRandomVariable->getTag();
+	  int i = theReliabilityDomain->getRandomVariableIndex(tag);
 	  meanVector(i) = aRandomVariable->getMean();
 	  stdvVector(i) = aRandomVariable->getStdv();
 	}
@@ -182,8 +183,10 @@ FOSMAnalysis::analyze(void)
 		  opserr << "FOSMAnalysis::analyze -- random variable with tag " << rv2 << " not found in domain" << endln;
 		  return -1;
 		}
-		int i1 = rv1Ptr->getIndex();
-		int i2 = rv2Ptr->getIndex();
+		//int i1 = rv1Ptr->getIndex();
+		//int i2 = rv2Ptr->getIndex();
+		int i1 = theReliabilityDomain->getRandomVariableIndex(rv1);
+		int i2 = theReliabilityDomain->getRandomVariableIndex(rv2);
 		covariance = correlation*stdvVector(i1)*stdvVector(i2);
 		covMatrix(i1,i2) = covariance;
 		covMatrix(i2,i1) = covariance;
@@ -250,8 +253,9 @@ FOSMAnalysis::analyze(void)
 		rvIter.reset();
 		//for (int i=0;  i<nrv; i++) {
 		while ((aRandomVariable = rvIter()) != 0) {
-		  int i = aRandomVariable->getIndex();
-		  outputFile << "#       " <<setw(3)<<aRandomVariable->getTag()<<"              ";
+		  int tag = aRandomVariable->getTag();
+		  int i = theReliabilityDomain->getRandomVariableIndex(tag);
+		  outputFile << "#       " <<setw(3)<< tag <<"              ";
 		  outputFile << "";
 		  if (importance(i) < 0.0)
 		    outputFile << "-"; 

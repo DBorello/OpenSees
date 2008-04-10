@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2008-03-13 22:33:36 $
+// $Revision: 1.13 $
+// $Date: 2008-04-10 00:05:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/OpenSeesGradGEvaluator.cpp,v $
 
 
@@ -178,7 +178,8 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 			theRandomVariable = theReliabilityDomain->getRandomVariablePtr(rvTag);
 
 			double stdv = theRandomVariable->getStdv();
-			int rvIndex = theRandomVariable->getIndex();
+			//int rvIndex = theRandomVariable->getIndex();
+			int rvIndex = theReliabilityDomain->getRandomVariableIndex(rvTag);
 
 			sprintf(tclAssignment , "set x_%d  %35.20f", rvTag, (passed_x(rvIndex)+perturbationFactor*stdv) );
 			if (Tcl_Eval( theTclInterp, tclAssignment) == TCL_ERROR) {
@@ -264,8 +265,9 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 			RandomVariable *theRV;
 			//for (int i=1; i<=nrv; i++) {
 			while ((theRV = rvIter()) != 0) {
-			  int i = theRV->getIndex();
 			  int rvTag = theRV->getTag();
+			  //int i = theRV->getIndex();
+			  int i = theReliabilityDomain->getRandomVariableIndex(rvTag);
 			  sprintf(tclAssignment , "set sens [sensNodeVel %d %d %d ]",nodeNumber,direction,i);
 			  if (Tcl_Eval( theTclInterp, tclAssignment) == TCL_ERROR) {
 			    opserr << "ERROR OpenSeesGradGEvaluator -- Tcl_Eval returned error" << endln;
@@ -368,8 +370,9 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 			RandomVariable *theRV;
 			//for (int i=1; i<=nrv; i++) {
 			while ((theRV = rvIter()) != 0) {
-			  int i = theRV->getIndex();
 			  int rvTag = theRV->getTag();
+			  //int i = theRV->getIndex();
+			  int i = theReliabilityDomain->getRandomVariableIndex(rvTag);
 			  sprintf(tclAssignment , "set sens [sensNodeDisp %d %d %d ]",nodeNumber,direction,i);
 			  if (Tcl_Eval( theTclInterp, tclAssignment) == TCL_ERROR) {
 			    opserr << theTclInterp->result << endln;
@@ -456,8 +459,9 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 		      RandomVariable *theRV;
 		      //for (int i=1; i<=nrv; i++) {
 		      while ((theRV = rvIter()) != 0) {
-			int i = theRV->getIndex();
 			int rvTag = theRV->getTag();
+			//int i = theRV->getIndex();
+			int i = theReliabilityDomain->getRandomVariableIndex(rvTag);
 			sprintf(tclAssignment , "set sens [sensSectionForce %d %d %d %d]",eleNumber,sectionNumber,rowNumber,i);
 			if (Tcl_Eval( theTclInterp, tclAssignment) == TCL_ERROR) {
 			  opserr << "ERROR OpenSeesGradGEvaluator -- Tcl_Eval returned error" << endln;

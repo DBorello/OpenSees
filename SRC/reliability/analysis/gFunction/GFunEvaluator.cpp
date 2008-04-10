@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2008-04-09 23:15:03 $
+// $Revision: 1.14 $
+// $Date: 2008-04-10 00:05:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/GFunEvaluator.cpp,v $
 
 
@@ -122,7 +122,8 @@ GFunEvaluator::evaluateG(const Vector &x)
 		if ( strncmp(tokenPtr, "x",1) == 0) {
 			int rvNum;
 			sscanf(tempchar,"x_%i",&rvNum);
-			sprintf(tclAssignment , "set x_%d  %15.5f", rvNum, x(rvNum-1) );
+			int index = theReliabilityDomain->getRandomVariableIndex(rvNum);
+			sprintf(tclAssignment , "set x_%d  %15.5f", rvNum, x(index) );
 			Tcl_Eval( theTclInterp, tclAssignment);
 		}
 		else if ( strncmp(tokenPtr, "file",4) == 0) {
