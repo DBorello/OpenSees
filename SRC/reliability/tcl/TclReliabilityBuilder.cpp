@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.40 $
-// $Date: 2008-04-10 18:11:14 $
+// $Revision: 1.41 $
+// $Date: 2008-04-10 18:23:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -8816,45 +8816,58 @@ TclReliabilityModelBuilder_getBetaFORM(ClientData clientData, Tcl_Interp *interp
 int 
 TclReliabilityModelBuilder_getGammaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
-  if (argc < 3) {
+  if (argc < 2) {
     opserr << "ERROR: Invalid number of arguments to getGammaFORM command." << endln;
     return TCL_ERROR;
   }
 
-  int lsfTag, rvTag;
+  int lsfTag;
   if (Tcl_GetInt(interp, argv[1], &lsfTag) != TCL_OK) {
     opserr << "WARNING gammaFORM lsfTag? rvTag? - could not read lsfTag\n";
     return TCL_ERROR;	        
-  }   
-  if (Tcl_GetInt(interp, argv[2], &rvTag) != TCL_OK) {
-    opserr << "WARNING gammaFORM lsfTag? rvTag? - could not read rvTag\n";
-    return TCL_ERROR;	        
-  }   
+  }
 
   LimitStateFunction *theLSF =
     theReliabilityDomain->getLimitStateFunctionPtr(lsfTag);
-
+  
   if (theLSF == 0) {
     opserr << "WARNING gammaFORM LSF with tag " << lsfTag << " not found\n";
     return TCL_ERROR;	        
   }
 
-  RandomVariable *theRV =
-    theReliabilityDomain->getRandomVariablePtr(rvTag);
-
-  if (theRV == 0) {
-    opserr << "WARNING gammaFORM RV with tag " << rvTag << " not found\n";
-    return TCL_ERROR;	        
-  }
-
   const Vector &gammaVec = theLSF->getFORM_gamma();
-  int index = theReliabilityDomain->getRandomVariableIndex(rvTag);
-  double gamma = gammaVec(index);
-
+  
   char buffer[40];
-  sprintf(buffer,"%35.20f",gamma);
 
-  Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+  if (argc > 2) {
+    int rvTag;
+    if (Tcl_GetInt(interp, argv[2], &rvTag) != TCL_OK) {
+      opserr << "WARNING gammaFORM lsfTag? rvTag? - could not read rvTag\n";
+      return TCL_ERROR;	        
+    }   
+    
+    RandomVariable *theRV =
+      theReliabilityDomain->getRandomVariablePtr(rvTag);
+    
+    if (theRV == 0) {
+      opserr << "WARNING gammaFORM RV with tag " << rvTag << " not found\n";
+      return TCL_ERROR;	        
+    }
+  
+    int index = theReliabilityDomain->getRandomVariableIndex(rvTag);
+    double gamma = gammaVec(index);
+    
+    sprintf(buffer,"%35.20f",gamma);
+    
+    Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+  }
+  else {
+    int nrv = gammaVec.Size();
+    for (int i = 0; i < nrv; i++) {
+      sprintf(buffer, "%35.20f ", gammaVec(i));
+      Tcl_AppendResult(interp, buffer, NULL);
+    }
+  }
 
   return TCL_OK;
 }
