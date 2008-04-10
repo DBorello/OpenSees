@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2008-04-10 00:03:20 $
+// $Revision: 1.10 $
+// $Date: 2008-04-10 16:23:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/LognormalRV.cpp,v $
 
 
@@ -275,8 +275,7 @@ LognormalRV::getParameter2()
 void
 LognormalRV::Print(OPS_Stream &s, int flag)
 {
-  s << "Lognormal random variable" << endln;
-  s << "\ttag = " << this->getTag() << endln;
+  s << "Lognormal RV #" << this->getTag() << endln;
   s << "\tlambda = " << lambda << endln;
   s << "\tzeta = " << zeta << endln;
 }
