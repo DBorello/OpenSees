@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.39 $
-// $Date: 2008-04-10 16:22:18 $
+// $Revision: 1.40 $
+// $Date: 2008-04-10 18:11:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -8797,15 +8797,19 @@ TclReliabilityModelBuilder_getBetaFORM(ClientData clientData, Tcl_Interp *interp
   LimitStateFunction *theLSF =
     theReliabilityDomain->getLimitStateFunctionPtr(lsfTag);
 
-  if (theLSF != 0) {
-    double beta = theLSF->FORMReliabilityIndexBeta;
-    sprintf(interp->result,"%35.20f",beta);
-    return TCL_OK;
-  }
-  else {
+  if (theLSF == 0) {
     opserr << "WARNING betaFORM LSF with tag " << lsfTag << " not found\n";
     return TCL_ERROR;	        
   }
+
+  double beta = theLSF->getFORM_beta();
+
+  char buffer[40];
+  sprintf(buffer,"%35.20f",beta);
+
+  Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+
+  return TCL_OK;
 }
 
 ///getGammaFORM is not in K.F.
@@ -8843,8 +8847,15 @@ TclReliabilityModelBuilder_getGammaFORM(ClientData clientData, Tcl_Interp *inter
     return TCL_ERROR;	        
   }
 
-  double gamma = theLSF->importanceVectorGamma(rvTag-1);
-  sprintf(interp->result,"%35.20f",gamma);
+  const Vector &gammaVec = theLSF->getFORM_gamma();
+  int index = theReliabilityDomain->getRandomVariableIndex(rvTag);
+  double gamma = gammaVec(index);
+
+  char buffer[40];
+  sprintf(buffer,"%35.20f",gamma);
+
+  Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+
   return TCL_OK;
 }
 
