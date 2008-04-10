@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2008-04-10 00:29:17 $
+// $Revision: 1.15 $
+// $Date: 2008-04-10 16:25:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.cpp,v $
 
 
@@ -50,9 +50,8 @@
 #include <CorrelationCoefficientIter.h>
 
 ReliabilityDomain::ReliabilityDomain():
-  numRandomVariables(0), numRandomVariablePositioners(0),
-  numParameterPositioners(0), numLimitStateFunctions(0),
-  numCorrelationCoefficients(0), rvIndex(0)
+  numRandomVariables(0), numLimitStateFunctions(0),
+  rvIndex(0), lsfIndex(0)
 {
 	theRandomVariablesPtr = new ArrayOfTaggedObjects (256);
 	theCorrelationCoefficientsPtr = new ArrayOfTaggedObjects (256);
@@ -78,6 +77,9 @@ ReliabilityDomain::ReliabilityDomain():
 
 	rvIndex = new int[rvSize_init];
 	rvSize = rvSize_init;
+
+	lsfIndex = new int[lsfSize_init];
+	lsfSize = lsfSize_init;
 }
 
 ReliabilityDomain::~ReliabilityDomain()
@@ -121,7 +123,8 @@ ReliabilityDomain::~ReliabilityDomain()
 
 	if (rvIndex != 0)
 	  delete [] rvIndex;
-	numRandomVariables = 0;
+	if (lsfIndex != 0)
+	  delete [] lsfIndex;
 }
 
 
@@ -130,7 +133,7 @@ ReliabilityDomain::addRandomVariable(RandomVariable *theRandomVariable)
 {
   bool result = theRandomVariablesPtr->addComponent(theRandomVariable);
 
-  if (theRandomVariable != 0) {
+  if (result == true) {
 
     // Array is full
     if (numRandomVariables == rvSize) {
@@ -161,9 +164,6 @@ ReliabilityDomain::addRandomVariable(RandomVariable *theRandomVariable)
 bool
 ReliabilityDomain::addCorrelationCoefficient(CorrelationCoefficient *theCorrelationCoefficient)
 {
-  theCorrelationCoefficient->setIndex(numCorrelationCoefficients);
-  numCorrelationCoefficients++;
-
   bool result = theCorrelationCoefficientsPtr->addComponent(theCorrelationCoefficient);
   return result;
 }
@@ -171,10 +171,33 @@ ReliabilityDomain::addCorrelationCoefficient(CorrelationCoefficient *theCorrelat
 bool
 ReliabilityDomain::addLimitStateFunction(LimitStateFunction *theLimitStateFunction)
 {
-  theLimitStateFunction->setIndex(numLimitStateFunctions);
-  numLimitStateFunctions++;
-
   bool result = theLimitStateFunctionsPtr->addComponent(theLimitStateFunction);
+
+  if (result == true) {
+
+    // Array is full
+    if (numLimitStateFunctions == lsfSize) {
+
+      // Increase size and allocate new array
+      lsfSize += lsfSize_grow;
+      int *tmp_lsfIndex = new int[lsfSize];
+
+      // Copy values from old array to new
+      for (int i = 0; i < numLimitStateFunctions; i++)
+	tmp_lsfIndex[i] = lsfIndex[i];
+
+      // Get rid of old array
+      delete [] lsfIndex;
+
+      // Set pointer to new array
+      lsfIndex = tmp_lsfIndex;
+    }
+
+    // Add to index
+    lsfIndex[numLimitStateFunctions] = theLimitStateFunction->getTag();
+    numLimitStateFunctions++;
+  }
+
   return result;
 }
 
@@ -348,6 +371,37 @@ ReliabilityDomain::getLimitStateFunctionPtr(int tag)
   return result;
 }
 
+LimitStateFunction *
+ReliabilityDomain::getLimitStateFunctionPtrFromIndex(int index)
+{
+  if (index >= 0 && index < numLimitStateFunctions)
+    return this->getLimitStateFunctionPtr(lsfIndex[index]);
+
+  else {
+    opserr << "ReliabilityDomain::getLimitStateFunctionPtrFromIndex -- index " << index << " out of bounds 0 ... " << numLimitStateFunctions-1 << endln;
+    return 0;
+  }
+
+}
+
+int
+ReliabilityDomain::getLimitStateFunctionIndex(int tag)
+{
+  int index;
+
+  // Find index of LSF with specified tag
+  for (index = 0; index < numLimitStateFunctions; index++) {
+    if (lsfIndex[index] == tag)
+      break;
+  }
+
+  if (index == numLimitStateFunctions) {
+    opserr << "ReliabilityDomain::getLimitStateFunctionIndex -- lsf with tag " << tag << " not found" << endln;
+    return -1;
+  }
+
+  return index;
+}
 
 RandomVariablePositioner *
 ReliabilityDomain::getRandomVariablePositionerPtr(int tag)
@@ -494,52 +548,37 @@ ReliabilityDomain::removeRandomVariable(int tag)
 int
 ReliabilityDomain::removeCorrelationCoefficient(int tag)
 {
-  CorrelationCoefficient *theCC = (CorrelationCoefficient*) theCorrelationCoefficientsPtr->getComponentPtr(tag);
-  int indexToRemove = theCC->getIndex();
-
-  // shift indices down by one
-  for (int i = indexToRemove; i < numCorrelationCoefficients-1; i++) {
-    // find rv with index equal to i+1
-    theCCIter->reset();
-    while ((theCC = (*theCCIter)()) != 0) {
-      if (theCC->getIndex() == i+1)
-	break;
-    }
-    // now set its index to i
-    theCC->setIndex(i);
-  }
-
-  // Now remove the component
   theCorrelationCoefficientsPtr->removeComponent(tag);
-  numCorrelationCoefficients--;
 
   return 0;
 }
 
 int
-ReliabilityDomain::removePerformanceFunction(int tag)
+ReliabilityDomain::removeLimitStateFunction(int tag)
 {
   LimitStateFunction *theLSF = (LimitStateFunction*) theLimitStateFunctionsPtr->getComponentPtr(tag);
-  int indexToRemove = theLSF->getIndex();
+  
+  if (theLSF != 0) {
 
-  // shift indices down by one
-  for (int i = indexToRemove; i < numLimitStateFunctions-1; i++) {
-    // find rv with index equal to i+1
-    theLSFIter->reset();
-    while ((theLSF = (*theLSFIter)()) != 0) {
-      if (theLSF->getIndex() == i+1)
+    // Find where LSF is located
+    int index;
+    for (index = 0; index < numLimitStateFunctions; index++) {
+      if (lsfIndex[index] == tag)
 	break;
     }
-    // now set its index to i
-    theLSF->setIndex(i);
+    
+    // Shift indices down by one
+    for (int i = index; i < numLimitStateFunctions-1; i++)
+      lsfIndex[i] = lsfIndex[i+1];
+    
+    // Now remove the component
+    theLimitStateFunctionsPtr->removeComponent(tag);
+    numLimitStateFunctions--;
   }
-
-  // Now remove the component
-  theLimitStateFunctionsPtr->removeComponent(tag);
-  numLimitStateFunctions--;
 
   return 0;
 }
+
 
 //-Quan
 
@@ -676,6 +715,15 @@ ReliabilityDomain::Print(OPS_Stream &s, int flag)
 {
   s << "Current Reliability Domain Information\n";
 
-  s << "\nRV DATA: NumRVs: " << theRandomVariablesPtr->getNumComponents() << "\n";
-  theRandomVariablesPtr->Print(s, flag);
+  s << theRandomVariablesPtr->getNumComponents() << " random variables\n";
+  if (flag == 1)
+    theRandomVariablesPtr->Print(s, flag);
+
+  s << theCorrelationCoefficientsPtr->getNumComponents() << " correlation coefficients\n";
+  if (flag == 1)
+    theCorrelationCoefficientsPtr->Print(s, flag);
+
+  s << theLimitStateFunctionsPtr->getNumComponents() << " limit state functions\n";
+  if (flag == 1)
+    theLimitStateFunctionsPtr->Print(s, flag);
 }

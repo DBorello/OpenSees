@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2008-04-10 00:02:58 $
+// $Revision: 1.14 $
+// $Date: 2008-04-10 16:25:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.h,v $
 
 
@@ -86,10 +86,16 @@ public:
 
 	// Member functions to get components from the domain
 	RandomVariable *getRandomVariablePtr(int tag);
+	// Following two methods to map index to tag and vice versa
 	RandomVariable *getRandomVariablePtrFromIndex(int index);
 	int getRandomVariableIndex(int tag);
-	CorrelationCoefficient *getCorrelationCoefficientPtr(int tag);
+
 	LimitStateFunction *getLimitStateFunctionPtr(int tag);
+	// Following two methods to map index to tag and vice versa
+	LimitStateFunction *getLimitStateFunctionPtrFromIndex(int index);
+	int getLimitStateFunctionIndex(int tag);
+
+	CorrelationCoefficient *getCorrelationCoefficientPtr(int tag);
 	RandomVariablePositioner *getRandomVariablePositionerPtr(int tag);
 	ParameterPositioner *getParameterPositionerPtr(int tag);
 	ModulatingFunction *getModulatingFunction(int tag);
@@ -126,7 +132,7 @@ public:
 	int removeParameterPositioner(int tag);
 	int removeRandomVariable(int tag);
 	int removeCorrelationCoefficient(int tag);
-	int removePerformanceFunction(int tag);
+	int removeLimitStateFunction(int tag);
 
 	int removeDesignVariable(int tag);
        	int removeDesignVariablePositioner(int tag);
@@ -162,22 +168,26 @@ private:
 	TaggedObjectStorage *theDesignVariablePositionersPtr;
 
 	RandomVariableIter *theRVIter;
-	int numRandomVariables;
 	RandomVariablePositionerIter *theRVPosIter;
-	int numRandomVariablePositioners;
 	ParameterPositionerIter *theParamPosIter;
-	int numParameterPositioners;
 	LimitStateFunctionIter *theLSFIter;
-	int numLimitStateFunctions;
 	CorrelationCoefficientIter *theCCIter;
-	int numCorrelationCoefficients;
 
+
+	// Integer array: index[i] = tag of component i
 	// Should put these in another class eventually because
 	// we may need to do the same thing for lsf, cc, etc. -- MHS
 	int *rvIndex;
 	enum {rvSize_init = 100};
 	enum {rvSize_grow = 20};
 	int rvSize;
+	int numRandomVariables;
+
+	int *lsfIndex;
+	enum {lsfSize_init = 10};
+	enum {lsfSize_grow = 2};
+	int lsfSize;
+	int numLimitStateFunctions;
 };
 
 #endif
