@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.114 $
-// $Date: 2008-04-01 00:35:43 $
+// $Revision: 1.115 $
+// $Date: 2008-04-10 18:22:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -4780,7 +4780,7 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
 			return TCL_ERROR;
 		}
 		ReliabilityDomain *theReliabilityDomain = theReliabilityBuilder->getReliabilityDomain();
-		theReliabilityDomain->removePerformanceFunction(lsfTag);
+		theReliabilityDomain->removeLimitStateFunction(lsfTag);
 	}
     else if (strcmp(argv[1],"sensitivityAlgorithm") == 0) {
 		if (theSensitivityAlgorithm != 0) {
