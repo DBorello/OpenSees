@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2008-04-10 16:24:36 $
+// $Revision: 1.12 $
+// $Date: 2008-04-10 18:10:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.cpp,v $
 
 
@@ -58,10 +58,6 @@ LimitStateFunction::initializeFORMAnalysis(void)
   GFunValueAtEndPt = 0.0;
   FORMReliabilityIndexBeta = 0.0;
   FORMProbabilityOfFailure_pf1 = 0.0;
-  //Vector designPoint_x_inOriginalSpace;
-  //Vector designPoint_u_inStdNormalSpace;
-  //Vector normalizedNegativeGradientVectorAlpha;
-  //Vector importanceVectorGamma;
   numberOfStepsToFindDesignPointAlgorithm = 0;
 }
 
@@ -83,10 +79,7 @@ LimitStateFunction::initializeSORMAnalysis(void)
   SORMPointFittingPf2Breitung = 0.0;
   SORMUsingSearchBetaBreitung = 0.0;
   SORMUsingSearchPf2Breitung = 0.0;
-  //Vector lastSearchDirection;
-  numberOfCurvatauresUsed = 0;
-  //Vector secondLast_u;
-  //Vector secondLastAlpha;
+  numberOfCurvaturesUsed = 0;
 }
 
 LimitStateFunction::~LimitStateFunction()
