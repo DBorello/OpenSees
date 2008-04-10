@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2008-03-13 22:26:01 $
+// $Revision: 1.3 $
+// $Date: 2008-04-10 00:04:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/NewSearchWithStepSizeAndStepDirection.cpp,v $
                                                                      
 
@@ -519,7 +519,7 @@ NewSearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passed
 		result = theSearchDirection->computeSearchDirection(iter,
 			*u, gFunctionValue, *gradientInStandardNormalSpace );
 		if (result < 0) {
-			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+			opserr << "NewSearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 				<< " could not compute search direction. " << endln;
 			if(xinit!=0){
 				delete xinit;
@@ -534,7 +534,7 @@ NewSearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passed
 		result = theStepSizeRule->computeStepSize(
 			*u, *gradientInStandardNormalSpace, gFunctionValue, *searchDirection, iter, reschk);
 		if (result < 0) {  // (something went wrong)
-			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+			opserr << "NewSearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 				<< " could not compute step size. " << endln;
 			if(xinit!=0){
 				delete xinit;
@@ -694,7 +694,7 @@ NewSearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passed
 				/*
 				result = theProbabilityTransformation->set_u(*u);
 				if (result < 0) {
-					opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+					opserr << "NewSearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 						<< " could not set u in the xu-transformation." << endln;
 					if(xinit!=0){
 						delete xinit;
@@ -704,7 +704,7 @@ NewSearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passed
 				}
 				result = theProbabilityTransformation->transform_u_to_x();
 				if (result < 0) {
-					opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+					opserr << "NewSearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 							<< " could not transform from u to x." << endln;
 					if(xinit!=0){
 						delete xinit;
@@ -736,7 +736,7 @@ NewSearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passed
 		MatrixOperations theMatrixOperations(*jacobian_x_u);
 		result = theMatrixOperations.computeTranspose();
 		if (result < 0) {
-			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+			opserr << "NewSearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 				<< " could not compute transpose of jacobian matrix. " << endln;
 			if(xinit!=0){
 				delete xinit;
@@ -763,7 +763,7 @@ NewSearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passed
 		Matrix Jxu(numberOfRandomVariables,numberOfRandomVariables);
 		result = theProbabilityTransformation->getJacobian_u_to_x(*u, Jux);
 		if (result < 0) {
-		  opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+		  opserr << "NewSearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 			 << " could not transform from u to x." << endln;
 		  return -1;
 		}
@@ -804,7 +804,7 @@ NewSearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passed
 				/*
 				result = theProbabilityTransformation->set_u(*u);
 				if (result < 0) {
-					opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+					opserr << "NewSearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 						<< " could not set u in the xu-transformation." << endln;
 					if(xinit!=0){
 						delete xinit;
@@ -814,7 +814,7 @@ NewSearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passed
 				}
 				result = theProbabilityTransformation->transform_u_to_x();
 				if (result < 0) {
-					opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+					opserr << "NewSearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 							<< " could not transform from u to x." << endln;
 					if(xinit!=0){
 						delete xinit;
@@ -958,13 +958,13 @@ NewSearchWithStepSizeAndStepDirection::set_u(Vector& uin)
 	/*
 	result = theProbabilityTransformation->set_u(uin);
 	if (result < 0) {
-		opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+		opserr << "NewSearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 			<< " could not set u in the xu-transformation." << endln;
 		exit(-1);
 	}
 	result = theProbabilityTransformation->transform_u_to_x_andComputeJacobian();
 	if (result < 0) {
-		opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+		opserr << "NewSearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 			<< " could not set u in the xu-transformation." << endln;
 		exit(-1);
 	}
@@ -980,55 +980,55 @@ NewSearchWithStepSizeAndStepDirection::set_u(Vector& uin)
 void
 NewSearchWithStepSizeAndStepDirection::errorMmessage_setx()
 {
-	opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+	opserr << "NewSearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 			<< " could not set x in the xu-transformation." << endln;
 }
 void
 NewSearchWithStepSizeAndStepDirection::errorMessage_xtou()
 {
-	opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+	opserr << "NewSearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 			<< " could not transform from x to u." << endln;
 }
 void
 NewSearchWithStepSizeAndStepDirection::errorMessage_setu()
 {
-	opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+	opserr << "NewSearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 		<< " could not set u in the xu-transformation." << endln;
 }
 void
 NewSearchWithStepSizeAndStepDirection::errorMessage_utox()
 {
-	opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+	opserr << "NewSearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 			<< " could not transform from u to x and compute Jacobian." << endln;
 }
 void
 NewSearchWithStepSizeAndStepDirection::errorMessage_gfun()
 {
-	opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+	opserr << "NewSearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 			<< " could not run analysis to evaluate limit-state function. " << endln;
 }
 void
 NewSearchWithStepSizeAndStepDirection::errorMessage_evalg()
 {
-	opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+	opserr << "NewSearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 			<< " could not tokenize limit-state function. " << endln;
 }
 void
 NewSearchWithStepSizeAndStepDirection::errorMessage_compGradg()
 {
-	opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+	opserr << "NewSearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 			<< " could not compute gradients of the limit-state function. " << endln;
 }
 void
 NewSearchWithStepSizeAndStepDirection::errorMessage_checkGradg()
 {
-	opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+	opserr << "NewSearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 				<< " all components of the gradient vector is zero. " << endln;
 }
 void
 NewSearchWithStepSizeAndStepDirection::errorMessage_zeroGradg()
 {
-	opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+	opserr << "NewSearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 		<< " the norm of the gradient is zero. " << endln;
 }
 void 
