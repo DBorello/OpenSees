@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2008-04-10 00:05:14 $
+// $Revision: 1.14 $
+// $Date: 2008-04-10 16:26:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/OpenSeesGradGEvaluator.cpp,v $
 
 
@@ -538,8 +538,8 @@ OpenSeesGradGEvaluator::computeAllGradG(const Vector &gFunValues,
 	// Loop over performance functions
 	//for (int j=1; j<=gFunValues.Size(); j++) {
 	while ((theLSF = lsfIter()) != 0) {
-	  int j = theLSF->getIndex();
 	  int lsfTag = theLSF->getTag();
+	  int j = theReliabilityDomain->getLimitStateFunctionIndex(lsfTag);
 
 	  // Set tag of active limit-state function
 	  theReliabilityDomain->setTagOfActiveLimitStateFunction(lsfTag);

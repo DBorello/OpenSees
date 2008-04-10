@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2008-04-10 00:05:14 $
+// $Revision: 1.10 $
+// $Date: 2008-04-10 16:26:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/FiniteDifferenceGradGEvaluator.cpp,v $
 
 
@@ -283,7 +283,7 @@ FiniteDifferenceGradGEvaluator::computeAllGradG(const Vector &gFunValues,
 		while ((theLSF = lsfIter()) != 0) {
 		  
 		  int lsfTag = theLSF->getTag();
-		  int j = theLSF->getIndex();
+		  int j = theReliabilityDomain->getLimitStateFunctionIndex(lsfTag);
 
 			// Set tag of active limit-state function
 			theReliabilityDomain->setTagOfActiveLimitStateFunction(lsfTag);
