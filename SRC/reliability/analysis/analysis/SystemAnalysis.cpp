@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2008-04-10 16:25:55 $
+// $Revision: 1.15 $
+// $Date: 2008-04-10 18:10:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.cpp,v $
 
 
@@ -157,9 +157,9 @@ SystemAnalysis::initialize()
 		  //int i = theLimitStateFunction->getIndex();
 		  int i = theReliabilityDomain->getLimitStateFunctionIndex(tag);
 
-			beta = theLimitStateFunction->FORMReliabilityIndexBeta;
-			pf1 = theLimitStateFunction->FORMProbabilityOfFailure_pf1;
-			const Vector &alpha = theLimitStateFunction->normalizedNegativeGradientVectorAlpha;
+		  beta = theLimitStateFunction->getFORM_beta();
+		  pf1 = theLimitStateFunction->getFORM_pf1();
+		  const Vector &alpha = theLimitStateFunction->getFORM_alpha();
 
 			// Put FORM results into vector of all betas and alphas
 			// Note that the first index of 'allAlphas' here denote 'nrv'

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-10-31 22:50:42 $
+// $Revision: 1.10 $
+// $Date: 2008-04-10 18:10:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SORMAnalysis.cpp,v $
 
 
@@ -124,8 +124,8 @@ SORMAnalysis::analyze(void)
 			
 
 		// Get FORM results from the limit-state function
-		beta = theLimitStateFunction->FORMReliabilityIndexBeta;
-		pf1 = theLimitStateFunction->FORMProbabilityOfFailure_pf1;
+		beta = theLimitStateFunction->getFORM_beta();
+		pf1 = theLimitStateFunction->getFORM_pf1();
 
 
 		// Compute failure probability by "Breitung"
@@ -148,9 +148,9 @@ SORMAnalysis::analyze(void)
 
 
 		// Put results into reliability domain
-		theLimitStateFunction->numberOfCurvatauresUsed = numberOfCurvatures;
-		theLimitStateFunction->SORMUsingSearchPf2Breitung = pf2Breitung;
-		theLimitStateFunction->SORMUsingSearchBetaBreitung = betaBreitung;
+		theLimitStateFunction->setSORM_numCurvatures(numberOfCurvatures);
+		theLimitStateFunction->setSORM_us_pf2_breitung(pf2Breitung);
+		theLimitStateFunction->setSORM_us_beta_breitung(betaBreitung);
 
 
 		// Print SORM results to the output file

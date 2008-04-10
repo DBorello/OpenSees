@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2008-03-13 22:29:28 $
+// $Revision: 1.6 $
+// $Date: 2008-04-10 18:10:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/curvature/CurvaturesBySearchAlgorithm.cpp,v $
 
 
@@ -57,12 +57,14 @@ CurvaturesBySearchAlgorithm::computeCurvatures(ReliabilityDomain *theReliability
 {
 
 	// Initial declarations
+  /*
 	Vector last_u;
 	Vector secondLast_u;
 	Vector lastAlpha;
 	Vector secondLastAlpha;
 	Vector lastDirection;
-	Vector uLastMinus_u = last_u - secondLast_u;
+  */
+  //Vector uLastMinus_u = last_u - secondLast_u;
 	double signumProduct;
 	double alphaProduct;
 	double sumSquared;
@@ -74,7 +76,7 @@ CurvaturesBySearchAlgorithm::computeCurvatures(ReliabilityDomain *theReliability
 		theReliabilityDomain->getLimitStateFunctionPtr(lsf);
 
 	// The design point in the original space
-	Vector x_star = theLimitStateFunction->designPoint_x_inOriginalSpace;
+	const Vector &x_star = theLimitStateFunction->getFORM_x();
 
 	// Number of random variables
 	int nrv = x_star.Size();
@@ -96,23 +98,28 @@ CurvaturesBySearchAlgorithm::computeCurvatures(ReliabilityDomain *theReliability
 	for (i=0; i<numberOfCurvatures; i++) {
 
 		// Get hold of 'u', 'alpha' and search direction at the two last steps
-		last_u = theLimitStateFunction->designPoint_u_inStdNormalSpace;
-		secondLast_u = theLimitStateFunction->secondLast_u;
-		lastAlpha = theLimitStateFunction->normalizedNegativeGradientVectorAlpha;
-		secondLastAlpha = theLimitStateFunction->secondLastAlpha;
-		lastDirection = theLimitStateFunction->lastSearchDirection;
+	  const Vector &last_u = theLimitStateFunction->getFORM_u();
+	  const Vector &secondLast_u = theLimitStateFunction->getSecondLast_u();
+	  const Vector &lastAlpha = theLimitStateFunction->getFORM_alpha();
+	  const Vector &secondLastAlpha = theLimitStateFunction->getSecondLast_alpha();
+	  const Vector &lastDirection = theLimitStateFunction->getLastSearchDirection();
 
 		// Compute curvature according to Der Kiureghian & De Stefano (1992), Eq.26:
 
 		// Initial computations
-		uLastMinus_u = last_u - secondLast_u;
-		signumProduct = secondLastAlpha ^ uLastMinus_u;
+	  //Vector uLastMinus_u(nrv);
+	  //uLastMinus_u = last_u - secondLast_u;
+	  //signumProduct = secondLastAlpha ^ uLastMinus_u;
+	  signumProduct = secondLastAlpha ^ last_u;
+	  signumProduct -= secondLastAlpha ^ secondLast_u;
 		alphaProduct = secondLastAlpha ^ lastAlpha;
 		sumSquared = 0.0;
 
 		// Compute norm of the difference vector
 		for ( int k=0; k<last_u.Size(); k++ ) {
-			sumSquared += uLastMinus_u(k)*uLastMinus_u(k);
+		  //sumSquared += uLastMinus_u(k)*uLastMinus_u(k);
+		  double tmp = last_u(k)-secondLast_u(k);
+		  sumSquared += tmp*tmp;
 		}
 		norm_uLastMinus_u = sqrt(sumSquared);
 

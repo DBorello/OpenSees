@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2008-03-24 03:19:23 $
+// $Revision: 1.8 $
+// $Date: 2008-04-10 18:10:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/curvature/FirstPrincipalCurvature.cpp,v $
 
 //
@@ -58,16 +58,16 @@ FirstPrincipalCurvature::computeCurvatures(ReliabilityDomain *theReliabilityDoma
 		theReliabilityDomain->getLimitStateFunctionPtr(lsf);
 
 	// Get hold of 'u' and 'alpha' at the two last steps
-	Vector last_u = theLimitStateFunction->designPoint_u_inStdNormalSpace;
-	Vector secondLast_u = theLimitStateFunction->secondLast_u;
-	Vector lastAlpha = theLimitStateFunction->normalizedNegativeGradientVectorAlpha;
-	Vector secondLastAlpha = theLimitStateFunction->secondLastAlpha;
+	const Vector &last_u = theLimitStateFunction->getFORM_u();
+	const Vector &secondLast_u = theLimitStateFunction->getSecondLast_u();
+	const Vector &lastAlpha = theLimitStateFunction->getFORM_alpha();
+	const Vector &secondLastAlpha = theLimitStateFunction->getSecondLast_alpha();
 
 	// Compute curvature according to Der Kiureghian & De Stefano (1992), Eq.26:
 
 	// Initial computations
-	Vector uLastMinus_u = last_u - secondLast_u;
-    Vector principalAxes = uLastMinus_u;
+	//Vector uLastMinus_u = last_u - secondLast_u;
+	//const Vector &principalAxes = uLastMinus_u;
 
 //	opserr<<"last_u    "<<last_u<<endln;
 //	opserr<<"secondLast_u  "<<secondLast_u<<endln;
@@ -78,18 +78,23 @@ FirstPrincipalCurvature::computeCurvatures(ReliabilityDomain *theReliabilityDoma
     strcpy (fileName, "principalAxes_.out");
     ofstream resultsOutputFile( fileName, ios::out );
     for ( int m=0; m<principalAxes.Size(); m++ ) {
-        resultsOutputFile<<principalAxes(m)<<endln;
-	}
+      //resultsOutputFile<<principalAxes(m)<<endln;
+      resultsOutputFile<<last_u(m)-secondLast_u(m)<<endln;
+    }
 
     resultsOutputFile.close();
 
-	double signumProduct = secondLastAlpha ^ uLastMinus_u;
-	double alphaProduct = secondLastAlpha ^ lastAlpha;
-	double sumSquared = 0.0;
+    //double signumProduct = secondLastAlpha ^ uLastMinus_u;
+    double signumProduct = secondLastAlpha ^ last_u;
+    signumProduct -= secondLastAlpha ^ secondLast_u;
+    double alphaProduct = secondLastAlpha ^ lastAlpha;
+    double sumSquared = 0.0;
 
 	// Compute norm of the difference vector
 	for ( int i=0; i<last_u.Size(); i++ ) {
-		sumSquared += uLastMinus_u(i)*uLastMinus_u(i);
+	  //sumSquared += uLastMinus_u(i)*uLastMinus_u(i);
+	  double tmp = last_u(i)-secondLast_u(i);
+	  sumSquared += tmp*tmp;
 	}
 
 	double norm_uLastMinus_u = sqrt(sumSquared);

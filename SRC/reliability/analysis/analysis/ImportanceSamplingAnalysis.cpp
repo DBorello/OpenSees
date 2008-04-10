@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-04-10 16:25:55 $
+// $Revision: 1.3 $
+// $Date: 2008-04-10 18:10:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/ImportanceSamplingAnalysis.cpp,v $
 
 //
@@ -524,10 +524,10 @@ ImportanceSamplingAnalysis::analyze(void)
 					pf_sim	 = q_bar(lsfIndex);
 					cov_sim	 = cov_of_q_bar(lsfIndex);
 					num_sim  = k;
-					theLimitStateFunction->SimulationReliabilityIndexBeta = beta_sim;
-					theLimitStateFunction->SimulationProbabilityOfFailure_pfsim = pf_sim;
-					theLimitStateFunction->CoefficientOfVariationOfPfFromSimulation = cov_sim;
-					theLimitStateFunction->NumberOfSimulations = num_sim;
+					theLimitStateFunction->setSIM_beta(beta_sim);
+					theLimitStateFunction->setSIM_pfsim(pf_sim);
+					theLimitStateFunction->setSIM_pfcov(cov_sim);
+					theLimitStateFunction->setSIM_numsim(num_sim);
 				}
 
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2008-04-10 00:05:14 $
+// $Revision: 1.15 $
+// $Date: 2008-04-10 18:10:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FORMAnalysis.cpp,v $
 
 
@@ -186,18 +186,18 @@ FORMAnalysis::analyze()
 
 	  
 	  // Store key results in the limit-state functions
-	  theLimitStateFunction->FORMReliabilityIndexBeta				= beta;
-	  theLimitStateFunction->FORMProbabilityOfFailure_pf1			= pf1;
-	  theLimitStateFunction->designPoint_x_inOriginalSpace		= xStar;
-	  theLimitStateFunction->designPoint_u_inStdNormalSpace		= uStar;
-	  theLimitStateFunction->normalizedNegativeGradientVectorAlpha= alpha;
-	  theLimitStateFunction->importanceVectorGamma				= gamma;
-	  theLimitStateFunction->numberOfStepsToFindDesignPointAlgorithm		= numberOfSteps;
-	  theLimitStateFunction->GFunValueAtStartPt					= Go;
-	  theLimitStateFunction->GFunValueAtEndPt						= Glast;
-	  theLimitStateFunction->secondLast_u							= uSecondLast;
-	  theLimitStateFunction->secondLastAlpha						= alphaSecondLast;
-	  theLimitStateFunction->lastSearchDirection					= lastSearchDirection;
+	  theLimitStateFunction->setFORM_beta(beta);
+	  theLimitStateFunction->setFORM_pf1(pf1);
+	  theLimitStateFunction->setFORM_x(xStar);
+	  theLimitStateFunction->setFORM_u(uStar);
+	  theLimitStateFunction->setFORM_alpha(alpha);
+	  theLimitStateFunction->setFORM_gamma(gamma);
+	  theLimitStateFunction->setFORM_numSteps(numberOfSteps);
+	  theLimitStateFunction->setFORM_startGFun(Go);
+	  theLimitStateFunction->setFORM_endGFun(Glast);
+	  theLimitStateFunction->setSecondLast_u(uSecondLast);
+	  theLimitStateFunction->setSecondLast_alpha(alphaSecondLast);
+	  theLimitStateFunction->setLastSearchDirection(lastSearchDirection);
 
 
 	  outputFile << "#  Limit-state function value at start point: ......... " 
