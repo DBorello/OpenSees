@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2008-04-10 00:01:28 $
+// $Revision: 1.16 $
+// $Date: 2008-04-10 00:02:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariable.h,v $
 
 
@@ -63,9 +63,7 @@ public:
 
 	int setNewTag(int tag);
 
-protected:   //different from K.F.
-
-private:	//different from K.F.
+private:
 	double startValue;
 };
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2008-03-13 22:35:13 $
+// $Revision: 1.13 $
+// $Date: 2008-04-10 00:02:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.cpp,v $
 
 
@@ -52,7 +52,7 @@
 ReliabilityDomain::ReliabilityDomain():
   numRandomVariables(0), numRandomVariablePositioners(0),
   numParameterPositioners(0), numLimitStateFunctions(0),
-  numCorrelationCoefficients(0)
+  numCorrelationCoefficients(0), rvIndex(0)
 {
 	theRandomVariablesPtr = new ArrayOfTaggedObjects (256);
 	theCorrelationCoefficientsPtr = new ArrayOfTaggedObjects (256);
@@ -75,6 +75,9 @@ ReliabilityDomain::ReliabilityDomain():
 	theParamPosIter = new ParameterPositionerIter(theParameterPositionersPtr);
 	theLSFIter = new LimitStateFunctionIter(theLimitStateFunctionsPtr);
 	theCCIter = new CorrelationCoefficientIter(theCorrelationCoefficientsPtr);
+
+	rvIndex = new int[rvSize_init];
+	rvSize = rvSize_init;
 }
 
 ReliabilityDomain::~ReliabilityDomain()
@@ -115,16 +118,43 @@ ReliabilityDomain::~ReliabilityDomain()
 	  delete theLSFIter;
 	if (theCCIter != 0)
 	  delete theCCIter;
+
+	if (rvIndex != 0)
+	  delete [] rvIndex;
+	numRandomVariables = 0;
 }
 
 
 bool
 ReliabilityDomain::addRandomVariable(RandomVariable *theRandomVariable)
 {
-  theRandomVariable->setIndex(numRandomVariables);
-  numRandomVariables++;
-
   bool result = theRandomVariablesPtr->addComponent(theRandomVariable);
+
+  if (theRandomVariable != 0) {
+
+    // Array is full
+    if (numRandomVariables == rvSize) {
+
+      // Increase size and allocate new array
+      rvSize += rvSize_grow;
+      int *tmp_rvIndex = new int[rvSize];
+
+      // Copy values from old array to new
+      for (int i = 0; i < numRandomVariables; i++)
+	tmp_rvIndex[i] = rvIndex[i];
+
+      // Get rid of old array
+      delete [] rvIndex;
+
+      // Set pointer to new array
+      rvIndex = tmp_rvIndex;
+    }
+
+    // Add to index
+    rvIndex[numRandomVariables] = theRandomVariable->getTag();
+    numRandomVariables++;
+  }
+
   return result;
 }
 
@@ -257,11 +287,35 @@ ReliabilityDomain::getCorrelationCoefficients(void)
 RandomVariable *
 ReliabilityDomain::getRandomVariablePtr(int tag)
 {
-	TaggedObject *theComponent = theRandomVariablesPtr->getComponentPtr(tag);
-	if ( theComponent == 0 )
-		return 0;
-	RandomVariable *result = (RandomVariable *) theComponent;
-	return result;
+  TaggedObject *theComponent = theRandomVariablesPtr->getComponentPtr(tag);
+  if ( theComponent == 0 )
+    return 0;
+  RandomVariable *result = (RandomVariable *) theComponent;
+  return result;
+}
+
+RandomVariable *
+ReliabilityDomain::getRandomVariablePtrFromIndex(int index)
+{
+  TaggedObject *theComponent = theRandomVariablesPtr->getComponentPtr(rvIndex[index]);
+  if ( theComponent == 0 )
+    return 0;
+  RandomVariable *result = (RandomVariable *) theComponent;
+  return result;
+}
+
+int
+ReliabilityDomain::getRandomVariableIndex(int tag)
+{
+  int index;
+
+  // Find index of RV with specified tag
+  for (index = 0; index < numRandomVariables; index++) {
+    if (rvIndex[index] == tag)
+      break;
+  }
+
+  return index;
 }
 
 
@@ -406,23 +460,24 @@ int
 ReliabilityDomain::removeRandomVariable(int tag)
 {
   RandomVariable *theRV = (RandomVariable*) theRandomVariablesPtr->getComponentPtr(tag);
-  int indexToRemove = theRV->getIndex();
+  
+  if (theRV != 0) {
 
-  // shift indices down by one
-  for (int i = indexToRemove; i < numRandomVariables-1; i++) {
-    // find rv with index equal to i+1
-    theRVIter->reset();
-    while ((theRV = (*theRVIter)()) != 0) {
-      if (theRV->getIndex() == i+1)
+    // Find where RV is located
+    int index;
+    for (index = 0; index < numRandomVariables; index++) {
+      if (rvIndex[index] == tag)
 	break;
     }
-    // now set its index to i
-    theRV->setIndex(i);
+    
+    // Shift indices down by one
+    for (int i = index; i < numRandomVariables-1; i++)
+      rvIndex[i] = rvIndex[i+1];
+    
+    // Now remove the component
+    theRandomVariablesPtr->removeComponent(tag);
+    numRandomVariables--;
   }
-
-  // Now remove the component
-  theRandomVariablesPtr->removeComponent(tag);
-  numRandomVariables--;
 
   return 0;
 }
@@ -608,3 +663,11 @@ ReliabilityDomain::setTagOfActiveLimitStateFunction(int passedTag)
 	tagOfActiveLimitStateFunction = passedTag;
 }
 
+void
+ReliabilityDomain::Print(OPS_Stream &s, int flag) 
+{
+  s << "Current Reliability Domain Information\n";
+
+  s << "\nRV DATA: NumRVs: " << theRandomVariablesPtr->getNumComponents() << "\n";
+  theRandomVariablesPtr->Print(s, flag);
+}

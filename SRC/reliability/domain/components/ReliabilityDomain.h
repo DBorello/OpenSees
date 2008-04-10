@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2008-03-24 03:19:23 $
+// $Revision: 1.13 $
+// $Date: 2008-04-10 00:02:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.h,v $
 
 
@@ -86,6 +86,8 @@ public:
 
 	// Member functions to get components from the domain
 	RandomVariable *getRandomVariablePtr(int tag);
+	RandomVariable *getRandomVariablePtrFromIndex(int index);
+	int getRandomVariableIndex(int tag);
 	CorrelationCoefficient *getCorrelationCoefficientPtr(int tag);
 	LimitStateFunction *getLimitStateFunctionPtr(int tag);
 	RandomVariablePositioner *getRandomVariablePositionerPtr(int tag);
@@ -139,6 +141,8 @@ public:
 	LimitStateFunctionIter &getLimitStateFunctions(void);
 	CorrelationCoefficientIter &getCorrelationCoefficients(void);
 
+	virtual void Print(OPS_Stream &s, int flag =0);
+
 protected:
 
 private:
@@ -167,6 +171,13 @@ private:
 	int numLimitStateFunctions;
 	CorrelationCoefficientIter *theCCIter;
 	int numCorrelationCoefficients;
+
+	// Should put these in another class eventually because
+	// we may need to do the same thing for lsf, cc, etc. -- MHS
+	int *rvIndex;
+	enum {rvSize_init = 100};
+	enum {rvSize_grow = 20};
+	int rvSize;
 };
 
 #endif
