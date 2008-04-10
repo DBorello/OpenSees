@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2008-04-10 00:05:14 $
+// $Revision: 1.8 $
+// $Date: 2008-04-10 16:25:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FOSMAnalysis.cpp,v $
 
 
@@ -139,7 +139,8 @@ FOSMAnalysis::analyze(void)
 		   << " could not tokenize limit-state function. " << endln;
 	    return -1;
 	  }
-	  int i = theLSF->getIndex();
+	  //int i = theLSF->getIndex();
+	  int i = theReliabilityDomain->getLimitStateFunctionIndex(lsf);
 	  meanEstimates(i) = theGFunEvaluator->getG();
 	}
 
@@ -201,8 +202,9 @@ FOSMAnalysis::analyze(void)
 	//for (lsf=1; lsf<=numLsf; lsf++ ) {
 	while ((theLSF = lsfIter()) != 0) {
 
-	  int j = theLSF->getIndex();
 	  int lsf = theLSF->getTag();
+	  //int j = theLSF->getIndex();
+	  int j = theReliabilityDomain->getLimitStateFunctionIndex(lsf);
 
 
 		// Set tag of active limit-state function
@@ -324,13 +326,15 @@ FOSMAnalysis::analyze(void)
 		lsfIter.reset();
 		//for (i=0; i<numLsf; i++) {
 		while ((theLSF = lsfIter()) != 0) {
-		  int i = theLSF->getIndex();
 		  int iTag = theLSF->getTag();
+		  int i = theReliabilityDomain->getLimitStateFunctionIndex(iTag);
+		  //int i = theLSF->getIndex();
 		  lsfIter2.reset();
 		  //for (j=i+1; j<numLsf; j++) {
 		  while ((theLSF2 = lsfIter2()) != 0) {
-		    int j = theLSF2->getIndex();
 		    int jTag = theLSF2->getTag();
+		    int j = theReliabilityDomain->getLimitStateFunctionIndex(jTag);
+		    //int j = theLSF2->getIndex();
 		    //				outputFile.setf(ios::fixed, ios::floatfield);
 		    outputFile << "#    " <<setw(3)<<iTag<<"    "<<setw(3)<<jTag<<"     ";
 		    if (correlationMatrix(i,j)<0.0) { outputFile << "-"; }

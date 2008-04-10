@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-11-06 01:58:41 $
+// $Revision: 1.14 $
+// $Date: 2008-04-10 16:25:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.cpp,v $
 
 
@@ -152,7 +152,10 @@ SystemAnalysis::initialize()
 		LimitStateFunctionIter &lsfIter = theReliabilityDomain->getLimitStateFunctions();
 		//for (i=0; i<numLsf; i++ ) {
 		while ((theLimitStateFunction = lsfIter()) != 0) {
-		  int i = theLimitStateFunction->getIndex();
+
+		  int tag = theLimitStateFunction->getTag();
+		  //int i = theLimitStateFunction->getIndex();
+		  int i = theReliabilityDomain->getLimitStateFunctionIndex(tag);
 
 			beta = theLimitStateFunction->FORMReliabilityIndexBeta;
 			pf1 = theLimitStateFunction->FORMProbabilityOfFailure_pf1;

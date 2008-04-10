@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-03-13 22:22:25 $
+// $Revision: 1.2 $
+// $Date: 2008-04-10 16:25:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/ImportanceSamplingAnalysis.cpp,v $
 
 //
@@ -285,8 +285,9 @@ ImportanceSamplingAnalysis::analyze(void)
 		// Loop over number of limit-state functions
 		//for (int lsf=0; lsf<numLsf; lsf++ ) {
 		while ((theLimitStateFunction = lsfIter()) != 0) {
-		  int lsf = theLimitStateFunction->getIndex();
+		  //int lsf = theLimitStateFunction->getIndex();
 		  int lsfTag = theLimitStateFunction->getTag();
+		  int lsf = theReliabilityDomain->getLimitStateFunctionIndex(lsfTag);
 
 
 			// Set tag of "active" limit-state function
@@ -493,14 +494,14 @@ ImportanceSamplingAnalysis::analyze(void)
 		LimitStateFunction *theLimitStateFunction;
 		//for (int lsf=1; lsf<=numLsf; lsf++ ) {
 		while ((theLimitStateFunction = lsfIter()) != 0) {
-		  int lsfIndex = theLimitStateFunction->getIndex();
-		  int lsf = theLimitStateFunction->getTag();
-
+		  //int lsf = theLimitStateFunction->getIndex();
+		  int lsfTag = theLimitStateFunction->getTag();
+		  int lsfIndex = theReliabilityDomain->getLimitStateFunctionIndex(lsfTag);
 			if ( q_bar(lsfIndex) == 0.0 ) {
 
 				resultsOutputFile << "#######################################################################" << endln;
 				resultsOutputFile << "#  SAMPLING ANALYSIS RESULTS, LIMIT-STATEFUNCDTION NUMBER   "
-					<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<lsf <<"      #" << endln;
+					<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<lsfTag <<"      #" << endln;
 				resultsOutputFile << "#                                                                     #" << endln;
 				resultsOutputFile << "#  Failure did not occur, or zero response!                           #" << endln;
 				resultsOutputFile << "#                                                                     #" << endln;
@@ -514,7 +515,7 @@ ImportanceSamplingAnalysis::analyze(void)
 
 
 				// Set tag of "active" limit-state function
-				theReliabilityDomain->setTagOfActiveLimitStateFunction(lsf);
+				theReliabilityDomain->setTagOfActiveLimitStateFunction(lsfTag);
 
 
 				// Store results
@@ -534,7 +535,7 @@ ImportanceSamplingAnalysis::analyze(void)
 				if (analysisTypeTag == 1) {
 					resultsOutputFile << "#######################################################################" << endln;
 					resultsOutputFile << "#  SAMPLING ANALYSIS RESULTS, LIMIT-STATE FUNCTION NUMBER   "
-						<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<lsf <<"      #" << endln;
+						<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<lsfTag <<"      #" << endln;
 					resultsOutputFile << "#                                                                     #" << endln;
 					resultsOutputFile << "#  Reliability index beta: ............................ " 
 						<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<beta_sim 
@@ -554,7 +555,7 @@ ImportanceSamplingAnalysis::analyze(void)
 				else {
 					resultsOutputFile << "#######################################################################" << endln;
 					resultsOutputFile << "#  SAMPLING ANALYSIS RESULTS, LIMIT-STATE FUNCTION NUMBER   "
-						<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<lsf <<"      #" << endln;
+						<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<lsfTag <<"      #" << endln;
 					resultsOutputFile << "#                                                                     #" << endln;
 					resultsOutputFile << "#  Estimated mean: .................................... " 
 						<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<q_bar(lsfIndex) 
@@ -584,12 +585,12 @@ ImportanceSamplingAnalysis::analyze(void)
 				//for (i=0; i<numLsf; i++) {
 				while ((lsfI = lsfIterI()) != 0) {
 				  int iTag = lsfI->getTag();
-				  int i = lsfI->getIndex();
+				  int i = theReliabilityDomain->getLimitStateFunctionIndex(iTag);
 				  lsfIterJ.reset();
 				  //for (int j=i+1; j<numLsf; j++) {
 				  while ((lsfJ = lsfIterJ()) != 0) {
 				    int jTag = lsfJ->getTag();
-				    int j = lsfJ->getIndex();
+				    int j = theReliabilityDomain->getLimitStateFunctionIndex(jTag);
 				    resultsOutputFile << "#    " <<setw(3)<< iTag <<"    "<<setw(3)<< jTag <<"     ";
 				    if (responseCorrelation(i,j)<0.0) { resultsOutputFile << "-"; }
 				    else { resultsOutputFile << " "; }
