@@ -27,7 +27,7 @@ OBJS       = AllIndependentTransformation.o \
 	GeneralRandGenerator.o \
 	OutCrossingResults.o \
 	StaticAnalyzer.o \
-	GFunEachstepEvaluator.o \
+	GFunEachStepEvaluator.o \
 	PerformanceFunctionCoeff.o \
 	StatRandomVibrationSimulation.o \
 	InitialPointBuilder.o \
