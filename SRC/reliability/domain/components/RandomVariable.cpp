@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2008-04-10 00:01:28 $
+// $Revision: 1.8 $
+// $Date: 2008-04-10 16:22:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariable.cpp,v $
 
 
@@ -80,4 +80,14 @@ RandomVariable::getParameter4()
 {
   opserr << "No parameter 4 in r.v. #" << this->getTag() << endln;
   return 0.0;  
+}
+
+void
+RandomVariable::Print(OPS_Stream &s, int flag)
+{
+  s << "RV #" << this->getTag() << ' ' << this->getType() << endln;
+  s << "\tParameter 1: " << this->getParameter1() << endln;
+  s << "\tParameter 2: " << this->getParameter2() << endln;
+  s << "\tParameter 3: " << this->getParameter3() << endln;
+  s << "\tParameter 4: " << this->getParameter4() << endln;
 }
