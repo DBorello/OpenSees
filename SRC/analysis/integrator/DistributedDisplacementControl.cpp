@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-04-02 23:42:26 $
+// $Revision: 1.3 $
+// $Date: 2008-04-11 23:37:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/DistributedDisplacementControl.cpp,v $
                                                                         
 // Written: fmk 
@@ -34,7 +34,6 @@
 // change in applied load and DistributedDisplacementControl is a control parameter.
 //
 // What: "@(#) DistributedDisplacementControl.C, revA"
-
 
 #include <DistributedDisplacementControl.h>
 #include <AnalysisModel.h>
@@ -122,12 +121,13 @@ DistributedDisplacementControl::newStep(void)
     else if (theIncrement > maxIncrement)
       theIncrement = maxIncrement;
 
-
     // get the current load factor
     currentLambda = theModel->getCurrentDomainTime();
 
     // determine dUhat
     this->formTangent();
+
+
 
     if (processID == 0)
       theLinSOE->setB(*phat);
@@ -151,8 +151,9 @@ DistributedDisplacementControl::newStep(void)
 
     deltaLambdaStep = dLambda;
     currentLambda += dLambda;
- //   opserr << "DistributedDisplacementControl: " << dUahat  << " " << theDofID << endln;
- //   opserr << "DistributedDisplacementControl::newStep() : " << deltaLambdaStep << endln;
+    //    opserr << "DistributedDisplacementControl:newStep " << dUahat  << " " << theDofID << endln;
+    //opserr << "DistributedDisplacementControl:newStep " << *phat << endln;
+    //   opserr << "DistributedDisplacementControl::newStep() : " << deltaLambdaStep << endln;
     // determine delta U(1) == dU
     (*deltaU) = dUhat;
     (*deltaU) *= dLambda;
@@ -238,7 +239,6 @@ DistributedDisplacementControl::update(const Vector &dU)
 int 
 DistributedDisplacementControl::domainChanged(void)
 {
-
     // we first create the Vectors needed
     AnalysisModel *theModel = this->getAnalysisModel();
     LinearSOE *theLinSOE = this->getLinearSOE();    
@@ -289,7 +289,7 @@ DistributedDisplacementControl::domainChanged(void)
       theChannel->recvID(0, 0, data);
       theDofID = data(0);
     } 
-    
+
     // if main domain, collect all theDofID if not -1 then this is the value & send value out
     else {
       
@@ -369,7 +369,7 @@ DistributedDisplacementControl::domainChanged(void)
 
     currentLambda += 1.0;
     theModel->applyLoadDomain(currentLambda);    
-
+    
     this->formUnbalance(); // NOTE: this assumes unbalance at last was 0
     (*phat) = theLinSOE->getB();
 
@@ -511,4 +511,26 @@ void
 DistributedDisplacementControl::Print(OPS_Stream &s, int flag)
 {
     // TO FINISH    
+}
+
+int
+DistributedDisplacementControl::setProcessID(int dTag) 
+{
+  processID = dTag;
+  return 0;
+}
+
+int
+DistributedDisplacementControl::setChannels(int nChannels, Channel **theC)
+{
+  numChannels = nChannels;
+
+  if (theChannels != 0)
+    delete [] theChannels;
+
+  theChannels = new Channel *[numChannels];
+  for (int i=0; i<numChannels; i++)
+    theChannels[i] = theC[i];
+
+  return 0;
 }

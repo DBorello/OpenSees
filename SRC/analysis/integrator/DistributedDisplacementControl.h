@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-11-29 21:59:49 $
+// $Revision: 1.2 $
+// $Date: 2008-04-11 23:37:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/DistributedDisplacementControl.h,v $
 
 // Written: fmk 
@@ -66,6 +66,9 @@ class DistributedDisplacementControl : public StaticIntegrator
 			 FEM_ObjectBroker &theBroker);
 
     void Print(OPS_Stream &s, int flag =0);    
+
+    int setProcessID(int processTag);
+    int setChannels(int numChannels, Channel **theChannels);
     
   protected:
     
