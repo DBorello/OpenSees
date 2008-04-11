@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.115 $
-// $Date: 2008-04-10 18:22:25 $
+// $Revision: 1.116 $
+// $Date: 2008-04-11 23:39:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -206,6 +206,9 @@ OPS_Stream *opserrPtr = &sserr;
 
 #ifdef _MUMPS
 #ifdef _PARALLEL_PROCESSING
+#include <MumpsParallelSOE.h>
+#include <MumpsParallelSolver.h>
+#elif _PARALLEL_INTERPRETERS
 #include <MumpsParallelSOE.h>
 #include <MumpsParallelSolver.h>
 #else
@@ -445,6 +448,9 @@ int
 opsBarrier(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
+domainChange(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
 opsSend(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
@@ -624,6 +630,7 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "recv", &opsRecv, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateCommand(interp, "domainChange",     domainChange,(ClientData)NULL, NULL);
     Tcl_CreateCommand(interp, "metaData",     neesMetaData,(ClientData)NULL, NULL);
     Tcl_CreateCommand(interp, "defaultUnits", defaultUnits,(ClientData)NULL, NULL);
     Tcl_CreateCommand(interp, "neesUpload", neesUpload,(ClientData)NULL, NULL);
@@ -2314,10 +2321,15 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 #ifdef _PARALLEL_PROCESSING
     MumpsParallelSolver *theSolver = new MumpsParallelSolver(icntl14);
     theSOE = new MumpsParallelSOE(*theSolver);
+#elif _PARALLEL_INTERPRETERS
+    MumpsParallelSolver *theSolver = new MumpsParallelSolver(icntl14);
+    MumpsParallelSOE *theParallelSOE = new MumpsParallelSOE(*theSolver);
+    theParallelSOE->setProcessID(rank);
+    theParallelSOE->setChannels(numChannels, theChannels);
+    theSOE = theParallelSOE;
 #else
     MumpsSolver *theSolver = new MumpsSolver(icntl14);
     theSOE = new MumpsSOE(*theSolver);
-
 #endif
 
   }
@@ -2436,7 +2448,7 @@ specifyNumberer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **
 
 #ifdef _PARALLEL_INTERPRETERS
 
-  else if (strcmp(argv[1],"ParallelPlain") == 0) {
+  else if ((strcmp(argv[1],"ParallelPlain") == 0) || (strcmp(argv[1],"Parallel") == 0)) {
     ParallelNumberer *theParallelNumberer = new ParallelNumberer;
     theNumberer = theParallelNumberer;       
     theParallelNumberer->setProcessID(rank);
@@ -3063,6 +3075,7 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
       if (theStaticAnalysis != 0)
 	theStaticAnalysis->setIntegrator(*theStaticIntegrator);
   }
+
   
   else if (strcmp(argv[1],"DisplacementControl") == 0) {
       int node;
@@ -3121,6 +3134,54 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
       if (theStaticAnalysis != 0)
 	theStaticAnalysis->setIntegrator(*theStaticIntegrator);
   }  
+
+
+#ifdef _PARALLEL_INTERPRETERS
+
+  else if ((strcmp(argv[1],"ParallelDisplacementControl") == 0) || (strcmp(argv[1],"ParallelDisplacementControl") == 0)) {
+      int node;
+      int dof;
+      double increment, minIncr, maxIncr;
+      int numIter;
+      if (argc < 5) {
+	opserr << "WARNING integrator DisplacementControl node dof dU \n";
+	opserr << "<Jd minIncrement maxIncrement>\n";
+	return TCL_ERROR;
+      }    
+      if (Tcl_GetInt(interp, argv[2], &node) != TCL_OK)	
+	return TCL_ERROR;	
+      if (Tcl_GetInt(interp, argv[3], &dof) != TCL_OK)	
+	return TCL_ERROR;	
+      if (Tcl_GetDouble(interp, argv[4], &increment) != TCL_OK)	
+	return TCL_ERROR;	      
+      if (argc > 7) {
+	if (Tcl_GetInt(interp, argv[5], &numIter) != TCL_OK)	
+	  return TCL_ERROR;	
+	if (Tcl_GetDouble(interp, argv[6], &minIncr) != TCL_OK)	
+	  return TCL_ERROR;	
+	if (Tcl_GetDouble(interp, argv[7], &maxIncr) != TCL_OK)	
+	  return TCL_ERROR;	  
+      }
+      else {
+	minIncr = increment;
+	maxIncr = increment;
+	numIter = 1;
+      }
+
+
+      DistributedDisplacementControl *theDDC  = new DistributedDisplacementControl(node,dof-1,increment,
+										   numIter, minIncr, maxIncr);
+
+      theDDC->setProcessID(rank);
+      theDDC->setChannels(numChannels, theChannels);
+      theStaticIntegrator = theDDC;
+
+      // if the analysis exists - we want to change the Integrator
+      if (theStaticAnalysis != 0)
+	theStaticAnalysis->setIntegrator(*theStaticIntegrator);
+  }
+#endif
+
   
   else if (strcmp(argv[1],"Newmark") == 0) {
       double gamma;
@@ -5904,4 +5965,11 @@ int convertTextToBinary(ClientData clientData, Tcl_Interp *interp, int argc, TCL
   const char *outputFile = argv[2];
 
   return textToBinary(inputFile, outputFile);
+}
+
+int domainChange(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  
+  theDomain.domainChange();
+  return TCL_OK;
 }
