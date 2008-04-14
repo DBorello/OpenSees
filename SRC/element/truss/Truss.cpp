@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2007-08-07 18:05:53 $
+// $Revision: 1.30 $
+// $Date: 2008-04-14 17:14:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -947,7 +947,8 @@ Truss::setResponse(const char **argv, int argc, OPS_Stream &output)
   //
 
 
-  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0){
+  if ((strcmp(argv[0],"force") == 0) || (strcmp(argv[0],"forces") == 0) 
+      || (strcmp(argv[0],"globalForces") == 0) || (strcmp(argv[0],"globalforces") == 0)){
     char outputData[10];
     int numDOFperNode = numDOF/2;
     for (int i=0; i<numDOFperNode; i++) {
@@ -958,7 +959,7 @@ Truss::setResponse(const char **argv, int argc, OPS_Stream &output)
       sprintf(outputData,"P2_%d", j+1);
       output.tag("ResponseType", outputData);
     }
-    theResponse =  new ElementResponse(this, 1, this->getResistingForce());
+    theResponse =  new ElementResponse(this, 3, this->getResistingForce());
 
   } else if ((strcmp(argv[0],"axialForce") == 0) || (strcmp(argv[0],"localForce") == 0) || 
 	     (strcmp(argv[0],"localForce") == 0)) {
@@ -968,7 +969,7 @@ Truss::setResponse(const char **argv, int argc, OPS_Stream &output)
   } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
 	     strcmp(argv[0],"deformation") == 0) {
 
-    output.tag("ResponseType", "eps");
+    output.tag("ResponseType", "U");
     theResponse = new ElementResponse(this, 2, 0.0);
 
   // a material quantity    
@@ -992,7 +993,7 @@ Truss::getResponse(int responseID, Information &eleInfo)
       return eleInfo.setDouble(L * theMaterial->getStrain());
       
     case 3:
-      return eleInfo.setMatrix(this->getTangentStiff());
+      return eleInfo.setVector(this->getResistingForce());
 
     default:
       return 0;

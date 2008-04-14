@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2007-02-02 01:35:22 $
+// $Revision: 1.20 $
+// $Date: 2008-04-14 17:14:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -885,8 +885,22 @@ TrussSection::setResponse(const char **argv, int argc, OPS_Stream &output)
   // we compare argv[0] for known response types for the Truss
   //
 
-  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"axialForce") == 0) {
+  if ((strcmp(argv[0],"force") == 0) || (strcmp(argv[0],"forces") == 0) 
+      || (strcmp(argv[0],"globalForces") == 0) || (strcmp(argv[0],"globalforces") == 0)){
+    char outputData[10];
+    int numDOFperNode = numDOF/2;
+    for (int i=0; i<numDOFperNode; i++) {
+      sprintf(outputData,"P1_%d", i+1);
+      output.tag("ResponseType", outputData);
+    }
+    for (int j=0; j<numDOFperNode; j++) {
+      sprintf(outputData,"P2_%d", j+1);
+      output.tag("ResponseType", outputData);
+    }
+    theResponse =  new ElementResponse(this, 3, this->getResistingForce());
 
+  } else if ((strcmp(argv[0],"axialForce") == 0) || (strcmp(argv[0],"localForce") == 0) || 
+	     (strcmp(argv[0],"localForce") == 0)) {
     output.tag("ResponseType", "N");
     theResponse =  new ElementResponse(this, 1, 0.0);
 
@@ -951,10 +965,10 @@ TrussSection::getResponse(int responseID, Information &eleInformation)
     eleInformation.theDouble = strain*L;    
     return 0;
     
+  case 3:
+    return eleInformation.setVector(this->getResistingForce());
+    
   default:
-    if (responseID >= 100)
-      return theSection->getResponse(responseID-100, eleInformation);
-    else
       return -1;
   }
 }
