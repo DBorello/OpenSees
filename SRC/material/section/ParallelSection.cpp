@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-10-26 04:38:15 $
+// $Revision: 1.2 $
+// $Date: 2008-04-14 21:39:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ParallelSection.cpp,v $
                                                                         
                                                                         
@@ -85,7 +85,7 @@ ParallelSection::ParallelSection (int tag, SectionForceDeformation &theSec,
 	opserr << "ParallelSection::ParallelSection -- null uniaxial material pointer passed\n";
 	exit(-1);
       }	
-      theAdditions[i] = theAdds[i]->getCopy(this);
+      theAdditions[i] = theAdds[i]->getCopy();
       
       if (!theAdditions[i]) {
 	opserr << "ParallelSection::ParallelSection -- failed to copy uniaxial material\n";
@@ -130,7 +130,7 @@ ParallelSection::ParallelSection (int tag, SectionForceDeformation &theSec,
 
   theAdditions = new UniaxialMaterial *[1];
   
-  theAdditions[0] = theAddition.getCopy(this);
+  theAdditions[0] = theAddition.getCopy();
   
   if (!theAdditions[0]) {
     opserr << "ParallelSection::ParallelSection -- failed to copy uniaxial material\n";
@@ -206,7 +206,6 @@ ParallelSection::~ParallelSection()
 int ParallelSection::setTrialSectionDeformation (const Vector &def)
 {
   int ret = 0;
-  int i = 0;
 
   // Set deformation in section
   ret = theSection->setTrialSectionDeformation(def);
@@ -650,27 +649,11 @@ ParallelSection::getResponse(int responseID, Information &info)
 }
 
 int
-ParallelSection::setVariable(const char *argv)
-{
-  // Axial strain
-  if (strcmp(argv,"axialStrain") == 0)
-    return 1;
-  // Curvature about the section z-axis
-  else if (strcmp(argv,"curvatureZ") == 0)
-    return 2;
-  // Curvature about the section y-axis
-  else if (strcmp(argv,"curvatureY") == 0)
-    return 3;
-  else
-    return -1;
-}
-
-int
-ParallelSection::getVariable(int variableID, double &info)
+ParallelSection::getVariable(const char *argv, Information &info)
 {
   int i;
 
-  info = 0.0;
+  info.theDouble = 0.0;
 
   int order = numMats;
   if (theSection != 0)
@@ -679,26 +662,23 @@ ParallelSection::getVariable(int variableID, double &info)
   const Vector &e = this->getSectionDeformation();
   const ID &code  = this->getType();
 
-  switch (variableID) {
-  case 1:	// Axial strain
+  if (strcmp(argv,"axialStrain") == 0) {
     // Series model ... add all sources of deformation
     for (i = 0; i < order; i++)
       if (code(i) == SECTION_RESPONSE_P)
-	info += e(i);
-    return 0;
-  case 2:	// Curvature about the section z-axis
+	info.theDouble += e(i);
+  } else if (strcmp(argv,"curvatureZ") == 0) {
     for (i = 0; i < order; i++)
       if (code(i) == SECTION_RESPONSE_MZ)
-	info += e(i);
-    return 0;
-  case 3:	// Curvature about the section y-axis
+	info.theDouble += e(i);
+  }  else if (strcmp(argv,"curvatureY") == 0) {
     for (i = 0; i < order; i++)
       if (code(i) == SECTION_RESPONSE_MY)
-	info += e(i);
-    return 0;
-  default:
+	info.theDouble += e(i);
+  } else
     return -1;
-  }
+
+  return 0;
 }
 
 // AddingSensitivity:BEGIN ////////////////////////////////////

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2007-11-30 23:34:45 $
+// $Revision: 1.18 $
+// $Date: 2008-04-14 21:39:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.cpp,v $
                                                                         
                                                                         
@@ -85,7 +85,8 @@ SectionAggregator::SectionAggregator (int tag, SectionForceDeformation &theSec,
 	opserr << "SectionAggregator::SectionAggregator -- null uniaxial material pointer passed\n";
 	exit(-1);
       }	
-      theAdditions[i] = theAdds[i]->getCopy(this);
+      //theAdditions[i] = theAdds[i]->getCopy(this);
+      theAdditions[i] = theAdds[i]->getCopy();
       
       if (!theAdditions[i]) {
 	opserr << "SectionAggregator::SectionAggregator -- failed to copy uniaxial material\n";
@@ -141,7 +142,8 @@ SectionAggregator::SectionAggregator (int tag, int numAdds,
 	exit(-1);
       }		
 	
-      theAdditions[i] = theAdds[i]->getCopy(this);
+      //      theAdditions[i] = theAdds[i]->getCopy(this);
+      theAdditions[i] = theAdds[i]->getCopy();
       
       if (!theAdditions[i]) {
 	opserr << "SectionAggregator::SectionAggregator -- failed to copy uniaxial material\n";
@@ -185,7 +187,7 @@ SectionAggregator::SectionAggregator (int tag, SectionForceDeformation &theSec,
 
   theAdditions = new UniaxialMaterial *[1];
   
-  theAdditions[0] = theAddition.getCopy(this);
+  //  theAdditions[0] = theAddition.getCopy();
   
   if (!theAdditions[0]) {
     opserr << "SectionAggregator::SectionAggregator -- failed to copy uniaxial material\n";
@@ -832,28 +834,11 @@ SectionAggregator::getResponse(int responseID, Information &info)
 }
 
 int
-SectionAggregator::setVariable(const char *argv)
+SectionAggregator::getVariable(const char *argv, Information &info)
 {
-  // Axial strain
-  if (strcmp(argv,"axialStrain") == 0)
-    return 1;
-  // Curvature about the section z-axis
-  else if (strcmp(argv,"curvatureZ") == 0)
-    return 2;
-  // Curvature about the section y-axis
-  else if (strcmp(argv,"curvatureY") == 0)
-    return 3;
-  else
-    return -1;
-}
 
-int
-SectionAggregator::getVariable(int variableID, double &info)
-{
+  info.theDouble = 0.0;
   int i;
-
-  info = 0.0;
-
   int order = numMats;
   if (theSection != 0)
     order += theSection->getOrder();
@@ -861,26 +846,22 @@ SectionAggregator::getVariable(int variableID, double &info)
   const Vector &e = this->getSectionDeformation();
   const ID &code  = this->getType();
 
-  switch (variableID) {
-  case 1:	// Axial strain
-    // Series model ... add all sources of deformation
+  if (strcmp(argv,"axialStrain") == 0) {
     for (i = 0; i < order; i++)
       if (code(i) == SECTION_RESPONSE_P)
-	info += e(i);
-    return 0;
-  case 2:	// Curvature about the section z-axis
+	info.theDouble  += e(i);
+  }  else if (strcmp(argv,"curvatureZ") == 0) {
     for (i = 0; i < order; i++)
       if (code(i) == SECTION_RESPONSE_MZ)
-	info += e(i);
-    return 0;
-  case 3:	// Curvature about the section y-axis
+	info.theDouble += e(i);
+  } else if (strcmp(argv,"curvatureY") == 0) {
     for (i = 0; i < order; i++)
       if (code(i) == SECTION_RESPONSE_MY)
-	info += e(i);
-    return 0;
-  default:
+	info.theDouble += e(i);
+  } else 
     return -1;
-  }
+
+  return 0;
 }
 
 // AddingSensitivity:BEGIN ////////////////////////////////////

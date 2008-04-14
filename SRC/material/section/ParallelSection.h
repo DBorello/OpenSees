@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-10-26 04:38:15 $
+// $Revision: 1.2 $
+// $Date: 2008-04-14 21:39:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ParallelSection.h,v $
                                                                         
                                                                         
@@ -86,8 +86,7 @@ class ParallelSection : public SectionForceDeformation
     Response *setResponse(const char **argv, int argc, OPS_Stream &s);
     int getResponse(int responseID, Information &info);
 
-    int setVariable(const char *argv);
-    int getVariable(int variableID, double &info);
+    int getVariable(const char *varName, Information &info);
 
     // AddingSensitivity:BEGIN //////////////////////////////////////////
     int setParameter(const char **argv, int argc, Parameter &param);
