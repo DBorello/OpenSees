@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:36 $
+// $Revision: 1.3 $
+// $Date: 2008-04-14 21:41:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/patch/QuadPatch.cpp,v $
                                                                         
                                                                         
@@ -105,7 +105,6 @@ QuadPatch::getCells (void) const
    int i, j, k, r, s;
    int numCells;
    Cell **cells;
-   int error = 0;
   
    if (nDivIJ > 0  && nDivJK > 0)
    {
