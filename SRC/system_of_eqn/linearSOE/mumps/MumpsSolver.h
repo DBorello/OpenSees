@@ -18,13 +18,17 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2008-04-01 00:35:04 $
+// $Revision: 1.5 $
+// $Date: 2008-04-14 17:29:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsSolver.h,v $
                                                                         
                                                                         
 #ifndef MumpsSolver_h
 #define MumpsSolver_h
+
+#ifdef _WIN32
+#include <mpi.h>
+#endif
 
 // Written: fmk 
 // Created: 02/06

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-04-13 20:58:07 $
+// $Revision: 1.3 $
+// $Date: 2008-04-14 17:29:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsParallelSOE.h,v $
                                                                         
 #ifndef MumpsParallelSOE_h
@@ -36,6 +36,10 @@
 
 // What: "@(#) MumpsParallelSOE.h, revA"
 
+
+#ifdef _WIN32
+#include <mpi.h>
+#endif
 
 #include <MumpsSOE.h>
 #include <Vector.h>

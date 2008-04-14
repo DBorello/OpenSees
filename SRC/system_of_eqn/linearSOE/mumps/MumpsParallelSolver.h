@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2008-04-01 00:35:04 $
+// $Revision: 1.4 $
+// $Date: 2008-04-14 17:29:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsParallelSolver.h,v $
                                                                         
                                                                         
@@ -43,6 +43,10 @@
 // http://www.enseeiht.fr/apo/MUMPS/ or http://graal.ens-lyon.fr/MUMPS
 
 // What: "@(#) Mumps.h, revA"
+
+#ifdef _WIN32
+#include <mpi.h>
+#endif
 
 #include <LinearSOESolver.h>
 extern "C" {
