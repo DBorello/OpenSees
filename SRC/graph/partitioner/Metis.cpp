@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2008-03-31 21:02:10 $
+// $Revision: 1.6 $
+// $Date: 2008-04-14 18:13:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/partitioner/Metis.cpp,v $
                                                                         
                                                                         
@@ -37,12 +37,14 @@
 //
 // What: "@(#) Metis.C, revA"
 
-#include <Metis.h>
+#include "Metis.h"
 #include <Graph.h>
 #include <Vertex.h>
 
 /* stuff needed to get the program working on the clump & NOW machines*/
 #include <bool.h>
+
+//int IsWeighted =0;
 
 extern "C" 
 int METIS_PartGraphRecursive(int *, int *, int *, int *, int *, int *, int *, int *, int *, int *, int *);
