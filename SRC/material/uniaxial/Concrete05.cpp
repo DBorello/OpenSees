@@ -3142,29 +3142,6 @@ void Concrete05::Print (OPS_Stream& s, int flag)
 
 
 // AddingSensitivity:BEGIN ///////////////////////////////////
-int
-Concrete05::setParameter(const char **argv, int argc, Information &info)
-{
-  //removed	
-  return -1;
-
-}
-   
-
-int
-Concrete05::updateParameter(int parameterID, Information &info)
-{
-  //removed
-  return -1;  // should never be called
-}
-
-
-int
-Concrete05::activateParameter(int passedParameterID)
-{
-//removed
-	return 0;
-}
 
 double
 Concrete05::getStressSensitivity(int gradNumber, bool conditional)

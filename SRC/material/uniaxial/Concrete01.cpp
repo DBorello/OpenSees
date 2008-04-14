@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2008-03-10 19:12:02 $
+// $Revision: 1.21 $
+// $Date: 2008-04-14 21:19:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.cpp,v $
                                                                         
 // Written: MHS 
@@ -42,8 +42,6 @@
 #include <math.h>
 #include <float.h>
 
-int count = 0;
-
 Concrete01::Concrete01
 (int tag, double FPC, double EPSC0, double FPCU, double EPSCU)
   :UniaxialMaterial(tag, MAT_TAG_Concrete01),
@@ -51,7 +49,6 @@ Concrete01::Concrete01
    CminStrain(0.0), CendStrain(0.0),
    Cstrain(0.0), Cstress(0.0) 
 {
-  count++;
   // Make all concrete parameters negative
   if (fpc > 0.0)
     fpc = -fpc;

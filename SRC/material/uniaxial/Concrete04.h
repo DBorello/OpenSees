@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-08-03 23:42:19 $
+// $Revision: 1.5 $
+// $Date: 2008-04-14 21:20:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete04.h,v $
                                                                         
                                                                         
@@ -52,7 +52,7 @@ class Concrete04 : public UniaxialMaterial
   Concrete04 ();
   ~Concrete04();
 
-  const char *getClassType(void) {return "Concrete04";};
+  const char *getClassType(void) const {return "Concrete04";};
   
   int setTrialStrain(double strain, double strainRate = 0.0); 
   double getStrain(void);      

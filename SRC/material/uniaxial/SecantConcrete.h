@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2007-10-26 04:32:06 $
+// $Revision: 1.2 $
+// $Date: 2008-04-14 21:20:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SecantConcrete.h,v $
 
 // Written: MHS
@@ -62,7 +62,7 @@ class SecantConcrete : public UniaxialMaterial
   
   void Print(OPS_Stream &s, int flag =0);
   
-  int setParameter(const char **argv, int argc, Information &info);
+  int setParameter(const char **argv, int argc, Parameter &info);
   int updateParameter(int parameterID, Information &info);
   
   // AddingSensitivity:BEGIN //////////////////////////////////////////

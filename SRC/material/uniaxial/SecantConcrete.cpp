@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2007-11-30 23:34:33 $
+// $Revision: 1.3 $
+// $Date: 2008-04-14 21:19:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SecantConcrete.cpp,v $
 
 // Written: MHS
@@ -33,6 +33,7 @@
 #include <Vector.h>
 #include <Channel.h>
 #include <Information.h>
+#include <Parameter.h>
 #include <math.h>
 
 SecantConcrete::SecantConcrete(int tag, double f, double ec, double eu)
@@ -228,20 +229,18 @@ SecantConcrete::Print(OPS_Stream &s, int flag)
   s << "  epsu: " << epsu << endln;
 }
 
+
 int
-SecantConcrete::setParameter(const char **argv, int argc, Information &info)
+SecantConcrete::setParameter(const char **argv, int argc, Parameter &param)
 {
   if (strcmp(argv[0],"fc") == 0 || strcmp(argv[0],"fpc") == 0) {
-    info.theType = DoubleType;
-    return 5;
+    return param.addObject(5, this);
   }
   else if (strcmp(argv[0],"ec") == 0 || strcmp(argv[0],"epsc") == 0) {
-    info.theType = DoubleType;
-    return 6;
+    return param.addObject(6, this);
   }
   else if (strcmp(argv[0],"eu") == 0 || strcmp(argv[0],"epsu") == 0) {
-    info.theType = DoubleType;
-    return 7;
+    return param.addObject(7, this);
   }
 
   return -1;

@@ -36,9 +36,6 @@ class Concrete06 : public UniaxialMaterial
   void Print(OPS_Stream &s, int flag =0);
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////
-    int    setParameter             (const char **argv, int argc, Information &info);
-    int    updateParameter          (int parameterID, Information &info);
-    int    activateParameter        (int parameterID);
     double getStressSensitivity     (int gradNumber, bool conditional);
     int    commitSensitivity        (double strainGradient, int gradNumber, int numGrads);
     // AddingSensitivity:END ///////////////////////////////////////////
