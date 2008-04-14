@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.11 $
-// $Date: 2006-09-05 22:22:58 $
+// $Revision: 1.12 $
+// $Date: 2008-04-14 21:26:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HardeningMaterial.h,v $
 
 #ifndef HardeningMaterial_h
@@ -44,7 +44,7 @@ class HardeningMaterial : public UniaxialMaterial
     HardeningMaterial();
     ~HardeningMaterial();
 
-    const char *getClassType(void) {return "HardeningMaterial";};
+    const char *getClassType(void) const {return "HardeningMaterial";};
 
     int setTrialStrain(double strain, double strainRate = 0.0); 
     double getStrain(void);          

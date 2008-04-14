@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-03-27 19:41:21 $
+// $Revision: 1.2 $
+// $Date: 2008-04-14 21:27:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SelfCenteringMaterial.h,v $
 
 #ifndef SelfCenteringMaterial_h
@@ -46,7 +46,7 @@ class SelfCenteringMaterial : public UniaxialMaterial
     SelfCenteringMaterial();
     ~SelfCenteringMaterial();
 
-	const char *getClassType(void) {return "SelfCenteringMaterial";};
+    const char *getClassType(void) const {return "SelfCenteringMaterial";};
 
     int setTrialStrain(double strain, double strainRate = 0.0); 
     double getStrain(void);          

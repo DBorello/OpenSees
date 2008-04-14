@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-08-03 23:42:47 $
+// $Revision: 1.3 $
+// $Date: 2008-04-14 21:28:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/drain/DrainBilinearMaterial.h,v $
                                                                       
 // Written: MHS
@@ -45,7 +45,7 @@ class DrainBilinearMaterial : public DrainMaterial
   DrainBilinearMaterial(void);
   virtual ~DrainBilinearMaterial();
 
-  const char *getClassType(void) {return "DrainBilinearMaterial";};
+  const char *getClassType(void) const {return "DrainBilinearMaterial";};
 
   int revertToStart(void);
   

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-08-03 23:42:47 $
+// $Revision: 1.3 $
+// $Date: 2008-04-14 21:28:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/drain/DrainClough1Material.h,v $
                                                                       
 // Written: MHS
@@ -45,7 +45,7 @@ class DrainClough1Material : public DrainMaterial
   DrainClough1Material(void);
   virtual ~DrainClough1Material();
 
-  const char *getClassType(void) {return "DrainClough1Material";};
+  const char *getClassType(void) const {return "DrainClough1Material";};
 
   int revertToStart(void);
   

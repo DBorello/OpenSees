@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-08-03 23:42:47 $
+// $Revision: 1.3 $
+// $Date: 2008-04-14 21:28:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/drain/DrainPinch1Material.h,v $
                                                                       
 // Written: MHS
@@ -46,7 +46,7 @@ class DrainPinch1Material : public DrainMaterial
     DrainPinch1Material(void);
     virtual ~DrainPinch1Material();
     
-  const char *getClassType(void) {return "DrainPinch1Material";};
+  const char *getClassType(void) const {return "DrainPinch1Material";};
     int revertToStart(void);
     
     UniaxialMaterial *getCopy(void);

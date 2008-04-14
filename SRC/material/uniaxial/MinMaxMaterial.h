@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-08-03 23:42:19 $
+// $Revision: 1.5 $
+// $Date: 2008-04-14 21:26:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/MinMaxMaterial.h,v $
                                                       
 // Written: MHS
@@ -41,7 +41,7 @@ class MinMaxMaterial : public UniaxialMaterial
     MinMaxMaterial();
     ~MinMaxMaterial();
     
-    const char *getClassType(void) {return "MinMaxMaterial";};
+    const char *getClassType(void) const {return "MinMaxMaterial";};
 
     int setTrialStrain(double strain, double strainRate = 0.0); 
     double getStrain(void);          
