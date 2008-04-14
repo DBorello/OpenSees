@@ -6,6 +6,7 @@
 
 #ifdef _WIN32
 #include <winsock2.h>
+#define bcopy(s,d,n)	memmove((d),(s),(n))
 #else
   #include <sys/socket.h>
   #include <sys/types.h>

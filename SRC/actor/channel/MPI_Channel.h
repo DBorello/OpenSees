@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-04-10 18:53:18 $
+// $Revision: 1.4 $
+// $Date: 2008-04-14 17:28:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/MPI_Channel.h,v $
                                                                         
                                                                         
@@ -34,8 +34,8 @@
 #ifndef MPI_Channel_h
 #define MPI_Channel_h
 
-#include <Channel.h>
 #include <mpi.h>
+#include <Channel.h>
 
 class MPI_Channel : public Channel
 {

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-10-25 18:20:30 $
+// $Revision: 1.3 $
+// $Date: 2008-04-14 17:28:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.cpp,v $
                                                                         
 // Written: fmk
@@ -32,6 +32,10 @@
 //
 // What: "@(#) FEM_ObjectBrokerAllClasses.C, revA"
 
+
+#ifdef _PARALLEL_PROCESSING
+#include <mpi.h>
+#endif
 
 #include <FEM_ObjectBrokerAllClasses.h>
 
@@ -1212,8 +1216,8 @@ FEM_ObjectBrokerAllClasses::getPtrNewRecorder(int classTag)
 	     return new EnvelopeElementRecorder();
 
 
-        case RECORDER_TAGS_TclFeViewer:  
-             return new TclFeViewer();
+//        case RECORDER_TAGS_TclFeViewer:  
+  //           return new TclFeViewer();
 	     
 	default:
 	     opserr << "FEM_ObjectBrokerAllClasses::getNewConstraintHandler - ";
