@@ -8,9 +8,11 @@
  * Started 10/19/95
  * George
  *
- * $Id: proto.h,v 1.2 2008-03-31 21:07:06 fmk Exp $
+ * $Id: proto.h,v 1.3 2008-04-14 17:26:15 fmk Exp $
  *
  */
+
+#include <stdlib.h>
 
 /* balance.c */
 void Balance2Way(CtrlType *, GraphType *, int *, float);
@@ -455,8 +457,13 @@ float snorm2(int, float *);
 float sdot(int n, float *, float *);
 void saxpy(int, float, float *, int, float *, int);
 void RandomPermute(int, idxtype *, int);
+#ifdef _WIN32
+# define drand48() (((float) rand())/((float) RAND_MAX)) 
+# define srand48(x) (srand((x))) 
+#else
 double drand48();
 void srand48(long);
+#endif
 int ispow2(int);
 void InitRandom(int);
 int log2(int);

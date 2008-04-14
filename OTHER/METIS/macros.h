@@ -8,10 +8,17 @@
  * Started 9/25/94
  * George
  *
- * $Id: macros.h,v 1.3 2008-03-31 21:07:06 fmk Exp $
+ * $Id: macros.h,v 1.4 2008-04-14 17:26:15 fmk Exp $
  *
  */
 
+#ifdef _WIN32 
+//#define drand48() (((float) rand())/((float) RAND_MAX)) 
+//# define srand48(x) (srand((x))) 
+//#elif defined __APPLE__ 
+//# define drand48() (((float) rand())/((float) RAND_MAX)) 
+//# define srand48(x) (srand((x))) 
+#endif
 
 /*************************************************************************
 * The following macro returns a random number in the specified range
