@@ -21,8 +21,8 @@
   
 
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-09-01 03:54:28 $
+// $Revision: 1.2 $
+// $Date: 2008-04-14 21:31:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/damage/Kratzig.h,v $
                                                                         
 #ifndef Kratzig_h
@@ -68,19 +68,14 @@ class Kratzig : public DamageModel
 
     DamageModel *getCopy (void);
 
-    int setVariable(const char *argv);
-    int getVariable(int variableID, double &info);
-
-    int setParameter(char **argv, int argc, Information &eleInformation);
-    int updateParameter(int responseID, Information &eleInformation);	
-
-    Response *setResponse(char **argv, int argc, Information &info);
+    Response *setResponse(const char **argv, int argc, Information &info);
     int getResponse(int responseID, Information &info);
 
-	int sendSelf(int commitTag, Channel &theChannel);  
+    int sendSelf(int commitTag, Channel &theChannel);  
     int recvSelf(int commitTag, Channel &theChannel, 
-			 FEM_ObjectBroker &theBroker);
-	void Print(OPS_Stream &s, int flag =0);    
+		 FEM_ObjectBroker &theBroker);
+
+    void Print(OPS_Stream &s, int flag =0);    
 
     // method for this damage model to update itself according to its new parameters
     void update(void) {return;}

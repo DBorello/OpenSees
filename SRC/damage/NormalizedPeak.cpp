@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-09-01 03:54:28 $
+// $Revision: 1.2 $
+// $Date: 2008-04-14 21:32:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/damage/NormalizedPeak.cpp,v $
 
 // Written: Arash Altoontash, Gregory Deierlein
@@ -231,7 +231,7 @@ double NormalizedPeak::getNegDamage (void)
 
 
 Response*
-NormalizedPeak::setResponse(char **argv, int argc, Information &info)
+NormalizedPeak::setResponse(const char **argv, int argc, Information &info)
 {
 //
 // we compare argv[0] for known response types for the Truss

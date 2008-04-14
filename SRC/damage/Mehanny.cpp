@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-09-01 03:54:28 $
+// $Revision: 1.2 $
+// $Date: 2008-04-14 21:31:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/damage/Mehanny.cpp,v $
 
 // Written: Arash Altoontash, Gregory Deierlein 
@@ -271,32 +271,9 @@ Mehanny::getCopy (void)
   return theCopy;
 }
 
-int
-Mehanny::setVariable(const char *argv)
-{
-  return -1;
-}
-
-int
-Mehanny::getVariable(int variableID, double &info)
-{
-  return -1;
-}
-
-int
-Mehanny::setParameter(char **argv, int argc, Information &eleInformation)
-{
-  return -1;
-}
-
-int
-Mehanny::updateParameter(int responseID, Information &eleInformation)
-{
-  return -1;
-}
 
 Response*
-Mehanny::setResponse(char **argv, int argc, Information &info)
+Mehanny::setResponse(const char **argv, int argc, Information &info)
 {
   //
   // we compare argv[0] for known response types for the Truss

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-09-01 03:54:28 $
+// $Revision: 1.2 $
+// $Date: 2008-04-14 21:30:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/damage/DamageModel.cpp,v $                                                                        
                                                                         
 // Written: Arash Altoontash, Gregory Deierlein
@@ -47,21 +47,8 @@ DamageModel::~DamageModel()
 
 }
 
-
-int
-DamageModel::setParameter(char **argv, int argc, Information &eleInformation)
-{
-  return -1;
-}
-
-int
-DamageModel::updateParameter(int responseID, Information &eleInformation)
-{
-  return -1;
-}
-
 Response*
-DamageModel::setResponse(char **argv, int argc, Information &info)
+DamageModel::setResponse(const char **argv, int argc, Information &info)
 {
   return 0;
 }

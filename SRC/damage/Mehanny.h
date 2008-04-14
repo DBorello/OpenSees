@@ -21,8 +21,8 @@
 #ifndef Mehanny_h
 #define Mehanny_h         
 
-// $Revision: 1.1 $
-// $Date: 2004-09-01 03:54:28 $
+// $Revision: 1.2 $
+// $Date: 2008-04-14 21:31:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/damage/Mehanny.h,v $
 
 
@@ -64,13 +64,7 @@ public:
   
   DamageModel *getCopy (void);
   
-  int setVariable(const char *argv);
-  int getVariable(int variableID, double &info);
-  
-  int setParameter(char **argv, int argc, Information &eleInformation);
-  int updateParameter(int responseID, Information &eleInformation);	
-  
-  Response *setResponse(char **argv, int argc, Information &info);
+  Response *setResponse(const char **argv, int argc, Information &info);
   int getResponse(int responseID, Information &info);
   
   int sendSelf(int commitTag, Channel &theChannel);  

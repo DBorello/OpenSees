@@ -19,8 +19,8 @@
 ** ****************************************************************** */
   
                              
-// $Revision: 1.1 $
-// $Date: 2004-09-01 03:54:28 $
+// $Revision: 1.2 $
+// $Date: 2008-04-14 21:30:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/damage/DamageModel.h,v $
                                                                         
 #ifndef DamageModel_h
@@ -40,11 +40,8 @@
 #include <TaggedObject.h>
 #include <Vector.h>
 
-
-#include <ErrorHandler.h>
 class Response;
 class DamageResponse;
-
 
 enum DamageType {
 	NotSpecified,
@@ -55,10 +52,9 @@ enum DamageType {
 	PlasticEnergy,
 };
 
-
 class DamageModel :  public TaggedObject, public MovableObject
 {
-public:
+ public:
     DamageModel(int tag, int classTag);    
     virtual ~DamageModel();
 
@@ -73,14 +69,8 @@ public:
     
     virtual DamageModel *getCopy (void) = 0;
     
-    virtual int setVariable(const char *argv)  { return -1; }
-    virtual int getVariable(int variableID, double &info)  { return -1; }
-    
-    virtual int setParameter(char **argv, int argc, Information &theInformation);
-    virtual int updateParameter(int responseID, Information &theInformation);	
-    virtual Response *setResponse(char **argv, int argc, Information &info) = 0;
+    virtual Response *setResponse(const char **argv, int argc, Information &info) = 0;
     virtual int getResponse(int responseID, Information &info) = 0;
-    
     
     virtual int sendSelf(int commitTag, Channel &theChannel) = 0;  
     virtual int recvSelf(int commitTag, Channel &theChannel, 

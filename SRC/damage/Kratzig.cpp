@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-09-01 03:54:28 $
+// $Revision: 1.2 $
+// $Date: 2008-04-14 21:31:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/damage/Kratzig.cpp,v $
                                                                         
 // Written: AA,GGD 
@@ -270,32 +270,8 @@ Kratzig::getCopy (void)
 	return theCopy;
 }
 
-int
-Kratzig::setVariable(const char *argv)
-{
-	return -1;
-}
-
-int
-Kratzig::getVariable(int variableID, double &info)
-{
-	return -1;
-}
-
-int
-Kratzig::setParameter(char **argv, int argc, Information &eleInformation)
-{
-    return -1;
-}
-
-int
-Kratzig::updateParameter(int responseID, Information &eleInformation)
-{
-    return -1;
-}
-
 Response*
-Kratzig::setResponse(char **argv, int argc, Information &info)
+Kratzig::setResponse(const char **argv, int argc, Information &info)
 {
 //
 // we compare argv[0] for known response types for the Truss

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-09-01 03:54:28 $
+// $Revision: 1.2 $
+// $Date: 2008-04-14 21:31:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/damage/HystereticEnergy.cpp,v $
 
 // Written: Arash Altoontash, Gregory Deierlein 
@@ -232,49 +232,22 @@ HystereticEnergy::getCopy (void)
 }
 
 
-int
-HystereticEnergy::setVariable(const char *argv)
-{
-	return -1;
-}
-
-
-int
-HystereticEnergy::getVariable(int variableID, double &info)
-{
-	return -1;
-}
-
-
-int
-HystereticEnergy::setParameter(char **argv, int argc, Information &eleInformation)
-{
-    return -1;
-}
-
-
-int
-HystereticEnergy::updateParameter(int responseID, Information &eleInformation)
-{
-    return -1;
-}
-
 
 Response*
-HystereticEnergy::setResponse(char **argv, int argc, Information &info)
+HystereticEnergy::setResponse(const char **argv, int argc, Information &info)
 {
 //
 // we compare argv[0] for known response types for the Truss
 //
 
-	if ( strcmp(argv[0],"damage") == 0 || strcmp(argv[0],"damageindex") == 0 )
+  if ( strcmp(argv[0],"damage") == 0 || strcmp(argv[0],"damageindex") == 0 )
     return new DamageResponse( this , 1 , 0.0 );
-
-	else if (strcmp(argv[0],"trial") == 0 || strcmp(argv[0],"trialinfo") == 0 )
+  
+  else if (strcmp(argv[0],"trial") == 0 || strcmp(argv[0],"trialinfo") == 0 )
     return new DamageResponse( this , 2 , Vector(7) );
-
-	else 
-		return 0;
+  
+  else 
+    return 0;
 
 }
 
@@ -305,7 +278,7 @@ HystereticEnergy::getResponse(int responseID, Information &info)
 int
 HystereticEnergy::sendSelf(int commitTag, Channel &theChannel)
 {
-	return 0;
+  return -1;
 }
 
 
@@ -313,7 +286,7 @@ int
 HystereticEnergy::recvSelf(int commitTag, Channel &theChannel,
 								FEM_ObjectBroker &theBroker)
 {
-	return 0;
+  return -1;
 }
 
 
