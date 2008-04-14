@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-25 23:33:37 $
+// $Revision: 1.8 $
+// $Date: 2008-04-14 21:17:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/CableMaterial.cpp,v $
                                                                         
 // Written: Charles Chadwell 
@@ -72,7 +72,7 @@ CableMaterial::setTrialStrain(double strain, double strainRate)
 {
   trialStrain     = strain;
 
-  double derivE, derivG, stress;
+  double derivE, derivG;
 
   // Check if out side the range of inportance 
   double testStress, dP, curstrain, e0;
@@ -121,13 +121,13 @@ CableMaterial::setTrialStrain(double strain, double strainRate)
   else 
     trialStress = middle;
 
-  if (stress <= 0.0) 
+  if (trialStress <= 0.0) 
     trialTangent = 0.0;
 	
   // Elastic Part
-  derivE = 1 / E * (1. - Mue * Mue * L * L / (24. * stress * stress) * (1. - 2. * Ps / stress));
+  derivE = 1 / E * (1. - Mue * Mue * L * L / (24. * trialStress * trialStress) * (1. - 2. * Ps / trialStress));
   // Geometric Part
-  derivG = 1 / 12. * Mue * Mue * L * L / (stress * stress * stress);
+  derivG = 1 / 12. * Mue * Mue * L * L / (trialStress * trialStress * trialStress);
   
   if (derivE + derivG != 0.0)
     trialTangent =  1.0 / (derivE + derivG);
