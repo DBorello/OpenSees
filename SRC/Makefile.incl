@@ -167,6 +167,8 @@ FE_INCLUDES  = -I$(FE)/matrix \
                -I$(FE)/reliability/domain/filter \
                -I$(FE)/reliability/domain/modulatingFunction \
                -I$(FE)/reliability/domain/spectrum \
+               -I$(FE)/reliability/optimization \
+               -I$(FE)/reliability/analysis/telm \
                -I$(FE)/reliability/FEsensitivity \
                -I$(FE)/reliability/tcl \
                -I$(FE)/reliability/optimization \
