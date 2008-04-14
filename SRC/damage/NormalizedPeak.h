@@ -21,8 +21,8 @@
 #ifndef NormalizedPeak_h
 #define NormalizedPeak_h         
 
-// $Revision: 1.1 $
-// $Date: 2004-09-01 03:54:28 $
+// $Revision: 1.2 $
+// $Date: 2008-04-14 22:38:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/damage/NormalizedPeak.h,v $
 
 // Written: Arash Altoontash, Gregory Deierlein
@@ -50,7 +50,7 @@ class NormalizedPeak : public DamageModel
   NormalizedPeak();  
   ~NormalizedPeak();
   
-  int setTrial (Vector trialVector);
+  int setTrial (const Vector &trialVector);
   int setTrial () { return -1; }
   
   double getDamage(void);
@@ -62,12 +62,6 @@ class NormalizedPeak : public DamageModel
   int revertToStart (void);
   
   DamageModel *getCopy (void);
-  
-  int setParameter(char **argv, int argc, Information &eleInformation) { return -1; }
-  int updateParameter(int responseID, Information &eleInformation) { return -1; }
-  
-  Response *setResponse(char **argv, int argc, Information &info);
-  int getResponse(int responseID, Information &info);
   
   int sendSelf(int commitTag, Channel &theChannel);  
   int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);

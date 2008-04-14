@@ -19,8 +19,8 @@
 ** ****************************************************************** */
   
 
-// $Revision: 1.2 $
-// $Date: 2008-04-14 21:31:03 $
+// $Revision: 1.3 $
+// $Date: 2008-04-14 22:38:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/damage/HystereticEnergy.h,v $
                                                                         
 #ifndef HystereticEnergy_h
@@ -47,7 +47,7 @@ class HystereticEnergy : public DamageModel
     HystereticEnergy();  
     ~HystereticEnergy();
     
-    int setTrial ( Vector trialVector );
+    int setTrial (const Vector &trialVector );
     int setTrial (); 
     
     int setInputResponse ( Element *elem , const char **argv , int argc, int ndof );
@@ -62,7 +62,7 @@ class HystereticEnergy : public DamageModel
     
     DamageModel *getCopy (void);
     
-    Response *setResponse(const char **argv, int argc, Information &info);
+    Response *setResponse(const char **argv, int argc, OPS_Stream &info);
     int getResponse(int responseID, Information &info);
     
     int sendSelf(int commitTag, Channel &theChannel);  

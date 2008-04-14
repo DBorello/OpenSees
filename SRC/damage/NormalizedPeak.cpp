@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-04-14 21:32:09 $
+// $Revision: 1.3 $
+// $Date: 2008-04-14 22:38:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/damage/NormalizedPeak.cpp,v $
 
 // Written: Arash Altoontash, Gregory Deierlein
@@ -159,7 +159,7 @@ NormalizedPeak::revertToStart (void)
 
 
 int
-NormalizedPeak::setTrial ( Vector trialVector )
+NormalizedPeak::setTrial (const Vector &trialVector )
 {
   if ( trialVector.Size() < 3 ) {
     opserr << "WARNING: NormalizedPeak::setTrial Wrong vector size for trial data" << endln;
@@ -229,36 +229,6 @@ double NormalizedPeak::getNegDamage (void)
   return TrialDmg;
 }
 
-
-Response*
-NormalizedPeak::setResponse(const char **argv, int argc, Information &info)
-{
-//
-// we compare argv[0] for known response types for the Truss
-//
-  
-  if ( strcmp(argv[0],"damage") == 0 || strcmp(argv[0],"damageindex") == 0 )
-    return new DamageResponse( this , 1 , 0.0 );
-  
-  else 
-    return 0;
-  
-}
-
-int 
-NormalizedPeak::getResponse(int responseID, Information &info)
-{
-  switch (responseID) {
-  case -1:
-    return -1;
-    
-  case 1:
-    return info.setDouble( this->getDamage() );
-    
-  default:
-    return -1;
-  }
-}
 
 
 int

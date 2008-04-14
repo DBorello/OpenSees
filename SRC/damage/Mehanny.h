@@ -21,8 +21,8 @@
 #ifndef Mehanny_h
 #define Mehanny_h         
 
-// $Revision: 1.2 $
-// $Date: 2008-04-14 21:31:49 $
+// $Revision: 1.3 $
+// $Date: 2008-04-14 22:38:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/damage/Mehanny.h,v $
 
 
@@ -49,7 +49,7 @@ public:
   Mehanny();  
   ~Mehanny();
   
-  int setTrial (Vector trialVector );
+  int setTrial (const Vector &trialVector );
   int setTrial () { return -1; } 
   
   int setInputResponse ( Element *elem , const char **argv , int argc, int ndof );
@@ -64,7 +64,7 @@ public:
   
   DamageModel *getCopy (void);
   
-  Response *setResponse(const char **argv, int argc, Information &info);
+  Response *setResponse(const char **argv, int argc, OPS_Stream &info);
   int getResponse(int responseID, Information &info);
   
   int sendSelf(int commitTag, Channel &theChannel);  

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-04-14 21:30:42 $
+// $Revision: 1.3 $
+// $Date: 2008-04-14 22:38:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/damage/DamageModel.cpp,v $                                                                        
                                                                         
 // Written: Arash Altoontash, Gregory Deierlein
@@ -48,13 +48,28 @@ DamageModel::~DamageModel()
 }
 
 Response*
-DamageModel::setResponse(const char **argv, int argc, Information &info)
+DamageModel::setResponse(const char **argv, int argc, OPS_Stream &stream)
 {
-  return 0;
+  if ( strcmp(argv[0],"damage") == 0 || strcmp(argv[0],"damageindex") == 0 )
+    return new DamageResponse( this , 1 , 0.0 );
+  
+  else 
+    return 0;
+  
 }
 
 int 
 DamageModel::getResponse(int responseID, Information &info)
 {
-  return -1;
+  switch (responseID) {
+  case -1:
+    return -1;
+    
+  case 1:
+    return info.setDouble( this->getDamage() );
+    
+  default:
+    return -1;
+  }
 }
+

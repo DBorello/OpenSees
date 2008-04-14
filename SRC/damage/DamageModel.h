@@ -19,8 +19,8 @@
 ** ****************************************************************** */
   
                              
-// $Revision: 1.2 $
-// $Date: 2008-04-14 21:30:42 $
+// $Revision: 1.3 $
+// $Date: 2008-04-14 22:38:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/damage/DamageModel.h,v $
                                                                         
 #ifndef DamageModel_h
@@ -58,7 +58,7 @@ class DamageModel :  public TaggedObject, public MovableObject
     DamageModel(int tag, int classTag);    
     virtual ~DamageModel();
 
-    virtual int setTrial (Vector trialVector) = 0;
+    virtual int setTrial(const Vector &trialVector) = 0;
     virtual double getDamage (void) = 0;
     virtual double getPosDamage (void) = 0;
     virtual double getNegDamage (void) = 0;
@@ -69,8 +69,8 @@ class DamageModel :  public TaggedObject, public MovableObject
     
     virtual DamageModel *getCopy (void) = 0;
     
-    virtual Response *setResponse(const char **argv, int argc, Information &info) = 0;
-    virtual int getResponse(int responseID, Information &info) = 0;
+    virtual Response *setResponse(const char **argv, int argc, OPS_Stream &theOutputStream);
+    virtual int getResponse(int responseID, Information &info);
     
     virtual int sendSelf(int commitTag, Channel &theChannel) = 0;  
     virtual int recvSelf(int commitTag, Channel &theChannel, 

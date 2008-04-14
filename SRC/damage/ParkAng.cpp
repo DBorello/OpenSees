@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-04-14 21:32:09 $
+// $Revision: 1.3 $
+// $Date: 2008-04-14 22:38:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/damage/ParkAng.cpp,v $
 
 // Written: AA,GGD 
@@ -66,7 +66,7 @@ ParkAng::setTrial (double scalar, double scalarRate )
 }
 
 int
-ParkAng::setTrial ( Vector trialVector )
+ParkAng::setTrial (const Vector & trialVector )
 {
 	// Trial step
 	double TForce, TDeformation, TUnloadingK, TEnergy, TMaxDefo, TDamage;
@@ -202,7 +202,7 @@ ParkAng::getCopy (void)
 }
 
 Response*
-ParkAng::setResponse(const char **argv, int argc, Information &info)
+ParkAng::setResponse(const char **argv, int argc, OPS_Stream &info)
 {
 //
 // we compare argv[0] for known response types for the Truss

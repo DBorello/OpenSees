@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-04-14 21:31:24 $
+// $Revision: 1.3 $
+// $Date: 2008-04-14 22:38:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/damage/Kratzig.cpp,v $
                                                                         
 // Written: AA,GGD 
@@ -62,7 +62,7 @@ Kratzig::~Kratzig()
 
 
 int
-Kratzig::setTrial ( Vector trialVector )
+Kratzig::setTrial ( const Vector & trialVector )
 {
 	// Trial step variables
 	double TDefo, TForce, TKunload, TSumPosFHC, TPosPHC, TSumNegFHC, TNegPHC, TMaxPosDefo, TMinNegDefo, TDamage;
@@ -271,7 +271,7 @@ Kratzig::getCopy (void)
 }
 
 Response*
-Kratzig::setResponse(const char **argv, int argc, Information &info)
+Kratzig::setResponse(const char **argv, int argc, OPS_Stream &info)
 {
 //
 // we compare argv[0] for known response types for the Truss

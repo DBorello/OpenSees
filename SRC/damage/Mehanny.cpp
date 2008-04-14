@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-04-14 21:31:49 $
+// $Revision: 1.3 $
+// $Date: 2008-04-14 22:38:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/damage/Mehanny.cpp,v $
 
 // Written: Arash Altoontash, Gregory Deierlein 
@@ -89,7 +89,7 @@ Mehanny::~Mehanny()
 }
 
 
-int Mehanny::setTrial (Vector trialVector )
+int Mehanny::setTrial (const Vector & trialVector )
 {
   if ( trialVector.Size() != 3 ) {
     opserr << "WARNING: Mehanny::setTrial Wrong vector size for trial data" << endln;
@@ -273,7 +273,7 @@ Mehanny::getCopy (void)
 
 
 Response*
-Mehanny::setResponse(const char **argv, int argc, Information &info)
+Mehanny::setResponse(const char **argv, int argc, OPS_Stream &info)
 {
   //
   // we compare argv[0] for known response types for the Truss

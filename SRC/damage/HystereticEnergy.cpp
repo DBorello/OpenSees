@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-04-14 21:31:03 $
+// $Revision: 1.3 $
+// $Date: 2008-04-14 22:38:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/damage/HystereticEnergy.cpp,v $
 
 // Written: Arash Altoontash, Gregory Deierlein 
@@ -60,7 +60,7 @@ HystereticEnergy::~HystereticEnergy()
 
 
 int
-HystereticEnergy::setTrial ( Vector trialVector )
+HystereticEnergy::setTrial (const Vector & trialVector )
 {	
   double TDisp, TForce, TKunload, TEnrgTot, TEnrgc, TExcurDmg, TCyclicDmg;
   double CDisp, CForce, CKunload, CEnrgTot, CEnrgc, CExcurDmg, CCyclicDmg;
@@ -234,7 +234,7 @@ HystereticEnergy::getCopy (void)
 
 
 Response*
-HystereticEnergy::setResponse(const char **argv, int argc, Information &info)
+HystereticEnergy::setResponse(const char **argv, int argc, OPS_Stream  &info)
 {
 //
 // we compare argv[0] for known response types for the Truss
