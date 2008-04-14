@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-02-02 01:19:30 $
+// $Revision: 1.5 $
+// $Date: 2008-04-14 21:26:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/snap/Bilinear.h,v $
 //
 //
@@ -71,7 +71,7 @@ class Bilinear : public UniaxialMaterial
 	int sendSelf(int commitTag, Channel &theChannel);  
 	int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
   
-	Response* setResponse(const char **argv, int argc);
+	Response* setResponse(const char **argv, int argc, OPS_Stream &s);
 	int getResponse(int responseID, Information &matInfo);
 
 	void Print(OPS_Stream &s, int flag =0);

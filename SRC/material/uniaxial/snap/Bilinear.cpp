@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-02-02 01:19:30 $
+// $Revision: 1.4 $
+// $Date: 2008-04-14 21:26:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/snap/Bilinear.cpp,v $
 //
 //
@@ -543,38 +543,58 @@ int Bilinear::setTrialStrain( double d, double strainRate)
 }
 
 
-Response* Bilinear::setResponse(const char **argv, int argc)
+Response* 
+Bilinear::setResponse(const char **argv, int argc, OPS_Stream &theOutput)
 {
-	if ( argv == NULL || argc == 0 ) {
-		opserr << "Error: Bilinear::setResponse  : No argument specified\n" << "\a";
-		exit (-1);
-	}
-;
+  Response *theResponse = 0;
 
-	if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"stress") == 0 )
-		return new MaterialResponse(this, 1, 0.0);
+  if ( argv == NULL || argc == 0 ) {
+    opserr << "Error: Bilinear::setResponse  : No argument specified\n" << "\a";
+    return 0;
+  };
+  
+  theOutput.tag("UniaxialMaterialOutput");
+  theOutput.attr("matType", this->getClassType());
+  theOutput.attr("matTag", this->getTag());
+  
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"stress") == 0 ) {
+    theOutput.tag("ResponseType", "sigma11");
+    theResponse = new MaterialResponse(this, 1, 0.0);
+  }
 
-	else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformation") == 0 ||
-		strcmp(argv[0],"strain") == 0)
-		return new MaterialResponse(this, 2, 0.0);
+  else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformation") == 0 ||
+	   strcmp(argv[0],"strain") == 0) {
+    theOutput.tag("ResponseType", "eps11");
+    theResponse =  new MaterialResponse(this, 2, 0.0);
+  }
 
-	else if (strcmp(argv[0],"plastic") == 0 || strcmp(argv[0],"plasticdefo") == 0 ||
-		strcmp(argv[0],"plasticdeformation") == 0 || strcmp(argv[0],"plasticstrain") == 0)
-		return new MaterialResponse(this, 3, 0.0);
+  else if (strcmp(argv[0],"plastic") == 0 || strcmp(argv[0],"plasticdefo") == 0 ||
+	   strcmp(argv[0],"plasticdeformation") == 0 || strcmp(argv[0],"plasticstrain") == 0) {
+    theOutput.tag("ResponseType", "eps1P");
+    theResponse =  new MaterialResponse(this, 3, 0.0);
+  }
 
-	else if ( (strcmp(argv[0],"stiff") == 0) || (strcmp(argv[0],"stiffness") == 0) )
-		return new MaterialResponse(this, 4, 0.0);
+  else if ( (strcmp(argv[0],"stiff") == 0) || (strcmp(argv[0],"stiffness") == 0) ) {
+    theOutput.tag("ResponseType", "C11");
+    theResponse =  new MaterialResponse(this, 4, 0.0);
+  }
 	
-	else if ( (strcmp(argv[0],"unloading") == 0) || (strcmp(argv[0],"unloadingstiffness") == 0)
-		|| (strcmp(argv[0],"unloadingstiff") == 0 ) )
-		return new MaterialResponse(this, 5, 0.0);
+  else if ( (strcmp(argv[0],"unloading") == 0) || (strcmp(argv[0],"unloadingstiffness") == 0)
+	    || (strcmp(argv[0],"unloadingstiff") == 0 ) ) {
+    theOutput.tag("ResponseType", "C11_unloading");
+    theResponse =  new MaterialResponse(this, 5, 0.0);
+  }
+  
+  else if ( (strcmp(argv[0],"damage") == 0) || (strcmp(argv[0],"damages") == 0)
+	    || (strcmp(argv[0],"Damage") == 0 ) || (strcmp(argv[0],"Damages") == 0 ) ) {
+    theOutput.tag("ResponseType", "str_damaga");
+    theOutput.tag("ResponseType", "stf_damaga");
+    theOutput.tag("ResponseType", "cap_damaga");
+    theResponse =  new MaterialResponse(this, 6, Vector(3));
+  }
 
-	else if ( (strcmp(argv[0],"damage") == 0) || (strcmp(argv[0],"damages") == 0)
-		|| (strcmp(argv[0],"Damage") == 0 ) || (strcmp(argv[0],"Damages") == 0 ) )
-		return new MaterialResponse(this, 6, Vector(3));
-
-	else
-		return 0;
+  theOutput.endTag();
+  return theResponse;    
 }
 
 int Bilinear::getResponse(int responseID, Information &matInfo)
