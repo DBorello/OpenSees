@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-11-30 23:34:33 $
+// $Revision: 1.5 $
+// $Date: 2008-04-14 22:01:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Elastic2Material.cpp,v $
                                                                         
                                                                         
@@ -207,7 +207,6 @@ Elastic2Material::updateParameter(int parameterID, Information &info)
     return 0;
   case 3:
     zeroE = info.theInt;
-    opserr << "Elastic2Material::updateParameter() zeroE : " << zeroE << endln;
     return 0;
   default:
     return -1;
