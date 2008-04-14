@@ -2,7 +2,7 @@
 /*  Elimination tree computation and layout routines */
 
 #include <stdio.h>
-#include <malloc.h>
+//#include <malloc.h>
 #include <stdlib.h>
 #include "superlu_ddefs.h"
 

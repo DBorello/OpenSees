@@ -19,7 +19,6 @@
 #include <mpi.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <malloc.h>
 
 /* Define my integer size int_t */
 #ifdef _CRAY
