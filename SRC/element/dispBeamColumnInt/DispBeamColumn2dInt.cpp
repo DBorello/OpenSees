@@ -2,7 +2,7 @@
 
 // $Version$
 
-// $Date: 2007-11-28 00:08:57 $
+// $Date: 2008-04-14 21:22:20 $
 
 
 
@@ -2071,45 +2071,6 @@ DispBeamColumn2dInt::getResponse(int responseID, Information &eleInfo)		//L modi
 
 
 // AddingSensitivity:BEGIN ///////////////////////////////////
-
-int
-
-DispBeamColumn2dInt::setParameter (const char **argv, int argc, Information &info)
-
-{
-
-		return -1;
-
-}
-
-
-
-int
-
-DispBeamColumn2dInt::updateParameter (int parameterID, Information &info)
-
-{
-
-		return -1;
-
-}
-
-
-
-
-
-int
-
-DispBeamColumn2dInt::activateParameter(int passedParameterID)
-
-{
-
-	return 0;
-
-}
-
-
-
 
 
 const Matrix &

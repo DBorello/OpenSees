@@ -1,8 +1,8 @@
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumnInt/DispBeamColumn2dInt.h,v $
 
-// $Revision: 1.3 $
+// $Revision: 1.4 $
 
-// $Date: 2007-11-28 00:08:57 $
+// $Date: 2008-04-14 21:22:20 $
 
 
 
@@ -157,94 +157,46 @@ class DispBeamColumn2dInt : public Element
 
 
     // AddingSensitivity:BEGIN //////////////////////////////////////////
-
-    int            setParameter(const char **argv, int argc, Information &info);
-
-    int            updateParameter(int parameterID, Information &info);
-
-    int            activateParameter(int parameterID);
-
     const Vector & getResistingForceSensitivity(int gradNumber);
-
     const Matrix & getKiSensitivity(int gradNumber);
-
     const Matrix & getMassSensitivity(int gradNumber);
-
     int            commitSensitivity(int gradNumber, int numGrads);
-
     // AddingSensitivity:END ///////////////////////////////////////////
 
-
-
   protected:
-
     
-
   private:
-
     const Matrix &getInitialBasicStiff(void);
-
-
 
     int numSections;
 
-
-
     FiberSection2dInt **theSections; // pointer to the ND material objects
-
     LinearCrdTransf2dInt *crdTransf;          // pointer to coordinate tranformation object 
 
-
-
     double C1;
-
     ID connectedExternalNodes; // Tags of quad nodes
-
-
 
     Node *theNodes[2];
 
-
-
     static Matrix K;		// Element stiffness, damping, and mass Matrix
-
     static Vector P;		// Element resisting force vector
 
-
-
     Vector Q;		// Applied nodal loads
-
     Vector q;		// Basic force
-
     double q0[6];  
-
     double p0[6];  
-
-
 
     double rho;			// Mass density per unit length
 
-
-
     static double workArea[];
-
-
 
     static LegendreBeamIntegration quadRule;
 
-
-
     // AddingSensitivity:BEGIN //////////////////////////////////////////
-
     int parameterID;
-
     // AddingSensitivity:END ///////////////////////////////////////////
-
 };
 
-
-
 #endif
-
 
 

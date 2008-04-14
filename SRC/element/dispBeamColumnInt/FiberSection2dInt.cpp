@@ -1,8 +1,8 @@
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumnInt/FiberSection2dInt.cpp,v $
 
-// $Revision: 1.2 $
+// $Revision: 1.3 $
 
-// $Date: 2007-11-28 00:08:57 $
+// $Date: 2008-04-14 21:22:20 $
 
 
 
@@ -1148,6 +1148,12 @@ tc1 = beta*tc1;
 
 
 
+const Vector &
+FiberSection2dInt::getSectionDeformation (void)
+{
+  return e;
+}
+
 
 
 int FiberSection2dInt::setTrialSectionDeformationB (const Vector &deforms, double L)
@@ -1157,31 +1163,19 @@ int FiberSection2dInt::setTrialSectionDeformationB (const Vector &deforms, doubl
   int res = 0;
 
 
-
-  e = deforms;									// axial strain, curvature and shear strain
-
-
-
+  
+  e = deforms;	// axial strain, curvature and shear strain
+  
+  
   kData[0] = 0.0; kData[1] = 0.0; kData[2] = 0.0; kData[3] = 0.0; kData[4] = 0.0; kData[5] = 0.0;
-
   kData[6] = 0.0; kData[7] = 0.0; kData[8] = 0.0;
-
-
-
   sData[0] = 0.0; sData[1] = 0.0; sData[2] = 0.0;
 
-
-
   double d0 = deforms(0);						// axial strain
-
   double d1 = deforms(1);						// curvature
-
   double d2 = deforms(2);						// shear strain
-
   double iterMax = 200;
-
   double tol = 1e-8;
-
   
 
   for (int jj = 0; jj < NStrip; jj++) {
@@ -1538,7 +1532,7 @@ int FiberSection2dInt::setTrialSectionDeformationB (const Vector &deforms, doubl
 
       for (int H = 0; H < numHFibers; H++) {				
 
-	UniaxialMaterial *theHMat = theHMaterials[H,jj];
+	UniaxialMaterial *theHMat = theHMaterials[H*numHFibers + jj];
 
 	double Hy = matHData[Hloc++];	
 
@@ -1879,16 +1873,6 @@ int FiberSection2dInt::setTrialSectionDeformationB (const Vector &deforms, doubl
 
 
 
-
-const Vector&
-
-FiberSection2dInt::getSectionDeformation(void)
-
-{
-
-  return e;
-
-}
 
 
 
@@ -2572,7 +2556,7 @@ for (int jj = 0; jj < NStrip; jj++) {
 
 	for (int H = 0; H < numHFibers; H++) {				
 
-	  UniaxialMaterial *theHMat = theHMaterials[H,jj];
+	  UniaxialMaterial *theHMat = theHMaterials[H * numHFibers + jj];
 
 	  double Hy = matHData[Hloc++];
 
@@ -3859,98 +3843,34 @@ FiberSection2dInt::getResponse(int responseID, Information &sectInfo)
 
 
 // AddingSensitivity:BEGIN ////////////////////////////////////
-
-int
-
-FiberSection2dInt::setParameter (const char **argv, int argc, Information &info)
-
-{
-
-return -1; 
-
-}
-
-
-
-int
-
-FiberSection2dInt::updateParameter (int parameterID, Information &info)
-
-{
-
-return -1; 
-
-}
-
-
-
-int
-
-FiberSection2dInt::activateParameter(int passedParameterID)
-
-{
-
-	return 0;
-
-}
-
-
-
 const Vector &
-
 FiberSection2dInt::getSectionDeformationSensitivity(int gradNumber)
-
 {
-
 	static Vector dummy(2);
-
 	return dummy;
-
 }
-
 
 
 const Vector &
-
 FiberSection2dInt::getStressResultantSensitivity(int gradNumber, bool conditional)
-
 {
-
 	static Vector dummy(2);	
-
 	return dummy;
-
 }
-
 
 
 const Matrix &
-
 FiberSection2dInt::getSectionTangentSensitivity(int gradNumber)
-
 {
-
 	static Matrix something(2,2);
-
 	something.Zero();
-
 	return something;
-
 }
-
-
 
 int
-
 FiberSection2dInt::commitSensitivity(const Vector& defSens, int gradNumber, int numGrads)
-
 {
-
   return 0;
-
 }
 
-
-
 // AddingSensitivity:END ///////////////////////////////////
-
