@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-02-02 01:18:12 $
+// $Revision: 1.8 $
+// $Date: 2008-04-14 21:34:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection.cpp,v $
                                                                         
 // Written: MHS
@@ -529,53 +529,62 @@ FiberSection::Print(OPS_Stream &s, int flag)
 }
 
 Response*
-FiberSection::setResponse(const char **argv, int argc)
+FiberSection::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
-	// See if the response is one of the defaults
-	Response *res = SectionForceDeformation::setResponse(argv, argc);
-	if (res != 0)
-		return res;
+  // See if the response is one of the defaults
+  Response *res = SectionForceDeformation::setResponse(argv, argc, s);
+  if (theResponse != 0)
+    return theResponse;
 
-	// Check if fiber response is requested
-    else if (strcmp(argv[0],"fiber") == 0) {
-        int key = 0;
-        int passarg = 2;
 
-        if (argc <= 2)          // not enough data input
-            return 0;
-        else if (argc <= 3)		// fiber number was input directly
-            key = atoi(argv[1]);
-        else {                  // fiber near-to coordinate specified
-            double yCoord = atof(argv[1]);
-			double zCoord = atof(argv[2]);
-			double ySearch, zSearch;
-	        theFibers[0]->getFiberLocation(ySearch,zSearch);
-			double closestDist = sqrt( pow(ySearch-yCoord,2) +
-                                 pow(zSearch-zCoord,2) );
-			double distance;
-			for (int j = 1; j < numFibers; j++) {
-				theFibers[j]->getFiberLocation(ySearch,zSearch);
-				distance = sqrt( pow(ySearch-yCoord,2) +
-                                 pow(zSearch-zCoord,2) );
-				if (distance < closestDist) {
-					closestDist = distance;
-					key = j;
-				}
-			}
-			theFibers[key]->getFiberLocation(ySearch,zSearch);
-		    passarg = 3;
-		}
-	
-        if (key < numFibers)
-			return theFibers[key]->setResponse(&argv[passarg],argc-passarg
-);
-        else
-            return 0;
+  output.tag("SectionOutput");
+  output.attr("secType", this->getClassType());
+  output.attr("secTag", this->getTag());
+
+  // Check if fiber response is requested
+  else if (strcmp(argv[0],"fiber") == 0) {
+    int key = 0;
+    int passarg = 2;
+    
+    if (argc <= 2)          // not enough data input
+      return 0;
+    else if (argc <= 3)		// fiber number was input directly
+      key = atoi(argv[1]);
+    else {                  // fiber near-to coordinate specified
+      double yCoord = atof(argv[1]);
+      double zCoord = atof(argv[2]);
+      double ySearch, zSearch;
+      theFibers[0]->getFiberLocation(ySearch,zSearch);
+      double closestDist = sqrt( pow(ySearch-yCoord,2) +
+				 pow(zSearch-zCoord,2) );
+      double distance;
+      for (int j = 1; j < numFibers; j++) {
+	theFibers[j]->getFiberLocation(ySearch,zSearch);
+	distance = sqrt( pow(ySearch-yCoord,2) +
+			 pow(zSearch-zCoord,2) );
+	if (distance < closestDist) {
+	  closestDist = distance;
+	  key = j;
+	}
+      }
+      theFibers[key]->getFiberLocation(ySearch,zSearch);
+      passarg = 3;
     }
-			
-    // otherwise response quantity is unknown for the FiberSection class
-    else
-		return 0;    
+	
+    if (key < numFibers && key >= 0) {
+	output.tag("FiberOutput");
+	double yLoc, zLoc;
+	theFibers[key]->getFiberLocation(yLoc, zLoc);
+	output.attr("yLoc", yLoc);
+	output.attr("zLoc",0.0);
+	output.attr("area", zLoc);
+	theResponse = theFibers[key]->setResponse(&argv[passarg],argc-passarg, output);
+	output.endTag();
+    }    
+  }
+
+  output.endTag();
+  return theResponse;
 }
 
 int 

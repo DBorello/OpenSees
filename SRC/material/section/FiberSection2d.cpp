@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.32 $
-// $Date: 2007-12-01 01:03:49 $
+// $Revision: 1.33 $
+// $Date: 2008-04-14 21:34:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.cpp,v $
                                                                         
 // Written: fmk
@@ -760,7 +760,6 @@ FiberSection2d::setResponse(const char **argv, int argc,
 {
   const ID &type = this->getType();
   int typeSize = this->getOrder();
-
 
   Response *theResponse =0;
 
