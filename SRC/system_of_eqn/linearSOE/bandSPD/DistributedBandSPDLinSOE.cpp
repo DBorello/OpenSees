@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-12-06 22:04:33 $
+// $Revision: 1.2 $
+// $Date: 2008-04-14 21:16:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandSPD/DistributedBandSPDLinSOE.cpp,v $
                                                                         
 // Written: fmk 
@@ -333,8 +333,6 @@ DistributedBandSPDLinSOE::addA(const Matrix &m, const ID &id, double fact)
       } 
     }  // for i
   }
-    return 0;
-
   return 0;
 }
 
@@ -597,8 +595,6 @@ DistributedBandSPDLinSOE::sendSelf(int commitTag, Channel &theChannel)
     return -1;
   }
 
-  return 0;
-  
   return 0;
 }
 
