@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-10-26 03:22:40 $
+// $Revision: 1.10 $
+// $Date: 2008-04-14 19:37:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/GammaRV.cpp,v $
 
 
@@ -32,6 +32,7 @@
 //
 
 #include <GammaRV.h>
+#include <NormalRV.h>
 #include <math.h>
 #include <string.h>
 #include <Vector.h>
@@ -99,6 +100,7 @@ GammaRV::getPDFvalue(double rvValue)
 	else {
 		result = 0.0;
 	}
+
 	return result;
 }
 
@@ -113,7 +115,7 @@ GammaRV::getCDFvalue(double rvValue)
 	else {
 		result = 0.0;
 	}
-
+	
 	return result;
 }
 
@@ -121,7 +123,6 @@ GammaRV::getCDFvalue(double rvValue)
 double
 GammaRV::getInverseCDFvalue(double probValue)
 {
-	double result = 0.0;
 	// Here we want to solve the nonlinear equation:
 	//         probValue = getCDFvalue(x)
 	// with respect to x. 
@@ -130,37 +131,42 @@ GammaRV::getInverseCDFvalue(double probValue)
 	// In our case the function f(x) is: f(x) = probValue - getCDFvalue(x)
 	// The derivative of the function can be found approximately by a
 	// finite difference scheme where e.g. stdv/200 is used as perturbation.
-	double tol = 0.000001;
-	double x_old = getMean();   // Start at the mean of the random variable
+	// Note to writer of above: Newton does not converge for all cases, particularly those
+	// that look like CDFs when the start point is not close to the zero point.  
+	
+	// bootstrap with estimate from equivalent normal distribution
+	static NormalRV normRV( 1, getMean(), getStdv(), 0.0);
+	
+	double tol = 1.0e-8;
+	double x_old = normRV.getInverseCDFvalue(probValue);
+	double result = x_old;
+
 	double x_new;
 	double f;
 	double df;
-	double h;
-	double perturbed_f;
-	for (int i=1;  i<=100;  i++ )  {
+	for (int i = 1; i <= 50;  i++ )  {
 		// Evaluate function
-		f = probValue - getCDFvalue(x_old);
-		// Evaluate perturbed function
-		h = getStdv()/200.0;
-		perturbed_f = probValue - getCDFvalue(x_old+h);
-		// Evaluate derivative of function
-		df = ( perturbed_f - f ) / h;
-		// Take a Newton step
-		x_new = x_old - f/df;
-		// Check convergence; quit or continue
-		if (fabs(1.0-fabs(x_old/x_new)) < tol) {
-			result = x_new;
+		f = getCDFvalue(x_old) - probValue;
+		
+		// evaluate derivative
+		df = getPDFvalue(x_old);
+		
+		if ( fabs(df) > 1e-8 ) {
+			// Take a Newton step
+			x_new = x_old - f/df;
+			
+			// Check convergence; quit or continue
+			if (fabs(f/df) < tol)
+				return x_new;
+		} else {
+			// gradient zero
+			return x_old;
 		}
-		else {
-			if (i==100) {
-				opserr << "WARNING: Did not converge to find inverse CDF!" << endln;
-				result = 0.0;
-			}
-			else {
-			x_old = x_new;
-			}
-		}
+		
+		x_old = x_new;
 	}
+	
+	opserr << "WARNING: Did not converge to find inverse CDF!" << endln;
 	return result;
 }
 
@@ -247,7 +253,7 @@ GammaRV::gammaFunction(double x)
 		c(6) = 8.333333333333333331554247e-02;
 		c(7) = 5.7083835261e-03;
 
-		double pi = 3.14159265358979;
+		double pi = acos(-1.0);
 		double y;
 		double y1;
 		double fact;
@@ -334,40 +340,40 @@ GammaRV::gammaFunction(double x)
 }
 
 double 
-GammaRV::incompleteGammaFunction(double x, double a)
+GammaRV::incompleteGammaFunction(double a, double x)
 {
-	double gam = log(gammaFunction(a));
 	double b = x;
-	if (x==0.0) {
+	if (x == 0.0) {
 		b = 0.0;
 	}
-	if (a==0.0) {
+	if (a == 0.0) {
 		b = 1.0;
 	}
 	// Series expansion for x < a+1
-	if (a!=0.0 && x!=0.0 && x<a+1.0) {
+	if ( (a != 0.0) && (x != 0.0) && (x < a+1.0) ) {
 		double ap = a;
-		double sum = 1.0/ap;
-		double del = sum;
-		while (fabs(del) >= 1.0e-10*fabs(sum)) {
+		double del = 1.0;
+		double sum = del;
+		while (fabs(del) >= 1.0e-12*fabs(sum)) {
 			ap = ap + 1.0;
 			del = x * del / ap;
 			sum = sum + del;
 		}
-		b = sum * exp(-x + a*log(x) - gam);
-	}
-
+		b = sum * exp(-x + a*log(x) - log(gammaFunction(a+1)) );
+		if ( x > 0 && b > 1 )
+			b = 1.0;
+			
+	} else {
 	// Continued fraction for x >= a+1
-	if ((a != 0) && (x != 0) && (x >= a+1.0))  {
 		double a0 = 1.0;
 		double a1 = x;
 		double b0 = 0.0;
 		double b1 = a0;
-		double fac = 1.0;
+		double fac = 1.0/a1;
 		double n = 1;
-		double g = b1;
+		double g = b1*fac;
 		double gold = b0;
-		while (fabs(g-gold) >= 1.0e-10*fabs(g))  {
+		while (fabs(g-gold) >= 1.0e-12*fabs(g))  {
 			gold = g;
 			double ana = n - a;
 			a0 = (a1 + a0 *ana) * fac;
@@ -379,7 +385,7 @@ GammaRV::incompleteGammaFunction(double x, double a)
 			g = b1 * fac;
 			n = n + 1.0;
 		}
-		b = 1 - exp(-x + a*log(x) - gam) * g;
+		b = 1.0 - exp(-x + a*log(x) - log(gammaFunction(a)) ) * g;
 	}
 
 	return b;
