@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2008-02-15 23:42:30 $
+// $Revision: 1.20 $
+// $Date: 2008-04-15 18:01:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.cpp,v $
                                                                         
                                                                         
@@ -180,7 +180,7 @@ HWND oglCreateWindow(char* title, int x, int y, int width, int height,
     glViewport(0, 0, (GLsizei)width, (GLsizei)height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(0.0, (GLdouble)width, 0.0, (GLdouble)height);
+    //gluOrtho2D(0.0, (GLdouble)width, 0.0, (GLdouble)height);
     glFlush();
  
     return hWnd;

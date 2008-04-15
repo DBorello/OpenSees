@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-26 18:56:09 $
+// $Revision: 1.5 $
+// $Date: 2008-04-15 18:01:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/WindowDevice.h,v $
                                                                         
 #ifndef WindowDevice_H
@@ -37,7 +37,7 @@
 // include open gl stuff for win32
 #include <windows.h>
 #include <gl\gl.h>
-#include <gl\glaux.h>
+//#include <gl\glaux.h>
 #endif
 
 #define MAX_NUM_POINTS_FOR_POLYGON 64

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2008-02-15 23:42:30 $
+// $Revision: 1.10 $
+// $Date: 2008-04-15 18:01:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.h,v $
                                                                         
                                                                         
@@ -45,7 +45,7 @@
 
 #include <windows.h>
 #include <gl\gl.h>
-#include <gl\glaux.h>
+//#include <gl\glaux.h>
 
 #elif _AGL
 

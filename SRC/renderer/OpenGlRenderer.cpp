@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2008-02-15 23:45:05 $
+// $Revision: 1.20 $
+// $Date: 2008-04-15 18:01:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlRenderer.cpp,v $
                                                                         
                                                                         
@@ -41,7 +41,7 @@ using std::ios;
 
 #ifdef _WGL
 #include <windows.h>
-#include <GL/glaux.h>
+//#include <GL/glaux.h>
 #include <GL/glu.h>
 #include <GL/gl.h>
 

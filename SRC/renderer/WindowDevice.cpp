@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-26 18:56:09 $
+// $Revision: 1.7 $
+// $Date: 2008-04-15 18:01:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/WindowDevice.cpp,v $
                                                                         
                                                                         
@@ -187,7 +187,7 @@ HWND oglCreateWindow(char* title, int x, int y, int width, int height,
     glViewport(0, 0, (GLsizei)width, (GLsizei)height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(0.0, (GLdouble)width, 0.0, (GLdouble)height);
+//    gluOrtho2D(0.0, (GLdouble)width, 0.0, (GLdouble)height);
     glFlush();
 
    
@@ -489,7 +489,7 @@ WindowDevice::WINOPEN(const char *_title, int _xLoc, int _yLoc, int _width, int 
     glViewport(0, 0, (GLsizei)width, (GLsizei)height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(0.0, (GLdouble)width, 0.0, (GLdouble)height);
+//    gluOrtho2D(0.0, (GLdouble)width, 0.0, (GLdouble)height);
     glFlush();
 
 #endif
