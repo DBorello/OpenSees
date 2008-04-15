@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2008-04-14 17:28:10 $
+// $Revision: 1.4 $
+// $Date: 2008-04-15 19:14:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.cpp,v $
                                                                         
 // Written: fmk
@@ -1216,11 +1216,12 @@ FEM_ObjectBrokerAllClasses::getPtrNewRecorder(int classTag)
 	     return new EnvelopeElementRecorder();
 
 
-//        case RECORDER_TAGS_TclFeViewer:  
+        case RECORDER_TAGS_TclFeViewer:  
+	  return 0;
   //           return new TclFeViewer();
 	     
 	default:
-	     opserr << "FEM_ObjectBrokerAllClasses::getNewConstraintHandler - ";
+	     opserr << "FEM_ObjectBrokerAllClasses::getNewRecordr - ";
 	     opserr << " - no ConstraintHandler type exists for class tag ";
 	     opserr << classTag << endln;
 	     return 0;
