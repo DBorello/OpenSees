@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2007-11-29 23:26:36 $
+// $Revision: 1.17 $
+// $Date: 2008-04-15 18:03:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -190,7 +190,6 @@ PartitionedDomain::addElement(Element *elePtr)
 
   int eleTag = elePtr->getTag();
 #ifdef _DEBUG      
-    if (check == true) {
 
 	// check ele Tag >= 0
 	if (eleTag < 0) {
@@ -214,7 +213,6 @@ PartitionedDomain::addElement(Element *elePtr)
 	    }      	
 	}
 	
-    }
 #endif
     
     TaggedObject *other = elements->getComponentPtr(eleTag);
@@ -238,11 +236,7 @@ bool
 PartitionedDomain::addNode(Node *nodePtr)
 {
 #ifdef _DEBUG    
-    if (check == true) {
-	// check its not in this or any of the subdomains
-
-	// MISSING CODE	
-    }
+   
 #endif
     return (this->Domain::addNode(nodePtr));    
 }
