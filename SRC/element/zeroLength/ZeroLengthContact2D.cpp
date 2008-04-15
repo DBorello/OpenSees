@@ -1,524 +1,261 @@
 /* ****************************************************************** **
-
 **    OpenSees - Open System for Earthquake Engineering Simulation    **
-
 **          Pacific Earthquake Engineering Research Center            **
-
 **                                                                    **
-
 **                                                                    **
-
 ** (C) Copyright 1999, The Regents of the University of California    **
-
 ** All Rights Reserved.                                               **
-
 **                                                                    **
-
 ** Commercial use of this program without express permission of the   **
-
 ** University of California, Berkeley, is strictly prohibited.  See   **
-
 ** file 'COPYRIGHT'  in main directory for information on usage and   **
-
 ** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
-
 **                                                                    **
-
 ** Developed by:                                                      **
-
 **   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
-
 **   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
-
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
-
 **                                                                    **
-
 ** ****************************************************************** */
 
-
-
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthContact2D.cpp,v $
-
-// $Revision: 1.2 $
-
-// $Date: 2007-11-28 00:08:57 $
-
-
+// $Revision: 1.3 $
+// $Date: 2008-04-15 18:38:29 $
 
 // Written: Gang Wang  (wang@ce.berkeley.edu)
-
 //          Prof. Nicholas Sitar (nsitar@ce.berkeley.edu)
-
 //
-
 // Created: 27/08/2003
 
-
-
 /*
-
  element zeroLengthContact2D  $eleID $sNdID $mNdID $Kn $Kt $fs -normal $Nx $Ny
-
  Description: This file contains the implementation for the ZeroLengthContact2D class.
-
 */
 
-
-
 #include "ZeroLengthContact2D.h"
-
 #include <Information.h>
 
-
-
 #include <Domain.h>
-
 #include <Node.h>
-
 #include <Channel.h>
-
 #include <FEM_ObjectBroker.h>
-
 #include <Renderer.h>
 
-
-
 #include <math.h>
-
 #include <stdlib.h>
-
 #include <string.h>
-
-
 
 #include <ElementResponse.h>
 
 
-
-
-
 //static data
-
 const int ZeroLengthContact2D::numberNodes = 2 ;
 
-
-
 // static data for 2D
-
 Matrix  ZeroLengthContact2D::stiff(2*numberNodes,2*numberNodes) ;
-
 Vector  ZeroLengthContact2D::resid(2*numberNodes) ;
-
 Matrix  ZeroLengthContact2D::zeroMatrix(2*numberNodes,2*numberNodes) ;
 
 
 
-
-
-
-
 //*********************************************************************
-
 //  Full Constructor:
 
-
-
 ZeroLengthContact2D::ZeroLengthContact2D(int tag,
-
 					 int Nd1, int Nd2,
-
 					 double Knormal, double Ktangent,
-
 					 double frictionRatio,  const Vector& normal )
-
   :Element(tag,ELE_TAG_ZeroLengthContact2D),
-
    connectedExternalNodes(numberNodes),
-
    N(2*numberNodes), T(2*numberNodes), ContactNormal(2),
-
    Ki(0), load(0)
-
 {
-
     // ensure the connectedExternalNode ID is of correct size & set values
-
     if (connectedExternalNodes.Size() != 2)
-
       opserr << "FATAL ZeroLength::setUp - failed to create an ID of correct size\n";
-
     connectedExternalNodes(0) = Nd1;
-
     connectedExternalNodes(1) = Nd2;
 
-
-
 	// assign Kn, Kt, fs
-
 	Kn = Knormal;
-
 	Kt = Ktangent;
-
 	fs = frictionRatio;
 
-
-
 	// assign outward contact normal of master block
-
  	ContactNormal(0) = normal(0)/normal.Norm();
-
 	ContactNormal(1) = normal(1)/normal.Norm();
 
-
-
     // set stick point cords in LOCAL basis
-
 	stickPt = 0;
 
-
-
 	// initialized contact flag be zero
-
 	ContactFlag=0;
 
-
-
 	gap_n  = 0 ;
-
 	lambda =0;   // add for augmented lagrange
-
 	pressure=0;  // add for augmented lagrange
-
 }
-
-
-
-
 
 
 
 //null constructor
 
-
-
 ZeroLengthContact2D::ZeroLengthContact2D(void)
-
   :Element(0,ELE_TAG_ZeroLengthContact2D),
-
   connectedExternalNodes(numberNodes),
-
   N(2*numberNodes), T(2*numberNodes), ContactNormal(2),
-
   Ki(0), load(0)
-
 {
-
-
 
 	//opserr<<this->getTag()<< " new ZeroLengthContact2D::null constructor" <<endln;
 
-
-
     // ensure the connectedExternalNode ID is of correct size
-
     if (connectedExternalNodes.Size() != 2)
-
       opserr << "FATAL ZeroLengthContact2D::ZeroLengthContact2D - failed to create an ID of correct size\n";
-
     for (int j=0; j<numberNodes; j++ ) {
-
       nodePointers[j] = 0;
-
 	}
-
 }
 
 
-
-
-
 //  Destructor:
-
 //  delete must be invoked on any objects created by the object
-
 //  and on the matertial object.
-
 ZeroLengthContact2D::~ZeroLengthContact2D()
-
 {
-
-
 
   //opserr<<this->getTag()<<" ZeroLengthContact2D::destructor" <<endln;
 
 
-
-
-
   if (load != 0)
-
     delete load;
 
-
-
   if (Ki != 0)
-
     delete Ki;
 
-
-
 }
-
-
-
 
 
 int
-
 ZeroLengthContact2D::getNumExternalNodes(void) const
-
 {
 
-
-
 	//opserr<<this->getTag()<<" ZeroLengthContact2D::getNumExternalNodes" <<endln;
-
     return 2;
-
 }
-
-
-
 
 
 const ID &
-
 ZeroLengthContact2D::getExternalNodes(void)
-
 {
-
 	//opserr<<this->getTag()<<" ZeroLengthContact2D::getExternalNodes" <<endln;
-
     return connectedExternalNodes;
-
 }
-
-
-
-
 
 
 
 Node **
-
 ZeroLengthContact2D::getNodePtrs(void)
-
 {
-
     return nodePointers;
-
 }
-
-
 
 int
-
 ZeroLengthContact2D::getNumDOF(void)
-
 {
-
      return numDOF;
-
 }
-
-
-
 
 
 // method: setDomain()
-
 //    to set a link to the enclosing Domain and to set the node pointers.
-
 //    also determines the number of dof associated
-
 //    with the ZeroLengthContact2D element
 
 
-
-
-
 void
-
 ZeroLengthContact2D::setDomain(Domain *theDomain)
-
 {
-
-
 
     //opserr<<this->getTag()<< " ZeroLengthContact2D::setDomain" <<endln;
 
 
-
-
-
     // check Domain is not null - invoked when object removed from a domain
-
     if (theDomain == 0) {
-
 	nodePointers[0] = 0;
-
 	nodePointers[1] = 0;
-
 	return;
-
     }
 
-
-
     // set default values for error conditions
-
     Ki   = &stiff;
-
     load = &resid;
 
-
-
     // first set the node pointers
-
     int Nd1 = connectedExternalNodes(0);
-
     int Nd2 = connectedExternalNodes(1);
-
     nodePointers[0] = theDomain->getNode(Nd1);
-
     nodePointers[1] = theDomain->getNode(Nd2);
 
-
-
     // if can't find both - send a warning message
-
     if ( nodePointers[0] == 0 || nodePointers[1] == 0 ) {
-
       if (nodePointers[0] == 0)
-
         opserr << "WARNING ZeroLengthContact2D::setDomain() - Nd1: " << Nd1 << " does not exist in ";
-
       else
-
         opserr << "WARNING ZeroLengthContact2D::setDomain() - Nd2: " << Nd2 << " does not exist in ";
-
-
 
       //opserr << "model for ZeroLengthContact2D ele: " << this->getTag() << endln;
 
-
-
       return;
-
     }
-
-
 
     // now determine the number of dof and the dimension
-
     int dofNd1 = nodePointers[0]->getNumberDOF();
-
     int dofNd2 = nodePointers[1]->getNumberDOF();
 
-
-
     // if differing dof at the ends - print a warning message
-
     if ( dofNd1 != dofNd2 ) {
-
       opserr << "WARNING ZeroLengthContact2D::setDomain(): nodes " << Nd1 << " and " << Nd2 <<
-
 	"have differing dof at ends for ZeroLengthContact2D " << this->getTag() << endln;
-
       return;
-
     }
 
-
-
     // Check that length is zero within tolerance
-
     const Vector &end1Crd = nodePointers[0]->getCrds();
-
     const Vector &end2Crd = nodePointers[1]->getCrds();
-
     Vector diff = end1Crd - end2Crd;
-
     double L  = diff.Norm();
-
     double v1 = end1Crd.Norm();
-
     double v2 = end2Crd.Norm();
-
     double vm;
-
-
 
     vm = (v1<v2) ? v2 : v1;
 
 
-
-
-
     if (L > LENTOL*vm)
-
       opserr << "WARNING ZeroLengthContact2D::setDomain(): Element " << this->getTag() << " has L= " << L <<
-
 	", which is greater than the tolerance\n";
 
-
-
     // call the base class method
-
     this->DomainComponent::setDomain(theDomain);
 
-
-
 	if (dofNd1 == 2 && dofNd2 == 2) {
-
 	numDOF = 4;
-
 	Ki   = &stiff;
-
 	load = &resid;
-
 	}
-
     else {
-
     opserr << "WARNING ZeroLengthContact2D::setDomain cannot handle " << dofNd1 <<
-
  	"dofs at nodes in " << dofNd1 << " d problem\n";
-
      return;
-
     }
-
-
 
 }
 
-
-
-
-
 int
-
 ZeroLengthContact2D::commitState()
 
 {
-
-
-
-   opserr<<this->getTag()<< " ZeroLengthContact2D::commitState()" <<endln;
-
-
 
    // need to update stick point here
 
