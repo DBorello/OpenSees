@@ -31,6 +31,8 @@ include ../../../Makefile.def
 	Concrete02.o \
 	Steel03.o \
 	Bond_SP01.o \
+	HyperbolicGapMaterial.o \
+	TclHyperbolicGapMaterial.o \
 	KinematicHardening.o \
 	TclKinematicHardening.o \
 	NewUniaxialMaterial.o \

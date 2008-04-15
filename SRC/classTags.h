@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.101 $
-// $Date: 2008-03-27 19:41:55 $
+// $Revision: 1.102 $
+// $Date: 2008-04-15 18:27:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -140,6 +140,7 @@
 #define MAT_TAG_Concrete05 33
 #define MAT_TAG_Concrete06 34
 #define MAT_TAG_Concrete07 37
+#define MAT_TAG_HyperbolicGapMaterial 38
 
 //B Jeremic
 #define MAT_TAG_PySimple1        205
