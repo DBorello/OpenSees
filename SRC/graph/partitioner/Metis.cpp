@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-04-14 18:13:45 $
+// $Revision: 1.7 $
+// $Date: 2008-04-15 19:13:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/partitioner/Metis.cpp,v $
                                                                         
                                                                         
@@ -212,7 +212,7 @@ Metis::partition(Graph &theGraph, int numPart)
     int *ewgts = 0;
     int numbering = 0;
     int weightflag = 0; // no weights on our graphs yet
-    opserr << " Metis::partition --- space allocated \n";
+
     if (START_VERTEX_NUM == 0)
 	numbering = 0;	
     else if (START_VERTEX_NUM == 1)
