@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.50 $
-// $Date: 2008-02-29 20:44:51 $
+// $Revision: 1.51 $
+// $Date: 2008-04-16 21:27:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -1356,6 +1356,26 @@ Domain::getNodeGraph(void)
     // return the Graph
     return *theNodeGraph;
 }
+
+void
+Domain::clearElementGraph(void) {
+  if (theElementGraph != 0)
+    delete theElementGraph;
+  theElementGraph = 0;
+
+  eleGraphBuiltFlag = false;
+}
+
+void
+Domain::clearNodeGraph(void) {
+  if (theNodeGraph != 0)
+    delete theNodeGraph;
+  theNodeGraph = 0;
+
+  nodeGraphBuiltFlag = false;
+}
+
+
 
 void
 Domain::setCommitTag(int newTag)

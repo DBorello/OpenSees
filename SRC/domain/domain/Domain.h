@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2008-02-29 20:44:51 $
+// $Revision: 1.25 $
+// $Date: 2008-04-16 21:27:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
 // Written: fmk 
@@ -154,6 +154,8 @@ class Domain
     // methods to get element and node graphs
     virtual  Graph  &getElementGraph(void);
     virtual  Graph  &getNodeGraph(void);
+    virtual  void   clearElementGraph(void);
+    virtual  void   clearNodeGraph(void);
     
     // methods to update the domain
     virtual  void setCommitTag(int newTag);    	
