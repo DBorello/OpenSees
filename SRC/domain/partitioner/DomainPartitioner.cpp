@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-10-17 22:14:30 $
+// $Revision: 1.9 $
+// $Date: 2008-04-16 21:31:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/partitioner/DomainPartitioner.cpp,v $
                                                                         
 // Written: fmk 
@@ -153,6 +153,7 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
   // we get the ele graph from the domain and partition it
   //    Graph &theEleGraph = myDomain->getElementGraph();
   //    theElementGraph = new Graph(myDomain->getElementGraph());
+
   theElementGraph = &(myDomain->getElementGraph());
   
   int theError = thePartitioner.partition(*theElementGraph, numParts);
@@ -168,7 +169,7 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
   
   // we do not invoke the destructor on the individual graphs as 
   // this would invoke the destructor on the individual vertices
-  
+
   if (theBoundaryElements != 0)
     delete [] theBoundaryElements;
   
@@ -179,7 +180,7 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
     numPartitions = 0;  
     return -1;
   }
-  
+
   for (int l=0; l<numParts; l++) {
     theBoundaryElements[l] = new Graph(2048); // graphs can grow larger; just an estimate
     
@@ -326,10 +327,15 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
     int partition = vertexPtr->getColor();
     if (partition != mainPartition) {          
       int eleTag = vertexPtr->getRef();
+
       Element *elePtr = myDomain->removeElement(eleTag);  
-      Subdomain *theSubdomain = myDomain->getSubdomainPtr(partition);  
-      theSubdomain->addElement(elePtr);
-    }
+      if (elePtr != 0) {
+	Subdomain *theSubdomain = myDomain->getSubdomainPtr(partition);  
+	theSubdomain->addElement(elePtr);
+      } else {
+	opserr << "DomainPartitioner::partioner - element GONE! - eleTag " << eleTag << endln;
+      }
+    } 
   }
 
   // now we go through the load patterns and move NodalLoad
@@ -390,6 +396,8 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
 	}
       }      
     }
+
+
   
     SP_ConstraintIter &theSPs = theLoadPattern->getSPs();
     SP_Constraint *spPtr;
@@ -529,6 +537,8 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
   
   // we invoke change on the PartitionedDomain
   myDomain->domainChange();
+
+  myDomain->clearElementGraph();
     
   // we are done
   partitionFlag = true;
