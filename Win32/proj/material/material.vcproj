@@ -227,6 +227,12 @@
 				RelativePath="..\..\..\SRC\material\uniaxial\HardeningMaterial.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\HyperbolicGapMaterial.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\HyperbolicGapMaterial.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\HystereticMaterial.cpp">
 			</File>
 			<File
@@ -284,6 +290,12 @@
 				RelativePath="..\..\..\SRC\material\uniaxial\SMAMaterial.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\SelfCenteringMaterial.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\SelfCenteringMaterial.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\SeriesMaterial.cpp">
 			</File>
 			<File
@@ -312,6 +324,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\Steel03.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\TclHyperbolicGapMaterial.cpp">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\TclModelBuilderUniaxialMaterialCommand.cpp">
