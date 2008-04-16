@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-02-28 19:19:34 $
+// $Revision: 1.6 $
+// $Date: 2008-04-16 21:26:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSOE.cpp,v $
                                                                         
                                                                         
@@ -79,7 +79,6 @@ UmfpackGenLinSOE::getNumEqn(void) const
 int 
 UmfpackGenLinSOE::setSize(Graph &theGraph)
 {
-
     int result = 0;
     int oldSize = size;
     size = theGraph.getNumVertex();
@@ -94,8 +93,6 @@ UmfpackGenLinSOE::setSize(Graph &theGraph)
     }
     nnz = newNNZ;
     lValue = 20*nnz; // 20 because 3 (10 also) was not working for some instances
-
-    opserr << "UmfpackGenLinSOE::setSize - n " << size << " nnz " << nnz << " lVal " << lValue << endln;
 
     if (lValue > Asize) { // we have to get more space for A and colA
 
