@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2008-04-15 18:01:55 $
+// $Revision: 1.12 $
+// $Date: 2008-04-17 19:33:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGLRenderer.h,v $
                                                                         
                                                                         
@@ -41,17 +41,6 @@
 using std::ofstream;
 
 #include <OpenGlDevice.h>
-
-#ifdef _GLX
-#include <GL/gl.h>
-#include <GL/glx.h>
-
-#else 
-#include <windows.h>
-#include <gl\gl.h>
-//#include <gl\glaux.h>
-// include open gl stuff for win32
-#endif
 
 #include <db.H>
 #include <Matrix.h>
