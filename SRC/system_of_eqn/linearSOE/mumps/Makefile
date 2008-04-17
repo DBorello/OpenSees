@@ -9,14 +9,14 @@ OBJS =
 ifdef MUMPS
 
 OBJS       = MumpsSOE.o \
-	MumpsSolver.o mumps.o
+	MumpsSolver.o
 
 ifeq ($(PROGRAMMING_MODE), PARALLEL)
 
 OBJS       = MumpsSOE.o \
 	MumpsSolver.o \
 	MumpsParallelSOE.o \
-	MumpsParallelSolver.o mumps.o
+	MumpsParallelSolver.o 
 
 endif
 
@@ -25,7 +25,7 @@ ifeq ($(PROGRAMMING_MODE), PARALLEL_INTERPRETERS)
 OBJS       = MumpsSOE.o \
 	MumpsSolver.o \
 	MumpsParallelSOE.o \
-	MumpsParallelSolver.o mumps.o
+	MumpsParallelSolver.o 
 
 endif
 endif
