@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-04-25 23:45:02 $
+// $Revision: 1.10 $
+// $Date: 2008-04-17 02:00:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.h,v $
                                                                         
                                                                         
@@ -92,11 +92,11 @@ class Subdomain: public Element, public Domain
     virtual int update(void);
     virtual int update(double newTime, double dT);
 
-#ifdef _PARALLEL_PROCESSING
+//#ifdef _PARALLEL_PROCESSING
     virtual  int barrierCheckIN(void) {return 0;};
     virtual  int barrierCheckOUT(int) {return 0;};
-#endif
-    
+//#endif
+   
     virtual  void Print(OPS_Stream &s, int flag =0);
     virtual void Print(OPS_Stream &s, ID *nodeTags, ID *eleTags, int flag =0);
     
