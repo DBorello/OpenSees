@@ -21,7 +21,19 @@
 # that will be created (if this all works!)
 
 OpenSees_PROGRAM = $(HOME)/bin/OpenSees
-OpenSees_PROGRAM_MPI = $(HOME)/bin/OpenSeesMPI
+
+#PROGRAMMING_MODE = SEQUENTIAL
+#PROGRAMMING_MODE = PARALLEL
+PROGRAMMING_MODE = PARALLEL_INTERPRETERS
+
+ifeq ($(PROGRAMMING_MODE),PARALLEL)
+OpenSees_PROGRAM = $(HOME)/bin/OpenSeesSP
+endif
+ifeq ($(PROGRAMMING_MODE),PARALLEL_INTERPRETERS)
+OpenSees_PROGRAM = $(HOME)/bin/OpenSeesMP
+endif
+
+
 
 # %---------------------------------%
 # |  SECTION 2: MAKEFILE CONSTANTS  |
@@ -32,14 +44,12 @@ OpenSees_PROGRAM_MPI = $(HOME)/bin/OpenSeesMPI
 OPERATING_SYSTEM = LINUX
 #GRAPHICS = UsingOpenGL
 GRAPHICS = NONE
-PROGRAMMING_MODE = PARALLEL
 
 #DEBUG_MODE = DEBUG, NO_DEBUG
 DEBUG_MODE = NO_DEBUG
 
 #RELIABILITY = YES_RELIABILITY, NO_RELIABILITY
 RELIABILITY = NO_RELIABILITY
-
 
 # %---------------------------------%
 # |  SECTION 3: PATHS               |
@@ -53,7 +63,6 @@ BASE  =
 #  PUT YOUR HOME DIRECTOREY HERE
 HOME  = /gpfs/fmk
 FE    = $(HOME)/OpenSees/SRC
-
 
 BLASdir      = $(HOME)/OpenSees/OTHER/BLAS
 CBLASdir     = $(HOME)/OpenSees/OTHER/CBLAS
@@ -69,33 +78,25 @@ SUPERLU_DISTdir   = $(HOME)/OpenSees/OTHER/SuperLU_DIST_2.0/SRC
 DIRS        = $(SUPERLUdir) \
               $(ARPACKdir) \
               $(LAPACKdir) \
+	      $(SUPERLU_DISTdir) \
               $(UMFPACKdir) \
               $(METISdir) \
               $(SRCdir) 
 
-ifeq ($(PROGRAMMING_MODE), PARALLEL)
+DISTRIBUTED_SUPERLU_LIBRARY     = $(HOME)/lib/libDistributedSuperLU.a
+
+ifeq ($(PROGRAMMING_MODE), SEQUENTIAL)
 
 DIRS        = $(SUPERLUdir) \
-	      $(SUPERLU_DISTdir) \
 	      $(ARPACKdir) \
               $(LAPACKdir) \
               $(UMFPACKdir) \
               $(METISdir) \
               $(SRCdir) 
+
+DISTRIBUTED_SUPERLU_LIBRARY     = 
+
 endif
-
-ifeq ($(PROGRAMMING_MODE), PARALLEL_INTERPRETERS)
-
-DIRS        = $(SUPERLUdir) \
-	      $(SUPERLU_DISTdir) \
-              $(LAPACKdir) \
-              $(ARPACKdir) \
-              $(UMFPACKdir) \
-              $(METISdir) \
-              $(SRCdir) 
-endif
-
-
 
 # %-------------------------------------------------------%
 # | SECTION 4: LIBRARIES                                  |
@@ -124,7 +125,6 @@ CBLAS_LIBRARY       = $(HOME)/lib/libCBlas.a
 ARPACK_LIBRARY      = $(HOME)/lib/libArpack.a
 UMFPACK_LIBRARY     = $(HOME)/lib/libUmfpack.a
 METIS_LIBRARY       = $(HOME)/lib/libMetis.a
-DISTRIBUTED_SUPERLU_LIBRARY     = $(HOME)/lib/libDistributedSuperLU.a
 
 TCL_LIBRARY         = /usr/local/apps/tcl-8.3.5/lib/libtcl8.3g.so \
 	 	/usr/local/apps/tk-8.3.5/lib/libtk8.3g.so
@@ -162,12 +162,16 @@ WIPE_LIBS	= $(FE_LIBRARY) \
 # # Compilers
 # ################################################### 
 
-#CC++            =  xlC_r
-#CC              =  xlc_r
-#FC              =  xlf_r
+ifeq ($(PROGRAMMMING_MOE), SEQUENTIAL)
 
-#F90             =  xlf90_r
-#LINKER          =  xlC_r
+CC++            =  xlC_r
+CC              =  xlc_r
+FC              =  xlf_r
+
+F90             =  xlf90_r
+LINKER          =  xlC_r
+
+else
 
 CC++            =  mpCC_r
 CC              =  mpcc_r
@@ -177,6 +181,8 @@ F90             =  mpxlf90_r
 FORTRAN             =  $(FC)
 
 LINKER          =  $(CC++)
+
+endif
 
 AR		= ar 
 ARCH		= ar 
@@ -189,10 +195,20 @@ RANLIB		= ranlib
 
 RANLIBFLAGS     = 
 
-
 GRAPHIC_FLAG = -D_NOGRAPHICS -D_GLX
 GRAPHIC_FLAG = -D_NOGRAPHICS
 PROGRAMMING_FLAG = 
+
+
+ifeq ($(PROGRAMMING_MODE), PARALLEL)
+PROGRAMMING_FLAG = -D_PARALLEL_PROCESSING
+endif
+
+ifeq ($(PROGRAMMING_MODE), PARALLEL_INTERPRETERS)
+PROGRAMMING_FLAG = -D_PARALLEL_INTERPRETERS
+endif
+
+
 
 #RELIABILITY_FLAG = -D_RELIABILITY
 RELIABILITY_FLAG =
@@ -206,9 +222,9 @@ PETSC_FLAG =
 COMP_FLAG = -qnoipa
 #-pg
 C++FLAGS         = -D_LINUX -D_UNIX  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(OPT_FLAG) $(COMP_FLAG)\
-		$(PROGRAMMING_FLAG) $(PETSC_FLAG) $(MUMPS_FLAG) -qarch=pwr4 -qtune=pwr4  -D_KAI -D_PARALLEL_PROCESSING -cpp 
+		$(PROGRAMMING_FLAG) $(PETSC_FLAG) $(MUMPS_FLAG) -qarch=pwr4 -qtune=pwr4  -D_KAI  -cpp 
 
-CFLAGS          = -qarch=pwr4 -qtune=pwr4  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(PROGRAMMING_FLAG)  -D_KAI -D_PARALLEL_PROCESSING $(OPT_FLAG) $(COMP_FLAG) 
+CFLAGS          = -qarch=pwr4 -qtune=pwr4  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(PROGRAMMING_FLAG)  -D_KAI $(OPT_FLAG) $(COMP_FLAG) 
 FFLAGS          = -qarch=pwr4 -qtune=pwr4 -qextname $(OPT_FLAG) $(COMP_FLAG) 
 LINKFLAGS       = -bnoquiet -bbigtoc
 
@@ -279,7 +295,7 @@ SHELL           = /bin/sh
 
 #-Wl,-rpath,$(PETSC_DIR)/lib/libg/$(PETSC_ARCH) \
 
-HAVEPETSC = YES
+HAVEPETSC = NO
 PETSCINC =
 PETSC_LIB = 
 
@@ -304,6 +320,10 @@ endif
 HAVEMUMPS = YES
 MUMPS_INCLUDE =
 MUMPS_LIB = 
+
+ifeq ($(PROGRAMMING_MODE), SEQUENTIAL)
+HAVEMUMPS = NO
+endif
 
 ifeq ($(HAVEMUMPS), YES)
 
@@ -338,6 +358,10 @@ PARALLEL_LIB = 	$(FE)/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSOE.o 
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSuperLU.o 
 
+ifeq ($(PROGRAMMING_MODE), SEQUENTIAL)
+PARALLEL_LIB =
+endif
+
 HPM_LIB = -L/usr/local/apps/hpm/lib/pwr4/ \
 	-lhpm_r -lpmapi -lm 
 
@@ -352,8 +376,6 @@ MACHINE_NUMERICAL_LIBS  = -lm \
   $(RELIABILITY_LIBRARY) \
   $(DISTRIBUTED_SUPERLU_LIBRARY) \
   $(METIS_LIBRARY) $(PARALLEL_LIB) $(HPM_LIB) 
-
-
 
 
 #MACHINE_SPECIFIC_LIBS = -lpng -lessl -lGL -lX11 -lf
@@ -376,6 +398,7 @@ MACHINE_INCLUDES        = -I/usr/local/BerkeleyDB.4.0/include \
 	-I$(HOME)/include   \
 	-I$(UMFPACKdir) \
 	-I$(SUPERLUdir) \
+	-I$(METISdir) \
 	-I$(SUPERLU_DISTdir) \
 	-I/usr/lpp/ppe.poe/include $(PETSCINC) $(MUMPS_INCLUDE) 
 
