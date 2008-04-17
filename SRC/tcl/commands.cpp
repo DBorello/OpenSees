@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.116 $
-// $Date: 2008-04-11 23:39:50 $
+// $Revision: 1.117 $
+// $Date: 2008-04-17 12:59:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -5447,7 +5447,7 @@ opsRecv(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
   int otherPID = 0;
   int myPID =  theMachineBroker->getPID();
   int np =  theMachineBroker->getNP();
-  const char *varToSet = argv[argc-1];
+  TCL_Char *varToSet = argv[argc-1];
 
   int msgLength = 0;
   char *gMsg = 0;
@@ -5481,7 +5481,7 @@ opsRecv(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 
 
       if (msgLength > 0) {
-	gMsg = new char [msgLength];
+	gMsg = new TCL_Char [msgLength];
 
 	if (fromAny == false && msgLength != 0)
 	  MPI_Recv((void *)gMsg, msgLength, MPI_CHAR, otherPID, 1, MPI_COMM_WORLD, &status);
