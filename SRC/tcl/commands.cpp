@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.118 $
-// $Date: 2008-04-17 15:05:07 $
+// $Revision: 1.119 $
+// $Date: 2008-04-17 23:05:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -5809,8 +5809,6 @@ const char * getInterpPWD(Tcl_Interp *interp) {
 int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 
-  opserr << "OpenSeesExit::START\n";
-  
   theDomain.clearAll();
 
 #ifdef _PARALLEL_PROCESSING
