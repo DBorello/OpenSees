@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-12-05 22:07:48 $
+// $Revision: 1.5 $
+// $Date: 2008-04-17 02:03:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PeerMotion.cpp,v $                                                                        
 
 // Written: fmk 
@@ -48,7 +48,13 @@ using std::ios;
 
 //#include <Socket.h>
 
-extern int httpGet(const char *URL, const char *page, unsigned int port, char **dataPtr);
+#ifdef _WIN32
+int __cdecl
+#else
+int
+#endif
+httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr);
+
 
 PeerMotion::PeerMotion()	
   :TimeSeries(TSERIES_TAG_PeerMotion),
