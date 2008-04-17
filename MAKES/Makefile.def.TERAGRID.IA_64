@@ -21,7 +21,17 @@
 # Specify the location and name of the OpenSees interpreter program
 # that will be created (if this all works!)
 
+#PROGRAMMING_MODE = PARALLEL, SEQUENTIAL, PARALLEL_INTERPRETERS
+PROGRAMMING_MODE = PARALLEL_INTERPRETERS
+
 OpenSees_PROGRAM = $(HOME)/bin/OpenSees
+ifeq ($(PROGRAMMING_MODE), PARALLEL)
+OpenSees_PROGRAM = $(HOME)/bin/OpenSeesSP
+endif
+
+ifeq ($(PROGRAMMING_MODE), PARALLEL_INTERPRETERS)
+OpenSees_PROGRAM = $(HOME)/bin/OpenSeesMP
+endif
 
 # %---------------------------------%
 # |  SECTION 2: MAKEFILE CONSTANTS  |
@@ -30,8 +40,7 @@ OpenSees_PROGRAM = $(HOME)/bin/OpenSees
 # Specify the constants the are used as control structure variables in the Makefiles.
 
 OPERATING_SYSTEM = LINUX
-#PROGRAMMING_MODE = PARALLEL, SEQUENTIAL, PARALLEL_INTERPRETERS
-PROGRAMMING_MODE = PARALLEL_INTERPRETERS
+
 #DEBUG_MODE = DEBUG, NO_DEBUG
 DEBUG_MODE = NO_DEBUG
 RELIABILITY = NO_RELIABILITY
@@ -60,7 +69,6 @@ SRCdir       = $(HOME)/OpenSees/SRC
 SUPERLUdir   = $(HOME)/OpenSees/OTHER/SuperLU_3.0/SRC
 SUPERLU_DISTdir   = $(HOME)/OpenSees/OTHER/SuperLU_DIST_2.0/SRC
 
-
 DIRS        = $(BLASdir) \
               $(CBLASdir) \
               $(SUPERLUdir) \
@@ -70,6 +78,23 @@ DIRS        = $(BLASdir) \
               $(UMFPACKdir) \
               $(METISdir) \
               $(SRCdir) 
+
+DISTRIBUTED_SUPERLU_LIBRARY     = $(HOME)/lib/libDistributedSuperLU.a
+
+ifeq ($(PROGRAMMING_MODE), SEQUENTIAL)
+
+DIRS        = $(BLASdir) \
+              $(CBLASdir) \
+              $(SUPERLUdir) \
+              $(LAPACKdir) \
+              $(ARPACKdir) \
+              $(UMFPACKdir) \
+              $(METISdir) \
+              $(SRCdir) 
+
+DISTRIBUTED_SUPERLU_LIBRARY     = 
+endif
+
 
 # %-------------------------------------------------------%
 # | SECTION 4: LIBRARIES                                  |
@@ -97,7 +122,7 @@ CBLAS_LIBRARY       = $(HOME)/lib/libCBlas.a
 ARPACK_LIBRARY      = $(HOME)/lib/libArpack.a
 UMFPACK_LIBRARY     = $(HOME)/lib/libUmfpack.a
 METIS_LIBRARY       = $(HOME)/lib/libMetis.a
-DISTRIBUTED_SUPERLU_LIBRARY     = $(HOME)/lib/libDistributedSuperLU.a
+
 
 TCL_LIBRARY         = /usr/lib/libtcl8.4.a
 
@@ -134,12 +159,12 @@ WIPE_LIBS	= $(FE_LIBRARY) \
 
 ifeq ($(PROGRAMMING_MODE), SEQUENTIAL)
 
-CC++            =  icc
+CC++            =  icpc
 CC              =  icc
 FC              =  ifort
 
 F90             =  ifort
-LINKER          =  icc
+LINKER          =  $(CC++)
 
 else
 
@@ -273,6 +298,10 @@ HAVEPETSC = YES
 PETSCINC =
 PETSC_LIB = 
 
+ifeq ($(PROGRAMMING_MODE), SEQUENTIAL)
+HAVEPETSC = NO
+endif
+
 ifeq ($(HAVEPETSC), YES)
 
 PETSC = YES
@@ -295,6 +324,10 @@ endif
 HAVEMUMPS = YES
 MUMPS_INCLUDE =
 MUMPS_LIB = 
+
+ifeq ($(PROGRAMMING_MODE), SEQUENTIAL)
+HAVEMUMPS = NO
+endif
 
 ifeq ($(HAVEMUMPS), YES)
 
@@ -339,6 +372,10 @@ PARALLEL_LIB = $(FE)/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSOE.o \
         $(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLinSOE.o \
         $(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSuperLU.o
 
+
+ifeq ($(PROGRAMMING_MODE), SEQUENTIAL)
+PARALLEL_LIB =
+endif
 
 HPM_LIB = -L/usr/local/apps/hpm/lib/pwr4/ \
 	-lhpm_r -lpmapi -lm 
