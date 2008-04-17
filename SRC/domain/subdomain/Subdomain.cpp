@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2008-04-17 02:00:17 $
+// $Revision: 1.14 $
+// $Date: 2008-04-17 02:02:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -794,7 +794,6 @@ Subdomain::newStep(double dT)
 bool
 Subdomain::doesIndependentAnalysis(void)
 {
-	opserr << "Subdomain::doesIndependentAnalysis -1\n";
   if (theAnalysis != 0)
     return theAnalysis->doesIndependentAnalysis();
   else
