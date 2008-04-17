@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2008-04-15 19:14:05 $
+// $Revision: 1.5 $
+// $Date: 2008-04-17 18:21:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.cpp,v $
                                                                         
 // Written: fmk
@@ -34,6 +34,10 @@
 
 
 #ifdef _PARALLEL_PROCESSING
+#include <mpi.h>
+#endif
+
+#ifdef _PARALLEL_INTERPRETERS
 #include <mpi.h>
 #endif
 
