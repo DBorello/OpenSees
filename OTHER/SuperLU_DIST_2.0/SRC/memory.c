@@ -5,7 +5,6 @@
  *
  */
 
-//#include <malloc.h>
 #include "superlu_ddefs.h"
 
 
