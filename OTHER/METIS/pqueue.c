@@ -10,7 +10,7 @@
  * Started 9/2/94
  * George
  *
- * $Id: pqueue.c,v 1.1 2008-03-31 21:10:14 fmk Exp $
+ * $Id: pqueue.c,v 1.2 2008-04-17 17:15:43 fmk Exp $
  *
  */
 
@@ -107,7 +107,8 @@ void PQueueFree(CtrlType *ctrl, PQueueType *queue)
   if (queue->type == 1) {
     if (queue->mustfree) {
       queue->buckets -= queue->ngainspan;  
-      GKfree(&queue->nodes, &queue->buckets, LTERM);
+      /*GKfree(&queue->nodes, &queue->buckets, LTERM);*/
+      GKfree2((void **)&queue->nodes, (void **)&queue->buckets);
     } 
     else {
       idxwspacefree(ctrl, sizeof(ListNodeType *)*(queue->ngainspan+queue->pgainspan+1)/sizeof(idxtype));

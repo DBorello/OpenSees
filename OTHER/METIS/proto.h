@@ -8,7 +8,7 @@
  * Started 10/19/95
  * George
  *
- * $Id: proto.h,v 1.3 2008-04-14 17:26:15 fmk Exp $
+ * $Id: proto.h,v 1.4 2008-04-17 17:15:43 fmk Exp $
  *
  */
 
@@ -434,7 +434,11 @@ int *ismalloc(int, int, char *);
 idxtype *idxsmalloc(int, idxtype, char *);
 void *GKmalloc(int, char *);
 #endif
-/*void GKfree(void **,...); */
+void GKfree1(void **); 
+void GKfree2(void **, void **); 
+void GKfree3(void **, void **, void**); 
+void GKfree4(void **, void **, void**, void **); 
+void GKfree5(void **, void **, void**, void **, void**); 
 int *iset(int n, int val, int *x);
 idxtype *idxset(int n, idxtype val, idxtype *x);
 float *sset(int n, float val, float *x);
@@ -466,7 +470,7 @@ void srand48(long);
 #endif
 int ispow2(int);
 void InitRandom(int);
-int log2(int);
+int log2i(int);
 
 
 

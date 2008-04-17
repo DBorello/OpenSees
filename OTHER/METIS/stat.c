@@ -8,7 +8,7 @@
  * Started 7/25/97
  * George
  *
- * $Id: stat.c,v 1.2 2008-03-31 21:07:06 fmk Exp $
+ * $Id: stat.c,v 1.3 2008-04-17 17:15:43 fmk Exp $
  *
  */
 
@@ -120,7 +120,8 @@ void ComputePartitionInfo(GraphType *graph, int nparts, idxtype *where)
     graph->adjwgt = NULL;
   }
 
-  GKfree(&kpwgts, &padjncy, &padjwgt, &padjcut, LTERM);
+  /*GKfree(&kpwgts, &padjncy, &padjwgt, &padjcut, LTERM);*/
+  GKfree4((void**)&kpwgts, (void **)&padjncy, (void **)&padjwgt, (void **)&padjcut);
 }
 
 
@@ -224,7 +225,8 @@ void ComputePartitionInfoBipartite(GraphType *graph, int nparts, idxtype *where)
     graph->adjwgt = NULL;
   }
 
-  GKfree(&kpwgts, &padjncy, &padjwgt, &padjcut, LTERM);
+  /*GKfree(&kpwgts, &padjncy, &padjwgt, &padjcut, LTERM);*/
+  GKfree4((void **)&kpwgts, (void **)&padjncy, (void **)&padjwgt, (void **)&padjcut);
 }
 
 

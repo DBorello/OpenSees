@@ -9,7 +9,7 @@
  * Started 7/15/98
  * George
  *
- * $Id: subdomains.c,v 1.1 2008-03-31 21:10:14 fmk Exp $
+ * $Id: subdomains.c,v 1.2 2008-04-17 17:15:44 fmk Exp $
  *
  */
 
@@ -882,7 +882,8 @@ void EliminateSubDomainEdges(CtrlType *ctrl, GraphType *graph, int nparts, float
   idxwspacefree(ctrl, nparts);
   idxwspacefree(ctrl, nvtxs);
 
-  GKfree(&cand, &cand2, LTERM);
+  /*GKfree(&cand, &cand2, LTERM);*/
+  GKfree2((void**)&cand, (void**)&cand2);
 }
 
 

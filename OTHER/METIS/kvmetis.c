@@ -9,7 +9,7 @@
  * Started 7/28/97
  * George
  *
- * $Id: kvmetis.c,v 1.1 2008-03-31 21:10:13 fmk Exp $
+ * $Id: kvmetis.c,v 1.2 2008-04-17 17:15:43 fmk Exp $
  *
  */
 
@@ -66,7 +66,7 @@ void METIS_WPartGraphVKway(int *nvtxs, idxtype *xadj, idxtype *adjncy, idxtype *
     ctrl.dbglvl = options[OPTION_DBGLVL];
   }
   ctrl.optype = OP_KVMETIS;
-  ctrl.CoarsenTo = amax((*nvtxs)/(40*log2(*nparts)), 20*(*nparts));
+  ctrl.CoarsenTo = amax((*nvtxs)/(40*log2i(*nparts)), 20*(*nparts));
   ctrl.maxvwgt = 1.5*((graph.vwgt ? idxsum(*nvtxs, graph.vwgt) : (*nvtxs))/ctrl.CoarsenTo);
 
   InitRandom(-1);
@@ -122,7 +122,8 @@ int MlevelVolKWayPartitioning(CtrlType *ctrl, GraphType *graph, int nparts, idxt
 
   idxcopy(graph->nvtxs, graph->where, part);
 
-  GKfree(&graph->gdata, &graph->rdata, LTERM);
+  /*GKfree(&graph->gdata, &graph->rdata, LTERM);*/
+  GKfree2((void**)&graph->gdata, (void**)&graph->rdata);
 
   return graph->minvol;
 

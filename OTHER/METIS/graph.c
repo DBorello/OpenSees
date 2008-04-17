@@ -9,7 +9,7 @@
  * Started 7/25/97
  * George
  *
- * $Id: graph.c,v 1.1 2008-03-31 21:10:13 fmk Exp $
+ * $Id: graph.c,v 1.2 2008-04-17 17:15:43 fmk Exp $
  *
  */
 
@@ -442,7 +442,8 @@ int IsConnectedSubdomain(CtrlType *ctrl, GraphType *graph, int pid, int report)
     printf("\n");
   }
 
-  GKfree(&touched, &queue, &cptr, LTERM);
+  /*GKfree(&touched, &queue, &cptr, LTERM);*/
+  GKfree3((void **)&touched, (void **)&queue, (void **)&cptr);
 
   return (ncmps == 1 ? 1 : 0);
 }
@@ -541,7 +542,8 @@ int IsConnected2(GraphType *graph, int report)
     printf("\n");
   }
 
-  GKfree(&touched, &queue, &cptr, LTERM);
+  /*GKfree(&touched, &queue, &cptr, LTERM);*/
+  GKfree3((void **)&touched, (void **)&queue, (void **)&cptr);
 
   return (ncmps == 1 ? 1 : 0);
 }

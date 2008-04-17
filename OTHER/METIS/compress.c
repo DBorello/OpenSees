@@ -9,7 +9,7 @@
  * Started 9/17/97
  * George
  *
- * $Id: compress.c,v 1.1 2008-03-31 21:10:13 fmk Exp $
+ * $Id: compress.c,v 1.2 2008-04-17 17:15:43 fmk Exp $
  */
 
 #include <metis.h>
@@ -148,7 +148,8 @@ void CompressGraph(CtrlType *ctrl, GraphType *graph, int nvtxs, idxtype *xadj, i
 
   }
 
-  GKfree(&keys, &map, &mark, LTERM);
+  /*GKfree(&keys, &map, &mark, LTERM);*/
+  GKfree3((void**)&keys, (void**)&map, (void**)&mark);
 }
 
 

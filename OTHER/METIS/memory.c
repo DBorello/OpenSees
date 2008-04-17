@@ -8,7 +8,7 @@
  * Started 2/24/96
  * George
  *
- * $Id: memory.c,v 1.2 2008-03-31 21:07:06 fmk Exp $
+ * $Id: memory.c,v 1.3 2008-04-17 17:15:43 fmk Exp $
  *
  */
 
@@ -86,7 +86,8 @@ void AllocateWorkSpace(CtrlType *ctrl, GraphType *graph, int nparts)
 **************************************************************************/
 void FreeWorkSpace(CtrlType *ctrl, GraphType *graph)
 {
-  GKfree(&ctrl->wspace.edegrees, &ctrl->wspace.vedegrees, &ctrl->wspace.core, &ctrl->wspace.pmat, LTERM);
+  /*GKfree(&ctrl->wspace.edegrees, &ctrl->wspace.vedegrees, &ctrl->wspace.core, &ctrl->wspace.pmat, LTERM);*/
+  GKfree4((void**)&ctrl->wspace.edegrees, (void**)&ctrl->wspace.vedegrees, (void **)&ctrl->wspace.core, (void **)&ctrl->wspace.pmat);
 }
 
 /*************************************************************************
@@ -202,7 +203,8 @@ void InitGraph(GraphType *graph)
 void FreeGraph(GraphType *graph) 
 {
 
-  GKfree(&graph->gdata, &graph->nvwgt, &graph->rdata, &graph->npwgts, LTERM);
+  /*GKfree(&graph->gdata, &graph->nvwgt, &graph->rdata, &graph->npwgts, LTERM);*/
+  GKfree4((void**)&graph->gdata, (void**)&graph->nvwgt, (void **)&graph->rdata, (void **)&graph->npwgts);
   free(graph);
 }
 

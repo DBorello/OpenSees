@@ -9,7 +9,7 @@
  * Started 11/4/97
  * George
  *
- * $Id: estmem.c,v 1.1 2008-03-31 21:10:13 fmk Exp $
+ * $Id: estmem.c,v 1.2 2008-04-17 17:15:43 fmk Exp $
  *
  */
 
@@ -99,7 +99,8 @@ void EstimateCFraction(int nvtxs, idxtype *xadj, idxtype *adjncy, float *vfracti
   *vfraction = (1.0*cnvtxs)/(1.0*nvtxs);
   *efraction = (1.0*cnedges)/(1.0*xadj[nvtxs]);
 
-  GKfree(&cmap, &match, &perm, LTERM);
+  /*GKfree(&cmap, &match, &perm, LTERM);*/
+  GKfree3((void**)&cmap, (void**)&match, (void**)&perm);
 }
 
 
@@ -149,7 +150,8 @@ int ComputeCoarseGraphSize(int nvtxs, idxtype *xadj, idxtype *adjncy, int cnvtxs
     cnvtxs++;
   }
 
-  GKfree(&htable, LTERM);
+  /*GKfree(&htable, LTERM);*/
+  GKfree1((void**)&htable);
 
   return cnedges;
 }

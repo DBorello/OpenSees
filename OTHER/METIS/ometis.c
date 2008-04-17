@@ -9,7 +9,7 @@
  * Started 7/24/97
  * George
  *
- * $Id: ometis.c,v 1.1 2008-03-31 21:10:14 fmk Exp $
+ * $Id: ometis.c,v 1.2 2008-04-17 17:15:43 fmk Exp $
  *
  */
 
@@ -135,7 +135,8 @@ void METIS_NodeND(int *nvtxs, idxtype *xadj, idxtype *adjncy, int *numflag, int 
 
     if (graph.nvtxs >= COMPRESSION_FRACTION*(*nvtxs)) {
       ctrl.oflags--; /* We actually performed no compression */
-      GKfree(&cptr, &cind, LTERM);
+      /*GKfree(&cptr, &cind, LTERM);*/
+      GKfree2((void **)&cptr, (void **)&cind);
     }
     else if (2*graph.nvtxs < *nvtxs && ctrl.nseps == 1)
       ctrl.nseps = 2;
@@ -167,7 +168,8 @@ void METIS_NodeND(int *nvtxs, idxtype *xadj, idxtype *adjncy, int *numflag, int 
         iperm[piperm[i]] = i;
     }
 
-    GKfree(&piperm, LTERM);
+    /*GKfree(&piperm, LTERM); */
+    GKfree1((void **)&piperm);
   }
   else if (ctrl.oflags&OFLAG_COMPRESS) { /* Uncompress the ordering */
     if (graph.nvtxs < COMPRESSION_FRACTION*(*nvtxs)) { 
@@ -181,7 +183,8 @@ void METIS_NodeND(int *nvtxs, idxtype *xadj, idxtype *adjncy, int *numflag, int 
       }
     }
 
-    GKfree(&cptr, &cind, LTERM);
+    /*GKfree(&cptr, &cind, LTERM);*/
+    GKfree2((void **)&cptr, (void **)&cind);
   }
 
 
@@ -300,19 +303,22 @@ void MlevelNestedDissection(CtrlType *ctrl, GraphType *graph, idxtype *order, fl
   SplitGraphOrder(ctrl, graph, &lgraph, &rgraph);
 
   /* Free the memory of the top level graph */
-  GKfree(&graph->gdata, &graph->rdata, &graph->label, LTERM);
+  /*GKfree(&graph->gdata, &graph->rdata, &graph->label, LTERM);*/
+  GKfree3((void **)&graph->gdata, (void**)&graph->rdata, (void **)&graph->label);
 
   if (rgraph.nvtxs > MMDSWITCH) 
     MlevelNestedDissection(ctrl, &rgraph, order, ubfactor, lastvtx);
   else {
     MMDOrder(ctrl, &rgraph, order, lastvtx); 
-    GKfree(&rgraph.gdata, &rgraph.rdata, &rgraph.label, LTERM);
+    /*GKfree(&rgraph.gdata, &rgraph.rdata, &rgraph.label, LTERM);*/
+    GKfree3((void**)&rgraph.gdata, (void**)&rgraph.rdata, (void**)&rgraph.label);
   }
   if (lgraph.nvtxs > MMDSWITCH) 
     MlevelNestedDissection(ctrl, &lgraph, order, ubfactor, lastvtx-rgraph.nvtxs);
   else {
     MMDOrder(ctrl, &lgraph, order, lastvtx-rgraph.nvtxs); 
-    GKfree(&lgraph.gdata, &lgraph.rdata, &lgraph.label, LTERM);
+    /*GKfree(&lgraph.gdata, &lgraph.rdata, &lgraph.label, LTERM);*/
+    GKfree3((void**)&lgraph.gdata, (void**)&lgraph.rdata, (void**)&lgraph.label);
   }
 }
 
@@ -357,16 +363,19 @@ void MlevelNestedDissectionCC(CtrlType *ctrl, GraphType *graph, idxtype *order, 
 
   nsgraphs = SplitGraphOrderCC(ctrl, graph, sgraphs, ncmps, cptr, cind);
 
-  GKfree(&cptr, &cind, LTERM);
+  /*GKfree(&cptr, &cind, LTERM);*/
+  GKfree2((void **)&cptr, (void **)&cind);
 
   /* Free the memory of the top level graph */
-  GKfree(&graph->gdata, &graph->rdata, &graph->label, LTERM);
+  /*GKfree(&graph->gdata, &graph->rdata, &graph->label, LTERM);*/
+  GKfree3((void**)&graph->gdata, (void**)&graph->rdata, (void**)&graph->label);
 
   /* Go and process the subgraphs */
   for (rnvtxs=i=0; i<nsgraphs; i++) {
     if (sgraphs[i].adjwgt == NULL) {
       MMDOrder(ctrl, sgraphs+i, order, lastvtx-rnvtxs);
-      GKfree(&sgraphs[i].gdata, &sgraphs[i].label, LTERM);
+      /*GKfree(&sgraphs[i].gdata, &sgraphs[i].label, LTERM);*/
+      GKfree2((void**)&sgraphs[i].gdata, (void**)&sgraphs[i].label);
     }
     else {
       MlevelNestedDissectionCC(ctrl, sgraphs+i, order, ubfactor, lastvtx-rnvtxs);
@@ -410,7 +419,8 @@ void MlevelNodeBisectionMultiple(CtrlType *ctrl, GraphType *graph, int *tpwgts, 
         idxcopy(nvtxs, graph->where, bestwhere);
       }
 
-      GKfree(&graph->rdata, LTERM);
+      /*GKfree(&graph->rdata, LTERM);*/
+      GKfree1((void**)&graph->rdata);
     
       if (mincut == 0)
         break;
@@ -444,7 +454,8 @@ void MlevelNodeBisectionMultiple(CtrlType *ctrl, GraphType *graph, int *tpwgts, 
         idxcopy(cnvtxs, cgraph->where, bestwhere);
       }
 
-      GKfree(&cgraph->rdata, LTERM);
+      /*GKfree(&cgraph->rdata, LTERM);*/
+      GKfree1((void **)&cgraph->rdata);
     
       if (mincut == 0)
         break;

@@ -6,7 +6,7 @@
  * Started 7/8/98
  * George
  *
- * $Id: kwayvolfm.c,v 1.1 2008-03-31 21:10:13 fmk Exp $
+ * $Id: kwayvolfm.c,v 1.2 2008-04-17 17:15:43 fmk Exp $
  *
  */
 
@@ -148,7 +148,8 @@ void Random_KWayVolRefine(CtrlType *ctrl, GraphType *graph, int nparts, float *t
       break;
   }
 
-  GKfree(&marker, &updind, &phtable, LTERM);
+  /*GKfree(&marker, &updind, &phtable, LTERM);*/
+  GKfree3((void**)&marker, (void**)&updind, (void**)&phtable);
 
   idxwspacefree(ctrl, nparts);
   idxwspacefree(ctrl, nparts);
@@ -384,7 +385,8 @@ void Random_KWayVolRefineMConn(CtrlType *ctrl, GraphType *graph, int nparts, flo
       break;
   }
 
-  GKfree(&marker, &updind, &phtable, LTERM);
+  /*GKfree(&marker, &updind, &phtable, LTERM);*/
+  GKfree3((void**)&marker, (void**)&updind, (void**)&phtable);
 
   idxwspacefree(ctrl, nparts);
   idxwspacefree(ctrl, nparts);
@@ -537,7 +539,8 @@ void Greedy_KWayVolBalance(CtrlType *ctrl, GraphType *graph, int nparts, float *
 
   }
 
-  GKfree(&marker, &updind, &phtable, LTERM);
+  /*GKfree(&marker, &updind, &phtable, LTERM);*/
+  GKfree3((void**)&marker, (void**)&updind, (void**)&phtable);
 
   PQueueFree(ctrl, &queue);
 
@@ -781,7 +784,8 @@ void Greedy_KWayVolBalanceMConn(CtrlType *ctrl, GraphType *graph, int nparts, fl
 
   }
 
-  GKfree(&marker, &updind, &phtable, LTERM);
+  /*GKfree(&marker, &updind, &phtable, LTERM);*/
+  GKfree3((void**)&marker, (void**)&updind, (void**)&phtable);
 
   PQueueFree(ctrl, &queue);
 
@@ -1601,7 +1605,8 @@ void EliminateVolSubDomainEdges(CtrlType *ctrl, GraphType *graph, int nparts, fl
   idxwspacefree(ctrl, nparts);
   idxwspacefree(ctrl, nvtxs);
 
-  GKfree(&cand, &cand2, LTERM);
+  /*GKfree(&cand, &cand2, LTERM);*/
+  GKfree2((void**)&cand, (void**)&cand2);
 }
 
 

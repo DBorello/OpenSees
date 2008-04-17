@@ -8,7 +8,7 @@
  * Started 9/28/95
  * George
  *
- * $Id: util.c,v 1.3 2008-03-31 21:07:06 fmk Exp $
+ * $Id: util.c,v 1.4 2008-04-17 17:15:44 fmk Exp $
  */
 
 #include <metis.h>
@@ -119,6 +119,7 @@ void *GKmalloc(int nbytes, char *msg)
 /*************************************************************************
 * This function is my wrapper around free, allows multiple pointers    
 **************************************************************************/
+/*
 void GKfree(void **ptr1,...)
 {
   va_list plist;
@@ -130,7 +131,6 @@ void GKfree(void **ptr1,...)
 
   va_start(plist, ptr1);
 
-  /* while ((int)(ptr = va_arg(plist, void **)) != -1) { */
   while ((ptr = va_arg(plist, void **)) != LTERM) {
     if (*ptr != NULL)
       free(*ptr);
@@ -139,6 +139,72 @@ void GKfree(void **ptr1,...)
 
   va_end(plist);
 }            
+*/
+void GKfree1(void **ptr1)
+{
+  if (*ptr1 != NULL)
+    free(*ptr1);
+  *ptr1 = NULL;
+}            
+void GKfree2(void **ptr1, void **ptr2)
+{
+  if (*ptr1 != NULL)
+    free(*ptr1);
+  *ptr1 = NULL;
+  if (*ptr2 != NULL)
+    free(*ptr2);
+  *ptr2 = NULL;
+}            
+
+void GKfree3(void **ptr1, void **ptr2, void **ptr3)
+{
+  if (*ptr1 != NULL)
+    free(*ptr1);
+  *ptr1 = NULL;
+  if (*ptr2 != NULL)
+    free(*ptr2);
+  *ptr2 = NULL;
+  if (*ptr3 != NULL)
+    free(*ptr3);
+  *ptr3 = NULL;
+}            
+
+void GKfree4(void **ptr1, void **ptr2, void **ptr3, void **ptr4)
+{
+  if (*ptr1 != NULL)
+    free(*ptr1);
+  *ptr1 = NULL;
+  if (*ptr2 != NULL)
+    free(*ptr2);
+  *ptr2 = NULL;
+  if (*ptr3 != NULL)
+    free(*ptr3);
+  *ptr3 = NULL;
+  if (*ptr4 != NULL)
+    free(*ptr4);
+  *ptr4 = NULL;
+
+}            
+
+void GKfree5(void **ptr1, void **ptr2, void **ptr3, void **ptr4, void **ptr5)
+{
+  if (*ptr1 != NULL)
+    free(*ptr1);
+  *ptr1 = NULL;
+  if (*ptr2 != NULL)
+    free(*ptr2);
+  *ptr2 = NULL;
+  if (*ptr3 != NULL)
+    free(*ptr3);
+  *ptr3 = NULL;
+  if (*ptr4 != NULL)
+    free(*ptr4);
+  *ptr4 = NULL;
+  if (*ptr5 != NULL)
+    free(*ptr5);
+  *ptr5 = NULL;
+}            
+
 
 
 /*************************************************************************
@@ -507,9 +573,9 @@ void InitRandom(int seed)
 }
 
 /*************************************************************************
-* This function returns the log2(x)
+* This function returns the log2i(x)
 **************************************************************************/
-int log2(int a)
+int log2i(int a)
 {
   int i;
 

@@ -8,7 +8,7 @@
  * Started 7/28/97
  * George
  *
- * $Id: kwayvolrefine.c,v 1.1 2008-03-31 21:10:13 fmk Exp $
+ * $Id: kwayvolrefine.c,v 1.2 2008-04-17 17:15:43 fmk Exp $
  */
 
 #include <metis.h>
@@ -71,7 +71,8 @@ void RefineVolKWay(CtrlType *ctrl, GraphType *orggraph, GraphType *graph, int np
     if (graph == orggraph)
       break;
 
-    GKfree(&graph->gdata, LTERM);  /* Deallocate the graph related arrays */
+    /*GKfree(&graph->gdata, LTERM);*/  /* Deallocate the graph related arrays */
+    GKfree1((void**)&graph->gdata);  /* Deallocate the graph related arrays */
 
     graph = graph->finer;
 

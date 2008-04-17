@@ -8,7 +8,7 @@
  * Started 10/14/97
  * George
  *
- * $Id: parmetis.c,v 1.1 2008-03-31 21:10:14 fmk Exp $
+ * $Id: parmetis.c,v 1.2 2008-04-17 17:15:43 fmk Exp $
  *
  */
 
@@ -140,7 +140,8 @@ void METIS_NodeNDP(int nvtxs, idxtype *xadj, idxtype *adjncy, int npes,
 
     if (graph.nvtxs >= COMPRESSION_FRACTION*(nvtxs)) {
       ctrl.oflags--; /* We actually performed no compression */
-      GKfree(&cptr, &cind, LTERM);
+      /*GKfree(&cptr, &cind, LTERM);*/
+      GKfree2((void **)&cptr, (void **)&cind);
     }
     else if (2*graph.nvtxs < nvtxs && ctrl.nseps == 1)
       ctrl.nseps = 2;
@@ -173,7 +174,8 @@ void METIS_NodeNDP(int nvtxs, idxtype *xadj, idxtype *adjncy, int npes,
       }
     }
 
-    GKfree(&cptr, &cind, LTERM);
+    /*GKfree(&cptr, &cind, LTERM);*/
+    GKfree2((void **)&cptr, (void **)&cind);
   }
 
 
@@ -201,7 +203,8 @@ void MlevelNestedDissectionP(CtrlType *ctrl, GraphType *graph, idxtype *order, i
   nvtxs = graph->nvtxs;
 
   if (nvtxs == 0) {
-    GKfree(&graph->gdata, &graph->rdata, &graph->label, LTERM);
+    /*GKfree(&graph->gdata, &graph->rdata, &graph->label, LTERM);*/
+    GKfree3((void **)&graph->gdata, (void **)&graph->rdata, (void **)&graph->label);
     return;
   }
 
@@ -236,19 +239,22 @@ void MlevelNestedDissectionP(CtrlType *ctrl, GraphType *graph, idxtype *order, i
   SplitGraphOrder(ctrl, graph, &lgraph, &rgraph);
 
   /* Free the memory of the top level graph */
-  GKfree(&graph->gdata, &graph->rdata, &graph->label, LTERM);
+  /*GKfree(&graph->gdata, &graph->rdata, &graph->label, LTERM);*/
+  GKfree3((void **)&graph->gdata, (void **)&graph->rdata, (void **)&graph->label);
 
   if (rgraph.nvtxs > MMDSWITCH || 2*cpos+1 < npes-1) 
     MlevelNestedDissectionP(ctrl, &rgraph, order, lastvtx, npes, 2*cpos+1, sizes);
   else {
     MMDOrder(ctrl, &rgraph, order, lastvtx); 
-    GKfree(&rgraph.gdata, &rgraph.rdata, &rgraph.label, LTERM);
+    /*GKfree(&rgraph.gdata, &rgraph.rdata, &rgraph.label, LTERM);*/
+    GKfree3((void **)&rgraph.gdata, (void **)&rgraph.rdata, (void **)&rgraph.label);
   }
   if (lgraph.nvtxs > MMDSWITCH || 2*cpos+2 < npes-1) 
     MlevelNestedDissectionP(ctrl, &lgraph, order, lastvtx-rgraph.nvtxs, npes, 2*cpos+2, sizes);
   else {
     MMDOrder(ctrl, &lgraph, order, lastvtx-rgraph.nvtxs); 
-    GKfree(&lgraph.gdata, &lgraph.rdata, &lgraph.label, LTERM);
+    /*GKfree(&lgraph.gdata, &lgraph.rdata, &lgraph.label, LTERM);*/
+    GKfree3((void **)&lgraph.gdata, (void **)&lgraph.rdata, (void **)&lgraph.label);
   }
 }
 
@@ -304,7 +310,8 @@ void METIS_NodeComputeSeparator(int *nvtxs, idxtype *xadj, idxtype *adjncy, idxt
   *sepsize = graph.pwgts[2];
   idxcopy(*nvtxs, graph.where, part);
 
-  GKfree(&graph.gdata, &graph.rdata, &graph.label, LTERM);
+  /*GKfree(&graph.gdata, &graph.rdata, &graph.label, LTERM);*/
+  GKfree3((void **)&graph.gdata, (void **)&graph.rdata, (void **)&graph.label);
 
 
   FreeWorkSpace(&ctrl, &graph);
@@ -363,7 +370,8 @@ void METIS_EdgeComputeSeparator(int *nvtxs, idxtype *xadj, idxtype *adjncy, idxt
   *sepsize = graph.pwgts[2];
   idxcopy(*nvtxs, graph.where, part);
 
-  GKfree(&graph.gdata, &graph.rdata, &graph.label, LTERM);
+  /*GKfree(&graph.gdata, &graph.rdata, &graph.label, LTERM);*/
+  GKfree3((void **)&graph.gdata, (void **)&graph.rdata, (void **)&graph.label);
 
 
   FreeWorkSpace(&ctrl, &graph);

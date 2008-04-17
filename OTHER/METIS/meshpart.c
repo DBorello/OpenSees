@@ -8,7 +8,7 @@
  * Started 9/29/97
  * George
  *
- * $Id: meshpart.c,v 1.1 2008-03-31 21:10:13 fmk Exp $
+ * $Id: meshpart.c,v 1.2 2008-04-17 17:15:43 fmk Exp $
  *
  */
 
@@ -98,7 +98,8 @@ void METIS_PartMeshNodal(int *ne, int *nn, idxtype *elmnts, int *etype, int *num
   if (*numflag == 1)
     ChangeMesh2FNumbering2((*ne)*esize, elmnts, *ne, *nn, epart, npart);
 
-  GKfree(&xadj, &adjncy, &pwgts, LTERM);
+  /*GKfree(&xadj, &adjncy, &pwgts, LTERM);*/
+  GKfree3((void**)&xadj, (void**)&adjncy, (void **)&pwgts);
 
 }
 
@@ -199,6 +200,7 @@ void METIS_PartMeshDual(int *ne, int *nn, idxtype *elmnts, int *etype, int *numf
   if (*numflag == 1)
     ChangeMesh2FNumbering2((*ne)*esize, elmnts, *ne, *nn, epart, npart);
 
-  GKfree(&xadj, &adjncy, &pwgts, &nptr, &nind, LTERM);
+  /*GKfree(&xadj, &adjncy, &pwgts, &nptr, &nind, LTERM);*/
+  GKfree5((void**)&xadj, (void**)&adjncy, (void**)&pwgts, (void**)&nptr, (void**)&nind);
 
 }

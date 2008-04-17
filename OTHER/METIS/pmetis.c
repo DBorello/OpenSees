@@ -9,7 +9,7 @@
  * Started 7/24/97
  * George
  *
- * $Id: pmetis.c,v 1.1 2008-03-31 21:10:14 fmk Exp $
+ * $Id: pmetis.c,v 1.2 2008-04-17 17:15:43 fmk Exp $
  *
  */
 
@@ -135,7 +135,8 @@ int MlevelRecursiveBisection(CtrlType *ctrl, GraphType *graph, int nparts, idxty
 
 
   /* Free the memory of the top level graph */
-  GKfree(&graph->gdata, &graph->rdata, &graph->label, LTERM);
+  /*GKfree(&graph->gdata, &graph->rdata, &graph->label, LTERM);*/
+  GKfree3((void **)&graph->gdata, (void **)&graph->rdata, (void **)&graph->label);
 
   /* Scale the fractions in the tpwgts according to the true weight */
   wsum = ssum(nparts/2, tpwgts);
@@ -154,7 +155,8 @@ int MlevelRecursiveBisection(CtrlType *ctrl, GraphType *graph, int nparts, idxty
   }
   else if (nparts == 3) {
     cut += MlevelRecursiveBisection(ctrl, &rgraph, nparts-nparts/2, part, tpwgts+nparts/2, ubfactor, fpart+nparts/2);
-    GKfree(&lgraph.gdata, &lgraph.label, LTERM);
+    /*GKfree(&lgraph.gdata, &lgraph.label, LTERM);*/
+    GKfree2((void **)&lgraph.gdata, (void **)&lgraph.label);
   }
 
   return cut;

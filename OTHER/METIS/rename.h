@@ -8,7 +8,7 @@
  * Started 10/2/97
  * George
  *
- * $Id: rename.h,v 1.2 2008-03-31 21:07:06 fmk Exp $
+ * $Id: rename.h,v 1.3 2008-04-17 17:15:43 fmk Exp $
  *
  */
 
@@ -410,7 +410,7 @@
 #define RandomPermute			__RandomPermute
 #define ispow2				__ispow2
 #define InitRandom			__InitRandom
-#define log2				__log2
+#define log2i				__log2i
 
 
 

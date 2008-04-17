@@ -9,7 +9,7 @@
  * Started 7/23/97
  * George
  *
- * $Id: minitpart2.c,v 1.1 2008-03-31 21:10:13 fmk Exp $
+ * $Id: minitpart2.c,v 1.2 2008-04-17 17:15:43 fmk Exp $
  *
  */
 
@@ -92,7 +92,8 @@ void MocGrowBisection2(CtrlType *ctrl, GraphType *graph, float *tpwgts, float *u
   graph->mincut = bestcut;
   idxcopy(nvtxs, bestwhere, where);
 
-  GKfree(&bestwhere, LTERM);
+  /*GKfree(&bestwhere, LTERM);*/
+  GKfree1((void**)&bestwhere);
 }
 
 
@@ -140,7 +141,8 @@ void MocGrowBisectionNew2(CtrlType *ctrl, GraphType *graph, float *tpwgts, float
   graph->mincut = bestcut;
   idxcopy(nvtxs, bestwhere, where);
 
-  GKfree(&bestwhere, LTERM);
+  /*GKfree(&bestwhere, LTERM);*/
+  GKfree1((void**)&bestwhere);
 }
 
 
