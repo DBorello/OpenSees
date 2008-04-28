@@ -10,7 +10,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkAppInit.cpp,v 1.5 2006-09-26 21:29:35 fmk Exp $
+ * RCS: @(#) $Id: tkAppInit.cpp,v 1.6 2008-04-28 23:18:13 fmk Exp $
  */
 
 extern "C" {
@@ -86,7 +86,7 @@ main(int argc, char **argv)
 #endif
 
     Tk_MainOpenSees(argc, argv, TK_LOCAL_APPINIT, Tcl_CreateInterp());
-    return 0;			/* Needed only to prevent compiler warning. */
+    return 0;  /* Needed only to prevent compiler warning. */
 }
 
 /*
@@ -118,19 +118,6 @@ Tcl_AppInit(Tcl_Interp *interp)
 	return TCL_ERROR;
     }
     Tcl_StaticPackage(interp, "Tk", Tk_Init, Tk_SafeInit);
-#ifdef TK_TEST
-    if (Tcltest_Init(interp) == TCL_ERROR) {
-	return TCL_ERROR;
-    }
-    Tcl_StaticPackage(interp, "Tcltest", Tcltest_Init,
-            (Tcl_PackageInitProc *) NULL);
-    if (Tktest_Init(interp) == TCL_ERROR) {
-	return TCL_ERROR;
-    }
-    Tcl_StaticPackage(interp, "Tktest", Tktest_Init,
-            (Tcl_PackageInitProc *) NULL);
-#endif /* TK_TEST */
-
 
     /*
      * Call the init procedures for included packages.  Each call should
@@ -161,15 +148,3 @@ Tcl_AppInit(Tcl_Interp *interp)
     Tcl_SetVar(interp, "tcl_rcFileName", "~/.wishrc", TCL_GLOBAL_ONLY);
     return TCL_OK;
 }
-
-
-
-
-
-
-/*
-int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
-{
-  return 0;
-}
-*/
