@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2008-04-23 22:49:50 $
+// $Revision: 1.15 $
+// $Date: 2008-04-28 23:18:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/tclAppInit.cpp,v $
 
 
@@ -36,7 +36,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclAppInit.cpp,v 1.14 2008-04-23 22:49:50 fmk Exp $
+ * RCS: @(#) $Id: tclAppInit.cpp,v 1.15 2008-04-28 23:18:33 fmk Exp $
  */
 
 extern "C" {
@@ -166,10 +166,6 @@ int Tcl_AppInit(Tcl_Interp *interp)
     return TCL_ERROR;
   }
   
-  if (Tcl_Eval(interp, "parray {1 2 3}") == TCL_ERROR) {
-    ;
-  }
-    
 #ifdef TCL_TEST
 #ifdef TCL_XT_TEST
      if (Tclxttest_Init(interp) == TCL_ERROR) {
