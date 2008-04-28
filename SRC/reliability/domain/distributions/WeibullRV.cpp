@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2008-04-10 22:11:27 $
+// $Revision: 1.9 $
+// $Date: 2008-04-28 18:36:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/WeibullRV.cpp,v $
 
 
@@ -163,71 +163,56 @@ WeibullRV::getParameter2()
   return k;
 }
 
+double 
+WeibullRV::harmonicNumber(double n)
+{
+	double Hn;
+	double pi = acos(-1);
+	double zeta3 = 1.2020569031595942854;
+	double zeta5 = 1.0369277551433699263;
+	double eulergamma = 0.57721566490153286061;
+	
+	if (n > 1) {
+		// asymptotic harmonic number series approximation
+		Hn = log(n) + eulergamma + 1/(2*n) - 1/(12*n*n) + 1/120/pow(n,4) - 1/252/pow(n,6);
+	}
+	else if (n > 0.25) {
+		// Taylor series expansion about n = 1/2
+		Hn = 2+2*pow(1-2*n,2) + (-4+pi*pi/2)*(n-0.5) + (-16+pow(pi,4)/6)*pow(n-0.5,3) + 
+			32*pow(n-0.5,4) - log(4) - 7/4*pow(1-2*n,2)*zeta3 - 31*pow(n-0.5,4)*zeta5;
+	}
+	else {
+		// Taylor series expansion about the origin
+		Hn = pow(pi,2)*n/6 + pow(pi,4)*pow(n,3)/90 - zeta3*pow(n,2) - zeta5*pow(n,4);
+	}
+	
+	return Hn;
+}
+
 void
 WeibullRV::setParameters(double mean, double stdv)
 {
 	double cov = stdv/mean;
-	double xk = 0.0;
-	function141(xk, cov,mean);
-}
-
-
-void
-WeibullRV::function141(double xk, double cov, double mean)
-{
+	double c = 1+cov*cov;
+	double k_prev = log(1/(c-1));
+	double del = 1.0;
 	GammaRV aGammaRV(1, 0.0, 1.0, 0.0);
-	xk = xk + 1.0;
-	double x1 = 1.0 + 1.0/xk;
-	double x2 = 1.0 + 2.0/xk;
-	double gm1 = aGammaRV.gammaFunction(x1);
-	double gm2 = aGammaRV.gammaFunction(x2);
-	double vy = sqrt(gm2/gm1/gm1 - 1.0);
-	if (cov-vy < 0.0) 
-		function141(xk,cov,mean);
-	else if (cov-vy == 0.0) 
-		function144(xk,gm1,mean);
-	else 
-		function142(xk,cov,mean);
-}
-void
-WeibullRV::function142(double xk, double cov, double mean)
-{
-	xk = xk - 0.1;
-	double x1 = 1.0 + 1.0/xk;
-	double x2 = 1.0 + 2.0/xk;
-	GammaRV aGammaRV(1, 0.0, 1.0, 0.0);
-	double gm1 = aGammaRV.gammaFunction(x1);
-	double gm2 = aGammaRV.gammaFunction(x2);
-	double vy = sqrt(gm2/gm1/gm1 - 1.0);
-	if (cov-vy < 0.0) 
-		function143(xk,cov,mean);
-	else if (cov-vy == 0.0) 
-		function144(xk,gm1,mean);
-	else 
-		function142(xk,cov,mean);
-}
-void
-WeibullRV::function143(double xk, double cov, double mean)
-{
-	xk = xk + 0.01;
-	double x1 = 1.0 + 1.0/xk;
-	double x2 = 1.0 + 2.0/xk;
-	GammaRV aGammaRV(1, 0.0, 1.0, 0.0);
-	double gm1 = aGammaRV.gammaFunction(x1);
-	double gm2 = aGammaRV.gammaFunction(x2);
-	double vy = sqrt(gm2/gm1/gm1 - 1.0);
-	if (cov-vy < 0.0) 
-		function143(xk,cov,mean);
-	else if (cov-vy == 0.0) 
-		function144(xk,gm1,mean);
-	else 
-		function144(xk,gm1,mean);
+	
+	// now use Newtons method with nice f/f' function
+	int ncount = 1;
+	int nmax = 100;
+	
+	while (del > 1.0e-8 && ncount <= nmax) {
+		k = k_prev - (c*pow(aGammaRV.gammaFunction(1/k_prev),2)-2*k_prev*aGammaRV.gammaFunction(2/k_prev)) / 
+			( 2*aGammaRV.gammaFunction(2/k_prev+1)*(-harmonicNumber(1/k_prev)+harmonicNumber(2/k_prev)) );
+		del = fabs(k-k_prev);
+		k_prev = k;
+		ncount++;
+	}
+	if (ncount >= nmax) {
+		opserr << "warning: Weibull distribution did not converge during setParameters()" << endln;
+	}
+	
+	u = mean/aGammaRV.gammaFunction(1+1/k);
 
-
-}
-void
-WeibullRV::function144(double xk, double gm1, double mean)
-{
-	u = mean/gm1;
-	k = xk;
 }

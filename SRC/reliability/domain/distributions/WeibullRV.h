@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-02-17 21:27:23 $
+// $Revision: 1.7 $
+// $Date: 2008-04-28 18:36:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/WeibullRV.h,v $
 
 
@@ -74,11 +74,8 @@ protected:
 private:
 	double u;
 	double k;
+	double harmonicNumber(double n);
 	void setParameters(double mean, double stdv);
-	void function141(double xk, double cov, double mean);
-	void function142(double xk, double cov, double mean);
-	void function143(double xk, double cov, double mean);
-	void function144(double xk, double gm1, double mean);
 };
 
 #endif
