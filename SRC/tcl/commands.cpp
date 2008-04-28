@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.119 $
-// $Date: 2008-04-17 23:05:28 $
+// $Revision: 1.120 $
+// $Date: 2008-04-28 23:19:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -536,7 +536,7 @@ int g3AppInit(Tcl_Interp *interp) {
     opserr.setFloatField(SCIENTIFIC);
     opserr.setFloatField(FIXEDD);
 #endif
-    Tcl_CreateObjCommand(interp, "interp", Tcl_InterpOpenSeesObjCmd, NULL, NULL);
+    //Tcl_CreateObjCommand(interp, "interp", Tcl_InterpOpenSeesObjCmd, NULL, NULL);
     Tcl_CreateObjCommand(interp, "pset", &OPS_SetObjCmd,
 			 (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
     Tcl_CreateCommand(interp, "source", &OPS_SourceCmd,
