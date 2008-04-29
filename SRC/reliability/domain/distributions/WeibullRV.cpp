@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2008-04-28 18:36:21 $
+// $Revision: 1.10 $
+// $Date: 2008-04-29 16:47:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/WeibullRV.cpp,v $
 
 
@@ -167,7 +167,7 @@ double
 WeibullRV::harmonicNumber(double n)
 {
 	double Hn;
-	double pi = acos(-1);
+	double pi = acos(-1.0);
 	double zeta3 = 1.2020569031595942854;
 	double zeta5 = 1.0369277551433699263;
 	double eulergamma = 0.57721566490153286061;
@@ -179,7 +179,7 @@ WeibullRV::harmonicNumber(double n)
 	else if (n > 0.25) {
 		// Taylor series expansion about n = 1/2
 		Hn = 2+2*pow(1-2*n,2) + (-4+pi*pi/2)*(n-0.5) + (-16+pow(pi,4)/6)*pow(n-0.5,3) + 
-			32*pow(n-0.5,4) - log(4) - 7/4*pow(1-2*n,2)*zeta3 - 31*pow(n-0.5,4)*zeta5;
+			32*pow(n-0.5,4) - log(4.0) - 7/4*pow(1-2*n,2)*zeta3 - 31*pow(n-0.5,4)*zeta5;
 	}
 	else {
 		// Taylor series expansion about the origin
