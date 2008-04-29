@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2008-04-10 18:10:07 $
+// $Revision: 1.13 $
+// $Date: 2008-04-29 23:10:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.cpp,v $
 
 
@@ -49,6 +49,12 @@ LimitStateFunction::LimitStateFunction(	int passedTag,
 	this->initializeFORMAnalysis();
 	this->initializeSimulationAnalysis();
 	this->initializeSORMAnalysis();
+}
+
+LimitStateFunction::LimitStateFunction(int tag, int classTag)
+  :ReliabilityDomainComponent(tag, classTag)
+{
+  
 }
 
 void
@@ -137,6 +143,14 @@ int
 LimitStateFunction::tokenizeIt(TCL_Char *originalExpression)
 {
 	// Also store the tokenized expression (with dollar signs in front of variable names)
+
+  // This function changes each occurrence of {asdf} in the limit state 
+  // function to $asdf; however, we can use \$asdf in the limit state and
+  // not have to do this
+  //
+  // Can automatically convert Terje's {} stuff to proper Tcl syntax
+  // in this method, e.g., {x_1} --> \$x(1) and {u_5_2} --> \[nodeDisp 5 2]
+
 	char lsf_forTokenizing[500];
 	char separators[5] = "}{";
 	char *dollarSign = "$";

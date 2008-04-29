@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2008-04-10 18:10:07 $
+// $Revision: 1.12 $
+// $Date: 2008-04-29 23:10:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.h,v $
 
 
@@ -42,8 +42,10 @@ class LimitStateFunction : public ReliabilityDomainComponent
 {
 
 public:
+  LimitStateFunction(int tag, int classTag);
 	LimitStateFunction(int tag, TCL_Char *expression);
 	~LimitStateFunction();
+
 	void Print(OPS_Stream &s, int flag =0);
 
 	// Method to get/add limit-state function
