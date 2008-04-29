@@ -15,6 +15,7 @@ OBJS       = ForceBeamColumn2d.o ForceBeamColumn3d.o \
 	UserDefinedBeamIntegration.o \
 	UserDefinedHingeIntegration.o \
 	DistHingeIntegration.o \
+	RegularizedHingeIntegration.o \
 	TrapezoidalBeamIntegration.o \
 	FixedLocationBeamIntegration.o \
 	LowOrderBeamIntegration.o \
