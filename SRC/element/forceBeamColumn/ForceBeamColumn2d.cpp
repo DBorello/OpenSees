@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.33 $
-// $Date: 2007-12-01 01:05:25 $
+// $Revision: 1.34 $
+// $Date: 2008-04-29 17:34:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 /*
@@ -2501,7 +2501,7 @@ ForceBeamColumn2d::setParameter(const char **argv, int argc, Parameter &param)
   else if (strstr(argv[0],"section") != 0) {
     
     if (argc < 3)
-      return 0;
+      return -1;
 
     // Get section number: 1...Np
     int sectionNum = atoi(argv[1]);
@@ -2511,6 +2511,16 @@ ForceBeamColumn2d::setParameter(const char **argv, int argc, Parameter &param)
 
     else
       return -1;
+
+    /*
+    // Find the right section and call its setParameter method
+    int ok = 0;
+    for (int i = 0; i < numSections; i++)
+      if (paramSectionTag == sections[i]->getTag())
+	ok += sections[i]->setParameter(&argv[2], argc-2, param);
+
+    return ok;
+    */
   }
   
   else if (strstr(argv[0],"integration") != 0) {
