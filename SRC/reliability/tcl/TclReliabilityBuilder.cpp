@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.41 $
-// $Date: 2008-04-10 18:23:31 $
+// $Revision: 1.42 $
+// $Date: 2008-04-29 23:12:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -1609,12 +1609,22 @@ TclReliabilityModelBuilder_addRandomVariable(ClientData clientData,Tcl_Interp *i
   }
 
 
+  
+
   // ADD THE OBJECT TO THE DOMAIN
   if (theReliabilityDomain->addRandomVariable(theRandomVariable) == false) {
 	opserr << "ERROR: failed to add random variable to the domain (wrong number of arguments?)\n";
 	opserr << "random variable: " << tag << endln;
 	delete theRandomVariable; // otherwise memory leak
 	return TCL_ERROR;
+  }
+
+  char tclAssignment[80];
+  sprintf(tclAssignment , "set xrv(%d)  %15.5f", tag, theRandomVariable->getStartValue());
+  if (Tcl_Eval(interp, tclAssignment) == TCL_ERROR) {						
+    opserr << "ERROR GFunEvaluator -- Tcl_Eval returned error in limit state function" << endln;
+    opserr << interp->result << endln;
+    return TCL_ERROR;
   }
 
   return TCL_OK;
