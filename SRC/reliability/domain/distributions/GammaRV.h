@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-10-26 03:22:40 $
+// $Revision: 1.9 $
+// $Date: 2008-04-29 14:59:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/GammaRV.h,v $
 
 
@@ -69,7 +69,7 @@ public:
 	double getParameter1();
 	double getParameter2();
 	double gammaFunction(double x);
-	double incompleteGammaFunction(double x, double a);
+	double incompleteGammaFunction(double a, double x);
 
 
 protected:
@@ -77,7 +77,7 @@ protected:
 private:
 	double k;
 	double lambda;
-
+	
 };
 
 #endif
