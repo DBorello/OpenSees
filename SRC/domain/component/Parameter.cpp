@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-10-26 04:55:40 $
+// $Revision: 1.7 $
+// $Date: 2008-04-29 17:33:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/Parameter.cpp,v $
 
 #include <classTags.h>
@@ -55,7 +55,7 @@ Parameter::Parameter(int passedTag,
     numComponents = 1;
   }
 
-  if (numObjects == 0) {
+  if (numObjects == 0 || ok < 0) {
     opserr << "Parameter::Parameter "<< this->getTag() <<" -- no objects were able to identify parameter" << endln;
     for (int i = 0; i < argc; i++)
       opserr << argv[i] << ' ';
@@ -157,11 +157,13 @@ Parameter::addComponent(DomainComponent *parentObject,
   //return (parentObject != 0) ?
   //  parentObject->setParameter(argv, argc, *this) : -1;
 
+  int ok = -1;
+
   int oldNumObjects = numObjects;
   if (parentObject != 0)
-    parentObject->setParameter(argv, argc, *this);
+    ok = parentObject->setParameter(argv, argc, *this);
 
-  if (numObjects == oldNumObjects) {
+  if (numObjects == oldNumObjects || ok < 0) {
     opserr << "Parameter::addComponent "<< this->getTag() <<" -- no objects were able to identify parameter" << endln;
     for (int i = 0; i < argc; i++)
       opserr << argv[i] << ' ';
