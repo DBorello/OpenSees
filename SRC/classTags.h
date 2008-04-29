@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.102 $
-// $Date: 2008-04-15 18:27:31 $
+// $Revision: 1.103 $
+// $Date: 2008-04-29 17:43:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -415,6 +415,7 @@
 #define BEAM_INTEGRATION_TAG_HingeRadauTwo    13
 #define BEAM_INTEGRATION_TAG_UserHinge     14
 #define BEAM_INTEGRATION_TAG_DistHinge     15
+#define BEAM_INTEGRATION_TAG_RegularizedHinge     16
 
 #define BEAM_INTEGRATION_TAG_HingeMidpoint2d 20
 #define BEAM_INTEGRATION_TAG_HingeEndpoint2d 21
