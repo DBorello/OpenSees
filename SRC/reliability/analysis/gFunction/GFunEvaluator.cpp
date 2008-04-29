@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2008-04-10 00:05:14 $
+// $Revision: 1.15 $
+// $Date: 2008-04-29 23:08:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/GFunEvaluator.cpp,v $
 
 
@@ -33,6 +33,7 @@
 
 #include <GFunEvaluator.h>
 #include <ReliabilityDomain.h>
+#include <RandomVariableIter.h>
 #include <tcl.h>
 
 #include <fstream>
@@ -81,6 +82,7 @@ GFunEvaluator::evaluateG(const Vector &x)
 	numberOfEvaluations++;
 
 
+
 	// "Download" limit-state function from reliability domain
 	int lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
 	LimitStateFunction *theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
@@ -93,6 +95,8 @@ GFunEvaluator::evaluateG(const Vector &x)
 	// Set value of GFun-specific parameters in the limit-state function
 	int result = this->tokenizeSpecials(theExpression);
 
+	////////////////////////////////////////////////////////////
+	// From here to next line of slashes should go away -- MHS
 
 	// Initial declarations
 	int i;
@@ -166,11 +170,31 @@ GFunEvaluator::evaluateG(const Vector &x)
 		tokenPtr = strtok( NULL, separators);
 	}
 
+	////////////////////////////////////////////////////////////
+
+	// Set random variable values in Tcl namespace
+	int ss = x.Size();
+	char buffer[120];
+	for (int i = 0; i < ss; i++) {
+	  RandomVariable *theRV = theReliabilityDomain->getRandomVariablePtrFromIndex(i);
+	  int rvTag = theRV->getTag();
+	  sprintf(buffer, "set xrv(%d) %15.5f", rvTag, x(i) );
+	  if (Tcl_Eval(theTclInterp, buffer) == TCL_ERROR) {
+	    opserr << "GFunEvaluator::evaluateG -- could not set xrv(" << rvTag << ")" << endln;
+	    return -1;
+	  }
+	}
+
+
 	// Compute value of g-function
 	char *theTokenizedExpression = theLimitStateFunction->getTokenizedExpression();
 	g = 0.0;
-	Tcl_ExprDouble( theTclInterp, theTokenizedExpression, &g );
+	if (Tcl_ExprDouble( theTclInterp, theTokenizedExpression, &g) != TCL_OK) {
+	  opserr << "GFunEvaluator::evaluateG -- could not evaluate expression" << endln;
+	  opserr << theTokenizedExpression << endln;
 
+	  return -1;
+	}
 
 	return 0;
 }
