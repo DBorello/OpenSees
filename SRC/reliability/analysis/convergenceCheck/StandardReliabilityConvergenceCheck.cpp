@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2008-02-29 19:47:19 $
+// $Revision: 1.6 $
+// $Date: 2008-05-01 21:54:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/convergenceCheck/StandardReliabilityConvergenceCheck.cpp,v $
 
 
@@ -62,7 +62,8 @@ StandardReliabilityConvergenceCheck::StandardReliabilityConvergenceCheck(double 
  	// S Modified by K Fujimura 10/10/2004
  	/////////////////////////////////////
  	fixscale = false;
- 	if(scaleValue != 0.0) 	fixscale = true;
+ 	if (scaleValue != 0.0)
+		fixscale = true;
  	/////////////////////////////////////
  	//E  Modified by K Fujimura 10/10/2004
  	/////////////////////////////////////
@@ -83,7 +84,7 @@ StandardReliabilityConvergenceCheck::setScaleValue(double passedScaleValue)
  	/////////////////////////////////////
  	//S  Modified by K Fujimura 10/10/2004
  	/////////////////////////////////////
- 	if (!fixscale){
+ 	if ( fixscale == false ) {
 		scaleValue = passedScaleValue;
 	}
 
@@ -99,15 +100,9 @@ StandardReliabilityConvergenceCheck::setScaleValue(double passedScaleValue)
 int	
 StandardReliabilityConvergenceCheck::check(const Vector &u, double g, const Vector &gradG)
 {
-	if (scaleValue == 0.0) {
-		opserr << "StandardReliabilityConvergenceCheck::check() --" << endln
-			<< " scale value has not been set!" << endln;
-	}
-
 
 	// Alpha vector
 	Vector alpha = gradG *  ( (-1.0) / gradG.Norm() );
-
 
 	// The scaling factor (rather new development)
 	double temp0=u.Norm();
@@ -115,16 +110,20 @@ StandardReliabilityConvergenceCheck::check(const Vector &u, double g, const Vect
 		temp0 = 1.0; 
 	}
 
-
 	// Scaled u-vector
 	Vector u_scaled = (1.0/temp0) * u;
-
-
-	// Convergence criteria
 	Vector temp1 = u_scaled - (alpha^u_scaled)*alpha;
-	criterium1 = fabs(g / scaleValue);
+	
+	// Convergence criteria
+	if (scaleValue == 0.0) {
+		opserr << "StandardReliabilityConvergenceCheck::check() -- scale value is zero or has " << 
+			"not been set!" << endln;
+		criterium1 = fabs(g);
+	}
+	else
+		criterium1 = fabs(g / scaleValue);
+	
 	criterium2 = temp1.Norm();
-
 
 	// Inform user about convergence status 
 	char outputString[100];
@@ -134,7 +133,6 @@ StandardReliabilityConvergenceCheck::check(const Vector &u, double g, const Vect
 	}
 	logfile << outputString << endln;
 	logfile.flush();
-
 
 	// Return '1' if the analysis converged ('-1' otherwise)
 	if ( ( criterium1 < e1 ) && ( criterium2 < e2 ) ) {
@@ -182,26 +180,37 @@ StandardReliabilityConvergenceCheck::getCriteriaValue(int whichCriteria)
 void
 StandardReliabilityConvergenceCheck::Scalefix(bool fix)
 {
-	fixscale=fix;
+	fixscale = fix;
 }
+
 double 
 StandardReliabilityConvergenceCheck::getCheck1()
-{ return criterium1;}
+{
+	return criterium1;
+}
+
 double 
 StandardReliabilityConvergenceCheck::getCheck2()
-{ return criterium2;}
+{
+	return criterium2;
+}
+
 int	
 StandardReliabilityConvergenceCheck::checkG(double g)
 {
+	// Convergence criterium 1 only
 	if (scaleValue == 0.0) {
-		opserr << "StandardReliabilityConvergenceCheck::check() --" << endln
-			<< " scale value has not been set!" << endln;
+		opserr << "StandardReliabilityConvergenceCheck::checkG() -- scale value is zero or has " << 
+			"not been set!" << endln;
+		criterium1 = fabs(g);
 	}
-	criterium1 = fabs(g / scaleValue);
+	else
+		criterium1 = fabs(g / scaleValue);
+	
 	// Return '1' if the analysis converged ('-1' otherwise)
 	if ( criterium1 < e1 ) {
 		return 1;
-	}else {
+	} else {
 		return -1;
 	}
 }

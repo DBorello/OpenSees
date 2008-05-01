@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2008-02-29 19:47:19 $
+// $Revision: 1.6 $
+// $Date: 2008-05-01 21:55:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/convergenceCheck/OptimalityConditionReliabilityConvergenceCheck.cpp,v $
 
 
@@ -75,7 +75,7 @@ int
 OptimalityConditionReliabilityConvergenceCheck::setScaleValue(double passedScaleValue)
 {
 	/////S modified by K Fujimura /////
-	if(!fixscale){
+	if( fixscale == false ) {
 		scaleValue = passedScaleValue;
 	}
 	//if (scaleValue == 0.0) {
@@ -90,24 +90,36 @@ OptimalityConditionReliabilityConvergenceCheck::setScaleValue(double passedScale
 int	
 OptimalityConditionReliabilityConvergenceCheck::check(const Vector &u, double g, const Vector &gradG)
 {
-	if (scaleValue == 0.0) {
-		opserr << "OptimalityConditionReliabilityConvergenceCheck::check() --" << endln
-			<< " scale value has not been set!" << endln;
-	}
 
+	// Alpha vector
+	Vector alpha = gradG *  ( (-1.0) / gradG.Norm() );
+	
 	// Convergence criteria
-	criterium1 = fabs(g / scaleValue);
-	criterium2 = 1.0 - fabs(1.0/(gradG.Norm()*u.Norm()) * (gradG^u));
+	if (scaleValue == 0.0) {
+		opserr << "OptimalityConditionReliabilityConvergenceCheck::check() -- scale value is zero or " <<
+			"has not been set!" << endln;
+		criterium1 = fabs(g);
+	}
+	else
+		criterium1 = fabs(g / scaleValue);
+
+	// Mackie edits based on original form in Haukaas and ADK PEER report
+	// note that the angle theta can also be pi at the design point, hence abs below
+	if ( u.Norm() != 0.0 )
+		criterium2 = 1.0 - fabs( (alpha^u)/u.Norm() );
+	else
+		criterium2 = 1.0;
 	
  	/////S Modified by K Fujimura///////
- 	if(u.Norm()!=0.0){
- 		criterium2 = 1.0+1.0/(gradG.Norm()*u.Norm()) * (gradG^u);
- 	}else criterium2 = 1.0;
+ 	//if ( u.Norm() != 0.0 ) {
+ 		//criterium2 = 1.0+1.0/(gradG.Norm()*u.Norm()) * (gradG^u);
+ 	//} else {
+		//criterium2 = 1.0;
+	//}
 	/////E Modified by K Fujimura///////
 
 
 	// Inform user about convergence status 
-	static ofstream logfile( "SearchLog.out", ios::out );///// Modified by K Fujimura
 	char outputString[100];
 	sprintf(outputString,"check1=(%11.3e), check2=(%10.3e), dist=%16.14f",criterium1,criterium2,u.Norm());
 	if (printFlag != 0) {
@@ -160,24 +172,34 @@ OptimalityConditionReliabilityConvergenceCheck::getCriteriaValue(int whichCriter
 
 double 
 OptimalityConditionReliabilityConvergenceCheck::getCheck1()
-{ return criterium1;}
+{
+	return criterium1;
+}
+
 double 
 OptimalityConditionReliabilityConvergenceCheck::getCheck2()
-{ return criterium2;}
+{
+	return criterium2;
+}
+
 void
 OptimalityConditionReliabilityConvergenceCheck::Scalefix(bool fix)
 {
 	fixscale=fix;
 }
+
 int	
 OptimalityConditionReliabilityConvergenceCheck::checkG(double g)
 {
+	// Convergence criterium 1 only
 	if (scaleValue == 0.0) {
-		opserr << "OptimalityConditionReliabilityConvergenceCheck::check() --" << endln
-			<< " scale value has not been set!" << endln;
+		opserr << "OptimalityConditionConvergenceCheck::checkG() -- scale value is zero or has " << 
+			"not been set!" << endln;
+		criterium1 = fabs(g);
 	}
-	// Convergence criteria
-	criterium1 = fabs(g / scaleValue);
+	else
+		criterium1 = fabs(g / scaleValue);
+		
 	// Return '1' if the analysis converged ('-1' otherwise)
 	if (  criterium1 < e1 ) {
 		return 1;
