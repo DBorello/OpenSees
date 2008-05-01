@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2008-04-29 23:08:34 $
+// $Revision: 1.16 $
+// $Date: 2008-05-01 18:45:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/GFunEvaluator.cpp,v $
 
 
@@ -37,6 +37,7 @@
 #include <tcl.h>
 
 #include <fstream>
+#include <limits>
 #include <iomanip>
 #include <iostream>
 using std::ifstream;
@@ -151,20 +152,30 @@ GFunEvaluator::evaluateG(const Vector &x)
 				opserr << "Could not open file with quantities for limit-state function." << endln;
 			}
 			for (i=1; i<rowNum; i++) {
-				inputFile.getline(buf,120);
+				// requires limits, just skips the lines that are not needed
+				inputFile.ignore(INT_MAX,'\n');
 			}
 			for (i=1; i<=colNum; i++) {
 				inputFile >> temp;
 			}
-			fileValue = (double)atof(temp);
-			if (fileValue == 0.0) {
-				opserr << "ERROR: Could not find quantity in performance function file." << endln;
-				return -1;
+			
+			// check for error in stream
+			if ( inputFile.fail() ) {
+				opserr << "ERROR: Could not find quantity (" << rowNum << ", " << colNum 
+					   << ") in performance function file." << endln;
+				fileValue = 0.0;
+			} else {
+				fileValue = atof(temp);
+				//opserr << "Found quantity (" << rowNum << ", " << colNum << ") = " << fileValue << endln;
 			}
+			
 			inputFile.close();
 			sprintf(tclAssignment , "set file_%s_%d_%d  %15.5f",fileName,rowNum,colNum,fileValue);
 
-			Tcl_Eval( theTclInterp, tclAssignment);
+			if (Tcl_Eval(theTclInterp, tclAssignment) == TCL_ERROR) {
+				opserr << "ERROR GFunEvaluator -- Tcl_Eval returned error in limit state function" << endln;
+				return -1;
+			}
 		}
 		
 		tokenPtr = strtok( NULL, separators);
@@ -198,9 +209,6 @@ GFunEvaluator::evaluateG(const Vector &x)
 
 	return 0;
 }
-
-
-
 
 
 
