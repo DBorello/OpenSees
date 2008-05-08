@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2008-04-10 16:25:09 $
+// $Revision: 1.15 $
+// $Date: 2008-05-08 15:34:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.h,v $
 
 
@@ -36,6 +36,7 @@
 
 #include <RandomVariable.h>
 #include <CorrelationCoefficient.h>
+#include <Cutset.h>
 #include <LimitStateFunction.h>
 #include <RandomVariablePositioner.h>
 #include <ParameterPositioner.h>
@@ -60,6 +61,7 @@ class RandomVariableIter;
 class RandomVariablePositionerIter;
 class ParameterPositionerIter;
 class LimitStateFunctionIter;
+class CutsetIter;
 class CorrelationCoefficientIter;
 
 class ReliabilityDomain
@@ -73,6 +75,7 @@ public:
 	virtual bool addRandomVariable(RandomVariable *theRandomVariable);
 	virtual bool addCorrelationCoefficient(CorrelationCoefficient *theCorrelationCoefficient);
 	virtual bool addLimitStateFunction(LimitStateFunction *theLimitStateFunction);
+	virtual bool addCutset(Cutset *theCutset);
 	virtual bool addRandomVariablePositioner(RandomVariablePositioner *theRandomVariablePositioner);
 	virtual bool addParameterPositioner(ParameterPositioner *theParameterPositioner);
 	virtual bool addModulatingFunction(ModulatingFunction *theModulatingFunction);
@@ -95,6 +98,11 @@ public:
 	LimitStateFunction *getLimitStateFunctionPtrFromIndex(int index);
 	int getLimitStateFunctionIndex(int tag);
 
+	Cutset *getCutsetPtr(int tag);
+	// Following two methods to map index to tag and vice versa
+	Cutset *getCutsetPtrFromIndex(int index);
+	int getCutsetIndex(int tag);
+
 	CorrelationCoefficient *getCorrelationCoefficientPtr(int tag);
 	RandomVariablePositioner *getRandomVariablePositionerPtr(int tag);
 	ParameterPositioner *getParameterPositionerPtr(int tag);
@@ -112,6 +120,7 @@ public:
 	int getNumberOfRandomVariables(void);
 	int getNumberOfCorrelationCoefficients(void);
 	int getNumberOfLimitStateFunctions(void);
+	int getNumberOfCutsets(void);
 	int getNumberOfRandomVariablePositioners(void);
 	int getNumberOfParameterPositioners(void);
 	int getNumberOfModulatingFunctions(void);
@@ -133,9 +142,10 @@ public:
 	int removeRandomVariable(int tag);
 	int removeCorrelationCoefficient(int tag);
 	int removeLimitStateFunction(int tag);
+	int removeCutset(int tag);
 
 	int removeDesignVariable(int tag);
-       	int removeDesignVariablePositioner(int tag);
+	int removeDesignVariablePositioner(int tag);
 	int removeObjectiveFunction(int tag);
 	int removeConstraintFunction(int tag);
 
@@ -146,7 +156,8 @@ public:
 	ParameterPositionerIter &getParameterPositioners(void);
 	LimitStateFunctionIter &getLimitStateFunctions(void);
 	CorrelationCoefficientIter &getCorrelationCoefficients(void);
-
+	CutsetIter &getCutsets(void);
+	
 	virtual void Print(OPS_Stream &s, int flag =0);
 
 protected:
@@ -155,6 +166,7 @@ private:
 	TaggedObjectStorage *theRandomVariablesPtr;
 	TaggedObjectStorage *theCorrelationCoefficientsPtr;
 	TaggedObjectStorage *theLimitStateFunctionsPtr;
+	TaggedObjectStorage *theCutsetsPtr;
 	TaggedObjectStorage *theRandomVariablePositionersPtr;
 	TaggedObjectStorage *theParameterPositionersPtr;
 	TaggedObjectStorage *theModulatingFunctionsPtr;
@@ -171,8 +183,8 @@ private:
 	RandomVariablePositionerIter *theRVPosIter;
 	ParameterPositionerIter *theParamPosIter;
 	LimitStateFunctionIter *theLSFIter;
+	CutsetIter *theCutIter;
 	CorrelationCoefficientIter *theCCIter;
-
 
 	// Integer array: index[i] = tag of component i
 	// Should put these in another class eventually because
@@ -188,6 +200,12 @@ private:
 	enum {lsfSize_grow = 2};
 	int lsfSize;
 	int numLimitStateFunctions;
+	
+	int *cutsetIndex;
+	enum {cutsetSize_init = 10};
+	enum {cutsetSize_grow = 2};
+	int cutsetSize;
+	int numCutsets;
 };
 
 #endif

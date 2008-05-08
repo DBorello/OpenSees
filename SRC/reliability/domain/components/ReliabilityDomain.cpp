@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2008-04-10 16:25:09 $
+// $Revision: 1.16 $
+// $Date: 2008-05-08 15:34:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.cpp,v $
 
 
@@ -34,6 +34,7 @@
 #include <ReliabilityDomain.h>
 
 #include <CorrelationCoefficient.h>
+#include <Cutset.h>
 #include <RandomVariable.h>
 #include <LimitStateFunction.h>
 #include <RandomVariablePositioner.h>
@@ -48,14 +49,15 @@
 #include <ParameterPositionerIter.h>
 #include <LimitStateFunctionIter.h>
 #include <CorrelationCoefficientIter.h>
+#include <CutsetIter.h>
 
 ReliabilityDomain::ReliabilityDomain():
-  numRandomVariables(0), numLimitStateFunctions(0),
-  rvIndex(0), lsfIndex(0)
+  numRandomVariables(0), numLimitStateFunctions(0), numCutsets(0)
 {
 	theRandomVariablesPtr = new ArrayOfTaggedObjects (256);
 	theCorrelationCoefficientsPtr = new ArrayOfTaggedObjects (256);
 	theLimitStateFunctionsPtr = new ArrayOfTaggedObjects (256);
+	theCutsetsPtr = new ArrayOfTaggedObjects (256);
 	theRandomVariablePositionersPtr = new ArrayOfTaggedObjects (256);
 	theParameterPositionersPtr = new ArrayOfTaggedObjects (256);
 	theModulatingFunctionsPtr = new ArrayOfTaggedObjects (256);
@@ -73,6 +75,7 @@ ReliabilityDomain::ReliabilityDomain():
 	theRVPosIter = new RandomVariablePositionerIter(theRandomVariablePositionersPtr);
 	theParamPosIter = new ParameterPositionerIter(theParameterPositionersPtr);
 	theLSFIter = new LimitStateFunctionIter(theLimitStateFunctionsPtr);
+	theCutIter = new CutsetIter(theCutsetsPtr);
 	theCCIter = new CorrelationCoefficientIter(theCorrelationCoefficientsPtr);
 
 	rvIndex = new int[rvSize_init];
@@ -80,6 +83,9 @@ ReliabilityDomain::ReliabilityDomain():
 
 	lsfIndex = new int[lsfSize_init];
 	lsfSize = lsfSize_init;
+	
+	cutsetIndex = new int[cutsetSize_init];
+	cutsetSize = cutsetSize_init;
 }
 
 ReliabilityDomain::~ReliabilityDomain()
@@ -90,6 +96,8 @@ ReliabilityDomain::~ReliabilityDomain()
 		delete theCorrelationCoefficientsPtr;
 	if (!theLimitStateFunctionsPtr)
 		delete theLimitStateFunctionsPtr;
+	if (!theCutsetsPtr)
+		delete theCutsetsPtr;
 	if (!theRandomVariablePositionersPtr)
 		delete theRandomVariablePositionersPtr;
 	if (!theParameterPositionersPtr)
@@ -118,6 +126,8 @@ ReliabilityDomain::~ReliabilityDomain()
 	  delete theParamPosIter;
 	if (theLSFIter != 0)
 	  delete theLSFIter;
+    if (theCutIter != 0)
+	  delete theCutIter;
 	if (theCCIter != 0)
 	  delete theCCIter;
 
@@ -125,6 +135,8 @@ ReliabilityDomain::~ReliabilityDomain()
 	  delete [] rvIndex;
 	if (lsfIndex != 0)
 	  delete [] lsfIndex;
+	if (cutsetIndex != 0)
+	  delete [] cutsetIndex;
 }
 
 
@@ -144,7 +156,7 @@ ReliabilityDomain::addRandomVariable(RandomVariable *theRandomVariable)
 
       // Copy values from old array to new
       for (int i = 0; i < numRandomVariables; i++)
-	tmp_rvIndex[i] = rvIndex[i];
+	    tmp_rvIndex[i] = rvIndex[i];
 
       // Get rid of old array
       delete [] rvIndex;
@@ -184,7 +196,7 @@ ReliabilityDomain::addLimitStateFunction(LimitStateFunction *theLimitStateFuncti
 
       // Copy values from old array to new
       for (int i = 0; i < numLimitStateFunctions; i++)
-	tmp_lsfIndex[i] = lsfIndex[i];
+	    tmp_lsfIndex[i] = lsfIndex[i];
 
       // Get rid of old array
       delete [] lsfIndex;
@@ -200,6 +212,40 @@ ReliabilityDomain::addLimitStateFunction(LimitStateFunction *theLimitStateFuncti
 
   return result;
 }
+
+bool
+ReliabilityDomain::addCutset(Cutset *theCutset)
+{
+  bool result = theCutsetsPtr->addComponent(theCutset);
+
+  if (result == true) {
+
+    // Array is full
+    if (numCutsets == cutsetSize) {
+
+      // Increase size and allocate new array
+      cutsetSize += cutsetSize_grow;
+      int *tmp_cutsetIndex = new int[cutsetSize];
+
+      // Copy values from old array to new
+      for (int i = 0; i < numCutsets; i++)
+	    tmp_cutsetIndex[i] = cutsetIndex[i];
+
+      // Get rid of old array
+      delete [] cutsetIndex;
+
+      // Set pointer to new array
+      cutsetIndex = tmp_cutsetIndex;
+    }
+
+    // Add to index
+    cutsetIndex[numCutsets] = theCutset->getTag();
+    numCutsets++;
+  }
+
+  return result;
+}
+
 
 bool
 ReliabilityDomain::addRandomVariablePositioner(RandomVariablePositioner *theRandomVariablePositioner)
@@ -306,6 +352,14 @@ ReliabilityDomain::getCorrelationCoefficients(void)
   return *theCCIter;
 }
 
+CutsetIter &
+ReliabilityDomain::getCutsets(void)
+{
+  theCutIter->reset();
+  return *theCutIter;
+}
+
+
 
 RandomVariable *
 ReliabilityDomain::getRandomVariablePtr(int tag)
@@ -402,6 +456,50 @@ ReliabilityDomain::getLimitStateFunctionIndex(int tag)
 
   return index;
 }
+
+
+Cutset * 
+ReliabilityDomain::getCutsetPtr(int tag)
+{
+	TaggedObject *theComponent = theCutsetsPtr->getComponentPtr(tag);
+	if ( theComponent == 0 )
+		return 0;
+	Cutset *result = (Cutset *) theComponent;
+	return result;
+}
+
+Cutset *
+ReliabilityDomain::getCutsetPtrFromIndex(int index)
+{
+  if (index >= 0 && index < numCutsets)
+    return this->getCutsetPtr(cutsetIndex[index]);
+
+  else {
+    opserr << "ReliabilityDomain::getCutsetPtrFromIndex -- index " << index << " out of bounds 0 ... " << numCutsets-1 << endln;
+    return 0;
+  }
+
+}
+
+int
+ReliabilityDomain::getCutsetIndex(int tag)
+{
+  int index;
+
+  // Find index of cutset with specified tag
+  for (index = 0; index < numCutsets; index++) {
+    if (cutsetIndex[index] == tag)
+      break;
+  }
+
+  if (index == numCutsets) {
+    opserr << "ReliabilityDomain::getCutsetIndex -- cutset with tag " << tag << " not found" << endln;
+    return -1;
+  }
+
+  return index;
+}
+
 
 RandomVariablePositioner *
 ReliabilityDomain::getRandomVariablePositionerPtr(int tag)
@@ -553,6 +651,7 @@ ReliabilityDomain::removeCorrelationCoefficient(int tag)
   return 0;
 }
 
+
 int
 ReliabilityDomain::removeLimitStateFunction(int tag)
 {
@@ -564,7 +663,7 @@ ReliabilityDomain::removeLimitStateFunction(int tag)
     int index;
     for (index = 0; index < numLimitStateFunctions; index++) {
       if (lsfIndex[index] == tag)
-	break;
+	  break;
     }
     
     // Shift indices down by one
@@ -574,6 +673,33 @@ ReliabilityDomain::removeLimitStateFunction(int tag)
     // Now remove the component
     theLimitStateFunctionsPtr->removeComponent(tag);
     numLimitStateFunctions--;
+  }
+
+  return 0;
+}
+
+
+int
+ReliabilityDomain::removeCutset(int tag)
+{
+  Cutset *theCutset = (Cutset*) theCutsetsPtr->getComponentPtr(tag);
+  
+  if (theCutset != 0) {
+
+    // Find where cutset is located
+    int index;
+    for (index = 0; index < numCutsets; index++) {
+      if (cutsetIndex[index] == tag)
+	  break;
+    }
+    
+    // Shift indices down by one
+    for (int i = index; i < numCutsets-1; i++)
+      cutsetIndex[i] = cutsetIndex[i+1];
+    
+    // Now remove the component
+    theCutsetsPtr->removeComponent(tag);
+    numCutsets--;
   }
 
   return 0;
@@ -618,8 +744,6 @@ ReliabilityDomain::removeObjectiveFunction(int tag)
 
 
 
-
-
 int
 ReliabilityDomain::getNumberOfRandomVariables()
 {
@@ -635,6 +759,7 @@ int ReliabilityDomain::setNumberOfRandomVariables( int pNum){
 };
 
 // --Quan
+
 int
 ReliabilityDomain::getNumberOfCorrelationCoefficients()
 {
@@ -644,6 +769,11 @@ int
 ReliabilityDomain::getNumberOfLimitStateFunctions()
 {
 	return theLimitStateFunctionsPtr->getNumComponents();
+}
+int
+ReliabilityDomain::getNumberOfCutsets()
+{
+	return theCutsetsPtr->getNumComponents();
 }
 int
 ReliabilityDomain::getNumberOfRandomVariablePositioners()
