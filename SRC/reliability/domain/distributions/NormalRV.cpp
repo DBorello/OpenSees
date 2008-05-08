@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2008-04-10 16:23:32 $
+// $Revision: 1.15 $
+// $Date: 2008-05-08 15:32:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/NormalRV.cpp,v $
 
 
@@ -87,7 +87,7 @@ NormalRV::~NormalRV()
 void
 NormalRV::Print(OPS_Stream &s, int flag)
 {
-  s << "RV # " << this->getTag() << endln;
+  s << "Normal RV # " << this->getTag() << endln;
   s << "\tmean = " << mju << endln;
   s << "\tst.dev. = " << sigma << endln;
 }

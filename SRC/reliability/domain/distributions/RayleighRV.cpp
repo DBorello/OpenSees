@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-02-17 21:27:23 $
+// $Revision: 1.8 $
+// $Date: 2008-05-08 15:32:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/RayleighRV.cpp,v $
 
 
@@ -67,6 +67,8 @@ RayleighRV::~RayleighRV()
 void
 RayleighRV::Print(OPS_Stream &s, int flag)
 {
+  s << "Rayleigh RV #" << this->getTag() << endln;
+  s << "\tu = " << u << endln;
 }
 
 
@@ -115,7 +117,7 @@ RayleighRV::getType()
 double 
 RayleighRV::getMean()
 {
-	double pi = 3.14159265358979;
+	double pi = acos(-1.0);
 	return 0.5*sqrt(pi) * u;
 }
 
@@ -124,7 +126,7 @@ RayleighRV::getMean()
 double 
 RayleighRV::getStdv()
 {
-	double pi = 3.14159265358979;
+	double pi = acos(-1.0);
 	return 0.5 * sqrt(4.0-pi) * u;
 }
 

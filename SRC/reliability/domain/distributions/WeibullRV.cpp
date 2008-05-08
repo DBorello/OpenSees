@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2008-04-29 16:47:12 $
+// $Revision: 1.11 $
+// $Date: 2008-05-08 15:32:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/WeibullRV.cpp,v $
 
 
@@ -85,6 +85,9 @@ WeibullRV::~WeibullRV()
 void
 WeibullRV::Print(OPS_Stream &s, int flag)
 {
+  s << "Weibull RV #" << this->getTag() << endln;
+  s << "\tu = " << u << endln;
+  s << "\tk = " << k << endln;
 }
 
 

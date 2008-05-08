@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-10-25 16:32:09 $
+// $Revision: 1.9 $
+// $Date: 2008-05-08 15:32:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/UniformRV.cpp,v $
 
 
@@ -88,9 +88,9 @@ UniformRV::~UniformRV()
 void
 UniformRV::Print(OPS_Stream &s, int flag)
 {
-  s << "Uniform random variable" << endln;
-  s << "\ttag = " << this->getTag() << endln;
-  s << "\ta = " << a << ", b = " << b << endln;
+  s << "Uniform RV #" << this->getTag() << endln;
+  s << "\ta = " << a << endln;
+  s << "\tb = " << b << endln;
 }
 
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2008-04-14 19:37:26 $
+// $Revision: 1.11 $
+// $Date: 2008-05-08 15:32:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/GammaRV.cpp,v $
 
 
@@ -87,6 +87,9 @@ GammaRV::~GammaRV()
 void
 GammaRV::Print(OPS_Stream &s, int flag)
 {
+  s << "Gamma RV #" << this->getTag() << endln;
+  s << "\tk = " << k << endln;
+  s << "\tlambda = " << lambda << endln;
 }
 
 

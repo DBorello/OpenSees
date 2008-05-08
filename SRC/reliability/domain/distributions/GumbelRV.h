@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-02-17 21:27:23 $
+// $Revision: 1.7 $
+// $Date: 2008-05-08 15:32:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/GumbelRV.h,v $
 
 
@@ -75,7 +75,8 @@ protected:
 private:
 	double u;
 	double alpha;
-
+	void setParameters(double mean, double stdv);
+	
 };
 
 #endif

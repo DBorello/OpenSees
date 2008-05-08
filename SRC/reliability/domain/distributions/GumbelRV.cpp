@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-02-17 21:27:23 $
+// $Revision: 1.9 $
+// $Date: 2008-05-08 15:32:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/GumbelRV.cpp,v $
 
 
@@ -43,10 +43,7 @@ GumbelRV::GumbelRV(int passedTag,
 		 double passedStartValue)
 :RandomVariable(passedTag, RANDOM_VARIABLE_gumbel, passedStartValue)
 {
-	double pi = 3.14159265358979;
-	double gamma = 0.5772156649;
-	u = passedMean - (gamma*sqrt(6.0)*passedStdv)/pi;
-	alpha = pi / ( sqrt(6.0) * passedStdv );
+	setParameters(passedMean,passedStdv);
 }
 GumbelRV::GumbelRV(int passedTag, 
 		 double passedParameter1,
@@ -64,10 +61,7 @@ GumbelRV::GumbelRV(int passedTag,
 		 double passedStdv)
 :RandomVariable(passedTag, RANDOM_VARIABLE_gumbel, passedMean)
 {
-	double pi = 3.14159265358979;
-	double gamma = 0.5772156649;
-	u = passedMean - (gamma*sqrt(6.0)*passedStdv)/pi;
-	alpha = pi / ( sqrt(6.0) * passedStdv );
+	setParameters(passedMean,passedStdv);
 }
 GumbelRV::GumbelRV(int passedTag, 
 		 double passedParameter1,
@@ -86,10 +80,21 @@ GumbelRV::~GumbelRV()
 {
 }
 
+void
+GumbelRV::setParameters(double mean, double stdv)
+{
+	double pi = acos(-1.0);
+	double eulergamma = 0.57721566490153286061;
+	u = mean - (eulergamma*sqrt(6.0)*stdv)/pi;
+	alpha = pi / ( sqrt(6.0) * stdv );
+}
 
 void
 GumbelRV::Print(OPS_Stream &s, int flag)
 {
+  s << "Gumbel RV #" << this->getTag() << endln;
+  s << "\tu = " << u << endln;
+  s << "\talpha = " << alpha << endln;
 }
 
 
@@ -124,8 +129,8 @@ GumbelRV::getType()
 double 
 GumbelRV::getMean()
 {
-	double gamma = 0.5772156649;
-	return u+gamma/alpha;
+	double eulergamma = 0.57721566490153286061;
+	return u+eulergamma/alpha;
 }
 
 
@@ -133,7 +138,7 @@ GumbelRV::getMean()
 double 
 GumbelRV::getStdv()
 {
-	double pi = 3.14159265358979;
+	double pi = acos(-1.0);
 	return pi/(sqrt(6.0)*alpha);
 }
 
