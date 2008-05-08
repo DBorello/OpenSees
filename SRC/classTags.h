@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.103 $
-// $Date: 2008-04-29 17:43:36 $
+// $Revision: 1.104 $
+// $Date: 2008-05-08 15:34:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -650,6 +650,8 @@
 #define CORRELATION_COEFFICIENT           1
 
 #define LIMIT_STATE_FUNCTION			  1
+
+#define CUTSET			  1
 
 #define MODULATING_FUNCTION_gamma         1
 #define MODULATING_FUNCTION_constant      2
