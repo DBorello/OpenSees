@@ -22,72 +22,47 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
+// $Revision: 1.1 $
 // $Date: 2008-05-11 19:52:54 $
-// $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.h,v $
+// $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/misc/CorrelatedStandardNormal.h,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
+// Written by Kevin Mackie (kmackie@mail.ucf.edu)
 //
 
-#ifndef SystemAnalysis_h
-#define SystemAnalysis_h
+#ifndef CorrelatedStandardNormal_h
+#define CorrelatedStandardNormal_h
 
-#include <ReliabilityAnalysis.h>
-#include <ReliabilityDomain.h>
-#include <RandomNumberGenerator.h>
+#include <NormalRV.h>
 
-#include <Matrix.h>
-#include <Vector.h>
-#include <ID.h>
-
-class SystemAnalysis : public ReliabilityAnalysis
+class CorrelatedStandardNormal
 {
 
 public:
-	SystemAnalysis(ReliabilityDomain *passedReliabilityDomain, TCL_Char *passedBeta, TCL_Char *passedRho);
-	virtual ~SystemAnalysis();
-	virtual int analyze(void) =0;
+	CorrelatedStandardNormal(double);
+	~CorrelatedStandardNormal();
 	
-	int		computeBounds(int);
-	double	getLowerBound();
-	double	getUpperBound();
-	int		getNumberOfLimitStateFunctions();
-	int		getNumPermutations(int, int);
-	
-	int		setCutsets();
-	int		setPermutations(int, int);
-	int		setPermutedComponents(int, int);
-	
-	const Vector& getBeta();
-	const Matrix& getRho();
-	const Vector& getBetaPermutation();
-	const Matrix& getRhoPermutation();
-	
+	int setCorrelation(double);
+	double bivariatePDF(double b1, double b2, double r);
+	double getPDF(double b1, double b2);
+	double getCDF(double b1, double b2);
+
 protected:
-	ReliabilityDomain *theReliabilityDomain;
 
 private:
-   	int			initialize(void);
-	long int	factorial(int);
-	int			arrange(int, RandomNumberGenerator*, ID&);
-	int			combinations(Vector&, int, Matrix&);
+	double exponentialForm(double, double, double);
+	double SimpsonOwen(double, double, double, double);
+	double SimpsonSheppard(double, double, double);
+	double getCDFowen(double b1, double b2, int popt);
+	double getCDFsheppard(double b1, double b2, int popt);
+	double getCDFadaptive(double b1, double b2, int popt);
+	double getAdaptiveIntegralValue(double tol, double lowerBound, double upperBound, 
+		double fa, double fb, double fc, double beta1, double beta2);
+	void testCDF();
 	
-	char rhoFile[256];
-	char betaFile[256];
-	int numLsf;
-	double minLowerBound;
-	double maxUpperBound;
-	
-	Vector *allBetas;
-	Matrix *rhos;
-	Vector *allPf1s;
-	Matrix *Pmn;
+	double rho; 
 
-	Matrix *sets;
-	Vector *permutedBetas;
-	Matrix *permutedRhos;
 };
 
 #endif

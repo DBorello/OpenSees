@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2008-03-13 22:27:49 $
+// $Revision: 1.9 $
+// $Date: 2008-05-11 19:52:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/misc/MatrixOperations.h,v $
 
 
@@ -90,11 +90,9 @@ private:
 	int beginMod;
     int numModes;
 
-  double *eigenvalue;
-  double *eigenvector;
-  Vector *eigenV;
-  double *work;
-
+	double *eigenvalue;
+	double *eigenvector;
+	Vector *eigenV;
 
 };
 

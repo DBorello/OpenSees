@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2008-04-10 18:10:29 $
+// $Revision: 1.16 $
+// $Date: 2008-05-11 19:52:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.cpp,v $
 
 
@@ -36,8 +36,11 @@
 #include <ReliabilityAnalysis.h>
 #include <LimitStateFunction.h>
 #include <LimitStateFunctionIter.h>
+#include <Cutset.h>
+#include <CutsetIter.h>
 #include <RandomNumberGenerator.h>
 #include <CStdLibRandGenerator.h>
+#include <CorrelatedStandardNormal.h>
 #include <NormalRV.h>
 
 #include <math.h>
@@ -66,6 +69,11 @@ SystemAnalysis::SystemAnalysis(ReliabilityDomain *passedReliabilityDomain, TCL_C
 		opserr << "SystemAnalysis::SystemAnalysis() ERROR - SystemAnalysis failed to initialize" << endln;
 		exit(-1);
 	}
+	
+	sets = new Matrix(2,2);
+	permutedBetas = new Vector(2);
+	permutedRhos = new Matrix(2,2);
+	
 }
 
 SystemAnalysis::~SystemAnalysis()
@@ -78,6 +86,13 @@ SystemAnalysis::~SystemAnalysis()
 		delete allPf1s;
 	if (Pmn != 0 )
 		delete Pmn;
+		
+	if (sets != 0 )
+		delete sets;
+	if (permutedBetas != 0)
+		delete permutedBetas;
+	if (permutedRhos != 0)
+		delete permutedRhos;
 }
 
 
@@ -192,9 +207,12 @@ SystemAnalysis::initialize()
 	// Compute the bi-variate parallel probability for all the pairs
 	// Note this is upper-diagonal only
 	Pmn = new Matrix(numLsf,numLsf);
+	CorrelatedStandardNormal phi2(0.0);
 	for (m=0; m<numLsf; m++ ) {
-		for (n=m+1; n<numLsf; n++ )
-			(*Pmn)(m,n) = twoComponent(-(*allBetas)(m),-(*allBetas)(n),(*rhos)(m,n));
+		for (n=m+1; n<numLsf; n++) {
+			phi2.setCorrelation((*rhos)(m,n));
+			(*Pmn)(m,n) = phi2.getCDF(-(*allBetas)(m),-(*allBetas)(n));
+		}
 	}
 	
 	return 0;
@@ -290,6 +308,53 @@ SystemAnalysis::computeBounds(int aType)
 		
 }
 
+
+int
+SystemAnalysis::setCutsets(void)
+{
+	Cutset *theCutset;
+	CutsetIter &cutIter = theReliabilityDomain->getCutsets();
+	while ((theCutset = cutIter()) != 0) {
+		const Vector &allComps = theCutset->getComponents();
+		int nc = theCutset->getNumberOfComponents();
+		Vector cutBeta(nc);
+		Matrix cutRho(nc,nc);
+		
+		// remember that the cutsets can refer to LSF numbers only because the use of cutset in domain 
+		// checks for corresponding LSF when created. However, allow computation of upper bound using 
+		// both methods here.  
+		for (int i = 0; i < nc; i++) {
+			int actual = 0;
+			
+			if (strlen(betaFile) > 1 && strlen(rhoFile) > 1) {
+				// assume LSF are numbered 1:numLsf
+				actual = allComps(i);
+				cutBeta(i) = (*allBetas)(actual-1);
+				for (int j = 0; j < nc; j++)
+					cutRho(j,i) = (*rhos)(allComps(j),actual-1);
+			}
+			else {
+				// get actual LSF index from tag
+				actual = theReliabilityDomain->getLimitStateFunctionIndex(allComps(i));
+				cutBeta(i) = (*allBetas)(actual);
+				for (int j = 0; j < nc; j++) {
+					int actualj = theReliabilityDomain->getLimitStateFunctionIndex(allComps(j));
+					cutRho(j,i) = (*rhos)(actualj,actual);
+				}
+			}
+		}
+		
+		theCutset->setBetaCutset(cutBeta);
+		theCutset->setRhoCutset(cutRho);
+		
+		//opserr << cutBeta;
+		//opserr << cutRho;
+	}
+	
+	return 0;
+}
+
+
 double 
 SystemAnalysis::getLowerBound(void)
 {
@@ -304,8 +369,10 @@ SystemAnalysis::getUpperBound(void)
 }
 
 int 
-SystemAnalysis::getNumberLimitStateFunctions(void)
+SystemAnalysis::getNumberOfLimitStateFunctions(void)
 {
+	// note that since you can read beta and rho from a file, this should not simply
+	// query the reliability domain
 	return numLsf;
 }
 
@@ -321,22 +388,14 @@ SystemAnalysis::getRho(void)
 	return *rhos;
 }
 
-double
-SystemAnalysis::functionToIntegrate(double rho, double beta1, double beta2)
-{
-	static const double pi = acos(-1.0);
-	if ( 1 - fabs(rho) < DBL_EPSILON ) {
-		opserr << "SystemAnalysis::functionToIntegrate warning rho approx. 1 or -1" << endln;
-		return 0.0;
-	}
-	else
-		return 1.0/(2.0*pi*sqrt(1.0-rho*rho)) *
-			exp(-(beta1*beta1+beta2*beta2-2.0*rho*beta1*beta2)/(2.0*(1.0-rho*rho)));
-}
-
 long int
 SystemAnalysis::factorial(int num)
 {
+	if (num == 0)
+		return 1;
+	else if (num < 0)
+		return -1;
+	
 	int i = num-1;
 	long int result = num;
 
@@ -378,49 +437,262 @@ SystemAnalysis::arrange(int num, RandomNumberGenerator *randNum, ID &permutation
 	return 0;
 }
 
-double SystemAnalysis::twoComponent(double beta1, double beta2, double rho2)
+int
+SystemAnalysis::getNumPermutations(int k, int n)
 {
-	static NormalRV uRV(1, 0.0, 1.0, 0.0);
-	
-	double thresh = 0.99;
-	double integral = 0;
-	
-	if ( rho2 > thresh ) {
-		// create a refined domain near +1
-		integral = Simpson(0,thresh,beta1,beta2,rho2);
-		integral += Simpson(thresh,rho2,beta1,beta2,rho2);
-	} else if ( rho2 < -thresh ) {
-		// create a refined domain near -1
-		integral = Simpson(0,-thresh,beta1,beta2,rho2);
-		integral += Simpson(-thresh,rho2,beta1,beta2,rho2);
-	} else {
-		integral = Simpson(0,rho2,beta1,beta2,rho2);
+	if (k > n) {
+		opserr << "k must be less than n for n choose k permutations" << endln;
+		return -1;
 	}
-	
-	return uRV.getCDFvalue(beta1)*uRV.getCDFvalue(beta2) + integral;
+	// binomial
+	return factorial(n)/factorial(k)/factorial(n-k);
 }
 
-double
-SystemAnalysis::Simpson(double a, double b, double beta1, double beta2, double rho)
+int 
+SystemAnalysis::setPermutations(int k, int n)
 {
-	// Composite Simpson's numerical integration
-	// n must be even, endpoints a and b
-	int n = 1600;
-	double h, fa, fb;
-	double integral = 0;
+	// early exit if user specified rho and beta files (hence no cutsets)
+	if (strlen(betaFile) > 1 && strlen(rhoFile) > 1)
+		return -1;
+		
+	// create arrays of vectors and matrices that contain beta and rho for each permutation
+	int perms = getNumPermutations(k,n);
 	
-	h = (b-a)/n;
-	fa = functionToIntegrate(a,beta1,beta2);
-	fb = functionToIntegrate(b,beta1,beta2);
+	// vector 1:n of cut set indices
+	Vector v(n);
+	for (int i = 1; i <= n; i++)
+		v(i-1) = i;
 	
-	double sum_fx2j_1 = 0.0;
-	double sum_fx2j_2 = 0.0;
-	for (int j=2; j <= n/2;  j++)
-		sum_fx2j_1 = sum_fx2j_1 + functionToIntegrate(a+h*(2*j-2),beta1,beta2);
-	for (int j=1; j <= n/2;  j++)
-		sum_fx2j_2 = sum_fx2j_2 + functionToIntegrate(a+h*(2*j-1),beta1,beta2);
+	// put realizations of k possible permutations of n into matrix
+	sets->resize(perms,k);
+	sets->Zero();
+	Vector tmp(k);
+	int is, js;
+	
+	// generate actual combinations
+	if (n == k) {
+		for (js = 0; js < k; js++)
+			(*sets)(0,js) = v(js);
+	}
+	else if (n == k + 1) {
+		for (is = 0; is < perms; is++) {
+			tmp.Zero();
+			int tmp_indx = 0;
+			for (int j = 1; j <= n; j++) {
+				if (j != n-is) {
+					tmp(tmp_indx) = v(j-1);
+					tmp_indx++;
+				}
+			}
+			for (js = 0; js < k; js++)
+				(*sets)(is,js) = tmp(js);
+		}
+	}
+	else if (k == 1) {
+		for (is = 0; is < perms; is++) {
+			tmp(0) = v(is);
+			(*sets)(is,0) = tmp(0);
+		}
+	}
+	else if (n < 17 && (k > 3 || n-k < 4)) {
+		long int rows = pow(2,n);
+		long int ncycles = rows;
+		long int nreps, im, jm, cnter;
+		int count;
 
-	integral = h/3.0*(fa + 2.0*sum_fx2j_1 + 4.0*sum_fx2j_2 + fb);
+		Matrix x(rows,n);
+		for (count = 1; count <= n; count++) {
+			ncycles = ncycles/2;
+			nreps = rows/(2*ncycles);
+			Matrix settings(2*nreps,ncycles);
+			for (im = 0; im < nreps; im++) {
+				for (jm = 0; jm < ncycles; jm++)
+					settings(im,jm) = 1;
+			}
+			
+			// put settings matrix column by column into x matrix
+			cnter = 0;
+			for (jm = 0; jm < ncycles; jm++) {
+				for (im = 0; im < 2*nreps; im++) {
+					x(cnter,n-count) = settings(im,jm);
+					cnter++;
+				}
+			}
+		}
+		
+		Vector unitvec(n);
+		Vector rowsum(rows);
+		rowsum.addMatrixVector(0,x,unitvec+1,1);
+		int nrows = 0;
+		for (im = 0; im < rows; im++) {
+			if (rowsum(im) == k)
+				nrows++;
+		}
+		
+		// note that nrows better equal perms
+		Matrix idx(nrows,n);
+		cnter = 0;
+		for (im = 0; im < rows; im++) {
+			if (rowsum(im) == k) {
+				for (jm = 0; jm < n; jm++)
+					idx(cnter,jm) = x(im,jm);
+				cnter++;
+			}
+		}
+		
+		// generate actual combinations in tmp vector and store in sets
+		for (is = 0; is < perms; is++) {
+			tmp.Zero();
+			int tmp_indx = 0;
+			for (jm = 0; jm < n; jm++) {
+				if ( idx(is,jm) == 1 ) {
+					tmp(tmp_indx) = v(jm);
+					tmp_indx++;
+				}
+			}
+			for (js = 0; js < k; js++)
+				(*sets)(is,js) = tmp(js);
+		}
+	}
+	else {
+		int ks;
+		is = 0;
+		
+		for (int idx = 1; idx <= n-k+1; idx++) {
+			Vector vpass(n-idx);
+			Matrix Q( getNumPermutations(k-1, n-idx), k-1 );
+			for (js = 0; js < n-idx; js++)
+				vpass(js) = v(idx+js);
+				
+			combinations( vpass, k-1, Q );
+			for (ks = 0; ks < getNumPermutations(k-1, n-idx); ks++) {
+				(*sets)(is,0) = v(idx-1);
+				for (js = 0; js < k-1; js++)
+					(*sets)(is,js+1) = Q(ks,js);
+					
+				is++;
+			}
+		}
+	}
+	//opserr << *sets;
+	
+	return 0;
+}
 
-	return integral;
+int 
+SystemAnalysis::combinations(Vector &v, int m, Matrix &Q)
+{
+	int n = v.Size();
+	int is = 0, js, ks;
+	Q.Zero();
+	
+	if (n == m) {
+		for (js = 0; js < n; js++)
+			Q(0,js) = v(js);
+			
+	} else if (m == 1) {
+		for (is = 0; is < n; is++)
+			Q(is,0) = v(is);
+			
+	} else {
+		if (m < n && m > 1) {
+			for (int k = 1; k <= n-m+1; k++) {
+				Vector newv(n-k);
+				Matrix newQ( getNumPermutations(m-1, n-k), m-1 );
+				for (int nv = 0; nv < n-k; nv++)
+					newv(nv) = v(nv + k);
+				
+				combinations( newv,m-1,newQ );
+				for (ks = 0; ks < getNumPermutations(m-1, n-k); ks++) {
+					Q(is,0) = v(k-1);
+					for (js = 0; js < m-1; js++)
+						Q(is,js+1) = newQ(ks,js);
+						
+					is++;
+				}
+			}
+		}
+	}
+	
+	return 0;
+}
+
+int 
+SystemAnalysis::setPermutedComponents(int k, int i)
+{
+	Cutset *theCutset;
+	Vector single_set(k);
+	int js;
+	for (js = 0; js < k; js++)
+		single_set(js) = (*sets)(i,js);
+
+	// need to determine size of new beta and rho, taking unique components ONLY
+	int cutLen = 0;
+	for (js = 0; js < k; js++) {
+		theCutset = theReliabilityDomain->getCutsetPtrFromIndex( single_set(js)-1 );
+		if (theCutset == 0) {
+			opserr << "error getting theCutset" << endln;
+			return -1;
+		}
+		else
+			cutLen += theCutset->getNumberOfComponents();
+	}
+	
+	// fill out component numbers to determine which ones are unique
+	Vector tmp_comp(cutLen);
+	int curi = 0;
+	for (js = 0; js < k; js++) {
+		theCutset = theReliabilityDomain->getCutsetPtrFromIndex( single_set(js)-1 );
+		const Vector &allComps = theCutset->getComponents();
+		for (int jk = 0; jk < theCutset->getNumberOfComponents(); jk++) {
+			int isunique = 1;
+			for (int kl = curi; kl >= 0; kl--) {
+				if ( tmp_comp(kl) == allComps(jk) )
+					isunique = 0;
+			}
+			
+			if ( isunique == 1 ) {
+				tmp_comp(curi) = allComps(jk);
+				curi++;
+			}
+		}
+	}
+	cutLen = curi;
+	
+	Vector permutedComps(cutLen);
+	for (js = 0; js < cutLen; js++)
+		permutedComps(js) = tmp_comp(js);
+		
+	//opserr << permutedComps;
+	
+	permutedBetas->resize(cutLen);
+	permutedBetas->Zero();
+	permutedRhos->resize(cutLen,cutLen);
+	permutedRhos->Zero();
+	
+	// now flesh out vectors with data from each component in cutset
+	for (int j = 0; j < cutLen; j++) {
+		int actual = theReliabilityDomain->getLimitStateFunctionIndex( permutedComps(j) );
+		(*permutedBetas)(j) = (*allBetas)(actual);
+		for (int jk = 0; jk < cutLen; jk++) {
+			int actualj = theReliabilityDomain->getLimitStateFunctionIndex( permutedComps(jk) );
+			(*permutedRhos)(jk,j) = (*rhos)(actualj,actual);
+		}
+	}
+		
+	return 0;
+}
+
+const Vector &
+SystemAnalysis::getBetaPermutation()
+{
+	//opserr << *permutedBetas;
+	return *permutedBetas;
+}
+
+const Matrix &
+SystemAnalysis::getRhoPermutation()
+{
+	//opserr << *permutedRhos;
+	return *permutedRhos;
 }

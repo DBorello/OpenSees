@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2008-03-13 22:27:49 $
+// $Revision: 1.12 $
+// $Date: 2008-05-11 19:52:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/misc/MatrixOperations.cpp,v $
 
 
@@ -55,12 +55,11 @@ MatrixOperations::MatrixOperations(Matrix passedMatrix)
 	theMatrixNorm = 0;
 	theTrace = 0; 
 
- // Set number of modes
-   numModes = passedMatrix.noRows();
-   eigenV = 0;
-   eigenvalue=0;
-   eigenvector=0;
-   work=0;
+	// Set number of modes
+	numModes = passedMatrix.noRows();
+	eigenV = 0;
+	eigenvalue = 0;
+	eigenvector = 0;
 }
 
 

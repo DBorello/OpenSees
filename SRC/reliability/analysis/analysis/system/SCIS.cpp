@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-11-08 20:12:38 $
+// $Revision: 1.6 $
+// $Date: 2008-05-11 19:52:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/system/SCIS.cpp,v $
 
 
@@ -33,6 +33,8 @@
 
 #include <SCIS.h>
 #include <SystemAnalysis.h>
+#include <Cutset.h>
+#include <CutsetIter.h>
 #include <ReliabilityDomain.h>
 #include <NormalRV.h>
 #include <RandomNumberGenerator.h>
@@ -100,23 +102,72 @@ SCIS::analyze(void)
 	// Allocate beta and rho
 	const Vector &allBetas = getBeta();
 	const Matrix &rhos = getRho();
+	int numCuts = 1;
+	double uBound = 1;
+	double lBound = 0;
+	int result;
 	
-	// compute and get bounds
-	int result = computeBounds(analysisType);
-	if (result != 0)
-		opserr << "SCIS::analyze WARNING - failed to compute system bounds" << endln;
-	
-	double uBound = getUpperBound();
-	double lBound = getLowerBound();
+	if (analysisType == 0 || analysisType == 1) {
+		// compute and get bounds
+		result = computeBounds(analysisType);
+		if (result != 0)
+			opserr << "SCIS::analyze WARNING - failed to compute system bounds" << endln;
+		
+		uBound = getUpperBound();
+		lBound = getLowerBound();
+	} else if (analysisType == 2) {
+		numCuts = theReliabilityDomain->getNumberOfCutsets();
+		if (numCuts < 1)
+			opserr << "SCIS::analyze WARNING - not enough cutsets available in domain" << endln;
+		
+		result = setCutsets();
+		if (result != 0)
+			opserr << "SCIS::analyze WARNING - failed to set cutset components" << endln;
+	}
 	
 	// perform analysis
 	double pf = 0;
 	if (analysisType == 0) {
 		// parallel system
 		pf = SCISfunc(allBetas,rhos,-1.0);
-	} else {
+	} else if (analysisType == 1) {
 		// series system
 		pf = 1.0 - SCISfunc(allBetas,rhos,1.0);
+	} else if (analysisType == 2) {
+		// general system (k cutset unions of parallel subsystems)
+		int ck;
+		
+		// first-order terms in the inclusion-exclusion rule (always present)
+		// upper bound to probability when cutsets are not disjoint
+		Cutset *theCutset;
+		CutsetIter &cutIter = theReliabilityDomain->getCutsets();
+		while ((theCutset = cutIter()) != 0) {
+			pf += SCISfunc(theCutset->getBetaCutset(),theCutset->getRhoCutset(),-1.0);
+		}
+		uBound = pf;
+		
+		// if necessary, carry out n-choose-k algorithm to find all remaining pairs of events
+		// note, this is extremely dependent on ability to check n factorial pairs even with a 
+		// greatly reduced decision tree
+		for (ck = 2; ck <= numCuts; ck++) {
+			int numPerms = getNumPermutations(ck,numCuts);
+			result = setPermutations(ck,numCuts);
+			if (result != 0) {
+				opserr << "SCIS::analyze WARNING - failed to set permutations of cut sets" << endln;
+				return -1;
+			}
+			
+			double scaleF = pow(-1.0,ck-1);
+			for (int ip = 1; ip <= numPerms; ip++) {
+				result = setPermutedComponents(ck,ip-1);
+				if (result != 0) {
+					opserr << "SCIS::analyze WARNING - failed to set permuted beta and rho" << endln;
+					return -1;
+				}
+				
+				pf += scaleF * SCISfunc(getBetaPermutation(),getRhoPermutation(),-1.0);
+			}
+		}
 	}
 	
 	// Print results  (should do this over all defined systems)
@@ -136,7 +187,7 @@ SCIS::analyze(void)
 				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<lBound<< "  #" << endln;
 		outputFile << "#  Upper parallel probability bound: .................. " 
 				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<uBound<< "  #" << endln;
-	} else {
+	} else if (analysisType == 1) {
 		// series system
 		outputFile << "#  Series probability failure estimate (SCIS): ........ "
 				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<pf<< "  #" << endln;
@@ -144,7 +195,14 @@ SCIS::analyze(void)
 				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<lBound<< "  #" << endln;
 		outputFile << "#  Upper series probability bound: .................... " 
 				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<uBound<< "  #" << endln;
+	} else if (analysisType == 2) {
+		// general system
+		outputFile << "#  General probability failure estimate (SCIS): ....... "
+				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<pf<< "  #" << endln;
+		outputFile << "#  General upper probability bound: ................... " 
+				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<uBound<< "  #" << endln;
 	}
+	
 	outputFile << "#                                                                     #" << endln;
 	outputFile << "#######################################################################" << endln << endln << endln;
 
@@ -214,13 +272,13 @@ SCIS::SCISfunc(const Vector &allbeta, const Matrix &rhoin, double modifier)
 	double em, sm, dd, za, zb, zz;
 
 	for (ii = 1; ii <= Nmax; ii++) {
-		y(ii-1) = 1;
+		y(ii-1) = 1.0;
 
 		// calculate probability of k-th variable
 		for (k = 1; k <= n; k++) {
 			// mean and std for k-th variable
-			dd = 1/sqrt(d(k-1,k-1));
-			em = 0;
+			dd = 1.0 / sqrt(d(k-1,k-1));
+			em = 0.0;
 
 			// mean of conditional distribution
 			if (k != 1) {
@@ -233,14 +291,14 @@ SCIS::SCISfunc(const Vector &allbeta, const Matrix &rhoin, double modifier)
 			// conditional cumulative probability za, our interval goes from -inf to beta so za = 0
 			//za = (-DBL_MAX-em)/dd;
 			//za = uRV.getCDFvalue(za);
-			za = 0;
+			za = 0.0;
 			
 			// conditional cumulative probability zb
 			zb = (beta(k-1)-em)/dd;
 			if ( isfinite(zb) )
 				zb = uRV.getCDFvalue(zb);
 			else
-				zb = 0;
+				zb = 0.0;
 			y(ii-1) = y(ii-1)*(zb-za);
 
 			// sample a random value x_k

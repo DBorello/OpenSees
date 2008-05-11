@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.42 $
-// $Date: 2008-04-29 23:12:10 $
+// $Revision: 1.43 $
+// $Date: 2008-05-11 19:52:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -46,13 +46,13 @@ using std::setiosflags;
 #include <Vector.h>
 #include <ID.h>
 #include <ArrayOfTaggedObjects.h>
-
 #include <Domain.h>
 
 #include <ReliabilityDomain.h>
 #include <RandomVariable.h>
 #include <RandomVariableIter.h>
 #include <CorrelationCoefficient.h>
+#include <Cutset.h>
 #include <LimitStateFunction.h>
 #include <LimitStateFunctionIter.h>
 #include <RandomVariablePositioner.h>
@@ -60,6 +60,7 @@ using std::setiosflags;
 #include <ParameterIter.h>
 #include <ParameterPositioner.h>
 #include <ParameterPositionerIter.h>
+
 #include <NormalRV.h>
 #include <LognormalRV.h>
 #include <GammaRV.h>
@@ -79,6 +80,7 @@ using std::setiosflags;
 #include <UserDefinedRV.h>
 #include <LaplaceRV.h>
 #include <ParetoRV.h>
+
 #include <GFunEvaluator.h>
 #include <GradGEvaluator.h>
 #include <StepSizeRule.h>
@@ -264,6 +266,7 @@ static RandomVibrationAnalysis *theRandomVibrationAnalysis = 0;
 //
 int TclReliabilityModelBuilder_addRandomVariable(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_addCorrelate(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_addCutset(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_correlateGroup(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_correlationStructure(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_addLimitState(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
@@ -349,6 +352,7 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
   Tcl_CreateCommand(interp, "correlate", TclReliabilityModelBuilder_addCorrelate,(ClientData)NULL, NULL); 
   Tcl_CreateCommand(interp, "correlateGroup", TclReliabilityModelBuilder_correlateGroup,(ClientData)NULL, NULL); 
   Tcl_CreateCommand(interp, "correlationStructure", TclReliabilityModelBuilder_correlationStructure,(ClientData)NULL, NULL); 
+  Tcl_CreateCommand(interp, "cutset", TclReliabilityModelBuilder_addCutset,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "performanceFunction", TclReliabilityModelBuilder_addLimitState,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "randomVariablePositioner",TclReliabilityModelBuilder_addRandomVariablePositioner,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "parameterPositioner",TclReliabilityModelBuilder_addParameterPositioner,(ClientData)NULL, NULL);
@@ -1734,6 +1738,56 @@ TclReliabilityModelBuilder_addCorrelate(ClientData clientData, Tcl_Interp *inter
   return TCL_OK;
 }
 
+
+//////////////////////////////////////////////////////////////////
+int 
+TclReliabilityModelBuilder_addCutset(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  Cutset *theCutset = 0;
+  int tag, set;
+
+  // GET INPUT PARAMETER (integer)
+  if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+	opserr << "ERROR: invalid input: tag \n";
+	return TCL_ERROR;
+  }
+  
+  Vector components(argc-2);
+  int argi = 2;
+  while (argi < argc) {
+     if (Tcl_GetInt(interp, argv[argi], &set) != TCL_OK) {
+	    opserr << "ERROR: invalid input: cutset components \n";
+	    return TCL_ERROR;
+     }
+	 
+	 // check LSF exists in domain
+	 if (theReliabilityDomain->getLimitStateFunctionIndex(set) < 0) {
+	    opserr << "ERROR: LSF does not exist \n";
+	    return TCL_ERROR;
+     }
+	 
+	 components(argi-2) = set;
+	 argi++;
+  }
+  
+  // CREATE THE OBJECT
+  theCutset = new Cutset(tag, components);
+  if (theCutset == 0) {
+	opserr << "ERROR: ran out of memory creating cutset \n";
+	opserr << "cutset: " << tag << endln;
+	return TCL_ERROR;
+  }
+
+  // ADD THE OBJECT TO THE DOMAIN
+  if (theReliabilityDomain->addCutset(theCutset) == false) {
+	opserr << "ERROR: failed to add cutset to the domain\n";
+	opserr << "cutset: " << tag << endln;
+	delete theCutset; // otherwise memory leak
+	return TCL_ERROR;
+  }
+
+  return TCL_OK;
+}
 
 
 
@@ -5121,6 +5175,8 @@ TclReliabilityModelBuilder_runSystemAnalysis(ClientData clientData, Tcl_Interp *
 		aType = 0;
 	else if (strcmp(argv[3],"allInSeries") == 0)
 		aType = 1;
+	else if (strcmp(argv[3],"cutsets") == 0)
+		aType = 2;
 	else {
 		opserr << "ERROR: Invalid system reliability analysis type input:" << argv[3] << endln;
 		return TCL_ERROR;

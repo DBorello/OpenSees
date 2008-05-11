@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2008-04-10 16:26:27 $
+// $Revision: 1.11 $
+// $Date: 2008-05-11 19:52:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/FiniteDifferenceGradGEvaluator.cpp,v $
 
 
@@ -69,23 +69,22 @@ FiniteDifferenceGradGEvaluator::FiniteDifferenceGradGEvaluator(
 	reComputeG = pReComputeG;
 
 	int nrv = passedReliabilityDomain->getNumberOfRandomVariables();
+	int lsf = passedReliabilityDomain->getNumberOfLimitStateFunctions();
 	grad_g = new Vector(nrv);
-	grad_g_matrix = 0;
+	grad_g_matrix = new Matrix(nrv,lsf);
 
 	DgDdispl = 0;
-	DgDpar = 0;
+	
 }
 
 FiniteDifferenceGradGEvaluator::~FiniteDifferenceGradGEvaluator()
 {
 	delete grad_g;
-
+	delete grad_g_matrix;
+	
 	if (DgDdispl != 0)
 		delete DgDdispl;
-	if (DgDpar != 0)
-		delete DgDpar;
-	if (grad_g_matrix != 0)
-		delete grad_g_matrix;
+
 }
 
 
@@ -98,18 +97,12 @@ FiniteDifferenceGradGEvaluator::getGradG()
 
 
 
-
 Matrix
 FiniteDifferenceGradGEvaluator::getAllGradG()
 {
-	if (grad_g_matrix==0) {
-		Matrix dummy(1,1);
-		return dummy;
-	}
-	else {
-		return (*grad_g_matrix);
-	}
+	return (*grad_g_matrix);
 }
+
 
 int
 FiniteDifferenceGradGEvaluator::computeGradG(double gFunValue,
@@ -205,6 +198,7 @@ FiniteDifferenceGradGEvaluator::computeGradG(double gFunValue,
 		}
 		outputFile.close();
 		opserr << "PRESS Ctrl+C TO TERMINATE APPLICATION!" << endln;
+		// should never have an infinite loop in a program........
 		while(true) {
 		}
 	}
@@ -222,19 +216,11 @@ FiniteDifferenceGradGEvaluator::computeAllGradG(const Vector &gFunValues,
 
 	numberOfEvalIncSens++;///// added by K Fujimura /////
 
-	// Get number of random variables and performance functions
+	// Get number of random variables
 	int nrv = theReliabilityDomain->getNumberOfRandomVariables();
-	int lsf = theReliabilityDomain->getNumberOfLimitStateFunctions();
 
-
-	// Allocate result matrix
-	if (grad_g_matrix == 0) {
-		grad_g_matrix = new Matrix(nrv,lsf);
-	}
-	else {
-		grad_g_matrix->Zero();
-	}
-
+	// Zero result matrix
+	grad_g_matrix->Zero();
 
 	// Initial declarations
 	Vector perturbed_x(nrv);

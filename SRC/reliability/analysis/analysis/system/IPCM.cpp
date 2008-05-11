@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-11-08 20:12:38 $
+// $Revision: 1.5 $
+// $Date: 2008-05-11 19:52:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/system/IPCM.cpp,v $
 
 
@@ -33,6 +33,9 @@
 
 #include <IPCM.h>
 #include <SystemAnalysis.h>
+#include <Cutset.h>
+#include <CutsetIter.h>
+#include <CorrelatedStandardNormal.h>
 #include <ReliabilityDomain.h>
 #include <NormalRV.h>
 
@@ -73,23 +76,72 @@ IPCM::analyze(void)
 	// Allocate beta and rho
 	const Vector &allBetas = getBeta();
 	const Matrix &rhos = getRho();
+	int numCuts = 1;
+	double uBound = 1;
+	double lBound = 0;
+	int result;
 	
-	// compute and get bounds
-	int result = computeBounds(analysisType);
-	if (result != 0)
-		opserr << "IPCM::analyze WARNING - failed to compute system bounds" << endln;
-	
-	double uBound = getUpperBound();
-	double lBound = getLowerBound();
+	if (analysisType == 0 || analysisType == 1) {
+		// compute and get bounds
+		result = computeBounds(analysisType);
+		if (result != 0)
+			opserr << "IPCM::analyze WARNING - failed to compute system bounds" << endln;
+		
+		uBound = getUpperBound();
+		lBound = getLowerBound();
+	} else if (analysisType == 2) {
+		numCuts = theReliabilityDomain->getNumberOfCutsets();
+		if (numCuts < 1)
+			opserr << "IPCM::analyze WARNING - not enough cutsets available in domain" << endln;
+		
+		result = setCutsets();
+		if (result != 0)
+			opserr << "IPCM::analyze WARNING - failed to set cutset components" << endln;
+	}
 	
 	// perform analysis
 	double pf = 0;
 	if (analysisType == 0) {
 		// parallel system
 		pf = 1.0 - IPCMfunc(allBetas,rhos,-1.0);
-	} else {
+	} else if (analysisType == 1) {
 		// series system
 		pf = IPCMfunc(allBetas,rhos,1.0);
+	} else if (analysisType == 2) {
+		// general system (k cutset unions of parallel subsystems)
+		int ck;
+		
+		// first-order terms in the inclusion-exclusion rule (always present)
+		// upper bound to probability when cutsets are not disjoint
+		Cutset *theCutset;
+		CutsetIter &cutIter = theReliabilityDomain->getCutsets();
+		while ((theCutset = cutIter()) != 0) {
+			pf += (1.0 - IPCMfunc(theCutset->getBetaCutset(),theCutset->getRhoCutset(),-1.0));
+		}
+		uBound = pf;
+		
+		// if necessary, carry out n-choose-k algorithm to find all remaining pairs of events
+		// note, this is extremely dependent on ability to check n factorial pairs even with a 
+		// greatly reduced decision tree
+		for (ck = 2; ck <= numCuts; ck++) {
+			int numPerms = getNumPermutations(ck,numCuts);
+			result = setPermutations(ck,numCuts);
+			if (result != 0) {
+				opserr << "IPCM::analyze WARNING - failed to set permutations of cut sets" << endln;
+				return -1;
+			}
+			
+			double scaleF = pow(-1.0,ck-1);
+			for (int ip = 1; ip <= numPerms; ip++) {
+				result = setPermutedComponents(ck,ip-1);
+				if (result != 0) {
+					opserr << "IPCM::analyze WARNING - failed to set permuted beta and rho" << endln;
+					return -1;
+				}
+				
+				pf += scaleF * (1.0 - IPCMfunc(getBetaPermutation(),getRhoPermutation(),-1.0) );
+			}
+		}
 	}
 	
 	// Print results  (should do this over all defined systems)
@@ -109,7 +161,7 @@ IPCM::analyze(void)
 				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<lBound<< "  #" << endln;
 		outputFile << "#  Upper parallel probability bound: .................. " 
 				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<uBound<< "  #" << endln;
-	} else {
+	} else if (analysisType == 1) {
 		// series system
 		outputFile << "#  Series probability failure estimate (IPCM): ........ "
 				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<pf<< "  #" << endln;
@@ -117,7 +169,14 @@ IPCM::analyze(void)
 				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<lBound<< "  #" << endln;
 		outputFile << "#  Upper series probability bound: .................... " 
 				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<uBound<< "  #" << endln;
+	} else if (analysisType == 2) {
+		// general system
+		outputFile << "#  General probability failure estimate (IPCM): ....... "
+				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<pf<< "  #" << endln;
+		outputFile << "#  General upper probability bound: ................... " 
+				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<uBound<< "  #" << endln;
 	}
+	
 	outputFile << "#                                                                     #" << endln;
 	outputFile << "#######################################################################" << endln << endln << endln;
 
@@ -146,6 +205,7 @@ IPCM::IPCMfunc(const Vector &allbeta, const Matrix &rhoin, double modifier)
 	
 	double c1, c2, r, a, b, c21, jprob;
 	double orig, newg, modval;
+	CorrelatedStandardNormal phi2(0.0);
 	
 	// ÑÑÑÑ FIRST CYCLE ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ 
 	double pdfc1 = uRV.getPDFvalue(rho(1-1,1-1)); 
@@ -161,9 +221,10 @@ IPCM::IPCMfunc(const Vector &allbeta, const Matrix &rhoin, double modifier)
 		c21 = (c2 + r*a)/sqrt(1.0 - r*r*b);
 		
 		// original
-		orig = (1 - cdfc1)*uRV.getCDFvalue(c21);
+		orig = (1.0 - cdfc1)*uRV.getCDFvalue(c21);
 		// bootstrap with binormal
-		newg = twoComponent(c1,c2,r);
+		phi2.setCorrelation(r);
+		newg = phi2.getCDF(c1,c2);
 		
 		jprob = uRV.getCDFvalue(c2) - newg;
 		// might have a div by 0 problem here
@@ -196,9 +257,10 @@ IPCM::IPCMfunc(const Vector &allbeta, const Matrix &rhoin, double modifier)
 			c21 = (c2 + r*a)/sqrt(1.0 - r*r*b);
 			
 			// original
-			orig = (1 - cdfc1)*uRV.getCDFvalue(c21);
+			orig = (1.0 - cdfc1)*uRV.getCDFvalue(c21);
 			// bootstrap with binormal
-			newg = twoComponent(c1,c2,r);
+			phi2.setCorrelation(r);
+			newg = phi2.getCDF(c1,c2);
 			
 			jprob = uRV.getCDFvalue(c2) - newg;
 			modval = 1.0 - jprob/cdfc1;
@@ -222,11 +284,12 @@ IPCM::IPCMfunc(const Vector &allbeta, const Matrix &rhoin, double modifier)
 		pf = pf + log(uRV.getCDFvalue(rho(i-1,i-2)));
 		
 	// check closed-form solution
-	double pcf = 1-twoComponent(beta(0),beta(1),rhoin(1,0));
+	phi2.setCorrelation(rhoin(1,0));
+	double pcf = 1.0 - phi2.getCDF(beta(0),beta(1));
 	//opserr << "pcf = " << pcf << " and IPCM = " << 1-exp(pf) << endln;
 	
 	if (n == 2)
 		return pcf;
 	else
-		return 1-exp(pf);
+		return 1.0 - exp(pf);
 }

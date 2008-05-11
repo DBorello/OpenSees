@@ -53,6 +53,7 @@ RELIABILITY_OBJS = $(FE)/domain/pattern/DiscretizedRandomProcessSeries.o \
 		$(FE)/reliability/analysis/meritFunction/CriteriaReductionMeritFunctionCheck.o \
 		$(FE)/reliability/analysis/meritFunction/MeritFunctionCheck.o \
 		$(FE)/reliability/analysis/misc/MatrixOperations.o \
+		$(FE)/reliability/analysis/misc/CorrelatedStandardNormal.o \
 		$(FE)/reliability/analysis/randomNumber/CStdLibRandGenerator.o \
 		$(FE)/reliability/analysis/randomNumber/RandomNumberGenerator.o \
 		$(FE)/reliability/analysis/rootFinding/RootFinding.o \
@@ -124,6 +125,8 @@ RELIABILITY_OBJS = $(FE)/domain/pattern/DiscretizedRandomProcessSeries.o \
 		$(FE)/reliability/domain/components/ReliabilityDomainComponent.o \
 		$(FE)/reliability/domain/components/ReliabilityDomain.o \
 		$(FE)/reliability/domain/components/PrincipalPlane.o \
+		$(FE)/reliability/domain/components/Cutset.o \
+		$(FE)/reliability/domain/components/CutsetIter.o \
 		$(FE)/reliability/domain/distributions/BetaRV.o \
 		$(FE)/reliability/domain/distributions/GumbelRV.o \
 		$(FE)/reliability/domain/distributions/ParetoRV.o \

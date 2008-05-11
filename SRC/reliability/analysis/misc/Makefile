@@ -1,6 +1,7 @@
 include ../../../../Makefile.def
 
-OBJS       = 	MatrixOperations.o
+OBJS       = 	MatrixOperations.o \
+	CorrelatedStandardNormal.o
 
 # Compilation control
 all:         $(OBJS)
