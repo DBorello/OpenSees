@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2008-02-29 19:47:20 $
+// $Revision: 1.11 $
+// $Date: 2008-05-12 16:05:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/randomNumber/CStdLibRandGenerator.cpp,v $
 
 
@@ -41,15 +41,6 @@ CStdLibRandGenerator::CStdLibRandGenerator()
 :RandomNumberGenerator()
 {
 	generatedNumbers = 0;
-	/////S added by K Fujimura /////
-	aStdNormRV = 0;
-	aStdNormRV = new NormalRV(1,0.0,1.0,0.0);
-	if (aStdNormRV==0) {
-		opserr << "CStdLibRandGenerator::generate_nIndependentStdNormalNumbers() - " << endln
- 			<< " out of memory while instantiating internal objects." << endln;
- 		exit(-1);
- 	}
-	/////E added by K Fujimura /////
 }
 
 CStdLibRandGenerator::~CStdLibRandGenerator()
@@ -201,6 +192,8 @@ CStdLibRandGenerator::generate_singleUniformNumber(double lower, double upper)
 double
 CStdLibRandGenerator::generate_singleStdNormalNumber(void)
 {
+	static NormalRV aStdNormRV(1,0.0,1.0,0.0);
+
 	if(seed==0) {
 		seed=time(NULL);
 		srand(seed);
@@ -220,7 +213,7 @@ CStdLibRandGenerator::generate_singleStdNormalNumber(void)
  	//    z = invPhi( F(x) )
  	//       where F(x) for the uniform distribution 
  	//       from 0 to 1 in fact is equal to x itself.
- 	randomNumber=aStdNormRV->getInverseCDFvalue(randomNumberBetween0And1); 
+ 	randomNumber=aStdNormRV.getInverseCDFvalue(randomNumberBetween0And1); 
  	return randomNumber;
 }
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2008-02-29 19:47:20 $
+// $Revision: 1.6 $
+// $Date: 2008-05-12 16:05:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/randomNumber/CStdLibRandGenerator.h,v $
 
 
@@ -61,7 +61,6 @@ private:
 	int seed;
 
     /////S added by K Fujimrua /////
-	NormalRV *aStdNormRV;
 // 	int	randomNumberBetween0And32767;
  	int	randomNumberBetween0AndRAND_MAX;
  	double randomNumberBetween0And1;
