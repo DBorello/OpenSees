@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2008-05-08 15:34:00 $
+// $Revision: 1.17 $
+// $Date: 2008-05-13 20:21:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.cpp,v $
 
 
@@ -40,6 +40,7 @@
 #include <RandomVariablePositioner.h>
 #include <ParameterPositioner.h>
 #include <ArrayOfTaggedObjects.h>
+#include <MapOfTaggedObjects.h>
 #include <ModulatingFunction.h>
 #include <Filter.h>
 #include <Spectrum.h>
@@ -54,6 +55,7 @@
 ReliabilityDomain::ReliabilityDomain():
   numRandomVariables(0), numLimitStateFunctions(0), numCutsets(0)
 {
+
 	theRandomVariablesPtr = new ArrayOfTaggedObjects (256);
 	theCorrelationCoefficientsPtr = new ArrayOfTaggedObjects (256);
 	theLimitStateFunctionsPtr = new ArrayOfTaggedObjects (256);
@@ -90,33 +92,59 @@ ReliabilityDomain::ReliabilityDomain():
 
 ReliabilityDomain::~ReliabilityDomain()
 {
-	if (!theRandomVariablesPtr)
-		delete theRandomVariablesPtr;
-	if (!theCorrelationCoefficientsPtr)
-		delete theCorrelationCoefficientsPtr;
-	if (!theLimitStateFunctionsPtr)
-		delete theLimitStateFunctionsPtr;
-	if (!theCutsetsPtr)
-		delete theCutsetsPtr;
-	if (!theRandomVariablePositionersPtr)
-		delete theRandomVariablePositionersPtr;
-	if (!theParameterPositionersPtr)
-		delete theParameterPositionersPtr;
-	if (!theModulatingFunctionsPtr)
-		delete theModulatingFunctionsPtr;
-	if (!theSpectraPtr)
-		delete theSpectraPtr;
-	if (!theFiltersPtr)
-		delete theFiltersPtr;
+  if (theRandomVariablesPtr != 0) {
+    theRandomVariablesPtr->clearAll();
+    delete theRandomVariablesPtr;
+  }
+  if (theCorrelationCoefficientsPtr != 0) {
+    theCorrelationCoefficientsPtr->clearAll();
+    delete theCorrelationCoefficientsPtr;
+  }
+  if (theLimitStateFunctionsPtr != 0) {
+    theLimitStateFunctionsPtr->clearAll();
+    delete theLimitStateFunctionsPtr;
+  }
+  if (theCutsetsPtr != 0) {
+    theCutsetsPtr->clearAll();
+    delete theCutsetsPtr;
+  }
+  if (theRandomVariablePositionersPtr != 0) {
+    theRandomVariablePositionersPtr->clearAll();
+    delete theRandomVariablePositionersPtr;
+  }
+  if (theParameterPositionersPtr != 0) {
+    theParameterPositionersPtr->clearAll();
+    delete theParameterPositionersPtr;
+  }
+  if (theModulatingFunctionsPtr != 0) {
+    theModulatingFunctionsPtr->clearAll();
+    delete theModulatingFunctionsPtr;
+  }
+  if (theSpectraPtr != 0) {
+    theSpectraPtr->clearAll();
+    delete theSpectraPtr;
+  }
+  if (theFiltersPtr != 0) {
+    theFiltersPtr->clearAll();
+    delete theFiltersPtr;
+  }
 
-	if (!theDesignVariablesPtr)
-		delete theDesignVariablesPtr;
-	if (!theDesignVariablePositionersPtr)
-		delete theDesignVariablePositionersPtr;
-	if (!theConstraintFunctionsPtr)
-		delete theConstraintFunctionsPtr;
-	if (!theObjectiveFunctionsPtr)
-		delete theObjectiveFunctionsPtr;
+  if (theDesignVariablesPtr != 0) {
+    theDesignVariablesPtr->clearAll();
+    delete theDesignVariablesPtr;
+  }
+  if (theDesignVariablePositionersPtr != 0) {
+    theDesignVariablePositionersPtr->clearAll();
+    delete theDesignVariablePositionersPtr;
+  }
+  if (theConstraintFunctionsPtr != 0) {
+    theConstraintFunctionsPtr->clearAll();
+    delete theConstraintFunctionsPtr;
+  }
+  if (theObjectiveFunctionsPtr != 0) {
+    theObjectiveFunctionsPtr->clearAll();
+    delete theObjectiveFunctionsPtr;
+  }
 
 	if (theRVIter != 0)
 	  delete theRVIter;
