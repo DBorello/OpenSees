@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2007-07-19 21:19:08 $
+// $Revision: 1.19 $
+// $Date: 2008-05-13 21:50:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
                                                                         
@@ -142,6 +142,12 @@ nodeResponse(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
 
 int 
 calculateNodalReactions(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+getNodeTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+getEleTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 // AddingSensitivity:BEGIN /////////////////////////////////////////////////
 

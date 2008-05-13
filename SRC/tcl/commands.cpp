@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.120 $
-// $Date: 2008-04-28 23:19:55 $
+// $Revision: 1.121 $
+// $Date: 2008-05-13 21:50:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -637,6 +637,11 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "stripXML", stripOpenSeesXML,(ClientData)NULL, NULL);
     Tcl_CreateCommand(interp, "convertBinaryToText", convertBinaryToText,(ClientData)NULL, NULL);
     Tcl_CreateCommand(interp, "convertTextToBinary", convertTextToBinary,(ClientData)NULL, NULL);
+
+    Tcl_CreateCommand(interp, "getEleTags", &getEleTags, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
+    Tcl_CreateCommand(interp, "getNodeTags", &getNodeTags, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
 
 #ifdef _RELIABILITY
     Tcl_CreateCommand(interp, "wipeReliability", wipeReliability, 
@@ -5376,6 +5381,37 @@ getNP(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
   return TCL_OK;  
 }
 
+int
+getEleTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  Element *theEle;
+  ElementIter &eleIter = theDomain.getElements();
+
+  char buffer[20];
+
+  while ((theEle = eleIter()) != 0) {
+    sprintf(buffer, "%d ", theEle->getTag());
+    Tcl_AppendResult(interp, buffer, NULL);
+  }
+
+  return TCL_OK;
+}
+
+int
+getNodeTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  Node *theEle;
+  NodeIter &eleIter = theDomain.getNodes();
+
+  char buffer[20];
+
+  while ((theEle = eleIter()) != 0) {
+    sprintf(buffer, "%d ", theEle->getTag());
+    Tcl_AppendResult(interp, buffer, NULL);
+  }
+
+  return TCL_OK;
+}
 
 int 
 opsBarrier(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
