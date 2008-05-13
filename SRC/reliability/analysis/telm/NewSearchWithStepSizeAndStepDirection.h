@@ -23,8 +23,8 @@
 ** ****************************************************************** */
 
 
-// $Revision: 1.2 $
-// $Date: 2008-03-13 22:26:01 $
+// $Revision: 1.3 $
+// $Date: 2008-05-13 16:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/NewSearchWithStepSizeAndStepDirection.h,v $
 
 
@@ -55,6 +55,7 @@ public:
 	// Constructor and destructor
 	NewSearchWithStepSizeAndStepDirection(
 					int passedMaxNumberOfIterations, 
+					ReliabilityDomain *passedReliabilityDomain,
 					GFunEvaluator *passedGFunEvaluator,
 					GradGEvaluator *passedGradGEvaluator,
 					StepSizeRule *passedStepSizeRule,
@@ -67,7 +68,7 @@ public:
 					Vector *startPoint);
 	~NewSearchWithStepSizeAndStepDirection();
 	
-	int findDesignPoint(ReliabilityDomain *theReliabilityDomain);
+	int findDesignPoint();
 
 	const Vector &get_x();
 	const Vector &get_u();
@@ -81,20 +82,16 @@ public:
 	double getLastGFunValue();
 	const Vector &getGradientInStandardNormalSpace();
 	int    getNumberOfEvaluations();
-  	int    getNumberOfSensAna();
+
+	//  Modified by K Fujimura 10/10/2004
+	int    getNumberOfSensAna();
 	double get_check1_init();
 	double get_check2_init();
 	double get_check1_conv();
 	double get_check2_conv();
-
-
-	//  Modified by K Fujimura 10/10/2004
-	ReliabilityConvergenceCheck* getReliabilityConvergenceCheck()
-	{ return theReliabilityConvergenceCheck;}
+	
 	void set_x(Vector&);
 	void set_u(Vector&);
-	GradGEvaluator* getGradGEvaluator()
-	{ return theGradGEvaluator;}
 	virtual double get_beta();
 	Matrix getJacobian_x_u(){ return (*jacobian_x_u);}
 
@@ -176,7 +173,7 @@ private:
 	Vector *designPoint_uStar;
 
 	int printFlag;
-	char *fileNamePrint;
+	char fileNamePrint[256];
 	int numberOfEvaluations;
 	int numberOfSensAna;
 

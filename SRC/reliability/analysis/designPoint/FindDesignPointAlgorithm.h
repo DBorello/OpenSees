@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2008-03-13 22:30:16 $
+// $Revision: 1.6 $
+// $Date: 2008-05-13 16:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/FindDesignPointAlgorithm.h,v $
 
 
@@ -45,10 +45,10 @@ class FindDesignPointAlgorithm
 {
 
 public:
-	FindDesignPointAlgorithm();
+	FindDesignPointAlgorithm(ReliabilityDomain *theReliabilityDomain);
 	virtual ~FindDesignPointAlgorithm();
 
-	virtual int findDesignPoint(ReliabilityDomain *theReliabilityDomain) =0;
+	virtual int findDesignPoint() =0;
 
 	virtual const Vector &get_x() =0;
 	virtual const Vector &get_u() =0;
@@ -66,19 +66,21 @@ public:
 	virtual int setStartPt(Vector *) =0;
 	
 	
-	ofstream * outputFile;
-	
-
 	/////S added by K Fujimura /////
-	//virtual ReliabilityConvergenceCheck* getReliabilityConvergenceCheck();
+	virtual int    getNumberOfSensAna();
+	virtual double get_check1_init();
+	virtual double get_check2_init();
+	virtual double get_check1_conv();
+	virtual double get_check2_conv();
+	
 	virtual void set_u(Vector&);
-	virtual GradGEvaluator* getGradGEvaluator();
+	virtual void set_x(Vector&);
 	virtual double get_beta();
 	virtual Matrix getJacobian_x_u();
 	/////E added by K Fujimura /////
 
 protected:
-
+	ReliabilityDomain *theReliabilityDomain;
 
 private:
 

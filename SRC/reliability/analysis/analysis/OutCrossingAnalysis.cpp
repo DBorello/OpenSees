@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2008-03-13 22:21:49 $
+// $Revision: 1.9 $
+// $Date: 2008-05-13 16:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/OutCrossingAnalysis.cpp,v $
 
 //
@@ -182,7 +182,7 @@ OutCrossingAnalysis::analyze(void)
 
 
 			// Find the design point for the original limit-state function
-			if (theFindDesignPointAlgorithm->findDesignPoint(theReliabilityDomain) < 0){
+			if (theFindDesignPointAlgorithm->findDesignPoint() < 0){
 				opserr << "OutCrossingAnalysis::analyze() - failed while finding the" << endln
 					<< " design point for limit-state function number " << lsf << "." << endln;
 				DSPTfailed = true;
@@ -271,7 +271,7 @@ OutCrossingAnalysis::analyze(void)
 
 
 					// Find the design point for the edited limit-state function
-					if (theFindDesignPointAlgorithm->findDesignPoint(theReliabilityDomain) < 0){
+					if (theFindDesignPointAlgorithm->findDesignPoint() < 0){
 						opserr << "OutCrossingAnalysis::analyze() - failed while finding the" << endln
 							<< " design point for limit-state function number " << lsf << "." << endln;
 						DSPTfailed = true;

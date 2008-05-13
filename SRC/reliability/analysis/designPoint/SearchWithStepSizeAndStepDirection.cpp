@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2008-03-13 22:30:16 $
+// $Revision: 1.16 $
+// $Date: 2008-05-13 16:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.cpp,v $
 
 
@@ -33,6 +33,7 @@
 
 #include <SearchWithStepSizeAndStepDirection.h>
 #include <FindDesignPointAlgorithm.h>
+#include <ReliabilityDomain.h>
 #include <StepSizeRule.h>
 #include <SearchDirection.h>
 #include <ProbabilityTransformation.h>
@@ -54,14 +55,13 @@
 
 using std::ifstream;
 using std::ios;
-
 using std::setw;
 using std::setprecision;
 
 
-
 SearchWithStepSizeAndStepDirection::SearchWithStepSizeAndStepDirection(
-					int passedMaxNumberOfIterations, 
+					int passedMaxNumberOfIterations,
+					ReliabilityDomain *passedReliabilityDomain,
 					GFunEvaluator *passedGFunEvaluator,
 					GradGEvaluator *passedGradGEvaluator,
 					StepSizeRule *passedStepSizeRule,
@@ -72,7 +72,7 @@ SearchWithStepSizeAndStepDirection::SearchWithStepSizeAndStepDirection(
 					int pprintFlag,
 					char *pFileNamePrint,
 					Vector *pStartPoint)
-:FindDesignPointAlgorithm()
+:FindDesignPointAlgorithm(passedReliabilityDomain)
 {
 	maxNumberOfIterations			= passedMaxNumberOfIterations;
 	theGFunEvaluator				= passedGFunEvaluator;
@@ -91,46 +91,62 @@ SearchWithStepSizeAndStepDirection::SearchWithStepSizeAndStepDirection(
 	else {
 		strcpy(fileNamePrint,"searchpoints.out");
 	}
+	
+	int nrv = passedReliabilityDomain->getNumberOfRandomVariables();
+	x = new Vector(nrv);
+	u = new Vector(nrv);
+	alpha = new Vector(nrv);
+	gamma = new Vector(nrv);
+	gradientInStandardNormalSpace = new Vector(nrv);
+	uSecondLast = new Vector(nrv);
+	alphaSecondLast = new Vector(nrv);
+	searchDirection = new Vector(nrv);
 }
 
 
 
 SearchWithStepSizeAndStepDirection::~SearchWithStepSizeAndStepDirection()
 {
-  
+	if (x != 0)
+		delete x;
+	if (u != 0)
+		delete u;
+	if (alpha != 0)
+		delete alpha;
+	if (gamma != 0)
+		delete gamma;
+	if (gradientInStandardNormalSpace != 0)
+		delete gradientInStandardNormalSpace;
+	if (uSecondLast != 0)
+		delete uSecondLast;
+	if (alphaSecondLast != 0)
+		delete alphaSecondLast;
+    if (searchDirection != 0)
+		delete searchDirection;
+		
 }
 
 
 int
-SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedReliabilityDomain)
+SearchWithStepSizeAndStepDirection::findDesignPoint()
 {
-
-	// Set the reliability domain (a data member of this class)
-	theReliabilityDomain = passedReliabilityDomain;
 
 	// Declaration of data used in the algorithm
 	int numberOfRandomVariables = theReliabilityDomain->getNumberOfRandomVariables();
-	int j;
-	int zeroFlag;
-	Vector dummy(numberOfRandomVariables);
-	x = dummy;
-	u = dummy;
-	Vector u_old(numberOfRandomVariables);
-	uSecondLast = dummy;
-	Vector uNew(numberOfRandomVariables);
-	alpha = dummy;
-	gamma = dummy;
-	alphaSecondLast = dummy;
+	int j, zeroFlag, result;
+	int evaluationInStepSize = 0;
+	
 	double gFunctionValue = 1.0;
 	double gFunctionValue_old = 1.0;
+	double normOfGradient = 0.0;
+	double stepSize = 1.0;
+	
+	Vector u_old(numberOfRandomVariables);
+	Vector uNew(numberOfRandomVariables);	
 	Vector gradientOfgFunction(numberOfRandomVariables);
-	gradientInStandardNormalSpace = dummy;
 	Vector gradientInStandardNormalSpace_old(numberOfRandomVariables);
-	double normOfGradient =0;
-	double stepSize;
-	//Matrix jacobian_x_u(numberOfRandomVariables,numberOfRandomVariables);
-	int evaluationInStepSize = 0;
-	int result;
+	
+	
 	theGFunEvaluator->initializeNumberOfEvaluations();
 
 	
@@ -150,7 +166,7 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 	else {
 
 		// Get starting point
-		x = (*startPoint);
+		*x = *startPoint;
 
 		/*
 		// Transform starting point into standard normal space
@@ -172,7 +188,7 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 		*/
 
 		// Transform starting point into standard normal space
-		result = theProbabilityTransformation->transform_x_to_u(x, u);
+		result = theProbabilityTransformation->transform_x_to_u(*x, *u);
 		if (result < 0) {
 		  opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 			 << " could not transform from x to u." << endln;
@@ -184,8 +200,8 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 	Matrix Jux(numberOfRandomVariables, numberOfRandomVariables);
 
 	// Loop to find design point
-	i = 1;
-	while ( i <= maxNumberOfIterations )
+	steps = 1;
+	while ( steps <= maxNumberOfIterations )
 	{
 	  /*
 		// Transform from u to x space
@@ -206,14 +222,14 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 		const Matrix &jacobian_x_u = theProbabilityTransformation->getJacobian_x_u();
 	  */
 		// Transform to x-space
-		result = theProbabilityTransformation->transform_u_to_x(u, x);
+		result = theProbabilityTransformation->transform_u_to_x(*u, *x);
 		if (result < 0) {
 		  opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 			 << " could not transform from u to x." << endln;
 		  return -1;
 		}
 		// Get Jacobian x-space to u-space
-		result = theProbabilityTransformation->getJacobian_x_to_u(x, Jxu);
+		result = theProbabilityTransformation->getJacobian_x_to_u(*x, Jxu);
 		if (result < 0) {
 		  opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 			 << " could not transform from u to x." << endln;
@@ -228,14 +244,14 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 
 			if (printFlag == 1) {
 				outputFile2.setf(ios::scientific, ios::floatfield);
-				for (iii=0; iii<x.Size(); iii++) {
-					outputFile2<<setprecision(5)<<setw(15)<<x(iii)<<endln;
+				for (iii=0; iii<x->Size(); iii++) {
+					outputFile2<<setprecision(5)<<setw(15)<<(*x)(iii)<<endln;
 				}
 			}
 			else if (printFlag == 2) {
 				outputFile2.setf(ios::scientific, ios::floatfield);
-				for (iii=0; iii<u.Size(); iii++) {
-					outputFile2<<setprecision(5)<<setw(15)<<u(iii)<<endln;
+				for (iii=0; iii<u->Size(); iii++) {
+					outputFile2<<setprecision(5)<<setw(15)<<(*u)(iii)<<endln;
 				}
 			}
 		}
@@ -244,13 +260,13 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 		// Evaluate limit-state function unless it has been done in 
 		// a trial step by the "stepSizeAlgorithm"
 		if (evaluationInStepSize == 0) {
-			result = theGFunEvaluator->runGFunAnalysis(x);
+			result = theGFunEvaluator->runGFunAnalysis(*x);
 			if (result < 0) {
 				opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 					<< " could not run analysis to evaluate limit-state function. " << endln;
 				return -1;
 			}
-			result = theGFunEvaluator->evaluateG(x);
+			result = theGFunEvaluator->evaluateG(*x);
 			if (result < 0) {
 				opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 					<< " could not tokenize limit-state function. " << endln;
@@ -262,7 +278,7 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 
 
 		// Set scale parameter
-		if (i == 1)	{
+		if (steps == 1)	{
 			Gfirst = gFunctionValue;
 			opserr << " Limit-state function value at start point, g=" << gFunctionValue << endln;
 			opserr << " STEP #0: ";
@@ -271,7 +287,7 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 
 
 		// Gradient in original space
-		result = theGradGEvaluator->computeGradG(gFunctionValue,x);
+		result = theGradGEvaluator->computeGradG(gFunctionValue,*x);
 		if (result < 0) {
 			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 				<< " could not compute gradients of the limit-state function. " << endln;
@@ -295,14 +311,14 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 
 
 		// Gradient in standard normal space
-		gradientInStandardNormalSpace_old = gradientInStandardNormalSpace;
+		gradientInStandardNormalSpace_old = *gradientInStandardNormalSpace;
 		//gradientInStandardNormalSpace = jacobian_x_u ^ gradientOfgFunction;
 		//gradientInStandardNormalSpace.addMatrixTransposeVector(0.0, jacobian_x_u, gradientOfgFunction, 1.0);
-		gradientInStandardNormalSpace.addMatrixTransposeVector(0.0, Jxu, gradientOfgFunction, 1.0);
+		gradientInStandardNormalSpace->addMatrixTransposeVector(0.0, Jxu, gradientOfgFunction, 1.0);
 
 
 		// Compute the norm of the gradient in standard normal space
-		normOfGradient = gradientInStandardNormalSpace.Norm();
+		normOfGradient = gradientInStandardNormalSpace->Norm();
 
 
 		// Check that the norm is not zero
@@ -314,12 +330,12 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 
 		
 		// Compute alpha-vector
-		alpha = gradientInStandardNormalSpace *  ( (-1.0) / normOfGradient );
+		alpha->addVector(0.0, *gradientInStandardNormalSpace, -1.0/normOfGradient );
 
 
 		// Check convergence
-		result = theReliabilityConvergenceCheck->check(u,gFunctionValue,gradientInStandardNormalSpace);
-		if (result > 0 || i == maxNumberOfIterations)  {
+		result = theReliabilityConvergenceCheck->check(*u,gFunctionValue,*gradientInStandardNormalSpace);
+		if (result > 0 || steps == maxNumberOfIterations)  {
 		
 
 			// Inform the user of the happy news!
@@ -346,7 +362,7 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 					}
 					x = theProbabilityTransformation->get_x();
 				  */
-				  result = theProbabilityTransformation->transform_u_to_x(u, x);
+				  result = theProbabilityTransformation->transform_u_to_x(*u, *x);
 				  if (result < 0) {
 				    opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 					   << " could not transform from u to x." << endln;
@@ -354,15 +370,15 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 				  }
 
 					outputFile2.setf(ios::scientific, ios::floatfield);
-					for (iii=0; iii<x.Size(); iii++) {
-						outputFile2<<setprecision(5)<<setw(15)<<x(iii)<<endln;
+					for (iii=0; iii<x->Size(); iii++) {
+						outputFile2<<setprecision(5)<<setw(15)<<(*x)(iii)<<endln;
 					}
 				}
 				else if (printFlag == 4) {
 					static ofstream outputFile2( fileNamePrint, ios::out );
 					outputFile2.setf(ios::scientific, ios::floatfield);
-					for (iii=0; iii<u.Size(); iii++) {
-						outputFile2<<setprecision(5)<<setw(15)<<u(iii)<<endln;
+					for (iii=0; iii<u->Size(); iii++) {
+						outputFile2<<setprecision(5)<<setw(15)<<(*u)(iii)<<endln;
 					}
 				}
 			}
@@ -371,7 +387,7 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 			// Compute the gamma vector
 			//const Matrix &jacobian_u_x = theProbabilityTransformation->getJacobian_u_x();
 			// Get Jacobian u-space to x-space
-			result = theProbabilityTransformation->getJacobian_u_to_x(u, Jux);
+			result = theProbabilityTransformation->getJacobian_u_to_x(*u, Jux);
 			if (result < 0) {
 			  opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 				 << " could not transform from u to x." << endln;
@@ -381,7 +397,7 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 			//Vector tempProduct = jacobian_u_x ^ alpha;
 			Vector tempProduct(numberOfRandomVariables);
 			//tempProduct.addMatrixTransposeVector(0.0, jacobian_u_x, alpha, 1.0);
-			tempProduct.addMatrixTransposeVector(0.0, Jux, alpha, 1.0);
+			tempProduct.addMatrixTransposeVector(0.0, Jux, *alpha, 1.0);
 
 			// Only diagonal elements of (J_xu*J_xu^T) are used
 			for (j = 0; j < numberOfRandomVariables; j++) {
@@ -392,7 +408,7 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 			    jk = Jxu(j,k);
 			    sum += jk*jk;
 			  }
-			  gamma(j) = sqrt(sum) * tempProduct(j);
+			  (*gamma)(j) = sqrt(sum) * tempProduct(j);
 			}
 			
 			Glast = gFunctionValue;
@@ -404,40 +420,40 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 
 
 		// Store 'u' and 'alpha' at the second last iteration point
-		uSecondLast = u;
-		alphaSecondLast = alpha;
+		*uSecondLast = *u;
+		*alphaSecondLast = *alpha;
 
 
 		// Let user know that we have to take a new step
-		opserr << " STEP #" << i <<": ";
+		opserr << " STEP #" << steps <<": ";
 
 
 		// Update Hessian approximation, if any
-		if (  (theHessianApproximation!=0) && (i!=1)  ) {
+		if (  (theHessianApproximation!=0) && (steps!=1)  ) {
 			theHessianApproximation->updateHessianApproximation(u_old,
 											    gFunctionValue_old,
 											    gradientInStandardNormalSpace_old,
 											    stepSize,
-											    searchDirection,
+											    *searchDirection,
 											    gFunctionValue,
-											    gradientInStandardNormalSpace);
+											    *gradientInStandardNormalSpace);
 		}
 
 
 		// Determine search direction
-		result = theSearchDirection->computeSearchDirection(i,
-			u, gFunctionValue, gradientInStandardNormalSpace );
+		result = theSearchDirection->computeSearchDirection(steps,
+			*u, gFunctionValue, *gradientInStandardNormalSpace );
 		if (result < 0) {
 			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 				<< " could not compute search direction. " << endln;
 			return -1;
 		}
-		searchDirection = theSearchDirection->getSearchDirection();
+		*searchDirection = theSearchDirection->getSearchDirection();
 
 
 		// Determine step size
 		result = theStepSizeRule->computeStepSize(
-			u, gradientInStandardNormalSpace, gFunctionValue, searchDirection, i);
+			*u, *gradientInStandardNormalSpace, gFunctionValue, *searchDirection, steps);
 		if (result < 0) {  // (something went wrong)
 			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 				<< " could not compute step size. " << endln;
@@ -455,14 +471,13 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 
 
 		// Determine new iteration point (take the step)
-		u_old = u;
+		u_old = *u;
 		//u = u_old + (searchDirection * stepSize);
-		u = u_old;
-		u.addVector(1.0, searchDirection, stepSize);
+		u->addVector(1.0, *searchDirection, stepSize);
 
 
 		// Increment the loop parameter
-		i++;
+		steps++;
 
 	}
 
@@ -480,52 +495,52 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 const Vector&
 SearchWithStepSizeAndStepDirection::get_x()
 {
-	return x;
+	return *x;
 }
 
 const Vector &
 SearchWithStepSizeAndStepDirection::get_u()
 {
-	return u;
+	return *u;
 }
 
 const Vector&
 SearchWithStepSizeAndStepDirection::get_alpha()
 {
-	return alpha;
+	return *alpha;
 }
 
 const Vector&
 SearchWithStepSizeAndStepDirection::get_gamma()
 {
-  if (gamma.Norm() > 1.0)
-    gamma = gamma / gamma.Norm();
+  if (gamma->Norm() > 1.0)
+    gamma->Normalize();
 
-  return gamma;
+  return *gamma;
 }
 
 int
 SearchWithStepSizeAndStepDirection::getNumberOfSteps()
 {
-	return (i-1);
+	return (steps-1);
 }
 
 const Vector&
 SearchWithStepSizeAndStepDirection::getSecondLast_u()
 {
-	return uSecondLast;
+	return *uSecondLast;
 }
 
 const Vector&
 SearchWithStepSizeAndStepDirection::getSecondLast_alpha()
 {
-	return alphaSecondLast;
+	return *alphaSecondLast;
 }
 
 const Vector&
 SearchWithStepSizeAndStepDirection::getLastSearchDirection()
 {
-	return searchDirection;
+	return *searchDirection;
 }
 
 double
@@ -544,7 +559,7 @@ SearchWithStepSizeAndStepDirection::getLastGFunValue()
 const Vector&
 SearchWithStepSizeAndStepDirection::getGradientInStandardNormalSpace()
 {
-	return gradientInStandardNormalSpace;
+	return *gradientInStandardNormalSpace;
 }
 
 

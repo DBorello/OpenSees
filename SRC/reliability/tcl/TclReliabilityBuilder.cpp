@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.43 $
-// $Date: 2008-05-11 19:52:54 $
+// $Revision: 1.44 $
+// $Date: 2008-05-13 16:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -218,26 +218,29 @@ MonteCarloResponseAnalysis * theMonteCarloResponseAnalysis=0;
 SamplingAnalysis * theSamplingAnalysis =0;
 // --- Quan
 
-
 ReliabilityDomain *theReliabilityDomain = 0;
 static Domain *theStructuralDomain = 0;
 
+// base class static pointers
 static GFunEvaluator *theGFunEvaluator = 0;
 static GradGEvaluator *theGradGEvaluator = 0;
 static StepSizeRule *theStepSizeRule = 0;
 static SearchDirection *theSearchDirection = 0;
 static HessianApproximation *theHessianApproximation = 0;
 static MeritFunctionCheck *theMeritFunctionCheck = 0;
-static PolakHeSearchDirectionAndMeritFunction *thePolakHeDualPurpose = 0;
-static SQPsearchDirectionMeritFunctionAndHessian *theSQPtriplePurpose = 0;
 static ProbabilityTransformation *theProbabilityTransformation = 0;
 static ReliabilityConvergenceCheck *theReliabilityConvergenceCheck = 0;
 static Vector *theStartPoint = 0;
 static RootFinding *theRootFindingAlgorithm = 0;
-RandomNumberGenerator *theRandomNumberGenerator = 0;
-static FindDesignPointAlgorithm *theFindDesignPointAlgorithm = 0;
-static NewSearchWithStepSizeAndStepDirection *theNewSearchWithStepSizeAndStepDirection = 0;
 static FindCurvatures *theFindCurvatures = 0;
+static FindDesignPointAlgorithm *theFindDesignPointAlgorithm = 0;
+RandomNumberGenerator *theRandomNumberGenerator = 0;
+
+// mixed pointers
+static PolakHeSearchDirectionAndMeritFunction *thePolakHeDualPurpose = 0;
+static SQPsearchDirectionMeritFunctionAndHessian *theSQPtriplePurpose = 0;
+
+// analysis base class pointers
 static GFunVisualizationAnalysis *theGFunVisualizationAnalysis = 0;
 static FORMAnalysis *theFORMAnalysis = 0;
 static FOSMAnalysis *theFOSMAnalysis = 0;
@@ -246,6 +249,7 @@ static OutCrossingAnalysis *theOutCrossingAnalysis = 0;
 static SORMAnalysis *theSORMAnalysis = 0;
 static ImportanceSamplingAnalysis *theImportanceSamplingAnalysis = 0;
 static SystemAnalysis *theSystemAnalysis = 0;
+
 /////////////////////////////////////////////////////////
 ///S added by K Fujimura for Random Vibration Analysis ///
 /////////////////////////////////////////////////////////
@@ -439,10 +443,9 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
   if (theReliabilityDomain != 0)
     delete theReliabilityDomain;
 
-  if (theGFunEvaluator != 0) {
+  // base class pointers
+  if (theGFunEvaluator != 0)
     delete theGFunEvaluator;
-    theGFunEvaluator = 0;
-  }
   if (theGradGEvaluator != 0)
     delete theGradGEvaluator;
   if (theStepSizeRule != 0)
@@ -451,10 +454,6 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
     delete theSearchDirection;
   if (theHessianApproximation != 0)
     delete theHessianApproximation;
-  if (thePolakHeDualPurpose != 0)
-    delete thePolakHeDualPurpose;
-  if (theSQPtriplePurpose != 0)
-    delete theSQPtriplePurpose;
   if (theMeritFunctionCheck != 0)
     delete theMeritFunctionCheck;
   if (theReliabilityConvergenceCheck != 0)
@@ -471,6 +470,14 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
     delete theFindDesignPointAlgorithm;
   if (theFindCurvatures != 0)
     delete theFindCurvatures;
+	
+  // mixed pointers
+  if (thePolakHeDualPurpose != 0)
+    delete thePolakHeDualPurpose;
+  if (theSQPtriplePurpose != 0)
+    delete theSQPtriplePurpose;
+	
+  // analysis pointers
   if (theFORMAnalysis != 0)
     delete theFORMAnalysis;
   if (theFOSMAnalysis != 0)
@@ -483,6 +490,10 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
     delete theImportanceSamplingAnalysis;
   if (theSystemAnalysis != 0)
     delete theSystemAnalysis;
+  if (theGFunVisualizationAnalysis != 0)
+    delete theGFunVisualizationAnalysis;
+  if (theOutCrossingAnalysis != 0)
+    delete theOutCrossingAnalysis;
   
   /////S added by K Fujimura /////
   if (theAnalyzer != 0)
@@ -507,36 +518,42 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
  #ifdef _SNOPT
   if (theSNOPTAnalysis != 0)
     delete theSNOPTAnalysis;
-  if (theMonteCarloResponseAnalysis != 0)
-    delete theMonteCarloResponseAnalysis;
   if (theSNOPT != 0)
     delete theSNOPT;
 #endif
+  if (theMonteCarloResponseAnalysis != 0)
+    delete theMonteCarloResponseAnalysis;
+  if (theSamplingAnalysis != 0)
+    delete theSamplingAnalysis;
   // ---Quan 
 
   theReliabilityDomain = 0;
-  theReliabilityDomain =0;
-  theGFunEvaluator =0;
-  theGradGEvaluator =0;
-  theStepSizeRule =0;
-  theSearchDirection =0;
-  theHessianApproximation =0;
+  theGFunEvaluator = 0;
+  theGradGEvaluator = 0;
+  theStepSizeRule = 0;
+  theSearchDirection = 0;
+  theHessianApproximation = 0;
+  theMeritFunctionCheck = 0;
+  theReliabilityConvergenceCheck = 0;
+  theProbabilityTransformation = 0;
+  theStartPoint = 0;
+  theRootFindingAlgorithm = 0;
+  theRandomNumberGenerator = 0;
+  theFindDesignPointAlgorithm = 0;
+  theFindCurvatures = 0;
+  
   thePolakHeDualPurpose =0;
   theSQPtriplePurpose =0;
-  theMeritFunctionCheck =0;
-  theReliabilityConvergenceCheck =0;
-  theProbabilityTransformation =0;
-  theStartPoint =0;
-  theRootFindingAlgorithm =0;
-  theRandomNumberGenerator =0;
-  theFindDesignPointAlgorithm =0;
-  theFindCurvatures =0;
-  theFORMAnalysis =0;
-  theFOSMAnalysis =0;
-  theParametricReliabilityAnalysis =0;
-  theSORMAnalysis =0;
-  theImportanceSamplingAnalysis =0;
-  theSystemAnalysis =0;
+  
+  theFORMAnalysis = 0;
+  theFOSMAnalysis = 0;
+  theParametricReliabilityAnalysis = 0;
+  theSORMAnalysis = 0;
+  theImportanceSamplingAnalysis = 0;
+  theSystemAnalysis = 0;
+  theGFunVisualizationAnalysis = 0;
+  theOutCrossingAnalysis = 0;
+  
  /////S added by K Fujimura /////
   theAnalyzer=0;
   theInitialStaticAnalysis=0;
@@ -547,6 +564,15 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
   theRandomVibrationSimulation= 0;
   theRandomVibrationAnalysis = 0;
  /////E added by K Fujimura /////
+ 
+  // Quan ---
+ #ifdef _SNOPT
+  theSNOPTAnalysis = 0;
+  theSNOPT = 0;
+#endif
+  theMonteCarloResponseAnalysis = 0;
+  theSamplingAnalysis = 0;
+  // ---Quan
 
   // Delete commands
   Tcl_DeleteCommand(theInterp, "randomVariable");
@@ -4222,6 +4248,10 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 		return TCL_ERROR;
 	}
 
+	int printFlag=0;
+	char fileNamePrint[256];
+	strcpy(fileNamePrint,"initialized");
+	int maxNumIter = 100;
 	int argvCounter = 1;
 
 	// GET INPUT PARAMETER (string) AND CREATE THE OBJECT
@@ -4267,13 +4297,6 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 			return TCL_ERROR;
 		}
 
-		int printFlag=0;
-		char *fileNamePrint;
-		fileNamePrint = new char[256];
-		strcpy(fileNamePrint,"initialized");
-
-
-		int maxNumIter = 100;
 		while (argvCounter < argc) {
 
 			if (strcmp(argv[argvCounter],"-maxNumIter") == 0) {
@@ -4328,7 +4351,7 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 		}
 		
 		theFindDesignPointAlgorithm = new SearchWithStepSizeAndStepDirection(
-					maxNumIter, 
+					maxNumIter, theReliabilityDomain, 
 					theGFunEvaluator,
 					theGradGEvaluator,
 					theStepSizeRule,
@@ -4336,13 +4359,9 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 					theProbabilityTransformation,
 					theHessianApproximation,
 					theReliabilityConvergenceCheck,
-					printFlag,
-					fileNamePrint,
-					theStartPoint);
-
-		delete [] fileNamePrint;
+					printFlag, fileNamePrint, theStartPoint);
 		
-	}   //if stepSize
+	}   //if StepSearch
 
 	// Quan SNOPT interface ----
 #ifdef _SNOPT
@@ -4379,13 +4398,7 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 			return TCL_ERROR;
 		}
 */
-		int printFlag=0;
-		char *fileNamePrint1;
-		fileNamePrint1 = new char[256];
-		strcpy(fileNamePrint1,"initialized");
-
-
-		int maxNumIter = 250;
+		maxNumIter = 250;
 		while (argvCounter < argc) {
 
 			if (strcmp(argv[argvCounter],"-maxNumIter") == 0) {
@@ -4439,21 +4452,15 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 			}
 		}
 
-		char *ProbType = new char[256];
-		strcpy(ProbType,"reliability");
-
+		char ProbType[] = "reliability";
 		
-		theSNOPT = new snoptProblem(
+		theFindDesignPointAlgorithm = new SnoptProblem(
 					maxNumIter, 
 					theGFunEvaluator,
 					theGradGEvaluator,
 					theProbabilityTransformation,
-					printFlag,
-					fileNamePrint1,
-					theStartPoint,
+					printFlag, fileNamePrint, theStartPoint, 
 					ProbType,theReliabilityDomain);
-		
-		theFindDesignPointAlgorithm=theSNOPT;  // is this transfer correct 
 /*
    snoptProblem::snoptProblem(int passedMaxNumberOfIterations, 
 					GFunEvaluator *passedGFunEvaluator,
@@ -4464,7 +4471,6 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 					Vector *pStartPoint, char * probType):
    
    */
-		delete [] fileNamePrint1;  // something wrong here
 		
 	//if SNOPT  ---- Quan
 	}
@@ -4512,13 +4518,6 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 			return TCL_ERROR;
 		}
 
-		int printFlag=0;
-		char *fileNamePrint;
-		fileNamePrint = new char[256];
-		strcpy(fileNamePrint,"initialized");
-
-
-		int maxNumIter = 100;
 		while (argvCounter < argc) {
 
 			if (strcmp(argv[argvCounter],"-maxNumIter") == 0) {
@@ -4572,8 +4571,8 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 			}
 		}
 	
-		theNewSearchWithStepSizeAndStepDirection = new NewSearchWithStepSizeAndStepDirection(
-					maxNumIter, 
+		theFindDesignPointAlgorithm = new NewSearchWithStepSizeAndStepDirection(
+					maxNumIter, theReliabilityDomain, 
 					theGFunEvaluator,
 					theGradGEvaluator,
 					theStepSizeRule,
@@ -4581,12 +4580,7 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 					theProbabilityTransformation,
 					theHessianApproximation,
 					theReliabilityConvergenceCheck,
-					printFlag,
-					fileNamePrint,
-					theStartPoint);
-		theFindDesignPointAlgorithm = theNewSearchWithStepSizeAndStepDirection;
-
-		delete [] fileNamePrint;
+					printFlag, fileNamePrint, theStartPoint);
 		
 	}
 	else {
@@ -9347,7 +9341,7 @@ TclReliabilityModelBuilder_addInitialPointBuilder(ClientData clientData, Tcl_Int
 			}
 		}
 
-		if (theNewSearchWithStepSizeAndStepDirection == 0 ) {
+		if (theFindDesignPointAlgorithm == 0 ) {
 			opserr << "Need theNewSearchWithStepSizeAndStepDirection before a ThresholdIncInitialPointBuilder can be created" << endln;
 			return TCL_ERROR;
 		}
@@ -9355,7 +9349,7 @@ TclReliabilityModelBuilder_addInitialPointBuilder(ClientData clientData, Tcl_Int
 		theInitialPointBuilder = new ThresholdIncInitialPointBuilder
 								(theReliabilityDomain,
 								 theGFunEvaluator,
-								 theNewSearchWithStepSizeAndStepDirection,
+								 theFindDesignPointAlgorithm,
 								 maxDivide,
 								 eps,
 								 start_mirror,
@@ -9422,11 +9416,16 @@ TclReliabilityModelBuilder_addCrossingRateAnalyzer(ClientData clientData, Tcl_In
 		opserr << "Need theGFunEvaluator before an CrossingRateAnalyzer can be created" << endln;
 		return TCL_ERROR;
 		}
+		if (theGradGEvaluator == 0 ) {
+		opserr << "Need theGradGEvaluator before an CrossingRateAnalyzer can be created" << endln;
+		return TCL_ERROR;
+		}
 	}
 	theCrossingRateAnalyzer = new CrossingRateAnalyzer
 								(theReliabilityDomain,
 								 theFindDesignPointAlgorithm,
 								 theGFunEvaluator,
+								 theGradGEvaluator,
 								 analysisType,
 						         littleDt,
   								 print);
@@ -10156,7 +10155,7 @@ TclReliabilityModelBuilder_runRandomVibrationAnalysis(ClientData clientData, Tcl
 
 	theRandomVibrationAnalysis = new RandomVibrationAnalysis
 								(theReliabilityDomain,
-								 theNewSearchWithStepSizeAndStepDirection,
+								 theFindDesignPointAlgorithm,
 								 theStructuralDomain,
 //								 theMirrorImageBuilder,
 								 theInitialPointBuilder,
@@ -10164,6 +10163,7 @@ TclReliabilityModelBuilder_runRandomVibrationAnalysis(ClientData clientData, Tcl
 								 theFirstPassageAnalyzer,
 								 theGFunEvaluator,
 								 theGradGEvaluator,
+								 theReliabilityConvergenceCheck,
 								 StartTime,EndTime,TimeInterval,StartAnalysis,	
 								 FragMin,FragInt,nFrag,
 								 designPoint,

@@ -1,13 +1,14 @@
 
 
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:52 $
+// $Revision: 1.2 $
+// $Date: 2008-05-13 16:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/CrossingRateAnalyzer.cpp,v $
 
 #include <CrossingRateAnalyzer.h>
 CrossingRateAnalyzer::CrossingRateAnalyzer(ReliabilityDomain* passedReliabilityDomain,
 					   FindDesignPointAlgorithm* passedFindDesignPointAlgorithm,
 					   GFunEvaluator* passedGFunEvaluator,
+					   GradGEvaluator* passedGradGEvaluator,
 					   int passedanalysisType,
 					   double passedlittleDt,
   			         bool passedprint)
@@ -23,6 +24,7 @@ CrossingRateAnalyzer::CrossingRateAnalyzer(ReliabilityDomain* passedReliabilityD
 	theReliabilityDomain=passedReliabilityDomain;
 	theFindDesignPointAlgorithm=passedFindDesignPointAlgorithm;
 	theGFunEvaluator=passedGFunEvaluator;
+	theGradGEvaluator = passedGradGEvaluator;
 	theRandomProcess=0;
 	analysisType=passedanalysisType;
 	littleDt=passedlittleDt;
@@ -215,11 +217,9 @@ double CrossingRateAnalyzer::computeRate1()
 	char string[500];
 	NormalRV aStdNormRV(1,0.0,1.0,0.0);
 
-	GradGEvaluator* theGraEv=
-		theFindDesignPointAlgorithm->getGradGEvaluator();
 	// Get the 'dgdu' vector from the sensitivity evaluator
 	// (The returned matrix containes 'node#' 'dir#' 'dgdu' in rows)
-	Matrix DgDdispl = theGraEv->getDgDdispl();
+	Matrix DgDdispl = theGradGEvaluator->getDgDdispl();
 	// Add extra term to limit-state function
 	// (should add an alternative option where user give additional limit-state functions)
 	// (... because this works only when g is linear in u)
@@ -249,8 +249,7 @@ double CrossingRateAnalyzer::computeRate1()
 
 	theGFunEvaluator->setNsteps(numSteps);
 	theFindDesignPointAlgorithm->set_u(*uShifted);
-	int iresult=theFindDesignPointAlgorithm
-			->findDesignPoint(theReliabilityDomain);
+	int iresult=theFindDesignPointAlgorithm->findDesignPoint();
 
 	if (iresult < 0){
 		opserr << "OutCrossingAnalysis::analyze() - failed while finding the" << endln

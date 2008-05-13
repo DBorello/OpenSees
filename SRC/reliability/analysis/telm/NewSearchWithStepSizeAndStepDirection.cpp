@@ -22,14 +22,15 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2008-04-10 00:04:48 $
+// $Revision: 1.4 $
+// $Date: 2008-05-13 16:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/NewSearchWithStepSizeAndStepDirection.cpp,v $
                                                                      
 
 
 #include <NewSearchWithStepSizeAndStepDirection.h>
 #include <FindDesignPointAlgorithm.h>
+#include <ReliabilityDomain.h>
 #include <StepSizeRule.h>
 #include <SearchDirection.h>
 #include <ProbabilityTransformation.h>
@@ -51,7 +52,6 @@
 
 using std::ifstream;
 using std::ios;
-
 using std::setw;
 using std::setprecision;
 
@@ -59,6 +59,7 @@ using std::setprecision;
 
 NewSearchWithStepSizeAndStepDirection::NewSearchWithStepSizeAndStepDirection(
 					int passedMaxNumberOfIterations, 
+					ReliabilityDomain *passedReliabilityDomain,
 					GFunEvaluator *passedGFunEvaluator,
 					GradGEvaluator *passedGradGEvaluator,
 					StepSizeRule *passedStepSizeRule,
@@ -69,7 +70,7 @@ NewSearchWithStepSizeAndStepDirection::NewSearchWithStepSizeAndStepDirection(
 					int pprintFlag,
 					char *pFileNamePrint,
 					Vector *pStartPoint)
-:FindDesignPointAlgorithm()
+:FindDesignPointAlgorithm(passedReliabilityDomain)
 {
 	maxNumberOfIterations			= passedMaxNumberOfIterations;
 	theGFunEvaluator				= passedGFunEvaluator;
@@ -83,7 +84,6 @@ NewSearchWithStepSizeAndStepDirection::NewSearchWithStepSizeAndStepDirection(
 	printFlag						= pprintFlag;
 	numberOfEvaluations =0;
 	numberOfSensAna =0;
-	fileNamePrint = new char[256];
 	if (printFlag != 0) {
 		strcpy(fileNamePrint,pFileNamePrint);
 	}
@@ -123,12 +123,12 @@ NewSearchWithStepSizeAndStepDirection::NewSearchWithStepSizeAndStepDirection(
 
 NewSearchWithStepSizeAndStepDirection::~NewSearchWithStepSizeAndStepDirection()
 {
-	if (fileNamePrint!=0){delete [] fileNamePrint;fileNamePrint=0;}
+
 }
 
 
 int
-NewSearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedReliabilityDomain)
+NewSearchWithStepSizeAndStepDirection::findDesignPoint()
 {
 
   	check1_init=0.0;
@@ -137,7 +137,7 @@ NewSearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passed
 	check2_conv=0.0;
 
 	// Set the reliability domain (a data member of this class)
-	theReliabilityDomain = passedReliabilityDomain;
+	//theReliabilityDomain = passedReliabilityDomain;
 	// Declaration of data used in the algorithm
 	int numberOfRandomVariables = theReliabilityDomain->getNumberOfRandomVariables();
 	int j;

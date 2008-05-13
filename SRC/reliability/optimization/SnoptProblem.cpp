@@ -68,7 +68,8 @@ SnoptProblem::SnoptProblem(int passedMaxNumberOfIterations,
 					int pPrintFlag,
 					char *pFileNamePrint,
 					Vector *pStartPoint, char * probType, 
-					ReliabilityDomain * passedReliabilityDomain):
+					ReliabilityDomain * passedReliabilityDomain)
+:FindDesignPointAlgorithm(passedReliabilityDomain), 
   iSpecs(0), iSumm(6), iPrint(0), initCalled(0)
 {
 
@@ -116,7 +117,7 @@ SnoptProblem::SnoptProblem(int passedMaxNumberOfIterations,
 
 
 // ---------------------- step 3 snopt construction for reliability -------------------------------
-	this->theReliabilityDomain = passedReliabilityDomain;
+//	this->theReliabilityDomain = passedReliabilityDomain;
 
  
 //--------------------- step 3.1 for snopt memory alloc -------------------------------------
@@ -703,14 +704,14 @@ void SnoptProblem::setUserFun( My_fp ausrfun )
 // ------------------------------ reliability part ---------------------------
 
 int
-SnoptProblem::findDesignPoint(ReliabilityDomain *passedReliabilityDomain)
+SnoptProblem::findDesignPoint()
 {
 
 
 //---------------------define variables ------------------------------------------------------
 
 
-	 this->theReliabilityDomain = passedReliabilityDomain;
+//	 this->theReliabilityDomain = passedReliabilityDomain;
 
 	int numberOfRandomVariables = theReliabilityDomain->getNumberOfRandomVariables();
 	
@@ -749,7 +750,8 @@ SnoptProblem::findDesignPoint(ReliabilityDomain *passedReliabilityDomain)
 	
 	// Prepare output file to store the search points
 	
-	if (this->outputFile ==0)  { outputFile= new ofstream( fileNamePrint, ios::out ); }
+	if (this->outputFile ==0)
+		outputFile = new ofstream( fileNamePrint, ios::out );
 
 
 	if (printFlag == 0) {

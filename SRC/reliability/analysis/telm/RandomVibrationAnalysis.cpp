@@ -1,19 +1,20 @@
 
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:53 $
+// $Revision: 1.2 $
+// $Date: 2008-05-13 16:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/RandomVibrationAnalysis.cpp,v $
 
 #include <RandomVibrationAnalysis.h>
 RandomVibrationAnalysis::RandomVibrationAnalysis
 						(ReliabilityDomain* passedReliabilityDomain,
-						 //FindDesignPointAlgorithm* passedFindDesignPointAlgorithm,
-						 NewSearchWithStepSizeAndStepDirection* passedFindDesignPointAlgorithm,
+						 FindDesignPointAlgorithm* passedFindDesignPointAlgorithm,
+						 //NewSearchWithStepSizeAndStepDirection* passedFindDesignPointAlgorithm,
 						 Domain* passedDomain, 
 						 InitialPointBuilder* passedInitialPointBuilder,
 						 CrossingRateAnalyzer* passedCrossingRateAnalyzer,
 						 FirstPassageAnalyzer* passedFirstPassageAnalyzer,
 						 GFunEvaluator* passedGFunEvaluator,
    						 GradGEvaluator* passedGradGEvaluator,
+						 ReliabilityConvergenceCheck* passedReliabilityConvergenceCheck,
 						 double passedStartTime,
 						 double passedEndTime,
 						 double passedTimeInterval,
@@ -30,22 +31,21 @@ RandomVibrationAnalysis::RandomVibrationAnalysis
 						 char* passedFileBinary,
 						 Tcl_Interp* passedTclInterp,
 	 					 bool passedprint)
-:theReliabilityDomain(passedReliabilityDomain),
- theFindDesignPointAlgorithm(passedFindDesignPointAlgorithm),
- theDomain(passedDomain), 
- theInitialPointBuilder(passedInitialPointBuilder),
- theGFunEvaluator(passedGFunEvaluator),
- theGradGEvaluator(passedGradGEvaluator),
- theCrossingRateAnalyzer(passedCrossingRateAnalyzer),
- theFirstPassageAnalyzer(passedFirstPassageAnalyzer),
- designpoint(passeddesignpoint),
- stationary(passedstationary),
- mirrorimage(passedmirrorimage),
- initialpoint(passedinitialpoint),
- firstpassage(passedfirstpassage),
- theTclInterp(passedTclInterp),
- print(passedprint)
+:designpoint(passeddesignpoint), stationary(passedstationary),
+ mirrorimage(passedmirrorimage), initialpoint(passedinitialpoint),
+ firstpassage(passedfirstpassage), print(passedprint)
 {
+	theReliabilityDomain = passedReliabilityDomain;
+	theFindDesignPointAlgorithm = passedFindDesignPointAlgorithm;
+	theDomain = passedDomain;
+	theInitialPointBuilder = passedInitialPointBuilder;
+	theCrossingRateAnalyzer = passedCrossingRateAnalyzer;
+	theFirstPassageAnalyzer = passedFirstPassageAnalyzer;
+	theGFunEvaluator = passedGFunEvaluator;
+	theGradGEvaluator = passedGradGEvaluator;
+	theReliabilityConvergenceCheck = passedReliabilityConvergenceCheck;
+	theTclInterp = passedTclInterp;
+ 
 	delta= theGFunEvaluator->getDt();  // time step for the dynamic response analysis
 	fileName = new char[256];		   // output file name	
 	strcpy(fileName,passedFileName);
@@ -60,9 +60,8 @@ RandomVibrationAnalysis::RandomVibrationAnalysis
 	numRVPos = theReliabilityDomain->getNumberOfRandomVariablePositioners();
 	numLsf	 = theReliabilityDomain->getNumberOfLimitStateFunctions();
 
-	theRelConv=theFindDesignPointAlgorithm->getReliabilityConvergenceCheck();
- 	Scorg=theRelConv->getScaleValue();
-	Scfixorg=theRelConv->getScfix();
+	Scorg=theReliabilityConvergenceCheck->getScaleValue();
+	Scfixorg=theReliabilityConvergenceCheck->getScfix();
 	////////////////////////////////
 	///// find random process /////
 	////////////////////////////////
@@ -401,7 +400,7 @@ RandomVibrationAnalysis::DesignPoints(void)
 			}
 			theGFunEvaluator->setNsteps(AnalysisStep);
 			theFindDesignPointAlgorithm->set_x(*xinitial);
-			iresult=theFindDesignPointAlgorithm->findDesignPoint(theReliabilityDomain);
+			iresult=theFindDesignPointAlgorithm->findDesignPoint();
 			opserr<< "check--1\n";
 	 		if(iresult<0){ 
 				opserr << "Warning!! FORMAnalysis::analyze() - failed while finding the" << endln
@@ -768,9 +767,9 @@ double RandomVibrationAnalysis::setLimitState(LimitStateFunction* theLSF)
 }
 void RandomVibrationAnalysis::setScale(double scale)
 {
-	theRelConv->Scalefix(false);
-	theRelConv->setScaleValue(fabs(Performthreshold));
-	theRelConv->Scalefix(true);
+	theReliabilityConvergenceCheck->Scalefix(false);
+	theReliabilityConvergenceCheck->setScaleValue(fabs(Performthreshold));
+	theReliabilityConvergenceCheck->Scalefix(true);
 }
 void  RandomVibrationAnalysis::saveDesResults(int loc, int presult,
 											  int plsf, double pthre)
@@ -786,8 +785,8 @@ void  RandomVibrationAnalysis::saveDesResults(int loc, int presult,
 	numIterinFORM=theFindDesignPointAlgorithm->getNumberOfSteps();
 	betaTmp =(*alphaTmp)^(theFindDesignPointAlgorithm->get_u());
 	pfTmp = 1.0 - aStdNormRV->getCDFvalue(betaTmp);
-	double check1=theRelConv->getCheck1();
-	double check2=theRelConv->getCheck2();
+	double check1=theReliabilityConvergenceCheck->getCheck1();
+	double check2=theReliabilityConvergenceCheck->getCheck2();
 	double check1_init=theFindDesignPointAlgorithm->get_check1_init();
 	double check2_init=theFindDesignPointAlgorithm->get_check2_init();
 	double check1_conv=theFindDesignPointAlgorithm->get_check1_conv();
@@ -1142,7 +1141,7 @@ RandomVibrationAnalysis::nonStatDesignPoints(void)
 				theGFunEvaluator->setNsteps(AnalysisStep);
 				//// design point search 
 				theFindDesignPointAlgorithm->set_x(*xinitial);
-				iresult=theFindDesignPointAlgorithm->findDesignPoint(theReliabilityDomain);
+				iresult=theFindDesignPointAlgorithm->findDesignPoint();
 				if(iresult<0){ 
 					opserr << "Warning!! FORMAnalysis::analyze() - failed while finding the" << endln
 						   << " design point for limit-state function number " << lsf << "." << endln;
@@ -1222,7 +1221,7 @@ RandomVibrationAnalysis::nonStatDesignPoints(void)
 				}
 				theGFunEvaluator->setNsteps(AnalysisStep);
 				theFindDesignPointAlgorithm->set_x(*xinitial);
-				iresult=theFindDesignPointAlgorithm->findDesignPoint(theReliabilityDomain);
+				iresult=theFindDesignPointAlgorithm->findDesignPoint();
 				if(iresult<0){ 
 					opserr << "Warning FORMAnalysis::analyze() - failed while finding the" << endln
 							<< " design point for limit-state function number " 

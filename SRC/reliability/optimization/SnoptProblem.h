@@ -104,7 +104,7 @@ public:
 					Vector *startPoint, char * probType,
 					ReliabilityDomain * passedReliabilityDomain);
 
-   SnoptProblem(){this->outputFile =0;};
+   //SnoptProblem(){this->outputFile =0;};
 
 
   ~SnoptProblem();
@@ -145,7 +145,7 @@ public:
 // ---------------- for reliability part only --------------------------
 // ----------------------------------------------------------------  
 public:
-	int findDesignPoint(ReliabilityDomain *theReliabilityDomain);
+	int findDesignPoint();
 
 	const Vector & get_x();
 	const Vector & get_u();
@@ -175,7 +175,6 @@ public:  // not good, but avoid large amount of functions.
 	
 
 	// The reliability domain and tools for the analysis
-	ReliabilityDomain *theReliabilityDomain;
 	GFunEvaluator *theGFunEvaluator;
 	GradGEvaluator *theGradGEvaluator;
 	ProbabilityTransformation *theProbabilityTransformation;
@@ -202,6 +201,8 @@ public:  // not good, but avoid large amount of functions.
 	int printFlag;
 	char *fileNamePrint;
 	int numberOfEvaluations;
+	
+	ofstream *outputFile;
 
 };
 

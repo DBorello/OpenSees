@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-10-31 22:01:17 $
+// $Revision: 1.8 $
+// $Date: 2008-05-13 16:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FragilityAnalysis.cpp,v $
 
 
@@ -189,7 +189,7 @@ FragilityAnalysis::analyze(void)
 
 
 			// Find the design point
-			if (theFindDesignPointAlgorithm->findDesignPoint(theReliabilityDomain) < 0){
+			if (theFindDesignPointAlgorithm->findDesignPoint() < 0){
 
 				// Set detectable 'crazy' values when the design point wasn't found
 				pf(counter) = -1.0;

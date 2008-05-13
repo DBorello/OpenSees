@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2008-03-13 22:30:16 $
+// $Revision: 1.4 $
+// $Date: 2008-05-13 16:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/FindDesignPointAlgorithm.cpp,v $
 
 
@@ -32,11 +32,12 @@
 //
 
 #include <FindDesignPointAlgorithm.h>
+#include <ReliabilityDomain.h>
 
  
-FindDesignPointAlgorithm::FindDesignPointAlgorithm()
+FindDesignPointAlgorithm::FindDesignPointAlgorithm(ReliabilityDomain *passedReliabilityDomain)
 {
-	outputFile =0;
+	theReliabilityDomain = passedReliabilityDomain;
 }
 
 FindDesignPointAlgorithm::~FindDesignPointAlgorithm()
@@ -50,12 +51,12 @@ FindDesignPointAlgorithm::set_u(Vector& v)
 	opserr << "FindDesignPointAlgorithm::set_u() - " << endln
            << " this function is for newalgorithm" << endln;
 }
-GradGEvaluator*
-FindDesignPointAlgorithm::getGradGEvaluator()
+
+void
+FindDesignPointAlgorithm::set_x(Vector& x)
 {
-	opserr << "FindDesignPointAlgorithm::getGradGEvaluator() - " << endln
+	opserr << "FindDesignPointAlgorithm::set_x() - " << endln
            << " this function is for newalgorithm" << endln;
-	return 0;
 }
 
 double
@@ -73,4 +74,44 @@ FindDesignPointAlgorithm::getJacobian_x_u()
            << " this function is for newalgorithm" << endln;
 	Matrix* zero=0;
 	return (*zero);
+}
+
+int
+FindDesignPointAlgorithm::getNumberOfSensAna()
+{
+	opserr << "FindDesignPointAlgorithm::getNumberOfSensAna() - " << endln
+           << " this function is for newalgorithm" << endln;
+	return 0;
+}
+
+double
+FindDesignPointAlgorithm::get_check1_init()
+{
+	opserr << "FindDesignPointAlgorithm::get_check1_init() - " << endln
+           << " this function is for newalgorithm" << endln;
+	return 0;
+}
+
+double
+FindDesignPointAlgorithm::get_check2_init()
+{
+	opserr << "FindDesignPointAlgorithm::get_check2_init() - " << endln
+           << " this function is for newalgorithm" << endln;
+	return 0;
+}
+
+double
+FindDesignPointAlgorithm::get_check1_conv()
+{
+	opserr << "FindDesignPointAlgorithm::get_check1_conv() - " << endln
+           << " this function is for newalgorithm" << endln;
+	return 0;
+}
+
+double
+FindDesignPointAlgorithm::get_check2_conv()
+{
+	opserr << "FindDesignPointAlgorithm::get_check2_conv() - " << endln
+           << " this function is for newalgorithm" << endln;
+	return 0;
 }

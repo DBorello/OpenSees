@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:53 $
+// $Revision: 1.2 $
+// $Date: 2008-05-13 16:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/RandomVibrationAnalysis.h,v $
 
 #ifndef RandomVibrationAnalysis_h
@@ -29,6 +29,7 @@
 #include <ReliabilityDomain.h>
 #include <FindDesignPointAlgorithm.h>
 #include <NewSearchWithStepSizeAndStepDirection.h>
+#include <ReliabilityConvergenceCheck.h>
 #include <InitialPointBuilder.h>
 #include <CrossingRateAnalyzer.h>
 #include <FirstPassageAnalyzer.h>
@@ -56,14 +57,15 @@ class RandomVibrationAnalysis
 {
   public:
 	RandomVibrationAnalysis(ReliabilityDomain* passedReliabilityDomain,
-							//FindDesignPointAlgorithm* passedFindDesignPointAlgorithm,
-							NewSearchWithStepSizeAndStepDirection* passedFindDesignPointAlgorithm,
+							FindDesignPointAlgorithm* passedFindDesignPointAlgorithm,
+							//NewSearchWithStepSizeAndStepDirection* passedFindDesignPointAlgorithm,
 							Domain* passedDomain, 
 							InitialPointBuilder* passedInitialPointBuilder,
 							CrossingRateAnalyzer* passedCrossingRateAnalyzer,
 							FirstPassageAnalyzer* passedFirstPassageAnalyzer,
 							GFunEvaluator* passedGFunEvaluator,
 							GradGEvaluator* passedGradGEvaluator,
+							ReliabilityConvergenceCheck* passedReliabilityConvergenceCheck,
 							double passedStartTime,
 							double passedEndTime,
 							double passedTimeInterval,
@@ -105,10 +107,11 @@ class RandomVibrationAnalysis
 	// classes //
 	Domain* theDomain; 
 	ReliabilityDomain* theReliabilityDomain;
-	//FindDesignPointAlgorithm* theFindDesignPointAlgorithm;
-	NewSearchWithStepSizeAndStepDirection* theFindDesignPointAlgorithm;
+	FindDesignPointAlgorithm* theFindDesignPointAlgorithm;
+	//NewSearchWithStepSizeAndStepDirection* theFindDesignPointAlgorithm;
     GFunEvaluator* theGFunEvaluator;
     GradGEvaluator* theGradGEvaluator;
+	ReliabilityConvergenceCheck* theReliabilityConvergenceCheck;
 
 	InitialPointBuilder* theInitialPointBuilder;
 	CrossingRateAnalyzer* theCrossingRateAnalyzer;
@@ -116,7 +119,6 @@ class RandomVibrationAnalysis
 
 	RandomProcess* theRandomProcess;
 	TimePoints* theTimePoints;
-	ReliabilityConvergenceCheck* theRelConv;
 	LimitStateFunction *theLSF;
 	OutCrossingResults* theOutCrossingResults;
     TaggedObjectStorage* thePerformFuncCoeffs;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:53 $
+// $Revision: 1.2 $
+// $Date: 2008-05-13 16:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/ThresholdIncInitialPointBuilder.h,v $
 
 #ifndef ThresholdIncInitialPointBuilder_h
@@ -47,8 +47,8 @@ class ThresholdIncInitialPointBuilder : public InitialPointBuilder
   public:
 	ThresholdIncInitialPointBuilder(ReliabilityDomain *theReliabilityDomain,
 						GFunEvaluator* theGFunEvaluator,
-						//FindDesignPointAlgorithm* theFindDesignPointAlgorithm,
-						NewSearchWithStepSizeAndStepDirection* theFindDesignPointAlgorithm,
+						FindDesignPointAlgorithm* theFindDesignPointAlgorithm,
+						//NewSearchWithStepSizeAndStepDirection* theFindDesignPointAlgorithm,
 						int maxDivide=20,
 						double eps=0.05,
 						bool start_mirror=true,
@@ -69,7 +69,8 @@ class ThresholdIncInitialPointBuilder : public InitialPointBuilder
   protected: 
     
   private:
-	NewSearchWithStepSizeAndStepDirection* theFindDesignPointAlgorithm;
+	//NewSearchWithStepSizeAndStepDirection* theFindDesignPointAlgorithm;
+	FindDesignPointAlgorithm* theFindDesignPointAlgorithm;
 	int numAna;
 	bool print;
 	ofstream output;

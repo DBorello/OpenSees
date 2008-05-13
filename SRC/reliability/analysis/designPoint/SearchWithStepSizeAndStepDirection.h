@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2008-03-13 22:30:16 $
+// $Revision: 1.8 $
+// $Date: 2008-05-13 16:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.h,v $
 
 
@@ -57,6 +57,7 @@ public:
 	// Constructor and destructor
 	SearchWithStepSizeAndStepDirection(
 					int passedMaxNumberOfIterations, 
+					ReliabilityDomain *passedReliabilityDomain,
 					GFunEvaluator *passedGFunEvaluator,
 					GradGEvaluator *passedGradGEvaluator,
 					StepSizeRule *passedStepSizeRule,
@@ -69,7 +70,7 @@ public:
 					Vector *startPoint);
 	~SearchWithStepSizeAndStepDirection();
 	
-	int findDesignPoint(ReliabilityDomain *theReliabilityDomain);
+	int findDesignPoint();
 
 	const Vector &get_x();
 	const Vector &get_u();
@@ -90,7 +91,6 @@ protected:
 private:	
 
 	// The reliability domain and tools for the analysis
-	ReliabilityDomain *theReliabilityDomain;
 	GFunEvaluator *theGFunEvaluator;
 	GradGEvaluator *theGradGEvaluator;
 	StepSizeRule *theStepSizeRule;
@@ -107,21 +107,22 @@ private:
 	int maxNumberOfIterations;
 
 	// Data members where the results are to be stored
-	Vector x;
-	Vector u;
-	Vector alpha;
-	Vector gradientInStandardNormalSpace;
-	Vector gamma;
-	Vector uSecondLast;
-	Vector alphaSecondLast;
-	int i;
-	Vector searchDirection;
+	Vector *x;
+	Vector *u;
+	Vector *alpha;
+	Vector *gamma;
+	Vector *gradientInStandardNormalSpace;
+	Vector *uSecondLast;
+	Vector *alphaSecondLast;
+	Vector *searchDirection;
+	
+	int steps;
 	double Gfirst;
 	double Glast;
 
 	// Data members set through the call when a job is to be done
 	Vector *startPoint;
-	Vector *designPoint_uStar;
+	//Vector *designPoint_uStar;
 
 	int printFlag;
 	char fileNamePrint[256];

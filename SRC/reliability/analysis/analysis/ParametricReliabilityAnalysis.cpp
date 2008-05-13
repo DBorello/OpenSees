@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-11-06 01:59:51 $
+// $Revision: 1.7 $
+// $Date: 2008-05-13 16:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/ParametricReliabilityAnalysis.cpp,v $
 
 
@@ -188,7 +188,7 @@ ParametricReliabilityAnalysis::analyze(void)
 
 
 			// Find the design point
-			if (theFindDesignPointAlgorithm->findDesignPoint(theReliabilityDomain) < 0){
+			if (theFindDesignPointAlgorithm->findDesignPoint() < 0){
 
 				// Set detectable 'crazy' values when the design point wasn't found
 				pf(counter) = -1.0;

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2008-04-10 18:10:29 $
+// $Revision: 1.16 $
+// $Date: 2008-05-13 16:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FORMAnalysis.cpp,v $
 
 
@@ -120,7 +120,7 @@ FORMAnalysis::analyze()
 	  outputFile << "#                                                                     #" << endln;
 	  
 	  // Find the design point
-	  if (theFindDesignPointAlgorithm->findDesignPoint(theReliabilityDomain) < 0){
+	  if (theFindDesignPointAlgorithm->findDesignPoint() < 0){
 	    opserr << "FORMAnalysis::analyze() - failed while finding the" << endln
 		   << " design point for limit-state function number " << lsf << "." << endln;
 	    

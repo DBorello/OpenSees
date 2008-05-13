@@ -18,15 +18,15 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:53 $
+// $Revision: 1.2 $
+// $Date: 2008-05-13 16:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/ThresholdIncInitialPointBuilder.cpp,v $
 
 #include <ThresholdIncInitialPointBuilder.h>
 ThresholdIncInitialPointBuilder::ThresholdIncInitialPointBuilder(ReliabilityDomain *passedReliabilityDomain,
 						GFunEvaluator* passedGFunEvaluator,
-						//FindDesignPointAlgorithm* passedFindDesignPointAlgorithm,
-						NewSearchWithStepSizeAndStepDirection* passedFindDesignPointAlgorithm,
+						FindDesignPointAlgorithm* passedFindDesignPointAlgorithm,
+						//NewSearchWithStepSizeAndStepDirection* passedFindDesignPointAlgorithm,
 						int passedmaxDivide,
 						double passedeps,
 						bool passedstart_mirror,
@@ -206,7 +206,7 @@ Vector ThresholdIncInitialPointBuilder::buildInitialPoint(int nstep)
 //						theOutCrossingResults->clear(lsf,0, xresp, 0.0, 0, numRV);
 						theGFunEvaluator->setThreshold(xresp);
 						theFindDesignPointAlgorithm->set_x(*xtemp);
-						int iresult=theFindDesignPointAlgorithm->findDesignPoint(theReliabilityDomain);
+						int iresult=theFindDesignPointAlgorithm->findDesignPoint();
 
 						// save results //
 //						theOutCrossingResults->setnumAna(0,theFindDesignPointAlgorithm->getNumberOfEvaluations());

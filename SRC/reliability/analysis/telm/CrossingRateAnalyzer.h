@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:52 $
+// $Revision: 1.2 $
+// $Date: 2008-05-13 16:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/CrossingRateAnalyzer.h,v $
 
 
@@ -51,6 +51,7 @@ class CrossingRateAnalyzer
 	CrossingRateAnalyzer(ReliabilityDomain* passedReliabilityDomain,
 						 FindDesignPointAlgorithm* passedFindDesignPointAlgorithm,
 						 GFunEvaluator* passedGFunEvaluator,
+						 GradGEvaluator* passedGradGEvaluator,
 						 int passedanalysisType=2,
 						 double passedlittleDt=0.1,
   						 bool passedprint=false);
@@ -70,6 +71,7 @@ class CrossingRateAnalyzer
 	ReliabilityDomain* theReliabilityDomain;
 	FindDesignPointAlgorithm* theFindDesignPointAlgorithm;
     GFunEvaluator*   theGFunEvaluator;
+	GradGEvaluator* theGradGEvaluator;
 	RandomProcess* theRandomProcess;
 	double computeRate1(void);
 	double computeRate2(void);
