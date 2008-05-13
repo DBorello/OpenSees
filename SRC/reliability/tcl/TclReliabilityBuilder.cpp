@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.44 $
-// $Date: 2008-05-13 16:30:27 $
+// $Revision: 1.45 $
+// $Date: 2008-05-13 20:24:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -370,7 +370,7 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
   Tcl_CreateCommand(interp, "gradGEvaluator",TclReliabilityModelBuilder_addGradGEvaluator,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "stepSizeRule",TclReliabilityModelBuilder_addStepSizeRule,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "searchDirection",	TclReliabilityModelBuilder_addSearchDirection,(ClientData)NULL, NULL);
-  Tcl_CreateCommand(interp, "HessianApproximation",	TclReliabilityModelBuilder_addHessianApproximation,(ClientData)NULL, NULL);
+  Tcl_CreateCommand(interp, "hessianApproximation",	TclReliabilityModelBuilder_addHessianApproximation,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "meritFunctionCheck",	TclReliabilityModelBuilder_addMeritFunctionCheck,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "reliabilityConvergenceCheck",	TclReliabilityModelBuilder_addReliabilityConvergenceCheck,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "probabilityTransformation",	TclReliabilityModelBuilder_addProbabilityTransformation,(ClientData)NULL, NULL);
@@ -579,29 +579,31 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
   Tcl_DeleteCommand(theInterp, "correlate");
   Tcl_DeleteCommand(theInterp, "correlateGroup");
   Tcl_DeleteCommand(theInterp, "correlationStructure");
-  Tcl_DeleteCommand(theInterp, "limitState");
+  Tcl_DeleteCommand(theInterp, "cutset");
+  Tcl_DeleteCommand(theInterp, "performanceFunction");
   Tcl_DeleteCommand(theInterp, "randomVariablePositioner");
   Tcl_DeleteCommand(theInterp, "positionerPositioner");
   Tcl_DeleteCommand(theInterp, "modulatingFunction");
   Tcl_DeleteCommand(theInterp, "filter");
   Tcl_DeleteCommand(theInterp, "spectrum");
   Tcl_DeleteCommand(theInterp, "findDesignPoint");
-  Tcl_DeleteCommand(theInterp, "gFunEvaluator");
-  Tcl_DeleteCommand(theInterp, "GradGEvaluator");
-  Tcl_DeleteCommand(theInterp, "stepSizeRule");
-  Tcl_DeleteCommand(theInterp, "searchDirection");
-  Tcl_DeleteCommand(theInterp, "HessianApproximation");
-  Tcl_DeleteCommand(theInterp, "meritFunctionCheck");
-  Tcl_DeleteCommand(theInterp, "reliabilityConvergenceCheck");
-  Tcl_DeleteCommand(theInterp, "ProbabilityTransformation");
   Tcl_DeleteCommand(theInterp, "startPoint");
   Tcl_DeleteCommand(theInterp, "rootFinding");
+  Tcl_DeleteCommand(theInterp, "gFunEvaluator");
+  Tcl_DeleteCommand(theInterp, "gradGEvaluator");
+  Tcl_DeleteCommand(theInterp, "stepSizeRule");
+  Tcl_DeleteCommand(theInterp, "searchDirection");
+  Tcl_DeleteCommand(theInterp, "hessianApproximation");
+  Tcl_DeleteCommand(theInterp, "meritFunctionCheck");
+  Tcl_DeleteCommand(theInterp, "reliabilityConvergenceCheck");
+  Tcl_DeleteCommand(theInterp, "probabilityTransformation");
   Tcl_DeleteCommand(theInterp, "findCurvatures");
   Tcl_DeleteCommand(theInterp, "randomNumberGenerator");
   Tcl_DeleteCommand(theInterp, "runFORMAnalysis");
   Tcl_DeleteCommand(theInterp, "runFOSMAnalysis");
   Tcl_DeleteCommand(theInterp, "runParametricReliabilityAnalysis");
   Tcl_DeleteCommand(theInterp, "runGFunVizAnalysis");
+  Tcl_DeleteCommand(theInterp, "runOutCrossingAnalysis");
   Tcl_DeleteCommand(theInterp, "runSORMAnalysis");
   Tcl_DeleteCommand(theInterp, "runSystemAnalysis");
   Tcl_DeleteCommand(theInterp, "runImportanceSamplingAnalysis");
@@ -609,23 +611,11 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
   Tcl_DeleteCommand(theInterp, "inputCheck");
   Tcl_DeleteCommand(theInterp, "getMean");
   Tcl_DeleteCommand(theInterp, "getStdv");
-
-  Tcl_DeleteCommand(theInterp, "designVariable");
-  Tcl_DeleteCommand(theInterp, "designVariablePositioner");
-  Tcl_DeleteCommand(theInterp, "constraintFunction");
-  Tcl_DeleteCommand(theInterp, "objectiveFunction");
-  Tcl_DeleteCommand(theInterp, "runSNOPTAnalysis");
-  Tcl_DeleteCommand(theInterp, "runMonteCarloResponseAnalysis");
-  Tcl_DeleteCommand(theInterp, "updateParameter");
-  Tcl_DeleteCommand(theInterp, "runOrthogonalPlaneSamplingAnalysis");
-  Tcl_DeleteCommand(theInterp, "computeHessian");
-  Tcl_DeleteCommand(theInterp, "runMultiDimVisualPrinPlane");
-  Tcl_DeleteCommand(theInterp, "runDP_RSM_SimTimeInvariantAnalysis");
-  Tcl_DeleteCommand(theInterp, "runDP_RSM_SimTimeVariantAnalysis");
-  
+  Tcl_DeleteCommand(theInterp, "rvReduction");
   Tcl_DeleteCommand(theInterp, "betaFORM");
   Tcl_DeleteCommand(theInterp, "gammaFORM");
   Tcl_DeleteCommand(theInterp, "invNormalCDF");
+
   /////S added by K Fujimura /////
   Tcl_DeleteCommand(theInterp, "analyzer");
   Tcl_DeleteCommand(theInterp, "initialstaticanalysis");
@@ -636,6 +626,21 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
   Tcl_DeleteCommand(theInterp, "randomvibrationsimulation");
   Tcl_DeleteCommand(theInterp, "randomvibrationanalysis");
   /////E added by K Fujimura /////
+
+  Tcl_DeleteCommand(theInterp, "runMonteCarloResponseAnalysis");
+  Tcl_DeleteCommand(theInterp, "designVariablePositioner");
+  Tcl_DeleteCommand(theInterp, "constraintFunction");
+  Tcl_DeleteCommand(theInterp, "objectiveFunction");
+  Tcl_DeleteCommand(theInterp, "runSNOPTAnalysis");
+  Tcl_DeleteCommand(theInterp, "updateParameter");
+  Tcl_DeleteCommand(theInterp, "designVariable");
+  Tcl_DeleteCommand(theInterp, "runOrthogonalPlaneSamplingAnalysis");
+  Tcl_DeleteCommand(theInterp, "computeHessian");
+  Tcl_DeleteCommand(theInterp, "runMultiDimVisualPrinPlane");
+  Tcl_DeleteCommand(theInterp, "transformXtoU");
+  Tcl_DeleteCommand(theInterp, "transformUtoX");
+  Tcl_DeleteCommand(theInterp, "runDP_RSM_SimTimeInvariantAnalysis");
+  Tcl_DeleteCommand(theInterp, "runDP_RSM_SimTimeVariantAnalysis");
 }
 
 
