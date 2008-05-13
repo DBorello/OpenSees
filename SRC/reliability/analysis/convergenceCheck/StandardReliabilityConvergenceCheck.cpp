@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-05-01 21:54:47 $
+// $Revision: 1.7 $
+// $Date: 2008-05-13 18:37:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/convergenceCheck/StandardReliabilityConvergenceCheck.cpp,v $
 
 
@@ -100,20 +100,37 @@ StandardReliabilityConvergenceCheck::setScaleValue(double passedScaleValue)
 int	
 StandardReliabilityConvergenceCheck::check(const Vector &u, double g, const Vector &gradG)
 {
-
 	// Alpha vector
-	Vector alpha = gradG *  ( (-1.0) / gradG.Norm() );
+	//Vector alpha = gradG *  ( (-1.0) / gradG.Norm() );
+	double gradGnorm = gradG.Norm();
+	double oneOver_gradGnorm = 1.0/gradGnorm;
 
 	// The scaling factor (rather new development)
 	double temp0=u.Norm();
 	if (temp0 < 1.0) {
 		temp0 = 1.0; 
 	}
+	double oneOver_temp0 = 1.0/temp0;
 
 	// Scaled u-vector
-	Vector u_scaled = (1.0/temp0) * u;
-	Vector temp1 = u_scaled - (alpha^u_scaled)*alpha;
-	
+	//Vector u_scaled = (1.0/temp0) * u;
+	//Vector temp1 = u_scaled - (alpha^u_scaled)*alpha;
+	double alpha_dot_uScaled = -(gradG^u)*oneOver_gradGnorm*oneOver_temp0;
+
+	//criterium2 = temp1.Norm();
+	//opserr << criterium2 << endln;
+
+	criterium2 = 0.0;
+	double tmp1;
+	double tmp2 = -alpha_dot_uScaled*oneOver_gradGnorm;
+	// This loop replaces 'Vector temp1' above -- MHS
+	for (int i = 0; i < u.Size(); i++) {
+	  tmp1 = oneOver_temp0*u(i) - tmp2*gradG(i);
+	  criterium2 += tmp1*tmp1;
+	}
+	criterium2 = sqrt(criterium2);
+	//opserr << criterium2 << ' ';
+
 	// Convergence criteria
 	if (scaleValue == 0.0) {
 		opserr << "StandardReliabilityConvergenceCheck::check() -- scale value is zero or has " << 
@@ -123,8 +140,6 @@ StandardReliabilityConvergenceCheck::check(const Vector &u, double g, const Vect
 	else
 		criterium1 = fabs(g / scaleValue);
 	
-	criterium2 = temp1.Norm();
-
 	// Inform user about convergence status 
 	char outputString[100];
 	sprintf(outputString,"check1=(%11.3e), check2=(%10.3e), dist=%16.14f",criterium1,criterium2,u.Norm());
