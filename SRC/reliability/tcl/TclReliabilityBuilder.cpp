@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.45 $
-// $Date: 2008-05-13 20:24:28 $
+// $Revision: 1.46 $
+// $Date: 2008-05-15 21:24:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -330,7 +330,7 @@ int TclReliabilityModelBuilder_addObjectiveFunction(ClientData clientData,Tcl_In
 int TclReliabilityModelBuilder_addConstraintFunction(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_runSNOPTAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_runMonteCarloResponseAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-int TclReliabilityModelBuilder_updateParameter(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_updateParameterValue(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_runOrthogonalPlaneSamplingAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_computeHessian(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_MultiDimVisPrincPlane(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
@@ -416,7 +416,7 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
    Tcl_CreateCommand(interp, "constraintFunction", TclReliabilityModelBuilder_addConstraintFunction,(ClientData)NULL, NULL);
    Tcl_CreateCommand(interp, "objectiveFunction", TclReliabilityModelBuilder_addObjectiveFunction,(ClientData)NULL, NULL);
    Tcl_CreateCommand(interp, "runSNOPTAnalysis", TclReliabilityModelBuilder_runSNOPTAnalysis,(ClientData)NULL, NULL);
-   Tcl_CreateCommand(interp, "updateParameter", TclReliabilityModelBuilder_updateParameter,(ClientData)NULL, NULL);
+   Tcl_CreateCommand(interp, "updateParameterValue", TclReliabilityModelBuilder_updateParameterValue,(ClientData)NULL, NULL);
    Tcl_CreateCommand(interp, "designVariable", TclReliabilityModelBuilder_addDesignVariable,(ClientData)NULL, NULL);
    Tcl_CreateCommand(interp, "runOrthogonalPlaneSamplingAnalysis",TclReliabilityModelBuilder_runOrthogonalPlaneSamplingAnalysis,(ClientData)NULL, NULL);
    Tcl_CreateCommand(interp, "computeHessian",TclReliabilityModelBuilder_computeHessian,(ClientData)NULL, NULL);
@@ -632,7 +632,7 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
   Tcl_DeleteCommand(theInterp, "constraintFunction");
   Tcl_DeleteCommand(theInterp, "objectiveFunction");
   Tcl_DeleteCommand(theInterp, "runSNOPTAnalysis");
-  Tcl_DeleteCommand(theInterp, "updateParameter");
+  Tcl_DeleteCommand(theInterp, "updateParameterValue");
   Tcl_DeleteCommand(theInterp, "designVariable");
   Tcl_DeleteCommand(theInterp, "runOrthogonalPlaneSamplingAnalysis");
   Tcl_DeleteCommand(theInterp, "computeHessian");
@@ -7724,12 +7724,11 @@ TclReliabilityModelBuilder_runMonteCarloResponseAnalysis(ClientData clientData, 
 }
 
 
-
 ///////
-///  Command:  updateParameter  -rv 1 -value 20.0  or updateParameter   -startPoint 
-///            updateParameter  -dv 3 -value 20.0
+///  Command:  updateParameterValue  -rv 1 -value 20.0  or updateParameterValue   -startPoint 
+///            updateParameterValue  -dv 3 -value 20.0
 int 
-TclReliabilityModelBuilder_updateParameter(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+TclReliabilityModelBuilder_updateParameterValue(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 	// Do input check
 	char theCommand[15] = "inputCheck";
@@ -7836,7 +7835,6 @@ TclReliabilityModelBuilder_updateParameter(ClientData clientData, Tcl_Interp *in
 	return TCL_OK;
 
 }
-
 
 /*
 Hessian::Hessian(int pSize,ReliabilityDomain *passedReliabilityDomain, 
