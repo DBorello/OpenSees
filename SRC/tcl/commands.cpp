@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.121 $
-// $Date: 2008-05-13 21:50:11 $
+// $Revision: 1.122 $
+// $Date: 2008-05-15 21:11:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -91,6 +91,7 @@ OPS_Stream *opserrPtr = &sserr;
 #include <LoadPatternIter.h>
 #include <ElementalLoad.h>
 #include <ElementalLoadIter.h>
+#include <ParameterIter.h>
 #include <SP_Constraint.h> //Joey UC Davis
 #include <SP_ConstraintIter.h> //Joey UC Davis
 
@@ -641,6 +642,10 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "getEleTags", &getEleTags, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
     Tcl_CreateCommand(interp, "getNodeTags", &getNodeTags, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
+    Tcl_CreateCommand(interp, "getParamTags", &getParamTags, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
+    Tcl_CreateCommand(interp, "getParamValue", &getParamValue, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
 
 #ifdef _RELIABILITY
@@ -5409,6 +5414,47 @@ getNodeTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv
     sprintf(buffer, "%d ", theEle->getTag());
     Tcl_AppendResult(interp, buffer, NULL);
   }
+
+  return TCL_OK;
+}
+
+int
+getParamTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  Parameter *theEle;
+  ParameterIter &eleIter = theDomain.getParameters();
+
+  char buffer[20];
+
+  while ((theEle = eleIter()) != 0) {
+    sprintf(buffer, "%d ", theEle->getTag());
+    Tcl_AppendResult(interp, buffer, NULL);
+  }
+
+  return TCL_OK;
+}
+
+int
+getParamValue(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  if (argc < 2) {
+    opserr << "Insufficient arguments to getParamValue" << endln;
+    return TCL_ERROR;
+  }
+
+  int paramTag;
+
+  if (Tcl_GetInt(interp, argv[1], &paramTag) != TCL_OK) {
+    opserr << "WARNING getParamValue -- could not read paramTag \n";
+    return TCL_ERROR;	        
+  }
+
+  Parameter *theEle = theDomain.getParameter(paramTag);
+
+  char buffer[20];
+
+  sprintf(buffer, "%f", theEle->getValue());
+  Tcl_SetResult(interp, buffer, TCL_VOLATILE);
 
   return TCL_OK;
 }

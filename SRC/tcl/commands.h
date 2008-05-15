@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2008-05-13 21:50:11 $
+// $Revision: 1.20 $
+// $Date: 2008-05-15 21:11:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
                                                                         
@@ -148,6 +148,12 @@ getNodeTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv
 
 int 
 getEleTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+getParamTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+getParamValue(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 // AddingSensitivity:BEGIN /////////////////////////////////////////////////
 
