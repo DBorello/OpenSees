@@ -1,6 +1,6 @@
 include ../../../../Makefile.def
 
-OBJS       = 	Filter.o \
+OBJS       = 	Filter.o FilterIter.o \
 	StandardLinearOscillatorDisplacementFilter.o \
 	StandardLinearOscillatorAccelerationFilter.o \
 	StandardLinearOscillatorVelocityFilter.o \
