@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2008-05-08 15:34:00 $
+// $Revision: 1.16 $
+// $Date: 2008-05-15 21:12:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.h,v $
 
 
@@ -63,6 +63,9 @@ class ParameterPositionerIter;
 class LimitStateFunctionIter;
 class CutsetIter;
 class CorrelationCoefficientIter;
+class ModulatingFunctionIter;
+class FilterIter;
+class SpectrumIter;
 
 class ReliabilityDomain
 {
@@ -143,6 +146,9 @@ public:
 	int removeCorrelationCoefficient(int tag);
 	int removeLimitStateFunction(int tag);
 	int removeCutset(int tag);
+	int removeModulatingFunction(int tag);
+	int removeFilter(int tag);
+	int removeSpectrum(int tag);
 
 	int removeDesignVariable(int tag);
 	int removeDesignVariablePositioner(int tag);
@@ -157,6 +163,9 @@ public:
 	LimitStateFunctionIter &getLimitStateFunctions(void);
 	CorrelationCoefficientIter &getCorrelationCoefficients(void);
 	CutsetIter &getCutsets(void);
+	ModulatingFunctionIter &getModulatingFunctions(void);
+	FilterIter &getFilters(void);
+	SpectrumIter &getSpectra(void);
 	
 	virtual void Print(OPS_Stream &s, int flag =0);
 
@@ -185,6 +194,9 @@ private:
 	LimitStateFunctionIter *theLSFIter;
 	CutsetIter *theCutIter;
 	CorrelationCoefficientIter *theCCIter;
+	ModulatingFunctionIter *theMFIter;
+	FilterIter *theFilterIter;
+	SpectrumIter *theSpectrumIter;
 
 	// Integer array: index[i] = tag of component i
 	// Should put these in another class eventually because

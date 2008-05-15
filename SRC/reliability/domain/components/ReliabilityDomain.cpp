@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2008-05-13 20:21:16 $
+// $Revision: 1.18 $
+// $Date: 2008-05-15 21:12:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.cpp,v $
 
 
@@ -51,6 +51,9 @@
 #include <LimitStateFunctionIter.h>
 #include <CorrelationCoefficientIter.h>
 #include <CutsetIter.h>
+#include <ModulatingFunctionIter.h>
+#include <FilterIter.h>
+#include <SpectrumIter.h>
 
 ReliabilityDomain::ReliabilityDomain():
   numRandomVariables(0), numLimitStateFunctions(0), numCutsets(0)
@@ -79,6 +82,9 @@ ReliabilityDomain::ReliabilityDomain():
 	theLSFIter = new LimitStateFunctionIter(theLimitStateFunctionsPtr);
 	theCutIter = new CutsetIter(theCutsetsPtr);
 	theCCIter = new CorrelationCoefficientIter(theCorrelationCoefficientsPtr);
+	theMFIter = new ModulatingFunctionIter(theModulatingFunctionsPtr);
+	theFilterIter = new FilterIter(theFiltersPtr);
+	theSpectrumIter = new SpectrumIter(theSpectraPtr);
 
 	rvIndex = new int[rvSize_init];
 	rvSize = rvSize_init;
@@ -146,25 +152,31 @@ ReliabilityDomain::~ReliabilityDomain()
     delete theObjectiveFunctionsPtr;
   }
 
-	if (theRVIter != 0)
-	  delete theRVIter;
-	if (theRVPosIter != 0)
-	  delete theRVPosIter;
-	if (theParamPosIter != 0)
-	  delete theParamPosIter;
-	if (theLSFIter != 0)
-	  delete theLSFIter;
-    if (theCutIter != 0)
-	  delete theCutIter;
-	if (theCCIter != 0)
-	  delete theCCIter;
+  if (theRVIter != 0)
+    delete theRVIter;
+  if (theRVPosIter != 0)
+    delete theRVPosIter;
+  if (theParamPosIter != 0)
+    delete theParamPosIter;
+  if (theLSFIter != 0)
+    delete theLSFIter;
+  if (theCutIter != 0)
+    delete theCutIter;
+  if (theCCIter != 0)
+    delete theCCIter;
+  if (theMFIter != 0)
+    delete theMFIter;
+  if (theFilterIter != 0)
+    delete theFilterIter;
+  if (theSpectrumIter != 0)
+    delete theSpectrumIter;
 
-	if (rvIndex != 0)
-	  delete [] rvIndex;
-	if (lsfIndex != 0)
-	  delete [] lsfIndex;
-	if (cutsetIndex != 0)
-	  delete [] cutsetIndex;
+  if (rvIndex != 0)
+      delete [] rvIndex;
+  if (lsfIndex != 0)
+    delete [] lsfIndex;
+  if (cutsetIndex != 0)
+    delete [] cutsetIndex;
 }
 
 
@@ -387,6 +399,26 @@ ReliabilityDomain::getCutsets(void)
   return *theCutIter;
 }
 
+ModulatingFunctionIter &
+ReliabilityDomain::getModulatingFunctions(void)
+{
+  theMFIter->reset();
+  return *theMFIter;
+}
+
+FilterIter &
+ReliabilityDomain::getFilters(void)
+{
+  theFilterIter->reset();
+  return *theFilterIter;
+}
+
+SpectrumIter &
+ReliabilityDomain::getSpectra(void)
+{
+  theSpectrumIter->reset();
+  return *theSpectrumIter;
+}
 
 
 RandomVariable *
