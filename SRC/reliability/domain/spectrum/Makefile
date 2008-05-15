@@ -3,7 +3,7 @@ include ../../../../Makefile.def
 OBJS       = 	JonswapSpectrum.o \
 	NarrowBandSpectrum.o \
 	PointsSpectrum.o \
-	Spectrum.o
+	Spectrum.o SpectrumIter.o
 
 
 # Compilation control
