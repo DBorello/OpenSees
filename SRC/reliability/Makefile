@@ -147,6 +147,7 @@ RELIABILITY_OBJS = $(FE)/domain/pattern/DiscretizedRandomProcessSeries.o \
 		$(FE)/reliability/domain/distributions/Type3SmallestValueRV.o \
 		$(FE)/reliability/domain/distributions/UserDefinedRV.o \
 		$(FE)/reliability/domain/modulatingFunction/ModulatingFunction.o \
+		$(FE)/reliability/domain/modulatingFunction/ModulatingFunctionIter.o \
 		$(FE)/reliability/domain/modulatingFunction/ConstantModulatingFunction.o \
 		$(FE)/reliability/domain/modulatingFunction/GammaModulatingFunction.o \
 		$(FE)/reliability/domain/modulatingFunction/TrapezoidalModulatingFunction.o \
@@ -155,7 +156,9 @@ RELIABILITY_OBJS = $(FE)/domain/pattern/DiscretizedRandomProcessSeries.o \
 		$(FE)/reliability/domain/spectrum/NarrowBandSpectrum.o \
 		$(FE)/reliability/domain/spectrum/PointsSpectrum.o \
 		$(FE)/reliability/domain/spectrum/Spectrum.o \
+		$(FE)/reliability/domain/spectrum/SpectrumIter.o \
 		$(FE)/reliability/domain/filter/Filter.o \
+		$(FE)/reliability/domain/filter/FilterIter.o \
 		$(FE)/reliability/domain/filter/StandardLinearOscillatorAccelerationFilter.o \
 		$(FE)/reliability/domain/filter/StandardLinearOscillatorDisplacementFilter.o \
 		$(FE)/reliability/domain/filter/StandardLinearOscillatorVelocityFilter.o \
