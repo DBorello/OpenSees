@@ -2,7 +2,7 @@ include ../../../../Makefile.def
 
 OBJS       = ConstantModulatingFunction.o \
 	GammaModulatingFunction.o \
-	ModulatingFunction.o \
+	ModulatingFunction.o ModulatingFunctionIter.o \
 	TrapezoidalModulatingFunction.o \
 	KooModulatingFunction.o
 
