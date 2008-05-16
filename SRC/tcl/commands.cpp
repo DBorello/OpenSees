@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.122 $
-// $Date: 2008-05-15 21:11:39 $
+// $Revision: 1.123 $
+// $Date: 2008-05-16 00:38:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -2778,7 +2778,7 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
   }
 
   else {
-      opserr << "WARNING No EquiSolnAlgo type exists (Linear, Newton only) \n";
+    opserr << "WARNING No EquiSolnAlgo type " << argv[1] << " exists\n";
       return TCL_ERROR;
   }    
 
