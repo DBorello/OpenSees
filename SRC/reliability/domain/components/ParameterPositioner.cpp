@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-09-05 22:49:36 $
+// $Revision: 1.4 $
+// $Date: 2008-05-22 20:05:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ParameterPositioner.cpp,v $
 
 
@@ -40,14 +40,14 @@ ParameterPositioner::ParameterPositioner (int passedTag,
 					  DomainComponent *parentObject,
 					  const char **argv, int argc)
   :ReliabilityDomainComponent(passedTag, PARAMETER_POSITIONER),
-   theParameter(passedTag, parentObject, argv, argc)
+   theParameter(passedTag, parentObject, argv, argc), gradNumber(passedTag)
 {
 
 }
 
 ParameterPositioner::ParameterPositioner (int passedTag, Parameter &param)
   :ReliabilityDomainComponent(passedTag, PARAMETER_POSITIONER),
-   theParameter(param)
+   theParameter(param), gradNumber(passedTag)
 {
 
 }
@@ -79,4 +79,5 @@ void
 ParameterPositioner::Print(OPS_Stream &s, int flag)  
 {
   s << "ParameterPositioner, tag = " << this->getTag() << endln;
+  s << "\tgrad number " << gradNumber << endln;
 }
