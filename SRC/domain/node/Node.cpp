@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2008-03-10 18:25:22 $
+// $Revision: 1.27 $
+// $Date: 2008-05-22 22:44:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -1846,6 +1846,13 @@ Node::saveDispSensitivity(const Vector &v, int gradNum, int numGrads)
     dispSensitivity = new Matrix( numberDOF, numGrads );
   } 
 
+  if (dispSensitivity->noRows() != numberDOF ||
+      dispSensitivity->noCols() != numGrads) {
+    delete dispSensitivity;
+    dispSensitivity = new Matrix( numberDOF, numGrads );
+  }
+
+  //opserr << "Node::saveDispSens " << dispSensitivity->noRows() << ' ' << dispSensitivity->noCols() << endln;
   for (int i=0; i<numberDOF; i++ )
     (*dispSensitivity)(i,gradNum-1) = v(i);
 
@@ -1884,10 +1891,12 @@ double
 Node::getDispSensitivity(int dof, int gradNum)
 {
 	double result;
-	if (dispSensitivity != 0)
+	if (dispSensitivity != 0) {
 		result = (*dispSensitivity)(dof-1,gradNum-1);
-	else
+	}
+	else {
 		result = 0.0;
+	}
 
 	return result;
 }
