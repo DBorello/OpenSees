@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2008-05-15 21:11:39 $
+// $Revision: 1.21 $
+// $Date: 2008-05-22 20:14:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
                                                                         
@@ -168,6 +168,9 @@ int
 sensNodeVel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
+sensSectionForce(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
 sensitivityAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
@@ -186,6 +189,13 @@ rayleighDamping(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **
 
 int 
 addRegion(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+sectionForce(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+sectionDeformation(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
 
 
 

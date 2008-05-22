@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.123 $
-// $Date: 2008-05-16 00:38:33 $
+// $Revision: 1.124 $
+// $Date: 2008-05-22 20:13:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -58,6 +58,7 @@ using std::ofstream;
 
 #include <StandardStream.h>
 #include <FileStream.h>
+#include <DummyStream.h>
 StandardStream sserr;
 //OPS_Stream &opserr = sserr;
 OPS_Stream *opserrPtr = &sserr;
@@ -265,6 +266,9 @@ OPS_Stream *opserrPtr = &sserr;
 //#include <DynamicSensitivityIntegrator.h>
 #include <NewmarkSensitivityIntegrator.h>
 #include <RandomVariablePositioner.h>
+#include <RandomVariablePositionerIter.h>
+#include <ParameterPositioner.h>
+#include <ParameterPositionerIter.h>
 #include <NewNewmarkSensitivityIntegrator.h>
 #include <NewStaticSensitivityIntegrator.h>
 //#include <OrigSensitivityAlgorithm.h>
@@ -289,6 +293,8 @@ extern char *neesCentralProjID;
 extern char *neesCentralExpID;
 extern char *neesCentralUser;
 extern char *neesCentralPasswd;
+
+#include <Response.h>
 
 ModelBuilder *theBuilder =0;
 
@@ -648,6 +654,11 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "getParamValue", &getParamValue, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
 
+    Tcl_CreateCommand(interp, "sectionForce", &sectionForce, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
+    Tcl_CreateCommand(interp, "sectionDeformation", &sectionDeformation, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
+
 #ifdef _RELIABILITY
     Tcl_CreateCommand(interp, "wipeReliability", wipeReliability, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
@@ -664,6 +675,8 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "sensNodeDisp", &sensNodeDisp, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "sensNodeVel", &sensNodeVel, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
+    Tcl_CreateCommand(interp, "sensSectionForce", &sensSectionForce, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
 
 	theSensitivityAlgorithm =0;
@@ -4745,6 +4758,20 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
       }
     }
 
+    else if (strcmp(argv[1],"parameter") == 0) {
+      if (argc < 3) {
+	opserr << "WARNING want - remove parameter paramTag?\n";
+	return TCL_ERROR;
+      }    
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	opserr << "WARNING remove parameter tag? failed to read tag: " << argv[2] << endln;
+	return TCL_ERROR;
+      }      
+      Parameter *theParameter = theDomain.removeParameter(tag);
+      if (theParameter != 0) {
+	delete theParameter;
+      }
+    }
 
     else if (strcmp(argv[1],"node") == 0) {
       if (argc < 3) {
@@ -4844,6 +4871,24 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
 		ReliabilityDomain *theReliabilityDomain = theReliabilityBuilder->getReliabilityDomain();
 		theReliabilityDomain->removeRandomVariablePositioner(rvPosTag);
 	}
+    else if (strcmp(argv[1],"randomVariable") == 0) {
+		int rvTag;
+		if (Tcl_GetInt(interp, argv[2], &rvTag) != TCL_OK) {
+			opserr << "WARNING invalid input: rvTag \n";
+			return TCL_ERROR;
+		}
+		ReliabilityDomain *theReliabilityDomain = theReliabilityBuilder->getReliabilityDomain();
+		theReliabilityDomain->removeRandomVariable(rvTag);
+	}
+    else if (strcmp(argv[1],"parameterPositioner") == 0) {
+		int paramPosTag;
+		if (Tcl_GetInt(interp, argv[2], &paramPosTag) != TCL_OK) {
+			opserr << "WARNING invalid input: paramPositionerTag \n";
+			return TCL_ERROR;
+		}
+		ReliabilityDomain *theReliabilityDomain = theReliabilityBuilder->getReliabilityDomain();
+		theReliabilityDomain->removeParameterPositioner(paramPosTag);
+	}
     else if (strcmp(argv[1],"performanceFunction") == 0) {
 		int lsfTag;
 		if (Tcl_GetInt(interp, argv[2], &lsfTag) != TCL_OK) {
@@ -4863,7 +4908,7 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
 #endif
 
     else
-      opserr << "WARNING remove element, loadPattern - only commands  available at the moment: " << endln;
+      opserr << "WARNING remove " << argv[1] << " not supported" << endln;
 
     return TCL_OK;
 }
@@ -5241,7 +5286,241 @@ sensNodeVel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv
     return TCL_OK;
 }
 
+int 
+sensSectionForce(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  // make sure at least one other argument to contain type of system
+  if (argc < 5) {
+    interp->result = "WARNING want - sensSectionForce eleTag? secNum? dof? gradNum?\n";
+    return TCL_ERROR;
+  }    
+  
+  //opserr << "sensSectionForce: ";
+  //for (int i = 0; i < argc; i++) 
+  //  opserr << argv[i] << ' ' ;
+  //opserr << endln;
 
+  int tag, secNum, dof, gradNum;
+
+  if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+    opserr << "WARNING sensSectionForce eleTag? secNum? dof? gradNum?- could not read eleTag? \n";
+    return TCL_ERROR;	        
+  }    
+  if (Tcl_GetInt(interp, argv[2], &secNum) != TCL_OK) {
+    opserr << "WARNING sensSectionForce eleTag? secNum? dof? gradNum?- could not read secNum? \n";
+    return TCL_ERROR;	        
+  }    
+  if (Tcl_GetInt(interp, argv[3], &dof) != TCL_OK) {
+    opserr << "WARNING sensSectionForce eleTag? secNum? dof? gradNum?- could not read dof? \n";
+    return TCL_ERROR;	        
+  }        
+  if (Tcl_GetInt(interp, argv[4], &gradNum) != TCL_OK) {
+    opserr << "WARNING sensSectionForce eleTag? secNum? dof? gradNum?- could not read gradNum? \n";
+    return TCL_ERROR;	        
+  }        
+
+  ReliabilityDomain *theReliabilityDomain =
+    theReliabilityBuilder->getReliabilityDomain();
+
+  RandomVariablePositionerIter &rvpIter =
+    theReliabilityDomain->getRandomVariablePositioners();
+  RandomVariablePositioner *theRVP;
+  while ((theRVP = rvpIter()) != 0) {
+    theRVP->activate(false);
+  }
+  rvpIter.reset();
+  while ((theRVP = rvpIter()) != 0) {
+    if (theRVP->getRvIndex() == gradNum)
+      theRVP->activate(true);
+  }
+
+  ParameterPositionerIter &ppIter =
+    theReliabilityDomain->getParameterPositioners();
+  ParameterPositioner *thePP;
+  while ((thePP = ppIter()) != 0) {
+      thePP->activate(false);
+  }
+  ppIter.reset();
+  while ((thePP = ppIter()) != 0) {
+    if (thePP->getGradNumber() == gradNum) {
+      thePP->activate(true);
+    }
+  }
+
+  Element *theElement = theDomain.getElement(tag);
+  if (theElement == 0) {
+    opserr << "WARNING sensSectionForce element with tag " << tag << " not found in domain \n";
+    return TCL_ERROR; 
+  }
+
+  int argcc = 3;
+  char a[80] = "section";
+  char b[80];
+  sprintf(b, "%d", secNum);
+  char c[80] = "dsdh";
+  const char *argvv[3];
+  argvv[0] = a;
+  argvv[1] = b;
+  argvv[2] = c;
+
+  DummyStream dummy;
+
+  Response *theResponse = theElement->setResponse(argvv, argcc, dummy);
+  if (theResponse == 0) {
+    opserr << "WARNING unable to set dsdh response in element " << tag << endln;
+    return TCL_ERROR;	  
+  }
+
+  theResponse->getResponseSensitivity(gradNum);
+  Information &info = theResponse->getInformation();
+
+  const Vector &theVec = *(info.theVector);
+
+  char buffer[40];
+  sprintf(buffer,"%35.20f",theVec(dof-1));
+
+  Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+
+  delete theResponse;
+
+  return TCL_OK;
+}
+
+int 
+sectionForce(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  // make sure at least one other argument to contain type of system
+  if (argc < 4) {
+    interp->result = "WARNING want - sectionForce eleTag? secNum? dof? \n";
+    return TCL_ERROR;
+  }    
+  
+  //opserr << "sectionForce: ";
+  //for (int i = 0; i < argc; i++) 
+  //  opserr << argv[i] << ' ' ;
+  //opserr << endln;
+
+  int tag, secNum, dof;
+
+  if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+    opserr << "WARNING sectionForce eleTag? secNum? dof? - could not read eleTag? \n";
+    return TCL_ERROR;	        
+  }    
+  if (Tcl_GetInt(interp, argv[2], &secNum) != TCL_OK) {
+    opserr << "WARNING sectionForce eleTag? secNum? dof? - could not read secNum? \n";
+    return TCL_ERROR;	        
+  }    
+  if (Tcl_GetInt(interp, argv[3], &dof) != TCL_OK) {
+    opserr << "WARNING sectionForce eleTag? secNum? dof? - could not read dof? \n";
+    return TCL_ERROR;	        
+  }        
+
+  Element *theElement = theDomain.getElement(tag);
+  if (theElement == 0) {
+    opserr << "WARNING sectionForce element with tag " << tag << " not found in domain \n";
+    return TCL_ERROR; 
+  }
+
+  int argcc = 3;
+  char a[80] = "section";
+  char b[80];
+  sprintf(b, "%d", secNum);
+  char c[80] = "force";
+  const char *argvv[3];
+  argvv[0] = a;
+  argvv[1] = b;
+  argvv[2] = c;
+
+  DummyStream dummy;
+
+  Response *theResponse = theElement->setResponse(argvv, argcc, dummy);
+  if (theResponse == 0) {
+    opserr << "WARNING unable to set s response in element " << tag << endln;
+    return TCL_ERROR;	  
+  }
+
+  theResponse->getResponse();
+  Information &info = theResponse->getInformation();
+
+  const Vector &theVec = *(info.theVector);
+
+  char buffer[40];
+  sprintf(buffer,"%35.20f",theVec(dof-1));
+
+  Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+
+  delete theResponse;
+
+  return TCL_OK;
+}
+
+int 
+sectionDeformation(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  // make sure at least one other argument to contain type of system
+  if (argc < 4) {
+    interp->result = "WARNING want - sectionDeformation eleTag? secNum? dof? \n";
+    return TCL_ERROR;
+  }    
+  
+  //opserr << "sectionDeformation: ";
+  //for (int i = 0; i < argc; i++) 
+  //  opserr << argv[i] << ' ' ;
+  //opserr << endln;
+
+  int tag, secNum, dof;
+
+  if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+    opserr << "WARNING sectionDeformation eleTag? secNum? dof? - could not read eleTag? \n";
+    return TCL_ERROR;	        
+  }    
+  if (Tcl_GetInt(interp, argv[2], &secNum) != TCL_OK) {
+    opserr << "WARNING sectionDeformation eleTag? secNum? dof? - could not read secNum? \n";
+    return TCL_ERROR;	        
+  }    
+  if (Tcl_GetInt(interp, argv[3], &dof) != TCL_OK) {
+    opserr << "WARNING sectionDeformation eleTag? secNum? dof? - could not read dof? \n";
+    return TCL_ERROR;	        
+  }        
+
+  Element *theElement = theDomain.getElement(tag);
+  if (theElement == 0) {
+    opserr << "WARNING sectionDeformation element with tag " << tag << " not found in domain \n";
+    return TCL_ERROR; 
+  }
+
+  int argcc = 3;
+  char a[80] = "section";
+  char b[80];
+  sprintf(b, "%d", secNum);
+  char c[80] = "deformation";
+  const char *argvv[3];
+  argvv[0] = a;
+  argvv[1] = b;
+  argvv[2] = c;
+
+  DummyStream dummy;
+
+  Response *theResponse = theElement->setResponse(argvv, argcc, dummy);
+  if (theResponse == 0) {
+    opserr << "WARNING unable to set s response in element " << tag << endln;
+    return TCL_ERROR;	  
+  }
+
+  theResponse->getResponse();
+  Information &info = theResponse->getInformation();
+
+  const Vector &theVec = *(info.theVector);
+
+  char buffer[40];
+  sprintf(buffer,"%35.20f",theVec(dof-1));
+
+  Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+
+  delete theResponse;
+
+  return TCL_OK;
+}
 
 int 
 computeGradients(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
