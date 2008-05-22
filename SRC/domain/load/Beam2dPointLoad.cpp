@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-10-17 22:11:35 $
+// $Revision: 1.8 $
+// $Date: 2008-05-22 22:41:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dPointLoad.cpp,v $
                                                                         
 // Written: fmk 
@@ -118,7 +118,7 @@ int
 Beam2dPointLoad::setParameter(const char **argv, int argc, Parameter &param)
 {
   if (argc < 1)
-    return -1;
+    return 0;
 
   if (strcmp(argv[0],"Ptrans") == 0 || strcmp(argv[0],"P") == 0)
     return param.addObject(1, this);
@@ -129,7 +129,7 @@ Beam2dPointLoad::setParameter(const char **argv, int argc, Parameter &param)
   if (strcmp(argv[0],"x") == 0)
     return param.addObject(3, this);
 
-  return -1;
+  return 0;
 }
 
 int
