@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2008-02-29 19:47:19 $
+// $Revision: 1.12 $
+// $Date: 2008-05-22 19:55:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/SensitivityAlgorithm.cpp,v $
 
 
@@ -69,7 +69,6 @@ SensitivityAlgorithm::SensitivityAlgorithm(ReliabilityDomain *passedReliabilityD
 	// Tag to tell whether grads should be computed at each step
 	// and whether they should be computed wrt. random variables
 	analysisTypeTag = passedAnalysisTypeTag;
-
 }
 
 
@@ -90,7 +89,6 @@ SensitivityAlgorithm::computeSensitivities(void)
 	// 3: compute by command wrt. random variables
 	// 4: compute by command wrt. parameters
 
-	
 	// Get pointer to the system of equations (SOE)
 	LinearSOE *theSOE = theAlgorithm->getLinearSOEptr();
 
@@ -133,7 +131,7 @@ SensitivityAlgorithm::computeSensitivities(void)
 	      if ( rvIndex==gradNumber ) {
 		// Set sensitivity flag so that this one contributes to the RHS
 		theRVPos->activate(true);
-	      } // End if rv# == gradient#
+	      }
 	    }
 
 	    // Zero out the old right-hand side
@@ -141,7 +139,7 @@ SensitivityAlgorithm::computeSensitivities(void)
 	    
 	    // Form new right-hand side
 	    theSensitivityIntegrator->formSensitivityRHS(gradNumber);
-	    
+
 	    // Solve the system of equation with the new right-hand side
 	    theSOE->solve();
 	    
@@ -156,24 +154,26 @@ SensitivityAlgorithm::computeSensitivities(void)
 
 	  int numGrads = theReliabilityDomain->getNumberOfParameterPositioners();
 
-	  ParameterPositionerIter &paramPosIter =
-	    theReliabilityDomain->getParameterPositioners();
-	  ParameterPositioner *theParamPos;
-	  while ((theParamPos = paramPosIter()) != 0) {
-	    theParamPos->activate(false);
-	  }
-	  paramPosIter.reset();
-	  while ((theParamPos = paramPosIter()) != 0) {
-	    theParamPos->activate(true);
-
-	    int gradNumber = theParamPos->getGradNumber();
-
+	  for (int gradNumber = 1; gradNumber <= numGrads; gradNumber++ )  {
+	    ParameterPositionerIter &paramPosIter =
+	      theReliabilityDomain->getParameterPositioners();
+	    ParameterPositioner *theParamPos;
+	    while ((theParamPos = paramPosIter()) != 0) {
+	      theParamPos->activate(false);
+	    }
+	    paramPosIter.reset();
+	    while ((theParamPos = paramPosIter()) != 0) {
+	      // Set sensitivity flag so that this one contributes to the RHS
+	      if (theParamPos->getGradNumber() == gradNumber)
+		theParamPos->activate(true);
+	    }
+	    
 	    // Zero out the old right-hand side
 	    theSOE->zeroB();
-	    
+
 	    // Form new right-hand side
 	    theSensitivityIntegrator->formSensitivityRHS(gradNumber);
-	    
+
 	    // Solve the system of equation with the new right-hand side
 	    theSOE->solve();
 	    
@@ -182,9 +182,6 @@ SensitivityAlgorithm::computeSensitivities(void)
 	    
 	    // Commit unconditional history variables (also for elastic problems; strain sens may be needed anyway)
 	    theSensitivityIntegrator->commitSensitivity(gradNumber, numGrads);
-
-	    // Set back to false so it doesn't contribute next time
-	    theParamPos->activate(false);
 	  }
 	}
 	
