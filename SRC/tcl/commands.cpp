@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.124 $
-// $Date: 2008-05-22 20:13:55 $
+// $Revision: 1.125 $
+// $Date: 2008-05-25 23:33:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -609,7 +609,9 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "reactions", &calculateNodalReactions, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "nodeCoord", &nodeCoord, 
-		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
+    Tcl_CreateCommand(interp, "eleNodes", &eleNodes, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);            
     Tcl_CreateCommand(interp, "nodeBounds", &nodeBounds, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "start", &startTimer, 
@@ -5063,6 +5065,36 @@ nodeCoord(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
   
   // now we copy the value to the tcl string that is returned
   sprintf(interp->result,"%35.20f",value);
+  
+  return TCL_OK;
+}
+
+int 
+eleNodes(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  if (argc < 2) {
+    opserr << "WARNING want - eleNodes eleTag?\n";
+    return TCL_ERROR;
+  }    
+  
+  int tag;
+  
+  if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+    opserr << "WARNING eleNodes eleTag? \n";
+    return TCL_ERROR;	        
+  }    
+  
+  char buffer[20];
+
+  Element *theElement = theDomain.getElement(tag);
+  if (theElement != 0) {
+    const ID &tags = theElement->getExternalNodes();
+    int numTags = tags.Size();
+    for (int i = 0; i < numTags; i++) {
+      sprintf(buffer, "%d ", tags(i));
+      Tcl_AppendResult(interp, buffer, NULL);
+    }
+  }
   
   return TCL_OK;
 }
