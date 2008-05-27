@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2008-02-29 19:47:19 $
+// $Revision: 1.6 $
+// $Date: 2008-05-27 23:30:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/StaticSensitivityIntegrator.cpp,v $
 
 
@@ -197,6 +197,7 @@ StaticSensitivityIntegrator::recvSelf(int commitTag, Channel &theChannel, FEM_Ob
 void 
 StaticSensitivityIntegrator::Print(OPS_Stream &s, int flag)  
 {
+  s << "\tStaticSensitivityIntegrator\n";
 }
 
 int 
