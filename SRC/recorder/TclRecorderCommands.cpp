@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.48 $
-// $Date: 2008-02-15 23:34:43 $
+// $Revision: 1.49 $
+// $Date: 2008-05-27 22:55:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -671,6 +671,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	responseID  = argv[pos];
       }
 
+
+
       // construct the DataHandler
       if (eMode == DATA_STREAM && fileName != 0) {
 	theOutputStream = new DataFileStream(fileName);
@@ -683,8 +685,9 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       } else {
 	theOutputStream = new StandardStream();
       }
-      
+
       if (strcmp(argv[1],"Node") == 0) {
+
 	(*theRecorder) = new NodeRecorder(theDofs, 
 					  theNodes, 
 					  sensitivity,
@@ -693,15 +696,16 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 					  *theOutputStream, 
 					  dT, 
 					  echoTimeFlag);
+	
       } else
-	  
+	
 	(*theRecorder) = new EnvelopeNodeRecorder(theDofs, 
 						  theNodes, 
 						  responseID, 
 						  theDomain,
 						  *theOutputStream,
 						  dT, echoTimeFlag);
-     
+
       if (theNodes != 0)
 	delete theNodes;
     }

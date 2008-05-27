@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2007-11-30 19:24:53 $
+// $Revision: 1.31 $
+// $Date: 2008-05-27 22:55:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -64,14 +64,14 @@ NodeRecorder::NodeRecorder(const ID &dofs,
 			   double dT,
 			   bool timeFlag)
 :Recorder(RECORDER_TAGS_NodeRecorder),
- theDofs(0), theNodalTags(0), theNodes(0), 
- response(0), 
+ theDofs(0), theNodalTags(0), theNodes(0), response(0), 
  theDomain(&theDom), theOutputHandler(&theOutputHandler),
  echoTimeFlag(timeFlag), dataFlag(0), 
  deltaT(dT), nextTimeStampToRecord(0.0), 
  sensitivity(psensitivity), 
  initializationDone(false), numValidNodes(0)
 {
+
   //
   // store copy of dof's to be recorder, verifying dof are valid, i.e. >= 0
   //
@@ -171,11 +171,12 @@ NodeRecorder::NodeRecorder(const ID &dofs,
 
 NodeRecorder::~NodeRecorder()
 {
-  theOutputHandler->endTag(); // Data
-  theOutputHandler->endTag(); // OpenSeesOutput
 
-  if (theOutputHandler != 0)
+  if (theOutputHandler != 0) {
+    theOutputHandler->endTag(); // Data
+    theOutputHandler->endTag(); // OpenSeesOutput
     delete theOutputHandler;
+  }
 
   if (theDofs != 0)
     delete theDofs;
