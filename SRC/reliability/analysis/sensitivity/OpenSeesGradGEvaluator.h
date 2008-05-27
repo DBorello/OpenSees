@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-07-13 19:25:20 $
+// $Revision: 1.5 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/OpenSeesGradGEvaluator.h,v $
 
 
@@ -38,6 +38,8 @@
 #include <Vector.h>
 #include <Matrix.h>
 #include <ReliabilityDomain.h>
+#include <Domain.h>
+#include <GFunEvaluator.h>
 #include <tcl.h>
 
 class SensitivityAlgorithm;
@@ -50,14 +52,17 @@ class OpenSeesGradGEvaluator : public GradGEvaluator
 
 public:
 	OpenSeesGradGEvaluator(Tcl_Interp *passedTclInterp, 
-			       ReliabilityDomain *passedReliabilityDomain,
+			       GFunEvaluator *passedGFunEvaluator,
+				   ReliabilityDomain *passedReliabilityDomain,
+				   Domain *passedOpenSeesDomain,
 			       SensitivityAlgorithm *theAlgo,
 			       bool doGradientCheck);
 	~OpenSeesGradGEvaluator();
 
 	int		computeGradG(double gFunValue, const Vector &passed_x);
-	int		computeAllGradG(const Vector &gFunValues,
-					const Vector &passed_x);
+	int		computeAllGradG(const Vector &gFunValues, const Vector &passed_x);
+	double	nodeGradient(int nodeNumber, int direction, int indx, char* dispOrWhat);
+	double	elementGradient(int eleNumber, int indx, char* inString);
 
 	Vector	getGradG();
 	Matrix	getAllGradG();
@@ -68,6 +73,7 @@ protected:
 
 private:
 	SensitivityAlgorithm *theSensAlgo;
+	Domain *theOpenSeesDomain;
 	Vector *grad_g;
 	Matrix *grad_g_matrix;
 	Matrix *DgDdispl;

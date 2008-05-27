@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2008-05-13 16:30:27 $
+// $Revision: 1.8 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/ParametricReliabilityAnalysis.cpp,v $
 
 
@@ -93,6 +93,8 @@ ParametricReliabilityAnalysis::analyze(void)
 
 	// The relevant commands are now, for instance, given like this
 	// performanceFunction 1 "{par_1}-{u_7_1}"
+	// KRM note:	{par_1}  -->  \$par(1)
+	//				{u_7_1}  -->  \$u(7,1)
 	// runParametricReliabilityAnalysis output.out -par 1 -range 14.0 16.0 -num 10
 
 
@@ -109,13 +111,12 @@ ParametricReliabilityAnalysis::analyze(void)
 	Vector currentValues(numIntervals+1);
 	ParameterPositioner *theParameterPositioner = 0;
 
-
-	LimitStateFunctionIter &lsfIter = theReliabilityDomain->getLimitStateFunctions();
+	LimitStateFunctionIter lsfIter = theReliabilityDomain->getLimitStateFunctions();
 	LimitStateFunction *theLimitStateFunction;
 	// Loop over number of limit-state functions and perform FORM analysis
 	//for (lsf=1; lsf <= numLsf; lsf++ ) {
 	while ((theLimitStateFunction = lsfIter()) != 0) {
-	  int lsf = theLimitStateFunction->getTag();
+		int lsf = theLimitStateFunction->getTag();
 
 		// Inform the user which limit-state function is being evaluated
 		opserr << "Limit-state function number: " << lsf << endln;
@@ -136,59 +137,73 @@ ParametricReliabilityAnalysis::analyze(void)
 		outputFile.setf(ios::scientific, ios::floatfield);
 		outputFile.flush();
 
+		// Detect parameter, first the case where the parameter is represented by a parameterPositioner
+		numPos = theReliabilityDomain->getNumberOfParameterPositioners();
+		if (numPos != 0) {
+			theParameterPositioner = theReliabilityDomain->getParameterPositionerPtr(parameterNumber);
+			if (theParameterPositioner == 0) {
+				opserr << "ParametricReliabilityAnalysis::analyze() -- The parameter number in the " << endln
+					<< " fragility analysis object does not match the parameter number " << endln
+					<< " being set by the parameter positioner." << endln;
+			}
+		}
+		
+		// Now when the original \$par(i) syntax is used
+		else {
+			
+			// check that par(i) exists in the LSF
+			int llength = 0;
+			int foundit = 0;
+			Tcl_Obj *passedList = theLimitStateFunction->getParameters();
+			Tcl_Obj *paramList = Tcl_DuplicateObj(passedList);
+			Tcl_Obj *objPtr;
+			Tcl_ListObjLength(theTclInterp,paramList,&llength);
+				
+			for (int jk = 0; jk < llength; jk++) {
+				Tcl_ListObjIndex(theTclInterp,paramList,jk,&objPtr);
+				char *listStr = Tcl_GetStringFromObj(objPtr,NULL);
+				
+				int tempNumber;
+				int args = sscanf(listStr,"par(%i)",&tempNumber);
+				if (args == 1 && tempNumber == parameterNumber)
+					foundit = 1;
+			}
+			
+			// reclaim Tcl object space
+			Tcl_DecrRefCount(paramList);
+			
+			if (foundit == 0) {
+				opserr << "ParametricReliabilityAnalysis::analyze() -- The parameter number " << endln
+									<< " in the limit-state function does not match the parameter " << endln
+									<< " number in the fragility analysis object." << endln;
+			}
+		}
 
 		// Range over parameter values
 		currentValue = first;
 		for (int counter=0; counter<(numIntervals+1); counter++) {
 
 			currentValues(counter) = currentValue;
-
-			// Detect parameter and set value, first the 
-			// case where the parameter is represented by a 
-			// parameterPositioner
-			numPos = theReliabilityDomain->getNumberOfParameterPositioners();
-			if (numPos != 0) {
-				theParameterPositioner = theReliabilityDomain->getParameterPositionerPtr(parameterNumber);
-				if (theParameterPositioner == 0) {
-					opserr << "ParametricReliabilityAnalysis::analyze() -- The parameter number in the " << endln
-						<< " fragility analysis object does not match the parameter number " << endln
-						<< " being set by the parameter positioner." << endln;
-				}
-			}
-			else {
-				char separators[5] = "_}{";
-				char *theExpression = theLimitStateFunction->getExpression();
-				char lsf_forTokenizing[1000];
-				strcpy(lsf_forTokenizing,theExpression);
-				char *tokenPtr = strtok( lsf_forTokenizing, separators);
-				while ( tokenPtr != NULL ) {
-					if ( strcmp(tokenPtr, "par") == 0) {
-						tokenPtr = strtok( NULL, separators);
-						int par = atoi( tokenPtr );
-						if (par==parameterNumber) {
-							char tclAssignment[100];
-							sprintf(tclAssignment , "set par_%d  %15.5f", parameterNumber, currentValue);
-							Tcl_Eval( theTclInterp, tclAssignment);
-						}
-						else {
-							opserr << "ParametricReliabilityAnalysis::analyze() -- The parameter number " << endln
-								<< " in the limit-state function does not match the parameter " << endln
-								<< " number in the fragility analysis object." << endln;
-						}
-					}
-					tokenPtr = strtok( NULL, separators);
-				}
-			}
-
-
-			// Possibly set the parameter value in the FE domain
+			
 			if (theParameterPositioner != 0) {
+				// Possibly set the parameter value in the FE domain
 				theParameterPositioner->update(currentValue);
 			}
-
+			else {
+				// set parameter value in Tcl domain
+				char theIndex[20];
+				sprintf(theIndex,"%d",parameterNumber);
+							
+				Tcl_Obj *outp = Tcl_SetVar2Ex(theTclInterp,"par",theIndex,Tcl_NewDoubleObj(currentValue),TCL_LEAVE_ERR_MSG);
+				if (outp == NULL) {
+					opserr << "ERROR ParametricReliabilityAnalysis -- error setting parameter with tag " << parameterNumber << endln;
+					opserr << theTclInterp->result << endln;
+					return -1;
+				}
+			}
 
 			// Find the design point
-			if (theFindDesignPointAlgorithm->findDesignPoint() < 0){
+			if (theFindDesignPointAlgorithm->findDesignPoint() < 0) {
 
 				// Set detectable 'crazy' values when the design point wasn't found
 				pf(counter) = -1.0;

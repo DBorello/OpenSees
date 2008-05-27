@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2008-05-13 16:30:27 $
+// $Revision: 1.17 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FORMAnalysis.cpp,v $
 
 
@@ -88,116 +88,118 @@ FORMAnalysis::analyze()
 	// Declare variables used in this method
 	double stdv, mean, Go, Glast, beta, pf1;
 	int numberOfSteps, numberOfEvaluations;
-	int numRV = theReliabilityDomain->getNumberOfRandomVariables();
 	static NormalRV aStdNormRV(1,0.0,1.0,0.0);
-	Vector delta(numRV); 
+
+	// reliability domain info
+	int numRV = theReliabilityDomain->getNumberOfRandomVariables();
+	int numLsf = theReliabilityDomain->getNumberOfLimitStateFunctions();
+	LimitStateFunction *theLimitStateFunction;
+	
+	Vector delta(numRV);
 	Vector eta(numRV);
 	Vector kappa(numRV);
-
-
+	
 	// Open output file
 	ofstream outputFile( fileName, ios::out );
 
-	LimitStateFunctionIter lsfIter = theReliabilityDomain->getLimitStateFunctions();
-	LimitStateFunction *theLimitStateFunction;
-
 	// Loop over number of limit-state functions and perform FORM analysis
-	//for (lsf=1; lsf<=numLsf; lsf++ ) {
-	while ((theLimitStateFunction = lsfIter()) != 0) {
+	//LimitStateFunctionIter lsfIter = theReliabilityDomain->getLimitStateFunctions();
+	//while ((theLimitStateFunction = lsfIter()) != 0) {
+	for (int lsf = 0; lsf < numLsf; lsf++ ) {
+		theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtrFromIndex(lsf);
+		int lsfTag = theLimitStateFunction->getTag();
 
-	  int lsf = theLimitStateFunction->getTag();
+		// Inform the user which limit-state function is being evaluated
+		opserr << "Limit-state function number: " << lsfTag << endln;
+		Tcl_SetVar2Ex(interp,"RELIABILITY_lsf",NULL,Tcl_NewIntObj(lsfTag),TCL_NAMESPACE_ONLY);
 
-	  // Inform the user which limit-state function is being evaluated
-	  opserr << "Limit-state function number: " << lsf << endln;
-	  Tcl_SetVar2Ex(interp,"RELIABILITY_lsf",NULL,Tcl_NewIntObj(lsf),TCL_NAMESPACE_ONLY);
-
-	  // Set tag of "active" limit-state function
-	  theReliabilityDomain->setTagOfActiveLimitStateFunction(lsf);
+		// Set tag of "active" limit-state function
+		theReliabilityDomain->setTagOfActiveLimitStateFunction(lsfTag);
 	  
-	  outputFile << "#######################################################################" << endln;
-	  outputFile << "#  FORM ANALYSIS RESULTS, LIMIT-STATE FUNCTION NUMBER "
-		     <<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<lsf <<"            #" << endln;
-	  outputFile << "#                                                                     #" << endln;
-	  
-	  // Find the design point
-	  if (theFindDesignPointAlgorithm->findDesignPoint() < 0){
-	    opserr << "FORMAnalysis::analyze() - failed while finding the" << endln
-		   << " design point for limit-state function number " << lsf << "." << endln;
-	    
+		outputFile << "#######################################################################" << endln;
+		outputFile << "#  FORM ANALYSIS RESULTS, LIMIT-STATE FUNCTION NUMBER "
+				   << setiosflags(ios::left)<<setprecision(1)<<setw(4)<<lsfTag <<"            #" << endln;
+		outputFile << "#                                                                     #" << endln;
+
+		// Find the design point
+		if (theFindDesignPointAlgorithm->findDesignPoint() < 0) {
+		opserr << "FORMAnalysis::analyze() - failed while finding the" << endln
+		   << " design point for limit-state function number " << lsfTag << "." << endln;
+
 			
 			outputFile << "#  No convergence!                                                    #" << endln;
 			outputFile << "#  Results shown for last iteration of analysis                       #" << endln;
-	  }
+		}
 
-	  // Get results from the "find desingn point algorithm"
-	  const Vector &xStar = theFindDesignPointAlgorithm->get_x();
-	  const Vector &uStar = theFindDesignPointAlgorithm->get_u();
-	  const Vector &alpha = theFindDesignPointAlgorithm->get_alpha();
-	  const Vector &gamma = theFindDesignPointAlgorithm->get_gamma();
-	  numberOfSteps					= theFindDesignPointAlgorithm->getNumberOfSteps();
-	  Go					= theFindDesignPointAlgorithm->getFirstGFunValue();
-	  Glast				= theFindDesignPointAlgorithm->getLastGFunValue();
-	  const Vector &uSecondLast = theFindDesignPointAlgorithm->getSecondLast_u();
-	  const Vector &alphaSecondLast = theFindDesignPointAlgorithm->getSecondLast_alpha();
-	  const Vector &lastSearchDirection = theFindDesignPointAlgorithm->getLastSearchDirection();
-	  numberOfEvaluations	= theFindDesignPointAlgorithm->getNumberOfEvaluations();
+		// Get results from the "find desingn point algorithm"
+		const Vector &xStar = theFindDesignPointAlgorithm->get_x();
+		const Vector &uStar = theFindDesignPointAlgorithm->get_u();
+		const Vector &alpha = theFindDesignPointAlgorithm->get_alpha();
+		const Vector &gamma = theFindDesignPointAlgorithm->get_gamma();
+		numberOfSteps		= theFindDesignPointAlgorithm->getNumberOfSteps();
+		Go					= theFindDesignPointAlgorithm->getFirstGFunValue();
+		Glast				= theFindDesignPointAlgorithm->getLastGFunValue();
+		const Vector &uSecondLast = theFindDesignPointAlgorithm->getSecondLast_u();
+		const Vector &alphaSecondLast = theFindDesignPointAlgorithm->getSecondLast_alpha();
+		const Vector &lastSearchDirection = theFindDesignPointAlgorithm->getLastSearchDirection();
+		numberOfEvaluations	= theFindDesignPointAlgorithm->getNumberOfEvaluations();
 	  
-	  // Postprocessing
-	  beta = alpha ^ uStar;
-	  pf1 = 1.0 - aStdNormRV.getCDFvalue(beta);
+		// Postprocessing
+		beta = alpha ^ uStar;
+		pf1 = 1.0 - aStdNormRV.getCDFvalue(beta);
 	  
 	  
-	  // Reliability sensitivity analysis wrt. mean/stdv
-	  if (relSensTag == 1) {
-	    double dBetaDmean;
-	    double dBetaDstdv;
-	    Vector DuStarDmean(numRV);
-	    Vector DuStarDstdv(numRV);
-	    
-	    RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
-	    RandomVariable *theRV;
-	    //for ( int j=1; j<=numRV; j++ ) {
-	    while ((theRV = rvIter()) != 0) {
-	      //int j = theRV->getIndex();
-	      int rvTag = theRV->getTag();
-	      int j = theReliabilityDomain->getRandomVariableIndex(rvTag);
-	      DuStarDmean = theProbabilityTransformation->meanSensitivityOf_x_to_u(xStar,rvTag);
-	      DuStarDstdv = theProbabilityTransformation->stdvSensitivityOf_x_to_u(xStar,rvTag);
-	      dBetaDmean = alpha^DuStarDmean;
-	      dBetaDstdv = alpha^DuStarDstdv;
-	      stdv = theRV->getStdv();
-	      mean = theRV->getMean();
-	      delta(j) = stdv * dBetaDmean;
-	      eta(j) = stdv * dBetaDstdv;
-	      // (Kappa is the sensitivity wrt. the coefficient of variation)
-	      if (mean != 0.0) {
-		kappa(j) = -dBetaDmean*stdv/((stdv/mean)*(stdv/mean))+dBetaDstdv*mean;
-	      }
-	      else {
-		kappa(j) = 0.0;
-	      }
-	    }
-	    
-	    // Don't scale them: WHY????? they give gibberish otherwise
-	    delta /= delta.Norm();
-	    eta /= eta.Norm();
-	    kappa /= kappa.Norm();
-	  }
+		// Reliability sensitivity analysis wrt. mean/stdv
+		if (relSensTag == 1) {
+			double dBetaDmean;
+			double dBetaDstdv;
+			Vector DuStarDmean(numRV);
+			Vector DuStarDstdv(numRV);
 
+			RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
+			RandomVariable *theRV;
+			//for ( int j=1; j<=numRV; j++ ) {
+			while ((theRV = rvIter()) != 0) {
+				//int j = theRV->getIndex();
+				int rvTag = theRV->getTag();
+				int j = theReliabilityDomain->getRandomVariableIndex(rvTag);
+				
+				DuStarDmean = theProbabilityTransformation->meanSensitivityOf_x_to_u(xStar,rvTag);
+				DuStarDstdv = theProbabilityTransformation->stdvSensitivityOf_x_to_u(xStar,rvTag);
+				dBetaDmean = alpha^DuStarDmean;
+				dBetaDstdv = alpha^DuStarDstdv;
+				stdv = theRV->getStdv();
+				mean = theRV->getMean();
+				
+				delta(j) = stdv * dBetaDmean;
+				eta(j) = stdv * dBetaDstdv;
+				// (Kappa is the sensitivity wrt. the coefficient of variation)
+				if (mean != 0.0)
+					kappa(j) = -dBetaDmean*stdv/((stdv/mean)*(stdv/mean))+dBetaDstdv*mean;
+				else
+					kappa(j) = 0.0;
+			}
+
+			// Don't scale them: WHY????? the output is gibberish otherwise
+			delta /= delta.Norm();
+			eta /= eta.Norm();
+			kappa /= kappa.Norm();
+		}
+		
 	  
-	  // Store key results in the limit-state functions
-	  theLimitStateFunction->setFORM_beta(beta);
-	  theLimitStateFunction->setFORM_pf1(pf1);
-	  theLimitStateFunction->setFORM_x(xStar);
-	  theLimitStateFunction->setFORM_u(uStar);
-	  theLimitStateFunction->setFORM_alpha(alpha);
-	  theLimitStateFunction->setFORM_gamma(gamma);
-	  theLimitStateFunction->setFORM_numSteps(numberOfSteps);
-	  theLimitStateFunction->setFORM_startGFun(Go);
-	  theLimitStateFunction->setFORM_endGFun(Glast);
-	  theLimitStateFunction->setSecondLast_u(uSecondLast);
-	  theLimitStateFunction->setSecondLast_alpha(alphaSecondLast);
-	  theLimitStateFunction->setLastSearchDirection(lastSearchDirection);
+		// Store key results in the limit-state functions
+		theLimitStateFunction->setFORM_beta(beta);
+		theLimitStateFunction->setFORM_pf1(pf1);
+		theLimitStateFunction->setFORM_x(xStar);
+		theLimitStateFunction->setFORM_u(uStar);
+		theLimitStateFunction->setFORM_alpha(alpha);
+		theLimitStateFunction->setFORM_gamma(gamma);
+		theLimitStateFunction->setFORM_numSteps(numberOfSteps);
+		theLimitStateFunction->setFORM_startGFun(Go);
+		theLimitStateFunction->setFORM_endGFun(Glast);
+		theLimitStateFunction->setSecondLast_u(uSecondLast);
+		theLimitStateFunction->setSecondLast_alpha(alphaSecondLast);
+		theLimitStateFunction->setLastSearchDirection(lastSearchDirection);
 
 
 	  outputFile << "#  Limit-state function value at start point: ......... " 
@@ -278,7 +280,7 @@ FORMAnalysis::analyze()
 	  
 	  
 	  // Inform the user that we're done with this limit-state function
-	  opserr << "Done analyzing limit-state function " << lsf << ", beta=" << beta << endln;
+	  opserr << "Done analyzing limit-state function " << lsfTag << ", beta=" << beta << endln;
 	}
 	
 	// Clean up

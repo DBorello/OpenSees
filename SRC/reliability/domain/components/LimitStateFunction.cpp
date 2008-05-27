@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2008-04-29 23:10:28 $
+// $Revision: 1.14 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.cpp,v $
 
 
@@ -34,27 +34,48 @@
 #include <LimitStateFunction.h>
 #include <Vector.h>
 #include <string.h>
+#include <stdlib.h>
 #include <classTags.h>
+#include <tcl.h>
 
 LimitStateFunction::LimitStateFunction(	int passedTag, 
-									    TCL_Char *passedExpression)
+									    TCL_Char *passedExpression, Tcl_Interp *passedTclInterp)
   :ReliabilityDomainComponent(passedTag, LIMIT_STATE_FUNCTION)
 {
+	
+	theTclInterp = passedTclInterp;
+	
+	int exprLen = strlen(passedExpression);
+	originalExpression = new char[exprLen+1];
 	strcpy(originalExpression,passedExpression);
-
+	
+	expressionWithAddition = new char[exprLen+1];
 	strcpy(expressionWithAddition,passedExpression);
-
-	tokenizeIt(passedExpression);
+	
+	tokenizeIt(originalExpression);
 
 	this->initializeFORMAnalysis();
 	this->initializeSimulationAnalysis();
 	this->initializeSORMAnalysis();
 }
 
+/*
 LimitStateFunction::LimitStateFunction(int tag, int classTag)
   :ReliabilityDomainComponent(tag, classTag)
 {
-  
+
+}
+*/
+
+LimitStateFunction::~LimitStateFunction()
+{
+	if (originalExpression != 0)
+		delete [] originalExpression;
+	if (expressionWithAddition != 0)
+		delete [] expressionWithAddition;
+	
+	// reclaim Tcl object space
+	Tcl_DecrRefCount(paramList);
 }
 
 void
@@ -88,19 +109,13 @@ LimitStateFunction::initializeSORMAnalysis(void)
   numberOfCurvaturesUsed = 0;
 }
 
-LimitStateFunction::~LimitStateFunction()
-{
-  
-}
-
 
 void
 LimitStateFunction::Print(OPS_Stream &s, int flag)  
 {
-  s << "Limit State Function #" << this->getTag() << endln;
-  s << "Expression: " << this->getExpression() << endln;
-  s << "Tokenized Expression: " << this->getTokenizedExpression() << endln;
-  s << endln;
+	s << "Limit State Function #" << this->getTag() << endln;
+	s << "Expression: " << this->getExpression() << endln;
+	s << endln;
 }
 
 
@@ -115,12 +130,23 @@ LimitStateFunction::getExpression()
 char *
 LimitStateFunction::getTokenizedExpression()
 {
-	return tokenizedExpression;
+	return expressionWithAddition;
+}
+
+Tcl_Obj *
+LimitStateFunction::getParameters()
+{
+	return paramList;
 }
 
 int
 LimitStateFunction::addExpression(char *addition)
 {
+	int exprLen = strlen(originalExpression) + strlen(addition);
+	delete [] expressionWithAddition;
+	expressionWithAddition = new char[exprLen+1];
+	
+	strcpy(expressionWithAddition,originalExpression);
 	strcat(expressionWithAddition,addition);
 
 	tokenizeIt(expressionWithAddition);
@@ -131,6 +157,10 @@ LimitStateFunction::addExpression(char *addition)
 int
 LimitStateFunction::removeAddedExpression()
 {
+	int exprLen = strlen(originalExpression);
+	delete [] expressionWithAddition;
+	expressionWithAddition = new char[exprLen+1];
+	
 	strcpy(expressionWithAddition,originalExpression);
 
 	tokenizeIt(expressionWithAddition);
@@ -140,60 +170,106 @@ LimitStateFunction::removeAddedExpression()
 
 
 int
-LimitStateFunction::tokenizeIt(TCL_Char *originalExpression)
+LimitStateFunction::tokenizeIt(const char *originalExpression)
 {
-	// Also store the tokenized expression (with dollar signs in front of variable names)
+	// Can automatically convert Terje's {} stuff to proper Tcl syntax
+	// in this method, e.g., {x_1} --> \$x(1) and {u_5_2} --> \[nodeDisp 5 2]
+	//
+	// implementation of any new patterns needs to also be reflected in gfunction and sensitivity algorithm
 
-  // This function changes each occurrence of {asdf} in the limit state 
-  // function to $asdf; however, we can use \$asdf in the limit state and
-  // not have to do this
-  //
-  // Can automatically convert Terje's {} stuff to proper Tcl syntax
-  // in this method, e.g., {x_1} --> \$x(1) and {u_5_2} --> \[nodeDisp 5 2]
-
-	char lsf_forTokenizing[500];
-	char separators[5] = "}{";
-	char *dollarSign = "$";
-	strcpy(lsf_forTokenizing,originalExpression);
-	char lsf_expression[500] = "";
-	char *tokenPtr2 = strtok( lsf_forTokenizing, separators);
-	while ( tokenPtr2 != NULL ) {
-		if (   strncmp(tokenPtr2, "a",1) == 0
-			|| strncmp(tokenPtr2, "b",1) == 0
-			|| strncmp(tokenPtr2, "c",1) == 0
-			|| strncmp(tokenPtr2, "d",1) == 0
-			|| strncmp(tokenPtr2, "e",1) == 0
-			|| strncmp(tokenPtr2, "f",1) == 0
-			|| strncmp(tokenPtr2, "g",1) == 0
-			|| strncmp(tokenPtr2, "h",1) == 0
-			|| strncmp(tokenPtr2, "i",1) == 0
-			|| strncmp(tokenPtr2, "j",1) == 0
-			|| strncmp(tokenPtr2, "k",1) == 0
-			|| strncmp(tokenPtr2, "l",1) == 0
-			|| strncmp(tokenPtr2, "m",1) == 0
-			|| strncmp(tokenPtr2, "n",1) == 0
-			|| strncmp(tokenPtr2, "o",1) == 0
-			|| strncmp(tokenPtr2, "p",1) == 0
-			|| strncmp(tokenPtr2, "q",1) == 0
-			|| strncmp(tokenPtr2, "r",1) == 0
-			|| strncmp(tokenPtr2, "s",1) == 0
-			|| strncmp(tokenPtr2, "t",1) == 0
-			|| strncmp(tokenPtr2, "u",1) == 0
-			|| strncmp(tokenPtr2, "v",1) == 0
-			|| strncmp(tokenPtr2, "w",1) == 0
-			|| strncmp(tokenPtr2, "x",1) == 0
-			|| strncmp(tokenPtr2, "y",1) == 0
-			|| strncmp(tokenPtr2, "z",1) == 0) {
-			strcat(lsf_expression, dollarSign);
-			strcat(lsf_expression, tokenPtr2);
-		}
-		else {
-			strcat(lsf_expression, tokenPtr2);
-		}
-		tokenPtr2 = strtok( NULL, separators);
+	char separators[] = "}{";
+	int deprecated = strcspn(originalExpression, separators);
+	int originalLen = strlen(originalExpression);
+	
+	if (deprecated < originalLen) {
+		opserr << "WARNING: Limit state function " << this->getTag() << " contains OLD syntax "
+				<< "that uses {x_1}, {u_1_1}, {file_fileName_1_1}, etc. " << endln;
+		opserr << "Use new Tcl variable syntax \\$x(1), \\$u(1,1), etc." << endln << endln;
+		opserr << "Just a note (from KRM) about the deprecated LSF syntax:\n"
+				<< "you can still use RVs in your LSF, however, they are now specified directly:\n"
+				<< "	{x_2}  -->  \\$xrv(2)\n"
+				<< "if you feel really nostalgic, you can still write the following:\n"
+				<< "	{x_2}  -->  \\$x_2\n"
+				<< "however the second option will go away at some point.\n" << endln
+				<< "Nodal commands now work as follows:\n"
+				<< "	{u_1_2}  -->  \\$u(1,2)\n"
+				<< "	{u_1_2}  -->  \\[nodeDisp 1 2]\n"
+				<< "	{u_1_2}  -->  \\$node(1,2,disp) or \\$rec_node(1,2,disp)\n"
+				<< "	{ud_1_2} -->  \\$rec_node(1,2,vel) or \\$ud(1,2)\n"
+				<< "	etc., etc.\n" << endln
+				<< "Element forces can be defined in the same way and are element dependent:\n"
+				<< "	\\$element(2,localForce_1) would give you column 1 of ele 2 localForce\n"
+				<< "	\\$rec_element(1,section_2_force_1), etc, etc.\n" << endln
+				<< "Also, the code in this file also allowed reading of values from a file.\n"
+				<< "This too can be implemented more directly by the user simply by using \n"
+				<< "standard Tcl variables.  ie., instead of computing a value, writing it \n"
+				<< "to a file, and then using file_fileName_1_2 or whatever, now:\n"
+				<< "	{file_fileName_1_2}  -->  \\$yourTclVariable\n" << endln
+				<< "Limit state function parameters can now be specified and used, both for \n"
+				<< "sensitivity studies, and for parametricReliabilityAnalysis:\n"
+				<< "	{par_1}  -->  \\$par(1)\n" << endln
+				<< "And a final note, if a particular GFunEvaluator is still obsessed with\n"
+				<< "case-specific LSF arguments, they can still be implemented through \n"
+				<< "the tokenizeSpecials() function. However, they must be specified in \n"
+				<< "standard Tcl syntax and the values initialized in your own script.\n" << endln
+				<< "If you are using DDM, the \\[nodeDisp 1 2] or similar commands will not \n"
+				<< "work because there is no way to perturb these to calculate dg/du. So \n"
+				<< "if you are doing DDM, use the \\$u(1,2), \\$ud(1,2), etc syntax.  For \n"
+				<< "DDM, you can also use element forces (if sensitivities are coded).\n" << endln;
+		exit(-1);
 	}
-
-	strcpy(tokenizedExpression,lsf_expression);
-
+	
+	// now match regular expressions of known lsf parameters
+	// Note: lsf parameters are not the same as the Parameter class in OS domain.
+	const int numberOfParamTypes = 5;
+	char* pattern[numberOfParamTypes] = {"x(_|rv\\()[0-9]+\\)?",
+										 "ud*\\([0-9]+,[0-9]+\\)",
+										 "(rec_)?node\\([0-9]+,[0-9]+,[a-z]+\\)",
+										 "(rec_)?element\\([0-9]+,[a-zA-Z0-9_]+\\)",
+										 "par\\([0-9]+\\)"};
+	const char* first;
+	const char* last;
+	char par_result[30];
+	
+	// initialize the tcl list object
+	paramList = Tcl_NewListObj(0,NULL);
+	
+	// cycle through pattern types and save instances of parameters to tcl list object
+	for (int ireg = 0; ireg < numberOfParamTypes; ireg++) {
+		Tcl_RegExp regexp = Tcl_RegExpCompile(theTclInterp, pattern[ireg]);
+		if (regexp == NULL) {
+			opserr << "LSF::tokenizeIt ERROR compiling regular expression -- " << pattern[ireg] << endln;
+			opserr << theTclInterp->result << endln;
+		}
+		
+		char* current = new char[originalLen+1];
+		strcpy(current,originalExpression);
+			
+		while ( Tcl_RegExpExec(theTclInterp, regexp, current, current) == 1 ) {
+			// match found
+			Tcl_RegExpRange(regexp, 0, &first, &last);
+			
+			if (first) {
+				strncpy(par_result,first,last-first);
+				par_result[last-first] = '\0';
+				
+				//opserr << "Found: " << par_result << endln;
+				Tcl_Obj *tempStr = Tcl_NewStringObj(par_result,last-first);
+				//opserr << Tcl_GetStringFromObj(tempStr,NULL) << endln;
+				
+				if (Tcl_ListObjAppendElement(theTclInterp, paramList, tempStr) != TCL_OK) {
+					opserr << "LSF::tokenizeIt ERROR creating list element from " << par_result << endln;
+					opserr << theTclInterp->result << endln;
+				}
+			}
+			
+			strcpy(current, last);
+		} 
+			
+		delete [] current;
+	}
+	
+	//Tcl_IncrRefCount(paramList);
+		
 	return 0;
 }

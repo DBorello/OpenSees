@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:52 $
+// $Revision: 1.2 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/AnalyzerGradGEvaluator.cpp,v $
 
 //
@@ -34,6 +34,7 @@
 #include <Vector.h>
 #include <Matrix.h>
 #include <GradGEvaluator.h>
+#include <GFunEvaluator.h>
 #include <ReliabilityDomain.h>
 #include <LimitStateFunction.h>
 #include <RandomVariable.h>
@@ -54,10 +55,11 @@ AnalyzerGradGEvaluator::AnalyzerGradGEvaluator(
 					Tcl_Interp *passedTclInterp,
 					ReliabilityDomain *passedReliabilityDomain,
                     Domain* passedDomain,
+					GFunEvaluator* passedGFunEvaluator,
 					bool PdoGradientCheck)
-:GradGEvaluator(passedReliabilityDomain, passedTclInterp)
+:GradGEvaluator(passedReliabilityDomain, passedGFunEvaluator, passedTclInterp)
 {
-	theReliabilityDomain = passedReliabilityDomain;
+	
 	doGradientCheck = PdoGradientCheck;
 	theDomain=passedDomain;
 

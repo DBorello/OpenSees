@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-12-06 23:14:26 $
+// $Revision: 1.6 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/BasicGFunEvaluator.h,v $
 
 
@@ -48,8 +48,7 @@ public:
 						ReliabilityDomain *passedReliabilityDomain);
 	~BasicGFunEvaluator();
 
-	int		runGFunAnalysis(const Vector &x);
-	int		tokenizeSpecials(TCL_Char *theExpression);
+	int		tokenizeSpecials(TCL_Char *theExpression, Tcl_Obj *paramList);
 
 protected:
 

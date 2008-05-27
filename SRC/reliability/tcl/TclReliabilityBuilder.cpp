@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.46 $
-// $Date: 2008-05-15 21:24:21 $
+// $Revision: 1.47 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -330,7 +330,7 @@ int TclReliabilityModelBuilder_addObjectiveFunction(ClientData clientData,Tcl_In
 int TclReliabilityModelBuilder_addConstraintFunction(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_runSNOPTAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_runMonteCarloResponseAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-int TclReliabilityModelBuilder_updateParameterValue(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_updateParameter(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_runOrthogonalPlaneSamplingAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_computeHessian(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_MultiDimVisPrincPlane(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
@@ -416,7 +416,7 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
    Tcl_CreateCommand(interp, "constraintFunction", TclReliabilityModelBuilder_addConstraintFunction,(ClientData)NULL, NULL);
    Tcl_CreateCommand(interp, "objectiveFunction", TclReliabilityModelBuilder_addObjectiveFunction,(ClientData)NULL, NULL);
    Tcl_CreateCommand(interp, "runSNOPTAnalysis", TclReliabilityModelBuilder_runSNOPTAnalysis,(ClientData)NULL, NULL);
-   Tcl_CreateCommand(interp, "updateParameterValue", TclReliabilityModelBuilder_updateParameterValue,(ClientData)NULL, NULL);
+   Tcl_CreateCommand(interp, "updateParameter", TclReliabilityModelBuilder_updateParameter,(ClientData)NULL, NULL);
    Tcl_CreateCommand(interp, "designVariable", TclReliabilityModelBuilder_addDesignVariable,(ClientData)NULL, NULL);
    Tcl_CreateCommand(interp, "runOrthogonalPlaneSamplingAnalysis",TclReliabilityModelBuilder_runOrthogonalPlaneSamplingAnalysis,(ClientData)NULL, NULL);
    Tcl_CreateCommand(interp, "computeHessian",TclReliabilityModelBuilder_computeHessian,(ClientData)NULL, NULL);
@@ -632,7 +632,7 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
   Tcl_DeleteCommand(theInterp, "constraintFunction");
   Tcl_DeleteCommand(theInterp, "objectiveFunction");
   Tcl_DeleteCommand(theInterp, "runSNOPTAnalysis");
-  Tcl_DeleteCommand(theInterp, "updateParameterValue");
+  Tcl_DeleteCommand(theInterp, "updateParameter");
   Tcl_DeleteCommand(theInterp, "designVariable");
   Tcl_DeleteCommand(theInterp, "runOrthogonalPlaneSamplingAnalysis");
   Tcl_DeleteCommand(theInterp, "computeHessian");
@@ -1654,13 +1654,14 @@ TclReliabilityModelBuilder_addRandomVariable(ClientData clientData,Tcl_Interp *i
 	return TCL_ERROR;
   }
 
-  char tclAssignment[80];
-  sprintf(tclAssignment , "set xrv(%d)  %15.5f", tag, theRandomVariable->getStartValue());
-  if (Tcl_Eval(interp, tclAssignment) == TCL_ERROR) {						
-    opserr << "ERROR GFunEvaluator -- Tcl_Eval returned error in limit state function" << endln;
-    opserr << interp->result << endln;
-    return TCL_ERROR;
-  }
+  // this has all moved to the gFunEvaluator classes, also note you cannot use theRandomVariable once it has been deleted
+  //char tclAssignment[80];
+  //sprintf(tclAssignment , "set xrv(%d)  %15.5f", tag, theRandomVariable->getStartValue());
+  //if (Tcl_Eval(interp, tclAssignment) == TCL_ERROR) {						
+  //  opserr << "ERROR GFunEvaluator -- Tcl_Eval returned error in limit state function" << endln;
+  //  opserr << interp->result << endln;
+  //  return TCL_ERROR;
+  //}
 
   return TCL_OK;
 }
@@ -2006,7 +2007,7 @@ TclReliabilityModelBuilder_addLimitState(ClientData clientData, Tcl_Interp *inte
   }
   
   // CREATE THE OBJECT (passing on argv[2])
-  theLimitStateFunction = new LimitStateFunction(tag, argv[2]);
+  theLimitStateFunction = new LimitStateFunction(tag, argv[2], interp);
   if (theLimitStateFunction == 0) {
 	opserr << "ERROR: ran out of memory creating limit-state function \n";
 	opserr << "limit-state function: " << tag << endln;
@@ -3926,7 +3927,8 @@ TclReliabilityModelBuilder_addgFunEvaluator(ClientData clientData, Tcl_Interp *i
 			opserr << "ERROR: Wrong input to Tcl g-function evaluator." << endln;
 			return TCL_ERROR;
 		}
-		theGFunEvaluator = new TclGFunEvaluator(interp, theReliabilityDomain, argv[3]);
+		theGFunEvaluator = new TclGFunEvaluator(interp, theReliabilityDomain, 
+											theStructuralDomain, argv[3]);
 
 	}
 	else if (strcmp(argv[1],"OpenSees") == 0) {
@@ -4106,7 +4108,8 @@ TclReliabilityModelBuilder_addGradGEvaluator(ClientData clientData, Tcl_Interp *
 			}
 		}
 
-		theGradGEvaluator = new FiniteDifferenceGradGEvaluator(theGFunEvaluator, theReliabilityDomain,interp, perturbationFactor,doGradientCheck, false);
+		theGradGEvaluator = new FiniteDifferenceGradGEvaluator(theGFunEvaluator, theReliabilityDomain, 
+					interp, perturbationFactor,doGradientCheck, false);
 	}
 	else if (strcmp(argv[1],"OpenSees") == 0) {
 
@@ -4131,7 +4134,8 @@ TclReliabilityModelBuilder_addGradGEvaluator(ClientData clientData, Tcl_Interp *
 			return TCL_ERROR;
 		}
 
-		theGradGEvaluator = new OpenSeesGradGEvaluator(interp, theReliabilityDomain, theSensitivityAlgorithm, doGradientCheck);
+		theGradGEvaluator = new OpenSeesGradGEvaluator(interp, theGFunEvaluator, 
+					theReliabilityDomain, theStructuralDomain, theSensitivityAlgorithm, doGradientCheck);
 	}
 	////////////////////////////////////////
 	//////S modified by K Fujimura 10/10/2004
@@ -4162,9 +4166,8 @@ TclReliabilityModelBuilder_addGradGEvaluator(ClientData clientData, Tcl_Interp *
 			return TCL_ERROR;
 		}
 
-		theGradGEvaluator = new AnalyzerGradGEvaluator
-			                (interp, theReliabilityDomain,
-							 theStructuralDomain,
+		theGradGEvaluator = new AnalyzerGradGEvaluator(interp, theReliabilityDomain,
+							 theStructuralDomain, theGFunEvaluator,
 							 doGradientCheck);
 	}
 	////////////////////////////////////////
@@ -5327,8 +5330,7 @@ TclReliabilityModelBuilder_runImportanceSamplingAnalysis(ClientData clientData, 
 				if (theStartPoint == 0) {
 					theStartPoint = new Vector(nrv);
 				}
-				RandomVariableIter rvIter =
-				  theReliabilityDomain->getRandomVariables();
+				RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
 				//for ( int i=1; i<=nrv; i++ ) {
 				while ((aRandomVariable = rvIter()) != 0) {
 				  //int i = aRandomVariable->getIndex();
@@ -7724,11 +7726,12 @@ TclReliabilityModelBuilder_runMonteCarloResponseAnalysis(ClientData clientData, 
 }
 
 
+
 ///////
-///  Command:  updateParameterValue  -rv 1 -value 20.0  or updateParameterValue   -startPoint 
-///            updateParameterValue  -dv 3 -value 20.0
+///  Command:  updateParameter  -rv 1 -value 20.0  or updateParameter   -startPoint 
+///            updateParameter  -dv 3 -value 20.0
 int 
-TclReliabilityModelBuilder_updateParameterValue(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+TclReliabilityModelBuilder_updateParameter(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 	// Do input check
 	char theCommand[15] = "inputCheck";
@@ -7835,6 +7838,7 @@ TclReliabilityModelBuilder_updateParameterValue(ClientData clientData, Tcl_Inter
 	return TCL_OK;
 
 }
+
 
 /*
 Hessian::Hessian(int pSize,ReliabilityDomain *passedReliabilityDomain, 

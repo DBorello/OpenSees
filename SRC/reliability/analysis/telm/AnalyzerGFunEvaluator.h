@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:52 $
+// $Revision: 1.2 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/AnalyzerGFunEvaluator.h,v $
 
 //
@@ -70,7 +70,7 @@ public:
 
 	int		runGFunAnalysis(const Vector &x);
 	int		evaluateG(const Vector &x);
-	int		tokenizeSpecials(TCL_Char *theExpression);
+	int		tokenizeSpecials(TCL_Char *theExpression, Tcl_Obj *paramList);
 
 	void    setNsteps(int nsteps);
 	double  getDt();

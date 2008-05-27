@@ -22,16 +22,16 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:52 $
+// $Revision: 1.2 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/AnalyzerGFunEvaluator.cpp,v $
 
 //
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:52 $
+// $Revision: 1.2 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/AnalyzerGFunEvaluator.cpp,v $
 
 
@@ -89,7 +89,7 @@ double AnalyzerGFunEvaluator::PerformanceFunction()
 	return sum;
 }
 int
-AnalyzerGFunEvaluator::tokenizeSpecials(TCL_Char *theExpression)
+AnalyzerGFunEvaluator::tokenizeSpecials(TCL_Char *theExpression, Tcl_Obj *paramList)
 {
 	// this should not be called //
 	// Set value of OpenSees finite element response quantities 

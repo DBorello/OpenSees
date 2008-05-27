@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2008-03-13 22:32:30 $
+// $Revision: 1.8 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/GFunEvaluator.h,v $
 
 
@@ -36,30 +36,42 @@
 
 #include <Vector.h>
 #include <ReliabilityDomain.h>
+#include <Domain.h>
 #include <tcl.h>
 ///// added buy K Fujimura /////
 #include <GFunEachStepEvaluator.h>
 #include <PerformanceFunctionCoefficientIter.h>
-#include <fstream>
-using std::ofstream;
+
+//#include <fstream>
+//using std::ofstream;
 
 class GFunEvaluator
 {
 
 public:
+	GFunEvaluator(Tcl_Interp *theTclInterp, ReliabilityDomain *theReliabilityDomain, Domain *theOpenSeesDomain);
 	GFunEvaluator(Tcl_Interp *theTclInterp, ReliabilityDomain *theReliabilityDomain);
 	virtual ~GFunEvaluator();
 
 	// Methods provided by base class
 	///// changed by K Fujimura /////
+	virtual int		runGFunAnalysis(const Vector &x);
 	virtual int		evaluateG(const Vector &x);
+	virtual int		evaluateGnoRecompute(const char* lsfExpression);
 	double	getG();
 	int     initializeNumberOfEvaluations();
 	int     getNumberOfEvaluations();
+	
+	// Methods in base class for evaluating LSF
+	int		setTclRandomVariables(const Vector &x);
+	int		uParse(char *tempchar, int *node, int *dirn, char* disp, char* varName, char* arrName);
+	int		nodeParse(char *tempchar, int *node, int *dirn, char* disp, char* varName, char* arrName);
+	int		elementParse(char *tempchar, int *element, char* varName, char* eleArgs);
+	int		nodeTclVariable(int nodeNumber, int direction, char* dispOrWhat, char* varName, char* arrName);
+	int		elementTclVariable(int eleNumber, char* varName, char* restString);
 
 	// Methods to be implemented by specific classes
-	virtual int		runGFunAnalysis(const Vector &x)	=0;
-	virtual int		tokenizeSpecials(TCL_Char *theExpression)	=0;
+	virtual int		tokenizeSpecials(TCL_Char *theExpression, Tcl_Obj *paramList) = 0;
 
 	// Methods implemented by SOME specific classes (random vibrations stuff)
 	virtual void    setNsteps(int nsteps);
@@ -83,14 +95,15 @@ public:
 	virtual double getG2(double g, double littleDt);
 
 
-
 protected:
 	Tcl_Interp *theTclInterp;
 	ReliabilityDomain *theReliabilityDomain;
+	Domain *theOpenSeesDomain;
 	double g;
 	int numberOfEvaluations;
 
 private:
+	
 
 };
 

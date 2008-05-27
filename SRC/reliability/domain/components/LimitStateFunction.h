@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2008-04-29 23:10:28 $
+// $Revision: 1.13 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.h,v $
 
 
@@ -36,14 +36,14 @@
 
 #include <ReliabilityDomainComponent.h>
 #include <Vector.h>
-//#include <fstream>
+#include <tcl.h>
 
 class LimitStateFunction : public ReliabilityDomainComponent
 {
 
 public:
-  LimitStateFunction(int tag, int classTag);
-	LimitStateFunction(int tag, TCL_Char *expression);
+	//LimitStateFunction(int tag, int classTag);
+	LimitStateFunction(int tag, TCL_Char *expression, Tcl_Interp *theTclInterp);
 	~LimitStateFunction();
 
 	void Print(OPS_Stream &s, int flag =0);
@@ -51,6 +51,7 @@ public:
 	// Method to get/add limit-state function
 	char *getExpression();
 	char *getTokenizedExpression();
+	Tcl_Obj *getParameters();
 	int addExpression(char *expression);
 	int removeAddedExpression();
 
@@ -164,11 +165,12 @@ private:
 	void initializeSimulationAnalysis(void);
 	void initializeSORMAnalysis(void);
 
-	int tokenizeIt(TCL_Char *expression);
+	int tokenizeIt(const char *expression);
 
-	char originalExpression[500];
-	char tokenizedExpression[500];
-	char expressionWithAddition[500];
+	char *originalExpression;
+	char *expressionWithAddition;
+	Tcl_Interp *theTclInterp;
+	Tcl_Obj *paramList;
 
 };
 

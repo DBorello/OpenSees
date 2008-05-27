@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2008-05-11 19:52:54 $
+// $Revision: 1.12 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/FiniteDifferenceGradGEvaluator.cpp,v $
 
 
@@ -39,10 +39,9 @@
 #include <LimitStateFunction.h>
 #include <GFunEvaluator.h>
 #include <RandomVariable.h>
-#include <tcl.h>
-
 #include <RandomVariableIter.h>
 #include <LimitStateFunctionIter.h>
+#include <tcl.h>
 
 #include <fstream>
 #include <iomanip>
@@ -61,9 +60,9 @@ FiniteDifferenceGradGEvaluator::FiniteDifferenceGradGEvaluator(
 					double passedPerturbationFactor,
 					bool PdoGradientCheck,
 					bool pReComputeG)
-:GradGEvaluator(passedReliabilityDomain, passedTclInterp)
+:GradGEvaluator(passedReliabilityDomain, passedGFunEvaluator, passedTclInterp)
 {
-	theGFunEvaluator = passedGFunEvaluator;
+	
 	perturbationFactor = passedPerturbationFactor;
 	doGradientCheck = PdoGradientCheck;
 	reComputeG = pReComputeG;
@@ -79,12 +78,12 @@ FiniteDifferenceGradGEvaluator::FiniteDifferenceGradGEvaluator(
 
 FiniteDifferenceGradGEvaluator::~FiniteDifferenceGradGEvaluator()
 {
-	delete grad_g;
-	delete grad_g_matrix;
-	
+	if (grad_g != 0)
+		delete grad_g;
+	if (grad_g_matrix != 0)
+		delete grad_g_matrix;
 	if (DgDdispl != 0)
 		delete DgDdispl;
-
 }
 
 
@@ -110,10 +109,7 @@ FiniteDifferenceGradGEvaluator::computeGradG(double gFunValue,
 {
 	
 	numberOfEvalIncSens++;///// added by K Fujimura /////
-
-	// Call base class method
-	computeParameterDerivatives(gFunValue);
-
+	double gFunLocal = gFunValue;
 
 	// Possibly re-compute limit-state function value
 	int result;
@@ -130,8 +126,11 @@ FiniteDifferenceGradGEvaluator::computeGradG(double gFunValue,
 				<< " could not tokenize limit-state function. " << endln;
 			return -1;
 		}
-		gFunValue = theGFunEvaluator->getG();
+		gFunLocal = theGFunEvaluator->getG();
 	}
+	
+	// Call base class method
+	computeParameterDerivatives(gFunLocal);
 
 
 	// Initial declarations
@@ -142,50 +141,47 @@ FiniteDifferenceGradGEvaluator::computeGradG(double gFunValue,
 	double gFunValueAStepAhead;
 	double stdv;
 
-	RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
+	//RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
 	// For each random variable: perturb and run analysis again
-	//for ( i=0 ; i<numberOfRandomVariables ; i++ ) {
-	while ((theRandomVariable = rvIter()) != 0) {
+	// KRM -- note I changed this back to for-loop  because this rvIter is nested 
+	// above the rvIter going on inside GFunEvaluator
+	for ( int i=0; i < numberOfRandomVariables; i++ ) {
+	//while ((theRandomVariable = rvIter()) != 0) {
 	  
-	  int rvTag = theRandomVariable->getTag();
-	  //int i = theRandomVariable->getIndex();
-	  int i = theReliabilityDomain->getRandomVariableIndex(rvTag);
-
-	  //opserr << "tag: " << rvTag << ", index: " << i << endln;
+		theRandomVariable = theReliabilityDomain->getRandomVariablePtrFromIndex(i);
+		//int rvTag = theRandomVariable->getTag();
+		//int i = theRandomVariable->getIndex();
+		//int i = theReliabilityDomain->getRandomVariableIndex(rvTag);
 
 		// Get the standard deviation
 		stdv = theRandomVariable->getStdv();
 
-
 		// Compute perturbation
 		h = stdv/perturbationFactor;
-
 
 		// Compute perturbed vector of random variables realization
 		perturbed_x = passed_x;
 		perturbed_x(i) = perturbed_x(i) + h;
 
-
 		// Evaluate limit-state function
 		result = theGFunEvaluator->runGFunAnalysis(perturbed_x);
 		if (result < 0) {
 			opserr << "FiniteDifferenceGradGEvaluator::evaluate_grad_g() - " << endln
-				<< " could not run analysis to evaluate limit-state function. " << endln;
+				<< " could not run analysis to evaluate limit-state function values. " << endln;
 			return -1;
 		}
 		result = theGFunEvaluator->evaluateG(perturbed_x);
 		if (result < 0) {
-		  opserr << "FiniteDifferenceGradGEvaluator::evaluate_grad_g() - " << endln
-			 << " could not tokenize limit-state function. " << endln;
-		  return -1;
+			opserr << "FiniteDifferenceGradGEvaluator::evaluate_grad_g() - " << endln
+				<< " could not evaluate limit-state function. " << endln;
+			return -1;
 		}
 		gFunValueAStepAhead = theGFunEvaluator->getG();
 
 
 		// Compute the derivative by finite difference
-		(*grad_g)(i) = (gFunValueAStepAhead - gFunValue) / h;
+		(*grad_g)(i) = (gFunValueAStepAhead - gFunLocal) / h;
 	}
-
 
 	if (doGradientCheck) {
 		char myString[100];
@@ -230,29 +226,27 @@ FiniteDifferenceGradGEvaluator::computeAllGradG(const Vector &gFunValues,
 	double stdv;
 	int result;
 
-
+	//RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
 	// For each random variable: perturb and run analysis again
-	RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
-	// For each random variable: perturb and run analysis again
-	//for (int i=1; i<=nrv; i++) {
-	while ((theRandomVariable = rvIter()) != 0) {
-
-	  int rvTag = theRandomVariable->getTag();
-	  //int i = theRandomVariable->getIndex();
-	  int i = theReliabilityDomain->getRandomVariableIndex(rvTag);
+	// KRM -- note I changed this back to for-loop  because this rvIter is nested 
+	// above the rvIter going on inside GFunEvaluator
+	for ( int i=0; i < nrv; i++ ) {
+	//while ((theRandomVariable = rvIter()) != 0) {
+	  
+		theRandomVariable = theReliabilityDomain->getRandomVariablePtrFromIndex(i);
+		//int rvTag = theRandomVariable->getTag();
+		//int i = theRandomVariable->getIndex();
+		//int i = theReliabilityDomain->getRandomVariableIndex(rvTag);
 
 		// Get the standard deviation
 		stdv = theRandomVariable->getStdv();
 
-
 		// Compute perturbation
 		h = stdv/perturbationFactor;
-
 
 		// Compute perturbed vector of random variables realization
 		perturbed_x = passed_x;
 		perturbed_x(i) = perturbed_x(i) + h;
-
 
 		// Evaluate limit-state function
 		result = theGFunEvaluator->runGFunAnalysis(perturbed_x);
@@ -262,6 +256,8 @@ FiniteDifferenceGradGEvaluator::computeAllGradG(const Vector &gFunValues,
 			return -1;
 		}
 
+		// not sure if the lsfIter is causing problems here, may need to resort back to 
+		// for-loop unless iters are copied at some point.
 		LimitStateFunctionIter lsfIter = theReliabilityDomain->getLimitStateFunctions();
 		LimitStateFunction *theLSF;
 		// Now loop over limit-state functions
@@ -302,7 +298,7 @@ FiniteDifferenceGradGEvaluator::getDgDdispl()
 	// This method is implemented solely for the purpose of mean 
 	// out-crossing rate analysis using "two searches". Then the 
 	// derivative of the limit-state function wrt. the displacement
-	// is needed to expand the limit-state funciton expression
+	// is needed to expand the limit-state function expression
 
 	// Result matrix
 	Matrix *DgDdispl = 0;

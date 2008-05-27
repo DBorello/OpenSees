@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2008-03-13 22:32:30 $
+// $Revision: 1.12 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.h,v $
 
 
@@ -40,8 +40,8 @@
 #include <ReliabilityDomain.h>
 #include <tcl.h>
 
-#include <fstream>
-using std::ofstream;
+//#include <fstream>
+//using std::ofstream;
 
 
 class OpenSeesGFunEvaluator : public GFunEvaluator
@@ -59,25 +59,21 @@ class OpenSeesGFunEvaluator : public GFunEvaluator
   ~OpenSeesGFunEvaluator();
   
   int		runGFunAnalysis(const Vector &x);
-  int		tokenizeSpecials(TCL_Char *theExpression);
+  int		tokenizeSpecials(TCL_Char *theExpression, Tcl_Obj *passedList);
   
-  void    setNsteps(int nsteps);
-  double  getDt();
+  void		setNsteps(int nsteps);
+  double	getDt();
 
-  double getG2(double g, double littleDt);
+  double	getG2(double g, double littleDt);
 	
   
  protected:
   
  private:
-  int createTclVariables();
-  int removeTclVariables();
-  int rec_nodeTclVariable(char *tempchar, char *variableName);
-  int rec_elementTclVariable(char *tempchar, char *variableName);
-  char fileName[256];
-  int nsteps;
-  double dt;
-  Domain *theOpenSeesDomain;
+	char fileName[256];
+	int nsteps;
+	double dt;
+	
 };
 
 #endif

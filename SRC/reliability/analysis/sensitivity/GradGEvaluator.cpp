@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2008-02-29 19:47:20 $
+// $Revision: 1.6 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/GradGEvaluator.cpp,v $
 
 
@@ -35,16 +35,19 @@
 #include <Matrix.h>
 #include <ReliabilityDomain.h>
 #include <tcl.h>
+#include <float.h>
 
 GradGEvaluator::GradGEvaluator(ReliabilityDomain *passedReliabilityDomain,
+							   GFunEvaluator *passedGFunEvaluator,
 							   Tcl_Interp *passedTclInterp)
 {
 	theTclInterp = passedTclInterp;
 	theReliabilityDomain = passedReliabilityDomain;
+	theGFunEvaluator = passedGFunEvaluator;
 	DgDpar = 0;
 	/////S added by K Fujimura /////
-    finitedifference= false;
-	numberOfEvalIncSens=0;
+    finitedifference = false;
+	numberOfEvalIncSens = 0;
 	/////E added by K Fujimura /////
 }
 
@@ -68,64 +71,92 @@ GradGEvaluator::getDgDdispl()
 
 
 
-
-
-
-
 int 
 GradGEvaluator::computeParameterDerivatives(double g)
 {
+	
 	// Zero out the previous result matrix
 	if (DgDpar != 0) {
 		delete DgDpar;
 		DgDpar = 0;
 	}
 
-
 	// Initial declarations
-	char separators[5] = "}{";
-	char tclAssignment[500];
+	double g_perturbed;
 	double onedgdpar;
-	int i;
-
+	int llength = 0;
 
 	// "Download" limit-state function from reliability domain
 	int lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
-	LimitStateFunction *theLimitStateFunction = 
-		theReliabilityDomain->getLimitStateFunctionPtr(lsf);
+	LimitStateFunction *theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
 	char *theExpression = theLimitStateFunction->getExpression();
-	char lsf_copy[500];
-	strcpy(lsf_copy,theExpression);
-	char *tokenPtr = strtok( lsf_copy, separators); 
-
-	while ( tokenPtr != NULL ) {
-
-		if ( strncmp(tokenPtr, "par", 3) == 0) {
+	Tcl_Obj *passedList = theLimitStateFunction->getParameters();
 	
+	// Cycle over all the LSF parameters and compute gradients
+	Tcl_Obj *paramList = Tcl_DuplicateObj(passedList);
+	Tcl_Obj *objPtr;
+	Tcl_ListObjLength(theTclInterp,paramList,&llength);
+		
+	for (int jk = 0; jk < llength; jk++) {
+		Tcl_ListObjIndex(theTclInterp,paramList,jk,&objPtr);
+		char *listStr = Tcl_GetStringFromObj(objPtr,NULL);
+
+		// If a RV is detected
+		if ( strncmp(listStr, "par", 3) == 0 ) {
+
 			// Get parameter number
 			int parameterNumber;
-			sscanf(tokenPtr,"par_%i",&parameterNumber);
+			int args = sscanf(listStr,"par(%i)",&parameterNumber);
+			if (args != 1) {
+				opserr << "GradGEvaluator ERROR -- could not determine parameter number in LSF " << lsf << endln;
+				return -1;
+			}
+			char theIndex[20];
+			sprintf(theIndex,"%d",parameterNumber);
 
 			// Store the original parameter value
 			double originalValue;
-			sprintf(tclAssignment , "($par_%d)",parameterNumber);
-			Tcl_ExprDouble( theTclInterp, tclAssignment, &originalValue );
+			Tcl_Obj *tempDouble = Tcl_GetVar2Ex(theTclInterp, "par", theIndex, TCL_LEAVE_ERR_MSG);
+			if (tempDouble == NULL) {
+				opserr << "ERROR GradGEvaluator -- GetVar error" << endln;
+				opserr << theTclInterp->result << endln;
+				return -1;
+			}
+			Tcl_GetDoubleFromObj(theTclInterp, tempDouble, &originalValue);
 			
 			// Assign a perturbed value
-			sprintf(tclAssignment,"set par_%d [ expr ($par_%d*1.001) ]",parameterNumber,parameterNumber);
-			Tcl_Eval( theTclInterp, tclAssignment);
-
+			double xval = 0.001;
+			if ( fabs(originalValue) > 2.0*DBL_EPSILON )
+				xval = originalValue * 1.001;
+				
+			Tcl_Obj *outp = Tcl_SetVar2Ex(theTclInterp,"par",theIndex,Tcl_NewDoubleObj(xval),TCL_LEAVE_ERR_MSG);
+			if (outp == NULL) {
+				opserr << "ERROR GradGEvaluator -- error setting parameter with tag " << parameterNumber << endln;
+				opserr << theTclInterp->result << endln;
+				return -1;
+			}
+			
 			// Evaluate limit-state function again
-			double g_perturbed;
-			char *theTokenizedExpression = theLimitStateFunction->getTokenizedExpression();
-			Tcl_ExprDouble( theTclInterp, theTokenizedExpression, &g_perturbed );
-
+			if (theGFunEvaluator->evaluateGnoRecompute(theExpression) < 0) {
+				opserr << "ERROR GradGEvaluator -- error evaluating LSF" << endln;
+				opserr << theTclInterp->result << endln;
+				return -1;
+			}
+			g_perturbed = theGFunEvaluator->getG();
+			
 			// Compute the gradient 'dgdpar' by finite difference
-			onedgdpar = (g_perturbed-g)/(originalValue*0.001);
+			if ( fabs(originalValue) > 2.0*DBL_EPSILON )
+				onedgdpar = (g_perturbed-g)/(originalValue*0.001);
+			else
+				onedgdpar = (g_perturbed-g)/0.001;
 
 			// Make assignment back to its original value
-			sprintf(tclAssignment,"set par_%d %35.20f",parameterNumber,originalValue);
-			Tcl_Eval( theTclInterp, tclAssignment);
+			outp = Tcl_SetVar2Ex(theTclInterp,"par",theIndex,Tcl_NewDoubleObj(originalValue),TCL_LEAVE_ERR_MSG);
+			if (outp == NULL) {
+				opserr << "ERROR GradGEvaluator -- error setting parameter with tag " << parameterNumber << endln;
+				opserr << theTclInterp->result << endln;
+				return -1;
+			}
 			
 			// Store the DgDpar in a matrix (make it expand successively)
 			if (DgDpar == 0) {
@@ -138,17 +169,20 @@ GradGEvaluator::computeParameterDerivatives(double g)
 				Matrix tempMatrix = *DgDpar;
 				delete DgDpar;
 				DgDpar = new Matrix(oldSize+1, 2);
-				for (i=0; i<oldSize; i++) {
+				for (int i=0; i<oldSize; i++) {
 					(*DgDpar)(i,0) = tempMatrix(i,0);
 					(*DgDpar)(i,1) = tempMatrix(i,1);
 				}
 				(*DgDpar)(oldSize,0) = (double)parameterNumber;
 				(*DgDpar)(oldSize,1) = onedgdpar;
 			}
+
 		}
 
-		tokenPtr = strtok( NULL, separators); 
 	}
+	
+	// reclaim Tcl object space
+	Tcl_DecrRefCount(paramList);
 
 	return 0;
 }
@@ -158,7 +192,12 @@ GradGEvaluator::computeParameterDerivatives(double g)
 Matrix 
 GradGEvaluator::getDgDpar()
 {
-	return (*DgDpar);
+	if (DgDpar==0) {
+		Matrix dummy(1,1);
+		return dummy;
+	}
+	else
+		return (*DgDpar);
 }
 
 int
@@ -173,11 +212,12 @@ GradGEvaluator::getNumberOfEvaluations()
 	return numberOfEvalIncSens;
 }
 
-void GradGEvaluator::setPerformFuncCoeffs(TaggedObjectStorage* a){
+void GradGEvaluator::setPerformFuncCoeffs(TaggedObjectStorage* a) {
 	opserr << "GFunEvaluator::setPerformFuncCoeffs() -- This method is not " << endln
 		<< " implemented for the chosen type of GradgEvaluator." << endln;
 }
-void GradGEvaluator::setPerformFuncCoeffIter(PerformanceFunctionCoefficientIter* a){
+
+void GradGEvaluator::setPerformFuncCoeffIter(PerformanceFunctionCoefficientIter* a) {
 	opserr << "GFunEvaluator::setPerformFuncCoeffIter() -- This method is not " << endln
 		<< " implemented for the chosen type of GradgEvaluator." << endln;
 }

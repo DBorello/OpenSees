@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-10-31 21:37:48 $
+// $Revision: 1.8 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/TclGFunEvaluator.cpp,v $
 
 
@@ -38,15 +38,17 @@
 #include <LimitStateFunction.h>
 #include <RandomVariablePositioner.h>
 #include <RandomVariablePositionerIter.h>
-//#include <fstream>
+
 #include <tcl.h>
+#include <stdlib.h>
 #include <string.h>
 
 
 TclGFunEvaluator::TclGFunEvaluator(Tcl_Interp *passedTclInterp,
 					ReliabilityDomain *passedReliabilityDomain,
+					Domain *passedOpenSeesDomain,
 					TCL_Char *passed_fileName)
-:GFunEvaluator(passedTclInterp, passedReliabilityDomain)
+:GFunEvaluator(passedTclInterp, passedReliabilityDomain, passedOpenSeesDomain)
 {
 	strcpy(fileName,passed_fileName);
 }
@@ -61,10 +63,6 @@ TclGFunEvaluator::~TclGFunEvaluator()
 int
 TclGFunEvaluator::runGFunAnalysis(const Vector &x)
 {	
-	// Initial declarations
-	char theCommand[100];
-	int i;
-
 
 ////// IN CASE AN OPENSEES MODEL EXISTS ////////////////////////////////
 
@@ -78,32 +76,26 @@ TclGFunEvaluator::runGFunAnalysis(const Vector &x)
 
 	// Put random variables into the structural domain according to the RandomVariablePositioners
 	int rvIndex;
-	RandomVariablePositionerIter &rvPosIter =
-	  theReliabilityDomain->getRandomVariablePositioners();
+	RandomVariablePositionerIter rvPosIter = theReliabilityDomain->getRandomVariablePositioners();
 	RandomVariablePositioner *theRVPos;
 	while ((theRVPos = rvPosIter()) != 0) {
-	  rvIndex = theRVPos->getRvIndex();
-	  theRVPos->update(x(rvIndex));
+		rvIndex = theRVPos->getRvIndex();
+		theRVPos->update(x(rvIndex));
 	}
 
 //////////////////////////////////////////////////////////////////////////
 
-
-	// Set values of random variables in the Tcl intepreter
-	for (i=0; i<x.Size(); i++) {
-		sprintf(theCommand,"set x_%d %20.12e",(i+1),x(i));
-		if (Tcl_Eval(theTclInterp, theCommand) == TCL_ERROR) {
-		  opserr << "ERROR TclGFunEvaluator -- error in Tcl_Eval" << endln;
-		  return -1;
-		}
+	// Set random variable values in Tcl namespace
+	if (setTclRandomVariables(x) != 0) {
+		opserr << "ERROR TclGFunEvaluator::runGFunAnalysis -- error in setTclRandomVariables" << endln;
+		return -1;
 	}
 
 
 	// Source the code file that the user has provided
-	sprintf(theCommand,"source %s",fileName);
-	if (Tcl_Eval(theTclInterp, theCommand) == TCL_ERROR) {
-	  opserr << "ERROR TclGFunEvaluator -- error in Tcl_Eval" << endln;
-	  return -1;
+	if (Tcl_EvalFile(theTclInterp, fileName) == TCL_ERROR) {
+		opserr << "ERROR TclGFunEvaluator -- error in Tcl_EvalFile" << endln;
+		return -1;
 	}
 
 
@@ -111,12 +103,52 @@ TclGFunEvaluator::runGFunAnalysis(const Vector &x)
 }
 
 
-
-
 int
-TclGFunEvaluator::tokenizeSpecials(TCL_Char *theExpression)
+TclGFunEvaluator::tokenizeSpecials(TCL_Char *theExpression, Tcl_Obj *passedList)
 {
+	// Set value of OpenSees finite element response quantities 
+	// appearing in the limit-state function in the Tcl domain
+	
+	// Note: we no longer need theExpression as all the parameters were saved in LimitStateFunction
+	
+	Tcl_Obj *paramList = Tcl_DuplicateObj(passedList);
+	int llength;
+	Tcl_Obj *objPtr;
+	if (Tcl_ListObjLength(theTclInterp,paramList,&llength) != TCL_OK) {
+		opserr << "TclGFunEvaluator::tokenizeSpecials ERROR getting list length. " << endln;
+		opserr << theTclInterp->result << endln;
+	}
+	
+	// initialize variables that will be used
+	char dispOrWhat[10] = "";
+	char eleRest[100] = "";
+	char varName[20] = "";
+	char arrName[40] = "";
+	int nodeNumber = 0, direction = 0, eleNumber = 0;
+	
+	for (int jk = 0; jk < llength; jk++) {
+		Tcl_ListObjIndex(theTclInterp,paramList,jk,&objPtr);
+		char *listStr = Tcl_GetStringFromObj(objPtr,NULL);
 
+		// If a node quantity is detected
+		if ( strncmp(listStr, "u", 1) == 0 ) {
+			uParse(listStr, &nodeNumber, &direction, dispOrWhat, varName, arrName);
+			nodeTclVariable(nodeNumber, direction, dispOrWhat, varName, arrName);
+		}
+		else if ( strncmp(listStr, "node", 4) == 0 || strncmp(listStr, "rec_node", 8) == 0 ) {
+			nodeParse(listStr, &nodeNumber, &direction, dispOrWhat, varName, arrName);
+			nodeTclVariable(nodeNumber, direction, dispOrWhat, varName, arrName);
+		}      
+		// If an element quantity is detected
+		else if ( strncmp(listStr, "element", 7) == 0 || strncmp(listStr, "rec_element", 11) == 0 ) {
+			elementParse(listStr, &eleNumber, varName, eleRest);
+			elementTclVariable(eleNumber, varName, eleRest);
+		}
+	}
+	
+	// reclaim Tcl object space
+	Tcl_DecrRefCount(paramList);
+	
 	return 0;
 }
 

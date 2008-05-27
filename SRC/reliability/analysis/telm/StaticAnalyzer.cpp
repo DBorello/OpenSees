@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:53 $
+// $Revision: 1.2 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/StaticAnalyzer.cpp,v $
 
 #include <StaticAnalyzer.h>
@@ -211,7 +211,7 @@ int StaticAnalyzer::analyzeMean()
 		output << "\n";
 		output.flush();
 	}
-	RandomVariablePositionerIter &rvpIter = theReliabilityDomain->getRandomVariablePositioners();
+	RandomVariablePositionerIter rvpIter = theReliabilityDomain->getRandomVariablePositioners();
 	//for ( i=1 ; i<=numberOfRandomVariablePositioners ; i++ )  {
 	while ((theRandomVariablePositioner = rvpIter()) != 0) {
 		//theRandomVariablePositioner = theReliabilityDomain->getRandomVariablePositionerPtr(i);

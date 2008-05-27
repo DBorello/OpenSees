@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
   
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:52 $
+// $Revision: 1.2 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/AnalyzerGradGEvaluator.h,v $
 
                                                                       
@@ -35,6 +35,7 @@
 #define AnalyzerGradGEvaluator_h
 
 #include <GradGEvaluator.h>
+#include <GFunEvaluator.h>
 #include <Vector.h>
 #include <Matrix.h>
 #include <Domain.h>
@@ -55,6 +56,7 @@ public:
 	AnalyzerGradGEvaluator(Tcl_Interp *passedTclInterp, 
 				           ReliabilityDomain *passedReliabilityDomain,
                            Domain* passedDomain,
+						   GFunEvaluator* passedGFunEvaluator,
 				           bool doGradientCheck);
 	~AnalyzerGradGEvaluator();
 

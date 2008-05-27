@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2008-05-13 16:30:27 $
+// $Revision: 1.17 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.cpp,v $
 
 
@@ -232,7 +232,7 @@ SearchWithStepSizeAndStepDirection::findDesignPoint()
 		result = theProbabilityTransformation->getJacobian_x_to_u(*x, Jxu);
 		if (result < 0) {
 		  opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
-			 << " could not transform from u to x." << endln;
+			 << " could not transform Jacobian from x to u." << endln;
 		  return -1;
 		}
 
@@ -414,7 +414,20 @@ SearchWithStepSizeAndStepDirection::findDesignPoint()
 			Glast = gFunctionValue;
 
 			numberOfEvaluations = theGFunEvaluator->getNumberOfEvaluations();
-
+			
+			// compute sensitivity pf beta wrt to LSF parameters (if they exist)
+			const Matrix &dGdPar = theGradGEvaluator->getDgDpar();
+			int numPars = dGdPar.noRows();
+			if (numPars > 0 && dGdPar.noCols() > 1) {
+				opserr << "Sensitivity of beta wrt LSF parameters: ";
+				Vector dBetadPar(numPars);
+				
+				for (int ib=0; ib<numPars; ib++)
+					dBetadPar(ib) = dGdPar(ib,1) / gradientInStandardNormalSpace->Norm();
+		
+				opserr << dBetadPar;
+			}
+	
 			return 1;
 		}
 

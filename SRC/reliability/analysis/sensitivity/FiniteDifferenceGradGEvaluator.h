@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2008-05-11 19:52:54 $
+// $Revision: 1.5 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/FiniteDifferenceGradGEvaluator.h,v $
 
 
@@ -73,7 +73,6 @@ private:
 
 	Vector *grad_g;
 	Matrix *grad_g_matrix;
-	GFunEvaluator *theGFunEvaluator;
 	Matrix *DgDdispl;
 
 	double perturbationFactor;

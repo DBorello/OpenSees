@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2008-02-29 19:47:20 $
+// $Revision: 1.5 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/GradGEvaluator.h,v $
 
 
@@ -37,6 +37,7 @@
 #include <Vector.h>
 #include <Matrix.h>
 #include <ReliabilityDomain.h>
+#include <GFunEvaluator.h>
 #include <tcl.h>
 
 class PerformanceFunctionCoefficientIter;
@@ -45,7 +46,7 @@ class GradGEvaluator
 {
 
 public:
-	GradGEvaluator(ReliabilityDomain *theReliabilityDomain, Tcl_Interp *theTclInterp);
+	GradGEvaluator(ReliabilityDomain *theReliabilityDomain, GFunEvaluator *theGFunEvaluator, Tcl_Interp *theTclInterp);
 	virtual ~GradGEvaluator();
 
 	// Methods provided by the sub-classes
@@ -72,7 +73,10 @@ public:
 
 protected:
 	int computeParameterDerivatives(double g);
+
+	// one day these should find themselves a better home than protected
 	ReliabilityDomain *theReliabilityDomain;
+	GFunEvaluator *theGFunEvaluator;
 	Tcl_Interp *theTclInterp;
 
 	/////S added by K Fujimura /////

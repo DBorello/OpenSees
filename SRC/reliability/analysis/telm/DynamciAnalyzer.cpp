@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:52 $
+// $Revision: 1.2 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/DynamciAnalyzer.cpp,v $
 
 
@@ -124,7 +124,7 @@ int DynamicAnalyzer::analyze(Vector x)
 		output << "\n";
 		output.flush();
 	}
-	RandomVariablePositionerIter &rvpIter = theReliabilityDomain->getRandomVariablePositioners();
+	RandomVariablePositionerIter rvpIter = theReliabilityDomain->getRandomVariablePositioners();
 	RandomVariablePositioner *theRVP;
 	while ((theRVP = rvpIter()) != 0) {
 	//for ( i=1 ; i<=numberOfRandomVariablePositioners ; i++ )  {
@@ -218,7 +218,7 @@ int DynamicAnalyzer::analyzeMean()
 		output << "\n";
 		output.flush();
 	}
-	RandomVariablePositionerIter &rvpIter = theReliabilityDomain->getRandomVariablePositioners();
+	RandomVariablePositionerIter rvpIter = theReliabilityDomain->getRandomVariablePositioners();
 	RandomVariablePositioner *theRVP;
 	while ((theRVP = rvpIter()) != 0) {
 	//for ( i=1 ; i<=numberOfRandomVariablePositioners ; i++ )  {

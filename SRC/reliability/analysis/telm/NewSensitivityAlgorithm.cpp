@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:53 $
+// $Revision: 1.2 $
+// $Date: 2008-05-27 20:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/NewSensitivityAlgorithm.cpp,v $
                                                                         
 #include <NewSensitivityAlgorithm.h>
@@ -363,7 +363,7 @@ NewSensitivityAlgorithm::sensitivityDomainChanged(void)
 		int numEach;
 		for (int gradNumber=1; gradNumber<=numGrads; gradNumber++ )  {
 			numEach=0;
-			RandomVariablePositionerIter &rvpIter = theReliabilityDomain->getRandomVariablePositioners();
+			RandomVariablePositionerIter rvpIter = theReliabilityDomain->getRandomVariablePositioners();
 			//for (int i=1; i<=numPos; i++ ) {
 			
 			while ((theRandomVariablePositioner = rvpIter()) != 0) {
@@ -382,7 +382,7 @@ NewSensitivityAlgorithm::sensitivityDomainChanged(void)
 		delete [] itemp;
 		itemp=0;
 	}else{
-		ParameterPositionerIter &pIter = theReliabilityDomain->getParameterPositioners();
+		ParameterPositionerIter pIter = theReliabilityDomain->getParameterPositioners();
 		while ((theParameterPositioner = pIter()) != 0) {
 		//for (int i=1; i<=numPos; i++ ) {
 			//theParameterPositioner = theReliabilityDomain->getParameterPositionerPtr(i);
