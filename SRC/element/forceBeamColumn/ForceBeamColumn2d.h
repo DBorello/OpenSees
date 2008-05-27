@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.10 $
-// $Date: 2007-02-16 00:11:49 $
+// $Revision: 1.11 $
+// $Date: 2008-05-27 23:10:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.h,v $
 
 /*
@@ -177,6 +177,11 @@ class ForceBeamColumn2d: public Element
   Vector *vscommit;              // array of commited section deformation vectors
   
   enum {maxNumEleLoads = 100};
+  enum {NDM = 2};         // dimension of the problem (2d)
+  enum {NND = 3};         // number of nodal dof's
+  enum {NEGD = 6};         // number of element global dof's
+  enum {NEBD = 3};         // number of element dof's in the basic system
+
   int numEleLoads; // Number of element load objects
   ElementalLoad *eleLoads[maxNumEleLoads];
 
@@ -186,8 +191,9 @@ class ForceBeamColumn2d: public Element
   static Vector theVector;
   static double workArea[];
   
-  enum {maxNumSections = 100};
-  
+  enum {maxNumSections = 20};
+  enum {maxSectionOrder = 5};
+
   // following are added for subdivision of displacement increment
   int    maxSubdivisions;       // maximum number of subdivisons of dv for local iterations
   
