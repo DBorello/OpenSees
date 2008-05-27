@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2006-09-06 20:17:34 $
+// $Revision: 1.9 $
+// $Date: 2008-05-27 23:23:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection3d.h,v $
 
 #ifndef ElasticSection3d_h
@@ -72,10 +72,7 @@ class ElasticSection3d : public SectionForceDeformation
   int activateParameter(int parameterID);
   const Vector& getStressResultantSensitivity(int gradNumber,
 					      bool conditional);
-  const Vector& getSectionDeformationSensitivity(int gradNumber);
   const Matrix& getInitialTangentSensitivity(int gradNumber);
-  int commitSensitivity(const Vector& sectionDeformationGradient,
-			int gradNumber, int numGrads);
 
  protected:
   

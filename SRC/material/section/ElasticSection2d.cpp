@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2006-09-06 20:17:34 $
+// $Revision: 1.11 $
+// $Date: 2008-05-27 23:23:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection2d.cpp,v $
 
 #include <ElasticSection2d.h>
@@ -80,7 +80,7 @@ ElasticSection2d::ElasticSection2d
 
 ElasticSection2d::~ElasticSection2d(void)
 {
-
+  return;
 }
 
 int 
@@ -307,26 +307,10 @@ ElasticSection2d::getStressResultantSensitivity(int gradNumber,
   return s;
 }
 
-const Vector&
-ElasticSection2d::getSectionDeformationSensitivity(int gradNumber)
-{
-  s.Zero();
-
-  return s;
-}
-
 const Matrix&
 ElasticSection2d::getInitialTangentSensitivity(int gradNumber)
 {
   ks.Zero();
 
   return ks;
-}
-
-int
-ElasticSection2d::commitSensitivity(const Vector& sectionDeformationGradient,
-				    int gradNumber, int numGrads)
-{
-  // Nothing to commit, path independent
-  return 0;
 }
