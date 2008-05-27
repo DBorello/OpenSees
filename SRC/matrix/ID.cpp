@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-08-03 00:17:09 $
+// $Revision: 1.14 $
+// $Date: 2008-05-27 22:55:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.cpp,v $
                                                                         
                                                                         
@@ -54,24 +54,26 @@ ID::ID(int size)
 {
 
 #ifdef _G3DEBUG
-  if (sz <= 0) {
+  if (sz < 0) {
     opserr << "ID::ID(int) - size " << size << " specified <= 0\n";
-    sz = 1;
-    arraySize = 1;
+    sz = 0;
+    arraySize = 0;
   }
 #endif    
 
   // create the space for the data & check space was available
   //  data = (int *)malloc(size*sizeof(int));
-  data = new int[size]; 
-  if (data == 0) {
-    opserr << "ID::ID(int): ran out of memory with size " << size << endln;
-    exit(-1);
+  if (size > 0) {
+    data = new int[size]; 
+    if (data == 0) {
+      opserr << "ID::ID(int): ran out of memory with size " << size << endln;
+      exit(-1);
+    }
+    
+    // zero the data
+    for (int i=0; i<size; i++)
+      data[i] = 0;
   }
-
-  // zero the data
-  for (int i=0; i<size; i++)
-    data[i] = 0;
 }
 
 

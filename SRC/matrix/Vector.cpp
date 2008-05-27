@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2006-10-02 20:16:35 $
+// $Revision: 1.13 $
+// $Date: 2008-05-27 22:55:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.cpp,v $
                                                                         
                                                                         
@@ -57,24 +57,26 @@ Vector::Vector(int size)
 : sz(size), theData(0), fromFree(0)
 {
 #ifdef _G3DEBUG
-  if (sz <= 0) {
-    opserr << "Vector::Vector(int) - size " << size << " specified <= 0\n";
+  if (sz < 0) {
+    opserr << "Vector::Vector(int) - size " << size << " specified < 0\n";
     sz = 1;
   }
 #endif
 
   // get some space for the vector
   //  theData = (double *)malloc(size*sizeof(double));
-  theData = new double [size];
+  if (size > 0) {
+    theData = new double [size];
 
-  if (theData == 0) {
-    opserr << "Vector::Vector(int) - out of memory creating vector of size " << size << endln;
-    sz = 0; // set this should fatal error handler not kill process!!
-  }
+    if (theData == 0) {
+      opserr << "Vector::Vector(int) - out of memory creating vector of size " << size << endln;
+      sz = 0; // set this should fatal error handler not kill process!!
+    }
     
-  // zero the components
-  for (int i=0; i<sz; i++)
-    theData[i] = 0.0;
+    // zero the components
+    for (int i=0; i<sz; i++)
+      theData[i] = 0.0;
+  }
 }
 
 
