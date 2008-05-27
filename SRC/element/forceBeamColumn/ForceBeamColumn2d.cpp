@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.34 $
-// $Date: 2008-04-29 17:34:17 $
+// $Revision: 1.35 $
+// $Date: 2008-05-27 23:09:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 /*
@@ -76,14 +76,9 @@ Journal of Structural Engineering, Approved for publication, February 2007.
 #include <ElementResponse.h>
 #include <ElementalLoad.h>
 
-#define  NDM   2         // dimension of the problem (2d)
-#define  NND   3         // number of nodal dof's
-#define  NEGD  6         // number of element global dof's
-#define  NEBD  3         // number of element dof's in the basic system
-
 Matrix ForceBeamColumn2d::theMatrix(6,6);
 Vector ForceBeamColumn2d::theVector(6);
-double ForceBeamColumn2d::workArea[100];
+double ForceBeamColumn2d::workArea[200];
 
 Vector *ForceBeamColumn2d::vsSubdivide = 0;
 Matrix *ForceBeamColumn2d::fsSubdivide = 0;
@@ -548,11 +543,11 @@ ForceBeamColumn2d::initializeSectionHistoryVariables (void)
   for (int i = 0; i < numSections; i++) {
     int order = sections[i]->getOrder();
     
-    fs[i] = Matrix(order,order);
-    vs[i] = Vector(order);
-    Ssr[i] = Vector(order);
+	fs[i] = Matrix(order, order);
+	vs[i] = Vector(order);
+	Ssr[i] = Vector(order);
     
-    vscommit[i] = Vector(order);
+	vscommit[i] = Vector(order);
   }
 }
 
@@ -930,7 +925,7 @@ ForceBeamColumn2d::update()
     opserr << "WARNING - ForceBeamColumn2d::update - failed to get compatible ";
     opserr << "element forces & deformations for element: ";
     opserr << this->getTag() << "(dW: << " << dW << ")\n";
-    return -1;
+    //return -1;
   }
 
   initialFlag = 1;
@@ -1167,6 +1162,7 @@ ForceBeamColumn2d::computeSectionForceSensitivity(Vector &dspdh, int isec,
       double aOverL = data(2);
 
       const Vector &sens = eleLoads[i]->getSensitivityData(gradNumber);
+      //opserr << "sensdata: " << sens << endln;
       double dPdh = sens(0);
       double dNdh = sens(1);
       double daLdh = sens(2);
@@ -1191,7 +1187,7 @@ ForceBeamColumn2d::computeSectionForceSensitivity(Vector &dspdh, int isec,
 	    break;
 	  case SECTION_RESPONSE_MZ:
 	    //sp(ii) -= x*V1;
-	    dspdh(ii) -= dxdh*V1 + x*dV1dh;
+	    dspdh(ii) -= (dxdh*V1 + x*dV1dh);
 	    break;
 	  case SECTION_RESPONSE_VY:
 	    //sp(ii) -= V1;
@@ -1209,7 +1205,7 @@ ForceBeamColumn2d::computeSectionForceSensitivity(Vector &dspdh, int isec,
 	    break;
 	  case SECTION_RESPONSE_VY:
 	    //sp(ii) += V2;
-	    dspdh(ii) -= dV2dh;
+	    dspdh(ii) += dV2dh;
 	    break;
 	  default:
 	    break;
@@ -1889,7 +1885,7 @@ ForceBeamColumn2d::Print(OPS_Stream &s, int flag)
     vp = crdTransf->getBasicTrialDisp();
     vp.addMatrixVector(1.0, fe, Se, -1.0);
     s << "#PLASTIC_HINGE_ROTATION " << vp[1] << " " << vp[2] << " " << 0.1*L << " " << 0.1*L << endln;
-
+/*
     // allocate array of vectors to store section coordinates and displacements
     static int maxNumSections = 0;
     static Vector *coords = 0;
@@ -1933,7 +1929,7 @@ ForceBeamColumn2d::Print(OPS_Stream &s, int flag)
       s << " " << (displs[i])(0) << " " << (displs[i])(1) << endln;
       sections[i]->Print(s, flag); 
     }
-    
+    */
   } else {
 
     s << "\nElement: " << this->getTag() << " Type: ForceBeamColumn2d ";
@@ -2168,6 +2164,43 @@ ForceBeamColumn2d::setResponse(const char **argv, int argc, OPS_Stream &output)
     theResponse = new ElementResponse(this, 11, Vector(numSections));
 
   // section response -
+  else if (strstr(argv[0],"sectionX") != 0) {
+    if (argc > 2) {
+      float sectionLoc = atof(argv[1]);
+
+      double xi[maxNumSections];
+      double L = crdTransf->getInitialLength();
+      beamIntegr->getSectionLocations(numSections, L, xi);
+      
+      sectionLoc /= L;
+
+      float minDistance = fabs(xi[0]-sectionLoc);
+      int sectionNum = 0;
+      for (int i = 1; i < numSections; i++) {
+	if (fabs(xi[i]-sectionLoc) < minDistance) {
+	  minDistance = fabs(xi[i]-sectionLoc);
+	  sectionNum = i;
+	}
+	  }
+
+      output.tag("GaussPointOutput");
+      output.attr("number",sectionNum+1);
+      output.attr("eta",xi[sectionNum]*L);
+      
+      if (strcmp(argv[2],"dsdh") != 0) {
+	theResponse = sections[sectionNum]->setResponse(&argv[2], argc-2, output);
+      } else {
+	int order = sections[sectionNum]->getOrder();
+	theResponse = new ElementResponse(this, 76, Vector(order));
+	Information &info = theResponse->getInformation();
+	info.theInt = sectionNum;
+	  }
+	  
+
+	}
+  }
+
+  // section response -
   else if (strstr(argv[0],"section") != 0) {
     if (argc > 2) {
       int sectionNum = atoi(argv[1]);
@@ -2190,7 +2223,6 @@ ForceBeamColumn2d::setResponse(const char **argv, int argc, OPS_Stream &output)
 	  info.theInt = sectionNum;
 	}
 	
-	output.endTag();
       }
     }
   }
@@ -2431,8 +2463,9 @@ ForceBeamColumn2d::getResponseSensitivity(int responseID, int gradNumber,
       }
     }
     
-    //opserr << "FBC2d::getRespSens dsdh=b*dqdh+dspdh: " << dsdh;
     /*
+    opserr << "FBC2d::getRespSens dsdh=b*dqdh+dspdh: " << dsdh;
+
     dsdh.Zero();
     if (numEleLoads > 0) {
       this->computeSectionForceSensitivity(dsdh, sectionNum-1, gradNumber);
@@ -2441,10 +2474,9 @@ ForceBeamColumn2d::getResponseSensitivity(int responseID, int gradNumber,
     const Vector &dedh  = sections[sectionNum-1]->getSectionDeformationSensitivity(gradNumber);
     dsdh.addMatrixVector(1.0, ks, dedh, 1.0);
     dsdh.addVector(1.0, sections[sectionNum-1]->getStressResultantSensitivity(gradNumber, true), 1.0);
+
+    opserr << "FBC2d::getRespSens dsdh=b*dqdh+dspdh: " << dsdh;
     */
-
-    //opserr << "FBC2d::getRespSens dsdh=b*dqdh+dspdh: " << dsdh;
-
     return eleInfo.setVector(dsdh);
   }
 
@@ -2490,13 +2522,37 @@ int
 ForceBeamColumn2d::setParameter(const char **argv, int argc, Parameter &param)
 {
   if (argc < 1)
-    return -1;
+    return 0;
 
   int result = -1;
 
   if (strcmp(argv[0],"rho") == 0)
     return param.addObject(1, this);
   
+  // section response -
+  else if (strstr(argv[0],"sectionX") != 0) {
+    if (argc > 2) {
+      float sectionLoc = atof(argv[1]);
+
+      double xi[maxNumSections];
+      double L = crdTransf->getInitialLength();
+      beamIntegr->getSectionLocations(numSections, L, xi);
+      
+      sectionLoc /= L;
+
+      float minDistance = fabs(xi[0]-sectionLoc);
+      int sectionNum = 0;
+      for (int i = 1; i < numSections; i++) {
+	if (fabs(xi[i]-sectionLoc) < minDistance) {
+	  minDistance = fabs(xi[i]-sectionLoc);
+	  sectionNum = i;
+	}
+      }
+
+      return sections[sectionNum]->setParameter(&argv[2], argc-2, param);
+    }
+  }
+
   // If the parameter belongs to a section or lower
   else if (strstr(argv[0],"section") != 0) {
     
@@ -2526,7 +2582,7 @@ ForceBeamColumn2d::setParameter(const char **argv, int argc, Parameter &param)
   else if (strstr(argv[0],"integration") != 0) {
     
     if (argc < 2)
-      return -1;
+      return 0;
 
     return beamIntegr->setParameter(&argv[1], argc-1, param);
   }
@@ -2750,12 +2806,16 @@ ForceBeamColumn2d::computedqdh(int gradNumber)
     Vector dsdh(&workArea[order], order);
     dsdh = sections[i]->getStressResultantSensitivity(gradNumber,true);
     //opserr << "FBC2d::dqdh -- " << gradNumber << ' ' << dsdh;
-
+    
+    Vector dspdh(&workArea[2*order], order);
+    dspdh.Zero();
     // Add sensitivity wrt element loads
     if (numEleLoads > 0) {
-      this->computeSectionForceSensitivity(dsdh, i, gradNumber);
+      this->computeSectionForceSensitivity(dspdh, i, gradNumber);
+      //opserr << "FBC2d::dspdh -- " << i << ' ' << dsdh;
     }
-    
+    dsdh.addVector(1.0, dspdh, -1.0);
+
     int j;
     for (j = 0; j < order; j++) {
       switch (code(j)) {
@@ -2830,6 +2890,8 @@ ForceBeamColumn2d::computedqdh(int gradNumber)
   static Vector dqdh(3);
   dqdh.addMatrixVector(0.0, kv, dvdh, 1.0);
   
+  //opserr << "dqdh: " << dqdh << endln;
+
   return dqdh;
 }
 
