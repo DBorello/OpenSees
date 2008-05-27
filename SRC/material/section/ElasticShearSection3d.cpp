@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-09-06 20:17:34 $
+// $Revision: 1.2 $
+// $Date: 2008-05-27 23:26:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticShearSection3d.cpp,v $
 
 #include <ElasticShearSection3d.h>
@@ -101,7 +101,7 @@ ElasticShearSection3d::ElasticShearSection3d
 
 ElasticShearSection3d::~ElasticShearSection3d(void)
 {
-    
+    return;
 }
 
 int 
@@ -331,27 +331,34 @@ ElasticShearSection3d::setParameter(const char **argv, int argc, Parameter &para
   if (argc < 1)
     return -1;
 
-  if (strcmp(argv[0],"E") == 0)
+  if (strcmp(argv[0],"E") == 0) {
+	  param.setValue(E);
     return param.addObject(1, this);
-
-  if (strcmp(argv[0],"A") == 0)
+  }
+  if (strcmp(argv[0],"A") == 0) {
+	  param.setValue(A);
     return param.addObject(2, this);
-
-  if (strcmp(argv[0],"Iz") == 0)
+  }
+  if (strcmp(argv[0],"Iz") == 0) {
+	  param.setValue(Iz);
     return param.addObject(3, this);
-
-  if (strcmp(argv[0],"Iy") == 0)
+  }
+  if (strcmp(argv[0],"Iy") == 0) {
+	  param.setValue(Iy);
     return param.addObject(4, this);
-
-  if (strcmp(argv[0],"G") == 0)
+  }
+  if (strcmp(argv[0],"G") == 0) {
+	  param.setValue(G);
     return param.addObject(5, this);
-
-  if (strcmp(argv[0],"J") == 0)
+  }
+  if (strcmp(argv[0],"J") == 0) {
+	  param.setValue(J);
     return param.addObject(6, this);
-
-  if (strcmp(argv[0],"alpha") == 0)
+  }
+  if (strcmp(argv[0],"alpha") == 0) {
+	  param.setValue(alpha);
     return param.addObject(7, this);
-
+  }
   return -1;
 }
 
@@ -422,26 +429,10 @@ ElasticShearSection3d::getStressResultantSensitivity(int gradNumber,
   return s;
 }
 
-const Vector&
-ElasticShearSection3d::getSectionDeformationSensitivity(int gradNumber)
-{
-  s.Zero();
-
-  return s;
-}
-
 const Matrix&
 ElasticShearSection3d::getInitialTangentSensitivity(int gradNumber)
 {
   ks.Zero();
 
   return ks;
-}
-
-int
-ElasticShearSection3d::commitSensitivity(const Vector& dedh,
-					 int gradNumber, int numGrads)
-{
-  // Nothing to commit, path independent
-  return 0;
 }

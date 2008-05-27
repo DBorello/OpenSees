@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-09-06 20:17:34 $
+// $Revision: 1.2 $
+// $Date: 2008-05-27 23:26:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticShearSection2d.cpp,v $
 
 #include <ElasticShearSection2d.h>
@@ -39,9 +39,9 @@ Matrix ElasticShearSection2d::ks(3,3);
 ID ElasticShearSection2d::code(3);
 
 ElasticShearSection2d::ElasticShearSection2d(void)
-:SectionForceDeformation(0, SEC_TAG_Elastic2d),
+:SectionForceDeformation(0, SEC_TAG_ElasticShear2d),
  E(0.0), A(0.0), I(0.0), G(0.0), alpha(0.0),
- e(3), eCommit(3)
+ e(3), eCommit(3), parameterID(0)
 {
     if (code(0) != SECTION_RESPONSE_P)
     {
@@ -55,7 +55,7 @@ ElasticShearSection2d::ElasticShearSection2d
 (int tag, double E_in, double A_in, double I_in, double G_in, double alpha_in)
 :SectionForceDeformation(tag, SEC_TAG_ElasticShear2d),
  E(E_in), A(A_in), I(I_in), G(G_in), alpha(alpha_in),
- e(3), eCommit(3)
+ e(3), eCommit(3), parameterID(0)
 {
     if (E <= 0.0)  {
 		opserr << "ElasticShearSection2d::ElasticShearSection2d -- Input E <= 0.0 ... setting E to 1.0\n";
@@ -82,7 +82,7 @@ ElasticShearSection2d::ElasticShearSection2d
 
 ElasticShearSection2d::~ElasticShearSection2d(void)
 {
-
+  return;
 }
 
 int 
@@ -180,6 +180,7 @@ ElasticShearSection2d::getCopy(void)
     new ElasticShearSection2d (this->getTag(), E, A, I, G, alpha);
   
   theCopy->eCommit = eCommit;
+  theCopy->parameterID = parameterID;
   
   return theCopy;
 }
@@ -271,21 +272,26 @@ ElasticShearSection2d::setParameter(const char **argv, int argc,
   if (argc < 1)
     return -1;
 
-  if (strcmp(argv[0],"E") == 0)
+  if (strcmp(argv[0],"E") == 0) {
+	  param.setValue(E);
     return param.addObject(1, this);
-
-  if (strcmp(argv[0],"A") == 0)
+  }
+  if (strcmp(argv[0],"A") == 0) {
+	  param.setValue(A);
     return param.addObject(2, this);
-
-  if (strcmp(argv[0],"I") == 0)
+  }
+  if (strcmp(argv[0],"I") == 0) {
+	  param.setValue(I);
     return param.addObject(3, this);
-
-  if (strcmp(argv[0],"G") == 0)
+  }
+  if (strcmp(argv[0],"G") == 0) {
+	  param.setValue(G);
     return param.addObject(4, this);
-
-  if (strcmp(argv[0],"alpha") == 0)
+  }
+  if (strcmp(argv[0],"alpha") == 0) {
+	  param.setValue(alpha);
     return param.addObject(5, this);
-
+  }
   return -1;
 }
 
@@ -338,26 +344,10 @@ ElasticShearSection2d::getStressResultantSensitivity(int gradNumber,
   return s;
 }
 
-const Vector&
-ElasticShearSection2d::getSectionDeformationSensitivity(int gradNumber)
-{
-  s.Zero();
-
-  return s;
-}
-
 const Matrix&
 ElasticShearSection2d::getInitialTangentSensitivity(int gradNumber)
 {
   ks.Zero();
 
   return ks;
-}
-
-int
-ElasticShearSection2d::commitSensitivity(const Vector& sectionDeformationGradient,
-				    int gradNumber, int numGrads)
-{
-  // Nothing to commit, path independent
-  return 0;
 }
