@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2008-03-13 22:21:49 $
+// $Revision: 1.6 $
+// $Date: 2008-05-27 15:42:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/OutCrossingAnalysis.h,v $
 
 //
@@ -70,7 +70,6 @@ public:
  protected:
   
  private:
-  double getAdaptiveIntegralValue(double tol, double lowerBound, double upperBound, double fa, double fb, double fc, double beta1, double beta2 );
   
   ReliabilityDomain *theReliabilityDomain;
   GFunEvaluator *theGFunEvaluator;
@@ -84,9 +83,10 @@ public:
   char fileName[256];
   
   // A private method:
-  double functionToIntegrate(double rho, double beta1, double beta2);
-  
+  //double functionToIntegrate(double rho, double beta1, double beta2);
+  //double getAdaptiveIntegralValue(double tol, double lowerBound, double upperBound, double fa, double fb, double fc, double beta1, double beta2 );
   double integralTolerance;
+  
   int numOfEvaluation;
   int maxNumOfEvaluation;
   int impulseFreq;

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2008-05-13 16:30:27 $
+// $Revision: 1.10 $
+// $Date: 2008-05-27 15:42:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/OutCrossingAnalysis.cpp,v $
 
 //
@@ -37,6 +37,7 @@
 #include <GFunEvaluator.h>
 #include <GradGEvaluator.h>
 #include <FindDesignPointAlgorithm.h>
+#include <CorrelatedStandardNormal.h>
 #include <math.h>
 #include <tcl.h>
 #include <string.h>
@@ -107,7 +108,8 @@ OutCrossingAnalysis::analyze(void)
 	double pf1, pf2;
 //	int n_2;
 //	double a, b, integral, h, fa, fb, sum_fx2j, sum_fx2j_1, Pmn1;
-	double a, b, c, integral, fa, fb, fc,  Pmn1;
+//	double a, b, c, integral, fa, fb, fc;
+	double a, Pmn1;
 	char string[500];
 
 
@@ -223,18 +225,13 @@ OutCrossingAnalysis::analyze(void)
 				if (analysisType == 1) {
 
 				//  ====== possible options: using first design point as the beginning of this second search.. 
+					if (useFirstDesignPt) {
 
-					if (useFirstDesignPt){
-						
-							
 						Vector xStar = theFindDesignPointAlgorithm->get_x();
-
 						theFindDesignPointAlgorithm->setStartPt(&xStar);
 						
 					}
-
-
-
+					
 				 // ============ by default,start from origin of the standard normal space ====================	
 
 
@@ -258,7 +255,7 @@ OutCrossingAnalysis::analyze(void)
 						dgduValue = DgDdispl(j,2);
 
 						char expression[200];
-						sprintf(expression,"+(%20.14e)*(%20.14e)*{ud_%d_%d}",littleDeltaT, dgduValue, nodeNumber, dofNumber);
+						sprintf(expression,"+(%20.14e)*(%20.14e)*\\$ud(%d,%d)",littleDeltaT, dgduValue, nodeNumber, dofNumber);
 						strcpy(expressionPtr,expression);
 
 						// Add it to the limit-state function
@@ -271,7 +268,7 @@ OutCrossingAnalysis::analyze(void)
 
 
 					// Find the design point for the edited limit-state function
-					if (theFindDesignPointAlgorithm->findDesignPoint() < 0){
+					if (theFindDesignPointAlgorithm->findDesignPoint() < 0) {
 						opserr << "OutCrossingAnalysis::analyze() - failed while finding the" << endln
 							<< " design point for limit-state function number " << lsf << "." << endln;
 						DSPTfailed = true;
@@ -296,16 +293,18 @@ OutCrossingAnalysis::analyze(void)
 					}
 					else {
 						outputFile << "#  Second limit-state function did not converge.                      #" << endln;
+						
+						// NOTE - need to provide a value for beta2 or initialize in declaration
 					}
 				
 					// Post-processing to find parallel system probability
-
-
-
-
- 
-					//Quan & Michele January '06
+					// use CorrelatedStandardNormal class
+					CorrelatedStandardNormal phi2(0.0);
+					phi2.setCorrelation( alpha ^ alpha2 );
+					Pmn1 = phi2.getCDF(-beta1,-beta2);
+					
 					a = -(alpha ^ alpha2);	// Interval start  ??????????????????????
+					/*
 					c = 0.0;				// Interval end
 					b = (c+a)/2.0;
 					fa = functionToIntegrate(a,beta1,beta2);
@@ -313,7 +312,7 @@ OutCrossingAnalysis::analyze(void)
 					fc = functionToIntegrate(c,beta1,beta2);
 					integral = this->getAdaptiveIntegralValue(integralTolerance,a,c,fa,fb,fc,beta1,beta2);
 					Pmn1 = aStdNormRV.getCDFvalue(-beta1)*aStdNormRV.getCDFvalue(-beta2) - integral;
-
+					*/
 				
 				}
 				else {
@@ -325,16 +324,11 @@ OutCrossingAnalysis::analyze(void)
 					}
 					
 					// Post-processing to find parallel system probability
-					
 					a = -1.0*(alpha ^ alpha2)/alpha2.Norm();  
-					
-		
-
-
-					double pi = 3.14159265358979;
-					Pmn1 = 1.0/(2.0*pi) * exp(-beta2*beta2*0.5) * (asin(a)+1.570796326794897);
 				
-				
+					double pi = acos(-1.0);
+					Pmn1 = 1.0/(2.0*pi) * exp(-beta2*beta2*0.5) * (asin(a) + pi/2.0);
+
 				}
 
 
@@ -426,6 +420,7 @@ OutCrossingAnalysis::analyze(void)
 
 
 			// Matrix of intersection probabilities between 'g's (not g1 or g2) at all times
+			CorrelatedStandardNormal phi2(0.0);
 			for (k=0; k<pf.Size(); k++) {
 				for (kk=0; kk<pf.Size(); kk++) {
 					// Extract alpha vectors
@@ -433,10 +428,12 @@ OutCrossingAnalysis::analyze(void)
 						alpha_k(j) = allAlphas(j,k);
 						alpha_kk(j) = allAlphas(j,kk);
 					}
-
-
 					
-		//Quan & Michele January '06
+					// use CorrelatedStandardNormal class
+					phi2.setCorrelation( alpha_k ^ alpha_kk );
+					Pmn2(k,kk) = phi2.getCDF(-beta(k),-beta(kk));
+					
+					/*
 					a = 0.0;
 					c = (alpha_k ^ alpha_kk);				// Interval end
 					b = (c+a)/2.0;
@@ -446,7 +443,7 @@ OutCrossingAnalysis::analyze(void)
 					integral = this->getAdaptiveIntegralValue(integralTolerance, a,c,fa,fb,fc,beta(k),beta(kk));
 
 					Pmn2(k,kk) = aStdNormRV.getCDFvalue(-beta(k))*aStdNormRV.getCDFvalue(-beta(kk)) + integral;
-				
+					*/
 				}
 			}
 
@@ -507,7 +504,8 @@ OutCrossingAnalysis::analyze(void)
 }
 
 
-	//Quan & Michele January '06
+/*
+//Quan & Michele January '06
 double 
 OutCrossingAnalysis::getAdaptiveIntegralValue(double tol, double lowerBound, double upperBound, double fa, double fb, double fc, double beta1, double beta2 ){
 	double b= (lowerBound+upperBound)/2.0;
@@ -544,3 +542,4 @@ OutCrossingAnalysis::functionToIntegrate(double rho, double beta1, double beta2)
 	}
 	return result;
 }
+*/
