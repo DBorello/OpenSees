@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-10-17 21:16:26 $
+// $Revision: 1.7 $
+// $Date: 2008-05-27 22:59:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/File.cpp,v $
                                                                         
                                                                         
@@ -82,11 +82,12 @@ File::addFile(File *theFile)
   if (isDirectory == false)
     return -1;
   
-  if (dirFiles.find(theFile->name) == dirFiles.end())
+  if (dirFiles.find(theFile->name) == dirFiles.end()) {
     dirFiles[theFile->name] = theFile;
+  } else
+    return -1;
 
   theFile->setParentDir(this);
-
   return 0;
 }
 
@@ -112,8 +113,6 @@ File::addFile(const char *fileName, const char *path, const char *fileDescriptio
   File *currentDir = this;
 
   const char *pathCurrent = strstr(combined, "/");
-
-
 
   if (pathCurrent != NULL) {
 
@@ -157,7 +156,7 @@ File::addFile(const char *fileName, const char *path, const char *fileDescriptio
 	  if (prevPath != 0)
 	     newPath = new char[strlen(prevPath)+2+dirNameLength]; // / + '\0';
 	  else
-		  newPath = new char[2+dirNameLength]; // / + '\0'
+	    newPath = new char[2+dirNameLength]; // / + '\0'
 	  
 	  if (prevPath != 0) {
 	     strcpy(newPath, prevPath);
@@ -185,10 +184,9 @@ File::addFile(const char *fileName, const char *path, const char *fileDescriptio
 
   file = new File(combinedFile, fileDescription, false);
 
-  currentDir->addFile(file);
+  if (currentDir->addFile(file) != 0) // file already existed
+    delete file;
   
-
-
   delete [] combined;
   return 0;
 }
