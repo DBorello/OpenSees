@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.40 $
-// $Date: 2008-03-24 20:34:29 $
+// $Revision: 1.41 $
+// $Date: 2008-05-27 23:25:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -1392,7 +1392,8 @@ TclCommand_addNodalLoad(ClientData clientData, Tcl_Interp *interp, int argc,
   }
 
   bool isLoadConst = false;
-  int loadPatternTag = 123456789; // some pattern that will never be used!
+  bool userSpecifiedPattern = false;
+  int loadPatternTag = 0; 
 
   // allow some additional options at end of command
   int endMarker = 2+ndf;
@@ -1403,6 +1404,7 @@ TclCommand_addNodalLoad(ClientData clientData, Tcl_Interp *interp, int argc,
     } else if (strcmp(argv[endMarker],"-pattern") == 0) {
       // allow user to specify load pattern other than current
       endMarker++;
+      userSpecifiedPattern = true;
       if (endMarker == argc || 
 	  Tcl_GetInt(interp, argv[endMarker], &loadPatternTag) != TCL_OK) {
 
@@ -1415,7 +1417,7 @@ TclCommand_addNodalLoad(ClientData clientData, Tcl_Interp *interp, int argc,
   }
 
   // get the current pattern tag if no tag given in i/p
-  if (loadPatternTag == 123456789)
+  if (userSpecifiedPattern == false)
     if (theTclLoadPattern == 0) {
 	opserr << "WARNING no current load pattern - load " << nodeId;
 	opserr << " " << ndf << " forces\n";
@@ -1454,6 +1456,11 @@ TclCommand_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int argc,
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
     opserr << "WARNING current builder has been destroyed - eleLoad\n";    
+    return TCL_ERROR;
+  }
+
+  if (theTclLoadPattern == 0) {
+    opserr << "WARNING no active load pattern - eleLoad\n";    
     return TCL_ERROR;
   }
 
@@ -1789,10 +1796,6 @@ TclCommand_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int argc,
 	  opserr << "WARNING eleLoad - invalid Tbot " << argv[count+1] << " for -beamTemp\n";	
 	  return TCL_ERROR;
 	}
-
-
-
-
 
 	for (int i=0; i<theEleTags.Size(); i++) {
 	  theLoad = new Beam2dTempLoad(eleLoadTag, temp1, temp2, theEleTags(i));
@@ -2315,10 +2318,9 @@ TclCommand_addSP(ClientData clientData, Tcl_Interp *interp, int argc,
   }
 
   bool isSpConst = false;
-  int loadPatternTag = 123456789; // some pattern that will never be used!
+  bool userSpecifiedPattern = false;
+  int loadPatternTag = 0; // some pattern that will never be used!
 
-  // allow some additional options at end of command
-  theTclLoadPattern->getTag();
   int endMarker = 4;
   while (endMarker != argc) {
     if (strcmp(argv[endMarker],"-const") == 0) {
@@ -2327,6 +2329,7 @@ TclCommand_addSP(ClientData clientData, Tcl_Interp *interp, int argc,
     } else if (strcmp(argv[endMarker],"-pattern") == 0) {
       // allow user to specify load pattern other than current
       endMarker++;
+      userSpecifiedPattern = true;
       if (endMarker == argc || 
 	  Tcl_GetInt(interp, argv[endMarker], &loadPatternTag) != TCL_OK) {
 
@@ -2339,7 +2342,7 @@ TclCommand_addSP(ClientData clientData, Tcl_Interp *interp, int argc,
   }
 
   // if load pattern tag has not changed - get the pattern tag from current one
-  if (loadPatternTag == 123456789) {
+  if (userSpecifiedPattern == false) {
     if (theTclLoadPattern == 0) {
       opserr << "WARNING no current pattern - sp " << nodeId << " dofID value\n";
       return TCL_ERROR;
