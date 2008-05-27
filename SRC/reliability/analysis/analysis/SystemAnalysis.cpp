@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2008-05-11 19:52:54 $
+// $Revision: 1.17 $
+// $Date: 2008-05-27 23:31:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.cpp,v $
 
 
@@ -495,7 +495,7 @@ SystemAnalysis::setPermutations(int k, int n)
 		}
 	}
 	else if (n < 17 && (k > 3 || n-k < 4)) {
-		long int rows = pow(2,n);
+		long int rows = (long int)pow(2.0,n);
 		long int ncycles = rows;
 		long int nreps, im, jm, cnter;
 		int count;
