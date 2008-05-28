@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.31 $
-// $Date: 2007-11-30 19:24:52 $
+// $Revision: 1.32 $
+// $Date: 2008-05-28 18:36:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -537,6 +537,7 @@ ElementRecorder::initialize(void)
       Response *theResponse = theEle->setResponse((const char **)responseArgs, numArgs, *theOutputHandler);
       if (theResponse != 0) {
 	if (numResponse == numEle) {
+	  // Why is this created locally and not used? -- MHS
 	  Response **theNextResponses = new Response *[numEle*2];
 	  if (theNextResponses != 0) {
 	    for (int i=0; i<numEle; i++)
@@ -545,6 +546,7 @@ ElementRecorder::initialize(void)
 	      theNextResponses[j] = 0;
 	  }
 	  numEle = 2*numEle;
+	  delete [] theNextResponses;
 	}
 	theResponses[numResponse] = theResponse;
 
