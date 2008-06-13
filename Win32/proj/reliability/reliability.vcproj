@@ -209,6 +209,12 @@
 				Name="misc"
 				Filter="">
 				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\misc\CorrelatedStandardNormal.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\analysis\misc\CorrelatedStandardNormal.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\reliability\analysis\misc\MatrixOperations.cpp">
 				</File>
 				<File
@@ -840,6 +846,18 @@
 					RelativePath="..\..\..\SRC\reliability\domain\components\CorrelationCoefficientIter.h">
 				</File>
 				<File
+					RelativePath="..\..\..\SRC\reliability\domain\components\Cutset.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\domain\components\Cutset.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\domain\components\CutsetIter.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\domain\components\CutsetIter.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\reliability\domain\components\LimitStateFunction.cpp">
 				</File>
 				<File
@@ -1028,6 +1046,12 @@
 					RelativePath="..\..\..\SRC\reliability\domain\filter\Filter.h">
 				</File>
 				<File
+					RelativePath="..\..\..\SRC\reliability\domain\filter\FilterIter.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\domain\filter\FilterIter.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\reliability\domain\filter\KooFilter.cpp">
 				</File>
 				<File
@@ -1079,6 +1103,12 @@
 				<File
 					RelativePath="..\..\..\SRC\reliability\domain\spectrum\Spectrum.h">
 				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\domain\spectrum\SpectrumIter.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\domain\spectrum\SpectrumIter.h">
+				</File>
 			</Filter>
 			<Filter
 				Name="modulatingFunction"
@@ -1106,6 +1136,12 @@
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\reliability\domain\modulatingFunction\ModulatingFunction.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\domain\modulatingFunction\ModulatingFunctionIter.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\reliability\domain\modulatingFunction\ModulatingFunctionIter.h">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\reliability\domain\modulatingFunction\TrapezoidalModulatingFunction.cpp">
