@@ -1,957 +1,472 @@
 /* ****************************************************************** **
-
 **    OpenSees - Open System for Earthquake Engineering Simulation    **
-
 **          Pacific Earthquake Engineering Research Center            **
-
 **                                                                    **
-
 **                                                                    **
-
 ** (C) Copyright 1999, The Regents of the University of California    **
-
 ** All Rights Reserved.                                               **
-
 **                                                                    **
-
 ** Commercial use of this program without express permission of the   **
-
 ** University of California, Berkeley, is strictly prohibited.  See   **
-
 ** file 'COPYRIGHT'  in main directory for information on usage and   **
-
 ** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
-
 **                                                                    **
-
 ** Developed by:                                                      **
-
 **   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
-
 **   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
-
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
-
 **                                                                    **
-
 ** ****************************************************************** */
-
                                                                         
-
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthContact3D.cpp,v $
-
-// $Revision: 1.2 $
-
-// $Date: 2007-11-28 00:08:58 $
-
-
+// $Revision: 1.3 $
+// $Date: 2008-06-13 21:01:04 $
 
                                                                         
-
 // Written: Gang Wang  (wang@ce.berkeley.edu)
-
 //          Prof. Nicholas Sitar (nsitar@ce.berkeley.edu)
-
 //
-
 // Created: 27/08/2003
-
 //
-
 // Description: This file contains the implementation for the ZeroLengthContact3D class.
 
 
-
-
-
 #include "ZeroLengthContact3D.h"
-
 #include <Information.h>
 
-
-
 #include <Domain.h>
-
 #include <Node.h>
-
 #include <Channel.h>
-
 #include <FEM_ObjectBroker.h>
-
 #include <Renderer.h>
 
-
-
 #include <math.h>
-
 #include <stdlib.h>
-
 #include <string.h>
-
-
 
 #include <ElementResponse.h>
 
-
-
  
-
 //static data
-
 const int ZeroLengthContact3D::numberNodes = 2 ;
 
-
-
 // static data for 3D
-
 Matrix  ZeroLengthContact3D::stiff(3*numberNodes,3*numberNodes) ;
-
 Vector  ZeroLengthContact3D::resid(3*numberNodes) ;
-
 Matrix  ZeroLengthContact3D::zeroMatrix(3*numberNodes,3*numberNodes) ;
 
-
-
-
-
-
-
 //*********************************************************************
-
 //  Full Constructor:
 
-
-
 ZeroLengthContact3D::ZeroLengthContact3D(int tag,
-
-		       int Nd1, int Nd2, 
-
-		       int direction, double Knormal, double Ktangent, 
-
-			   double frictionRatio, double c, double origX, double origY )
-
- :Element(tag,ELE_TAG_ZeroLengthContact3D),     
-
-  connectedExternalNodes(numberNodes),
-
-  directionID(direction), N(3*numberNodes), T1(3*numberNodes), T2(3*numberNodes),
-
-  Ki(0), load(0), origin(2), stickPt(2), xi(2)
-
+					 int Nd1, int Nd2, 
+					 int direction, double Knormal, double Ktangent, 
+					 double frictionRatio, double c, double origX, double origY )
+  :Element(tag,ELE_TAG_ZeroLengthContact3D),     
+   connectedExternalNodes(numberNodes),
+   directionID(direction), N(3*numberNodes), T1(3*numberNodes), T2(3*numberNodes),
+   Ki(0), load(0), origin(2), stickPt(2), xi(2)
 {
-
-
-
-   	if ( direction < 0 || direction > 3 ) {
-
-	  opserr << "WARNING ZeroLengthContact3D:incorrect direction, set to 0\n";
-
-	  directionID = 0;
-
-	}
-
-
-
-    // ensure the connectedExternalNode ID is of correct size & set values
-
-    if (connectedExternalNodes.Size() != 2)
-
-      opserr << "FATAL ZeroLength::setUp - failed to create an ID of correct size\n";    
-
-    connectedExternalNodes(0) = Nd1;
-
-    connectedExternalNodes(1) = Nd2;
-
-
-
-	// assign Kn, Kt, fs, cohesion
-
-	Kn = Knormal;
-
-	Kt = Ktangent;
-
-	fs = frictionRatio;
-
-    cohesion = c; 
-
-
-
-   //set origin coord for circular contact, (0,0) by default
-
-    origin(0) = origX;
-
-	origin(1) = origY;
-
-
-
-   // set stick point cords in LOCAL basis
-
-	stickPt(0)= 0;
-
-	stickPt(1)= 0;
-
-
-
-	// initialized contact flag be zero
-
-	ContactFlag=0;
-
-
-
-	gap_n = 0 ; 
-
+  
+  if ( direction < 0 || direction > 3 ) {
+    opserr << "WARNING ZeroLengthContact3D:incorrect direction, set to 0\n";
+    directionID = 0;
+  }
+  
+  // ensure the connectedExternalNode ID is of correct size & set values
+  if (connectedExternalNodes.Size() != 2)
+    opserr << "FATAL ZeroLength::setUp - failed to create an ID of correct size\n";    
+  connectedExternalNodes(0) = Nd1;
+  connectedExternalNodes(1) = Nd2;
+  
+  // assign Kn, Kt, fs, cohesion
+  Kn = Knormal;
+  Kt = Ktangent;
+  fs = frictionRatio;
+  cohesion = c; 
+  
+  //set origin coord for circular contact, (0,0) by default
+  origin(0) = origX;
+  origin(1) = origY;
+  
+  // set stick point cords in LOCAL basis
+  stickPt(0)= 0;
+  stickPt(1)= 0;
+  
+  // initialized contact flag be zero
+  ContactFlag=0;
+  
+  gap_n = 0 ; 
 }
-
-
-
-
 
 
 
 //null constructor
-
 ZeroLengthContact3D::ZeroLengthContact3D(void)
-
   :Element(0,ELE_TAG_ZeroLengthContact3D),     
-
-  connectedExternalNodes(numberNodes),
-
-  N(3*numberNodes), T1(3*numberNodes), T2(3*numberNodes),
-
-  Ki(0), load(0), origin(2), stickPt(2),  xi(2)
-
+   connectedExternalNodes(numberNodes),
+   N(3*numberNodes), T1(3*numberNodes), T2(3*numberNodes),
+   Ki(0), load(0), origin(2), stickPt(2),  xi(2)
 {
-
-
-
-    // ensure the connectedExternalNode ID is of correct size 
-
-    if (connectedExternalNodes.Size() != 2)
-
-      opserr << "FATAL ZeroLengthContact3D::ZeroLengthContact3D - failed to create an ID of correct size\n";
-
-    for (int j=0; j<numberNodes; j++ ) {
-
-      nodePointers[j] = 0;
-
-	}
-
+  
+  // ensure the connectedExternalNode ID is of correct size 
+  if (connectedExternalNodes.Size() != 2)
+    opserr << "FATAL ZeroLengthContact3D::ZeroLengthContact3D - failed to create an ID of correct size\n";
+  for (int j=0; j<numberNodes; j++ ) {
+    nodePointers[j] = 0;
+  }
 }
-
-
-
 
 
 //  Destructor:
-
 //  delete must be invoked on any objects created by the object
-
 //  and on the matertial object.
-
 ZeroLengthContact3D::~ZeroLengthContact3D()
-
 {
-
-
-
   if (load != 0)
-
     delete load;
-
-
-
+  
   if (Ki != 0)
-
     delete Ki;
-
-
-
 }
-
-
-
 
 
 int
-
 ZeroLengthContact3D::getNumExternalNodes(void) const
-
 {
-
-    return 2;
-
+return 2;
 }
-
-
-
 
 
 const ID &
-
 ZeroLengthContact3D::getExternalNodes(void) 
-
 {
-
-    return connectedExternalNodes;
-
+  return connectedExternalNodes;
 }
-
-
-
-
 
 
 
 Node **
-
 ZeroLengthContact3D::getNodePtrs(void) 
-
 {
-
-    return nodePointers;
-
+  return nodePointers;
 }
-
-
 
 int
-
 ZeroLengthContact3D::getNumDOF(void) 
-
 {
-
-     return numDOF;
-
+  return numDOF;
 }
-
-
-
 
 
 // method: setDomain()
-
 //    to set a link to the enclosing Domain and to set the node pointers.
-
 //    also determines the number of dof associated
-
 //    with the ZeroLengthContact3D element
-
 void
-
 ZeroLengthContact3D::setDomain(Domain *theDomain)
-
 {
 
-
-
    // check Domain is not null - invoked when object removed from a domain
-
     if (theDomain == 0) {
-
 	nodePointers[0] = 0;
-
 	nodePointers[1] = 0;
-
 	return;
-
     }
-
-
-
-    // set default values for error conditions   
-
-    Ki   = &stiff;
-
-    load = &resid;
-
 
 
     // first set the node pointers
-
     int Nd1 = connectedExternalNodes(0);
-
     int Nd2 = connectedExternalNodes(1);
-
     nodePointers[0] = theDomain->getNode(Nd1);
-
     nodePointers[1] = theDomain->getNode(Nd2);	
 
-
-
     // if can't find both - send a warning message
-
     if ( nodePointers[0] == 0 || nodePointers[1] == 0 ) {
-
       if (nodePointers[0] == 0) 
-
         opserr << "WARNING ZeroLengthContact3D::setDomain() - Nd1: " << Nd1 << " does not exist in ";
-
       else
-
         opserr << "WARNING ZeroLengthContact3D::setDomain() - Nd2: " << Nd2 << " does not exist in ";
-
       return;
-
     }
-
-
 
     // now determine the number of dof and the dimension    
-
     int dofNd1 = nodePointers[0]->getNumberDOF();
-
     int dofNd2 = nodePointers[1]->getNumberDOF();	
 
-
-
     // if differing dof at the ends - print a warning message
-
     if ( dofNd1 != dofNd2 ) {
-
       opserr << "WARNING ZeroLengthContact3D::setDomain(): nodes " << Nd1 << " and " << Nd2 <<
-
 	"have differing dof at ends for ZeroLengthContact3D " << this->getTag() << endln;
-
       return;
-
     }	
 
-
-
     // Check that length is zero within tolerance
-
     const Vector &end1Crd = nodePointers[0]->getCrds();
-
     const Vector &end2Crd = nodePointers[1]->getCrds();	
-
     Vector diff = end1Crd - end2Crd;
-
     double L  = diff.Norm();
-
     double v1 = end1Crd.Norm();
-
     double v2 = end2Crd.Norm();
-
     double vm;
-
     
-
     vm = (v1<v2) ? v2 : v1;
 
-
-
     if (L > LENTOL*vm)
-
       opserr << "WARNING ZeroLengthContact3D::setDomain(): Element " << this->getTag() << " has L= " << L << 
-
 	", which is greater than the tolerance\n";
-
         
-
     // call the base class method
-
     this->DomainComponent::setDomain(theDomain);
-
     
-
 	if (dofNd1 == 3 && dofNd2 == 3) {
-
 	numDOF = 6;	
-
-	Ki   = &stiff;
-
-	load = &resid;
-
 	}
-
     else {
-
     opserr << "WARNING ZeroLengthContact3D::setDomain cannot handle " << dofNd1 << 
-
  	"dofs at nodes in " << dofNd1 << " d problem\n"; 
-
      return;
-
     }
-
-
-
 }   	 
 
 
 
 
-
 int
-
 ZeroLengthContact3D::commitState()
-
 {
-
-
 
   // need to update stick point here 
-
   if (ContactFlag == 2 )   // update stick point only for slide case
-
     stickPt=xi; 
 
-
-
   // update gap for "dynamic gap" method
-
     gap_n = gap; 
 
-
-
 	return 0;
-
 }
 
-
-
 int
-
 ZeroLengthContact3D::revertToLastCommit()
-
 {
 
-
-
 	///////////////////////////////////////////
-
     // need to revert the stickPoint??
-
 	xi=stickPt;
 
-
-
 	return 0;
-
 }
-
-
-
 
 
 int
-
 ZeroLengthContact3D::revertToStart()
-
 {   
 
-
-
 	// need to rezero stickPoint??
-
 	stickPt.Zero();  
-
 	return 0;
-
 }
-
-
-
 
 
 // calculate stress-strain relation -- M. Frank
-
 /*
-
 int
-
 ZeroLengthContact3D::update(void)
-
 {
-
  	return 0;
-
 }
-
 */
 
-
-
 const Matrix &
-
 ZeroLengthContact3D::getTangentStiff(void)
-
 {
-
-
 
   int tang_flag = 1 ; //get the tangent 
 
-
-
   //do tangent and residual here
-
   formResidAndTangent( tang_flag ) ;  
-
-
 
   return stiff ;
 
-
-
 }
-
-
-
 
 
 const Matrix &
-
 ZeroLengthContact3D::getInitialStiff(void)
-
 {
-
   int tang_flag = 1 ; //get the tangent 
 
-
-
   //do tangent and residual here
-
   formResidAndTangent( tang_flag ) ;  
 
-
-
   return stiff ;
-
 }
-
     
 
-
-
 const Matrix &
-
 ZeroLengthContact3D::getDamp(void)
-
 {
-
     // no mass 
-
  	zeroMatrix.Zero(); 
-
 	return zeroMatrix;
-
 }
-
-
-
 
 
 const Matrix &
-
 ZeroLengthContact3D::getMass(void)
-
 {
-
     // no mass 
-
  	zeroMatrix.Zero(); 
-
 	return zeroMatrix;
-
 }
-
-
-
 
 
 void 
-
 ZeroLengthContact3D::zeroLoad(void)
-
 {
-
   // does nothing now
-
 }
 
-
-
 int 
-
 ZeroLengthContact3D::addLoad(ElementalLoad *theLoad, double loadFactor)
-
 {
-
   // meaningless to addLoad to a contact !
-
   return 0;
-
 }
-
-
 
 int 
-
 ZeroLengthContact3D::addInertiaLoadToUnbalance(const Vector &accel)
-
 {
-
   // does nothing as element has no mass yet!
-
   return 0;
-
 }
-
-
-
 
 
 const Vector &
-
 ZeroLengthContact3D::getResistingForce()
-
 {
 
-
-
   int tang_flag = 0 ; //don't get the tangent
-
   formResidAndTangent( tang_flag ) ;
-
-
 
   return resid ;   
-
 }
-
-
-
 
 
 const Vector &
-
 ZeroLengthContact3D::getResistingForceIncInertia()
-
 {	
-
   // there is no Inertia 
-
  
-
   int tang_flag = 0 ; //don't get the tangent
-
   formResidAndTangent( tang_flag ) ;
 
-
-
   return  resid ;   
-
 }
 
 
-
-
-
 int
-
 ZeroLengthContact3D::sendSelf(int commitTag, Channel &theChannel)
-
 {
-
    // doing nothing here
-
 	return 0;
-
 }
 
-
-
 int
-
 ZeroLengthContact3D::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
-
 {
-
 // doing nothing here
-
 	return 0;
-
 }
-
-
-
 
 
 int
-
 ZeroLengthContact3D::displaySelf(Renderer &theViewer, int displayMode, float fact)
-
 { // nothing to display
-
     return 0;
-
 }
-
-
-
 
 
 void
-
 ZeroLengthContact3D::Print(OPS_Stream &s, int flag)
-
 {
-
     if (flag == 0) { // print everything
-
 	s << "Element: " << this->getTag(); 
-
 	s << " type: ZeroLengthContact3D  iNode: " << connectedExternalNodes(0);
-
 	s << " jNode: " << connectedExternalNodes(1) << endln;
-
     } else if (flag == 1) {
-
 	s << this->getTag() << endln;
-
     } 
 
-
-
 }
-
-
 
 Response*
-
 ZeroLengthContact3D::setResponse(const char **argv, int argc, Information &eleInformation)
-
 {
-
      if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
-
      return new ElementResponse(this, 1, resid);
 
-
-
      // tangent stiffness matrix
-
      else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
-
      return new ElementResponse(this, 2, stiff);
 
-
-
  	 else 
-
 		return 0;
-
 }
-
-
-
 
 
 int 
-
 ZeroLengthContact3D::getResponse(int responseID, Information &eleInfo)
-
 {
-
  if (responseID == 1)
-
 	 return eleInfo.setVector(this->getResistingForce());
-
  else if (responseID == 2)
-
 	 return eleInfo.setMatrix(this->getTangentStiff());
-
  else
-
 	 return -1;
-
 }
 
 
-
-
-
 // Private methods
-
 // determine the slave/master pair in contact, and setup Vectors (N,T1,T2)
-
  int ZeroLengthContact3D::contactDetect(void)
-
  {
-
   			  	
 
-
-
 	  
-
 	  int transientgap; 
-
 	  transientgap = 1;   // 1: transient gap; 0: dynamic gap
 
-
-
 	  Vector  slaveNd;
-
 	  Vector  masterNd;
 
-
-
       //+--------------+-----------------+----------------+----------------+---------------+
-
       // NOTES: some methods to get displacements from nodes
-
       //+--------------+-----------------+----------------+----------------+---------------+
-
       // getDisp() :         get commit(k-1) disp, will be commit(k) after commit
-
       // getTrialDisp():     get Trial(k) disp
-
       // getIncrDisp():      get Trial(k)-Commit(k-1), will be 0 after commit
-
       // getIncrDeltaDisp(): get Trial(k)-Trial(k-1),  will be 0 after commit
-
       //+--------------+-----------------+----------------+----------------+---------------+
-
-
 
 	  if (transientgap) 
-
 	  {  ///////////// for transient gap //////////////////////////
 
-
-
 		   slaveNd = nodePointers[0]->getCrds() + nodePointers[0]->getTrialDisp();
-
            masterNd= nodePointers[1]->getCrds() + nodePointers[1]->getTrialDisp();
-
 	  }  else {
-
          ///////////// for dynamic gap ////////////////////////////
-
     	  slaveNd = nodePointers[0]->getCrds() + nodePointers[0]->getIncrDisp();
-
           masterNd= nodePointers[1]->getCrds() + nodePointers[1]->getIncrDisp();
-
 	  }
-
       
-
       double Xs=slaveNd(0)  - origin(0);
-
       double Ys=slaveNd(1)  - origin(1);
-
 	  double Zs=slaveNd(2);
-
       double Rs=sqrt(Xs*Xs +Ys*Ys); 
 
-
-
       double Xm=masterNd(0) - origin(0);
-
 	  double Ym=masterNd(1) - origin(1);
-
       double Zm=masterNd(2);
 
 	  double Rm=sqrt(Xm*Xm +Ym*Ym);
