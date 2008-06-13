@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-07-16 22:57:03 $
+// $Revision: 1.12 $
+// $Date: 2008-06-13 22:24:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.h,v $
 
 // Written: fmk 
@@ -99,7 +99,9 @@ class Vector
     Vector operator/(const Matrix &M) const;
 
     int operator==(const Vector &V) const;
+    int operator==(double) const;
     int operator!=(const Vector &V) const;
+    int operator!=(double) const;
 
     // methods added by Remo
     int  Assemble(const Vector &V, int init_row, double fact = 1.0);

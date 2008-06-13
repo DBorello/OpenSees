@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2008-05-27 22:55:12 $
+// $Revision: 1.14 $
+// $Date: 2008-06-13 22:24:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.cpp,v $
                                                                         
                                                                         
@@ -1054,6 +1054,30 @@ Vector::operator/(const Matrix &M) const
 // 	Then returns 1 if all the components of the two vectors are equal and 0 otherwise.
 
 int 
+Vector::operator==(double value) const
+{
+  double *dataThis = theData;
+
+  for (int i=0; i<sz; i++)
+    if (*dataThis++ != value)
+      return 0;
+
+  return 1;
+}
+
+int 
+Vector::operator!=(double value) const
+{
+  double *dataThis = theData;
+
+  for (int i=0; i<sz; i++)
+    if (*dataThis++ == value)
+      return 0;
+
+  return 1;
+}
+
+int 
 Vector::operator==(const Vector &V) const
 {
 #ifdef _G3DEBUG
@@ -1078,7 +1102,7 @@ Vector::operator==(const Vector &V) const
 //	The != operator checks the two vectors are of the same size if VECTOR_CHECK is defined.
 // 	Then returns 1 if any of the components of the two vectors are unequal and 0 otherwise.
 
-int 
+int
 Vector::operator!=(const Vector &V) const
 {
 #ifdef _G3DEBUG
@@ -1092,10 +1116,10 @@ Vector::operator!=(const Vector &V) const
   double *dataV = V.theData;
 
   for (int i=0; i<sz; i++)
-    if (*dataThis++ != *dataV++)
-      return 1;
+    if (*dataThis++ == *dataV++)
+      return 0;
 
-  return 0;
+  return 1;
 }
 
 	
