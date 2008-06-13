@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2007-11-07 23:24:07 $
+// $Revision: 1.22 $
+// $Date: 2008-06-13 21:11:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
-                                                                        
-                                                                        
-// File: ~/element/ZeroLength/ZeroLength.C
-// 
+
 // Written: GLF
 // Created: 12/99
 // Revision: A
@@ -74,7 +71,7 @@ ZeroLength::ZeroLength(int tag,
   connectedExternalNodes(2),
   dimension(dim), numDOF(0), transformation(3,3),
   theMatrix(0), theVector(0),
-  numMaterials1d(1), theMaterial1d(0), dir1d(0), t1d(0)
+  numMaterials1d(1), theMaterial1d(0), dir1d(0), t1d(0), d0(0), v0(0)
 {
   // allocate memory for numMaterials1d uniaxial material models
   theMaterial1d = new UniaxialMaterial*  [numMaterials1d];
@@ -113,7 +110,7 @@ ZeroLength::ZeroLength(int tag,
   connectedExternalNodes(2),
   dimension(dim), numDOF(0), transformation(3,3),
   theMatrix(0), theVector(0),
-  numMaterials1d(n1dMat), theMaterial1d(0), dir1d(0), t1d(0)
+  numMaterials1d(n1dMat), theMaterial1d(0), dir1d(0), t1d(0), d0(0), v0(0)
 {
 
     // allocate memory for numMaterials1d uniaxial material models
@@ -152,7 +149,7 @@ ZeroLength::ZeroLength(void)
   dimension(0), numDOF(0), transformation(3,3),
   theMatrix(0), theVector(0),
   numMaterials1d(0), theMaterial1d(0),
-  dir1d(0), t1d(0)
+  dir1d(0), t1d(0), d0(0), v0(0)
 {
     // ensure the connectedExternalNode ID is of correct size 
     if (connectedExternalNodes.Size() != 2)
@@ -180,6 +177,12 @@ ZeroLength::~ZeroLength()
 	delete t1d;
     if (dir1d != 0 )
 	delete dir1d;
+
+    if (d0 != 0)
+      delete d0;
+
+    if (v0 != 0)
+      delete v0;
 }
 
 
@@ -321,7 +324,22 @@ ZeroLength::setDomain(Domain *theDomain)
     // for 1d materials (uniaxial materials)
     if ( numMaterials1d > 0 )
 	this->setTran1d( elemType, numMaterials1d );
+
+    // get trial displacements and take difference
+    const Vector& disp1 = theNodes[0]->getTrialDisp();
+    const Vector& disp2 = theNodes[1]->getTrialDisp();
+    Vector  diffD  = disp2-disp1;
+    const Vector& vel1  = theNodes[0]->getTrialVel();
+    const Vector& vel2  = theNodes[1]->getTrialVel();
+    Vector  diffV = vel2-vel1;
+
+    if (diffD != 0.0)
+      d0 = new Vector(diffD);
+
+    if (diffV != 0)
+      v0 = new Vector(diffV);
 }   	 
+
 
 
 int
@@ -380,6 +398,13 @@ ZeroLength::update(void)
     const Vector& vel1  = theNodes[0]->getTrialVel();
     const Vector& vel2  = theNodes[1]->getTrialVel();
     Vector  diffv = vel2-vel1;
+
+
+    if (d0 != 0)
+      diff -= *d0;
+
+    if (v0 != 0)
+      diffv -= *v0;
     
     // loop over 1d materials
     

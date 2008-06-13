@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-06-06 19:38:22 $
+// $Revision: 1.12 $
+// $Date: 2008-06-13 21:11:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.h,v $
                                                                         
                                                                         
@@ -129,7 +129,7 @@ class ZeroLength : public Element
   protected:
     
   private:
-	  Etype elemType;
+    Etype elemType;
 
     // private methods
     void   setUp ( int Nd1, int Nd2, const Vector& x, const Vector& y);
@@ -152,8 +152,12 @@ class ZeroLength : public Element
     // Storage for uniaxial material models
     int numMaterials1d;			   // number of 1d materials
     UniaxialMaterial **theMaterial1d;      // array of pointers to 1d materials
-    ID                     *dir1d;     	   // array of directions 0-5 for 1d materials
-    Matrix                 *t1d; 	   // hold the transformation matrix
+    ID               *dir1d;     	   // array of directions 0-5 for 1d materials
+    Matrix           *t1d; 	   // hold the transformation matrix
+
+    // vector pointers to initial disp and vel if present
+    Vector *d0;
+    Vector *v0;
 
     // static data - single copy for all objects of the class	
     static Matrix ZeroLengthM2;   // class wide matrix for 2*2
