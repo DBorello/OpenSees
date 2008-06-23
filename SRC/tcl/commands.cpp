@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.125 $
-// $Date: 2008-05-25 23:33:41 $
+// $Revision: 1.126 $
+// $Date: 2008-06-23 20:45:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -95,7 +95,7 @@ OPS_Stream *opserrPtr = &sserr;
 #include <ParameterIter.h>
 #include <SP_Constraint.h> //Joey UC Davis
 #include <SP_ConstraintIter.h> //Joey UC Davis
-
+#include <Parameter.h>
 
 // analysis model
 #include <AnalysisModel.h>
@@ -5321,6 +5321,7 @@ sensNodeVel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv
 int 
 sensSectionForce(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
+#ifdef _RELIABILITY
   // make sure at least one other argument to contain type of system
   if (argc < 5) {
     interp->result = "WARNING want - sensSectionForce eleTag? secNum? dof? gradNum?\n";
@@ -5414,7 +5415,7 @@ sensSectionForce(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char *
   Tcl_SetResult(interp, buffer, TCL_VOLATILE);
 
   delete theResponse;
-
+#endif
   return TCL_OK;
 }
 
