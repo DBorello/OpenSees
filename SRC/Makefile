@@ -173,6 +173,7 @@ REMO_LIBS = $(FE)/element/nonlinearBeamColumn/matrixutil/MatrixUtil.o \
 	$(FE)/element/forceBeamColumn/UserDefinedBeamIntegration.o \
 	$(FE)/element/forceBeamColumn/UserDefinedHingeIntegration.o \
 	$(FE)/element/forceBeamColumn/DistHingeIntegration.o \
+	$(FE)/element/forceBeamColumn/RegularizedHingeIntegration.o \
 	$(FE)/element/forceBeamColumn/MidDistanceBeamIntegration.o \
 	$(FE)/element/forceBeamColumn/TrapezoidalBeamIntegration.o \
 	$(FE)/element/forceBeamColumn/FixedLocationBeamIntegration.o \

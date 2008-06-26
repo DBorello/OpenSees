@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2007-12-19 20:54:05 $
+// $Revision: 1.19 $
+// $Date: 2008-06-26 23:33:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/TclForceBeamColumnCommand.cpp,v $
                                                                         
 // Written: MHS
@@ -53,6 +53,7 @@
 #include <HingeRadauTwoBeamIntegration.h>
 #include <UserDefinedHingeIntegration.h>
 #include <DistHingeIntegration.h>
+#include <RegularizedHingeIntegration.h>
 
 #include <TrapezoidalBeamIntegration.h>
 #include <FixedLocationBeamIntegration.h>
@@ -167,6 +168,7 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
       (strcmp(argv[6],"HingeRadauTwo") != 0) &&
       (strcmp(argv[6],"UserHinge") != 0) &&
       (strcmp(argv[6],"DistHinge") != 0) &&
+      (strcmp(argv[6],"RegularizedHinge") != 0) &&
       (strcmp(argv[6],"Trapezoidal") != 0) &&
       (strcmp(argv[6],"FixedLocation") != 0) &&
       (strcmp(argv[6],"LowOrder") != 0) &&
@@ -758,7 +760,7 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
       return TCL_ERROR;
     }
     
-    int numSections = 2*nIP;
+    numSections = 2*nIP;
     sections = new SectionForceDeformation *[numSections + 2];
     for (int i = 0; i < nIP; i++) {
       sections[i] = sectionI;
@@ -769,6 +771,119 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     sections[numSections+1] = sectionE;
     
     beamIntegr = new DistHingeIntegration(lpI, lpJ, *otherBeamInt);
+
+    numSections += 2;
+
+    if (otherBeamInt != 0)
+      delete otherBeamInt;
+  }
+
+  else if (strcmp(argv[6],"RegularizedHinge") == 0) {
+    
+    if (argc < 16) {
+      opserr << "WARNING insufficient arguments\n";
+      printCommand(argc, argv);
+      opserr << "Want: element " << argv[1] << " eleTag? iNode? jNode? transfTag? type distType nIP? secTagI? lpI? zetaI? secTagJ? lpJ? zetaJ? secTagE?\n";
+      return TCL_ERROR;
+    }
+
+    int secTagI, secTagJ, secTagE;
+    double lpI, lpJ;
+    double zetaI, zetaJ;
+    int nIP;
+
+    BeamIntegration *otherBeamInt = 0;
+    if (strcmp(argv[7],"Lobatto") == 0)
+      otherBeamInt = new LobattoBeamIntegration();
+    else if (strcmp(argv[7],"Legendre") == 0)
+      otherBeamInt = new LegendreBeamIntegration();
+    else if (strcmp(argv[7],"Radau") == 0)
+      otherBeamInt = new RadauBeamIntegration();
+    else if (strcmp(argv[7],"NewtonCotes") == 0)
+      otherBeamInt = new NewtonCotesBeamIntegration();
+    else if (strcmp(argv[7],"Trapezoidal") == 0)
+      otherBeamInt = new TrapezoidalBeamIntegration();
+    else {
+      opserr << "ERROR: invalid integration type: " << argv[7] << endln;
+      return TCL_ERROR;
+    }
+
+    if (Tcl_GetInt(interp, argv[8], &nIP) != TCL_OK) {
+      opserr << "WARNING invalid nIP\n";
+      opserr << "" << argv[1] << " element: " << eleTag << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetInt(interp, argv[9], &secTagI) != TCL_OK) {
+      opserr << "WARNING invalid secTagI\n";
+      opserr << "" << argv[1] << " element: " << eleTag << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetDouble(interp, argv[10], &lpI) != TCL_OK) {
+      opserr << "WARNING invalid lpI\n";
+      opserr << "" << argv[1] << " element: " << eleTag << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetDouble(interp, argv[11], &zetaI) != TCL_OK) {
+      opserr << "WARNING invalid zetaI\n";
+      opserr << "" << argv[1] << " element: " << eleTag << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetInt(interp, argv[12], &secTagJ) != TCL_OK) {
+      opserr << "WARNING invalid secTagJ\n";
+      opserr << "" << argv[1] << " element: " << eleTag << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetDouble(interp, argv[13], &lpJ) != TCL_OK) {
+      opserr << "WARNING invalid lpJ\n";
+      opserr << "" << argv[1] << " element: " << eleTag << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetDouble(interp, argv[14], &zetaJ) != TCL_OK) {
+      opserr << "WARNING invalid zetaI\n";
+      opserr << "" << argv[1] << " element: " << eleTag << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetInt(interp, argv[15], &secTagE) != TCL_OK) {
+      opserr << "WARNING invalid secTagE\n";
+      opserr << "" << argv[1] << " element: " << eleTag << endln;
+      return TCL_ERROR;
+    }
+
+    SectionForceDeformation *sectionI = theTclBuilder->getSection(secTagI);
+    if (sectionI == 0) {
+      opserr << "WARNING section not found\n";
+      opserr << "Section: " << secTagI;
+      opserr << "\n" << argv[1] << " element: " << eleTag << endln;
+      return TCL_ERROR;
+    }
+    SectionForceDeformation *sectionJ = theTclBuilder->getSection(secTagJ);
+    if (sectionJ == 0) {
+      opserr << "WARNING section not found\n";
+      opserr << "Section: " << secTagJ;
+      opserr << "\n" << argv[1] << " element: " << eleTag << endln;
+      return TCL_ERROR;
+    }
+    
+    SectionForceDeformation *sectionE = theTclBuilder->getSection(secTagE);
+    if (sectionJ == 0) {
+      opserr << "WARNING section not found\n";
+      opserr << "Section: " << secTagE;
+      opserr << "\n" << argv[1] << " element: " << eleTag << endln;
+      return TCL_ERROR;
+    }
+    
+    numSections = nIP;
+    sections = new SectionForceDeformation *[numSections + 2];
+    for (int i = 1; i < nIP-1; i++) {
+      sections[i] = sectionE;
+    }
+
+    sections[0] = sectionI;
+    sections[numSections]   = sectionI;
+    sections[numSections-1] = sectionJ;
+    sections[numSections+1] = sectionJ;
+    
+    beamIntegr = new RegularizedHingeIntegration(*otherBeamInt, lpI, lpJ, zetaI, zetaJ);
 
     numSections += 2;
 
