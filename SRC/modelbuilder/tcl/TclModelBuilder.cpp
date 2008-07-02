@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.41 $
-// $Date: 2008-05-27 23:25:05 $
+// $Revision: 1.42 $
+// $Date: 2008-07-02 18:14:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -98,6 +98,12 @@
 #include <StrengthDegradation.h>
 #include <HystereticBackbone.h>
 #endif
+
+
+////////////////////// gnp adding damping 
+#include <Element.h>
+////////////////////////////////////////////
+
 
 #include <packages.h>
 
@@ -318,6 +324,16 @@ TclCommand_UpdateParameter(ClientData clientData,
 			   Tcl_Interp *interp,  
 			   int argc, 
 			   TCL_Char **argv);
+
+////////////////gnp adding rayleigh //////////////////////////
+int 
+TclCommand_addElementRayleigh(ClientData clientData, 
+			      Tcl_Interp *interp,  
+			      int argc, 
+			      TCL_Char **argv);
+///////////////////////////////////////////////////////////////
+
+
 
 // REMO
 extern int
@@ -541,6 +557,7 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   //		    TclCommand_UpdateParameter,
   //	    (ClientData)NULL, NULL);
 
+  
 
 
 #ifdef _LIMITSTATEMATERIAL
@@ -551,6 +568,12 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   Tcl_CreateCommand(interp, "loadPackage", TclCommand_Package,
 		    (ClientData)NULL, NULL);
 
+
+  ////// gnp adding per element damping ///////////////////////////////
+  Tcl_CreateCommand(interp, "setElementRayleighFactors",
+		    TclCommand_addElementRayleigh,
+		    (ClientData)NULL, NULL);
+  /////////////////////////////////////////////////////////////////////
 
   // set the static pointers in this file
   theTclBuilder = this;
@@ -1177,6 +1200,75 @@ TclCommand_addNode(ClientData clientData, Tcl_Interp *interp, int argc,
 
 
 
+/////////////////////////////   gnp adding element damping 
+int 
+TclCommand_addElementRayleigh(ClientData clientData, 
+			      Tcl_Interp *interp,  
+			      int argc, 
+			      TCL_Char **argv) 
+{
+  
+  if (theTclBuilder == 0) {
+    opserr << "WARNING builder has been destroyed" << endln;
+    return TCL_ERROR;
+  }
+
+  // make sure corect number of arguments on command line
+  if (argc < 6) {
+    opserr << "WARNING insufficient arguments\n";
+    printCommand(argc, argv);
+    opserr << "Want: setElementRayleighFactors elementTag?  alphaM? $betaK? $betaKinit? $betaKcomm? \n";
+    return TCL_ERROR;
+  }    
+  
+  int eleTag =0;
+  
+  if (Tcl_GetInt(interp, argv[1], &eleTag) != TCL_OK) {
+    opserr << "WARNING: setElementRayleighFactors invalid eleTag: " << argv[1];
+    opserr << " \n";
+    return TCL_ERROR;
+  }
+  
+  double alphaM,betaK,betaKinit,betaKcomm;
+  
+  if (Tcl_GetDouble(interp, argv[2], &alphaM) != TCL_OK) {
+    opserr << "WARNING : setElementRayleighFactors invalid ";
+    opserr << "alphaM: " << argv[2] << endln;
+    return TCL_ERROR;
+  }
+  
+  if (Tcl_GetDouble(interp, argv[3], &betaK) != TCL_OK) {
+    opserr << "WARNING : setElementRayleighFactors invalid ";
+    opserr << "betaK: " << argv[3] << endln;
+    return TCL_ERROR;
+  }
+
+  if (Tcl_GetDouble(interp, argv[4], &betaKinit) != TCL_OK) {
+    opserr << "WARNING : setElementRayleighFactors invalid ";
+    opserr << "betaKinit: " << argv[4] << endln;
+    return TCL_ERROR;
+  }
+
+  if (Tcl_GetDouble(interp, argv[5], &betaKcomm) != TCL_OK) {
+    opserr << "WARNING : setElementRayleighFactors invalid ";
+    opserr << "betaKcomm: " << argv[5] << endln;
+    return TCL_ERROR;
+  }
+  
+  Element* elePtr = theTclDomain->getElement(eleTag);
+  
+  if (elePtr == 0) 
+    opserr << "WARNING : setElementRayleighFactors invalid eleTag: " << eleTag << " the element does not exist in the domain \n";
+  
+  
+  if ( elePtr->setRayleighDampingFactors(alphaM, betaK, betaKinit, betaKcomm) != 0 ) {
+    opserr << "ERROR : setElementRayleighFactors: FAILED to add damping factors for element " << eleTag << "\n";
+    
+  }
+  
+  return TCL_OK;
+}
+/////////////////////////////   gnp adding element damping 
 
 
 // the function for creating ne material objects and patterns is in a seperate file.
