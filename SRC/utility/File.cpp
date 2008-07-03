@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2008-05-27 22:59:05 $
+// $Revision: 1.8 $
+// $Date: 2008-07-03 18:48:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/File.cpp,v $
                                                                         
                                                                         
@@ -32,8 +32,11 @@
 
 
 #include <map>
-#include <string>
-using namespace std;
+#include <string.h>
+//#include <string>
+//using namespace std;
+
+
 
 #include <File.h>
 #include <FileIter.h>
