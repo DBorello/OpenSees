@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-08-04 17:34:58 $
+// $Revision: 1.6 $
+// $Date: 2008-07-07 22:58:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete04.cpp,v $
                                                                         
 // Written: N.Mitra (nmitra@u.washington.edu) 
@@ -367,16 +367,34 @@ UniaxialMaterial* Concrete04::getCopy ()
 }
 
 int Concrete04::sendSelf (int commitTag, Channel& theChannel)
-{   int res = 0;   static Vector data(13);   data(0) = this->getTag();
+{   
+  int res = 0;   
+
+  static Vector data(14);   
+  data(0) = this->getTag();
   
-  /* Material properties*/   data(1) = fpc;   data(2) = epsc0;   data(3) = epscu;   data(4) = Ec0;   data(5) = fct;
+  /* Material properties*/   
+  data(1) = fpc;   
+  data(2) = epsc0;   
+  data(3) = epscu;   
+  data(4) = Ec0;   
+  data(5) = fct;
   /*// History variables from last converged state*/
-  data(6) = CminStrain;   data(7) = CunloadSlope;   data(8) = CendStrain;   data(9) = CUtenSlope;   data(10) = CmaxStrain;
+  data(6) = CminStrain;   
+  data(7) = CunloadSlope;   
+  data(8) = CendStrain;   
+  data(9) = CUtenSlope;   
+  data(10) = CmaxStrain;
   
-  /*// State variables from last converged state*/   data(11) = Cstrain;   data(12) = Cstress;   data(13) = Ctangent;   
+  /*// State variables from last converged state*/   
+  data(11) = Cstrain;   
+  data(12) = Cstress;   
+  data(13) = Ctangent;   
   /*// Data is only sent after convergence, so no trial variables   // need to be sent through data vector*/
   
-  res = theChannel.sendVector(this->getDbTag(), commitTag, data);   if (res < 0)       opserr << "Concrete04::sendSelf() - failed to send data\n";
+  res = theChannel.sendVector(this->getDbTag(), commitTag, data);   
+  if (res < 0)       
+    opserr << "Concrete04::sendSelf() - failed to send data\n";
   return res;
 }
 
@@ -384,7 +402,7 @@ int Concrete04::recvSelf (int commitTag, Channel& theChannel,
 			  FEM_ObjectBroker& theBroker)
 {
   int res = 0;
-  static Vector data(13);
+  static Vector data(14);
   res = theChannel.recvVector(this->getDbTag(), commitTag, data);
   
   if (res < 0) {
@@ -402,12 +420,19 @@ int Concrete04::recvSelf (int commitTag, Channel& theChannel,
     fct = data(5);
     
     /*// History variables from last converged state*/
-    CminStrain = data(6);      CunloadSlope = data(7);      CendStrain = data(8);      CcompStrain = data(9);      CmaxStrain = data(10); 
+    CminStrain = data(6);      
+    CunloadSlope = data(7);      
+    CendStrain = data(8);      
+    CcompStrain = data(9);      
+    CmaxStrain = data(10); 
     
-    /*// State variables from last converged state*/      Cstrain = data(11);      Cstress = data(12);      Ctangent = data(13);
+    /*// State variables from last converged state*/      
+    Cstrain = data(11);      
+    Cstress = data(12);      
+    Ctangent = data(13);
     
-    /*// Set trial state variables*/      this->revertToLastCommit();
-    /*Tstrain = Cstrain;      Tstress = Cstress;      Ttangent = Ctangent;*/
+    /*// Set trial state variables*/      
+    this->revertToLastCommit();
   }
   
   return res;
