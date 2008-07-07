@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2008-04-17 18:21:27 $
+// $Revision: 1.6 $
+// $Date: 2008-07-07 22:58:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.cpp,v $
                                                                         
 // Written: fmk
@@ -63,7 +63,11 @@
 #include <ElasticPPMaterial.h>
 #include <ParallelMaterial.h>
 #include <Concrete01.h>
+#include <Concrete02.h>
+#include <Concrete04.h>
+#include <Concrete06.h>
 #include <Steel01.h>
+#include <Steel02.h>
 #include <HardeningMaterial.h>
 #include <HystereticMaterial.h>
 #include <EPPGapMaterial.h>
@@ -760,8 +764,20 @@ FEM_ObjectBrokerAllClasses::getNewUniaxialMaterial(int classTag)
 	case MAT_TAG_Concrete01:  
 	     return new Concrete01();
 
+	case MAT_TAG_Concrete02:  
+	     return new Concrete02();
+
+	case MAT_TAG_Concrete04:  
+	     return new Concrete04();
+
+	case MAT_TAG_Concrete06:  
+	     return new Concrete06();
+
 	case MAT_TAG_Steel01:  
 	     return new Steel01();
+
+	case MAT_TAG_Steel02:  
+	     return new Steel02();
 
 	case MAT_TAG_Hardening:
 		return new HardeningMaterial();
@@ -775,8 +791,7 @@ FEM_ObjectBrokerAllClasses::getNewUniaxialMaterial(int classTag)
 
 	case MAT_TAG_TzSimple1:
 		return new TzSimple1();
-
-	case MAT_TAG_TzLiq1:
+        case MAT_TAG_TzLiq1:
 		return new TzLiq1();
 
 	case MAT_TAG_QzSimple1:
