@@ -9,8 +9,8 @@
 // based on FourNodeQuad element by Michael Scott		  	     //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.7 $
-// $Date: 2007-03-30 01:50:11 $
+// $Revision: 1.8 $
+// $Date: 2008-07-08 00:01:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/FourNodeQuadUP.cpp,v $
 
 #include <FourNodeQuadUP.h>
@@ -1028,8 +1028,16 @@ FourNodeQuadUP::setParameter(const char **argv, int argc, Parameter &param)
   if (strcmp(argv[0],"pressure") == 0)
     return param.addObject(2, this);
 
+  // permeability in horizontal direction
+  if (strcmp(argv[0],"hPerm") == 0)
+    return param.addObject(3, this);
+
+  // permeability in vertical direction
+  if (strcmp(argv[0],"vPerm") == 0)
+    return param.addObject(4, this);
+
   // a material parameter
-  else if (strstr(argv[0],"material") != 0) {
+  if (strstr(argv[0],"material") != 0) {
 
     if (argc < 3)
       return -1;
@@ -1068,6 +1076,14 @@ FourNodeQuadUP::updateParameter(int parameterID, Information &info)
 	case 2:
 		pressure = info.theDouble;
 		this->setPressureLoadAtNodes();	// update consistent nodal loads
+		return 0;
+	case 3:
+		perm[0] = info.theDouble;
+		this->getDamp();	// update mass matrix
+		return 0;
+	case 4:
+		perm[1] = info.theDouble;
+		this->getDamp();	// update mass matrix
 		return 0;
 	default:
 		if (parameterID >= 100) { // material parameter

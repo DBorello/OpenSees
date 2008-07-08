@@ -80,9 +80,8 @@
 
 #include <ElementResponse.h>
 
-
-
-
+#include <Information.h>
+#include <Parameter.h>
 
 #include <Channel.h>
 
@@ -2299,6 +2298,14 @@ TwentyEightNodeBrickUP::setParameter(const char **argv, int argc, Parameter &par
   if (argc < 1)
     return -1;
 
+  // permeability in horizontal direction
+  if (strcmp(argv[0],"hPerm") == 0)
+    return param.addObject(3, this);
+
+  // permeability in vertical direction
+  if (strcmp(argv[0],"vPerm") == 0)
+    return param.addObject(4, this);
+
   int res = -1;
 
   int matRes = res;
@@ -2314,6 +2321,20 @@ TwentyEightNodeBrickUP::setParameter(const char **argv, int argc, Parameter &par
 int
 TwentyEightNodeBrickUP::updateParameter(int parameterID, Information &info)
 {
+  switch( parameterID ) {
+	case 3:
+		perm[0] = info.theDouble;
+		this->getDamp();	// update mass matrix
+		return 0;
+	case 4:
+		perm[1] = info.theDouble;
+		perm[2] = info.theDouble;
+		this->getDamp();	// update mass matrix
+		return 0;
+	default:
+		return -1;
+  }
+
   return -1;
 }
 

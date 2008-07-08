@@ -29,8 +29,8 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.5 $
-// $Date: 2007-04-13 22:42:52 $
+// $Revision: 1.6 $
+// $Date: 2008-07-08 00:01:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/BrickUP.cpp,v $
 
 // by Zhaohui Yang (Modified based on Ed "C++" Love's Brick element)
@@ -53,7 +53,8 @@
 #include <shp3d.h>
 #include <Renderer.h>
 #include <ElementResponse.h>
-
+#include <Information.h>
+#include <Parameter.h>
 
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
@@ -1614,6 +1615,14 @@ BrickUP::setParameter(const char **argv, int argc, Parameter &param)
   if (argc < 1)
     return -1;
 
+  // permeability in horizontal direction
+  if (strcmp(argv[0],"hPerm") == 0)
+    return param.addObject(3, this);
+
+  // permeability in vertical direction
+  if (strcmp(argv[0],"vPerm") == 0)
+    return param.addObject(4, this);
+
   int res = -1;
 
   int matRes = res;
@@ -1629,5 +1638,18 @@ BrickUP::setParameter(const char **argv, int argc, Parameter &param)
 int
 BrickUP::updateParameter(int parameterID, Information &info)
 {
+  switch( parameterID ) {
+	case 3:
+		perm[0] = info.theDouble;
+		this->getDamp();	// update mass matrix
+		return 0;
+	case 4:
+		perm[1] = info.theDouble;
+		perm[2] = info.theDouble;
+		this->getDamp();	// update mass matrix
+		return 0;
+	default:
+		return -1;
+  }
   return -1;
 }

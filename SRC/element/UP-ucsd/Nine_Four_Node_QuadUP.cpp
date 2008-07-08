@@ -22,9 +22,9 @@
 
 
 
-// $Revision: 1.7 $
+// $Revision: 1.8 $
 
-// $Date: 2007-03-30 01:50:11 $
+// $Date: 2008-07-08 00:01:54 $
 
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/Nine_Four_Node_QuadUP.cpp,v $
 
@@ -1787,8 +1787,16 @@ NineFourNodeQuadUP::setParameter(const char **argv, int argc, Parameter &param)
   if (strcmp(argv[0],"rho") == 0)
     return param.addObject(1, this);
 
+  // permeability in horizontal direction
+  if (strcmp(argv[0],"hPerm") == 0)
+    return param.addObject(3, this);
+
+  // permeability in vertical direction
+  if (strcmp(argv[0],"vPerm") == 0)
+    return param.addObject(4, this);
+
   // a material parameter
-  else if (strstr(argv[0],"material") != 0) {
+  if (strstr(argv[0],"material") != 0) {
 
     if (argc < 3)
       return -1;
@@ -1816,11 +1824,18 @@ int
 NineFourNodeQuadUP::updateParameter(int parameterID, Information &info)
 {
   switch (parameterID) {
-  case 1:
-    rho = info.theDouble;
-    this->getMass();	// update mass matrix
-    return 0;
-
+    case 1:
+  	  rho = info.theDouble;
+	  this->getMass();	// update mass matrix
+	  return 0;
+	case 3:
+   	  perm[0] = info.theDouble;
+	  this->getDamp();	// update mass matrix
+	  return 0;
+	case 4:
+	  perm[1] = info.theDouble;
+	  this->getDamp();	// update mass matrix
+	  return 0;
   default:
     return -1;
   }
