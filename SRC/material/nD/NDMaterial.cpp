@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $                                                              
-// $Date: 2007-08-17 17:50:47 $                                                                  
+// $Revision: 1.23 $                                                              
+// $Date: 2008-07-11 19:19:21 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C
@@ -339,7 +339,7 @@ NDMaterial::setResponse (const char **argv, int argc,
       for (int i=0; i<size; i++) 
 	output.tag("ResponseType","UnknownStrain");
     }      
-    theResponse =  new MaterialResponse(this, 1, this->getStress());
+    theResponse =  new MaterialResponse(this, 2, this->getStress());
   }
 
   output.endTag(); // NdMaterialOutput
