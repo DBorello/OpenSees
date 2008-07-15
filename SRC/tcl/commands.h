@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2008-05-25 23:33:41 $
+// $Revision: 1.23 $
+// $Date: 2008-07-15 23:08:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
                                                                         
@@ -118,6 +118,9 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
 
 int 
 eleForce(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+eleResponse(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
 nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);

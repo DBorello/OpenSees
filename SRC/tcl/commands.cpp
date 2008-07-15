@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.126 $
-// $Date: 2008-06-23 20:45:52 $
+// $Revision: 1.127 $
+// $Date: 2008-07-15 23:08:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -84,6 +84,7 @@ OPS_Stream *opserrPtr = &sserr;
 #include <Domain.h>
 #endif
 
+#include <Information.h>
 #include <Element.h>
 #include <Node.h>
 #include <ElementIter.h>
@@ -241,6 +242,12 @@ OPS_Stream *opserrPtr = &sserr;
 #include <SymBandEigenSolver.h>
 #include <FullGenEigenSOE.h>
 #include <FullGenEigenSolver.h>
+
+
+#ifdef _CUDA
+#include <BandGenLinSOE_Single.h>
+#include <BandGenLinLapackSolver_Single.h>
+#endif
 
 
 // graph
@@ -595,6 +602,8 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "remove", &removeObject, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "eleForce", &eleForce, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
+    Tcl_CreateCommand(interp, "eleResponse", &eleResponse, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "nodeDisp", &nodeDisp, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
@@ -2045,7 +2054,13 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 #endif
   } 
 
-
+#ifdef _CUDA
+  else if ((strcmp(argv[1],"BandGeneral_Single") == 0) || (strcmp(argv[1],"BandGEN_Single") == 0)
+      || (strcmp(argv[1],"BandGen_Single") == 0)){
+    BandGenLinLapackSolver_Single    *theSolver = new BandGenLinLapackSolver_Single();
+    theSOE = new BandGenLinSOE_Single(*theSolver);      
+  }
+#endif
 
   // BAND SPD SOE & SOLVER
   else if (strcmp(argv[1],"BandSPD") == 0) {
@@ -4920,33 +4935,49 @@ int
 nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
     // make sure at least one other argument to contain type of system
-    if (argc < 3) {
-	opserr << "WARNING want - nodeDisp nodeTag? dof?\n";
+    if (argc < 2) {
+	opserr << "WARNING want - nodeDisp nodeTag? <dof?>\n";
 	return TCL_ERROR;
    }    
 
-    int tag, dof;
+    int tag;
+    int dof = -1;
 
     if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
 	opserr << "WARNING nodeDisp nodeTag? dof? - could not read nodeTag? \n";
 	return TCL_ERROR;	        
-    }    
-    if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
+    } 
+
+    if (argc > 2) {
+      if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
 	opserr << "WARNING nodeDisp nodeTag? dof? - could not read dof? \n";
 	return TCL_ERROR;	        
-    }        
+      }   
+    }     
     
     dof--;
 
     const Vector *nodalResponse = theDomain.getNodeResponse(tag, Disp);
-
-    if (nodalResponse == 0 || nodalResponse->Size() < dof || dof < 0)
+    if (nodalResponse == 0)
       return TCL_ERROR;
 
-    double value = (*nodalResponse)(dof);
+    int size = nodalResponse->Size();
     
-    // now we copy the value to the tcl string that is returned
-    sprintf(interp->result,"%35.20f",value);
+    if (dof >= 0) {
+      if (size < dof)
+	return TCL_ERROR;
+      
+      double value = (*nodalResponse)(dof);
+      
+      // now we copy the value to the tcl string that is returned
+      sprintf(interp->result,"%35.20f ",value);
+    } else {
+      char buffer [40];
+      for (int i=0; i<size; i++) {
+	sprintf(buffer,"%35.20f",(*nodalResponse)(i));
+	Tcl_AppendResult(interp, buffer, NULL);
+      }
+    }	
 	
     return TCL_OK;
 }
@@ -4994,34 +5025,99 @@ int
 eleForce(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
     // make sure at least one other argument to contain type of system
-    if (argc < 3) {
-	opserr << "WARNING want - nodeDisp nodeTag? dof?\n";
+    if (argc < 2) {
+	opserr << "WARNING want - eleForce eleTag? <dof?>\n";
 	return TCL_ERROR;
    }    
 
-    int tag, dof;
+    int tag;
+    int dof = -1;
 
     if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
 	opserr << "WARNING eleForce eleTag? dof? - could not read nodeTag? \n";
 	return TCL_ERROR;	        
     }    
-    if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
+
+    if (argc > 2) {
+      if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
 	opserr << "WARNING eleForce eleTag? dof? - could not read dof? \n";
 	return TCL_ERROR;	        
-    }        
+      }   
+    }     
     
     dof--;
     Element *theEle = theDomain.getElement(tag);
-    const Vector &force = theEle->getResistingForce();
-
-    if (force.Size() < dof || dof < 0)
+    if (theEle == 0)
       return TCL_ERROR;
-
-    double value = force(dof);
     
-    // now we copy the value to the tcl string that is returned
-    sprintf(interp->result,"%35.20f",value);
-	
+    const Vector &force = theEle->getResistingForce();
+    int size = force.Size();
+
+    if (dof >= 0) {
+
+      if (size < dof)
+	return TCL_ERROR;
+
+      double value = force(dof);
+      
+      // now we copy the value to the tcl string that is returned
+      sprintf(interp->result,"%35.20f",value);
+
+    } else {
+      char buffer[40];
+      for (int i=0; i<size; i++) {
+	sprintf(buffer,"%35.20f",force(i));
+	Tcl_AppendResult(interp, buffer, NULL);
+      }
+    }
+
+    return TCL_OK;
+}
+
+
+
+int 
+eleResponse(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+    // make sure at least one other argument to contain type of system
+    if (argc < 2) {
+	opserr << "WARNING want - eleResponse eleTag? eleArgs...\n";
+	return TCL_ERROR;
+   }    
+
+    int tag;
+
+    if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+	opserr << "WARNING eleForce eleTag? dof? - could not read nodeTag? \n";
+	return TCL_ERROR;	        
+    }    
+
+    Element *theEle = theDomain.getElement(tag);
+    if (theEle == 0)
+      return TCL_ERROR;
+    
+    DummyStream dummy;
+    Response *theResponse = theEle->setResponse(argv+2, argc-2, dummy);
+    if (theResponse == 0) {
+      return TCL_ERROR;	  
+    }
+
+    if (theResponse->getResponse() < 0) {
+      delete theResponse;
+      return TCL_ERROR;
+    }
+
+    Information &eleInfo = theResponse->getInformation();
+    const Vector &data = eleInfo.getData();
+
+    int size = data.Size();
+    char buffer[40];
+    for (int i=0; i<size; i++) {
+      sprintf(buffer,"%35.20f",data(i));
+      Tcl_AppendResult(interp, buffer, NULL);
+    }
+    delete theResponse;
+
     return TCL_OK;
 }
 
@@ -5131,32 +5227,50 @@ int
 nodeVel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
     // make sure at least one other argument to contain type of system
-    if (argc < 3) {
-	opserr << "WARNING want - nodeDisp nodeTag? dof?\n";
+    if (argc < 2) {
+	opserr << "WARNING want - nodeDisp nodeTag? <dof?>\n";
 	return TCL_ERROR;
    }    
 
-    int tag, dof;
+    int tag;
+    int dof = -1;
 
     if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
 	opserr << "WARNING nodeDisp nodeTag? dof? - could not read nodeTag? \n";
 	return TCL_ERROR;	        
     }    
-    if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
+    if (argc > 2) {
+      if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
 	opserr << "WARNING nodeDisp nodeTag? dof? - could not read dof? \n";
 	return TCL_ERROR;	        
-    }        
-    
+      }        
+    }    
+
     dof--;
 
     const Vector *nodalResponse = theDomain.getNodeResponse(tag, Vel);
-    if (nodalResponse == 0 || nodalResponse->Size() < dof || dof < 0)
+
+    if (nodalResponse == 0)
       return TCL_ERROR;
 
-    double value = (*nodalResponse)(dof);
-    
-    // now we copy the value to the tcl string that is returned
-    sprintf(interp->result,"%35.20f",value);
+    int size = nodalResponse->Size();
+
+    if (dof >= 0) {
+      if (size < dof)
+	return TCL_ERROR;
+
+      double value = (*nodalResponse)(dof);
+      
+      // now we copy the value to the tcl string that is returned
+      sprintf(interp->result,"%35.20f",value);
+    } else {
+
+      char buffer[40];
+      for (int i=0; i<size; i++) {
+	sprintf(buffer,"%35.20f",(*nodalResponse)(i));
+	Tcl_AppendResult(interp, buffer, NULL);
+      }
+    }
 	
     return TCL_OK;
 }
@@ -5166,32 +5280,49 @@ int
 nodeAccel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
     // make sure at least one other argument to contain type of system
-    if (argc < 3) {
+    if (argc < 2) {
 	opserr << "WARNING want - nodeDisp nodeTag? dof?\n";
 	return TCL_ERROR;
    }    
 
-    int tag, dof;
+    int tag;
+    int dof = -1;
 
     if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
 	opserr << "WARNING nodeDisp nodeTag? dof? - could not read nodeTag? \n";
 	return TCL_ERROR;	        
     }    
-    if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
+    if (argc > 2) {
+      if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
 	opserr << "WARNING nodeDisp nodeTag? dof? - could not read dof? \n";
 	return TCL_ERROR;	        
-    }        
+      }   
+    }     
     
     dof--;
 
     const Vector *nodalResponse = theDomain.getNodeResponse(tag, Accel);
-    if (nodalResponse == 0 || nodalResponse->Size() < dof || dof < 0)
+    if (nodalResponse == 0)
       return TCL_ERROR;
 
-    double value = (*nodalResponse)(dof);
+
+    int size =  nodalResponse->Size();
+
+    if (dof >= 0) {
+      if (size < dof)
+	return TCL_ERROR;
+
+      double value = (*nodalResponse)(dof);
     
-    // now we copy the value to the tcl string that is returned
-    sprintf(interp->result,"%35.20f",value);
+      // now we copy the value to the tcl string that is returned
+      sprintf(interp->result,"%35.20f",value);
+    } else {
+      char buffer[40];
+      for (int i=0; i<size; i++) {
+	sprintf(buffer,"%35.20f",(*nodalResponse)(i));
+	Tcl_AppendResult(interp, buffer, NULL);
+      }
+    }
 	
     return TCL_OK;
 }
