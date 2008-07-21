@@ -153,6 +153,7 @@ KJE_LIBS = $(FE)/material/uniaxial/limitState/LimitStateMaterial.o \
 # the files that make up the FE_LIBRARY
 GLF_LIBS = $(FE)/element/zeroLength/ZeroLength.o \
 	$(FE)/element/zeroLength/ZeroLengthSection.o \
+	$(FE)/element/zeroLength/ZeroLengthND.o \
 	$(FE)/element/zeroLength/TclZeroLength.o
 
 REMO_LIBS = $(FE)/element/nonlinearBeamColumn/matrixutil/MatrixUtil.o \
