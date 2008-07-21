@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.45 $
-// $Date: 2007-11-29 18:29:33 $
+// $Revision: 1.46 $
+// $Date: 2008-07-21 22:53:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -563,9 +563,9 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
     return result;
     
   } else if (strcmp(argv[1],"zeroLengthND") == 0) {
-    opserr << "element zeroLengthND is no longer available, please use "
-	 << "the zeroLengthSection element instead" << endln;
-    return TCL_ERROR;
+    int result = TclModelBuilder_addZeroLengthND(clientData, interp, argc, argv,
+						 theTclDomain, theTclBuilder);
+    return result;
   } else if ((strcmp(argv[1],"Joint2D") == 0) ||
 	     (strcmp(argv[1],"Joint2d") == 0)) {
     int result = TclModelBuilder_addJoint2D(clientData, interp, argc, argv,

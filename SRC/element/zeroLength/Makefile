@@ -4,6 +4,7 @@ OBJS       = ZeroLength.o \
 	ZeroLengthSection.o \
 	ZeroLengthContact2D.o \
 	ZeroLengthContact3D.o \
+	ZeroLengthND.o \
 	TclZeroLength.o
 
 all:         $(OBJS)

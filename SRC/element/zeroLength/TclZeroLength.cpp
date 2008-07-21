@@ -18,13 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-10-25 18:18:13 $
+// $Revision: 1.7 $
+// $Date: 2008-07-21 22:52:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/TclZeroLength.cpp,v $
-                                                                        
-                                                                        
-// File: ~/element/zeroLength/TclZeroLength.C
-// 
 // Written: fmk
 // Created: 01/00
 //
@@ -37,7 +33,7 @@
 #include <tcl.h>
 
 #include <ZeroLength.h>
-//#include <ZeroLengthND.h>
+#include <ZeroLengthND.h>
 #include <ZeroLengthSection.h>
 #include <ZeroLengthContact2D.h>
 #include <ZeroLengthContact3D.h>
@@ -676,7 +672,6 @@ TclModelBuilder_addZeroLengthContact3D(ClientData clientData, Tcl_Interp *interp
 
 
 
-/*
 int
 TclModelBuilder_addZeroLengthND(ClientData clientData, Tcl_Interp *interp,
 			      int argc, TCL_Char **argv,
@@ -704,30 +699,26 @@ TclModelBuilder_addZeroLengthND(ClientData clientData, Tcl_Interp *interp,
 
     // get the ele tag 
     if (Tcl_GetInt(interp, argv[2], &eleTag) != TCL_OK) {
-	opserr << "WARNING invalied eleTag %s %s %s %s\n" << 
-				argv[2],
-				"- element zeroLengthND eleTag? iNode? jNode? " <<
-				"NDTag? <1DTag?>" <<
-				"<-orient x1? x2? x3? y1? y2? y3?>\n";	
+	opserr << "WARNING invalied eleTag " << 
+	  argv[2] << " - element zeroLengthND eleTag? iNode? jNode? NDTag? <1DTag?> <-orient x1? x2? x3? y1? y2? y3?>\n";	
+	  
 	return TCL_ERROR;
     }
 
     // get the two end nodes
     if (Tcl_GetInt(interp, argv[3], &iNode) != TCL_OK) {
-	opserr << "WARNING invalied iNode %s %s %s %s\n" << 
-				argv[3],
-				"- element zeroLengthND eleTag? iNode? jNode? " <<
-				"NDTag? <1DTag?>" <<
-				"<-orient x1? x2? x3? y1? y2? y3?>\n";	
+	opserr << "WARNING invalied iNode " << 
+	  argv[3] <<
+	  "- element zeroLengthND eleTag? iNode? jNode? " <<
+	  "NDTag? <1DTag?>" <<
+	  "<-orient x1? x2? x3? y1? y2? y3?>\n";	
 	return TCL_ERROR;
     }
 
     if (Tcl_GetInt(interp, argv[4], &jNode) != TCL_OK) {
-	opserr << "WARNING invalid jNode %s %s %s %s\n" << 
-				argv[4],
-				"- element zeroLengthND eleTag? iNode? jNode? " <<
-				"NDTag? <1DTag?>" <<
-				"<-orient x1? x2? x3? y1? y2? y3?>\n";	
+      opserr << "WARNING invalid jNode " << 
+	argv[4] << "- element zeroLengthND eleTag? iNode? jNode? " <<
+	"NDTag? <1DTag?> <-orient x1? x2? x3? y1? y2? y3?>\n";	
 	return TCL_ERROR;
     }
 
@@ -735,10 +726,9 @@ TclModelBuilder_addZeroLengthND(ClientData clientData, Tcl_Interp *interp,
 
     if (Tcl_GetInt(interp, argv[5], &NDTag) != TCL_OK) {
 	opserr << "WARNING invalid NDTag %s %s %s %s\n" << 
-				argv[5],
-				"- element zeroLengthND eleTag? iNode? jNode? " <<
-				"NDTag? <1DTag?>" <<
-				"<-orient x1? x2? x3? y1? y2? y3?>\n";	
+	  argv[5] << "- element zeroLengthND eleTag? iNode? jNode? " <<
+	  "NDTag? <1DTag?> <-orient x1? x2? x3? y1? y2? y3?>\n"; 
+	
 	return TCL_ERROR;
     }
 
@@ -751,19 +741,16 @@ TclModelBuilder_addZeroLengthND(ClientData clientData, Tcl_Interp *interp,
 		int uniTag;
 
 		if (Tcl_GetInt(interp, argv[6], &uniTag) != TCL_OK) {
-			opserr << "WARNING invalid 1DTag %s %s %s %s\n" << 
-					argv[5],
-					"- element zeroLengthND eleTag? iNode? jNode? " <<
-					"NDTag? <1DTag?>" <<
-					"<-orient x1? x2? x3? y1? y2? y3?>\n";	
+			opserr << "WARNING invalid NDTag " << 
+			  argv[5] << "- element zeroLengthND eleTag? iNode? jNode? " <<
+			  "NDTag? <1DTag?> <-orient x1? x2? x3? y1? y2? y3?>\n"; 
 			return TCL_ERROR;
 		}
 
 		the1DMat = theBuilder->getUniaxialMaterial(uniTag);
 
 		if (the1DMat == 0)
-			opserr << "WARNING UniaxialMaterial %d not found in model, %s" <<
-				uniTag, "proceeding without\n";
+		  opserr << "WARNING UniaxialMaterial " << uniTag << " not found in model, proceeding without\n";
 
 		argi = 7;
 	}
@@ -776,12 +763,9 @@ TclModelBuilder_addZeroLengthND(ClientData clientData, Tcl_Interp *interp,
     if (argi < argc) {
 	if (strcmp(argv[argi],"-orient") == 0) {
 	    if (argc < (argi+7)) {
-		opserr << "WARNING %s %d %s %s %s %s\n" << 
-				"not enough paramaters after -orient flag for ele " <<
-				eleTag,
-				"- element zeroLengthND eleTag? iNode? jNode? " <<
-				"NDTag? <1DTag?>" <<
-				"<-orient x1? x2? x3? y1? y2? y3?>\n";	
+		opserr << "WARNING not enough paramaters after -orient flag for ele "  << 
+		  eleTag << "- element zeroLengthND eleTag? iNode? jNode? " <<
+		  "NDTag? <1DTag?> <-orient x1? x2? x3? y1? y2? y3?>\n";	
 		return TCL_ERROR;		
 	    } else {
 		argi++;
@@ -789,13 +773,10 @@ TclModelBuilder_addZeroLengthND(ClientData clientData, Tcl_Interp *interp,
 		// read the x values
 		for (int i=0; i<3; i++)  {
 		    if (Tcl_GetDouble(interp, argv[argi], &value) != TCL_OK) {
-			opserr << "WARNING %s %d %s %s %s %s\n" << 
-						"invalid -orient value for ele  " <<
-						eleTag,
-						argv[argi],
-						"- element zeroLengthND eleTag? iNode? jNode? " <<
-						"NDTag? <1DTag?>" <<
-						"<-orient x1? x2? x3? y1? y2? y3?>\n";	
+			opserr << "WARNING invalid -orient value for ele  " <<
+			  eleTag << argv[argi] << "- element zeroLengthND eleTag? iNode? jNode? " <<
+			  "NDTag? <1DTag?> <-orient x1? x2? x3? y1? y2? y3?>\n";	
+						
 			return TCL_ERROR;
 		    } else {
 			argi++;
@@ -805,13 +786,10 @@ TclModelBuilder_addZeroLengthND(ClientData clientData, Tcl_Interp *interp,
 		// read the y values
 		for (int j=0; j<3; j++)  {
 		    if (Tcl_GetDouble(interp, argv[argi], &value) != TCL_OK) {
-			opserr << "WARNING %s %d %s %s %s %s\n" << 
-						"invalid -orient value for ele  " <<
-						eleTag,
-						argv[argi],
-						"- element zeroLengthND eleTag? iNode? jNode? " <<
-						"NDTag? <1DTag?>" <<
-						"<-orient x1? x2? x3? y1? y2? y3?>\n";	
+			opserr << "WARNING invalid -orient value for ele  " <<
+			  eleTag << " " << argv[argi] << 
+			  "- element zeroLengthND eleTag? iNode? jNode? " <<
+			  "NDTag? <1DTag?> <-orient x1? x2? x3? y1? y2? y3?>\n";	
 			return TCL_ERROR;
 		    } else {
 			argi++;
@@ -829,24 +807,22 @@ TclModelBuilder_addZeroLengthND(ClientData clientData, Tcl_Interp *interp,
 	NDMaterial *theNDMat = theBuilder->getNDMaterial(NDTag);
 
 	if (theNDMat == 0) {
-		opserr << "%s -- no NDMaterial with tag %d exists in Domain\n" << 
-			"zeroLengthND" << NDTag);	
-		return TCL_ERROR;		
+	  opserr << "zeroLengthND -- no NDMaterial with tag " << NDTag << " exists in Domain\n";
+	  return TCL_ERROR;		
 	}
 
 	Element *theEle = 0;
 
 	if (the1DMat == 0)
-		theEle = new ZeroLengthND(eleTag, ndm, iNode, jNode, x, y, *theNDMat);
+	  theEle = new ZeroLengthND(eleTag, ndm, iNode, jNode, x, y, *theNDMat);
 	else
-		theEle = new ZeroLengthND(eleTag, ndm, iNode, jNode, x, y, *theNDMat, *the1DMat);
+	  theEle = new ZeroLengthND(eleTag, ndm, iNode, jNode, x, y, *theNDMat, *the1DMat);
     
 	if (theEle == 0)
-		return TCL_ERROR;
-   
-    if (theDomain->addElement(theEle) == false)
-		return TCL_ERROR;
-
-    return TCL_OK;
+	  return TCL_ERROR;
+	
+	if (theDomain->addElement(theEle) == false)
+	  return TCL_ERROR;
+	
+	return TCL_OK;
 }
-*/
