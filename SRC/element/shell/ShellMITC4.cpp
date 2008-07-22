@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2007-05-03 23:02:33 $
+// $Revision: 1.19 $
+// $Date: 2008-07-22 22:51:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.cpp,v $
 
 // Ed "C++" Love
@@ -532,7 +532,7 @@ ShellMITC4::setResponse(const char **argv, int argc, OPS_Stream &output)
       output.endTag(); // NdMaterialOutput
     }
     
-    theResponse =  new ElementResponse(this, 2, Vector(84));
+    theResponse =  new ElementResponse(this, 2, Vector(32));
   }
 
   output.endTag();
