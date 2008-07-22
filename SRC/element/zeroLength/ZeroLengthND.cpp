@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2008-07-21 22:52:39 $
+// $Revision: 1.6 $
+// $Date: 2008-07-22 00:00:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthND.cpp,v $
                                                                         
 // Written: MHS
@@ -74,17 +74,18 @@ end1Ptr(0), end2Ptr(0), theNDMaterial(0), the1DMaterial(0), order(0)
 	// Obtain copy of Nd material model
 	theNDMaterial = theNDmat.getCopy();
 	
-	if (theNDMaterial == 0)
-		g3ErrorHandler->fatal("%s -- failed to get copy of NDMaterial",
-			"ZeroLengthND::ZeroLengthND");
-
+	if (theNDMaterial == 0) {
+		opserr << "ZeroLengthND::zeroLengthND-- failed to get copy of NDMaterial\n";
+		exit(-1);
+	}
 	// Get the material order
 	order = theNDMaterial->getOrder();
 
 	// Check material order
-	if (order < 2 || order > 3)
-		g3ErrorHandler->fatal("%s -- NDMaterial not of order 2 or 3",
-			"ZeroLengthND::ZeroLengthND");
+	if (order < 2 || order > 3) {
+		opserr << "ZeroLengthND::  -- NDMaterial not of order 2 or 3\n";
+		exit(-1);
+	}
 
 	// Set up the transformation matrix of direction cosines
 	this->setUp(Nd1, Nd2, x, yprime);
@@ -102,23 +103,26 @@ end1Ptr(0), end2Ptr(0), theNDMaterial(0), the1DMaterial(0), order(0)
 	// Obtain copy of Nd material model
 	theNDMaterial = theNDmat.getCopy();
 	
-	if (theNDMaterial == 0)
-		g3ErrorHandler->fatal("%s -- failed to get copy of NDMaterial",
-			"ZeroLengthND::ZeroLengthND");
+	if (theNDMaterial == 0) {
+		opserr << "ZeroLengthND::  -- failed to get copy of NDMaterial\n";
+		exit(-1);
+	}
 
 	// Obtain copy of 1d material model
 	the1DMaterial = the1Dmat.getCopy();
 	
-	if (the1DMaterial == 0)
-		g3ErrorHandler->fatal("%s -- failed to get copy of UniaxialMaterial",
-			"ZeroLength1D::ZeroLength1D");
+	if (the1DMaterial == 0) {
+		opserr << "ZeroLengthND""ZeroLengthND -- failed to get copy of UniaxialMaterial\n";
+		exit(-1);	
+	}	
 
 	// Get the material order
 	order = theNDMaterial->getOrder();
 
-	if (order != 2)
-		g3ErrorHandler->fatal("%s -- NDMaterial not of order 2",
-			"ZeroLengthND::ZeroLengthND");
+	if (order != 2) {
+		opserr << "ZeroLengthND::ZeroLengthND-- NDMaterial not of order 2\n";
+		exit(-1);
+	}
 
 	// Set up the transformation matrix of direction cosines
 	this->setUp(Nd1, Nd2, x, yprime);
@@ -200,15 +204,12 @@ ZeroLengthND::setDomain(Domain *theDomain)
     // if can't find both - send a warning message
     if (end1Ptr == 0 || end2Ptr == 0) {
 		if (end1Ptr == 0) 
-			g3ErrorHandler->warning("%s -- Nd1: %d does not exist in ",
-				"ZeroLengthND::setDomain()", Nd1);
+			opserr << "ZeroLengthND::setDomain()-- Nd1 does not exist in model\n";
 		else
-			g3ErrorHandler->warning("%s -- Nd2: %d does not exist in ",
-				"ZeroLengthND::setDomain()", Nd2);
+			opserr << "ZeroLengthND::setDomain -- Nd2 does not exist in model\n";
 
-		g3ErrorHandler->warning("model for ZeroLengthND with id %d",
-			this->getTag());
-
+		end1Ptr = 0;
+		end2Ptr = 0;
 		return;
     }
 
@@ -218,18 +219,20 @@ ZeroLengthND::setDomain(Domain *theDomain)
 
     // if differing dof at the ends - print a warning message
     if (dofNd1 != dofNd2) {
-		g3ErrorHandler->warning("%s -- nodes %d and %d %s %d\n",Nd1, Nd2,
-			"ZeroLengthND::setDomain()",
-			"have differing dof at ends for ZeroLengthND ",
-			this->getTag());
+		opserr << "ZeroLengthND::setDomain -- nodes have differing dof's at end\n";
+		end1Ptr = 0;
+		end2Ptr = 0;
 		return;
     }	
 
 	numDOF = 2*dofNd1;
 
-	if (numDOF != 6 && numDOF != 12)
-		g3ErrorHandler->warning("%s -- element only works for 3 (2d) or 6 (3d) dof per node"
-			      "ZeroLengthND::setDomain()");
+	if (numDOF != 6 && numDOF != 12) {
+		opserr << "ZeroLengthND::setDomain -  element only works for 3 (2d) or 6 (3d) dof per node\n";
+		end1Ptr = 0;
+		end2Ptr = 0;
+		return;
+	}
 
     // Check that length is zero within tolerance
     const Vector &end1Crd = end1Ptr->getCrds();
@@ -243,8 +246,7 @@ ZeroLengthND::setDomain(Domain *theDomain)
     vm = (v1<v2) ? v2 : v1;
     
     if (L > LENTOL*vm)
-		g3ErrorHandler->warning("%s -- Element %d has L=%e, which is greater than the tolerance",
-			"ZeroLengthND::setDomain()", this->getTag(), L);
+		opserr << "ZeroLengthND::setDomain -- Element has L=, which is greater than the tolerance\n";
         
     // call the base class method
     this->DomainComponent::setDomain(theDomain);
@@ -420,8 +422,7 @@ ZeroLengthND::zeroLoad(void)
 int 
 ZeroLengthND::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("ZeroLength::addLoad - load type unknown for truss with tag: %d",
-			  this->getTag());
+  opserr << "ZeroLength::addLoad - load type unknown for ZeroLengthND\n";
   
   return -1;
 }
@@ -529,8 +530,7 @@ ZeroLengthND::sendSelf(int commitTag, Channel &theChannel)
 
 	res += theChannel.sendID(dataTag, commitTag, idData);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to send ID data",
-			"ZeroLengthND::sendSelf");
+		opserr << "ZeroLengthND::sendSelf() -- failed to send ID data\n";
 		return res;
 	}
 
@@ -538,16 +538,14 @@ ZeroLengthND::sendSelf(int commitTag, Channel &theChannel)
 	// in the constructor and not setDomain()
 	res += theChannel.sendMatrix(dataTag, commitTag, transformation);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to send transformation Matrix",
-			"ZeroLengthND::sendSelf");
+		opserr << "ZeroLengthND::sendSelf -- failed to send transformation Matrix\n";
 		return res;
 	}
 
 	// Send the NDMaterial
 	res += theNDMaterial->sendSelf(commitTag, theChannel);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to send NDMaterial",
-			"ZeroLengthND::sendSelf");
+		opserr << "ZeroLengthND::  -- failed to send NDMaterial\n";
 		return res;
 	}
 
@@ -555,8 +553,7 @@ ZeroLengthND::sendSelf(int commitTag, Channel &theChannel)
 	if (the1DMaterial != 0) {
 		res += the1DMaterial->sendSelf(commitTag, theChannel);
 		if (res < 0) {
-			g3ErrorHandler->warning("%s -- failed to send UniaxialMaterial",
-				"ZeroLengthND::sendSelf");
+			opserr << "ZeroLengthND::sendSelf-- failed to send UniaxialMaterial";
 			return res;
 		}
 	}
@@ -578,15 +575,13 @@ ZeroLengthND::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &the
 
 	res += theChannel.recvID(dataTag, commitTag, idData);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to receive ID data",
-			"ZeroLengthND::recvSelf");
+		opserr << "ZeroLengtHND::recvSelf -- failed to receive ID data\n";
 		return res;
 	}
 
 	res += theChannel.recvMatrix(dataTag, commitTag, transformation);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to receive transformation Matrix",
-			"ZeroLengthND::recvSelf");
+		opserr << "zeroLengthND::revbSelf -- failed to receive transformation Matrix\n";
 		return res;
 	}
 
@@ -606,9 +601,6 @@ ZeroLengthND::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &the
 
 		A = new Matrix(order, numDOF);
 
-		if (A == 0)
-			g3ErrorHandler->fatal("%s -- failed to allocate transformation Matrix",
-				"ZeroLengthND::recvSelf");
 
 		if (numDOF == 6) {
 			K = &K6;
@@ -639,8 +631,7 @@ ZeroLengthND::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &the
 
 	// Check if either allocation failed from broker
 	if (theNDMaterial == 0) {
-		g3ErrorHandler->warning("%s -- failed to allocate new NDMaterial",
-			"ZeroLengthND::recvSelf");
+		opserr << "ZeroLengthND::  -- failed to allocate new NDMaterial\n";
 		return -1;
 	}
 
@@ -648,8 +639,7 @@ ZeroLengthND::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &the
 	theNDMaterial->setDbTag(idData(8));
 	res += theNDMaterial->recvSelf(commitTag, theChannel, theBroker);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to receive NDMaterial",
-			"ZeroLengthND::recvSelf");
+		opserr << "ZeroLengthND::  -- failed to receive NDMaterial\n";
 		return res;
 	}
 
@@ -669,8 +659,7 @@ ZeroLengthND::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &the
 
 		// Check if either allocation failed from broker
 		if (the1DMaterial == 0) {
-			g3ErrorHandler->warning("%s -- failed to allocate new UniaxialMaterial",
-				"ZeroLengthND::recvSelf");
+			opserr << "ZeroLengthND::  -- failed to allocate new UniaxialMaterial\n";
 			return -1;
 		}
 
@@ -678,8 +667,7 @@ ZeroLengthND::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &the
 		the1DMaterial->setDbTag(idData(10));
 		res += the1DMaterial->recvSelf(commitTag, theChannel, theBroker);
 		if (res < 0) {
-			g3ErrorHandler->warning("%s -- failed to receive UniaxialMaterial",
-				"ZeroLengthND::recvSelf");
+			opserr << "ZeroLengthND::  -- failed to receive UniaxialMaterial\n";
 			return res;
 		}
 	}
@@ -800,18 +788,19 @@ void
 ZeroLengthND::setUp(int Nd1, int Nd2, const Vector &x, const Vector &yp)
 { 
     // ensure the connectedExternalNode ID is of correct size & set values
-    if (connectedExternalNodes.Size() != 2)
-		g3ErrorHandler->fatal("%s -- failed to create an ID of correct size",
-			"ZeroLengthND::setUp");
+	if (connectedExternalNodes.Size() != 2) {
+		opserr << "ZeroLengthND::setUp -- failed to create an ID of correct size\n";
+		exit(-1);
+	}
     
     connectedExternalNodes(0) = Nd1;
     connectedExternalNodes(1) = Nd2;
     
     // check that vectors for orientation are correct size
-    if ( x.Size() != 3 || yp.Size() != 3 )
-		g3ErrorHandler->fatal("%s -- incorrect dimension of orientation vectors",
-			"ZeroLengthND::setUp");
-
+	if ( x.Size() != 3 || yp.Size() != 3 ) {
+		opserr << "ZeroLengthND -- incorrect dimension of orientation vectors\n";
+	exit(-1);
+	}
     // establish orientation of element for the tranformation matrix
     // z = x cross yp
     static Vector z(3);
@@ -831,9 +820,10 @@ ZeroLengthND::setUp(int Nd1, int Nd2, const Vector &x, const Vector &yp)
     double zn = z.Norm();
 
     // check valid x and y vectors, i.e. not parallel and of zero length
-    if (xn == 0 || yn == 0 || zn == 0)
-		g3ErrorHandler->fatal("%s -- invalid vectors to constructor",
-			"ZeroLengthND::setUp");
+	if (xn == 0 || yn == 0 || zn == 0){
+		opserr << "ZeroLengthND::setUP -- invalid vectors to constructor\n";
+		exit(-1);
+	}
     
     // create transformation matrix of direction cosines
     for (int i = 0; i < 3; i++) {
@@ -853,10 +843,10 @@ ZeroLengthND::setTransformation(void)
 
 	A = (the1DMaterial == 0) ? new Matrix(order, numDOF) : new Matrix(order+1, numDOF);
 
-	if (A == 0)
-		g3ErrorHandler->fatal("%s -- failed to allocate transformation Matrix",
-			"ZeroLengthND::setTransformation");
-
+	if (A == 0) {
+		opserr << "ZeroLengthND::setTransformation -- failed to allocate transformation Matrix\n";
+			exit(-1);
+	}
 	if (numDOF == 6) {
 		K = &K6;
 		P = &P6;
