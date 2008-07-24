@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-07-24 22:06:34 $
+// $Revision: 1.3 $
+// $Date: 2008-07-24 22:59:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/PeerNGA.cpp,v $
                                                                         
                                                                         
@@ -36,7 +36,6 @@
 #include <string.h>
 #include <StringContainer.h>
 
-#ifdef _HTTPS
 
 #ifdef _WIN32
 extern int __cdecl
@@ -95,6 +94,7 @@ int __cdecl
 #else
 int
 #endif
+
 peerSearchNGA(const char *Eq,
 	      const char *SoilType,
 	      const char *Fault,
@@ -279,7 +279,3 @@ peerSearchNGA(const char *Eq,
   return trialID;
 }
 
-
-
-
-#endif
