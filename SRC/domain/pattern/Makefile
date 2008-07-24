@@ -18,7 +18,7 @@ OBJS       = $(RELIABILITY_OBJS) \
 	TrigSeries.o ConstantSeries.o UniformExcitation.o \
 	TimeSeriesIntegrator.o TrapezoidalTimeSeriesIntegrator.o \
 	MultiSupportPattern.o TclSeriesCommand.o TclSeriesIntegratorCommand.o \
-	PulseSeries.o TriangleSeries.o PeerMotion.o
+	PulseSeries.o TriangleSeries.o PeerMotion.o PeerNGAMotion.o
 
 # Compilation control
 

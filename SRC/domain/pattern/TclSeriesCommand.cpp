@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.18 $
-// $Date: 2008-02-29 20:47:30 $
+// $Revision: 1.19 $
+// $Date: 2008-07-24 21:47:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclSeriesCommand.cpp,v $
 
 // Written: fmk 
@@ -44,6 +44,7 @@
 #include <PathTimeSeries.h>
 #include <PathSeries.h>
 #include <PeerMotion.h>
+#include <PeerNGAMotion.h>
 #include <string.h>
 
 
@@ -234,6 +235,52 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
 	  int nPts = thePeerMotion->getNPts();
 	  char string[30];
 	  sprintf(string,"set %s %d", variableName, nPts);   Tcl_Eval(interp, string);
+	  argCount+=2;
+	} else
+	  argCount++;
+      }
+    }
+  }
+
+
+  else if ((strcmp(argv[0],"PeerNGADatabase") == 0) || (strcmp(argv[0],"PeerNGAMotion") == 0)) {
+
+    if (argc < 3) {
+      opserr << "WARNING not enough TimeSeries args - ";
+      opserr << " PeerDatabase eqMotion station type factor\n";
+      cleanup(argv);
+      return 0;	
+    }	
+
+    double cFactor = 1.0;
+
+    if (Tcl_GetDouble(interp, argv[2], &cFactor) != TCL_OK) {
+      opserr << "WARNING invalid input: random process mean \n";
+      cleanup(argv);
+      return 0;
+    }
+    
+    PeerNGAMotion *thePeerMotion = new PeerNGAMotion(argv[1], "-ACCEL", cFactor);       	
+    theSeries = thePeerMotion;
+
+    if (argc > 3 && theSeries != 0) {
+      int argCount = 3;
+
+      while (argCount+1 < argc) {
+	if ((strcmp(argv[argCount],"-dT") == 0) || (strcmp(argv[argCount],"-dt") == 0) || 
+	    (strcmp(argv[argCount],"-DT") == 0)) {
+	  const char *variableName = argv[argCount+1];
+	  double dT = thePeerMotion->getDt();
+	  char string[30];
+	  sprintf(string,"set %s %.18e", variableName, dT);   Tcl_Eval(interp, string);
+	  argCount+=2;
+
+	} else if ((strcmp(argv[argCount],"-nPts") == 0) || (strcmp(argv[argCount],"-NPTS") == 0)) {
+	  const char *variableName = argv[argCount+1];
+	  int nPts = thePeerMotion->getNPts();
+	  char string[30];
+	  sprintf(string,"set %s %d", variableName, nPts);   Tcl_Eval(interp, string);
+
 	  argCount+=2;
 	} else
 	  argCount++;
