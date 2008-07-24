@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2008-07-03 18:48:55 $
+// $Revision: 1.17 $
+// $Date: 2008-07-24 21:45:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/SimulationInformation.cpp,v $
 //
 // Description: This file contains the class definition for SimulationInformation.
@@ -36,7 +36,7 @@
 #include <time.h>
 #include <math.h>
 #include <tcl.h>
-#include <malloc.h>
+#include <stdlib.h>
 
 
 static int numSimulationInformation = 0;
