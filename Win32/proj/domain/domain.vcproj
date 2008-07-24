@@ -378,6 +378,12 @@
 				RelativePath="..\..\..\SRC\domain\pattern\PBowlLoading.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\domain\pattern\PeerNGAMotion.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\domain\pattern\PeerNGAMotion.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\domain\pattern\TclPatternCommand.cpp">
 			</File>
 			<File

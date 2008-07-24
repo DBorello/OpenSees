@@ -117,6 +117,9 @@
 			RelativePath="..\..\..\SRC\utility\NeesCentral.cpp">
 		</File>
 		<File
+			RelativePath="..\..\..\SRC\utility\PeerNGA.cpp">
+		</File>
+		<File
 			RelativePath="..\..\..\SRC\utility\SimulationInformation.cpp">
 		</File>
 		<File

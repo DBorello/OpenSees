@@ -207,6 +207,12 @@
 				RelativePath="..\..\..\SRC\element\zeroLength\ZeroLengthContact3D.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\element\zeroLength\ZeroLengthND.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\zeroLength\ZeroLengthND.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\element\zeroLength\ZeroLengthSection.cpp">
 			</File>
 			<File
@@ -670,6 +676,12 @@
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\RadauBeamIntegration.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\RegularizedHingeIntegration.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\element\forceBeamColumn\RegularizedHingeIntegration.h">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\element\forceBeamColumn\TrapezoidalBeamIntegration.cpp">
