@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-10-05 22:07:08 $
+// $Revision: 1.4 $
+// $Date: 2008-07-24 22:06:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/NeesCentral.cpp,v $
                                                                         
                                                                         
@@ -226,6 +226,32 @@ neesGET(const char *page,
   }
 
   return 0;  
+}
+
+
+
+extern int httpsGET_File(char const *URL, char const *page, const char *cookie, unsigned int port, const char *filename);
+
+#ifdef _WIN32
+int __cdecl
+#else
+int
+#endif
+neesGET_File(const char *page,
+	     const char *cookie,
+	     const char *filename) 
+{
+
+  char *URL="central.nees.org";
+
+  
+  if (httpsGET_File(URL, page, cookie, 443, filename) != 0) {
+
+      fprintf(stderr, "ERROR: neesGET_File\n");
+      return -1;
+    }
+    
+    return 0;  
 }
 
 #ifdef _WIN32
@@ -479,13 +505,19 @@ neesADD_TrialAnalysisFile(const char *cookie,
     return -1;
   }
 
+
+  res = neesGET(neesFilePage, cookie, &resHTML);
+  //  fprintf(stderr, "%s\n%s\n\n\n", neesFilePage, resHTML);
+
+  neesGET_File(neesFilePage, cookie, "tmp.out");
+
+
   //
   // clean up memory
   //
 
   free(neesFilePage);
   free(xmlData);
-
   if (resHTML != 0)
     free(resHTML);
 
@@ -610,102 +642,6 @@ int neesADD_TrialAnalysisDir(const char *cookie,
 
   return 0;
 }
-
-/*
-int neesADD_TrialAnalysisDir(const char *cookie,
-			     int projID,
-			     int expID,
-			     int trialID,
-			     const char *path,
-			     const char *dirName)
-{
-
-  // 
-  // as of this moment there is nothing in the REST interface for adding a directory
-  // we will do it using there browser interface .. takes a couple of gets to get some info
-  // and not too stable .. however what can you do!
-  //
-
-  char *resHTML =0;
-  int res;
-  char *startData, *endData;
-  char neesPage[1024];
-
-  //
-  // first we need to do a GET to get Analysis directory
-  //
-  sprintf(neesPage,"/REST/Project/%d/Experiment/%d/Trial/%d%c",projID,expID,trialID,'\0');
-
-  res = neesGET(neesPage, cookie, &resHTML);
-  
-  if (res < 0) {
-    fprintf(stderr, "ERROR neesADD_TrialAnalysisDir - failed to get trial information\n");    
-    free(resHTML);
-    return -1;
-  }
-
-  startData = strstr(resHTML, "DataFile");
-  startData+=20; // <DataFile link="/REST
-
-  endData = strstr(resHTML,"Analysis");
-  endData+=8;
-  
-  char *neesFilePage = new char[endData-startData+1];
-
-
-  strncpy(neesFilePage, startData, endData-startData);
-  strncpy(&neesFilePage[endData-startData], "\0", 1);
-
-
-  //char *expData = strstr(startData,"Experiment");
-  //  char *trialData = strstr(startData,"/Trial");
-  //strncpy(neesFilePage, startData, expData-startData);
-  //strncpy(&neesFilePage[expData-startData], trialData, endData-trialData);
-  //strncpy(&neesFilePage[expData-startData+endData-trialData+1], "\0", 1);
-
-  free(resHTML);
-
-  int dataLength = 512+strlen(neesFilePage)+strlen(path);
-
-  //
-  // now we can create the directory
-  //
-
-  char *neesBrowserPage =  new char[dataLength];
-  
-  //  sprintf(neesBrowserPage,"?projid=%d&expid=%d&trialid=%d&tloc=Analysis&section=&view=browser&basepath=%s&path=%s&floc=Mkdir",
-  sprintf(neesBrowserPage,"?projid=%d&expid=%d&trialid=%d&action=DisplayTrialAnalysis&view=browser&basepath=%s&path=%s&floc=Mkdir",
-	  projID, expID, trialID, neesFilePage, path);
-
-
-  dataLength+= strlen(dirName);
-
-  char *data = new char[dataLength];
-  sprintf(data,"projid=%d&expid=%d&trialid=%d&action=DisplayTrialAnalysis&view=browser&basepath=%s&path=%s&doit=1&newdir=%s",
-	  projID, expID, trialID, &neesFilePage[5], path, dirName); //&neesFilePage[5] to remove /File 
-
-
-//  sprintf(data,"projid=%d&expid=%d&trialid=%d&action=DisplayTrialAnalysis&view=browser&basepath=%s&path=%s&doit=1&newdir=%s",
-//	  projID, expID, trialID, &neesFilePage[5], path, dirName); //&neesFilePage[5] to remove /File 
-
-  char *contentType="application/x-www-form-urlencoded";
-
-  res = neesSEND(neesBrowserPage, cookie, data, contentType, true, &resHTML);
-
-  if (res < 0) {
-    fprintf(stderr, "ERROR neesADD_TrialAnalysisDir - failed to add dir\n");    
-    return -1;
-  }
-
-  // clean up memory
-  delete [] data;
-  delete [] neesBrowserPage;
-  delete [] neesFilePage;
-  free(resHTML);
-
-  return 0;
-}
-*/
 
 #endif
 

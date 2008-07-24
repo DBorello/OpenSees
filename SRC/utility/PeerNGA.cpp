@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-07-24 21:44:43 $
+// $Revision: 1.2 $
+// $Date: 2008-07-24 22:06:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/PeerNGA.cpp,v $
                                                                         
                                                                         
@@ -188,6 +188,10 @@ peerSearchNGA(const char *Eq,
     }
 
     loc = resHTML;
+    
+    //
+    // now get each record from search & get record locations
+    //
 
     while (loc != 0) {
       loc = strstr(loc,"http://peer.berkeley.edu/nga/data?doi=");
@@ -205,6 +209,11 @@ peerSearchNGA(const char *Eq,
 	if (ngaHTML != 0) {
 
 	  int ok = 0;
+
+	  //
+	  // if soil specified, get soil type & check
+	  //
+
 	  if (soilType != noData) {
 	    char *siteSoilType = strstr(ngaHTML,"Geomatrix 3:");
 	    if (siteSoilType != 0) {
@@ -215,6 +224,11 @@ peerSearchNGA(const char *Eq,
 	      }
 	    }
 	  }
+
+	  //
+	  // get first 2 recordings
+	  // ignoring vertical as some given and some not
+	  //
 	   
 	  if (ok == 0) {
 
@@ -232,7 +246,6 @@ peerSearchNGA(const char *Eq,
 	      strncpy(recordName, recordLoc, recordLength);
 	      strcpy(&recordName[recordLength],"");
 	      ngaRecordNames.addString(recordName);
-	      fprintf(stderr,"%s",recordName);
 	      delete [] recordName;
 	    } 
 	    
@@ -245,7 +258,6 @@ peerSearchNGA(const char *Eq,
 	      strncpy(recordName, recordLoc, recordLength);
 	      strcpy(&recordName[recordLength],"");
 	      ngaRecordNames.addString(recordName);
-	      fprintf(stderr,"%s\n",recordName);
 	      delete [] recordName;
 	    } 
 	  }
