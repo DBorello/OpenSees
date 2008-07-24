@@ -502,6 +502,7 @@ UTILITY_LIBS = $(FE)/utility/Timer.o \
 	$(FE)/utility/File.o \
 	$(FE)/utility/FileIter.o \
 	$(FE)/utility/NeesCentral.o \
+	$(FE)/utility/PeerNGA.o \
 	$(FE)/utility/StringContainer.o 
 
 
@@ -569,6 +570,7 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/UniaxialMaterial.o \
 	$(FE)/material/uniaxial/ElasticMaterial.o \
+	$(FE)/material/uniaxial/Neoprene.o \
 	$(FE)/material/uniaxial/Elastic2Material.o \
 	$(FE)/material/uniaxial/ReinforcingSteel.o \
 	$(FE)/material/uniaxial/TclReinforcingSteel.o \
@@ -728,6 +730,7 @@ endif
 #	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLinSOE.o 
 #endif
 
+CUDA_CLASSES = 
 
 SysOfEqn_LIBS = $(FE)/system_of_eqn/SystemOfEqn.o \
 	$(FE)/system_of_eqn/Solver.o \
@@ -822,6 +825,7 @@ DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/pattern/TrigSeries.o \
 	$(FE)/domain/pattern/PathSeries.o \
 	$(FE)/domain/pattern/PeerMotion.o \
+	$(FE)/domain/pattern/PeerNGAMotion.o \
 	$(FE)/domain/pattern/PathTimeSeries.o \
 	$(FE)/domain/pattern/PulseSeries.o \
 	$(FE)/domain/pattern/TriangleSeries.o \
