@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2008-03-13 22:16:08 $
+// $Revision: 1.5 $
+// $Date: 2008-07-24 21:47:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/HTTP.cpp,v $
                                                                         
 // Written: fmk 11/06
@@ -155,7 +155,11 @@ httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
 
   // add the header information to outBuf
   sprintf(outBuf, "GET %s HTTP/1.1\nHost:%s\n",page,URL);
-  strcat(outBuf, "Connection:close\n\n");
+  strcat(outBuf,"Accept:text/xml,text/html\n");
+  strcat(outBuf,"Accept-Language:en-us,en\n");
+  strcat(outBuf,"Accept-Charset:ISO-8859-1,utf-8\n");
+  strcat(outBuf,"Keep-Alive:300\n");
+  strcat(outBuf, "Connection:keep-alive\n\n");
   nleft = strlen(outBuf);
 
   //send the data
@@ -163,7 +167,7 @@ httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
   // place the incoming data there
   nwrite = 0;    
   gMsg = outBuf;
-  
+
   while (nleft > 0) {
     nwrite = send(sockfd, gMsg, nleft, 0);
     nleft -= nwrite;
