@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2008-06-13 22:24:48 $
+// $Revision: 1.15 $
+// $Date: 2008-07-29 23:36:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.cpp,v $
                                                                         
                                                                         
@@ -1071,10 +1071,10 @@ Vector::operator!=(double value) const
   double *dataThis = theData;
 
   for (int i=0; i<sz; i++)
-    if (*dataThis++ == value)
-      return 0;
+    if (*dataThis++ != value)
+      return 1;
 
-  return 1;
+  return 0;
 }
 
 int 
@@ -1116,10 +1116,10 @@ Vector::operator!=(const Vector &V) const
   double *dataV = V.theData;
 
   for (int i=0; i<sz; i++)
-    if (*dataThis++ == *dataV++)
-      return 0;
+    if (*dataThis++ != *dataV++)
+      return 1;
 
-  return 1;
+  return 0;
 }
 
 	
