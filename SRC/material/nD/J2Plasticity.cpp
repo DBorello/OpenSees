@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-08-22 21:05:59 $
+// $Revision: 1.11 $
+// $Date: 2008-07-29 23:36:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2Plasticity.cpp,v $
 
 // Written: Ed "C++" Love
@@ -370,8 +370,7 @@ J2Plasticity :: getCopy (const char *type)
     // Handle other cases
     else
     {
-      opserr << "J2Plasticity::getModel failed to get model: " << type << endln;
-      return 0;
+      return NDMaterial::getCopy(type);
     }
 }
 
