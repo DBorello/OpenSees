@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.49 $
-// $Date: 2008-04-15 18:28:02 $
+// $Revision: 1.50 $
+// $Date: 2008-07-30 19:56:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -340,14 +340,17 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
         return TCL_ERROR;
       }
       
-      if (argc > 6 && strcmp(argv[6],"damage") == 0)
-	damage = 1;
-      else if (argc > 7 && strcmp(argv[7],"damage") == 0) {
-	damage = 1;
-	if (Tcl_GetDouble(interp, argv[6], &eta) != TCL_OK) {
-	  opserr << "WARNING invalid eta\n";
-	  opserr << "uniaxialMaterial ElasticPPGap: " << tag << endln;
-	  return TCL_ERROR;
+      if (argc > 6){
+	if (strcmp(argv[6],"damage") == 0)
+	  damage = 1;
+	else {
+	  if (Tcl_GetDouble(interp, argv[6], &eta) != TCL_OK) {
+	    opserr << "WARNING invalid eta\n";
+	    opserr << "uniaxialMaterial ElasticPPGap: " << tag << endln;
+	    return TCL_ERROR;
+	  }	
+	  if (argc > 7 && strcmp(argv[7],"damage") == 0) 
+	    damage = 1;
 	}
       }
       
