@@ -869,6 +869,12 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/SecantLineSearch.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/RegulaFalsiLineSearch.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/InitialInterpolatedLineSearch.o \
+	$(FE)/analysis/algorithm/equiSolnAlgo/AcceleratedNewton.o \
+	$(FE)/analysis/algorithm/equiSolnAlgo/accelerator/Accelerator.o \
+	$(FE)/analysis/algorithm/equiSolnAlgo/accelerator/RaphsonAccelerator.o \
+	$(FE)/analysis/algorithm/equiSolnAlgo/accelerator/PeriodicAccelerator.o \
+	$(FE)/analysis/algorithm/equiSolnAlgo/accelerator/KrylovAccelerator.o \
+	$(FE)/analysis/algorithm/equiSolnAlgo/accelerator/SecantAccelerator2.o \
 	$(FE)/convergenceTest/ConvergenceTest.o \
 	$(FE)/convergenceTest/CTestNormUnbalance.o \
 	$(FE)/convergenceTest/CTestNormDispIncr.o \
