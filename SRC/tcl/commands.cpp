@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.128 $
-// $Date: 2008-07-24 21:43:15 $
+// $Revision: 1.129 $
+// $Date: 2008-07-31 18:38:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -122,7 +122,13 @@ OPS_Stream *opserrPtr = &sserr;
 #include <BFGS.h>
 #include <KrylovNewton.h>
 #include <PeriodicNewton.h>
+#include <AcceleratedNewton.h>
 
+// accelerators
+#include <RaphsonAccelerator.h>
+#include <PeriodicAccelerator.h>
+#include <KrylovAccelerator.h>
+#include <SecantAccelerator2.h>
 
 // line searches
 #include <BisectionLineSearch.h>
@@ -2652,6 +2658,30 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
       theNewAlgo = new KrylovNewton(*theTest, formTangent); 
     else
       theNewAlgo = new KrylovNewton(*theTest, formTangent, maxDim); 
+  }
+
+  else if (strcmp(argv[1],"SecantNewton") == 0) {
+    int formTangent = CURRENT_TANGENT;
+    int maxDim = 3;
+    for (int i = 2; i < argc; i++) {
+      if (strcmp(argv[i],"-secant") == 0) {
+	formTangent = CURRENT_SECANT;
+      } else if (strcmp(argv[i],"-initial") == 0) {
+	formTangent = INITIAL_TANGENT;
+      } else if (strcmp(argv[i++],"-maxDim") == 0 && i < argc) {
+	maxDim = atoi(argv[i]);
+      }
+    }
+
+    if (theTest == 0) {
+      opserr << "ERROR: No ConvergenceTest yet specified\n";
+      return TCL_ERROR;	  
+    }
+
+    Accelerator *theAccel;
+    theAccel = new SecantAccelerator2(maxDim, formTangent); 
+
+    theNewAlgo = new AcceleratedNewton(*theTest, theAccel, formTangent);
   }
 
   else if (strcmp(argv[1],"PeriodicNewton") == 0) {
