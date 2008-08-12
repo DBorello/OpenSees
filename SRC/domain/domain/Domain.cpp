@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.51 $
-// $Date: 2008-04-16 21:27:41 $
+// $Revision: 1.52 $
+// $Date: 2008-08-12 20:44:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -334,8 +334,8 @@ Domain::~Domain()
   
   int i;
   for (i=0; i<numRecorders; i++) 
-	  if (theRecorders[i] != 0)
-    delete theRecorders[i];
+    if (theRecorders[i] != 0)
+      delete theRecorders[i];
   
   if (theRecorders != 0) {
     delete [] theRecorders;
@@ -1819,6 +1819,13 @@ Domain::addRecorder(Recorder &theRecorder)
   if (theRecorder.setDomain(*this) != 0) {
     opserr << "Domain::addRecorder() - recorder could not be added\n";
     return -1;
+  }
+
+  for (int i=0; i<numRecorders; i++) {
+    if (theRecorders[i] == 0) {
+      theRecorders[i] = &theRecorder;
+      return 0;
+    }
   }
 
   Recorder **newRecorders = new Recorder *[numRecorders + 1]; 
