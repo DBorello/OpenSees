@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2005-11-29 23:36:47 $
+// $Revision: 1.7 $
+// $Date: 2008-08-13 22:41:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.h,v $
                                                                         
                                                                         
@@ -82,7 +82,6 @@ class StaticAnalysis: public Analysis
     EquiSolnAlgo     *getAlgorithm(void);
     StaticIntegrator *getIntegrator(void);
     ConvergenceTest  *getConvergenceTest(void);
-
 
     // AddingSensitivity:BEGIN ///////////////////////////////
 #ifdef _RELIABILITY
