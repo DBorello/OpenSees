@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-04-21 00:06:20 $
+// $Revision: 1.14 $
+// $Date: 2008-08-13 22:41:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.cpp,v $
                                                                         
                                                                         
@@ -452,9 +452,24 @@ StaticAnalysis::setConvergenceTest(ConvergenceTest &theNewTest)
     return theAlgorithm->setConvergenceTest(theTest);
 }
 
+EquiSolnAlgo *
+StaticAnalysis::getAlgorithm(void)
+{
+  return theAlgorithm;
+}
+
+StaticIntegrator *
+StaticAnalysis::getIntegrator(void)
+{
+  return theIntegrator;
+}
 
 
-
+ConvergenceTest *
+StaticAnalysis::getConvergenceTest(void)
+{
+  return theTest;
+}
 
 
 
