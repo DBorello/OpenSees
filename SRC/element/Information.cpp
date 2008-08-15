@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:03 $
+// $Revision: 1.6 $
+// $Date: 2008-08-15 19:16:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Information.cpp,v $
                                                                         
                                                                         
@@ -252,9 +252,10 @@ Information::getData(void)
     int noCols = theMatrix->noCols();
     if (theVector == 0) 
       theVector = new Vector(noRows * noCols);
+    int count = 0;
     for (int i=0; i<noRows; i++)
       for (int j=0; j<noCols; j++)
-	(*theVector)(i) = (*theMatrix)(i,j);
+	(*theVector)(count++) = (*theMatrix)(i,j);
   }
   
   return *theVector;
