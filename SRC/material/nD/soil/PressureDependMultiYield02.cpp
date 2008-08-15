@@ -1,5 +1,5 @@
-// $Revision: 1.13 $
-// $Date: 2007-05-04 23:00:20 $
+// $Revision: 1.14 $
+// $Date: 2008-08-15 19:17:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield02.cpp,v $
 
 // Written: ZHY
@@ -860,6 +860,7 @@ int PressureDependMultiYield02::setParameter(const char **argv, int argc, Parame
 
   else if (strcmp(argv[0],"shearModulus") == 0)
     return param.addObject(10, this);
+
   else if (strcmp(argv[0],"bulkModulus") == 0)
     return param.addObject(11, this);
 

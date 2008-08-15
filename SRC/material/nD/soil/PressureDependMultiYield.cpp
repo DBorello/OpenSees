@@ -1,5 +1,5 @@
-// $Revision: 1.42 $
-// $Date: 2007-11-07 23:31:48 $
+// $Revision: 1.43 $
+// $Date: 2008-08-15 19:17:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
 
 // Written: ZHY
@@ -799,6 +799,9 @@ int PressureDependMultiYield::setParameter(const char **argv, int argc, Paramete
   if (argc < 2)
     return -1;
 
+  opserr << "PressureDependMultiYield::setParameter() " << argv[0] << endln;
+
+
   int matTag = atoi(argv[1]);
 
   if (this->getTag() == matTag) {
@@ -806,8 +809,10 @@ int PressureDependMultiYield::setParameter(const char **argv, int argc, Paramete
       return param.addObject(1, this);
     else if (strcmp(argv[0],"shearModulus") == 0)
       return param.addObject(10, this);
-    else if (strcmp(argv[0],"bulkModulus") == 0)
+    else if (strcmp(argv[0],"bulkModulus") == 0) {
+      opserr << "PressureDependMultiYield::setParameter() - FOUND \n";      
       return param.addObject(11, this);
+    }
   }
 
   return -1;
@@ -1183,23 +1188,25 @@ Response*
 PressureDependMultiYield::setResponse (const char **argv, int argc, OPS_Stream &output)
 {
   if (strcmp(argv[0],"stress") == 0 || strcmp(argv[0],"stresses") == 0)
-		return new MaterialResponse(this, 1, this->getCommittedStress());
-
+    return new MaterialResponse(this, 1, this->getCommittedStress());
+  
   else if (strcmp(argv[0],"strain") == 0 || strcmp(argv[0],"strains") == 0)
-		return new MaterialResponse(this, 2, this->getCommittedStrain());
-
-	else if (strcmp(argv[0],"tangent") == 0)
-		return new MaterialResponse(this, 3, this->getTangent());
-
-	else if (strcmp(argv[0],"backbone") == 0) {
-	    int numOfSurfaces = numOfSurfacesx[matN];
-        static Matrix curv(numOfSurfaces+1,(argc-1)*2);
-		for (int i=1; i<argc; i++)
-			curv(0,(i-1)*2) = atoi(argv[i]);
-		return new MaterialResponse(this, 4, curv);
+    return new MaterialResponse(this, 2, this->getCommittedStrain());
+  
+  else if (strcmp(argv[0],"tangent") == 0)
+    return new MaterialResponse(this, 3, this->getTangent());
+  
+  else if (strcmp(argv[0],"backbone") == 0) {
+    int numOfSurfaces = numOfSurfacesx[matN];
+    Matrix curv(numOfSurfaces+1,(argc-1)*2);
+    for (int i=1; i<argc; i++) {
+      curv(0,(i-1)*2) = atoi(argv[i]);
+      opserr << atoi(argv[i]) << endln;
+    }
+    return new MaterialResponse(this, 4, curv);
   }
-	else
-		return 0;
+  else
+    return 0;
 }
 
 void
@@ -1212,37 +1219,36 @@ PressureDependMultiYield::getBackbone (Matrix & bb)
   int numOfSurfaces = numOfSurfacesx[matN];
 
   double vol, conHeig, scale, factor, shearModulus, stress1,
-		     stress2, strain1, strain2, plastModulus, elast_plast, gre;
-
-	for (int k=0; k<bb.noCols()/2; k++) {
-		vol = bb(0,k*2);
-		if (vol<=0.) {
-			opserr <<k<< "\nNDMaterial " <<this->getTag()
-			  <<": invalid confinement for backbone recorder, " << vol << endln;
-			continue;
-		}
-		conHeig = vol + residualPress;
-		scale = -conHeig / (refPressure-residualPress);
-		factor = pow(scale, pressDependCoeff);
-		shearModulus = factor*refShearModulus;
-
-		for (int i=1; i<=numOfSurfaces; i++) {
-			if (i==1) {
-				stress2 = theSurfaces[i].size()*conHeig/sqrt(3.0);
-				strain2 = stress2/shearModulus;
-				bb(1,k*2) = strain2; bb(1,k*2+1) = shearModulus;
-			} else {
-				stress1 = stress2; strain1 = strain2;
-				plastModulus = factor*theSurfaces[i-1].modulus();
-				elast_plast = 2*shearModulus*plastModulus/(2*shearModulus+plastModulus);
-				stress2 = theSurfaces[i].size()*conHeig/sqrt(3.0);
-			  strain2 = 2*(stress2-stress1)/elast_plast + strain1;
-				gre = stress2/strain2;
+    stress2, strain1, strain2, plastModulus, elast_plast, gre;
+  
+  for (int k=0; k<bb.noCols()/2; k++) {
+    vol = bb(0,k*2);
+    if (vol<=0.) {
+      opserr <<k<< "\nNDMaterial " <<this->getTag()
+	     <<": invalid confinement for backbone recorder, " << vol << endln;
+      continue;
+    }
+    conHeig = vol + residualPress;
+    scale = -conHeig / (refPressure-residualPress);
+    factor = pow(scale, pressDependCoeff);
+    shearModulus = factor*refShearModulus;
+    
+    for (int i=1; i<=numOfSurfaces; i++) {
+      if (i==1) {
+	stress2 = committedSurfaces[i].size()*conHeig/sqrt(3.0);
+	strain2 = stress2/shearModulus;
+	bb(1,k*2) = strain2; bb(1,k*2+1) = shearModulus;
+      } else {
+	stress1 = stress2; strain1 = strain2;
+	plastModulus = factor*committedSurfaces[i-1].modulus();
+	elast_plast = 2*shearModulus*plastModulus/(2*shearModulus+plastModulus);
+	stress2 = committedSurfaces[i].size()*conHeig/sqrt(3.0);
+	strain2 = 2*(stress2-stress1)/elast_plast + strain1;
+	gre = stress2/strain2;
         bb(i,k*2) = strain2; bb(i,k*2+1) = gre;
-			}
-		}
-	}
-
+      }
+    }
+  }
 }
 
 int
@@ -1264,8 +1270,9 @@ PressureDependMultiYield::getResponse (int responseID, Information &matInfo)
       *(matInfo.theMatrix) = getTangent();
     return 0;
   case 4:
-    if (matInfo.theMatrix != 0)
+    if (matInfo.theMatrix != 0) {
       getBackbone(*(matInfo.theMatrix));
+    }
     return 0;
   default:
     return -1;
