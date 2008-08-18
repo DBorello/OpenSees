@@ -4,7 +4,7 @@
 
 include ../../Makefile.def
 
-OBJS       = Vector.o ID.o Matrix.o
+OBJS       = ID.o Vector.o Matrix.o
 
 ################### TARGETS ########################
 all: $(OBJS) 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2008-07-29 23:36:10 $
+// $Revision: 1.16 $
+// $Date: 2008-08-18 17:18:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.cpp,v $
                                                                         
                                                                         
@@ -284,7 +284,7 @@ Vector::addVector(double thisFact, const Vector &other, double otherFact )
 	*dataPtr++ = *otherDataPtr++;
     } else if (otherFact == -1.0) { // no point doing a multiplication if otherFact == 1.0
       for (int i=0; i<sz; i++) 
-	*dataPtr++ = *otherDataPtr++;
+	*dataPtr++ = -(*otherDataPtr++);
     } else 
       for (int i=0; i<sz; i++) 
 	*dataPtr++ = *otherDataPtr++ * otherFact;
