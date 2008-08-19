@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.27 $
-// $Date: 2008-05-22 22:44:32 $
+// $Revision: 1.28 $
+// $Date: 2008-08-19 22:50:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -1964,7 +1964,7 @@ Node::addReactionForce(const Vector &add, double factor){
 }
 
 int   
-Node::resetReactionForce(bool inclInertia){
+Node::resetReactionForce(int flag){
 
   // create rection vector if have not done so already
   if (reaction == 0) {
@@ -1978,12 +1978,18 @@ Node::resetReactionForce(bool inclInertia){
   reaction->Zero();
 
   // add unbalance, the negative of applied forces hence the -=
-  if (inclInertia == false) {
+  if (flag == 0) {
     *reaction -= this->getUnbalancedLoad();
-  } else {
+  } if (flag == 1) {
     *reaction -= this->getUnbalancedLoadIncInertia();
+  } else {
+    if (mass != 0 && alphaM != 0) {
+      if (alphaM != 0.0) {
+	const Vector &theVel = this->getTrialVel(); // in case vel not created
+	reaction->addMatrixVector(1.0, *mass, theVel, alphaM);
+      }
+    } 
   }
-
   return 0;
 }
 

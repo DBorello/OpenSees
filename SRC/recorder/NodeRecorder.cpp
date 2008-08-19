@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.31 $
-// $Date: 2008-05-27 22:55:57 $
+// $Revision: 1.32 $
+// $Date: 2008-08-19 22:51:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -136,6 +136,9 @@ NodeRecorder::NodeRecorder(const ID &dofs,
 	     || ((strcmp(dataToStore, "reactionInclInertia") == 0))
 	     || ((strcmp(dataToStore, "reactionIncludingInertia") == 0))) {
     dataFlag = 8;
+  } else if (((strcmp(dataToStore, "rayleighForces") == 0))
+	     || ((strcmp(dataToStore, "rayleighDampingForces") == 0))) {
+    dataFlag = 9;
   } else if ((strncmp(dataToStore, "eigen",5) == 0)) {
     int mode = atoi(&(dataToStore[5]));
     if (mode > 0)
@@ -220,11 +223,11 @@ NodeRecorder::record(int commitTag, double timeStamp)
     //
 
     if (dataFlag == 7)
-      theDomain->calculateNodalReactions(false);
+      theDomain->calculateNodalReactions(0);
     else if (dataFlag == 8)
-      theDomain->calculateNodalReactions(true);
-
-
+      theDomain->calculateNodalReactions(1);
+    if (dataFlag == 9)
+      theDomain->calculateNodalReactions(2);
     //
     // add time information if requested
     //
@@ -337,7 +340,7 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	}
 
 
-      } else if (dataFlag == 7) {
+      } else if (dataFlag == 7 || dataFlag == 8 || dataFlag == 9) {
 	const Vector &theResponse = theNode->getReaction();
 	for (int j=0; j<numDOF; j++) {
 	  int dof = (*theDofs)(j);
@@ -345,23 +348,8 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	    response(cnt) = theResponse(dof);
 	  } else 
 	    response(cnt) = 0.0;
-	  
 	  cnt++;
 	}
-
-
-      } else if (dataFlag == 8) {
-	const Vector &theResponse = theNode->getReaction();
-	for (int j=0; j<numDOF; j++) {
-	  int dof = (*theDofs)(j);
-	  if (theResponse.Size() > dof) {
-	    response(cnt) = theResponse(dof);
-	  } else 
-	    response(cnt) = 0.0;
-	  
-	  cnt++;
-	}
-
 
       } else if (10 <= dataFlag  && dataFlag < 1000) {
 	int mode = dataFlag - 10;

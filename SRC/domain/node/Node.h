@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2007-01-10 22:11:11 $
+// $Revision: 1.13 $
+// $Date: 2008-08-19 22:50:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.h,v $
                                                                         
                                                                         
@@ -148,7 +148,7 @@ class Node : public DomainComponent
 
     virtual const Vector &getReaction();
     virtual int   addReactionForce(const Vector &, double factor);
-    virtual int   resetReactionForce(bool inclInertia);
+    virtual int   resetReactionForce(int flag);
     virtual const Vector *getResponse(NodeResponseType);
     
   private:

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2007-02-02 01:30:47 $
+// $Revision: 1.22 $
+// $Date: 2008-08-19 22:52:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
@@ -407,6 +407,16 @@ Element::setResponse(const char **argv, int argc, OPS_Stream &output)
     }
     theResponse = new ElementResponse(this, 1, this->getResistingForce());
   }
+
+  else if (strcmp(argv[0],"dampingForce") == 0 || strcmp(argv[0],"dampingForces") == 0) {
+    const Vector &force = this->getResistingForce();
+    int size = force.Size();
+    for (int i=0; i<size; i++) {
+      sprintf(nodeData,"P%d",i+1);
+      output.tag("ResponseType",nodeData);
+    }
+    theResponse = new ElementResponse(this, 2, this->getResistingForce());
+  }
   output.endTag();
   return theResponse;
 }
@@ -414,9 +424,13 @@ Element::setResponse(const char **argv, int argc, OPS_Stream &output)
 int
 Element::getResponse(int responseID, Information &eleInfo)
 {
+  int loc;
+
   switch (responseID) {
   case 1: // global forces
     return eleInfo.setVector(this->getResistingForce());
+  case 2:
+    return eleInfo.setVector(this->getRayleighDampingForces());
   default:
     return -1;
   }
@@ -498,9 +512,8 @@ Element::getDampSensitivity(int gradNumber)
 }
 
 
-
 int 
-Element::addResistingForceToNodalReaction(bool inclInertia) 
+Element::addResistingForceToNodalReaction(int flag) 
 {
   int result = 0;
   int numNodes = this->getNumExternalNodes();
@@ -584,10 +597,12 @@ Element::addResistingForceToNodalReaction(bool inclInertia)
   //
 
   const Vector *theResistingForce;
-  if (inclInertia == 0)
+  if (flag == 0)
     theResistingForce = &(this->getResistingForce());
-  else
+  else if (flag == 1)
     theResistingForce = &(this->getResistingForceIncInertia());
+  else if (flag == 2)
+    theResistingForce = &(this->getRayleighDampingForces());
 
   if (nodeIndex == -1) {
     opserr << "LOGIC ERROR Element::addResistingForceToNodalReaction() -HUH!\n";

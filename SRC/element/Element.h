@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2007-02-02 01:30:47 $
+// $Revision: 1.16 $
+// $Date: 2008-08-19 22:52:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.h,v $
                                                                         
                                                                         
@@ -106,7 +106,7 @@ class Element : public DomainComponent
     virtual int   commitSensitivity(int gradNumber, int numGrads);
 // AddingSensitivity:END ///////////////////////////////////////////
 
-    virtual int addResistingForceToNodalReaction(bool inclInertia);
+    virtual int addResistingForceToNodalReaction(int flag);
 
   protected:
     const Vector &getRayleighDampingForces(void);

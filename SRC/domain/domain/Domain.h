@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2008-04-16 21:27:41 $
+// $Revision: 1.26 $
+// $Date: 2008-08-19 22:50:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
 // Written: fmk 
@@ -210,7 +210,7 @@ class Domain
     virtual double getNodeDisp(int nodeTag, int dof, int &errorFlag);
     virtual int setMass(const Matrix &mass, int nodeTag);
 
-    virtual int calculateNodalReactions(bool inclInertia);
+    virtual int calculateNodalReactions(int flag);
 
   protected:    
 

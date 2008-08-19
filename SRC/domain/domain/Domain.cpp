@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.52 $
-// $Date: 2008-08-12 20:44:31 $
+// $Revision: 1.53 $
+// $Date: 2008-08-19 22:50:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -2919,18 +2919,18 @@ Domain::setMass(const Matrix &mass, int nodeTag)
 }
 
 int
-Domain::calculateNodalReactions(bool inclInertia)
+Domain::calculateNodalReactions(int flag)
 {
   Node *theNode;
   Element *theElement;
 
   NodeIter &theNodes = this->getNodes();
   while ((theNode = theNodes()) != 0) {
-    theNode->resetReactionForce(inclInertia);
+    theNode->resetReactionForce(flag);
   }
 
   ElementIter &theElements = this->getElements();
   while ((theElement = theElements()) != 0)
-    theElement->addResistingForceToNodalReaction(inclInertia);
+    theElement->addResistingForceToNodalReaction(flag);
   return 0;
 }
