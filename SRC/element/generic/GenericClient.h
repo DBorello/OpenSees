@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-12-13 22:05:32 $
+// $Revision: 1.4 $
+// $Date: 2008-08-19 01:00:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/generic/GenericClient.h,v $
 
 #ifndef GenericClient_h
@@ -62,8 +62,9 @@ class GenericClient : public Element
 public:
     // constructors
     GenericClient(int tag, ID nodes, ID *dof,
-        int port, char *machineInetAddress = 0,
-        int ssl = 0, int dataSize = 256);
+		  int port, char *machineInetAddress = 0,
+		  int ssl = 0, int dataSize = 256);
+    GenericClient();    
     
     // destructor
     ~GenericClient();
@@ -144,6 +145,13 @@ private:
     bool massFlag;
         
     Node **theNodes;
+
+    int port;
+    char *machineInetAddr;
+    int ssl;
+    int dataSize;
+    int connectionSetup;
+    int setupConnection(void);
 };
 
 #endif

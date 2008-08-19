@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-12-13 22:05:32 $
+// $Revision: 1.4 $
+// $Date: 2008-08-19 01:00:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/generic/GenericClient.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -29,6 +29,7 @@
 // Description: This file contains the implementation of the GenericClient class.
 
 #include "GenericClient.h"
+#include <Message.h>
 
 #include <Domain.h>
 #include <Node.h>
@@ -58,13 +59,14 @@ Vector GenericClient::theLoad(1);
 // responsible for allocating the necessary space needed
 // by each object and storing the tags of the end nodes.
 GenericClient::GenericClient(int tag, ID nodes, ID *dof,
-    int port, char *machineInetAddr, int ssl, int dataSize)
-    : Element(tag, ELE_TAG_GenericClient),
+			     int Port, char *MachineInetAddr, int Ssl, int DataSize)
+  : Element(tag, ELE_TAG_GenericClient),
     connectedExternalNodes(nodes), basicDOF(1),
     numExternalNodes(0), numDOF(0), numBasicDOF(0),
     theChannel(0), sData(0), sendData(0), rData(0), recvData(0),
     db(0), vb(0), ab(0), t(0), qMeas(0), rMatrix(0),
-    dbTarg(1), dbPast(1), initStiffFlag(false), massFlag(false)
+    dbTarg(1), dbPast(1), initStiffFlag(false), massFlag(false),
+    port(Port), ssl(Ssl), dataSize(DataSize), connectionSetup(0)
 {    
     // initialize nodes
     numExternalNodes = connectedExternalNodes.Size();
@@ -92,83 +94,22 @@ GenericClient::GenericClient(int tag, ID nodes, ID *dof,
         numBasicDOF += dof[i].Size();
         theDOF[i] = dof[i];
     }
-    
-    // setup the connection
-    if (!ssl)  {
-        if (machineInetAddr == 0)
-            theChannel = new TCP_Socket(port, "127.0.0.1");
-        else
-            theChannel = new TCP_Socket(port, machineInetAddr);
-    }
-#ifdef SSL
-    else  {
-        if (machineInetAddr == 0)
-            theChannel = new TCP_SocketSSL(port, "127.0.0.1");
-        else
-            theChannel = new TCP_SocketSSL(port, machineInetAddr);
-    }
-#endif
-    if (!theChannel)  {
-        opserr << "GenericClient::GenericClient() "
-            << "- failed to create channel\n";
-        exit(-1);
-    }
-    if (theChannel->setUpConnection() != 0)  {
-        opserr << "GenericClient::GenericClient() "
-            << "- failed to setup connection\n";
-        exit(-1);
-    }
+}
 
-    // set the data size for the experimental element
-    int intData[2*5+1];
-    ID idData(intData, 2*5+1);
-    ID *sizeCtrl = new ID(intData, 5);
-    ID *sizeDaq = new ID(&intData[5], 5);
-    idData.Zero();
-        
-    (*sizeCtrl)[0] = numBasicDOF;
-    (*sizeCtrl)[1] = numBasicDOF;
-    (*sizeCtrl)[2] = numBasicDOF;
-    (*sizeCtrl)[4] = 1;
-    
-    (*sizeDaq)[3]  = numBasicDOF;
-    
-    if (dataSize < 1+3*numBasicDOF+1) dataSize = 1+3*numBasicDOF+1;
-    if (dataSize < numBasicDOF*numBasicDOF) dataSize = numBasicDOF*numBasicDOF;
-    intData[2*5] = dataSize;
 
-    theChannel->sendID(0, 0, idData, 0);
-    
-    // allocate memory for the send vectors
-    int id = 1;
-    sData = new double [dataSize];
-    sendData = new Vector(sData, dataSize);
-    db = new Vector(&sData[id], numBasicDOF);
-    id += numBasicDOF;
-    vb = new Vector(&sData[id], numBasicDOF);
-    id += numBasicDOF;
-    ab = new Vector(&sData[id], numBasicDOF);
-    id += numBasicDOF;
-    t = new Vector(&sData[id], 1);
-    sendData->Zero();
-
-    // allocate memory for the receive vectors
-    id = 0;
-    rData = new double [dataSize];
-    recvData = new Vector(rData, dataSize);
-    qMeas = new Vector(&rData[id], numBasicDOF);
-    recvData->Zero();
-
-    // allocate memory for the receive matrix
-    rMatrix = new Matrix(rData, numBasicDOF, numBasicDOF);
-
-    // set the vector and matrix sizes and zero them
-    basicDOF.resize(numBasicDOF);
-    basicDOF.Zero();
-    dbTarg.resize(numBasicDOF);
-    dbTarg.Zero();
-    dbPast.resize(numBasicDOF);
-    dbPast.Zero();
+GenericClient::GenericClient()
+    : Element(0, ELE_TAG_GenericClient),
+    connectedExternalNodes(0), basicDOF(1),
+    numExternalNodes(0), numDOF(0), numBasicDOF(0),
+    theChannel(0), sData(0), sendData(0), rData(0), recvData(0),
+    db(0), vb(0), ab(0), t(0), qMeas(0), rMatrix(0),
+      dbTarg(1), dbPast(1), initStiffFlag(false), massFlag(false),
+      port(0), ssl(0), dataSize(0), connectionSetup(0)
+{    
+    // initialize nodes
+  theNodes = 0;
+  theDOF = 0;
+  machineInetAddr = 0;
 }
 
 
@@ -331,7 +272,14 @@ int GenericClient::revertToStart()
 
 int GenericClient::update()
 {
-    int rValue = 0;
+
+  int rValue = 0;
+  if (connectionSetup == 0) {
+    rValue = this->setupConnection();
+    if (rValue != 0) {
+      return -1;
+    }
+  }
 
     // get current time
     Domain *theDomain = this->getDomain();
@@ -472,8 +420,17 @@ int GenericClient::addInertiaLoadToUnbalance(const Vector &accel)
 
 const Vector& GenericClient::getResistingForce()
 {
-    // zero the residual
-    theVector.Zero();
+  int res = 0;
+  if (connectionSetup == 0) {
+    res = this->setupConnection();
+    if (res != 0) {
+      opserr << "ERROR: GenericClient::getResistingForce() - setup FAILED\n";
+      return theVector;
+    }
+  }
+
+  // zero the residual
+  theVector.Zero();
     
     // get measured resisting forces
     sData[0] = RemoteTest_getForce;
@@ -522,16 +479,62 @@ const Vector& GenericClient::getResistingForceIncInertia()
 
 int GenericClient::sendSelf(int commitTag, Channel &theChannel)
 {
-    // has not been implemented yet.....
-    return 0;
+  static ID idData(6);
+  idData(0) = this->getTag();
+  idData(1) = connectedExternalNodes.Size();
+  idData(2) = port;
+  idData(3) = ssl;
+  idData(4) = dataSize;
+  idData(5) = strlen(machineInetAddr);;
+
+  theChannel.sendID(0, commitTag, idData);
+  theChannel.sendID(0, commitTag, connectedExternalNodes);
+  theChannel.sendID(0, commitTag, *theDOF);
+  Message theMessage(machineInetAddr, strlen(machineInetAddr));
+  theChannel.sendMsg(0, commitTag, theMessage);
+
+  return 0;
 }
 
 
 int GenericClient::recvSelf(int commitTag, Channel &theChannel,
-    FEM_ObjectBroker &theBroker)
+			    FEM_ObjectBroker &theBroker)
 {
-    // has not been implemented yet.....
-    return 0;
+  static ID idData(6);
+  theChannel.recvID(0, commitTag, idData);
+
+  this->setTag(idData(0));
+
+  // initialize nodes
+  numExternalNodes = idData(1);
+  theNodes = new Node* [numExternalNodes];
+  theDOF = new ID(numExternalNodes);
+
+  if (!theNodes)  {
+    opserr << "GenericClient::GenericClient() "
+	   << "- failed to create node array\n";
+    return -1;
+  }
+  
+  connectedExternalNodes.resize(numExternalNodes);
+  theChannel.recvID(0, commitTag, connectedExternalNodes);
+  theChannel.recvID(0, commitTag, *theDOF);
+  
+  // set node pointers to NULL
+  int i;
+  for (i=0; i<numExternalNodes; i++)
+    theNodes[i] = 0;
+  
+  machineInetAddr = new char(idData(5));
+
+  port  = idData(2);
+  ssl = idData(3);
+  dataSize = idData(4);
+
+  Message theMessage(machineInetAddr, strlen(machineInetAddr));  
+  theChannel.recvMsg(0, commitTag, theMessage);
+
+  return 0;
 }
 
 
@@ -738,4 +741,89 @@ int GenericClient::getResponse(int responseID, Information &eleInformation)
     default:
         return -1;
     }
+}
+
+int 
+GenericClient::setupConnection(void)
+{
+    // setup the connection
+    if (!ssl)  {
+        if (machineInetAddr == 0)
+            theChannel = new TCP_Socket(port, "127.0.0.1");
+        else
+            theChannel = new TCP_Socket(port, machineInetAddr);
+    }
+#ifdef SSL
+    else  {
+        if (machineInetAddr == 0)
+            theChannel = new TCP_SocketSSL(port, "127.0.0.1");
+        else
+            theChannel = new TCP_SocketSSL(port, machineInetAddr);
+    }
+#endif
+    if (!theChannel)  {
+        opserr << "GenericClient::GenericClient() "
+            << "- failed to create channel\n";
+        exit(-1);
+    }
+    if (theChannel->setUpConnection() != 0)  {
+        opserr << "GenericClient::GenericClient() "
+            << "- failed to setup connection\n";
+        exit(-1);
+    }
+
+    // set the data size for the experimental element
+    int intData[2*5+1];
+    ID idData(intData, 2*5+1);
+    ID *sizeCtrl = new ID(intData, 5);
+    ID *sizeDaq = new ID(&intData[5], 5);
+    idData.Zero();
+        
+    (*sizeCtrl)[0] = numBasicDOF;
+    (*sizeCtrl)[1] = numBasicDOF;
+    (*sizeCtrl)[2] = numBasicDOF;
+    (*sizeCtrl)[4] = 1;
+    
+    (*sizeDaq)[3]  = numBasicDOF;
+    
+    if (dataSize < 1+3*numBasicDOF+1) dataSize = 1+3*numBasicDOF+1;
+    if (dataSize < numBasicDOF*numBasicDOF) dataSize = numBasicDOF*numBasicDOF;
+    intData[2*5] = dataSize;
+
+    theChannel->sendID(0, 0, idData, 0);
+    
+    // allocate memory for the send vectors
+    int id = 1;
+    sData = new double [dataSize];
+    sendData = new Vector(sData, dataSize);
+    db = new Vector(&sData[id], numBasicDOF);
+    id += numBasicDOF;
+    vb = new Vector(&sData[id], numBasicDOF);
+    id += numBasicDOF;
+    ab = new Vector(&sData[id], numBasicDOF);
+    id += numBasicDOF;
+    t = new Vector(&sData[id], 1);
+    sendData->Zero();
+
+    // allocate memory for the receive vectors
+    id = 0;
+    rData = new double [dataSize];
+    recvData = new Vector(rData, dataSize);
+    qMeas = new Vector(&rData[id], numBasicDOF);
+    recvData->Zero();
+
+    // allocate memory for the receive matrix
+    rMatrix = new Matrix(rData, numBasicDOF, numBasicDOF);
+
+    // set the vector and matrix sizes and zero them
+    basicDOF.resize(numBasicDOF);
+    basicDOF.Zero();
+    dbTarg.resize(numBasicDOF);
+    dbTarg.Zero();
+    dbPast.resize(numBasicDOF);
+    dbPast.Zero();
+
+    connectionSetup = 1;
+
+    return 0;
 }
