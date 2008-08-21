@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2008-08-21 20:02:23 $
+// $Revision: 1.18 $
+// $Date: 2008-08-21 20:03:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/OpenSeesGradGEvaluator.cpp,v $
 
 
@@ -347,7 +347,7 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 
 			// Compute gradient
 			double onedgdu = (g_perturbed-g)/(newValue-originalValue);
-			opserr << "node dgdu = " << onedgdu << endln;
+			//opserr << "node dgdu = " << onedgdu << endln;
 
 			// Store the DgDdispl in a matrix
 			if (DgDdispl == 0) {
@@ -396,7 +396,7 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 		// If an element quantity is detected
 		else if ( strncmp(listStr, "element", 7) == 0 || strncmp(listStr, "rec_element", 11) == 0 ) {
 		
-			opserr << "DDM with element argument " << listStr << endln;
+		  //opserr << "DDM with element argument " << listStr << endln;
 			// Get element number and arguments
 			// take advantage of GFunEvaluator parser, do NOT recode everything here
 			int eleNumber = 0;
@@ -451,7 +451,7 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 				//int idx = theReliabilityDomain->getRandomVariableIndex(rvTag);
 				dudx(ig) = elementGradient(eleNumber, ig, restString);
 			}
-			opserr << dudx;
+			//opserr << dudx;
 
 			// Add gradient contribution
 			(*grad_g) += onedgdu*dudx;
