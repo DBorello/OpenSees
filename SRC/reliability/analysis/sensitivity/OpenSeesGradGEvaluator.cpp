@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2008-08-21 19:56:09 $
+// $Revision: 1.17 $
+// $Date: 2008-08-21 20:02:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/OpenSeesGradGEvaluator.cpp,v $
 
 
@@ -386,7 +386,7 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 				//int idx = theReliabilityDomain->getRandomVariableIndex(rvTag);
 				dudx(ig) = nodeGradient(nodeNumber, direction, ig, dispOrWhat);
 			}
-			opserr << dudx;
+			//opserr << dudx;
 
 			// Add gradient contribution
 			(*grad_g) += onedgdu*dudx;
