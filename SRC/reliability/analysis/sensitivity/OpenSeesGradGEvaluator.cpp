@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2008-05-27 20:04:30 $
+// $Revision: 1.16 $
+// $Date: 2008-08-21 19:56:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/OpenSeesGradGEvaluator.cpp,v $
 
 
@@ -132,6 +132,8 @@ OpenSeesGradGEvaluator::nodeGradient(int nodeNumber, int direction, int indx, ch
 
 	double gFunValue = 0.0;
 	 
+	indx++; // To circumvent 0...N-1 and 1...N discrepancy -- MHS
+
 	if ( strncmp(dispOrWhat, "disp", 4) == 0) {
 		gFunValue = theNode->getDispSensitivity(direction,indx);
 	}
