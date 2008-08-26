@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-07-31 18:04:11 $
+// $Revision: 1.2 $
+// $Date: 2008-08-26 17:07:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/AcceleratedNewton.h,v $
                                                                         
 #ifndef AcceleratedNewton_h
@@ -55,6 +55,7 @@ class AcceleratedNewton: public EquiSolnAlgo
   ConvergenceTest *getTest(void);     
   
   int getNumFactorizations(void) {return numFactorizations;}
+  int getNumIterations(void) {return numIterations;}
   double getTotalTimeCPU(void)   {return totalTimeCPU;}
   double getTotalTimeReal(void)  {return totalTimeReal;}
   double getSolveTimeCPU(void)   {return solveTimeCPU;}
@@ -79,6 +80,7 @@ class AcceleratedNewton: public EquiSolnAlgo
   Vector *vAccel;
   
   int numFactorizations;
+  int numIterations;
 
   Timer totalTimer;
   double totalTimeReal;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-04-02 23:41:13 $
+// $Revision: 1.8 $
+// $Date: 2008-08-26 17:07:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/EquiSolnAlgo.h,v $
                                                                         
                                                                         
@@ -68,6 +68,7 @@ class EquiSolnAlgo: public SolutionAlgorithm
     virtual void Print(OPS_Stream &s, int flag =0) =0;    
 
     virtual int getNumFactorizations(void) {return 0;}
+    virtual int getNumIterations(void) {return 0;}
     virtual double getTotalTimeCPU(void)   {return 0.0;}
     virtual double getTotalTimeReal(void)  {return 0.0;}
     virtual double getSolveTimeCPU(void)   {return 0.0;}

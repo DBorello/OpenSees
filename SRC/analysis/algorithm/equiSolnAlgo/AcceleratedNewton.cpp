@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-07-31 18:04:11 $
+// $Revision: 1.2 $
+// $Date: 2008-08-26 17:07:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/AcceleratedNewton.cpp,v $
 
 // Written: MHS
@@ -52,7 +52,8 @@
 AcceleratedNewton::AcceleratedNewton(int theTangentToUse)
   :EquiSolnAlgo(EquiALGORITHM_TAGS_AcceleratedNewton),
    theTest(0), tangent(theTangentToUse),
-   theAccelerator(0), vAccel(0), numFactorizations(0),
+   theAccelerator(0), vAccel(0), 
+   numFactorizations(0), numIterations(0),
    totalTimer(), totalTimeReal(0.0), totalTimeCPU(0.0),
    solveTimer(), solveTimeReal(0.0), solveTimeCPU(0.0),
    accelTimer(), accelTimeReal(0.0), accelTimeCPU(0.0)
@@ -65,7 +66,8 @@ AcceleratedNewton::AcceleratedNewton(ConvergenceTest &theT,
 				     int theTangentToUse)
   :EquiSolnAlgo(EquiALGORITHM_TAGS_AcceleratedNewton),
    theTest(&theT), tangent(theTangentToUse),
-   theAccelerator(theAccel), vAccel(0), numFactorizations(0),
+   theAccelerator(theAccel), vAccel(0), 
+   numFactorizations(0), numIterations(0),
    totalTimer(), totalTimeReal(0.0), totalTimeCPU(0.0),
    solveTimer(), solveTimeReal(0.0), solveTimeCPU(0.0),
    accelTimer(), accelTimeReal(0.0), accelTimeCPU(0.0)
@@ -202,6 +204,8 @@ AcceleratedNewton::solveCurrentStep(void)
       opserr << "the Integrator failed in formUnbalance()\n";	
       return -2;
     }
+
+    numIterations++;
 
     // Check convergence criteria
     result = theTest->test();
