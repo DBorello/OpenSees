@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2008-05-27 20:04:30 $
+// $Revision: 1.3 $
+// $Date: 2008-08-26 17:34:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/NewSensitivityAlgorithm.cpp,v $
                                                                         
 #include <NewSensitivityAlgorithm.h>
@@ -47,10 +47,12 @@ using std::setprecision;
 
 
 NewSensitivityAlgorithm::NewSensitivityAlgorithm(ReliabilityDomain *passedReliabilityDomain,
-										   EquiSolnAlgo *passedAlgorithm,
-										   SensitivityIntegrator *passedSensitivityIntegrator,
-										   int passedAnalysisTypeTag)
-										   :SensitivityAlgorithm(passedReliabilityDomain, passedAlgorithm,
+						 Domain* passedFEDomain,
+						 EquiSolnAlgo *passedAlgorithm,
+						 SensitivityIntegrator *passedSensitivityIntegrator,
+						 int passedAnalysisTypeTag)
+  
+:SensitivityAlgorithm(passedFEDomain, passedAlgorithm,
 										   passedSensitivityIntegrator, passedAnalysisTypeTag)
 {
 	// The reliability domain is needed to get hold 

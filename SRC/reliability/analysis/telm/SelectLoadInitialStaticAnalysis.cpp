@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:53 $
+// $Revision: 1.2 $
+// $Date: 2008-08-26 17:34:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/SelectLoadInitialStaticAnalysis.cpp,v $
 
 
@@ -202,10 +202,12 @@ void SelectLoadInitialStaticAnalysis::createStaticAnalysis(void)
 	}
 	int analysisTypeTag=1;	
 	if(theSensitivityAlgorithm!=NULL){delete theSensitivityAlgorithm; theSensitivityAlgorithm=NULL;}
-	theSensitivityAlgorithm = new NewSensitivityAlgorithm(theReliabilityDomain,
-											           theAlgorithm,
-													   theSensitivityIntegrator,
-													   analysisTypeTag);
+	theSensitivityAlgorithm = new 
+	  NewSensitivityAlgorithm(theReliabilityDomain,
+				  theDomain,
+				  theAlgorithm,
+				  theSensitivityIntegrator,
+				  analysisTypeTag);
 	if(theSensitivityAlgorithm == NULL) {
 	opserr << "Fail to generate theSensitivityAlgorithm\n";
 	opserr << "in SelectLoadStaticAnalysis::createStaticAnalysis \n";

@@ -23,8 +23,8 @@
 ** ****************************************************************** */
 
 
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:53 $
+// $Revision: 1.2 $
+// $Date: 2008-08-26 17:34:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/NewSensitivityAlgorithm.h,v $
 
 #ifndef NewSensitivityAlgorithm_h
@@ -42,6 +42,7 @@ class NewSensitivityAlgorithm: public SensitivityAlgorithm
 {
   public:
   NewSensitivityAlgorithm(ReliabilityDomain *passedReliabilityDomain,
+			  Domain *passedFEDomain,
 			  EquiSolnAlgo *passedAlgorithm,
 			  SensitivityIntegrator *passedSensitivityIntegrator,
 			  int analysisTypeTag);
