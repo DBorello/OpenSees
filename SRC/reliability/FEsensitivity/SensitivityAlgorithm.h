@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2008-02-29 19:47:19 $
+// $Revision: 1.6 $
+// $Date: 2008-08-26 16:15:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/SensitivityAlgorithm.h,v $
 
 
@@ -34,6 +34,7 @@
 #ifndef SensitivityAlgorithm_h
 #define SensitivityAlgorithm_h
 
+class Domain;
 class ReliabilityDomain;
 class EquiSolnAlgo;
 class SensitivityIntegrator;
@@ -41,7 +42,7 @@ class SensitivityIntegrator;
 class SensitivityAlgorithm
 {
  public:
-  SensitivityAlgorithm(ReliabilityDomain *passedReliabilityDomain,
+  SensitivityAlgorithm(Domain *passedDomain,
 		       EquiSolnAlgo *passedAlgorithm,
 		       SensitivityIntegrator *passedSensitivityIntegrator,
 		       int analysisTypeTag);
@@ -55,6 +56,7 @@ class SensitivityAlgorithm
  protected:
   
  private:
+    Domain *theDomain;
     ReliabilityDomain *theReliabilityDomain;
     EquiSolnAlgo *theAlgorithm;
     SensitivityIntegrator *theSensitivityIntegrator;

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2008-05-22 19:55:51 $
+// $Revision: 1.13 $
+// $Date: 2008-08-26 16:15:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/SensitivityAlgorithm.cpp,v $
 
 
@@ -32,63 +32,36 @@
 //
 
 #include <SensitivityAlgorithm.h>
-
 #include <ReliabilityDomain.h>
-#include <EquiSolnAlgo.h>
 #include <SensitivityIntegrator.h>
 
-
-
 #include <LinearSOE.h>
-#include <Vector.h>
 #include <EquiSolnAlgo.h>
-#include <ReliabilityDomain.h>
-#include <RandomVariablePositioner.h>
-#include <RandomVariablePositionerIter.h>
-#include <ParameterPositioner.h>
-#include <ParameterPositionerIter.h>
+#include <Vector.h>
+#include <Domain.h>
+#include <Parameter.h>
+#include <ParameterIter.h>
 
 
-SensitivityAlgorithm::SensitivityAlgorithm(ReliabilityDomain *passedReliabilityDomain,
-										   EquiSolnAlgo *passedAlgorithm,
-										   SensitivityIntegrator *passedSensitivityIntegrator,
-										   int passedAnalysisTypeTag)
+SensitivityAlgorithm::SensitivityAlgorithm(Domain *passedDomain,
+					   EquiSolnAlgo *passedAlgorithm,
+					   SensitivityIntegrator *passedSensitivityIntegrator,
+					   int passedAnalysisTypeTag):
+  theDomain(passedDomain), theAlgorithm(passedAlgorithm), 
+  theSensitivityIntegrator(passedSensitivityIntegrator),
+  analysisTypeTag(passedAnalysisTypeTag)
 {
-	// The reliability domain is needed to get hold 
-	// of the random variable positioners:
-	theReliabilityDomain = passedReliabilityDomain;
-
-	// The finite element equation solution algorithm is 
-	// needed to get hold of the system of equations (SOE):
-	theAlgorithm = passedAlgorithm;
-
-	// The sensitivity integrator is needed to assemble the 
-	// new right-hand side of the system of equations:
-	theSensitivityIntegrator = passedSensitivityIntegrator;
-
-	// Tag to tell whether grads should be computed at each step
-	// and whether they should be computed wrt. random variables
-	analysisTypeTag = passedAnalysisTypeTag;
+  
 }
-
-
-
 
 SensitivityAlgorithm::~SensitivityAlgorithm()
 {
+
 }
-
-
 
 int 
 SensitivityAlgorithm::computeSensitivities(void)
 {
-	// Meaning of analysisTypeTag:
-	// 1: compute at each step wrt. random variables
-	// 2: compute at each step wrt. parameters
-	// 3: compute by command wrt. random variables
-	// 4: compute by command wrt. parameters
-
 	// Get pointer to the system of equations (SOE)
 	LinearSOE *theSOE = theAlgorithm->getLinearSOEptr();
 
@@ -113,88 +86,47 @@ SensitivityAlgorithm::computeSensitivities(void)
 	// Form the part of the RHS which are indepent of parameter
 	theSensitivityIntegrator->formIndependentSensitivityRHS();
 
+	ParameterIter &paramIter = theDomain->getParameters();
+	Parameter *theParam;
+	// De-activate all parameters
+	while ((theParam = paramIter()) != 0)
+	  theParam->activate(false);
 
-	if (analysisTypeTag == 1 || analysisTypeTag == 3) {
+	// Now, compute sensitivity wrt each parameter
+	int numGrads = theDomain->getNumParameters();
+	paramIter = theDomain->getParameters();
+	while ((theParam = paramIter()) != 0) {
 
-	  int numGrads = theReliabilityDomain->getNumberOfRandomVariables();
+	  // Activate this parameter
+	  theParam->activate(true);
 
-	  for (int gradNumber = 1; gradNumber <= numGrads; gradNumber++ )  {
-	    RandomVariablePositionerIter &rvPosIter =
-	      theReliabilityDomain->getRandomVariablePositioners();
-	    RandomVariablePositioner *theRVPos;
-	    while ((theRVPos = rvPosIter()) != 0) {
-	      theRVPos->activate(false);
-	    }
-	    rvPosIter.reset();
-	    while ((theRVPos = rvPosIter()) != 0) {
-	      int rvIndex = theRVPos->getRvIndex();
-	      if ( rvIndex==gradNumber ) {
-		// Set sensitivity flag so that this one contributes to the RHS
-		theRVPos->activate(true);
-	      }
-	    }
+	  // Zero the RHS vector
+	  theSOE->zeroB();
 
-	    // Zero out the old right-hand side
-	    theSOE->zeroB();
-	    
-	    // Form new right-hand side
-	    theSensitivityIntegrator->formSensitivityRHS(gradNumber);
+	  // Get the grad index for this parameter
+	  int gradIndex = theParam->getGradIndex();
 
-	    // Solve the system of equation with the new right-hand side
-	    theSOE->solve();
-	    
-	    // Save 'v' to the nodes for a "sensNodeDisp node? dof?" command
-	    theSensitivityIntegrator->saveSensitivity( theSOE->getX(), gradNumber, numGrads );
-	    
-	    // Commit unconditional history variables (also for elastic problems; strain sens may be needed anyway)
-	    theSensitivityIntegrator->commitSensitivity(gradNumber, numGrads);
-	  }
+	  // Form the RHS
+	  theSensitivityIntegrator->formSensitivityRHS(gradIndex);
+
+	  // Solve for displacement sensitivity
+	  theSOE->solve();
+
+	  // Save sensitivity to nodes
+	  theSensitivityIntegrator->saveSensitivity( theSOE->getX(), gradIndex, numGrads );
+	  
+	  // Commit unconditional history variables (also for elastic problems; strain sens may be needed anyway)
+	  theSensitivityIntegrator->commitSensitivity(gradIndex, numGrads);
+	  
+	  // De-activate this parameter for next sensitivity calc
+	  theParam->activate(false);
 	}
-	else {
 
-	  int numGrads = theReliabilityDomain->getNumberOfParameterPositioners();
-
-	  for (int gradNumber = 1; gradNumber <= numGrads; gradNumber++ )  {
-	    ParameterPositionerIter &paramPosIter =
-	      theReliabilityDomain->getParameterPositioners();
-	    ParameterPositioner *theParamPos;
-	    while ((theParamPos = paramPosIter()) != 0) {
-	      theParamPos->activate(false);
-	    }
-	    paramPosIter.reset();
-	    while ((theParamPos = paramPosIter()) != 0) {
-	      // Set sensitivity flag so that this one contributes to the RHS
-	      if (theParamPos->getGradNumber() == gradNumber)
-		theParamPos->activate(true);
-	    }
-	    
-	    // Zero out the old right-hand side
-	    theSOE->zeroB();
-
-	    // Form new right-hand side
-	    theSensitivityIntegrator->formSensitivityRHS(gradNumber);
-
-	    // Solve the system of equation with the new right-hand side
-	    theSOE->solve();
-	    
-	    // Save 'v' to the nodes for a "sensNodeDisp node? dof?" command
-	    theSensitivityIntegrator->saveSensitivity( theSOE->getX(), gradNumber, numGrads );
-	    
-	    // Commit unconditional history variables (also for elastic problems; strain sens may be needed anyway)
-	    theSensitivityIntegrator->commitSensitivity(gradNumber, numGrads);
-	  }
-	}
-	
 	return 0;
 }
 
 bool 
 SensitivityAlgorithm::shouldComputeAtEachStep(void)
 {
-	if (analysisTypeTag==1 || analysisTypeTag==2) {
-		return true;
-	}
-	else {
-		return false;
-	}
+  return (analysisTypeTag == 1);
 }
