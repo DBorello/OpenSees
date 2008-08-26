@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2008-08-19 22:50:49 $
+// $Revision: 1.27 $
+// $Date: 2008-08-26 17:03:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
 // Written: fmk 
@@ -137,6 +137,9 @@ class Domain
     virtual  MP_Constraint *getMP_Constraint(int tag);    
     virtual  LoadPattern   *getLoadPattern(int tag);        
     virtual  Parameter     *getParameter(int tag);        
+    // Following two methods to map index to tag and vice versa
+    virtual Parameter *getParameterFromIndex(int index);
+    virtual int getParameterIndex(int tag);
 
     // methods to query the state of the domain
     virtual double  getCurrentTime(void) const;
@@ -262,6 +265,14 @@ class Domain
     double theEigenvalueSetTime;
 
     int lastChannel;
+
+    // Integer array: index[i] = tag of component i
+    // Should put these in another class eventually -- MHS
+    int *paramIndex;
+    enum {paramSize_init = 100};
+    enum {paramSize_grow = 20};
+    int paramSize;
+    int numParameters;
 };
 
 #endif

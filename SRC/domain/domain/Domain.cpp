@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.53 $
-// $Date: 2008-08-19 22:50:49 $
+// $Revision: 1.54 $
+// $Date: 2008-08-26 17:03:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -644,7 +644,30 @@ Domain::addParameter(Parameter *theParam)
   if (result == true) {
     // mark the Domain as having been changed
     //    this->domainChange();
-    ;
+
+    // Array is full
+    if (numParameters == paramSize) {
+
+      // Increase size and allocate new array
+      paramSize += paramSize_grow;
+      int *tmp_paramIndex = new int[paramSize];
+
+      // Copy values from old array to new
+      for (int i = 0; i < numParameters; i++)
+	tmp_paramIndex[i] = paramIndex[i];
+
+      // Get rid of old array
+      delete [] paramIndex;
+
+      // Set pointer to new array
+      paramIndex = tmp_paramIndex;
+    }
+
+    // Add to index
+    paramIndex[numParameters] = paramTag;
+    theParam->setGradIndex(numParameters);
+    numParameters++;    
+
   } else 
     opserr << "Domain::addParameter - parameter " << paramTag << "could not be added to container\n";      
 
@@ -979,6 +1002,32 @@ Domain::removeMP_Constraint(int tag)
 Parameter *
 Domain::removeParameter(int tag)
 {
+  Parameter *theParam = (Parameter*) theParameters->getComponentPtr(tag);
+  
+  if (theParam != 0) {
+
+    // Find where RV is located
+    int index;
+    for (index = 0; index < numParameters; index++) {
+      if (paramIndex[index] == tag)
+	break;
+    }
+    
+    // Shift indices down by one
+    for (int i = index; i < numParameters-1; i++) {
+      paramIndex[i] = paramIndex[i+1];
+      Parameter *otherParam = this->getParameterFromIndex(i);
+      otherParam->setGradIndex(i+1);
+    }
+    
+    // Now remove the component
+    theParameters->removeComponent(tag);
+    numParameters--;
+  }
+
+  return 0;
+
+  /*
   // remove the object from the container    
   TaggedObject *mc = theParameters->removeComponent(tag);
   
@@ -994,6 +1043,7 @@ Domain::removeParameter(int tag)
   Parameter *result = (Parameter *)mc;
   //  result->setDomain(0);
   return result;
+  */
 }
 
 LoadPattern *
@@ -1211,6 +1261,38 @@ Domain::getParameter(int tag)
       return 0;
   Parameter *result = (Parameter *)mc;
   return result;
+}
+
+Parameter *
+Domain::getParameterFromIndex(int index)
+{
+  if (index >= 0 && index < numParameters)
+    return this->getParameter(paramIndex[index]);
+
+  else {
+    opserr << "Domain::getParameterFromIndex -- index " << index << " out of bounds 0 ... " << numParameters-1 << endln;
+    return 0;
+  }
+
+}
+
+int
+Domain::getParameterIndex(int tag)
+{
+  int index;
+
+  // Find index of RV with specified tag
+  for (index = 0; index < numParameters; index++) {
+    if (paramIndex[index] == tag)
+      break;
+  }
+
+  if (index == numParameters) {
+    opserr << "Domain::getParameterIndex -- parameter with tag " << tag << " not found" << endln;
+    return -1;
+  }
+
+  return index;
 }
 
 LoadPattern *
