@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2008-07-15 23:08:08 $
+// $Revision: 1.24 $
+// $Date: 2008-08-26 17:08:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
                                                                         
@@ -174,6 +174,9 @@ int
 sensNodeVel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
+sensNodeAccel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
 sensSectionForce(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
@@ -201,6 +204,21 @@ sectionForce(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
 
 int 
 sectionDeformation(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+totalCPU(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+solveCPU(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+accelCPU(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+numFact(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+numIter(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 
 

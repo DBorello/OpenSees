@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.129 $
-// $Date: 2008-07-31 18:38:42 $
+// $Revision: 1.130 $
+// $Date: 2008-08-26 17:08:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -97,6 +97,7 @@ OPS_Stream *opserrPtr = &sserr;
 #include <SP_Constraint.h> //Joey UC Davis
 #include <SP_ConstraintIter.h> //Joey UC Davis
 #include <Parameter.h>
+#include <ParameterIter.h>
 
 // analysis model
 #include <AnalysisModel.h>
@@ -128,7 +129,10 @@ OPS_Stream *opserrPtr = &sserr;
 #include <RaphsonAccelerator.h>
 #include <PeriodicAccelerator.h>
 #include <KrylovAccelerator.h>
+#include <SecantAccelerator1.h>
 #include <SecantAccelerator2.h>
+#include <SecantAccelerator3.h>
+#include <MillerAccelerator.h>
 
 // line searches
 #include <BisectionLineSearch.h>
@@ -285,7 +289,7 @@ OPS_Stream *opserrPtr = &sserr;
 #include <NewNewmarkSensitivityIntegrator.h>
 #include <NewStaticSensitivityIntegrator.h>
 //#include <OrigSensitivityAlgorithm.h>
-#include <NewSensitivityAlgorithm.h>
+//#include <NewSensitivityAlgorithm.h>
 #include <ReliabilityStaticAnalysis.h>
 #include <ReliabilityDirectIntegrationAnalysis.h>
 // AddingSensitivity:END /////////////////////////////////////////////////
@@ -684,6 +688,18 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "sectionDeformation", &sectionDeformation, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
 
+
+    Tcl_CreateCommand(interp, "totalCPU", &totalCPU, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
+    Tcl_CreateCommand(interp, "solveCPU", &solveCPU, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
+    Tcl_CreateCommand(interp, "accelCPU", &accelCPU, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
+    Tcl_CreateCommand(interp, "numFact", &numFact, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
+    Tcl_CreateCommand(interp, "numIter", &numIter, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
+
 #ifdef _RELIABILITY
     Tcl_CreateCommand(interp, "wipeReliability", wipeReliability, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
@@ -700,6 +716,8 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "sensNodeDisp", &sensNodeDisp, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "sensNodeVel", &sensNodeVel, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
+    Tcl_CreateCommand(interp, "sensNodeAccel", &sensNodeAccel, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "sensSectionForce", &sensSectionForce, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
@@ -813,10 +831,8 @@ sensitivityAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Ch
 {
 	bool withRespectToRVs = true;
 	bool newalgorithm = false;
-	int analysisTypeTag;  // 1: compute at each step wrt. random variables
-						  // 2: compute at each step wrt. parameters
-						  // 3: compute by command wrt. random variables
-						  // 4: compute by command wrt. parameters
+	int analysisTypeTag = 1;  
+	// 1: compute at each step (default); 2: compute by command
 
 	if (argc < 2) {
 		opserr << "ERROR: Wrong number of parameters to sensitivity algorithm." << endln;
@@ -832,82 +848,39 @@ sensitivityAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Ch
 		<< " the sensitivity algorithm can be created." << endln;
 		return TCL_ERROR;
 	}
-	else {
 
-		if (argc == 3) {
-			if (strcmp(argv[2],"-parameters") == 0) {
-				withRespectToRVs = false;
-			}
-			else if (strcmp(argv[2],"-randomVariables") == 0) {
-				withRespectToRVs = true;
-			}
-			else if (strcmp(argv[2],"-new") == 0) {
-				newalgorithm = true;
-			}
-			else {
-				opserr << "ERROR: Invalid argument in sensitivity algorithm command." << endln;
-				return TCL_ERROR;
-			}
-		}
-		if (argc == 4) {
-			if (strcmp(argv[2],"-parameters") == 0) {
-				withRespectToRVs = false;
-			}
-			else if (strcmp(argv[2],"-randomVariables") == 0) {
-				withRespectToRVs = true;
-			}
-			else {
-				opserr << "ERROR: Invalid argument in sensitivity algorithm command." << endln;
-				return TCL_ERROR;
-			}
-			if (strcmp(argv[3],"-new") == 0) {
-				newalgorithm = true;
-			}
-			else {
-				opserr << "ERROR: Invalid argument in sensitivity algorithm command." << endln;
-				return TCL_ERROR;
-			}
-		}
-		if (strcmp(argv[1],"-computeAtEachStep") == 0) {
-			if (withRespectToRVs) {
-				analysisTypeTag = 1;
-			}
-			else {
-				analysisTypeTag = 2;
-			}
-		}
-		else if (strcmp(argv[1],"-computeByCommand") == 0) {
-			if (withRespectToRVs) {
-				analysisTypeTag = 3;
-			}
-			else {
-				analysisTypeTag = 4;
-			}
-		}
-		else {
-			opserr << "WARNING: Invalid type of sensitivity algorithm." << endln;
-			return TCL_ERROR;
-		}
-		ReliabilityDomain *theReliabilityDomain;
-		theReliabilityDomain = theReliabilityBuilder->getReliabilityDomain();
-		if(newalgorithm){
-		theSensitivityAlgorithm = new NewSensitivityAlgorithm(theReliabilityDomain,
-									theAlgorithm,
-									theSensitivityIntegrator,
-									analysisTypeTag);
-		} else {
-		theSensitivityAlgorithm = new SensitivityAlgorithm(theReliabilityDomain,
-									theAlgorithm,
-									theSensitivityIntegrator,
-									analysisTypeTag);
-		}
-		if (theSensitivityAlgorithm == 0) {
-			opserr << "ERROR: Could not create theSensitivityAlgorithm. " << endln;
-			return TCL_ERROR;
-		}
+	if (strcmp(argv[1],"-computeAtEachStep") == 0)
+	  analysisTypeTag = 1;
+	else if (strcmp(argv[1],"-computeByCommand") == 0)
+	  analysisTypeTag = 2;
+	else {
+	  opserr << "Unknown sensitivity algorithm option: " << argv[1] << endln;
+	  return TCL_ERROR;
 	}
-	return TCL_OK;
 	
+	ReliabilityDomain *theReliabilityDomain;
+	theReliabilityDomain = theReliabilityBuilder->getReliabilityDomain();
+	if(newalgorithm){
+	  /*
+	    theSensitivityAlgorithm = new NewSensitivityAlgorithm(theReliabilityDomain,
+	    theAlgorithm,
+	    theSensitivityIntegrator,
+	    analysisTypeTag);
+	  */
+	  theSensitivityAlgorithm = 0;
+	} else {
+	  theSensitivityAlgorithm = new 
+	    SensitivityAlgorithm(&theDomain,
+				 theAlgorithm,
+				 theSensitivityIntegrator,
+				 analysisTypeTag);
+	}
+	if (theSensitivityAlgorithm == 0) {
+	  opserr << "ERROR: Could not create theSensitivityAlgorithm. " << endln;
+	  return TCL_ERROR;
+	}
+	
+	return TCL_OK;
 }
 
 int 
@@ -2638,37 +2611,30 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
   }
 
   else if (strcmp(argv[1],"KrylovNewton") == 0) {
-    int formTangent = CURRENT_TANGENT;
-    int maxDim = -1;
-    for (int i = 2; i < argc; i++) {
-      if (strcmp(argv[i],"-secant") == 0) {
-	formTangent = CURRENT_SECANT;
-      } else if (strcmp(argv[i],"-initial") == 0) {
-	formTangent = INITIAL_TANGENT;
-      } else if (strcmp(argv[i++],"-maxDim") == 0 && i < argc) {
-	maxDim = atoi(argv[i]);
-      }
-    }
-
-    if (theTest == 0) {
-      opserr << "ERROR: No ConvergenceTest yet specified\n";
-      return TCL_ERROR;	  
-    }
-    if (maxDim == -1)
-      theNewAlgo = new KrylovNewton(*theTest, formTangent); 
-    else
-      theNewAlgo = new KrylovNewton(*theTest, formTangent, maxDim); 
-  }
-
-  else if (strcmp(argv[1],"SecantNewton") == 0) {
-    int formTangent = CURRENT_TANGENT;
+    int incrementTangent = CURRENT_TANGENT;
+    int iterateTangent = CURRENT_TANGENT;
     int maxDim = 3;
     for (int i = 2; i < argc; i++) {
-      if (strcmp(argv[i],"-secant") == 0) {
-	formTangent = CURRENT_SECANT;
-      } else if (strcmp(argv[i],"-initial") == 0) {
-	formTangent = INITIAL_TANGENT;
-      } else if (strcmp(argv[i++],"-maxDim") == 0 && i < argc) {
+      if (strcmp(argv[i],"-iterate") == 0 && i+1 < argc) {
+	i++;
+	if (strcmp(argv[i],"current") == 0)
+	  iterateTangent = CURRENT_TANGENT;
+	if (strcmp(argv[i],"initial") == 0)
+	  iterateTangent = INITIAL_TANGENT;
+	if (strcmp(argv[i],"noTangent") == 0)
+	  iterateTangent = NO_TANGENT;
+      } 
+      else if (strcmp(argv[i],"-increment") == 0 && i+1 < argc) {
+	i++;
+	if (strcmp(argv[i],"current") == 0)
+	  incrementTangent = CURRENT_TANGENT;
+	if (strcmp(argv[i],"initial") == 0)
+	  incrementTangent = INITIAL_TANGENT;
+	if (strcmp(argv[i],"noTangent") == 0)
+	  incrementTangent = NO_TANGENT;
+      }
+      else if (strcmp(argv[i],"-maxDim") == 0 && i+1 < argc) {
+	i++;
 	maxDim = atoi(argv[i]);
       }
     }
@@ -2679,20 +2645,71 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
     }
 
     Accelerator *theAccel;
-    theAccel = new SecantAccelerator2(maxDim, formTangent); 
+    theAccel = new KrylovAccelerator(maxDim, iterateTangent);
 
-    theNewAlgo = new AcceleratedNewton(*theTest, theAccel, formTangent);
+    theNewAlgo = new AcceleratedNewton(*theTest, theAccel, incrementTangent);
   }
 
-  else if (strcmp(argv[1],"PeriodicNewton") == 0) {
-    int formTangent = CURRENT_TANGENT;
-    int maxDim = -1;
+  else if (strcmp(argv[1],"RaphsonNewton") == 0) {
+    int incrementTangent = CURRENT_TANGENT;
+    int iterateTangent = CURRENT_TANGENT;
     for (int i = 2; i < argc; i++) {
-      if (strcmp(argv[i],"-secant") == 0) {
-	formTangent = CURRENT_SECANT;
-      } else if (strcmp(argv[i],"-initial") == 0) {
-	formTangent = INITIAL_TANGENT;
-      } else if (strcmp(argv[i++],"-maxCount") == 0 && i < argc) {
+      if (strcmp(argv[i],"-iterate") == 0 && i+1 < argc) {
+	i++;
+	if (strcmp(argv[i],"current") == 0)
+	  iterateTangent = CURRENT_TANGENT;
+	if (strcmp(argv[i],"initial") == 0)
+	  iterateTangent = INITIAL_TANGENT;
+	if (strcmp(argv[i],"noTangent") == 0)
+	  iterateTangent = NO_TANGENT;
+      } 
+      else if (strcmp(argv[i],"-increment") == 0 && i+1 < argc) {
+	i++;
+	if (strcmp(argv[i],"current") == 0)
+	  incrementTangent = CURRENT_TANGENT;
+	if (strcmp(argv[i],"initial") == 0)
+	  incrementTangent = INITIAL_TANGENT;
+	if (strcmp(argv[i],"noTangent") == 0)
+	  incrementTangent = NO_TANGENT;
+      }
+    }
+
+    if (theTest == 0) {
+      opserr << "ERROR: No ConvergenceTest yet specified\n";
+      return TCL_ERROR;	  
+    }
+
+    Accelerator *theAccel;
+    theAccel = new RaphsonAccelerator(iterateTangent);
+
+    theNewAlgo = new AcceleratedNewton(*theTest, theAccel, incrementTangent);
+  }
+
+  else if (strcmp(argv[1],"MillerNewton") == 0) {
+    int incrementTangent = CURRENT_TANGENT;
+    int iterateTangent = CURRENT_TANGENT;
+    int maxDim = 3;
+    for (int i = 2; i < argc; i++) {
+      if (strcmp(argv[i],"-iterate") == 0 && i+1 < argc) {
+	i++;
+	if (strcmp(argv[i],"current") == 0)
+	  iterateTangent = CURRENT_TANGENT;
+	if (strcmp(argv[i],"initial") == 0)
+	  iterateTangent = INITIAL_TANGENT;
+	if (strcmp(argv[i],"noTangent") == 0)
+	  iterateTangent = NO_TANGENT;
+      } 
+      else if (strcmp(argv[i],"-increment") == 0 && i+1 < argc) {
+	i++;
+	if (strcmp(argv[i],"current") == 0)
+	  incrementTangent = CURRENT_TANGENT;
+	if (strcmp(argv[i],"initial") == 0)
+	  incrementTangent = INITIAL_TANGENT;
+	if (strcmp(argv[i],"noTangent") == 0)
+	  incrementTangent = NO_TANGENT;
+      }
+      else if (strcmp(argv[i],"-maxDim") == 0 && i+1 < argc) {
+	i++;
 	maxDim = atoi(argv[i]);
       }
     }
@@ -2701,10 +2718,91 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
       opserr << "ERROR: No ConvergenceTest yet specified\n";
       return TCL_ERROR;	  
     }
-    if (maxDim == -1)
-      theNewAlgo = new PeriodicNewton(*theTest, formTangent); 
-    else
-      theNewAlgo = new PeriodicNewton(*theTest, formTangent, maxDim); 
+
+    Accelerator *theAccel;
+    theAccel = new MillerAccelerator(maxDim, 0.01, iterateTangent);
+
+    theNewAlgo = new AcceleratedNewton(*theTest, theAccel, incrementTangent);
+  }
+
+  else if (strcmp(argv[1],"SecantNewton") == 0) {
+    int incrementTangent = CURRENT_TANGENT;
+    int iterateTangent = CURRENT_TANGENT;
+    int maxDim = 3;
+    for (int i = 2; i < argc; i++) {
+      if (strcmp(argv[i],"-iterate") == 0 && i+1 < argc) {
+	i++;
+	if (strcmp(argv[i],"current") == 0)
+	  iterateTangent = CURRENT_TANGENT;
+	if (strcmp(argv[i],"initial") == 0)
+	  iterateTangent = INITIAL_TANGENT;
+	if (strcmp(argv[i],"noTangent") == 0)
+	  iterateTangent = NO_TANGENT;
+      } 
+      else if (strcmp(argv[i],"-increment") == 0 && i+1 < argc) {
+	i++;
+	if (strcmp(argv[i],"current") == 0)
+	  incrementTangent = CURRENT_TANGENT;
+	if (strcmp(argv[i],"initial") == 0)
+	  incrementTangent = INITIAL_TANGENT;
+	if (strcmp(argv[i],"noTangent") == 0)
+	  incrementTangent = NO_TANGENT;
+      }
+      else if (strcmp(argv[i],"-maxDim") == 0 && i+1 < argc) {
+	i++;
+	maxDim = atoi(argv[i]);
+      }
+    }
+
+    if (theTest == 0) {
+      opserr << "ERROR: No ConvergenceTest yet specified\n";
+      return TCL_ERROR;	  
+    }
+
+    Accelerator *theAccel;
+    theAccel = new SecantAccelerator2(maxDim, iterateTangent); 
+
+    theNewAlgo = new AcceleratedNewton(*theTest, theAccel, incrementTangent);
+  }
+
+  else if (strcmp(argv[1],"PeriodicNewton") == 0) {
+    int incrementTangent = CURRENT_TANGENT;
+    int iterateTangent = CURRENT_TANGENT;
+    int maxDim = 3;
+    for (int i = 2; i < argc; i++) {
+      if (strcmp(argv[i],"-iterate") == 0 && i+1 < argc) {
+	i++;
+	if (strcmp(argv[i],"current") == 0)
+	  iterateTangent = CURRENT_TANGENT;
+	if (strcmp(argv[i],"initial") == 0)
+	  iterateTangent = INITIAL_TANGENT;
+	if (strcmp(argv[i],"noTangent") == 0)
+	  iterateTangent = NO_TANGENT;
+      } 
+      else if (strcmp(argv[i],"-increment") == 0 && i+1 < argc) {
+	i++;
+	if (strcmp(argv[i],"current") == 0)
+	  incrementTangent = CURRENT_TANGENT;
+	if (strcmp(argv[i],"initial") == 0)
+	  incrementTangent = INITIAL_TANGENT;
+	if (strcmp(argv[i],"noTangent") == 0)
+	  incrementTangent = NO_TANGENT;
+      }
+      else if (strcmp(argv[i],"-maxDim") == 0 && i+1 < argc) {
+	i++;
+	maxDim = atoi(argv[i]);
+      }
+    }
+
+    if (theTest == 0) {
+      opserr << "ERROR: No ConvergenceTest yet specified\n";
+      return TCL_ERROR;	  
+    }
+
+    Accelerator *theAccel;
+    theAccel = new PeriodicAccelerator(maxDim, iterateTangent); 
+
+    theNewAlgo = new AcceleratedNewton(*theTest, theAccel, incrementTangent);
   }
 
   else if (strcmp(argv[1],"Broyden") == 0) {
@@ -5426,60 +5524,107 @@ sensNodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
 
     // make sure at least one other argument to contain type of system
     if (argc < 4) {
-	interp->result = "WARNING want - sensNodeDisp nodeTag? dof?\n";
+	interp->result = "WARNING want - sensNodeDisp nodeTag? dof? paramTag?\n";
 	return TCL_ERROR;
    }    
 
-    int tag, dof, gradNum;
+    int tag, dof, paramTag;
 
     if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
-	opserr << "WARNING nodeDisp nodeTag? dof? gradNum?- could not read nodeTag? ";
+	opserr << "WARNING nodeDisp nodeTag? dof? paramTag?- could not read nodeTag? ";
 	return TCL_ERROR;	        
     }    
     if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
-	opserr << "WARNING nodeDisp nodeTag? dof? gradNum?- could not read dof? ";
+	opserr << "WARNING nodeDisp nodeTag? dof? paramTag?- could not read dof? ";
 	return TCL_ERROR;	        
     }        
-    if (Tcl_GetInt(interp, argv[3], &gradNum) != TCL_OK) {
-	opserr << "WARNING nodeDisp nodeTag? dof? gradNum?- could not read dof? ";
+    if (Tcl_GetInt(interp, argv[3], &paramTag) != TCL_OK) {
+	opserr << "WARNING nodeDisp paramTag? dof? paramTag?- could not read paramTag? ";
 	return TCL_ERROR;	        
     }        
     
     Node *theNode = theDomain.getNode(tag);
-	double value = theNode->getDispSensitivity(dof,gradNum);
+
+    Parameter *theParam = theDomain.getParameter(paramTag);
+    int gradIndex = theParam->getGradIndex();
+
+    double value = theNode->getDispSensitivity(dof,gradIndex);
     
     // copy the value to the tcl string that is returned
     sprintf(interp->result,"%35.20f",value);
 	
     return TCL_OK;
 }
+
 int 
 sensNodeVel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 
     // make sure at least one other argument to contain type of system
     if (argc < 4) {
-	interp->result = "WARNING want - sensNodeDisp nodeTag? dof?\n";
+	interp->result = "WARNING want - sensNodeVel nodeTag? dof? paramTag?\n";
 	return TCL_ERROR;
    }    
 
-    int tag, dof, gradNum;
+    int tag, dof, paramTag;
 
     if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
-	opserr << "WARNING nodeDisp nodeTag? dof? gradNum?- could not read nodeTag? \n";
+	opserr << "WARNING sensNodeVel nodeTag? dof? paramTag? - could not read nodeTag? \n";
 	return TCL_ERROR;	        
     }    
     if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
-	opserr << "WARNING nodeDisp nodeTag? dof? gradNum?- could not read dof? \n";
+	opserr << "WARNING sensNodeVel nodeTag? dof? paramTag? - could not read dof? \n";
 	return TCL_ERROR;	        
     }        
-    if (Tcl_GetInt(interp, argv[3], &gradNum) != TCL_OK) {
-	opserr << "WARNING nodeDisp nodeTag? dof? gradNum?- could not read dof? \n";
+    if (Tcl_GetInt(interp, argv[3], &paramTag) != TCL_OK) {
+	opserr << "WARNING sensNodeVel nodeTag? dof? paramTag? - could not read paramTag? \n";
 	return TCL_ERROR;	        
     }        
     
     Node *theNode = theDomain.getNode(tag);
-	double value = theNode->getVelSensitivity(dof,gradNum);
+
+    Parameter *theParam = theDomain.getParameter(paramTag);
+    int gradIndex = theParam->getGradIndex();
+
+    double value = theNode->getVelSensitivity(dof,gradIndex);
+    
+    // copy the value to the tcl string that is returned
+    sprintf(interp->result,"%35.20f",value);
+	
+    return TCL_OK;
+}
+
+int 
+sensNodeAccel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+
+    // make sure at least one other argument to contain type of system
+    if (argc < 4) {
+	interp->result = "WARNING want - sensNodeAccel nodeTag? dof? paramTag?\n";
+	return TCL_ERROR;
+   }    
+
+    int tag, dof, paramTag;
+
+    if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+	opserr << "WARNING sensNodeAccel nodeTag? dof? paramTag? - could not read nodeTag? \n";
+	return TCL_ERROR;	        
+    }    
+    if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
+	opserr << "WARNING sensNodeAccel nodeTag? dof? paramTag? - could not read dof? \n";
+	return TCL_ERROR;	        
+    }        
+    if (Tcl_GetInt(interp, argv[3], &paramTag) != TCL_OK) {
+	opserr << "WARNING sendNodeAccel nodeTag? dof? paramTag? - could not read paramTag? \n";
+	return TCL_ERROR;	        
+    }        
+    
+    Node *theNode = theDomain.getNode(tag);
+
+    Parameter *theParam = theDomain.getParameter(paramTag);
+    int gradIndex = theParam->getGradIndex();
+
+    double value = theNode->getAccSensitivity(dof,gradIndex);
     
     // copy the value to the tcl string that is returned
     sprintf(interp->result,"%35.20f",value);
@@ -5493,7 +5638,7 @@ sensSectionForce(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char *
 #ifdef _RELIABILITY
   // make sure at least one other argument to contain type of system
   if (argc < 5) {
-    interp->result = "WARNING want - sensSectionForce eleTag? secNum? dof? gradNum?\n";
+    interp->result = "WARNING want - sensSectionForce eleTag? secNum? dof? paramTag?\n";
     return TCL_ERROR;
   }    
   
@@ -5502,52 +5647,33 @@ sensSectionForce(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char *
   //  opserr << argv[i] << ' ' ;
   //opserr << endln;
 
-  int tag, secNum, dof, gradNum;
+  int tag, secNum, dof, paramTag;
 
   if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
-    opserr << "WARNING sensSectionForce eleTag? secNum? dof? gradNum?- could not read eleTag? \n";
+    opserr << "WARNING sensSectionForce eleTag? secNum? dof? paramTag?- could not read eleTag? \n";
     return TCL_ERROR;	        
   }    
   if (Tcl_GetInt(interp, argv[2], &secNum) != TCL_OK) {
-    opserr << "WARNING sensSectionForce eleTag? secNum? dof? gradNum?- could not read secNum? \n";
+    opserr << "WARNING sensSectionForce eleTag? secNum? dof? paramTag?- could not read secNum? \n";
     return TCL_ERROR;	        
   }    
   if (Tcl_GetInt(interp, argv[3], &dof) != TCL_OK) {
-    opserr << "WARNING sensSectionForce eleTag? secNum? dof? gradNum?- could not read dof? \n";
+    opserr << "WARNING sensSectionForce eleTag? secNum? dof? paramTag?- could not read dof? \n";
     return TCL_ERROR;	        
   }        
-  if (Tcl_GetInt(interp, argv[4], &gradNum) != TCL_OK) {
-    opserr << "WARNING sensSectionForce eleTag? secNum? dof? gradNum?- could not read gradNum? \n";
+  if (Tcl_GetInt(interp, argv[4], &paramTag) != TCL_OK) {
+    opserr << "WARNING sensSectionForce eleTag? secNum? dof? paramTag?- could not read paramTag? \n";
     return TCL_ERROR;	        
-  }        
-
-  ReliabilityDomain *theReliabilityDomain =
-    theReliabilityBuilder->getReliabilityDomain();
-
-  RandomVariablePositionerIter &rvpIter =
-    theReliabilityDomain->getRandomVariablePositioners();
-  RandomVariablePositioner *theRVP;
-  while ((theRVP = rvpIter()) != 0) {
-    theRVP->activate(false);
-  }
-  rvpIter.reset();
-  while ((theRVP = rvpIter()) != 0) {
-    if (theRVP->getRvIndex() == gradNum)
-      theRVP->activate(true);
   }
 
-  ParameterPositionerIter &ppIter =
-    theReliabilityDomain->getParameterPositioners();
-  ParameterPositioner *thePP;
-  while ((thePP = ppIter()) != 0) {
-      thePP->activate(false);
-  }
-  ppIter.reset();
-  while ((thePP = ppIter()) != 0) {
-    if (thePP->getGradNumber() == gradNum) {
-      thePP->activate(true);
-    }
-  }
+  ParameterIter &pIter = theDomain.getParameters();
+  Parameter *theParam;
+  while ((theParam = pIter()) != 0)
+    theParam->activate(false);
+
+  theParam = theDomain.getParameter(paramTag);
+  int gradIndex = theParam->getGradIndex();
+  theParam->activate(true);
 
   Element *theElement = theDomain.getElement(tag);
   if (theElement == 0) {
@@ -5569,11 +5695,11 @@ sensSectionForce(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char *
 
   Response *theResponse = theElement->setResponse(argvv, argcc, dummy);
   if (theResponse == 0) {
-    opserr << "WARNING unable to set dsdh response in element " << tag << endln;
-    return TCL_ERROR;	  
+    Tcl_SetResult(interp, "0.0", TCL_VOLATILE);
+    return TCL_OK;
   }
 
-  theResponse->getResponseSensitivity(gradNum);
+  theResponse->getResponseSensitivity(gradIndex);
   Information &info = theResponse->getInformation();
 
   const Vector &theVec = *(info.theVector);
@@ -5637,8 +5763,8 @@ sectionForce(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
 
   Response *theResponse = theElement->setResponse(argvv, argcc, dummy);
   if (theResponse == 0) {
-    opserr << "WARNING unable to set s response in element " << tag << endln;
-    return TCL_ERROR;	  
+    Tcl_SetResult(interp, "0.0", TCL_VOLATILE);
+    return TCL_OK;
   }
 
   theResponse->getResponse();
@@ -5705,8 +5831,8 @@ sectionDeformation(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char
 
   Response *theResponse = theElement->setResponse(argvv, argcc, dummy);
   if (theResponse == 0) {
-    opserr << "WARNING unable to set s response in element " << tag << endln;
-    return TCL_ERROR;	  
+    Tcl_SetResult(interp, "0.0", TCL_VOLATILE);
+    return TCL_OK;
   }
 
   theResponse->getResponse();
@@ -6633,6 +6759,76 @@ peerNGA(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
     Tcl_AppendResult(interp, ngaRecordNames.getString(i), NULL);
     Tcl_AppendResult(interp, " ", NULL);
   }
+
+  return TCL_OK;
+}
+
+int
+totalCPU(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  char buffer[20];
+
+  if (theAlgorithm == 0)
+    return TCL_ERROR;
+
+  sprintf(buffer, "%f", theAlgorithm->getTotalTimeCPU());
+  Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+
+  return TCL_OK;
+}
+
+int
+solveCPU(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  char buffer[20];
+
+  if (theAlgorithm == 0)
+    return TCL_ERROR;
+
+  sprintf(buffer, "%f", theAlgorithm->getSolveTimeCPU());
+  Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+
+  return TCL_OK;
+}
+
+int
+accelCPU(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  char buffer[20];
+
+  if (theAlgorithm == 0)
+    return TCL_ERROR;
+
+  sprintf(buffer, "%f", theAlgorithm->getAccelTimeCPU());
+  Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+
+  return TCL_OK;
+}
+
+int
+numFact(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  char buffer[20];
+
+  if (theAlgorithm == 0)
+    return TCL_ERROR;
+
+  sprintf(buffer, "%d", theAlgorithm->getNumFactorizations());
+  Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+
+  return TCL_OK;
+}
+
+int
+numIter(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  char buffer[20];
+
+  if (theAlgorithm == 0)
+    return TCL_ERROR;
+
+  sprintf(buffer, "%d", theAlgorithm->getNumIterations());
+  Tcl_SetResult(interp, buffer, TCL_VOLATILE);
 
   return TCL_OK;
 }
