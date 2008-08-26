@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-05-22 22:45:23 $
+// $Revision: 1.7 $
+// $Date: 2008-08-26 15:38:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/Parameter.h,v $
 
 #ifndef Parameter_h
@@ -55,6 +55,9 @@ class Parameter : public TaggedObject, public MovableObject
   virtual int addComponent(DomainComponent *theObject, const char **argv, int argc);  
   virtual int addObject(int parameterID, MovableObject *object);
 
+  void setGradIndex(int gradInd) {gradIndex = gradInd;}
+  int getGradIndex(void) {return gradIndex;}
+
   virtual void setDomain(Domain *theDomain);
   virtual int sendSelf(int commitTag, Channel &theChannel);  
   virtual int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
@@ -77,6 +80,8 @@ class Parameter : public TaggedObject, public MovableObject
   int maxNumObjects;
 
   int *parameterID;
+
+  int gradIndex; // 0,...,nparam-1
 };
 
 #endif

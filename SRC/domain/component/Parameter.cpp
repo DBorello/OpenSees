@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2008-04-29 17:33:32 $
+// $Revision: 1.8 $
+// $Date: 2008-08-26 15:38:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/Parameter.cpp,v $
 
 #include <classTags.h>
@@ -32,7 +32,7 @@ Parameter::Parameter(int passedTag,
   :TaggedObject(passedTag), MovableObject(PARAMETER_TAG_Parameter),
    theObjects(0), 
    numComponents(0), maxNumComponents(0),
-   numObjects(0), maxNumObjects(0), parameterID(0)
+   numObjects(0), maxNumObjects(0), parameterID(0), gradIndex(-1)
 {
   int ok = -1;
 
@@ -64,13 +64,14 @@ Parameter::Parameter(int passedTag,
 }
 
 Parameter::Parameter(const Parameter &param):
-  TaggedObject(param.getTag()), MovableObject(PARAMETER_TAG_Parameter)
+  TaggedObject(param.getTag()), MovableObject(PARAMETER_TAG_Parameter),
 {
   theInfo = param.theInfo;
   numComponents = param.numComponents;
   maxNumComponents = param.maxNumComponents;
   numObjects = param.numObjects;
   maxNumObjects = param.maxNumObjects;
+  gradIndex = param.gradIndex;
 
   theComponents = new DomainComponent *[maxNumComponents];
   int i;
@@ -94,7 +95,7 @@ Parameter::Parameter(int tag, int classTag)
   :TaggedObject(tag), MovableObject(classTag),
    theObjects(0), 
    numComponents(0), maxNumComponents(0),
-   numObjects(0), maxNumObjects(0), parameterID(0)
+   numObjects(0), maxNumObjects(0), parameterID(0), gradIndex(-1)
 {
   maxNumObjects = 1;
   maxNumComponents = 1;
@@ -109,7 +110,7 @@ Parameter::Parameter()
   :TaggedObject(0), MovableObject(PARAMETER_TAG_Parameter), 
    theObjects(0), 
    numComponents(0), maxNumComponents(0),
-   numObjects(0), maxNumObjects(0), parameterID(0)
+   numObjects(0), maxNumObjects(0), parameterID(0), gradIndex(-1)
 {
   maxNumObjects = 0;
   maxNumComponents = 0;
