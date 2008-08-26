@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2008-03-10 19:07:06 $
+// $Revision: 1.5 $
+// $Date: 2008-08-26 16:22:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/BoucWenMaterial.h,v $
 
 
@@ -76,13 +76,13 @@ class BoucWenMaterial : public UniaxialMaterial
     int setParameter (const char **argv, int argc, Parameter &param);
     int    updateParameter          (int parameterID, Information &info);
 	int    activateParameter        (int parameterID);
-	double getStressSensitivity     (int gradNumber, bool conditional);
-	double getStrainSensitivity     (int gradNumber);
-	double getTangentSensitivity    (int gradNumber);
-	double getDampTangentSensitivity(int gradNumber);
-	double getRhoSensitivity        (int gradNumber);
-	int    commitSensitivity        (double strainGradient, int gradNumber, int numGrads);
-    double  getInitialTangentSensitivity(int gradNumber);
+	double getStressSensitivity     (int gradIndex, bool conditional);
+	double getStrainSensitivity     (int gradIndex);
+	double getTangentSensitivity    (int gradIndex);
+	double getDampTangentSensitivity(int gradIndex);
+	double getRhoSensitivity        (int gradIndex);
+	int    commitSensitivity        (double strainGradient, int gradIndex, int numGrads);
+    double  getInitialTangentSensitivity(int gradIndex);
 
   protected:
     

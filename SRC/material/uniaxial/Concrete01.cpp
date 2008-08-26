@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2008-04-14 21:19:50 $
+// $Revision: 1.22 $
+// $Date: 2008-08-26 16:23:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.cpp,v $
                                                                         
 // Written: MHS 
@@ -586,7 +586,7 @@ Concrete01::activateParameter(int passedParameterID)
 }
 
 double
-Concrete01::getStressSensitivity(int gradNumber, bool conditional)
+Concrete01::getStressSensitivity(int gradIndex, bool conditional)
 {
 	// Initialize return value
 	double TstressSensitivity = 0.0;
@@ -601,11 +601,11 @@ Concrete01::getStressSensitivity(int gradNumber, bool conditional)
 	double CstressSensitivity = 0.0;
 	double CstrainSensitivity = 0.0;
 	if (SHVs != 0) {
-		CminStrainSensitivity   = (*SHVs)(0,(gradNumber-1));
-		CunloadSlopeSensitivity = (*SHVs)(1,(gradNumber-1));
-		CendStrainSensitivity   = (*SHVs)(2,(gradNumber-1));
-		CstressSensitivity      = (*SHVs)(3,(gradNumber-1));
-		CstrainSensitivity      = (*SHVs)(4,(gradNumber-1));
+		CminStrainSensitivity   = (*SHVs)(0,gradIndex);
+		CunloadSlopeSensitivity = (*SHVs)(1,gradIndex);
+		CendStrainSensitivity   = (*SHVs)(2,gradIndex);
+		CstressSensitivity      = (*SHVs)(3,gradIndex);
+		CstrainSensitivity      = (*SHVs)(4,gradIndex);
 	}
 
 
@@ -706,7 +706,7 @@ Concrete01::getStressSensitivity(int gradNumber, bool conditional)
 
 
 int
-Concrete01::commitSensitivity(double TstrainSensitivity, int gradNumber, int numGrads)
+Concrete01::commitSensitivity(double TstrainSensitivity, int gradIndex, int numGrads)
 {
 
 	// Initialize unconditaional stress sensitivity
@@ -746,11 +746,11 @@ Concrete01::commitSensitivity(double TstrainSensitivity, int gradNumber, int num
 		CunloadSlopeSensitivity = (2.0*fpcSensitivity*epsc0-2.0*fpc*epsc0Sensitivity) / (epsc0*epsc0);
 	}
 	else {
-		CminStrainSensitivity   = (*SHVs)(0,(gradNumber-1));
-		CunloadSlopeSensitivity = (*SHVs)(1,(gradNumber-1));
-		CendStrainSensitivity   = (*SHVs)(2,(gradNumber-1));
-		CstressSensitivity      = (*SHVs)(3,(gradNumber-1));
-		CstrainSensitivity      = (*SHVs)(4,(gradNumber-1));
+		CminStrainSensitivity   = (*SHVs)(0,gradIndex);
+		CunloadSlopeSensitivity = (*SHVs)(1,gradIndex);
+		CendStrainSensitivity   = (*SHVs)(2,gradIndex);
+		CstressSensitivity      = (*SHVs)(3,gradIndex);
+		CstrainSensitivity      = (*SHVs)(4,gradIndex);
 	}
 
 
@@ -824,8 +824,8 @@ Concrete01::commitSensitivity(double TstrainSensitivity, int gradNumber, int num
 	}
 
 	// Commit some history variables
-	(*SHVs)(3,(gradNumber-1)) = TstressSensitivity;
-	(*SHVs)(4,(gradNumber-1)) = TstrainSensitivity;
+	(*SHVs)(3,gradIndex) = TstressSensitivity;
+	(*SHVs)(4,gradIndex) = TstrainSensitivity;
 
 
 
@@ -913,9 +913,9 @@ Concrete01::commitSensitivity(double TstrainSensitivity, int gradNumber, int num
 
 
 
-	(*SHVs)(0,(gradNumber-1)) = TminStrainSensitivity;
-	(*SHVs)(1,(gradNumber-1)) = TunloadSlopeSensitivity;
-	(*SHVs)(2,(gradNumber-1)) = TendStrainSensitivity;
+	(*SHVs)(0,gradIndex) = TminStrainSensitivity;
+	(*SHVs)(1,gradIndex) = TunloadSlopeSensitivity;
+	(*SHVs)(2,gradIndex) = TendStrainSensitivity;
 
 	return 0;
 }
@@ -946,7 +946,7 @@ Concrete01::commitSensitivity(double TstrainSensitivity, int gradNumber, int num
 
 /* THE OLD METHODS:
 double
-Concrete01::getStressSensitivity(int gradNumber, bool conditional)
+Concrete01::getStressSensitivity(int gradIndex, bool conditional)
 {
 	// (This method only works for path-independent problems for now.)
 
@@ -1019,7 +1019,7 @@ Concrete01::getStressSensitivity(int gradNumber, bool conditional)
 
 
 int
-Concrete01::commitSensitivity(double TstrainSensitivity, int gradNumber, int numGrads)
+Concrete01::commitSensitivity(double TstrainSensitivity, int gradIndex, int numGrads)
 {
 	// Not treated yet. 
 

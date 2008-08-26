@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2008-03-10 19:07:06 $
+// $Revision: 1.6 $
+// $Date: 2008-08-26 16:22:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/BoucWenMaterial.cpp,v $
 
 
@@ -392,7 +392,7 @@ BoucWenMaterial::activateParameter(int passedParameterID)
 
 
 double
-BoucWenMaterial::getStressSensitivity(int gradNumber, bool conditional)
+BoucWenMaterial::getStressSensitivity(int gradIndex, bool conditional)
 {
 
 	// Declare output variable
@@ -440,9 +440,9 @@ BoucWenMaterial::getStressSensitivity(int gradNumber, bool conditional)
 	double DCe = 0.0;
 	double DCstrain = 0.0;
 	if (SHVs != 0) {
-		DCz		 = (*SHVs)(0,(gradNumber-1));
-		DCe		 = (*SHVs)(1,(gradNumber-1));
-		DCstrain = (*SHVs)(2,(gradNumber-1));
+		DCz		 = (*SHVs)(0,gradIndex);
+		DCe		 = (*SHVs)(1,gradIndex);
+		DCstrain = (*SHVs)(2,gradIndex);
 	}
 
 	
@@ -493,32 +493,32 @@ BoucWenMaterial::getStressSensitivity(int gradNumber, bool conditional)
 
 
 double
-BoucWenMaterial::getTangentSensitivity(int gradNumber)
+BoucWenMaterial::getTangentSensitivity(int gradIndex)
 {
 	return 0.0;
 }
 
 double
-BoucWenMaterial::getDampTangentSensitivity(int gradNumber)
+BoucWenMaterial::getDampTangentSensitivity(int gradIndex)
 {
 	return 0.0;
 }
 
 double
-BoucWenMaterial::getStrainSensitivity(int gradNumber)
+BoucWenMaterial::getStrainSensitivity(int gradIndex)
 {
 	return 0.0;
 }
 
 double
-BoucWenMaterial::getRhoSensitivity(int gradNumber)
+BoucWenMaterial::getRhoSensitivity(int gradIndex)
 {
 	return 0.0;
 }
 
 
 int
-BoucWenMaterial::commitSensitivity(double TstrainSensitivity, int gradNumber, int numGrads)
+BoucWenMaterial::commitSensitivity(double TstrainSensitivity, int gradIndex, int numGrads)
 {
 //  Quan & Michele Apr. 2006
 	if (Tz == 0){return 0;}
@@ -553,9 +553,9 @@ BoucWenMaterial::commitSensitivity(double TstrainSensitivity, int gradNumber, in
 	double DCe = 0.0;
 	double DCstrain = 0.0;
 	if (SHVs != 0) {
-		DCz		 = (*SHVs)(0,(gradNumber-1));
-		DCe		 = (*SHVs)(1,(gradNumber-1));
-		DCstrain = (*SHVs)(2,(gradNumber-1));
+		DCz		 = (*SHVs)(0,gradIndex);
+		DCe		 = (*SHVs)(1,gradIndex);
+		DCstrain = (*SHVs)(2,gradIndex);
 	}
 
 	
@@ -601,16 +601,16 @@ BoucWenMaterial::commitSensitivity(double TstrainSensitivity, int gradNumber, in
 
 
 	// Save sensitivity history variables
-	(*SHVs)(0,(gradNumber-1)) = DTz;
-	(*SHVs)(1,(gradNumber-1)) = DTe;
-	(*SHVs)(2,(gradNumber-1)) = DTstrain;
+	(*SHVs)(0,gradIndex) = DTz;
+	(*SHVs)(1,gradIndex) = DTe;
+	(*SHVs)(2,gradIndex) = DTstrain;
 
 	return 0;
 }
 
 
 double
-BoucWenMaterial::getInitialTangentSensitivity(int gradNumber)
+BoucWenMaterial::getInitialTangentSensitivity(int gradIndex)
 {
 
 	double dAlphadh =0.0;
