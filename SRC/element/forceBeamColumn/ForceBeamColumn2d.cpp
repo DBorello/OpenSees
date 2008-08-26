@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.35 $
-// $Date: 2008-05-27 23:09:54 $
+// $Revision: 1.36 $
+// $Date: 2008-08-26 17:10:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 /*
@@ -760,10 +760,10 @@ ForceBeamColumn2d::update()
 	    
 	    // get section resisting forces
 	    SsrSubdivide[i] = sections[i]->getStressResultant();
-	    
+
 	    // get section flexibility matrix
 	    fsSubdivide[i] = sections[i]->getSectionFlexibility();
-	    
+
 	    // calculate section residual deformations
 	    // dvs = fs * (Ss - Ssr);
 	    dSs = Ss;
@@ -1950,10 +1950,10 @@ ForceBeamColumn2d::Print(OPS_Stream &s, int flag)
 
     s << "\tEnd 1 Forces (P V M): " << -P+p0[0] << " " << V+p0[1] << " " << M1 << endln;
     s << "\tEnd 2 Forces (P V M): " << P << " " << -V+p0[2] << " " << M2 << endln;
-    
+
     if (flag == 1) { 
       for (int i = 0; i < numSections; i++)
-	s << "\numSections "<<i<<" :" << *sections[i];
+	s << "\nSection "<<i<<" :" << *sections[i];
     }
   }
 }
@@ -2463,6 +2463,26 @@ ForceBeamColumn2d::getResponseSensitivity(int responseID, int gradNumber,
       }
     }
     
+    double dLdh = crdTransf->getdLdh();
+    double d1oLdh = crdTransf->getd1overLdh();
+    
+    double dptsdh[maxNumSections];
+    beamIntegr->getLocationsDeriv(numSections, L, dLdh, dptsdh);
+    double dxLdh = dptsdh[sectionNum-1];
+
+    for (int j = 0; j < order; j++) {
+      switch (code(j)) {
+      case SECTION_RESPONSE_MZ:
+	dsdh(j) += dxLdh*(Se(1)+Se(2));
+	break;
+      case SECTION_RESPONSE_VY:
+	dsdh(j) += d1oLdh*(Se(1)+Se(2));
+	break;
+      default:
+	break;
+      }
+    }
+
     /*
     opserr << "FBC2d::getRespSens dsdh=b*dqdh+dspdh: " << dsdh;
 
@@ -2477,6 +2497,7 @@ ForceBeamColumn2d::getResponseSensitivity(int responseID, int gradNumber,
 
     opserr << "FBC2d::getRespSens dsdh=b*dqdh+dspdh: " << dsdh;
     */
+
     return eleInfo.setVector(dsdh);
   }
 
