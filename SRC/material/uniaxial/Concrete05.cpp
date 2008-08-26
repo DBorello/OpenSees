@@ -3139,25 +3139,3 @@ void Concrete05::Print (OPS_Stream& s, int flag)
    s << "  xcrp: " << xcrp << endln;
 
 }
-
-
-// AddingSensitivity:BEGIN ///////////////////////////////////
-
-double
-Concrete05::getStressSensitivity(int gradNumber, bool conditional)
-{
-//removed
-	return 0;
-}
-
-
-int
-Concrete05::commitSensitivity(double TstrainSensitivity, int gradNumber, int numGrads)
-{
-//removed
-	return 0;
-}
-
-
-// AddingSensitivity:END /////////////////////////////////////////////
-

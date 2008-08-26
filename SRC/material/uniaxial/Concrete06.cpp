@@ -470,26 +470,6 @@ void Concrete06::Print (OPS_Stream& s, int flag)
 
 }
 
-
-// AddingSensitivity:BEGIN ///////////////////////////////////
-
-double
-Concrete06::getStressSensitivity(int gradNumber, bool conditional)
-{
-	return 0;
-}
-
-
-int
-Concrete06::commitSensitivity(double TstrainSensitivity, int gradNumber, int numGrads)
-{
-	return 0;
-}
-
-
-// AddingSensitivity:END /////////////////////////////////////////////
-
-
 int
 Concrete06::getVariable(const char *varName, Information &theInfo)
 {
