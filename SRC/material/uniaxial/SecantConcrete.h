@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2008-04-14 21:20:09 $
+// $Revision: 1.3 $
+// $Date: 2008-08-26 16:34:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SecantConcrete.h,v $
 
 // Written: MHS
@@ -67,9 +67,9 @@ class SecantConcrete : public UniaxialMaterial
   
   // AddingSensitivity:BEGIN //////////////////////////////////////////
   int activateParameter(int parameterID);
-  double getStressSensitivity(int gradNumber, bool conditional);
-  double getInitialTangentSensitivity(int gradNumber);
-  int commitSensitivity(double strainGradient, int gradNumber, int numGrads);
+  double getStressSensitivity(int gradIndex, bool conditional);
+  double getInitialTangentSensitivity(int gradIndex);
+  int commitSensitivity(double strainGradient, int gradIndex, int numGrads);
   // AddingSensitivity:END ///////////////////////////////////////////
   
  protected:
@@ -96,12 +96,12 @@ class SecantConcrete : public UniaxialMaterial
   Matrix *SHVs;
   // AddingSensitivity:END ///////////////////////////////////////////
   
-  double getStressGradient(int gradNumber);
-  int setStrainGradient(int gradNumber, double depsilondh);
+  double getStressGradient(int gradIndex);
+  int setStrainGradient(int gradIndex, double depsilondh);
   
   void backbone(double strain, double &stress, double &tangent);
-  double backboneCondDeriv(double strain, int gradNumber);
-  double backboneUncondDeriv(double strain, int gradNumber, double depsilondh);
+  double backboneCondDeriv(double strain, int gradIndex);
+  double backboneUncondDeriv(double strain, int gradIndex, double depsilondh);
 };
 
 #endif

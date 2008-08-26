@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-11-30 23:34:33 $
+// $Revision: 1.10 $
+// $Date: 2008-08-26 16:30:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ElasticMaterial.cpp,v $
                                                                         
                                                                         
@@ -204,7 +204,7 @@ ElasticMaterial::activateParameter(int paramID)
 }
 
 double
-ElasticMaterial::getStressSensitivity(int gradNumber, bool conditional)
+ElasticMaterial::getStressSensitivity(int gradIndex, bool conditional)
 {
   if (parameterID == 1)
     return trialStrain;
@@ -215,14 +215,14 @@ ElasticMaterial::getStressSensitivity(int gradNumber, bool conditional)
 }
 
 double
-ElasticMaterial::getInitialTangentSensitivity(int gradNumber)
+ElasticMaterial::getInitialTangentSensitivity(int gradIndex)
 {
   return 0.0;
 }
 
 int
 ElasticMaterial::commitSensitivity(double strainGradient,
-				   int gradNumber, int numGrads)
+				   int gradIndex, int numGrads)
 {
   // Nothing to commit ... path independent
   return 0.0;

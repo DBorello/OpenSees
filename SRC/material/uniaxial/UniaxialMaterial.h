@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-02-02 01:19:30 $
+// $Revision: 1.12 $
+// $Date: 2008-08-26 16:36:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.h,v $
                                                                         
                                                                         
@@ -78,12 +78,12 @@ class UniaxialMaterial : public Material
     virtual int getResponse (int responseID, Information &matInformation);    
 
     // AddingSensitivity:BEGIN //////////////////////////////////////////
-    virtual double getStressSensitivity     (int gradNumber, bool conditional);
-    virtual double getStrainSensitivity     (int gradNumber);
-    virtual double getInitialTangentSensitivity(int gradNumber);
-    virtual double getDampTangentSensitivity(int gradNumber);
-    virtual double getRhoSensitivity        (int gradNumber);
-    virtual int    commitSensitivity        (double strainGradient, int gradNumber, int numGrads);
+    virtual double getStressSensitivity     (int gradIndex, bool conditional);
+    virtual double getStrainSensitivity     (int gradIndex);
+    virtual double getInitialTangentSensitivity(int gradIndex);
+    virtual double getDampTangentSensitivity(int gradIndex);
+    virtual double getRhoSensitivity        (int gradIndex);
+    virtual int    commitSensitivity        (double strainGradient, int gradIndex, int numGrads);
     // AddingSensitivity:END ///////////////////////////////////////////
     
  protected:

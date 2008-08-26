@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2008-04-14 21:19:50 $
+// $Revision: 1.4 $
+// $Date: 2008-08-26 16:34:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SecantConcrete.cpp,v $
 
 // Written: MHS
@@ -275,31 +275,31 @@ SecantConcrete::activateParameter(int paramID)
 }
 
 double
-SecantConcrete::getStressSensitivity(int gradNumber, bool conditional)
+SecantConcrete::getStressSensitivity(int gradIndex, bool conditional)
 {
-  return this->getStressGradient(gradNumber);
+  return this->getStressGradient(gradIndex);
 }
 
 double
-SecantConcrete::getInitialTangentSensitivity(int gradNumber)
+SecantConcrete::getInitialTangentSensitivity(int gradIndex)
 {
   return 0.0;
 }
 
 int
 SecantConcrete::commitSensitivity(double strainGradient,
-				  int gradNumber, int numGrads)
+				  int gradIndex, int numGrads)
 {
   if (SHVs == 0) {
     SHVs = new Matrix(2,numGrads);
     SHVs->Zero();
   }
 
-  return this->setStrainGradient(gradNumber, strainGradient);
+  return this->setStrainGradient(gradIndex, strainGradient);
 }
 
 double
-SecantConcrete::backboneCondDeriv(double strain, int gradNumber)
+SecantConcrete::backboneCondDeriv(double strain, int gradIndex)
 {
   double dfcdh = 0.0;
   double decdh = 0.0;
@@ -330,14 +330,14 @@ SecantConcrete::backboneCondDeriv(double strain, int gradNumber)
 }
 
 double
-SecantConcrete::getStressGradient(int gradNumber)
+SecantConcrete::getStressGradient(int gradIndex)
 {
   double depsdh = 0.0;
   double dsigdh = 0.0;
 
   if (SHVs != 0) {
-    depsdh = (*SHVs)(0,gradNumber-1);
-    dsigdh = (*SHVs)(1,gradNumber-1);
+    depsdh = (*SHVs)(0,gradIndex);
+    dsigdh = (*SHVs)(1,gradIndex);
   }
 
   if (Tstrain > 0.0 || Tstrain < epsu)
@@ -348,11 +348,11 @@ SecantConcrete::getStressGradient(int gradNumber)
     return Tstrain*(CminStrain*dsigdh-sigmaMin*depsdh)/(CminStrain*CminStrain);
   }
   else
-    return this->backboneCondDeriv(Tstrain, gradNumber);
+    return this->backboneCondDeriv(Tstrain, gradIndex);
 }
 
 double
-SecantConcrete::backboneUncondDeriv(double strain, int gradNumber,
+SecantConcrete::backboneUncondDeriv(double strain, int gradIndex,
 				    double depsilondh)
 {
   double dfcdh = 0.0;
@@ -385,16 +385,16 @@ SecantConcrete::backboneUncondDeriv(double strain, int gradNumber,
 }
 
 int
-SecantConcrete::setStrainGradient(int gradNumber, double depsilondh)
+SecantConcrete::setStrainGradient(int gradIndex, double depsilondh)
 {
   if (SHVs != 0) {
 
-    double &depsdh = (*SHVs)(0,gradNumber-1);
-    double &dsigdh = (*SHVs)(1,gradNumber-1);
+    double &depsdh = (*SHVs)(0,gradIndex);
+    double &dsigdh = (*SHVs)(1,gradIndex);
 
     if (TminStrain < CminStrain) {
       depsdh = depsilondh;
-      dsigdh = this->backboneUncondDeriv(TminStrain, gradNumber, depsdh);
+      dsigdh = this->backboneUncondDeriv(TminStrain, gradIndex, depsdh);
     }
   }
 

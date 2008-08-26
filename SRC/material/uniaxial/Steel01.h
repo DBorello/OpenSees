@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2006-09-05 22:27:12 $
+// $Revision: 1.14 $
+// $Date: 2008-08-26 16:35:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.h,v $
                                                                         
                                                                         
@@ -80,9 +80,9 @@ class Steel01 : public UniaxialMaterial
     int setParameter(const char **argv, int argc, Parameter &param);
     int    updateParameter          (int parameterID, Information &info);
     int    activateParameter        (int parameterID);
-    double getStressSensitivity     (int gradNumber, bool conditional);
-    double getInitialTangentSensitivity(int gradNumber);
-    int    commitSensitivity        (double strainGradient, int gradNumber, int numGrads);
+    double getStressSensitivity     (int gradIndex, bool conditional);
+    double getInitialTangentSensitivity(int gradIndex);
+    int    commitSensitivity        (double strainGradient, int gradIndex, int numGrads);
     // AddingSensitivity:END ///////////////////////////////////////////
     
  protected:

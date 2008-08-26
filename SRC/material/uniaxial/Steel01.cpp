@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2007-11-30 23:34:33 $
+// $Revision: 1.20 $
+// $Date: 2008-08-26 16:35:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.cpp,v $
                                                                         
 // Written: MHS 
@@ -562,7 +562,7 @@ Steel01::activateParameter(int passedParameterID)
 
 
 double
-Steel01::getStressSensitivity(int gradNumber, bool conditional)
+Steel01::getStressSensitivity(int gradIndex, bool conditional)
 {
 	// Initialize return value
 	double gradient = 0.0;
@@ -572,8 +572,8 @@ Steel01::getStressSensitivity(int gradNumber, bool conditional)
 	double CstrainSensitivity = 0.0;
 	double CstressSensitivity = 0.0;
 	if (SHVs != 0) {
-		CstrainSensitivity = (*SHVs)(0,(gradNumber-1));
-		CstressSensitivity = (*SHVs)(1,(gradNumber-1));
+		CstrainSensitivity = (*SHVs)(0,gradIndex);
+		CstressSensitivity = (*SHVs)(1,gradIndex);
 	}
 
 
@@ -631,7 +631,7 @@ Steel01::getStressSensitivity(int gradNumber, bool conditional)
 
 
 double
-Steel01::getInitialTangentSensitivity(int gradNumber)
+Steel01::getInitialTangentSensitivity(int gradIndex)
 {
 	// For now, assume that this is only called for initial stiffness 
 	if (parameterID == 2) {
@@ -644,7 +644,7 @@ Steel01::getInitialTangentSensitivity(int gradNumber)
 
 
 int
-Steel01::commitSensitivity(double TstrainSensitivity, int gradNumber, int numGrads)
+Steel01::commitSensitivity(double TstrainSensitivity, int gradIndex, int numGrads)
 {
 	if (SHVs == 0) {
 		SHVs = new Matrix(2,numGrads);
@@ -659,8 +659,8 @@ Steel01::commitSensitivity(double TstrainSensitivity, int gradNumber, int numGra
 	double CstrainSensitivity = 0.0;
 	double CstressSensitivity	 = 0.0;
 	if (SHVs != 0) {
-		CstrainSensitivity = (*SHVs)(0,(gradNumber-1));
-		CstressSensitivity = (*SHVs)(1,(gradNumber-1));
+		CstrainSensitivity = (*SHVs)(0,gradIndex);
+		CstressSensitivity = (*SHVs)(1,gradIndex);
 	}
 
 
@@ -715,8 +715,8 @@ Steel01::commitSensitivity(double TstrainSensitivity, int gradNumber, int numGra
 
 
 	// Commit history variables
-	(*SHVs)(0,(gradNumber-1)) = TstrainSensitivity;
-	(*SHVs)(1,(gradNumber-1)) = gradient;
+	(*SHVs)(0,gradIndex) = TstrainSensitivity;
+	(*SHVs)(1,gradIndex) = gradient;
 
 	return 0;
 }

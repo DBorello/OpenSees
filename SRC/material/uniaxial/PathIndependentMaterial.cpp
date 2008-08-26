@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-02-12 20:37:25 $
+// $Revision: 1.8 $
+// $Date: 2008-08-26 16:33:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PathIndependentMaterial.cpp,v $
 
 // Written: MHS
@@ -225,38 +225,38 @@ PathIndependentMaterial::Print(OPS_Stream &s, int flag)
 }
 
 double
-PathIndependentMaterial::getStressSensitivity(int gradNumber, bool conditional)
+PathIndependentMaterial::getStressSensitivity(int gradIndex, bool conditional)
 {
-  return theMaterial->getStressSensitivity(gradNumber, conditional);
+  return theMaterial->getStressSensitivity(gradIndex, conditional);
 }
 
 double
-PathIndependentMaterial::getStrainSensitivity(int gradNumber)
+PathIndependentMaterial::getStrainSensitivity(int gradIndex)
 {
-  return theMaterial->getStrainSensitivity(gradNumber);
+  return theMaterial->getStrainSensitivity(gradIndex);
 }
 
 double
-PathIndependentMaterial::getInitialTangentSensitivity(int gradNumber)
+PathIndependentMaterial::getInitialTangentSensitivity(int gradIndex)
 {
-  return theMaterial->getInitialTangentSensitivity(gradNumber);
+  return theMaterial->getInitialTangentSensitivity(gradIndex);
 }
 
 double
-PathIndependentMaterial::getDampTangentSensitivity(int gradNumber)
+PathIndependentMaterial::getDampTangentSensitivity(int gradIndex)
 {
-  return theMaterial->getDampTangentSensitivity(gradNumber);
+  return theMaterial->getDampTangentSensitivity(gradIndex);
 }
 
 double
-PathIndependentMaterial::getRhoSensitivity(int gradNumber)
+PathIndependentMaterial::getRhoSensitivity(int gradIndex)
 {
-  return theMaterial->getRhoSensitivity(gradNumber);
+  return theMaterial->getRhoSensitivity(gradIndex);
 }
 
 int   
 PathIndependentMaterial::commitSensitivity(double strainGradient,
-					   int gradNumber, int numGrads)
+					   int gradIndex, int numGrads)
 {
   return 0; // commit nothing, path independent
 }

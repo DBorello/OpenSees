@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2007-02-02 23:43:03 $
+// $Revision: 1.18 $
+// $Date: 2008-08-26 16:36:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.cpp,v $
                                                                         
                                                                         
@@ -194,37 +194,37 @@ UniaxialMaterial::getResponse(int responseID, Information &matInfo)
 
 // AddingSensitivity:BEGIN ////////////////////////////////////////
 double
-UniaxialMaterial::getStressSensitivity(int gradNumber, bool conditional)
+UniaxialMaterial::getStressSensitivity(int gradIndex, bool conditional)
 {
     return 0.0;
 }
 
 double
-UniaxialMaterial::getStrainSensitivity(int gradNumber)
+UniaxialMaterial::getStrainSensitivity(int gradIndex)
 {
     return 0.0;
 }
 
 double
-UniaxialMaterial::getInitialTangentSensitivity(int gradNumber)
+UniaxialMaterial::getInitialTangentSensitivity(int gradIndex)
 {
     return 0.0;
 }
 
 double
-UniaxialMaterial::getRhoSensitivity(int gradNumber)
+UniaxialMaterial::getRhoSensitivity(int gradIndex)
 {
     return 0.0;
 }
 
 double
-UniaxialMaterial::getDampTangentSensitivity(int gradNumber)
+UniaxialMaterial::getDampTangentSensitivity(int gradIndex)
 {
     return 0.0;
 }
 
 int
-UniaxialMaterial::commitSensitivity(double strainSensitivity, int gradNumber, int numGrads)
+UniaxialMaterial::commitSensitivity(double strainSensitivity, int gradIndex, int numGrads)
 {
     return -1;
 }

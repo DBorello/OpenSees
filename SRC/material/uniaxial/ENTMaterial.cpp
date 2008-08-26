@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-11-30 23:34:33 $
+// $Revision: 1.9 $
+// $Date: 2008-08-26 16:31:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ENTMaterial.cpp,v $
                                                                         
                                                                         
@@ -189,7 +189,7 @@ ENTMaterial::activateParameter(int paramID)
 }
 
 double
-ENTMaterial::getStressSensitivity(int gradNumber, bool conditional)
+ENTMaterial::getStressSensitivity(int gradIndex, bool conditional)
 {
   if (parameterID == 1 && trialStrain < 0.0)
     return trialStrain;
@@ -198,14 +198,14 @@ ENTMaterial::getStressSensitivity(int gradNumber, bool conditional)
 }
 
 double
-ENTMaterial::getInitialTangentSensitivity(int gradNumber)
+ENTMaterial::getInitialTangentSensitivity(int gradIndex)
 {
   return 0.0;
 }
 
 int
 ENTMaterial::commitSensitivity(double strainGradient,
-			       int gradNumber, int numGrads)
+			       int gradIndex, int numGrads)
 {
   // Nothing to commit ... path independent
   return 0.0;

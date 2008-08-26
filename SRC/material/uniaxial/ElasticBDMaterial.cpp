@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-11-30 23:34:33 $
+// $Revision: 1.3 $
+// $Date: 2008-08-26 16:30:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ElasticBDMaterial.cpp,v $
                                                                         
                                                                         
@@ -225,7 +225,7 @@ ElasticBDMaterial::activateParameter(int paramID)
 }
 
 double
-ElasticBDMaterial::getStressSensitivity(int gradNumber, bool conditional)
+ElasticBDMaterial::getStressSensitivity(int gradIndex, bool conditional)
 {
   if (parameterID == 1)
     return b*d*a*trialStrain;
@@ -242,14 +242,14 @@ ElasticBDMaterial::getStressSensitivity(int gradNumber, bool conditional)
 }
 
 double
-ElasticBDMaterial::getInitialTangentSensitivity(int gradNumber)
+ElasticBDMaterial::getInitialTangentSensitivity(int gradIndex)
 {
   return 0.0;
 }
 
 int
 ElasticBDMaterial::commitSensitivity(double strainGradient,
-				   int gradNumber, int numGrads)
+				     int gradIndex, int numGrads)
 {
   // Nothing to commit ... path independent
   return 0;

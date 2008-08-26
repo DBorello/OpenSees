@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.14 $
-// $Date: 2007-11-30 23:34:33 $
+// $Revision: 1.15 $
+// $Date: 2008-08-26 16:32:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HardeningMaterial.cpp,v $
 
 // Written: MHS
@@ -346,9 +346,8 @@ HardeningMaterial::activateParameter(int passedParameterID)
 
 
 double
-HardeningMaterial::getStressSensitivity(int gradNumber, bool conditional)
+HardeningMaterial::getStressSensitivity(int gradIndex, bool conditional)
 {
-
 	// First set values depending on what is random
 	double SigmaYSensitivity = 0.0;
 	double ESensitivity = 0.0;
@@ -376,9 +375,9 @@ HardeningMaterial::getStressSensitivity(int gradNumber, bool conditional)
 	double CbackStressSensitivity	 = 0.0;
 	double ChardeningSensitivity	 = 0.0;
 	if (SHVs != 0) {
-		CplasticStrainSensitivity = (*SHVs)(0,(gradNumber-1));
-		CbackStressSensitivity	 = (*SHVs)(1,(gradNumber-1));
-		ChardeningSensitivity	 = (*SHVs)(2,(gradNumber-1));
+		CplasticStrainSensitivity = (*SHVs)(0,gradIndex);
+		CbackStressSensitivity	 = (*SHVs)(1,gradIndex);
+		ChardeningSensitivity	 = (*SHVs)(2,gradIndex);
 	}
 
 	// Elastic trial stress
@@ -425,7 +424,7 @@ HardeningMaterial::getStressSensitivity(int gradNumber, bool conditional)
 
 
 double
-HardeningMaterial::getInitialTangentSensitivity(int gradNumber)
+HardeningMaterial::getInitialTangentSensitivity(int gradIndex)
 {
 	// For now, assume that this is only called for initial stiffness 
 	if (parameterID == 2) {
@@ -438,7 +437,7 @@ HardeningMaterial::getInitialTangentSensitivity(int gradNumber)
 
 
 int
-HardeningMaterial::commitSensitivity(double TstrainSensitivity, int gradNumber, int numGrads)
+HardeningMaterial::commitSensitivity(double TstrainSensitivity, int gradIndex, int numGrads)
 {
 	if (SHVs == 0) {
 		SHVs = new Matrix(3,numGrads);
@@ -467,9 +466,9 @@ HardeningMaterial::commitSensitivity(double TstrainSensitivity, int gradNumber, 
 	}
 
 	// Then pick up history variables for this gradient number
-	double CplasticStrainSensitivity= (*SHVs)(0,(gradNumber-1));
-	double CbackStressSensitivity	= (*SHVs)(1,(gradNumber-1));
-	double ChardeningSensitivity	= (*SHVs)(2,(gradNumber-1));
+	double CplasticStrainSensitivity= (*SHVs)(0,gradIndex);
+	double CbackStressSensitivity	= (*SHVs)(1,gradIndex);
+	double ChardeningSensitivity	= (*SHVs)(2,gradIndex);
 
 	// Elastic trial stress
 	double Tstress = E * (Tstrain-CplasticStrain);
@@ -503,9 +502,9 @@ HardeningMaterial::commitSensitivity(double TstrainSensitivity, int gradNumber, 
 			(fSensitivity*(E+Hkin+Hiso)-f*(ESensitivity+HkinSensitivity+HisoSensitivity))
 			/((E+Hkin+Hiso)*(E+Hkin+Hiso));
 
-		(*SHVs)(0,(gradNumber-1)) += dGammaSensitivity*sign;
-		(*SHVs)(1,(gradNumber-1)) += dGammaSensitivity*Hkin*sign + dGamma*HkinSensitivity*sign;
-		(*SHVs)(2,(gradNumber-1)) += dGammaSensitivity;
+		(*SHVs)(0,gradIndex) += dGammaSensitivity*sign;
+		(*SHVs)(1,gradIndex) += dGammaSensitivity*Hkin*sign + dGamma*HkinSensitivity*sign;
+		(*SHVs)(2,gradIndex) += dGammaSensitivity;
 
 	}
 

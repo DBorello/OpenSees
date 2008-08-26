@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-09-05 22:20:15 $
+// $Revision: 1.7 $
+// $Date: 2008-08-26 16:30:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ElasticMaterial.h,v $
                                                                         
                                                                         
@@ -76,9 +76,9 @@ class ElasticMaterial : public UniaxialMaterial
 
     // AddingSensitivity:BEGIN //////////////////////////////////////////
     int activateParameter(int parameterID);
-    double getStressSensitivity(int gradNumber, bool conditional);
-    double getInitialTangentSensitivity(int gradNumber);
-    int commitSensitivity(double strainGradient, int gradNumber, int numGrads);
+    double getStressSensitivity(int gradIndex, bool conditional);
+    double getInitialTangentSensitivity(int gradIndex);
+    int commitSensitivity(double strainGradient, int gradIndex, int numGrads);
     // AddingSensitivity:END ///////////////////////////////////////////
 
   protected:
