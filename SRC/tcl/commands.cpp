@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.130 $
-// $Date: 2008-08-26 17:08:31 $
+// $Revision: 1.131 $
+// $Date: 2008-08-26 18:24:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -289,7 +289,7 @@ OPS_Stream *opserrPtr = &sserr;
 #include <NewNewmarkSensitivityIntegrator.h>
 #include <NewStaticSensitivityIntegrator.h>
 //#include <OrigSensitivityAlgorithm.h>
-//#include <NewSensitivityAlgorithm.h>
+#include <NewSensitivityAlgorithm.h>
 #include <ReliabilityStaticAnalysis.h>
 #include <ReliabilityDirectIntegrationAnalysis.h>
 // AddingSensitivity:END /////////////////////////////////////////////////
@@ -861,13 +861,12 @@ sensitivityAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Ch
 	ReliabilityDomain *theReliabilityDomain;
 	theReliabilityDomain = theReliabilityBuilder->getReliabilityDomain();
 	if(newalgorithm){
-	  /*
-	    theSensitivityAlgorithm = new NewSensitivityAlgorithm(theReliabilityDomain,
-	    theAlgorithm,
-	    theSensitivityIntegrator,
-	    analysisTypeTag);
-	  */
-	  theSensitivityAlgorithm = 0;
+	  theSensitivityAlgorithm = new 
+	    NewSensitivityAlgorithm(theReliabilityDomain, 
+				    &theDomain,
+				    theAlgorithm,
+				    theSensitivityIntegrator,
+				    analysisTypeTag);
 	} else {
 	  theSensitivityAlgorithm = new 
 	    SensitivityAlgorithm(&theDomain,
