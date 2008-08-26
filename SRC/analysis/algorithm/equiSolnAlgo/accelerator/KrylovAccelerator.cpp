@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-10-26 04:22:01 $
+// $Revision: 1.2 $
+// $Date: 2008-08-26 18:25:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/accelerator/KrylovAccelerator.cpp,v $
                                                                         
 // Written: MHS
@@ -168,10 +168,6 @@ int
 KrylovAccelerator::accelerate(Vector &vStar, LinearSOE &theSOE, 
 			      IncrementalIntegrator &theIntegrator)
 {
-  theSOE.solve();
-
-  vStar = theSOE.getX();
-
   Vector &r = vStar;
   //rFile << "dim: " << dimension << endln;
   //rFile << r << endln;

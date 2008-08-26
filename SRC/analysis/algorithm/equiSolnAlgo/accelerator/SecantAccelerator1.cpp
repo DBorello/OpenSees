@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-10-26 03:56:45 $
+// $Revision: 1.2 $
+// $Date: 2008-08-26 18:26:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/accelerator/SecantAccelerator1.cpp,v $
                                                                         
 // Written: MHS
@@ -95,9 +95,6 @@ int
 SecantAccelerator1::accelerate(Vector &vStar, LinearSOE &theSOE, 
 			       IncrementalIntegrator &theIntegrator)
 {
-  theSOE.solve();
-  vStar = theSOE.getX();
-
   // Current right hand side
   const Vector &rNew  = theSOE.getB();
 

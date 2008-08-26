@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-10-26 03:56:45 $
+// $Revision: 1.2 $
+// $Date: 2008-08-26 18:26:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/accelerator/SecantAccelerator3.cpp,v $
                                                                         
 // Written: MHS
@@ -106,9 +106,6 @@ int
 SecantAccelerator3::accelerate(Vector &vStar, LinearSOE &theSOE, 
 			       IncrementalIntegrator &theIntegrator)
 {
-  theSOE.solve();
-  vStar = theSOE.getX();
-
   // Current right hand side
   const Vector &rNew  = theSOE.getB();
 
@@ -161,6 +158,29 @@ SecantAccelerator3::accelerate(Vector &vStar, LinearSOE &theSOE,
 int
 SecantAccelerator3::updateTangent(IncrementalIntegrator &theIntegrator)
 {
+  if (iteration < maxIterations)
+    return 0;
+
+  switch (theTangent) {
+  case CURRENT_TANGENT:
+    iteration = 0;
+    theIntegrator.formTangent(CURRENT_TANGENT);
+    return 1;
+    break;
+  case INITIAL_TANGENT:
+    iteration = 0;
+    theIntegrator.formTangent(INITIAL_TANGENT);
+    return 0;
+    break;
+  case NO_TANGENT:
+    //iteration = 0;
+    return 0;
+    break;
+  default:
+    return 0;
+  }
+
+  /*
   if (iteration > maxIterations) {
     //opserr << "SecantAccelerator3::updateTangent() tangent formed" << endln;
     iteration = 0;
@@ -173,6 +193,7 @@ SecantAccelerator3::updateTangent(IncrementalIntegrator &theIntegrator)
   }
   else
     return 0;
+  */
 }
 
 void
