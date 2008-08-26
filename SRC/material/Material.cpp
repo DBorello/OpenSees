@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-06-08 00:40:55 $
+// $Revision: 1.8 $
+// $Date: 2008-08-26 16:20:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/Material.cpp,v $
                                                                         
                                                                         
@@ -60,7 +60,7 @@ Material::getResponse(int responseID, Information &info)
 }
 
 int 
-Material::getResponseSensitivity(int responseID, int gradNumber,
+Material::getResponseSensitivity(int responseID, int gradIndex,
 				 Information &info)
 {
   return -1;
