@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-05-27 23:26:45 $
+// $Revision: 1.3 $
+// $Date: 2008-08-26 16:49:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticShearSection3d.cpp,v $
 
 #include <ElasticShearSection3d.h>
@@ -392,7 +392,7 @@ ElasticShearSection3d::activateParameter(int paramID)
 }
 
 const Vector&
-ElasticShearSection3d::getStressResultantSensitivity(int gradNumber,
+ElasticShearSection3d::getStressResultantSensitivity(int gradIndex,
 						     bool conditional)
 {
   s.Zero();
@@ -430,7 +430,7 @@ ElasticShearSection3d::getStressResultantSensitivity(int gradNumber,
 }
 
 const Matrix&
-ElasticShearSection3d::getInitialTangentSensitivity(int gradNumber)
+ElasticShearSection3d::getInitialTangentSensitivity(int gradIndex)
 {
   ks.Zero();
 

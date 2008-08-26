@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2008-04-14 21:38:11 $
+// $Revision: 1.14 $
+// $Date: 2008-08-26 16:45:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionForceDeformation.h,v $
                                                                         
                                                                         
@@ -83,20 +83,20 @@ class SectionForceDeformation : public Material
   virtual Response *setResponse(const char **argv, int argc, OPS_Stream &s);
   virtual int getResponse(int responseID, Information &info);
 
-  virtual int getResponseSensitivity(int responseID, int gradNumber,
+  virtual int getResponseSensitivity(int responseID, int gradIndex,
 				     Information &info);
   
   // AddingSensitivity:BEGIN //////////////////////////////////////////
-  virtual const Vector &getStressResultantSensitivity(int gradNumber,
+  virtual const Vector &getStressResultantSensitivity(int gradIndex,
 						      bool conditional);
-  virtual const Vector &getSectionDeformationSensitivity(int gradNumber);
-  virtual const Matrix &getSectionTangentSensitivity(int gradNumber);
-  virtual const Matrix &getSectionFlexibilitySensitivity(int gradNumber);
-  virtual const Matrix &getInitialTangentSensitivity(int gradNumber);
-  virtual const Matrix &getInitialFlexibilitySensitivity(int gradNumber);
-  virtual double getRhoSensitivity(int gradNumber);
+  virtual const Vector &getSectionDeformationSensitivity(int gradIndex);
+  virtual const Matrix &getSectionTangentSensitivity(int gradIndex);
+  virtual const Matrix &getSectionFlexibilitySensitivity(int gradIndex);
+  virtual const Matrix &getInitialTangentSensitivity(int gradIndex);
+  virtual const Matrix &getInitialFlexibilitySensitivity(int gradIndex);
+  virtual double getRhoSensitivity(int gradIndex);
   virtual int commitSensitivity(const Vector& sectionDeformationGradient,
-				int gradNumber, int numGrads);
+				int gradIndex, int numGrads);
   // AddingSensitivity:END ///////////////////////////////////////////
   
  protected:

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-04-14 21:39:54 $
+// $Revision: 1.3 $
+// $Date: 2008-08-26 16:48:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ParallelSection.cpp,v $
                                                                         
                                                                         
@@ -716,7 +716,7 @@ ParallelSection::setParameter(const char **argv, int argc, Parameter &param)
 }
 
 const Vector &
-ParallelSection::getSectionDeformationSensitivity(int gradNumber)
+ParallelSection::getSectionDeformationSensitivity(int gradIndex)
 {
   s->Zero();
 
@@ -724,15 +724,15 @@ ParallelSection::getSectionDeformationSensitivity(int gradNumber)
 }
 
 const Vector &
-ParallelSection::getStressResultantSensitivity(int gradNumber,
-						 bool conditional)
+ParallelSection::getStressResultantSensitivity(int gradIndex,
+					       bool conditional)
 {
   int i = 0;
 
   int theSectionOrder = 0;
     
   if (theSection) {
-    const Vector &dsdh = theSection->getStressResultantSensitivity(gradNumber,
+    const Vector &dsdh = theSection->getStressResultantSensitivity(gradIndex,
 								   conditional);
     theSectionOrder = theSection->getOrder();
     
@@ -743,14 +743,14 @@ ParallelSection::getStressResultantSensitivity(int gradNumber,
   int order = theSectionOrder + numMats;
 
   for ( ; i < order; i++)
-    (*s)(i) = theAdditions[i-theSectionOrder]->getStressSensitivity(gradNumber,
+    (*s)(i) = theAdditions[i-theSectionOrder]->getStressSensitivity(gradIndex,
 								    conditional);
   
   return *s;
 }
 
 const Matrix &
-ParallelSection::getSectionTangentSensitivity(int gradNumber)
+ParallelSection::getSectionTangentSensitivity(int gradIndex)
 {
   ks->Zero();
   
@@ -759,7 +759,7 @@ ParallelSection::getSectionTangentSensitivity(int gradNumber)
 
 int
 ParallelSection::commitSensitivity(const Vector& defSens,
-				     int gradNumber, int numGrads)
+				     int gradIndex, int numGrads)
 {
   int ret = 0;
   int i = 0;
@@ -775,14 +775,14 @@ ParallelSection::commitSensitivity(const Vector& defSens,
     for (i = 0; i < theSectionOrder; i++)
       dedh(i) = defSens(i);
     
-    ret = theSection->commitSensitivity(dedh, gradNumber, numGrads);
+    ret = theSection->commitSensitivity(dedh, gradIndex, numGrads);
   }
 
   int order = theSectionOrder + numMats;
   
   for ( ; i < order; i++)
     ret += theAdditions[i-theSectionOrder]->commitSensitivity(defSens(i),
-							      gradNumber,
+							      gradIndex,
 							      numGrads);
   
   return ret;

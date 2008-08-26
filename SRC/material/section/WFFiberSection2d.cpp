@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-10-26 04:42:10 $
+// $Revision: 1.2 $
+// $Date: 2008-08-26 16:45:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/WFFiberSection2d.cpp,v $
                                                                         
 // Written: MHS
@@ -146,13 +146,13 @@ WFFiberSection2d::Print(OPS_Stream &s, int flag)
 }
 
 const Vector &
-WFFiberSection2d::getStressResultantSensitivity(int gradNumber,
-						 bool conditional)
+WFFiberSection2d::getStressResultantSensitivity(int gradIndex,
+						bool conditional)
 {
   static Vector ds;
   
   // get material stress contribution
-  ds = FiberSection2d::getStressResultantSensitivity(gradNumber, conditional);
+  ds = FiberSection2d::getStressResultantSensitivity(gradIndex, conditional);
   
   double y, A, stressGradient;
   int loc = 0;
@@ -161,7 +161,7 @@ WFFiberSection2d::getStressResultantSensitivity(int gradNumber,
     y = matData[loc++];
     A = matData[loc++];
     
-    stressGradient = theMaterials[i]->getStressSensitivity(gradNumber,true);
+    stressGradient = theMaterials[i]->getStressSensitivity(gradIndex,true);
     stressGradient = stressGradient * A;
     ds(0) += stressGradient;
     ds(1) += stressGradient * y;

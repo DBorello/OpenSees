@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-09-05 21:31:56 $
+// $Revision: 1.8 $
+// $Date: 2008-08-26 16:48:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/GenericSection1d.h,v $
                                                                         
                                                                         
@@ -79,8 +79,8 @@ class GenericSection1d : public SectionForceDeformation
 
     // AddingSensitivity:BEGIN //////////////////////////////////////////
     int setParameter(const char **argv, int argc, Parameter &param);
-    const Vector &getStressResultantSensitivity(int gradNumber, bool conditional);
-    int   commitSensitivity(const Vector &dedh, int gradNumber, int numGrads);
+    const Vector &getStressResultantSensitivity(int gradIndex, bool conditional);
+    int   commitSensitivity(const Vector &dedh, int gradIndex, int numGrads);
     // AddingSensitivity:END ///////////////////////////////////////////
     
  protected:

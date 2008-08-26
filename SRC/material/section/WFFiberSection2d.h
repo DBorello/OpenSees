@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-02-29 01:18:47 $
+// $Revision: 1.3 $
+// $Date: 2008-08-26 16:45:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/WFFiberSection2d.h,v $
                                                                         
 // Written: MHS
@@ -59,7 +59,7 @@ class WFFiberSection2d : public FiberSection2d
 	       FEM_ObjectBroker &theBroker);
   void Print(OPS_Stream &s, int flag = 0);
 
-  const Vector& getStressResultantSensitivity(int gradNumber,
+  const Vector& getStressResultantSensitivity(int gradIndex,
 					      bool conditional);
 
  protected:

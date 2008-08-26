@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2008-03-12 23:39:05 $
+// $Revision: 1.29 $
+// $Date: 2008-08-26 16:47:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -1003,21 +1003,21 @@ FiberSection3d::setParameter(const char **argv, int argc, Parameter &param)
 }
 
 const Vector &
-FiberSection3d::getSectionDeformationSensitivity(int gradNumber)
+FiberSection3d::getSectionDeformationSensitivity(int gradIndex)
 {
 	static Vector dummy(3);
 	dummy.Zero();
 	if (SHVs !=0) {
-		dummy(0) = (*SHVs)(0,(gradNumber-1));
-		dummy(1) = (*SHVs)(1,(gradNumber-1));
-		dummy(2) = (*SHVs)(2,(gradNumber-1));
+		dummy(0) = (*SHVs)(0,gradIndex);
+		dummy(1) = (*SHVs)(1,gradIndex);
+		dummy(2) = (*SHVs)(2,gradIndex);
 	}
 	return dummy;
 }
 
    
 const Vector &
-FiberSection3d::getStressResultantSensitivity(int gradNumber, bool conditional)
+FiberSection3d::getStressResultantSensitivity(int gradIndex, bool conditional)
 {
   
   static Vector ds(3);
@@ -1033,7 +1033,7 @@ FiberSection3d::getStressResultantSensitivity(int gradNumber, bool conditional)
     double y = matData[loc++] - yBar;
     double z = matData[loc++] - zBar;
     double A = matData[loc++];
-    stressGradient = theMaterials[i]->getStressSensitivity(gradNumber,conditional);
+    stressGradient = theMaterials[i]->getStressSensitivity(gradIndex,conditional);
     stressGradient *=  A;
     ds(0) += stressGradient;
     ds(1) += stressGradient * y;
@@ -1045,7 +1045,7 @@ FiberSection3d::getStressResultantSensitivity(int gradNumber, bool conditional)
 }
 
 const Matrix &
-FiberSection3d::getSectionTangentSensitivity(int gradNumber)
+FiberSection3d::getSectionTangentSensitivity(int gradIndex)
 {
   static Matrix something(2,2);
   
@@ -1055,7 +1055,7 @@ FiberSection3d::getSectionTangentSensitivity(int gradNumber)
 }
 
 int
-FiberSection3d::commitSensitivity(const Vector& defSens, int gradNumber, int numGrads)
+FiberSection3d::commitSensitivity(const Vector& defSens, int gradIndex, int numGrads)
 {
 
   // here add SHVs to store the strain sensitivity.
@@ -1064,9 +1064,9 @@ FiberSection3d::commitSensitivity(const Vector& defSens, int gradNumber, int num
     SHVs = new Matrix(3,numGrads);
   }
   
-  (*SHVs)(0,(gradNumber-1)) = defSens(0);
-  (*SHVs)(1,(gradNumber-1)) = defSens(1);
-  (*SHVs)(2,(gradNumber-1)) = defSens(2);
+  (*SHVs)(0,gradIndex) = defSens(0);
+  (*SHVs)(1,gradIndex) = defSens(1);
+  (*SHVs)(2,gradIndex) = defSens(2);
 
   int loc = 0;
 
@@ -1084,7 +1084,7 @@ FiberSection3d::commitSensitivity(const Vector& defSens, int gradNumber, int num
 
 
     
-	theMat->commitSensitivity(strainSens,gradNumber,numGrads);
+	theMat->commitSensitivity(strainSens,gradIndex,numGrads);
   }
 
   return 0;

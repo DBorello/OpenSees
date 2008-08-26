@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-10-17 22:10:11 $
+// $Revision: 1.6 $
+// $Date: 2008-08-26 16:52:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/ElementalLoad.cpp,v $
                                                                         
                                                                         
@@ -80,7 +80,7 @@ ElementalLoad::applyLoad(double loadFactor)
 }
 
 const Vector&
-ElementalLoad::getSensitivityData(int gradNumber)
+ElementalLoad::getSensitivityData(int gradIndex)
 {
   static Vector trash(10);
 

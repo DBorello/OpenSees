@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2008-08-19 22:52:55 $
+// $Revision: 1.23 $
+// $Date: 2008-08-26 16:52:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
@@ -437,7 +437,7 @@ Element::getResponse(int responseID, Information &eleInfo)
 }
 
 int
-Element::getResponseSensitivity(int responseID, int gradNumber,
+Element::getResponseSensitivity(int responseID, int gradIndex,
 				Information &eleInfo)
 {
   return -1;
@@ -445,28 +445,28 @@ Element::getResponseSensitivity(int responseID, int gradNumber,
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////
 const Vector &
-Element::getResistingForceSensitivity(int gradNumber)
+Element::getResistingForceSensitivity(int gradIndex)
 {
 	static Vector dummy(1);
 	return dummy;
 }
 
 const Matrix &
-Element::getInitialStiffSensitivity(int gradNumber)
+Element::getInitialStiffSensitivity(int gradIndex)
 {
 	static Matrix dummy(1,1);
 	return dummy;
 }
 
 const Matrix &
-Element::getMassSensitivity(int gradNumber)
+Element::getMassSensitivity(int gradIndex)
 {
 	static Matrix dummy(1,1);
 	return dummy;
 }
 
 int
-Element::commitSensitivity(int gradNumber, int numGrads)
+Element::commitSensitivity(int gradIndex, int numGrads)
 {
 	return -1;
 }
@@ -483,7 +483,7 @@ Element::addInertiaLoadSensitivityToUnbalance(const Vector &accel, bool tag)
 
 
 const Matrix &
-Element::getDampSensitivity(int gradNumber) 
+Element::getDampSensitivity(int gradIndex) 
 {
   if (index  == -1) {
     this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
@@ -493,14 +493,14 @@ Element::getDampSensitivity(int gradNumber)
   Matrix *theMatrix = theMatrices[index]; 
   theMatrix->Zero();
   if (alphaM != 0.0) {
-    theMatrix->addMatrix(0.0, this->getMassSensitivity(gradNumber), alphaM);
+    theMatrix->addMatrix(0.0, this->getMassSensitivity(gradIndex), alphaM);
   }
   if (betaK != 0.0) {
 	theMatrix->addMatrix(1.0, this->getTangentStiff(), 0.0); // Don't use this and DDM      
 	opserr << "Rayleigh damping with non-zero betaCurrentTangent is not compatible with DDM sensitivity analysis" << endln;
   }
   if (betaK0 != 0.0) {
-    theMatrix->addMatrix(1.0, this->getInitialStiffSensitivity(gradNumber), betaK0);      
+    theMatrix->addMatrix(1.0, this->getInitialStiffSensitivity(gradIndex), betaK0);      
   }
   if (betaKc != 0.0) {
     theMatrix->addMatrix(1.0, *Kc, 0.0);      // Don't use this and DDM   

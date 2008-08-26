@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-04-14 21:39:54 $
+// $Revision: 1.3 $
+// $Date: 2008-08-26 16:48:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ParallelSection.h,v $
                                                                         
                                                                         
@@ -90,11 +90,11 @@ class ParallelSection : public SectionForceDeformation
 
     // AddingSensitivity:BEGIN //////////////////////////////////////////
     int setParameter(const char **argv, int argc, Parameter &param);
-    const Vector & getStressResultantSensitivity(int gradNumber, bool 
+    const Vector & getStressResultantSensitivity(int gradIndex, bool 
 conditional);
-    const Vector & getSectionDeformationSensitivity(int gradNumber);
-    const Matrix & getSectionTangentSensitivity(int gradNumber);
-    int   commitSensitivity(const Vector& sectionDeformationGradient, int gradNumber, int numGrads);
+    const Vector & getSectionDeformationSensitivity(int gradIndex);
+    const Matrix & getSectionTangentSensitivity(int gradIndex);
+    int   commitSensitivity(const Vector& sectionDeformationGradient, int gradIndex, int numGrads);
 
     const Vector &getdedh(void); // MHS hack
     // AddingSensitivity:END ///////////////////////////////////////////

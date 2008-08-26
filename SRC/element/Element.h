@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2008-08-19 22:52:55 $
+// $Revision: 1.17 $
+// $Date: 2008-08-26 16:52:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.h,v $
                                                                         
                                                                         
@@ -94,16 +94,16 @@ class Element : public DomainComponent
     virtual Response *setResponse(const char **argv, int argc, 
 				  OPS_Stream &theHandler);
     virtual int getResponse(int responseID, Information &eleInformation);
-    virtual int getResponseSensitivity(int responseID, int gradNumber,
+    virtual int getResponseSensitivity(int responseID, int gradIndex,
 				       Information &eleInformation);
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////
     virtual int addInertiaLoadSensitivityToUnbalance(const Vector &accel, bool tag);
-    virtual const Vector & getResistingForceSensitivity(int gradNumber);
-    virtual const Matrix & getInitialStiffSensitivity(int gradNumber);
-    virtual const Matrix & getDampSensitivity(int gradNumber);
-    virtual const Matrix & getMassSensitivity(int gradNumber);
-    virtual int   commitSensitivity(int gradNumber, int numGrads);
+    virtual const Vector & getResistingForceSensitivity(int gradIndex);
+    virtual const Matrix & getInitialStiffSensitivity(int gradIndex);
+    virtual const Matrix & getDampSensitivity(int gradIndex);
+    virtual const Matrix & getMassSensitivity(int gradIndex);
+    virtual int   commitSensitivity(int gradIndex, int numGrads);
 // AddingSensitivity:END ///////////////////////////////////////////
 
     virtual int addResistingForceToNodalReaction(int flag);

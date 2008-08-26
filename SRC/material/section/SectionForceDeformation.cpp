@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-02-02 01:18:13 $
+// $Revision: 1.14 $
+// $Date: 2008-08-26 16:45:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionForceDeformation.cpp,v $
                                                                         
                                                                         
@@ -291,20 +291,20 @@ SectionForceDeformation::getResponse(int responseID, Information &secInfo)
 }
 
 int 
-SectionForceDeformation::getResponseSensitivity(int responseID, int gradNumber,
+SectionForceDeformation::getResponseSensitivity(int responseID, int gradIndex,
 						Information &secInfo)
 {
   Vector &theVec = *(secInfo.theVector);
 
   switch (responseID) {
   case 1:
-    theVec = this->getSectionDeformationSensitivity(gradNumber);
+    theVec = this->getSectionDeformationSensitivity(gradIndex);
     return secInfo.setVector(theVec);
     
   case 2: {
     const Matrix &ks = this->getSectionTangent();
-    const Vector &dedh = this->getSectionDeformationSensitivity(gradNumber);
-    const Vector &dsdh = this->getStressResultantSensitivity(gradNumber, true);
+    const Vector &dedh = this->getSectionDeformationSensitivity(gradIndex);
+    const Vector &dsdh = this->getStressResultantSensitivity(gradIndex, true);
     theVec.addMatrixVector(0.0, ks, dedh, 1.0);
     theVec.addVector(1.0, dsdh, 1.0);
     return secInfo.setVector(theVec);
@@ -317,7 +317,7 @@ SectionForceDeformation::getResponseSensitivity(int responseID, int gradNumber,
 
 // AddingSensitivity:BEGIN ////////////////////////////////////////
 const Vector &
-SectionForceDeformation::getStressResultantSensitivity(int gradNumber, bool conditional)
+SectionForceDeformation::getStressResultantSensitivity(int gradIndex, bool conditional)
 {
   if (sDefault == 0)
     sDefault = new Vector (this->getOrder());
@@ -325,7 +325,7 @@ SectionForceDeformation::getStressResultantSensitivity(int gradNumber, bool cond
 }
 
 const Vector &
-SectionForceDeformation::getSectionDeformationSensitivity(int gradNumber)
+SectionForceDeformation::getSectionDeformationSensitivity(int gradIndex)
 {
   if (sDefault == 0)
     sDefault = new Vector (this->getOrder());
@@ -333,7 +333,7 @@ SectionForceDeformation::getSectionDeformationSensitivity(int gradNumber)
 }
 
 const Matrix &
-SectionForceDeformation::getSectionTangentSensitivity(int gradNumber)
+SectionForceDeformation::getSectionTangentSensitivity(int gradIndex)
 {
   int order = this->getOrder();
   
@@ -351,7 +351,7 @@ SectionForceDeformation::getSectionTangentSensitivity(int gradNumber)
 }
 
 const Matrix &
-SectionForceDeformation::getInitialTangentSensitivity(int gradNumber)
+SectionForceDeformation::getInitialTangentSensitivity(int gradIndex)
 {
   int order = this->getOrder();
   
@@ -369,7 +369,7 @@ SectionForceDeformation::getInitialTangentSensitivity(int gradNumber)
 }
 
 const Matrix&
-SectionForceDeformation::getSectionFlexibilitySensitivity(int gradNumber)
+SectionForceDeformation::getSectionFlexibilitySensitivity(int gradIndex)
 {
   int order = this->getOrder();
   
@@ -381,7 +381,7 @@ SectionForceDeformation::getSectionFlexibilitySensitivity(int gradNumber)
     }
   }
 
-  const Matrix &dksdh = this->getSectionTangentSensitivity(gradNumber);
+  const Matrix &dksdh = this->getSectionTangentSensitivity(gradIndex);
   
   const Matrix &fs = this->getSectionFlexibility();
 
@@ -391,7 +391,7 @@ SectionForceDeformation::getSectionFlexibilitySensitivity(int gradNumber)
 }
 
 const Matrix&
-SectionForceDeformation::getInitialFlexibilitySensitivity(int gradNumber)
+SectionForceDeformation::getInitialFlexibilitySensitivity(int gradIndex)
 {
   int order = this->getOrder();
   
@@ -403,7 +403,7 @@ SectionForceDeformation::getInitialFlexibilitySensitivity(int gradNumber)
     }
   }
   
-  const Matrix &dksdh = this->getInitialTangentSensitivity(gradNumber);
+  const Matrix &dksdh = this->getInitialTangentSensitivity(gradIndex);
   
   const Matrix &fs = this->getInitialFlexibility();
 
@@ -413,14 +413,14 @@ SectionForceDeformation::getInitialFlexibilitySensitivity(int gradNumber)
 }
 
 double
-SectionForceDeformation::getRhoSensitivity(int gradNumber)
+SectionForceDeformation::getRhoSensitivity(int gradIndex)
 {
   return 0.0;
 }
 
 int
 SectionForceDeformation::commitSensitivity(const Vector& defSens,
-					   int gradNumber, int numGrads)
+					   int gradIndex, int numGrads)
 {
   return -1;
 }

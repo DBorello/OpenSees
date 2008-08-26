@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-09-05 21:31:56 $
+// $Revision: 1.8 $
+// $Date: 2008-08-26 16:48:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/GenericSection1d.cpp,v $
                                                                         
                                                                         
@@ -277,19 +277,19 @@ GenericSection1d::setParameter(const char **argv, int argc, Parameter &param)
 }
 
 const Vector&
-GenericSection1d::getStressResultantSensitivity(int gradNumber,
+GenericSection1d::getStressResultantSensitivity(int gradIndex,
 						bool conditional)
 {
   static Vector dsdh(1);
 
-  dsdh(0) = theModel->getStressSensitivity(gradNumber, conditional);
+  dsdh(0) = theModel->getStressSensitivity(gradIndex, conditional);
 
   return dsdh;
 }
 
 int
-GenericSection1d::commitSensitivity(const Vector &dedh, int gradNumber,
+GenericSection1d::commitSensitivity(const Vector &dedh, int gradIndex,
 				    int numGrads)
 {
-  return theModel->commitSensitivity(dedh(0), gradNumber, numGrads);
+  return theModel->commitSensitivity(dedh(0), gradIndex, numGrads);
 }

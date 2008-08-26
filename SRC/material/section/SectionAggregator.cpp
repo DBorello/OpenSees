@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2008-04-14 21:39:33 $
+// $Revision: 1.19 $
+// $Date: 2008-08-26 16:48:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.cpp,v $
                                                                         
                                                                         
@@ -923,7 +923,7 @@ SectionAggregator::setParameter(const char **argv, int argc, Parameter &param)
 }
 
 const Vector &
-SectionAggregator::getSectionDeformationSensitivity(int gradNumber)
+SectionAggregator::getSectionDeformationSensitivity(int gradIndex)
 {
   s->Zero();
 
@@ -931,7 +931,7 @@ SectionAggregator::getSectionDeformationSensitivity(int gradNumber)
 }
 
 const Vector &
-SectionAggregator::getStressResultantSensitivity(int gradNumber,
+SectionAggregator::getStressResultantSensitivity(int gradIndex,
 						 bool conditional)
 {
   int i = 0;
@@ -939,7 +939,7 @@ SectionAggregator::getStressResultantSensitivity(int gradNumber,
   int theSectionOrder = 0;
     
   if (theSection) {
-    const Vector &dsdh = theSection->getStressResultantSensitivity(gradNumber,
+    const Vector &dsdh = theSection->getStressResultantSensitivity(gradIndex,
 								   conditional);
     theSectionOrder = theSection->getOrder();
     
@@ -950,14 +950,14 @@ SectionAggregator::getStressResultantSensitivity(int gradNumber,
   int order = theSectionOrder + numMats;
 
   for ( ; i < order; i++)
-    (*s)(i) = theAdditions[i-theSectionOrder]->getStressSensitivity(gradNumber,
+    (*s)(i) = theAdditions[i-theSectionOrder]->getStressSensitivity(gradIndex,
 								    conditional);
   
   return *s;
 }
 
 const Matrix &
-SectionAggregator::getSectionTangentSensitivity(int gradNumber)
+SectionAggregator::getSectionTangentSensitivity(int gradIndex)
 {
   ks->Zero();
   
@@ -966,7 +966,7 @@ SectionAggregator::getSectionTangentSensitivity(int gradNumber)
 
 int
 SectionAggregator::commitSensitivity(const Vector& defSens,
-				     int gradNumber, int numGrads)
+				     int gradIndex, int numGrads)
 {
   int ret = 0;
   int i = 0;
@@ -982,14 +982,14 @@ SectionAggregator::commitSensitivity(const Vector& defSens,
     for (i = 0; i < theSectionOrder; i++)
       dedh(i) = defSens(i);
     
-    ret = theSection->commitSensitivity(dedh, gradNumber, numGrads);
+    ret = theSection->commitSensitivity(dedh, gradIndex, numGrads);
   }
 
   int order = theSectionOrder + numMats;
   
   for ( ; i < order; i++)
     ret += theAdditions[i-theSectionOrder]->commitSensitivity(defSens(i),
-							      gradNumber,
+							      gradIndex,
 							      numGrads);
   
   return ret;

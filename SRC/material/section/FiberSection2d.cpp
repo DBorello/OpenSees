@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.33 $
-// $Date: 2008-04-14 21:34:58 $
+// $Revision: 1.34 $
+// $Date: 2008-08-26 16:47:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.cpp,v $
                                                                         
 // Written: fmk
@@ -1031,7 +1031,7 @@ FiberSection2d::setParameter(const char **argv, int argc, Parameter &param)
 }
 
 const Vector &
-FiberSection2d::getSectionDeformationSensitivity(int gradNumber)
+FiberSection2d::getSectionDeformationSensitivity(int gradIndex)
 {
   static Vector dummy(2);
 
@@ -1039,7 +1039,7 @@ FiberSection2d::getSectionDeformationSensitivity(int gradNumber)
 }
 
 const Vector &
-FiberSection2d::getStressResultantSensitivity(int gradNumber, bool conditional)
+FiberSection2d::getStressResultantSensitivity(int gradIndex, bool conditional)
 {
   static Vector ds(2);
   
@@ -1079,7 +1079,7 @@ FiberSection2d::getStressResultantSensitivity(int gradNumber, bool conditional)
     y = fiberLocs[i] - yBar;
     A = fiberArea[i];
     
-    stressGradient = theMaterials[i]->getStressSensitivity(gradNumber,true);
+    stressGradient = theMaterials[i]->getStressSensitivity(gradIndex,true);
     stressGradient = stressGradient * A;
 
     ds(0) += stressGradient;
@@ -1113,7 +1113,7 @@ FiberSection2d::getStressResultantSensitivity(int gradNumber, bool conditional)
 }
 
 const Matrix &
-FiberSection2d::getInitialTangentSensitivity(int gradNumber)
+FiberSection2d::getInitialTangentSensitivity(int gradIndex)
 {
   static Matrix dksdh(2,2);
   
@@ -1156,7 +1156,7 @@ FiberSection2d::getInitialTangentSensitivity(int gradNumber)
     dAdh = areaDeriv[i];
     
     tangent = theMaterials[i]->getInitialTangent();
-    dtangentdh = theMaterials[i]->getInitialTangentSensitivity(gradNumber);
+    dtangentdh = theMaterials[i]->getInitialTangentSensitivity(gradIndex);
 
     dksdh(0,0) += dtangentdh*A + tangent*dAdh;
 
@@ -1172,7 +1172,7 @@ FiberSection2d::getInitialTangentSensitivity(int gradNumber)
 
 int
 FiberSection2d::commitSensitivity(const Vector& defSens,
-				  int gradNumber, int numGrads)
+				  int gradIndex, int numGrads)
 {
   double d0 = defSens(0);
   double d1 = defSens(1);
@@ -1211,7 +1211,7 @@ FiberSection2d::commitSensitivity(const Vector& defSens,
 
     // determine material strain and set it
     double strainSens = d0 - y*d1 - locsDeriv[i]*kappa;
-    theMat->commitSensitivity(strainSens,gradNumber,numGrads);
+    theMat->commitSensitivity(strainSens,gradIndex,numGrads);
   }
 
   return 0;
