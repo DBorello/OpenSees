@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-10-26 03:56:45 $
+// $Revision: 1.2 $
+// $Date: 2008-08-26 18:26:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/accelerator/SecantAccelerator2.cpp,v $
                                                                         
 // Written: MHS
@@ -36,9 +36,9 @@
 
 SecantAccelerator2::SecantAccelerator2(int maxIter, int tangent)
   :Accelerator(ACCELERATOR_TAGS_Secant),
-   iteration(0), numEqns(0), R1(0.0), R2(0.0),
+   iteration(0), numEqns(0), R1(3.5), R2(0.3),
    vOld(0), rOld(0), maxIterations(maxIter), theTangent(tangent),
-   cutOut(false)
+   cutOut(true)
 {
 
 }
@@ -86,7 +86,7 @@ SecantAccelerator2::newStep(LinearSOE &theSOE)
     rOld = new Vector(numEqns);
 
   // Reset iteration counter
-  iteration = (theTangent == CURRENT_TANGENT) ? maxIterations : 0;
+  iteration = 0;
 
   return 0;
 }
@@ -110,6 +110,7 @@ SecantAccelerator2::accelerate(Vector &vStar, LinearSOE &theSOE,
     double C   = ((*vOld)^rNew) * den;
     double A   = 1.0-C;
     double D   = -C - A*(vStar^(*rOld))*den;
+    //D = -C - (vStar^(*rOld))*den;
     double DA  = D/A;
 
     // Check "cut-out" criteria
@@ -118,8 +119,11 @@ SecantAccelerator2::accelerate(Vector &vStar, LinearSOE &theSOE,
       //opserr << "SecantAccelerator2::accelerate() -- cut out, A = " << A
       // 	   << ", D/A = " << DA << endln;
     }
-    else
-      vStar.addVector(A, *vOld, D);
+    else {
+      //vStar.addVector(A, *vOld, D);
+      vStar *= A;
+      vStar.addVector(1.0, *vOld, D);
+    }
   }
 
   // Store old values for next iteration
