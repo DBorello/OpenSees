@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2008-08-26 15:38:37 $
+// $Revision: 1.9 $
+// $Date: 2008-08-26 15:43:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/Parameter.cpp,v $
 
 #include <classTags.h>
@@ -64,7 +64,7 @@ Parameter::Parameter(int passedTag,
 }
 
 Parameter::Parameter(const Parameter &param):
-  TaggedObject(param.getTag()), MovableObject(PARAMETER_TAG_Parameter),
+  TaggedObject(param.getTag()), MovableObject(PARAMETER_TAG_Parameter)
 {
   theInfo = param.theInfo;
   numComponents = param.numComponents;
