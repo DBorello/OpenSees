@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2008-08-19 22:50:49 $
+// $Revision: 1.29 $
+// $Date: 2008-08-26 17:04:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -1839,7 +1839,7 @@ Node::activateParameter(int passedParameterID)
 }
 
 int 
-Node::saveDispSensitivity(const Vector &v, int gradNum, int numGrads)
+Node::saveDispSensitivity(const Vector &v, int gradIndex, int numGrads)
 {
   // If the sensitivity matrices are not already created:
   if (dispSensitivity == 0) {
@@ -1854,13 +1854,13 @@ Node::saveDispSensitivity(const Vector &v, int gradNum, int numGrads)
 
   //opserr << "Node::saveDispSens " << dispSensitivity->noRows() << ' ' << dispSensitivity->noCols() << endln;
   for (int i=0; i<numberDOF; i++ )
-    (*dispSensitivity)(i,gradNum-1) = v(i);
+    (*dispSensitivity)(i,gradIndex) = v(i);
 
   return 0;
 }
 
 int 
-Node::saveVelSensitivity(const Vector &vdot, int gradNum, int numGrads)
+Node::saveVelSensitivity(const Vector &vdot, int gradIndex, int numGrads)
 {
   // If the sensitivity matrices are not already created:
   if (velSensitivity == 0) {
@@ -1868,13 +1868,13 @@ Node::saveVelSensitivity(const Vector &vdot, int gradNum, int numGrads)
   } 
 
   for (int i=0; i<numberDOF; i++ )
-    (*velSensitivity)(i,gradNum-1) = vdot(i);
+    (*velSensitivity)(i,gradIndex) = vdot(i);
 
   return 0;
 }
 
 int 
-Node::saveAccelSensitivity(const Vector &vdotdot, int gradNum, int numGrads)
+Node::saveAccelSensitivity(const Vector &vdotdot, int gradIndex, int numGrads)
 {
   // If the sensitivity matrices are not already created:
   if (accSensitivity == 0) {
@@ -1882,41 +1882,36 @@ Node::saveAccelSensitivity(const Vector &vdotdot, int gradNum, int numGrads)
   } 
 
   for (int i=0; i<numberDOF; i++ )
-    (*accSensitivity)(i,gradNum-1) = vdotdot(i);
+    (*accSensitivity)(i,gradIndex) = vdotdot(i);
 
   return 0;
 }
 
 double 
-Node::getDispSensitivity(int dof, int gradNum)
+Node::getDispSensitivity(int dof, int gradIndex)
 {
-	double result;
-	if (dispSensitivity != 0) {
-		result = (*dispSensitivity)(dof-1,gradNum-1);
-	}
-	else {
-		result = 0.0;
-	}
-
-	return result;
+  if (dispSensitivity != 0)
+    return (*dispSensitivity)(dof-1,gradIndex);
+  else 
+    return 0.0;
 }
 
 double 
-Node::getVelSensitivity(int dof, int gradNum)
+Node::getVelSensitivity(int dof, int gradIndex)
 {
-	if (velSensitivity != 0)
-		return (*velSensitivity)(dof-1,gradNum-1);
-	else
-		return 0.0;
+  if (velSensitivity != 0)
+    return (*velSensitivity)(dof-1,gradIndex);
+  else
+    return 0.0;
 }
 
 double 
-Node::getAccSensitivity(int dof, int gradNum)
+Node::getAccSensitivity(int dof, int gradIndex)
 {
-	if (accSensitivity != 0)
-		return (*accSensitivity)(dof-1,gradNum-1);
-	else
-		return 0.0;
+  if (accSensitivity != 0)
+    return (*accSensitivity)(dof-1,gradIndex);
+  else
+    return 0.0;
 }
 // AddingSensitivity:END /////////////////////////////////////////
 

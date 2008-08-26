@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $                                                              
-// $Date: 2008-07-11 19:19:21 $                                                                  
+// $Revision: 1.24 $                                                              
+// $Date: 2008-08-26 17:04:49 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C
@@ -366,39 +366,39 @@ NDMaterial::getResponse (int responseID, Information &matInfo)
 
 // AddingSensitivity:BEGIN ////////////////////////////////////////
 const Vector &
-NDMaterial::getStressSensitivity(int gradNumber, bool conditional)
+NDMaterial::getStressSensitivity(int gradIndex, bool conditional)
 {
 	static Vector dummy(1);
 	return dummy;
 }
 
 const Vector &
-NDMaterial::getStrainSensitivity(int gradNumber)
+NDMaterial::getStrainSensitivity(int gradIndex)
 {
 	static Vector dummy(1);
 	return dummy;
 }
 
 double
-NDMaterial::getRhoSensitivity(int gradNumber)
+NDMaterial::getRhoSensitivity(int gradIndex)
 {
 	return 0.0;
 }
 
 const Matrix &
-NDMaterial::getDampTangentSensitivity(int gradNumber)
+NDMaterial::getDampTangentSensitivity(int gradIndex)
 {
 	static Matrix dummy(1,1);
 	return dummy;
 }
 const Matrix &
-NDMaterial::getTangentSensitivity(int gradNumber)
+NDMaterial::getTangentSensitivity(int gradIndex)
 {
 	static Matrix dummy(1,1);
 	return dummy;
 }
 int
-NDMaterial::commitSensitivity(Vector & strainSensitivity, int gradNumber, int numGrads)
+NDMaterial::commitSensitivity(Vector & strainSensitivity, int gradIndex, int numGrads)
 {
 	return 0;
 }
