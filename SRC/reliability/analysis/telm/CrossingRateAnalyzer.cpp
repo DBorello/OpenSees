@@ -1,7 +1,7 @@
 
 
-// $Revision: 1.2 $
-// $Date: 2008-05-13 16:30:27 $
+// $Revision: 1.3 $
+// $Date: 2008-08-27 17:04:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/CrossingRateAnalyzer.cpp,v $
 
 #include <CrossingRateAnalyzer.h>
@@ -235,7 +235,7 @@ double CrossingRateAnalyzer::computeRate1()
 		int dofNumber = (int)DgDdispl(j,1);
 		double dgduValue = DgDdispl(j,2);
 		char expression[100];
-		sprintf(expression,"+(%10.8f)*(%8.5f)*{ud_%d_%d}",dt_small, dgduValue, nodeNumber, dofNumber);
+		sprintf(expression,"+(%10.8f)*(%8.5f)*\\$ud(%d,%d)",dt_small, dgduValue, nodeNumber, dofNumber);
 		strcpy(expressionPtr,expression);
 		// Add it to the limit-state function
 		theLSF->addExpression(expressionPtr);
@@ -269,7 +269,7 @@ double CrossingRateAnalyzer::computeRate1()
 		pf2 = 1.0 - aStdNormRV.getCDFvalue(beta1);
 				
 //   Post-processing to find parallel system probability
-
+	// should use CorrelatedStandardNormal class
 		double	a = -((*uDesign0)^(*uShifted));	// Interval start
 		a/=((*uDesign0).Norm()*(*uShifted).Norm());
 		double 	b = 0.0;				// Interval end
