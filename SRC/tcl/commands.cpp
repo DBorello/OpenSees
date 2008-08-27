@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.132 $
-// $Date: 2008-08-27 16:51:19 $
+// $Revision: 1.133 $
+// $Date: 2008-08-27 17:01:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -5049,6 +5049,15 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
 		}
 		ReliabilityDomain *theReliabilityDomain = theReliabilityBuilder->getReliabilityDomain();
 		theReliabilityDomain->removeLimitStateFunction(lsfTag);
+	}
+	else if (strcmp(argv[1],"cutset") == 0) {
+		int cutTag;
+		if (Tcl_GetInt(interp, argv[2], &cutTag) != TCL_OK) {
+			opserr << "WARNING invalid input: cutTag \n";
+			return TCL_ERROR;
+		}
+		ReliabilityDomain *theReliabilityDomain = theReliabilityBuilder->getReliabilityDomain();
+		theReliabilityDomain->removeCutset(cutTag);
 	}
     else if (strcmp(argv[1],"sensitivityAlgorithm") == 0) {
 		if (theSensitivityAlgorithm != 0) {
