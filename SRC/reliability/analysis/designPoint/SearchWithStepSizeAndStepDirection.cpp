@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2008-05-27 20:04:30 $
+// $Revision: 1.18 $
+// $Date: 2008-08-27 17:11:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.cpp,v $
 
 
@@ -328,6 +328,10 @@ SearchWithStepSizeAndStepDirection::findDesignPoint()
 			return -1;
 		}
 
+		// check there are no sucessive large betas
+		int earlyexit = 0;
+		if ( u->Norm() > uSecondLast->Norm() > 10 )
+			earlyexit = 1;
 		
 		// Compute alpha-vector
 		alpha->addVector(0.0, *gradientInStandardNormalSpace, -1.0/normOfGradient );
@@ -483,11 +487,24 @@ SearchWithStepSizeAndStepDirection::findDesignPoint()
 		stepSize = theStepSizeRule->getStepSize();
 
 
-		// Determine new iteration point (take the step)
+		// save the previous displacement before modifying
 		u_old = *u;
-		//u = u_old + (searchDirection * stepSize);
-		u->addVector(1.0, *searchDirection, stepSize);
+		double udiff = 20.0;
+		double stepSizeMod = 1.0;
+		
+		// Determine new iteration point (take the step), BUT limit the maximum jump that can occur
+		while ( fabs(udiff) > 15 ) {
+			*u = u_old;
+			
+			if (stepSizeMod < 1)
+				opserr << "SearchWithStepSizeAndStepDirection:: reducing stepSize using modification factor of " << stepSizeMod << endln;
 
+			//u = u_old + (searchDirection * stepSize);
+			u->addVector(1.0, *searchDirection, stepSize*stepSizeMod);
+
+			udiff = u->Norm() - u_old.Norm();
+			stepSizeMod *= 0.75;
+		}
 
 		// Increment the loop parameter
 		steps++;
