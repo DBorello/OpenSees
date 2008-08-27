@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.48 $
-// $Date: 2008-05-27 23:19:34 $
+// $Revision: 1.49 $
+// $Date: 2008-08-27 17:03:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -1793,7 +1793,7 @@ TclReliabilityModelBuilder_addCutset(ClientData clientData, Tcl_Interp *interp, 
      }
 	 
 	 // check LSF exists in domain
-	 if (theReliabilityDomain->getLimitStateFunctionIndex(set) < 0) {
+	 if (theReliabilityDomain->getLimitStateFunctionIndex( abs(set) ) < 0) {
 	    opserr << "ERROR: LSF does not exist \n";
 	    return TCL_ERROR;
      }
