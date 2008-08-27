@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2008-05-11 19:52:54 $
+// $Revision: 1.11 $
+// $Date: 2008-08-27 17:08:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.h,v $
 
 
@@ -71,6 +71,7 @@ protected:
 private:
    	int			initialize(void);
 	long int	factorial(int);
+	int			sign(int);
 	int			arrange(int, RandomNumberGenerator*, ID&);
 	int			combinations(Vector&, int, Matrix&);
 	

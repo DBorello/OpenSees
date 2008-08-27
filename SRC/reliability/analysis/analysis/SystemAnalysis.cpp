@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2008-05-27 23:31:22 $
+// $Revision: 1.18 $
+// $Date: 2008-08-27 17:08:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.cpp,v $
 
 
@@ -201,8 +201,8 @@ SystemAnalysis::initialize()
 		}
 	}
 
-	opserr << "B vector:" << *allBetas;
-	opserr << "R matrix:" << *rhos;
+	//opserr << "B vector:" << *allBetas;
+	//opserr << "R matrix:" << *rhos;
 	
 	// Compute the bi-variate parallel probability for all the pairs
 	// Note this is upper-diagonal only
@@ -335,11 +335,14 @@ SystemAnalysis::setCutsets(void)
 			}
 			else {
 				// get actual LSF index from tag
-				actual = theReliabilityDomain->getLimitStateFunctionIndex(allComps(i));
-				cutBeta(i) = (*allBetas)(actual);
+				int iComp = allComps(i);
+				actual = theReliabilityDomain->getLimitStateFunctionIndex( abs(iComp) );
+				cutBeta(i) = (*allBetas)(actual) * sign(iComp);
+					
 				for (int j = 0; j < nc; j++) {
-					int actualj = theReliabilityDomain->getLimitStateFunctionIndex(allComps(j));
-					cutRho(j,i) = (*rhos)(actualj,actual);
+					int jComp = allComps(j);
+					int actualj = theReliabilityDomain->getLimitStateFunctionIndex( abs(jComp) );
+					cutRho(j,i) = (*rhos)(actualj,actual) * sign(iComp) * sign(jComp);
 				}
 			}
 		}
@@ -407,6 +410,12 @@ SystemAnalysis::factorial(int num)
 	return result;
 }
 
+int 
+SystemAnalysis::sign(int v)
+{
+	return v > 0 ? 1 : (v < 0 ? -1 : 0);
+}
+
 int
 SystemAnalysis::arrange(int num, RandomNumberGenerator *randNum, ID &permutation)
 {
@@ -457,6 +466,7 @@ SystemAnalysis::setPermutations(int k, int n)
 		
 	// create arrays of vectors and matrices that contain beta and rho for each permutation
 	int perms = getNumPermutations(k,n);
+	//opserr << "set " << n << " given " << k << " permutations = " << perms << endln;
 	
 	// vector 1:n of cut set indices
 	Vector v(n);
@@ -672,11 +682,11 @@ SystemAnalysis::setPermutedComponents(int k, int i)
 	
 	// now flesh out vectors with data from each component in cutset
 	for (int j = 0; j < cutLen; j++) {
-		int actual = theReliabilityDomain->getLimitStateFunctionIndex( permutedComps(j) );
-		(*permutedBetas)(j) = (*allBetas)(actual);
+		int actual = theReliabilityDomain->getLimitStateFunctionIndex( abs(permutedComps(j)) );
+		(*permutedBetas)(j) = (*allBetas)(actual) * sign(permutedComps(j));
 		for (int jk = 0; jk < cutLen; jk++) {
-			int actualj = theReliabilityDomain->getLimitStateFunctionIndex( permutedComps(jk) );
-			(*permutedRhos)(jk,j) = (*rhos)(actualj,actual);
+			int actualj = theReliabilityDomain->getLimitStateFunctionIndex( abs(permutedComps(jk)) );
+			(*permutedRhos)(jk,j) = (*rhos)(actualj,actual) * sign(permutedComps(j)) * sign(permutedComps(jk));
 		}
 	}
 		
