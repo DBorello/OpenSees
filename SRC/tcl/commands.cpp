@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.131 $
-// $Date: 2008-08-26 18:24:26 $
+// $Revision: 1.132 $
+// $Date: 2008-08-27 16:51:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -132,7 +132,7 @@ OPS_Stream *opserrPtr = &sserr;
 #include <SecantAccelerator1.h>
 #include <SecantAccelerator2.h>
 #include <SecantAccelerator3.h>
-#include <MillerAccelerator.h>
+//#include <MillerAccelerator.h>
 
 // line searches
 #include <BisectionLineSearch.h>
@@ -2718,8 +2718,8 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
       return TCL_ERROR;	  
     }
 
-    Accelerator *theAccel;
-    theAccel = new MillerAccelerator(maxDim, 0.01, iterateTangent);
+    Accelerator *theAccel = 0;
+    //theAccel = new MillerAccelerator(maxDim, 0.01, iterateTangent);
 
     theNewAlgo = new AcceleratedNewton(*theTest, theAccel, incrementTangent);
   }
