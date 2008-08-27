@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2008-05-13 16:45:54 $
+// $Revision: 1.9 $
+// $Date: 2008-08-27 17:17:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/system/SCIS.cpp,v $
 
 
@@ -33,6 +33,8 @@
 
 #include <SCIS.h>
 #include <SystemAnalysis.h>
+#include <Cutset.h>
+#include <CutsetIter.h>
 #include <ReliabilityDomain.h>
 #include <NormalRV.h>
 #include <RandomNumberGenerator.h>
@@ -100,23 +102,72 @@ SCIS::analyze(void)
 	// Allocate beta and rho
 	const Vector &allBetas = getBeta();
 	const Matrix &rhos = getRho();
+	int numCuts = 1;
+	double uBound = 1;
+	double lBound = 0;
+	int result;
 	
-	// compute and get bounds
-	int result = computeBounds(analysisType);
-	if (result != 0)
-		opserr << "SCIS::analyze WARNING - failed to compute system bounds" << endln;
-	
-	double uBound = getUpperBound();
-	double lBound = getLowerBound();
+	if (analysisType == 0 || analysisType == 1) {
+		// compute and get bounds
+		result = computeBounds(analysisType);
+		if (result != 0)
+			opserr << "SCIS::analyze WARNING - failed to compute system bounds" << endln;
+		
+		uBound = getUpperBound();
+		lBound = getLowerBound();
+	} else if (analysisType == 2) {
+		numCuts = theReliabilityDomain->getNumberOfCutsets();
+		if (numCuts < 1)
+			opserr << "SCIS::analyze WARNING - not enough cutsets available in domain" << endln;
+		
+		result = setCutsets();
+		if (result != 0)
+			opserr << "SCIS::analyze WARNING - failed to set cutset components" << endln;
+	}
 	
 	// perform analysis
 	double pf = 0;
 	if (analysisType == 0) {
 		// parallel system
 		pf = SCISfunc(allBetas,rhos,-1.0);
-	} else {
+	} else if (analysisType == 1) {
 		// series system
 		pf = 1.0 - SCISfunc(allBetas,rhos,1.0);
+	} else if (analysisType == 2) {
+		// general system (k cutset unions of parallel subsystems)
+		int ck;
+		
+		// first-order terms in the inclusion-exclusion rule (always present)
+		// upper bound to probability when cutsets are not disjoint
+		Cutset *theCutset;
+		CutsetIter &cutIter = theReliabilityDomain->getCutsets();
+		while ((theCutset = cutIter()) != 0) {
+			pf += SCISfunc(theCutset->getBetaCutset(),theCutset->getRhoCutset(),-1.0);
+		}
+		uBound = pf;
+		
+		// if necessary, carry out n-choose-k algorithm to find all remaining pairs of events
+		// note, this is extremely dependent on ability to check n factorial pairs even with a 
+		// greatly reduced decision tree
+		for (ck = 2; ck <= numCuts; ck++) {
+			int numPerms = getNumPermutations(ck,numCuts);
+			result = setPermutations(ck,numCuts);
+			if (result != 0) {
+				opserr << "SCIS::analyze WARNING - failed to set permutations of cut sets" << endln;
+				return -1;
+			}
+			
+			double scaleF = pow(-1.0,ck-1);
+			for (int ip = 1; ip <= numPerms; ip++) {
+				result = setPermutedComponents(ck,ip-1);
+				if (result != 0) {
+					opserr << "SCIS::analyze WARNING - failed to set permuted beta and rho" << endln;
+					return -1;
+				}
+				
+				pf += scaleF * SCISfunc(getBetaPermutation(),getRhoPermutation(),-1.0);
+			}
+		}
 	}
 	
 	// Print results  (should do this over all defined systems)
@@ -136,13 +187,19 @@ SCIS::analyze(void)
 				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<lBound<< "  #" << endln;
 		outputFile << "#  Upper parallel probability bound: .................. " 
 				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<uBound<< "  #" << endln;
-	} else {
+	} else if (analysisType == 1) {
 		// series system
 		outputFile << "#  Series probability failure estimate (SCIS): ........ "
 				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<pf<< "  #" << endln;
 		outputFile << "#  Lower series probability bound: .................... " 
 				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<lBound<< "  #" << endln;
 		outputFile << "#  Upper series probability bound: .................... " 
+				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<uBound<< "  #" << endln;
+	} else if (analysisType == 2) {
+		// general system
+		outputFile << "#  General probability failure estimate (SCIS): ....... "
+				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<pf<< "  #" << endln;
+		outputFile << "#  General upper probability bound: ................... " 
 				   << setiosflags(ios::left)<<setprecision(5)<<setw(12)<<uBound<< "  #" << endln;
 	}
 	outputFile << "#                                                                     #" << endln;
@@ -163,7 +220,7 @@ SCIS::SCISfunc(const Vector &allbeta, const Matrix &rhoin, double modifier)
 	static NormalRV uRV(1, 0.0, 1.0, 0.0);
 	Vector beta(n);
 	Matrix rho(n,n);
-	int i,ii,j,k,result,N;
+	int i,ii,j,k,N;
 	
 	rho = rhoin;
 	for (i=0; i < n; i++) {
@@ -171,105 +228,109 @@ SCIS::SCISfunc(const Vector &allbeta, const Matrix &rhoin, double modifier)
 		rho(i,i) = 1.0;
 	}
 	
-	// SCIS allocation, note that Nmax is limited to maximum size of Vector class (currently int)
-	srand ( time(NULL) );
-	Matrix Dk(n,n);
-	Matrix d(n,n);
-	Vector y(Nmax);
-	Vector x(n);
-	double rand01;
+	if (n == 1)
+		return uRV.getCDFvalue( beta(0) );
+	else {
+		// SCIS allocation, note that Nmax is limited to maximum size of Vector class (currently int)
+		srand ( time(NULL) );
+		Matrix Dk(n,n);
+		Matrix d(n,n);
+		Vector y(Nmax);
+		Vector x(n);
+		double rand01;
 
-	// Preprocessing
-	// d : Matrix containing parts of inverse of covariance matrix 
-	//     (Note) d(k,1:k) - k-th row of inverse matrix of C(1:k,1:k)
-	for (ii = 1; ii <= n; ii++) {
-		Matrix tempMat(ii,ii);
-		for (i = 0; i < ii; i++) {
-			for (j = 0; j < ii; j++)
-				tempMat(i,j) = rho(i,j);
-		}
-
-		Matrix Cinv(ii,ii);
-		tempMat.Invert(Cinv);
-
-		for (i = 0; i < ii; i++) {
-			for (j = 0; j < ii; j++)
-				Dk(i,j) = Cinv(i,j);
-		}
-		
-		for (j = 1; j <= ii; j++)
-			d(ii-1,j-1) = Dk(ii-1,j-1); 
-	}
-
-	// ICIS algorithm (Ambartzumian and Der Kiureghian)
-	// y    : Product of probabilities
-	// sumy : Sum of products y
-	// P    : Estimate of probability (sumy/N)
-	// em   : Mean of conditional multinormal distribution
-	// dd   : Standard deviation of conditional multinormal distribution
-	// x    : Sampled value for each random variable
-	double sumy = 0;
-	double cov = DBL_MAX;
-	double P = 0;
-	double em, sm, dd, za, zb, zz;
-
-	for (ii = 1; ii <= Nmax; ii++) {
-		y(ii-1) = 1;
-
-		// calculate probability of k-th variable
-		for (k = 1; k <= n; k++) {
-			// mean and std for k-th variable
-			dd = 1/sqrt(d(k-1,k-1));
-			em = 0;
-
-			// mean of conditional distribution
-			if (k != 1) {
-				for (j = 1; j <= k-1; j++) {
-					sm = d(k-1,j-1)*x(j-1)/d(k-1,k-1);
-					em = em - sm;
-				}
+		// Preprocessing
+		// d : Matrix containing parts of inverse of covariance matrix 
+		//     (Note) d(k,1:k) - k-th row of inverse matrix of C(1:k,1:k)
+		for (ii = 1; ii <= n; ii++) {
+			Matrix tempMat(ii,ii);
+			for (i = 0; i < ii; i++) {
+				for (j = 0; j < ii; j++)
+					tempMat(i,j) = rho(i,j);
 			}
 
-			// conditional cumulative probability za, our interval goes from -inf to beta so za = 0
-			//za = (-DBL_MAX-em)/dd;
-			//za = uRV.getCDFvalue(za);
-			za = 0;
-			
-			// conditional cumulative probability zb
-			zb = (beta(k-1)-em)/dd;
-#ifdef _LINUX
-			if ( isfinite(zb) )
-				zb = uRV.getCDFvalue(zb);
-			else
-				zb = 0;
-#endif
-			y(ii-1) = y(ii-1)*(zb-za);
+			Matrix Cinv(ii,ii);
+			tempMat.Invert(Cinv);
 
-			// sample a random value x_k
-			rand01 = (double)rand()/RAND_MAX;
-			zz = uRV.getInverseCDFvalue( (zb-za)*(rand01)+za );
-			x(k-1) = dd*zz + em;
+			for (i = 0; i < ii; i++) {
+				for (j = 0; j < ii; j++)
+					Dk(i,j) = Cinv(i,j);
+			}
+			
+			for (j = 1; j <= ii; j++)
+				d(ii-1,j-1) = Dk(ii-1,j-1); 
 		}
 
-		// sum of y up to i-trials
-		sumy = sumy + y(ii-1);
-		N = ii;
-		P = sumy / N;
+		// SCIS algorithm (Ambartzumian and Der Kiureghian)
+		// y    : Product of probabilities
+		// sumy : Sum of products y
+		// P    : Estimate of probability (sumy/N)
+		// em   : Mean of conditional multinormal distribution
+		// dd   : Standard deviation of conditional multinormal distribution
+		// x    : Sampled value for each random variable
+		double sumy = 0;
+		double cov = DBL_MAX;
+		double P = 0;
+		double em, sm, dd, za, zb, zz;
 
-		// calculation of c.o.v. of estimate P
-		if (ii >= 5 && P > 0.0) {
-			Vector *vectemp = new Vector(N);
-			for (j = 0; j < N; j++)
-				(*vectemp)(j) = y(j) - P;
+		for (ii = 1; ii <= Nmax; ii++) {
+			y(ii-1) = 1;
+
+			// calculate probability of k-th variable
+			for (k = 1; k <= n; k++) {
+				// mean and std for k-th variable
+				dd = 1/sqrt(d(k-1,k-1));
+				em = 0;
+
+				// mean of conditional distribution
+				if (k != 1) {
+					for (j = 1; j <= k-1; j++) {
+						sm = d(k-1,j-1)*x(j-1)/d(k-1,k-1);
+						em = em - sm;
+					}
+				}
+
+				// conditional cumulative probability za, our interval goes from -inf to beta so za = 0
+				//za = (-DBL_MAX-em)/dd;
+				//za = uRV.getCDFvalue(za);
+				za = 0;
 				
-			cov = vectemp->Norm()/N/P;
-			delete vectemp;
-		}
-			
-		// early exit
-		if (cov < errMax)
-			break;
-	}
+				// conditional cumulative probability zb
+				zb = (beta(k-1)-em)/dd;
+	#ifdef _LINUX
+				if ( isfinite(zb) )
+					zb = uRV.getCDFvalue(zb);
+				else
+					zb = 0;
+	#endif
+				y(ii-1) = y(ii-1)*(zb-za);
 
-	return P;
+				// sample a random value x_k
+				rand01 = (double)rand()/RAND_MAX;
+				zz = uRV.getInverseCDFvalue( (zb-za)*(rand01)+za );
+				x(k-1) = dd*zz + em;
+			}
+
+			// sum of y up to i-trials
+			sumy = sumy + y(ii-1);
+			N = ii;
+			P = sumy / N;
+
+			// calculation of c.o.v. of estimate P
+			if (ii >= 5 && P > 0.0) {
+				Vector *vectemp = new Vector(N);
+				for (j = 0; j < N; j++)
+					(*vectemp)(j) = y(j) - P;
+					
+				cov = vectemp->Norm()/N/P;
+				delete vectemp;
+			}
+				
+			// early exit
+			if (cov < errMax)
+				break;
+		}
+
+		return P;
+	}
 }

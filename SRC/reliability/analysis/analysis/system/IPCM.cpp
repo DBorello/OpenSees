@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2008-05-11 19:52:54 $
+// $Revision: 1.6 $
+// $Date: 2008-08-27 17:17:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/system/IPCM.cpp,v $
 
 
@@ -196,6 +196,10 @@ IPCM::IPCMfunc(const Vector &allbeta, const Matrix &rhoin, double modifier)
 	Vector beta(n);
 	Matrix rho(n,n);
 	int i,ic,ir,j,k;
+
+	double c1, c2, r, a, b, c21, jprob;
+	double orig, newg, modval;
+	CorrelatedStandardNormal phi2(0.0);
 	
 	rho = rhoin;
 	for (i=0; i < n; i++) {
@@ -203,55 +207,25 @@ IPCM::IPCMfunc(const Vector &allbeta, const Matrix &rhoin, double modifier)
 		rho(i,i) = beta(i);
 	}
 	
-	double c1, c2, r, a, b, c21, jprob;
-	double orig, newg, modval;
-	CorrelatedStandardNormal phi2(0.0);
-	
-	// ÑÑÑÑ FIRST CYCLE ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ 
-	double pdfc1 = uRV.getPDFvalue(rho(1-1,1-1)); 
-	double cdfc1 = uRV.getCDFvalue(rho(1-1,1-1)); 
-	double A1 = pdfc1/cdfc1;
-	double B1 = A1*(rho(1-1,1-1) + A1);
-	for (k = 2; k <= n; k++) {
-		c1 = -rho(1-1,1-1); 
-		c2 = -rho(k-1,k-1); 
-		r = rho(1-1,k-1); 
-		a = pdfc1/(1.0 - cdfc1); 
-		b = a*(c1 + a); 
-		c21 = (c2 + r*a)/sqrt(1.0 - r*r*b);
+	if (n == 1)
+		return 1.0 - uRV.getCDFvalue( beta(0) );
+	else if (n == 2) {
+		// check closed-form solution
+		phi2.setCorrelation(rhoin(1,0));
+		double pcf = phi2.getCDF(beta(0),beta(1));
+		//opserr << "pcf = " << pcf << " and PCM = " << exp(pf) << endln;
+		return 1.0 - pcf;
+	} else {
 		
-		// original
-		orig = (1.0 - cdfc1)*uRV.getCDFvalue(c21);
-		// bootstrap with binormal
-		phi2.setCorrelation(r);
-		newg = phi2.getCDF(c1,c2);
-		
-		jprob = uRV.getCDFvalue(c2) - newg;
-		// might have a div by 0 problem here
-		modval = 1.0 - jprob/cdfc1;
-		if ( isnan(modval) ) {
-			opserr << "SystemAnalysis::IPCM WARNING illegal norminv value input (nan)" << endln;
-			opserr << "   cdfc1 = " << cdfc1 << " and c2 = " << c2 << endln;
-		}
-		
-		rho(k-1,1-1) = uRV.getInverseCDFvalue(modval); 
-	}
-
-	for (ir = 2; ir <= n - 1; ir++) {
-		for (ic = ir + 1; ic <= n ; ic++)
-			rho(ir-1,ic-1) = (rho(ir-1,ic-1) - rho(1-1,ir-1)*rho(1-1,ic-1)*B1)/sqrt((1 - rho(1-1,ir-1)*rho(1-1,ir-1)*B1)*(1 - rho(1-1,ic-1)*rho(1-1,ic-1)*B1));
-	}
-
-	// ÑÑÑÑ- OTHER CYCLES ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÐ 
-	for (j = 2; j <= n - 1; j++) {
-		pdfc1 = uRV.getPDFvalue(rho(j-1,j-2));
-		cdfc1 = uRV.getCDFvalue(rho(j-1,j-2)); 
-		A1 = pdfc1/cdfc1;
-		B1 = A1*(rho(j-1,j-2) + A1);
-		for (k = j + 1; k <= n; k++) {
-			c1 = -rho(j-1,j-2); 
-			c2 = -rho(k-1,j-2); 
-			r = rho(j-1,k-1); 
+		// ÑÑÑÑ FIRST CYCLE ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ 
+		double pdfc1 = uRV.getPDFvalue(rho(1-1,1-1)); 
+		double cdfc1 = uRV.getCDFvalue(rho(1-1,1-1)); 
+		double A1 = pdfc1/cdfc1;
+		double B1 = A1*(rho(1-1,1-1) + A1);
+		for (k = 2; k <= n; k++) {
+			c1 = -rho(1-1,1-1); 
+			c2 = -rho(k-1,k-1);
+			r = rho(1-1,k-1); 
 			a = pdfc1/(1.0 - cdfc1); 
 			b = a*(c1 + a); 
 			c21 = (c2 + r*a)/sqrt(1.0 - r*r*b);
@@ -263,33 +237,62 @@ IPCM::IPCMfunc(const Vector &allbeta, const Matrix &rhoin, double modifier)
 			newg = phi2.getCDF(c1,c2);
 			
 			jprob = uRV.getCDFvalue(c2) - newg;
+			// might have a div by 0 problem here
 			modval = 1.0 - jprob/cdfc1;
 			if ( isnan(modval) ) {
-				opserr << "SystemAnalysis::IPCM WARNING illegal norminv value input (nan)" << endln;
-				opserr << "   cdfc1 = " << cdfc1 << " and c2 = " << c2 << endln;
+				opserr << "SystemAnalysis::IPCM WARNING illegal norminv value input (nan): " 
+					   << "cdfc1 = " << cdfc1 << " and c2 = " << c2 << endln;
 			}
-				
-			rho(k-1,j-1) = uRV.getInverseCDFvalue(modval); 
+			
+			rho(k-1,1-1) = uRV.getInverseCDFvalue(modval); 
 		}
-		
-		for (ir = j + 1; ir <= n - 1; ir++) {
-			for (ic = ir + 1; ic <= n; ic++)
-				rho(ir-1,ic-1) = (rho(ir-1,ic-1) - rho(j-1,ir-1)*rho(j-1,ic-1)*B1)/sqrt((1 - rho(j-1,ir-1)*rho(j-1,ir-1)*B1)*(1 - rho(j-1,ic-1)*rho(j-1,ic-1)*B1)); 
-		}
-	}
 
-	// ÑÑÑÐ Calculate the product of conditional marginals 
-	double pf = log(uRV.getCDFvalue(rho(1-1,1-1))); 
-	for (i = 2; i<=n; i++)
-		pf = pf + log(uRV.getCDFvalue(rho(i-1,i-2)));
+		for (ir = 2; ir <= n - 1; ir++) {
+			for (ic = ir + 1; ic <= n ; ic++)
+				rho(ir-1,ic-1) = (rho(ir-1,ic-1) - rho(1-1,ir-1)*rho(1-1,ic-1)*B1)/sqrt((1 - rho(1-1,ir-1)*rho(1-1,ir-1)*B1)*(1 - rho(1-1,ic-1)*rho(1-1,ic-1)*B1));
+		}
+
+		// ÑÑÑÑ- OTHER CYCLES ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÐ 
+		for (j = 2; j <= n - 1; j++) {
+			pdfc1 = uRV.getPDFvalue(rho(j-1,j-2));
+			cdfc1 = uRV.getCDFvalue(rho(j-1,j-2)); 
+			A1 = pdfc1/cdfc1;
+			B1 = A1*(rho(j-1,j-2) + A1);
+			for (k = j + 1; k <= n; k++) {
+				c1 = -rho(j-1,j-2); 
+				c2 = -rho(k-1,j-2); 
+				r = rho(j-1,k-1); 
+				a = pdfc1/(1.0 - cdfc1); 
+				b = a*(c1 + a); 
+				c21 = (c2 + r*a)/sqrt(1.0 - r*r*b);
+				
+				// original
+				orig = (1.0 - cdfc1)*uRV.getCDFvalue(c21);
+				// bootstrap with binormal
+				phi2.setCorrelation(r);
+				newg = phi2.getCDF(c1,c2);
+				
+				jprob = uRV.getCDFvalue(c2) - newg;
+				modval = 1.0 - jprob/cdfc1;
+				if ( isnan(modval) ) {
+					opserr << "SystemAnalysis::IPCM WARNING illegal norminv value input (nan)" << endln;
+					opserr << "   cdfc1 = " << cdfc1 << " and c2 = " << c2 << endln;
+				}
+					
+				rho(k-1,j-1) = uRV.getInverseCDFvalue(modval); 
+			}
+			
+			for (ir = j + 1; ir <= n - 1; ir++) {
+				for (ic = ir + 1; ic <= n; ic++)
+					rho(ir-1,ic-1) = (rho(ir-1,ic-1) - rho(j-1,ir-1)*rho(j-1,ic-1)*B1)/sqrt((1 - rho(j-1,ir-1)*rho(j-1,ir-1)*B1)*(1 - rho(j-1,ic-1)*rho(j-1,ic-1)*B1)); 
+			}
+		}
+
+		// ÑÑÑÐ Calculate the product of conditional marginals 
+		double pf = log(uRV.getCDFvalue(rho(1-1,1-1))); 
+		for (i = 2; i<=n; i++)
+			pf = pf + log(uRV.getCDFvalue(rho(i-1,i-2)));
 		
-	// check closed-form solution
-	phi2.setCorrelation(rhoin(1,0));
-	double pcf = 1.0 - phi2.getCDF(beta(0),beta(1));
-	//opserr << "pcf = " << pcf << " and IPCM = " << 1-exp(pf) << endln;
-	
-	if (n == 2)
-		return pcf;
-	else
 		return 1.0 - exp(pf);
+	}
 }

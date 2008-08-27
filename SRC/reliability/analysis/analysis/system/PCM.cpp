@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2008-05-11 19:52:54 $
+// $Revision: 1.6 $
+// $Date: 2008-08-27 17:17:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/system/PCM.cpp,v $
 
 
@@ -200,42 +200,45 @@ PCM::PCMfunc(const Vector &allbeta, const Matrix &rhoin, double modifier)
 		rho(i,i) = beta(i);
 	}
 	
-	// ÑÑÑÑ FIRST CYCLE ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ 
-	double A1 = uRV.getPDFvalue(rho(1-1,1-1))/(uRV.getCDFvalue(rho(1-1,1-1)));
-	double B1 = A1*(rho(1-1,1-1) + A1);
-	for (k = 2; k <= n; k++) 
-		rho(k-1,1-1) = (rho(k-1,k-1) + rho(1-1,k-1)*A1)/sqrt(1 - rho(1-1,k-1)*rho(1-1,k-1)*B1);
-
-	for (ir = 2; ir <= n - 1; ir++) {
-		for (ic = ir + 1; ic <= n; ic++)
-			rho(ir-1,ic-1) = (rho(ir-1,ic-1) - rho(1-1,ir-1)*rho(1-1,ic-1)*B1)/sqrt((1-rho(1-1,ir-1)*rho(1-1,ir-1)*B1)*(1 - rho(1-1,ic-1)*rho(1-1,ic-1)*B1));
-	}
-
-	// ÑÑÑÑ- OTHER CYCLES ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÐ 
-	for (j = 2; j <= n - 1; j++) {
-		A1 = uRV.getPDFvalue(rho(j-1,j-2))/(uRV.getCDFvalue(rho(j-1,j-2)));
-		B1 = A1*(rho(j-1,j-2) + A1);
-		for (k = j + 1; k <= n; k++) 
-			rho(k-1,j-1) = (rho(k-1,j-2) + rho(j-1,k-1)*A1)/sqrt(1 - rho(j-1,k-1)*rho(j-1,k-1)*B1);	
-		
-		for (ir = j + 1; ir <= n - 1; ir++) {
-			for (ic = ir + 1; ic <= n; ic++) 
-				rho(ir-1,ic-1) = (rho(ir-1,ic-1) - rho(j-1,ir-1)*rho(j-1,ic-1)*B1)/sqrt((1 - rho(j-1,ir-1)*rho(j-1,ir-1)*B1)*(1 - rho(j-1,ic-1)*rho(j-1,ic-1)*B1));
-		}
-	}
-
-	// ÑÑÑÐ Calculate the product of conditional marginals 
-	double pf = log(uRV.getCDFvalue(rho(1-1,1-1))); 
-	for (i = 2; i<=n; i++)
-		pf = pf + log(uRV.getCDFvalue(rho(i-1,i-2)));
-		
-	// check closed-form solution
-	CorrelatedStandardNormal phi2(rhoin(1,0));
-	double pcf = phi2.getCDF(beta(0),beta(1));
-	//opserr << "pcf = " << pcf << " and PCM = " << exp(pf) << endln;
-	
-	if (n == 2)
+	if (n == 1)
+		return uRV.getCDFvalue( beta(0) );
+	else if (n == 2) {
+		// check closed-form solution
+		CorrelatedStandardNormal phi2(rhoin(1,0));
+		double pcf = phi2.getCDF(beta(0),beta(1));
+		//opserr << "pcf = " << pcf << " and PCM = " << exp(pf) << endln;
 		return pcf;
-	else
+	} else {
+	
+		// ÑÑÑÑ FIRST CYCLE ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ 
+		double A1 = uRV.getPDFvalue(rho(1-1,1-1))/(uRV.getCDFvalue(rho(1-1,1-1)));
+		double B1 = A1*(rho(1-1,1-1) + A1);
+		for (k = 2; k <= n; k++) 
+			rho(k-1,1-1) = (rho(k-1,k-1) + rho(1-1,k-1)*A1)/sqrt(1 - rho(1-1,k-1)*rho(1-1,k-1)*B1);
+
+		for (ir = 2; ir <= n - 1; ir++) {
+			for (ic = ir + 1; ic <= n; ic++)
+				rho(ir-1,ic-1) = (rho(ir-1,ic-1) - rho(1-1,ir-1)*rho(1-1,ic-1)*B1)/sqrt((1-rho(1-1,ir-1)*rho(1-1,ir-1)*B1)*(1 - rho(1-1,ic-1)*rho(1-1,ic-1)*B1));
+		}
+
+		// ÑÑÑÑ- OTHER CYCLES ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÐ 
+		for (j = 2; j <= n - 1; j++) {
+			A1 = uRV.getPDFvalue(rho(j-1,j-2))/(uRV.getCDFvalue(rho(j-1,j-2)));
+			B1 = A1*(rho(j-1,j-2) + A1);
+			for (k = j + 1; k <= n; k++) 
+				rho(k-1,j-1) = (rho(k-1,j-2) + rho(j-1,k-1)*A1)/sqrt(1 - rho(j-1,k-1)*rho(j-1,k-1)*B1);	
+			
+			for (ir = j + 1; ir <= n - 1; ir++) {
+				for (ic = ir + 1; ic <= n; ic++) 
+					rho(ir-1,ic-1) = (rho(ir-1,ic-1) - rho(j-1,ir-1)*rho(j-1,ic-1)*B1)/sqrt((1 - rho(j-1,ir-1)*rho(j-1,ir-1)*B1)*(1 - rho(j-1,ic-1)*rho(j-1,ic-1)*B1));
+			}
+		}
+
+		// ÑÑÑÐ Calculate the product of conditional marginals 
+		double pf = log(uRV.getCDFvalue(rho(1-1,1-1))); 
+		for (i = 2; i<=n; i++)
+			pf = pf + log(uRV.getCDFvalue(rho(i-1,i-2)));
+		
 		return exp(pf);
+	}
 }

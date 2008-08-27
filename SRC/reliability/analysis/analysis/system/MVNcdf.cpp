@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2008-05-11 19:52:54 $
+// $Revision: 1.5 $
+// $Date: 2008-08-27 17:17:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/system/MVNcdf.cpp,v $
 
 
@@ -142,6 +142,7 @@ MVNcdf::analyze(void)
 			pf += MVNcdffunc(theCutset->getBetaCutset(),theCutset->getRhoCutset(),-1.0);
 		}
 		uBound = pf;
+		opserr << "MVN upper bound = " << pf << endln;
 		
 		// if necessary, carry out n-choose-k algorithm to find all remaining pairs of events
 		// note, this is extremely dependent on ability to check n factorial pairs even with a 
@@ -224,64 +225,68 @@ MVNcdf::MVNcdffunc(const Vector &allbeta, const Matrix &rhoin, double modifier)
 		beta(i) = allbeta(i)*modifier;
 		rho(i,i) = 1.0;
 	}
-	
-	Vector x = beta;
-	double ci = 99.9;
 
-	// Cholesky decomposition of correlation matrix
-	MatrixOperations theMat(rho);
-	result = theMat.computeCholeskyAndItsInverse();
-	if (result < 0) {
-		opserr << "SystemAnalysis::MVNcdf() - could not compute the Cholesky decomposition and " << endln
-			<< "  its inverse for the correlation matrix." << endln;
-	}
-	Matrix C = theMat.getLowerCholesky();
-	double alph = uRV.getInverseCDFvalue(ci/100.0);
+	if (m == 1)
+		return uRV.getCDFvalue( beta(0) );
+	else {	
+		Vector x = beta;
+		double ci = 99.9;
 
-	double intsum = 0, varsum = 0, q; 
-	long int N = 0;
-	
-	// d is always zero for integration from -infinity to beta
-	// so f = e in Genz
-	Vector d(m); Vector e(m); Vector f(m);
-	d(1-1) = 0.0;
-	e(1-1) = uRV.getCDFvalue(x(1-1) / C(1-1,1-1));
-	f(1-1) = e(1-1)-d(1-1);
-	
-	// initialize random number generator
-	RandomNumberGenerator *theRandomNumberGenerator = new CStdLibRandGenerator();
-	result = theRandomNumberGenerator->generate_nIndependentUniformNumbers(m-1,0,1,time(NULL));
-	if (result < 0) {
-		opserr << "SystemAnalysis::MVNcdf() - could not generate random numbers for simulation." << endln;
-	}
-	Vector w(m-1);
+		// Cholesky decomposition of correlation matrix
+		MatrixOperations theMat(rho);
+		result = theMat.computeCholeskyAndItsInverse();
+		if (result < 0) {
+			opserr << "SystemAnalysis::MVNcdf() - could not compute the Cholesky decomposition and " << endln
+				<< "  its inverse for the correlation matrix." << endln;
+		}
+		Matrix C = theMat.getLowerCholesky();
+		double alph = uRV.getInverseCDFvalue(ci/100.0);
 
-	// simulate
-	Vector y(m);
-	double err = 2.0 * errMax;
-	while ( (err > errMax || N < 5) && (N < Nmax) ) {
-		result = theRandomNumberGenerator->generate_nIndependentUniformNumbers(m-1,0,1);
-		w = theRandomNumberGenerator->getGeneratedNumbers();
+		double intsum = 0, varsum = 0, q; 
+		long int N = 0;
+		
+		// d is always zero for integration from -infinity to beta
+		// so f = e in Genz
+		Vector d(m); Vector e(m); Vector f(m);
+		d(1-1) = 0.0;
+		e(1-1) = uRV.getCDFvalue(x(1-1) / C(1-1,1-1));
+		f(1-1) = e(1-1)-d(1-1);
+		
+		// initialize random number generator
+		RandomNumberGenerator *theRandomNumberGenerator = new CStdLibRandGenerator();
+		result = theRandomNumberGenerator->generate_nIndependentUniformNumbers(m-1,0,1,time(NULL));
+		if (result < 0) {
+			opserr << "SystemAnalysis::MVNcdf() - could not generate random numbers for simulation." << endln;
+		}
+		Vector w(m-1);
 
-		for (i = 2; i <= m; i++) {
-			y(i-1-1) = uRV.getInverseCDFvalue(d(i-1-1) + w(i-1-1) * (e(i-1-1)-d(i-1-1)) );
-			q = 0.0;
-			for (j = 1; j <= i-1; j++)
-				q += C(i-1,j-1)*y(j-1);
-				
-			d(i-1) = 0.0;
-			e(i-1) = uRV.getCDFvalue( (x(i-1) - q)/C(i-1,i-1) );
-			f(i-1) = (e(i-1)-d(i-1)) * f(i-1-1);
+		// simulate
+		Vector y(m);
+		double err = 2.0 * errMax;
+		while ( (err > errMax || N < 5) && (N < Nmax) ) {
+			result = theRandomNumberGenerator->generate_nIndependentUniformNumbers(m-1,0,1);
+			w = theRandomNumberGenerator->getGeneratedNumbers();
+
+			for (i = 2; i <= m; i++) {
+				y(i-1-1) = uRV.getInverseCDFvalue(d(i-1-1) + w(i-1-1) * (e(i-1-1)-d(i-1-1)) );
+				q = 0.0;
+				for (j = 1; j <= i-1; j++)
+					q += C(i-1,j-1)*y(j-1);
+					
+				d(i-1) = 0.0;
+				e(i-1) = uRV.getCDFvalue( (x(i-1) - q)/C(i-1,i-1) );
+				f(i-1) = (e(i-1)-d(i-1)) * f(i-1-1);
+			}
+
+			N++;
+			intsum += f(m-1);
+			varsum += f(m-1)*f(m-1);
+			err = alph*sqrt( (varsum/N - pow(intsum/N,2))/N );
+			//opserr << "#" << N << " has err = " << err << " with alpha=" << alph << endln;
 		}
 
-		N++;
-		intsum += f(m-1);
-		varsum += f(m-1)*f(m-1);
-		err = alph*sqrt( (varsum/N - pow(intsum/N,2))/N );
-		//opserr << "#" << N << " has err = " << err << " with alpha=" << alph << endln;
+		delete theRandomNumberGenerator;
+		
+		return intsum/N;
 	}
-
-	delete theRandomNumberGenerator;
-	
-	return intsum/N;
 }
