@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2008-05-27 20:04:30 $
+// $Revision: 1.18 $
+// $Date: 2008-08-27 17:12:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FORMAnalysis.cpp,v $
 
 
@@ -218,7 +218,7 @@ FORMAnalysis::analyze()
 		     <<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<beta 
 		     << "  #" << endln;
 	  outputFile << "#  FO approx. probability of failure, pf1: ............ " 
-		     <<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<pf1 
+		     <<setiosflags(ios::left)<<setiosflags(ios::scientific)<<setprecision(5)<<setw(12)<<pf1 
 		     << "  #" << endln;
 	  outputFile << "#                                                                     #" << endln;
 	  outputFile << "# rvtag   x*          u*         alpha    gamma    delta    eta       #" << endln;
