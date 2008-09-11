@@ -1,5 +1,5 @@
-// $Revision: 1.43 $
-// $Date: 2008-08-15 19:17:06 $
+// $Revision: 1.44 $
+// $Date: 2008-09-11 20:33:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
 
 // Written: ZHY
@@ -1372,7 +1372,7 @@ PressureDependMultiYield::setUpSurfaces (double * gredu)
 		// tao = cohesion * sqrt(8.0)/3.
     residualPress = 2 * cohesion / Mnys;
     // a small nonzero residualPress for numerical purpose only
-    if (residualPress < 0.01) residualPress = 0.01;
+    if (residualPress < 0.0001*pAtm) residualPress = 0.0001*pAtm;
     coneHeight = - (refPressure - residualPress);
     peakShear = sqrt(2.) * coneHeight * Mnys / 3.;
     refStrain = (peakShearStrain * peakShear)
@@ -1413,7 +1413,7 @@ PressureDependMultiYield::setUpSurfaces (double * gredu)
 		double tmax = refShearModulus*gredu[ii]*gredu[ii+1];
 		double Mnys = -(sqrt(3.) * tmax - 2.* cohesion) / refPressure;
     residualPress = 2 * cohesion / Mnys;
-    if (residualPress < 0.01) residualPress = 0.01;
+    if (residualPress < 0.0001*pAtm) residualPress = 0.0001*pAtm;
     coneHeight = - (refPressure - residualPress);
 
     double sinPhi = 3*Mnys /(6+Mnys);
