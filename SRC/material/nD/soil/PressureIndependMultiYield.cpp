@@ -1,5 +1,5 @@
-// $Revision: 1.36 $
-// $Date: 2007-10-12 23:01:50 $
+// $Revision: 1.37 $
+// $Date: 2008-09-15 20:55:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
 
 // Written: ZHY
@@ -911,130 +911,130 @@ const Vector & PressureIndependMultiYield::getCommittedStrain (void)
 // NOTE: surfaces[0] is not used
 void PressureIndependMultiYield::setUpSurfaces (double * gredu)
 {
-    double residualPress = residualPressx[matN];
-    double refPressure = refPressurex[matN];
-    double pressDependCoeff =pressDependCoeffx[matN];
-    int numOfSurfaces = numOfSurfacesx[matN];
-    double frictionAngle = frictionAnglex[matN];
+	double residualPress = residualPressx[matN];
+	double refPressure = refPressurex[matN];
+	double pressDependCoeff =pressDependCoeffx[matN];
+	int numOfSurfaces = numOfSurfacesx[matN];
+	double frictionAngle = frictionAnglex[matN];
 	double cohesion = cohesionx[matN];
-    double peakShearStrain = peakShearStrainx[matN];
+	double peakShearStrain = peakShearStrainx[matN];
 
 	double  stress1, stress2, strain1, strain2, size, elasto_plast_modul, plast_modul;
 	double pi = 3.14159265358979;
 	double refStrain, peakShear, coneHeight;
 
 	if (gredu == 0) {  //automatic generation of surfaces
-	  if (frictionAngle > 0) {
-	    double sinPhi = sin(frictionAngle * pi/180.);
-	    double Mnys = 6.*sinPhi/(3.-sinPhi);
-	    residualPress = 3.* cohesion / (sqrt(2.) * Mnys);
-		  coneHeight = - (refPressure - residualPress);
-		  peakShear = sqrt(2.) * coneHeight * Mnys / 3.;
-		  refStrain = (peakShearStrain * peakShear)
-			            / (refShearModulus * peakShearStrain - peakShear);
+		if (frictionAngle > 0) {
+			double sinPhi = sin(frictionAngle * pi/180.);
+			double Mnys = 6.*sinPhi/(3.-sinPhi);
+			residualPress = 3.* cohesion / (sqrt(2.) * Mnys);
+			coneHeight = - (refPressure - residualPress);
+			peakShear = sqrt(2.) * coneHeight * Mnys / 3.;
+			refStrain = (peakShearStrain * peakShear)
+				/ (refShearModulus * peakShearStrain - peakShear);
 		}
 
-	  else if (frictionAngle == 0.) { // cohesion = peakShearStrength
-		  peakShear = 2*sqrt(2.)*cohesion/3;
-		  refStrain = (peakShearStrain * peakShear)
-			            / (refShearModulus * peakShearStrain - peakShear);
-		  residualPress = 0.;
+		else if (frictionAngle == 0.) { // cohesion = peakShearStrength
+			peakShear = 2*sqrt(2.)*cohesion/3;
+			refStrain = (peakShearStrain * peakShear)
+				/ (refShearModulus * peakShearStrain - peakShear);
+			residualPress = 0.;
 		}
 
-	  double stressInc = peakShear / numOfSurfaces;
+		double stressInc = peakShear / numOfSurfaces;
 
-	  for (int ii=1; ii<=numOfSurfaces; ii++){
-        stress1 = ii * stressInc;
-				stress2 = stress1 + stressInc;
-        strain1 = stress1 * refStrain / (refShearModulus * refStrain - stress1);
-        strain2 = stress2 * refStrain / (refShearModulus * refStrain - stress2);
-        if (frictionAngle > 0.) size = 3. * stress1 / sqrt(2.) / coneHeight;
-        else if (frictionAngle == 0.) size = 3. * stress1 / sqrt(2.);
+		for (int ii=1; ii<=numOfSurfaces; ii++){
+			stress1 = ii * stressInc;
+			stress2 = stress1 + stressInc;
+			strain1 = stress1 * refStrain / (refShearModulus * refStrain - stress1);
+			strain2 = stress2 * refStrain / (refShearModulus * refStrain - stress2);
+			if (frictionAngle > 0.) size = 3. * stress1 / sqrt(2.) / coneHeight;
+			else if (frictionAngle == 0.) size = 3. * stress1 / sqrt(2.);
 
-        elasto_plast_modul = 2.*(stress2 - stress1)/(strain2 - strain1);
+			elasto_plast_modul = 2.*(stress2 - stress1)/(strain2 - strain1);
 
-        if ( (2.*refShearModulus - elasto_plast_modul) <= 0)
-					plast_modul = UP_LIMIT;
-        else
-					plast_modul = (2.*refShearModulus * elasto_plast_modul)/
-                        (2.*refShearModulus - elasto_plast_modul);
-        if (plast_modul < 0) plast_modul = 0;
-        if (plast_modul > UP_LIMIT) plast_modul = UP_LIMIT;
-        if (ii==numOfSurfaces) plast_modul = 0;
+			if ( (2.*refShearModulus - elasto_plast_modul) <= 0)
+				plast_modul = UP_LIMIT;
+			else
+				plast_modul = (2.*refShearModulus * elasto_plast_modul)/
+				(2.*refShearModulus - elasto_plast_modul);
+			if (plast_modul < 0) plast_modul = 0;
+			if (plast_modul > UP_LIMIT) plast_modul = UP_LIMIT;
+			if (ii==numOfSurfaces) plast_modul = 0;
 
-		    static Vector temp(6);
-        committedSurfaces[ii] = MultiYieldSurface(temp,size,plast_modul);
+			static Vector temp(6);
+			committedSurfaces[ii] = MultiYieldSurface(temp,size,plast_modul);
 		}  // ii
 	}
 	else {  //user defined surfaces
 		if (frictionAngle > 0) {   // ignore user defined frictionAngle
-		  int ii = 2*(numOfSurfaces-1);
+			int ii = 2*(numOfSurfaces-1);
 			double tmax = refShearModulus*gredu[ii]*gredu[ii+1];
 			double Mnys = -(sqrt(3.) * tmax - 2. * cohesion) / refPressure;
 			if (Mnys <= 0) {   // also ignore user defined cohesion
-         cohesion = sqrt(3.)/2 * tmax;
-         frictionAngle = 0.;
-		     coneHeight = 1.;
-		     residualPress = 0.;
-      } else {
-         double sinPhi = 3*Mnys /(6+Mnys);
-	       if (sinPhi<0. || sinPhi>1.) {
-					 opserr <<"\nNDMaterial " <<this->getTag()<<": Invalid friction angle, please modify ref. pressure or G/Gmax curve."<<endln;
-           exit(-1);
-				 }
-    	  residualPress = 2. * cohesion / Mnys;
-        if (residualPress < 0.01) residualPress = 0.01;
-        coneHeight = - (refPressure - residualPress);
-        frictionAngle = asin(sinPhi)*180/pi;
-			}
-    }  else if (frictionAngle == 0.) {   // ignore user defined cohesion
-				int ii = 2*(numOfSurfaces-1);
-				double tmax = refShearModulus*gredu[ii]*gredu[ii+1];
-        cohesion = sqrt(3.)/2 * tmax;
+				cohesion = sqrt(3.)/2 * tmax;
+				frictionAngle = 0.;
 				coneHeight = 1.;
 				residualPress = 0.;
+			} else {
+				double sinPhi = 3*Mnys /(6+Mnys);
+				if (sinPhi<0. || sinPhi>1.) {
+					opserr <<"\nNDMaterial " <<this->getTag()<<": Invalid friction angle, please modify ref. pressure or G/Gmax curve."<<endln;
+					exit(-1);
+				}
+				residualPress = 2. * cohesion / Mnys;
+				if (residualPress < 0.01*refPressure) residualPress = 0.01*refPressure;
+				coneHeight = - (refPressure - residualPress);
+				frictionAngle = asin(sinPhi)*180/pi;
+			}
+		}  else if (frictionAngle == 0.) {   // ignore user defined cohesion
+			int ii = 2*(numOfSurfaces-1);
+			double tmax = refShearModulus*gredu[ii]*gredu[ii+1];
+			cohesion = sqrt(3.)/2 * tmax;
+			coneHeight = 1.;
+			residualPress = 0.;
 		}
 
 		opserr << "\nNDMaterial " <<this->getTag()<<": Friction angle = "<<frictionAngle
-		                                           <<", Cohesion = "<<cohesion<<"\n"<<endln;
+			<<", Cohesion = "<<cohesion<<"\n"<<endln;
 
-    if (frictionAngle == 0.) pressDependCoeff = 0.; // ignore user defined pressDependCoeff
+		if (frictionAngle == 0.) pressDependCoeff = 0.; // ignore user defined pressDependCoeff
 
 		for (int i=1; i<numOfSurfaces; i++) {
 			int ii = 2*(i-1);
 			strain1 = gredu[ii];
-      stress1 = refShearModulus*gredu[ii+1]*strain1;
+			stress1 = refShearModulus*gredu[ii+1]*strain1;
 			strain2 = gredu[ii+2];
-      stress2 = refShearModulus*gredu[ii+3]*strain2;
+			stress2 = refShearModulus*gredu[ii+3]*strain2;
 
-      size = sqrt(3.) * stress1 / coneHeight;
-      elasto_plast_modul = 2.*(stress2 - stress1)/(strain2 - strain1);
+			size = sqrt(3.) * stress1 / coneHeight;
+			elasto_plast_modul = 2.*(stress2 - stress1)/(strain2 - strain1);
 			if ( (2.*refShearModulus - elasto_plast_modul) <= 0)
-					plast_modul = UP_LIMIT;
-      else
-					plast_modul = (2.*refShearModulus * elasto_plast_modul)/
-                        (2.*refShearModulus - elasto_plast_modul);
-      if (plast_modul <= 0) {
+				plast_modul = UP_LIMIT;
+			else
+				plast_modul = (2.*refShearModulus * elasto_plast_modul)/
+				(2.*refShearModulus - elasto_plast_modul);
+			if (plast_modul <= 0) {
 				opserr << "\nNDMaterial " <<this->getTag()<<": Surface " << i
-					   << " has plastic modulus < 0.\n Please modify G/Gmax curve.\n"<<endln;
-        exit(-1);
-      }
-      if (plast_modul > UP_LIMIT) plast_modul = UP_LIMIT;
+					<< " has plastic modulus < 0.\n Please modify G/Gmax curve.\n"<<endln;
+				exit(-1);
+			}
+			if (plast_modul > UP_LIMIT) plast_modul = UP_LIMIT;
 
-		  static Vector temp(6);
-      committedSurfaces[i] = MultiYieldSurface(temp,size,plast_modul);
+			static Vector temp(6);
+			committedSurfaces[i] = MultiYieldSurface(temp,size,plast_modul);
 
 			if (i==(numOfSurfaces-1)) {
 				plast_modul = 0;
 				size = sqrt(3.) * stress2 / coneHeight;
-        committedSurfaces[i+1] = MultiYieldSurface(temp,size,plast_modul);
+				committedSurfaces[i+1] = MultiYieldSurface(temp,size,plast_modul);
 			}
 		}
-  }
+	}
 
-  residualPressx[matN] = residualPress;
-  frictionAnglex[matN] = frictionAngle;
-  cohesionx[matN] = cohesion;
+	residualPressx[matN] = residualPress;
+	frictionAnglex[matN] = frictionAngle;
+	cohesionx[matN] = cohesion;
 }
 
 
