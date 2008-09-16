@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-10-26 03:56:45 $
+// $Revision: 1.2 $
+// $Date: 2008-09-16 18:15:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/accelerator/PeriodicAccelerator.cpp,v $
                                                                         
 // Written: MHS
@@ -33,6 +33,9 @@
 #include <Vector.h>
 #include <LinearSOE.h>
 #include <IncrementalIntegrator.h>
+
+#include <ID.h>
+#include <Channel.h>
 
 PeriodicAccelerator::PeriodicAccelerator(int iter, int tangent)
   :Accelerator(ACCELERATOR_TAGS_Periodic),
@@ -142,12 +145,20 @@ PeriodicAccelerator::Print(OPS_Stream &s, int flag)
 int
 PeriodicAccelerator::sendSelf(int commitTag, Channel &theChannel)
 {
-  return -1;
+  static ID data(2);
+  data(0) = theTangent;
+  data(1) = maxIter;
+  return theChannel.sendID(0, commitTag, data);
+  
 }
 
 int
 PeriodicAccelerator::recvSelf(int commitTag, Channel &theChannel, 
 			    FEM_ObjectBroker &theBroker)
 {
-  return -1;
+  static ID data(2);
+  int res = theChannel.recvID(0, commitTag, data);
+  theTangent = data(0);
+  maxIter = data(1);
+  return res;
 }

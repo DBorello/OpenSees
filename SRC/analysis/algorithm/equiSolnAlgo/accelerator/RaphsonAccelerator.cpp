@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-10-26 03:56:45 $
+// $Revision: 1.2 $
+// $Date: 2008-09-16 18:15:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/accelerator/RaphsonAccelerator.cpp,v $
                                                                         
 // Written: MHS
@@ -33,6 +33,9 @@
 #include <Vector.h>
 #include <LinearSOE.h>
 #include <IncrementalIntegrator.h>
+
+#include <ID.h>
+#include <Channel.h>
 
 RaphsonAccelerator::RaphsonAccelerator(int tangent)
   :Accelerator(ACCELERATOR_TAGS_Raphson), theTangent(tangent), totalIter(0)
@@ -108,12 +111,17 @@ RaphsonAccelerator::Print(OPS_Stream &s, int flag)
 int
 RaphsonAccelerator::sendSelf(int commitTag, Channel &theChannel)
 {
-  return -1;
+  static ID data(1);
+  data(0) = theTangent;
+  return theChannel.sendID(0, commitTag, data);
 }
 
 int
 RaphsonAccelerator::recvSelf(int commitTag, Channel &theChannel, 
 			    FEM_ObjectBroker &theBroker)
 {
-  return -1;
+  static ID data(1);
+  int res = theChannel.recvID(0, commitTag, data);
+  theTangent = data(0);
+  return res;
 }

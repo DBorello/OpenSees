@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-08-26 18:25:34 $
+// $Revision: 1.3 $
+// $Date: 2008-09-16 18:15:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/accelerator/KrylovAccelerator.cpp,v $
                                                                         
 // Written: MHS
@@ -34,6 +34,9 @@
 #include <Vector.h>
 #include <LinearSOE.h>
 #include <IncrementalIntegrator.h>
+
+#include <ID.h>
+#include <Channel.h>
 
 KrylovAccelerator::KrylovAccelerator(int max, int tangent)
   :Accelerator(ACCELERATOR_TAGS_Krylov),
@@ -329,12 +332,19 @@ KrylovAccelerator::Print(OPS_Stream &s, int flag)
 int
 KrylovAccelerator::sendSelf(int commitTag, Channel &theChannel)
 {
-  return -1;
+  static ID data(2);
+  data(0) = theTangent;
+  data(1) = maxDimension;
+  return theChannel.sendID(0, commitTag, data);
 }
 
 int
 KrylovAccelerator::recvSelf(int commitTag, Channel &theChannel, 
 			    FEM_ObjectBroker &theBroker)
 {
-  return -1;
+  static ID data(2);
+  int res = theChannel.recvID(0, commitTag, data);
+  theTangent = data(0);
+  maxDimension = data(1);
+  return res;
 }
