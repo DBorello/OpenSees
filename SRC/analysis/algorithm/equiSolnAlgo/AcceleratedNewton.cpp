@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2008-08-26 17:07:08 $
+// $Revision: 1.3 $
+// $Date: 2008-09-16 18:17:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/AcceleratedNewton.cpp,v $
 
 // Written: MHS
@@ -252,14 +252,65 @@ AcceleratedNewton::getTest(void)
 int
 AcceleratedNewton::sendSelf(int cTag, Channel &theChannel)
 {
-  return -1;
+  static ID data(2);
+  data(0) = tangent;
+  if (theAccelerator != 0)
+    data(1) = theAccelerator->getClassTag();
+  else
+    data(1) = -1;
+
+  int res = theChannel.sendID(0, cTag, data);
+  if (res < 0) {
+    opserr << "AcceleratedNewton::recvSelf() - failed to send data\n";
+    return -1;
+  }
+
+  if (theAccelerator != 0) {  
+    res = theAccelerator->sendSelf(cTag, theChannel);
+    if (res < 0) {
+      opserr << "AcceleratedNewton::recvSelf() - accelerator to send\n";
+      return -1;
+    }
+  }
+
+  return 0;
 }
 
 int
 AcceleratedNewton::recvSelf(int cTag, Channel &theChannel, 
 			    FEM_ObjectBroker &theBroker)
 {
-  return -1;
+  static ID data(2);
+  int res = theChannel.recvID(0, cTag, data);
+
+  if (res < 0) {
+    opserr << "AcceleratedNewton::recvSelf() - failed to recv data\n";
+    return -1;
+  }
+
+  tangent = data(0) = tangent;
+
+  if (data(1) != -1) {
+
+    if (theAccelerator != 0)
+      delete theAccelerator;
+
+    theAccelerator = theBroker.getAccelerator(data(1));
+    if (theAccelerator == 0) {
+      opserr << "AcceleratedNewton::recvSelf() - no acccelerator of classTag " << data(1) << " exists\n";
+      return -1;
+    }
+    
+    if (res == 0) {
+      res = theAccelerator->recvSelf(cTag, theChannel, theBroker);
+      if (res < 0) {
+	opserr << "AcceleratedNewton::recvSelf() - accelerator failed to recvSelf\n";
+	return -1;
+      }
+    }
+  }
+
+  return 0;
 }
 
 void
