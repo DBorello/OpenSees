@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-07-03 18:47:28 $
+// $Revision: 1.2 $
+// $Date: 2008-09-17 18:02:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.h,v $
                                                                         
 // Written: fmk
@@ -92,6 +92,7 @@ class FEM_ObjectBrokerAllClasses : public FEM_ObjectBroker
     virtual DOF_Numberer        *getNewNumberer(int classTag);
     virtual AnalysisModel       *getNewAnalysisModel(int classTag);
     virtual EquiSolnAlgo        *getNewEquiSolnAlgo(int classTag);
+    virtual Accelerator         *getAccelerator(int classTag);
     virtual LineSearch          *getLineSearch(int classTag);
     virtual DomainDecompAlgo    *getNewDomainDecompAlgo(int classTag);
     virtual StaticIntegrator    *getNewStaticIntegrator(int classTag);

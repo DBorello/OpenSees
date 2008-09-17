@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-05-04 06:59:08 $
+// $Revision: 1.9 $
+// $Date: 2008-09-17 18:02:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.h,v $
                                                                         
                                                                         
@@ -85,6 +85,7 @@ class GroundMotion;
 class OPS_Stream;
 class Recorder;
 class Parameter;
+class Accelerator;
 
 class Actor;
 
@@ -142,6 +143,7 @@ class FEM_ObjectBroker
     virtual DOF_Numberer        *getNewNumberer(int classTag);
     virtual AnalysisModel       *getNewAnalysisModel(int classTag);
     virtual EquiSolnAlgo        *getNewEquiSolnAlgo(int classTag);
+    virtual Accelerator         *getAccelerator(int classTag);
     virtual LineSearch          *getLineSearch(int classTag);
     virtual DomainDecompAlgo    *getNewDomainDecompAlgo(int classTag);
     virtual StaticIntegrator    *getNewStaticIntegrator(int classTag);

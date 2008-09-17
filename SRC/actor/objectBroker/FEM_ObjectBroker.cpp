@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.44 $
-// $Date: 2007-07-03 18:52:16 $
+// $Revision: 1.45 $
+// $Date: 2008-09-17 18:02:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -262,6 +262,12 @@ FEM_ObjectBroker::getNewAnalysisModel(int classTag)
 
 EquiSolnAlgo        *
 FEM_ObjectBroker::getNewEquiSolnAlgo(int classTag)
+{
+  return 0;
+}
+
+Accelerator        *
+FEM_ObjectBroker::getAccelerator(int classTag)
 {
   return 0;
 }

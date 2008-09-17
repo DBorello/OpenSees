@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-07-07 22:58:00 $
+// $Revision: 1.7 $
+// $Date: 2008-09-17 18:02:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.cpp,v $
                                                                         
 // Written: fmk
@@ -259,7 +259,11 @@
 #include <Broyden.h>
 #include <NewtonLineSearch.h>
 #include <KrylovNewton.h>
+#include <AcceleratedNewton.h>
 #include <ModifiedNewton.h>
+
+#include <KrylovAccelerator.h>
+#include <RaphsonAccelerator.h>
 
 
 #include <BisectionLineSearch.h>
@@ -1342,6 +1346,9 @@ FEM_ObjectBrokerAllClasses::getNewEquiSolnAlgo(int classTag)
 
 	case EquiALGORITHM_TAGS_KrylovNewton:  
 	     return new KrylovNewton();
+
+	case EquiALGORITHM_TAGS_AcceleratedNewton:  
+	     return new AcceleratedNewton();
 	     
 	case EquiALGORITHM_TAGS_ModifiedNewton:  
 	     return new ModifiedNewton();
@@ -1358,6 +1365,24 @@ FEM_ObjectBrokerAllClasses::getNewEquiSolnAlgo(int classTag)
 	 }        
 }
 
+Accelerator        *
+FEM_ObjectBrokerAllClasses::getAccelerator(int classTag)
+{
+    switch(classTag) {
+
+    case ACCELERATOR_TAGS_Krylov:
+      return new KrylovAccelerator;
+    case ACCELERATOR_TAGS_Raphson:
+      return new RaphsonAccelerator;
+
+    default:
+      opserr << "FEM_ObjectBrokerAllClasses::getAccelerator - ";
+      opserr << " - no EquiSolnAlgo type exists for class tag ";
+      opserr << classTag << endln;
+      return 0;
+      
+    }        
+}
 
 LineSearch        *
 FEM_ObjectBrokerAllClasses::getLineSearch(int classTag)
