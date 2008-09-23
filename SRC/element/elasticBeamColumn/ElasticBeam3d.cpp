@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2007-02-02 01:46:20 $
+// $Revision: 1.20 $
+// $Date: 2008-09-23 22:50:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam3d.cpp,v $
                                                                         
                                                                         
@@ -893,7 +893,19 @@ ElasticBeam3d::setResponse(const char **argv, int argc, OPS_Stream &output)
     output.tag("ResponseType","Mz_2");
 
     theResponse =  new ElementResponse(this, 3, P);
-  }
+
+  // basic forces
+  } else if (strcmp(argv[0],"basicForce") == 0 || strcmp(argv[0],"basicForces") == 0) {
+
+    output.tag("ResponseType","N");
+    output.tag("ResponseType","Mz_1");
+    output.tag("ResponseType","Mz_2");
+    output.tag("ResponseType","My_1");
+    output.tag("ResponseType","My_2");
+    output.tag("ResponseType","T");
+    
+    theResponse = new ElementResponse(this, 4, Vector(6));
+  }  
 
   output.endTag(); // ElementOutput
 
@@ -945,6 +957,9 @@ ElasticBeam3d::getResponse (int responseID, Information &eleInfo)
     
     return eleInfo.setVector(P);
     
+  case 4: // basic forces
+    return eleInfo.setVector(q);
+
   default:
     return -1;
   }

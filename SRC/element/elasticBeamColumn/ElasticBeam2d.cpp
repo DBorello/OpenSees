@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2007-02-02 01:30:47 $
+// $Revision: 1.23 $
+// $Date: 2008-09-23 22:50:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.cpp,v $
                                                                         
                                                                         
@@ -693,6 +693,15 @@ ElasticBeam2d::setResponse(const char **argv, int argc, OPS_Stream &output)
     output.tag("ResponseType","M_2");
     
     theResponse = new ElementResponse(this, 3, P);
+
+  // basic forces
+  }    else if (strcmp(argv[0],"basicForce") == 0 || strcmp(argv[0],"basicForces") == 0) {
+
+    output.tag("ResponseType","N");
+    output.tag("ResponseType","M_1");
+    output.tag("ResponseType","M_2");
+    
+    theResponse = new ElementResponse(this, 4, Vector(3));
   }  
 
   output.endTag(); // ElementOutput
@@ -729,6 +738,9 @@ ElasticBeam2d::getResponse (int responseID, Information &eleInfo)
     P(4) = -V+p0[2];
     return eleInfo.setVector(P);
     
+  case 4: // basic forces
+    return eleInfo.setVector(q);
+
   default:
     return -1;
   }
