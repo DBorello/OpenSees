@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2008-08-19 01:00:59 $
+// $Revision: 1.5 $
+// $Date: 2008-09-23 23:11:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/generic/GenericClient.h,v $
 
 #ifndef GenericClient_h
@@ -62,7 +62,7 @@ class GenericClient : public Element
 public:
     // constructors
     GenericClient(int tag, ID nodes, ID *dof,
-		  int port, char *machineInetAddress = 0,
+		  int port, char *machineInetAddr = 0,
 		  int ssl = 0, int dataSize = 256);
     GenericClient();    
     
@@ -94,17 +94,27 @@ public:
     void zeroLoad();
     int addLoad(ElementalLoad *theLoad, double loadFactor);
     int addInertiaLoadToUnbalance(const Vector &accel);
+    
     const Vector &getResistingForce();
     const Vector &getResistingForceIncInertia();
     
+    // public methods to obtain other response in global system
+    //const Vector &getTime();
+    
+    // public methods to obtain other response in basic system
+    //const Vector &getBasicDisp();
+    //const Vector &getBasicVel();
+    //const Vector &getBasicAccel();
+    
     // public methods for element output
-    int sendSelf(int commitTag, Channel &theChannel);
-    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
+    int sendSelf(int commitTag, Channel &sChannel);
+    int recvSelf(int commitTag, Channel &rChannel, FEM_ObjectBroker &theBroker);
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(OPS_Stream &s, int flag = 0);    
     
+    // public methods for element recorder
     Response *setResponse(const char **argv, int argc, OPS_Stream &s);
-    int getResponse(int responseID, Information &eleInformation);
+    int getResponse(int responseID, Information &eleInfo);
     
 protected:
     
@@ -113,45 +123,49 @@ private:
     ID connectedExternalNodes;      // contains the tags of the end nodes
     ID *theDOF;                     // array with the dof of the end nodes
     ID basicDOF;                    // contains the basic dof
+    
+    int numExternalNodes;       // number of external nodes
+    int numDOF;                 // number of total DOF
+    int numBasicDOF;            // number of used DOF
+    
+    int port;                   // ipPort
+    char *machineInetAddr;      // ipAddress
+    int ssl;                    // secure socket layer flag
+    int dataSize;               // data size of send/recv vectors
 
-    int numExternalNodes;
-    int numDOF;
-    int numBasicDOF;
-        
-    static Matrix theMatrix;
-    static Matrix theInitStiff;
-    static Matrix theMass;
-    static Vector theVector;
-    static Vector theLoad;
+    static Matrix theMatrix;        // objects matrix
+    static Matrix theInitStiff;     // initial stiffness matrix
+    static Matrix theMass;          // mass matrix
+    static Vector theVector;        // objects vector
+    static Vector theLoad;          // load vector
     
     Channel *theChannel;        // channel
     double *sData;              // send data array
     Vector *sendData;           // send vector
     double *rData;              // receive data array
     Vector *recvData;           // receive vector
-
+    
     Vector *db;         // trial displacements in basic system
     Vector *vb;         // trial velocities in basic system
     Vector *ab;         // trial accelerations in basic system
     Vector *t;          // trial time
-
+    
     Vector *qMeas;      // measured forces in basic system
     Matrix *rMatrix;    // receive matrix
-
+    
     Vector dbTarg;      // target displacements in basic system
+    Vector vbTarg;      // target velocities in basic system
+    Vector abTarg;      // target accelerations in basic system
+    
     Vector dbPast;      // past displacements in basic system
-
+    double tPast;       // past time
+    
     bool initStiffFlag;
     bool massFlag;
-        
+    
     Node **theNodes;
-
-    int port;
-    char *machineInetAddr;
-    int ssl;
-    int dataSize;
-    int connectionSetup;
-    int setupConnection(void);
+    
+    int setupConnection();
 };
 
 #endif

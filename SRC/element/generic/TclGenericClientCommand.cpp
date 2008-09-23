@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-12-13 22:05:32 $
+// $Revision: 1.4 $
+// $Date: 2008-09-23 23:11:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/generic/TclGenericClientCommand.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -147,12 +147,12 @@ int TclModelBuilder_addGenericClient(ClientData clientData, Tcl_Interp *interp, 
         argi++;
         if (argi < argc && strcmp(argv[argi], "-dataSize") != 0
             && strcmp(argv[argi], "-ssl") != 0)  {
-            ipAddr = (char *)malloc((strlen(argv[argi]) + 1)*sizeof(char));
+            ipAddr = new char [strlen(argv[argi])+1];
             strcpy(ipAddr,argv[argi]);
             argi++;
         }
         else  {
-            ipAddr = (char *)malloc((9 + 1)*sizeof(char));
+            ipAddr = new char [9+1];
             strcpy(ipAddr,"127.0.0.1");
         }
         for (i = argi; i < argc; i++)  {
@@ -173,11 +173,15 @@ int TclModelBuilder_addGenericClient(ClientData clientData, Tcl_Interp *interp, 
 	    opserr << "genericClient element: " << tag << endln;
         return TCL_ERROR;
     }
- 
+    
 	// now create the GenericClient
     theElement = new GenericClient(tag, nodes, dofs, ipPort, ipAddr, ssl, dataSize);
-	
-	if (theElement == 0)  {
+    
+    // cleanup dynamic memory
+    if (dofs != 0)
+        delete [] dofs;
+    
+    if (theElement == 0)  {
 		opserr << "WARNING ran out of memory creating element\n";
 		opserr << "genericClient element: " << tag << endln;
 		return TCL_ERROR;

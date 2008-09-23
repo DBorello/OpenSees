@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-12-13 22:05:32 $
+// $Revision: 1.4 $
+// $Date: 2008-09-23 23:11:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/generic/GenericCopy.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -67,11 +67,25 @@ GenericCopy::GenericCopy(int tag, ID nodes, int srctag)
             << "- failed to create node array\n";
         exit(-1);
     }
-
+    
     // set node pointers to NULL
     int i;
     for (i=0; i<numExternalNodes; i++)
         theNodes[i] = 0;
+}
+
+
+// invoked by a FEM_ObjectBroker - blank object that recvSelf
+// needs to be invoked upon
+GenericCopy::GenericCopy()
+    : Element(0, ELE_TAG_GenericCopy),
+    connectedExternalNodes(1),
+    numExternalNodes(0), numDOF(0),
+    srcTag(0), theSource(0),
+    initStiffFlag(false), massFlag(false)
+{   
+    // initialize variables
+    theNodes = 0;
 }
 
 
@@ -119,7 +133,7 @@ void GenericCopy::setDomain(Domain *theDomain)
             theNodes[i] = 0;
         return;
     }
-
+    
     // get a pointer to the source element
     theSource = theDomain->getElement(srcTag);
     if (theSource == 0) {
@@ -136,7 +150,7 @@ void GenericCopy::setDomain(Domain *theDomain)
             << "agree with source\n";
         return;
     }
-
+    
     // now set the node pointers
     for (i=0; i<numExternalNodes; i++)
         theNodes[i] = theDomain->getNode(connectedExternalNodes(i));
@@ -162,7 +176,7 @@ void GenericCopy::setDomain(Domain *theDomain)
             << "agree with source\n";
         return;
     }
-
+    
     // set the matrix and vector sizes and zero them
     theMatrix.resize(numDOF,numDOF);
     theMatrix.Zero();
@@ -225,7 +239,7 @@ const Matrix& GenericCopy::getInitialStiff()
     if (initStiffFlag == false)  {
         // zero the matrix
         theInitStiff.Zero();
-    
+        
         // get initial stiffness matrix from source element
         theInitStiff = theSource->getInitialStiff();
         initStiffFlag = true;
@@ -283,7 +297,7 @@ int GenericCopy::addInertiaLoadToUnbalance(const Vector &accel)
     int ndim = 0, i;
     static Vector Raccel(numDOF);
     Raccel.Zero();
-
+    
     // get mass matrix
     Matrix M = this->getMass();
     // assemble Raccel vector
@@ -326,7 +340,7 @@ const Vector& GenericCopy::getResistingForceIncInertia()
     int ndim = 0, i;
     static Vector accel(numDOF);
     accel.Zero();
-
+    
     // get mass matrix
     Matrix M = this->getMass();
     // assemble accel vector
@@ -341,17 +355,51 @@ const Vector& GenericCopy::getResistingForceIncInertia()
 }
 
 
-int GenericCopy::sendSelf(int commitTag, Channel &theChannel)
+int GenericCopy::sendSelf(int commitTag, Channel &sChannel)
 {
-    // has not been implemented yet.....
+    // send element parameters
+    static ID idData(3);
+    idData(0) = this->getTag();
+    idData(1) = numExternalNodes;
+    idData(2) = srcTag;
+    sChannel.sendID(0, commitTag, idData);
+    
+    // send the end nodes
+    sChannel.sendID(0, commitTag, connectedExternalNodes);
+    
     return 0;
 }
 
 
-int GenericCopy::recvSelf(int commitTag, Channel &theChannel,
+int GenericCopy::recvSelf(int commitTag, Channel &rChannel,
     FEM_ObjectBroker &theBroker)
 {
-    // has not been implemented yet.....
+    // delete dynamic memory
+    if (theNodes != 0)
+        delete [] theNodes;
+    
+    // receive element parameters
+    static ID idData(3);
+    rChannel.recvID(0, commitTag, idData);    
+    this->setTag(idData(0));
+    numExternalNodes = idData(1);
+    srcTag = idData(2);
+    
+    // initialize nodes and receive them
+    connectedExternalNodes.resize(numExternalNodes);
+    rChannel.recvID(0, commitTag, connectedExternalNodes);
+    theNodes = new Node* [numExternalNodes];
+    if (!theNodes)  {
+        opserr << "GenericCopy::recvSelf() "
+            << "- failed to create node array\n";
+        return -1;
+    }
+    
+    // set node pointers to NULL
+    int i;
+    for (i=0; i<numExternalNodes; i++)
+        theNodes[i] = 0;
+    
     return 0;
 }
 
@@ -391,8 +439,9 @@ void GenericCopy::Print(OPS_Stream &s, int flag)
         s << "Element: " << this->getTag() << endln;
         s << "  type: GenericCopy";
         for (i=0; i<numExternalNodes; i++ )
-            s << "  Node" << i+1 << ": " << connectedExternalNodes(i);
-        s << "\n  source element: " << srcTag << endln;
+            s << ", Node" << i+1 << ": " << connectedExternalNodes(i);
+        s << endln;
+        s << "  source element: " << srcTag << endln;
         // determine resisting forces in global system
         s << "  resisting force: " << this->getResistingForce() << endln;
     } else if (flag == 1)  {
@@ -425,7 +474,7 @@ Response* GenericCopy::setResponse(const char **argv, int argc,
             sprintf(outputData,"P%d",i+1);
             output.tag("ResponseType",outputData);
         }
-        theResponse = new ElementResponse(this, 2, theVector);
+        theResponse = new ElementResponse(this, 1, theVector);
     }
     // local forces
     else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
@@ -434,7 +483,7 @@ Response* GenericCopy::setResponse(const char **argv, int argc,
             sprintf(outputData,"p%d",i+1);
             output.tag("ResponseType",outputData);
         }
-        theResponse = new ElementResponse(this, 3, theVector);
+        theResponse = new ElementResponse(this, 2, theVector);
     }
 
     output.endTag(); // ElementOutput
@@ -443,29 +492,14 @@ Response* GenericCopy::setResponse(const char **argv, int argc,
 }
 
 
-int GenericCopy::getResponse(int responseID, Information &eleInformation)
+int GenericCopy::getResponse(int responseID, Information &eleInfo)
 {    
     switch (responseID)  {
-    case -1:
-        return -1;
+    case 1:  // global forces
+        return eleInfo.setVector(this->getResistingForce());
         
-    case 1:  // initial stiffness
-        if (eleInformation.theMatrix != 0)  {
-            *(eleInformation.theMatrix) = this->getInitialStiff();
-        }
-        return 0;
-        
-    case 2:  // global forces
-        if (eleInformation.theVector != 0)  {
-            *(eleInformation.theVector) = this->getResistingForce();
-        }
-        return 0;      
-        
-    case 3:  // local forces
-        if (eleInformation.theVector != 0)  {
-            *(eleInformation.theVector) = this->getResistingForce();
-        }
-        return 0;
+    case 2:  // local forces
+        return eleInfo.setVector(this->getResistingForce());
         
     default:
         return -1;

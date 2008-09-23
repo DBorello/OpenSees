@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-12-13 22:05:32 $
+// $Revision: 1.4 $
+// $Date: 2008-09-23 23:11:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/generic/GenericCopy.h,v $
 
 #ifndef GenericCopy_h
@@ -44,13 +44,14 @@ class GenericCopy : public Element
 public:
     // constructors
     GenericCopy(int tag, ID nodes, int srcTag);
+    GenericCopy();
     
     // destructor
     ~GenericCopy();
     
     // method to get class type
     const char *getClassType() const {return "GenericCopy";};
-
+    
     // public methods to obtain information about dof & connectivity    
     int getNumExternalNodes() const;
     const ID &getExternalNodes();
@@ -73,39 +74,41 @@ public:
     void zeroLoad();
     int addLoad(ElementalLoad *theLoad, double loadFactor);
     int addInertiaLoadToUnbalance(const Vector &accel);
+    
     const Vector &getResistingForce();
     const Vector &getResistingForceIncInertia();
     
     // public methods for element output
-    int sendSelf(int commitTag, Channel &theChannel);
-    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
+    int sendSelf(int commitTag, Channel &sChannel);
+    int recvSelf(int commitTag, Channel &rChannel, FEM_ObjectBroker &theBroker);
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(OPS_Stream &s, int flag = 0);    
     
+    // public methods for element recorder
     Response *setResponse(const char **argv, int argc, OPS_Stream &s);
-    int getResponse(int responseID, Information &eleInformation);
+    int getResponse(int responseID, Information &eleInfo);
     
 protected:
     
 private:
     // private attributes - a copy for each object of the class
     ID connectedExternalNodes;      // contains the tags of the end nodes
-
+    
     int numExternalNodes;
     int numDOF;
-
+    
     int srcTag;
     Element *theSource;
-        
+    
     static Matrix theMatrix;
     static Matrix theInitStiff;
     static Matrix theMass;
     static Vector theVector;
     static Vector theLoad;
-
+    
     bool initStiffFlag;
     bool massFlag;
-        
+    
     Node **theNodes;
 };
 

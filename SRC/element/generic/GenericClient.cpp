@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2008-08-19 01:00:58 $
+// $Revision: 1.5 $
+// $Date: 2008-09-23 23:11:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/generic/GenericClient.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -29,11 +29,11 @@
 // Description: This file contains the implementation of the GenericClient class.
 
 #include "GenericClient.h"
-#include <Message.h>
 
 #include <Domain.h>
 #include <Node.h>
 #include <Channel.h>
+#include <Message.h>
 #include <FEM_ObjectBroker.h>
 #include <Renderer.h>
 #include <Information.h>
@@ -59,14 +59,15 @@ Vector GenericClient::theLoad(1);
 // responsible for allocating the necessary space needed
 // by each object and storing the tags of the end nodes.
 GenericClient::GenericClient(int tag, ID nodes, ID *dof,
-			     int Port, char *MachineInetAddr, int Ssl, int DataSize)
-  : Element(tag, ELE_TAG_GenericClient),
+    int _port, char *machineinetaddr, int _ssl, int datasize)
+    : Element(tag, ELE_TAG_GenericClient),
     connectedExternalNodes(nodes), basicDOF(1),
     numExternalNodes(0), numDOF(0), numBasicDOF(0),
+    port(_port), machineInetAddr(0), ssl(_ssl), dataSize(datasize),
     theChannel(0), sData(0), sendData(0), rData(0), recvData(0),
     db(0), vb(0), ab(0), t(0), qMeas(0), rMatrix(0),
-    dbTarg(1), dbPast(1), initStiffFlag(false), massFlag(false),
-    port(Port), ssl(Ssl), dataSize(DataSize), connectionSetup(0)
+    dbTarg(1), vbTarg(1), abTarg(1), dbPast(1), tPast(0.0),
+    initStiffFlag(false), massFlag(false)
 {    
     // initialize nodes
     numExternalNodes = connectedExternalNodes.Size();
@@ -76,12 +77,12 @@ GenericClient::GenericClient(int tag, ID nodes, ID *dof,
             << "- failed to create node array\n";
         exit(-1);
     }
-
+    
     // set node pointers to NULL
     int i;
     for (i=0; i<numExternalNodes; i++)
         theNodes[i] = 0;
-
+    
     // initialize dof
     theDOF = new ID [numExternalNodes];
     if (!theDOF)  {
@@ -91,41 +92,63 @@ GenericClient::GenericClient(int tag, ID nodes, ID *dof,
     }
     numBasicDOF = 0;
     for (i=0; i<numExternalNodes; i++)  {
-        numBasicDOF += dof[i].Size();
         theDOF[i] = dof[i];
+        numBasicDOF += theDOF[i].Size();
     }
+    
+    // save ipAddress
+    machineInetAddr = machineinetaddr;
+    
+    // set the vector sizes and zero them
+    basicDOF.resize(numBasicDOF);
+    basicDOF.Zero();
+    dbTarg.resize(numBasicDOF);
+    dbTarg.Zero();
+    vbTarg.resize(numBasicDOF);
+    vbTarg.Zero();
+    abTarg.resize(numBasicDOF);
+    abTarg.Zero();
+    dbPast.resize(numBasicDOF);
+    dbPast.Zero();
 }
 
 
+// invoked by a FEM_ObjectBroker - blank object that recvSelf
+// needs to be invoked upon
 GenericClient::GenericClient()
     : Element(0, ELE_TAG_GenericClient),
-    connectedExternalNodes(0), basicDOF(1),
+    connectedExternalNodes(1), basicDOF(1),
     numExternalNodes(0), numDOF(0), numBasicDOF(0),
+    port(0), machineInetAddr(0), ssl(0), dataSize(0),
     theChannel(0), sData(0), sendData(0), rData(0), recvData(0),
     db(0), vb(0), ab(0), t(0), qMeas(0), rMatrix(0),
-      dbTarg(1), dbPast(1), initStiffFlag(false), massFlag(false),
-      port(0), ssl(0), dataSize(0), connectionSetup(0)
+    dbTarg(1), vbTarg(1), abTarg(1), dbPast(1), tPast(0.0),
+    initStiffFlag(false), massFlag(false)
 {    
-    // initialize nodes
-  theNodes = 0;
-  theDOF = 0;
-  machineInetAddr = 0;
+    // initialize variables
+    theNodes = 0;
+    theDOF = 0;
 }
 
 
 // delete must be invoked on any objects created by the object.
 GenericClient::~GenericClient()
 {
-    sData[0] = RemoteTest_DIE;
-    theChannel->sendVector(0, 0, *sendData, 0);
-
+    // terminate remote process
+    if (theChannel != 0)  {
+        sData[0] = RemoteTest_DIE;
+        theChannel->sendVector(0, 0, *sendData, 0);
+    }
+    
     // invoke the destructor on any objects created by the object
     // that the object still holds a pointer to
-    if (theDOF != 0)
-        delete [] theDOF;
     if (theNodes != 0)
         delete [] theNodes;
-
+    if (theDOF != 0)
+        delete [] theDOF;
+    if (machineInetAddr != 0)
+        delete [] machineInetAddr;
+    
     if (db != 0)
         delete db;
     if (vb != 0)
@@ -134,12 +157,12 @@ GenericClient::~GenericClient()
         delete ab;
     if (t != 0)
         delete t;
-
+    
     if (qMeas != 0)
         delete qMeas;
     if (rMatrix != 0)
         delete rMatrix;
-
+    
     if (sendData != 0)
         delete sendData;
     if (sData != 0)
@@ -272,14 +295,15 @@ int GenericClient::revertToStart()
 
 int GenericClient::update()
 {
+    int rValue = 0;
 
-  int rValue = 0;
-  if (connectionSetup == 0) {
-    rValue = this->setupConnection();
-    if (rValue != 0) {
-      return -1;
+    if (theChannel == 0)  {
+        if (this->setupConnection() != 0)  {
+            opserr << "GenericClient::update() - "
+                << "failed to setup connection\n";
+            return -1;
+        }
     }
-  }
 
     // get current time
     Domain *theDomain = this->getDomain();
@@ -299,9 +323,10 @@ int GenericClient::update()
         ndim += theDOF[i].Size();
     }
  
-    if ((*db) != dbPast)  {
-        // save the displacements
+    if ((*db) != dbPast || (*t)(0) != tPast)  {
+        // save the displacements and the time
         dbPast = (*db);
+        tPast = (*t)(0);
         // set the trial response at the element
         sData[0] = RemoteTest_setTrialResponse;
         rValue += theChannel->sendVector(0, 0, *sendData, 0);
@@ -419,33 +444,26 @@ int GenericClient::addInertiaLoadToUnbalance(const Vector &accel)
 
 
 const Vector& GenericClient::getResistingForce()
-{
-  int res = 0;
-  if (connectionSetup == 0) {
-    res = this->setupConnection();
-    if (res != 0) {
-      opserr << "ERROR: GenericClient::getResistingForce() - setup FAILED\n";
-      return theVector;
-    }
-  }
-
-  // zero the residual
-  theVector.Zero();
+{    
+    // zero the residual
+    theVector.Zero();
     
     // get measured resisting forces
     sData[0] = RemoteTest_getForce;
     theChannel->sendVector(0, 0, *sendData, 0);
     theChannel->recvVector(0, 0, *recvData, 0);
-   
-    // save corresponding target displacements for recorder
+    
+    // save corresponding target response for recorder
     dbTarg = (*db);
-
+    vbTarg = (*vb);
+    abTarg = (*ab);
+    
     // determine resisting forces in global system
     theVector.Assemble(*qMeas, basicDOF);
     
     // subtract external load
     theVector.addVector(1.0, theLoad, -1.0);
-
+    
     return theVector;
 }
 
@@ -477,64 +495,139 @@ const Vector& GenericClient::getResistingForceIncInertia()
 }
 
 
-int GenericClient::sendSelf(int commitTag, Channel &theChannel)
-{
-  static ID idData(6);
-  idData(0) = this->getTag();
-  idData(1) = connectedExternalNodes.Size();
-  idData(2) = port;
-  idData(3) = ssl;
-  idData(4) = dataSize;
-  idData(5) = strlen(machineInetAddr);;
-
-  theChannel.sendID(0, commitTag, idData);
-  theChannel.sendID(0, commitTag, connectedExternalNodes);
-  theChannel.sendID(0, commitTag, *theDOF);
-  Message theMessage(machineInetAddr, strlen(machineInetAddr));
-  theChannel.sendMsg(0, commitTag, theMessage);
-
-  return 0;
+/*const Vector& GenericClient::getTime()
+{	
+    sData[0] = RemoteTest_getTime;
+    theChannel->sendVector(0, 0, *sendData, 0);
+    theChannel->recvVector(0, 0, *recvData, 0);
+    
+    return *tMeas;
 }
 
 
-int GenericClient::recvSelf(int commitTag, Channel &theChannel,
-			    FEM_ObjectBroker &theBroker)
+const Vector& GenericClient::getBasicDisp()
+{	
+    sData[0] = RemoteTest_getDisp;
+    theChannel->sendVector(0, 0, *sendData, 0);
+    theChannel->recvVector(0, 0, *recvData, 0);
+    
+    return *dbMeas;
+}
+
+
+const Vector& GenericClient::getBasicVel()
+{	
+    sData[0] = RemoteTest_getVel;
+    theChannel->sendVector(0, 0, *sendData, 0);
+    theChannel->recvVector(0, 0, *recvData, 0);
+    
+    return *vbMeas;
+}
+
+
+const Vector& GenericClient::getBasicAccel()
+{	
+    sData[0] = RemoteTest_getAccel;
+    theChannel->sendVector(0, 0, *sendData, 0);
+    theChannel->recvVector(0, 0, *recvData, 0);
+    
+    return *abMeas;
+}*/
+
+
+int GenericClient::sendSelf(int commitTag, Channel &sChannel)
 {
-  static ID idData(6);
-  theChannel.recvID(0, commitTag, idData);
+    // send element parameters
+    static ID idData(6);
+    idData(0) = this->getTag();
+    idData(1) = numExternalNodes;
+    idData(2) = port;
+    idData(3) = strlen(machineInetAddr);
+    idData(4) = ssl;
+    idData(5) = dataSize;
+    sChannel.sendID(0, commitTag, idData);
 
-  this->setTag(idData(0));
+    // send the end nodes and dofs
+    sChannel.sendID(0, commitTag, connectedExternalNodes);
+    for (int i=0; i<numExternalNodes; i++)
+        sChannel.sendID(0, commitTag, theDOF[i]);
+    
+    // send the ip-address
+    Message theMessage(machineInetAddr, strlen(machineInetAddr));
+    sChannel.sendMsg(0, commitTag, theMessage);
+    
+    return 0;
+}
 
-  // initialize nodes
-  numExternalNodes = idData(1);
-  theNodes = new Node* [numExternalNodes];
-  theDOF = new ID(numExternalNodes);
 
-  if (!theNodes)  {
-    opserr << "GenericClient::GenericClient() "
-	   << "- failed to create node array\n";
-    return -1;
-  }
-  
-  connectedExternalNodes.resize(numExternalNodes);
-  theChannel.recvID(0, commitTag, connectedExternalNodes);
-  theChannel.recvID(0, commitTag, *theDOF);
-  
-  // set node pointers to NULL
-  int i;
-  for (i=0; i<numExternalNodes; i++)
-    theNodes[i] = 0;
-  
-  machineInetAddr = new char(idData(5));
-
-  port  = idData(2);
-  ssl = idData(3);
-  dataSize = idData(4);
-
-  Message theMessage(machineInetAddr, strlen(machineInetAddr));  
-  theChannel.recvMsg(0, commitTag, theMessage);
-
-  return 0;
+int GenericClient::recvSelf(int commitTag, Channel &rChannel,
+    FEM_ObjectBroker &theBroker)
+{
+    // delete dynamic memory
+    if (theNodes != 0)
+        delete [] theNodes;
+    if (theDOF != 0)
+        delete [] theDOF;
+    if (machineInetAddr != 0)
+        delete [] machineInetAddr;
+    
+    // receive element parameters
+    static ID idData(6);
+    rChannel.recvID(0, commitTag, idData);    
+    this->setTag(idData(0));
+    numExternalNodes = idData(1);
+    port = idData(2);
+    machineInetAddr = new char [idData(3) + 1];
+    ssl = idData(4);
+    dataSize = idData(5);
+    
+    // initialize nodes and receive them
+    connectedExternalNodes.resize(numExternalNodes);
+    rChannel.recvID(0, commitTag, connectedExternalNodes);
+    theNodes = new Node* [numExternalNodes];
+    if (!theNodes)  {
+        opserr << "GenericClient::recvSelf() "
+            << "- failed to create node array\n";
+        return -1;
+    }
+    
+    // set node pointers to NULL
+    int i;
+    for (i=0; i<numExternalNodes; i++)
+        theNodes[i] = 0;
+    
+    // initialize dof
+    theDOF = new ID [numExternalNodes];
+    if (!theDOF)  {
+        opserr << "GenericClient::recvSelf() "
+            << "- failed to create dof array\n";
+        return -2;
+    }
+    
+    // initialize number of basic dof
+    numBasicDOF = 0;
+    for (i=0; i<numExternalNodes; i++)  {
+        rChannel.recvID(0, commitTag, theDOF[i]);
+        numBasicDOF += theDOF[i].Size();
+    }
+    
+    // receive the ip-address
+    Message theMessage(machineInetAddr, strlen(machineInetAddr));  
+    rChannel.recvMsg(0, commitTag, theMessage);
+    
+    // set the vector sizes and zero them
+    basicDOF.resize(numBasicDOF);
+    basicDOF.Zero();
+    dbTarg.resize(numBasicDOF);
+    dbTarg.Zero();
+    vbTarg.resize(numBasicDOF);
+    vbTarg.Zero();
+    abTarg.resize(numBasicDOF);
+    abTarg.Zero();
+    dbPast.resize(numBasicDOF);
+    dbPast.Zero();
+    
+    return 0;
 }
 
 
@@ -571,10 +664,12 @@ void GenericClient::Print(OPS_Stream &s, int flag)
     if (flag == 0)  {
         // print everything
         s << "Element: " << this->getTag() << endln;
-        s << "  type: GenericClient";
+        s << "  type: GenericClient" << endln;
         for (i=0; i<numExternalNodes; i++ )
             s << "  Node" << i+1 << ": " << connectedExternalNodes(i);
         s << endln;
+        s << "  ipAddress: " << machineInetAddr
+            << ", ipPort: " << port << endln;
         // determine resisting forces in global system
         s << "  resisting force: " << this->getResistingForce() << endln;
     } else if (flag == 1)  {
@@ -587,10 +682,10 @@ Response* GenericClient::setResponse(const char **argv, int argc,
     OPS_Stream &output)
 {
     Response *theResponse = 0;
-
+    
     int i;
     char outputData[10];
-
+    
     output.tag("ElementOutput");
     output.attr("eleType","GenericClient");
     output.attr("eleTag",this->getTag());
@@ -598,7 +693,7 @@ Response* GenericClient::setResponse(const char **argv, int argc,
         sprintf(outputData,"node%d",i+1);
         output.attr(outputData,connectedExternalNodes[i]);
     }
-
+    
     // global forces
     if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 ||
         strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0)
@@ -607,7 +702,7 @@ Response* GenericClient::setResponse(const char **argv, int argc,
             sprintf(outputData,"P%d",i+1);
             output.tag("ResponseType",outputData);
         }
-        theResponse = new ElementResponse(this, 2, theVector);
+        theResponse = new ElementResponse(this, 1, theVector);
     }
     // local forces
     else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
@@ -616,7 +711,7 @@ Response* GenericClient::setResponse(const char **argv, int argc,
             sprintf(outputData,"p%d",i+1);
             output.tag("ResponseType",outputData);
         }
-        theResponse = new ElementResponse(this, 3, theVector);
+        theResponse = new ElementResponse(this, 2, theVector);
     }
     // forces in basic system
     else if (strcmp(argv[0],"basicForce") == 0 || strcmp(argv[0],"basicForces") == 0)
@@ -625,7 +720,7 @@ Response* GenericClient::setResponse(const char **argv, int argc,
             sprintf(outputData,"q%d",i+1);
             output.tag("ResponseType",outputData);
         }
-        theResponse = new ElementResponse(this, 4, Vector(numBasicDOF));
+        theResponse = new ElementResponse(this, 3, Vector(numBasicDOF));
     }
     // target basic displacements
     else if (strcmp(argv[0],"deformation") == 0 || strcmp(argv[0],"deformations") == 0 || 
@@ -636,115 +731,102 @@ Response* GenericClient::setResponse(const char **argv, int argc,
             sprintf(outputData,"db%d",i+1);
             output.tag("ResponseType",outputData);
         }
+        theResponse = new ElementResponse(this, 4, Vector(numBasicDOF));
+    }
+    // target basic velocities
+    else if (strcmp(argv[0],"targetVelocity") == 0 ||
+        strcmp(argv[0],"targetVelocities") == 0)
+    {
+        for (i=0; i<numBasicDOF; i++)  {
+            sprintf(outputData,"vb%d",i+1);
+            output.tag("ResponseType",outputData);
+        }
         theResponse = new ElementResponse(this, 5, Vector(numBasicDOF));
     }
-    // measured basic displacements
-    /*else if (strcmp(argv[0],"measuredDisplacement") == 0 || 
-        strcmp(argv[0],"measuredDisplacements") == 0)
+    // target basic accelerations
+    else if (strcmp(argv[0],"targetAcceleration") == 0 ||
+        strcmp(argv[0],"targetAccelerations") == 0)
     {
-        for (int i=0; i<numBasicDOF; i++)  {
-            sprintf(outputData,"dbm%d",i+1);
+        for (i=0; i<numBasicDOF; i++)  {
+            sprintf(outputData,"ab%d",i+1);
             output.tag("ResponseType",outputData);
         }
         theResponse = new ElementResponse(this, 6, Vector(numBasicDOF));
+    }
+    /* measured basic displacements
+    else if (strcmp(argv[0],"measuredDisplacement") == 0 || 
+        strcmp(argv[0],"measuredDisplacements") == 0)
+    {
+        for (i=0; i<numBasicDOF; i++)  {
+            sprintf(outputData,"dbm%d",i+1);
+            output.tag("ResponseType",outputData);
+        }
+        theResponse = new ElementResponse(this, 7, Vector(numBasicDOF));
     }
     // measured basic velocities
     else if (strcmp(argv[0],"measuredVelocity") == 0 || 
         strcmp(argv[0],"measuredVelocities") == 0)
     {
-        for (int i=0; i<numBasicDOF; i++)  {
+        for (i=0; i<numBasicDOF; i++)  {
             sprintf(outputData,"vbm%d",i+1);
             output.tag("ResponseType",outputData);
         }
-        theResponse = new ElementResponse(this, 7, Vector(numBasicDOF));
+        theResponse = new ElementResponse(this, 8, Vector(numBasicDOF));
     }
     // measured basic accelerations
     else if (strcmp(argv[0],"measuredAcceleration") == 0 || 
         strcmp(argv[0],"measuredAccelerations") == 0)
     {
-        for (int i=0; i<numBasicDOF; i++)  {
+        for (i=0; i<numBasicDOF; i++)  {
             sprintf(outputData,"abm%d",i+1);
             output.tag("ResponseType",outputData);
         }
-        theResponse = new ElementResponse(this, 8, Vector(numBasicDOF));
+        theResponse = new ElementResponse(this, 9, Vector(numBasicDOF));
     }*/
-
+    
     output.endTag(); // ElementOutput
-
+    
     return theResponse;
 }
 
 
-int GenericClient::getResponse(int responseID, Information &eleInformation)
+int GenericClient::getResponse(int responseID, Information &eleInfo)
 {    
     switch (responseID)  {
-    case -1:
-        return -1;
+    case 1:  // global forces
+        return eleInfo.setVector(this->getResistingForce());
         
-    case 1:  // initial stiffness
-        if (eleInformation.theMatrix != 0)  {
-            *(eleInformation.theMatrix) = this->getInitialStiff();
-        }
-        return 0;
+    case 2:  // local forces
+        return eleInfo.setVector(this->getResistingForce());
         
-    case 2:  // global forces
-        if (eleInformation.theVector != 0)  {
-            *(eleInformation.theVector) = this->getResistingForce();
-        }
-        return 0;      
+    case 3:  // basic forces
+        return eleInfo.setVector(*qMeas);
         
-    case 3:  // local forces
-        if (eleInformation.theVector != 0)  {
-            *(eleInformation.theVector) = this->getResistingForce();
-        }
-        return 0;
+    case 4:  // target basic displacements
+        return eleInfo.setVector(dbTarg);
         
-    case 4:  // forces in basic system
-        if (eleInformation.theVector != 0)  {
-            *(eleInformation.theVector) = (*qMeas);
-        }
-        return 0;      
+    case 5:  // target basic velocities
+        return eleInfo.setVector(vbTarg);
         
-    case 5:  // target basic displacements
-        if (eleInformation.theVector != 0)  {
-            *(eleInformation.theVector) = dbTarg;
-        }
-        return 0;      
+    case 6:  // target basic accelerations
+        return eleInfo.setVector(abTarg);
         
-    /*case 6:  // measured basic displacements
-        if (eleInformation.theVector != 0)  {
-            sData[0] = RemoteTest_getDisp;
-            theChannel->sendVector(0, 0, *sendData, 0);
-            theChannel->recvVector(0, 0, *recvData, 0);
-            *(eleInformation.theVector) = (*dbMeas);
-        }
-        return 0;
-
-    case 7:  // measured basic velocities
-        if (eleInformation.theVector != 0)  {
-            sData[0] = RemoteTest_getVel;
-            theChannel->sendVector(0, 0, *sendData, 0);
-            theChannel->recvVector(0, 0, *recvData, 0);
-            *(eleInformation.theVector) = (*vbMeas);
-        }
-        return 0;
-
-    case 8:  // measured basic accelerations
-        if (eleInformation.theVector != 0)  {
-            sData[0] = RemoteTest_getAccel;
-            theChannel->sendVector(0, 0, *sendData, 0);
-            theChannel->recvVector(0, 0, *recvData, 0);
-            *(eleInformation.theVector) = (*abMeas);
-        }
-        return 0;*/
-
+    /*case 7:  // measured basic displacements
+        return eleInfo.setVector(this->getBasicDisp());
+        
+    case 8:  // measured basic velocities
+        return eleInfo.setVector(this->getBasicVel());
+        
+    case 9:  // measured basic accelerations
+        return eleInfo.setVector(this->getBasicAccel());*/
+        
     default:
         return -1;
     }
 }
 
-int 
-GenericClient::setupConnection(void)
+
+int GenericClient::setupConnection()
 {
     // setup the connection
     if (!ssl)  {
@@ -764,32 +846,29 @@ GenericClient::setupConnection(void)
     if (!theChannel)  {
         opserr << "GenericClient::GenericClient() "
             << "- failed to create channel\n";
-        exit(-1);
+        return -1;
     }
     if (theChannel->setUpConnection() != 0)  {
         opserr << "GenericClient::GenericClient() "
             << "- failed to setup connection\n";
-        exit(-1);
+        return -2;
     }
-
-    // set the data size for the experimental element
-    int intData[2*5+1];
-    ID idData(intData, 2*5+1);
-    ID *sizeCtrl = new ID(intData, 5);
-    ID *sizeDaq = new ID(&intData[5], 5);
-    idData.Zero();
-        
-    (*sizeCtrl)[0] = numBasicDOF;
-    (*sizeCtrl)[1] = numBasicDOF;
-    (*sizeCtrl)[2] = numBasicDOF;
-    (*sizeCtrl)[4] = 1;
     
-    (*sizeDaq)[3]  = numBasicDOF;
+    // set the data size for the experimental element
+    ID idData(2*5+1);
+    idData.Zero();
+    
+    idData(0) = numBasicDOF;  // sizeCtrl->disp
+    idData(1) = numBasicDOF;  // sizeCtrl->vel
+    idData(2) = numBasicDOF;  // sizeCtrl->accel
+    idData(4) = 1;            // sizeCtrl->time
+    
+    idData(8) = numBasicDOF;  // sizeDaq->force
     
     if (dataSize < 1+3*numBasicDOF+1) dataSize = 1+3*numBasicDOF+1;
     if (dataSize < numBasicDOF*numBasicDOF) dataSize = numBasicDOF*numBasicDOF;
-    intData[2*5] = dataSize;
-
+    idData(10) = dataSize;
+    
     theChannel->sendID(0, 0, idData, 0);
     
     // allocate memory for the send vectors
@@ -804,26 +883,16 @@ GenericClient::setupConnection(void)
     id += numBasicDOF;
     t = new Vector(&sData[id], 1);
     sendData->Zero();
-
+    
     // allocate memory for the receive vectors
     id = 0;
     rData = new double [dataSize];
     recvData = new Vector(rData, dataSize);
     qMeas = new Vector(&rData[id], numBasicDOF);
     recvData->Zero();
-
+    
     // allocate memory for the receive matrix
     rMatrix = new Matrix(rData, numBasicDOF, numBasicDOF);
-
-    // set the vector and matrix sizes and zero them
-    basicDOF.resize(numBasicDOF);
-    basicDOF.Zero();
-    dbTarg.resize(numBasicDOF);
-    dbTarg.Zero();
-    dbPast.resize(numBasicDOF);
-    dbPast.Zero();
-
-    connectionSetup = 1;
-
+    
     return 0;
 }
