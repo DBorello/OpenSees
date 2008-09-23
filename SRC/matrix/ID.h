@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-08-03 00:17:09 $
+// $Revision: 1.14 $
+// $Date: 2008-09-23 22:49:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.h,v $
                                                                         
                                                                         
@@ -64,7 +64,9 @@ class ID
     ID &operator=(const ID  &V);
 
     int operator==(const ID &V) const;
+    int operator==(int) const;
     int operator!=(const ID &V) const;
+    int operator!=(int) const;
 
     int insert(int value);  // differs from using [] in that inserted in order
     int getLocation(int value) const;
