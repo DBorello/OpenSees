@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-12-14 20:14:53 $
+// $Revision: 1.4 $
+// $Date: 2008-09-23 22:52:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/FullGenEigenSolver.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -95,12 +95,13 @@ int FullGenEigenSolver::solve(int nEigen)
         return 0;
     }
 
-
     // get the number of equations
-    int n  = theSOE->size;
+    int n = theSOE->size;
 
     // set the number of eigenvalues
     numEigen = nEigen;
+    if (numEigen > n)
+        numEigen = n;
 
     // do not compute left eigenvalues and eigenvectors
     char *jobvl = "N";
@@ -195,7 +196,7 @@ int FullGenEigenSolver::solve(int nEigen)
             }
         }
         else {
-	  eigenvalue[i] = DBL_MAX;
+	    eigenvalue[i] = DBL_MAX;
 	}
         sortingID[i] = i;
     }
@@ -205,10 +206,10 @@ int FullGenEigenSolver::solve(int nEigen)
     this->sort(n, eigenvalue, sortingID);
 
     for (int i=0; i<numEigen; i++) {
-      if (eigenvalue[i] == DBL_MAX) {
-	  opserr << "FullGenEigenSolver::solve() - the eigenvalue "
-		 << i+1 << " is numerically undetermined or infinite\n";
-      }
+        if (eigenvalue[i] == DBL_MAX) {
+	    opserr << "FullGenEigenSolver::solve() - the eigenvalue "
+		    << i+1 << " is numerically undetermined or infinite\n";
+        }
     }
 
     int lworkOpt = (int) work[0];
@@ -331,11 +332,11 @@ void FullGenEigenSolver::sort(int length, double *x, int *id)
         for (i=0; i<(length-d); i++) {
             if (x[i+d] < x[i]) {
                 // swap items at positions i+d and d
-	      xTmp = x[i+d];  idTmp = id[i+d]; 
-	      x[i+d] = x[i];  id[i+d] = id[i]; 
-	      x[i] = xTmp;    id[i] = idTmp; 
-	      // indicate that a swap has occurred
-	      flag = 1;
+	            xTmp = x[i+d];  idTmp = id[i+d]; 
+	            x[i+d] = x[i];  id[i+d] = id[i]; 
+	            x[i] = xTmp;    id[i] = idTmp; 
+	            // indicate that a swap has occurred
+	            flag = 1;
             }
         }
     }
