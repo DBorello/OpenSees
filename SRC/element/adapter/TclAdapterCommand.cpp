@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-09-23 23:37:00 $
+// $Revision: 1.2 $
+// $Date: 2008-09-23 23:59:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/adapter/TclAdapterCommand.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
