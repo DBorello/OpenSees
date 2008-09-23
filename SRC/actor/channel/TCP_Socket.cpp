@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.17 $
-// $Date: 2007-11-30 00:02:45 $
+// $Revision: 1.18 $
+// $Date: 2008-09-23 22:47:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.cpp,v $
 
 // Written: fmk
@@ -461,13 +461,13 @@ TCP_Socket::recvMsgUnknownSize(int dbTag, int commitTag,
         while (nleft > 0) {
             nread = recv(sockfd,gMsg,nleft,0);
             nleft -= nread;
-            gMsg +=  nread;
-        }
-        if (*(gMsg-1) == '\0')
-            eol = true;
-        else if (*(gMsg-1) == '\n') {
-            eol = true;
-            *gMsg = '\0';
+            gMsg  += nread;
+            if (*(gMsg-1) == '\0')
+                eol = true;
+            else if (*(gMsg-1) == '\n') {
+                eol = true;
+                *gMsg = '\0';
+            }
         }
     }
 

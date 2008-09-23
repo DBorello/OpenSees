@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2007-11-30 00:11:04 $
+// $Revision: 1.5 $
+// $Date: 2008-09-23 22:47:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_SocketSSL.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -604,26 +604,31 @@ TCP_SocketSSL::recvMsgUnknownSize(int dbTag, int commitTag,
 
     // if o.k. get a pointer to the data in the message and 
     // place the incoming data there
-    int nleft;
+    int nleft, nread;
     bool eol = false;
     char *gMsg;
     gMsg = msg.data;
 
     while (!eol) {
         nleft = SSL_pending(ssl);
-        if (SSL_read(ssl, gMsg, nleft) != nleft) {
-            opserr << "TCP_SocketSSL::recvMsgUnknownSize() - could not read data\n";
-            SSL_shutdown(ssl);
-            SSL_free(ssl);
-            SSL_CTX_free(ctx);
-            cleanup_sockets();
-            return -2;
-        }
-        if (*(gMsg-1) == '\0')
-            eol = true;
-        else if (*(gMsg-1) == '\n') {
-            eol = true;
-            *gMsg = '\0';
+        while (nleft > 0) {
+            nread = SSL_read(ssl, gMsg, nleft);
+            if (nread < 0) {
+                opserr << "TCP_SocketSSL::recvMsgUnknownSize() - could not read data\n";
+                SSL_shutdown(ssl);
+                SSL_free(ssl);
+                SSL_CTX_free(ctx);
+                cleanup_sockets();
+                return -2;
+            }
+            nleft -= nread;
+            gMsg  += nread;
+            if (*(gMsg-1) == '\0')
+                eol = true;
+            else if (*(gMsg-1) == '\n') {
+                eol = true;
+                *gMsg = '\0';
+            }
         }
     }
 
