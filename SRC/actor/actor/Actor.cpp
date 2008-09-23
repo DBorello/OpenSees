@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-11-23 18:24:30 $
+// $Revision: 1.5 $
+// $Date: 2008-09-23 22:47:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/actor/Actor.cpp,v $
                                                                         
                                                                         
@@ -50,18 +50,22 @@ Actor::Actor(Channel &theChan,
  numMethods(0), maxNumMethods(numActorMethods), actorMethods(0), 
  theRemoteShadowsAddress(0), commitTag(0)
 {
-  // call setUpActor on the channel and get shadows address
-  theChannel->setUpConnection();
-  theRemoteShadowsAddress = theChan.getLastSendersAddress();
+    // call setUpActor on the channel and get shadows address
+    if (theChannel->setUpConnection() != 0)  {
+        opserr << "Actor::Actor() "
+            << "- failed to setup connection\n";
+        exit(-1);
+    }
+    theRemoteShadowsAddress = theChan.getLastSendersAddress();
 
-  if (numActorMethods != 0)
-    actorMethods = new ActorMethod *[numActorMethods];
-  
-  if (actorMethods == 0)
-    maxNumMethods = 0;
-  
-  for (int i=0; i<numMethods; i++)
-    actorMethods[i] = 0;
+    if (numActorMethods != 0)
+        actorMethods = new ActorMethod *[numActorMethods];
+
+    if (actorMethods == 0)
+        maxNumMethods = 0;
+
+    for (int i=0; i<numMethods; i++)
+        actorMethods[i] = 0;
 }
 
 

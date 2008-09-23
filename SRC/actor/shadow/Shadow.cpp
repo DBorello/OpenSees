@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-11-23 18:25:17 $
+// $Revision: 1.6 $
+// $Date: 2008-09-23 22:47:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/shadow/Shadow.cpp,v $
                                                                         
 
@@ -46,7 +46,11 @@ Shadow::Shadow(Channel &theChan,
 	       FEM_ObjectBroker &myBroker)
   :theChannel(&theChan), theBroker(&myBroker), theRemoteActorsAddress(0), commitTag(0)
 {
-  theChannel->setUpConnection();
+    if (theChannel->setUpConnection() != 0)  {
+        opserr << "Shadow::Shadow() "
+            << "- failed to setup connection\n";
+        exit(-1);
+    }
 }
 
 
@@ -56,7 +60,11 @@ Shadow::Shadow(Channel &theChan,
   :theChannel(&theChan), theBroker(&myBroker), theRemoteActorsAddress(&theAddress),
    commitTag(0)
 {
-  theChannel->setUpConnection();
+    if (theChannel->setUpConnection() != 0)  {
+        opserr << "Shadow::Shadow() "
+            << "- failed to setup connection\n";
+        exit(-1);
+    }
 }
 
 Shadow::Shadow(int actorType,
@@ -65,17 +73,21 @@ Shadow::Shadow(int actorType,
 	       int compDemand)
   :theBroker(&myBroker), theRemoteActorsAddress(0), commitTag(0)
 {
-  // start the remote actor process running
-  theChannel = theMachineBroker.startActor(actorType, compDemand);
-  if (theChannel < 0) {
-    opserr << "Shadow::Shadow - could not start remote actor\n";
-    opserr << " using program " << actorType << endln;
-    exit(-1);
-  }
+    // start the remote actor process running
+    theChannel = theMachineBroker.startActor(actorType, compDemand);
+    if (theChannel < 0) {
+        opserr << "Shadow::Shadow - could not start remote actor\n";
+        opserr << " using program " << actorType << endln;
+        exit(-1);
+    }
 
-  // now call setUpShadow on the channel
-  theChannel->setUpConnection();
-  theRemoteActorsAddress = theChannel->getLastSendersAddress();
+    // now call setUpShadow on the channel
+    if (theChannel->setUpConnection() != 0)  {
+        opserr << "Shadow::Shadow() "
+            << "- failed to setup connection\n";
+        exit(-1);
+    }
+    theRemoteActorsAddress = theChannel->getLastSendersAddress();
 }
 
 Shadow::~Shadow()
