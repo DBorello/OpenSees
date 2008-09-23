@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2008-05-27 22:55:12 $
+// $Revision: 1.15 $
+// $Date: 2008-09-23 22:49:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.cpp,v $
                                                                         
                                                                         
@@ -32,6 +32,8 @@
 
 #include "ID.h"
 #include <stdlib.h>
+#include <map>
+#include <list>
 
 
 int ID::ID_NOT_VALID_ENTRY = 0;
@@ -259,21 +261,29 @@ ID::removeValue(int value)
 int
 ID::unique(void)
 {
-    // find unique values and number thereof
-    int i = 0;
-    while (i < sz-1)  {
-        int j = i+1;
-        while (j < sz)  {
-            if (data[i] == data[j])  {
-                for (int k=j; k<sz-1; k++)
-	                data[k] = data[k+1];
-                sz--;
-            } else  {
-                j++;
-            }
+    // preserve order method, runs in O(nlogn)
+    // order is preserved via list O(1)
+    // map serves as dictionary O(logn)
+    std::map<int,int> uniquesm;
+    std::list<int> uniquesl;
+    int count = 0;
+    for (int i=0; i<sz; i++)  {
+        int tmp = data[i];
+        if (uniquesm.find(tmp) == uniquesm.end()) {
+            uniquesm[tmp] = tmp;
+            uniquesl.push_back(tmp);
         }
-        i++;
     }
+
+    sz = uniquesl.size();
+    int* newdata = new int[sz];
+    for (std::list<int>::iterator pos=uniquesl.begin(); pos!=uniquesl.end(); pos++)
+        newdata[count++] = *pos;
+
+    delete [] data;
+    arraySize = sz;
+    data = newdata;
+
     return sz;
 }
 
@@ -448,18 +458,26 @@ ID::operator=(const ID &V)
 int 
 ID::operator==(const ID &V) const
 {
-#ifdef _G3DEBUG
-  if (sz != V.sz) {
-    opserr << "WARNING Vector::operator==(ID):IDs not of same sizes: " << sz << " != " << V.sz << endln;
-    return -1;
-  }
-#endif
+  if (sz != V.sz)
+    return 0;
 
   int *dataThis = data;
   int *dataV = V.data;
 
   for (int i=0; i<sz; i++)
     if (*dataThis++ != *dataV++)
+      return 0;
+
+  return 1;
+}
+
+int 
+ID::operator==(int value) const
+{
+  int *dataThis = data;
+
+  for (int i=0; i<sz; i++)
+    if (*dataThis++ != value)
       return 0;
 
   return 1;
@@ -473,18 +491,26 @@ ID::operator==(const ID &V) const
 int 
 ID::operator!=(const ID &V) const
 {
-#ifdef _G3DEBUG
-  if (sz != V.sz) {
-    opserr << "WARNING ID::operator!=(ID):IDs not of same sizes: " << sz << " != " << V.sz << endln;
-    return -1;
-  }
-#endif
+  if (sz != V.sz)
+    return 1;
 
   int *dataThis = data;
   int *dataV = V.data;
 
   for (int i=0; i<sz; i++)
     if (*dataThis++ != *dataV++)
+      return 1;
+
+  return 0;
+}
+
+int 
+ID::operator!=(int value) const
+{
+  int *dataThis = data;
+
+  for (int i=0; i<sz; i++)
+    if (*dataThis++ != value)
       return 1;
 
   return 0;

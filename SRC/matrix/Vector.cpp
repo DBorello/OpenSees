@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2008-08-18 17:18:22 $
+// $Revision: 1.17 $
+// $Date: 2008-09-23 22:49:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.cpp,v $
                                                                         
                                                                         
@@ -1054,44 +1054,28 @@ Vector::operator/(const Matrix &M) const
 // 	Then returns 1 if all the components of the two vectors are equal and 0 otherwise.
 
 int 
-Vector::operator==(double value) const
-{
-  double *dataThis = theData;
-
-  for (int i=0; i<sz; i++)
-    if (*dataThis++ != value)
-      return 0;
-
-  return 1;
-}
-
-int 
-Vector::operator!=(double value) const
-{
-  double *dataThis = theData;
-
-  for (int i=0; i<sz; i++)
-    if (*dataThis++ != value)
-      return 1;
-
-  return 0;
-}
-
-int 
 Vector::operator==(const Vector &V) const
 {
-#ifdef _G3DEBUG
-  if (sz != V.sz) {
-    opserr << "WARNING Vector::operator==(Vector):Vectors not of same sizes: " << sz << " != " << V.sz << endln;
-    return -1;
-  }
-#endif
+  if (sz != V.sz)
+    return 0;
 
   double *dataThis = theData;
   double *dataV = V.theData;
 
   for (int i=0; i<sz; i++)
     if (*dataThis++ != *dataV++)
+      return 0;
+
+  return 1;
+}
+
+int 
+Vector::operator==(double value) const
+{
+  double *dataThis = theData;
+
+  for (int i=0; i<sz; i++)
+    if (*dataThis++ != value)
       return 0;
 
   return 1;
@@ -1105,12 +1089,8 @@ Vector::operator==(const Vector &V) const
 int
 Vector::operator!=(const Vector &V) const
 {
-#ifdef _G3DEBUG
-  if (sz != V.sz) {
-    opserr << "WARNING Vector::operator!=(Vector):Vectors not of same sizes: " << sz << " != " << V.sz << endln;
-    return -1;
-  }
-#endif
+  if (sz != V.sz)
+    return 1;
 
   double *dataThis = theData;
   double *dataV = V.theData;
@@ -1122,8 +1102,17 @@ Vector::operator!=(const Vector &V) const
   return 0;
 }
 
-	
+int 
+Vector::operator!=(double value) const
+{
+  double *dataThis = theData;
 
+  for (int i=0; i<sz; i++)
+    if (*dataThis++ != value)
+      return 1;
+
+  return 0;
+}
 
 
 // friend OPS_Stream &operator<<(OPS_Stream &s, const Vector &V)
