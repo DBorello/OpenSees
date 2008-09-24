@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2008-09-16 18:15:42 $
+// $Revision: 1.4 $
+// $Date: 2008-09-24 23:05:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/accelerator/KrylovAccelerator.cpp,v $
                                                                         
 // Written: MHS
@@ -147,7 +147,7 @@ KrylovAccelerator::newStep(LinearSOE &theSOE)
 
 #ifdef _WIN32
 
-extern "C" int DGELS(char *T, unsigned int *SZ, int *M, int *N, int *NRHS,
+extern "C" int DGELS(char *T, int *M, int *N, int *NRHS,
 			      double *A, int *LDA, double *B, int *LDB,
 			      double *WORK, int *LWORK, int *INFO);
 
@@ -235,8 +235,7 @@ KrylovAccelerator::accelerate(Vector &vStar, LinearSOE &theSOE,
     
     // Call the LAPACK least squares subroutine
 #ifdef _WIN32
-    unsigned int sizeC = 1;
-    DGELS(trans, &sizeC, &numEqns, &k, &nrhs, AvData, &numEqns,
+    DGELS(trans, &numEqns, &k, &nrhs, AvData, &numEqns,
 	  rData, &ldb, work, &lwork, &info);
 #else
     dgels_(trans, &numEqns, &k, &nrhs, AvData, &numEqns,
