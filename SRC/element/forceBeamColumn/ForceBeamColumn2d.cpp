@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.36 $
-// $Date: 2008-08-26 17:10:03 $
+// $Revision: 1.37 $
+// $Date: 2008-09-25 22:17:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 /*
@@ -2194,10 +2194,8 @@ ForceBeamColumn2d::setResponse(const char **argv, int argc, OPS_Stream &output)
 	theResponse = new ElementResponse(this, 76, Vector(order));
 	Information &info = theResponse->getInformation();
 	info.theInt = sectionNum;
-	  }
-	  
-
-	}
+      }
+    }
   }
 
   // section response -

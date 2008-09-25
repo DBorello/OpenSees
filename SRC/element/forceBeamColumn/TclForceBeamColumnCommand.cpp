@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2008-06-26 23:33:46 $
+// $Revision: 1.20 $
+// $Date: 2008-09-25 22:17:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/TclForceBeamColumnCommand.cpp,v $
                                                                         
 // Written: MHS
@@ -92,7 +92,8 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
 	   << " not compatible with beamColumn element" << endln;
     return TCL_ERROR;
   }
-  
+
+
   // split possible lists present in argv
   char *List;
 
@@ -102,23 +103,20 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     return TCL_ERROR;
   }
 
-  //  opserr << "List :" << List << endln;
-
   // remove braces from list
   for (int i = 0; List[i] != '\0'; i++) {
     if ((List[i] == '{')  ||  (List[i] == '}'))
       List[i] = ' ';
   }
-  
+
   int argc;
   TCL_Char **argv;
-       
+
   if (Tcl_SplitList(interp, List, &argc, &argv) != TCL_OK) {
     opserr <<  "WARNING - TclModelBuilder_addForceBeamColumn - problem spliting list\n";
     return TCL_ERROR;
   }
-      
-  Tcl_Free (List);
+  Tcl_Free ((char *)List);
 
 
   if (argc < 6) {
@@ -303,6 +301,9 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
       delete theElement;
       return TCL_ERROR;
     }
+
+
+  Tcl_Free((char *)argv);
 
     return TCL_OK;
   } 
@@ -985,7 +986,7 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
 	if (Tcl_GetDouble(interp, argv[j+2*numSections], &wt) != TCL_OK) {
 	  opserr << "WARNING invalid wt\n";
 	  opserr << "" << argv[1] << " element: " << eleTag << endln;
-	  return TCL_ERROR;
+	  return  TCL_ERROR;
 	}
 	else {
 	  wts(i)  = wt;
@@ -1126,5 +1127,7 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
   }
   
   // if get here we have sucessfully created the element and added it to the domain
+  Tcl_Free((char *)argv);
+	     
   return TCL_OK;
 }
