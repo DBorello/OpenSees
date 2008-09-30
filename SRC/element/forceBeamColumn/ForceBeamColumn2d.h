@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.11 $
-// $Date: 2008-05-27 23:10:55 $
+// $Revision: 1.12 $
+// $Date: 2008-09-30 21:15:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.h,v $
 
 /*
@@ -183,7 +183,9 @@ class ForceBeamColumn2d: public Element
   enum {NEBD = 3};         // number of element dof's in the basic system
 
   int numEleLoads; // Number of element load objects
-  ElementalLoad *eleLoads[maxNumEleLoads];
+  int sizeEleLoads;
+  ElementalLoad **eleLoads;
+  double *eleLoadFactors;
 
   Matrix *Ki;
   

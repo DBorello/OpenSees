@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.37 $
-// $Date: 2008-09-25 22:17:39 $
+// $Revision: 1.38 $
+// $Date: 2008-09-30 21:15:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 /*
@@ -93,8 +93,9 @@ ForceBeamColumn2d::ForceBeamColumn2d():
   initialFlag(0),
   kv(NEBD,NEBD), Se(NEBD),
   kvcommit(NEBD,NEBD), Secommit(NEBD),
-  fs(0), vs(0), Ssr(0), vscommit(0), numEleLoads(0), Ki(0),
-  parameterID(0)
+  fs(0), vs(0), Ssr(0), vscommit(0), 
+  numEleLoads(0), sizeEleLoads(0), eleLoads(0), eleLoadFactors(0),
+  Ki(0), parameterID(0)
 {
   theNodes[0] = 0;  
   theNodes[1] = 0;
@@ -125,8 +126,9 @@ ForceBeamColumn2d::ForceBeamColumn2d (int tag, int nodeI, int nodeJ,
   initialFlag(0),
   kv(NEBD,NEBD), Se(NEBD), 
   kvcommit(NEBD,NEBD), Secommit(NEBD),
-  fs(0), vs(0),Ssr(0), vscommit(0), numEleLoads(0), Ki(0),
-  parameterID(0)
+  fs(0), vs(0),Ssr(0), vscommit(0), 
+  numEleLoads(0), sizeEleLoads(0), eleLoads(0), eleLoadFactors(0),
+  Ki(0), parameterID(0)
 {
   theNodes[0] = 0;
   theNodes[1] = 0;
@@ -171,6 +173,14 @@ ForceBeamColumn2d::~ForceBeamColumn2d()
       if (sections[i] != 0)
 	delete sections[i];
     delete [] sections;
+  }
+
+  if (sizeEleLoads != 0) {
+    if (eleLoads != 0)
+      delete [] eleLoads;
+
+    if (eleLoadFactors != 0)
+      delete [] eleLoadFactors;
   }
   
   if (fs != 0) 
@@ -433,11 +443,12 @@ ForceBeamColumn2d::computeReactions(double *p0)
   
   for (int i = 0; i < numEleLoads; i++) {
     
-    const Vector &data = eleLoads[i]->getData(type, 1.0);
-    
+    double loadFactor = eleLoadFactors[i];
+    const Vector &data = eleLoads[i]->getData(type, loadFactor);
+
     if (type == LOAD_TAG_Beam2dUniformLoad) {
-      double wa = data(1)*1.0;  // Axial
-      double wy = data(0)*1.0;  // Transverse
+      double wa = data(1)*loadFactor;  // Axial
+      double wy = data(0)*loadFactor;  // Transverse
       
       p0[0] -= wa*L;
       double V = 0.5*wy*L;
@@ -445,8 +456,8 @@ ForceBeamColumn2d::computeReactions(double *p0)
       p0[2] -= V;
     }
     else if (type == LOAD_TAG_Beam2dPointLoad) {
-      double P = data(0)*1.0;
-      double N = data(1)*1.0;
+      double P = data(0)*loadFactor;
+      double N = data(1)*loadFactor;
       double aOverL = data(2);
       
       if (aOverL < 0.0 || aOverL > 1.0)
@@ -665,8 +676,8 @@ ForceBeamColumn2d::update()
 	  double v0[3];
 	  v0[0] = 0.0; v0[1] = 0.0; v0[2] = 0.0;
 
-	  for (int ie = 0; ie < numEleLoads; ie++)
-	    beamIntegr->addElasticDeformations(eleLoads[ie], 1.0, L, v0);
+	  for (int ie = 0; ie < numEleLoads; ie++) 
+	    beamIntegr->addElasticDeformations(eleLoads[ie], eleLoadFactors[ie], L, v0);
 
 	  // Add effects of element loads
 	  vr(0) += v0[0];
@@ -1002,10 +1013,30 @@ ForceBeamColumn2d::zeroLoad(void)
 int
 ForceBeamColumn2d::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  if (numEleLoads < maxNumEleLoads)
-    eleLoads[numEleLoads++] = theLoad;
-  else
-    opserr << "ForceBeamColumn2d::addLoad -- maxNumEleLoads exceeded\n";
+  if (numEleLoads == sizeEleLoads) {
+
+    //
+    // create larger arrays, copy old, delete old & set as new
+    //
+
+    ElementalLoad ** theNextEleLoads = new ElementalLoad *[sizeEleLoads+1];
+    double *theNextEleLoadFactors = new double[sizeEleLoads+1];
+    for (int i=0; i<numEleLoads; i++) {
+      theNextEleLoads[i] = eleLoads[i];
+      theNextEleLoadFactors[i] = eleLoadFactors[i];
+    }
+    delete [] eleLoads;
+    delete [] eleLoadFactors;
+    eleLoads = theNextEleLoads;
+    eleLoadFactors = theNextEleLoadFactors;  
+
+    // increment array size
+    sizeEleLoads+=1;
+  }
+
+  eleLoadFactors[numEleLoads] = loadFactor;
+  eleLoads[numEleLoads] = theLoad;
+  numEleLoads++;
 
   return 0;
 }
@@ -1026,11 +1057,12 @@ ForceBeamColumn2d::computeSectionForces(Vector &sp, int isec)
 
   for (int i = 0; i < numEleLoads; i++) {
 
-    const Vector &data = eleLoads[i]->getData(type, 1.0);
-    
+    double loadFactor = eleLoadFactors[i];
+    const Vector &data = eleLoads[i]->getData(type, loadFactor);
+
     if (type == LOAD_TAG_Beam2dUniformLoad) {
-      double wa = data(1)*1.0;  // Axial
-      double wy = data(0)*1.0;  // Transverse
+      double wa = data(1)*loadFactor;  // Axial
+      double wy = data(0)*loadFactor;  // Transverse
       
       for (int ii = 0; ii < order; ii++) {
 	
@@ -1050,8 +1082,8 @@ ForceBeamColumn2d::computeSectionForces(Vector &sp, int isec)
       }
     }
     else if (type == LOAD_TAG_Beam2dPointLoad) {
-      double P = data(0)*1.0;
-      double N = data(1)*1.0;
+      double P = data(0)*loadFactor;
+      double N = data(1)*loadFactor;
       double aOverL = data(2);
       
       if (aOverL < 0.0 || aOverL > 1.0)
