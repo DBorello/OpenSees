@@ -21,8 +21,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2008-10-06 19:14:01 $
+// $Revision: 1.25 $
+// $Date: 2008-10-06 19:18:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/OPS_Globals.h,v $
                                                                         
 // Written: fmk `
@@ -52,7 +52,7 @@ enum NodeResponseType { Disp = 1, Vel = 2, Accel =3, IncrDisp =4, IncrDeltaDisp 
 
 #ifdef _TCL85
 #define TCL_Char const char
-#ifdef _TCL84
+#elif _TCL84
 #define TCL_Char const char
 #else
 #define TCL_Char char
