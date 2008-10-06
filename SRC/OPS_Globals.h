@@ -21,8 +21,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2008-04-14 21:23:57 $
+// $Revision: 1.24 $
+// $Date: 2008-10-06 19:14:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/OPS_Globals.h,v $
                                                                         
 // Written: fmk `
@@ -50,6 +50,8 @@ extern OPS_Stream *opserrPtr;
 
 enum NodeResponseType { Disp = 1, Vel = 2, Accel =3, IncrDisp =4, IncrDeltaDisp =5, Reaction =6};
 
+#ifdef _TCL85
+#define TCL_Char const char
 #ifdef _TCL84
 #define TCL_Char const char
 #else
