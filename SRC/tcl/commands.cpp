@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.133 $
-// $Date: 2008-08-27 17:01:15 $
+// $Revision: 1.134 $
+// $Date: 2008-10-08 21:12:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -4681,6 +4681,10 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	  (strcmp(argv[loc],"-fullGenLapack") == 0))
 	typeSolver = 3;
 
+      else if ((strcmp(argv[loc],"symmBandLapack") == 0) || 
+	  (strcmp(argv[loc],"-symmBandLapack") == 0))
+	typeSolver = 4;
+
       else {
 	opserr << "eigen - unknown option specified " << argv[loc] << endln;
 	return TCL_ERROR;
@@ -4729,7 +4733,11 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
       } else if (typeSolver == 3) {
 	FullGenEigenSolver *theEigenSolver = new FullGenEigenSolver();
 	theEigenSOE = new FullGenEigenSOE(*theEigenSolver, *theEigenModel);
+      }  else if (typeSolver == 4) {
+	SymBandEigenSolver *theEigenSolver = new SymBandEigenSolver(); 
+	theEigenSOE = new SymBandEigenSOE(*theEigenSolver, *theEigenModel);    
       }
+
     }
     // create the rest of components of an eigen analysis
     EigenIntegrator  *theEigenIntegrator = new EigenIntegrator();    
