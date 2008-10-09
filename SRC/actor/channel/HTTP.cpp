@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2008-07-24 21:47:49 $
+// $Revision: 1.6 $
+// $Date: 2008-10-09 21:26:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/HTTP.cpp,v $
                                                                         
 // Written: fmk 11/06
@@ -42,8 +42,11 @@
 
 #define OUTBUF_SIZE 4096
 
-static char outBuf[OUTBUF_SIZE];
-static char inBuf[OUTBUF_SIZE];
+static char outBuf[OUTBUF_SIZE+1];
+static char inBuf[OUTBUF_SIZE+1];
+
+static char *lastURL = 0;
+static socket_type lastSockfd;
 
 socket_type
 establishHTTPConnection(const char* URL, unsigned int port) {
@@ -143,15 +146,27 @@ httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
   // in case we fail, set return pointer to 0
   *dataPtr = 0;
 
-  // invoke startup sockets
   startup_sockets();
-  
-  // open a socket
-  sockfd = establishHTTPConnection(URL, port);
-  if (sockfd < 0) {
-    fprintf(stderr, "postData: failed to establis connection\n");
-    return -1;
-  }
+  if (lastURL == 0 || strcmp(lastURL, URL) != 0) {
+    if (lastURL != 0) {
+      free(lastURL);
+      close(sockfd);
+    }
+
+    lastURL = (char *)malloc(strlen(URL+1));
+    strcpy(lastURL, URL);
+
+    // open a socket
+    sockfd = establishHTTPConnection(URL, port);
+    if (sockfd < 0) {
+      if (lastURL != 0)
+	free(lastURL);
+      fprintf(stderr, "postData: failed to establis connection\n");
+      return -1;
+    }
+    lastSockfd = sockfd;
+  } else
+    sockfd = lastSockfd;
 
   // add the header information to outBuf
   sprintf(outBuf, "GET %s HTTP/1.1\nHost:%s\n",page,URL);
@@ -160,6 +175,7 @@ httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
   strcat(outBuf,"Accept-Charset:ISO-8859-1,utf-8\n");
   strcat(outBuf,"Keep-Alive:300\n");
   strcat(outBuf, "Connection:keep-alive\n\n");
+
   nleft = strlen(outBuf);
 
   //send the data
@@ -185,7 +201,11 @@ httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
 
     gMsg = inBuf;
     ok = recv(sockfd, gMsg, nleft, 0);
+    
+    //    for (int i=0; i<ok; i++) fprintf(stderr,"%c",inBuf[i]);
 
+    inBuf[ok+1]='\0';
+         
     if (ok > 0) {
       nextData = data;
       data = (char *)malloc((sizeData+ok+1)*sizeof(char));
@@ -201,12 +221,26 @@ httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
 	strcpy(&data[sizeData],"");
       }
     }
+
+    if (strstr(inBuf,"</html>") != NULL)
+      ok = 0;
+
   }
 
+  if (sizeData == 0) {
+    if (lastURL != 0)
+      free(lastURL);
+    lastURL = 0;
+
+    close(sockfd);
+    return -1;
+  }
 
   // now we need to strip off the response header 
   gMsg = data;
+
   nextData = strstr(data,"Content-Type");
+
   if (nextData != NULL) {
     nextData = strchr(nextData,'\n');
     nextData += 3;
@@ -214,15 +248,18 @@ httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
     nwrite = sizeData+1-(nextData-data);
 
     data = (char *)malloc((sizeData+1)*sizeof(char));
+
     for (i=0; i<nwrite; i++)
       data[i]=nextData[i];
+
     //    strcpy(&data[nwrite],""); /we already placed a end-of-string marker there above
   }
 
   *dataPtr = data;
 
   cleanup_sockets();
-  
+
+
   return 0;
 }
 
