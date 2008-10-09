@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2008-07-24 22:59:03 $
+// $Revision: 1.4 $
+// $Date: 2008-10-09 21:33:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/PeerNGA.cpp,v $
                                                                         
                                                                         
@@ -55,7 +55,16 @@ peerGET(const char *page,
   
   char *URL="peer.berkeley.edu";
   
-  httpGet(URL, page, 80, res);
+  int result = httpGet(URL, page, 80, res);
+
+  if (result == -1) 
+    result = httpGet(URL, page, 80, res);
+
+  if (result == -1) {
+    fprintf(stderr, "ERROR: peerGET - no data\n");
+    return -1;
+
+  }
 
   char *failure = strstr(*res,"400 Bad Request");
   
@@ -175,6 +184,9 @@ peerSearchNGA(const char *Eq,
 	    fault, magLo, magHi, distLo, distHi, vsLo, vsHi, pgaLo, pgaHi, latSW, latNE, lngSW, lngNE);
 
 
+  fprintf(stderr,"PeerNGA - 1\n");
+
+
   trialID = peerGET(peerPage, &resHTML);
 
   if (trialID == 0 && resHTML != 0) {    
@@ -186,6 +198,9 @@ peerSearchNGA(const char *Eq,
       delete [] resHTML;
       return 0;
     }
+
+
+
 
     loc = resHTML;
     
@@ -203,6 +218,8 @@ peerSearchNGA(const char *Eq,
 	strncpy(ngaName, loc, ngaNameLength);
 	strcpy(&ngaName[ngaNameLength],"");
 	sprintf(peerPage,"/nga/data?doi=%s",ngaName);
+
+	fprintf(stderr,"PeerNGA - %s\n", ngaName);
 
 	trialID = peerGET(peerPage, &ngaHTML);
 	
@@ -275,6 +292,8 @@ peerSearchNGA(const char *Eq,
   if (resHTML != 0)
     free(resHTML);
   }
+  fprintf(stderr,"PeerNGA - DONE\n");
+
   
   return trialID;
 }
