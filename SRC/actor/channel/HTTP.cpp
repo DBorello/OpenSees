@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-10-09 21:26:51 $
+// $Revision: 1.7 $
+// $Date: 2008-10-14 18:24:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/HTTP.cpp,v $
                                                                         
 // Written: fmk 11/06
@@ -147,13 +147,16 @@ httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
   *dataPtr = 0;
 
   startup_sockets();
+
+  /*
   if (lastURL == 0 || strcmp(lastURL, URL) != 0) {
+
     if (lastURL != 0) {
       free(lastURL);
       close(sockfd);
     }
 
-    lastURL = (char *)malloc(strlen(URL+1));
+    lastURL = (char *)malloc(strlen(URL)+1);
     strcpy(lastURL, URL);
 
     // open a socket
@@ -167,6 +170,13 @@ httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
     lastSockfd = sockfd;
   } else
     sockfd = lastSockfd;
+  */
+
+  sockfd = establishHTTPConnection(URL, port);
+  if (sockfd < 0) {
+    fprintf(stderr, "httpGet: failed to establis connection\n");
+    return -1;
+  }
 
   // add the header information to outBuf
   sprintf(outBuf, "GET %s HTTP/1.1\nHost:%s\n",page,URL);
@@ -184,11 +194,13 @@ httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
   nwrite = 0;    
   gMsg = outBuf;
 
+
   while (nleft > 0) {
     nwrite = send(sockfd, gMsg, nleft, 0);
     nleft -= nwrite;
     gMsg +=  nwrite;
   }
+
 
   ok = 1;
   nleft = 4095;
@@ -201,8 +213,6 @@ httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
 
     gMsg = inBuf;
     ok = recv(sockfd, gMsg, nleft, 0);
-    
-    //    for (int i=0; i<ok; i++) fprintf(stderr,"%c",inBuf[i]);
 
     inBuf[ok+1]='\0';
          
@@ -216,7 +226,7 @@ httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
 	  free(nextData);
 	}
 	for (i=0, j=sizeData; i<ok; i++, j++)
-	  data[j]=inBuf[i];
+ 	  data[j]=inBuf[i];
 	sizeData += ok;
 	strcpy(&data[sizeData],"");
       }
@@ -251,14 +261,14 @@ httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
 
     for (i=0; i<nwrite; i++)
       data[i]=nextData[i];
-
-    //    strcpy(&data[nwrite],""); /we already placed a end-of-string marker there above
   }
 
   *dataPtr = data;
+  free(gMsg);
+
+  close(sockfd); sockfd = 0;
 
   cleanup_sockets();
-
 
   return 0;
 }
