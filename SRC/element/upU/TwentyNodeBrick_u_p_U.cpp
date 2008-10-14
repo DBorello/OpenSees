@@ -159,6 +159,14 @@ TwentyNodeBrick_u_p_U::TwentyNodeBrick_u_p_U ()
 
    for (int j=0; j<Num_Nodes; j++)
      theNodes[j] = 0;
+
+    theMaterial = new NDMaterial *[Num_TotalGaussPts];
+    if (theMaterial == 0) {
+       opserr<<" TwentyNodeBrick_u_p_U::TwentyNodeBrick_u_p_U -- failed allocate material model pointer\n";
+       exit(-1);
+    }
+    for (int i=0; i<Num_TotalGaussPts; i++) 
+       theMaterial[i] = 0;
 }
 
 //======================================================================
