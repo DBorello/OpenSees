@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2008-04-17 02:03:05 $
+// $Revision: 1.6 $
+// $Date: 2008-10-14 18:27:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PeerMotion.cpp,v $                                                                        
 
 // Written: fmk 
@@ -78,7 +78,7 @@ PeerMotion::PeerMotion(const char *earthquake,
   int nPts,i;
   double value;
   char tmp1[100];
-  
+
   if ((strcmp(type,"ACCEL") == 0) || (strcmp(type,"-accel") == 0) || (strcmp(type,"-ACCEL") == 0)
       || (strcmp(type,"accel") == 0) || (strcmp(type,"ATH") == 0) || (strcmp(type,"-ATH") == 0)) {
     sprintf(peerPage, "/smcat/data/ath/%s/%s.AT2",earthquake,station);
@@ -94,7 +94,7 @@ PeerMotion::PeerMotion(const char *earthquake,
     opserr << "PeerMotion::PeerMotion() - could not connect to PEER Database, ";
     return; 
   }
-  
+
   nextData = strstr(eqData,"Page Not Found");
   if (nextData != 0) {
     opserr << "PeerMotion::PeerMotion() - could not get Data for record from Database, ";

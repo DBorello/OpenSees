@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-07-24 21:46:51 $
+// $Revision: 1.2 $
+// $Date: 2008-10-14 18:27:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PeerNGAMotion.cpp,v $
 
 // Written: fmk 
@@ -66,9 +66,9 @@ PeerNGAMotion::PeerNGAMotion()
 
 		   
 PeerNGAMotion::PeerNGAMotion(const char *earthquake,
-		       const char *station,
-		       const char *type,
-		       double theFactor)
+			     const char *station,
+			     const char *type,
+			     double theFactor)
   :TimeSeries(TSERIES_TAG_PeerNGAMotion),
    thePath(0), dT(0.0), 
    cFactor(theFactor), dbTag1(0), dbTag2(0), lastSendCommitTag(-1), lastChannel(0)
@@ -89,12 +89,14 @@ PeerNGAMotion::PeerNGAMotion(const char *earthquake,
     opserr << "PeerNGAMotion::PeerNGAMotion() - not a valid type:" << type << " (-ACCEL requiured)\n";
     return;
   }
-  
+
   if (httpGet("peer.berkeley.edu",peerPage,80,&eqData) != 0) {
-    opserr << "PeerNGAMotion::PeerNGAMotion() - could not connect to PEER Database, ";
-    return; 
+    if (httpGet("peer.berkeley.edu",peerPage,80,&eqData) != 0) {
+      opserr << "PeerNGAMotion::PeerNGAMotion() - could not connect to PEER Database, ";
+      return; 
+    }
   }
-  
+
   nextData = strstr(eqData,"Page Not Found");
   if (nextData != 0) {
     opserr << "PeerNGAMotion::PeerNGAMotion() - could not get Data for record from Database, ";
@@ -110,8 +112,6 @@ PeerNGAMotion::PeerNGAMotion(const char *earthquake,
     return;
   }
 
-
-  
   nextData+=5; // NPTS=
   nPts = atoi(nextData);
   
@@ -149,8 +149,8 @@ PeerNGAMotion::PeerNGAMotion(const char *earthquake,
 
 
 PeerNGAMotion::PeerNGAMotion(const char *earthquakeStation,
-		       const char *type,
-		       double theFactor)
+			     const char *type,
+			     double theFactor)
   :TimeSeries(TSERIES_TAG_PeerNGAMotion),
    thePath(0), dT(0.0), 
    cFactor(theFactor), dbTag1(0), dbTag2(0), lastSendCommitTag(-1), lastChannel(0)
@@ -160,7 +160,8 @@ PeerNGAMotion::PeerNGAMotion(const char *earthquakeStation,
   int nPts,i;
   double value;
   char tmp1[100];
-  
+
+
   if ((strcmp(type,"ACCEL") == 0) || (strcmp(type,"-accel") == 0) || (strcmp(type,"-ACCEL") == 0)
       || (strcmp(type,"accel") == 0) || (strcmp(type,"ATH") == 0) || (strcmp(type,"-ATH") == 0)) {
     sprintf(peerPage, "/nga_files/ath/%s.AT2",earthquakeStation);
@@ -176,7 +177,7 @@ PeerNGAMotion::PeerNGAMotion(const char *earthquakeStation,
     opserr << "PeerNGAMotion::PeerNGAMotion() - could not connect to PEER Database, ";
     return; 
   }
-  
+
   nextData = strstr(eqData,"Page Not Found");
   if (nextData != 0) {
     opserr << "PeerNGAMotion::PeerNGAMotion() - could not get Data for record from Database, ";
@@ -184,7 +185,7 @@ PeerNGAMotion::PeerNGAMotion(const char *earthquakeStation,
     free(eqData);
     return;
   }
-  
+
   nextData = strstr(eqData,"\n"); nextData++;
   nextData = strstr(nextData,"\n"); nextData++;
   nextData = strstr(nextData,"\n"); nextData++;
