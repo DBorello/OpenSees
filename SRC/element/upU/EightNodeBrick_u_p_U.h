@@ -67,9 +67,9 @@ public:
                    double nn, double alf, double rs,double rf,
                    double permb_x, double permb_y, double permb_z,
                    double kks, double kkf, double pp);
-                   EightNodeBrick_u_p_U ();
-                   ~EightNodeBrick_u_p_U();
-    
+   EightNodeBrick_u_p_U ();
+   ~EightNodeBrick_u_p_U();
+
     const char *getClassType(void) const {return "EightNodeBrick_u_P_U";};
     
     // public methods to obtain information about dof & connectivity

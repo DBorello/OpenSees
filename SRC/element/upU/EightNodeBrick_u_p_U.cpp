@@ -134,22 +134,33 @@ EightNodeBrick_u_p_U::EightNodeBrick_u_p_U ()
 
    for (int j=0; j<Num_Nodes; j++)
      theNodes[j] = 0;
+
+    theMaterial = new NDMaterial *[Num_TotalGaussPts];
+    if (theMaterial == 0) {
+       opserr<<" EightNodeBrick_u_p_U::EightNodeBrick_u_p_U -- failed allocate material model pointer\n";
+       exit(-1);
+    }
+    for (int i=0; i<Num_TotalGaussPts; i++) {
+       theMaterial[i] = 0;
+    }
 }
 
 //======================================================================
 EightNodeBrick_u_p_U::~EightNodeBrick_u_p_U ()
 {
-   if (theMaterial)
-     delete [] theMaterial;
+  if (theMaterial) {
+    for (int i=0; i<8; i++)
+      if (theMaterial[i] != 0)
+	delete theMaterial[i];
+    
+    delete [] theMaterial;
+  }
 
-   for (int j=0; j<Num_Nodes; j++)
-     theNodes[j] = 0;
-
-   if (Q != 0)
-     delete Q;
-
-   if (Ki != 0)
-     delete Ki;
+  if (Q != 0)
+    delete Q;
+  
+  if (Ki != 0)
+    delete Ki;
 
 }
 
@@ -486,15 +497,143 @@ const Vector& EightNodeBrick_u_p_U::getResistingForceIncInertia ()
 //=============================================================================
 int EightNodeBrick_u_p_U::sendSelf (int commitTag, Channel &theChannel)
 {
-     // Not implemented yet
-     return 0;
+
+  //
+  // into an id and a vector place all data needed to rebuild on other side
+  //
+
+  static ID iData(25);
+  static Vector dData(13);
+
+  // fill in the vector with all double data
+  dData(0) = poro;
+  dData(1) = alpha;
+  dData(2) = rho_s;
+  dData(3) = rho_f;
+  dData(4) = ks;
+  dData(5) = kf;
+  dData(6) = pressure;
+  dData(7) = perm(0);
+  dData(8) = perm(1);
+  dData(9) = perm(2);
+  dData(10) = bf(0);
+  dData(11) = bf(1);
+  dData(12) = bf(2);
+
+  // fill in the id with node info, material info and ele tag
+  for (int i=0; i<8; i++) {
+    iData(i) = connectedExternalNodes(i);
+    if (theMaterial[i] != 0) {
+      iData(i+8) = theMaterial[i]->getClassTag();
+      int matDbTag = theMaterial[i]->getDbTag();
+      if (matDbTag == 0) {
+	matDbTag = theChannel.getDbTag();
+	theMaterial[i]->setDbTag(matDbTag);
+      }
+      iData(i+16) = matDbTag;
+    } else
+      iData(i+8) = 0;
+  }
+
+  iData(24) = this->getTag();
+
+  int dbTag = this->getDbTag();
+
+  //
+  // send id and vector
+  //
+
+  if (theChannel.sendID(dbTag, commitTag, iData) < 0) {
+    opserr << "EightNodeBrick_u_p_U::sendSelf () - failed to send ID data\n";
+    return -1;
+  }
+
+  if (theChannel.sendVector(dbTag, commitTag, dData) < 0) {
+    opserr << "EightNodeBrick_u_p_U::sendSelf () - failed to send Vector data\n";
+    return -2;
+  }
+
+
+  //
+  // send the materials
+  //
+
+  for (int i=0; i<8; i++) {
+    if (theMaterial[i] != 0)
+      if (theMaterial[i]->sendSelf(commitTag, theChannel) < 0) {
+	opserr << "EightNodeBrick_u_p_U::sendSelf () - failed to send a material\n";
+	return -3;
+      }
+  }
+
+  return 0;
 }
 
 //=============================================================================
 int EightNodeBrick_u_p_U::recvSelf (int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-     // Not implemented yet
-     return 0;
+  //
+  // into an id and a vector recv all data needed to rebuild on this side
+  //
+
+  static ID iData(25);
+  static Vector dData(13);
+
+  int dbTag = this->getDbTag();
+  
+  if (theChannel.recvID(dbTag, commitTag, iData) < 0) {
+    opserr << "EightNodeBrick_u_p_U::recvSelf () - failed to recv ID data\n";
+    return -1;
+  }
+
+  if (theChannel.recvVector(dbTag, commitTag, dData) < 0) {
+    opserr << "EightNodeBrick_u_p_U::recvSelf () - failed to recv Vector data\n";
+    return -2;
+  }
+
+  poro = dData(0);
+  alpha = dData(1);
+  rho_s = dData(2);
+  rho_f = dData(3);
+  ks = dData(4);
+  kf = dData(5);
+  pressure = dData(6);
+  perm(0) = dData(7);
+  perm(1) = dData(8);
+  perm(2) = dData(9);
+  bf(0) = dData(10);
+  bf(1) = dData(11);
+  bf(2) = dData(12);
+
+  //
+  // fill in the node data, obtain materials of correct type and invoke recvSelf on them
+  //
+
+  for (int i=0; i<8; i++) {
+    connectedExternalNodes(i) = iData(i);
+    int matType = iData(i+8);
+    int matDbTag = iData(i+16);
+    if (theMaterial[i] != 0) {
+      if (theMaterial[i]->getClassTag() != matType || 
+	  theMaterial[i]->getDbTag() != matDbTag) {
+	delete theMaterial[i];
+	theMaterial[i] = 0;;
+      }
+    }
+    if (theMaterial[i] == 0) {
+      theMaterial[i] = theBroker.getNewNDMaterial(matType);
+      if (theMaterial[i] == 0) {
+	return -3;
+      }
+      theMaterial[i] ->setDbTag(matDbTag);
+      theMaterial[i]->recvSelf(commitTag, theChannel, theBroker);
+    }
+  }
+
+  // set ele tag
+  this->setTag(iData(24));
+
+  return 0;
 }
 
 //=============================================================================
