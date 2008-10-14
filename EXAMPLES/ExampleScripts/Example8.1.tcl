@@ -87,9 +87,9 @@ analyze 5
 # ----------------------------
 
 recorder Node -file Node.out -time -node $nn -dof 1 disp
-recorder plot Node.out CenterNodeDisp 625 10 625 450 -columns 1 2
+#recorder plot Node.out CenterNodeDisp 625 10 625 450 -columns 1 2
 
-recorder display ShakingBeam 0 0 300 300 -wipe
+recorder display ShakingBeam 100 40 500 500 -wipe
 prp -100 100 120.5
 vup 0 1 0 
 display 1 4 1 
@@ -125,5 +125,10 @@ analysis Transient
 
 # Perform the transient analysis (20 sec)
 #       numSteps  dt
-analyze 100 2.0
+#analyze 1000 1.0
+puts [eigen -standard 1]
+puts [eigen -standard -fullGenLapack 1]
+
+
+
 

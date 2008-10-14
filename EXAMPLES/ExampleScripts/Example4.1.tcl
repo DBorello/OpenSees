@@ -20,6 +20,9 @@
 # Date: January 2001
 
 
+set pid [getPID]
+
+
 # Parameter identifying the number of bays
 set numBay          3
 
@@ -249,7 +252,7 @@ analysis Static
 initialize
 
 # perform the gravity load analysis, requires 10 steps to reach the load level
-analyze 10
+#analyze 10
 
 
 # set gravity loads to be const and set pseudo time to be 0.0
@@ -278,17 +281,13 @@ pattern Plain 2 Linear {
 
 # Create a recorder which writes to Node.out and prints
 # the current load factor (pseudo-time) and dof 1 displacements at node 2 & 3
-recorder Node -file Node41.out -time -node 2 3 -dof 1 disp
+recorder Node -file Node41.$pid.out -time -node 2 3 -dof 1 disp
 
 # Source in some commands to display the model
 # comment out one of lines
 set displayMode "displayON"
 #set displayMode "displayOFF"
 
-if {$displayMode == "displayON"} {
-    # a window to plot the nodal displacements versus load for node 3
-    recorder plot Node41.out Node_3_Xdisp 10 340 300 300 -columns 3 1 -dT 0.1
-}
 
 # ------------------------------
 # End of recorder generation
@@ -306,10 +305,10 @@ integrator LoadControl 1.0 4 0.02 2.0
 
 # Perform the pushover analysis
 # Set some parameters
-set maxU 10.0;	        # Max displacement
+set maxU -1.0;	        # Max displacement
 set controlDisp 0.0;
-set ok 0;
-
+set ok 1;
+analyze 1
 while {$controlDisp < $maxU && $ok == 0} {
     set ok [analyze 1]
     set controlDisp [nodeDisp 3 1]
