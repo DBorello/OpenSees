@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2008-09-17 18:02:31 $
+// $Revision: 1.8 $
+// $Date: 2008-10-14 18:46:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.cpp,v $
                                                                         
 // Written: fmk
@@ -167,6 +167,9 @@
 #include <BrickUP.h>
 #include <Twenty_Eight_Node_BrickUP.h>
 #include <FourNodeQuadUP.h>
+#include <EightNodeBrick_u_p_U.h>
+#include <TwentyNodeBrick_u_p_U.h>
+
 
 #include <DispBeamColumn2d.h>
 #include <DispBeamColumn3d.h>
@@ -551,6 +554,12 @@ FEM_ObjectBrokerAllClasses::getNewElement(int classTag)
 
 	case ELE_TAG_Twenty_Eight_Node_BrickUP:
 	    return new TwentyEightNodeBrickUP();
+
+	case ELE_TAG_EightNodeBrick_u_p_U:
+	    return new EightNodeBrick_u_p_U();
+
+	case ELE_TAG_TwentyNodeBrick_u_p_U:
+	    return new TwentyNodeBrick_u_p_U();
 
 	default:
 	     opserr << "FEM_ObjectBrokerAllClasses::getNewElement - ";
