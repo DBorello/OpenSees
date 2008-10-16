@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-09-29 01:55:11 $
+// $Revision: 1.11 $
+// $Date: 2008-10-16 22:33:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathTimeSeries.cpp,v $
                                                                         
                                                                         
@@ -222,14 +222,22 @@ PathTimeSeries::PathTimeSeries(const char *fileName,
       theFile >> dataPoint;	// Read in second value of pair
     }
   }
+
+  if ((numDataPoints % 2) != 0) {
+    opserr << "WARNING - PathTimeSeries::PathTimeSeries()";
+    opserr << " - num data entries in file NOT EVEN! " << fileName << endln;
+    numDataPoints--;
+  }
+
+
   theFile.close();
 
   // create a vector and read in the data
   if (numDataPoints != 0) {
     
     // now create the two vector
-    thePath = new Vector(numDataPoints);
-    time = new Vector(numDataPoints);
+    thePath = new Vector(numDataPoints/2);
+    time = new Vector(numDataPoints/2);
     
     // ensure did not run out of memory creating copies
     if (thePath == 0 || thePath->Size() == 0 || time == 0 || time->Size() == 0) {
@@ -261,6 +269,7 @@ PathTimeSeries::PathTimeSeries(const char *fileName,
 	(*time)(count) = dataPoint;
 	theFile1 >> dataPoint;
 	(*thePath)(count) = dataPoint;
+
 	count++;
       }
       
