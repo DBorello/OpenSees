@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2008-10-14 18:24:35 $
+// $Revision: 1.8 $
+// $Date: 2008-10-17 23:54:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/HTTP.cpp,v $
                                                                         
 // Written: fmk 11/06
@@ -242,7 +242,12 @@ httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
       free(lastURL);
     lastURL = 0;
 
-    close(sockfd);
+#ifdef _WIN32
+  closesocket(sockfd);
+#else
+  close(sockfd);
+#endif
+
     return -1;
   }
 
@@ -266,7 +271,15 @@ httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
   *dataPtr = data;
   free(gMsg);
 
-  close(sockfd); sockfd = 0;
+#ifdef _WIN32
+  closesocket(sockfd);
+#else
+  close(sockfd);
+#endif
+ 
+  
+  
+  sockfd = 0;
 
   cleanup_sockets();
 
