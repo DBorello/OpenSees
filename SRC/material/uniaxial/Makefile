@@ -5,6 +5,7 @@ include ../../../Makefile.def
 	Elastic2Material.o \
         ElasticPPMaterial.o \
 	ParallelMaterial.o \
+	Neoprene.o \
         HardeningMaterial.o \
 	Concrete01.o \
 	Concrete04.o \
