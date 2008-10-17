@@ -34,6 +34,7 @@
 #define TWENTYNODEBRICK_U_P_U_CPP
 
 #include <TwentyNodeBrick_u_p_U.h>
+#include <ElementResponse.h>
 
 const int TwentyNodeBrick_u_p_U::Num_IntegrationPts = 3;
 const int TwentyNodeBrick_u_p_U::Num_TotalGaussPts = 27;

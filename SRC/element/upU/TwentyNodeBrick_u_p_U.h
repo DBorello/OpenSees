@@ -39,7 +39,7 @@
 #endif
 
 #include <Information.h>
-#include <ElementResponse.h>
+
 #include <ElementalLoad.h>
 #include <Domain.h>
 #include <Node.h>

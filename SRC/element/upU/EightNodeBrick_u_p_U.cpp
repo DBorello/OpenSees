@@ -34,6 +34,7 @@
 #define EIGHTNODEBRICK_U_P_U_CPP
 
 #include <EightNodeBrick_u_p_U.h>
+#include <ElementResponse.h>
 
 const int EightNodeBrick_u_p_U::Num_IntegrationPts = 2;
 const int EightNodeBrick_u_p_U::Num_TotalGaussPts = 8;
