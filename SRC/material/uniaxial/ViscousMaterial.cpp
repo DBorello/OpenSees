@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-04-02 22:02:42 $
+// $Revision: 1.6 $
+// $Date: 2008-10-17 23:35:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ViscousMaterial.cpp,v $
                                                                         
 // Written: Mehrdad Sasani 
@@ -37,19 +37,25 @@
 
 #include <OPS_Globals.h>
 
-ViscousMaterial::ViscousMaterial(int tag, double c, double a)
+ViscousMaterial::ViscousMaterial(int tag, double c, double a, double minV)
 :UniaxialMaterial(tag,MAT_TAG_Viscous),
- trialRate(0.0), C(c), Alpha(a)
+ trialRate(0.0), C(c), Alpha(a), minVel(minV)
 {
     if (Alpha < 0.0) {
       opserr << "ViscousMaterial::ViscousMaterial -- Alpha < 0.0, setting to 1.0\n";
       Alpha = 1.0;
     }
+    
+    minVel = fabs(minVel);
+    if (minVel == 0.0) {
+      opserr << "ViscousMaterial::ViscousMaterial -- minVel == 0.0, setting to 1.0e-21\n";
+      minVel = 1.0e-21;
+    }
 }
 
 ViscousMaterial::ViscousMaterial()
 :UniaxialMaterial(0,MAT_TAG_Viscous),
- trialRate(0.0), C(0.0), Alpha(0.0)
+ trialRate(0.0), C(0.0), Alpha(0.0), minVel(1e-11)
 {
 
 }
@@ -70,8 +76,14 @@ ViscousMaterial::setTrialStrain(double strain, double strainRate)
 double 
 ViscousMaterial::getStress(void)
 {
-    double stress = C*pow(fabs(trialRate),Alpha);
+    double stress = 0.0;
+    double absRate = fabs(trialRate);
 
+    if (absRate > minVel)
+      stress = C*pow(absRate, Alpha);
+    else
+      stress = C*pow(minVel, Alpha);
+    
     if (trialRate < 0.0)
         return -stress;
     else
@@ -93,14 +105,12 @@ ViscousMaterial::getInitialTangent(void)
 double
 ViscousMaterial::getDampTangent(void)
 {
-  static const double minvel = 1.e-11;
+     double absRate = fabs(trialRate);
 
-    double absRate = fabs(trialRate);
-
-    if (absRate < minvel)
-		return Alpha*C*pow(minvel,Alpha-1.0);
-	else
-		return Alpha*C*pow(absRate,Alpha-1.0);	
+    if (absRate < minVel)
+      return Alpha*C*pow(minVel,Alpha-1.0);
+    else
+      return Alpha*C*pow(absRate,Alpha-1.0);	
 }
 
 
@@ -150,11 +160,12 @@ int
 ViscousMaterial::sendSelf(int cTag, Channel &theChannel)
 {
   int res = 0;
-  static Vector data(4);
+  static Vector data(5);
   data(0) = this->getTag();
   data(1) = C;
   data(2) = Alpha;
   data(3) = trialRate;
+  data(4) = minVel;
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
     opserr << "ViscousMaterial::sendSelf() - failed to send data\n";
@@ -167,7 +178,7 @@ ViscousMaterial::recvSelf(int cTag, Channel &theChannel,
 			       FEM_ObjectBroker &theBroker)
 {
   int res = 0;
-  static Vector data(4);
+  static Vector data(5);
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   
   if (res < 0) {
@@ -178,8 +189,9 @@ ViscousMaterial::recvSelf(int cTag, Channel &theChannel,
   else {
     this->setTag((int)data(0));
     C = data(1);
-	Alpha = data(2);
+    Alpha = data(2);
     trialRate = data(3);
+    minVel = data(4);
   }
     
   return res;
@@ -191,6 +203,7 @@ ViscousMaterial::Print(OPS_Stream &s, int flag)
     s << "Viscous tag: " << this->getTag() << endln;
     s << "  C: " << C << endln;
     s << "  Alpha: " << Alpha << endln;
+    s << "  minVel: " << minVel << endln;
 }
 
 

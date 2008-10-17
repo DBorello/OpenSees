@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-08-03 23:42:19 $
+// $Revision: 1.6 $
+// $Date: 2008-10-17 23:35:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ViscousMaterial.h,v $
                                                                         
 // Written: Mehrdad Sasani 
@@ -39,7 +39,7 @@
 class ViscousMaterial : public UniaxialMaterial
 {
   public:
-    ViscousMaterial(int tag, double C, double Alpha);    
+    ViscousMaterial(int tag, double C, double Alpha, double minVel = 1.0e-11);    
     ViscousMaterial(); 
     ~ViscousMaterial();
 
@@ -73,6 +73,7 @@ class ViscousMaterial : public UniaxialMaterial
     double trialRate;
     double C;
     double Alpha;
+    double minVel;
 };
 
 
