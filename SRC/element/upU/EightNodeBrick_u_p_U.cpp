@@ -623,10 +623,16 @@ int EightNodeBrick_u_p_U::recvSelf (int commitTag, Channel &theChannel, FEM_Obje
     if (theMaterial[i] == 0) {
       theMaterial[i] = theBroker.getNewNDMaterial(matType);
       if (theMaterial[i] == 0) {
+	opserr << "EightNodeBrick_u_p_U::recvSelf () - ";
+	opserr << "failed to get material with classType: " << matType << endln;
 	return -3;
       }
       theMaterial[i] ->setDbTag(matDbTag);
-      theMaterial[i]->recvSelf(commitTag, theChannel, theBroker);
+      if (theMaterial[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
+	opserr << "EightNodeBrick_u_p_U::recvSelf () - ";
+	opserr << "failed to recv material with classTagtype: " << matType << endln;
+	return -4;
+      }
     }
   }
 
