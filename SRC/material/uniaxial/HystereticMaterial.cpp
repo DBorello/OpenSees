@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2007-10-12 22:57:07 $
+// $Revision: 1.18 $
+// $Date: 2008-10-17 23:41:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HystereticMaterial.cpp,v $
 
 // Written: MHS
@@ -173,11 +173,13 @@ HystereticMaterial::setTrialStrain(double strain, double strainRate)
     TrotMax = Tstrain;
     Ttangent = posEnvlpTangent(Tstrain);
     Tstress = posEnvlpStress(Tstrain);
+	TloadIndicator=1;
   }
   else if (Tstrain <= CrotMin) {
     TrotMin = Tstrain;
     Ttangent = negEnvlpTangent(Tstrain);
     Tstress = negEnvlpStress(Tstrain);
+	TloadIndicator=2;
   }
   else {
     if (dStrain < 0.0)
