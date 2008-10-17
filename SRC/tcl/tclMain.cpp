@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.45 2008-03-04 23:48:21 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.46 2008-10-17 23:41:17 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -58,8 +58,10 @@ int		Tcl_AppInit _ANSI_ARGS_((Tcl_Interp *interp));
  * code in that file from anywhere in Tcl, so it may not be
  * linked into the application.
  */
-
-#ifdef _TCL84
+#ifdef _TCL85
+int (*tclDummyLinkVarPtr)(Tcl_Interp *interp, const char *a,
+			  char *b, int c) = Tcl_LinkVar;
+#elif _TCL84
 int (*tclDummyLinkVarPtr)(Tcl_Interp *interp, const char *a,
 			  char *b, int c) = Tcl_LinkVar;
 #else
