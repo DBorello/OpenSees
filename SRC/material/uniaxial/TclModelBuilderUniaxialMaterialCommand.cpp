@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.51 $
-// $Date: 2008-10-17 23:37:06 $
+// $Revision: 1.52 $
+// $Date: 2008-10-17 23:39:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -1461,7 +1461,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 
       double minVel = 1e-11;
       if (argc > 5) {
-	if ((strcmp(argv[5],"-minVel") == 0) && argc =7)
+	if ((strcmp(argv[5],"-minVel") == 0) && (argc > 6))
 	  if (Tcl_GetDouble(interp, argv[6], &minVel) != TCL_OK) {
 	    opserr << "WARNING invalid minVel\n";
 	    opserr << "Viscous material: " << tag << endln;
