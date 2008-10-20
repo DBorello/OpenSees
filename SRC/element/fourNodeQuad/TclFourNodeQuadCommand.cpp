@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:32:54 $
+// $Revision: 1.6 $
+// $Date: 2008-10-20 22:50:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/TclFourNodeQuadCommand.cpp,v $
                                                                         
 // File: ~/element/TclFourNodeQuadCommand.C
@@ -130,23 +130,18 @@ TclModelBuilder_addFourNodeQuad(ClientData clientData, Tcl_Interp *interp,
      return TCL_ERROR;
   }
 
-	if ((argc-argStart) > 11) {
+	if ((argc-argStart) > 10) {
 		if (Tcl_GetDouble(interp, argv[8+argStart], &p) != TCL_OK) {
 			opserr << "WARNING invalid pressure\n";
 			opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
 			return TCL_ERROR;
 		}
-		if (Tcl_GetDouble(interp, argv[9+argStart], &r) != TCL_OK) {
-			opserr << "WARNING invalid rho\n";
-			opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
-			return TCL_ERROR;
-		}
-		if (Tcl_GetDouble(interp, argv[10+argStart], &b1) != TCL_OK) {
+		if (Tcl_GetDouble(interp, argv[9+argStart], &b1) != TCL_OK) {
 			opserr << "WARNING invalid b1\n";
 			opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
 			return TCL_ERROR;
 		}
-		if (Tcl_GetDouble(interp, argv[11+argStart], &b2) != TCL_OK) {
+		if (Tcl_GetDouble(interp, argv[10+argStart], &b2) != TCL_OK) {
 			opserr << "WARNING invalid b2\n";
 			opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
 			return TCL_ERROR;
@@ -166,7 +161,7 @@ TclModelBuilder_addFourNodeQuad(ClientData clientData, Tcl_Interp *interp,
   // now create the FourNodeQuad and add it to the Domain
   FourNodeQuad *theFourNodeQuad = 
       new FourNodeQuad(FourNodeQuadId,iNode,jNode,kNode,lNode,
-		       *theMaterial, type, thickness, p, r, b1, b2);
+		       *theMaterial, type, thickness, p, b1, b2);
   if (theFourNodeQuad == 0) {
       opserr << "WARNING ran out of memory creating element\n";
       opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;

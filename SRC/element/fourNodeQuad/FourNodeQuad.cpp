@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.32 $
-// $Date: 2007-10-11 21:54:45 $
+// $Revision: 1.33 $
+// $Date: 2008-10-20 22:50:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -53,10 +53,10 @@ double FourNodeQuad::wts[4];
 
 FourNodeQuad::FourNodeQuad(int tag, int nd1, int nd2, int nd3, int nd4,
 			   NDMaterial &m, const char *type, double t,
-			   double p, double r, double b1, double b2)
+			   double p, double b1, double b2)
 :Element (tag, ELE_TAG_FourNodeQuad), 
   theMaterial(0), connectedExternalNodes(4), 
-  Q(8), pressureLoad(8), thickness(t), rho(r), pressure(p), Ki(0)
+  Q(8), pressureLoad(8), thickness(t), pressure(p), Ki(0)
 {
 	pts[0][0] = -0.5773502691896258;
 	pts[0][1] = -0.5773502691896258;
@@ -116,7 +116,7 @@ FourNodeQuad::FourNodeQuad(int tag, int nd1, int nd2, int nd3, int nd4,
 FourNodeQuad::FourNodeQuad()
 :Element (0,ELE_TAG_FourNodeQuad),
   theMaterial(0), connectedExternalNodes(4), 
- Q(8), pressureLoad(8), thickness(0.0), rho(0.0), pressure(0.0), Ki(0)
+ Q(8), pressureLoad(8), thickness(0.0), pressure(0.0), Ki(0)
 {
   pts[0][0] = -0.577350269189626;
   pts[0][1] = -0.577350269189626;
@@ -430,7 +430,7 @@ FourNodeQuad::getMass()
 
 	int i;
 	static double rhoi[4];
-	double sum = this->rho;
+	double sum = 0.0;
 	for (i = 0; i < 4; i++) {
 	  rhoi[i] = theMaterial[i]->getRho();
 	  sum += rhoi[i];
@@ -448,8 +448,7 @@ FourNodeQuad::getMass()
 		rhodvol = this->shapeFunction(pts[i][0], pts[i][1]);
 
 		// Element plus material density ... MAY WANT TO REMOVE ELEMENT DENSITY
-		double tmp = rho + rhoi[i];
-		rhodvol *= (tmp*thickness*wts[i]);
+		rhodvol *= (rhoi[i]*thickness*wts[i]);
 
 		for (int alpha = 0, ia = 0; alpha < 4; alpha++, ia++) {
 			Nrho = shp[2][alpha]*rhodvol;
@@ -481,7 +480,7 @@ FourNodeQuad::addInertiaLoadToUnbalance(const Vector &accel)
 {
   int i;
   static double rhoi[4];
-  double sum = this->rho;
+  double sum = 0.0;
   for (i = 0; i < 4; i++) {
     rhoi[i] = theMaterial[i]->getRho();
     sum += rhoi[i];
@@ -576,7 +575,7 @@ FourNodeQuad::getResistingForceIncInertia()
 {
 	int i;
 	static double rhoi[4];
-	double sum = this->rho;
+	double sum = 0.0;
 	for (i = 0; i < 4; i++) {
 	  rhoi[i] = theMaterial[i]->getRho();
 	  sum += rhoi[i];
@@ -641,7 +640,6 @@ FourNodeQuad::sendSelf(int commitTag, Channel &theChannel)
   static Vector data(10);
   data(0) = this->getTag();
   data(1) = thickness;
-  data(2) = rho;
   data(3) = b[0];
   data(4) = b[1];
   data(5) = pressure;
@@ -719,7 +717,6 @@ FourNodeQuad::recvSelf(int commitTag, Channel &theChannel,
   
   this->setTag((int)data(0));
   thickness = data(1);
-  rho = data(2);
   b[0] = data(3);
   b[1] = data(4);
   pressure = data(5);
@@ -843,7 +840,6 @@ FourNodeQuad::Print(OPS_Stream &s, int flag)
 	s << "\nFourNodeQuad, element id:  " << this->getTag() << endln;
 	s << "\tConnected external nodes:  " << connectedExternalNodes;
 	s << "\tthickness:  " << thickness << endln;
-	s << "\tmass density:  " << rho << endln;
 	s << "\tsurface pressure:  " << pressure << endln;
 	s << "\tbody forces:  " << b[0] << " " << b[1] << endln;
 	theMaterial[0]->Print(s,flag);
@@ -1031,12 +1027,8 @@ FourNodeQuad::setParameter(const char **argv, int argc, Parameter &param)
 
   int res = -1;
 
-  // quad mass density per unit volume
-  if (strcmp(argv[0],"rho") == 0)
-    return param.addObject(1, this);
-
   // quad pressure loading
-  else if (strcmp(argv[0],"pressure") == 0)
+  if (strcmp(argv[0],"pressure") == 0)
     return param.addObject(2, this);
 
   // a material parameter
@@ -1075,10 +1067,6 @@ FourNodeQuad::updateParameter(int parameterID, Information &info)
     case -1:
       return -1;
       
-	case 1:
-		rho = info.theDouble;
-		this->getMass();	// update mass matrix
-		return 0;
 	case 2:
 		pressure = info.theDouble;
 		this->setPressureLoadAtNodes();	// update consistent nodal loads
