@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-08-04 18:18:38 $
+// $Revision: 1.6 $
+// $Date: 2008-10-20 22:23:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2Plasticity.h,v $
 
 #ifndef J2Plasticity_h
@@ -74,7 +74,8 @@ class J2Plasticity : public NDMaterial {
                    double yield_infty,
                    double d,
                    double H,
-                   double viscosity = 0 ) ;
+                   double viscosity = 0,
+		   double rho = 0.0) ;
 
   //elastic constructor
   J2Plasticity( int tag, int classTag, double K, double G ) ;
@@ -106,7 +107,9 @@ class J2Plasticity : public NDMaterial {
   virtual NDMaterial *getCopy (void) ;
   virtual const char *getType (void) const ;
   virtual int getOrder (void) const ;
-    
+
+  double getRho(void); 
+
   protected :
 
   //this is mike's problem
@@ -161,6 +164,8 @@ class J2Plasticity : public NDMaterial {
   //matrix index to tensor index mapping
   virtual void index_map( int matrix_index, int &i, int &j ) ;
 
+  double rho;
+  
 
 } ; //end of J2Plasticity declarations
 

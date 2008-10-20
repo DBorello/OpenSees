@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-08-04 18:18:38 $
+// $Revision: 1.7 $
+// $Date: 2008-10-20 22:23:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2ThreeDimensional.h,v $
 
 // Written: Ed "C++" Love
@@ -79,7 +79,8 @@ class J2ThreeDimensional : public J2Plasticity {
                    double yield_infty,
                    double d,
                    double H,
-                   double viscosity = 0 ) ;
+			double viscosity = 0,
+			double rho = 0) ;
 
 
   //elastic constructor
@@ -123,6 +124,7 @@ class J2ThreeDimensional : public J2Plasticity {
   int setTrialStrainIncr(const Tensor &v) ;
   int setTrialStrainIncr(const Tensor &v, const Tensor &r) ;
   const Tensor& getTangentTensor( ) ;
+
 //jeremic@ucdavis.edu 22jan2001  const Tensor& getStressTensor( ) ;
 //jeremic@ucdavis.edu 22jan2001  const Tensor& getStrainTensor( ) ;  
 

@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2004-02-24 22:53:34 $
+// $Revision: 1.7 $
+// $Date: 2008-10-20 22:23:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2PlaneStrain.cpp,v $
 
 // Written: Ed "C++" Love
@@ -74,9 +74,10 @@ J2PlaneStrain(   int    tag,
                  double yield_infty,
                  double d,
                  double H,
-                 double viscosity ) : 
+                 double viscosity,
+		 double rho) : 
 J2Plasticity( tag, ND_TAG_J2PlaneStrain, 
-             K, G, yield0, yield_infty, d, H, viscosity )
+	      K, G, yield0, yield_infty, d, H, viscosity, rho )
 { 
 
 }
@@ -307,7 +308,7 @@ J2PlaneStrain::sendSelf (int commitTag, Channel &theChannel)
 {
   // we place all the data needed to define material and it's state
   // int a vector object
-  static Vector data(18);
+  static Vector data(19);
   int cnt = 0;
   data(cnt++) = this->getTag();
   data(cnt++) = bulk;
@@ -317,6 +318,8 @@ J2PlaneStrain::sendSelf (int commitTag, Channel &theChannel)
   data(cnt++) = delta;
   data(cnt++) = Hard;
   data(cnt++) = eta;
+  data(cnt++) = rho;
+
   data(cnt++) = xi_n;
 
   //  data(cnt++) = commitEps22;
@@ -338,7 +341,7 @@ J2PlaneStrain::recvSelf (int commitTag, Channel &theChannel,
 {
 
   // recv the vector object from the channel which defines material param and state
-  static Vector data(18);
+  static Vector data(19);
   if (theChannel.recvVector(this->getDbTag(), commitTag, data) < 0) {
     opserr << "J2PlaneStrain::recvSelf - failed to sned vectorto channel\n";
     return -1;
@@ -354,6 +357,7 @@ J2PlaneStrain::recvSelf (int commitTag, Channel &theChannel,
   delta = data(cnt++);
   Hard = data(cnt++);
   eta = data(cnt++);
+  rho = data(cnt++);
   xi_n = data(cnt++);
   for (int i=0; i<3; i++)
     for (int j=0; j<3; j++) 

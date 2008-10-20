@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2008-07-29 23:36:21 $
+// $Revision: 1.12 $
+// $Date: 2008-10-20 22:23:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2Plasticity.cpp,v $
 
 // Written: Ed "C++" Love
@@ -96,6 +96,7 @@ strain(3,3)
   delta       = 0.0 ;
   Hard        = 0.0 ;
   eta         = 0.0 ;
+  rho = 0.0;
 
   this->zero( ) ;     // or (*this).zero( ) 
 
@@ -166,7 +167,8 @@ J2Plasticity :: J2Plasticity(int    tag,
 			     double yield_infty,
 			     double d,
 			     double H,
-			     double viscosity) 
+			     double viscosity,
+			     double r) 
 : 
   NDMaterial(tag, classTag),
   epsilon_p_n(3,3),
@@ -181,6 +183,7 @@ J2Plasticity :: J2Plasticity(int    tag,
   delta       = d ;
   Hard        = H ;
   eta         = viscosity ;
+  rho = r;
 
   this->zero( ) ;
 
@@ -333,21 +336,21 @@ J2Plasticity :: getCopy (const char *type)
     {
 	J2PlaneStress  *clone ;
 	clone = new J2PlaneStress(this->getTag(), bulk, shear, sigma_0,
-				  sigma_infty, delta, Hard, eta) ;
+				  sigma_infty, delta, Hard, eta, rho) ;
 	return clone ;
     }
     else if (strcmp(type,"PlaneStrain2D") == 0 || strcmp(type,"PlaneStrain") == 0)
     {
 	J2PlaneStrain  *clone ;
 	clone = new J2PlaneStrain(this->getTag(), bulk, shear, sigma_0,
-				  sigma_infty, delta, Hard, eta) ;
+				  sigma_infty, delta, Hard, eta, rho) ;
 	return clone ;
     }
     else if (strcmp(type,"AxiSymmetric2D") == 0 || strcmp(type,"AxiSymmetric") == 0)
     {
 	J2AxiSymm  *clone ;
 	clone = new J2AxiSymm(this->getTag(), bulk, shear, sigma_0,
-			      sigma_infty, delta, Hard, eta) ;
+			      sigma_infty, delta, Hard, eta, rho) ;
 	return clone ;	
     }
     else if ((strcmp(type,"ThreeDimensional") == 0) ||
@@ -355,14 +358,14 @@ J2Plasticity :: getCopy (const char *type)
     {
 	J2ThreeDimensional  *clone ;
 	clone = new J2ThreeDimensional(this->getTag(), bulk, shear, sigma_0,
-			      sigma_infty, delta, Hard, eta) ;
+				       sigma_infty, delta, Hard, eta, rho) ;
 	return clone ;	
     }
     else if ( (strcmp(type,"PlateFiber") == 0) )
     {
 	J2PlateFiber  *clone ;
 	clone = new J2PlateFiber(this->getTag(), bulk, shear, sigma_0,
-			      sigma_infty, delta, Hard, eta) ;
+				 sigma_infty, delta, Hard, eta, rho) ;
 	return clone ;	
     }
 
@@ -387,6 +390,7 @@ void J2Plasticity :: Print( OPS_Stream &s, int flag )
   s << "Delta =          " << delta       << endln ;
   s << "H =              " << Hard        << endln ;
   s << "Eta =            " << eta         << endln ;
+  s << "Rho =            " << rho         << endln ;
   s << endln ;
 }
 
@@ -738,7 +742,7 @@ J2Plasticity::sendSelf(int commitTag, Channel &theChannel)
 {
   // we place all the data needed to define material and it's state
   // int a vector object
-  static Vector data(9);
+  static Vector data(10+9);
   int cnt = 0;
   data(cnt++) = this->getTag();
   data(cnt++) = bulk;
@@ -748,7 +752,14 @@ J2Plasticity::sendSelf(int commitTag, Channel &theChannel)
   data(cnt++) = delta;
   data(cnt++) = Hard;
   data(cnt++) = eta;
+  data(cnt++) = rho;
+
   data(cnt++) = xi_n;
+
+  for (int i=0; i<3; i++) 
+    for (int j=0; j<3; j++) 
+      data(cnt++) = epsilon_p_n(i,j);
+
 
   // send the vector object to the channel
   if (theChannel.sendVector(this->getDbTag(), commitTag, data) < 0) {
@@ -765,7 +776,7 @@ J2Plasticity::recvSelf (int commitTag, Channel &theChannel,
 {
 
   // recv the vector object from the channel which defines material param and state
-  static Vector data(9);
+  static Vector data(10+9);
   if (theChannel.recvVector(this->getDbTag(), commitTag, data) < 0) {
     opserr << "J2Plasticity::recvSelf - failed to recv vector from channel\n";
     return -1;
@@ -781,7 +792,13 @@ J2Plasticity::recvSelf (int commitTag, Channel &theChannel,
   delta = data(cnt++);
   Hard = data(cnt++);
   eta = data(cnt++);
+  rho = data(cnt++);
+
   xi_n = data(cnt++);
+
+  for (int i=0; i<3; i++)
+    for (int j=0; j<3; j++) 
+      epsilon_p_n(i,j) = data(cnt++);
 
   epsilon_p_nplus1 = epsilon_p_n;
   xi_nplus1        = xi_n;

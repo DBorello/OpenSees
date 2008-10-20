@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-08-04 18:18:37 $
+// $Revision: 1.7 $
+// $Date: 2008-10-20 22:23:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2AxiSymm.h,v $
 
 // Written: Ed "C++" Love
@@ -73,13 +73,14 @@ class J2AxiSymm : public J2Plasticity {
 
   //full constructor
   J2AxiSymm(   int    tag, 
-                   double K,
-                   double G,
-                   double yield0,
-                   double yield_infty,
-                   double d,
-                   double H,
-                   double viscosity = 0 ) ;
+	       double K,
+	       double G,
+	       double yield0,
+	       double yield_infty,
+	       double d,
+	       double H,
+   	       double viscosity = 0,
+	       double rho = 0 ) ;
 
 
   //elastic constructor

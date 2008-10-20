@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:25 $
+// $Revision: 1.6 $
+// $Date: 2008-10-20 22:23:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2PlateFiber.cpp,v $
 
 // Written: Ed "C++" Love
@@ -74,9 +74,10 @@ J2PlateFiber(   int    tag,
                  double yield_infty,
                  double d,
                  double H,
-                 double viscosity ) : 
+		double viscosity,
+		double rho) : 
 J2Plasticity(tag, ND_TAG_J2PlateFiber, 
-             K, G, yield0, yield_infty, d, H, viscosity )
+             K, G, yield0, yield_infty, d, H, viscosity, rho )
 { 
   commitEps22 =0.0;
 }
@@ -380,7 +381,7 @@ J2PlateFiber::sendSelf (int commitTag, Channel &theChannel)
 {
   // we place all the data needed to define material and it's state
   // int a vector object
-  static Vector data(10+9);
+  static Vector data(11+9);
   int cnt = 0;
   data(cnt++) = this->getTag();
   data(cnt++) = bulk;
@@ -390,6 +391,8 @@ J2PlateFiber::sendSelf (int commitTag, Channel &theChannel)
   data(cnt++) = delta;
   data(cnt++) = Hard;
   data(cnt++) = eta;
+  data(cnt++) = rho;
+
   data(cnt++) = xi_n;
   data(cnt++) = commitEps22;
 
@@ -412,7 +415,7 @@ J2PlateFiber::recvSelf (int commitTag, Channel &theChannel,
 {
 
   // recv the vector object from the channel which defines material param and state
-  static Vector data(10+9);
+  static Vector data(11+9);
   if (theChannel.recvVector(this->getDbTag(), commitTag, data) < 0) {
     opserr << "J2Plasticity::recvSelf - failed to recv vector from channel\n";
     return -1;
@@ -428,8 +431,11 @@ J2PlateFiber::recvSelf (int commitTag, Channel &theChannel,
   delta = data(cnt++);
   Hard = data(cnt++);
   eta = data(cnt++);
+  rho = data(cnt++);  
+
   xi_n = data(cnt++);
   commitEps22 = data(cnt++);
+
   for (int i=0; i<3; i++)
     for (int j=0; j<3; j++) 
       epsilon_p_n(i,j) = data(cnt++);

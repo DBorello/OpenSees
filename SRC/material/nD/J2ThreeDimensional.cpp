@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2005-03-25 00:34:40 $
+// $Revision: 1.7 $
+// $Date: 2008-10-20 22:23:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2ThreeDimensional.cpp,v $
 
 // Written: Ed "C++" Love
@@ -72,15 +72,16 @@ J2Plasticity( )
 //full constructor
 J2ThreeDimensional :: 
 J2ThreeDimensional(   int    tag, 
-                 double K,
-                 double G,
-                 double yield0,
-                 double yield_infty,
-                 double d,
-                 double H,
-                 double viscosity ) : 
-J2Plasticity( tag, ND_TAG_J2ThreeDimensional, 
-             K, G, yield0, yield_infty, d, H, viscosity )
+		      double K,
+		      double G,
+		      double yield0,
+		      double yield_infty,
+		      double d,
+		      double H,
+		      double viscosity,
+		      double rho) : 
+  J2Plasticity( tag, ND_TAG_J2ThreeDimensional, 
+		K, G, yield0, yield_infty, d, H, viscosity, rho)
 { 
 
 }

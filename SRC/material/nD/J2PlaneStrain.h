@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-08-04 18:18:37 $
+// $Revision: 1.7 $
+// $Date: 2008-10-20 22:23:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2PlaneStrain.h,v $
 
 #ifndef J2PlaneStrain_h
@@ -78,7 +78,8 @@ class J2PlaneStrain : public J2Plasticity {
                    double yield_infty,
                    double d,
                    double H,
-                   double viscosity = 0 ) ;
+                   double viscosity = 0,
+		   double rho = 0) ;
 
 
   //elastic constructor
