@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2008-05-15 21:12:54 $
+// $Revision: 1.19 $
+// $Date: 2008-10-21 22:49:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.cpp,v $
 
 
@@ -181,7 +181,8 @@ ReliabilityDomain::~ReliabilityDomain()
 
 
 bool
-ReliabilityDomain::addRandomVariable(RandomVariable *theRandomVariable)
+ReliabilityDomain::addRandomVariable(RandomVariable *theRandomVariable,
+				     double startValue)
 {
   bool result = theRandomVariablesPtr->addComponent(theRandomVariable);
 

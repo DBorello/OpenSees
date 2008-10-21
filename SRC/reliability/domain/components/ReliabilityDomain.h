@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2008-05-15 21:12:54 $
+// $Revision: 1.17 $
+// $Date: 2008-10-21 22:49:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.h,v $
 
 
@@ -75,7 +75,8 @@ public:
 	virtual ~ReliabilityDomain();
 
 	// Member functions to add components to the domain
-	virtual bool addRandomVariable(RandomVariable *theRandomVariable);
+	virtual bool addRandomVariable(RandomVariable *theRandomVariable,
+				       double startValue = 0.0);
 	virtual bool addCorrelationCoefficient(CorrelationCoefficient *theCorrelationCoefficient);
 	virtual bool addLimitStateFunction(LimitStateFunction *theLimitStateFunction);
 	virtual bool addCutset(Cutset *theCutset);
