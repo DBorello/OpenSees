@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.49 $
-// $Date: 2008-08-27 17:03:07 $
+// $Revision: 1.50 $
+// $Date: 2008-10-21 19:20:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -5526,7 +5526,7 @@ TclReliabilityModelBuilder_runOutCrossingAnalysis(ClientData clientData, Tcl_Int
 				}
 				argvCounter++;
 			 }
-			if (strcmp(argv[argvCounter],"-useFirstDesignPoint") == 0) {
+			else if (strcmp(argv[argvCounter],"-useFirstDesignPoint") == 0) {
 				argvCounter++;
 				useFirstDesignPt =true;
 				
