@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.134 $
-// $Date: 2008-10-08 21:12:57 $
+// $Revision: 1.135 $
+// $Date: 2008-10-21 18:39:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -1759,12 +1759,16 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 // AddingSensitivity:BEGIN ///////////////////////////////
 #ifdef _RELIABILITY
 	if (theSensitivityAlgorithm != 0 && theSensitivityAlgorithm->shouldComputeAtEachStep()) {
-		if(theSensitivityAlgorithm->newAlgorithm()){
-			opserr << "WARNING original sensitivity algorothm needs to be specified \n";
-			opserr << "for static analysis \n";
-			return TCL_ERROR;
-		}
-		theTransientAnalysis->setSensitivityAlgorithm(theSensitivityAlgorithm);
+
+	  /* This if-statement cannot possibly stay in the code -- MHS
+	  if(theSensitivityAlgorithm->newAlgorithm()){
+	    opserr << "WARNING original sensitivity algorothm needs to be specified \n";
+	    opserr << "for static analysis \n";
+	    return TCL_ERROR;
+	  }
+	  */
+		
+	  theTransientAnalysis->setSensitivityAlgorithm(theSensitivityAlgorithm);
 	}
 #endif
 // AddingSensitivity:END /////////////////////////////////
@@ -1877,12 +1881,16 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 					       theTest);
 
 		if (theSensitivityAlgorithm != 0 && theSensitivityAlgorithm->shouldComputeAtEachStep()) {
-			if(!theSensitivityAlgorithm->newAlgorithm()){
-				opserr << "WARNING new sensitivity algorothm needs to be specified \n";
-				opserr << "for reliability static analysis \n";
-				return TCL_ERROR;
-			}
-			theStaticAnalysis->setSensitivityAlgorithm(theSensitivityAlgorithm);
+
+		  /* This if-statement cannot stay -- MHS
+		  if(!theSensitivityAlgorithm->newAlgorithm()){
+		    opserr << "WARNING new sensitivity algorothm needs to be specified \n";
+		    opserr << "for reliability static analysis \n";
+		    return TCL_ERROR;
+		  }
+		  */
+
+		  theStaticAnalysis->setSensitivityAlgorithm(theSensitivityAlgorithm);
 		} else {
 			opserr << "Faltal SensitivityAlgorithm must be definde before defining \n";
 			opserr << "ReliabilityStaticAnalysis with computeateachstep\n";
@@ -1935,11 +1943,15 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 							     theTest);
 
 		if (theSensitivityAlgorithm != 0 && theSensitivityAlgorithm->shouldComputeAtEachStep()) {
-			if(!theSensitivityAlgorithm->newAlgorithm()){
-				opserr << "WARNING new sensitivity algorothm needs to be specified \n";
-				opserr << "for reliability static analysis \n";
-				return TCL_ERROR;
-			}
+
+		  /* This if-statement must go -- MHS
+		  if(!theSensitivityAlgorithm->newAlgorithm()){
+		    opserr << "WARNING new sensitivity algorothm needs to be specified \n";
+		    opserr << "for reliability static analysis \n";
+		    return TCL_ERROR;
+		  }
+		  */
+
 			theReliabilityTransientAnalysis->setSensitivityAlgorithm(theSensitivityAlgorithm);
 		}else{
 			opserr << "Faltal SensitivityAlgorithm must be definde before defining \n";
@@ -5560,15 +5572,26 @@ sensNodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
     }        
     
     Node *theNode = theDomain.getNode(tag);
+    if (theNode == 0) {
+      opserr << "sensNodeDisp: node " << tag << " not found" << endln;
+      return TCL_ERROR;
+    }
 
     Parameter *theParam = theDomain.getParameter(paramTag);
-    int gradIndex = theParam->getGradIndex();
+    if (theParam == 0) {
+      opserr << "sensNodeDisp: parameter " << paramTag << " not found" << endln;
+      return TCL_ERROR;
+    }
 
+    int gradIndex = theParam->getGradIndex();
+    
     double value = theNode->getDispSensitivity(dof,gradIndex);
     
-    // copy the value to the tcl string that is returned
-    sprintf(interp->result,"%35.20f",value);
-	
+    char buffer[40];
+    sprintf(buffer,"%35.20f",value);
+
+    Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+
     return TCL_OK;
 }
 
@@ -5598,15 +5621,26 @@ sensNodeVel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv
     }        
     
     Node *theNode = theDomain.getNode(tag);
+    if (theNode == 0) {
+      opserr << "sensNodeVel: node " << tag << " not found" << endln;
+      return TCL_ERROR;
+    }
 
     Parameter *theParam = theDomain.getParameter(paramTag);
-    int gradIndex = theParam->getGradIndex();
+    if (theParam == 0) {
+      opserr << "sensNodeVel: parameter " << paramTag << " not found" << endln;
+      return TCL_ERROR;
+    }
 
+    int gradIndex = theParam->getGradIndex();
+    
     double value = theNode->getVelSensitivity(dof,gradIndex);
     
-    // copy the value to the tcl string that is returned
-    sprintf(interp->result,"%35.20f",value);
-	
+    char buffer[40];
+    sprintf(buffer,"%35.20f",value);
+
+    Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+
     return TCL_OK;
 }
 
@@ -5636,15 +5670,26 @@ sensNodeAccel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **ar
     }        
     
     Node *theNode = theDomain.getNode(tag);
+    if (theNode == 0) {
+      opserr << "sensNodeAccel: node " << tag << " not found" << endln;
+      return TCL_ERROR;
+    }
 
     Parameter *theParam = theDomain.getParameter(paramTag);
-    int gradIndex = theParam->getGradIndex();
+    if (theParam == 0) {
+      opserr << "sensNodeAccel: parameter " << paramTag << " not found" << endln;
+      return TCL_ERROR;
+    }
 
+    int gradIndex = theParam->getGradIndex();
+    
     double value = theNode->getAccSensitivity(dof,gradIndex);
     
-    // copy the value to the tcl string that is returned
-    sprintf(interp->result,"%35.20f",value);
-	
+    char buffer[40];
+    sprintf(buffer,"%35.20f",value);
+
+    Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+
     return TCL_OK;
 }
 
