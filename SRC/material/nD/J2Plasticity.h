@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-10-20 22:23:03 $
+// $Revision: 1.7 $
+// $Date: 2008-10-21 18:58:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2Plasticity.h,v $
 
 #ifndef J2Plasticity_h
@@ -108,7 +108,7 @@ class J2Plasticity : public NDMaterial {
   virtual const char *getType (void) const ;
   virtual int getOrder (void) const ;
 
-  double getRho(void); 
+  double getRho(void) {return rho;}
 
   protected :
 
