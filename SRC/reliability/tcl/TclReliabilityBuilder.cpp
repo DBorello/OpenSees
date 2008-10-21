@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.50 $
-// $Date: 2008-10-21 19:20:05 $
+// $Revision: 1.51 $
+// $Date: 2008-10-21 22:52:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -873,7 +873,7 @@ TclReliabilityModelBuilder_addRandomVariable(ClientData clientData,Tcl_Interp *i
 //	  }
 
 	  // Add the random variable to the domain
-	  if (theReliabilityDomain->addRandomVariable(theRandomVariable) == false) {
+		  if (theReliabilityDomain->addRandomVariable(theRandomVariable, startPt) == false) {
 		opserr << "ERROR: failed to add random variable to the domain (wrong number of arguments?)\n";
 		opserr << "random variable: " << tag << endln;
 		delete theRandomVariable; // otherwise memory leak
@@ -1647,7 +1647,7 @@ TclReliabilityModelBuilder_addRandomVariable(ClientData clientData,Tcl_Interp *i
   
 
   // ADD THE OBJECT TO THE DOMAIN
-  if (theReliabilityDomain->addRandomVariable(theRandomVariable) == false) {
+  if (theReliabilityDomain->addRandomVariable(theRandomVariable, startPt) == false) {
 	opserr << "ERROR: failed to add random variable to the domain (wrong number of arguments?)\n";
 	opserr << "random variable: " << tag << endln;
 	delete theRandomVariable; // otherwise memory leak
