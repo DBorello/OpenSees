@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2008-10-21 22:49:25 $
+// $Revision: 1.18 $
+// $Date: 2008-10-22 15:26:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.h,v $
 
 
@@ -50,6 +50,7 @@
 #include <ConstraintFunction.h>
 #include <ObjectiveFunction.h>
 
+class Vector;
 
 class TaggedObjectStorage;
 class ConstraintFunction;
@@ -96,6 +97,7 @@ public:
 	// Following two methods to map index to tag and vice versa
 	RandomVariable *getRandomVariablePtrFromIndex(int index);
 	int getRandomVariableIndex(int tag);
+	void getStartPoint(Vector &start);
 
 	LimitStateFunction *getLimitStateFunctionPtr(int tag);
 	// Following two methods to map index to tag and vice versa
@@ -203,6 +205,7 @@ private:
 	// Should put these in another class eventually because
 	// we may need to do the same thing for lsf, cc, etc. -- MHS
 	int *rvIndex;
+	double *startValue;
 	enum {rvSize_init = 100};
 	enum {rvSize_grow = 20};
 	int rvSize;

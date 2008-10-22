@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2008-10-21 22:49:25 $
+// $Revision: 1.20 $
+// $Date: 2008-10-22 15:26:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.cpp,v $
 
 
@@ -32,6 +32,7 @@
 //
 
 #include <ReliabilityDomain.h>
+#include <Vector.h>
 
 #include <CorrelationCoefficient.h>
 #include <Cutset.h>
@@ -87,6 +88,7 @@ ReliabilityDomain::ReliabilityDomain():
 	theSpectrumIter = new SpectrumIter(theSpectraPtr);
 
 	rvIndex = new int[rvSize_init];
+	startValue = new double[rvSize_init];
 	rvSize = rvSize_init;
 
 	lsfIndex = new int[lsfSize_init];
@@ -173,6 +175,8 @@ ReliabilityDomain::~ReliabilityDomain()
 
   if (rvIndex != 0)
       delete [] rvIndex;
+  if (startValue != 0)
+    delete [] startValue;
   if (lsfIndex != 0)
     delete [] lsfIndex;
   if (cutsetIndex != 0)
@@ -182,7 +186,7 @@ ReliabilityDomain::~ReliabilityDomain()
 
 bool
 ReliabilityDomain::addRandomVariable(RandomVariable *theRandomVariable,
-				     double startValue)
+				     double startPt)
 {
   bool result = theRandomVariablesPtr->addComponent(theRandomVariable);
 
@@ -194,20 +198,26 @@ ReliabilityDomain::addRandomVariable(RandomVariable *theRandomVariable,
       // Increase size and allocate new array
       rvSize += rvSize_grow;
       int *tmp_rvIndex = new int[rvSize];
+      double *tmp_startValue = new double[rvSize];
 
       // Copy values from old array to new
-      for (int i = 0; i < numRandomVariables; i++)
+      for (int i = 0; i < numRandomVariables; i++) {
 	    tmp_rvIndex[i] = rvIndex[i];
+	    tmp_startValue[i] = startValue[i];
+      }
 
       // Get rid of old array
       delete [] rvIndex;
+      delete [] startValue;
 
       // Set pointer to new array
       rvIndex = tmp_rvIndex;
+      startValue = tmp_startValue;
     }
 
     // Add to index
     rvIndex[numRandomVariables] = theRandomVariable->getTag();
+    startValue[numRandomVariables] = startPt;
     numRandomVariables++;
   }
 
@@ -357,6 +367,12 @@ ReliabilityDomain::addObjectiveFunction(ObjectiveFunction *theObjectiveFunction)
 	return result;
 }
 
+void
+ReliabilityDomain::getStartPoint(Vector &start)
+{
+  for (int i = 0; i < numRandomVariables; i++)
+    start(i) = startValue[i];
+}
 
 RandomVariableIter &
 ReliabilityDomain::getRandomVariables(void)
@@ -692,8 +708,10 @@ ReliabilityDomain::removeRandomVariable(int tag)
     }
     
     // Shift indices down by one
-    for (int i = index; i < numRandomVariables-1; i++)
+    for (int i = index; i < numRandomVariables-1; i++) {
       rvIndex[i] = rvIndex[i+1];
+      startValue[i] = startValue[i+1];
+    }
     
     // Now remove the component
     theRandomVariablesPtr->removeComponent(tag);
