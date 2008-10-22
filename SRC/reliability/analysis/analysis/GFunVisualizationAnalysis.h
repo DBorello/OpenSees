@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-10-25 16:49:13 $
+// $Revision: 1.6 $
+// $Date: 2008-10-22 16:41:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/GFunVisualizationAnalysis.h,v $
 
 
@@ -56,6 +56,7 @@ public:
 					ReliabilityDomain *theReliabilityDomain,
 					GFunEvaluator *theGFunEvaluator,
 					ProbabilityTransformation *theProbabilityTransformation,
+					bool startAtOrigin,
 					TCL_Char *outputFileName,
 					TCL_Char *convFileName,
 					int convResults,
@@ -96,8 +97,9 @@ private:
 	MeritFunctionCheck *theMeritFunctionCheck;
 	GradGEvaluator *theGradGEvaluator;
 	ReliabilityConvergenceCheck *theReliabilityConvergenceCheck;
-	Vector *theStartPoint;
 	RootFinding *theRootFindingAlgorithm;
+
+	bool startAtOrigin;
 
 	char outputFileName[256];
 	char convFileName[256];

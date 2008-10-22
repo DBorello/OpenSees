@@ -99,9 +99,10 @@ public:
 					GFunEvaluator *passedGFunEvaluator,
 					GradGEvaluator *passedGradGEvaluator,
 					ProbabilityTransformation *passedProbabilityTransformation,
+			bool startAtOrigin,
 					int printFlag,
 					char *fileNamePrint,
-					Vector *startPoint, char * probType,
+					char * probType,
 					ReliabilityDomain * passedReliabilityDomain);
 
    //SnoptProblem(){this->outputFile =0;};
@@ -195,7 +196,7 @@ public:  // not good, but avoid large amount of functions.
 	double Glast;
 
 	// Data members set through the call when a job is to be done
-	Vector *startPoint;
+	bool startAtOrigin;
 	Vector *designPoint_uStar;
 
 	int printFlag;

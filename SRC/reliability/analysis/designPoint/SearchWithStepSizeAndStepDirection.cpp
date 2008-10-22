@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2008-08-27 17:11:05 $
+// $Revision: 1.19 $
+// $Date: 2008-10-22 16:41:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.cpp,v $
 
 
@@ -69,9 +69,9 @@ SearchWithStepSizeAndStepDirection::SearchWithStepSizeAndStepDirection(
 					ProbabilityTransformation *passedProbabilityTransformation,
 					HessianApproximation *passedHessianApproximation,
 					ReliabilityConvergenceCheck *passedReliabilityConvergenceCheck,
+					bool pStartAtOrigin,
 					int pprintFlag,
-					char *pFileNamePrint,
-					Vector *pStartPoint)
+					char *pFileNamePrint)
 :FindDesignPointAlgorithm(passedReliabilityDomain)
 {
 	maxNumberOfIterations			= passedMaxNumberOfIterations;
@@ -82,7 +82,8 @@ SearchWithStepSizeAndStepDirection::SearchWithStepSizeAndStepDirection(
 	theProbabilityTransformation	= passedProbabilityTransformation;
 	theHessianApproximation			= passedHessianApproximation;
 	theReliabilityConvergenceCheck  = passedReliabilityConvergenceCheck;
-	startPoint						= pStartPoint;
+	//startPoint						= pStartPoint;
+	startAtOrigin = pStartAtOrigin;
 	printFlag						= pprintFlag;
 	numberOfEvaluations =0;
 	if (printFlag != 0) {
@@ -157,43 +158,19 @@ SearchWithStepSizeAndStepDirection::findDesignPoint()
 		outputFile2 << "This is just a dummy file. " << endln;
 	}
 
-
-	if (startPoint == 0) {
-		// Here we want to start at the origin in the standard normal space. 
-		// Hence, just leave 'u' as being initialized to zero. 
-		// (Note; this is slightly different from the mean point, as done earlier)
-	}
+	// Get starting point
+	if (startAtOrigin) 
+	  u->Zero();
 	else {
+	  theReliabilityDomain->getStartPoint(*x);
 
-		// Get starting point
-		*x = *startPoint;
-
-		/*
-		// Transform starting point into standard normal space
-		result = theProbabilityTransformation->set_x(x);
-		if (result < 0) {
-			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
-				<< " could not set x in the xu-transformation." << endln;
-			return -1;
-		}
-
-
-		result = theProbabilityTransformation->transform_x_to_u();
-		if (result < 0) {
-			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
-				<< " could not transform from x to u." << endln;
-			return -1;
-		}
-		u = theProbabilityTransformation->get_u();
-		*/
-
-		// Transform starting point into standard normal space
-		result = theProbabilityTransformation->transform_x_to_u(*x, *u);
-		if (result < 0) {
-		  opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
-			 << " could not transform from x to u." << endln;
-		  return -1;
-		}
+	  // Transform starting point into standard normal space
+	  result = theProbabilityTransformation->transform_x_to_u(*x, *u);
+	  if (result < 0) {
+	    opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+		   << " could not transform from x to u." << endln;
+	    return -1;
+	  }
 	}
 
 	Matrix Jxu(numberOfRandomVariables, numberOfRandomVariables);
@@ -203,24 +180,6 @@ SearchWithStepSizeAndStepDirection::findDesignPoint()
 	steps = 1;
 	while ( steps <= maxNumberOfIterations )
 	{
-	  /*
-		// Transform from u to x space
-		result = theProbabilityTransformation->set_u(u);
-		if (result < 0) {
-			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
-				<< " could not set u in the xu-transformation." << endln;
-			return -1;
-		}
-
-		result = theProbabilityTransformation->transform_u_to_x_andComputeJacobian();
-		if (result < 0) {
-			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
-				<< " could not transform from u to x and compute Jacobian." << endln;
-			return -1;
-		}
-		x = theProbabilityTransformation->get_x();
-		const Matrix &jacobian_x_u = theProbabilityTransformation->getJacobian_x_u();
-	  */
 		// Transform to x-space
 		result = theProbabilityTransformation->transform_u_to_x(*u, *x);
 		if (result < 0) {
@@ -294,7 +253,6 @@ SearchWithStepSizeAndStepDirection::findDesignPoint()
 			return -1;
 		}
 		gradientOfgFunction = theGradGEvaluator->getGradG();
-
 
 		// Check if all components of the vector is zero
 		zeroFlag = 0;
@@ -602,12 +560,10 @@ SearchWithStepSizeAndStepDirection::getNumberOfEvaluations()
 
 
 // Quan and Michele
-
 int SearchWithStepSizeAndStepDirection::setStartPt(Vector * pStartPt)
 {
-	startPoint->addVector(0.0,(*pStartPt),1.0);
+  //startPoint->addVector(0.0,(*pStartPt),1.0);
 	return 0;
 }
-
 
 

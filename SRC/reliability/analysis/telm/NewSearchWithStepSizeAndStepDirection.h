@@ -23,8 +23,8 @@
 ** ****************************************************************** */
 
 
-// $Revision: 1.3 $
-// $Date: 2008-05-13 16:30:27 $
+// $Revision: 1.4 $
+// $Date: 2008-10-22 16:41:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/NewSearchWithStepSizeAndStepDirection.h,v $
 
 
@@ -63,9 +63,9 @@ public:
 					ProbabilityTransformation *passedProbabilityTransformation,
 					HessianApproximation *theHessianApproximation,
 					ReliabilityConvergenceCheck *theReliabilityConvergenceCheck,
+					bool startAtOrigin,
 					int printFlag,
-					char *fileNamePrint,
-					Vector *startPoint);
+					char *fileNamePrint);
 	~NewSearchWithStepSizeAndStepDirection();
 	
 	int findDesignPoint();
@@ -111,6 +111,8 @@ private:
 	ProbabilityTransformation *theProbabilityTransformation;
 	HessianApproximation *theHessianApproximation;
 	ReliabilityConvergenceCheck *theReliabilityConvergenceCheck;
+
+	bool startAtOrigin;
 
 	// Private member functions to do the job
 	int doTheActualSearch(bool doRvProjection);
@@ -169,7 +171,7 @@ private:
 
 
 	// Data members set through the call when a job is to be done
-	Vector *startPoint;
+	//Vector *startPoint;
 	Vector *designPoint_uStar;
 
 	int printFlag;

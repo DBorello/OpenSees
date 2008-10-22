@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-11-06 19:32:35 $
+// $Revision: 1.8 $
+// $Date: 2008-10-22 16:41:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/GFunVisualizationAnalysis.cpp,v $
 
 
@@ -55,6 +55,7 @@ GFunVisualizationAnalysis::GFunVisualizationAnalysis(
 					ReliabilityDomain *passedReliabilityDomain,
 					GFunEvaluator *passedGFunEvaluator,
 					ProbabilityTransformation *passedProbabilityTransformation,
+					bool passedStartAtOrigin,
 					TCL_Char *passedOutputFileName,
 					TCL_Char *passedConvFileName,
 					int passedConvResults,
@@ -70,7 +71,7 @@ GFunVisualizationAnalysis::GFunVisualizationAnalysis(
 	theMeritFunctionCheck = 0;
 	theGradGEvaluator = 0;
 	theReliabilityConvergenceCheck = 0;
-	theStartPoint = 0;
+	startAtOrigin = passedStartAtOrigin;
 
 	strcpy(outputFileName,passedOutputFileName);
 	strcpy(convFileName,passedConvFileName);
@@ -226,7 +227,7 @@ GFunVisualizationAnalysis::getCurrentAxes12Point(int i, int j)
 
 	// Find the start point in the space which the user 
 	// wants to visualize in. 
-	if (theStartPoint == 0) {
+	if (startAtOrigin) {
 		
 
 		// This indicates the origin in the standard normal space
@@ -263,7 +264,7 @@ GFunVisualizationAnalysis::getCurrentAxes12Point(int i, int j)
 
 		// Here the start point is actually given in the orginal space
 
-		iPoint = (*theStartPoint);
+	  theReliabilityDomain->getStartPoint(iPoint);
 
 		// Transform it into the u-space if that's where the user wants to be
 		if (space==2) {
@@ -402,7 +403,7 @@ GFunVisualizationAnalysis::setRootFindingAlgorithm(RootFinding *pRootFinder)
 int
 GFunVisualizationAnalysis::setStartPoint(Vector *pStartPoint)
 {
-	theStartPoint = pStartPoint;
+  //theStartPoint = pStartPoint;
 
 	return 0;
 }

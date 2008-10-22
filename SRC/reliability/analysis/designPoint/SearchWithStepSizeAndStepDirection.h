@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2008-05-13 16:30:27 $
+// $Revision: 1.9 $
+// $Date: 2008-10-22 16:41:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.h,v $
 
 
@@ -65,9 +65,9 @@ public:
 					ProbabilityTransformation *passedProbabilityTransformation,
 					HessianApproximation *theHessianApproximation,
 					ReliabilityConvergenceCheck *theReliabilityConvergenceCheck,
+					bool startAtOrigin,
 					int printFlag,
-					char *fileNamePrint,
-					Vector *startPoint);
+					char *fileNamePrint);
 	~SearchWithStepSizeAndStepDirection();
 	
 	int findDesignPoint();
@@ -121,8 +121,9 @@ private:
 	double Glast;
 
 	// Data members set through the call when a job is to be done
-	Vector *startPoint;
+	//Vector *startPoint;
 	//Vector *designPoint_uStar;
+	bool startAtOrigin;
 
 	int printFlag;
 	char fileNamePrint[256];

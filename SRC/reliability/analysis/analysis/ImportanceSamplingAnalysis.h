@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-03-13 22:22:25 $
+// $Revision: 1.2 $
+// $Date: 2008-10-22 16:41:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/ImportanceSamplingAnalysis.h,v $
 
 //
@@ -51,13 +51,13 @@ public:
 				   ProbabilityTransformation *passedProbabilityTransformation,
 				   GFunEvaluator *passedGFunEvaluator,
 				   RandomNumberGenerator *passedRandomNumberGenerator,
+				   bool passedStartAtOrigin,
 				   Tcl_Interp *passedInterp,
 				   int passedNumberOfSimulations,
 				   double passedTargetCOV,
 				   double samplingStdv,
 				   int printFlag,
 				   TCL_Char *fileName,
-				   Vector *startPoint,
 				   int analysisTypeTag);
 	
 	~ImportanceSamplingAnalysis();
@@ -71,13 +71,13 @@ private:
 	ProbabilityTransformation *theProbabilityTransformation;
 	GFunEvaluator *theGFunEvaluator;
 	RandomNumberGenerator *theRandomNumberGenerator;
+	bool startAtOrigin;
 	Tcl_Interp *interp;
 	int numberOfSimulations;
 	double targetCOV;
 	double samplingStdv;
 	int printFlag;
 	char fileName[256];
-	Vector *startPoint;
 	int analysisTypeTag;
 };
 

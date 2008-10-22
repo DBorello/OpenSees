@@ -65,9 +65,10 @@ SnoptProblem::SnoptProblem(int passedMaxNumberOfIterations,
 					GFunEvaluator *passedGFunEvaluator,
 					GradGEvaluator *passedGradGEvaluator,
 					ProbabilityTransformation *passedProbabilityTransformation,
+			   bool passedStartAtOrigin,
 					int pPrintFlag,
 					char *pFileNamePrint,
-					Vector *pStartPoint, char * probType, 
+					char * probType, 
 					ReliabilityDomain * passedReliabilityDomain)
 :FindDesignPointAlgorithm(passedReliabilityDomain), 
   iSpecs(0), iSumm(6), iPrint(0), initCalled(0)
@@ -102,7 +103,7 @@ SnoptProblem::SnoptProblem(int passedMaxNumberOfIterations,
 	theGFunEvaluator				= passedGFunEvaluator;
 	theGradGEvaluator				= passedGradGEvaluator;
 	theProbabilityTransformation	= passedProbabilityTransformation;
-	startPoint						= pStartPoint;
+	startAtOrigin = passedStartAtOrigin;
 	printFlag						= pPrintFlag;
 	numberOfEvaluations =0;
 	fileNamePrint = new char[256];
@@ -247,7 +248,6 @@ SnoptProblem::~SnoptProblem()
   delete []xnames; delete []Fnames;
 
   if (this->outputFile !=0) delete outputFile; 
-
 }
 
 void SnoptProblem::init2zero()
@@ -761,11 +761,12 @@ SnoptProblem::findDesignPoint()
 
 	
 //------------------------ start point ------------------------------------------------	
-	
-	if (startPoint != 0) {
+	if (startAtOrigin)
+	  u.Zero();
+	else {
 
 		// Get starting point
-		reliability_x = (*startPoint);
+	  theReliabilityDomain->getStartPoint(reliability_x);
 
 
 		// Transform starting point into standard normal space
@@ -1060,7 +1061,7 @@ SnoptProblem::getNumberOfEvaluations()
 
 int SnoptProblem::setStartPt(Vector * pStartPt)
 {
-	startPoint->addVector(0.0,(*pStartPt),1.0);
+  //startPoint->addVector(0.0,(*pStartPt),1.0);
 	return 0;
 }
 

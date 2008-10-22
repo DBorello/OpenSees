@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2008-05-13 16:30:27 $
+// $Revision: 1.5 $
+// $Date: 2008-10-22 16:41:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/NewSearchWithStepSizeAndStepDirection.cpp,v $
                                                                      
 
@@ -67,9 +67,9 @@ NewSearchWithStepSizeAndStepDirection::NewSearchWithStepSizeAndStepDirection(
 					ProbabilityTransformation *passedProbabilityTransformation,
 					HessianApproximation *passedHessianApproximation,
 					ReliabilityConvergenceCheck *passedReliabilityConvergenceCheck,
+					bool pStartAtOrigin,
 					int pprintFlag,
-					char *pFileNamePrint,
-					Vector *pStartPoint)
+					char *pFileNamePrint)
 :FindDesignPointAlgorithm(passedReliabilityDomain)
 {
 	maxNumberOfIterations			= passedMaxNumberOfIterations;
@@ -80,7 +80,7 @@ NewSearchWithStepSizeAndStepDirection::NewSearchWithStepSizeAndStepDirection(
 	theProbabilityTransformation	= passedProbabilityTransformation;
 	theHessianApproximation			= passedHessianApproximation;
 	theReliabilityConvergenceCheck  = passedReliabilityConvergenceCheck;
-	startPoint						= pStartPoint;
+	startAtOrigin = pStartAtOrigin;
 	printFlag						= pprintFlag;
 	numberOfEvaluations =0;
 	numberOfSensAna =0;
@@ -208,30 +208,17 @@ NewSearchWithStepSizeAndStepDirection::findDesignPoint()
 		outputFile2 << "This is just a dummy file. " << endln;
 	}
 
-	if (startPoint == 0) {
-		(*u).Zero();
-		// Here we want to start at the origin in the standard normal space. 
-		// Hence, just leave 'u' as being initialized to zero. 
-		// (Note; this is slightly different from the mean point, as done earlier)
-	}
-  	else {
-		if(xinit==0){// Get starting point
-			(*x) = (*startPoint);
-		}else{
-			(*x) = (*xinit);
-		}
-		// Transform starting point into standard normal space
-		//result = theProbabilityTransformation->set_x(*x);
-		//if (result < 0) { errorMmessage_setx(); delxinit(); return -1; }
-		//result = theProbabilityTransformation->transform_x_to_u();
-		//if (result < 0) { errorMessage_xtou(); delxinit();  return -1; }
-		//(*u) = theProbabilityTransformation->get_u();
-		result = theProbabilityTransformation->transform_x_to_u(*x, *u);
-		if (result < 0) { 
-			errorMessage_xtou(); delxinit();  return -1; 
-		}
+	if (startAtOrigin)
+	  u->Zero();
+	else {
+	  theReliabilityDomain->getStartPoint(*x);
 
+	  result = theProbabilityTransformation->transform_x_to_u(*x, *u);
+	  if (result < 0) { 
+	    errorMessage_xtou(); delxinit();  return -1; 
+	  }
 	}
+
 	convergenceAchieved=false;
 
 	/// work area ///

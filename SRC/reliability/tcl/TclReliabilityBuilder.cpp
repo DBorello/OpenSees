@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.51 $
-// $Date: 2008-10-21 22:52:38 $
+// $Revision: 1.52 $
+// $Date: 2008-10-22 16:44:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -231,6 +231,7 @@ static MeritFunctionCheck *theMeritFunctionCheck = 0;
 static ProbabilityTransformation *theProbabilityTransformation = 0;
 static ReliabilityConvergenceCheck *theReliabilityConvergenceCheck = 0;
 static Vector *theStartPoint = 0;
+static bool startAtOrigin = false;
 static RootFinding *theRootFindingAlgorithm = 0;
 static FindCurvatures *theFindCurvatures = 0;
 static FindDesignPointAlgorithm *theFindDesignPointAlgorithm = 0;
@@ -4367,7 +4368,8 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 					theProbabilityTransformation,
 					theHessianApproximation,
 					theReliabilityConvergenceCheck,
-					printFlag, fileNamePrint, theStartPoint);
+					startAtOrigin,
+					printFlag, fileNamePrint);
 		
 	}   //if StepSearch
 
@@ -4467,7 +4469,8 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 					theGFunEvaluator,
 					theGradGEvaluator,
 					theProbabilityTransformation,
-					printFlag, fileNamePrint, theStartPoint, 
+					startAtOrigin,
+					printFlag, fileNamePrint,
 					ProbType,theReliabilityDomain);
 /*
    snoptProblem::snoptProblem(int passedMaxNumberOfIterations, 
@@ -4588,7 +4591,8 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 					theProbabilityTransformation,
 					theHessianApproximation,
 					theReliabilityConvergenceCheck,
-					printFlag, fileNamePrint, theStartPoint);
+					startAtOrigin,
+					printFlag, fileNamePrint);
 		
 	}
 	else {
@@ -4628,36 +4632,33 @@ TclReliabilityModelBuilder_addStartPoint(ClientData clientData, Tcl_Interp *inte
 	// GET INPUT PARAMETER (string) AND CREATE THE OBJECT
 	if (strcmp(argv[1],"Mean") == 0) {
 
-		theStartPoint = new Vector(nrv);
-
 		RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
-		//for ( int i=1; i<=nrv; i++ ) {
 		while ((aRandomVariable = rvIter()) != 0) {
-		  //int i = aRandomVariable->getIndex();
 		  int tag = aRandomVariable->getTag();
-		  int i = theReliabilityDomain->getRandomVariableIndex(tag);
-		  (*theStartPoint)(i) = aRandomVariable->getMean();
+		  double mean = aRandomVariable->getMean();
+		  theReliabilityDomain->setStartPoint(tag, mean);
 		}
+		startAtOrigin = false;
 	}
 	else if (strcmp(argv[1],"Origin") == 0) {
-		// This is the default option (at least from now on...)
-		// Do nothing; theStartPoint==0 is the indication of this case
+		
+	  /*
+	  RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
+	  while ((aRandomVariable = rvIter()) != 0) {
+	    int tag = aRandomVariable->getTag();
+	    theReliabilityDomain->setStartPoint(tag, 0.0);
+	  }
+	  */
+	  startAtOrigin = true;
 	}
 	else if (strcmp(argv[1],"Given") == 0) {
-
-		theStartPoint = new Vector(nrv);
-
-		RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
-		//for ( int i=1; i<=nrv; i++ ) {
-		while ((aRandomVariable = rvIter()) != 0) {
-		  //int i = aRandomVariable->getIndex();
-		  int tag = aRandomVariable->getTag();
-		  int i = theReliabilityDomain->getRandomVariableIndex(tag);
-		  (*theStartPoint)(i) = aRandomVariable->getStartValue();
-		}
+	  // This is now the default option
+	  startAtOrigin = false;
 	}
 	else if (strcmp(argv[1],"-file") == 0) {
-
+	  opserr << "startPoint -file option is currently disabled" << endln;
+	  return TCL_ERROR;
+	  /*
 		theStartPoint = new Vector(nrv);
 
 		ifstream inputFile( argv[2], ios::in );
@@ -4690,25 +4691,12 @@ TclReliabilityModelBuilder_addStartPoint(ClientData clientData, Tcl_Interp *inte
 			inputFile2 >> (*theStartPoint)(i);
 		}
 		inputFile2.close();
+	  */
 
 	}
 	else {
 	  opserr << "ERROR: Invalid type of start point is given. " << endln;
 	  return TCL_ERROR;
-	}
-
-
-	// Check that the vector is of correct size
-	if (theStartPoint==0) {
-	  //		opserr << "ERROR: Could not create the start point. " << endln;
-	  //		return TCL_ERROR;
-	}
-	else {
-	  if (theStartPoint->Size() != nrv) {
-	    opserr << "ERROR: The size of the start point vector is NOT equal " << endln
-		   << " to the number of random variables in the model! " << endln;
-	    return TCL_ERROR;
-	  }
 	}
 	
 	return TCL_OK;
@@ -5327,16 +5315,11 @@ TclReliabilityModelBuilder_runImportanceSamplingAnalysis(ClientData clientData, 
 				// Make sure that the mean point is the sampling center
 				int nrv = theReliabilityDomain->getNumberOfRandomVariables();
 				RandomVariable *aRandomVariable;
-				if (theStartPoint == 0) {
-					theStartPoint = new Vector(nrv);
-				}
 				RandomVariableIter rvIter = theReliabilityDomain->getRandomVariables();
-				//for ( int i=1; i<=nrv; i++ ) {
 				while ((aRandomVariable = rvIter()) != 0) {
-				  //int i = aRandomVariable->getIndex();
 				  int tag = aRandomVariable->getTag();
-				  int i = theReliabilityDomain->getRandomVariableIndex(tag);
-				  (*theStartPoint)(i) = aRandomVariable->getMean();
+				  double mean = aRandomVariable->getMean();
+				  theReliabilityDomain->setStartPoint(tag, mean);
 				}
 				opserr << "NOTE: The startPoint is set to the Mean due to the selected sampling analysis type." << endln;
 			}
@@ -5397,13 +5380,13 @@ TclReliabilityModelBuilder_runImportanceSamplingAnalysis(ClientData clientData, 
 							 theProbabilityTransformation, 
 							 theGFunEvaluator, 
 							 theRandomNumberGenerator, 
+							 startAtOrigin,
 							 interp,
 							 numberOfSimulations, 
 							 targetCOV,
 							 samplingVariance,
 							 printFlag,
 							 argv[1],
-							 theStartPoint,
 							 analysisTypeTag);
 
 	if (theImportanceSamplingAnalysis == 0) {
@@ -5647,11 +5630,14 @@ TclReliabilityModelBuilder_runOrthogonalPlaneSamplingAnalysis(ClientData clientD
 	Vector * theDesignPoint;
 	double littleDt = 1.0e-3;
 
+	/*
 	if (theStartPoint == 0 ) {
 		opserr << "orthogonalPlaneSamplingAnalysis can not run. Need StartPoint !" << endln;
 		return TCL_ERROR;
 	}
 	else theDesignPoint = theStartPoint;
+	*/
+	theReliabilityDomain->getStartPoint(*theDesignPoint);
 
 	int argvCounter = 1;
 	while (argc > argvCounter) {
@@ -6185,17 +6171,18 @@ TclReliabilityModelBuilder_runGFunVisualizationAnalysis(ClientData clientData, T
 	}
 
 	if (zeroFindingAlg ==0) 
-	   theGFunVisualizationAnalysis = new GFunVisualizationAnalysis(
-											theReliabilityDomain, 
-											theGFunEvaluator, 
-											theProbabilityTransformation, 
-											argv[1],
-											argv[convFileArgv],
-											convResults,
-											space,
-											funSurf,
-											axes,
-											dir);
+	   theGFunVisualizationAnalysis = 
+	     new GFunVisualizationAnalysis(theReliabilityDomain, 
+					   theGFunEvaluator, 
+					   theProbabilityTransformation, 
+					   startAtOrigin,
+					   argv[1],
+					   argv[convFileArgv],
+					   convResults,
+					   space,
+					   funSurf,
+					   axes,
+					   dir);
 /*	else if (zeroFindingAlg ==1) 
 	   theGFunVisualizationAnalysis = new GFunVisualizationSamplingAnalysis(
 											theReliabilityDomain, 

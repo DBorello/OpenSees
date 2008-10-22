@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2008-04-10 18:10:29 $
+// $Revision: 1.4 $
+// $Date: 2008-10-22 16:41:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/ImportanceSamplingAnalysis.cpp,v $
 
 //
@@ -64,13 +64,13 @@ ImportanceSamplingAnalysis::ImportanceSamplingAnalysis(	ReliabilityDomain *passe
 										ProbabilityTransformation *passedProbabilityTransformation,
 										GFunEvaluator *passedGFunEvaluator,
 										RandomNumberGenerator *passedRandomNumberGenerator,
+							bool passedStartAtOrigin,
 										Tcl_Interp *passedInterp,
 										int passedNumberOfSimulations,
 										double passedTargetCOV,
 										double passedSamplingStdv,
 										int passedPrintFlag,
 										TCL_Char *passedFileName,
-										Vector *pStartPoint,
 										int passedAnalysisTypeTag)
 :ReliabilityAnalysis()
 {
@@ -78,13 +78,13 @@ ImportanceSamplingAnalysis::ImportanceSamplingAnalysis(	ReliabilityDomain *passe
 	theProbabilityTransformation = passedProbabilityTransformation;
 	theGFunEvaluator = passedGFunEvaluator;
 	theRandomNumberGenerator = passedRandomNumberGenerator;
+	startAtOrigin = passedStartAtOrigin;
 	interp = passedInterp;
 	numberOfSimulations = passedNumberOfSimulations;
 	targetCOV = passedTargetCOV;
 	samplingStdv = passedSamplingStdv;
 	printFlag = passedPrintFlag;
 	strcpy(fileName,passedFileName);
-	startPoint = pStartPoint;
 	analysisTypeTag = passedAnalysisTypeTag;
 }
 
@@ -111,7 +111,6 @@ ImportanceSamplingAnalysis::analyze(void)
 	double det_covariance, phi, h, q;
 	int numRV = theReliabilityDomain->getNumberOfRandomVariables();
 	int numLsf = theReliabilityDomain->getNumberOfLimitStateFunctions();
-	Vector startValues(numRV);
 	Vector x(numRV);
 	Vector z(numRV);
 	Vector u(numRV);
@@ -169,26 +168,11 @@ ImportanceSamplingAnalysis::analyze(void)
 	// unless it is the origin that is to be sampled around
 	Vector startPointY(numRV);
 
-	if (startPoint == 0) {
-		// Do nothing; keep it as zero
-	}
+	if (startAtOrigin)
+	  startPointY.Zero();
 	else {
-	  /*
-		result = theProbabilityTransformation->set_x(*startPoint);
-		if (result < 0) {
-			opserr << "ImportanceSamplingAnalysis::analyze() - could not " << endln
-				<< " set the x-vector for xu-transformation. " << endln;
-			return -1;
-		}
-		result = theProbabilityTransformation->transform_x_to_u();
-		if (result < 0) {
-			opserr << "ImportanceSamplingAnalysis::analyze() - could not " << endln
-				<< " transform x to u. " << endln;
-			return -1;
-		}
-		startPointY = theProbabilityTransformation->get_u();
-	  */
-	  result = theProbabilityTransformation->transform_x_to_u(*startPoint, startPointY);
+	  theReliabilityDomain->getStartPoint(x);
+	  result = theProbabilityTransformation->transform_x_to_u(x, startPointY);
 	  if (result < 0) {
 	    opserr << "ImportanceSamplingAnalysis::analyze() - could not " << endln
 		   << " transform x to u. " << endln;
