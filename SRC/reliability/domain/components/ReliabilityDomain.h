@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2008-10-22 15:26:50 $
+// $Revision: 1.19 $
+// $Date: 2008-10-22 16:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.h,v $
 
 
@@ -98,6 +98,7 @@ public:
 	RandomVariable *getRandomVariablePtrFromIndex(int index);
 	int getRandomVariableIndex(int tag);
 	void getStartPoint(Vector &start);
+	int setStartPoint(int tag, double start);
 
 	LimitStateFunction *getLimitStateFunctionPtr(int tag);
 	// Following two methods to map index to tag and vice versa

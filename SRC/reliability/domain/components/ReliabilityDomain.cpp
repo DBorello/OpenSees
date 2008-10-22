@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2008-10-22 15:26:50 $
+// $Revision: 1.21 $
+// $Date: 2008-10-22 16:42:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.cpp,v $
 
 
@@ -372,6 +372,21 @@ ReliabilityDomain::getStartPoint(Vector &start)
 {
   for (int i = 0; i < numRandomVariables; i++)
     start(i) = startValue[i];
+}
+
+int
+ReliabilityDomain::setStartPoint(int tag, double start)
+{
+  int index = this->getRandomVariableIndex(tag);
+
+  if (index < 0) {
+    opserr << "ReliabilityDomain::setStartPoint -- invalid tag " << tag << endln;
+    return -1;
+  }
+
+  startValue[index] = start;
+
+  return 0;
 }
 
 RandomVariableIter &
