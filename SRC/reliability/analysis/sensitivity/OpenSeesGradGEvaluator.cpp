@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2008-08-26 16:17:06 $
+// $Revision: 1.20 $
+// $Date: 2008-10-22 16:41:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/OpenSeesGradGEvaluator.cpp,v $
 
 
@@ -144,7 +144,7 @@ OpenSeesGradGEvaluator::nodeGradient(int nodeNumber, int direction, int indx, ch
 	else {
 		opserr << "OpenSeesGradGEvaluator::nodeGradient in syntax (" << dispOrWhat << ") not supported" << endln;
 	}
-		
+
 	return gFunValue;
 }
 
@@ -214,8 +214,10 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 
 	// Compute gradients if this is a path-INdependent analysis
 	// (This command only has effect if it IS path-independent.)
-	if (theSensAlgo != 0 && !(theSensAlgo->shouldComputeAtEachStep()) )
+	//if (theSensAlgo != 0 && !(theSensAlgo->shouldComputeAtEachStep()) ) {
+	if (theSensAlgo != 0)
 	  theSensAlgo->computeSensitivities();
+	//}
 
 	// Initialize gradient vector
 	grad_g->Zero();
@@ -384,7 +386,6 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 				//int idx = theReliabilityDomain->getRandomVariableIndex(rvTag);
 				dudx(ig) = nodeGradient(nodeNumber, direction, ig, dispOrWhat);
 			}
-			//opserr << dudx;
 
 			// Add gradient contribution
 			(*grad_g) += onedgdu*dudx;
