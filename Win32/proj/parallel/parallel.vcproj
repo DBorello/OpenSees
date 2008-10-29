@@ -22,8 +22,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\src\modelbuilder;..\..\..\src\convergenceTest;..\..\..\src\analysis\handler;..\..\..\src\analysis\algorithm;..\..\..\src\analysis\algorithm\equiSolnAlgo;..\..\..\src\analysis\integrator;..\..\..\src\analysis\analysis;..\..\..\src\recorder;..\..\..\src\domain\domain\single;..\..\..\src\domain\partitioner;..\..\..\src\domain\loadBalancer;..\..\..\src\graph\partitioner;..\..\..\OTHER\SuperLU_DIST_2.0\SRC;..\..\..\src\actor\message;&quot;c:\Program Files\MPICH2\include&quot;;..\..\..\src\actor\channel;..\..\..\src\actor\shadow;..\..\..\src\domain\subdomain;..\..\..\src\domain\domain\partitioned;..\..\..\src\tagged\storage;..\..\..\src\domain\pattern;..\..\..\src\domain\domain\domain;..\..\..\src\domain\load;..\..\..\src\utility;..\..\..\src\element;..\..\..\src\domain\partitioner;..\..\..\src\domain\loadBalancer;..\..\..\src\graph\partitioner;..\..\..\src\domain\node;..\..\..\src\domain\component;..\..\..\src\domain\constraints;..\..\..\src\graph\numberer;..\..\..\src\domain\domain;..\..\..\src\analysis\model;..\..\..\src\analysis\numberer;..\..\..\src\system_of_eqn\linearSOE\profileSPD;..\..\..\src\tagged;..\..\..\src\graph\graph;..\..\..\OTHER\SuperLU_DIST_2.0\SRC;..\..\..\src\system_of_eqn;..\..\..\src\actor\address;..\..\..\src\actor\machineBroker;..\..\..\src\actor\objectBroker;..\..\..\src\matrix;..\..\..\src\system_of_eqn\linearSOE;..\..\..\src\system_of_eqn\linearSOE\sparseGEN;..\..\..\src\actor\shadow;..\..\..\src\domain\subdomain;&quot;c:\Program Files\MPICH2\include&quot;;..\..\..\SRC\domain\domain\partitioned;..\..\..\src\analysis\dof_grp;..\..\..\src\analysis\fe_ele;..\..\..\src\package;..\..\..\src\actor\message;..\..\..\src\actor\actor;..\..\..\src\actor\channel;..\..\..\SRC\actor\actor;..\..\..\src\parallel;..\..\..\src\handler;..\..\..\src;..\..\..\src\nDarray;&quot;c:\Program Files\tcl&quot;"
-				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,_TCL84,_PARALLEL_PROCESSING"
+				AdditionalIncludeDirectories="..\..\..\src\analysis\algorithm\equiSolnAlgo\accelerator;..\..\..\src\element\upU;..\..\..\OTHER\METIS;..\..\..\SRC\system_of_eqn\linearSOE\diagonal;..\..\..\OTHER\MUMPS_4.7.3\include;..\..\..\OTHER\MUMPS_4.7.3\include;..\..\..\src\system_of_eqn\linearSOE\mumps;&quot;c:\Program Files\MPICH2\include&quot;;..\..\..\src\system_of_eqn\linearSOE\mumps;..\..\..\SRC\tcl;&quot;..\..\..\SRC\element\UP-ucsd&quot;;..\..\..\src\actor\machineBroker;..\..\..\SRC\actor\shadow;..\..\..\src\package;&quot;c:\Program Files\tcl\include&quot;;..\..\..\src\element\elasticBeamColumn;..\..\..\src\element\shell;..\..\..\src\element\dispBeamColumn;..\..\..\src\element\beamWithHinges;&quot;c:\Program Files\tcl\include&quot;;..\..\..\src\element\forceBeamColumn;..\..\..\src\material\section\fiber;..\..\..\src\element\fourNodeQuad;..\..\..\src\material\backbone;..\..\..\src\material\state;..\..\..\src\material\state\stiffness;..\..\..\src\material\state\deformation;..\..\..\src\material\state\strength;..\..\..\src\material\nD;..\..\..\src\coordTransformation;..\..\..\src\domain\groundMotion;..\..\..\src\system_of_eqn\linearSOE\profileSPD;..\..\..\src\system_of_eqn\linearSOE;..\..\..\src\system_of_eqn\linearSOE\sparseSYM;..\..\..\src\analysis\integrator;..\..\..\src\analysis\fe_ele;..\..\..\src\analysis\dof_grp;..\..\..\src\system_of_eqn\eigenSOE;..\..\..\src\handler;..\..\..\symSparse;..\..\..\src\analysis\model\simple;..\..\..\src\system_of_eqn\linearSOE\umfGEN;..\..\..\src\system_of_eqn\linearSOE\fullGEN;..\..\..\src\system_of_eqn\linearSOE\sparseGEN;..\..\..\src\system_of_eqn\linearSOE\bandSPD;..\..\..\src\system_of_eqn\linearSOE\bandGEN;..\..\..\src\analysis\algorithm\domaindecompAlgo;..\..\..\src\analysis\algorithm\eigenAlgo;..\..\..\src\domain\domain\single;..\..\..\src\convergenceTest;..\..\..\src\analysis\analysis;..\..\..\src\recorder;..\..\..\src\analysis\algorithm\equiSolnAlgo;..\..\..\src\analysis\algorithm;..\..\..\src\system_of_eqn;..\..\..\src\graph\graph;..\..\..\src\graph\numberer;..\..\..\src\analysis\numberer;..\..\..\src\analysis\fe_ele\transformation;..\..\..\src\analysis\fe_ele\lagrange;..\..\..\src\analysis\fe_ele\penalty;..\..\..\src\actor\objectBroker;..\..\..\src\actor\channel;..\..\..\src\utility;..\..\..\src\domain\subdomain;..\..\..\src\domain\constraints;..\..\..\src\tagged;..\..\..\src\domain\component;..\..\..\src\domain\node;..\..\..\src\element;..\..\..\src\matrix;..\..\..\src\domain\domain;..\..\..\src\analysis\model;..\..\..\src;..\..\..\src\actor\actor;..\..\..\src\analysis\handler;..\..\..\src\material\section;..\..\..\src\modelbuilder;..\..\..\src\renderer;..\..\..\src\modelbuilder\tcl;..\..\..\src\tagged\storage;..\..\..\src\element\nonlinearBeamColumn\tcl\repres\section;..\..\..\src\element\nonlinearBeamColumn\tcl\repres\patch;..\..\..\src\element\nonlinearBeamColumn\tcl\repres\reinfBar;..\..\..\src\element\nonlinearBeamColumn\tcl\repres\reinfLayer;..\..\..\src\element\nonlinearBeamColumn\tcl\repres\cell;..\..\..\src\element\nonlinearBeamColumn;..\..\..\src\element\nonlinearBEamCOlumn\quadrule;..\..\..\src\element\nonlinearBeamColumn\matrixutil;..\..\..\src\element\nonlinearBeamColumn\fiber;..\..\..\src\material;..\..\..\src\element\nonlinearBeamColumn\element;..\..\..\src\domain\load;..\..\..\src\domain\pattern;..\..\..\src\element\zeroLength;..\..\..\src\element\feap;..\..\..\src\element\truss;..\..\..\src\element\beam3d;..\..\..\src\element\beam2d;..\..\..\src\material\uniaxial;..\..\..\src\actor\address;..\..\..\src\actor\message;..\..\..\src\nDarray;..\..\..\src\material\uniaxial\fedeas;..\..\..\src\material\uniaxial\drain;..\..\..\src\element\8nbrick;..\..\..\src\element\brick;..\..\..\src\material\uniaxial\py;..\..\..\src\material\nd\soil;..\..\..\src\element\joint;..\..\..\src\material\nd\feap;..\..\..\other\SuperLU_3.0\SRC;&quot;c:\Program Files\tcl&quot;;..\..\..\src\modelbuilder;..\..\..\src\convergenceTest;..\..\..\src\analysis\handler;..\..\..\src\analysis\algorithm;..\..\..\src\analysis\algorithm\equiSolnAlgo;..\..\..\src\analysis\integrator;..\..\..\src\analysis\analysis;..\..\..\src\recorder;..\..\..\src\domain\domain\single;..\..\..\src\domain\partitioner;..\..\..\src\domain\loadBalancer;..\..\..\src\graph\partitioner;..\..\..\OTHER\SuperLU_DIST_2.0\SRC;..\..\..\src\actor\message;&quot;c:\Program Files\MPICH2\include&quot;;..\..\..\src\actor\channel;..\..\..\src\actor\shadow;..\..\..\src\domain\subdomain;..\..\..\src\domain\domain\partitioned;..\..\..\src\tagged\storage;..\..\..\src\domain\pattern;..\..\..\src\domain\domain\domain;..\..\..\src\domain\load;..\..\..\src\utility;..\..\..\src\element;..\..\..\src\domain\partitioner;..\..\..\src\domain\loadBalancer;..\..\..\src\graph\partitioner;..\..\..\src\domain\node;..\..\..\src\domain\component;..\..\..\src\domain\constraints;..\..\..\src\graph\numberer;..\..\..\src\domain\domain;..\..\..\src\analysis\model;..\..\..\src\analysis\numberer;..\..\..\src\system_of_eqn\linearSOE\profileSPD;..\..\..\src\tagged;..\..\..\src\graph\graph;..\..\..\OTHER\SuperLU_DIST_2.0\SRC;..\..\..\src\system_of_eqn;..\..\..\src\actor\address;..\..\..\src\actor\machineBroker;..\..\..\src\actor\objectBroker;..\..\..\src\matrix;..\..\..\src\system_of_eqn\linearSOE;..\..\..\src\system_of_eqn\linearSOE\sparseGEN;..\..\..\src\actor\shadow;..\..\..\src\domain\subdomain;&quot;c:\Program Files\MPICH2\include&quot;;..\..\..\SRC\domain\domain\partitioned;..\..\..\src\analysis\dof_grp;..\..\..\src\analysis\fe_ele;..\..\..\src\package;..\..\..\src\actor\message;..\..\..\src\actor\actor;..\..\..\src\actor\channel;..\..\..\SRC\actor\actor;..\..\..\src\parallel;..\..\..\src\handler;..\..\..\src;..\..\..\src\nDarray;&quot;c:\Program Files\tcl&quot;"
+				PreprocessorDefinitions="_WIN32;WIN32;NDEBUG;_LIB;_TCL84;_PARALLEL_PROCESSING;_MUMPS"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
@@ -66,7 +66,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\src\modelbuilder;..\..\..\src\convergenceTest;..\..\..\src\analysis\handler;..\..\..\src\analysis\algorithm;..\..\..\src\analysis\algorithm\equiSolnAlgo;..\..\..\src\analysis\integrator;..\..\..\src\analysis\analysis;..\..\..\src\recorder;..\..\..\src\domain\domain\single;..\..\..\src\domain\partitioner;..\..\..\src\domain\loadBalancer;..\..\..\src\graph\partitioner;..\..\..\OTHER\SuperLU_DIST_2.0\SRC;..\..\..\src\actor\message;&quot;c:\Program Files\MPICH2\include&quot;;..\..\..\src\actor\channel;..\..\..\src\actor\shadow;..\..\..\src\domain\subdomain;..\..\..\src\domain\domain\partitioned;..\..\..\src\tagged\storage;..\..\..\src\domain\pattern;..\..\..\src\domain\domain\domain;..\..\..\src\domain\load;..\..\..\src\utility;..\..\..\src\element;..\..\..\src\domain\partitioner;..\..\..\src\domain\loadBalancer;..\..\..\src\graph\partitioner;..\..\..\src\domain\node;..\..\..\src\domain\component;..\..\..\src\domain\constraints;..\..\..\src\graph\numberer;..\..\..\src\domain\domain;..\..\..\src\analysis\model;..\..\..\src\analysis\numberer;..\..\..\src\system_of_eqn\linearSOE\profileSPD;..\..\..\src\tagged;..\..\..\src\graph\graph;..\..\..\OTHER\SuperLU_DIST_2.0\SRC;..\..\..\src\system_of_eqn;..\..\..\src\actor\address;..\..\..\src\actor\machineBroker;..\..\..\src\actor\objectBroker;..\..\..\src\matrix;..\..\..\src\system_of_eqn\linearSOE;..\..\..\src\system_of_eqn\linearSOE\sparseGEN;..\..\..\src\actor\shadow;..\..\..\src\domain\subdomain;&quot;c:\Program Files\MPICH2\include&quot;;..\..\..\SRC\domain\domain\partitioned;..\..\..\src\analysis\dof_grp;..\..\..\src\analysis\fe_ele;..\..\..\src\package;..\..\..\src\actor\message;..\..\..\src\actor\actor;..\..\..\src\actor\channel;..\..\..\SRC\actor\actor;..\..\..\src\parallel;..\..\..\src\handler;..\..\..\src;..\..\..\src\nDarray;&quot;c:\Program Files\tcl&quot;"
+				AdditionalIncludeDirectories="..\..\..\OTHER\MUMPS_4.7.3\include;..\..\..\src\system_of_eqn\linearSOE\mumps;..\..\..\src\modelbuilder;..\..\..\src\convergenceTest;..\..\..\src\analysis\handler;..\..\..\src\analysis\algorithm;..\..\..\src\analysis\algorithm\equiSolnAlgo;..\..\..\src\analysis\integrator;..\..\..\src\analysis\analysis;..\..\..\src\recorder;..\..\..\src\domain\domain\single;..\..\..\src\domain\partitioner;..\..\..\src\domain\loadBalancer;..\..\..\src\graph\partitioner;..\..\..\OTHER\SuperLU_DIST_2.0\SRC;..\..\..\src\actor\message;&quot;c:\Program Files\MPICH2\include&quot;;..\..\..\src\actor\channel;..\..\..\src\actor\shadow;..\..\..\src\domain\subdomain;..\..\..\src\domain\domain\partitioned;..\..\..\src\tagged\storage;..\..\..\src\domain\pattern;..\..\..\src\domain\domain\domain;..\..\..\src\domain\load;..\..\..\src\utility;..\..\..\src\element;..\..\..\src\domain\partitioner;..\..\..\src\domain\loadBalancer;..\..\..\src\graph\partitioner;..\..\..\src\domain\node;..\..\..\src\domain\component;..\..\..\src\domain\constraints;..\..\..\src\graph\numberer;..\..\..\src\domain\domain;..\..\..\src\analysis\model;..\..\..\src\analysis\numberer;..\..\..\src\system_of_eqn\linearSOE\profileSPD;..\..\..\src\tagged;..\..\..\src\graph\graph;..\..\..\OTHER\SuperLU_DIST_2.0\SRC;..\..\..\src\system_of_eqn;..\..\..\src\actor\address;..\..\..\src\actor\machineBroker;..\..\..\src\actor\objectBroker;..\..\..\src\matrix;..\..\..\src\system_of_eqn\linearSOE;..\..\..\src\system_of_eqn\linearSOE\sparseGEN;..\..\..\src\actor\shadow;..\..\..\src\domain\subdomain;&quot;c:\Program Files\MPICH2\include&quot;;..\..\..\SRC\domain\domain\partitioned;..\..\..\src\analysis\dof_grp;..\..\..\src\analysis\fe_ele;..\..\..\src\package;..\..\..\src\actor\message;..\..\..\src\actor\actor;..\..\..\src\actor\channel;..\..\..\SRC\actor\actor;..\..\..\src\parallel;..\..\..\src\handler;..\..\..\src;..\..\..\src\nDarray;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_TCL84;_PARALLEL_PROCESSING"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
@@ -114,6 +114,33 @@
 			Name="actor"
 			Filter="">
 			<File
+				RelativePath="..\..\..\SRC\actor\actor\Actor.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\actor\actor\Actor.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\actor\channel\Channel.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\actor\channel\Channel.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\actor\objectBroker\FEM_ObjectBroker.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\actor\objectBroker\FEM_ObjectBroker.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\actor\objectBroker\FEM_ObjectBrokerAllClasses.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\actor\objectBroker\FEM_ObjectBrokerAllClasses.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\actor\channel\HTTP.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\actor\channel\MPI_Channel.cpp">
 			</File>
 			<File
@@ -136,6 +163,42 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\actor\machineBroker\MachineBroker.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\actor\message\Message.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\actor\message\Message.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\actor\actor\MovableObject.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\actor\actor\MovableObject.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\actor\objectBroker\ObjectBroker.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\actor\objectBroker\ObjectBroker.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\actor\shadow\Shadow.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\actor\shadow\Shadow.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\actor\channel\Socket.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\actor\channel\Socket.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\actor\channel\TCP_Socket.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\actor\channel\TCP_Socket.h">
 			</File>
 		</Filter>
 		<Filter
@@ -171,6 +234,34 @@
 			<File
 				RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\sparseGEN\DistributedSuperLU.h">
 			</File>
+			<Filter
+				Name="mumps"
+				Filter="">
+				<File
+					RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\mumps\MumpsParallelSOE.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\mumps\MumpsParallelSOE.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\mumps\MumpsParallelSolver.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\mumps\MumpsParallelSolver.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\mumps\MumpsSOE.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\mumps\MumpsSOE.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\mumps\MumpsSolver.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\system_of_eqn\linearSOE\mumps\MumpsSolver.h">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="numberer"
@@ -216,52 +307,61 @@
 				Name="metis"
 				Filter="">
 				<File
-					RelativePath="..\..\..\OTHER\METIS\GKlib.c">
+					RelativePath="..\..\..\OTHER\METIS\balance.c">
 				</File>
 				<File
-					RelativePath="..\..\..\OTHER\METIS\GKlib.h">
+					RelativePath="..\..\..\OTHER\METIS\bucketsort.c">
 				</File>
 				<File
-					RelativePath="..\..\..\OTHER\METIS\balpart.c">
-				</File>
-				<File
-					RelativePath="..\..\..\OTHER\METIS\bucketlist.c">
+					RelativePath="..\..\..\OTHER\METIS\ccgraph.c">
 				</File>
 				<File
 					RelativePath="..\..\..\OTHER\METIS\coarsen.c">
 				</File>
 				<File
+					RelativePath="..\..\..\OTHER\METIS\compress.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\debug.c">
+				</File>
+				<File
 					RelativePath="..\..\..\OTHER\METIS\defs.h">
 				</File>
 				<File
-					RelativePath="..\..\..\OTHER\METIS\entrypoint.c">
+					RelativePath="..\..\..\OTHER\METIS\estmem.c">
 				</File>
 				<File
 					RelativePath="..\..\..\OTHER\METIS\fm.c">
 				</File>
 				<File
-					RelativePath="..\..\..\OTHER\METIS\htable.c">
+					RelativePath="..\..\..\OTHER\METIS\fortran.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\frename.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\graph.c">
 				</File>
 				<File
 					RelativePath="..\..\..\OTHER\METIS\initpart.c">
 				</File>
 				<File
-					RelativePath="..\..\..\OTHER\METIS\io.c">
+					RelativePath="..\..\..\OTHER\METIS\kmetis.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\kvmetis.c">
 				</File>
 				<File
 					RelativePath="..\..\..\OTHER\METIS\kwayfm.c">
 				</File>
 				<File
-					RelativePath="..\..\..\OTHER\METIS\kwaygreedy.c">
+					RelativePath="..\..\..\OTHER\METIS\kwayrefine.c">
 				</File>
 				<File
-					RelativePath="..\..\..\OTHER\METIS\kwaypart.c">
+					RelativePath="..\..\..\OTHER\METIS\kwayvolfm.c">
 				</File>
 				<File
-					RelativePath="..\..\..\OTHER\METIS\lanczos.c">
-				</File>
-				<File
-					RelativePath="..\..\..\OTHER\METIS\list.c">
+					RelativePath="..\..\..\OTHER\METIS\kwayvolrefine.c">
 				</File>
 				<File
 					RelativePath="..\..\..\OTHER\METIS\macros.h">
@@ -270,22 +370,82 @@
 					RelativePath="..\..\..\OTHER\METIS\match.c">
 				</File>
 				<File
+					RelativePath="..\..\..\OTHER\METIS\mbalance.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\mbalance2.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\mcoarsen.c">
+				</File>
+				<File
 					RelativePath="..\..\..\OTHER\METIS\memory.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\mesh.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\meshpart.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\metis.h">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\mfm.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\mfm2.c">
 				</File>
 				<File
 					RelativePath="..\..\..\OTHER\METIS\mincover.c">
 				</File>
 				<File
-					RelativePath="..\..\..\OTHER\METIS\mlevelorder.c">
+					RelativePath="..\..\..\OTHER\METIS\minitpart.c">
 				</File>
 				<File
-					RelativePath="..\..\..\OTHER\METIS\mlevelpart.c">
+					RelativePath="..\..\..\OTHER\METIS\minitpart2.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\mkmetis.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\mkwayfmh.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\mkwayrefine.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\mmatch.c">
 				</File>
 				<File
 					RelativePath="..\..\..\OTHER\METIS\mmd.c">
 				</File>
 				<File
-					RelativePath="..\..\..\OTHER\METIS\multilevel.h">
+					RelativePath="..\..\..\OTHER\METIS\mpmetis.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\mrefine.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\mrefine2.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\mutil.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\myqsort.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\ometis.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\parmetis.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\pmetis.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\pqueue.c">
 				</File>
 				<File
 					RelativePath="..\..\..\OTHER\METIS\proto.h">
@@ -300,16 +460,22 @@
 					RelativePath="..\..\..\OTHER\METIS\separator.c">
 				</File>
 				<File
-					RelativePath="..\..\..\OTHER\METIS\smbfactor.c">
+					RelativePath="..\..\..\OTHER\METIS\sfm.c">
 				</File>
 				<File
-					RelativePath="..\..\..\OTHER\METIS\smbfct.c">
+					RelativePath="..\..\..\OTHER\METIS\srefine.c">
 				</File>
 				<File
 					RelativePath="..\..\..\OTHER\METIS\stat.c">
 				</File>
 				<File
 					RelativePath="..\..\..\OTHER\METIS\struct.h">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\subdomains.c">
+				</File>
+				<File
+					RelativePath="..\..\..\OTHER\METIS\timing.c">
 				</File>
 				<File
 					RelativePath="..\..\..\OTHER\METIS\util.c">

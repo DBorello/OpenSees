@@ -120,6 +120,9 @@
 			RelativePath="..\..\..\OTHER\CBLAS\ddot.c">
 		</File>
 		<File
+			RelativePath="..\..\..\OTHER\CBLAS\dgemm.c">
+		</File>
+		<File
 			RelativePath="..\..\..\OTHER\CBLAS\dgemv.c">
 		</File>
 		<File
@@ -142,6 +145,9 @@
 		</File>
 		<File
 			RelativePath="..\..\..\OTHER\CBLAS\dsyr2.c">
+		</File>
+		<File
+			RelativePath="..\..\..\OTHER\CBLAS\dtrsm.c">
 		</File>
 		<File
 			RelativePath="..\..\..\OTHER\CBLAS\dtrsv.c">

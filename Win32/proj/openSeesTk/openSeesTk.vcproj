@@ -45,7 +45,7 @@
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="c:\program files\tcl\lib;..\..\lib\release;..\..\lib;..\..\lib\release"
 				IgnoreDefaultLibraryNames=""
-				ProgramDatabaseFile=".\..\..\bin/openSeesTk.pdb"
+				ProgramDatabaseFile=""
 				SubSystem="1"/>
 			<Tool
 				Name="VCMIDLTool"
