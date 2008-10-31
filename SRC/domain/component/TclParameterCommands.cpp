@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2007-03-21 20:10:52 $
+// $Revision: 1.5 $
+// $Date: 2008-10-31 18:46:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/TclParameterCommands.cpp,v $
 
 #include <stdlib.h>
@@ -126,6 +126,9 @@ TclModelBuilderParameterCommand(ClientData clientData, Tcl_Interp *interp,
 						argc-argStart);
 	
 	theTclDomain->addParameter(newParameter);
+	char buffer[40];
+	sprintf(buffer, "%d", paramTag);
+	Tcl_SetResult(interp, buffer, TCL_VOLATILE);
       }
     }
     // Add to an existing parameter
