@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.52 $
-// $Date: 2008-10-17 23:39:06 $
+// $Revision: 1.53 $
+// $Date: 2008-11-04 22:24:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -54,6 +54,7 @@
 #include <EPPGapMaterial.h>		// Mackie
 #include <ViscousMaterial.h>	// Sasani
 #include <PathIndependentMaterial.h>	// MHS
+#include <BackboneMaterial.h>	// MHS
 #include <MinMaxMaterial.h>	// MHS
 #include <FatigueMaterial.h>	// Patxi
 #include <SeriesMaterial.h>		// MHS
@@ -1508,6 +1509,40 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 
 		theMaterial = new PathIndependentMaterial (tag, *material);
 	}
+
+    else if (strcmp(argv[1],"Backbone") == 0) {
+      if (argc < 4) {
+	opserr << "WARNING insufficient arguments\n";
+	printCommand(argc,argv);
+	opserr << "Want: uniaxialMaterial Backbone tag? bbTag?" << endln;
+	return TCL_ERROR;
+      }
+      
+      int tag, bbTag;
+
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	opserr << "WARNING invalid tag\n";
+	opserr << "Backbone material: " << tag << endln;
+	return TCL_ERROR;
+      }
+		
+      if (Tcl_GetInt(interp, argv[3], &bbTag) != TCL_OK) {
+	opserr << "WARNING invalid bTag\n";
+	opserr << "Backbone material: " << tag << endln;
+	return TCL_ERROR;
+      }
+
+      HystereticBackbone *backbone = theTclBuilder->getHystereticBackbone(bbTag);
+		
+      if (backbone == 0) {
+	opserr << "WARNING backbone does not exist\n";
+	opserr << "backbone: " << bbTag; 
+	opserr << "\nuniaxialMaterial Backbone: " << tag << endln;
+	return TCL_ERROR;
+      }
+      
+      theMaterial = new BackboneMaterial(tag, *backbone);
+    }
 
     else if (strcmp(argv[1],"MinMax") == 0) {
       if (argc < 4) {

@@ -52,6 +52,7 @@ include ../../../Makefile.def
 	ElasticBDMaterial.o \
 	ShearPanelMaterial.o \
 	SelfCenteringMaterial.o \
+	BackboneMaterial.o \
         TclModelBuilderUniaxialMaterialCommand.o
 
 all:         $(OBJS)
