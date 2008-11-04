@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2008-08-26 16:47:42 $
+// $Revision: 1.30 $
+// $Date: 2008-11-04 21:23:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -261,7 +261,7 @@ FiberSection3d::setTrialSectionDeformation (const Vector &deforms)
     // determine material strain and set it
     double strain = d0 + y*d1 + z*d2;
     double tangent, stress;
-    res = theMat->setTrial(strain, stress, tangent);
+    res += theMat->setTrial(strain, stress, tangent);
 
     double value = tangent * A;
     double vas1 = y*value;
