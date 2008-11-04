@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.33 $
-// $Date: 2007-10-13 00:53:04 $
+// $Revision: 1.34 $
+// $Date: 2008-11-04 21:32:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -265,6 +265,8 @@ DispBeamColumn2d::revertToStart()
 int
 DispBeamColumn2d::update(void)
 {
+  int err = 0;
+
   // Update the transformation
   crdTransf->update();
   
@@ -302,9 +304,14 @@ DispBeamColumn2d::update(void)
     }
     
     // Set the section deformations
-    theSections[i]->setTrialSectionDeformation(e);
+    err += theSections[i]->setTrialSectionDeformation(e);
   }
   
+  if (err != 0) {
+    opserr << "DispBeamColumn2d::update() - failed setTrialSectionDeformations()\n";
+    return err;
+  }
+
   return 0;
 }
 
