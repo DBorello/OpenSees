@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-06-26 20:13:24 $
+// $Revision: 1.8 $
+// $Date: 2008-11-04 20:21:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.h,v $
                                                                         
 // Written: fmk 
@@ -115,9 +115,9 @@ class TclModelBuilder : public ModelBuilder
     UnloadingRule *getUnloadingRule(int tag);
     int addStrengthDegradation(StrengthDegradation &theDegr);
     StrengthDegradation *getStrengthDegradation(int tag);
+#endif
     int addHystereticBackbone(HystereticBackbone &theBackbone);
     HystereticBackbone *getHystereticBackbone(int tag);
-#endif
 
   private:
     int ndm;	// space dimension of the mesh
@@ -139,8 +139,8 @@ class TclModelBuilder : public ModelBuilder
     TaggedObjectStorage *theStiffnessDegradations;
     TaggedObjectStorage *theUnloadingRules;
     TaggedObjectStorage *theStrengthDegradations;
-    TaggedObjectStorage *theHystereticBackbones;
 #endif
+    TaggedObjectStorage *theHystereticBackbones;
 
  protected:
     Tcl_Interp *theInterp;

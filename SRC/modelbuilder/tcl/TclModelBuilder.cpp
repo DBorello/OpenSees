@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.42 $
-// $Date: 2008-07-02 18:14:36 $
+// $Revision: 1.43 $
+// $Date: 2008-11-04 20:25:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -96,8 +96,8 @@
 #include <StiffnessDegradation.h>
 #include <UnloadingRule.h>
 #include <StrengthDegradation.h>
-#include <HystereticBackbone.h>
 #endif
+#include <HystereticBackbone.h>
 
 
 ////////////////////// gnp adding damping 
@@ -291,12 +291,12 @@ int
 TclCommand_addStrengthDegradation(ClientData clientData,
 				  Tcl_Interp *interp,
 				  int argc, TCL_Char **argv);
+#endif
 
 int
 TclCommand_addHystereticBackbone(ClientData clientData,
 				 Tcl_Interp *interp,
 				 int argc, TCL_Char **argv);
-#endif
 
 int
 TclCommand_addGroundMotion(ClientData clientData, 
@@ -397,8 +397,8 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   theStiffnessDegradations = new ArrayOfTaggedObjects(32);
   theUnloadingRules = new ArrayOfTaggedObjects(32);
   theStrengthDegradations = new ArrayOfTaggedObjects(32);
-  theHystereticBackbones= new ArrayOfTaggedObjects(32);
 #endif
+  theHystereticBackbones= new ArrayOfTaggedObjects(32);
   theYieldSurface_BCs = new ArrayOfTaggedObjects(32);
   theCycModels = new ArrayOfTaggedObjects(32); //!!
   theDamageModels = new ArrayOfTaggedObjects(32); //!!
@@ -537,11 +537,10 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   Tcl_CreateCommand(interp, "strengthDegradation",
 		    TclCommand_addStrengthDegradation,
 		    (ClientData)NULL, NULL);
-  
+#endif
   Tcl_CreateCommand(interp, "hystereticBackbone",
 		    TclCommand_addHystereticBackbone,
 		    (ClientData)NULL, NULL);
-#endif
 
   ///new command for elast2plast in Multi-yield plasticity, by ZHY
   Tcl_CreateCommand(interp, "updateMaterialStage", 
@@ -603,8 +602,8 @@ TclModelBuilder::~TclModelBuilder()
   theStiffnessDegradations->clearAll();
   theUnloadingRules->clearAll();
   theStrengthDegradations->clearAll();
-  theHystereticBackbones->clearAll();
 #endif
+  theHystereticBackbones->clearAll();
 
   // free up memory allocated in the constructor
   delete theUniaxialMaterials;
@@ -623,8 +622,8 @@ TclModelBuilder::~TclModelBuilder()
   delete theStiffnessDegradations;
   delete theUnloadingRules;
   delete theStrengthDegradations;
-  delete theHystereticBackbones;
 #endif
+  delete theHystereticBackbones;
 
   // set the pointers to 0 
   theTclDomain =0;
@@ -670,8 +669,8 @@ TclModelBuilder::~TclModelBuilder()
   Tcl_DeleteCommand(theInterp, "unloadingRule");
   Tcl_DeleteCommand(theInterp, "stiffnessDegradation");
   Tcl_DeleteCommand(theInterp, "strengthDegradation");
-  Tcl_DeleteCommand(theInterp, "hystereticBackbone");
 #endif
+  Tcl_DeleteCommand(theInterp, "hystereticBackbone");
 
   Tcl_DeleteCommand(theInterp, "yieldSurface_BC");
   Tcl_DeleteCommand(theInterp, "ysEvolutionModel");
@@ -782,6 +781,7 @@ TclModelBuilder::getStrengthDegradation(int tag)
   StrengthDegradation *result = (StrengthDegradation *)mc;
   return result;
 }
+#endif
 
 int
 TclModelBuilder::addHystereticBackbone(HystereticBackbone &theBackbone)
@@ -806,7 +806,6 @@ TclModelBuilder::getHystereticBackbone(int tag)
   HystereticBackbone *result = (HystereticBackbone *)mc;
   return result;
 }
-#endif
 
 int 
 TclModelBuilder::addUniaxialMaterial(UniaxialMaterial &theMaterial)
@@ -3235,6 +3234,7 @@ TclCommand_addStrengthDegradation(ClientData clientData,
   return TclModelBuilderStrengthDegradationCommand(clientData, interp, 
 						   argc, argv, theTclBuilder);
 }
+#endif
 
 extern int
 TclModelBuilderHystereticBackboneCommand(ClientData clientData,
@@ -3250,7 +3250,6 @@ TclCommand_addHystereticBackbone(ClientData clientData,
   return TclModelBuilderHystereticBackboneCommand(clientData, interp, 
 						  argc, argv, theTclBuilder);
 }
-#endif
 
 /// added by ZHY
 extern int 
