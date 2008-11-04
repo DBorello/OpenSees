@@ -1,6 +1,7 @@
 include ../../../../Makefile.def
 
-OBJS       = ArctangentBackbone.o \
+OBJS       = HystereticBackbone.o \
+	ArctangentBackbone.o \
 	TrilinearBackbone.o \
 	TclModelBuilderBackboneCommand.o
 
