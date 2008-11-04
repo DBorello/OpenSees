@@ -1,7 +1,7 @@
 include ../../../Makefile.def
 
-OBJS       = DispBeamColumn2d.o DispBeamColumn3d.o \
-	TclDispBeamColumnCommand.o
+OBJS       = DispBeamColumn2d.o \
+	DispBeamColumn3d.o
 
 all:         $(OBJS)
 
