@@ -591,6 +591,7 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/EPPGapMaterial.o \
 	$(FE)/material/uniaxial/ViscousMaterial.o \
 	$(FE)/material/uniaxial/PathIndependentMaterial.o \
+	$(FE)/material/uniaxial/BackboneMaterial.o \
 	$(FE)/material/uniaxial/MinMaxMaterial.o \
 	$(FE)/material/uniaxial/FatigueMaterial.o \
 	$(FE)/material/uniaxial/CableMaterial.o \
@@ -604,6 +605,10 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/HyperbolicGapMaterial.o \
 	$(FE)/material/uniaxial/TclHyperbolicGapMaterial.o \
 	$(FE)/material/uniaxial/SelfCenteringMaterial.o \
+	$(FE)/material/uniaxial/backbone/HystereticBackbone.o \
+	$(FE)/material/uniaxial/backbone/ArctangentBackbone.o \
+	$(FE)/material/uniaxial/backbone/TrilinearBackbone.o \
+	$(FE)/material/uniaxial/backbone/TclModelBuilderBackboneCommand.o \
 	$(FE)/material/nD/NDMaterial.o \
 	$(FE)/material/nD/J2Plasticity.o \
 	$(FE)/material/nD/J2PlaneStress.o \
@@ -689,6 +694,7 @@ SECTION_LIBS = $(FE)/material/section/SectionForceDeformation.o \
 	$(FE)/material/section/MembranePlateFiberSection.o \
 	$(FE)/material/section/Bidirectional.o \
 	$(FE)/material/section/Isolator2spring.o \
+	$(FE)/material/section/WSection2d.o \
 	$(FE)/material/section/integration/SectionIntegration.o \
 	$(FE)/material/section/integration/RCSectionIntegration.o \
 	$(FE)/material/section/integration/WideFlangeSectionIntegration.o \
@@ -874,7 +880,11 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/accelerator/RaphsonAccelerator.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/accelerator/PeriodicAccelerator.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/accelerator/KrylovAccelerator.o \
+	$(FE)/analysis/algorithm/equiSolnAlgo/accelerator/SecantAccelerator1.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/accelerator/SecantAccelerator2.o \
+	$(FE)/analysis/algorithm/equiSolnAlgo/accelerator/SecantAccelerator3.o \
+	$(FE)/analysis/algorithm/equiSolnAlgo/accelerator/MillerAccelerator.o \
+	$(FE)/analysis/algorithm/equiSolnAlgo/accelerator/naccel.o \
 	$(FE)/convergenceTest/ConvergenceTest.o \
 	$(FE)/convergenceTest/CTestNormUnbalance.o \
 	$(FE)/convergenceTest/CTestNormDispIncr.o \
