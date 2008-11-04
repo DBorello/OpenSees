@@ -883,8 +883,6 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/accelerator/SecantAccelerator1.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/accelerator/SecantAccelerator2.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/accelerator/SecantAccelerator3.o \
-	$(FE)/analysis/algorithm/equiSolnAlgo/accelerator/MillerAccelerator.o \
-	$(FE)/analysis/algorithm/equiSolnAlgo/accelerator/naccel.o \
 	$(FE)/convergenceTest/ConvergenceTest.o \
 	$(FE)/convergenceTest/CTestNormUnbalance.o \
 	$(FE)/convergenceTest/CTestNormDispIncr.o \
