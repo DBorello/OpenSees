@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.38 $
-// $Date: 2008-09-30 21:15:02 $
+// $Revision: 1.39 $
+// $Date: 2008-11-04 21:32:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 /*
@@ -767,7 +767,10 @@ ForceBeamColumn2d::update()
 	    if (initialFlag != 0)
 	      vsSubdivide[i] += dvs;
 	    
-	    sections[i]->setTrialSectionDeformation(vsSubdivide[i]);
+	    if (sections[i]->setTrialSectionDeformation(vsSubdivide[i]) < 0) {
+	      opserr << "ForceBeamColumn2d::update() - section failed in setTrial\n";
+	      return -1;
+	    }
 	    
 	    // get section resisting forces
 	    SsrSubdivide[i] = sections[i]->getStressResultant();
@@ -936,7 +939,7 @@ ForceBeamColumn2d::update()
     opserr << "WARNING - ForceBeamColumn2d::update - failed to get compatible ";
     opserr << "element forces & deformations for element: ";
     opserr << this->getTag() << "(dW: << " << dW << ")\n";
-    //return -1;
+    return -1;
   }
 
   initialFlag = 1;
