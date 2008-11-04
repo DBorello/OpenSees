@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.27 $
-// $Date: 2007-06-09 17:16:04 $
+// $Revision: 1.28 $
+// $Date: 2008-11-04 21:33:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 /*
@@ -708,7 +708,10 @@ ForceBeamColumn3d::getInitialStiff(void)
 	      if (initialFlag != 0)
 		vsSubdivide[i] += dvs;
 
-	      sections[i]->setTrialSectionDeformation(vsSubdivide[i]);
+	      if ( sections[i]->setTrialSectionDeformation(vsSubdivide[i]) < 0) {
+		opserr << "ForceBeamColumn3d::update() - section failed in setTrial\n";
+		return -1;
+	      }
 
 	      // get section resisting forces
 	      SsrSubdivide[i] = sections[i]->getStressResultant();
