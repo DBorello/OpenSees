@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-11-04 22:20:59 $
+// $Revision: 1.2 $
+// $Date: 2008-11-06 15:27:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/BackboneMaterial.cpp,v $
 
 // Written: MHS
@@ -68,6 +68,8 @@ int
 BackboneMaterial::setTrialStrain(double eps, double epsdot)
 {
   strain = eps;
+
+  return 0;
 }
 
 double 
