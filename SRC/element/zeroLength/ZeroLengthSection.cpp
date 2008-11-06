@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-02-02 01:30:47 $
+// $Revision: 1.12 $
+// $Date: 2008-11-06 21:01:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthSection.cpp,v $
                                                                         
 // Written: MHS
@@ -54,13 +54,14 @@ Vector ZeroLengthSection::P12(12);
 //  and storing the tags of the ZeroLengthSection end nodes.
 
 ZeroLengthSection::ZeroLengthSection(int tag, int dim, int Nd1, int Nd2, 
-	       const Vector& x, const Vector& yprime, 
-		   SectionForceDeformation& sec) : 
-Element(tag, ELE_TAG_ZeroLengthSection),
-connectedExternalNodes(2),
-dimension(dim), numDOF(0), 
-transformation(3,3), A(0), v(0), K(0), P(0),
-theSection(0), order(0)
+				     const Vector& x, const Vector& yprime, 
+				     SectionForceDeformation& sec,
+				     int doRayleigh) 
+ :Element(tag, ELE_TAG_ZeroLengthSection),
+  connectedExternalNodes(2),
+  dimension(dim), numDOF(0), 
+  transformation(3,3), useRayleighDamping(doRayleigh),A(0), v(0), K(0), P(0),
+  theSection(0), order(0)
 {
 	// Obtain copy of section model
 	theSection = sec.getCopy();
@@ -301,6 +302,10 @@ ZeroLengthSection::getResistingForce()
 	// Compute element resisting force ... P = A^*q
 	P->addMatrixTransposeVector(0.0, *A, q, 1.0);
 
+	if (useRayleighDamping == 0)
+	  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
+	    *P += this->getRayleighDampingForces();
+
 	return *P;
 }
 
@@ -330,7 +335,7 @@ ZeroLengthSection::sendSelf(int commitTag, Channel &theChannel)
 
 	// ZeroLengthSection packs its data into an ID and sends this to theChannel
 	// along with its dbTag and the commitTag passed in the arguments
-	static ID idData(8);
+	static ID idData(9);
 
 	idData(0) = this->getTag();
 	idData(1) = dimension;
@@ -347,6 +352,8 @@ ZeroLengthSection::sendSelf(int commitTag, Channel &theChannel)
 			theSection->setDbTag(secDbTag);
 	}
 	idData(7) = secDbTag;
+	idData(8) = useRayleighDamping;
+
 
 	res += theChannel.sendID(dataTag, commitTag, idData);
 	if (res < 0) {
@@ -383,7 +390,7 @@ ZeroLengthSection::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
 	// ZeroLengthSection creates an ID, receives the ID and then sets the 
 	// internal data with the data in the ID
 
-	static ID idData(8);
+	static ID idData(9);
 
 	res += theChannel.recvID(dataTag, commitTag, idData);
 	if (res < 0) {
@@ -402,6 +409,7 @@ ZeroLengthSection::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
 	numDOF = idData(2);
 	connectedExternalNodes(0) = idData(4);
 	connectedExternalNodes(1) = idData(5);
+	useRayleighDamping =idData(8);
 
 	// Check that there is correct number of materials, reallocate if needed
 	if (order != idData(3)) {

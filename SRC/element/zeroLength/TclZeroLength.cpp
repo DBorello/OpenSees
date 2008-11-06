@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2008-07-21 22:52:39 $
+// $Revision: 1.8 $
+// $Date: 2008-11-06 21:01:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/TclZeroLength.cpp,v $
 // Written: fmk
 // Created: 01/00
@@ -225,7 +225,9 @@ TclModelBuilder_addZeroLength(ClientData clientData, Tcl_Interp *interp,
     Vector y(3); y(0) = 0.0; y(1) = 1.0; y(2) = 0.0;
 
     // finally check the command line to see if user specified orientation
-    if (argi < argc) {
+    int doRayleighDamping = 1;
+
+    while (argi < argc) {
 	if (strcmp(argv[argi],"-orient") == 0) {
 	    if (argc < (argi+7)) {
 	      opserr << "WARNING not enough paramaters after -orient flag for ele " << eleTag <<
@@ -246,28 +248,34 @@ TclModelBuilder_addZeroLength(ClientData clientData, Tcl_Interp *interp,
 		    "<-orient x1? x2? x3? y1? y2? y3?>\n";	
 		  delete [] theMats;			
 		  return TCL_ERROR;
-		    } else {
-			argi++;
-			x(i) = value;
-		    }
+		} else {
+		  argi++;
+		  x(i) = value;
 		}
-		// read the y values
-		for (int j=0; j<3; j++)  {
-		    if (Tcl_GetDouble(interp, argv[argi], &value) != TCL_OK) {
-		      opserr << "WARNING invalid -orient value for ele  " <<
-			eleTag << argv[argi] <<
-			"- element ZeroLength eleTag? iNode? jNode? " <<
-			"-mat matID1? ... -dir dirMat1? .. " <<
-			"<-orient x1? x2? x3? y1? y2? y3?>\n";	
-		      delete [] theMats;			
-		      return TCL_ERROR;
-		    } else {
-		      argi++;
-		      y(j) = value;		
-		    }
+	      }
+	      // read the y values
+	      for (int j=0; j<3; j++)  {
+		if (Tcl_GetDouble(interp, argv[argi], &value) != TCL_OK) {
+		  opserr << "WARNING invalid -orient value for ele  " <<
+		    eleTag << argv[argi] <<
+		    "- element ZeroLength eleTag? iNode? jNode? " <<
+		    "-mat matID1? ... -dir dirMat1? .. " <<
+		    "<-orient x1? x2? x3? y1? y2? y3?>\n";	
+		  delete [] theMats;			
+		  return TCL_ERROR;
+		} else {
+		  argi++;
+		  y(j) = value;		
 		}
+	      }
 	    }
-	}
+	    
+	    argi++;
+	} else 	if (strcmp(argv[argi],"-doRayleigh") == 0)  {
+	  doRayleighDamping = 0;
+	  argi++;
+	}  else
+	  argi++;
     }
     
     //
@@ -275,7 +283,7 @@ TclModelBuilder_addZeroLength(ClientData clientData, Tcl_Interp *interp,
     //
 
     Element *theEle;
-    theEle = new ZeroLength(eleTag, ndm, iNode, jNode, x, y, numMat, theMats, theDirns);
+    theEle = new ZeroLength(eleTag, ndm, iNode, jNode, x, y, numMat, theMats, theDirns, doRayleighDamping);
     if (theEle == 0) {
 	delete [] theMats;	
 	return TCL_ERROR;
@@ -360,10 +368,11 @@ TclModelBuilder_addZeroLengthSection(ClientData clientData, Tcl_Interp *interp,
     Vector x(3); x(0) = 1.0; x(1) = 0.0; x(2) = 0.0;
     Vector y(3); y(0) = 0.0; y(1) = 1.0; y(2) = 0.0;
 
-	int argi = 6;
+    int argi = 6;
+    int doRayleighDamping = 1;
 
     // finally check the command line to see if user specified orientation
-    if (argi < argc) {
+    while (argi < argc) {
       if (strcmp(argv[argi],"-orient") == 0) {
 	if (argc < (argi+7)) {
 	  opserr << "WARNING not enough paramaters after -orient flag for ele " <<
@@ -400,7 +409,12 @@ TclModelBuilder_addZeroLengthSection(ClientData clientData, Tcl_Interp *interp,
 	    }
 	  }
 	}
-      }
+      } else if (strcmp(argv[argi],"-doRayleigh") == 0)  {
+	doRayleighDamping = 0;
+	argi++;
+      } else
+	argi++;
+
     }
     
     //
@@ -414,7 +428,7 @@ TclModelBuilder_addZeroLengthSection(ClientData clientData, Tcl_Interp *interp,
       return TCL_ERROR;		
     }
     
-    Element *theEle = new ZeroLengthSection(eleTag, ndm, iNode, jNode, x, y, *theSection);
+    Element *theEle = new ZeroLengthSection(eleTag, ndm, iNode, jNode, x, y, *theSection, doRayleighDamping);
     
     if (theEle == 0)
       return TCL_ERROR;

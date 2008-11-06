@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2008-06-13 21:11:18 $
+// $Revision: 1.13 $
+// $Date: 2008-11-06 21:01:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.h,v $
                                                                         
                                                                         
@@ -67,7 +67,8 @@ class ZeroLength : public Element
 	       const Vector& x,
 	       const Vector& yprime,
 	       UniaxialMaterial& theMaterial,
-	       int direction );
+	       int direction,
+	       int doRayleighDamping = 1);
 
     // Constructor for a multiple 1d material models
     ZeroLength(int tag, 			      
@@ -77,7 +78,8 @@ class ZeroLength : public Element
 	       const Vector& yprime,
 	       int n1dMat,
 	       UniaxialMaterial** theMaterial,  
-	       const ID& direction );
+	       const ID& direction,
+	       int doRaylieghDamping = 1);
 
     ZeroLength();    
     ~ZeroLength();
@@ -143,6 +145,7 @@ class ZeroLength : public Element
     int dimension;                      // = 1, 2, or 3 dimensions
     int numDOF;	                        // number of dof for ZeroLength
     Matrix transformation;		// transformation matrix for orientation
+    int useRayleighDamping;
 	
     Node *theNodes[2];
 

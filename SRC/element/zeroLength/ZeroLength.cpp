@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2008-06-13 21:11:18 $
+// $Revision: 1.23 $
+// $Date: 2008-11-06 21:01:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
 
 // Written: GLF
@@ -66,10 +66,11 @@ ZeroLength::ZeroLength(int tag,
 		       int Nd1, int Nd2, 
 		       const Vector &x, const Vector &yp,
 		       UniaxialMaterial &theMat,
-		       int direction )
+		       int direction,
+		       int doRayleigh)
  :Element(tag,ELE_TAG_ZeroLength),     
   connectedExternalNodes(2),
-  dimension(dim), numDOF(0), transformation(3,3),
+  dimension(dim), numDOF(0), transformation(3,3), useRayleighDamping(doRayleigh),
   theMatrix(0), theVector(0),
   numMaterials1d(1), theMaterial1d(0), dir1d(0), t1d(0), d0(0), v0(0)
 {
@@ -105,10 +106,11 @@ ZeroLength::ZeroLength(int tag,
 		       const Vector& x, const Vector& yp,
 		       int n1dMat,
 		       UniaxialMaterial** theMat,
-		       const ID& direction )
+		       const ID& direction,
+		       int doRayleigh)
  :Element(tag,ELE_TAG_ZeroLength),     
   connectedExternalNodes(2),
-  dimension(dim), numDOF(0), transformation(3,3),
+  dimension(dim), numDOF(0), transformation(3,3), useRayleighDamping(doRayleigh),
   theMatrix(0), theVector(0),
   numMaterials1d(n1dMat), theMaterial1d(0), dir1d(0), t1d(0), d0(0), v0(0)
 {
@@ -588,7 +590,14 @@ ZeroLength::getResistingForceIncInertia()
 {	
     // there is no mass, so return
     
-    return this->getResistingForce();
+    this->getResistingForce();
+
+    if (useRayleighDamping == 0)
+      if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
+	*theVector += this->getRayleighDampingForces();
+
+    return *theVector;
+
 }
 
 
@@ -607,7 +616,7 @@ ZeroLength::sendSelf(int commitTag, Channel &theChannel)
 
 	// Make one size bigger so not a multiple of 3, otherwise will conflict
 	// with classTags ID
-	static ID idData(6+1);
+	static ID idData(7);
 
 	idData(0) = this->getTag();
 	idData(1) = dimension;
@@ -615,6 +624,7 @@ ZeroLength::sendSelf(int commitTag, Channel &theChannel)
 	idData(3) = numMaterials1d;
 	idData(4) = connectedExternalNodes(0);
 	idData(5) = connectedExternalNodes(1);
+	idData(6) = useRayleighDamping;
 
 	res += theChannel.sendID(dataTag, commitTag, idData);
 	if (res < 0) {
@@ -678,7 +688,7 @@ ZeroLength::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBr
   // ZeroLength creates an ID, receives the ID and then sets the 
   // internal data with the data in the ID
 
-  static ID idData(6+1);
+  static ID idData(7);
 
   res += theChannel.recvID(dataTag, commitTag, idData);
   if (res < 0) {
@@ -699,6 +709,7 @@ ZeroLength::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBr
   numDOF = idData(2);
   connectedExternalNodes(0) = idData(4);
   connectedExternalNodes(1) = idData(5);
+  useRayleighDamping = idData(6);
   
   if (idData(3) < 1) {
     numMaterials1d = 0;

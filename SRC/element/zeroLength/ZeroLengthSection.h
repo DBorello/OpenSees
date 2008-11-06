@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-02-02 01:30:47 $
+// $Revision: 1.9 $
+// $Date: 2008-11-06 21:01:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthSection.h,v $
                                                                         
 // Written: MHS
@@ -49,11 +49,12 @@ class ZeroLengthSection : public Element
   public:
     
     ZeroLengthSection(int tag, 			      
-	       int dimension,
-	       int Nd1, int Nd2, 
-	       const Vector& x,
-	       const Vector& yprime,
-		   SectionForceDeformation& theSection);
+		      int dimension,
+		      int Nd1, int Nd2, 
+		      const Vector& x,
+		      const Vector& yprime,
+		      SectionForceDeformation& theSection,
+		      int doRayleighDamping = 1);
 
     ZeroLengthSection();    
     ~ZeroLengthSection();
@@ -99,13 +100,14 @@ class ZeroLengthSection : public Element
     // private methods
     void setUp (int Nd1, int Nd2, const Vector& x, const Vector& y);
     void setTransformation(void);
-	void computeSectionDefs(void);
+    void computeSectionDefs(void);
 
     // private attributes - a copy for each object of the class
     ID  connectedExternalNodes;         // contains the tags of the end nodes
     int dimension;                      // = 2 or 3 dimensions
     int numDOF;	                        // number of dof for ZeroLengthSection
     Matrix transformation;		// transformation matrix for orientation
+    int useRayleighDamping;
 	
     Matrix *A;	// Transformation matrix ... e = A*(u2-u1)
     Vector *v;	// Section deformation vector, the element basic deformations
