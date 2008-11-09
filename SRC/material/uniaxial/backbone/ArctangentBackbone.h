@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-11-04 20:06:23 $
+// $Revision: 1.2 $
+// $Date: 2008-11-09 06:03:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/backbone/ArctangentBackbone.h,v $
 
 // Written: MHS

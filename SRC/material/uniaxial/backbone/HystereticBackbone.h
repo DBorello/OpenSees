@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-11-04 20:23:12 $
+// $Revision: 1.2 $
+// $Date: 2008-11-09 06:05:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/backbone/HystereticBackbone.h,v $
 
 // Written: MHS
