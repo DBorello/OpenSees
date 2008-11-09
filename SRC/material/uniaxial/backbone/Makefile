@@ -3,6 +3,8 @@ include ../../../../Makefile.def
 OBJS       = HystereticBackbone.o \
 	ArctangentBackbone.o \
 	TrilinearBackbone.o \
+	ReeseSoftClayBackbone.o \
+	ReeseSandBackbone.o \
 	TclModelBuilderBackboneCommand.o
 
 
