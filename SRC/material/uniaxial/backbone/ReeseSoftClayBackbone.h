@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-11-09 06:07:01 $
+// $Revision: 1.2 $
+// $Date: 2008-11-10 22:42:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/backbone/ReeseSoftClayBackbone.h,v $
 
 // Written: MHS
