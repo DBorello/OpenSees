@@ -29,6 +29,8 @@
 #include <FluidSolidPorousMaterial.h>
 #include <TzSimple1.h>
 #include <iostream>
+#include <FourNodeQuadUP.h>
+#include <Nine_Four_Node_QuadUP.h>
 
 class TzLiq1 : public TzSimple1
 {
@@ -105,3 +107,4 @@ class TzLiq1 : public TzSimple1
 };
 
 #endif // TZLIQ1_H
+

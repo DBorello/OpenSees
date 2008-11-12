@@ -26,6 +26,7 @@
 #include <math.h>
 #include <Parameter.h>
 
+
 // Controls on internal iteration between spring components
 const int PYmaxIterations = 20;
 const double PYtolerance = 1.0e-12;
@@ -269,157 +270,181 @@ PyLiq1::revertToStart(void)
 double 
 PyLiq1::getEffectiveStress(void)
 {
+
 	// Default value for meanStress
 	double meanStress = meanConsolStress;
 	
-	// if the elemFlag has not been set yet, then set it
+	// if theDomain pointer is nonzero, then set pointers to attached soil elements.
 	//
-	if(elemFlag.compare("NONE") == 0) {	//string.compare returns zero if equal
-
-		// if theDomain pointer is nonzero, then set pointers to attached soil elements.
-		//
-		if(theDomain != 0)
-		{	
-			Element *theElement1 = theDomain->getElement(solidElem1);
-			Element *theElement2 = theDomain->getElement(solidElem2);
-			if (theElement1 == 0 || theElement2 == 0) {
-				opserr << "WARNING solid element not found in getEffectiveStress" << endln;
-				opserr << "PyLiq1: " << endln;
-				opserr << "Adjacent solidElems: " << solidElem1 << ", " << solidElem2 << endln;
-				exit(-1);
-			}
-
-			// Check each of the allowable element types, starting with 4NodeQuads
-			theQuad1 = dynamic_cast<FourNodeQuad*>(theElement1);
-			theQuad2 = dynamic_cast<FourNodeQuad*>(theElement2);
-			if(theQuad1 != 0 && theQuad2 != 0) {
-				elemFlag.assign("4NodeQuad");
-			}
-
-			// Check on each other type of allowable element types, only if no successful yet.
-			if(elemFlag.compare("NONE") == 0) {	//string.compare returns zero if equal
-
-				// try other elements like, 4NodeQuadUP
-				elemFlag.assign("NONE");
-			}
-			
-			// Check on acceptable soil materials
-			//
-			if(elemFlag.compare("4NodeQuad") == 0) {
-				NDMaterial *theNDM1[4];
-				NDMaterial *theNDM2[4];
-				FluidSolidPorousMaterial *theFSPM1[4];
-				FluidSolidPorousMaterial *theFSPM2[4];
-				int dummy = 0;
-				for (int i=0; i<4; i++) {
-				  theNDM1[i] = theQuad1->theMaterial[i];
-				  theNDM2[i] = theQuad2->theMaterial[i];
-				  theFSPM1[i] = dynamic_cast<FluidSolidPorousMaterial*>(theNDM1[i]);
-				  theFSPM2[i] = dynamic_cast<FluidSolidPorousMaterial*>(theNDM2[i]);
-				  if(theFSPM1 == 0 || theFSPM2 == 0) dummy = dummy + 1;
-				}
-				if(dummy == 0) elemFlag.append("-FSPM");
-
-				// Check other acceptable soil types.
-			}
-
-			if(elemFlag.compare("NONE") == 0) {	// Never obtained a valid pointer set
-				opserr << "WARNING: Adjoining solid elements did not return valid pointers";
-				opserr << "PyLiq1: " << endln;
-				opserr << "Adjacent solidElems: " << solidElem1 << ", " << solidElem2 << endln;
-				exit(-1);
-				return meanStress;
-			}
-	
-		}
-	}
-	
-	// Get effective stresses using appropriate pointers in elemFlag not "NONE"
-	//
-	if(elemFlag.compare("NONE") != 0) {
-
-		if(elemFlag.compare("4NodeQuad-FSPM") == 0) {
-			meanStress = 0.0;
-			Vector *theStressVector = &stressV3;
-			double excessPorePressure = 0.0;
-			NDMaterial *theNDM;
-			FluidSolidPorousMaterial *theFSPM;
-
-			for(int i=0; i < 4; i++) { 
-				*theStressVector = theQuad1->theMaterial[i]->getStress();
-				meanStress += 2.0*(*theStressVector)[0] + (*theStressVector)[1];
-				*theStressVector = theQuad2->theMaterial[i]->getStress();
-				meanStress += 2.0*(*theStressVector)[0] + (*theStressVector)[1];
-
-				theNDM = theQuad1->theMaterial[i];
-				theFSPM= dynamic_cast<FluidSolidPorousMaterial*>(theNDM);
-				excessPorePressure += (theFSPM->trialExcessPressure);
-				theNDM = theQuad2->theMaterial[i];
-				theFSPM= dynamic_cast<FluidSolidPorousMaterial*>(theNDM);
-				excessPorePressure += (theFSPM->trialExcessPressure);
-			}
-			meanStress = meanStress/(2.0*4.0*3.0);
-			excessPorePressure = excessPorePressure/(2.0*4.0);
-			meanStress = meanStress - excessPorePressure;
-
-			return meanStress;
-		}
-
-		else if(elemFlag.compare("4NodeQuadUP-FSPM") == 0) {
-			
-			// expect to later have UP option on quads
-
-			return meanStress;
-		}
-		
-		else {	// Never found a matching flag
-			opserr << "WARNING: Something wrong with specification of elemFlag in getEffectiveStress";
+	if(theDomain != 0)
+	{	
+		Element *theElement1 = theDomain->getElement(solidElem1);
+		Element *theElement2 = theDomain->getElement(solidElem2);
+		if (theElement1 == 0 || theElement2 == 0) {
+			opserr << "WARNING solid element not found in getEffectiveStress" << endln;
 			opserr << "PyLiq1: " << endln;
 			opserr << "Adjacent solidElems: " << solidElem1 << ", " << solidElem2 << endln;
 			exit(-1);
-			return meanStress;
 		}
+
+		// Check that the class tags for the solid elements are either for a FourNodeQuad object
+		// or for a FourNodeQuadUP object or for a 9_4_QuadUP
+		if(theElement1->getClassTag()!=ELE_TAG_FourNodeQuad && theElement1->getClassTag()!=ELE_TAG_FourNodeQuadUP && theElement1->getClassTag()!=ELE_TAG_Nine_Four_Node_QuadUP)
+		{
+			opserr << "Element: " << theElement1->getTag() << " cannot be used to read effective stress for a PyLiq1 material." << endln;
+			exit(-1);
+		}
+		if(theElement2->getClassTag()!=ELE_TAG_FourNodeQuad && theElement2->getClassTag()!=ELE_TAG_FourNodeQuadUP && theElement2->getClassTag()!=ELE_TAG_Nine_Four_Node_QuadUP)
+		{
+			opserr << "Element: " << theElement2->getTag() << " cannot be used to read effective stress for a PyLiq1 material." << endln;
+			exit(-1);
+		}
+
+		double excessPorePressure = 0.0;
+		meanStress = 0.0;
+		
+		// get mean stress from element1 if it is a FourNodeQuad object
+		if(theElement1->getClassTag()==ELE_TAG_FourNodeQuad)
+		{
+			// It's safe to cast *theElement1 onto the FourNodeQuad class because we already
+			// checked the class tags.
+			FourNodeQuad *theElement1 = (FourNodeQuad *)(theDomain->getElement(solidElem1));
+			
+			// If the element is a quad, check that the class tag for the material at each gauss point is 100 for FluidSolidPorous object
+			meanStress = 0.0;
+			for(int i=0;i<4;i++)
+			{
+				NDMaterial *NDM = theElement1->theMaterial[i];
+				if(NDM->getClassTag()!=ND_TAG_FluidSolidPorousMaterial){
+					opserr << "Material: " << NDM->getTag() << " cannot be used to read effective stress for a PyLiq1 material." << endln;
+					exit(-1);
+				}
+				FluidSolidPorousMaterial *theFSPM = (FluidSolidPorousMaterial *)(NDM);
+				meanStress += 1.0/8.0*(2.0/3.0*(NDM->getStress())[0] + 1.0/3.0*(NDM->getStress())[1] - theFSPM->trialExcessPressure);
+			}
+		}
+		// get mean stress from element2 if it is a FourNodeQuad object
+		if(theElement2->getClassTag()==ELE_TAG_FourNodeQuad)
+		{
+			// It's safe to cast *theElement1 onto the FourNodeQuad class because we already
+			// checked the class tags.
+			FourNodeQuad *theElement2 = (FourNodeQuad *)(theDomain->getElement(solidElem2));
+			for(int i=0;i<4;i++)
+			{
+				NDMaterial *NDM = theElement2->theMaterial[i];
+				if(NDM->getClassTag()!=ND_TAG_FluidSolidPorousMaterial){
+					opserr << "Material: " << NDM->getTag() << " cannot be used to read effective stress for a PyLiq1 material." << endln;
+					exit(-1);
+				}
+				FluidSolidPorousMaterial *theFSPM = (FluidSolidPorousMaterial *)(NDM);
+				meanStress += 1.0/8.0*(2.0/3.0*(NDM->getStress())[0] + 1.0/3.0*(NDM->getStress())[1] - theFSPM->trialExcessPressure);
+			}
+		}
+
+		// get mean stress from element1 if it is a FourNodeQuadUP object
+		if(theElement1->getClassTag()==ELE_TAG_FourNodeQuadUP)
+		{
+			// It's safe to cast *theElement1 onto the FourNodeQuadUP class because we already
+			// checked the class tags.
+			FourNodeQuadUP *theElement1 = (FourNodeQuadUP *)(theDomain->getElement(solidElem1));
+			meanStress=0.0;
+			for(int i=0;i<4;i++)
+			{
+				NDMaterial *NDM = theElement1->theMaterial[i];
+				if(NDM->getClassTag()!=ND_TAG_PressureDependMultiYield && NDM->getClassTag() !=ND_TAG_PressureDependMultiYield02){
+					opserr << "Material: " << NDM->getTag() << " cannot be used to read effective stress for a PyLiq1 material." << endln;
+					exit(-1);
+				}
+				meanStress += 1.0/8.0*(2.0/3.0*(NDM->getStress())[0] + 1.0/3.0*(NDM->getStress())[1]);
+			}
+		}
+		// get mean stress from element 2 if it is a FourNodeQuadUP object
+		if(theElement2->getClassTag()==ELE_TAG_FourNodeQuadUP)
+		{
+			// It's safe to cast *theElement1 onto the FourNodeQuadUP class because we already
+			// checked the class tags.
+			FourNodeQuadUP *theElement2 = (FourNodeQuadUP *)(theDomain->getElement(solidElem2));
+			for(int i=0;i<4;i++)
+			{
+				NDMaterial *NDM = theElement2->theMaterial[i];
+				if(NDM->getClassTag()!=ND_TAG_PressureDependMultiYield && NDM->getClassTag() !=ND_TAG_PressureDependMultiYield02){
+					opserr << "Material: " << NDM->getTag() << " cannot be used to read effective stress for a PyLiq1 material." << endln;
+					exit(-1);
+				}
+				meanStress += 1.0/8.0*(2.0/3.0*(NDM->getStress())[0] + 1.0/3.0*(NDM->getStress())[1]);
+			}
+		}
+		// get mean stress from element1 if it is a 9_4_QuadUP object
+		if(theElement1->getClassTag()==ELE_TAG_Nine_Four_Node_QuadUP)
+		{
+			// It's safe to cast *theElement1 onto the FourNodeQuadUP class because we already
+			// checked the class tags.
+			NineFourNodeQuadUP *theElement1 = (NineFourNodeQuadUP *)(theDomain->getElement(solidElem1));
+			meanStress=0.0;
+			for(int i=0;i<9;i++)
+			{
+				NDMaterial *NDM = theElement1->theMaterial[i];
+				if(NDM->getClassTag()!=ND_TAG_PressureDependMultiYield && NDM->getClassTag() !=ND_TAG_PressureDependMultiYield02){
+					opserr << "Material: " << NDM->getTag() << " cannot be used to read effective stress for a PyLiq1 material." << endln;
+					exit(-1);
+				}
+				meanStress += 1.0/18.0*(2.0/3.0*(NDM->getStress())[0] + 1.0/3.0*(NDM->getStress())[1]);
+			}
+		}
+		if(theElement2->getClassTag()==ELE_TAG_Nine_Four_Node_QuadUP)
+		{
+			NineFourNodeQuadUP *theElement2 = (NineFourNodeQuadUP *)(theDomain->getElement(solidElem2));
+			for(int i=0;i<9;i++)
+			{
+				NDMaterial *NDM = theElement2->theMaterial[i];
+				if(NDM->getClassTag()!=ND_TAG_PressureDependMultiYield && NDM->getClassTag() !=ND_TAG_PressureDependMultiYield02){
+					opserr << "Material: " << NDM->getTag() << " cannot be used to read effective stress for a PyLiq1 material." << endln;
+					exit(-1);
+				}
+				meanStress += 1.0/18.0*(2.0/3.0*(NDM->getStress())[0] + 1.0/3.0*(NDM->getStress())[1]);
+			}
+		}
+		
 	}
 
 	return meanStress;
 }
 
+
+
 /////////////////////////////////////////////////////////////////////
 
 int PyLiq1::setParameter(const char **argv, int argc, Parameter &param)
-{
-  
-  if (strcmp(argv[0],"updateMaterialStage") == 0) {
+{	
+  if (strcmp(argv[0],"updateMaterialStage") == 0 && atoi(argv[1])==this->getTag()) {
     return param.addObject(1, this);  
   }
 
   return -1;
 }
 
-
+/////////////////////////////////////////////////////////////////////
 int 
-PyLiq1::updateParameter(int responseID, Information &eleInformation)
+PyLiq1::updateParameter(int snum,Information &eleInformation)
 {
-  if (responseID == 1) {
-    int snum = eleInformation.theInt; 
-    // TclUpdateMaterialStageCommand will call this routine with the
-    // command:
-    //
-    //      updateMaterialStage - material tag -stage snum
-    //
-    // If snum = 0; running linear elastic for soil elements,
-    //              so excess pore pressure should be zero.
-    // If snum = 1; running plastic soil element behavior,
-    //              so this marks the end of the "consol" gravity loading.
-    
-    if(snum !=0 && snum !=1){
-      opserr << "WARNING updateMaterialStage for PyLiq1 material must be 0 or 1";
-      opserr << endln;
-      return -1;
-    }
-    loadStage = snum;
-  }
-  return 0;
+	// TclUpdateMaterialStageCommand will call this routine with the
+	// command:
+	//
+	//      updateMaterialStage - material tag -stage snum
+	//
+	// If snum = 0; running linear elastic for soil elements,
+	//              so excess pore pressure should be zero.
+	// If snum = 1; running plastic soil element behavior,
+	//              so this marks the end of the "consol" gravity loading.
+
+	if(snum !=0 && snum !=1){
+		opserr << "WARNING updateMaterialStage for PyLiq1 material must be 0 or 1";
+		opserr << endln;
+		exit(-1);
+	}
+	loadStage = snum;
+
+	return 0;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -529,3 +554,4 @@ PyLiq1::Print(OPS_Stream &s, int flag)
 }
 
 /////////////////////////////////////////////////////////////////////
+
