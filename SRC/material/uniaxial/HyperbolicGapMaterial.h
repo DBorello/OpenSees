@@ -17,9 +17,9 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
-// $Revision: 1.1 $
-// $Date: 2008-04-15 18:29:00 $
+
+// $Revision: 1.2 $
+// $Date: 2008-11-12 22:54:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HyperbolicGapMaterial.h,v $
 
 // File: ~/material/HyperbolicGapMaterial.C
@@ -62,7 +62,7 @@ class HyperbolicGapMaterial : public UniaxialMaterial
     const char *getClassType(void) const {return "HyperbolicGapMaterial";};
 
     int setTrialStrain(double strain, double strainRate = 0.0); 
-    double getStrain(void);          
+	double getStrain(void);
     double getStress(void);
     double getTangent(void);
     double getInitialTangent(void);
@@ -72,16 +72,17 @@ class HyperbolicGapMaterial : public UniaxialMaterial
     int revertToStart(void);    
 
     UniaxialMaterial *getCopy(void);
-    
+
     int sendSelf(int commitTag, Channel &theChannel);  
     int recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker);    
     
     void Print(OPS_Stream &s, int flag =0);
-    
+
   protected:
-    
+
   private:
+
     double Kmax;
 	double Kur;
 	double Rf;
@@ -94,6 +95,7 @@ class HyperbolicGapMaterial : public UniaxialMaterial
 	double Cstrain;
 	double Cstress;
 	double TstrainMin;
+	double CstrainMin;
     double TonsetOfUnloadingStrain;
     double ConsetOfUnloadingStrain;
     double TonsetOfUnloadingStress;
@@ -105,10 +107,9 @@ class HyperbolicGapMaterial : public UniaxialMaterial
 	double negEnvStress(double strain);
 	double negEnvTangent(double strain);
 
-    void positiveIncrement(double dStrain);
+	void positiveIncrement(double dStrain);
     void negativeIncrement(double dStrain);
 
 };
-
 
 #endif

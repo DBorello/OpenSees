@@ -17,9 +17,9 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
-// $Revision: 1.1 $
-// $Date: 2008-04-15 18:29:00 $
+
+// $Revision: 1.2 $
+// $Date: 2008-11-12 22:54:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HyperbolicGapMaterial.cpp,v $
 
 // File: ~/material/HyperbolicGapMaterial.C
@@ -107,7 +107,7 @@ HyperbolicGapMaterial::setTrialStrain(double strain, double strainRate)
   dStrain = Tstrain - Cstrain;
 
   // loading on the envelope curve
-  if (Tstrain <= TstrainMin) {
+  if (Tstrain <= CstrainMin) {
     TstrainMin = Tstrain;
     Ttangent = negEnvTangent(Tstrain);
     Tstress = negEnvStress(Tstrain);
@@ -120,7 +120,6 @@ HyperbolicGapMaterial::setTrialStrain(double strain, double strainRate)
     else if (dStrain > 0.0)
       positiveIncrement(dStrain);
   }
-
   return 0;
 }
 
@@ -134,7 +133,6 @@ double
 HyperbolicGapMaterial::getStress(void)
 {
   return Tstress;
-
 }
 
 double 
@@ -152,8 +150,8 @@ HyperbolicGapMaterial::getInitialTangent(void)
 void
 HyperbolicGapMaterial::positiveIncrement(double dStrain)
 {
-	// store strain and stress at which unloading first takes place
-	if (TstrainMin == Cstrain) {
+    // store strain and stress at which unloading first takes place
+    if (TstrainMin == Cstrain) {
 	  TonsetOfUnloadingStrain = TstrainMin;
 	  TonsetOfUnloadingStress = Cstress;
 	  TonsetOfReloadingStrain = TstrainMin - TonsetOfUnloadingStress/Kur;
@@ -191,24 +189,23 @@ HyperbolicGapMaterial::commitState(void)
 {
     ConsetOfUnloadingStrain = TonsetOfUnloadingStrain;
 	ConsetOfReloadingStrain = TonsetOfReloadingStrain;
-
 	Cstress = Tstress;
 	Cstrain = Tstrain;
+        CstrainMin = TstrainMin;
 	return 0;
 }
-
 
 int 
 HyperbolicGapMaterial::revertToLastCommit(void)
 {
     TonsetOfUnloadingStrain = ConsetOfUnloadingStrain;
     TonsetOfReloadingStrain = ConsetOfReloadingStrain;
-    
 	Tstrain = Cstrain;
 	Tstress = Cstress;
+    TstrainMin = CstrainMin;
+
     return 0;
 }
-
 
 int 
 HyperbolicGapMaterial::revertToStart(void)
@@ -219,14 +216,13 @@ HyperbolicGapMaterial::revertToStart(void)
 	Tstress = 0.0;
 	Ttangent = Kmax;
 	TstrainMin = 0.0;
-
+    CstrainMin = 0.0; 
 	ConsetOfUnloadingStrain = 0.0;
 	ConsetOfReloadingStrain = 0.0;
 	TonsetOfReloadingStress = 0.0;
 
     return 0;
 }
-
 
 UniaxialMaterial *
 HyperbolicGapMaterial::getCopy(void)
@@ -240,16 +236,16 @@ HyperbolicGapMaterial::getCopy(void)
 	theCopy->Cstrain = Cstrain;
 	theCopy->Ttangent = Ttangent;
 	theCopy->TstrainMin = TstrainMin;
+	theCopy->CstrainMin = TstrainMin;
 
     return theCopy;
 }
-
 
 int 
 HyperbolicGapMaterial::sendSelf(int cTag, Channel &theChannel)
 {
   int res = 0;
-  static Vector data(14);
+  static Vector data(15);
   data(0) = this->getTag();
   data(1) = Cstrain;
   data(2) = Kmax;
@@ -264,6 +260,7 @@ HyperbolicGapMaterial::sendSelf(int cTag, Channel &theChannel)
   data(11) = Cstrain;
   data(12) = Ttangent;
   data(13) = TstrainMin;
+  data(14) = CstrainMin;
 
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
@@ -277,7 +274,7 @@ HyperbolicGapMaterial::recvSelf(int cTag, Channel &theChannel,
 				 FEM_ObjectBroker &theBroker)
 {
   int res = 0;
-  static Vector data(14);
+  static Vector data(15);
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   if (res < 0)
     opserr << "HyperbolicGapMaterial::recvSelf() - failed to recv data\n";
@@ -297,6 +294,7 @@ HyperbolicGapMaterial::recvSelf(int cTag, Channel &theChannel,
     Cstrain = data(11);
     Ttangent = data(12);
     TstrainMin = data(13);
+    CstrainMin = data(14);
 
   }
 
@@ -331,3 +329,4 @@ HyperbolicGapMaterial::negEnvTangent(double strain)
 	else
 		return 1/(Kmax*pow(((1/Kmax)+(Rf*(strain-gap)/Fult)),2));
 }
+
