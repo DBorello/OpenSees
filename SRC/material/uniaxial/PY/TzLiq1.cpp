@@ -404,9 +404,10 @@ TzLiq1::getEffectiveStress(void)
 
 int TzLiq1::setParameter(const char **argv, int argc, Parameter &param)
 {
-  if (strcmp(argv[0],"updateMaterialStage") == 0 && atoi(argv[1]) == this->getTag()) {
-    return param.addObject(1, this);  
-  }
+  if (argc >= 2)
+    if (strcmp(argv[0],"updateMaterialStage") == 0 && atoi(argv[1]) == this->getTag()) {
+      return param.addObject(1, this);  
+    }
 
   return -1;
 }
