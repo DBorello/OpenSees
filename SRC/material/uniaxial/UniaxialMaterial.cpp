@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2008-08-26 16:36:11 $
+// $Revision: 1.19 $
+// $Date: 2008-11-12 22:53:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.cpp,v $
                                                                         
                                                                         
@@ -136,7 +136,8 @@ UniaxialMaterial::setResponse(const char **argv, int argc,
 
   // strain
   else if ((strcmp(argv[0],"stressStrain") == 0) || 
-	   (strcmp(argv[0],"stressANDstrain") == 0)) {
+	   (strcmp(argv[0],"stressANDstrain") == 0) ||
+	   (strcmp(argv[0],"stressAndStrain") == 0)) {
     theOutput.tag("ResponseType", "sig11");
     theOutput.tag("ResponseType", "eps11");
     theResponse =  new MaterialResponse(this, 4, Vector(2));
