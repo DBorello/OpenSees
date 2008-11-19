@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-12-05 20:05:19 $
+// $Revision: 1.7 $
+// $Date: 2008-11-19 23:42:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.h,v $
                                                                         
                                                                         
@@ -88,7 +88,7 @@ class TransformationDOF_Group: public DOF_Group
     virtual void setEigenvector(int mode, const Vector &eigenvalue);
 
     int addSP_Constraint(SP_Constraint &theSP);
-    int enforceSPs(void);
+    int enforceSPs(int doMP);
 
 // AddingSensitivity:BEGIN ////////////////////////////////////
     void addM_ForceSensitivity(const Vector &Udotdot, double fact = 1.0);        
@@ -115,7 +115,8 @@ class TransformationDOF_Group: public DOF_Group
     Vector *modUnbalance;
     ID *modID;
     int modNumDOF;
-    
+    int numConstrainedNodeRetainedDOF; 
+    int needRetainedData;
     SP_Constraint **theSPs;
     
     // static variables - single copy for all objects of the class	    

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2008-03-13 22:14:34 $
+// $Revision: 1.20 $
+// $Date: 2008-11-19 23:42:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.cpp,v $
                                                                         
                                                                         
@@ -64,7 +64,9 @@ TransformationDOF_Group::TransformationDOF_Group(int tag, Node *node,
     const ID &retainedDOF = mp->getRetainedDOFs();
     const ID &constrainedDOF = mp->getConstrainedDOFs();    
     int numNodalDOFConstrained = constrainedDOF.Size();
-    int numConstrainedNodeRetainedDOF = numNodalDOF - numNodalDOFConstrained;
+    numConstrainedNodeRetainedDOF = numNodalDOF - numNodalDOFConstrained;
+    needRetainedData = -1;
+
     int numRetainedNodeDOF = retainedDOF.Size();
 
     modNumDOF = numConstrainedNodeRetainedDOF + numRetainedNodeDOF;
@@ -177,6 +179,7 @@ TransformationDOF_Group::setID(int dof, int value)
 {
     if (theMP == 0)
 	this->DOF_Group::setID(dof,value);
+
     else
 	(*modID)(dof) = value;
 }
@@ -458,15 +461,37 @@ TransformationDOF_Group::setNodeDisp(const Vector &u)
     int loc = theID(i);
     if (loc >= 0)
       (*modUnbalance)(i) = u(loc);
-    else
+    else 
       (*modUnbalance)(i) = 0.0;
-  }    
+  }
+
+
+  if (needRetainedData == 0) {
+    int retainedNode = theMP->getNodeRetained();
+    Domain *theDomain = myNode->getDomain();
+    Node *retainedNodePtr = theDomain->getNode(retainedNode);
+    const Vector &responseR = retainedNodePtr->getTrialDisp();
+    const ID &retainedDOF = theMP->getRetainedDOFs();
+    
+
+    for (int i=numConstrainedNodeRetainedDOF, j=0; i<modNumDOF; i++, j++) {
+      int loc = theID(i);
+      if (loc < 0)
+	(*modUnbalance)(i) = responseR(retainedDOF(j));
+    }
+  }
+
+  //  opserr << "MOD: " << *modUnbalance;
+
   Matrix *T = this->getT();
   if (T != 0) {
     
     // *unbalance = (*T) * (*modUnbalance);
     unbalance->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
-	myNode->setTrialDisp(*unbalance);
+    myNode->setTrialDisp(*unbalance);
+
+    //    opserr << "SETTING: " << *unbalance;
+    // opserr << *myNode;
 	
   } else
     myNode->setTrialDisp(*modUnbalance);
@@ -488,15 +513,29 @@ TransformationDOF_Group::setNodeVel(const Vector &u)
 	    (*modUnbalance)(i) = u(loc);
 	else 	// NO SP STUFF .. WHAT TO DO
 	    (*modUnbalance)(i) = 0.0;	    
+   }    
 
-    }    
-    Matrix *T = this->getT();
-    if (T != 0) {
-	// *unbalance = (*T) * (*modUnbalance);
-	unbalance->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
-	myNode->setTrialVel(*unbalance);
-    } else
-	myNode->setTrialVel(*modUnbalance);
+  if (needRetainedData == 0) {
+    int retainedNode = theMP->getNodeRetained();
+    Domain *theDomain = myNode->getDomain();
+    Node *retainedNodePtr = theDomain->getNode(retainedNode);
+    const Vector &responseR = retainedNodePtr->getTrialVel();
+    const ID &retainedDOF = theMP->getRetainedDOFs();
+    
+    for (int i=numConstrainedNodeRetainedDOF, j=0; i<modNumDOF; i++, j++) {
+      int loc = theID(i);
+      if (loc < 0)
+	(*modUnbalance)(i) = responseR(retainedDOF(j));
+    }
+  }
+
+  Matrix *T = this->getT();
+  if (T != 0) {
+    // *unbalance = (*T) * (*modUnbalance);
+    unbalance->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
+    myNode->setTrialVel(*unbalance);
+  } else
+    myNode->setTrialVel(*modUnbalance);
 }
 
 
@@ -518,6 +557,21 @@ TransformationDOF_Group::setNodeAccel(const Vector &u)
 	    (*modUnbalance)(i) = 0.0;	    
 
     }    
+
+  if (needRetainedData == 0) {
+    int retainedNode = theMP->getNodeRetained();
+    Domain *theDomain = myNode->getDomain();
+    Node *retainedNodePtr = theDomain->getNode(retainedNode);
+    const Vector &responseR = retainedNodePtr->getTrialAccel();
+    const ID &retainedDOF = theMP->getRetainedDOFs();
+    
+    for (int i=numConstrainedNodeRetainedDOF, j=0; i<modNumDOF; i++, j++) {
+      int loc = theID(i);
+      if (loc < 0)
+	(*modUnbalance)(i) = responseR(retainedDOF(j));
+    }
+  }
+
     Matrix *T = this->getT();
     if (T != 0) {
 	// *unbalance = (*T) * (*modUnbalance);
@@ -753,6 +807,13 @@ TransformationDOF_Group::doneID(void)
 	    exit(-1);
 	}
     }    
+
+    if (modID != 0) {
+      for (int i=numConstrainedNodeRetainedDOF; i<modNumDOF; i++)
+	if ((*modID)(i) == -1)
+	  needRetainedData = 0;
+    }
+
     return 0;
 }
 
@@ -778,15 +839,54 @@ TransformationDOF_Group::addSP_Constraint(SP_Constraint &theSP)
 }
 
 int 
-TransformationDOF_Group::enforceSPs(void)
+TransformationDOF_Group::enforceSPs(int doMP)
 {
-  int numDof = myNode->getNumberDOF();
-  for (int i=0; i<numDof; i++)
-    if (theSPs[i] != 0) {
-      double value = theSPs[i]->getValue();
-      myNode->setTrialDisp(value, i);
+  if (doMP != 0) {
+      int numDof = myNode->getNumberDOF();
+      
+      for (int i=0; i<numDof; i++)
+	if (theSPs[i] != 0) {
+	  double value = theSPs[i]->getValue();
+	  myNode->setTrialDisp(value, i);
+	}
+      return 0;
+  } else {
+
+    if (needRetainedData == 0) {
+
+      if (theMP != 0) {
+	
+	const ID &theID = this->getID();
+	
+	int retainedNode = theMP->getNodeRetained();
+	Domain *theDomain = myNode->getDomain();
+	Node *retainedNodePtr = theDomain->getNode(retainedNode);
+	const Vector &responseR = retainedNodePtr->getTrialDisp();
+	const ID &retainedDOF = theMP->getRetainedDOFs();
+	
+	modUnbalance->Zero();    
+	for (int i=numConstrainedNodeRetainedDOF, j=0; i<modNumDOF; i++, j++) {
+	  int loc = theID(i);
+	  if (loc < 0)
+	    (*modUnbalance)(i) = responseR(retainedDOF(j));
+	}
+
+	Matrix *T = this->getT();
+	if (T != 0) {
+	  
+	  // *unbalance = (*T) * (*modUnbalance);
+	  unbalance->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
+	  
+	  const ID &constrainedDOF = theMP->getConstrainedDOFs();
+	  for (int i=0; i<constrainedDOF.Size(); i++) {
+	    int cDOF = constrainedDOF(i);
+	    myNode->setTrialDisp((*unbalance)(cDOF), cDOF);
+	  }
+	}
+      }
     }
-  
+  }
+
   return 0;
 }
 

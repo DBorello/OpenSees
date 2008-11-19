@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2007-05-04 07:00:45 $
+// $Revision: 1.15 $
+// $Date: 2008-11-19 23:42:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/TransformationConstraintHandler.cpp,v $
                                                                         
                                                                         
@@ -459,7 +459,13 @@ TransformationConstraintHandler::enforceSPs(void)
 	// upward cast - safe as i put it in this location
 	TransformationDOF_Group *theDof  =
 	    (TransformationDOF_Group *)theDOFs[numDOF-i];
-	theDof->enforceSPs();
+	theDof->enforceSPs(1);
+    }
+    for (int k=1; k<=numConstrainedNodes; k++) {
+	// upward cast - safe as i put it in this location
+	TransformationDOF_Group *theDof  =
+	    (TransformationDOF_Group *)theDOFs[numDOF-k];
+	theDof->enforceSPs(0);
     }
 
     for (int j=0; j<numFE; j++) {
