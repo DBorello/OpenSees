@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-02-08 20:20:00 $
+// $Revision: 1.7 $
+// $Date: 2008-11-19 23:38:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/penalty/PenaltySP_FE.cpp,v $
                                                                         
                                                                         
@@ -50,19 +50,14 @@
 #include <SP_Constraint.h>
 #include <DOF_Group.h>
 
+Matrix PenaltySP_FE::tang(1,1);
+Vector PenaltySP_FE::resid(1);
+
 PenaltySP_FE::PenaltySP_FE(int tag, Domain &theDomain, 
 			   SP_Constraint &TheSP, double Alpha)
 :FE_Element(tag, 1,1), alpha(Alpha),
- theSP(&TheSP), theNode(0), tang(0), resid(0)
+ theSP(&TheSP), theNode(0)
 {
-    // create a matrix and a vector for tangent and residual
-    tang = new Matrix(1,1);
-    resid = new Vector(1);
-    if (tang == 0 || resid == 0 || tang->noCols() == 0 || resid->Size() == 0) {
-	opserr << "FATAL PenaltySP_FE::PenaltySP_FE() - ran out of memory\n";
-	exit(-1);
-    }
-
     // get a pointer to the Node
     theNode = theDomain.getNode(theSP->getNodeTag());
     if (theNode == 0) {
@@ -75,18 +70,12 @@ PenaltySP_FE::PenaltySP_FE(int tag, Domain &theDomain,
     DOF_Group *dofGrpPtr = theNode->getDOF_GroupPtr();
     if (dofGrpPtr != 0) 
 	myDOF_Groups(0) = dofGrpPtr->getTag();	    
-    
-    // set the tangent
-    (*tang)(0,0) = alpha;
-    
-    
 }
 
 
 PenaltySP_FE::~PenaltySP_FE()
 {
-    if (tang != 0) delete tang;
-    if (resid != 0) delete resid;
+
 }    
 
 // void setID(int index, int value);
@@ -124,7 +113,8 @@ PenaltySP_FE::setID(void)
 const Matrix &
 PenaltySP_FE::getTangent(Integrator *theNewIntegrator)
 {
-    return *tang;
+  tang(0,0) = alpha;
+  return tang;
 }
 
 
@@ -138,16 +128,16 @@ PenaltySP_FE::getResidual(Integrator *theNewIntegrator)
     if (constrainedDOF < 0 || constrainedDOF >= nodeDisp.Size()) {
 	opserr << "WARNING PenaltySP_FE::getTangForce() - ";	
 	opserr << " constrained DOF " << constrainedDOF << " outside disp\n";
-	(*resid)(0) = 0;
+	resid(0) = 0;
     }
 
     //    (*resid)(0) = alpha * (constraint - nodeDisp(constrainedDOF));    
     // is replace with the following to remove possible problems with
     // subtracting very small numbers
 
-    (*resid)(0) = alpha * (constraint - nodeDisp(constrainedDOF));    
+    resid(0) = alpha * (constraint - nodeDisp(constrainedDOF));    
 
-    return *resid;
+    return resid;
 }
 
 
@@ -159,28 +149,28 @@ PenaltySP_FE::getTangForce(const Vector &disp, double fact)
     if (constrainedID < 0 || constrainedID >= disp.Size()) {
 	opserr << "WARNING PenaltySP_FE::getTangForce() - ";	
 	opserr << " constrained DOF " << constrainedID << " outside disp\n";
-	(*resid)(0) = 0.0;
-	return *resid;
+	resid(0) = 0.0;
+	return resid;
     }
-    (*resid)(0) = alpha * disp(constrainedID);
+    resid(0) = alpha * disp(constrainedID);
 
-    return *resid;
+    return resid;
 }
 
 const Vector &
 PenaltySP_FE::getK_Force(const Vector &disp, double fact)
 {
   opserr << "WARNING PenaltySP_FE::getK_Force() - not yet implemented\n";
-  (*resid)(0) = 0.0;
-  return *resid;
+  resid(0) = 0.0;
+  return resid;
 }
 
 const Vector &
 PenaltySP_FE::getKi_Force(const Vector &disp, double fact)
 {
   opserr << "WARNING PenaltySP_FE::getKi_Force() - not yet implemented\n";
-  (*resid)(0) = 0.0;
-  return *resid;
+  resid(0) = 0.0;
+  return resid;
 }
 
 
@@ -188,16 +178,16 @@ const Vector &
 PenaltySP_FE::getC_Force(const Vector &disp, double fact)
 {
   opserr << "WARNING PenaltySP_FE::getC_Force() - not yet implemented\n";
-  (*resid)(0) = 0.0;
-  return *resid;
+  resid(0) = 0.0;
+  return resid;
 }
 
 const Vector &
 PenaltySP_FE::getM_Force(const Vector &disp, double fact)
 {
   opserr << "WARNING PenaltySP_FE::getM_Force() - not yet implemented\n";
-  (*resid)(0) = 0.0;
-  return *resid;
+  resid(0) = 0.0;
+  return resid;
 }
 
 

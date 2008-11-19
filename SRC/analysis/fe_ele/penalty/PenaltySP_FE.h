@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-02-08 20:20:00 $
+// $Revision: 1.5 $
+// $Date: 2008-11-19 23:38:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/penalty/PenaltySP_FE.h,v $
                                                                         
                                                                         
@@ -71,8 +71,8 @@ class PenaltySP_FE: public FE_Element
     double alpha;
     SP_Constraint *theSP;
     Node *theNode;
-    Matrix *tang;
-    Vector *resid;
+    static Matrix tang;
+    static Vector resid;
 };
 
 #endif
