@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2006-12-01 18:11:23 $
+// $Revision: 1.20 $
+// $Date: 2008-11-19 23:39:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.cpp,v $
                                                                         
 // Written: fmk 
@@ -144,6 +144,7 @@ TransformationFE::TransformationFE(int tag, Element *ele)
 
 TransformationFE::~TransformationFE()
 {
+
     numTransFE--;
     
     if (theDOFs != 0)
@@ -223,6 +224,10 @@ TransformationFE::setID(void)
 
     // create an ID to hold the array, cannot use existing as 
     // may be different size
+    if (modID != 0)
+      delete modID;
+    modID = 0;
+
     modID = new ID(numTransformedDOF);
     if (modID == 0 || modID->Size() == 0) {
 	opserr << "TransformationFE::setID() ";
