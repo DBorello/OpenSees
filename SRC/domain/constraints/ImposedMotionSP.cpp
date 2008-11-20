@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-07-27 23:14:07 $
+// $Revision: 1.7 $
+// $Date: 2008-11-20 22:37:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/ImposedMotionSP.cpp,v $
                                                                         
 // Written: fmk 
@@ -81,13 +81,23 @@ ImposedMotionSP::applyConstraint(double time)
   // on first 
   if (theGroundMotion == 0 || theNode == 0 || theNodeResponse) {
     Domain *theDomain = this->getDomain();
-    
+
     theNode = theDomain->getNode(nodeTag);
     if (theNode == 0) {
-        return -1;
+      opserr << "ImposedMotionSP::applyConstraint() - node " << nodeTag << " does not exist\n";
+      return -1;
     }
-    theNodeResponse = new Vector(theNode->getNumberDOF());
+
+    int numNodeDOF = theNode->getNumberDOF();
+
+    if (dofNumber < 0 || numNodeDOF >= dofNumber) {
+      opserr << "ImposedMotionSP::applyConstraint() - dof number " << dofNumber++ << " at node " << nodeTag << " not valid\n";
+      return -2;
+    }
+
+    theNodeResponse = new Vector(numNodeDOF);
     if (theNodeResponse == 0) {
+      opserr << "ImposedMotionSP::applyConstraint() - out of memory\n";
       return -2;
     }
     
@@ -99,10 +109,12 @@ ImposedMotionSP::applyConstraint(double time)
     if (theGroundMotion == 0)
       return -4;
   }
+
+  if (theNodeResponse == 0) 
+    return -1;
   
   // now get the response from the ground motion
   theGroundMotionResponse = theGroundMotion->getDispVelAccel(time);
-  
   
   //
   // now set the responses at the node
