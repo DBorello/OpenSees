@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.46 2008-10-17 23:41:17 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.47 2008-11-21 20:04:23 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -47,6 +47,8 @@ const char * getInterpPWD(Tcl_Interp *interp);
 #include <OPS_Globals.h>
 
 int		Tcl_AppInit _ANSI_ARGS_((Tcl_Interp *interp));
+
+EXTERN int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 
 # undef TCL_STORAGE_CLASS
@@ -478,7 +480,7 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
       const char *pwd = getInterpPWD(interp);
       simulationInfo.start();
       simulationInfo.addInputFile(tclStartupScriptFileName, pwd);
-      
+
       code = Tcl_EvalFile(interp, tclStartupScriptFileName);
       
       if (code != TCL_OK) {
@@ -674,7 +676,8 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
      */
 
     Tcl_Eval(interp, buffer);
-    
+
+   Tcl_Eval(interp, "quit"); 
+
     return;
 }
-

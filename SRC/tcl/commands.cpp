@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.135 $
-// $Date: 2008-10-21 18:39:38 $
+// $Revision: 1.136 $
+// $Date: 2008-11-21 20:04:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -6569,6 +6569,7 @@ int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char *
   if (theMachineBroker != 0) {
     theMachineBroker->shutdown();
     fprintf(stderr, "Process Terminating\n");
+    theMachineBroker = 0;
   }
 #endif
 
@@ -6580,6 +6581,7 @@ int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char *
   if (theMachineBroker != 0) {
     theMachineBroker->shutdown();
     fprintf(stderr, "Process Terminating\n");
+    theMachineBroker = 0;
   }
 #endif
 
@@ -6590,6 +6592,7 @@ int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char *
     simulationInfoOutputFile.open();
     simulationInfoOutputFile << simulationInfo;
     simulationInfoOutputFile.close();
+    simulationInfoOutputFilename = 0;
   }
 
   if (neesCentralProjID != 0) {
@@ -6607,6 +6610,7 @@ int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char *
       }
     
     simulationInfo.neesUpload(neesCentralUser, neesCentralPasswd, pid, expid);
+    neesCentralProjID = 0;
   }
 
   Tcl_Exit(0);
