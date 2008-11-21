@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.43 $
-// $Date: 2008-11-04 20:25:46 $
+// $Revision: 1.44 $
+// $Date: 2008-11-21 22:19:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -597,7 +597,7 @@ TclModelBuilder::~TclModelBuilder()
   thePlasticMaterials->clearAll();
   theCycModels->clearAll();//!!
   theDamageModels->clearAll();//!!
-  
+
 #ifdef OO_HYSTERETIC
   theStiffnessDegradations->clearAll();
   theUnloadingRules->clearAll();
@@ -1172,17 +1172,19 @@ TclCommand_addNode(ClientData clientData, Tcl_Interp *interp, int argc,
   }
 
   // check for mass terms
-  if (argc > 2+ndm) {
-    if (strcmp(argv[2+ndm],"-mass") == 0) {
-      if (argc < 3+ndm+ndf) {
-        opserr << "WARNING incorrect number of nodal mass terms\n";
-        opserr << "node: " << nodeId << endln;
-        return TCL_ERROR;      
+  int currentArg = 2+ndm;  
+  while (currentArg < argc) {
+    if (strcmp(argv[currentArg],"-mass") == 0) {
+      if (argc < currentArg+ndf) {
+	opserr << "WARNING incorrect number of nodal mass terms\n";
+	opserr << "node: " << nodeId << endln;
+	return TCL_ERROR;      
       }	
+      currentArg++;
       Matrix mass(ndf,ndf);
       double theMass;
       for (int i=0; i<ndf; i++) {
-	if (Tcl_GetDouble(interp, argv[i+3+ndm], &theMass) != TCL_OK) {
+	if (Tcl_GetDouble(interp, argv[currentArg++], &theMass) != TCL_OK) {
 	  opserr << "WARNING invalid nodal mass term\n";
 	  opserr << "node: " << nodeId << ", dof: " << i+1 << endln;
 	  return TCL_ERROR;
@@ -1190,7 +1192,26 @@ TclCommand_addNode(ClientData clientData, Tcl_Interp *interp, int argc,
 	mass(i,i) = theMass;
       }
       theNode->setMass(mass);      
-    }
+    } else if (strcmp(argv[currentArg],"-disp") == 0) {
+      if (argc < currentArg+ndf) {
+	opserr << "WARNING incorrect number of nodal disp terms\n";
+	opserr << "node: " << nodeId << endln;
+	return TCL_ERROR;      
+      }	
+      currentArg++;
+      Vector disp(ndf);
+      double theDisp;
+      for (int i=0; i<ndf; i++) {
+	if (Tcl_GetDouble(interp, argv[currentArg++], &theDisp) != TCL_OK) {
+	  opserr << "WARNING invalid nodal disp term\n";
+	  opserr << "node: " << nodeId << ", dof: " << i+1 << endln;
+	  return TCL_ERROR;
+	}
+	disp(i) = theDisp;
+      }
+      theNode->setTrialDisp(disp);      
+    } else
+      currentArg++;
   }
 
   // if get here we have sucessfully created the node and added it to the domain
@@ -2518,6 +2539,22 @@ TclCommand_addImposedMotionSP(ClientData clientData,
     if (strcmp(argv[4],"-other") == 0) 
       alt = true;
   }
+
+  //
+  // check valid node & dof
+  //
+
+  Node *theNode = theTclDomain->getNode(nodeId);
+  if (theNode == 0) {
+    opserr << "WARNING invalid node " << argv[2] << " node not found\n ";
+    return -1;
+  }
+  int nDof = theNode->getNumberDOF();
+  if (dofId < 0 || dofId >= nDof) {
+    opserr << "WARNING invalid dofId: " << argv[2] << " dof specified cannot be <= 0 or greater than num dof at nod\n ";
+    return -2;
+  }
+
 
   MultiSupportPattern *thePattern = theTclMultiSupportPattern;
   int loadPatternTag = thePattern->getTag();
