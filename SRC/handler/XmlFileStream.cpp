@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2008-01-16 00:19:01 $
+// $Revision: 1.10 $
+// $Date: 2008-11-21 19:51:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/XmlFileStream.cpp,v $
 
 #include <XmlFileStream.h>
@@ -65,7 +65,7 @@ XmlFileStream::XmlFileStream(const char *name, openMode mode, int indent)
 
 XmlFileStream::~XmlFileStream()
 {
-    int fileNameLength = strlen(fileName);
+  int fileNameLength = strlen(fileName);
 
   if (fileOpen == 1) {
     for (int i=0; i<numTag; i++) {
@@ -190,6 +190,8 @@ XmlFileStream::~XmlFileStream()
 
     delete [] theFiles;
     theFile.close();
+    fileOpen = 0;
+    theFile << "</OpenSees>\n";    
   }
 
   if (tags != 0)
@@ -291,8 +293,14 @@ XmlFileStream::open(void)
 int 
 XmlFileStream::close(void)
 {
-  if (fileOpen != 0)
+  if (fileOpen == 1) {
+    for (int i=0; i<numTag; i++) {
+      this->endTag();
+    }
+
+    theFile << "</OpenSees>\n";
     theFile.close();
+  }
 
   fileOpen = 0;
   return 0;
@@ -429,9 +437,7 @@ XmlFileStream::endTag()
     return 0;
   }
 
-  opserr << "XmlFileStream::endTag() - too many endTags have been called on file: " << fileName << endln;
   return -1;
-
 }
 
 int 
