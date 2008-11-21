@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2008-07-24 21:45:25 $
+// $Revision: 1.18 $
+// $Date: 2008-11-21 19:50:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/SimulationInformation.cpp,v $
 //
 // Description: This file contains the class definition for SimulationInformation.
@@ -336,15 +336,22 @@ PrintFiles(OPS_Stream &s, File *theFile)
   const char *fileName = theFile->getName();
 
   if (theFile->isDir() == true) {
-    if (fileName != 0)
-		s << fileName << endln;
+    if (fileName != 0) {
+      s.tag("Directory");
+      s.attr("name", fileName);
+
+    }
 
     FileIter theDirFiles = theFile->getFiles();
     File *theDirFile;
     while ((theDirFile = theDirFiles()) != 0)
       PrintFiles(s, theDirFile);
-  } else
-    s << "  " << fileName << endln;
+  } else {
+    s.tag("File");
+    s.attr("name", fileName);
+    }
+
+  s.endTag();
 }
 
 void 
@@ -416,7 +423,9 @@ SimulationInformation::Print(OPS_Stream &s) const
   s.tag("machine","local");
   s.endTag(); // Computer
 
+  s.tag("Files");
   PrintFiles(s, theFiles);
+  s.endTag(); // Files
 
   s.endTag(); // SimulationRun
   s.endTag(); // Central
