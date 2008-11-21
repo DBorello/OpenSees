@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2008-11-20 22:37:27 $
+// $Revision: 1.8 $
+// $Date: 2008-11-21 22:22:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/ImposedMotionSP.cpp,v $
                                                                         
 // Written: fmk 
@@ -90,7 +90,7 @@ ImposedMotionSP::applyConstraint(double time)
 
     int numNodeDOF = theNode->getNumberDOF();
 
-    if (dofNumber < 0 || numNodeDOF >= dofNumber) {
+    if (dofNumber < 0 || numNodeDOF <= dofNumber) {
       opserr << "ImposedMotionSP::applyConstraint() - dof number " << dofNumber++ << " at node " << nodeTag << " not valid\n";
       return -2;
     }
@@ -112,6 +112,8 @@ ImposedMotionSP::applyConstraint(double time)
 
   if (theNodeResponse == 0) 
     return -1;
+
+
   
   // now get the response from the ground motion
   theGroundMotionResponse = theGroundMotion->getDispVelAccel(time);
