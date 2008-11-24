@@ -608,8 +608,11 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/backbone/HystereticBackbone.o \
 	$(FE)/material/uniaxial/backbone/ArctangentBackbone.o \
 	$(FE)/material/uniaxial/backbone/TrilinearBackbone.o \
-	$(FE)/material/uniaxial/backbone/ReeseSandBackbone.o \
 	$(FE)/material/uniaxial/backbone/ReeseSoftClayBackbone.o \
+	$(FE)/material/uniaxial/backbone/ReeseStiffClayBelowWS.o \
+	$(FE)/material/uniaxial/backbone/ReeseSandBackbone.o \
+	$(FE)/material/uniaxial/backbone/ManderBackbone.o \
+	$(FE)/material/uniaxial/backbone/RaynorBackbone.o \
 	$(FE)/material/uniaxial/backbone/TclModelBuilderBackboneCommand.o \
 	$(FE)/material/nD/NDMaterial.o \
 	$(FE)/material/nD/J2Plasticity.o \
