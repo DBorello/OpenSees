@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-11-10 22:42:44 $
+// $Revision: 1.3 $
+// $Date: 2008-11-24 17:12:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/backbone/ReeseSandBackbone.h,v $
 
 // Written: MHS
@@ -33,8 +33,6 @@
 
 #include <HystereticBackbone.h>
 #include <Vector.h>
-
-#define BACKBONE_TAG_ReeseSand 1976
 
 class ReeseSandBackbone : public HystereticBackbone
 {

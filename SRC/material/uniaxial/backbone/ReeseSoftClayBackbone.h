@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-11-10 22:42:44 $
+// $Revision: 1.3 $
+// $Date: 2008-11-24 17:12:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/backbone/ReeseSoftClayBackbone.h,v $
 
 // Written: MHS
@@ -34,12 +34,10 @@
 #include <HystereticBackbone.h>
 #include <Vector.h>
 
-#define BACKBONE_TAG_ReeseSoftClay 1976
-
 class ReeseSoftClayBackbone : public HystereticBackbone
 {
  public:
-  ReeseSoftClayBackbone(int tag, double pu, double y50);
+  ReeseSoftClayBackbone(int tag, double pu, double y50, double n);
   ReeseSoftClayBackbone();
   ~ReeseSoftClayBackbone();
   
@@ -65,6 +63,7 @@ class ReeseSoftClayBackbone : public HystereticBackbone
  private:
   double pu;
   double y50;
+  double n;
 };
 
 #endif

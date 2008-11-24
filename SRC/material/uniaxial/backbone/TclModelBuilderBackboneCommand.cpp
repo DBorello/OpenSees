@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-11-09 06:05:48 $
+// $Revision: 1.3 $
+// $Date: 2008-11-24 17:12:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/backbone/TclModelBuilderBackboneCommand.cpp,v $
 
 // Written: MHS
@@ -39,7 +39,10 @@
 //#include <MaterialBackbone.h>
 //#include <LinearCappedBackbone.h>
 #include <ReeseSoftClayBackbone.h>
+#include <ReeseStiffClayBelowWS.h>
 #include <ReeseSandBackbone.h>
+#include <ManderBackbone.h>
+#include <RaynorBackbone.h>
 
 #include <string.h>
 
@@ -230,15 +233,15 @@ TclModelBuilderHystereticBackboneCommand(ClientData clienData,
   }
   
   else if (strcmp(argv[1],"ReeseSoftClay") == 0) {
-    if (argc < 5) {
+    if (argc < 6) {
       opserr << "WARNING insufficient arguments\n";
       printCommand(argc,argv);
-      opserr << "Want: hystereticBackbone ReeseSoftClay tag? pu? y50?" << endln;
+      opserr << "Want: hystereticBackbone ReeseSoftClay tag? pu? y50? n?" << endln;
       return TCL_ERROR;
     }
     
     int tag;
-    double pu, y50;
+    double pu, y50, n;
     
     if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
       opserr << "WARNING invalid hystereticBackbone ReeseSoftClay tag" << endln;
@@ -254,8 +257,13 @@ TclModelBuilderHystereticBackboneCommand(ClientData clienData,
       opserr << "WARNING invalid hystereticBackbone ReeseSoftClay y50" << endln;
       return TCL_ERROR;
     }
+
+    if (Tcl_GetDouble(interp, argv[5], &n) != TCL_OK) {
+      opserr << "WARNING invalid hystereticBackbone ReeseSoftClay n" << endln;
+      return TCL_ERROR;
+    }
     
-    theBackbone = new ReeseSoftClayBackbone(tag, pu, y50);
+    theBackbone = new ReeseSoftClayBackbone(tag, pu, y50, n);
   }
   
   else if (strcmp(argv[1],"ReeseSand") == 0) {
@@ -296,6 +304,141 @@ TclModelBuilderHystereticBackboneCommand(ClientData clienData,
     }
     
     theBackbone = new ReeseSandBackbone(tag, kx, ym, pm, yu, pu);
+  }
+
+  else if (strcmp(argv[1],"ReeseStiffClayBelowWS") == 0)
+  {
+    if (argc < 7)
+    {
+      opserr << "WARNING insufficient arguments\n";
+      printCommand(argc,argv);
+      opserr << "Want: hystereticBackbone ReeseStiffClayBelowWS tag? Esi? y50? As?  Pc?" <<endln;
+      return TCL_ERROR;
+    }
+
+    int tag;
+    double Esi, y50, As, Pc;
+
+    if( Tcl_GetInt(interp, argv[2], &tag ) != TCL_OK)
+    {
+      opserr << "WARNING invalid hystereticBackbone ReeseStiffClayBelowWS tag" << endln;
+      return TCL_ERROR;
+    }
+    if( Tcl_GetDouble(interp, argv[3], &Esi ) != TCL_OK)
+    {
+      opserr << "WARNING invalid hystereticBackbone ReeseStiffClayBelowWS Esi" << endln;
+      return TCL_ERROR;
+    }
+    if( Tcl_GetDouble(interp, argv[4], &y50 ) != TCL_OK)
+    {
+      opserr << "WARNING invalid hystereticBackbone ReeseStiffClayBelowWS y50" << endln;
+      return TCL_ERROR;
+    }
+    if( Tcl_GetDouble(interp, argv[5], &As ) != TCL_OK)
+    {
+      opserr << "WARNING invalid hystereticBackbone ReeseStiffClayBelowWS As" << endln;
+      return TCL_ERROR;
+    }
+    if( Tcl_GetDouble(interp, argv[6], &Pc ) != TCL_OK)
+    {
+      opserr << "WARNING invalid hystereticBackbone ReeseStiffClayBelowWS Pc" << endln;
+      return TCL_ERROR;
+    }
+
+    theBackbone = new ReeseStiffClayBelowWS (tag, Esi, y50, As, Pc);
+
+  }
+
+  else if (strcmp(argv[1],"Mander") == 0) {
+    if (argc < 6) {
+      opserr << "WARNING insufficient arguments\n";
+      printCommand(argc,argv);
+      opserr << "Want: hystereticBackbone Mander tag? fc? epsc? Ec?" << endln;
+      return TCL_ERROR;
+    }
+    
+    int tag;
+    double fc, epsc, Ec;
+    
+    if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+      opserr << "WARNING invalid hystereticBackbone Mander tag" << endln;
+      return TCL_ERROR;
+    }
+    
+    if (Tcl_GetDouble(interp, argv[3], &fc) != TCL_OK) {
+      opserr << "WARNING invalid hystereticBackbone Mander fc" << endln;
+      return TCL_ERROR;
+    }
+    
+    if (Tcl_GetDouble(interp, argv[4], &epsc) != TCL_OK) {
+      opserr << "WARNING invalid hystereticBackbone Mander epsc" << endln;
+      return TCL_ERROR;
+    }
+    
+    if (Tcl_GetDouble(interp, argv[5], &Ec) != TCL_OK) {
+      opserr << "WARNING invalid hystereticBackbone Mander Ec" << endln;
+      return TCL_ERROR;
+    }
+    
+    theBackbone = new ManderBackbone (tag, fc, epsc, Ec);
+  }
+  
+  else if (strcmp(argv[1],"Raynor") == 0)
+  {
+    if (argc < 10)
+    {
+      opserr << "WARNING insufficient arguments\n";
+      printCommand(argc,argv);
+      opserr << "Want: hystereticBackbone Raynor tag? Es? fy? fsu? Epsilonsh? Epsilonsm? C1? Ey?" <<endln;
+      return TCL_ERROR;
+    }
+
+    int tag;
+    double Es, fy, fsu, Epsilonsh, Epsilonsm, C1, Ey;
+
+    if( Tcl_GetInt(interp, argv[2], &tag ) != TCL_OK)
+    {
+      opserr << "WARNING invalid hystereticBackbone Raynor tag" << endln;
+      return TCL_ERROR;
+    }
+    if( Tcl_GetDouble(interp, argv[3], &Es ) != TCL_OK)
+    {
+      opserr << "WARNING invalid hystereticBackbone Raynor Es" << endln;
+      return TCL_ERROR;
+    }
+    if( Tcl_GetDouble(interp, argv[4], &fy ) != TCL_OK)
+    {
+      opserr << "WARNING invalid hystereticBackbone Raynor fy" << endln;
+      return TCL_ERROR;
+    }
+    if( Tcl_GetDouble(interp, argv[5], &fsu ) != TCL_OK)
+    {
+      opserr << "WARNING invalid hystereticBackbone Raynor fsu" << endln;
+      return TCL_ERROR;
+    }
+    if( Tcl_GetDouble(interp, argv[6], &Epsilonsh ) != TCL_OK)
+    {
+      opserr << "WARNING invalid hystereticBackbone Raynor Epsilonsh" << endln;
+      return TCL_ERROR;
+    }
+    if( Tcl_GetDouble(interp, argv[7], &Epsilonsm ) != TCL_OK)
+    {
+      opserr << "WARNING invalid hystereticBackbone Raynor Epsilonsm" << endln;
+      return TCL_ERROR;
+    }
+    if( Tcl_GetDouble(interp, argv[8], &C1 ) != TCL_OK)
+    {
+      opserr << "WARNING invalid hystereticBackbone Raynor fy" << endln;
+      return TCL_ERROR;
+    }
+    if( Tcl_GetDouble(interp, argv[9], &Ey ) != TCL_OK)
+    {
+      opserr << "WARNING invalid hystereticBackbone Raynor fsu" << endln;
+      return TCL_ERROR;
+    }
+
+    theBackbone = new RaynorBackbone (tag, Es, fy, fsu, Epsilonsh, Epsilonsm, C1, Ey);
+
   }
 
   else if (strcmp(argv[1],"Capped") == 0) {

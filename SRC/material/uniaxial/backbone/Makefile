@@ -4,7 +4,10 @@ OBJS       = HystereticBackbone.o \
 	ArctangentBackbone.o \
 	TrilinearBackbone.o \
 	ReeseSoftClayBackbone.o \
+	ReeseStiffClayBelowWS.o \
 	ReeseSandBackbone.o \
+	ManderBackbone.o \
+	RaynorBackbone.o \
 	TclModelBuilderBackboneCommand.o
 
 
