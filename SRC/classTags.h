@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.105 $
-// $Date: 2008-07-24 21:54:02 $
+// $Revision: 1.106 $
+// $Date: 2008-11-24 17:12:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -278,6 +278,11 @@
 #define BACKBONE_TAG_Multilinear	6
 #define BACKBONE_TAG_Mander		7
 #define BACKBONE_TAG_KentPark		8
+#define BACKBONE_TAG_Raynor		9
+#define BACKBONE_TAG_ReeseStiffClayBelowWS 10
+#define BACKBONE_TAG_ReeseSoftClay      11
+#define BACKBONE_TAG_ReeseSand          12
+
 
 #define DEG_TAG_STIFF_Constant		1
 #define DEG_TAG_STIFF_Ductility		2
