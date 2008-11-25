@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2007-02-02 01:44:57 $
+// $Revision: 1.5 $
+// $Date: 2008-11-25 15:24:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint3D.cpp,v $
 
 // Written: Arash Altoontash, Gregory Deierlein
@@ -279,11 +279,12 @@ Joint3D::~Joint3D()
 				delete Temp_MP;
 			}
 		}
-		if ( theNodes[7] != NULL )
+		if ( theNodes[6] != NULL )
 		{
-			int intnodetag = theNodes[7]->getTag();
-			TheDomain->removeNode( intnodetag );
-			delete theNodes[7];
+			int intnodetag = theNodes[6]->getTag();
+			Node *theNode = TheDomain->removeNode( intnodetag );
+			if (theNode != 0) // have to check against eurned node in case node alrady gone!
+			  delete theNode;
 		}
 	}
 
