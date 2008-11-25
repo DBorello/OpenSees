@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2008-08-26 17:08:31 $
+// $Revision: 1.25 $
+// $Date: 2008-11-25 23:58:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
                                                                         
@@ -195,6 +195,9 @@ stopTimer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
 rayleighDamping(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+setElementRayleighDampingFactors(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
 addRegion(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);

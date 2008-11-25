@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.136 $
-// $Date: 2008-11-21 20:04:23 $
+// $Revision: 1.137 $
+// $Date: 2008-11-25 23:58:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -641,6 +641,9 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "stop", &stopTimer, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "rayleigh", &rayleighDamping, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
+    Tcl_CreateCommand(interp, "setElementRayleighDampingFactors", 
+		      &setElementRayleighDampingFactors, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "region", &addRegion, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
@@ -5970,6 +5973,48 @@ rayleighDamping(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **
   }        
   
   theDomain.setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
+  return TCL_OK;
+}
+
+
+int 
+setElementRayleighDampingFactors(ClientData clientData, 
+				 Tcl_Interp *interp, 
+				 int argc, 
+				 TCL_Char **argv)
+{
+  if (argc < 6) { 
+    opserr << "WARNING setElementRayleighDampingFactors eleTag? alphaM? betaK? betaK0? betaKc? - not enough arguments to command\n";
+    return TCL_ERROR;
+  }
+  int eleTag;
+  double alphaM, betaK, betaK0, betaKc;
+
+  if (Tcl_GetInt(interp, argv[1], &eleTag) != TCL_OK) {
+    opserr << "WARNING rayleigh alphaM? betaK? betaK0? betaKc? - could not read eleTag? \n";
+    return TCL_ERROR;	        
+  }    
+
+
+  if (Tcl_GetDouble(interp, argv[2], &alphaM) != TCL_OK) {
+    opserr << "WARNING rayleigh alphaM? betaK? betaK0? betaKc? - could not read alphaM? \n";
+    return TCL_ERROR;	        
+  }    
+  if (Tcl_GetDouble(interp, argv[3], &betaK) != TCL_OK) {
+    opserr << "WARNING rayleigh alphaM? betaK? betaK0? betaKc? - could not read betaK? \n";
+    return TCL_ERROR;	        
+  }        
+  if (Tcl_GetDouble(interp, argv[4], &betaK0) != TCL_OK) {
+    opserr << "WARNING rayleigh alphaM? betaK? betaK0? betaKc? - could not read betaK0? \n";
+    return TCL_ERROR;	        
+  }        
+  if (Tcl_GetDouble(interp, argv[5], &betaKc) != TCL_OK) {
+    opserr << "WARNING rayleigh alphaM? betaK? betaK0? betaKc? - could not read betaKc? \n";
+    return TCL_ERROR;	        
+  }        
+
+  Element *theEle = theDomain.getElement(eleTag);
+  theEle->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
   return TCL_OK;
 }
 
