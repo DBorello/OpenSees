@@ -29,9 +29,9 @@ all:
 	@$(CD) $(FE)/machine; $(MAKE);
 	@$(CD) $(FE)/element; $(MAKE);
 	@$(CD) $(FE)/coordTransformation; $(MAKE);
-	@$(CD) $(FE)/package; $(MAKE);
+	@$(CD) $(FE)/api; $(MAKE);
 	@$(CD) $(FE)/damage; $(MAKE);
-	@$(CD) $(FE)/package; $(MAKE);
+	@$(CD) $(FE)/api; $(MAKE);
 	@$(CD) $(FE)/reliability; $(MAKE);
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATRIX_LIBS) 
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(ELE_LIBS) 
@@ -90,9 +90,9 @@ all:
 	@$(CD) $(FE)/machine; $(MAKE);
 	@$(CD) $(FE)/element; $(MAKE);
 	@$(CD) $(FE)/coordTransformation; $(MAKE);
-	@$(CD) $(FE)/package; $(MAKE);
+	@$(CD) $(FE)/api; $(MAKE);
 	@$(CD) $(FE)/damage; $(MAKE);
-	@$(CD) $(FE)/package; $(MAKE);
+	@$(CD) $(FE)/api; $(MAKE);
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATRIX_LIBS) 
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(ELE_LIBS) 
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATERIAL_LIBS)
@@ -138,10 +138,9 @@ metis:
 	@$(CD) $(FE)/graph/partitioner/metis-2.0; $(MAKE) clean;
 	@$(CD) $(FE)/graph/partitioner/metis-2.0; $(MAKE) lib;
 
-
 FMK_LIBS = $(FE)/database/FE_Datastore.o \
-	$(FE)/package/packages.o
-
+	$(FE)/api/packages.o \
+	$(FE)/api/OPS_ProceduralAPI.o
 
 KJE_LIBS = $(FE)/material/uniaxial/limitState/LimitStateMaterial.o \
 	$(FE)/material/uniaxial/limitState/TclLimitState.o \
@@ -518,6 +517,7 @@ GRAPH_LIBS = $(FE)/graph/graph/DOF_Graph.o \
 	$(FE)/graph/partitioner/Metis.o
 
 ELE_LIBS   =  $(FE)/element/Element.o \
+	$(FE)/element/WrapperElement.o \
 	$(FE)/element/Information.o \
 	$(FE)/element/ElementalLoad.o \
 	$(FE)/element/truss/Truss.o \
@@ -569,6 +569,7 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 
 MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/UniaxialMaterial.o \
+	$(FE)/material/uniaxial/WrapperUniaxialMaterial.o \
 	$(FE)/material/uniaxial/ElasticMaterial.o \
 	$(FE)/material/uniaxial/Elastic2Material.o \
 	$(FE)/material/uniaxial/ReinforcingSteel.o \
@@ -699,7 +700,6 @@ SECTION_LIBS = $(FE)/material/section/SectionForceDeformation.o \
 	$(FE)/material/section/MembranePlateFiberSection.o \
 	$(FE)/material/section/Bidirectional.o \
 	$(FE)/material/section/Isolator2spring.o \
-	$(FE)/material/section/WSection2d.o \
 	$(FE)/material/section/integration/SectionIntegration.o \
 	$(FE)/material/section/integration/RCSectionIntegration.o \
 	$(FE)/material/section/integration/WideFlangeSectionIntegration.o \
@@ -996,9 +996,8 @@ wipe: spotless
 	@$(CD) $(FE)/coordTransformation; $(MAKE) wipe;
 	@$(CD) $(FE)/element; $(MAKE) wipe;
 	@$(CD) $(FE)/reliability; $(MAKE) wipe;
-	@$(CD) $(FE)/package; $(MAKE) wipe;
+	@$(CD) $(FE)/api; $(MAKE) wipe;
 	@$(CD) $(FE)/damage; $(MAKE) wipe;
-	@$(CD) $(FE)/package; $(MAKE) wipe;
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
