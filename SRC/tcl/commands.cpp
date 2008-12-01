@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.137 $
-// $Date: 2008-11-25 23:58:58 $
+// $Revision: 1.138 $
+// $Date: 2008-12-01 19:50:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -5125,14 +5125,18 @@ nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
     dof--;
 
     const Vector *nodalResponse = theDomain.getNodeResponse(tag, Disp);
+
     if (nodalResponse == 0)
       return TCL_ERROR;
 
     int size = nodalResponse->Size();
-    
+
     if (dof >= 0) {
-      if (size < dof)
+
+      if (dof >= size) {
+	opserr << "WARNING nodeDisp nodeTag? dof? - dofTag? too large\n";
 	return TCL_ERROR;
+      }
       
       double value = (*nodalResponse)(dof);
       
