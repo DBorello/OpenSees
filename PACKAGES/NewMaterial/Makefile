@@ -1,20 +1,9 @@
 include ../../Makefile.def
 
-LIBRARY         = MyElasticPP.so
-
-all: $(LIBRARY)
-
-OBJS = MyElasticPP.o TclMyElasticPP.o 
-
-$(LIBRARY): $(OBJS)
-	$(CC++) -shared -Wl,-soname,$(LIBRARY) -o $(LIBRARY) $(OBJS) -lc
-
-MyElasticPP.o: MyElasticPP.cpp
-	$(CC++) -fPIC $(INCLUDES)  -c -Wall MyElasticPP.cpp
-
-TclMyElasticPP.o: TclMyElasticPP.cpp
-	$(CC) -fPIC $(INCLUDES)  -c -Wall TclMyElasticPP.cpp
-
+all: 
+	@$(CD) $(FE)/../PACKAGES/NewMaterial/cpp; $(MAKE);
+	@$(CD) $(FE)/../PACKAGES/NewMaterial/c; $(MAKE);
+	@$(CD) $(FE)/../PACKAGES/NewMaterial/fortran; $(MAKE);
 
 # Miscellaneous
 tidy:
@@ -27,6 +16,8 @@ spotless: clean
 	@$(RM) $(RMFLAGS) $(PROGRAM) fake core
 
 wipe: spotless
-	@$(RM) $(RMFLAGS) $(PROGRAM) fake core $(LIBRARY)
+	@$(CD) $(FE)/../PACKAGES/NewMaterial/cpp; $(MAKE) wipe;
+	@$(CD) $(FE)/../PACKAGES/NewMaterial/c; $(MAKE) wipe;
+	@$(CD) $(FE)/../PACKAGES/NewMaterial/fortran; $(MAKE) wipe;
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
