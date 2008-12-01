@@ -1,19 +1,9 @@
 include ../../Makefile.def
 
-LIBRARY         = myTruss.so
-
-all:   $(LIBRARY)
-
-OBJS = MyTruss.o TclMyTruss.o 
-
-$(LIBRARY): $(OBJS)
-	$(CC++) -shared -Wl,-soname,$(LIBRARY) -o $(LIBRARY) $(OBJS) -lc
-
-MyTruss.o: MyTruss.cpp
-	$(CC++) -fPIC $(INCLUDES) -g -c -Wall MyTruss.cpp
-
-TclMyTruss.o: TclMyTruss.cpp
-	$(CC) -fPIC $(INCLUDES) -g -c -Wall TclMyTruss.cpp
+all: 
+	@$(CD) $(FE)/../PACKAGES/NewElement/cpp; $(MAKE);
+	@$(CD) $(FE)/../PACKAGES/NewElement/c; $(MAKE);
+	@$(CD) $(FE)/../PACKAGES/NewElement/fortran; $(MAKE);
 
 # Miscellaneous
 tidy:
@@ -26,6 +16,8 @@ spotless: clean
 	@$(RM) $(RMFLAGS) $(PROGRAM) fake core
 
 wipe: spotless
-	@$(RM) $(RMFLAGS) $(PROGRAM) fake core $(LIBRARY)
+	@$(CD) $(FE)/../PACKAGES/NewElement/cpp; $(MAKE) wipe;
+	@$(CD) $(FE)/../PACKAGES/NewElement/c; $(MAKE) wipe;
+	@$(CD) $(FE)/../PACKAGES/NewElement/fortran; $(MAKE) wipe;
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
