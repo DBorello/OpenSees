@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-08-26 16:15:47 $
+// $Revision: 1.7 $
+// $Date: 2008-12-03 23:47:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/SensitivityAlgorithm.h,v $
 
 
@@ -51,6 +51,7 @@ class SensitivityAlgorithm
   int computeSensitivities(void);
   bool shouldComputeAtEachStep(void);
   int sensitivityDomainChanged(void) {return 0;}
+  // This method needs to go -- MHS
   bool newAlgorithm(void) {return true;};
   
  protected:
