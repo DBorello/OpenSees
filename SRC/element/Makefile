@@ -1,6 +1,6 @@
 include ../../Makefile.def
 
-OBJS       = Element.o ElementalLoad.o  Information.o TclElementCommands.o NewElement.o
+OBJS       = Element.o ElementalLoad.o  Information.o TclElementCommands.o NewElement.o WrapperElement.o
 # Compilation control
 
 all:         $(OBJS)
