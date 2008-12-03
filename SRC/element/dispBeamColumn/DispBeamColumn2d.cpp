@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.34 $
-// $Date: 2008-11-04 21:32:05 $
+// $Revision: 1.35 $
+// $Date: 2008-12-03 23:41:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -1336,16 +1336,14 @@ DispBeamColumn2d::setParameter(const char **argv, int argc, Parameter &param)
     if (argc < 3)
       return -1;
     
-    // Get section and material tag numbers from user input
-    int paramSectionTag = atoi(argv[1]);
+    // Get section number: 1...Np
+    int sectionNum = atoi(argv[1]);
     
-    // Find the right section and call its setParameter method
-    int ok = 0;
-    for (int i = 0; i < numSections; i++)
-      if (paramSectionTag == theSections[i]->getTag())
-	ok += theSections[i]->setParameter(&argv[2], argc-2, param);
-
-    return ok;
+    if (sectionNum > 0 && sectionNum <= numSections)
+      return theSections[sectionNum-1]->setParameter(&argv[2], argc-2, param);
+    
+    else
+      return -1;
   }
   
   else if (strstr(argv[0],"integration") != 0) {
