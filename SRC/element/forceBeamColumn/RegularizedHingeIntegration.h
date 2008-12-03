@@ -18,15 +18,15 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-04-29 17:48:09 $
+// $Revision: 1.2 $
+// $Date: 2008-12-03 23:43:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/RegularizedHingeIntegration.h,v $
 
 // Theory Reference
 // ----------------
 // Scott, M.H. and Hamutcuoglu, O.M. "Numerically consistent regularization
 // of force-based frame elements." International Journal for Numerical
-// Methods in Engineering. In press, Approved April 2008.
+// Methods in Engineering. http://dx.doi.org/10.1002/nme.2386
 
 #ifndef RegularizedHingeIntegration_h
 #define RegularizedHingeIntegration_h
@@ -55,6 +55,13 @@ class RegularizedHingeIntegration : public BeamIntegration
   int sendSelf(int cTag, Channel &theChannel);
   int recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
 
+  int setParameter(const char **argv, int argc, Parameter &param);
+  int updateParameter(int parameterID, Information &info);
+  int activateParameter(int parameterID);
+
+  void getLocationsDeriv(int nIP, double L, double dLdh, double *dptsdh);
+  void getWeightsDeriv(int nIP, double L, double dLdh, double *dwtsdh);
+
   void Print(OPS_Stream &s, int flag = 0);
 
  private:
@@ -65,6 +72,10 @@ class RegularizedHingeIntegration : public BeamIntegration
   double epsJ;
 
   BeamIntegration *beamInt;
+
+  double *wf;
+
+  int parameterID;
 };
 
 #endif
