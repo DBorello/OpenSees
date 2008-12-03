@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.54 $
-// $Date: 2008-08-26 17:03:32 $
+// $Revision: 1.55 $
+// $Date: 2008-12-03 22:56:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -2172,25 +2172,8 @@ Domain::buildNodeGraph(Graph *theNodeGraph)
 	return 0;
     }	
 	
-    // create another vertices array which aids in adding edges
-    
-    int *theNodeTagVertices = 0;
-    int maxNodNum = 0;
     Node *nodPtr;
-    NodeIter &nodeIter = this->getNodes();
-    while ((nodPtr = nodeIter()) != 0)
-	if (nodPtr->getTag() > maxNodNum)
-	    maxNodNum = nodPtr->getTag();
-
-    theNodeTagVertices = new int [maxNodNum+1];
-
-    if (theNodeTagVertices == 0) {
-	opserr << "WARNING Domain::buildNodeGraph ";
-	opserr << " - Not Enough Memory for NodeTagVertices\n";
-	return -1;
-    }
-    
-    for (int j=0; j<=maxNodNum; j++) theNodeTagVertices[j] = -1;
+    MAP_INT theNodeTagVertices;
 
     // now create the vertices with a reference equal to the node number.
     // and a tag which ranges from START_VERTEX_NUM through 
@@ -2206,7 +2189,6 @@ Domain::buildNodeGraph(Graph *theNodeGraph)
 	    opserr << "WARNING Domain::buildNodeGraph";
 	    opserr << " - Not Enough Memory to create ";
 	    opserr << count << "th Vertex\n";
-	    delete [] theNodeTagVertices;
 	    return -1;
 	}
 
@@ -2241,13 +2223,8 @@ Domain::buildNodeGraph(Graph *theNodeGraph)
 		}
 	}
     }
-
-    // done now delete theNodeTagVertices
-    delete [] theNodeTagVertices;
-    
     return 0;
 }
-
 
 int 
 Domain::sendSelf(int cTag, Channel &theChannel)
