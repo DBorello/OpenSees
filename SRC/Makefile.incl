@@ -173,7 +173,7 @@ FE_INCLUDES  = -I$(FE)/matrix \
                -I$(FE)/reliability/FEsensitivity \
                -I$(FE)/reliability/tcl \
                -I$(FE)/unittest \
-               -I$(FE)/package \
+               -I$(FE)/api \
                -I$(FE) \
                -I$(SUPERLUdir) \
                -I$(FE)/package 	
