@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $                                                              
-// $Date: 2007-10-13 00:16:03 $                                                                  
+// $Revision: 1.11 $                                                              
+// $Date: 2008-12-03 23:40:07 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CorotCrdTransf2d.h,v $ 
                                         
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
@@ -62,7 +62,7 @@ public:
     const Vector &getBasicTrialVel(void);
     const Vector &getBasicTrialAccel(void);
     
-    const Vector &getGlobalResistingForce(const Vector &basicForce, const Vector &uniformLoad);
+    const Vector &getGlobalResistingForce(const Vector &basicForce, const Vector &p0);
     const Matrix &getGlobalStiffMatrix(const Matrix &basicStiff, const Vector &basicForce);
     const Matrix &getInitialGlobalStiffMatrix(const Matrix &basicStiff);
     

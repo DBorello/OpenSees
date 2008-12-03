@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-10-13 00:16:03 $
+// $Revision: 1.4 $
+// $Date: 2008-12-03 23:40:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CorotCrdTransf2d.cpp,v $
 
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
@@ -511,7 +511,7 @@ CorotCrdTransf2d::getBasicTrialAccel(void)
 
 
 const Vector &
-CorotCrdTransf2d::getGlobalResistingForce(const Vector &pb, const Vector &unifLoad)
+CorotCrdTransf2d::getGlobalResistingForce(const Vector &pb, const Vector &p0)
 {
     
     // transform resisting forces from the basic system to local coordinates
@@ -519,19 +519,31 @@ CorotCrdTransf2d::getGlobalResistingForce(const Vector &pb, const Vector &unifLo
     static Vector pl(6);
     pl.addMatrixTransposeVector(0.0, Tbl, pb, 1.0);    // pl = Tbl ^ pb;
     
-    ///opserr << "pl: " << pl;
-    // check distributed load is zero (not implemented yet)
-    
-    if (unifLoad.Norm() != 0.0)
-    {
-        opserr << "CorotCrdTransf2d::getGlobalResistingForce: affect of Po not implemented yet.";
-        opserr << "using zero value";
-    }  
-    
-    // transform resisting forces  from local to global coordinates
-    this->getTransfMatrixLocalGlobal(Tlg);     // OPTIMIZE LATER
-    pg.addMatrixTransposeVector(0.0, Tlg, pl, 1.0);   // pg = Tlg ^ pl; residual
+    // add end forces due to element p0 loads
+    // This assumes member loads are in local system
+    pl(0) += p0(0);
+    pl(1) += p0(1);
+    pl(4) += p0(2);
 
+    /*     // This assumes member loads are in basic system
+    pl(0) += p0(0)*cosAlpha - p0(1)*sinAlpha;
+    pl(1) += p0(0)*sinAlpha + p0(1)*cosAlpha;
+    pl(3) -= p0(2)*sinAlpha;
+    pl(4) += p0(2)*cosAlpha;
+    */
+
+    // transform resisting forces  from local to global coordinates
+    //this->getTransfMatrixLocalGlobal(Tlg);     // OPTIMIZE LATER
+    //pg.addMatrixTransposeVector(0.0, Tlg, pl, 1.0);   // pg = Tlg ^ pl; residual
+
+    pg(0) = cosTheta*pl[0] - sinTheta*pl[1];
+    pg(1) = sinTheta*pl[0] + cosTheta*pl[1];
+    
+    pg(3) = cosTheta*pl[3] - sinTheta*pl[4];
+    pg(4) = sinTheta*pl[3] + cosTheta*pl[4];
+    
+    pg(2) = pl[2];
+    pg(5) = pl[5];
 
     // account for rigid offsets
     if (nodeOffsets == true) {
