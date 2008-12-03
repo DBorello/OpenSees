@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2007-10-26 04:48:31 $
+// $Revision: 1.5 $
+// $Date: 2008-12-03 23:43:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/HingeRadauBeamIntegration.cpp,v $
 
 /*
@@ -213,20 +213,20 @@ HingeRadauBeamIntegration::getLocationsDeriv(int numSections,
 
   if (parameterID == 1) { // lpI
     dptsdh[1] = 8.0/3*oneOverL;
-    dptsdh[2] = -2*(1.0-oneRoot3)*oneOverL + 4*oneOverL;
-    dptsdh[3] = -2*(1.0+oneRoot3)*oneOverL + 4*oneOverL;
+    dptsdh[2] = 2.0*oneOverL*(1.0+oneRoot3);
+    dptsdh[3] = 2.0*oneOverL*(1.0-oneRoot3);
   }
 
   if (parameterID == 2) { // lpJ
-    dptsdh[2] = -2*(1.0-oneRoot3)*oneOverL;
-    dptsdh[3] = -2*(1.0+oneRoot3)*oneOverL;
+    dptsdh[2] = -2.0*oneOverL*(1.0-oneRoot3);
+    dptsdh[3] = -2.0*oneOverL*(1.0+oneRoot3);
     dptsdh[4] = -8.0/3*oneOverL;
   }
 
   if (parameterID == 3) { // lpI and lpJ
     dptsdh[1] = 8.0/3*oneOverL;
-    dptsdh[2] = -4*(1.0-oneRoot3)*oneOverL + 4*oneOverL;
-    dptsdh[3] = -4*(1.0+oneRoot3)*oneOverL + 4*oneOverL;
+    dptsdh[2] =  4.0*oneOverL*oneRoot3;
+    dptsdh[3] = -4.0*oneOverL*oneRoot3;
     dptsdh[4] = -8.0/3*oneOverL;
   }
 
