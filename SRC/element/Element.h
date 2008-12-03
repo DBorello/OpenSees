@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2008-08-26 16:52:10 $
+// $Revision: 1.18 $
+// $Date: 2008-12-03 18:44:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.h,v $
                                                                         
                                                                         
@@ -81,9 +81,9 @@ class Element : public DomainComponent
     virtual const Matrix &getMass(void);    
 
     // methods for applying loads
-    virtual void zeroLoad(void) =0;	
-    virtual int addLoad(ElementalLoad *theLoad, double loadFactor) =0;
-    virtual int addInertiaLoadToUnbalance(const Vector &accel) =0;
+    virtual void zeroLoad(void);	
+    virtual int addLoad(ElementalLoad *theLoad, double loadFactor);
+    virtual int addInertiaLoadToUnbalance(const Vector &accel);
     virtual int setRayleighDampingFactors(double alphaM, double betaK, double betaK0, double betaKc);
 
     // methods for obtaining resisting force (force includes elemental loads)

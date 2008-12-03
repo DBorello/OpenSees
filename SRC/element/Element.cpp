@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2008-08-26 16:52:10 $
+// $Revision: 1.24 $
+// $Date: 2008-12-03 18:44:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
@@ -86,6 +86,19 @@ int
 Element::revertToStart(void)
 {
   return 0;
+}
+
+
+void 
+Element::zeroLoad(void)
+{
+
+}
+
+int 
+Element::addInertiaLoadToUnbalance(const Vector &accel)
+{
+  return -1;
 }
 
 
