@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2007-10-26 04:45:26 $
+// $Revision: 1.3 $
+// $Date: 2008-12-03 23:42:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/LowOrderBeamIntegration.cpp,v $
 
 #include <LowOrderBeamIntegration.h>
@@ -104,6 +104,30 @@ LowOrderBeamIntegration::getSectionWeights(int numSections,
 					   double L, double *wt)
 {
   int nIP = wts.Size();
+
+  int Nf = nIP-Nc;
+
+  if (Nf > 0) {
+    Vector R(Nf);
+    for (int i = 0; i < Nf; i++) {
+      double sum = 0.0;
+      for (int j = 0; j < Nc; j++)
+	sum += pow(pts(j),i)*wts(j);
+      R(i) = 1.0/(i+1) - sum;
+    }
+    
+    Matrix J(Nf,Nf);
+    for (int i = 0; i < Nf; i++)
+      for (int j = 0; j < Nf; j++)
+	J(i,j) = pow(pts(Nc+j),i);
+    
+    Vector wf(Nf);
+    
+    J.Solve(R, wf);
+    
+    for (int i = 0; i < Nf; i++)
+      wts(Nc+i) = wf(i);
+  }
 
   int i;
   for (i = 0; i < nIP; i++)
