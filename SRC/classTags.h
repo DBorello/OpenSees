@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.106 $
-// $Date: 2008-11-24 17:12:46 $
+// $Revision: 1.107 $
+// $Date: 2008-12-03 18:26:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -142,6 +142,7 @@
 #define MAT_TAG_Concrete06 34
 #define MAT_TAG_Concrete07 37
 #define MAT_TAG_HyperbolicGapMaterial 38
+#define MAT_TAG_WrapperUniaxialMaterial 101
 
 //B Jeremic
 #define MAT_TAG_PySimple1        205
@@ -324,6 +325,7 @@
 
 
 #define ELE_TAG_Subdomain     	1
+#define ELEMENT_TAGS_WrapperElement 2001
 #define ELE_TAG_ElasticBeam2d   2000
 #define ELE_TAG_ElasticBeam3d   3000
 #define ELE_TAG_Beam2d    	2001
