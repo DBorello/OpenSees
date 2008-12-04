@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.53 $
-// $Date: 2008-11-04 22:24:18 $
+// $Revision: 1.54 $
+// $Date: 2008-12-04 21:31:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -32,6 +32,8 @@
 // What: "@(#) TclModelBuilderUniaxialMaterialCommand.C, revA"
 
 #include <TclModelBuilder.h>
+
+#include <elementAPI.h>
 
 #include <ElasticMaterial.h>	// fmk
 #include <Elastic2Material.h>	// ZHY
@@ -90,6 +92,8 @@ extern int
 TclCommand_HyperbolicGapMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
 				 TCL_Char **argv, TclModelBuilder *theTclBuilder);
 
+extern UniaxialMaterial *Tcl_addWrapperUniaxialMaterial(matObj *, ClientData clientData, Tcl_Interp *interp,
+							int argc, TCL_Char **argv, TclModelBuilder *theTclBuilder);
 
 #include <packages.h>
 
@@ -2974,6 +2978,25 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 				theTclBuilder);	
 	
 	return result;
+      }
+
+
+      // maybe material in a routine
+      //
+      
+      char *matType = new char[strlen(argv[1])+1];
+      strcpy(matType, argv[1]);
+      matObj *matObject = OPS_GetMaterialType(matType, strlen(matType));
+      
+      delete [] matType;
+      
+      if (matObject != 0) {
+	
+	theMaterial = Tcl_addWrapperUniaxialMaterial(matObject, clientData, interp,
+						    argc, argv, theTclBuilder);
+	
+	if (theMaterial == 0)
+	  delete matObject;
       }
     }
     
