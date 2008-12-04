@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.54 $
-// $Date: 2008-12-04 21:31:09 $
+// $Revision: 1.55 $
+// $Date: 2008-12-04 21:39:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -2954,8 +2954,8 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 		     TCL_Char **argv, TclModelBuilder *);       
       int matNameLength = strlen(argv[1]);
       char *tclFuncName = new char[matNameLength+12];
-      strcpy(tclFuncName, "TclCommand_");
-      strcpy(&tclFuncName[11], argv[1]);    
+      strcpy(tclFuncName, "OPS_");
+      strcpy(&tclFuncName[4], argv[1]);    
       int res = getLibraryFunction(argv[1], tclFuncName, &libHandle, (void **)&funcPtr);
       
       delete [] tclFuncName;
