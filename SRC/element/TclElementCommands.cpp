@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.46 $
-// $Date: 2008-07-21 22:53:02 $
+// $Revision: 1.47 $
+// $Date: 2008-12-04 22:39:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -49,16 +49,22 @@
 
 #include <TclModelBuilder.h>
 #include <packages.h>
-
+#include <elementAPI.h>
 //
 // SOME STATIC POINTERS USED IN THE FUNCTIONS INVOKED BY THE INTERPRETER
 //
 
+extern int OPS_ResetInput(ClientData clientData, 
+			  Tcl_Interp *interp,  
+			  int cArg, 
+			  int mArg, 
+			  TCL_Char **argv, 
+			  Domain *domain,
+			  TclModelBuilder *builder);
 
 typedef struct elementPackageCommand {
   char *funcName;
-  int (*funcPtr)(ClientData clientData, Tcl_Interp *interp,  int argc, 
-		 TCL_Char **argv, Domain*, TclModelBuilder *); 
+  void *(*funcPtr)(int argc, const char **argv);
   struct elementPackageCommand *next;
 } ElementPackageCommand;
 
@@ -77,6 +83,11 @@ TclModelBuilder_addFeapTruss(ClientData clientData, Tcl_Interp *interp,  int arg
 extern int
 TclModelBuilder_addTruss(ClientData clientData, Tcl_Interp *interp,  int argc, 
 			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
+
+
+extern int
+Tcl_addWrapperElement(eleObj *, ClientData clientData, Tcl_Interp *interp,  int argc, 
+		      TCL_Char **argv, Domain*, TclModelBuilder *); 
 
 extern int
 TclModelBuilder_addElasticBeam(ClientData clientData, Tcl_Interp *interp,  int argc, 
@@ -607,25 +618,36 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
     //
 
     // try existing loaded packages
-
+	  
     ElementPackageCommand *eleCommands = theElementPackageCommands;
     bool found = false;
+    int result = TCL_ERROR;
     while (eleCommands != NULL && found == false) {
       if (strcmp(argv[1], eleCommands->funcName) == 0) {
-	int result = (*(eleCommands->funcPtr))(clientData, interp, argc, argv, theTclDomain, theTclBuilder);
-	return result;
+
+	OPS_ResetInput(clientData, interp, 2, argc, argv, theTclDomain, theTclBuilder);
+	void *theRes = (*(eleCommands->funcPtr))(argc, argv);
+	if (theRes != 0) {
+	  Element *theEle = (Element *)theRes;
+	  result = theTclDomain->addElement(theEle);
+
+	  if (result >= 0)
+	    return TCL_OK;
+	  else
+	    return TCL_ERROR;
+	}
+	return TCL_ERROR;;
       } else
 	eleCommands = eleCommands->next;
     }
 
     // load new package
     void *libHandle;
-    int (*funcPtr)(ClientData clientData, Tcl_Interp *interp,  int argc, 
-		   TCL_Char **argv, Domain*, TclModelBuilder *);       
+    void *(*funcPtr)(int argc, const char **argv);
     int eleNameLength = strlen(argv[1]);
-    char *tclFuncName = new char[eleNameLength+12];
-    strcpy(tclFuncName, "TclCommand_");
-    strcpy(&tclFuncName[11], argv[1]);    
+    char *tclFuncName = new char[eleNameLength+5];
+    strcpy(tclFuncName, "OPS_");
+    strcpy(&tclFuncName[4], argv[1]);    
 
     int res = getLibraryFunction(argv[1], tclFuncName, &libHandle, (void **)&funcPtr);
 
@@ -640,15 +662,45 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
       theEleCommand->funcName = eleName;	
       theEleCommand->next = theElementPackageCommands;
       theElementPackageCommands = theEleCommand;
+
+      OPS_ResetInput(clientData, interp, 2, argc, argv, theTclDomain, theTclBuilder);
+      void *theRes = (*funcPtr)(argc, argv);
+
+      if (theRes != 0) {
+	Element *theEle = (Element *)theRes;
+	result = theTclDomain->addElement(theEle);
+	if (result >= 0)
+	  return TCL_OK;
+	else
+	  return TCL_ERROR;
+      } else {
+	return TCL_ERROR;
+      }
+    }
+
+    //
+    // maybe element in a routine
+    //
+
+    char *eleType = new char[strlen(argv[1])+1];
+    strcpy(eleType, argv[1]);
+    eleObj *eleObject = OPS_GetElementType(eleType, strlen(eleType));
+
+    delete [] eleType;
+
+    if (eleObject != 0) {
       
-      int result = (*funcPtr)(clientData, interp,
-			      argc, argv,
-			      theTclDomain, theTclBuilder);	
-      return result;
+      int result = Tcl_addWrapperElement(eleObject, clientData, interp,
+					 argc, argv,
+					 theTclDomain, theTclBuilder);
+
+      if (result != 0)
+	delete eleObject;
+
+      return 0;
     }
 
     // element type not recognized
-    opserr << "WARNING unknown element type: " <<  argv[1] << " :check the manual\n";
     return TCL_ERROR;
   }    
 }
