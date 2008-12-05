@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-12-01 23:30:00 $
+// $Revision: 1.2 $
+// $Date: 2008-12-05 19:14:06 $
 // $Source: /usr/local/cvs/OpenSees/PACKAGES/NewMaterial/cpp/MyElasticPP.cpp,v $
                                                                         
 // Written: fmk 
@@ -40,6 +40,8 @@
 
 #ifdef _USRDLL
 #define DllExport _declspec(dllexport)
+#elif _MACOSX
+#define DllExport __attribute__((visibility("default")))
 #else
 #define DllExport
 #endif
@@ -50,7 +52,7 @@ OPS_MyElasticPP(int argc,
 {
   // Pointer to a uniaxial material that will be returned
   UniaxialMaterial *theMaterial = 0;
-  
+
   if (argc < 5) {
     opserr << "WARNING insufficient arguments\n";
     opserr << "Want: uniaxialMaterial ElasticPP tag? E? epsy?" << endln;
@@ -60,7 +62,7 @@ OPS_MyElasticPP(int argc,
   int    iData[1];
   double dData[2];
   int numData;
-  
+
   numData = 1;
   if (OPS_GetIntInput(&numData, iData) != 0) {
     opserr << "WARNING invalid uniaxialMaterial ElasticPP tag" << endln;
@@ -72,7 +74,7 @@ OPS_MyElasticPP(int argc,
     opserr << "WARNING invalid E & ep\n";
     return 0;	
   }
-  
+
   theMaterial = new MyElasticPP(iData[0], dData[0], dData[1]);       
 
   if (theMaterial == 0) {

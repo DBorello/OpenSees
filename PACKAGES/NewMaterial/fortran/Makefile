@@ -1,5 +1,9 @@
 include ../../../Makefile.def
 
+OS_FLAG ?= -D_LINUX
+
+ifeq ($(OS_FLAG), LINUX)
+
 LIBRARY         = elasticppf_.so
 
 all: $(LIBRARY)
@@ -10,8 +14,19 @@ OBJS = materialtypes.mod materialapi.mod elasticPPf.o
 $(LIBRARY): $(OBJS)
 	$(CC++) -shared -Wl,-soname,$(LIBRARY) -o $(LIBRARY)   elasticPPf.o -lc
 
-elasticPPC.o: elasticPPC.c
-	$(CC++) -fPIC $(INCLUDES)  -c -Wall elasticPPC.c
+else
+
+LIBRARY         = elasticPPf_.dylib
+
+OUTSIDE_OBJS = $(FE)/../PACKAGES/dynamicLoadFunctions.o
+
+OBJS = materialtypes.mod materialapi.mod 
+
+all: $(OBJS)
+	$(FC) $(OS_FLAG) -dynamiclib $(INCLUDES) -Wl,-undefined,suppress,-flat_namespace elasticPPf.f $(OUTSIDE_OBJS)  -current_version 1.0 -compatibility_version 1.0 -fvisibility=hidden -o $(LIBRARY)
+
+
+endif
 
 materialapi.mod: materialAPI.f materialtypee.mod
 	$(FC)  -c  materialAPI.f

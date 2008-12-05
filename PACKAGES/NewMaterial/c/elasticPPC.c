@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.1 $
-** $Date: 2008-12-01 23:30:00 $
+** $Revision: 1.2 $
+** $Date: 2008-12-05 19:14:30 $
 ** $Source: /usr/local/cvs/OpenSees/PACKAGES/NewMaterial/c/elasticPPC.c,v $
                                                                         
 ** Written: fmk 
@@ -38,6 +38,8 @@
 #ifdef _USRDLL
 #include <windows.h>
 #define DllExport _declspec(dllexport)
+#elif _MACOSX
+#define DllExport __attribute__((visibility("default")))
 #else
 #define DllExport
 #endif

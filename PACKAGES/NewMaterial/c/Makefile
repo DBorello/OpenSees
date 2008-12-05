@@ -1,5 +1,9 @@
 include ../../../Makefile.def
 
+OS_FLAG ?= -D_LINUX
+
+ifeq ($(OS_FLAG), LINUX)
+
 LIBRARY         = elasticPPC.so
 
 all: $(LIBRARY)
@@ -11,6 +15,19 @@ $(LIBRARY): $(OBJS)
 
 elasticPPC.o: elasticPPC.c
 	$(CC++) -fPIC $(INCLUDES)  -c -Wall elasticPPC.c
+
+else
+
+LIBRARY         = elasticPPC.dylib
+
+OUTSIDE_OBJS = $(FE)/../PACKAGES/dynamicLoadFunctions.o
+
+
+all: 
+	$(CC++) $(OS_FLAG) -dynamiclib $(INCLUDES) -Wl,-undefined,suppress,-flat_namespace elasticPPC.c $(OUTSIDE_OBJS)  -current_version 1.0 -compatibility_version 1.0 -fvisibility=hidden -o $(LIBRARY)
+
+
+endif
 
 # Miscellaneous
 tidy:
