@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.55 $
-// $Date: 2008-12-04 21:39:39 $
+// $Revision: 1.56 $
+// $Date: 2008-12-08 21:48:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -33,7 +33,7 @@
 
 #include <TclModelBuilder.h>
 
-#include <elementAPI.h>
+#include <OPS_ProceduralAPI.h>
 
 #include <ElasticMaterial.h>	// fmk
 #include <Elastic2Material.h>	// ZHY
@@ -97,12 +97,18 @@ extern UniaxialMaterial *Tcl_addWrapperUniaxialMaterial(matObj *, ClientData cli
 
 #include <packages.h>
 
+extern int OPS_ResetInput(ClientData clientData, 
+			  Tcl_Interp *interp,  
+			  int cArg, 
+			  int mArg, 
+			  TCL_Char **argv, 
+			  Domain *domain,
+			  TclModelBuilder *builder);
 
 
 typedef struct uniaxialPackageCommand {
   char *funcName;
-  int (*funcPtr)(ClientData clientData, Tcl_Interp *interp,  int argc, 
-		 TCL_Char **argv, TclModelBuilder *); 
+  void * (*funcPtr)(int argc, TCL_Char **argv); 
   struct uniaxialPackageCommand *next;
 } UniaxialPackageCommand;
 
@@ -2935,52 +2941,54 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
       bool found = false;
       while (matCommands != NULL && found == false) {
 	if (strcmp(argv[1], matCommands->funcName) == 0) {
-	  
-	  int result = (*(matCommands->funcPtr))(clientData, interp, argc, argv, theTclBuilder);
-	  return result;
+	  OPS_ResetInput(clientData, interp, 2, argc, argv, theDomain, theTclBuilder);	  
+	  theMaterial = (UniaxialMaterial *)(*(matCommands->funcPtr))(argc, argv);
+	  found = true;;
 	} else
 	  matCommands = matCommands->next;
       }
       
       
-      //
-      // maybe element command exists in a dll in library path
-      //  so try loading package of same name as material name containg
-      //  a c function "TclCommand_MatName"
-      //
-      
-      void *libHandle;
-      int (*funcPtr)(ClientData clientData, Tcl_Interp *interp,  int argc, 
-		     TCL_Char **argv, TclModelBuilder *);       
-      int matNameLength = strlen(argv[1]);
-      char *tclFuncName = new char[matNameLength+12];
-      strcpy(tclFuncName, "OPS_");
-      strcpy(&tclFuncName[4], argv[1]);    
-      int res = getLibraryFunction(argv[1], tclFuncName, &libHandle, (void **)&funcPtr);
-      
-      delete [] tclFuncName;
-      
-      if (res == 0) {
-	
+      if (found == false) {
 	//
-	// add loaded function to list of functions
+	// maybe element command exists in a dll in library path
+	//  so try loading package of same name as material name containg
+	//  a c function "TclCommand_MatName"
 	//
-	char *matName = new char[matNameLength+1];
-	strcpy(matName, argv[1]);
-	UniaxialPackageCommand *theMatCommand = new UniaxialPackageCommand;
-	theMatCommand->funcPtr = funcPtr;
-	theMatCommand->funcName = matName;	
-	theMatCommand->next = theUniaxialPackageCommands;
-	theUniaxialPackageCommands = theMatCommand;
 	
-	int result = (*funcPtr)(clientData, interp,
-				argc, argv,
-				theTclBuilder);	
+	void *libHandle;
+	void * (*funcPtr)(int argc, TCL_Char **argv);
 	
-	return result;
+	int matNameLength = strlen(argv[1]);
+	char *tclFuncName = new char[matNameLength+12];
+	strcpy(tclFuncName, "OPS_");
+	strcpy(&tclFuncName[4], argv[1]);    
+	int res = getLibraryFunction(argv[1], tclFuncName, &libHandle, (void **)&funcPtr);
+	
+	delete [] tclFuncName;
+	
+	if (res == 0) {
+	  
+	  //
+	  // add loaded function to list of functions
+	  //
+	  
+	  char *matName = new char[matNameLength+1];
+	  strcpy(matName, argv[1]);
+	  UniaxialPackageCommand *theMatCommand = new UniaxialPackageCommand;
+	  theMatCommand->funcPtr = funcPtr;
+	  theMatCommand->funcName = matName;	
+	  theMatCommand->next = theUniaxialPackageCommands;
+	  theUniaxialPackageCommands = theMatCommand;
+	  
+	  OPS_ResetInput(clientData, interp, 2, argc, argv, theDomain, theTclBuilder);	
+	  theMaterial = (UniaxialMaterial *)(*funcPtr)(argc, argv);
+	  found = true;
+	}
       }
-
-
+    }
+    
+    if (theMaterial == 0) {
       // maybe material in a routine
       //
       
@@ -2993,13 +3001,14 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
       if (matObject != 0) {
 	
 	theMaterial = Tcl_addWrapperUniaxialMaterial(matObject, clientData, interp,
-						    argc, argv, theTclBuilder);
+						     argc, argv, theTclBuilder);
 	
 	if (theMaterial == 0)
 	  delete matObject;
       }
     }
     
+
     //
     // if still here the element command does not exist
     //
