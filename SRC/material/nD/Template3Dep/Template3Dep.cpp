@@ -71,11 +71,7 @@
 #define KK 1000.0  
 
 
-
-#include "Template3Dep.h"
-
-
-
+#include <Template3Dep.h>
 
 
 stresstensor Template3Dep::Stress;

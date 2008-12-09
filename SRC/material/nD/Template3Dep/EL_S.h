@@ -40,8 +40,8 @@ class EvolutionLaw_S
 {
  public:
     
-    EvolutionLaw_S() {};			 //Normal Constructor
-
+    EvolutionLaw_S() {};	       //Normal Constructor
+    virtual ~EvolutionLaw_S() {};      //Normal Destructor
     virtual EvolutionLaw_S *newObj();  //create a colne of itself
 
     // Not necessary since the increment of internal var can be evalulated in constitutive driver!

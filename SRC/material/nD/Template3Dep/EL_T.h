@@ -43,6 +43,7 @@ class EvolutionLaw_T
     
     // Constructor
     EvolutionLaw_T() {};			 
+    virtual ~EvolutionLaw_T() {};			 
 
     //create a colne of itself
     virtual EvolutionLaw_T *newObj();  

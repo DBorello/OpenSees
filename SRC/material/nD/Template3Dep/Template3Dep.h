@@ -187,8 +187,8 @@ class Template3Dep : public NDMaterial
     NDMaterial *getCopy(void);
     NDMaterial *getCopy(const char *code) ;
 
-    //Template3Dep getCopy(void);  //????/
-    //Template3Dep getCopy(const char *code) ;///???/
+    //Template3Dep getCopy(void);  
+    //Template3Dep getCopy(const char *code) ;
 
     const char *getType(void) const ;
     //int getOrder(void) const ;
@@ -305,7 +305,6 @@ class Template3Dep : public NDMaterial
     static straintensor Strain;     
 
 };
-
 
 #endif
 

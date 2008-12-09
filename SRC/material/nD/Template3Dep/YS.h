@@ -37,6 +37,7 @@ class YieldSurface
 {
   public:
     YieldSurface() {} ;			 //Normal Constructor
+    virtual ~YieldSurface() {} ;			 //Normal Destructor
     virtual YieldSurface *newObj() = 0;  //create a clone of itself
   
     virtual double f( const EPState *EPS ) const = 0;	 //pure virtual func
@@ -54,7 +55,6 @@ class YieldSurface
     virtual tensor xi_t2( const EPState *EPS ) const;
     virtual tensor xi_t3( const EPState *EPS ) const;
     virtual tensor xi_t4( const EPState *EPS ) const;
-
 
     //================================================================================
     // Overloaded Insertion Operator
