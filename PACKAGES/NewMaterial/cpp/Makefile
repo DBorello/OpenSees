@@ -20,28 +20,28 @@ OS_FLAG ?= -D_LINUX
 
 ifeq ($(OS_FLAG), LINUX)
 
-LIBRARY         = MyElasticPP.so
+LIBRARY         = ElasticPPcpp.so
 
 OUTSIDE_OBJS = 
 
 
-OBJS = MyElasticPP.o
+OBJS = ElasticPPcpp.o
 
 all: $(OBJS)
 	$(CC++) -shared -Wl,-soname,$(LIBRARY) -o $(LIBRARY) $(OBJS) -lc
 
-MyElasticPP.o: MyElasticPP.cpp
-	$(CC++) -fPIC $(INCLUDES)  -c -Wall MyElasticPP.cpp
+ElasticPPcpp.o: ElasticPPcpp.cpp
+	$(CC++) -fPIC $(INCLUDES)  -c -Wall ElasticPPcpp.cpp
 
 else
 
-LIBRARY         = MyElasticPP.dylib
+LIBRARY         = ElasticPPcpp.dylib
 
 OUTSIDE_OBJS = $(FE)/../PACKAGES/dynamicLoadFunctions.o
 
 
 all: 
-	$(CC++) $(OS_FLAG) -dynamiclib $(INCLUDES) -Wl,-undefined,suppress,-flat_namespace MyElasticPP.cpp $(OUTSIDE_OBJS)  -current_version 1.0 -compatibility_version 1.0 -fvisibility=hidden -o $(LIBRARY)
+	$(CC++) $(OS_FLAG) -dynamiclib $(INCLUDES) -Wl,-undefined,suppress,-flat_namespace ElasticPPcpp.cpp $(OUTSIDE_OBJS)  -current_version 1.0 -compatibility_version 1.0 -fvisibility=hidden -o $(LIBRARY)
 
 endif
 

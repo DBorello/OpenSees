@@ -2,8 +2,8 @@
 #
 # purpose: example1 in the manual with existing truss element
 #
-# $Revision: 1.1 $
-# $Date: 2008-12-01 23:30:00 $
+# $Revision: 1.2 $
+# $Date: 2008-12-09 19:59:46 $
 # $Source: /usr/local/cvs/OpenSees/PACKAGES/NewMaterial/cpp/example1.tcl,v $
 
 #create the ModelBuilder object
@@ -18,7 +18,7 @@ node 3 168.0  0.0
 node 4  72.0 96.0
 
 # add material - command: material <matType> matID <matArgs>
-uniaxialMaterial MyElasticPP 1 3000 0.03
+uniaxialMaterial ElasticPPcpp 1 3000 0.03
 #uniaxialMaterial Elastic 1 3000.0
 
 # add truss elements - command: truss trussID node1 node2 A matID
