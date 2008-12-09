@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-12-09 00:14:39 $
+// $Revision: 1.3 $
+// $Date: 2008-12-09 19:51:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/WrapperElement.cpp,v $
                                                                         
 // Written: fmk 
@@ -158,7 +158,7 @@ WrapperElement::commitState()
   // invoke the element routine
   int isw = ISW_COMMIT;
   int error = 0;
-  theEle->eleFunctPtr(theEle, &theModelState, u, K , R, &isw, &error);
+  theEle->eleFunctPtr(theEle, &theModelState, K , R, &isw, &error);
   return error;
 }
 
@@ -176,7 +176,7 @@ WrapperElement::revertToLastCommit()
   // invoke the element routine
   int isw = ISW_REVERT;
   int error = 0;
-  theEle->eleFunctPtr(theEle, &theModelState, u, K , R, &isw, &error);
+  theEle->eleFunctPtr(theEle, &theModelState, K , R, &isw, &error);
   return error;
 }
 
@@ -194,7 +194,7 @@ WrapperElement::revertToStart()
   // invoke the element routine
   int isw = ISW_REVERT_TO_START;
   int error = 0;
-  theEle->eleFunctPtr(theEle, &theModelState, u, K , R, &isw, &error);
+  theEle->eleFunctPtr(theEle, &theModelState, K , R, &isw, &error);
   return error;
 }
 
@@ -221,7 +221,7 @@ WrapperElement::getMass(void)
     // invoke the element routine
     int isw = ISW_FORM_MASS;
     int error = 0;
-    theEle->eleFunctPtr(theEle, &theModelState, u, K , R, &isw, &error);
+    theEle->eleFunctPtr(theEle, &theModelState, K , R, &isw, &error);
 
     // set the matrix
     Kmatrix.setData(K,theEle->nDOF, theEle->nDOF);
@@ -279,7 +279,7 @@ WrapperElement::update()
     // zero the matrix
     int error = 0;
     int isw = ISW_FORM_TANG_AND_RESID;
-    theEle->eleFunctPtr(theEle, &theModelState, u, K , R, &isw, &error);
+    theEle->eleFunctPtr(theEle, &theModelState, K , R, &isw, &error);
     
     Rvector.setData(R, theEle->nDOF);
 

@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.2 $
-** $Date: 2008-12-09 00:16:30 $
+** $Revision: 1.3 $
+** $Date: 2008-12-09 19:51:27 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/elementAPI.h,v $
                                                                         
 ** Written: fmk 
@@ -60,7 +60,7 @@ struct matObject {
 
 typedef struct matObject matObj;
 
-typedef void (*eleFunct)(struct eleObject *, modelState *, double *u,double *tang, double *resid, int *isw, int *error);
+typedef void (*eleFunct)(struct eleObject *, modelState *, double *tang, double *resid, int *isw, int *error);
 
 struct eleObject {
   int tag;

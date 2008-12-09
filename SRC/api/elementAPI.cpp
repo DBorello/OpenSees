@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.2 $
-** $Date: 2008-12-09 00:12:19 $
+** $Revision: 1.3 $
+** $Date: 2008-12-09 19:51:27 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/elementAPI.cpp,v $
                                                                         
 ** Written: fmk 
@@ -504,7 +504,7 @@ Tcl_addWrapperElement(eleObj *theEle, ClientData clientData, Tcl_Interp *interp,
   // invoke the ele function with isw = 0
   int isw = ISW_INIT;
   int result = 0;
-  theEle->eleFunctPtr(theEle, &theModelState, 0, 0, 0, &isw, &result);
+  theEle->eleFunctPtr(theEle, &theModelState, 0, 0, &isw, &result);
 
   if (result != 0) {
     opserr << "Tcl_addWrapperElement - failed in element function " << result << endln;
