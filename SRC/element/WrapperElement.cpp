@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-12-01 23:36:23 $
+// $Revision: 1.2 $
+// $Date: 2008-12-09 00:14:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/WrapperElement.cpp,v $
                                                                         
 // Written: fmk 
@@ -35,8 +35,6 @@
 #include <stdlib.h>
 
 extern modelState theModelState;
-
-#define ELEMENT_TAGS_WrapperElement 100001
 
 Vector WrapperElement::Rvector;    // vector to hold the applied load P
 Matrix WrapperElement::Kmatrix;

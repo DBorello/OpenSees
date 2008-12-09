@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-12-01 23:36:23 $
+// $Revision: 1.2 $
+// $Date: 2008-12-09 00:14:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/WrapperElement.h,v $
 
 // Written: fmk                                                                         
@@ -30,7 +30,7 @@
 #include <Element.h>
 #include <Matrix.h>
 
-#include <OPS_ProceduralAPI.h>
+#include <elementAPI.h>
 
 class Node;
 class Channel;
