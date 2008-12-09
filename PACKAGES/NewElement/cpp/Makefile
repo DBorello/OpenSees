@@ -18,6 +18,11 @@ TrussCPP.o: TrussCPP.cpp
 
 else
 
+LIBRARY         = TrussCPP.dylib
+
+
+all: 
+	$(CC++) $(OS_FLAG) -dynamiclib $(INCLUDES) -Wl,-undefined,suppress,-flat_namespace TrussCPP.cpp $(OUTSIDE_OBJS)  -current_version 1.0 -compatibility_version 1.0 -fvisibility=hidden -o $(LIBRARY)
 
 endif
 
