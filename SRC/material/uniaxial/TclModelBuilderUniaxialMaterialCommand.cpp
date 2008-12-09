@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.56 $
-// $Date: 2008-12-08 21:48:12 $
+// $Revision: 1.57 $
+// $Date: 2008-12-09 19:50:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -33,7 +33,7 @@
 
 #include <TclModelBuilder.h>
 
-#include <OPS_ProceduralAPI.h>
+#include <elementAPI.h>
 
 #include <ElasticMaterial.h>	// fmk
 #include <Elastic2Material.h>	// ZHY

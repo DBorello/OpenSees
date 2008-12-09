@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-12-03 18:23:40 $
+// $Revision: 1.2 $
+// $Date: 2008-12-09 19:50:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/WrapperUniaxialMaterial.h,v $
 
 // Written: fmk                                                                         
@@ -30,7 +30,7 @@
 #include <UniaxialMaterial.h>
 #include <Matrix.h>
 
-#include <OPS_ProceduralAPI.h>
+#include <elementAPI.h>
 
 class WrapperUniaxialMaterial : public UniaxialMaterial
 {
