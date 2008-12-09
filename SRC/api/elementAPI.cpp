@@ -19,14 +19,14 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.1 $
-** $Date: 2008-12-09 00:09:40 $
+** $Revision: 1.2 $
+** $Date: 2008-12-09 00:12:19 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/elementAPI.cpp,v $
                                                                         
 ** Written: fmk 
 */
 
-#include <OPS_ProceduralAPI.h>
+#include <elementAPI.h>
 #include <stdlib.h>
 #include <packages.h>
 #include <OPS_Globals.h>
@@ -64,7 +64,8 @@ static TclModelBuilder *theModelBuilder = 0;
 static TCL_Char **currentArgv = 0;
 static int currentArg = 0;
 static int maxArg = 0;
-static int uniaxialMaterialObjectCount =0;
+
+//static int uniaxialMaterialObjectCount =0;
 
 modelState *theModelState = 0;
 
@@ -77,7 +78,7 @@ struct cmp_str {
 std::map<char *, eleFunct, cmp_str>theEleFunctions;              // map of user added ele functions
 std::map<char *, eleFunct, cmp_str>theUniaxialMaterialFunctions; // map of user added material functions
 
-std::map<int, UniaxialMaterial *>theUniaxialMaterials;           // map for UniaxialMaterial objects needed by user added ele functions'
+//std::map<int, UniaxialMaterial *>theUniaxialMaterials;           // map for UniaxialMaterial objects needed by user added ele functions'
 
 static 
 void OPS_InvokeMaterialObject(struct matObject *theMat, modelState *theModel,double *strain, double *tang, double *stress, int *isw, int *result)

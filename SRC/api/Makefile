@@ -1,7 +1,7 @@
 include ../../Makefile.def
 
 OBJS       = packages.o \
-	OPS_ProceduralAPI.o
+	elementAPI.o
 
 # Compilation control
 
