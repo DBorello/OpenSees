@@ -1,8 +1,6 @@
 #  Written: Boris Jeremic jeremic@ucdavis.edu
 #  Created: Aug2000
 
-
-
 # #LD = /usr/local/gnu/bin/ld
 # MACHINE = LINUX
 # 
@@ -46,13 +44,12 @@ OBJS  = Template3Dep.o \
 
 ################### TARGETS ########################
 all: $(OBJS) 
+	@$(RM) $(MATMOD_LIBRARY) 
 	$(AR) $(ARFLAGS) $(MATMOD_LIBRARY) $(OBJS)
+	@$(RANLIB) $(RANLIBFLAGS) $(MATMOD_LIBRARY)
 
 libmatmod.a: $(OBJS)
 	$(AR) $(ARFLAGS) $(MATMOD_LIBRARY) $(OBJS)
-
-
-
 
 # Miscellaneous
 tidy:	
