@@ -2,8 +2,8 @@
 #
 # purpose: example1 in the manual with existing truss element
 #
-# $Revision: 1.1 $
-# $Date: 2008-12-01 23:30:25 $
+# $Revision: 1.2 $
+# $Date: 2008-12-09 22:43:40 $
 # $Source: /usr/local/cvs/OpenSees/PACKAGES/NewElement/cpp/example1.tcl,v $
 
 #create the ModelBuilder object
@@ -21,9 +21,9 @@ node 4  72.0 96.0
 uniaxialMaterial Elastic 1 3000
 
 # add truss elements - command: truss trussID node1 node2 A matID
-element myTruss 1 1 4 10.0 1
-element myTruss 2 2 4 5.0 1
-element myTruss 3 3 4 5.0 1
+element TrussCPP 1 1 4 10.0 1
+element TrussCPP 2 2 4 5.0 1
+element TrussCPP 3 3 4 5.0 1
 
 # set the boundary conditions - command: fix nodeID xResrnt? yRestrnt?
 fix 1 1 1 
