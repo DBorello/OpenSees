@@ -19,15 +19,14 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.1 $
-** $Date: 2008-12-09 00:09:40 $
+** $Revision: 1.2 $
+** $Date: 2008-12-09 00:16:30 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/elementAPI.h,v $
                                                                         
 ** Written: fmk 
 */
 
 #ifndef _eleAPI
-
 #define _eleAPI
 
 #define ISW_INIT 0
@@ -36,7 +35,7 @@
 #define ISW_FORM_TANG_AND_RESID 3
 #define ISW_FORM_MASS 4
 #define ISW_REVERT_TO_START 5
-#define DELETE 6
+#define ISW_DELETE 6
 
 #define OPS_UNIAXIAL_MATERIAL_TYPE 1
 #define OPS_SECTION_TYPE 2
