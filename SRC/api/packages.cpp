@@ -18,8 +18,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.1 $
-** $Date: 2008-12-01 23:33:16 $
+** $Revision: 1.2 $
+** $Date: 2008-12-09 00:09:40 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/packages.cpp,v $
                                                                         
 ** Written: fmk 
@@ -101,35 +101,57 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
 #else
 
   int libNameLength = strlen(libName);
-  char *localLibName = new char[libNameLength+4];
+  char *localLibName = new char[libNameLength+10];
   strcpy(localLibName, libName);
+
+#ifdef _MACOSX
+  strcpy(&localLibName[libNameLength], ".dylib");
+#else
   strcpy(&localLibName[libNameLength], ".so");
+#endif
 
   char *error;
+
+  opserr << "packages - START " << localLibName << " " << funcName << endln;
 
   *libHandle = dlopen (localLibName, RTLD_NOW);
 
   if (*libHandle != NULL) {    
-    opserr << "packages - FOUND LIB " << libName << " " << funcName << " result: " << result << endln;
+
+    opserr << "packages - FOUND LIB " << localLibName << " " << funcName << endln;
     
     void *funcPtr = dlsym(*libHandle, funcName);
+
+
     //    *funcHandle = dlsym(*libHandle, funcName);
     error = dlerror();
     if (funcPtr == NULL ) {
-      result =  -1;
-      dlclose(*libHandle);
-    }
+
+      char *underscoreFunctionName = new char[strlen(funcName)+2];
+      strcpy(underscoreFunctionName, "_");
+      strcpy(&underscoreFunctionName[1], funcName);    
+      void *funcPtr = dlsym(*libHandle, underscoreFunctionName);
+      delete [] underscoreFunctionName;
+
+      if (funcPtr == NULL)  {
+	opserr << "packages - NO FUNCTION " << localLibName << " " << funcName << endln;
+	result =  -1;
+	dlclose(*libHandle);
+      }
+    } else
+      opserr << "packages - FOUND FUNCTION " << localLibName << " " << funcName << endln;
+
     *funcHandle = funcPtr;
   } else {
+    opserr << "packages - NO LIB " << localLibName << " " << funcName << " result: " << result << endln;
     result =  -1;
   }
   
   delete [] localLibName;
   
- 
 
 #endif
-
   opserr << "packages - " << libName << " " << funcName << " result: " << result << endln;
+
   return result;
 }
