@@ -15,10 +15,9 @@ include ../../../Makefile.def
 #	$(FE)/recorder/response/Response.o \
 #	$(FE)/tagged/TaggedObject.o
 
-
 OS_FLAG ?= -D_LINUX
 
-ifeq ($(OS_FLAG), LINUX)
+ifeq ($(OS_FLAG), -D_LINUX)
 
 LIBRARY         = ElasticPPcpp.so
 

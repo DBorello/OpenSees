@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.2 $
-** $Date: 2008-12-05 19:14:30 $
+** $Revision: 1.3 $
+** $Date: 2008-12-09 22:33:14 $
 ** $Source: /usr/local/cvs/OpenSees/PACKAGES/NewMaterial/c/elasticPPC.c,v $
                                                                         
 ** Written: fmk 
@@ -28,7 +28,7 @@
 ** Description: This file contains the implementation of elasticPP material
 */
 
-#include "OPS_ProceduralAPI.h"
+#include "elementAPI.h"
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>

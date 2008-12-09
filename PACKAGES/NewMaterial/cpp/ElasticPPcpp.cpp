@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-12-09 20:00:16 $
+// $Revision: 1.2 $
+// $Date: 2008-12-09 22:32:30 $
 // $Source: /usr/local/cvs/OpenSees/PACKAGES/NewMaterial/cpp/ElasticPPcpp.cpp,v $
                                                                         
 // Written: fmk 
@@ -29,7 +29,7 @@
 //
 // What: "@(#) ElasticPPcpp.C, revA"
 
-#include <OPS_ProceduralAPI.h>
+#include <elementAPI.h>
 #include "ElasticPPcpp.h"
 
 #include <Vector.h>

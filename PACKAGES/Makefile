@@ -2,7 +2,7 @@ include ../Makefile.def
 
 OS_FLAG ?= -D_LINUX
 
-ifeq ($(OS_FLAG), LINUX)
+ifeq ($(OS_FLAG), -D_LINUX)
 all: 
 	@$(CD) $(FE)/../PACKAGES/NewElement; $(MAKE);
 	@$(CD) $(FE)/../PACKAGES/NewMaterial; $(MAKE);
