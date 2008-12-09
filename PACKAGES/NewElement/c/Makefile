@@ -1,5 +1,9 @@
 include ../../../Makefile.def
 
+OS_FLAG ?= -D_LINUX
+
+ifeq ($(OS_FLAG), -D_LINUX)
+
 LIBRARY         = trussC.so
 
 all:   $(LIBRARY)
@@ -11,6 +15,17 @@ $(LIBRARY): $(OBJS)
 
 trussC.o: trussC.c
 	$(CC++) -fPIC $(INCLUDES) -I$(FE)/element -g -c -Wall trussC.c
+
+
+else
+
+LIBRARY         = trussC.dylib
+
+
+all: 
+	$(CC++) $(OS_FLAG) -dynamiclib $(INCLUDES) -Wl,-undefined,suppress,-flat_namespace trussC.c $(OUTSIDE_OBJS)  -current_version 1.0 -compatibility_version 1.0 -fvisibility=hidden -o $(LIBRARY)
+
+endif
 
 # Miscellaneous
 tidy:

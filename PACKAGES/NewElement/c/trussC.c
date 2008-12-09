@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.1 $
-** $Date: 2008-12-01 23:30:25 $
+** $Revision: 1.2 $
+** $Date: 2008-12-09 22:36:45 $
 ** $Source: /usr/local/cvs/OpenSees/PACKAGES/NewElement/c/trussC.c,v $
                                                                         
 ** Written: fmk 
@@ -36,12 +36,14 @@
 #ifdef _USRDLL
 #include <windows.h>
 #define DllExport _declspec(dllexport)
+#elif _MACOSX
+#define DllExport __attribute__((visibility("default")))
 #else
 #define DllExport
 #endif
 
 extern "C" DllExport void
-trussC (eleObj *thisObj, modelState *model, double *u, double *tang, double *resid, int *isw, int *errFlag) 
+trussC (eleObj *thisObj, modelState *model, double *tang, double *resid, int *isw, int *errFlag) 
 {
   double matStrain[1];
   double matTang[1];
