@@ -140,7 +140,7 @@ metis:
 
 FMK_LIBS = $(FE)/database/FE_Datastore.o \
 	$(FE)/api/packages.o \
-	$(FE)/api/OPS_ProceduralAPI.o
+	$(FE)/api/elementAPI.o
 
 KJE_LIBS = $(FE)/material/uniaxial/limitState/LimitStateMaterial.o \
 	$(FE)/material/uniaxial/limitState/TclLimitState.o \
@@ -578,6 +578,7 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/HardeningMaterial.o \
 	$(FE)/material/uniaxial/ParallelMaterial.o \
 	$(FE)/material/uniaxial/SeriesMaterial.o \
+	$(FE)/material/uniaxial/Neoprene.o \
 	$(FE)/material/uniaxial/Concrete01.o \
 	$(FE)/material/uniaxial/Concrete02.o \
 	$(FE)/material/uniaxial/Concrete04.o \
@@ -782,6 +783,7 @@ SysOfEqn_LIBS = $(FE)/system_of_eqn/SystemOfEqn.o \
 MODEL_BUILDER_LIBS = $(FE)/modelbuilder/ModelBuilder.o \
 	$(FE)/modelbuilder/PlaneFrame.o \
 	$(FE)/modelbuilder/tcl/TclUniaxialMaterialTester.o \
+	$(FE)/modelbuilder/tcl/TclSectionTester.o \
 	$(FE)/modelbuilder/tcl/TclModelBuilder.o \
 	$(FE)/modelbuilder/tcl/Block2D.o \
 	$(FE)/modelbuilder/tcl/Block3D.o
