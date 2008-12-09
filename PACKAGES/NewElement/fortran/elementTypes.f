@@ -23,9 +23,11 @@ c      end type modelState
       type (c_ptr) :: theParam;
       type (c_ptr) :: cState;
       type (c_ptr) :: tState;
-      type(c_funptr) ::functPtr
+      type(c_funptr) ::functPtr;
+      type (c_ptr) :: matObjPtr;
       end type matObject;
 
+c
 c      real (C_DOUBLE) :: theParam;
 c      real (C_DOUBLE) :: cState;
 c      real (C_DOUBLE) :: tState;

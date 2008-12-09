@@ -1,11 +1,10 @@
-      SUBROUTINE trussf(eleObj,modl,u,tang,resid,isw,error) 
+      SUBROUTINE trussf(eleObj,modl,tang,resid,isw,error) 
       use elementTypes
       use elementAPI
       implicit none
       
       type(eleObject)::eleObj
       type(modelState)::modl
-      double precision u(1)
       double precision tang(4, *)
       double precision resid(1)
       integer::isw;
@@ -66,7 +65,6 @@ c     Allocate the element state
          matTags(1) = matTag;
          matType = OPS_UNIAXIAL_MATERIAL_TYPE;
          err = OPS_AllocateElement(eleObj, matTags, matType)
-
 
 c         theCMatPtr = theCMatPtrPtr(2); 
 c         j=OPS_InvokeMaterialDirectly(theCMatPtr, modl, strn, strs,
