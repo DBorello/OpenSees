@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-12-09 22:43:40 $
+// $Revision: 1.2 $
+// $Date: 2008-12-10 00:05:21 $
 // $Source: /usr/local/cvs/OpenSees/PACKAGES/NewElement/cpp/TrussCPP.cpp,v $
                                                                         
 // Written: fmk 
@@ -333,27 +333,6 @@ TrussCPP::getInitialStiff(void)
 }
 
 const Matrix &
-TrussCPP::getSecantStiff(void)
-{
-    if (L == 0.0) { // length = zero - problem in setDomain()
-	trussK.Zero();
-	return trussK;
-    }
-    
-    // get the current stress from the material for the last updated strain
-    double strain = this->computeCurrentStrain();
-    double stress = theMaterial->getStress();    
-    double E = stress/strain;
-
-    // form the tangent stiffness matrix
-    trussK = trans^trans;
-    trussK *= A*E/L;  
-
-    // return the matrix
-    return trussK;
-}
-    
-const Matrix &
 TrussCPP::getDamp(void)
 {
   return trussD;
@@ -366,23 +345,6 @@ TrussCPP::getMass(void)
   trussM.Zero();
   return trussM;
 }
-
-void 
-TrussCPP::zeroLoad(void)
-{
-  // does nothing - no elemental loads
-}
-
-
-int 
-TrussCPP::addLoad(ElementalLoad *theLoad, double loadFactor)
-
-{  
-  opserr <<"Truss::addLoad - load type unknown for truss with tag: " << this->getTag() << endln;
-  
-  return -1;
-}
-
 
 const Vector &
 TrussCPP::getResistingForce()
@@ -400,13 +362,6 @@ TrussCPP::getResistingForce()
 	trussR(i) = trans(0,i)*force;
 
     return trussR;
-}
-
-
-int 
-TrussCPP::addInertiaLoadToUnbalance(const Vector &accel)
-{
-  return 0;
 }
 
 int
@@ -507,72 +462,14 @@ TrussCPP::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBrok
     return 0;
 }
 
-
-int
-TrussCPP::displaySelf(Renderer &theViewer, int displayMode, float fact)
-{
-    // check setDomain() was successfull
-    if (L == 0.0)
-       return 0;
-
-    // first determine the two end points of the truss based on
-    // the display factor (a measure of the distorted image)
-    // store this information in 2 3d vectors v1 and v2
-    const Vector &end1Crd = theNodes[0]->getCrds();
-    const Vector &end2Crd = theNodes[1]->getCrds();	
-    const Vector &end1Disp = theNodes[0]->getDisp();
-    const Vector &end2Disp = theNodes[1]->getDisp();    
-
-    Vector v1(3);
-    Vector v2(3);
-    for (int i=0; i<2; i++) {
-      v1(i) = end1Crd(i)+end1Disp(i)*fact;
-      v2(i) = end2Crd(i)+end2Disp(i)*fact;    
-    }
-
-    if (displayMode == 3) { // use the strain as the drawing measure
-	double strain = theMaterial->getStrain();
-        return theViewer.drawLine(v1, v2, strain, strain);	
-    } else if (displayMode == 2) { // otherwise use the material stress
-        double stress = A*theMaterial->getStress();
-        return theViewer.drawLine(v1,v2, stress, stress);
-    } else { // use the axial force
-        double force = A * theMaterial->getStress();
-        return theViewer.drawLine(v1,v2, force, force);
-    }
-}
-
-
 void
 TrussCPP::Print(OPS_Stream &s, int flag)
 {
-    // compute the strain and axial force in the member
-    double strain, force;
-    if (L == 0.0) {
-      strain = 0;
-      force = 0.0;
-    } else {
-      strain = theMaterial->getStrain();
-      force = A * theMaterial->getStress();    
-    }
-
-    for (int i=0; i<4; i++)
-      trussR(i) = trans(0,i)*force;
-
-    if (flag == 0) { // print everything
-      s << "Element: " << this->getTag(); 
-      s << " type: TrussCPP  iNode: " << externalNodes(0);
-      s << " jNode: " << externalNodes(1);
-      s << " Area: " << A;
-	
-      s << " \n\t strain: " << strain;
-      s << " axial load: " <<  force;
-      s << " \n\t unbalanced load: " << trussR;
-      s << " \t Material: " << *theMaterial;
-      s << endln;
-    } else if (flag == 1) { // just print ele id, strain and force
-      s << this->getTag() << "  " << strain << "  " << force << endln;
-    }
+  s << "Element: " << this->getTag(); 
+  s << " type: TrussCPP  iNode: " << externalNodes(0);
+  s << " jNode: " << externalNodes(1);
+  s << " Area: " << A;
+  s << " \t Material: " << *theMaterial;
 }
 
 

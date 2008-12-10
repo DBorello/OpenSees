@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-12-09 22:43:40 $
+// $Revision: 1.2 $
+// $Date: 2008-12-10 00:05:21 $
 // $Source: /usr/local/cvs/OpenSees/PACKAGES/NewElement/cpp/TrussCPP.h,v $
                                                                         
 #ifndef TrussCPP_h
@@ -75,20 +75,15 @@ class TrussCPP : public Element
 
     // public methods to obtain stiffness, mass, damping and residual information    
     const Matrix &getTangentStiff(void);
-    const Matrix &getSecantStiff(void);    
     const Matrix &getInitialStiff(void);
     const Matrix &getDamp(void);    
     const Matrix &getMass(void);    
 
-    void zeroLoad(void);	
-    int addLoad(ElementalLoad *theLoad, double loadFactor);
-    int addInertiaLoadToUnbalance(const Vector &accel);    
     const Vector &getResistingForce(void);
 
     // public methods for output    
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
-    int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(OPS_Stream &s, int flag =0);    
 
     Response *setResponse(const char **argv, int argc, Information &eleInfo, OPS_Stream &s);
