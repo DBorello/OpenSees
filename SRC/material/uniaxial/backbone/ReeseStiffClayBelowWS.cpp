@@ -38,58 +38,54 @@ ReeseStiffClayBelowWS::~ReeseStiffClayBelowWS()
 double
 ReeseStiffClayBelowWS::getTangent (double strain)
 {
+  strain = fabs(strain);
+
   double y1 = 0.25*Pc*Pc/(y50*Esi*Esi);
   double y2 = As*y50;
 
-  if( abs(strain) <= y1 ) 
+  if( strain <= y1 ) 
     return Esi;
 
-  else if( abs(strain)<=y2 && abs(strain)>y1 )
+  else if( strain <= y2 && strain > y1 )
     return 0.25*Pc/y50*pow(strain/y50,-0.5);
 
-  else if( abs(strain)<=6*y2 && abs(strain)>y2 )
+  else if( strain <= 6*y2 && strain > y2 )
     return 0.25*Pc/y50*pow(strain/y50,-0.5)-0.06875*Pc/y2*pow((strain-y2)/y2,0.25);
 
-  else if( abs(strain)<=18*y2 && abs(strain)>6*y2 )
+  else if( strain <= 18*y2 && strain > 6*y2 )
     return -0.0625*Pc/y50;
 
   else 
-    return 0.0;
+    return 0.001*Esi;
 }
 
 double
 ReeseStiffClayBelowWS::getStress (double strain)
 {
+  int signStrain = (strain > 0.0) ? 1 : -1;
+  strain = signStrain*strain;
+
   double y1 = 0.25*Pc*Pc/(y50*Esi*Esi);
   double y2 = As*y50;
+  
+  double stress = 0.0;
 
-  if( abs(strain) <= y1) 
-    return Esi*strain;
+  if( strain <= y1)
+    stress = Esi*strain;
 
-  else if( strain<=y2 && strain>y1 )
-    return 0.5*Pc*pow(strain/y50,0.5);
-
-  else if( strain>=-y2 && strain<-y1 )
-    return -0.5*Pc*pow(-strain/y50,0.5);
+  else if( strain<=y2 && strain>y1 ) 
+    stress = 0.5*Pc*pow(strain/y50,0.5);
 
   else if( strain<=6*y2 && strain>y2 )
-    return 0.5*Pc*pow(strain/y50,0.5)-0.055*Pc*pow((strain-y2)/y2,1.25);
-
-  else if( strain>=-6*y2 && strain<-y2 )
-    return -0.5*Pc*pow(-strain/y50,0.5)+0.055*Pc*pow((-strain-y2)/y2,1.25);
+    stress = 0.5*Pc*pow(strain/y50,0.5)-0.055*Pc*pow((strain-y2)/y2,1.25);
 
   else if( strain<=18*y2 && strain>6*y2 )
-    return 0.5*Pc*pow(6*As,0.5)-0.411*Pc-0.0625/y50*Pc*(strain-6*y2);
-
-  else if( strain>=-18*y2 && strain<-6*y2 )
-    return -0.5*Pc*pow(6*As,0.5)+0.411*Pc+0.0625/y50*Pc*(-strain-6*y2);
-
+    stress = 0.5*Pc*pow(6*As,0.5)-0.411*Pc-0.0625/y50*Pc*(strain-6*y2);
+  
   else if( strain > 18*y2 )
-    return Pc*(1.225*sqrt(As)-0.75*As-0.411);
+    stress = Pc*(1.225*sqrt(As)-0.75*As-0.411);
 
-  else
-    return -Pc*(1.225*sqrt(As)-0.75*As-0.411);
-
+  return signStrain*stress;
 }
 
 double
