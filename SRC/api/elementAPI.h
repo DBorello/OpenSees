@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.3 $
-** $Date: 2008-12-09 19:51:27 $
+** $Revision: 1.4 $
+** $Date: 2008-12-12 23:00:22 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/elementAPI.h,v $
                                                                         
 ** Written: fmk 
@@ -92,6 +92,8 @@ typedef struct eleObject eleObj;
 #define OPS_InvokeMaterial ops_invokematerial_
 #define OPS_InvokeMaterialDirectly ops_invokematerialdirectly_
 
+#ifdef __cplusplus
+
 extern "C" int        OPS_Error(char *, int length);
 extern "C" int        OPS_GetIntInput(int *numData, int*data);
 extern "C" int        OPS_GetDoubleInput(int *numData, double *data);
@@ -118,5 +120,29 @@ class SectionForceDeformation;
 extern UniaxialMaterial *OPS_GetUniaxialMaterial(int matTag);
 extern NDMaterial *OPS_GetNDMaterial(int matTag);
 extern SectionForceDeformation *OPS_GetSectionForeceDeformation(int matTag);
+
+#else
+
+int        OPS_Error(char *, int length);
+int        OPS_GetIntInput(int *numData, int*data);
+int        OPS_GetDoubleInput(int *numData, double *data);
+matObj    *OPS_GetMaterial(int *matTag, int *matType);
+void       OPS_GetMaterialPtr(int *, matObj *);
+eleObj    *OPS_GetElement(int *);
+matObj    *OPS_GetMaterialType(char *type, int sizeType);
+eleObj    *OPS_GetElementType(char *, int);
+int        OPS_AllocateElement(eleObject *, int *matTags, int *maType);
+int        OPS_AllocateMaterial(matObject *);
+
+int    OPS_InvokeMaterial(eleObject *, int *,modelState *, double *, double *, double *, int *);
+int    OPS_InvokeMaterialDirectly(matObject **, modelState *, double *, double *, double *, int *);
+int    OPS_InvokeMaterialDirectly2(matObject *, modelState *, double *, double *, double *, int *);
+
+int    OPS_GetNodeCrd(int *nodeTag, int *sizeData, double *data);
+int    OPS_GetNodeDisp(int *nodeTag, int *sizeData, double *data);
+int    OPS_GetNodeVel(int *nodeTag, int *sizeData, double *data);
+int    OPS_GetNodeAcc(int *nodeTag, int *sizeData, double *data);
+
+#endif
 
 #endif
