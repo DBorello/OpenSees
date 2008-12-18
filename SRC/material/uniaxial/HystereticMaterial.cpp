@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2008-10-17 23:41:44 $
+// $Revision: 1.19 $
+// $Date: 2008-12-18 23:40:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HystereticMaterial.cpp,v $
 
 // Written: MHS
@@ -82,6 +82,7 @@ mom1n(m1n), rot1n(r1n), mom2n(m2n), rot2n(r2n), mom3n(m3n), rot3n(r3n)
 	// Initialize history variables
 	this->revertToStart();
 	this->revertToLastCommit();
+
 }
 
 HystereticMaterial::HystereticMaterial(int tag,
@@ -227,8 +228,8 @@ HystereticMaterial::positiveIncrement(double dStrain)
 	if (TloadIndicator == 2) {
 		TloadIndicator = 1;
 		if (Cstress <= 0.0) {
-			TrotNu = Cstrain - Cstress/(E1n*kn);
-			double energy = CenergyD - 0.5*Cstress/(E1n*kn)*Cstress;
+			TrotNu = Cstrain - Cstress/(Eun*kn);
+			double energy = CenergyD - 0.5*Cstress/(Eun*kn)*Cstress;
 			double damfc = 0.0;
 			if (CrotMin < rot1n) {
 				damfc = damfc2*energy/energyA;
@@ -253,8 +254,8 @@ HystereticMaterial::positiveIncrement(double dStrain)
 	
 	//	double rotmp1 = rotrel + pinchY*(TrotMax-rotrel);
 
-	double rotmp2 = TrotMax - (1.0-pinchY)*maxmom/(E1p*kp);
-	//double rotmp2 = TrotMax-(1-pinchY)*maxmom/E1p;
+	double rotmp2 = TrotMax - (1.0-pinchY)*maxmom/(Eup*kp);
+	//double rotmp2 = TrotMax-(1-pinchY)*maxmom/Eup;
 	//	double rotch = rotmp1 + (rotmp2-rotmp1)*pinchX;
 	double rotch = rotrel + (rotmp2-rotrel)*pinchX;                   // changed on 7/11/2006
 
@@ -262,26 +263,26 @@ HystereticMaterial::positiveIncrement(double dStrain)
 	double tmpmo2;
 
 	if (Tstrain < TrotNu) {
-		Ttangent = E1n*kn;
+		Ttangent = Eun*kn;
 		Tstress = Cstress + Ttangent*dStrain;
 		if (Tstress >= 0.0) {
 			Tstress = 0.0;
-			Ttangent = E1n*1.0e-9;
+			Ttangent = Eun*1.0e-9;
 		}
 	}
 
 	else if (Tstrain >= TrotNu && Tstrain < rotch) {
 		if (Tstrain <= rotrel) {
 			Tstress = 0.0;
-			Ttangent = E1p*1.0e-9;
+			Ttangent = Eup*1.0e-9;
 		}
 		else {
 			Ttangent = maxmom*pinchY/(rotch-rotrel);
-			tmpmo1 = Cstress + E1p*kp*dStrain;
+			tmpmo1 = Cstress + Eup*kp*dStrain;
 			tmpmo2 = (Tstrain-rotrel)*Ttangent;
 			if (tmpmo1 < tmpmo2) {
 				Tstress = tmpmo1;
-				Ttangent = E1p*kp;
+				Ttangent = Eup*kp;
 			}
 			else
 				Tstress = tmpmo2;
@@ -290,11 +291,11 @@ HystereticMaterial::positiveIncrement(double dStrain)
 
 	else {
 		Ttangent = (1.0-pinchY)*maxmom/(TrotMax-rotch);
-		tmpmo1 = Cstress + E1p*kp*dStrain;
+		tmpmo1 = Cstress + Eup*kp*dStrain;
 		tmpmo2 = pinchY*maxmom + (Tstrain-rotch)*Ttangent;
 		if (tmpmo1 < tmpmo2) {
 			Tstress = tmpmo1;
-			Ttangent = E1p*kp;
+			Ttangent = Eup*kp;
 		}
 		else
 			Tstress = tmpmo2;
@@ -312,8 +313,8 @@ HystereticMaterial::negativeIncrement(double dStrain)
 	if (TloadIndicator == 1) {
 		TloadIndicator = 2;
 		if (Cstress >= 0.0) {
-			TrotPu = Cstrain - Cstress/(E1p*kp);
-			double energy = CenergyD - 0.5*Cstress/(E1p*kp)*Cstress;
+			TrotPu = Cstrain - Cstress/(Eup*kp);
+			double energy = CenergyD - 0.5*Cstress/(Eup*kp)*Cstress;
 			double damfc = 0.0;
 			if (CrotMax > rot1p) {
 				damfc = damfc2*energy/energyA;
@@ -337,8 +338,8 @@ HystereticMaterial::negativeIncrement(double dStrain)
 	//  rotrel = rotlim;
 
 	//double rotmp1 = rotrel + pinchY*(TrotMin-rotrel);
-	double rotmp2 = TrotMin - (1.0-pinchY)*minmom/(E1n*kn);
-	//double rotmp2 = TrotMin-(1-pinchY)*minmom/E1n;	
+	double rotmp2 = TrotMin - (1.0-pinchY)*minmom/(Eun*kn);
+	//double rotmp2 = TrotMin-(1-pinchY)*minmom/Eun;	
 	//double rotch = rotmp1 + (rotmp2-rotmp1)*pinchX;
 	double rotch = rotrel + (rotmp2-rotrel)*pinchX;                   // changed on 7/11/2006
 
@@ -346,26 +347,26 @@ HystereticMaterial::negativeIncrement(double dStrain)
 	double tmpmo2;
 
 	if (Tstrain > TrotPu) {
-		Ttangent = E1p*kp;
+		Ttangent = Eup*kp;
 		Tstress = Cstress + Ttangent*dStrain;
 		if (Tstress <= 0.0) {
 			Tstress = 0.0;
-			Ttangent = E1p*1.0e-9;
+			Ttangent = Eup*1.0e-9;
 		}
 	}
 
 	else if (Tstrain <= TrotPu && Tstrain > rotch) {
 		if (Tstrain >= rotrel) {
 			Tstress = 0.0;
-			Ttangent = E1n*1.0e-9;
+			Ttangent = Eun*1.0e-9;
 		}
 		else {
 			Ttangent = minmom*pinchY/(rotch-rotrel);
-			tmpmo1 = Cstress + E1n*kn*dStrain;
+			tmpmo1 = Cstress + Eun*kn*dStrain;
 			tmpmo2 = (Tstrain-rotrel)*Ttangent;
 			if (tmpmo1 > tmpmo2) {
 				Tstress = tmpmo1;
-				Ttangent = E1n*kn;
+				Ttangent = Eun*kn;
 			}
 			else
 				Tstress = tmpmo2;
@@ -374,11 +375,11 @@ HystereticMaterial::negativeIncrement(double dStrain)
 
 	else {
 		Ttangent = (1.0-pinchY)*minmom/(TrotMin-rotch);
-		tmpmo1 = Cstress + E1n*kn*dStrain;
+		tmpmo1 = Cstress + Eun*kn*dStrain;
 		tmpmo2 = pinchY*minmom + (Tstrain-rotch)*Ttangent;
 		if (tmpmo1 > tmpmo2) {
 			Tstress = tmpmo1;
-			Ttangent = E1n*kn;
+			Ttangent = Eun*kn;
 		}
 		else
 			Tstress = tmpmo2;
@@ -602,6 +603,14 @@ HystereticMaterial::setEnvelope(void)
 	E1n = mom1n/rot1n;
 	E2n = (mom2n-mom1n)/(rot2n-rot1n);
 	E3n = (mom3n-mom2n)/(rot3n-rot2n);
+
+	Eup = E1p;
+	if (E2p > Eup) Eup = E2p;
+	if (E3p > Eup) Eup = E3p;
+
+	Eun = E1n;
+	if (E2n > Eun) Eun = E2n;
+	if (E3n > Eun) Eun = E3n;
 }
 
 double
@@ -637,31 +646,31 @@ HystereticMaterial::negEnvlpStress(double strain)
 double
 HystereticMaterial::posEnvlpTangent(double strain)
 {
-	if (strain < 0.0)
-		return E1p*1.0e-9;
-	else if (strain <= rot1p)
-		return E1p;
-	else if (strain <= rot2p)
-		return E2p;
-	else if (strain <= rot3p || E3p > 0.0)
-		return E3p;
-	else
-		return E1p*1.0e-9;
+  if (strain < 0.0)
+    return E1p*1.0e-9;
+  else if (strain <= rot1p)
+    return E1p;
+  else if (strain <= rot2p)
+    return E2p;
+  else if (strain <= rot3p || E3p > 0.0)
+    return E3p;
+  else
+    return E1p*1.0e-9;
 }
 
 double
 HystereticMaterial::negEnvlpTangent(double strain)
 {
-	if (strain > 0.0)
-		return E1n*1.0e-9;
-	else if (strain >= rot1n)
-		return E1n;
-	else if (strain >= rot2n)
-		return E2n;
-	else if (strain >= rot3n || E3n > 0.0)
-		return E3n;
-	else
-		return E1n*1.0e-9;
+  if (strain > 0.0)
+    return E1n*1.0e-9;
+  else if (strain >= rot1n)
+    return E1n;
+  else if (strain >= rot2n)
+    return E2n;
+  else if (strain >= rot3n || E3n > 0.0)
+    return E3n;
+  else
+    return E1n*1.0e-9;
 }
 
 double

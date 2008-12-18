@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-08-03 23:42:19 $
+// $Revision: 1.8 $
+// $Date: 2008-12-18 23:40:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HystereticMaterial.h,v $
 
 // Written: MHS
@@ -127,7 +127,8 @@ class HystereticMaterial : public UniaxialMaterial
   double E1p, E1n;
   double E2p, E2n;
   double E3p, E3n;
-  
+  double Eup, Eun;
+
   double energyA;
   
   void setEnvelope(void);
