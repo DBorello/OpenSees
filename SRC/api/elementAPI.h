@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.4 $
-** $Date: 2008-12-12 23:00:22 $
+** $Revision: 1.5 $
+** $Date: 2008-12-18 22:48:22 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/elementAPI.h,v $
                                                                         
 ** Written: fmk 
@@ -40,10 +40,12 @@
 #define OPS_UNIAXIAL_MATERIAL_TYPE 1
 #define OPS_SECTION_TYPE 2
 
-typedef struct {
+struct modState {
   double time;
   double dt;
-} modelState;
+};
+
+typedef struct modState modelState;
 
 typedef void (*matFunct)(struct matObject *, modelState *,double *strain, double *tang, double *stress, int *isw, int *error); 
 
@@ -73,7 +75,7 @@ struct eleObject {
   double *param;
   double *cState;
   double *tState;
-  matObject **mats;
+  matObj **mats;
   eleFunct eleFunctPtr;
 };
 
@@ -102,8 +104,8 @@ extern "C" void       OPS_GetMaterialPtr(int *, matObj *);
 extern "C" eleObj    *OPS_GetElement(int *);
 extern "C" matObj    *OPS_GetMaterialType(char *type, int sizeType);
 extern "C" eleObj    *OPS_GetElementType(char *, int);
-extern "C" int        OPS_AllocateElement(eleObject *, int *matTags, int *maType);
-extern "C" int        OPS_AllocateMaterial(matObject *);
+extern "C" int        OPS_AllocateElement(eleObj *, int *matTags, int *maType);
+extern "C" int        OPS_AllocateMaterial(matObj *);
 
 extern "C" int    OPS_InvokeMaterial(eleObject *, int *,modelState *, double *, double *, double *, int *);
 extern "C" int    OPS_InvokeMaterialDirectly(matObject **, modelState *, double *, double *, double *, int *);
@@ -123,20 +125,20 @@ extern SectionForceDeformation *OPS_GetSectionForeceDeformation(int matTag);
 
 #else
 
-int        OPS_Error(char *, int length);
-int        OPS_GetIntInput(int *numData, int*data);
-int        OPS_GetDoubleInput(int *numData, double *data);
+int     OPS_Error(char *, int length);
+int     OPS_GetIntInput(int *numData, int*data);
+int     OPS_GetDoubleInput(int *numData, double *data);
 matObj    *OPS_GetMaterial(int *matTag, int *matType);
 void       OPS_GetMaterialPtr(int *, matObj *);
 eleObj    *OPS_GetElement(int *);
 matObj    *OPS_GetMaterialType(char *type, int sizeType);
 eleObj    *OPS_GetElementType(char *, int);
-int        OPS_AllocateElement(eleObject *, int *matTags, int *maType);
-int        OPS_AllocateMaterial(matObject *);
+int        OPS_AllocateElement(eleObj *, int *matTags, int *maType);
+int        OPS_AllocateMaterial(matObj *);
 
-int    OPS_InvokeMaterial(eleObject *, int *,modelState *, double *, double *, double *, int *);
-int    OPS_InvokeMaterialDirectly(matObject **, modelState *, double *, double *, double *, int *);
-int    OPS_InvokeMaterialDirectly2(matObject *, modelState *, double *, double *, double *, int *);
+int    OPS_InvokeMaterial(struct eleObj *, int *,modelState *, double *, double *, double *, int *);
+int    OPS_InvokeMaterialDirectly(matObj **, modelState *, double *, double *, double *, int *);
+int    OPS_InvokeMaterialDirectly2(matObj *, modelState *, double *, double *, double *, int *);
 
 int    OPS_GetNodeCrd(int *nodeTag, int *sizeData, double *data);
 int    OPS_GetNodeDisp(int *nodeTag, int *sizeData, double *data);

@@ -18,8 +18,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.2 $
-** $Date: 2008-12-09 00:09:40 $
+** $Revision: 1.3 $
+** $Date: 2008-12-18 22:48:22 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/packages.cpp,v $
                                                                         
 ** Written: fmk 
@@ -33,6 +33,7 @@
 #ifdef _WIN32
 
 #include <windows.h>
+#include <elementAPI.h>
 #else
 #include <dlfcn.h>
 #endif
@@ -40,6 +41,7 @@
 int 
 getLibraryFunction(const char *libName, const char *funcName, void **libHandle, void **funcHandle) {
 
+  opserr << " packages.cpp getLibraryFunction\n";
   int result = 0;
   
   *libHandle = NULL;
@@ -55,12 +57,13 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
   char *localLibName = new char[libNameLength+5];
   strcpy(localLibName, libName);
   strcpy(&localLibName[libNameLength], ".dll");
-  
+   opserr << " packages.cpp getLibraryFunction - loaded lib? " << localLibName << endln;
   HINSTANCE hLib = LoadLibrary(localLibName);
   
   delete [] localLibName;
-  
+
   if (hLib != NULL) {
+	   opserr << " packages.cpp getLibraryFunction -- SUCESS LOADING LIB\n";
     char mod[124];
     GetModuleFileName((HMODULE)hLib, (LPTSTR)mod, 124);
     
@@ -79,8 +82,25 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
     //
     // we need to set the OpenSees pointer global variables if function there
     //
-    
-    typedef void(_cdecl *setGlobalPointersFunction)(OPS_Stream *);
+    typedef int (_cdecl *OPS_ErrorPtrType)(char *, int);
+	typedef int (_cdecl *OPS_ErrorPtrType)(char *, int);
+	typedef int (_cdecl *OPS_GetIntInputPtrType)(int *, int *);
+	typedef int (_cdecl *OPS_GetDoubleInputPtrType)(int *, double *);
+	typedef int (_cdecl *OPS_AllocateElementPtrType)(eleObj *, int *matTags, int *maType);
+	typedef int (_cdecl *OPS_AllocateMaterialPtrType)(matObj *);
+	typedef UniaxialMaterial *(*OPS_GetUniaxialMaterialPtrType)(int matTag);
+	typedef NDMaterial * (*OPS_GetNDMaterialPtrType)(int matTag);
+
+    //typedef void(_cdecl *setGlobalPointersFunction)(OPS_Stream *);
+    typedef void (_cdecl *setGlobalPointersFunction)(OPS_Stream *,
+					OPS_ErrorPtrType,
+					OPS_GetIntInputPtrType,
+					OPS_GetDoubleInputPtrType,
+					OPS_AllocateElementPtrType,
+					OPS_AllocateMaterialPtrType,
+					OPS_GetUniaxialMaterialPtrType,
+				OPS_GetNDMaterialPtrType); 
+
     setGlobalPointersFunction funcPtr;
     
     // look for pointer function
@@ -91,7 +111,8 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
     }
     
     // invoke pointer function
-    (funcPtr)(opserrPtr);
+    (funcPtr)(opserrPtr, OPS_Error, OPS_GetIntInput, OPS_GetDoubleInput,
+		OPS_AllocateElement, OPS_AllocateMaterial, OPS_GetUniaxialMaterial, OPS_GetNDMaterial);
     
   } else // no lib exists
     return -1;

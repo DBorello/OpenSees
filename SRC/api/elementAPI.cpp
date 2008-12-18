@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.3 $
-** $Date: 2008-12-09 19:51:27 $
+** $Revision: 1.4 $
+** $Date: 2008-12-18 22:48:22 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/elementAPI.cpp,v $
                                                                         
 ** Written: fmk 
@@ -67,7 +67,7 @@ static int maxArg = 0;
 
 //static int uniaxialMaterialObjectCount =0;
 
-modelState *theModelState = 0;
+modelState theModelState;
 
 struct cmp_str {
   bool operator()(const char *a, const char *b) {
