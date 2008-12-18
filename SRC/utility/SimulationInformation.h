@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-09-29 01:58:46 $
+// $Revision: 1.4 $
+// $Date: 2008-12-18 22:46:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/SimulationInformation.h,v $
                                                                         
                                                                         
@@ -38,7 +38,6 @@
 #define SimulationInformation_h
 
 #include <OPS_Globals.h>
-#include <tcl.h>
 #include <StringContainer.h>
 #include <File.h>
 
