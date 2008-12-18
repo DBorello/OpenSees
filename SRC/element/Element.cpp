@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2008-12-03 18:44:02 $
+// $Revision: 1.25 $
+// $Date: 2008-12-18 22:45:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
@@ -37,7 +37,7 @@
 
 #include "Element.h"
 #include "ElementResponse.h"
-#include <Renderer.h>
+//#include <Renderer.h>
 #include <Vector.h>
 #include <Matrix.h>
 #include <Node.h>
