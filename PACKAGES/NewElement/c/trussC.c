@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.2 $
-** $Date: 2008-12-09 22:36:45 $
+** $Revision: 1.3 $
+** $Date: 2008-12-19 15:35:25 $
 ** $Source: /usr/local/cvs/OpenSees/PACKAGES/NewElement/c/trussC.c,v $
                                                                         
 ** Written: fmk 
@@ -37,17 +37,30 @@
 #include <windows.h>
 #define DllExport _declspec(dllexport)
 #elif _MACOSX
-#define DllExport __attribute__((visibility("default")))
+#define DllExport extern "C" __attribute__((visibility("default")))
 #else
-#define DllExport
+#define extern "C" DllExport
 #endif
 
-extern "C" DllExport void
+
+
+DllExport void
 trussC (eleObj *thisObj, modelState *model, double *tang, double *resid, int *isw, int *errFlag) 
 {
   double matStrain[1];
   double matTang[1];
   double matStress[1];
+  double A, L, K, rho, cs, sn;
+  int i,j;
+  double dx, dy, dLength;
+  double d1[2];
+  double d2[2];
+  int nd1, nd2, numDOF, numCrd;
+  int *matData, matTag, matType, n1, n2;
+  double nd1Crd[2];
+  double nd2Crd[2];
+  double tran[4];
+  matObj *theMat;
 
   if (*isw == ISW_INIT) {
 
@@ -63,9 +76,9 @@ trussC (eleObj *thisObj, modelState *model, double *tang, double *resid, int *is
 
     /* Allocate the element state */
     thisObj->tag = iData[0];
-    int n1 = iData[1];
-    int n2 = iData[2];
-    int matTag = iData[3];
+    n1 = iData[1];
+    n2 = iData[2];
+    matTag = iData[3];
 
     thisObj->nNode = 2;
     thisObj->nParam = 4;
@@ -74,26 +87,25 @@ trussC (eleObj *thisObj, modelState *model, double *tang, double *resid, int *is
     thisObj->nMat = 1;
     iData[0] = matTag;
 
-    int *matData = iData;
+    matData = iData;
 
-    int matType = OPS_UNIAXIAL_MATERIAL_TYPE;
+    matType = OPS_UNIAXIAL_MATERIAL_TYPE;
     OPS_AllocateElement(thisObj, matData, &matType);
 
     /* fill in the element state */
     thisObj->node[0] = n1;
     thisObj->node[1] = n2;
-    double nd1Crd[2];
-    double nd2Crd[2];
-    int numCrd = 2;
+   
+    numCrd = 2;
 
     thisObj->param[0] = dData[0];    
 
     OPS_GetNodeCrd(&n1, &numCrd, nd1Crd);
     OPS_GetNodeCrd(&n2, &numCrd, nd2Crd);
 
-    double dx = nd2Crd[0]-nd1Crd[0];
-    double dy = nd2Crd[1]-nd1Crd[1];	
-    double L = sqrt(dx*dx + dy*dy);
+    dx = nd2Crd[0]-nd1Crd[0];
+    dy = nd2Crd[1]-nd1Crd[1];	
+    L = sqrt(dx*dx + dy*dy);
 
     thisObj->param[1] = L;    
     if (L == 0.0) {
@@ -101,8 +113,8 @@ trussC (eleObj *thisObj, modelState *model, double *tang, double *resid, int *is
       return;
     }
 
-    double cs = dx/L;
-    double sn = dy/L;
+    cs = dx/L;
+    sn = dy/L;
     
     thisObj->param[2] = cs;
     thisObj->param[3] = sn;
@@ -142,34 +154,33 @@ trussC (eleObj *thisObj, modelState *model, double *tang, double *resid, int *is
       return;
     }
 
-    double d1[2];
-    double d2[2];
+   
 
-    int nd1 = thisObj->node[0];
-    int nd2 = thisObj->node[1];
+    nd1 = thisObj->node[0];
+    nd2 = thisObj->node[1];
 
-    int numDOF = 2;
+    numDOF = 2;
     OPS_GetNodeDisp(&nd1, &numDOF, d1);
     OPS_GetNodeDisp(&nd2, &numDOF, d2);    
 
-    double A = thisObj->param[0];
-    double cs = thisObj->param[2];
-    double sn = thisObj->param[3];
-
-    double tran[4];
+    A = thisObj->param[0];
+    cs = thisObj->param[2];
+    sn = thisObj->param[3];
+   
     tran[0] = -cs;
     tran[1] = -sn;
     tran[2] = cs;
     tran[3] = sn;
 
-    double dLength = 0.0;
-    for (int i=0; i<2; i++){
+   
+	dLength = 0.0;
+    for (i=0; i<2; i++){
       dLength -= (d2[i]-d1[i]) * tran[i];
     }
 
     matStrain[0] = dLength/L;
 
-    matObj *theMat = thisObj->mats[0];
+    theMat = thisObj->mats[0];
 
     theMat->matFunctPtr(theMat, model, matStrain, matTang, matStress, isw, errFlag); 
 
@@ -186,29 +197,29 @@ trussC (eleObj *thisObj, modelState *model, double *tang, double *resid, int *is
 
       double force = A*matStress[0];
 
-      for (int i=0; i<4; i++)
+    for (i=0; i<4; i++)
 	resid[i] = tran[i]*force;
       
-      double k = A*matTang[0]/L;
+      K = A*matTang[0]/L;
 
       // tang(j,i)
-      for (int i = 0; i<4; i++) 
-	for (int j=0; j < 4; j++)
-	  tang[i+j*4] = k * tran[i]*tran[j];
+      for (i = 0; i<4; i++) 
+	for (j=0; j < 4; j++)
+	  tang[i+j*4] = K * tran[i]*tran[j];
 
     }
 
   } else if (*isw == ISW_FORM_MASS) {
 
-    double L = thisObj->param[1];
+    L = thisObj->param[1];
     if (L == 0.0) {
       //      OPS_Error("Warning - truss element has zero length\n", 1);
       return;
     }
-    double A = thisObj->param[0];
+    A = thisObj->param[0];
 
-    double rho = thisObj->param[4];
-    for (int i=0; i<16; i++) 
+    rho = thisObj->param[4];
+    for (i=0; i<16; i++) 
       tang[i] = 0.0;
 
     if (rho != 0.0) {

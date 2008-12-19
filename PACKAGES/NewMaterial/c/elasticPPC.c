@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.3 $
-** $Date: 2008-12-09 22:33:14 $
+** $Revision: 1.4 $
+** $Date: 2008-12-19 15:35:37 $
 ** $Source: /usr/local/cvs/OpenSees/PACKAGES/NewMaterial/c/elasticPPC.c,v $
                                                                         
 ** Written: fmk 
@@ -39,12 +39,12 @@
 #include <windows.h>
 #define DllExport _declspec(dllexport)
 #elif _MACOSX
-#define DllExport __attribute__((visibility("default")))
+#define DllExport extern "C" __attribute__((visibility("default")))
 #else
-#define DllExport
+#define extern "C" DllExport
 #endif
 
-extern "C" DllExport void
+DllExport void
 elasticPPC (matObj *thisObj, modelState *model, double *strain, double *tang, double *stress, int *isw, int *result) 
 {
   if (*isw == ISW_INIT) {
@@ -64,17 +64,13 @@ elasticPPC (matObj *thisObj, modelState *model, double *strain, double *tang, do
     thisObj->nState = 2;  /* strain, ep */
     OPS_AllocateMaterial(thisObj);
 
-    double E = dData[0];
-    double eyp = dData[1];
-
-
-    thisObj->theParam[0] = E;
-    thisObj->theParam[1] = eyp;
+    thisObj->theParam[0] = dData[0];
+    thisObj->theParam[1] = dData[1];
 
   } else if (*isw == ISW_COMMIT) {
 
     double trialStrain = thisObj->tState[0];
-    double f;		// yield function
+    double f, fYieldSurface;		// yield function
 
     double E = thisObj->theParam[0];
     double eyp = thisObj->theParam[1];
@@ -92,7 +88,7 @@ elasticPPC (matObj *thisObj, modelState *model, double *strain, double *tang, do
     else
 	f = -sigtrial + fyn;
 
-    double fYieldSurface = - E * DBL_EPSILON;
+    fYieldSurface = - E * DBL_EPSILON;
     if ( f > fYieldSurface ) {
       // plastic
       if ( sigtrial > 0.0 ) {
@@ -106,13 +102,13 @@ elasticPPC (matObj *thisObj, modelState *model, double *strain, double *tang, do
     thisObj->cState[1] = ep;
 
   } else if (*isw == ISW_REVERT) {
-    
-    for (int i=0; i<3; i++)
+    int i;
+    for (i=0; i<3; i++)
       thisObj->tState[i] = thisObj->cState[i];
 
   } else if (*isw == ISW_REVERT_TO_START) {
-
-    for (int i=0; i<2; i++) {
+	int i;
+    for (i=0; i<2; i++) {
       thisObj->cState[i] = 0.0;
       thisObj->tState[i] = 0.0;
     }
@@ -121,9 +117,9 @@ elasticPPC (matObj *thisObj, modelState *model, double *strain, double *tang, do
 
     double trialStrain = *strain;
     double f;		// yield function
-    double trialStress, trialTangent;
+    double trialStress, trialTangent, fYieldSurface;
 
-    double E = thisObj->theParam[0];
+    double E = thisObj->theParam[0]; 
     double eyp = thisObj->theParam[1];
     double ep = thisObj->cState[1];
 
@@ -139,7 +135,7 @@ elasticPPC (matObj *thisObj, modelState *model, double *strain, double *tang, do
     else
 	f = -sigtrial + fyn;
 
-    double fYieldSurface = - E * DBL_EPSILON;
+    fYieldSurface = - E * DBL_EPSILON;
     if ( f <= fYieldSurface ) {
 
       // elastic
