@@ -21,7 +21,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;c:\Program Files\tcl\include&quot;;..\..\..\SRC\actor\actor;..\..\..\src\utility;..\..\..\src\matrix;..\..\..\src\domain\domain;..\..\..\src\tagged\storage;..\..\..\src;..\..\..\src\tagged;..\..\..\src\handler;&quot;c:\Program Files\tcl&quot;"
+				AdditionalIncludeDirectories="..\..\..\src\nDarray;..\..\..\src\api;&quot;c:\Program Files\tcl\include&quot;;..\..\..\SRC\actor\actor;..\..\..\src\utility;..\..\..\src\matrix;..\..\..\src\domain\domain;..\..\..\src\tagged\storage;..\..\..\src;..\..\..\src\tagged;..\..\..\src\handler;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="WIN32,_DEBUG,_LIB,_TCL84"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
@@ -66,7 +66,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="&quot;c:\Program Files\tcl\include&quot;;..\..\..\SRC\actor\actor;..\..\..\src\utility;..\..\..\src\matrix;..\..\..\src\domain\domain;..\..\..\src\tagged\storage;..\..\..\src;..\..\..\src\tagged;..\..\..\src\handler;&quot;c:\Program Files\tcl&quot;"
+				AdditionalIncludeDirectories="..\..\..\src\nDarray;..\..\..\src\api;&quot;c:\Program Files\tcl\include&quot;;..\..\..\SRC\actor\actor;..\..\..\src\utility;..\..\..\src\matrix;..\..\..\src\domain\domain;..\..\..\src\tagged\storage;..\..\..\src;..\..\..\src\tagged;..\..\..\src\handler;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,_TCL84"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
@@ -138,7 +138,10 @@
 			RelativePath="..\..\..\SRC\utility\Timer.h">
 		</File>
 		<File
-			RelativePath="..\..\..\SRC\package\packages.cpp">
+			RelativePath="..\..\..\SRC\api\packages.cpp">
+		</File>
+		<File
+			RelativePath="..\..\..\SRC\api\packages.h">
 		</File>
 	</Files>
 	<Globals>
