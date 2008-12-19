@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-12-03 18:23:40 $
+// $Revision: 1.2 $
+// $Date: 2008-12-19 17:28:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/WrapperUniaxialMaterial.cpp,v $
 
 // Written: fmk                                                                         
@@ -34,7 +34,7 @@ WrapperUniaxialMaterial::WrapperUniaxialMaterial(const char *name, matObject *th
   theMat(theMat_),
   strain(0.0), stress(0.0), tangent(0.0), initTangent(0.0)
 {
-  opserr << "WrapperMaterial::WrapperMaterial() " << theMat->tag << endln;
+  /*opserr << "WrapperMaterial::WrapperMaterial() " << theMat->tag << endln; */
 
   funcName = new char[strlen(name)+1];
   if (funcName != 0)
@@ -59,7 +59,7 @@ WrapperUniaxialMaterial::WrapperUniaxialMaterial()
 WrapperUniaxialMaterial::~WrapperUniaxialMaterial()
 {
 
-  opserr << "WrapperUniaxialMaterial::~WrapperUniaxialMaterial()\n";
+  /*opserr << "WrapperUniaxialMaterial::~WrapperUniaxialMaterial()\n";*/
 
   if (funcName != 0)
     delete [] funcName;

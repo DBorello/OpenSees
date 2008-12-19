@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2008-12-09 19:51:03 $
+// $Revision: 1.4 $
+// $Date: 2008-12-19 17:28:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/WrapperElement.cpp,v $
                                                                         
 // Written: fmk 
@@ -45,8 +45,6 @@ WrapperElement::WrapperElement(const char *name, eleObject *ele)
  funcName(0), theEle(ele),
  theNodes(0), u(0), R(0), K(0)
 {
-
-  opserr << "WrapperElement::WrapperElement() " << ele->tag << " " << ele->nNode << endln;
 
   funcName = new char[strlen(name)+1];
   if (funcName != 0)
@@ -116,8 +114,6 @@ WrapperElement::setDomain(Domain *theDomain)
 
   int numNodes = theEle->nNode;
 
-  opserr << "WRAPPERELEMENT::setDomain() " << numNodes << endln;
-
   theNodes = new Node *[numNodes];
   for (int i=0; i<numNodes; i++) {
     Node *theNode = theDomain->getNode(theEle->node[i]);
@@ -132,8 +128,6 @@ WrapperElement::setDomain(Domain *theDomain)
 
   // call the DomainComponent class method THIS IS VERY IMPORTANT
   this->DomainComponent::setDomain(theDomain);
-
-  opserr << "WrapperElement::WrapperElement() NDOF " << theEle->nDOF << endln;
   
   u = new double [theEle->nDOF];
   R = new double [theEle->nDOF];

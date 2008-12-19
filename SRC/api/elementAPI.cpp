@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.4 $
-** $Date: 2008-12-18 22:48:22 $
+** $Revision: 1.5 $
+** $Date: 2008-12-19 17:28:53 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/elementAPI.cpp,v $
                                                                         
 ** Written: fmk 
@@ -90,11 +90,8 @@ void OPS_InvokeMaterialObject(struct matObject *theMat, modelState *theModel,dou
     UniaxialMaterial *theMaterial = (UniaxialMaterial *)theMat->matObjectPtr;
     if (theMaterial == 0) {
       *result = -1;
-      opserr << "OPS_InvokeMaterialObj - NO MATERIAL\n";
       return;
     }
-      opserr << "OPS_InvokeMaterialObj - THE MATERIAL\n";
-      opserr << theMaterial;
     
     if (*isw == ISW_COMMIT) {
       *result =  theMaterial->commitState();
@@ -161,7 +158,7 @@ int OPS_GetDoubleInput(int *numData, double *data)
 extern "C" 
 matObj *OPS_GetMaterial(int *matTag, int *matType)
 {
-  opserr << "matObj *OPS_GetMaterial(int *matTag): " << *matTag << " " << matType << endln;
+  /*opserr << "matObj *OPS_GetMaterial(int *matTag): " << *matTag << " " << matType << endln; */
 
   if (*matType == OPS_UNIAXIAL_MATERIAL_TYPE) {
     UniaxialMaterial *theUniaxialMaterial = theModelBuilder->getUniaxialMaterial(*matTag);
@@ -374,7 +371,7 @@ matObj *OPS_GetMaterialType(char *type, int sizeType) {
 extern "C" 
 int OPS_AllocateMaterial(matObject *theMat){
 
-  fprintf(stderr,"allocateMaterial Address %p\n",theMat);
+  /*fprintf(stderr,"allocateMaterial Address %p\n",theMat);*/
 
   if (theMat->nParam > 0)
     theMat->theParam = new double[theMat->nParam];
@@ -413,8 +410,9 @@ int OPS_AllocateElement(eleObject *theEle, int *matTags, int *matType){
   if (numMat > 0)
     theEle->mats = new matObject *[numMat];
 
+  
   for (int i=0; i< numMat; i++) {
-    opserr << "AllocateElement - matTag " << matTags[i] << "\n";
+  /*  opserr << "AllocateElement - matTag " << matTags[i] << "\n"; */
 
     matObject *theMat = OPS_GetMaterial(&(matTags[i]), matType);
     //    matObject *theMat = OPS_GetMaterial(&(matTags[i]));
@@ -458,7 +456,6 @@ int OPS_GetNodeDisp(int *nodeTag, int *sizeData, double *data)
   }
   int size = *sizeData;
   const Vector &disp = theNode->getTrialDisp();
-  opserr << "OPS_GetNodeDisp() " << disp;
 
   if (disp.Size() != size) {
     opserr << "OPS_GetNodeCrd - crd size mismatch\n";
@@ -473,12 +470,44 @@ int OPS_GetNodeDisp(int *nodeTag, int *sizeData, double *data)
 extern "C" 
 int OPS_GetNodeVel(int *nodeTag, int *sizeData, double *data)
 {
+	  Node *theNode = theDomain->getNode(*nodeTag);
+
+  if (theNode == 0) {
+    opserr << "OPS_GetNodeVel - no node with tag " << *nodeTag << endln;
+    return -1;
+  }
+  int size = *sizeData;
+  const Vector &vel = theNode->getTrialVel();
+
+  if (vel.Size() != size) {
+    opserr << "OPS_GetNodeVel - crd size mismatch\n";
+    return -1;
+  }
+  for (int i=0; i < size; i++) 
+    data[i] = vel(i);
+    
   return 0;
 }
 
 extern "C" 
 int OPS_GetNodeAcc(int *nodeTag, int *sizeData, double *data)
 {
+   Node *theNode = theDomain->getNode(*nodeTag);
+
+  if (theNode == 0) {
+    opserr << "OPS_GetNodeAcc - no node with tag " << *nodeTag << endln;
+    return -1;
+  }
+  int size = *sizeData;
+  const Vector &accel = theNode->getTrialAccel();
+
+  if (accel.Size() != size) {
+    opserr << "OPS_GetNodeAcc - accel size mismatch\n";
+    return -1;
+  }
+  for (int i=0; i < size; i++) 
+    data[i] = accel(i);
+    
   return 0;
 }
 
