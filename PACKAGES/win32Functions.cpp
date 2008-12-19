@@ -5,13 +5,14 @@
 #include <elementAPI.h>
 
 #include <OPS_Stream.h>
-#include <Domain.h>
-#include <TclModelBuilder.h>
+
+//#include <Domain.h>
+//#include <TclModelBuilder.h>
 
 #include <windows.h>
 
-#include <SimulationInformation.h>
-SimulationInformation simulationInfo;
+//#include <SimulationInformation.h>
+//SimulationInformation simulationInfo;
 
 #define DllExport _declspec(dllexport)
 
@@ -25,22 +26,6 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 
 OPS_Stream *opserrPtr =0;
 
-/*
-extern "C" DllExport
-void setGlobalPointers(OPS_Stream *theErrorStreamPtr)
-{
-   opserrPtr = theErrorStreamPtr;
-}
-*/
-/*
-int __cdecl OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
-{
-
-  Tcl_Exit(0);
-  return 0;
-}
-*/
-
 typedef int (*OPS_ErrorPtrType)(char *, int);
 typedef int (*OPS_GetIntInputPtrType)(int *, int *);
 typedef int (*OPS_GetDoubleInputPtrType)(int *, double *);
@@ -48,6 +33,7 @@ typedef int (*OPS_AllocateElementPtrType)(eleObj *, int *matTags, int *maType);
 typedef int (*OPS_AllocateMaterialPtrType)(matObj *);
 typedef UniaxialMaterial *(*OPS_GetUniaxialMaterialPtrType)(int matTag);
 typedef NDMaterial * (*OPS_GetNDMaterialPtrType)(int matTag);
+typedef int (*OPS_GetNodeInfoPtrType)(int *, int *, double *);
 
 //int    OPS_InvokeMaterial(struct eleObj *, int *,modelState *, double *, double *, double *, int *);
 
@@ -58,6 +44,8 @@ OPS_AllocateElementPtrType OPS_AllocateElementPtr =0;
 OPS_AllocateMaterialPtrType OPS_AllocateMaterialPtr =0;
 OPS_GetUniaxialMaterialPtrType OPS_GetUniaxialMaterialPtr = 0;
 OPS_GetNDMaterialPtrType OPS_GetNDMaterialPtr = 0;
+OPS_GetNodeInfoPtrType OPS_GetNodeCrdPtr = 0;
+OPS_GetNodeInfoPtrType OPS_GetNodeDispPtr = 0;
 
 extern "C" DllExport
 void setGlobalPointers(OPS_Stream *theErrorStreamPtr,
@@ -67,7 +55,9 @@ void setGlobalPointers(OPS_Stream *theErrorStreamPtr,
 				OPS_AllocateElementPtrType  allocateElementFunct,
 				OPS_AllocateMaterialPtrType allocateMaterialFunct,
 				OPS_GetUniaxialMaterialPtrType OPS_GetUniaxialMaterialFunct,
-				OPS_GetNDMaterialPtrType OPS_GetNDMaterialFunct)
+				OPS_GetNDMaterialPtrType OPS_GetNDMaterialFunct,
+				OPS_GetNodeInfoPtrType OPS_GetNodeCrdFunct,
+				OPS_GetNodeInfoPtrType OPS_GetNodeDispFunct)
 {
 	opserrPtr = theErrorStreamPtr;
 	OPS_ErrorPtr = errorFunct;
@@ -77,6 +67,8 @@ void setGlobalPointers(OPS_Stream *theErrorStreamPtr,
 	OPS_AllocateMaterialPtr =allocateMaterialFunct;
 	OPS_GetUniaxialMaterialPtr = OPS_GetUniaxialMaterialFunct;
 	OPS_GetNDMaterialPtr = OPS_GetNDMaterialFunct;
+	OPS_GetNodeCrdPtr = OPS_GetNodeCrdFunct;
+	OPS_GetNodeDispPtr = OPS_GetNodeDispFunct;
 }
 
 
@@ -87,14 +79,12 @@ int OPS_Error(char *data, int length)
 
 extern "C" int  OPS_GetIntInput(int *numData, int*data)
 {
-  opserr << "int OPS_GetIntInput(int *numData, int*data)\n";
   return (*OPS_GetIntInputPtr)(numData, data);
 }
 
 
 extern "C" int OPS_GetDoubleInput(int *numData, double *data)
 {
-  opserr << "int        OPS_GetDoubleInput(int *numData, int*data)\n";
   return (*OPS_GetDoubleInputPtr)(numData, data);
 }
 
@@ -105,4 +95,17 @@ extern "C" int OPS_AllocateMaterial(matObj *mat)
 extern UniaxialMaterial *OPS_GetUniaxialMaterial(int matTag)
 {
 	return (*OPS_GetUniaxialMaterialPtr)(matTag);
+}
+extern "C" int OPS_AllocateElement(eleObj *ele, int *matTags, int *matType)
+{
+	return (*OPS_AllocateElementPtr)(ele, matTags, matType);
+}
+
+extern "C" int OPS_GetNodeCrd(int *nodeTag, int *sizeData, double *data)
+{
+	return (*OPS_GetNodeCrdPtr)(nodeTag, sizeData, data);
+}
+extern "C" int OPS_GetNodeDisp(int *nodeTag, int *sizeData, double *data)
+{
+	return (*OPS_GetNodeDispPtr)(nodeTag, sizeData, data);
 }
