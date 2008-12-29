@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2008-04-14 17:14:33 $
+// $Revision: 1.21 $
+// $Date: 2008-12-29 19:11:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -932,21 +932,13 @@ TrussSection::getResponse(int responseID, Information &eleInformation)
 	  strain = 0;
 	  force = 0.0;
       } else {
-	strain = this->computeCurrentStrain();	
+
 	int order = theSection->getOrder();
 	const ID &code = theSection->getType();
 	
-	Vector e (order);
-	
-	int i;
-	for (i = 0; i < order; i++) {
-	  if (code(i) == SECTION_RESPONSE_P)
-	    e(i) = strain;
-	}
-	
-	theSection->setTrialSectionDeformation(e);
-	
 	const Vector &s = theSection->getStressResultant();
+	force = 0.0;
+	int i;
 	for (i = 0; i < order; i++) {
 	  if (code(i) == SECTION_RESPONSE_P)
 	    force += s(i);
