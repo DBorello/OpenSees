@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.107 $
-// $Date: 2008-12-03 18:26:26 $
+// $Revision: 1.108 $
+// $Date: 2009-01-07 22:41:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -150,6 +150,9 @@
 #define MAT_TAG_QzSimple1        207
 #define MAT_TAG_PyLiq1           208
 #define MAT_TAG_TzLiq1           209
+#define MAT_TAG_PySimple2        210
+#define MAT_TAG_TzSimple2        211
+#define MAT_TAG_QzSimple2        212
 
 #define MAT_TAG_FedeasMaterial         1000
 #define MAT_TAG_FedeasBond1       1001

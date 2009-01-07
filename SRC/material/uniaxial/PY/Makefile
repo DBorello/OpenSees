@@ -1,13 +1,17 @@
 include ../../../../Makefile.def
 
 OBJS       = PySimple1.o \
-             QzSimple1.o \
-             TzSimple1.o \
-             TclPyTzQzMaterialCommand.o \
-             PyLiq1.o \
-             TzLiq1.o \
-             PySimple1Gen.o \
-             TzSimple1Gen.o 
+	QzSimple1.o \
+	TzSimple1.o \
+	PySimple2.o \
+	QzSimple2.o \
+	TzSimple2.o \
+	TclPyTzQzMaterialCommand.o \
+	ShallowFoundationGen.o \
+	PyLiq1.o \
+	TzLiq1.o \
+	PySimple1Gen.o \
+	TzSimple1Gen.o 
 
 all:         $(OBJS)
 
