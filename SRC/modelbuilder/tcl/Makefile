@@ -87,6 +87,7 @@ GRAPHIC_LIBS_TCL = $(FE)/tcl/TclFeViewer.o \
 
 endif
 
+
 INTERPRETER_LIBS_TCL = $(FE)/tcl/tclMain.o \
 	$(FE)/tcl/tclAppInit.o \
 	$(FE)/tcl/commands.o \

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.44 $
-// $Date: 2008-11-21 22:19:56 $
+// $Revision: 1.45 $
+// $Date: 2009-01-07 22:50:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -85,6 +85,10 @@
 #include <PySimple1Gen.h>
 #include <TzSimple1Gen.h>
 // End added by SJB
+
+// Added by Prishati Raychowdhury  (PRC)
+#include <ShallowFoundationGen.h>
+//end PRC
 
 #include <YieldSurface_BC.h>
 #include <YS_Evolution.h>
@@ -235,6 +239,12 @@ int
 TclCommand_doTzSimple1Gen(ClientData clientData, Tcl_Interp *interp, int argc,
                           TCL_Char **argv);
 // End added by SJB
+
+// Added by Prishati Raychowdhury (UCSD)
+int
+TclModelBuilder_doShallowFoundationGen(ClientData clientData, Tcl_Interp *interp, int argc,
+                          TCL_Char **argv);
+// End PRC
 
 int
 TclCommand_doBlock2D(ClientData clientData, Tcl_Interp *interp, int argc, 
@@ -502,6 +512,11 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   Tcl_CreateCommand(interp, "TzSimple1Gen", TclCommand_doTzSimple1Gen,
                         (ClientData)NULL, NULL);
   // End added by SJB
+
+// Added by Prishati Raychowdhury (UCSD)
+  Tcl_CreateCommand(interp, "ShallowFoundationGen", TclModelBuilder_doShallowFoundationGen,
+                        (ClientData)NULL, NULL);
+// End PRC
 
   Tcl_CreateCommand(interp, "block2D", TclCommand_doBlock2D,
 		    (ClientData)NULL, NULL);
@@ -2810,6 +2825,46 @@ TclCommand_doTzSimple1Gen(ClientData clientData, Tcl_Interp *interp, int argc,
 }
 // End Added by Scott J. Brandenberg
 ///////////////////////////////////////////////////////////////////////////////////////////////////	
+
+// Added by Prishati Raychowdhury (UCSD)
+int
+TclModelBuilder_doShallowFoundationGen(ClientData clientData, Tcl_Interp *interp, int argc,
+                               TCL_Char **argv)
+{
+    	if(argc != 5){
+		opserr << "WARNING ShallowFoundationGen FoundationID? ConnectingNode? InputDataFile? FoundationMatType?";
+		opserr << "Must have 4 arguments." << endln;
+	}
+	
+	ShallowFoundationGen *theShallowFoundationGen;
+	theShallowFoundationGen = new ShallowFoundationGen;
+
+	
+      // Checking for error
+        int FoundationID; int ConnectingNode; int FoundationMatType;
+
+		if (Tcl_GetInt (interp, argv[1], &FoundationID) != TCL_OK) {
+	  opserr << "WARNING invalid FoundationID: " << argv[1]
+	       << ". ShallowFoundationGen FoundationID? ConnectingNode? InputDataFile? FoundationMatType? ";
+	  return TCL_ERROR;
+        }
+        if (Tcl_GetInt (interp, argv[2], &ConnectingNode) != TCL_OK) {
+	  opserr << "WARNING invalid ConnectingNode: " << argv[2]
+	       << ". ShallowFoundationGen FoundationID? ConnectingNode? InputDataFile? FoundationMatType? ";
+	  return TCL_ERROR;
+        }
+        if (Tcl_GetInt (interp, argv[4], &FoundationMatType) != TCL_OK) {
+	  opserr << "WARNING invalid FoundationMatType: " << argv[4]
+	       << ". ShallowFoundationGen FoundationID? ConnectingNode? InputDataFile? FoundationMatType? ";
+	  return TCL_ERROR;
+        }
+     
+	theShallowFoundationGen->GetShallowFoundation(argv[1], argv[2], argv[3], argv[4]);
+	delete theShallowFoundationGen;
+
+	return TCL_OK;
+}
+// End PRC
 
 int
 TclCommand_doBlock2D(ClientData clientData, Tcl_Interp *interp, int argc,   
