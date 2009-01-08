@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2009-01-07 22:41:39 $
+// $Revision: 1.10 $
+// $Date: 2009-01-08 00:11:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.cpp,v $
                                                                         
 // Written: fmk
@@ -809,17 +809,17 @@ FEM_ObjectBrokerAllClasses::getNewUniaxialMaterial(int classTag)
 	case MAT_TAG_PySimple2:
 		return new PySimple2();
 
-	case MAT_TAG_PyLiq2:
-		return new PyLiq2();
-
 	case MAT_TAG_TzSimple2:
 		return new TzSimple2();
 
-        case MAT_TAG_TzLiq1:
+    case MAT_TAG_TzLiq1:
 		return new TzLiq1();
 
 	case MAT_TAG_QzSimple1:
 		return new QzSimple1();
+
+	case MAT_TAG_QzSimple2:
+		return new QzSimple2();
 
 	case MAT_TAG_Hysteretic:
 		return new HystereticMaterial();
