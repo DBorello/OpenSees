@@ -478,10 +478,28 @@
 					RelativePath="..\..\..\SRC\material\uniaxial\PY\PySimple1Gen.h">
 				</File>
 				<File
+					RelativePath="..\..\..\SRC\material\uniaxial\PY\PySimple2.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\uniaxial\PY\PySimple2.h">
+				</File>
+				<File
 					RelativePath="..\..\..\Src\material\uniaxial\Py\QzSimple1.cpp">
 				</File>
 				<File
 					RelativePath="..\..\..\Src\material\uniaxial\Py\QzSimple1.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\uniaxial\PY\QzSimple2.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\uniaxial\PY\QzSimple2.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\uniaxial\PY\ShallowFoundationGen.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\uniaxial\PY\ShallowFoundationGen.h">
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\material\uniaxial\PY\TclPyTzQzMaterialCommand.cpp">
@@ -503,6 +521,12 @@
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\material\uniaxial\PY\TzSimple1Gen.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\uniaxial\PY\TzSimple2.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\uniaxial\PY\TzSimple2.h">
 				</File>
 			</Filter>
 			<Filter
