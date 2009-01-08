@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2008-08-26 17:04:14 $
+// $Revision: 1.30 $
+// $Date: 2009-01-08 00:00:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -1580,7 +1580,7 @@ Node::Print(OPS_Stream &s, int flag)
     s << "\n Node: " << this->getTag() << endln;
     s << "\tCoordinates  : " << *Crd;
     if (commitDisp != 0)         
-	s << "\tcommitDisps: " << *trialDisp;
+	s << "\tDisps: " << *trialDisp;
     if (commitVel != 0)     
 	s << "\tVelocities   : " << *trialVel;
     if (commitAccel != 0)         
