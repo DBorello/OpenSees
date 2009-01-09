@@ -14,7 +14,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkMain.cpp,v 1.20 2007-11-27 23:40:30 fmk Exp $
+ * RCS: @(#) $Id: tkMain.cpp,v 1.21 2009-01-09 00:02:20 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -85,6 +85,8 @@ extern "C" char *	strrchr _ANSI_ARGS_((CONST char *string, int c));
 #endif
 
 #ifdef _TCL84
+extern "C" void  TkpDisplayWarning _ANSI_ARGS_((const char *msg, char *title));
+#elif _TCL85
 extern "C" void  TkpDisplayWarning _ANSI_ARGS_((const char *msg, char *title));
 #else
 extern "C" void  TkpDisplayWarning _ANSI_ARGS_((char *msg, char *title));
@@ -268,8 +270,7 @@ Tk_MainOpenSees(int argc, char **argv, Tcl_AppInitProc *appInitProc, Tcl_Interp 
      * Invoke application-specific initialization.
      */
 	if ((*appInitProc)(interp) != TCL_OK) {
-      TkpDisplayWarning(Tcl_GetStringResult(interp), 
-    	"Application initialization failed");
+      TkpDisplayWarning(Tcl_GetStringResult(interp), "Application Inititialization Failed");
 	}
     /*
      * Invoke the script specified on the command line, if any.
@@ -285,7 +286,7 @@ Tk_MainOpenSees(int argc, char **argv, Tcl_AppInitProc *appInitProc, Tcl_Interp 
 	     */
 
 	    Tcl_AddErrorInfo(interp, "");
-	    TkpDisplayWarning(Tcl_GetVar(interp, "errorInfo",
+	    TkpDisplayWarning(Tcl_GetVar(interp, "error Info",
 					 TCL_GLOBAL_ONLY), "Error in startup script");
 	    Tcl_DeleteInterp(interp);
 	    Tcl_Exit(1);
@@ -448,6 +449,10 @@ Prompt(Tcl_Interp *interp, int partial)
 {
 
 #ifdef _TCL84
+  const char *promptCmd;
+  const char one[12] = "tcl_prompt1";
+  const char two[12] = "tcl_prompt2";
+#elif _TCL85
   const char *promptCmd;
   const char one[12] = "tcl_prompt1";
   const char two[12] = "tcl_prompt2";

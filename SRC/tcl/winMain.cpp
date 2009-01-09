@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: winMain.cpp,v 1.3 2004-07-21 00:01:23 fmk Exp $
+ * RCS: @(#) $Id: winMain.cpp,v 1.4 2009-01-09 00:02:20 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -48,8 +48,10 @@ void Tk_MainOpenSees(int argc, char **argv,Tcl_AppInitProc *appInitProc,
 static void		setargv _ANSI_ARGS_((int *argcPtr, char ***argvPtr));
 #ifdef _TCL84
 static Tcl_PanicProc WishPanic;
+#elif _TCL85
+static void WishPanic(CONST char *format, ...);
 #else
-static void		WishPanic _ANSI_ARGS_(TCL_VARARGS(char *,format));
+static void	WishPanic _ANSI_ARGS_(TCL_VARARGS(char *,format));
 #endif
 
 #ifdef TK_TEST
@@ -263,6 +265,24 @@ WishPanic TCL_VARARGS_DEF(CONST char *,arg1)
     CONST char *format;
     
     format = TCL_VARARGS_START(CONST char *,arg1,argList);
+    vsprintf(buf, format, argList);
+
+    MessageBeep(MB_ICONEXCLAMATION);
+    MessageBox(NULL, buf, "Fatal Error in Wish",
+	    MB_ICONSTOP | MB_OK | MB_TASKMODAL | MB_SETFOREGROUND);
+#ifdef _MSC_VER
+    DebugBreak();
+#endif
+    ExitProcess(1);
+}
+#elif _TCL85
+void
+WishPanic(CONST char *format, ...)
+{
+    va_list argList;
+    char buf[1024];
+
+	va_start(argList, format);
     vsprintf(buf, format, argList);
 
     MessageBeep(MB_ICONEXCLAMATION);
