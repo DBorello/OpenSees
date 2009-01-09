@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.4 $
-** $Date: 2008-12-19 15:35:37 $
+** $Revision: 1.5 $
+** $Date: 2009-01-09 23:51:24 $
 ** $Source: /usr/local/cvs/OpenSees/PACKAGES/NewMaterial/c/elasticPPC.c,v $
                                                                         
 ** Written: fmk 
@@ -160,4 +160,11 @@ elasticPPC (matObj *thisObj, modelState *model, double *strain, double *tang, do
   }
 
   *result = 0;
+}
+
+
+extern "C" DllExport void
+localInit() 
+{
+  OPS_Error("elasticPPC.c - Written by fmk UC Berkeley Copyright 2008 - Use at your Own Peril\n", 1);
 }
