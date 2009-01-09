@@ -44,7 +44,7 @@ OBJS  = Template3Dep.o \
 
 ################### TARGETS ########################
 all: $(OBJS) 
-	@$(RM) $(MATMOD_LIBRARY) 
+	@$(RM) $(RMFLAGS) $(MATMOD_LIBRARY) 
 	$(AR) $(ARFLAGS) $(MATMOD_LIBRARY) $(OBJS)
 	@$(RANLIB) $(RANLIBFLAGS) $(MATMOD_LIBRARY)
 
