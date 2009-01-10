@@ -58,15 +58,12 @@ int __cdecl OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TC
 // Initializer.
 __attribute__((constructor))
 static void initializer(void) {                             // 2
-  printf("[%s] initializer()\n", __FILE__);
-
+  //  printf("[%s] initializer()\n", __FILE__);
 }
 
 __attribute__((destructor))
 static void finalizer(void) {                               // 3
-
-  printf("[%s] finalizer()\n", __FILE__);
-
+  //  printf("[%s] finalizer()\n", __FILE__);
 }
 
 #endif
