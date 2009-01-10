@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-12-10 00:05:21 $
+// $Revision: 1.3 $
+// $Date: 2009-01-10 00:08:27 $
 // $Source: /usr/local/cvs/OpenSees/PACKAGES/NewElement/cpp/TrussCPP.cpp,v $
                                                                         
 // Written: fmk 
@@ -62,6 +62,13 @@ Vector TrussCPP::trussR(4);
 #else
 #define DllExport
 #endif
+
+
+extern "C" DllExport void
+localInit() 
+{
+  OPS_Error("trussC.c - Written by fmk UC Berkeley Copyright 2008 - Use at your Own Peril\n", 1);
+}
 
 extern "C" DllExport void *
 OPS_TrussCPP(int argc, const char **argv)

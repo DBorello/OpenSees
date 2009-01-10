@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.3 $
-** $Date: 2008-12-19 15:35:25 $
+** $Revision: 1.4 $
+** $Date: 2009-01-10 00:08:27 $
 ** $Source: /usr/local/cvs/OpenSees/PACKAGES/NewElement/c/trussC.c,v $
                                                                         
 ** Written: fmk 
@@ -236,3 +236,8 @@ trussC (eleObj *thisObj, modelState *model, double *tang, double *resid, int *is
 
 
 
+extern "C" DllExport void
+localInit() 
+{
+  OPS_Error("trussC.c - Written by fmk UC Berkeley Copyright 2008 - Use at your Own Peril\n", 1);
+}
