@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.5 $
-** $Date: 2009-01-10 00:23:48 $
+** $Revision: 1.6 $
+** $Date: 2009-01-10 00:33:54 $
 ** $Source: /usr/local/cvs/OpenSees/PACKAGES/NewElement/c/trussC.c,v $
                                                                         
 ** Written: fmk 
@@ -37,7 +37,7 @@
 #include <windows.h>
 #define OPS_Export _declspec(dllexport)
 #elif _MACOSX
-#define OPS_Export __attribute__((visibility("default")))
+#define OPS_Export extern "C" __attribute__((visibility("default")))
 #else
 #define OPS_Export extern "C"
 #endif
@@ -237,5 +237,5 @@ trussC (eleObj *thisObj, modelState *model, double *tang, double *resid, int *is
 OPS_Export void
 localInit() 
 {
-  OPS_Error("trussC.c - Written by fmk UC Berkeley Copyright 2008 - Use at your Own Peril\n", 1);
+  OPS_Error("trussC element - Written by fmk UC Berkeley Copyright 2008 - Use at your Own Peril\n", 1);
 }
