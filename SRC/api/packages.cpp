@@ -18,8 +18,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.5 $
-** $Date: 2009-01-10 00:01:48 $
+** $Revision: 1.6 $
+** $Date: 2009-01-10 17:45:55 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/packages.cpp,v $
                                                                         
 ** Written: fmk 
@@ -119,10 +119,12 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
 	      OPS_AllocateElement, OPS_AllocateMaterial, OPS_GetUniaxialMaterial, 
 	      OPS_GetNDMaterial, OPS_GetNodeCrd, OPS_GetNodeDisp, OPS_GetNodeVel,
 	      OPS_GetNodeAcc);
-    
-    funcPtr = (LocalInitPtrType)GetProcAddress((HMODULE)hLib,"localInit");
-    if (!funcPtr) {
-      (funcPtr);
+   
+
+   LocalInitPtrType initPtr;
+	initPtr = (LocalInitPtrType)GetProcAddress((HMODULE)hLib,"localInit");
+	if (!initPtr) {
+      initPtr();
     }
     
   } else // no lib exists
