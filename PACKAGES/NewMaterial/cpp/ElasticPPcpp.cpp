@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2009-01-09 23:51:28 $
+// $Revision: 1.4 $
+// $Date: 2009-01-10 00:25:25 $
 // $Source: /usr/local/cvs/OpenSees/PACKAGES/NewMaterial/cpp/ElasticPPcpp.cpp,v $
                                                                         
 // Written: fmk 
@@ -39,20 +39,20 @@
 
 
 #ifdef _USRDLL
-#define DllExport _declspec(dllexport)
+#define OPS_Export _declspec(dllexport)
 #elif _MACOSX
-#define DllExport __attribute__((visibility("default")))
+#define OPS_Export __attribute__((visibility("default")))
 #else
-#define DllExport
+#define OPS_Export extern "C"
 #endif
 
-extern "C" DllExport void
+extern "C" OPS_Export void
 localInit() 
 {
   OPS_Error("ElasticPPcpp - Written by fmk UC Berkeley Copyright 2008 - Use at your Own Peril\n", 1);
 }
 
-extern "C" DllExport void *
+extern "C" OPS_Export void *
 OPS_ElasticPPcpp(int argc, 
 		const char **argv)
 {

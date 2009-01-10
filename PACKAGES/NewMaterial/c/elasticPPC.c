@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.5 $
-** $Date: 2009-01-09 23:51:24 $
+** $Revision: 1.6 $
+** $Date: 2009-01-10 00:25:25 $
 ** $Source: /usr/local/cvs/OpenSees/PACKAGES/NewMaterial/c/elasticPPC.c,v $
                                                                         
 ** Written: fmk 
@@ -37,14 +37,14 @@
 
 #ifdef _USRDLL
 #include <windows.h>
-#define DllExport _declspec(dllexport)
+#define OPS_Export _declspec(dllexport)
 #elif _MACOSX
-#define DllExport extern "C" __attribute__((visibility("default")))
+#define OPS_Export extern "C" __attribute__((visibility("default")))
 #else
-#define extern "C" DllExport
+#define OPS_Export extern "C" 
 #endif
 
-DllExport void
+OPS_Export void
 elasticPPC (matObj *thisObj, modelState *model, double *strain, double *tang, double *stress, int *isw, int *result) 
 {
   if (*isw == ISW_INIT) {
@@ -163,7 +163,7 @@ elasticPPC (matObj *thisObj, modelState *model, double *strain, double *tang, do
 }
 
 
-extern "C" DllExport void
+extern "C" OPS_Export void
 localInit() 
 {
   OPS_Error("elasticPPC.c - Written by fmk UC Berkeley Copyright 2008 - Use at your Own Peril\n", 1);
