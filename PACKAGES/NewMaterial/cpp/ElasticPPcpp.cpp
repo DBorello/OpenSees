@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2009-01-10 00:25:25 $
+// $Revision: 1.5 $
+// $Date: 2009-01-10 00:35:41 $
 // $Source: /usr/local/cvs/OpenSees/PACKAGES/NewMaterial/cpp/ElasticPPcpp.cpp,v $
                                                                         
 // Written: fmk 
@@ -49,7 +49,7 @@
 extern "C" OPS_Export void
 localInit() 
 {
-  OPS_Error("ElasticPPcpp - Written by fmk UC Berkeley Copyright 2008 - Use at your Own Peril\n", 1);
+  OPS_Error("ElasticPPcpp unaxial material - Written by fmk UC Berkeley Copyright 2008 - Use at your Own Peril\n", 1);
 }
 
 extern "C" OPS_Export void *
