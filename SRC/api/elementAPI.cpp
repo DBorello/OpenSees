@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.5 $
-** $Date: 2008-12-19 17:28:53 $
+** $Revision: 1.6 $
+** $Date: 2009-01-10 00:02:04 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/elementAPI.cpp,v $
                                                                         
 ** Written: fmk 
@@ -184,8 +184,6 @@ matObj *OPS_GetMaterial(int *matTag, int *matType)
 
       theMatObject->matObjectPtr = theCopy;
       
-      fprintf(stderr,"getMaterial Address %d %d %d\n", *matTag, theMatObject, sizeof(int));
-      
       return theMatObject;
     }
     
@@ -327,7 +325,7 @@ matObj *OPS_GetMaterialType(char *type, int sizeType) {
       
       matObj *theMatObject = new matObj;
       theMatObject->matFunctPtr = matFunction->theFunct;
-      opserr << "matObj *OPS_GetMaterialType() - FOUND " << endln;  
+      /* opserr << "matObj *OPS_GetMaterialType() - FOUND " << endln;  */
       return theMatObject;
     }
     else
@@ -360,7 +358,7 @@ matObj *OPS_GetMaterialType(char *type, int sizeType) {
 
     theMatObject->matFunctPtr = matFunction->theFunct;
 
-    fprintf(stderr,"getMaterial Address %p\n",theMatObject);
+    //    fprintf(stderr,"getMaterial Address %p\n",theMatObject);
 
     return theMatObject;
   }
@@ -548,8 +546,6 @@ Tcl_addWrapperElement(eleObj *theEle, ClientData clientData, Tcl_Interp *interp,
     return TCL_ERROR;
   }  
 
-  opserr << "Tcl_addWrapperElement() - DONE\n";
-
   return 0;
 }
 
@@ -596,7 +592,7 @@ OPS_InvokeMaterial(eleObject *theEle, int *mat, modelState *model, double *strai
   int error =0;
 
   matObject *theMat = theEle->mats[*mat];
-  fprintf(stderr,"invokeMaterial Address %d %d %d\n",*mat, theMat, sizeof(int));
+  /* fprintf(stderr,"invokeMaterial Address %d %d %d\n",*mat, theMat, sizeof(int)); */
 
   if (theMat != 0)
     theMat->matFunctPtr(theMat, model, strain, tang, stress, isw, &error);   
