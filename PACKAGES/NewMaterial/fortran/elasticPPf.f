@@ -1,4 +1,8 @@
-      SUBROUTINE elasticPPf(matObj,model,strain,tang,stress,isw,error) 
+      SUBROUTINE ELASTICPPF(matObj,model,strain,tang,stress,isw,error) 
+      
+!DEC$ IF DEFINED (_DLL)
+!DEC$ ATTRIBUTES DLLEXPORT :: ELASTICPPF
+!DEC$ END IF
       use materialTypes
       use materialAPI
       implicit none
@@ -25,7 +29,7 @@
       real *8, pointer:: dPtr(:)
 
 c     outside functions called
-      integer OPS_GetIntInput, OPS_GetDoubleInput, OPS_AllocateMaterial
+c      integer OPS_GetIntInput, OPS_GetDoubleInput, OPS_AllocateMaterial
 
       IF (isw.eq.ISW_INIT) THEN
          

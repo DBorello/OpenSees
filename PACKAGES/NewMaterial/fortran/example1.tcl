@@ -2,8 +2,8 @@
 #
 # purpose: example1 in the manual with existing truss element
 #
-# $Revision: 1.1 $
-# $Date: 2008-12-01 23:30:00 $
+# $Revision: 1.2 $
+# $Date: 2009-01-12 20:37:57 $
 # $Source: /usr/local/cvs/OpenSees/PACKAGES/NewMaterial/fortran/example1.tcl,v $
 
 #create the ModelBuilder object
@@ -18,8 +18,8 @@ node 3 168.0  0.0
 node 4  72.0 96.0
 
 # add material - command: material <matType> matID <matArgs>
-uniaxialMaterial elasticppf_ 1 3000 0.03
-uniaxialMaterial elasticppf_ 2 3000 0.001
+uniaxialMaterial elasticppf 1 3000 0.03
+uniaxialMaterial elasticppf 2 3000 0.001
 #uniaxialMaterial Elastic 1 3000.0
 
 # add truss elements - command: truss trussID node1 node2 A matID

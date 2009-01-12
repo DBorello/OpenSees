@@ -53,5 +53,5 @@ c      end interface
          end function OPS_AllocateMaterial
       end interface
 
-      contains
+c     contains
       end module materialAPI
