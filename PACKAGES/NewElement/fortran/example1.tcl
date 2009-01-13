@@ -2,8 +2,8 @@
 #
 # purpose: example1 in the manual with existing truss element
 #
-# $Revision: 1.1 $
-# $Date: 2008-12-01 23:30:25 $
+# $Revision: 1.2 $
+# $Date: 2009-01-13 07:31:06 $
 # $Source: /usr/local/cvs/OpenSees/PACKAGES/NewElement/fortran/example1.tcl,v $
 
 #create the ModelBuilder object
@@ -21,9 +21,9 @@ node 4  72.0 96.0
 uniaxialMaterial Elastic 1 3000
 
 # add truss elements - command: truss trussID node1 node2 A matID
-element trussf_ 1 1 4 10.0 1
-element trussf_ 2 2 4 5.0 1
-element trussf_ 3 3 4 5.0 1
+element trussf 1 1 4 10.0 1
+element trussf 2 2 4 5.0 1
+element trussf 3 3 4 5.0 1
 
 # set the boundary conditions - command: fix nodeID xResrnt? yRestrnt?
 fix 1 1 1 

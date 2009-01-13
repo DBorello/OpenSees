@@ -5,7 +5,7 @@ OS_FLAG ?= -D_LINUX
 
 ifeq ($(OS_FLAG), -D_LINUX)
 
-LIBRARY         = trussf_.so
+LIBRARY         = trussf.so
 
 all: $(LIBRARY)
 
@@ -17,7 +17,7 @@ $(LIBRARY): $(OBJS)
 
 else
 
-LIBRARY         = trussf_.dylib
+LIBRARY         = trussf.dylib
 
 OUTSIDE_OBJS = $(FE)/../PACKAGES/dynamicLoadFunctions.o
 
