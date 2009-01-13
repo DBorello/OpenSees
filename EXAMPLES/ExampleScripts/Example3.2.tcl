@@ -106,10 +106,6 @@ set maxU 15.0;	        # Max displacement
 set numSteps [expr int($maxU/$dU)]
 
 
-
-system BandGen_Single
-
-
 # Perform the analysis
 set ok [analyze $numSteps]
 
