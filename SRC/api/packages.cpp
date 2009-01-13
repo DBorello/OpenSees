@@ -18,8 +18,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.8 $
-** $Date: 2009-01-13 06:26:09 $
+** $Revision: 1.9 $
+** $Date: 2009-01-13 07:33:31 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/packages.cpp,v $
                                                                         
 ** Written: fmk 
@@ -183,8 +183,6 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
     delete [] localLibName;
     return -1;
   }
-
-  opserr << "FOUND FUNCTION\n";
   
   *funcHandle = funcPtr;
   
@@ -193,10 +191,15 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
   funcPtr = dlsym(*libHandle, "localInit");
   
   if (funcPtr != NULL ) {
-    opserr << "FOUND INIT\n";
     initFunct = (localInitPtrType)funcPtr;
     initFunct();
-  } 
+  } else {
+    funcPtr = dlsym(*libHandle, "localinit_");
+    if (funcPtr != NULL ) {
+      initFunct = (localInitPtrType)funcPtr;
+      initFunct();
+    }
+  }
   
   delete [] localLibName;
 
