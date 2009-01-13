@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2009-01-08 00:11:56 $
+// $Revision: 1.11 $
+// $Date: 2009-01-13 01:20:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.cpp,v $
                                                                         
 // Written: fmk
@@ -689,10 +689,8 @@ FEM_ObjectBrokerAllClasses::getNewCrdTransf2d(int classTag)
 		return new LinearCrdTransf2d();
 	case CRDTR_TAG_PDeltaCrdTransf2d:
 		return new PDeltaCrdTransf2d();
-#ifdef _COROTATIONAL
 	case CRDTR_TAG_CorotCrdTransf2d:
 		return new CorotCrdTransf2d();
-#endif
 	default:
 		opserr << "FEM_ObjectBrokerAllClasses::getCrdTransf2d - ";
 	    opserr << " - no CrdTransf2d type exists for class tag ";
@@ -710,10 +708,8 @@ FEM_ObjectBrokerAllClasses::getNewCrdTransf3d(int classTag)
 		return new LinearCrdTransf3d();
 	case CRDTR_TAG_PDeltaCrdTransf3d:
 		return new PDeltaCrdTransf3d();
-#ifdef _COROTATIONAL
 	case CRDTR_TAG_CorotCrdTransf3d:
 		return new CorotCrdTransf3d();
-#endif
 	default:
 		opserr << "FEM_ObjectBrokerAllClasses::getCrdTransf3d - ";
 	    opserr << " - no CrdTransf3d type exists for class tag ";
