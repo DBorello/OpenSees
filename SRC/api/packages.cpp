@@ -18,8 +18,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.10 $
-** $Date: 2009-01-13 20:17:37 $
+** $Revision: 1.11 $
+** $Date: 2009-01-13 21:47:04 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/packages.cpp,v $
                                                                         
 ** Written: fmk 
@@ -135,6 +135,11 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
    initPtr = (LocalInitPtrType)GetProcAddress((HMODULE)hLib,"localInit");
    if (initPtr !=0) {
      initPtr();
+   } else {
+	  initPtr = (LocalInitPtrType)GetProcAddress((HMODULE)hLib,"localinit_");
+	  if (initPtr !=0) {
+	    initPtr();
+	  }
    }
     
   } else // no lib exists
