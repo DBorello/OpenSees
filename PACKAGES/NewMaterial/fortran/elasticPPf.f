@@ -163,6 +163,6 @@ c     return error code
       implicit none
       integer::error;
 
-      error = OPS_Error('elasticPPC uniaxial material - ');
+      error = OPS_Error('elasticPPf uniaxial material - ');
       error = OPS_Error('Written by fmk UC Berkeley Copyright 2008');
       END SUBROUTINE localInit
