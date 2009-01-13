@@ -18,8 +18,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.6 $
-** $Date: 2009-01-10 17:45:55 $
+** $Revision: 1.7 $
+** $Date: 2009-01-13 01:19:48 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/packages.cpp,v $
                                                                         
 ** Written: fmk 
@@ -62,6 +62,7 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
   delete [] localLibName;
 
   if (hLib != NULL) {
+
     char mod[124];
     GetModuleFileName((HMODULE)hLib, (LPTSTR)mod, 124);
     
@@ -69,13 +70,21 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
     // Now look for function with funcName
     //
     
-    (*funcHandle) = (void *)GetProcAddress((HMODULE)hLib, funcName);
+    (*funcHandle) = (void *)GetProcAddress((HMODULE)hLib, funcName);    
     
+	if (*funcHandle == NULL) {
+      char *underscoreFunctionName = new char[strlen(funcName)+2];
+	  strcpy(underscoreFunctionName, funcName);
+      strcpy(&underscoreFunctionName[strlen(funcName)], "_");   
+      (*funcHandle) = (void *)GetProcAddress((HMODULE)hLib, underscoreFunctionName);
+	  delete [] underscoreFunctionName;
+	}
+
     
-    if (*funcHandle == NULL) {
+	if (*funcHandle == NULL) {
       FreeLibrary((HMODULE)hLib);
       return -2;
-    }	
+    } 
 
     //
     // we need to set the OpenSees pointer global variables if function there
@@ -91,7 +100,6 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
     typedef NDMaterial * (*OPS_GetNDMaterialPtrType)(int matTag);
     typedef int (_cdecl *OPS_GetNodeInfoPtrType)(int *, int *, double *);
     
-    //typedef void(_cdecl *setGlobalPointersFunction)(OPS_Stream *);
     typedef void (_cdecl *setGlobalPointersFunction)(OPS_Stream *,
 						     OPS_ErrorPtrType,
 						     OPS_GetIntInputPtrType,
@@ -109,21 +117,20 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
     
     // look for pointer function
     funcPtr = (setGlobalPointersFunction)GetProcAddress((HMODULE)hLib,"setGlobalPointers");
-    if (!funcPtr) {
+    if (funcPtr == 0) {
       FreeLibrary((HMODULE)hLib);
       return -2;
     }
-    
+  
     // invoke pointer function
     (funcPtr)(opserrPtr, OPS_Error, OPS_GetIntInput, OPS_GetDoubleInput,
 	      OPS_AllocateElement, OPS_AllocateMaterial, OPS_GetUniaxialMaterial, 
 	      OPS_GetNDMaterial, OPS_GetNodeCrd, OPS_GetNodeDisp, OPS_GetNodeVel,
 	      OPS_GetNodeAcc);
-   
 
    LocalInitPtrType initPtr;
 	initPtr = (LocalInitPtrType)GetProcAddress((HMODULE)hLib,"localInit");
-	if (!initPtr) {
+	if (initPtr !=0) {
       initPtr();
     }
     
@@ -161,6 +168,8 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
       strcpy(&underscoreFunctionName[1], funcName);    
       void *funcPtr = dlsym(*libHandle, underscoreFunctionName);
       delete [] underscoreFunctionName;
+
+
 
       if (funcPtr == NULL)  {
 	result =  -1;
