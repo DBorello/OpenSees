@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.47 $
-// $Date: 2008-12-04 22:39:29 $
+// $Revision: 1.48 $
+// $Date: 2009-01-13 21:47:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -614,7 +614,7 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
   else {
 
     //
-    // maybe element in a package
+    // maybe element already loaded as c++ class from a package
     //
 
     // try existing loaded packages
@@ -641,7 +641,32 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
 	eleCommands = eleCommands->next;
     }
 
-    // load new package
+   //
+    // maybe element in a routine, check existing ones or try loading new ones
+    //
+
+    char *eleType = new char[strlen(argv[1])+1];
+    strcpy(eleType, argv[1]);
+    eleObj *eleObject = OPS_GetElementType(eleType, strlen(eleType));
+
+    delete [] eleType;
+
+    if (eleObject != 0) {
+      
+      int result = Tcl_addWrapperElement(eleObject, clientData, interp,
+					 argc, argv,
+					 theTclDomain, theTclBuilder);
+
+      if (result != 0)
+		delete eleObject;
+	  else
+		return result;
+    }
+
+	//
+    // try loading new dynamic library containg a c+= class
+	//
+
     void *libHandle;
     void *(*funcPtr)(int argc, const char **argv);
     int eleNameLength = strlen(argv[1]);
@@ -678,29 +703,9 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
       }
     }
 
-    //
-    // maybe element in a routine
-    //
-
-    char *eleType = new char[strlen(argv[1])+1];
-    strcpy(eleType, argv[1]);
-    eleObj *eleObject = OPS_GetElementType(eleType, strlen(eleType));
-
-    delete [] eleType;
-
-    if (eleObject != 0) {
-      
-      int result = Tcl_addWrapperElement(eleObject, clientData, interp,
-					 argc, argv,
-					 theTclDomain, theTclBuilder);
-
-      if (result != 0)
-	delete eleObject;
-
-      return 0;
-    }
-
+ 
     // element type not recognized
+	opserr << "WARNING could not create element, unknown type:" << argv[1] << endln;
     return TCL_ERROR;
   }    
 }
