@@ -138,7 +138,7 @@ puts "eigen values at start of transient: [eigen 2]"
 
 
 # set some variables
-set tFinal [expr 20 * 0.01]
+set tFinal [expr 2000 * 0.01]
 set tCurrent [getTime]
 set ok 0
 
