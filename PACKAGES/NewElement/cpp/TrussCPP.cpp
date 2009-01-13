@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2009-01-10 00:33:54 $
+// $Revision: 1.6 $
+// $Date: 2009-01-13 01:14:20 $
 // $Source: /usr/local/cvs/OpenSees/PACKAGES/NewElement/cpp/TrussCPP.cpp,v $
                                                                         
 // Written: fmk 
@@ -56,7 +56,7 @@ Vector TrussCPP::trussR(4);
 
 #ifdef _USRDLL
 #include <windows.h>
-#define OPS_Export _declspec(dllexport)
+#define OPS_Export extern "C" _declspec(dllexport)
 #elif _MACOSX
 #define OPS_Export extern "C" __attribute__((visibility("default")))
 #else
