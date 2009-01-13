@@ -32,7 +32,7 @@ c     outside functions called
 c      integer OPS_GetIntInput, OPS_GetDoubleInput, OPS_AllocateMaterial
 
       IF (isw.eq.ISW_INIT) THEN
-         
+
 c     get the input data  - tag? E? eyp? 
 
          numData = 1
@@ -152,3 +152,17 @@ c     return error code
 
       END SUBROUTINE elasticPPf
 
+
+      SUBROUTINE localInit() 
+      
+!DEC$ IF DEFINED (_DLL)
+!DEC$ ATTRIBUTES DLLEXPORT :: LOCALINIT
+!DEC$ END IF
+
+      use materialAPI
+      implicit none
+      integer::error;
+
+      error = OPS_Error('elasticPPC uniaxial material - ');
+      error = OPS_Error('Written by fmk UC Berkeley Copyright 2008');
+      END SUBROUTINE localInit
