@@ -137,5 +137,12 @@ c         type(c_ptr) :: matTags
          end function OPS_InvokeMaterialDirectly2
       end interface
 
-      contains
+      PUBLIC OPS_Error
+      interface
+         function OPS_Error(msg)
+         integer :: OPS_Error
+         character, dimension(*) :: msg
+         end function OPS_Error
+      end interface
+
       end module elementAPI
