@@ -18,8 +18,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.7 $
-** $Date: 2009-01-13 01:19:48 $
+** $Revision: 1.8 $
+** $Date: 2009-01-13 06:26:09 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/packages.cpp,v $
                                                                         
 ** Written: fmk 
@@ -72,16 +72,16 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
     
     (*funcHandle) = (void *)GetProcAddress((HMODULE)hLib, funcName);    
     
-	if (*funcHandle == NULL) {
+    if (*funcHandle == NULL) {
       char *underscoreFunctionName = new char[strlen(funcName)+2];
-	  strcpy(underscoreFunctionName, funcName);
+      strcpy(underscoreFunctionName, funcName);
       strcpy(&underscoreFunctionName[strlen(funcName)], "_");   
       (*funcHandle) = (void *)GetProcAddress((HMODULE)hLib, underscoreFunctionName);
-	  delete [] underscoreFunctionName;
-	}
+      delete [] underscoreFunctionName;
+    }
 
     
-	if (*funcHandle == NULL) {
+    if (*funcHandle == NULL) {
       FreeLibrary((HMODULE)hLib);
       return -2;
     } 
@@ -129,10 +129,10 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
 	      OPS_GetNodeAcc);
 
    LocalInitPtrType initPtr;
-	initPtr = (LocalInitPtrType)GetProcAddress((HMODULE)hLib,"localInit");
-	if (initPtr !=0) {
-      initPtr();
-    }
+   initPtr = (LocalInitPtrType)GetProcAddress((HMODULE)hLib,"localInit");
+   if (initPtr !=0) {
+     initPtr();
+   }
     
   } else // no lib exists
     return -1;
@@ -155,43 +155,48 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
 
   *libHandle = dlopen (localLibName, RTLD_NOW);
   
-  if (*libHandle != NULL) {    
-
-    void *funcPtr = dlsym(*libHandle, funcName);
-
-    //    *funcHandle = dlsym(*libHandle, funcName);
-    error = dlerror();
-    if (funcPtr == NULL ) {
-
-      char *underscoreFunctionName = new char[strlen(funcName)+2];
-      strcpy(underscoreFunctionName, "_");
-      strcpy(&underscoreFunctionName[1], funcName);    
-      void *funcPtr = dlsym(*libHandle, underscoreFunctionName);
-      delete [] underscoreFunctionName;
-
-
-
-      if (funcPtr == NULL)  {
-	result =  -1;
-	dlclose(*libHandle);
-	delete [] localLibName;
-	return result;
-      }
-    } else
-      ;
-
-    *funcHandle = funcPtr;
-    
-    typedef int (*localInitPtrType)();
-    localInitPtrType initFunct;
-    funcPtr = dlsym(*libHandle, "localInit");
-    if (funcPtr != NULL ) {
-      initFunct = (localInitPtrType)funcPtr;
-      initFunct();
-    } 
-  } else {
-    result =  -1;
+  if (*libHandle == NULL)  {
+    delete [] localLibName;
+    return -1; // no lib exists
   }
+
+  void *funcPtr = dlsym(*libHandle, funcName);
+  
+  error = dlerror();
+  
+  //
+  // look for fortran procedure, trailing underscore
+  //
+  
+  if (funcPtr == NULL ) {
+    int funcNameLength  =strlen(funcName);
+    char *underscoreFunctionName = new char[funcNameLength+2];
+    strcpy(underscoreFunctionName, funcName);
+    strcpy(&underscoreFunctionName[funcNameLength], "_");   
+    strcpy(&underscoreFunctionName[funcNameLength+1], "");    
+    funcPtr = dlsym(*libHandle, underscoreFunctionName);
+    delete [] underscoreFunctionName;
+  } 
+  
+  if (funcPtr == NULL)  {
+    dlclose(*libHandle);
+    delete [] localLibName;
+    return -1;
+  }
+
+  opserr << "FOUND FUNCTION\n";
+  
+  *funcHandle = funcPtr;
+  
+  typedef int (*localInitPtrType)();
+  localInitPtrType initFunct;
+  funcPtr = dlsym(*libHandle, "localInit");
+  
+  if (funcPtr != NULL ) {
+    opserr << "FOUND INIT\n";
+    initFunct = (localInitPtrType)funcPtr;
+    initFunct();
+  } 
   
   delete [] localLibName;
 
