@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.5 $
-** $Date: 2008-12-18 22:48:22 $
+** $Revision: 1.6 $
+** $Date: 2009-01-13 07:34:13 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/elementAPI.h,v $
                                                                         
 ** Written: fmk 
@@ -81,7 +81,7 @@ struct eleObject {
 
 typedef struct eleObject eleObj;
 
-#define OPS_ERROR ops_error_
+#define OPS_Error ops_error_
 #define OPS_GetIntInput ops_getintinput_
 #define OPS_GetDoubleInput ops_getdoubleinput_
 #define OPS_AllocateMaterial ops_allocatematerial_
