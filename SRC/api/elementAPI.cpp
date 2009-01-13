@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.6 $
-** $Date: 2009-01-10 00:02:04 $
+** $Revision: 1.7 $
+** $Date: 2009-01-13 07:34:38 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/elementAPI.cpp,v $
                                                                         
 ** Written: fmk 
@@ -120,6 +120,7 @@ extern "C"
 int OPS_Error(char *errorMessage, int length)
 {
   opserr << errorMessage;
+  opserr << endln;
   return 0;
 }
 
@@ -158,7 +159,6 @@ int OPS_GetDoubleInput(int *numData, double *data)
 extern "C" 
 matObj *OPS_GetMaterial(int *matTag, int *matType)
 {
-  /*opserr << "matObj *OPS_GetMaterial(int *matTag): " << *matTag << " " << matType << endln; */
 
   if (*matType == OPS_UNIAXIAL_MATERIAL_TYPE) {
     UniaxialMaterial *theUniaxialMaterial = theModelBuilder->getUniaxialMaterial(*matTag);
@@ -607,7 +607,7 @@ extern "C" int
 OPS_InvokeMaterialDirectly(matObject **theMat, modelState *model, double *strain, double *stress, double *tang, int *isw)
 {
   int error =0;
-  fprintf(stderr,"invokeMaterialDirectly Address %d %d %d\n",theMat, sizeof(int), *theMat);
+  //  fprintf(stderr,"invokeMaterialDirectly Address %d %d %d\n",theMat, sizeof(int), *theMat);
   if (*theMat != 0)
     (*theMat)->matFunctPtr(*theMat, model, strain, tang, stress, isw, &error);   
   else
@@ -622,12 +622,11 @@ extern "C" int
 OPS_InvokeMaterialDirectly2(matObject *theMat, modelState *model, double *strain, double *stress, double *tang, int *isw)
 {
   int error =0;
-  fprintf(stderr,"invokeMaterialDirectly Address %d %d\n",theMat, sizeof(int));
+  //  fprintf(stderr,"invokeMaterialDirectly Address %d %d\n",theMat, sizeof(int));
   if (theMat != 0)
     theMat->matFunctPtr(theMat, model, strain, tang, stress, isw, &error);   
   else
     error = -1;
-
 
   return error;
 }
