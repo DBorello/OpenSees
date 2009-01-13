@@ -31,7 +31,7 @@
 #define _SnoptWrapper
 
 #include <snopt.h>
-
+#include <stdlib.h>
 
 class SnoptWrapper {
 
