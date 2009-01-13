@@ -32,8 +32,8 @@ c      integer (c_int), target :: matTags(2);
       integer numData, err, matType
 
 c     outside functions called
-      integer OPS_GetIntInput, OPS_GetDoubleInput, OPS_InvokeMaterial
-      integer OPS_GetNodeCrd, OPS_AllocateElement, OPS_GetNodeDisp
+c      integer OPS_GetIntInput, OPS_GetDoubleInput, OPS_InvokeMaterial
+c      integer OPS_GetNodeCrd, OPS_AllocateElement, OPS_GetNodeDisp
 
       IF (isw.eq.ISW_INIT) THEN
          
@@ -60,7 +60,7 @@ c     Allocate the element state
          eleObj%ndof = 4
          eleObj%nparam = 4
          eleObj%nstate = 0  
-         eleObj%nmat = 2
+         eleObj%nmat = 1
 
          matTags(1) = matTag;
          matType = OPS_UNIAXIAL_MATERIAL_TYPE;
@@ -103,8 +103,6 @@ c            OPS_Error("Warning - truss element has zero length\n", 1);
 
          theNodes(1) = nd1;
          theNodes(2) = nd2;
-
-         write(*,*) "nd1,nd2,A,L,cs,sn",tag, nd1, nd2, A, L, cs, sn
 
       ELSE
 
@@ -163,8 +161,6 @@ c            i=OPS_InvokeMaterial(eleObj, i, modl, strn, strs, tng, isw)
             force = A*strs(1);
             k = A*tng(1)/L;
 
-c            write(*,*) "A,L,cs,sn,K,force",A, L, cs, sn, k, force
-
             do 20 i =1,4
                resid(i) = force * tran(i);
                do 30 j = 1,4
@@ -181,3 +177,17 @@ c     return error code
 
       END SUBROUTINE trussf
 
+
+      SUBROUTINE localInit() 
+      
+!DEC$ IF DEFINED (_DLL)
+!DEC$ ATTRIBUTES DLLEXPORT :: LOCALINIT
+!DEC$ END IF
+
+      use elementAPI
+      implicit none
+      integer::error;
+
+      error = OPS_Error('trussF element - ');
+      error = OPS_Error('Written by fmk UC Berkeley Copyright 2008');
+      END SUBROUTINE localInit
