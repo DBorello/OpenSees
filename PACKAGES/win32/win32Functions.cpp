@@ -34,6 +34,7 @@ typedef int (*OPS_AllocateMaterialPtrType)(matObj *);
 typedef UniaxialMaterial *(*OPS_GetUniaxialMaterialPtrType)(int matTag);
 typedef NDMaterial * (*OPS_GetNDMaterialPtrType)(int matTag);
 typedef int (*OPS_GetNodeInfoPtrType)(int *, int *, double *);
+typedef int (*OPS_InvokeMaterialDirectlyPtrType)(matObject **, modelState *, double *, double *, double *, int *);
 
 //int    OPS_InvokeMaterial(struct eleObj *, int *,modelState *, double *, double *, double *, int *);
 
@@ -46,6 +47,9 @@ OPS_GetUniaxialMaterialPtrType OPS_GetUniaxialMaterialPtr = 0;
 OPS_GetNDMaterialPtrType OPS_GetNDMaterialPtr = 0;
 OPS_GetNodeInfoPtrType OPS_GetNodeCrdPtr = 0;
 OPS_GetNodeInfoPtrType OPS_GetNodeDispPtr = 0;
+OPS_GetNodeInfoPtrType OPS_GetNodeVelPtr = 0;
+OPS_GetNodeInfoPtrType OPS_GetNodeAccelPtr = 0;
+OPS_InvokeMaterialDirectlyPtrType OPS_InvokeMaterialDirectlyPtr =0;
 
 extern "C" DllExport
 void setGlobalPointers(OPS_Stream *theErrorStreamPtr,
@@ -56,8 +60,11 @@ void setGlobalPointers(OPS_Stream *theErrorStreamPtr,
 				OPS_AllocateMaterialPtrType allocateMaterialFunct,
 				OPS_GetUniaxialMaterialPtrType OPS_GetUniaxialMaterialFunct,
 				OPS_GetNDMaterialPtrType OPS_GetNDMaterialFunct,
+				OPS_InvokeMaterialDirectlyPtrType OPS_InvokeMaterialDirectlyFunct,
 				OPS_GetNodeInfoPtrType OPS_GetNodeCrdFunct,
-				OPS_GetNodeInfoPtrType OPS_GetNodeDispFunct)
+				OPS_GetNodeInfoPtrType OPS_GetNodeDispFunct,
+				OPS_GetNodeInfoPtrType OPS_GetNodeVelFunct,
+				OPS_GetNodeInfoPtrType OPS_GetNodeAccelFunct)	
 {
 	opserrPtr = theErrorStreamPtr;
 	OPS_ErrorPtr = errorFunct;
@@ -69,6 +76,9 @@ void setGlobalPointers(OPS_Stream *theErrorStreamPtr,
 	OPS_GetNDMaterialPtr = OPS_GetNDMaterialFunct;
 	OPS_GetNodeCrdPtr = OPS_GetNodeCrdFunct;
 	OPS_GetNodeDispPtr = OPS_GetNodeDispFunct;
+	OPS_GetNodeVelPtr = OPS_GetNodeVelFunct;
+	OPS_GetNodeAccelPtr = OPS_GetNodeAccelFunct;
+	OPS_InvokeMaterialDirectlyPtr = OPS_InvokeMaterialDirectlyFunct;
 }
 
 
@@ -108,4 +118,16 @@ extern "C" int OPS_GetNodeCrd(int *nodeTag, int *sizeData, double *data)
 extern "C" int OPS_GetNodeDisp(int *nodeTag, int *sizeData, double *data)
 {
 	return (*OPS_GetNodeDispPtr)(nodeTag, sizeData, data);
+}
+extern "C" int OPS_GetNodeVel(int *nodeTag, int *sizeData, double *data)
+{
+	return (*OPS_GetNodeVelPtr)(nodeTag, sizeData, data);
+}
+extern "C" int OPS_GetNodeAccel(int *nodeTag, int *sizeData, double *data)
+{
+	return (*OPS_GetNodeAccelPtr)(nodeTag, sizeData, data);
+}
+extern "C" int        
+OPS_InvokeMaterialDirectly(matObject **theMat, modelState *model, double *strain, double *stress, double *tang, int *isw) {
+	return(*OPS_InvokeMaterialDirectlyPtr)(theMat, model, strain, stress, tang, isw);
 }
