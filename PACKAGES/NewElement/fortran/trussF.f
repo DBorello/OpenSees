@@ -142,9 +142,7 @@ c            OPS_Error("Warning - truss element has zero length\n", 1);
             nd2 = theNodes(2);
 
             numDOF = 2;
-            write(*,*) nd1
             err = OPS_GetNodeDisp(nd1, numDOF, d1);
-            write(*,*) nd2
             err = OPS_GetNodeDisp(nd2, numDOF, d2);    
 
             tran(1) = -cs;
@@ -161,11 +159,8 @@ c            OPS_Error("Warning - truss element has zero length\n", 1);
 
 c            i = 0
 c            i=OPS_InvokeMaterial(eleObj, i, modl, strn, strs, tng, isw)
-      write(*,*) 'HERE'
             j=OPS_InvokeMaterialDirectly(theCMatPtr, modl, strn, strs,
      +       tng, isw)
-      
-      write(*,*) 'THERE'
 
             force = A*strs(1);
             k = A*tng(1)/L;
@@ -187,7 +182,7 @@ c     return error code
       END SUBROUTINE trussf
 
 
-         SUBROUTINE LOCALINIT() 
+      SUBROUTINE localinit() 
       
 !DEC$ IF DEFINED (_DLL)
 !DEC$ ATTRIBUTES DLLEXPORT :: LOCALINIT
