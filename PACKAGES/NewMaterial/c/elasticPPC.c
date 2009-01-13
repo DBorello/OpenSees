@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.7 $
-** $Date: 2009-01-10 00:35:41 $
+** $Revision: 1.8 $
+** $Date: 2009-01-13 01:00:52 $
 ** $Source: /usr/local/cvs/OpenSees/PACKAGES/NewMaterial/c/elasticPPC.c,v $
                                                                         
 ** Written: fmk 
@@ -163,7 +163,7 @@ elasticPPC (matObj *thisObj, modelState *model, double *strain, double *tang, do
 }
 
 
-extern "C" OPS_Export void
+OPS_Export void
 localInit() 
 {
   OPS_Error("elasticPPC uniaxial material - Written by fmk UC Berkeley Copyright 2008 - Use at your Own Peril\n", 1);
