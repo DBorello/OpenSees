@@ -18,8 +18,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.9 $
-** $Date: 2009-01-13 07:33:31 $
+** $Revision: 1.10 $
+** $Date: 2009-01-13 20:17:37 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/packages.cpp,v $
                                                                         
 ** Written: fmk 
@@ -99,6 +99,8 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
     typedef UniaxialMaterial *(*OPS_GetUniaxialMaterialPtrType)(int matTag);
     typedef NDMaterial * (*OPS_GetNDMaterialPtrType)(int matTag);
     typedef int (_cdecl *OPS_GetNodeInfoPtrType)(int *, int *, double *);
+	typedef int (_cdecl *OPS_InvokeMaterialDirectlyPtrType)(matObject **, modelState *, double *, double *, double *, int *);
+
     
     typedef void (_cdecl *setGlobalPointersFunction)(OPS_Stream *,
 						     OPS_ErrorPtrType,
@@ -108,6 +110,7 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
 						     OPS_AllocateMaterialPtrType,
 						     OPS_GetUniaxialMaterialPtrType,
 						     OPS_GetNDMaterialPtrType,
+							 OPS_InvokeMaterialDirectlyPtrType,
 						     OPS_GetNodeInfoPtrType,
 						     OPS_GetNodeInfoPtrType,
 						     OPS_GetNodeInfoPtrType,
@@ -125,8 +128,8 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
     // invoke pointer function
     (funcPtr)(opserrPtr, OPS_Error, OPS_GetIntInput, OPS_GetDoubleInput,
 	      OPS_AllocateElement, OPS_AllocateMaterial, OPS_GetUniaxialMaterial, 
-	      OPS_GetNDMaterial, OPS_GetNodeCrd, OPS_GetNodeDisp, OPS_GetNodeVel,
-	      OPS_GetNodeAcc);
+	      OPS_GetNDMaterial, OPS_InvokeMaterialDirectly, OPS_GetNodeCrd, 
+		  OPS_GetNodeDisp, OPS_GetNodeVel, OPS_GetNodeAcc);
 
    LocalInitPtrType initPtr;
    initPtr = (LocalInitPtrType)GetProcAddress((HMODULE)hLib,"localInit");
