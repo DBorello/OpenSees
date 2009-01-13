@@ -4,7 +4,7 @@ OS_FLAG ?= -D_LINUX
 
 ifeq ($(OS_FLAG), -D_LINUX)
 
-LIBRARY         = elasticppf_.so
+LIBRARY         = elasticppf.so
 
 all: $(LIBRARY)
 
