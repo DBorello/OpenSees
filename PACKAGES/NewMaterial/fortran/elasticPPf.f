@@ -153,7 +153,7 @@ c     return error code
       END SUBROUTINE elasticPPf
 
 
-      SUBROUTINE localInit() 
+      SUBROUTINE LOCALINIT() 
       
 !DEC$ IF DEFINED (_DLL)
 !DEC$ ATTRIBUTES DLLEXPORT :: LOCALINIT
@@ -162,7 +162,7 @@ c     return error code
       use materialAPI
       implicit none
       integer::error;
-
-      error = OPS_Error('elasticPPf uniaxial material - ');
-      error = OPS_Error('Written by fmk UC Berkeley Copyright 2008');
+      character *60:: msg;
+      msg = 'elasticPPf - Written by fmk UC Berkeley Copyright 2008'
+      error = OPS_Error(msg);
       END SUBROUTINE localInit
