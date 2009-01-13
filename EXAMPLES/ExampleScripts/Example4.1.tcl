@@ -285,9 +285,13 @@ recorder Node -file Node41.$pid.out -time -node 2 3 -dof 1 disp
 
 # Source in some commands to display the model
 # comment out one of lines
-set displayMode "displayON"
-#set displayMode "displayOFF"
+#set displayMode "displayON"
+set displayMode "displayOFF"
 
+if {$displayMode == "displayON"} {  
+    # a window to plot the nodal displacements versus load for node 3  
+    recorder plot Node41.out Node_3_Xdisp 10 340 300 300 -columns 3 1 -dT 0.1  
+}
 
 # ------------------------------
 # End of recorder generation
@@ -305,9 +309,9 @@ integrator LoadControl 1.0 4 0.02 2.0
 
 # Perform the pushover analysis
 # Set some parameters
-set maxU -1.0;	        # Max displacement
+set maxU 10.0;	        # Max displacement
 set controlDisp 0.0;
-set ok 1;
+set ok 0;
 analyze 1
 while {$controlDisp < $maxU && $ok == 0} {
     set ok [analyze 1]
@@ -327,9 +331,6 @@ if {$ok != 0} {
 } else {
     puts "Pushover analysis completed SUCCESSFULLY"
 }
-
-
-
 
 
 
