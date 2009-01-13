@@ -53,5 +53,13 @@ c      end interface
          end function OPS_AllocateMaterial
       end interface
 
+      PUBLIC OPS_Error
+      interface
+         function OPS_Error(msg)
+         integer :: OPS_Error
+         character, dimension(*) :: msg
+         end function OPS_Error
+      end interface
+
 c     contains
       end module materialAPI
