@@ -16,7 +16,7 @@ $(LIBRARY): $(OBJS)
 
 else
 
-LIBRARY         = elasticPPf_.dylib
+LIBRARY         = elasticPPf.dylib
 
 OUTSIDE_OBJS = $(FE)/../PACKAGES/dynamicLoadFunctions.o
 
