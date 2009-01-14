@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2008-11-25 23:58:58 $
+// $Revision: 1.26 $
+// $Date: 2009-01-14 17:24:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
                                                                         
@@ -35,8 +35,7 @@
 
 #include <OPS_Globals.h>
 
-int
-g3AppInit(Tcl_Interp *interp);
+int OpenSeesAppInit(Tcl_Interp *interp);
 
 int 
 OPS_SetObjCmd(ClientData clientData, Tcl_Interp *interp, int argc, Tcl_Obj * const *argv);

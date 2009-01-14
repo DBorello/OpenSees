@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.138 $
-// $Date: 2008-12-01 19:50:20 $
+// $Revision: 1.139 $
+// $Date: 2009-01-14 17:24:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -544,7 +544,7 @@ int Tcl_InterpOpenSeesObjCmd(ClientData clientData,  Tcl_Interp *interp, int obj
   case OPT_CREATE: {
     TCL_Char *theInterpreterName = Tcl_GetStringResult(interp);
     Tcl_Interp *slaveInterp = Tcl_GetSlave(interp, theInterpreterName);
-    ok = g3AppInit(slaveInterp);
+    ok = OpenSeesAppInit(slaveInterp);
     return ok;
     break;
   }
@@ -556,7 +556,7 @@ int Tcl_InterpOpenSeesObjCmd(ClientData clientData,  Tcl_Interp *interp, int obj
 }
 
 
-int g3AppInit(Tcl_Interp *interp) {
+int OpenSeesAppInit(Tcl_Interp *interp) {
 
 
 #ifndef _LINUX  
