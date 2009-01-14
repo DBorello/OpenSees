@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.139 $
-// $Date: 2009-01-14 17:24:33 $
+// $Revision: 1.140 $
+// $Date: 2009-01-14 23:44:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -303,6 +303,8 @@ int wipeReliability(ClientData, Tcl_Interp *, int, TCL_Char **);
 const char * getInterpPWD(Tcl_Interp *interp);
 
 #include <XmlFileStream.h>
+
+/*
 #include <SimulationInformation.h>
 extern SimulationInformation simulationInfo;
 extern char *simulationInfoOutputFilename;
@@ -310,6 +312,7 @@ extern char *neesCentralProjID;
 extern char *neesCentralExpID;
 extern char *neesCentralUser;
 extern char *neesCentralPasswd;
+*/
 
 #include <Response.h>
 
@@ -403,6 +406,23 @@ extern int np;
 extern MachineBroker *theMachineBroker;
 #endif
 
+typedef struct parameterValues {
+  char *value;
+  struct parameterValues *next;
+} OpenSeesTcl_ParameterValues;
+
+typedef struct parameter {
+  char *name;
+  OpenSeesTcl_ParameterValues *values;
+  struct parameter *next;
+} OpenSeesTcl_Parameter;
+
+
+static OpenSeesTcl_Parameter *theParameters = 0;
+static OpenSeesTcl_Parameter *endParameters = 0;
+static int numParam = 0;
+static char **paramNames =0;
+static char **paramValues =0;
 
 static AnalysisModel *theAnalysisModel =0;
 static EquiSolnAlgo *theAlgorithm =0;
@@ -440,6 +460,17 @@ static EigenAnalysis *theEigenAnalysis = 0;
 static char *resDataPtr = 0;
 static int resDataSize = 0;
 static Timer *theTimer = 0;
+
+#include <FileStream.h>
+#include <SimulationInformation.h>
+SimulationInformation simulationInfo;
+
+char *simulationInfoOutputFilename = 0;
+char *neesCentralProjID =0;
+char * neesCentralExpID =0;
+char *neesCentralUser =0;
+char *neesCentralPasswd =0;
+
 
 FE_Datastore *theDatabase  =0;
 FEM_ObjectBrokerAllClasses theBroker;
@@ -558,30 +589,37 @@ int Tcl_InterpOpenSeesObjCmd(ClientData clientData,  Tcl_Interp *interp, int obj
 
 int OpenSeesAppInit(Tcl_Interp *interp) {
 
-
+    
 #ifndef _LINUX  
     opserr.setFloatField(SCIENTIFIC);
     opserr.setFloatField(FIXEDD);
 #endif
+	
     //Tcl_CreateObjCommand(interp, "interp", Tcl_InterpOpenSeesObjCmd, NULL, NULL);
     Tcl_CreateObjCommand(interp, "pset", &OPS_SetObjCmd,
 			 (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
-    Tcl_CreateCommand(interp, "source", &OPS_SourceCmd,
-		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
+	
+	Tcl_CreateObjCommand(interp, "source", &OPS_SourceCmd,
+			 (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
+
     Tcl_CreateCommand(interp, "wipe", &wipeModel,
-		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);    
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
+
     Tcl_CreateCommand(interp, "wipeAnalysis", &wipeAnalysis,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);    
     Tcl_CreateCommand(interp, "reset", &resetModel,
-		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);        
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
+	
     Tcl_CreateCommand(interp, "initialize", &initializeAnalysis,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);        
     Tcl_CreateCommand(interp, "loadConst", &setLoadConst,
-		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);            
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
+
     Tcl_CreateCommand(interp, "setTime", &setTime,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);     
     Tcl_CreateCommand(interp, "getTime", &getTime,
-		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);     
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+		
     Tcl_CreateCommand(interp, "build", &buildModel,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
     Tcl_CreateCommand(interp, "analyze", &analyzeModel, 
@@ -600,6 +638,7 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
     Tcl_CreateCommand(interp, "test", &specifyCTest, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);    
+
     Tcl_CreateCommand(interp, "integrator", &specifyIntegrator, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
     Tcl_CreateCommand(interp, "recorder", &addRecorder, 
@@ -614,7 +653,7 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "remove", &removeObject, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
-    Tcl_CreateCommand(interp, "eleForce", &eleForce, 
+			  Tcl_CreateCommand(interp, "eleForce", &eleForce, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "eleResponse", &eleResponse, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
@@ -634,7 +673,9 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
     Tcl_CreateCommand(interp, "eleNodes", &eleNodes, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);            
-    Tcl_CreateCommand(interp, "nodeBounds", &nodeBounds, 
+
+
+			  Tcl_CreateCommand(interp, "nodeBounds", &nodeBounds, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "start", &startTimer, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
@@ -752,7 +793,7 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
 #else
     theTclVideoPlayer = 0;
 #endif
-
+   
     return myCommands(interp);
 }
 
@@ -789,19 +830,67 @@ OPS_SetObjCmd(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj * con
     return 0;
 }
 
+int
+OPS_SourceCmd(
+    ClientData dummy,		/* Not used. */
+    Tcl_Interp *interp,		/* Current interpreter. */
+    int objc,			/* Number of arguments. */
+    Tcl_Obj *CONST objv[])	/* Argument objects. */
+{
+    CONST char *encodingName = NULL;
+    Tcl_Obj *fileName;
+
+    if (objc != 2 && objc !=4) {
+	Tcl_WrongNumArgs(interp, 1, objv, "?-encoding name? fileName");
+	return TCL_ERROR;
+    }
+
+    fileName = objv[objc-1];
+
+    if (objc == 4) {
+	static CONST char *options[] = {
+	    "-encoding", NULL
+	};
+	int index;
+
+	if (TCL_ERROR == Tcl_GetIndexFromObj(interp, objv[1], options,
+		"option", TCL_EXACT, &index)) {
+	    return TCL_ERROR;
+	}
+	encodingName = Tcl_GetString(objv[2]);
+    }
+
+    const char *pwd = getInterpPWD(interp);
+	const char *fileN = Tcl_GetString(fileName);
+
+    simulationInfo.addInputFile(fileN, pwd);
+
+#ifndef _TCL85
+       ok = Tcl_EvalFile(interp, argv[1]);
+#else
+    return Tcl_FSEvalFileEx(interp, fileName, encodingName);
+#endif
+}
+/*
 int 
 OPS_SourceCmd(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
+
+  CONST char *encodingName = NULL;
+
   int ok = TCL_OK;
   if (argc > 1) {
     const char *pwd = getInterpPWD(interp);
     simulationInfo.addInputFile(argv[1], pwd);
-
+#ifndef _TCL85
     ok = Tcl_EvalFile(interp, argv[1]);
+#else
+   ok = Tcl_FSEvalFileEx(interp, argv[1], encodingName);
+#endif
   }
   return ok;
 }
-
+*/
 
 
 #ifdef _RELIABILITY
@@ -6946,3 +7035,177 @@ numIter(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 
   return TCL_OK;
 }
+
+extern "C" int OpenSeesParseArgv(int argc, char **argv)
+{
+   if (argc > 1) {
+	int currentArg = 1;
+	while (currentArg < argc && argv[currentArg] != NULL) {
+
+	  if ((strcmp(argv[currentArg], "-par") == 0) || (strcmp(argv[currentArg], "-Par") == 0)) {
+	    
+	    if (argc > (currentArg+2)) {
+	      
+	      char *parName = argv[currentArg+1];
+	      char *parValue = argv[currentArg+2];
+	      
+	      // add a OpenSeesTcl_Parameter to end of list of parameters
+	      OpenSeesTcl_Parameter *nextParam = new OpenSeesTcl_Parameter;
+	      nextParam->name = new char [strlen(parName)+1];
+	      strcpy(nextParam->name, parName);
+	      nextParam->values = 0;
+	      
+	      if (theParameters == 0)
+		theParameters = nextParam;
+	      if (endParameters != 0)
+		endParameters->next = nextParam;
+	      nextParam->next = 0;
+	      endParameters = nextParam;
+	      
+	      // now open par values files to create the values
+	      char nextLine[1000];
+	      FILE *valueFP = fopen(parValue,"r");
+	      if (valueFP != 0) {
+		OpenSeesTcl_ParameterValues *endValues = 0;
+		
+		while (fscanf(valueFP, "%s", nextLine) != EOF) {
+		  
+		  OpenSeesTcl_ParameterValues *nextValue = new OpenSeesTcl_ParameterValues;
+		  nextValue->value = new char [strlen(nextLine)+1];
+		  strcpy(nextValue->value, nextLine);
+		  
+		  if (nextParam->values == 0) {
+		    nextParam->values = nextValue;
+		  }
+		if (endValues != 0)
+		  endValues->next = nextValue;
+		endValues = nextValue;
+		nextValue->next = 0;	      
+		}
+		fclose(valueFP);
+	      } else {
+		
+		OpenSeesTcl_ParameterValues *nextValue = new OpenSeesTcl_ParameterValues;		
+		nextValue->value = new char [strlen(parValue)+1];
+		
+		strcpy(nextValue->value, parValue);
+		
+		nextParam->values = nextValue;
+		nextValue->next = 0;
+		
+	      }
+	      numParam++;
+	    }
+	    currentArg += 3;
+	  } else if ((strcmp(argv[currentArg], "-info") == 0) || (strcmp(argv[currentArg], "-INFO") == 0)) {
+	    if (argc > (currentArg+1)) {
+	      simulationInfoOutputFilename = argv[currentArg+1];	    
+	    }			   
+	    currentArg+=2;
+	  } else if ((strcmp(argv[currentArg], "-upload") == 0) || (strcmp(argv[currentArg], "-UPLOAD") == 0)) {
+	    bool more = true;
+	    currentArg++;
+	    while (more == true && currentArg < argc) {
+	      
+	      if (strcmp(argv[currentArg],"-user") == 0) {
+		neesCentralUser = argv[currentArg+1];
+		currentArg += 2;
+
+	      } else if (strcmp(argv[currentArg],"-pass") == 0) {
+		neesCentralPasswd = argv[currentArg+1];
+		currentArg += 2;
+	      } else if (strcmp(argv[currentArg],"-projID") == 0) {
+		neesCentralProjID = argv[currentArg+1];
+		currentArg += 2;
+		
+	      } else if (strcmp(argv[currentArg],"-expID") == 0) {
+		neesCentralExpID = argv[currentArg+1];
+		currentArg += 2;
+    
+	      } else if (strcmp(argv[currentArg],"-title") == 0) {
+		simulationInfo.setTitle(argv[currentArg+1]);	
+		currentArg += 2;
+      
+	      } else if (strcmp(argv[currentArg],"-description") == 0) {
+		simulationInfo.setDescription(argv[currentArg+1]);	
+		currentArg += 2;      
+	      } else
+		more = false;
+	    }
+	  } else 
+	    currentArg++;
+	}
+   }
+   if (numParam != 0) {
+     paramNames = new char *[numParam];
+	 paramValues = new char *[numParam];
+   }
+	return numParam;
+}
+
+
+extern "C" int
+EvalFileWithParameters(Tcl_Interp *interp, 
+				char *tclStartupFileScript, 
+				OpenSeesTcl_Parameter *theInputParameters,  
+				int currentParam, 
+				int rank, 
+				int np)
+{
+  if (theInputParameters == 0)
+	  theInputParameters = theParameters;
+
+  if (currentParam < numParam) {
+    OpenSeesTcl_Parameter *theCurrentParam = theInputParameters;
+    OpenSeesTcl_Parameter *theNextParam = theParameters->next;
+    char *paramName = theCurrentParam->name;
+    paramNames[currentParam] = paramName;
+
+    OpenSeesTcl_ParameterValues *theValue = theCurrentParam->values;
+    int nextParam = currentParam+1;
+    while (theValue != 0) {
+      char *paramValue = theValue->value;
+      paramValues[currentParam] = paramValue;
+      EvalFileWithParameters(interp, 
+			     tclStartupFileScript, 
+			     theNextParam, 
+			     nextParam, 
+			     rank, 
+			     np);
+
+      theValue=theValue->next;
+    } 
+  } else {
+    
+    simulationInfo.start();
+    static int count = 0;
+    
+    if ((count % np) == rank) {
+      Tcl_Eval(interp, "wipe");
+     
+	  
+      for (int i=0; i<numParam; i++) {
+		  
+	Tcl_SetVar(interp, paramNames[i], paramValues[i], TCL_GLOBAL_ONLY);	
+    
+	simulationInfo.addParameter(paramNames[i], paramValues[i]); 
+     }
+
+      count++;
+
+      const char *pwd = getInterpPWD(interp);
+      simulationInfo.addInputFile(tclStartupFileScript, pwd);
+
+      int ok = Tcl_EvalFile(interp, tclStartupFileScript);
+
+      simulationInfo.end();
+      
+      return ok;
+    }
+    else
+      count++;
+  }
+
+  return 0;
+}
+

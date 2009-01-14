@@ -10,11 +10,13 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain85.cpp,v 1.1 2009-01-14 17:25:17 fmk Exp $
+ * RCS: @(#) $Id: tclMain85.cpp,v 1.2 2009-01-14 23:44:42 fmk Exp $
  */
 
 
-#define OPS_VERSION "2.1.0"
+
+
+#include <OPS_Globals.h>
 
 #include <tcl.h>
 #include <tclWinPort.h>
@@ -25,6 +27,15 @@
 #define TclNewStringObj(objPtr, s, len) (objPtr) = Tcl_NewStringObj((s), (len))
 #define TclNewLiteralStringObj(objPtr, sLiteral) TclNewStringObj((objPtr), (sLiteral), (int)(sizeof(sLiteral "") -1)) 
 extern "C" int TclObjCommandComplete(Tcl_Obj *);
+
+
+extern "C" int OpenSeesParseArgv(int argc, char **argv);
+extern "C" int EvalFileWithParameters(Tcl_Interp *interp, 
+				                      char *tclStartupFileScript, 
+				                      void *theInputParameters,  
+				                      int currentParam, 
+				                      int rank, 
+				                      int np);
 
 /*
  * The default prompt used when the user has not overridden it.
@@ -352,6 +363,8 @@ Tcl_Main(
     Tcl_Interp *interp;
     Tcl_DString appName;
 
+	int numParam = 0;
+
 #ifdef _PARALLEL_INTERPRETERS
     if (theMachineBroker->getPID() == 0) {
 #endif
@@ -373,6 +386,8 @@ Tcl_Main(
 
     interp = Tcl_CreateInterp();
     Tcl_InitMemory(interp);
+
+	numParam = OpenSeesParseArgv(argc, argv);
 
     /*
      * If the application has not already set a startup script, parse the
@@ -463,7 +478,10 @@ Tcl_Main(
 
     path = Tcl_GetStartupScript(&encodingName);
     if (path != NULL) {
-	code = Tcl_FSEvalFileEx(interp, path, encodingName);
+		if (numParam == 0)
+	      code = Tcl_FSEvalFileEx(interp, path, encodingName);
+		else
+		  code = EvalFileWithParameters(interp, Tcl_GetStringFromObj(path, &length), 0, 0, 0, 1);
 	if (code != TCL_OK) {
 	    errChannel = Tcl_GetStdChannel(TCL_STDERR);
 	    if (errChannel) {
