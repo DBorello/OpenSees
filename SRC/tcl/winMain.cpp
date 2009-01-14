@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: winMain.cpp,v 1.4 2009-01-09 00:02:20 fmk Exp $
+ * RCS: @(#) $Id: winMain.cpp,v 1.5 2009-01-14 23:42:51 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -224,7 +224,7 @@ Tcl_AppInit(Tcl_Interp *interp)
 #endif /* TK_TEST */
 
 
-    if (g3AppInit(interp) < 0)
+    if (OpenSeesAppInit(interp) < 0)
 		return TCL_ERROR;
 
 
