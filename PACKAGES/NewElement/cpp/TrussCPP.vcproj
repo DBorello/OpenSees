@@ -141,9 +141,6 @@
 			<File
 				RelativePath="..\..\..\SRC\nDarray\nDarray.cpp">
 			</File>
-			<File
-				RelativePath="..\..\win32\win32Functions.cpp">
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"

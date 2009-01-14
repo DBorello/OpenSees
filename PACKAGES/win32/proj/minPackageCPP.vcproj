@@ -22,7 +22,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\src\domain\domain;..\..\..\src\domain\node;..\..\..\src\recorder\response;..\..\..\src\element;..\..\..\src\nDarray;..\..\..\src\matrix;..\..\..\src\tagged;..\..\..\src\domain\component;..\..\..\src\material;..\..\..\src\material\uniaxial;..\..\..\src\actor\actor;..\..\..\src\handler;..\..\..\src;..\..\..\src\utility"
+				AdditionalIncludeDirectories="..\..\..\src\api;..\..\..\src\domain\domain;..\..\..\src\domain\node;..\..\..\src\recorder\response;..\..\..\src\element;..\..\..\src\nDarray;..\..\..\src\matrix;..\..\..\src\tagged;..\..\..\src\domain\component;..\..\..\src\material;..\..\..\src\material\uniaxial;..\..\..\src\actor\actor;..\..\..\src\handler;..\..\..\src;..\..\..\src\utility"
 				PreprocessorDefinitions="_DLL;_DEBUG;WIN32;_LIB;_WGL"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
@@ -68,7 +68,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\src\domain\domain;..\..\..\src\domain\node;..\..\..\src\recorder\response;..\..\..\src\element;..\..\..\src\nDarray;..\..\..\src\matrix;..\..\..\src\tagged;..\..\..\src\domain\component;..\..\..\src\material;..\..\..\src\material\uniaxial;..\..\..\src\actor\actor;..\..\..\src\handler;..\..\..\src;..\..\..\src\utility"
+				AdditionalIncludeDirectories="..\..\..\src\api;..\..\..\src\domain\domain;..\..\..\src\domain\node;..\..\..\src\recorder\response;..\..\..\src\element;..\..\..\src\nDarray;..\..\..\src\matrix;..\..\..\src\tagged;..\..\..\src\domain\component;..\..\..\src\material;..\..\..\src\material\uniaxial;..\..\..\src\actor\actor;..\..\..\src\handler;..\..\..\src;..\..\..\src\utility"
 				PreprocessorDefinitions="_DLL;NDEBUG;WIN32;_LIB;_WGL"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
@@ -172,6 +172,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\nDarray\nDarray.cpp">
+			</File>
+			<File
+				RelativePath="..\win32Functions.cpp">
 			</File>
 		</Filter>
 		<Filter

@@ -125,9 +125,6 @@
 			<File
 				RelativePath="elasticPPC.c">
 			</File>
-			<File
-				RelativePath="..\..\win32\win32Functions.cpp">
-			</File>
 			<Filter
 				Name="Header Files"
 				Filter="h;hpp;hxx;hm;inl;inc">
