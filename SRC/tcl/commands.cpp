@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.140 $
-// $Date: 2009-01-14 23:44:20 $
+// $Revision: 1.141 $
+// $Date: 2009-01-15 00:12:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -839,7 +839,7 @@ OPS_SourceCmd(
 {
     CONST char *encodingName = NULL;
     Tcl_Obj *fileName;
-
+    
     if (objc != 2 && objc !=4) {
 	Tcl_WrongNumArgs(interp, 1, objv, "?-encoding name? fileName");
 	return TCL_ERROR;
@@ -866,7 +866,7 @@ OPS_SourceCmd(
     simulationInfo.addInputFile(fileN, pwd);
 
 #ifndef _TCL85
-       ok = Tcl_EvalFile(interp, argv[1]);
+    return Tcl_EvalFile(interp, fileN);
 #else
     return Tcl_FSEvalFileEx(interp, fileName, encodingName);
 #endif
