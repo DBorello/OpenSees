@@ -14,7 +14,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkMain.cpp,v 1.21 2009-01-09 00:02:20 fmk Exp $
+ * RCS: @(#) $Id: tkMain.cpp,v 1.22 2009-01-15 19:58:44 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -41,17 +41,7 @@ extern "C" {
 #endif
 
 #include <OPS_Globals.h>
-
-
-#include <FileStream.h>
-#include <SimulationInformation.h>
-SimulationInformation simulationInfo;
-char *simulationInfoOutputFilename = 0;
-
-char *neesCentralProjID =0;
-char * neesCentralExpID =0;
-char *neesCentralUser =0;
-char *neesCentralPasswd =0;
+extern "C" int OpenSeesParseArgv(int argc, char **argv);
 
 typedef struct ThreadSpecificData {
     Tcl_Interp *interp;         /* Interpreter for this thread. */
@@ -206,6 +196,8 @@ Tk_MainOpenSees(int argc, char **argv, Tcl_AppInitProc *appInitProc, Tcl_Interp 
 	}
     }
     
+	OpenSeesParseArgv(argc, argv);
+
     /*
      * Make command-line arguments available in the Tcl variables "argc"
      * and "argv".
