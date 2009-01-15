@@ -86,5 +86,5 @@ superlu_timer.o: superlu_timer.c ; $(CC) -c $(NOOPTS) $(CDEFS) $<
 
 
 clean:	
-	rm -f *.o ../superlu$(PLAT).a
+	rm -f *.o $(DISTRIBUTED_SUPERLU_LIBRARY)
 

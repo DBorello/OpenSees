@@ -19,6 +19,7 @@ OBJS = coarsen.o fm.o initpart.o match.o ccgraph.o memory.o \
 
 
 all: $(OBJS)
+	@$(RM) $(RMFLAGS) $(METIS_LIBRARY)
 	@$(AR) $(ARFLAGS) $(METIS_LIBRARY) $(OBJS)
 	@$(RANLIB) $(RANLIBFLAGS) $(METIS_LIBRARY)
 
