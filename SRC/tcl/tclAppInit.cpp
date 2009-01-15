@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2008-04-28 23:18:33 $
+// $Revision: 1.16 $
+// $Date: 2009-01-15 00:12:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/tclAppInit.cpp,v $
 
 
@@ -36,7 +36,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclAppInit.cpp,v 1.15 2008-04-28 23:18:33 fmk Exp $
+ * RCS: @(#) $Id: tclAppInit.cpp,v 1.16 2009-01-15 00:12:37 fmk Exp $
  */
 
 extern "C" {
@@ -208,7 +208,7 @@ int Tcl_AppInit(Tcl_Interp *interp)
      * they weren't already created by the init procedures called above.
      */
 
-    if (g3AppInit(interp) < 0)
+    if (OpenSeesAppInit(interp) < 0)
 	return TCL_ERROR;
 
     /*

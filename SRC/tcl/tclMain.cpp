@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.47 2008-11-21 20:04:23 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.48 2009-01-15 00:12:37 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -81,35 +81,19 @@ int (*tclDummyLinkVarPtr)(Tcl_Interp *interp, char *a,
  */
 
 
-typedef struct parameterValues {
-  char *value;
-  struct parameterValues *next;
-} OpenSeesTcl_ParameterValues;
-
-typedef struct parameter {
-  char *name;
-  OpenSeesTcl_ParameterValues *values;
-  struct parameter *next;
-} OpenSeesTcl_Parameter;
-
-
 #ifdef _WIN32
 extern "C" int	isatty _ANSI_ARGS_((int fd));
 extern "C" char * strcpy _ANSI_ARGS_((char *dst, CONST char *src)) throw();
 #endif
 static char *tclStartupScriptFileName = NULL;
 
-
-#include <FileStream.h>
-#include <SimulationInformation.h>
-SimulationInformation simulationInfo;
-
-char *simulationInfoOutputFilename = 0;
-char *neesCentralProjID =0;
-char * neesCentralExpID =0;
-char *neesCentralUser =0;
-char *neesCentralPasswd =0;
-
+extern "C" int OpenSeesParseArgv(int argc, char **argv);
+extern "C" int EvalFileWithParameters(Tcl_Interp *interp, 
+				      char *tclStartupFileScript, 
+				      void *theInputParameters,  
+				      int currentParam, 
+				      int rank, 
+				      int np);
 
 /*
  *----------------------------------------------------------------------
@@ -155,75 +139,6 @@ char *TclGetStartupScriptFileName()
     return tclStartupScriptFileName;
 }
 
-int
-EvalFileWithParameters(Tcl_Interp *interp, 
-		       char *tclStartupFileScript, 
-		       OpenSeesTcl_Parameter *theParameters, 
-		       char **paramNames, 
-		       char **paramValues, 
-		       int numParam, 
-		       int currentParam, 
-		       int rank, 
-		       int np)
-{
-  if (currentParam < numParam) {
-    OpenSeesTcl_Parameter *theCurrentParam = theParameters;
-    OpenSeesTcl_Parameter *theNextParam = theParameters->next;
-    char *paramName = theCurrentParam->name;
-    paramNames[currentParam] = paramName;
-
-    OpenSeesTcl_ParameterValues *theValue = theCurrentParam->values;
-    int nextParam = currentParam+1;
-    while (theValue != 0) {
-      char *paramValue = theValue->value;
-      paramValues[currentParam] = paramValue;
-      EvalFileWithParameters(interp, 
-			     tclStartupFileScript, 
-			     theNextParam, 
-			     paramNames, 
-			     paramValues, 
-			     numParam, 
-			     nextParam, 
-			     rank, 
-			     np);
-
-      theValue=theValue->next;
-    } 
-  } else {
-    
-    simulationInfo.start();
-    static int count = 0;
-    
-    if ((count % np) == rank) {
-      Tcl_Eval(interp, "wipe");
-     
-	  
-      for (int i=0; i<numParam; i++) {
-		  
-	Tcl_SetVar(interp, paramNames[i], paramValues[i], TCL_GLOBAL_ONLY);	    
-	simulationInfo.addParameter(paramNames[i], paramValues[i]); 
-     }
-
-      count++;
-
-      const char *pwd = getInterpPWD(interp);
-      simulationInfo.addInputFile(tclStartupScriptFileName, pwd);
-
-      int ok = Tcl_EvalFile(interp, tclStartupScriptFileName);
-
-      simulationInfo.end();
-      
-      return ok;
-    }
-    else
-      count++;
-  }
-
-  return 0;
-}
-
-
-
 /*
  *----------------------------------------------------------------------
  *
@@ -243,11 +158,6 @@ EvalFileWithParameters(Tcl_Interp *interp,
  *----------------------------------------------------------------------
  */
 
-//// Boris Jeremic {
-//#include <fstream.h>
-//// } Boris Jeremic
-
-
 void
 g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np)
 { 
@@ -259,6 +169,8 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
     Tcl_Channel inChannel, outChannel, errChannel;
     Tcl_Interp *interp;
     Tcl_DString argString;
+
+    int numParam;
 
 #ifdef _PARALLEL_INTERPRETERS
     if (theMachineBroker->getPID() == 0) {
@@ -280,6 +192,7 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
     Tcl_FindExecutable(argv[0]);
     interp = Tcl_CreateInterp();
 
+    numParam = OpenSeesParseArgv(argc, argv);
 
 #ifdef TCL_MEM_DEBUG
     Tcl_InitMemory(interp);
@@ -350,138 +263,11 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 
 
     if (tclStartupScriptFileName != NULL) {
-      OpenSeesTcl_Parameter *theParameters = 0;
-      OpenSeesTcl_Parameter *endParameters = 0;
-      int numParam = 0;
-
-      if (argc > 1) {
-	int currentArg = 1;
-	while (currentArg < argc && argv[currentArg] != NULL) {
-
-	  if ((strcmp(argv[currentArg], "-par") == 0) || (strcmp(argv[currentArg], "-Par") == 0)) {
-	    
-	    if (argc > (currentArg+2)) {
-	      
-	      char *parName = argv[currentArg+1];
-	      char *parValue = argv[currentArg+2];
-	      
-	      // add a OpenSeesTcl_Parameter to end of list of parameters
-	      OpenSeesTcl_Parameter *nextParam = new OpenSeesTcl_Parameter;
-	      nextParam->name = new char [strlen(parName)+1];
-	      strcpy(nextParam->name, parName);
-	      nextParam->values = 0;
-	      
-	      if (theParameters == 0)
-		theParameters = nextParam;
-	      if (endParameters != 0)
-		endParameters->next = nextParam;
-	      nextParam->next = 0;
-	      endParameters = nextParam;
-	      
-	      // now open par values files to create the values
-	      char nextLine[1000];
-	      FILE *valueFP = fopen(parValue,"r");
-	      if (valueFP != 0) {
-		OpenSeesTcl_ParameterValues *endValues = 0;
-		
-		while (fscanf(valueFP, "%s", nextLine) != EOF) {
-		  
-		  OpenSeesTcl_ParameterValues *nextValue = new OpenSeesTcl_ParameterValues;
-		  nextValue->value = new char [strlen(nextLine)+1];
-		  strcpy(nextValue->value, nextLine);
-		  
-		  if (nextParam->values == 0) {
-		    nextParam->values = nextValue;
-		  }
-		if (endValues != 0)
-		  endValues->next = nextValue;
-		endValues = nextValue;
-		nextValue->next = 0;	      
-		}
-		fclose(valueFP);
-	      } else {
-		
-		OpenSeesTcl_ParameterValues *nextValue = new OpenSeesTcl_ParameterValues;		
-		nextValue->value = new char [strlen(parValue)+1];
-		
-		strcpy(nextValue->value, parValue);
-		
-		nextParam->values = nextValue;
-		nextValue->next = 0;
-		
-	      }
-	      numParam++;
-	    }
-	    currentArg += 3;
-	  } else if ((strcmp(argv[currentArg], "-info") == 0) || (strcmp(argv[currentArg], "-INFO") == 0)) {
-	    if (argc > (currentArg+1)) {
-	      simulationInfoOutputFilename = argv[currentArg+1];	    
-	    }			   
-	    currentArg+=2;
-	  } else if ((strcmp(argv[currentArg], "-upload") == 0) || (strcmp(argv[currentArg], "-UPLOAD") == 0)) {
-	    bool more = true;
-	    currentArg++;
-	    while (more == true && currentArg < argc) {
-	      
-	      if (strcmp(argv[currentArg],"-user") == 0) {
-		neesCentralUser = argv[currentArg+1];
-		currentArg += 2;
-
-	      } else if (strcmp(argv[currentArg],"-pass") == 0) {
-		neesCentralPasswd = argv[currentArg+1];
-		currentArg += 2;
-	      } else if (strcmp(argv[currentArg],"-projID") == 0) {
-		neesCentralProjID = argv[currentArg+1];
-		currentArg += 2;
-		
-	      } else if (strcmp(argv[currentArg],"-expID") == 0) {
-		neesCentralExpID = argv[currentArg+1];
-		currentArg += 2;
-    
-	      } else if (strcmp(argv[currentArg],"-title") == 0) {
-		simulationInfo.setTitle(argv[currentArg+1]);	
-		currentArg += 2;
       
-	      } else if (strcmp(argv[currentArg],"-description") == 0) {
-		simulationInfo.setDescription(argv[currentArg+1]);	
-		currentArg += 2;      
-	      } else
-		more = false;
-	    }
-	  } else 
-	    currentArg++;
-	}
-
-	if (numParam != 0) {
-	  char **paramNames = new char *[numParam];
-	  char **paramValues = new char *[numParam];
-	  code = EvalFileWithParameters(interp, tclStartupScriptFileName, theParameters, paramNames, paramValues, numParam, 0, rank, np);
-
-	  if (code != TCL_OK) {
-	    errChannel = Tcl_GetStdChannel(TCL_STDERR);
-	    if (errChannel) {
-	      /*
-	       * The following statement guarantees that the errorInfo
-	       * variable is set properly.
-	       */
-	      
-	      Tcl_AddErrorInfo(interp, "");
-	      Tcl_WriteObj(errChannel, Tcl_GetVar2Ex(interp, "errorInfo",
-						     NULL, TCL_GLOBAL_ONLY));
-	      Tcl_WriteChars(errChannel, "\n", 1);
-	    }
-	    exitCode = 1;
-	  }
-	  goto done;
-	}
-      }
-
-      //      if (simulationInfoOutputFilename != 0) {
-      const char *pwd = getInterpPWD(interp);
-      simulationInfo.start();
-      simulationInfo.addInputFile(tclStartupScriptFileName, pwd);
-
-      code = Tcl_EvalFile(interp, tclStartupScriptFileName);
+      if (numParam == 0)
+	code = Tcl_EvalFile(interp, tclStartupScriptFileName);
+      else
+	code = EvalFileWithParameters(interp, tclStartupScriptFileName, 0, 0, 0, 1);
       
       if (code != TCL_OK) {
 	errChannel = Tcl_GetStdChannel(TCL_STDERR);
@@ -499,7 +285,14 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	exitCode = 1;
       }
       goto done;
-    } else {
+    }
+
+    /*
+      const char *pwd = getInterpPWD(interp);
+      simulationInfo.start();
+      simulationInfo.addInputFile(tclStartupScriptFileName, pwd);
+    */
+
 
     /*
      * We're running interactively.  Source a user-specific startup
@@ -508,47 +301,6 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 
       Tcl_DStringFree(&argString);
       
-      int currentArg = 1;
-      while (currentArg < argc && argv[currentArg] != NULL) {
-	if ((strcmp(argv[currentArg], "-info") == 0) || (strcmp(argv[currentArg], "-INFO") == 0)) {
-	  if (argc > (currentArg+1)) {
-	    simulationInfoOutputFilename = argv[currentArg+1];	    
-	  }			   
-	  currentArg+=2;
-	} else if ((strcmp(argv[currentArg], "-upload") == 0) || (strcmp(argv[currentArg], "-UPLOAD") == 0)) {
-	  bool more = true;
-	  currentArg++;
-	  while (more == true && currentArg < argc) {
-	    
-	    if (strcmp(argv[currentArg],"-user") == 0) {
-	      neesCentralUser = argv[currentArg+1];
-	      currentArg += 2;
-	      
-	    } else if (strcmp(argv[currentArg],"-pass") == 0) {
-	      neesCentralPasswd = argv[currentArg+1];
-	      currentArg += 2;
-	    } else if (strcmp(argv[currentArg],"-projID") == 0) {
-	      neesCentralProjID = argv[currentArg+1];
-	      currentArg += 2;
-	      
-	    } else if (strcmp(argv[currentArg],"-expID") == 0) {
-	      neesCentralExpID = argv[currentArg+1];
-	      currentArg += 2;
-	      
-	    } else if (strcmp(argv[currentArg],"-title") == 0) {
-	      simulationInfo.setTitle(argv[currentArg+1]);	
-	      currentArg += 2;
-	      
-	    } else if (strcmp(argv[currentArg],"-description") == 0) {
-	      simulationInfo.setDescription(argv[currentArg+1]);	
-	      currentArg += 2;      
-	    } else
-	      more = false;
-	  }
-	} else 
-	  currentArg++; 	
-      }
-
       Tcl_SourceRCFile(interp);
       
       /*
@@ -557,10 +309,12 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
        * eval, since they may have been changed.
        */
      
+      /*
       if (simulationInfoOutputFilename != 0) {
 	simulationInfo.start();
       }
-     
+      */
+
       commandPtr = Tcl_NewObj();
       Tcl_IncrRefCount(commandPtr);
       
@@ -612,7 +366,7 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	if ((length == 0) && Tcl_Eof(inChannel) && (!gotPartial)) {
 	  goto done;
 	}
-	
+      	
 	/*
 	 * Add the newline removed by Tcl_GetsObj back to the string.
 	 */
@@ -652,7 +406,6 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 	}
 #endif
       }
-    }
 
  done:
     

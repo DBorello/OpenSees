@@ -10,11 +10,8 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain85.cpp,v 1.2 2009-01-14 23:44:42 fmk Exp $
+ * RCS: @(#) $Id: tclMain85.cpp,v 1.3 2009-01-15 00:12:37 fmk Exp $
  */
-
-
-
 
 #include <OPS_Globals.h>
 
@@ -387,7 +384,7 @@ Tcl_Main(
     interp = Tcl_CreateInterp();
     Tcl_InitMemory(interp);
 
-	numParam = OpenSeesParseArgv(argc, argv);
+    numParam = OpenSeesParseArgv(argc, argv);
 
     /*
      * If the application has not already set a startup script, parse the
@@ -478,10 +475,10 @@ Tcl_Main(
 
     path = Tcl_GetStartupScript(&encodingName);
     if (path != NULL) {
-		if (numParam == 0)
-	      code = Tcl_FSEvalFileEx(interp, path, encodingName);
-		else
-		  code = EvalFileWithParameters(interp, Tcl_GetStringFromObj(path, &length), 0, 0, 0, 1);
+	if (numParam == 0)
+	    code = Tcl_FSEvalFileEx(interp, path, encodingName);
+	else
+	    code = EvalFileWithParameters(interp, Tcl_GetStringFromObj(path, &length), 0, 0, 0, 1);
 	if (code != TCL_OK) {
 	    errChannel = Tcl_GetStdChannel(TCL_STDERR);
 	    if (errChannel) {
