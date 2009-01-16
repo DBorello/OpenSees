@@ -112,6 +112,9 @@
 				RelativePath="..\..\..\SRC\modelbuilder\tcl\TclModelBuilder.cpp">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\modelbuilder\tcl\TclSectionTester.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\modelbuilder\tcl\TclUniaxialMaterialTester.cpp">
 			</File>
 			<File
@@ -132,6 +135,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\modelbuilder\tcl\TclModelBuilder.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\modelbuilder\tcl\TclSectionTester.h">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\modelbuilder\tcl\TclUniaxialMaterialTester.h">
