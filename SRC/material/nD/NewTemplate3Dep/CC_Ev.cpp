@@ -35,15 +35,18 @@
 #define CC_Ev_CPP
 
 #include "CC_Ev.h"
+#include <Channel.h>
+#include <ID.h>
 
 CC_Ev::CC_Ev(int lambda_index_in, 
              int kappa_index_in,
              int e0_index_in,
              int p0_index_in)
-: lambda_index(lambda_index_in), 
-  kappa_index(kappa_index_in),
-  e0_index(e0_index_in),
-  p0_index(p0_index_in)
+  : ScalarEvolution(SCALAR_EVOLUTION_TAGS_CC_Ev), 
+    lambda_index(lambda_index_in), 
+    kappa_index(kappa_index_in),
+    e0_index(e0_index_in),
+    p0_index(p0_index_in)
 {
 
 }
@@ -113,6 +116,43 @@ double CC_Ev::getp0(const MaterialParameter& material_parameter) const
         opserr << "CC_Ev: Invalid Input of " << p0_index << endln;
         exit (1);
     }
+}
+
+int 
+CC_Ev::sendSelf(int commitTag, Channel &theChannel)
+{
+  static ID iData(4);
+  iData(0) = lambda_index;
+  iData(1) = kappa_index;
+  iData(2) = e0_index;
+  iData(3) = p0_index;
+
+  int dbTag = this->getDbTag();
+
+  if (theChannel.sendID(dbTag, commitTag, iData) < 0) {
+    opserr << "CC_Ev::sendSelf() - failed to send data\n";
+    return -1;
+  }
+
+  return 0;
+}
+int 
+CC_Ev::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  static ID iData(4);
+  int dbTag = this->getDbTag();
+
+  if (theChannel.recvID(dbTag, commitTag, iData) < 0) {
+    opserr << "CC_Ev::recvSelf() - failed to recv data\n";
+    return -1;
+  }
+
+  lambda_index = iData(0);
+  kappa_index = iData(1);
+  e0_index = iData(2);
+  p0_index = iData(3);
+
+  return 0;
 }
 
 #endif

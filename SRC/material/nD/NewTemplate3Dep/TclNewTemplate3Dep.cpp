@@ -1059,3 +1059,153 @@ TensorEvolution** EvaluateTE(ClientData clientData, Tcl_Interp *interp, TCL_Char
   cleanup(argv);
   return ITT;
 }
+
+
+
+
+
+MaterialParameter *
+getMaterialParameter(int classTag)
+{
+  switch(classTag) {
+
+  case MATERIAL_PARAMATER_TAGS_MaterialParameter:
+    return new MaterialParameter();
+    
+  default:
+    opserr << "TclNewTemplate3Dep::getMaterialParameter - unknown type: " << classTag << endln;
+    return 0;
+  }
+  return 0;
+}
+
+ElasticState      *
+getElasticState(int classTag)
+{
+  switch(classTag) {
+
+  case ELASTICSTATE_TAGS_Isotropic_Elastic:
+    return new Isotropic_Elastic();
+
+  case ELASTICSTATE_TAGS_elnp_Elastic:
+    return new elnp_Elastic();    
+
+  case ELASTICSTATE_TAGS_PressureDependent_Elastic:
+    return new PressureDependent_Elastic();
+
+  case ELASTICSTATE_TAGS_DM04_Elastic:
+    return new DM04_Elastic();
+
+  default:
+    opserr << "TclNewTemplate3Dep::getElasticState - unknown type: " << classTag << endln;
+    return 0;
+  }
+
+  return 0;
+}
+
+YieldFunction     *
+getYieldFunction(int classTag)
+{
+  switch(classTag) {
+
+  case YIELDFUNCTION_TAGS_VM_YF:
+    return new VM_YF();
+
+    /*
+  case YIELDFUNCTION_TAGS_RMC_YF:
+    return new RMC_YF();
+    */
+
+  case YIELDFUNCTION_TAGS_DP_YF:
+    return new DP_YF();
+
+  case YIELDFUNCTION_TAGS_CC_YF:
+    return new CC_YF();
+
+  case YIELDFUNCTION_TAGS_DM04_YF:
+    return new DM04_YF();
+
+  default:
+    opserr << "TclNewTemplate3Dep::getYieldFunction - unknown type: " << classTag << endln;
+    return 0;
+  }
+
+
+  return 0;
+}
+
+PlasticFlow       *
+getPlasticFlow(int classTag)
+{
+  switch(classTag) {
+
+  case PLASTICFLOW_TAGS_VM_PF:
+    return new VM_PF();
+
+    /*
+  case PLASTICFLOW_TAGS_RMC_PF:
+    return new RMC_PF();
+    */
+
+  case PLASTICFLOW_TAGS_DP_PF:
+    return new DP_PF();
+
+  case PLASTICFLOW_TAGS_CC_PF:
+    return new CC_PF();
+
+  case PLASTICFLOW_TAGS_DM04_PF:
+    return new DM04_PF();
+
+  default:
+    opserr << "TclNewTemplate3Dep::getPlasticFlow - unknown type: " << classTag << endln;
+    return 0;
+  }
+
+
+  return 0;
+}
+
+ScalarEvolution   *
+getScalarEvolution(int classTag)
+{
+  switch(classTag) {
+
+  case SCALAR_EVOLUTION_TAGS_Linear_Eeq:
+    return new Linear_Eeq();
+
+  case SCALAR_EVOLUTION_TAGS_CC_Ev:
+    return new CC_Ev();
+
+  default:
+    opserr << "TclNewTemplate3Dep::getScalarEvolution - unknown type: " << classTag << endln;
+    return 0;
+  }
+
+  return 0;
+}
+
+TensorEvolution   *
+getTensorEvolution(int classTag)
+{
+  switch(classTag) {
+
+  case TENSOR_EVOLUTION_TAGS_Linear_Eij:
+    return new Linear_Eij();
+
+  case TENSOR_EVOLUTION_TAGS_AF_Eij:
+    return new AF_Eij();
+
+  case TENSOR_EVOLUTION_TAGS_DM04_alpha_Eij:
+    return new DM04_alpha_Eij();
+
+  case TENSOR_EVOLUTION_TAGS_DM04_z_Eij:
+    return new DM04_z_Eij();
+
+  default:
+    opserr << "TclNewTemplate3Dep::getTensorEvolution - unknown type: " << classTag << endln;
+    return 0;
+  }
+
+  return 0;
+}

@@ -34,13 +34,16 @@
 #define DM04_YF_H
 
 #include "YieldFunction.h"
+
+#define YIELDFUNCTION_TAGS_DM04_YF 5
+
 #include <math.h>
 
 class DM04_YF : public YieldFunction
 {
   public:
-    DM04_YF(int m_which_in, int index_m_in, 
-            int alpha_which_in, int index_alpha_in);
+    DM04_YF(int m_which_in =0, int index_m_in =0, 
+            int alpha_which_in =0, int index_alpha_in =0);
     ~DM04_YF();
       
     YieldFunction *newObj();
@@ -58,6 +61,9 @@ class DM04_YF : public YieldFunction
     int getNumInternalScalar() const;
     int getNumInternalTensor() const;
     int getYieldFunctionRank() const;
+
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
 
   private:
     double getm(const MaterialParameter &MaterialParameter_in) const;

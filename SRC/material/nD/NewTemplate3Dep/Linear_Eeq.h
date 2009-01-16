@@ -34,18 +34,23 @@
 #ifndef Linear_Eeq_H
 #define Linear_Eeq_H 
 
+#define SCALAR_EVOLUTION_TAGS_Linear_Eeq 1
+
 #include "ScalarEvolution.h"
 
 class Linear_Eeq : public ScalarEvolution
 {
   public:
   
-    Linear_Eeq(int LinearFactor_index_in);
+    Linear_Eeq(int LinearFactor_index_in =0);
     
     ScalarEvolution* newObj();
 
     double H(const straintensor& plastic_flow, const stresstensor& Stre, 
              const straintensor& Stra, const MaterialParameter& material_parameter);
+
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
        
   private:
   

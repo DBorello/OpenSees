@@ -33,6 +33,8 @@
 #ifndef VM_YF_H
 #define VM_YF_H
 
+#define YIELDFUNCTION_TAGS_VM_YF 1
+
 #include "YieldFunction.h"
 #include <math.h>
 
@@ -63,6 +65,9 @@ class VM_YF : public YieldFunction
     int getNumInternalScalar() const;
     int getNumInternalTensor() const;
     int getYieldFunctionRank() const;
+
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
 
   private:
   

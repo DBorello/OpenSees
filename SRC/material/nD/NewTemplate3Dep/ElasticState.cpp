@@ -41,22 +41,23 @@ const stresstensor ElasticState::zerostress(0.0);
 const straintensor ElasticState::zerostrain(0.0);
 
 ////////////////////////////////////////////////////////////////
-ElasticState::ElasticState(const stresstensor &initialStress, const straintensor &initialStrain)
-: Stress(initialStress), Strain(initialStrain)
+ElasticState::ElasticState(const stresstensor &initialStress, const straintensor &initialStrain, int classTag)
+  :MovableObject(classTag), Stress(initialStress), Strain(initialStrain)
 {
 
 }
 
 ////////////////////////////////////////////////////////////////
-ElasticState::ElasticState(const stresstensor &initialStress)
-: Stress(initialStress)
+ElasticState::ElasticState(const stresstensor &initialStress, int classTag)
+  :MovableObject(classTag), Stress(initialStress)
 {
     straintensor ZeroStra;
     Strain = ZeroStra;
 }
 
 ////////////////////////////////////////////////////////////////
-ElasticState::ElasticState()
+ElasticState::ElasticState(int classTag)
+  :MovableObject(classTag)
 {
     stresstensor ZeroStre;
     Stress = ZeroStre;

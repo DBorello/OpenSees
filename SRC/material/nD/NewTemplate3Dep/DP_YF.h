@@ -33,6 +33,8 @@
 #ifndef DP_YF_H
 #define DP_YF_H
 
+#define YIELDFUNCTION_TAGS_DP_YF 3
+
 #include "YieldFunction.h"
 #include <math.h>
 
@@ -63,6 +65,10 @@ class DP_YF : public YieldFunction
     int getNumInternalScalar() const;
     int getNumInternalTensor() const;
     int getYieldFunctionRank() const;
+
+
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
 
   private:
     double geta(const MaterialParameter &MaterialParameter_in) const;

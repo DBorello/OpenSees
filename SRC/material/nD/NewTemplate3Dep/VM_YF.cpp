@@ -35,13 +35,16 @@
 #define VM_YF_CPP
 
 #include "VM_YF.h"
+#include <Channel.h>
+#include <ID.h>
 
 stresstensor VM_YF::VMst;
 
 //================================================================================
 VM_YF::VM_YF(int k_which_in, int index_k_in, int alpha_which_in, int index_alpha_in)
-: k_which(k_which_in), index_k(index_k_in), 
-  alpha_which(alpha_which_in), index_alpha(index_alpha_in)
+  :YieldFunction(YIELDFUNCTION_TAGS_VM_YF),
+   k_which(k_which_in), index_k(index_k_in), 
+   alpha_which(alpha_which_in), index_alpha(index_alpha_in)
 {
 
 }
@@ -183,6 +186,47 @@ const stresstensor& VM_YF::getbackstress(const MaterialParameter &MaterialParame
 	}
 }
 
+int 
+VM_YF::sendSelf(int commitTag, Channel &theChannel)
+{
+  if (theChannel.isDatastore() == 0) {
+    opserr << "VM_YF::sendSelf() - does not send to database due to dbTags\n";
+    return -1;
+  }
+  
+  static ID iData(4);
+  iData(0) = k_which;
+  iData(1) = index_k;
+  iData(2) = alpha_which;
+  iData(3) = index_alpha;
+  int dbTag = this->getDbTag();
 
+  if (theChannel.sendID(dbTag, commitTag, iData) < 0) {
+    opserr << "VM_YF::sendSelf() - failed to send data\n";
+    return -1;
+  }
+
+  return 0;
+}
+int 
+VM_YF::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  static ID iData(4);
+  int dbTag = this->getDbTag();
+
+  if (theChannel.recvID(dbTag, commitTag, iData) < 0) {
+    opserr << "VM_YF::recvSelf() - failed to recv data\n";
+    return -1;
+  }
+
+
+  k_which = iData(0);
+  index_k = iData(1);
+  alpha_which = iData(2);
+  index_alpha = iData(3);
+
+
+  return 0;
+}
 #endif
 

@@ -33,30 +33,35 @@
 #ifndef DM04_PF_H
 #define DM04_PF_H
 
+#define PLASTICFLOW_TAGS_DM04_PF 5
+
 #include "PlasticFlow.h"
 #include <math.h>
 
 class DM04_PF : public PlasticFlow
 {
   public:   
-    DM04_PF(int e0_which, int index_e0,
-            int e_r_which_in, int index_e_r_in,
-            int lambda_c_which_in, int index_lambda_c_in,
-            int xi_which_in, int index_xi_in,
-            int Pat_which_in, int index_Pat_in,
-            int m_which_in, int index_m_in,
-            int M_cal_which_in, int index_M_cal_in,
-            int cc_which_in, int index_cc_in,        
-            int A0_which_in, int index_A0_in,
-            int nd_which_in, int index_nd_in,
-            int alpha_which_in, int index_alpha_in,
-            int z_which_in, int index_z_in);
+    DM04_PF(int e0_which =0, int index_e0 =0,
+            int e_r_which_in =0, int index_e_r_in =0,
+            int lambda_c_which_in =0, int index_lambda_c_in =0,
+            int xi_which_in =0, int index_xi_in =0,
+            int Pat_which_in =0, int index_Pat_in =0,
+            int m_which_in =0, int index_m_in =0,
+            int M_cal_which_in =0, int index_M_cal_in =0,
+            int cc_which_in =0, int index_cc_in =0,        
+            int A0_which_in =0, int index_A0_in =0,
+            int nd_which_in =0, int index_nd_in =0,
+            int alpha_which_in =0, int index_alpha_in =0,
+            int z_which_in =0, int index_z_in =0);
     ~DM04_PF();     
     PlasticFlow* newObj();
    
     const straintensor& PlasticFlowTensor(const stresstensor &Stre, 
                                           const straintensor &Stra, 
                                           const MaterialParameter &MaterialParameter_in) const;
+
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
 
   private: 
 
@@ -90,7 +95,6 @@ class DM04_PF : public PlasticFlow
     int cc_which;         int index_cc;
     int A0_which;         int index_A0;   
     int nd_which;         int index_nd;
-
     int alpha_which;      int index_alpha;
     int z_which;          int index_z;
             

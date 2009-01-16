@@ -48,6 +48,11 @@
 #define MaterialParameter_CPP
 
 #include "MaterialParameter.h"
+#include <classTags.h>
+#include <Vector.h>
+#include <ID.h>
+#include <Channel.h>
+#include <FEM_ObjectBroker.h>
 
 // Constructor 1
 MaterialParameter::MaterialParameter(const double *Material_Parameter_in, 
@@ -56,6 +61,7 @@ MaterialParameter::MaterialParameter(const double *Material_Parameter_in,
                                     int Num_Internal_Scalar_in, 
                                     const stresstensor *Internal_Tensor_in, 
                                     int Num_Internal_Tensor_in)
+  :MovableObject(MATERIAL_PARAMATER_TAGS_MaterialParameter)
 {
     // Material Constants
     if (Num_Material_Parameter_in > 0) {
@@ -108,7 +114,8 @@ MaterialParameter::MaterialParameter(const double *Material_Parameter_in,
                                      int Num_Material_Parameter_in, 
                                      const stresstensor *Internal_Tensor_in, 
                                      int Num_Internal_Tensor_in)
-: Internal_Scalar(NULL), Num_Internal_Scalar(0)
+  :MovableObject(MATERIAL_PARAMATER_TAGS_MaterialParameter),
+   Internal_Scalar(NULL), Num_Internal_Scalar(0)
 {
     // Material Constants
     if (Num_Material_Parameter_in > 0) {
@@ -142,13 +149,16 @@ MaterialParameter::MaterialParameter(const double *Material_Parameter_in,
 }
 
 // Constructor 3
+/*
 MaterialParameter::MaterialParameter( )
-: Material_Parameter(NULL), Num_Material_Parameter(0), 
+  :MovableObject(MATERIAL_PARAMATER_TAGS_MaterialParameter),
+  Material_Parameter(NULL), Num_Material_Parameter(0), 
   Internal_Scalar(NULL), Num_Internal_Scalar(0), 
   Internal_Tensor(NULL), Num_Internal_Tensor(0)
 {
 
 }
+*/
 
 // Destructor
 MaterialParameter::~MaterialParameter( )
@@ -165,6 +175,7 @@ MaterialParameter::~MaterialParameter( )
 
 // Copy constructor
 MaterialParameter::MaterialParameter(const MaterialParameter &refer_MaterialParameter )
+  :MovableObject(MATERIAL_PARAMATER_TAGS_MaterialParameter)
 {
     // Material Constants
     if (refer_MaterialParameter.getNum_Material_Parameter() > 0) {
@@ -312,6 +323,126 @@ int MaterialParameter::setInternal_Tensor(int which, const stresstensor &newInte
 	Internal_Tensor[which] = newInternal_Tensor;
 				
 	return 0;
+}
+
+
+int 
+MaterialParameter::sendSelf(int commitTag, Channel &theChannel)
+{
+  static ID iData(3);
+  iData(0) = Num_Material_Parameter;
+  iData(1) = Num_Internal_Scalar;
+  iData(2) = Num_Internal_Tensor;
+  int dbTag = this->getDbTag();
+
+  theChannel.sendID(dbTag, commitTag, iData);
+
+  static Vector dData;
+  
+  if (Num_Material_Parameter != 0) {
+    dData.setData(Material_Parameter, Num_Material_Parameter);
+    theChannel.sendVector(dbTag, commitTag, dData);    
+  }
+
+  if (Num_Material_Parameter != 0) {
+    dData.setData(Internal_Scalar, Num_Internal_Scalar);
+    theChannel.sendVector(dbTag, commitTag, dData);    
+  }
+
+  for (int k=0; k<Num_Internal_Tensor; k++) {
+    Internal_Tensor[k].sendSelf(0, commitTag, theChannel);
+  }
+
+  return 0;
+}
+
+int 
+MaterialParameter::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  static ID iData(3);
+  int dbTag = this->getDbTag();
+
+  theChannel.recvID(dbTag, commitTag, iData);
+
+  Num_Material_Parameter = iData(0);
+  Num_Internal_Scalar = iData(1);
+
+  //
+  // make sure the arrays are large enough
+  //
+
+  if (Num_Material_Parameter != iData(0)) {
+    if (Num_Material_Parameter != 0) {
+      delete [] Material_Parameter;
+      Material_Parameter = 0;
+    }
+
+    Num_Material_Parameter = iData(0);
+    
+    if (Num_Material_Parameter != 0) {
+      Material_Parameter = new double [Num_Material_Parameter];
+      if (Material_Parameter == 0) {
+	opserr << "MaterialParameter::recvSelf() - out of memory for material parameter data\n";
+	return -1;
+      }
+    }
+  }      
+
+  if (Num_Internal_Scalar != iData(1)) {
+    if (Num_Internal_Scalar != 0) {
+      delete [] Internal_Scalar;
+      Internal_Scalar = 0;
+    }
+
+    Num_Internal_Scalar = iData(1);
+    
+    if (Num_Internal_Scalar != 0) {
+      Internal_Scalar = new double [Num_Internal_Scalar];
+      if (Internal_Scalar == 0) {
+	opserr << "MaterialParameter::recvSelf() - out of memory for material scalar data\n";
+	return -1;
+      }
+    }
+  }    
+
+  if (Num_Internal_Tensor != iData(2)) {
+    if (Num_Internal_Tensor != 0) {
+      delete [] Internal_Tensor;
+      Internal_Tensor = 0;
+    }
+
+    Num_Internal_Tensor = iData(2);
+    if (Num_Internal_Tensor != 0) {
+      Internal_Tensor = new stresstensor[Num_Internal_Tensor];
+      if (Internal_Scalar == 0) {
+	opserr << "MaterialParameter::recvSelf() - out of memory for material scalar data\n";
+	return -1;
+      }
+    }
+  }
+
+  //
+  // now recive the data
+  //
+
+  static Vector dData;
+
+  if (Num_Material_Parameter != 0) {
+    dData.setData(Material_Parameter, Num_Material_Parameter);
+    theChannel.recvVector(dbTag, commitTag, dData);    
+  }
+
+  if (Num_Material_Parameter != 0) {
+    dData.setData(Internal_Scalar, Num_Internal_Scalar);
+    theChannel.recvVector(dbTag, commitTag, dData);    
+  }
+
+  for (int k=0; k<Num_Internal_Tensor; k++) {
+    Internal_Tensor[k].recvSelf(0, commitTag, theChannel);
+  }
+
+  return 0;
+
 }
 
 

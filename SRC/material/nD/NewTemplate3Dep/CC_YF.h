@@ -33,6 +33,8 @@
 #ifndef CC_YF_H
 #define CC_YF_H
 
+#define YIELDFUNCTION_TAGS_CC_YF 4
+
 #include "YieldFunction.h"
 #include <math.h>
 
@@ -58,6 +60,9 @@ class CC_YF : public YieldFunction
     int getNumInternalScalar() const;
     int getNumInternalTensor() const;
     int getYieldFunctionRank() const;
+
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
 
   private:
     double getM(const MaterialParameter &MaterialParameter_in) const;

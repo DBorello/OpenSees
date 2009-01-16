@@ -43,6 +43,8 @@
 #define DM04_z_Eij_CPP
 
 #include "DM04_z_Eij.h"
+#include <Channel.h>
+#include <ID.h>
 
 stresstensor DM04_z_Eij::DM04_z_t;
 
@@ -51,7 +53,8 @@ DM04_z_Eij::DM04_z_Eij(int m_index_in,
                        int z_max_index_in,
                        int alpha_index_in,
                        int z_index_in)
-: m_index(m_index_in), 
+  :TensorEvolution(TENSOR_EVOLUTION_TAGS_DM04_z_Eij),
+   m_index(m_index_in), 
   c_z_index(c_z_index_in), 
   z_max_index(z_max_index_in),
   alpha_index(alpha_index_in), 
@@ -163,6 +166,48 @@ const stresstensor& DM04_z_Eij::getz(const MaterialParameter& material_parameter
         opserr << "DM04_z: Invalid Input. " << endln;
         exit (1);
     }
+}
+
+int
+DM04_z_Eij::sendSelf(int commitTag, Channel &theChannel)
+{
+  static ID iData(5);
+
+  iData(0) = m_index;
+  iData(1) = c_z_index;
+  iData(2) = z_max_index;
+  iData(3) = alpha_index;
+  iData(4) = z_index;
+
+  int dbTag = this->getDbTag();
+
+  if (theChannel.sendID(dbTag, commitTag, iData) < 0) {
+    opserr << "DM04_z_Eij::sendSelf() - failed to send data\n";
+    return -1;
+  }
+
+  return 0;
+}
+
+int 
+DM04_z_Eij::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  static ID iData(5);
+  int dbTag = this->getDbTag();
+
+  if (theChannel.recvID(dbTag, commitTag, iData) < 0) {
+    opserr << "DM04_z_Eij::recvSelf() - failed to recv data\n";
+    return -1;
+  }
+
+  m_index = iData(0);
+  c_z_index = iData(1);
+  z_max_index = iData(2);
+  alpha_index = iData(3);
+  z_index = iData(4);
+
+
+  return 0;
 }
 
 #endif

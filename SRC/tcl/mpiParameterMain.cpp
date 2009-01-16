@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2008-03-06 22:36:18 $
+// $Revision: 1.10 $
+// $Date: 2009-01-16 00:04:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/mpiParameterMain.cpp,v $
 
 /* 
@@ -35,7 +35,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: mpiParameterMain.cpp,v 1.9 2008-03-06 22:36:18 fmk Exp $
+ * RCS: @(#) $Id: mpiParameterMain.cpp,v 1.10 2009-01-16 00:04:20 fmk Exp $
  */
 
 extern "C" {
@@ -45,6 +45,7 @@ extern "C" {
 
 // #include <mpi.h>
 #include "commands.h"
+extern "C" int OpenSeesParseArgv(int argc, char **argv);
 
 /*
  * The following variable is a special hack that is needed in order for
@@ -233,6 +234,8 @@ main(int argc, char **argv)
       argCount++;
     }
 
+  OpenSeesParseArgv(argc, argv);  
+
 #ifndef TCL_LOCAL_APPINIT
 #define TCL_LOCAL_APPINIT Tcl_AppInit    
 #endif
@@ -334,7 +337,7 @@ int Tcl_AppInit(Tcl_Interp *interp)
      * they weren't already created by the init procedures called above.
      */
 
-    if (g3AppInit(interp) < 0)
+    if (OpenSeesAppInit(interp) < 0)
 	return TCL_ERROR;
 
     /*

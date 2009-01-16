@@ -34,6 +34,8 @@
 #ifndef CC_Ev_H
 #define CC_Ev_H 
 
+#define SCALAR_EVOLUTION_TAGS_CC_Ev 2
+
 #include "ScalarEvolution.h"
 #include "ElasticState.h"
 
@@ -41,15 +43,18 @@ class CC_Ev : public ScalarEvolution
 {
   public:
   
-   CC_Ev(int lambda_index_in,
-         int kappa_index_in,
-         int e0_index_in,
-         int p0_index_in);
+   CC_Ev(int lambda_index_in =0,
+         int kappa_index_in =0,
+         int e0_index_in =0,
+         int p0_index_in =0);
 
     ScalarEvolution* newObj();
 
     double H(const straintensor& plastic_flow, const stresstensor& Stre, 
              const straintensor& Stra, const MaterialParameter& material_parameter);
+
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
        
   private:
   

@@ -31,6 +31,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 
+#define ELASTICSTATE_TAGS_Isotropic_Elastic 1
+
 #ifndef Isotropic_Elastic_H
 #define Isotropic_Elastic_H
 
@@ -43,14 +45,17 @@ class Isotropic_Elastic : public ElasticState
 {  
   public:
                     
-    Isotropic_Elastic(int E_in, 
-                   int v_in,
+    Isotropic_Elastic(int E_in =0, 
+                   int v_in =0,
                    const stresstensor& initialStress = zerostress, 
                    const straintensor& initialStrain = zerostrain);
-    
+
     ElasticState *newObj();
     
     const BJtensor& getElasticStiffness(const MaterialParameter &MaterialParameter_in) const;
+
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
     
   private:
     

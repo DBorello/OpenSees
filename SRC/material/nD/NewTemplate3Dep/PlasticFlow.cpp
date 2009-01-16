@@ -40,4 +40,10 @@ PlasticFlow::~PlasticFlow()
   
 }
 
+PlasticFlow::PlasticFlow(int classTag)
+  :MovableObject(classTag)
+{
+  
+}
+
 

@@ -44,6 +44,8 @@
 #define DM04_Elastic_CPP
 
 #include "DM04_Elastic.h"
+#include <Channel.h>
+#include <ID.h>
 
 //BJtensor DM04_Elastic::StiffnessH(4, def_dim_4, 0.0);
 
@@ -54,7 +56,7 @@ DM04_Elastic::DM04_Elastic(int G0_in,
                            int e0_in, 
                            const stresstensor& initialStress, 
                            const straintensor& initialStrain)
-: ElasticState(initialStress, initialStrain),
+  : ElasticState(initialStress, initialStrain, ELASTICSTATE_TAGS_DM04_Elastic),
   G0_index(G0_in),
   v_index(v_in),
   Pat_index(Pat_in),
@@ -180,6 +182,72 @@ double DM04_Elastic::gete0(const MaterialParameter &MaterialParameter_in) const
 	}
 	else
 		return MaterialParameter_in.getMaterial_Parameter(e0_index - 1); 
+}
+
+
+int 
+DM04_Elastic::sendSelf(int commitTag, Channel &theChannel)
+{
+  if (theChannel.isDatastore() == 0) {
+    opserr << "DM04_Elastic::sendSelf() - does not send to database due to dbTags\n";
+    return -1;
+  }
+  
+  static ID iData(5);
+  iData(0) = G0_index;
+  iData(1) = v_index;
+  iData(2) = Pat_index;
+  iData(3) = k_c_index;
+  iData(4) = e0_index;
+  int dbTag = this->getDbTag();
+
+  theChannel.sendID(dbTag, commitTag, iData);
+
+  if (Stress.sendSelf(0, commitTag, theChannel) < 0) {
+    opserr << "elnp_Elastic::sendSelf() - failed to send Stress\n";
+    return -1;
+  }
+  if (Strain.sendSelf(0, commitTag, theChannel) < 0) {
+    opserr << "DM04y_Elastic::sendSelf() - failed to send Strain\n";
+    return -1;
+  }
+
+  return 0;
+}
+int 
+DM04_Elastic::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  if (theChannel.isDatastore() == 0) {
+    opserr << "DM04_Elastic::recvSelf() - does not recv from database due to dbTags\n";
+    return -1;
+  }
+
+  static ID iData(5);
+  int dbTag = this->getDbTag();
+
+  if (theChannel.recvID(dbTag, commitTag, iData) < 0) {
+    opserr << "DM04_Elastic::recvSelf() - failed to recv data\n";
+    return -1;
+  }
+
+
+  G0_index = iData(0);
+  v_index = iData(1);
+  Pat_index = iData(2);
+  k_c_index = iData(3);
+  e0_index = iData(4);
+
+  if (Stress.recvSelf(0, commitTag, theChannel) < 0) {
+    opserr << "DM04_Elastic::recvSelf() - failed to recv Stress\n";
+    return -1;
+  }
+  if (Strain.recvSelf(0, commitTag, theChannel) < 0) {
+    opserr << "DM04_Elastic::recvSelf() - failed to recv Strain\n";
+    return -1;
+  }
+
+  return 0;
+
 }
 
 #endif

@@ -44,6 +44,8 @@
 #define PressureDependent_Elastic_CPP
 
 #include "PressureDependent_Elastic.h"
+#include <Channel.h>
+#include <ID.h>
 
 PressureDependent_Elastic::PressureDependent_Elastic(int E0_in, 
                                                      int v_in,
@@ -52,7 +54,7 @@ PressureDependent_Elastic::PressureDependent_Elastic(int E0_in,
                                                      int k_cut_in,
                                                      const stresstensor& initialStress,
                                                      const straintensor& initialStrain)
-: ElasticState(initialStress, initialStrain),
+  : ElasticState(initialStress, initialStrain, ELASTICSTATE_TAGS_PressureDependent_Elastic),
   E0_index(E0_in),
   v_index(v_in),
   m_index(m_in),
@@ -169,6 +171,71 @@ double PressureDependent_Elastic::getk_cut(const MaterialParameter &MaterialPara
 	}
 	else
 		return MaterialParameter_in.getMaterial_Parameter(k_cut_index - 1); 
+}
+
+int 
+PressureDependent_Elastic::sendSelf(int commitTag, Channel &theChannel)
+{
+  if (theChannel.isDatastore() == 0) {
+    opserr << "PressureDependent_Elastic::sendSelf() - does not send to database due to dbTags\n";
+    return -1;
+  }
+  
+  static ID iData(5);
+  iData(0) = E0_index;
+  iData(1) = v_index;
+  iData(2) = m_index;
+  iData(3) = p_ref_index;
+  iData(4) = k_cut_index;
+  int dbTag = this->getDbTag();
+
+  theChannel.sendID(dbTag, commitTag, iData);
+
+  if (Stress.sendSelf(0, commitTag, theChannel) < 0) {
+    opserr << "elnp_Elastic::sendSelf() - failed to send Stress\n";
+    return -1;
+  }
+  if (Strain.sendSelf(0, commitTag, theChannel) < 0) {
+    opserr << "PressureDependenty_Elastic::sendSelf() - failed to send Strain\n";
+    return -1;
+  }
+
+  return 0;
+}
+int 
+PressureDependent_Elastic::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  if (theChannel.isDatastore() == 0) {
+    opserr << "PressureDependent_Elastic::recvSelf() - does not recv from database due to dbTags\n";
+    return -1;
+  }
+
+  static ID iData(5);
+  int dbTag = this->getDbTag();
+
+  if (theChannel.recvID(dbTag, commitTag, iData) < 0) {
+    opserr << "PressureDependent_Elastic::recvSelf() - failed to recv data\n";
+    return -1;
+  }
+
+
+  E0_index = iData(0);
+  v_index = iData(1);
+  m_index = iData(2);
+  p_ref_index = iData(3);
+  k_cut_index = iData(4);
+
+  if (Stress.recvSelf(0, commitTag, theChannel) < 0) {
+    opserr << "PressureDependent_Elastic::recvSelf() - failed to recv Stress\n";
+    return -1;
+  }
+  if (Strain.recvSelf(0, commitTag, theChannel) < 0) {
+    opserr << "PressureDependent_Elastic::recvSelf() - failed to recv Strain\n";
+    return -1;
+  }
+
+  return 0;
+
 }
 
 #endif

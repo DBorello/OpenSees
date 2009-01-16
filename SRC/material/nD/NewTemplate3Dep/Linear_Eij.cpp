@@ -35,9 +35,12 @@
 #define Linear_Eij_CPP
 
 #include "Linear_Eij.h"
+#include <Channel.h>
+#include <ID.h>
 
 Linear_Eij::Linear_Eij(int LinearFactor_index_in)
-: LinearFactor_index(LinearFactor_index_in)
+  :TensorEvolution(TENSOR_EVOLUTION_TAGS_Linear_Eij),
+   LinearFactor_index(LinearFactor_index_in)
 {
 
 }
@@ -64,6 +67,38 @@ double Linear_Eij::getLinearFactor(const MaterialParameter& material_parameter) 
         opserr << "Linear_Eij: Invalid Input. " << endln;
         exit (1);
     }  
+}
+
+int 
+Linear_Eij::sendSelf(int commitTag, Channel &theChannel)
+{
+  static ID iData(1);
+  iData(0) = LinearFactor_index;
+
+  int dbTag = this->getDbTag();
+
+  if (theChannel.sendID(dbTag, commitTag, iData) < 0) {
+    opserr << "Linear_Eij::sendSelf() - failed to send data\n";
+    return -1;
+  }
+
+  return 0;
+}
+
+int 
+Linear_Eij::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  static ID iData(1);
+  int dbTag = this->getDbTag();
+
+  if (theChannel.recvID(dbTag, commitTag, iData) < 0) {
+    opserr << "Linear_Eij::recvSelf() - failed to recv data\n";
+    return -1;
+  }
+
+  LinearFactor_index = iData(0);
+
+  return 0;
 }
 
 #endif

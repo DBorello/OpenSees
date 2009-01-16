@@ -133,8 +133,7 @@ private:
                  const MaterialParameter& pointer_material_parameter, 
                  double alfa ) const;
  
-private:
-   
+private:   
     straintensor TrialStrain;
     stresstensor TrialStress;
     straintensor TrialPlastic_Strain;

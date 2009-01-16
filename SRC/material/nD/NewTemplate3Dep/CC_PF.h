@@ -33,6 +33,8 @@
 #ifndef CC_PF_H
 #define CC_PF_H
 
+#define PLASTICFLOW_TAGS_CC_PF 4
+
 #include "PlasticFlow.h"
 #include <math.h>
 
@@ -49,6 +51,9 @@ class CC_PF : public PlasticFlow
     const straintensor& PlasticFlowTensor(const stresstensor &Stre, 
                                           const straintensor &Stra, 
                                           const MaterialParameter &MaterialParameter_in) const;
+
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
 
   private:
     double getM(const MaterialParameter &MaterialParameter_in) const;

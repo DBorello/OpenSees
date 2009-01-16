@@ -38,12 +38,13 @@
 #include <stresst.h>
 #include "MaterialParameter.h"
 #include "ElasticState.h"
+#include <MovableObject.h>
 
-class ScalarEvolution
+class ScalarEvolution : public MovableObject
 {
   public:
     
-    ScalarEvolution();
+    ScalarEvolution(int classTag);
     virtual ~ScalarEvolution() {};
 
     virtual ScalarEvolution *newObj() = 0;

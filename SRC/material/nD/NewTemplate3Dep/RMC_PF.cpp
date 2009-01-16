@@ -35,13 +35,16 @@
 #define RMC_PF_CPP
 
 #include "RMC_PF.h"
+#include <Channel.h>
+#include <ID.h>
 
 straintensor RMC_PF::RMCm;
 
 //================================================================================
 RMC_PF::RMC_PF(int dilatant_which_in, int index_dilatant_in, int r_which_in, int index_r_in)
-: dilatant_which(dilatant_which_in), index_dilatant(index_dilatant_in), 
-  r_which(r_which_in), index_r(index_r_in)
+  : PlasticFlow(PLASTICFLOW_TAGS_RMC_PF), 
+    dilatant_which(dilatant_which_in), index_dilatant(index_dilatant_in), 
+    r_which(r_which_in), index_r(index_r_in)
 {
 
 }
@@ -167,5 +170,40 @@ double RMC_PF::RoundedFunctiondf2(double s, double r) const
 	return -8.0*(1 - r*r)*cos(s)*sin(s);
 }
 
+int 
+RMC_PF::sendSelf(int commitTag, Channel &theChannel)
+{
+  static ID iData(4);
+  iData(0) = dilatant_which;
+  iData(1) = index_dilatant;
+  iData(2) = r_which;
+  iData(3) = index_r;
+  int dbTag = this->getDbTag();
+
+  if (theChannel.sendID(dbTag, commitTag, iData) < 0) {
+    opserr << "RMC_PF::sendSelf() - failed to send data\n";
+    return -1;
+  }
+
+  return 0;
+}
+int 
+RMC_PF::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  static ID iData(4);
+  int dbTag = this->getDbTag();
+
+  if (theChannel.recvID(dbTag, commitTag, iData) < 0) {
+    opserr << "RMC_PF::recvSelf() - failed to recv data\n";
+    return -1;
+  }
+
+  dilatant_which = iData(0);
+  index_dilatant = iData(1);
+  r_which = iData(2);
+  index_r= iData(3);
+
+  return 0;
+}
 
 #endif

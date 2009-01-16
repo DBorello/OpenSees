@@ -34,6 +34,8 @@
 #ifndef PressureDependent_Elastic_H
 #define PressureDependent_Elastic_H
 
+#define ELASTICSTATE_TAGS_PressureDependent_Elastic 3
+
 #include "ElasticState.h"
 #include <math.h>
 
@@ -44,16 +46,19 @@ class PressureDependent_Elastic : public ElasticState
 {  
   public:
   
-  PressureDependent_Elastic(int E0_in, 
-                            int v_in,
-                            int m_in,
-                            int p_ref_in,
-                            int k_cut_in,
+  PressureDependent_Elastic(int E0_in =0, 
+                            int v_in =0,
+                            int m_in =0,
+                            int p_ref_in =0,
+                            int k_cut_in =0,
                             const stresstensor& initialStress = zerostress,
                             const straintensor& initialStrain = zerostrain);
     ElasticState* newObj();
     
     const BJtensor& getElasticStiffness(const MaterialParameter &MaterialParameter_in) const;
+
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
     
   private:
   

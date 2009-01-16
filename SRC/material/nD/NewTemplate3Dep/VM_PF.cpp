@@ -35,13 +35,16 @@
 #define VM_PF_CPP
 
 #include "VM_PF.h"
+#include <Channel.h>
+#include <ID.h>
 
 straintensor VM_PF::VMm;
 stresstensor VM_PF::VMb;
 
 //================================================================================
 VM_PF::VM_PF(int alpha_which_in, int index_alpha_in)
-: alpha_which(alpha_which_in), index_alpha(index_alpha_in)
+  : PlasticFlow(PLASTICFLOW_TAGS_VM_PF),
+    alpha_which(alpha_which_in), index_alpha(index_alpha_in)
 {
 
 }
@@ -93,6 +96,39 @@ const stresstensor& VM_PF::getalpha(const MaterialParameter &MaterialParameter_i
 	opserr << "Warning!! VM_PF: Invalid Input. " << endln;
 	exit (1);
 }
+
+int 
+VM_PF::sendSelf(int commitTag, Channel &theChannel)
+{
+  static ID iData(2);
+  iData(0) = alpha_which;
+  iData(1) = index_alpha;
+  int dbTag = this->getDbTag();
+
+  if (theChannel.sendID(dbTag, commitTag, iData) < 0) {
+    opserr << "VM_PF::sendSelf() - failed to send data\n";
+    return -1;
+  }
+
+  return 0;
+}
+int 
+VM_PF::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  static ID iData(2);
+  int dbTag = this->getDbTag();
+
+  if (theChannel.recvID(dbTag, commitTag, iData) < 0) {
+    opserr << "VM_PF::recvSelf() - failed to recv data\n";
+    return -1;
+  }
+
+  alpha_which = iData(0);
+  index_alpha = iData(1);
+
+  return 0;
+}
+
 
 #endif
 

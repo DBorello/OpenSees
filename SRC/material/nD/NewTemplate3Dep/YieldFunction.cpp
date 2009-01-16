@@ -36,6 +36,11 @@
 
 #include "YieldFunction.h"
 
+YieldFunction::YieldFunction(int classTag)
+  :MovableObject(classTag)
+{
+
+}
 double YieldFunction::InScalarDerivative(const stresstensor& Stre, 
                                          const MaterialParameter &MaterialParameter_in, 
                                          int which) const

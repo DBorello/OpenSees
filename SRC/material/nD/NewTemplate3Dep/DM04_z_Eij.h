@@ -34,22 +34,27 @@
 #ifndef DM04_z_Eij_H
 #define DM04_z_Eij_H 
 
+#define TENSOR_EVOLUTION_TAGS_DM04_z_Eij 4
+
 #include "TensorEvolution.h"
 
 class DM04_z_Eij : public TensorEvolution
 {
   public:
   
-    DM04_z_Eij(int m_index_in,
-               int c_z_index_in,
-               int z_max_index_in,
-               int alpha_index_in,
-               int z_index_in);
+    DM04_z_Eij(int m_index_in =0,
+               int c_z_index_in =0,
+               int z_max_index_in =0,
+               int alpha_index_in =0,
+               int z_index_in =0);
 
     TensorEvolution* newObj();
 
     const straintensor& Hij(const straintensor& plastic_flow, const stresstensor& Stre, 
                             const straintensor& Stra, const MaterialParameter& material_parameter);
+
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
        
   private:
   

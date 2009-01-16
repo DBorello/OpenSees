@@ -43,6 +43,8 @@
 #define elnp_Elastic_CPP
 
 #include "elnp_Elastic.h"
+#include <Channel.h>
+#include <ID.h>
 
 //BJtensor elnp_Elastic::StiffnessH(4, def_dim_4, 0.0);
 
@@ -52,7 +54,7 @@ elnp_Elastic::elnp_Elastic(int kappa_in,
                            int e0_in,
                            const stresstensor& initialStress,
                            const straintensor& initialStrain)
-: ElasticState(initialStress, initialStrain),
+  : ElasticState(initialStress, initialStrain, ELASTICSTATE_TAGS_elnp_Elastic),
   kappa_index(kappa_in),
   v_index(v_in),
   K_c_index(K_c_in),
@@ -153,6 +155,68 @@ double elnp_Elastic::gete0(const MaterialParameter &MaterialParameter_in) const
     }
     else
         return MaterialParameter_in.getMaterial_Parameter(e0_index - 1); 
+}
+
+int 
+elnp_Elastic::sendSelf(int commitTag, Channel &theChannel)
+{
+  if (theChannel.isDatastore() == 0) {
+    opserr << "elnp_Elastic::sendSelf() - does not send to database due to dbTags\n";
+    return -1;
+  }
+  
+  static ID iData(4);
+  iData(0) = kappa_index;
+  iData(1) = v_index;
+  iData(2) = K_c_index;
+  iData(3) = e0_index;
+  int dbTag = this->getDbTag();
+
+  theChannel.sendID(dbTag, commitTag, iData);
+
+  if (Stress.sendSelf(0, commitTag, theChannel) < 0) {
+    opserr << "elnp_Elastic::sendSelf() - failed to send Stress\n";
+    return -1;
+  }
+  if (Strain.sendSelf(0, commitTag, theChannel) < 0) {
+    opserr << "elnp_Elastic::sendSelf() - failed to send Strain\n";
+    return -1;
+  }
+
+  return 0;
+}
+int 
+elnp_Elastic::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  if (theChannel.isDatastore() == 0) {
+    opserr << "elnp_Elastic::recvSelf() - does not recv from database due to dbTags\n";
+    return -1;
+  }
+
+  static ID iData(4);
+  int dbTag = this->getDbTag();
+
+  if (theChannel.recvID(dbTag, commitTag, iData) < 0) {
+    opserr << "elnp_Elastic::recvSelf() - failed to recv data\n";
+    return -1;
+  }
+
+
+  kappa_index = iData(0);
+  v_index = iData(1);
+  K_c_index = iData(2);
+  e0_index = iData(3);
+
+  if (Stress.recvSelf(0, commitTag, theChannel) < 0) {
+    opserr << "elnp_Elastic::recvSelf() - failed to recv Stress\n";
+    return -1;
+  }
+  if (Strain.recvSelf(0, commitTag, theChannel) < 0) {
+    opserr << "elnp_Elastic::recvSelf() - failed to recv Strain\n";
+    return -1;
+  }
+
+  return 0;
 }
 
 #endif

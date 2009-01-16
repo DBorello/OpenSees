@@ -35,6 +35,8 @@
 #define RMC_YF_CPP
 
 #include "RMC_YF.h"
+#include <Channel.h>
+#include <ID.h>
 
 stresstensor RMC_YF::RMCst;
 
@@ -42,9 +44,10 @@ stresstensor RMC_YF::RMCst;
 RMC_YF::RMC_YF(int a_which_in, int index_a_in, 
              int k_which_in, int index_k_in, 
              int r_which_in, int index_r_in)
-: a_which(a_which_in), index_a(index_a_in), 
-  k_which(k_which_in), index_k(index_k_in),
-  r_which(r_which_in), index_r(index_r_in)
+  : YieldFunction(YIELDFUNCTION_TAGS_RMC_YF),
+    a_which(a_which_in), index_a(index_a_in), 
+    k_which(k_which_in), index_k(index_k_in),
+    r_which(r_which_in), index_r(index_r_in)
 {
 
 }
@@ -269,4 +272,47 @@ double RMC_YF::RoundedFunction(double s, double r) const
 	return f1/f2;
 }
 
+int 
+RMC_YF::sendSelf(int commitTag, Channel &theChannel)
+{
+  static ID iData(6);
+  iData(0) = a_which;
+  iData(1) = index_a;
+  iData(2) = k_which;
+  iData(3) = index_k;
+  iData(4) = r_which;
+  iData(5) = index_r;
+  int dbTag = this->getDbTag();
+
+  if (theChannel.sendID(dbTag, commitTag, iData) != 0) {
+    opserr << "RMC_YF::sendSelf() - failed to send data\n";
+    return -1;
+  }
+
+  return 0;
+}
+
+int 
+RMC_YF::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  static ID iData(6);
+  int dbTag = this->getDbTag();
+
+  if (theChannel.recvID(dbTag, commitTag, iData) < 0) {
+    opserr << "RMC_YF::recvSelf() - failed to recv data\n";
+    return -1;
+  }
+
+
+  a_which = iData(0);
+  index_a = iData(1);
+  k_which = iData(2);
+  index_k = iData(3);
+  r_which = iData(4);
+  index_r = iData(5);
+
+  return 0;
+
+}
 #endif
+

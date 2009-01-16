@@ -34,32 +34,37 @@
 #ifndef DM04_alpha_Eij_H
 #define DM04_alpha_Eij_H 
 
+#define TENSOR_EVOLUTION_TAGS_DM04_alpha_Eij 3
+
 #include "TensorEvolution.h"
 
 class DM04_alpha_Eij : public TensorEvolution
 {
   public:
   
-    DM04_alpha_Eij(int e0_index_in,
-                   int e_r_index_in,
-                   int lambda_c_index_in,
-                   int xi_index_in,
-                   int Pat_index_in,
-                   int m_index_in,
-                   int M_cal_index_in,
-                   int cc_index_in,
-                   int nb_index_in,
-                   int h0_index_in,
-                   int ch_index_in,
-                   int G0_index_in,
-                   int alpha_index_in,
-                   int z_index_in);
+    DM04_alpha_Eij(int e0_index_in =0,
+                   int e_r_index_in =0,
+                   int lambda_c_index_in =0,
+                   int xi_index_in =0,
+                   int Pat_index_in =0,
+                   int m_index_in =0,
+                   int M_cal_index_in =0,
+                   int cc_index_in =0,
+                   int nb_index_in =0,
+                   int h0_index_in =0,
+                   int ch_index_in =0,
+                   int G0_index_in =0,
+                   int alpha_index_in =0,
+                   int z_index_in =0);
 
     TensorEvolution* newObj();
 
     const straintensor& Hij(const straintensor& plastic_flow, const stresstensor& Stre, 
                             const straintensor& Stra, const MaterialParameter& material_parameter);
-       
+
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
+              
   private:
     
     double gete0(const MaterialParameter& material_parameter) const; 

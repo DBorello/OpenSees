@@ -36,6 +36,8 @@
 
 #include "ElasticState.h"
 
+#define ELASTICSTATE_TAGS_elnp_Elastic 2
+
 //stresstensor zerostress;
 //straintensor zerostrain;
 
@@ -43,16 +45,20 @@ class elnp_Elastic : public ElasticState
 {  
   public:
   
-    elnp_Elastic(int kappa_in, 
-                 int v_in, 
-                 int K_c_in,
-                 int e0_in,
+    elnp_Elastic(int kappa_in =0, 
+                 int v_in =0, 
+                 int K_c_in =0,
+                 int e0_in =0,
                  const stresstensor& initialStress = zerostress, 
                  const straintensor& initialStrain = zerostrain);
+
                                        
     ElasticState* newObj();
     
     const BJtensor& getElasticStiffness(const MaterialParameter &MaterialParameter_in) const;
+
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
     
   private:
   

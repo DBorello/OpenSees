@@ -35,9 +35,12 @@
 #define Linear_Eeq_CPP
 
 #include "Linear_Eeq.h"
+#include <Channel.h>
+#include <ID.h>
 
 Linear_Eeq::Linear_Eeq(int LinearFactor_index_in)
-: LinearFactor_index(LinearFactor_index_in)
+  : ScalarEvolution(SCALAR_EVOLUTION_TAGS_Linear_Eeq), 
+    LinearFactor_index(LinearFactor_index_in)
 {
 
 }
@@ -65,6 +68,35 @@ double Linear_Eeq::getLinearFactor(const MaterialParameter& material_parameter) 
     }
 } 
 
+int 
+Linear_Eeq::sendSelf(int commitTag, Channel &theChannel)
+{
+  static ID iData(1);
+  iData(0) = LinearFactor_index;
+  int dbTag = this->getDbTag();
+
+  if (theChannel.sendID(dbTag, commitTag, iData) < 0) {
+    opserr << "Linear_Eeq::sendSelf() - failed to send data\n";
+    return -1;
+  }
+
+  return 0;
+}
+int 
+Linear_Eeq::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  static ID iData(1);
+  int dbTag = this->getDbTag();
+
+  if (theChannel.recvID(dbTag, commitTag, iData) < 0) {
+    opserr << "Linear_Eeq::recvSelf() - failed to recv data\n";
+    return -1;
+  }
+
+  LinearFactor_index = iData(0);
+
+  return 0;
+}
 
 #endif
 

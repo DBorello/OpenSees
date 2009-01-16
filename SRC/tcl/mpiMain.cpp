@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2008-03-20 22:05:00 $
+// $Revision: 1.11 $
+// $Date: 2009-01-16 00:04:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/mpiMain.cpp,v $
 
 /* 
@@ -35,7 +35,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: mpiMain.cpp,v 1.10 2008-03-20 22:05:00 fmk Exp $
+ * RCS: @(#) $Id: mpiMain.cpp,v 1.11 2009-01-16 00:04:20 fmk Exp $
  */
 
 extern "C" {
@@ -297,7 +297,7 @@ int Tcl_AppInit(Tcl_Interp *interp)
      * they weren't already created by the init procedures called above.
      */
 
-    if (g3AppInit(interp) < 0)
+    if (OpenSeesAppInit(interp) < 0)
 	return TCL_ERROR;
 
     /*

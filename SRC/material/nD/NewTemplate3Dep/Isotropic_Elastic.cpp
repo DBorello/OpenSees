@@ -36,16 +36,20 @@
 
 #include "Isotropic_Elastic.h"
 
+#include <ID.h>
+#include <Channel.h>
+
 Isotropic_Elastic::Isotropic_Elastic(int E_in,
                                int v_in,
                                const stresstensor& initialStress, 
                                const straintensor& initialStrain)
-: ElasticState(initialStress, initialStrain),
+  : ElasticState(initialStress, initialStrain, ELASTICSTATE_TAGS_Isotropic_Elastic),
   E_index(E_in),
   v_index(v_in)
 {
 
 }
+
 
 // Create a new 
 ElasticState* Isotropic_Elastic::newObj() 
@@ -106,5 +110,65 @@ double Isotropic_Elastic::getv(const MaterialParameter &MaterialParameter_in) co
       return MaterialParameter_in.getMaterial_Parameter(v_index - 1);  
 }
 
+int 
+Isotropic_Elastic::sendSelf(int commitTag, Channel &theChannel)
+{
+  if (theChannel.isDatastore() == 0) {
+    opserr << "Isotropic_Elastic::sendSelf() - does not send to database due to dbTags\n";
+    return -1;
+  }
+  
+  static ID iData(2);
+  iData(0) = E_index;
+  iData(1) = v_index;
+  int dbTag = this->getDbTag();
+
+  theChannel.sendID(dbTag, commitTag, iData);
+
+
+  if (Stress.sendSelf(0, commitTag, theChannel) < 0) {
+    opserr << "Isotropic_Elastic::sendSelf() - failed to send Stress\n";
+    return -1;
+  }
+  if (Strain.sendSelf(0, commitTag, theChannel) < 0) {
+    opserr << "Isotropic_Elastic::sendSelf() - failed to send Strain\n";
+    return -1;
+  }
+
+  return 0;
+}
+
+int 
+Isotropic_Elastic::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  if (theChannel.isDatastore() == 0) {
+    opserr << "Isotropic_Elastic::recvSelf() - does not recv from database due to dbTags\n";
+    return -1;
+  }
+
+  static ID iData(2);
+  int dbTag = this->getDbTag();
+
+  if (theChannel.recvID(dbTag, commitTag, iData) < 0) {
+    opserr << "Isotropic_Elastic::recvSelf() - failed to recv data\n";
+    return -1;
+  }
+
+
+  E_index = iData(0);
+  v_index = iData(1);
+
+  if (Stress.recvSelf(0, commitTag, theChannel) < 0) {
+    opserr << "Isotropic_Elastic::recvSelf() - failed to recv Stress\n";
+    return -1;
+  }
+  if (Strain.recvSelf(0, commitTag, theChannel) < 0) {
+    opserr << "Isotropic_Elastic::recvSelf() - failed to recv Strain\n";
+    return -1;
+  }
+
+  return 0;
+
+}
 #endif
 

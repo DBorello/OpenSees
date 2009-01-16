@@ -34,6 +34,8 @@
 #ifndef AF_Eij_H
 #define AF_Eij_H 
 
+#define TENSOR_EVOLUTION_TAGS_AF_Eij 2
+
 #include "TensorEvolution.h"
 
 
@@ -41,15 +43,18 @@ class AF_Eij : public TensorEvolution
 {
   public:
   
-    AF_Eij(int ha_index_in,
-           int Cr_index_in,
-           int alpha_index_in);
+    AF_Eij(int ha_index_in =0,
+           int Cr_index_in =0,
+           int alpha_index_in =0);
 
     TensorEvolution* newObj();
 
     const straintensor& Hij(const straintensor& plastic_flow, const stresstensor& Stre, 
                             const straintensor& Stra, const MaterialParameter& material_parameter);
-       
+
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
+              
   private:
   
     double getha(const MaterialParameter& material_parameter) const;

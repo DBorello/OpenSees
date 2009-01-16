@@ -36,11 +36,12 @@
 #include <stresst.h>
 #include <straint.h>
 #include "MaterialParameter.h"
+#include <MovableObject.h>
 
-class PlasticFlow
+class PlasticFlow : public MovableObject
 {
   public:
-  
+    PlasticFlow(int classTag);
     virtual ~PlasticFlow();
     
     virtual PlasticFlow *newObj() = 0;

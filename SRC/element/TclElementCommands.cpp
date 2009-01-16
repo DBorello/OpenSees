@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.48 $
-// $Date: 2009-01-13 21:47:27 $
+// $Revision: 1.49 $
+// $Date: 2009-01-16 00:03:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -702,10 +702,8 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
 	return TCL_ERROR;
       }
     }
+  }
 
- 
-    // element type not recognized
-	opserr << "WARNING could not create element, unknown type:" << argv[1] << endln;
-    return TCL_ERROR;
-  }    
+  opserr << "WARNING could not create element, unknown type:" << argv[1] << endln;
+  return TCL_ERROR;
 }

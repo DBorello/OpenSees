@@ -40,14 +40,17 @@
 #define DM04_YF_CPP
 
 #include "DM04_YF.h"
+#include <Channel.h>
+#include <ID.h>
 
 stresstensor DM04_YF::DM04st;
 
 //================================================================================
 DM04_YF::DM04_YF(int m_which_in, int index_m_in, 
                  int alpha_which_in, int index_alpha_in)
-: m_which(m_which_in), index_m(index_m_in), 
-  alpha_which(alpha_which_in), index_alpha(index_alpha_in)
+  : YieldFunction(YIELDFUNCTION_TAGS_DM04_YF), 
+    m_which(m_which_in), index_m(index_m_in), 
+    alpha_which(alpha_which_in), index_alpha(index_alpha_in)
 {
 
 }
@@ -177,5 +180,40 @@ const stresstensor& DM04_YF::getalpha(const MaterialParameter &MaterialParameter
 	}
 }
 
+int 
+DM04_YF::sendSelf(int commitTag, Channel &theChannel)
+{
+  static ID iData(4);
+  iData(0) = m_which;
+  iData(1) = index_m;
+  iData(2) = alpha_which;
+  iData(3) = index_alpha;
+  int dbTag = this->getDbTag();
+
+  if (theChannel.sendID(dbTag, commitTag, iData) < 0) {
+    opserr << "DM04_YF::sendSelf() - failed to send data\n";
+    return -1;
+  }
+
+  return 0;
+}
+int 
+DM04_YF::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  static ID iData(4);
+  int dbTag = this->getDbTag();
+
+  if (theChannel.recvID(dbTag, commitTag, iData) < 0) {
+    opserr << "DM04_YF::recvSelf() - failed to recv data\n";
+    return -1;
+  }
+
+  m_which = iData(0);
+  index_m = iData(1);
+  alpha_which = iData(2);
+  index_alpha = iData(3);
+
+  return 0;
+}
 #endif
 

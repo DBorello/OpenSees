@@ -52,6 +52,8 @@
 #define DM04_alpha_Eij_CPP
 
 #include "DM04_alpha_Eij.h"
+#include <Channel.h>
+#include <ID.h>
 
 stresstensor DM04_alpha_Eij::DM04_alpha_t;
 
@@ -69,20 +71,21 @@ DM04_alpha_Eij::DM04_alpha_Eij(int e0_index_in,
                                int G0_index_in,
                                int alpha_index_in,
                                int z_index_in)
-: e0_index(e0_index_in),
-  e_r_index(e_r_index_in), 
-  lambda_c_index(lambda_c_index_in),
-  xi_index(xi_index_in),
-  Pat_index(Pat_index_in),
-  m_index(m_index_in),  
-  M_cal_index(M_cal_index_in),
-  cc_index(cc_index_in),
-  nb_index(nb_index_in),
-  h0_index(h0_index_in),   
-  ch_index(ch_index_in),
-  G0_index(G0_index_in),
-  alpha_index(alpha_index_in),
-  z_index(z_index_in) 
+  :TensorEvolution(TENSOR_EVOLUTION_TAGS_DM04_alpha_Eij),
+   e0_index(e0_index_in),
+   e_r_index(e_r_index_in), 
+   lambda_c_index(lambda_c_index_in),
+   xi_index(xi_index_in),
+   Pat_index(Pat_index_in),
+   m_index(m_index_in),  
+   M_cal_index(M_cal_index_in),
+   cc_index(cc_index_in),
+   nb_index(nb_index_in),
+   h0_index(h0_index_in),   
+   ch_index(ch_index_in),
+   G0_index(G0_index_in),
+   alpha_index(alpha_index_in),
+   z_index(z_index_in) 
 {
    a_index = 0;
    stresstensor zT;
@@ -364,6 +367,67 @@ double DM04_alpha_Eij::getg(double c, double cos3theta) const
     return 2.0 * c / ( (1.0+c) - (1.0-c)*cos3theta );
 }
 
+
+int
+DM04_alpha_Eij::sendSelf(int commitTag, Channel &theChannel)
+{
+  static ID iData(14);
+
+  iData(0) = e0_index;
+  iData(1) = e_r_index;
+  iData(2) = lambda_c_index;
+  iData(3) = xi_index;
+  iData(4) = Pat_index;
+  iData(5) = M_cal_index;
+  iData(6) = m_index;
+  iData(7) = cc_index;
+  iData(8) = nb_index;
+  iData(9) = h0_index;
+  iData(10) = ch_index;
+  iData(11) = G0_index;
+  iData(12) = alpha_index;
+  iData(13) = z_index;
+
+
+  int dbTag = this->getDbTag();
+
+  if (theChannel.sendID(dbTag, commitTag, iData) < 0) {
+    opserr << "DM04_alpha_Eij::sendSelf() - failed to send data\n";
+    return -1;
+  }
+
+  return 0;
+}
+
+int 
+DM04_alpha_Eij::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  static ID iData(14);
+  int dbTag = this->getDbTag();
+
+  if (theChannel.recvID(dbTag, commitTag, iData) < 0) {
+    opserr << "DM04_alpha_Eij::recvSelf() - failed to recv data\n";
+    return -1;
+  }
+
+  e0_index = iData(0);
+  e_r_index = iData(1);
+  lambda_c_index = iData(2);
+  xi_index = iData(3);
+  Pat_index = iData(4);
+  m_index = iData(5);
+  M_cal_index = iData(6);
+  cc_index = iData(7);
+  nb_index = iData(8);
+  h0_index = iData(9);
+  ch_index = iData(10);
+  G0_index = iData(11);
+  alpha_index = iData(12);
+  z_index = iData(13);
+
+
+  return 0;
+}
 
 #endif
 

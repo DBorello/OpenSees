@@ -35,11 +35,12 @@
 
 #include <stresst.h>
 #include "MaterialParameter.h"
+#include <MovableObject.h>
 
-class YieldFunction
+class YieldFunction : public MovableObject
 {
   public:    
-
+  YieldFunction(int classTag);
     virtual ~YieldFunction() {};
     virtual YieldFunction *newObj() = 0;
   

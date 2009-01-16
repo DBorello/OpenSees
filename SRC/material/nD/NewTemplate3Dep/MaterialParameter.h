@@ -34,9 +34,12 @@
 #ifndef MaterialParameter_H
 #define MaterialParameter_H
 
+#define MATERIAL_PARAMATER_TAGS_MaterialParameter 1
+
+#include <MovableObject.h>
 #include <stresst.h>
 		
-class MaterialParameter
+class MaterialParameter : public MovableObject
 {  
   public:
 
@@ -50,7 +53,6 @@ class MaterialParameter
                       int Num_Material_Parameter_in, 
 		      const stresstensor *Internal_Tensor_in, 
 		      int Num_Internal_Tensor_in);
-    MaterialParameter( );
     ~MaterialParameter( );
     MaterialParameter(const MaterialParameter &refer_MaterialParameter);
     MaterialParameter* newObj();
@@ -65,6 +67,9 @@ class MaterialParameter
     int setMaterial_Parameter(int which, double newMaterial_Parameter);
     int setInternal_Scalar(int which, double newInternal_Scalar);
     int setInternal_Tensor(int which, const stresstensor &newInternal_Tensor);    
+
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
   
   private:
                  

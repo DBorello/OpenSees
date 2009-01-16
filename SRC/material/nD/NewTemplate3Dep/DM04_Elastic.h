@@ -34,6 +34,8 @@
 #ifndef DM04_Elastic_H
 #define DM04_Elastic_H
 
+#define ELASTICSTATE_TAGS_DM04_Elastic 4
+
 #include "ElasticState.h"
 #include <math.h>
 
@@ -44,17 +46,20 @@ class DM04_Elastic : public ElasticState
 {  
   public:
   
-    DM04_Elastic(int G0_in, 
-                 int v_in,
-                 int Pat_in,
-                 int k_c_in,
-                 int e0_in,
+    DM04_Elastic(int G0_in =0, 
+                 int v_in =0,
+                 int Pat_in =0,
+                 int k_c_in =0,
+                 int e0_in =0,
                  const stresstensor& initialStress = zerostress, 
                  const straintensor& initialStrain = zerostrain);                    
     
     ElasticState* newObj();
     
     const BJtensor& getElasticStiffness (const MaterialParameter &MaterialParameter_in) const;
+
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
 
     stresstensor getStress() const;    
     

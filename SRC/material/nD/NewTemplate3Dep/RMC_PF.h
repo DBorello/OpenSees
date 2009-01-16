@@ -33,7 +33,10 @@
 #ifndef RMC_PF_H
 #define RMC_PF_H
 
+#define PLASTICFLOW_TAGS_RMC_PF 2
+
 #include "PlasticFlow.h"
+
 #include <math.h>
 
 class RMC_PF : public PlasticFlow
@@ -50,17 +53,21 @@ class RMC_PF : public PlasticFlow
                                           const straintensor &Stra, 
                                           const MaterialParameter &MaterialParameter_in) const;
 
+
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
+
   private:
      
     double getdilatant(const MaterialParameter &MaterialParameter_in) const;
     double getr(const MaterialParameter &MaterialParameter_in) const; 
     
     double RoundedFunctionf1(double s, double r) const;
-	double RoundedFunctionf2(double s, double r) const;
-	double RoundedFunctiondf1(double s, double r) const;
-	double RoundedFunctiondf2(double s, double r) const;    
-
-  private:
+    double RoundedFunctionf2(double s, double r) const;
+    double RoundedFunctiondf1(double s, double r) const;
+    double RoundedFunctiondf2(double s, double r) const;    
+    
+ private:
     
     int dilatant_which;
     int index_dilatant;

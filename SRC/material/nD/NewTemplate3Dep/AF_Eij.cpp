@@ -36,15 +36,18 @@
 #include <OPS_Globals.h>
 
 #include "AF_Eij.h"
+#include <Channel.h>
+#include <ID.h>
 	
 stresstensor AF_Eij::AFal;
 
 AF_Eij::AF_Eij(int ha_index_in, 
                int Cr_index_in,
                int alpha_index_in)
-: ha_index(ha_index_in), 
-  Cr_index(Cr_index_in),
-  alpha_index(alpha_index_in)
+  :TensorEvolution(TENSOR_EVOLUTION_TAGS_AF_Eij),
+   ha_index(ha_index_in), 
+   Cr_index(Cr_index_in),
+   alpha_index(alpha_index_in)
 {
 
 }
@@ -100,6 +103,43 @@ const stresstensor& AF_Eij::getalpha(const MaterialParameter& material_parameter
         opserr << "AF_Eij: Invalid Input of " << alpha_index << endln;
         exit (1);
     }
+}
+
+int
+AF_Eij::sendSelf(int commitTag, Channel &theChannel)
+{
+  static ID iData(3);
+
+  iData(0) = ha_index;
+  iData(1) = Cr_index;
+  iData(2) = alpha_index;
+
+  int dbTag = this->getDbTag();
+
+  if (theChannel.sendID(dbTag, commitTag, iData) < 0) {
+    opserr << "AF_Eij::sendSelf() - failed to send data\n";
+    return -1;
+  }
+
+  return 0;
+}
+
+int 
+AF_Eij::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  static ID iData(3);
+  int dbTag = this->getDbTag();
+
+  if (theChannel.recvID(dbTag, commitTag, iData) < 0) {
+    opserr << "AF_Eij::recvSelf() - failed to recv data\n";
+    return -1;
+  }
+
+  ha_index = iData(0);
+  Cr_index = iData(1);
+  alpha_index = iData(2);
+
+  return 0;
 }
 
 #endif

@@ -38,35 +38,36 @@
 #include <stresst.h>
 #include <straint.h>
 #include "MaterialParameter.h"
+#include <MovableObject.h>
 
-class ElasticState
+class ElasticState : public MovableObject
 {  
   public:
     
-    ElasticState(const stresstensor &initialStress, const straintensor &initialStrain);
-    ElasticState(const stresstensor &initialStress);
-    ElasticState();
+  ElasticState(const stresstensor &initialStress, const straintensor &initialStrain, int classTag);
+  ElasticState(const stresstensor &initialStress, int classTag);
+  ElasticState(int classTag);
     
-    virtual ~ElasticState() {};
-    virtual ElasticState* newObj() = 0;
-
-    virtual stresstensor getStress() const;
-    virtual straintensor getStrain() const;
-    
-    virtual const BJtensor &getElasticStiffness (const MaterialParameter &MatPar_in) const = 0;
-    
-    virtual int setStress(const stresstensor &Stre_in);
-    virtual int setStrain(const straintensor &Stra_in);
+  virtual ~ElasticState() {};
+  virtual ElasticState* newObj() = 0;
+  
+  virtual stresstensor getStress() const;
+  virtual straintensor getStrain() const;
+  
+  virtual const BJtensor &getElasticStiffness (const MaterialParameter &MatPar_in) const = 0;
+  
+  virtual int setStress(const stresstensor &Stre_in);
+  virtual int setStrain(const straintensor &Stra_in);
   
   protected:                 
     
-    stresstensor Stress;
-    straintensor Strain; 
-    
-    static BJtensor ElasticStiffness;
-    static const stresstensor zerostress;
-    static const straintensor zerostrain;
-
+  stresstensor Stress;
+  straintensor Strain; 
+  
+  static BJtensor ElasticStiffness;
+  static const stresstensor zerostress;
+  static const straintensor zerostrain;
+  
 };
 
 

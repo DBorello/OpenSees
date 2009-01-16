@@ -38,7 +38,8 @@
 
 straintensor TensorEvolution::TensorEvolutionHij;
 
-TensorEvolution::TensorEvolution()
+TensorEvolution::TensorEvolution(int tag)
+  :MovableObject(tag)
 {
 
 }

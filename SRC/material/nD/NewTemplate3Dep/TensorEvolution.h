@@ -38,12 +38,13 @@
 #include <straint.h>
 #include "MaterialParameter.h"
 #include "ElasticState.h"
+#include <MovableObject.h>
 
-class TensorEvolution
+class TensorEvolution : public MovableObject
 {
   public:
     
-    TensorEvolution();
+    TensorEvolution(int classTag);
     virtual ~TensorEvolution(){};
     
     virtual TensorEvolution *newObj() = 0;

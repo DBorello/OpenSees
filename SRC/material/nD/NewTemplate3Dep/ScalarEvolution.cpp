@@ -36,7 +36,8 @@
 
 #include "ScalarEvolution.h"
 
-ScalarEvolution::ScalarEvolution()
+ScalarEvolution::ScalarEvolution(int tag)
+  :MovableObject(tag)
 {
 
 }

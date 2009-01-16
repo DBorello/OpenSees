@@ -50,6 +50,8 @@
 #define DM04_PF_CPP
 
 #include "DM04_PF.h"
+#include <Channel.h>
+#include <ID.h>
 
 straintensor DM04_PF::DM04m;
 stresstensor DM04_PF::DM04temp;
@@ -67,18 +69,19 @@ DM04_PF::DM04_PF(int e0_which_in, int index_e0_in,
                  int nd_which_in, int index_nd_in,
                  int alpha_which_in, int index_alpha_in,
                  int z_which_in, int index_z_in)
-: e0_which(e0_which_in), index_e0(index_e0_in), 
-  e_r_which(e_r_which_in), index_e_r(index_e_r_in), 
-  lambda_c_which(lambda_c_which_in), index_lambda_c(index_lambda_c_in),
-  xi_which(xi_which_in), index_xi(index_xi_in),
-  Pat_which(Pat_which_in), index_Pat(index_Pat_in),
-  m_which(m_which_in), index_m(index_m_in),
-  M_cal_which(M_cal_which_in), index_M_cal(index_M_cal_in),
-  cc_which(cc_which_in), index_cc(index_cc_in),
-  A0_which(A0_which_in), index_A0(index_A0_in),
-  nd_which(nd_which_in), index_nd(index_nd_in),
-  alpha_which(alpha_which_in), index_alpha(index_alpha_in),
-  z_which(z_which_in), index_z(index_z_in)
+  : PlasticFlow(PLASTICFLOW_TAGS_DM04_PF), 
+    e0_which(e0_which_in), index_e0(index_e0_in), 
+    e_r_which(e_r_which_in), index_e_r(index_e_r_in), 
+    lambda_c_which(lambda_c_which_in), index_lambda_c(index_lambda_c_in),
+    xi_which(xi_which_in), index_xi(index_xi_in),
+    Pat_which(Pat_which_in), index_Pat(index_Pat_in),
+    m_which(m_which_in), index_m(index_m_in),
+    M_cal_which(M_cal_which_in), index_M_cal(index_M_cal_in),
+    cc_which(cc_which_in), index_cc(index_cc_in),
+    A0_which(A0_which_in), index_A0(index_A0_in),
+    nd_which(nd_which_in), index_nd(index_nd_in),
+    alpha_which(alpha_which_in), index_alpha(index_alpha_in),
+    z_which(z_which_in), index_z(index_z_in)
 {
 
 }
@@ -344,6 +347,82 @@ double DM04_PF::getg(double c, double cos3theta) const
     return 2.0 * c / ( (1.0+c) - (1.0-c)*cos3theta );
 }
 
+int 
+DM04_PF::sendSelf(int commitTag, Channel &theChannel)
+{
+  static ID iData(24);
+  iData(0) = e0_which;
+  iData(1) = index_e0;
+  iData(2) = e_r_which;
+  iData(3) = index_e_r;
+  iData(4) = lambda_c_which;
+  iData(5) = index_lambda_c;
+  iData(6) = xi_which;
+  iData(7) = index_xi;
+  iData(8) = Pat_which;
+  iData(9) = index_Pat;
+  iData(10) = m_which;
+  iData(11) = index_m;
+  iData(12) = M_cal_which;
+  iData(13) = index_M_cal;
+  iData(14) = cc_which;
+  iData(15) = index_cc;
+  iData(16) = A0_which;
+  iData(17) = index_A0;
+  iData(18) = nd_which;
+  iData(19) = index_nd;
+  iData(20) = alpha_which;
+  iData(21) = index_alpha;
+  iData(22) = z_which;
+  iData(23) = index_z;
+
+  int dbTag = this->getDbTag();
+
+  if (theChannel.sendID(dbTag, commitTag, iData) < 0) {
+    opserr << "DM04_PF::sendSelf() - failed to send data\n";
+    return -1;
+  }
+
+  return 0;
+}
+int 
+DM04_PF::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  static ID iData(4);
+  int dbTag = this->getDbTag();
+
+  if (theChannel.recvID(dbTag, commitTag, iData) < 0) {
+    opserr << "DM04_PF::recvSelf() - failed to recv data\n";
+    return -1;
+  }
+
+  e0_which = iData(0);
+  index_e0 = iData(1);
+  e_r_which = iData(2);
+  index_e_r = iData(3);
+  lambda_c_which = iData(4);
+  index_lambda_c =iData(5);
+  xi_which = iData(6);
+  index_xi= iData(7);
+  Pat_which = iData(8);
+  index_Pat = iData(9);
+  m_which = iData(10);
+  index_m = iData(11);
+  M_cal_which = iData(12);
+  index_M_cal= iData(13);
+  cc_which = iData(14);
+  index_cc = iData(15);
+  A0_which = iData(16);
+  index_A0 = iData(17);
+  nd_which = iData(18);
+  index_nd = iData(19);
+  alpha_which = iData(20);
+  index_alpha = iData(21);
+  z_which = iData(22);
+  index_z = iData(23);
+
+  return 0;
+}
 
 #endif
 

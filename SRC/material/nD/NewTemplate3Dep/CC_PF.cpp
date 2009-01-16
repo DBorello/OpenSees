@@ -34,16 +34,20 @@
 #ifndef CC_PF_CPP
 #define CC_PF_CPP
 
+
 #include "CC_PF.h"
-#include <OPS_Globals.h>
+#include <Channel.h>
+#include <ID.h>
+
 
 straintensor CC_PF::CCm;
 
 //================================================================================
 CC_PF::CC_PF(int M_which_in, int index_M_in, 
              int p0_which_in, int index_p0_in)
-: M_which(M_which_in), index_M(index_M_in),
-  p0_which(p0_which_in), index_p0(index_p0_in)
+  : PlasticFlow(PLASTICFLOW_TAGS_CC_PF), 
+    M_which(M_which_in), index_M(index_M_in),
+    p0_which(p0_which_in), index_p0(index_p0_in)
 {
 
 }
@@ -108,6 +112,42 @@ double CC_PF::getP0(const MaterialParameter &MaterialParameter_in) const
 		opserr << "Warning!! CC_PF: Invalid Input (po). " << endln;
 		exit (1);
 	}
+}
+
+int 
+CC_PF::sendSelf(int commitTag, Channel &theChannel)
+{
+  static ID iData(4);
+  iData(0) = M_which;
+  iData(1) = index_M;
+  iData(2) = p0_which;
+  iData(3) = index_p0;
+  int dbTag = this->getDbTag();
+
+  if (theChannel.sendID(dbTag, commitTag, iData) < 0) {
+    opserr << "CC_PF::sendSelf() - failed to send data\n";
+    return -1;
+  }
+
+  return 0;
+}
+int 
+CC_PF::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  static ID iData(4);
+  int dbTag = this->getDbTag();
+
+  if (theChannel.recvID(dbTag, commitTag, iData) < 0) {
+    opserr << "CC_PF::recvSelf() - failed to recv data\n";
+    return -1;
+  }
+
+  M_which = iData(0);
+  index_M = iData(1);
+  p0_which = iData(2);
+  index_p0 = iData(3);
+
+  return 0;
 }
 
 #endif

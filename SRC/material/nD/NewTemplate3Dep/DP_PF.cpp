@@ -35,13 +35,16 @@
 #define DP_PF_CPP
 
 #include "DP_PF.h"
+#include <Channel.h>
+#include <ID.h>
 
 straintensor DP_PF::DPm;
 
 //================================================================================
 DP_PF::DP_PF(int dilatant_which_in, int index_dilatant_in, int alpha_which_in, int index_alpha_in)
-: dilatant_which(dilatant_which_in), index_dilatant(index_dilatant_in), 
-  alpha_which(alpha_which_in), index_alpha(index_alpha_in)
+  : PlasticFlow(PLASTICFLOW_TAGS_DP_PF), 
+    dilatant_which(dilatant_which_in), index_dilatant(index_dilatant_in), 
+    alpha_which(alpha_which_in), index_alpha(index_alpha_in)
 {
 
 }
@@ -135,6 +138,42 @@ const stresstensor& DP_PF::getalpha(const MaterialParameter &MaterialParameter_i
 		opserr << "DP_PF: Invalid Input. " << endln;
 		exit (1);
 	}
+}
+
+int 
+DP_PF::sendSelf(int commitTag, Channel &theChannel)
+{
+  static ID iData(4);
+  iData(0) = dilatant_which;
+  iData(1) = index_dilatant;
+  iData(2) = alpha_which;
+  iData(3) = index_alpha;
+  int dbTag = this->getDbTag();
+
+  if (theChannel.sendID(dbTag, commitTag, iData) < 0) {
+    opserr << "DP_PF::sendSelf() - failed to send data\n";
+    return -1;
+  }
+
+  return 0;
+}
+int 
+DP_PF::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  static ID iData(4);
+  int dbTag = this->getDbTag();
+
+  if (theChannel.recvID(dbTag, commitTag, iData) < 0) {
+    opserr << "DP_PF::recvSelf() - failed to recv data\n";
+    return -1;
+  }
+
+  dilatant_which = iData(0);
+  index_dilatant = iData(1);
+  alpha_which = iData(2);
+  index_alpha= iData(3);
+
+  return 0;
 }
 
 #endif

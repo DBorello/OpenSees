@@ -35,6 +35,15 @@
 #define NewTemplate3Dep_CPP
 
 #include "NewTemplate3Dep.h"
+#include <Channel.h>
+#include <ID.h>
+
+extern    MaterialParameter *getMaterialParameter(int classTag);
+extern    ElasticState      *getElasticState(int classTag);
+extern    YieldFunction     *getYieldFunction(int classTag);
+extern    PlasticFlow       *getPlasticFlow(int classTag);
+extern    ScalarEvolution   *getScalarEvolution(int classTag);
+extern    TensorEvolution   *getTensorEvolution(int classTag);
 
 const  straintensor NewTemplate3Dep::ZeroStrain;
 const  stresstensor NewTemplate3Dep::ZeroStress;
@@ -511,15 +520,278 @@ const char *NewTemplate3Dep::getType(void) const
 //================================================================================
 int NewTemplate3Dep::sendSelf(int commitTag, Channel &theChannel)
 {
-    // Not yet implemented
-    return 0;
+  static ID idata(11); 
+  int numScalar, numTensorEvolution;
+  idata(10) = caseIndex;
+
+  idata(0) = pointer_material_parameter->getClassTag();
+  idata(1) = pointer_elastic_state->getClassTag();
+  idata(2) = pointer_yield_function->getClassTag();
+  idata(3) = pointer_plastic_flow->getClassTag();
+
+  numScalar = pointer_material_parameter->getNum_Internal_Scalar();
+  numTensorEvolution = pointer_material_parameter->getNum_Internal_Tensor();
+
+  idata(4) = numScalar;
+  idata(5) = numTensorEvolution;
+
+  int dTag = pointer_material_parameter->getDbTag();
+  if (dTag == 0 && theChannel.isDatastore() == 0) {
+    dTag = theChannel.getDbTag();
+    pointer_material_parameter->setDbTag(dTag);
+  }
+  idata(6) = dTag;
+
+  dTag = pointer_elastic_state->getDbTag();
+  if (dTag == 0 && theChannel.isDatastore() == 0) {
+    dTag = theChannel.getDbTag();
+    pointer_elastic_state->setDbTag(dTag);
+  }
+  idata(7) = dTag;
+
+
+  dTag = pointer_yield_function->getDbTag();
+  if (dTag == 0 && theChannel.isDatastore() == 0) {
+    dTag = theChannel.getDbTag();
+    pointer_yield_function->setDbTag(dTag);
+  }
+  idata(8) = dTag;
+
+  dTag = pointer_plastic_flow->getDbTag();
+  if (dTag == 0 && theChannel.isDatastore() == 0) {
+    dTag = theChannel.getDbTag();
+    pointer_plastic_flow->setDbTag(dTag);
+  }
+  idata(9) = dTag;
+
+  int dbTag = this->getDbTag();
+
+  theChannel.sendID(dbTag, commitTag, idata);
+  pointer_material_parameter->sendSelf(commitTag, theChannel);
+  pointer_elastic_state->sendSelf(commitTag, theChannel);
+  pointer_yield_function->sendSelf(commitTag, theChannel);
+  pointer_plastic_flow->sendSelf(commitTag, theChannel);
+
+  if (numScalar != 0) {
+    ID scalarData(numScalar*2);
+    for (int i=0; i<numScalar; i++) {
+      scalarData(i)=pointer_scalar_evolution[i]->getClassTag();
+      int dTag = pointer_scalar_evolution[i]->getDbTag();
+      if (dTag == 0 && theChannel.isDatastore() == 0) {
+	dTag = theChannel.getDbTag();
+	pointer_scalar_evolution[i]->setDbTag(dTag);
+      }
+      scalarData(i+numScalar)=dTag;
+    }
+    theChannel.sendID(dbTag, commitTag, scalarData);
+
+    for (int j=0; j<numScalar; j++) 
+      pointer_scalar_evolution[j]->sendSelf(commitTag, theChannel);
+  }
+
+  if (numTensorEvolution != 0) {
+    int add = 0;
+    if (numScalar == numTensorEvolution) 
+      add=2;
+
+    ID tensorEvolutionData(numTensorEvolution*2+add);  // the 2 is so scalarData and tensor data of differeing sizes fo db
+    for (int i=0; i<numTensorEvolution; i++) {
+      tensorEvolutionData(i)=pointer_tensor_evolution[i]->getClassTag();
+      int dTag = pointer_tensor_evolution[i]->getDbTag();
+      if (dTag == 0 && theChannel.isDatastore() == 0) {
+	dTag = theChannel.getDbTag();
+	pointer_tensor_evolution[i]->setDbTag(dTag);
+      }
+      tensorEvolutionData(i+numTensorEvolution)=dTag;
+    }
+    
+    theChannel.sendID(dbTag, commitTag, tensorEvolutionData);
+
+    for (int j=0; j<numTensorEvolution; j++) 
+      pointer_tensor_evolution[j]->sendSelf(commitTag, theChannel);
+  }
+
+  CommitStress.sendSelf(dbTag, commitTag, theChannel);
+  CommitStrain.sendSelf(dbTag, commitTag, theChannel);
+  CommitPlastic_Strain.sendSelf(dbTag, commitTag, theChannel);
+
+  return 0;
 }
 
 //================================================================================
 int NewTemplate3Dep::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-    // Not yet implemented
-    return 0;
+  static ID idata(11);
+  int numScalar, numTensorEvolution;
+
+  int numOldScalar = 0;
+  int numOldTensor = 0;
+
+  int dbTag = this->getDbTag();
+
+  if (pointer_material_parameter != 0) {
+    numOldScalar = pointer_material_parameter->getNum_Internal_Scalar();
+    numOldTensor = pointer_material_parameter->getNum_Internal_Tensor();
+  }
+
+  theChannel.recvID(dbTag, commitTag, idata);
+
+  caseIndex = idata(10);
+
+  //
+  // get mateial parameter
+  //
+
+  int matType =idata(0);
+  if (pointer_material_parameter == 0) { 
+    pointer_material_parameter = getMaterialParameter(matType);
+    if (pointer_material_parameter == 0) {
+      opserr << "NewTemplate3Dep::recvSelf() - no MaterialParameter of type : " << matType << endln;
+      return -1;
+    }
+  }
+  pointer_material_parameter->setDbTag(idata(6));
+  if (pointer_material_parameter->recvSelf(commitTag, theChannel, theBroker) < 0) {
+    if (pointer_material_parameter == 0) {
+      opserr << "NewTemplate3Dep::recvSelf() - MaterialParameter failed in recvSelf\n";
+      return -1;
+    }
+  }
+
+  //
+  // get elastic state
+  //
+
+  int stateType =idata(1);
+  if (pointer_elastic_state == 0) {
+    pointer_elastic_state = getElasticState(stateType);
+    if (pointer_elastic_state == 0) {
+      opserr << "NewTemplate3Dep::recvSelf() - no ElasticState of type : " << stateType << endln;
+      return -1;
+    }
+  }
+  pointer_elastic_state->setDbTag(idata(7));
+  if (pointer_elastic_state->recvSelf(commitTag, theChannel, theBroker) < 0) {
+    if (pointer_elastic_state == 0) {
+      opserr << "NewTemplate3Dep::recvSelf() - ElasticState failed in recvSelf\n";
+      return -1;
+    }
+  }
+
+  //
+  // get yield function
+  //
+
+  int yieldType =idata(2);
+  if (pointer_yield_function == 0) {
+    pointer_yield_function = getYieldFunction(yieldType);
+    if (pointer_yield_function == 0) {
+      opserr << "NewTemplate3Dep::recvSelf() - no YieldFunction of type : " << yieldType << endln;
+      return -1;
+    }
+  }
+  pointer_yield_function->setDbTag(idata(8));
+  if (pointer_yield_function->recvSelf(commitTag, theChannel, theBroker) < 0) {
+    if (pointer_yield_function == 0) {
+      opserr << "NewTemplate3Dep::recvSelf() - YieldFunction failed in recvSelf\n";
+      return -1;
+    }
+  }
+
+  //
+  // get plastic flow
+  //
+
+  int flowType =idata(3);
+  if (pointer_plastic_flow == 0) {
+    pointer_plastic_flow = getPlasticFlow(flowType);
+    if (pointer_plastic_flow == 0) {
+      opserr << "NewTemplate3Dep::recvSelf() - no PlasticFlow of type : " << flowType << endln;
+      return -1;
+    }
+  }
+  pointer_plastic_flow->setDbTag(idata(9));
+  if (pointer_plastic_flow->recvSelf(commitTag, theChannel, theBroker) < 0) {
+    if (pointer_plastic_flow == 0) {
+      opserr << "NewTemplate3Dep::recvSelf() - PlasticFlow failed in recvSelf\n";
+      return -1;
+    }
+  }
+
+  numScalar = idata(4);
+  numTensorEvolution = idata(5);
+
+  //
+  // get scalar evolutions
+  //
+
+  if (numScalar != 0) {
+    ID scalarData(numScalar*2);    
+    theChannel.recvID(dbTag, commitTag, scalarData);
+
+    if (numOldScalar == 0) {
+      pointer_scalar_evolution = new ScalarEvolution* [numScalar];
+
+      for (int i = 0; i < numScalar; i++) {
+	int scalarType = scalarData(i);
+        pointer_scalar_evolution[i] = getScalarEvolution(scalarType);
+	if (pointer_scalar_evolution[i] == 0) {
+	  opserr << "NewTemplate3Dep::recvSelf() - no ScalarEvolution of type : " << scalarType << endln;
+	  return -1;
+	}
+      }
+    }
+    
+    for (int j=0; j<numScalar; j++) {
+	pointer_scalar_evolution[j]->setDbTag(scalarData(j+numScalar));
+	if (pointer_scalar_evolution[j]->recvSelf(commitTag, theChannel, theBroker) < 0) {
+	  opserr << "NewTemplate3Dep::recvSelf() - ScalarEvolution failed in recvSelf\n";
+	  return -1;
+	}
+    }
+  }
+
+  //
+  // get tensor evolutions
+  //
+
+  if (numTensorEvolution != 0) {
+    int add = 0;
+    if (numScalar == numTensorEvolution) 
+      add=2;
+
+    ID tensorData(numTensorEvolution*2);    
+    theChannel.recvID(dbTag, commitTag, tensorData);
+
+    if (numOldTensor == 0) {
+      pointer_tensor_evolution = new TensorEvolution* [numTensorEvolution];
+
+      for (int i = 0; i < numTensorEvolution; i++) {
+	int tensorType = tensorData(i);
+        pointer_tensor_evolution[i] = getTensorEvolution(tensorType);
+	if (pointer_tensor_evolution[i] == 0) {
+	  opserr << "NewTemplate3Dep::recvSelf() - no TensorEvolution of type : " << tensorType << endln;
+	  return -1;
+	}
+      }
+    }
+    
+    for (int j=0; j<numTensorEvolution; j++) {
+	pointer_tensor_evolution[j]->setDbTag(tensorData(j+numTensorEvolution));
+	if (pointer_tensor_evolution[j]->recvSelf(commitTag, theChannel, theBroker) < 0) {
+	  opserr << "NewTemplate3Dep::recvSelf() - TensorEvolution failed in recvSelf\n";
+	  return -1;
+	}
+    }
+  }
+
+  CommitStress.recvSelf(dbTag, commitTag, theChannel);
+  CommitStrain.recvSelf(dbTag, commitTag, theChannel);
+  CommitPlastic_Strain.recvSelf(dbTag, commitTag, theChannel);
+
+  this->revertToLastCommit();
+
+  return 0;
 }
 
 //================================================================================
