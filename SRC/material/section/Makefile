@@ -15,7 +15,6 @@ OBJS       = SectionForceDeformation.o \
 	Bidirectional.o \
 	Elliptical.o \
 	FiberSectionGJ.o \
-	WSection2d.o \
 	TimoshenkoSection3d.o \
 	WFFiberSection2d.o \
 	Isolator2spring.o \

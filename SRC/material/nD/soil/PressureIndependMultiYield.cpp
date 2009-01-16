@@ -1,5 +1,5 @@
-// $Revision: 1.37 $
-// $Date: 2008-09-15 20:55:57 $
+// $Revision: 1.38 $
+// $Date: 2009-01-16 19:40:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
 
 // Written: ZHY
@@ -103,15 +103,16 @@ PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd,
 
   if (matCount%20 == 0) {
      int * temp1 = loadStagex;
-	 int * temp2 = ndmx;
-	 double * temp3 = rhox;
+     int * temp2 = ndmx;
+     double * temp3 = rhox;
      double * temp6 = frictionAnglex;
      double * temp7 = peakShearStrainx;
      double * temp8 = refPressurex;
      double * temp9 = cohesionx;
      double * temp10 = pressDependCoeffx;
-	 int * temp11 = numOfSurfacesx;
+     int * temp11 = numOfSurfacesx;
      double * temp12 = residualPressx;
+
      loadStagex = new int[matCount+20];
      ndmx = new int[matCount+20];
      rhox = new double[matCount+20];
@@ -123,27 +124,27 @@ PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd,
      numOfSurfacesx = new int[matCount+20];
      residualPressx = new double[matCount+20];
 
-	 for (int i=0; i<matCount; i++) {
-         loadStagex[i] = temp1[i];
-		 ndmx[i] = temp2[i];
-         rhox[i] = temp3[i];
-         frictionAnglex[i] = temp6[i];
-         peakShearStrainx[i] = temp7[i];
-         refPressurex[i] = temp8[i];
-         cohesionx[i] = temp9[i];
-         pressDependCoeffx[i] = temp10[i];
-         numOfSurfacesx[i] = temp11[i];
-         residualPressx[i] = temp12[i];
+     for (int i=0; i<matCount; i++) {
+       loadStagex[i] = temp1[i];
+       ndmx[i] = temp2[i];
+       rhox[i] = temp3[i];
+       frictionAnglex[i] = temp6[i];
+       peakShearStrainx[i] = temp7[i];
+       refPressurex[i] = temp8[i];
+       cohesionx[i] = temp9[i];
+       pressDependCoeffx[i] = temp10[i];
+       numOfSurfacesx[i] = temp11[i];
+       residualPressx[i] = temp12[i];
      }
-
-	 if (matCount > 0) {
-	     delete [] temp1; delete [] temp2; delete [] temp3;
-	     delete [] temp6; delete [] temp7; delete [] temp8;
-	     delete [] temp9; delete [] temp10; delete [] temp11;
-		 delete [] temp12;
+     
+     if (matCount > 0) {
+       delete [] temp1; delete [] temp2; delete [] temp3;
+       delete [] temp6; delete [] temp7; delete [] temp8;
+       delete [] temp9; delete [] temp10; delete [] temp11;
+       delete [] temp12;
      }
   }
-
+  
   ndmx[matCount] = nd;
   loadStagex[matCount] = 0;   //default
   refShearModulus = refShearModul;
@@ -155,15 +156,15 @@ PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd,
   pressDependCoeffx[matCount] = pressDependCoe;
   numOfSurfacesx[matCount] = numberOfYieldSurf;
   rhox[matCount] = r;
-
+  
   e2p = 0;
   matN = matCount;
   matCount ++;
-
-	theSurfaces = new MultiYieldSurface[numberOfYieldSurf+1]; //first surface not used
+  
+  theSurfaces = new MultiYieldSurface[numberOfYieldSurf+1]; //first surface not used
   committedSurfaces = new MultiYieldSurface[numberOfYieldSurf+1];
-	activeSurfaceNum = committedActiveSurf = 0;
-
+  activeSurfaceNum = committedActiveSurf = 0;
+  
   setUpSurfaces(gredu);  // residualPress is calculated inside.
 }
 

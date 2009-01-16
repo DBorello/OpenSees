@@ -10,7 +10,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkAppInit.cpp,v 1.6 2008-04-28 23:18:13 fmk Exp $
+ * RCS: @(#) $Id: tkAppInit.cpp,v 1.7 2009-01-16 19:40:36 fmk Exp $
  */
 
 extern "C" {
@@ -135,7 +135,7 @@ Tcl_AppInit(Tcl_Interp *interp)
      * they weren't already created by the init procedures called above.
      */
 
-    if (g3AppInit(interp) < 0)
+    if (OpenSeesAppInit(interp) < 0)
 	return TCL_ERROR;
 
     /*

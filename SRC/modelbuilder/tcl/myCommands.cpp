@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2008-01-28 19:22:50 $
+// $Revision: 1.9 $
+// $Date: 2009-01-16 19:40:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/myCommands.cpp,v $
                                                                         
                                                                         
@@ -38,6 +38,7 @@
 #include <Domain.h>
 #include "TclModelBuilder.h"
 #include "TclUniaxialMaterialTester.h"
+#include "TclSectionTester.h"
 
 #include <tcl.h>
 
@@ -150,7 +151,8 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Cha
       }
     }
 
-    else if (strcmp(argv[1],"test") == 0 || strcmp(argv[1],"TestUniaxial") == 0) {
+    else if ((strcmp(argv[1],"test") == 0) || (strcmp(argv[1],"TestUniaxial") == 0) ||
+	     (strcmp(argv[1],"testUniaxial") == 0) || (strcmp(argv[1],"UniaxialMaterialTest") == 0)) {
       int count = 1;
       if (argc == 3) {
 	    if (Tcl_GetInt(interp, argv[2], &count) != TCL_OK) {
@@ -158,6 +160,22 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Cha
 	    }	  
       }
       theBuilder = new TclUniaxialMaterialTester(theDomain, interp, count);
+      if (theBuilder == 0) {
+	opserr << "WARNING ran out of memory in creating TclUniaxialMAterialTester model\n";
+	return TCL_ERROR;
+      }
+    }
+
+
+    else if ((strcmp(argv[1],"sectionTest") == 0) || (strcmp(argv[1],"TestSection") == 0) ||
+	     (strcmp(argv[1],"testSection") == 0) || (strcmp(argv[1],"SectionForceDeformationTest") == 0)) {
+      int count = 1;
+      if (argc == 3) {
+	if (Tcl_GetInt(interp, argv[2], &count) != TCL_OK) {
+	  return TCL_ERROR;
+	}	  
+      }
+      theBuilder = new TclSectionTester(theDomain, interp, count);
       if (theBuilder == 0) {
 	opserr << "WARNING ran out of memory in creating TclUniaxialMAterialTester model\n";
 	return TCL_ERROR;

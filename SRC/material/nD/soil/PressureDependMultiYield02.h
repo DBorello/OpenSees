@@ -1,5 +1,5 @@
-// $Revision: 1.9 $
-// $Date: 2007-03-30 01:52:10 $
+// $Revision: 1.10 $
+// $Date: 2009-01-16 19:40:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield02.h,v $
 
 // Written: ZHY
@@ -61,7 +61,7 @@ public:
      // Destructor: clean up memory storage space.
      virtual ~PressureDependMultiYield02 ();
 
-		 double getRho(void) {return rhox[matN];} ;
+     double getRho(void) {return rhox[matN];} ;
 
      // Sets the values of the trial strain tensor.
      int setTrialStrain (const Vector &strain);

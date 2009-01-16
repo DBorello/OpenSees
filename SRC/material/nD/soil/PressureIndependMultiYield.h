@@ -1,5 +1,5 @@
-// $Revision: 1.19 $
-// $Date: 2007-03-30 01:52:10 $
+// $Revision: 1.20 $
+// $Date: 2009-01-16 19:40:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.h,v $
                                                                         
 // Written: ZHY
@@ -46,6 +46,7 @@ public:
      const char *getClassType(void) const {return "PressureIndependMultiYield";};
 
      double getRho(void) {return rhox[matN];} ;
+
      // Sets the values of the trial strain tensor.
      int setTrialStrain (const Vector &strain);
 
