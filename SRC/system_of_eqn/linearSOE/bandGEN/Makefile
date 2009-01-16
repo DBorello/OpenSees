@@ -4,10 +4,7 @@ OBJS       = BandGenLinSOE.o \
 	BandGenLinSolver.o \
 	BandGenLinLapackSolver.o \
 	DistributedBandGenLinSOE.o \
-	BandGenLinSOE_Single.o \
-	BandGenLinLapackSolver_Single.o \
-	sgbsv.o sgbtrs.o sgbtrf.o slaswp.o sgbtf2.o cuda_routines.o
-
+	BandGenLinSOE_Single.o
 
 all:    $(OBJS)
 
