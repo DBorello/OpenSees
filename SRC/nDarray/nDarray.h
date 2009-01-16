@@ -71,6 +71,7 @@
 class BJtensor;
 class BJmatrix;
 class BJvector;
+class Channel;
 
 //class stiffness_BJmatrix;
 
@@ -303,6 +304,10 @@ class nDarray
   public:
     int rank(void) const;
     int dim(int which) const;
+
+ public:
+    virtual int sendSelf(int dbTag, int commitTag, Channel &theChannel);
+    virtual int recvSelf(int dbTag, int commitTag, Channel &theChannel);
 
 // from Numerical recipes in C
     private:

@@ -1,5 +1,5 @@
-// $Revision: 1.6 $
-// $Date: 2006-08-07 22:17:27 $
+// $Revision: 1.7 $
+// $Date: 2009-01-16 00:05:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/nDarray/nDarray.cpp,v $
                                                                         
                                                                         
@@ -91,6 +91,10 @@
 
 //  #include "basics.hh"
 #include "nDarray.h"
+#include <Vector.h>
+#include <Channel.h>
+#include <ID.h>
+
 
 //##############################################################################
 nDarray::nDarray(int rank_of_nDarray, double initval)
@@ -2427,6 +2431,81 @@ void nDarray_rep::operator delete(void *p)
   }
 
 
+
+int 
+nDarray::sendSelf(int dbTag, int commitTag, Channel &theChannel)
+{
+  static ID iData(2);
+  double *data = pc_nDarray_rep->pd_nDdata;
+  int *dim =  pc_nDarray_rep->dim;
+  int rank =  pc_nDarray_rep->nDarray_rank;
+  int elem =  pc_nDarray_rep->total_numb;
+
+  iData(0) = rank;
+  iData(1) = elem;
+  
+  if (theChannel.sendID(dbTag, commitTag, iData) < 0) {
+    opserr << "nDarray::sendSelf() - could not send rank and num ele\n";
+    return -1;
+  }
+
+  static ID dimensions;
+  dimensions.setData(dim, rank);
+
+  if (theChannel.sendID(dbTag, commitTag, dimensions) < 0) {
+    opserr << "nDarray::sendSelf() - could not send dim\n";
+    return -1;
+  }
+
+  static Vector dData;
+  dData.setData(data, elem);
+
+  if (theChannel.sendVector(dbTag, commitTag, dData) < 0) {
+    opserr << "nDarray::sendSelf() - could not send data\n";
+    return -1;
+  }
+
+  return 0;
+}
+
+int 
+nDarray::recvSelf(int dbTag, int commitTag, Channel &theChannel)
+{
+  static ID iData(2);
+  int rank =  pc_nDarray_rep->nDarray_rank;
+  int elem =  pc_nDarray_rep->total_numb;
+
+  double *data = pc_nDarray_rep->pd_nDdata;
+  int *dim =  pc_nDarray_rep->dim;
+
+  if (theChannel.recvID(dbTag, commitTag, iData) < 0) {
+    opserr << "nDarray::recvSelf() - could not receive rank and num ele\n";
+    return -1;
+  }
+
+  if ((iData(0) != rank) || (iData(1) = elem)) {
+    opserr << "nDarray::recvSelf() - mismatch in rank or array dimension\n";
+    return -1;
+  }
+
+  static ID dimensions;
+  dimensions.setData(dim, rank);
+
+  if (theChannel.recvID(dbTag, commitTag, dimensions) < 0) {
+    opserr << "nDarray::recvSelf() - could not recv dim\n";
+    return -1;
+  }
+
+  static Vector dData;
+  dData.setData(data, elem);
+
+  if (theChannel.recvVector(dbTag, commitTag, dData) < 0) {
+    opserr << "nDarray::recvSelf() - could not receive data\n";
+    return -1;
+  }
+
+  return 0;
+}
 
 
 #endif
