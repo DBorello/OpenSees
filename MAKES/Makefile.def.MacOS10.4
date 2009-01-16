@@ -17,7 +17,7 @@
 
 # need to install gFortran from
 # http://www.macresearch.org/xcode_gfortran_plugin_update
-# NOW USING hpc.sourceforge.net
+# Now USING hpc.sourceforge.net
 
 # FOR PARALLEL
 #1.  install openmpi (i used  openmpi-v1.2.6.tar.gz, configured with:
@@ -37,6 +37,8 @@
 #      ATLAS ~/Desktop/ATLAS/configure -b 32 -t 0
 #      make; make install (installed in /usr/local/atlas)
 #     
+# And of Course Tcl from ActiveState - i used 8.5.5 version
+
 
 # %---------------------------------%
 # |  SECTION 1: PROGRAM             |
@@ -45,8 +47,8 @@
 # Specify the location and name of the OpenSees interpreter program
 # that will be created (if this all works!)
 
-PROGRAMMING_MODE = SEQUENTIAL
-#PROGRAMMING_MODE = PARALLEL
+#PROGRAMMING_MODE = SEQUENTIAL
+PROGRAMMING_MODE = PARALLEL
 #PROGRAMMING_MODE = PARALLEL_INTERPRETERS
 
 OpenSees_PROGRAM = $(HOME)/bin/OpenSees
@@ -84,7 +86,7 @@ endif
 BLASdir      = $(HOME)/OpenSees/OTHER/BLAS
 CBLASdir     = $(HOME)/OpenSees/OTHER/CBLAS
 
-BLAS_LIBRARY    = $(HOME)/lib/libBlas.a 
+BLAS_LIBRARY    = $(HOME)/lib/libBlas.a
 CBLAS_LIBRARY   = $(HOME)/lib/libCBlas.a
 
 ifeq ($(HAVE_BLAS), YES) 
@@ -189,6 +191,12 @@ NDARRAY_LIBRARY = $(HOME)/lib/libndarray.a # BJ_UCD jeremic@ucdavis.edu
 MATMOD_LIBRARY  = $(HOME)/lib/libmatmod.a  # BJ_UCD jeremic@ucdavis.edu
 BJMISC_LIBRARY  = $(HOME)/lib/libBJmisc.a  # BJ_UCD jeremic@ucdavis.edu
 LAPACK_LIBRARY  = $(HOME)/lib/libLapack.a
+#CLAPACK_LIBRARY  = $(HOME)/OpenSees/OTHER/CLAPACK-3.1.1/lapack_MAC.a
+CLAPACK_LIBRARY  = 
+#CLBLAS_LIBRARY  = $(HOME)/OpenSees/OTHER/CLAPACK-3.1.1/blas_MAC.a
+CLBLAS_LIBRARY  = 
+#LIBF2C_LIBRARY  = $(HOME)/OpenSees/OTHER/CLAPACK-3.1.1/blas_MAC.a
+LIBF2C_LIBRARY  = 
 SUPERLU_LIBRARY = $(HOME)/lib/libSuperLU.a
 ARPACK_LIBRARY  = $(HOME)/lib/libArpack.a
 UMFPACK_LIBRARY = $(HOME)/lib/libUmfpack.a
@@ -198,9 +206,11 @@ TCL_LIBRARY = -framework Tcl
 
 # WATCH OUT .. These libraries are removed when 'make wipe' is invoked.
 WIPE_LIBS	= $(FE_LIBRARY) \
+		$(NDARRAY_LIBRARY) \
+		$(MATMOD_LIBRARY) \
 		$(LAPACK_LIBRARY) \
 		$(BLAS_LIBRARY) \
-		$(CBLAS_LIBRARY) \
+		$(CLBLAS_LIBRARY) \
 		$(SUPERLU_LIBRARY) \
 		$(ARPACK_LIBRARY) \
 		$(UMFPACK_LIBRARY) \
@@ -220,13 +230,14 @@ CC++	= g++
 CC      = gcc
 FC	= /usr/local/bin/gfortran
 LINKER          = $(CC++)
-LINKFLAGS       =  -Wl
+LINKFLAGS       =  -Wl 
+#LINKFLAGS       =  -Wl
 else
 CC++	= /usr/local/openmpi-1.2.6/bin/mpic++
 CC      = /usr/local/openmpi-1.2.6/bin/mpicc
 FC	= /usr/local/openmpi-1.2.6/bin/mpif77
 LINKER          = $(CC++)
-LINKFLAGS       =  
+LINKFLAGS       =  -L/usr/local/openmpi-1.2.6/lib /usr/local/openmpi-1.2.6/lib/libmpi.a
 #LINKFLAGS       =  -Wl,-u,_munmap -Wl,-multiply_defined,suppress -Wl,-u,_mmap -Wl,-multiply_defined,suppress 
 endif
 
@@ -243,15 +254,17 @@ RANLIBFLAGS     =
 #    C FLAGS used -DUSE_VENDOR_BLAS (needed in SuperLU) if UNIX in C++ FLAGS
 #
 
+OS_FLAG = -D_MACOSX
+
 # modified as optimizaton currently causing problems with Steeln01 code
 ifeq ($(DEBUG_MODE), DEBUG)
 
-C++FLAGS         = -Wall -D_LINUX -D_UNIX -D_TCL84   -D_MACOSX \
-		$(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG) \
-	         -g -pg 
-	      
-CFLAGS          = -Wall -pg $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG) -D_MACOSX -D_TCL84 -D_UNIX
-FFLAGS          = -Wall 
+C++FLAGS         = -Wall -D_LINUX -D_UNIX  -D_TCL85  $(OS_FLAG) -D_HTTPS \
+	$(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(MUMPS_FLAG) \
+	$(PROGRAMMING_FLAG) -g -O0 -ffloat-store 
+CFLAGS          = -Wall -O0 -g
+FFLAGS          = -Wall -O -DCUBLAS -x f77-cpp-input --no-second-underscore
+
 
 # Linker
 LINKER          = $(CC++)
@@ -259,11 +272,11 @@ LINKFLAGS       = -g -pg
 
 else
 
-C++FLAGS         = -Wall -D_LINUX -D_UNIX  -D_TCL84  -D_MACOSX \
+C++FLAGS         = -Wall -D_LINUX -D_UNIX  -D_TCL85  -D_MACOSX -D_HTTPS \
 	$(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(MUMPS_FLAG) \
 	$(PROGRAMMING_FLAG) -O3 -ffloat-store 
 CFLAGS          = -Wall -O2
-FFLAGS          = -Wall -O
+FFLAGS          = -Wall -O -DCUBLAS -x f77-cpp-input --no-second-underscore
 
 # Linker
 
@@ -373,17 +386,49 @@ endif
 MACHINE_LINKLIBS  = -L$(BASE)/lib \
 		-L$(HOME)/lib 
 
+HAVE_CUDA = NO
+CUDA_DIR = 
+CUDA_FLAG =
+CUDA_LIB =
+
+ifeq ($(HAVE_CUDA),YES)
+CUDA_DIR = /usr/local/cuda
+CUDA_FLAG = -D_CUDA
+#CUDA_LIB = -L$(CUDA_DIR)/lib  -lcublas
+CUDA_LIB = $(FE)/system_of_eqn/linearSOE/bandGEN/BandGenLinSOE_Single.o \
+	$(FE)/system_of_eqn/linearSOE/bandGEN/BandGenLinLapackSolver_Single.o \
+	$(FE)/system_of_eqn/linearSOE/bandGEN/sgbsv.o \
+	$(FE)/system_of_eqn/linearSOE/bandGEN/sgbtrs.o \
+	$(FE)/system_of_eqn/linearSOE/bandGEN/sgbtrf.o \
+	$(FE)/system_of_eqn/linearSOE/bandGEN/sgbtf2.o \
+	$(FE)/system_of_eqn/linearSOE/bandGEN/slaswp.o \
+	-L$(CUDA_DIR)/lib -cublas -lcuda \
+	-L/usr/local/scalapack_installer_0.91/lib \
+	-lrefblas
+
+CUDA_INCLUDE = -I$(CUDA_DIR)/include
+endif
+
+
+#FORTO = $(LAPACKdir)/fortran.o
+FORTO = 
+
 MACHINE_NUMERICAL_LIBS  =  \
 		$(ARPACK_LIBRARY) \
 		$(SUPERLU_LIBRARY) \
 		$(UMFPACK_LIBRARY) \
 	        $(LAPACK_LIBRARY) \
+	        $(CLAPACK_LIBRARY) \
+	        $(CLBLAS_LIBRARY) \
 		$(BLAS_LIBRARY) \
 		$(CBLAS_LIBRARY) \
 		$(GRAPHIC_LIBRARY)\
+		$(FORTO) \
+		$(CUDA_LIB) \
 		-ldl -L/usr/local/lib /usr/local/lib/libgfortran.a
 
-MACHINE_SPECIFIC_LIBS = $(AGL_OBJS)
+
+MACHINE_SPECIFIC_LIBS = $(AGL_OBJS) -lssl
 
 PARALLEL_LIB = 	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSuperLU.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLinSOE.o \
@@ -413,20 +458,21 @@ MACHINE_INCLUDES        = -I/usr/include \
 			  -I/usr/local/include \
 			  -I$(BASE)/include \
 			  -I/usr/include/cxx \
-			  -I$(HOME)/include -I$(HOME)/blitz
+			  -I$(HOME)/include -I$(HOME)/blitz \
+			  -I$(CUDA_DIR)/include
 else
 MACHINE_INCLUDES        = -I/usr/include \
 			  -I/usr/local/include \
 			  -I$(BASE)/include \
 			  -I/usr/include/cxx \
 			  -I$(FE)/../OTHER/SuperLU_DIST_2.0/SRC \
-			  -I$(HOME)/include -I$(HOME)/blitz $(MUMPS_INCLUDE)
+			  -I$(HOME)/include -I$(HOME)/blitz $(MUMPS_INCLUDE) -I$(CUDA_DIR)/include
 endif
 
 # this file contains all the OpenSees/SRC includes
 include $(FE)/Makefile.incl
 
-TCL_INCLUDES = 
+TCL_INCLUDES = -I/Library/Frameworks/Tcl.framework/Headers
 
 INCLUDES = $(TCL_INCLUDES) $(FE_INCLUDES) $(MACHINE_INCLUDES)
 
