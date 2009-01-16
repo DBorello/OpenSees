@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2009-01-16 00:04:20 $
+// $Revision: 1.11 $
+// $Date: 2009-01-16 20:37:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/mpiParameterMain.cpp,v $
 
 /* 
@@ -35,8 +35,10 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: mpiParameterMain.cpp,v 1.10 2009-01-16 00:04:20 fmk Exp $
+ * RCS: @(#) $Id: mpiParameterMain.cpp,v 1.11 2009-01-16 20:37:22 fmk Exp $
  */
+
+#include <mpi.h>
 
 extern "C" {
 #include <tcl.h>
@@ -141,6 +143,32 @@ LoadBalancer      *OPS_BALANCER = 0;
 FEM_ObjectBroker  *OPS_OBJECT_BROKER =0;
 MachineBroker     *OPS_MACHINE =0;
 Channel          **OPS_theChannels = 0;
+
+
+#include <FileStream.h>
+#include <SimulationInformation.h>
+/*
+SimulationInformation simulationInfo;
+
+char *simulationInfoOutputFilename = 0;
+char *neesCentralProjID =0;
+char *neesCentralExpID =0;
+char *neesCentralUser =0;
+char *neesCentralPasswd =0;
+*/
+
+/*
+#include <StandardStream.h>
+#include <FileStream.h>
+StandardStream sserr;
+//OPS_Stream &opserr = sserr;
+OPS_Stream *opserrPtr = &sserr;
+
+// init the global variabled defined in OPS_Globals.h
+double        ops_Dt = 1.0;
+Domain       *ops_TheActiveDomain = 0;
+Element      *ops_TheActiveElement = 0;
+*/
 
 MachineBroker *theMachineBroker = 0;
 Channel **theChannels = 0;
@@ -263,7 +291,7 @@ main(int argc, char **argv)
   //
   // mpi clean up
   //
-  
+
   fprintf(stderr, "Process Terminating %d\n", rank);
   
   return 0;
@@ -287,7 +315,6 @@ main(int argc, char **argv)
  *
  *----------------------------------------------------------------------
  */
-
 
 int Tcl_AppInit(Tcl_Interp *interp)
 {
@@ -340,6 +367,7 @@ int Tcl_AppInit(Tcl_Interp *interp)
     if (OpenSeesAppInit(interp) < 0)
 	return TCL_ERROR;
 
+
     /*
      * Specify a user-specific startup file to invoke if the application
      * is run interactively.  Typically the startup file is "~/.apprc"
@@ -350,5 +378,4 @@ int Tcl_AppInit(Tcl_Interp *interp)
     Tcl_SetVar(interp, "tcl_rcFileName", "~/.tclshrc", TCL_GLOBAL_ONLY);
     return TCL_OK;
 }
-
 
