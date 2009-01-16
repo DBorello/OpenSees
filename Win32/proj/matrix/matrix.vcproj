@@ -21,7 +21,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\SRC\actor\actor;..\..\..\src\matrix;..\..\..\src\handler;..\..\..\src;..\..\..\src\nDarray;&quot;c:\Program Files\tcl&quot;"
+				AdditionalIncludeDirectories="..\..\..\src\actor\channel;..\..\..\SRC\actor\actor;..\..\..\src\matrix;..\..\..\src\handler;..\..\..\src;..\..\..\src\nDarray;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
@@ -65,7 +65,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\SRC\actor\actor;..\..\..\src\matrix;..\..\..\src\handler;..\..\..\src;..\..\..\src\nDarray;&quot;c:\Program Files\tcl&quot;"
+				AdditionalIncludeDirectories="..\..\..\src\actor\channel;..\..\..\SRC\actor\actor;..\..\..\src\matrix;..\..\..\src\handler;..\..\..\src;..\..\..\src\nDarray;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="WIN32,_DEBUG,_LIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
