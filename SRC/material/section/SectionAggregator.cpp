@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2008-08-26 16:48:40 $
+// $Revision: 1.20 $
+// $Date: 2009-01-22 23:35:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.cpp,v $
                                                                         
                                                                         
@@ -809,20 +809,13 @@ SectionAggregator::Print(OPS_Stream &s, int flag)
 Response*
 SectionAggregator::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
-  // See if the response is one of the defaults
-  Response *res = SectionForceDeformation::setResponse(argv, argc, output);
-  if (res != 0)
-    return res;
-  
-  // If not, forward the request to the section (need to do this to get fiber response)
-  // CURRENTLY NOT SENDING ANYTHING OFF TO THE UniaxialMaterials ... Probably
-  // don't need anything more from them than stress, strain, and stiffness, 
-  // which are covered in base class method ... can change if need arises
-  else if (theSection != 0)
+  if (theSection != 0)
     return theSection->setResponse(argv, argc, output);
-  
+    
   else
-    return 0;
+    return SectionForceDeformation::setResponse(argv, argc, output);
+
+  return 0;
 }
 
 int
