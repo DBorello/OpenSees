@@ -1,5 +1,5 @@
-// $Revision: 1.44 $
-// $Date: 2008-09-11 20:33:04 $
+// $Revision: 1.45 $
+// $Date: 2009-01-29 00:42:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
 
 // Written: ZHY
@@ -799,9 +799,6 @@ int PressureDependMultiYield::setParameter(const char **argv, int argc, Paramete
   if (argc < 2)
     return -1;
 
-  opserr << "PressureDependMultiYield::setParameter() " << argv[0] << endln;
-
-
   int matTag = atoi(argv[1]);
 
   if (this->getTag() == matTag) {
@@ -810,7 +807,6 @@ int PressureDependMultiYield::setParameter(const char **argv, int argc, Paramete
     else if (strcmp(argv[0],"shearModulus") == 0)
       return param.addObject(10, this);
     else if (strcmp(argv[0],"bulkModulus") == 0) {
-      opserr << "PressureDependMultiYield::setParameter() - FOUND \n";      
       return param.addObject(11, this);
     }
   }
@@ -1281,19 +1277,21 @@ PressureDependMultiYield::getResponse (int responseID, Information &matInfo)
 
 void
 PressureDependMultiYield::Print(OPS_Stream &s, int flag )
+
 {
-  s << "PressureDependMultiYield" << endln;
+  int theLoadStage = loadStagex[matN];
+  s << "PressureDependMultiYield - loadSatge: " << theLoadStage << endln;
 }
 
 const Vector &
 PressureDependMultiYield::getCommittedStress (void)
 {
-	int ndm = ndmx[matN];
-	int numOfSurfaces = numOfSurfacesx[matN];
-    double residualPress = residualPressx[matN];
-
-	double scale = currentStress.deviatorRatio(residualPress)/committedSurfaces[numOfSurfaces].size();
-	if (loadStagex[matN] != 1) scale = 0.;
+  int ndm = ndmx[matN];
+  int numOfSurfaces = numOfSurfacesx[matN];
+  double residualPress = residualPressx[matN];
+  
+  double scale = currentStress.deviatorRatio(residualPress)/committedSurfaces[numOfSurfaces].size();
+  if (loadStagex[matN] != 1) scale = 0.;
   if (ndm==3) {
 		static Vector temp7(7);
 		workV6 = currentStress.t2Vector();

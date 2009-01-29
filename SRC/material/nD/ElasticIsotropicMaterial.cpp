@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $                                                              
-// $Date: 2007-12-01 01:04:41 $                                                                  
+// $Revision: 1.25 $                                                              
+// $Date: 2009-01-29 00:42:03 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
                                                                         
                                                                         
@@ -414,7 +414,7 @@ ElasticIsotropicMaterial::setParameter(const char **argv, int argc,
   else if (strcmp(argv[0],"rho") == 0)
     return param.addObject(3, this);
 
-  return 1;
+  return -1;
 }
 
 int 

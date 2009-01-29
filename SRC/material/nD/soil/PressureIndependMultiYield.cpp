@@ -1,5 +1,5 @@
-// $Revision: 1.38 $
-// $Date: 2009-01-16 19:40:36 $
+// $Revision: 1.39 $
+// $Date: 2009-01-29 00:42:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
 
 // Written: ZHY
@@ -556,7 +556,7 @@ int PressureIndependMultiYield::updateParameter(int responseID, Information &inf
 {
   if (responseID == 1)
     loadStagex[matN] = info.theInt;
-
+  
   return 0;
 }
 
@@ -856,7 +856,7 @@ void PressureIndependMultiYield::getBackbone (Matrix & bb)
 
 void PressureIndependMultiYield::Print(OPS_Stream &s, int flag )
 {
-  s << "PressureIndependMultiYield" << endln;
+  s << "PressureIndependMultiYield - loadStage: " <<  loadStagex[matN] << endln;
 }
 
 
