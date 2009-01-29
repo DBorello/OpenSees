@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.22 $
-// $Date: 2007-06-27 00:24:34 $
+// $Revision: 1.23 $
+// $Date: 2009-01-29 00:40:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.cpp,v $
 
 // Ed "C++" Love
@@ -1583,17 +1583,20 @@ BbarBrick::setParameter(const char **argv, int argc, Parameter &param)
     else 
       return -1;
   }
+
+  
   
   // otherwise it could be just a forall material parameter
   else {
+
     int matRes = res;
     for (int i=0; i<8; i++) {
       matRes =  materialPointers[i]->setParameter(argv, argc, param);
-      if (matRes != -1)
+      if (matRes >= 0)
 	res = matRes;
     }
   }
-  
+
   return res;
 }
     

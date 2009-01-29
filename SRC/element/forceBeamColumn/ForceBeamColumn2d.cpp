@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.39 $
-// $Date: 2008-11-04 21:32:53 $
+// $Revision: 1.40 $
+// $Date: 2009-01-29 00:40:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 /*
@@ -2576,7 +2576,7 @@ int
 ForceBeamColumn2d::setParameter(const char **argv, int argc, Parameter &param)
 {
   if (argc < 1)
-    return 0;
+    return -1;
 
   int result = -1;
 
@@ -2636,7 +2636,7 @@ ForceBeamColumn2d::setParameter(const char **argv, int argc, Parameter &param)
   else if (strstr(argv[0],"integration") != 0) {
     
     if (argc < 2)
-      return 0;
+      return -1;
 
     return beamIntegr->setParameter(&argv[1], argc-1, param);
   }
@@ -2653,6 +2653,7 @@ ForceBeamColumn2d::setParameter(const char **argv, int argc, Parameter &param)
   ok = beamIntegr->setParameter(argv, argc, param);
   if (ok != -1)
     result = ok;
+
   return result;
 }
 

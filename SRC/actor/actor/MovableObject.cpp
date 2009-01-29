@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2008-04-29 17:32:46 $
+// $Revision: 1.8 $
+// $Date: 2009-01-29 00:41:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/actor/MovableObject.cpp,v $
                                                                         
                                                                         
@@ -32,6 +32,7 @@
 // What: "@(#) MovableObject.C, revA"
 
 #include <MovableObject.h>
+#include <OPS_Globals.h>
 
 MovableObject::MovableObject(int cTag, int dTag)
 :classTag(cTag), dbTag(dTag)
@@ -82,7 +83,7 @@ MovableObject::setDbTag(int newTag)
 int
 MovableObject::setParameter(const char **argv, int argc, Parameter &param)
 {
-  return 0;
+  return -1;
 }
 
 int
