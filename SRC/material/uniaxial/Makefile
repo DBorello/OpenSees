@@ -34,6 +34,8 @@ include ../../../Makefile.def
 	Bond_SP01.o \
 	HyperbolicGapMaterial.o \
 	TclHyperbolicGapMaterial.o \
+	ImpactMaterial.o \
+	TclImpactMaterial.o \
 	KinematicHardening.o \
 	TclKinematicHardening.o \
 	NewUniaxialMaterial.o \

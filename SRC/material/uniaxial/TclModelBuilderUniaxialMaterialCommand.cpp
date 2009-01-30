@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.58 $
-// $Date: 2009-01-16 00:07:26 $
+// $Revision: 1.59 $
+// $Date: 2009-01-30 01:43:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -91,6 +91,10 @@ Tcl_AddLimitStateMaterial(ClientData clientData, Tcl_Interp *interp, int argc, T
 extern int
 TclCommand_HyperbolicGapMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
 				 TCL_Char **argv, TclModelBuilder *theTclBuilder);
+
+extern int
+TclCommand_ImpactMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
+			  TCL_Char **argv, TclModelBuilder *theTclBuilder);
 
 extern UniaxialMaterial *Tcl_addWrapperUniaxialMaterial(matObj *, ClientData clientData, Tcl_Interp *interp,
 							int argc, TCL_Char **argv, TclModelBuilder *theTclBuilder);
@@ -2905,8 +2909,13 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
     
     else if (strcmp(argv[1],"HyperbolicGapMaterial") == 0) { 
       return TclCommand_HyperbolicGapMaterial(clientData, interp, argc, argv, theTclBuilder);
+    }
 
-    }  else {
+    else if (strcmp(argv[1],"ImpactMaterial") == 0) { 
+      return TclCommand_ImpactMaterial(clientData, interp, argc, argv, theTclBuilder);
+    }
+
+    else {
       // Fedeas
       theMaterial = TclModelBuilder_addFedeasMaterial(clientData, interp, argc, argv, theTclBuilder);
       
