@@ -610,6 +610,8 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/Bond_SP01.o \
 	$(FE)/material/uniaxial/HyperbolicGapMaterial.o \
 	$(FE)/material/uniaxial/TclHyperbolicGapMaterial.o \
+	$(FE)/material/uniaxial/ImpactMaterial.o \
+	$(FE)/material/uniaxial/TclImpactMaterial.o \
 	$(FE)/material/uniaxial/SelfCenteringMaterial.o \
 	$(FE)/material/uniaxial/backbone/HystereticBackbone.o \
 	$(FE)/material/uniaxial/backbone/ArctangentBackbone.o \
