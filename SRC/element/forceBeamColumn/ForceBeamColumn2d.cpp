@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.40 $
-// $Date: 2009-01-29 00:40:53 $
+// $Revision: 1.41 $
+// $Date: 2009-02-05 16:28:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 /*
@@ -1806,6 +1806,67 @@ ForceBeamColumn2d::getInitialFlexibility(Matrix &fe)
   return 0;
 }
 
+int
+ForceBeamColumn2d::getInitialDeformations(Vector &v0)
+{
+  v0.Zero();
+  if (numEleLoads < 1)
+    return 0;
+
+  double L = crdTransf->getInitialLength();
+  double oneOverL  = 1.0/L;
+
+  double xi[maxNumSections];
+  beamIntegr->getSectionLocations(numSections, L, xi);
+  
+  double wt[maxNumSections];
+  beamIntegr->getSectionWeights(numSections, L, wt);
+  
+  for (int i = 0; i < numSections; i++) {
+    
+    int order      = sections[i]->getOrder();
+    const ID &code = sections[i]->getType();
+    
+    double xL  = xi[i];
+    double xL1 = xL-1.0;
+    double wtL = wt[i]*L;
+
+    static Vector sp;
+    sp.setData(workArea, order);
+    sp.Zero();
+
+    this->computeSectionForces(sp, i);
+
+    const Matrix &fse = sections[i]->getInitialFlexibility();
+
+    static Vector e;
+    e.setData(&workArea[order], order);
+
+    e.addMatrixVector(0.0, fse, sp, 1.0);
+
+    double dei, tmp;
+    for (int ii = 0; ii < order; ii++) {
+      dei = e(ii)*wtL;
+      switch(code(ii)) {
+      case SECTION_RESPONSE_P:
+	v0(0) += dei;
+	break;
+      case SECTION_RESPONSE_MZ:
+	v0(1) += xL1*dei; v0(2) += xL*dei;
+	break;
+      case SECTION_RESPONSE_VY:
+	tmp = oneOverL*dei;
+	v0(1) += tmp; v0(2) += tmp; 
+	break;
+      default:
+	break;
+      }
+    }    
+  }
+
+  return 0;
+}
+
 void ForceBeamColumn2d::compSectionDisplacements(Vector sectionCoords[], Vector sectionDispls[]) const
 {
    // get basic displacements and increments
@@ -2304,6 +2365,9 @@ ForceBeamColumn2d::getResponse(int responseID, Information &eleInfo)
     this->getInitialFlexibility(fe);
     vp = crdTransf->getBasicTrialDisp();
     vp.addMatrixVector(1.0, fe, Se, -1.0);
+    static Vector v0(3);
+    this->getInitialDeformations(v0);
+    vp.addVector(1.0, v0, -1.0);
     return eleInfo.setVector(vp);
   }
 
