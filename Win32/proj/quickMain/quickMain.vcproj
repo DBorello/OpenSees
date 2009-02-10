@@ -39,11 +39,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="reliability.lib actor.lib analysis.lib cblas.lib convergence.lib domain.lib element.lib graph.lib material.lib matrix.lib modelbuilder.lib recorder.lib superLU.lib system.lib tagged.lib utility.lib database.lib renderer.lib blas.lib lapack.lib feap.lib arpack.lib umfpack.lib tcl84.lib tk84.lib ifconsol.lib libifcore.lib libm.lib odbc32.lib odbccp32.lib OpenGL32.lib glu32.lib"
+				AdditionalDependencies="reliability.lib actor.lib analysis.lib cblas.lib convergence.lib domain.lib element.lib graph.lib material.lib matrix.lib modelbuilder.lib recorder.lib superLU.lib system.lib tagged.lib utility.lib database.lib renderer.lib blas.lib lapack.lib feap.lib arpack.lib umfpack.lib ifconsol.lib libifcore.lib libm.lib odbc32.lib odbccp32.lib OpenGL32.lib glu32.lib"
 				OutputFile=".\..\..\bin/quickMain.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="c:\msdev\lib,c:\Program Files\tcl\lib,..\..\lib,..\..\lib\debug"
+				AdditionalLibraryDirectories="c:\msdev\lib,..\..\lib,..\..\lib\debug"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\..\..\bin/quickMain.pdb"
@@ -94,11 +94,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="reliability.lib database.lib renderer.lib blas.lib lapack.lib feap.lib arpack.lib umfpack.lib actor.lib analysis.lib cblas.lib convergence.lib domain.lib element.lib graph.lib material.lib matrix.lib modelbuilder.lib recorder.lib superLU.lib system.lib tagged.lib utility.lib tcl84.lib tk84.lib ifconsol.lib libifcore.lib libm.lib odbc32.lib odbccp32.lib OpenGL32.lib glu32.lib"
+				AdditionalDependencies="reliability.lib database.lib renderer.lib blas.lib lapack.lib feap.lib arpack.lib umfpack.lib actor.lib analysis.lib cblas.lib convergence.lib domain.lib element.lib graph.lib material.lib matrix.lib modelbuilder.lib recorder.lib superLU.lib system.lib tagged.lib utility.lib ifconsol.lib libifcore.lib libm.lib odbc32.lib odbccp32.lib OpenGL32.lib glu32.lib"
 				OutputFile=".\..\..\bin/quickMain.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="c:\Program Files\tcl\lib,c:\msdev\lib,..\..\lib,..\..\lib\release"
+				AdditionalLibraryDirectories=",c:\msdev\lib,..\..\lib,..\..\lib\release"
 				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\..\..\bin/quickMain.pdb"
 				SubSystem="1"/>
