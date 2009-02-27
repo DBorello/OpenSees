@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2008-07-22 22:51:21 $
+// $Revision: 1.20 $
+// $Date: 2009-02-27 22:38:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.cpp,v $
 
 // Ed "C++" Love
@@ -243,59 +243,14 @@ ShellMITC4::~ShellMITC4( )
 {
   int i ;
   for ( i = 0 ;  i < 4; i++ ) {
-
-    delete materialPointers[i] ;
+    
+    if (materialPointers[i] != 0)
+      delete materialPointers[i] ;
     materialPointers[i] = 0 ; 
 
     nodePointers[i] = 0 ;
 
   } //end for i
-
-  //shear matrix pointers
-  if ( GammaB1pointer != 0 ) {
-	delete GammaB1pointer[0] ;
-	delete GammaB1pointer[1] ;
-	delete GammaB1pointer[2] ;
-	delete GammaB1pointer[3] ;
-	delete [] GammaB1pointer ;
-	GammaB1pointer = 0 ;
-  } //end if B1
-
-  if ( GammaD1pointer != 0 ) {
-	delete GammaD1pointer[0] ;
-	delete GammaD1pointer[1] ;
-	delete GammaD1pointer[2] ;
-	delete GammaD1pointer[3] ;
-	delete [] GammaD1pointer ;
-	GammaD1pointer = 0 ;
-  } //end if D1
-
-  if ( GammaA2pointer != 0 ) {
-	delete GammaA2pointer[0] ;
-	delete GammaA2pointer[1] ;
-	delete GammaA2pointer[2] ;
-	delete GammaA2pointer[3] ;
-	delete [] GammaA2pointer ;
-	GammaA2pointer = 0 ;
-  } //end if A2
-
-  if ( GammaC2pointer != 0 ) {
-	delete GammaC2pointer[0] ;
-	delete GammaC2pointer[1] ;
-	delete GammaC2pointer[2] ;
-	delete GammaC2pointer[3] ;
-	delete [] GammaC2pointer ;
-	GammaC2pointer = 0 ;
-  } //end if C2
-
-  if ( Bhat != 0 ) {
-	delete Bhat[0] ;
-	delete Bhat[1] ;
-	delete Bhat[2] ;
-	delete Bhat[3] ;
-	delete [] Bhat ;
-	Bhat = 0 ;
-  } //end if Bhat
 
   if (load != 0)
     delete load;
