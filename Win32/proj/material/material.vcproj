@@ -239,6 +239,12 @@
 				RelativePath="..\..\..\SRC\material\uniaxial\HystereticMaterial.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\ImpactMaterial.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\ImpactMaterial.h">
+			</File>
+			<File
 				RelativePath="..\..\..\Src\material\uniaxial\MinMaxMaterial.cpp">
 			</File>
 			<File
@@ -327,6 +333,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\TclHyperbolicGapMaterial.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\TclImpactMaterial.cpp">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\TclModelBuilderUniaxialMaterialCommand.cpp">
