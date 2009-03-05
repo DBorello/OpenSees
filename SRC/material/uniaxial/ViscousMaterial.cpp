@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-10-17 23:35:01 $
+// $Revision: 1.7 $
+// $Date: 2009-03-05 00:52:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ViscousMaterial.cpp,v $
                                                                         
 // Written: Mehrdad Sasani 
@@ -83,7 +83,9 @@ ViscousMaterial::getStress(void)
       stress = C*pow(absRate, Alpha);
     else
       stress = C*pow(minVel, Alpha);
-    
+
+    stress = C*pow(absRate, Alpha);    
+
     if (trialRate < 0.0)
         return -stress;
     else
