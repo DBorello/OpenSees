@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2008-11-06 21:01:14 $
+// $Revision: 1.13 $
+// $Date: 2009-03-06 18:19:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthSection.cpp,v $
                                                                         
 // Written: MHS
@@ -302,10 +302,6 @@ ZeroLengthSection::getResistingForce()
 	// Compute element resisting force ... P = A^*q
 	P->addMatrixTransposeVector(0.0, *A, q, 1.0);
 
-	if (useRayleighDamping == 0)
-	  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
-	    *P += this->getRayleighDampingForces();
-
 	return *P;
 }
 
@@ -314,10 +310,10 @@ const Vector &
 ZeroLengthSection::getResistingForceIncInertia()
 {	
     this->getResistingForce();
-    
-    // add the damping forces if rayleigh damping
-    if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
-      *P += this->getRayleighDampingForces();
+
+    if (useRayleighDamping == 0)
+      if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
+	*P += this->getRayleighDampingForces();
 
     return *P;
 }

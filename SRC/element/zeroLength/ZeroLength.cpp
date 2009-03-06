@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2008-11-06 21:01:13 $
+// $Revision: 1.24 $
+// $Date: 2009-03-06 18:19:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
 
 // Written: GLF
@@ -597,7 +597,6 @@ ZeroLength::getResistingForceIncInertia()
 	*theVector += this->getRayleighDampingForces();
 
     return *theVector;
-
 }
 
 
