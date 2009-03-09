@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2006-02-08 20:20:00 $
+// $Revision: 1.19 $
+// $Date: 2009-03-09 22:33:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.cpp,v $
                                                                         
                                                                         
@@ -1003,8 +1003,11 @@ FE_Element::commitSensitivity(int gradNum, int numGrads)
 int  
 FE_Element::updateElement(void)
 {
-  if (myEle != 0)
+  if (myEle != 0) {
     return myEle->update();
+    opserr << "FE_Element::update()"; myEle->Print(opserr, 0);
+  }
 
+  
   return 0;
 }
