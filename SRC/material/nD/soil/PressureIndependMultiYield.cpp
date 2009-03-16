@@ -1,5 +1,5 @@
-// $Revision: 1.39 $
-// $Date: 2009-01-29 00:42:03 $
+// $Revision: 1.40 $
+// $Date: 2009-03-16 19:41:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
 
 // Written: ZHY
@@ -136,7 +136,7 @@ PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd,
        numOfSurfacesx[i] = temp11[i];
        residualPressx[i] = temp12[i];
      }
-     
+
      if (matCount > 0) {
        delete [] temp1; delete [] temp2; delete [] temp3;
        delete [] temp6; delete [] temp7; delete [] temp8;
@@ -144,7 +144,7 @@ PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd,
        delete [] temp12;
      }
   }
-  
+
   ndmx[matCount] = nd;
   loadStagex[matCount] = 0;   //default
   refShearModulus = refShearModul;
@@ -156,15 +156,15 @@ PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd,
   pressDependCoeffx[matCount] = pressDependCoe;
   numOfSurfacesx[matCount] = numberOfYieldSurf;
   rhox[matCount] = r;
-  
+
   e2p = 0;
   matN = matCount;
   matCount ++;
-  
+
   theSurfaces = new MultiYieldSurface[numberOfYieldSurf+1]; //first surface not used
   committedSurfaces = new MultiYieldSurface[numberOfYieldSurf+1];
   activeSurfaceNum = committedActiveSurf = 0;
-  
+
   setUpSurfaces(gredu);  // residualPress is calculated inside.
 }
 
@@ -548,6 +548,10 @@ int PressureIndependMultiYield::setParameter(const char **argv, int argc, Parame
     if (strcmp(argv[0],"updateMaterialStage") == 0) {
       return param.addObject(1, this);
     }
+    else if (strcmp(argv[0],"shearModulus") == 0)
+      return param.addObject(10, this);
+	else if (strcmp(argv[0],"bulkModulus") == 0)
+      return param.addObject(11, this);
   }
   return -1;
 }
@@ -556,7 +560,10 @@ int PressureIndependMultiYield::updateParameter(int responseID, Information &inf
 {
   if (responseID == 1)
     loadStagex[matN] = info.theInt;
-  
+  else if (responseID==10)
+    refShearModulus = info.theDouble;
+  else if (responseID==11)
+    refBulkModulus = info.theDouble;
   return 0;
 }
 
