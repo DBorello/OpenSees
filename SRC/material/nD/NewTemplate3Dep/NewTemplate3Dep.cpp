@@ -806,7 +806,7 @@ int NewTemplate3Dep::ForwardEuler(const straintensor& strain_incr)
     straintensor start_strain;
     stresstensor start_stress;
     stresstensor stress_incr;
-    stresstensor Intersection_strain;
+    straintensor Intersection_strain;
     stresstensor Intersection_stress;
     stresstensor elastic_predictor_stress;
     BJtensor Ee;
@@ -850,6 +850,7 @@ int NewTemplate3Dep::ForwardEuler(const straintensor& strain_incr)
     }
     
     // If Elastic and then Elastic-Plastic
+	else {
     if ( f_start < 0.0 )  {
 
         intersection_factor = zbrentstress( start_stress, elastic_predictor_stress, 0.0, 1.0, TOL );      
@@ -867,7 +868,6 @@ int NewTemplate3Dep::ForwardEuler(const straintensor& strain_incr)
     }
     
     // If E-P Response,
-    {
         double lower = 0.0;
         double Delta_lambda = 0.0;
         double hardMod  = 0.0;
@@ -889,7 +889,7 @@ int NewTemplate3Dep::ForwardEuler(const straintensor& strain_incr)
         //Intersection_stress = Intersection_stress *(1.0 - TOL);
                    
         dFods = pointer_yield_function->StressDerivative( Intersection_stress, *pointer_material_parameter );
-        dQods = pointer_plastic_flow->PlasticFlowTensor( Intersection_stress, Intersection_strain, *pointer_material_parameter );
+        dQods = pointer_plastic_flow->PlasticFlowTensor( Intersection_stress, start_strain, *pointer_material_parameter );
 
         // E_ijkl * R_kl
         Hq = Ee("ijkl") * dQods("kl");
@@ -913,7 +913,7 @@ int NewTemplate3Dep::ForwardEuler(const straintensor& strain_incr)
         // Evolution of tensor (kinematic) internal variables in yield function
         double Num_internal_tensor_in_yield_function = pointer_yield_function->getNumInternalTensor();
         for (i = 0;  i < Num_internal_tensor_in_yield_function; i++) {
-          h_t = pointer_tensor_evolution[i]->Hij( dQods, Intersection_stress, Intersection_strain, *pointer_material_parameter);
+          h_t = pointer_tensor_evolution[i]->Hij( dQods, Intersection_stress, start_strain, *pointer_material_parameter);
           xi_t = pointer_yield_function->InTensorDerivative( Intersection_stress, *pointer_material_parameter, i+1);
           hardMod += ( h_t("mn") * xi_t("mn") ).trace();
         }
@@ -961,7 +961,7 @@ int NewTemplate3Dep::ForwardEuler(const straintensor& strain_incr)
         stresstensor T;
         int Num_internal_tensor = pointer_material_parameter->getNum_Internal_Tensor();
         for (i = 0; i < Num_internal_tensor; i++) {
-          dT = pointer_tensor_evolution[i]->Hij(dQods, Intersection_stress, Intersection_strain, *pointer_material_parameter) *Delta_lambda; 
+          dT = pointer_tensor_evolution[i]->Hij(dQods, Intersection_stress, start_strain, *pointer_material_parameter) *Delta_lambda; 
           T = pointer_material_parameter->getInternal_Tensor(i);
           err += pointer_material_parameter->setInternal_Tensor(i, T + dT );
         }
