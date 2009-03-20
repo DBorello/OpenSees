@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.55 $
-// $Date: 2008-12-03 22:56:58 $
+// $Revision: 1.56 $
+// $Date: 2009-03-20 18:38:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -1522,6 +1522,8 @@ Domain::applyLoad(double timeStep)
     while ((theSP = theSPs()) != 0) {
 	theSP->applyConstraint(timeStep);
     }
+
+    ops_Dt = dT;
 }
 
 
