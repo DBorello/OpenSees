@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.109 $
-// $Date: 2009-01-30 01:44:21 $
+// $Revision: 1.110 $
+// $Date: 2009-03-20 18:40:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -549,6 +549,7 @@
 #define INTEGRATOR_TAGS_AlphaOSGeneralized              25
 #define INTEGRATOR_TAGS_Collocation 	          	    26
 #define INTEGRATOR_TAGS_CollocationHybridSimulation 	27
+#define INTEGRATOR_TAGS_TRBDF2 	28
 
 
 
