@@ -14,6 +14,7 @@ OBJS       = IncrementalIntegrator.o \
 	HHT1.o \
 	Newmark1.o \
 	CentralDifferenceAlternative.o \
+	TRBDF2.o \
 	ArcLength.o \
 	ArcLength1.o \
 	LoadPath.o \
