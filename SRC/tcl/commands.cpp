@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.141 $
-// $Date: 2009-01-15 00:12:11 $
+// $Revision: 1.142 $
+// $Date: 2009-03-23 23:16:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -44,6 +44,7 @@ extern "C" {
 }
 
 #include <OPS_Globals.h>
+#include <TclModelBuilder.cpp>
 #include <Matrix.h>
 
 // the following is a little kludgy but it works!
@@ -161,6 +162,7 @@ OPS_Stream *opserrPtr = &sserr;
 #include <MinUnbalDispNorm.h>
 #include <DisplacementControl.h>
 #include <Newmark.h>
+#include <TRBDF2.h>
 #include <WilsonTheta.h>
 #include <HHT.h>
 #include <HHT1.h>
@@ -390,6 +392,14 @@ Domain theDomain;
 
 #endif
 
+extern int OPS_ResetInput(ClientData clientData, 
+			  Tcl_Interp *interp,  
+			  int cArg, 
+			  int mArg, 
+			  TCL_Char **argv, 
+			  Domain *domain,
+			  TclModelBuilder *builder);
+
 
 #ifdef _PARALLEL_INTERPRETERS
 #include <MachineBroker.h>
@@ -406,10 +416,13 @@ extern int np;
 extern MachineBroker *theMachineBroker;
 #endif
 
+
+
 typedef struct parameterValues {
   char *value;
   struct parameterValues *next;
 } OpenSeesTcl_ParameterValues;
+
 
 typedef struct parameter {
   char *name;
@@ -418,8 +431,9 @@ typedef struct parameter {
 } OpenSeesTcl_Parameter;
 
 
-static OpenSeesTcl_Parameter *theParameters = 0;
-static OpenSeesTcl_Parameter *endParameters = 0;
+static OpenSeesTcl_Parameter *theParameters = NULL;
+static OpenSeesTcl_Parameter *endParameters = NULL;
+
 static int numParam = 0;
 static char **paramNames =0;
 static char **paramValues =0;
@@ -2101,25 +2115,16 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 }
 
 
-//
-// command invoked to allow the SystemOfEqn and Solver objects to be built
-//
-
-
-typedef struct linearSOE_PackageCommand {
+typedef struct externalClassFunction {
   char *funcName;
-  int (*funcPtr)(ClientData clientData, 
-		 Tcl_Interp *interp,  
-		 int argc, 
-		 TCL_Char **argv, 
-		 FEM_ObjectBroker *,
-		 LinearSOE **); 
-  struct linearSOE_PackageCommand *next;
-} LinearSOE_PackageCommand;
+  void *(*funcPtr)();
+  struct externalClassFunction *next;
+} ExternalClassFunction;
 
-
-// static variables
-static LinearSOE_PackageCommand *theLinearSOE_PackageCommands = NULL;
+static ExternalClassFunction *theExternalSolverCommands = NULL;
+static ExternalClassFunction *theExternalStaticIntegratorCommands = NULL;
+static ExternalClassFunction *theExternalTransientIntegratorCommands = NULL;
+static ExternalClassFunction *theExternalAlgorithmCommands = NULL;
 
 int 
 specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
@@ -2472,46 +2477,62 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
     //
     // maybe a package
     //
+
+    opserr << "commands.cpp - specifySOE: " << argv[1] << endln;
+
     
     // try existing loaded packages
-    
-    LinearSOE_PackageCommand *soeCommands = theLinearSOE_PackageCommands;
+    ExternalClassFunction  *solverCommands = theExternalSolverCommands;
     bool found = false;
-    while (soeCommands != NULL && found == false) {
-      if (strcmp(argv[1], soeCommands->funcName) == 0) {
-	int result = (*(soeCommands->funcPtr))(clientData, interp, argc, argv, &theBroker, &theSOE);
-	found = true;
+    int result = TCL_ERROR;
+    while (solverCommands != NULL && found == false) {
+
+      if (strcmp(argv[1], solverCommands->funcName) == 0) {
+	
+	OPS_ResetInput(clientData, interp, 2, argc, argv, &theDomain, NULL);
+	void *theRes = (*(solverCommands->funcPtr))();
+	if (theRes != 0) {
+
+	  theSOE = (LinearSOE *)theRes;
+	  found = true;
+	}
       } else
-	soeCommands = soeCommands->next;
+	solverCommands = solverCommands->next;
     }
-    
+
+    //
+    // if not there try loading package
+    //
+
     if (found == false) {
-      // load new package
-    
+
       void *libHandle;
-      int (*funcPtr)(ClientData clientData, Tcl_Interp *interp,  int argc, 
-		     TCL_Char **argv, FEM_ObjectBroker *, LinearSOE **);       
-      int linearSOE_NameLength = strlen(argv[1]);
-      char *tclFuncName = new char[linearSOE_NameLength+12];
-      strcpy(tclFuncName, "TclCommand_");
-      strcpy(&tclFuncName[11], argv[1]);    
-      
+      void *(*funcPtr)();
+      int solverNameLength = strlen(argv[1]);
+      char *tclFuncName = new char[solverNameLength+5];
+      strcpy(tclFuncName, "OPS_");
+      strcpy(&tclFuncName[4], argv[1]);    
+
       int res = getLibraryFunction(argv[1], tclFuncName, &libHandle, (void **)&funcPtr);
       
+      delete [] tclFuncName;
+      
       if (res == 0) {
-	char *linearSOE_Name = new char[linearSOE_NameLength+1];
-	strcpy(linearSOE_Name, argv[1]);
-	LinearSOE_PackageCommand *theSOE_Command = new LinearSOE_PackageCommand;
-	theSOE_Command->funcPtr = funcPtr;
-	theSOE_Command->funcName = linearSOE_Name;	
-	theSOE_Command->next = theLinearSOE_PackageCommands;
-	theLinearSOE_PackageCommands = theSOE_Command;
+
+	char *solverName = new char[solverNameLength+1];
+	strcpy(solverName, argv[1]);
+	ExternalClassFunction *theSolverCommand = new ExternalClassFunction;
+	theSolverCommand->funcPtr = funcPtr;
+	theSolverCommand->funcName = solverName;	
+	theSolverCommand->next = theExternalSolverCommands;
+	theExternalSolverCommands = theSolverCommand;
 	
-	int result = (*funcPtr)(clientData, interp,
-				argc, 
-				argv,
-				&theBroker,
-				&theSOE);	
+	OPS_ResetInput(clientData, interp, 2, argc, argv, &theDomain, NULL);
+	
+	void *theRes = (*funcPtr)();
+	if (theRes != 0) {
+	  theSOE = (LinearSOE *)theRes;
+	}
       }
     }
   }
@@ -3461,6 +3482,9 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
   }
 #endif
 
+  else if ((strcmp(argv[1],"TRBDF2") == 0) || (strcmp(argv[1],"Bathe") == 0)) {
+    theTransientIntegrator = new TRBDF2();           
+  }
   
   else if (strcmp(argv[1],"Newmark") == 0) {
       double gamma;
@@ -4624,6 +4648,142 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
     if (theTransientAnalysis != 0)
       theTransientAnalysis->setIntegrator(*theTransientIntegrator);
   }      
+
+  else if (strcmp(argv[1],"Transient") == 0) {
+
+    theTransientIntegrator = 0;
+    
+    // try existing loaded packages
+    ExternalClassFunction  *integratorCommands = theExternalTransientIntegratorCommands;
+    bool found = false;
+    int result = TCL_ERROR;
+    while (integratorCommands != NULL && found == false) {
+
+      if (strcmp(argv[2], integratorCommands->funcName) == 0) {
+	
+	OPS_ResetInput(clientData, interp, 3, argc, argv, &theDomain, NULL);
+	void *theRes = (*(integratorCommands->funcPtr))();
+	if (theRes != 0) {
+	  theTransientIntegrator = (TransientIntegrator *)theRes;
+	  found = true;
+	}
+      } else
+	integratorCommands = integratorCommands->next;
+    }
+
+    //
+    // if not there try loading package
+    //
+
+    if (found == false) {
+
+      void *libHandle;
+      void *(*funcPtr)();
+      int integratorNameLength = strlen(argv[2]);
+      char *tclFuncName = new char[integratorNameLength+5];
+      strcpy(tclFuncName, "OPS_");
+      strcpy(&tclFuncName[4], argv[2]);    
+
+      int res = getLibraryFunction(argv[2], tclFuncName, &libHandle, (void **)&funcPtr);
+      
+      delete [] tclFuncName;
+      
+      if (res == 0) {
+
+	char *integratorName = new char[integratorNameLength+1];
+	strcpy(integratorName, argv[2]);
+	ExternalClassFunction *theIntegratorCommand = new ExternalClassFunction;
+	theIntegratorCommand->funcPtr = funcPtr;
+	theIntegratorCommand->funcName = integratorName;	
+	theIntegratorCommand->next = theExternalTransientIntegratorCommands;
+	theExternalTransientIntegratorCommands = theIntegratorCommand;
+	
+	OPS_ResetInput(clientData, interp, 3, argc, argv, &theDomain, NULL);
+	
+	void *theRes = (*funcPtr)();
+	if (theRes != 0) {
+	  theTransientIntegrator = (TransientIntegrator *)theRes;
+	}
+      }
+    }
+
+    if (theTransientIntegrator == 0) {
+      opserr << "Transient Integrator Not Found \n";
+      return TCL_ERROR;      
+    }
+
+    // if the analysis exists - we want to change the Integrator
+    if (theTransientAnalysis != 0)
+      theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+  }
+
+  else if (strcmp(argv[1],"Static") == 0) {
+
+    theStaticIntegrator = 0;
+
+    // try existing loaded packages
+    ExternalClassFunction  *integratorCommands = theExternalStaticIntegratorCommands;
+    bool found = false;
+    int result = TCL_ERROR;
+    while (integratorCommands != NULL && found == false) {
+
+      if (strcmp(argv[2], integratorCommands->funcName) == 0) {
+	
+	OPS_ResetInput(clientData, interp, 3, argc, argv, &theDomain, NULL);
+	void *theRes = (*(integratorCommands->funcPtr))();
+	if (theRes != 0) {
+	  theStaticIntegrator = (StaticIntegrator *)theRes;
+	  found = true;
+	}
+      } else
+	integratorCommands = integratorCommands->next;
+    }
+
+    //
+    // if not there try loading package
+    //
+
+    if (found == false) {
+
+      void *libHandle;
+      void *(*funcPtr)();
+      int integratorNameLength = strlen(argv[2]);
+      char *tclFuncName = new char[integratorNameLength+5];
+      strcpy(tclFuncName, "OPS_");
+      strcpy(&tclFuncName[4], argv[2]);    
+
+      int res = getLibraryFunction(argv[2], tclFuncName, &libHandle, (void **)&funcPtr);
+      
+      delete [] tclFuncName;
+      
+      if (res == 0) {
+
+	char *integratorName = new char[integratorNameLength+1];
+	strcpy(integratorName, argv[2]);
+	ExternalClassFunction *theIntegratorCommand = new ExternalClassFunction;
+	theIntegratorCommand->funcPtr = funcPtr;
+	theIntegratorCommand->funcName = integratorName;	
+	theIntegratorCommand->next = theExternalStaticIntegratorCommands;
+	theExternalStaticIntegratorCommands = theIntegratorCommand;
+	
+	OPS_ResetInput(clientData, interp, 3, argc, argv, &theDomain, NULL);
+	
+	void *theRes = (*funcPtr)();
+	if (theRes != 0) {
+	  theStaticIntegrator = (StaticIntegrator *)theRes;
+	}
+      }
+    }
+
+    if (theStaticIntegrator == 0) {
+      opserr << "Static Integrator Not Found \n";
+      return TCL_ERROR;      
+    }
+
+    // if the analysis exists - we want to change the Integrator
+    if (theStaticAnalysis != 0)
+      theStaticAnalysis->setIntegrator(*theStaticIntegrator);
+  }
 
   else {
     opserr << "WARNING No Integrator type exists \n";
