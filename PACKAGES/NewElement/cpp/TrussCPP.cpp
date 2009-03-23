@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2009-01-13 01:14:20 $
+// $Revision: 1.7 $
+// $Date: 2009-03-23 23:17:04 $
 // $Source: /usr/local/cvs/OpenSees/PACKAGES/NewElement/cpp/TrussCPP.cpp,v $
                                                                         
 // Written: fmk 
@@ -71,15 +71,8 @@ localInit()
 }
 
 OPS_Export void *
-OPS_TrussCPP(int argc, const char **argv)
+OPS_TrussCPP()
 {
-  // check the number of arguments is correct
-  if (argc < 6) {
-    opserr << "WARNING insufficient arguments\n";
-    opserr << "Want: element truss eleTag? iNode? jNode? A? matTag?\n";
-    return 0;
-  }    
-
   // get the id and end nodes 
   int iData[4];
   double dData[1];

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2009-01-13 01:00:04 $
+// $Revision: 1.7 $
+// $Date: 2009-03-23 23:17:04 $
 // $Source: /usr/local/cvs/OpenSees/PACKAGES/NewMaterial/cpp/ElasticPPcpp.cpp,v $
                                                                         
 // Written: fmk 
@@ -53,18 +53,11 @@ localInit()
 }
 
 OPS_Export void *
-OPS_ElasticPPcpp(int argc, 
-		const char **argv)
+OPS_ElasticPPcpp()
 {
   // Pointer to a uniaxial material that will be returned
   UniaxialMaterial *theMaterial = 0;
 
-  if (argc < 5) {
-    opserr << "WARNING insufficient arguments\n";
-    opserr << "Want: uniaxialMaterial ElasticPP tag? E? epsy?" << endln;
-    return 0;
-  }
-  
   int    iData[1];
   double dData[2];
   int numData;
@@ -84,7 +77,7 @@ OPS_ElasticPPcpp(int argc,
   theMaterial = new ElasticPPcpp(iData[0], dData[0], dData[1]);       
 
   if (theMaterial == 0) {
-    opserr << "WARNING could not create uniaxialMaterial " << argv[1] << endln;
+    opserr << "WARNING could not create uniaxialMaterial of type ElasticPPCpp\n";
     return 0;
   }
 

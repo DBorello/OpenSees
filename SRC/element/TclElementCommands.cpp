@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.49 $
-// $Date: 2009-01-16 00:03:59 $
+// $Revision: 1.50 $
+// $Date: 2009-03-23 23:17:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -64,7 +64,7 @@ extern int OPS_ResetInput(ClientData clientData,
 
 typedef struct elementPackageCommand {
   char *funcName;
-  void *(*funcPtr)(int argc, const char **argv);
+  void *(*funcPtr)();
   struct elementPackageCommand *next;
 } ElementPackageCommand;
 
@@ -626,7 +626,7 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
       if (strcmp(argv[1], eleCommands->funcName) == 0) {
 
 	OPS_ResetInput(clientData, interp, 2, argc, argv, theTclDomain, theTclBuilder);
-	void *theRes = (*(eleCommands->funcPtr))(argc, argv);
+	void *theRes = (*(eleCommands->funcPtr))();
 	if (theRes != 0) {
 	  Element *theEle = (Element *)theRes;
 	  result = theTclDomain->addElement(theEle);
@@ -663,12 +663,12 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
 		return result;
     }
 
-	//
+    //
     // try loading new dynamic library containg a c+= class
-	//
+    //
 
     void *libHandle;
-    void *(*funcPtr)(int argc, const char **argv);
+    void *(*funcPtr)();
     int eleNameLength = strlen(argv[1]);
     char *tclFuncName = new char[eleNameLength+5];
     strcpy(tclFuncName, "OPS_");
@@ -689,7 +689,8 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
       theElementPackageCommands = theEleCommand;
 
       OPS_ResetInput(clientData, interp, 2, argc, argv, theTclDomain, theTclBuilder);
-      void *theRes = (*funcPtr)(argc, argv);
+
+      void *theRes = (*funcPtr)();
 
       if (theRes != 0) {
 	Element *theEle = (Element *)theRes;
@@ -704,6 +705,5 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
     }
   }
 
-  opserr << "WARNING could not create element, unknown type:" << argv[1] << endln;
   return TCL_ERROR;
 }

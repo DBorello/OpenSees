@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.59 $
-// $Date: 2009-01-30 01:43:37 $
+// $Revision: 1.60 $
+// $Date: 2009-03-23 23:17:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -112,7 +112,7 @@ extern int OPS_ResetInput(ClientData clientData,
 
 typedef struct uniaxialPackageCommand {
   char *funcName;
-  void * (*funcPtr)(int argc, TCL_Char **argv); 
+  void * (*funcPtr)(); 
   struct uniaxialPackageCommand *next;
 } UniaxialPackageCommand;
 
@@ -2951,7 +2951,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
       while (matCommands != NULL && found == false) {
 	if (strcmp(argv[1], matCommands->funcName) == 0) {
 	  OPS_ResetInput(clientData, interp, 2, argc, argv, theDomain, theTclBuilder);	  
-	  theMaterial = (UniaxialMaterial *)(*(matCommands->funcPtr))(argc, argv);
+	  theMaterial = (UniaxialMaterial *)(*(matCommands->funcPtr))();
 	  found = true;;
 	} else
 	  matCommands = matCommands->next;
@@ -2991,7 +2991,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
     if (theMaterial == 0) {
 	
       void *libHandle;
-      void * (*funcPtr)(int argc, TCL_Char **argv);
+      void * (*funcPtr)();
       
       int matNameLength = strlen(argv[1]);
       char *tclFuncName = new char[matNameLength+12];
@@ -3016,7 +3016,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	theUniaxialPackageCommands = theMatCommand;
 	
 	OPS_ResetInput(clientData, interp, 2, argc, argv, theDomain, theTclBuilder);	
-	theMaterial = (UniaxialMaterial *)(*funcPtr)(argc, argv);
+	theMaterial = (UniaxialMaterial *)(*funcPtr)();
       }
     }
     
