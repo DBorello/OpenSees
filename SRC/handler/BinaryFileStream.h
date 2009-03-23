@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-01-16 00:19:01 $
+// $Revision: 1.2 $
+// $Date: 2009-03-23 22:15:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/BinaryFileStream.h,v $
 
 #ifndef _BinaryFileStream
@@ -66,6 +66,8 @@ class BinaryFileStream : public OPS_Stream
   OPS_Stream& write(const unsigned char *s, int n);
   OPS_Stream& write(const signed char *s, int n);
   OPS_Stream& write(const void *s, int n);
+  OPS_Stream& write(const double *s, int n);
+
   OPS_Stream& operator<<(char c);
   OPS_Stream& operator<<(unsigned char c);
   OPS_Stream& operator<<(signed char c);

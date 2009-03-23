@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-06-09 03:32:10 $
+// $Revision: 1.4 $
+// $Date: 2009-03-23 22:15:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/XmlFileStream.h,v $
 
 #ifndef _XmlFileStream
@@ -62,6 +62,8 @@ class XmlFileStream : public OPS_Stream
   OPS_Stream& write(const unsigned char *s, int n);
   OPS_Stream& write(const signed char *s, int n);
   OPS_Stream& write(const void *s, int n);
+  OPS_Stream& write(const double *s, int n);
+
   OPS_Stream& operator<<(char c);
   OPS_Stream& operator<<(unsigned char c);
   OPS_Stream& operator<<(signed char c);

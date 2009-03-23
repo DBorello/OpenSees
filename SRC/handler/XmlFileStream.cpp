@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2008-11-21 19:51:06 $
+// $Revision: 1.11 $
+// $Date: 2009-03-23 22:15:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/XmlFileStream.cpp,v $
 
 #include <XmlFileStream.h>
@@ -542,6 +542,7 @@ XmlFileStream::write(const signed char*s,int n)
 
   return *this;
 }
+
 OPS_Stream& 
 XmlFileStream::write(const void *s, int n)
 {
@@ -558,6 +559,28 @@ XmlFileStream::write(const void *s, int n)
 
   return *this;
 }
+
+OPS_Stream& 
+XmlFileStream::write(const double *s, int n)
+{
+  if (fileOpen == 0)
+    this->open();
+
+  if (attributeMode == true) {
+    theFile << "/>\n";
+    attributeMode = false;
+  }
+
+  if (fileOpen != 0) {
+    for (int i=0; i<n; i++)
+      theFile << s[i] << " ";
+    theFile << endln;
+  }
+
+  return *this;
+}
+
+
 OPS_Stream& 
 XmlFileStream::operator<<(char c)
 {

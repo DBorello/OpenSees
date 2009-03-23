@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-06-25 21:18:37 $
+// $Revision: 1.6 $
+// $Date: 2009-03-23 22:15:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/DataFileStream.cpp,v $
 
 
@@ -326,6 +326,22 @@ DataFileStream::write(const void *s, int n)
 
   return *this;
 }
+
+OPS_Stream& 
+DataFileStream::write(const double *s, int n)
+{
+  if (fileOpen == 0)
+    this->open();
+
+  if (fileOpen != 0) {
+    for (int i=0; i<n; i++)
+      theFile << s[i] << " ";
+    theFile << endln;
+  }
+  return *this;
+}
+
+
 OPS_Stream& 
 DataFileStream::operator<<(char c)
 {  

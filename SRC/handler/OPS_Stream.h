@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2008-12-18 22:49:50 $
+// $Revision: 1.6 $
+// $Date: 2009-03-23 22:15:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/OPS_Stream.h,v $
 
 #ifndef _OPS_Stream
@@ -60,6 +60,8 @@ class OPS_Stream:  public MovableObject
 
   virtual OPS_Stream& write(const signed char *s, int n);
   virtual OPS_Stream& write(const void *s, int n);
+
+  virtual OPS_Stream& write(const double *s, int n);
 
   virtual OPS_Stream& operator<<(char c);
   virtual OPS_Stream& operator<<(unsigned char c);

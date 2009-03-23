@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-01-16 00:19:01 $
+// $Revision: 1.2 $
+// $Date: 2009-03-23 22:15:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/BinaryFileStream.cpp,v $
 
 
@@ -277,6 +277,23 @@ BinaryFileStream::write(const signed char*s,int n)
 
   return *this;
 }
+
+OPS_Stream& 
+BinaryFileStream::write(const double *s, int n)
+{
+  if (fileOpen == 0)
+    this->open();
+
+  if (fileOpen != 0) {
+    for (int i=0; i<n; i++)
+      theFile.write((char *)(&s[i]), 8);
+
+    theFile << '\n';
+    theFile.flush();
+  }
+  return *this;
+}
+
 
 OPS_Stream& 
 BinaryFileStream::write(const void *s, int n)
