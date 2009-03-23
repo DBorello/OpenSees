@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2008-09-23 22:49:55 $
+// $Revision: 1.18 $
+// $Date: 2009-03-23 22:15:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.cpp,v $
                                                                         
                                                                         
@@ -1120,10 +1120,14 @@ Vector::operator!=(double value) const
 
 OPS_Stream &operator<<(OPS_Stream &s, const Vector &V)
 {
+  /*
   for (int i=0; i<V.Size(); i++) 
       s << V(i) << " ";
 
   return s << endln;
+  */
+  return s.write(V.theData, V.sz);
+
 }
 
 // friend istream &operator>>(istream &s, Vector &V)
