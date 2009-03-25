@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-09-23 23:23:47 $
+// $Revision: 1.2 $
+// $Date: 2009-03-25 22:50:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elastomericBearing/ElastomericBearing3d.h,v $
 
 #ifndef ElastomericBearing3d_h
@@ -34,6 +34,9 @@
 // or a high-damping rubber bearing defined by two nodes. This simplified version
 // uses a bidirectional plasticity model to simulate the shear behavior and four
 // uniaxial material models to simulate the axial, moment and torsional behaviors.
+// Because the axial and shear springs are uncoupled the influence of the axial
+// load on the shear behavior is not accounted for. However, the total P-Delta
+// moments are equally distributed to the two end nodes of the element.
 
 #include <Element.h>
 #include <Matrix.h>
@@ -49,7 +52,7 @@ public:
     ElastomericBearing3d(int tag, int Nd1, int Nd2,
         double ke, double fy, double alpha,
         UniaxialMaterial **theMaterials,
-        const Vector& y, const Vector& x = 0,
+        const Vector y, const Vector x = 0,
         double mass = 0.0);
     ElastomericBearing3d();
 	

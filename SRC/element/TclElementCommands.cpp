@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.50 $
-// $Date: 2009-03-23 23:17:41 $
+// $Revision: 1.51 $
+// $Date: 2009-03-25 22:55:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -278,6 +278,40 @@ extern int
 TclModelBuilder_addEightNode_Brick_u_p(ClientData, Tcl_Interp *, int, TCL_Char **,
 				Domain*, TclModelBuilder *, int);
 
+// Andreas Schellenberg
+extern int
+TclModelBuilder_addActuator(ClientData clientData, Tcl_Interp *interp,  int argc, 
+			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
+
+extern int
+TclModelBuilder_addActuatorCorot(ClientData clientData, Tcl_Interp *interp,  int argc, 
+			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
+
+extern int
+TclModelBuilder_addAdapter(ClientData clientData, Tcl_Interp *interp,  int argc, 
+			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
+
+extern int
+TclModelBuilder_addSlider(ClientData clientData, Tcl_Interp *interp,  int argc, 
+			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
+
+extern int
+TclModelBuilder_addFPSingle(ClientData clientData, Tcl_Interp *interp,  int argc, 
+			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
+
+extern int
+TclModelBuilder_addFPDouble(ClientData clientData, Tcl_Interp *interp,  int argc, 
+			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
+
+extern int
+TclModelBuilder_addElastomericBearing(ClientData clientData, Tcl_Interp *interp,  int argc, 
+			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
+
+extern int
+TclModelBuilder_addTwoNodeLink(ClientData clientData, Tcl_Interp *interp,  int argc, 
+			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
+
+
 int
 TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 			      int argc, TCL_Char **argv, 
@@ -378,18 +412,6 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
           int result = TclModelBuilder_addTwentyNodeBrick(clientData, interp, argc, argv,
 						       theTclDomain, theTclBuilder);
 	  return result;
-
-  } else if (strcmp(argv[1],"genericClient") == 0) {
-    int eleArgStart = 1;
-    int result = TclModelBuilder_addGenericClient(clientData, interp, argc, argv,
-						  theTclDomain, theTclBuilder, eleArgStart);
-    return result;
-
-  } else if (strcmp(argv[1],"genericCopy") == 0) {
-    int eleArgStart = 1;
-    int result = TclModelBuilder_addGenericCopy(clientData, interp, argc, argv,
-						theTclDomain, theTclBuilder, eleArgStart);
-    return result;
 
   } else if ((strcmp(argv[1],"shell") == 0) || (strcmp(argv[1],"shellMITC4") == 0) ||
 	     (strcmp(argv[1],"Shell") == 0) || (strcmp(argv[1],"ShellMITC4") == 0)) {
@@ -608,6 +630,63 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
     int result = TclModelBuilder_addBeamColumnJoint(clientData, interp,
 						    argc, argv, theTclDomain,
 						    theTclBuilder, eleArgStart);
+    return result;
+  }
+
+  // Andreas Schellenberg
+  else if (strcmp(argv[1],"actuator") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addActuator(clientData, interp, argc, argv,
+						theTclDomain, theTclBuilder, eleArgStart);    
+    return result;
+  }
+
+  else if (strcmp(argv[1],"corotActuator") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addActuatorCorot(clientData, interp, argc, argv,
+						theTclDomain, theTclBuilder, eleArgStart);    
+    return result;
+  }
+
+  else if (strcmp(argv[1],"adapter") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addAdapter(clientData, interp, argc, argv,
+						theTclDomain, theTclBuilder, eleArgStart);    
+    return result;
+  }
+
+  else if (strcmp(argv[1],"sliderBearing") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addSlider(clientData, interp, argc, argv,
+						theTclDomain, theTclBuilder, eleArgStart);    
+    return result;
+  }
+
+  else if (strcmp(argv[1],"singleFPBearing") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addFPSingle(clientData, interp, argc, argv,
+						theTclDomain, theTclBuilder, eleArgStart);    
+    return result;
+  }
+
+  else if (strcmp(argv[1],"doubleFPBearing") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addFPDouble(clientData, interp, argc, argv,
+						theTclDomain, theTclBuilder, eleArgStart);    
+    return result;
+  }
+
+  else if (strcmp(argv[1],"elastomericBearing") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addElastomericBearing(clientData, interp, argc, argv,
+						theTclDomain, theTclBuilder, eleArgStart);    
+    return result;
+  }
+
+  else if (strcmp(argv[1],"twoNodeLink") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addTwoNodeLink(clientData, interp, argc, argv,
+						theTclDomain, theTclBuilder, eleArgStart);    
     return result;
   }
 

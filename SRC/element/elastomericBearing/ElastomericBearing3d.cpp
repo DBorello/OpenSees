@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-09-23 23:23:47 $
+// $Revision: 1.2 $
+// $Date: 2009-03-25 22:50:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elastomericBearing/ElastomericBearing3d.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -56,7 +56,7 @@ Vector ElastomericBearing3d::theLoad(12);
 
 ElastomericBearing3d::ElastomericBearing3d(int tag, int Nd1, int Nd2,
     double ke, double fy, double alpha, UniaxialMaterial **materials,
-    const Vector &_y, const Vector &_x, double m)
+    const Vector _y, const Vector _x, double m)
     : Element(tag, ELE_TAG_ElastomericBearing3d),
     connectedExternalNodes(2), theMaterials(0),
     k0(0.0), qYield(0.0), k2(0.0), x(_x), y(_y), mass(m),
@@ -824,19 +824,21 @@ void ElastomericBearing3d::setUp()
     L = xp.Norm();
     
     if (L > DBL_EPSILON)  {
-        if (x.Size() > 0)  {
+		if (x.Size() == 0)  {
+		    x.resize(3);
+		    x = xp;
+        } else  {
             opserr << "WARNING ElastomericBearing3d::setUp() - " 
-                << "ignoring supplied local x vector and "
-                << "using element nodes to determine orientation\n";
+                << "element: " << this->getTag() << endln
+                << "ignoring nodes and using specified "
+                << "local x vector to determine orientation\n";
         }
-        x.resize(3);
-        x = xp;
     }
     // check that vectors for orientation are of correct size
     if (x.Size() != 3 || y.Size() != 3)  {
         opserr << "ElastomericBearing3d::setUp() - "
-            << "element: " << this->getTag()
-            << " incorrect dimension of orientation vectors\n";
+            << "element: " << this->getTag() << endln
+            << "incorrect dimension of orientation vectors\n";
         exit(-1);
     }
     
@@ -859,8 +861,9 @@ void ElastomericBearing3d::setUp()
     
     // check valid x and y vectors, i.e. not parallel and of zero length
     if (xn == 0 || yn == 0 || zn == 0)  {
-        opserr << "ElastomericBearing3d::setUp() - element: "
-            << this->getTag() << " invalid orientation vectors\n";
+        opserr << "ElastomericBearing3d::setUp() - "
+            << "element: " << this->getTag() << endln
+            << "invalid orientation vectors\n";
         exit(-1);
     }
     

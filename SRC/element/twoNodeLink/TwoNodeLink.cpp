@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-09-23 23:21:15 $
+// $Revision: 1.2 $
+// $Date: 2009-03-25 22:49:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/twoNodeLink/TwoNodeLink.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -59,9 +59,9 @@ Vector TwoNodeLink::TwoNodeLinkV12(12);
 // responsible for allocating the necessary space needed
 // by each object and storing the tags of the end nodes.
 TwoNodeLink::TwoNodeLink(int tag, int dim, int Nd1, int Nd2, 
-    const ID &direction, const Vector &_y, const Vector &_x,
-    UniaxialMaterial **materials, Vector Mr, double m)
-    : Element(tag, ELE_TAG_TwoNodeLink),     
+    const ID &direction, UniaxialMaterial **materials,
+    const Vector _y, const Vector _x, Vector Mr, double m)
+    : Element(tag, ELE_TAG_TwoNodeLink),
     numDIM(dim), numDOF(0), connectedExternalNodes(2),
     theMaterials(0), numDir(direction.Size()), dir(0), trans(3,3),
     x(_x), y(_y), Mratio(Mr), mass(m), L(0.0),
@@ -916,24 +916,26 @@ void TwoNodeLink::setUp()
     L = xp.Norm();
     
     if (L > DBL_EPSILON)  {
-        if (x.Size() > 0)  {
+        if (x.Size() == 0)  {
+            x.resize(3);
+            x.Zero();
+            x(0) = xp(0);
+            if (xp.Size() > 1)
+                x(1) = xp(1);
+            if (xp.Size() > 2)
+                x(2) = xp(2);
+        } else  {
             opserr << "WARNING TwoNodeLink::setUp() - " 
-                << "ignoring supplied local x vector and "
-                << "using element nodes to determine orientation\n";
+                << "element: " << this->getTag() << endln
+                << "ignoring nodes and using specified "
+                << "local x vector to determine orientation\n";
         }
-        x.resize(3);
-        x.Zero();
-        x(0) = xp(0);
-        if (xp.Size() == 2)
-            x(1) = xp(1);
-        if (xp.Size() == 3)
-            x(2) = xp(2);
     }
     // check that vectors for orientation are of correct size
     if (x.Size() != 3 || y.Size() != 3)  {
         opserr << "TwoNodeLink::setUp() - "
-            << "element: " << this->getTag()
-            << " incorrect dimension of orientation vectors\n";
+            << "element: " << this->getTag() << endln
+            << "incorrect dimension of orientation vectors\n";
         exit(-1);
     }
     
@@ -956,8 +958,9 @@ void TwoNodeLink::setUp()
     
     // check valid x and y vectors, i.e. not parallel and of zero length
     if (xn == 0 || yn == 0 || zn == 0)  {
-        opserr << "TwoNodeLink::setUp() - element: "
-            << this->getTag() << " invalid orientation vectors\n";
+        opserr << "TwoNodeLink::setUp() - "
+            << "element: " << this->getTag() << endln
+            << "invalid orientation vectors\n";
         exit(-1);
     }
     

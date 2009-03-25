@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-09-23 23:23:47 $
+// $Revision: 1.2 $
+// $Date: 2009-03-25 22:50:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elastomericBearing/ElastomericBearing2d.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -56,7 +56,7 @@ Vector ElastomericBearing2d::theLoad(6);
 
 ElastomericBearing2d::ElastomericBearing2d(int tag, int Nd1, int Nd2,
     double ke, double fy, double alpha, UniaxialMaterial **materials,
-    const Vector &_y, const Vector &_x, double m)
+    const Vector _y, const Vector _x, double m)
     : Element(tag, ELE_TAG_ElastomericBearing2d),
     connectedExternalNodes(2), theMaterials(0),
     k0(0.0), qYield(0.0), k2(0.0), x(_x), y(_y), mass(m),
@@ -760,21 +760,23 @@ void ElastomericBearing2d::setUp()
     L = xp.Norm();
     
     if (L > DBL_EPSILON)  {
-        if (x.Size() > 0 || y.Size() > 0)  {
+        if (x.Size() == 0)  {
+            x.resize(3);
+            x(0) = xp(0);  x(1) = xp(1);  x(2) = 0.0;
+            y.resize(3);
+            y(0) = -x(1);  y(1) = x(0);  y(2) = 0.0;
+        } else  {
             opserr << "WARNING ElastomericBearing2d::setUp() - " 
-                << "ignoring supplied local x and y vectors and "
-                << "using element nodes to determine orientation\n";
+                << "element: " << this->getTag() << endln
+                << "ignoring nodes and using specified "
+                << "local x vector to determine orientation\n";
         }
-        x.resize(3);
-        x(0) = xp(0);  x(1) = xp(1);  x(2) = 0.0;
-        y.resize(3);
-        y(0) = -x(1);  y(1) = x(0);  y(2) = x(2);
     }
     // check that vectors for orientation are of correct size
     if (x.Size() != 3 || y.Size() != 3)  {
         opserr << "ElastomericBearing2d::setUp() - "
-            << "element: " << this->getTag()
-            << " incorrect dimension of orientation vectors\n";
+            << "element: " << this->getTag() << endln
+            << "incorrect dimension of orientation vectors\n";
         exit(-1);
     }
     
@@ -797,8 +799,9 @@ void ElastomericBearing2d::setUp()
     
     // check valid x and y vectors, i.e. not parallel and of zero length
     if (xn == 0 || yn == 0 || zn == 0)  {
-        opserr << "ElastomericBearing2d::setUp() - element: "
-            << this->getTag() << " invalid orientation vectors\n";
+        opserr << "ElastomericBearing2d::setUp() - "
+            << "element: " << this->getTag() << endln
+            << "invalid orientation vectors\n";
         exit(-1);
     }
     

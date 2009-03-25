@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-09-23 23:21:15 $
+// $Revision: 1.2 $
+// $Date: 2009-03-25 22:49:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/twoNodeLink/TwoNodeLink.h,v $
 
 #ifndef TwoNodeLink_h
@@ -53,8 +53,8 @@ class TwoNodeLink : public Element
 public:
     // constructors
     TwoNodeLink(int tag, int dimension, int Nd1, int Nd2,
-        const ID &direction, const Vector &y, const Vector &x,
-        UniaxialMaterial** theMaterials, Vector Mratio = 0,
+        const ID &direction, UniaxialMaterial **theMaterials,
+        const Vector y, const Vector x = 0, Vector Mratio = 0,
         double mass = 0.0);
     TwoNodeLink();
     

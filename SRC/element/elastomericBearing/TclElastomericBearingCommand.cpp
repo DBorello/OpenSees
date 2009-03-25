@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-09-23 23:23:47 $
+// $Revision: 1.2 $
+// $Date: 2009-03-25 22:50:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elastomericBearing/TclElastomericBearingCommand.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -247,7 +247,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
         if ((argc-eleArgStart) < 15)  {
             opserr << "WARNING insufficient arguments\n";
             printCommand(argc, argv);
-            opserr << "Want: elastomericBearing eleTag iNode jNode ke fy alpha -P matTag -T matTag -My matTag -Mz matTag <-orient x1 x2 x3 y1 y2 y3> <-mass m>\n";
+            opserr << "Want: elastomericBearing eleTag iNode jNode ke fy alpha -P matTag -T matTag -My matTag -Mz matTag <-orient <x1 x2 x3> y1 y2 y3> <-mass m>\n";
             return TCL_ERROR;
         }
         
@@ -363,7 +363,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
         }
         
         // check for optional arguments
-        Vector x = 0;
+        Vector x(0);
         Vector y(3); y(0) = 0.0; y(1) = 1.0; y(2) = 0.0;
         for (i = 11+eleArgStart; i < argc; i++)  {
             if (strcmp(argv[i],"-orient") == 0)  {

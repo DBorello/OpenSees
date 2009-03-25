@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-09-23 23:21:15 $
+// $Revision: 1.2 $
+// $Date: 2009-03-25 22:49:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/twoNodeLink/TclTwoNodeLinkCommand.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -252,7 +252,7 @@ int TclModelBuilder_addTwoNodeLink(ClientData clientData,
 	}
     
     // now create the twoNodeLink
-    theElement = new TwoNodeLink(tag, ndm, iNode, jNode, theDirIDs, y, x, theMaterials, Mratio, mass);
+    theElement = new TwoNodeLink(tag, ndm, iNode, jNode, theDirIDs, theMaterials, y, x, Mratio, mass);
     
     // cleanup dynamic memory
     if (theMaterials != 0)

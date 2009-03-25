@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2008-09-23 23:59:48 $
+// $Revision: 1.3 $
+// $Date: 2009-03-25 22:50:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/adapter/ActuatorCorot.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -538,27 +538,27 @@ const Vector& ActuatorCorot::getResistingForce()
     
     // update response if time has advanced
     if (t > tPast)  {
-        // receive and check action
+        // receive data
         theChannel->recvVector(0, 0, *recvData, 0);
-        if (rData[0] != RemoteTest_getForce)  {
-            opserr << "ActuatorCorot::getResistingForce() - "
-                << "wrong action received\n";
-            exit(-1);
+        
+        // check if force request was received
+        if (rData[0] == RemoteTest_getForce)  {
+            // send measured displacements and forces
+            theChannel->sendVector(0, 0, *sendData, 0);
+            
+            // receive new trial response
+            theChannel->recvVector(0, 0, *recvData, 0);
         }
         
-        // send measured displacements and forces
-        theChannel->sendVector(0, 0, *sendData, 0);
-        
-        // receive new target displacements and forces
-        theChannel->recvVector(0, 0, *recvData, 0);
         if (rData[0] != RemoteTest_setTrialResponse)  {
             if (rData[0] == RemoteTest_DIE)  {
                 opserr << "\nThe Simulation has successfully completed.\n";
             } else  {
                 opserr << "ActuatorCorot::getResistingForce() - "
-                    << "wrong action received\n";
+                    << "wrong action received: expecting 3 but got "
+                    << rData[0] << endln;
             }
-            exit(-2);
+            exit(-1);
         }
         
         // save current time
