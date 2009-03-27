@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2009-01-30 01:43:37 $
+// $Revision: 1.2 $
+// $Date: 2009-03-27 19:19:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ImpactMaterial.h,v $
 
 // File: ~/material/ImpactMaterial.C

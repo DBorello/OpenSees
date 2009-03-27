@@ -20,8 +20,8 @@
                                                                         
 // Function contributed by  Quan Gu & Michele Barbato
 
-// $Revision: 1.1 $
-// $Date: 2009-03-27 17:59:00 $
+// $Revision: 1.2 $
+// $Date: 2009-03-27 19:19:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SmoothPSConcrete.h,v $
                                                                         
                                                                         

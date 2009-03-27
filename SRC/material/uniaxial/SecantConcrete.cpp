@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2008-08-26 16:34:37 $
+// $Revision: 1.5 $
+// $Date: 2009-03-27 19:19:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SecantConcrete.cpp,v $
 
 // Written: MHS

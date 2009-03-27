@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.61 $
-// $Date: 2009-03-27 17:59:38 $
+// $Revision: 1.62 $
+// $Date: 2009-03-27 19:19:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -72,13 +72,6 @@
 #include <SmoothPSConcrete.h>      //Quan & Michele
 
 #include <SelfCenteringMaterial.h> //JAE
-
-#include <Domain.h>			    // RWB bringing in Domain for PyLiq
-#include <PySimple1.h>			// RWB
-#include <PyLiq1.h>			    // RWB
-#include <TzSimple1.h>			// RWB
-#include <TzLiq1.h>			    // RWB
-
 
 #include <SMAMaterial.h>     // Davide Fugazza
 
