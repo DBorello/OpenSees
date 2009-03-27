@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.51 $
-// $Date: 2009-03-25 22:55:03 $
+// $Revision: 1.52 $
+// $Date: 2009-03-27 20:14:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -279,6 +279,7 @@ TclModelBuilder_addEightNode_Brick_u_p(ClientData, Tcl_Interp *, int, TCL_Char *
 				Domain*, TclModelBuilder *, int);
 
 // Andreas Schellenberg
+/*
 extern int
 TclModelBuilder_addActuator(ClientData clientData, Tcl_Interp *interp,  int argc, 
 			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
@@ -303,6 +304,7 @@ extern int
 TclModelBuilder_addFPDouble(ClientData clientData, Tcl_Interp *interp,  int argc, 
 			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
 
+			 */
 extern int
 TclModelBuilder_addElastomericBearing(ClientData clientData, Tcl_Interp *interp,  int argc, 
 			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
@@ -634,6 +636,7 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
   }
 
   // Andreas Schellenberg
+/*
   else if (strcmp(argv[1],"actuator") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addActuator(clientData, interp, argc, argv,
@@ -675,7 +678,7 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
 						theTclDomain, theTclBuilder, eleArgStart);    
     return result;
   }
-
+*/
   else if (strcmp(argv[1],"elastomericBearing") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addElastomericBearing(clientData, interp, argc, argv,
