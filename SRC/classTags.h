@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.110 $
-// $Date: 2009-03-20 18:40:37 $
+// $Revision: 1.111 $
+// $Date: 2009-03-27 20:15:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -402,6 +402,9 @@
 #define ELE_TAG_Joint2D    9902
 #define ELE_TAG_Joint3D    9903
 
+#define ELE_TAG_ElastomericBearing3d 9904
+#define ELE_TAG_ElastomericBearing2d 9905
+#define ELE_TAG_TwoNodeLink 9906
 
 #define ELE_TAG_GenericClient    2103
 #define ELE_TAG_GenericCopy      2104
