@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.60 $
-// $Date: 2009-03-23 23:17:56 $
+// $Revision: 1.61 $
+// $Date: 2009-03-27 17:59:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -67,6 +67,9 @@
 #include <ShearPanelMaterial.h>  // NM
 #include <BarSlipMaterial.h>     // NM
 #include <Bond_SP01.h>	// JZ
+
+#include <SteelMP.h>             //Quan & Michele
+#include <SmoothPSConcrete.h>      //Quan & Michele
 
 #include <SelfCenteringMaterial.h> //JAE
 
@@ -2915,6 +2918,158 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
       return TclCommand_ImpactMaterial(clientData, interp, argc, argv, theTclBuilder);
     }
 
+    else if (strcmp(argv[1],"SteelMP") == 0) {
+      // Check that there is the minimum number of arguments
+      if (argc < 4) {
+        opserr << "WARNING insufficient arguments\n";
+        printCommand(argc,argv);
+        opserr << "Want: uniaxialMaterial SteelMP tag? fy? E0? b? ";
+        opserr << " <coeffR1?  coeffR2? a1? a2?>" << endln;    
+        return TCL_ERROR;
+      }
+
+      int tag;
+      
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+        opserr << "WARNING invalid uniaxialMaterial SteelMP tag" << endln;
+        return TCL_ERROR;
+      }
+      
+      // Read required Steel01 material parameters
+      double fy, E, b;
+      
+      if (Tcl_GetDouble(interp, argv[3], &fy) != TCL_OK) {
+        opserr << "WARNING invalid fy\n";
+        opserr << "uniaxialMaterial SteelMP: " << tag << endln;
+        return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[4], &E) != TCL_OK) {
+        opserr << "WARNING invalid E0\n";
+        opserr << "uniaxialMaterial SteelMP: " << tag << endln;
+        return TCL_ERROR;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[5], &b) != TCL_OK) {
+        opserr << "WARNING invalid b\n";
+        opserr << "uniaxialMaterial SteelMP: " << tag << endln;
+        return TCL_ERROR;
+      }
+        
+      if (argc < 5) {
+	opserr << "WARNING insufficient number of hardening parameters\n";
+	opserr << "uniaxialMaterial Steel03: " << tag << endln;
+	return TCL_ERROR;
+      } 
+
+      // Read optional Steel01 material parameters
+      double r, coeffR1, coeffR2, a1, a2;
+      r=20.0;
+      coeffR1 =18.5;
+      coeffR2 =.15;	 
+      a1=0;
+      a2=0;
+      
+      if (argc >6) { 
+	if (Tcl_GetDouble(interp, argv[6], &r) != TCL_OK) {
+	  opserr << "WARNING invalid r\n";
+	  opserr << "uniaxialMaterial SteelMP: " << tag << endln;
+	  return TCL_ERROR;
+	}
+		
+	if (Tcl_GetDouble(interp, argv[7], &coeffR1) != TCL_OK) {
+	  opserr << "WARNING invalid CR1\n";
+	  opserr << "uniaxialMaterial SteelMP: " << tag << endln;
+	  return TCL_ERROR;
+	}
+
+	if (Tcl_GetDouble(interp, argv[8], &coeffR2) != TCL_OK) {
+	  opserr << "WARNING invalid CR2\n";
+	  opserr << "uniaxialMaterial SteelMP: " << tag << endln;
+	  return TCL_ERROR;
+	  
+	}
+
+	if (Tcl_GetDouble(interp, argv[9], &a1) != TCL_OK) {
+	  opserr << "WARNING invalid a1\n";
+	  opserr << "uniaxialMaterial SteelMP: " << tag << endln;
+	  return TCL_ERROR;
+	  
+	}
+	
+	if (Tcl_GetDouble(interp, argv[10], &a2) != TCL_OK) {
+	  opserr << "WARNING invalid a2\n";
+	  opserr << "uniaxialMaterial SteelMP: " << tag << endln;
+	  return TCL_ERROR;
+	  
+	}
+      } //if
+
+      theMaterial = new SteelMP (tag, fy, E, b, r, coeffR1,coeffR2, a1, a2);
+    }
+
+    else if (strcmp(argv[1],"SmoothPSConcrete") == 0) {
+      if (argc < 6 || argc > 9) {
+	opserr << "WARNING invalid number of arguments\n";
+	printCommand(argc,argv);
+	opserr << "Want: uniaxialMaterial SmoothPSConcrete tag? fc? fu? Ec? <eps0?> <epsu?> <eta?>" << endln;
+	return TCL_ERROR;
+      }    
+      
+      int tag;
+      double fu, Ec, fc;
+      double eps0=0.002;
+      double epsu=0.005;
+      double eta=0.2;
+      
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	opserr << "WARNING invalid uniaxialMaterial SmoothPSConcrete tag" << endln;
+	return TCL_ERROR;		
+      }
+      
+      if (Tcl_GetDouble(interp, argv[3], &fc) != TCL_OK) {
+	opserr << "WARNING invalid fc\n";
+	opserr << "uniaxiaMaterial SmoothPSConcrete: " << tag << endln;
+	return TCL_ERROR;	
+      }
+      
+      if (Tcl_GetDouble(interp, argv[4], &fu) != TCL_OK) {
+	opserr << "WARNING invalid fu\n";
+	opserr << "uniaxiaMaterial SmoothPSConcrete: " << tag << endln;
+	return TCL_ERROR;	
+      }
+      
+      if (Tcl_GetDouble(interp, argv[5], &Ec) != TCL_OK) {
+	opserr << "WARNING invalid Ec\n";
+	opserr << "uniaxiaMaterial SmoothPSConcrete: " << tag << endln;
+	return TCL_ERROR;	
+      }
+      
+      if (argc >= 7) 
+	if (Tcl_GetDouble(interp,argv[6], &eps0) != TCL_OK) {
+	  opserr << "WARNING invalid eps0\n";
+	  opserr << "uniaxialMaterial SmoothPSConcrete: " << tag << endln;
+	  return TCL_ERROR;
+	}
+      
+      if (argc >= 8) 
+	if (Tcl_GetDouble(interp,argv[7], &epsu) != TCL_OK) {
+	  opserr << "WARNING invalid epsu\n";
+	  opserr << "uniaxialMaterial SmoothPSConcrete: " << tag << endln;
+	  return TCL_ERROR;
+	}
+      
+      if (argc >= 9) 
+	if (Tcl_GetDouble(interp,argv[8], &eta) != TCL_OK) {
+	  opserr << "WARNING invalid eta\n";
+	  opserr << "uniaxialMaterial SmoothPSConcrete: " << tag << endln;
+	  return TCL_ERROR;
+	}
+      
+      // Parsing was successful, allocate the material
+      theMaterial = new SmoothPSConcrete( tag, fc, fu, Ec, eps0, epsu, eta);       
+    }
+    
     else {
       // Fedeas
       theMaterial = TclModelBuilder_addFedeasMaterial(clientData, interp, argc, argv, theTclBuilder);
