@@ -591,6 +591,8 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/Steel01.o \
 	$(FE)/material/uniaxial/Steel02.o \
 	$(FE)/material/uniaxial/Steel03.o \
+	$(FE)/material/uniaxial/SteelMP.o \
+	$(FE)/material/uniaxial/SmoothPSConcrete.o \
 	$(FE)/material/uniaxial/Concrete01WithSITC.o \
 	$(FE)/material/uniaxial/ECC01.o \
 	$(FE)/material/uniaxial/HystereticMaterial.o \
@@ -919,6 +921,7 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/analysis/integrator/DistributedDisplacementControl.o \
 	$(FE)/analysis/integrator/TransientIntegrator.o \
 	$(FE)/analysis/integrator/Newmark.o \
+	$(FE)/analysis/integrator/TRBDF2.o \
 	$(FE)/analysis/integrator/HHT.o \
 	$(FE)/analysis/integrator/Newmark1.o \
 	$(FE)/analysis/integrator/HHT1.o \
