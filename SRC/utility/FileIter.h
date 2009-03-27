@@ -18,15 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-09-29 01:59:20 $
+// $Revision: 1.2 $
+// $Date: 2009-03-27 19:18:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/FileIter.h,v $
                                                                         
                                                                         
 // Written: fmk 
 // Created: 09/07
-//
-// What: "@(#) SimulationInformation.h, revA"
+
 
 #ifndef FileIter_h
 #define FileIter_h

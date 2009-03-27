@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2008-07-03 18:48:55 $
+// $Revision: 1.9 $
+// $Date: 2009-03-27 19:18:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/File.cpp,v $
                                                                         
                                                                         
@@ -27,8 +27,6 @@
 // Created: 09/07
 //
 // Description: This file contains the class definition for File used in SimulationINformation.
-//
-// What: "@(#) SimulationInformation.h, revA"
 
 
 #include <map>

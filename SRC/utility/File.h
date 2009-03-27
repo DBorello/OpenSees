@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-10-05 22:06:01 $
+// $Revision: 1.4 $
+// $Date: 2009-03-27 19:18:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/File.h,v $
                                                                         
                                                                         
@@ -28,7 +28,7 @@
 //
 // Description: This file contains the class definition for File used in SimulationINformation.
 //
-// What: "@(#) SimulationInformation.h, revA"
+// What: "@(#) File.h, revA"
 
 #ifndef File_h
 #define File_h
