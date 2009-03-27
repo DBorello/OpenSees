@@ -314,6 +314,12 @@
 				RelativePath="..\..\..\SRC\material\uniaxial\ShearPanelMaterial.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\SmoothPSConcrete.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\SmoothPSConcrete.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\Steel01.cpp">
 			</File>
 			<File
@@ -330,6 +336,12 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\Steel03.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\SteelMP.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\SteelMP.h">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\TclHyperbolicGapMaterial.cpp">
