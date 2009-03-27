@@ -28,6 +28,8 @@ include ../../../Makefile.def
 	Pinching4Material.o \
 	BarSlipMaterial.o \
 	FatigueMaterial.o \
+	SteelMP.o \
+	SmoothPSConcrete.o \
 	Steel02.o \
 	Concrete02.o \
 	Steel03.o \
