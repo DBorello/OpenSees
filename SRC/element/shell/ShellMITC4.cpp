@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2009-02-27 22:38:39 $
+// $Revision: 1.21 $
+// $Date: 2009-04-02 22:43:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.cpp,v $
 
 // Ed "C++" Love
@@ -498,7 +498,7 @@ int
 ShellMITC4::getResponse(int responseID, Information &eleInfo)
 {
   int cnt = 0;
-  static Vector stresses(84);
+  static Vector stresses(32);
 
   switch (responseID) {
   case 1: // global forces
