@@ -395,10 +395,6 @@ FINITE_DEFORMATION_BJ_LIBS = $(FE)/material/nD/FiniteDeformation/NeoHookeanWEner
 			     $(FE)/material/nD/FiniteDeformation/fdYield/fdYieldDP.o \
 			     $(FE)/material/nD/FiniteDeformation/TclFiniteDeformationEP3DCommand.o
 
-
-
-
-
 PY_SJB_RWB_BJ_LIBS = $(FE)/material/uniaxial/PY/PySimple1.o \
                      $(FE)/material/uniaxial/PY/QzSimple1.o \
                      $(FE)/material/uniaxial/PY/TzSimple1.o \
@@ -568,7 +564,12 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/generic/GenericClient.o \
 	$(FE)/element/generic/GenericCopy.o \
 	$(FE)/element/generic/TclGenericClientCommand.o \
-	$(FE)/element/generic/TclGenericCopyCommand.o
+	$(FE)/element/generic/TclGenericCopyCommand.o \
+	$(FE)/element/elastomericBearing/ElastomericBearing2d.o \
+	$(FE)/element/elastomericBearing/ElastomericBearing3d.o \
+	$(FE)/element/elastomericBearing/TclElastomericBearingCommand.o \
+	$(FE)/element/twoNodeLink/TwoNodeLink.o \
+	$(FE)/element/twoNodeLink/TclTwoNodeLinkCommand.o
 
 
 MATERIAL_LIBS   =  $(FE)/material/Material.o \
