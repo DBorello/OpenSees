@@ -31,6 +31,7 @@ all:         $(OBJS)
 	@$(CD) $(FE)/element/generic; $(MAKE);
 	@$(CD) $(FE)/element/elastomericBearing; $(MAKE);
 	@$(CD) $(FE)/element/adapter; $(MAKE);
+	@$(CD) $(FE)/element/twoNodeLink; $(MAKE);
 
 # Miscellaneous
 tidy:	
@@ -66,6 +67,7 @@ spotless: clean
 	@$(CD) $(FE)/element/generic; $(MAKE) wipe;
 	@$(CD) $(FE)/element/elastomericBearing; $(MAKE) wipe;
 	@$(CD) $(FE)/element/adapter; $(MAKE) wipe;
+	@$(CD) $(FE)/element/twoNodeLink; $(MAKE) wipe;
 
 wipe: spotless
 
