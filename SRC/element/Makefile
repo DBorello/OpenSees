@@ -1,6 +1,7 @@
 include ../../Makefile.def
 
 OBJS       = Element.o ElementalLoad.o  Information.o TclElementCommands.o NewElement.o WrapperElement.o
+
 # Compilation control
 
 all:         $(OBJS)
@@ -28,6 +29,8 @@ all:         $(OBJS)
 	@$(CD) $(FE)/element/forceBeamColumn; $(MAKE);
 	@$(CD) $(FE)/element/dispBeamColumnInt; $(MAKE);
 	@$(CD) $(FE)/element/generic; $(MAKE);
+	@$(CD) $(FE)/element/elastomericBearing; $(MAKE);
+	@$(CD) $(FE)/element/adapter; $(MAKE);
 
 # Miscellaneous
 tidy:	
@@ -61,6 +64,8 @@ spotless: clean
 	@$(CD) $(FE)/element/forceBeamColumn; $(MAKE) wipe;
 	@$(CD) $(FE)/element/dispBeamColumnInt; $(MAKE) wipe;
 	@$(CD) $(FE)/element/generic; $(MAKE) wipe;
+	@$(CD) $(FE)/element/elastomericBearing; $(MAKE) wipe;
+	@$(CD) $(FE)/element/adapter; $(MAKE) wipe;
 
 wipe: spotless
 
