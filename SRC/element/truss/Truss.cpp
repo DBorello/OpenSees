@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2008-04-14 17:14:33 $
+// $Revision: 1.31 $
+// $Date: 2009-04-02 22:41:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -1206,7 +1206,7 @@ Truss::getResistingForceSensitivity(int gradNumber)
 		}
 
 		double materialTangent = theMaterial->getTangent();
-		double strainSensitivity;
+		double strainSensitivity = 0.0;
 
 		if (nodeParameterID0 == 1) {		// here x1 is random
 			strainSensitivity = (dLengthDerivative*L+strain*dx)/(L*L);
