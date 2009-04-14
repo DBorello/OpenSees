@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2009-03-23 22:15:40 $
+// $Revision: 1.5 $
+// $Date: 2009-04-14 21:11:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/OPS_Stream.cpp,v $
 
 #include <OPS_Stream.h>
@@ -51,9 +51,12 @@ OPS_Stream::write(const void *s, int n) {return *this;}
 OPS_Stream& 
 OPS_Stream::write(const double *d, int n) 
 {
-  for (int i=0; i<n; i++)
+  int nm1 = n-1;
+
+  for (int i=0; i<nm1; i++)
     (*this) << d[i] << " ";
-  
+  (*this) << d[nm1] << "\n";
+
   return *this;
 }
 
