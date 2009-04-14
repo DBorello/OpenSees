@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2009-01-13 01:20:35 $
+// $Revision: 1.12 $
+// $Date: 2009-04-14 21:15:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.cpp,v $
                                                                         
 // Written: fmk
@@ -284,6 +284,10 @@
 #include <ArcLength.h>
 #include <TransientIntegrator.h>
 #include <Newmark.h>
+#include <HHT.h>
+#include <TRBDF2.h>
+#include <CentralDifference.h>
+
 #include <DisplacementControl.h>
 #include <CentralDifferenceNoDamping.h>
 #include <CentralDifferenceAlternative.h>
@@ -1473,6 +1477,15 @@ FEM_ObjectBrokerAllClasses::getNewTransientIntegrator(int classTag)
     switch(classTag) {
 	case INTEGRATOR_TAGS_Newmark:  
 	     return new Newmark();
+
+	case INTEGRATOR_TAGS_TRBDF2:  
+	     return new TRBDF2();
+
+	case INTEGRATOR_TAGS_HHT:  
+	     return new HHT();
+
+	case INTEGRATOR_TAGS_CentralDifference:  
+	     return new CentralDifference();      // must recvSelf
 
 	case INTEGRATOR_TAGS_CentralDifferenceNoDamping:  
 	     return new CentralDifferenceNoDamping();      // must recvSelf
