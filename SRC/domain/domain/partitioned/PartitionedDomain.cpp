@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2008-04-15 18:03:15 $
+// $Revision: 1.18 $
+// $Date: 2009-04-14 21:17:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -154,28 +154,29 @@ PartitionedDomain::~PartitionedDomain()
 
   if (elements != 0)
     delete elements;
-  
+
   if (theSubdomains != 0)
     delete theSubdomains;
-  
+
   if (theSubdomainIter != 0)
     delete theSubdomainIter;
-  
+
   if (theEleIter != 0)
     delete theEleIter;
+
 }
 
 void
 PartitionedDomain::clearAll(void)
 {
+  this->removeRecorders();
+
   SubdomainIter &mySubdomains = this->getSubdomains();
   Subdomain *theSub;
   while ((theSub = mySubdomains()) != 0) 
     theSub->clearAll();
 
   theSubdomains->clearAll();
-
-
   this->Domain::clearAll();
   elements->clearAll();
 }
@@ -1140,9 +1141,6 @@ PartitionedDomain::addRecorder(Recorder &theRecorder)
 int  
 PartitionedDomain::removeRecorders(void)
 {
-  if (this->Domain::removeRecorders() < 0)
-    return -1;
-
   // do the same for all the subdomains
   if (theSubdomains != 0) {
     ArrayOfTaggedObjectsIter theSubsIter(*theSubdomains);	
@@ -1157,6 +1155,10 @@ PartitionedDomain::removeRecorders(void)
       }	    
     }
   }
+
+  if (this->Domain::removeRecorders() < 0)
+    return -1;
+
   return 0;
 }
 
