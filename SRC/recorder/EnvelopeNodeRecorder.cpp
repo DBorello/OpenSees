@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.18 $
-// $Date: 2007-11-30 19:24:53 $
+// $Revision: 1.19 $
+// $Date: 2009-04-14 21:14:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -53,7 +53,7 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder()
  currentData(0), data(0), 
  theDomain(0), theHandler(0),
  deltaT(0.0), nextTimeStampToRecord(0.0), 
- first(true), initializationDone(false), numValidNodes(0)
+ first(true), initializationDone(false), numValidNodes(0), addColumnInfo(0)
 {
 
 }
@@ -69,7 +69,7 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID &dofs,
  currentData(0), data(0), 
  theDomain(&theDom), theHandler(&theOutputHandler),
  deltaT(dT), nextTimeStampToRecord(0.0), 
- first(true), initializationDone(false), numValidNodes(0), echoTimeFlag(echoTime)
+ first(true), initializationDone(false), numValidNodes(0), echoTimeFlag(echoTime), addColumnInfo(0)
 {
   // verify dof are valid 
   int numDOF = dofs.Size();
@@ -138,6 +138,7 @@ EnvelopeNodeRecorder::~EnvelopeNodeRecorder()
   //
   // write the data
   //
+
   if (theHandler != 0 && currentData != 0) {
     
     theHandler->tag("Data"); // Data
@@ -152,17 +153,15 @@ EnvelopeNodeRecorder::~EnvelopeNodeRecorder()
     theHandler->endTag(); // OpenSeesOutput
   }
 
-
   //
   // clean up the memory
   //
-
   if (theDofs != 0)
     delete theDofs;
 
   if (theNodalTags != 0)
     delete theNodalTags;
-  
+
   if (theHandler != 0)
     delete theHandler;
 
@@ -395,6 +394,8 @@ EnvelopeNodeRecorder::setDomain(Domain &theDom)
 int
 EnvelopeNodeRecorder::sendSelf(int commitTag, Channel &theChannel)
 {
+  addColumnInfo = 1;
+
   if (theChannel.isDatastore() == 1) {
     opserr << "EnvelopeNodeRecorder::sendSelf() - does not send data to a datastore\n";
     return -1;
@@ -458,6 +459,8 @@ int
 EnvelopeNodeRecorder::recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker)
 {
+  addColumnInfo = 1;
+
   if (theChannel.isDatastore() == 1) {
     opserr << "EnvelopeNodeRecorder::sendSelf() - does not send data to a datastore\n";
     return -1;
@@ -643,6 +646,48 @@ EnvelopeNodeRecorder::initialize(void)
   } else
     strcpy(dataType,"Unknown");
 
+
+  //
+  // resize the output matrix
+  //
+
+  int numDOF = theDofs->Size();
+  int numValidResponse = numValidNodes*numDOF;
+
+  if (echoTimeFlag == true) {
+    numValidResponse *= 2;
+  }
+
+  currentData = new Vector(numValidResponse);
+  data = new Matrix(3, numValidResponse);
+  data->Zero();
+
+  Vector response(numValidResponse);
+
+  if (theNodalTags != 0 && addColumnInfo == 1) {
+
+    int count = 0;
+
+    int numNode = theNodalTags->Size();
+    for (int i=0; i<numNode; i++) {
+      int nodeTag = (*theNodalTags)(i);
+      Node *theNode = theDomain->getNode(nodeTag);
+      if (theNode != 0) {
+	for (int j=0; j<numDOF; j++)
+	  response(count++) = i+1;
+	if (echoTimeFlag == true) {
+	  for (int j=0; j<numDOF; j++)
+	    response(count++) = i+1;
+	}
+      }
+    }
+    theHandler->write("ORDERING: ",10);
+    (*theHandler) << numValidResponse << " ";
+    theHandler->write(response);
+  }
+
+  theHandler->tag("OpenSeesOutput");
+
   for (int i=0; i<numValidNodes; i++) {
     int nodeTag = theNodes[i]->getTag();
 
@@ -667,16 +712,7 @@ EnvelopeNodeRecorder::initialize(void)
   //
   // resize the response vector
   //
-  int numValidResponse = numValidNodes*theDofs->Size();
 
-  if (echoTimeFlag == true) {
-    numValidResponse *= 2;
-  }
-
-
-  currentData = new Vector(numValidResponse);
-  data = new Matrix(3, numValidResponse);
-  data->Zero();
 
   initializationDone = true;
 

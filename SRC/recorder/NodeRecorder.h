@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2007-04-25 23:42:26 $
+// $Revision: 1.15 $
+// $Date: 2009-04-14 21:14:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.h,v $
                                                                         
 #ifndef NodeRecorder_h
@@ -91,6 +91,8 @@ class NodeRecorder: public Recorder
 
     bool initializationDone;
     int numValidNodes;
+
+    int addColumnInfo;
 };
 
 #endif

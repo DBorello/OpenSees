@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2007-11-30 19:24:53 $
+// $Revision: 1.22 $
+// $Date: 2009-04-14 21:14:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -49,7 +49,7 @@ EnvelopeElementRecorder::EnvelopeElementRecorder()
  numEle(0), eleID(0), theResponses(0), theDomain(0),
  theHandler(0), deltaT(0), nextTimeStampToRecord(0.0), 
  data(0), currentData(0), first(true),
- initializationDone(false), responseArgs(0), numArgs(0), echoTimeFlag(false)
+ initializationDone(false), responseArgs(0), numArgs(0), echoTimeFlag(false), addColumnInfo(0)
 {
 
 }
@@ -65,7 +65,7 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID *ele,
  numEle(0), eleID(0), theResponses(0), theDomain(&theDom),
  theHandler(&theOutputHandler), deltaT(dT), nextTimeStampToRecord(0.0), 
  data(0), currentData(0), first(true),
- initializationDone(false), responseArgs(0), numArgs(0), echoTimeFlag(echoTime)
+ initializationDone(false), responseArgs(0), numArgs(0), echoTimeFlag(echoTime), addColumnInfo(0)
 {
 
   if (ele != 0) {
@@ -292,6 +292,8 @@ EnvelopeElementRecorder::setDomain(Domain &theDom)
 int
 EnvelopeElementRecorder::sendSelf(int commitTag, Channel &theChannel)
 {
+  addColumnInfo = 1;
+
   if (theChannel.isDatastore() == 1) {
     opserr << "EnvelopeElementRecorder::sendSelf() - does not send data to a datastore\n";
     return -1;
@@ -405,6 +407,8 @@ int
 EnvelopeElementRecorder::recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker)
 {
+  addColumnInfo = 1;
+
   if (theChannel.isDatastore() == 1) {
     opserr << "EnvelopeElementRecorder::recvSelf() - does not recv data to a datastore\n";
     return -1;
@@ -538,7 +542,6 @@ EnvelopeElementRecorder::recvSelf(int commitTag, Channel &theChannel,
 
 }
 
-
 int 
 EnvelopeElementRecorder::initialize(void) 
 {
@@ -560,6 +563,10 @@ EnvelopeElementRecorder::initialize(void)
   //   1. create an array of pointers for them
   //   2. iterate over the elements invoking setResponse() to get the new objects & determine size of data
   //
+
+  ID responseID(0,64);
+  ID responseCount(0,64);
+  int count = 0;
 
   if (eleID != 0) {
 
@@ -584,8 +591,18 @@ EnvelopeElementRecorder::initialize(void)
 	  // from the response type determine no of cols for each      
 	  Information &eleInfo = theResponses[ii]->getInformation();
 	  const Vector &eleData = eleInfo.getData();
-	  numDbColumns += eleData.Size();
+	  int dataSize = eleData.Size();
+	  numDbColumns += dataSize;
 	  
+	  if (addColumnInfo == 1) {
+	    responseID[count] = ii+1;
+	    if (echoTimeFlag == true) 
+	      responseCount[count] = 2*dataSize;
+	    else
+	      responseCount[count] = dataSize;
+	    count++;
+	  }
+
 	  if (echoTimeFlag == true) {
 	    for (int i=0; i<eleData.Size(); i++) {
 	      theHandler->tag("TimeOutput");
@@ -670,6 +687,26 @@ EnvelopeElementRecorder::initialize(void)
     exit(-1);
   }
 
+  if (addColumnInfo == 1) {
+    
+    int numResponse = responseID.Size();
+    Vector data(numDbColumns);
+
+    int count = 0;
+
+    for (int i=0; i<numResponse; i++) {
+      int id = responseID[i];
+      int countID = responseCount[i];
+
+	for (int j=0; j<countID; j++)
+	  data(count++) = id;
+    }
+
+    theHandler->write("ORDERING: ",10);
+    (*theHandler) << numDbColumns << " ";
+    theHandler->write(data);
+  }
+  
   initializationDone = true;  
   return 0;
 }

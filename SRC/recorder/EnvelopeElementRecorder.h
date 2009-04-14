@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-04-25 23:42:26 $
+// $Revision: 1.10 $
+// $Date: 2009-04-14 21:14:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.h,v $
                                                                         
 #ifndef EnvelopeElementRecorder_h
@@ -89,6 +89,8 @@ class EnvelopeElementRecorder: public Recorder
     int numArgs;
 
     bool echoTimeFlag; 
+
+    int addColumnInfo;
 };
 
 

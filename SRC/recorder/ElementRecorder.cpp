@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.32 $
-// $Date: 2008-05-28 18:36:34 $
+// $Revision: 1.33 $
+// $Date: 2009-04-14 21:14:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -49,7 +49,7 @@ ElementRecorder::ElementRecorder()
  numEle(0), eleID(0), theResponses(0), 
  theDomain(0), theOutputHandler(0),
  echoTimeFlag(true), deltaT(0), nextTimeStampToRecord(0.0), data(0), 
- initializationDone(false), responseArgs(0), numArgs(0)
+ initializationDone(false), responseArgs(0), numArgs(0), addColumnInfo(0)
 {
 
 }
@@ -65,7 +65,7 @@ ElementRecorder::ElementRecorder(const ID *ele,
  numEle(0), eleID(0), theResponses(0), 
  theDomain(&theDom), theOutputHandler(&theOutputHandler),
  echoTimeFlag(echoTime), deltaT(dT), nextTimeStampToRecord(0.0), data(0),
- initializationDone(false), responseArgs(0), numArgs(0)
+ initializationDone(false), responseArgs(0), numArgs(0), addColumnInfo(0)
 {
 
   if (ele != 0) {
@@ -147,7 +147,7 @@ ElementRecorder::record(int commitTag, double timeStamp)
       return -1;
     }
   }
-
+  
   int result = 0;
   if (deltaT == 0.0 || timeStamp >= nextTimeStampToRecord) {
 
@@ -206,6 +206,8 @@ ElementRecorder::setDomain(Domain &theDom)
 int
 ElementRecorder::sendSelf(int commitTag, Channel &theChannel)
 {
+  addColumnInfo = 1;
+
   if (theChannel.isDatastore() == 1) {
     opserr << "ElementRecorder::sendSelf() - does not send data to a datastore\n";
     return -1;
@@ -319,6 +321,8 @@ int
 ElementRecorder::recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker)
 {
+  addColumnInfo = 1;
+
   if (theChannel.isDatastore() == 1) {
     opserr << "ElementRecorder::recvSelf() - does not recv data to a datastore\n";
     return -1;
@@ -476,7 +480,11 @@ ElementRecorder::initialize(void)
   //   2. iterate over the elements invoking setResponse() to get the new objects & determine size of data
   //
 
-  int i;
+  int i =0;
+  ID responseID(0,64);
+  ID responseCount(0,64);
+
+
   if (eleID != 0) {
 
     //
@@ -493,6 +501,14 @@ ElementRecorder::initialize(void)
     for (int k=0; k<numEle; k++)
       theResponses[k] = 0;
 
+    int count = 0;
+
+    if (echoTimeFlag == true && addColumnInfo == 1) {
+      responseID[count] = 0;
+      responseCount[count] = 1;
+      count++;
+    }
+
     // loop over ele & set Reponses
     for (i=0; i<numEle; i++) {
       Element *theEle = theDomain->getElement((*eleID)(i));
@@ -504,11 +520,16 @@ ElementRecorder::initialize(void)
 	  // from the response type determine no of cols for each
 	  Information &eleInfo = theResponses[i]->getInformation();
 	  const Vector &eleData = eleInfo.getData();
-	  numDbColumns += eleData.Size();
+	  int dataSize = eleData.Size();
+	  numDbColumns += dataSize;
+	  if (addColumnInfo == 1) {
+	    responseID[count] = i+1;
+	    responseCount[count] = dataSize;
+	    count++;
+	  }
 	}
       }
     }
-
   } else {
 
     //
@@ -562,13 +583,30 @@ ElementRecorder::initialize(void)
     numEle = numResponse;
   }
 
-
   // create the vector to hold the data
   data = new Vector(numDbColumns);
 
   if (data == 0) {
     opserr << "ElementRecorder::initialize() - out of memory\n";
     return -1;
+  }
+
+  if (addColumnInfo == 1) {
+
+    int numResponse = responseID.Size();
+    int count = 0;
+
+    for (int i=0; i<numResponse; i++) {
+      int id = responseID[i];
+      int countID = responseCount[i];
+
+	for (int j=0; j<countID; j++)
+	  (*data)(count++) = id;
+    }
+
+    theOutputHandler->write("ORDERING: ",10);
+    (*theOutputHandler) << data->Size() << " ";
+    theOutputHandler->write(*data);
   }
   
   theOutputHandler->tag("Data");

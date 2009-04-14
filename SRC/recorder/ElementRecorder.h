@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-04-25 23:42:26 $
+// $Revision: 1.14 $
+// $Date: 2009-04-14 21:14:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.h,v $
                                                                         
                                                                         
@@ -93,6 +93,8 @@ class ElementRecorder: public Recorder
     bool initializationDone;
     char **responseArgs;
     int numArgs;
+
+    int addColumnInfo;
 };
 
 

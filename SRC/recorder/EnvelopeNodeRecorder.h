@@ -19,8 +19,8 @@
 ** ****************************************************************** */
                                                                         
 
-// $Revision: 1.9 $
-// $Date: 2007-04-25 23:42:26 $
+// $Revision: 1.10 $
+// $Date: 2009-04-14 21:14:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.h,v $
                                                                         
 
@@ -94,6 +94,8 @@ class EnvelopeNodeRecorder: public Recorder
     int numValidNodes;
 
     bool echoTimeFlag;   // flag indicating whether time to be included in o/p
+
+    int addColumnInfo;
 };
 
 #endif

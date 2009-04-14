@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.32 $
-// $Date: 2008-08-19 22:51:03 $
+// $Revision: 1.33 $
+// $Date: 2009-04-14 21:14:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -50,7 +50,7 @@ NodeRecorder::NodeRecorder()
  echoTimeFlag(true), dataFlag(0), 
  deltaT(0), nextTimeStampToRecord(0.0), 
  sensitivity(0),
- initializationDone(false), numValidNodes(0)
+ initializationDone(false), numValidNodes(0), addColumnInfo(0)
 {
 
 }
@@ -69,7 +69,7 @@ NodeRecorder::NodeRecorder(const ID &dofs,
  echoTimeFlag(timeFlag), dataFlag(0), 
  deltaT(dT), nextTimeStampToRecord(0.0), 
  sensitivity(psensitivity), 
- initializationDone(false), numValidNodes(0)
+ initializationDone(false), numValidNodes(0), addColumnInfo(0)
 {
 
   //
@@ -429,6 +429,8 @@ NodeRecorder::setDomain(Domain &theDom)
 int 
 NodeRecorder::sendSelf(int commitTag, Channel &theChannel)
 {
+  addColumnInfo = 1;
+
   if (theChannel.isDatastore() == 1) {
     opserr << "NodeRecorder::sendSelf() - does not send data to a datastore\n";
     return -1;
@@ -493,6 +495,8 @@ int
 NodeRecorder::recvSelf(int commitTag, Channel &theChannel, 
 		       FEM_ObjectBroker &theBroker)
 {
+  addColumnInfo = 1;
+
   if (theChannel.isDatastore() == 1) {
     opserr << "NodeRecorder::sendSelf() - does not send data to a datastore\n";
     return -1;
@@ -600,15 +604,6 @@ NodeRecorder::initialize(void)
     return -1;
   }
 
-
-  theOutputHandler->tag("OpenSeesOutput");
-
-  if (echoTimeFlag == true) {
-    theOutputHandler->tag("TimeOutput");
-    theOutputHandler->tag("ResponseType", "time");
-    theOutputHandler->endTag();
-  }
-  
   //
   // create & set nodal array pointer
   //
@@ -663,6 +658,7 @@ NodeRecorder::initialize(void)
   response.resize(numValidResponse);
   response.Zero();
 
+
   //
   // need to create the data description, i.e. what each column of data is
   //
@@ -715,8 +711,39 @@ NodeRecorder::initialize(void)
 
   ***********************************************************/
 
+  int numDOF = theDofs->Size();
+
+  if (theNodalTags != 0 && addColumnInfo == 1) {
+
+    int count = 0;
+
+    if (echoTimeFlag == true) 
+      response(count++) = 0;
+
+    int numNode = theNodalTags->Size();
+    for (int i=0; i<numNode; i++) {
+      int nodeTag = (*theNodalTags)(i);
+      Node *theNode = theDomain->getNode(nodeTag);
+      if (theNode != 0) {
+	for (int j=0; j<numDOF; j++)
+	  response(count++) = i+1;
+      }
+    }
+    theOutputHandler->write("ORDERING: ",10);
+    (*theOutputHandler) << response.Size() << " ";
+    theOutputHandler->write(response);
+  }
+
   char nodeCrdData[20];
   sprintf(nodeCrdData,"coord");
+
+  theOutputHandler->tag("OpenSeesOutput");
+
+  if (echoTimeFlag == true) {
+    theOutputHandler->tag("TimeOutput");
+    theOutputHandler->tag("ResponseType", "time");
+    theOutputHandler->endTag();
+  }
 
   for (int i=0; i<numValidNodes; i++) {
     int nodeTag = theNodes[i]->getTag();
