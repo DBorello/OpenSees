@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.45 $
-// $Date: 2009-01-07 22:50:40 $
+// $Revision: 1.46 $
+// $Date: 2009-04-17 22:58:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -95,6 +95,8 @@
 #include <PlasticHardeningMaterial.h>
 #include <CyclicModel.h> //!!
 #include <DamageModel.h> //!!
+
+#include <FrictionModel.h>
 
 #ifdef OO_HYSTERETIC
 #include <StiffnessDegradation.h>
@@ -286,6 +288,12 @@ TclCommand_addRemoGeomTransf(ClientData clientData,
 			     int argc,   
 			     TCL_Char **argv); 
 
+int
+TclModelBuilder_addFrictionModel(ClientData clientData,
+                Tcl_Interp *interp,
+                int argc,   
+                TCL_Char **argv);
+
 #ifdef OO_HYSTERETIC
 int
 TclCommand_addStiffnessDegradation(ClientData clientData,
@@ -414,6 +422,7 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   theDamageModels = new ArrayOfTaggedObjects(32); //!!
   theYS_EvolutionModels = new ArrayOfTaggedObjects(32);
   thePlasticMaterials = new ArrayOfTaggedObjects(32);
+  theFrictionModels = new ArrayOfTaggedObjects(32);
 
   // call Tcl_CreateCommand for class specific commands
   Tcl_CreateCommand(interp, "parameter", TclCommand_addParameter,
@@ -540,6 +549,10 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   Tcl_CreateCommand(interp, "geomTransf", TclCommand_addRemoGeomTransf,
 		    (ClientData)NULL, NULL);    
 
+  Tcl_CreateCommand(interp, "frictionModel",
+            TclModelBuilder_addFrictionModel,
+		    (ClientData)NULL, NULL);
+
 #ifdef OO_HYSTERETIC
   Tcl_CreateCommand(interp, "stiffnessDegradation",
 		    TclCommand_addStiffnessDegradation,
@@ -612,6 +625,7 @@ TclModelBuilder::~TclModelBuilder()
   thePlasticMaterials->clearAll();
   theCycModels->clearAll();//!!
   theDamageModels->clearAll();//!!
+  theFrictionModels->clearAll();
 
 #ifdef OO_HYSTERETIC
   theStiffnessDegradations->clearAll();
@@ -632,6 +646,7 @@ TclModelBuilder::~TclModelBuilder()
   delete thePlasticMaterials;
   delete theCycModels;//!!
   delete theDamageModels;//!!
+  delete theFrictionModels;
 
 #ifdef OO_HYSTERETIC
   delete theStiffnessDegradations;
@@ -679,6 +694,8 @@ TclModelBuilder::~TclModelBuilder()
   Tcl_DeleteCommand(theInterp, "geomTransf");
   Tcl_DeleteCommand(theInterp, "updateMaterialStage");
   Tcl_DeleteCommand(theInterp, "updateMaterials");
+
+  Tcl_DeleteCommand(theInterp, "frictionModel");
 
 #ifdef OO_HYSTERETIC
   Tcl_DeleteCommand(theInterp, "unloadingRule");
@@ -1077,6 +1094,34 @@ TclModelBuilder::getCrdTransf3d(int tag)
   CrdTransf3d *result = (CrdTransf3d *)mc;
   return result;
 }
+
+
+int 
+TclModelBuilder::addFrictionModel(FrictionModel &theFrnMdl)
+{
+  bool result = theFrictionModels->addComponent(&theFrnMdl);
+  if (result == true)
+    return 0;
+  else {
+    opserr << "TclModelBuilder::addFrictionModel() - "
+        << "failed to add friction model: " << theFrnMdl;
+    return -1;
+  }
+}
+
+
+FrictionModel *
+TclModelBuilder::getFrictionModel(int tag)
+{
+  TaggedObject *mc = theFrictionModels->getComponentPtr(tag);
+  if (mc == 0) 
+    return 0;
+
+  // otherweise we do a cast and return
+  FrictionModel *result = (FrictionModel *)mc;
+  return result;
+}
+
 
 //
 // THE FUNCTIONS INVOKED BY THE INTERPRETER
@@ -3420,6 +3465,19 @@ TclModelBuilder::getDamageModel(int tag)
   return result;
 }
 
+extern int
+TclModelBuilderFrictionModelCommand (ClientData clienData,
+                 Tcl_Interp *interp, int argc, TCL_Char **argv,
+                 TclModelBuilder *theTclBuilder, Domain *theDomain);
+
+int
+TclModelBuilder_addFrictionModel(ClientData clientData,
+                    Tcl_Interp *interp, int argc, TCL_Char **argv)                      
+{
+  return TclModelBuilderFrictionModelCommand(clientData, interp, 
+						argc, argv, theTclBuilder, theTclDomain);
+}
+
 int 
 TclCommand_Package(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
@@ -3444,7 +3502,7 @@ TclCommand_Package(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char
 			    theTclDomain,
 			    theTclBuilder);	
   } else {
-    opserr << "Error: Could not find function: " << argv[1] << res << endln;
+    opserr << "Error: Could not find function: " << argv[1] << endln;
     return -1;
   }
 

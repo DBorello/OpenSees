@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2008-11-04 20:21:12 $
+// $Revision: 1.9 $
+// $Date: 2009-04-17 22:58:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.h,v $
                                                                         
 // Written: fmk 
@@ -55,6 +55,7 @@ class HystereticBackbone;
 class StiffnessDegradation;
 class UnloadingRule;
 class StrengthDegradation;
+class FrictionModel;
 
 class CrdTransf2d;
 class CrdTransf3d;
@@ -107,6 +108,10 @@ class TclModelBuilder : public ModelBuilder
     int addDamageModel(DamageModel &theModel); //!!
     DamageModel *getDamageModel(int tag); //!!
 
+    // methods needed for the friction models
+    int addFrictionModel(FrictionModel &theFrnMdl);
+    FrictionModel *getFrictionModel(int tag);
+
 #ifdef OO_HYSTERETIC
     // methods needed to add/get material state relationships
     int addStiffnessDegradation(StiffnessDegradation &theDegr);
@@ -134,6 +139,7 @@ class TclModelBuilder : public ModelBuilder
     TaggedObjectStorage *theYS_EvolutionModels;
     TaggedObjectStorage *theCycModels; //!!
     TaggedObjectStorage *theDamageModels; //!!
+    TaggedObjectStorage *theFrictionModels;
 
 #ifdef OO_HYSTERETIC
     TaggedObjectStorage *theStiffnessDegradations;
