@@ -565,9 +565,24 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/generic/GenericCopy.o \
 	$(FE)/element/generic/TclGenericClientCommand.o \
 	$(FE)/element/generic/TclGenericCopyCommand.o \
+	$(FE)/element/adapter/ActuatorCorot.o \
+	$(FE)/element/adapter/Actuator.o \
+	$(FE)/element/adapter/Adapter.o \
+	$(FE)/element/adapter/TclActuatorCommand.o \
+	$(FE)/element/adapter/TclActuatorCorotCommand.o \
+	$(FE)/element/adapter/TclAdapterCommand.o \
 	$(FE)/element/elastomericBearing/ElastomericBearing2d.o \
 	$(FE)/element/elastomericBearing/ElastomericBearing3d.o \
 	$(FE)/element/elastomericBearing/TclElastomericBearingCommand.o \
+	$(FE)/element/frictionBearing/FlatSliderSimple2d.o \
+	$(FE)/element/frictionBearing/FlatSliderSimple3d.o \
+	$(FE)/element/frictionBearing/TclFlatSliderCommand.o \
+	$(FE)/element/frictionBearing/frictionModel/CoulombFriction.o \
+	$(FE)/element/frictionBearing/frictionModel/FrictionModel.o \
+	$(FE)/element/frictionBearing/frictionModel/FrictionResponse.o \
+	$(FE)/element/frictionBearing/frictionModel/TclModelBuilderFrictionModelCommand.o \
+	$(FE)/element/frictionBearing/frictionModel/VDependentFriction.o \
+	$(FE)/element/frictionBearing/frictionModel/VPDependentFriction.o \
 	$(FE)/element/twoNodeLink/TwoNodeLink.o \
 	$(FE)/element/twoNodeLink/TclTwoNodeLinkCommand.o
 

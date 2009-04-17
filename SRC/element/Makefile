@@ -30,6 +30,7 @@ all:         $(OBJS)
 	@$(CD) $(FE)/element/dispBeamColumnInt; $(MAKE);
 	@$(CD) $(FE)/element/generic; $(MAKE);
 	@$(CD) $(FE)/element/elastomericBearing; $(MAKE);
+	@$(CD) $(FE)/element/frictionBearing; $(MAKE);
 	@$(CD) $(FE)/element/adapter; $(MAKE);
 	@$(CD) $(FE)/element/twoNodeLink; $(MAKE);
 
@@ -68,6 +69,7 @@ spotless: clean
 	@$(CD) $(FE)/element/elastomericBearing; $(MAKE) wipe;
 	@$(CD) $(FE)/element/adapter; $(MAKE) wipe;
 	@$(CD) $(FE)/element/twoNodeLink; $(MAKE) wipe;
+	@$(CD) $(FE)/element/frictionBearing; $(MAKE) wipe;
 
 wipe: spotless
 
