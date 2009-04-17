@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.112 $
-// $Date: 2009-04-02 22:39:41 $
+// $Revision: 1.113 $
+// $Date: 2009-04-17 23:25:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -401,7 +401,6 @@
 #define ELE_TAG_SimpleJoint2D    9901
 #define ELE_TAG_Joint2D    9902
 #define ELE_TAG_Joint3D    9903
-
 #define ELE_TAG_ElastomericBearing3d 9904
 #define ELE_TAG_ElastomericBearing2d 9905
 #define ELE_TAG_TwoNodeLink 9906
@@ -409,9 +408,29 @@
 #define ELE_TAG_Actuator 9908
 #define ELE_TAG_Adapter 9909
 
+#define ELE_TAG_FlatSliderSimple2d  5100
+#define ELE_TAG_FlatSliderSimple3d  5101
+#define ELE_TAG_FlatSlider2d        5102
+#define ELE_TAG_FlatSlider3d        5103
+#define ELE_TAG_SingleFPSimple2d    5104
+#define ELE_TAG_SingleFPSimple3d    5105
+#define ELE_TAG_SingleFP2d          5106
+#define ELE_TAG_SingleFP3d          5107
+#define ELE_TAG_DoubleFPSimple2d    5108
+#define ELE_TAG_DoubleFPSimple3d    5109
+#define ELE_TAG_DoubleFP2d          5110
+#define ELE_TAG_DoubleFP3d          5111
+#define ELE_TAG_TripleFPSimple2d    5112
+#define ELE_TAG_TripleFPSimple3d    5113
+#define ELE_TAG_TripleFP2d          5114
+#define ELE_TAG_TripleFP3d          5115
+
 #define ELE_TAG_GenericClient    2103
 #define ELE_TAG_GenericCopy      2104
 
+#define FRN_TAG_CoulombFriction     1
+#define FRN_TAG_VDependentFriction  2
+#define FRN_TAG_VPDependentFriction 3
 
 // Terje:
 #define ELE_TAG_FourNodeQuad02  9903
@@ -528,36 +547,40 @@
 #define LINESEARCH_TAGS_SecantLineSearch              4
 
 
-#define INTEGRATOR_TAGS_Newmark          	             1
-#define INTEGRATOR_TAGS_HHT 	          	             2
-#define INTEGRATOR_TAGS_WilsonTheta                 	 3
+#define INTEGRATOR_TAGS_Newmark                          1
+#define INTEGRATOR_TAGS_HHT                              2
+#define INTEGRATOR_TAGS_WilsonTheta                      3
 #define INTEGRATOR_TAGS_CentralDifference                4
-#define INTEGRATOR_TAGS_LoadControl          	         5
+#define INTEGRATOR_TAGS_LoadControl                      5
 #define INTEGRATOR_TAGS_DisplacementControl              6
-#define INTEGRATOR_TAGS_ArcLength	     	             7
-#define INTEGRATOR_TAGS_LoadPath          	             8
-#define INTEGRATOR_TAGS_Newmark1          	             9
-#define INTEGRATOR_TAGS_HHT1 	          	            10
-#define INTEGRATOR_TAGS_MinUnbalDispNorm 	            11
-#define INTEGRATOR_TAGS_ArcLength1	     	            12
-#define INTEGRATOR_TAGS_StaticSensitivity				13
-#define INTEGRATOR_TAGS_HSConstraint					14
+#define INTEGRATOR_TAGS_ArcLength                        7
+#define INTEGRATOR_TAGS_LoadPath                         8
+#define INTEGRATOR_TAGS_Newmark1                         9
+#define INTEGRATOR_TAGS_HHT1                            10
+#define INTEGRATOR_TAGS_MinUnbalDispNorm                11
+#define INTEGRATOR_TAGS_ArcLength1                      12
+#define INTEGRATOR_TAGS_StaticSensitivity               13
+#define INTEGRATOR_TAGS_HSConstraint                    14
 #define INTEGRATOR_TAGS_DistributedDisplacementControl  15
-#define INTEGRATOR_TAGS_CentralDifferenceAlternative	16
-#define INTEGRATOR_TAGS_CentralDifferenceNoDamping		17
-#define INTEGRATOR_TAGS_NewmarkExplicit		            18
-#define INTEGRATOR_TAGS_NewmarkHybridSimulation		    19
-#define INTEGRATOR_TAGS_HHTExplicit 	          	    20
-#define INTEGRATOR_TAGS_HHTGeneralized 	          	    21
-#define INTEGRATOR_TAGS_HHTGeneralizedExplicit          22
-#define INTEGRATOR_TAGS_HHTHybridSimulation 	        23
-#define INTEGRATOR_TAGS_AlphaOS                         24
-#define INTEGRATOR_TAGS_AlphaOSGeneralized              25
-#define INTEGRATOR_TAGS_Collocation 	          	    26
-#define INTEGRATOR_TAGS_CollocationHybridSimulation 	27
-#define INTEGRATOR_TAGS_TRBDF2 	28
-
-
+#define INTEGRATOR_TAGS_CentralDifferenceAlternative    16
+#define INTEGRATOR_TAGS_CentralDifferenceNoDamping      17
+#define INTEGRATOR_TAGS_NewmarkExplicit                 18
+#define INTEGRATOR_TAGS_NewmarkHSIncrReduct             19
+#define INTEGRATOR_TAGS_NewmarkHSFixedNumIter           20
+#define INTEGRATOR_TAGS_HHTExplicit                     21
+#define INTEGRATOR_TAGS_HHTGeneralized                  22
+#define INTEGRATOR_TAGS_HHTGeneralizedExplicit          23
+#define INTEGRATOR_TAGS_HHTHSIncrReduct                 24
+#define INTEGRATOR_TAGS_HHTHSFixedNumIter               25
+#define INTEGRATOR_TAGS_AlphaOS                         26
+#define INTEGRATOR_TAGS_AlphaOSGeneralized              27
+#define INTEGRATOR_TAGS_Collocation                     28
+#define INTEGRATOR_TAGS_CollocationHSIncrReduct         29
+#define INTEGRATOR_TAGS_CollocationHSFixedNumIter       30
+#define INTEGRATOR_TAGS_TRBDF2                          31
+#define INTEGRATOR_TAGS_NewmarkHybridSimulation         32
+#define INTEGRATOR_TAGS_HHTHybridSimulation             33
+#define INTEGRATOR_TAGS_CollocationHybridSimulation     34
 
 #define LinSOE_TAGS_FullGenLinSOE		1
 #define LinSOE_TAGS_BandGenLinSOE		2
