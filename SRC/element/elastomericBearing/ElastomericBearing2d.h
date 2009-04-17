@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2009-03-25 22:50:53 $
+// $Revision: 1.3 $
+// $Date: 2009-04-17 23:00:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elastomericBearing/ElastomericBearing2d.h,v $
 
 #ifndef ElastomericBearing2d_h
@@ -79,7 +79,7 @@ public:
     const Matrix &getTangentStiff();
     const Matrix &getInitialStiff();
     const Matrix &getMass();
-
+    
     void zeroLoad();
 	int addLoad(ElementalLoad *theLoad, double loadFactor);
     int addInertiaLoadToUnbalance(const Vector &accel);
@@ -106,8 +106,8 @@ private:
     
     // private attributes - a copy for each object of the class
     ID connectedExternalNodes;          // contains the tags of the end nodes
-    Node *theNodes[2];
-	UniaxialMaterial **theMaterials;    // array of uniaxial materials
+    Node *theNodes[2];                  // array of nodes
+	UniaxialMaterial *theMaterials[2];  // array of uniaxial materials
     
     // parameters
     double k0;          // initial stiffness of hysteretic component

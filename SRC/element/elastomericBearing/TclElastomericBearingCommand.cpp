@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2009-03-25 22:50:53 $
+// $Revision: 1.3 $
+// $Date: 2009-04-17 23:00:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elastomericBearing/TclElastomericBearingCommand.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -113,7 +113,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
             opserr << "elastomericBearing element: " << tag << endln;
             return TCL_ERROR;
         }
-        UniaxialMaterial **theMaterials = new UniaxialMaterial* [2];
+        UniaxialMaterial *theMaterials[2];
         for (i = 7+eleArgStart; i < argc; i++)  {
             if (i+1 < argc && strcmp(argv[i], "-P") == 0)  {
                 theMaterials[0] = 0;
@@ -159,7 +159,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
         // check for optional arguments
         Vector x = 0;
         Vector y = 0;
-        for (i = 9+eleArgStart; i < argc; i++)  {
+        for (i = 7+eleArgStart; i < argc; i++)  {
             if (strcmp(argv[i],"-orient") == 0)  {
                 j = i+1;
                 int numOrient = 0;
@@ -203,7 +203,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
                 }
             }
         }
-        for (i = 9+eleArgStart; i < argc; i++)  {
+        for (i = 7+eleArgStart; i < argc; i++)  {
             if (i+1 < argc && strcmp(argv[i], "-mass") == 0)  {
                 if (Tcl_GetDouble(interp, argv[i+1], &mass) != TCL_OK)  {
                     opserr << "WARNING invalid mass\n";
@@ -215,10 +215,6 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
         
         // now create the elastomericBearing
         theElement = new ElastomericBearing2d(tag, iNode, jNode, ke, fy, alpha, theMaterials, y, x, mass);
-        
-        // cleanup dynamic memory
-        if (theMaterials != 0)
-            delete [] theMaterials;
         
         if (theElement == 0)  {
             opserr << "WARNING ran out of memory creating element\n";
@@ -286,7 +282,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
             opserr << "elastomericBearing element: " << tag << endln;
             return TCL_ERROR;
         }
-        UniaxialMaterial **theMaterials = new UniaxialMaterial* [4];
+        UniaxialMaterial *theMaterials[4];
         for (i = 7+eleArgStart; i < argc; i++)  {
             if (i+1 < argc && strcmp(argv[i], "-P") == 0)  {
                 if (Tcl_GetInt(interp, argv[i+1], &matTag) != TCL_OK)  {
@@ -365,7 +361,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
         // check for optional arguments
         Vector x(0);
         Vector y(3); y(0) = 0.0; y(1) = 1.0; y(2) = 0.0;
-        for (i = 11+eleArgStart; i < argc; i++)  {
+        for (i = 7+eleArgStart; i < argc; i++)  {
             if (strcmp(argv[i],"-orient") == 0)  {
                 j = i+1;
                 int numOrient = 0;
@@ -423,7 +419,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
                 }
             }
         }
-        for (i = 11+eleArgStart; i < argc; i++)  {
+        for (i = 7+eleArgStart; i < argc; i++)  {
             if (i+1 < argc && strcmp(argv[i], "-mass") == 0)  {
                 if (Tcl_GetDouble(interp, argv[i+1], &mass) != TCL_OK)  {
                     opserr << "WARNING invalid mass\n";
@@ -435,10 +431,6 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
         
         // now create the elastomericBearing
         theElement = new ElastomericBearing3d(tag, iNode, jNode, ke, fy, alpha, theMaterials, y, x, mass);
-        
-        // cleanup dynamic memory
-        if (theMaterials != 0)
-            delete [] theMaterials;
         
         if (theElement == 0)  {
             opserr << "WARNING ran out of memory creating element\n";

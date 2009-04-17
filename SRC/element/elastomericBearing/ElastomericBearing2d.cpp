@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2009-03-25 22:50:53 $
+// $Revision: 1.3 $
+// $Date: 2009-04-17 23:00:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elastomericBearing/ElastomericBearing2d.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -28,8 +28,6 @@
 //
 // Description: This file contains the implementation of the
 // ElastomericBearing2d class.
-//
-// What: "@(#) ElastomericBearing2d.cpp, revA"
 
 #include "ElastomericBearing2d.h"
 
@@ -58,7 +56,7 @@ ElastomericBearing2d::ElastomericBearing2d(int tag, int Nd1, int Nd2,
     double ke, double fy, double alpha, UniaxialMaterial **materials,
     const Vector _y, const Vector _x, double m)
     : Element(tag, ELE_TAG_ElastomericBearing2d),
-    connectedExternalNodes(2), theMaterials(0),
+    connectedExternalNodes(2),
     k0(0.0), qYield(0.0), k2(0.0), x(_x), y(_y), mass(m),
     L(0.0), ub(3), ubPlastic(0.0), qb(3), kb(3,3), ul(6),
     Tgl(6,6), Tlb(3,6), ubPlasticC(0.0), kbInit(3,3)
@@ -88,14 +86,6 @@ ElastomericBearing2d::ElastomericBearing2d(int tag, int Nd1, int Nd2,
         exit(-1);
     }
     
-    // allocate memory for the uniaxial materials
-    theMaterials = new UniaxialMaterial* [2];
-    if (theMaterials == 0)  {
-        opserr << "ElastomericBearing2d::ElastomericBearing2d() - "
-            << "failed to allocate pointers for uniaxial materials.\n";
-        exit(-1);
-    }
-
     // get copies of the uniaxial materials
     for (int i=0; i<2; i++)  {
         if (materials[i] == 0) {
@@ -124,7 +114,7 @@ ElastomericBearing2d::ElastomericBearing2d(int tag, int Nd1, int Nd2,
 
 ElastomericBearing2d::ElastomericBearing2d()
     : Element(0, ELE_TAG_ElastomericBearing2d),
-    connectedExternalNodes(2), theMaterials(0),
+    connectedExternalNodes(2),
     k0(0.0), qYield(0.0), k2(0.0), x(0), y(0), mass(0.0),
     L(0.0), ub(3), ubPlastic(0.0), qb(3), kb(3,3), ul(6),
     Tgl(6,6), Tlb(3,6), ubPlasticC(0.0), kbInit(3,3)
@@ -139,6 +129,10 @@ ElastomericBearing2d::ElastomericBearing2d()
     // set node pointers to NULL
 	for (int i=0; i<2; i++)
 		theNodes[i] = 0;    
+    
+    // set material pointers to NULL
+	for (int i=0; i<2; i++)
+		theMaterials[i] = 0;
 }
 
 
@@ -146,12 +140,9 @@ ElastomericBearing2d::~ElastomericBearing2d()
 {
     // invoke the destructor on any objects created by the object
     // that the object still holds a pointer to
-    if (theMaterials != 0)  {
-        for (int i=0; i<2; i++)
-            if (theMaterials[i] != 0)
-                delete theMaterials[i];
-        delete [] theMaterials;
-    }
+    for (int i=0; i<2; i++)
+        if (theMaterials[i] != 0)
+            delete theMaterials[i];
 }
 
 
@@ -386,12 +377,12 @@ const Matrix& ElastomericBearing2d::getMass()
 {
 	// zero the matrix
     theMatrix.Zero();
-
+    
 	// check for quick return
 	if (mass == 0.0)  {
 		return theMatrix;
 	}    
-
+    
 	double m = 0.5*mass;
 	for (int i = 0; i < 2; i++)  {
 		theMatrix(i,i)     = m;
@@ -413,7 +404,7 @@ int ElastomericBearing2d::addLoad(ElementalLoad *theLoad, double loadFactor)
 	opserr <<"ElastomericBearing2d::addLoad() - "
 		<< "load type unknown for element: "
 		<< this->getTag() << endln;
-
+    
 	return -1;
 }
 
@@ -424,7 +415,7 @@ int ElastomericBearing2d::addInertiaLoadToUnbalance(const Vector &accel)
 	if (mass == 0.0)  {
 		return 0;
 	}    
-
+    
 	// get R * accel from the nodes
 	const Vector &Raccel1 = theNodes[0]->getRV(accel);
 	const Vector &Raccel2 = theNodes[1]->getRV(accel);
@@ -434,7 +425,7 @@ int ElastomericBearing2d::addInertiaLoadToUnbalance(const Vector &accel)
 			<< "matrix and vector sizes are incompatible\n";
 		return -1;
 	}
-
+    
 	// want to add ( - fact * M R * accel ) to unbalance
 	// take advantage of lumped mass matrix
 	double m = 0.5*mass;
@@ -442,7 +433,7 @@ int ElastomericBearing2d::addInertiaLoadToUnbalance(const Vector &accel)
         theLoad(i)   -= m * Raccel1(i);
         theLoad(i+3) -= m * Raccel2(i);
     }
-
+    
 	return 0;
 }
 
@@ -534,13 +525,10 @@ int ElastomericBearing2d::sendSelf(int commitTag, Channel &sChannel)
 int ElastomericBearing2d::recvSelf(int commitTag, Channel &rChannel,
     FEM_ObjectBroker &theBroker)
 {
-    // delete dynamic memory
-    if (theMaterials != 0)  {
-        for (int i=0; i<2; i++)
-            if (theMaterials[i] != 0)
-                delete theMaterials[i];
-        delete [] theMaterials;
-    }
+    // delete material memory
+    for (int i=0; i<2; i++)
+        if (theMaterials[i] != 0)
+            delete theMaterials[i];
     
     // receive element parameters
     static Vector data(7);
@@ -553,18 +541,11 @@ int ElastomericBearing2d::recvSelf(int commitTag, Channel &rChannel,
     
     // receive the two end nodes
     rChannel.recvID(0, commitTag, connectedExternalNodes);
-
+    
     // receive the material class tags
     ID matClassTags(2);
     rChannel.recvID(0, commitTag, matClassTags);
     
-    // allocate memory for the uniaxial materials
-    theMaterials = new UniaxialMaterial* [2];
-    if (theMaterials == 0)  {
-        opserr << "ElastomericBearing2d::recvSelf() - "
-            << "failed to allocate pointers for uniaxial materials.\n";
-        return -1;
-    }
     // receive the material models
     for (int i=0; i<2; i++)  {
         theMaterials[i] = theBroker.getNewUniaxialMaterial(matClassTags(i));
@@ -710,6 +691,14 @@ Response* ElastomericBearing2d::setResponse(const char **argv, int argc,
         
         theResponse = new ElementResponse(this, 5, Vector(3));
     }
+    // material output
+    else if (strcmp(argv[0],"material") == 0)  {
+        if (argc > 2)  {
+            int matNum = atoi(argv[1]);
+            if (matNum >= 1 && matNum <= 2)
+                theResponse =  theMaterials[matNum-1]->setResponse(&argv[2], argc-2, output);
+        }
+    }
     
     output.endTag(); // ElementOutput
     
@@ -720,7 +709,7 @@ Response* ElastomericBearing2d::setResponse(const char **argv, int argc,
 int ElastomericBearing2d::getResponse(int responseID, Information &eleInfo)
 {
     double MpDelta;
-
+    
 	switch (responseID)  {
 	case 1:  // global forces
         return eleInfo.setVector(this->getResistingForce());
@@ -812,7 +801,7 @@ void ElastomericBearing2d::setUp()
     Tgl(1,0) = Tgl(4,3) = y(0)/yn;
     Tgl(1,1) = Tgl(4,4) = y(1)/yn;
     Tgl(2,2) = Tgl(5,5) = z(2)/zn;
-
+    
     // create transformation matrix from local to basic system (linear)
     Tlb.Zero();
     Tlb(0,0) = Tlb(1,1) = Tlb(2,2) = -1.0;

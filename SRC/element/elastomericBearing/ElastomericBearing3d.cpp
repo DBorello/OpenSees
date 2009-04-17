@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2009-03-25 22:50:53 $
+// $Revision: 1.3 $
+// $Date: 2009-04-17 23:00:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elastomericBearing/ElastomericBearing3d.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -58,7 +58,7 @@ ElastomericBearing3d::ElastomericBearing3d(int tag, int Nd1, int Nd2,
     double ke, double fy, double alpha, UniaxialMaterial **materials,
     const Vector _y, const Vector _x, double m)
     : Element(tag, ELE_TAG_ElastomericBearing3d),
-    connectedExternalNodes(2), theMaterials(0),
+    connectedExternalNodes(2),
     k0(0.0), qYield(0.0), k2(0.0), x(_x), y(_y), mass(m),
     L(0.0), ub(6), ubPlastic(2), qb(6), kb(6,6), ul(12),
     Tgl(12,12), Tlb(6,12), ubPlasticC(2), kbInit(6,6)
@@ -88,14 +88,6 @@ ElastomericBearing3d::ElastomericBearing3d(int tag, int Nd1, int Nd2,
         exit(-1);
     }
     
-    // allocate memory for the uniaxial materials
-    theMaterials = new UniaxialMaterial* [4];
-    if (theMaterials == 0)  {
-        opserr << "ElastomericBearing3d::ElastomericBearing3d() - "
-            << "failed to allocate pointers for uniaxial materials.\n";
-        exit(-1);
-    }
-
     // get copies of the uniaxial materials
     for (int i=0; i<4; i++)  {
         if (materials[i] == 0) {
@@ -127,7 +119,7 @@ ElastomericBearing3d::ElastomericBearing3d(int tag, int Nd1, int Nd2,
 
 ElastomericBearing3d::ElastomericBearing3d()
     : Element(0, ELE_TAG_ElastomericBearing3d),
-    connectedExternalNodes(2), theMaterials(0),
+    connectedExternalNodes(2),
     k0(0.0), qYield(0.0), k2(0.0), x(0), y(0), mass(0.0),
     L(0.0), ub(6), ubPlastic(2), qb(6), kb(6,6), ul(6),
     Tgl(12,12), Tlb(6,12), ubPlasticC(2), kbInit(6,6)
@@ -138,10 +130,14 @@ ElastomericBearing3d::ElastomericBearing3d()
 			<<  "failed to create an ID of size 2\n";
 		exit(-1);
     }
-
+    
     // set node pointers to NULL
 	for (int i=0; i<2; i++)
 		theNodes[i] = 0;
+    
+    // set material pointers to NULL
+	for (int i=0; i<4; i++)
+		theMaterials[i] = 0;
 }
 
 
@@ -149,12 +145,9 @@ ElastomericBearing3d::~ElastomericBearing3d()
 {
     // invoke the destructor on any objects created by the object
     // that the object still holds a pointer to
-    if (theMaterials != 0)  {
-        for (int i=0; i<4; i++)
-            if (theMaterials[i] != 0)
-                delete theMaterials[i];
-        delete [] theMaterials;
-    }
+    for (int i=0; i<4; i++)
+        if (theMaterials[i] != 0)
+            delete theMaterials[i];
 }
 
 
@@ -188,7 +181,7 @@ void ElastomericBearing3d::setDomain(Domain *theDomain)
     if (!theDomain)  {
 		theNodes[0] = 0;
 		theNodes[1] = 0;
-
+        
 		return;
     }
 
@@ -237,14 +230,14 @@ void ElastomericBearing3d::setDomain(Domain *theDomain)
 int ElastomericBearing3d::commitState()
 {
 	int errCode = 0;
-
+    
     // commit trial history variables
     ubPlasticC = ubPlastic;
 	
     // commit material models
     for (int i=0; i<4; i++)
 	    errCode += theMaterials[i]->commitState();
-
+    
 	return errCode;
 }
 
@@ -264,7 +257,7 @@ int ElastomericBearing3d::revertToLastCommit()
 int ElastomericBearing3d::revertToStart()
 {   
     int errCode=0;
-
+    
     // reset trial history variables
     ub.Zero();
     ubPlastic.Zero();
@@ -272,10 +265,10 @@ int ElastomericBearing3d::revertToStart()
     
     // reset committed history variables
     ubPlasticC.Zero();
-
+    
     // reset stiffness matrix in basic system
     kb = kbInit;
-
+    
     // revert material models
     for (int i=0; i<4; i++)
         errCode += theMaterials[i]->revertToStart();
@@ -316,11 +309,11 @@ int ElastomericBearing3d::update()
     Vector qTrial(2);
     qTrial(0) = k0*(ub(1) - ubPlasticC(0));
     qTrial(1) = k0*(ub(2) - ubPlasticC(1));
-
+    
     // compute yield criterion of hysteretic component
     double qTrialNorm = qTrial.Norm();
     double Y = qTrialNorm - qYield;
-
+    
     // elastic step -> no updates required
     if (Y <= 0.0)  {
         // set shear forces
@@ -355,13 +348,11 @@ int ElastomericBearing3d::update()
     // 4) get moment and stiffness in basic y-direction
     theMaterials[2]->setTrialStrain(ub(4),ubdot(4));
     qb(4) = theMaterials[2]->getStress();
-    //qb(4) += 0.5*qb(0)*ub(2);
     kb(4,4) = theMaterials[2]->getTangent();
     
     // 5) get moment and stiffness in basic z-direction
     theMaterials[3]->setTrialStrain(ub(5),ubdot(5));
     qb(5) = theMaterials[3]->getStress();
-    //qb(5) -= 0.5*qb(0)*ub(1);
     kb(5,5) = theMaterials[3]->getTangent();
     
     return 0;
@@ -414,12 +405,12 @@ const Matrix& ElastomericBearing3d::getMass()
 {
 	// zero the matrix
     theMatrix.Zero();
-
+    
 	// check for quick return
 	if (mass == 0.0)  {
 		return theMatrix;
 	}    
-
+    
 	double m = 0.5*mass;
 	for (int i = 0; i < 3; i++)  {
 		theMatrix(i,i)     = m;
@@ -441,7 +432,7 @@ int ElastomericBearing3d::addLoad(ElementalLoad *theLoad, double loadFactor)
 	opserr <<"ElastomericBearing3d::addLoad() - "
 		<< "load type unknown for element: "
 		<< this->getTag() << endln;
-
+    
 	return -1;
 }
 
@@ -451,8 +442,8 @@ int ElastomericBearing3d::addInertiaLoadToUnbalance(const Vector &accel)
 	// check for quick return
 	if (mass == 0.0)  {
 		return 0;
-	}    
-
+	}
+    
 	// get R * accel from the nodes
 	const Vector &Raccel1 = theNodes[0]->getRV(accel);
 	const Vector &Raccel2 = theNodes[1]->getRV(accel);
@@ -462,7 +453,7 @@ int ElastomericBearing3d::addInertiaLoadToUnbalance(const Vector &accel)
 			<< "matrix and vector sizes are incompatible\n";
 		return -1;
 	}
-
+    
 	// want to add ( - fact * M R * accel ) to unbalance
 	// take advantage of lumped mass matrix
 	double m = 0.5*mass;
@@ -470,7 +461,7 @@ int ElastomericBearing3d::addInertiaLoadToUnbalance(const Vector &accel)
         theLoad(i)   -= m * Raccel1(i);
         theLoad(i+3) -= m * Raccel2(i);
     }
-
+    
 	return 0;
 }
 
@@ -566,13 +557,10 @@ int ElastomericBearing3d::sendSelf(int commitTag, Channel &sChannel)
 int ElastomericBearing3d::recvSelf(int commitTag, Channel &rChannel,
     FEM_ObjectBroker &theBroker)
 {
-    // delete dynamic memory
-    if (theMaterials != 0)  {
-        for (int i=0; i<4; i++)
-            if (theMaterials[i] != 0)
-                delete theMaterials[i];
-        delete [] theMaterials;
-    }
+    // delete material memory
+    for (int i=0; i<4; i++)
+        if (theMaterials[i] != 0)
+            delete theMaterials[i];
     
     // receive element parameters
     static Vector data(7);
@@ -585,18 +573,11 @@ int ElastomericBearing3d::recvSelf(int commitTag, Channel &rChannel,
     
     // receive the two end nodes
     rChannel.recvID(0, commitTag, connectedExternalNodes);
-
+    
     // receive the material class tags
     ID matClassTags(4);
     rChannel.recvID(0, commitTag, matClassTags);
     
-    // allocate memory for the uniaxial materials
-    theMaterials = new UniaxialMaterial* [4];
-    if (theMaterials == 0)  {
-        opserr << "ElastomericBearing2d::recvSelf() - "
-            << "failed to allocate pointers for uniaxial materials.\n";
-        return -1;
-    }
     // receive the material models
     for (int i=0; i<4; i++)  {
         theMaterials[i] = theBroker.getNewUniaxialMaterial(matClassTags(i));
@@ -771,6 +752,14 @@ Response* ElastomericBearing3d::setResponse(const char **argv, int argc,
         
         theResponse = new ElementResponse(this, 5, Vector(6));
     }
+    // material output
+    else if (strcmp(argv[0],"material") == 0)  {
+        if (argc > 2)  {
+            int matNum = atoi(argv[1]);
+            if (matNum >= 1 && matNum <= 4)
+                theResponse =  theMaterials[matNum-1]->setResponse(&argv[2], argc-2, output);
+        }
+    }
     
     output.endTag(); // ElementOutput
     
@@ -878,7 +867,7 @@ void ElastomericBearing3d::setUp()
     Tgl(2,0) = Tgl(5,3) = Tgl(8,6) = Tgl(11,9)  = z(0)/zn;
     Tgl(2,1) = Tgl(5,4) = Tgl(8,7) = Tgl(11,10) = z(1)/zn;
     Tgl(2,2) = Tgl(5,5) = Tgl(8,8) = Tgl(11,11) = z(2)/zn;
-
+    
     // create transformation matrix from local to basic system (linear)
     Tlb.Zero();
     Tlb(0,0) = Tlb(1,1) = Tlb(2,2) = Tlb(3,3) = Tlb(4,4) = Tlb(5,5) = -1.0;

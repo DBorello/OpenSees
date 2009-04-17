@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2009-03-25 22:50:53 $
+// $Revision: 1.3 $
+// $Date: 2009-04-17 23:00:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elastomericBearing/ElastomericBearing3d.h,v $
 
 #ifndef ElastomericBearing3d_h
@@ -83,10 +83,10 @@ public:
     void zeroLoad();
 	int addLoad(ElementalLoad *theLoad, double loadFactor);
     int addInertiaLoadToUnbalance(const Vector &accel);
-
+    
     const Vector &getResistingForce();
     const Vector &getResistingForceIncInertia();
-
+    
     // public methods for element output
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
@@ -96,7 +96,7 @@ public:
     // public methods for element recorder
     Response *setResponse(const char **argv, int argc, OPS_Stream &s);
     int getResponse(int responseID, Information &eleInfo);
-
+    
 protected:
 
 private:
@@ -105,9 +105,9 @@ private:
     double sgn(double x);
     
     // private attributes - a copy for each object of the class
-    ID connectedExternalNodes;      // contains the tags of the end nodes
-    Node *theNodes[2];
-	UniaxialMaterial **theMaterials;    // array of uniaxial materials
+    ID connectedExternalNodes;          // contains the tags of the end nodes
+    Node *theNodes[2];                  // array of nodes
+	UniaxialMaterial *theMaterials[4];  // array of uniaxial materials
     
     // parameters
     double k0;          // initial stiffness of hysteretic component
