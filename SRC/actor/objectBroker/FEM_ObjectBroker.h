@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2008-09-17 18:02:31 $
+// $Revision: 1.10 $
+// $Date: 2009-04-17 22:57:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.h,v $
                                                                         
                                                                         
@@ -78,6 +78,7 @@ class UniaxialMaterial;
 class SectionForceDeformation;
 class NDMaterial;
 class Fiber;
+class FrictionModel;
 
 class ConvergenceTest;
 class SectionForceDeformation;
@@ -120,6 +121,7 @@ class FEM_ObjectBroker
     virtual SectionForceDeformation  *getNewSection(int classTag);    
     virtual NDMaterial *getNewNDMaterial(int classTag);
     virtual Fiber *getNewFiber(int classTag);
+    virtual FrictionModel *getNewFrictionModel(int classTag);
 
     virtual ConvergenceTest *getNewConvergenceTest(int classTag);
     virtual LoadPattern *getNewLoadPattern(int classTag);

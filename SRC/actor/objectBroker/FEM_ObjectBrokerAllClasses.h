@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-09-17 18:02:31 $
+// $Revision: 1.3 $
+// $Date: 2009-04-17 22:57:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.h,v $
                                                                         
 // Written: fmk
@@ -69,6 +69,7 @@ class FEM_ObjectBrokerAllClasses : public FEM_ObjectBroker
     virtual SectionForceDeformation  *getNewSection(int classTag);    
     virtual NDMaterial *getNewNDMaterial(int classTag);
     virtual Fiber *getNewFiber(int classTag);
+    virtual FrictionModel *getNewFrictionModel(int classTag);
 
     virtual ConvergenceTest *getNewConvergenceTest(int classTag);
     virtual LoadPattern *getNewLoadPattern(int classTag);

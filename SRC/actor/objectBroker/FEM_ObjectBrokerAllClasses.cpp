@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2009-04-14 21:15:25 $
+// $Revision: 1.13 $
+// $Date: 2009-04-17 22:57:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.cpp,v $
                                                                         
 // Written: fmk
@@ -140,6 +140,12 @@
 // Fibers
 #include <UniaxialFiber2d.h>
 #include <UniaxialFiber3d.h>
+
+// friction models
+#include <CoulombFriction.h>
+#include <VDependentFriction.h>
+#include <VPDependentFriction.h>
+
 // element header files
 #include <Element.h>
 #include <beam2d02.h>
@@ -1032,6 +1038,27 @@ FEM_ObjectBrokerAllClasses::getNewFiber(int classTag)
 		opserr << classTag << endln;
 		return 0;
 	}
+}
+
+FrictionModel *
+FEM_ObjectBrokerAllClasses::getNewFrictionModel(int classTag)
+{
+    switch(classTag) {
+	case FRN_TAG_CoulombFriction:  
+	     return new CoulombFriction();
+
+	case FRN_TAG_VDependentFriction:  
+	     return new VDependentFriction();
+	     
+	case FRN_TAG_VPDependentFriction:  
+	     return new VPDependentFriction();
+
+	default:
+	  opserr << "FEM_ObjectBrokerAllClasses::getNewFrictionModel - ";
+	  opserr << " - no FrictionModel type exists for class tag ";
+	  opserr << classTag << endln;
+	  return 0;
+    }        
 }
 
 ConvergenceTest *

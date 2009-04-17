@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.45 $
-// $Date: 2008-09-17 18:02:31 $
+// $Revision: 1.46 $
+// $Date: 2009-04-17 22:57:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -156,6 +156,12 @@ FEM_ObjectBroker::getNewNDMaterial(int classTag)
 
 Fiber*
 FEM_ObjectBroker::getNewFiber(int classTag)
+{
+  return 0;
+}
+
+FrictionModel *
+FEM_ObjectBroker::getNewFrictionModel(int classTag)
 {
   return 0;
 }
