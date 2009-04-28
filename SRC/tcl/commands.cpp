@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.142 $
-// $Date: 2009-03-23 23:16:10 $
+// $Revision: 1.143 $
+// $Date: 2009-04-28 17:32:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -632,6 +632,8 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "setTime", &setTime,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);     
     Tcl_CreateCommand(interp, "getTime", &getTime,
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    Tcl_CreateCommand(interp, "getLoadFactor", &getLoadFactor,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 		
     Tcl_CreateCommand(interp, "build", &buildModel,
@@ -1265,6 +1267,32 @@ getTime(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
   // now we copy the value to the tcl string that is returned
 
   sprintf(interp->result,"%f",time);
+  return TCL_OK;
+}
+
+int 
+getLoadFactor(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  if (argc < 2) {
+    opserr << "WARNING no load pattern supplied -- getLoadFactor\n";
+    return TCL_ERROR;
+  }
+
+  int pattern;
+  if (Tcl_GetInt(interp, argv[1], &pattern) != TCL_OK) {
+    opserr << "ERROR reading load pattern tag -- getLoadFactor\n";
+    return TCL_ERROR;
+  }
+
+  LoadPattern *thePattern = theDomain.getLoadPattern(pattern);
+  if (thePattern == 0) {
+    opserr << "ERROR load pattern with tag " << pattern << " not found in domain -- getLoadFactor\n";
+    return TCL_ERROR;
+  }
+
+  double factor = thePattern->getLoadFactor();
+
+  sprintf(interp->result,"%f",factor);
   return TCL_OK;
 }
 
