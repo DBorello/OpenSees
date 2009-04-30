@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2009-04-17 22:57:47 $
+// $Revision: 1.14 $
+// $Date: 2009-04-30 23:28:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.cpp,v $
                                                                         
 // Written: fmk
@@ -211,6 +211,7 @@
 #include <StandardStream.h>
 #include <XmlFileStream.h>
 #include <DataFileStream.h>
+#include <BinaryFileStream.h>
 #include <DatabaseStream.h>
 #include <DummyStream.h>
 
@@ -1250,6 +1251,9 @@ FEM_ObjectBrokerAllClasses::getPtrNewStream(int classTag)
 
     case OPS_STREAM_TAGS_DataFileStream:
 	     return new DataFileStream();
+
+    case OPS_STREAM_TAGS_BinaryFileStream:
+	     return new BinaryFileStream();
 
     case OPS_STREAM_TAGS_DatabaseStream:
       return new DatabaseStream();
