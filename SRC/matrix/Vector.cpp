@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2009-03-23 22:15:08 $
+// $Revision: 1.19 $
+// $Date: 2009-04-30 23:27:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.cpp,v $
                                                                         
                                                                         
@@ -159,7 +159,7 @@ int
 Vector::resize(int newSize){
 
   // first check that newSize is valid
-  if (newSize <= 0) {
+  if (newSize < 0) {
     opserr << "Vector::resize) - size specified " << newSize << " <= 0\n";
     return -1;
   } 
