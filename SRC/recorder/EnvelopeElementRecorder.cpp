@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2009-04-14 21:14:22 $
+// $Revision: 1.23 $
+// $Date: 2009-04-30 23:25:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -112,26 +112,23 @@ EnvelopeElementRecorder::~EnvelopeElementRecorder()
     theHandler->tag("Data"); // Data
 
     for (int i=0; i<3; i++) {
-      int size = currentData->Size();
-      for (int j=0; j<size; j++)
+      int numResponse = currentData->Size();
+      for (int j=0; j<numResponse; j++)
 	(*currentData)(j) = (*data)(i,j);
       theHandler->write(*currentData);
     }
 
     theHandler->endTag(); // Data
-    theHandler->endTag(); // OpenSeesOutput
   }
 
   if (theHandler != 0)
     delete theHandler;
-
 
   if (data != 0)
     delete data;
   
   if (currentData != 0)
     delete currentData;
-
 
   //
   // clean up the memory
@@ -154,9 +151,6 @@ EnvelopeElementRecorder::~EnvelopeElementRecorder()
   for (int i=0; i<numArgs; i++)
     delete [] responseArgs[i];
   delete [] responseArgs;
-  /*  
-
-  */
 }
 
 
@@ -549,12 +543,10 @@ EnvelopeElementRecorder::initialize(void)
     return 0;
 
   if (theResponses != 0) {
-    delete theResponses;
-    theResponses = 0;
-    numEle = 0;
+    for (int i = 0; i < numEle; i++)
+      delete theResponses[i];
+    delete [] theResponses;
   }
-
-  theHandler->tag("OpenSeesOutput");
 
   int numDbColumns = 0;
 
@@ -564,11 +556,25 @@ EnvelopeElementRecorder::initialize(void)
   //   2. iterate over the elements invoking setResponse() to get the new objects & determine size of data
   //
 
-  ID responseID(0,64);
-  ID responseCount(0,64);
-  int count = 0;
+  int i =0;
+  ID xmlOrder(0,64);
+  ID responseOrder(0,64);
 
   if (eleID != 0) {
+
+    int eleCount = 0;
+    int responseCount = 0;
+
+    // loop over ele & set Reponses
+    for (i=0; i<numEle; i++) {
+      Element *theEle = theDomain->getElement((*eleID)(i));
+      if (theEle != 0) {
+	xmlOrder[eleCount] = i+1;
+	eleCount++;
+      }
+    }
+
+    theHandler->setOrder(xmlOrder);
 
     //
     // if we have an eleID we know Reponse size so allocate Response holder & loop over & ask each element
@@ -581,11 +587,15 @@ EnvelopeElementRecorder::initialize(void)
       return -1;
     }
 
+
     for (int ii=0; ii<numEle; ii++) {
       Element *theEle = theDomain->getElement((*eleID)(ii));
       if (theEle == 0) {
 	theResponses[ii] = 0;
       } else {
+	if (echoTimeFlag == true) 
+	  theHandler->tag("EnvelopeElementOutput");	  
+	
 	theResponses[ii] = theEle->setResponse((const char **)responseArgs, numArgs, *theHandler);
 	if (theResponses[ii] != 0) {
 	  // from the response type determine no of cols for each      
@@ -595,24 +605,27 @@ EnvelopeElementRecorder::initialize(void)
 	  numDbColumns += dataSize;
 	  
 	  if (addColumnInfo == 1) {
-	    responseID[count] = ii+1;
 	    if (echoTimeFlag == true) 
-	      responseCount[count] = 2*dataSize;
+	      for (int j=0; j<2*dataSize; j++)
+		responseOrder[responseCount++] = i+1;
 	    else
-	      responseCount[count] = dataSize;
-	    count++;
+	      for (int j=0; j<dataSize; j++)
+		responseOrder[responseCount++] = i+1;
 	  }
-
+	  
 	  if (echoTimeFlag == true) {
 	    for (int i=0; i<eleData.Size(); i++) {
 	      theHandler->tag("TimeOutput");
-	      theHandler->attr("ResponseType", "time");
+	      theHandler->tag("ResponseType", "time");
 	      theHandler->endTag();
 	    }
+	    theHandler->endTag();
 	  }
 	}
       }
     }
+    
+    theHandler->setOrder(responseOrder);
 
   } else {
 
@@ -663,8 +676,8 @@ EnvelopeElementRecorder::initialize(void)
 	if (echoTimeFlag == true) {
 	  for (int i=0; i<eleData.Size(); i++) {
 	    theHandler->tag("TimeOutput");
-	    theHandler->attr("ResponseType", "time");
-	    theHandler->endTag();
+	    theHandler->tag("ResponseType", "time");
+	    theHandler->endTag(); // TimeOutput
 	  }
 	}
       }
@@ -687,26 +700,6 @@ EnvelopeElementRecorder::initialize(void)
     exit(-1);
   }
 
-  if (addColumnInfo == 1) {
-    
-    int numResponse = responseID.Size();
-    Vector data(numDbColumns);
-
-    int count = 0;
-
-    for (int i=0; i<numResponse; i++) {
-      int id = responseID[i];
-      int countID = responseCount[i];
-
-	for (int j=0; j<countID; j++)
-	  data(count++) = id;
-    }
-
-    theHandler->write("ORDERING: ",10);
-    (*theHandler) << numDbColumns << " ";
-    theHandler->write(data);
-  }
-  
   initializationDone = true;  
   return 0;
 }

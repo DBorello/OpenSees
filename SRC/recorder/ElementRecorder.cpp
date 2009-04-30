@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.33 $
-// $Date: 2009-04-14 21:14:22 $
+// $Revision: 1.34 $
+// $Date: 2009-04-30 23:25:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -102,7 +102,6 @@ ElementRecorder::ElementRecorder(const ID *ele,
 ElementRecorder::~ElementRecorder()
 {
   theOutputHandler->endTag(); // Data
-  theOutputHandler->endTag(); // OpenSeesOutput
 
   if (theOutputHandler != 0)
     delete theOutputHandler;
@@ -461,19 +460,12 @@ ElementRecorder::initialize(void)
     return 0;
 
   if (theResponses != 0) {
-    delete theResponses;
-    theResponses = 0;
+    for (int i = 0; i < numEle; i++)
+      delete theResponses[i];
+    delete [] theResponses;
   }
-
-  theOutputHandler->tag("OpenSeesOutput");
 
   int numDbColumns = 0;
-  if (echoTimeFlag == true) {
-    theOutputHandler->tag("TimeOutput");
-    theOutputHandler->tag("ResponseType", "time");
-    theOutputHandler->endTag(); // TimeOutput
-    numDbColumns += 1;
-  }
 
   // Set the response objects:
   //   1. create an array of pointers for them
@@ -481,11 +473,46 @@ ElementRecorder::initialize(void)
   //
 
   int i =0;
-  ID responseID(0,64);
-  ID responseCount(0,64);
-
+  ID xmlOrder(0,64);
+  ID responseOrder(0,64);
 
   if (eleID != 0) {
+
+    //
+    // if we have an eleID we know Reponse size so allocate Response holder & loop over & ask each element
+    //
+
+    int eleCount = 0;
+    int responseCount = 0;
+
+    if (echoTimeFlag == true && addColumnInfo == 1) {
+      xmlOrder[0] = 0;
+      responseOrder[0] = 0;
+      eleCount = 1;
+      responseCount =1;
+    }
+
+    // loop over ele & set Reponses
+    for (i=0; i<numEle; i++) {
+      Element *theEle = theDomain->getElement((*eleID)(i));
+      if (theEle != 0) {
+	xmlOrder[eleCount] = i+1;
+	eleCount++;
+      }
+    }
+
+    theOutputHandler->setOrder(xmlOrder);
+
+    //
+    // do time
+    //
+
+    if (echoTimeFlag == true) {
+      theOutputHandler->tag("TimeOutput");
+      theOutputHandler->tag("ResponseType", "time");
+      theOutputHandler->endTag(); // TimeOutput
+      numDbColumns += 1;
+    }
 
     //
     // if we have an eleID we know Reponse size so allocate Response holder & loop over & ask each element
@@ -501,14 +528,6 @@ ElementRecorder::initialize(void)
     for (int k=0; k<numEle; k++)
       theResponses[k] = 0;
 
-    int count = 0;
-
-    if (echoTimeFlag == true && addColumnInfo == 1) {
-      responseID[count] = 0;
-      responseCount[count] = 1;
-      count++;
-    }
-
     // loop over ele & set Reponses
     for (i=0; i<numEle; i++) {
       Element *theEle = theDomain->getElement((*eleID)(i));
@@ -523,14 +542,23 @@ ElementRecorder::initialize(void)
 	  int dataSize = eleData.Size();
 	  numDbColumns += dataSize;
 	  if (addColumnInfo == 1) {
-	    responseID[count] = i+1;
-	    responseCount[count] = dataSize;
-	    count++;
+	    for (int j=0; j<dataSize; j++)
+	      responseOrder[responseCount++] = i+1;
 	  }
 	}
       }
     }
+
+    theOutputHandler->setOrder(responseOrder);
+
   } else {
+
+    if (echoTimeFlag == true) {
+      theOutputHandler->tag("TimeOutput");
+      theOutputHandler->tag("ResponseType", "time");
+      theOutputHandler->endTag(); // TimeOutput
+      numDbColumns += 1;
+    }
 
     //
     // if no eleID we don't know response size so make initial guess & loop over & ask ele
@@ -590,27 +618,9 @@ ElementRecorder::initialize(void)
     opserr << "ElementRecorder::initialize() - out of memory\n";
     return -1;
   }
-
-  if (addColumnInfo == 1) {
-
-    int numResponse = responseID.Size();
-    int count = 0;
-
-    for (int i=0; i<numResponse; i++) {
-      int id = responseID[i];
-      int countID = responseCount[i];
-
-	for (int j=0; j<countID; j++)
-	  (*data)(count++) = id;
-    }
-
-    theOutputHandler->write("ORDERING: ",10);
-    (*theOutputHandler) << data->Size() << " ";
-    theOutputHandler->write(*data);
-  }
   
   theOutputHandler->tag("Data");
-
   initializationDone = true;
+
   return 0;
 }

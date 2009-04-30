@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.33 $
-// $Date: 2009-04-14 21:14:22 $
+// $Revision: 1.34 $
+// $Date: 2009-04-30 23:25:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -174,10 +174,8 @@ NodeRecorder::NodeRecorder(const ID &dofs,
 
 NodeRecorder::~NodeRecorder()
 {
-
   if (theOutputHandler != 0) {
     theOutputHandler->endTag(); // Data
-    theOutputHandler->endTag(); // OpenSeesOutput
     delete theOutputHandler;
   }
 
@@ -242,9 +240,11 @@ NodeRecorder::record(int commitTag, double timeStamp)
     //
     // now we go get the responses from the nodes & place them in disp vector
     //
-
+    
     for (int i=0; i<numValidNodes; i++) {
+
       int cnt = i*numDOF + timeOffset; 
+
       Node *theNode = theNodes[i];
       if (dataFlag == 0) {
 	// AddingSensitivity:BEGIN ///////////////////////////////////
@@ -598,7 +598,6 @@ NodeRecorder::recvSelf(int commitTag, Channel &theChannel,
 int
 NodeRecorder::initialize(void)
 {
-
   if (theDofs == 0 || theDomain == 0) {
     opserr << "NodeRecorder::initialize() - either nodes, dofs or domain has not been set\n";
     return -1;
@@ -658,6 +657,7 @@ NodeRecorder::initialize(void)
   response.resize(numValidResponse);
   response.Zero();
 
+  ID orderResponse(numValidResponse);
 
   //
   // need to create the data description, i.e. what each column of data is
@@ -713,43 +713,54 @@ NodeRecorder::initialize(void)
 
   int numDOF = theDofs->Size();
 
+  // write out info to handler if parallel execution
+  int numNode = theNodalTags->Size();
+
+  ID xmlOrder(numValidNodes);
+
+  if (echoTimeFlag == true)  
+    xmlOrder.resize(numValidNodes+1);
+
   if (theNodalTags != 0 && addColumnInfo == 1) {
 
     int count = 0;
+    int nodeCount = 0;
 
-    if (echoTimeFlag == true) 
-      response(count++) = 0;
-
-    int numNode = theNodalTags->Size();
+    if (echoTimeFlag == true)  {
+      orderResponse(count++) = 0;
+      xmlOrder(nodeCount++) = 0;
+    }
+    
     for (int i=0; i<numNode; i++) {
       int nodeTag = (*theNodalTags)(i);
       Node *theNode = theDomain->getNode(nodeTag);
       if (theNode != 0) {
+	xmlOrder(nodeCount++) = i+1;
 	for (int j=0; j<numDOF; j++)
-	  response(count++) = i+1;
+	  orderResponse(count++) = i+1;
       }
     }
-    theOutputHandler->write("ORDERING: ",10);
-    (*theOutputHandler) << response.Size() << " ";
-    theOutputHandler->write(response);
+
+    theOutputHandler->setOrder(xmlOrder);
   }
 
   char nodeCrdData[20];
   sprintf(nodeCrdData,"coord");
 
-  theOutputHandler->tag("OpenSeesOutput");
-
   if (echoTimeFlag == true) {
-    theOutputHandler->tag("TimeOutput");
-    theOutputHandler->tag("ResponseType", "time");
-    theOutputHandler->endTag();
+    if (theNodalTags != 0 && addColumnInfo == 1) {
+      theOutputHandler->tag("TimeOutput");
+      theOutputHandler->tag("ResponseType", "time");
+      theOutputHandler->endTag();
+    }
   }
 
   for (int i=0; i<numValidNodes; i++) {
     int nodeTag = theNodes[i]->getTag();
     const Vector &nodeCrd = theNodes[i]->getCrds();
     int numCoord = nodeCrd.Size();
-    
+
+
     theOutputHandler->tag("NodeOutput");
     theOutputHandler->attr("nodeTag", nodeTag);
 
@@ -767,6 +778,10 @@ NodeRecorder::initialize(void)
     }
 
     theOutputHandler->endTag();
+  }
+
+  if (theNodalTags != 0 && addColumnInfo == 1) {
+    theOutputHandler->setOrder(orderResponse);
   }
 
   theOutputHandler->tag("Data");

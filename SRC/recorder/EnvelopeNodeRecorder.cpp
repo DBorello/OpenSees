@@ -17,11 +17,9 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
 
-
-// $Revision: 1.19 $
-// $Date: 2009-04-14 21:14:22 $
+// $Revision: 1.20 $
+// $Date: 2009-04-30 23:25:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -139,18 +137,19 @@ EnvelopeNodeRecorder::~EnvelopeNodeRecorder()
   // write the data
   //
 
-  if (theHandler != 0 && currentData != 0) {
+  if (theHandler != 0 && data != 0) {
     
     theHandler->tag("Data"); // Data
-
+    
+    int numResponse = data->noCols();
+    
     for (int i=0; i<3; i++) {
-      int size = currentData->Size();
-      for (int j=0; j<size; j++)
+      for (int j=0; j<numResponse; j++)
 	(*currentData)(j) = (*data)(i,j);
       theHandler->write(*currentData);
     }
+      
     theHandler->endTag(); // Data
-    theHandler->endTag(); // OpenSeesOutput
   }
 
   //
@@ -564,8 +563,6 @@ EnvelopeNodeRecorder::initialize(void)
     return -1;
   }
 
-  theHandler->tag("OpenSeesOutput");
-  
   //
   // create & set nodal array pointer
   //
@@ -662,31 +659,31 @@ EnvelopeNodeRecorder::initialize(void)
   data = new Matrix(3, numValidResponse);
   data->Zero();
 
-  Vector response(numValidResponse);
+  ID dataOrder(numValidResponse);
+  ID xmlOrder(numValidNodes);
 
   if (theNodalTags != 0 && addColumnInfo == 1) {
 
     int count = 0;
+    int nodeCount = 0;
 
     int numNode = theNodalTags->Size();
     for (int i=0; i<numNode; i++) {
       int nodeTag = (*theNodalTags)(i);
       Node *theNode = theDomain->getNode(nodeTag);
       if (theNode != 0) {
+	xmlOrder(nodeCount++) = i+1;
 	for (int j=0; j<numDOF; j++)
-	  response(count++) = i+1;
+	  dataOrder(count++) = i+1;
 	if (echoTimeFlag == true) {
 	  for (int j=0; j<numDOF; j++)
-	    response(count++) = i+1;
+	    dataOrder(count++) = i+1;
 	}
       }
     }
-    theHandler->write("ORDERING: ",10);
-    (*theHandler) << numValidResponse << " ";
-    theHandler->write(response);
-  }
 
-  theHandler->tag("OpenSeesOutput");
+    theHandler->setOrder(xmlOrder);
+  }
 
   for (int i=0; i<numValidNodes; i++) {
     int nodeTag = theNodes[i]->getTag();
@@ -709,10 +706,9 @@ EnvelopeNodeRecorder::initialize(void)
     theHandler->endTag();
   }
 
-  //
-  // resize the response vector
-  //
-
+  if (theNodalTags != 0 && addColumnInfo == 1) {
+    theHandler->setOrder(dataOrder);
+  }
 
   initializationDone = true;
 
