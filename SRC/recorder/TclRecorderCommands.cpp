@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.49 $
-// $Date: 2008-05-27 22:55:57 $
+// $Revision: 1.50 $
+// $Date: 2009-04-30 23:24:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -69,11 +69,30 @@
 #include <DatabaseStream.h>
 
 
+#include <packages.h>
+#include <elementAPI.h>
+
 extern const char * getInterpPWD(Tcl_Interp *interp);  // commands.cpp
 
 extern TclModelBuilder *theDamageTclModelBuilder;
 
-enum outputMode  {STANDARD_STREAM, DATA_STREAM, XML_STREAM, DATABASE_STREAM, BINARY_STREAM};
+extern int OPS_ResetInput(ClientData clientData, 
+			  Tcl_Interp *interp,  
+			  int cArg, 
+			  int mArg, 
+			  TCL_Char **argv, 
+			  Domain *domain,
+			  TclModelBuilder *builder);
+
+typedef struct externalRecorderCommand {
+  char *funcName;
+  void *(*funcPtr)(int argc, const char **argv);
+  struct externalRecorderCommand *next;
+} ExternalRecorderCommand;
+
+static ExternalRecorderCommand *theExternalRecorderCommands = NULL;
+
+enum outputMode  {STANDARD_STREAM, DATA_STREAM, XML_STREAM, DATABASE_STREAM, BINARY_STREAM, DATA_STREAM_CSV};
 
 
 #include <EquiSolnAlgo.h>
@@ -265,6 +284,15 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    loc +=1;
 	  }
 	}
+
+	else if (strcmp(argv[loc],"-fileCSV") == 0) {
+	  fileName = argv[loc+1];
+	  eMode = DATA_STREAM_CSV;
+	  const char *pwd = getInterpPWD(interp);
+	  simulationInfo.addOutputFile(fileName,pwd);
+	  loc += 2;
+	}
+
 	
 	else if (strcmp(argv[loc],"-database") == 0) {
 	  theRecorderDatabase = theDatabase;
@@ -320,6 +348,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       // construct the DataHandler
       if (eMode == DATA_STREAM && fileName != 0) {
 	theOutputStream = new DataFileStream(fileName);
+      } else if (eMode == DATA_STREAM_CSV && fileName != 0) {
+	theOutputStream = new DataFileStream(fileName, OVERWRITE, 2, 1);
       } else if (eMode == XML_STREAM && fileName != 0) {
 	theOutputStream = new XmlFileStream(fileName);
       } else if (eMode == DATABASE_STREAM && tableName != 0) {
@@ -517,6 +547,14 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  pos += 2;
 	}
 
+	else if (strcmp(argv[pos],"-fileCSV") == 0) {
+	  fileName = argv[pos+1];
+	  const char *pwd = getInterpPWD(interp);
+	  simulationInfo.addOutputFile(fileName, pwd);
+	  eMode = DATA_STREAM_CSV;
+	  pos += 2;
+	}
+
 	else if (strcmp(argv[pos],"-database") == 0) {
 	  eMode = DATABASE_STREAM;
 	  theRecorderDatabase = theDatabase;
@@ -676,6 +714,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       // construct the DataHandler
       if (eMode == DATA_STREAM && fileName != 0) {
 	theOutputStream = new DataFileStream(fileName);
+      } else if (eMode == DATA_STREAM_CSV && fileName != 0) {
+	theOutputStream = new DataFileStream(fileName, OVERWRITE, 2, 1);
       } else if (eMode == XML_STREAM && fileName != 0) {
 	theOutputStream = new XmlFileStream(fileName);
       } else if (eMode == DATABASE_STREAM && tableName != 0) {
@@ -745,7 +785,6 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       int perpDirn = 2;
       int pos = 2;
       while (pos < argc) {
-
 	
 	if (strcmp(argv[pos],"-file") == 0) {
 	  fileName = argv[pos+1];
@@ -760,6 +799,14 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    eMode = DATA_STREAM;
 	    pos +=1;
 	  }
+	}
+
+	else if (strcmp(argv[pos],"-fileCSV") == 0) {
+	  fileName = argv[pos+1];
+	  eMode = DATA_STREAM_CSV;
+	  const char *pwd = getInterpPWD(interp);
+	  simulationInfo.addOutputFile(fileName, pwd);
+	  pos += 2;
 	}
 	
 	else if (strcmp(argv[pos],"-database") == 0) {
@@ -856,6 +903,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       // construct the DataHandler
       if (eMode == DATA_STREAM && fileName != 0) {
 	theOutputStream = new DataFileStream(fileName);
+      } else if (eMode == DATA_STREAM_CSV && fileName != 0) {
+	theOutputStream = new DataFileStream(fileName, OVERWRITE, 2, 1);
       } else if (eMode == XML_STREAM && fileName != 0) {
 	theOutputStream = new XmlFileStream(fileName);
       } else if (eMode == DATABASE_STREAM && tableName != 0) {
@@ -1159,14 +1208,78 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	(*theRecorder) = theR;
     }
     ************************************************* */
-    
-    // no recorder type specified yet exists
+
     else {
-      opserr << "WARNING No recorder type exists ";
-      opserr << "for recorder of type:" << argv[1];
+
+      // try existing loaded packages
+      ExternalRecorderCommand *recorderCommands = theExternalRecorderCommands;
+      bool found = false;
+
+      while (recorderCommands != NULL && found == false) {
+	opserr << "TclRecorder: " << recorderCommands->funcName << endln;
+	if (strcmp(argv[1], recorderCommands->funcName) == 0) {
+	  
+	  OPS_ResetInput(clientData, interp, 2, argc, argv, &theDomain, NULL);
+	  void *theRes = (*(recorderCommands->funcPtr))(argc, argv);
+	  if (theRes != 0) {
+	    
+	    opserr << "commands.cpp - : " << argv[1] << " ALREADY LOADED - FOUND\n";
+	    
+	    *theRecorder = (Recorder *)theRes;
+	    found = true;
+	  }
+	} else
+	  recorderCommands = recorderCommands->next;
+      }
       
-      return TCL_ERROR;
-    }    
+      //
+      // if not there try loading package
+      //
+      
+      if (found == false) {
+	
+	opserr << "commands.cpp - : " << argv[1] << " NOT LOADED\n";
+	
+	void *libHandle;
+	void *(*funcPtr)(int argc, const char **argv);
+	int recorderNameLength = strlen(argv[1]);
+	char *tclFuncName = new char[recorderNameLength+5];
+	strcpy(tclFuncName, "OPS_");
+	strcpy(&tclFuncName[4], argv[1]);    
+	
+	opserr << "commands.cpp - : " << argv[1] << "LOOKING FOR: " << tclFuncName << " \n";      
+	
+	int res = getLibraryFunction(argv[1], tclFuncName, &libHandle, (void **)&funcPtr);
+	
+	delete [] tclFuncName;
+	
+	if (res == 0) {
+	  opserr << "commands.cpp - : " << argv[1] << " FOUND & LOADED\n";	
+	  
+	  char *recorderName = new char[recorderNameLength+1];
+	  strcpy(recorderName, argv[1]);
+	  ExternalRecorderCommand *theRecorderCommand = new ExternalRecorderCommand;
+	  theRecorderCommand->funcPtr = funcPtr;
+	  theRecorderCommand->funcName = recorderName;	
+	  theRecorderCommand->next = theExternalRecorderCommands;
+	  theExternalRecorderCommands = theRecorderCommand;
+	  
+	  OPS_ResetInput(clientData, interp, 2, argc, argv, &theDomain, NULL);
+	  
+	  void *theRes = (*funcPtr)(argc, argv);
+	  if (theRes != 0) {
+	    *theRecorder = (Recorder *)theRes;
+	  }
+	}
+      }
+
+      if (*theRecorder == 0) {
+	opserr << "WARNING No recorder type exists ";
+	opserr << "for recorder of type:" << argv[1];
+	
+	return TCL_ERROR;
+      }    
+    }
     
     // check we instantiated a recorder .. if not ran out of memory
     if ((*theRecorder) == 0) {
