@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.50 $
-// $Date: 2009-04-30 23:24:50 $
+// $Revision: 1.51 $
+// $Date: 2009-04-30 23:26:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -285,7 +285,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  }
 	}
 
-	else if (strcmp(argv[loc],"-fileCSV") == 0) {
+	else if ((strcmp(argv[loc],"-fileCSV") == 0) || (strcmp(argv[loc],"-csv") == 0)) {
 	  fileName = argv[loc+1];
 	  eMode = DATA_STREAM_CSV;
 	  const char *pwd = getInterpPWD(interp);
