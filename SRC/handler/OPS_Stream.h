@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2009-03-23 22:15:40 $
+// $Revision: 1.7 $
+// $Date: 2009-04-30 23:23:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/OPS_Stream.h,v $
 
 #ifndef _OPS_Stream
@@ -29,7 +29,7 @@
 enum openMode  {OVERWRITE, APPEND};
 enum floatField {FIXEDD, SCIENTIFIC};
 class Vector;
-
+class ID;
 
 class OPS_Stream:  public MovableObject
 {
@@ -37,6 +37,7 @@ class OPS_Stream:  public MovableObject
   OPS_Stream(int classTag);
   virtual ~OPS_Stream();
 
+  // output format
   virtual int setFile(const char *fileName, openMode mode = OVERWRITE) {return 0;}
   virtual int setPrecision(int precision) {return 0;}
   virtual int setFloatField(floatField) {return 0;}
@@ -53,14 +54,10 @@ class OPS_Stream:  public MovableObject
   virtual int write(Vector &data) =0; 
 
   // regular stuff
-  
   virtual OPS_Stream& write(const char *s, int n);
-  
   virtual OPS_Stream& write(const unsigned char *s, int n);
-
   virtual OPS_Stream& write(const signed char *s, int n);
   virtual OPS_Stream& write(const void *s, int n);
-
   virtual OPS_Stream& write(const double *s, int n);
 
   virtual OPS_Stream& operator<<(char c);
@@ -80,16 +77,15 @@ class OPS_Stream:  public MovableObject
   virtual OPS_Stream& operator<<(double n);
   virtual OPS_Stream& operator<<(float n);
 
-  int sendSelf(int commitTag, Channel &theChannel) =0;  
-  int recvSelf(int commitTag, Channel &theChannel, 
-	       FEM_ObjectBroker &theBroker) =0;
-
+  // parallel stuff
+  virtual int setOrder(const ID &order);
+  virtual int sendSelf(int commitTag, Channel &theChannel) =0;  
+  virtual int recvSelf(int commitTag, Channel &theChannel, 
+		       FEM_ObjectBroker &theBroker) =0;
 
  private:
   void indent();
   int numIndent;
-
-
 };
 
 #endif

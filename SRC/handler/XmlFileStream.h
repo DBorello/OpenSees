@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2009-03-23 22:15:40 $
+// $Revision: 1.5 $
+// $Date: 2009-04-30 23:23:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/XmlFileStream.h,v $
 
 #ifndef _XmlFileStream
@@ -29,6 +29,8 @@
 
 #include <fstream>
 using std::ofstream;
+class Matrix;
+
 
 class XmlFileStream : public OPS_Stream
 {
@@ -81,11 +83,15 @@ class XmlFileStream : public OPS_Stream
   OPS_Stream& operator<<(double n);
   OPS_Stream& operator<<(float n);
 
+  // parallel stuff
+  int setOrder(const ID &orderOfData);
   int sendSelf(int commitTag, Channel &theChannel);  
   int recvSelf(int commitTag, Channel &theChannel, 
 	       FEM_ObjectBroker &theBroker);
 
  private:
+  int mergeXML();
+
   ofstream theFile;
   int fileOpen;
   openMode theOpenMode;
@@ -102,6 +108,22 @@ class XmlFileStream : public OPS_Stream
   char **tags;
 
   int sendSelfCount;
+  Channel **theChannels;
+  int numDataRows;
+
+  Matrix *mapping;
+  int maxCount;
+  ID *sizeColumns;
+  ID **theColumns;
+  double **theData;
+  Vector **theRemoteData;
+
+  int xmlOrderProcessed; // -1 waiting, 1 processed, 2 processed
+  char *xmlString;
+  int xmlStringLength;
+
+  int numXMLTags;
+  ID *xmlColumns;
 };
 
 #endif

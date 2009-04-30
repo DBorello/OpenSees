@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2009-03-23 22:15:40 $
+// $Revision: 1.3 $
+// $Date: 2009-04-30 23:23:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/BinaryFileStream.h,v $
 
 #ifndef _BinaryFileStream
@@ -29,11 +29,12 @@
 
 #include <fstream>
 using std::ofstream;
+class Matrix;
+class Message;
 
 
 int binaryToText(const char *inputFilename, const char *outputFilename);
 int textToBinary(const char *inputFilename, const char *outputFilename);
-
 
 class BinaryFileStream : public OPS_Stream
 {
@@ -85,6 +86,8 @@ class BinaryFileStream : public OPS_Stream
   OPS_Stream& operator<<(double n);
   OPS_Stream& operator<<(float n);
 
+  // parallel stuff
+  int setOrder(const ID &orderOfData);
   int sendSelf(int commitTag, Channel &theChannel);  
   int recvSelf(int commitTag, Channel &theChannel, 
 	       FEM_ObjectBroker &theBroker);
@@ -96,6 +99,15 @@ class BinaryFileStream : public OPS_Stream
   char *fileName;
 
   int sendSelfCount;
+  Channel **theChannels;
+  int numDataRows;
+
+  Matrix *mapping;
+  int maxCount;
+  ID *sizeColumns;
+  ID **theColumns;
+  double **theData;
+  Vector **theRemoteData;
 };
 
 #endif

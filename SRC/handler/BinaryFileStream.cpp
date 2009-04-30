@@ -18,10 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2009-03-23 22:15:40 $
+// $Revision: 1.3 $
+// $Date: 2009-04-30 23:23:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/BinaryFileStream.cpp,v $
-
 
 #include <BinaryFileStream.h>
 #include <Vector.h>
@@ -31,6 +30,7 @@
 #include <ID.h>
 #include <Channel.h>
 #include <Message.h>
+#include <Matrix.h>
 
 using std::cerr;
 using std::ios;
@@ -41,65 +41,58 @@ using std::getline;
 
 BinaryFileStream::BinaryFileStream()
   :OPS_Stream(OPS_STREAM_TAGS_BinaryFileStream), 
-   fileOpen(0), fileName(0), sendSelfCount(0)
+   fileOpen(0), fileName(0), sendSelfCount(0),
+   theChannels(0), numDataRows(0),
+   mapping(0), maxCount(0), sizeColumns(0), theColumns(0), theData(0), theRemoteData(0)
 {
 
 }
-
 
 BinaryFileStream::BinaryFileStream(const char *file, openMode mode)
   :OPS_Stream(OPS_STREAM_TAGS_BinaryFileStream), 
-   fileOpen(0), fileName(0), sendSelfCount(0)
+   fileOpen(0), fileName(0), sendSelfCount(0),
+   theChannels(0), numDataRows(0),
+   mapping(0), maxCount(0), sizeColumns(0), theColumns(0), theData(0), theRemoteData(0)
 {
   this->setFile(file, mode);
 }
-
 
 BinaryFileStream::~BinaryFileStream()
 {
   if (fileOpen == 1)
     theFile.close();
 
-  if (sendSelfCount != 0) {
+  if (theChannels != 0) {
 
-    int fileNameLength = strlen(fileName);
-    sprintf(&fileName[fileNameLength-2],"");
-    
-    theFile.open(fileName, ios::out);
-
-    ifstream **theFiles = new ifstream *[sendSelfCount+1];
-    
-    // open up the files
-    for (int i=0; i<=sendSelfCount; i++) {
-      theFiles[i] = new ifstream;
-      sprintf(&fileName[fileNameLength-2],".%d",i+1);
-      theFiles[i]->open(fileName, ios::in);
-    }
-
-    // go through each file, reading a line & sending to the output file
-    bool done = false;
-    string s;
-
-    while (done == false) {
-      for (int i=0; i<=sendSelfCount; i++) {
-	getline(*(theFiles[i]), s);	
-	theFile << s;
-	
-	if (theFiles[i]->eof()) {
-	  done = true;
-	  theFiles[i]->close();
-	  delete theFiles[i];
-	}
-      }
-      theFile << "\n";
-    }
-
-    delete [] theFiles;
-    theFile.close();
+    static ID lastMsg(1);
+    if (sendSelfCount > 0) {
+      for (int i=0; i<sendSelfCount; i++) 
+	theChannels[i]->sendID(0, 0, lastMsg);
+    } else
+	theChannels[0]->recvID(0, 0, lastMsg);
+    delete [] theChannels;
   }
 
   if (fileName != 0)
     delete [] fileName;
+
+  if (sendSelfCount > 0) {
+
+    for (int i=0; i<=sendSelfCount; i++) {
+      if (theColumns[i] != 0)
+	delete theColumns[i];
+
+      if (theData[i] != 0)
+	delete [] theData[i];
+
+      if (theRemoteData[i] != 0)
+	delete theRemoteData[i];
+    }
+    delete [] theData;
+    delete [] theRemoteData;
+    delete [] theColumns;
+    delete sizeColumns;
+  }    
 }
 
 int 
@@ -116,6 +109,7 @@ BinaryFileStream::setFile(const char *name, openMode mode)
       delete [] fileName;
     fileName = 0;
   }
+
   if (fileName == 0) {
     fileName = new char[strlen(name)+5];
     if (fileName == 0) {
@@ -153,10 +147,6 @@ BinaryFileStream::open(void)
   // if file already open, return
   if (fileOpen == 1) {
     return 0;
-  }
-
-  if (sendSelfCount != 0) {
-    strcat(fileName, ".1");
   }
 
   if (theOpenMode == OVERWRITE) 
@@ -244,7 +234,57 @@ BinaryFileStream::write(Vector &data)
   if (fileOpen == 0)
     this->open();
 
-  (*this) << data;  
+  //
+  // if not parallel, just write the data
+  //
+
+  if (sendSelfCount == 0) {
+    (*this) << data;  
+    return 0;
+  }
+
+  //
+  // otherwise parallel, send the data if not p0
+  //
+
+  if (sendSelfCount < 0) {
+    if (data.Size() != 0) {
+      return theChannels[0]->sendVector(0, 0, data);
+    } else
+      return 0;
+  }
+
+  //
+  // if p0 recv the data & write it out sorted
+  //
+
+  // recv data
+  for (int i=0; i<=sendSelfCount; i++) {
+    int numColumns = (*sizeColumns)(i);
+    double *dataI = theData[i];
+    if (i == 0) {
+      for (int j=0; j<numColumns; j++) {
+	dataI[j] = data(j);
+      }
+    } else { 
+      if (numColumns != 0) {
+	theChannels[i-1]->recvVector(0, 0, *(theRemoteData[i]));
+      }
+    }
+  }
+
+  Matrix &printMapping = *mapping;
+
+  // write data
+  for (int i=0; i<maxCount+1; i++) {
+    int fileID = printMapping(0,i);
+    int startLoc = printMapping(1,i);
+    int numData = printMapping(2,i);
+    double *data = theData[fileID];
+    //    for (int j=0; j<numData; j++)
+    theFile.write((char *)(&data[startLoc]), 8*numData);
+  }
+  theFile << "\n";
 
   return 0;
 }
@@ -285,8 +325,8 @@ BinaryFileStream::write(const double *s, int n)
     this->open();
 
   if (fileOpen != 0) {
-    for (int i=0; i<n; i++)
-      theFile.write((char *)(&s[i]), 8);
+    //    for (int i=0; i<n; i++)
+    theFile.write((char *)(&s[0]), 8*n);
 
     theFile << '\n';
     theFile.flush();
@@ -453,7 +493,17 @@ BinaryFileStream::operator<<(float n)
 int 
 BinaryFileStream::sendSelf(int commitTag, Channel &theChannel)
 {
-  static ID idData(2);
+  sendSelfCount++;
+
+  Channel **theNextChannels = new Channel *[sendSelfCount];
+  for (int i=0; i<sendSelfCount-1; i++)
+    theNextChannels[i] = theChannels[i];
+  theNextChannels[sendSelfCount-1] = &theChannel;
+  if (theChannels != 0)
+    delete [] theChannels;
+  theChannels = theNextChannels;
+
+  static ID idData(3);
   int fileNameLength = 0;
   if (fileName != 0)
     fileNameLength = strlen(fileName);
@@ -464,6 +514,8 @@ BinaryFileStream::sendSelf(int commitTag, Channel &theChannel)
     idData(1) = 0;
   else
     idData(1) = 1;
+
+  idData(2) = sendSelfCount;
 
   if (theChannel.sendID(0, commitTag, idData) < 0) {
     opserr << "BinaryFileStream::sendSelf() - failed to send id data\n";
@@ -477,8 +529,6 @@ BinaryFileStream::sendSelf(int commitTag, Channel &theChannel)
       return -1;
     }
   }
-
-  sendSelfCount++;
   
   return 0;
 }
@@ -486,7 +536,11 @@ BinaryFileStream::sendSelf(int commitTag, Channel &theChannel)
 int 
 BinaryFileStream::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-  static ID idData(2);
+  static ID idData(3);
+
+  sendSelfCount = -1;
+  theChannels = new Channel *[1];
+  theChannels[0] = &theChannel;
 
   if (theChannel.recvID(0, commitTag, idData) < 0) {
     opserr << "BinaryFileStream::recvSelf() - failed to recv id data\n";
@@ -513,7 +567,10 @@ BinaryFileStream::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker 
       opserr << "BinaryFileStream::recvSelf() - failed to recv message\n";
       return -1;
     }
-    sprintf(&fileName[fileNameLength],".%d",commitTag);
+
+    int tag = idData(2);
+
+    sprintf(&fileName[fileNameLength],".%d",tag);
 
     if (this->setFile(fileName, theOpenMode) < 0) {
       opserr << "BinaryFileStream::BinaryFileStream() - setFile() failed\n";
@@ -661,3 +718,127 @@ textToBinary(const char *inputFilename, const char *outputFilename)
   return 0;
 }
 
+int
+BinaryFileStream::setOrder(const ID &orderData)
+{
+  opserr << "BinaryFileStream::setOrder(const ID &orderData) - START\n";
+  if (sendSelfCount < 0) {
+    static ID numColumnID(1);
+    int numColumn = orderData.Size();
+    numColumnID(0) = numColumn;
+    theChannels[0]->sendID(0, 0, numColumnID);
+    opserr << "BinaryFileStream::setOrder(const ID &orderData) - SENT numColumnData : " << numColumnID;
+    if (numColumn != 0)
+      theChannels[0]->sendID(0, 0, orderData);
+    opserr << "BinaryFileStream::setOrder(const ID &orderData) - SENT\n";
+  }
+
+  if (sendSelfCount > 0) {      
+
+    sizeColumns = new ID(sendSelfCount+1);
+    theColumns = new ID *[sendSelfCount+1];
+    theData = new double *[sendSelfCount+1];
+    theRemoteData = new Vector *[sendSelfCount+1];
+    
+    int numColumns = orderData.Size();
+    (*sizeColumns)(0) = numColumns;
+    if (numColumns != 0) {
+      theColumns[0] = new ID(orderData);
+      theData[0] = new double [numColumns];
+    } else {
+      theColumns[0] = 0;
+      theData[0] = 0;
+    }      
+    theRemoteData[0] = 0;
+
+    maxCount = 0;
+    if (numColumns != 0)
+      maxCount = orderData(numColumns-1);
+
+    // now receive orderData from the other channels
+    for (int i=0; i<sendSelfCount; i++) { 
+      opserr << "BinaryFileStream::setOrder(const ID &orderData) - RECEIVING\n";
+      static ID numColumnID(1);	  
+      if (theChannels[i]->recvID(0, 0, numColumnID) < 0) {
+	opserr << "BinaryFileStream::setOrder - failed to recv column size for process: " << i+1 << endln;
+	return -1;
+      }
+
+      int numColumns = numColumnID(0);
+      opserr << "BinaryFileStream::setOrder(const ID &orderData) - NumColumns: " << numColumns << endln;
+
+      (*sizeColumns)(i+1) = numColumns;
+      if (numColumns != 0) {
+	theColumns[i+1] = new ID(numColumns);
+	if (theChannels[i]->recvID(0, 0, *theColumns[i+1]) < 0) {
+	  opserr << "BinaryFileStream::setOrder - failed to recv column data for process: " << i+1 << endln;
+	  return -1;
+	}
+	
+	if (numColumns != 0 && (*theColumns[i+1])[numColumns-1] > maxCount)
+	  maxCount = (*theColumns[i+1])[numColumns-1];
+	
+	theData[i+1] = new double [numColumns];
+	theRemoteData[i+1] = new Vector(theData[i+1], numColumns);
+      } else {
+	theColumns[i+1] = 0;
+	theData[i+1] = 0;
+	theRemoteData[i+1] = 0;
+      }
+    }
+
+    opserr << "BinaryFileStream::setOrder(const ID &orderData) - STARTING MAPPING;\n";
+
+    ID currentLoc(sendSelfCount+1);
+    ID currentCount(sendSelfCount+1);
+	
+    if (mapping != 0)
+      delete mapping;
+
+    mapping = new Matrix(3, maxCount+1);
+
+    Matrix &printMapping = *mapping;
+	
+    for (int i=0; i<=sendSelfCount; i++) {
+      currentLoc(i) = 0;
+      if (theColumns[i] != 0)
+	currentCount(i) = (*theColumns[i])[0];
+      else
+	currentCount(i) = -1;
+    }
+
+    int count =0;
+    while (count <= maxCount) {
+      for (int i=0; i<=sendSelfCount; i++) {
+	if (currentCount(i) == count) {
+	  printMapping(0,count) = i;
+	  
+	  int maxLoc = theColumns[i]->Size();
+	  int loc = currentLoc(i);
+	  int columnCounter = 0;
+	  
+	  printMapping(1,count) = loc;
+	  
+	  while (loc < maxLoc && (*theColumns[i])(loc) == count) {
+	    loc++;
+	    columnCounter++;
+	  }
+	  
+	  printMapping(2,count) = columnCounter;
+	  
+	  currentLoc(i) = loc;
+	  
+	  if (loc < maxLoc)
+	    currentCount(i) = (*theColumns[i])(loc);		
+	  else
+	    currentCount(i) = -1; 		
+	}
+      }
+      count++;
+    }
+    
+    opserr << printMapping;
+  }
+
+  return 0;
+}

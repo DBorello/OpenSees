@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2009-04-14 21:12:15 $
+// $Revision: 1.8 $
+// $Date: 2009-04-30 23:23:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/DataFileStream.cpp,v $
 
 
@@ -42,7 +42,8 @@ using std::getline;
 
 DataFileStream::DataFileStream(int indent)
   :OPS_Stream(OPS_STREAM_TAGS_DataFileStream), 
-   fileOpen(0), fileName(0), indentSize(indent), sendSelfCount(0), theChannels(0)
+   fileOpen(0), fileName(0), indentSize(indent), sendSelfCount(0), theChannels(0), numDataRows(0),
+   mapping(0), maxCount(0), sizeColumns(0), theColumns(0), theData(0), theRemoteData(0), doCSV(0)
 {
   if (indentSize < 1) indentSize = 1;
   indentString = new char[indentSize+5];
@@ -51,10 +52,13 @@ DataFileStream::DataFileStream(int indent)
 }
 
 
-DataFileStream::DataFileStream(const char *file, openMode mode, int indent)
+DataFileStream::DataFileStream(const char *file, openMode mode, int indent, int csv)
   :OPS_Stream(OPS_STREAM_TAGS_DataFileStream), 
-   fileOpen(0), fileName(0), indentSize(indent), sendSelfCount(0), theChannels(0)
+   fileOpen(0), fileName(0), indentSize(indent), sendSelfCount(0), 
+   theChannels(0), numDataRows(0),
+   mapping(0), maxCount(0), sizeColumns(0), theColumns(0), theData(0), theRemoteData(0), doCSV(csv)
 {
+
   if (indentSize < 1) indentSize = 1;
   indentString = new char[indentSize+1];
   for (int i=0; i<indentSize; i++)
@@ -68,439 +72,41 @@ DataFileStream::~DataFileStream()
 {
   if (fileOpen == 1)
     theFile.close();
-  
-#ifdef _NO_PARALLEL_FILESYSTEM
 
-  if (sendSelfCount < 0) {
-
-    ifstream theFile0;
-
-    theFile0.open(fileName, ios::in);
-    char c=theFile0.peek();
-    int ordering = -1;
-    if (c == 'O') {
-      ordering = 0;
-    }
-
-    if (ordering == 0) {
-      char Ordering[11];
-      theFile0.get(Ordering, 11);
-      int numColumns =0;
-      theFile0 >> numColumns;
-
-      static ID numColumnID(1);
-      numColumnID(0) = numColumns;
-      theChannels[0]->sendID(0,0,numColumnID);
-      
-      if (numColumns != 0) {
-	
-	ID *theColumns = new ID(numColumns);
-	double *theData = new double [numColumns];
-	Vector data(theData, numColumns);
-	
-	for (int j=0; j<numColumns; j++)
-	  theFile0 >> (*theColumns)[j];
-
-	theChannels[0]->sendID(0, 0, *theColumns);
-	delete theColumns;
-
-	bool done = false;
-
-	while (done == false) {
-	  
-	  for (int j=0; j<numColumns; j++) {
-	    theFile0 >> theData[j];
-	  }
-	  
-	  if (theFile0.eof()) {
-	    done = true;
-	    theFile0.close();
-	  } 
-	  
-	  if (done == false) {
-	    theChannels[0]->sendVector(0, 0, data);	  
-	  }
-	} // while (done == false)
-	
-	delete [] theData;
-
-      } // if (numColumns != 0)
-      else
-      theFile0.close();
-
-    } // ordereing == 0
-
-  } else  if (sendSelfCount > 0) {      
-
-      ifstream theFile0;
-      theFile0.open(fileName, ios::in);
-      int ordering = -1;
-      char c=theFile0.peek();
-      if (c == 'O') {
-	ordering = 0;
-      }
-      string s;
-
-      // see if ORDERING: first few char of file
-      if (ordering == 0) {
-
-	int fileNameLength = strlen(fileName);
-	sprintf(&fileName[fileNameLength-2],"");
-	
-	theFile.open(fileName, ios::out);
-
-	ID sizeColumns(sendSelfCount+1);
-	ID **theColumns = new ID *[sendSelfCount+1];
-	double **theData = new double *[sendSelfCount+1];
-	Vector **theRemoteData = new Vector *[sendSelfCount+1];
-
-	char Ordering[11];
-	theFile0.get(Ordering, 11);
-	int numColumns =0;
-	theFile0 >> numColumns;
-
-	sizeColumns(0) = numColumns;
-	if (numColumns != 0) {
-	  theColumns[0] = new ID(numColumns);
-	  theData[0] = new double [numColumns];
-	} else {
-	  theColumns[0] = 0;
-	  theData[0] = 0;
-	}      
-	theRemoteData[0] = 0;
-
-	for (int j=0; j<numColumns; j++)
-	  theFile0 >> (*theColumns[0])[j];
-
-	getline(theFile0, s);	// clean up to end of line
-	
-
-	int maxCount = 0;
-	if (numColumns != 0)
-	  maxCount = (*theColumns[0])[numColumns-1];
-
-	for (int i=0; i<sendSelfCount; i++) {
-
-	  static ID numColumnID(1);	  
-
-	  theChannels[i]->recvID(0, 0, numColumnID);
-
-	  int numColumns = numColumnID(0);
-
-	  sizeColumns(i+1) = numColumns;
-	  if (numColumns != 0) {
-	    theColumns[i+1] = new ID(numColumns);
-	    theChannels[i]->recvID(0, 0, *theColumns[i+1]);
-
-	    if (numColumns != 0 && (*theColumns[i+1])[numColumns-1] > maxCount)
-	      maxCount = (*theColumns[i+1])[numColumns-1];
-
-	    theData[i+1] = new double [numColumns];
-	    theRemoteData[i+1] = new Vector(theData[i+1], numColumns);
-	  } else {
-	    theColumns[i+1] = 0;
-	    theData[i+1] = 0;
-	    theRemoteData[i+1] = 0;
-	  }
-	}
-
-	bool done = false;
-	ID currentLoc(sendSelfCount+1);
-	ID currentCount(sendSelfCount+1);
-	
-	Matrix printMapping(3,maxCount+1);
-	
-	for (int i=0; i<=sendSelfCount; i++) {
-	  currentLoc(i) = 0;
-	  if (theColumns[i] != 0)
-	    currentCount(i) = (*theColumns[i])[0];
-	  else
-	    currentCount(i) = -1;
-	}
-	
-	int count =0;
-	while (count <= maxCount) {
-	  for (int i=0; i<=sendSelfCount; i++) {
-	    if (currentCount(i) == count) {
-	      printMapping(0,count) = i;
-	      
-	      int maxLoc = theColumns[i]->Size();
-	      int loc = currentLoc(i);
-	      int columnCounter = 0;
-	      
-	      printMapping(1,count) = loc;
-	      
-	      while (loc < maxLoc && (*theColumns[i])(loc) == count) {
-		loc++;
-		columnCounter++;
-	      }
-	      
-	      printMapping(2,count) = columnCounter;
-	      
-	      currentLoc(i) = loc;
-	      
-	      if (loc < maxLoc)
-		currentCount(i) = (*theColumns[i])(loc);		
-	      else
-		currentCount(i) = -1; 		
-	    }
-	  }
-	  
-	  count++;
-	}
-	
-            
-	// go through each file, reading a line & sending to the output file
-	done = false;
-
-
-	while (done == false) {
-	  for (int i=0; i<=sendSelfCount; i++) {
-	    
-	    int numColumns = sizeColumns(i);
-	    double *data = theData[i];
-	    
-	    if (i == 0) {
-
-	      if (numColumns != 0) {
-		for (int j=0; j<numColumns; j++) {
-		  theFile0 >> data[j];
-		}
-	      } else {
-		getline(theFile0, s);	
-	      }
-
-	      if (theFile0.eof()) {
-		done = true;
-		theFile0.close();
-	      }
-
-	    } else { // i == 0
-
-	      if (done == false) {
-		if (numColumns != 0) {
-		  theChannels[i-1]->recvVector(0, 0, *(theRemoteData[i]));
-		}
-	      }
-	    }
-	  }
-	  
-	  
-	  if (done == false) {
-	    for (int i=0; i<maxCount+1; i++) {
-	      int fileID = printMapping(0,i);
-	      int startLoc = printMapping(1,i);
-	      int numData = printMapping(2,i);
-	      double *data = theData[fileID];
-	      for (int j=0; j<numData; j++)
-		theFile << data[startLoc++] << " ";
-	    }
-	  }
-	    
-	  if (done == false)
-	    theFile << "\n";
-	}
-
-	for (int i=0; i<=sendSelfCount; i++) {
-	  if (theColumns[i] != 0) delete theColumns[i];
-	  if (theData[i] != 0) delete [] theData[i];
-	  if (theRemoteData[i] != 0) delete theRemoteData[i];
-	}
-
-	delete [] theColumns;
-	delete [] theData;
-	delete [] theRemoteData;
-
-	theFile.close();
-	
-      } else {
-	
-	
-      }
-  }
-
-#else
-  if (sendSelfCount > 0) {
-
-    int fileNameLength = strlen(fileName);
-    sprintf(&fileName[fileNameLength-2],"");
-    
-    theFile.open(fileName, ios::out);
-
-    ifstream **theFiles = new ifstream *[sendSelfCount+1];
-    
-    int ordering = -1;
-    // open up the files
-    for (int i=0; i<=sendSelfCount; i++) {
-      theFiles[i] = new ifstream;
-      sprintf(&fileName[fileNameLength-2],".%d",i);
-      theFiles[i]->open(fileName, ios::in);
-      char c=theFiles[i]->peek();
-      if (c == 'O') {
-	ordering = 0;
-      }
-    }
-
-    // see if ORDERING: first few char of file
-    if (ordering == 0) {
-      ID sizeColumns(sendSelfCount+1);
-      ID **theColumns = new ID *[sendSelfCount+1];
-      double **theData = new double *[sendSelfCount+1];
-      int maxCount = 0;
-
-      for (int i=0; i<=sendSelfCount; i++) {
-	char Ordering[11];
-
-	theFiles[i]->get(Ordering, 11);
-	int numColumns;
-	(*theFiles[i]) >> numColumns;
-
-	sizeColumns(i) = numColumns;
-	if (numColumns != 0) {
-	  theColumns[i] = new ID(numColumns);
-	  theData[i] = new double [numColumns];
-	} else {
-	  theColumns[i] = 0;
-	  theData[i] = 0;
-	}
-
-	for (int j=0; j<numColumns; j++)
-	  (*theFiles[i]) >> (*theColumns[i])[j];
-
-	if (numColumns != 0 && (*theColumns[i])[numColumns-1] > maxCount)
-	  maxCount = (*theColumns[i])[numColumns-1];
-
-      }
-      
-      bool done = false;
-      ID currentLoc(sendSelfCount+1);
-      ID currentCount(sendSelfCount+1);
-
-      Matrix printMapping(3,maxCount+1);
-
-      for (int i=0; i<=sendSelfCount; i++) {
-	currentLoc(i) = 0;
-	if (theColumns[i] != 0)
-	  currentCount(i) = (*theColumns[i])[0];
-	else
-	  currentCount(i) = -1;
-      }
-
-      int count =0;
-      while (count <= maxCount) {
-	for (int i=0; i<=sendSelfCount; i++) {
-	  if (currentCount(i) == count) {
-	    printMapping(0,count) = i;
-	    
-	    int maxLoc = theColumns[i]->Size();
-	    int loc = currentLoc(i);
-	    int columnCounter = 0;
-
-	    printMapping(1,count) = loc;
-
-	    while (loc < maxLoc && (*theColumns[i])(loc) == count) {
-	      loc++;
-	      columnCounter++;
-	    }
-	    
-	    printMapping(2,count) = columnCounter;
-
-	    currentLoc(i) = loc;
-	    
-	    if (loc < maxLoc)
-	      currentCount(i) = (*theColumns[i])(loc);		
-	    else
-	      currentCount(i) = -1; 		
-	  }
-	}
-
-	count++;
-      }
-
-      // go through each file, reading a line & sending to the output file
-      done = false;
-      string s;
-      
-      while (done == false) {
-	for (int i=0; i<=sendSelfCount; i++) {
-
-	  if (done == false) {
-	    int numColumns = sizeColumns(i);
-	    double *data = theData[i];
-	    for (int j=0; j<numColumns; j++) {
-	      (*theFiles[i]) >> data[j];
-	    }
-	  }
-
-	  if (theFiles[i]->eof()) {
-	    done = true;
-	    theFiles[i]->close();
-	    delete theFiles[i];
-	  }
-	}
-
-	if (done == false) {
-	  for (int i=0; i<maxCount+1; i++) {
-	    int fileID = printMapping(0,i);
-	    int startLoc = printMapping(1,i);
-	    int numData = printMapping(2,i);
-	    double *data = theData[fileID];
-	    for (int j=0; j<numData; j++)
-	      theFile << data[startLoc++] << " ";
-	  }
-	}
-
-	if (done == false)
-	  theFile << "\n";
-      }
-
-      for (int i=0; i<=sendSelfCount; i++) {
-	if (theColumns[i] != 0) delete theColumns[i];
-	if (theData[i] != 0) delete [] theData[i];
-      }
-
-      delete [] theColumns;
-      delete [] theData;
-      delete [] theFiles;
-
-      theFile.close();
-
-    } else {
-
-      // go through each file, reading a line & sending to the output file
-      bool done = false;
-      string s;
-      
-      while (done == false) {
-	for (int i=0; i<=sendSelfCount; i++) {
-	  bool eoline = false;
-	  getline(*(theFiles[i]), s);	
-	  theFile << s;
-	  
-	  if (theFiles[i]->eof()) {
-	    done = true;
-	    theFiles[i]->close();
-	    delete theFiles[i];
-	  }
-	}
-	theFile << "\n";
-      }
-      
-      delete [] theFiles;
-      theFile.close();
-    }
-
-  }
-#endif
-
-  if (theChannels != 0)
+  if (theChannels != 0) {
+
+    static ID lastMsg(1);
+    if (sendSelfCount > 0) {
+      for (int i=0; i<sendSelfCount; i++) 
+	theChannels[i]->sendID(0, 0, lastMsg);
+    } else
+	theChannels[0]->recvID(0, 0, lastMsg);
     delete [] theChannels;
+  }
 
   if (indentString != 0)
     delete [] indentString;
 
   if (fileName != 0)
     delete [] fileName;
+
+  if (sendSelfCount > 0) {
+
+    for (int i=0; i<=sendSelfCount; i++) {
+      if (theColumns[i] != 0)
+	delete theColumns[i];
+
+      if (theData[i] != 0)
+	delete [] theData[i];
+
+      if (theRemoteData[i] != 0)
+	delete theRemoteData[i];
+    }
+    delete [] theData;
+    delete [] theRemoteData;
+    delete [] theColumns;
+    delete sizeColumns;
+  }    
 }
 
 int 
@@ -554,10 +160,6 @@ DataFileStream::open(void)
   // if file already open, return
   if (fileOpen == 1) {
     return 0;
-  }
-
-  if (sendSelfCount > 0) {
-    strcat(fileName, ".0");
   }
 
   if (theOpenMode == OVERWRITE) 
@@ -660,10 +262,76 @@ DataFileStream::attr(const char *name, const char *value)
 int 
 DataFileStream::write(Vector &data)
 {
+
   if (fileOpen == 0)
     this->open();
 
-  (*this) << data;  
+  //
+  // if not parallel, just write the data
+  //
+
+  if (sendSelfCount == 0) {
+    (*this) << data;  
+    return 0;
+  }
+
+  //
+  // otherwise parallel, send the data if not p0
+  //
+
+  if (sendSelfCount < 0) {
+    if (data.Size() != 0) {
+      return theChannels[0]->sendVector(0, 0, data);
+    } else
+      return 0;
+  }
+
+  //
+  // if p0 recv the data & write it out sorted
+  //
+
+  // recv data
+  for (int i=0; i<=sendSelfCount; i++) {
+    int numColumns = (*sizeColumns)(i);
+    double *dataI = theData[i];
+    if (i == 0) {
+      for (int j=0; j<numColumns; j++) {
+	dataI[j] = data(j);
+      }
+    } else { 
+      if (numColumns != 0) {
+	theChannels[i-1]->recvVector(0, 0, *(theRemoteData[i]));
+      }
+    }
+  }
+
+  Matrix &printMapping = *mapping;
+
+  // write data
+  if (doCSV == 0) {
+    for (int i=0; i<maxCount+1; i++) {
+      int fileID = printMapping(0,i);
+      int startLoc = printMapping(1,i);
+      int numData = printMapping(2,i);
+      double *data = theData[fileID];
+      for (int j=0; j<numData; j++)
+	theFile << data[startLoc++] << " ";
+    }
+    theFile << "\n";
+  } else {
+    for (int i=0; i<maxCount+1; i++) {
+      int fileID = printMapping(0,i);
+      int startLoc = printMapping(1,i);
+      int numData = printMapping(2,i);
+      double *data = theData[fileID];
+      int nM1 = numData-1;
+      for (int j=0; j<numData; j++)
+	if ((i ==maxCount) && (j == nM1))
+	  theFile << data[startLoc++] << "\n";
+	else
+	  theFile << data[startLoc++] << ",";
+    }
+  }
 
   return 0;
 }
@@ -719,15 +387,26 @@ DataFileStream::write(const void *s, int n)
 OPS_Stream& 
 DataFileStream::write(const double *s, int n)
 {
+  numDataRows++;
+
   if (fileOpen == 0)
     this->open();
 
   if (fileOpen != 0) {
-    int nm1 = n-1;
-    for (int i=0; i<n; i++)
-      theFile << s[i] << " ";
-    //    theFile << s[nm1] << endln;
-    theFile << endln;
+    if (n > 0) {
+      if (doCSV == 0) {
+	int nm1 = n-1;
+	for (int i=0; i<nm1; i++) {
+	  theFile << s[i] << " ";
+	}
+	theFile << s[nm1] << "\n";
+      } else { int nm1 = n-1;
+	for (int i=0; i<nm1; i++) {
+	  theFile << s[i] << ",";
+	}
+	theFile << s[nm1] << "\n";
+      }
+    }
   }
   return *this;
 }
@@ -960,7 +639,6 @@ DataFileStream::sendSelf(int commitTag, Channel &theChannel)
       return -1;
     }
   }
-
   
   return 0;
 }
@@ -1023,4 +701,124 @@ DataFileStream::indent(void)
   if (fileOpen != 0)
     for (int i=0; i<numIndent; i++)
       theFile << indentString;
+}
+
+
+int
+DataFileStream::setOrder(const ID &orderData)
+{
+  if (sendSelfCount == 0)
+    return 0;
+
+  if (sendSelfCount < 0) {
+    static ID numColumnID(1);
+    int numColumn = orderData.Size();
+    numColumnID(0) = numColumn;
+    theChannels[0]->sendID(0, 0, numColumnID);
+    if (numColumn != 0)
+      theChannels[0]->sendID(0, 0, orderData);
+  }
+
+  if (sendSelfCount > 0) {      
+
+    sizeColumns = new ID(sendSelfCount+1);
+    theColumns = new ID *[sendSelfCount+1];
+    theData = new double *[sendSelfCount+1];
+    theRemoteData = new Vector *[sendSelfCount+1];
+    
+    int numColumns = orderData.Size();
+    (*sizeColumns)(0) = numColumns;
+    if (numColumns != 0) {
+      theColumns[0] = new ID(orderData);
+      theData[0] = new double [numColumns];
+    } else {
+      theColumns[0] = 0;
+      theData[0] = 0;
+    }      
+    theRemoteData[0] = 0;
+
+    maxCount = 0;
+    if (numColumns != 0)
+      maxCount = orderData(numColumns-1);
+
+    // now receive orderData from the other channels
+    for (int i=0; i<sendSelfCount; i++) { 
+      static ID numColumnID(1);	  
+      if (theChannels[i]->recvID(0, 0, numColumnID) < 0) {
+	opserr << "DataFileStream::setOrder - failed to recv column size for process: " << i+1 << endln;
+	return -1;
+      }
+
+      int numColumns = numColumnID(0);
+
+      (*sizeColumns)(i+1) = numColumns;
+      if (numColumns != 0) {
+	theColumns[i+1] = new ID(numColumns);
+	if (theChannels[i]->recvID(0, 0, *theColumns[i+1]) < 0) {
+	  opserr << "DataFileStream::setOrder - failed to recv column data for process: " << i+1 << endln;
+	  return -1;
+	}
+	
+	if (numColumns != 0 && (*theColumns[i+1])[numColumns-1] > maxCount)
+	  maxCount = (*theColumns[i+1])[numColumns-1];
+	
+	theData[i+1] = new double [numColumns];
+	theRemoteData[i+1] = new Vector(theData[i+1], numColumns);
+      } else {
+	theColumns[i+1] = 0;
+	theData[i+1] = 0;
+	theRemoteData[i+1] = 0;
+      }
+    }
+
+    ID currentLoc(sendSelfCount+1);
+    ID currentCount(sendSelfCount+1);
+	
+    if (mapping != 0)
+      delete mapping;
+
+    mapping = new Matrix(3, maxCount+1);
+
+    Matrix &printMapping = *mapping;
+	
+    for (int i=0; i<=sendSelfCount; i++) {
+      currentLoc(i) = 0;
+      if (theColumns[i] != 0)
+	currentCount(i) = (*theColumns[i])[0];
+      else
+	currentCount(i) = -1;
+    }
+
+    int count =0;
+    while (count <= maxCount) {
+      for (int i=0; i<=sendSelfCount; i++) {
+	if (currentCount(i) == count) {
+	  printMapping(0,count) = i;
+	  
+	  int maxLoc = theColumns[i]->Size();
+	  int loc = currentLoc(i);
+	  int columnCounter = 0;
+	  
+	  printMapping(1,count) = loc;
+	  
+	  while (loc < maxLoc && (*theColumns[i])(loc) == count) {
+	    loc++;
+	    columnCounter++;
+	  }
+	  
+	  printMapping(2,count) = columnCounter;
+	  
+	  currentLoc(i) = loc;
+	  
+	  if (loc < maxLoc)
+	    currentCount(i) = (*theColumns[i])(loc);		
+	  else
+	    currentCount(i) = -1; 		
+	}
+      }
+      count++;
+    }
+  }
+
+  return 0;
 }

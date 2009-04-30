@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2009-04-14 21:12:15 $
+// $Revision: 1.7 $
+// $Date: 2009-04-30 23:23:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/DataFileStream.h,v $
 
 #ifndef _DataFileStream
@@ -30,11 +30,13 @@
 #include <fstream>
 using std::ofstream;
 
+class Matrix;
+
 class DataFileStream : public OPS_Stream
 {
  public:
   DataFileStream(int indent=2);
-  DataFileStream(const char *fileName, openMode mode = OVERWRITE, int indent=2);
+  DataFileStream(const char *fileName, openMode mode = OVERWRITE, int indent=2, int doCSV =0);
   ~DataFileStream();
 
   int setFile(const char *fileName, openMode mode = OVERWRITE);
@@ -80,6 +82,8 @@ class DataFileStream : public OPS_Stream
   OPS_Stream& operator<<(double n);
   OPS_Stream& operator<<(float n);
 
+  // parallel stuff
+  int setOrder(const ID &orderOfData);
   int sendSelf(int commitTag, Channel &theChannel);  
   int recvSelf(int commitTag, Channel &theChannel, 
 	       FEM_ObjectBroker &theBroker);
@@ -97,6 +101,16 @@ class DataFileStream : public OPS_Stream
 
   int sendSelfCount;
   Channel **theChannels;
+  int numDataRows;
+
+  Matrix *mapping;
+  int maxCount;
+  ID *sizeColumns;
+  ID **theColumns;
+  double **theData;
+  Vector **theRemoteData;
+
+  int doCSV;
 };
 
 #endif

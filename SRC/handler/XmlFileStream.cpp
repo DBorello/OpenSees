@@ -18,12 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2009-03-23 22:15:40 $
+// $Revision: 1.12 $
+// $Date: 2009-04-30 23:23:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/XmlFileStream.cpp,v $
 
 #include <XmlFileStream.h>
 #include <Vector.h>
+#include <Matrix.h>
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -41,7 +42,9 @@ using std::getline;
 XmlFileStream::XmlFileStream(int indent)
   :OPS_Stream(OPS_STREAM_TAGS_XmlFileStream), 
    fileOpen(0), fileName(0), indentSize(indent), numIndent(-1),
-   attributeMode(false), numTag(0), sizeTags(0), tags(0), sendSelfCount(0)
+   attributeMode(false), numTag(0), sizeTags(0), tags(0), sendSelfCount(0), theChannels(0), numDataRows(0),
+   mapping(0), maxCount(0), sizeColumns(0), theColumns(0), theData(0), theRemoteData(0), 
+   xmlOrderProcessed(0), xmlString(0), xmlStringLength(0), numXMLTags(0), xmlColumns(0)
 {
   if (indentSize < 1) indentSize = 1;
   indentString = new char[indentSize+1];
@@ -52,156 +55,71 @@ XmlFileStream::XmlFileStream(int indent)
 XmlFileStream::XmlFileStream(const char *name, openMode mode, int indent)
   :OPS_Stream(OPS_STREAM_TAGS_XmlFileStream), 
    fileOpen(0), fileName(0), indentSize(indent), numIndent(-1),
-   attributeMode(false), numTag(0), sizeTags(0), tags(0), sendSelfCount(0)
+   attributeMode(false), numTag(0), sizeTags(0), tags(0), sendSelfCount(0), theChannels(0), numDataRows(0),
+   mapping(0), maxCount(0), sizeColumns(0), theColumns(0), theData(0), theRemoteData(0), 
+   xmlOrderProcessed(0), xmlString(0), xmlStringLength(0), numXMLTags(0), xmlColumns(0)
 {
   if (indentSize < 1) indentSize = 1;
   indentString = new char[indentSize+1];
+
   for (int i=0; i<indentSize; i++)
     strcpy(&indentString[i]," ");
 
   this->setFile(name, mode);
-
 }
 
 XmlFileStream::~XmlFileStream()
 {
-  int fileNameLength = strlen(fileName);
-
   if (fileOpen == 1) {
-    for (int i=0; i<numTag; i++) {
-      this->endTag();
-    }
-
-    theFile << "</OpenSees>\n";
-    theFile.close();
+    this->close();
   }
 
-  if (sendSelfCount != 0) {
-
-    int fileNameLength = strlen(fileName);
- 
-    sprintf(&fileName[fileNameLength-2],"");
-    
-    theFile.open(fileName, ios::out);
-    
-    ifstream **theFiles = new ifstream *[sendSelfCount+1];
-    string s;
-    
-    // open up the files
-    for (int i=0; i<=sendSelfCount; i++) {
-      theFiles[i] = new ifstream;
-      sprintf(&fileName[fileNameLength-2],".%d",i+1);
-      theFiles[i]->open(fileName, ios::in);
-      if (theFiles[i]->bad()) {
-	theFiles[i] = 0;
-	opserr << "XmlFileStream::~XmlFileStrream - trouble opening file: " << fileName << endln;
-      }      
-
-      else {
-	// read and throw away the first six lines from all but 0 (to first tag)
-	for (int j=0; j<6; j++) {
-		getline(*(theFiles[i]), s);	
-	  if (i == 0) 
-	    theFile << s << "\n";
-	}
-      }
-
-    }
-
-    // go through each file, reading a line & sending to the output file
-    bool done = false;
-    bool hasData = false;
-
-    // read the xml stuff for each file up until DATA
-    for (int j=0; j<=sendSelfCount; j++) {
-      if (theFiles[j] != 0) {
-	bool  foundData = false;
-	while (foundData == false) {
-		getline(*(theFiles[j]), s);	
-	  if (theFiles[j]->eof()) {
-	    foundData = true;
-	    theFiles[j]->close();
-	    delete theFiles[j];
-	    theFiles[j] = 0;
-	    done = true;
-	  }
-	      
-	  string::size_type loc = s.find( "<Data>", 0 );
-	  
-	  if( loc != string::npos ) {
-	    foundData = true;
-	  } else {
-	    theFile << s << "\n";
-	  }
-	}
-      }
-    }
-
-    if (done == false)
-      theFile << "  <Data>\n";
-
-    while (done == false) {
-      char c;
-      for (int i=0; i<=sendSelfCount; i++) {
-	if (theFiles[i] != 0) {
-	  bool eoline = false;
-	  getline(*(theFiles[i]), s);	
-	  
-	  string::size_type loc = s.find( "</Data>", 0 );
-	  
-	  if( loc != string::npos ) {
-	    done = true;
-	  } else {
-	    theFile << s;
-	  }
-	  
-	  if (theFiles[i]->eof()) {
-	    done = true;
-	    theFiles[i]->close();
-	    delete theFiles[i];
-	    theFiles[i] = 0;
-	  }
-	}
-      }
-      if (done == false) 
-	theFile << "\n";
-    }
-
-    theFile << "  </Data>\n";
-
-    done = false;
-    while (done == false) {
-      if (theFiles[0] == 0)
-	done = true;
-      else {
-		  getline(*(theFiles[0]), s);	
-	theFile << s << "\n";
-	if (theFiles[0]->eof())
-	  done = true;
-      }
-    }
-
-    for (int l=0; l<=sendSelfCount; l++) {
-      if (theFiles[l] != 0) {
-	theFiles[l]->close();
-	delete theFiles[l];
-      }
-    }
-
-    delete [] theFiles;
-    theFile.close();
-    fileOpen = 0;
-    theFile << "</OpenSees>\n";    
+  /*
+  if (theChannels != 0) {
+    static ID lastMsg(1);
+    if (sendSelfCount > 0) {
+      for (int i=0; i<sendSelfCount; i++) 
+	theChannels[i]->sendID(0, 0, lastMsg);
+    } else
+	theChannels[0]->recvID(0, 0, lastMsg);
+    delete [] theChannels;
   }
-
-  if (tags != 0)
-    delete [] tags;
+  */
 
   if (indentString != 0)
     delete [] indentString;
 
   if (fileName != 0)
     delete [] fileName;
+
+  if (sendSelfCount > 0) {
+
+    for (int i=0; i<=sendSelfCount; i++) {
+      if (theColumns[i] != 0)
+	delete theColumns[i];
+
+      if (theData[i] != 0)
+	delete [] theData[i];
+
+      if (theRemoteData[i] != 0)
+	delete theRemoteData[i];
+    }
+    delete [] theData;
+    delete [] theRemoteData;
+    delete [] theColumns;
+    delete sizeColumns;
+  }    
+
+  if (sendSelfCount < 0) {
+
+    if (theColumns[0] != 0)
+      delete theColumns[0];
+
+    delete [] theColumns;
+  }    
+
+  if (xmlColumns != 0)
+    delete xmlColumns;
 }
 
 int 
@@ -258,11 +176,10 @@ XmlFileStream::open(void)
     return 0;
   }
 
-  if (sendSelfCount != 0) {
-    strcat(fileName,".1");
+  if (sendSelfCount > 0) {
+    strcat(fileName,".0");
   }
-
-
+  
   // open file
   if (theOpenMode == OVERWRITE) 
     theFile.open(fileName, ios::out);
@@ -279,13 +196,19 @@ XmlFileStream::open(void)
   } else
     fileOpen = 1;
 
-  theFile << setiosflags(ios::fixed);
 
-  theFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-  theFile << " <OpenSees\n";
-  theFile << "  xmlns:xsi = \"http://www.w3.org/2001/XMLSchema-instance\"\n";
-  theFile << "  xsi:noNamespaceSchemaLocation = \"http://OpenSees.berkeley.edu/xml-schema/xmlns/OpenSees.xsd\">\n";
-  numIndent++;
+  if (sendSelfCount >= 0) {
+
+    theFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+    theFile << " <OpenSees\n";
+    theFile << "  xmlns:xsi = \"http://www.w3.org/2001/XMLSchema-instance\"\n";
+    theFile << "  xsi:noNamespaceSchemaLocation = \"http://OpenSees.berkeley.edu/xml-schema/xmlns/OpenSees.xsd\">\n";
+    numIndent++;
+
+  } 
+
+
+  //  theFile << setiosflags(ios::fixed);
 
   return 0;
 }
@@ -351,7 +274,7 @@ XmlFileStream::tag(const char *tagName)
   // if tags array not large enough, expand
   if (numTag == sizeTags) {
     int nextSize = 2*sizeTags;
-
+    
     if (nextSize == 0) nextSize = 32;
     char **nextTags = new char *[nextSize];
     if (nextTags != 0) {
@@ -368,30 +291,68 @@ XmlFileStream::tag(const char *tagName)
     }
     
     if (tags != 0)
-      delete [] tags;
-
+	delete [] tags;
+    
     tags = nextTags;
   } 
+
 
   // copy string and assign to end of array
   char *newTag = new char[strlen(tagName) +1];
   strcpy(newTag, tagName);
+
+
+
+  if (sendSelfCount != 0 && numTag != 0) {
+    if (attributeMode == true) 
+      (*xmlColumns)(numXMLTags) += 2;
+    else
+      (*xmlColumns)(numXMLTags) += 1;
+  }
+  
   tags[numTag++] = newTag;
 
+  //  if (sendSelfCount == 0 || (strstr(tagName,"Data") != 0)) {
+    if (attributeMode == true) {
+      theFile << ">\n";
+    }
+    
+    // output the xml for it to the file
+    
+    numIndent++;
+    this->indent();
+    theFile << "<" << tagName;
+    
+    attributeMode = true;
 
-  if (attributeMode == true) {
-    theFile << ">";
+    /*  } else {
+    numIndent++;
+    int nextXmlStringLength = xmlStringLength + numIndent*indentSize + strlen(tagName) + 5;
+    char *nextXmlString = new char [nextXmlStringLength];
+
+    if (xmlString != 0) {
+      strncpy(nextXmlString, xmlString, xmlStringLength);
+      delete [] xmlString;
+    } else
+      nextXmlString[0]='\0';
+
+    xmlString = nextXmlString;
+    xmlStringLength = nextXmlStringLength;
+    
+    if (attributeMode == true) {
+      strcat(xmlString,">\n");
+    } else {
+      strcat(xmlString,"\n");
+    }
+
+    for (int i=0; i<numIndent; i++)
+      strcat(xmlString, indentString);      
+    strcat(xmlString, "<");      
+    strcat(xmlString, tagName);      
+    
+    attributeMode = true;
   }
-
-  // output the xml for it to the file
-
-  numIndent++;
-  theFile << endln;
-  this->indent();
-  theFile << "<" << tagName;
-  
-  attributeMode = true;
-
+    */
   return 0;
 }
 
@@ -402,52 +363,185 @@ XmlFileStream::tag(const char *tagName, const char *value)
   if (fileOpen == 0)
     this->open();
 
-  if (attributeMode == true) {
-    theFile << ">\n";
+  //  if (sendSelfCount == 0) {
+    if (attributeMode == true) {
+      theFile << ">\n";
+    }
+    
+    // output the xml for it to the file
+    numIndent++;
+    this->indent();
+    theFile << "<" << tagName << ">" << value << "</" << tagName << ">" << endln;
+    numIndent--;
+
+  if (sendSelfCount != 0 && numTag != 0)
+    (*xmlColumns)(numXMLTags) += 1;
+    
+    attributeMode = false;
+    /*  } else {
+
+    numIndent++;
+    int nextXmlStringLength = xmlStringLength + numIndent*indentSize + 2*strlen(tagName) + strlen(value) + 6;
+    char *nextXmlString = new char [nextXmlStringLength];
+
+    if (xmlString != 0) {
+      strncpy(nextXmlString, xmlString, xmlStringLength);
+      delete [] xmlString;
+    } else
+      nextXmlString[0]='\0';
+
+    xmlString = nextXmlString;
+    xmlStringLength = nextXmlStringLength;
+    
+    if (attributeMode == true) {
+      strcat(xmlString,">\n");
+    } 
+
+    for (int i=0; i<numIndent; i++)
+      strcat(xmlString, indentString);      
+
+    numIndent--;
+
+    strcat(xmlString, "<");      
+    strcat(xmlString, tagName);      
+    strcat(xmlString, ">");      
+    strcat(xmlString, value);      
+    strcat(xmlString, "</");      
+    strcat(xmlString, tagName);      
+    strcat(xmlString, ">\n");          
+
+    attributeMode = false;
   }
-
-  // output the xml for it to the file
-  numIndent++;
-  this->indent();
-  theFile << "<" << tagName << ">" << value << "</" << tagName << ">" << endln;
-  numIndent--;
-
-  attributeMode = false;
-
+    */
   return 0;
 }
 
 int 
 XmlFileStream::endTag()
 {
-  if (numTag != 0) {
-    if (attributeMode == true) {
-      theFile << "/>\n";
-      delete [] tags[numTag-1];
-      numTag--;
-    } else {
-      this->indent();
-      theFile << "</" << tags[numTag-1] << ">\n";
-      delete [] tags[numTag-1];
-      numTag--;
-    }    
+  //  if (sendSelfCount == 0) {
+    if (numTag != 0) {
+      if (attributeMode == true) {
+	theFile << "/>\n";
+	delete [] tags[numTag-1];
+	numTag--;
+      } else {
+	this->indent();
+	theFile << "</" << tags[numTag-1] << ">\n";
+	delete [] tags[numTag-1];
+	numTag--;
+      }    
+      
+      attributeMode = false;
+      numIndent--;
 
-    attributeMode = false;
-    numIndent--;
-    return 0;
-  }
+      if (sendSelfCount != 0)
+	(*xmlColumns)[numXMLTags] += 1;
 
-  return -1;
+      if (numIndent == -1) 
+	numXMLTags++;
+
+      return 0;
+    }
+    
+    /*  } else {
+  
+    if (numTag != 0) {
+      if (attributeMode == true) {
+	int nextXmlStringLength = xmlStringLength +  4;
+	char *nextXmlString = new char [nextXmlStringLength];
+	nextXmlString[0]='\0';
+	if (xmlString != 0) {
+	  strncpy(nextXmlString, xmlString, xmlStringLength);
+	  delete [] xmlString;
+	}
+      
+	xmlString = nextXmlString;
+	xmlStringLength = nextXmlStringLength;
+
+	strcat(xmlString,"/>\n");
+	delete [] tags[numTag-1];
+	numTag--;
+
+      } else {
+
+	int nextXmlStringLength = xmlStringLength + numIndent*indentSize + strlen(tags[numTag-1]) + 5;
+	char *nextXmlString = new char [nextXmlStringLength];
+
+
+	if (xmlString != 0) {
+	  strncpy(nextXmlString, xmlString, xmlStringLength);
+	  delete [] xmlString;
+	} else
+	  nextXmlString[0]='\0';
+										  
+	xmlString = nextXmlString;
+	xmlStringLength = nextXmlStringLength;
+
+	for (int i=0; i<numIndent; i++)
+	  strcat(xmlString, indentString);      
+	strcat(xmlString, "</");      
+	strcat(xmlString, tags[numTag-1]);      
+	strcat(xmlString, ">\n");      
+
+	delete [] tags[numTag-1];
+	numTag--;
+      }
+	  
+      attributeMode = false;
+      numIndent--;
+
+      if (numIndent == -1) {
+
+	  delete [] xmlString;
+	  xmlString = 0;
+	  xmlStringLength = 0;
+	}
+
+      
+      return 0;
+    }
+    }
+    */
+
+    return -1;
 }
 
 int 
 XmlFileStream::attr(const char *name, int value)
-{
-  if (fileOpen == 0)
-    this->open();
 
-  theFile << " " << name << "=\"" << value << "\"";
+{  if (fileOpen == 0)
+    this->open();
   
+  //  if (sendSelfCount == 0 ) {
+
+      theFile << " " << name << "=\"" << value << "\"";
+
+      /*  } else {
+
+    static char intRep[30];
+    sprintf(intRep, "%d", value);
+
+    int nextXmlStringLength = xmlStringLength + strlen(name) + strlen(intRep) + 5;
+    char *nextXmlString = new char [nextXmlStringLength];
+
+    if (xmlString != 0) {
+      strncpy(nextXmlString, xmlString, xmlStringLength);
+      delete [] xmlString;
+    } else
+      nextXmlString[0]='\0';
+
+    xmlString = nextXmlString;
+    xmlStringLength = nextXmlStringLength;
+
+    strcat(xmlString, " ");      
+    strcat(xmlString, name);   
+    strcat(xmlString, "=\"");         
+    strcat(xmlString, intRep);         
+    strcat(xmlString, "\"");         
+
+  }
+      */  
   return 0;
 }
 
@@ -457,8 +551,34 @@ XmlFileStream::attr(const char *name, double value)
   if (fileOpen == 0)
     this->open();
 
-  theFile << " " << name << "=\"" << value << "\"";
+  //  if (sendSelfCount == 0) {
 
+    theFile << " " << name << "=\"" << value << "\"";
+
+    /*  } else {
+
+    char intRep[30];
+    sprintf(intRep, "%e", value);
+
+    int nextXmlStringLength = xmlStringLength + strlen(name) + strlen(intRep) + 5;
+    char *nextXmlString = new char [nextXmlStringLength];
+
+    if (xmlString != 0) {
+      strncpy(nextXmlString, xmlString, xmlStringLength);
+      delete [] xmlString;
+    } else
+      nextXmlString[0]='\0';
+
+    xmlString = nextXmlString;
+    xmlStringLength = nextXmlStringLength;
+
+    strcat(xmlString, " ");      
+    strcat(xmlString, name);   
+    strcat(xmlString, "=\"");         
+    strcat(xmlString, intRep);         
+    strcat(xmlString, "\"");         
+  }
+    */
   return 0;
 }
 
@@ -468,8 +588,31 @@ XmlFileStream::attr(const char *name, const char *value)
   if (fileOpen == 0)
     this->open();
 
-  theFile << " " << name << "=\"" << value << "\"";
+  //  if (sendSelfCount == 0) {
 
+    theFile << " " << name << "=\"" << value << "\"";
+
+    /*  } else {
+
+    int nextXmlStringLength = xmlStringLength + strlen(name) + strlen(value) + 5;
+    char *nextXmlString = new char [nextXmlStringLength];
+
+    if (xmlString != 0) {
+      strncpy(nextXmlString, xmlString, xmlStringLength);
+      delete [] xmlString;
+    } else
+      nextXmlString[0]='\0';
+
+    xmlString = nextXmlString;
+    xmlStringLength = nextXmlStringLength;
+
+    strcat(xmlString, " ");      
+    strcat(xmlString, name);   
+    strcat(xmlString, "=\"");         
+    strcat(xmlString, value);         
+    strcat(xmlString, "\"");         
+  }
+    */
   return 0;
 }
 
@@ -479,15 +622,89 @@ XmlFileStream::write(Vector &data)
   if (fileOpen == 0)
     this->open();
 
+  //
+  // if not parallel, just write the data
+  //
+
+  if (sendSelfCount == 0) {
+    numDataRows++;
+    
+    if (attributeMode == true) {
+      theFile << ">\n";
+      attributeMode = false;
+      numIndent++;
+    }
+    
+    this->indent();
+    (*this) << data;  
+    return 0;
+  }
+
+  //
+  // otherwise parallel
+  //
+
+
+  //
+  // process xml info in the files
+  //
+
+
+  //
+  // send data if not p0
+
+  if (sendSelfCount < 0) {
+    if (data.Size() != 0) {
+      theChannels[0]->sendVector(0, 0, data);
+      return 0;
+    } else {
+      return 0;
+    }
+  }
+
+  //
+  // if p0 recv the data & write it out sorted
+  //
+
+  // recv data
+
+  numDataRows++;
+  
   if (attributeMode == true) {
     theFile << ">\n";
     attributeMode = false;
     numIndent++;
   }
-
+  
   this->indent();
-  (*this) << data;  
+  
+  for (int i=0; i<=sendSelfCount; i++) {
+    int numColumns = (*sizeColumns)(i);
 
+    double *dataI = theData[i];
+    if (i == 0) {
+      for (int j=0; j<numColumns; j++) {
+	dataI[j] = data(j);
+      }
+    } else { 
+      if (numColumns != 0) {
+	theChannels[i-1]->recvVector(0, 0, *(theRemoteData[i]));
+      }
+    }
+  }
+
+  Matrix &printMapping = *mapping;
+
+  // write data
+  for (int i=0; i<maxCount+1; i++) {
+    int fileID = printMapping(0,i);
+    int startLoc = printMapping(1,i);
+    int numData = printMapping(2,i);
+    double *data = theData[fileID];
+    for (int j=0; j<numData; j++)
+      theFile << data[startLoc++] << " ";
+  }
+  theFile << "\n";
   return 0;
 }
 
@@ -852,7 +1069,17 @@ XmlFileStream::operator<<(float n)
 int 
 XmlFileStream::sendSelf(int commitTag, Channel &theChannel)
 {
-  static ID idData(2);
+  sendSelfCount++;
+
+  Channel **theNextChannels = new Channel *[sendSelfCount];
+  for (int i=0; i<sendSelfCount-1; i++)
+    theNextChannels[i] = theChannels[i];
+  theNextChannels[sendSelfCount-1] = &theChannel;
+  if (theChannels != 0)
+    delete [] theChannels;
+  theChannels = theNextChannels;
+
+  static ID idData(3);
   int fileNameLength = 0;
   if (fileName != 0)
     fileNameLength = strlen(fileName);
@@ -863,6 +1090,8 @@ XmlFileStream::sendSelf(int commitTag, Channel &theChannel)
     idData(1) = 0;
   else
     idData(1) = 1;
+
+  idData(2) = sendSelfCount;
 
   if (theChannel.sendID(0, commitTag, idData) < 0) {
     opserr << "XmlFileStream::sendSelf() - failed to send id data\n";
@@ -876,16 +1105,18 @@ XmlFileStream::sendSelf(int commitTag, Channel &theChannel)
       return -1;
     }
   }
-
-  sendSelfCount++;
- 
+  
   return 0;
 }
 
 int 
 XmlFileStream::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-  static ID idData(2);
+  static ID idData(3);
+
+  sendSelfCount = -1;
+  theChannels = new Channel *[1];
+  theChannels[0] = &theChannel;
 
   if (theChannel.recvID(0, commitTag, idData) < 0) {
     opserr << "XmlFileStream::recvSelf() - failed to recv id data\n";
@@ -912,7 +1143,10 @@ XmlFileStream::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &th
       opserr << "XmlFileStream::recvSelf() - failed to recv message\n";
       return -1;
     }
-    sprintf(&fileName[fileNameLength],".%d",commitTag);
+
+    int tag = idData(2);
+
+    sprintf(&fileName[fileNameLength],".%d",tag);
 
     if (this->setFile(fileName, theOpenMode) < 0) {
       opserr << "XmlFileStream::XmlFileStream() - setFile() failed\n";
@@ -932,4 +1166,301 @@ XmlFileStream::indent(void)
   if (fileOpen != 0)
     for (int i=0; i<numIndent; i++)
       theFile << indentString;
+}
+
+
+int
+XmlFileStream::setOrder(const ID &orderData)
+{
+  if (fileOpen == 0)
+    this->open();
+
+  if (sendSelfCount == 0)
+    return 0;
+
+  if (xmlOrderProcessed == 0) {
+    xmlColumns = new ID(orderData.Size());
+    xmlOrderProcessed = 1;
+  } else if (xmlOrderProcessed == 1) {
+    this->mergeXML();
+    xmlOrderProcessed = 2;
+  } 
+
+  if (sendSelfCount < 0) {
+    static ID numColumnID(1);
+    int numColumn = orderData.Size();
+    numColumnID(0) = numColumn;
+    theChannels[0]->sendID(0, 0, numColumnID);
+
+    theColumns = new ID *[1];
+    theColumns[0] = new ID(orderData);
+      
+    if (numColumn != 0)
+      theChannels[0]->sendID(0, 0, orderData);
+  }
+
+  if (sendSelfCount > 0) {      
+
+    sizeColumns = new ID(sendSelfCount+1);
+    theColumns = new ID *[sendSelfCount+1];
+    theData = new double *[sendSelfCount+1];
+    theRemoteData = new Vector *[sendSelfCount+1];
+    
+    int numColumns = orderData.Size();
+    (*sizeColumns)(0) = numColumns;
+    if (numColumns != 0) {
+      theColumns[0] = new ID(orderData);
+      theData[0] = new double [numColumns];
+    } else {
+      theColumns[0] = 0;
+      theData[0] = 0;
+    }      
+    theRemoteData[0] = 0;
+
+    maxCount = 0;
+    if (numColumns != 0)
+      maxCount = orderData(numColumns-1);
+
+    // now receive orderData from the other channels
+    for (int i=0; i<sendSelfCount; i++) { 
+      static ID numColumnID(1);	  
+      if (theChannels[i]->recvID(0, 0, numColumnID) < 0) {
+	opserr << "XmlFileStream::setOrder - failed to recv column size for process: " << i+1 << endln;
+	return -1;
+      }
+
+      int numColumns = numColumnID(0);
+
+      (*sizeColumns)(i+1) = numColumns;
+      if (numColumns != 0) {
+	theColumns[i+1] = new ID(numColumns);
+	if (theChannels[i]->recvID(0, 0, *theColumns[i+1]) < 0) {
+	  opserr << "XmlFileStream::setOrder - failed to recv column data for process: " << i+1 << endln;
+	  return -1;
+	}
+
+	if (numColumns != 0 && (*theColumns[i+1])[numColumns-1] > maxCount)
+	  maxCount = (*theColumns[i+1])[numColumns-1];
+	
+	theData[i+1] = new double [numColumns];
+	theRemoteData[i+1] = new Vector(theData[i+1], numColumns);
+      } else {
+	theColumns[i+1] = 0;
+	theData[i+1] = 0;
+	theRemoteData[i+1] = 0;
+      }
+    }
+
+    ID currentLoc(sendSelfCount+1);
+    ID currentCount(sendSelfCount+1);
+	
+    if (mapping != 0)
+      delete mapping;
+
+    mapping = new Matrix(3, maxCount+1);
+
+    Matrix &printMapping = *mapping;
+	
+    for (int i=0; i<=sendSelfCount; i++) {
+      currentLoc(i) = 0;
+      if (theColumns[i] != 0)
+	currentCount(i) = (*theColumns[i])[0];
+      else
+	currentCount(i) = -1;
+    }
+
+    int count =0;
+    while (count <= maxCount) {
+      for (int i=0; i<=sendSelfCount; i++) {
+	if (currentCount(i) == count) {
+	  printMapping(0,count) = i;
+	  
+	  int maxLoc = theColumns[i]->Size();
+	  int loc = currentLoc(i);
+	  int columnCounter = 0;
+	  
+	  printMapping(1,count) = loc;
+	  
+	  while (loc < maxLoc && (*theColumns[i])(loc) == count) {
+	    loc++;
+	    columnCounter++;
+	  }
+	  
+	  printMapping(2,count) = columnCounter;
+	  
+	  currentLoc(i) = loc;
+	  
+	  if (loc < maxLoc)
+	    currentCount(i) = (*theColumns[i])(loc);		
+	  else
+	    currentCount(i) = -1; 		
+	}
+      }
+      count++;
+    }
+  }
+
+  if (theChannels != 0) {
+    static ID lastMsg(1);
+    if (sendSelfCount > 0) {
+      for (int i=0; i<sendSelfCount; i++) 
+	theChannels[i]->sendID(0, 0, lastMsg);
+    } else
+	theChannels[0]->recvID(0, 0, lastMsg);
+  }
+
+  return 0;
+}
+
+
+int
+XmlFileStream::mergeXML() 
+{
+  int fileNameLength = strlen(fileName);
+
+  theFile.close();
+  fileOpen = 0;
+  
+  if (sendSelfCount < 0) {
+
+    int numColumns = numXMLTags;
+
+    if (numColumns < 0)
+      return 0;
+
+    ifstream theFile0;
+    theFile0.open(fileName, ios::in);
+
+    string s;
+    string s2;
+
+    for (int j=0; j<numColumns; j++) {
+      char *data = 0;
+      int sizeData = 1;  // for terminating character
+      
+      int numLines = (*xmlColumns)(j);
+      for (int k=0; k<=numLines; k++) {
+	getline(theFile0, s);  
+	const char *s1 =  s.c_str();
+	int sizeNewData = strlen(s1)+1; // for newline
+	char *nextData = new char[sizeData + sizeNewData];
+	if (data != 0) {
+	  strncpy(nextData, data, sizeData);
+	  delete [] data;
+	}
+
+	strncpy(&nextData[sizeData-1], s1, sizeNewData);
+	sizeData = sizeData + sizeNewData;
+	data = nextData;
+	data[sizeData-2] = '\n';
+	data[sizeData-1] = '\0';
+      }
+      static ID dataSize(1);
+      dataSize(0) = sizeData;
+      theChannels[0]->sendID(0, 0, dataSize);
+      
+      Message dataMsg(data, sizeData);
+      theChannels[0]->sendMsg(0, 0, dataMsg);
+      if (data != 0)
+	delete [] data;
+    }
+  } else  if (sendSelfCount > 0) {      
+
+      ifstream theFile0;
+
+      theFile0.open(fileName, ios::in);
+
+      int fileNameLength = strlen(fileName);
+      sprintf(&fileName[fileNameLength-2],"");
+      
+      theFile.open(fileName, ios::out);
+      fileOpen = 1;
+
+      string s;
+    
+      for (int i=0; i<4; i++) {
+	getline(theFile0, s);  // print out the first 4 lines
+	theFile << s.c_str();
+	theFile << "\n";
+      }      
+
+      int count = 0;
+      ID currentLoc(sendSelfCount+1);
+      currentLoc.Zero();
+      int maxCount = mapping->noCols()+1;
+
+      int p0Count = 0;
+
+      while (count <= maxCount) {
+
+	bool printedData = false;
+	  
+	// if P0 owns it, read from file & print it
+	char *data = 0;
+	int sizeData = 1;
+	
+	for (int i=0; i<sendSelfCount+1; i++) {
+
+	  if (theColumns[i] != 0) {
+	  
+	    ID &theColumnsI = *theColumns[i];
+
+	    if (theColumnsI[currentLoc[i]] == count) {
+
+	      currentLoc[i] = currentLoc[i]+1;
+
+	      if (i == 0) {
+
+		printedData = true;
+
+		int numLines = (*xmlColumns)(p0Count);
+
+		p0Count++;
+
+		for (int k=0; k<=numLines; k++) {
+		  getline(theFile0, s);  
+		  const char *s1 =  s.c_str();
+		  theFile << s1;
+		  theFile << "\n";
+		}		  
+	      } else {
+		static ID dataSize(1);
+		
+		theChannels[i-1]->recvID(0, 0, dataSize);
+
+		int iDataSize = dataSize(0);
+		
+		if (iDataSize > sizeData) {
+		  sizeData = iDataSize;
+		  if (data != 0)
+		    delete [] data;
+		  data = new char[sizeData];
+		}
+		
+		Message dataMsg(data, iDataSize);
+		theChannels[i-1]->recvMsg(0, 0, dataMsg);		  
+	      }
+
+	      if (printedData == false && data != 0) {
+		printedData = true;
+		theFile.write(data, sizeData);
+	      }
+	    }
+	  }
+	}
+	
+	count++;;
+      }
+  }
+
+  if (theChannels != 0) {
+    static ID lastMsg(1);
+    if (sendSelfCount > 0) {
+      for (int i=0; i<sendSelfCount; i++) 
+	theChannels[i]->sendID(0, 0, lastMsg);
+    } else
+	theChannels[0]->recvID(0, 0, lastMsg);
+  }
+
+  return 0;
 }

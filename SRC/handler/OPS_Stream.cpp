@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2009-04-14 21:11:07 $
+// $Revision: 1.6 $
+// $Date: 2009-04-30 23:23:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/OPS_Stream.cpp,v $
 
 #include <OPS_Stream.h>
@@ -51,11 +51,12 @@ OPS_Stream::write(const void *s, int n) {return *this;}
 OPS_Stream& 
 OPS_Stream::write(const double *d, int n) 
 {
-  int nm1 = n-1;
+  if (n == 0)
+    return *this;
 
-  for (int i=0; i<nm1; i++)
+  for (int i=0; i<n; i++)
     (*this) << d[i] << " ";
-  (*this) << d[nm1] << "\n";
+  *this << "\n";
 
   return *this;
 }
@@ -107,3 +108,10 @@ OPS_Stream::operator<<(double n) {return *this;}
 
 OPS_Stream& 
 OPS_Stream::operator<<(float n) {return *this;}
+
+int 
+OPS_Stream::setOrder(const ID &order)
+{
+  return 0;
+}
+
