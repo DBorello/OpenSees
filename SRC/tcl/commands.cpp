@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.143 $
-// $Date: 2009-04-28 17:32:48 $
+// $Revision: 1.144 $
+// $Date: 2009-05-11 21:34:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -118,8 +118,6 @@ OPS_Stream *opserrPtr = &sserr;
 #include <NewtonRaphson.h>
 #include <NewtonLineSearch.h>
 #include <ModifiedNewton.h>
-#include <FrequencyAlgo.h>
-#include <StandardEigenAlgo.h>
 #include <Broyden.h>
 #include <BFGS.h>
 #include <KrylovNewton.h>
@@ -167,7 +165,6 @@ OPS_Stream *opserrPtr = &sserr;
 #include <HHT.h>
 #include <HHT1.h>
 #include <Newmark1.h> 
-#include <EigenIntegrator.h>
 #include <CentralDifferenceAlternative.h>
 #include <CentralDifferenceNoDamping.h>
 #include <CentralDifference.h>
@@ -187,7 +184,6 @@ OPS_Stream *opserrPtr = &sserr;
 #include <StaticAnalysis.h>
 #include <DirectIntegrationAnalysis.h>
 #include <VariableTimeStepDirectIntegrationAnalysis.h>
-#include <EigenAnalysis.h>
 
 // system of eqn and solvers
 #include <BandSPDLinSOE.h>
@@ -246,6 +242,8 @@ OPS_Stream *opserrPtr = &sserr;
 
 #include <EigenSOE.h>
 #include <EigenSolver.h>
+#include <ArpackSOE.h>
+#include <ArpackSolver.h>
 #include <SymArpackSOE.h>
 #include <SymArpackSolver.h>
 #include <BandArpackSOE.h>
@@ -443,9 +441,11 @@ static EquiSolnAlgo *theAlgorithm =0;
 static ConstraintHandler *theHandler =0;
 static DOF_Numberer *theNumberer =0;
 static LinearSOE *theSOE =0;
+static EigenSOE *theEigenSOE =0;
 static StaticAnalysis *theStaticAnalysis = 0;
 static DirectIntegrationAnalysis *theTransientAnalysis = 0;
 static VariableTimeStepDirectIntegrationAnalysis *theVariableTimeStepTransientAnalysis = 0;
+
 
 // AddingSensitivity:BEGIN /////////////////////////////////////////////
 #ifdef _RELIABILITY
@@ -469,7 +469,6 @@ static TransientIntegrator *theTransientIntegrator =0;
 static ConvergenceTest *theTest =0;
 static bool builtModel = false;
 
-static EigenAnalysis *theEigenAnalysis = 0;
 
 static char *resDataPtr = 0;
 static int resDataSize = 0;
@@ -691,7 +690,7 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);            
 
 
-			  Tcl_CreateCommand(interp, "nodeBounds", &nodeBounds, 
+    Tcl_CreateCommand(interp, "nodeBounds", &nodeBounds, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "start", &startTimer, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
@@ -1087,17 +1086,15 @@ wipeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
   // NOTE : DON'T do the above on theVariableTimeStepAnalysis
   // as it and theTansientAnalysis are one in the same
 
-  /*
-  if (theEigenAnalysis != 0) {
-    delete theEigenAnalysis;
-    theEigenAnalysis = 0;
-  }
-  */
 
   if (theDatabase != 0)
     delete theDatabase;
   
   theDomain.clearAll();
+
+#ifdef _PARALLEL_PROCESSING
+  OPS_PARTITIONED = false;
+#endif
 
 #ifdef _NOGRAPHICS
 
@@ -1168,6 +1165,7 @@ wipeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
   theNumberer =0;
   theAnalysisModel =0;  
   theSOE =0;
+  theEigenSOE =0;
   theStaticIntegrator =0;
   theTransientIntegrator =0;
   theStaticAnalysis =0;
@@ -1401,6 +1399,7 @@ analyzeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
   int result = 0;
 
 #ifdef _PARALLEL_PROCESSING
+
   if (OPS_PARTITIONED == false && OPS_NUM_SUBDOMAINS > 1) 
     if (partitionModel() < 0) {
       opserr << "WARNING before analysis; partition failed\n";
@@ -2163,8 +2162,6 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       return TCL_ERROR;
   }    
 
-
-
   // check argv[1] for type of SOE and create it
   // BAND GENERAL SOE & SOLVER
   if ((strcmp(argv[1],"BandGeneral") == 0) || (strcmp(argv[1],"BandGEN") == 0)
@@ -2287,20 +2284,13 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 	   (strcmp(argv[1],"SparseGEN") == 0)) {
     
     SparseGenColLinSolver *theSolver =0;    
-
+    int count = 2;
     double thresh = 0.0;
     int npRow = 1;
     int npCol = 1;
     int np = 1;
 
     // defaults for threaded SuperLU
-    int count = 2;
-    int permSpec = 0;
-    int panelSize = 6;
-    int relax = 6;
-
-
-
 
     while (count < argc) {
 
@@ -2327,7 +2317,11 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       }
       count++;
     }
-  
+
+    int permSpec = 0;
+    int panelSize = 6;
+    int relax = 6;
+
 
 #ifdef _THREADS
     if (np != 0)
@@ -2354,6 +2348,7 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       }
       count++;
     }
+    
     theSolver = new SuperLU(permSpec, drop_tol, panelSize, relax, symmetric); 	
 
 #endif
@@ -2381,9 +2376,9 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 
     SymSparseLinSolver *theSolver = new SymSparseLinSolver();
     theSOE = new SymSparseLinSOE(*theSolver, lSparse);      
-  }	
+  }    
   
-  else if (strcmp(argv[1],"UmfPack") == 0) {
+  else if ((strcmp(argv[1],"UmfPack") == 0) || (strcmp(argv[1],"Umfpack") == 0)) {
     // now must determine the type of solver to create from rest of args
       UmfpackGenLinSolver *theSolver = new UmfpackGenLinSolver();
       theSOE = new UmfpackGenLinSOE(*theSolver);      
@@ -3459,7 +3454,7 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 #endif
 
       // if the analysis exists - we want to change the Integrator
-      if (theStaticAnalysis != 0)
+      if (theStaticAnalysis != 0) 
 	theStaticAnalysis->setIntegrator(*theStaticIntegrator);
   }  
 
@@ -4819,7 +4814,11 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
   }    
 
 #ifdef _PARALLEL_PROCESSING
+    opserr << "commands.cpp - setIntegrator - parallel part\n";
   if (theStaticAnalysis != 0 && theStaticIntegrator != 0) {
+
+    opserr << "commands.cpp - setIntegrator - setting subdomain integrators\n";
+
     IncrementalIntegrator *theIntegrator;
     theIntegrator = theStaticIntegrator;
 
@@ -4940,34 +4939,50 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	return TCL_ERROR;
     }    
 
-    int typeAlgo = 0; // 0 - frequency/generalized (default),1 - standard, 2 - buckling
+    bool generalizedAlgo = true; // 0 - frequency/generalized (default),1 - standard, 2 - buckling
     int typeSolver = 2; // 0 - SymmBandLapack, 1 - SymmSparseArpack, 2 - GenBandArpack (default)
     int loc = 1;
+    double shift = 0.0;
 
     // Check type of eigenvalue analysis
     while (loc < (argc-1)) {
-      
       if ((strcmp(argv[loc],"frequency") == 0) || 
 	  (strcmp(argv[loc],"-frequency") == 0) ||
 	  (strcmp(argv[loc],"generalized") == 0) ||
 	  (strcmp(argv[loc],"-generalized") == 0))
-	typeAlgo = 0;
+	generalizedAlgo = true;
 
       else if ((strcmp(argv[loc],"standard") == 0) || 
 	  (strcmp(argv[loc],"-standard") == 0))
-	typeAlgo = 1;
+	generalizedAlgo = false;
 
       else if ((strcmp(argv[loc],"symmBandLapack") == 0) || 
 	  (strcmp(argv[loc],"-symmBandLapack") == 0))
 	typeSolver = 0;
 
       else if ((strcmp(argv[loc],"symmSparseArpack") == 0) || 
-	  (strcmp(argv[loc],"-symmSparseArpack") == 0))
+	  (strcmp(argv[loc],"-symmSparseArpack") == 0) || (strcmp(argv[loc],"-symmSparse") == 0))
 	typeSolver = 1;
 
       else if ((strcmp(argv[loc],"genBandArpack") == 0) || 
-	  (strcmp(argv[loc],"-genBandArpack") == 0))
+	       (strcmp(argv[loc],"-genBandArpack") == 0) || (strcmp(argv[loc],"-BandGeneral") == 0)
+	       || (strcmp(argv[loc],"BandGeneral") == 0))
 	typeSolver = 2;
+
+      else if ((strcmp(argv[loc],"umfpack") == 0) || 
+	       (strcmp(argv[loc],"-UmfPack") == 0) || (strcmp(argv[loc],"-Umfpack") == 0) ||
+	       (strcmp(argv[loc],"UmfPack") == 0) || (strcmp(argv[loc],"Umfpack") == 0))
+	typeSolver = 5;
+
+#ifdef _MUMPS
+      else if ((strcmp(argv[loc],"mumps") == 0) || (strcmp(argv[loc],"-Mumps") == 0) 
+	       || (strcmp(argv[loc],"-mumps") == 0) || (strcmp(argv[loc],"Mumps") == 0))
+	typeSolver = 6;
+#endif
+
+      else if ((strcmp(argv[loc],"SparseGeneral") == 0) || (strcmp(argv[loc],"-SparseGeneral") == 0) 
+	       || (strcmp(argv[loc],"-SuperLU") == 0) || (strcmp(argv[loc],"SuperLU") == 0))
+	typeSolver = 7;
 
       else if ((strcmp(argv[loc],"fullGenLapack") == 0) || 
 	  (strcmp(argv[loc],"-fullGenLapack") == 0))
@@ -4985,7 +5000,6 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
       loc++;
     }
 
-
     // check argv[loc] for number of modes
     int numEigen;
     if ((Tcl_GetInt(interp, argv[loc], &numEigen) != TCL_OK) || numEigen < 0) {
@@ -4993,59 +5007,145 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
       return TCL_ERROR;	
     }
 
-    EigenAlgorithm *theEigenAlgo = 0;
-    EigenSOE       *theEigenSOE = 0;
-    AnalysisModel *theEigenModel = new AnalysisModel();
+    //
+    // create a transient analysis if no analysis exists
+    //
 
-    // create the algorithm
-    if (typeAlgo == 0) 
-      theEigenAlgo = new FrequencyAlgo();
-    else if (typeAlgo == 1) {
-      theEigenAlgo = new StandardEigenAlgo();
+    if (theStaticAnalysis == 0 && theTransientAnalysis == 0) {
+	if (theAnalysisModel == 0) 
+	    theAnalysisModel = new AnalysisModel();
+	if (theTest == 0) 
+	  theTest = new CTestNormUnbalance(1.0e-6,25,0);       
+	if (theAlgorithm == 0) {
+	  theAlgorithm = new NewtonRaphson(*theTest); 
+	}
+	if (theHandler == 0) {
+	  theHandler = new TransformationConstraintHandler();       
+	}
+	if (theNumberer == 0) {
+	  RCM *theRCM = new RCM(false);	
+	  theNumberer = new DOF_Numberer(*theRCM);    	
+	}
+	if (theTransientIntegrator == 0) {
+	  theTransientIntegrator = new Newmark(0.5,0.25);       
+	}
+	if (theSOE == 0) {
+	  ProfileSPDLinSolver *theSolver;
+	  theSolver = new ProfileSPDLinDirectSolver(); 	
+#ifdef _PARALLEL_PROCESSING
+	  theSOE = new DistributedProfileSPDLinSOE(*theSolver);
+#else
+	  theSOE = new ProfileSPDLinSOE(*theSolver);      
+#endif
+	}
+	
+	theTransientAnalysis = new DirectIntegrationAnalysis(theDomain,
+							     *theHandler,
+							     *theNumberer,
+							     *theAnalysisModel,
+							     *theAlgorithm,
+							     *theSOE,
+							     *theTransientIntegrator,
+							     theTest);
 
-      // temporarily will place here .. only solver that will work with standard
+    }
+
+    //
+    // create a new eigen system and solver
+    //
+
+    if (typeSolver == 0) {
+
       SymBandEigenSolver *theEigenSolver = new SymBandEigenSolver(); 
-      theEigenSOE = new SymBandEigenSOE(*theEigenSolver, *theEigenModel);    
+      theEigenSOE = new SymBandEigenSOE(*theEigenSolver, *theAnalysisModel); 
+
+    } else if (typeSolver == 1) {
+      
+      int lSparse = 1;     // MMD
+      SymSparseLinSolver *theSolver = new SymSparseLinSolver();
+      LinearSOE *theArpackSOE = new SymSparseLinSOE(*theSolver, lSparse);      
+      ArpackSolver *theEigenSolver = new ArpackSolver();
+      theEigenSOE = new ArpackSOE(*theEigenSolver, *theAnalysisModel, *theArpackSOE, shift);
+
+      // SymArpackSolver *theEigenSolver = new SymArpackSolver(numEigen); 
+      // theEigenSOE = new SymArpackSOE(*theEigenSolver, *theAnalysisModel);    
+
+    } else if (typeSolver == 2) {  
+      /*
+      BandGenLinSolver    *theSolver = new BandGenLinLapackSolver();
+      LinearSOE *theArpackSOE = new BandGenLinSOE(*theSolver);      
+      ArpackSolver *theEigenSolver = new ArpackSolver();
+      theEigenSOE = new ArpackSOE(*theEigenSolver, *theAnalysisModel, *theArpackSOE, shift);    
+      */
+      BandArpackSolver *theEigenSolver = new BandArpackSolver(numEigen); 
+      theEigenSOE = new BandArpackSOE(*theEigenSolver, *theAnalysisModel);    
+
+    } else if (typeSolver == 3) {
+
+      FullGenEigenSolver *theEigenSolver = new FullGenEigenSolver();
+      theEigenSOE = new FullGenEigenSOE(*theEigenSolver, *theAnalysisModel);
+
+    }  else if (typeSolver == 4) {
+
+      SymBandEigenSolver *theEigenSolver = new SymBandEigenSolver(); 
+      theEigenSOE = new SymBandEigenSOE(*theEigenSolver, *theAnalysisModel);    
+
+    }  else if (typeSolver == 5) {  
+      
+      UmfpackGenLinSolver *theSolver = new UmfpackGenLinSolver();
+      LinearSOE *theArpackSOE = new UmfpackGenLinSOE(*theSolver);      
+      ArpackSolver *theEigenSolver = new ArpackSolver();
+      theEigenSOE = new ArpackSOE(*theEigenSolver, *theAnalysisModel, *theArpackSOE, shift);    
+
+#ifdef _MUMPS
+
+    }  else if (typeSolver == 6) {  
+      
+
+      int icntl14 = 20;
+      MumpsParallelSolver *theSolver = new MumpsParallelSolver(icntl14);
+      LinearSOE *theArpackSOE = new MumpsParallelSOE(*theSolver);
+      ArpackSolver *theEigenSolver = new ArpackSolver();
+      theEigenSOE = new ArpackSOE(*theEigenSolver, *theAnalysisModel, *theArpackSOE, shift);    
+#endif
+    }  else if (typeSolver == 7) {  
+      SparseGenColLinSolver *theSolver =0;    
+      
+      int npRow = 1;
+      int npCol = 1;
+
+#ifdef _PARALLEL_PROCESSING
+      theSolver = new DistributedSuperLU(npRow, npCol);
+#else
+      
+      char symmetric = 'N';
+      double drop_tol = 0.0;
+      /*
+	while (count < argc) {
+	if (strcmp(argv[count],"s") == 0 || strcmp(argv[count],"symmetric") ||
+	strcmp(argv[count],"-symm")) {
+	symmetric = 'Y';
+	}
+	count++;
+	}
+      */
+      int permSpec = 0;
+      int panelSize = 6;
+      int relax = 6;
+      theSolver = new SuperLU(permSpec, drop_tol, panelSize, relax, symmetric); 	
+#endif
+
+#ifdef _PARALLEL_PROCESSING
+      LinearSOE *theArpackSOE = new DistributedSparseGenColLinSOE(*theSolver);      
+#else
+      LinearSOE *theArpackSOE = new SparseGenColLinSOE(*theSolver);      
+#endif
+      
+      ArpackSolver *theEigenSolver = new ArpackSolver();
+      theEigenSOE = new ArpackSOE(*theEigenSolver, *theAnalysisModel, *theArpackSOE, shift);    
 
     }
 
-    // again temporary until i rewrite these solvers.
-    if (typeAlgo == 0) {
-
-      // create the eigen system and solver
-      if (typeSolver == 0) {
-	SymBandEigenSolver *theEigenSolver = new SymBandEigenSolver(); 
-	theEigenSOE = new SymBandEigenSOE(*theEigenSolver, *theEigenModel);    
-      } else if (typeSolver == 1) {
-	SymArpackSolver *theEigenSolver = new SymArpackSolver(numEigen); 
-	theEigenSOE = new SymArpackSOE(*theEigenSolver, *theEigenModel);    
-      } else if (typeSolver == 2) {  
-	BandArpackSolver *theEigenSolver = new BandArpackSolver(numEigen); 
-	theEigenSOE = new BandArpackSOE(*theEigenSolver, *theEigenModel);    
-      } else if (typeSolver == 3) {
-	FullGenEigenSolver *theEigenSolver = new FullGenEigenSolver();
-	theEigenSOE = new FullGenEigenSOE(*theEigenSolver, *theEigenModel);
-      }  else if (typeSolver == 4) {
-	SymBandEigenSolver *theEigenSolver = new SymBandEigenSolver(); 
-	theEigenSOE = new SymBandEigenSOE(*theEigenSolver, *theEigenModel);    
-      }
-
-    }
-    // create the rest of components of an eigen analysis
-    EigenIntegrator  *theEigenIntegrator = new EigenIntegrator();    
-    RCM *theRCM = new RCM(false);	
-    DOF_Numberer *theEigenNumberer = new DOF_Numberer(*theRCM);    	
-    ConstraintHandler *theEigenHandler = new TransformationConstraintHandler();
-
-
-    // create the eigen analysis
-    theEigenAnalysis = new EigenAnalysis(theDomain,
-					 *theEigenHandler,
-					 *theEigenNumberer,
-					 *theEigenModel,
-					 *theEigenAlgo,
-					 *theEigenSOE,
-					 *theEigenIntegrator);
 
     int requiredDataSize = 20*numEigen;
     if (requiredDataSize > resDataSize) {
@@ -5060,8 +5160,21 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
       resDataPtr[i] = '\n';
 
     // perfrom the eigen analysis & store the results with the interpreter
+    int result = 0;
 
-    if (theEigenAnalysis->analyze(numEigen) == 0) {
+    //
+    // set the eigen soe in the system
+    //
+
+    if (theStaticAnalysis != 0) {
+      theStaticAnalysis->setEigenSOE(*theEigenSOE);
+      result = theStaticAnalysis->eigen(numEigen, generalizedAlgo);      
+    } else if (theTransientAnalysis != 0) {
+      theTransientAnalysis->setEigenSOE(*theEigenSOE);
+      result = theTransientAnalysis->eigen(numEigen, generalizedAlgo);      
+    } 
+
+    if (result == 0) {
       //      char *eigenvalueS = new char[15 * numEigen];    
       const Vector &eigenvalues = theDomain.getEigenvalues();
       int cnt = 0;
@@ -5072,11 +5185,6 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
       
       Tcl_SetResult(interp, resDataPtr, TCL_STATIC);
     }
-
-    // finally invoke the destructor on the eigen analysis
-    delete theEigenAnalysis;
-
-    theEigenAnalysis = 0;
     
     return TCL_OK;
 }
