@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:27 $
+// $Revision: 1.2 $
+// $Date: 2009-05-11 20:52:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/LinearSOESolver.cpp,v $
-                                                                        
-                                                                        
-// File: ~/system_of_eqn/linearSOE/LinearSOESolver.C
-//
+
 // Written: fmk 
 // Created: Tue Sep 26 16:27:47: 1996
 // Revision: A
@@ -41,7 +38,7 @@
 
 
 LinearSOESolver::LinearSOESolver(int classtag)
-:Solver(classtag)
+:MovableObject(classtag)
 {
     
 }

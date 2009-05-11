@@ -18,19 +18,16 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-12-01 01:12:55 $
+// $Revision: 1.5 $
+// $Date: 2009-05-11 20:52:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/LinearSOE.h,v $
                                                                         
                                                                         
 #ifndef LinearSOE_h
 #define LinearSOE_h
 
-// File: ~/system_of_eqn/LinearSOE.h
-//
 // Written: fmk 
 // Created: 11/96
-// Revision: A
 //
 // Description: This file contains the class definition for LinearSOE.
 // LinearSOE is an abstract base class and thus no objects of it's type
@@ -46,7 +43,7 @@
 #include <bool.h>
 #endif
 
-#include <SystemOfEqn.h>
+#include <MovableObject.h>
 
 class LinearSOESolver;
 class Graph;
@@ -54,10 +51,11 @@ class Matrix;
 class Vector;
 class ID;
 
-class LinearSOE : public SystemOfEqn
+class LinearSOE : public MovableObject
 {
   public:
     LinearSOE(LinearSOESolver &theSolver, int classTag);    
+    LinearSOE(int classTag);    
     virtual ~LinearSOE();
 
     virtual int solve(void);    

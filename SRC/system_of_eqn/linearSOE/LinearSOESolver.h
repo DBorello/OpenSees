@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-02-17 06:32:38 $
+// $Revision: 1.3 $
+// $Date: 2009-05-11 20:52:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/LinearSOESolver.h,v $
                                                                         
-                                                                        
-// File: ~/system_of_eqn/linearSOE/LinearSOESolver.h
-//
 // Written: fmk 
 // Created: Tue Sep 26 16:27:47: 1996
 // Revision: A
@@ -40,17 +37,16 @@
 #ifndef LinearSOESolver_h
 #define LinearSOESolver_h
 
-#include <Solver.h>
+#include <MovableObject.h>
 class LinearSOE;
 
-class LinearSOESolver : public Solver
+class LinearSOESolver : public MovableObject
 {
   public:
     LinearSOESolver(int classTag);    
     virtual ~LinearSOESolver();
 
     virtual int solve(void) = 0;
-//    virtual int setLinearSOE(LinearSOE &theSOE) =0;
     virtual int setSize(void) = 0;
     virtual double getDeterminant(void) {return 1.0;};
     

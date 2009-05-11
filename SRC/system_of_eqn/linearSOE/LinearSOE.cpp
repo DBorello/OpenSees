@@ -18,16 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-20 22:36:37 $
+// $Revision: 1.4 $
+// $Date: 2009-05-11 20:52:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/LinearSOE.cpp,v $
                                                                         
                                                                         
-// File: ~/system_of_eqn/LinearSOE.C
-//
 // Written: fmk 
 // Created: 11/96
-// Revision: A
 //
 // Description: This file contains the implementation of LinearSOE.
 //
@@ -37,27 +34,41 @@
 #include<LinearSOESolver.h>
 
 LinearSOE::LinearSOE(LinearSOESolver &theLinearSOESolver, int classtag)
-:SystemOfEqn(classtag), theSolver(&theLinearSOESolver)
+:MovableObject(classtag), theSolver(&theLinearSOESolver)
 {
 
 }
 
+LinearSOE::LinearSOE(int classtag)
+:MovableObject(classtag), theSolver(0)
+{
+
+}
+
+
 LinearSOE::~LinearSOE()
 {
-  delete theSolver;
+  if (theSolver != 0)
+    delete theSolver;
 }
 
 int 
 LinearSOE::solve(void)
 {
+  if (theSolver != 0)
     return (theSolver->solve());
+  else 
+    return -1;
 }
 
 
 double
 LinearSOE::getDeterminant(void)
 {
-  return theSolver->getDeterminant();
+  if (theSolver != 0)
+    return theSolver->getDeterminant();
+  else 
+    return 0;
 }
 
 
