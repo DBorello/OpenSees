@@ -201,6 +201,8 @@ LAW_LIBS = $(FE)/system_of_eqn/linearSOE/sparseSYM/SymSparseLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/sparseSYM/genmmd.o \
 	$(FE)/system_of_eqn/eigenSOE/EigenSOE.o \
 	$(FE)/system_of_eqn/eigenSOE/EigenSolver.o \
+	$(FE)/system_of_eqn/eigenSOE/ArpackSOE.o \
+	$(FE)/system_of_eqn/eigenSOE/ArpackSolver.o \
 	$(FE)/system_of_eqn/eigenSOE/BandArpackSOE.o \
 	$(FE)/system_of_eqn/eigenSOE/BandArpackSolver.o \
 	$(FE)/system_of_eqn/eigenSOE/SymArpackSOE.o \
@@ -767,9 +769,7 @@ endif
 
 CUDA_CLASSES = 
 
-SysOfEqn_LIBS = $(FE)/system_of_eqn/SystemOfEqn.o \
-	$(FE)/system_of_eqn/Solver.o \
-	$(FE)/system_of_eqn/linearSOE/LinearSOE.o \
+SysOfEqn_LIBS =	$(FE)/system_of_eqn/linearSOE/LinearSOE.o \
 	$(FE)/system_of_eqn/linearSOE/LinearSOESolver.o \
 	$(FE)/system_of_eqn/linearSOE/DomainSolver.o \
 	$(FE)/system_of_eqn/linearSOE/bandGEN/BandGenLinSOE.o \
