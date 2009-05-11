@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2009-05-11 21:08:36 $
+// $Revision: 1.2 $
+// $Date: 2009-05-11 22:43:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/ArpackSolver.cpp,v $
 
 // Written: fmk
@@ -44,7 +44,6 @@
 #include <ArpackSolver.h>
 #include <ArpackSOE.h>
 #include <LinearSOE.h>
-#include <Element.h>
 #include <math.h>
 #include <stdio.h>
 #include <AnalysisModel.h>
