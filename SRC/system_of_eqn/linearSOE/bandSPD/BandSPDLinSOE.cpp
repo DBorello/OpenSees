@@ -18,17 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-12-06 22:03:48 $
+// $Revision: 1.5 $
+// $Date: 2009-05-11 20:53:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandSPD/BandSPDLinSOE.cpp,v $
                                                                         
                                                                         
-// file: ~/system_of_eqn/linearSOE/bandSPD/BandSPDLinSOE.C
-//
 // Written: fmk 
 // Created: Febuary 1997
-// Revision: A
-//
+
 // Description: This file contains the implementation for BandSPDLinSOE
 
 
@@ -56,6 +53,16 @@ BandSPDLinSOE::BandSPDLinSOE(BandSPDLinSolver &the_Solver)
 
 BandSPDLinSOE::BandSPDLinSOE(BandSPDLinSolver &the_Solver, int classTag)
 :LinearSOE(the_Solver, classTag),
+ size(0), half_band(0), A(0), B(0), X(0), vectX(0), vectB(0),
+ Asize(0), Bsize(0),
+ factored(false)
+{
+
+}
+
+
+BandSPDLinSOE::BandSPDLinSOE(int classTag)
+:LinearSOE(classTag),
  size(0), half_band(0), A(0), B(0), X(0), vectX(0), vectB(0),
  Asize(0), Bsize(0),
  factored(false)
@@ -439,12 +446,14 @@ BandSPDLinSOE::setBandSPDSolver(BandSPDLinSolver &newSolver)
 int 
 BandSPDLinSOE::sendSelf(int tag, Channel &theChannel)
 {
-    return 0;
+  opserr << "BandSPDLinSOE::sendSelf() - not implemented\n";
+  return -1;
 }
 
 
 int 
 BandSPDLinSOE::recvSelf(int tag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-    return 0;
+  opserr << "BandSPDLinSOE::recvSelf( - not implemented\n";
+  return -1;
 }

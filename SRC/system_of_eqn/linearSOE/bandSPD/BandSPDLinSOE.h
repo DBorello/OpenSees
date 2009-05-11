@@ -18,19 +18,16 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-12-06 22:03:48 $
+// $Revision: 1.4 $
+// $Date: 2009-05-11 20:53:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandSPD/BandSPDLinSOE.h,v $
                                                                         
                                                                         
 #ifndef BandSPDLinSOE_h
 #define BandSPDLinSOE_h
 
-// File: ~/system_of_eqn/linearSOE/bandSPD/BandSPDLinSOE.h
-//
 // Written: fmk 
 // Created: Febuary 1997
-// Revision: A
 //
 // Description: This file contains the class definition for BandSPDLinSOE
 // BandSPDLinSOE is a subclass of LinearSOE. It uses the LAPACK Upper storage
@@ -51,6 +48,7 @@ class BandSPDLinSOE : public LinearSOE
 {
   public:
     BandSPDLinSOE(BandSPDLinSolver &theSolver);    
+    BandSPDLinSOE(int classTag);    
     BandSPDLinSOE(BandSPDLinSolver &theSolver, int classTag);    
     BandSPDLinSOE(int N, int bandwidth, BandSPDLinSolver &theSolver);        
 
