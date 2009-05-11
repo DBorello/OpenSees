@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-08-29 07:17:38 $
+// $Revision: 1.2 $
+// $Date: 2009-05-11 21:14:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/machineBroker/MPI_MachineBroker.cpp,v $
                                                                         
                                                                         
@@ -43,7 +43,7 @@ MPI_MachineBroker::MPI_MachineBroker(FEM_ObjectBroker *theBroker, int argc, char
 
   theChannels = new MPI_Channel *[size];
   for (int i=0; i<size; i++) {
-      theChannels[i] = new MPI_Channel(i);
+    theChannels[i] = new MPI_Channel(i);
   }
   usedChannels = new ID(size);
   usedChannels->Zero();
@@ -104,7 +104,6 @@ MPI_MachineBroker::getRemoteProcess(void)
   // no processes available
   return 0;
 }
-
 
 
 int 

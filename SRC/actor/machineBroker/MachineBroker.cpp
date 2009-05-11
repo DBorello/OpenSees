@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-05-01 23:24:34 $
+// $Revision: 1.4 $
+// $Date: 2009-05-11 21:14:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/machineBroker/MachineBroker.cpp,v $
                                                                         
 // Written: fmk
@@ -88,6 +88,12 @@ int
 MachineBroker::runActors(void)
 {
   Channel *theChannel = this->getMyChannel();
+
+  if (theChannel == 0) {
+    opserr << "MachineBroker::runActors(void) - failed to get a free Channel\n";
+    return -1;    
+  }
+
   ID idData(1);
   int done = 0;
 
@@ -96,10 +102,11 @@ MachineBroker::runActors(void)
 
     if (theChannel->recvID(0, 0, idData) < 0) {
       opserr << "MachineBroker::runActors(void) - failed to recv ID\n";
+      return -1;
     }
 
     int actorType = idData(0);
-    
+
     // switch on data type
     if (idData(0) == 0) {
       done = 1;
@@ -160,7 +167,7 @@ MachineBroker::startActor(int actorType, int compDemand)
       }
     }
   }
-  
+
   // if no available connection established .. establish a new one
   if (theChannel == 0) {
 
@@ -214,7 +221,6 @@ MachineBroker::startActor(int actorType, int compDemand)
   }
 
   return theChannel;
-  
 }
 
 int
@@ -228,7 +234,7 @@ MachineBroker::finishedWithActor(Channel *theChannel)
       return 0;
     }
   }
-  
+
   // if get here .. startActor() not called or subclass override
   return -1;
 }
