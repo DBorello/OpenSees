@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-11-23 18:25:17 $
+// $Revision: 1.4 $
+// $Date: 2009-05-11 21:28:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/shadow/Shadow.h,v $
                                                                         
                                                                         
@@ -82,8 +82,9 @@ class Shadow
     ChannelAddress        *getActorAddressPtr(void) const;
 
   protected:
-    Channel	 	  *theChannel;    
-    FEM_ObjectBroker      *theBroker;
+    Channel	       *theChannel;    
+    FEM_ObjectBroker   *theObjectBroker;
+    MachineBroker      *theMachineBroker;
 
   private:
     ChannelAddress 	  *theRemoteActorsAddress;    

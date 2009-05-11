@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-09-23 22:47:56 $
+// $Revision: 1.7 $
+// $Date: 2009-05-11 21:28:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/shadow/Shadow.cpp,v $
                                                                         
 
@@ -44,55 +44,58 @@
 
 Shadow::Shadow(Channel &theChan, 
 	       FEM_ObjectBroker &myBroker)
-  :theChannel(&theChan), theBroker(&myBroker), theRemoteActorsAddress(0), commitTag(0)
+  :theChannel(&theChan), theObjectBroker(&myBroker), theMachineBroker(0),
+   theRemoteActorsAddress(0), commitTag(0)
 {
-    if (theChannel->setUpConnection() != 0)  {
-        opserr << "Shadow::Shadow() "
-            << "- failed to setup connection\n";
-        exit(-1);
-    }
+  if (theChannel->setUpConnection() != 0)  {
+    opserr << "Shadow::Shadow() "
+	   << "- failed to setup connection\n";
+    exit(-1);
+  }
 }
 
 
 Shadow::Shadow(Channel &theChan, 
 	       FEM_ObjectBroker &myBroker,
 	       ChannelAddress &theAddress)
-  :theChannel(&theChan), theBroker(&myBroker), theRemoteActorsAddress(&theAddress),
-   commitTag(0)
+  :theChannel(&theChan), theObjectBroker(&myBroker), theMachineBroker(0),
+   theRemoteActorsAddress(&theAddress), commitTag(0)
 {
-    if (theChannel->setUpConnection() != 0)  {
-        opserr << "Shadow::Shadow() "
-            << "- failed to setup connection\n";
-        exit(-1);
-    }
+  if (theChannel->setUpConnection() != 0)  {
+    opserr << "Shadow::Shadow() "
+	   << "- failed to setup connection\n";
+    exit(-1);
+  }
 }
 
 Shadow::Shadow(int actorType,
 	       FEM_ObjectBroker &myBroker,	       
-	       MachineBroker &theMachineBroker,
+	       MachineBroker &theMachineBrokr,
 	       int compDemand)
-  :theBroker(&myBroker), theRemoteActorsAddress(0), commitTag(0)
+  :theObjectBroker(&myBroker), theMachineBroker(&theMachineBrokr), 
+   theRemoteActorsAddress(0), commitTag(0)
 {
     // start the remote actor process running
-    theChannel = theMachineBroker.startActor(actorType, compDemand);
-    if (theChannel < 0) {
-        opserr << "Shadow::Shadow - could not start remote actor\n";
-        opserr << " using program " << actorType << endln;
-        exit(-1);
-    }
-
-    // now call setUpShadow on the channel
-    if (theChannel->setUpConnection() != 0)  {
-        opserr << "Shadow::Shadow() "
-            << "- failed to setup connection\n";
-        exit(-1);
-    }
-    theRemoteActorsAddress = theChannel->getLastSendersAddress();
+  theChannel = theMachineBroker->startActor(actorType, compDemand);
+  if (theChannel < 0) {
+    opserr << "Shadow::Shadow - could not start remote actor\n";
+    opserr << " using program " << actorType << endln;
+    exit(-1);
+  }
+  
+  // now call setUpShadow on the channel
+  if (theChannel->setUpConnection() != 0)  {
+    opserr << "Shadow::Shadow() "
+	   << "- failed to setup connection\n";
+    exit(-1);
+  }
+  theRemoteActorsAddress = theChannel->getLastSendersAddress();
 }
 
 Shadow::~Shadow()
 {
-    
+  if (theMachineBroker != 0)
+    theMachineBroker->finishedWithActor(theChannel);    
 }    
 
 int
@@ -104,7 +107,7 @@ Shadow::sendObject(MovableObject &theObject)
 int
 Shadow::recvObject(MovableObject &theObject)
 {
-    return theChannel->recvObj(commitTag, theObject,*theBroker, theRemoteActorsAddress);
+    return theChannel->recvObj(commitTag, theObject,*theObjectBroker, theRemoteActorsAddress);
 }
 
 
@@ -173,7 +176,7 @@ Shadow::getChannelPtr(void) const
 FEM_ObjectBroker *
 Shadow::getObjectBrokerPtr(void) const
 {
-    return theBroker;
+    return theObjectBroker;
 }
 
 ChannelAddress *
