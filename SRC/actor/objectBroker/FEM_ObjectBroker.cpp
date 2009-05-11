@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.46 $
-// $Date: 2009-04-17 22:57:47 $
+// $Revision: 1.47 $
+// $Date: 2009-05-11 21:11:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -38,7 +38,7 @@
 
 
 FEM_ObjectBroker::FEM_ObjectBroker()
-:lastLinearSolver(0),lastDomainSolver(0)
+:lastDomainSolver(0)
 {
 
 }
@@ -313,22 +313,11 @@ FEM_ObjectBroker::getNewIncrementalIntegrator(int classTag)
   return 0;
 }
 
-
-LinearSOESolver *
-FEM_ObjectBroker::getNewLinearSolver(void)
-{
-    return 0;
-}
-
 LinearSOE *
-FEM_ObjectBroker::getNewLinearSOE(int classTagSOE, 
-				  int classTagSolver)
+FEM_ObjectBroker::getNewLinearSOE(int classTagSOE)
 {
   return 0;		 
 }
-
-
-
 
 DomainSolver *
 FEM_ObjectBroker::getNewDomainSolver(void)

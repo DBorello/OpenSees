@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2009-04-17 22:57:47 $
+// $Revision: 1.11 $
+// $Date: 2009-05-11 21:11:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.h,v $
                                                                         
                                                                         
@@ -152,8 +152,7 @@ class FEM_ObjectBroker
     virtual TransientIntegrator *getNewTransientIntegrator(int classTag);
     virtual IncrementalIntegrator *getNewIncrementalIntegrator(int classTag);
 
-    virtual LinearSOE *getNewLinearSOE(int classTagSOE, int classTagSolver);
-    virtual LinearSOESolver *getNewLinearSolver(void);
+    virtual LinearSOE *getNewLinearSOE(int classTagSOE);
     
     virtual LinearSOE *getPtrNewDDLinearSOE(int classTagSOE, 
 					    int classTagDDSolver);
@@ -171,10 +170,7 @@ class FEM_ObjectBroker
   protected:
     
   private:
-    LinearSOESolver *lastLinearSolver;
     DomainSolver *lastDomainSolver;
-
-    
 };
 
 #endif
