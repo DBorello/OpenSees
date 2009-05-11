@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-04-16 21:26:42 $
+// $Revision: 1.7 $
+// $Date: 2009-05-11 20:56:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSOE.cpp,v $
                                                                         
                                                                         
-// File: ~/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSOE.h
-//
 // Written: fmk 
 // Created: 11/98
 // Revision: A
@@ -54,6 +52,17 @@ UmfpackGenLinSOE::UmfpackGenLinSOE(UmfpackGenLinSolver &the_Solver)
  factored(false)
 {
     the_Solver.setLinearSOE(*this);
+}
+
+
+UmfpackGenLinSOE::UmfpackGenLinSOE()
+:LinearSOE(LinSOE_TAGS_UmfpackGenLinSOE),
+ size(0), nnz(0), A(0), B(0), X(0), colA(0), rowStartA(0),
+ lValue(0), index(0),
+ vectX(0), vectB(0), Asize(0), Bsize(0),
+ factored(false)
+{
+
 }
 
 
@@ -456,13 +465,32 @@ UmfpackGenLinSOE::setUmfpackGenLinSolver(UmfpackGenLinSolver &newSolver)
 int 
 UmfpackGenLinSOE::sendSelf(int cTag, Channel &theChannel)
 {
-    return 0;
+  LinearSOESolver *theSoeSolver = this->getSolver();
+  if (theSoeSolver != 0) {
+    if (theSoeSolver->sendSelf(cTag, theChannel) < 0) {
+      opserr <<"WARNING MumpsParallelSOE::sendSelf() - failed to send solver\n";
+      return -1;
+    } 
+  } else {
+    opserr <<"WARNING MumpsParallelSOE::sendSelf() - no solver to send!\n";
+    return -1;
+  }  
+  return 0;
 }
 
 int 
 UmfpackGenLinSOE::recvSelf(int cTag, Channel &theChannel, 
 			   FEM_ObjectBroker &theBroker)
 {
-    return 0;
+  UmfpackGenLinSolver *theSolvr = new UmfpackGenLinSolver();
+  if (theSolvr->recvSelf(cTag, theChannel, theBroker) < 0) {
+    opserr <<"WARNING MumpsParallelSOE::sendSelf() - failed to recv solver\n";
+    return -1;
+  }
+
+  theSolvr->setLinearSOE(*this);
+  this->setSolver(*theSolvr);
+
+  return 0;
 }
 

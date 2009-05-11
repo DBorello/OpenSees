@@ -18,16 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-12-07 00:17:55 $
+// $Revision: 1.3 $
+// $Date: 2009-05-11 20:56:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSOE.h,v $
                                                                         
-                                                                        
-// File: ~/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSOE.h
-//
 // Written: fmk 
 // Created: 11/98
-// Revision: A
 //
 // Description: This file contains the class definition for 
 // UmfpackGenLinSOE. It stores the sparse matrix A in a fashion
@@ -48,6 +44,7 @@ class UmfpackGenLinSOE : public LinearSOE
 {
   public:
     UmfpackGenLinSOE(UmfpackGenLinSolver &theSolver);        
+    UmfpackGenLinSOE();        
     UmfpackGenLinSOE(int N, int NNZ, int *rowStartA, int *colA,
 		    UmfpackGenLinSolver &theSolver);        
 
