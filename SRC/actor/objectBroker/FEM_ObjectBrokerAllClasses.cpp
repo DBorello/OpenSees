@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2009-04-30 23:28:21 $
+// $Revision: 1.15 $
+// $Date: 2009-05-11 21:12:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.cpp,v $
                                                                         
 // Written: fmk
@@ -306,18 +306,12 @@
 #include <LinearSOE.h>
 #include <DomainSolver.h>
 #include <FullGenLinSOE.h>
-#include <FullGenLinLapackSolver.h>
 #include <BandGenLinSOE.h>
-
-#include <BandGenLinLapackSolver.h>
 #include <BandSPDLinSOE.h>
-#include <BandSPDLinLapackSolver.h>
 #include <ProfileSPDLinSOE.h>
-#include <ProfileSPDLinDirectSolver.h>
 #include <ProfileSPDLinSubstrSolver.h>
 
 #include <SparseGenColLinSOE.h>
-#include <SuperLU.h>
 
 #include <DomainDecompositionAnalysis.h>
 
@@ -345,18 +339,14 @@
 
 #ifdef _PETSC
 #include <PetscSOE.h>
-#include <PetscSolver.h>
 #include <SparseGenColLinSOE.h>
-#include <PetscSparseSeqSolver.h>
 #endif
 
 
 #ifdef _MUMPS
 #include <MumpsSOE.h>
-#include <MumpsSolver.h>
 #ifdef _PARALLEL_PROCESSING
 #include <MumpsParallelSOE.h>
-#include <MumpsParallelSolver.h>
 #endif
 #endif
 
@@ -365,14 +355,12 @@
 #include <DistributedProfileSPDLinSOE.h>
 #include <DistributedSparseGenColLinSOE.h>
 #include <DistributedSparseGenRowLinSOE.h>
-#include <DistributedSparseGenRowLinSolver.h>
 #include <DistributedBandGenLinSOE.h>
 #include <DistributedSuperLU.h>
 #include <ParallelNumberer.h>
 #include <StaticDomainDecompositionAnalysis.h>
 #include <TransientDomainDecompositionAnalysis.h>
 #include <DistributedDiagonalSOE.h>
-#include <DistributedDiagonalSolver.h>
 #endif
 
 #include <TclFeViewer.h>
@@ -392,7 +380,7 @@ static UniaxialPackage *theUniaxialPackage = NULL;
 
 
 FEM_ObjectBrokerAllClasses::FEM_ObjectBrokerAllClasses()
-:lastLinearSolver(0),lastDomainSolver(0)
+:lastDomainSolver(0)
 {
 
 }
@@ -1563,36 +1551,10 @@ FEM_ObjectBrokerAllClasses::getNewIncrementalIntegrator(int classTag)
 	 }
 }
 
-
-LinearSOESolver *
-FEM_ObjectBrokerAllClasses::getNewLinearSolver(void)
-{
-    return lastLinearSolver;
-}
-
 LinearSOE *
-FEM_ObjectBrokerAllClasses::getNewLinearSOE(int classTagSOE, 
-				  int classTagSolver)
+FEM_ObjectBrokerAllClasses::getNewLinearSOE(int classTagSOE)
 {
     LinearSOE *theSOE =0;
-//    SlowLinearSOESolver *theSlowSolver =0;	    
-    FullGenLinSolver *theGenSolver =0;
-    BandGenLinSolver *theGenBandSolver =0;
-    BandSPDLinSolver *theBandSPDSolver =0;
-    ProfileSPDLinSolver *theProfileSPDSolver =0;    
-    SuperLU *theSparseGenLinSolver =0;
-
-#ifdef _PETSC
-    PetscSolver *thePetscSolver = 0;
-#endif
-
-#ifdef _PARALLEL_PROCESSING
-    DistributedSuperLU *theDistributedSparseGenLinSolver =0;
-    DistributedDiagonalSolver *theDistributedDiagonalSolver =0;
-#ifdef _MUMPS
-    MumpsParallelSolver *theMumpsSolver = 0;
-#endif
-#endif    
 
     /*
       case LinSOE_TAGS_SlowLinearSOE:  
@@ -1612,198 +1574,49 @@ FEM_ObjectBrokerAllClasses::getNewLinearSOE(int classTagSOE,
 
     
     switch(classTagSOE) {
-      case LinSOE_TAGS_FullGenLinSOE:  
 
-	if (classTagSolver == SOLVER_TAGS_FullGenLinLapackSolver) {
-	    theGenSolver = new FullGenLinLapackSolver();
-	    theSOE = new FullGenLinSOE(*theGenSolver);
-	    lastLinearSolver = theGenSolver;
-	    return theSOE;
-	} else {
-	    opserr << "FEM_ObjectBrokerAllClasses::getNewLinearSOE - ";
-	    opserr << " - no FullGenLinSOESolver type exists for class tag ";
-	    opserr << classTagSolver << endln;
-	    return 0;		 
-	}	     
-	
-					 
-      case LinSOE_TAGS_BandGenLinSOE:  
-
-	  if (classTagSolver == SOLVER_TAGS_BandGenLinLapackSolver) {
-	      theGenBandSolver = new BandGenLinLapackSolver();
-	      theSOE = new BandGenLinSOE(*theGenBandSolver);
-	      lastLinearSolver = theGenBandSolver;
-	      return theSOE;
-	  } else {
-	      opserr << "FEM_ObjectBrokerAllClasses::getNewLinearSOE - ";
-	      opserr << " - no BandGenLinSolver type exists for class tag ";
-	      opserr << classTagSolver << endln;
-	      return 0;
-	  }		     
-
-	case LinSOE_TAGS_BandSPDLinSOE:  
-
-	  if (classTagSolver == SOLVER_TAGS_BandSPDLinLapackSolver) {
-	      theBandSPDSolver = new BandSPDLinLapackSolver();
-	      theSOE = new BandSPDLinSOE(*theBandSPDSolver);
-	      lastLinearSolver = theBandSPDSolver;
-	      return theSOE;
-	  } else {
-	      opserr << "FEM_ObjectBrokerAllClasses::getNewLinearSOE - ";
-	      opserr << " - no BandSPDLinSOESolver type exists for class tag ";
-	      opserr << classTagSolver << endln;
-	      return 0;
-	  }	     
-
-	case LinSOE_TAGS_ProfileSPDLinSOE:  
-
-	  if (classTagSolver == SOLVER_TAGS_ProfileSPDLinDirectSolver) {
-	      theProfileSPDSolver = new ProfileSPDLinDirectSolver();
-	      theSOE = new ProfileSPDLinSOE(*theProfileSPDSolver);
-	      lastLinearSolver = theProfileSPDSolver;
-	      return theSOE;
-	  } else if (classTagSolver == SOLVER_TAGS_ProfileSPDLinSubstrSolver) {
-	      theProfileSPDSolver = new ProfileSPDLinSubstrSolver();
-	      theSOE = new ProfileSPDLinSOE(*theProfileSPDSolver);
-	      lastLinearSolver = theProfileSPDSolver;
-	      return 0;		 
-	  }	
-	  else {
-	      opserr << "FEM_ObjectBrokerAllClasses::getNewLinearSOE - ";
-	      opserr << " - no ProfileSPD_LinSolver type exists for class tag ";
-	      opserr << classTagSolver << endln;
-	      return 0;		 
-	  }	     
-
+	case LinSOE_TAGS_SparseGenColLinSOE:  
+	  theSOE = new SparseGenColLinSOE();
+	  return theSOE;
 
 #ifdef _PETSC
-      case LinSOE_TAGS_PetscSOE:  
-	
-	  if (classTagSolver == SOLVER_TAGS_PetscSolver) {
-	      thePetscSolver = new PetscSolver();
-	      theSOE = new PetscSOE(*thePetscSolver);
-	      return theSOE;
-	  } else {
-	      opserr << "FEM_ObjectBrokerAllClasses::getNewLinearSOE - ";
-	      opserr << " - no PetscSolver type exists for class tag ";
-	      opserr << classTagSolver << endln;
-	      return 0;
-	  }		     
+        case LinSOE_TAGS_PetscSOE:  
+	  theSOE = new PetscSOE();
+	  return theSOE;
 #endif
 
 #ifdef _PARALLEL_PROCESSING
 
 #ifdef _MUMPS
-      case LinSOE_TAGS_MumpsParallelSOE:  
-	  if (classTagSolver == SOLVER_TAGS_MumpsParallelSolver) {
-	      theMumpsSolver = new MumpsParallelSolver();
-	      theSOE = new MumpsParallelSOE(*theMumpsSolver);
-	      lastLinearSolver = theMumpsSolver;
-	      return theSOE;
-	  } else {
-	      opserr << "FEM_ObjectBrokerAllClasses::getNewLinearSOE - ";
-	      opserr << " - no DistributedBandGenLinSolver type exists for class tag ";
-	      opserr << classTagSolver << endln;
-	      return 0;
-	  }		     
+        case LinSOE_TAGS_MumpsParallelSOE:  
+	  theSOE = new MumpsParallelSOE();
+	  return theSOE;
 #endif
 
-      case LinSOE_TAGS_DistributedBandGenLinSOE:  
+        case LinSOE_TAGS_DistributedBandGenLinSOE:  
 
-	  if (classTagSolver == SOLVER_TAGS_BandGenLinLapackSolver) {
-	      theGenBandSolver = new BandGenLinLapackSolver();
-	      theSOE = new DistributedBandGenLinSOE(*theGenBandSolver);
-	      lastLinearSolver = theGenBandSolver;
-	      return theSOE;
-	  } else {
-	      opserr << "FEM_ObjectBrokerAllClasses::getNewLinearSOE - ";
-	      opserr << " - no DistributedBandGenLinSolver type exists for class tag ";
-	      opserr << classTagSolver << endln;
-	      return 0;
-	  }		     
+	  theSOE = new DistributedBandGenLinSOE();
+	  return theSOE;
 
         case LinSOE_TAGS_DistributedBandSPDLinSOE:  
 
-	  if (classTagSolver == SOLVER_TAGS_BandSPDLinLapackSolver) {
-	      theBandSPDSolver = new BandSPDLinLapackSolver();
-	      theSOE = new DistributedBandSPDLinSOE(*theBandSPDSolver);
-	      lastLinearSolver = theBandSPDSolver;
-	      return theSOE;
-	  } else {
-	      opserr << "FEM_ObjectBrokerAllClasses::getNewLinearSOE - ";
-	      opserr << " - no DistributedBandSPDLinSolver type exists for class tag ";
-	      opserr << classTagSolver << endln;
-	      return 0;
-	  }		     
-	  
+	  theSOE = new DistributedBandSPDLinSOE();
+	  return theSOE;
 
 	case LinSOE_TAGS_DistributedProfileSPDLinSOE:  
 
-	  if (classTagSolver == SOLVER_TAGS_ProfileSPDLinDirectSolver) {
-	      theProfileSPDSolver = new ProfileSPDLinDirectSolver();
-	      theSOE = new DistributedProfileSPDLinSOE(*theProfileSPDSolver);
-	      lastLinearSolver = theProfileSPDSolver;
-	      return theSOE;
-	  } else if (classTagSolver == SOLVER_TAGS_ProfileSPDLinSubstrSolver) {
-	      theProfileSPDSolver = new ProfileSPDLinSubstrSolver();
-	      theSOE = new DistributedProfileSPDLinSOE(*theProfileSPDSolver);
-	      lastLinearSolver = theProfileSPDSolver;
-	      return 0;		 
-	  }	
-	  else {
-	      opserr << "FEM_ObjectBrokerAllClasses::getNewLinearSOE - ";
-	      opserr << " - no ProfileSPD_LinSolver type exists for class tag ";
-	      opserr << classTagSolver << endln;
-	      return 0;		 
-	  }	     
+	  theSOE = new DistributedProfileSPDLinSOE();
+	  return theSOE;
 	  
 	case LinSOE_TAGS_DistributedDiagonalSOE:  
 
-	  if (classTagSolver == SOLVER_TAGS_DistributedDiagonalSolver) {
-	    theDistributedDiagonalSolver = new DistributedDiagonalSolver();
-	    theSOE = new DistributedDiagonalSOE(*theDistributedDiagonalSolver);
-	    lastLinearSolver = theDistributedDiagonalSolver;
-	    return theSOE;
-	  } else {
-	    opserr << "FEM_ObjectBrokerAllClasses::getNewLinearSOE - ";
-	    opserr << " - no DistributedSparseGenLinSolverSolver type exists for class tag ";
-	    opserr << classTagSolver << endln;
-	    return 0;
-	  }	     
+	  theSOE = new DistributedDiagonalSOE();
+	  return theSOE;
 
 	case LinSOE_TAGS_DistributedSparseGenColLinSOE:  
 
-	  if (classTagSolver == SOLVER_TAGS_SuperLU) {
-	      theSparseGenLinSolver = new SuperLU();
-	      theSOE = new DistributedSparseGenColLinSOE(*theSparseGenLinSolver);
-	      lastLinearSolver = theSparseGenLinSolver;
-	      return theSOE;
-	  } else if (classTagSolver == SOLVER_TAGS_DistributedSuperLU) {
-	      theDistributedSparseGenLinSolver = new DistributedSuperLU();
-	      theSOE = new DistributedSparseGenColLinSOE(*theDistributedSparseGenLinSolver);
-	      lastLinearSolver = theSparseGenLinSolver;
-	      return theSOE;
-	  } else {
-	      opserr << "FEM_ObjectBrokerAllClasses::getNewLinearSOE - ";
-	      opserr << " - no DistributedSparseGenLinSolverSolver type exists for class tag ";
-	      opserr << classTagSolver << endln;
-	      return 0;
-	  }	     
-
-#else
-	case LinSOE_TAGS_SparseGenColLinSOE:  
-
-	  if (classTagSolver == SOLVER_TAGS_SuperLU) {
-	      theSparseGenLinSolver = new SuperLU();
-	      theSOE = new SparseGenColLinSOE(*theSparseGenLinSolver);
-	      lastLinearSolver = theSparseGenLinSolver;
-	      return theSOE;
-	  } else {
-	      opserr << "FEM_ObjectBrokerAllClasses::getNewLinearSOE - ";
-	      opserr << " - no SparseGenLinSolverSolver type exists for class tag ";
-	      opserr << classTagSolver << endln;
-	      return 0;
-	  }	     
+	  theSOE = new DistributedSparseGenColLinSOE();
+	  return theSOE;
 
 #endif
 

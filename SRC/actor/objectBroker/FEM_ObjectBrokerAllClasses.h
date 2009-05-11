@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2009-04-17 22:57:47 $
+// $Revision: 1.4 $
+// $Date: 2009-05-11 21:12:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.h,v $
                                                                         
 // Written: fmk
@@ -42,87 +42,84 @@ class FEM_ObjectBrokerAllClasses : public FEM_ObjectBroker
 {
   public:
     FEM_ObjectBrokerAllClasses();
-    virtual ~FEM_ObjectBrokerAllClasses();
+    ~FEM_ObjectBrokerAllClasses();
 
-    virtual Actor*getNewActor(int classTag, Channel *theChannel);
+    Actor*getNewActor(int classTag, Channel *theChannel);
     
-    virtual PartitionedModelBuilder *
+    PartitionedModelBuilder *
       getPtrNewPartitionedModelBuilder(Subdomain &theSub,
 				       int classTag);
     
-    virtual GraphNumberer *getPtrNewGraphNumberer(int classTag);
+    GraphNumberer *getPtrNewGraphNumberer(int classTag);
     
     // methods to get new modelling class objects
-    virtual Element       *getNewElement(int classTag);
-    virtual Node          *getNewNode(int classTag);
-    virtual MP_Constraint *getNewMP(int classTag);
-    virtual SP_Constraint *getNewSP(int classTag);
-    virtual NodalLoad     *getNewNodalLoad(int classTag);
-    virtual ElementalLoad *getNewElementalLoad(int classTag);
+    Element       *getNewElement(int classTag);
+    Node          *getNewNode(int classTag);
+    MP_Constraint *getNewMP(int classTag);
+    SP_Constraint *getNewSP(int classTag);
+    NodalLoad     *getNewNodalLoad(int classTag);
+    ElementalLoad *getNewElementalLoad(int classTag);
     
-    virtual CrdTransf2d *getNewCrdTransf2d(int classTag);
-    virtual CrdTransf3d *getNewCrdTransf3d(int classTag);
+    CrdTransf2d *getNewCrdTransf2d(int classTag);
+    CrdTransf3d *getNewCrdTransf3d(int classTag);
 
-    virtual BeamIntegration *getNewBeamIntegration(int classTag);
+    BeamIntegration *getNewBeamIntegration(int classTag);
 
-    virtual UniaxialMaterial  *getNewUniaxialMaterial(int classTag);
-    virtual SectionForceDeformation  *getNewSection(int classTag);    
-    virtual NDMaterial *getNewNDMaterial(int classTag);
-    virtual Fiber *getNewFiber(int classTag);
-    virtual FrictionModel *getNewFrictionModel(int classTag);
+    UniaxialMaterial  *getNewUniaxialMaterial(int classTag);
+    SectionForceDeformation  *getNewSection(int classTag);    
+    NDMaterial *getNewNDMaterial(int classTag);
+    Fiber *getNewFiber(int classTag);
+    FrictionModel *getNewFrictionModel(int classTag);
 
-    virtual ConvergenceTest *getNewConvergenceTest(int classTag);
-    virtual LoadPattern *getNewLoadPattern(int classTag);
-    virtual GroundMotion *getNewGroundMotion(int classTag);
-    virtual TimeSeries  *getNewTimeSeries(int classTag);    
-    virtual TimeSeriesIntegrator  *getNewTimeSeriesIntegrator(int classTag);    
+    ConvergenceTest       *getNewConvergenceTest(int classTag);
+    LoadPattern           *getNewLoadPattern(int classTag);
+    GroundMotion          *getNewGroundMotion(int classTag);
+    TimeSeries            *getNewTimeSeries(int classTag);    
+    TimeSeriesIntegrator  *getNewTimeSeriesIntegrator(int classTag);    
     
     // matrix vector and id objects
-    virtual Matrix	  *getPtrNewMatrix(int classTag, int noRows, int noCols);
-    virtual Vector	  *getPtrNewVector(int classTag, int size);
-    virtual ID	          *getPtrNewID(int classTag, int size);
+    Matrix	  *getPtrNewMatrix(int classTag, int noRows, int noCols);
+    Vector	  *getPtrNewVector(int classTag, int size);
+    ID	          *getPtrNewID(int classTag, int size);
 
     // methods for ouput objects
-    //    virtual DataOutputHandler *getPtrNewDataOutputHandler(int classTag);
-    virtual OPS_Stream *getPtrNewStream(int classTag);
-    virtual Recorder *getPtrNewRecorder(int classTag);
+    //    DataOutputHandler *getPtrNewDataOutputHandler(int classTag);
+    OPS_Stream *getPtrNewStream(int classTag);
+    Recorder *getPtrNewRecorder(int classTag);
     
     
     // methods to get new analysis objects
-    virtual ConstraintHandler   *getNewConstraintHandler(int classTag);
-    virtual DOF_Numberer        *getNewNumberer(int classTag);
-    virtual AnalysisModel       *getNewAnalysisModel(int classTag);
-    virtual EquiSolnAlgo        *getNewEquiSolnAlgo(int classTag);
-    virtual Accelerator         *getAccelerator(int classTag);
-    virtual LineSearch          *getLineSearch(int classTag);
-    virtual DomainDecompAlgo    *getNewDomainDecompAlgo(int classTag);
-    virtual StaticIntegrator    *getNewStaticIntegrator(int classTag);
-    virtual TransientIntegrator *getNewTransientIntegrator(int classTag);
-    virtual IncrementalIntegrator *getNewIncrementalIntegrator(int classTag);
+    ConstraintHandler     *getNewConstraintHandler(int classTag);
+    DOF_Numberer          *getNewNumberer(int classTag);
+    AnalysisModel         *getNewAnalysisModel(int classTag);
+    EquiSolnAlgo          *getNewEquiSolnAlgo(int classTag);
+    Accelerator           *getAccelerator(int classTag);
+    LineSearch            *getLineSearch(int classTag);
+    DomainDecompAlgo      *getNewDomainDecompAlgo(int classTag);
+    StaticIntegrator      *getNewStaticIntegrator(int classTag);
+    TransientIntegrator   *getNewTransientIntegrator(int classTag);
+    IncrementalIntegrator *getNewIncrementalIntegrator(int classTag);
 
-    virtual LinearSOE *getNewLinearSOE(int classTagSOE, int classTagSolver);
-    virtual LinearSOESolver *getNewLinearSolver(void);
+    LinearSOE *getNewLinearSOE(int classTagSOE);
     
-    virtual LinearSOE *getPtrNewDDLinearSOE(int classTagSOE, 
-					    int classTagDDSolver);
-    virtual DomainSolver *getNewDomainSolver(void);
+    LinearSOE *getPtrNewDDLinearSOE(int classTagSOE, 
+				    int classTagDDSolver);
 
-    virtual DomainDecompositionAnalysis *
+    DomainSolver *getNewDomainSolver(void);
+
+    DomainDecompositionAnalysis *
       getNewDomainDecompAnalysis(int classTag, Subdomain &theDomain);
 
-    virtual Subdomain  *getSubdomainPtr(int classTag);
+    Subdomain  *getSubdomainPtr(int classTag);
 
-    virtual Parameter *getParameter(int classTag);
+    Parameter *getParameter(int classTag);
 
-    virtual int addUniaxialMaterial(int classTag, const char *lib, const char *funcName, UniaxialMaterial *(*)(void));
+    int addUniaxialMaterial(int classTag, const char *lib, const char *funcName, UniaxialMaterial *(*)(void));
     
   protected:
     
   private:
-    LinearSOESolver *lastLinearSolver;
     DomainSolver *lastDomainSolver;
-
-    
 };
 
 #endif
