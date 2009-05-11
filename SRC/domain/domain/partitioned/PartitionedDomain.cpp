@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2009-04-14 21:17:22 $
+// $Revision: 1.19 $
+// $Date: 2009-05-11 21:30:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -177,7 +177,9 @@ PartitionedDomain::clearAll(void)
     theSub->clearAll();
 
   theSubdomains->clearAll();
+
   this->Domain::clearAll();
+
   elements->clearAll();
 }
     
@@ -977,7 +979,7 @@ PartitionedDomain::hasDomainChanged(void)
 }
 
 int
-PartitionedDomain::newStep(double dT)
+PartitionedDomain::analysisStep(double dT)
 {
   // first we need to see if any subdomain has changed & mark the change in domain
   bool domainChangedAnySubdomain = this->getDomainChangeFlag();
@@ -1005,7 +1007,7 @@ PartitionedDomain::newStep(double dT)
     }
   }
 
-  this->Domain::newStep(dT);
+  this->Domain::analysisStep(dT);
 
     int res = 0;
     // do the same for all the subdomains
@@ -1014,12 +1016,60 @@ PartitionedDomain::newStep(double dT)
       TaggedObject *theObject;
       while ((theObject = theSubsIter()) != 0) {
 	Subdomain *theSub = (Subdomain *)theObject;	    
-	res += theSub->newStep(dT);
+	res += theSub->analysisStep(dT);
 	if (res != 0) 
 	  opserr << "PartitionedDomain::step - subdomain " << theSub->getTag() << " failed in step\n";
       }
     }
     return res;
+}
+
+
+
+int
+PartitionedDomain::eigenAnalysis(int numModes, bool generalized)
+{
+  // first we need to see if any subdomain has changed & mark the change in domain
+  bool domainChangedAnySubdomain = this->getDomainChangeFlag();
+  if (domainChangedAnySubdomain == false) {
+    // do the same for all the subdomains
+    if (theSubdomains != 0) {
+	ArrayOfTaggedObjectsIter theSubsIter(*theSubdomains);	
+	TaggedObject *theObject;
+	while (((theObject = theSubsIter()) != 0) && (domainChangedAnySubdomain == false)) {
+	    Subdomain *theSub = (Subdomain *)theObject;	    
+	    domainChangedAnySubdomain = theSub->getDomainChangeFlag();
+	}
+    }
+  }
+
+  if (domainChangedAnySubdomain == true) {
+    this->Domain::domainChange();
+    if (theSubdomains != 0) {
+	ArrayOfTaggedObjectsIter theSubsIter(*theSubdomains);	
+	TaggedObject *theObject;
+	while (((theObject = theSubsIter()) != 0) && (domainChangedAnySubdomain == false)) {
+	    Subdomain *theSub = (Subdomain *)theObject;	    
+	    theSub->domainChange();
+	}
+    }
+  }
+
+  this->Domain::eigenAnalysis(numModes, generalized);
+  
+  int res = 0;
+  // do the same for all the subdomains
+  if (theSubdomains != 0) {
+    ArrayOfTaggedObjectsIter theSubsIter(*theSubdomains);	
+    TaggedObject *theObject;
+    while ((theObject = theSubsIter()) != 0) {
+      Subdomain *theSub = (Subdomain *)theObject;	    
+      res += theSub->eigenAnalysis(numModes, generalized);
+      if (res != 0) 
+	opserr << "PartitionedDomain::step - subdomain " << theSub->getTag() << " failed in step\n";
+    }
+  }
+  return res;
 }
 
 
@@ -1282,7 +1332,6 @@ PartitionedDomain::partition(int numPartitions, bool usingMain, int mainPartitio
       }
     }
 
-    
     return result;
 }
 

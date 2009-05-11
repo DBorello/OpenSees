@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-11-29 23:26:36 $
+// $Revision: 1.12 $
+// $Date: 2009-05-11 21:30:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.h,v $
                                                                         
                                                                         
@@ -106,7 +106,8 @@ class PartitionedDomain: public Domain
     virtual  int revertToStart(void);    
     virtual  int update(void);        
     virtual  int update(double newTime, double dT);
-    virtual  int newStep(double dT);
+    virtual  int analysisStep(double dT);
+    virtual  int eigenAnalysis(int, bool);
 
     virtual int  addRecorder(Recorder &theRecorder);    	
     virtual int  removeRecorders(void);

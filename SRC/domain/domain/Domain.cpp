@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.56 $
-// $Date: 2009-03-20 18:38:29 $
+// $Revision: 1.57 $
+// $Date: 2009-05-11 21:30:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -1745,7 +1745,13 @@ Domain::updateParameter(int tag, double value)
 
 
 int
-Domain::newStep(double dT)
+Domain::analysisStep(double dT)
+{
+  return 0;
+}
+
+int
+Domain::eigenAnalysis(int nuMode, bool generalized)
 {
   return 0;
 }

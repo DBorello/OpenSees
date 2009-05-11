@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.27 $
-// $Date: 2008-08-26 17:03:32 $
+// $Revision: 1.28 $
+// $Date: 2009-05-11 21:30:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
 // Written: fmk 
@@ -178,7 +178,8 @@ class Domain
     virtual  int  updateParameter(int tag, int value);
     virtual  int  updateParameter(int tag, double value);    
     
-    virtual  int  newStep(double dT);
+    virtual  int  analysisStep(double dT);
+    virtual  int  eigenAnalysis(int numMode, bool generalized);
     
     // methods for eigenvalue analysis
     virtual int setEigenvalues(const Vector &theEigenvalues);
