@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-04-02 23:43:18 $
+// $Revision: 1.6 $
+// $Date: 2009-05-11 21:32:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DomainDecompositionAnalysis.h,v $
                                                                         
                                                                         
@@ -52,6 +52,7 @@ class DOF_Numberer;
 class AnalysisModel;
 class IncrementalIntegrator;
 class LinearSOE;
+class EigenSOE;
 class DomainSolver;
 class DomainDecompAlgo;
 class Subdomain;
@@ -92,7 +93,10 @@ class DomainDecompositionAnalysis: public Analysis, public MovableObject
     // that do some form of condensation to the tangent
     virtual int  getNumExternalEqn(void);
     virtual int  getNumInternalEqn(void);
+
     virtual int  newStep(double dT);
+    virtual int  analysisStep(double dT);
+    virtual int  eigenAnalysis(int numMode, bool generalized);
     virtual int  computeInternalResponse(void);
     virtual int  formTangent(void);
     virtual int  formResidual(void);
@@ -109,6 +113,7 @@ class DomainDecompositionAnalysis: public Analysis, public MovableObject
     virtual int setAlgorithm(EquiSolnAlgo &theAlgorithm);
     virtual int setIntegrator(IncrementalIntegrator &theIntegrator);
     virtual int setLinearSOE(LinearSOE &theSOE);
+    virtual int setEigenSOE(EigenSOE &theSOE);
     virtual int setConvergenceTest(ConvergenceTest &theTest);
     
   protected: 

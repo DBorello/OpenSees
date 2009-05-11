@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2008-08-13 22:41:32 $
+// $Revision: 1.15 $
+// $Date: 2009-05-11 21:32:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.cpp,v $
                                                                         
                                                                         
@@ -33,6 +33,7 @@
 #include <EquiSolnAlgo.h>
 #include <AnalysisModel.h>
 #include <LinearSOE.h>
+#include <EigenSOE.h>
 #include <DOF_Numberer.h>
 #include <ConstraintHandler.h>
 #include <ConvergenceTest.h>
@@ -67,7 +68,7 @@ StaticAnalysis::StaticAnalysis(Domain &the_Domain,
 			       ConvergenceTest *theConvergenceTest)
 :Analysis(the_Domain), theConstraintHandler(&theHandler),
  theDOF_Numberer(&theNumberer), theAnalysisModel(&theModel), 
- theAlgorithm(&theSolnAlgo), theSOE(&theLinSOE),
+ theAlgorithm(&theSolnAlgo), theSOE(&theLinSOE), theEigenSOE(0),
  theIntegrator(&theStaticIntegrator), theTest(theConvergenceTest),
  domainStamp(0)
 {
@@ -116,6 +117,8 @@ StaticAnalysis::clearAll(void)
     delete theSOE;
   if (theTest != 0)
     delete theTest;
+  if (theEigenSOE != 0)
+    delete theEigenSOE;
 
   // now set the pointers to NULL
   theAnalysisModel =0;
@@ -124,6 +127,7 @@ StaticAnalysis::clearAll(void)
   theIntegrator =0;
   theAlgorithm =0;
   theSOE =0;
+  theEigenSOE =0;
   theTest = 0;
 
   // AddingSensitivity:BEGIN ////////////////////////////////////
@@ -143,7 +147,7 @@ StaticAnalysis::analyze(int numSteps)
 
     for (int i=0; i<numSteps; i++) {
 
-	result = theAnalysisModel->newStepDomain();
+	result = theAnalysisModel->analysisStep();
 	if (result < 0) {
 	    opserr << "StaticAnalysis::analyze() - the AnalysisModel failed";
 	    opserr << " at iteration: " << i << " with domain at load factor ";
@@ -221,6 +225,113 @@ StaticAnalysis::analyze(int numSteps)
 	    return -4;
 	}    	
     }
+    
+    return 0;
+}
+
+
+int 
+StaticAnalysis::eigen(int numMode, bool generalized)
+{
+
+    if (theAnalysisModel == 0 || theEigenSOE == 0) {
+      opserr << "WARNING StaticAnalysis::eigen() - no EigenSOE has been set\n";
+      return -1;
+    }
+
+    int result = 0;
+    Domain *the_Domain = this->getDomainPtr();
+
+    result = theAnalysisModel->eigenAnalysis(numMode, generalized);
+
+    int stamp = the_Domain->hasDomainChanged();
+
+    if (stamp != domainStamp) {
+      domainStamp = stamp;
+      
+      result = this->domainChanged();
+      
+      if (result < 0) {
+	opserr << "StaticAnalysis::eigen() - domainChanged failed";
+	return -1;
+      }	
+    }
+
+
+    //
+    // zero A and M
+    //
+
+    theEigenSOE->zeroA();
+    theEigenSOE->zeroM();
+
+    //
+    // form K
+    //
+
+    FE_EleIter &theEles = theAnalysisModel->getFEs();    
+    FE_Element *elePtr;
+
+    while((elePtr = theEles()) != 0) {
+      elePtr->zeroTangent();
+      elePtr->addKtToTang(1.0);
+      if (theEigenSOE->addA(elePtr->getTangent(0), elePtr->getID()) < 0) {
+	opserr << "WARNING StaticAnalysis::eigen() -";
+	opserr << " failed in addA for ID " << elePtr->getID();	    
+	result = -2;
+      }
+    }
+
+    //
+    // if generalized is true, form M
+    //
+
+    if (generalized == true) {
+      int result = 0;
+      FE_EleIter &theEles2 = theAnalysisModel->getFEs();    
+      while((elePtr = theEles2()) != 0) {     
+	elePtr->zeroTangent();
+	elePtr->addMtoTang(1.0);
+	if (theEigenSOE->addM(elePtr->getTangent(0), elePtr->getID()) < 0) {
+	  opserr << "WARNING StaticAnalysis::eigen() -";
+	  opserr << " failed in addA for ID " << elePtr->getID();	    
+	  result = -2;
+	}
+      }
+      
+      DOF_Group *dofPtr;
+      DOF_GrpIter &theDofs = theAnalysisModel->getDOFs();    
+      while((dofPtr = theDofs()) != 0) {
+	dofPtr->zeroTangent();
+	dofPtr->addMtoTang(1.0);
+	if (theEigenSOE->addM(dofPtr->getTangent(0),dofPtr->getID()) < 0) {
+	  opserr << "WARNING StaticAnalysis::eigen() -";
+	  opserr << " failed in addM for ID " << dofPtr->getID();	    
+	  result = -3;
+	}
+      }
+    }
+    
+    // 
+    // solve for the eigen values & vectors
+    //
+
+    if (theEigenSOE->solve(numMode, generalized) < 0) {
+	opserr << "WARNING StaticAnalysis::eigen() - EigenSOE failed in solve()\n";
+	return -4;
+    }
+
+    //
+    // now set the eigenvalues and eigenvectors in the model
+    //
+
+    theAnalysisModel->setNumEigenvectors(numMode);
+    Vector theEigenvalues(numMode);
+    for (int i = 1; i <= numMode; i++) {
+      theEigenvalues[i-1] = theEigenSOE->getEigenvalue(i);
+      theAnalysisModel->setEigenvector(i, theEigenSOE->getEigenvector(i));
+    }    
+    theAnalysisModel->setEigenvalues(theEigenvalues);
     
     return 0;
 }
@@ -310,9 +421,17 @@ StaticAnalysis::domainChanged(void)
 	return -3;
     }	    
 
+    if (theEigenSOE != 0) {
+      result = theEigenSOE->setSize(theGraph);
+      if (result < 0) {
+	opserr << "StaticAnalysis::handle() - ";
+	opserr << "EigenSOE::setSize() failed";
+	return -3;
+      }	    
+    }
+
     // finally we invoke domainChanged on the Integrator and Algorithm
     // objects .. informing them that the model has changed
-
 
     result = theIntegrator->domainChanged();
     if (result < 0) {
@@ -321,13 +440,14 @@ StaticAnalysis::domainChanged(void)
 	return -4;
     }	    
 
+  opserr << "StaticAnalysis::domainChanged(void) - 6\n";
     result = theAlgorithm->domainChanged();
     if (result < 0) {
 	opserr << "StaticAnalysis::setAlgorithm() - ";
 	opserr << "Algorithm::domainChanged() failed";
 	return -5;
     }	        
-
+  opserr << "StaticAnalysis::domainChanged(void) - 7\n";
     // if get here successfull
     return 0;
 }    
@@ -409,11 +529,14 @@ StaticAnalysis::setIntegrator(StaticIntegrator &theNewIntegrator)
     theIntegrator->setLinks(*theAnalysisModel, *theSOE, theTest);
     theConstraintHandler->setLinks(*the_Domain, *theAnalysisModel, *theIntegrator);
     theAlgorithm->setLinks(*theAnalysisModel, *theIntegrator, *theSOE, theTest);
-    // cause domainChanged to be invoked on next analyze
-    //    domainStamp = 0;
 
+    // cause domainChanged to be invoked on next analyze
+    domainStamp = 0;
+
+    /*
     if (domainStamp != 0)
       theIntegrator->domainChanged();
+    */
 
   return 0;
 
@@ -432,7 +555,32 @@ StaticAnalysis::setLinearSOE(LinearSOE &theNewSOE)
     theAlgorithm->setLinks(*theAnalysisModel, *theIntegrator, *theSOE, theTest);
 
     // cause domainChanged to be invoked on next analyze
+    /*
+    if (domainStamp != 0) {
+      Graph &theGraph = theAnalysisModel->getDOFGraph();
+      int result = theSOE->setSize(theGraph);
+    }
+    */
     domainStamp = 0;
+    return 0;
+}
+
+
+int 
+StaticAnalysis::setEigenSOE(EigenSOE &theNewSOE)
+{
+    // invoke the destructor on the old one
+    if (theEigenSOE != 0)
+	delete theEigenSOE;
+
+    // set the links needed by the other objects in the aggregation
+    theEigenSOE = &theNewSOE;
+
+    // cause domainChanged to be invoked on next analyze
+    if (domainStamp != 0) {
+      Graph &theGraph = theAnalysisModel->getDOFGraph();
+      int result = theEigenSOE->setSize(theGraph);
+    }
 
     return 0;
 }

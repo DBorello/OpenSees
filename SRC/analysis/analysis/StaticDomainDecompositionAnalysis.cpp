@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-04-21 00:06:20 $
+// $Revision: 1.9 $
+// $Date: 2009-05-11 21:32:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticDomainDecompositionAnalysis.cpp,v $
                                                                         
 // Written: fmk 
@@ -33,6 +33,7 @@
 #include <EquiSolnAlgo.h>
 #include <AnalysisModel.h>
 #include <LinearSOE.h>
+#include <EigenSOE.h>
 #include <LinearSOESolver.h>
 #include <DOF_Numberer.h>
 #include <ConstraintHandler.h>
@@ -67,6 +68,7 @@ StaticDomainDecompositionAnalysis::StaticDomainDecompositionAnalysis(Subdomain &
    theAnalysisModel(0), 
    theAlgorithm(0), 
    theSOE(0),
+   theEigenSOE(0),
    theIntegrator(0),
    theTest(0),
    domainStamp(0)
@@ -89,6 +91,7 @@ StaticDomainDecompositionAnalysis::StaticDomainDecompositionAnalysis(Subdomain &
    theAnalysisModel(&theModel), 
    theAlgorithm(&theSolnAlgo), 
    theSOE(&theLinSOE),
+   theEigenSOE(0),
    theIntegrator(&theStaticIntegrator),
    theTest(theConvergenceTest),
    domainStamp(0)
@@ -128,6 +131,8 @@ StaticDomainDecompositionAnalysis::clearAll(void)
     delete theAlgorithm;
   if (theSOE != 0)
     delete theSOE;
+  if (theEigenSOE != 0)
+    delete theEigenSOE;
   if (theTest != 0)
     delete theTest;
 
@@ -138,6 +143,7 @@ StaticDomainDecompositionAnalysis::clearAll(void)
   theIntegrator =0;
   theAlgorithm =0;
   theSOE =0;
+  theEigenSOE =0;
   theTest = 0;
 }    
 
@@ -225,6 +231,112 @@ StaticDomainDecompositionAnalysis::analyze(double dT)
 }
 
 
+
+int 
+StaticDomainDecompositionAnalysis::eigen(int numMode, bool generalized)
+{
+  int result = 0;
+  Domain *the_Domain = this->getDomainPtr();
+
+  if (theEigenSOE == 0) {
+    opserr << "StaticDomainDecompositionAnalysis::eigen() - no eigen solver has been set\n";
+    return -1;
+  }
+
+  // check for change in Domain since last step. As a change can
+  // occur in a commit() in a domaindecomp with load balancing
+  // this must now be inside the loop
+
+  int stamp = the_Domain->hasDomainChanged();
+  if (stamp != domainStamp) {
+    domainStamp = stamp;
+    result = this->domainChanged();
+    if (result < 0) {
+      opserr << "StaticDomainDecompositionAnalysis::eigen() - domainChanged failed";
+      return -1;
+    }	
+  }
+
+    //
+    // zero A and M
+    //
+
+    theEigenSOE->zeroA();
+    theEigenSOE->zeroM();
+
+    //
+    // form K
+    //
+
+    FE_EleIter &theEles = theAnalysisModel->getFEs();    
+    FE_Element *elePtr;
+
+    while((elePtr = theEles()) != 0) {
+      elePtr->zeroTangent();
+      elePtr->addKtToTang(1.0);
+      if (theEigenSOE->addA(elePtr->getTangent(0), elePtr->getID()) < 0) {
+	opserr << "WARNING StaticAnalysis::eigen() -";
+	opserr << " failed in addA for ID " << elePtr->getID();	    
+	result = -2;
+      }
+    }
+
+    //
+    // if generalized is true, form M
+    //
+
+    if (generalized == true) {
+      int result = 0;
+      FE_EleIter &theEles2 = theAnalysisModel->getFEs();    
+      while((elePtr = theEles2()) != 0) {     
+	elePtr->zeroTangent();
+	elePtr->addMtoTang(1.0);
+	if (theEigenSOE->addM(elePtr->getTangent(0), elePtr->getID()) < 0) {
+	  opserr << "WARNING StaticAnalysis::eigen() -";
+	  opserr << " failed in addA for ID " << elePtr->getID();	    
+	  result = -2;
+	}
+      }
+      
+      DOF_Group *dofPtr;
+      DOF_GrpIter &theDofs = theAnalysisModel->getDOFs();    
+      while((dofPtr = theDofs()) != 0) {
+	dofPtr->zeroTangent();
+	dofPtr->addMtoTang(1.0);
+	if (theEigenSOE->addM(dofPtr->getTangent(0),dofPtr->getID()) < 0) {
+	  opserr << "WARNING StaticAnalysis::eigen() -";
+	  opserr << " failed in addM for ID " << dofPtr->getID();	    
+	  result = -3;
+	}
+      }
+    }
+    
+    // 
+    // solve for the eigen values & vectors
+    //
+
+    if (theEigenSOE->solve(numMode, generalized) < 0) {
+	opserr << "WARNING StaticAnalysis::eigen() - EigenSOE failed in solve()\n";
+	return -4;
+    }
+
+    //
+    // now set the eigenvalues and eigenvectors in the model
+    //
+
+    theAnalysisModel->setNumEigenvectors(numMode);
+    Vector theEigenvalues(numMode);
+    for (int i = 1; i <= numMode; i++) {
+      theEigenvalues[i-1] = theEigenSOE->getEigenvalue(i);
+      theAnalysisModel->setEigenvector(i, theEigenSOE->getEigenvector(i));
+    }    
+    theAnalysisModel->setEigenvalues(theEigenvalues);
+
+
+  return 0;
+}
+
+
 int 
 StaticDomainDecompositionAnalysis::initialize(void)
 {
@@ -293,12 +405,22 @@ StaticDomainDecompositionAnalysis::domainChanged(void)
   // we invoke setSize() on the LinearSOE which
   // causes that object to determine its size
   Graph &theGraph = theAnalysisModel->getDOFGraph();
+
   result = theSOE->setSize(theGraph);
   if (result < 0) {
     opserr << "StaticDomainDecompositionAnalysis::handle() - ";
     opserr << "LinearSOE::setSize() failed";
     return -3;
   }	    
+
+    if (theEigenSOE != 0) {
+      result = theSOE->setSize(theGraph);
+      if (result < 0) {
+	opserr << "StaticDomainDecompositionAnalysis::handle() - ";
+	opserr << "EigenSOE::setSize() failed";
+	return -3;
+      }	    
+    }
 
   // finally we invoke domainChanged on the Integrator and Algorithm
   // objects .. informing them that the model has changed
@@ -335,12 +457,20 @@ StaticDomainDecompositionAnalysis::getNumInternalEqn(void)
   return 0;
 }
 int  
-StaticDomainDecompositionAnalysis::newStep(double dT) 
+StaticDomainDecompositionAnalysis::analysisStep(double dT) 
 {
   this->analyze(dT);
   return 0;
-
 }
+
+int  
+StaticDomainDecompositionAnalysis::eigenAnalysis(int numMode, bool generalized) 
+{
+  this->eigen(numMode, generalized);
+  return 0;
+}
+
+
 int  
 StaticDomainDecompositionAnalysis::computeInternalResponse(void)
 {
@@ -535,7 +665,7 @@ StaticDomainDecompositionAnalysis::recvSelf(int commitTag, Channel &theChannel,
     if (theSOE != 0)
       delete theSOE;
     
-    theSOE = theBroker.getNewLinearSOE(data(4), data(5));
+    theSOE = theBroker.getNewLinearSOE(data(4));
     if (theSOE == 0) {
       opserr << "StaticDomainDecompositionAnalysis::recvSelf";
       opserr << " - failed to get the LinearSOE\n";
@@ -630,10 +760,12 @@ StaticDomainDecompositionAnalysis::setIntegrator(IncrementalIntegrator &theNewIn
   }
 
   // cause domainChanged to be invoked on next analyze
-  //  domainStamp = 0;
+  domainStamp = 0;
+
+  /*
   if (domainStamp != 0)
     theIntegrator->domainChanged();  
-
+  */
   return 0;
 }
 
@@ -651,6 +783,23 @@ StaticDomainDecompositionAnalysis::setLinearSOE(LinearSOE &theNewSOE)
       theIntegrator->setLinks(*theAnalysisModel, *theSOE, theTest);
       theAlgorithm->setLinks(*theAnalysisModel, *theIntegrator, *theSOE, theTest);
     }
+    
+    // cause domainChanged to be invoked on next analyze
+    domainStamp = 0;
+
+    return 0;
+}
+
+
+int 
+StaticDomainDecompositionAnalysis::setEigenSOE(EigenSOE &theNewSOE)
+{
+    // invoke the destructor on the old one
+    if (theEigenSOE != 0)
+      delete theEigenSOE;
+
+    // set the links needed by the other objects in the aggregation
+    theEigenSOE = &theNewSOE;
     
     // cause domainChanged to be invoked on next analyze
     domainStamp = 0;

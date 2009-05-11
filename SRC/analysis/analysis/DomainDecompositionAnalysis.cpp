@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-04-02 23:43:18 $
+// $Revision: 1.8 $
+// $Date: 2009-05-11 21:32:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DomainDecompositionAnalysis.cpp,v $
                                                                         
                                                                         
@@ -278,24 +278,37 @@ DomainDecompositionAnalysis::getNumInternalEqn(void)
   return numEqn-numExtEqn;
 }
 
-
-
-
 int  
 DomainDecompositionAnalysis::newStep(double dT)
 {
   return theIntegrator->newStep(dT);
 }
 
+int  
+DomainDecompositionAnalysis::analysisStep(double dT)
+{
+  return theIntegrator->newStep(dT);
+}
 
+int  
+DomainDecompositionAnalysis::eigenAnalysis(int numMode, bool generalized)
+{
+  opserr << "DomainDecompositionAnalysis::eigenAnalysis() - should not be called\n";
+  return -1;;
+}
+
+int  
+DomainDecompositionAnalysis::setEigenSOE(EigenSOE &theSOE)
+{
+  opserr << "DomainDecompositionAnalysis::setEigenSOE() - should not be called\n";
+  return -1;;
+}
 
 int  
 DomainDecompositionAnalysis::computeInternalResponse(void)
 {
   return theAlgorithm->solveCurrentStep();
 }
-
-
 
 
 int  

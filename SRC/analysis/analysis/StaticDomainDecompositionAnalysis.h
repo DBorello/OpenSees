@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-12-01 00:07:57 $
+// $Revision: 1.2 $
+// $Date: 2009-05-11 21:32:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticDomainDecompositionAnalysis.h,v $
                                                                         
 // Written: fmk 
@@ -50,6 +50,7 @@ class AnalysisModel;
 class StaticIntegrator;
 class ConvergenceTest;
 class LinearSOE;
+class EigenSOE;
 class LinearSolver;
 class EquiSolnAlgo;
 class Subdomain;
@@ -76,13 +77,15 @@ class StaticDomainDecompositionAnalysis: public DomainDecompositionAnalysis
 
     // methods for non standard domain deomposition analysis
     int analyze(double dT);
+    int eigen(int numMode, bool generalized);
     bool doesIndependentAnalysis(void);    
 
     // methods for standard domain deomposition analysis
     // that do some form of condensation to the tangent
     int  getNumExternalEqn(void);
     int  getNumInternalEqn(void);
-    int  newStep(double dT);
+    int  analysisStep(double dT);
+    int  eigenAnalysis(int numMode, bool generalized);
     int  computeInternalResponse(void);
     int  formTangent(void);
     int  formResidual(void);
@@ -95,6 +98,7 @@ class StaticDomainDecompositionAnalysis: public DomainDecompositionAnalysis
     int setAlgorithm(EquiSolnAlgo &theAlgorithm);
     int setIntegrator(IncrementalIntegrator &theIntegrator);
     int setLinearSOE(LinearSOE &theSOE);
+    int setEigenSOE(EigenSOE &theSOE);
     int setConvergenceTest(ConvergenceTest &theTest);
 
     // methods to send/receive
@@ -110,6 +114,7 @@ class StaticDomainDecompositionAnalysis: public DomainDecompositionAnalysis
     AnalysisModel 	*theAnalysisModel;
     EquiSolnAlgo 	*theAlgorithm;
     LinearSOE 		*theSOE;
+    EigenSOE 		*theEigenSOE;
     StaticIntegrator    *theIntegrator;
     ConvergenceTest    *theTest;
     int domainStamp;			   

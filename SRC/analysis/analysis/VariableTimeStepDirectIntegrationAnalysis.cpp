@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-06-06 22:40:03 $
+// $Revision: 1.7 $
+// $Date: 2009-05-11 21:32:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/VariableTimeStepDirectIntegrationAnalysis.cpp,v $
                                                                         
                                                                         
@@ -84,7 +84,7 @@ VariableTimeStepDirectIntegrationAnalysis::analyze(int numSteps, double dT, doub
   // loop until analysis has performed the total time incr requested
   while (currentTimeIncr < totalTimeIncr) {
 
-    if (theModel->newStepDomain(currentDt) < 0) {
+    if (theModel->analysisStep(currentDt) < 0) {
       opserr << "DirectIntegrationAnalysis::analyze() - the AnalysisModel failed in newStepDomain";
       opserr << " at time " << theDom->getCurrentTime() << endln;
       theDom->revertToLastCommit();

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-08-13 22:41:41 $
+// $Revision: 1.7 $
+// $Date: 2009-05-11 21:32:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DirectIntegrationAnalysis.h,v $
                                                                         
                                                                         
@@ -51,6 +51,7 @@ class TransientIntegrator;
 class LinearSOE;
 class EquiSolnAlgo;
 class ConvergenceTest;
+class EigenSOE;
 
 class DirectIntegrationAnalysis: public TransientAnalysis
 {
@@ -69,8 +70,8 @@ class DirectIntegrationAnalysis: public TransientAnalysis
     void clearAll(void);	    
     
     int analyze(int numSteps, double dT);
+    int eigen(int numMode, bool generlzed = true);
     int initialize(void);
-
     int domainChanged(void);
 
     int setNumberer(DOF_Numberer &theNumberer);    
@@ -78,6 +79,7 @@ class DirectIntegrationAnalysis: public TransientAnalysis
     int setIntegrator(TransientIntegrator &theIntegrator);
     int setLinearSOE(LinearSOE &theSOE); 
     int setConvergenceTest(ConvergenceTest &theTest);
+    int setEigenSOE(EigenSOE &theSOE);
     
     int checkDomainChange(void);
 
@@ -100,6 +102,7 @@ class DirectIntegrationAnalysis: public TransientAnalysis
     AnalysisModel 	*theAnalysisModel;
     EquiSolnAlgo 	*theAlgorithm;
     LinearSOE 		*theSOE;
+    EigenSOE 		*theEigenSOE;
     TransientIntegrator *theIntegrator;
     ConvergenceTest     *theTest;
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2008-08-13 22:41:41 $
+// $Revision: 1.8 $
+// $Date: 2009-05-11 21:32:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.h,v $
                                                                         
                                                                         
@@ -52,6 +52,7 @@ class StaticIntegrator;
 class LinearSOE;
 class EquiSolnAlgo;
 class ConvergenceTest;
+class EigenSOE;
 
 class StaticAnalysis: public Analysis
 {
@@ -70,6 +71,7 @@ class StaticAnalysis: public Analysis
     void clearAll(void);	    
     
     int analyze(int numSteps);
+    int eigen(int numMode, bool generlzed = true);
     int initialize(void);
     int domainChanged(void);
 
@@ -78,6 +80,7 @@ class StaticAnalysis: public Analysis
     int setIntegrator(StaticIntegrator &theIntegrator);
     int setLinearSOE(LinearSOE &theSOE);
     int setConvergenceTest(ConvergenceTest &theTest);
+    int setEigenSOE(EigenSOE &theSOE);
 
     EquiSolnAlgo     *getAlgorithm(void);
     StaticIntegrator *getIntegrator(void);
@@ -97,6 +100,7 @@ class StaticAnalysis: public Analysis
     AnalysisModel 	*theAnalysisModel;
     EquiSolnAlgo 	*theAlgorithm;
     LinearSOE 		*theSOE;
+    EigenSOE 		*theEigenSOE;
     StaticIntegrator    *theIntegrator;
     ConvergenceTest     *theTest;
 
