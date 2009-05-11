@@ -18,16 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:29 $
+// $Revision: 1.2 $
+// $Date: 2009-05-11 20:55:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandSPD/BandSPDLinSolver.cpp,v $
                                                                         
-                                                                        
-// File: ~/system_of_eqn/linearSOE/bandSPD/BandSPDLinSolver.C
-//
 // Written: fmk 
 // Created: Tue Sep 26 16:27:47: 1996
-// Revision: A
 //
 // Description: This file contains the implementation of BandSPDLinSolver.
 //

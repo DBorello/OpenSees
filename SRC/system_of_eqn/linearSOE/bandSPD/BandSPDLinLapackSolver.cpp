@@ -18,16 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-04-02 22:02:52 $
+// $Revision: 1.4 $
+// $Date: 2009-05-11 20:55:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandSPD/BandSPDLinLapackSolver.cpp,v $
                                                                         
                                                                         
-// File: ~/system_of_eqn/linearSOE/bandSPD/BandSPDLinLapackSolver.h
-//
 // Written: fmk 
 // Created: 11/96
-// Revision: A
 //
 // Description: This file contains the implementation of BandSPDLinLapackSolver.
 //
@@ -138,16 +135,16 @@ BandSPDLinLapackSolver::solve(void)
 int
 BandSPDLinLapackSolver::setSize()
 {
-    // nothing to do    
-    return 0;
+  // nothing to do    
+  return 0;
 }
 
 int
 BandSPDLinLapackSolver::sendSelf(int cTag,
 				 Channel &theChannel)
 {
-    // nothing to do
-    return 0;
+  // nothing to do
+  return 0;
 }
 
 int
@@ -155,8 +152,8 @@ BandSPDLinLapackSolver::recvSelf(int tag,
 				 Channel &theChannel, 
 				 FEM_ObjectBroker &theBroker)
 {
-    // nothing to do
-    return 0;
+  // nothing to do
+  return 0;
 }
 
 
