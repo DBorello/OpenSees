@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-12-06 22:02:08 $
+// $Revision: 1.2 $
+// $Date: 2009-05-11 20:57:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandGEN/DistributedBandGenLinSOE.cpp,v $
                                                                         
 // Written: fmk 
@@ -28,6 +28,7 @@
 
 
 #include <DistributedBandGenLinSOE.h>
+#include <BandGenLinLapackSolver.h>
 #include <BandGenLinSolver.h>
 #include <Matrix.h>
 #include <Graph.h>
@@ -39,10 +40,17 @@
 #include <FEM_ObjectBroker.h>
 
 DistributedBandGenLinSOE::DistributedBandGenLinSOE(BandGenLinSolver &theSolvr)
-  :BandGenLinSOE(theSolvr, LinSOE_TAGS_DistributedBandGenLinSOE), 
+  :BandGenLinSOE(LinSOE_TAGS_DistributedBandGenLinSOE), 
    processID(0), numChannels(0), theChannels(0), localCol(0), workArea(0), sizeWork(0), myB(0), myVectB(0)
 {
     theSolvr.setLinearSOE(*this);
+}
+
+DistributedBandGenLinSOE::DistributedBandGenLinSOE()
+  :BandGenLinSOE(LinSOE_TAGS_DistributedBandGenLinSOE), 
+   processID(0), numChannels(0), theChannels(0), localCol(0), workArea(0), sizeWork(0), myB(0), myVectB(0)
+{
+
 }
 
 
@@ -74,8 +82,10 @@ DistributedBandGenLinSOE::setSize(Graph &theGraph)
   int result = 0;
   int oldSize = size;
   int maxNumSubVertex = 0;
+
   // if subprocess, collect graph, send it off, 
   // vector back containing size of system, etc.
+
   if (processID != 0) {
     Channel *theChannel = theChannels[0];
     theGraph.sendSelf(0, *theChannel);
@@ -635,6 +645,17 @@ DistributedBandGenLinSOE::sendSelf(int commitTag, Channel &theChannel)
     return -1;
   }
 
+  LinearSOESolver *theSoeSolver = this->getSolver();
+  if (theSoeSolver != 0) {
+    if (theSoeSolver->sendSelf(commitTag, theChannel) < 0) {
+      opserr <<"WARNING DistributedBandGenLinSOE::sendSelf() - failed to send solver\n";
+      return -1;
+    } 
+  } else {
+    opserr <<"WARNING DistributedBandGenLinSOE::sendSelf() - no solver to send!\n";
+    return -1;
+  }
+
   return 0;
 }
 
@@ -654,10 +675,17 @@ DistributedBandGenLinSOE::recvSelf(int commitTag, Channel &theChannel, FEM_Objec
   theChannels = new Channel *[1];
   theChannels[0] = &theChannel;
 
-
   localCol = new ID *[numChannels];
   for (int i=0; i<numChannels; i++)
     localCol[i] = 0;
+
+  BandGenLinSolver *theBandGenSolver = new BandGenLinLapackSolver();
+  if (theBandGenSolver->recvSelf(commitTag, theChannel, theBroker) < 0) {
+    opserr <<"WARNING DistributedBandgenLinSOE::sendSelf() - failed to recv solver\n";
+    return -1;
+  }
+  theBandGenSolver->setLinearSOE(*this);
+  this->setSolver(*theBandGenSolver);
 
   return 0;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2008-04-17 06:21:15 $
+// $Revision: 1.5 $
+// $Date: 2009-05-11 20:56:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsParallelSOE.h,v $
                                                                         
 #ifndef MumpsParallelSOE_h
@@ -48,6 +48,7 @@ class MumpsParallelSOE : public MumpsSOE
 {
   public:
     MumpsParallelSOE(MumpsParallelSolver &theSolver, int matType=2);
+    MumpsParallelSOE();
     
     ~MumpsParallelSOE();
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-12-06 22:20:18 $
+// $Revision: 1.2 $
+// $Date: 2009-05-11 20:57:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLinSOE.h,v $
                                                                         
 #ifndef DistributedSparseGenColLinSOE_h
@@ -44,6 +44,7 @@ class DistributedSparseGenColLinSOE : public SparseGenColLinSOE
 {
   public:
     DistributedSparseGenColLinSOE(SparseGenColLinSolver &theSolver);
+    DistributedSparseGenColLinSOE();
     
     ~DistributedSparseGenColLinSOE();
 

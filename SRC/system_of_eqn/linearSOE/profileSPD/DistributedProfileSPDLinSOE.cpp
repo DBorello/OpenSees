@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2007-01-09 19:31:44 $
+// $Revision: 1.3 $
+// $Date: 2009-05-11 20:58:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/profileSPD/DistributedProfileSPDLinSOE.cpp,v $
                                                                         
 // Written: fmk 
@@ -44,6 +44,15 @@ DistributedProfileSPDLinSOE::DistributedProfileSPDLinSOE(ProfileSPDLinSolver &th
    localCol(0), sizeLocal(0), workArea(0), sizeWork(0), myVectB(0), myB(0)
 {
     theSolvr.setLinearSOE(*this);
+}
+
+
+DistributedProfileSPDLinSOE::DistributedProfileSPDLinSOE()
+  :ProfileSPDLinSOE(LinSOE_TAGS_DistributedProfileSPDLinSOE), 
+   processID(0), numChannels(0), theChannels(0), 
+   localCol(0), sizeLocal(0), workArea(0), sizeWork(0), myVectB(0), myB(0)
+{
+
 }
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-12-06 22:07:52 $
+// $Revision: 1.2 $
+// $Date: 2009-05-11 20:58:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/profileSPD/DistributedProfileSPDLinSOE.h,v $
                                                                         
 #ifndef DistributedProfileSPDLinSOE_h
@@ -43,6 +43,7 @@ class DistributedProfileSPDLinSOE : public ProfileSPDLinSOE
 {
   public:
     DistributedProfileSPDLinSOE(ProfileSPDLinSolver &theSolver);
+    DistributedProfileSPDLinSOE();
     
     ~DistributedProfileSPDLinSOE();
 

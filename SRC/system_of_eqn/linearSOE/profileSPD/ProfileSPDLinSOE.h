@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-12-06 22:06:04 $
+// $Revision: 1.4 $
+// $Date: 2009-05-11 20:58:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinSOE.h,v $
                                                                         
                                                                         
@@ -44,6 +44,7 @@ class ProfileSPDLinSOE : public LinearSOE
   public:
     ProfileSPDLinSOE(ProfileSPDLinSolver &theSolver);
     ProfileSPDLinSOE(ProfileSPDLinSolver &theSolver, int classTag);
+    ProfileSPDLinSOE(int classTag);
     ProfileSPDLinSOE(int N, int *iLoc, ProfileSPDLinSolver &theSolver);
 
     virtual ~ProfileSPDLinSOE();

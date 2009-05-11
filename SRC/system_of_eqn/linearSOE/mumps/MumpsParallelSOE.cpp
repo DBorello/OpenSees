@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-05-01 23:19:24 $
+// $Revision: 1.5 $
+// $Date: 2009-05-11 20:56:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsParallelSOE.cpp,v $
                                                                         
 // Written: fmk 
@@ -44,6 +44,15 @@ MumpsParallelSOE::MumpsParallelSOE(MumpsParallelSolver &theSolvr, int matType)
    sizeWork(0), myB(0), myVectB(0)
 {
     theSolvr.setLinearSOE(*this);
+}
+
+
+MumpsParallelSOE::MumpsParallelSOE()
+  :MumpsSOE(LinSOE_TAGS_MumpsParallelSOE), 
+   processID(0), numChannels(0), theChannels(0), localCol(0), workArea(0), 
+   sizeWork(0), myB(0), myVectB(0)
+{
+
 }
 
 
@@ -309,7 +318,7 @@ MumpsParallelSOE::solve(void)
     // send B
     Channel *theChannel = theChannels[0];
     theChannel->sendVector(0, 0, *myVectB);
-    LinearSOESolver *theSoeSolver = this->getSolver();
+
     resSolver =  this->LinearSOE::solve();
 
     if (resSolver == 0) {
@@ -482,7 +491,6 @@ MumpsParallelSOE::sendSelf(int commitTag, Channel &theChannel)
   // if not P0, send current processID
 
   if (processID == 0) {
-
     // check if already using this object
     bool found = false;
     for (int i=0; i<numChannels; i++)
@@ -541,6 +549,18 @@ MumpsParallelSOE::sendSelf(int commitTag, Channel &theChannel)
     return -1;
   }
 
+  LinearSOESolver *theSoeSolver = this->getSolver();
+  if (theSoeSolver != 0) {
+    if (theSoeSolver->sendSelf(commitTag, theChannel) < 0) {
+      opserr <<"WARNING MumpsParallelSOE::sendSelf() - failed to send solver\n";
+      return -1;
+    } 
+  } else {
+    opserr <<"WARNING MumpsParallelSOE::sendSelf() - no solver to send!\n";
+    return -1;
+  }
+    
+
   return 0;
 }
 
@@ -564,6 +584,16 @@ MumpsParallelSOE::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker 
   localCol = new ID *[numChannels];
   for (int i=0; i<numChannels; i++)
     localCol[i] = 0;
+
+
+  MumpsParallelSolver *theSolvr = new MumpsParallelSolver();
+  if (theSolvr->recvSelf(commitTag, theChannel, theBroker) < 0) {
+    opserr <<"WARNING MumpsParallelSOE::sendSelf() - failed to recv solver\n";
+    return -1;
+  }
+  
+  theSolvr->setLinearSOE(*this);
+  this->setSolver(*theSolvr);
 
   return 0;
 }

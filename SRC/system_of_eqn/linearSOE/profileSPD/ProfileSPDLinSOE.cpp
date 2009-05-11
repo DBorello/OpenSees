@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-12-06 22:06:04 $
+// $Revision: 1.5 $
+// $Date: 2009-05-11 20:58:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinSOE.cpp,v $
                                                                         
                                                                         
@@ -49,6 +49,17 @@ ProfileSPDLinSOE::ProfileSPDLinSOE(ProfileSPDLinSolver &the_Solver)
 {
     the_Solver.setLinearSOE(*this);
 }
+
+
+ProfileSPDLinSOE::ProfileSPDLinSOE(int classTag)
+:LinearSOE(classTag),
+ size(0), profileSize(0), A(0), B(0), X(0), vectX(0), vectB(0),
+ iDiagLoc(0), Asize(0), Bsize(0), isAfactored(false), isAcondensed(false),
+ numInt(0) 
+{
+
+}
+
 
 ProfileSPDLinSOE::ProfileSPDLinSOE(ProfileSPDLinSolver &the_Solver, int classTag)
 :LinearSOE(the_Solver, classTag),

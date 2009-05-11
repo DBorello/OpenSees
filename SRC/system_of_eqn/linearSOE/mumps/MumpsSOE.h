@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-04-17 06:21:15 $
+// $Revision: 1.7 $
+// $Date: 2009-05-11 20:56:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsSOE.h,v $
                                                                         
 #ifndef MumpsSOE_h
@@ -51,8 +51,10 @@ class LinearSOESolver;
 class MumpsSOE : public LinearSOE
 {
   public:
-  MumpsSOE(MumpsSolver &theSolver, int matType=2);        
-  MumpsSOE(LinearSOESolver &theSolver, int classTag, int matType = 2);        
+    MumpsSOE(MumpsSolver &theSolver, int matType=2);        
+    MumpsSOE();       
+    MumpsSOE(int classTag);        
+    MumpsSOE(LinearSOESolver &theSolver, int classTag, int matType = 2);        
 
     virtual ~MumpsSOE();
 
@@ -91,7 +93,6 @@ class MumpsSOE : public LinearSOE
     int matType;
 
   private:
-
 };
 
 

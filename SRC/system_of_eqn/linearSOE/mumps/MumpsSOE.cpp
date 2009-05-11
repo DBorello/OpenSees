@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2007-05-01 23:19:24 $
+// $Revision: 1.6 $
+// $Date: 2009-05-11 20:56:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/mumps/MumpsSOE.cpp,v $
                                                                         
                                                                         
@@ -49,6 +49,30 @@ MumpsSOE::MumpsSOE(MumpsSolver &the_Solver, int _matType)
  factored(false), matType(_matType)
 {
   the_Solver.setLinearSOE(*this);
+}
+
+MumpsSOE::MumpsSOE()
+ :LinearSOE(LinSOE_TAGS_MumpsSOE),
+  size(0), nnz(0), 
+  A(0), B(0), X(0), 
+  colA(0), rowA(0), rowB(0), colStartA(0),
+  vectX(0), vectB(0),
+  Asize(0), Bsize(0),
+  factored(false), matType(0)
+{
+
+}
+
+MumpsSOE::MumpsSOE(int classTag)
+ :LinearSOE(classTag),
+  size(0), nnz(0), 
+  A(0), B(0), X(0), 
+  colA(0), rowA(0), rowB(0), colStartA(0),
+  vectX(0), vectB(0),
+  Asize(0), Bsize(0),
+  factored(false), matType(0)
+{
+
 }
 
 

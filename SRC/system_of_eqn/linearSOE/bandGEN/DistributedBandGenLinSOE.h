@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-12-06 22:02:07 $
+// $Revision: 1.2 $
+// $Date: 2009-05-11 20:57:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandGEN/DistributedBandGenLinSOE.h,v $
                                                                         
 #ifndef DistributedBandGenLinSOE_h
@@ -43,6 +43,7 @@ class DistributedBandGenLinSOE : public BandGenLinSOE
 {
   public:
     DistributedBandGenLinSOE(BandGenLinSolver &theSolver);
+    DistributedBandGenLinSOE();
 
     ~DistributedBandGenLinSOE();
 

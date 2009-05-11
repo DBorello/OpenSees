@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-01-13 00:28:07 $
+// $Revision: 1.5 $
+// $Date: 2009-05-11 20:57:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSOE.h,v $
                                                                         
                                                                         
@@ -28,7 +28,6 @@
 
 // Written: fmk 
 // Created: 04/98
-// Revision: A
 //
 // Description: This file contains the class definition for SparseGenColLinSOE
 // SparseGenColLinSOE is a subclass of LinearSOE. It stores the matrix equation
@@ -46,6 +45,8 @@ class SparseGenColLinSOE : public LinearSOE
 {
   public:
     SparseGenColLinSOE(SparseGenColLinSolver &theSolver);        
+    SparseGenColLinSOE(int classTag);        
+    SparseGenColLinSOE();        
     SparseGenColLinSOE(SparseGenColLinSolver &theSolver, int classTag);        
     SparseGenColLinSOE(int N, int NNZ, int *rowStartA, int *colA,
 		       SparseGenColLinSolver &theSolver);        

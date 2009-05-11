@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-01-25 01:44:00 $
+// $Revision: 1.4 $
+// $Date: 2009-05-11 20:58:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSOE.cpp,v $
 
 // Written: fmk 
@@ -55,6 +55,16 @@ DistributedDiagonalSOE::DistributedDiagonalSOE(DistributedDiagonalSolver &the_So
  myDOFs(0,32), myDOFsShared(0,16), numShared(0), dataShared(0), vectShared(0), theModel(0)
 {
     the_Solver.setLinearSOE(*this);
+}
+
+DistributedDiagonalSOE::DistributedDiagonalSOE()
+:LinearSOE(LinSOE_TAGS_DistributedDiagonalSOE),
+ size(0), A(0), B(0), X(0), vectX(0), vectB(0), isAfactored(false),
+ processID(0), numProcesses(0),
+ numChannels(0), theChannels(0), localCol(0), 
+ myDOFs(0,32), myDOFsShared(0,16), numShared(0), dataShared(0), vectShared(0), theModel(0)
+{
+
 }
 
 
@@ -577,6 +587,17 @@ DistributedDiagonalSOE::sendSelf(int cTag, Channel &theChannel)
     return -1;
   }
 
+  LinearSOESolver *theSoeSolver = this->getSolver();
+  if (theSoeSolver != 0) {
+    if (theSoeSolver->sendSelf(cTag, theChannel) < 0) {
+      opserr <<"WARNING DistributedDiagonalSOE::sendSelf() - failed to send solver\n";
+      return -1;
+    } 
+  } else {
+    opserr <<"WARNING DistributedDiagonalSOE::sendSelf() - no solver to send!\n";
+    return -1;
+  }
+
   return 0;
 }
 
@@ -601,6 +622,13 @@ DistributedDiagonalSOE::recvSelf(int cTag, Channel &theChannel,
   for (int i=0; i<numChannels; i++)
     localCol[i] = 0;
 
+  DistributedDiagonalSolver *theDistributedDiagonalSolver = new DistributedDiagonalSolver();
+  if (theDistributedDiagonalSolver->recvSelf(cTag, theChannel, theBroker) < 0) {
+    opserr <<"WARNING DistributedBandgenLinSOE::sendSelf() - failed to recv solver\n";
+    return -1;
+  }
+  theDistributedDiagonalSolver->setLinearSOE(*this);
+  this->setSolver(*theDistributedDiagonalSolver);
   return 0;
 }
 

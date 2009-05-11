@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-12-06 21:56:41 $
+// $Revision: 1.4 $
+// $Date: 2009-05-11 20:57:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandGEN/BandGenLinSOE.h,v $
                                                                         
                                                                         
@@ -44,8 +44,9 @@ class BandGenLinSolver;
 class BandGenLinSOE : public LinearSOE
 {
   public:
+    BandGenLinSOE();
+    BandGenLinSOE(int classTag);
     BandGenLinSOE(BandGenLinSolver &theSolver);
-    BandGenLinSOE(BandGenLinSolver &theSolver, int classTag);
 
     BandGenLinSOE(int N, int numSuperDiagonals, int numSubDiagonal,
 		  BandGenLinSolver &theSolver);        

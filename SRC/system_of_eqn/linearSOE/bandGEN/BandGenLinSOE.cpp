@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-12-06 21:56:41 $
+// $Revision: 1.5 $
+// $Date: 2009-05-11 20:57:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandGEN/BandGenLinSOE.cpp,v $
                                                                         
                                                                         
@@ -47,12 +47,20 @@ BandGenLinSOE::BandGenLinSOE(BandGenLinSolver &theSolvr)
     theSolvr.setLinearSOE(*this);
 }
 
-BandGenLinSOE::BandGenLinSOE(BandGenLinSolver &theSolvr, int classTag)
-:LinearSOE(theSolvr, classTag),
+BandGenLinSOE::BandGenLinSOE()
+:LinearSOE(LinSOE_TAGS_BandGenLinSOE),
  size(0), numSuperD(0), numSubD(0), A(0), B(0), X(0), 
  vectX(0), vectB(0), Asize(0), Bsize(0), factored(false)
 {
-    theSolvr.setLinearSOE(*this);
+
+}
+
+BandGenLinSOE::BandGenLinSOE(int classTag)
+:LinearSOE(classTag),
+ size(0), numSuperD(0), numSubD(0), A(0), B(0), X(0), 
+ vectX(0), vectB(0), Asize(0), Bsize(0), factored(false)
+{
+
 }
 
 

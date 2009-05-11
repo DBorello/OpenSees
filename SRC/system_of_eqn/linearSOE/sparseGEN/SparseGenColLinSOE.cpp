@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-10-02 20:23:22 $
+// $Revision: 1.8 $
+// $Date: 2009-05-11 20:57:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSOE.cpp,v $
                                                                         
                                                                         
@@ -48,6 +48,27 @@ SparseGenColLinSOE::SparseGenColLinSOE(SparseGenColLinSolver &the_Solver)
  factored(false)
 {
     the_Solver.setLinearSOE(*this);
+}
+
+
+SparseGenColLinSOE::SparseGenColLinSOE()
+:LinearSOE(LinSOE_TAGS_SparseGenColLinSOE),
+ size(0), nnz(0), A(0), B(0), X(0), rowA(0), colStartA(0),
+ vectX(0), vectB(0),
+ Asize(0), Bsize(0),
+ factored(false)
+{
+
+}
+
+SparseGenColLinSOE::SparseGenColLinSOE(int classTag)
+:LinearSOE(classTag),
+ size(0), nnz(0), A(0), B(0), X(0), rowA(0), colStartA(0),
+ vectX(0), vectB(0),
+ Asize(0), Bsize(0),
+ factored(false)
+{
+
 }
 
 

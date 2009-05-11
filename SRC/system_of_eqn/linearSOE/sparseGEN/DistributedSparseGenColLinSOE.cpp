@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-10-02 20:23:22 $
+// $Revision: 1.3 $
+// $Date: 2009-05-11 20:57:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLinSOE.cpp,v $
                                                                         
 // Written: fmk 
@@ -46,6 +46,15 @@ DistributedSparseGenColLinSOE::DistributedSparseGenColLinSOE(SparseGenColLinSolv
   
 {
     theSolvr.setLinearSOE(*this);
+}
+
+DistributedSparseGenColLinSOE::DistributedSparseGenColLinSOE()
+  :SparseGenColLinSOE(LinSOE_TAGS_DistributedSparseGenColLinSOE), 
+   processID(0), numChannels(0), theChannels(0), localCol(0), workArea(0), sizeWork(0), myB(0),
+   myVectB(0)
+  
+{
+
 }
 
 

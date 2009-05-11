@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-05-25 23:33:46 $
+// $Revision: 1.2 $
+// $Date: 2009-05-11 20:58:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSOE.h,v $
                                                                         
 // Written: fmk 
@@ -38,12 +38,15 @@
 #include <Vector.h>
 #include <ID.h>
 
+
+class AnalysisModel;
 class DistributedDiagonalSolver;
 
 class DistributedDiagonalSOE : public LinearSOE
 {
   public:
     DistributedDiagonalSOE(DistributedDiagonalSolver &theSolver);
+    DistributedDiagonalSOE();
     ~DistributedDiagonalSOE();
 
     int getNumEqn(void) const;
