@@ -18,13 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2008-04-15 18:01:55 $
+// $Revision: 1.21 $
+// $Date: 2009-05-11 21:35:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.cpp,v $
                                                                         
                                                                         
 #include <OpenGlDevice.h>
-#include <OPS_Globals.h>
+//#include <OPS_Globals.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -33,6 +33,9 @@
 #define _PNG
 #include <png.h>
 #endif
+
+#include <iostream>
+using std::cerr;
 
 int OpenGlDevice::numWindows(0);
 // GLuint OpenGlDevice::FontBase(0);
@@ -244,12 +247,6 @@ int oglCreateBitmap(int width, int height, HGLRC *hRC, HDC *hDC,
 	info->bmiHeader.biWidth = width;
 	info->bmiHeader.biHeight = height;
 
-	/*
-	if ((*bits = (GLubyte *)(calloc(width*height, 1))) == 0){
-		opserr << "BITS ZERO\n";
-		return -1;
-	}
-	*/
 	void *theBits = *bits;
 //	void **theBitsPtr = &theBits;
 
@@ -425,7 +422,7 @@ OpenGlDevice::WINOPEN(const char *_title, int _xLoc, int _yLoc, int _width, int 
 
   theDisplay = XOpenDisplay("");      // init a display connection
   if (theDisplay == 0) {              // and check we got one
-    opserr << "OpenGlDevice::initX11() - could not connect to display\n";
+    cerr << "OpenGlDevice::initX11() - could not connect to display\n";
     exit(-1);
   }
 
@@ -452,7 +449,7 @@ OpenGlDevice::WINOPEN(const char *_title, int _xLoc, int _yLoc, int _width, int 
   }
 
   if(visual == NULL) {
-    opserr << "OpenGlDevice::WINOPEN - unable to get visual\n";
+    cerr << "OpenGlDevice::WINOPEN - unable to get visual\n";
     exit(2);
   }
 
@@ -710,7 +707,7 @@ OpenGlDevice::saveImageAsBMP(const char *fileName)
     // create the file name 'bmpFileName$count.BMP'
     char *newFileName = new char[strlen(fileName)+4];
     if (newFileName == 0) {
-      opserr << "OpenGlDevice::saveImageAsBMP() failed to open file: " << fileName << endln;
+      cerr << "OpenGlDevice::saveImageAsBMP() failed to open file: " << fileName << "\n";
       return -1;
     }	
     strcpy(newFileName, fileName);
@@ -719,7 +716,7 @@ OpenGlDevice::saveImageAsBMP(const char *fileName)
     // open the file
     FILE *fp;
     if ((fp = fopen(newFileName,"wb")) == NULL) {
-      opserr << "OpenGLDevice::saveBmpImage() - could not open file named" <<  newFileName << endln;
+      cerr << "OpenGLDevice::saveBmpImage() - could not open file named" <<  newFileName << "\n";
 	return -1;
     }	
 
@@ -873,7 +870,7 @@ OpenGlDevice::saveImageAsPNG(const char *fileName)
   char *image;
   image = new char[3*width*height];
   if (image == 0) {
-    opserr << "OpenGlDevice::failed to allocate memory for image\n";
+    cerr << "OpenGlDevice::failed to allocate memory for image\n";
     return(-1);
   }
   
@@ -891,7 +888,7 @@ OpenGlDevice::saveImageAsPNG(const char *fileName)
   FILE *fp;
   char *newFileName = new char (strlen(fileName+4));
   if (newFileName == 0) {
-    opserr << "OpenGlDevice::saveImageAsPNG() failed to open file: " << fileName << endln;
+    cerr << "OpenGlDevice::saveImageAsPNG() failed to open file: " << fileName << "\n";
     delete [] image;
     return -1;
   }
@@ -900,7 +897,7 @@ OpenGlDevice::saveImageAsPNG(const char *fileName)
   strcat(newFileName, ".png");
 
   if((fp = fopen(newFileName, "wb"))==NULL) {
-    opserr << "OpenGlDevice::saveImageAsPNG() failed to open file: " << fileName << endln;
+    cerr << "OpenGlDevice::saveImageAsPNG() failed to open file: " << fileName << "\n";
     delete [] image;
     return -1;
   }
