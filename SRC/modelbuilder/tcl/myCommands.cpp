@@ -18,16 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2009-01-16 19:40:36 $
+// $Revision: 1.10 $
+// $Date: 2009-05-11 21:36:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/myCommands.cpp,v $
-                                                                        
-                                                                        
-// File: ~/modelbuilder/tcl/myCommands.C
-// 
+
 // Written: fmk 
 // Created: 04/98
-// Revision: A
 //
 // Description: This file contains the function myCommands().
 // myCommands() is called in g3AppInit() - all new user commands
@@ -190,7 +186,7 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Cha
 	   << " not supported\n";
       return TCL_ERROR;
     }
-    
+
     return TCL_OK;
 }
 

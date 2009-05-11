@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:02:10 $
+// $Revision: 1.3 $
+// $Date: 2009-05-11 21:36:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tagged/storage/ArrayOfTaggedObjects.cpp,v $
                                                                         
                                                                         
@@ -61,8 +61,8 @@ ArrayOfTaggedObjects::ArrayOfTaggedObjects(int size)
 
 ArrayOfTaggedObjects::~ArrayOfTaggedObjects()
 {
-    if (theComponents != 0)
-	delete [] theComponents;
+  if (theComponents != 0)
+    delete [] theComponents;
 }
 
 
@@ -339,28 +339,28 @@ ArrayOfTaggedObjects::getEmptyCopy(void)
 void
 ArrayOfTaggedObjects::clearAll(bool invokeDestructors)
 {
-    if (invokeDestructors == true) {
-	// go through and invoke the components object destructors
-	// and set the array pointers to 0
-	for (int i=0; i<=positionLastEntry; i++) {
-	    if (theComponents[i] != 0) {
-		delete theComponents[i];
-		theComponents[i] = 0;
-	    }
-	}
-    } else {
-	// just set the array pointers to 0
-	for (int i=0; i<=positionLastEntry; i++) {
-	    if (theComponents[i] != 0) {
-		theComponents[i] = 0;
-	    }
-	}
+  if (invokeDestructors == true) {
+    // go through and invoke the components object destructors
+    // and set the array pointers to 0
+    for (int i=0; i<=positionLastEntry; i++) {
+      if (theComponents[i] != 0) {
+	delete theComponents[i];
+	theComponents[i] = 0;
+      }
     }
+  } else {
+    // just set the array pointers to 0
+    for (int i=0; i<=positionLastEntry; i++) {
+      if (theComponents[i] != 0) {
+	theComponents[i] = 0;
+      }
+    }
+  }
     
-    positionLastEntry = 0;
-    positionLastNoFitEntry = 0;
-    fitFlag = true;
-    numComponents = 0;
+  positionLastEntry = 0;
+  positionLastNoFitEntry = 0;
+  fitFlag = true;
+  numComponents = 0;
 }
 
 

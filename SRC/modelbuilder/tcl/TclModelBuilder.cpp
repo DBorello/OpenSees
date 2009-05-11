@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.46 $
-// $Date: 2009-04-17 22:58:46 $
+// $Revision: 1.47 $
+// $Date: 2009-05-11 21:36:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -3314,7 +3314,6 @@ TclCommand_addRemoLayer(ClientData clientData, Tcl_Interp *interp, int argc,
   return TclCommand_addReinfLayer(clientData, interp, argc,argv,
 				       theTclBuilder);
 }
-
 
 					 
 int
