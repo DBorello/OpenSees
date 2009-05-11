@@ -1,5 +1,7 @@
-// File: ~/system_of_eqn/eigenSOE/EigenSOE.h
-//
+// $Revision: 1.2 $
+// $Date: 2009-05-11 21:00:17 $
+// $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/EigenSOE.h,v $
+
 // Written: Jun Peng
 // Created: Sat Feb. 6, 1999
 // Revision: A
@@ -22,7 +24,7 @@
 #include <bool.h>
 #endif
 
-#include <SystemOfEqn.h>
+#include <MovableObject.h>
 
 class EigenSolver;
 class Graph;
@@ -30,14 +32,14 @@ class Matrix;
 class Vector;
 class ID;
 
-class EigenSOE : public SystemOfEqn
+class EigenSOE : public MovableObject
 {
   public:
      EigenSOE(EigenSolver &theSolver, int classTag);
+     EigenSOE(int classTag);
      virtual ~EigenSOE();
      
-     virtual int solve(int numModes);
-     virtual int solve(void);     
+     virtual int solve(int numModes, bool generalized);
      
      // pure virtual functions
      virtual int addA(const Matrix &, const ID &, double fact = 1.0) = 0;

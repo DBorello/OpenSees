@@ -1,5 +1,7 @@
-// File: ~/system_of_eqn/eigenSOE/EigenSOE.C
-//
+// $Revision: 1.4 $
+// $Date: 2009-05-11 21:00:17 $
+// $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/EigenSOE.cpp,v $
+
 // Written: Jun Peng
 // Created: Sat Feb. 6, 1999
 // Revision: A
@@ -10,36 +12,40 @@
 // subclasses. To solve the genreal eigen value equations means that
 // by the given K and M, find the corresponding eigen value and eigen
 // vectors.
-//
-// This class is inheritanted from the base class of SystemOfEqn
-// which was created by fmk (Frank).
+
+
 
 
 #include <EigenSOE.h>
 #include <EigenSolver.h>
 
 EigenSOE::EigenSOE(EigenSolver &theEigenSolver, int classTag)
-  :SystemOfEqn(classTag), theSolver(&theEigenSolver)
+  :MovableObject(classTag), theSolver(&theEigenSolver)
 {
 
 }
+
+
+EigenSOE::EigenSOE(int classTag)
+  :MovableObject(classTag), theSolver(0)
+{
+
+}
+
 
 EigenSOE::~EigenSOE()
 {
-  delete theSolver;
+  if (theSolver != 0)
+    delete theSolver;
 }
 
 int 
-EigenSOE::solve(int numModes)
+EigenSOE::solve(int numModes, bool generalized)
 {
-    return (theSolver->solve(numModes));
-}
-
-int 
-EigenSOE::solve(void)
-{
-    opserr << "ERROR EigenSOE::solve(void) - need to specify numModes\n";
+  if (theSolver == 0)
     return -1;
+  else
+    return (theSolver->solve(numModes, generalized));
 }
 
 int
