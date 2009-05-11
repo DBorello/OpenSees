@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2009-05-11 21:35:29 $
+// $Revision: 1.22 $
+// $Date: 2009-05-11 22:43:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.cpp,v $
                                                                         
                                                                         
@@ -798,7 +798,7 @@ OpenGlDevice::saveImageAsBMP(const char *fileName)
     glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
 
 	if (bits == 0) {
-		opserr << "OpenGLDEvice::saveImage - BITS ZERO\n";
+		cerr << "OpenGLDEvice::saveImage - BITS ZERO\n";
 		return -1;
 	}
 
@@ -819,7 +819,7 @@ OpenGlDevice::saveImageAsBMP(const char *fileName)
 	{
     // write the header to the file
 //    if (fwrite(&header, 1, sizeof(BITMAPFILEHEADER), fp) < sizeof(BITMAPFILEHEADER)) {
-	    opserr << "OpenGLDevice::saveBmpImage() - failed to write BITMAPHEADER" << endln;
+	    cerr << "OpenGLDevice::saveBmpImage() - failed to write BITMAPHEADER\n";
 	    fclose(fp);
 	    return -4;
 	}
@@ -827,7 +827,7 @@ OpenGlDevice::saveImageAsBMP(const char *fileName)
         {
     // write the bit map information to the file
 //    if (fwrite(&info, 1, sizeof(BITMAPINFOHEADER), fp) < sizeof(BITMAPINFOHEADER)) {
-	    opserr << "OpenGLDevice::saveBmpImage() - failed to write BITMAPINFOHEADER" << endln;
+	  cerr << "OpenGLDevice::saveBmpImage() - failed to write BITMAPINFOHEADER\n";
 	    fclose(fp);
 	    return -5;	    
 	}    
@@ -835,7 +835,7 @@ OpenGlDevice::saveImageAsBMP(const char *fileName)
         {
     // now we write the bits
     //if (fwrite(bits, 1, currentBitSize, fp) < currentBitSize) {
-	opserr << "OpenGLDevice::saveBmpImage() - failed to write BITMAPINFOHEADER" << endln;
+	cerr << "OpenGLDevice::saveBmpImage() - failed to write BITMAPINFOHEADER\n";
 	fclose(fp);
 	return -6;	
     }        
