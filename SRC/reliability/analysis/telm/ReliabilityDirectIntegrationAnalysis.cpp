@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:53 $
+// $Revision: 1.2 $
+// $Date: 2009-05-11 22:42:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/ReliabilityDirectIntegrationAnalysis.cpp,v $
                                                                         
 #include <DOF_Group.h>
@@ -169,7 +169,7 @@ ReliabilityDirectIntegrationAnalysis::analyze(int numSteps, double dT)
 
 	  if( i%100 ==0) opserr << "step "<<i << endln;
 
-      if (theAnalysisModel->newStepDomain(dT) < 0) {
+      if (theAnalysisModel->analysisStep(dT) < 0) {
 	opserr << "DirectIntegrationAnalysis::analyze() - the AnalysisModel failed";
 	opserr << " at time " << the_Domain->getCurrentTime() << endln;
 	the_Domain->revertToLastCommit();

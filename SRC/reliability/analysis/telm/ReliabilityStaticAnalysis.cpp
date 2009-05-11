@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:53 $
+// $Revision: 1.2 $
+// $Date: 2009-05-11 22:42:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/ReliabilityStaticAnalysis.cpp,v $
 
 #include <ReliabilityStaticAnalysis.h>
@@ -136,7 +136,7 @@ ReliabilityStaticAnalysis::analyze(int numSteps)
 
     for (int i=0; i<numSteps; i++) {
 
-	result = theAnalysisModel->newStepDomain();
+	result = theAnalysisModel->analysisStep();
 	if (result < 0) {
 	    opserr << "StaticAnalysis::analyze() - the AnalysisModel failed";
 	    opserr << " at iteration: " << i << " with domain at load factor ";
