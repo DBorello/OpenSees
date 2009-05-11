@@ -369,6 +369,18 @@
 			Name="arpack"
 			Filter="">
 			<File
+				RelativePath="..\..\..\SRC\system_of_eqn\eigenSOE\ArpackSOE.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\system_of_eqn\eigenSOE\ArpackSOE.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\system_of_eqn\eigenSOE\ArpackSolver.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\system_of_eqn\eigenSOE\ArpackSolver.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\system_of_eqn\eigenSOE\BandArpackSOE.cpp">
 			</File>
 			<File

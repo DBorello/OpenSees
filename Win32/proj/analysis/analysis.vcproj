@@ -130,12 +130,6 @@
 				RelativePath="..\..\..\SRC\analysis\analysis\DomainDecompositionAnalysis.h">
 			</File>
 			<File
-				RelativePath="..\..\..\SRC\analysis\analysis\EigenAnalysis.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\analysis\analysis\EigenAnalysis.h">
-			</File>
-			<File
 				RelativePath="..\..\..\SRC\analysis\analysis\StaticAnalysis.cpp">
 			</File>
 			<File
@@ -266,22 +260,10 @@
 				RelativePath="..\..\..\SRC\analysis\algorithm\domainDecompAlgo\DomainDecompAlgo.h">
 			</File>
 			<File
-				RelativePath="..\..\..\SRC\analysis\algorithm\eigenAlgo\EigenAlgorithm.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\analysis\algorithm\eigenAlgo\EigenAlgorithm.h">
-			</File>
-			<File
 				RelativePath="..\..\..\SRC\analysis\algorithm\equiSolnAlgo\EquiSolnAlgo.cpp">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\analysis\algorithm\equiSolnAlgo\EquiSolnAlgo.h">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\analysis\algorithm\eigenAlgo\FrequencyAlgo.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\analysis\algorithm\eigenAlgo\FrequencyAlgo.h">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\analysis\algorithm\equiSolnAlgo\KrylovNewton.cpp">
@@ -324,12 +306,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\analysis\algorithm\SolutionAlgorithm.h">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\analysis\algorithm\eigenAlgo\StandardEigenAlgo.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\analysis\algorithm\eigenAlgo\StandardEigenAlgo.h">
 			</File>
 			<Filter
 				Name="accelerator"
