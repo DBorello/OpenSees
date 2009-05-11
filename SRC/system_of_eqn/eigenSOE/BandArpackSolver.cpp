@@ -1,10 +1,8 @@
-// Written: Jun Peng
-// Created: Feb. 11, 1999
+// Written: fmk
+// Created: 05/09
 // Revision: A
 //
-// Description: This file contains the class definition for 
-// BandArpackSolver. It solves the BandArpackSOE object by calling
-// Arpack routines.
+// Description: This file contains the class definition for BandArpackSolver
 
 #include <BandArpackSolver.h>
 #include <BandArpackSOE.h>
@@ -122,8 +120,13 @@ extern "C" int dseupd_(bool *rvec, char *howmny, logical *select, double *d, dou
 
 
 int
-BandArpackSolver::solve(void)
+BandArpackSolver::solve(int numModes, bool generalized)
 {
+  if (generalized == false) {
+    opserr << "BandArpackSolver::solve(int numMode, bool generalized) - only solves generalized problem\n";
+    return -1;
+  }
+
     if (theSOE == 0) {
 	opserr << "WARNING BandGenLinLapackSolver::solve(void)- ";
 	opserr << " No LinearSOE object has been set\n";
@@ -149,7 +152,7 @@ BandArpackSolver::solve(void)
     double *Aptr = theSOE->A;
     int    *iPIV = iPiv;
 
-    int nev = theNev;
+    int nev = numModes;;
     int ncv = getNCV(n, nev);
 
     // set up the space for ARPACK functions.
@@ -205,21 +208,27 @@ BandArpackSolver::solve(void)
       unsigned int sizeWhich =2;
       unsigned int sizeBmat =1;
       unsigned int sizeHowmany =1;
-	  unsigned int sizeOne = 1;
-	  /*
-      DSAUPD(&ido, &bmat, &sizeBmat, &n, which, &sizeWhich, &nev, &tol, resid, 
+      unsigned int sizeOne = 1;
+      /*
+	DSAUPD(&ido, &bmat, &sizeBmat, &n, which, &sizeWhich, &nev, &tol, resid, 
+	&ncv, v, &ldv,
+	iparam, ipntr, workd, workl, &lworkl, &info);
+      */
+      
+      DSAUPD(&ido, &bmat, &n, which, &nev, &tol, resid, 
 	     &ncv, v, &ldv,
 	     iparam, ipntr, workd, workl, &lworkl, &info);
-	   */
-	  DSAUPD(&ido, &bmat, &n, which, &nev, &tol, resid, 
-		 &ncv, v, &ldv,
-		 iparam, ipntr, workd, workl, &lworkl, &info);
 #else
-	  dsaupd_(&ido, &bmat, &n, which, &nev, &tol, resid, &ncv, v, &ldv,
-		  iparam, ipntr, workd, workl, &lworkl, &info);
-#endif
 
+      dsaupd_(&ido, &bmat, &n, which, &nev, &tol, resid, &ncv, v, &ldv,
+	      iparam, ipntr, workd, workl, &lworkl, &info);
+#endif
+      opserr << "BandArpackSolver::solve() " << n << " " << nev << " " << ncv << " " << lworkl << endln;
+      
       if (ido == -1) {
+
+
+	opserr << "ido: " << ido << endln;
 
 	  myMv(n, &workd[ipntr[0]-1], &workd[ipntr[1]-1]); 
 #ifdef _WIN32

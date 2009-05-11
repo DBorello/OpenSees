@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2005-07-06 22:00:20 $
+// $Revision: 1.8 $
+// $Date: 2009-05-11 21:01:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/SymBandEigenSolver.cpp,v $
 
 // Written: MHS
@@ -76,8 +76,14 @@ extern "C" int dsbevx_(char *jobz, char *range, char *uplo, int *n, int *kd,
 #endif
 
 int
-SymBandEigenSolver::solve(int nModes)
+SymBandEigenSolver::solve(int nModes, bool generalized)
 {
+
+  if (generalized == true) {
+    opserr << "SymBandEigenSolver::solve() - only does standard problem\n";
+    return -1;
+  }
+
   if (theSOE == 0) {
     opserr << "SymBandEigenSolver::solve() -- no EigenSOE has been set yet\n";
     return -1;

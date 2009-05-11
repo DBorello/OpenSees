@@ -1,5 +1,7 @@
-// File: ~/system_of_eqn/eigenSOE/EigenSolver.C
-//
+// $Revision: 1.2 $
+// $Date: 2009-05-11 21:01:10 $
+// $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/EigenSolver.h,v $
+
 // Written: Jun Peng
 // Created: Sat Feb. 6, 1999
 // Revision: A
@@ -17,19 +19,18 @@
 #ifndef EigenSolver_h
 #define EigenSolver_h
 
-#include <Solver.h>
+#include <MovableObject.h>
 #include <Vector.h>
 
 class EigenSOE;
 
-class EigenSolver : public Solver
+class EigenSolver : public MovableObject
 {
   public:
      EigenSolver(int classTag);
      virtual ~EigenSolver();
 
-     virtual int solve(void) =0;
-     virtual int solve(int numModes) =0;     
+     virtual int solve(int numModes, bool generalized) =0;     
      virtual const Vector &getEigenvector(int mode) = 0;
      virtual double getEigenvalue(int mode) = 0;     
 

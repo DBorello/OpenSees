@@ -19,8 +19,8 @@ class BandArpackSolver : public EigenSolver
     BandArpackSolver(int numE = 0);    
     virtual ~BandArpackSolver();
 
-    virtual int solve(void);
-    virtual int solve(int numModes) {return this->solve();};    
+    virtual int solve(int numModes, bool generalized);  
+
     virtual int setSize(void);
     virtual int setEigenSOE(BandArpackSOE &theSOE);
     

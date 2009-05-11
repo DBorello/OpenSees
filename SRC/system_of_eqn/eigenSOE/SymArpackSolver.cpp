@@ -94,13 +94,18 @@ extern "C" void pfsslv(int neqns, double *diag, double **penv, int nblks,
 
 
 int
-SymArpackSolver::solve(void)
+SymArpackSolver::solve(int numModes, bool generalized)
 { 
-    if (theSOE == 0) {
-	opserr << "WARNING SymArpackSolver::solve(void)- ";
-	opserr << " No EigenSOE object has been set\n";
-	return -1;
-    }
+  if (generalized == false) {
+    opserr << "BandArpackSolver::solve(int numMode, bool generalized) - only solves generalized problem\n";
+    return -1;
+  }
+
+  if (theSOE == 0) {
+    opserr << "WARNING SymArpackSolver::solve(void)- ";
+    opserr << " No EigenSOE object has been set\n";
+    return -1;
+  }
 
     int      nblks = theSOE->nblks;
     int      *xblk = theSOE->xblk;
@@ -132,7 +137,8 @@ SymArpackSolver::solve(void)
 	}
 
 
-    int nev = theNev;
+	int nev = numModes;
+
     int ncv = getNCV(n, nev);
 
     // set up the space for ARPACK functions.

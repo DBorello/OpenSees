@@ -1,5 +1,7 @@
-// File: ~/system_of_eqn/eigenSOE/EigenSolver.C
-//
+// $Revision: 1.2 $
+// $Date: 2009-05-11 21:01:10 $
+// $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/EigenSolver.cpp,v $
+
 // Written: Jun Peng
 // Created: Sat Feb. 6, 1999
 // Revision: A
@@ -18,7 +20,7 @@
 
 
 EigenSolver::EigenSolver(int classTag)
-  :Solver(classTag)
+  :MovableObject(classTag)
 {
 
 }

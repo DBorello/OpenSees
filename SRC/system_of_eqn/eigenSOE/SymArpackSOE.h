@@ -27,12 +27,14 @@ extern "C" {
 
 
 class SymArpackSolver;
+class AnalysisModel;
 
 class SymArpackSOE : public EigenSOE
 {
   public:
-    SymArpackSOE(SymArpackSolver &theSolver, AnalysisModel &theModel,
-		double shift = 0.0);        
+    SymArpackSOE(SymArpackSolver &theSolver, 
+		 AnalysisModel &theModel,
+		 double shift = 0.0);        
 
     virtual ~SymArpackSOE();
 

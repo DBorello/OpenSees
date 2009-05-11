@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2008-09-23 22:52:17 $
+// $Revision: 1.5 $
+// $Date: 2009-05-11 21:01:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/FullGenEigenSolver.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -81,8 +81,13 @@ FullGenEigenSolver::~FullGenEigenSolver()
 }
 
 
-int FullGenEigenSolver::solve(int nEigen)
+int FullGenEigenSolver::solve(int nEigen, bool generalized)
 {
+  if (generalized == true) {
+    opserr << "FullGenEigenSolver::solve() - only solves standard problem\n";
+    return -1;
+  }
+
     if (theSOE == 0) {
         opserr << "FullGenEigenSolver::solve()- "
             << " No EigenSOE object has been set yet\n";

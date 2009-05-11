@@ -2,6 +2,8 @@ include ../../../Makefile.def
 
 OBJS       = EigenSOE.o \
 	EigenSolver.o \
+	ArpackSOE.o \
+	ArpackSolver.o \
 	BandArpackSOE.o  \
 	BandArpackSolver.o \
 	SymArpackSOE.o \

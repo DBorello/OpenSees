@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2007-12-04 22:29:05 $
+// $Revision: 1.3 $
+// $Date: 2009-05-11 21:01:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/FullGenEigenSolver.h,v $
 
 
@@ -44,8 +44,7 @@ public:
     FullGenEigenSolver();    
     virtual ~FullGenEigenSolver();
 
-    virtual int solve(void) {return this->solve(theSOE->size);};
-    virtual int solve(int numEigen);    
+    virtual int solve(int numEigen, bool generalized);    
     virtual int setSize(void);
     virtual int setEigenSOE(FullGenEigenSOE &theSOE);
 
