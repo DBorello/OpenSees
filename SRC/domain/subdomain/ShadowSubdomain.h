@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2007-11-29 23:26:36 $
+// $Revision: 1.12 $
+// $Date: 2009-05-11 21:30:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.h,v $
                                                                         
                                                                         
@@ -136,6 +136,7 @@ class ShadowSubdomain: public Shadow, public Subdomain
     virtual int setAnalysisAlgorithm(EquiSolnAlgo &theAlgorithm);
     virtual int setAnalysisIntegrator(IncrementalIntegrator &theIntegrator);
     virtual int setAnalysisLinearSOE(LinearSOE &theSOE);
+    virtual int setAnalysisEigenSOE(EigenSOE &theSOE);
     virtual int setAnalysisConvergenceTest(ConvergenceTest &theTest);
     virtual void clearAnalysis(void);
     virtual void domainChange(void);
@@ -153,7 +154,8 @@ class ShadowSubdomain: public Shadow, public Subdomain
 
     const Vector &getLastExternalSysResponse(void);
     virtual int computeNodalResponse(void);    
-    virtual int newStep(double deltaT);
+    virtual int analysisStep(double deltaT);
+    virtual int eigenAnalysis(int numMode, bool generalized);
 
     virtual int sendSelf(int commitTag, Channel &theChannel);
     virtual int recvSelf(int commitTag, Channel &theChannel, 

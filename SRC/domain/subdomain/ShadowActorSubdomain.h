@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-11-29 23:26:36 $
+// $Revision: 1.11 $
+// $Date: 2009-05-11 21:30:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowActorSubdomain.h,v $
                                                                         
                                                                         
@@ -31,7 +31,8 @@
 //
 // What: "@(#) ShadowSubdomain.h, revA"
 static const int ShadowActorSubdomain_setTag = 72;
-static const int ShadowActorSubdomain_newStep = 73;
+static const int ShadowActorSubdomain_analysisStep = 73;
+static const int ShadowActorSubdomain_eigenAnalysis = 77;
 static const int ShadowActorSubdomain_buildSubdomain = 70;
 static const int ShadowActorSubdomain_getRemoteData = 71;
 static const int ShadowActorSubdomain_addElement = 1;
@@ -69,6 +70,7 @@ static const int ShadowActorSubdomain_clearAnalysis = 42;
 static const int ShadowActorSubdomain_setAnalysisAlgorithm = 43;
 static const int ShadowActorSubdomain_setAnalysisIntegrator = 44;
 static const int ShadowActorSubdomain_setAnalysisLinearSOE = 45;
+static const int ShadowActorSubdomain_setAnalysisEigenSOE = 78;
 static const int ShadowActorSubdomain_setAnalysisConvergenceTest = 46;
 static const int ShadowActorSubdomain_getTang = 53;
 static const int ShadowActorSubdomain_getResistingForce = 54;

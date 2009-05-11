@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2007-11-29 23:26:36 $
+// $Revision: 1.15 $
+// $Date: 2009-05-11 21:30:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -58,6 +58,7 @@
 #include <EquiSolnAlgo.h>
 #include <IncrementalIntegrator.h>
 #include <LinearSOE.h>
+#include <EigenSOE.h>
 #include <LinearSOESolver.h>
 #include <ConvergenceTest.h>
 #include <Recorder.h>
@@ -349,7 +350,7 @@ ShadowSubdomain::addSP_Constraint(int startTag, int axisDirn, double axisValue,
       ID theID(numSP);
       this->recvID(theID);
       for (int i=0; i<numSP; i++) {
-	SP_Constraint *theSP = theBroker->getNewSP(theID(i));
+	SP_Constraint *theSP = theObjectBroker->getNewSP(theID(i));
 	if (theSP != 0) {
 	  this->recvObject(*theSP);
 	  numSPs++;    
@@ -532,7 +533,7 @@ ShadowSubdomain::removeElement(int tag)
 	if (theType == -1) // the ele was not there!
 	    return 0;    
     
-	Element *theEle = theBroker->getNewElement(theType);
+	Element *theEle = theObjectBroker->getNewElement(theType);
 	if (theEle != 0) 
 	    this->recvObject(*theEle);
     
@@ -567,7 +568,7 @@ ShadowSubdomain::removeNode(int tag)
 	if (theType == -1)
 	    return 0;
     
-	Node *theNode = theBroker->getNewNode(theType);
+	Node *theNode = theObjectBroker->getNewNode(theType);
 	if (theNode != 0) {
 	    this->recvObject(*theNode);
 	    if (loc >= 0)
@@ -812,7 +813,7 @@ ShadowSubdomain::getElement(int tag)
 
     opserr << "ShadowSubdomain::getElement(int tag) 3 type: " << theType << endln;   
     
-    Element *theEle = theBroker->getNewElement(theType);
+    Element *theEle = theObjectBroker->getNewElement(theType);
 
 
     if (theEle != 0) {
@@ -840,7 +841,7 @@ ShadowSubdomain::getNode(int tag)
   this->recvID(msgData);
   int theType = msgData(0);
   if (theType != -1) {
-    theNod = theBroker->getNewNode(theType);
+    theNod = theObjectBroker->getNewNode(theType);
     
     if (theNod != 0) {
       this->recvObject(*theNod);
@@ -1033,6 +1034,7 @@ ShadowSubdomain::barrierCheckOUT(int result)
 void
 ShadowSubdomain::clearAll(void)
 {
+  opserr << "ShadowSubdomain::clearAll(void) - clearrAll()\n";
   msgData(0) = ShadowActorSubdomain_clearAll;
   this->sendID(msgData);
   this->recvID(msgData);
@@ -1104,7 +1106,6 @@ void
 ShadowSubdomain::wipeAnalysis(void)
 {
   msgData(0) = ShadowActorSubdomain_wipeAnalysis;
-    
   this->sendID(msgData);
 }
 
@@ -1140,6 +1141,8 @@ ShadowSubdomain::setAnalysisIntegrator(IncrementalIntegrator &theIntegrator)
     
     this->sendID(msgData);
     this->sendObject(theIntegrator);
+    this->recvID(msgData);
+
     return 0;
 }
 
@@ -1155,6 +1158,19 @@ ShadowSubdomain::setAnalysisLinearSOE(LinearSOE &theSOE)
     this->sendID(msgData);
     this->sendObject(theSOE);
     this->sendObject(*theSolver);
+
+    return 0;
+}
+
+
+int 
+ShadowSubdomain::setAnalysisEigenSOE(EigenSOE &theSOE)
+{
+    msgData(0) = ShadowActorSubdomain_setAnalysisEigenSOE;
+    msgData(1) = theSOE.getClassTag();
+
+    this->sendID(msgData);
+    this->sendObject(theSOE);
 
     return 0;
 }
@@ -1389,15 +1405,30 @@ ShadowSubdomain::computeNodalResponse(void)
 
 
 int 
-ShadowSubdomain::newStep(double dT)    
+ShadowSubdomain::analysisStep(double dT)    
 {
-    msgData(0) =  ShadowActorSubdomain_newStep;
+    msgData(0) =  ShadowActorSubdomain_analysisStep;
     this->sendID(msgData);
 
     static Vector timeStep(4);
     timeStep(0) = dT;
 
     this->sendVector(timeStep);
+
+    return 0;
+}
+
+int 
+ShadowSubdomain::eigenAnalysis(int numMode, bool generalized)    
+{
+    msgData(0) =  ShadowActorSubdomain_eigenAnalysis;
+    msgData(1) = numMode;
+    if (generalized == true)
+      msgData(2) = 0;
+    else
+      msgData(2) = 1;
+
+    this->sendID(msgData);
 
     return 0;
 }

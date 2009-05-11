@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2008-04-17 02:02:06 $
+// $Revision: 1.15 $
+// $Date: 2009-05-11 21:30:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -471,6 +471,16 @@ Subdomain::setAnalysisLinearSOE(LinearSOE &theSOE)
   return 0;
 }
 
+
+int 
+Subdomain::setAnalysisEigenSOE(EigenSOE &theSOE)
+{
+  if (theAnalysis != 0)
+    return theAnalysis->setEigenSOE(theSOE);
+
+  return 0;
+}
+
 int 
 Subdomain::setAnalysisConvergenceTest(ConvergenceTest &theTest)
 {
@@ -782,10 +792,20 @@ Subdomain::computeNodalResponse(void)
 
 
 int 
-Subdomain::newStep(double dT)
+Subdomain::analysisStep(double dT)
 {
   if (theAnalysis != 0)
-    return theAnalysis->newStep(dT);
+    return theAnalysis->analysisStep(dT);
+
+  return 0;
+}
+
+
+int
+Subdomain::eigenAnalysis(int numMode, bool generalized)
+{
+  if (theAnalysis != 0)
+    return theAnalysis->eigenAnalysis(numMode, generalized);
 
   return 0;
 }

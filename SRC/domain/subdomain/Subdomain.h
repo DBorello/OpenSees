@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2008-04-17 02:00:17 $
+// $Revision: 1.11 $
+// $Date: 2009-05-11 21:30:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.h,v $
                                                                         
                                                                         
@@ -50,6 +50,7 @@ class PartitionedModelBuilder;
 class EquiSolnAlgo;
 class IncrementalIntegrator;
 class LinearSOE;
+class EigenSOE;
 class ConvergenceTest;
 class FE_Element;
 
@@ -110,6 +111,7 @@ class Subdomain: public Element, public Domain
     virtual int setAnalysisAlgorithm(EquiSolnAlgo &theAlgorithm);
     virtual int setAnalysisIntegrator(IncrementalIntegrator &theIntegrator);
     virtual int setAnalysisLinearSOE(LinearSOE &theSOE);
+    virtual int setAnalysisEigenSOE(EigenSOE &theSOE);
     virtual int setAnalysisConvergenceTest(ConvergenceTest &theTest);
     virtual int invokeChangeOnAnalysis(void);
     
@@ -145,7 +147,8 @@ class Subdomain: public Element, public Domain
     void setFE_ElementPtr(FE_Element *theFE_Ele);
     virtual const Vector &getLastExternalSysResponse(void);
     virtual int computeNodalResponse(void);    
-    virtual int newStep(double deltaT);
+    virtual int analysisStep(double deltaT);
+    virtual int eigenAnalysis(int numMode, bool generalized);
     virtual bool doesIndependentAnalysis(void);
 
     virtual int sendSelf(int commitTag, Channel &theChannel);

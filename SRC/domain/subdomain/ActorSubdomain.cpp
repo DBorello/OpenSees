@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2007-11-29 23:26:36 $
+// $Revision: 1.15 $
+// $Date: 2009-05-11 21:30:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ActorSubdomain.cpp,v $
                                                                         
 #include <ActorSubdomain.h>
@@ -81,38 +81,38 @@ ActorSubdomain::run(void)
       }
 
       bool change;
-      int theType, theOtherType, tag, dbTag, loadPatternTag, startTag, endTag, axisDirn, numSP, i;
-	Element *theEle;
-	Node *theNod;
-	SP_Constraint *theSP;
-	MP_Constraint *theMP;
-	LoadPattern *theLoadPattern;
-	NodalLoad *theNodalLoad;
-	ElementalLoad *theElementalLoad;
-	DomainDecompositionAnalysis *theDDAnalysis;
-	const Matrix *theMatrix;
-	const Vector *theVector;
-	Matrix *theM;
-	Vector *theV;
-	ID     *theI, *theNodeTags, *theEleTags;
-	PartitionedModelBuilder *theBuilder;
-	IncrementalIntegrator *theIntegrator;
-	EquiSolnAlgo *theAlgorithm;
-	LinearSOE *theSOE;
-	LinearSOESolver *theSolver;
-	ConvergenceTest *theTest;
-	Recorder *theRecorder;
-	bool res;
-	double doubleRes;
-	int intRes;
-	NodeResponseType nodeResponseType;
-	Parameter *theParameter;
-
-	const ID *theID;
-
-	//	opserr << "ActorSubdomain action: " << action << endln;
-	
-	switch (action) {
+      int theType, theOtherType, tag, dbTag, loadPatternTag, startTag, endTag, axisDirn, numSP, i, numMode;
+      Element *theEle;
+      Node *theNod;
+      SP_Constraint *theSP;
+      MP_Constraint *theMP;
+      LoadPattern *theLoadPattern;
+      NodalLoad *theNodalLoad;
+      ElementalLoad *theElementalLoad;
+      DomainDecompositionAnalysis *theDDAnalysis;
+      const Matrix *theMatrix;
+      const Vector *theVector;
+      Matrix *theM;
+      Vector *theV;
+      ID     *theI, *theNodeTags, *theEleTags;
+      PartitionedModelBuilder *theBuilder;
+      IncrementalIntegrator *theIntegrator;
+      EquiSolnAlgo *theAlgorithm;
+      LinearSOE *theSOE;
+      LinearSOESolver *theSolver;
+      ConvergenceTest *theTest;
+      Recorder *theRecorder;
+      bool res, generalized;
+      double doubleRes;
+      int intRes;
+      NodeResponseType nodeResponseType;
+      Parameter *theParameter;
+      
+      const ID *theID;
+      
+      //	opserr << "ActorSubdomain action: " << action << endln;
+      
+      switch (action) {
 
 	  case ShadowActorSubdomain_setTag:
 	    tag = msgData(1); // subdomain tag
@@ -120,9 +120,18 @@ ActorSubdomain::run(void)
 	    this->Actor::setCommitTag(tag);
 	    break;
 
-	  case ShadowActorSubdomain_newStep:
+	  case ShadowActorSubdomain_analysisStep:
 	    this->recvVector(theVect);
-	    this->newStep(theVect(0));
+	    this->analysisStep(theVect(0));
+	    break;
+
+	  case ShadowActorSubdomain_eigenAnalysis:
+	    numMode = msgData(1);
+	    if (msgData(2) == 0)
+	      generalized = true;
+	    else
+	      generalized = false;
+	    this->eigenAnalysis(numMode, generalized);
 	    break;
 
 	  case ShadowActorSubdomain_buildSubdomain:
@@ -667,21 +676,26 @@ ActorSubdomain::run(void)
 	  break;
 	  
 	case ShadowActorSubdomain_setAnalysisIntegrator:
+	  opserr << "ActorSUbdoman:: - setAnalysisIntegrator 1\n";
 	  theType = msgData(1);
 	  theIntegrator = theBroker->getNewIncrementalIntegrator(theType);
+	  opserr << "ActorSUbdoman:: - setAnalysisIntegrator 2\n";
 	  if (theIntegrator != 0) {
+	  opserr << "ActorSUbdoman:: - setAnalysisIntegrator 3\n";
 	    this->recvObject(*theIntegrator);
+	  opserr << "ActorSUbdoman:: - setAnalysisIntegrator 4\n";
 	    this->setAnalysisIntegrator(*theIntegrator);
+	  opserr << "ActorSUbdoman:: - setAnalysisIntegrator 5\n";
 	    msgData(0) = 0;
 	  } else
 	    msgData(0) = -1;
-	    
+	  this->sendID(msgData);
+	  opserr << "ActorSUbdoman:: - setAnalysisIntegrator SENT\n";
 	  break;
 
 	case ShadowActorSubdomain_setAnalysisLinearSOE:
 	  theType = msgData(1);
-	  theOtherType = msgData(2);
-	  theSOE = theBroker->getNewLinearSOE(theType, theOtherType);
+	  theSOE = theBroker->getNewLinearSOE(theType);
 
 	  if (theSOE != 0) {
 	    this->recvObject(*theSOE);
