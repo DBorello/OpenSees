@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.113 $
-// $Date: 2009-04-17 23:25:49 $
+// $Revision: 1.114 $
+// $Date: 2009-05-11 22:02:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -46,15 +46,17 @@
 #define DMG_TAG_Mehanny          4
 #define DMG_TAG_NormalizedPeak   5
 
+
 #define EigenSOE_TAGS_BandArpackSOE 	1
 #define EigenSOE_TAGS_SymArpackSOE 	2
 #define EigenSOE_TAGS_SymBandEigenSOE   3
 #define EigenSOE_TAGS_FullGenEigenSOE   4
-
+#define EigenSOE_TAGS_ArpackSOE 	5
 #define EigenSOLVER_TAGS_BandArpackSolver 	1
 #define EigenSOLVER_TAGS_SymArpackSolver 	2
 #define EigenSOLVER_TAGS_SymBandEigenSolver     3
 #define EigenSOLVER_TAGS_FullGenEigenSolver  4
+#define EigenSOLVER_TAGS_ArpackSolver  5
 
 #define EigenALGORITHM_TAGS_Frequency 1
 #define EigenALGORITHM_TAGS_Standard  2
