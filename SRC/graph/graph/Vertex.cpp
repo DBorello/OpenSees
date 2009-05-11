@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-11-10 01:07:59 $
+// $Revision: 1.6 $
+// $Date: 2009-05-11 21:37:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/Vertex.cpp,v $
                                                                         
 // Written: fmk 
@@ -134,7 +134,7 @@ Vertex::Print(OPS_Stream &s, int flag)
     else if (flag == 3)
         s << myWeight << " " << myColor << " " ;    
     else if (flag == 4)
-      s << myWeight << " " << myColor << " " << myTmp << " " ;
+      s << " weight: " << myWeight << " color: " << myColor << " tmp: " << myTmp << " " ;
 
     s << "ADJACENCY: " << myAdjacency;    	
 }
