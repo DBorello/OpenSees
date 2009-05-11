@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2006-03-29 18:50:37 $
+// $Revision: 1.15 $
+// $Date: 2009-05-11 21:33:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.cpp,v $
                                                                         
                                                                         
@@ -578,7 +578,7 @@ AnalysisModel::updateDomain(double newTime, double dT)
 
 
 int
-AnalysisModel::newStepDomain(double dT)
+AnalysisModel::analysisStep(double dT)
 {
     // check to see there is a Domain linked to the Model
 
@@ -588,8 +588,21 @@ AnalysisModel::newStepDomain(double dT)
     }
 
     // invoke the method
-    return myDomain->newStep(dT);
+    return myDomain->analysisStep(dT);
+}
 
+int
+AnalysisModel::eigenAnalysis(int numMode, bool generalized)
+{
+    // check to see there is a Domain linked to the Model
+
+    if (myDomain == 0) {
+	opserr << "WARNING: AnalysisModel::newStep. No Domain linked.\n";
+	return -1;
+    }
+
+    // invoke the method
+    return myDomain->eigenAnalysis(numMode, generalized);
 }
 
 
