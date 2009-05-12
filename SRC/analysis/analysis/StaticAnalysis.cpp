@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2009-05-11 21:32:27 $
+// $Revision: 1.16 $
+// $Date: 2009-05-12 18:17:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.cpp,v $
                                                                         
                                                                         
@@ -577,11 +577,13 @@ StaticAnalysis::setEigenSOE(EigenSOE &theNewSOE)
     theEigenSOE = &theNewSOE;
 
     // cause domainChanged to be invoked on next analyze
-    if (domainStamp != 0) {
+	domainStamp = 0;
+    /*
+	if (domainStamp != 0) {
       Graph &theGraph = theAnalysisModel->getDOFGraph();
       int result = theEigenSOE->setSize(theGraph);
     }
-
+	*/
     return 0;
 }
 

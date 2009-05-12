@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2009-05-11 21:32:27 $
+// $Revision: 1.14 $
+// $Date: 2009-05-12 18:17:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DirectIntegrationAnalysis.cpp,v $
                                                                         
                                                                         
@@ -506,10 +506,7 @@ DirectIntegrationAnalysis::setEigenSOE(EigenSOE &theNewSOE)
   theEigenSOE = &theNewSOE;
 
   // cause domainChanged to be invoked on next analyze
-  if (domainStamp != 0) {
-    Graph &theGraph = theAnalysisModel->getDOFGraph();
-    int result = theEigenSOE->setSize(theGraph);
-  }
+  domainStamp = 0;
 
   return 0;
 }
