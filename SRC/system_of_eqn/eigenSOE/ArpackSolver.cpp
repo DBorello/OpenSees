@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2009-05-11 22:43:55 $
+// $Revision: 1.3 $
+// $Date: 2009-05-12 18:16:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/ArpackSolver.cpp,v $
 
 // Written: fmk
@@ -157,21 +157,20 @@ ArpackSolver::solve(int numModes, bool generalized)
     if (resid != 0) delete [] resid;
     if (select != 0) delete [] select;
     
-    int blah = 10000;
     v = new double[ldv * ncv];
-    workl = new double[lworkl + 1 + blah];
-    workd = new double[3 * n + 1 + blah];
+    workl = new double[lworkl + 1];
+    workd = new double[3 * n + 1];
     eigenvalues = new double[nev];
     eigenvectors = new double[n * nev];
     resid = new double[n];
     select = new logical[ncv];
 
-    for (int i=0; i<lworkl+1+blah; i++)
+    for (int i=0; i<lworkl+1; i++)
 	   workl[i] = 0;
-    for (int i=0; i<2*n+1+blah; i++)
+    for (int i=0; i<3*n+1; i++)
       workd[i] = 0;
 
-    for (int i=0; i<ldv*ncv+blah; i++)
+    for (int i=0; i<ldv*ncv; i++)
       v[i] = 0;
     
     numModesMax = numModes;

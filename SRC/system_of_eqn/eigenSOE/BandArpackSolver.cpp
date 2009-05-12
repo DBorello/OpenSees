@@ -223,12 +223,8 @@ BandArpackSolver::solve(int numModes, bool generalized)
       dsaupd_(&ido, &bmat, &n, which, &nev, &tol, resid, &ncv, v, &ldv,
 	      iparam, ipntr, workd, workl, &lworkl, &info);
 #endif
-      opserr << "BandArpackSolver::solve() " << n << " " << nev << " " << ncv << " " << lworkl << endln;
       
       if (ido == -1) {
-
-
-	opserr << "ido: " << ido << endln;
 
 	  myMv(n, &workd[ipntr[0]-1], &workd[ipntr[1]-1]); 
 #ifdef _WIN32
