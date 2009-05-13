@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2009-05-11 20:57:11 $
+// $Revision: 1.3 $
+// $Date: 2009-05-13 18:15:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandGEN/DistributedBandGenLinSOE.cpp,v $
                                                                         
 // Written: fmk 
@@ -43,6 +43,7 @@ DistributedBandGenLinSOE::DistributedBandGenLinSOE(BandGenLinSolver &theSolvr)
   :BandGenLinSOE(LinSOE_TAGS_DistributedBandGenLinSOE), 
    processID(0), numChannels(0), theChannels(0), localCol(0), workArea(0), sizeWork(0), myB(0), myVectB(0)
 {
+	this->setSolver(theSolvr);
     theSolvr.setLinearSOE(*this);
 }
 
@@ -282,6 +283,12 @@ DistributedBandGenLinSOE::setSize(Graph &theGraph)
 
     // invoke setSize() on the Solver
   LinearSOESolver *theSolvr = this->getSolver();
+  if (theSolvr == 0) {
+	opserr << "WARNING:DistributedBandGenLinSOE::setSize :";
+    opserr << " no solver set\n";
+    return -2;
+  }    
+
   int solverOK = theSolvr->setSize();
   if (solverOK < 0) {
     opserr << "WARNING:DistributedBandGenLinSOE::setSize :";
