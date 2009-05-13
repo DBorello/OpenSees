@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2009-04-30 23:23:04 $
+// $Revision: 1.9 $
+// $Date: 2009-05-13 21:58:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/DataFileStream.cpp,v $
 
 
@@ -74,13 +74,13 @@ DataFileStream::~DataFileStream()
     theFile.close();
 
   if (theChannels != 0) {
-
     static ID lastMsg(1);
     if (sendSelfCount > 0) {
       for (int i=0; i<sendSelfCount; i++) 
 	theChannels[i]->sendID(0, 0, lastMsg);
     } else
 	theChannels[0]->recvID(0, 0, lastMsg);
+
     delete [] theChannels;
   }
 
@@ -95,10 +95,8 @@ DataFileStream::~DataFileStream()
     for (int i=0; i<=sendSelfCount; i++) {
       if (theColumns[i] != 0)
 	delete theColumns[i];
-
       if (theData[i] != 0)
 	delete [] theData[i];
-
       if (theRemoteData[i] != 0)
 	delete theRemoteData[i];
     }
@@ -725,6 +723,13 @@ DataFileStream::setOrder(const ID &orderData)
     theColumns = new ID *[sendSelfCount+1];
     theData = new double *[sendSelfCount+1];
     theRemoteData = new Vector *[sendSelfCount+1];
+
+    for (int i=0; i<=sendSelfCount; i++) {
+      theColumns[i] = 0;
+      theData[i] = 0;
+      theRemoteData[i] = 0;
+    }
+    
     
     int numColumns = orderData.Size();
     (*sizeColumns)(0) = numColumns;
