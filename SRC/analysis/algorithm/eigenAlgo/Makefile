@@ -1,6 +1,6 @@
 include ../../../../Makefile.def
 
-OBJS       = EigenAlgorithm.o FrequencyAlgo.o StandardEigenAlgo.o
+OBJS       = 
 
 # Compilation control
 

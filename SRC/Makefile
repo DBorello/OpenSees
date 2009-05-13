@@ -210,10 +210,7 @@ LAW_LIBS = $(FE)/system_of_eqn/linearSOE/sparseSYM/SymSparseLinSOE.o \
 	$(FE)/system_of_eqn/eigenSOE/SymBandEigenSOE.o \
 	$(FE)/system_of_eqn/eigenSOE/SymBandEigenSolver.o \
 	$(FE)/analysis/analysis/EigenAnalysis.o \
-	$(FE)/analysis/integrator/EigenIntegrator.o \
-	$(FE)/analysis/algorithm/eigenAlgo/EigenAlgorithm.o \
-	$(FE)/analysis/algorithm/eigenAlgo/FrequencyAlgo.o \
-	$(FE)/analysis/algorithm/eigenAlgo/StandardEigenAlgo.o
+	$(FE)/analysis/integrator/EigenIntegrator.o 
 
 
 GGD_LIBS = $(FE)/element/joint/MP_Joint2D.o \
