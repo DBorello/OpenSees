@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2009-05-11 20:52:01 $
+// $Revision: 1.6 $
+// $Date: 2009-05-14 22:45:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/LinearSOE.h,v $
                                                                         
                                                                         
@@ -50,6 +50,7 @@ class Graph;
 class Matrix;
 class Vector;
 class ID;
+class AnalysisModel;
 
 class LinearSOE : public MovableObject
 {
@@ -59,6 +60,7 @@ class LinearSOE : public MovableObject
     virtual ~LinearSOE();
 
     virtual int solve(void);    
+    virtual int setLinks(AnalysisModel &theModel);    
 
     // pure virtual functions
     virtual int setSize(Graph &theGraph) =0;    

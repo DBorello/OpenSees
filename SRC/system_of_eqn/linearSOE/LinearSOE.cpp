@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2009-05-11 20:52:01 $
+// $Revision: 1.5 $
+// $Date: 2009-05-14 22:45:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/LinearSOE.cpp,v $
                                                                         
                                                                         
@@ -86,9 +86,11 @@ LinearSOE::getSolver(void)
     return theSolver;
 }
 
-
-
-
+int 
+LinearSOE::setLinks(AnalysisModel &theModel)
+{
+  return 0;
+}
 
 
 

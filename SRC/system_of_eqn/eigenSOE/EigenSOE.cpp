@@ -1,5 +1,5 @@
-// $Revision: 1.4 $
-// $Date: 2009-05-11 21:00:17 $
+// $Revision: 1.5 $
+// $Date: 2009-05-14 22:45:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/EigenSOE.cpp,v $
 
 // Written: Jun Peng
@@ -14,10 +14,9 @@
 // vectors.
 
 
-
-
 #include <EigenSOE.h>
 #include <EigenSolver.h>
+#include <AnalysisModel.h>
 
 EigenSOE::EigenSOE(EigenSolver &theEigenSolver, int classTag)
   :MovableObject(classTag), theSolver(&theEigenSolver)
@@ -72,5 +71,9 @@ EigenSOE::getEigenvalue(int mode) {
 }
 
 
-
+int 
+EigenSOE::setLinks(AnalysisModel &theModel)
+{
+  return 0;
+}
 

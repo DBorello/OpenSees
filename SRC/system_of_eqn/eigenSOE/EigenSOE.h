@@ -1,5 +1,5 @@
-// $Revision: 1.2 $
-// $Date: 2009-05-11 21:00:17 $
+// $Revision: 1.3 $
+// $Date: 2009-05-14 22:45:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/EigenSOE.h,v $
 
 // Written: Jun Peng
@@ -27,6 +27,7 @@
 #include <MovableObject.h>
 
 class EigenSolver;
+class AnalysisModel;
 class Graph;
 class Matrix;
 class Vector;
@@ -40,6 +41,7 @@ class EigenSOE : public MovableObject
      virtual ~EigenSOE();
      
      virtual int solve(int numModes, bool generalized);
+     virtual int setLinks(AnalysisModel &theModel);    
      
      // pure virtual functions
      virtual int addA(const Matrix &, const ID &, double fact = 1.0) = 0;
