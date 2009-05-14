@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2009-05-14 22:46:38 $
+// $Revision: 1.3 $
+// $Date: 2009-05-14 23:25:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/ArpackSOE.cpp,v $
 
 // Written: fmk
@@ -382,10 +382,12 @@ int
 ArpackSOE::setLinks(AnalysisModel &theAnalysisModel)
 {
   theModel = &theAnalysisModel;
+  return 0;
 }
 
 int 
 ArpackSOE::setLinearSOE(LinearSOE &theLinearSOE)
 {
   theSOE = &theLinearSOE;
+	return 0;
 }
