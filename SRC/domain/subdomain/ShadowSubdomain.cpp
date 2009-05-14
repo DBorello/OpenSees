@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2009-05-11 21:30:58 $
+// $Revision: 1.16 $
+// $Date: 2009-05-14 22:48:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -59,7 +59,6 @@
 #include <IncrementalIntegrator.h>
 #include <LinearSOE.h>
 #include <EigenSOE.h>
-#include <LinearSOESolver.h>
 #include <ConvergenceTest.h>
 #include <Recorder.h>
 #include <Parameter.h>
@@ -1034,7 +1033,6 @@ ShadowSubdomain::barrierCheckOUT(int result)
 void
 ShadowSubdomain::clearAll(void)
 {
-  opserr << "ShadowSubdomain::clearAll(void) - clearrAll()\n";
   msgData(0) = ShadowActorSubdomain_clearAll;
   this->sendID(msgData);
   this->recvID(msgData);
@@ -1152,12 +1150,8 @@ ShadowSubdomain::setAnalysisLinearSOE(LinearSOE &theSOE)
     msgData(0) = ShadowActorSubdomain_setAnalysisLinearSOE;
     msgData(1) = theSOE.getClassTag();
 
-    LinearSOESolver *theSolver = theSOE.getSolver();
-    msgData(2) = theSolver->getClassTag();    
-
     this->sendID(msgData);
     this->sendObject(theSOE);
-    this->sendObject(*theSolver);
 
     return 0;
 }
