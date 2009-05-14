@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2009-05-11 21:08:36 $
+// $Revision: 1.2 $
+// $Date: 2009-05-14 22:46:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/ArpackSOE.h,v $
 
 // Written: fmk
@@ -41,13 +41,15 @@ class LinearSOE;
 class ArpackSOE : public EigenSOE
 {
   public:
-    ArpackSOE(ArpackSolver &theSolver, 
-	      AnalysisModel &theModel, 
-	      LinearSOE &theLinearSOE,
-	      double shift = 0.0);    
+    ArpackSOE(LinearSOE &theLinearSOE,
+	      double shift = 0.0);
+
     ArpackSOE();
 
     ~ArpackSOE();
+
+    int setLinks(AnalysisModel &theModel);   
+    int setLinearSOE(LinearSOE &theSOE);    
 
     int getNumEqn(void) const;
     int setSize(Graph &theGraph);
@@ -62,7 +64,7 @@ class ArpackSOE : public EigenSOE
     
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
-		     
+
     friend class ArpackSolver;
 
   protected:
@@ -74,6 +76,12 @@ class ArpackSOE : public EigenSOE
     double shift;
     AnalysisModel *theModel;
     LinearSOE *theSOE;
+
+    int processID;
+    int numChannels;
+    Channel **theChannels;
+    ID **localCol;
+    ID *sizeLocal;
 };
 
 

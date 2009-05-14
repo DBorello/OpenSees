@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2009-05-12 18:16:46 $
+// $Revision: 1.4 $
+// $Date: 2009-05-14 22:46:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/ArpackSolver.cpp,v $
 
 // Written: fmk
@@ -53,6 +53,10 @@
 #include <FE_Element.h>
 #include <Integrator.h>
 #include <string.h>
+#include <Channel.h>
+
+static double *workArea = 0;
+static int sizeWork = 0;
 
 ArpackSolver::ArpackSolver()
 :EigenSolver(EigenSOLVER_TAGS_ArpackSolver),
@@ -80,6 +84,9 @@ ArpackSolver::~ArpackSolver()
     delete [] resid;
   if (select != 0)
     delete [] select;
+  if (workArea != 0)
+    delete [] workArea;
+  sizeWork = 0;
 }
 
 #ifdef _WIN32
@@ -126,13 +133,10 @@ ArpackSolver::solve(int numModes, bool generalized)
     return -1;
   }
 
+  theSOE = theArpackSOE->theSOE;
+
   if (theSOE == 0) {
     opserr << "ArpackSolver::setSize() - no LinearSOE set\n";
-    return -1;
-  }
-  if (theSOE == 0) {
-    opserr << "WARNING GenLinLapackSolver::solve(void)- ";
-    opserr << " No LinearSOE object has been set\n";
     return -1;
   }
   
@@ -144,6 +148,9 @@ ArpackSolver::solve(int numModes, bool generalized)
   int ncv = getNCV(n, nev);
   int ldv = n;
   int lworkl = ncv*ncv + 8*ncv;
+
+  int processID = theArpackSOE->processID;
+  
   
   // set up the space for ARPACK functions.
   // this is done each time method is called!! .. this needs to be cleaned up
@@ -194,7 +201,6 @@ ArpackSolver::solve(int numModes, bool generalized)
   bool rvec = true;
   
   int ido = 0;
-  
   int ierr = 0;
   
   while (1) { 
@@ -232,7 +238,11 @@ ArpackSolver::solve(int numModes, bool generalized)
       myCopy(n, &workd[ipntr[2]-1], &workd[ipntr[1]-1]);
       
       theVector.setData(&workd[ipntr[1] - 1], size);
-      theSOE->setB(theVector);
+      if (processID > 0)
+	theSOE->zeroB();
+      else
+	theSOE->setB(theVector);
+
       theSOE->solve();
       const Vector &X = theSOE->getX();
       theVector = X;
@@ -432,9 +442,13 @@ ArpackSolver::myMv(int n, double *v, double *result)
     int Msize = theArpackSOE->Msize;
 
     double *M = theArpackSOE->M;
-
-    for (int i=0; i<n; i++)
-      result[i] = M[i]*v[i];
+    if (n <= Msize) {
+      for (int i=0; i<n; i++)
+	result[i] = M[i]*v[i];
+    } else {
+      opserr << "ArpackSolver::myMv() n > Msize!\n";
+      return;
+    }
 
   } else {
 
@@ -457,6 +471,28 @@ ArpackSolver::myMv(int n, double *v, double *result)
     while ((dofPtr = theDofs()) != 0) {
       const Vector &a = dofPtr->getM_Force(x,1.0);      
       y.Assemble(a, dofPtr->getID(), 1.0);
+    }
+  }
+
+  // if paallel we have to merge the results
+  int processID = theArpackSOE->processID;
+  if (processID != -1) {
+    Channel **theChannels = theArpackSOE->theChannels;
+    int numChannels = theArpackSOE->numChannels;
+    if (processID != 0) {
+      theChannels[0]->sendVector(0, 0, y);
+      theChannels[0]->recvVector(0, 0, y);
+    } else {
+      Vector other(workArea, n);
+      // recv contribution from remote & add
+      for (int i=0; i<numChannels; i++) {
+	theChannels[i]->recvVector(0,0,other);
+	y += other;
+      }
+      // send result back
+      for (int i=0; i<numChannels; i++) {
+	theChannels[i]->sendVector(0,0,y);
+      }
     }
   }
 }
@@ -489,7 +525,7 @@ ArpackSolver::getEigenvector(int mode)
   int index = (mode - 1) * size;
   
   theVector.setData(&eigenvectors[index], size);
-  
+
   return theVector;;  
 }
 
@@ -514,13 +550,14 @@ ArpackSolver::getEigenvalue(int mode)
 int
 ArpackSolver::setSize()
 {
-  theSOE = theArpackSOE->theSOE;
-  if (theSOE == 0) {
-    opserr << "ArpackSolver::setSize() - no LinearSOE set\n";
-    return -1;
-  }
+  size = theArpackSOE->Msize;
 
-  size = theSOE->getNumEqn();
+  if (sizeWork < size)
+    if (workArea != 0)
+      delete [] workArea;
+
+  workArea = new double[size];
+  
   return 0;
 }
 
