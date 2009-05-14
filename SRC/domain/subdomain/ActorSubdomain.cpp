@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2009-05-11 21:30:58 $
+// $Revision: 1.16 $
+// $Date: 2009-05-14 22:49:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ActorSubdomain.cpp,v $
                                                                         
 #include <ActorSubdomain.h>
@@ -40,7 +40,7 @@
 #include <EquiSolnAlgo.h>
 #include <IncrementalIntegrator.h>
 #include <LinearSOE.h>
-#include <LinearSOESolver.h>
+#include <EigenSOE.h>
 #include <Recorder.h>
 #include <Parameter.h>
 
@@ -99,7 +99,7 @@ ActorSubdomain::run(void)
       IncrementalIntegrator *theIntegrator;
       EquiSolnAlgo *theAlgorithm;
       LinearSOE *theSOE;
-      LinearSOESolver *theSolver;
+      EigenSOE *theEigenSOE;
       ConvergenceTest *theTest;
       Recorder *theRecorder;
       bool res, generalized;
@@ -699,9 +699,20 @@ ActorSubdomain::run(void)
 
 	  if (theSOE != 0) {
 	    this->recvObject(*theSOE);
-	    theSolver = theSOE->getSolver();
-	    this->recvObject(*theSolver);
 	    this->setAnalysisLinearSOE(*theSOE);
+	    msgData(0) = 0;
+	  } else
+	    msgData(0) = -1;
+	    
+	  break;
+
+	case ShadowActorSubdomain_setAnalysisEigenSOE:
+	  theType = msgData(1);
+	  theEigenSOE = theBroker->getNewEigenSOE(theType);
+
+	  if (theEigenSOE != 0) {
+	    this->recvObject(*theEigenSOE);
+	    this->setAnalysisEigenSOE(*theEigenSOE);
 	    msgData(0) = 0;
 	  } else
 	    msgData(0) = -1;
