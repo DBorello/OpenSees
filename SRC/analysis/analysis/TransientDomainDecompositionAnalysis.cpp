@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2009-05-11 21:32:27 $
+// $Revision: 1.10 $
+// $Date: 2009-05-14 22:50:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/TransientDomainDecompositionAnalysis.cpp,v $
                                                                         
 // Written: fmk 
@@ -105,6 +105,7 @@ TransientDomainDecompositionAnalysis::TransientDomainDecompositionAnalysis(Subdo
     theDOF_Numberer->setLinks(theModel);
     theIntegrator->setLinks(theModel,theLinSOE, theTest);
     theAlgorithm->setLinks(theModel,theTransientIntegrator,theLinSOE, theTest);
+    theSOE->setLinks(*theAnalysisModel);
   }
 
 }    
@@ -256,8 +257,8 @@ TransientDomainDecompositionAnalysis::eigen(int numMode, bool generalized)
     // zero A and M
     //
 
-    theEigenSOE->zeroA();
-    theEigenSOE->zeroM();
+  theEigenSOE->zeroA();
+  theEigenSOE->zeroM();
 
     //
     // form K
@@ -309,7 +310,6 @@ TransientDomainDecompositionAnalysis::eigen(int numMode, bool generalized)
     // 
     // solve for the eigen values & vectors
     //
-
     if (theEigenSOE->solve(numMode, generalized) < 0) {
 	opserr << "WARNING TransientDomainDecomposition::eigen() - EigenSOE failed in solve()\n";
 	return -4;
@@ -358,14 +358,12 @@ int
 TransientDomainDecompositionAnalysis::domainChanged(void)
 {
   int result = 0;
-  
   theAnalysisModel->clearAll();    
   theConstraintHandler->clearAll();
 
   // now we invoke handle() on the constraint handler which
   // causes the creation of FE_Element and DOF_Group objects
   // and their addition to the AnalysisModel.
-
   result = theConstraintHandler->handle();
   if (result < 0) {
     opserr << "TransientDomainDecompositionAnalysis::handle() - ";
@@ -376,7 +374,6 @@ TransientDomainDecompositionAnalysis::domainChanged(void)
   // we now invoke number() on the numberer which causes
   // equation numbers to be assigned to all the DOFs in the
   // AnalysisModel.
-
   result = theDOF_Numberer->numberDOF();
   if (result < 0) {
     opserr << "TransientDomainDecompositionAnalysis::handle() - ";
@@ -389,7 +386,6 @@ TransientDomainDecompositionAnalysis::domainChanged(void)
   // we invoke setSize() on the LinearSOE which
   // causes that object to determine its size
   Graph &theGraph = theAnalysisModel->getDOFGraph();
-
   result = theSOE->setSize(theGraph);
   if (result < 0) {
     opserr << "TransientDomainDecompositionAnalysis::handle() - ";
@@ -398,7 +394,7 @@ TransientDomainDecompositionAnalysis::domainChanged(void)
   }	    
 
   if (theEigenSOE != 0) {
-    result = theSOE->setSize(theGraph);
+    result = theEigenSOE->setSize(theGraph);
     if (result < 0) {
       opserr << "TransientDomainDecompositionAnalysis::handle() - ";
       opserr << "EigenSOE::setSize() failed";
@@ -408,7 +404,7 @@ TransientDomainDecompositionAnalysis::domainChanged(void)
   
   // finally we invoke domainChanged on the Integrator and Algorithm
   // objects .. informing them that the model has changed
-  
+
   result = theIntegrator->domainChanged();
   if (result < 0) {
     opserr << "TransientDomainDecompositionAnalysis::setAlgorithm() - ";
@@ -773,6 +769,7 @@ TransientDomainDecompositionAnalysis::setLinearSOE(LinearSOE &theNewSOE)
     if (theIntegrator != 0 && theAlgorithm != 0 && theAnalysisModel != 0 && theSOE != 0) {
       theIntegrator->setLinks(*theAnalysisModel, *theSOE, theTest);
       theAlgorithm->setLinks(*theAnalysisModel, *theIntegrator, *theSOE, theTest);
+      theSOE->setLinks(*theAnalysisModel);
     }
 
     // cause domainChanged to be invoked on next analyze
@@ -790,6 +787,7 @@ TransientDomainDecompositionAnalysis::setEigenSOE(EigenSOE &theNewSOE)
 
     // set the links needed by the other objects in the aggregation
     theEigenSOE = &theNewSOE;
+    theEigenSOE->setLinks(*theAnalysisModel);
 
     // cause domainChanged to be invoked on next analyze
     domainStamp = 0;

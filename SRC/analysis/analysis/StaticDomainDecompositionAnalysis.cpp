@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2009-05-11 21:32:27 $
+// $Revision: 1.10 $
+// $Date: 2009-05-14 22:50:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticDomainDecompositionAnalysis.cpp,v $
                                                                         
 // Written: fmk 
@@ -104,6 +104,7 @@ StaticDomainDecompositionAnalysis::StaticDomainDecompositionAnalysis(Subdomain &
     theDOF_Numberer->setLinks(theModel);
     theIntegrator->setLinks(theModel, theLinSOE, theTest);
     theAlgorithm->setLinks(theModel, theStaticIntegrator, theLinSOE, theTest);
+    theSOE->setLinks(*theAnalysisModel);
   }
 }    
 
@@ -414,7 +415,7 @@ StaticDomainDecompositionAnalysis::domainChanged(void)
   }	    
 
     if (theEigenSOE != 0) {
-      result = theSOE->setSize(theGraph);
+      result = theEigenSOE->setSize(theGraph);
       if (result < 0) {
 	opserr << "StaticDomainDecompositionAnalysis::handle() - ";
 	opserr << "EigenSOE::setSize() failed";
@@ -782,6 +783,7 @@ StaticDomainDecompositionAnalysis::setLinearSOE(LinearSOE &theNewSOE)
     if (theIntegrator != 0 && theAlgorithm != 0 && theAnalysisModel != 0 && theSOE != 0) {
       theIntegrator->setLinks(*theAnalysisModel, *theSOE, theTest);
       theAlgorithm->setLinks(*theAnalysisModel, *theIntegrator, *theSOE, theTest);
+      theSOE->setLinks(*theAnalysisModel);
     }
     
     // cause domainChanged to be invoked on next analyze
@@ -800,6 +802,7 @@ StaticDomainDecompositionAnalysis::setEigenSOE(EigenSOE &theNewSOE)
 
     // set the links needed by the other objects in the aggregation
     theEigenSOE = &theNewSOE;
+    theEigenSOE->setLinks(*theAnalysisModel);
     
     // cause domainChanged to be invoked on next analyze
     domainStamp = 0;

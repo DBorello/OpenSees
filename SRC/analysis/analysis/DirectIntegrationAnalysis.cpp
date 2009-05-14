@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2009-05-12 18:17:29 $
+// $Revision: 1.15 $
+// $Date: 2009-05-14 22:50:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DirectIntegrationAnalysis.cpp,v $
                                                                         
                                                                         
@@ -246,7 +246,6 @@ DirectIntegrationAnalysis::analyze(int numSteps, double dT)
 int 
 DirectIntegrationAnalysis::eigen(int numMode, bool generalized)
 {
-
     if (theAnalysisModel == 0 || theEigenSOE == 0) {
       opserr << "WARNING DirectIntegrationAnalysis::eigen() - no EigenSOE has been set\n";
       return -1;
@@ -270,11 +269,9 @@ DirectIntegrationAnalysis::eigen(int numMode, bool generalized)
       }	
     }
 
-
     //
     // zero A and M
     //
-
     theEigenSOE->zeroA();
     theEigenSOE->zeroM();
 
@@ -357,14 +354,13 @@ DirectIntegrationAnalysis::domainChanged(void)
     Domain *the_Domain = this->getDomainPtr();
     int stamp = the_Domain->hasDomainChanged();
     domainStamp = stamp;
-   
+
     theAnalysisModel->clearAll();    
     theConstraintHandler->clearAll();
     
     // now we invoke handle() on the constraint handler which
     // causes the creation of FE_Element and DOF_Group objects
     // and their addition to the AnalysisModel.
-
     theConstraintHandler->handle();
 
     // we now invoke number() on the numberer which causes
@@ -488,6 +484,7 @@ DirectIntegrationAnalysis::setLinearSOE(LinearSOE &theNewSOE)
   theSOE = &theNewSOE;
   theIntegrator->setLinks(*theAnalysisModel,*theSOE, theTest);
   theAlgorithm->setLinks(*theAnalysisModel, *theIntegrator, *theSOE, theTest);
+  theSOE->setLinks(*theAnalysisModel);
 
   // cause domainChanged to be invoked on next analyze
   domainStamp = 0;
@@ -504,6 +501,7 @@ DirectIntegrationAnalysis::setEigenSOE(EigenSOE &theNewSOE)
 
   // set the links needed by the other objects in the aggregation
   theEigenSOE = &theNewSOE;
+  theEigenSOE->setLinks(*theAnalysisModel);
 
   // cause domainChanged to be invoked on next analyze
   domainStamp = 0;

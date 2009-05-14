@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2009-05-12 18:17:29 $
+// $Revision: 1.17 $
+// $Date: 2009-05-14 22:50:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.cpp,v $
                                                                         
                                                                         
@@ -440,14 +440,13 @@ StaticAnalysis::domainChanged(void)
 	return -4;
     }	    
 
-  opserr << "StaticAnalysis::domainChanged(void) - 6\n";
     result = theAlgorithm->domainChanged();
     if (result < 0) {
 	opserr << "StaticAnalysis::setAlgorithm() - ";
 	opserr << "Algorithm::domainChanged() failed";
 	return -5;
     }	        
-  opserr << "StaticAnalysis::domainChanged(void) - 7\n";
+
     // if get here successfull
     return 0;
 }    
@@ -553,6 +552,7 @@ StaticAnalysis::setLinearSOE(LinearSOE &theNewSOE)
     theSOE = &theNewSOE;
     theIntegrator->setLinks(*theAnalysisModel, *theSOE, theTest);
     theAlgorithm->setLinks(*theAnalysisModel, *theIntegrator, *theSOE, theTest);
+    theSOE->setLinks(*theAnalysisModel);
 
     // cause domainChanged to be invoked on next analyze
     /*
@@ -575,6 +575,7 @@ StaticAnalysis::setEigenSOE(EigenSOE &theNewSOE)
 
     // set the links needed by the other objects in the aggregation
     theEigenSOE = &theNewSOE;
+    theEigenSOE->setLinks(*theAnalysisModel);
 
     // cause domainChanged to be invoked on next analyze
 	domainStamp = 0;
