@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.47 $
-// $Date: 2009-05-11 21:11:45 $
+// $Revision: 1.48 $
+// $Date: 2009-05-14 22:52:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -315,6 +315,13 @@ FEM_ObjectBroker::getNewIncrementalIntegrator(int classTag)
 
 LinearSOE *
 FEM_ObjectBroker::getNewLinearSOE(int classTagSOE)
+{
+  return 0;		 
+}
+
+
+EigenSOE *
+FEM_ObjectBroker::getNewEigenSOE(int classTagSOE)
 {
   return 0;		 
 }

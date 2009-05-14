@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2009-05-11 21:12:44 $
+// $Revision: 1.5 $
+// $Date: 2009-05-14 22:52:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.h,v $
                                                                         
 // Written: fmk
@@ -101,6 +101,7 @@ class FEM_ObjectBrokerAllClasses : public FEM_ObjectBroker
     IncrementalIntegrator *getNewIncrementalIntegrator(int classTag);
 
     LinearSOE *getNewLinearSOE(int classTagSOE);
+    EigenSOE *getNewEigenSOE(int classTagSOE);
     
     LinearSOE *getPtrNewDDLinearSOE(int classTagSOE, 
 				    int classTagDDSolver);

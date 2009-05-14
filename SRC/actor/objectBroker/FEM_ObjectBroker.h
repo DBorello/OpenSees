@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2009-05-11 21:11:45 $
+// $Revision: 1.12 $
+// $Date: 2009-05-14 22:52:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.h,v $
                                                                         
                                                                         
@@ -64,9 +64,9 @@ class StaticIntegrator;
 class TransientIntegrator;
 class IncrementalIntegrator;
 class LinearSOE;
+class EigenSOE;
 class DomainSolver;
 class DomainDecompositionAnalysis;
-class LinearSOESolver;
 class PartitionedModelBuilder;
 
 class CrdTransf2d;
@@ -153,6 +153,7 @@ class FEM_ObjectBroker
     virtual IncrementalIntegrator *getNewIncrementalIntegrator(int classTag);
 
     virtual LinearSOE *getNewLinearSOE(int classTagSOE);
+    virtual EigenSOE *getNewEigenSOE(int classTagSOE);
     
     virtual LinearSOE *getPtrNewDDLinearSOE(int classTagSOE, 
 					    int classTagDDSolver);

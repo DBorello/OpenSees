@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2009-05-11 21:12:44 $
+// $Revision: 1.16 $
+// $Date: 2009-05-14 22:52:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.cpp,v $
                                                                         
 // Written: fmk
@@ -336,6 +336,8 @@
 
 // time series integrators
 #include <TrapezoidalTimeSeriesIntegrator.h>
+
+#include <ArpackSOE.h>
 
 #ifdef _PETSC
 #include <PetscSOE.h>
@@ -1623,6 +1625,28 @@ FEM_ObjectBrokerAllClasses::getNewLinearSOE(int classTagSOE)
 	default:
 	  opserr << "FEM_ObjectBrokerAllClasses::getNewLinearSOE - ";
 	  opserr << " - no LinearSOE type exists for class tag ";
+	  opserr << classTagSOE << endln;
+	  return 0;
+	  
+      
+    }
+}
+
+
+EigenSOE *
+FEM_ObjectBrokerAllClasses::getNewEigenSOE(int classTagSOE)
+{
+    EigenSOE *theSOE =0;
+
+    switch(classTagSOE) {
+
+	case EigenSOE_TAGS_ArpackSOE:  
+	  theSOE = new ArpackSOE();
+	  return theSOE;
+
+	default:
+	  opserr << "FEM_ObjectBrokerAllClasses::getNewEigenSOE - ";
+	  opserr << " - no EigenSOE type exists for class tag ";
 	  opserr << classTagSOE << endln;
 	  return 0;
 	  
