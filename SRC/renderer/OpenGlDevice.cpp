@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2009-05-11 22:43:20 $
+// $Revision: 1.23 $
+// $Date: 2009-05-16 00:24:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.cpp,v $
                                                                         
                                                                         
@@ -472,7 +472,7 @@ OpenGlDevice::WINOPEN(const char *_title, int _xLoc, int _yLoc, int _width, int 
 			    mask, &swa);
 
   if (theWindow == 0) {
-    opserr << "OpenGlDevice::WINOPEN() - could not open a window\n";
+    cerr << "OpenGlDevice::WINOPEN() - could not open a window\n";
     exit(-1);
   }
     
@@ -488,7 +488,7 @@ OpenGlDevice::WINOPEN(const char *_title, int _xLoc, int _yLoc, int _width, int 
   /* create a GLX context */
   cx = glXCreateContext(theDisplay, visual, NULL, GL_TRUE);
   if (cx == 0) {
-    opserr << "OpenGlDevice::WINOPEN() - could not create a glx context\n";
+    cerr << "OpenGlDevice::WINOPEN() - could not create a glx context\n";
     exit(-1);
   }    
 
@@ -909,7 +909,7 @@ OpenGlDevice::saveImageAsPNG(const char *fileName)
   if(!png_ptr) {
     delete [] image;
     fclose(fp);
-    opserr << "OpenGlDevice::saveImageAsPNG() - out of memery creating write structure\n";
+    cerr << "OpenGlDevice::saveImageAsPNG() - out of memery creating write structure\n";
     return -1;
   }
   
@@ -919,7 +919,7 @@ OpenGlDevice::saveImageAsPNG(const char *fileName)
 			     (png_infopp)NULL);
     delete [] image;
     fclose(fp);
-    opserr << "OpenGlDevice::saveImageAsPNG() - out of memery creating info structure\n";
+    cerr << "OpenGlDevice::saveImageAsPNG() - out of memery creating info structure\n";
 
     return -1;
   }
@@ -932,7 +932,7 @@ OpenGlDevice::saveImageAsPNG(const char *fileName)
   if(setjmp(png_jmpbuf(png_ptr))) {
     png_destroy_write_struct(&png_ptr, &info_ptr);
     fclose(fp);
-    opserr << "OpenGlDevice::saveImageAsPNG() - setjmp problem\n";
+    cerr << "OpenGlDevice::saveImageAsPNG() - setjmp problem\n";
     return 2;
   }
 
@@ -991,7 +991,7 @@ OpenGlDevice::saveImageAsPNG(const char *fileName)
     png_destroy_write_struct(&png_ptr, &info_ptr);
     delete [] image;
     fclose(fp);
-    opserr << "OpenGlDevice::failed to allocate memory for row pointers\n";
+    cerr << "OpenGlDevice::failed to allocate memory for row pointers\n";
     return(-1);
   }
 
