@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2007-02-02 01:35:22 $
+// $Revision: 1.14 $
+// $Date: 2009-05-18 22:01:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.cpp,v $
                                                                         
 // Written: MHS 
@@ -696,50 +696,74 @@ CorotTruss::Print(OPS_Stream &s, int flag)
 Response*
 CorotTruss::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
-  Response *theResponse = 0;
+    Response *theResponse = 0;
 
-  output.tag("ElementOutput");
-  output.attr("eleType","Truss");
-  output.attr("eleTag",this->getTag());
-  output.attr("node1",connectedExternalNodes[0]);
-  output.attr("node2",connectedExternalNodes[1]);
+    output.tag("ElementOutput");
+    output.attr("eleType","Truss");
+    output.attr("eleTag",this->getTag());
+    output.attr("node1",connectedExternalNodes[0]);
+    output.attr("node2",connectedExternalNodes[1]);
 
-  //
-  // we compare argv[0] for known response types for the Truss
-  //
+    //
+    // we compare argv[0] for known response types for the CorotTruss
+    //
 
-  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"axialForce") == 0) {
+    if ((strcmp(argv[0],"force") == 0) || (strcmp(argv[0],"forces") == 0) 
+        || (strcmp(argv[0],"globalForces") == 0) || (strcmp(argv[0],"globalforces") == 0)){
+            char outputData[10];
+            int numDOFperNode = numDOF/2;
+            for (int i=0; i<numDOFperNode; i++) {
+                sprintf(outputData,"P1_%d", i+1);
+                output.tag("ResponseType", outputData);
+            }
+            for (int j=0; j<numDOFperNode; j++) {
+                sprintf(outputData,"P2_%d", j+1);
+                output.tag("ResponseType", outputData);
+            }
+            theResponse =  new ElementResponse(this, 1, Vector(numDOF));
 
-    output.tag("ResponseType", "N");
-    theResponse =  new ElementResponse(this, 1, 0.0);
+    } else if ((strcmp(argv[0],"axialForce") == 0) || (strcmp(argv[0],"basicForce") == 0) || 
+        (strcmp(argv[0],"basicForce") == 0)) {
+            output.tag("ResponseType", "N");
+            theResponse =  new ElementResponse(this, 2, 0.0);
 
-  } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
-	     strcmp(argv[0],"deformation") == 0) {
+    } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
+        strcmp(argv[0],"deformation") == 0) {
 
-    output.tag("ResponseType", "eps");
-    theResponse = new ElementResponse(this, 2, 0.0);
+            output.tag("ResponseType", "U");
+            theResponse = new ElementResponse(this, 3, 0.0);
 
-  // a material quantity    
-  } else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"-material") == 0) {
+    // a material quantity
+    } else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"-material") == 0) {
 
-    theResponse =  theMaterial->setResponse(&argv[1], argc-1, output);
-  }
+        theResponse =  theMaterial->setResponse(&argv[1], argc-1, output);
+    }
 
-  output.endTag();
-  return theResponse;
+    output.endTag();
+    return theResponse;
 }
 
 int 
 CorotTruss::getResponse(int responseID, Information &eleInfo)
 {
-  switch (responseID) {
+    double strain;
+
+    switch (responseID) {
     case 1:
-	  return eleInfo.setDouble(A * theMaterial->getStress());
-      
+        return eleInfo.setVector(this->getResistingForce());
+
     case 2:
-	  return eleInfo.setDouble(Lo * theMaterial->getStrain());
-      
+        return eleInfo.setDouble(A * theMaterial->getStress());
+
+    case 3:
+        if (Lo == 0.0) {
+            strain = 0.0;
+        } else {
+            strain = theMaterial->getStrain();
+        }
+        return eleInfo.setDouble(Lo * strain);
+
     default:
-	  return 0;
-  }
+        return 0;
+    }
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-02-02 01:35:22 $
+// $Revision: 1.10 $
+// $Date: 2009-05-18 22:01:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTrussSection.cpp,v $
                                                                         
 // Written: MHS 
@@ -325,43 +325,24 @@ CorotTrussSection::revertToStart()
 int
 CorotTrussSection::update(void)
 {
-	// Nodal displacements
-	const Vector &end1Disp = theNodes[0]->getTrialDisp();
-	const Vector &end2Disp = theNodes[1]->getTrialDisp();    
-
-    // Initial offsets
-	d21[0] = Lo;
-	d21[1] = 0.0;
-	d21[2] = 0.0;
-
-   	// Update offsets in basic system due to nodal displacements
-	int i;
-    for (i = 0; i < numDIM; i++) {
-        d21[0] += R(0,i)*(end2Disp(i)-end1Disp(i));
-        d21[1] += R(1,i)*(end2Disp(i)-end1Disp(i));
-        d21[2] += R(2,i)*(end2Disp(i)-end1Disp(i));
+    if (Lo == 0.0) { // - problem in setDomain() no further warnings
+	return -1;
     }
-
-	// Compute new length
-	Ln = d21[0]*d21[0] + d21[1]*d21[1] + d21[2]*d21[2];
-	Ln = sqrt(Ln);
-
-	// Compute engineering strain
-	double strain = (Ln-Lo)/Lo;
+    
+    // determine the current strain given trial displacements at nodes
+    double strain = this->computeCurrentStrain();
 
 	int order = theSection->getOrder();
 	const ID &code = theSection->getType();
 
-	static double data[10];
-	Vector e(data, order);
-	for (i = 0; i < order; i++) {
-		if (code(i) == SECTION_RESPONSE_P)
-			e(i) = strain;
-		else
-			e(i) = 0.0;
-	}
-
-	// Set material trial strain
+    Vector e (order);
+	
+    int i;
+    for (i = 0; i < order; i++) {
+      if (code(i) == SECTION_RESPONSE_P)
+	e(i) = strain;
+    }
+    
 	return theSection->setTrialSectionDeformation(e);
 }
 
@@ -632,28 +613,124 @@ CorotTrussSection::Print(OPS_Stream &s, int flag)
 	}
 }
 
+double
+CorotTrussSection::computeCurrentStrain(void)
+{
+    // NOTE method will not be called if Lo == 0
+
+	// Nodal displacements
+	const Vector &end1Disp = theNodes[0]->getTrialDisp();
+	const Vector &end2Disp = theNodes[1]->getTrialDisp();    
+
+    // Initial offsets
+	d21[0] = Lo;
+	d21[1] = 0.0;
+	d21[2] = 0.0;
+
+   	// Update offsets in basic system due to nodal displacements
+	int i;
+    for (i = 0; i < numDIM; i++) {
+        d21[0] += R(0,i)*(end2Disp(i)-end1Disp(i));
+        d21[1] += R(1,i)*(end2Disp(i)-end1Disp(i));
+        d21[2] += R(2,i)*(end2Disp(i)-end1Disp(i));
+    }
+
+	// Compute new length
+	Ln = d21[0]*d21[0] + d21[1]*d21[1] + d21[2]*d21[2];
+	Ln = sqrt(Ln);
+
+    // this method should never be called with Lo == 0
+    return (Ln-Lo)/Lo;
+}
+
 Response*
 CorotTrussSection::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
-  Response *theResponse = 0;
+    Response *theResponse = 0;
 
-  output.tag("ElementOutput");
-  output.attr("eleType","Truss");
-  output.attr("eleTag",this->getTag());
-  output.attr("node1",connectedExternalNodes[0]);
-  output.attr("node2",connectedExternalNodes[1]);
+    output.tag("ElementOutput");
+    output.attr("eleType","Truss");
+    output.attr("eleTag",this->getTag());
+    output.attr("node1",connectedExternalNodes[0]);
+    output.attr("node2",connectedExternalNodes[1]);
 
-  if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"-material") == 0) {
+    //
+    // we compare argv[0] for known response types for the CorotTruss
+    //
 
-    theResponse =  theSection->setResponse(&argv[1], argc-1, output);
-  }
+    if ((strcmp(argv[0],"force") == 0) || (strcmp(argv[0],"forces") == 0) 
+        || (strcmp(argv[0],"globalForces") == 0) || (strcmp(argv[0],"globalforces") == 0)){
+            char outputData[10];
+            int numDOFperNode = numDOF/2;
+            for (int i=0; i<numDOFperNode; i++) {
+                sprintf(outputData,"P1_%d", i+1);
+                output.tag("ResponseType", outputData);
+            }
+            for (int j=0; j<numDOFperNode; j++) {
+                sprintf(outputData,"P2_%d", j+1);
+                output.tag("ResponseType", outputData);
+            }
+            theResponse =  new ElementResponse(this, 1, Vector(numDOF));
 
-  output.endTag();
-  return theResponse;
+    } else if ((strcmp(argv[0],"axialForce") == 0) || (strcmp(argv[0],"basicForce") == 0) || 
+        (strcmp(argv[0],"basicForce") == 0)) {
+            output.tag("ResponseType", "N");
+            theResponse =  new ElementResponse(this, 2, 0.0);
+
+    } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
+        strcmp(argv[0],"deformation") == 0) {
+
+            output.tag("ResponseType", "U");
+            theResponse = new ElementResponse(this, 3, 0.0);
+
+    // a section quantity
+    }  else if (strcmp(argv[0],"section") ==0) {
+        theResponse = theSection->setResponse(&argv[1], argc-1, output);
+
+    }  
+
+    output.endTag();
+    return theResponse;
 }
 
 int 
 CorotTrussSection::getResponse(int responseID, Information &eleInfo)
 {
-  return 0;
+    double strain, force;
+
+    switch (responseID) {
+    case 1:
+        return eleInfo.setVector(this->getResistingForce());
+
+    case 2:
+        if (Lo == 0.0) {
+            strain = 0.0;
+            force = 0.0;
+        } else {
+
+            int order = theSection->getOrder();
+            const ID &code = theSection->getType();
+
+            const Vector &s = theSection->getStressResultant();
+            force = 0.0;
+            int i;
+            for (i = 0; i < order; i++) {
+                if (code(i) == SECTION_RESPONSE_P)
+                    force += s(i);
+            }
+
+        }      
+        return eleInfo.setDouble(force);    
+
+    case 3:
+        if (Lo == 0.0) {
+            strain = 0.0;
+        } else {
+            strain = this->computeCurrentStrain();
+        }
+        return eleInfo.setDouble(Lo * strain);
+
+    default:
+        return -1;
+    }
 }

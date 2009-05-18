@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2009-03-06 18:19:36 $
+// $Revision: 1.14 $
+// $Date: 2009-05-18 22:01:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthSection.cpp,v $
                                                                         
 // Written: MHS
@@ -513,60 +513,73 @@ ZeroLengthSection::Print(OPS_Stream &s, int flag)
 Response*
 ZeroLengthSection::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
-  Response *theResponse = 0;
+    Response *theResponse = 0;
 
-  output.tag("ElementOutput");
-  output.attr("eleType","ZeroLengthSection");
-  output.attr("eleTag",this->getTag());
-  output.attr("node1",connectedExternalNodes[0]);
-  output.attr("node2",connectedExternalNodes[1]);
+    output.tag("ElementOutput");
+    output.attr("eleType","ZeroLengthSection");
+    output.attr("eleTag",this->getTag());
+    output.attr("node1",connectedExternalNodes[0]);
+    output.attr("node2",connectedExternalNodes[1]);
 
-  char outputData[5];
-  // element forces
-  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0) {
-    
-    for (int i=0; i<P->Size(); i++) {
-      sprintf(outputData,"P%d",i+1);
-      output.tag("ResponseType",outputData);
+    char outputData[5];
+    // element forces
+    if ((strcmp(argv[0],"force") == 0) || (strcmp(argv[0],"forces") == 0)
+        || (strcmp(argv[0],"globalForces") == 0) || (strcmp(argv[0],"globalforces") == 0)) {
+
+            for (int i=0; i<P->Size(); i++) {
+                sprintf(outputData,"P%d",i+1);
+                output.tag("ResponseType",outputData);
+            }
+            theResponse = new ElementResponse(this, 1, *P);
+
+    } else if (strcmp(argv[0],"basicForce") == 0 || strcmp(argv[0],"basicForces") == 0) {
+
+        for (int i=0; i<order; i++) {
+            sprintf(outputData,"P%d",i+1);
+            output.tag("ResponseType",outputData);
+        }
+        theResponse = new ElementResponse(this, 2, Vector(order));
+
+    } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
+        strcmp(argv[0],"deformation") == 0) {
+
+            for (int i=0; i<order; i++) {
+                sprintf(outputData,"e%d",i+1);
+                output.tag("ResponseType",outputData);
+            }
+            theResponse = new ElementResponse(this, 3, Vector(order));
+
+    // a section quantity
+    } else if (strcmp(argv[0],"section") == 0) {
+        theResponse = theSection->setResponse(&argv[1], argc-1, output);
     }
-    theResponse =  new ElementResponse(this, 1, *P);
 
-  } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
-		strcmp(argv[0],"deformation") == 0) {
-
-    for (int i=0; i<order; i++) {
-      sprintf(outputData,"e%d",i+1);
-      output.tag("ResponseType",outputData);
-    }
-
-    theResponse = new ElementResponse(this, 3, Vector(order));
-
-  }  else if (strcmp(argv[0],"section") == 0) {
-    theResponse =  theSection->setResponse(&argv[1], argc-1, output);
-  }
-  
-  output.endTag();
-  return theResponse;
+    output.endTag();
+    return theResponse;
 
 }
 
 int 
 ZeroLengthSection::getResponse(int responseID, Information &eleInfo)
 {
-  switch (responseID) {
-	case 1:
-		return eleInfo.setVector(this->getResistingForce());
-		
-    case 2:
-		return eleInfo.setMatrix(this->getTangentStiff());
+    Vector q(order);
 
-	case 3:
-		this->computeSectionDefs();
-		return eleInfo.setVector(*v);
+    switch (responseID) {
+    case 1:
+        return eleInfo.setVector(this->getResistingForce());
+
+    case 2:
+        // Get section stress resultants, the element basic forces
+        q = theSection->getStressResultant();
+        return eleInfo.setVector(q);
+
+    case 3:
+        this->computeSectionDefs();
+        return eleInfo.setVector(*v);
 
     default:
-		return -1;
-  }
+        return -1;
+    }
 }
 
 // Private methods

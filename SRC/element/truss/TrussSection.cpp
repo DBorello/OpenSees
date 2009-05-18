@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2008-12-29 19:11:02 $
+// $Revision: 1.22 $
+// $Date: 2009-05-18 22:01:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -748,7 +748,8 @@ TrussSection::displaySelf(Renderer &theViewer, int displayMode, float fact)
 	strain = 0.0;
 	force = 0.0;
       } else {
-	strain = this->computeCurrentStrain();		    
+	strain = this->computeCurrentStrain();
+    force = 0.0;
 	
 	int order = theSection->getOrder();
 	const ID &code = theSection->getType();
@@ -771,9 +772,9 @@ TrussSection::displaySelf(Renderer &theViewer, int displayMode, float fact)
       }
       
       if (displayMode == 2) // use the strain as the drawing measure
-	return theViewer.drawLine(v1, v2, strain, strain);	
+	return theViewer.drawLine(v1, v2, (float)strain, (float)strain);	
       else { // otherwise use the axial force as measure
-	return theViewer.drawLine(v1,v2, force, force);
+	return theViewer.drawLine(v1,v2, (float)force, (float)force);
       }
     } else if (displayMode < 0) {
       int mode = displayMode  *  -1;
@@ -804,7 +805,8 @@ TrussSection::Print(OPS_Stream &s, int flag)
 	strain = 0;
 	force = 0.0;
     } else {
-		strain = this->computeCurrentStrain();	
+		strain = this->computeCurrentStrain();
+        force = 0.0;
 
 		int order = theSection->getOrder();
 		const ID &code = theSection->getType();
@@ -873,116 +875,113 @@ TrussSection::computeCurrentStrain(void) const
 Response*
 TrussSection::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
-  Response *theResponse = 0;
+    Response *theResponse = 0;
 
-  output.tag("ElementOutput");
-  output.attr("eleType","Truss");
-  output.attr("eleTag",this->getTag());
-  output.attr("node1",connectedExternalNodes[0]);
-  output.attr("node2",connectedExternalNodes[1]);
+    output.tag("ElementOutput");
+    output.attr("eleType","Truss");
+    output.attr("eleTag",this->getTag());
+    output.attr("node1",connectedExternalNodes[0]);
+    output.attr("node2",connectedExternalNodes[1]);
 
-  //
-  // we compare argv[0] for known response types for the Truss
-  //
+    //
+    // we compare argv[0] for known response types for the Truss
+    //
 
-  if ((strcmp(argv[0],"force") == 0) || (strcmp(argv[0],"forces") == 0) 
-      || (strcmp(argv[0],"globalForces") == 0) || (strcmp(argv[0],"globalforces") == 0)){
-    char outputData[10];
-    int numDOFperNode = numDOF/2;
-    for (int i=0; i<numDOFperNode; i++) {
-      sprintf(outputData,"P1_%d", i+1);
-      output.tag("ResponseType", outputData);
-    }
-    for (int j=0; j<numDOFperNode; j++) {
-      sprintf(outputData,"P2_%d", j+1);
-      output.tag("ResponseType", outputData);
-    }
-    theResponse =  new ElementResponse(this, 3, this->getResistingForce());
+    if ((strcmp(argv[0],"force") == 0) || (strcmp(argv[0],"forces") == 0) 
+        || (strcmp(argv[0],"globalForces") == 0) || (strcmp(argv[0],"globalforces") == 0)){
+            char outputData[10];
+            int numDOFperNode = numDOF/2;
+            for (int i=0; i<numDOFperNode; i++) {
+                sprintf(outputData,"P1_%d", i+1);
+                output.tag("ResponseType", outputData);
+            }
+            for (int j=0; j<numDOFperNode; j++) {
+                sprintf(outputData,"P2_%d", j+1);
+                output.tag("ResponseType", outputData);
+            }
+            theResponse =  new ElementResponse(this, 1, Vector(numDOF));
 
-  } else if ((strcmp(argv[0],"axialForce") == 0) || (strcmp(argv[0],"localForce") == 0) || 
-	     (strcmp(argv[0],"localForce") == 0)) {
-    output.tag("ResponseType", "N");
-    theResponse =  new ElementResponse(this, 1, 0.0);
+    } else if ((strcmp(argv[0],"axialForce") == 0) || (strcmp(argv[0],"basicForce") == 0) || 
+        (strcmp(argv[0],"basicForce") == 0)) {
+            output.tag("ResponseType", "N");
+            theResponse =  new ElementResponse(this, 2, 0.0);
 
-  } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
-	     strcmp(argv[0],"deformation") == 0) {
+    } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
+        strcmp(argv[0],"deformation") == 0) {
 
-    output.tag("ResponseType", "eps");
-    theResponse = new ElementResponse(this, 2, 0.0);
+            output.tag("ResponseType", "U");
+            theResponse = new ElementResponse(this, 3, 0.0);
 
-  // a section quantity    
-  }  else if (strcmp(argv[0],"section") ==0) {
-    theResponse = theSection->setResponse(&argv[1], argc-1, output);
+    // a section quantity
+    }  else if (strcmp(argv[0],"section") ==0) {
+        theResponse = theSection->setResponse(&argv[1], argc-1, output);
 
-  }  
+    }  
 
-  output.endTag();
-  return theResponse;
+    output.endTag();
+    return theResponse;
 
 }
 
 int 
-TrussSection::getResponse(int responseID, Information &eleInformation)
+TrussSection::getResponse(int responseID, Information &eleInfo)
 {
- double strain, force;
- 
-  switch (responseID) {
-    case 1:
+    double strain, force;
+
+    switch (responseID) {
+  case 1:
+      return eleInfo.setVector(this->getResistingForce());
+
+  case 2:
       if (L == 0.0) {
-	  strain = 0;
-	  force = 0.0;
+          strain = 0.0;
+          force = 0.0;
       } else {
 
-	int order = theSection->getOrder();
-	const ID &code = theSection->getType();
-	
-	const Vector &s = theSection->getStressResultant();
-	force = 0.0;
-	int i;
-	for (i = 0; i < order; i++) {
-	  if (code(i) == SECTION_RESPONSE_P)
-	    force += s(i);
-	}
-	
+          int order = theSection->getOrder();
+          const ID &code = theSection->getType();
+
+          const Vector &s = theSection->getStressResultant();
+          force = 0.0;
+          int i;
+          for (i = 0; i < order; i++) {
+              if (code(i) == SECTION_RESPONSE_P)
+                  force += s(i);
+          }
+
       }      
-      eleInformation.theDouble = force;    
-      return 0;
-      
-  case 2:
-    if (L == 0.0) {
-      strain = 0;
-    } else {
-      strain = this->computeCurrentStrain();	
-    }
-    eleInformation.theDouble = strain*L;    
-    return 0;
-    
+      return eleInfo.setDouble(force);    
+
   case 3:
-    return eleInformation.setVector(this->getResistingForce());
-    
+      if (L == 0.0) {
+          strain = 0.0;
+      } else {
+          strain = this->computeCurrentStrain();
+      }
+      return eleInfo.setDouble(L * strain);
+
   default:
       return -1;
-  }
+    }
 }
 
 int
 TrussSection::setParameter (const char **argv, int argc, Parameter &param)
 {
-  if (argc < 1)
-    return -1;
+    if (argc < 1)
+        return -1;
 
-  // a section parameter
-  if (strstr(argv[0],"section") != 0) {
+    // a section parameter
+    if (strstr(argv[0],"section") != 0) {
 
-    if (argc < 2)
-      return -1;
+        if (argc < 2)
+            return -1;
 
+        else
+            return theSection->setParameter(&argv[1], argc-1, param);
+    } 
+
+    // otherwise parameter is unknown for the TrussSection class
     else
-      return theSection->setParameter(&argv[1], argc-1, param);
-  } 
-  
-  // otherwise parameter is unknown for the TrussSection class
-  else
-    return -1;
+        return -1;
 }
-

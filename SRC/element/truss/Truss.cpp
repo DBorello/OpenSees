@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.31 $
-// $Date: 2009-04-02 22:41:51 $
+// $Revision: 1.32 $
+// $Date: 2009-05-18 22:01:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -835,9 +835,9 @@ Truss::displaySelf(Renderer &theViewer, int displayMode, float fact)
 	}
     
 	if (displayMode == 2) // use the strain as the drawing measure
-	  return theViewer.drawLine(v1, v2, strain, strain);	
+	  return theViewer.drawLine(v1, v2, (float)strain, (float)strain);	
 	else { // otherwise use the axial force as measure
-	  return theViewer.drawLine(v1,v2, force, force);
+	  return theViewer.drawLine(v1,v2, (float)force, (float)force);
 	}
     } else if (displayMode < 0) {
       int mode = displayMode  *  -1;
@@ -934,70 +934,77 @@ Response*
 Truss::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
 
-  Response *theResponse = 0;
+    Response *theResponse = 0;
 
-  output.tag("ElementOutput");
-  output.attr("eleType","Truss");
-  output.attr("eleTag",this->getTag());
-  output.attr("node1",connectedExternalNodes[0]);
-  output.attr("node2",connectedExternalNodes[1]);
+    output.tag("ElementOutput");
+    output.attr("eleType","Truss");
+    output.attr("eleTag",this->getTag());
+    output.attr("node1",connectedExternalNodes[0]);
+    output.attr("node2",connectedExternalNodes[1]);
 
-  //
-  // we compare argv[0] for known response types for the Truss
-  //
+    //
+    // we compare argv[0] for known response types for the Truss
+    //
 
 
-  if ((strcmp(argv[0],"force") == 0) || (strcmp(argv[0],"forces") == 0) 
-      || (strcmp(argv[0],"globalForces") == 0) || (strcmp(argv[0],"globalforces") == 0)){
-    char outputData[10];
-    int numDOFperNode = numDOF/2;
-    for (int i=0; i<numDOFperNode; i++) {
-      sprintf(outputData,"P1_%d", i+1);
-      output.tag("ResponseType", outputData);
+    if ((strcmp(argv[0],"force") == 0) || (strcmp(argv[0],"forces") == 0) 
+        || (strcmp(argv[0],"globalForces") == 0) || (strcmp(argv[0],"globalforces") == 0)){
+            char outputData[10];
+            int numDOFperNode = numDOF/2;
+            for (int i=0; i<numDOFperNode; i++) {
+                sprintf(outputData,"P1_%d", i+1);
+                output.tag("ResponseType", outputData);
+            }
+            for (int j=0; j<numDOFperNode; j++) {
+                sprintf(outputData,"P2_%d", j+1);
+                output.tag("ResponseType", outputData);
+            }
+            theResponse =  new ElementResponse(this, 1, Vector(numDOF));
+
+    } else if ((strcmp(argv[0],"axialForce") == 0) || (strcmp(argv[0],"basicForce") == 0) || 
+        (strcmp(argv[0],"basicForce") == 0)) {
+            output.tag("ResponseType", "N");
+            theResponse =  new ElementResponse(this, 2, 0.0);
+
+    } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
+        strcmp(argv[0],"deformation") == 0) {
+
+            output.tag("ResponseType", "U");
+            theResponse = new ElementResponse(this, 3, 0.0);
+
+    // a material quantity
+    } else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"-material") == 0) {
+
+        theResponse =  theMaterial->setResponse(&argv[1], argc-1, output);
     }
-    for (int j=0; j<numDOFperNode; j++) {
-      sprintf(outputData,"P2_%d", j+1);
-      output.tag("ResponseType", outputData);
-    }
-    theResponse =  new ElementResponse(this, 3, this->getResistingForce());
 
-  } else if ((strcmp(argv[0],"axialForce") == 0) || (strcmp(argv[0],"localForce") == 0) || 
-	     (strcmp(argv[0],"localForce") == 0)) {
-    output.tag("ResponseType", "N");
-    theResponse =  new ElementResponse(this, 1, 0.0);
-
-  } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
-	     strcmp(argv[0],"deformation") == 0) {
-
-    output.tag("ResponseType", "U");
-    theResponse = new ElementResponse(this, 2, 0.0);
-
-  // a material quantity    
-  } else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"-material") == 0) {
-
-    theResponse =  theMaterial->setResponse(&argv[1], argc-1, output);
-  }
-
-  output.endTag();
-  return theResponse;
+    output.endTag();
+    return theResponse;
 }
 
 int 
 Truss::getResponse(int responseID, Information &eleInfo)
 {
-  switch (responseID) {
+    double strain;
+
+    switch (responseID) {
     case 1:
-      return eleInfo.setDouble(A * theMaterial->getStress());
-      
+        return eleInfo.setVector(this->getResistingForce());
+
     case 2:
-      return eleInfo.setDouble(L * theMaterial->getStrain());
-      
+        return eleInfo.setDouble(A * theMaterial->getStress());
+
     case 3:
-      return eleInfo.setVector(this->getResistingForce());
+        if (L == 0.0) {
+            strain = 0.0;
+        } else {
+            strain = theMaterial->getStrain();
+        }
+        return eleInfo.setDouble(L * strain);
 
     default:
-      return 0;
-  }
+        return 0;
+    }
 }
 
 // AddingSensitivity:BEGIN ///////////////////////////////////

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-07-22 00:00:46 $
+// $Revision: 1.7 $
+// $Date: 2009-05-18 22:01:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthND.cpp,v $
                                                                         
 // Written: MHS
@@ -715,68 +715,112 @@ ZeroLengthND::Print(OPS_Stream &s, int flag)
 }
 
 Response*
-ZeroLengthND::setResponse(const char **argv, int argc, OPS_Stream &s)
+ZeroLengthND::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
-	// element forces
-    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
-      return new ElementResponse(this, 1, *P);
-    
-    // element stiffness matrix
-    else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
-      return new ElementResponse(this, 2, *K);
-    
-    else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
-	     strcmp(argv[0],"deformation") == 0) {
-      if (the1DMaterial != 0)
-	return new ElementResponse(this, 3, Vector(3));
-      else
-	return new ElementResponse(this, 3, Vector(order));
-    }     
-    
-    else if (strcmp(argv[0],"material") == 0) {
-      // See if NDMaterial can handle request ...
-      Response *res = theNDMaterial->setResponse(&argv[1], argc-1, s);
-      if (res != 0)
-	return res;
-      
-      // If not, send request to UniaxialMaterial, if present
-      if (the1DMaterial != 0)
-	return the1DMaterial->setResponse(&argv[1], argc-1, s);
-      
-      // If neither material can handle request, return 0
-      else
-	return 0;
+    Response *theResponse = 0;
+
+    output.tag("ElementOutput");
+    output.attr("eleType","ZeroLength");
+    output.attr("eleTag",this->getTag());
+    output.attr("node1",connectedExternalNodes[0]);
+    output.attr("node2",connectedExternalNodes[1]);
+
+    char outputData[10];
+
+    if ((strcmp(argv[0],"force") == 0) || (strcmp(argv[0],"forces") == 0) 
+        || (strcmp(argv[0],"globalForces") == 0) || (strcmp(argv[0],"globalforces") == 0)) {
+
+            char outputData[10];
+            int numDOFperNode = numDOF/2;
+            for (int i=0; i<numDOFperNode; i++) {
+                sprintf(outputData,"P1_%d", i+1);
+                output.tag("ResponseType", outputData);
+            }
+            for (int j=0; j<numDOFperNode; j++) {
+                sprintf(outputData,"P2_%d", j+1);
+                output.tag("ResponseType", outputData);
+            }
+            theResponse =  new ElementResponse(this, 1, *P);
+
+    } else if (strcmp(argv[0],"basicForce") == 0 || strcmp(argv[0],"basicForces") == 0) {
+
+        if (the1DMaterial != 0) {
+            for (int i=0; i<3; i++) {
+                sprintf(outputData,"P%d",i+1);
+                output.tag("ResponseType",outputData);
+            }
+            theResponse = new ElementResponse(this, 2, Vector(3));
+        } else {
+            for (int i=0; i<order; i++) {
+                sprintf(outputData,"P%d",i+1);
+                output.tag("ResponseType",outputData);
+            }
+            theResponse = new ElementResponse(this, 2, Vector(order));
+        }
+
+    } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
+        strcmp(argv[0],"deformation") == 0) {
+
+            if (the1DMaterial != 0) {
+                for (int i=0; i<3; i++) {
+                    sprintf(outputData,"e%d",i+1);
+                    output.tag("ResponseType",outputData);
+                }
+                theResponse = new ElementResponse(this, 3, Vector(3));
+            } else {
+                for (int i=0; i<order; i++) {
+                    sprintf(outputData,"e%d",i+1);
+                    output.tag("ResponseType",outputData);
+                }
+                theResponse = new ElementResponse(this, 3, Vector(order));
+            }
+
+    // a material quantity
+    } else if (strcmp(argv[0],"material") == 0) {
+        // See if NDMaterial can handle request ...
+        theResponse = theNDMaterial->setResponse(&argv[1], argc-1, output);
+
+        if ((theResponse == 0) && (the1DMaterial != 0))
+            theResponse = the1DMaterial->setResponse(&argv[1], argc-1, output);
     }
-    
-    else 
-      return 0;
+
+    output.endTag();
+    return theResponse;
 }
 
 int 
 ZeroLengthND::getResponse(int responseID, Information &eleInfo)
 {
-  switch (responseID) {
-	case 1:
-		return eleInfo.setVector(this->getResistingForce());
-		
-    case 2:
-		return eleInfo.setMatrix(this->getTangentStiff());
+    switch (responseID) {
+    case 1:
+        return eleInfo.setVector(this->getResistingForce());
 
-	case 3:
-		if (eleInfo.theVector != 0) {
-			this->computeStrain();
-			const Vector &tmp = *v;	// NDMaterial strains
-			Vector &def = *(eleInfo.theVector);
-			for (int i = 0; i < order; i++)
-				def(i) = tmp(i);
-			if (the1DMaterial != 0)
-				def(order) = e;	// UniaxialMaterial strain
-		}
-		return 0;
+    case 2:
+        if (eleInfo.theVector != 0) {
+            const Vector &tmp = theNDMaterial->getStress();
+            Vector &force = *(eleInfo.theVector);
+            for (int i = 0; i < order; i++)
+                force(i) = tmp(i);
+            if (the1DMaterial != 0)
+                force(order) = the1DMaterial->getStress();
+        }
+        return 0;
+
+    case 3:
+        if (eleInfo.theVector != 0) {
+            this->computeStrain();
+            const Vector &tmp = *v;	// NDMaterial strains
+            Vector &def = *(eleInfo.theVector);
+            for (int i = 0; i < order; i++)
+                def(i) = tmp(i);
+            if (the1DMaterial != 0)
+                def(order) = e;	// UniaxialMaterial strain
+        }
+        return 0;
 
     default:
-		return -1;
-  }
+        return -1;
+    }
 }
 
 // Private methods

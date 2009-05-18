@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2009-03-25 22:49:22 $
+// $Revision: 1.3 $
+// $Date: 2009-05-18 22:01:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/twoNodeLink/TwoNodeLink.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -860,9 +860,17 @@ Response* TwoNodeLink::setResponse(const char **argv, int argc,
         }
         theResponse = new ElementResponse(this, 6, Vector(numDir*2));
     }
-
+    // material output
+    else if (strcmp(argv[0],"material") == 0)  {
+        if (argc > 2)  {
+            int matNum = atoi(argv[1]);
+            if (matNum >= 1 && matNum <= numDir)
+                theResponse =  theMaterials[matNum-1]->setResponse(&argv[2], argc-2, output);
+        }
+    }
+    
     output.endTag(); // ElementOutput
-
+    
     return theResponse;
 }
 
@@ -980,42 +988,46 @@ void TwoNodeLink::setTranGlobalLocal()
     Tgl.resize(numDOF,numDOF);
     Tgl.Zero();
     
-    for (int i=0; i<numDOF/2; i++)  {
-        
-        // switch on dimensionality of element
-        switch (elemType)  {
-        case D1N2:
-            Tgl(i,0) = Tgl(i+1,1) = trans(i,0);
-            break;
-        case D2N4:
-            Tgl(i,0) = Tgl(i+2,2) = trans(i,0);  
-            Tgl(i,1) = Tgl(i+2,3) = trans(i,1);
-            break;
-        case D2N6: 
-            if (i<2)  {
-                Tgl(i,0) = Tgl(i+3,3) = trans(i,0);  
-                Tgl(i,1) = Tgl(i+3,4) = trans(i,1);
-            } else  {
-                Tgl(i,2) = Tgl(i+3,5) = trans(i,2);
-            }
-            break;
-        case D3N6:
-            Tgl(i,0) = Tgl(i+3,3) = trans(i,0);  
-            Tgl(i,1) = Tgl(i+3,4) = trans(i,1);
-            Tgl(i,2) = Tgl(i+3,5) = trans(i,2);
-            break;
-        case D3N12:
-            if (i < 3)  {
-                Tgl(i,0) = Tgl(i+6,6)  = trans(i,0);
-                Tgl(i,1) = Tgl(i+6,7)  = trans(i,1);
-                Tgl(i,2) = Tgl(i+6,8)  = trans(i,2);
-            } else  {
-                Tgl(i,3) = Tgl(i+6,9)  = trans(i,0);
-                Tgl(i,4) = Tgl(i+6,10) = trans(i,1);
-                Tgl(i,5) = Tgl(i+6,11) = trans(i,2);
-            }
-            break;
-        }
+    // switch on dimensionality of element
+    switch (elemType)  {
+    case D1N2:
+        Tgl(0,0) = Tgl(1,1) = trans(0,0);
+        break;
+    case D2N4:
+        Tgl(0,0) = Tgl(2,2) = trans(0,0);
+        Tgl(0,1) = Tgl(2,3) = trans(0,1);
+        Tgl(1,0) = Tgl(3,2) = trans(1,0);
+        Tgl(1,1) = Tgl(3,3) = trans(1,1);
+        break;
+    case D2N6:
+        Tgl(0,0) = Tgl(3,3) = trans(0,0);
+        Tgl(0,1) = Tgl(3,4) = trans(0,1);
+        Tgl(1,0) = Tgl(4,3) = trans(1,0);
+        Tgl(1,1) = Tgl(4,4) = trans(1,1);
+        Tgl(2,2) = Tgl(5,5) = trans(2,2);
+        break;
+    case D3N6:
+        Tgl(0,0) = Tgl(3,3) = trans(0,0);
+        Tgl(0,1) = Tgl(3,4) = trans(0,1);
+        Tgl(0,2) = Tgl(3,5) = trans(0,2);
+        Tgl(1,0) = Tgl(4,3) = trans(1,0);
+        Tgl(1,1) = Tgl(4,4) = trans(1,1);
+        Tgl(1,2) = Tgl(4,5) = trans(1,2);
+        Tgl(2,0) = Tgl(5,3) = trans(2,0);
+        Tgl(2,1) = Tgl(5,4) = trans(2,1);
+        Tgl(2,2) = Tgl(5,5) = trans(2,2);
+        break;
+    case D3N12:
+        Tgl(0,0) = Tgl(3,3) = Tgl(6,6) = Tgl(9,9)   = trans(0,0);
+        Tgl(0,1) = Tgl(3,4) = Tgl(6,7) = Tgl(9,10)  = trans(0,1);
+        Tgl(0,2) = Tgl(3,5) = Tgl(6,8) = Tgl(9,11)  = trans(0,2);
+        Tgl(1,0) = Tgl(4,3) = Tgl(7,6) = Tgl(10,9)  = trans(1,0);
+        Tgl(1,1) = Tgl(4,4) = Tgl(7,7) = Tgl(10,10) = trans(1,1);
+        Tgl(1,2) = Tgl(4,5) = Tgl(7,8) = Tgl(10,11) = trans(1,2);
+        Tgl(2,0) = Tgl(5,3) = Tgl(8,6) = Tgl(11,9)  = trans(2,0);
+        Tgl(2,1) = Tgl(5,4) = Tgl(8,7) = Tgl(11,10) = trans(2,1);
+        Tgl(2,2) = Tgl(5,5) = Tgl(8,8) = Tgl(11,11) = trans(2,2);
+        break;
     }
 }
 

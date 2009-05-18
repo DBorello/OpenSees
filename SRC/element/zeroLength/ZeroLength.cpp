@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2009-03-06 18:19:36 $
+// $Revision: 1.25 $
+// $Date: 2009-05-18 22:01:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
 
 // Written: GLF
@@ -822,9 +822,9 @@ ZeroLength::displaySelf(Renderer &theViewer, int displayMode, float fact)
 	double force  = 0.0;
     
 	if (displayMode == 2) // use the strain as the drawing measure
-	    return theViewer.drawLine(v1, v2, strain, strain);	
+	    return theViewer.drawLine(v1, v2, (float)strain, (float)strain);	
 	else { // otherwise use the axial force as measure
-	    return theViewer.drawLine(v1,v2, force, force);
+	    return theViewer.drawLine(v1,v2, (float)force, (float)force);
 	}
     }
     return 0;
@@ -858,107 +858,117 @@ ZeroLength::Print(OPS_Stream &s, int flag)
 Response*
 ZeroLength::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
-  Response *theResponse = 0;
+    Response *theResponse = 0;
 
-  output.tag("ElementOutput");
-  output.attr("eleType","ZeroLength");
-  output.attr("eleTag",this->getTag());
-  output.attr("node1",connectedExternalNodes[0]);
-  output.attr("node2",connectedExternalNodes[1]);
+    output.tag("ElementOutput");
+    output.attr("eleType","ZeroLength");
+    output.attr("eleTag",this->getTag());
+    output.attr("node1",connectedExternalNodes[0]);
+    output.attr("node2",connectedExternalNodes[1]);
 
-  char outputData[10];
+    char outputData[10];
 
-  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0) {
+    if ((strcmp(argv[0],"force") == 0) || (strcmp(argv[0],"forces") == 0) 
+        || (strcmp(argv[0],"globalForces") == 0) || (strcmp(argv[0],"globalforces") == 0)) {
 
-    for (int i=0; i<numMaterials1d; i++) {
-      sprintf(outputData,"P%d",i+1);
-      output.tag("ResponseType",outputData);
+            char outputData[10];
+            int numDOFperNode = numDOF/2;
+            for (int i=0; i<numDOFperNode; i++) {
+                sprintf(outputData,"P1_%d", i+1);
+                output.tag("ResponseType", outputData);
+            }
+            for (int j=0; j<numDOFperNode; j++) {
+                sprintf(outputData,"P2_%d", j+1);
+                output.tag("ResponseType", outputData);
+            }
+            theResponse = new ElementResponse(this, 1, Vector(numDOF));
+
+    } else if (strcmp(argv[0],"basicForce") == 0 || strcmp(argv[0],"basicForces") == 0) {
+
+        for (int i=0; i<numMaterials1d; i++) {
+            sprintf(outputData,"P%d",i+1);
+            output.tag("ResponseType",outputData);
+        }
+        theResponse = new ElementResponse(this, 2, Vector(numMaterials1d));
+
+    } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
+        strcmp(argv[0],"deformation") == 0) {
+
+            for (int i=0; i<numMaterials1d; i++) {
+                sprintf(outputData,"e%d",i+1);
+                output.tag("ResponseType",outputData);
+            }
+            theResponse = new ElementResponse(this, 3, Vector(numMaterials1d));
+
+    } else if ((strcmp(argv[0],"defoANDforce") == 0) ||
+        (strcmp(argv[0],"deformationANDforces") == 0) ||
+        (strcmp(argv[0],"deformationsANDforces") == 0)) {
+
+            int i;
+            for (i=0; i<numMaterials1d; i++) {
+                sprintf(outputData,"e%d",i+1);
+                output.tag("ResponseType",outputData);
+            }
+            for (i=0; i<numMaterials1d; i++) {
+                sprintf(outputData,"P%d",i+1);
+                output.tag("ResponseType",outputData);
+            }
+            theResponse = new ElementResponse(this, 4, Vector(2*numMaterials1d));
+
+    // a material quantity
+    } else if (strcmp(argv[0],"material") == 0) {
+        if (argc > 2) {
+            int matNum = atoi(argv[1]);
+            if (matNum >= 1 && matNum <= numMaterials1d)
+                theResponse =  theMaterial1d[matNum-1]->setResponse(&argv[2], argc-2, output);
+        }
     }
 
-    theResponse =  new ElementResponse(this, 1, Vector(numMaterials1d));
-  
-  }  else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
-	      strcmp(argv[0],"deformation") == 0) {
+    output.endTag();
 
-    for (int i=0; i<numMaterials1d; i++) {
-      sprintf(outputData,"e%d",i+1);
-      output.tag("ResponseType",outputData);
-    }
-
-    theResponse =  new ElementResponse(this, 2, Vector(numMaterials1d));
-  
-  }  else if ((strcmp(argv[0],"defoANDforce") == 0) ||
-	   (strcmp(argv[0],"deformationANDforces") == 0) ||
-	      (strcmp(argv[0],"deformationsANDforces") == 0)) {
-	int i;
-    for (i=0; i<numMaterials1d; i++) {
-      sprintf(outputData,"e%d",i+1);
-      output.tag("ResponseType",outputData);
-    }
-    for (i=0; i<numMaterials1d; i++) {
-      sprintf(outputData,"P%d",i+1);
-      output.tag("ResponseType",outputData);
-    }
-
-    theResponse =  new ElementResponse(this, 4, Vector(2*numMaterials1d));
-
-  }  else if (strcmp(argv[0],"material") == 0) {
-    if (argc > 2) {
-      int matNum = atoi(argv[1]);
-      if (matNum >= 1 && matNum <= numMaterials1d)
-	theResponse =  theMaterial1d[matNum-1]->setResponse(&argv[2], argc-2, output);
-    }
-  }
-
-  output.endTag();
-
-  return theResponse;
+    return theResponse;
 }
 
 int 
 ZeroLength::getResponse(int responseID, Information &eleInformation)
 {
-  const Vector& disp1 = theNodes[0]->getTrialDisp();
-  const Vector& disp2 = theNodes[1]->getTrialDisp();
-  const Vector  diff  = disp2-disp1;
-  
-  switch (responseID) {
-  case -1:
-    return -1;
-    
-  case 1:
-    if (eleInformation.theVector != 0) {
-      for (int i = 0; i < numMaterials1d; i++)
-	(*(eleInformation.theVector))(i) = theMaterial1d[i]->getStress();
+    const Vector& disp1 = theNodes[0]->getTrialDisp();
+    const Vector& disp2 = theNodes[1]->getTrialDisp();
+    const Vector  diff  = disp2-disp1;
+
+    switch (responseID) {
+    case -1:
+        return -1;
+
+    case 1:
+        return eleInformation.setVector(this->getResistingForce());
+
+    case 2:
+        if (eleInformation.theVector != 0) {
+            for (int i = 0; i < numMaterials1d; i++)
+                (*(eleInformation.theVector))(i) = theMaterial1d[i]->getStress();
+        }
+        return 0;
+
+    case 3:
+        if (eleInformation.theVector != 0) {
+            for (int i = 0; i < numMaterials1d; i++)
+                (*(eleInformation.theVector))(i) = theMaterial1d[i]->getStrain();
+        }
+        return 0;
+
+    case 4:
+        if (eleInformation.theVector != 0) {
+            for (int i = 0; i < numMaterials1d; i++) {
+                (*(eleInformation.theVector))(i) = theMaterial1d[i]->getStrain();
+                (*(eleInformation.theVector))(i+numMaterials1d) = theMaterial1d[i]->getStress();
+            }
+        }
+        return 0;      
+
+    default:
+        return -1;
     }
-    return 0;
-    
-  case 2:
-    if (eleInformation.theVector != 0) {
-      for (int i = 0; i < numMaterials1d; i++)
-	(*(eleInformation.theVector))(i) = theMaterial1d[i]->getStrain();
-    }
-    return 0;      
-    
-  case 4:
-    if (eleInformation.theVector != 0) {
-      for (int i = 0; i < numMaterials1d; i++) {
-	(*(eleInformation.theVector))(i) = theMaterial1d[i]->getStrain();
-	(*(eleInformation.theVector))(i+numMaterials1d) = theMaterial1d[i]->getStress();
-      }
-    }
-    return 0;      
-    
-  case 3:
-    if (eleInformation.theMatrix != 0) {
-      for (int i = 0; i < numMaterials1d; i++)
-	(*(eleInformation.theMatrix))(i,i) = theMaterial1d[i]->getTangent();
-    }
-    return 0;      
-    
-  default:
-    return -1;
-  }
 }
 
 int

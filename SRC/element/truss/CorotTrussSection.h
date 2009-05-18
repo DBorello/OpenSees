@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2007-02-02 01:35:22 $
+// $Revision: 1.9 $
+// $Date: 2009-05-18 22:01:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTrussSection.h,v $
 
 #ifndef CorotTrussSection_h
@@ -93,7 +93,8 @@ class CorotTrussSection : public Element
   protected:
     
   private:
-   
+    double computeCurrentStrain(void);
+       
     // private attributes - a copy for each object of the class
     SectionForceDeformation *theSection;  // pointer to a material
     ID  connectedExternalNodes;     // contains the tags of the end nodes
