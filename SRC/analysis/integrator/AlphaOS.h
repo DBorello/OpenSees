@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2005-12-21 00:31:57 $
+// $Revision: 1.3 $
+// $Date: 2009-05-19 22:10:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/AlphaOS.h,v $
 
 
@@ -48,12 +48,16 @@ class AlphaOS : public TransientIntegrator
 public:
     // constructors
     AlphaOS();
-    AlphaOS(double alpha);
+    AlphaOS(double alpha,
+        bool updDomFlag = false);
     AlphaOS(double alpha, 
-        double alphaM, double betaK, double betaKi, double betaKc);
-    AlphaOS(double alpha, double beta, double gamma);
+        double alphaM, double betaK, double betaKi, double betaKc,
+        bool updDomFlag = false);
     AlphaOS(double alpha, double beta, double gamma,
-        double alphaM, double betaK, double betaKi, double betaKc);
+        bool updDomFlag = false);
+    AlphaOS(double alpha, double beta, double gamma,
+        double alphaM, double betaK, double betaKi, double betaKc,
+        bool updDomFlag = false);
 
     // destructor
     ~AlphaOS();
@@ -81,6 +85,7 @@ private:
     double alpha;
     double beta;
     double gamma;
+    bool updDomFlag;    // a flag indicating if updateDomain() is called
     double deltaT;
     
     // rayleigh damping factors

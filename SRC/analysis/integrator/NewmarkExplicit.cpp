@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2007-04-05 01:29:04 $
+// $Revision: 1.5 $
+// $Date: 2009-05-19 22:10:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/NewmarkExplicit.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -44,7 +44,7 @@
 
 NewmarkExplicit::NewmarkExplicit()
     : TransientIntegrator(INTEGRATOR_TAGS_NewmarkExplicit),
-    gamma(0), 
+    gamma(0), updDomFlag(0),
     alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
     updateCount(0), c2(0.0), c3(0.0),
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0)
@@ -53,9 +53,10 @@ NewmarkExplicit::NewmarkExplicit()
 }
 
 
-NewmarkExplicit::NewmarkExplicit(double _gamma)
+NewmarkExplicit::NewmarkExplicit(double _gamma,
+    bool upddomflag)
     : TransientIntegrator(INTEGRATOR_TAGS_NewmarkExplicit),
-    gamma(_gamma), 
+    gamma(_gamma), updDomFlag(upddomflag),
     alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
     updateCount(0), c2(0.0), c3(0.0),
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0)
@@ -65,9 +66,10 @@ NewmarkExplicit::NewmarkExplicit(double _gamma)
 
 
 NewmarkExplicit::NewmarkExplicit(double _gamma, 
-    double _alphaM, double _betaK, double _betaKi , double _betaKc)
+    double _alphaM, double _betaK, double _betaKi , double _betaKc,
+    bool upddomflag)
     : TransientIntegrator(INTEGRATOR_TAGS_NewmarkExplicit),
-    gamma(_gamma), 
+    gamma(_gamma), updDomFlag(upddomflag),
     alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
     updateCount(0), c2(0.0), c3(0.0),
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0)
@@ -328,10 +330,12 @@ int NewmarkExplicit::update(const Vector &aiPlusOne)
     // update the response at the DOFs
     theModel->setVel(*Udot);
     theModel->setAccel(*Udotdot);
-    //if (theModel->updateDomain() < 0)  {
-    //    opserr << "NewmarkExplicit::update() - failed to update the domain\n";
-    //    return -4;
-    //}
+    if (updDomFlag == true)  {
+        if (theModel->updateDomain() < 0)  {
+            opserr << "NewmarkExplicit::update() - failed to update the domain\n";
+            return -4;
+        }
+    }
     
     return 0;
 }    
@@ -339,12 +343,16 @@ int NewmarkExplicit::update(const Vector &aiPlusOne)
 
 int NewmarkExplicit::sendSelf(int cTag, Channel &theChannel)
 {
-    Vector data(5);
+    Vector data(6);
     data(0) = gamma;
     data(1) = alphaM;
     data(2) = betaK;
     data(3) = betaKi;
     data(4) = betaKc;
+    if (updDomFlag == false) 
+        data(5) = 0.0;
+    else
+        data(5) = 1.0;
     
     if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0)  {
         opserr << "WARNING NewmarkExplicit::sendSelf() - could not send data\n";
@@ -357,7 +365,7 @@ int NewmarkExplicit::sendSelf(int cTag, Channel &theChannel)
 
 int NewmarkExplicit::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-    Vector data(5);
+    Vector data(6);
     if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0)  {
         opserr << "WARNING NewmarkExplicit::recvSelf() - could not receive data\n";
         gamma = 0.5; 
@@ -369,6 +377,10 @@ int NewmarkExplicit::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &t
     betaK  = data(2);
     betaKi = data(3);
     betaKc = data(4);
+    if (data(5) == 0.0)
+        updDomFlag = false;
+    else
+        updDomFlag = true;
     
     return 0;
 }
@@ -379,11 +391,11 @@ void NewmarkExplicit::Print(OPS_Stream &s, int flag)
     AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0)  {
         double currentTime = theModel->getCurrentDomainTime();
-        s << "\t NewmarkExplicit - currentTime: " << currentTime << endln;
+        s << "NewmarkExplicit - currentTime: " << currentTime << endln;
         s << "  gamma: " << gamma << endln;
         s << "  c2: " << c2 << "  c3: " << c3 << endln;
         s << "  Rayleigh Damping - alphaM: " << alphaM << "  betaK: " << betaK;
         s << "  betaKi: " << betaKi << "  betaKc: " << betaKc << endln;	    
     } else 
-        s << "\t NewmarkExplicit - no associated AnalysisModel\n";
+        s << "NewmarkExplicit - no associated AnalysisModel\n";
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2007-04-05 01:29:04 $
+// $Revision: 1.5 $
+// $Date: 2009-05-19 22:10:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHTGeneralizedExplicit.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -46,23 +46,8 @@
 HHTGeneralizedExplicit::HHTGeneralizedExplicit()
     : TransientIntegrator(INTEGRATOR_TAGS_HHTGeneralizedExplicit),
     alphaI(1.0), alphaF(1.0), beta(0.0), gamma(0.0),
-    deltaT(0.0), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
-    updateCount(0), c1(0.0), c2(0.0), c3(0.0), 
-    Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
-    Ualpha(0), Ualphadot(0), Ualphadotdot(0)
-{
-    
-}
-
-
-HHTGeneralizedExplicit::HHTGeneralizedExplicit(double _rhoB, double _alphaF)
-    : TransientIntegrator(INTEGRATOR_TAGS_HHTGeneralizedExplicit),
-    alphaI((2.0-_rhoB)/(1.0+_rhoB)), alphaF(_alphaF),
-    beta((5.0-3*_rhoB+3*_alphaF*(-2.0-_rhoB+pow(_rhoB,2))
-    +pow(_alphaF,2)*(2.0+3*_rhoB-pow(_rhoB,3)))
-    /((-1.0+_alphaF)*(-2.0+_rhoB)*pow(1.0+_rhoB,2))),
-    gamma(0.5+alphaI-_alphaF),
-    deltaT(0.0), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+    updDomFlag(0), deltaT(0.0),
+    alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
     updateCount(0), c1(0.0), c2(0.0), c3(0.0), 
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0), Ualphadotdot(0)
@@ -72,14 +57,34 @@ HHTGeneralizedExplicit::HHTGeneralizedExplicit(double _rhoB, double _alphaF)
 
 
 HHTGeneralizedExplicit::HHTGeneralizedExplicit(double _rhoB, double _alphaF,
-    double _alphaM, double _betaK, double _betaKi, double _betaKc)
+    bool upddomflag)
     : TransientIntegrator(INTEGRATOR_TAGS_HHTGeneralizedExplicit),
     alphaI((2.0-_rhoB)/(1.0+_rhoB)), alphaF(_alphaF),
     beta((5.0-3*_rhoB+3*_alphaF*(-2.0-_rhoB+pow(_rhoB,2))
     +pow(_alphaF,2)*(2.0+3*_rhoB-pow(_rhoB,3)))
     /((-1.0+_alphaF)*(-2.0+_rhoB)*pow(1.0+_rhoB,2))),
     gamma(0.5+alphaI-_alphaF),
-    deltaT(0.0), alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
+    updDomFlag(upddomflag), deltaT(0.0),
+    alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+    updateCount(0), c1(0.0), c2(0.0), c3(0.0), 
+    Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
+    Ualpha(0), Ualphadot(0), Ualphadotdot(0)
+{
+    
+}
+
+
+HHTGeneralizedExplicit::HHTGeneralizedExplicit(double _rhoB, double _alphaF,
+    double _alphaM, double _betaK, double _betaKi, double _betaKc,
+    bool upddomflag)
+    : TransientIntegrator(INTEGRATOR_TAGS_HHTGeneralizedExplicit),
+    alphaI((2.0-_rhoB)/(1.0+_rhoB)), alphaF(_alphaF),
+    beta((5.0-3*_rhoB+3*_alphaF*(-2.0-_rhoB+pow(_rhoB,2))
+    +pow(_alphaF,2)*(2.0+3*_rhoB-pow(_rhoB,3)))
+    /((-1.0+_alphaF)*(-2.0+_rhoB)*pow(1.0+_rhoB,2))),
+    gamma(0.5+alphaI-_alphaF),
+    updDomFlag(upddomflag), deltaT(0.0),
+    alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
     updateCount(0), c1(0.0), c2(0.0), c3(0.0),
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0), Ualphadotdot(0)
@@ -89,10 +94,12 @@ HHTGeneralizedExplicit::HHTGeneralizedExplicit(double _rhoB, double _alphaF,
 
 
 HHTGeneralizedExplicit::HHTGeneralizedExplicit(double _alphaI, double _alphaF,
-    double _beta, double _gamma)
+    double _beta, double _gamma,
+    bool upddomflag)
     : TransientIntegrator(INTEGRATOR_TAGS_HHTGeneralizedExplicit),
     alphaI(_alphaI), alphaF(_alphaF), beta(_beta), gamma(_gamma),
-    deltaT(0.0), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+    updDomFlag(upddomflag), deltaT(0.0),
+    alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
     updateCount(0), c1(0.0), c2(0.0), c3(0.0), 
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0), Ualphadotdot(0)
@@ -103,10 +110,12 @@ HHTGeneralizedExplicit::HHTGeneralizedExplicit(double _alphaI, double _alphaF,
 
 HHTGeneralizedExplicit::HHTGeneralizedExplicit(double _alphaI, double _alphaF,
     double _beta, double _gamma,
-    double _alphaM, double _betaK, double _betaKi, double _betaKc)
+    double _alphaM, double _betaK, double _betaKi, double _betaKc,
+    bool upddomflag)
     : TransientIntegrator(INTEGRATOR_TAGS_HHTGeneralizedExplicit),
     alphaI(_alphaI), alphaF(_alphaF), beta(_beta), gamma(_gamma),
-    deltaT(0.0), alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
+    updDomFlag(upddomflag), deltaT(0.0),
+    alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
     updateCount(0), c1(0.0), c2(0.0), c3(0.0), 
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0), Ualphadotdot(0)
@@ -402,10 +411,12 @@ int HHTGeneralizedExplicit::update(const Vector &aiPlusOne)
         
     // update the response at the DOFs
     theModel->setResponse(*U,*Udot,*Udotdot);        
-    //if (theModel->updateDomain() < 0)  {
-    //    opserr << "HHTGeneralizedExplicit::update() - failed to update the domain\n";
-    //    return -4;
-    //}
+    if (updDomFlag == true)  {
+        if (theModel->updateDomain() < 0)  {
+            opserr << "HHTGeneralizedExplicit::update() - failed to update the domain\n";
+            return -4;
+        }
+    }
     
     return 0;
 }
@@ -430,7 +441,7 @@ int HHTGeneralizedExplicit::commit(void)
 
 int HHTGeneralizedExplicit::sendSelf(int cTag, Channel &theChannel)
 {
-    Vector data(8);
+    Vector data(9);
     data(0) = alphaI;
     data(1) = alphaF;
     data(2) = beta;
@@ -439,6 +450,10 @@ int HHTGeneralizedExplicit::sendSelf(int cTag, Channel &theChannel)
     data(5) = betaK;
     data(6) = betaKi;
     data(7) = betaKc;
+    if (updDomFlag == false) 
+        data(8) = 0.0;
+    else
+        data(8) = 1.0;
     
     if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0)  {
         opserr << "WARNING HHTGeneralizedExplicit::sendSelf() - could not send data\n";
@@ -451,7 +466,7 @@ int HHTGeneralizedExplicit::sendSelf(int cTag, Channel &theChannel)
 
 int HHTGeneralizedExplicit::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-    Vector data(8);
+    Vector data(9);
     if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0)  {
         opserr << "WARNING HHTGeneralizedExplicit::recvSelf() - could not receive data\n";
         return -1;
@@ -465,6 +480,10 @@ int HHTGeneralizedExplicit::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBr
     betaK  = data(5);
     betaKi = data(6);
     betaKc = data(7);
+    if (data(8) == 0.0)
+        updDomFlag = false;
+    else
+        updDomFlag = true;
     
     return 0;
 }
@@ -475,13 +494,13 @@ void HHTGeneralizedExplicit::Print(OPS_Stream &s, int flag)
     AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0)  {
         double currentTime = theModel->getCurrentDomainTime();
-        s << "\t HHTGeneralizedExplicit - currentTime: " << currentTime << endln ;
+        s << "HHTGeneralizedExplicit - currentTime: " << currentTime << endln ;
         s << "  alphaI: " << alphaI << "  alphaF: " << alphaF  << "  beta: " << beta  << "  gamma: " << gamma << endln;
         s << "  c1: " << c1 << "  c2: " << c2 << "  c3: " << c3 << endln;
         s << "  Rayleigh Damping - alphaM: " << alphaM << "  betaK: " << betaK;
         s << "  betaKi: " << betaKi << "  betaKc: " << betaKc << endln;	    
     } else 
-        s << "\t HHTGeneralizedExplicit - no associated AnalysisModel\n";
+        s << "HHTGeneralizedExplicit - no associated AnalysisModel\n";
 }
 
 

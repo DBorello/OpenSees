@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2005-12-21 00:32:57 $
+// $Revision: 1.3 $
+// $Date: 2009-05-19 22:10:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/NewmarkExplicit.h,v $
 
 
@@ -47,8 +47,11 @@ class NewmarkExplicit : public TransientIntegrator
 public:
     // constructors
     NewmarkExplicit();
-    NewmarkExplicit(double gamma);
-    NewmarkExplicit(double gamma, double alphaM, double betaK, double betaKi, double betaKc); 
+    NewmarkExplicit(double gamma,
+        bool updDomFlag = false);
+    NewmarkExplicit(double gamma,
+        double alphaM, double betaK, double betaKi, double betaKc,
+        bool updDomFlag = false); 
     
     // destructor
     ~NewmarkExplicit();
@@ -72,6 +75,7 @@ protected:
     
 private:
     double gamma;
+    bool updDomFlag;    // a flag indicating if updateDomain() is called
 
     // rayleigh damping factors
     double alphaM;

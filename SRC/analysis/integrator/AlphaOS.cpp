@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2007-04-05 01:27:43 $
+// $Revision: 1.5 $
+// $Date: 2009-05-19 22:10:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/AlphaOS.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -28,7 +28,7 @@
 //
 // Description: This file contains the implementation of the AlphaOS class.
 //
-// What: "@(#)E AlphaOS.cpp, revA"
+// What: "@(#) AlphaOS.cpp, revA"
 
 #include <AlphaOS.h>
 #include <FE_Element.h>
@@ -46,7 +46,8 @@
 AlphaOS::AlphaOS()
     : TransientIntegrator(INTEGRATOR_TAGS_AlphaOS),
     alpha(1.0), beta(0.0), gamma(0.0),
-    deltaT(0.0), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+    updDomFlag(0), deltaT(0.0),
+    alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
     updateCount(0), c1(0.0), c2(0.0), c3(0.0), 
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0), Upt(0), Uptdot(0)
@@ -55,10 +56,12 @@ AlphaOS::AlphaOS()
 }
 
 
-AlphaOS::AlphaOS(double _alpha)
+AlphaOS::AlphaOS(double _alpha,
+    bool upddomflag)
     : TransientIntegrator(INTEGRATOR_TAGS_AlphaOS),
     alpha(_alpha), beta((2-_alpha)*(2-_alpha)*0.25), gamma(1.5-_alpha),
-    deltaT(0.0), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+    updDomFlag(upddomflag), deltaT(0.0),
+    alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
     updateCount(0), c1(0.0), c2(0.0), c3(0.0),
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0), Upt(0), Uptdot(0)
@@ -68,22 +71,12 @@ AlphaOS::AlphaOS(double _alpha)
 
 
 AlphaOS::AlphaOS(double _alpha, 
-    double _alphaM, double _betaK, double _betaKi, double _betaKc)
+    double _alphaM, double _betaK, double _betaKi, double _betaKc,
+    bool upddomflag)
     : TransientIntegrator(INTEGRATOR_TAGS_AlphaOS),
     alpha(_alpha), beta((2-_alpha)*(2-_alpha)*0.25), gamma(1.5-_alpha),  
-    deltaT(0.0), alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
-    updateCount(0), c1(0.0), c2(0.0), c3(0.0),
-    Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
-    Ualpha(0), Ualphadot(0), Upt(0), Uptdot(0)
-{
-    
-}
-
-
-AlphaOS::AlphaOS(double _alpha, double _beta, double _gamma)
-    : TransientIntegrator(INTEGRATOR_TAGS_AlphaOS),
-    alpha(_alpha), beta(_beta), gamma(_gamma),
-    deltaT(0.0), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+    updDomFlag(upddomflag), deltaT(0.0),
+    alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
     updateCount(0), c1(0.0), c2(0.0), c3(0.0),
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0), Upt(0), Uptdot(0)
@@ -93,10 +86,26 @@ AlphaOS::AlphaOS(double _alpha, double _beta, double _gamma)
 
 
 AlphaOS::AlphaOS(double _alpha, double _beta, double _gamma,
-    double _alphaM, double _betaK, double _betaKi, double _betaKc)
+    bool upddomflag)
     : TransientIntegrator(INTEGRATOR_TAGS_AlphaOS),
     alpha(_alpha), beta(_beta), gamma(_gamma),
-    deltaT(0.0), alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
+    updDomFlag(upddomflag), deltaT(0.0),
+    alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+    updateCount(0), c1(0.0), c2(0.0), c3(0.0),
+    Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
+    Ualpha(0), Ualphadot(0), Upt(0), Uptdot(0)
+{
+    
+}
+
+
+AlphaOS::AlphaOS(double _alpha, double _beta, double _gamma,
+    double _alphaM, double _betaK, double _betaKi, double _betaKc,
+    bool upddomflag)
+    : TransientIntegrator(INTEGRATOR_TAGS_AlphaOS),
+    alpha(_alpha), beta(_beta), gamma(_gamma),
+    updDomFlag(upddomflag), deltaT(0.0),
+    alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
     updateCount(0), c1(0.0), c2(0.0), c3(0.0),
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0), Upt(0), Uptdot(0)
@@ -215,9 +224,15 @@ int AlphaOS::formEleTangent(FE_Element *theEle)
 {
     theEle->zeroTangent();
     
-    theEle->addKiToTang(alpha*c1);
-    theEle->addCtoTang(alpha*c2);
-    theEle->addMtoTang(c3);
+    if (statusFlag == CURRENT_TANGENT)  {
+        theEle->addKtToTang(alpha*c1);
+        theEle->addCtoTang(alpha*c2);
+        theEle->addMtoTang(c3);
+    } else if (statusFlag == INITIAL_TANGENT)  {
+        theEle->addKiToTang(alpha*c1);
+        theEle->addCtoTang(alpha*c2);
+        theEle->addMtoTang(c3);
+    }
     
     return 0;
 }    
@@ -406,10 +421,12 @@ int AlphaOS::update(const Vector &deltaU)
     
     // update the response at the DOFs
     theModel->setResponse(*U,*Udot,*Udotdot);
-    //if (theModel->updateDomain() < 0)  {
-    //    opserr << "AlphaOS::update() - failed to update the domain\n";
-    //    return -4;
-    //}
+    if (updDomFlag == true)  {
+        if (theModel->updateDomain() < 0)  {
+            opserr << "AlphaOS::update() - failed to update the domain\n";
+            return -4;
+        }
+    }
     
     return 0;
 }    
@@ -434,7 +451,7 @@ int AlphaOS::commit(void)
 
 int AlphaOS::sendSelf(int cTag, Channel &theChannel)
 {
-    Vector data(7);
+    Vector data(8);
     data(0) = alpha;
     data(1) = beta;
     data(2) = gamma;
@@ -442,6 +459,10 @@ int AlphaOS::sendSelf(int cTag, Channel &theChannel)
     data(4) = betaK;
     data(5) = betaKi;
     data(6) = betaKc;
+    if (updDomFlag == false) 
+        data(7) = 0.0;
+    else
+        data(7) = 1.0;
     
     if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0)  {
         opserr << "WARNING AlphaOS::sendSelf() - could not send data\n";
@@ -454,7 +475,7 @@ int AlphaOS::sendSelf(int cTag, Channel &theChannel)
 
 int AlphaOS::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-    Vector data(7);
+    Vector data(8);
     if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0)  {
         opserr << "WARNING AlphaOS::recvSelf() - could not receive data\n";
         return -1;
@@ -467,6 +488,10 @@ int AlphaOS::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
     betaK  = data(4);
     betaKi = data(5);
     betaKc = data(6);
+    if (data(7) == 0.0)
+        updDomFlag = false;
+    else
+        updDomFlag = true;
     
     return 0;
 }
@@ -477,13 +502,13 @@ void AlphaOS::Print(OPS_Stream &s, int flag)
     AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0)  {
         double currentTime = theModel->getCurrentDomainTime();
-        s << "\t AlphaOS - currentTime: " << currentTime << endln;
+        s << "AlphaOS - currentTime: " << currentTime << endln;
         s << "  alpha: " << alpha << "  beta: " << beta  << "  gamma: " << gamma << endln;
         s << "  c1: " << c1 << "  c2: " << c2 << "  c3: " << c3 << endln;
         s << "  Rayleigh Damping - alphaM: " << alphaM << "  betaK: " << betaK;
         s << "  betaKi: " << betaKi << "  betaKc: " << betaKc << endln;	    
     } else 
-        s << "\t AlphaOS - no associated AnalysisModel\n";
+        s << "AlphaOS - no associated AnalysisModel\n";
 }
 
 
@@ -503,10 +528,18 @@ int AlphaOS::formElementResidual(void)
             opserr << " failed in addB for ID " << elePtr->getID();
             res = -2;
         }        
-        if (theSOE->addB(elePtr->getKi_Force(*Ut-*Upt), elePtr->getID(), alpha-1.0) < 0)  {
-            opserr << "WARNING AlphaOS::formElementResidual -";
-            opserr << " failed in addB for ID " << elePtr->getID();
-            res = -2;
+        if (statusFlag == CURRENT_TANGENT)  {
+            if (theSOE->addB(elePtr->getK_Force(*Ut-*Upt), elePtr->getID(), alpha-1.0) < 0)  {
+                opserr << "WARNING AlphaOS::formElementResidual -";
+                opserr << " failed in addB for ID " << elePtr->getID();
+                res = -2;
+            }
+        } else if (statusFlag == INITIAL_TANGENT)  {
+            if (theSOE->addB(elePtr->getKi_Force(*Ut-*Upt), elePtr->getID(), alpha-1.0) < 0)  {
+                opserr << "WARNING AlphaOS::formElementResidual -";
+                opserr << " failed in addB for ID " << elePtr->getID();
+                res = -2;
+            }
         }
     }
 

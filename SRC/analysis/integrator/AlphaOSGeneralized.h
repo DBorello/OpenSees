@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2005-12-21 00:31:57 $
+// $Revision: 1.3 $
+// $Date: 2009-05-19 22:10:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/AlphaOSGeneralized.h,v $
 
 #ifndef AlphaOSGeneralized_h
@@ -47,12 +47,18 @@ class AlphaOSGeneralized : public TransientIntegrator
 public:
     // constructors
     AlphaOSGeneralized();
-    AlphaOSGeneralized(double rhoInf);
+    AlphaOSGeneralized(double rhoInf,
+        bool updDomFlag = false);
     AlphaOSGeneralized(double rhoInf, 
-        double alphaM, double betaK, double betaKi, double betaKc);
-    AlphaOSGeneralized(double alphaI, double alphaF, double beta, double gamma);
-    AlphaOSGeneralized(double alphaI, double alphaF, double beta, double gamma,
-        double alphaM, double betaK, double betaKi, double betaKc);
+        double alphaM, double betaK, double betaKi, double betaKc,
+        bool updDomFlag = false);
+    AlphaOSGeneralized(double alphaI, double alphaF,
+        double beta, double gamma,
+        bool updDomFlag = false);
+    AlphaOSGeneralized(double alphaI, double alphaF,
+        double beta, double gamma,
+        double alphaM, double betaK, double betaKi, double betaKc,
+        bool updDomFlag = false);
 
     // destructor
     ~AlphaOSGeneralized();
@@ -81,6 +87,7 @@ private:
     double alphaF;
     double beta;
     double gamma;
+    bool updDomFlag;    // a flag indicating if updateDomain() is called
     double deltaT;
     
     // rayleigh damping factors

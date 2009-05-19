@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2007-04-05 01:27:43 $
+// $Revision: 1.5 $
+// $Date: 2009-05-19 22:10:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/AlphaOSGeneralized.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -28,7 +28,7 @@
 //
 // Description: This file contains the implementation of the AlphaOSGeneralized class.
 //
-// What: "@(#)E AlphaOSGeneralized.cpp, revA"
+// What: "@(#) AlphaOSGeneralized.cpp, revA"
 
 #include <AlphaOSGeneralized.h>
 #include <FE_Element.h>
@@ -46,7 +46,8 @@
 AlphaOSGeneralized::AlphaOSGeneralized()
     : TransientIntegrator(INTEGRATOR_TAGS_AlphaOSGeneralized),
     alphaI(1.0), alphaF(1.0), beta(0.0), gamma(0.0),
-    deltaT(0.0), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+    updDomFlag(0), deltaT(0.0),
+    alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
     updateCount(0), c1(0.0), c2(0.0), c3(0.0), 
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0), Ualphadotdot(0), Upt(0), Uptdot(0)
@@ -55,11 +56,13 @@ AlphaOSGeneralized::AlphaOSGeneralized()
 }
 
 
-AlphaOSGeneralized::AlphaOSGeneralized(double _rhoInf)
+AlphaOSGeneralized::AlphaOSGeneralized(double _rhoInf,
+    bool upddomflag)
     : TransientIntegrator(INTEGRATOR_TAGS_AlphaOSGeneralized),
     alphaI((2.0-_rhoInf)/(1.0+_rhoInf)), alphaF(1.0/(1.0+_rhoInf)),
     beta(1.0/(1.0+_rhoInf)/(1.0+_rhoInf)), gamma(0.5*(3.0-_rhoInf)/(1.0+_rhoInf)),
-    deltaT(0.0), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+    updDomFlag(upddomflag), deltaT(0.0),
+    alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
     updateCount(0), c1(0.0), c2(0.0), c3(0.0),
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0), Ualphadotdot(0), Upt(0), Uptdot(0)
@@ -69,24 +72,13 @@ AlphaOSGeneralized::AlphaOSGeneralized(double _rhoInf)
 
 
 AlphaOSGeneralized::AlphaOSGeneralized(double _rhoInf, 
-    double _alphaM, double _betaK, double _betaKi, double _betaKc)
+    double _alphaM, double _betaK, double _betaKi, double _betaKc,
+    bool upddomflag)
     : TransientIntegrator(INTEGRATOR_TAGS_AlphaOSGeneralized),
     alphaI((2.0-_rhoInf)/(1.0+_rhoInf)), alphaF(1.0/(1.0+_rhoInf)),
     beta(1.0/(1.0+_rhoInf)/(1.0+_rhoInf)), gamma(0.5*(3.0-_rhoInf)/(1.0+_rhoInf)),
-    deltaT(0.0), alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
-    updateCount(0), c1(0.0), c2(0.0), c3(0.0),
-    Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
-    Ualpha(0), Ualphadot(0), Ualphadotdot(0), Upt(0), Uptdot(0)
-{
-    
-}
-
-
-AlphaOSGeneralized::AlphaOSGeneralized(double _alphaI, double _alphaF,
-    double _beta, double _gamma)
-    : TransientIntegrator(INTEGRATOR_TAGS_AlphaOSGeneralized),
-    alphaI(_alphaI), alphaF(_alphaF), beta(_beta), gamma(_gamma),
-    deltaT(0.0), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+    updDomFlag(upddomflag), deltaT(0.0),
+    alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
     updateCount(0), c1(0.0), c2(0.0), c3(0.0),
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0), Ualphadotdot(0), Upt(0), Uptdot(0)
@@ -97,10 +89,27 @@ AlphaOSGeneralized::AlphaOSGeneralized(double _alphaI, double _alphaF,
 
 AlphaOSGeneralized::AlphaOSGeneralized(double _alphaI, double _alphaF,
     double _beta, double _gamma,
-    double _alphaM, double _betaK, double _betaKi, double _betaKc)
+    bool upddomflag)
     : TransientIntegrator(INTEGRATOR_TAGS_AlphaOSGeneralized),
     alphaI(_alphaI), alphaF(_alphaF), beta(_beta), gamma(_gamma),
-    deltaT(0.0), alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
+    updDomFlag(upddomflag), deltaT(0.0),
+    alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+    updateCount(0), c1(0.0), c2(0.0), c3(0.0),
+    Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
+    Ualpha(0), Ualphadot(0), Ualphadotdot(0), Upt(0), Uptdot(0)
+{
+    
+}
+
+
+AlphaOSGeneralized::AlphaOSGeneralized(double _alphaI, double _alphaF,
+    double _beta, double _gamma,
+    double _alphaM, double _betaK, double _betaKi, double _betaKc,
+    bool upddomflag)
+    : TransientIntegrator(INTEGRATOR_TAGS_AlphaOSGeneralized),
+    alphaI(_alphaI), alphaF(_alphaF), beta(_beta), gamma(_gamma),
+    updDomFlag(upddomflag), deltaT(0.0),
+    alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
     updateCount(0), c1(0.0), c2(0.0), c3(0.0),
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0), Ualphadotdot(0), Upt(0), Uptdot(0)
@@ -221,9 +230,15 @@ int AlphaOSGeneralized::formEleTangent(FE_Element *theEle)
 {
     theEle->zeroTangent();
     
-    theEle->addKiToTang(alphaF*c1);
-    theEle->addCtoTang(alphaF*c2);
-    theEle->addMtoTang(alphaI*c3);
+    if (statusFlag == CURRENT_TANGENT)  {
+        theEle->addKtToTang(alphaF*c1);
+        theEle->addCtoTang(alphaF*c2);
+        theEle->addMtoTang(alphaI*c3);
+    } else if (statusFlag == INITIAL_TANGENT)  {
+        theEle->addKiToTang(alphaF*c1);
+        theEle->addCtoTang(alphaF*c2);
+        theEle->addMtoTang(alphaI*c3);
+    }
     
     return 0;
 }    
@@ -418,10 +433,12 @@ int AlphaOSGeneralized::update(const Vector &deltaU)
     
     // update the response at the DOFs
     theModel->setResponse(*U,*Udot,*Udotdot);
-    //if (theModel->updateDomain() < 0)  {
-    //    opserr << "AlphaOSGeneralized::update() - failed to update the domain\n";
-    //    return -4;
-    //}
+    if (updDomFlag == true)  {
+        if (theModel->updateDomain() < 0)  {
+            opserr << "AlphaOSGeneralized::update() - failed to update the domain\n";
+            return -4;
+        }
+    }
     
     return 0;
 }    
@@ -446,7 +463,7 @@ int AlphaOSGeneralized::commit(void)
 
 int AlphaOSGeneralized::sendSelf(int cTag, Channel &theChannel)
 {
-    Vector data(8);
+    Vector data(9);
     data(0) = alphaI;
     data(1) = alphaF;
     data(2) = beta;
@@ -455,6 +472,10 @@ int AlphaOSGeneralized::sendSelf(int cTag, Channel &theChannel)
     data(5) = betaK;
     data(6) = betaKi;
     data(7) = betaKc;
+    if (updDomFlag == false) 
+        data(8) = 0.0;
+    else
+        data(8) = 1.0;
     
     if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0)  {
         opserr << "WARNING AlphaOSGeneralized::sendSelf() - could not send data\n";
@@ -467,7 +488,7 @@ int AlphaOSGeneralized::sendSelf(int cTag, Channel &theChannel)
 
 int AlphaOSGeneralized::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-    Vector data(8);
+    Vector data(9);
     if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0)  {
         opserr << "WARNING AlphaOSGeneralized::recvSelf() - could not receive data\n";
         return -1;
@@ -481,6 +502,10 @@ int AlphaOSGeneralized::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker
     betaK  = data(5);
     betaKi = data(6);
     betaKc = data(7);
+    if (data(8) == 0.0)
+        updDomFlag = false;
+    else
+        updDomFlag = true;
     
     return 0;
 }
@@ -491,13 +516,13 @@ void AlphaOSGeneralized::Print(OPS_Stream &s, int flag)
     AnalysisModel *theModel = this->getAnalysisModel();
     if (theModel != 0)  {
         double currentTime = theModel->getCurrentDomainTime();
-        s << "\t AlphaOSGeneralized - currentTime: " << currentTime << endln;
+        s << "AlphaOSGeneralized - currentTime: " << currentTime << endln;
         s << "  alphaI: " << alphaI << "  alphaF: " << alphaF  << "  beta: " << beta  << "  gamma: " << gamma << endln;
         s << "  c1: " << c1 << "  c2: " << c2 << "  c3: " << c3 << endln;
         s << "  Rayleigh Damping - alphaM: " << alphaM << "  betaK: " << betaK;
         s << "  betaKi: " << betaKi << "  betaKc: " << betaKc << endln;	    
     } else 
-        s << "\t AlphaOSGeneralized - no associated AnalysisModel\n";
+        s << "AlphaOSGeneralized - no associated AnalysisModel\n";
 }
 
 
@@ -517,10 +542,18 @@ int AlphaOSGeneralized::formElementResidual(void)
             opserr << " failed in addB for ID " << elePtr->getID();
             res = -2;
         }        
-        if (theSOE->addB(elePtr->getKi_Force(*Ut-*Upt), elePtr->getID(), alphaF-1.0) < 0)  {
-            opserr << "WARNING AlphaOSGeneralized::formElementResidual -";
-            opserr << " failed in addB for ID " << elePtr->getID();
-            res = -2;
+        if (statusFlag == CURRENT_TANGENT)  {
+            if (theSOE->addB(elePtr->getK_Force(*Ut-*Upt), elePtr->getID(), alphaF-1.0) < 0)  {
+                opserr << "WARNING AlphaOSGeneralized::formElementResidual -";
+                opserr << " failed in addB for ID " << elePtr->getID();
+                res = -2;
+            }
+        } else if (statusFlag == INITIAL_TANGENT)  {
+            if (theSOE->addB(elePtr->getKi_Force(*Ut-*Upt), elePtr->getID(), alphaF-1.0) < 0)  {
+                opserr << "WARNING AlphaOSGeneralized::formElementResidual -";
+                opserr << " failed in addB for ID " << elePtr->getID();
+                res = -2;
+            }
         }
     }
 

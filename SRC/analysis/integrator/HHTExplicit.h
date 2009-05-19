@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2005-12-21 00:32:57 $
+// $Revision: 1.3 $
+// $Date: 2009-05-19 22:10:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHTExplicit.h,v $
 
 
 #ifndef HHTExplicit_h
 #define HHTExplicit_h
 
-// File: ~/analysis/integrator/HHTExplicit.h
-// 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
 // Created: 02/05
 // Revision: A
@@ -49,12 +47,16 @@ class HHTExplicit : public TransientIntegrator
 public:
     // constructors
     HHTExplicit();
-    HHTExplicit(double alpha);
     HHTExplicit(double alpha,
-        double alphaM, double betaK, double betaKi, double betaKc);
-    HHTExplicit(double alpha, double gamma);
+        bool updDomFlag = false);
+    HHTExplicit(double alpha,
+        double alphaM, double betaK, double betaKi, double betaKc,
+        bool updDomFlag = false);
     HHTExplicit(double alpha, double gamma,
-        double alphaM, double betaK, double betaKi, double betaKc);
+        bool updDomFlag = false);
+    HHTExplicit(double alpha, double gamma,
+        double alphaM, double betaK, double betaKi, double betaKc,
+        bool updDomFlag = false);
     
     // destructor
     ~HHTExplicit();
@@ -80,6 +82,7 @@ protected:
 private:
     double alpha;
     double gamma;
+    bool updDomFlag;    // a flag indicating if updateDomain() is called
     double deltaT;
     
     // rayleigh damping factors

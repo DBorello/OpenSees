@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2005-12-21 00:32:57 $
+// $Revision: 1.3 $
+// $Date: 2009-05-19 22:10:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHTGeneralizedExplicit.h,v $
 
 
 #ifndef HHTGeneralizedExplicit_h
 #define HHTGeneralizedExplicit_h
 
-// File: ~/analysis/integrator/HHTGeneralizedExplicit.h
-// 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
 // Created: 10/05
 // Revision: A
@@ -49,12 +47,16 @@ class HHTGeneralizedExplicit : public TransientIntegrator
 public:
     // constructors
     HHTGeneralizedExplicit();
-    HHTGeneralizedExplicit(double rhoB, double alphaF);
     HHTGeneralizedExplicit(double rhoB, double alphaF,
-        double alphaM, double betaK, double betaKi, double betaKc);
-    HHTGeneralizedExplicit(double alphaI, double alphaF, double beta, double gamma);
+        bool updDomFlag = false);
+    HHTGeneralizedExplicit(double rhoB, double alphaF,
+        double alphaM, double betaK, double betaKi, double betaKc,
+        bool updDomFlag = false);
     HHTGeneralizedExplicit(double alphaI, double alphaF, double beta, double gamma,
-        double alphaM, double betaK, double betaKi, double betaKc);
+        bool updDomFlag = false);
+    HHTGeneralizedExplicit(double alphaI, double alphaF, double beta, double gamma,
+        double alphaM, double betaK, double betaKi, double betaKc,
+        bool updDomFlag = false);
     
     // destructor
     ~HHTGeneralizedExplicit();
@@ -82,6 +84,7 @@ private:
     double alphaF;
     double beta;
     double gamma;
+    bool updDomFlag;    // a flag indicating if updateDomain() is called
     double deltaT;
     
     // rayleigh damping factors
