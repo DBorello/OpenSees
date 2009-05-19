@@ -25,13 +25,16 @@ OBJS       = IncrementalIntegrator.o \
 	HSConstraint.o \
 	CentralDifferenceNoDamping.o \
 	NewmarkExplicit.o \
-	NewmarkHybridSimulation.o \
+	NewmarkHSFixedNumIter.o \
+	NewmarkHSIncrReduct.o \
 	HHTExplicit.o \
 	HHTGeneralized.o \
 	HHTGeneralizedExplicit.o \
-	HHTHybridSimulation.o \
+	HHTHSFixedNumIter.o \
+	HHTHSIncrReduct.o \
 	Collocation.o \
-	CollocationHybridSimulation.o \
+	CollocationHSFixedNumIter.o \
+	CollocationHSIncrReduct.o \
 	AlphaOSGeneralized.o \
 	AlphaOS.o 
 
