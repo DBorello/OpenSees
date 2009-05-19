@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2009-05-11 21:01:10 $
+// $Revision: 1.6 $
+// $Date: 2009-05-19 21:54:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/FullGenEigenSolver.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -30,7 +30,6 @@
 // FullGenEigenSolver class.
 
 #include <FullGenEigenSolver.h>
-#include <f2c.h>
 #include <float.h>
 #include <math.h>
 #include <stdio.h>
@@ -83,16 +82,16 @@ FullGenEigenSolver::~FullGenEigenSolver()
 
 int FullGenEigenSolver::solve(int nEigen, bool generalized)
 {
-  if (generalized == true) {
-    opserr << "FullGenEigenSolver::solve() - only solves standard problem\n";
+  if (generalized == false) {
+    opserr << "FullGenEigenSolver::solve() - only solves generalized problem\n";
     return -1;
   }
-
-    if (theSOE == 0) {
-        opserr << "FullGenEigenSolver::solve()- "
-            << " No EigenSOE object has been set yet\n";
-        return -1;
-    }
+  
+  if (theSOE == 0) {
+    opserr << "FullGenEigenSolver::solve()- "
+	   << " No EigenSOE object has been set yet\n";
+    return -1;
+  }
 
     // check for quick return
     if (nEigen < 1) {
