@@ -1012,6 +1012,12 @@
 					RelativePath="..\..\..\SRC\material\nD\BeamFiberMaterial.h">
 				</File>
 				<File
+					RelativePath="..\..\..\SRC\material\nD\PlaneStrainMaterial.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\PlaneStrainMaterial.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\material\nD\PlaneStressMaterial.cpp">
 				</File>
 				<File

@@ -406,10 +406,16 @@
 				RelativePath="..\..\..\SRC\analysis\integrator\Collocation.h">
 			</File>
 			<File
-				RelativePath="..\..\..\SRC\analysis\integrator\CollocationHybridSimulation.cpp">
+				RelativePath="..\..\..\SRC\analysis\integrator\CollocationHSFixedNumIter.cpp">
 			</File>
 			<File
-				RelativePath="..\..\..\SRC\analysis\integrator\CollocationHybridSimulation.h">
+				RelativePath="..\..\..\SRC\analysis\integrator\CollocationHSFixedNumIter.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\CollocationHSIncrReduct.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\CollocationHSIncrReduct.h">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\analysis\integrator\DisplacementControl.cpp">
@@ -454,10 +460,16 @@
 				RelativePath="..\..\..\SRC\analysis\integrator\HHTGeneralizedExplicit.h">
 			</File>
 			<File
-				RelativePath="..\..\..\SRC\analysis\integrator\HHTHybridSimulation.cpp">
+				RelativePath="..\..\..\SRC\analysis\integrator\HHTHSFixedNumIter.cpp">
 			</File>
 			<File
-				RelativePath="..\..\..\SRC\analysis\integrator\HHTHybridSimulation.h">
+				RelativePath="..\..\..\SRC\analysis\integrator\HHTHSFixedNumIter.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\HHTHSIncrReduct.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\HHTHSIncrReduct.h">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\analysis\integrator\HSConstraint.cpp">
@@ -514,10 +526,16 @@
 				RelativePath="..\..\..\SRC\analysis\integrator\NewmarkExplicit.h">
 			</File>
 			<File
-				RelativePath="..\..\..\SRC\analysis\integrator\NewmarkHybridSimulation.cpp">
+				RelativePath="..\..\..\SRC\analysis\integrator\NewmarkHSFixedNumIter.cpp">
 			</File>
 			<File
-				RelativePath="..\..\..\SRC\analysis\integrator\NewmarkHybridSimulation.h">
+				RelativePath="..\..\..\SRC\analysis\integrator\NewmarkHSFixedNumIter.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\NewmarkHSIncrReduct.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\analysis\integrator\NewmarkHSIncrReduct.h">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\analysis\integrator\StaticIntegrator.cpp">

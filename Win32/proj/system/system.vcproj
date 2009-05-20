@@ -380,30 +380,6 @@
 			<File
 				RelativePath="..\..\..\SRC\system_of_eqn\eigenSOE\ArpackSolver.h">
 			</File>
-			<File
-				RelativePath="..\..\..\SRC\system_of_eqn\eigenSOE\BandArpackSOE.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\system_of_eqn\eigenSOE\BandArpackSOE.h">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\system_of_eqn\eigenSOE\BandArpackSolver.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\system_of_eqn\eigenSOE\BandArpackSolver.h">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\system_of_eqn\eigenSOE\SymArpackSOE.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\system_of_eqn\eigenSOE\SymArpackSOE.h">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\system_of_eqn\eigenSOE\SymArpackSolver.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\SRC\system_of_eqn\eigenSOE\SymArpackSolver.h">
-			</File>
 		</Filter>
 		<Filter
 			Name="symBandEigen"
