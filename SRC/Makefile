@@ -203,10 +203,6 @@ LAW_LIBS = $(FE)/system_of_eqn/linearSOE/sparseSYM/SymSparseLinSOE.o \
 	$(FE)/system_of_eqn/eigenSOE/EigenSolver.o \
 	$(FE)/system_of_eqn/eigenSOE/ArpackSOE.o \
 	$(FE)/system_of_eqn/eigenSOE/ArpackSolver.o \
-	$(FE)/system_of_eqn/eigenSOE/BandArpackSOE.o \
-	$(FE)/system_of_eqn/eigenSOE/BandArpackSolver.o \
-	$(FE)/system_of_eqn/eigenSOE/SymArpackSOE.o \
-	$(FE)/system_of_eqn/eigenSOE/SymArpackSolver.o \
 	$(FE)/system_of_eqn/eigenSOE/SymBandEigenSOE.o \
 	$(FE)/system_of_eqn/eigenSOE/SymBandEigenSolver.o \
 	$(FE)/analysis/analysis/EigenAnalysis.o \
@@ -662,6 +658,7 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/nD/ElasticIsotropicPlateFiber.o \
 	$(FE)/material/nD/ElasticIsotropicBeamFiber.o \
 	$(FE)/material/nD/PlaneStressMaterial.o \
+	$(FE)/material/nD/PlaneStrainMaterial.o \
 	$(FE)/material/nD/PlateFiberMaterial.o \
 	$(FE)/material/nD/BeamFiberMaterial.o \
 	$(FE)/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.o \
@@ -943,15 +940,18 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/analysis/integrator/CentralDifferenceNoDamping.o \
 	$(FE)/analysis/integrator/WilsonTheta.o \
 	$(FE)/analysis/integrator/NewmarkExplicit.o \
-	$(FE)/analysis/integrator/NewmarkHybridSimulation.o \
+	$(FE)/analysis/integrator/NewmarkHSIncrReduct.o \
+	$(FE)/analysis/integrator/NewmarkHSFixedNumIter.o \
 	$(FE)/analysis/integrator/HHTExplicit.o \
 	$(FE)/analysis/integrator/HHTGeneralized.o \
 	$(FE)/analysis/integrator/HHTGeneralizedExplicit.o \
-	$(FE)/analysis/integrator/HHTHybridSimulation.o \
+	$(FE)/analysis/integrator/HHTHSIncrReduct.o \
+	$(FE)/analysis/integrator/HHTHSFixedNumIter.o \
 	$(FE)/analysis/integrator/AlphaOS.o \
 	$(FE)/analysis/integrator/AlphaOSGeneralized.o \
 	$(FE)/analysis/integrator/Collocation.o \
-	$(FE)/analysis/integrator/CollocationHybridSimulation.o \
+	$(FE)/analysis/integrator/CollocationHSIncrReduct.o \
+	$(FE)/analysis/integrator/CollocationHSFixedNumIter.o \
 	$(FE)/analysis/model/AnalysisModel.o \
 	$(FE)/analysis/model/FE_EleIter.o \
 	$(FE)/analysis/model/DOF_GrpIter.o \
