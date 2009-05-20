@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2009-05-20 17:28:53 $
+// $Revision: 1.2 $
+// $Date: 2009-05-20 22:03:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/PlaneStrainMaterial.h,v $
 
 // Antonios Vytiniotis
