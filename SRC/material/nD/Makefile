@@ -11,6 +11,7 @@ OBJS       = NDMaterial.o \
              J2PlaneStrain.o \
              PlateFiberMaterial.o \
              PlaneStressMaterial.o \
+             PlaneStrainMaterial.o \
              J2PlaneStress.o \
              J2Plasticity.o \
              J2AxiSymm.o \
