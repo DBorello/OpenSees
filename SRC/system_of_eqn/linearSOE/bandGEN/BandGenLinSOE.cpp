@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2009-05-11 20:57:11 $
+// $Revision: 1.6 $
+// $Date: 2009-05-20 17:30:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandGEN/BandGenLinSOE.cpp,v $
                                                                         
                                                                         
@@ -34,7 +34,6 @@
 #include <Graph.h>
 #include <Vertex.h>
 #include <VertexIter.h>
-#include <f2c.h>
 #include <math.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>

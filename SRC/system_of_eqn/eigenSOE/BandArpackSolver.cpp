@@ -6,7 +6,6 @@
 
 #include <BandArpackSolver.h>
 #include <BandArpackSOE.h>
-#include <f2c.h>
 #include <math.h>
 #include <stdio.h>
 #include <AnalysisModel.h>

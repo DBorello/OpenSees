@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2009-05-11 20:58:23 $
+// $Revision: 1.4 $
+// $Date: 2009-05-20 17:30:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/profileSPD/DistributedProfileSPDLinSOE.cpp,v $
                                                                         
 // Written: fmk 
@@ -33,7 +33,6 @@
 #include <Graph.h>
 #include <Vertex.h>
 #include <VertexIter.h>
-#include <f2c.h>
 #include <math.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>

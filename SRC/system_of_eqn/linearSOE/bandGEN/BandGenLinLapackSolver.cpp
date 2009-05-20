@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-04-02 22:02:51 $
+// $Revision: 1.4 $
+// $Date: 2009-05-20 17:30:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandGEN/BandGenLinLapackSolver.cpp,v $
                                                                         
                                                                         
@@ -37,7 +37,6 @@
 
 #include <BandGenLinLapackSolver.h>
 #include <BandGenLinSOE.h>
-#include <f2c.h>
 #include <math.h>
 
 

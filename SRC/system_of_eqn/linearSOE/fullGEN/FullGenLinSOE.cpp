@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-02-28 19:19:50 $
+// $Revision: 1.5 $
+// $Date: 2009-05-20 17:30:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/fullGEN/FullGenLinSOE.cpp,v $
                                                                         
                                                                         
@@ -38,7 +38,6 @@
 #include <Graph.h>
 #include <Vertex.h>
 #include <VertexIter.h>
-#include <f2c.h>
 #include <math.h>
 
 

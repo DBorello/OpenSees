@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2007-11-29 19:31:09 $
+// $Revision: 1.2 $
+// $Date: 2009-05-20 17:31:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/FullGenEigenSOE.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -35,7 +35,6 @@
 #include <Graph.h>
 #include <Vertex.h>
 #include <VertexIter.h>
-#include <f2c.h>
 #include <math.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>

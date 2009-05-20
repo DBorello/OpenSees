@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:02:03 $
+// $Revision: 1.3 $
+// $Date: 2009-05-20 17:30:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinDirectSkypackSolver.cpp,v $
                                                                         
                                                                         
-// File: ~/system_of_eqn/linearSOE/ProfileSPD/ProfileSPDLinDirectSkypackSolver.C
-//
 // Written: fmk 
 // Created: 03/98
-// Revision: A
+
 //
 // Description: This file contains the class definition for 
 // ProfileSPDLinDirectSkypackSolver. ProfileSPDLinDirectSkypackSolver 
@@ -39,7 +37,6 @@
 
 #include <ProfileSPDLinDirectSkypackSolver.h>
 #include <ProfileSPDLinSOE.h>
-#include <f2c.h>
 #include <math.h>
 
 #include <math.h>

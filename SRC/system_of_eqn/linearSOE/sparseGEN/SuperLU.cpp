@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2005-04-01 19:56:12 $
+// $Revision: 1.7 $
+// $Date: 2009-05-20 17:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/SuperLU.cpp,v $
                                                                         
                                                                         
@@ -34,7 +34,6 @@
 
 #include <SuperLU.h>
 #include <SparseGenColLinSOE.h>
-#include <f2c.h>
 #include <math.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>

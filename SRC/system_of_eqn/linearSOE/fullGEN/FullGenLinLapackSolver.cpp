@@ -18,16 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-04-02 22:02:52 $
+// $Revision: 1.4 $
+// $Date: 2009-05-20 17:30:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/fullGEN/FullGenLinLapackSolver.cpp,v $
                                                                         
                                                                         
-// File: ~/system_of_eqn/linearSOE/FullGEN/FullGenLinLapackSolver.h
-//
 // Written: fmk 
 // Created: Tue Sep 26 16:27:47: 1996
-// Revision: A
 //
 // Description: This file contains the class definition for 
 // FullGenLinLapackSolver. It solves the FullGenLinSOE object by calling
@@ -37,7 +34,6 @@
 
 #include <FullGenLinLapackSolver.h>
 #include <FullGenLinSOE.h>
-#include <f2c.h>
 #include <math.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>

@@ -18,16 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-04-02 22:02:53 $
+// $Revision: 1.4 $
+// $Date: 2009-05-20 17:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSolver.cpp,v $
                                                                         
                                                                         
-// File: ~/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSolver.C
-//
 // Written: fmk 
 // Created: 11/98
-// Revision: A
 //
 // Description: This file contains the class definition for 
 // UmfpackGenLinSolver. It solves the UmfpackGenLinSOEobject by calling

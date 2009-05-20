@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-12-07 00:17:52 $
+// $Revision: 1.3 $
+// $Date: 2009-05-20 17:30:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/fullGEN/FullGenLinSOE.h,v $
                                                                         
                                                                         
@@ -48,6 +48,7 @@ class FullGenLinSOE : public LinearSOE
   public:
     FullGenLinSOE(FullGenLinSolver &theSolver);        
     FullGenLinSOE(int N, FullGenLinSolver &theSolver);        
+    FullGenLinSOE();
 
     ~FullGenLinSOE();
 

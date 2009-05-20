@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2009-05-11 21:01:10 $
+// $Revision: 1.9 $
+// $Date: 2009-05-20 17:31:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/SymBandEigenSolver.cpp,v $
 
 // Written: MHS
@@ -30,7 +30,6 @@
 // of a symmetric banded matrix using the LAPACK subroutine dsbevx.
 
 #include <SymBandEigenSolver.h>
-#include <f2c.h>
 #include <math.h>
 #include <stdio.h>
 #include <AnalysisModel.h>

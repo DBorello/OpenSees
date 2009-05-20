@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2009-05-11 20:55:31 $
+// $Revision: 1.5 $
+// $Date: 2009-05-20 17:30:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandSPD/BandSPDLinLapackSolver.cpp,v $
                                                                         
                                                                         
@@ -32,7 +32,7 @@
 
 #include <BandSPDLinLapackSolver.h>
 #include <BandSPDLinSOE.h>
-#include <f2c.h>
+//#include <f2c.h>
 #include <math.h>
 
 
