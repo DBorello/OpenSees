@@ -25,8 +25,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.40 $
-// $Date: 2006-08-11 21:22:38 $
+// $Revision: 1.41 $
+// $Date: 2009-05-20 17:28:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
 
 
@@ -46,6 +46,7 @@
 #include <MultiaxialCyclicPlasticity.h> //Gang Wang
 
 #include <PlaneStressMaterial.h>
+#include <PlaneStrainMaterial.h>  // Antonios Vytiniotis:
 #include <PlateFiberMaterial.h>
 #include <BeamFiberMaterial.h>
 
@@ -882,9 +883,42 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
  	theMaterial = new PlaneStressMaterial( tag, *threeDMaterial );
      }
 
-
+    // PlaneStrainMaterial
+     else if (strcmp(argv[1],"PlaneStrainMaterial") == 0 ||
+	      strcmp(argv[1],"PlaneStrain") == 0) {
+       if (argc < 4) {
+	 opserr << "WARNING insufficient arguments\n";
+	 printCommand(argc,argv);
+	 opserr << "Want: nDMaterial PlaneStrain tag? matTag?" << endln;
+	 return TCL_ERROR;
+       }
+       
+       int tag, matTag;
+       
+       if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	 opserr << "WARNING invalid nDMaterial PlaneStrain tag" << endln;
+	 return TCL_ERROR;
+       }
+       
+       if (Tcl_GetInt (interp, argv[3], &matTag) != TCL_OK) {
+	 opserr << "WARNING invalid matTag" << endln;
+	 opserr << "PlaneStrain: " << matTag << endln;
+	 return TCL_ERROR;
+       }
+       
+       NDMaterial *threeDMaterial = theTclBuilder->getNDMaterial(matTag);
+       if (threeDMaterial == 0) {
+	 opserr << "WARNING nD material does not exist\n";
+	 opserr << "nD material: " << matTag;
+	 opserr << "\nPlaneStrain nDMaterial: " << tag << endln;
+	 return TCL_ERROR;
+       }
+       
+       theMaterial = new PlaneStrainMaterial( tag, *threeDMaterial );
+     }
+    
      else if (strcmp(argv[1],"PlateFiberMaterial") == 0 ||
- 	     strcmp(argv[1],"PlateFiber") == 0) {
+	      strcmp(argv[1],"PlateFiber") == 0) {
  	if (argc < 4) {
  	    opserr << "WARNING insufficient arguments\n";
  	    printCommand(argc,argv);
