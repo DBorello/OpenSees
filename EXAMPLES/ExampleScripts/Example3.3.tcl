@@ -169,9 +169,9 @@ if {$ok == 0} {
 }
 
 # Perform an eigenvalue analysis
-puts "eigen values at start of transient: [eigen 1]"
-puts "eigen values at start of transient: [eigen 2]"
-puts "eigen values at start of transient: [eigen 2]"
+puts "eigen values at start of transient: [eigen -Umfpack 1]"
+puts "eigen values at start of transient: [eigen -Umfpack 2]"
+puts "eigen values at start of transient: [eigen -Umfpack 2]"
 
 # Print state of node 3
 print node 3
