@@ -4,10 +4,6 @@ OBJS       = EigenSOE.o \
 	EigenSolver.o \
 	ArpackSOE.o \
 	ArpackSolver.o \
-	BandArpackSOE.o  \
-	BandArpackSolver.o \
-	SymArpackSOE.o \
-	SymArpackSolver.o \
 	SymBandEigenSOE.o \
 	SymBandEigenSolver.o \
 	FullGenEigenSOE.o \
