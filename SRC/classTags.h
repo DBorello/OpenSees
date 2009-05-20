@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.114 $
-// $Date: 2009-05-11 22:02:36 $
+// $Revision: 1.115 $
+// $Date: 2009-05-20 18:58:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -259,6 +259,7 @@
 #define ND_TAG_FeapMaterial03                 1003
 #define ND_TAG_PlaneStressMaterial          2000
 #define ND_TAG_PlateFiberMaterial          2001
+#define ND_TAG_PlaneStrainMaterial          2003
 #define ND_TAG_BeamFiberMaterial		2002
 #define ND_TAG_CompressibleFluid		3001
 #define ND_TAG_GeneralizedPlasticity 3002
