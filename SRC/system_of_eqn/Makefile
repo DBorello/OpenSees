@@ -2,7 +2,7 @@
 
 include ../../Makefile.def
 
-OBJS       = SystemOfEqn.o Solver.o
+OBJS       = 
 
 all: $(OBJS)
 	@$(CD) $(FE)/system_of_eqn/linearSOE; $(MAKE);
