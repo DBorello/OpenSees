@@ -584,6 +584,7 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 
 MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/UniaxialMaterial.o \
+	$(FE)/material/uniaxial/UniaxialJ2Plasticity.o \
 	$(FE)/material/uniaxial/WrapperUniaxialMaterial.o \
 	$(FE)/material/uniaxial/ElasticMaterial.o \
 	$(FE)/material/uniaxial/Elastic2Material.o \
