@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2008-11-12 22:53:13 $
+// $Revision: 1.20 $
+// $Date: 2009-05-29 19:10:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.cpp,v $
                                                                         
                                                                         
@@ -147,9 +147,28 @@ UniaxialMaterial::setResponse(const char **argv, int argc,
 	   (strcmp(argv[0],"stressANDstrainANDtangent") == 0)) {
     theOutput.tag("ResponseType", "sig11");
     theOutput.tag("ResponseType", "eps11");
-	theOutput.tag("ResponseType", "C11");
+    theOutput.tag("ResponseType", "C11");
     theResponse =  new MaterialResponse(this, 5, Vector(3));
   }
+
+  // stress sensitivity for local sensitivity recorder purpose.  Quan 2009
+  // limit:  no more than 10000 random variables/sensitivity parameters
+  else if (strcmp(argv[0],"stressSensitivity") == 0) {
+    char *token = strtok((char *) argv[0], " ");
+    if (token != NULL) token = strtok(NULL, " ");
+    int gradient = atoi(token);
+    theOutput.tag("ResponseType", "sigsens11");
+    theResponse =  new MaterialResponse(this, gradient+10000, this->getStress());
+  }
+  // strain sensivitiy
+  else if (strcmp(argv[0],"strainSensitivity") == 0) {
+    char *token = strtok((char *) argv[0], " ");
+    if (token != NULL) token = strtok(NULL, " ");
+    int gradient = atoi(token);
+    theOutput.tag("ResponseType", "epssens11");
+    theResponse =  new MaterialResponse(this, gradient+20000, this->getStrain());
+  }
+
 
   theOutput.endTag();
   return theResponse;
@@ -161,7 +180,18 @@ UniaxialMaterial::getResponse(int responseID, Information &matInfo)
 {
   static Vector stressStrain(2);
   static Vector stressStrainTangent(3);
-  // each subclass must implement its own stuff    
+  // each subclass must implement its own stuff   
+
+  // added for sensitivity recorder. Quan 2009
+  if ((responseID>10000)&&(responseID<20000)){
+      matInfo.setDouble(this->getStressSensitivity(responseID-10000,false));
+      return 0;
+  }
+  else if (responseID>20000){
+      matInfo.setDouble(this->getStrainSensitivity(responseID-20000));
+      return 0;
+  }
+
   switch (responseID) {
     case 1:
       matInfo.setDouble(this->getStress());
