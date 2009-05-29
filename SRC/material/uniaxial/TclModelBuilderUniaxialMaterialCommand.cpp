@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.62 $
-// $Date: 2009-03-27 19:19:20 $
+// $Revision: 1.63 $
+// $Date: 2009-05-29 19:11:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -78,7 +78,7 @@
 #include <Vector.h>
 #include <string.h>
 
-
+#include <UniaxialJ2Plasticity.h>   // Quan 
 #ifdef _LIMITSTATEMATERIAL
 extern UniaxialMaterial *
 Tcl_AddLimitStateMaterial(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
@@ -3063,6 +3063,53 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
       theMaterial = new SmoothPSConcrete( tag, fc, fu, Ec, eps0, epsu, eta);       
     }
     
+	    // ----- 1D J2 Plasticity ----
+	    else if (strcmp(argv[1],"UniaxialJ2Plasticity") == 0) {
+      if (argc < 7) {
+		opserr << "WARNING invalid number of arguments\n";
+		printCommand(argc,argv);
+		opserr << "Want: uniaxialMaterial UniaxialJ2Plasticity tag? E? sigmaY? Hkin? <Hiso?>" << endln;
+		return TCL_ERROR;
+      }    
+      
+      int tag;
+      double E, sigmaY, Hkin, Hiso;
+	  Hiso =0.0;
+      
+	  if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+		opserr << "WARNING invalid uniaxialMaterial UniaxialJ2Plasticity tag" << endln;
+		return TCL_ERROR;		
+	  }
+	      
+	  if (Tcl_GetDouble(interp, argv[3], &E) != TCL_OK) {
+			opserr << "WARNING invalid E\n";
+			opserr << "uniaxiaMaterial UniaxialJ2Plasticity: " << tag << endln;
+			return TCL_ERROR;	
+	  }
+	      
+	   if (Tcl_GetDouble(interp, argv[4], &sigmaY) != TCL_OK) {
+			opserr << "WARNING invalid sigmaY\n";
+			opserr << "uniaxiaMaterial UniaxialJ2Plasticity: " << tag << endln;
+			return TCL_ERROR;	
+		  }
+	      
+		  if (Tcl_GetDouble(interp, argv[5], &Hkin) != TCL_OK) {
+			opserr << "WARNING invalid Hkin\n";
+			opserr << "uniaxiaMaterial SmoothPSConcrete: " << tag << endln;
+			return TCL_ERROR;	
+			}
+	      
+		  if (argc >= 7) 
+			if (Tcl_GetDouble(interp,argv[6], &Hiso) != TCL_OK) {
+			  opserr << "WARNING invalid Hiso\n";
+			  opserr << "uniaxialMaterial UniaxialJ2Plasticity: " << tag << endln;
+			  return TCL_ERROR;
+			}
+	      
+		       
+      // Parsing was successful, allocate the material
+      theMaterial = new UniaxialJ2Plasticity(tag, E, sigmaY, Hkin, Hiso);       
+    }
     else {
       // Fedeas
       theMaterial = TclModelBuilder_addFedeasMaterial(clientData, interp, argc, argv, theTclBuilder);
