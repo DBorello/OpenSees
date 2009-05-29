@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.115 $
-// $Date: 2009-05-20 18:58:29 $
+// $Revision: 1.116 $
+// $Date: 2009-05-29 19:13:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -146,6 +146,9 @@
 #define MAT_TAG_HyperbolicGapMaterial 38
 #define MAT_TAG_ImpactMaterial 39
 #define MAT_TAG_WrapperUniaxialMaterial 101
+
+#define MAT_TAG_UniaxialJ2Plasticity 1093489700
+
 
 //B Jeremic
 #define MAT_TAG_PySimple1        205
