@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.146 $
-// $Date: 2009-05-19 22:32:39 $
+// $Revision: 1.147 $
+// $Date: 2009-05-29 19:12:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -988,6 +988,23 @@ sensitivityAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Ch
 	  return TCL_ERROR;
 	}
 	
+	// ---- by Quan 2009 for recover the previous framework ---
+
+	if (theSensitivityAlgorithm->shouldComputeAtEachStep()) {
+	
+		if (theStaticAnalysis !=0)
+			theStaticAnalysis->setSensitivityAlgorithm(theSensitivityAlgorithm);
+		else if (theTransientAnalysis !=0)
+			theTransientAnalysis->setSensitivityAlgorithm(theSensitivityAlgorithm);
+		else if (theVariableTimeStepTransientAnalysis !=0)
+			theVariableTimeStepTransientAnalysis->setSensitivityAlgorithm(theSensitivityAlgorithm);
+		else {
+			// do nothing		
+		}
+	
+	
+	}
+
 	return TCL_OK;
 }
 
