@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2008-09-23 23:59:48 $
+// $Revision: 1.3 $
+// $Date: 2009-06-02 21:10:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/adapter/Actuator.h,v $
 
 #ifndef Actuator_h
@@ -136,10 +136,10 @@ private:
     double *sData;          // send data array
     Vector *sendData;       // send vector
     
-    Vector *targDisp;   // target displacements in basic system
-    Vector *targForce;  // target forces in basic system
-    Vector *measDisp;   // measured displacements in basic system
-    Vector *measForce;  // measured forces in basic system
+    Vector *ctrlDisp;   // ctrl displacements in basic system
+    Vector *ctrlForce;  // ctrl forces in basic system
+    Vector *daqDisp;    // daq displacements in basic system
+    Vector *daqForce;   // daq forces in basic system
     
     Node *theNodes[2];
     

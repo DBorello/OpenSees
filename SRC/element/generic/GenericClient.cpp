@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2008-09-23 23:11:51 $
+// $Revision: 1.6 $
+// $Date: 2009-06-02 21:09:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/generic/GenericClient.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -65,8 +65,8 @@ GenericClient::GenericClient(int tag, ID nodes, ID *dof,
     numExternalNodes(0), numDOF(0), numBasicDOF(0),
     port(_port), machineInetAddr(0), ssl(_ssl), dataSize(datasize),
     theChannel(0), sData(0), sendData(0), rData(0), recvData(0),
-    db(0), vb(0), ab(0), t(0), qMeas(0), rMatrix(0),
-    dbTarg(1), vbTarg(1), abTarg(1), dbPast(1), tPast(0.0),
+    db(0), vb(0), ab(0), t(0), qDaq(0), rMatrix(0),
+    dbCtrl(1), vbCtrl(1), abCtrl(1), dbPast(1), tPast(0.0),
     initStiffFlag(false), massFlag(false)
 {    
     // initialize nodes
@@ -102,12 +102,12 @@ GenericClient::GenericClient(int tag, ID nodes, ID *dof,
     // set the vector sizes and zero them
     basicDOF.resize(numBasicDOF);
     basicDOF.Zero();
-    dbTarg.resize(numBasicDOF);
-    dbTarg.Zero();
-    vbTarg.resize(numBasicDOF);
-    vbTarg.Zero();
-    abTarg.resize(numBasicDOF);
-    abTarg.Zero();
+    dbCtrl.resize(numBasicDOF);
+    dbCtrl.Zero();
+    vbCtrl.resize(numBasicDOF);
+    vbCtrl.Zero();
+    abCtrl.resize(numBasicDOF);
+    abCtrl.Zero();
     dbPast.resize(numBasicDOF);
     dbPast.Zero();
 }
@@ -121,8 +121,8 @@ GenericClient::GenericClient()
     numExternalNodes(0), numDOF(0), numBasicDOF(0),
     port(0), machineInetAddr(0), ssl(0), dataSize(0),
     theChannel(0), sData(0), sendData(0), rData(0), recvData(0),
-    db(0), vb(0), ab(0), t(0), qMeas(0), rMatrix(0),
-    dbTarg(1), vbTarg(1), abTarg(1), dbPast(1), tPast(0.0),
+    db(0), vb(0), ab(0), t(0), qDaq(0), rMatrix(0),
+    dbCtrl(1), vbCtrl(1), abCtrl(1), dbPast(1), tPast(0.0),
     initStiffFlag(false), massFlag(false)
 {    
     // initialize variables
@@ -158,8 +158,8 @@ GenericClient::~GenericClient()
     if (t != 0)
         delete t;
     
-    if (qMeas != 0)
-        delete qMeas;
+    if (qDaq != 0)
+        delete qDaq;
     if (rMatrix != 0)
         delete rMatrix;
     
@@ -448,18 +448,18 @@ const Vector& GenericClient::getResistingForce()
     // zero the residual
     theVector.Zero();
     
-    // get measured resisting forces
+    // get daq resisting forces
     sData[0] = RemoteTest_getForce;
     theChannel->sendVector(0, 0, *sendData, 0);
     theChannel->recvVector(0, 0, *recvData, 0);
     
-    // save corresponding target response for recorder
-    dbTarg = (*db);
-    vbTarg = (*vb);
-    abTarg = (*ab);
+    // save corresponding ctrl response for recorder
+    dbCtrl = (*db);
+    vbCtrl = (*vb);
+    abCtrl = (*ab);
     
     // determine resisting forces in global system
-    theVector.Assemble(*qMeas, basicDOF);
+    theVector.Assemble(*qDaq, basicDOF);
     
     // subtract external load
     theVector.addVector(1.0, theLoad, -1.0);
@@ -501,7 +501,7 @@ const Vector& GenericClient::getResistingForceIncInertia()
     theChannel->sendVector(0, 0, *sendData, 0);
     theChannel->recvVector(0, 0, *recvData, 0);
     
-    return *tMeas;
+    return *tDaq;
 }
 
 
@@ -511,7 +511,7 @@ const Vector& GenericClient::getBasicDisp()
     theChannel->sendVector(0, 0, *sendData, 0);
     theChannel->recvVector(0, 0, *recvData, 0);
     
-    return *dbMeas;
+    return *dbDaq;
 }
 
 
@@ -521,7 +521,7 @@ const Vector& GenericClient::getBasicVel()
     theChannel->sendVector(0, 0, *sendData, 0);
     theChannel->recvVector(0, 0, *recvData, 0);
     
-    return *vbMeas;
+    return *vbDaq;
 }
 
 
@@ -531,7 +531,7 @@ const Vector& GenericClient::getBasicAccel()
     theChannel->sendVector(0, 0, *sendData, 0);
     theChannel->recvVector(0, 0, *recvData, 0);
     
-    return *abMeas;
+    return *abDaq;
 }*/
 
 
@@ -618,12 +618,12 @@ int GenericClient::recvSelf(int commitTag, Channel &rChannel,
     // set the vector sizes and zero them
     basicDOF.resize(numBasicDOF);
     basicDOF.Zero();
-    dbTarg.resize(numBasicDOF);
-    dbTarg.Zero();
-    vbTarg.resize(numBasicDOF);
-    vbTarg.Zero();
-    abTarg.resize(numBasicDOF);
-    abTarg.Zero();
+    dbCtrl.resize(numBasicDOF);
+    dbCtrl.Zero();
+    vbCtrl.resize(numBasicDOF);
+    vbCtrl.Zero();
+    abCtrl.resize(numBasicDOF);
+    abCtrl.Zero();
     dbPast.resize(numBasicDOF);
     dbPast.Zero();
     
@@ -695,8 +695,10 @@ Response* GenericClient::setResponse(const char **argv, int argc,
     }
     
     // global forces
-    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 ||
-        strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0)
+    if (strcmp(argv[0],"force") == 0 ||
+        strcmp(argv[0],"forces") == 0 ||
+        strcmp(argv[0],"globalForce") == 0 ||
+        strcmp(argv[0],"globalForces") == 0)
     {
          for (i=0; i<numDOF; i++)  {
             sprintf(outputData,"P%d",i+1);
@@ -704,8 +706,10 @@ Response* GenericClient::setResponse(const char **argv, int argc,
         }
         theResponse = new ElementResponse(this, 1, theVector);
     }
+    
     // local forces
-    else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
+    else if (strcmp(argv[0],"localForce") == 0 ||
+        strcmp(argv[0],"localForces") == 0)
     {
         for (i=0; i<numDOF; i++)  {
             sprintf(outputData,"p%d",i+1);
@@ -713,8 +717,12 @@ Response* GenericClient::setResponse(const char **argv, int argc,
         }
         theResponse = new ElementResponse(this, 2, theVector);
     }
+    
     // forces in basic system
-    else if (strcmp(argv[0],"basicForce") == 0 || strcmp(argv[0],"basicForces") == 0)
+    else if (strcmp(argv[0],"basicForce") == 0 ||
+        strcmp(argv[0],"basicForces") == 0 ||
+        strcmp(argv[0],"daqForce") == 0 ||
+        strcmp(argv[0],"daqForces") == 0)
     {
         for (i=0; i<numBasicDOF; i++)  {
             sprintf(outputData,"q%d",i+1);
@@ -722,10 +730,17 @@ Response* GenericClient::setResponse(const char **argv, int argc,
         }
         theResponse = new ElementResponse(this, 3, Vector(numBasicDOF));
     }
-    // target basic displacements
-    else if (strcmp(argv[0],"deformation") == 0 || strcmp(argv[0],"deformations") == 0 || 
-        strcmp(argv[0],"basicDeformation") == 0 || strcmp(argv[0],"basicDeformations") == 0 ||
-        strcmp(argv[0],"targetDisplacement") == 0 || strcmp(argv[0],"targetDisplacements") == 0)
+    
+    // ctrl basic displacements
+    else if (strcmp(argv[0],"defo") == 0 ||
+        strcmp(argv[0],"deformation") == 0 ||
+        strcmp(argv[0],"deformations") == 0 ||
+        strcmp(argv[0],"basicDefo") == 0 ||
+        strcmp(argv[0],"basicDeformation") == 0 ||
+        strcmp(argv[0],"basicDeformations") == 0 ||
+        strcmp(argv[0],"ctrlDisp") == 0 ||
+        strcmp(argv[0],"ctrlDisplacement") == 0 ||
+        strcmp(argv[0],"ctrlDisplacements") == 0)
     {
         for (i=0; i<numBasicDOF; i++)  {
             sprintf(outputData,"db%d",i+1);
@@ -733,9 +748,11 @@ Response* GenericClient::setResponse(const char **argv, int argc,
         }
         theResponse = new ElementResponse(this, 4, Vector(numBasicDOF));
     }
-    // target basic velocities
-    else if (strcmp(argv[0],"targetVelocity") == 0 ||
-        strcmp(argv[0],"targetVelocities") == 0)
+    
+    // ctrl basic velocities
+    else if (strcmp(argv[0],"ctrlVel") == 0 ||
+        strcmp(argv[0],"ctrlVelocity") == 0 ||
+        strcmp(argv[0],"ctrlVelocities") == 0)
     {
         for (i=0; i<numBasicDOF; i++)  {
             sprintf(outputData,"vb%d",i+1);
@@ -743,9 +760,11 @@ Response* GenericClient::setResponse(const char **argv, int argc,
         }
         theResponse = new ElementResponse(this, 5, Vector(numBasicDOF));
     }
-    // target basic accelerations
-    else if (strcmp(argv[0],"targetAcceleration") == 0 ||
-        strcmp(argv[0],"targetAccelerations") == 0)
+    
+    // ctrl basic accelerations
+    else if (strcmp(argv[0],"ctrlAccel") == 0 ||
+        strcmp(argv[0],"ctrlAcceleration") == 0 ||
+        strcmp(argv[0],"ctrlAccelerations") == 0)
     {
         for (i=0; i<numBasicDOF; i++)  {
             sprintf(outputData,"ab%d",i+1);
@@ -753,9 +772,11 @@ Response* GenericClient::setResponse(const char **argv, int argc,
         }
         theResponse = new ElementResponse(this, 6, Vector(numBasicDOF));
     }
-    /* measured basic displacements
-    else if (strcmp(argv[0],"measuredDisplacement") == 0 || 
-        strcmp(argv[0],"measuredDisplacements") == 0)
+    
+    /* daq basic displacements
+    else if (strcmp(argv[0],"daqDisp") == 0 ||
+        strcmp(argv[0],"daqDisplacement") == 0 ||
+        strcmp(argv[0],"daqDisplacements") == 0)
     {
         for (i=0; i<numBasicDOF; i++)  {
             sprintf(outputData,"dbm%d",i+1);
@@ -763,9 +784,11 @@ Response* GenericClient::setResponse(const char **argv, int argc,
         }
         theResponse = new ElementResponse(this, 7, Vector(numBasicDOF));
     }
-    // measured basic velocities
-    else if (strcmp(argv[0],"measuredVelocity") == 0 || 
-        strcmp(argv[0],"measuredVelocities") == 0)
+    
+    // daq basic velocities
+    else if (strcmp(argv[0],"daqVel") == 0 ||
+        strcmp(argv[0],"daqVelocity") == 0 ||
+        strcmp(argv[0],"daqVelocities") == 0)
     {
         for (i=0; i<numBasicDOF; i++)  {
             sprintf(outputData,"vbm%d",i+1);
@@ -773,9 +796,11 @@ Response* GenericClient::setResponse(const char **argv, int argc,
         }
         theResponse = new ElementResponse(this, 8, Vector(numBasicDOF));
     }
-    // measured basic accelerations
-    else if (strcmp(argv[0],"measuredAcceleration") == 0 || 
-        strcmp(argv[0],"measuredAccelerations") == 0)
+    
+    // daq basic accelerations
+    else if (strcmp(argv[0],"daqAccel") == 0 ||
+        strcmp(argv[0],"daqAcceleration") == 0 ||
+        strcmp(argv[0],"daqAccelerations") == 0)
     {
         for (i=0; i<numBasicDOF; i++)  {
             sprintf(outputData,"abm%d",i+1);
@@ -800,24 +825,24 @@ int GenericClient::getResponse(int responseID, Information &eleInfo)
         return eleInfo.setVector(this->getResistingForce());
         
     case 3:  // basic forces
-        return eleInfo.setVector(*qMeas);
+        return eleInfo.setVector(*qDaq);
         
-    case 4:  // target basic displacements
-        return eleInfo.setVector(dbTarg);
+    case 4:  // ctrl basic displacements
+        return eleInfo.setVector(dbCtrl);
         
-    case 5:  // target basic velocities
-        return eleInfo.setVector(vbTarg);
+    case 5:  // ctrl basic velocities
+        return eleInfo.setVector(vbCtrl);
         
-    case 6:  // target basic accelerations
-        return eleInfo.setVector(abTarg);
+    case 6:  // ctrl basic accelerations
+        return eleInfo.setVector(abCtrl);
         
-    /*case 7:  // measured basic displacements
+    /*case 7:  // daq basic displacements
         return eleInfo.setVector(this->getBasicDisp());
         
-    case 8:  // measured basic velocities
+    case 8:  // daq basic velocities
         return eleInfo.setVector(this->getBasicVel());
         
-    case 9:  // measured basic accelerations
+    case 9:  // daq basic accelerations
         return eleInfo.setVector(this->getBasicAccel());*/
         
     default:
@@ -888,7 +913,7 @@ int GenericClient::setupConnection()
     id = 0;
     rData = new double [dataSize];
     recvData = new Vector(rData, dataSize);
-    qMeas = new Vector(&rData[id], numBasicDOF);
+    qDaq = new Vector(&rData[id], numBasicDOF);
     recvData->Zero();
     
     // allocate memory for the receive matrix

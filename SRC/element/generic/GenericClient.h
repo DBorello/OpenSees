@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2008-09-23 23:11:51 $
+// $Revision: 1.6 $
+// $Date: 2009-06-02 21:09:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/generic/GenericClient.h,v $
 
 #ifndef GenericClient_h
@@ -71,7 +71,7 @@ public:
     
     // method to get class type
     const char *getClassType() const {return "GenericClient";};
-
+    
     // public methods to obtain information about dof & connectivity    
     int getNumExternalNodes() const;
     const ID &getExternalNodes();
@@ -132,7 +132,7 @@ private:
     char *machineInetAddr;      // ipAddress
     int ssl;                    // secure socket layer flag
     int dataSize;               // data size of send/recv vectors
-
+    
     static Matrix theMatrix;        // objects matrix
     static Matrix theInitStiff;     // initial stiffness matrix
     static Matrix theMass;          // mass matrix
@@ -150,12 +150,12 @@ private:
     Vector *ab;         // trial accelerations in basic system
     Vector *t;          // trial time
     
-    Vector *qMeas;      // measured forces in basic system
+    Vector *qDaq;       // daq forces in basic system
     Matrix *rMatrix;    // receive matrix
     
-    Vector dbTarg;      // target displacements in basic system
-    Vector vbTarg;      // target velocities in basic system
-    Vector abTarg;      // target accelerations in basic system
+    Vector dbCtrl;      // ctrl displacements in basic system
+    Vector vbCtrl;      // ctrl velocities in basic system
+    Vector abCtrl;      // ctrl accelerations in basic system
     
     Vector dbPast;      // past displacements in basic system
     double tPast;       // past time

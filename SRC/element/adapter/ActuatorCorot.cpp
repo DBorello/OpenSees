@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2009-03-25 22:50:10 $
+// $Revision: 1.4 $
+// $Date: 2009-06-02 21:10:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/adapter/ActuatorCorot.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -63,7 +63,7 @@ ActuatorCorot::ActuatorCorot(int tag, int dim, int Nd1, int Nd2,
     connectedExternalNodes(2), EA(ea), ipPort(ipport), rho(r), L(0.0), Ln(0.0),
     tPast(0.0), theMatrix(0), theVector(0), theLoad(0), R(3,3), db(1), q(1),
     theChannel(0), rData(0), recvData(0), sData(0), sendData(0),
-    targDisp(0), targForce(0), measDisp(0), measForce(0)
+    ctrlDisp(0), ctrlForce(0), daqDisp(0), daqForce(0)
 {    
     // ensure the connectedExternalNode ID is of correct size & set values
     if (connectedExternalNodes.Size() != 2)  {
@@ -88,7 +88,7 @@ ActuatorCorot::ActuatorCorot()
     connectedExternalNodes(2), EA(0.0), ipPort(0), rho(0.0), L(0.0), Ln(0.0),
     tPast(0.0), theMatrix(0), theVector(0), theLoad(0), R(3,3), db(1), q(1),
     theChannel(0), rData(0), recvData(0), sData(0), sendData(0),
-    targDisp(0), targForce(0), measDisp(0), measForce(0)
+    ctrlDisp(0), ctrlForce(0), daqDisp(0), daqForce(0)
 {    
     // ensure the connectedExternalNode ID is of correct size & set values
     if (connectedExternalNodes.Size() != 2)  {
@@ -111,14 +111,14 @@ ActuatorCorot::~ActuatorCorot()
     if (theLoad != 0)
         delete theLoad;
 
-    if (measDisp != 0)
-        delete measDisp;
-    if (measForce != 0)
-        delete measForce;
-    if (targDisp != 0)
-        delete targDisp;
-    if (targForce != 0)
-        delete targForce;
+    if (daqDisp != 0)
+        delete daqDisp;
+    if (daqForce != 0)
+        delete daqForce;
+    if (ctrlDisp != 0)
+        delete ctrlDisp;
+    if (ctrlForce != 0)
+        delete ctrlForce;
 
     if (sendData != 0)
         delete sendData;
@@ -400,7 +400,7 @@ const Matrix& ActuatorCorot::getTangentStiff(void)
             kl(i,j) = EAoverL3*d21[i]*d21[j];
     
     // geometric stiffness portion
-    q(0) = EA/L*(db(0) - (*targDisp)(0));
+    q(0) = EA/L*(db(0) - (*ctrlDisp)(0));
     double SL = q(0)/Ln;
     double SA = q(0)/(Ln*Ln*Ln);
     for (i=0; i<3; i++)  {
@@ -543,7 +543,7 @@ const Vector& ActuatorCorot::getResistingForce()
         
         // check if force request was received
         if (rData[0] == RemoteTest_getForce)  {
-            // send measured displacements and forces
+            // send daq displacements and forces
             theChannel->sendVector(0, 0, *sendData, 0);
             
             // receive new trial response
@@ -566,11 +566,11 @@ const Vector& ActuatorCorot::getResistingForce()
     }
     
     // get resisting force in basic system q = k*db + q0 = k*(db - db0)
-    q(0) = EA/L*(db(0) - (*targDisp)(0));
+    q(0) = EA/L*(db(0) - (*ctrlDisp)(0));
     
-    // assign measured values for feedback
-    (*measDisp)(0)  = db(0);
-    (*measForce)(0) = -q(0);
+    // assign daq values for feedback
+    (*daqDisp)(0)  = db(0);
+    (*daqForce)(0) = -q(0);
     
     // local resisting force
     static Vector ql(3);
@@ -708,18 +708,20 @@ Response* ActuatorCorot::setResponse(const char **argv, int argc,
     OPS_Stream &output)
 {
     Response *theResponse = 0;
-
+    
     output.tag("ElementOutput");
     output.attr("eleType","ActuatorCorot");
     output.attr("eleTag",this->getTag());
     output.attr("node1",connectedExternalNodes[0]);
     output.attr("node2",connectedExternalNodes[1]);
-
+    
     char outputData[10];
-
+    
     // global forces
-    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 ||
-        strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0)
+    if (strcmp(argv[0],"force") == 0 ||
+        strcmp(argv[0],"forces") == 0 ||
+        strcmp(argv[0],"globalForce") == 0 ||
+        strcmp(argv[0],"globalForces") == 0)
     {
         for (int i=0; i<numDOF; i++)  {
             sprintf(outputData,"P%d",i+1);
@@ -727,8 +729,10 @@ Response* ActuatorCorot::setResponse(const char **argv, int argc,
         }
         theResponse = new ElementResponse(this, 2, *theVector);
     }
+    
     // local forces
-    else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
+    else if (strcmp(argv[0],"localForce") == 0 ||
+        strcmp(argv[0],"localForces") == 0)
     {
         for (int i=0; i<numDOF; i++)  {
             sprintf(outputData,"p%d",i+1);
@@ -736,33 +740,46 @@ Response* ActuatorCorot::setResponse(const char **argv, int argc,
         }
         theResponse = new ElementResponse(this, 3, *theVector);
     }
+    
     // basic force
-    else if (strcmp(argv[0],"basicForce") == 0 || strcmp(argv[0],"basicForces") == 0)
+    else if (strcmp(argv[0],"basicForce") == 0 ||
+        strcmp(argv[0],"basicForces") == 0 ||
+        strcmp(argv[0],"daqForce") == 0 ||
+        strcmp(argv[0],"daqForces") == 0)
     {
         output.tag("ResponseType","q1");
-
+        
         theResponse = new ElementResponse(this, 4, Vector(1));
     }
-    // target basic displacement
-    else if (strcmp(argv[0],"deformation") == 0 || strcmp(argv[0],"deformations") == 0 || 
-        strcmp(argv[0],"basicDeformation") == 0 || strcmp(argv[0],"basicDeformations") == 0 ||
-        strcmp(argv[0],"targetDisplacement") == 0 || strcmp(argv[0],"targetDisplacements") == 0)
+    
+    // ctrl basic displacement
+    else if (strcmp(argv[0],"defo") == 0 ||
+        strcmp(argv[0],"deformation") == 0 ||
+        strcmp(argv[0],"deformations") == 0 ||
+        strcmp(argv[0],"basicDefo") == 0 ||
+        strcmp(argv[0],"basicDeformation") == 0 ||
+        strcmp(argv[0],"basicDeformations") == 0 ||
+        strcmp(argv[0],"ctrlDisp") == 0 ||
+        strcmp(argv[0],"ctrlDisplacement") == 0 ||
+        strcmp(argv[0],"ctrlDisplacements") == 0)
     {
         output.tag("ResponseType","db1");
-
+        
         theResponse = new ElementResponse(this, 5, Vector(1));
     }
-    // measured basic displacement
-    else if (strcmp(argv[0],"measuredDisplacement") == 0 || 
-        strcmp(argv[0],"measuredDisplacements") == 0)
+    
+    // daq basic displacement
+    else if (strcmp(argv[0],"daqDisp") == 0 ||
+        strcmp(argv[0],"daqDisplacement") == 0 ||
+        strcmp(argv[0],"daqDisplacements") == 0)
     {
         output.tag("ResponseType","dbm1");
-
+        
         theResponse = new ElementResponse(this, 6, Vector(1));
     }
-
+    
     output.endTag(); // ElementOutput
-
+    
     return theResponse;
 }
 
@@ -802,18 +819,18 @@ int ActuatorCorot::getResponse(int responseID, Information &eleInformation)
         }
         return 0;
         
-    case 5:  // target basic displacement
+    case 5:  // ctrl basic displacement
         if (eleInformation.theVector != 0)  {
-            *(eleInformation.theVector) = *targDisp;
+            *(eleInformation.theVector) = *ctrlDisp;
         }
         return 0;
-
-    case 6:  // measured basic displacement
+        
+    case 6:  // daq basic displacement
         if (eleInformation.theVector != 0)  {
-            *(eleInformation.theVector) = *measDisp;
+            *(eleInformation.theVector) = *daqDisp;
         }
         return 0;
-
+        
     default:
         return 0;
     }
@@ -854,11 +871,11 @@ int ActuatorCorot::setupConnection()
     rData = new double [sizes(10)];
     recvData = new Vector(rData, sizes(10));
     if (sizes(0) != 0)  {
-        targDisp = new Vector(&rData[id], sizes(0));
+        ctrlDisp = new Vector(&rData[id], sizes(0));
         id += sizes(0);
     }
     if (sizes(3) != 0)  {
-        targForce = new Vector(&rData[id], sizes(3));
+        ctrlForce = new Vector(&rData[id], sizes(3));
         id += sizes(3);
     }
     recvData->Zero();
@@ -868,11 +885,11 @@ int ActuatorCorot::setupConnection()
     sData = new double [sizes(10)];
     sendData = new Vector(sData, sizes(10));
     if (sizes(5) != 0)  {
-        measDisp = new Vector(&sData[id], sizes(5));
+        daqDisp = new Vector(&sData[id], sizes(5));
         id += sizes(5);
     }
     if (sizes(8) != 0)  {
-        measForce = new Vector(&sData[id], sizes(8));
+        daqForce = new Vector(&sData[id], sizes(8));
         id += sizes(8);
     }
     sendData->Zero();

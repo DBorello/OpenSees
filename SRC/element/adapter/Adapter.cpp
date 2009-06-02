@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2009-03-25 22:50:10 $
+// $Revision: 1.4 $
+// $Date: 2009-06-02 21:10:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/adapter/Adapter.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -59,7 +59,7 @@ Adapter::Adapter(int tag, ID nodes, ID *dof,
     numExternalNodes(0), numDOF(0), numBasicDOF(0),
     kb(_kb), ipPort(ipport), mb(0), tPast(0.0), db(1), q(1),
     theChannel(0), rData(0), recvData(0), sData(0), sendData(0),
-    targDisp(0), targForce(0), measDisp(0), measForce(0)
+    ctrlDisp(0), ctrlForce(0), daqDisp(0), daqForce(0)
 {
     // initialize nodes
     numExternalNodes = connectedExternalNodes.Size();
@@ -110,7 +110,7 @@ Adapter::Adapter()
     numExternalNodes(0), numDOF(0), numBasicDOF(0),
     kb(1,1), ipPort(0), mb(0), tPast(0.0), db(1), q(1),
     theChannel(0), rData(0), recvData(0), sData(0), sendData(0),
-    targDisp(0), targForce(0), measDisp(0), measForce(0)
+    ctrlDisp(0), ctrlForce(0), daqDisp(0), daqForce(0)
 {
     // initialize variables
     theNodes = 0;
@@ -130,14 +130,14 @@ Adapter::~Adapter()
     if (mb != 0)
         delete mb;
     
-    if (measDisp != 0)
-        delete measDisp;
-    if (measForce != 0)
-        delete measForce;
-    if (targDisp != 0)
-        delete targDisp;
-    if (targForce != 0)
-        delete targForce;
+    if (daqDisp != 0)
+        delete daqDisp;
+    if (daqForce != 0)
+        delete daqForce;
+    if (ctrlDisp != 0)
+        delete ctrlDisp;
+    if (ctrlForce != 0)
+        delete ctrlForce;
     
     if (sendData != 0)
         delete sendData;
@@ -374,7 +374,7 @@ const Vector& Adapter::getResistingForce()
         
         // check if force request was received
         if (rData[0] == RemoteTest_getForce)  {
-            // send measured displacements and forces
+            // send daq displacements and forces
             theChannel->sendVector(0, 0, *sendData, 0);
             
             // receive new trial response
@@ -397,11 +397,11 @@ const Vector& Adapter::getResistingForce()
     }
     
     // get resisting force in basic system q = k*db + q0 = k*(db - db0)
-    q = kb*(db - *targDisp);
+    q = kb*(db - *ctrlDisp);
     
-    // assign measured values for feedback
-    *measDisp  = db;
-    *measForce = -1.0*q;
+    // assign daq values for feedback
+    *daqDisp  = db;
+    *daqForce = -1.0*q;
     
     // zero the residual
     theVector.Zero();
@@ -588,10 +588,10 @@ Response* Adapter::setResponse(const char **argv, int argc,
     OPS_Stream &output)
 {
     Response *theResponse = 0;
-
+    
     int i;
     char outputData[10];
-
+    
     output.tag("ElementOutput");
     output.attr("eleType","Adapter");
     output.attr("eleTag",this->getTag());
@@ -599,10 +599,12 @@ Response* Adapter::setResponse(const char **argv, int argc,
         sprintf(outputData,"node%d",i+1);
         output.attr(outputData,connectedExternalNodes[i]);
     }
-
+    
     // global forces
-    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 ||
-        strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0)
+    if (strcmp(argv[0],"force") == 0 ||
+        strcmp(argv[0],"forces") == 0 ||
+        strcmp(argv[0],"globalForce") == 0 ||
+        strcmp(argv[0],"globalForces") == 0)
     {
          for (i=0; i<numDOF; i++)  {
             sprintf(outputData,"P%d",i+1);
@@ -610,8 +612,10 @@ Response* Adapter::setResponse(const char **argv, int argc,
         }
         theResponse = new ElementResponse(this, 2, theVector);
     }
+    
     // local forces
-    else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
+    else if (strcmp(argv[0],"localForce") == 0 ||
+        strcmp(argv[0],"localForces") == 0)
     {
         for (i=0; i<numDOF; i++)  {
             sprintf(outputData,"p%d",i+1);
@@ -619,8 +623,12 @@ Response* Adapter::setResponse(const char **argv, int argc,
         }
         theResponse = new ElementResponse(this, 3, theVector);
     }
+    
     // forces in basic system
-    else if (strcmp(argv[0],"basicForce") == 0 || strcmp(argv[0],"basicForces") == 0)
+    else if (strcmp(argv[0],"basicForce") == 0 ||
+        strcmp(argv[0],"basicForces") == 0 ||
+        strcmp(argv[0],"daqForce") == 0 ||
+        strcmp(argv[0],"daqForces") == 0)
     {
         for (i=0; i<numBasicDOF; i++)  {
             sprintf(outputData,"q%d",i+1);
@@ -628,10 +636,17 @@ Response* Adapter::setResponse(const char **argv, int argc,
         }
         theResponse = new ElementResponse(this, 4, Vector(numBasicDOF));
     }
-    // target basic displacements
-    else if (strcmp(argv[0],"deformation") == 0 || strcmp(argv[0],"deformations") == 0 || 
-        strcmp(argv[0],"basicDeformation") == 0 || strcmp(argv[0],"basicDeformations") == 0 ||
-        strcmp(argv[0],"targetDisplacement") == 0 || strcmp(argv[0],"targetDisplacements") == 0)
+    
+    // ctrl basic displacements
+    else if (strcmp(argv[0],"defo") == 0 ||
+        strcmp(argv[0],"deformation") == 0 ||
+        strcmp(argv[0],"deformations") == 0 ||
+        strcmp(argv[0],"basicDefo") == 0 ||
+        strcmp(argv[0],"basicDeformation") == 0 ||
+        strcmp(argv[0],"basicDeformations") == 0 ||
+        strcmp(argv[0],"ctrlDisp") == 0 ||
+        strcmp(argv[0],"ctrlDisplacement") == 0 ||
+        strcmp(argv[0],"ctrlDisplacements") == 0)
     {
         for (i=0; i<numBasicDOF; i++)  {
             sprintf(outputData,"db%d",i+1);
@@ -639,9 +654,11 @@ Response* Adapter::setResponse(const char **argv, int argc,
         }
         theResponse = new ElementResponse(this, 5, Vector(numBasicDOF));
     }
-    // measured basic displacements
-    else if (strcmp(argv[0],"measuredDisplacement") == 0 || 
-        strcmp(argv[0],"measuredDisplacements") == 0)
+    
+    // daq basic displacements
+    else if (strcmp(argv[0],"daqDisp") == 0 ||
+        strcmp(argv[0],"daqDisplacement") == 0 ||
+        strcmp(argv[0],"daqDisplacements") == 0)
     {
         for (int i=0; i<numBasicDOF; i++)  {
             sprintf(outputData,"dbm%d",i+1);
@@ -649,9 +666,9 @@ Response* Adapter::setResponse(const char **argv, int argc,
         }
         theResponse = new ElementResponse(this, 6, Vector(numBasicDOF));
     }
-
+    
     output.endTag(); // ElementOutput
-
+    
     return theResponse;
 }
 
@@ -686,18 +703,18 @@ int Adapter::getResponse(int responseID, Information &eleInformation)
         }
         return 0;      
         
-    case 5:  // target basic displacements
+    case 5:  // ctrl basic displacements
         if (eleInformation.theVector != 0)  {
-            *(eleInformation.theVector) = *targDisp;
+            *(eleInformation.theVector) = *ctrlDisp;
         }
         return 0;      
         
-    case 6:  // measured basic displacements
+    case 6:  // daq basic displacements
         if (eleInformation.theVector != 0)  {
-            *(eleInformation.theVector) = *measDisp;
+            *(eleInformation.theVector) = *daqDisp;
         }
         return 0;
-
+        
     default:
         return -1;
     }
@@ -741,11 +758,11 @@ int Adapter::setupConnection()
     rData = new double [sizes(10)];
     recvData = new Vector(rData, sizes(10));
     if (sizes(0) != 0)  {
-        targDisp = new Vector(&rData[id], sizes(0));
+        ctrlDisp = new Vector(&rData[id], sizes(0));
         id += sizes(0);
     }
     if (sizes(3) != 0)  {
-        targForce = new Vector(&rData[id], sizes(3));
+        ctrlForce = new Vector(&rData[id], sizes(3));
         id += sizes(3);
     }
     recvData->Zero();
@@ -755,11 +772,11 @@ int Adapter::setupConnection()
     sData = new double [sizes(10)];
     sendData = new Vector(sData, sizes(10));
     if (sizes(5) != 0)  {
-        measDisp = new Vector(&sData[id], sizes(5));
+        daqDisp = new Vector(&sData[id], sizes(5));
         id += sizes(5);
     }
     if (sizes(8) != 0)  {
-        measForce = new Vector(&sData[id], sizes(8));
+        daqForce = new Vector(&sData[id], sizes(8));
         id += sizes(8);
     }
     sendData->Zero();
