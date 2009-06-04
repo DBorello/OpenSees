@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.34 $
-// $Date: 2009-04-30 23:25:33 $
+// $Revision: 1.35 $
+// $Date: 2009-06-04 22:03:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -374,7 +374,7 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	  int dof = (*theDofs)(j);
 	  dof += 1; // Terje uses 1 through DOF for the dof indexing; the fool then subtracts 1 
 	  // his code!!
-	  response(cnt) = theNode->getDispSensitivity(dof, grad);
+	  response(cnt) = theNode->getDispSensitivity(dof, grad-1);  // Quan May 2009, the one above is not my comment! 
 	  cnt++;
 	}
       
@@ -385,7 +385,7 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	  int dof = (*theDofs)(j);
 	  dof += 1; // Terje uses 1 through DOF for the dof indexing; the fool then subtracts 1 
 	  // his code!!
-	  response(cnt) = theNode->getVelSensitivity(dof, grad);
+	  response(cnt) = theNode->getVelSensitivity(dof, grad-1); // Quan May 2009
 	  cnt++;
 	}
 	
@@ -397,7 +397,7 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	  int dof = (*theDofs)(j);
 	  dof += 1; // Terje uses 1 through DOF for the dof indexing; the fool then subtracts 1 
 	  // his code!!
-	  response(cnt) = theNode->getAccSensitivity(dof, grad);
+	  response(cnt) = theNode->getAccSensitivity(dof, grad-1);// Quan May 2009
 	  cnt++;
 	}
       }
