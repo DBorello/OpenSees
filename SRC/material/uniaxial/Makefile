@@ -52,7 +52,6 @@ include ../../../Makefile.def
 	Concrete01WithSITC.o \
 	Concrete05.o \
 	ECC01.o \
-	SMAMaterial.o \
 	PrestressedSteelMaterial.o \
 	ElasticBDMaterial.o \
 	ShearPanelMaterial.o \
