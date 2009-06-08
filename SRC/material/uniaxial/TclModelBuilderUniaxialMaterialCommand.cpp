@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.63 $
-// $Date: 2009-05-29 19:11:27 $
+// $Revision: 1.64 $
+// $Date: 2009-06-08 19:29:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -73,7 +73,7 @@
 
 #include <SelfCenteringMaterial.h> //JAE
 
-#include <SMAMaterial.h>     // Davide Fugazza
+// #include <SMAMaterial.h>     // Davide Fugazza
 
 #include <Vector.h>
 #include <string.h>
@@ -2667,7 +2667,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	}
     }
 
-
+    /*
     else if (strcmp(argv[1],"SMA") == 0) {
       
       if (argc < 9) {
@@ -2727,7 +2727,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
       theMaterial = new SMAMaterial(tag, E, eps_L, sig_AS_s, sig_AS_f, sig_SA_s, sig_SA_f);
       
     }
-
+    */
 
     else if (strcmp(argv[1],"ECC01") == 0) {
       if (argc < 16) {
