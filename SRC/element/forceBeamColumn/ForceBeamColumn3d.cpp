@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2008-11-04 21:33:05 $
+// $Revision: 1.29 $
+// $Date: 2009-07-14 19:32:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 /*
@@ -2073,7 +2073,7 @@ ForceBeamColumn3d::getInitialStiff(void)
     Response *theResponse = 0;
 
     output.tag("ElementOutput");
-    output.attr("eleType","ForceBeamColumn2d");
+    output.attr("eleType","ForceBeamColumn3d");
     output.attr("eleTag",this->getTag());
     output.attr("node1",connectedExternalNodes[0]);
     output.attr("node2",connectedExternalNodes[1]);
