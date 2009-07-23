@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.53 $
-// $Date: 2009-04-17 23:02:27 $
+// $Revision: 1.54 $
+// $Date: 2009-07-23 23:55:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -155,6 +155,11 @@ TclModelBuilder_addZeroLengthND(ClientData, Tcl_Interp *, int, TCL_Char **,
 extern int 
 TclModelBuilder_addBeamWithHinges(ClientData, Tcl_Interp *, int, TCL_Char **,
 				  Domain*, TclModelBuilder *);
+// Quan
+extern int 
+TclModelBuilder_addFourNodeQuadWithSensitivity(ClientData, Tcl_Interp *, int, TCL_Char **,
+				Domain*, TclModelBuilder *);
+
 extern int 
 TclModelBuilder_addFourNodeQuad(ClientData, Tcl_Interp *, int, TCL_Char **,
 				Domain*, TclModelBuilder *);
@@ -373,6 +378,10 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
     return result;
   } else if ((strcmp(argv[1],"quad") == 0) || (strcmp(argv[1],"stdQuad") == 0)) {
     int result = TclModelBuilder_addFourNodeQuad(clientData, interp, argc, argv,
+						 theTclDomain, theTclBuilder);
+	  return result;
+  } else if (strcmp(argv[1],"quadWithSensitivity") == 0) {
+    int result = TclModelBuilder_addFourNodeQuadWithSensitivity(clientData, interp, argc, argv,
 						 theTclDomain, theTclBuilder);
 	  return result;
   } else if (strcmp(argv[1],"enhancedQuad") == 0) {
