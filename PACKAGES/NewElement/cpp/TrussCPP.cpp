@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2009-03-23 23:17:04 $
+// $Revision: 1.8 $
+// $Date: 2009-07-23 23:05:21 $
 // $Source: /usr/local/cvs/OpenSees/PACKAGES/NewElement/cpp/TrussCPP.cpp,v $
                                                                         
 // Written: fmk 
@@ -475,7 +475,7 @@ TrussCPP::Print(OPS_Stream &s, int flag)
 
 
 Response *
-TrussCPP::setResponse(const char **argv, int argc, Information &eleInformation, OPS_Stream &s)
+TrussCPP::setResponse(const char **argv, int argc, OPS_Stream &s)
 {
     //
     // we compare argv[0] for known response types for the Truss
@@ -507,7 +507,6 @@ TrussCPP::getResponse(int responseID, Information &eleInfo)
       return -1;
       
     case 1:
-      theMaterial->setTrialStrain(strain);
       return eleInfo.setDouble(A * theMaterial->getStress());
 
     default:
