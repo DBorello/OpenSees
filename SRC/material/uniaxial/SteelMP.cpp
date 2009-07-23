@@ -20,8 +20,8 @@
                                                                         
 // $Function contributed by  Quan Gu & Michele Barbato
 
-// $Revision: 1.2 $
-// $Date: 2009-03-27 19:19:20 $
+// $Revision: 1.3 $
+// $Date: 2009-07-23 23:43:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SteelMP.cpp,v $
 
 #include <SteelMP.h>
@@ -77,10 +77,7 @@ SteelMP::SteelMP
 
 SteelMP::~SteelMP ()
 {
-// AddingSensitivity:BEGIN /////////////////////////////////////
-	parameterID = 0;
-	SHVs = 0;
-// AddingSensitivity:END //////////////////////////////////////
+   if (SHVs != 0)  delete SHVs;
 }
 
 int SteelMP::setTrialStrain (double strain, double strainRate)
@@ -352,7 +349,7 @@ int SteelMP::revertToStart ()
    return 0;
 }
 
-
+  
 
 
 UniaxialMaterial* SteelMP::getCopy ()

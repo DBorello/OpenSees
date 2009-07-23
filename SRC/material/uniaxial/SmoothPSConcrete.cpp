@@ -20,8 +20,8 @@
                                                                         
 // Function contributed by Quan Gu & Michele Barbato
 
-// $Revision: 1.2 $
-// $Date: 2009-03-27 19:19:20 $
+// $Revision: 1.3 $
+// $Date: 2009-07-23 23:43:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SmoothPSConcrete.cpp,v $
                                                                         
 // Description: This file contains the class definition for 
@@ -53,13 +53,15 @@ SmoothPSConcrete::SmoothPSConcrete
 ///// refer to the same function revertToStart();
 	this->revertToStart ();
 	this->compute_epsmax(&epsmax,&sigmax);
-
+	
+	SHVs =0;
+	parameterID =0;
 }
 
 
 SmoothPSConcrete::~SmoothPSConcrete ()
 {
-   if (SHVs != 0)  delete [] SHVs;
+   if (SHVs != 0)  delete SHVs;
 }
 
 int SmoothPSConcrete::setTrialStrain (double strain, double strainRate)
@@ -1424,7 +1426,7 @@ int SmoothPSConcrete::Transition_r(double epsc, double e1,double e2,double s1,do
 
     // e2th < epsc < e1th
 
-	int result;
+	int result=0;
 
     double b = (-(Et2+2*Et1)*(e2-e1)+3*(s2-s1))/((e2-e1)*(e2-e1));
     double a = (Et2-Et1-2*b*(e2-e1))/3./((e2-e1)*(e2-e1));
