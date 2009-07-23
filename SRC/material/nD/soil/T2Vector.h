@@ -1,14 +1,14 @@
 //<<<<<<< T2Vector.h
 //<<<<<<< T2Vector.h
-// $Revision: 1.7 $
-// $Date: 2002-05-16 00:07:47 $
+// $Revision: 1.8 $
+// $Date: 2009-07-23 23:57:27 $
 //=======
-// $Revision: 1.7 $
-// $Date: 2002-05-16 00:07:47 $
+// $Revision: 1.8 $
+// $Date: 2009-07-23 23:57:27 $
 //>>>>>>> 1.4
 //=======
-// $Revision: 1.7 $
-// $Date: 2002-05-16 00:07:47 $
+// $Revision: 1.8 $
+// $Date: 2009-07-23 23:57:27 $
 //>>>>>>> 1.6
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/T2Vector.h,v $
                                                                         
@@ -32,6 +32,10 @@
 
 // global function: scalar product of two second order tensor vectors
 double operator && (const Vector &, const Vector &);
+void doubledotProduct (Vector & c, const Vector & a, const Matrix & b);
+void tensorProduct(Matrix & c, const Vector & a, const Vector & b);
+void doubledotMatrixProduct (Matrix & c, const Matrix & a, const Matrix & b);
+double delta(int i,int j);
 
 // define second order tensor vector class
 class T2Vector 
@@ -69,6 +73,7 @@ public:
 
   int operator == (const T2Vector & a) const;
   int isZero(void) const;
+  int Zero(void);
 
 protected:
 

@@ -1,5 +1,5 @@
-// $Revision: 1.10 $
-// $Date: 2003-02-14 23:01:32 $
+// $Revision: 1.11 $
+// $Date: 2009-07-23 23:57:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/T2Vector.cpp,v $
                                                                         
 // Written: ZHY
@@ -9,10 +9,13 @@
 // T2Vector.cpp
 // ----------
 //
+
 #include <math.h>
 #include <float.h>
 #include <stdlib.h>
 #include <T2Vector.h>
+#include <Matrix.h>
+
 
 
 Vector T2Vector::engrgStrain(6);
@@ -29,6 +32,68 @@ double operator && (const Vector & a, const Vector & b)
   for (int i=0; i<3; i++)
     result += a[i]*b[i] + 2*a[i+3]*b[i+3];
   return result;
+}
+
+// ---------------- add by guquan ------------------------------
+// ---------------- c=a:b, c(k,l)=a(i,j)*b(i,j,k,l)-------------
+void doubledotProduct (Vector & c, const Vector & a, const Matrix & b)
+{
+  if (c.Size() !=6 || a.Size() !=6 || b.noCols() !=6|| b.noRows() !=6) {
+    opserr << "FATAL:operator && (Vector &, Matrix &): vector or Matrix size not equal 6" << endln;
+    exit(-1);
+  }
+	
+  c.Zero();
+  for(int j=0;j<6;j++){
+	  for (int i=0; i<3; i++){
+		c[j] += a[i]*b(i,j) + 2*a[i+3]*b(i+3,j);
+	  }
+  }
+  return;
+}
+
+
+// ---------------- add by guquan ------------------------------
+// ---------------- c=a:b, c(i,j,k,l)=a(i,j,m,n)*b(m,n,k,l)-------------
+void doubledotMatrixProduct (Matrix & c, const Matrix & a, const Matrix & b)
+{
+  if (c.noCols() !=6 ||c.noRows() !=6 || a.noCols() !=6 ||a.noRows() !=6 || b.noCols() !=6|| b.noRows() !=6) {
+    opserr << "FATAL: doubledotproduct(Matrix &, Matrix &): Matrix size not equal 6" << endln;
+    exit(-1);
+  }
+	
+  c.Zero();
+  for(int i=0;i<6;i++){
+	for(int j=0;j<6;j++){
+	  for (int l=0; l<3; l++){
+		c(i,j) += a(i,l)*b(l,j) + 2*a(i,l+3)*b(l+3,j);
+	  }
+	}
+  }
+  return;
+}
+ 
+// ---------------- add by guquan ------------------------------
+// ---------------- c=a*b, c(i,j,k,l)=a(i,j)*b(k,l)-------------
+void tensorProduct(Matrix & c, const Vector & a, const Vector & b)
+{
+  if (b.Size() !=6 || a.Size() !=6 || c.noCols() !=6|| c.noRows() !=6) {
+    opserr << "FATAL:operator && (Vector &, Matrix &): vector or Matrix size not equal 6" << endln;
+    exit(-1);
+  }
+	
+  c.Zero();
+  for(int j=0;j<6;j++){
+	  for (int i=0; i<6; i++){
+		c(i,j) = a[i]*b[j];
+	  }
+  }
+  return;
+}
+
+double delta(int i,int j){
+	if (i==j) return 1.0;
+	else return 0.0;
 }
 
 
@@ -59,6 +124,7 @@ T2Vector::T2Vector(const Vector &init, int isEngrgStrain)
     }
   }
 }
+
 
 
 T2Vector::T2Vector(const Vector & deviat_init, double volume_init)
@@ -267,6 +333,13 @@ T2Vector::isZero(void) const
     if(theT2Vector[i] != 0.0) return 0;
 
   return 1;
+}
+int T2Vector::Zero(void)
+{
+  theT2Vector.Zero();
+  theDeviator.Zero();
+  theVolume=0.0;
+return 1;
 }
 
 
