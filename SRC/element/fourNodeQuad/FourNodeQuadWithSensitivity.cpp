@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2009-07-23 23:50:28 $
+// $Revision: 1.2 $
+// $Date: 2009-07-24 00:08:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuadWithSensitivity.cpp,v $
 
 // Written: MHS
@@ -42,7 +42,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <ElementResponse.h>
-#define ELE_TAG_FourNodeQuadWithSensitivity 1000000000000011
+#define ELE_TAG_FourNodeQuadWithSensitivity 100000011
 
 double FourNodeQuadWithSensitivity::matrixData[64];
 Matrix FourNodeQuadWithSensitivity::K(matrixData, 8, 8);
