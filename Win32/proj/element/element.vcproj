@@ -324,6 +324,12 @@
 				RelativePath="..\..\..\SRC\element\fourNodeQuad\FourNodeQuad.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\element\fourNodeQuad\FourNodeQuadWithSensitivity.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\fourNodeQuad\FourNodeQuadWithSensitivity.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\element\fourNodeQuad\NineNodeMixedQuad.cpp">
 			</File>
 			<File
