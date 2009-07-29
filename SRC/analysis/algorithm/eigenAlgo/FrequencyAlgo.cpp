@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:41 $
+// $Revision: 1.3 $
+// $Date: 2009-07-29 21:57:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/eigenAlgo/FrequencyAlgo.cpp,v $
                                                                         
                                                                         
@@ -84,7 +84,7 @@ FrequencyAlgo::solveCurrentStep(int numModes)
        return -3;
     }
 
-    if (theSOE->solve(numModes) < 0) {
+    if (theSOE->solve(numModes, true) < 0) {
        opserr << "Warning FrequencyAlgo::solveCurrentStep() - ";
        opserr << "the EigenSOE failed in solve().\n";
        return -4;

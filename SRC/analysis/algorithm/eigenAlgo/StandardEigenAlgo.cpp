@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:41 $
+// $Revision: 1.3 $
+// $Date: 2009-07-29 21:57:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/eigenAlgo/StandardEigenAlgo.cpp,v $
                                                                         
 // Written: MHS
@@ -69,7 +69,7 @@ StandardEigenAlgo::solveCurrentStep(int numModes)
     return -2;
   }
   
-  if (theSOE->solve(numModes) < 0) {
+  if (theSOE->solve(numModes, false) < 0) {
     opserr << "StandardEigenAlgo::solverCurrentStep() -- the EigenSOE failed in solve()\n";
     return -4;
   }
