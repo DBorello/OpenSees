@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2009-03-09 22:33:01 $
+// $Revision: 1.20 $
+// $Date: 2009-07-29 21:58:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.cpp,v $
                                                                         
                                                                         
@@ -57,14 +57,14 @@ int FE_Element::numFEs(0);           // number of objects
 FE_Element::FE_Element(int tag, Element *ele)
   :TaggedObject(tag),
    myDOF_Groups((ele->getExternalNodes()).Size()), myID(ele->getNumDOF()), 
- numDOF(ele->getNumDOF()), theModel(0), myEle(ele), 
- theResidual(0), theTangent(0), theIntegrator(0)
+   numDOF(ele->getNumDOF()), theModel(0), myEle(ele), 
+   theResidual(0), theTangent(0), theIntegrator(0)
 {
-    if (numDOF <= 0) {
-	opserr << "FE_Element::FE_Element(Element *) ";
-	opserr << " element must have 1 dof " << *ele;
-	exit(-1);
-    }
+  if (numDOF <= 0) {
+    opserr << "FE_Element::FE_Element(Element *) ";
+    opserr << " element must have 1 dof " << *ele;
+    exit(-1);
+  }
     
     // get elements domain & check it is valid
     Domain *theDomain = ele->getDomain();
@@ -457,22 +457,22 @@ FE_Element::zeroResidual(void)
 void  
 FE_Element::addRtoResidual(double fact)
 {
-    if (myEle != 0) {
-	// check for a quick return	
-	if (fact == 0.0) 
-	    return;
-	else if (myEle->isSubdomain() == false) {
-	  const Vector &eleResisting = myEle->getResistingForce();
-	  theResidual->addVector(1.0, eleResisting, -fact);
-	}
-	else {
-	    opserr << "WARNING FE_Element::addRtoResidual() - ";
-	    opserr << "- this should not be called on a Subdomain!\n";
-	}    	    	    	
+  if (myEle != 0) {
+    // check for a quick return	
+    if (fact == 0.0) 
+      return;
+    else if (myEle->isSubdomain() == false) {
+      const Vector &eleResisting = myEle->getResistingForce();
+      theResidual->addVector(1.0, eleResisting, -fact);
     }
     else {
-	opserr << "WARNING FE_Element::addRtoResidual() - no Element *given ";
-	opserr << "- subclasses must provide implementation\n";
+      opserr << "WARNING FE_Element::addRtoResidual() - ";
+      opserr << "- this should not be called on a Subdomain!\n";
+    }    	    	    	
+  }
+  else {
+    opserr << "WARNING FE_Element::addRtoResidual() - no Element *given ";
+    opserr << "- subclasses must provide implementation\n";
     }    	        
 }
 
