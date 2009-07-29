@@ -546,6 +546,7 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/elasticBeamColumn/TclElasticBeamCommand.o \
 	$(FE)/element/fourNodeQuad/TclFourNodeQuadCommand.o \
 	$(FE)/element/fourNodeQuad/FourNodeQuad.o \
+	$(FE)/element/fourNodeQuad/FourNodeQuadWithSensitivity.o \
 	$(FE)/element/fourNodeQuad/ConstantPressureVolumeQuad.o \
 	$(FE)/element/fourNodeQuad/EnhancedQuad.o \
 	$(FE)/element/fourNodeQuad/NineNodeMixedQuad.o \
