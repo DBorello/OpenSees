@@ -18,8 +18,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.11 $
-** $Date: 2009-01-13 21:47:04 $
+** $Revision: 1.12 $
+** $Date: 2009-07-31 21:42:19 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/packages.cpp,v $
                                                                         
 ** Written: fmk 
@@ -28,6 +28,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <OPS_Globals.h>
+#include <sys/stat.h>
+
+extern
+#ifdef _WIN32
+int __cdecl
+#else
+int
+#endif
+httpGET_File(char const *URL, char const *page, unsigned int port, const char *filename);
 
 
 #ifdef _WIN32
@@ -45,6 +54,11 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
   
   *libHandle = NULL;
   *funcHandle = NULL;
+
+  struct stat stFileInfo;
+  bool blnReturn;
+  int intStat;
+
   
 #ifdef _WIN32
   
@@ -158,6 +172,17 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
 #else
   strcpy(&localLibName[libNameLength], ".so");
 #endif
+
+  // Attempt to get the file attributes
+  intStat = stat(localLibName, &stFileInfo);
+  if(intStat != 0) {
+    opserr << "packages.cpp - NO FILE EXISTS: - trying OpenSees" << localLibName << endln;
+    int res = httpGET_File("opensees.berkeley.edu", localLibName, 80, localLibName);
+    if (res != 0) {
+      opserr << "packages.cpp - NO FILE EXISTS: " << localLibName << endln;
+      return -1;
+    }
+  } 
 
   char *error;
 
