@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-25 23:32:50 $
+// $Revision: 1.5 $
+// $Date: 2009-08-03 20:18:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/TclElasticBeamCommand.cpp,v $
                                                                         
 // Written: fmk 
@@ -108,6 +108,8 @@ TclModelBuilder_addElasticBeam(ClientData clientData, Tcl_Interp *interp, int ar
 
     double alpha = 0.0;
     double d = 0.0;
+    double mass = 0.0;
+    int argi = 0;
 
     if ((argc-eleArgStart) == 10) {    
       if (Tcl_GetDouble(interp, argv[7+eleArgStart], &alpha) != TCL_OK) {
@@ -122,6 +124,7 @@ TclModelBuilder_addElasticBeam(ClientData clientData, Tcl_Interp *interp, int ar
 	opserr << "WARNING invalid transTag - elasticBeamColumn " << beamId << " iNode jNode A E I alpha d transTag\n";
 	return TCL_ERROR;
       }
+      argi = 10;
     } 
 
     else {
@@ -129,6 +132,7 @@ TclModelBuilder_addElasticBeam(ClientData clientData, Tcl_Interp *interp, int ar
 	opserr << "WARNING invalid transTag - elasticBeamColumn " << beamId << " iNode jNode A E I transTag\n";
 	return TCL_ERROR;
       }
+      argi = 8;
     }
 
     CrdTransf2d *theTrans = theTclBuilder->getCrdTransf2d(transTag);
@@ -137,9 +141,27 @@ TclModelBuilder_addElasticBeam(ClientData clientData, Tcl_Interp *interp, int ar
 	opserr << "WARNING transformation object not found - elasticBeamColumn " << beamId;
 	return TCL_ERROR;
     }
+
+    while (argi < argc) {
+      if (strcmp(argv[argi],"-mass") == 0) {
+	if (argc < argi+2) {
+	  opserr << "WARNING not enough -mass args need -mass mass??\n";
+	  opserr << argv[1] << " element: " << beamId << endln;
+	  return TCL_ERROR;
+	}
+	if (Tcl_GetDouble(interp, argv[argi+1], &mass) != TCL_OK) {
+	  opserr << "WARNING invalid mass\n";
+	  opserr << argv[1] << " element: " << beamId << endln;
+	  return TCL_ERROR;
+	}
+	argi += 2;
+      } else
+	argi++;
+    }
+
     
     // now create the beam and add it to the Domain
-    theBeam = new ElasticBeam2d (beamId,A,E,I,iNode,jNode, *theTrans, alpha, d, 0.0);
+    theBeam = new ElasticBeam2d (beamId,A,E,I,iNode,jNode, *theTrans, alpha, d, mass);
     
     if (theBeam == 0) {
       opserr << "WARNING ran out of memory creating beam - elasticBeamColumn ";	
@@ -204,9 +226,29 @@ TclModelBuilder_addElasticBeam(ClientData clientData, Tcl_Interp *interp, int ar
 	opserr << "WARNING transformation object not found - elasticBeamColumn " << beamId;
 	return TCL_ERROR;
       }
+
+      double mass = 0.0;
+      int argi = 6+eleArgStart;
+
+      while (argi < argc) {
+	if (strcmp(argv[argi],"-mass") == 0) {
+	  if (argc < argi+2) {
+	    opserr << "WARNING not enough -mass args need -mass mass??\n";
+	    opserr << argv[1] << " element: " << beamId << endln;
+	    return TCL_ERROR;
+	  }
+	  if (Tcl_GetDouble(interp, argv[argi+1], &mass) != TCL_OK) {
+	    opserr << "WARNING invalid mass\n";
+	    opserr << argv[1] << " element: " << beamId << endln;
+	    return TCL_ERROR;
+	  }
+	  argi += 2;
+	} else
+	  argi++;
+      }
       
       // now create the beam and add it to the Domain
-      theBeam = new ElasticBeam3d (beamId, iNode, jNode, theSection, *theTrans);      
+      theBeam = new ElasticBeam3d (beamId, iNode, jNode, theSection, *theTrans, mass);      
 
     } else {
 
@@ -252,9 +294,32 @@ TclModelBuilder_addElasticBeam(ClientData clientData, Tcl_Interp *interp, int ar
 	opserr << "WARNING transformation object not found - elasticBeamColumn " << beamId;
 	return TCL_ERROR;
       }
+
+
+
+      double mass = 0.0;
+      int argi = 11+eleArgStart;
+      
+      while (argi < argc) {
+	if (strcmp(argv[argi],"-mass") == 0) {
+	  if (argc < argi+2) {
+	    opserr << "WARNING not enough -mass args need -mass mass??\n";
+	    opserr << argv[1] << " element: " << beamId << endln;
+	    return TCL_ERROR;
+	  }
+	  if (Tcl_GetDouble(interp, argv[argi+1], &mass) != TCL_OK) {
+	    opserr << "WARNING invalid mass\n";
+	    opserr << argv[1] << " element: " << beamId << endln;
+	    return TCL_ERROR;
+	  }
+	  argi += 2;
+	} else
+	  argi++;
+      }
+
       
       // now create the beam and add it to the Domain
-      theBeam = new ElasticBeam3d (beamId,A,E,G,Jx,Iy,Iz,iNode,jNode, *theTrans);
+      theBeam = new ElasticBeam3d (beamId,A,E,G,Jx,Iy,Iz,iNode,jNode, *theTrans, mass);
     }
 
     if (theBeam == 0) {
