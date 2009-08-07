@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-01-10 18:41:34 $
+// $Revision: 1.8 $
+// $Date: 2009-08-07 00:18:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/TclBrickCommand.cpp,v $
                                                                         
 // Written: fmk 
@@ -33,6 +33,7 @@
 
 #include <Brick.h>
 #include <BbarBrick.h>
+#include <BbarBrickWithSensitivity.h>
 
 #ifdef _FLBrick
 #include <FLBrick.h>
@@ -161,15 +162,21 @@ TclModelBuilder_addBrick(ClientData clientData, Tcl_Interp *interp,  int argc,
     theBrick = new Brick(BrickId,Node1,Node2,Node3,Node4,
 			 Node5, Node6, Node7, Node8, *theMaterial,
 			 b1, b2, b3);
-  } else if (strcmp(argv[1],"bbarBrick") == 0) {
+  }
+  else if (strcmp(argv[1],"bbarBrickWithSensitivity") == 0) {
+    theBrick = new BbarBrickWithSensitivity(BrickId,Node1,Node2,Node3,Node4,
+			 Node5, Node6, Node7, Node8, *theMaterial,
+			 b1, b2, b3);
+  }
+  else if (strcmp(argv[1],"bbarBrick") == 0) {
     theBrick = new BbarBrick(BrickId,Node1,Node2,Node3,Node4,
 			     Node5, Node6, Node7, Node8, *theMaterial, b1, b2, b3);
-#ifdef _FLBrick
-  } else if (strcmp(argv[1],"flBrick") == 0) {
-    theBrick = new FLBrick(BrickId,Node1,Node2,Node3,Node4,
-			   Node5, Node6, Node7, Node8, *theMaterial, b1, b2, b3);
-  }
-#endif
+	#ifdef _FLBrick
+	  } else if (strcmp(argv[1],"flBrick") == 0) {
+		theBrick = new FLBrick(BrickId,Node1,Node2,Node3,Node4,
+				   Node5, Node6, Node7, Node8, *theMaterial, b1, b2, b3);
+	  }
+	#endif
 
   } else {
     opserr << "WARNING element " << argv[1] << " type not recognized\n";
