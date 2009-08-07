@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.33 $
-// $Date: 2008-10-20 22:50:09 $
+// $Revision: 1.34 $
+// $Date: 2009-08-07 20:01:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -53,10 +53,10 @@ double FourNodeQuad::wts[4];
 
 FourNodeQuad::FourNodeQuad(int tag, int nd1, int nd2, int nd3, int nd4,
 			   NDMaterial &m, const char *type, double t,
-			   double p, double b1, double b2)
+			   double p, double r, double b1, double b2)
 :Element (tag, ELE_TAG_FourNodeQuad), 
   theMaterial(0), connectedExternalNodes(4), 
-  Q(8), pressureLoad(8), thickness(t), pressure(p), Ki(0)
+ Q(8), pressureLoad(8), thickness(t), pressure(p), rho(r), Ki(0)
 {
 	pts[0][0] = -0.5773502691896258;
 	pts[0][1] = -0.5773502691896258;
@@ -432,7 +432,10 @@ FourNodeQuad::getMass()
 	static double rhoi[4];
 	double sum = 0.0;
 	for (i = 0; i < 4; i++) {
-	  rhoi[i] = theMaterial[i]->getRho();
+	  if (rho == 0)
+	    rhoi[i] = theMaterial[i]->getRho();
+	  else
+	    rhoi[i] = rho;	    
 	  sum += rhoi[i];
 	}
 

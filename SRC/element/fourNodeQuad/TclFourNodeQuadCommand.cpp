@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2009-07-23 23:50:28 $
+// $Revision: 1.8 $
+// $Date: 2009-08-07 20:01:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/TclFourNodeQuadCommand.cpp,v $
                                                                         
 // File: ~/element/TclFourNodeQuadCommand.C
@@ -84,10 +84,10 @@ TclModelBuilder_addFourNodeQuad(ClientData clientData, Tcl_Interp *interp,
   // get the id and end nodes 
   int FourNodeQuadId, iNode, jNode, kNode, lNode, matID;
   double thickness;
-	double p = 0.0;		// uniform normal traction (pressure)
-	double r = 0.0;		// mass density
-	double b1 = 0.0;
-	double b2 = 0.0;
+  double p = 0.0;		// uniform normal traction (pressure)
+  double rho = 0.0;		// mass density
+  double b1 = 0.0;
+  double b2 = 0.0;
 
   if (Tcl_GetInt(interp, argv[argStart], &FourNodeQuadId) != TCL_OK) {
     opserr << "WARNING invalid FourNodeQuad eleTag" << endln;
@@ -131,18 +131,23 @@ TclModelBuilder_addFourNodeQuad(ClientData clientData, Tcl_Interp *interp,
      return TCL_ERROR;
   }
 
-	if ((argc-argStart) > 10) {
+	if ((argc-argStart) > 11) {
 		if (Tcl_GetDouble(interp, argv[8+argStart], &p) != TCL_OK) {
 			opserr << "WARNING invalid pressure\n";
 			opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
 			return TCL_ERROR;
 		}
-		if (Tcl_GetDouble(interp, argv[9+argStart], &b1) != TCL_OK) {
+		if (Tcl_GetDouble(interp, argv[9+argStart], &rho) != TCL_OK) {
 			opserr << "WARNING invalid b1\n";
 			opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
 			return TCL_ERROR;
 		}
-		if (Tcl_GetDouble(interp, argv[10+argStart], &b2) != TCL_OK) {
+		if (Tcl_GetDouble(interp, argv[10+argStart], &b1) != TCL_OK) {
+			opserr << "WARNING invalid b1\n";
+			opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
+			return TCL_ERROR;
+		}
+		if (Tcl_GetDouble(interp, argv[11+argStart], &b2) != TCL_OK) {
 			opserr << "WARNING invalid b2\n";
 			opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
 			return TCL_ERROR;
@@ -162,7 +167,7 @@ TclModelBuilder_addFourNodeQuad(ClientData clientData, Tcl_Interp *interp,
   // now create the FourNodeQuad and add it to the Domain
   FourNodeQuad *theFourNodeQuad = 
       new FourNodeQuad(FourNodeQuadId,iNode,jNode,kNode,lNode,
-		       *theMaterial, type, thickness, p, b1, b2);
+		       *theMaterial, type, thickness, p, rho, b1, b2);
   if (theFourNodeQuad == 0) {
       opserr << "WARNING ran out of memory creating element\n";
       opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;

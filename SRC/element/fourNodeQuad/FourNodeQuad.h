@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2008-10-20 22:50:09 $
+// $Revision: 1.15 $
+// $Date: 2009-08-07 20:01:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.h,v $
                                                                         
 // Written: MHS
@@ -48,9 +48,10 @@ class FourNodeQuad : public Element
 {
   public:
     FourNodeQuad(int tag, int nd1, int nd2, int nd3, int nd4,
-		  NDMaterial &m, const char *type,
-		  double t, double pressure = 0.0,
-		  double b1 = 0.0, double b2 = 0.0);
+		 NDMaterial &m, const char *type,
+		 double t, double pressure = 0.0, 
+		 double rho = 0.0,
+		 double b1 = 0.0, double b2 = 0.0);
     FourNodeQuad();
     ~FourNodeQuad();
 
@@ -121,6 +122,7 @@ class FourNodeQuad : public Element
     double thickness;	        // Element thickness
     double pressure;	        // Normal surface traction (pressure) over entire element
 					 // Note: positive for outward normal
+    double rho;
     static double shp[3][4];	// Stores shape functions and derivatives (overwritten)
     static double pts[4][2];	// Stores quadrature points
     static double wts[4];		// Stores quadrature weights
