@@ -25,8 +25,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.41 $
-// $Date: 2009-05-20 17:28:53 $
+// $Revision: 1.42 $
+// $Date: 2009-08-07 20:57:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
 
 
@@ -55,6 +55,7 @@
 #include <PressureDependMultiYield02.h>
 #include <FluidSolidPorousMaterial.h>
 
+#include <MultiYieldSurfaceClay.h>
 #include <string.h>
 
 #include <Template3Dep.h>
@@ -572,6 +573,69 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 		   gredu = 0;
 	   }
     }
+
+	    // Pressure Independend Multi-yield, by Quan Gu
+    else if (strcmp(argv[1],"MultiYieldSurfaceClay") == 0) {
+		const int numParam = 6;
+		const int totParam = 10;
+		int tag;  double param[totParam];
+		param[6] = 0.0;
+		param[7] = 100.;
+		param[8] = 0.0;
+		param[9] = 20;
+
+		char * arg[] = {"nd", "rho", "refShearModul", "refBulkModul",
+				"cohesi", "peakShearStra",
+				"frictionAng (=0)", "refPress (=100)", "pressDependCoe (=0.0)",
+			"numberOfYieldSurf (=20)"};
+		if (argc < (3+numParam)) {
+			opserr << "WARNING insufficient arguments\n";
+			printCommand(argc,argv);
+			opserr << "Want: nDMaterial MultiYieldSurfaceClay tag? " << arg[0];
+			opserr << "? "<< "\n";
+			opserr << arg[1] << "? "<< arg[2] << "? "<< arg[3] << "? "<< "\n";
+			opserr << arg[4] << "? "<< arg[5] << "? "<< arg[6] << "? "<< "\n";
+			opserr << arg[7] << "? "<< arg[8] << "? "<< arg[9] << "? "<<endln;
+			return TCL_ERROR;
+		}
+
+		if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+			opserr << "WARNING invalid MultiYieldSurfaceClay tag" << endln;
+			return TCL_ERROR;
+		}
+
+		for (int i=3; (i<argc && i<13); i++)
+			if (Tcl_GetDouble(interp, argv[i], &param[i-3]) != TCL_OK) {
+				opserr << "WARNING invalid " << arg[i-3] << "\n";
+				opserr << "nDMaterial MultiYieldSurfaceClay: " << tag << endln;
+				return TCL_ERROR;
+			}
+
+		static double * gredu = 0;
+		// user defined yield surfaces
+		if (param[9] < 0 && param[9] > -40) {
+		 param[9] = -int(param[9]);
+		 gredu = new double[int(2*param[9])];
+			 for (int i=0; i<2*param[9]; i++)
+			  if (Tcl_GetDouble(interp, argv[i+13], &gredu[i]) != TCL_OK) {
+				  opserr << "WARNING invalid " << arg[i-3] << "\n";
+				  opserr << "nDMaterial MultiYieldSurfaceClay: " << tag << endln;
+				  return TCL_ERROR;
+					}
+	  }
+
+		MultiYieldSurfaceClay * temp =
+			new MultiYieldSurfaceClay (tag, param[0], param[1], param[2],
+							param[3], param[4], param[5], param[6],
+							param[7], param[8], param[9], gredu);
+		theMaterial = temp;
+
+	   if (gredu != 0) {
+		   delete [] gredu;
+		   gredu = 0;
+	   }
+    }
+	// ============
 
     // Pressure Dependend Multi-yield, by ZHY
     else if (strcmp(argv[1],"PressureDependMultiYield") == 0) {
