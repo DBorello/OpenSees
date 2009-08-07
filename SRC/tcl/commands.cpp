@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.147 $
-// $Date: 2009-05-29 19:12:38 $
+// $Revision: 1.148 $
+// $Date: 2009-08-07 00:28:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -506,6 +506,9 @@ TclVideoPlayer *theTclVideoPlayer =0;
 // commands defined in this file are registered with the interpreter.
 
 int 
+setPrecision(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
 logFile(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
@@ -706,6 +709,8 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "region", &addRegion, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
     Tcl_CreateCommand(interp, "logFile", &logFile, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
+    Tcl_CreateCommand(interp, "setPrecision", &setPrecision, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
     Tcl_CreateCommand(interp, "exit", &OpenSeesExit, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
@@ -6748,6 +6753,26 @@ logFile(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 
   return TCL_OK;
 }
+
+
+int 
+setPrecision(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+
+  if (argc < 2) { 
+    opserr << "WARNING setPrecision precision? - no precision value supplied\n";
+    return TCL_ERROR;
+  }
+  int precision;
+  if (Tcl_GetInt(interp, argv[2], &precision) != TCL_OK) {
+    opserr << "WARNING setPrecision precision? - error reading precision value supplied\n";
+    return TCL_ERROR;
+  }
+  opserr.setPrecision(precision);
+
+  return TCL_OK;
+}
+
 
 int 
 exit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
