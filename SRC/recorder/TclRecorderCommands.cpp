@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.51 $
-// $Date: 2009-04-30 23:26:27 $
+// $Revision: 1.52 $
+// $Date: 2009-08-07 20:54:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -150,6 +150,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       int eleData = 0;
       outputMode eMode = STANDARD_STREAM; 
       ID *eleIDs = 0;
+      int precision = 6;
 
       while (flags == 0 && loc < argc) {
 	
@@ -269,6 +270,14 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    return TCL_ERROR;	
 	  loc++;
 	} 
+
+
+	else if (strcmp(argv[loc],"-precision") == 0) {
+	  loc ++;
+	  if (Tcl_GetInt(interp, argv[loc], &precision) != TCL_OK)	
+	    return TCL_ERROR;		  
+	  loc++;
+	}
 	
 	else if (strcmp(argv[loc],"-file") == 0) {
 	  fileName = argv[loc+1];
@@ -359,7 +368,9 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       } else
 	theOutputStream = new StandardStream();
       
-      
+
+      theOutputStream->setPrecision(precision);
+
       if (strcmp(argv[1],"Element") == 0) 
 	(*theRecorder) = new ElementRecorder(eleIDs, 
 					     data, 
@@ -527,6 +538,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       ID *theNodes = 0;
       ID theDofs(0, 6);
 
+      int precision = 6;
+
       while (flags == 0 && pos < argc) {
 
 	if (strcmp(argv[pos],"-time") == 0) {
@@ -594,14 +607,21 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  pos++;
 	}
 
+	else if (strcmp(argv[pos],"-precision") == 0) {
+	  pos ++;
+	  if (Tcl_GetInt(interp, argv[pos], &precision) != TCL_OK)	
+	    return TCL_ERROR;		  
+	  pos++;
+	}
+
 	else if ((strcmp(argv[pos],"-node") == 0) || 
 		 (strcmp(argv[pos],"-nodes") == 0)) {
 	  pos++;
 	  
 	  // read in the node tags or 'all' can be used
 	  if (strcmp(argv[pos],"all") == 0) {
-	    theNodes = 0;
-	    pos++;
+	    opserr << "recoder Node - error -all option has been removed, use -nodeRange instaed\n";
+	    return TCL_ERROR;		  
 	  } else {
 	    theNodes = new ID(0,16);
 	    int node;
@@ -725,6 +745,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       } else {
 	theOutputStream = new StandardStream();
       }
+
+      theOutputStream->setPrecision(precision);
 
       if (strcmp(argv[1],"Node") == 0) {
 
