@@ -1,8 +1,13 @@
 include ../../../../Makefile.def
 
-OBJS       = FluidSolidPorousMaterial.o MultiYieldSurface.o \
-	PressureDependMultiYield.o TclUpdateMaterialStageCommand.o \
-	PressureIndependMultiYield.o T2Vector.o PressureDependMultiYield02.o
+OBJS       = FluidSolidPorousMaterial.o \
+	MultiYieldSurface.o \
+	MultiYieldSurfaceClay.o \
+	PressureDependMultiYield.o \
+	TclUpdateMaterialStageCommand.o \
+	PressureIndependMultiYield.o \
+	T2Vector.o \
+	PressureDependMultiYield02.o
 
 all:	$(OBJS)
 

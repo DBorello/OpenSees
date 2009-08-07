@@ -407,6 +407,7 @@ PY_SJB_RWB_BJ_LIBS = $(FE)/material/uniaxial/PY/PySimple1.o \
 
 ZHY_LIBS =	$(FE)/material/nD/soil/FluidSolidPorousMaterial.o \
 	$(FE)/material/nD/soil/MultiYieldSurface.o \
+	$(FE)/material/nD/soil/MultiYieldSurfaceClay.o \
 	$(FE)/material/nD/soil/PressureDependMultiYield.o \
 	$(FE)/material/nD/soil/PressureDependMultiYield02.o \
 	$(FE)/material/nD/soil/TclUpdateMaterialStageCommand.o \
@@ -555,6 +556,7 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/shell/TclShellCommand.o \
 	$(FE)/element/brick/Brick.o \
 	$(FE)/element/brick/BbarBrick.o \
+	$(FE)/element/brick/BbarBrickWithSensitivity.o \
 	$(FE)/element/brick/shp3d.o \
 	$(FE)/element/brick/TclBrickCommand.o \
 	$(FE)/element/generic/GenericClient.o \

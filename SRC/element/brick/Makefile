@@ -1,6 +1,11 @@
 include ../../../Makefile.def
 
-OBJS       = Brick.o shp3d.o TclBrickCommand.o BbarBrick.o FLBrick.o
+OBJS       = Brick.o \
+	shp3d.o \
+	TclBrickCommand.o \
+	BbarBrick.o \
+	BbarBrickWithSensitivity.o \
+	FLBrick.o
 
 all:         $(OBJS)
 
