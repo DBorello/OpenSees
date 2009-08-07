@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.54 $
-// $Date: 2009-07-23 23:55:51 $
+// $Revision: 1.55 $
+// $Date: 2009-08-07 00:19:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -576,6 +576,11 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
 					  theTclDomain, theTclBuilder, eleArgStart);
     return result;
   } else if (strcmp(argv[1],"bbarBrick") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addBrick(clientData, interp, argc, argv,
+					  theTclDomain, theTclBuilder, eleArgStart);
+    return result;
+  } else if (strcmp(argv[1],"bbarBrickWithSensitivity") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addBrick(clientData, interp, argc, argv,
 					  theTclDomain, theTclBuilder, eleArgStart);
