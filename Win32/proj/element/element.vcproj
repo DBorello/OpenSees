@@ -368,6 +368,12 @@
 				RelativePath="..\..\..\SRC\element\brick\BbarBrick.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\element\brick\BbarBrickWithSensitivity.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\brick\BbarBrickWithSensitivity.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\element\brick\Brick.cpp">
 			</File>
 			<File
