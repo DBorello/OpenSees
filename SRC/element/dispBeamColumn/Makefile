@@ -1,7 +1,10 @@
 include ../../../Makefile.def
 
 OBJS       = DispBeamColumn2d.o \
-	DispBeamColumn3d.o
+	DispBeamColumn3d.o \
+	DispBeamColumn2dWithSensitivity.o \
+	DispBeamColumn3dWithSensitivity.o
+
 
 all:         $(OBJS)
 
