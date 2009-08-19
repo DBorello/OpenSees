@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.9 $
-// $Date: 2005-12-15 00:30:38 $
+// $Revision: 1.10 $
+// $Date: 2009-08-19 17:53:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf3d.h,v $
 
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
@@ -82,7 +82,10 @@ public:
     const Vector &getPointGlobalDisplFromBasic(double xi, const Vector &basicDisps);
     
     int getLocalAxes(Vector &xAxis, Vector &yAxis, Vector &zAxis);
-    
+
+   ////////////////// sensitivity /////////////////////////////////
+	const Vector & getBasicDisplSensitivity (int gradNumber);
+   /////////////////////////////////////////////////////////////    
 private:
     int computeElemtLengthAndOrient(void);
     

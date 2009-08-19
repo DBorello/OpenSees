@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2006-09-26 18:22:24 $
+// $Revision: 1.6 $
+// $Date: 2009-08-19 17:53:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CrdTransf.h,v $
 
 
@@ -72,8 +72,10 @@ public:
     
     // AddingSensitivity:BEGIN //////////////////////////////////
     virtual const Vector &getBasicDisplSensitivity(int gradNumber);
+    virtual const Vector &getBasicDisplSensitivity(int gradNumber,int); // used by Quan 
     //virtual const Vector &getGlobalResistingForceShapeSensitivity(const Vector &basicForce, const Vector &uniformLoad);
     virtual const Vector &getGlobalResistingForceShapeSensitivity(const Vector &pb, const Vector &p0, int gradNumber);
+    virtual const Vector &getGlobalResistingForceShapeSensitivity(const Vector &pb, const Vector &p0);
     virtual const Vector &getBasicTrialDispShapeSensitivity(void);
     virtual bool isShapeSensitivity(void) {return false;}
     virtual double getdLdh(void) {return 0.0;}

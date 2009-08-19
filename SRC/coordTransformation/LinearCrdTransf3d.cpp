@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.14 $
-// $Date: 2007-05-15 22:21:33 $
+// $Revision: 1.15 $
+// $Date: 2009-08-19 17:53:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf3d.cpp,v $
 
 
@@ -33,7 +33,7 @@
 // LinearCrdTransf3d class. LinearCrdTransf3d is a linear
 // transformation for a planar frame between the global 
 // and basic coordinate systems
-
+// Sensitivity: QGu UCSD 2009
 
 #include <Vector.h>
 #include <Matrix.h>
@@ -103,6 +103,8 @@ nodeIInitialDisp(0), nodeJInitialDisp(0), initialDispChecked(false)
             nodeJOffset[2] = rigJntOffset2(2);
         }
 }
+
+
 
 
 // constructor:
@@ -1373,4 +1375,72 @@ LinearCrdTransf3d::Print(OPS_Stream &s, int flag)
         s << "\tNode I offset: " << nodeIOffset[0] << " " << nodeIOffset[1] << " "<< nodeIOffset[2] << endln;
     if (nodeJOffset)
         s << "\tNode J offset: " << nodeJOffset[0] << " " << nodeJOffset[1] << " "<< nodeJOffset[2] << endln;
+}
+
+
+////////////////////////////////// sensitivity //////////////////////////////////
+const Vector &
+LinearCrdTransf3d::getBasicDisplSensitivity (int gradNumber)
+{
+  
+  static double ug[12];
+  for (int i = 0; i < 6; i++) {
+    ug[i]   = nodeIPtr->getDispSensitivity((i+1),gradNumber);
+    ug[i+6] = nodeJPtr->getDispSensitivity((i+1),gradNumber);
+  }    // it is ok.
+
+	double oneOverL = 1.0/L;
+
+	static Vector ub(6);
+
+	static double ul[12];
+
+	ul[0]  = R[0][0]*ug[0] + R[0][1]*ug[1] + R[0][2]*ug[2];
+	ul[1]  = R[1][0]*ug[0] + R[1][1]*ug[1] + R[1][2]*ug[2];
+	ul[2]  = R[2][0]*ug[0] + R[2][1]*ug[1] + R[2][2]*ug[2];
+
+	ul[3]  = R[0][0]*ug[3] + R[0][1]*ug[4] + R[0][2]*ug[5];
+	ul[4]  = R[1][0]*ug[3] + R[1][1]*ug[4] + R[1][2]*ug[5];
+	ul[5]  = R[2][0]*ug[3] + R[2][1]*ug[4] + R[2][2]*ug[5];
+
+	ul[6]  = R[0][0]*ug[6] + R[0][1]*ug[7] + R[0][2]*ug[8];
+	ul[7]  = R[1][0]*ug[6] + R[1][1]*ug[7] + R[1][2]*ug[8];
+	ul[8]  = R[2][0]*ug[6] + R[2][1]*ug[7] + R[2][2]*ug[8];
+
+	ul[9]  = R[0][0]*ug[9] + R[0][1]*ug[10] + R[0][2]*ug[11];
+	ul[10] = R[1][0]*ug[9] + R[1][1]*ug[10] + R[1][2]*ug[11];
+	ul[11] = R[2][0]*ug[9] + R[2][1]*ug[10] + R[2][2]*ug[11];
+
+	static double Wu[3];
+	if (nodeIOffset) {
+		Wu[0] =  nodeIOffset[2]*ug[4] - nodeIOffset[1]*ug[5];
+		Wu[1] = -nodeIOffset[2]*ug[3] + nodeIOffset[0]*ug[5];
+		Wu[2] =  nodeIOffset[1]*ug[3] - nodeIOffset[0]*ug[4];
+
+		ul[0] += R[0][0]*Wu[0] + R[0][1]*Wu[1] + R[0][2]*Wu[2];
+		ul[1] += R[1][0]*Wu[0] + R[1][1]*Wu[1] + R[1][2]*Wu[2];
+		ul[2] += R[2][0]*Wu[0] + R[2][1]*Wu[1] + R[2][2]*Wu[2];
+	}
+
+	if (nodeJOffset) {
+		Wu[0] =  nodeJOffset[2]*ug[10] - nodeJOffset[1]*ug[11];
+		Wu[1] = -nodeJOffset[2]*ug[9]  + nodeJOffset[0]*ug[11];
+		Wu[2] =  nodeJOffset[1]*ug[9]  - nodeJOffset[0]*ug[10];
+
+		ul[6] += R[0][0]*Wu[0] + R[0][1]*Wu[1] + R[0][2]*Wu[2];
+		ul[7] += R[1][0]*Wu[0] + R[1][1]*Wu[1] + R[1][2]*Wu[2];
+		ul[8] += R[2][0]*Wu[0] + R[2][1]*Wu[1] + R[2][2]*Wu[2];
+	}
+
+	ub(0) = ul[6] - ul[0];
+	double tmp;
+	tmp = oneOverL*(ul[1]-ul[7]);
+	ub(1) = ul[5] + tmp;
+	ub(2) = ul[11] + tmp;
+	tmp = oneOverL*(ul[8]-ul[2]);
+	ub(3) = ul[4] + tmp;
+	ub(4) = ul[10] + tmp;
+	ub(5) = ul[9] - ul[3];
+
+	return ub;
 }
