@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2008-09-25 22:17:39 $
+// $Revision: 1.21 $
+// $Date: 2009-08-19 20:18:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/TclForceBeamColumnCommand.cpp,v $
                                                                         
 // Written: MHS
@@ -38,6 +38,10 @@
 #include <ForceBeamColumn3d.h>
 #include <DispBeamColumn2d.h>
 #include <DispBeamColumn3d.h>
+ 
+#include <DispBeamColumn2dWithSensitivity.h>
+#include <DispBeamColumn3dWithSensitivity.h>
+
 #include <ElasticForceBeamColumn2d.h>
 #include <ElasticForceBeamColumn3d.h>
 
@@ -274,7 +278,9 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
 	theElement = new ElasticForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections, beamIntegr, *theTransf2d);
       else if (strcmp(argv[1],"dispBeamColumn") == 0)
 	theElement = new DispBeamColumn2d(eleTag, iNode, jNode, nIP, sections, beamIntegr, *theTransf2d, mass);
-      else 
+      else if (strcmp(argv[1],"dispBeamColumnWithSensitivity") == 0)
+	theElement = new DispBeamColumn2dWithSensitivity(eleTag, iNode, jNode, nIP, sections, beamIntegr, *theTransf2d, mass);
+      else								            //tag     ndI    ndJ   nPts  secID    transf
 	theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections,
 					   beamIntegr, *theTransf2d, mass, numIter, tol);
     }
@@ -283,6 +289,9 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
 	theElement = new ElasticForceBeamColumn3d(eleTag, iNode, jNode, nIP, sections, beamIntegr, *theTransf3d);
       else if (strcmp(argv[1],"dispBeamColumn") == 0)
 	theElement = new DispBeamColumn3d(eleTag, iNode, jNode, nIP, sections, beamIntegr, *theTransf3d, mass);
+	  else if (strcmp(argv[1],"dispBeamColumnWithSensitivity") == 0)
+	theElement = new DispBeamColumn3dWithSensitivity(eleTag, iNode, jNode, nIP, sections, beamIntegr,*theTransf3d,mass);
+	                                               
       else
 	theElement = new ForceBeamColumn3d(eleTag, iNode, jNode, nIP, sections,
 					   beamIntegr, *theTransf3d, mass, numIter, tol);

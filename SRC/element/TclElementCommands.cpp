@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.55 $
-// $Date: 2009-08-07 00:19:12 $
+// $Revision: 1.56 $
+// $Date: 2009-08-19 20:18:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -368,7 +368,7 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
 						   theTclDomain, theTclBuilder);
     return result;
 
-  } else if (strcmp(argv[1],"forceBeamColumn") == 0 || strcmp(argv[1],"dispBeamColumn") == 0 || strcmp(argv[1],"elasticForceBeamColumn") == 0 || strcmp(argv[1],"nonlinearBeamColumn") == 0) {
+  } else if (strcmp(argv[1],"forceBeamColumn") == 0 || strcmp(argv[1],"dispBeamColumn") == 0 || strcmp(argv[1],"elasticForceBeamColumn") == 0 || strcmp(argv[1],"nonlinearBeamColumn") == 0 || strcmp(argv[1],"dispBeamColumnWithSensitivity") == 0) {
     int result = TclModelBuilder_addForceBeamColumn(clientData, interp, argc, argv,
 						    theTclDomain, theTclBuilder);
     return result;
