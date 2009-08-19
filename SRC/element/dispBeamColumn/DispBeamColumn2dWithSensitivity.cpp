@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2009-08-19 17:52:03 $
+// $Revision: 1.2 $
+// $Date: 2009-08-19 18:11:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2dWithSensitivity.cpp,v $
 
 // Written: MHS
@@ -45,7 +45,7 @@
 #include <ElementResponse.h>
 #include <ElementalLoad.h>
 
-#define ELE_TAG_DispBeamColumn2dWithSensitivity 10203040505678
+#define ELE_TAG_DispBeamColumn2dWithSensitivity 102030
 
 Matrix DispBeamColumn2dWithSensitivity::K(6,6);
 Vector DispBeamColumn2dWithSensitivity::P(6);

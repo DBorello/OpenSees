@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2009-08-19 17:52:03 $
+// $Revision: 1.2 $
+// $Date: 2009-08-19 18:11:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3dWithSensitivity.cpp,v $
 
 // Written: MHS
@@ -46,7 +46,7 @@
 #include <BeamIntegration.h>
 
 
-# define ELE_TAG_DispBeamColumn3dWithSensitivity 1110000011100
+# define ELE_TAG_DispBeamColumn3dWithSensitivity 1110000
 
 Matrix DispBeamColumn3dWithSensitivity::K(12,12);
 Vector DispBeamColumn3dWithSensitivity::P(12);
