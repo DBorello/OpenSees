@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2008-12-19 17:09:29 $
+// $Revision: 1.16 $
+// $Date: 2009-08-25 21:57:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.cpp,v $
                                                                         
                                                                         
@@ -40,6 +40,12 @@
 
 #define MATRIX_WORK_AREA 400
 #define INT_WORK_AREA 20
+
+#ifdef _WIN32
+#ifdef _USRDLL
+#define _DLL
+#endif
+#endif
 
 int Matrix::sizeDoubleWork = MATRIX_WORK_AREA;
 int Matrix::sizeIntWork = INT_WORK_AREA;
