@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-12-01 00:07:57 $
+// $Revision: 1.2 $
+// $Date: 2009-08-25 22:34:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/SubdomainAnalysis.h,v $
                                                                         
                                                                         
@@ -39,10 +39,6 @@
 
 #ifndef SubdomainAnalysis_h
 #define SubdomainAnalysis_h
-
-#ifndef _bool_h
-#include <bool.h>
-#endif
 
 #include <Analysis.h>
 #include <Matrix.h>

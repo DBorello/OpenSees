@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2009-05-11 21:32:27 $
+// $Revision: 1.3 $
+// $Date: 2009-08-25 22:34:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticDomainDecompositionAnalysis.h,v $
                                                                         
 // Written: fmk 
@@ -34,10 +34,6 @@
 
 #ifndef StaticDomainDecompositionAnalysis_h
 #define StaticDomainDecompositionAnalysis_h
-
-#ifndef _bool_h
-#include <bool.h>
-#endif
 
 #include <DomainDecompositionAnalysis.h>
 #include <Matrix.h>

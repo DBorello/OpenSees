@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2008-12-03 18:44:02 $
+// $Revision: 1.19 $
+// $Date: 2009-08-25 22:32:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.h,v $
                                                                         
                                                                         
@@ -36,10 +36,6 @@
 
 #ifndef Element_h
 #define Element_h
-
-#ifndef _bool_h
-#include "bool.h"
-#endif
 
 #include <ID.h>
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-08-03 23:28:34 $
+// $Revision: 1.2 $
+// $Date: 2009-08-25 22:33:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/DatabaseStream.cpp,v $
                                                                         
 // Written: fmk 
@@ -33,7 +33,6 @@
 #include "DatabaseStream.h"
 #include <FE_Datastore.h>
 #include <Vector.h>
-#include <bool.h>
 
 DatabaseStream::DatabaseStream(FE_Datastore *database, const char *tName)
   :OPS_Stream(OPS_STREAM_TAGS_DatabaseStream),

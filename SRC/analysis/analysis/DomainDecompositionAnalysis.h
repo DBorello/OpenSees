@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2009-05-11 21:32:27 $
+// $Revision: 1.7 $
+// $Date: 2009-08-25 22:34:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DomainDecompositionAnalysis.h,v $
                                                                         
                                                                         
@@ -37,10 +37,6 @@
 
 #ifndef DomainDecompositionAnalysis_h
 #define DomainDecompositionAnalysis_h
-
-#ifndef _bool_h
-#include <bool.h>
-#endif
 
 #include <Analysis.h>
 #include <Matrix.h>
