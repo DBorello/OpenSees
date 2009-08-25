@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2009-05-14 22:52:04 $
+// $Revision: 1.13 $
+// $Date: 2009-08-25 23:33:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.h,v $
                                                                         
                                                                         
@@ -36,8 +36,6 @@
 
 #ifndef FEM_ObjectBroker_h
 #define FEM_ObjectBroker_h
-
-#include<ObjectBroker.h>
 
 class Element;
 class Node;
@@ -72,6 +70,8 @@ class PartitionedModelBuilder;
 class CrdTransf2d;
 class CrdTransf3d;
 
+class GraphNumberer;
+
 class BeamIntegration;
 
 class UniaxialMaterial;
@@ -89,6 +89,7 @@ class Parameter;
 class Accelerator;
 
 class Actor;
+class Channel;
 
 class FEM_ObjectBroker
 {
