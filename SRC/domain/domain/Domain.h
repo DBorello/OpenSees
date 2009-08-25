@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2009-05-11 21:30:23 $
+// $Revision: 1.29 $
+// $Date: 2009-08-25 22:09:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
 // Written: fmk 
@@ -38,10 +38,6 @@
 
 #include <OPS_Stream.h>
 #include <Vector.h>
-
-#ifndef _bool_h
-#include <bool.h>
-#endif
 
 class Element;
 class Node;

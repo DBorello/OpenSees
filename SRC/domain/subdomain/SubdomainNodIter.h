@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2009-08-25 22:09:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/SubdomainNodIter.h,v $
                                                                         
                                                                         
-// File: ~/domain/subdomain/SubdomainNodIter.h
-//
 // Written: fmk 
 // Created: Fri Sep 20 15:27:47: 1996
 // Revision: A
@@ -39,10 +37,6 @@
 
 #ifndef SubdomainNodIter_h
 #define SubdomainNodIter_h
-
-#ifndef _bool_h
-#include <bool.h>
-#endif
 
 #include <NodeIter.h>
 

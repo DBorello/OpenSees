@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:18 $
+// $Revision: 1.2 $
+// $Date: 2009-08-25 22:10:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomainEleIter.h,v $
                                                                         
                                                                         
@@ -39,11 +39,6 @@
 
 #ifndef PartitionedDomainEleIter_h
 #define PartitionedDomainEleIter_h
-
-
-#ifndef _bool_h
-#include <bool.h>
-#endif
 
 #include <ElementIter.h>
 #include <SingleDomEleIter.h>

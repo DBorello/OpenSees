@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-11-23 22:37:53 $
+// $Revision: 1.4 $
+// $Date: 2009-08-25 22:11:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tagged/storage/TaggedObjectStorage.h,v $
                                                                         
                                                                         
@@ -40,7 +40,6 @@ class TaggedObject;
 class TaggedObjectIter;
 
 #include <OPS_Globals.h>
-#include <bool.h>
 
 class TaggedObjectStorage 
 {

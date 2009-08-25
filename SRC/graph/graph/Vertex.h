@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-11-03 23:11:55 $
+// $Revision: 1.4 $
+// $Date: 2009-08-25 22:07:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/Vertex.h,v $
                                                                         
                                                                         
@@ -33,10 +33,6 @@
 // Vertex is an element of a graph.
 //
 // What: "@(#) Vertex.h, revA"
-
-#ifndef _bool_h
-#include "bool.h"
-#endif
 
 #include <TaggedObject.h>
 #include <ID.h>

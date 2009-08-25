@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-04-02 23:42:26 $
+// $Revision: 1.10 $
+// $Date: 2009-08-25 22:08:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/IncrementalIntegrator.h,v $
                                                                         
                                                                         
 #ifndef IncrementalIntegrator_h
 #define IncrementalIntegrator_h
 
-// File: ~/analysis/integrator/IncrementalIntegrator.h
-// 
 // Written: fmk 
 // Created: Tue Sept 17 15:54:47: 1996
 // Revision: A
@@ -40,10 +38,6 @@
 // What: "@(#) IncrementalIntegrator.h, revA"
 
 #include <Integrator.h>
-
-#ifndef _bool_h
-#include <bool.h>
-#endif
 
 class LinearSOE;
 class AnalysisModel;

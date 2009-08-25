@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-11-03 23:11:55 $
+// $Revision: 1.4 $
+// $Date: 2009-08-25 22:07:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/Graph.h,v $
                                                                         
                                                                         
@@ -36,10 +36,6 @@
 // about the edges in this design.
 //
 // What: "@(#) Graph.h, revA"
-
-#ifndef _bool_h
-#include "bool.h"
-#endif
 
 #include <OPS_Stream.h>
 
