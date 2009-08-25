@@ -424,10 +424,16 @@
 				RelativePath="..\..\..\SRC\element\dispBeamColumn\DispBeamColumn2d.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\element\dispBeamColumn\DispBeamColumn2dWithSensitivity.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\element\dispBeamColumn\DispBeamColumn3d.cpp">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\element\dispBeamColumn\DispBeamColumn3d.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\dispBeamColumn\DispBeamColumn3dWithSensitivity.cpp">
 			</File>
 		</Filter>
 		<Filter
