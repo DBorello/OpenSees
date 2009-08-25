@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2009-05-29 19:10:11 $
+// $Revision: 1.21 $
+// $Date: 2009-08-25 21:42:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.cpp,v $
                                                                         
                                                                         
@@ -38,7 +38,6 @@
 #include <MaterialResponse.h>
 #include <float.h>
 #include <Vector.h>
-#include <DataOutputHandler.h>
 
 
 UniaxialMaterial::UniaxialMaterial(int tag, int clasTag)
