@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2008-04-16 21:31:18 $
+// $Revision: 1.10 $
+// $Date: 2009-08-25 23:26:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/partitioner/DomainPartitioner.cpp,v $
                                                                         
 // Written: fmk 
@@ -163,6 +163,11 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
     opserr << "element graph\n";
     return -10+theError;
   }
+
+  /* print graph 
+  opserr << "DomainPartitioner::partition - eleGraph: \n";
+  theElementGraph->Print(opserr, 4);
+  */
 
   // we create empty graphs for the numParts subdomains,
   // in the graphs we place the vertices for the elements on the boundaries

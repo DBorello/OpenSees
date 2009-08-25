@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2009-05-11 21:30:58 $
+// $Revision: 1.16 $
+// $Date: 2009-08-25 23:26:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -58,8 +58,6 @@
 
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
-
-#include <Timer.h>
 
 
 Matrix Subdomain::badResult(1,1); // for returns from getStiff, getMass and getDamp
@@ -671,7 +669,7 @@ int
 Subdomain::computeTang(void)
 {   
   if (theAnalysis != 0) {
-    theTimer.start();
+    //    theTimer.start();
     
     int res =0;
     res = theAnalysis->formTangent();
@@ -691,15 +689,15 @@ int
 Subdomain::computeResidual(void)
 {
   if (theAnalysis != 0) {
-    theTimer.start();
+    //    theTimer.start();
     
     int res =0;
     res = theAnalysis->formResidual();
     
-    theTimer.pause();
-    realCost += theTimer.getReal();
-    cpuCost += theTimer.getCPU();
-    pageCost += theTimer.getNumPageFaults();
+    //theTimer.pause();
+    //    realCost += theTimer.getReal();
+    //    cpuCost += theTimer.getCPU();
+    //    pageCost += theTimer.getNumPageFaults();
     
     return res;
     

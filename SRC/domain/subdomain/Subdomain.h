@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2009-05-11 21:30:58 $
+// $Revision: 1.12 $
+// $Date: 2009-08-25 23:26:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.h,v $
                                                                         
                                                                         
@@ -40,7 +40,6 @@
 
 #include <Domain.h>
 #include <Element.h>
-#include <Timer.h>
 
 class Node;
 class ID;
@@ -176,7 +175,6 @@ class Subdomain: public Element, public Domain
     double realCost;
     double cpuCost;
     int pageCost;
-    Timer theTimer;
     DomainDecompositionAnalysis *theAnalysis;
     ID *extNodes;
     FE_Element *theFEele;

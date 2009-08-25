@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-10-16 00:11:55 $
+// $Revision: 1.10 $
+// $Date: 2009-08-25 23:26:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/MaterialStageParameter.cpp,v $
 
 #include <classTags.h>
@@ -81,8 +81,6 @@ MaterialStageParameter::setDomain(Domain *theDomain)
     opserr << "WARNING: updateMaterialStage - MaterialStageParameter::setDomain() - no effect with material tag " << theMaterialTag << endln;
 
   theResult = 0;
-
-  //delete [] theString;
 
   return;
 }
