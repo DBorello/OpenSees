@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2009-05-11 21:33:07 $
+// $Revision: 1.12 $
+// $Date: 2009-08-25 23:18:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.h,v $
                                                                         
                                                                         
@@ -39,10 +39,6 @@
 //
 // What: "@(#) AnalysisModel.h, revA"
 
-#ifndef _bool_h
-#include <bool.h>
-#endif
-    
 #include <MovableObject.h>
 
 class TaggedObjectStorage;

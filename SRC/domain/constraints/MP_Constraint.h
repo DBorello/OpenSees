@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:00:55 $
+// $Revision: 1.4 $
+// $Date: 2009-08-25 23:17:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/MP_Constraint.h,v $
                                                                         
                                                                         
 #ifndef MP_Constraint_h
 #define MP_Constraint_h
 
-// File: ~/domain/constraints/MP_Constraint.h
-//
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -45,7 +43,6 @@
 // What: "@(#) MP_Constraint, revA"
 
 #include <DomainComponent.h>
-#include <bool.h>
 
 class Matrix;
 class ID;

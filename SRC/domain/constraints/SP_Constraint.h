@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-11-22 19:41:17 $
+// $Revision: 1.4 $
+// $Date: 2009-08-25 23:17:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/SP_Constraint.h,v $
                                                                         
                                                                         
@@ -40,7 +40,6 @@
 // What: "@(#) SP_Constraint, revA"
 
 #include <DomainComponent.h>
-#include <bool.h>
 
 class SP_Constraint : public DomainComponent
 {

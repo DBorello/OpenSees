@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2009-05-14 22:45:39 $
+// $Revision: 1.7 $
+// $Date: 2009-08-25 23:18:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/LinearSOE.h,v $
                                                                         
                                                                         
@@ -38,10 +38,6 @@
 // given A, B and C to find the unknown X such that the equation is satisfied.
 //
 // What: "@(#) LinearSOE.h, revA"
-
-#ifndef _bool_h
-#include <bool.h>
-#endif
 
 #include <MovableObject.h>
 
