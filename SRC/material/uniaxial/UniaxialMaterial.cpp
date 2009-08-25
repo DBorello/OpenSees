@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2009-08-25 21:42:53 $
+// $Revision: 1.22 $
+// $Date: 2009-08-25 23:40:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.cpp,v $
                                                                         
                                                                         
@@ -152,7 +152,7 @@ UniaxialMaterial::setResponse(const char **argv, int argc,
 
   // stress sensitivity for local sensitivity recorder purpose.  Quan 2009
   // limit:  no more than 10000 random variables/sensitivity parameters
-  else if (strcmp(argv[0],"stressSensitivity") == 0) {
+  else if (strstr(argv[0],"stressSensitivity") != 0) {
     char *token = strtok((char *) argv[0], " ");
     if (token != NULL) token = strtok(NULL, " ");
     int gradient = atoi(token);
@@ -160,7 +160,7 @@ UniaxialMaterial::setResponse(const char **argv, int argc,
     theResponse =  new MaterialResponse(this, gradient+10000, this->getStress());
   }
   // strain sensivitiy
-  else if (strcmp(argv[0],"strainSensitivity") == 0) {
+  else if (strstr(argv[0],"strainSensitivity") != 0) {
     char *token = strtok((char *) argv[0], " ");
     if (token != NULL) token = strtok(NULL, " ");
     int gradient = atoi(token);
