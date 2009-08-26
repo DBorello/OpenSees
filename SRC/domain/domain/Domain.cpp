@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.57 $
-// $Date: 2009-05-11 21:30:23 $
+// $Revision: 1.58 $
+// $Date: 2009-08-26 20:32:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -68,6 +68,8 @@
 #include <Analysis.h>
 #include <FE_Datastore.h>
 #include <FEM_ObjectBroker.h>
+
+Domain       *ops_TheActiveDomain = 0;
 
 Domain::Domain()
 :theRecorders(0), numRecorders(0),
