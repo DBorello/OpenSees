@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2009-05-14 22:49:43 $
+// $Revision: 1.17 $
+// $Date: 2009-08-26 20:33:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ActorSubdomain.cpp,v $
                                                                         
 #include <ActorSubdomain.h>
@@ -133,7 +133,7 @@ ActorSubdomain::run(void)
 	      generalized = false;
 	    this->eigenAnalysis(numMode, generalized);
 	    break;
-
+	    /*
 	  case ShadowActorSubdomain_buildSubdomain:
 	    theType = msgData(1);
 	    tag = msgData(3); // subdomain tag
@@ -145,7 +145,7 @@ ActorSubdomain::run(void)
 	    this->buildSubdomain(tag, *theBuilder);
 
 	    break;
-
+	    */
 	case ShadowActorSubdomain_getRemoteData:
 	    theID = &(this->getExternalNodes());
 	    msgData(0) = theID->Size();

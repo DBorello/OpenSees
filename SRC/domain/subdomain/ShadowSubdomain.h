@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2009-05-11 21:30:58 $
+// $Revision: 1.13 $
+// $Date: 2009-08-26 20:33:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.h,v $
                                                                         
                                                                         
@@ -54,8 +54,8 @@ class ShadowSubdomain: public Shadow, public Subdomain
     virtual  ~ShadowSubdomain();    
 
     // method added for parallel domain generation
-    virtual int buildSubdomain(int numSubdomains, 
-			       PartitionedModelBuilder &theBuilder);
+    //    virtual int buildSubdomain(int numSubdomains, 
+    //			       PartitionedModelBuilder &theBuilder);
     virtual int getRemoteData(void);
 
     // Methods inherited from Domain, Subdomain and Element

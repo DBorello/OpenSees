@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2009-08-25 23:26:33 $
+// $Revision: 1.17 $
+// $Date: 2009-08-26 20:33:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -46,7 +46,7 @@
 #include <FE_Element.h>
 #include <SingleDomNodIter.h>
 #include <classTags.h>
-#include <PartitionedModelBuilder.h>
+//#include <PartitionedModelBuilder.h>
 #include <DOF_Group.h>
 #include <ElementIter.h>
 
@@ -68,9 +68,10 @@ Subdomain::Subdomain(int tag)
  Domain(),
  mapBuilt(false),map(0),mappedVect(0),mappedMatrix(0),
  realCost(0.0),cpuCost(0),pageCost(0),
- theAnalysis(0), extNodes(0), theFEele(0),
- thePartitionedModelBuilder(0)
+ theAnalysis(0), extNodes(0), theFEele(0) 
 {
+
+  //thePartitionedModelBuilder = 0;
     // init the arrays.
     internalNodes = new MapOfTaggedObjects();
     externalNodes = new MapOfTaggedObjects();
@@ -106,9 +107,9 @@ Subdomain::Subdomain(int tag,
    internalNodes(&theInternalNodeStorage),
    externalNodes(&theExternalNodeStorage), 
    realCost(0.0),cpuCost(0),pageCost(0),
-   theAnalysis(0), extNodes(0), theFEele(0),
-   thePartitionedModelBuilder(0)
+   theAnalysis(0), extNodes(0), theFEele(0)
 {
+  //thePartitionedModelBuilder = 0;
   //    realExternalNodes = new MapOfTaggedObjects(256);    
     
     internalNodeIter = new SingleDomNodIter(internalNodes);
@@ -160,7 +161,7 @@ Subdomain::clearAll(void)
   if (externalNodes != 0)
     externalNodes->clearAll();
 }
-
+/*
 int 
 Subdomain::buildSubdomain(int numSubdomains, PartitionedModelBuilder &theBuilder)
 {
@@ -171,7 +172,7 @@ Subdomain::buildSubdomain(int numSubdomains, PartitionedModelBuilder &theBuilder
   }
   return result;
 }
-
+*/
 
 
 // void addNode(Node *);

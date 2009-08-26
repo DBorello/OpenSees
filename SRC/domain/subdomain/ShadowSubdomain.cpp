@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2009-05-14 22:48:29 $
+// $Revision: 1.17 $
+// $Date: 2009-08-26 20:33:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -171,7 +171,7 @@ ShadowSubdomain::~ShadowSubdomain()
   delete theShadowLPs;
 }
 
-
+/*
 int
 ShadowSubdomain::buildSubdomain(int numSubdomains, PartitionedModelBuilder &theBuilder)
 {
@@ -192,7 +192,7 @@ ShadowSubdomain::buildSubdomain(int numSubdomains, PartitionedModelBuilder &theB
   this->Domain::domainChange();
   return 0;  
 }
-
+*/
 
 int
 ShadowSubdomain::getRemoteData(void)

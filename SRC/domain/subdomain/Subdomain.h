@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2009-08-25 23:26:33 $
+// $Revision: 1.13 $
+// $Date: 2009-08-26 20:33:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.h,v $
                                                                         
                                                                         
@@ -45,7 +45,7 @@ class Node;
 class ID;
 class TaggedObjectStorage;
 class DomainDecompositionAnalysis;
-class PartitionedModelBuilder;
+//class PartitionedModelBuilder;
 class EquiSolnAlgo;
 class IncrementalIntegrator;
 class LinearSOE;
@@ -71,8 +71,8 @@ class Subdomain: public Element, public Domain
     virtual  ~Subdomain();    
 
     // method added for parallel domain generation
-    virtual int buildSubdomain(int numSubdomains, 
-			       PartitionedModelBuilder &theBuilder); 
+    //    virtual int buildSubdomain(int numSubdomains, 
+    //			       PartitionedModelBuilder &theBuilder); 
 
     // Domain methods which must be rewritten
     virtual void clearAll(void);
@@ -185,7 +185,7 @@ class Subdomain: public Element, public Domain
     SingleDomNodIter   *externalNodeIter;    
     SubdomainNodIter   *theNodIter;
 
-    PartitionedModelBuilder *thePartitionedModelBuilder;
+    //    PartitionedModelBuilder *thePartitionedModelBuilder;
     static Matrix badResult;
 };
 
