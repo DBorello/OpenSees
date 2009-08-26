@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.148 $
-// $Date: 2009-08-07 00:28:47 $
+// $Revision: 1.149 $
+// $Date: 2009-08-26 20:33:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -492,7 +492,6 @@ FEM_ObjectBrokerAllClasses theBroker;
 
 // init the global variabled defined in OPS_Globals.h
 double        ops_Dt = 1.0;
-Domain       *ops_TheActiveDomain = 0;
 Element      *ops_TheActiveElement = 0;
 
 #ifdef _NOGRAPHICS
@@ -5681,7 +5680,6 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
     }
 
 
-    //Boris Jeremic and Joey Yang -- UC Davis
     else if ((strcmp(argv[1],"SPconstraint") == 0) || (strcmp(argv[1],"sp") == 0)) {
       if (argc < 3) {
       	opserr << "WARNING want - remove SPconstraint spTag?\n";
