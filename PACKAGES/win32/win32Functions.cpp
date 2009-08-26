@@ -25,6 +25,7 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 }
 
 OPS_Stream *opserrPtr =0;
+double ops_Dt =0;
 
 typedef int (*OPS_ErrorPtrType)(char *, int);
 typedef int (*OPS_GetIntInputPtrType)(int *, int *);
