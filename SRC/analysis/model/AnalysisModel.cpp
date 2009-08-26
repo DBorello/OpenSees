@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2009-05-11 21:33:07 $
+// $Revision: 1.16 $
+// $Date: 2009-08-26 00:00:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.cpp,v $
                                                                         
                                                                         
@@ -52,8 +52,6 @@
 
 
 #include <MapOfTaggedObjects.h>
-
-#include <Timer.h>
 
 #define START_EQN_NUM 0
 #define START_VERTEX_NUM 0
