@@ -538,6 +538,8 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/beamWithHinges/TclBeamWithHingesBuilder.o \
 	$(FE)/element/dispBeamColumn/DispBeamColumn2d.o \
 	$(FE)/element/dispBeamColumn/DispBeamColumn3d.o \
+	$(FE)/element/dispBeamColumn/DispBeamColumn2dWithSensitivity.o \
+	$(FE)/element/dispBeamColumn/DispBeamColumn3dWithSensitivity.o \
 	$(FE)/element/dispBeamColumnInt/DispBeamColumn2dInt.o \
 	$(FE)/element/dispBeamColumnInt/FiberSection2dInt.o \
 	$(FE)/element/dispBeamColumnInt/LinearCrdTransf2dInt.o \
