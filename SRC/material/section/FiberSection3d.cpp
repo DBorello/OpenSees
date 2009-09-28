@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2008-11-04 21:23:21 $
+// $Revision: 1.31 $
+// $Date: 2009-09-28 22:48:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -863,7 +863,6 @@ FiberSection3d::setResponse(const char **argv, int argc, OPS_Stream &output)
   else {
     if (argc > 2 || strcmp(argv[0],"fiber") == 0) {
 
-
       int key = numFibers;
       int passarg = 2;
       
@@ -939,9 +938,9 @@ FiberSection3d::setResponse(const char **argv, int argc, OPS_Stream &output)
       
       if (key < numFibers && key >= 0) {
 	output.tag("FiberOutput");
-	output.attr("yLoc",-matData[2*key]);
-	output.attr("zLoc",matData[2*key+1]);
-	output.attr("area",matData[2*key+2]);
+	output.attr("yLoc",-matData[3*key]);
+	output.attr("zLoc",matData[3*key+1]);
+	output.attr("area",matData[3*key+2]);
 	
 	theResponse =  theMaterials[key]->setResponse(&argv[passarg], argc-passarg, output);
 	
