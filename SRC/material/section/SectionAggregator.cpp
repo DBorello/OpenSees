@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2009-10-01 22:10:31 $
+// $Revision: 1.22 $
+// $Date: 2009-10-01 23:04:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.cpp,v $
                                                                         
                                                                         
@@ -786,6 +786,26 @@ SectionAggregator::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &the
     (*matCodes)(i) = classTags(j);
 
   return res;
+}
+
+Response*
+SectionAggregator::setResponse(const char **argv, int argc, OPS_Stream &output)
+{
+  
+  Response *theResponse =0;
+
+  if ( (strcmp(argv[0],"deformations") == 0) || (strcmp(argv[0],"deformation") == 0) || 
+	(strcmp(argv[0],"forces") == 0) || (strcmp(argv[0],"force") == 0) ||
+       (strcmp(argv[0],"forceAndDeformation") == 0)) {
+    
+    return this::SectionForceDeformation::setResponse(argv, argc, output);
+  } 
+  
+
+  if (theSection != 0)
+      return theSection->setResponse(argv, argc, output)    
+
+  return 0;
 }
 
 void
