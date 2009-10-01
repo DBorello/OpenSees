@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2008-08-26 16:48:40 $
+// $Revision: 1.16 $
+// $Date: 2009-10-01 22:10:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.h,v $
                                                                         
                                                                         
@@ -84,9 +84,6 @@ class SectionAggregator : public SectionForceDeformation
 		 FEM_ObjectBroker &theBroker);
  
     void Print(OPS_Stream &s, int flag =0);
-
-    Response *setResponse(const char **argv, int argc, OPS_Stream &s);
-    int getResponse(int responseID, Information &info);
 
     int getVariable(const char *, Information &);
 

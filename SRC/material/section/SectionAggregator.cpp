@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2009-01-22 23:35:10 $
+// $Revision: 1.21 $
+// $Date: 2009-10-01 22:10:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.cpp,v $
                                                                         
                                                                         
@@ -806,25 +806,6 @@ SectionAggregator::Print(OPS_Stream &s, int flag)
   }
 }
 
-Response*
-SectionAggregator::setResponse(const char **argv, int argc, OPS_Stream &output)
-{
-  if (theSection != 0)
-    return theSection->setResponse(argv, argc, output);
-    
-  else
-    return SectionForceDeformation::setResponse(argv, argc, output);
-
-  return 0;
-}
-
-int
-SectionAggregator::getResponse(int responseID, Information &info)
-{
-  // Just call the base class method ... don't need to define
-  // this function, but keeping it here just for clarity
-  return SectionForceDeformation::getResponse(responseID, info);
-}
 
 int
 SectionAggregator::getVariable(const char *argv, Information &info)
