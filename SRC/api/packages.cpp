@@ -18,8 +18,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.12 $
-** $Date: 2009-07-31 21:42:19 $
+** $Revision: 1.13 $
+** $Date: 2009-10-02 22:20:35 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/packages.cpp,v $
                                                                         
 ** Written: fmk 
@@ -113,7 +113,7 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
     typedef UniaxialMaterial *(*OPS_GetUniaxialMaterialPtrType)(int matTag);
     typedef NDMaterial * (*OPS_GetNDMaterialPtrType)(int matTag);
     typedef int (_cdecl *OPS_GetNodeInfoPtrType)(int *, int *, double *);
-	typedef int (_cdecl *OPS_InvokeMaterialDirectlyPtrType)(matObject **, modelState *, double *, double *, double *, int *);
+    typedef int (_cdecl *OPS_InvokeMaterialDirectlyPtrType)(matObject **, modelState *, double *, double *, double *, int *);
 
     
     typedef void (_cdecl *setGlobalPointersFunction)(OPS_Stream *,
@@ -124,7 +124,9 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
 						     OPS_AllocateMaterialPtrType,
 						     OPS_GetUniaxialMaterialPtrType,
 						     OPS_GetNDMaterialPtrType,
-							 OPS_InvokeMaterialDirectlyPtrType,
+						     OPS_InvokeMaterialDirectlyPtrType,
+						     OPS_GetNodeInfoPtrType,
+						     OPS_GetNodeInfoPtrType,
 						     OPS_GetNodeInfoPtrType,
 						     OPS_GetNodeInfoPtrType,
 						     OPS_GetNodeInfoPtrType,
@@ -143,7 +145,8 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
     (funcPtr)(opserrPtr, OPS_Error, OPS_GetIntInput, OPS_GetDoubleInput,
 	      OPS_AllocateElement, OPS_AllocateMaterial, OPS_GetUniaxialMaterial, 
 	      OPS_GetNDMaterial, OPS_InvokeMaterialDirectly, OPS_GetNodeCrd, 
-		  OPS_GetNodeDisp, OPS_GetNodeVel, OPS_GetNodeAcc);
+	      OPS_GetNodeDisp, OPS_GetNodeVel, OPS_GetNodeAcc, 
+	      OPS_GetNodeIncrDisp, OPS_GetNodeIncrDeltaDisp);
 
    LocalInitPtrType initPtr;
    initPtr = (LocalInitPtrType)GetProcAddress((HMODULE)hLib,"localInit");

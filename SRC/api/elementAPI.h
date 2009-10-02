@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.6 $
-** $Date: 2009-01-13 07:34:13 $
+** $Revision: 1.7 $
+** $Date: 2009-10-02 22:20:35 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/elementAPI.h,v $
                                                                         
 ** Written: fmk 
@@ -91,6 +91,10 @@ typedef struct eleObject eleObj;
 #define OPS_GetMaterialPtr ops_getmaterialptr_
 #define OPS_GetNodeCrd ops_getnodecrd_
 #define OPS_GetNodeDisp ops_getnodedisp_
+#define OPS_GetNodeVel ops_getnodevel_
+#define OPS_GetNodeAccel ops_getnodeaccel_
+#define OPS_GetNodeIncrDisp ops_getnodeincrdisp_
+#define OPS_GetNodeIncrDeltaDisp ops_getnodeincrdeltadisp_
 #define OPS_InvokeMaterial ops_invokematerial_
 #define OPS_InvokeMaterialDirectly ops_invokematerialdirectly_
 
@@ -115,6 +119,8 @@ extern "C" int    OPS_GetNodeCrd(int *nodeTag, int *sizeData, double *data);
 extern "C" int    OPS_GetNodeDisp(int *nodeTag, int *sizeData, double *data);
 extern "C" int    OPS_GetNodeVel(int *nodeTag, int *sizeData, double *data);
 extern "C" int    OPS_GetNodeAcc(int *nodeTag, int *sizeData, double *data);
+extern "C" int    OPS_GetNodeIncrDisp(int *nodeTag, int *sizeData, double *data);
+extern "C" int    OPS_GetNodeIncrDeltaDisp(int *nodeTag, int *sizeData, double *data);
 
 class UniaxialMaterial;
 class NDMaterial;
@@ -144,6 +150,8 @@ int    OPS_GetNodeCrd(int *nodeTag, int *sizeData, double *data);
 int    OPS_GetNodeDisp(int *nodeTag, int *sizeData, double *data);
 int    OPS_GetNodeVel(int *nodeTag, int *sizeData, double *data);
 int    OPS_GetNodeAcc(int *nodeTag, int *sizeData, double *data);
+int    OPS_GetNodeIncrDisp(int *nodeTag, int *sizeData, double *data);
+int    OPS_GetNodeIncrDeltaDisp(int *nodeTag, int *sizeData, double *data);
 
 #endif
 

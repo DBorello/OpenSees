@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.7 $
-** $Date: 2009-01-13 07:34:38 $
+** $Revision: 1.8 $
+** $Date: 2009-10-02 22:20:35 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/elementAPI.cpp,v $
                                                                         
 ** Written: fmk 
@@ -449,14 +449,14 @@ int OPS_GetNodeDisp(int *nodeTag, int *sizeData, double *data)
   Node *theNode = theDomain->getNode(*nodeTag);
 
   if (theNode == 0) {
-    opserr << "OPS_GetNodeCrd - no node with tag " << *nodeTag << endln;
+    opserr << "OPS_GetNodeDisp - no node with tag " << *nodeTag << endln;
     return -1;
   }
   int size = *sizeData;
   const Vector &disp = theNode->getTrialDisp();
 
   if (disp.Size() != size) {
-    opserr << "OPS_GetNodeCrd - crd size mismatch\n";
+    opserr << "OPS_GetNodeDisp - crd size mismatch\n";
     return -1;
   }
   for (int i=0; i < size; i++) 
@@ -508,6 +508,53 @@ int OPS_GetNodeAcc(int *nodeTag, int *sizeData, double *data)
     
   return 0;
 }
+
+extern "C" 
+int OPS_GetNodeIncrDisp(int *nodeTag, int *sizeData, double *data)
+{
+  Node *theNode = theDomain->getNode(*nodeTag);
+
+  if (theNode == 0) {
+    opserr << "OPS_GetNodeIncrDisp - no node with tag " << *nodeTag << endln;
+    return -1;
+  }
+  int size = *sizeData;
+  const Vector &disp = theNode->getIncrDisp();
+
+  if (disp.Size() != size) {
+    opserr << "OPS_GetNodeIncrDis - crd size mismatch\n";
+    return -1;
+  }
+  for (int i=0; i < size; i++) 
+    data[i] = disp(i);
+    
+  return 0;
+}
+
+
+extern "C" 
+int OPS_GetNodeIncrDeltaDisp(int *nodeTag, int *sizeData, double *data)
+{
+  Node *theNode = theDomain->getNode(*nodeTag);
+
+  if (theNode == 0) {
+    opserr << "OPS_GetNodeIncrDisp - no node with tag " << *nodeTag << endln;
+    return -1;
+  }
+  int size = *sizeData;
+  const Vector &disp = theNode->getIncrDeltaDisp();
+
+  if (disp.Size() != size) {
+    opserr << "OPS_GetNodeIncrDis - crd size mismatch\n";
+    return -1;
+  }
+  for (int i=0; i < size; i++) 
+    data[i] = disp(i);
+    
+  return 0;
+}
+
+
 
 int
 Tcl_addWrapperElement(eleObj *theEle, ClientData clientData, Tcl_Interp *interp,  int argc, 
