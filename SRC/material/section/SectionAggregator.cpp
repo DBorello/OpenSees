@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2009-10-01 23:04:32 $
+// $Revision: 1.23 $
+// $Date: 2009-10-02 20:48:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.cpp,v $
                                                                         
                                                                         
@@ -798,12 +798,12 @@ SectionAggregator::setResponse(const char **argv, int argc, OPS_Stream &output)
 	(strcmp(argv[0],"forces") == 0) || (strcmp(argv[0],"force") == 0) ||
        (strcmp(argv[0],"forceAndDeformation") == 0)) {
     
-    return this::SectionForceDeformation::setResponse(argv, argc, output);
+    return this->SectionForceDeformation::setResponse(argv, argc, output);
   } 
   
 
   if (theSection != 0)
-      return theSection->setResponse(argv, argc, output)    
+    return theSection->setResponse(argv, argc, output);
 
   return 0;
 }
