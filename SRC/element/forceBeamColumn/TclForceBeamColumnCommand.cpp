@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2009-08-19 20:18:52 $
+// $Revision: 1.22 $
+// $Date: 2009-10-02 21:23:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/TclForceBeamColumnCommand.cpp,v $
                                                                         
 // Written: MHS
@@ -184,27 +184,73 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
       return TCL_ERROR;
     }
 
-    if (Tcl_GetInt(interp, argv[6], &secTag) != TCL_OK) {
-      opserr << "WARNING invalid secTag\n";
+    if (nIP <= 0) {
+      opserr << "WARNING invalid nIP - cannot be <= 0 \n";
       opserr << argv[1] << " element: " << eleTag << endln;
       return TCL_ERROR;
     }
 
-    SectionForceDeformation *theSection = theTclBuilder->getSection(secTag);
-    if (theSection == 0) {
-      opserr << "WARNING section not found\n";
-      opserr << "Section: " << secTag;
-      opserr << argv[1] << " element: " << eleTag << endln;
-      return TCL_ERROR;
-    }
+    int argi = 6;
+    SectionForceDeformation **sections = new SectionForceDeformation *[nIP];
 
-    if (Tcl_GetInt(interp, argv[7], &transfTag) != TCL_OK) {
-      opserr << "WARNING invalid transfTag\n";
-      opserr << argv[1] << " element: " << eleTag << endln;
-      return TCL_ERROR;
+    if (strcmp(argv[argi],"-sections") != 0)  {
+
+      if (Tcl_GetInt(interp, argv[argi], &secTag) != TCL_OK) {
+	opserr << "WARNING invalid secTag\n";
+	opserr << argv[1] << " element: " << eleTag << endln;
+	return TCL_ERROR;
+      } else 
+	argi++;
+   
+       SectionForceDeformation *theSection = theTclBuilder->getSection(secTag);
+      if (theSection == 0) {
+	opserr << "WARNING section not found\n";
+	opserr << "Section: " << secTag;
+	opserr << argv[1] << " element: " << eleTag << endln;
+	return TCL_ERROR;
+      }
+    
+      if (Tcl_GetInt(interp, argv[argi], &transfTag) != TCL_OK) {
+	opserr << "WARNING invalid transfTag\n";
+	opserr << argv[1] << " element: " << eleTag << endln;
+	return TCL_ERROR;
+      } else
+	argi++;
+
+      for (int i = 0; i < nIP; i++)
+	sections[i] = theSection;
+
+
+    } else {
+      
+      argi++;
+      // get section tags
+      for (int i=0; i<nIP; i++) {
+	if (Tcl_GetInt(interp, argv[argi], &secTag) != TCL_OK) {
+	  opserr << "WARNING invalid secTag\n";
+	  opserr << argv[1] << " element: " << eleTag << endln;
+	  return TCL_ERROR;
+	} else 
+	  argi++;
+	
+	SectionForceDeformation *theSection = theTclBuilder->getSection(secTag);
+	if (theSection == 0) {
+	  opserr << "WARNING section not found\n";
+	  opserr << "Section: " << secTag;
+	  opserr << argv[1] << " element: " << eleTag << endln;
+	  return TCL_ERROR;
+	}      
+	sections[i] = theSection;  
+      }
+
+      if (Tcl_GetInt(interp, argv[argi], &transfTag) != TCL_OK) {
+	opserr << "WARNING invalid transfTag\n";
+	opserr << argv[1] << " element: " << eleTag << endln;
+	return TCL_ERROR;
+      } else
+	argi++;
     }
     
-    int argi = 8;
     int numIter = 10;
     double tol = 1.0e-12;
     double mass = 0.0;
@@ -266,10 +312,6 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
 	return TCL_ERROR;
       }
     }
-    
-    SectionForceDeformation **sections = new SectionForceDeformation *[nIP];
-    for (int i = 0; i < nIP; i++)
-      sections[i] = theSection;
 
     LobattoBeamIntegration beamIntegr;
 
