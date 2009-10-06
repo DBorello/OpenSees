@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-04-02 23:41:13 $
+// $Revision: 1.7 $
+// $Date: 2009-10-06 23:14:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/BFGS.cpp,v $
                                                                         
 // Written: Ed Love
@@ -42,12 +42,15 @@ BFGS::BFGS(int theTangentToUse, int n )
 :EquiSolnAlgo(EquiALGORITHM_TAGS_BFGS),
  tangent(theTangentToUse), numberLoops(n) 
 {
-  s  = new Vector*[numberLoops+3];
 
+  theTest = 0;
+  localTest = 0;
+
+  s  = new Vector*[numberLoops+3];
   z  = new Vector*[numberLoops+3];
 
   //  r  = new (Vector*)[numberLoops+3];
-
+  opserr << "HELLO3\n";
   residOld = 0;
   residNew = 0;
   du = 0;
@@ -62,18 +65,18 @@ BFGS::BFGS(int theTangentToUse, int n )
     s[i] = 0;
     z[i] = 0;
   }
- 
-  localTest = 0;
 
+  localTest = 0;
 }
 
 //Constructor
 BFGS::BFGS(ConvergenceTest &theT, int theTangentToUse, int n)
 :EquiSolnAlgo(EquiALGORITHM_TAGS_BFGS),
- tangent(theTangentToUse), numberLoops(n) 
+ tangent(theTangentToUse), numberLoops(n)
 {
-  s  = new Vector*[numberLoops+3];
+  theTest = &theT;
 
+  s  = new Vector*[numberLoops+3];
   z  = new Vector*[numberLoops+3];
 
   residOld = 0;
@@ -88,17 +91,14 @@ BFGS::BFGS(ConvergenceTest &theT, int theTangentToUse, int n)
   for ( int i =0; i < numberLoops+3; i++ ) {
     s[i] = 0;
     z[i] = 0;
-    //r[i] = 0;
   }
 
-  localTest = theTest->getCopy( this->numberLoops );
-
+  localTest = theTest->getCopy(numberLoops);
 }
 
 // Destructor
 BFGS::~BFGS()
 {
-
   if (temp != 0) delete temp;
   temp = 0;
 
@@ -137,8 +137,6 @@ BFGS::~BFGS()
   if ( localTest != 0 )
      delete localTest;
   localTest = 0;
-
-  
 }
 
 void 
@@ -149,29 +147,29 @@ BFGS::setLinks(AnalysisModel &theModel,
 {
   this->EquiSolnAlgo::setLinks(theModel, theIntegrator, theSOE, theTest);
 
-    if ( localTest != 0 )  
-      delete localTest ;
-
-    localTest = theTest->getCopy( this->numberLoops ) ;
-    if (localTest == 0) {
-      opserr << "BFGS::setLinks() - could not get a copy\n";
-    } 
+  if ( localTest != 0 )  
+    delete localTest ;
+  
+  localTest = theTest->getCopy( this->numberLoops ) ;
+  if (localTest == 0) {
+    opserr << "BFGS::setLinks() - could not get a copy\n";
+  } 
 }  
 
 int
 BFGS::setConvergenceTest(ConvergenceTest *newTest)
 {
-    theTest = newTest;
-
-    if ( localTest != 0 )  
-      delete localTest;
-
-    localTest = theTest->getCopy( this->numberLoops );
-    if (localTest != 0) {
-      opserr << "BFGS::setConvergenceTest() - could not get copy for local test\n";
-      return -1;
-    } else
-      return 0;
+  theTest = newTest;
+  
+  if ( localTest != 0 )  
+    delete localTest;
+  
+  localTest = theTest->getCopy( this->numberLoops );
+  if (localTest == 0) {
+    opserr << "BFGS::setConvergenceTest() - could not get copy for local test\n";
+    return -1;
+  } else
+    return 0;
 }
 
 
