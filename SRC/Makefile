@@ -19,7 +19,7 @@ all:
 	@$(CD) $(FE)/analysis; $(MAKE);
 	@$(CD) $(FE)/graph; $(MAKE);
 	@$(CD) $(FE)/utility; $(MAKE);
-	@$(CD) $(FE)/convergenceTest; $(MAKE);
+	@$(CD) $(FE)/convergenceTest; $(MAKE)
 	@$(CD) $(FE)/recorder; $(MAKE);
 	@$(CD) $(FE)/tcl; $(MAKE);
 	@$(CD) $(FE)/renderer; $(MAKE);
@@ -414,7 +414,9 @@ ZHY_LIBS =	$(FE)/material/nD/soil/FluidSolidPorousMaterial.o \
 	$(FE)/material/nD/soil/PressureIndependMultiYield.o \
 	$(FE)/material/nD/soil/T2Vector.o \
 	$(FE)/element/UP-ucsd/BrickUP.o \
+	$(FE)/element/UP-ucsd/BBarBrickUP.o \
 	$(FE)/element/UP-ucsd/FourNodeQuadUP.o \
+	$(FE)/element/UP-ucsd/BBarFourNodeQuadUP.o \
 	$(FE)/element/UP-ucsd/Nine_Four_Node_QuadUP.o \
 	$(FE)/element/UP-ucsd/Twenty_Eight_Node_BrickUP.o \
 	$(FE)/element/UP-ucsd/shp3dv.o \
