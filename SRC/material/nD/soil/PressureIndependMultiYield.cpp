@@ -1,10 +1,10 @@
-// $Revision: 1.40 $
-// $Date: 2009-03-16 19:41:30 $
+// $Revision: 1.41 $
+// $Date: 2009-10-07 20:14:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
 
 // Written: ZHY
 // Created: August 2000
-
+// Last Modified: September 2009
 //
 // PressureIndependMultiYield.cpp
 // -------------------
@@ -245,6 +245,7 @@ void PressureIndependMultiYield::elast2Plast(void)
 int PressureIndependMultiYield::setTrialStrain (const Vector &strain)
 {
   int ndm = ndmx[matN];
+  if (ndmx[matN] == 0) ndm = 2;
 
   static Vector temp(6);
   if (ndm==3 && strain.Size()==6)
@@ -280,6 +281,7 @@ int PressureIndependMultiYield::setTrialStrain (const Vector &strain, const Vect
 int PressureIndependMultiYield::setTrialStrainIncr (const Vector &strain)
 {
   int ndm = ndmx[matN];
+  if (ndmx[matN] == 0) ndm = 2;
 
   static Vector temp(6);
   if (ndm==3 && strain.Size()==6)
@@ -310,6 +312,7 @@ const Matrix & PressureIndependMultiYield::getTangent (void)
 {
   int loadStage = loadStagex[matN];
   int ndm = ndmx[matN];
+  if (ndmx[matN] == 0) ndm = 3;
 
   if (loadStage == 1 && e2p == 0) elast2Plast();
 
@@ -378,6 +381,7 @@ const Matrix & PressureIndependMultiYield::getTangent (void)
 const Matrix & PressureIndependMultiYield::getInitialTangent (void)
 {
   int ndm = ndmx[matN];
+  if (ndmx[matN] == 0) ndm = 3;
 
   for (int i=0;i<6;i++)
     for (int j=0;j<6;j++) {
@@ -410,6 +414,7 @@ const Vector & PressureIndependMultiYield::getStress (void)
   int loadStage = loadStagex[matN];
   int numOfSurfaces = numOfSurfacesx[matN];
   int ndm = ndmx[matN];
+  if (ndmx[matN] == 0) ndm = 3;
 
   int i;
   if (loadStage == 1 && e2p == 0) elast2Plast();
@@ -521,6 +526,7 @@ NDMaterial * PressureIndependMultiYield::getCopy (const char *code)
 const char * PressureIndependMultiYield::getType (void) const
 {
   int ndm = ndmx[matN];
+  if (ndmx[matN] == 0) ndm = 2;
 
   return (ndm == 2) ? "PlaneStrain" : "ThreeDimensional";
 }
@@ -529,6 +535,7 @@ const char * PressureIndependMultiYield::getType (void) const
 int PressureIndependMultiYield::getOrder (void) const
 {
   int ndm = ndmx[matN];
+  if (ndmx[matN] == 0) ndm = 2;
 
   return (ndm == 2) ? 3 : 6;
 }
@@ -564,6 +571,11 @@ int PressureIndependMultiYield::updateParameter(int responseID, Information &inf
     refShearModulus = info.theDouble;
   else if (responseID==11)
     refBulkModulus = info.theDouble;
+
+  // used by BBarFourNodeQuadUP element
+  else if (responseID==20 && ndmx[matN] == 2)
+		ndmx[matN] = 0;
+
   return 0;
 }
 
@@ -870,6 +882,7 @@ void PressureIndependMultiYield::Print(OPS_Stream &s, int flag )
 const Vector & PressureIndependMultiYield::getCommittedStress (void)
 {
 	int ndm = ndmx[matN];
+    if (ndmx[matN] == 0) ndm = 2;
 	int numOfSurfaces = numOfSurfacesx[matN];
 
 	double scale = sqrt(3./2.)*currentStress.deviatorLength()/committedSurfaces[numOfSurfaces].size();
@@ -902,6 +915,7 @@ const Vector & PressureIndependMultiYield::getCommittedStress (void)
 const Vector & PressureIndependMultiYield::getCommittedStrain (void)
 {
 	int ndm = ndmx[matN];
+    if (ndmx[matN] == 0) ndm = 2;
 
   if (ndm==3)
     return currentStrain.t2Vector(1);
@@ -1387,4 +1401,5 @@ int PressureIndependMultiYield:: isCrossingNextSurface(void)
 
   return 0;
 }
+
 

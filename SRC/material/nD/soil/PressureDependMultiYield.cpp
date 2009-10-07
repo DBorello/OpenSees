@@ -1,10 +1,10 @@
-// $Revision: 1.45 $
-// $Date: 2009-01-29 00:42:03 $
+// $Revision: 1.46 $
+// $Date: 2009-10-07 20:14:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
 
 // Written: ZHY
 // Created: August 2000
-
+// Last Modified: September 2009
 //
 // PressureDependMultiYield.cpp
 // -------------------
@@ -396,6 +396,7 @@ int
 PressureDependMultiYield::setTrialStrain (const Vector &strain)
 {
   int ndm = ndmx[matN];
+  if (ndmx[matN] == 0) ndm = 2;
 
   if (ndm==3 && strain.Size()==6)
     workV6 = strain;
@@ -430,6 +431,7 @@ int
 PressureDependMultiYield::setTrialStrainIncr (const Vector &strain)
 {
   int ndm = ndmx[matN];
+  if (ndmx[matN] == 0) ndm = 2;
 
   if (ndm==3 && strain.Size()==6)
     workV6 = strain;
@@ -467,6 +469,7 @@ PressureDependMultiYield::getTangent (void)
   double refPressure = refPressurex[matN];
   double residualPress = residualPressx[matN];
   int ndm = ndmx[matN];
+  if (ndmx[matN] == 0) ndm = 3;
 
   if (loadStage == 1 && e2p == 0) elast2Plast();
   if (loadStage==2 && initPress==refPressure)
@@ -537,7 +540,9 @@ PressureDependMultiYield::getTangent (void)
 				if (i<3) theTangent(i,j) -= coeff3 * workV6[j];
 				if (j<3) theTangent(i,j) -= coeff4 * workV6[i];*/
       }
-  }  if (ndm==3)
+  }
+
+  if (ndm==3)
     return theTangent;
   else {
     static Matrix workM(3,3);
@@ -573,6 +578,7 @@ PressureDependMultiYield::getInitialTangent (void)
   double refPressure = refPressurex[matN];
   double residualPress = residualPressx[matN];
   int ndm = ndmx[matN];
+  if (ndmx[matN] == 0) ndm = 3;
 
   if (loadStage==2 && initPress==refPressure)
 	  initPress = currentStress.volume();
@@ -627,6 +633,7 @@ PressureDependMultiYield::getStress (void)
   int loadStage = loadStagex[matN];
   int numOfSurfaces = numOfSurfacesx[matN];
   int ndm = ndmx[matN];
+  if (ndmx[matN] == 0) ndm = 3;
 
   int i, is;
   if (loadStage == 1 && e2p == 0)
@@ -781,6 +788,7 @@ const char *
 PressureDependMultiYield::getType (void) const
 {
   int ndm = ndmx[matN];
+  if (ndmx[matN] == 0) ndm = 2;
 
   return (ndm == 2) ? "PlaneStrain" : "ThreeDimensional";
 }
@@ -789,6 +797,7 @@ int
 PressureDependMultiYield::getOrder (void) const
 {
   int ndm = ndmx[matN];
+  if (ndmx[matN] == 0) ndm = 2;
 
   return (ndm == 2) ? 3 : 6;
 }
@@ -802,7 +811,7 @@ int PressureDependMultiYield::setParameter(const char **argv, int argc, Paramete
   int matTag = atoi(argv[1]);
 
   if (this->getTag() == matTag) {
-    if (strcmp(argv[0],"updateMaterialStage") == 0) 
+    if (strcmp(argv[0],"updateMaterialStage") == 0)
       return param.addObject(1, this);
     else if (strcmp(argv[0],"shearModulus") == 0)
       return param.addObject(10, this);
@@ -831,6 +840,10 @@ PressureDependMultiYield::updateParameter(int responseID, Information &info)
     //    opserr << "PressureDependMultiYield::updateParameter() - bulkModulus " << info.theDouble << endln;
     refBulkModulusx[matN]=info.theDouble;
   }
+
+  // used by BBarFourNodeQuadUP element
+  else if (responseID==20 && ndmx[matN] == 2)
+		ndmx[matN] = 0;
 
   return 0;
 }
@@ -1185,13 +1198,13 @@ PressureDependMultiYield::setResponse (const char **argv, int argc, OPS_Stream &
 {
   if (strcmp(argv[0],"stress") == 0 || strcmp(argv[0],"stresses") == 0)
     return new MaterialResponse(this, 1, this->getCommittedStress());
-  
+
   else if (strcmp(argv[0],"strain") == 0 || strcmp(argv[0],"strains") == 0)
     return new MaterialResponse(this, 2, this->getCommittedStrain());
-  
+
   else if (strcmp(argv[0],"tangent") == 0)
     return new MaterialResponse(this, 3, this->getTangent());
-  
+
   else if (strcmp(argv[0],"backbone") == 0) {
     int numOfSurfaces = numOfSurfacesx[matN];
     Matrix curv(numOfSurfaces+1,(argc-1)*2);
@@ -1216,7 +1229,7 @@ PressureDependMultiYield::getBackbone (Matrix & bb)
 
   double vol, conHeig, scale, factor, shearModulus, stress1,
     stress2, strain1, strain2, plastModulus, elast_plast, gre;
-  
+
   for (int k=0; k<bb.noCols()/2; k++) {
     vol = bb(0,k*2);
     if (vol<=0.) {
@@ -1228,7 +1241,7 @@ PressureDependMultiYield::getBackbone (Matrix & bb)
     scale = -conHeig / (refPressure-residualPress);
     factor = pow(scale, pressDependCoeff);
     shearModulus = factor*refShearModulus;
-    
+
     for (int i=1; i<=numOfSurfaces; i++) {
       if (i==1) {
 	stress2 = committedSurfaces[i].size()*conHeig/sqrt(3.0);
@@ -1287,9 +1300,10 @@ const Vector &
 PressureDependMultiYield::getCommittedStress (void)
 {
   int ndm = ndmx[matN];
+    if (ndmx[matN] == 0) ndm = 2;
   int numOfSurfaces = numOfSurfacesx[matN];
   double residualPress = residualPressx[matN];
-  
+
   double scale = currentStress.deviatorRatio(residualPress)/committedSurfaces[numOfSurfaces].size();
   if (loadStagex[matN] != 1) scale = 0.;
   if (ndm==3) {
@@ -1329,7 +1343,8 @@ PressureDependMultiYield::getCommittedStress (void)
 const
 Vector & PressureDependMultiYield::getCommittedStrain (void)
 {
-	int ndm = ndmx[matN];
+  int ndm = ndmx[matN];
+  if (ndmx[matN] == 0) ndm = 2;
 
   if (ndm==3)
     return currentStrain.t2Vector(1);
@@ -2213,3 +2228,4 @@ PressureDependMultiYield:: isCrossingNextSurface(void)
 
   return 0;
 }
+
