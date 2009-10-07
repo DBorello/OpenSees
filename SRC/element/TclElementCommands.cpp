@@ -17,12 +17,12 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
-// $Revision: 1.56 $
-// $Date: 2009-08-19 20:18:09 $
+
+// $Revision: 1.57 $
+// $Date: 2009-10-07 20:12:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
-                                                                        
-// Written: fmk 
+
+// Written: fmk
 // Created: 07/99
 // Revision: A
 //
@@ -54,11 +54,11 @@
 // SOME STATIC POINTERS USED IN THE FUNCTIONS INVOKED BY THE INTERPRETER
 //
 
-extern int OPS_ResetInput(ClientData clientData, 
-			  Tcl_Interp *interp,  
-			  int cArg, 
-			  int mArg, 
-			  TCL_Char **argv, 
+extern int OPS_ResetInput(ClientData clientData,
+			  Tcl_Interp *interp,
+			  int cArg,
+			  int mArg,
+			  TCL_Char **argv,
 			  Domain *domain,
 			  TclModelBuilder *builder);
 
@@ -72,60 +72,60 @@ static ElementPackageCommand *theElementPackageCommands = NULL;
 
 extern void printCommand(int argc, TCL_Char **argv);
 
-// 
+//
 // THE PROTOTYPES OF THE FUNCTIONS INVOKED BY THE INTERPRETER
 //
 
 extern int
-TclModelBuilder_addFeapTruss(ClientData clientData, Tcl_Interp *interp,  int argc, 
+TclModelBuilder_addFeapTruss(ClientData clientData, Tcl_Interp *interp,  int argc,
 			     TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
 
 extern int
-TclModelBuilder_addTruss(ClientData clientData, Tcl_Interp *interp,  int argc, 
-			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
+TclModelBuilder_addTruss(ClientData clientData, Tcl_Interp *interp,  int argc,
+			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
 
 
 extern int
-Tcl_addWrapperElement(eleObj *, ClientData clientData, Tcl_Interp *interp,  int argc, 
-		      TCL_Char **argv, Domain*, TclModelBuilder *); 
+Tcl_addWrapperElement(eleObj *, ClientData clientData, Tcl_Interp *interp,  int argc,
+		      TCL_Char **argv, Domain*, TclModelBuilder *);
 
 extern int
-TclModelBuilder_addElasticBeam(ClientData clientData, Tcl_Interp *interp,  int argc, 
+TclModelBuilder_addElasticBeam(ClientData clientData, Tcl_Interp *interp,  int argc,
 			       TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
 
 extern int
 TclModelBuilder_addBrick(ClientData clientData, Tcl_Interp *interp,
-			 int argc, TCL_Char **argv, Domain*, 
+			 int argc, TCL_Char **argv, Domain*,
 			 TclModelBuilder *, int argStart);
 
 extern int
 TclModelBuilder_addShellMITC4(ClientData clientData, Tcl_Interp *interp,
-			      int argc, TCL_Char **argv, Domain*, 
+			      int argc, TCL_Char **argv, Domain*,
 			      TclModelBuilder *, int argStart);
 
-extern int 
+extern int
 TclModelBuilder_addConstantPressureVolumeQuad(ClientData, Tcl_Interp *, int, TCL_Char **,
 					      Domain*, TclModelBuilder *);
 
-extern int 
+extern int
 TclModelBuilder_addJoint2D(ClientData, Tcl_Interp *, int, TCL_Char **,
 			   Domain*, TclModelBuilder *);
 
-extern int 
+extern int
 TclModelBuilder_addJoint3D(ClientData, Tcl_Interp *, int, TCL_Char **,
 			   Domain*, TclModelBuilder *);
 
-extern int 
+extern int
 TclModelBuilder_addEnhancedQuad(ClientData, Tcl_Interp *, int, TCL_Char **,
 				Domain*, TclModelBuilder *);
 
-extern int 
+extern int
 TclModelBuilder_addNineNodeMixedQuad(ClientData, Tcl_Interp *, int, TCL_Char **,
 				     Domain*, TclModelBuilder *);
 
 
-// GLF			       
-extern int 
+// GLF
+extern int
 TclModelBuilder_addZeroLength(ClientData, Tcl_Interp *, int, TCL_Char **,
 			      Domain*, TclModelBuilder *);
 
@@ -133,102 +133,102 @@ TclModelBuilder_addZeroLength(ClientData, Tcl_Interp *, int, TCL_Char **,
 // add by Gang Wang for Contact Element
 extern int
 TclModelBuilder_addZeroLengthContact2D(ClientData, Tcl_Interp *, int, TCL_Char **,
-			      Domain*, TclModelBuilder *);
+				       Domain*, TclModelBuilder *);
 
 // add by Gang Wang for Contact Element
 extern int
 TclModelBuilder_addZeroLengthContact3D(ClientData, Tcl_Interp *, int, TCL_Char **,
-			      Domain*, TclModelBuilder *);
+				       Domain*, TclModelBuilder *);
 
-// MHS			       
-extern int 
+// MHS
+extern int
 TclModelBuilder_addZeroLengthSection(ClientData, Tcl_Interp *, int, TCL_Char **,
 				     Domain*, TclModelBuilder *);
 
 // MHS
-extern int 
+extern int
 TclModelBuilder_addZeroLengthND(ClientData, Tcl_Interp *, int, TCL_Char **,
 				Domain*, TclModelBuilder *);
 
 
 // MHS
-extern int 
+extern int
 TclModelBuilder_addBeamWithHinges(ClientData, Tcl_Interp *, int, TCL_Char **,
 				  Domain*, TclModelBuilder *);
 // Quan
-extern int 
+extern int
 TclModelBuilder_addFourNodeQuadWithSensitivity(ClientData, Tcl_Interp *, int, TCL_Char **,
-				Domain*, TclModelBuilder *);
+					       Domain*, TclModelBuilder *);
 
-extern int 
+extern int
 TclModelBuilder_addFourNodeQuad(ClientData, Tcl_Interp *, int, TCL_Char **,
 				Domain*, TclModelBuilder *);
 
-extern int 
+extern int
 TclModelBuilder_addDispBeamColumnInt(ClientData, Tcl_Interp *, int, TCL_Char **,
-				  Domain*, TclModelBuilder *);
+				     Domain*, TclModelBuilder *);
 
-extern int 
+extern int
 TclModelBuilder_addForceBeamColumn(ClientData, Tcl_Interp *, int, TCL_Char **,
 				   Domain*, TclModelBuilder *);
-		   
+
 // NM
 extern int
 TclModelBuilder_addBeamColumnJoint(ClientData, Tcl_Interp *, int, TCL_Char **,
 				   Domain*, TclModelBuilder *, int);
 
 //Boris Jeremic & Zhaohui
-extern int TclModelBuilder_addEightNodeBrick(ClientData, 
-                                             Tcl_Interp *,  
-					     int, 
+extern int TclModelBuilder_addEightNodeBrick(ClientData,
+                                             Tcl_Interp *,
+					     int,
 					     TCL_Char **,
-					     Domain*, 
-					     TclModelBuilder *, 
+					     Domain*,
+					     TclModelBuilder *,
 					     int);
 //Boris Jeremic & Zhaohui
-extern int TclModelBuilder_addTwentyNodeBrick(ClientData, 
-                                              Tcl_Interp *,  
-					      int, 
+extern int TclModelBuilder_addTwentyNodeBrick(ClientData,
+                                              Tcl_Interp *,
+					      int,
 					      TCL_Char **,
-					      Domain*, 
-					      TclModelBuilder *, 
+					      Domain*,
+					      TclModelBuilder *,
 					      int);
 
 //Boris Jeremic & Xiaoyan 01/07/2002
-extern int TclModelBuilder_addEightNodeBrick_u_p_U(ClientData, 
-                                                   Tcl_Interp *,  
-						   int, 
+extern int TclModelBuilder_addEightNodeBrick_u_p_U(ClientData,
+                                                   Tcl_Interp *,
+						   int,
 						   TCL_Char **,
-						   Domain*, 
-						   TclModelBuilder *, 
+						   Domain*,
+						   TclModelBuilder *,
 						   int);
 //Boris Jeremic & Xiaoyan 01/07/2002
-extern int TclModelBuilder_addTwentyNodeBrick_u_p_U(ClientData, 
-                                                    Tcl_Interp *,  
-						    int, 
+extern int TclModelBuilder_addTwentyNodeBrick_u_p_U(ClientData,
+                                                    Tcl_Interp *,
+						    int,
 						    TCL_Char **,
-						    Domain*, 
-						    TclModelBuilder *, 
+						    Domain*,
+						    TclModelBuilder *,
 						    int);
 
 //Boris Jeremic & Guanzhou Jie 10/30/2003
-extern int TclModelBuilder_addTwentySevenNodeBrick(ClientData, 
-                                                   Tcl_Interp *, 
-                                                   int, 
-                                                   TCL_Char **, 
-                                                   Domain*, 
-                                                   TclModelBuilder *, 
+extern int TclModelBuilder_addTwentySevenNodeBrick(ClientData,
+                                                   Tcl_Interp *,
+                                                   int,
+                                                   TCL_Char **,
+                                                   Domain*,
+                                                   TclModelBuilder *,
                                                    int);
 
 
 // Andreas Schellenberg
 extern int
 TclModelBuilder_addGenericClient(ClientData , Tcl_Interp *,  int, TCL_Char **,
-				 Domain*, TclModelBuilder *, int argStart); 
+				 Domain*, TclModelBuilder *, int argStart);
 
 extern int
 TclModelBuilder_addGenericCopy(ClientData , Tcl_Interp *,  int, TCL_Char **,
-				 Domain*, TclModelBuilder *, int argStart); 
+				 Domain*, TclModelBuilder *, int argStart);
 
 
 //Rohit Kraul
@@ -242,25 +242,36 @@ TclModelBuilder_addElement2dYS(ClientData, Tcl_Interp *, int, TCL_Char **,
 // Zhaohui Yang
 extern int
 TclModelBuilder_addFourNodeQuadUP(ClientData, Tcl_Interp *, int, TCL_Char **,
-				Domain*, TclModelBuilder *);
+				  Domain*, TclModelBuilder *);
 
 // Zhaohui Yang
 extern int
 TclModelBuilder_addBrickUP(ClientData, Tcl_Interp *, int, TCL_Char **,
-				Domain*, TclModelBuilder *);
+			   Domain*, TclModelBuilder *);
 
 // Zhaohui Yang
 extern int
 TclModelBuilder_addNineFourNodeQuadUP(ClientData, Tcl_Interp *, int, TCL_Char **,
-				Domain*, TclModelBuilder *);
+				      Domain*, TclModelBuilder *);
+
+// Zhaohui Yang
+extern int
+TclModelBuilder_addBBarFourNodeQuadUP(ClientData, Tcl_Interp *, int, TCL_Char **,
+				      Domain*, TclModelBuilder *);
+
+// Zhaohui Yang
+extern int
+TclModelBuilder_addBBarBrickUP(ClientData, Tcl_Interp *, int, TCL_Char **,
+			       Domain*, TclModelBuilder *);
+
 // Jinchi Lu
 extern int
 TclModelBuilder_addTwentyEightNodeBrickUP(ClientData, Tcl_Interp *, int, TCL_Char **,
-				Domain*, TclModelBuilder *);
+					  Domain*, TclModelBuilder *);
 // Jinchi Lu
 extern int
 TclModelBuilder_addTwentyNodeBrick(ClientData, Tcl_Interp *, int, TCL_Char **,
-				Domain*, TclModelBuilder *);
+				   Domain*, TclModelBuilder *);
 
 // Boris Jeremic and Zhao Cheng
 extern int
@@ -270,65 +281,65 @@ TclModelBuilder_addTLFD20nBrick(ClientData, Tcl_Interp *, int, TCL_Char **,
 // Boris Jeremic and Zhao Cheng
 extern int
 TclModelBuilder_addTLFD8nBrick(ClientData, Tcl_Interp *, int, TCL_Char **,
-				Domain*, TclModelBuilder *, int);
-				
-				
+			       Domain*, TclModelBuilder *, int);
+
+
 // Boris Jeremic and Zhao Cheng
 extern int
 TclModelBuilder_addEightNode_LDBrick_u_p(ClientData, Tcl_Interp *, int, TCL_Char **,
-				Domain*, TclModelBuilder *, int);
+					 Domain*, TclModelBuilder *, int);
 
 // Boris Jeremic and Zhao Cheng
 extern int
 TclModelBuilder_addEightNode_Brick_u_p(ClientData, Tcl_Interp *, int, TCL_Char **,
-				Domain*, TclModelBuilder *, int);
+				       Domain*, TclModelBuilder *, int);
 
 // Andreas Schellenberg
 extern int
-TclModelBuilder_addActuator(ClientData clientData, Tcl_Interp *interp,  int argc, 
-			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
+TclModelBuilder_addActuator(ClientData clientData, Tcl_Interp *interp,  int argc,
+			    TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
 
 extern int
-TclModelBuilder_addActuatorCorot(ClientData clientData, Tcl_Interp *interp,  int argc, 
-			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
+TclModelBuilder_addActuatorCorot(ClientData clientData, Tcl_Interp *interp,  int argc,
+				 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
 
 extern int
-TclModelBuilder_addAdapter(ClientData clientData, Tcl_Interp *interp,  int argc, 
-			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
+TclModelBuilder_addAdapter(ClientData clientData, Tcl_Interp *interp,  int argc,
+			   TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
 
 extern int
-TclModelBuilder_addFlatSliderBearing(ClientData clientData, Tcl_Interp *interp,  int argc, 
-			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
+TclModelBuilder_addFlatSliderBearing(ClientData clientData, Tcl_Interp *interp,  int argc,
+				     TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
 
 /*extern int
-TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp,  int argc, 
-			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
-
-extern int
-TclModelBuilder_addDoubleFPBearing(ClientData clientData, Tcl_Interp *interp,  int argc, 
-			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
+  TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp,  int argc,
+  TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
+  
+  extern int
+  TclModelBuilder_addDoubleFPBearing(ClientData clientData, Tcl_Interp *interp,  int argc,
+  TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
 */
 extern int
-TclModelBuilder_addElastomericBearing(ClientData clientData, Tcl_Interp *interp,  int argc, 
-			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
+TclModelBuilder_addElastomericBearing(ClientData clientData, Tcl_Interp *interp,  int argc,
+				      TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
 
 extern int
-TclModelBuilder_addTwoNodeLink(ClientData clientData, Tcl_Interp *interp,  int argc, 
-			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart); 
+TclModelBuilder_addTwoNodeLink(ClientData clientData, Tcl_Interp *interp,  int argc,
+			       TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
 
 
 int
 TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
-			      int argc, TCL_Char **argv, 
+			      int argc, TCL_Char **argv,
 			      Domain *theTclDomain, TclModelBuilder *theTclBuilder)
 {
-  // ensure the destructor has not been called - 
+  // ensure the destructor has not been called -
   if (theTclBuilder == 0) {
-    opserr << "WARNING builder has been destroyed\n";    
+    opserr << "WARNING builder has been destroyed\n";
     return TCL_ERROR;
   }
 
-  // check at least two arguments so don't segemnt fault on strcmp  
+  // check at least two arguments so don't segemnt fault on strcmp
   if (argc < 2) {
     opserr << "WARNING need to specify an element type\n";
     opserr << "Want: element eleType <specific element args> .. see manual for valid eleTypes & arguments\n";
@@ -348,9 +359,9 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
   } else if (strcmp(argv[1],"elasticBeamColumn") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addElasticBeam(clientData, interp, argc, argv,
-						theTclDomain, theTclBuilder, eleArgStart);    
+						theTclDomain, theTclBuilder, eleArgStart);
     return result;
-  } 
+  }
   /*
 else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
     int result = TclModelBuilder_addNLBeamColumn(clientData, interp, argc, argv,
@@ -361,7 +372,7 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
 						   theTclDomain, theTclBuilder);
     return result;
 
-  } 
+  }
   */
   else if (strcmp(argv[1],"dispBeamColumnInt") == 0) {
     int result = TclModelBuilder_addDispBeamColumnInt(clientData, interp, argc, argv,
@@ -373,64 +384,71 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
 						    theTclDomain, theTclBuilder);
     return result;
   } else if (strstr(argv[1],"beamWithHinges") != 0) {
-	  int result = TclModelBuilder_addBeamWithHinges(clientData, interp, argc, argv,
-						 theTclDomain, theTclBuilder);
+    int result = TclModelBuilder_addBeamWithHinges(clientData, interp, argc, argv,
+						   theTclDomain, theTclBuilder);
     return result;
   } else if ((strcmp(argv[1],"quad") == 0) || (strcmp(argv[1],"stdQuad") == 0)) {
     int result = TclModelBuilder_addFourNodeQuad(clientData, interp, argc, argv,
 						 theTclDomain, theTclBuilder);
-	  return result;
+    return result;
   } else if (strcmp(argv[1],"quadWithSensitivity") == 0) {
     int result = TclModelBuilder_addFourNodeQuadWithSensitivity(clientData, interp, argc, argv,
-						 theTclDomain, theTclBuilder);
-	  return result;
+								theTclDomain, theTclBuilder);
+    return result;
   } else if (strcmp(argv[1],"enhancedQuad") == 0) {
     int result = TclModelBuilder_addEnhancedQuad(clientData, interp, argc, argv,
 						 theTclDomain, theTclBuilder);
     return result;
   } else if ((strcmp(argv[1],"bbarQuad") == 0) || (strcmp(argv[1],"mixedQuad") == 0)) {
-    int result = TclModelBuilder_addConstantPressureVolumeQuad(clientData, interp, 
+    int result = TclModelBuilder_addConstantPressureVolumeQuad(clientData, interp,
 							       argc, argv,
-							       theTclDomain, 
+							       theTclDomain,
 							       theTclBuilder);
     return result;
-  } else if ((strcmp(argv[1],"nineNodeMixedQuad") == 0) 
+  } else if ((strcmp(argv[1],"nineNodeMixedQuad") == 0)
 	     || (strcmp(argv[1],"nineNodeQuad") == 0)) {
-    int result = TclModelBuilder_addNineNodeMixedQuad(clientData, interp, 
+    int result = TclModelBuilder_addNineNodeMixedQuad(clientData, interp,
 						      argc, argv,
-						      theTclDomain, 
+						      theTclDomain,
 						      theTclBuilder);
     return result;
   } else if (strcmp(argv[1],"quadUP") == 0) {
-          int result = TclModelBuilder_addFourNodeQuadUP(clientData, interp, argc, argv,
-						       theTclDomain, theTclBuilder);
-	  return result;
+    int result = TclModelBuilder_addFourNodeQuadUP(clientData, interp, argc, argv,
+						   theTclDomain, theTclBuilder);
+    return result;
   } else if (strcmp(argv[1],"brickUP") == 0) {
-          int result = TclModelBuilder_addBrickUP(clientData, interp, argc, argv,
-						       theTclDomain, theTclBuilder);
-	  return result;
+    int result = TclModelBuilder_addBrickUP(clientData, interp, argc, argv,
+					    theTclDomain, theTclBuilder);
+    return result;
   } else if (strcmp(argv[1],"9_4_QuadUP") == 0) {
-          int result = TclModelBuilder_addNineFourNodeQuadUP(clientData, interp, argc, argv,
+    int result = TclModelBuilder_addNineFourNodeQuadUP(clientData, interp, argc, argv,
 						       theTclDomain, theTclBuilder);
-	  return result;
+    return result;
   } else if (strcmp(argv[1],"20_8_BrickUP") == 0) {
-          int result = TclModelBuilder_addTwentyEightNodeBrickUP(clientData, interp, argc, argv,
-						       theTclDomain, theTclBuilder);
-	  return result;
+    int result = TclModelBuilder_addTwentyEightNodeBrickUP(clientData, interp, argc, argv,
+							   theTclDomain, theTclBuilder);
+    return result;
   } else if (strcmp(argv[1],"20NodeBrick") == 0) {
-          int result = TclModelBuilder_addTwentyNodeBrick(clientData, interp, argc, argv,
+    int result = TclModelBuilder_addTwentyNodeBrick(clientData, interp, argc, argv,
+						    theTclDomain, theTclBuilder);
+    return result;
+  } else if (strcmp(argv[1],"bbarQuadUP") == 0) {
+    int result = TclModelBuilder_addBBarFourNodeQuadUP(clientData, interp, argc, argv,
 						       theTclDomain, theTclBuilder);
-	  return result;
-
+    return result;
+  } else if (strcmp(argv[1],"bbarBrickUP") == 0) {
+    int result = TclModelBuilder_addBBarBrickUP(clientData, interp, argc, argv,
+						theTclDomain, theTclBuilder);
+    return result;
   } else if ((strcmp(argv[1],"shell") == 0) || (strcmp(argv[1],"shellMITC4") == 0) ||
 	     (strcmp(argv[1],"Shell") == 0) || (strcmp(argv[1],"ShellMITC4") == 0)) {
-
-
+    
+    
     int eleArgStart = 1;
-    int result = TclModelBuilder_addShellMITC4(clientData, interp, 
+    int result = TclModelBuilder_addShellMITC4(clientData, interp,
 					       argc, argv,
-					       theTclDomain, 
-					       theTclBuilder, 
+					       theTclDomain,
+					       theTclBuilder,
 					       eleArgStart);
     return result;
   }
@@ -439,14 +457,14 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
   else if (strcmp(argv[1],"genericClient") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addGenericClient(clientData, interp, argc, argv,
-						theTclDomain, theTclBuilder, eleArgStart);    
+						theTclDomain, theTclBuilder, eleArgStart);
     return result;
   }
-  
+
   else if (strcmp(argv[1],"genericCopy") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addGenericCopy(clientData, interp, argc, argv,
-						theTclDomain, theTclBuilder, eleArgStart);    
+						theTclDomain, theTclBuilder, eleArgStart);
     return result;
   }
 
@@ -467,26 +485,26 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
   //Boris Jeremic & Zhaohui
   else if (strcmp(argv[1],"Brick20N") == 0) {
     int eleArgStart = 1;
-    int result = TclModelBuilder_addTwentyNodeBrick(clientData, 
-						    interp, 
-						    argc, 
+    int result = TclModelBuilder_addTwentyNodeBrick(clientData,
+						    interp,
+						    argc,
 						    argv,
-						    theTclDomain, 
-						    theTclBuilder, 
+						    theTclDomain,
+						    theTclBuilder,
 						    eleArgStart);
     return result;
-  } 
+  }
 
   //Boris Jeremic & Guanzhou Jie
-  else if (strcmp(argv[1],"Brick27N") == 0) 
+  else if (strcmp(argv[1],"Brick27N") == 0)
     {
       int eleArgStart = 1;
-      int result = TclModelBuilder_addTwentySevenNodeBrick(clientData, 
-                                                           interp, 
-                                                           argc, 
+      int result = TclModelBuilder_addTwentySevenNodeBrick(clientData,
+                                                           interp,
+                                                           argc,
                                                            argv,
-                                                           theTclDomain, 
-                                                           theTclBuilder, 
+                                                           theTclDomain,
+                                                           theTclBuilder,
                                                            eleArgStart);
                                                            return result;
     }
@@ -496,63 +514,63 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
   else if (strcmp(argv[1],"TLFD20nBrick") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addTLFD20nBrick(clientData,
-                                                   interp,
-                                                   argc,
-                                                   argv,
-                                                   theTclDomain,
-                                                   theTclBuilder,
-                                                   eleArgStart);
+						 interp,
+						 argc,
+						 argv,
+						 theTclDomain,
+						 theTclBuilder,
+						 eleArgStart);
     return result;
   }
-
+  
   // Boris jeremic & Zhao Cheng
   else if (strcmp(argv[1],"TLFD8nBrick") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addTLFD8nBrick(clientData,
-                                                   interp,
-                                                   argc,
-                                                   argv,
-                                                   theTclDomain,
-                                                   theTclBuilder,
-                                                   eleArgStart);
+						interp,
+						argc,
+						argv,
+						theTclDomain,
+						theTclBuilder,
+						eleArgStart);
     return result;
   }
   
-  //Boris Jeremic & Zhaohui  
+  //Boris Jeremic & Zhaohui
   else if (strcmp(argv[1],"Brick8N_u_p_U") == 0) {
     int eleArgStart = 1;
-    int result = TclModelBuilder_addEightNodeBrick_u_p_U(clientData, 
-							 interp, 
-							 argc, 
+    int result = TclModelBuilder_addEightNodeBrick_u_p_U(clientData,
+							 interp,
+							 argc,
 							 argv,
-							 theTclDomain, 
-							 theTclBuilder, 
+							 theTclDomain,
+							 theTclBuilder,
 							 eleArgStart);
     return result;
-  } 
-  //Boris Jeremic & Zhaohui  
+  }
+  //Boris Jeremic & Zhaohui
   else if (strcmp(argv[1],"Brick20N_u_p_U") == 0) {
     int eleArgStart = 1;
-    int result = TclModelBuilder_addTwentyNodeBrick_u_p_U(clientData, 
-							  interp, 
-							  argc, 
+    int result = TclModelBuilder_addTwentyNodeBrick_u_p_U(clientData,
+							  interp,
+							  argc,
 							  argv,
-							  theTclDomain, 
-							  theTclBuilder, 
+							  theTclDomain,
+							  theTclBuilder,
 							  eleArgStart);
     return result;
-  } 
+  }
 
   // Boris Jeremic & Zhao Cheng
   else if (strcmp(argv[1],"EightNode_LDBrick_u_p") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addEightNode_LDBrick_u_p(clientData,
-                                                   interp,
-                                                   argc,
-                                                   argv,
-                                                   theTclDomain,
-                                                   theTclBuilder,
-                                                   eleArgStart);
+							  interp,
+							  argc,
+							  argv,
+							  theTclDomain,
+							  theTclBuilder,
+							  eleArgStart);
     return result;
   }
   
@@ -560,16 +578,16 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
   else if (strcmp(argv[1],"EightNode_Brick_u_p") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addEightNode_Brick_u_p(clientData,
-                                                   interp,
-                                                   argc,
-                                                   argv,
-                                                   theTclDomain,
-                                                   theTclBuilder,
-                                                   eleArgStart);
+							interp,
+							argc,
+							argv,
+							theTclDomain,
+							theTclBuilder,
+							eleArgStart);
     return result;
   }
-    
-
+  
+  
   else if (strcmp(argv[1],"stdBrick") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addBrick(clientData, interp, argc, argv,
@@ -596,9 +614,9 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
     return result;
   } else if (strcmp(argv[1],"zeroLengthSection") == 0) {
     int result = TclModelBuilder_addZeroLengthSection(clientData, interp, argc, argv,
-					       theTclDomain, theTclBuilder);
+						      theTclDomain, theTclBuilder);
     return result;
-
+    
   } else if (strcmp(argv[1],"zeroLengthContact2D") == 0) {
     int result = TclModelBuilder_addZeroLengthContact2D(clientData, interp, argc, argv,
 							theTclDomain, theTclBuilder);
@@ -631,14 +649,14 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
     int result = TclModelBuilder_addElement2dYS (clientData, interp,
 						 argc, argv,
 						 theTclDomain, theTclBuilder);
-    return result;	
+    return result;
   } else if ((strcmp(argv[1],"element2dGNL") == 0) ||
 	     (strcmp(argv[1],"elastic2dGNL") == 0)) {
     int result = TclModelBuilder_addElastic2dGNL(clientData, interp, argc, argv,
 						 theTclDomain, theTclBuilder);
     return result;
   }
-
+  
   else if (strcmp(argv[1],"beamColumnJoint") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addBeamColumnJoint(clientData, interp,
@@ -646,61 +664,61 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
 						    theTclBuilder, eleArgStart);
     return result;
   }
-
+  
   // Andreas Schellenberg
   else if (strcmp(argv[1],"actuator") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addActuator(clientData, interp, argc, argv,
-						theTclDomain, theTclBuilder, eleArgStart);    
+					     theTclDomain, theTclBuilder, eleArgStart);
     return result;
   }
-
+  
   else if (strcmp(argv[1],"corotActuator") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addActuatorCorot(clientData, interp, argc, argv,
-						theTclDomain, theTclBuilder, eleArgStart);    
+						  theTclDomain, theTclBuilder, eleArgStart);
     return result;
   }
-
+  
   else if (strcmp(argv[1],"adapter") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addAdapter(clientData, interp, argc, argv,
-						theTclDomain, theTclBuilder, eleArgStart);    
+					    theTclDomain, theTclBuilder, eleArgStart);
     return result;
   }
 
   else if (strcmp(argv[1],"flatSliderBearing") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addFlatSliderBearing(clientData, interp, argc, argv,
-						theTclDomain, theTclBuilder, eleArgStart);    
+						      theTclDomain, theTclBuilder, eleArgStart);
     return result;
   }
 
   /*else if (strcmp(argv[1],"singleFPBearing") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addSingleFPBearing(clientData, interp, argc, argv,
-						theTclDomain, theTclBuilder, eleArgStart);    
+						theTclDomain, theTclBuilder, eleArgStart);
     return result;
   }
 
   else if (strcmp(argv[1],"doubleFPBearing") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addDoubleFPBearing(clientData, interp, argc, argv,
-						theTclDomain, theTclBuilder, eleArgStart);    
+						theTclDomain, theTclBuilder, eleArgStart);
     return result;
   }*/
 
   else if (strcmp(argv[1],"elastomericBearing") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addElastomericBearing(clientData, interp, argc, argv,
-						theTclDomain, theTclBuilder, eleArgStart);    
+						       theTclDomain, theTclBuilder, eleArgStart);
     return result;
   }
 
   else if (strcmp(argv[1],"twoNodeLink") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addTwoNodeLink(clientData, interp, argc, argv,
-						theTclDomain, theTclBuilder, eleArgStart);    
+						theTclDomain, theTclBuilder, eleArgStart);
     return result;
   }
 
@@ -711,7 +729,7 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
     //
 
     // try existing loaded packages
-	  
+
     ElementPackageCommand *eleCommands = theElementPackageCommands;
     bool found = false;
     int result = TCL_ERROR;
@@ -745,46 +763,46 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
     delete [] eleType;
 
     if (eleObject != 0) {
-      
+
       int result = Tcl_addWrapperElement(eleObject, clientData, interp,
 					 argc, argv,
 					 theTclDomain, theTclBuilder);
-
+      
       if (result != 0)
-		delete eleObject;
-	  else
-		return result;
+	delete eleObject;
+      else
+	return result;
     }
-
+    
     //
     // try loading new dynamic library containg a c+= class
     //
-
+    
     void *libHandle;
     void *(*funcPtr)();
     int eleNameLength = strlen(argv[1]);
     char *tclFuncName = new char[eleNameLength+5];
     strcpy(tclFuncName, "OPS_");
-    strcpy(&tclFuncName[4], argv[1]);    
-
+    strcpy(&tclFuncName[4], argv[1]);
+    
     int res = getLibraryFunction(argv[1], tclFuncName, &libHandle, (void **)&funcPtr);
-
+    
     delete [] tclFuncName;
-
+    
     if (res == 0) {
-
+      
       char *eleName = new char[eleNameLength+1];
       strcpy(eleName, argv[1]);
       ElementPackageCommand *theEleCommand = new ElementPackageCommand;
       theEleCommand->funcPtr = funcPtr;
-      theEleCommand->funcName = eleName;	
+      theEleCommand->funcName = eleName;
       theEleCommand->next = theElementPackageCommands;
       theElementPackageCommands = theEleCommand;
-
+      
       OPS_ResetInput(clientData, interp, 2, argc, argv, theTclDomain, theTclBuilder);
-
+      
       void *theRes = (*funcPtr)();
-
+      
       if (theRes != 0) {
 	Element *theEle = (Element *)theRes;
 	result = theTclDomain->addElement(theEle);
@@ -797,6 +815,7 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
       }
     }
   }
-
+  
   return TCL_ERROR;
 }
+
