@@ -17,11 +17,11 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
-// $Revision: 1.116 $
-// $Date: 2009-05-29 19:13:20 $
+
+// $Revision: 1.117 $
+// $Date: 2009-10-07 20:15:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
-                                                                        
+
 // Written: fmk
 // Revision: A
 //
@@ -220,7 +220,7 @@
 #define SEC_TAG_BeamFiberSection	12
 #define SEC_TAG_ElasticPlateSection	13
 #define SEC_TAG_ElasticMembranePlateSection	14
-#define SEC_TAG_MembranePlateFiberSection	15 
+#define SEC_TAG_MembranePlateFiberSection	15
 #define SEC_TAG_Bidirectional	16
 #define SEC_TAG_WSection2d	17
 #define SEC_TAG_Isolator2spring 18
@@ -240,13 +240,13 @@
 #define ND_TAG_ElasticIsotropicPlaneStress2d	12
 #define ND_TAG_ElasticIsotropicAxiSymm          13
 #define ND_TAG_ElasticIsotropicPlateFiber		14
-#define ND_TAG_ElasticIsotropicBeamFiber		15 
+#define ND_TAG_ElasticIsotropicBeamFiber		15
 #define ND_TAG_ElasticIsotropic3D               16
 #define ND_TAG_ElasticCrossAnisotropic3D        17
-#define ND_TAG_J2PlaneStrain                  3005 
-#define ND_TAG_J2PlaneStress                  3006 
-#define ND_TAG_J2AxiSymm                      3007 
-#define ND_TAG_J2ThreeDimensional             3009 
+#define ND_TAG_J2PlaneStrain                  3005
+#define ND_TAG_J2PlaneStress                  3006
+#define ND_TAG_J2AxiSymm                      3007
+#define ND_TAG_J2ThreeDimensional             3009
 #define ND_TAG_J2PlateFiber					3010
 #define ND_TAG_J2BeamFiber					3011
 #define ND_TAG_PressureDependentElastic3D       22
@@ -274,7 +274,7 @@
 
 // MultiaxialCyclicPlasticity, add by Gang Wang
 #define ND_TAG_MultiaxialCyclicPlasticity             10031
-#define ND_TAG_MultiaxialCyclicPlasticity3D           10032 
+#define ND_TAG_MultiaxialCyclicPlasticity3D           10032
 #define ND_TAG_MultiaxialCyclicPlasticityAxiSymm      10033
 #define ND_TAG_MultiaxialCyclicPlasticityPlaneStrain  10034
 
@@ -360,7 +360,7 @@
 #define ELE_TAG_NLBeamColumn3d	 6001
 #define ELE_TAG_LargeDispBeamColumn3d	 6002
 #define ELE_TAG_FourNodeQuad	 1010
-#define ELE_TAG_BeamWithHinges2d  401  
+#define ELE_TAG_BeamWithHinges2d  401
 #define ELE_TAG_BeamWithHinges3d  402
 #define ELE_TAG_EightNodeBrick   7001
 #define ELE_TAG_TwentyNodeBrick   7002
@@ -376,15 +376,17 @@
 #define ELE_TAG_Nine_Four_Node_QuadUP         7012
 #define ELE_TAG_Twenty_Eight_Node_BrickUP         7013
 #define ELE_TAG_Twenty_Node_Brick         7014
-#define ELE_TAG_PlateMITC4      2023 
-#define ELE_TAG_ShellMITC4      2024 
-#define ELE_TAG_Plate1          2022 
-#define ELE_TAG_Brick                      3458 
-#define ELE_TAG_BbarBrick                  3457 
-#define ELE_TAG_FLBrick                  3455 
+#define ELE_TAG_BBarFourNodeQuadUP      7015
+#define ELE_TAG_BBarBrickUP             7016
+#define ELE_TAG_PlateMITC4      2023
+#define ELE_TAG_ShellMITC4      2024
+#define ELE_TAG_Plate1          2022
+#define ELE_TAG_Brick                      3458
+#define ELE_TAG_BbarBrick                  3457
+#define ELE_TAG_FLBrick                  3455
 #define ELE_TAG_EnhancedQuad               3459
-#define ELE_TAG_ConstantPressureVolumeQuad 3456 
-#define ELE_TAG_NineNodeMixedQuad          3359 
+#define ELE_TAG_ConstantPressureVolumeQuad 3456
+#define ELE_TAG_NineNodeMixedQuad          3359
 #define ELE_TAG_DispBeamColumn2d 9870
 #define ELE_TAG_DispBeamColumn3d 9871
 #define ELE_TAG_HingedBeam2d     9872
@@ -713,5 +715,4 @@
 
 
 #endif
-
 
