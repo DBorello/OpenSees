@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2009-08-25 23:26:33 $
+// $Revision: 1.11 $
+// $Date: 2009-10-12 23:51:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/partitioner/DomainPartitioner.cpp,v $
                                                                         
 // Written: fmk 
@@ -157,6 +157,7 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
   theElementGraph = &(myDomain->getElementGraph());
   
   int theError = thePartitioner.partition(*theElementGraph, numParts);
+
   if (theError < 0) {
     opserr << "DomainPartitioner::partition";
     opserr << " - the graph partioner failed to partition the ";
@@ -164,11 +165,30 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
     return -10+theError;
   }
 
-  /* print graph 
-  opserr << "DomainPartitioner::partition - eleGraph: \n";
-  theElementGraph->Print(opserr, 4);
-  */
+  /* print graph */
+  //  opserr << "DomainPartitioner::partition - eleGraph: \n";
+  //  theElementGraph->Print(opserr, 4);
+  
+  VertexIter &theVertices1 = theElementGraph->getVertices();
+  Vertex *vertexPtr = 0;
+  bool moreThanOne = false;
+  
+  vertexPtr = theVertices1();
+  int vertexOnePartition  = 0;
+  if (vertexPtr != 0)
+    vertexOnePartition  = vertexPtr->getColor();  
+  while ((moreThanOne == false) && ((vertexPtr = theVertices1()) != 0)) {
+    int partition = vertexPtr->getColor();
+    if (partition != vertexOnePartition ) {
+      moreThanOne = true;
+    }
+  }
 
+  if (moreThanOne == false) {
+    opserr <<"DomainPartitioner::partition - too few elements for model to be partitioned\n";
+    return -1;
+  }
+      
   // we create empty graphs for the numParts subdomains,
   // in the graphs we place the vertices for the elements on the boundaries
   
@@ -238,7 +258,6 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
   //
   
   VertexIter &theVertexIter = theElementGraph->getVertices();
-  Vertex *vertexPtr;
   while ((vertexPtr = theVertexIter()) != 0) {
     int eleTag = vertexPtr->getRef();
     int vertexColor = vertexPtr->getColor();
@@ -303,6 +322,7 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
   // we now add the nodes, 
   TaggedObjectIter &theNodeLocationIter = theNodeLocations->getComponents();
   TaggedObject *theNodeObject;
+
   while ((theNodeObject = theNodeLocationIter()) != 0) {
     NodeLocations *theNodeLocation = (NodeLocations *)theNodeObject;
 
@@ -332,7 +352,6 @@ DomainPartitioner::partition(int numParts, bool usingMain, int mainPartitionTag)
     int partition = vertexPtr->getColor();
     if (partition != mainPartition) {          
       int eleTag = vertexPtr->getRef();
-
       Element *elePtr = myDomain->removeElement(eleTag);  
       if (elePtr != 0) {
 	Subdomain *theSubdomain = myDomain->getSubdomainPtr(partition);  

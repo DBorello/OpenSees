@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2009-01-16 00:04:20 $
+// $Revision: 1.12 $
+// $Date: 2009-10-12 23:51:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/mpiMain.cpp,v $
 
 /* 
@@ -35,7 +35,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: mpiMain.cpp,v 1.11 2009-01-16 00:04:20 fmk Exp $
+ * RCS: @(#) $Id: mpiMain.cpp,v 1.12 2009-10-12 23:51:37 fmk Exp $
  */
 
 extern "C" {
@@ -134,11 +134,12 @@ int
 main(int argc, char **argv)
 {
   FEM_ObjectBrokerAllClasses theBroker;
-  MPI_MachineBroker theMachine(&theBroker, argc, argv);
-  theMachineBroker = &theMachine;
+  // MPI_MachineBroker theMachine(&theBroker, argc, argv);
+  // theMachineBroker = &theMachine;
+  theMachineBroker = new MPI_MachineBroker(&theBroker, argc, argv);
 
-  int rank = theMachine.getPID();
-  int np = theMachine.getNP();
+  int rank = theMachineBroker->getPID();
+  int np = theMachineBroker->getNP();
 
   //
   // depending on rank we do something
@@ -149,7 +150,7 @@ main(int argc, char **argv)
     // on slave processes we spin waiting to create & run actors
     //
     fprintf(stderr, "Slave Process Running %d\n", rank);
-    theMachine.runActors();
+    theMachineBroker->runActors();
 
   } else {
 
@@ -162,7 +163,8 @@ main(int argc, char **argv)
     // set some global parameters
     //
     OPS_OBJECT_BROKER = &theBroker;
-    OPS_MACHINE = &theMachine;
+    //    OPS_MACHINE = &theMachine;
+    OPS_MACHINE = theMachineBroker;
     OPS_PARALLEL_PROCESSING = np;
 
     if (np%2 == 0) {
@@ -217,7 +219,7 @@ main(int argc, char **argv)
     theDomain.clearAll();
     
     // shutdown the remote machines
-    theMachine.shutdown();
+    theMachineBroker->shutdown();
   }
   
   //
@@ -225,6 +227,9 @@ main(int argc, char **argv)
   //
 
   fprintf(stderr, "Process Terminating %d\n", rank);
+
+  if (theMachineBroker != 0)
+    delete theMachineBroker;
   
   return 0;
 }

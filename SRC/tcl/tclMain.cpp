@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.48 2009-01-15 00:12:37 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.49 2009-10-12 23:51:38 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -430,7 +430,7 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc, int rank, int np
 
     Tcl_Eval(interp, buffer);
 
-   Tcl_Eval(interp, "quit"); 
+    Tcl_Eval(interp, "quit"); 
 
     return;
 }

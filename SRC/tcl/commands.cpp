@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.149 $
-// $Date: 2009-08-26 20:33:45 $
+// $Revision: 1.150 $
+// $Date: 2009-10-12 23:51:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -544,7 +544,8 @@ neesMetaData(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
 int
 stripOpenSeesXML(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
-extern int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+//extern 
+int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 extern int myCommands(Tcl_Interp *interp);
 
@@ -690,8 +691,7 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "nodeCoord", &nodeCoord, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
-    Tcl_CreateCommand(interp, "eleNodes", &eleNodes, 
-		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);            
+    Tcl_CreateCommand(interp, "eleNodes", &eleNodes, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);            
 
 
     Tcl_CreateCommand(interp, "nodeBounds", &nodeBounds, 
@@ -1369,7 +1369,10 @@ partitionModel(void)
     theDomain.setPartitioner(OPS_DOMAIN_PARTITIONER);
   }
 
-  theDomain.partition(OPS_NUM_SUBDOMAINS, OPS_USING_MAIN_DOMAIN, OPS_MAIN_DOMAIN_PARTITION_ID);
+  result = theDomain.partition(OPS_NUM_SUBDOMAINS, OPS_USING_MAIN_DOMAIN, OPS_MAIN_DOMAIN_PARTITION_ID);
+  
+  if (result < 0) 
+    return result;
 
   OPS_PARTITIONED = true;
   
@@ -1425,7 +1428,9 @@ analyzeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
 
   if (OPS_PARTITIONED == false && OPS_NUM_SUBDOMAINS > 1) 
     if (partitionModel() < 0) {
-      opserr << "WARNING before analysis; partition failed\n";
+      opserr << "WARNING before analysis; partition failed - too few elements\n";
+      OpenSeesExit(clientData, interp, argc, argv);
+      opserr << "WARNING called OpenSeesExit\n";
       return TCL_ERROR;
     }
 #endif
@@ -1439,6 +1444,7 @@ analyzeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
 
     if (Tcl_GetInt(interp, argv[1], &numIncr) != TCL_OK)	
       return TCL_ERROR;	      
+
     result = theStaticAnalysis->analyze(numIncr);
 
   } else if (theTransientAnalysis != 0) {
@@ -7324,7 +7330,6 @@ const char * getInterpPWD(Tcl_Interp *interp) {
 
 int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
-
   theDomain.clearAll();
 
 #ifdef _PARALLEL_PROCESSING
@@ -7335,6 +7340,7 @@ int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char *
   if (theMachineBroker != 0) {
     theMachineBroker->shutdown();
     fprintf(stderr, "Process Terminating\n");
+    delete theMachineBroker;
     theMachineBroker = 0;
   }
 #endif
@@ -7347,6 +7353,7 @@ int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char *
   if (theMachineBroker != 0) {
     theMachineBroker->shutdown();
     fprintf(stderr, "Process Terminating\n");
+    delete theMachineBroker;
     theMachineBroker = 0;
   }
 #endif
@@ -7379,8 +7386,8 @@ int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char *
     neesCentralProjID = 0;
   }
 
+  opserr << "OpenSeesExit-8\n";
   Tcl_Exit(0);
-
   return 0;
 }
 
