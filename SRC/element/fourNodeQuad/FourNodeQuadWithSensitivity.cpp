@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2009-07-24 00:08:18 $
+// $Revision: 1.3 $
+// $Date: 2009-10-13 21:14:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuadWithSensitivity.cpp,v $
 
 // Written: MHS
@@ -831,8 +831,8 @@ FourNodeQuadWithSensitivity::Print(OPS_Stream &s, int flag)
     avgStress.Zero();
     avgStrain.Zero();
     for (i=0; i<numMaterials; i++) {
-      avgStress += theMaterial[i]->getCommittedStress();
-      avgStrain += theMaterial[i]->getCommittedStrain();
+      avgStress += theMaterial[i]->getStress();
+      avgStrain += theMaterial[i]->getStrain();
     }
     avgStress /= numMaterials;
     avgStrain /= numMaterials;
