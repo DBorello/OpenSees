@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.35 $
-// $Date: 2009-06-04 22:03:13 $
+// $Revision: 1.36 $
+// $Date: 2009-10-13 21:16:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -144,28 +144,28 @@ NodeRecorder::NodeRecorder(const ID &dofs,
     if (mode > 0)
       dataFlag = 10 + mode;
     else
-      dataFlag = 6;
+      dataFlag = 10;
   } else if ((strncmp(dataToStore, "sensitivity",11) == 0)) {
     int grad = atoi(&(dataToStore[11]));
     if (grad > 0)
       dataFlag = 1000 + grad;
     else
-      dataFlag = 6;
+      dataFlag = 10;
   } else if ((strncmp(dataToStore, "velSensitivity",14) == 0)) {
     int grad = atoi(&(dataToStore[14]));
     if (grad > 0)
       dataFlag = 2000 + grad;
     else
-      dataFlag = 6;
+      dataFlag = 10;
   } else if ((strncmp(dataToStore, "accSensitivity",14) == 0)) {
     int grad = atoi(&(dataToStore[14]));
     if (grad > 0)
       dataFlag = 3000 + grad;
     else
-      dataFlag = 6;
+      dataFlag = 10;
 
   } else {
-    dataFlag = 6;
+    dataFlag = 10;
     opserr << "NodeRecorder::NodeRecorder - dataToStore " << dataToStore;
     opserr << "not recognized (disp, vel, accel, incrDisp, incrDeltaDisp)\n";
   }
@@ -181,7 +181,7 @@ NodeRecorder::~NodeRecorder()
 
   if (theDofs != 0)
     delete theDofs;
-  
+
   if (theNodalTags != 0)
     delete theNodalTags;
 
