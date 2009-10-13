@@ -1,5 +1,5 @@
-// $Revision: 1.24 $
-// $Date: 2007-10-11 21:56:04 $
+// $Revision: 1.25 $
+// $Date: 2009-10-13 21:11:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.cpp,v $
                                                                         
 // Written: ZHY
@@ -274,13 +274,13 @@ int FluidSolidPorousMaterial::updateParameter(int responseID, Information &info)
 
 const Vector & FluidSolidPorousMaterial::getCommittedStress (void)
 {
-	return theSoilMaterial->getCommittedStress();
+	return this->getStress();
 }
 
 
 const Vector & FluidSolidPorousMaterial::getCommittedStrain (void)
 {
-	return theSoilMaterial->getCommittedStrain();
+	return theSoilMaterial->getStrain();
 }
 
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $                                                              
-// $Date: 2008-08-26 17:04:49 $                                                                  
+// $Revision: 1.25 $                                                              
+// $Date: 2009-10-13 21:11:19 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C
@@ -100,18 +100,6 @@ double
 NDMaterial::getRho(void)
 {
   return 0.0;
-}
-
-const Vector &
-NDMaterial::getCommittedStress(void) 
-{
-  return this->getStress();
-}
-
-const Vector &
-NDMaterial::getCommittedStrain(void) 
-{
-  return this->getStrain();
 }
 
 // methods to set and retrieve state.

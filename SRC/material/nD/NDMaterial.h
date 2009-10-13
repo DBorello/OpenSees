@@ -23,8 +23,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.21 $
-// $Date: 2008-08-26 17:04:49 $
+// $Revision: 1.22 $
+// $Date: 2009-10-13 21:11:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.h,v $
 
 
@@ -73,10 +73,6 @@ class NDMaterial : public Material
     virtual const Vector &getStress(void);
     virtual const Vector &getStrain(void);
 
-    // new methods for recorder requested by Zhouhui Yang .. MAY NOT STAY
-    virtual const Vector &getCommittedStress(void);
-    virtual const Vector &getCommittedStrain(void);
-
     // methods to set and retrieve state using the Tensor class
     virtual int setTrialStrain(const Tensor &v);
     virtual int setTrialStrain(const Tensor &v, const Tensor &r);
@@ -88,7 +84,7 @@ class NDMaterial : public Material
     //Added Joey Aug. 13, 2001
     virtual const straintensor& getPlasticStrainTensor(void);
 
-// added Sept 22 2003 for Large Deformation, F is the Deformation Gradient
+    // added Sept 22 2003 for Large Deformation, F is the Deformation Gradient
     virtual int setTrialF(const straintensor &f);
     virtual int setTrialFIncr(const straintensor &df);
     virtual int setTrialC(const straintensor &c);
@@ -98,7 +94,7 @@ class NDMaterial : public Material
     virtual const straintensor& getF(void);
     virtual const straintensor& getC(void);
     virtual const straintensor& getFp(void);
-// Only For Large Deformation, END////////////////////////////////////////
+    // Only For Large Deformation, END////////////////////////////////////////
 
     virtual int commitState(void) = 0;
     virtual int revertToLastCommit(void) = 0;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2009-05-20 22:03:16 $
+// $Revision: 1.3 $
+// $Date: 2009-10-13 21:11:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/PlaneStrainMaterial.h,v $
 
 // Antonios Vytiniotis
@@ -93,9 +93,7 @@ private :
     NDMaterial *theMaterial ;  //pointer to three dimensional material
 
     Vector strain ;
-
     static Vector stress ;
-
     static Matrix tangent ;
 
 } ;
