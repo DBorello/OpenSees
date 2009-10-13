@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.20 $
-// $Date: 2009-04-30 23:25:33 $
+// $Revision: 1.21 $
+// $Date: 2009-10-13 21:16:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -117,15 +117,47 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID &dofs,
     dataFlag = 4;
   } else if ((strcmp(dataToStore, "unbalance") == 0)) {
     dataFlag = 5;
+  } else if ((strcmp(dataToStore, "unbalanceInclInertia") == 0) ||
+	     (strcmp(dataToStore, "unbalanceIncInertia") == 0) ||
+	     (strcmp(dataToStore, "unbalanceIncludingInertia") == 0))  {
+    dataFlag = 6;
+  } else if ((strcmp(dataToStore, "reaction") == 0)) {
+    dataFlag = 7;
+  } else if (((strcmp(dataToStore, "reactionIncInertia") == 0))
+	     || ((strcmp(dataToStore, "reactionInclInertia") == 0))
+	     || ((strcmp(dataToStore, "reactionIncludingInertia") == 0))) {
+    dataFlag = 8;
+  } else if (((strcmp(dataToStore, "rayleighForces") == 0))
+	     || ((strcmp(dataToStore, "rayleighDampingForces") == 0))) {
+    dataFlag = 9;
   } else if ((strncmp(dataToStore, "eigen",5) == 0)) {
     int mode = atoi(&(dataToStore[5]));
     if (mode > 0)
       dataFlag = 10 + mode;
     else
-      dataFlag = 6;
+      dataFlag = 10;
+  } else if ((strncmp(dataToStore, "sensitivity",11) == 0)) {
+    int grad = atoi(&(dataToStore[11]));
+    if (grad > 0)
+      dataFlag = 1000 + grad;
+    else
+      dataFlag = 10;
+  } else if ((strncmp(dataToStore, "velSensitivity",14) == 0)) {
+    int grad = atoi(&(dataToStore[14]));
+    if (grad > 0)
+      dataFlag = 2000 + grad;
+    else
+      dataFlag = 10;
+  } else if ((strncmp(dataToStore, "accSensitivity",14) == 0)) {
+    int grad = atoi(&(dataToStore[14]));
+    if (grad > 0)
+      dataFlag = 3000 + grad;
+    else
+      dataFlag = 10;
+
   } else {
-    dataFlag = 6;
-    opserr << "EnvelopeNodeRecorder::EnvelopeNodeRecorder - dataToStore " << dataToStore;
+    dataFlag = 10;
+    opserr << "EnvelopeNodeRecorder::NodeRecorder - dataToStore " << dataToStore;
     opserr << "not recognized (disp, vel, accel, incrDisp, incrDeltaDisp)\n";
   }
 }
@@ -201,6 +233,19 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
     
     if (deltaT != 0.0) 
       nextTimeStampToRecord = timeStamp + deltaT;
+
+    //
+    // if need nodal reactions get the domain to calculate them
+    // before we iterate over the nodes
+    //
+
+    if (dataFlag == 7)
+      theDomain->calculateNodalReactions(0);
+    else if (dataFlag == 8)
+      theDomain->calculateNodalReactions(1);
+    if (dataFlag == 9)
+      theDomain->calculateNodalReactions(2);
+
     
     for (int i=0; i<numValidNodes; i++) {
       int cnt = i*numDOF;
@@ -272,6 +317,31 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
 	  
 	  cnt++;
 	}
+
+      } else if (dataFlag == 6) {
+	const Vector &theResponse = theNode->getUnbalancedLoadIncInertia();
+	for (int j=0; j<numDOF; j++) {
+	  int dof = (*theDofs)(j);
+	  if (theResponse.Size() > dof) {
+	    (*currentData)(cnt) = theResponse(dof);
+	  } else 
+	    (*currentData)(cnt) = 0.0;
+	  
+	  cnt++;
+	}
+
+      } else if (dataFlag == 7 || dataFlag == 8 || dataFlag == 9) {
+	const Vector &theResponse = theNode->getReaction();
+	for (int j=0; j<numDOF; j++) {
+	  int dof = (*theDofs)(j);
+	  if (theResponse.Size() > dof) {
+	    (*currentData)(cnt) = theResponse(dof);
+	  } else 
+	    (*currentData)(cnt) = 0.0;
+	  
+	  cnt++;
+	}
+
       } else if (dataFlag > 10) {
 	int mode = dataFlag - 10;
 	int column = mode - 1;
