@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2009-04-30 23:23:04 $
+// $Revision: 1.13 $
+// $Date: 2009-10-13 21:17:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/XmlFileStream.cpp,v $
 
 #include <XmlFileStream.h>
@@ -95,19 +95,22 @@ XmlFileStream::~XmlFileStream()
   if (sendSelfCount > 0) {
 
     for (int i=0; i<=sendSelfCount; i++) {
-      if (theColumns[i] != 0)
-	delete theColumns[i];
+      if (theColumns != 0)
+	if (theColumns[i] != 0)
+	  delete theColumns[i];
 
-      if (theData[i] != 0)
-	delete [] theData[i];
-
-      if (theRemoteData[i] != 0)
-	delete theRemoteData[i];
+      if (theData != 0)
+	if (theData[i] != 0)
+	  delete [] theData[i];
+      
+      if (theRemoteData != 0)
+	if (theRemoteData[i] != 0)
+	  delete theRemoteData[i];
     }
-    delete [] theData;
-    delete [] theRemoteData;
-    delete [] theColumns;
-    delete sizeColumns;
+    if (theData != 0) delete [] theData;
+    if (theRemoteData != 0) delete [] theRemoteData;
+    if (theColumns != 0) delete [] theColumns;
+    if (sizeColumns != 0) delete sizeColumns;
   }    
 
   if (sendSelfCount < 0) {
