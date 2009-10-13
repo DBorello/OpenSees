@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2006-02-08 20:20:00 $
+// $Revision: 1.8 $
+// $Date: 2009-10-13 21:13:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/penalty/PenaltyMP_FE.cpp,v $
                                                                         
                                                                         
@@ -246,7 +246,7 @@ PenaltyMP_FE::getC_Force(const Vector &disp, double fact)
 const Vector &
 PenaltyMP_FE::getM_Force(const Vector &disp, double fact)
 {
- opserr << "WARNING PenaltySP_FE::getM_Force() - not yet implemented\n";
+  // opserr << "WARNING PenaltySP_FE::getM_Force() - not yet implemented\n";
  return *resid;
 }
 
