@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2008-09-23 22:47:25 $
+// $Revision: 1.6 $
+// $Date: 2009-10-23 21:36:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_SocketSSL.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -249,7 +249,7 @@ TCP_SocketSSL::TCP_SocketSSL(unsigned int other_Port,
 #ifdef _WIN32
     other_Addr.addr_in.sin_addr.S_un.S_addr = inet_addr(other_InetAddr);
 #else
-    other_Addr.addr_in.sin_addr.s_addr = inet_aton(other_InetAddr);
+    other_Addr.addr_in.sin_addr.s_addr = inet_addr(other_InetAddr);
 #endif
 
     // set up my_Addr.addr_in
