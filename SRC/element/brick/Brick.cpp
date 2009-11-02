@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2007-06-27 00:24:34 $
+// $Revision: 1.30 $
+// $Date: 2009-11-02 21:22:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.cpp,v $
 
 // Ed "C++" Love
@@ -259,8 +259,8 @@ void  Brick::Print( OPS_Stream &s, int flag )
     avgStress.Zero();
     avgStrain.Zero();
     for (i=0; i<numMaterials; i++) {
-      avgStress += materialPointers[i]->getCommittedStress();
-      avgStrain += materialPointers[i]->getCommittedStrain();
+      avgStress += materialPointers[i]->getStress();
+      avgStrain += materialPointers[i]->getStrain();
     }
     avgStress /= numMaterials;
     avgStrain /= numMaterials;

@@ -31,8 +31,8 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.1 $
-// $Date: 2009-10-07 20:02:23 $
+// $Revision: 1.2 $
+// $Date: 2009-11-02 21:22:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/BBarBrickUP.cpp,v $
 
 // by Zhaohui Yang (Modified based on Ed "C++" Love's Brick element)
@@ -301,8 +301,8 @@ void  BBarBrickUP::Print( OPS_Stream &s, int flag )
     avgStress.Zero();
     avgStrain.Zero();
     for (i=0; i<numMaterials; i++) {
-      avgStress += materialPointers[i]->getCommittedStress();
-      avgStrain += materialPointers[i]->getCommittedStrain();
+      avgStress += materialPointers[i]->getStress();
+      avgStrain += materialPointers[i]->getStrain();
     }
     avgStress /= numMaterials;
     avgStrain /= numMaterials;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.57 $
-// $Date: 2009-10-07 20:12:35 $
+// $Revision: 1.58 $
+// $Date: 2009-11-02 21:22:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
 
 // Written: fmk
@@ -50,6 +50,15 @@
 #include <TclModelBuilder.h>
 #include <packages.h>
 #include <elementAPI.h>
+
+extern 
+#ifdef _WIN32
+int __cdecl
+#else
+int
+#endif
+httpGET_File(char const *URL, char const *page, unsigned int port, const char *filename);
+
 //
 // SOME STATIC POINTERS USED IN THE FUNCTIONS INVOKED BY THE INTERPRETER
 //
@@ -761,7 +770,7 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
     eleObj *eleObject = OPS_GetElementType(eleType, strlen(eleType));
 
     delete [] eleType;
-
+    
     if (eleObject != 0) {
 
       int result = Tcl_addWrapperElement(eleObject, clientData, interp,
@@ -773,7 +782,7 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
       else
 	return result;
     }
-    
+
     //
     // try loading new dynamic library containg a c+= class
     //
@@ -783,6 +792,7 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
     int eleNameLength = strlen(argv[1]);
     char *tclFuncName = new char[eleNameLength+5];
     strcpy(tclFuncName, "OPS_");
+
     strcpy(&tclFuncName[4], argv[1]);
     
     int res = getLibraryFunction(argv[1], tclFuncName, &libHandle, (void **)&funcPtr);
@@ -814,8 +824,9 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
 	return TCL_ERROR;
       }
     }
+
+    
   }
-  
+
   return TCL_ERROR;
 }
-

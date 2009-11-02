@@ -643,9 +643,9 @@ void  TwentyEightNodeBrickUP::Print( OPS_Stream &s, int flag )
 
 		for (i=0; i<numMaterials; i++) {
 
-			avgStress += materialPointers[i]->getCommittedStress();
+			avgStress += materialPointers[i]->getStress();
 
-			avgStrain += materialPointers[i]->getCommittedStrain();
+			avgStrain += materialPointers[i]->getStrain();
 
 		}
 

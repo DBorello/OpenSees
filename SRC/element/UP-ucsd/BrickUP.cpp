@@ -29,8 +29,8 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.6 $
-// $Date: 2008-07-08 00:01:54 $
+// $Revision: 1.7 $
+// $Date: 2009-11-02 21:22:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/BrickUP.cpp,v $
 
 // by Zhaohui Yang (Modified based on Ed "C++" Love's Brick element)
@@ -294,8 +294,8 @@ void  BrickUP::Print( OPS_Stream &s, int flag )
     avgStress.Zero();
     avgStrain.Zero();
     for (i=0; i<numMaterials; i++) {
-      avgStress += materialPointers[i]->getCommittedStress();
-      avgStrain += materialPointers[i]->getCommittedStrain();
+      avgStress += materialPointers[i]->getStress();
+      avgStrain += materialPointers[i]->getStrain();
     }
     avgStress /= numMaterials;
     avgStrain /= numMaterials;
