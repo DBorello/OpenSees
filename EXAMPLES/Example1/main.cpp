@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-11-18 19:55:56 $
+// $Revision: 1.6 $
+// $Date: 2009-11-02 22:23:58 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/Example1/main.cpp,v $
 
 
@@ -73,7 +73,7 @@ StandardStream sserr;
 OPS_Stream *opserrPtr = &sserr;
 
 double        ops_Dt = 0;
-Domain       *ops_TheActiveDomain = 0;
+// Domain       *ops_TheActiveDomain = 0;
 Element      *ops_TheActiveElement = 0;
 
 
