@@ -781,6 +781,18 @@
 			Name="up"
 			Filter="">
 			<File
+				RelativePath="..\..\..\SRC\element\UP-ucsd\BBarBrickUP.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\UP-ucsd\BBarBrickUP.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\UP-ucsd\BBarFourNodeQuadUP.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\UP-ucsd\BBarFourNodeQuadUP.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\element\UP-ucsd\BrickUP.cpp">
 			</File>
 			<File
