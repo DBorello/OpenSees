@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-02-02 01:35:22 $
+// $Revision: 1.10 $
+// $Date: 2009-11-03 23:10:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.h,v $
 
 #ifndef CorotTruss_h
@@ -100,10 +100,11 @@ class CorotTruss : public Element
     int numDIM;                     // number of dimensions
 
     double Lo;	        // initial length of truss
-    double Ln;		// current length of truss
-    double d21[3];	// current displacement offsets in basic system
+    double Ln;		    // current length of truss
+    double d21[3];	    // current displacement offsets in basic system
+    double v21[3];      // current velocity offsets in basic system
     double A; 	        // area of CorotTruss
-    double rho; 	        // mass density per unit length
+    double rho; 	    // mass density per unit length
 
     Node *theNodes[2];
 

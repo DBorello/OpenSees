@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2009-05-18 22:01:06 $
+// $Revision: 1.15 $
+// $Date: 2009-11-03 23:10:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.cpp,v $
                                                                         
 // Written: MHS 
@@ -327,30 +327,36 @@ int
 CorotTruss::update(void)
 {
   // Nodal displacements
-  const Vector &end1Disp = theNodes[0]->getTrialDisp();
-  const Vector &end2Disp = theNodes[1]->getTrialDisp();    
+  const Vector &end1Disp  = theNodes[0]->getTrialDisp();
+  const Vector &end2Disp  = theNodes[1]->getTrialDisp();    
+  const Vector &end1Vel   = theNodes[0]->getTrialVel();
+  const Vector &end2Vel   = theNodes[1]->getTrialVel();	
   
   // Initial offsets
-  d21[0] = Lo;
-  d21[1] = 0.0;
-  d21[2] = 0.0;
+  d21[0] = Lo; d21[1] = d21[2] = 0.0;
+  v21[0] = v21[1] = v21[2] = 0.0;
   
   // Update offsets in basic system due to nodal displacements
   for (int i = 0; i < numDIM; i++) {
-    d21[0] += R(0,i)*(end2Disp(i)-end1Disp(i));
-    d21[1] += R(1,i)*(end2Disp(i)-end1Disp(i));
-    d21[2] += R(2,i)*(end2Disp(i)-end1Disp(i));
+    double deltaDisp = end2Disp(i) - end1Disp(i);
+    d21[0] += deltaDisp*R(0,i);
+    d21[1] += deltaDisp*R(1,i);
+    d21[2] += deltaDisp*R(2,i);
+    double deltaVel = end2Vel(i) - end1Vel(i);
+    v21[0] += deltaVel*R(0,i);
+    v21[1] += deltaVel*R(1,i);
+    v21[2] += deltaVel*R(2,i);
   }
   
   // Compute new length
-  Ln = d21[0]*d21[0] + d21[1]*d21[1] + d21[2]*d21[2];
-  Ln = sqrt(Ln);
+  Ln = sqrt(d21[0]*d21[0] + d21[1]*d21[1] + d21[2]*d21[2]);
   
-  // Compute engineering strain
-  double strain = (Ln-Lo)/Lo;
+  // Compute engineering strain and strain rate
+  double strain = (Ln - Lo)/Lo;
+  double rate = (d21[0]*v21[0] + d21[1]*v21[1] + d21[2]*v21[2])/Ln/Lo;
   
   // Set material trial strain
-  return theMaterial->setTrialStrain(strain);
+  return theMaterial->setTrialStrain(strain,rate);
 }
 
 const Matrix &
@@ -709,7 +715,7 @@ CorotTruss::setResponse(const char **argv, int argc, OPS_Stream &output)
     //
 
     if ((strcmp(argv[0],"force") == 0) || (strcmp(argv[0],"forces") == 0) 
-        || (strcmp(argv[0],"globalForces") == 0) || (strcmp(argv[0],"globalforces") == 0)){
+        || (strcmp(argv[0],"globalForce") == 0) || (strcmp(argv[0],"globalForces") == 0)){
             char outputData[10];
             int numDOFperNode = numDOF/2;
             for (int i=0; i<numDOFperNode; i++) {
@@ -723,12 +729,13 @@ CorotTruss::setResponse(const char **argv, int argc, OPS_Stream &output)
             theResponse =  new ElementResponse(this, 1, Vector(numDOF));
 
     } else if ((strcmp(argv[0],"axialForce") == 0) || (strcmp(argv[0],"basicForce") == 0) || 
-        (strcmp(argv[0],"basicForce") == 0)) {
+        (strcmp(argv[0],"basicForces") == 0)) {
             output.tag("ResponseType", "N");
             theResponse =  new ElementResponse(this, 2, 0.0);
 
-    } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
-        strcmp(argv[0],"deformation") == 0) {
+    } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformation") == 0 ||
+        strcmp(argv[0],"deformations") == 0 || strcmp(argv[0],"basicDefo") == 0 ||
+        strcmp(argv[0],"basicDeformation") == 0 || strcmp(argv[0],"basicDeformations") == 0) {
 
             output.tag("ResponseType", "U");
             theResponse = new ElementResponse(this, 3, 0.0);
