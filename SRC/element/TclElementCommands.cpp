@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.58 $
-// $Date: 2009-11-02 21:22:22 $
+// $Revision: 1.59 $
+// $Date: 2009-11-03 23:17:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
 
 // Written: fmk
@@ -320,10 +320,10 @@ extern int
 TclModelBuilder_addFlatSliderBearing(ClientData clientData, Tcl_Interp *interp,  int argc,
 				     TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
 
-/*extern int
+extern int
   TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp,  int argc,
   TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
-  
+*/  
   extern int
   TclModelBuilder_addDoubleFPBearing(ClientData clientData, Tcl_Interp *interp,  int argc,
   TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
@@ -703,13 +703,14 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
     return result;
   }
 
-  /*else if (strcmp(argv[1],"singleFPBearing") == 0) {
+  else if (strcmp(argv[1],"singleFPBearing") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addSingleFPBearing(clientData, interp, argc, argv,
 						theTclDomain, theTclBuilder, eleArgStart);
     return result;
   }
 
+  /*
   else if (strcmp(argv[1],"doubleFPBearing") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addDoubleFPBearing(clientData, interp, argc, argv,
