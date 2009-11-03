@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2009-04-17 23:02:41 $
+// $Revision: 1.2 $
+// $Date: 2009-11-03 23:12:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/frictionBearing/FlatSliderSimple2d.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -64,7 +64,7 @@ FlatSliderSimple2d::FlatSliderSimple2d(int tag, int Nd1, int Nd2,
 {
     // ensure the connectedExternalNode ID is of correct size & set values
     if (connectedExternalNodes.Size() != 2)  {
-        opserr << "FlatSliderSimple2d::setUp() - element: "
+        opserr << "FlatSliderSimple2d::FlatSliderSimple2d() - element: "
             << this->getTag() << " failed to create an ID of size 2\n";
     }
     
@@ -374,7 +374,7 @@ int FlatSliderSimple2d::update()
     } while ((fabs(qb(1)-qb1Old) >= tol) && (iter <= maxIter));
     
     // issue warning if iteration did not converge
-    if (iter >= maxIter)   {
+    if (iter >= maxIter)  {
         opserr << "WARNING: FlatSliderSimple2d::update() - did not find the shear force after "
             << iter << " iterations and norm: " << fabs(qb(1)-qb1Old) << endln;
         return -1;
@@ -438,7 +438,7 @@ const Matrix& FlatSliderSimple2d::getMass()
 	}
     
 	double m = 0.5*mass;
-	for (int i = 0; i < 2; i++)  {
+	for (int i=0; i<2; i++)  {
 		theMatrix(i,i)     = m;
 		theMatrix(i+3,i+3) = m;
 	}
@@ -483,7 +483,7 @@ int FlatSliderSimple2d::addInertiaLoadToUnbalance(const Vector &accel)
 	// want to add ( - fact * M R * accel ) to unbalance
 	// take advantage of lumped mass matrix
 	double m = 0.5*mass;
-    for (int i = 0; i < 2; i++)  {
+    for (int i=0; i<2; i++)  {
         theLoad(i)   -= m * Raccel1(i);
         theLoad(i+3) -= m * Raccel2(i);
     }
@@ -530,7 +530,7 @@ const Vector& FlatSliderSimple2d::getResistingForceIncInertia()
 		const Vector &accel2 = theNodes[1]->getTrialAccel();    
 		
 		double m = 0.5*mass;
-		for (int i = 0; i < 2; i++)  {
+		for (int i=0; i<2; i++)  {
 			theVector(i)   += m * accel1(i);
 			theVector(i+3) += m * accel2(i);
 		}
@@ -669,7 +669,7 @@ int FlatSliderSimple2d::displaySelf(Renderer &theViewer,
     static Vector v1(3);
     static Vector v2(3);
     
-    for (int i = 0; i < 2; i++)  {
+    for (int i=0; i<2; i++)  {
         v1(i) = end1Crd(i) + end1Disp(i)*fact;
         v2(i) = end2Crd(i) + end2Disp(i)*fact;    
     }
@@ -710,8 +710,10 @@ Response* FlatSliderSimple2d::setResponse(const char **argv, int argc,
     output.attr("node2",connectedExternalNodes[1]);
 
     // global forces
-    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 ||
-        strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0)
+    if (strcmp(argv[0],"force") == 0 ||
+        strcmp(argv[0],"forces") == 0 ||
+        strcmp(argv[0],"globalForce") == 0 ||
+        strcmp(argv[0],"globalForces") == 0)
     {
         output.tag("ResponseType","Px_1");
         output.tag("ResponseType","Py_1");
@@ -723,7 +725,8 @@ Response* FlatSliderSimple2d::setResponse(const char **argv, int argc,
         theResponse = new ElementResponse(this, 1, theVector);
     }
     // local forces
-    else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
+    else if (strcmp(argv[0],"localForce") == 0 ||
+        strcmp(argv[0],"localForces") == 0)
     {
         output.tag("ResponseType","N_1");
         output.tag("ResponseType","V_1");
@@ -735,7 +738,8 @@ Response* FlatSliderSimple2d::setResponse(const char **argv, int argc,
         theResponse = new ElementResponse(this, 2, theVector);
     }
     // basic forces
-    else if (strcmp(argv[0],"basicForce") == 0 || strcmp(argv[0],"basicForces") == 0)
+    else if (strcmp(argv[0],"basicForce") == 0 ||
+        strcmp(argv[0],"basicForces") == 0)
     {
         output.tag("ResponseType","qb1");
         output.tag("ResponseType","qb2");
@@ -757,9 +761,12 @@ Response* FlatSliderSimple2d::setResponse(const char **argv, int argc,
         theResponse = new ElementResponse(this, 4, theVector);
     }
 	// basic displacements
-    else if (strcmp(argv[0],"deformation") == 0 || strcmp(argv[0],"deformations") == 0 || 
-        strcmp(argv[0],"basicDeformation") == 0 || strcmp(argv[0],"basicDeformations") == 0 ||
-        strcmp(argv[0],"basicDisplacement") == 0 || strcmp(argv[0],"basicDisplacements") == 0)
+    else if (strcmp(argv[0],"deformation") == 0 ||
+        strcmp(argv[0],"deformations") == 0 || 
+        strcmp(argv[0],"basicDeformation") == 0 ||
+        strcmp(argv[0],"basicDeformations") == 0 ||
+        strcmp(argv[0],"basicDisplacement") == 0 ||
+        strcmp(argv[0],"basicDisplacements") == 0)
     {
         output.tag("ResponseType","ub1");
         output.tag("ResponseType","ub2");
@@ -818,7 +825,7 @@ int FlatSliderSimple2d::getResponse(int responseID, Information &eleInfo)
 
 // establish the external nodes and set up the transformation matrix for orientation
 void FlatSliderSimple2d::setUp()
-{ 
+{
     const Vector &end1Crd = theNodes[0]->getCrds();
     const Vector &end2Crd = theNodes[1]->getCrds();	
     Vector xp = end2Crd - end1Crd;

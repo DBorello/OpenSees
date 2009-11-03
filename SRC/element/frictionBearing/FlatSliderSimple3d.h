@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2009-04-17 23:02:41 $
+// $Revision: 1.2 $
+// $Date: 2009-11-03 23:12:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/frictionBearing/FlatSliderSimple3d.h,v $
 
 #ifndef FlatSliderSimple3d_h
@@ -31,7 +31,8 @@
 //
 // Description: This file contains the class definition for FlatSliderSimple3d.
 // FlatSliderSimple3d is a friction slider element defined by two nodes. This
-// simplified version does not account for rotations of the sliding surface.
+// simplified version uses small angle approximations and accounts for
+// rotations of the sliding surface by shifting the shear forces.
 
 #include <Element.h>
 #include <Matrix.h>
@@ -54,6 +55,9 @@ public:
     
     // destructor
     ~FlatSliderSimple3d();
+    
+    // method to get class type
+    const char *getClassType() const {return "FlatSliderSimple3d";};
     
     // public methods to obtain information about dof & connectivity    
     int getNumExternalNodes() const;

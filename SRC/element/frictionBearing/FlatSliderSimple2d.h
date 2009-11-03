@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2009-04-17 23:02:41 $
+// $Revision: 1.2 $
+// $Date: 2009-11-03 23:12:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/frictionBearing/FlatSliderSimple2d.h,v $
 
 #ifndef FlatSliderSimple2d_h
@@ -31,7 +31,8 @@
 //
 // Description: This file contains the class definition for FlatSliderSimple2d.
 // FlatSliderSimple2d is a friction slider element defined by two nodes. This
-// simplified version does not account for rotations of the sliding surface.
+// simplified version uses small angle approximations and accounts for the
+// rotation of the sliding surface by shifting the shear force.
 
 #include <Element.h>
 #include <Matrix.h>
@@ -90,7 +91,7 @@ public:
     void Print(OPS_Stream &s, int flag = 0);    
     
     Response *setResponse(const char **argv, int argc, OPS_Stream &s);
-    int getResponse(int responseID, Information &eleInfo);
+    int getResponse(int responseID, Information &eleInformation);
     
 protected:
 

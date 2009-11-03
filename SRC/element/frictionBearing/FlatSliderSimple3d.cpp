@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2009-04-17 23:02:41 $
+// $Revision: 1.2 $
+// $Date: 2009-11-03 23:12:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/frictionBearing/FlatSliderSimple3d.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -64,7 +64,7 @@ FlatSliderSimple3d::FlatSliderSimple3d(int tag, int Nd1, int Nd2,
 {
     // ensure the connectedExternalNode ID is of correct size & set values
     if (connectedExternalNodes.Size() != 2)  {
-        opserr << "FlatSliderSimple3d::setUp() - element: "
+        opserr << "FlatSliderSimple3d::FlatSliderSimple3d() - element: "
             << this->getTag() << " failed to create an ID of size 2\n";
     }
     
@@ -156,25 +156,25 @@ FlatSliderSimple3d::~FlatSliderSimple3d()
 }
 
 
-int FlatSliderSimple3d::getNumExternalNodes(void) const
+int FlatSliderSimple3d::getNumExternalNodes() const
 {
     return 2;
 }
 
 
-const ID& FlatSliderSimple3d::getExternalNodes(void) 
+const ID& FlatSliderSimple3d::getExternalNodes() 
 {
     return connectedExternalNodes;
 }
 
 
-Node** FlatSliderSimple3d::getNodePtrs(void) 
+Node** FlatSliderSimple3d::getNodePtrs() 
 {
 	return theNodes;
 }
 
 
-int FlatSliderSimple3d::getNumDOF(void) 
+int FlatSliderSimple3d::getNumDOF() 
 {
     return 12;
 }
@@ -291,7 +291,7 @@ int FlatSliderSimple3d::revertToStart()
 }
 
 
-int FlatSliderSimple3d::update(void)
+int FlatSliderSimple3d::update()
 {
     // get global trial displacements and velocities
     const Vector &dsp1 = theNodes[0]->getTrialDisp();
@@ -300,7 +300,7 @@ int FlatSliderSimple3d::update(void)
     const Vector &vel2 = theNodes[1]->getTrialVel();
     
     static Vector ug(12), ugdot(12), uldot(12), ubdot(6);
-    for (int i = 0; i < 6; i++)  {
+    for (int i=0; i<6; i++)  {
         ug(i)   = dsp1(i);  ugdot(i)   = vel1(i);
         ug(i+6) = dsp2(i);  ugdot(i+6) = vel2(i);
     }
@@ -412,7 +412,7 @@ int FlatSliderSimple3d::update(void)
 }
 
 
-const Matrix& FlatSliderSimple3d::getTangentStiff(void)
+const Matrix& FlatSliderSimple3d::getTangentStiff()
 {
     // zero the matrix
     theMatrix.Zero();
@@ -442,7 +442,7 @@ const Matrix& FlatSliderSimple3d::getTangentStiff(void)
 }
 
 
-const Matrix& FlatSliderSimple3d::getInitialStiff(void)
+const Matrix& FlatSliderSimple3d::getInitialStiff()
 {
     // zero the matrix
     theMatrix.Zero();
@@ -458,7 +458,7 @@ const Matrix& FlatSliderSimple3d::getInitialStiff(void)
 }
 
 
-const Matrix& FlatSliderSimple3d::getMass(void)
+const Matrix& FlatSliderSimple3d::getMass()
 {
 	// zero the matrix
     theMatrix.Zero();
@@ -469,7 +469,7 @@ const Matrix& FlatSliderSimple3d::getMass(void)
 	}    
     
 	double m = 0.5*mass;
-	for (int i = 0; i < 3; i++)  {
+	for (int i=0; i<3; i++)  {
 		theMatrix(i,i)     = m;
 		theMatrix(i+3,i+3) = m;
 	}
@@ -478,7 +478,7 @@ const Matrix& FlatSliderSimple3d::getMass(void)
 }
 
 
-void FlatSliderSimple3d::zeroLoad(void)
+void FlatSliderSimple3d::zeroLoad()
 {
     theLoad.Zero();
 }
@@ -514,7 +514,7 @@ int FlatSliderSimple3d::addInertiaLoadToUnbalance(const Vector &accel)
 	// want to add ( - fact * M R * accel ) to unbalance
 	// take advantage of lumped mass matrix
 	double m = 0.5*mass;
-    for (int i = 0; i < 3; i++)  {
+    for (int i=0; i<3; i++)  {
         theLoad(i)   -= m * Raccel1(i);
         theLoad(i+3) -= m * Raccel2(i);
     }
@@ -568,7 +568,7 @@ const Vector& FlatSliderSimple3d::getResistingForceIncInertia()
 		const Vector &accel2 = theNodes[1]->getTrialAccel();    
 		
 		double m = 0.5*mass;
-		for (int i = 0; i < 3; i++)  {
+		for (int i=0; i<3; i++)  {
 			theVector(i)   += m * accel1(i);
 			theVector(i+3) += m * accel2(i);
 		}
@@ -710,7 +710,7 @@ int FlatSliderSimple3d::displaySelf(Renderer &theViewer,
     static Vector v1(3);
     static Vector v2(3);
     
-    for (int i = 0; i < 3; i++)  {
+    for (int i=0; i<3; i++)  {
         v1(i) = end1Crd(i) + end1Disp(i)*fact;
         v2(i) = end2Crd(i) + end2Disp(i)*fact;    
     }
@@ -753,8 +753,10 @@ Response* FlatSliderSimple3d::setResponse(const char **argv, int argc,
     output.attr("node2",connectedExternalNodes[1]);
     
     // global forces
-    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 ||
-        strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0)
+    if (strcmp(argv[0],"force") == 0 ||
+        strcmp(argv[0],"forces") == 0 ||
+        strcmp(argv[0],"globalForce") == 0 ||
+        strcmp(argv[0],"globalForces") == 0)
     {
         output.tag("ResponseType","Px_1");
         output.tag("ResponseType","Py_1");
@@ -772,7 +774,8 @@ Response* FlatSliderSimple3d::setResponse(const char **argv, int argc,
         theResponse = new ElementResponse(this, 1, theVector);
     }
     // local forces
-    else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
+    else if (strcmp(argv[0],"localForce") == 0 ||
+        strcmp(argv[0],"localForces") == 0)
     {
         output.tag("ResponseType","N_ 1");
         output.tag("ResponseType","Vy_1");
@@ -786,11 +789,12 @@ Response* FlatSliderSimple3d::setResponse(const char **argv, int argc,
         output.tag("ResponseType","T_2");
         output.tag("ResponseType","My_2");
         output.tag("ResponseType","Mz_2");
-
+        
         theResponse = new ElementResponse(this, 2, theVector);
     }
     // basic forces
-    else if (strcmp(argv[0],"basicForce") == 0 || strcmp(argv[0],"basicForces") == 0)
+    else if (strcmp(argv[0],"basicForce") == 0 ||
+        strcmp(argv[0],"basicForces") == 0)
     {
         output.tag("ResponseType","qb1");
         output.tag("ResponseType","qb2");
@@ -798,7 +802,7 @@ Response* FlatSliderSimple3d::setResponse(const char **argv, int argc,
         output.tag("ResponseType","qb4");
         output.tag("ResponseType","qb5");
         output.tag("ResponseType","qb6");
-
+        
         theResponse = new ElementResponse(this, 3, Vector(6));
     }
 	// local displacements
@@ -821,9 +825,12 @@ Response* FlatSliderSimple3d::setResponse(const char **argv, int argc,
         theResponse = new ElementResponse(this, 4, theVector);
     }
 	// basic displacements
-    else if (strcmp(argv[0],"deformation") == 0 || strcmp(argv[0],"deformations") == 0 || 
-        strcmp(argv[0],"basicDeformation") == 0 || strcmp(argv[0],"basicDeformations") == 0 ||
-        strcmp(argv[0],"basicDisplacement") == 0 || strcmp(argv[0],"basicDisplacements") == 0)
+    else if (strcmp(argv[0],"deformation") == 0 ||
+        strcmp(argv[0],"deformations") == 0 || 
+        strcmp(argv[0],"basicDeformation") == 0 ||
+        strcmp(argv[0],"basicDeformations") == 0 ||
+        strcmp(argv[0],"basicDisplacement") == 0 ||
+        strcmp(argv[0],"basicDisplacements") == 0)
     {
         output.tag("ResponseType","ub1");
         output.tag("ResponseType","ub2");
