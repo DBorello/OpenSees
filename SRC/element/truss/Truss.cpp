@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.32 $
-// $Date: 2009-05-18 22:01:06 $
+// $Revision: 1.33 $
+// $Date: 2009-11-03 23:09:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -948,7 +948,7 @@ Truss::setResponse(const char **argv, int argc, OPS_Stream &output)
 
 
     if ((strcmp(argv[0],"force") == 0) || (strcmp(argv[0],"forces") == 0) 
-        || (strcmp(argv[0],"globalForces") == 0) || (strcmp(argv[0],"globalforces") == 0)){
+        || (strcmp(argv[0],"globalForce") == 0) || (strcmp(argv[0],"globalForces") == 0)){
             char outputData[10];
             int numDOFperNode = numDOF/2;
             for (int i=0; i<numDOFperNode; i++) {
@@ -962,12 +962,13 @@ Truss::setResponse(const char **argv, int argc, OPS_Stream &output)
             theResponse =  new ElementResponse(this, 1, Vector(numDOF));
 
     } else if ((strcmp(argv[0],"axialForce") == 0) || (strcmp(argv[0],"basicForce") == 0) || 
-        (strcmp(argv[0],"basicForce") == 0)) {
+        (strcmp(argv[0],"basicForces") == 0)) {
             output.tag("ResponseType", "N");
             theResponse =  new ElementResponse(this, 2, 0.0);
 
-    } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
-        strcmp(argv[0],"deformation") == 0) {
+    } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformation") == 0 ||
+        strcmp(argv[0],"deformations") == 0 || strcmp(argv[0],"basicDefo") == 0 ||
+        strcmp(argv[0],"basicDeformation") == 0 || strcmp(argv[0],"basicDeformations") == 0) {
 
             output.tag("ResponseType", "U");
             theResponse = new ElementResponse(this, 3, 0.0);
