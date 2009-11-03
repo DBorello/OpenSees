@@ -2,8 +2,10 @@ include ../../../Makefile.def
 
 OBJS       = FlatSliderSimple2d.o \
 	FlatSliderSimple3d.o \
-	TclFlatSliderCommand.o
-
+	SingleFPSimple2d.o \
+	SingleFPSimple3d.o \
+	TclFlatSliderCommand.o \
+	TclSingleFPCommand.o
 
 # Compilation control
 

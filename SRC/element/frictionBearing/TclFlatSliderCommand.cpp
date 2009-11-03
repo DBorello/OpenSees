@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2009-04-17 23:02:41 $
+// $Revision: 1.2 $
+// $Date: 2009-11-03 23:13:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/frictionBearing/TclFlatSliderCommand.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -257,7 +257,7 @@ int TclModelBuilder_addFlatSliderBearing(ClientData clientData,
         } 
 
         // check the number of arguments is correct
-        if ((argc-eleArgStart) < 7)  {
+        if ((argc-eleArgStart) < 14)  {
             opserr << "WARNING insufficient arguments\n";
             printCommand(argc, argv);
             opserr << "Want: flatSliderBearing eleTag iNode jNode frnMdlTag uy -P matTag -T matTag -My matTag -Mz matTag <-orient <x1 x2 x3> y1 y2 y3> <-mass m> <-iter maxIter tol>\n";
