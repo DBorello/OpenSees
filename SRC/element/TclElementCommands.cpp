@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.59 $
-// $Date: 2009-11-03 23:17:50 $
+// $Revision: 1.60 $
+// $Date: 2009-11-03 23:37:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
 
 // Written: fmk
@@ -323,7 +323,7 @@ TclModelBuilder_addFlatSliderBearing(ClientData clientData, Tcl_Interp *interp, 
 extern int
   TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp,  int argc,
   TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
-*/  
+/*  
   extern int
   TclModelBuilder_addDoubleFPBearing(ClientData clientData, Tcl_Interp *interp,  int argc,
   TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
