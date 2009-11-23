@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.117 $
-// $Date: 2009-10-07 20:15:39 $
+// $Revision: 1.118 $
+// $Date: 2009-11-23 23:29:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
 
 // Written: fmk
@@ -124,6 +124,7 @@
 #define MAT_TAG_Pinching4					18
 #define MAT_TAG_BarSlip					19
 #define MAT_TAG_Fatigue			20
+#define MAT_TAG_SAWSMaterial			41
 #define MAT_TAG_Steel03					23
 #define MAT_TAG_ReinforcingSteel					24
 #define MAT_TAG_ShearPanelMaterial					40
@@ -146,8 +147,7 @@
 #define MAT_TAG_HyperbolicGapMaterial 38
 #define MAT_TAG_ImpactMaterial 39
 #define MAT_TAG_WrapperUniaxialMaterial 101
-
-#define MAT_TAG_UniaxialJ2Plasticity 1093489700
+#define MAT_TAG_UniaxialJ2Plasticity 102
 
 
 //B Jeremic

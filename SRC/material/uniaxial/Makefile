@@ -58,6 +58,7 @@ include ../../../Makefile.def
 	SelfCenteringMaterial.o \
 	BackboneMaterial.o \
 	WrapperUniaxialMaterial.o \
+	SAWSMaterial.o \
         TclModelBuilderUniaxialMaterialCommand.o
 
 all:         $(OBJS)

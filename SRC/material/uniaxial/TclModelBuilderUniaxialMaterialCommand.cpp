@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.64 $
-// $Date: 2009-06-08 19:29:29 $
+// $Revision: 1.65 $
+// $Date: 2009-11-23 23:28:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -79,6 +79,10 @@
 #include <string.h>
 
 #include <UniaxialJ2Plasticity.h>   // Quan 
+
+
+extern void *OPS_NewSAWSMaterial(void);
+
 #ifdef _LIMITSTATEMATERIAL
 extern UniaxialMaterial *
 Tcl_AddLimitStateMaterial(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
@@ -146,6 +150,7 @@ UniaxialMaterial *
 TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
 				  TCL_Char **argv, TclModelBuilder *theTclBuilder, Domain *theDomain);
 
+
 /*
 int
 TclCommand_KinematicHardening(ClientData clientData, Tcl_Interp *interp, int argc, 
@@ -156,7 +161,10 @@ int
 TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *interp, int argc,
 					TCL_Char **argv, TclModelBuilder *theTclBuilder, Domain *theDomain)
 {
-    // Make sure there is a minimum number of arguments
+  
+  OPS_ResetInput(clientData, interp, 2, argc, argv, theDomain, theTclBuilder);	  
+
+  // Make sure there is a minimum number of arguments
     if (argc < 3) {
 	opserr << "WARNING insufficient number of uniaxial material arguments\n";
 	opserr << "Want: uniaxialMaterial type? tag? <specific material args>" << endln;
@@ -1697,6 +1705,15 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 					m, epsmin, epsmax);
       
     }
+
+    else if ((strcmp(argv[1],"SAWSMaterial") == 0) || (strcmp(argv[1],"SAWS") == 0)) {
+      void *theMat = OPS_NewSAWSMaterial();
+      if (theMat != 0) 
+	theMaterial = (UniaxialMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+    }
+
     else if (strcmp(argv[1],"Cable") == 0) 
 	{
 		if (argc != 7) {
@@ -3145,7 +3162,6 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
       bool found = false;
       while (matCommands != NULL && found == false) {
 	if (strcmp(argv[1], matCommands->funcName) == 0) {
-	  OPS_ResetInput(clientData, interp, 2, argc, argv, theDomain, theTclBuilder);	  
 	  theMaterial = (UniaxialMaterial *)(*(matCommands->funcPtr))();
 	  found = true;;
 	} else
@@ -3210,7 +3226,6 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	theMatCommand->next = theUniaxialPackageCommands;
 	theUniaxialPackageCommands = theMatCommand;
 	
-	OPS_ResetInput(clientData, interp, 2, argc, argv, theDomain, theTclBuilder);	
 	theMaterial = (UniaxialMaterial *)(*funcPtr)();
       }
     }
@@ -3226,11 +3241,11 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
     
     // Now add the material to the modelBuilder
     if (theTclBuilder->addUniaxialMaterial(*theMaterial) < 0) {
-      opserr << "WARNING could not add uniaxialMaterial to the domain\n";
+      opserr << "WARNING could not add uniaxialMaterial to the modelbuilder\n";
       opserr << *theMaterial << endln;
       delete theMaterial; // invoke the material objects destructor, otherwise mem leak
       return TCL_ERROR;
     }
-    
+
     return TCL_OK;
 }
