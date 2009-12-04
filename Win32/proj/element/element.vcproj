@@ -976,7 +976,22 @@
 				RelativePath="..\..\..\SRC\element\frictionBearing\FlatSliderSimple3d.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\element\frictionBearing\SingleFPSimple2d.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\frictionBearing\SingleFPSimple2d.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\frictionBearing\SingleFPSimple3d.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\frictionBearing\SingleFPSimple3d.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\element\frictionBearing\TclFlatSliderCommand.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\frictionBearing\TclSingleFPCommand.cpp">
 			</File>
 			<Filter
 				Name="frictionModel"

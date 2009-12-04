@@ -290,6 +290,12 @@
 				RelativePath="..\..\..\SRC\material\uniaxial\ReinforcingSteel.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\SAWSMaterial.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\SAWSMaterial.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\SelfCenteringMaterial.cpp">
 			</File>
 			<File
