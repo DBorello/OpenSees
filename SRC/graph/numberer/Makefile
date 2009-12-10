@@ -1,6 +1,10 @@
 include ../../../Makefile.def
 
-OBJS       = RCM.o SimpleNumberer.o GraphNumberer.o MyRCM.o
+OBJS       = RCM.o \
+	AMDNumberer.o \
+	SimpleNumberer.o \
+	GraphNumberer.o \
+	MyRCM.o
 
 all:         $(OBJS)
 
