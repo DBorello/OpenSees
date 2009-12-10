@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2008-11-25 15:24:34 $
+// $Revision: 1.6 $
+// $Date: 2009-12-10 00:28:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint3D.cpp,v $
 
 // Written: Arash Altoontash, Gregory Deierlein
@@ -222,7 +222,7 @@ TheDomain(0), numDof(0), nodeDbTag(0), dofDbTag(0)
   // Generate and add constraints to domain
   
   // get the constraint numbers
-  int startMPtag = theDomain->getNumMPs();
+  int startMPtag = theDomain->getNumMPs() + 1;
   for ( i=0 ; i<6 ; i++ ) InternalConstraints(i) = startMPtag + i ;
  
   // create MP_Joint constraint node 1

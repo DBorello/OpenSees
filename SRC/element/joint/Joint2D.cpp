@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.11 $
-// $Date: 2007-02-02 01:44:57 $
+// $Revision: 1.12 $
+// $Date: 2009-12-10 00:28:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint2D.cpp,v $
 
 // Written: Arash & GGD
@@ -197,7 +197,7 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
   // Generate and add constraints to domain
   
   // get the constraint numbers
-  int startMPtag = theDomain->getNumMPs();
+  int startMPtag = theDomain->getNumMPs()+1;
   for ( i=0 ; i<4 ; i++ ) InternalConstraints(i) = startMPtag + i ;
   
   // create MP_Joint constraint node 1
