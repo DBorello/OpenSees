@@ -509,6 +509,7 @@ GRAPH_LIBS = $(FE)/graph/graph/DOF_Graph.o \
 	$(FE)/graph/graph/Graph.o \
 	$(FE)/graph/graph/DOF_GroupGraph.o  \
 	$(FE)/graph/numberer/RCM.o \
+	$(FE)/graph/numberer/AMDNumberer.o \
 	$(FE)/graph/numberer/MyRCM.o \
 	$(FE)/graph/numberer/GraphNumberer.o \
 	$(FE)/graph/numberer/SimpleNumberer.o \
@@ -579,6 +580,9 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/frictionBearing/FlatSliderSimple2d.o \
 	$(FE)/element/frictionBearing/FlatSliderSimple3d.o \
 	$(FE)/element/frictionBearing/TclFlatSliderCommand.o \
+	$(FE)/element/frictionBearing/SingleFPSimple2d.o \
+	$(FE)/element/frictionBearing/SingleFPSimple3d.o \
+	$(FE)/element/frictionBearing/TclSingleFPCommand.o \
 	$(FE)/element/frictionBearing/frictionModel/CoulombFriction.o \
 	$(FE)/element/frictionBearing/frictionModel/FrictionModel.o \
 	$(FE)/element/frictionBearing/frictionModel/FrictionResponse.o \
