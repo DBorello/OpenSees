@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2007-07-27 18:52:19 $
+// $Revision: 1.30 $
+// $Date: 2009-12-17 20:07:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -111,13 +111,12 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
     
     // Check argv[1] for section type
     if (strcmp(argv[1],"Elastic") == 0) {
-	if (argc < 5) {
-	    opserr << "WARNING insufficient arguments\n";
-	    printCommand(argc,argv);
-	    //opserr << "Want: section Elastic tag? EA? EIz? <EIy? GJ?>" << endln;
-		opserr << "Want: section Elastic tag? E? A? Iz? <Iy? G? J?>" << endln;
-	    return TCL_ERROR;
-	}
+      if (argc < 5) {
+	opserr << "WARNING insufficient arguments\n";
+	printCommand(argc,argv);
+	opserr << "Want: section Elastic tag? E? A? Iz? <Iy? G? J?>" << endln;
+	return TCL_ERROR;
+      }
 	
 	int tag;
 	double E, A, Iz, Iy, G, J, alpha;
@@ -163,10 +162,17 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	  }
 	  else 
 	    theSection = new ElasticSection2d(tag, E, A, Iz);
-	}
-	else {
+	} else {
+	  // 3D
+	  if (argc < 8) {
+	    opserr << "WARNING insufficient arguments\n";
+	    printCommand(argc,argv);
+	    opserr << "Want: section Elastic tag? E? A? Iz? Iy? G? J?" << endln;
+	    return TCL_ERROR;
+	  }
+
 	  if (Tcl_GetDouble (interp, argv[6], &Iy) != TCL_OK) {
-	    opserr << "WARNING invalid EIy" << endln;
+	    opserr << "WARNING invalid Iy" << endln;
 	    opserr << "Elastic section: " << tag << endln;
 	    return TCL_ERROR;
 	  }
