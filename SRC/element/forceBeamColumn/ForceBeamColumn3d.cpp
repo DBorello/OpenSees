@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2009-07-14 19:32:43 $
+// $Revision: 1.30 $
+// $Date: 2009-12-17 23:49:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 /*
@@ -72,6 +72,10 @@ Journal of Structural Engineering, Approved for publication, February 2007.
 #include <FEM_ObjectBroker.h>
 #include <Renderer.h>
 #include <math.h>
+
+#include <fstream>
+using std::ifstream;
+#include <fstream>
 
 #include <ElementResponse.h>
 #include <ElementalLoad.h>
@@ -2069,9 +2073,8 @@ ForceBeamColumn3d::getInitialStiff(void)
   Response*
   ForceBeamColumn3d::setResponse(const char **argv, int argc, OPS_Stream &output)
   {
-
     Response *theResponse = 0;
-
+    
     output.tag("ElementOutput");
     output.attr("eleType","ForceBeamColumn3d");
     output.attr("eleTag",this->getTag());
@@ -2117,64 +2120,72 @@ ForceBeamColumn3d::getInitialStiff(void)
       output.tag("ResponseType","T_2");
       output.tag("ResponseType","My_2");
       output.tag("ResponseType","Mz_2");
-
+      
       theResponse = new ElementResponse(this, 2, theVector);
-
+      
     // chord rotation -
     }  else if (strcmp(argv[0],"chordRotation") == 0 || strcmp(argv[0],"chordDeformation") == 0 
-	      || strcmp(argv[0],"basicDeformation") == 0) {
-
+		|| strcmp(argv[0],"basicDeformation") == 0) {
+      
       output.tag("ResponseType","eps");
       output.tag("ResponseType","thetaZ_1");
       output.tag("ResponseType","thetaZ_2");
       output.tag("ResponseType","thetaY_1");
       output.tag("ResponseType","thetaY_2");
       output.tag("ResponseType","thetaX");
-
+      
       theResponse = new ElementResponse(this, 3, Vector(6));
-
-    // plastic rotation -
+      
+      // plastic rotation -
     } else if (strcmp(argv[0],"plasticRotation") == 0 || strcmp(argv[0],"plasticDeformation") == 0) {
-
-    output.tag("ResponseType","epsP");
-    output.tag("ResponseType","thetaZP_1");
-    output.tag("ResponseType","thetaZP_2");
-    output.tag("ResponseType","thetaYP_1");
-    output.tag("ResponseType","thetaYP_2");
-    output.tag("ResponseType","thetaXP");
-
-    theResponse = new ElementResponse(this, 4, Vector(6));
+      
+      output.tag("ResponseType","epsP");
+      output.tag("ResponseType","thetaZP_1");
+      output.tag("ResponseType","thetaZP_2");
+      output.tag("ResponseType","thetaYP_1");
+      output.tag("ResponseType","thetaYP_2");
+      output.tag("ResponseType","thetaXP");
+      
+      theResponse = new ElementResponse(this, 4, Vector(6));
+      
+      // point of inflection
+    } else if (strcmp(argv[0],"inflectionPoint") == 0) {
+      theResponse = new ElementResponse(this, 5, Vector(2));
+      
+      // tangent drift
+    } else if (strcmp(argv[0],"tangentDrift") == 0) {
+      theResponse = new ElementResponse(this, 6, Vector(4));
   
-  // point of inflection
-  } else if (strcmp(argv[0],"inflectionPoint") == 0) {
-    theResponse = new ElementResponse(this, 5, Vector(2));
-  
-  // tangent drift
-  } else if (strcmp(argv[0],"tangentDrift") == 0) {
-    theResponse = new ElementResponse(this, 6, Vector(4));
+    } else if (strcmp(argv[0],"getRemCriteria1") == 0) {
+      theResponse = new ElementResponse(this, 7, Vector(2));
 
-  // section response -
-  } else if (strcmp(argv[0],"section") ==0) { 
-    if (argc > 2) {
-    
-      int sectionNum = atoi(argv[1]);
-      if (sectionNum > 0 && sectionNum <= numSections) {
-	double xi[maxNumSections];
-	double L = crdTransf->getInitialLength();
-	beamIntegr->getSectionLocations(numSections, L, xi);
+    } else if (strcmp(argv[0],"getRemCriteria2") == 0) {
+      theResponse = new ElementResponse(this, 8, Vector(2), ID(6));
+
+      // section response -
+    } else if (strcmp(argv[0],"section") ==0) { 
+      if (argc > 2) {
 	
-	output.tag("GaussPointOutput");
-	output.attr("number",sectionNum);
-	output.attr("eta",2.0*xi[sectionNum-1]-1.0);
-	theResponse =  sections[sectionNum-1]->setResponse(&argv[2], argc-2, output);
-	
-	output.endTag();
+	int sectionNum = atoi(argv[1]);
+	if (sectionNum > 0 && sectionNum <= numSections) {
+	  double xi[maxNumSections];
+	  double L = crdTransf->getInitialLength();
+	  beamIntegr->getSectionLocations(numSections, L, xi);
+	  
+	  output.tag("GaussPointOutput");
+	  output.attr("number",sectionNum);
+	  output.attr("eta",2.0*xi[sectionNum-1]-1.0);
+	  theResponse =  sections[sectionNum-1]->setResponse(&argv[2], argc-2, output);
+	  
+	  output.endTag();
+	  
+	}
       }
     }
-  }
   
-  output.endTag();
-  return theResponse;
+    output.endTag();
+
+    return theResponse;
 }
 
 int 
@@ -2333,6 +2344,120 @@ ForceBeamColumn3d::getResponse(int responseID, Information &eleInfo)
     d(3) = d3y;
 
     return eleInfo.setVector(d);
+
+  } else if (responseID == 7) {
+    return -1;
+  } else if (responseID == 8) {
+
+    ID *eleInfoID = eleInfo.theID;
+
+    int compID = (*eleInfoID)(0);
+    int critID = (*eleInfoID)(1);
+    int nTagbotn11 = (*eleInfoID)(2);
+    int nTagmidn11 = (*eleInfoID)(3);
+    int nTagtopn11 = (*eleInfoID)(4);
+    int globgrav11 = (*eleInfoID)(5);
+
+    const char* filenamewall = eleInfo.theString;
+
+    // int returns
+    double value = 0.0;
+    double checkvalue1 = 0.0;
+
+    if (critID == 7) {
+      Domain *theDomain = this->getDomain();
+
+      double oofwallresp;
+      // determine the in plane horizontal deformation axis
+      // and the out of plane horizontal deformation axis
+      Node *theNode1a = theDomain->getNode(nTagbotn11);
+      Node *theNode3a = theDomain->getNode(nTagtopn11); 
+      const Vector &crdIa1 = theNode1a->getCrds();
+      const Vector &crdJa1 = theNode3a->getCrds();
+      int indwdir1;
+      int indwdir2;
+      if (globgrav11==1) {
+	indwdir1=1;
+	indwdir2=2;
+      }
+      else if (globgrav11==2) {
+	indwdir1=0;
+	indwdir2=2;		  
+      }
+      else if (globgrav11==3) {
+	indwdir1=0;
+	indwdir2=1;		  
+      }
+
+      double dir1a1=crdJa1(indwdir1)-crdIa1(indwdir1);
+      double dir2a1=crdJa1(indwdir2)-crdIa1(indwdir2);
+      double dirsumdum=sqrt(dir1a1*dir1a1+dir2a1*dir2a1);
+      double dir1inp=dir1a1/dirsumdum;		
+      double dir2inp=dir2a1/dirsumdum;
+      
+      double dir1oop=-dir2inp;
+      double dir2oop=dir1inp;
+      
+      Node *theNode1 = theDomain->getNode(nTagbotn11);
+      const Vector &theResponsewall = theNode1->getTrialDisp();
+      double valbotinfn=theResponsewall(indwdir1)*dir1inp+theResponsewall(indwdir2)*dir2inp;
+      double valbotoutfn=theResponsewall(indwdir1)*dir1oop+theResponsewall(indwdir2)*dir2oop;
+      
+      Node *theNode2 = theDomain->getNode(nTagmidn11);
+      const Vector &theResponsewall2 = theNode2->getTrialDisp();
+      double valmidinfn=theResponsewall2(indwdir1)*dir1inp+theResponsewall2(indwdir2)*dir2inp;
+      double valmidoutfn=theResponsewall2(indwdir1)*dir1oop+theResponsewall2(indwdir2)*dir2oop;
+      
+      Node *theNode3 = theDomain->getNode(nTagtopn11);
+      const Vector &theResponsewall3 = theNode3->getTrialDisp();
+      double valtopinfn=theResponsewall3(indwdir1)*dir1inp+theResponsewall3(indwdir2)*dir2inp;
+      double valtopoutfn=theResponsewall3(indwdir1)*dir1oop+theResponsewall3(indwdir2)*dir2oop;
+      
+      value = sqrt(pow((valtopinfn-valbotinfn),2.0));
+      double valoutchck=valmidoutfn-(valtopoutfn+valbotoutfn)/2.0;
+      oofwallresp = sqrt(pow(valoutchck,2.0));
+      //        
+      double outplanevaldat; // variable for input value
+      double inplanevaldat; // variable for input value
+      double outplanevaldat1; // variable for input value
+      double inplanevaldat1; // variable for input value
+      ifstream indata;
+
+      if (filenamewall!=NULL) {
+	//		
+	indata.open(filenamewall); // opens the file
+	if(!indata) { // file couldn't be opened
+	  opserr << "Error: file for infill wall could not be opened" << endln;
+	  exit(1);
+	}
+	checkvalue1=0.0;
+	int counterdum=0;
+	while ( !indata.eof() ) { // keep reading until end-of-file
+	  counterdum=counterdum+1;
+	  indata >> outplanevaldat >> inplanevaldat ; // sets EOF flag if no value found
+	  if (counterdum!=1)  {
+	    if (oofwallresp >= outplanevaldat1 && oofwallresp <= outplanevaldat)  {
+	      checkvalue1= inplanevaldat1+(oofwallresp-outplanevaldat1)/(outplanevaldat-outplanevaldat1)*(inplanevaldat-inplanevaldat1);
+	      break; 
+	    }
+	  }
+	  indata >> outplanevaldat1 >> inplanevaldat1;
+	  if (oofwallresp >= outplanevaldat && oofwallresp <= outplanevaldat1)  {
+	    checkvalue1= inplanevaldat+(oofwallresp-outplanevaldat)/(outplanevaldat1-outplanevaldat)*(inplanevaldat1-inplanevaldat);
+	    break;
+	  }
+	}
+	indata.close();
+      }
+
+      static Vector result8(2);
+      result8(0) = value;
+      result8(1) = checkvalue1;      
+      
+      return eleInfo.setVector(result8);
+    }
+
+    return -1;
   }
 
   else
