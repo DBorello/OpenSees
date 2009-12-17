@@ -16,6 +16,7 @@ OBJS       = Recorder.o \
 	DriftRecorder.o \
 	EnvelopeDriftRecorder.o \
 	PatternRecorder.o \
+	RemoveRecorder.o \
 	DamageRecorder.o $(GRAPHIC_OBJECTS)
 
 

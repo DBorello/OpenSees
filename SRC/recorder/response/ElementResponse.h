@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2007-03-02 00:12:50 $
+// $Revision: 1.5 $
+// $Date: 2009-12-17 23:50:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/response/ElementResponse.h,v $
                                                                         
 // Written: MHS 
@@ -50,6 +50,8 @@ public:
 	ElementResponse(Element *ele, int id, const Vector &val);
 	ElementResponse(Element *ele, int id, const Matrix &val);
 	ElementResponse(Element *ele, int id, const Tensor &val);
+	ElementResponse(Element *ele, int id, const Vector &val1, const ID &val2);
+
 	~ElementResponse();
 
 	int getResponse(void);

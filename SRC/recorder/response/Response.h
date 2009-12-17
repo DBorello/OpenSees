@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2007-03-02 00:12:50 $
+// $Revision: 1.8 $
+// $Date: 2009-12-17 23:50:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/response/Response.h,v $
                                                                         
 // Written: MHS 
@@ -47,7 +47,8 @@ class Response
   Response(const Vector &val);
   Response(const Matrix &val);
   Response(const Tensor &val);
-  
+  Response(const Vector &val1, const ID &val2);
+
   virtual ~Response();
   
   virtual int getResponse(void) = 0;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.52 $
-// $Date: 2009-08-07 20:54:34 $
+// $Revision: 1.53 $
+// $Date: 2009-12-17 23:50:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -60,6 +60,8 @@
 #include <DamageRecorder.h>
 #include <MeshRegion.h>
 //#include <GSA_Recorder.h>
+#include <RemoveRecorder.h>
+
 #include <TclModelBuilder.h>
 
 #include <StandardStream.h>
@@ -506,8 +508,428 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       (*theRecorder) = new DamageRecorder( eleID , secIDs, dofID , dmgPTR , theDomain,echoTime,dT ,*theOutput);
       
     }
-	//////////////////////End of ElementDamage recorder////////////////////////////
+    //////////////////////End of ElementDamage recorder////////////////////////////
     
+    else if ( (strcmp(argv[1],"Remove") == 0) || (strcmp(argv[1],"ElementRemoval") == 0) ||
+	      (strcmp(argv[1],"NodeRemoval") == 0) || (strcmp(argv[1],"Collapse") == 0) ) {
+      
+      
+      if (argc < 4) {
+	opserr << "WARNING recorder Collapse -ele eleID <eleID2? ...>  -node nodeID <-time> <-file fileName?> ? "
+	       <<"\n or recorder Collapse -ele eleID1 <eleID2? ...>? <-sec secID1? secID2? ...> -crit crit1? value1?"
+	       << " <-crit crit2? value2?> <-time> <-file fileName?> <-mass mass1? mass2? ...> <-g gAcc gDir? gPat?>?"<<endln;
+	return TCL_ERROR;
+      }    
+      
+      
+      int maxNumCriteria = 2;	// current maximum number of either-or criteria for an element
+      double dT = 0.0;
+      bool echoTime = false;
+      int endEleIDs = 2;
+      int numEle = endEleIDs-2;
+      int loc = endEleIDs;
+      int flags = 0;
+      int eleData = 0;
+      int nodeTag = 0;
+      //  new
+      int nTagbotn = 0;
+      int nTagmidn = 0;
+      int nTagtopn = 0;
+      int globgrav = 0;
+      const char *fileNameinf = 0;
+
+      //  end of new
+      int numSlaveEle = 0;
+      
+      // create an ID to hold ele tags
+      //ID eleIDs(numEle, numEle+1); 
+      ID eleIDs;
+      eleIDs = ID(1);
+      ID slaveEleIDs = ID(1);
+      slaveEleIDs[0] = 0;
+      bool slaveFlag = false;
+      ID secIDs = 0;
+      //	secIDs = 0;
+      
+      // optional mass and weight definition
+      Vector eleMass(1);
+      eleMass.Zero();
+      double gAcc = 0;
+      int gDir = 0, gPat = 0;
+      
+      
+      Vector remCriteria(2*maxNumCriteria);
+      remCriteria.Zero();
+      int numCrit = 0;
+      
+      //   DataOutputHandler *theDataOutputHandler = 0;
+      //    TCL_Char *fileName = 0;
+      
+      
+      while (flags == 0 && loc < argc) {
+	
+	if (strcmp(argv[loc],"-node") == 0) {
+	  
+	  if (Tcl_GetInt(interp, argv[loc+1], &nodeTag) != TCL_OK) {
+	    opserr << "WARNING recorder Collapse -node - invalid node tag " << argv[loc+1] << endln;
+	    return TCL_ERROR;
+	  }
+	  
+	  Node* theNode = theDomain.getNode(nodeTag);
+	  if (theNode == 0) {
+	    opserr << "WARNING recorder Collapse -node - invalid node " << argv[loc+1] << endln;
+	    return TCL_ERROR;
+	  }
+	  loc += 2; 
+	}
+	// new
+	
+	else if (strcmp(argv[loc],"-file_infill") == 0) {
+	  fileNameinf = argv[loc+1];
+	  loc += 2;
+	}
+	
+	else if (strcmp(argv[loc],"-checknodes") == 0) {
+	  if (Tcl_GetInt(interp, argv[loc+1], &nTagbotn) != TCL_OK) {
+	    opserr << "WARNING recorder Collapse -node - invalid node tag " << argv[loc+1] << endln;
+	    return TCL_ERROR;
+	  }
+	  if (Tcl_GetInt(interp, argv[loc+2], &nTagmidn) != TCL_OK) {
+	    opserr << "WARNING recorder Collapse -node - invalid node tag " << argv[loc+1] << endln;
+	    return TCL_ERROR;
+	  }
+	  if (Tcl_GetInt(interp, argv[loc+3], &nTagtopn) != TCL_OK) {
+	    opserr << "WARNING recorder Collapse -node - invalid node tag " << argv[loc+1] << endln;
+	    return TCL_ERROR;
+	  }
+	  loc += 4;
+	}
+	
+	else if (strcmp(argv[loc],"-global_gravaxis") == 0) {
+	  if (Tcl_GetInt(interp, argv[loc+1], &globgrav) != TCL_OK) {
+	    opserr << "WARNING recorder Collapse -global_gravaxis - invalid global axis for gravity " << argv[loc+1] << endln;
+	    return TCL_ERROR;
+	  }
+	  loc += 2;
+	}
+	
+	
+	//    end of new
+	
+	else if ((strcmp(argv[loc],"-slave") == 0)) {
+	  slaveFlag = true;
+	  loc++;
+	}
+	
+	else if ((strcmp(argv[loc],"-ele") == 0) ||
+		 (strcmp(argv[loc],"-eles") == 0) ||
+		 (strcmp(argv[loc],"-element") == 0)) {
+	  
+	  // ensure no segmentation fault if user messes up
+	  if (argc < loc+2) {
+	    opserr << "WARNING recorder Collapse .. -ele tag1? .. - no ele tags specified\n";
+	    return TCL_ERROR;
+	  }
+	  
+	  //
+	  // read in a list of ele until end of command or other flag
+	  //
+	  loc++;
+	  int eleTag;
+	  while (loc < argc && Tcl_GetInt(interp, argv[loc], &eleTag) == TCL_OK) {
+	    if (slaveFlag == false)
+	      eleIDs[numEle++] = eleTag;
+	    else
+	      slaveEleIDs[numSlaveEle++] = eleTag;
+	    slaveFlag = false;
+	    loc++;
+	  }
+	  
+	  Tcl_ResetResult(interp);
+	  
+	  //	    if (loc == argc) {
+	  //	      opserr << "ERROR: No response type specified for element recorder. " << endln;
+	  //	      return TCL_ERROR;
+	  //	    }
+	  
+	  if (strcmp(argv[loc],"all") == 0) {
+	    ElementIter &theEleIter = theDomain.getElements();
+	    Element *theEle;
+	    while ((theEle = theEleIter()) != 0)
+	      eleIDs[numEle++] = theEle->getTag();
+	    loc++;
+	  }
+	  
+	}
+	
+	else if (strcmp(argv[loc],"-eleRange") == 0) {
+	  
+	  // ensure no segmentation fault if user messes up
+	  if (argc < loc+3) {
+	    opserr << "WARNING recorder Element .. -eleRange start? end?  .. - no ele tags specified\n";
+	    return TCL_ERROR;
+	  }
+	  
+	  //
+	  // read in start and end tags of two elements & add set [start,end]
+	  //
+	  
+	  int start, end;
+	  if (Tcl_GetInt(interp, argv[loc+1], &start) != TCL_OK) {
+	    opserr << "WARNING recorder Element -eleRange start? end? - invalid start " << argv[loc+1] << endln;
+	    return TCL_ERROR;
+	  }      
+	  if (Tcl_GetInt(interp, argv[loc+2], &end) != TCL_OK) {
+	    opserr << "WARNING recorder Element -eleRange start? end? - invalid end " << argv[loc+2] << endln;
+	    return TCL_ERROR;
+	  }      
+	  if (start > end) {
+	    int swap = end;
+	    end = start;
+	    start = swap;
+	  }
+	  
+	  for (int i=start; i<=end; i++)
+	    if (slaveFlag == false)
+	      eleIDs[numEle++] = i;
+	    else
+	      slaveEleIDs[numSlaveEle++] = i;
+	  
+	  slaveFlag = false;    
+	  loc += 3;
+	} 
+	
+	else if (strcmp(argv[loc],"-region") == 0) {
+	  // allow user to specif elements via a region
+	  
+	  if (argc < loc+2) {
+	    opserr << "WARNING recorder Element .. -region tag?  .. - no region specified\n";
+	    return TCL_ERROR;
+	  }
+	  int tag;
+	  if (Tcl_GetInt(interp, argv[loc+1], &tag) != TCL_OK) {
+	    opserr << "WARNING recorder Element -region tag? - invalid tag " << argv[loc+1] << endln;
+	    return TCL_ERROR;
+	  }      
+	  MeshRegion *theRegion = theDomain.getRegion(tag);
+	  if (theRegion == 0) {
+	    opserr << "WARNING recorder Element -region " << tag << " - region does not exist" << endln;
+	    return TCL_OK;
+	  }      
+	  const ID &eleRegion = theRegion->getElements();
+	  for (int i=0; i<eleRegion.Size(); i++)
+	    if (slaveFlag == false)
+	      eleIDs[numEle++] = eleRegion(i);
+	    else
+	      slaveEleIDs[numSlaveEle++] = eleRegion(i);
+	  
+	  slaveFlag = false;
+	  loc += 2;
+	} 
+	
+	else if ((strcmp(argv[loc],"-time") == 0) || (strcmp(argv[loc],"-load") == 0)) { 
+	  // allow user to specify const load
+	  echoTime = true;
+	  loc++;
+	} 
+	
+	else if (strcmp(argv[loc],"-dT") == 0) {
+	  // allow user to specify time step size for recording
+	  loc++;
+	  if (Tcl_GetDouble(interp, argv[loc], &dT) != TCL_OK)	
+	    return TCL_ERROR;	
+	  loc++;
+	} 
+	
+	else if (strcmp(argv[loc],"-file") == 0) {
+	  fileName = argv[loc+1];
+	  //	    simulationInfo.addWriteFile(fileName);
+	  loc += 2;
+	}
+	
+	else if ((strcmp(argv[loc],"-mass") == 0)) {
+	  eleMass.resize(numEle);
+	  eleMass.Zero();
+	  loc++;
+	  double eleM = 0;
+	  
+	  if (loc < argc && Tcl_GetDouble(interp, argv[loc+1], &eleM) != TCL_OK) {
+	    Tcl_GetDouble(interp, argv[loc], &eleM);
+	    for (int i=0; i<numEle; i++)
+	      eleMass(i) = eleM;
+	    loc++;
+	  }
+	  else {
+	    int i = 0;
+	    while (loc < argc && Tcl_GetDouble(interp, argv[loc], &eleM) == TCL_OK) {
+	      eleMass(i) = eleM;
+	      loc++;
+	      i++;
+	    }
+	  }
+	  
+	  //Tcl_ResetResult(interp);
+	}
+	
+	else if ((strcmp(argv[loc],"-g") == 0)) {
+	  loc++;
+	  double eleM = 0;
+	  
+	  if (Tcl_GetDouble(interp, argv[loc], &gAcc) != TCL_OK) {
+	    opserr << "WARNING recorder Remove -g gValue? gDir? gPat?... invalid gValue ";
+	    opserr << argv[loc] << endln;
+	    return TCL_ERROR;
+	  }   
+	  
+	  if (Tcl_GetInt(interp, argv[loc+1], &gDir) != TCL_OK) {
+	    opserr << "WARNING recorder Remove -g gValue? gDir? gPat?... invalid gDir ";
+	    opserr << argv[loc+1] << endln;
+	    return TCL_ERROR;
+	  }   
+	  
+	  if (Tcl_GetInt(interp, argv[loc+2], &gPat) != TCL_OK) {
+	    opserr << "WARNING recorder Remove -g gValue? gDir? gPat?... invalid gPat ";
+	    opserr << argv[loc+1] << endln;
+	    return TCL_ERROR;
+	  }  
+	  loc += 3;
+	}
+	
+	
+	else if (strcmp(argv[loc],"-database") == 0) {
+	  theRecorderDatabase = theDatabase;
+	  if (theRecorderDatabase != 0)
+	    tableName = argv[loc+1];
+	  else {
+	    opserr << "WARNING recorder Node .. -database &lt;fileName&gt; - NO CURRENT DATABASE, results to File instead\n";
+	    fileName = argv[loc+1];
+	  }
+	  
+	  loc += 2;
+	}
+	
+	else if ( (strcmp(argv[loc],"-section")==0) || (strcmp(argv[loc],"-sec")==0)
+		  || (strcmp(argv[loc],"-comp")==0) ) {
+	  
+	  loc++;
+	  
+	  int secID;		
+	  int endSecIDs = loc;
+	  int numSec = 0;
+	  while ( Tcl_GetInt(interp, argv[endSecIDs], &secID ) == TCL_OK) {
+	    endSecIDs++;
+	  }
+	  
+	  numSec = endSecIDs - loc ;
+	  // create an ID to hold section/material tags
+	  secIDs = ID(numSec);
+	  
+	  // read in the sec tags to the ID
+	  for (int i=loc; i<endSecIDs; i++) {
+	    if (Tcl_GetInt(interp, argv[i], &secID) != TCL_OK)	
+	      return TCL_ERROR;	
+	    secIDs[i-loc] = secID;	 
+	  }
+	  
+	  
+	  loc = endSecIDs;
+	} 
+	
+	else if ( strcmp(argv[loc],"-criteria")==0 || strcmp(argv[loc],"-crit")==0 ) {
+	  
+	  int critTag = 0;
+	  double critValue = 0;
+	  
+	  if ( strcmp(argv[loc+1],"minStrain")==0 || strcmp(argv[loc+1],"1")==0 )
+	    critTag = 1;
+	  else if ( strcmp(argv[loc+1],"maxStrain")==0 || strcmp(argv[loc+1],"2")==0 )
+	    critTag = 2;
+	  else if ( strcmp(argv[loc+1],"axialDI")==0 || strcmp(argv[loc+1],"3")==0 )
+	    critTag = 3;
+	  else if ( strcmp(argv[loc+1],"flexureDI")==0 || strcmp(argv[loc+1],"4")==0 )
+	    critTag = 4;
+	  else if ( strcmp(argv[loc+1],"axialLS")==0 || strcmp(argv[loc+1],"5")==0 )
+	    critTag = 5;
+	  else if ( strcmp(argv[loc+1],"shearLS")==0 || strcmp(argv[loc+1],"6")==0 )
+	    critTag = 6;
+	  //      new
+	  else if ( strcmp(argv[loc+1],"INFILLWALL")==0 || strcmp(argv[loc+1],"7")==0 )
+	    critTag = 7;
+	  //
+	  else {
+	    opserr<<"Error: RemoveRecorder - Removal Criteria "<<argv[loc+1]<<" not recognized"<<endln;
+	    return TCL_ERROR;
+	  }
+	  //     new
+	  if (critTag != 7) {
+	    if (Tcl_GetDouble(interp, argv[loc+2], &critValue) != TCL_OK) {
+	      opserr << "WARNING recorder Remove -crit critTag? critValue?... invalid critValue ";
+	      opserr << argv[loc+1] << endln;
+	      return TCL_ERROR;
+	    }   
+	  }
+
+	  remCriteria[2*numCrit] = critTag;
+	  //      new
+	  if (critTag != 7) {
+	    remCriteria[2*numCrit+1] = critValue;
+	  }
+	  else {
+            remCriteria[2*numCrit+1] = 100.0;
+	  }
+	  numCrit ++;
+	  if (critTag != 7) {
+	    loc += 3;
+	  }
+	  else {
+	    loc += 2;
+	    secIDs = ID(1);
+	    secIDs[1] = 1;   // this is not used directly, gets rid of the "-sec" for infillwall 	 
+	  }      
+	} 
+	
+	else {
+	  // first unknown string then is assumed to start 
+	  // element response request starts
+	  eleData = loc;
+	  flags = 1;
+	}
+      }
+      
+      // if user has specified no element tags lets assume he wants them all
+      if (numEle == 0) {
+	ElementIter &theEleIter = theDomain.getElements();
+	Element *theEle;
+	while ((theEle = theEleIter()) != 0)
+	  eleIDs[numEle++] = theEle->getTag();
+      }
+
+      theOutputStream = new StandardStream();
+	
+      // now construct the recorder
+      (*theRecorder) = new RemoveRecorder( nodeTag, 
+					   eleIDs, 
+					   secIDs, 
+					   slaveEleIDs, 
+					   remCriteria, 
+					   theDomain,
+					   *theOutputStream,
+					   echoTime, 
+					   dT ,
+					   fileName, 
+					   eleMass, 
+					   gAcc, 
+					   gDir, 
+					   gPat, 
+					   nTagbotn, 
+					   nTagmidn, 
+					   nTagtopn, 
+					   globgrav, 
+					   fileNameinf);
+      //      
+    }
+    
+    //////////////////////End of Component Remove recorder////////////////////////////
     
     // create a recorder to write nodal displacement quantities to a file
     else if ((strcmp(argv[1],"Node") == 0) || (strcmp(argv[1],"EnvelopeNode") == 0) 
