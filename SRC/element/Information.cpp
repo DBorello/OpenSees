@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-08-15 19:16:18 $
+// $Revision: 1.7 $
+// $Date: 2009-12-17 23:56:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Information.cpp,v $
                                                                         
                                                                         
-// File: ~/element/Information.C
-//
 // Written: fmk 10/99
 // Revised:
 //
@@ -38,28 +36,28 @@
 
 Information::Information() 
   :theType(UnknownType),
-  theID(0), theVector(0), theMatrix(0), theTensor(0)
+   theID(0), theVector(0), theMatrix(0), theTensor(0), theString(0)
 {
     // does nothing
 }
 
 Information::Information(int val) 
   :theType(IntType), theInt(val),
-  theID(0), theVector(0), theMatrix(0), theTensor(0)
+  theID(0), theVector(0), theMatrix(0), theTensor(0), theString(0)
 {
     // does nothing
 }
 
 Information::Information(double val) 
   :theType(DoubleType), theDouble(val),
-  theID(0), theVector(0), theMatrix(0), theTensor(0)
+  theID(0), theVector(0), theMatrix(0), theTensor(0), theString(0)
 {
   // does nothing
 }
 
 Information::Information(const ID &val) 
   :theType(IdType),
-  theID(0), theVector(0), theMatrix(0), theTensor(0)
+  theID(0), theVector(0), theMatrix(0), theTensor(0), theString(0)
 {
   // Make a copy
   theID = new ID(val);
@@ -70,7 +68,7 @@ Information::Information(const ID &val)
 
 Information::Information(const Vector &val) 
   :theType(VectorType),
-  theID(0), theVector(0), theMatrix(0), theTensor(0)
+  theID(0), theVector(0), theMatrix(0), theTensor(0), theString(0)
 {
   // Make a copy
   theVector = new Vector(val);
@@ -81,7 +79,7 @@ Information::Information(const Vector &val)
 
 Information::Information(const Matrix &val) 
   :theType(MatrixType),
-   theID(0), theVector(0), theMatrix(0), theTensor(0)
+   theID(0), theVector(0), theMatrix(0), theTensor(0), theString(0)
 {
   // Make a copy
   theMatrix = new Matrix(val);
@@ -92,7 +90,7 @@ Information::Information(const Matrix &val)
 
 Information::Information(const Tensor &val) 
   :theType(TensorType),
-  theID(0), theVector(0), theMatrix(0), theTensor(0)
+  theID(0), theVector(0), theMatrix(0), theTensor(0), theString(0)
 {
   // Make a copy
   theTensor = new Tensor(val);
@@ -100,6 +98,20 @@ Information::Information(const Tensor &val)
   if (theTensor == 0)
     opserr << "Information::Iformation -- failed to allocate Tensor\n";
 }
+
+
+Information::Information(const ID &val1, const Vector &val2) 
+  :theType(IdType),
+   theID(0), theVector(0), theMatrix(0), theTensor(0), theString(0)
+{
+  // Make a copy
+  theID = new ID(val1);
+  theVector = new Vector(val2);
+
+  if (theID == 0)
+    opserr << "Information::Information -- failed to allocate\n";
+}
+
 
 Information::~Information() 
 {
@@ -137,9 +149,10 @@ Information::setID(const ID &newID)
 {
   if (theID != 0) {
     *theID = newID;
-    return 0;
-  } else
-    return -1;
+  } else {
+    theID = new ID(newID);
+  }
+  return 0;
 }
 
 int 
@@ -147,10 +160,11 @@ Information::setVector(const Vector &newVector)
 {
   if (theVector != 0) {
     *theVector = newVector;
-    return 0;
+  } else {
+    theVector = new Vector(newVector);
   }
-  else
-    return -1;
+    
+  return 0;
 }
 
 int 
@@ -158,10 +172,11 @@ Information::setMatrix(const Matrix &newMatrix)
 {
   if (theMatrix != 0) {
     *theMatrix = newMatrix;
-    return 0;
+  } else {
+    theMatrix = new Matrix(newMatrix);
   }
-  else
-    return -1;
+
+  return 0;
 }
 
 int 
@@ -169,10 +184,32 @@ Information::setTensor(const Tensor &newTensor)
 {
   if (theTensor != 0) {
     *theTensor = newTensor;
-    return 0;
+  } else {
+    theTensor = new Tensor(newTensor);
   }
-  else
-    return -1;
+  return 0;
+}
+
+int 
+Information::setString(const char *newString)
+{
+  int newLength = strlen(newString);
+
+  if (theString != 0) {
+    int oldLength = strlen(theString);
+    if (oldLength >= newLength) 
+      strncpy(theString, newString, oldLength);
+    else {
+      delete [] theString;
+      theString = new char[newLength+1];
+      strncpy(theString, newString, newLength);      
+    }
+  } else {
+      theString = new char[newLength+1];
+      strncpy(theString, newString, newLength);      
+  }
+
+  return 0;
 }
 
 void 

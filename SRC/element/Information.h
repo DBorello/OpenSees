@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-25 23:32:43 $
+// $Revision: 1.7 $
+// $Date: 2009-12-17 23:56:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Information.h,v $
                                                                         
                                                                         
@@ -60,6 +60,7 @@ class Information
     Information(const Vector &val);
     Information(const Matrix &val);
     Information(const Tensor &val);
+    Information(const ID &val1, const Vector &val2);
     
     virtual ~Information();
     
@@ -69,11 +70,11 @@ class Information
     virtual int setVector(const Vector &newVector);
     virtual int setMatrix(const Matrix &newMatrix);
     virtual int setTensor(const Tensor &newTensor);
+    virtual int setString(const char *theString);
     
     virtual void Print(OPS_Stream &s, int flag = 0);
     virtual void Print(ofstream &s, int flag = 0);
     virtual const Vector &getData(void);
-
 
     // data that is stored in the information object
     InfoType	theType;   // information about data type
@@ -83,6 +84,7 @@ class Information
     Vector 	*theVector;// pointer to a Vector object, created elsewhere
     Matrix	*theMatrix;// pointer to a Matrix object, created elsewhere
     Tensor      *theTensor;// pointer to a Tensor object, created elsewhere
+    char        *theString;// pointer to string
 
   protected:
     
