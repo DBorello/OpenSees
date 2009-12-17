@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2009-12-17 20:07:46 $
+// $Revision: 1.31 $
+// $Date: 2009-12-17 20:10:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -75,14 +75,6 @@ using std::ifstream;
 #include <iostream>
 using std::ios;
 
-static void printCommand(int argc, TCL_Char **argv)
-{
-    opserr << "Input command: \n";
-    for (int i=0; i<argc; i++)
-	opserr << argv[i] << " \n";
-    opserr << endln;
-} 
-
 int
 TclCommand_addFiberSection (ClientData clientData, Tcl_Interp *interp, int argc,
 			    TCL_Char **argv, TclModelBuilder *theBuilder);
@@ -113,7 +105,6 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
     if (strcmp(argv[1],"Elastic") == 0) {
       if (argc < 5) {
 	opserr << "WARNING insufficient arguments\n";
-	printCommand(argc,argv);
 	opserr << "Want: section Elastic tag? E? A? Iz? <Iy? G? J?>" << endln;
 	return TCL_ERROR;
       }
@@ -166,7 +157,6 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	  // 3D
 	  if (argc < 8) {
 	    opserr << "WARNING insufficient arguments\n";
-	    printCommand(argc,argv);
 	    opserr << "Want: section Elastic tag? E? A? Iz? Iy? G? J?" << endln;
 	    return TCL_ERROR;
 	  }
@@ -209,7 +199,6 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	     strcmp(argv[1],"Uniaxial") == 0) {
 	if (argc < 5) {
 	    opserr << "WARNING insufficient arguments\n";
-	    printCommand(argc,argv);
 	    opserr << "Want: section Uniaxial tag? 1DTag? code?" << endln;
 	    return TCL_ERROR;
 	}
@@ -266,7 +255,6 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
       /*
 	if (argc < 5) {
 	    opserr << "WARNING insufficient arguments\n";
-	    printCommand(argc,argv);
 	    opserr << "Want: section GenericNd tag? NDTag? code?" << endln;
 	    return TCL_ERROR;
 	}
@@ -327,7 +315,6 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
     else if (strcmp(argv[1],"WSection2d") == 0) {
 	if (argc < 10) {
 	    opserr << "WARNING insufficient arguments\n";
-	    printCommand(argc,argv);
 	    opserr << "Want: section WSection2d tag? matTag? d? tw? bf? tf? nfdw? nftf? <shape?>" << endln;
 	    return TCL_ERROR;
 	}
@@ -430,7 +417,6 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
     else if (strcmp(argv[1],"WFSection2d") == 0) {
 	if (argc < 10) {
 	    opserr << "WARNING insufficient arguments\n";
-	    printCommand(argc,argv);
 	    opserr << "Want: section WFSection2d tag? matTag? d? tw? bf? tf? nfdw? nftf?" << endln;
 	    return TCL_ERROR;
 	}
@@ -511,7 +497,6 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
     else if (strcmp(argv[1],"RCSection2d") == 0) {
 	if (argc < 15) {
 	    opserr << "WARNING insufficient arguments\n";
-	    printCommand(argc,argv);
 	    opserr << "Want: section RCSection2d tag? coreTag? coverTag? steelTag? d? b? cover? Atop? Abottom? Aside? nfcore? nfcover? nfs?" << endln;
 	    return TCL_ERROR;
 	}
@@ -638,7 +623,6 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
     else if (strcmp(argv[1],"AddDeformation") == 0 || strcmp(argv[1],"Aggregator") == 0) {
 	if (argc < 5) {
 	    opserr << "WARNING insufficient arguments\n";
-	    printCommand(argc,argv);
 	    opserr << "Want: section Aggregator tag? uniTag1? code1? ... <-section secTag?>" << endln;
 	    return TCL_ERROR;
 	}
@@ -753,7 +737,6 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
     else if (strcmp(argv[1],"ElasticPlateSection") == 0) {
 	if (argc < 5) {
 	    opserr << "WARNING insufficient arguments\n";
-	    printCommand(argc,argv);
 	    opserr << "Want: section ElasticPlateSection tag? E? nu? h? " << endln;
 	    return TCL_ERROR;
 	}
@@ -790,7 +773,6 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
     else if (strcmp(argv[1],"ElasticMembranePlateSection") == 0) {
 	if (argc < 5) {
 	    opserr << "WARNING insufficient arguments\n";
-	    printCommand(argc,argv);
 	    opserr << "Want: section ElasticMembranePlateSection tag? E? nu? h? <rho?>" << endln;
 	    return TCL_ERROR;
 	}
@@ -834,7 +816,6 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
     else if (strcmp(argv[1],"PlateFiber") == 0) {
 	if (argc < 5) {
 	    opserr << "WARNING insufficient arguments\n";
-	    printCommand(argc,argv);
 	    opserr << "Want: section PlateFiber tag? matTag? h? " << endln;
 	    return TCL_ERROR;
 	}
@@ -873,7 +854,6 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
         else if (strcmp(argv[1],"Bidirectional") == 0) {
 	if (argc < 7) {
 	    opserr << "WARNING insufficient arguments\n";
-	    printCommand(argc,argv);
 	    opserr << "Want: section Bidirectional tag? E? sigY? Hiso? Hkin?" << endln;
 	    return TCL_ERROR;
 	}    
@@ -916,7 +896,6 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
         else if (strcmp(argv[1],"Iso2spring") == 0) {
 	  if (argc < 10) {
 	    opserr << "WARNING insufficient arguments\n";
-	    printCommand(argc,argv);
 	    opserr << "Want: section Iso2spring tag? tol? k1? Fy? k2? kv? hb? Pe? <Po?>" << endln;
 	    return TCL_ERROR;
 	  }    
