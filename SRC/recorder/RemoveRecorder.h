@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2009-12-17 23:52:17 $
+// $Revision: 1.2 $
+// $Date: 2009-12-22 20:38:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/RemoveRecorder.h,v $
                                                                         
 #ifndef RemoveRecorder_h
@@ -94,8 +94,8 @@ class RemoveRecorder: public Recorder
    int updateNodalMasses(int theEleTag, double theEleMass);
    
    static int numRecs;
-   static Vector remEleList;
-   static Vector remNodeList;
+   static ID remEleList;
+   static ID remNodeList;
    static int numRemEles;
    static int numRemNodes;
    static Element** remEles;

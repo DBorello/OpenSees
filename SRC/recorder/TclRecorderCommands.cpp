@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.53 $
-// $Date: 2009-12-17 23:50:36 $
+// $Revision: 1.54 $
+// $Date: 2009-12-22 20:38:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -69,7 +69,7 @@
 #include <XmlFileStream.h>
 #include <BinaryFileStream.h>
 #include <DatabaseStream.h>
-
+#include <DummyStream.h>
 
 #include <packages.h>
 #include <elementAPI.h>
@@ -904,7 +904,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  eleIDs[numEle++] = theEle->getTag();
       }
 
-      theOutputStream = new StandardStream();
+      theOutputStream = new DummyStream();
 	
       // now construct the recorder
       (*theRecorder) = new RemoveRecorder( nodeTag, 

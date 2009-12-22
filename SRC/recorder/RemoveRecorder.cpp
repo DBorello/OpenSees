@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2009-12-17 23:52:17 $
+// $Revision: 1.2 $
+// $Date: 2009-12-22 20:38:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/RemoveRecorder.cpp,v $
                                                                         
 // Written: M Talaat
@@ -66,12 +66,15 @@ using std::ios;
 
 // initiatie class-wide static members to keep track of removed components
 int RemoveRecorder::numRecs = 0;
-Vector RemoveRecorder::remEleList(0);
-Vector RemoveRecorder::remNodeList(0);
+ID RemoveRecorder::remEleList(0);
+ID RemoveRecorder::remNodeList(0);
 int RemoveRecorder::numRemEles = 0;
 int RemoveRecorder::numRemNodes = 0;
+
 Element** RemoveRecorder::remEles = 0;
 Node** RemoveRecorder::remNodes = 0;
+
+
 char* RemoveRecorder::fileName = 0;
 // new
 char* RemoveRecorder::fileNameinf = 0;
@@ -126,8 +129,6 @@ RemoveRecorder::RemoveRecorder(int nodeID,
   opserr<<"RemoveRecorder, constructor called"<<endln;
 #endif
   
-  RemoveRecorder::remEles = new Element* [theDomain->getNumElements()];
-  RemoveRecorder::remNodes = new Node* [theDomain->getNumNodes()];
   numRules = criteria.Size()/2;
 
 #ifdef MMTDEBUG
@@ -142,7 +143,6 @@ RemoveRecorder::RemoveRecorder(int nodeID,
     eleResponses[l] = 0;
   }
 
-  
   if (secIDs[0] != 0 || secIDs.Size() != 1) {
     for (int l=0 ; l<numSecs ; l++) {
       secTags(l) = secIDs(l);
@@ -269,10 +269,7 @@ RemoveRecorder::RemoveRecorder(int nodeID,
       opserr << "WARNING - RemoveRecorder::RemoveRecorder()";
       opserr << " - could not open file " << fileName << endln;
     }    
-    
   }
-  
-
   
 #ifdef MMTDEBUG
   opserr<<"RemoveRecorder, constructor finished"<<endln;
@@ -285,34 +282,33 @@ RemoveRecorder::~RemoveRecorder()
   
   // if last recorder to be deleted, check if any elements or nodes had been "removed" and destroy them
   if (numRecs == 0) {
-    numRemEles = numRemNodes = 0;
-    remEleList.Zero();
-    remNodeList.Zero();
-    if (remEles != 0) {
+    opserr << "RemoveRecorder::~RemoveRecorder()\n";
+    for (int i=0; i<numRemEles; i++)
+      delete remEles[i];
+
+    for (int i=0; i<numRemNodes; i++)
+      delete remNodes[i];
+
+    if (remEles != 0)
       delete [] remEles;
-      remEles = 0;
-#ifdef MMTDEBUG
-      opserr<<"actually deleting elements"<<endln;
-#endif
-    }
-    if (remNodes != 0) {
+
+    if (remNodes != 0)
       delete [] remNodes;
-      remNodes = 0;
-#ifdef MMTDEBUG
-      opserr<<"actually deleting nodes"<<endln;
-#endif
-    }
-    
+
+    numRemEles = 0;
+    numRemNodes = 0;
+    remEles = 0;
+    remNodes = 0;
+
     if (fileName != 0)
       delete [] fileName;
-    
-    RemoveRecorder::fileName = 0;
-    
+    fileName = 0;
+
     // close the file
     if (!theFile.bad()) 
       theFile.close();
-    
   }
+
 #ifdef MMTDEBUG	
   opserr<<"RemoveRecorder, destructor finished"<<endln;
 #endif
@@ -589,14 +585,20 @@ RemoveRecorder::checkEleRemoval(Element* theEle, Response *eleResponse, int &the
 int
 RemoveRecorder::elimElem(int theEleTag, double timeStamp)
 {
+
+#ifdef MMTDEBUG
+  opserr << "RemoveRecorder::elimElem() remving ele: " << theEleTag << " at timeStamp: " << timeStamp << endln;;
+#endif
+
   Element *theEle = theDomain->removeElement(theEleTag);
   if (theEle != 0) {
     // we also have to remove any elemental loads from the domain
     LoadPatternIter &theLoadPatterns = theDomain->getLoadPatterns();
     LoadPattern *thePattern;
-    
+
     // go through all load patterns
     while ((thePattern = theLoadPatterns()) != 0) {
+
       ElementalLoadIter theEleLoads = thePattern->getElementalLoads();
       ElementalLoad *theLoad;
       
@@ -605,38 +607,47 @@ RemoveRecorder::elimElem(int theEleTag, double timeStamp)
 	
 	// remove & destroy elemental from elemental load if there
 	// Note - if last element in load, remove the load and delete it
-	
-	opserr << "ERROR - FMK NEEDS TO FIX\n";
-	exit(0);
-	/* *****************
-	int numLoadsLeft = theLoad->removeElement(theEleTag);
-	if (numLoadsLeft == 0) {
-	  thePattern->removeElementalLoad(theLoad->getTag());
-	  delete theLoad;
+
+	int loadEleTag = theLoad->getElementTag();
+	if (loadEleTag == theEleTag) {
+	  opserr << "RemoveRecorder::elimElem() -3 removing  eleLoad\n";
+
+	  ElementalLoad *theElementalLoad = thePattern->removeElementalLoad(theLoad->getTag());
+	  if (theElementalLoad != 0) {
+	    delete theElementalLoad;
+	  }
 	}
-	*********************/
       }
     }
-    
+
     // finally invoke the destructor on the element 
     //	delete theEle;
     /////////////// M.Talaat : Avoid recorder trouble at element removal and just set it to zero after removing it from the domain!
     theEle->revertToStart();
-    
+
     RemoveRecorder::remEleList[RemoveRecorder::numRemEles] = theEle->getTag();
-    RemoveRecorder::remEles[RemoveRecorder::numRemEles] = theEle;
-    RemoveRecorder::numRemEles ++;
-    
+
+    Element **newRemEles = new Element *[numRemEles+1];
+    for (int ii=0; ii<numRemEles; ii++)
+      newRemEles[ii] = remEles[ii];
+
+    newRemEles[numRemEles] = theEle;
+    if (remEles != 0)
+      delete [] remEles;
+
+    remEles = newRemEles;
+
+    numRemEles ++;
+
     // now give us some notice of what happened
     if (fileName != 0)
       theFile<<timeStamp<<" Elem "<<theEle->getTag()<<"\n";
     if (echoTimeFlag == true)
-      opserr<<"Element "<<theEle->getTag()<<" removed, Time/Load Factor = " <<timeStamp<<endln;
 #ifdef MMTDEBUG
     opserr<< " element "<<theEle->getTag()<<" removed automatically"<<endln; 
 #endif
+    ;
   }
-  
   return 0;
 }
 
@@ -752,8 +763,20 @@ RemoveRecorder::elimNode(int theNodeTag, double timeStamp)
   }
   
   RemoveRecorder::remNodeList[numRemNodes] = theNode->getTag();
-  RemoveRecorder::remNodes[numRemNodes] = theNode;
-  RemoveRecorder::numRemNodes ++;
+  //  RemoveRecorder::remNodes[numRemNodes] = theNode;
+  //  RemoveRecorder::numRemNodes ++;
+
+  Node **newRemNodes = new Node *[numRemNodes+1];
+  for (int ii=0; ii<numRemNodes; ii++)
+    newRemNodes[ii] = remNodes[ii];
+  newRemNodes[numRemNodes] = theNode;
+  if (remNodes != 0)
+    delete [] remNodes;
+  remNodes = newRemNodes;
+  
+  numRemNodes++;
+
+	       
   
   // now give us some notice of what happened
   if (fileName != 0)
