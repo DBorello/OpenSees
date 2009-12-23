@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2008-09-23 22:49:55 $
+// $Revision: 1.16 $
+// $Date: 2009-12-23 22:53:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.cpp,v $
                                                                         
                                                                         
@@ -336,7 +336,8 @@ ID::operator[](int x)
       // release the memory held by the old
       //      free((void *)data);	    
       if (fromFree == 0)
-	delete [] data;
+	if (data != 0)
+	  delete [] data;
       data = newData;
       arraySize = newArraySize;
       
