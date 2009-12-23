@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2009-12-22 20:38:47 $
+// $Revision: 1.3 $
+// $Date: 2009-12-23 22:56:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/RemoveRecorder.cpp,v $
                                                                         
 // Written: M Talaat
@@ -479,7 +479,7 @@ RemoveRecorder::restart(void)
 
 int
 // changed
-RemoveRecorder::checkEleRemoval(Element* theEle, Response *eleResponse, int &theComponent,const Vector criteria)
+RemoveRecorder::checkEleRemoval(Element* theEle, Response *eleResponse, int &theComponent,const Vector &criteria)
 {
   if (eleResponse == 0)
     return 0;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2009-12-22 20:38:47 $
+// $Revision: 1.3 $
+// $Date: 2009-12-23 22:56:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/RemoveRecorder.h,v $
                                                                         
 #ifndef RemoveRecorder_h
@@ -86,7 +86,7 @@ class RemoveRecorder: public Recorder
    
    int restart(void);    
    // changed
-   int checkEleRemoval(Element* theEle, Response *eleResponse, int &theComponent,const Vector Criteria);
+   int checkEleRemoval(Element* theEle, Response *eleResponse, int &theComponent,const Vector &Criteria);
    //	int checkNodeRemoval(Element* theEle, int &theComponent,const Vector Criteria);
    int elimElem(int theDeadEleTag, double timeStamp = 0);
    int elimNode(int theDeadNodeTag, double timeStamp = 0);
