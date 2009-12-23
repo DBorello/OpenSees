@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2009-04-30 23:27:27 $
+// $Revision: 1.20 $
+// $Date: 2009-12-23 22:54:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.cpp,v $
                                                                         
                                                                         
@@ -634,11 +634,26 @@ Vector::operator[](int x)
 {
 #ifdef _G3DEBUG
   // check if it is inside range [0,sz-1]
-  if (x < 0 || x >= sz) {
+  if (x < 0) {
     opserr << "Vector::() - x " << x << " outside range 0 - << " << sz-1 << endln;
     return VECTOR_NOT_VALID_ENTRY;
   }
 #endif
+  
+  if (x >= sz) {
+    double *dataNew = new double[x+1];
+    for (int i=0; i<sz; i++)
+      dataNew[i] = theData[i];
+    for (int j=sz; j<x; j++)
+      dataNew[j] = 0.0;
+    
+    if (fromFree == 1)
+      if (theData != 0)
+	delete [] theData;
+
+    theData = dataNew;
+    sz = x+1;
+  }
 
   return theData[x];
 }
