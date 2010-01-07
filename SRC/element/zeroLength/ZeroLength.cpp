@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2009-05-18 22:01:17 $
+// $Revision: 1.26 $
+// $Date: 2010-01-07 20:15:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
 
 // Written: GLF
@@ -883,7 +883,8 @@ ZeroLength::setResponse(const char **argv, int argc, OPS_Stream &output)
             }
             theResponse = new ElementResponse(this, 1, Vector(numDOF));
 
-    } else if (strcmp(argv[0],"basicForce") == 0 || strcmp(argv[0],"basicForces") == 0) {
+    } else if ((strcmp(argv[0],"basicForce") == 0 || strcmp(argv[0],"basicForces") == 0) ||
+	       (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)) {
 
         for (int i=0; i<numMaterials1d; i++) {
             sprintf(outputData,"P%d",i+1);

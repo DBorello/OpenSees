@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2009-05-18 22:01:17 $
+// $Revision: 1.15 $
+// $Date: 2010-01-07 20:15:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthSection.cpp,v $
                                                                         
 // Written: MHS
@@ -532,7 +532,8 @@ ZeroLengthSection::setResponse(const char **argv, int argc, OPS_Stream &output)
             }
             theResponse = new ElementResponse(this, 1, *P);
 
-    } else if (strcmp(argv[0],"basicForce") == 0 || strcmp(argv[0],"basicForces") == 0) {
+    } else if ((strcmp(argv[0],"basicForce") == 0) || (strcmp(argv[0],"basicForces") == 0) ||
+	       (strcmp(argv[0],"localForce") == 0) || (strcmp(argv[0],"localForces") == 0)) {
 
         for (int i=0; i<order; i++) {
             sprintf(outputData,"P%d",i+1);
