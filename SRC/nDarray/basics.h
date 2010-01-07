@@ -1,6 +1,6 @@
 
-// $Revision: 1.2 $
-// $Date: 2004-06-01 21:19:12 $
+// $Revision: 1.3 $
+// $Date: 2010-01-07 20:30:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/nDarray/basics.h,v $
 
 //#############################################################################
@@ -68,13 +68,14 @@
 
 
 // Define BJmatrix as matrix type
-#ifndef matrix
-#define matrix BJmatrix
-#endif
+//#ifndef matrix
+//#define matrix BJmatrix
+//#endif
+
 // Define BJvector as vector type
-#ifndef vector
-#define vector BJvector
-#endif
+//#ifndef vector
+//#define vector BJvector
+//#endif
 // Define BJtensor as tensor type
 #ifndef tensor
 #define tensor BJtensor

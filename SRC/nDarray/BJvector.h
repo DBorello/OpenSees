@@ -1,6 +1,6 @@
                                                                         
-// $Revision: 1.1 $                                                              
-// $Date: 2001-08-23 16:45:51 $                                                                  
+// $Revision: 1.2 $                                                              
+// $Date: 2010-01-07 20:30:44 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/nDarray/BJvector.h,v $                                                                
                                                                         
 //#############################################################################
@@ -59,8 +59,8 @@
 //*/
 
 
-#ifndef VECTOR_HH
-#define VECTOR_HH
+#ifndef BJVECTOR_HH
+#define BJVECTOR_HH
 
 #include "BJmatrix.h"
 
@@ -70,27 +70,27 @@
 
 class BJvector : virtual public BJmatrix
   {
-    public:
-      BJvector(int order_n = 1, double initvalue = 0.0);  // default constructor
-
-      BJvector(int order_n, double *initval);
-
-      BJvector(const nDarray & x); // copy-initializer
-
-//....       ~BJvector( );
-
-      BJvector& operator=( const BJvector & x ); // BJvector assignment
-//..      BJvector& operator=( const BJmatrix & x ); // BJvector assignment
-//..      BJvector& operator=( const nDarray & x ); // BJvector assignment
-
-//#######        BJmatrix operator*( BJvector &); // BJvector multiplication
-
-//....     BJvector operator*( double arg); // scalar multiplication 
-// this  ellipsis at the end are just to prevent the compiler
-// from issuing a warning on hiding function from base class nDarray . . . 
-     double & val(int subscript, ... );
-     double cval(int subscript, ... ) const; // const
-// THE ROW COUNTER STARTS FROM 1 ( NOT FROM 0 )
-
+  public:
+    BJvector(int order_n = 1, double initvalue = 0.0);  // default constructor
+      
+    BJvector(int order_n, double *initval);
+    
+    BJvector(const nDarray & x); // copy-initializer
+    
+    //....       ~BJvector( );
+    
+    BJvector& operator=( const BJvector & x ); // BJvector assignment
+    //..      BJvector& operator=( const BJmatrix & x ); // BJvector assignment
+    //..      BJvector& operator=( const nDarray & x ); // BJvector assignment
+    
+    //#######        BJmatrix operator*( BJvector &); // BJvector multiplication
+    
+    //....     BJvector operator*( double arg); // scalar multiplication 
+    // this  ellipsis at the end are just to prevent the compiler
+    // from issuing a warning on hiding function from base class nDarray . . . 
+    double & val(int subscript, ... );
+    double cval(int subscript, ... ) const; // const
+    // THE ROW COUNTER STARTS FROM 1 ( NOT FROM 0 )
+     
 };
 #endif
