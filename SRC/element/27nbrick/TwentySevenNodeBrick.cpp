@@ -1334,7 +1334,7 @@ tensor TwentySevenNodeBrick::stiffness_matrix(const tensor & K)
   {
 //    int K_dim[] = {20,3,3,20};
 //    tensor K(4,K_dim,0.0);
-    matrix Kmatrix(81,81,0.0);
+    BJmatrix Kmatrix(81,81,0.0);
 
     int Ki=0;
     int Kj=0;
@@ -1366,7 +1366,7 @@ tensor TwentySevenNodeBrick::mass_matrix(const tensor & M)
   {
     //    int K_dim[] = {20,3,3,20};
     //    tensor K(4,K_dim,0.0);
-    matrix Mmatrix(81,81,0.0);
+    BJmatrix Mmatrix(81,81,0.0);
 
     for ( int i=1 ; i<=81 ; i++ )
       {

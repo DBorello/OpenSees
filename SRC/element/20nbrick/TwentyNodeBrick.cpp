@@ -1010,7 +1010,7 @@ tensor TwentyNodeBrick::stiffness_matrix(const tensor & K)
   {
 //    int K_dim[] = {20,3,3,20};
 //    tensor K(4,K_dim,0.0);
-    matrix Kmatrix(60,60,0.0);
+    BJmatrix Kmatrix(60,60,0.0);
 
     int Ki=0;
     int Kj=0;
@@ -1042,7 +1042,7 @@ tensor TwentyNodeBrick::mass_matrix(const tensor & M)
   {
     //    int K_dim[] = {20,3,3,20};
     //    tensor K(4,K_dim,0.0);
-    matrix Mmatrix(60,60,0.0);
+    BJmatrix Mmatrix(60,60,0.0);
 
     for ( int i=1 ; i<=60 ; i++ )
       {

@@ -765,7 +765,7 @@ tensor EightNodeBrick::getStiffnessTensor(void)
     tensor Kkt(4,K_dim,0.0);
 
     //debugging
-    matrix Kmat;
+    BJmatrix Kmat;
 
     double r  = 0.0;
     double rw = 0.0;
@@ -1204,7 +1204,7 @@ tensor EightNodeBrick::stiffness_matrix(const tensor & K)
 //BJ//BJ
 //    int K_dim[] = {20,3,3,20};
 //    tensor K(4,K_dim,0.0);
-    matrix Kmatrix(24,24,0.0);   // Xiaoyan changed from (60,60,0,0) to (24,24,0,0)
+    BJmatrix Kmatrix(24,24,0.0);   // Xiaoyan changed from (60,60,0,0) to (24,24,0,0)
 
     int Ki=0;
     int Kj=0;
@@ -1237,7 +1237,7 @@ tensor EightNodeBrick::mass_matrix(const tensor & M)
   {
     //    int K_dim[] = {20,3,3,20};
     //    tensor K(4,K_dim,0.0);
-    matrix Mmatrix(24,24,0.0);  // Xiaoyan changed from (60,60,0,0) to (24,24,0,0) for 8 nodes
+    BJmatrix Mmatrix(24,24,0.0);  // Xiaoyan changed from (60,60,0,0) to (24,24,0,0) for 8 nodes
 
     for ( int i=1 ; i<=24 ; i++ )   // Xiaoyan changed from i<=60 to i<=24 for 8 nodes
       {
