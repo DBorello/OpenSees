@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2010-01-20 20:34:28 $
+// $Revision: 1.4 $
+// $Date: 2010-01-20 21:05:33 $
                                                                         
 // File: ~/Bond_SP01.h
 //
@@ -132,7 +132,7 @@ class Bond_SP01 : public UniaxialMaterial
     void determineTrialState (double tslip, double dslip);
     
     // Calculates envelope stress for a slip
-    double Bond_SP01::getEnvelopeStress (double slip);
+    double getEnvelopeStress (double slip);
     
     // Determines if a Stress reversal has occurred based on the trial Strain
     void detectStressReversal (double dslip);
