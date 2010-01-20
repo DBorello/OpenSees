@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.150 $
-// $Date: 2009-10-12 23:51:37 $
+// $Revision: 1.151 $
+// $Date: 2010-01-20 23:26:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -264,6 +264,7 @@ OPS_Stream *opserrPtr = &sserr;
 
 // graph
 #include <RCM.h>
+#include <AMDNumberer.h>
 
 #include <ErrorHandler.h>
 #include <ConsoleErrorHandler.h>
@@ -2647,6 +2648,9 @@ specifyNumberer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **
   } else if (strcmp(argv[1],"RCM") == 0) {
     RCM *theRCM = new RCM(false);	
     theNumberer = new DOF_Numberer(*theRCM);    	
+  } else if (strcmp(argv[1],"AMD") == 0) {
+    AMD *theAMD = new AMD();	
+    theNumberer = new DOF_Numberer(*theAMD);    	
   } 
 
 #ifdef _PARALLEL_INTERPRETERS
@@ -3569,46 +3573,52 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	      opserr << "WARNING integrator Newmark gamma beta alphaM betaK betaKi betaKc - alphaM\n";	  
 	      return TCL_ERROR;	
 	  }
-      argi++;
+	  argi++;
 	  if (Tcl_GetDouble(interp, argv[argi], &betaK) != TCL_OK) {
-	      opserr << "WARNING integrator Newmark gamma beta alphaM betaK betaKi betaKc - betaK\n";
+	    opserr << "WARNING integrator Newmark gamma beta alphaM betaK betaKi betaKc - betaK\n";
 	      return TCL_ERROR;	
 	  }
-      argi++;
+	  argi++;
 	  if (Tcl_GetDouble(interp, argv[argi], &betaKi) != TCL_OK) {
-	      opserr << "WARNING integrator Newmark gamma beta alphaM betaK betaKi betaKc - betaKi\n";
-	      return TCL_ERROR;	
+	    opserr << "WARNING integrator Newmark gamma beta alphaM betaK betaKi betaKc - betaKi\n";
+	    return TCL_ERROR;	
 	  }
-      argi++;
+	  argi++;
 	  if (Tcl_GetDouble(interp, argv[argi], &betaKc) != TCL_OK) {
 	    opserr << "WARNING integrator Newmark gamma beta alphaM betaK betaKi betaKc - betaKc\n";
 	    return TCL_ERROR;	
 	  }
-      argi++;
+	  argi++;
       }
       if (argi<argc) {
-      if (strcmp(argv[argi],"-form") == 0) {
-      if (strcmp(argv[argi+1],"D") == 0 || strcmp(argv[argi+1],"d") == 0)
-          dispFlag = true;
-      else if (strcmp(argv[argi+1],"A") == 0 || strcmp(argv[argi+1],"a") == 0)
-          dispFlag = false;
-      }
+	if (strcmp(argv[argi],"-form") == 0) {
+	  if (strcmp(argv[argi+1],"D") == 0 || strcmp(argv[argi+1],"d") == 0)
+	    dispFlag = true;
+	  else if (strcmp(argv[argi+1],"A") == 0 || strcmp(argv[argi+1],"a") == 0)
+	    dispFlag = false;
+	}
       }
       if (argc == 4 || argc == 6)
-	  theTransientIntegrator = new Newmark(gamma,beta,dispFlag);       
-      else
-	  theTransientIntegrator = new Newmark(gamma,beta,alphaM,betaK,betaKi,betaKc,dispFlag);
-
+	theTransientIntegrator = new Newmark(gamma,beta,dispFlag);       
+      else {
+	if (alphaM != 0 || betaK != 0 || betaKi != 0 || betaKc != 0) {
+	  opserr << "WARNING: providing rayleigh factors to integrator is deprecated\n";
+	  return TCL_ERROR;	  
+	}
+	  
+	theTransientIntegrator = new Newmark(gamma,beta, dispFlag);
+      }
+      
       // if the analysis exists - we want to change the Integrator
 	  if (theTransientAnalysis != 0)
-		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+	    theTransientAnalysis->setIntegrator(*theTransientIntegrator);
   }  
-
+  
   else if (strcmp(argv[1],"NewmarkExplicit") == 0) {
-      double gamma;
-      bool updDomFlag = false;
-      double alphaM, betaK, betaKi, betaKc;
-      if (argc < 3 || argc > 8) {
+    double gamma;
+    bool updDomFlag = false;
+    double alphaM, betaK, betaKi, betaKc;
+    if (argc < 3 || argc > 8) {
 	opserr << "WARNING integrator NewmarkExplicit gamma <alphaM betaK betaKi betaKc> <-updateDomain>\n";
 	return TCL_ERROR;
       }    
@@ -3944,74 +3954,33 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
   
   else if (strcmp(argv[1],"HHT") == 0) {
       double alpha, beta, gamma;
-      double alphaM, betaK, betaKi, betaKc;
-      if (argc != 3 && argc != 5 && argc != 7 && argc != 9) {
-	opserr << "WARNING integrator HHT alpha <alphaM betaK betaKi betaKc>\n";
-	opserr << "     or integrator HHT alpha beta gamma <alphaM betaK betaKi betaKc>\n";
+      if (argc != 3 && argc != 5) {
+	opserr << "WARNING integrator HHT alpha <beta gamma>\n";
+	opserr << " if you were trying to pass rayleigh damping factors use the rayleigh command\n";
 	return TCL_ERROR;
       }    
       if (Tcl_GetDouble(interp, argv[2], &alpha) != TCL_OK) {
 	  opserr << "WARNING integrator HHT alpha - undefined alpha\n";	  
 	  return TCL_ERROR;	
       }
-      if (argc == 5 || argc == 9) {
-      if (Tcl_GetDouble(interp, argv[3], &beta) != TCL_OK) {
+      if (argc == 5) {
+	if (Tcl_GetDouble(interp, argv[3], &beta) != TCL_OK) {
 	  opserr << "WARNING integrator HHT alpha beta gamma - undefined beta\n";	  
 	  return TCL_ERROR;	
-      }
-      if (Tcl_GetDouble(interp, argv[4], &gamma) != TCL_OK) {
+	}
+	if (Tcl_GetDouble(interp, argv[4], &gamma) != TCL_OK) {
 	  opserr << "WARNING integrator HHT alpha beta gamma - undefined gamma\n";	  
 	  return TCL_ERROR;	
+	}
       }
-      }
-      if (argc == 7) {
-	  if (Tcl_GetDouble(interp, argv[3], &alphaM) != TCL_OK) {
-	      opserr << "WARNING integrator HHT alpha alphaM betaK betaKi betaKc - alphaM\n";	  
-	      return TCL_ERROR;	
-	  }
-	  if (Tcl_GetDouble(interp, argv[4], &betaK) != TCL_OK) {
-	      opserr << "WARNING integrator HHT alpha alphaM betaK betaKi betaKc - betaK\n";
-	      return TCL_ERROR;	
-	  }
-	  if (Tcl_GetDouble(interp, argv[5], &betaKi) != TCL_OK) {
-	      opserr << "WARNING integrator HHT alpha alphaM betaK betaKi betaKc - betaKi\n";
-	      return TCL_ERROR;	
-	  }
-	  if (Tcl_GetDouble(interp, argv[6], &betaKc) != TCL_OK) {
-	    opserr << "WARNING integrator HHT alpha alphaM betaK betaKi betaKc - betaKi\n";
-	    return TCL_ERROR;	
-	  }
-      } 
-      if (argc == 9) {
-	  if (Tcl_GetDouble(interp, argv[5], &alphaM) != TCL_OK) {
-	      opserr << "WARNING integrator HHT alpha beta gamma alphaM betaK betaKi betaKc - alphaM\n";	  
-	      return TCL_ERROR;	
-	  }
-	  if (Tcl_GetDouble(interp, argv[6], &betaK) != TCL_OK) {
-	      opserr << "WARNING integrator HHT alpha beta gamma alphaM betaK betaKi betaKc - betaK\n";
-	      return TCL_ERROR;	
-	  }
-	  if (Tcl_GetDouble(interp, argv[7], &betaKi) != TCL_OK) {
-	      opserr << "WARNING integrator HHT alpha beta gamma alphaM betaK betaKi betaKc - betaKi\n";
-	      return TCL_ERROR;	
-	  }
-	  if (Tcl_GetDouble(interp, argv[8], &betaKc) != TCL_OK) {
-	    opserr << "WARNING integrator HHT alpha beta gamma alphaM betaK betaKi betaKc - betaKc\n";
-	    return TCL_ERROR;	
-	  }
-      }      
+
       if (argc == 3)
 	  theTransientIntegrator = new HHT(alpha);       
       else if (argc == 5)
-      theTransientIntegrator = new HHT(alpha,beta,gamma);
-      else if (argc == 7)
-	  theTransientIntegrator = new HHT(alpha,alphaM,betaK,betaKi,betaKc);
-      else if (argc == 9)
-	  theTransientIntegrator = new HHT(alpha,beta,gamma,alphaM,betaK,betaKi,betaKc);
+	theTransientIntegrator = new HHT(alpha,beta,gamma);
 
-      // if the analysis exists - we want to change the Integrator
-	  if (theTransientAnalysis != 0)
-		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+      if (theTransientAnalysis != 0)
+	theTransientAnalysis->setIntegrator(*theTransientIntegrator);
   }    
 
   else if (strcmp(argv[1],"HHTGeneralized") == 0) {
@@ -5260,8 +5229,8 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	     (strcmp(argv[loc],"-standard") == 0))
       generalizedAlgo = false;
     
-    else if ((strcmp(argv[loc],"symmBandLapack") == 0) || 
-	     (strcmp(argv[loc],"-symmBandLapack") == 0))
+    else if ((strcmp(argv[loc],"symmBandLapackEigen") == 0) || 
+	     (strcmp(argv[loc],"-symmBandLapackEigen") == 0))
       typeSolver = 0;
     
     else if ((strcmp(argv[loc],"symmSparseArpack") == 0) || 
