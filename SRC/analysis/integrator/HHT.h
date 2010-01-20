@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.8 $
-// $Date: 2010-01-20 18:53:18 $
+// $Revision: 1.9 $
+// $Date: 2010-01-20 22:28:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHT.h,v $
 
 
@@ -48,11 +48,7 @@ public:
     // constructors
     HHT();
     HHT(double alpha);
-    HHT(double alpha,
-        double alphaM, double betaK, double betaKi, double betaKc);
     HHT(double alpha, double beta, double gamma);
-    HHT(double alpha, double beta, double gamma,
-        double alphaM, double betaK, double betaKi, double betaKc);
     
     // destructor
     ~HHT();
@@ -80,12 +76,6 @@ private:
     double beta;
     double gamma;
     double deltaT;
-    
-    // rayleigh damping factors
-    double alphaM;
-    double betaK;
-    double betaKi;
-    double betaKc;
     
     double c1, c2, c3;              // some constants we need to keep
     Vector *Ut, *Utdot, *Utdotdot;  // response quantities at time t

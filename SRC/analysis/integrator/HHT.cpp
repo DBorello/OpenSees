@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.13 $
-// $Date: 2010-01-20 18:53:18 $
+// $Revision: 1.14 $
+// $Date: 2010-01-20 22:28:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHT.cpp,v $
 
 // Written: fmk
@@ -45,7 +45,7 @@
 HHT::HHT()
     : TransientIntegrator(INTEGRATOR_TAGS_HHT),
     alpha(1.0), beta(0.0), gamma(0.0),
-    deltaT(0.0), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+    deltaT(0.0), 
     c1(0.0), c2(0.0), c3(0.0), 
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0)
@@ -57,20 +57,7 @@ HHT::HHT()
 HHT::HHT(double _alpha)
     : TransientIntegrator(INTEGRATOR_TAGS_HHT),
     alpha(_alpha), beta((2-_alpha)*(2-_alpha)*0.25), gamma(1.5-_alpha),
-    deltaT(0.0), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
-    c1(0.0), c2(0.0), c3(0.0), 
-    Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
-    Ualpha(0), Ualphadot(0)
-{
-    
-}
-
-
-HHT::HHT(double _alpha,
-    double _alphaM, double _betaK, double _betaKi, double _betaKc)
-    : TransientIntegrator(INTEGRATOR_TAGS_HHT),
-    alpha(_alpha), beta((2-_alpha)*(2-_alpha)*0.25), gamma(1.5-_alpha),  
-    deltaT(0.0), alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
+    deltaT(0.0), 
     c1(0.0), c2(0.0), c3(0.0), 
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0)
@@ -82,20 +69,7 @@ HHT::HHT(double _alpha,
 HHT::HHT(double _alpha, double _beta, double _gamma)
     : TransientIntegrator(INTEGRATOR_TAGS_HHT),
     alpha(_alpha), beta(_beta), gamma(_gamma),
-    deltaT(0.0), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
-    c1(0.0), c2(0.0), c3(0.0), 
-    Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
-    Ualpha(0), Ualphadot(0)
-{
-    
-}
-
-
-HHT::HHT(double _alpha, double _beta, double _gamma,
-    double _alphaM, double _betaK, double _betaKi, double _betaKc)
-    : TransientIntegrator(INTEGRATOR_TAGS_HHT),
-    alpha(_alpha), beta(_beta), gamma(_gamma),
-    deltaT(0.0), alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
+    deltaT(0.0), 
     c1(0.0), c2(0.0), c3(0.0), 
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     Ualpha(0), Ualphadot(0)
@@ -235,10 +209,6 @@ int HHT::domainChanged()
     LinearSOE *theLinSOE = this->getLinearSOE();
     const Vector &x = theLinSOE->getX();
     int size = x.Size();
-    
-    // if damping factors exist set them in the ele & node of the domain
-    if (alphaM != 0.0 || betaK != 0.0 || betaKi != 0.0 || betaKc != 0.0)
-        myModel->setRayleighDampingFactors(alphaM, betaK, betaKi, betaKc);
     
     // create the new Vector objects
     if (Ut == 0 || Ut->Size() != size)  {
@@ -419,14 +389,11 @@ int HHT::commit(void)
 
 int HHT::sendSelf(int cTag, Channel &theChannel)
 {
-    Vector data(7);
+    Vector data(3);
     data(0) = alpha;
     data(1) = beta;
     data(2) = gamma;
-    data(3) = alphaM;
-    data(4) = betaK;
-    data(5) = betaKi;
-    data(6) = betaKc;
+
     
     if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0)  {
         opserr << "WARNING HHT::sendSelf() - could not send data\n";
@@ -439,7 +406,7 @@ int HHT::sendSelf(int cTag, Channel &theChannel)
 
 int HHT::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-    Vector data(7);
+    Vector data(3);
     if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0)  {
         opserr << "WARNING HHT::recvSelf() - could not receive data\n";
         return -1;
@@ -448,10 +415,6 @@ int HHT::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
     alpha  = data(0);
     beta   = data(1);
     gamma  = data(2);
-    alphaM = data(3);
-    betaK  = data(4);
-    betaKi = data(5);
-    betaKc = data(6);
     
     return 0;
 }
@@ -465,8 +428,6 @@ void HHT::Print(OPS_Stream &s, int flag)
         s << "\t HHT - currentTime: " << currentTime << endln;
         s << "  alpha: " << alpha << "  beta: " << beta  << "  gamma: " << gamma << endln;
         s << "  c1: " << c1 << "  c2: " << c2 << "  c3: " << c3 << endln;
-        s << "  Rayleigh Damping - alphaM: " << alphaM << "  betaK: " << betaK;
-        s << "  betaKi: " << betaKi << "  betaKc: " << betaKc << endln;	    
     } else 
         s << "\t HHT - no associated AnalysisModel\n";
 }
