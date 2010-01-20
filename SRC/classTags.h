@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.118 $
-// $Date: 2009-11-23 23:29:57 $
+// $Revision: 1.119 $
+// $Date: 2010-01-20 23:50:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
 
 // Written: fmk
@@ -522,6 +522,7 @@
 #define GraphNUMBERER_TAG_SimpleNumberer   	2
 #define GraphNUMBERER_TAG_MyRCM   		3
 #define GraphNUMBERER_TAG_Metis   		4
+#define GraphNUMBERER_TAG_AMD   		5
 
 
 #define AnaMODEL_TAGS_AnalysisModel 	1
