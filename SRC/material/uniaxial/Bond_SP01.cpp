@@ -18,14 +18,17 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2006-05-24 21:10:28 $
-
+// $Revision: 1.2 $
+// $Date: 2010-01-20 20:34:28 $
+                                                                        
+// File: ~/Bond_SP01.cpp
+//
 // Written: 		Jian Zhao, Iowa State University 		04/2004
 // Revision:		Jian Zhao, University of Wisconsin, Milwaukee 		04/2006
+// Revision:		Jian Zhao, University of Wisconsin, Milwaukee. Fixed the jump in the negative direction
 //
 // Description: This file contains the class defination for Uniaxial material Bond_SP01. 
-//		Bond_SP01: Strain penetration of rebars at footings w/o bond damage.
+// Bond_SP01: Strain penetration of fully anchored rebars w/o bond damage.
 
 
 #include <Bond_SP01.h>
@@ -46,15 +49,16 @@ fy(FY), sy(SY),  fu(FU), su(SU), Kz(KZ), R(r), Cd(CD), db(DB), fc(FC), lba(LA)
 		opserr << "WARNING: For the Strain-Penetration Model: input values in ksi and in." << endln;
 
 	
-	// Set bar stress-slip envelope 
-	Cr = 1.01;				//% need to be large than 1 pretty arbitary
+	// Set parameters for bar stress-slip envelope 
+	Cr = 1.01;						//% need to be large than 1 pretty arbitary
 	Ks = pow(R,Kz/2.5);		//% pretty arbitary
+	slvrg = pow(12.0/30.0,1/0.4)*0.04;			//%the slip corresponding to the virgin friction in local bond-slip model
 
-	// Assume symmetric envelope 
+	// Assume symmetric envelope. This needs to be changed later because end-bearing participate when under compression
 	E0 = fy/sy;
 
 	// bond condition (for future use) 
-    la = fy*db*1000.0/40.0/pow(fc*1000,0.5);	// effective anchorage length
+    la = fy*db*1000.0/40.0/pow(fc*1000,0.5);	// effective anchorage length (not being used inversions 1.x)
 
 	// Set all history and state variables to initial values
 	this->revertToStart ();
@@ -74,6 +78,7 @@ UniaxialMaterial(tag,MAT_TAG_Bond_SP01),
 	// Set bar stress-slip envelope  (yield point)
 	Cr = 1.01;				//% need to be large than 1 pretty arbitary
 	Ks = pow(R,Kz/2.5);		//% pretty arbitary
+	slvrg = pow(12.0/30.0,1/0.4)*0.04;			//%the slip corresponding to the virgin friction in local bond-slip model
 
 	// Assume symmetric envelope 
 	E0 = fy/sy;
@@ -99,149 +104,141 @@ Bond_SP01::~Bond_SP01 ()
 
 int Bond_SP01::setTrialStrain (double strain, double strainRate)
 {
-  // Reset history variables to last converged state
-  TRSlip = CRSlip;			// Return slip
-  TRLoad = CRLoad;			// Return load
-  TRSlope = CRSlope;			// Return slope
-  TmaxHSlip = CmaxHSlip;		// Maximum slip in tension
-  TminHSlip = CminHSlip;		// Maximum slip in compression
-  Tloading = Cloading;		// Loading flag
-  TYieldFlag = CYieldFlag;	// Yield flag
-  
-  // Set trial slip
-  Tslip = strain;
-  
-  // Determine change in slip from last converged state
-  double dslip = Tslip - Cslip;
-  
-  // Calculate the trial state given the trial Strain
-  determineTrialState (Tslip, dslip);
+	// Reset history variables to last converged state
+	TRSlip = CRSlip;			// Return slip
+	TRLoad = CRLoad;			// Return load
+	TRSlope = CRSlope;			// Return slope
+	TmaxHSlip = CmaxHSlip;		// Maximum slip in tension
+	TminHSlip = CminHSlip;		// Maximum slip in compression
+	Tloading = Cloading;		// Loading flag
+	TYieldFlag = CYieldFlag;	// Yield flag
 
-  return 0;
+	// Set trial slip
+	Tslip = strain;
+
+	// Determine change in slip from last converged state
+	double dslip = Tslip - Cslip;
+
+	// Calculate the trial state given the trial Strain
+	determineTrialState (Tslip, dslip);
+
+	return 0;
 }
 
 int Bond_SP01::setTrial (double strain, double &stress, double &tangent, double strainRate)
 {
-  // Reset history variables to last converged state
-  TRSlip = CRSlip;			// Return slip
-  TRLoad = CRLoad;			// Return load
-  TRSlope = CRSlope;			// Return slope
-  TmaxHSlip = CmaxHSlip;		// Maximum slip in tension
-  TminHSlip = CminHSlip;		// Maximum slip in compression
-  Tloading = Cloading;		// Loading flag
-  TYieldFlag = CYieldFlag;	// Yield flag
-  
-  // Set trial Strain
-  Tslip = strain;
-  
-  // Determine change in Strain from last converged state
-  double dslip;
-  dslip = Tslip - Cslip;
-  
-  // Calculate the trial state given the trial Strain
-  determineTrialState (Tslip, dslip);
-  
-  stress = Tload;
-  tangent = Ttangent;
-  
-  return 0;
+	// Reset history variables to last converged state
+	TRSlip = CRSlip;			// Return slip
+	TRLoad = CRLoad;			// Return load
+	TRSlope = CRSlope;			// Return slope
+	TmaxHSlip = CmaxHSlip;		// Maximum slip in tension
+	TminHSlip = CminHSlip;		// Maximum slip in compression
+	Tloading = Cloading;		// Loading flag
+	TYieldFlag = CYieldFlag;	// Yield flag
+
+	// Set trial Strain
+	Tslip = strain;
+
+	// Determine change in Strain from last converged state
+	double dslip;
+	dslip = Tslip - Cslip;
+
+	// Calculate the trial state given the trial Strain
+	determineTrialState (Tslip, dslip);
+
+	stress = Tload;
+	tangent = Ttangent;
+
+	return 0;
 }
 
 void Bond_SP01::determineTrialState (double ts, double dslip)
 {
 
-	double maxrs;				// maximum return slip in tension in history
-	double maxrl;				// maximum return load in tension in history
-	double maxvgs;				// maximum return vergin slip in tension in history
-	double minrs;				// maximum return slip in compression in history
-	double minrl;				// maximum return load in compression in history
-	double minvgs;				// maximum return vergin slip in compression in history
-	double rslip;				// last return slip 
-	double rload;				// last return load
-	double rsvg;				// last return vergin slip
-	double trs;					// this return slip
-	double trl;					// this return load
-	double trsvg;				// this return vergin slip
-	double Eun;					// unloading slope (tension --> compression)
-	double Ere;					// reloading slope (compression --> tension)
-	double Er;					// return slope 
-	double kkk = 0.38;			// unloading slope (damage)
-	double templ, temps;		// temporary virables
+	double maxrs;					// maximum return slip in tension in history
+	double maxrl;					// maximum return load in tension in history
+	double minrs;					// maximum return slip in compression in history
+	double minrl;					// maximum return load in compression in history
+	double rslip;					// last return slip 
+	double rload;					// last return load
+	double rsvg;					// last return vergin slip
+	double trs;						// this return slip
+	double trl;						// this return load
+	double trsvg;					// this return vergin slip
+	double Eun;						// unloading slope (tension --> compression)
+	double Ere;						// reloading slope (compression --> tension)
+	double Er;						// return slope 
+	double kkk = 0.38;				// unloading slope (damage)
+	double R1;						// temporary virables
 
-	double ss;					// normalized slip
-	double Sy;					// dummy yield slip to keep reloadig slope E0
-	double ssy;					// ratio of slip to Sy
-	double suy;					// ratio of dummy su to Sy
-	double ft;					// normalized load
-	double st;					// normalized slope
+	double ss;						// normalized slip
+	double Sy;						// dummy yield slip to keep reloadig slope E0
+	double ssy;						// ratio of slip to Sy
+	double suy;						// ratio of dummy su to Sy
+	double ft;						// normalized load
+	double st;						// normalized slope
 	
 	if (fabs(dslip) <= DBL_EPSILON)             //ignore trivial slip change
     {
 		Tload = Cload;
+		Ttangent = Ctangent;
 		return;
 	}
 
-	if (Tloading == 0)
+	if (Tloading == 0)						//the inital step when loading/unloading is not determined
 	{
 		Tload = getEnvelopeStress(ts);
-		if (dslip > 0.0) 
+		if (dslip > 0.0)					//positive change in slip --> loading (Tloading = 1)
 		{
 			Tloading = 1;
-			CminHSlip = -ts;			//avoid divided by zero
+			CminHSlip = -slvrg;				//avoid divided by zero later in determine reloading path
 		}
-		else
+		else								//negtive change in slip --> unloading (Tloading = -1)
 		{
 			Tloading = -1;
-			CmaxHSlip = -ts;			//avoid divided by zero
+			CmaxHSlip = slvrg;				//avoid divided by zero later in determine reloading path
 		}
 		return;
 	}
 
-	if (TYieldFlag == 0)
+	if (TYieldFlag == 0)					//no yielding in previous steps 
 	{
-		if (fabs(ts) <= sy)
+		Tload = getEnvelopeStress(ts);
+		if (Tloading > 0.0)									// (Cloading>0): was loading (tension)
 		{
-			Tload = ts*E0;
-			Ttangent = E0;
+			if (dslip < 0.0)											//% (dslip<0): turn unloading (compression)
+			{
+				Tloading = -1;
+				TRSlip = Cslip;
+				TRLoad = Cload;
+				TRSlope = E0;
+				if (Cslip > TmaxHSlip)
+					TmaxHSlip = Cslip;
+			}
 		}
-		else
+		else								//(Tloading<0): was unloading (compression)
 		{
-			TYieldFlag = 1;
-			Tload = getEnvelopeStress(ts);
+			if (dslip > 0.0)					//%(dslip<0): turn reloading (tension)
+			{
+				Tloading = 1;
+				TRSlip = Cslip;
+				TRLoad = Cload;
+				TRSlope = E0;
+				if (Cslip < TminHSlip)
+					TminHSlip = Cslip;
+			}
 		}
-
-		if (Tloading > 0 && dslip < 0.0 && Cslip > TmaxHSlip)
-			TmaxHSlip = Cslip;
-		if (Tloading < 0 && dslip > 0.0 && Cslip < TminHSlip)
-			TminHSlip = Cslip;
-
 		return;
 	}
 
-	//set limits
+	//set limits for elastic unloading/reloading: before the curve hits the x-axis
 	maxrs = TmaxHSlip;
 	maxrl = getEnvelopeStress(maxrs);
-	if (maxrs > sy)
-	{
-		Eun = E0/pow(maxrs/sy,kkk);
-	}
-	else
-	{
-		Eun = E0;
-	}
-	maxvgs = maxrs-maxrl/Eun;
+	Eun = E0;
 
 	minrs = TminHSlip;
 	minrl = getEnvelopeStress(minrs);
-	if (minrs < -sy)
-	{
-		Ere = E0/pow(-minrs/sy,kkk);
-	}
-	else
-	{
-		Ere = E0;
-	}
-	minvgs = minrs-minrl/Ere;
+	Ere = E0;
 
 	rslip = TRSlip;
 	rload = TRLoad;
@@ -249,52 +246,48 @@ void Bond_SP01::determineTrialState (double ts, double dslip)
 	rsvg = rslip-rload/Er;
 
 	//get load for a slip
-	if (Tloading > 0.0)					//(Cloading>0): was loading (tension)
+	if (Tloading > 0.0)									// (Cloading>0): was loading (tension)
 	{
-		if (dslip > 0.0)					//%(dslip>0): keep loading (tension)
+		if (dslip > 0.0)											//% (dslip>0): keep loading (tension)
 		{
-			if (ts >= maxrs)					//%%envelope stress
+			if (ts >= maxrs)										//%% larger than the max. slip -> envelope stress
 			{
 				Tload = getEnvelopeStress(ts);
 			}
-			else								//%% ts < maxrs
+			else													//%% ts < maxrs
 			{
-				if (ts >= rsvg)					//%%curve reloading (tension)
+				if (rsvg > rslip)										//%%  turn from compression to tension
 				{
-					Sy = maxrl/Ere;
-					suy = (maxrs-rsvg)/Sy;
-					if (ts-rsvg <= Ks*(maxrs-rsvg))
+					if (ts >= rsvg)										//%%% curve reloading (tension)
 					{
+						Sy = maxrl/Ere;
+						suy = (maxrs-rsvg)/Sy;
 						ssy = (ts-rsvg)/Sy; 
 						ss = ssy/(suy-ssy);
-						ft = ss/pow((pow(1/suy,R)+pow(ss,R)),(1/R));
+						R1 = R+(1.01-R)*pow(((ts-rsvg)/(maxrs-rsvg)),(1/R/R));			//%%%% to avoid infinite slope 
+						ft = ss/pow((pow(1/suy,R1)+pow(ss,R1)),(1/R1));
 						Tload = ft*maxrl;
-						st = pow(suy,(1-R))/pow(suy-ssy,2)/pow((pow(1/suy,R)+pow(ss,R)),(1/R+1));
+						st = pow(suy,(1-R1))/pow(suy-ssy,2)/pow((pow(1/suy,R1)+pow(ss,R1)),(1/R1+1));
 						Ttangent = st*Ere;
 					}
-					else
-					{
-						ssy = Ks*(maxrs-rsvg)/Sy; 
-						ss = ssy/(suy-ssy);
-						ft = ss/pow((pow(1/suy,R)+pow(ss,R)),(1/R));
-						templ = ft*maxrl;
-						temps = Ks*(maxrs-rsvg)+rsvg;
-						Tload = templ+(maxrl-templ)/(maxrs-temps)*(ts-temps);
-						Ttangent = (maxrl-templ)/(maxrs-temps);
-					}
-				}
-				else							//%% ts < rsvg
-				{
-					if (ts >= rslip)			//%%linear reloading (tension)
+					else							//%% ts < rsvg
 					{
 						Tload = rload*(ts-rsvg)/(rslip-rsvg);
-						Ttangent = Er;
+						Ttangent = Ere;
 					}
-					else						//%%ts > rsvg not possible for safety
-					{
-						Tload = rload;
-					}
-                }
+				}
+				else										//%%  rsvg < rslip turn from linear tension to tension
+				{
+					Sy = maxrl/Er;
+					suy = (maxrs-rslip)/Sy;
+					ssy = (ts-rslip)/Sy; 
+					ss = ssy/(suy-ssy);
+					R1 = R+(1.01-R)*pow(((ts-rslip)/(maxrs-rslip)),(1/R/R));	//%%%% to avoid infinite slope 
+					ft = ss/pow((pow(1/suy,R1)+pow(ss,R1)),(1/R1));
+					Tload = ft*(maxrl-rload)+rload;
+					st = pow(suy,(1-R1))/pow(suy-ssy,2)/pow((pow(1/suy,R1)+pow(ss,R1)),(1/R1+1));
+					Ttangent = st*Er;
+				}						
 			}
 		}
 		else								//%(dslip<0): turn unloading (compression)
@@ -302,71 +295,59 @@ void Bond_SP01::determineTrialState (double ts, double dslip)
 			Tloading = -1;
 			TRSlip = Cslip;
 			TRLoad = Cload;
+			TRSlope = E0;
 			if (Cslip > TmaxHSlip)
 			{
 				TmaxHSlip = Cslip;
-	            if (TmaxHSlip > sy)
-				{
-					TRSlope = E0/pow(TmaxHSlip/sy, kkk);
-				}
-				else
-				{
-					TRSlope = E0;
-				}
+				maxrs = TmaxHSlip;
+				maxrl = getEnvelopeStress(maxrs);
+				Eun = E0;
 			}
-			Er = TRSlope;
 
 			trs = TRSlip;
 			trl = TRLoad;
+			Er = TRSlope;
 			trsvg = trs-trl/Er;
         
-			if (trsvg > 0.0 && CminHSlip == 0.0)	//%%guess a minimum return slip
-				CminHSlip = -sy*trsvg/su;
-
-			if (ts > trs)						//%%not possible for safety
+			if (ts <= minrs)
 			{
-				Tload = trl;
+				Tload = getEnvelopeStress(ts);
 			}
 			else
 			{
-				if (ts > trsvg)					//%%linear unloading (compression)
+                if (trsvg < trs)						//%% from tension to compression
 				{
-					Tload = trl*(ts-trsvg)/(trs-trsvg);
-					Ttangent = Er;
-				}
-				else
-				{
-					if (ts > minrs)				//%%curve unloading (compression)
+					if (ts <= trsvg)					//%%linear unloading (compression)
 					{
 						Sy = minrl/Eun;
 						suy = (minrs-trsvg)/Sy;
-						if (ts-trsvg >= Ks*(minrs-trsvg))
-						{
-							ssy = (ts-trsvg)/Sy; 
-							ss = ssy/(suy-ssy);
-							ft = ss/pow((pow(1/suy,R)+pow(ss,R)),(1/R));
-							Tload = ft*minrl;
-							st = pow(suy,(1-R))/pow(suy-ssy,2)/pow((pow(1/suy,R)+pow(ss,R)),(1/R+1));
-							Ttangent = st*Eun;
-						}
-					else
-						{
-							ssy = Ks*(minrs-trsvg)/Sy; 
-							ss = ssy/(suy-ssy);
-							ft = ss/pow((pow(1/suy,R)+pow(ss,R)),(1/R));
-							templ = ft*minrl;
-							temps = Ks*(minrs-trsvg)+trsvg;
-							Tload = templ+(minrl-templ)/(minrs-temps)*(ts-temps);
-							Ttangent = (minrl-templ)/(minrs-temps);
-						}
+						ssy = (ts-trsvg)/Sy; 
+						ss = ssy/(suy-ssy);
+						R1 = R+(1.01-R)*pow(((ts-trsvg)/(minrs-trsvg)),(1/R/R));			//%%%% to avoid infinite slope 
+						ft = ss/pow((pow(1/suy,R1)+pow(ss,R1)),(1/R1));
+						Tload = ft*minrl;
+						st = pow(suy,(1-R1))/pow(suy-ssy,2)/pow((pow(1/suy,R1)+pow(ss,R1)),(1/R1+1));
+						Ttangent = st*Eun;
 					}
-					else						//%%envelope stress
+					else
 					{
-						Tload = getEnvelopeStress(ts);
+						Tload = trl*(ts-trsvg)/(trs-trsvg);
+						Ttangent = Eun;
 					}
 				}
+				else							//%% from compression to compression
+				{
+					Sy = minrl/Er;
+					suy = (minrs-trs)/Sy;
+					ssy = (ts-trs)/Sy; 
+					ss = ssy/(suy-ssy);
+					R1 = R+(1.01-R)*pow(((ts-trs)/(minrs-trs)),(1/R/R));	//%%%% to avoid infinite slope 
+					ft = ss/pow((pow(1/suy,R1)+pow(ss,R1)),(1/R1));
+					Tload = ft*(minrl-trl)+trl;
+					st = pow(suy,(1-R1))/pow(suy-ssy,2)/pow((pow(1/suy,R1)+pow(ss,R1)),(1/R1+1));
+					Ttangent = st*Er;
+				}
 			}
-
 		}
 	}
 	else								//(Tloading<0): was unloading (compression)
@@ -379,41 +360,38 @@ void Bond_SP01::determineTrialState (double ts, double dslip)
 			}
 			else								//%% ts > minrs								
 			{
-				if (ts <= rsvg)					//%%curve unloading (compression)
+				if (rsvg < rslip)					//%%tension to compression and keep compression
 				{
-					Sy = minrl/Eun;
-					suy = (minrs-rsvg)/Sy;
-					if (ts-rsvg >= Ks*(minrs-rsvg))
+					if (ts <= rsvg)					//%% ts < rsvg curve unloading (compression)
 					{
+						Sy = minrl/Eun;
+						suy = (minrs-rsvg)/Sy;
 						ssy = (ts-rsvg)/Sy; 
 						ss = ssy/(suy-ssy);
-						ft = ss/pow((pow(1/suy,R)+pow(ss,R)),(1/R));
+						R1 = R+(1.01-R)*pow(((ts-rsvg)/(minrs-rsvg)),(1/R/R));			//%%%% to avoid infinite slope 
+						ft = ss/pow((pow(1/suy,R1)+pow(ss,R1)),(1/R1));
 						Tload = ft*minrl;
-						st = pow(suy,(1-R))/pow(suy-ssy,2)/pow((pow(1/suy,R)+pow(ss,R)),(1/R+1));
+						st = pow(suy,(1-R1))/pow(suy-ssy,2)/pow((pow(1/suy,R1)+pow(ss,R1)),(1/R1+1));
 						Ttangent = st*Eun;
 					}
-					else
-					{
-						ssy = Ks*(minrs-rsvg)/Sy; 
-						ss = ssy/(suy-ssy);
-						ft = ss/pow((pow(1/suy,R)+pow(ss,R)),(1/R));
-						templ = ft*minrl;
-						temps = Ks*(minrs-rsvg)+rsvg;
-						Tload = templ+(minrl-templ)/(minrs-temps)*(ts-temps);
-						Ttangent = (minrl-templ)/(minrs-temps);
-					}
-				}
-				else							//%% ts > rsvg
-				{
-					if (ts <= rslip)			//%%linear unloading (compression)
+					else				//%%linear unloading (compression)
 					{
 						Tload = rload*(ts-rsvg)/(rslip-rsvg);
-						Ttangent = E0;
+						Ttangent = Eun;
 					}
-					else						//%%not possible for safety
-					{
-                    Tload = rload;
-					}
+
+				}
+				else							//%%%  unloading from linear reloading and keep unloading
+				{
+					Sy = minrl/Er;
+					suy = (minrs-rslip)/Sy;
+					ssy = (ts-rslip)/Sy; 
+					ss = ssy/(suy-ssy);
+					R1 = R+(1.01-R)*pow(((ts-rslip)/(minrs-rslip)),(1/R/R));	//%%%% to avoid infinite slope 
+					ft = ss/pow((pow(1/suy,R1)+pow(ss,R1)),(1/R1));
+					Tload = ft*(minrl-rload)+rload;
+					st = pow(suy,(1-R1))/pow(suy-ssy,2)/pow((pow(1/suy,R1)+pow(ss,R1)),(1/R1+1));
+					Ttangent = st*Er;
 				}
 			}
 		}
@@ -422,79 +400,89 @@ void Bond_SP01::determineTrialState (double ts, double dslip)
 			Tloading = 1;
 			TRSlip = Cslip;
 			TRLoad = Cload;
+			TRSlope = E0;
 			if (Cslip < TminHSlip)
 			{
 				TminHSlip = Cslip;
-	            if (TminHSlip < -sy)
-				{
-					TRSlope = E0/pow(-TminHSlip/sy, kkk);
-				}
-				else
-				{
-					TRSlope = E0;
-				}
+				minrs = TminHSlip;
+				minrl = getEnvelopeStress(minrs);
+				Ere = E0;
 			}
-			Er = TRSlope;
 
 			trs = TRSlip;
 			trl = TRLoad;
+			Er = TRSlope;
 			trsvg = trs-trl/Er;
         
-			if (trsvg < 0.0 && CmaxHSlip == 0.0)
-				CmaxHSlip = sy*trsvg/(-su);
-
-			if (ts < trs)						//%%not possible for safety
+			if (ts >= maxrs)						//%%envelope stress
 			{
-				Tload = trl;
+				Tload = getEnvelopeStress(ts);
 			}
 			else								//%% ts > trs
 			{
-				if (ts < trsvg)					//%%linear unloading (compression)
+				if (trsvg > trs)			//%%compression to tension
 				{
-					Tload = trl*(ts-trsvg)/(trs-trsvg);
-					Ttangent = Er;
-				}
-				else							//%% ts > trsvg
-				{
-					if (ts < maxrs)				//%%curve reloading (compression)
+					if (ts >= trsvg)					//%%curve reloading (tension)
 					{
 						Sy = maxrl/Ere;
-						suy = (maxrs-rsvg)/Sy;
-						if (ts-trsvg <= Ks*(maxrs-trsvg))
-						{
-							ssy = (ts-trsvg)/Sy; 
-							ss = ssy/(suy-ssy);
-							ft = ss/pow((pow(1/suy,R)+pow(ss,R)),(1/R));
-							Tload = ft*maxrl;
-							st = pow(suy,(1-R))/pow(suy-ssy,2)/pow((pow(1/suy,R)+pow(ss,R)),(1/R+1));
-							Ttangent = st*Ere;
-						}
-						else
-						{
-							ssy = Ks*(maxrs-trsvg)/Sy; 
-							ss = ssy/(suy-ssy);
-							ft = ss/pow((pow(1/suy,R)+pow(ss,R)),(1/R));
-							templ = ft*maxrl;
-							temps = Ks*(maxrs-trsvg)+trsvg;
-							Tload = templ+(maxrl-templ)/(maxrs-temps)*(ts-temps);
-							Ttangent = (maxrl-templ)/(maxrs-temps);
-						}
+						suy = (maxrs-trsvg)/Sy;
+						ssy = (ts-trsvg)/Sy; 
+						ss = ssy/(suy-ssy);
+						R1 = R+(1.01-R)*pow(((ts-trsvg)/(maxrs-trsvg)),(1/R/R));			//%%%% to avoid infinite slope 
+						ft = ss/pow((pow(1/suy,R1)+pow(ss,R1)),(1/R1));
+						Tload = ft*maxrl;
+						st = pow(suy,(1-R1))/pow(suy-ssy,2)/pow((pow(1/suy,R1)+pow(ss,R1)),(1/R1+1));
+						Ttangent = st*Ere;
 					}
-					else						//%%envelope stress
+					else							//%% ts < trsvg linear reloading (conpression)
 					{
-						Tload = getEnvelopeStress(ts);
+						Tload = trl*(ts-trsvg)/(trs-trsvg);
+						Ttangent = Ere;
 					}
 				}
-			}
-			if (Cslip < TminHSlip)
-			{
-				TminHSlip = Cslip;
+				else						
+				{
+					Sy = maxrl/Er;
+					suy = (maxrs-trs)/Sy;
+					ssy = (ts-trs)/Sy; 
+					ss = ssy/(suy-ssy);
+					R1 = R+(1.01-R)*pow(((ts-trs)/(maxrs-trs)),(1/R/R));	//%%%% to avoid infinite slope 
+					ft = ss/pow((pow(1/suy,R1)+pow(ss,R1)),(1/R1));
+					Tload = ft*(maxrl-trl)+trl;
+					st = pow(suy,(1-R1))/pow(suy-ssy,2)/pow((pow(1/suy,R1)+pow(ss,R1)),(1/R1+1));
+					Ttangent = st*Er;
+				}
 			}
         }
     }
+}
 
-	// Detect load reversals and determine damage indexes
-	//this->detectloadReversal (dslip);
+void Bond_SP01::detectStressReversal (double dslip)
+{
+	if (Tloading > 0.0)									// (Cloading>0): was loading (tension)
+	{
+		if (dslip < 0.0)											//% (dslip<0): turn unloading (compression)
+		{
+			Tloading = -1;
+			TRSlip = Cslip;
+			TRLoad = Cload;
+			TRSlope = E0;
+			if (Cslip > TmaxHSlip)
+				TmaxHSlip = Cslip;
+		}
+	}
+	else								//(Tloading<0): was unloading (compression)
+	{
+		if (dslip > 0.0)					//%(dslip<0): turn reloading (tension)
+		{
+			Tloading = 1;
+			TRSlip = Cslip;
+			TRLoad = Cload;
+			TRSlope = E0;
+			if (Cslip < TminHSlip)
+				TminHSlip = Cslip;
+		}
+	}
 }
 
 double Bond_SP01::getEnvelopeStress (double s)
@@ -522,6 +510,7 @@ double Bond_SP01::getEnvelopeStress (double s)
 		}
 		else 
 		{
+			TYieldFlag = 1;
 			if (s < su)
 			{
 				ssy = (s-sy)/sy;
@@ -548,6 +537,7 @@ double Bond_SP01::getEnvelopeStress (double s)
 		}
 		else 
 		{
+			TYieldFlag = 1;
 			if (s > -su)
 			{
 				ssy = (s-(-sy))/(-sy);

@@ -18,9 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-08-03 22:06:26 $
+// $Revision: 1.3 $
+// $Date: 2010-01-20 20:34:28 $
                                                                         
+// File: ~/Bond_SP01.h
+//
 // Written: 		Jian Zhao, Iowa State University 		04/2004
 // Revision:		Jian Zhao, University of Wisconsin, Milwaukee 		04/2006
 //
@@ -48,7 +50,7 @@ class Bond_SP01 : public UniaxialMaterial
     Bond_SP01();
     ~Bond_SP01();
 
-    const char *getClassType(void) const {return "Bond_SP01";};   
+    const char *getClassType(void) const {return "Bond_SP01";};  
 
     int setTrialStrain (double strain, double strainRate = 0.0); 
     int setTrial (double strain, double &stress, double &tangent, double strainRate = 0.0);
@@ -73,63 +75,64 @@ class Bond_SP01 : public UniaxialMaterial
     
   private:
     /*** anchorage condition ***/
-    double db;			// rebar diameter
-    double fc;			// concrete compressive strength (positive ksi)
-    double lba;			// bond length (can be shorter than current set -> rigid-body slip)
-    double la;			// required minimum anchorage length
+    double db;				// rebar diameter
+    double fc;				// concrete compressive strength (positive ksi)
+    double lba;				// bond length (can be shorter than current set -> rigid-body slip)
+    double la;				// required minimum anchorage length
     
     /*** strain penetration ***/
-    double sy;			// rebar slip at bar yielding
-    double su;			// rebar slip at bar failure (assume @ 1.5fy)
-    double fy;			// bar yield strength
-    double fu;			// bar ultimate strength (assume @ 1.5fy)
-    double E0;			// initial slope of the envelope
-    double Kz;			// initial hardening ratio (0.3), 0.25<Kz<0.5
-    double Cr;			// R factor for the envelope using menegoto-pinto curve
-    double Ks;			// reloading stop point (to avoid infinity slope with pinching)
+    double sy;				// rebar slip at bar yielding
+    double su;				// rebar slip at bar failure (assume @ 1.5fy)
+    double fy;				// bar yield strength
+    double fu;				// bar ultimate strength (assume @ 1.5fy)
+    double E0;				// initial slope of the envelope
+    double Kz;				// initial hardening ratio (0.3), 0.25<Kz<0.5
+    double Cr;				// R factor for the envelope using menegoto-pinto curve
+    double Ks;				// reloading stop point (to avoid infinity slope with pinching)
+    double slvrg;			// slip corresponding to virgin friction in local bond-slip model 
     
     /*** pinching condition ***/
-    double R;			// R factor for reloading using menegoto-pinto type curve
-    double Cd;			// bond damage factor (currently no use)
+    double R;				// R factor for reloading using menegoto-pinto type curve
+    double Cd;				// bond damage factor (currently no use)
     
     /*** CONVERGED History Variables ***/
-    double CRSlip;		// return slip
-    double CRLoad;		// return load
-    double CRSlope;		// return slope
-    double CmaxHSlip;	// Maximum slip in tension
-    double CminHSlip;	// Maximum slip in compression
-    int Cloading;       // Flag for Stressing/unStressing
-                        // 1 = loading (positive slip increment)
-                        // -1 = unloaading (negative slip increment)
-                        // 0 = initial state
-    int CYieldFlag;		// Flag for yielding
-                                // 1 = yielded
-                                // 0 = not yielded
-
+    double CRSlip;			// return slip
+    double CRLoad;			// return load
+    double CRSlope;			// return slope
+    double CmaxHSlip;		// Maximum slip in tension
+    double CminHSlip;		// Maximum slip in compression
+    int Cloading;			// Flag for Stressing/unStressing
+							// 1 = loading (positive slip increment)
+							// -1 = unloaading (negative slip increment)
+							// 0 = initial state
+    int CYieldFlag;			// Flag for yielding
+							// 1 = yielded
+							// 0 = not yielded
+    
     /*** CONVERGED State Variables ***/    
     double Cslip;
     double Cload;
     double Ctangent;    
 
     /*** TRIAL History Variables ***/
-    double TRSlip;		// return slip
-    double TRLoad;		// return load
-    double TRSlope;		// return slope
-    double TmaxHSlip;	// Maximum slip in tension
-    double TminHSlip;	// Maximum slip in compression
-    int Tloading;       // Flag for Stressing/unStressing
-    int TYieldFlag;		// Flag for yielding
+    double TRSlip;			// return slip
+    double TRLoad;			// return load
+    double TRSlope;			// return slope
+    double TmaxHSlip;		// Maximum slip in tension
+    double TminHSlip;		// Maximum slip in compression
+    int Tloading;			// Flag for Stressing/unStressing
+    int TYieldFlag;			// Flag for yielding
     
     /*** TRIAL State Variables ***/
     double Tslip;
     double Tload;
     double Ttangent;    
-
+    
     // Calculates the trial state variables based on the trial Strain
     void determineTrialState (double tslip, double dslip);
     
     // Calculates envelope stress for a slip
-    double getEnvelopeStress (double slip);
+    double Bond_SP01::getEnvelopeStress (double slip);
     
     // Determines if a Stress reversal has occurred based on the trial Strain
     void detectStressReversal (double dslip);
