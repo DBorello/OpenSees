@@ -18,12 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.7 $
-// $Date: 2007-04-05 01:29:04 $
+// $Revision: 1.8 $
+// $Date: 2010-01-20 18:53:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/CentralDifference.cpp,v $
 
-// Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
-// Created: 02/05
+// Written: fmk
+// Created: 11/98
 // Revision: A
 //
 // Description: This file contains the implementation of the CentralDifference class.

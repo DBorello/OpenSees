@@ -18,16 +18,16 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.7 $
-// $Date: 2005-12-19 22:43:36 $
+// $Revision: 1.8 $
+// $Date: 2010-01-20 18:53:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHT.h,v $
 
 
 #ifndef HHT_h
 #define HHT_h
 
-// Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
-// Created: 02/05
+// Written: fmk
+// Created: 11/98
 // Revision: A
 //
 // Description: This file contains the class definition for HHT.
