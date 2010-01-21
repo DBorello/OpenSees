@@ -21,7 +21,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\src\handler,..\..\..\src\actor\channel,..\..\..\src\graph\numberer,..\..\..\src\actor\objectBroker,..\..\..\src\analysis\dof_grp,..\..\..\src\analysis\fe_ele,..\..\..\src\actor\actor,..\..\..\src\analysis\model\simple,..\..\..\src\analysis\model,..\..\..\src\tagged\storage,..\..\..\src\matrix,..\..\..\src\graph\graph,..\..\..\src,..\..\..\src\tagged,..\..\..\src\nDarray,c:\Program Files\tcl"
+				AdditionalIncludeDirectories="..\..\..\OTHER\AMD;..\..\..\src\handler;..\..\..\src\actor\channel;..\..\..\src\graph\numberer;..\..\..\src\actor\objectBroker;..\..\..\src\analysis\dof_grp;..\..\..\src\analysis\fe_ele;..\..\..\src\actor\actor;..\..\..\src\analysis\model\simple;..\..\..\src\analysis\model;..\..\..\src\tagged\storage;..\..\..\src\matrix;..\..\..\src\graph\graph;..\..\..\src;..\..\..\src\tagged;..\..\..\src\nDarray;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
@@ -65,7 +65,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\src\handler,..\..\..\src\actor\channel,..\..\..\src\graph\numberer,..\..\..\src\actor\objectBroker,..\..\..\src\analysis\dof_grp,..\..\..\src\analysis\fe_ele,..\..\..\src\actor\actor,..\..\..\src\analysis\model\simple,..\..\..\src\analysis\model,..\..\..\src\tagged\storage,..\..\..\src\matrix,..\..\..\src\graph\graph,..\..\..\src,..\..\..\src\tagged,..\..\..\src\nDarray,c:\Program Files\tcl"
+				AdditionalIncludeDirectories="..\..\..\OTHER\AMD;..\..\..\src\handler;..\..\..\src\actor\channel;..\..\..\src\graph\numberer;..\..\..\src\actor\objectBroker;..\..\..\src\analysis\dof_grp;..\..\..\src\analysis\fe_ele;..\..\..\src\actor\actor;..\..\..\src\analysis\model\simple;..\..\..\src\analysis\model;..\..\..\src\tagged\storage;..\..\..\src\matrix;..\..\..\src\graph\graph;..\..\..\src;..\..\..\src\tagged;..\..\..\src\nDarray;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="WIN32,_DEBUG,_LIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
@@ -105,6 +105,9 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
+				RelativePath="..\..\..\SRC\graph\numberer\AMDNumberer.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\graph\graph\ArrayGraph.cpp">
 			</File>
 			<File
@@ -142,6 +145,9 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
 			<File
+				RelativePath="..\..\..\SRC\graph\numberer\AMDNumberer.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\graph\graph\ArrayGraph.h">
 			</File>
 			<File
@@ -173,6 +179,49 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\graph\graph\VertexIter.h">
+			</File>
+		</Filter>
+		<Filter
+			Name="amd"
+			Filter="">
+			<File
+				RelativePath="..\..\..\OTHER\AMD\amd_1.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\AMD\amd_2.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\AMD\amd_aat.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\AMD\amd_control.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\AMD\amd_defaults.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\AMD\amd_dump.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\AMD\amd_global.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\AMD\amd_info.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\AMD\amd_order.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\AMD\amd_post_tree.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\AMD\amd_postorder.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\AMD\amd_preprocess.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\AMD\amd_valid.c">
 			</File>
 		</Filter>
 	</Files>
