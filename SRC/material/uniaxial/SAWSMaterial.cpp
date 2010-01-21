@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2009-11-23 23:29:34 $
+// $Revision: 1.2 $
+// $Date: 2010-01-21 22:51:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SAWSMaterial.cpp,v $
 
 // Written: Patxi (Converted from FORTRAN code originally written by Bryan Folz)
