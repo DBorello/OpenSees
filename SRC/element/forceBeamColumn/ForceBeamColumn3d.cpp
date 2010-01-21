@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2009-12-17 23:49:09 $
+// $Revision: 1.31 $
+// $Date: 2010-01-21 21:43:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 /*
@@ -2427,8 +2427,9 @@ ForceBeamColumn3d::getResponse(int responseID, Information &eleInfo)
 	//		
 	indata.open(filenamewall); // opens the file
 	if(!indata) { // file couldn't be opened
-	  opserr << "Error: file for infill wall could not be opened" << endln;
-	  exit(1);
+		opserr << "ForceBeamColumn3d::getResponse()"
+			<< " file for infill wall (" << filenamewall << " could not be opened" << endln;
+	  return -1;
 	}
 	checkvalue1=0.0;
 	int counterdum=0;
