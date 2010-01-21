@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2009-12-17 23:56:39 $
+// $Revision: 1.8 $
+// $Date: 2010-01-21 21:43:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Information.cpp,v $
                                                                         
                                                                         
@@ -198,15 +198,15 @@ Information::setString(const char *newString)
   if (theString != 0) {
     int oldLength = strlen(theString);
     if (oldLength >= newLength) 
-      strncpy(theString, newString, oldLength);
+      strcpy(theString, newString);
     else {
       delete [] theString;
       theString = new char[newLength+1];
-      strncpy(theString, newString, newLength);      
+      strcpy(theString, newString);      
     }
   } else {
       theString = new char[newLength+1];
-      strncpy(theString, newString, newLength);      
+      strcpy(theString, newString);      
   }
 
   return 0;
