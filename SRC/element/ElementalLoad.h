@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-08-26 16:52:10 $
+// $Revision: 1.7 $
+// $Date: 2010-02-04 19:16:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/ElementalLoad.h,v $
                                                                         
                                                                         
@@ -55,7 +55,7 @@ class ElementalLoad : public Load
     int eleTag;
 
   private:
-    Element *theElement;  // pointer to associated elements
+    Element *theElement;  // pointer to associated element
 };
 
 #endif
