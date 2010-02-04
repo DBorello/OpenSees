@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2009-05-11 21:36:11 $
+// $Revision: 1.11 $
+// $Date: 2010-02-04 00:27:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/myCommands.cpp,v $
 
 // Written: fmk 
@@ -77,7 +77,8 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Cha
     }
 
     // check argv[1] for type of ModelBuilder and create the object 
-    if (strcmp(argv[1],"basic") == 0 || strcmp(argv[1],"BasicBuilder") == 0) {
+    if ((strcmp(argv[1],"basic") == 0) || (strcmp(argv[1],"BasicBuilder") == 0) ||
+	(strcmp(argv[1],"Basic") == 0) || (strcmp(argv[1],"basicBuilder") == 0)) {
       int ndm =0;
       int ndf = 0;
       
@@ -141,6 +142,7 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Cha
 
       // create the model builder
       theBuilder = new TclModelBuilder(theDomain, interp, ndm, ndf);
+
       if (theBuilder == 0) {
 	opserr << "WARNING ran out of memory in creating BasicBuilder model\n";
 	return TCL_ERROR;
