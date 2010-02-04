@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2010-02-04 01:05:34 $
+// $Revision: 1.2 $
+// $Date: 2010-02-04 22:40:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/GeneralizedAlpha.cpp,v $
 
 // Written: fmk
@@ -60,7 +60,6 @@ OPS_NewGeneralizedAlpha(void)
   }
 
   double dData[4];
-  opserr << "ARGC: " << argc << endln;
   if (OPS_GetDouble(&argc, dData) != 0) {
     opserr << "WARNING - invalid args want GeneralizedAlpha $alphaM $alphaF <$gamma $beta>\n";
     return 0;
