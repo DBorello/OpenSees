@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.152 $
-// $Date: 2010-02-04 00:30:12 $
+// $Revision: 1.153 $
+// $Date: 2010-02-04 18:22:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -2178,7 +2178,13 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
     }
 #endif
 
-
+    if (theEigenSOE != 0) {
+      if (theStaticAnalysis != 0) {
+	theStaticAnalysis->setEigenSOE(*theEigenSOE);
+      } else if (theTransientAnalysis != 0) {
+	theTransientAnalysis->setEigenSOE(*theEigenSOE);
+      }
+    }
 	
 
     return TCL_OK;
@@ -5232,7 +5238,10 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
     // create a transient analysis if no analysis exists
     //
 
+    
+
     if (theStaticAnalysis == 0 && theTransientAnalysis == 0) {
+
 	if (theAnalysisModel == 0) 
 	    theAnalysisModel = new AnalysisModel();
 	if (theTest == 0) 
