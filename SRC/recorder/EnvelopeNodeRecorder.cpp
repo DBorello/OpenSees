@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.21 $
-// $Date: 2009-10-13 21:16:26 $
+// $Revision: 1.22 $
+// $Date: 2010-02-04 01:03:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -42,6 +42,7 @@
 #include <Matrix.h>
 #include <FE_Datastore.h>
 #include <FEM_ObjectBroker.h>
+#include <TimeSeries.h>
 
 #include <string.h>
 
@@ -51,7 +52,8 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder()
  currentData(0), data(0), 
  theDomain(0), theHandler(0),
  deltaT(0.0), nextTimeStampToRecord(0.0), 
- first(true), initializationDone(false), numValidNodes(0), addColumnInfo(0)
+ first(true), initializationDone(false), 
+ numValidNodes(0), addColumnInfo(0), theTimeSeries(0)
 {
 
 }
@@ -61,13 +63,16 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID &dofs,
 					   const char *dataToStore,
 					   Domain &theDom,
 					   OPS_Stream &theOutputHandler,
-					   double dT, bool echoTime)
+					   double dT, 
+					   bool echoTime,
+					   TimeSeries *theSeries)
 :Recorder(RECORDER_TAGS_EnvelopeNodeRecorder),
  theDofs(0), theNodalTags(0), theNodes(0),
  currentData(0), data(0), 
  theDomain(&theDom), theHandler(&theOutputHandler),
  deltaT(dT), nextTimeStampToRecord(0.0), 
- first(true), initializationDone(false), numValidNodes(0), echoTimeFlag(echoTime), addColumnInfo(0)
+ first(true), initializationDone(false), numValidNodes(0), echoTimeFlag(echoTime), 
+ addColumnInfo(0),theTimeSeries(theSeries)
 {
   // verify dof are valid 
   int numDOF = dofs.Size();
@@ -204,6 +209,9 @@ EnvelopeNodeRecorder::~EnvelopeNodeRecorder()
 
   if (theNodes != 0)
     delete [] theNodes;
+
+  if (theTimeSeries != 0)
+    delete theTimeSeries;
 }
 
 int 
@@ -234,6 +242,12 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
     if (deltaT != 0.0) 
       nextTimeStampToRecord = timeStamp + deltaT;
 
+    double timeSeriesTerm = 0.0;
+
+    if (theTimeSeries != 0) {
+      timeSeriesTerm += theTimeSeries->getFactor(timeStamp);
+    }
+
     //
     // if need nodal reactions get the domain to calculate them
     // before we iterate over the nodes
@@ -256,9 +270,9 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
 	for (int j=0; j<numDOF; j++) {
 	  int dof = (*theDofs)(j);
 	  if (response.Size() > dof) {
-	    (*currentData)(cnt) = response(dof);
+	    (*currentData)(cnt) = response(dof) + timeSeriesTerm;
 	  }else 
-	    (*currentData)(cnt) = 0.0;
+	    (*currentData)(cnt) = 0.0 + timeSeriesTerm;
 	  
 	  cnt++;
 	}
@@ -267,9 +281,9 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
 	for (int j=0; j<numDOF; j++) {
 	  int dof = (*theDofs)(j);
 	  if (response.Size() > dof) {
-	    (*currentData)(cnt) = response(dof);
+	    (*currentData)(cnt) = response(dof) + timeSeriesTerm;
 	  } else 
-	    (*currentData)(cnt) = 0.0;
+	    (*currentData)(cnt) = 0.0 + timeSeriesTerm;
 	  
 	  cnt++;
 	}
@@ -278,9 +292,9 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
 	for (int j=0; j<numDOF; j++) {
 	  int dof = (*theDofs)(j);
 	  if (response.Size() > dof) {
-	    (*currentData)(cnt) = response(dof);
+	    (*currentData)(cnt) = response(dof) + timeSeriesTerm;
 	  } else 
-	    (*currentData)(cnt) = 0.0;
+	    (*currentData)(cnt) = 0.0 + timeSeriesTerm;
 	  
 	  cnt++;
 	}

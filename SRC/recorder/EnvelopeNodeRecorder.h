@@ -19,8 +19,8 @@
 ** ****************************************************************** */
                                                                         
 
-// $Revision: 1.10 $
-// $Date: 2009-04-14 21:14:22 $
+// $Revision: 1.11 $
+// $Date: 2010-02-04 01:03:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.h,v $
                                                                         
 
@@ -42,6 +42,7 @@
 #include <ID.h>
 #include <Vector.h>
 #include <Matrix.h>
+#include <TimeSeries.h>
 
 class Domain;
 class FE_Datastore;
@@ -57,7 +58,8 @@ class EnvelopeNodeRecorder: public Recorder
 			 Domain &theDomain,
 			 OPS_Stream &theOutputHandler,
 			 double deltaT = 0.0,
-			 bool echoTimeFlag = false); 
+			 bool echoTimeFlag = false,
+			 TimeSeries *theTimeSeries =0); 
     
     ~EnvelopeNodeRecorder();
 
@@ -96,6 +98,8 @@ class EnvelopeNodeRecorder: public Recorder
     bool echoTimeFlag;   // flag indicating whether time to be included in o/p
 
     int addColumnInfo;
+    TimeSeries *theTimeSeries;
+
 };
 
 #endif

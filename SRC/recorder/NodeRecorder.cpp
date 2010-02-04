@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.36 $
-// $Date: 2009-10-13 21:16:03 $
+// $Revision: 1.37 $
+// $Date: 2010-02-04 01:03:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -50,7 +50,7 @@ NodeRecorder::NodeRecorder()
  echoTimeFlag(true), dataFlag(0), 
  deltaT(0), nextTimeStampToRecord(0.0), 
  sensitivity(0),
- initializationDone(false), numValidNodes(0), addColumnInfo(0)
+ initializationDone(false), numValidNodes(0), addColumnInfo(0), theTimeSeries(0)
 {
 
 }
@@ -62,14 +62,15 @@ NodeRecorder::NodeRecorder(const ID &dofs,
 			   Domain &theDom,
 			   OPS_Stream &theOutputHandler,
 			   double dT,
-			   bool timeFlag)
+			   bool timeFlag,
+			   TimeSeries *theSeries)
 :Recorder(RECORDER_TAGS_NodeRecorder),
  theDofs(0), theNodalTags(0), theNodes(0), response(0), 
  theDomain(&theDom), theOutputHandler(&theOutputHandler),
  echoTimeFlag(timeFlag), dataFlag(0), 
  deltaT(dT), nextTimeStampToRecord(0.0), 
  sensitivity(psensitivity), 
- initializationDone(false), numValidNodes(0), addColumnInfo(0)
+ initializationDone(false), numValidNodes(0), addColumnInfo(0), theTimeSeries(theSeries)
 {
 
   //
@@ -187,6 +188,9 @@ NodeRecorder::~NodeRecorder()
 
   if (theNodes != 0)
     delete [] theNodes;
+
+  if (theTimeSeries != 0)
+    delete theTimeSeries;
 }
 
 int 
@@ -236,11 +240,16 @@ NodeRecorder::record(int commitTag, double timeStamp)
       response(0) = timeStamp;
     }
 
+    double timeSeriesTerm = 0.0;
+
+    if (theTimeSeries != 0) {
+      timeSeriesTerm += theTimeSeries->getFactor(timeStamp);
+    }
 
     //
     // now we go get the responses from the nodes & place them in disp vector
     //
-    
+
     for (int i=0; i<numValidNodes; i++) {
 
       int cnt = i*numDOF + timeOffset; 
@@ -253,10 +262,10 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	  for (int j=0; j<numDOF; j++) {
 	    int dof = (*theDofs)(j);
 	    if (theResponse.Size() > dof) {
-	      response(cnt) = theResponse(dof);
+	      response(cnt) = theResponse(dof)  + timeSeriesTerm;
 	    }
 	    else {
-	      response(cnt) = 0.0;
+	      response(cnt) = 0.0 + timeSeriesTerm;
 	    }
 	    cnt++;
 	    }
@@ -276,9 +285,9 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	for (int j=0; j<numDOF; j++) {
 	  int dof = (*theDofs)(j);
 	  if (theResponse.Size() > dof) {
-	    response(cnt) = theResponse(dof);
+	    response(cnt) = theResponse(dof) + timeSeriesTerm;    
 	  } else 
-	    response(cnt) = 0.0;
+	    response(cnt) = 0.0 + timeSeriesTerm;    
 	  
 	  cnt++;
 	}
@@ -287,9 +296,9 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	for (int j=0; j<numDOF; j++) {
 	  int dof = (*theDofs)(j);
 	  if (theResponse.Size() > dof) {
-	    response(cnt) = theResponse(dof);
+	    response(cnt) = theResponse(dof) + timeSeriesTerm;    
 	  } else 
-	    response(cnt) = 0.0;
+	    response(cnt) = 0.0 + timeSeriesTerm;    
 	  
 	  cnt++;
 	}
@@ -298,9 +307,9 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	for (int j=0; j<numDOF; j++) {
 	  int dof = (*theDofs)(j);
 	  if (theResponse.Size() > dof) {
-	    response(cnt) = theResponse(dof);
+	    response(cnt) = theResponse(dof);    
 	  } else 
-	    response(cnt) = 0.0;
+	    response(cnt) = 0.0;    
 	    
 	  cnt++;
 	}
@@ -309,9 +318,9 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	for (int j=0; j<numDOF; j++) {
 	  int dof = (*theDofs)(j);
 	  if (theResponse.Size() > dof) {
-	    response(cnt) = theResponse(dof);
+	    response(cnt) = theResponse(dof);    
 	  } else 
-	    response(cnt) = 0.0;
+	    response(cnt) = 0.0;    
 	  
 	  cnt++;
 	}

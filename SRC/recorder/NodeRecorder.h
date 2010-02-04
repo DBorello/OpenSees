@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2009-04-14 21:14:22 $
+// $Revision: 1.16 $
+// $Date: 2010-02-04 01:03:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.h,v $
                                                                         
 #ifndef NodeRecorder_h
@@ -39,6 +39,7 @@
 #include <Recorder.h>
 #include <ID.h>
 #include <Vector.h>
+#include <TimeSeries.h>
 
 class Domain;
 class FE_Datastore;
@@ -55,7 +56,8 @@ class NodeRecorder: public Recorder
 		 Domain &theDomain,
 		 OPS_Stream &theOutputHandler,
 		 double deltaT = 0.0,
-		 bool echoTimeFlag = true); 
+		 bool echoTimeFlag = true,
+		 TimeSeries *timeSeries = 0); 
     
     ~NodeRecorder();
 
@@ -93,6 +95,8 @@ class NodeRecorder: public Recorder
     int numValidNodes;
 
     int addColumnInfo;
+
+    TimeSeries *theTimeSeries;
 };
 
 #endif

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.54 $
-// $Date: 2009-12-22 20:38:47 $
+// $Revision: 1.55 $
+// $Date: 2010-02-04 01:03:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -73,6 +73,9 @@
 
 #include <packages.h>
 #include <elementAPI.h>
+
+
+extern TimeSeries *TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg);
 
 extern const char * getInterpPWD(Tcl_Interp *interp);  // commands.cpp
 
@@ -961,6 +964,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       ID theDofs(0, 6);
 
       int precision = 6;
+      TimeSeries *theTimeSeries = 0;
 
       while (flags == 0 && pos < argc) {
 
@@ -1026,6 +1030,12 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  pos ++;
 	  if (Tcl_GetDouble(interp, argv[pos], &dT) != TCL_OK)	
 	    return TCL_ERROR;		  
+	  pos++;
+	}
+
+	else if (strcmp(argv[pos],"-timeSeries") == 0) {
+	  pos ++;
+	  theTimeSeries = TclSeriesCommand(clientData, interp, argv[pos]);
 	  pos++;
 	}
 
@@ -1179,7 +1189,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 					  theDomain, 
 					  *theOutputStream, 
 					  dT, 
-					  echoTimeFlag);
+					  echoTimeFlag,
+					  theTimeSeries);
 	
       } else
 	
@@ -1188,7 +1199,9 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 						  responseID, 
 						  theDomain,
 						  *theOutputStream,
-						  dT, echoTimeFlag);
+						  dT, 
+						  echoTimeFlag,
+						  theTimeSeries);
 
       if (theNodes != 0)
 	delete theNodes;
