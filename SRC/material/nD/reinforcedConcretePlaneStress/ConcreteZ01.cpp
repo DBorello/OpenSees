@@ -62,8 +62,6 @@ ConcreteZ01::ConcreteZ01
 (int tag, double FPC, double EPSC0): 
 UniaxialMaterial(tag, MAT_TAG_ConcreteZ01), fpc(FPC), epsc0(EPSC0)
 {
-  opserr << "COncreteZ01: " << fpc << " " << epsc0 << endln;
-
   // Make all concrete parameters negative
   if (fpc > 0.0)
     fpc = -fpc;

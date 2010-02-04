@@ -73,7 +73,6 @@ SteelZ01::SteelZ01
 UniaxialMaterial(tag, MAT_TAG_SteelZ01),
 fy(FY), E0(E), fpc(FPC), rou(ROU), ac(AC), rc(RC)
 {
-  opserr << fy << " " << E0 << " " << fpc << " " << rou << " " << ac << " " << rc << endln;
   tt1 = 0.0; // temp add
   tt2 = 0.0; // temp add by zhong
   ttStrain = 0.0;
