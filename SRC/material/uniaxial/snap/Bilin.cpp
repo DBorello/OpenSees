@@ -21,12 +21,13 @@
 
 #include <math.h>
 
-#include <Bilin.h>
+#include "Bilin.h"
 #include <Vector.h>
 #include <Channel.h>
 
 #include <OPS_Globals.h>
 
+#include <elementAPI.h>
 #define OPS_Export 
 
 static int numBilinMaterials = 0;
@@ -36,7 +37,7 @@ OPS_NewBilinMaterial()
 {
   if (numBilinMaterials == 0) {
     numBilinMaterials++;
-    OPS_Error("Bilin unaxial material - Written by D. Lignos, Stanfurd 2009\n", 1);
+    opserr << "Bilin unaxial material - Written by T. Karavasilis, Oxford and D. Lignos, Stanford 2009\n";;
   }
 
   // Pointer to a uniaxial material that will be returned
@@ -46,13 +47,13 @@ OPS_NewBilinMaterial()
   double dData[23];
   int numData = 1;
 
-  if (OPS_GetIntInput(&numData, iData) != 0) {
+  if (OPS_GetInt(&numData, iData) != 0) {
     opserr << "WARNING invalid uniaxialMaterial BilinMaterial tag" << endln;
     return 0;
   }
 
   numData = 23;
-  if (OPS_GetDoubleInput(&numData, dData) != 0) {
+  if (OPS_GetDouble(&numData, dData) != 0) {
     opserr << "Invalid Args want: uniaxialMaterial Bilin tag? Ke? As? AsNeg? My_pos? My_neg? LamdaS? ";
     opserr << "LamdaK?  LamdaA? LamdaD? Cs? Ck? Ca? Cd? Thetap_pos? Thetap_neg? Thetapc_pos? Thetapc_neg?K? ";
     opserr << "KNeg? Thetau_pos? Thetau_neg? PDPlus?  PDNeg\n";
