@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.65 $
-// $Date: 2009-11-23 23:28:40 $
+// $Revision: 1.66 $
+// $Date: 2010-02-04 01:01:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -82,6 +82,11 @@
 
 
 extern void *OPS_NewSAWSMaterial(void);
+extern void *OPS_NewConcreteZ01Material(void);
+extern void *OPS_NewConcreteL01Material(void);
+extern void *OPS_NewSteelZ01Material(void);
+extern void *OPS_NewTendonL01Material(void);
+extern void *OPS_NewConfinedConcrete01Material(void);
 
 #ifdef _LIMITSTATEMATERIAL
 extern UniaxialMaterial *
@@ -162,15 +167,15 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 					TCL_Char **argv, TclModelBuilder *theTclBuilder, Domain *theDomain)
 {
   
-  OPS_ResetInput(clientData, interp, 2, argc, argv, theDomain, theTclBuilder);	  
-
   // Make sure there is a minimum number of arguments
     if (argc < 3) {
 	opserr << "WARNING insufficient number of uniaxial material arguments\n";
 	opserr << "Want: uniaxialMaterial type? tag? <specific material args>" << endln;
 	return TCL_ERROR;
     }
-    
+
+    OPS_ResetInput(clientData, interp, 2, argc, argv, theDomain, theTclBuilder);	  
+
     // Pointer to a uniaxial material that will be added to the model builder
     UniaxialMaterial *theMaterial = 0;
 
@@ -767,13 +772,12 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	  }
 	  if (Tcl_GetDouble(interp, argv[12], &a4) != TCL_OK) {
 	    opserr << "WARNING invalid a4\n";
-	    printCommand(argc, argv);
-	    return 0;	
+	    printCommand(argc, argv);	    return 0;	
 	  }
 
 	  if (argc > 13) {
 	    if (Tcl_GetDouble(interp, argv[13], &sigini) != TCL_OK) {
-	      opserr << "WARNING invalid a1\n";
+	      opserr << "WARNING invalid initial stress\n";
 	      printCommand(argc, argv);
 	      return 0;	
 	    }
@@ -1708,6 +1712,47 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 
     else if ((strcmp(argv[1],"SAWSMaterial") == 0) || (strcmp(argv[1],"SAWS") == 0)) {
       void *theMat = OPS_NewSAWSMaterial();
+      if (theMat != 0) 
+	theMaterial = (UniaxialMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+    }
+
+    else if ((strcmp(argv[1],"ConcreteZ01Material") == 0) || (strcmp(argv[1],"ConcreteZ01") == 0)) {
+      void *theMat = OPS_NewConcreteZ01Material();
+      if (theMat != 0) 
+	theMaterial = (UniaxialMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+    }
+
+    else if ((strcmp(argv[1],"ConcreteL01Material") == 0) || (strcmp(argv[1],"ConcreteL01") == 0)) {
+      void *theMat = OPS_NewConcreteL01Material();
+      if (theMat != 0) 
+	theMaterial = (UniaxialMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+    }
+
+    else if ((strcmp(argv[1],"SteelZ01Material") == 0) || (strcmp(argv[1],"SteelZ01") == 0)) {
+      void *theMat = OPS_NewSteelZ01Material();
+      if (theMat != 0) 
+	theMaterial = (UniaxialMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+    }
+
+    else if ((strcmp(argv[1],"TendonL01Material") == 0) || (strcmp(argv[1],"TendonL01") == 0)) {
+      void *theMat = OPS_NewTendonL01Material();
+      if (theMat != 0) 
+	theMaterial = (UniaxialMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+    }
+
+
+    else if ((strcmp(argv[1],"ConfinedConcrete01") == 0) || (strcmp(argv[1],"ConfinedConcrete") == 0)) {
+      void *theMat = OPS_NewConfinedConcrete01Material();
       if (theMat != 0) 
 	theMaterial = (UniaxialMaterial *)theMat;
       else 
