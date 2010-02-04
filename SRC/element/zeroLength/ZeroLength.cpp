@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2010-01-07 20:15:28 $
+// $Revision: 1.27 $
+// $Date: 2010-02-04 01:17:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
 
 // Written: GLF
@@ -499,32 +499,35 @@ ZeroLength::getInitialStiff(void)
 const Matrix &
 ZeroLength::getDamp(void)
 {
-    double eta;
+  if (useRayleighDamping == 1)
+    return this->Element::getDamp();
 
-    // damp is a reference to the matrix holding the damping matrix
-    Matrix& damp = *theMatrix;
- 
-    // zero stiffness matrix
-    damp.Zero();
+  double eta;
+  
+  // damp is a reference to the matrix holding the damping matrix
+  Matrix& damp = *theMatrix;
+  
+  // zero stiffness matrix
+  damp.Zero();
+  
+  // loop over 1d materials
+  Matrix& tran = *t1d;;
+  for (int mat=0; mat<numMaterials1d; mat++) {
     
-    // loop over 1d materials
-    Matrix& tran = *t1d;;
-    for (int mat=0; mat<numMaterials1d; mat++) {
-	
-	// get tangent for material
-	eta = theMaterial1d[mat]->getDampTangent();
-	
-        // compute contribution of material to tangent matrix
-        for (int i=0; i<numDOF; i++)
-	    for(int j=0; j<i+1; j++)
-		damp(i,j) +=  tran(mat,i) * eta * tran(mat,j);
-
-    } // end loop over 1d materials 
-
-    // complete symmetric stiffness matrix
+    // get tangent for material
+    eta = theMaterial1d[mat]->getDampTangent();
+    
+    // compute contribution of material to tangent matrix
     for (int i=0; i<numDOF; i++)
-	for(int j=0; j<i; j++)
-	    damp(j,i) = damp(i,j);
+      for(int j=0; j<i+1; j++)
+	damp(i,j) +=  tran(mat,i) * eta * tran(mat,j);
+    
+  } // end loop over 1d materials 
+  
+    // complete symmetric stiffness matrix
+  for (int i=0; i<numDOF; i++)
+    for(int j=0; j<i; j++)
+      damp(j,i) = damp(i,j);
 
     return damp;
 }
@@ -592,7 +595,7 @@ ZeroLength::getResistingForceIncInertia()
     
     this->getResistingForce();
 
-    if (useRayleighDamping == 0)
+    if (useRayleighDamping == 1)
       if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
 	*theVector += this->getRayleighDampingForces();
 

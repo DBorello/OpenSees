@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2008-11-06 21:01:14 $
+// $Revision: 1.14 $
+// $Date: 2010-02-04 01:17:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.h,v $
                                                                         
                                                                         
@@ -61,25 +61,25 @@ class ZeroLength : public Element
   public:
     
     // Constructor for a single 1d material model
-    ZeroLength(int tag, 			      
-	       int dimension,
-	       int Nd1, int Nd2, 
-	       const Vector& x,
-	       const Vector& yprime,
-	       UniaxialMaterial& theMaterial,
-	       int direction,
-	       int doRayleighDamping = 1);
-
-    // Constructor for a multiple 1d material models
-    ZeroLength(int tag, 			      
-	       int dimension,
-	       int Nd1, int Nd2, 
-	       const Vector& x,
-	       const Vector& yprime,
-	       int n1dMat,
-	       UniaxialMaterial** theMaterial,  
-	       const ID& direction,
-	       int doRaylieghDamping = 1);
+  ZeroLength(int tag, 			      
+	     int dimension,
+	     int Nd1, int Nd2, 
+	     const Vector& x,
+	     const Vector& yprime,
+	     UniaxialMaterial& theMaterial,
+	     int direction,
+	     int doRayleighDamping = 0);
+  
+  // Constructor for a multiple 1d material models
+  ZeroLength(int tag, 			      
+	     int dimension,
+	     int Nd1, int Nd2, 
+	     const Vector& x,
+	     const Vector& yprime,
+	     int n1dMat,
+	     UniaxialMaterial** theMaterial,  
+	     const ID& direction,
+	     int doRaylieghDamping = 0);
 
     ZeroLength();    
     ~ZeroLength();

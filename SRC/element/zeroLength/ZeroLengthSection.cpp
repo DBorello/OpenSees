@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2010-01-07 20:15:29 $
+// $Revision: 1.16 $
+// $Date: 2010-02-04 01:17:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthSection.cpp,v $
                                                                         
 // Written: MHS
@@ -255,6 +255,18 @@ ZeroLengthSection::getTangentStiff(void)
 }
 
 const Matrix &
+ZeroLengthSection::getDamp()
+{	
+  if (useRayleighDamping == 1)
+    return this->Element::getDamp();
+
+  K->Zero();
+  return *K;
+}
+
+
+
+const Matrix &
 ZeroLengthSection::getInitialStiff(void)
 {
   // Get section tangent stiffness, the element basic stiffness
@@ -311,7 +323,7 @@ ZeroLengthSection::getResistingForceIncInertia()
 {	
     this->getResistingForce();
 
-    if (useRayleighDamping == 0)
+    if (useRayleighDamping == 1)
       if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
 	*P += this->getRayleighDampingForces();
 

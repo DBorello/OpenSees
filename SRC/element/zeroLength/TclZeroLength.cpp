@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2008-11-06 21:01:13 $
+// $Revision: 1.9 $
+// $Date: 2010-02-04 01:17:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/TclZeroLength.cpp,v $
 // Written: fmk
 // Created: 01/00
@@ -225,7 +225,7 @@ TclModelBuilder_addZeroLength(ClientData clientData, Tcl_Interp *interp,
     Vector y(3); y(0) = 0.0; y(1) = 1.0; y(2) = 0.0;
 
     // finally check the command line to see if user specified orientation
-    int doRayleighDamping = 1;
+    int doRayleighDamping = 0;
 
     while (argi < argc) {
 	if (strcmp(argv[argi],"-orient") == 0) {
@@ -272,7 +272,11 @@ TclModelBuilder_addZeroLength(ClientData clientData, Tcl_Interp *interp,
 	    
 	    argi++;
 	} else 	if (strcmp(argv[argi],"-doRayleigh") == 0)  {
-	  doRayleighDamping = 0;
+	  doRayleighDamping = 1;
+	  if (argi < argc) 
+	    if ((Tcl_GetInt(interp, argv[argi+1], &doRayleighDamping) == TCL_OK))
+	      argi++;
+	    
 	  argi++;
 	}  else
 	  argi++;

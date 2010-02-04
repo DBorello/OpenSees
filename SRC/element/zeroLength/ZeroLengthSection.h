@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2008-11-06 21:01:14 $
+// $Revision: 1.10 $
+// $Date: 2010-02-04 01:17:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthSection.h,v $
                                                                         
 // Written: MHS
@@ -54,7 +54,7 @@ class ZeroLengthSection : public Element
 		      const Vector& x,
 		      const Vector& yprime,
 		      SectionForceDeformation& theSection,
-		      int doRayleighDamping = 1);
+		      int doRayleighDamping = 0);
 
     ZeroLengthSection();    
     ~ZeroLengthSection();
@@ -76,6 +76,7 @@ class ZeroLengthSection : public Element
 
     // public methods to obtain stiffness, mass, damping and residual information    
     const Matrix &getTangentStiff(void);
+    const Matrix &getDamp(void);
     const Matrix &getInitialStiff(void);
 
     void zeroLoad(void);	

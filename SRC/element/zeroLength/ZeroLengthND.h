@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2008-07-21 22:52:39 $
+// $Revision: 1.6 $
+// $Date: 2010-02-04 01:17:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthND.h,v $
                                                                         
 // Written: MHS
@@ -55,22 +55,22 @@ class ZeroLengthND : public Element
     
     // Constructor for a single Nd material model of order 2 or 3
     ZeroLengthND(int tag, 			      
-	       int dimension,
-	       int Nd1, int Nd2, 
-	       const Vector& x,
-	       const Vector& yprime,
-		   NDMaterial& theNDMaterial);
-
+		 int dimension,
+		 int Nd1, int Nd2, 
+		 const Vector& x,
+		 const Vector& yprime,
+		 NDMaterial& theNDMaterial);
+    
     // Constructor for an Nd material model of order 2 with an 
-	// uncoupled 1d material model acting out of plane
+    // uncoupled 1d material model acting out of plane
     ZeroLengthND(int tag, 			      
-	       int dimension,
-	       int Nd1, int Nd2, 
-	       const Vector& x,
-	       const Vector& yprime,
-		   NDMaterial& theNDMaterial,
-		   UniaxialMaterial &the1DMaterial);
-
+		 int dimension,
+		 int Nd1, int Nd2, 
+		 const Vector& x,
+		 const Vector& yprime,
+		 NDMaterial& theNDMaterial,
+		 UniaxialMaterial &the1DMaterial);
+    
     ZeroLengthND();    
     ~ZeroLengthND();
 
@@ -78,10 +78,10 @@ class ZeroLengthND : public Element
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
     Node **getNodePtrs(void);
-
+    
     int getNumDOF(void);	
     void setDomain(Domain *theDomain);
-
+    
     // public methods to set the state of the element    
     int commitState(void);
     int revertToLastCommit(void);        
