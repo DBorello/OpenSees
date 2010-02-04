@@ -59,6 +59,7 @@ include ../../../Makefile.def
 	BackboneMaterial.o \
 	WrapperUniaxialMaterial.o \
 	SAWSMaterial.o \
+	ConfinedConcrete01.o \
         TclModelBuilderUniaxialMaterialCommand.o
 
 all:         $(OBJS)
