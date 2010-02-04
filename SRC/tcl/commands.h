@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2009-04-28 17:32:48 $
+// $Revision: 1.29 $
+// $Date: 2010-02-04 00:40:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
                                                                         
@@ -90,6 +90,10 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char *
 
 int
 specifyCTest(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int
+getCTestNorms(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int
+getCTestIter(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
 specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
