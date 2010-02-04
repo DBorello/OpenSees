@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2009-11-03 23:10:28 $
+// $Revision: 1.12 $
+// $Date: 2010-02-04 01:12:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTrussSection.cpp,v $
                                                                         
 // Written: MHS 
@@ -52,6 +52,79 @@ Vector CorotTrussSection::V2(2);
 Vector CorotTrussSection::V4(4);
 Vector CorotTrussSection::V6(6);
 Vector CorotTrussSection::V12(12);
+
+
+#include <elementAPI.h>
+#define OPS_Export 
+
+OPS_Export void *
+OPS_NewCorotTrussSectionElement()
+{
+  Element *theElement = 0;
+
+  int numRemainingArgs = OPS_GetNumRemainingInputArgs();
+
+  if (numRemainingArgs < 4) {
+    opserr << "Invalid Args want: element CorotTrussSection $tag $iNode $jNode $sectTag <-rho $rho> \n";
+    return 0;	
+  }
+
+  int    iData[4];
+  double rho = 0.0;
+  int ndm = OPS_GetNDM();
+
+  if (numRemainingArgs != 4 || numRemainingArgs != 6)
+    return 0; 
+
+  int numData = 4;
+  if (OPS_GetInt(&numData, iData) != 0) {
+    opserr << "WARNING invalid integer (tag, iNode, jNode, sectTag) in element CorotTrussSection " << endln;
+    return 0;
+  }
+
+  SectionForceDeformation *theSection = OPS_GetSectionForceDeformation(iData[3]);
+    
+  if (theSection == 0) {
+    opserr << "WARNING: Invalid section not found element CorotTrussSection " << iData[0] << " $iNode $jNode " << 
+      iData[3] << " <-rho $rho> \n";
+    return 0;
+  }
+  
+  numRemainingArgs -= 4;
+  while (numRemainingArgs > 1) {
+    char argvS[10];
+    if (OPS_GetString(argvS, 10) != 0) {
+      opserr << "WARNING: Invalid optional string element CorotTrussSection " << iData[0] << 
+	" $iNode $jNode $sectTag <-rho $rho>\n";
+      return 0;
+    } 
+  
+    if (strcmp(argvS,"-rho") == 0) {
+      numData = 1;
+      if (OPS_GetDouble(&numData, &rho) != 0) {
+	opserr << "WARNING Invalid rho in element CorotTrussSection " << iData[0] << 
+	  " $iNode $jNode $secTag <-rho $rho>\n";
+	return 0;
+      }
+    } else {
+      opserr << "WARNING: Invalid option " << argvS << "  in: element CorotTrussSection " << iData[0] << 
+	" $iNode $jNode $secTag <-rho $rho>\n";
+      return 0;
+    }      
+    numRemainingArgs -= 2;
+  }
+
+  //now create the ReinforcedConcretePlaneStress
+  theElement = new CorotTrussSection(iData[0], ndm, iData[1], iData[2], *theSection, rho);
+
+  if (theElement == 0) {
+    opserr << "WARNING: out of memory: element CorotTrussSection " << iData[0] << 
+      " $iNode $jNode $secTag <-rho $rho>\n";
+  }
+
+  return theElement;
+}
+
 
 // constructor:
 //  responsible for allocating the necessary space needed by each object

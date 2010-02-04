@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2009-11-03 23:10:08 $
+// $Revision: 1.16 $
+// $Date: 2010-02-04 01:12:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.cpp,v $
                                                                         
 // Written: MHS 
@@ -52,6 +52,97 @@ Vector CorotTruss::V2(2);
 Vector CorotTruss::V4(4);
 Vector CorotTruss::V6(6);
 Vector CorotTruss::V12(12);
+
+
+#include <elementAPI.h>
+#define OPS_Export 
+
+OPS_Export void *
+OPS_NewCorotTrussElement()
+{
+  Element *theElement = 0;
+
+  int numRemainingArgs = OPS_GetNumRemainingInputArgs();
+
+  if (numRemainingArgs < 4) {
+    opserr << "Invalid Args want: element CorotTruss $tag $iNode $jNode $sectTag <-rho $rho>";
+    opserr << " or: element CorotTruss $tag $iNode $jNode $A $matTag <-rho $rho>\n";
+    return 0;	
+  }
+
+  if (numRemainingArgs == 4 || numRemainingArgs == 6)
+    return 0; // it's a CorotTrussSection
+
+  int    iData[3];
+  double A = 0.0;
+  double rho = 0.0;
+  int matTag = 0;
+  int ndm = OPS_GetNDM();
+
+
+  int numData = 3;
+  if (OPS_GetInt(&numData, iData) != 0) {
+    opserr << "WARNING invalid integer (tag, iNode, jNode) in element CorotTruss " << endln;
+    return 0;
+  }
+
+  numData = 1;
+  if (OPS_GetDouble(&numData, &A) != 0) {
+    opserr << "WARNING: Invalid A: element CorotTruss " << iData[0] << 
+      " $iNode $jNode $A $matTag <-rho $rho> <-rayleig $flagh>\n";
+    return 0;	
+  }
+
+  numData = 1;
+  if (OPS_GetInt(&numData, &matTag) != 0) {
+    opserr << "WARNING: Invalid matTag: element CorotTruss " << iData[0] << 
+      " $iNode $jNode $A $matTag <-rho $rho> <-rayleig $flagh>\n";
+    return 0;
+  }
+
+  UniaxialMaterial *theUniaxialMaterial = OPS_GetUniaxialMaterial(matTag);
+    
+  if (theUniaxialMaterial == 0) {
+    opserr << "WARNING: Invalid material not found element CorotTruss " << iData[0] << " $iNode $jNode $A " << 
+      matTag << " <-rho $rho> <-rayleigh $flagh>\n";
+    return 0;
+  }
+  
+  numRemainingArgs -= 5;
+  while (numRemainingArgs > 1) {
+    char argvS[10];
+    if (OPS_GetString(argvS, 10) != 0) {
+      opserr << "WARNING: Invalid optional string element CorotTruss " << iData[0] << 
+	" $iNode $jNode $A $matTag <-rho $rho> <-rayleigh $flagh>\n";
+      return 0;
+    } 
+  
+    if (strcmp(argvS,"-rho") == 0) {
+      numData = 1;
+      if (OPS_GetDouble(&numData, &rho) != 0) {
+	opserr << "WARNING Invalid rho in element CorotTruss " << iData[0] << 
+	  " $iNode $jNode $A $matTag <-rho $rho> <-rayleigh $flagh>\n";
+	return 0;
+      }
+    } else {
+      opserr << "WARNING: Invalid option " << argvS << "  in: element CorotTruss " << iData[0] << 
+	" $iNode $jNode $A $matTag <-rho $rho> <-rayleigh $flagh>\n";
+      return 0;
+    }      
+    numRemainingArgs -= 2;
+  }
+
+  //now create the ReinforcedConcretePlaneStress
+  theElement = new CorotTruss(iData[0], ndm, iData[1], iData[2], *theUniaxialMaterial, A, rho);
+
+  if (theElement == 0) {
+    opserr << "WARNING: out of memory: element CorotTruss " << iData[0] << 
+      " $iNode $jNode $A $matTag <-rho $rho> \n";
+  }
+
+  return theElement;
+}
+
 
 // constructor:
 //  responsible for allocating the necessary space needed by each object
