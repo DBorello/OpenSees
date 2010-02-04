@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.47 $
-// $Date: 2009-05-11 21:36:11 $
+// $Revision: 1.48 $
+// $Date: 2010-02-04 00:27:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -78,6 +78,9 @@
 #include <ImposedMotionSP.h>
 #include <ImposedMotionSP1.h>
 #include <MultiSupportPattern.h>
+
+
+#include <TimeSeries.h>
 
 #include <Block2D.h>
 #include <Block3D.h>
@@ -174,8 +177,8 @@ TclCommand_addDamageModel(ClientData clientData, Tcl_Interp *interp,
 			  int argc, TCL_Char **argv);	
 
 int
-TclCommand_addPattern(ClientData clientData, Tcl_Interp *interp, int argc,
-		      TCL_Char **argv);
+TclCommand_addTimeSeries(ClientData clientData, Tcl_Interp *interp, int argc,
+			 TCL_Char **argv);
 
 int
 TclCommand_addPattern(ClientData clientData, Tcl_Interp *interp, int argc,   
@@ -467,6 +470,9 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   Tcl_CreateCommand(interp, "pattern", TclCommand_addPattern,
 		    (ClientData)NULL, NULL);
 
+  Tcl_CreateCommand(interp, "timeSeries", TclCommand_addTimeSeries,
+		    (ClientData)NULL, NULL);
+
   Tcl_CreateCommand(interp, "load", TclCommand_addNodalLoad,
 		    (ClientData)NULL, NULL);
 
@@ -612,8 +618,11 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   eleArgStart = 0;
 }
 
+extern void clearAllTimeSeries(void);
+
 TclModelBuilder::~TclModelBuilder()
 {
+  clearAllTimeSeries();
   theUniaxialMaterials->clearAll();
   theNDMaterials->clearAll();
   theSections->clearAll(); 
@@ -671,6 +680,7 @@ TclModelBuilder::~TclModelBuilder()
   Tcl_DeleteCommand(theInterp, "nDMaterial");
   Tcl_DeleteCommand(theInterp, "section");
   Tcl_DeleteCommand(theInterp, "pattern");
+  Tcl_DeleteCommand(theInterp, "timeSeries");
   Tcl_DeleteCommand(theInterp, "load");
   Tcl_DeleteCommand(theInterp, "mass");
   Tcl_DeleteCommand(theInterp, "fix");
@@ -1497,9 +1507,30 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
 int
 TclCommand_addPattern(ClientData clientData, Tcl_Interp *interp, 
 			   int argc, TCL_Char **argv)
-			  
 {
   return TclPatternCommand(clientData, interp, argc, argv, theTclDomain);
+}
+
+
+extern TimeSeries *
+TclTimeSeriesCommand(ClientData clientData, Tcl_Interp *interp, 
+		     int argc, TCL_Char **argv, Domain *theDomain);
+
+extern bool addTimeSeries(TimeSeries *newComponent);
+
+int
+TclCommand_addTimeSeries(ClientData clientData, Tcl_Interp *interp, 
+			 int argc, TCL_Char **argv)
+{
+  TimeSeries *theSeries = TclTimeSeriesCommand(clientData, interp, argc-1, &argv[1], 0);
+
+  if (theSeries != 0) {
+    if (addTimeSeries(theSeries) == true)
+      return TCL_OK;
+    else
+      return TCL_ERROR;
+  }
+  return TCL_ERROR;
 }
 
 
