@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-02-29 19:43:53 $
+// $Revision: 1.2 $
+// $Date: 2010-02-04 20:12:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/NewNewmarkSensitivityIntegrator.h,v $
 
 #ifndef NewNewmarkSensitivityIntegrator_h
@@ -115,6 +115,8 @@ class NewNewmarkSensitivityIntegrator : public SensitivityIntegrator , public Ne
 	double	a7;
 	double	a8;
 	double dt;
+	double alphaM;
+	double betaK;
 
 };
 

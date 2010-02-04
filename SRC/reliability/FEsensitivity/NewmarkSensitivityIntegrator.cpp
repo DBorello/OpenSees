@@ -23,8 +23,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2008-02-29 19:47:19 $
+// $Revision: 1.6 $
+// $Date: 2010-02-04 20:12:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/NewmarkSensitivityIntegrator.cpp,v $
 
 
@@ -68,9 +68,10 @@ NewmarkSensitivityIntegrator::NewmarkSensitivityIntegrator(int passedAssemblyFla
 		 double alpham, double betak, 
 		 double betaki, double betakc,
 		 bool dispFlag)
-:Newmark(theGamma, theBeta, alpham, betak, betaki, betakc, dispFlag),
+:Newmark(theGamma, theBeta, dispFlag),
 SensitivityIntegrator(),
-parameterID(0),sensitivityFlag(0),gradNumber(0)
+parameterID(0),sensitivityFlag(0),gradNumber(0),
+alphaM(alpham), betaK(betak)
 {
 	massMatrixMultiplicator = 0;
 	dampingMatrixMultiplicator = 0;

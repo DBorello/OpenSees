@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-02-29 19:47:19 $
+// $Revision: 1.3 $
+// $Date: 2010-02-04 20:12:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/NewmarkSensitivityIntegrator.h,v $
 
 
@@ -80,6 +80,8 @@ class NewmarkSensitivityIntegrator : public SensitivityIntegrator , public Newma
 	Vector *dampingMatrixMultiplicator;
 	int assemblyFlag;
 	Vector independentRHS;
+	double alphaM;
+	double betaK;
 
 };
 

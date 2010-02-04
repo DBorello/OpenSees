@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.21 $
-// $Date: 2010-02-04 18:32:41 $
+// $Revision: 1.22 $
+// $Date: 2010-02-04 20:12:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclSeriesCommand.cpp,v $
 
 // Written: fmk 
@@ -522,7 +522,7 @@ TclTimeSeriesCommand(ClientData clientData,
     }	
     
     // Parsing was successful, create the random process series object
-    theSeries = new NewDiscretizedRandomProcessSeries(0,numModFuncs,theModFUNCS,mean,maxStdv);       	
+    theSeries = new NewDiscretizedRandomProcessSeries(numModFuncs,theModFUNCS,mean,maxStdv);       	
   }
 
   else if (strcmp(argv[0],"SimulatedRandomProcess") == 0) {
