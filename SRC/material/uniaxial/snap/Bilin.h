@@ -1,4 +1,4 @@
-* ****************************************************************** **
+/* ****************************************************************** **
 **    OpenSees - Open System for Earthquake Engineering Simulation    **
 **          Pacific Earthquake Engineering Research Center            **
 **                                                                    **
@@ -53,6 +53,7 @@ class Bilin : public UniaxialMaterial
   int revertToLastCommit(void);    
   int revertToStart(void);        
   UniaxialMaterial *getCopy(void);
+
   int sendSelf(int commitTag, Channel &theChannel);  
   int recvSelf(int commitTag, Channel &theChannel, 
 	       FEM_ObjectBroker &theBroker);    
