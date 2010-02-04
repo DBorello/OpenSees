@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-10-14 18:27:55 $
+// $Revision: 1.7 $
+// $Date: 2010-02-04 00:36:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PeerMotion.cpp,v $                                                                        
 
 // Written: fmk 
@@ -56,6 +56,71 @@ int
 httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr);
 
 
+
+#include <elementAPI.h>
+#define OPS_Export 
+
+OPS_Export void *
+OPS_NewPeerMotion(void)
+{
+  // Pointer to a uniaxial material that will be returned
+  TimeSeries *theSeries = 0;
+  
+  int numRemainingArgs = OPS_GetNumRemainingInputArgs();
+  
+  if (numRemainingArgs < 4) {
+    opserr << "WARNING: invalid num args PeerMotion <tag?> $eqMotion $station $type $factor\n";
+    return 0;
+  }
+
+  int tag = 0;     // default tag = 0
+  double factor = 0.0; 
+  int numData = 0;
+  char *eqMotion = 0;
+  char *station = 0;
+  char *type = 0;
+
+  // get tag if provided
+  if (numRemainingArgs == 5 || numRemainingArgs == 7 || numRemainingArgs == 9) {
+    numData = 1;
+    if (OPS_GetIntInput(&numData, &tag) != 0) {
+      opserr << "WARNING invalid series tag in Constant tag?" << endln;
+      return 0;
+    }
+    numRemainingArgs -= 1;
+  }
+  
+  if (OPS_GetStringCopy(&eqMotion) != 0) {
+    opserr << "WARNING invalid eqMotion for PeerMotion with tag: " << tag << endln;
+    return 0;
+  }    
+
+  if (OPS_GetStringCopy(&station) != 0) {
+    opserr << "WARNING invalid station for PeerMotion with tag: " << tag << endln;
+    return 0;
+  }    
+
+  if (OPS_GetStringCopy(&type) != 0) {
+    opserr << "WARNING invalid type  for PeerMotion with tag: " << tag << endln;
+    return 0;
+  }    
+
+  if (OPS_GetDouble(&numData, &factor) != 0) {
+    opserr << "WARNING invalid shift in Trig Series with tag?" << tag << endln;
+    return 0;
+  }
+  
+  theSeries = new PeerMotion(tag, eqMotion, station, type, factor);
+
+  if (theSeries == 0) {
+    opserr << "WARNING ran out of memory creating PeerMotion with tag: " << tag << "\n";
+    return 0;
+  }
+
+  return theSeries;
+}
+
+
 PeerMotion::PeerMotion()	
   :TimeSeries(TSERIES_TAG_PeerMotion),
    thePath(0), dT(0.0), 
@@ -65,11 +130,12 @@ PeerMotion::PeerMotion()
 }
 
 		   
-PeerMotion::PeerMotion(const char *earthquake,
+PeerMotion::PeerMotion(int tag,
+		       const char *earthquake,
 		       const char *station,
 		       const char *type,
 		       double theFactor)
-  :TimeSeries(TSERIES_TAG_PeerMotion),
+  :TimeSeries(tag, TSERIES_TAG_PeerMotion),
    thePath(0), dT(0.0), 
    cFactor(theFactor), dbTag1(0), dbTag2(0), lastSendCommitTag(-1), lastChannel(0)
 {
@@ -144,6 +210,24 @@ PeerMotion::PeerMotion(const char *earthquake,
   // create copies of the vectors
 }
 
+
+PeerMotion::PeerMotion(int tag,
+		       Vector *theDataPoints,
+		       double theTimeStep, 
+		       double theFactor)
+  :TimeSeries(tag, TSERIES_TAG_PeerMotion),
+   thePath(0), dT(theTimeStep), 
+   cFactor(theFactor), dbTag1(0), dbTag2(0), lastSendCommitTag(-1), lastChannel(0)
+{
+  if (theDataPoints != 0)
+    thePath = new Vector(*theDataPoints);
+}
+
+TimeSeries *
+PeerMotion::getCopy(void) 
+{
+  return new PeerMotion(this->getTag(), thePath, dT, cFactor);
+}
 
 
 PeerMotion::~PeerMotion()

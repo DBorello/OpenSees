@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-10-14 18:27:55 $
+// $Revision: 1.3 $
+// $Date: 2010-02-04 00:36:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PeerNGAMotion.cpp,v $
 
 // Written: fmk 
@@ -56,6 +56,62 @@ int
 httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr);
 
 
+#include <elementAPI.h>
+#define OPS_Export 
+
+OPS_Export void *
+OPS_NewPeerNGAMotion(void)
+{
+  // Pointer to a uniaxial material that will be returned
+  TimeSeries *theSeries = 0;
+  
+  int numRemainingArgs = OPS_GetNumRemainingInputArgs();
+  
+  if (numRemainingArgs < 2) {
+    opserr << "WARNING: invalid num args PeerNGAMotion <tag?> $eqMotion $factor\n";
+    return 0;
+  }
+
+  int tag = 0;     // default tag = 0
+  double factor = 0.0; 
+  int numData = 0;
+  char *type = "-ACCEL";
+
+  // get tag if provided
+  if (numRemainingArgs == 3 || numRemainingArgs == 5 || numRemainingArgs == 7) {
+    numData = 1;
+    if (OPS_GetIntInput(&numData, &tag) != 0) {
+      opserr << "WARNING invalid series tag in Constant tag?" << endln;
+      return 0;
+    }
+    numRemainingArgs -= 1;
+  }
+
+  char eqMotion[100];
+  numData = 100;
+  if (OPS_GetString(eqMotion, numData) != 0) {
+    opserr << "WARNING invalid eqMotion for PeerNGAMotion with tag: " << tag << endln;
+    return 0;
+  }    
+
+  numData = 1;
+  if (OPS_GetDouble(&numData, &factor) != 0) {
+    opserr << "WARNING invalid shift in peerNGAMotion with tag?" << tag << endln;
+    return 0;
+  }
+  
+  theSeries = new PeerNGAMotion(tag, eqMotion, type, factor);
+
+  if (theSeries == 0) {
+    opserr << "WARNING ran out of memory creating PeerNGAMotion with tag: " << tag << "\n";
+    return 0;
+  }
+
+  return theSeries;
+}
+
+
+
 PeerNGAMotion::PeerNGAMotion()	
   :TimeSeries(TSERIES_TAG_PeerNGAMotion),
    thePath(0), dT(0.0), 
@@ -65,11 +121,12 @@ PeerNGAMotion::PeerNGAMotion()
 }
 
 		   
-PeerNGAMotion::PeerNGAMotion(const char *earthquake,
+PeerNGAMotion::PeerNGAMotion(int tag,
+			     const char *earthquake,
 			     const char *station,
 			     const char *type,
 			     double theFactor)
-  :TimeSeries(TSERIES_TAG_PeerNGAMotion),
+  :TimeSeries(tag, TSERIES_TAG_PeerNGAMotion),
    thePath(0), dT(0.0), 
    cFactor(theFactor), dbTag1(0), dbTag2(0), lastSendCommitTag(-1), lastChannel(0)
 {
@@ -148,10 +205,11 @@ PeerNGAMotion::PeerNGAMotion(const char *earthquake,
 
 
 
-PeerNGAMotion::PeerNGAMotion(const char *earthquakeStation,
+PeerNGAMotion::PeerNGAMotion(int tag,
+			     const char *earthquakeStation,
 			     const char *type,
 			     double theFactor)
-  :TimeSeries(TSERIES_TAG_PeerNGAMotion),
+  :TimeSeries(tag, TSERIES_TAG_PeerNGAMotion),
    thePath(0), dT(0.0), 
    cFactor(theFactor), dbTag1(0), dbTag2(0), lastSendCommitTag(-1), lastChannel(0)
 {
@@ -160,7 +218,6 @@ PeerNGAMotion::PeerNGAMotion(const char *earthquakeStation,
   int nPts,i;
   double value;
   char tmp1[100];
-
 
   if ((strcmp(type,"ACCEL") == 0) || (strcmp(type,"-accel") == 0) || (strcmp(type,"-ACCEL") == 0)
       || (strcmp(type,"accel") == 0) || (strcmp(type,"ATH") == 0) || (strcmp(type,"-ATH") == 0)) {
@@ -204,11 +261,35 @@ PeerNGAMotion::PeerNGAMotion(const char *earthquakeStation,
     (*thePath)(i) = value;
   }
 
+  if (thePath->Size() == 0) {
+    delete thePath;
+    thePath = 0;
+    opserr << "PeerNGAMotion - nodata for record from url: " << peerPage << endln;
+  }
+    
   free(eqData);
   
   // create copies of the vectors
 }
 
+PeerNGAMotion::PeerNGAMotion(int tag,
+			     Vector *theDataPoints,
+			     double theTimeStep, 
+			     double theFactor)
+  :TimeSeries(tag, TSERIES_TAG_PeerNGAMotion),
+   thePath(0), dT(theTimeStep), 
+   cFactor(theFactor), dbTag1(0), dbTag2(0), lastSendCommitTag(-1), lastChannel(0)
+{
+  if (theDataPoints != 0)
+    thePath = new Vector(*theDataPoints);
+}
+
+
+TimeSeries *
+PeerNGAMotion::getCopy(void) 
+{
+  return new PeerNGAMotion(this->getTag(), thePath, dT, cFactor);
+}
 
 
 PeerNGAMotion::~PeerNGAMotion()
@@ -250,7 +331,7 @@ PeerNGAMotion::getDuration()
   if (thePath == 0)
   {
     opserr << "WARNING -- PeerNGAMotion::getDuration() on empty Vector" << endln;
-	return 0.0;
+    return 0.0;
   }
   return (thePath->Size() * dT);
 }

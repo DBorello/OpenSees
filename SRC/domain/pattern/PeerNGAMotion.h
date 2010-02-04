@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-07-24 21:46:51 $
+// $Revision: 1.2 $
+// $Date: 2010-02-04 00:36:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PeerNGAMotion.h,v $
                                                                         
                                                                         
@@ -47,12 +47,14 @@ class PeerNGAMotion : public TimeSeries
 {
   public:
     // constructors  
-  PeerNGAMotion(const char *earthquake,
+  PeerNGAMotion(int tag,
+		const char *earthquake,
 		const char *station,
 		const char *type,
 		double cfactor = 1.0);
 
-  PeerNGAMotion(const char *earthquakeStation,
+  PeerNGAMotion(int tag,
+		const char *earthquakeStation,
 		const char *station,
 		double cfactor = 1.0);
 
@@ -61,6 +63,9 @@ class PeerNGAMotion : public TimeSeries
   // destructor    
   ~PeerNGAMotion();
   
+  TimeSeries *getCopy(void);
+
+
   // method to get factor
   double getFactor(double pseudoTime);
   double getDuration ();
@@ -77,6 +82,10 @@ class PeerNGAMotion : public TimeSeries
   void Print(OPS_Stream &s, int flag =0);    
   
  protected:
+  PeerNGAMotion(int tag,
+		Vector *thePath,
+		double dT, 
+		double cFactor);
   
  private:
   Vector *thePath;      // vector containg the data points

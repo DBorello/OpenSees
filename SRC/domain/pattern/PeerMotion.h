@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2006-11-21 23:46:18 $
+// $Revision: 1.3 $
+// $Date: 2010-02-04 00:36:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PeerMotion.h,v $
                                                                         
                                                                         
@@ -47,7 +47,8 @@ class PeerMotion : public TimeSeries
 {
   public:
     // constructors  
-  PeerMotion(const char *earthquake,
+   PeerMotion(int tag,
+	     const char *earthquake,
 	     const char *station,
 	     const char *responseType,
 	     double cfactor = 1.0);
@@ -56,6 +57,8 @@ class PeerMotion : public TimeSeries
     
   // destructor    
   ~PeerMotion();
+
+  TimeSeries *getCopy(void);
   
   // method to get factor
     double getFactor(double pseudoTime);
@@ -65,7 +68,6 @@ class PeerMotion : public TimeSeries
     double getDt();
     int getNPts();
 
-    
     // methods for output
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, 
@@ -74,6 +76,10 @@ class PeerMotion : public TimeSeries
     void Print(OPS_Stream &s, int flag =0);    
     
  protected:
+   PeerMotion(int tag,
+	      Vector *thePath,
+	      double dT, 
+	      double cFactor);
     
  private:
     Vector *thePath;      // vector containg the data points

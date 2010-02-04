@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:01 $
+// $Revision: 1.5 $
+// $Date: 2010-02-04 00:36:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TrapezoidalTimeSeriesIntegrator.cpp,v $
                                                                         
                                                                         
@@ -116,7 +116,7 @@ TrapezoidalTimeSeriesIntegrator::integrate(TimeSeries *theSeries, double delta)
   */
 
   // Set the method return value
-  PathSeries *returnSeries = new PathSeries (*theIntegratedValues, delta);
+  PathSeries *returnSeries = new PathSeries (0, *theIntegratedValues, delta);
 
   if (returnSeries == 0) {
     opserr << "TrapezoidalTimeSeriesIntegrator::integrate() Ran out of memory creating PathSeries\n";
