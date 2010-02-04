@@ -5,7 +5,12 @@ OBJS       = ZeroLength.o \
 	ZeroLengthContact2D.o \
 	ZeroLengthContact3D.o \
 	ZeroLengthND.o \
+	ZeroLengthContactNTS2D.o \
 	TclZeroLength.o
+
+
+#
+
 
 all:         $(OBJS)
 
