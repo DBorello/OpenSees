@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.119 $
-// $Date: 2010-01-20 23:50:46 $
+// $Revision: 1.120 $
+// $Date: 2010-02-04 01:28:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
 
 // Written: fmk
@@ -128,6 +128,10 @@
 #define MAT_TAG_Steel03					23
 #define MAT_TAG_ReinforcingSteel					24
 #define MAT_TAG_ShearPanelMaterial					40
+#define MAT_TAG_ConcreteL01			42
+#define MAT_TAG_ConcreteZ01			43
+#define MAT_TAG_TendonL01			44
+#define MAT_TAG_SteelZ01			45
 
 // Terje:
 #define MAT_TAG_SmoothSteel01			21
@@ -148,6 +152,8 @@
 #define MAT_TAG_ImpactMaterial 39
 #define MAT_TAG_WrapperUniaxialMaterial 101
 #define MAT_TAG_UniaxialJ2Plasticity 102
+
+
 
 
 //B Jeremic
@@ -181,6 +187,7 @@
 #define MAT_TAG_DrainClough2		2004
 #define MAT_TAG_DrainPinch1			2005
 #define MAT_TAG_DrainPinch2			2006
+#define MAT_TAG_Bilin		2007
 
 #define MAT_TAG_SnapMaterial		3000
 #define MAT_TAG_SnapBilinear		3001
@@ -271,6 +278,28 @@
 #define ND_TAG_NeoHookeanCompressible3D	        8003
 #define ND_TAG_FDdecoupledElastic3D	        8004
 #define ND_TAG_FiniteDeformationEP3D	        8005
+#define ND_TAG_ContactMaterial2D				14001
+#define ND_TAG_ContactMaterial3D				14002
+// 3D Drucker-Prager, added by Kathryn Petek and Pedro Arduino and Peter Mackenzie
+#define ND_TAG_DruckerPrager					14003
+#define ND_TAG_DruckerPragerThreeDimensional	14004
+#define ND_TAG_DruckerPragerTensionCutoff		14005
+#define ND_TAG_DruckerPrager3D	    14006
+
+// CamClay with Bounding Surface, added by Kathryn Petek and Pedro Arduino
+#define ND_TAG_BoundingCamClay                  14007
+#define ND_TAG_BoundingCamClay3D                14008
+
+
+#define ND_TAG_ReinforcedConcretePlaneStress  104
+#define ND_TAG_FAReinforcedConcretePlaneStress  105
+#define ND_TAG_FAFourSteelRCPlaneStress  106
+#define ND_TAG_RAFourSteelRCPlaneStress  107
+#define ND_TAG_PrestressedConcretePlaneStress  108
+#define ND_TAG_FAPrestressedConcretePlaneStress  109
+#define ND_TAG_FAFourSteelPCPlaneStress  110
+#define ND_TAG_RAFourSteelPCPlaneStress  111
+
 
 // MultiaxialCyclicPlasticity, add by Gang Wang
 #define ND_TAG_MultiaxialCyclicPlasticity             10031
@@ -356,6 +385,7 @@
 #define ELE_TAG_ZeroLengthND	 5002
 #define ELE_TAG_ZeroLengthContact2D	 5003
 #define ELE_TAG_ZeroLengthContact3D	 5004
+#define ELE_TAG_ZeroLengthContactNTS2D	 5005
 #define ELE_TAG_NLBeamColumn2d	 6000
 #define ELE_TAG_NLBeamColumn3d	 6001
 #define ELE_TAG_LargeDispBeamColumn3d	 6002
@@ -436,6 +466,7 @@
 #define ELE_TAG_GenericClient    2103
 #define ELE_TAG_GenericCopy      2104
 
+
 #define FRN_TAG_CoulombFriction     1
 #define FRN_TAG_VDependentFriction  2
 #define FRN_TAG_VPDependentFriction 3
@@ -475,6 +506,7 @@
 #define BEAM_INTEGRATION_TAG_HingeRadauTwo3d    33
 #define BEAM_INTEGRATION_TAG_UserHinge3d     34
 #define BEAM_INTEGRATION_TAG_DistHinge3d     35
+
 
 #define CRDTR_TAG_LinearCrdTransf2d 1
 #define CRDTR_TAG_PDeltaCrdTransf2d 2
@@ -519,6 +551,7 @@
 #define NUMBERER_TAG_ParallelNumberer 	3
 
 #define GraphNUMBERER_TAG_RCM   		1
+
 #define GraphNUMBERER_TAG_SimpleNumberer   	2
 #define GraphNUMBERER_TAG_MyRCM   		3
 #define GraphNUMBERER_TAG_Metis   		4
@@ -590,6 +623,8 @@
 #define INTEGRATOR_TAGS_NewmarkHybridSimulation         32
 #define INTEGRATOR_TAGS_HHTHybridSimulation             33
 #define INTEGRATOR_TAGS_CollocationHybridSimulation     34
+#define INTEGRATOR_TAGS_GeneralizedAlpha                35
+
 
 #define LinSOE_TAGS_FullGenLinSOE		1
 #define LinSOE_TAGS_BandGenLinSOE		2
