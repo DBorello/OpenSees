@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2006-09-05 20:48:25 $
+// $Revision: 1.4 $
+// $Date: 2010-02-04 00:32:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TimeSeries.cpp,v $
                                                                         
                                                                         
@@ -35,9 +35,39 @@
 // What: "@(#) TimeSeries.C, revA"
 
 #include <TimeSeries.h>
+#include <TaggedObject.h>
+#include <MapOfTaggedObjects.h>
+
+static MapOfTaggedObjects theTimeSeriesObjects;
+
+bool addTimeSeries(TimeSeries *newComponent) {
+  return theTimeSeriesObjects.addComponent(newComponent);
+}
+
+TimeSeries *getTimeSeries(int tag) {
+
+  TaggedObject *theResult = theTimeSeriesObjects.getComponentPtr(tag);
+  if (theResult == 0)
+    return 0;
+
+  TimeSeries *theSeries = (TimeSeries *)theResult;
+
+  return theSeries->getCopy();
+}
+
+void clearAllTimeSeries(void) {
+  theTimeSeriesObjects.clearAll();
+}
+    
+
+TimeSeries::TimeSeries(int tag, int classTag)
+  :TaggedObject(tag), MovableObject(classTag)
+{
+
+}
 
 TimeSeries::TimeSeries(int classTag)
-  :MovableObject(classTag)
+  :TaggedObject(0), MovableObject(classTag)
 {
 
 }
