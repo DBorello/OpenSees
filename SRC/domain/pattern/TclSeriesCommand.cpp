@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.19 $
-// $Date: 2008-07-24 21:47:21 $
+// $Revision: 1.20 $
+// $Date: 2010-02-04 00:35:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclSeriesCommand.cpp,v $
 
 // Written: fmk 
@@ -72,152 +72,293 @@ static void cleanup(TCL_Char **argv) {
 	  Tcl_Free((char *) argv);
 }
 
+extern void *OPS_NewConstantSeries(void);
+extern void *OPS_NewLinearSeries(void);
+extern void *OPS_NewTriangleSeries(void);
+extern void *OPS_NewTrigSeries(void);
+extern void *OPS_NewRectangularSeries(void);
+extern void *OPS_NewPulseSeries(void);
+extern void *OPS_NewPeerMotion(void);
+extern void *OPS_NewPeerNGAMotion(void);
+
+#include <TclModelBuilder.h>
+
+extern int OPS_ResetInput(ClientData clientData, 
+			  Tcl_Interp *interp,  
+			  int cArg, 
+			  int mArg, 
+			  TCL_Char **argv, 
+			  Domain *domain,
+			  TclModelBuilder *builder);
+
 
 TimeSeries *
-TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
+TclTimeSeriesCommand(ClientData clientData, 
+		     Tcl_Interp *interp,
+		     int argc, 
+		     TCL_Char **argv,
+		     Domain *theDomain)
 {
-
-  int argc;
-  TCL_Char **argv;
-
-  // split the list
-  if (Tcl_SplitList(interp, arg, &argc, &argv) != TCL_OK) {
-    opserr << "WARNING could not split series list " << arg << endln;
-    return 0;
-  }
+  // note the 1 instead of usual 2
+  OPS_ResetInput(clientData, interp, 1, argc, argv, theDomain, 0);	  
 			    
   TimeSeries *theSeries = 0;
 
-  if (strcmp(argv[0],"Constant") == 0) {
-    // LoadPattern and ConstantSeries - read args & create LinearSeries object
+  if ((strcmp(argv[0],"Constant") == 0) || (strcmp(argv[0],"ConstantSeries") == 0)) {
+
+    void *theResult = OPS_NewConstantSeries();
+    if (theResult != 0)
+      theSeries = (TimeSeries *)theResult;
+    
+  } else if ((strcmp(argv[0],"Trig") == 0) || (strcmp(argv[0],"TrigSeries") == 0) || 
+	     (strcmp(argv[0],"Sine") == 0) || (strcmp(argv[0],"SineSeries") == 0)) {
+
+    void *theResult = OPS_NewTrigSeries();
+    if (theResult != 0)
+      theSeries = (TimeSeries *)theResult;
+
+  }	
+
+  else if ((strcmp(argv[0],"Linear") == 0) || (strcmp(argv[0],"LinearSeries") == 0)) {
+
+    void *theResult = OPS_NewLinearSeries();
+    if (theResult != 0)
+      theSeries = (TimeSeries *)theResult;
+
+  }
+
+  else if (strcmp(argv[0],"Rectangular") == 0) {
+
+    void *theResult = OPS_NewRectangularSeries();
+    if (theResult != 0)
+      theSeries = (TimeSeries *)theResult;
+
+  }
+
+  else if ((strcmp(argv[0],"Pulse") == 0) || (strcmp(argv[0],"PulseSeries") == 0))  {
+
+    void *theResult = OPS_NewPulseSeries();
+    if (theResult != 0)
+      theSeries = (TimeSeries *)theResult;
+
+    }
+
+  else if ((strcmp(argv[0],"Triangle") == 0) || (strcmp(argv[0],"TriangleSeries") == 0))  {
+
+    void *theResult = OPS_NewTriangleSeries();
+    if (theResult != 0)
+      theSeries = (TimeSeries *)theResult;
+
+  }
+  
+  else if ((strcmp(argv[0],"Series") == 0) ||
+	   (strcmp(argv[0],"Path") == 0)) {
+
+    // LoadPattern and PathSeries - read args and create RectangularSeries object
     double cFactor = 1.0;
-	
-    int endMarker = 1;
-    if ((endMarker != argc) && (strcmp(argv[endMarker],"-factor") == 0)) {
-      // allow user to specify the factor
-      endMarker++;
-      if (endMarker == argc || 
-	  Tcl_GetDouble(interp, argv[endMarker], &cFactor) != TCL_OK) {
-	    
-	opserr << "WARNING invalid cFactor " << argv[endMarker] << " - ";
-	opserr << " Constant -factor cFactor\n";
-	cleanup(argv);
-	return 0;
-      }
+    if (argc < 3) {
+
+      opserr << "WARNING not enough args - ";
+      opserr << " Series -dt timeIncr -values {list of points }\n"; 
+      cleanup(argv);
+      return 0;	
+    }
+
+    int tag = 0;
+    double timeIncr = 0.0;
+    int endMarker =  1;
+    bool done = false;
+    int fileName = 0;
+    int fileTimeName = 0;
+    int filePathName = 0;
+    Vector *dataPath = 0;
+    Vector *dataTime = 0;
+
+    if (Tcl_GetInt(interp, argv[endMarker], &tag) == TCL_OK) {
       endMarker++;
     }
 
-    theSeries = new ConstantSeries(cFactor);       	
-    
-  } else if (strcmp(argv[0],"Trig") == 0 || 
-	     strcmp(argv[0],"Sine") == 0) {
-    // LoadPattern and TrigSeries - read args & create TrigSeries object
-    double cFactor = 1.0;
-    double tStart, tFinish, period;
-    double shift = 0.0;
-      
-    if (argc < 4) {
-      opserr << "WARNING not enough TimeSeries args - ";
-      opserr << " Trig tStart tFinish period <-shift shift> <-factor cFactor>\n";
-      cleanup(argv);
-      return 0;	
-    }	
-    if (Tcl_GetDouble(interp, argv[1], &tStart) != TCL_OK) {
-      opserr << "WARNING invalid tStart " << argv[1] << " - ";
-      opserr << " Trig tStart tFinish period <-shift shift> <-factor cFactor>\n";
-      cleanup(argv);
-      return 0;				
-    }
-    if (Tcl_GetDouble(interp, argv[2], &tFinish) != TCL_OK) {
-      opserr << "WARNING invalid tFinish " << argv[2] << " - ";
-      opserr << " Trig tStart tFinish period <-shift shift> <-factor cFactor>\n";
-      cleanup(argv);
-      return 0;	
-    }     
-    if (Tcl_GetDouble(interp, argv[3], &period) != TCL_OK) {
-      opserr << "WARNING invalid period " << argv[3] << " - ";
-      opserr << " Trig tStart tFinish period <-shift shift> <-factor cFactor>\n";
-      cleanup(argv);
-      return 0;	
-    }     
-    
-    int endMarker = 4;
-    
-    while (endMarker < argc && endMarker < argc) {
-      if (strcmp(argv[endMarker],"-factor") == 0) {
+    while (endMarker < argc && done == false) {
+	
+      if (strcmp(argv[endMarker],"-dt") == 0) {
+	// allow user to specify the time increment
+	endMarker++;
+	if (endMarker == argc || 
+	    Tcl_GetDouble(interp, argv[endMarker], &timeIncr) != TCL_OK) {
+	  
+	  opserr << "WARNING invalid dt " << argv[endMarker] << " - ";
+	  opserr << " Series -dt dt ... \n";
+	  cleanup(argv);
+	  return 0;
+	}
+      } 
+
+      else if (strcmp(argv[endMarker],"-tag") == 0) {
+	// allow user to specify the factor
+	endMarker++;
+	if (endMarker == argc || 
+	    Tcl_GetInt(interp, argv[endMarker], &tag) != TCL_OK) {
+	  
+	  opserr << "WARNING invalid tag " << argv[endMarker] << " - ";
+	  cleanup(argv);
+	  return 0;
+	}
+      } 
+
+      else if (strcmp(argv[endMarker],"-factor") == 0) {
 	// allow user to specify the factor
 	endMarker++;
 	if (endMarker == argc || 
 	    Tcl_GetDouble(interp, argv[endMarker], &cFactor) != TCL_OK) {
 	  
-	  opserr << "WARNING invalid cFactor " << argv[endMarker] << " -";
-	  opserr << " Trig  tStart tFinish period -factor cFactor\n";
+	  opserr << "WARNING invalid cFactor " << argv[endMarker] << " - ";
+	  opserr << " Series -factor ... \n";
 	  cleanup(argv);
 	  return 0;
 	}
-      }
+      } 
 
-      else if (strcmp(argv[endMarker],"-shift") == 0) {
-	// allow user to specify phase shift
+      else if (strcmp(argv[endMarker],"-file") == 0) {
+	// allow user to specify the file name containg time and data points
 	endMarker++;
-	if (endMarker == argc || 
-	    Tcl_GetDouble(interp, argv[endMarker], &shift) != TCL_OK) {
-	    
-	  opserr << "WARNING invalid phase shift " << argv[endMarker] << " - ";
-	  opserr << " Trig tStart tFinish period -shift shift\n";
-	  cleanup(argv);
-	  return 0;
+	if (endMarker != argc) {
+	  fileName = endMarker; // argv[endMarker];
 	}
       }
-      endMarker++;
-    }
 
-    theSeries = new TrigSeries(tStart, tFinish, period, shift, cFactor);
-	
-  }	
+      else if (strcmp(argv[endMarker],"-filePath") == 0) {
+	// allow user to specify the file name containg the data points
+	endMarker++;
+	if (endMarker != argc) {
+	  filePathName = endMarker; // argv[endMarker];
+	}
+      }
 
-  else if (strcmp(argv[0],"Linear") == 0) {
-    // LoadPattern and LinearSeries - read args & create LinearSeries object
-    double cFactor = 1.0;
+      else if (strcmp(argv[endMarker],"-fileTime") == 0) {
+	// allow user to specify the file name containg the data points
+	endMarker++;
+	if (endMarker != argc) {
+	  fileTimeName = endMarker; // argv[endMarker];
+	}
+      }
+
+      else if (strcmp(argv[endMarker],"-values") == 0) {
+	// allow user to specify the data points in tcl list
+	endMarker++;
+	if (endMarker != argc) {
+	  int pathSize;
+	  TCL_Char **pathStrings;
+	  
+	  if (Tcl_SplitList(interp, argv[endMarker], 
+			    &pathSize, &pathStrings) != TCL_OK) {
+		      
+	    opserr << "WARNING problem splitting path list " << argv[endMarker] << " - ";
+	    opserr << " Series -values {path} ... \n";
+	    cleanup(argv);
+	    return 0;
+	  }
+	  
+	  dataPath = new Vector(pathSize);
+	  for (int i=0; i<pathSize; i++) {
+	    double value;
+	    if ( Tcl_GetDouble(interp, pathStrings[i], &value) != TCL_OK) {
+	      opserr << "WARNING problem reading path data value " << pathStrings[i] << " - ";
+	      opserr << " Series -values {path} ... \n";
+	      cleanup(argv);
+	      cleanup(pathStrings);
+	      return 0;
+	    }
+	    (*dataPath)(i) = value;
+	  }
+	  // free up the array of pathsStrings .. see tcl man pages as to why
+	  cleanup(pathStrings);
+	}
+      }
+
+      else if (strcmp(argv[endMarker],"-time") == 0) {
+	// allow user to specify the data points in tcl list
+	endMarker++;
+	if (endMarker != argc) {
+	  int pathSize;
+	  TCL_Char **pathStrings;
+	  
+	  if (Tcl_SplitList(interp, argv[endMarker], 
+			    &pathSize, &pathStrings) != TCL_OK) {
+			
+	    opserr << "WARNING problem spltting time path " << argv[endMarker] << " - ";
+	    opserr << " Series -time {times} ... \n";
+	    cleanup(argv);
+	    return 0;
+	  }
+	  
+	  dataTime = new Vector(pathSize);
+	  for (int i=0; i<pathSize; i++) {
+	    double value;
+	    if ( Tcl_GetDouble(interp, pathStrings[i], &value) != TCL_OK) {
+	      opserr << "WARNING problem reading time path value " << pathStrings[i] << " - ";
+	      opserr << " Series -values {path} ... \n";
+
+	      cleanup(argv);
+	      cleanup(pathStrings);
+	      return 0;
+	    }
+	    (*dataTime)(i) = value;
+	  }
+	  // free up the array of pathsStrings .. see tcl man pages as to why
+	  cleanup(pathStrings);
+	}
+      }
       
-    int endMarker = 1;
-    
-    if ((endMarker < argc) && (strcmp(argv[endMarker],"-factor") == 0)) {
-      // allow user to specify the factor
-      endMarker++;
-      if (endMarker == argc || 
-	  Tcl_GetDouble(interp, argv[endMarker], &cFactor) != TCL_OK) {
-	
-	opserr << "WARNING invalid cFactor " << argv[endMarker] << " - ";
-	opserr << " Linear  -factor cFactor\n";
-	cleanup(argv);
-	return 0;
-      }	
       endMarker++;
     }
+    
 
-    theSeries = new LinearSeries(cFactor);       	
-  }
+    if (filePathName != 0 && fileTimeName == 0 && timeIncr != 0.0) {
+      const char *pwd = getInterpPWD(interp);
+      simulationInfo.addInputFile(argv[filePathName], pwd);  
+      theSeries = new PathSeries(tag, argv[filePathName], timeIncr, cFactor);
+    }
+
+    else if (fileName != 0) {
+      const char *pwd = getInterpPWD(interp);
+      simulationInfo.addInputFile(argv[fileName], pwd);  
+      theSeries = new PathTimeSeries(tag, argv[fileName], cFactor);
+
+    } else if (filePathName != 0 && fileTimeName != 0) {
+      const char *pwd = getInterpPWD(interp);
+      simulationInfo.addInputFile(argv[filePathName], pwd);  
+      simulationInfo.addInputFile(argv[fileTimeName], pwd);  
+      theSeries = new PathTimeSeries(tag, argv[filePathName], argv[fileTimeName], cFactor); 
+
+    } else if (dataPath != 0 && dataTime == 0 && timeIncr != 0.0) {
+      theSeries = new PathSeries(tag, *dataPath, timeIncr, cFactor); 
+      delete dataPath;
+
+    } else if (dataPath != 0 && dataTime != 0) {
+      theSeries = new PathTimeSeries(tag, *dataPath, *dataTime, cFactor);  
+      delete dataPath;      
+      delete dataTime;      
+
+    } else {
+      opserr << "WARNING choice of options for Path Series invalid - valid options for ";
+      opserr << " Path are\n";
+      opserr << " \t -fileT fileTimeName -fileP filePathName \n";
+      opserr << " \t -dt constTimeIncr -file filePathName\n";
+      opserr << " \t -dt constTimeIncr -values {list of points on path}\n";
+      opserr << " \t -time {list of time points} -values {list of points on path}\n";
+      cleanup(argv);
+      return 0;
+    }      
+	
+  } 
 
   else if ((strcmp(argv[0],"PeerDatabase") == 0) || (strcmp(argv[0],"PeerMotion") == 0)) {
 
-    if (argc < 5) {
-      opserr << "WARNING not enough TimeSeries args - ";
-      opserr << " PeerDatabase eqMotion station type factor\n";
-      cleanup(argv);
-      return 0;	
-    }	
-
-    double cFactor = 1.0;
-
-    if (Tcl_GetDouble(interp, argv[4], &cFactor) != TCL_OK) {
-      opserr << "WARNING invalid input: random process mean \n";
-      cleanup(argv);
-      return 0;
-    }
+    void *theResult = OPS_NewPeerMotion();
+    if (theResult != 0)
+      theSeries = (TimeSeries *)theResult;
     
-    PeerMotion *thePeerMotion = new PeerMotion(argv[1], argv[2], argv[3], cFactor);       	
-    theSeries = thePeerMotion;
+    PeerMotion *thePeerMotion = (PeerMotion *)theSeries;       	
 
     if (argc > 4 && theSeries != 0) {
       int argCount = 4;
@@ -245,23 +386,13 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
 
   else if ((strcmp(argv[0],"PeerNGADatabase") == 0) || (strcmp(argv[0],"PeerNGAMotion") == 0)) {
 
-    if (argc < 3) {
-      opserr << "WARNING not enough TimeSeries args - ";
-      opserr << " PeerDatabase eqMotion station type factor\n";
-      cleanup(argv);
-      return 0;	
-    }	
 
-    double cFactor = 1.0;
-
-    if (Tcl_GetDouble(interp, argv[2], &cFactor) != TCL_OK) {
-      opserr << "WARNING invalid input: random process mean \n";
-      cleanup(argv);
-      return 0;
-    }
+    void *theResult = OPS_NewPeerNGAMotion();
+    if (theResult != 0)
+      theSeries = (TimeSeries *)theResult;
     
-    PeerNGAMotion *thePeerMotion = new PeerNGAMotion(argv[1], "-ACCEL", cFactor);       	
-    theSeries = thePeerMotion;
+    PeerNGAMotion *thePeerMotion = (PeerNGAMotion*)(theSeries);       	
+
 
     if (argc > 3 && theSeries != 0) {
       int argCount = 3;
@@ -441,375 +572,6 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
 #endif
 
 
-  else if (strcmp(argv[0],"Rectangular") == 0) {
-    // LoadPattern and RectangularSeries - read args and create RectangularSeries object
-    double tStart, tFinish;
-    double cFactor = 1.0;
-    if (argc < 3) {
-      opserr << "WARNING not enogh args - ";
-      opserr << " Rectangular tStart tFinish <-factor cFactor>\n";
-      cleanup(argv);
-      return 0;	
-    }	
-    if (Tcl_GetDouble(interp, argv[1], &tStart) != TCL_OK) {
-      opserr << "WARNING invalid tStart " << argv[1] << " - ";
-      opserr << " Rectangular tStart tFinish <-factor factor>\n";
-      cleanup(argv);
-      return 0;
-    }
-    if (Tcl_GetDouble(interp, argv[2], &tFinish) != TCL_OK) {
-      opserr << "WARNING invalid tStart " << argv[2] << " - ";
-      opserr << " Rectangular tStart tFinish <-factor fcator>\n";
-      cleanup(argv);
-      return 0;	
-    }     
-
-    int endMarker =  3;
-    
-    if ((endMarker != argc) && (strcmp(argv[endMarker],"-factor") == 0)) {
-      // allow user to specify the factor
-      endMarker++;
-      if (endMarker == argc || 
-	  Tcl_GetDouble(interp, argv[endMarker], &cFactor) != TCL_OK) {
-	
-	opserr << "WARNING invalid cFactor " << argv[endMarker] << " - ";
-	opserr << " Rectangular tStart tFinish -factor cFactor\n";
-	cleanup(argv);
-	return 0;
-      }
-      endMarker++;
-    }  
-
-    theSeries = new RectangularSeries(tStart, tFinish, cFactor); 
-  }
-
-  else if (strcmp(argv[0],"Pulse") == 0)  {
-    // LoadPattern and PulseSeries - read args & create PulseSeries object
-    double cFactor = 1.0;
-    double tStart, tFinish, period;
-    double width = 0.5;
-    double shift = 0.0;
-      
-    if (argc < 4) {
-      opserr << "WARNING not enough PulseSeries args - ";
-      opserr << " Pulse tStart tFinish period <-width pulseWidth> <-shift shift> <-factor cFactor>\n";
-      cleanup(argv);
-      return 0;	
-    }	
-    if (Tcl_GetDouble(interp, argv[1], &tStart) != TCL_OK) {
-      opserr << "WARNING invalid tStart " << argv[1] << " - ";
-      opserr << " Pulse tStart tFinish period <-width pulseWidth> <-shift shift> <-factor cFactor>\n";
-      cleanup(argv);
-      return 0;				
-    }
-    if (Tcl_GetDouble(interp, argv[2], &tFinish) != TCL_OK) {
-      opserr << "WARNING invalid tFinish " << argv[2] << " - ";
-      opserr << " Pulse tStart tFinish period <-width pulseWidth> <-shift shift> <-factor cFactor>\n";
-      cleanup(argv);
-      return 0;	
-    }     
-    if (Tcl_GetDouble(interp, argv[3], &period) != TCL_OK) {
-      opserr << "WARNING invalid period " << argv[3] << " - ";
-      opserr << " Pulse tStart tFinish period <-width pulseWidth> <-shift shift> <-factor cFactor>\n";
-      cleanup(argv);
-      return 0;	
-    }     
-    
-    int endMarker = 4;
-    
-    while (endMarker < argc && endMarker < argc) {
-      if (strcmp(argv[endMarker],"-factor") == 0) {
-	// allow user to specify the factor
-	endMarker++;
-	if (endMarker == argc || 
-	    Tcl_GetDouble(interp, argv[endMarker], &cFactor) != TCL_OK) {
-	  
-	  opserr << "WARNING invalid cFactor " << argv[endMarker] << " -";
-	  opserr << " Pulse tStart tFinish period <-width pulseWidth> <-shift shift> <-factor cFactor>\n";
-	  cleanup(argv);
-	  return 0;
-	}
-      }
-
-      else if (strcmp(argv[endMarker],"-width") == 0) {
-	// allow user to specify pulse width
-	endMarker++;
-	if (endMarker == argc || 
-	    Tcl_GetDouble(interp, argv[endMarker], &width) != TCL_OK) {
-	    
-	  opserr << "WARNING invalid pulse width " << argv[endMarker] << " - ";
-	  opserr << " Pulse tStart tFinish period <-width pulseWidth> <-shift shift> <-factor cFactor>\n";
-	  cleanup(argv);
-	  return 0;
-	}
-      }
-
-      else if (strcmp(argv[endMarker],"-shift") == 0) {
-	// allow user to specify phase shift
-	endMarker++;
-	if (endMarker == argc || 
-	    Tcl_GetDouble(interp, argv[endMarker], &shift) != TCL_OK) {
-	    
-	  opserr << "WARNING invalid phase shift " << argv[endMarker] << " - ";
-	  opserr << " Pulse tStart tFinish period <-width pulseWidth> <-shift shift> <-factor cFactor>\n";
-	  cleanup(argv);
-	  return 0;
-	}
-      }
-      endMarker++;
-    }
-
-    theSeries = new PulseSeries(tStart, tFinish, period, width, shift, cFactor);
-  }	
-
-  else if (strcmp(argv[0],"Triangle") == 0)  {
-    // LoadPattern and TriangleSeries - read args & create TriangleSeries object
-    double cFactor = 1.0;
-    double tStart, tFinish, period;
-    double shift = 0.0;
-      
-    if (argc < 4) {
-      opserr << "WARNING not enough TriangleSeries args - ";
-      opserr << " Triangle tStart tFinish period <-shift shift> <-factor cFactor>\n";
-      cleanup(argv);
-      return 0;	
-    }	
-    if (Tcl_GetDouble(interp, argv[1], &tStart) != TCL_OK) {
-      opserr << "WARNING invalid tStart " << argv[1] << " - ";
-      opserr << " Triangle tStart tFinish period <-shift shift> <-factor cFactor>\n";
-      cleanup(argv);
-      return 0;				
-    }
-    if (Tcl_GetDouble(interp, argv[2], &tFinish) != TCL_OK) {
-      opserr << "WARNING invalid tFinish " << argv[2] << " - ";
-      opserr << " Triangle tStart tFinish period <-shift shift> <-factor cFactor>\n";
-      cleanup(argv);
-      return 0;	
-    }     
-    if (Tcl_GetDouble(interp, argv[3], &period) != TCL_OK) {
-      opserr << "WARNING invalid period " << argv[3] << " - ";
-      opserr << " Triangle tStart tFinish period <-shift shift> <-factor cFactor>\n";
-      cleanup(argv);
-      return 0;	
-    }     
-    
-    int endMarker = 4;
-    
-    while (endMarker < argc && endMarker < argc) {
-      if (strcmp(argv[endMarker],"-factor") == 0) {
-	// allow user to specify the factor
-	endMarker++;
-	if (endMarker == argc || 
-	    Tcl_GetDouble(interp, argv[endMarker], &cFactor) != TCL_OK) {
-	  
-	  opserr << "WARNING invalid cFactor " << argv[endMarker] << " -";
-	  opserr << " Triangle tStart tFinish period <-shift shift> <-factor cFactor>\n";
-	  cleanup(argv);
-	  return 0;
-	}
-      }
-
-      else if (strcmp(argv[endMarker],"-shift") == 0) {
-	// allow user to specify phase shift
-	endMarker++;
-	if (endMarker == argc || 
-	    Tcl_GetDouble(interp, argv[endMarker], &shift) != TCL_OK) {
-	    
-	  opserr << "WARNING invalid phase shift " << argv[endMarker] << " - ";
-	  opserr << " Triangle tStart tFinish period <-shift shift> <-factor cFactor>\n";
-	  cleanup(argv);
-	  return 0;
-	}
-      }
-      endMarker++;
-    }
-
-    theSeries = new TriangleSeries(tStart, tFinish, period, shift, cFactor);	
-  }
-  
-  else if ((strcmp(argv[0],"Series") == 0) ||
-	   (strcmp(argv[0],"Path") == 0)) {
-
-    // LoadPattern and PathSeries - read args and create RectangularSeries object
-    double cFactor = 1.0;
-    if (argc < 3) {
-
-      opserr << "WARNING not enough args - ";
-      opserr << " Series -dt timeIncr -values {list of points }\n"; 
-      cleanup(argv);
-      return 0;	
-    }
-
-    double timeIncr = 0.0;
-    int endMarker =  1;
-    bool done = false;
-    int fileName = 0;
-    int fileTimeName = 0;
-    int filePathName = 0;
-    Vector *dataPath = 0;
-    Vector *dataTime = 0;
-
-    while (endMarker < argc && done == false) {
-	
-      if (strcmp(argv[endMarker],"-dt") == 0) {
-	// allow user to specify the time increment
-	endMarker++;
-	if (endMarker == argc || 
-	    Tcl_GetDouble(interp, argv[endMarker], &timeIncr) != TCL_OK) {
-	  
-	  opserr << "WARNING invalid dt " << argv[endMarker] << " - ";
-	  opserr << " Series -dt dt ... \n";
-	  cleanup(argv);
-	  return 0;
-	}
-      } 
-
-      else if (strcmp(argv[endMarker],"-factor") == 0) {
-	// allow user to specify the factor
-	endMarker++;
-	if (endMarker == argc || 
-	    Tcl_GetDouble(interp, argv[endMarker], &cFactor) != TCL_OK) {
-	  
-	  opserr << "WARNING invalid cFactor " << argv[endMarker] << " - ";
-	  opserr << " Series -factor ... \n";
-	  cleanup(argv);
-	  return 0;
-	}
-      } 
-
-      else if (strcmp(argv[endMarker],"-file") == 0) {
-	// allow user to specify the file name containg time and data points
-	endMarker++;
-	if (endMarker != argc) {
-	  fileName = endMarker; // argv[endMarker];
-	}
-      }
-
-      else if (strcmp(argv[endMarker],"-filePath") == 0) {
-	// allow user to specify the file name containg the data points
-	endMarker++;
-	if (endMarker != argc) {
-	  filePathName = endMarker; // argv[endMarker];
-	}
-      }
-
-      else if (strcmp(argv[endMarker],"-fileTime") == 0) {
-	// allow user to specify the file name containg the data points
-	endMarker++;
-	if (endMarker != argc) {
-	  fileTimeName = endMarker; // argv[endMarker];
-	}
-      }
-
-      else if (strcmp(argv[endMarker],"-values") == 0) {
-	// allow user to specify the data points in tcl list
-	endMarker++;
-	if (endMarker != argc) {
-	  int pathSize;
-	  TCL_Char **pathStrings;
-	  
-	  if (Tcl_SplitList(interp, argv[endMarker], 
-			    &pathSize, &pathStrings) != TCL_OK) {
-		      
-	    opserr << "WARNING problem splitting path list " << argv[endMarker] << " - ";
-	    opserr << " Series -values {path} ... \n";
-	    cleanup(argv);
-	    return 0;
-	  }
-	  
-	  dataPath = new Vector(pathSize);
-	  for (int i=0; i<pathSize; i++) {
-	    double value;
-	    if ( Tcl_GetDouble(interp, pathStrings[i], &value) != TCL_OK) {
-	      opserr << "WARNING problem reading path data value " << pathStrings[i] << " - ";
-	      opserr << " Series -values {path} ... \n";
-	      cleanup(argv);
-	      cleanup(pathStrings);
-	      return 0;
-	    }
-	    (*dataPath)(i) = value;
-	  }
-	  // free up the array of pathsStrings .. see tcl man pages as to why
-	  cleanup(pathStrings);
-	}
-      }
-
-      else if (strcmp(argv[endMarker],"-time") == 0) {
-	// allow user to specify the data points in tcl list
-	endMarker++;
-	if (endMarker != argc) {
-	  int pathSize;
-	  TCL_Char **pathStrings;
-	  
-	  if (Tcl_SplitList(interp, argv[endMarker], 
-			    &pathSize, &pathStrings) != TCL_OK) {
-			
-	    opserr << "WARNING problem spltting time path " << argv[endMarker] << " - ";
-	    opserr << " Series -time {times} ... \n";
-	    cleanup(argv);
-	    return 0;
-	  }
-	  
-	  dataTime = new Vector(pathSize);
-	  for (int i=0; i<pathSize; i++) {
-	    double value;
-	    if ( Tcl_GetDouble(interp, pathStrings[i], &value) != TCL_OK) {
-	      opserr << "WARNING problem reading time path value " << pathStrings[i] << " - ";
-	      opserr << " Series -values {path} ... \n";
-
-	      cleanup(argv);
-	      cleanup(pathStrings);
-	      return 0;
-	    }
-	    (*dataTime)(i) = value;
-	  }
-	  // free up the array of pathsStrings .. see tcl man pages as to why
-	  cleanup(pathStrings);
-	}
-      }
-      
-      endMarker++;
-    }
-    
-
-    if (filePathName != 0 && fileTimeName == 0 && timeIncr != 0.0) {
-      const char *pwd = getInterpPWD(interp);
-      simulationInfo.addInputFile(argv[filePathName], pwd);  
-      theSeries = new PathSeries(argv[filePathName], timeIncr, cFactor);
-    }
-
-    else if (fileName != 0) {
-      const char *pwd = getInterpPWD(interp);
-      simulationInfo.addInputFile(argv[fileName], pwd);  
-      theSeries = new PathTimeSeries(argv[fileName], cFactor);
-
-    } else if (filePathName != 0 && fileTimeName != 0) {
-      const char *pwd = getInterpPWD(interp);
-      simulationInfo.addInputFile(argv[filePathName], pwd);  
-      simulationInfo.addInputFile(argv[fileTimeName], pwd);  
-      theSeries = new PathTimeSeries(argv[filePathName], argv[fileTimeName], cFactor); 
-
-    } else if (dataPath != 0 && dataTime == 0 && timeIncr != 0.0) {
-      theSeries = new PathSeries(*dataPath, timeIncr, cFactor); 
-      delete dataPath;
-
-    } else if (dataPath != 0 && dataTime != 0) {
-      theSeries = new PathTimeSeries(*dataPath, *dataTime, cFactor);  
-      delete dataPath;      
-      delete dataTime;      
-
-    } else {
-      opserr << "WARNING choice of options for Path Series invalid - valid options for ";
-      opserr << " Path are\n";
-      opserr << " \t -fileT fileTimeName -fileP filePathName \n";
-      opserr << " \t -dt constTimeIncr -file filePathName\n";
-      opserr << " \t -dt constTimeIncr -values {list of points on path}\n";
-      opserr << " \t -time {list of time points} -values {list of points on path}\n";
-      cleanup(argv);
-      return 0;
-    }      
-	
-  } 
 	
   else {
     // type of load pattern type unknown
@@ -819,11 +581,32 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
     return 0;
   }
 
+  return theSeries;
+}
+
+extern TimeSeries *getTimeSeries(int tag);
+
+TimeSeries *
+TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
+{
+  int argc;
+  TCL_Char **argv;
+
+  int timeSeriesTag = 0;
+  if (Tcl_GetInt(interp, arg, &timeSeriesTag) == TCL_OK) {
+    return getTimeSeries(timeSeriesTag);
+  }
+
+  // split the list
+  if (Tcl_SplitList(interp, arg, &argc, &argv) != TCL_OK) {
+    opserr << "WARNING could not split series list " << arg << endln;
+    return 0;
+  }
+
+  TimeSeries *theSeries = TclTimeSeriesCommand(clientData, interp, argc, argv, 0);
+
   // clean up after ourselves and return the series
   cleanup(argv);
   return theSeries;
 }
-
-
-
 
