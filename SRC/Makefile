@@ -477,7 +477,8 @@ RECORDER_LIBS = $(FE)/recorder/Recorder.o \
 	$(FE)/recorder/response/ElementResponse.o \
 	$(FE)/recorder/response/MaterialResponse.o \
 	$(FE)/recorder/response/FiberResponse.o \
-	$(FE)/recorder/DamageRecorder.o 
+	$(FE)/recorder/DamageRecorder.o \
+	$(FE)/recorder/RemoveRecorder.o 
 
 
 DATABASE_LIBS = $(FE)/database/FileDatastore.o \
@@ -525,6 +526,7 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/truss/CorotTrussSection.o \
 	$(FE)/element/zeroLength/ZeroLengthContact2D.o \
 	$(FE)/element/zeroLength/ZeroLengthContact3D.o \
+	$(FE)/element/zeroLength/ZeroLengthContactNTS2D.o \
 	$(FE)/element/feap/elmt01.o \
 	$(FE)/element/feap/elmt02.o \
 	$(FE)/element/feap/elmt03.o \
@@ -537,7 +539,6 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/feap/fElmt02.o \
 	$(FE)/element/TclElementCommands.o \
 	$(FE)/element/feap/TclFeapElementCommand.o \
-	$(FE)/element/truss/TclTrussCommand.o \
 	$(FE)/element/beamWithHinges/TclBeamWithHingesBuilder.o \
 	$(FE)/element/dispBeamColumn/DispBeamColumn2d.o \
 	$(FE)/element/dispBeamColumn/DispBeamColumn3d.o \
@@ -626,6 +627,8 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/MinMaxMaterial.o \
 	$(FE)/material/uniaxial/FatigueMaterial.o \
 	$(FE)/material/uniaxial/SAWSMaterial.o \
+	$(FE)/material/uniaxial/snap/Bilin.o \
+	$(FE)/material/uniaxial/ConfinedConcrete01.o \
 	$(FE)/material/uniaxial/CableMaterial.o \
 	$(FE)/material/uniaxial/ENTMaterial.o \
 	$(FE)/material/uniaxial/BoucWenMaterial.o \
@@ -654,6 +657,8 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/nD/J2AxiSymm.o \
 	$(FE)/material/nD/J2ThreeDimensional.o \
 	$(FE)/material/nD/J2PlateFiber.o \
+	$(FE)/material/nD/DruckerPrager.o \
+	$(FE)/material/nD/DruckerPrager3D.o \
 	$(FE)/material/nD/FeapMaterial.o \
 	$(FE)/material/nD/feap/TclFeapMaterialCommand.o \
 	$(FE)/material/nD/feap/FeapMaterial01.o \
@@ -678,7 +683,20 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/nD/cyclicSoil/MultiaxialCyclicPlasticity.o \
 	$(FE)/material/nD/cyclicSoil/MultiaxialCyclicPlasticityPlaneStrain.o \
 	$(FE)/material/nD/cyclicSoil/MultiaxialCyclicPlasticity3D.o \
-	$(FE)/material/nD/cyclicSoil/MultiaxialCyclicPlasticityAxiSymm.o
+	$(FE)/material/nD/cyclicSoil/MultiaxialCyclicPlasticityAxiSymm.o \
+	$(FE)/material/nd/reinforcedConcretePlaneStress/ReinforcedConcretePlaneStress.o \
+	$(FE)/material/nd/reinforcedConcretePlaneStress/FAReinforcedConcretePlaneStress.o \
+	$(FE)/material/nd/reinforcedConcretePlaneStress/FAFourSteelRCPlaneStress.o \
+	$(FE)/material/nd/reinforcedConcretePlaneStress/RAFourSteelRCPlaneStress.o \
+	$(FE)/material/nd/reinforcedConcretePlaneStress/PrestressedConcretePlaneStress.o \
+	$(FE)/material/nd/reinforcedConcretePlaneStress/FAPrestressedConcretePlaneStress.o \
+	$(FE)/material/nd/reinforcedConcretePlaneStress/FAFourSteelPCPlaneStress.o \
+	$(FE)/material/nd/reinforcedConcretePlaneStress/RAFourSteelPCPlaneStress.o \
+	$(FE)/material/nd/reinforcedConcretePlaneStress/ConcreteZ01.o \
+	$(FE)/material/nd/reinforcedConcretePlaneStress/ConcreteL01.o \
+	$(FE)/material/nd/reinforcedConcretePlaneStress/SteelZ01.o \
+	$(FE)/material/nd/reinforcedConcretePlaneStress/TendonL01.o
+
 
 FEDEAS_LIBS = $(FE)/material/uniaxial/FedeasMaterial.o \
 	$(FE)/material/uniaxial/fedeas/FedeasHardeningMaterial.o \
@@ -945,6 +963,7 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/analysis/integrator/Newmark.o \
 	$(FE)/analysis/integrator/TRBDF2.o \
 	$(FE)/analysis/integrator/HHT.o \
+	$(FE)/analysis/integrator/GeneralizedAlpha.o \
 	$(FE)/analysis/integrator/Newmark1.o \
 	$(FE)/analysis/integrator/HHT1.o \
 	$(FE)/analysis/integrator/CentralDifference.o \
