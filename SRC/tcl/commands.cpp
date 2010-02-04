@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.151 $
-// $Date: 2010-01-20 23:26:55 $
+// $Revision: 1.152 $
+// $Date: 2010-02-04 00:30:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -159,10 +159,16 @@ OPS_Stream *opserrPtr = &sserr;
 /******************************/
 #include <MinUnbalDispNorm.h>
 #include <DisplacementControl.h>
+
 #include <Newmark.h>
+//#include <HHT.h>
+
+extern TransientIntegrator *OPS_NewNewmark(void);
+extern TransientIntegrator *OPS_NewHHT(void);
+extern TransientIntegrator *OPS_NewGeneralizedAlpha(void);
+
 #include <TRBDF2.h>
 #include <WilsonTheta.h>
-#include <HHT.h>
 #include <HHT1.h>
 #include <Newmark1.h> 
 #include <CentralDifferenceAlternative.h>
@@ -659,6 +665,10 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
     Tcl_CreateCommand(interp, "test", &specifyCTest, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);    
+    Tcl_CreateCommand(interp, "testNorms", &getCTestNorms, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);    
+    Tcl_CreateCommand(interp, "testIter", &getCTestIter, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);    
 
     Tcl_CreateCommand(interp, "integrator", &specifyIntegrator, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
@@ -674,7 +684,10 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "remove", &removeObject, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
-			  Tcl_CreateCommand(interp, "eleForce", &eleForce, 
+
+    
+    
+    Tcl_CreateCommand(interp, "eleForce", &eleForce, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "eleResponse", &eleResponse, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
@@ -3287,6 +3300,10 @@ specifyCTest(ClientData clientData, Tcl_Interp *interp, int argc,
 
 
 
+	      
+
+
+
 
 //
 // command invoked to allow the Integrator object to be built
@@ -3295,6 +3312,9 @@ int
 specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, 
 		  TCL_Char **argv)
 {
+
+  OPS_ResetInput(clientData, interp, 2, argc, argv, &theDomain, theTclBuilder);	  
+
   // make sure at least one other argument to contain integrator
   if (argc < 2) {
       opserr << "WARNING need to specify an Integrator type \n";
@@ -3552,67 +3572,12 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
   }
   
   else if (strcmp(argv[1],"Newmark") == 0) {
-      double beta, gamma;
-      double alphaM, betaK, betaKi, betaKc;
-      bool dispFlag = true;
-      int argi = 4;
-      if (argc < 4 && argc > 10) {
-	opserr << "WARNING integrator Newmark gamma beta <alphaM betaK betaKi betaKc> <-form F>\n";
-	return TCL_ERROR;
-      }    
-      if (Tcl_GetDouble(interp, argv[2], &gamma) != TCL_OK) {
-	  opserr << "WARNING integrator Newmark gamma beta - undefined gamma\n";	  
-	  return TCL_ERROR;	
-      }
-      if (Tcl_GetDouble(interp, argv[3], &beta) != TCL_OK) {
-	  opserr << "WARNING integrator Newmark gamma beta - undefined beta\n";
-	  return TCL_ERROR;	
-      }
-      if (argc == 8 || argc == 10) {
-	  if (Tcl_GetDouble(interp, argv[argi], &alphaM) != TCL_OK) {
-	      opserr << "WARNING integrator Newmark gamma beta alphaM betaK betaKi betaKc - alphaM\n";	  
-	      return TCL_ERROR;	
-	  }
-	  argi++;
-	  if (Tcl_GetDouble(interp, argv[argi], &betaK) != TCL_OK) {
-	    opserr << "WARNING integrator Newmark gamma beta alphaM betaK betaKi betaKc - betaK\n";
-	      return TCL_ERROR;	
-	  }
-	  argi++;
-	  if (Tcl_GetDouble(interp, argv[argi], &betaKi) != TCL_OK) {
-	    opserr << "WARNING integrator Newmark gamma beta alphaM betaK betaKi betaKc - betaKi\n";
-	    return TCL_ERROR;	
-	  }
-	  argi++;
-	  if (Tcl_GetDouble(interp, argv[argi], &betaKc) != TCL_OK) {
-	    opserr << "WARNING integrator Newmark gamma beta alphaM betaK betaKi betaKc - betaKc\n";
-	    return TCL_ERROR;	
-	  }
-	  argi++;
-      }
-      if (argi<argc) {
-	if (strcmp(argv[argi],"-form") == 0) {
-	  if (strcmp(argv[argi+1],"D") == 0 || strcmp(argv[argi+1],"d") == 0)
-	    dispFlag = true;
-	  else if (strcmp(argv[argi+1],"A") == 0 || strcmp(argv[argi+1],"a") == 0)
-	    dispFlag = false;
-	}
-      }
-      if (argc == 4 || argc == 6)
-	theTransientIntegrator = new Newmark(gamma,beta,dispFlag);       
-      else {
-	if (alphaM != 0 || betaK != 0 || betaKi != 0 || betaKc != 0) {
-	  opserr << "WARNING: providing rayleigh factors to integrator is deprecated\n";
-	  return TCL_ERROR;	  
-	}
-	  
-	theTransientIntegrator = new Newmark(gamma,beta, dispFlag);
-      }
-      
-      // if the analysis exists - we want to change the Integrator
-	  if (theTransientAnalysis != 0)
-	    theTransientAnalysis->setIntegrator(*theTransientIntegrator);
-  }  
+    theTransientIntegrator = OPS_NewNewmark();
+
+    // if the analysis exists - we want to change the Integrator
+    if (theTransientAnalysis != 0)
+      theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+  } 
   
   else if (strcmp(argv[1],"NewmarkExplicit") == 0) {
     double gamma;
@@ -3953,34 +3918,17 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 #endif
   
   else if (strcmp(argv[1],"HHT") == 0) {
-      double alpha, beta, gamma;
-      if (argc != 3 && argc != 5) {
-	opserr << "WARNING integrator HHT alpha <beta gamma>\n";
-	opserr << " if you were trying to pass rayleigh damping factors use the rayleigh command\n";
-	return TCL_ERROR;
-      }    
-      if (Tcl_GetDouble(interp, argv[2], &alpha) != TCL_OK) {
-	  opserr << "WARNING integrator HHT alpha - undefined alpha\n";	  
-	  return TCL_ERROR;	
-      }
-      if (argc == 5) {
-	if (Tcl_GetDouble(interp, argv[3], &beta) != TCL_OK) {
-	  opserr << "WARNING integrator HHT alpha beta gamma - undefined beta\n";	  
-	  return TCL_ERROR;	
-	}
-	if (Tcl_GetDouble(interp, argv[4], &gamma) != TCL_OK) {
-	  opserr << "WARNING integrator HHT alpha beta gamma - undefined gamma\n";	  
-	  return TCL_ERROR;	
-	}
-      }
+    theTransientIntegrator = OPS_NewHHT();
 
-      if (argc == 3)
-	  theTransientIntegrator = new HHT(alpha);       
-      else if (argc == 5)
-	theTransientIntegrator = new HHT(alpha,beta,gamma);
+    if (theTransientAnalysis != 0)
+      theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+  } 
 
-      if (theTransientAnalysis != 0)
-	theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+  else if (strcmp(argv[1],"GeneralizedAlpha") == 0) {
+    theTransientIntegrator = OPS_NewGeneralizedAlpha();
+
+    if (theTransientAnalysis != 0)
+      theTransientAnalysis->setIntegrator(*theTransientIntegrator);
   }    
 
   else if (strcmp(argv[1],"HHTGeneralized") == 0) {
@@ -5770,6 +5718,44 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
 }
 
 
+int
+getCTestNorms(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  if (theTest != 0) {
+    const Vector &data = theTest->getNorms();
+      
+    char buffer [40];
+    int size = data.Size();
+    for (int i=0; i<size; i++) {
+      sprintf(buffer,"%35.20e",data(i));
+      Tcl_AppendResult(interp, buffer, NULL);
+    }
+	
+    return TCL_OK;
+  } 
+
+  opserr << "ERROR testNorms - no convergence test!\n";
+  return TCL_ERROR;
+}
+
+int
+getCTestIter(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  int res = 0;
+  if (theTest != 0) {
+    int res = theTest->getNumTests();
+  
+    char buffer [10];
+    sprintf(buffer,"%d",res);
+    Tcl_AppendResult(interp, buffer, NULL);
+
+    return TCL_OK;
+  }
+
+  opserr << "ERROR testIter - no convergence test!\n";
+  return TCL_ERROR;
+}
+
 int 
 nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
@@ -6176,7 +6162,7 @@ nodeResponse(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
 {
     // make sure at least one other argument to contain type of system
     if (argc < 4) {
-	opserr << "WARNING want - nodeResponse responseID? nodeTag? dof?\n";
+	opserr << "WARNING want - nodeResponse nodeTag? dof? responseID?\n";
 	return TCL_ERROR;
    }    
 
@@ -6191,7 +6177,7 @@ nodeResponse(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
 	return TCL_ERROR;	        
     }        
     if (Tcl_GetInt(interp, argv[3], &responseID) != TCL_OK) {
-	opserr << "WARNING nodeDisp nodeTag? dof? - could not read dof? \n";
+	opserr << "WARNING nodeDisp nodeTag? dof? responseID? - could not read responseID? \n";
 	return TCL_ERROR;	        
     }        
     
