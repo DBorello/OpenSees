@@ -167,6 +167,12 @@
 				RelativePath="..\..\..\SRC\material\uniaxial\Concrete07.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\ConfinedConcrete01.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\ConfinedConcrete01.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\DrainMaterial.cpp">
 			</File>
 			<File
@@ -560,6 +566,12 @@
 				Name="snap"
 				Filter="">
 				<File
+					RelativePath="..\..\..\SRC\material\uniaxial\snap\Bilin.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\uniaxial\snap\Bilin.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\material\uniaxial\snap\Bilinear.cpp">
 				</File>
 				<File
@@ -695,6 +707,18 @@
 		<Filter
 			Name="nD"
 			Filter="">
+			<File
+				RelativePath="..\..\..\SRC\material\nD\DruckerPrager.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\nD\DruckerPrager.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\nD\DruckerPrager3D.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\nD\DruckerPrager3D.h">
+			</File>
 			<File
 				RelativePath="..\..\..\SRC\material\nD\NDMaterial.cpp">
 			</File>
@@ -1416,6 +1440,82 @@
 				</File>
 				<File
 					RelativePath="..\..\..\SRC\material\nD\NewTemplate3Dep\elnp_Elastic.h">
+				</File>
+			</Filter>
+			<Filter
+				Name="reinforcedConcretePlaneStress"
+				Filter="">
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\ConcreteL01.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\ConcreteL01.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\ConcreteZ01.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\ConcreteZ01.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\FAFourSteelPCPlaneStress.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\FAFourSteelPCPlaneStress.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\FAFourSteelRCPlaneStress.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\FAFourSteelRCPlaneStress.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\FAPrestressedConcretePlaneStress.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\FAPrestressedConcretePlaneStress.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\FAReinforcedConcretePlaneStress.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\FAReinforcedConcretePlaneStress.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\PrestressedConcretePlaneStress.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\PrestressedConcretePlaneStress.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\RAFourSteelPCPlaneStress.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\RAFourSteelPCPlaneStress.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\RAFourSteelRCPlaneStress.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\RAFourSteelRCPlaneStress.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\ReinforcedConcretePlaneStress.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\ReinforcedConcretePlaneStress.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\SteelZ01.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\SteelZ01.h">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\TendonL01.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\TendonL01.h">
 				</File>
 			</Filter>
 		</Filter>

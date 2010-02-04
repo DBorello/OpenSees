@@ -160,9 +160,6 @@
 				RelativePath="..\..\..\Src\element\truss\CorotTrussSection.h">
 			</File>
 			<File
-				RelativePath="..\..\..\SRC\element\truss\TclTrussCommand.cpp">
-			</File>
-			<File
 				RelativePath="..\..\..\SRC\element\truss\Truss.cpp">
 			</File>
 			<File
@@ -217,6 +214,12 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\element\zeroLength\ZeroLengthContact3D.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\zeroLength\ZeroLengthContactNTS2D.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\zeroLength\ZeroLengthContactNTS2D.h">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\element\zeroLength\ZeroLengthND.cpp">
