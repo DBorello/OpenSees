@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2010-02-04 00:34:10 $
+// $Revision: 1.7 $
+// $Date: 2010-02-04 18:32:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/DiscretizedRandomProcessSeries.cpp,v $
 
 
@@ -61,6 +61,7 @@ TimeSeries *
 DiscretizedRandomProcessSeries::getCopy(void) 
 {
   opserr << "DiscretizedRandomProcessSeries::getCopy() - not yet implemented\n";
+  return 0;
 }
 
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2010-02-04 00:34:11 $
+// $Revision: 1.3 $
+// $Date: 2010-02-04 18:32:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/SimulatedRandomProcessSeries.cpp,v $
 
 
@@ -78,6 +78,7 @@ SimulatedRandomProcessSeries::SimulatedRandomProcessSeries(int tag,
 TimeSeries *
 SimulatedRandomProcessSeries::getCopy(void) {
   opserr << "SimulatedRandomProcessSeries::getCopy(void) - not yet implemented\n";
+  return 0;
 }
 
 SimulatedRandomProcessSeries::~SimulatedRandomProcessSeries()
