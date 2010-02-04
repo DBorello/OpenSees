@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.8 $
-** $Date: 2009-10-02 22:20:35 $
+** $Revision: 1.9 $
+** $Date: 2010-02-04 01:19:36 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/elementAPI.cpp,v $
                                                                         
 ** Written: fmk 
@@ -125,6 +125,12 @@ int OPS_Error(char *errorMessage, int length)
 }
 
 extern "C"   
+int OPS_GetNumRemainingInputArgs()
+{
+    return maxArg-currentArg;
+}
+
+extern "C"   
 int OPS_GetIntInput(int *numData, int*data)
 {
   int size = *numData;
@@ -155,6 +161,43 @@ int OPS_GetDoubleInput(int *numData, double *data)
   }
   return 0;  
 }
+
+
+
+extern "C" 
+int OPS_GetString(char *arrayData, int sizeArray)
+{
+  if (currentArg > maxArg) {
+      opserr << "OPS_GetStringInput -- error reading " << currentArg << endln;
+      return -1;
+  }
+
+  if (strlen(currentArgv[currentArg]) > sizeArray) {
+      opserr << "OPS_GetStringInput -- passed array too small " << currentArg << endln;
+      return -1;
+  }
+
+  strcpy(arrayData, currentArgv[currentArg]);
+  currentArg++;
+
+  return 0;  
+}
+
+
+int OPS_GetStringCopy(char **arrayData)
+{
+  if (currentArg > maxArg) {
+      opserr << "OPS_GetStringInput -- error reading " << currentArg << endln;
+      return -1;
+  }
+  char *newData = new char[strlen(currentArgv[currentArg])];
+  strcpy(newData, currentArgv[currentArg]);
+  arrayData = &newData;
+  currentArg++;
+
+  return 0;  
+}
+
 
 extern "C" 
 matObj *OPS_GetMaterial(int *matTag, int *matType)
@@ -690,7 +733,7 @@ OPS_GetNDMaterial(int matTag)
   return theModelBuilder->getNDMaterial(matTag);
 }
 SectionForceDeformation *
-OPS_GetSectionForeceDeformation(int matTag)
+OPS_GetSectionForceDeformation(int matTag)
 {
   return theModelBuilder->getSection(matTag);
 }
@@ -716,3 +759,14 @@ OPS_ResetInput(ClientData clientData,
 }
 	       
 			       
+int     
+OPS_GetNDF()
+{
+  return theModelBuilder->getNDM();
+}
+
+int     
+OPS_GetNDM()
+{
+  return theModelBuilder->getNDF();
+}

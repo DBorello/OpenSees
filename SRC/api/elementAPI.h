@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.7 $
-** $Date: 2009-10-02 22:20:35 $
+** $Revision: 1.8 $
+** $Date: 2010-02-04 01:19:36 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/elementAPI.h,v $
                                                                         
 ** Written: fmk 
@@ -37,8 +37,18 @@
 #define ISW_REVERT_TO_START 5
 #define ISW_DELETE 6
 
+#define ISW_SET_RESPONSE 7
+#define ISW_GET_RESPONSE 8
+
+
 #define OPS_UNIAXIAL_MATERIAL_TYPE 1
-#define OPS_SECTION_TYPE 2
+#define OPS_SECTION2D_TYPE 2
+#define OPS_SECTION3D_TYPE 3
+#define OPS_PLANESTRESS_TYPE 4
+#define OPS_PLANESTRAIN_TYPE 5
+#define OPS_THREEDIMENSIONAL_TYPE 6
+#define OPS_SECTION_TYPE 7
+
 
 struct modState {
   double time;
@@ -51,6 +61,7 @@ typedef void (*matFunct)(struct matObject *, modelState *,double *strain, double
 
 struct matObject {
   int tag;
+  int matType;
   int nParam;
   int nState;
   double *theParam;
@@ -97,12 +108,21 @@ typedef struct eleObject eleObj;
 #define OPS_GetNodeIncrDeltaDisp ops_getnodeincrdeltadisp_
 #define OPS_InvokeMaterial ops_invokematerial_
 #define OPS_InvokeMaterialDirectly ops_invokematerialdirectly_
+#define OPS_GetInt ops_getintinput_
+#define OPS_GetDouble ops_getdoubleinput_
+#define OPS_GetString ops_getstring
+#define OPS_GetNDM ops_getndm_
+#define OPS_GetNDF ops_getndf__
 
 #ifdef __cplusplus
-
+extern "C" int        OPS_GetNDM();
+extern "C" int        OPS_GetNDF();
 extern "C" int        OPS_Error(char *, int length);
+extern "C" int        OPS_GetNumRemainingInputArgs();
 extern "C" int        OPS_GetIntInput(int *numData, int*data);
 extern "C" int        OPS_GetDoubleInput(int *numData, double *data);
+extern "C" int        OPS_GetString(char *cArray, int sizeArray); // does a strcpy
+extern "C" int        OPS_GetStringCopy(char **cArray); // returns a new copy
 extern "C" matObj    *OPS_GetMaterial(int *matTag, int *matType);
 extern "C" void       OPS_GetMaterialPtr(int *, matObj *);
 extern "C" eleObj    *OPS_GetElement(int *);
@@ -127,20 +147,25 @@ class NDMaterial;
 class SectionForceDeformation;
 extern UniaxialMaterial *OPS_GetUniaxialMaterial(int matTag);
 extern NDMaterial *OPS_GetNDMaterial(int matTag);
-extern SectionForceDeformation *OPS_GetSectionForeceDeformation(int matTag);
+extern SectionForceDeformation *OPS_GetSectionForceDeformation(int matTag);
 
 #else
+
+
+int     OPS_GetNDF();
+int     OPS_GetNDM();
 
 int     OPS_Error(char *, int length);
 int     OPS_GetIntInput(int *numData, int*data);
 int     OPS_GetDoubleInput(int *numData, double *data);
-matObj    *OPS_GetMaterial(int *matTag, int *matType);
-void       OPS_GetMaterialPtr(int *, matObj *);
-eleObj    *OPS_GetElement(int *);
-matObj    *OPS_GetMaterialType(char *type, int sizeType);
-eleObj    *OPS_GetElementType(char *, int);
-int        OPS_AllocateElement(eleObj *, int *matTags, int *maType);
-int        OPS_AllocateMaterial(matObj *);
+int     OPS_GetString(char *cArray, int sizeArray);
+matObj  *OPS_GetMaterial(int *matTag, int *matType);
+void    OPS_GetMaterialPtr(int *, matObj *);
+eleObj  *OPS_GetElement(int *);
+matObj  *OPS_GetMaterialType(char *type, int sizeType);
+eleObj  *OPS_GetElementType(char *, int);
+int     OPS_AllocateElement(eleObj *, int *matTags, int *maType);
+int     OPS_AllocateMaterial(matObj *);
 
 int    OPS_InvokeMaterial(struct eleObj *, int *,modelState *, double *, double *, double *, int *);
 int    OPS_InvokeMaterialDirectly(matObj **, modelState *, double *, double *, double *, int *);
