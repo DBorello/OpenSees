@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2009-01-08 00:00:41 $
+// $Revision: 1.31 $
+// $Date: 2010-02-04 00:39:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -1589,8 +1589,10 @@ Node::Print(OPS_Stream &s, int flag)
       s << "\t unbalanced Load: " << *unbalLoad;
     if (reaction != 0)
       s << "\t reaction: " << *reaction;
-    if (mass != 0) 
+    if (mass != 0) {
 	s << "\tMass : " << *mass;
+	s << "\t Rayleigh Factor: alphaM: " << alphaM << endln;
+    }
     if (theEigenvectors != 0)
 	s << "\t Eigenvectors: " << *theEigenvectors;
     if (theDOF_GroupPtr != 0)
