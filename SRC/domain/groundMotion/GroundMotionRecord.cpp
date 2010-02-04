@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:32:40 $
+// $Revision: 1.6 $
+// $Date: 2010-02-04 00:37:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/groundMotion/GroundMotionRecord.cpp,v $
                                                                         
                                                                         
@@ -62,7 +62,7 @@ GroundMotionRecord::GroundMotionRecord(const char *fileNameAccel,
    data(3), delta(dT)
 {
 
-  theAccelTimeSeries = new PathSeries(fileNameAccel, timeStep, theFactor);
+  theAccelTimeSeries = new PathSeries(0, fileNameAccel, timeStep, theFactor);
 
   if (theAccelTimeSeries == 0) {
     opserr << "GroundMotionRecord::GroundMotionRecord() - unable to create PathSeries\n";
@@ -79,7 +79,7 @@ GroundMotionRecord::GroundMotionRecord(const char *fileNameAccel,
    data(3), delta(dT)
 {
 
-  theAccelTimeSeries = new PathTimeSeries(fileNameAccel, fileNameTime, theFactor);
+  theAccelTimeSeries = new PathTimeSeries(0, fileNameAccel, fileNameTime, theFactor);
 
   if (theAccelTimeSeries == 0) {
     opserr << "GroundMotionRecord::GroundMotionRecord() - unable to create PathSeries\n";
