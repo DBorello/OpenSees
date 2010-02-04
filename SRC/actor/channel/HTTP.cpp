@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2009-07-31 21:43:17 $
+// $Revision: 1.10 $
+// $Date: 2010-02-04 19:11:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/HTTP.cpp,v $
                                                                         
 // Written: fmk 11/06
@@ -263,7 +263,127 @@ httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr) {
 }
 
 
+#ifdef _WIN32
+int __cdecl
+#else
+int
+#endif
+httpGET_File(char const *URL, char const *page, unsigned int port, const char *filename) {
 
+  int nleft, nwrite, sizeData, ok;
+  char *gMsg, *data, *nextData;
+  char outBuf[OUTBUF_SIZE], inBuf[OUTBUF_SIZE];
+  socket_type sockfd;
+
+  FILE *fp;
+
+
+  fprintf(stderr, "httpGetFile URL: %s page %s\n", URL, page);  
+
+  // invoke startup sockets
+  startup_sockets();
+  
+  // open a socket
+  sockfd = establishHTTPConnection(URL, port);
+  if (sockfd < 0) {
+    fprintf(stderr, "postData: failed to establis connection\n");
+    return -1;
+  }
+
+  sockfd = establishHTTPConnection(URL, port);
+  if (sockfd < 0) {
+    fprintf(stderr, "httpGet: failed to establis connection\n");
+    return -1;
+  }
+
+  // add the header information to outBuf
+  sprintf(outBuf, "GET \/%s HTTP/1.1\nHost:%s\n", page, URL);
+  strcat(outBuf,"Keep-Alive:300\n");
+  strcat(outBuf, "Connection:keep-alive\n\n");
+
+  nleft = strlen(outBuf);
+
+  //send the data
+  // if o.k. get a ponter to the data in the message and 
+  // place the incoming data there
+  nwrite = 0;    
+  gMsg = outBuf;
+
+  while (nleft > 0) {
+    nwrite = send(sockfd, gMsg, nleft, 0);
+    nleft -= nwrite;
+    gMsg +=  nwrite;
+  }
+
+  ok = 1;
+  nleft = 4095;
+
+  sizeData = 0;
+  nextData = 0;
+  data = 0;
+
+  //
+  // open file for writing
+  //
+
+  int fileOpened = 0;
+  bool headerStripped = false;
+
+  while (ok > 0) {
+
+    gMsg = inBuf;
+    ok = recv(sockfd, gMsg, nleft, 0);
+
+    fprintf(stderr, "ok %d nleft %d\n", ok, nleft);
+
+    if (ok > 0) {
+
+      // now we need to strip off the response header 
+      nextData = strstr(gMsg, "Bad");
+      if (nextData != NULL) {
+	fprintf(stderr, "Bad Request\n");	  
+	return -1;
+      }
+
+      if (fileOpened == 0) {
+	fp = fopen(filename,"wb");
+	if (fp == 0) {
+	  fprintf(stderr, "cannot open file %s for reading - is it still open for writing!\n", filename);
+	  return -1;
+	} else
+	  fileOpened = 1;
+      }
+
+      if (headerStripped == false) {
+	gMsg = inBuf;
+	nextData = strstr(gMsg,"Content-Type");
+	if (nextData != NULL) {
+	  nextData = strchr(nextData,'\n');
+	  nextData += 3;
+	  
+	  nwrite = sizeData+1-(nextData-data);
+	  fwrite((void *)nextData, 1, nwrite, fp);
+	  headerStripped = true;
+	}
+      } else {
+	fwrite((void *)gMsg, 1, nleft, fp);
+      }
+    }
+  }
+
+  fprintf(stderr,"DONE\n");
+
+  if (fileOpened == 1)
+    fclose(fp);
+
+  cleanup_sockets();
+  
+  return 0;
+}
+
+
+
+	/*
 #ifdef _WIN32
 int __cdecl
 #else
@@ -385,7 +505,7 @@ httpGET_File(char const *URL, char const *page, unsigned int port, const char *f
   return 0;
 }
 
-
+	*/
 
 #ifdef _HTTPS
 

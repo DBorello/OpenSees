@@ -10,8 +10,8 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.2 $
-// $Date: 2007-02-02 01:44:56 $
+// $Revision: 1.3 $
+// $Date: 2010-02-04 19:14:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/UP-ucsd/Nine_Four_Node_QuadUPOld.h,v $
 
 #ifndef NineFourNodeQuadUP_h
