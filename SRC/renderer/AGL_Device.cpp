@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-02-15 23:40:47 $
+// $Revision: 1.2 $
+// $Date: 2010-02-04 01:21:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/AGL_Device.cpp,v $
                                                                         
 #include <AGL_Device.h>
@@ -62,7 +62,7 @@ AGL_Device::~AGL_Device()
   aglSetCurrentContext(NULL);
   aglSetDrawable(context, NULL);
   aglDestroyContext(context);
-  ReleaseWindow(window);
+  //  ReleaseWindow(window);
 }
 
 void
@@ -94,14 +94,14 @@ AGL_Device::WINOPEN(const char *_title, int _xLoc, int _yLoc, int _width, int _h
   screen = GetGWorldDevice(GetWindowPort(window));
   if (screen == 0) {
     fprintf(stderr, "Can't get GDevice for window\n");
-    ReleaseWindow(window);
+    //    ReleaseWindow(window);
   }
   
   //    pixelFormat = aglChoosePixelFormat(&screen, 1, ATTRIBUTES);
   pixelFormat = aglChoosePixelFormat(NULL, 1, ATTRIBUTES);
   if (pixelFormat == NULL) {
     fprintf(stderr, "Can't choose pixel format\n");
-    ReleaseWindow(window);
+    //    ReleaseWindow(window);
   }
   
   context = aglCreateContext(pixelFormat, NULL);
@@ -118,13 +118,13 @@ AGL_Device::WINOPEN(const char *_title, int _xLoc, int _yLoc, int _width, int _h
   if (!aglSetDrawable(context, GetWindowPort(window))) {
       fprintf(stderr, "Can't set context's drawable\n");
       aglDestroyContext(context);
-      ReleaseWindow(window);
+      //      ReleaseWindow(window);
     }
   
   if (!aglSetCurrentContext(context)) {
       fprintf(stderr, "Can't make context current\n");
       aglDestroyContext(context);
-      ReleaseWindow(window);
+      //      ReleaseWindow(window);
     }
   
     //    aglSetWindowRef(context, window);
@@ -140,7 +140,7 @@ AGL_Device::CLEAR()
   if (!aglSetCurrentContext(context)) {
     fprintf(stderr, "Can't make context current\n");
     aglDestroyContext(context);
-    ReleaseWindow(window);
+    //    ReleaseWindow(window);
   }
 }
 
