@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2008-03-13 22:26:01 $
+// $Revision: 1.4 $
+// $Date: 2010-02-04 18:31:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/NewDiscretizedRandomProcessSeries.cpp,v $
 
 #include <NewDiscretizedRandomProcessSeries.h>
@@ -77,6 +77,12 @@ NewDiscretizedRandomProcessSeries::~NewDiscretizedRandomProcessSeries()
   }
 }
 
+TimeSeries *
+NewDiscretizedRandomProcessSeries::getCopy(void)
+{
+  opserr << "NewDiscretizedRandomProcessSeries::getCopy() - not yet implemented\n";
+  return 0;
+}
 
 int
 NewDiscretizedRandomProcessSeries::setParameter (const char **argv, int argc, Parameter &param)

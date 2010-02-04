@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2008-02-29 23:04:15 $
+// $Revision: 1.3 $
+// $Date: 2010-02-04 18:31:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/NewDiscretizedRandomProcessSeries.h,v $
                                                                        
 
@@ -53,6 +53,7 @@ public:
 				      double targetStdv);
     ~NewDiscretizedRandomProcessSeries();
 
+    TimeSeries *getCopy(void);
     // method to get load factor
     double getFactor(double pseudoTime);
 
