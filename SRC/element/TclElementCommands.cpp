@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.60 $
-// $Date: 2009-11-03 23:37:57 $
+// $Revision: 1.61 $
+// $Date: 2010-02-04 01:18:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
 
 // Written: fmk
@@ -85,13 +85,17 @@ extern void printCommand(int argc, TCL_Char **argv);
 // THE PROTOTYPES OF THE FUNCTIONS INVOKED BY THE INTERPRETER
 //
 
-extern int
-TclModelBuilder_addFeapTruss(ClientData clientData, Tcl_Interp *interp,  int argc,
-			     TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
+extern  void *OPS_NewTrussElement(void);
+extern  void *OPS_NewTrussSectionElement(void);
+extern  void *OPS_NewCorotTrussElement(void);
+extern  void *OPS_NewCorotTrussSectionElement(void);
+extern Element *OPS_NewZeroLengthContactNTS2D(void);
 
-extern int
-TclModelBuilder_addTruss(ClientData clientData, Tcl_Interp *interp,  int argc,
-			 TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
+
+
+extern int TclModelBuilder_addFeapTruss(ClientData clientData, Tcl_Interp *interp,  int argc,
+					TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
+
 
 
 extern int
@@ -148,6 +152,7 @@ TclModelBuilder_addZeroLengthContact2D(ClientData, Tcl_Interp *, int, TCL_Char *
 extern int
 TclModelBuilder_addZeroLengthContact3D(ClientData, Tcl_Interp *, int, TCL_Char **,
 				       Domain*, TclModelBuilder *);
+
 
 // MHS
 extern int
@@ -348,6 +353,9 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
     return TCL_ERROR;
   }
 
+
+  OPS_ResetInput(clientData, interp, 2, argc, argv, theTclDomain, theTclBuilder);
+
   // check at least two arguments so don't segemnt fault on strcmp
   if (argc < 2) {
     opserr << "WARNING need to specify an element type\n";
@@ -355,16 +363,79 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
     return TCL_ERROR;
   }
 
+  Element *theElement = 0;
+
+  if ((strcmp(argv[1],"truss") == 0) || (strcmp(argv[1],"Truss") == 0)) {
+    
+    void *theEle = OPS_NewTrussElement();
+    
+    // for backward compatability
+    if (theEle == 0)
+      theEle = OPS_NewTrussSectionElement(); 
+    
+    if (theEle != 0) 
+      theElement = (Element *)theEle;
+    else 
+      return TCL_ERROR;      
+
+  } else if ((strcmp(argv[1],"trussSection") == 0) || (strcmp(argv[1],"TrussSection") == 0)) {
+
+    void *theEle = OPS_NewTrussSectionElement(); 
+    if (theEle != 0) 
+      theElement = (Element *)theEle;
+    else 
+      return TCL_ERROR;      
+
+  }
+  else if ((strcmp(argv[1],"corotTruss") == 0) || (strcmp(argv[1],"CorotTruss") == 0)) {
+    
+    void *theEle = OPS_NewCorotTrussElement();
+    
+    // for backward compatability
+    if (theEle == 0)
+      theEle = OPS_NewCorotTrussSectionElement(); 
+    
+    if (theEle != 0) 
+      theElement = (Element *)theEle;
+    else 
+      return TCL_ERROR;      
+
+  } else if ((strcmp(argv[1],"corotTrussSection") == 0) || (strcmp(argv[1],"CorotTrussSection") == 0)) {
+
+    void *theEle = OPS_NewCorotTrussSectionElement(); 
+    if (theEle != 0) 
+      theElement = (Element *)theEle;
+    else 
+      return TCL_ERROR;      
+
+  } else if (strcmp(argv[1],"zeroLengthContactNTS2D") == 0) {
+    
+    Element *theEle = OPS_NewZeroLengthContactNTS2D();
+    if (theEle != 0) 
+      theElement = (Element *)theEle;
+    else
+      return TCL_ERROR;
+  }
+
+  // if one of the above worked
+  if (theElement != 0) {
+    if (theTclDomain->addElement(theElement) == false) {
+      opserr << "WARNING could not add element of with tag: " << theElement->getTag() << " and of type: " 
+	     << theElement->getClassType() << " to the Domain\n";
+      delete theElement;
+      return TCL_ERROR;
+    } else
+      return TCL_OK;
+  }
+
+
+
   if (strcmp(argv[1],"fTruss") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addFeapTruss(clientData, interp, argc, argv,
 					      theTclDomain, theTclBuilder, eleArgStart);
     return result;
-  } else if (strcmp(argv[1],"truss") == 0 || strcmp(argv[1],"corotTruss") == 0) {
-    int eleArgStart = 1;
-    int result = TclModelBuilder_addTruss(clientData, interp, argc, argv,
-					  theTclDomain, theTclBuilder, eleArgStart);
-    return result;
+
   } else if (strcmp(argv[1],"elasticBeamColumn") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addElasticBeam(clientData, interp, argc, argv,
@@ -635,7 +706,7 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
     int result = TclModelBuilder_addZeroLengthContact3D(clientData, interp, argc, argv,
 							theTclDomain, theTclBuilder);
     return result;
-    
+
   } else if (strcmp(argv[1],"zeroLengthND") == 0) {
     int result = TclModelBuilder_addZeroLengthND(clientData, interp, argc, argv,
 						 theTclDomain, theTclBuilder);
