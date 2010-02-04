@@ -5,6 +5,7 @@ FE_INCLUDES  = -I$(FE)/matrix \
                -I$(FE)/damage \
                -I$(FE)/tcl \
                -I$(FE)/material \
+               -I$(FE)/material/wall \
                -I$(FE)/material/uniaxial \
                -I$(FE)/material/uniaxial/fedeas \
                -I$(FE)/material/uniaxial/drain \
@@ -181,6 +182,7 @@ FE_INCLUDES  = -I$(FE)/matrix \
                -I$(FE)/api \
                -I$(FE) \
                -I$(SUPERLUdir) \
-               -I$(FE)/package 	
+               -I$(FE)/package \
+	       -I$(FE)/../OTHER/AMD
                
                
