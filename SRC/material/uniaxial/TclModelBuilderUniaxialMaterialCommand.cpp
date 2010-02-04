@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.66 $
-// $Date: 2010-02-04 01:01:49 $
+// $Revision: 1.67 $
+// $Date: 2010-02-04 02:01:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -80,7 +80,7 @@
 
 #include <UniaxialJ2Plasticity.h>   // Quan 
 
-
+extern void *OPS_NewBilinMaterial(void);
 extern void *OPS_NewSAWSMaterial(void);
 extern void *OPS_NewConcreteZ01Material(void);
 extern void *OPS_NewConcreteL01Material(void);
@@ -1712,6 +1712,14 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 
     else if ((strcmp(argv[1],"SAWSMaterial") == 0) || (strcmp(argv[1],"SAWS") == 0)) {
       void *theMat = OPS_NewSAWSMaterial();
+      if (theMat != 0) 
+	theMaterial = (UniaxialMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+    }
+
+    else if ((strcmp(argv[1],"BilinMaterial") == 0) || (strcmp(argv[1],"Bilin") == 0)) {
+      void *theMat = OPS_NewBilinMaterial();
       if (theMat != 0) 
 	theMaterial = (UniaxialMaterial *)theMat;
       else 
