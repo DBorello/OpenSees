@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.8 $
-// $Date: 2005-12-19 22:43:36 $
+// $Revision: 1.9 $
+// $Date: 2010-02-04 01:06:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark.h,v $
 
 
@@ -49,8 +49,6 @@ public:
     // constructors
     Newmark();
     Newmark(double gamma, double beta, bool disp = true);
-    Newmark(double gamma, double beta, double alphaM, double betaK,
-        double betaKi, double betaKc, bool disp = true);
 
     // destructor
     ~Newmark();
@@ -78,12 +76,6 @@ protected:
     bool displ;      // a flag indicating whether displ or accel increments
     double gamma;
     double beta;
-    
-    // rayleigh damping factors
-    double alphaM;
-    double betaK;
-    double betaKi;
-    double betaKc;
     
     double c1, c2, c3;              // some constants we need to keep
     Vector *Ut, *Utdot, *Utdotdot;  // response quantities at time t
