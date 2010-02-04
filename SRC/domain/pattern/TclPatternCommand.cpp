@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.13 $
-// $Date: 2007-09-29 01:54:39 $
+// $Revision: 1.14 $
+// $Date: 2010-02-04 00:35:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclPatternCommand.cpp,v $
 
 // Written: fmk
@@ -75,8 +75,11 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg);
 
 
 int
-TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
-			      int argc, TCL_Char **argv, Domain *theDomain)
+TclPatternCommand(ClientData clientData, 
+		  Tcl_Interp *interp,
+		  int argc, 
+		  TCL_Char **argv, 
+		  Domain *theDomain)
 {
   LoadPattern *thePattern = 0;
 

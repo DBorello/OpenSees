@@ -12,13 +12,28 @@ RELIABILITY_OBJS =
 endif
 
 OBJS       = $(RELIABILITY_OBJS) \
-	EarthquakePattern.o PBowlLoading.o LinearSeries.o \
-	LoadPattern.o LoadPatternIter.o PathSeries.o PathTimeSeries.o \
-	RectangularSeries.o TimeSeries.o TclPatternCommand.o \
-	TrigSeries.o ConstantSeries.o UniformExcitation.o \
-	TimeSeriesIntegrator.o TrapezoidalTimeSeriesIntegrator.o \
-	MultiSupportPattern.o TclSeriesCommand.o TclSeriesIntegratorCommand.o \
-	PulseSeries.o TriangleSeries.o PeerMotion.o PeerNGAMotion.o
+	EarthquakePattern.o \
+	PBowlLoading.o \
+	LinearSeries.o \
+	LoadPattern.o \
+	LoadPatternIter.o \
+	PathSeries.o \
+	PathTimeSeries.o \
+	RectangularSeries.o \
+	TimeSeries.o \
+	TclPatternCommand.o \
+	TrigSeries.o \
+	ConstantSeries.o \
+	UniformExcitation.o \
+	TimeSeriesIntegrator.o \
+	TrapezoidalTimeSeriesIntegrator.o \
+	MultiSupportPattern.o \
+	TclSeriesCommand.o \
+	PulseSeries.o \
+	TriangleSeries.o \
+	TclSeriesIntegratorCommand.o \
+	PeerMotion.o \
+	PeerNGAMotion.o
 
 # Compilation control
 
