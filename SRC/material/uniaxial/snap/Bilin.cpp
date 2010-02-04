@@ -29,13 +29,13 @@
 
 #define OPS_Export 
 
-static int numSAWSMaterials = 0;
+static int numBilinMaterials = 0;
 
 OPS_Export void *
-OPS_NewSAWSMaterial()
+OPS_NewBilinMaterial()
 {
-  if (numSAWSMaterials == 0) {
-    numSAWSMaterials++;
+  if (numBilinMaterials == 0) {
+    numBilinMaterials++;
     OPS_Error("Bilin unaxial material - Written by D. Lignos, Stanfurd 2009\n", 1);
   }
 
@@ -47,7 +47,7 @@ OPS_NewSAWSMaterial()
   int numData = 1;
 
   if (OPS_GetIntInput(&numData, iData) != 0) {
-    opserr << "WARNING invalid uniaxialMaterial SAWSMaterial tag" << endln;
+    opserr << "WARNING invalid uniaxialMaterial BilinMaterial tag" << endln;
     return 0;
   }
 
