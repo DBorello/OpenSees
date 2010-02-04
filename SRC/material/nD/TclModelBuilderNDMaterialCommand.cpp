@@ -25,8 +25,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.42 $
-// $Date: 2009-08-07 20:57:29 $
+// $Revision: 1.43 $
+// $Date: 2010-02-04 00:41:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
 
 
@@ -63,6 +63,17 @@
 #include <FiniteDeformationElastic3D.h>
 #include <FiniteDeformationEP3D.h>
 
+extern  void *OPS_NewReinforcedConcretePlaneStressMaterial(void);
+extern  void *OPS_NewFAReinforcedConcretePlaneStressMaterial(void);
+extern  void *OPS_NewFAFourSteelRCPlaneStressMaterial(void);
+extern  void *OPS_NewRAFourSteelRCPlaneStressMaterial(void);
+extern  void *OPS_NewPrestressedConcretePlaneStressMaterial(void);
+extern  void *OPS_NewFAPrestressedConcretePlaneStressMaterial(void);
+extern  void *OPS_NewFAFourSteelPCPlaneStressMaterial(void);
+extern  void *OPS_NewRAFourSteelPCPlaneStressMaterial(void);
+
+extern  void *OPS_NewDruckerPragerMaterial(void);
+
 Template3Dep *
 TclModelBuilder_addTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  int argc,
 				TCL_Char **argv, TclModelBuilder *theTclBuilder, int eleArgStart);
@@ -85,6 +96,14 @@ TclModelBuilder_addFeapMaterial(ClientData clientData, Tcl_Interp *interp,
 				TclModelBuilder *theTclBuilder);
 
 
+extern int OPS_ResetInput(ClientData clientData, 
+			  Tcl_Interp *interp,  
+			  int cArg, 
+			  int mArg, 
+			  TCL_Char **argv, 
+			  Domain *domain,
+			  TclModelBuilder *builder);
+
 static void printCommand(int argc, TCL_Char **argv)
 {
     opserr << "Input command: ";
@@ -104,14 +123,99 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	return TCL_ERROR;
     }
 
+    OPS_ResetInput(clientData, interp, 2, argc, argv, 0, theTclBuilder);	  
+
     // Pointer to an ND material that will be added to the model builder
     NDMaterial *theMaterial = 0;
 
     // Check argv[1] for ND material type
 
+    if ((strcmp(argv[1],"ReinforceConcretePlaneStress") == 0) || (strcmp(argv[1],"ReinforceConcretePlaneStress") == 0)) {
+
+      void *theMat = OPS_NewReinforcedConcretePlaneStressMaterial();
+      if (theMat != 0) 
+	theMaterial = (NDMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+    }
+
+    else if ((strcmp(argv[1],"FAReinforceConcretePlaneStress") == 0) || (strcmp(argv[1],"FAReinforceConcretePlaneStress") == 0)) {
+
+      void *theMat = OPS_NewFAReinforcedConcretePlaneStressMaterial();
+      if (theMat != 0) 
+	theMaterial = (NDMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+    }
+
+    else if ((strcmp(argv[1],"RAFourSteelRCPlaneStress") == 0)){
+
+      void *theMat = OPS_NewRAFourSteelRCPlaneStressMaterial();
+      if (theMat != 0) 
+	theMaterial = (NDMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+    }
+
+    else if ((strcmp(argv[1],"FAFourSteelRCPlaneStress") == 0)){
+
+      void *theMat = OPS_NewFAFourSteelRCPlaneStressMaterial();
+      if (theMat != 0) 
+	theMaterial = (NDMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+    }
+
+    else if ((strcmp(argv[1],"PrestressedConcretePlaneStress") == 0)){
+
+      void *theMat = OPS_NewPrestressedConcretePlaneStressMaterial();
+      if (theMat != 0) 
+	theMaterial = (NDMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+    }
+
+    else if ((strcmp(argv[1],"FAPrestressedConcretePlaneStress") == 0)){
+
+      void *theMat = OPS_NewFAPrestressedConcretePlaneStressMaterial();
+      if (theMat != 0) 
+	theMaterial = (NDMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+    }
+
+    else if ((strcmp(argv[1],"RAFourSteetPCPlaneStress") == 0)){
+
+      void *theMat = OPS_NewRAFourSteelPCPlaneStressMaterial();
+      if (theMat != 0) 
+	theMaterial = (NDMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+    }
+
+    else if ((strcmp(argv[1],"FAFourSteelPCPlaneStress") == 0)){
+
+      void *theMat = OPS_NewFAFourSteelPCPlaneStressMaterial();
+      if (theMat != 0) 
+	theMaterial = (NDMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+    }
+
+
+    else if ((strcmp(argv[1],"DruckerPrager") == 0)){
+
+      void *theMat = OPS_NewDruckerPragerMaterial();
+      if (theMat != 0) 
+	theMaterial = (NDMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+    }
+
+
     //Jul. 07, 2001 Boris Jeremic & ZHaohui Yang jeremic|zhyang@ucdavis.edu
     // Pressure dependent elastic material
-    if (strcmp(argv[1],"PressureDependentElastic3D") == 0) {
+    else if (strcmp(argv[1],"PressureDependentElastic3D") == 0) {
 	if (argc < 6) {
 	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
