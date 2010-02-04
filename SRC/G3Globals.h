@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-07 22:16:23 $
+// $Revision: 1.4 $
+// $Date: 2010-02-04 19:13:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/G3Globals.h,v $
                                                                         
                                                                         
@@ -32,13 +32,13 @@
 // Description: This file contains global variables used in OpenSees files.
 // if you change some of the variables, you must recompile ALL the code.
 
-#include <ErrorHandler.h>
+//#include <ErrorHandler.h>
 class Domain;
 class Element;
 
 #define MAX_FILENAMELENGTH 50
 
-extern ErrorHandler *g3ErrorHandler;   // error handler for sending warning & fatal error messages
+//extern ErrorHandler *g3ErrorHandler;   // error handler for sending warning & fatal error messages
 extern double   ops_Dt;                // current delta T for current domain doing an update
 // extern double  *ops_Gravity;        // gravity factors for current domain undergoing an update
 extern Domain  *ops_TheActiveDomain;   // current domain undergoing an update
