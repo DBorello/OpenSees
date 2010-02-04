@@ -21,7 +21,9 @@ OBJS       = NDMaterial.o \
              ElasticIsotropicBeamFiber.o \
              BeamFiberMaterial.o \
              FeapMaterial.o \
-             ElasticCrossAnisotropic.o 
+             ElasticCrossAnisotropic.o \
+	DruckerPrager.o \
+	DruckerPrager3D.o
 
 all: $(OBJS) 
 	@$(CD) $(FE)/material/nD/soil; $(MAKE);
