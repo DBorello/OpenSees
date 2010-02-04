@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.153 $
-// $Date: 2010-02-04 18:22:14 $
+// $Revision: 1.154 $
+// $Date: 2010-02-04 19:39:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -7350,7 +7350,6 @@ int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char *
     neesCentralProjID = 0;
   }
 
-  opserr << "OpenSeesExit-8\n";
   Tcl_Exit(0);
   return 0;
 }
