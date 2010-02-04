@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2009-11-03 23:09:39 $
+// $Revision: 1.24 $
+// $Date: 2010-02-04 01:11:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -61,16 +61,99 @@ Vector TrussSection::trussV4(4);
 Vector TrussSection::trussV6(6);
 Vector TrussSection::trussV12(12);
 
+
+#include <elementAPI.h>
+#define OPS_Export 
+
+OPS_Export void *
+OPS_NewTrussSectionElement()
+{
+  Element *theElement = 0;
+
+  int numRemainingArgs = OPS_GetNumRemainingInputArgs();
+
+  if (numRemainingArgs < 4) {
+    opserr << "Invalid Args want: element TrussSection $tag $iNode $jNode $sectTag <-rho $rho> \n";
+    return 0;	
+  }
+
+  int    iData[4];
+  double rho = 0.0;
+  int ndm = OPS_GetNDM();
+  int doRayleigh = 0; // by default rayleigh not done
+
+  if (numRemainingArgs != 4 || numRemainingArgs != 6)
+    return 0; 
+
+  int numData = 4;
+  if (OPS_GetInt(&numData, iData) != 0) {
+    opserr << "WARNING invalid integer (tag, iNode, jNode, sectTag) in element TrussSection " << endln;
+    return 0;
+  }
+
+  SectionForceDeformation *theSection = OPS_GetSectionForceDeformation(iData[3]);
+    
+  if (theSection == 0) {
+    opserr << "WARNING: Invalid section not found element TrussSection " << iData[0] << " $iNode $jNode " << 
+      iData[3] << " <-rho $rho> \n";
+    return 0;
+  }
+  
+  numRemainingArgs -= 4;
+  while (numRemainingArgs > 1) {
+    char argvS[10];
+    if (OPS_GetString(argvS, 10) != 0) {
+      opserr << "WARNING: Invalid optional string element TrussSection " << iData[0] << 
+	" $iNode $jNode $sectTag <-rho $rho>\n";
+      return 0;
+    } 
+  
+    if (strcmp(argvS,"-rho") == 0) {
+      numData = 1;
+      if (OPS_GetDouble(&numData, &rho) != 0) {
+	opserr << "WARNING Invalid rho in element TrussSection " << iData[0] << 
+	  " $iNode $jNode $secTag <-rho $rho>\n";
+	return 0;
+      }
+    } else if (strcmp(argvS,"-doRayleigh") == 0) {
+      numData = 1;
+      if (OPS_GetInt(&numData, &doRayleigh) != 0) {
+	opserr << "WARNING: Invalid doRayleigh in element Truss " << iData[0] << 
+	  " $iNode $jNode $sectTag <-rho $rho> <-rayleig $flagh>\n";
+	return 0;
+      }
+    } else {
+      opserr << "WARNING: Invalid option " << argvS << "  in: element TrussSection " << iData[0] << 
+	" $iNode $jNode $secTag <-rho $rho>\n";
+      return 0;
+    }      
+    numRemainingArgs -= 2;
+  }
+
+  //now create the ReinforcedConcretePlaneStress
+  theElement = new TrussSection(iData[0], ndm, iData[1], iData[2], *theSection, rho, doRayleigh);
+
+  if (theElement == 0) {
+    opserr << "WARNING: out of memory: element TrussSection " << iData[0] << 
+      " $iNode $jNode $secTag <-rho $rho>\n";
+  }
+
+  return theElement;
+}
+
+
 TrussSection::TrussSection(int tag, 
 			   int dim,
 			   int Nd1, int Nd2, 
 			   SectionForceDeformation &theSect,
-			   double r)
+			   double r,
+			   int damp)
 :Element(tag,ELE_TAG_TrussSection),     
   connectedExternalNodes(2),
   dimension(dim), numDOF(0), theLoad(0), 
  theMatrix(0), theVector(0),
-  L(0.0), rho(r), theSection(0)
+ L(0.0), rho(r), doRayleighDamping(damp),
+ theSection(0)
 {
     // get a copy of the material and check we obtained a valid copy
     theSection = theSect.getCopy();
@@ -459,6 +542,17 @@ TrussSection::getInitialStiff(void)
 }
     
 const Matrix &
+TrussSection::getDamp(void)
+{   
+  if (doRayleighDamping == 1)
+    return this->Element::getDamp();
+  
+  theMatrix->Zero();
+  return *theMatrix;
+}
+
+
+const Matrix &
 TrussSection::getMass(void)
 {   
   // zero the matrix
@@ -575,28 +669,29 @@ TrussSection::getResistingForce()
 const Vector &
 TrussSection::getResistingForceIncInertia()
 {	
-    this->getResistingForce();
+  this->getResistingForce();
+  
+  // now include the mass portion
+  if (L != 0.0 && rho != 0.0) {
     
-    // now include the mass portion
-    if (L != 0.0 && rho != 0.0) {
-	
-	const Vector &accel1 = theNodes[0]->getTrialAccel();
-	const Vector &accel2 = theNodes[1]->getTrialAccel();	
-	
-	double M = 0.5*rho*L;
-	int dof = dimension;
-	int start = numDOF/2;
-	for (int i=0; i<dof; i++) {
-	    (*theVector)(i) += M*accel1(i);
-	    (*theVector)(i+start) += M*accel2(i);
-	}
-    }    
-
-    // add the damping forces if rayleigh damping
+    const Vector &accel1 = theNodes[0]->getTrialAccel();
+    const Vector &accel2 = theNodes[1]->getTrialAccel();	
+    
+    double M = 0.5*rho*L;
+    int dof = dimension;
+    int start = numDOF/2;
+    for (int i=0; i<dof; i++) {
+      (*theVector)(i) += M*accel1(i);
+      (*theVector)(i+start) += M*accel2(i);
+    }
+  }    
+  
+  // add the damping forces if rayleigh damping
+  if (doRayleighDamping == 1)
     if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
       *theVector += this->getRayleighDampingForces();
 
-    return *theVector;
+  return *theVector;
 }
 
 

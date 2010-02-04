@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2007-02-02 01:35:22 $
+// $Revision: 1.13 $
+// $Date: 2010-02-04 01:11:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.h,v $
                                                                         
                                                                         
@@ -48,10 +48,11 @@ class TrussSection : public Element
 {
   public:
     TrussSection(int tag, 
-	  int dimension,
-	  int Nd1, int Nd2, 
-	  SectionForceDeformation &theSection,
-	  double rho=0.0);     
+		 int dimension,
+		 int Nd1, int Nd2, 
+		 SectionForceDeformation &theSection,
+		 double rho=0.0,
+		 int doRayleigh = 0);
     
     TrussSection();    
     ~TrussSection();
@@ -76,6 +77,7 @@ class TrussSection : public Element
     const Matrix &getTangentStiff(void);
     const Matrix &getInitialStiff(void);
     const Matrix &getMass(void);    
+    const Matrix &getDamp(void);    
 
     void zeroLoad(void);	
     int addLoad(ElementalLoad *theLoad, double loadFactor);
@@ -113,6 +115,7 @@ class TrussSection : public Element
 
     double L;		// length of truss based on undeformed configuration
     double rho; 		// mass density per unit length
+    int doRayleighDamping;
 
     Node *theNodes[2];
 
