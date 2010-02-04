@@ -5,6 +5,7 @@ OBJS       = Pinching.o \
 	Clough.o \
 	CloughDamage.o \
 	PinchingDamage.o \
+	Bilin.o \
 	TclSnapMaterialCommand.o
 
 all:         $(OBJS)
