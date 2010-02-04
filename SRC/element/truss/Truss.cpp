@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.33 $
-// $Date: 2009-11-03 23:09:39 $
+// $Revision: 1.34 $
+// $Date: 2010-02-04 01:10:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -63,16 +63,112 @@ Vector Truss::trussV12(12);
 // constructor:
 //  responsible for allocating the necessary space needed by each object
 //  and storing the tags of the truss end nodes.
+
+#include <elementAPI.h>
+#define OPS_Export 
+
+OPS_Export void *
+OPS_NewTrussElement()
+{
+  Element *theElement = 0;
+
+  int numRemainingArgs = OPS_GetNumRemainingInputArgs();
+
+  if (numRemainingArgs < 4) {
+    opserr << "Invalid Args want: element Truss $tag $iNode $jNode $sectTag <-rho $rho> <-rayleigh $flag>\n";
+    opserr << " or: element Truss $tag $iNode $jNode $A $matTag <-rho $rho> <-rayleig $flagh>\n";
+    return 0;	
+  }
+if (numRemainingArgs == 4 || numRemainingArgs == 6 || numRemainingArgs ==8)
+    return 0; // it's a TrussSection
+
+  int    iData[3];
+  double A = 0.0;
+  double rho = 0.0;
+  int matTag = 0;
+  int doRayleigh = 0;
+  int ndm = OPS_GetNDM();
+
+  int numData = 3;
+  if (OPS_GetInt(&numData, iData) != 0) {
+    opserr << "WARNING invalid integer (tag, iNode, jNode) in element Truss " << endln;
+    return 0;
+  }
+
+  numData = 1;
+  if (OPS_GetDouble(&numData, &A) != 0) {
+    opserr << "WARNING: Invalid A: element Truss " << iData[0] << 
+      " $iNode $jNode $A $matTag <-rho $rho> <-rayleig $flagh>\n";
+    return 0;	
+  }
+
+  numData = 1;
+  if (OPS_GetInt(&numData, &matTag) != 0) {
+    opserr << "WARNING: Invalid matTag: element Truss " << iData[0] << 
+      " $iNode $jNode $A $matTag <-rho $rho> <-rayleig $flagh>\n";
+    return 0;
+  }
+
+  UniaxialMaterial *theUniaxialMaterial = OPS_GetUniaxialMaterial(matTag);
+    
+  if (theUniaxialMaterial == 0) {
+    opserr << "WARNING: Invalid material not found element Truss " << iData[0] << " $iNode $jNode $A " << 
+      matTag << " <-rho $rho> <-rayleig $flagh>\n";
+    return 0;
+  }
+  
+  numRemainingArgs -= 5;
+  while (numRemainingArgs > 1) {
+    char argvS[10];
+    if (OPS_GetString(argvS, 10) != 0) {
+      opserr << "WARNING: Invalid optional string element Truss " << iData[0] << 
+	" $iNode $jNode $A $matTag <-rho $rho> <-rayleig $flagh>\n";
+      return 0;
+    } 
+  
+    if (strcmp(argvS,"-rho") == 0) {
+      numData = 1;
+      if (OPS_GetDouble(&numData, &rho) != 0) {
+	opserr << "WARNING Invalid rho in element Truss " << iData[0] << 
+	  " $iNode $jNode $A $matTag <-rho $rho> <-rayleig $flagh>\n";
+	return 0;
+      }
+    } else if (strcmp(argvS,"-doRayleigh") == 0) {
+      numData = 1;
+      if (OPS_GetInt(&numData, &doRayleigh) != 0) {
+	opserr << "WARNING: Invalid doRayleigh in element Truss " << iData[0] << 
+	  " $iNode $jNode $A $matTag <-rho $rho> <-rayleig $flagh>\n";
+	return 0;
+      }
+    } else {
+      opserr << "WARNING: Invalid option " << argvS << "  in: element Truss " << iData[0] << 
+	" $iNode $jNode $A $matTag <-rho $rho> <-rayleig $flagh>\n";
+      return 0;
+    }      
+    numRemainingArgs -= 2;
+  }
+
+  //now create the ReinforcedConcretePlaneStress
+  theElement = new Truss(iData[0], ndm, iData[1], iData[2], *theUniaxialMaterial, A, rho, doRayleigh);
+
+  if (theElement == 0) {
+    opserr << "WARNING: out of memory: element Truss " << iData[0] << 
+      " $iNode $jNode $A $matTag <-rho $rho> <-rayleig $flagh>\n";
+  }
+
+  return theElement;
+}
+
 Truss::Truss(int tag, 
 	     int dim,
 	     int Nd1, int Nd2, 
 	     UniaxialMaterial &theMat,
-	     double a, double r)
+	     double a, double r, int damp)
  :Element(tag,ELE_TAG_Truss),     
   theMaterial(0), connectedExternalNodes(2),
   dimension(dim), numDOF(0), theLoad(0),
   theMatrix(0), theVector(0),
-  L(0.0), A(a), rho(r)
+  L(0.0), A(a), rho(r), doRayleighDamping(damp)
 {
     // get a copy of the material and check we obtained a valid copy
     theMaterial = theMat.getCopy();
@@ -431,30 +527,33 @@ Truss::getInitialStiff(void)
 const Matrix &
 Truss::getDamp(void)
 {
-    if (L == 0.0) { // - problem in setDomain() no further warnings
-	theMatrix->Zero();
-	return *theMatrix;
+  if (L == 0.0) { // - problem in setDomain() no further warnings
+    theMatrix->Zero();
+    return *theMatrix;
+  }
+  
+  if (doRayleighDamping == 1)
+    return this->Element::getDamp();
+
+  theMatrix->Zero();
+  double eta = theMaterial->getDampTangent();
+  
+  // come back later and redo this if too slow
+  Matrix &damp = *theMatrix;
+  
+  int numDOF2 = numDOF/2;
+  double temp;
+  double etaAoverL = eta*A/L;
+  for (int i = 0; i < dimension; i++) {
+    for (int j = 0; j < dimension; j++) {
+      temp = cosX[i]*cosX[j]*etaAoverL;
+      damp(i,j) = temp;
+      damp(i+numDOF2,j) = -temp;
+      damp(i,j+numDOF2) = -temp;
+      damp(i+numDOF2,j+numDOF2) = temp;
     }
-    
-    double eta = theMaterial->getDampTangent();
-
-    // come back later and redo this if too slow
-    Matrix &damp = *theMatrix;
-
-    int numDOF2 = numDOF/2;
-    double temp;
-    double etaAoverL = eta*A/L;
-    for (int i = 0; i < dimension; i++) {
-      for (int j = 0; j < dimension; j++) {
-	temp = cosX[i]*cosX[j]*etaAoverL;
-	damp(i,j) = temp;
-	damp(i+numDOF2,j) = -temp;
-	damp(i,j+numDOF2) = -temp;
-	damp(i+numDOF2,j+numDOF2) = temp;
-      }
-    }
-
-    return damp;
+  }
+  return damp;
 }
 
 
@@ -490,8 +589,7 @@ int
 Truss::addLoad(ElementalLoad *theLoad, double loadFactor)
 
 {  
-  opserr <<"Truss::addLoad - load type unknown for truss with tag: " << this->getTag() << endln;
-  
+  opserr <<"Truss::addLoad - load type unknown for truss with tag: " << this->getTag() << endln; 
   return -1;
 }
 
@@ -652,32 +750,35 @@ Truss::getResistingForce()
 const Vector &
 Truss::getResistingForceIncInertia()
 {	
-    this->getResistingForce();
+  if (doRayleighDamping == 1)
+    return this->Element::getResistingForceIncInertia();
+
+  this->getResistingForce();
+  
+  // now include the mass portion
+  if (L != 0.0 && rho != 0.0) {
     
-    // now include the mass portion
-    if (L != 0.0 && rho != 0.0) {
-	
-	const Vector &accel1 = theNodes[0]->getTrialAccel();
-	const Vector &accel2 = theNodes[1]->getTrialAccel();	
-	
-	int numDOF2 = numDOF/2;
-	double M = 0.5*rho*L;
-	for (int i = 0; i < dimension; i++) {
-	    (*theVector)(i) += M*accel1(i);
-	    (*theVector)(i+numDOF2) += M*accel2(i);
-	}
-
-	// add the damping forces if rayleigh damping
-	if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
-	  (*theVector) += this->getRayleighDampingForces();
-    }  else {
-
-      // add the damping forces if rayleigh damping
-      if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
-	(*theVector) += this->getRayleighDampingForces();
+    const Vector &accel1 = theNodes[0]->getTrialAccel();
+    const Vector &accel2 = theNodes[1]->getTrialAccel();	
+    
+    int numDOF2 = numDOF/2;
+    double M = 0.5*rho*L;
+    for (int i = 0; i < dimension; i++) {
+      (*theVector)(i) += M*accel1(i);
+      (*theVector)(i+numDOF2) += M*accel2(i);
     }
     
-    return *theVector;
+    // add the damping forces if rayleigh damping
+    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
+      (*theVector) += this->getRayleighDampingForces();
+  }  else {
+    
+    // add the damping forces if rayleigh damping
+    if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
+      (*theVector) += this->getRayleighDampingForces();
+  }
+  
+  return *theVector;
 }
 
 int
@@ -693,13 +794,17 @@ Truss::sendSelf(int commitTag, Channel &theChannel)
   // truss packs it's data into a Vector and sends this to theChannel
   // along with it's dbTag and the commitTag passed in the arguments
 
-  static Vector data(7);
+  static Vector data(8);
   data(0) = this->getTag();
   data(1) = dimension;
   data(2) = numDOF;
   data(3) = A;
   data(6) = rho;
-  
+  if (doRayleighDamping == 0)
+    data(7) = 0;
+  else
+    data(7) = 1;
+
   data(4) = theMaterial->getClassTag();
   int matDbTag = theMaterial->getDbTag();
 
@@ -745,7 +850,7 @@ Truss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
   // truss creates a Vector, receives the Vector and then sets the 
   // internal data with the data in the Vector
 
-  static Vector data(7);
+  static Vector data(8);
   res = theChannel.recvVector(dataTag, commitTag, data);
   if (res < 0) {
     opserr <<"WARNING Truss::recvSelf() - failed to receive Vector\n";
@@ -757,6 +862,10 @@ Truss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
   numDOF = (int)data(2);
   A = data(3);
   rho = data(6);
+  if (data(7) == 0)
+    doRayleighDamping = 0;
+  else
+    doRayleighDamping = 1;
   
   // truss now receives the tags of it's two external nodes
   res = theChannel.recvID(dataTag, commitTag, connectedExternalNodes);

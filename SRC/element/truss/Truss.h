@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2007-02-02 01:35:22 $
+// $Revision: 1.17 $
+// $Date: 2010-02-04 01:10:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.h,v $
                                                                         
                                                                         
@@ -51,7 +51,9 @@ class Truss : public Element
 	  int dimension,
 	  int Nd1, int Nd2, 
 	  UniaxialMaterial &theMaterial,
-	  double A, double rho=0.0);
+	  double A, 
+	  double rho=0.0, 
+	  int doRayleighDamping = 0);
     
     Truss();    
     ~Truss();
@@ -125,10 +127,12 @@ class Truss : public Element
     double L;	    // length of truss based on undeformed configuration
     double A; 	    // area of truss
     double rho; 	// rho: mass density per unit length
+    int doRayleighDamping; 
 
     double cosX[3]; // direction cosines
 
     Node *theNodes[2];
+
 	
 // AddingSensitivity:BEGIN //////////////////////////////////////////
     int parameterID;
