@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2010-02-04 01:00:34 $
+// $Revision: 1.2 $
+// $Date: 2010-02-04 19:10:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ConfinedConcrete01.h,v $
                                                                         
 #ifndef ConfinedConcrete01_h

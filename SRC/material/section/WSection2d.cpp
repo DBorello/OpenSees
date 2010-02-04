@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2008-12-03 23:46:59 $
+// $Revision: 1.2 $
+// $Date: 2010-02-04 19:10:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/WSection2d.cpp,v $
                                                                         
 // Written: MHS
