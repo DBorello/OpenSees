@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2008-10-16 22:33:11 $
+// $Revision: 1.12 $
+// $Date: 2010-02-04 00:33:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathTimeSeries.cpp,v $
                                                                         
                                                                         
@@ -55,10 +55,11 @@ PathTimeSeries::PathTimeSeries()
 }
 
 		   
-PathTimeSeries::PathTimeSeries(const Vector &theLoadPath, 
+PathTimeSeries::PathTimeSeries(int tag, 
+			       const Vector &theLoadPath, 
 			       const Vector &theTimePath, 
 			       double theFactor)
-  :TimeSeries(TSERIES_TAG_PathTimeSeries),
+  :TimeSeries(tag, TSERIES_TAG_PathTimeSeries),
    thePath(0), time(0), currentTimeLoc(0), 
    cFactor(theFactor), dbTag1(0), dbTag2(0), lastSendCommitTag(-1), lastChannel(0)
 {
@@ -88,11 +89,12 @@ PathTimeSeries::PathTimeSeries(const Vector &theLoadPath,
 }
 
 
-PathTimeSeries::PathTimeSeries(const char *filePathName, 
+PathTimeSeries::PathTimeSeries(int tag,
+			       const char *filePathName, 
 			       const char *fileTimeName, 
 			       double theFactor)
 			       
-  :TimeSeries(TSERIES_TAG_PathTimeSeries),
+  :TimeSeries(tag, TSERIES_TAG_PathTimeSeries),
    thePath(0), time(0), currentTimeLoc(0), 
    cFactor(theFactor), dbTag1(0), dbTag2(0), lastSendCommitTag(-1), lastChannel(0)
 {
@@ -197,9 +199,10 @@ PathTimeSeries::PathTimeSeries(const char *filePathName,
 }
 
 
-PathTimeSeries::PathTimeSeries(const char *fileName, 
+PathTimeSeries::PathTimeSeries(int tag,
+			       const char *fileName, 
 			       double theFactor)
-  :TimeSeries(TSERIES_TAG_PathTimeSeries),
+  :TimeSeries(tag, TSERIES_TAG_PathTimeSeries),
    thePath(0), time(0), currentTimeLoc(0), 
    cFactor(theFactor), dbTag1(0), dbTag2(0), lastChannel(0)
 {
@@ -286,6 +289,13 @@ PathTimeSeries::~PathTimeSeries()
   if (time != 0)
     delete time;
 }
+
+TimeSeries *
+PathTimeSeries::getCopy(void) 
+{
+  return new PathTimeSeries(this->getTag(), *thePath, *time, cFactor);
+}
+
 
 double
 PathTimeSeries::getTimeIncr (double pseudoTime)

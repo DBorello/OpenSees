@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-09-05 20:53:29 $
+// $Revision: 1.5 $
+// $Date: 2010-02-04 00:34:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/DiscretizedRandomProcessSeries.h,v $
 
 
@@ -41,11 +41,14 @@
 class DiscretizedRandomProcessSeries : public TimeSeries
 {
 public:
-  DiscretizedRandomProcessSeries(int num, 
+  DiscretizedRandomProcessSeries(int tag,
+				 int num, 
 				 ModulatingFunction **theModFuncs,
 				 double p_mean,
 				 double targetStdv);
     ~DiscretizedRandomProcessSeries();
+
+    TimeSeries *getCopy(void);
 
     // method to get load factor
     double getFactor(double pseudoTime);

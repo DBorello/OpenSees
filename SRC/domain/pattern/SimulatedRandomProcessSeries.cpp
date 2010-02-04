@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:49:21 $
+// $Revision: 1.2 $
+// $Date: 2010-02-04 00:34:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/SimulatedRandomProcessSeries.cpp,v $
 
 
@@ -41,12 +41,12 @@
 //#include <fstream>
 
 
-SimulatedRandomProcessSeries::SimulatedRandomProcessSeries(
-								RandomNumberGenerator *theRandNumGenerator,
-								Spectrum *theSpectr,
-								int numFreqInt,
-								double pmean)
-:TimeSeries(TSERIES_TAG_SimulatedRandomProcessSeries)
+SimulatedRandomProcessSeries::SimulatedRandomProcessSeries(int tag,
+							   RandomNumberGenerator *theRandNumGenerator,
+							   Spectrum *theSpectr,
+							   int numFreqInt,
+							   double pmean)
+ :TimeSeries(tag, TSERIES_TAG_SimulatedRandomProcessSeries)
 {
 	theRandomNumberGenerator = theRandNumGenerator;
 	theSpectrum = theSpectr;
@@ -73,6 +73,12 @@ SimulatedRandomProcessSeries::SimulatedRandomProcessSeries(
 
 }
 
+
+
+TimeSeries *
+SimulatedRandomProcessSeries::getCopy(void) {
+  opserr << "SimulatedRandomProcessSeries::getCopy(void) - not yet implemented\n";
+}
 
 SimulatedRandomProcessSeries::~SimulatedRandomProcessSeries()
 {

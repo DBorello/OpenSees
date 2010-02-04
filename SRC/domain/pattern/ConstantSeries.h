@@ -18,15 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:59 $
+// $Revision: 1.3 $
+// $Date: 2010-02-04 00:34:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/ConstantSeries.h,v $
 
 #ifndef ConstantSeries_h
 #define ConstantSeries_h
 
-// File: ~/domain/pattern/ConstantSeries.h
-//
 // Written: fmk 
 // Created: 07/99
 // Revision: A
@@ -43,9 +41,11 @@
 class ConstantSeries : public TimeSeries
 {
   public:
-    ConstantSeries(double cFactor = 1.0);
+    ConstantSeries(int tag=0, double cFactor = 1.0);
 
     ~ConstantSeries();
+
+    TimeSeries *getCopy(void);
 
     // method to get load factor
     double getFactor(double pseudoTime) {return cFactor;}

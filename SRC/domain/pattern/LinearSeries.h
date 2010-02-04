@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:00 $
+// $Revision: 1.3 $
+// $Date: 2010-02-04 00:34:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LinearSeries.h,v $
                                                                         
                                                                         
 #ifndef LinearSeries_h
 #define LinearSeries_h
 
-// File: ~/domain/pattern/LinearSeries.h
-//
 // Written: fmk 
 // Created: 07/99
 // Revision: A
@@ -44,9 +42,11 @@
 class LinearSeries : public TimeSeries
 {
   public:
-    LinearSeries(double cFactor = 1.0);
+    LinearSeries(int tag =0, double cFactor =1.0);
 
     ~LinearSeries();
+
+    TimeSeries *getCopy(void);
 
     // method to get load factor
     double getFactor(double pseudoTime);

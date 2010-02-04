@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:49:22 $
+// $Revision: 1.2 $
+// $Date: 2010-02-04 00:34:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/SimulatedRandomProcessSeries.h,v $
 
 
@@ -42,11 +42,15 @@
 class SimulatedRandomProcessSeries : public TimeSeries
 {
 public:
-    SimulatedRandomProcessSeries(RandomNumberGenerator *theRandNumGenerator,
-								 Spectrum *theSpectrum,
-								 int numFreqIntervals,
-								 double mean);
+  SimulatedRandomProcessSeries(int tag,
+			       RandomNumberGenerator *theRandNumGenerator,
+			       Spectrum *theSpectrum,
+			       int numFreqIntervals,
+			       double mean);
+
     ~SimulatedRandomProcessSeries();
+    
+    TimeSeries *getCopy(void);
 
     // method to get load factor
     double getFactor(double pseudoTime);

@@ -18,15 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-12-15 00:35:47 $
+// $Revision: 1.2 $
+// $Date: 2010-02-04 00:34:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TriangleSeries.h,v $
                                                                         
 #ifndef TriangleSeries_h
 #define TriangleSeries_h
 
-// File: ~/domain/pattern/TriangleSeries.h
-//
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
 // Created: 02/04
 // Revision: A
@@ -46,13 +44,19 @@ class TriangleSeries : public TimeSeries
 {
   public:
     // constructors
-    TriangleSeries(double tStart, double tFinish,
-        double period, double shift, double cFactor = 1.0);
+    TriangleSeries(int tag, 
+		   double tStart, 
+		   double tFinish,
+		   double period, 
+		   double shift, 
+		   double cFactor = 1.0);
 
     TriangleSeries();
     
     // destructor
     ~TriangleSeries();
+
+    TimeSeries *getCopy(void);
     
     // method to get load factor
     double getFactor(double pseudoTime);

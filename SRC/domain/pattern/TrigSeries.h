@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:01 $
+// $Revision: 1.3 $
+// $Date: 2010-02-04 00:34:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TrigSeries.h,v $
                                                                         
                                                                         
 #ifndef TrigSeries_h
 #define TrigSeries_h
 
-// File: ~/domain/pattern/TrigSeries.h
-//
 // Written: MHS 
 // Created: July 2000
 // Revision: A
@@ -47,12 +45,19 @@ class TrigSeries : public TimeSeries
 {
   public:
     // constructors
-    TrigSeries(double tStart, double tFinish,
-		double period, double shift, double cFactor = 1.0);
+    TrigSeries(int tag,
+	       double tStart, 
+	       double tFinish,
+	       double period, 
+	       double shift, 
+	       double cFactor = 1.0);
+
     TrigSeries();
-    
+
     // destructor
     ~TrigSeries();
+
+    TimeSeries *getCopy(void); 
     
     // method to get load factor
     double getFactor(double pseudoTime);

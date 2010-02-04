@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2006-09-05 20:53:29 $
+// $Revision: 1.6 $
+// $Date: 2010-02-04 00:34:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/DiscretizedRandomProcessSeries.cpp,v $
 
 
@@ -40,20 +40,27 @@
 #include <classTags.h>
 #include <Parameter.h>
 
-DiscretizedRandomProcessSeries::DiscretizedRandomProcessSeries(int num, 
+DiscretizedRandomProcessSeries::DiscretizedRandomProcessSeries(int tag,
+							       int num, 
 							       ModulatingFunction **theModFuncs,
 							       double p_mean,
 							       double p_maxStdv)
-:TimeSeries(TSERIES_TAG_DiscretizedRandomProcessSeries)
+ :TimeSeries(tag, TSERIES_TAG_DiscretizedRandomProcessSeries)
 {
-	randomVariables = 0;
-	kickInTimes = 0;
-    theModulatingFunctions = theModFuncs;
-	numModFuncs = num;
-	mean = p_mean;
-	maxStdv = p_maxStdv;
+  randomVariables = 0;
+  kickInTimes = 0;
+  theModulatingFunctions = theModFuncs;
+  numModFuncs = num;
+  mean = p_mean;
+  maxStdv = p_maxStdv;
+  
+  c = 0.0;
+}
 
-	c = 0.0;
+TimeSeries *
+DiscretizedRandomProcessSeries::getCopy(void) 
+{
+  opserr << "DiscretizedRandomProcessSeries::getCopy() - not yet implemented\n";
 }
 
 

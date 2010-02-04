@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-25 23:32:41 $
+// $Revision: 1.5 $
+// $Date: 2010-02-04 00:34:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathSeries.h,v $
                                                                         
                                                                         
 #ifndef PathSeries_h
 #define PathSeries_h
 
-// File: ~/analysis/integrator/PathSeries.h
-// 
 // Written: fmk 
 // Created: 07/99
 // Revision: A
@@ -48,10 +46,12 @@ class PathSeries : public TimeSeries
 {
   public:
     // constructors  
-    PathSeries(const Vector &thePath, 
+    PathSeries(int tag,
+	       const Vector &thePath, 
 	       double pathTimeIncr = 1.0, 
 	       double cfactor = 1.0);
-    PathSeries(const char *fileName, 
+    PathSeries(int tag,
+	       const char *fileName, 
 	       double pathTimeIncr = 1.0, 
 	       double cfactor = 1.0);    
     PathSeries();    
@@ -59,12 +59,14 @@ class PathSeries : public TimeSeries
     // destructor    
     ~PathSeries();
 
+    TimeSeries *getCopy(void);
+
     // method to get factor
     double getFactor(double pseudoTime);
-	double getDuration ();
-	double getPeakFactor ();
-	double getTimeIncr (double pseudoTime) {return pathTimeIncr;}
-
+    double getDuration ();
+    double getPeakFactor ();
+    double getTimeIncr (double pseudoTime) {return pathTimeIncr;}
+    
     // methods for output
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, 

@@ -18,12 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:59 $
+// $Revision: 1.3 $
+// $Date: 2010-02-04 00:34:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/ConstantSeries.cpp,v $
 
-// File: ~/domain/pattern/ConstantSeries.C
-//
 // Written: fmk 
 // Created: 07/99
 // Revision: A
@@ -41,18 +39,76 @@
 #include <Channel.h>
 #include <classTags.h>
 
-ConstantSeries::ConstantSeries(double theFactor)
-  :TimeSeries(TSERIES_TAG_ConstantSeries),
+#include <elementAPI.h>
+#define OPS_Export 
+
+OPS_Export void *
+OPS_NewConstantSeries(void)
+{
+  // Pointer to a uniaxial material that will be returned
+  TimeSeries *theSeries = 0;
+
+  int numRemainingArgs = OPS_GetNumRemainingInputArgs();
+
+  int tag = 0;
+  double cFactor = 1.0;
+  int numData = 0;
+
+  if (numRemainingArgs != 0) {
+  
+    if (numRemainingArgs == 1 || numRemainingArgs == 3) {
+      numData = 1;
+      if (OPS_GetIntInput(&numData, &tag) != 0) {
+	opserr << "WARNING invalid series tag in ConstantSeries tag? <-factor factor?>" << endln;
+	return 0;
+      }
+      numRemainingArgs --;
+    }
+
+    if (numRemainingArgs > 1) {
+	char argvS[10];
+	if (OPS_GetString(argvS, 10) != 0) {
+	  opserr << "WARNING invalid string in ConstantSeries with tag: " << tag << endln;
+	  return 0;
+	}
+	numData = 1;
+	if (OPS_GetDouble(&numData, &cFactor) != 0) {
+	  opserr << "WARNING invalid factor in  ConstantSeries with tag: " << tag << endln;
+	  return 0;
+	}
+    }
+  }
+
+  theSeries = new ConstantSeries(tag, cFactor);
+
+  if (theSeries == 0) {
+    opserr << "WARNING ran out of memory creating ConstantTimeSeries with tag: " << tag << "\n";
+    return 0;
+  }
+
+  return theSeries;
+}
+
+
+ConstantSeries::ConstantSeries(int tag, double theFactor)
+  :TimeSeries(tag,  TSERIES_TAG_ConstantSeries),
    cFactor(theFactor)
 {
   // does nothing
 }
 
 
+TimeSeries *
+ConstantSeries::getCopy(void) {
+  return new ConstantSeries(this->getTag(), cFactor);
+}
+
 ConstantSeries::~ConstantSeries()
 {
   // does nothing
 }
+
+
 
 int
 ConstantSeries::sendSelf(int commitTag, Channel &theChannel)

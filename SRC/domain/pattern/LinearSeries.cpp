@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:00 $
+// $Revision: 1.3 $
+// $Date: 2010-02-04 00:34:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LinearSeries.cpp,v $
                                                                         
                                                                         
-// File: ~/domain/pattern/LinearSeries.C
-//
 // Written: fmk 
 // Created: 07/99
 // Revision: A
@@ -41,9 +39,59 @@
 #include <Vector.h>
 #include <Channel.h>
 
+#include <elementAPI.h>
+#define OPS_Export 
 
-LinearSeries::LinearSeries(double theFactor)
-  :TimeSeries(TSERIES_TAG_LinearSeries),
+OPS_Export void *
+OPS_NewLinearSeries(void)
+{
+  // Pointer to a uniaxial material that will be returned
+  TimeSeries *theSeries = 0;
+
+  int numRemainingArgs = OPS_GetNumRemainingInputArgs();
+
+  int tag = 0;
+  double cFactor = 1.0;
+  int numData = 0;
+
+  if (numRemainingArgs != 0) {
+  
+    if (numRemainingArgs == 1 || numRemainingArgs == 3) {
+      numData = 1;
+      if (OPS_GetIntInput(&numData, &tag) != 0) {
+	opserr << "WARNING invalid series tag in LinearSeries tag? <-factor factor?>" << endln;
+	return 0;
+      }
+      numRemainingArgs--;
+    }
+
+    if (numRemainingArgs > 1) {
+	char argvS[10];
+	if (OPS_GetString(argvS, 10) != 0) {
+	  opserr << "WARNING invalid string in LinearSeries with tag: " << tag << endln;
+	  return 0;
+	}
+	numData = 1;
+	if (OPS_GetDouble(&numData, &cFactor) != 0) {
+	  opserr << "WARNING invalid factor in  LinearSeries with tag: " << tag << endln;
+	  return 0;
+	}
+    }
+  }
+
+  theSeries = new LinearSeries(tag, cFactor);
+
+  if (theSeries == 0) {
+    opserr << "WARNING ran out of memory creating ConstantTimeSeries with tag: " << tag << "\n";
+    return 0;
+  }
+
+  return theSeries;
+}
+
+
+LinearSeries::LinearSeries(int tag, double theFactor)
+  :TimeSeries(tag, TSERIES_TAG_LinearSeries),
    cFactor(theFactor)
 {
   // does nothing
@@ -53,6 +101,11 @@ LinearSeries::LinearSeries(double theFactor)
 LinearSeries::~LinearSeries()
 {
   // does nothing
+}
+
+TimeSeries *
+LinearSeries::getCopy(void) {
+  return new LinearSeries(this->getTag(), cFactor);
 }
 
 double

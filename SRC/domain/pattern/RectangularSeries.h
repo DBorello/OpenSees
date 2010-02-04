@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:00 $
+// $Revision: 1.3 $
+// $Date: 2010-02-04 00:34:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/RectangularSeries.h,v $
                                                                         
                                                                         
 #ifndef RectangularSeries_h
 #define RectangularSeries_h
 
-// File: ~/domain/pattern/RectangularSeries.h
-//
 // Written: fmk 
 // Created: 07/99
 // Revision: A
@@ -46,11 +44,13 @@ class RectangularSeries : public TimeSeries
 {
   public:
     // constructors
-    RectangularSeries(double tStart, double tFinal, double cFactor = 1.0);
+    RectangularSeries(int tag, double tStart, double tFinal, double cFactor = 1.0);
     RectangularSeries();
     
     // destructor
     ~RectangularSeries();
+
+    TimeSeries *getCopy(void);
     
     // method to get load factor
     double getFactor(double pseudoTime);

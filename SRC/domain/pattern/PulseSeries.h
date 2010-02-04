@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-12-15 00:35:47 $
+// $Revision: 1.2 $
+// $Date: 2010-02-04 00:34:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PulseSeries.h,v $
                                                                         
 #ifndef PulseSeries_h
@@ -44,13 +44,15 @@ class PulseSeries : public TimeSeries
 {
 public:
     // constructors
-    PulseSeries(double tStart, double tFinish,
-        double period, double pWidth, double shift, double cFactor = 1.0);
+    PulseSeries(int tag, double tStart, double tFinish,
+		double period, double pWidth, double shift, double cFactor = 1.0);
 
     PulseSeries();
     
     // destructor
     ~PulseSeries();
+
+    TimeSeries *getCopy(void);
     
     // method to get load factor
     double getFactor(double pseudoTime);

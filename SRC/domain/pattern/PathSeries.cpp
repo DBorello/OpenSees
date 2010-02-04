@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2007-09-29 01:55:11 $
+// $Revision: 1.10 $
+// $Date: 2010-02-04 00:34:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathSeries.cpp,v $
                                                                         
 // Written: fmk 
@@ -52,11 +52,11 @@ PathSeries::PathSeries()
   // does nothing
 }
 
-		   
-PathSeries::PathSeries(const Vector &theLoadPath, 
+PathSeries::PathSeries(int tag,
+		       const Vector &theLoadPath, 
 		       double theTimeIncr, 
 		       double theFactor)
-  :TimeSeries(TSERIES_TAG_PathSeries),
+  :TimeSeries(tag, TSERIES_TAG_PathSeries),
    thePath(0), pathTimeIncr(theTimeIncr), cFactor(theFactor), otherDbTag(0), lastSendCommitTag(-1)
 {
   // create a copy of the vector containg path points
@@ -73,10 +73,11 @@ PathSeries::PathSeries(const Vector &theLoadPath,
 }
 
 
-PathSeries::PathSeries(const char *fileName, 
+PathSeries::PathSeries(int tag,
+		       const char *fileName, 
 		       double theTimeIncr, 
 		       double theFactor)
-  :TimeSeries(TSERIES_TAG_PathSeries),
+  :TimeSeries(tag, TSERIES_TAG_PathSeries),
    thePath(0), pathTimeIncr(theTimeIncr), cFactor(theFactor), otherDbTag(0), lastSendCommitTag(-1)
 {
   // determine the number of data points .. open file and count num entries
@@ -139,6 +140,11 @@ PathSeries::~PathSeries()
 {
   if (thePath != 0)
     delete thePath;
+}
+
+TimeSeries *
+PathSeries::getCopy(void) {
+  return new PathSeries(this->getTag(), *thePath, pathTimeIncr, cFactor);
 }
 
 double

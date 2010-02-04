@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2005-12-15 00:35:47 $
+// $Revision: 1.2 $
+// $Date: 2010-02-04 00:34:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TriangleSeries.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -38,10 +38,89 @@
 
 #include <math.h>
 
+#include <elementAPI.h>
+#define OPS_Export 
 
-TriangleSeries::TriangleSeries(double startTime, double finishTime,
-    double T, double phi, double theFactor)
-    : TimeSeries(TSERIES_TAG_TriangleSeries),
+OPS_Export void *
+OPS_NewTriangleSeries(void)
+{
+  // Pointer to a uniaxial material that will be returned
+  TimeSeries *theSeries = 0;
+  
+  int numRemainingArgs = OPS_GetNumRemainingInputArgs();
+  
+  if (numRemainingArgs < 3) {
+      opserr << " Triangle <tag?> tStart tFinish period <-shift shift> <-factor cFactor>\n";
+    return 0;
+  }
+
+  int tag = 0;     // default tag = 0
+  double dData[5];
+  dData[3] = 0.0; // default shift = 0.0
+  dData[4] = 1.0; // default cFactor = 1.0
+  int numData = 0;
+
+  // get tag if provided
+  if (numRemainingArgs == 4 || numRemainingArgs == 6 || numRemainingArgs == 8) {
+    numData = 1;
+    if (OPS_GetIntInput(&numData, &tag) != 0) {
+      opserr << "WARNING invalid series tag in Constant tag?" << endln;
+      return 0;
+    }
+    numRemainingArgs -= 1;
+  }
+  
+  numData = 3;
+  if (OPS_GetDouble(&numData, dData) != 0) {
+    opserr << "WARNING invalid double data for TriangleSeries with tag: " << tag << endln;
+    return 0;
+  }    
+  numRemainingArgs -= 3;
+
+  while (numRemainingArgs > 1) {
+    char argvS[10];
+    if (OPS_GetString(argvS, 10) != 0) {
+      opserr << "WARNING invalid string in Constant <tag?> <-factor cFactor?>" << endln;
+      return 0;
+    }
+    if (strcmp(argvS,"-shift") == 0) {
+      numData = 1;
+      if (OPS_GetDouble(&numData, &dData[3]) != 0) {
+	opserr << "WARNING invalid shift in Triangle Series with tag?" << tag << endln;
+	return 0;
+      }
+    } else if (strcmp(argvS,"-factor") == 0) {
+      numData = 1;
+      if (OPS_GetDouble(&numData, &dData[4]) != 0) {
+	opserr << "WARNING invalid factor in Triangle Series with tag?" << tag << endln;
+	return 0;
+      }
+    } else {
+      opserr << "WARNING unknown option: " << argvS << "  in Triangle Series with tag?" << tag << endln;      
+      return 0;
+    }      
+    numRemainingArgs -= 2;
+  }
+
+  theSeries = new TriangleSeries(tag, dData[0], dData[1], dData[2], dData[3], dData[4]);
+
+  if (theSeries == 0) {
+    opserr << "WARNING ran out of memory creating TriangleSeries with tag: " << tag << "\n";
+    return 0;
+  }
+
+  return theSeries;
+}
+
+
+
+TriangleSeries::TriangleSeries(int tag,
+			       double startTime, 
+			       double finishTime,
+			       double T, 
+			       double phi, 
+			       double theFactor)
+  : TimeSeries(tag, TSERIES_TAG_TriangleSeries),
     tStart(startTime),tFinish(finishTime),
     period(T),shift(phi),cFactor(theFactor)
 {
@@ -66,6 +145,10 @@ TriangleSeries::~TriangleSeries()
 	// does nothing
 }
 
+TimeSeries *
+TriangleSeries::getCopy(void) {
+  return new TriangleSeries(this->getTag(), tStart, tFinish, period, shift, cFactor);
+}
 
 double TriangleSeries::getFactor(double pseudoTime)
 {	

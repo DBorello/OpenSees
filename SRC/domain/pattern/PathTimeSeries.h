@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2005-10-20 21:58:54 $
+// $Revision: 1.7 $
+// $Date: 2010-02-04 00:34:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathTimeSeries.h,v $
                                                                         
                                                                         
 #ifndef PathTimeSeries_h
 #define PathTimeSeries_h
 
-// File: ~/domain/pattern/PathTimeSeries.h
-// 
 // Written: fmk 
 // Created: 07/99
 // Revision: A
@@ -48,20 +46,26 @@ class PathTimeSeries : public TimeSeries
 {
   public:
     // constructors  
-    PathTimeSeries(const Vector &thePath, 
-		   const Vector &theTime, 
-		   double cfactor = 1.0);
+  PathTimeSeries(int tag,
+		 const Vector &thePath, 
+		 const Vector &theTime, 
+		 double cfactor = 1.0);
+  
+  PathTimeSeries(int tag,
+		 const char *fileNamePath, 
+		 const char *fileNameTime, 
+		 double cfactor = 1.0);    
+  
+  PathTimeSeries(int tag,
+		 const char *fileName,
+		 double cfactor = 1.0);
 
-    PathTimeSeries(const char *fileNamePath, 
-		   const char *fileNameTime, 
-		   double cfactor = 1.0);    
-
-    PathTimeSeries(const char *fileName,
-		   double cfactor = 1.0);
     PathTimeSeries();    
     
     // destructor    
     ~PathTimeSeries();
+    
+    TimeSeries *getCopy(void);
 
     // method to get factor
     double getFactor(double pseudoTime);

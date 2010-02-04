@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2005-12-15 00:35:47 $
+// $Revision: 1.2 $
+// $Date: 2010-02-04 00:34:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PulseSeries.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -39,9 +39,95 @@
 #include <math.h>
 
 
-PulseSeries::PulseSeries(double startTime, double finishTime,
-    double T, double pulseWidth, double phi, double theFactor)
-    : TimeSeries(TSERIES_TAG_PulseSeries),
+#include <elementAPI.h>
+#define OPS_Export 
+
+OPS_Export void *
+OPS_NewPulseSeries(void)
+{
+  // Pointer to a uniaxial material that will be returned
+  TimeSeries *theSeries = 0;
+  
+  int numRemainingArgs = OPS_GetNumRemainingInputArgs();
+  
+  if (numRemainingArgs < 3) {
+    opserr << " Pulse <tag?> tStart tFinish period <-width pulseWidth> <-shift shift> <-factor cFactor>\n";
+    return 0;
+  }
+
+  int tag = 0;     // default tag = 0
+  double dData[6];
+  dData[3] = 0.5; // default width = 0.5
+  dData[4] = 0.0; // default shift = 0.0
+  dData[5] = 1.0; // default factor = 1.0
+
+  int numData = 0;
+
+  // get tag if provided
+  if (numRemainingArgs == 4 || numRemainingArgs == 6 || numRemainingArgs == 8 || numRemainingArgs == 10) {
+    numData = 1;
+    if (OPS_GetIntInput(&numData, &tag) != 0) {
+      opserr << "WARNING invalid series tag in Pulse tag? tStart tFinish period <-shift shift> <-factor cFactor>\n";
+      return 0;
+    }
+    numRemainingArgs -= 1;
+  }
+  
+  numData = 3;
+  if (OPS_GetDouble(&numData, dData) != 0) {
+    opserr << "WARNING invalid double data for PulseSeries with tag: " << tag << endln;
+    return 0;
+  }    
+  numRemainingArgs -= 2;
+
+  // parse the optional args
+  while (numRemainingArgs > 1) {
+    char argvS[10];
+    if (OPS_GetString(argvS, 10) != 0) {
+      opserr << "WARNING invalid string in Constant <tag?> <-factor cFactor?>" << endln;
+      return 0;
+    } 
+
+    if (strcmp(argvS,"-width") == 0) {
+      numData = 1;
+      if (OPS_GetDouble(&numData, &dData[3]) != 0) {
+	opserr << "WARNING invalid shift in Trig Series with tag?" << tag << endln;
+	return 0;
+      }
+    } else if (strcmp(argvS,"-shift") == 0) {
+      numData = 1;
+      if (OPS_GetDouble(&numData, &dData[4]) != 0) {
+	opserr << "WARNING invalid shift in Trig Series with tag?" << tag << endln;
+	return 0;
+      }
+    } else if (strcmp(argvS,"-factor") == 0) {
+      numData = 1;
+      if (OPS_GetDouble(&numData, &dData[5]) != 0) {
+	opserr << "WARNING invalid shift in Trig Series with tag?" << tag << endln;
+	return 0;
+      }
+    } else {
+      opserr << "WARNING unknown option: " << argvS << "  in Rectangular Series with tag?" << tag << endln;      
+      return 0;
+    }      
+    numRemainingArgs -= 2;
+  }
+
+  // create the object
+  theSeries = new PulseSeries(tag, dData[0], dData[1], dData[2], dData[3], dData[4], dData[5]);
+  
+  if (theSeries == 0) {
+    opserr << "WARNING ran out of memory creating PulseSeries with tag: " << tag << "\n";
+    return 0;
+  }
+
+  return theSeries;
+}
+
+
+PulseSeries::PulseSeries(int tag, double startTime, double finishTime,
+			 double T, double pulseWidth, double phi, double theFactor)
+  : TimeSeries(tag, TSERIES_TAG_PulseSeries),
     tStart(startTime),tFinish(finishTime),
     period(T),pWidth(pulseWidth),shift(phi),cFactor(theFactor)
 {
@@ -50,7 +136,6 @@ PulseSeries::PulseSeries(double startTime, double finishTime,
 		period = 1;
 	}
 }
-
 
 PulseSeries::PulseSeries()
     : TimeSeries(TSERIES_TAG_PulseSeries),
@@ -64,6 +149,11 @@ PulseSeries::PulseSeries()
 PulseSeries::~PulseSeries()
 {
 	// does nothing
+}
+
+TimeSeries *
+PulseSeries::getCopy(void) {
+  return new PulseSeries(this->getTag(), tStart, tFinish, period, pWidth, shift, cFactor);
 }
 
 

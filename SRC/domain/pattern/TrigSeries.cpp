@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:01 $
+// $Revision: 1.3 $
+// $Date: 2010-02-04 00:34:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TrigSeries.cpp,v $
-                                                                        
-                                                                        
-// File: ~/domain/pattern/TrigSeries.C
-//
+
 // Written: fmk 
 // Created: 07/99
 // Revision: A
@@ -41,9 +38,90 @@
 
 #include <math.h>
 
-TrigSeries::TrigSeries(double startTime, double finishTime,
-					   double T, double phi, double theFactor)
-  :TimeSeries(TSERIES_TAG_TrigSeries),
+#include <elementAPI.h>
+#define OPS_Export 
+
+OPS_Export void *
+OPS_NewTrigSeries(void)
+{
+  // Pointer to a uniaxial material that will be returned
+  TimeSeries *theSeries = 0;
+  
+  int numRemainingArgs = OPS_GetNumRemainingInputArgs();
+  
+  if (numRemainingArgs < 3) {
+    opserr << "WARNING: invalid num args TrigSeries <tag?> $tStart $tFinish $period <-shift shift> <-factor cFactor?>\n";
+    return 0;
+  }
+
+  int tag = 0;     // default tag = 0
+  double dData[5];
+  dData[3] = 0.0; // default shift = 0.0
+  dData[4] = 1.0; // default cFactor = 1.0
+  int numData = 0;
+
+  // get tag if provided
+  if (numRemainingArgs == 4 || numRemainingArgs == 6 || numRemainingArgs == 8) {
+    numData = 1;
+    if (OPS_GetIntInput(&numData, &tag) != 0) {
+      opserr << "WARNING invalid series tag in Constant tag?" << endln;
+      return 0;
+    }
+    numRemainingArgs -= 1;
+  }
+  
+  numData = 3;
+  if (OPS_GetDouble(&numData, dData) != 0) {
+    opserr << "WARNING invalid double data for TrigSeries with tag: " << tag << endln;
+    return 0;
+  }    
+  numRemainingArgs -= 3;
+
+
+  while (numRemainingArgs > 1) {
+    char argvS[10];
+    if (OPS_GetString(argvS, 10) != 0) {
+      opserr << "WARNING invalid string in Constant <tag?> <-factor cFactor?>" << endln;
+      return 0;
+    } 
+  
+    if (strcmp(argvS,"-shift") == 0) {
+      numData = 1;
+      if (OPS_GetDouble(&numData, &dData[3]) != 0) {
+	opserr << "WARNING invalid shift in Trig Series with tag?" << tag << endln;
+	return 0;
+      }
+    } else if (strcmp(argvS,"-factor") == 0) {
+      numData = 1;
+      if (OPS_GetDouble(&numData, &dData[4]) != 0) {
+	opserr << "WARNING invalid shift in Trig Series with tag?" << tag << endln;
+	return 0;
+      }
+    } else {
+      opserr << "WARNING unknown option: " << argvS << "  in Rectangular Series with tag?" << tag << endln;      
+      return 0;
+    }      
+    numRemainingArgs -= 2;
+  }
+  
+  theSeries = new TrigSeries(tag, dData[0], dData[1], dData[2], dData[3], dData[4]);
+
+  if (theSeries == 0) {
+    opserr << "WARNING ran out of memory creating TrigSeries with tag: " << tag << "\n";
+    return 0;
+  }
+
+  return theSeries;
+}
+
+
+TrigSeries::TrigSeries(int tag,
+		       double startTime, 
+		       double finishTime,
+		       double T, 
+		       double phi, 
+		       double theFactor)
+  :TimeSeries(tag, TSERIES_TAG_TrigSeries),
    tStart(startTime),tFinish(finishTime),
    period(T),shift(phi),cFactor(theFactor)
 {
@@ -52,6 +130,7 @@ TrigSeries::TrigSeries(double startTime, double finishTime,
 	  period = 2*asin(1.0);
 	}
 }
+
 
 TrigSeries::TrigSeries()
   :TimeSeries(TSERIES_TAG_TrigSeries),
@@ -66,6 +145,12 @@ TrigSeries::~TrigSeries()
   // does nothing
 }
 
+TimeSeries *
+TrigSeries::getCopy(void) {
+  return new TrigSeries(this->getTag(), tStart, tFinish, period, shift, cFactor);
+}
+
+  
 double
 TrigSeries::getFactor(double pseudoTime)
 {
@@ -107,6 +192,7 @@ TrigSeries::recvSelf(int commitTag, Channel &theChannel,
     opserr << "TrigSeries::sendSelf() - channel failed to receive data\n";
     cFactor = 1.0;
     tStart= 0.0;
+
     tFinish = 0.0;
 	period = 1.0;
 	shift = 0.0;
