@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2010-02-04 00:44:04 $
+// $Revision: 1.2 $
+// $Date: 2010-02-04 20:50:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/DruckerPrager.cpp,v $
                                                                       
 // Written: Kathryn Petek, Peter Mackenzie-Helnwein, and Pedro Arduino
@@ -44,7 +44,10 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
-#include <myDebug.h>
+//#include <myDebug.h>
+#ifdef DEBUG_LEVEL
+#undef DEBUG_LEVEL
+#endif
 
 const double DruckerPrager :: one3   = 1.0 / 3.0 ;
 const double DruckerPrager :: two3   = 2.0 / 3.0 ;
@@ -61,7 +64,7 @@ double		DruckerPrager::mElastFlag = 2;    //  0 = elastic+no param update; 1 = e
 static int numDruckerPragerMaterials = 0;
 
 OPS_Export void *
-OPS_NewDruckerPragerMaterial()
+OPS_NewDruckerPragerMaterial(void)
 {
   if (numDruckerPragerMaterials == 0) {
     numDruckerPragerMaterials++;

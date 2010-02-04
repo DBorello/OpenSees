@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2010-02-04 00:44:04 $
+// $Revision: 1.2 $
+// $Date: 2010-02-04 20:50:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/DruckerPrager3D.cpp,v $
 
 // Written: Ed "C++" Love
@@ -25,7 +25,7 @@
 #include <Information.h>
 #include <Parameter.h>
 
-#include <myDebug.h>
+//#include <myDebug.h>
 
 //static vectors and matrices
 //Vector DruckerPrager3D :: strain_vec(6) ;
