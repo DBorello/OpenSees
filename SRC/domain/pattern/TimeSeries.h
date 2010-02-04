@@ -18,10 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-09-05 20:48:25 $
+// $Revision: 1.5 $
+// $Date: 2010-02-04 00:32:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TimeSeries.h,v $
-                                                                        
                                                                         
 #ifndef TimeSeries_h
 #define TimeSeries_h
@@ -37,15 +36,20 @@
 //
 // What: "@(#) TimeSeries.h, revA"
 
+#include <TaggedObject.h>
 #include <MovableObject.h>
 #include <OPS_Globals.h>
 #include <Information.h>
 
-class TimeSeries : public MovableObject
+
+class TimeSeries : public TaggedObject, public MovableObject
 {
   public:
+    TimeSeries(int tag, int classTag);
     TimeSeries(int classTag);
     virtual ~TimeSeries();
+
+    virtual TimeSeries *getCopy(void) =0;
 
     // pure virtual functions
     virtual double getFactor (double pseudoTime) = 0;
@@ -66,7 +70,7 @@ class TimeSeries : public MovableObject
     // AddingSensitivity:BEGIN //////////////////////////////////////////
 
   protected:
-	
+
   private:
 };
 
