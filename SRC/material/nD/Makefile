@@ -32,6 +32,7 @@ all: $(OBJS)
 	@$(CD) $(FE)/material/nD/Template3Dep; $(MAKE);  
 	@$(CD) $(FE)/material/nD/FiniteDeformation; $(MAKE);
 	@$(CD) $(FE)/material/nD/NewTemplate3Dep; $(MAKE); 
+	@$(CD) $(FE)/material/nD/reinforcedConcretePlaneStress; $(MAKE); 
 
 # Miscellaneous
 
@@ -50,6 +51,7 @@ spotless: clean
 	@$(CD) $(FE)/material/nD/Template3Dep; $(MAKE) wipe;
 	@$(CD) $(FE)/material/nD/FiniteDeformation; $(MAKE) wipe;
 	@$(CD) $(FE)/material/nD/NewTemplate3Dep; $(MAKE) wipe;
+	@$(CD) $(FE)/material/nD/reinforcedConcretePlaneStress; $(MAKE) wipe; 
 
 wipe: spotless
 
