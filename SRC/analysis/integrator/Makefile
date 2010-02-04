@@ -6,6 +6,7 @@ OBJS       = IncrementalIntegrator.o \
 	StaticIntegrator.o \
 	TransientIntegrator.o \
 	HHT.o \
+	GeneralizedAlpha.o \
 	WilsonTheta.o \
 	Newmark.o \
 	CentralDifference.o \
