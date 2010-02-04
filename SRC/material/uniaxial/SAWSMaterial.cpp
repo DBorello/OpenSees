@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2010-02-04 00:59:06 $
+// $Revision: 1.4 $
+// $Date: 2010-02-04 20:12:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SAWSMaterial.cpp,v $
 
 // Written: Patxi (Converted from FORTRAN code originally written by Bryan Folz)
@@ -87,8 +87,6 @@ OPS_NewSAWSMaterial(void)
 
   return theMaterial;
 }
-
-#define MAT_TAG_SAWSMaterial 1
 
 SAWSMaterial::SAWSMaterial(int tag,
 			   double f0, double fI, double dU, double s0,
