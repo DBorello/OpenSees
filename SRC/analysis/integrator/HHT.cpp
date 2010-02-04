@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.14 $
-// $Date: 2010-01-20 22:28:20 $
+// $Revision: 1.15 $
+// $Date: 2010-02-04 01:05:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHT.cpp,v $
 
 // Written: fmk
@@ -41,6 +41,40 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
+
+#include <elementAPI.h>
+#define OPS_Export 
+
+TransientIntegrator *
+OPS_NewHHT(void)
+{
+
+  // Pointer to a uniaxial material that will be returned
+  TransientIntegrator *theIntegrator = 0;
+
+  int argc = OPS_GetNumRemainingInputArgs();
+  if (argc != 1 && argc != 3) {
+    opserr << "WARNING - incorrect number of args want HHT $alpha <$gamma $beta>\n";
+    return 0;
+  }
+
+  double dData[3];
+  if (OPS_GetDouble(&argc, dData) != 0) {
+    opserr << "WARNING - invalid args want HHT $alpha <$gamma $beta>\n";
+    return 0;
+  }
+  
+  if (argc == 1)
+    theIntegrator = new HHT(dData[0]);
+  else
+    theIntegrator = new HHT(dData[0], dData[1], dData[2]);
+
+  if (theIntegrator == 0)
+    opserr << "WARNING - out of memory creating HHT integrator\n";
+
+  return theIntegrator;
+}
+    
 
 HHT::HHT()
     : TransientIntegrator(INTEGRATOR_TAGS_HHT),

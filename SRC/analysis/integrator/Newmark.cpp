@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.18 $
-// $Date: 2007-04-13 22:29:27 $
+// $Revision: 1.19 $
+// $Date: 2010-02-04 01:06:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark.cpp,v $
 
 // Written : fmk
@@ -42,11 +42,53 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
+#include <elementAPI.h>
+
+TransientIntegrator *
+OPS_NewNewmark(void)
+{
+  // Pointer to a uniaxial material that will be returned
+  TransientIntegrator *theIntegrator = 0;
+
+  int argc = OPS_GetNumRemainingInputArgs();
+  if (argc != 2 && argc != 4) {
+    opserr << "WARNING - incorrect number of args want Newmark $gamma $beta <-form $typeUnknown>\n";
+    return 0;
+  }
+
+  bool dispFlag = true;
+  double dData[2];
+  int numData = 2;
+  if (OPS_GetDouble(&numData, dData) != 0) {
+    opserr << "WARNING - invalid args want Newmark $gamma $beta <-form $typeUnknown>\n";
+    return 0;
+  }
+  
+  if (argc == 2)
+    theIntegrator = new Newmark(dData[0], dData[1]);
+  else {
+    char nextString[10];
+    OPS_GetString(nextString, 10);
+    if (strcmp(nextString,"-form") == 0) {
+      OPS_GetString(nextString, 10);
+      if ((nextString[0] == 'D') || (nextString[0] == 'd')) 
+	dispFlag = true;
+      else if ((nextString[0] == 'A') || (nextString[0] == 'a')) 
+	dispFlag = false;      
+    }    
+    theIntegrator = new Newmark(dData[0], dData[1], dispFlag);
+  }
+
+  if (theIntegrator == 0)
+    opserr << "WARNING - out of memory creating Newmark integrator\n";
+
+  return theIntegrator;
+}
+
 
 Newmark::Newmark()
     : TransientIntegrator(INTEGRATOR_TAGS_Newmark),
     displ(true), gamma(0), beta(0), 
-    alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
     c1(0.0), c2(0.0), c3(0.0), 
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     determiningMass(false)
@@ -58,28 +100,12 @@ Newmark::Newmark()
 Newmark::Newmark(double _gamma, double _beta, bool dispFlag)
     : TransientIntegrator(INTEGRATOR_TAGS_Newmark),
     displ(dispFlag), gamma(_gamma), beta(_beta), 
-    alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
     c1(0.0), c2(0.0), c3(0.0), 
     Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
     determiningMass(false)
 {
     
 }
-
-
-Newmark::Newmark(double _gamma, double _beta,
-    double _alphaM, double _betaK, double _betaKi, double _betaKc,
-    bool dispFlag)
-    : TransientIntegrator(INTEGRATOR_TAGS_Newmark),
-    displ(dispFlag), gamma(_gamma), beta(_beta), 
-    alphaM(_alphaM), betaK(_betaK), betaKi(_betaKi), betaKc(_betaKc),
-    c1(0.0), c2(0.0), c3(0.0), 
-    Ut(0), Utdot(0), Utdotdot(0), U(0), Udot(0), Udotdot(0),
-    determiningMass(false) 
-{
-
-}
-
 
 Newmark::~Newmark()
 {
@@ -230,9 +256,6 @@ int Newmark::domainChanged()
     const Vector &x = theLinSOE->getX();
     int size = x.Size();
     
-    // if damping factors exist set them in the ele & node of the domain
-    if (alphaM != 0.0 || betaK != 0.0 || betaKi != 0.0 || betaKc != 0.0)
-        myModel->setRayleighDampingFactors(alphaM, betaK, betaKi, betaKc);
     
     // create the new Vector objects
     if (Ut == 0 || Ut->Size() != size)  {
@@ -423,8 +446,6 @@ void Newmark::Print(OPS_Stream &s, int flag)
         s << "\t Newmark - currentTime: " << currentTime;
         s << "  gamma: " << gamma << "  beta: " << beta << endln;
         s << "  c1: " << c1 << "  c2: " << c2 << "  c3: " << c3 << endln;
-        s << "  Rayleigh Damping - alphaM: " << alphaM << "  betaK: " << betaK;
-        s << "  betaKi: " << betaKi << "  betaKc: " << betaKc << endln;	    
     } else 
         s << "\t Newmark - no associated AnalysisModel\n";
 }
