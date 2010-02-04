@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2010-01-21 22:51:13 $
+// $Revision: 1.3 $
+// $Date: 2010-02-04 00:59:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SAWSMaterial.cpp,v $
 
 // Written: Patxi (Converted from FORTRAN code originally written by Bryan Folz)
@@ -39,6 +39,7 @@
 #include <math.h>
 #include <float.h>
 #include <Channel.h>
+#include <classTags.h>
 
 #include <elementAPI.h>
 #define OPS_Export 
@@ -46,7 +47,7 @@
 static int numSAWSMaterials = 0;
 
 OPS_Export void *
-OPS_NewSAWSMaterial()
+OPS_NewSAWSMaterial(void)
 {
   if (numSAWSMaterials == 0) {
     numSAWSMaterials++;
@@ -87,6 +88,7 @@ OPS_NewSAWSMaterial()
   return theMaterial;
 }
 
+#define MAT_TAG_SAWSMaterial 1
 
 SAWSMaterial::SAWSMaterial(int tag,
 			   double f0, double fI, double dU, double s0,
