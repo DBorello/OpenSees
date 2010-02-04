@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2009-07-29 21:58:16 $
+// $Revision: 1.21 $
+// $Date: 2010-02-04 01:21:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.cpp,v $
                                                                         
                                                                         
@@ -346,10 +346,6 @@ FE_Element::zeroTangent(void)
 	    opserr << "- this should not be called on a Subdomain!\n";
 	}    	    	    
     }
-    else {
-	opserr << "WARNING FE_Element::zeroTangent() - no Element *given ";
-	opserr << "- subclasses must provide implementation\n";
-    }
 }
 
 void  
@@ -367,10 +363,6 @@ FE_Element::addKtToTang(double fact)
 	    opserr << "- this should not be called on a Subdomain!\n";
 	}    	    	    
     }
-    else {
-	opserr << "WARNING FE_Element::addKToTang() - no Element *given ";
-	opserr << "- subclasses must provide implementation\n";
-    }    	    
 }
 
 void  
@@ -388,10 +380,6 @@ FE_Element::addCtoTang(double fact)
 	  opserr << "- this should not be called on a Subdomain!\n";
 	}    	    	    	
     }
-    else {
-	opserr << "WARNING FE_Element::addCToTang() - no Element *given ";
-	opserr << "- subclasses must provide implementation\n";
-    }    	        
 }
     
 void  
@@ -409,10 +397,6 @@ FE_Element::addMtoTang(double fact)
 	  opserr << "- this should not be called on a Subdomain!\n";
 	}    	    	    	
     }	
-    else {
-	opserr << "WARNING FE_Element::addMToTang() - no Element *given ";
-	opserr << "- subclasses must provide implementation\n";
-    }    	        
 }    
 
 
@@ -430,10 +414,6 @@ FE_Element::addKiToTang(double fact)
 	opserr << "- this should not be called on a Subdomain!\n";
     }    	    	    	
   }	
-  else {
-    opserr << "WARNING FE_Element::addKiToTang() - no Element *given ";
-    opserr << "- subclasses must provide implementation\n";
-  }    	        
 }    
 
 
