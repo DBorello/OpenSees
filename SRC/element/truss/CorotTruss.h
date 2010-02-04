@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2009-11-03 23:10:08 $
+// $Revision: 1.11 $
+// $Date: 2010-02-04 01:12:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.h,v $
 
 #ifndef CorotTruss_h
@@ -45,9 +45,9 @@ class CorotTruss : public Element
 {
   public:
     CorotTruss(int tag, int dim,
-	  int Nd1, int Nd2, 
-	  UniaxialMaterial &theMaterial,
-	  double A, double rho=0.0);
+	       int Nd1, int Nd2, 
+	       UniaxialMaterial &theMaterial,
+	       double A, double rho=0.0);
     
     CorotTruss();    
     ~CorotTruss();
