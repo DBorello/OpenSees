@@ -684,18 +684,18 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/nD/cyclicSoil/MultiaxialCyclicPlasticityPlaneStrain.o \
 	$(FE)/material/nD/cyclicSoil/MultiaxialCyclicPlasticity3D.o \
 	$(FE)/material/nD/cyclicSoil/MultiaxialCyclicPlasticityAxiSymm.o \
-	$(FE)/material/nd/reinforcedConcretePlaneStress/ReinforcedConcretePlaneStress.o \
-	$(FE)/material/nd/reinforcedConcretePlaneStress/FAReinforcedConcretePlaneStress.o \
-	$(FE)/material/nd/reinforcedConcretePlaneStress/FAFourSteelRCPlaneStress.o \
-	$(FE)/material/nd/reinforcedConcretePlaneStress/RAFourSteelRCPlaneStress.o \
-	$(FE)/material/nd/reinforcedConcretePlaneStress/PrestressedConcretePlaneStress.o \
-	$(FE)/material/nd/reinforcedConcretePlaneStress/FAPrestressedConcretePlaneStress.o \
-	$(FE)/material/nd/reinforcedConcretePlaneStress/FAFourSteelPCPlaneStress.o \
-	$(FE)/material/nd/reinforcedConcretePlaneStress/RAFourSteelPCPlaneStress.o \
-	$(FE)/material/nd/reinforcedConcretePlaneStress/ConcreteZ01.o \
-	$(FE)/material/nd/reinforcedConcretePlaneStress/ConcreteL01.o \
-	$(FE)/material/nd/reinforcedConcretePlaneStress/SteelZ01.o \
-	$(FE)/material/nd/reinforcedConcretePlaneStress/TendonL01.o
+	$(FE)/material/nD/reinforcedConcretePlaneStress/FAReinforcedConcretePlaneStress.o \
+	$(FE)/material/nD/reinforcedConcretePlaneStress/ReinforcedConcretePlaneStress.o \
+	$(FE)/material/nD/reinforcedConcretePlaneStress/FAFourSteelRCPlaneStress.o \
+	$(FE)/material/nD/reinforcedConcretePlaneStress/RAFourSteelRCPlaneStress.o \
+	$(FE)/material/nD/reinforcedConcretePlaneStress/PrestressedConcretePlaneStress.o \
+	$(FE)/material/nD/reinforcedConcretePlaneStress/FAPrestressedConcretePlaneStress.o \
+	$(FE)/material/nD/reinforcedConcretePlaneStress/FAFourSteelPCPlaneStress.o \
+	$(FE)/material/nD/reinforcedConcretePlaneStress/RAFourSteelPCPlaneStress.o \
+	$(FE)/material/nD/reinforcedConcretePlaneStress/ConcreteZ01.o \
+	$(FE)/material/nD/reinforcedConcretePlaneStress/ConcreteL01.o \
+	$(FE)/material/nD/reinforcedConcretePlaneStress/SteelZ01.o \
+	$(FE)/material/nD/reinforcedConcretePlaneStress/TendonL01.o
 
 
 FEDEAS_LIBS = $(FE)/material/uniaxial/FedeasMaterial.o \
@@ -811,7 +811,9 @@ SysOfEqn_LIBS =	$(FE)/system_of_eqn/linearSOE/LinearSOE.o \
 	$(FE)/system_of_eqn/linearSOE/diagonal/DiagonalSolver.o \
 	$(FE)/system_of_eqn/linearSOE/diagonal/DiagonalDirectSolver.o \
 	$(FE)/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSOE.o \
+	$(FE)/system_of_eqn/linearSOE/diagonal/MPIDiagonalSOE.o \
 	$(FE)/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSolver.o \
+	$(FE)/system_of_eqn/linearSOE/diagonal/MPIDiagonalSolver.o \
 	$(FE)/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/profileSPD/DistributedProfileSPDLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinSolver.o \
@@ -894,6 +896,13 @@ DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/pattern/TclSeriesIntegratorCommand.o \
 	$(FE)/domain/pattern/TimeSeriesIntegrator.o \
 	$(FE)/domain/pattern/TrapezoidalTimeSeriesIntegrator.o \
+	$(FE)/domain/pattern/drm/DRMLoadPattern.o \
+	$(FE)/domain/pattern/drm/DRMLoadPatternWrapper.o \
+	$(FE)/domain/pattern/drm/DRMInputHandler.o \
+	$(FE)/domain/pattern/drm/PlaneDRMInputHandler.o \
+	$(FE)/domain/pattern/drm/Mesh3DSubdomain.o \
+	$(FE)/domain/pattern/drm/GeometricBrickDecorator.o \
+	$(FE)/domain/pattern/drm/DRMBoundaryLayerDecorator.o \
 	$(FE)/domain/groundMotion/GroundMotion.o \
 	$(FE)/domain/groundMotion/GroundMotionRecord.o \
 	$(FE)/domain/groundMotion/InterpolatedGroundMotion.o \
