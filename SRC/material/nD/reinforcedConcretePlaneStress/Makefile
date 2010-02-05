@@ -1,4 +1,4 @@
-include ../../../../../Makefile.def
+include ../../../../Makefile.def
 
 OBJS       = ConcreteL01.o \
 	ConcreteZ01.o \
