@@ -15,8 +15,11 @@
 
 
 # you nooed load module petsc in .bashrc
-
-
+# in the .basrc_user, or .cshrc_user you need to add the following
+# module unload pgi
+# module load   intel/10.1
+# module load   mkl/10.0
+# module load   mvapich/1.0.1
 # PUT YOUR HOME DIRECTOREY HERE IF NOT THE DEFAULT ONE IN 
 # HOME  = /gpfs/fmk
 
@@ -55,6 +58,7 @@ GRAPHICS = NONE
 
 BLASdir      = $(HOME)/OpenSees/OTHER/BLAS
 CBLASdir     = $(HOME)/OpenSees/OTHER/CBLAS
+AMDdir    = $(HOME)/OpenSees/OTHER/AMD
 LAPACKdir    = $(HOME)/OpenSees/OTHER/LAPACK
 ARPACKdir    = $(HOME)/OpenSees/OTHER/ARPACK
 UMFPACKdir   = $(HOME)/OpenSees/OTHER/UMFPACK
@@ -67,6 +71,7 @@ DIRS        =	$(SUPERLUdir) \
 	      $(SUPERLU_DISTdir) \
               $(ARPACKdir) \
               $(UMFPACKdir) \
+              $(AMDdir) \
               $(METISdir) \
               $(SRCdir) 
 
@@ -77,6 +82,7 @@ DIRS        = \
               $(ARPACKdir) \
               $(UMFPACKdir) \
               $(METISdir) \
+              $(AMDdir) \
               $(SRCdir) 
 endif
 
@@ -102,6 +108,7 @@ BJMISC_LIBRARY      = $(HOME)/lib/libBJmisc.a  # BJ_UCD jeremic@ucdavis.edu
 LAPACK_LIBRARY      = 
 BLAS_LIBRARY        = 
 SUPERLU_LIBRARY     = $(HOME)/lib/libSuperLU.a
+AMD_LIBRARY     = $(HOME)/lib/libAMD.a
 CBLAS_LIBRARY       = 
 ARPACK_LIBRARY      = $(HOME)/lib/libArpack.a
 UMFPACK_LIBRARY     = $(HOME)/lib/libUmfpack.a
@@ -127,6 +134,7 @@ WIPE_LIBS	= $(FE_LIBRARY) \
            $(MATMOD_LIBRARY) \
            $(SUPERLU_LIBRARY) \
            $(ARPACK_LIBRARY) \
+           $(AMD_LIBRARY) \
            $(UMFPACK_LIBRARY) \
            $(METIS_LIBRARY) \
            $(LAPACK_LIBRARY) \
@@ -146,22 +154,23 @@ WIPE_LIBS	= $(FE_LIBRARY) \
 # # Compilers
 # ################################################### 
 
-TACC_MKL_INCLUDE=/opt/apps/intel/mkl/10.0.1.014/include
-TACC_MKL_LIB=/opt/apps/intel/mkl/10.0.1.014/lib/em64t
+#TACC_MKL_INCLUDE=/opt/apps/intel/mkl/10.0.1.014/include
+#TACC_MKL_LIB=/opt/apps/intel/mkl/10.0.1.014/lib/em64t
 
-IFC_LIB=/opt/apps/intel/10.1/fc/lib
-IFC_INC=/opt/apps/intel/10.1/fc/include
-IFC_BIN=/opt/apps/intel/10.1/fc/bin
+#IFC_LIB=/opt/apps/intel/10.1/fc/lib
+#IFC_INC=/opt/apps/intel/10.1/fc/include
+#IFC_BIN=/opt/apps/intel/10.1/fc/bin
 
-ICC_INC=/opt/apps/intel/10.1/cc/include
-ICC_LIB=/opt/apps/intel/10.1/cc/lib
-ICC_BIN=/opt/apps/intel/10.1/cc/bin
+#ICC_INC=/opt/apps/intel/10.1/cc/include
+#ICC_LIB=/opt/apps/intel/10.1/cc/lib
+#ICC_BIN=/opt/apps/intel/10.1/cc/bin
 
-IIDB_BIN=/opt/apps/intel/10.1/idb/bin
-IIDB_DIR=/opt/apps/intel/10.1/idb
+#IIDB_BIN=/opt/apps/intel/10.1/idb/bin
+#IIDB_DIR=/opt/apps/intel/10.1/idb
 
-MPI_DIR = /share/apps/intel10_1/mvapich2/1.0
-MPI_BIN = /share/apps/intel10_1/mvapich2/1.0/bin
+
+MPI_DIR = $(MPICH_HOME)
+MPI_BIN = $(MPI_DIR)/bin
 
 ifeq ($(PROGRAMMING_MODE), SEQUENTIAL)
 
@@ -209,14 +218,17 @@ endif
 RELIABILITY_FLAG =
 
 #DEBUG_FLAG = -D_G3DEBUG 
-DEBUG_FLAG =
+#DEBUG_FLAG = -g -p -pg 
+#DEBUG_FLAG = -p -g
+DEBUG_FLAG = 
 
 MUMPS_FLAG = 
 PETSC_FLAG =
 
 OPT_FLAG = -O2 -xW
+#OPT_FLAG = -O0
 
-COMP_FLAG = 
+COMP_FLAG = -DMPICH_IGNORE_CXX_SEEK 
 
 C++FLAGS         = -D_LINUX -D_UNIX  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(OPT_FLAG) $(COMP_FLAG)\
 		$(PROGRAMMING_FLAG)  $(PETSC_FLAG) $(MUMPS_FLAG) \
@@ -360,6 +372,7 @@ endif
 PARALLEL_LIB = $(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSOE.o \
         $(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSuperLU.o \
+        $(FE)/system_of_eqn/linearSOE/sparseGEN/SuperLU.o \
 	-Wl,-rpath,$(TACC_MKL_LIB) \
 	-L$(TACC_MKL_LIB) \
 	$(TACC_MKL_LIB)/libmkl_scalapack_lp64.a \
@@ -407,6 +420,7 @@ MACHINE_NUMERICAL_LIBS  = -lm \
   $(ARPACK_LIBRARY) \
   $(SUPERLU_LIBRARY) \
   $(UMFPACK_LIBRARY) \
+  $(AMD_LIBRARY) \
   $(GRAPHIC_LIBRARY)\
   $(RELIABILITY_LIBRARY) \
   $(DISTRIBUTED_SUPERLU_LIBRARY) \
