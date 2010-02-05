@@ -25,8 +25,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.43 $
-// $Date: 2010-02-04 00:41:57 $
+// $Revision: 1.44 $
+// $Date: 2010-02-05 00:08:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
 
 
@@ -130,7 +130,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 
     // Check argv[1] for ND material type
 
-    if ((strcmp(argv[1],"ReinforceConcretePlaneStress") == 0) || (strcmp(argv[1],"ReinforceConcretePlaneStress") == 0)) {
+    if ((strcmp(argv[1],"ReinforcedConcretePlaneStress") == 0) || (strcmp(argv[1],"ReinforceConcretePlaneStress") == 0)) {
 
       void *theMat = OPS_NewReinforcedConcretePlaneStressMaterial();
       if (theMat != 0) 
@@ -139,7 +139,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	return TCL_ERROR;
     }
 
-    else if ((strcmp(argv[1],"FAReinforceConcretePlaneStress") == 0) || (strcmp(argv[1],"FAReinforceConcretePlaneStress") == 0)) {
+    else if ((strcmp(argv[1],"FAReinforceConcretePlaneStress") == 0) || (strcmp(argv[1],"FAReinforcedConcretePlaneStress") == 0)) {
 
       void *theMat = OPS_NewFAReinforcedConcretePlaneStressMaterial();
       if (theMat != 0) 
