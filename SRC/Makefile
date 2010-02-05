@@ -811,9 +811,7 @@ SysOfEqn_LIBS =	$(FE)/system_of_eqn/linearSOE/LinearSOE.o \
 	$(FE)/system_of_eqn/linearSOE/diagonal/DiagonalSolver.o \
 	$(FE)/system_of_eqn/linearSOE/diagonal/DiagonalDirectSolver.o \
 	$(FE)/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSOE.o \
-	$(FE)/system_of_eqn/linearSOE/diagonal/MPIDiagonalSOE.o \
 	$(FE)/system_of_eqn/linearSOE/diagonal/DistributedDiagonalSolver.o \
-	$(FE)/system_of_eqn/linearSOE/diagonal/MPIDiagonalSolver.o \
 	$(FE)/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/profileSPD/DistributedProfileSPDLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinSolver.o \
@@ -896,13 +894,6 @@ DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/pattern/TclSeriesIntegratorCommand.o \
 	$(FE)/domain/pattern/TimeSeriesIntegrator.o \
 	$(FE)/domain/pattern/TrapezoidalTimeSeriesIntegrator.o \
-	$(FE)/domain/pattern/drm/DRMLoadPattern.o \
-	$(FE)/domain/pattern/drm/DRMLoadPatternWrapper.o \
-	$(FE)/domain/pattern/drm/DRMInputHandler.o \
-	$(FE)/domain/pattern/drm/PlaneDRMInputHandler.o \
-	$(FE)/domain/pattern/drm/Mesh3DSubdomain.o \
-	$(FE)/domain/pattern/drm/GeometricBrickDecorator.o \
-	$(FE)/domain/pattern/drm/DRMBoundaryLayerDecorator.o \
 	$(FE)/domain/groundMotion/GroundMotion.o \
 	$(FE)/domain/groundMotion/GroundMotionRecord.o \
 	$(FE)/domain/groundMotion/InterpolatedGroundMotion.o \
