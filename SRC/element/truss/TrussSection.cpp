@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2010-02-06 19:08:26 $
+// $Revision: 1.26 $
+// $Date: 2010-02-06 19:11:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -68,7 +68,6 @@ Vector TrussSection::trussV12(12);
 OPS_Export void *
 OPS_NewTrussSectionElement()
 {
-	opserr << "HELLO NewTrussSection\n";
   Element *theElement = 0;
 
   int numRemainingArgs = OPS_GetNumRemainingInputArgs();
