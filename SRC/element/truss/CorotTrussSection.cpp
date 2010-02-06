@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2010-02-04 01:12:33 $
+// $Revision: 1.13 $
+// $Date: 2010-02-06 19:08:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTrussSection.cpp,v $
                                                                         
 // Written: MHS 
@@ -72,9 +72,6 @@ OPS_NewCorotTrussSectionElement()
   int    iData[4];
   double rho = 0.0;
   int ndm = OPS_GetNDM();
-
-  if (numRemainingArgs != 4 || numRemainingArgs != 6)
-    return 0; 
 
   int numData = 4;
   if (OPS_GetInt(&numData, iData) != 0) {

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.61 $
-// $Date: 2010-02-04 01:18:57 $
+// $Revision: 1.62 $
+// $Date: 2010-02-06 19:08:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
 
 // Written: fmk
@@ -368,15 +368,17 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
   if ((strcmp(argv[1],"truss") == 0) || (strcmp(argv[1],"Truss") == 0)) {
     
     void *theEle = OPS_NewTrussElement();
-    
     // for backward compatability
-    if (theEle == 0)
+	if (theEle == 0) {
       theEle = OPS_NewTrussSectionElement(); 
-    
+	}
+
     if (theEle != 0) 
       theElement = (Element *)theEle;
     else 
-      return TCL_ERROR;      
+      return TCL_ERROR;  
+
+    theElement->Print(opserr,0);
 
   } else if ((strcmp(argv[1],"trussSection") == 0) || (strcmp(argv[1],"TrussSection") == 0)) {
 
