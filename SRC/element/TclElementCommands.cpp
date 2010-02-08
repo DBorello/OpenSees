@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.62 $
-// $Date: 2010-02-06 19:08:26 $
+// $Revision: 1.63 $
+// $Date: 2010-02-08 21:54:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
 
 // Written: fmk
@@ -375,20 +375,22 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 
     if (theEle != 0) 
       theElement = (Element *)theEle;
-    else 
-      return TCL_ERROR;  
-
-    theElement->Print(opserr,0);
+    else  {
+      opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
+      return TCL_ERROR;      
+    }
 
   } else if ((strcmp(argv[1],"trussSection") == 0) || (strcmp(argv[1],"TrussSection") == 0)) {
 
     void *theEle = OPS_NewTrussSectionElement(); 
     if (theEle != 0) 
       theElement = (Element *)theEle;
-    else 
+    else  {
+      opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
       return TCL_ERROR;      
-
+    }
   }
+
   else if ((strcmp(argv[1],"corotTruss") == 0) || (strcmp(argv[1],"CorotTruss") == 0)) {
     
     void *theEle = OPS_NewCorotTrussElement();
@@ -399,24 +401,30 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
     
     if (theEle != 0) 
       theElement = (Element *)theEle;
-    else 
+    else {
+      opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
       return TCL_ERROR;      
+    }
 
   } else if ((strcmp(argv[1],"corotTrussSection") == 0) || (strcmp(argv[1],"CorotTrussSection") == 0)) {
 
     void *theEle = OPS_NewCorotTrussSectionElement(); 
     if (theEle != 0) 
       theElement = (Element *)theEle;
-    else 
+    else  {
+      opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
       return TCL_ERROR;      
+    }
 
   } else if (strcmp(argv[1],"zeroLengthContactNTS2D") == 0) {
     
     Element *theEle = OPS_NewZeroLengthContactNTS2D();
     if (theEle != 0) 
       theElement = (Element *)theEle;
-    else
+    else {
+      opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
       return TCL_ERROR;
+    }
   }
 
   // if one of the above worked
@@ -429,7 +437,6 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
     } else
       return TCL_OK;
   }
-
 
 
   if (strcmp(argv[1],"fTruss") == 0) {
