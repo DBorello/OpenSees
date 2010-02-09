@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2009-12-23 22:56:04 $
+// $Revision: 1.4 $
+// $Date: 2010-02-09 21:29:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/RemoveRecorder.cpp,v $
                                                                         
 // Written: M Talaat
@@ -279,22 +279,24 @@ RemoveRecorder::RemoveRecorder(int nodeID,
 RemoveRecorder::~RemoveRecorder()
 {
   numRecs--;
-  
+
   // if last recorder to be deleted, check if any elements or nodes had been "removed" and destroy them
   if (numRecs == 0) {
-    opserr << "RemoveRecorder::~RemoveRecorder()\n";
+   
     for (int i=0; i<numRemEles; i++)
-      delete remEles[i];
-
+		if (remEles[i] != 0)
+          delete remEles[i];
+ 
     for (int i=0; i<numRemNodes; i++)
-      delete remNodes[i];
-
+		if (remNodes[i] != 0)
+           delete remNodes[i];
+ 
     if (remEles != 0)
       delete [] remEles;
-
+ 
     if (remNodes != 0)
       delete [] remNodes;
-
+ 
     numRemEles = 0;
     numRemNodes = 0;
     remEles = 0;
