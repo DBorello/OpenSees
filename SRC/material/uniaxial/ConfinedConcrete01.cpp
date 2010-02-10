@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2010-02-04 19:10:34 $
+// $Revision: 1.3 $
+// $Date: 2010-02-10 23:31:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ConfinedConcrete01.cpp,v $
                                                                         
 // Description: This file contains the class definition for ConfinedConcrete01.
@@ -1665,7 +1665,7 @@ OPS_NewConfinedConcrete01Material()
 {
   if (numConfinedConcrete01Materials == 0) {
     numConfinedConcrete01Materials++;
-    OPS_Error("ConfinedConceret01 unaxial material - Written by M.D'Amato, University of Basilicata, Italy 2009\n", 1);
+    opserr << "ConfinedConceret01 unaxial material - Written by M.D'Amato, University of Basilicata, Italy 2009\n";
   }
 
   // Pointer to a uniaxial material that will be returned

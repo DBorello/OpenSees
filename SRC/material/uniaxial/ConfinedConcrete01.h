@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2010-02-04 19:10:34 $
+// $Revision: 1.3 $
+// $Date: 2010-02-10 23:31:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ConfinedConcrete01.h,v $
                                                                         
 #ifndef ConfinedConcrete01_h
@@ -136,12 +136,25 @@ class ConfinedConcrete01 : public UniaxialMaterial
   void superPosConfPress (std::vector<std::vector<double> > B, std::vector<double> semiLength, 
 			  std::vector<std::vector<double> > & frm, int secType, int dim, int i);
   
-  void ConfinedConcrete01::attSet (double epsc, double fc, double epsic, double fic,
-				   double ft, double fpl, double alpha, double Eti, double epsz, double fr,
-				   double &sigmaci, double &Eczi, double fcu, double &epscu, double epscuOption, double epscuLimit);
+  void attSet(double epsc, 
+	      double fc, 
+	      double epsic, 
+	      double fic,
+	      double ft, 
+	      double fpl, 
+	      double alpha, 
+	      double Eti, 
+	      double epsz, 
+	      double fr,
+	      double &sigmaci,
+	      double &Eczi,
+	      double fcu, 
+	      double &epscu, 
+	      double epscuOption, 
+	      double epscuLimit);
+
   /*** Envelope curve ***/
-  
-  std::vector<double> *eps, *sigmac;
+    std::vector<double> *eps, *sigmac;
   
   
   /*** Material Properties ***/
