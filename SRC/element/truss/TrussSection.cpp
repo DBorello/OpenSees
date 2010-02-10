@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2010-02-06 19:11:04 $
+// $Revision: 1.27 $
+// $Date: 2010-02-10 23:38:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -922,11 +922,13 @@ TrussSection::Print(OPS_Stream &s, int flag)
     
     double temp;
     int numDOF2 = numDOF/2;
-    for (int i=0; i<dimension; i++) {
-      temp = force*cosX[i];
-      (*theVector)(i) = -force;
-      (*theVector)(i+numDOF2) = force;
-    }
+	if (theVector != 0) {
+		for (int i=0; i<dimension; i++) {
+			temp = force*cosX[i];
+			(*theVector)(i) = -force;
+			(*theVector)(i+numDOF2) = force;
+		}
+	}
     
     if (flag == 0) { // print everything
 	s << "Element: " << this->getTag(); 

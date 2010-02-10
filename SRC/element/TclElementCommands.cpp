@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.63 $
-// $Date: 2010-02-08 21:54:40 $
+// $Revision: 1.64 $
+// $Date: 2010-02-10 23:38:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
 
 // Written: fmk
@@ -375,6 +375,7 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 
     if (theEle != 0) 
       theElement = (Element *)theEle;
+
     else  {
       opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
       return TCL_ERROR;      
