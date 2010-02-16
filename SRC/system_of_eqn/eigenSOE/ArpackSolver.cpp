@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2009-05-14 22:46:38 $
+// $Revision: 1.5 $
+// $Date: 2010-02-16 18:51:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/ArpackSolver.cpp,v $
 
 // Written: fmk
@@ -86,6 +86,7 @@ ArpackSolver::~ArpackSolver()
     delete [] select;
   if (workArea != 0)
     delete [] workArea;
+  workArea = 0;
   sizeWork = 0;
 }
 

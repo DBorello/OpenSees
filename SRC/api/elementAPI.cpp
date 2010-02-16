@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.9 $
-** $Date: 2010-02-04 01:19:36 $
+** $Revision: 1.10 $
+** $Date: 2010-02-16 18:55:14 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/elementAPI.cpp,v $
                                                                         
 ** Written: fmk 
@@ -190,9 +190,9 @@ int OPS_GetStringCopy(char **arrayData)
       opserr << "OPS_GetStringInput -- error reading " << currentArg << endln;
       return -1;
   }
-  char *newData = new char[strlen(currentArgv[currentArg])];
+  char *newData = new char[strlen(currentArgv[currentArg])+1];
   strcpy(newData, currentArgv[currentArg]);
-  arrayData = &newData;
+  *arrayData = newData;
   currentArg++;
 
   return 0;  
