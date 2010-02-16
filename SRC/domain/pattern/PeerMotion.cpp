@@ -18,10 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2010-02-04 00:36:46 $
+// $Revision: 1.8 $
+// $Date: 2010-02-16 18:57:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PeerMotion.cpp,v $                                                                        
-
 // Written: fmk 
 // Created: 10/06
 //
@@ -76,6 +75,7 @@ OPS_NewPeerMotion(void)
   int tag = 0;     // default tag = 0
   double factor = 0.0; 
   int numData = 0;
+
   char *eqMotion = 0;
   char *station = 0;
   char *type = 0;
@@ -90,23 +90,24 @@ OPS_NewPeerMotion(void)
     numRemainingArgs -= 1;
   }
   
-  if (OPS_GetStringCopy(&eqMotion) != 0) {
+  if ((OPS_GetStringCopy(&eqMotion) != 0) || eqMotion == 0) {
     opserr << "WARNING invalid eqMotion for PeerMotion with tag: " << tag << endln;
     return 0;
   }    
 
-  if (OPS_GetStringCopy(&station) != 0) {
+    if ((OPS_GetStringCopy(&station) != 0) || station == 0) {
     opserr << "WARNING invalid station for PeerMotion with tag: " << tag << endln;
     return 0;
   }    
 
-  if (OPS_GetStringCopy(&type) != 0) {
+    if ((OPS_GetStringCopy(&type) != 0) || type == 0) {
     opserr << "WARNING invalid type  for PeerMotion with tag: " << tag << endln;
     return 0;
   }    
 
+
   if (OPS_GetDouble(&numData, &factor) != 0) {
-    opserr << "WARNING invalid shift in Trig Series with tag?" << tag << endln;
+    opserr << "WARNING invalid facor in PeerMotion Series with tag?" << tag << endln;
     return 0;
   }
   
@@ -116,6 +117,10 @@ OPS_NewPeerMotion(void)
     opserr << "WARNING ran out of memory creating PeerMotion with tag: " << tag << "\n";
     return 0;
   }
+
+  delete [] eqMotion;
+  delete [] station;
+  delete [] type;
 
   return theSeries;
 }
@@ -145,69 +150,75 @@ PeerMotion::PeerMotion(int tag,
   double value;
   char tmp1[100];
 
-  if ((strcmp(type,"ACCEL") == 0) || (strcmp(type,"-accel") == 0) || (strcmp(type,"-ACCEL") == 0)
-      || (strcmp(type,"accel") == 0) || (strcmp(type,"ATH") == 0) || (strcmp(type,"-ATH") == 0)) {
-    sprintf(peerPage, "/smcat/data/ath/%s/%s.AT2",earthquake,station);
-  } else if ((strcmp(type,"DISP") == 0) || (strcmp(type,"-disp") == 0) || (strcmp(type,"-DISP") == 0)
-      || (strcmp(type,"adisp") == 0) || (strcmp(type,"DTH") == 0) || (strcmp(type,"-DTH") == 0)) {
-    sprintf(peerPage, "/smcat/data/dth/%s/%s.DT2",earthquake,station);
-  } else {
-    opserr << "PeerMotion::PeerMotion() - not a valid type:" << type << " (-DISP or -ACCEL requiured)\n";
-    return;
-  }
-  
-  if (httpGet("peer.berkeley.edu",peerPage,80,&eqData) != 0) {
-    opserr << "PeerMotion::PeerMotion() - could not connect to PEER Database, ";
-    return; 
-  }
+  if (earthquake != 0 && station != 0 && type != 0) {
+    
+    if ((strcmp(type,"ACCEL") == 0) || (strcmp(type,"-accel") == 0) || (strcmp(type,"-ACCEL") == 0)
+	|| (strcmp(type,"accel") == 0) || (strcmp(type,"ATH") == 0) || (strcmp(type,"-ATH") == 0)) {
+      sprintf(peerPage, "/smcat/data/ath/%s/%s.AT2",earthquake,station);
+    } else if ((strcmp(type,"DISP") == 0) || (strcmp(type,"-disp") == 0) || (strcmp(type,"-DISP") == 0)
+	       || (strcmp(type,"adisp") == 0) || (strcmp(type,"DTH") == 0) || (strcmp(type,"-DTH") == 0)) {
+      sprintf(peerPage, "/smcat/data/dth/%s/%s.DT2",earthquake,station);
+    } else {
+      opserr << "PeerMotion::PeerMotion() - not a valid type:" << type << " (-DISP or -ACCEL requiured)\n";
+      return;
+    }
 
-  nextData = strstr(eqData,"Page Not Found");
-  if (nextData != 0) {
-    opserr << "PeerMotion::PeerMotion() - could not get Data for record from Database, ";
-    opserr << "page: " << peerPage << " missing \n";
-    free(eqData);
-    return;
-  }
-  
-  nextData = strstr(eqData,"NPTS");
-  if (nextData == NULL) {
-    opserr << "PeerMotion::PeerMotion() - could not find nPts in record, send email opensees-support@berkeley.edu";
-    free(eqData);
-    return;
-  }
-  
-  nextData+=5; // NPTS=
-  nPts = atoi(nextData);
-  
-  nextData = strstr(eqData, "DT");
-  if (nextData == NULL) {
-    nextData = strstr(eqData, "dt");
-    if (nextData == NULL) {
-      opserr << "PeerMotion::PeerMotion() - could not find dt in record, send email opensees-support@berkeley.edu";
+    if (httpGet("peer.berkeley.edu",peerPage,80,&eqData) != 0) {
+      opserr << "PeerMotion::PeerMotion() - could not connect to PEER Database, ";
+      return; 
+    }
+
+    if (eqData == 0) {
+      opserr << "PeerMotion::PeerMotion() - NO data returned ";
+      return; 
+    }
+
+    nextData = strstr(eqData,"Page Not Found");
+    if (nextData != 0) {
+      opserr << "PeerMotion::PeerMotion() - could not get Data for record from Database, ";
+      opserr << "page: " << peerPage << " missing \n";
       free(eqData);
       return;
     }
-  }
 
-  nextData+=4; //DT= dT UNIT
-  dT = strtod(nextData, &nextData);
-  
-  sscanf(nextData, "%s", tmp1);
-  nextData += strlen(tmp1)+1;
-  
-  sscanf(nextData, "%s", tmp1);
+    nextData = strstr(eqData,"NPTS");
+    if (nextData == NULL) {
+      opserr << "PeerMotion::PeerMotion() - could not find nPts in record, send email opensees-support@berkeley.edu";
+      free(eqData);
+      return;
+    }
 
-  thePath = new Vector(nPts);
-  //  data = (double *)malloc(nPts*sizeof(double));
-  
-  for (i=0; i<nPts; i++) {
-    double value = strtod(nextData, &nextData);
-    (*thePath)(i) = value;
+    nextData+=5; // NPTS=
+    nPts = atoi(nextData);
+
+    nextData = strstr(eqData, "DT");
+    if (nextData == NULL) {
+      nextData = strstr(eqData, "dt");
+      if (nextData == NULL) {
+	opserr << "PeerMotion::PeerMotion() - could not find dt in record, send email opensees-support@berkeley.edu";
+	free(eqData);
+	return;
+      }
+    }
+
+    nextData+=4; //DT= dT UNIT
+    dT = strtod(nextData, &nextData);
+    
+    sscanf(nextData, "%s", tmp1);
+    nextData += strlen(tmp1)+1;
+    
+    sscanf(nextData, "%s", tmp1);
+
+    thePath = new Vector(nPts);
+    //  data = (double *)malloc(nPts*sizeof(double));
+
+    for (i=0; i<nPts; i++) {
+      double value = strtod(nextData, &nextData);
+      (*thePath)(i) = value;
+    }
+    
+    free(eqData);
   }
-  
-  free(eqData);
-  
-  // create copies of the vectors
 }
 
 
