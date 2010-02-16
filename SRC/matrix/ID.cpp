@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2010-02-09 21:28:49 $
+// $Revision: 1.18 $
+// $Date: 2010-02-16 18:54:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.cpp,v $
                                                                         
                                                                         
@@ -324,19 +324,25 @@ ID::operator[](int x)
       newArraySize = x+1;
     //    int *newData = (int *)malloc(newArraySize*sizeof(int));    
     int *newData = new int[newArraySize];
+
     if (newData != 0) {
+
       // copy the old
       for (int i=0; i<sz; i++)
 	newData[i] = data[i];
+
       // zero the new
       for (int j=sz; j<newArraySize; j++)
 	newData[j] = 0;
       
       sz = x+1;
+
       // release the memory held by the old
       //      free((void *)data);	    
-      if (fromFree == 0  && data == 0)
-	  delete [] data;
+
+      if (fromFree == 0 && data != 0)
+	delete [] data;
+
       data = newData;
       arraySize = newArraySize;
       
