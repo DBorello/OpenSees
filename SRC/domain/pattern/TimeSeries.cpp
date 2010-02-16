@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2010-02-04 00:32:49 $
+// $Revision: 1.5 $
+// $Date: 2010-02-16 18:57:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TimeSeries.cpp,v $
                                                                         
                                                                         
@@ -47,9 +47,10 @@ bool addTimeSeries(TimeSeries *newComponent) {
 TimeSeries *getTimeSeries(int tag) {
 
   TaggedObject *theResult = theTimeSeriesObjects.getComponentPtr(tag);
-  if (theResult == 0)
+  if (theResult == 0) {
+    opserr << "TimeSeries *getTimeSeries(int tag) - none found with tag: " << tag << endln;
     return 0;
-
+  }
   TimeSeries *theSeries = (TimeSeries *)theResult;
 
   return theSeries->getCopy();
