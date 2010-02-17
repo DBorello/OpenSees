@@ -1034,6 +1034,16 @@
 				</File>
 			</Filter>
 		</Filter>
+		<Filter
+			Name="pyMacro"
+			Filter="">
+			<File
+				RelativePath="..\..\..\SRC\element\pyMacro\PY_Macro2D.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\pyMacro\PY_Macro2D.h">
+			</File>
+		</Filter>
 		<File
 			RelativePath="..\..\..\SRC\element\NewElement.cpp">
 		</File>
