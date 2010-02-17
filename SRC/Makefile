@@ -591,6 +591,7 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/frictionBearing/frictionModel/VDependentFriction.o \
 	$(FE)/element/frictionBearing/frictionModel/VPDependentFriction.o \
 	$(FE)/element/twoNodeLink/TwoNodeLink.o \
+	$(FE)/element/pyMacro/PY_Macro2D.o \
 	$(FE)/element/twoNodeLink/TclTwoNodeLinkCommand.o
 
 

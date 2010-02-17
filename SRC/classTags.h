@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.120 $
-// $Date: 2010-02-04 01:28:09 $
+// $Revision: 1.121 $
+// $Date: 2010-02-17 20:26:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
 
 // Written: fmk
@@ -465,6 +465,7 @@
 
 #define ELE_TAG_GenericClient    2103
 #define ELE_TAG_GenericCopy      2104
+#define ELE_TAG_PY_MACRO2D      2105
 
 
 #define FRN_TAG_CoulombFriction     1
@@ -624,7 +625,7 @@
 #define INTEGRATOR_TAGS_HHTHybridSimulation             33
 #define INTEGRATOR_TAGS_CollocationHybridSimulation     34
 #define INTEGRATOR_TAGS_GeneralizedAlpha                35
-
+#define INTEGRATOR_TAGS_DisplacementPath             36
 
 #define LinSOE_TAGS_FullGenLinSOE		1
 #define LinSOE_TAGS_BandGenLinSOE		2
