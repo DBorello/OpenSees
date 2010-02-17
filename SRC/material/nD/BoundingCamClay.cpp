@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2010-02-17 20:52:18 $
+// $Revision: 1.2 $
+// $Date: 2010-02-17 21:37:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/BoundingCamClay.cpp,v $
 
 // Written: kap	
@@ -47,28 +47,77 @@ const double BoundingCamClay :: one3   = 1.0 / 3.0 ;
 const double BoundingCamClay :: two3   = 2.0 / 3.0 ;
 const double BoundingCamClay :: root23 = sqrt( 2.0 / 3.0 ) ;
 
+#include <elementAPI.h>
+static int numBoundingCamClayMaterials = 0;
+#define OPS_Export extern "C"
+
+OPS_Export void *
+OPS_NewBoundingCamClayMaterial(void)
+{
+  if (numBoundingCamClayMaterials == 0) {
+    numBoundingCamClayMaterials++;
+    opserr << "BoundingCamClay nDmaterial - Written by Kathryn Petek and Pedro Arduino - Copyright@2009\n";
+  }
+
+  // Pointer to a uniaxial material that will be returned
+  NDMaterial *theMaterial = 0;
+
+  int numArgs = OPS_GetNumRemainingInputArgs();
+
+  if (numArgs < 12) {
+    opserr << "Want: nDMaterial BoundingCamClay tag? C? r? R? p_o? kappa? mu_o? alpha? lambda? h? m? epsE_vo?" << endln;
+    return 0;	
+  }
+  
+  int tag;
+  double dData[11];
+
+  int numData = 1;
+  if (OPS_GetInt(&numData, &tag) != 0) {
+    opserr << "WARNING invalid tag for  BoundingCamClay material" << endln;
+    return 0;
+  }
+  numData = 11;
+  if (OPS_GetDouble(&numData, dData) != 0) {
+    opserr << "WARNING invalid material data for nDMaterial BoundingCamClay material  with tag: " << tag << endln;
+    return 0;
+  }
+
+  theMaterial = new BoundingCamClay(tag, 0, dData[0], dData[1], dData[2], dData[3], dData[4], 
+				    dData[5], dData[6], dData[7], dData[8], dData[9], dData[10]);
+
+  if (theMaterial == 0) {
+    opserr << "WARNING ran out of memory for nDMaterial BoundingCamClay material  with tag: " << tag << endln;
+  }
+
+  return theMaterial;
+}
+
+
+
+
 //full constructor
 BoundingCamClay::BoundingCamClay(int tag, int classTag, double C, double r, double R, double p_o, double kappa,
-							 double mu_o, double alpha, double lambda, double h, 
-							 double m, double epsE_vo)
+				 double mu_o, double alpha, double lambda, double h, 
+				 double m, double epsE_vo)
     : NDMaterial(tag,ND_TAG_BoundingCamClay),
-    mEpsilon(6), 
-	//mEpsilon_n(6),
-	mEpsilon_P(6),
-	mEpsilon_n_P(6),
-	mSigma(6),
-    mSigma_n(6),
-	mSIGMAo(6),
-	mSIGMAo_n(6),
-	//mBeta(6),
-	//mBeta_n(6),
-    mM(6,6),
-	mphi(6,6),
-	mCe(6,6),
-	mCep(6,6),
-	mI1(6),
-	mII(6,6),
-    mIIvol(6,6)
+      mEpsilon(6), 
+      //mEpsilon_n(6),
+      mEpsilon_P(6),
+      mEpsilon_n_P(6),
+      mSigma(6),
+      mSigma_n(6),
+      mSIGMAo(6),
+      mSIGMAo_n(6),
+      //mBeta(6),
+      //mBeta_n(6),
+      mM(6,6),
+      mphi(6,6),
+      mCe(6,6),
+      mCep(6,6),
+      mI1(6),
+      mII(6,6),
+      mIIvol(6,6)
 {
 #ifdef DEBUG
         opserr << "BoundingCamClay::BoundingCamClay(...)" << endln;

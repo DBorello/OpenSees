@@ -24,6 +24,53 @@ int ContactMaterial3D::matCount = 0;
 double* ContactMaterial3D::frictionCoeffx = 0;
 double* ContactMaterial3D::stiffnessx = 0;
 
+#include <elementAPI.h>
+static int numContactMaterial3DMaterials = 0;
+#define OPS_Export extern "C"
+
+
+OPS_Export void *
+OPS_NewContactMaterial3DMaterial(void)
+{
+  if (numContactMaterial3DMaterials == 0) {
+    numContactMaterial3DMaterials++;
+    OPS_Error("ContactMaterial3D nDmaterial - Written by Kathryn Petek and Pedro Arduino - Copyright@2009\n", 1);
+  }
+
+  // Pointer to a uniaxial material that will be returned
+  NDMaterial *theMaterial = 0;
+
+  int numArgs = OPS_GetNumRemainingInputArgs();
+
+  if (numArgs < 5) {
+    opserr << "Want: nDMaterial ContactMaterial3D tag? mu? G? c? t?\n";
+    return 0;	
+  }
+  
+  int tag;
+  double dData[4];
+
+  int numData = 1;
+  if (OPS_GetInt(&numData, &tag) != 0) {
+    opserr << "WARNING invalid tag for  ContactMaterial3D material" << endln;
+    return 0;
+  }
+  numData = 4;
+  if (OPS_GetDouble(&numData, dData) != 0) {
+    opserr << "WARNING invalid material data for nDMaterial ContactMaterial3D material  with tag: " << tag << endln;
+    return 0;
+  }
+
+  theMaterial = new ContactMaterial3D(tag, dData[0], dData[1], dData[2], dData[3]);
+
+  if (theMaterial == 0) {
+    opserr << "WARNING ran out of memory for nDMaterial ContactMaterial3D material  with tag: " << tag << endln;
+  }
+
+  return theMaterial;
+}
+
+
 //full constructor
 ContactMaterial3D::ContactMaterial3D (int tag, double mu, double Gmod, double c, double t)
  : NDMaterial(tag,ND_TAG_ContactMaterial3D),

@@ -18,7 +18,53 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
-#include <myDebug.h>
+#include <elementAPI.h>
+
+static int numContactMaterial2DMaterials = 0;
+#define OPS_Export extern "C"
+
+OPS_Export void *
+OPS_NewContactMaterial2DMaterial(void)
+{
+  if (numContactMaterial2DMaterials == 0) {
+    numContactMaterial2DMaterials++;
+    OPS_Error("ContactMaterial2D nDmaterial - Written by Kathryn Petek and Pedro Arduino - Copyright@2009\n", 1);
+  }
+
+  // Pointer to a uniaxial material that will be returned
+  NDMaterial *theMaterial = 0;
+
+  int numArgs = OPS_GetNumRemainingInputArgs();
+
+  if (numArgs < 5) {
+    opserr << "Want: nDMaterial ContactMaterial2D tag? mu? G? c? t?\n";
+    return 0;	
+  }
+  
+  int tag;
+  double dData[4];
+
+  int numData = 1;
+  if (OPS_GetInt(&numData, &tag) != 0) {
+    opserr << "WARNING invalid tag for  ContactMaterial2D material" << endln;
+    return 0;
+  }
+  numData = 4;
+  if (OPS_GetDouble(&numData, dData) != 0) {
+    opserr << "WARNING invalid material data for nDMaterial ContactMaterial2D material  with tag: " << tag << endln;
+    return 0;
+  }
+
+  theMaterial = new ContactMaterial2D(tag, dData[0], dData[1], dData[2], dData[3]);
+
+  if (theMaterial == 0) {
+    opserr << "WARNING ran out of memory for nDMaterial ContactMaterial2D material  with tag: " << tag << endln;
+  }
+
+  return theMaterial;
+}
+
+
 
 //full constructor
 ContactMaterial2D::ContactMaterial2D (int tag, double mu, double G, double c, double t)
