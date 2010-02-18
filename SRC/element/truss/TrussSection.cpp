@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.27 $
-// $Date: 2010-02-10 23:38:18 $
+// $Revision: 1.28 $
+// $Date: 2010-02-18 20:29:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -995,10 +995,12 @@ TrussSection::setResponse(const char **argv, int argc, OPS_Stream &output)
             }
             theResponse =  new ElementResponse(this, 1, Vector(numDOF));
 
-    } else if ((strcmp(argv[0],"axialForce") == 0) || (strcmp(argv[0],"basicForce") == 0) || 
-        (strcmp(argv[0],"basicForces") == 0)) {
-            output.tag("ResponseType", "N");
-            theResponse =  new ElementResponse(this, 2, 0.0);
+    } else if ((strcmp(argv[0],"axialForce") == 0) || 
+	       (strcmp(argv[0],"basicForce") == 0) || 
+	       (strcmp(argv[0],"localForce") == 0) || 
+	       (strcmp(argv[0],"basicForces") == 0)) {
+      output.tag("ResponseType", "N");
+      theResponse =  new ElementResponse(this, 2, 0.0);
 
     } else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformation") == 0 ||
         strcmp(argv[0],"deformations") == 0 || strcmp(argv[0],"basicDefo") == 0 ||
