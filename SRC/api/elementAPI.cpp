@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.10 $
-** $Date: 2010-02-16 18:55:14 $
+** $Revision: 1.11 $
+** $Date: 2010-02-18 22:57:22 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/elementAPI.cpp,v $
                                                                         
 ** Written: fmk 
@@ -762,11 +762,11 @@ OPS_ResetInput(ClientData clientData,
 int     
 OPS_GetNDF()
 {
-  return theModelBuilder->getNDM();
+  return theModelBuilder->getNDF();
 }
 
 int     
 OPS_GetNDM()
 {
-  return theModelBuilder->getNDF();
+  return theModelBuilder->getNDM();
 }
