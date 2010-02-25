@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.121 $
-// $Date: 2010-02-17 20:26:40 $
+// $Revision: 1.122 $
+// $Date: 2010-02-25 22:44:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
 
 // Written: fmk
@@ -701,6 +701,8 @@
 #define OPS_STREAM_TAGS_DatabaseStream		5
 #define OPS_STREAM_TAGS_DummyStream		6
 #define OPS_STREAM_TAGS_BinaryFileStream        7
+#define OPS_STREAM_TAGS_TCP_Stream              8
+#define OPS_STREAM_TAGS_ChannelStream           9
 
 
 #define DomDecompALGORITHM_TAGS_DomainDecompAlgo 1
