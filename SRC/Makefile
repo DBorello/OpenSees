@@ -275,6 +275,7 @@ ERRORHANDLER_LIBS = $(FE)/handler/StandardStream.o \
 	$(FE)/handler/XmlFileStream.o \
 	$(FE)/handler/BinaryFileStream.o \
 	$(FE)/handler/DummyStream.o \
+	$(FE)/handler/TCP_Stream.o \
 	$(FE)/handler/DatabaseStream.o 
 
 
