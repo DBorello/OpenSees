@@ -7,14 +7,25 @@ OBJS       = OPS_Stream.o \
 	DataFileStream.o \
 	BinaryFileStream.o \
 	DatabaseStream.o \
-	DummyStream.o
+	DummyStream.o \
+	TCP_Stream.o \
+	ChannelStream.o 
 
-TEST_OBJS = $(OBJS) TestDataOutputStreamHandler.o  TestDataOutputFileHandler.o TestDataOutputDatabaseHandler.o
+TEST_OBJS = $(OBJS) \
+	TestDataOutputStreamHandler.o \
+	TestDataOutputFileHandler.o \
+	TestDataOutputDatabaseHandler.o \
+	TestTCP_Stream.o
+
 # Compilation control
 
 all:         $(OBJS)
 
 test:  $(TEST_OBJS)
+	$(LINKER) $(LINKFLAGS) TestTCP_Stream.o $(OBJS) $(FE_LIBRARY) \
+	$(FE_LIBRARY) $(MACHINE_LINKLIBS) \
+	$(MACHINE_NUMERICAL_LIBS) $(MACHINE_SPECIFIC_LIBS) $(METIS_LIBRARY) \
+	 -o testTCP
 	$(LINKER) $(LINKFLAGS) TestDataOutputStreamHandler.o $(OBJS) $(FE_LIBRARY) \
 	$(FE_LIBRARY) $(MACHINE_LINKLIBS) \
 	$(MACHINE_NUMERICAL_LIBS) $(MACHINE_SPECIFIC_LIBS) $(METIS_LIBRARY) \
