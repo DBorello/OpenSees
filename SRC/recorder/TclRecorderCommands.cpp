@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.56 $
-// $Date: 2010-02-25 20:48:22 $
+// $Revision: 1.57 $
+// $Date: 2010-02-25 21:22:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -386,8 +386,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	theOutputStream = new BinaryFileStream(fileName);
       } else if (eMode == TCP_STREAM && inetAddr != 0) {
 	theOutputStream = new TCP_Stream(inetPort, inetAddr);
-      }
-      theOutputStream = new StandardStream();
+      } else 
+	theOutputStream = new StandardStream();
       
 
       theOutputStream->setPrecision(precision);
