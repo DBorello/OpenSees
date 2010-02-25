@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-04-14 21:16:13 $
+// $Revision: 1.3 $
+// $Date: 2010-02-25 23:21:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandSPD/DistributedBandSPDLinSOE.cpp,v $
                                                                         
 // Written: fmk 
@@ -44,6 +44,13 @@ DistributedBandSPDLinSOE::DistributedBandSPDLinSOE(BandSPDLinSolver &theSolvr)
    processID(0), numChannels(0), theChannels(0), localCol(0), workArea(0), sizeWork(0),  myVectB(0), myB(0)
 {
     theSolvr.setLinearSOE(*this);
+}
+
+DistributedBandSPDLinSOE::DistributedBandSPDLinSOE()
+  :BandSPDLinSOE(LinSOE_TAGS_DistributedBandSPDLinSOE), 
+   processID(0), numChannels(0), theChannels(0), localCol(0), workArea(0), sizeWork(0),  myVectB(0), myB(0)
+{
+
 }
 
 

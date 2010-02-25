@@ -6,7 +6,7 @@ PROGRAM       = test
 
 OBJS       = 
 
-ifdef PETSC
+ifeq ($(HAVEPETSC), YES)
 OBJS       = PetscSOE.o PetscSolver.o PetscSparseSeqSolver.o 
 endif
 

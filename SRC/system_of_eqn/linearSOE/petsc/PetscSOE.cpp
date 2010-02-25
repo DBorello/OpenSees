@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2006-06-15 00:20:06 $
+// $Revision: 1.7 $
+// $Date: 2010-02-25 23:21:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/PetscSOE.cpp,v $
                                                                         
 // Written: fmk & om
@@ -248,7 +248,8 @@ PetscSOE::setSize(Graph &theGraph)
       //
 
       ierr = PetscOptionsGetInt(PETSC_NULL, "-n", &size, &flg); CHKERRQ(ierr);
-      ierr = MatCreate(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE,size, size, &A); CHKERRQ(ierr);
+      //      ierr = MatCreateMPIAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE,size, size, &A); CHKERRQ(ierr);
+      ierr = MatCreate(PETSC_COMM_WORLD, &A); CHKERRQ(ierr);
       ierr = MatSetFromOptions(A);CHKERRQ(ierr);
       ierr = MatGetOwnershipRange(A, &startRow, &endRow);CHKERRQ(ierr);
 
