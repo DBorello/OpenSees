@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.55 $
-// $Date: 2010-02-04 01:03:34 $
+// $Revision: 1.56 $
+// $Date: 2010-02-25 20:48:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -70,6 +70,7 @@
 #include <BinaryFileStream.h>
 #include <DatabaseStream.h>
 #include <DummyStream.h>
+#include <TCP_Stream.h>
 
 #include <packages.h>
 #include <elementAPI.h>
@@ -97,7 +98,7 @@ typedef struct externalRecorderCommand {
 
 static ExternalRecorderCommand *theExternalRecorderCommands = NULL;
 
-enum outputMode  {STANDARD_STREAM, DATA_STREAM, XML_STREAM, DATABASE_STREAM, BINARY_STREAM, DATA_STREAM_CSV};
+enum outputMode  {STANDARD_STREAM, DATA_STREAM, XML_STREAM, DATABASE_STREAM, BINARY_STREAM, DATA_STREAM_CSV, TCP_STREAM};
 
 
 #include <EquiSolnAlgo.h>
@@ -156,6 +157,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       outputMode eMode = STANDARD_STREAM; 
       ID *eleIDs = 0;
       int precision = 6;
+      const char *inetAddr = 0;
+      int inetPort;
 
       while (flags == 0 && loc < argc) {
 	
@@ -314,7 +317,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    tableName = argv[loc+1];
 	    eMode = DATABASE_STREAM;
 	  } else {
-	    opserr << "WARNING recorder Node .. -database &lt;fileName&gt; - NO CURRENT DATABASE, results to File instead\n";
+	    opserr << "WARNING recorder Node .. -database " << fileName << "  - NO CURRENT DATABASE, results to File instead\n";
 	    fileName = argv[loc+1];
 	  }
 	  
@@ -329,6 +332,17 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  eMode = XML_STREAM;
 	  loc += 2;
 	}	    
+
+	else if ((strcmp(argv[loc],"-TCP") == 0) || (strcmp(argv[loc],"-tcp") == 0)) {
+	  inetAddr = argv[loc+1];
+	  if (Tcl_GetInt(interp, argv[loc+2], &inetPort) != TCL_OK) {
+	    ;
+	  }
+	  eMode = TCP_STREAM;
+	  loc += 3;
+	}	    
+
+
 
 	else if ((strcmp(argv[loc],"-binary") == 0)) {
 	  // allow user to specify load pattern other than current
@@ -370,8 +384,10 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	theOutputStream = new DatabaseStream(theDatabase, tableName);
       } else if (eMode == BINARY_STREAM && fileName != 0) {
 	theOutputStream = new BinaryFileStream(fileName);
-      } else
-	theOutputStream = new StandardStream();
+      } else if (eMode == TCP_STREAM && inetAddr != 0) {
+	theOutputStream = new TCP_Stream(inetPort, inetAddr);
+      }
+      theOutputStream = new StandardStream();
       
 
       theOutputStream->setPrecision(precision);
@@ -966,6 +982,9 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       int precision = 6;
       TimeSeries *theTimeSeries = 0;
 
+      const char *inetAddr = 0;
+      int inetPort;
+
       while (flags == 0 && pos < argc) {
 
 	if (strcmp(argv[pos],"-time") == 0) {
@@ -1006,6 +1025,15 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 
 	  pos += 2;
 	}
+
+	else if ((strcmp(argv[pos],"-TCP") == 0) || (strcmp(argv[pos],"-tcp") == 0)) {
+	  inetAddr = argv[pos+1];
+	  if (Tcl_GetInt(interp, argv[pos+2], &inetPort) != TCL_OK) {
+	    ;
+	  }
+	  eMode = TCP_STREAM;
+	  pos += 3;
+	}	    
 
 	else if ((strcmp(argv[pos],"-nees") == 0) || (strcmp(argv[pos],"-xml") == 0)) {
 	  // allow user to specify load pattern other than current
@@ -1174,6 +1202,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	theOutputStream = new DatabaseStream(theDatabase, tableName);
       } else if (eMode == BINARY_STREAM && fileName != 0) {
 	theOutputStream = new BinaryFileStream(fileName);
+      } else if (eMode == TCP_STREAM && inetAddr != 0) {
+	theOutputStream = new TCP_Stream(inetPort, inetAddr);
       } else {
 	theOutputStream = new StandardStream();
       }
