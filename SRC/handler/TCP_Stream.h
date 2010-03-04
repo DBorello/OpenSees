@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2010-02-25 20:46:25 $
+// $Revision: 1.2 $
+// $Date: 2010-03-04 19:05:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/TCP_Stream.h,v $
 
 
@@ -30,7 +30,7 @@
 
 #include <OPS_Stream.h>
 #include <Vector.h>
-class TCP_Stream;
+class TCP_Socket;
 
 class TCP_Stream : public OPS_Stream
 {
