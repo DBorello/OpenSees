@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2010-02-17 21:37:00 $
+// $Revision: 1.3 $
+// $Date: 2010-03-04 19:10:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/BoundingCamClay.cpp,v $
 
 // Written: kap	
@@ -41,7 +41,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
-#include <myDebug.h>
+//#include <myDebug.h>
 
 const double BoundingCamClay :: one3   = 1.0 / 3.0 ;
 const double BoundingCamClay :: two3   = 2.0 / 3.0 ;

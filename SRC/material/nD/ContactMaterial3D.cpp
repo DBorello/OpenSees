@@ -18,7 +18,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
-#include <myDebug.h>
+//#include <myDebug.h>
 
 int ContactMaterial3D::matCount = 0;
 double* ContactMaterial3D::frictionCoeffx = 0;

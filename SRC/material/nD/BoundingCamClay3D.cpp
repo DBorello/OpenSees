@@ -13,12 +13,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2010-02-17 20:52:18 $
+// $Revision: 1.2 $
+// $Date: 2010-03-04 19:10:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/BoundingCamClay3D.cpp,v $
 
-// $Revision: 1.1 $
-// $Date: 2010-02-17 20:52:18 $
+// $Revision: 1.2 $
+// $Date: 2010-03-04 19:10:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/BoundingCamClay3D.cpp,v $
 
 // Written: kap	
@@ -28,7 +28,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
-#include <myDebug.h>
+//#include <myDebug.h>
 
 
 //null constructor
