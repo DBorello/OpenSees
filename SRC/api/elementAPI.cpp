@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.11 $
-** $Date: 2010-02-18 22:57:22 $
+** $Revision: 1.12 $
+** $Date: 2010-03-05 22:32:36 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/elementAPI.cpp,v $
                                                                         
 ** Written: fmk 
@@ -736,6 +736,16 @@ SectionForceDeformation *
 OPS_GetSectionForceDeformation(int matTag)
 {
   return theModelBuilder->getSection(matTag);
+}
+
+CrdTransf2d *OPS_GetGetCrdTransf2d(int tag)
+{
+  return theModelBuilder->getCrdTransf2d(tag);
+}
+
+CrdTransf3d *OPS_GetGetCrdTransf3d(int tag)
+{
+  return theModelBuilder->getCrdTransf3d(tag);
 }
 
 int

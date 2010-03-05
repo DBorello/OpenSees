@@ -19,8 +19,8 @@
 ** ****************************************************************** */
 
 /*                                                                        
-** $Revision: 1.8 $
-** $Date: 2010-02-04 01:19:36 $
+** $Revision: 1.9 $
+** $Date: 2010-03-05 22:32:36 $
 ** $Source: /usr/local/cvs/OpenSees/SRC/api/elementAPI.h,v $
                                                                         
 ** Written: fmk 
@@ -145,9 +145,14 @@ extern "C" int    OPS_GetNodeIncrDeltaDisp(int *nodeTag, int *sizeData, double *
 class UniaxialMaterial;
 class NDMaterial;
 class SectionForceDeformation;
+class CrdTransf2d;
+class CrdTransf3d;
+
 extern UniaxialMaterial *OPS_GetUniaxialMaterial(int matTag);
 extern NDMaterial *OPS_GetNDMaterial(int matTag);
 extern SectionForceDeformation *OPS_GetSectionForceDeformation(int matTag);
+extern CrdTransf2d *OPS_GetGetCrdTransf2d(int tag);
+extern CrdTransf3d *OPS_GetGetCrdTransf3d(int tag);
 
 #else
 
