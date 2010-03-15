@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.154 $
-// $Date: 2010-02-04 19:39:13 $
+// $Revision: 1.155 $
+// $Date: 2010-03-15 18:42:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -2410,7 +2410,7 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
   }
 
   
-  else if (strcmp(argv[1],"SparseSPD") == 0) {
+  else if ((strcmp(argv[1],"SparseSPD") == 0) || (strcmp(argv[1],"SparseSYM") == 0)) {
     // now must determine the type of solver to create from rest of args
 
     // now determine ordering scheme
