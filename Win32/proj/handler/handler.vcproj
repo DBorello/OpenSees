@@ -126,6 +126,9 @@
 				RelativePath="..\..\..\Src\handler\StandardStream.cpp">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\handler\TCP_Stream.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\handler\XmlFileStream.cpp">
 			</File>
 		</Filter>
@@ -149,6 +152,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\Src\handler\StandardStream.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\handler\TCP_Stream.h">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\handler\XmlFileStream.h">
