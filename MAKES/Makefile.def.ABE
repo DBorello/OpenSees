@@ -20,8 +20,20 @@
 # Specify the location and name of the OpenSees interpreter program
 # that will be created (if this all works!)
 
+#PROGRAMMING_MODE = SEQUENTIAL
+#PROGRAMMING_MODE = PARALLEL
+PROGRAMMING_MODE = PARALLEL_INTERPRETERS
+
 OpenSees_PROGRAM = $(HOME)/bin/OpenSees
-OpenSees_PROGRAM_MPI = $(HOME)/bin/OpenSeesMPI
+
+ifeq ($(PROGRAMMING_MODE), PARALLEL)
+OpenSees_PROGRAM = $(HOME)/bin/OpenSeesSP
+endif
+
+ifeq ($(PROGRAMMING_MODE), PARALLEL_INTERPRETERS)
+OpenSees_PROGRAM = $(HOME)/bin/OpenSeesMP
+endif
+
 
 # %---------------------------------%
 # |  SECTION 2: MAKEFILE CONSTANTS  |
@@ -31,8 +43,8 @@ OpenSees_PROGRAM_MPI = $(HOME)/bin/OpenSeesMPI
 
 OPERATING_SYSTEM = LINUX
 #GRAPHICS = UsingOpenGL
-GRAPHICS = 
-PROGRAMMING_MODE = PARALLEL_INTERPRETERS
+GRAPHICS = NONE
+
 
 #DEBUG_MODE = DEBUG, NO_DEBUG
 DEBUG_MODE = NO_DEBUG
@@ -51,10 +63,11 @@ RELIABILITY = NO_RELIABILITY
 
 BASE  = 
 #  PUT YOUR HOME DIRECTOREY HERE
-HOME  = /u/ac/gpetropo/fmk
+HOME  = /u/ac/fmckenna
 FE    = $(HOME)/OpenSees/SRC
 
 
+AMDdir      = $(HOME)/OpenSees/OTHER/AMD
 BLASdir      = $(HOME)/OpenSees/OTHER/BLAS
 CBLASdir     = $(HOME)/OpenSees/OTHER/CBLAS
 LAPACKdir    = $(HOME)/OpenSees/OTHER/LAPACK
@@ -67,6 +80,7 @@ SUPERLU_DISTdir   = $(HOME)/OpenSees/OTHER/SuperLU_DIST_2.0/SRC
 
 DIRS        = $(BLASdir) \
               $(CBLASdir) \
+              $(AMDdir) \
               $(LAPACKdir) \
               $(SUPERLUdir) \
               $(SUPERLU_DISTdir) \
@@ -91,6 +105,7 @@ DIRS        = $(BLASdir) \
 # make sure the directory exsists where you want the library to go!
 
 FE_LIBRARY          = $(HOME)/lib/libOpenSees.a
+AMD_LIBRARY          = $(HOME)/lib/libAMD.a
 NDARRAY_LIBRARY     = $(HOME)/lib/libndarray.a  # BJ_UCD jeremic@ucdavis.edu 
 MATMOD_LIBRARY      = $(HOME)/lib/libmatmod.a   # BJ_UCD jeremic@ucdavis.edu 
 BJMISC_LIBRARY      = $(HOME)/lib/libBJmisc.a  # BJ_UCD jeremic@ucdavis.edu
@@ -118,6 +133,7 @@ RELIABILITY_LIBRARY =
 WIPE_LIBS	= $(FE_LIBRARY) \
            $(NDARRAY_LIBRARY) \
            $(MATMOD_LIBRARY) \
+           $(AMD_LIBRARY) \
            $(ARPACK_LIBRARY) \
            $(DISTRIBUTED_SUPERLU_LIBRARY) \
            $(SUPERLU_LIBRARY) \
@@ -196,9 +212,9 @@ PROF_FLAG =
 COMP_FLAG = -D_TCL84 -DMPICH_IGNORE_CXX_SEEK 
 #-qnoipa 
 C++FLAGS         = -D_LINUX -D_UNIX  $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(OPT_FLAG) $(COMP_FLAG)\
-		$(PROGRAMMING_FLAG) -D_KAI  -cpp $(PROF_FLAG)
+		$(PROGRAMMING_FLAG) $(MUMPS_FLAG) -D_KAI  -cpp $(PROF_FLAG)
 
-CFLAGS          = $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG)  -D_KAI -D_PARALLEL_PROCESSING $(OPT_FLAG) $(COMP_FLAG) $(PROF_FLAG)
+CFLAGS          = $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG)  $(MUMPS_FLAG) -D_KAI -D_PARALLEL_PROCESSING $(OPT_FLAG) $(COMP_FLAG) $(PROF_FLAG)
 FFLAGS          = -qextname $(OPT_FLAG) $(COMP_FLAG) $(PROF_FLAG)
 LINKFLAGS       = $(PROF_FLAG) 
 
@@ -299,13 +315,13 @@ PETSC_LIB =  -L$(PETSC_DIR)/lib/libg/$(PETSC_ARCH) \
 
 endif
 
-HAVEMUMPS = NO
+HAVEMUMPS = YES
 MUMPS_INCLUDE =
 MUMPS_LIB = 
 
 ifeq ($(HAVEMUMPS), YES)
 
-MUMPS_DIR = /users/ucb/ux455280/MUMPS_4.7.3
+MUMPS_DIR = $(HOME)/MUMPS_4.7.3
 MUMPS = YES
 MUMPS_FLAG = -D_MUMPS
 MUMPS_LIB = -L$(MUMPS_DIR)/lib \
@@ -315,7 +331,7 @@ MUMPS_LIB = -L$(MUMPS_DIR)/lib \
 	$(FE)/system_of_eqn/linearSOE/mumps/MumpsParallelSOE.o \
 	$(FE)/system_of_eqn/linearSOE/mumps/MumpsParallelSolver.o
 
-MUMPS_INCLUDE = -I$(MUMPS_DIR)/include
+MUMPS_INCLUDE = $(MUMPS_DIR)/include
 
 endif
 
@@ -326,11 +342,38 @@ endif
 #	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSuperLU.o 
 	
 
+PARALLEL_LIB = 	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSuperLU.o \
+	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLinSOE.o \
+	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSolver.o \
+	$(DISTRIBUTED_SUPERLU_LIBRARY) $(MUMPS_LIB) $(SCALAP_LIB) $(METIS_LIBRARY) \
+	-L /usr/apps/math/scalapack/scalapack-1.8.0 \
+	-lscalapack-mvapich2-intel \
+	-L /usr/apps/math/blacs/BLACS/LIB \
+	-lblacsF77init_MPI-mvapich2-intel-0 -lblacs_MPI-mvapich2-intel-0 \
+	-lblacsCinit_MPI-mvapich2-intel-0 	-lblacsF77init_MPI-mvapich2-intel-0 -lblacs_MPI-mvapich2-intel-0
+
+
+
+
+ifeq ($(PROGRAMMING_MODE), PARALLEL_INTERPRETERS)
+
+PARALLEL_LIB = 	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSuperLU.o \
+	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLinSOE.o \
+	$(DISTRIBUTED_SUPERLU_LIBRARY) $(MUMPS_LIB) $(SCALAP_LIB) $(METIS_LIBRARY) \
+	-L /usr/apps/math/scalapack/scalapack-1.8.0 \
+	-lscalapack-mvapich2-intel \
+	-L /usr/apps/math/blacs/BLACS/LIB \
+	-lblacsF77init_MPI-mvapich2-intel-0 -lblacs_MPI-mvapich2-intel-0 \
+	-lblacsCinit_MPI-mvapich2-intel-0 	-lblacsF77init_MPI-mvapich2-intel-0 -lblacs_MPI-mvapich2-intel-0
+
+endif
+
 HPM_LIB = 
 
 MACHINE_NUMERICAL_LIBS  = -lm \
   $(ARPACK_LIBRARY) \
   $(SUPERLU_LIBRARY) \
+  $(AMD_LIBRARY) \
   $(UMFPACK_LIBRARY) \
   $(LAPACK_LIBRARY)  \
   $(BLAS_LIBRARY) \
@@ -345,6 +388,10 @@ MACHINE_SPECIFIC_LIBS = -L${MKL_HOME}/lib/em64t -lmkl -lguide -lpthread -lmkl_gf
 	-L${INTEL_HOME}/lib -lifport -lifcore -lsvml -lipgo -lirc -lirc_s -ldl
 
 
+
+#MACHINE_SPECIC_LIBS = -L /usr/apps/math/scalapack/scalapack-1.8.0 -lscalapack-mvapich2-intel -L /usr/apps/math/blacs/BLACS/LIB \
+#-lblacsF77init _MPI-mvapich2-intel-0 -lblacs_MPI-mvapich2-intel-0 -L ${MKL_HOME}/lib/em64t -lmkl_lapack \
+#-lmkl_em64t -lguide -lirc -limf -lm -lpthread
 
 # %---------------------------------------------------------%
 # | SECTION 8: INCLUDE FILES                                |
@@ -361,6 +408,7 @@ MACHINE_INCLUDES        = -I/usr/local/BerkeleyDB.4.0/include \
 	-I$(HOME)/include   \
 	-I$(UMFPACKdir) \
 	-I$(SUPERLUdir) \
+	-I$(MUMPS_INCLUDE) \
 	-I$(SUPERLU_DISTdir) \
 	-I/usr/lpp/ppe.poe/include \
 	$(PETSCINC)
