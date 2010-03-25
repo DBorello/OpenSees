@@ -1,8 +1,8 @@
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumnInt/FiberSection2dInt.cpp,v $
 
-// $Revision: 1.3 $
+// $Revision: 1.4 $
 
-// $Date: 2008-04-14 21:22:20 $
+// $Date: 2010-03-25 23:59:38 $
 
 
 
@@ -3337,485 +3337,414 @@ FiberSection2dInt::Print(OPS_Stream &s, int flag)
 
 
 Response*
-
-FiberSection2dInt::setResponse(const char **argv, int argc, OPS_Stream &s)	
-
+FiberSection2dInt::setResponse(const char **argv, int argc, OPS_Stream &output)	
 {
-
-  // See if the response is one of the defaults
-
-  Response *res = SectionForceDeformation::setResponse(argv, argc, s);
-
-  if (res != 0)
-
-    return res;
-
+  const ID &type = this->getType();
+  int typeSize = this->getOrder();
   
+  Response *theResponse =0;
+  
+  output.tag("SectionOutput");
+  output.attr("secType", this->getClassType());
+  output.attr("secTag", this->getTag());
+
+  // deformations
+  if (strcmp(argv[0],"deformations") == 0 || strcmp(argv[0],"deformation") == 0) {
+    for (int i=0; i<typeSize; i++) {
+      int code = type(i);
+      switch (code){
+      case SECTION_RESPONSE_MZ:
+	output.tag("ResponseType","kappaZ");
+	break;
+      case SECTION_RESPONSE_P:
+	output.tag("ResponseType","eps");
+	break;
+      case SECTION_RESPONSE_VY:
+	output.tag("ResponseType","gammaY");
+	break;
+      case SECTION_RESPONSE_MY:
+	output.tag("ResponseType","kappaY");
+	break;
+      case SECTION_RESPONSE_VZ:
+	output.tag("ResponseType","gammaZ");
+	break;
+      case SECTION_RESPONSE_T:
+	output.tag("ResponseType","theta");
+	break;
+      default:
+	output.tag("ResponseType","Unknown");
+      }
+    }
+    theResponse =  new MaterialResponse(this, 1, this->getSectionDeformation());
+    return theResponse;
+  
+  // forces
+  } else if (strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"force") == 0) {
+    for (int i=0; i<typeSize; i++) {
+      int code = type(i);
+      switch (code){
+      case SECTION_RESPONSE_MZ:
+	output.tag("ResponseType","Mz");
+	break;
+      case SECTION_RESPONSE_P:
+	output.tag("ResponseType","P");
+	break;
+      case SECTION_RESPONSE_VY:
+	output.tag("ResponseType","Vy");
+	break;
+      case SECTION_RESPONSE_MY:
+	output.tag("ResponseType","My");
+	break;
+      case SECTION_RESPONSE_VZ:
+	output.tag("ResponseType","Vz");
+	break;
+      case SECTION_RESPONSE_T:
+	output.tag("ResponseType","T");
+	break;
+      default:
+	output.tag("ResponseType","Unknown");
+      }
+    }
+    theResponse =  new MaterialResponse(this, 2, this->getStressResultant());
+    return theResponse;
+  
+  // force and deformation
+  } else if (strcmp(argv[0],"forceAndDeformation") == 0) { 
+    for (int j=0; j<typeSize; j++) {
+      int code = type(j);
+      switch (code){
+      case SECTION_RESPONSE_MZ:
+	output.tag("ResponseType","kappaZ");
+	break;
+      case SECTION_RESPONSE_P:
+	output.tag("ResponseType","eps");
+	break;
+      case SECTION_RESPONSE_VY:
+	output.tag("ResponseType","gammaY");
+	break;
+      case SECTION_RESPONSE_MY:
+	output.tag("ResponseType","kappaY");
+	break;
+      case SECTION_RESPONSE_VZ:
+	output.tag("ResponseType","gammaZ");
+	break;
+      case SECTION_RESPONSE_T:
+	output.tag("ResponseType","theta");
+	break;
+      default:
+	output.tag("ResponseType","Unknown");
+      }
+    }
+    for (int i=0; i<typeSize; i++) {
+      int code = type(i);
+      switch (code){
+      case SECTION_RESPONSE_MZ:
+	output.tag("ResponseType","Mz");
+	break;
+      case SECTION_RESPONSE_P:
+	output.tag("ResponseType","P");
+	break;
+      case SECTION_RESPONSE_VY:
+	output.tag("ResponseType","Vy");
+	break;
+      case SECTION_RESPONSE_MY:
+	output.tag("ResponseType","My");
+	break;
+      case SECTION_RESPONSE_VZ:
+	output.tag("ResponseType","Vz");
+	break;
+      case SECTION_RESPONSE_T:
+	output.tag("ResponseType","T");
+	break;
+      default:
+	output.tag("ResponseType","Unknown");
+      }
+    }
+
+    theResponse =  new MaterialResponse(this, 4, Vector(2*this->getOrder()));
+    return theResponse;
+  }  
+
+  // strip sigma y
+  else if (strcmp(argv[0],"sigmaY") == 0)
+    return new MaterialResponse(this, 105, this->getSigmaY());
+
+  // strip Tau
+  else if (strcmp(argv[0],"tau") == 0)
+    return new MaterialResponse(this, 106, this->getTau());
+
+  // strip Alpha 
+  else if (strcmp(argv[0],"alpha") == 0)
+    return new MaterialResponse(this, 107, this->getAlpha());
+
+  // strip Alpha iter
+  else if (strcmp(argv[0],"iter") == 0)
+    return new MaterialResponse(this, 108, this->getIter());
+
+  // strip eX
+  else if (strcmp(argv[0],"eX") == 0)
+    return new MaterialResponse(this, 109, this->getEX());
+
+  // strip ey
+  else if (strcmp(argv[0],"eY") == 0)
+    return new MaterialResponse(this, 110, this->getEY());
+
+  // strip e1
+  else if (strcmp(argv[0],"e1") == 0)
+    return new MaterialResponse(this, 111, this->getE1());
+
+  // strip e2 
+  else if (strcmp(argv[0],"e2") == 0)
+    return new MaterialResponse(this, 112, this->getE2());
+
+  // strip sX
+  else if (strcmp(argv[0],"sX") == 0)
+    return new MaterialResponse(this, 113, this->getSX());
+
+  // strip sy
+  else if (strcmp(argv[0],"sY") == 0)
+    return new MaterialResponse(this, 114, this->getSY());
+
+  // strip s1
+  else if (strcmp(argv[0],"s1") == 0)
+    return new MaterialResponse(this, 115, this->getS1());
+
+  // strip s2                                                                                     
+  else if (strcmp(argv[0],"s2") == 0)
+    return new MaterialResponse(this, 116, this->getS2());
 
   // Check if fiber response is requested
-
   else if ((strcmp(argv[0],"fiber") == 0) || (strcmp(argv[0],"fiber1") == 0)) {	
-
     int key = numFibers;
-
     int passarg = 2;
 
-    
-
     if (argc <= 2)          
-
       return 0;
-
-
-
-	if (argc <= 3) {		  
-
+    if (argc <= 3) {		  
       key = atoi(argv[1]);
-
+      
       if (key < numFibers)
-
-         return theMaterials1[key]->setResponse(&argv[passarg],argc-passarg,s);
-
+	return theMaterials1[key]->setResponse(&argv[passarg],argc-passarg,output);
       else
-
          return 0;
-
 	}
-
-
 
     if (argc > 4) {         // find fiber closest to coord. with mat tag
-
       int matTag = atoi(argv[3]);
-
       double yCoord = atof(argv[1]);
-
       double closestDist;
-
       double ySearch, dy;
-
       double distance;
-
       int j;
-
       // Find first fiber with specified material tag
-
       for (j = 0; j < numFibers; j++) {
-
 	if (matTag == theMaterials1[j]->getTag()) {
-
 	  ySearch = -matData[2*j];
-
 	  dy = ySearch-yCoord;
-
 	  closestDist = fabs(dy);
-
 	  key = j;
-
 	  break;
-
 	}
-
       }
-
       // Search the remaining fibers
-
       for ( ; j < numFibers; j++) {
-
 	if (matTag == theMaterials1[j]->getTag()) {
-
 	  ySearch = -matData[2*j];
-
 	  dy = ySearch-yCoord;
-
 	  distance = fabs(dy);
-
 	  if (distance < closestDist) {
-
 	    closestDist = distance;
-
 	    key = j;
-
 	  }
-
 	}
-
       }
-
       passarg = 4;
-
     }
-
-
 
     else {                  // fiber near-to coordinate specified
-
       double yCoord = atof(argv[1]);
-
       double closestDist;
-
       double ySearch, dy;
-
       double distance;
-
       ySearch = -matData[0];
-
       dy = ySearch-yCoord;
-
       closestDist = fabs(dy);
-
       key = 0;
-
       for (int j = 1; j < numFibers; j++) {
-
 	ySearch = -matData[2*j];
-
 	dy = ySearch-yCoord;
-
 	distance = fabs(dy);
-
 	if (distance < closestDist) {
-
 	  closestDist = distance;
-
 	  key = j;
-
 	}
-
       }
-
       passarg = 3;
-
     }
-
     
-
     if (key < numFibers)
-
-      return theMaterials1[key]->setResponse(&argv[passarg],argc-passarg,s);
-
+      return theMaterials1[key]->setResponse(&argv[passarg],argc-passarg,output);
     else
-
       return 0;
-
   }
 
-
-
   
-
-
 
   else if (strcmp(argv[0],"fiber2") == 0) {
-
     int key = numFibers;
-
     int passarg = 2;
-
     
-
     if (argc <= 2)          
-
       return 0;
-
-
 
 	if (argc <= 3) {		  
-
       key = atoi(argv[1]);
-
       if (key < numFibers)
-
-         return theMaterials2[key]->setResponse(&argv[passarg],argc-passarg,s);
-
+         return theMaterials2[key]->setResponse(&argv[passarg],argc-passarg,output);
       else
-
          return 0;
-
 	}
-
-
 
     if (argc > 4) {         // find fiber closest to coord. with mat tag
-
       int matTag = atoi(argv[3]);
-
       double yCoord = atof(argv[1]);
-
       double closestDist;
-
       double ySearch, dy;
-
       double distance;
-
       int j;
-
       // Find first fiber with specified material tag
-
       for (j = 0; j < numFibers; j++) {
-
 	if (matTag == theMaterials2[j]->getTag()) {
-
 	  ySearch = -matData[2*j];
-
 	  dy = ySearch-yCoord;
-
 	  closestDist = fabs(dy);
-
 	  key = j;
-
 	  break;
-
 	}
-
       }
-
       // Search the remaining fibers
-
       for ( ; j < numFibers; j++) {
-
 	if (matTag == theMaterials2[j]->getTag()) {
-
 	  ySearch = -matData[2*j];
-
 	  dy = ySearch-yCoord;
-
 	  distance = fabs(dy);
-
 	  if (distance < closestDist) {
-
 	    closestDist = distance;
-
 	    key = j;
-
 	  }
-
 	}
-
       }
-
       passarg = 4;
-
     }
-
-
 
     else {                  // fiber near-to coordinate specified
-
       double yCoord = atof(argv[1]);
-
       double closestDist;
-
       double ySearch, dy;
-
       double distance;
-
       ySearch = -matData[0];
-
       dy = ySearch-yCoord;
-
       closestDist = fabs(dy);
-
       key = 0;
-
       for (int j = 1; j < numFibers; j++) {
-
 	ySearch = -matData[2*j];
-
 	dy = ySearch-yCoord;
-
 	distance = fabs(dy);
-
 	if (distance < closestDist) {
-
 	  closestDist = distance;
-
 	  key = j;
-
 	}
-
       }
-
       passarg = 3;
-
     }
-
     
-
     if (key < numFibers)
-
-      return theMaterials2[key]->setResponse(&argv[passarg],argc-passarg,s);
-
+      return theMaterials2[key]->setResponse(&argv[passarg],argc-passarg,output);
     else
-
       return 0;
-
   }
-
-
 
   
 
 
-
-
-
   // Check if fiber response is requested
-
   else if (strcmp(argv[0],"Hfiber") == 0) {
-
     int HFibOut=atoi(argv[1])-1;
-
 	int key = numHFibers;
-
     int passarg = 3;
-
     
-
     if (argc <= 3)          
-
       return 0;
-
-
 
 	if (argc <= 4) {		  
-
       key = atoi(argv[2]);
-
       if (key < numHFibers)
-
-         return theHMaterials[key*numHFibers + HFibOut]->setResponse(&argv[passarg],argc-passarg,s);
-
+         return theHMaterials[key*numHFibers + HFibOut]->setResponse(&argv[passarg],argc-passarg,output);
       else
-
          return 0;
-
 	}
-
-
 
     if (argc > 5) {         // find fiber closest to coord. with mat tag
-
       int matTag = atoi(argv[4]);
-
       double yCoord = atof(argv[2]);
-
       double closestDist;
-
       double ySearch, dy;
-
       double distance;
-
       int j;
-
       // Find first fiber with specified material tag
-
       for (j = 0; j < numHFibers; j++) {
-
 	if (matTag == theHMaterials[j * numHFibers + HFibOut]->getTag()) {
-
 	  ySearch = -matHData[2*j];
-
 	  dy = ySearch-yCoord;
-
 	  closestDist = fabs(dy);
-
 	  key = j;
-
 	  break;
-
 	}
-
       }
-
       // Search the remaining fibers
-
       for ( ; j < numHFibers; j++) {
-
 	if (matTag == theHMaterials[j * numHFibers + HFibOut]->getTag()) {
-
 	  ySearch = -matHData[2*j];
-
 	  dy = ySearch-yCoord;
-
 	  distance = fabs(dy);
-
 	  if (distance < closestDist) {
-
 	    closestDist = distance;
-
 	    key = j;
-
 	  }
-
 	}
-
       }
-
       passarg = 5;
-
     }
-
-
 
     else {                  // fiber near-to coordinate specified
-
       double yCoord = atof(argv[2]);
-
       double closestDist;
-
       double ySearch, dy;
-
       double distance;
-
       ySearch = -matHData[0];
-
       dy = ySearch-yCoord;
-
       closestDist = fabs(dy);
-
       key = 0;
-
       for (int j = 1; j < numHFibers; j++) {
-
 	ySearch = -matHData[2*j];
-
 	dy = ySearch-yCoord;
-
 	distance = fabs(dy);
-
 	if (distance < closestDist) {
-
 	  closestDist = distance;
-
 	  key = j;
-
 	}
-
       }
-
       passarg = 4;
-
     }
-
     
-
     if (key < numHFibers)
-
-      return theHMaterials[key * numHFibers + HFibOut]->setResponse(&argv[passarg],argc-passarg,s);
-
+      return theHMaterials[key * numHFibers + HFibOut]->setResponse(&argv[passarg],argc-passarg,output);
     else
-
       return 0;
-
   }
-
  
-
   else
-
     return 0;
-
 }
 
 
@@ -3823,17 +3752,72 @@ FiberSection2dInt::setResponse(const char **argv, int argc, OPS_Stream &s)
 
 
 int 
-
 FiberSection2dInt::getResponse(int responseID, Information &sectInfo)
-
 {
+  switch (responseID) {
+    
+  case 1:
+    return sectInfo.setVector(this->getSectionDeformation());
+    
+  case 2:
+    return sectInfo.setVector(this->getStressResultant());
+    
+  case 3:
+    return sectInfo.setMatrix(this->getSectionTangent());
+    
+  case 4: {
+    Vector &theVec = *(sectInfo.theVector);
+    const Vector &e = this->getSectionDeformation();
+    const Vector &s = this->getStressResultant();
+    int order = this->getOrder();
+    for (int i = 0; i < order; i++) {
+      theVec(i) = e(i);
+      theVec(i+order) = s(i);
+    }
 
-  // Just call the base class method ... don't need to define
+    return sectInfo.setVector(theVec);
+  }
 
-  // this function, but keeping it here just for clarity
-
-  return SectionForceDeformation::getResponse(responseID, sectInfo);
-
+    
+  case 105:
+    return sectInfo.setVector(this->getSigmaY());
+    
+  case 106:
+    return sectInfo.setVector(this->getTau());
+    
+  case 107:
+    return sectInfo.setVector(this->getAlpha());
+    
+  case 108:
+    return sectInfo.setVector(this->getIter());
+    
+  case 109:
+    return sectInfo.setVector(this->getEX());
+    
+  case 110:
+    return sectInfo.setVector(this->getEY());
+    
+  case 111:
+    return sectInfo.setVector(this->getE1());
+    
+  case 112:
+    return sectInfo.setVector(this->getE2());
+    
+  case 113:
+    return sectInfo.setVector(this->getSX());
+    
+  case 114:
+    return sectInfo.setVector(this->getSY());
+    
+  case 115:
+    return sectInfo.setVector(this->getS1());
+    
+  case 116:
+    return sectInfo.setVector(this->getS2());
+    
+  default:
+    return -1;
+  }
 }
 
 
