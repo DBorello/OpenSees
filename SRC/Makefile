@@ -631,6 +631,7 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/SAWSMaterial.o \
 	$(FE)/material/uniaxial/snap/Bilin.o \
 	$(FE)/material/uniaxial/ConfinedConcrete01.o \
+	$(FE)/material/uniaxial/ConfinedConcrete02.o \
 	$(FE)/material/uniaxial/CableMaterial.o \
 	$(FE)/material/uniaxial/ENTMaterial.o \
 	$(FE)/material/uniaxial/BoucWenMaterial.o \
