@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.66 $
-// $Date: 2010-04-02 23:21:25 $
+// $Revision: 1.67 $
+// $Date: 2010-04-02 23:58:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
 
 // Written: fmk
@@ -89,7 +89,7 @@ extern  void *OPS_NewTrussElement(void);
 extern  void *OPS_NewTrussSectionElement(void);
 extern  void *OPS_NewCorotTrussElement(void);
 extern  void *OPS_NewCorotTrussSectionElement(void);
-extern  void *OPS_NewElasticTubularJoint(void);
+extern  "C" void *OPS_ElasticTubularJoint(void);
 extern Element *OPS_NewZeroLengthContactNTS2D(void);
 extern "C" void *OPS_PY_Macro2D(void);
 
@@ -440,7 +440,7 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
   
   } else if ((strcmp(argv[1],"elasticTubularJoint") == 0) || (strcmp(argv[1],"ElasticTubularJoint") == 0)) {
     
-    void *theEle = OPS_NewElasticTubularJoint();
+    void *theEle = OPS_ElasticTubularJoint();
     if (theEle != 0) 
       theElement = (Element *)theEle;
     else {

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2010-04-02 23:38:05 $
+// $Revision: 1.3 $
+// $Date: 2010-04-02 23:58:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/ElasticTubularJoint.cpp,v $
                                                                         
 // Written: Kia & Alanjari
@@ -57,8 +57,17 @@ static const int NUM_DOF  =6;
 
 static int numElasticTubularJoint = 0;
 
-void *
-OPS_ElasticTubularJoint(int argc, const char **argv)
+#ifdef _USRDLL
+#include <windows.h>
+#define OPS_Export extern "C" _declspec(dllexport)
+#elif _MACOSX
+#define OPS_Export extern "C" __attribute__((visibility("default")))
+#else
+#define OPS_Export extern "C"
+#endif
+
+OPS_Export void *
+OPS_ElasticTubularJoint(void)
 {
 
   if (numElasticTubularJoint == 0) {
