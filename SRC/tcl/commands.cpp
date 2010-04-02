@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.155 $
-// $Date: 2010-03-15 18:42:11 $
+// $Revision: 1.156 $
+// $Date: 2010-04-02 22:55:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -54,7 +54,7 @@ extern "C" {
 using std::ios;
 #include <iostream>
 using std::ofstream;
-
+ 
 #else
 
 #include <StandardStream.h>
@@ -261,6 +261,7 @@ extern TransientIntegrator *OPS_NewGeneralizedAlpha(void);
 #include <FullGenEigenSOE.h>
 #include <FullGenEigenSolver.h>
 
+#include "TclOptimizationBuilder.h"
 
 #ifdef _CUDA
 #include <BandGenLinSOE_Single.h>
@@ -306,7 +307,11 @@ extern TransientIntegrator *OPS_NewGeneralizedAlpha(void);
 
 int reliability(ClientData, Tcl_Interp *, int, TCL_Char **);
 int wipeReliability(ClientData, Tcl_Interp *, int, TCL_Char **);
+
+int optimization(ClientData, Tcl_Interp *, int, TCL_Char **);  //Quan  (2)
+
 #endif
+
 
 
 const char * getInterpPWD(Tcl_Interp *interp);
@@ -470,8 +475,11 @@ static NewNewmarkSensitivityIntegrator *theNNSI = 0;
 //static SensitivityIntegrator *theSensitivityIntegrator = 0;
 //static NewmarkSensitivityIntegrator *theNSI = 0;
 
+static TclOptimizationBuilder *theOptimizationBuilder = 0;   // Quan March 2010 (3)
+
 #endif
 // AddingSensitivity:END ///////////////////////////////////////////////
+
 
 static StaticIntegrator *theStaticIntegrator =0;
 static TransientIntegrator *theTransientIntegrator =0;
@@ -743,15 +751,13 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "searchPeerNGA", &peerNGA, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
-
-
-    Tcl_CreateCommand(interp, "domainChange",     domainChange,(ClientData)NULL, NULL);
-    Tcl_CreateCommand(interp, "metaData",     neesMetaData,(ClientData)NULL, NULL);
-    Tcl_CreateCommand(interp, "defaultUnits", defaultUnits,(ClientData)NULL, NULL);
-    Tcl_CreateCommand(interp, "neesUpload", neesUpload,(ClientData)NULL, NULL);
-    Tcl_CreateCommand(interp, "stripXML", stripOpenSeesXML,(ClientData)NULL, NULL);
-    Tcl_CreateCommand(interp, "convertBinaryToText", convertBinaryToText,(ClientData)NULL, NULL);
-    Tcl_CreateCommand(interp, "convertTextToBinary", convertTextToBinary,(ClientData)NULL, NULL);
+    Tcl_CreateCommand(interp, "domainChange",  &domainChange,(ClientData)NULL, NULL);
+    Tcl_CreateCommand(interp, "metaData",  &neesMetaData,(ClientData)NULL, NULL);
+    Tcl_CreateCommand(interp, "defaultUnits", &defaultUnits,(ClientData)NULL, NULL);
+    Tcl_CreateCommand(interp, "neesUpload", &neesUpload,(ClientData)NULL, NULL);
+    Tcl_CreateCommand(interp, "stripXML", &stripOpenSeesXML,(ClientData)NULL, NULL);
+    Tcl_CreateCommand(interp, "convertBinaryToText", &convertBinaryToText,(ClientData)NULL, NULL);
+    Tcl_CreateCommand(interp, "convertTextToBinary", &convertTextToBinary,(ClientData)NULL, NULL);
 
     Tcl_CreateCommand(interp, "getEleTags", &getEleTags, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
@@ -801,12 +807,17 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "sensSectionForce", &sensSectionForce, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
 
-	theSensitivityAlgorithm =0;
-	theSensitivityIntegrator =0;
-	theReliabilityStaticAnalysis =0;
+    theSensitivityAlgorithm =0;
+    theSensitivityIntegrator =0;
+    theReliabilityStaticAnalysis =0;
     theReliabilityTransientAnalysis =0;    
-// AddingSensitivity:END //////////////////////////////////
+    // AddingSensitivity:END //////////////////////////////////
 
+    theOptimizationBuilder = 0;
+    
+    // --- Quan March 2010  (4)
+    Tcl_CreateCommand(interp, "optimization", &optimization, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
 #endif
 
     theAlgorithm =0;
@@ -831,6 +842,8 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
    
     return myCommands(interp);
 }
+
+
 
 int 
 OPS_SetObjCmd(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj * const objv[])
@@ -928,7 +941,25 @@ OPS_SourceCmd(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **ar
 */
 
 
-#ifdef _RELIABILITY
+#ifdef _RELIABILITY   
+
+
+// -- optimization Quan March 2010  (5)
+int 
+optimization(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  
+  if (theOptimizationBuilder == 0) {
+
+  theOptimizationBuilder = new TclOptimizationBuilder(theDomain , interp);
+      
+
+    return TCL_OK;
+  }
+  else  
+    return TCL_ERROR;
+}
+
 
 int 
 reliability(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
@@ -941,6 +972,9 @@ reliability(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv
   else
     return TCL_ERROR;
 }
+
+
+
 
 int 
 wipeReliability(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
@@ -1090,7 +1124,6 @@ sensitivityIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, TCL_C
 // AddingSensitivity:END /////////////////////////////////////////////////
 
 #endif
-
 
 
 
@@ -2550,9 +2583,6 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
     // maybe a package
     //
 
-    opserr << "commands.cpp - specifySOE: " << argv[1] << endln;
-
-    
     // try existing loaded packages
     ExternalClassFunction  *solverCommands = theExternalSolverCommands;
     bool found = false;
