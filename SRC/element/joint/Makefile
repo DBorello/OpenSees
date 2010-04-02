@@ -7,6 +7,7 @@ OBJS       = TclJoint2dCommand.o \
 	Joint3D.o \
 	MP_Joint3D.o \
 	BeamColumnJoint3d.o \
+	ElasticTubularJoint.o \
 	TclBeamColumnJointCommand.o \
 	TclJoint3dCommand.o 
 
