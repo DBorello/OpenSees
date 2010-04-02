@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2010-04-02 23:22:23 $
+// $Revision: 1.2 $
+// $Date: 2010-04-02 23:38:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/ElasticTubularJoint.h,v $
                                                                         
 #ifndef ElasticTubularJoint_h
