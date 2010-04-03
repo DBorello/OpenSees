@@ -499,6 +499,12 @@
 				RelativePath="..\..\..\SRC\element\joint\BeamColumnJoint3d.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\element\joint\ElasticTubularJoint.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\joint\ElasticTubularJoint.h">
+			</File>
+			<File
 				RelativePath="..\..\..\Src\element\joint\Joint2D.cpp">
 			</File>
 			<File
