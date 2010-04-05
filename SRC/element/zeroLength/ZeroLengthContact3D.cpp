@@ -19,8 +19,8 @@
 ** ****************************************************************** */
                                                                         
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthContact3D.cpp,v $
-// $Revision: 1.3 $
-// $Date: 2008-06-13 21:01:04 $
+// $Revision: 1.4 $
+// $Date: 2010-04-05 23:15:05 $
 
                                                                         
 // Written: Gang Wang  (wang@ce.berkeley.edu)
@@ -224,7 +224,7 @@ ZeroLengthContact3D::setDomain(Domain *theDomain)
 	}
     else {
     opserr << "WARNING ZeroLengthContact3D::setDomain cannot handle " << dofNd1 << 
- 	"dofs at nodes in " << dofNd1 << " d problem\n"; 
+ 	"dofs at nodes, can only handle 3\n"; 
      return;
     }
 }   	 
