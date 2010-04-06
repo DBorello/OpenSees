@@ -217,6 +217,7 @@ GGD_LIBS = $(FE)/element/joint/MP_Joint2D.o \
 	$(FE)/element/joint/TclJoint3dCommand.o \
 	$(FE)/element/joint/BeamColumnJoint2d.o \
 	$(FE)/element/joint/BeamColumnJoint3d.o \
+	$(FE)/element/joint/ElasticTubularJoint.o \
 	$(FE)/element/joint/TclBeamColumnJointCommand.o \
 	$(FE)/element/updatedLagrangianBeamColumn/Elastic2DGNL.o \
 	$(FE)/element/updatedLagrangianBeamColumn/Inelastic2DYS02.o \
@@ -488,6 +489,7 @@ DATABASE_LIBS = $(FE)/database/FileDatastore.o \
 
 MATRIX_LIBS   = $(FE)/matrix/Matrix.o \
 	$(FE)/matrix/Vector.o \
+	$(FE)/tcl/TclOptimizationBuilder.o \
 	$(FE)/matrix/ID.o  \
 
 TAGGED_LIBS =   $(FE)/tagged/TaggedObject.o \
