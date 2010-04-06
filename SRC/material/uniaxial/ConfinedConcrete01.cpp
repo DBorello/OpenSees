@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2010-02-10 23:31:32 $
+// $Revision: 1.4 $
+// $Date: 2010-04-06 20:18:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ConfinedConcrete01.cpp,v $
                                                                         
 // Description: This file contains the class definition for ConfinedConcrete01.
@@ -103,56 +103,84 @@ ConfinedConcrete01::ConfinedConcrete01(int tag, std::vector<double> *eps, std::v
    CminStrain(0.0), CendStrain(0.0),
    Cstrain(0.0), Cstress(0.0) 
 {
-	this->sigmac = sigmac;
-	this->eps = eps;
+  this->sigmac = sigmac;
+  this->eps = eps;
 }
 
 ConfinedConcrete01::ConfinedConcrete01(int tag, int secType, int dim, std::vector<double> semiLength, 
-					   std::vector<double> phis, std::vector<double> S, 
-					   std::vector<double> fyh, std::vector<double> Es0, 
-					   std::vector<double> haRatio, std::vector<double> mueps, 
-					   std::vector<double> As, std::vector<double> Is, 
-					   double rhos, double fpc, double stRatio, double Ec, 
-					   int epscuOption, double epscu, double epscuLimit, int nuOption, double nuc, 
-					   double phiLon, int concrType, int aggrType, double tol, int maxNumIter)
+				       std::vector<double> phis, std::vector<double> S, 
+				       std::vector<double> fyh, std::vector<double> Es0, 
+				       std::vector<double> haRatio, std::vector<double> mueps, 
+				       std::vector<double> As, std::vector<double> Is, 
+				       double rhos, double fpc, double stRatio, double Ec, 
+				       int epscuOption, double epscu, double epscuLimit, int nuOption, double nuc, 
+				       double phiLon, int concrType, int aggrType, double tol, int maxNumIter)
   :UniaxialMaterial(tag, MAT_TAG_ConfinedConcrete01),
    CminStrain(0.0), CendStrain(0.0),
    Cstrain(0.0), Cstress(0.0) 
 {
+  int ii;
+  opserr << tag << " " <<  secType << " " << dim << " " << rhos << " " << fpc << " " << stRatio << " " << Ec << endln;
+  opserr << epscuOption << " " <<  epscu << " " << epscuLimit << " " << nuOption << " " << nuc << " " << phiLon << " " ;
+  opserr << concrType << " " << aggrType << " " << tol << " " << maxNumIter << endln;
 
-	double epsc, epsic, fic, ft, fpl, alpha, Eti;
-	double fc = fpc * stRatio;
+  opserr << "1: "; for(ii=0; ii < semiLength.size(); ii++) opserr << semiLength[ii] << " "; opserr << endln;
+  opserr << "2: "; for(ii=0; ii < phis.size(); ii++) opserr << phis[ii] << " ";  opserr << endln;
+  opserr << "3: "; for(ii=0; ii < S.size(); ii++) opserr << S[ii] << " ";  opserr << endln;
+  opserr << "4: "; for(ii=0; ii < fyh.size(); ii++) opserr << fyh[ii] << " ";  opserr << endln;
+  opserr << "5: "; for(ii=0; ii < Es0.size(); ii++) opserr << Es0[ii] << " ";  opserr << endln;
+  opserr << "6: "; for(ii=0; ii < haRatio.size(); ii++) opserr << haRatio[ii] << " ";  opserr << endln;
+  opserr << "7: "; for(ii=0; ii < mueps.size(); ii++) opserr << mueps[ii] << " ";  opserr << endln;
+  opserr << "8: "; for(ii=0; ii < As.size(); ii++) opserr << As[ii] << " ";  opserr << endln;
+  opserr << "9: "; for(ii=0; ii < Is.size(); ii++) opserr << Is[ii] << " ";  opserr << endln;
 
-	setupAttardSetunge(fpc, stRatio, Ec, aggrType, concrType, 
-		epsc, fc, epsic, fic, ft, fpl,alpha, Eti);
 
-	bglModel (semiLength, epscu, epscuOption, epscuLimit, nuOption, nuc, epsc, fc, epsic,
-		fic, ft, fpl, alpha, Eti, phis, As, Is, S, fyh, mueps, Es0, haRatio, 
-		phiLon, secType, dim, tol, maxNumIter);
 
+  
+  double epsc, epsic, fic, ft, fpl, alpha, Eti;
+  double fc = fpc * stRatio;
+  
+  setupAttardSetunge(fpc, stRatio, Ec, aggrType, concrType, 
+		     epsc, fc, epsic, fic, ft, fpl,alpha, Eti);
+
+
+  opserr << fpc << " " << stRatio << " " << Ec << " " << aggrType << " " << concrType<< " " << epsc << " " << fc << " " << epsic << " " << fic << " " << ft << " " << fpl << " " << alpha << Eti << endln;
+
+  bglModel (semiLength, epscu, epscuOption, epscuLimit, nuOption, nuc, epsc, fc, epsic,
+	    fic, ft, fpl, alpha, Eti, phis, As, Is, S, fyh, mueps, Es0, haRatio, 
+	    phiLon, secType, dim, tol, maxNumIter);
+
+  opserr  << epscu  << " " << epscuOption << " " << epscuLimit;
+  opserr << " " << nuOption << " " << nuc << " " << epsc << " ";
+  opserr << fc << " " << epsic << " " << fic << " " << ft << " ";
+  //  opserr << fpl << " " << alpha << " " << Eti << " ";
+  // opserr << phis << " " << As << " " << Is << " " << fyh << " " << mueps << " " << Es0 << " " << haRatio << " " 
+  opserr << phiLon << " " << secType << " " << dim << " " << tol << " " << maxNumIter << endln;
+
+  
   // Make all concrete parameters negative
   this->epscu = -epscu;
   this->fpcu = -(*sigmac)[((int) sigmac->size()) - 1];
-
+  
   for (int i = 0; i < (int) eps->size(); i++) {
-	  (*eps)[i] = -(*eps)[i];
-	  if ((*sigmac)[i] != (*sigmac)[i]) {
-		  (*sigmac)[i] = 0.0;
-	  } else {
-		  (*sigmac)[i] = -(*sigmac)[i];
-	  }
+    (*eps)[i] = -(*eps)[i];
+    if ((*sigmac)[i] != (*sigmac)[i]) {
+      (*sigmac)[i] = 0.0;
+    } else {
+      (*sigmac)[i] = -(*sigmac)[i];
+    }
   }
-	// Find maximum strength
-	double max = 0;
+  // Find maximum strength
+  double max = 0;
   for (int i = 0; i < (int) eps->size(); i++) {
-	  //printf("%f\t%f\n", (*eps)[i], (*sigmac)[i]);
-	  //opserr << (*eps)[i] << "\t" << sigmac->at(i) << "\n";
-	  if (sigmac->at(i) > max) {
-		  max = sigmac->at(i);
-		  epsc0 = -eps->at(i);
-	  }
+    //printf("%f\t%f\n", (*eps)[i], (*sigmac)[i]);
+    //opserr << (*eps)[i] << "\t" << sigmac->at(i) << "\n";
+    if (sigmac->at(i) > max) {
+      max = sigmac->at(i);
+      epsc0 = -eps->at(i);
+    }
   }
-
+  
   // Initial tangent
   Ctangent = Eti;
   CunloadSlope = Eti;
@@ -224,72 +252,72 @@ void ConfinedConcrete01::setupAttardSetunge(double fpc, double stRatio, double E
 }
 
 void ConfinedConcrete01::bglModel(std::vector<double> semiLength, double & epscu, int epscuOption, double epscuLimit,
-						  int nuOption, double nuc, double epsc, double fc, 
-						  double epsic, double fic, double ft, double fpl, 
-						  double alpha, double Eti, std::vector<double> phis, 
-						  std::vector<double> As, std::vector<double> Is,
-						  std::vector<double> S, 
-						  std::vector<double> fyh, std::vector<double> mueps, 
-						  std::vector<double> Es0, std::vector<double> haRatio, double phiLon, 
-						  int secType, int dim, double tol, double maxNumIter) {
-
-	std::vector<double> Ec, nu;
-	/*
-	eps: axial strain of confined concrete
-	sigmac: corresponding stress in confined concrete
-	Ec: secant modulus of " "
-	nu: poisson ratio of unconfined concrete
-	*/
-
-	std::vector<std::vector<double> > sigmaTr(1, std::vector<double>(dim,0.0));
-	std::vector<std::vector<double> > epsTr(1, std::vector<double>(dim,0.0));
-	std::vector<std::vector<double> > A(1, std::vector<double>(dim,0.0));
-	std::vector<std::vector<double> > B(1, std::vector<double>(dim,0.0));
-	std::vector<std::vector<double> > Es;
-	std::vector<std::vector<double> > frm(1, std::vector<double>(dim+1,0.0));
-
-	/* 
-	sigmaTr: stress in transverse reinforcement
-	epsTr: strain in transverse reinf
-	Es: secant modulus of " "
-	A: Airy's constant
-	B: Airy's constant
-	frm: confining pressure (dim+1 columns)
-	*/
-	double gamma, DEc;
-	double fcu;
-
-//	int np; //number of points of each curve (the size of vectors defined above)
-
-	int i,j;
-
-    double fcc, epscc, dEpsZ, k;
-	std::vector<double> ksl;
-
-	eps = new std::vector<double>();
-	eps->push_back(0.0);
-	sigmac = new std::vector<double>();
-	sigmac->push_back(0.0);
-
-    /*
-	for (j = 0; j < dim; j++) {
-        printf("semilength %f\n", semiLength[j]);
-		printf("phi %f\n", phis[j]);
-		printf("As %f\n", As[j]);
-		printf("Is %f\n", Is[j]);
-		printf("S %f\n", S[j]);
-	}
-	    printf("epscu %f\n", epscu);
-	*/
-//---------------------Confinement along the column----------------------	
-	for (j = 0; j < dim; j++) {
-       
-		k = confAlongCol(semiLength[j], phis[j], S[j], dim, phiLon);
-		ksl.push_back(k);
-		//printf("ksl %d %f\n", j, ksl[j]);
-	}
- 
-//----------Calculation of parameters depending on axial strain---------  
+				  int nuOption, double nuc, double epsc, double fc, 
+				  double epsic, double fic, double ft, double fpl, 
+				  double alpha, double Eti, std::vector<double> phis, 
+				  std::vector<double> As, std::vector<double> Is,
+				  std::vector<double> S, 
+				  std::vector<double> fyh, std::vector<double> mueps, 
+				  std::vector<double> Es0, std::vector<double> haRatio, double phiLon, 
+				  int secType, int dim, double tol, double maxNumIter) {
+  
+  std::vector<double> Ec, nu;
+  /*
+    eps: axial strain of confined concrete
+    sigmac: corresponding stress in confined concrete
+    Ec: secant modulus of " "
+    nu: poisson ratio of unconfined concrete
+  */
+  
+  std::vector<std::vector<double> > sigmaTr(1, std::vector<double>(dim,0.0));
+  std::vector<std::vector<double> > epsTr(1, std::vector<double>(dim,0.0));
+  std::vector<std::vector<double> > A(1, std::vector<double>(dim,0.0));
+  std::vector<std::vector<double> > B(1, std::vector<double>(dim,0.0));
+  std::vector<std::vector<double> > Es;
+  std::vector<std::vector<double> > frm(1, std::vector<double>(dim+1,0.0));
+  
+  /* 
+     sigmaTr: stress in transverse reinforcement
+     epsTr: strain in transverse reinf
+     Es: secant modulus of " "
+     A: Airy's constant
+     B: Airy's constant
+     frm: confining pressure (dim+1 columns)
+  */
+  double gamma, DEc;
+  double fcu;
+  
+  //	int np; //number of points of each curve (the size of vectors defined above)
+  
+  int i,j;
+  
+  double fcc, epscc, dEpsZ, k;
+  std::vector<double> ksl;
+  
+  eps = new std::vector<double>();
+  eps->push_back(0.0);
+  sigmac = new std::vector<double>();
+  sigmac->push_back(0.0);
+  
+  /*
+    for (j = 0; j < dim; j++) {
+    printf("semilength %f\n", semiLength[j]);
+    printf("phi %f\n", phis[j]);
+    printf("As %f\n", As[j]);
+    printf("Is %f\n", Is[j]);
+    printf("S %f\n", S[j]);
+    }
+    printf("epscu %f\n", epscu);
+  */
+  //---------------------Confinement along the column----------------------	
+  for (j = 0; j < dim; j++) {
+    
+    k = confAlongCol(semiLength[j], phis[j], S[j], dim, phiLon);
+    ksl.push_back(k);
+    //printf("ksl %d %f\n", j, ksl[j]);
+  }
+  
+  //----------Calculation of parameters depending on axial strain---------  
 		 fcc = 0.0;
 		 fcu = 0.0;
 	 if (epscuOption == 2) { //If you assign gamma ratio. 

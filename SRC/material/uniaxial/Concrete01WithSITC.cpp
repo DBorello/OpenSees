@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2007-02-02 22:58:36 $
+// $Revision: 1.2 $
+// $Date: 2010-04-06 20:18:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01WithSITC.cpp,v $
          
 // Modified by: Won Lee
@@ -107,7 +107,6 @@ Concrete01WithSITC::~Concrete01WithSITC ()
 
 int Concrete01WithSITC::setTrialStrain (double strain, double strainRate)
 {
-
   // Set trial strain
   Tstrain = strain;
 
@@ -125,7 +124,6 @@ int Concrete01WithSITC::setTrialStrain (double strain, double strainRate)
     return 0;
   }
 
-
   if (Tstrain < 0.0) {  // compression
     if (Tstrain <= CminStrain) { // further on envelope curve
       TminStrain = Tstrain;
@@ -138,6 +136,7 @@ int Concrete01WithSITC::setTrialStrain (double strain, double strainRate)
       Ttangent = 0.0;
       Tindex = 5;
     }
+
     else { // anywhere in compression greater than minimum strain
       if (dStrain <= 0.0) { //loading in compression 
 	if (Cindex == 2 || Cindex == 1) {   

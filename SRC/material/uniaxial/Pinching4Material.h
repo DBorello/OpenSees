@@ -18,10 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-07-27 19:01:48 $
+// $Revision: 1.4 $
+// $Date: 2010-04-06 20:18:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Pinching4Material.h,v $
-                                                                        
                                                                         
 // Written: NM (nmitra@u.washington.edu) 
 // Created: December 2001

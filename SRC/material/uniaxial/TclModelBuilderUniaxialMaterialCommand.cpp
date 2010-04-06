@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.68 $
-// $Date: 2010-04-06 20:14:25 $
+// $Revision: 1.69 $
+// $Date: 2010-04-06 20:18:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -88,8 +88,8 @@ extern void *OPS_NewSteelZ01Material(void);
 extern void *OPS_NewTendonL01Material(void);
 extern void *OPS_NewConfinedConcrete01Material(void);
 
-#extern int TclCommand_ConfinedConcrete02(ClientData clientData, Tcl_Interp *interp, int argc, 
-#					 TCL_Char **argv, TclModelBuilder *theTclBuilder);
+//extern int TclCommand_ConfinedConcrete02(ClientData clientData, Tcl_Interp *interp, int argc, 
+//					 TCL_Char **argv, TclModelBuilder *theTclBuilder);
 
 extern UniaxialMaterial *
 Tcl_AddLimitStateMaterial(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
@@ -1768,9 +1768,9 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	return TCL_ERROR;
     }
 
-#    else if ((strcmp(argv[1],"ConfinedConcrete02") == 0)) {
-#      return TclCommand_ConfinedConcrete02(clientData, interp, argc, argv, theTclBuilder);
-#    }
+    //    else if ((strcmp(argv[1],"ConfinedConcrete02") == 0)) {
+    //     return TclCommand_ConfinedConcrete02(clientData, interp, argc, argv, theTclBuilder);
+    //    }
 
     else if (strcmp(argv[1],"Cable") == 0) 
 	{

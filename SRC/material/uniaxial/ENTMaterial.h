@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2008-08-26 16:31:34 $
+// $Revision: 1.9 $
+// $Date: 2010-04-06 20:18:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ENTMaterial.h,v $
                                                                         
                                                                         
@@ -32,8 +32,11 @@
 //
 // Description: This file contains the class definition for 
 // ENTMaterial. ENTMaterial provides the abstraction
-// of an viscoelastic uniaxial material,
-// i.e. stress = E*strain + eta*strainrate
+// of an elastic  uniaxial material under compression
+// i.e. stress = E*strain e
+// under tension however it exhbits the following
+//     stress = a*(tanh(strain*b))
+//     tangent = a*(1-tanh(strain*b)*tanh(strain*b));
 //
 //
 // What: "@(#) ENTMaterial.h, revA"
@@ -43,7 +46,7 @@
 class ENTMaterial : public UniaxialMaterial
 {
   public:
-    ENTMaterial(int tag, double E);    
+  ENTMaterial(int tag, double E, double a = 0.0, double b = 1.0);    
     ENTMaterial();    
     ~ENTMaterial();
 
@@ -86,6 +89,9 @@ class ENTMaterial : public UniaxialMaterial
     // AddingSensitivity:BEGIN //////////////////////////////////////////
     int parameterID;
     // AddingSensitivity:END ///////////////////////////////////////////
+
+    double a;
+    double b;
 };
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2008-08-26 16:31:34 $
+// $Revision: 1.10 $
+// $Date: 2010-04-06 20:18:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ENTMaterial.cpp,v $
                                                                         
                                                                         
@@ -40,9 +40,9 @@
 #include <Information.h>
 #include <Parameter.h>
 
-ENTMaterial::ENTMaterial(int tag, double e)
-:UniaxialMaterial(tag,MAT_TAG_ENTMaterial),
- E(e), trialStrain(0.0), parameterID(0)
+ENTMaterial::ENTMaterial(int tag, double e, double A, double B)
+  :UniaxialMaterial(tag,MAT_TAG_ENTMaterial),
+   E(e), trialStrain(0.0), parameterID(0),a(A), b(B)
 {
 
 }
@@ -75,19 +75,25 @@ ENTMaterial::getStrain(void)
 double 
 ENTMaterial::getStress(void)
 {
-	if (trialStrain < 0.0)
-		return E*trialStrain;
-	else
-		return 0.0;
+  if (trialStrain < 0.0)
+    return E*trialStrain;
+  else if (a == 0.0)
+    return 0.0;
+  else
+    return a*E*tanh(trialStrain*b);
 }
 
 double 
 ENTMaterial::getTangent(void)
 {
-	if (trialStrain <= 0.0)
-		return E;
-	else
-		return 0.0;
+  if (trialStrain <= 0.0)
+    return E;
+  else if (a == 0.0)
+    return 0;
+  else {
+    double tanhB = tanh(trialStrain*b);
+    return a*E*(1.0-tanhB*tanhB);
+  }
 }
 
 int 
@@ -105,16 +111,16 @@ ENTMaterial::revertToLastCommit(void)
 int 
 ENTMaterial::revertToStart(void)
 {
-    return 0;
+  return 0;
 }
 
 UniaxialMaterial *
 ENTMaterial::getCopy(void)
 {
-    ENTMaterial *theCopy = new ENTMaterial(this->getTag(),E);
-    theCopy->trialStrain = trialStrain;
-    theCopy->parameterID = parameterID;
-    return theCopy;
+  ENTMaterial *theCopy = new ENTMaterial(this->getTag(),E);
+  theCopy->trialStrain = trialStrain;
+  theCopy->parameterID = parameterID;
+  return theCopy;
 }
 
 int 

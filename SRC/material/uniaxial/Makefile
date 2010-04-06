@@ -9,6 +9,7 @@ include ../../../Makefile.def
         HardeningMaterial.o \
 	Concrete01.o \
 	Concrete04.o \
+	Concrete04.o \
 	Concrete06.o \
 	Concrete07.o \
 	Steel01.o \
@@ -60,6 +61,7 @@ include ../../../Makefile.def
 	WrapperUniaxialMaterial.o \
 	SAWSMaterial.o \
 	ConfinedConcrete01.o \
+	ConfinedConcrete02.o \
         TclModelBuilderUniaxialMaterialCommand.o
 
 all:         $(OBJS)
