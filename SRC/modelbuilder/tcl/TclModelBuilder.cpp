@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.48 $
-// $Date: 2010-02-04 00:27:22 $
+// $Revision: 1.49 $
+// $Date: 2010-04-06 20:11:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -386,14 +386,11 @@ TclCommand_addGeomTransf(ClientData, Tcl_Interp *, int, TCL_Char **,
 			 Domain*, TclModelBuilder *);   
 
 
-#ifdef _LIMITSTATEMATERIAL
 extern int
 Tcl_AddLimitCurveCommand(Tcl_Interp *interp, Domain *theDomain);
 
 extern int
-Tcl_RemoveLimitCurve(Tcl_Interp *interp);
-#endif
-
+Tcl_RemoveLimitCurveCommand(Tcl_Interp *interp);
 
 
 int
@@ -590,13 +587,8 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   //		    TclCommand_UpdateParameter,
   //	    (ClientData)NULL, NULL);
 
-  
-
-
-#ifdef _LIMITSTATEMATERIAL
   ///new command for LimitCurve
   Tcl_AddLimitCurveCommand(interp, &theDomain);
-#endif
 
   Tcl_CreateCommand(interp, "loadPackage", TclCommand_Package,
 		    (ClientData)NULL, NULL);
@@ -722,9 +714,7 @@ TclModelBuilder::~TclModelBuilder()
 
   Tcl_DeleteCommand(theInterp, "loadPackage");
 
-#ifdef _LIMITSTATE
-  Tcl_removeLimitCurve(Tcl_Interp *interp);
-#endif
+  Tcl_RemoveLimitCurveCommand(theInterp);
 }
 
 
