@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2010-02-04 00:34:11 $
+// $Revision: 1.3 $
+// $Date: 2010-04-06 20:16:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TriangleSeries.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -64,7 +64,7 @@ OPS_NewTriangleSeries(void)
   if (numRemainingArgs == 4 || numRemainingArgs == 6 || numRemainingArgs == 8) {
     numData = 1;
     if (OPS_GetIntInput(&numData, &tag) != 0) {
-      opserr << "WARNING invalid series tag in Constant tag?" << endln;
+      opserr << "WARNING invalid series tag in Triangle tag?" << endln;
       return 0;
     }
     numRemainingArgs -= 1;
@@ -80,7 +80,7 @@ OPS_NewTriangleSeries(void)
   while (numRemainingArgs > 1) {
     char argvS[10];
     if (OPS_GetString(argvS, 10) != 0) {
-      opserr << "WARNING invalid string in Constant <tag?> <-factor cFactor?>" << endln;
+      opserr << "WARNING invalid string in Triangle <tag?> <-factor cFactor?>" << endln;
       return 0;
     }
     if (strcmp(argvS,"-shift") == 0) {

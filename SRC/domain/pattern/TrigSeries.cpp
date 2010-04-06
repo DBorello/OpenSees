@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2010-02-04 00:34:11 $
+// $Revision: 1.4 $
+// $Date: 2010-04-06 20:16:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TrigSeries.cpp,v $
 
 // Written: fmk 
@@ -64,7 +64,7 @@ OPS_NewTrigSeries(void)
   if (numRemainingArgs == 4 || numRemainingArgs == 6 || numRemainingArgs == 8) {
     numData = 1;
     if (OPS_GetIntInput(&numData, &tag) != 0) {
-      opserr << "WARNING invalid series tag in Constant tag?" << endln;
+      opserr << "WARNING invalid series tag in Trig tag?" << endln;
       return 0;
     }
     numRemainingArgs -= 1;
@@ -81,7 +81,7 @@ OPS_NewTrigSeries(void)
   while (numRemainingArgs > 1) {
     char argvS[10];
     if (OPS_GetString(argvS, 10) != 0) {
-      opserr << "WARNING invalid string in Constant <tag?> <-factor cFactor?>" << endln;
+      opserr << "WARNING invalid string in Trig <tag?> <-factor cFactor?>" << endln;
       return 0;
     } 
   
@@ -125,10 +125,10 @@ TrigSeries::TrigSeries(int tag,
    tStart(startTime),tFinish(finishTime),
    period(T),shift(phi),cFactor(theFactor)
 {
-	if (period == 0.0) {
-	  opserr << "TrigSeries::TrigSeries -- input period is zero, setting period to PI\n";
-	  period = 2*asin(1.0);
-	}
+  if (period == 0.0) {
+    opserr << "TrigSeries::TrigSeries -- input period is zero, setting period to PI\n";
+    period = 2*asin(1.0);
+  }
 }
 
 
@@ -154,12 +154,12 @@ TrigSeries::getCopy(void) {
 double
 TrigSeries::getFactor(double pseudoTime)
 {
-	static double twopi = 4*asin(1.0);
-
-	if (pseudoTime >= tStart && pseudoTime <= tFinish)
-		return cFactor*sin(twopi*(pseudoTime-tStart)/period + shift);
-	else
-		return 0.0;
+  static double twopi = 4*asin(1.0);
+  
+  if (pseudoTime >= tStart && pseudoTime <= tFinish)
+    return cFactor*sin(twopi*(pseudoTime-tStart)/period + shift);
+  else
+    return 0.0;
 }
 
 int

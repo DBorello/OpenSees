@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.14 $
-// $Date: 2010-02-04 00:35:52 $
+// $Revision: 1.15 $
+// $Date: 2010-04-06 20:16:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclPatternCommand.cpp,v $
 
 // Written: fmk
@@ -102,11 +102,10 @@ TclPatternCommand(ClientData clientData,
 
   int  commandEndMarker = 0;
 
-  if (strcmp(argv[1],"Plain") == 0) {
+  if ((strcmp(argv[1],"Plain") == 0) || (strcmp(argv[1],"LoadPattern") == 0)) {
 
       thePattern = new LoadPattern(patternID);
       theSeries = TclSeriesCommand(clientData, interp, argv[3]);
-
 
       if (thePattern == 0 || theSeries == 0) {
 
