@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.67 $
-// $Date: 2010-02-04 02:01:38 $
+// $Revision: 1.68 $
+// $Date: 2010-04-06 20:14:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -88,10 +88,11 @@ extern void *OPS_NewSteelZ01Material(void);
 extern void *OPS_NewTendonL01Material(void);
 extern void *OPS_NewConfinedConcrete01Material(void);
 
-#ifdef _LIMITSTATEMATERIAL
+#extern int TclCommand_ConfinedConcrete02(ClientData clientData, Tcl_Interp *interp, int argc, 
+#					 TCL_Char **argv, TclModelBuilder *theTclBuilder);
+
 extern UniaxialMaterial *
 Tcl_AddLimitStateMaterial(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-#endif
 
 extern int
 TclCommand_HyperbolicGapMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
@@ -1767,6 +1768,10 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	return TCL_ERROR;
     }
 
+#    else if ((strcmp(argv[1],"ConfinedConcrete02") == 0)) {
+#      return TclCommand_ConfinedConcrete02(clientData, interp, argc, argv, theTclBuilder);
+#    }
+
     else if (strcmp(argv[1],"Cable") == 0) 
 	{
 		if (argc != 7) {
@@ -3196,12 +3201,9 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
       if (theMaterial == 0)
 	theMaterial = TclModelBuilder_addPyTzQzMaterial(clientData, interp, argc, argv, theTclBuilder, theDomain);
       
-#ifdef _LIMITSTATEMATERIAL
       // LimitState
       if (theMaterial == 0)
 	theMaterial = Tcl_AddLimitStateMaterial(clientData, interp, argc, argv);
-#endif
-
     }
     
     if (theMaterial == 0) {
