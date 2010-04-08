@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.67 $
-// $Date: 2010-04-02 23:58:16 $
+// $Revision: 1.68 $
+// $Date: 2010-04-08 20:25:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
 
 // Written: fmk
@@ -89,7 +89,7 @@ extern  void *OPS_NewTrussElement(void);
 extern  void *OPS_NewTrussSectionElement(void);
 extern  void *OPS_NewCorotTrussElement(void);
 extern  void *OPS_NewCorotTrussSectionElement(void);
-extern  "C" void *OPS_ElasticTubularJoint(void);
+extern  void *OPS_ElasticTubularJoint(void);
 extern Element *OPS_NewZeroLengthContactNTS2D(void);
 extern "C" void *OPS_PY_Macro2D(void);
 
