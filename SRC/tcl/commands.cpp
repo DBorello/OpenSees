@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.156 $
-// $Date: 2010-04-02 22:55:44 $
+// $Revision: 1.157 $
+// $Date: 2010-04-15 18:38:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -260,8 +260,6 @@ extern TransientIntegrator *OPS_NewGeneralizedAlpha(void);
 #include <SymBandEigenSolver.h>
 #include <FullGenEigenSOE.h>
 #include <FullGenEigenSolver.h>
-
-#include "TclOptimizationBuilder.h"
 
 #ifdef _CUDA
 #include <BandGenLinSOE_Single.h>
@@ -5006,7 +5004,7 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
     // try existing loaded packages
     ExternalClassFunction  *integratorCommands = theExternalStaticIntegratorCommands;
     bool found = false;
-    int result = TCL_ERROR;
+
     while (integratorCommands != NULL && found == false) {
 
       if (strcmp(argv[2], integratorCommands->funcName) == 0) {
@@ -5780,7 +5778,6 @@ getCTestNorms(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **ar
 int
 getCTestIter(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
-  int res = 0;
   if (theTest != 0) {
     int res = theTest->getNumTests();
   
@@ -5855,35 +5852,61 @@ nodeEigenvector(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **
 {
     // make sure at least one other argument to contain type of system
     if (argc < 3) {
-	opserr << "WARNING want - nodeDisp nodeTag? dof?\n";
+	opserr << "WARNING want - nodeEigenVector nodeTag? eigenVector? <dof?>\n";
 	return TCL_ERROR;
    }    
 
-    int tag, dof, eigenvector;
+    int tag;
+    int eigenvector = 0;
+    int dof = -1;
 
     if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
-	opserr << "WARNING nodeDisp nodeTag? dof? - could not read nodeTag? \n";
+	opserr << "WARNING nodeEigenvector nodeTag? dof? - could not read nodeTag? \n";
 	return TCL_ERROR;	        
-    }    
-    if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
-	opserr << "WARNING nodeDisp nodeTag? dof? - could not read dof? \n";
-	return TCL_ERROR;	        
-    }        
-    if (Tcl_GetInt(interp, argv[3], &eigenvector) != TCL_OK) {
-	opserr << "WARNING nodeDisp nodeTag? dof? - could not read dof? \n";
+    } 
+
+    if (Tcl_GetInt(interp, argv[2], &eigenvector) != TCL_OK) {
+	opserr << "WARNING nodeEigenvector nodeTag? dof? - could not read dof? \n";
 	return TCL_ERROR;	        
     }        
+
+    if (argc > 3) {
+      if (Tcl_GetInt(interp, argv[3], &dof) != TCL_OK) {
+	opserr << "WARNING nodeEigenvector nodeTag? dof? - could not read dof? \n";
+	return TCL_ERROR;	        
+      }   
+    }     
     
     dof--; eigenvector--;
-
     Node *theNode = theDomain.getNode(tag);
     const Matrix &theEigenvectors = theNode->getEigenvectors();
 
-    double value = theEigenvectors(dof, eigenvector);
-    
-    // now we copy the value to the tcl string that is returned
-    sprintf(interp->result,"%35.20f",value);
-	
+    int size = theEigenvectors.noRows();
+    int numEigen = theEigenvectors.noCols();
+
+    if (eigenvector < 0 || eigenvector >= numEigen) {
+	opserr << "WARNING nodeEigenvector nodeTag? dof? - eigenvecor too large\n";
+	return TCL_ERROR;
+    }
+
+    if (dof >= 0) {
+      if (dof >= size) {
+	opserr << "WARNING nodeEigenvector nodeTag? dof? - dofTag? too large\n";
+	return TCL_ERROR;
+      }
+
+      double value = theEigenvectors(dof, eigenvector);      
+      // now we copy the value to the tcl string that is returned
+      sprintf(interp->result,"%35.20f ",value);
+    } else {
+      char buffer [40];
+      for (int i=0; i<size; i++) {
+	double value = theEigenvectors(i, eigenvector);      
+	sprintf(buffer,"%35.20f", value);
+	Tcl_AppendResult(interp, buffer, NULL);
+      }
+    }	
+
     return TCL_OK;
 }
 
@@ -6096,7 +6119,7 @@ nodeVel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
     // make sure at least one other argument to contain type of system
     if (argc < 2) {
-	opserr << "WARNING want - nodeDisp nodeTag? <dof?>\n";
+	opserr << "WARNING want - nodeVel nodeTag? <dof?>\n";
 	return TCL_ERROR;
    }    
 
@@ -6104,12 +6127,12 @@ nodeVel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
     int dof = -1;
 
     if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
-	opserr << "WARNING nodeDisp nodeTag? dof? - could not read nodeTag? \n";
+	opserr << "WARNING nodeVel nodeTag? dof? - could not read nodeTag? \n";
 	return TCL_ERROR;	        
     }    
     if (argc > 2) {
       if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
-	opserr << "WARNING nodeDisp nodeTag? dof? - could not read dof? \n";
+	opserr << "WARNING nodeVel nodeTag? dof? - could not read dof? \n";
 	return TCL_ERROR;	        
       }        
     }    
@@ -6149,7 +6172,7 @@ nodeAccel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
     // make sure at least one other argument to contain type of system
     if (argc < 2) {
-	opserr << "WARNING want - nodeDisp nodeTag? dof?\n";
+	opserr << "WARNING want - nodeAccel nodeTag? dof?\n";
 	return TCL_ERROR;
    }    
 
@@ -6157,12 +6180,12 @@ nodeAccel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
     int dof = -1;
 
     if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
-	opserr << "WARNING nodeDisp nodeTag? dof? - could not read nodeTag? \n";
+	opserr << "WARNING nodeAccel nodeTag? dof? - could not read nodeTag? \n";
 	return TCL_ERROR;	        
     }    
     if (argc > 2) {
       if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
-	opserr << "WARNING nodeDisp nodeTag? dof? - could not read dof? \n";
+	opserr << "WARNING nodeAccel nodeTag? dof? - could not read dof? \n";
 	return TCL_ERROR;	        
       }   
     }     
@@ -6208,15 +6231,15 @@ nodeResponse(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
     int tag, dof, responseID;
 
     if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
-	opserr << "WARNING nodeDisp nodeTag? dof? - could not read nodeTag? \n";
+	opserr << "WARNING nodeResponse nodeTag? dof? - could not read nodeTag? \n";
 	return TCL_ERROR;	        
     }    
     if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
-	opserr << "WARNING nodeDisp nodeTag? dof? - could not read dof? \n";
+	opserr << "WARNING nodeResponse nodeTag? dof? - could not read dof? \n";
 	return TCL_ERROR;	        
     }        
     if (Tcl_GetInt(interp, argv[3], &responseID) != TCL_OK) {
-	opserr << "WARNING nodeDisp nodeTag? dof? responseID? - could not read responseID? \n";
+	opserr << "WARNING nodeResponse nodeTag? dof? responseID? - could not read responseID? \n";
 	return TCL_ERROR;	        
     }        
     
