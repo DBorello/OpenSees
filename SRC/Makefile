@@ -33,6 +33,7 @@ all:
 	@$(CD) $(FE)/damage; $(MAKE);
 	@$(CD) $(FE)/api; $(MAKE);
 	@$(CD) $(FE)/reliability; $(MAKE);
+	@$(CD) $(FE)/optimization; $(MAKE);
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATRIX_LIBS) 
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(ELE_LIBS) 
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATERIAL_LIBS)
@@ -489,7 +490,6 @@ DATABASE_LIBS = $(FE)/database/FileDatastore.o \
 
 MATRIX_LIBS   = $(FE)/matrix/Matrix.o \
 	$(FE)/matrix/Vector.o \
-	$(FE)/tcl/TclOptimizationBuilder.o \
 	$(FE)/matrix/ID.o  \
 
 TAGGED_LIBS =   $(FE)/tagged/TaggedObject.o \
@@ -1056,6 +1056,7 @@ wipe: spotless
 	@$(CD) $(FE)/coordTransformation; $(MAKE) wipe;
 	@$(CD) $(FE)/element; $(MAKE) wipe;
 	@$(CD) $(FE)/reliability; $(MAKE) wipe;
+	@$(CD) $(FE)/optimization; $(MAKE) wipe;
 	@$(CD) $(FE)/api; $(MAKE) wipe;
 	@$(CD) $(FE)/damage; $(MAKE) wipe;
 
