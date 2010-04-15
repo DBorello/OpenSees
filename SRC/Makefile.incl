@@ -150,6 +150,7 @@ FE_INCLUDES  = -I$(FE)/matrix \
                -I$(FE)/element/nonlinearBeamColumn/matrixutil \
                -I$(FE)/element/nonlinearBeamColumn/quadrule \
                -I$(FE)/coordTransformation \
+               -I$(FE)/optimization \
                -I$(FE)/reliability/analysis \
                -I$(FE)/reliability/analysis/analysis \
                -I$(FE)/reliability/analysis/analysis/system \
