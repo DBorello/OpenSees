@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2007-11-30 00:02:45 $
+// $Revision: 1.11 $
+// $Date: 2010-04-21 21:20:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.h,v $
                                                                         
                                                                         
@@ -48,7 +48,7 @@ class TCP_Socket : public Channel
     TCP_Socket();        
     TCP_Socket(unsigned int port, bool checkEndianness = false);    
     TCP_Socket(unsigned int other_Port, const char *other_InetAddr,
-        bool checkEndianness = false); 
+	       bool checkEndianness = false); 
     ~TCP_Socket();
 
     char *addToProgram(void);
@@ -85,7 +85,7 @@ class TCP_Socket : public Channel
     
     int sendVector(int dbTag, int commitTag, 
 		   const Vector &theVector,
-           ChannelAddress *theAddress =0);
+		   ChannelAddress *theAddress =0);
     int recvVector(int dbTag, int commitTag, 
 		   Vector &theVector, 
 		   ChannelAddress *theAddress =0);

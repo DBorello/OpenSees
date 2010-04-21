@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2010-02-04 19:11:53 $
+// $Revision: 1.11 $
+// $Date: 2010-04-21 21:20:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/HTTP.cpp,v $
                                                                         
 // Written: fmk 11/06
@@ -275,7 +275,7 @@ httpGET_File(char const *URL, char const *page, unsigned int port, const char *f
   char outBuf[OUTBUF_SIZE], inBuf[OUTBUF_SIZE];
   socket_type sockfd;
 
-  FILE *fp;
+  FILE *fp = 0;
 
 
   fprintf(stderr, "httpGetFile URL: %s page %s\n", URL, page);  
@@ -297,7 +297,7 @@ httpGET_File(char const *URL, char const *page, unsigned int port, const char *f
   }
 
   // add the header information to outBuf
-  sprintf(outBuf, "GET \/%s HTTP/1.1\nHost:%s\n", page, URL);
+  sprintf(outBuf, "GET /%s HTTP/1.1\nHost:%s\n", page, URL);
   strcat(outBuf,"Keep-Alive:300\n");
   strcat(outBuf, "Connection:keep-alive\n\n");
 
