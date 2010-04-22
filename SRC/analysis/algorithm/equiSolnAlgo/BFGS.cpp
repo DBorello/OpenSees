@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2009-10-06 23:14:26 $
+// $Revision: 1.8 $
+// $Date: 2010-04-22 23:42:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/BFGS.cpp,v $
                                                                         
 // Written: Ed Love
@@ -147,6 +147,9 @@ BFGS::setLinks(AnalysisModel &theModel,
 {
   this->EquiSolnAlgo::setLinks(theModel, theIntegrator, theSOE, theTest);
 
+  if (theTest == 0)
+    return;
+
   if ( localTest != 0 )  
     delete localTest ;
   
@@ -159,8 +162,11 @@ BFGS::setLinks(AnalysisModel &theModel,
 int
 BFGS::setConvergenceTest(ConvergenceTest *newTest)
 {
-  theTest = newTest;
-  
+  this->EquiSolnAlgo::setConvergenceTest(newTest);
+
+  if (theTest == 0)
+    return 0;
+
   if ( localTest != 0 )  
     delete localTest;
   

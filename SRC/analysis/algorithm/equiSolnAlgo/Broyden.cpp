@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-05-04 23:41:56 $
+// $Revision: 1.7 $
+// $Date: 2010-04-22 23:42:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/Broyden.cpp,v $
                                                                         
                                                                         
@@ -62,8 +62,7 @@ Broyden::Broyden(int theTangentToUse, int n )
     //r[i] = 0 ;
   }
 
-  localTest = 0 ;
-
+  localTest = 0;
 }
 
 //Constructor
@@ -118,6 +117,7 @@ Broyden::~Broyden()
 
   if ( localTest != 0 )
      delete localTest ;
+  localTest = 0;
 }
 
 
@@ -129,29 +129,37 @@ Broyden::setLinks(AnalysisModel &theModel,
 {
   this->EquiSolnAlgo::setLinks(theModel, theIntegrator, theSOE, theTest);
 
-    if ( localTest != 0 )  
-      delete localTest ;
+  if (theTest == 0)
+    return;
 
-    localTest = theTest->getCopy( this->numberLoops ) ;
-    if (localTest == 0) {
-      opserr << "Broyden::setTest() - could not get a copy\n";
-    } 
-}  
+  if ( localTest != 0 ) 
+    delete localTest ;
+
+  localTest = theTest->getCopy(this->numberLoops);
+  if (localTest == 0) {
+    opserr << "Broyden::setTest() - could not get a copy\n";
+  } 
+}
 
 
 int
 Broyden::setConvergenceTest(ConvergenceTest *newTest)
 {
-    if ( localTest != 0 )  
-      delete localTest ;
+  this->EquiSolnAlgo::setConvergenceTest(newTest);
 
-    localTest = theTest->getCopy( this->numberLoops ) ;
-    if (localTest == 0) {
-      opserr << "Broyden::setTest() - could not get a copy\n";
-      return -1;
-    } 
-    
+  if (theTest == 0)
     return 0;
+  
+  if ( localTest != 0 )  
+    delete localTest ;
+  
+  localTest = theTest->getCopy( this->numberLoops ) ;
+  if (localTest == 0) {
+    opserr << "Broyden::setTest() - could not get a copy\n";
+    return -1;
+  } 
+  
+  return 0;
 }
 
 
