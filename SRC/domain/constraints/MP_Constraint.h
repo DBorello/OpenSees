@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2009-08-25 23:17:41 $
+// $Revision: 1.5 $
+// $Date: 2010-04-23 22:50:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/MP_Constraint.h,v $
                                                                         
                                                                         
@@ -51,17 +51,15 @@ class MP_Constraint : public DomainComponent
 {
   public:
     // constructors        
-    MP_Constraint( int tag , int classTag );		// Arash
+    MP_Constraint(int classTag ); // Arash
 
-    MP_Constraint(int tag,
-		  int nodeRetain, 
+    MP_Constraint(int nodeRetain, 
 		  int nodeConstr, 
 		  ID &constrainedDOF,
     		  ID &retainedDOF,
 		  int classTag);    
 
-    MP_Constraint(int tag,
-		  int nodeRetain, 
+    MP_Constraint(int nodeRetain, 
 		  int nodeConstr, 
 		  Matrix &constrnt,
 		  ID &constrainedDOF,

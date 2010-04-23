@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-12-22 00:35:08 $
+// $Revision: 1.5 $
+// $Date: 2010-04-23 22:50:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/MP_Constraint.cpp,v $
                                                                         
                                                                         
-// File: ~/domain/constraints//MP_Constraint.C
-//
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -41,55 +39,60 @@
 #include <ID.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
+
+static int numMPs = 0;
+static int nextTag = 0;
  
 // constructor for FEM_ObjectBroker			// Arash
-MP_Constraint::MP_Constraint( int tag , int clasTag )		
-:DomainComponent(tag,clasTag),
+MP_Constraint::MP_Constraint(int clasTag )		
+:DomainComponent(nextTag++, clasTag),
  nodeRetained(0),nodeConstrained(0),constraint(0),constrDOF(0),retainDOF(0),
  dbTag1(0), dbTag2(0)
 {
-    
+  numMPs++;
 }
 
 // constructor for Subclass
-MP_Constraint::MP_Constraint(int tag, int nodeRetain, int nodeConstr, 
+MP_Constraint::MP_Constraint(int nodeRetain, int nodeConstr, 
 			     ID &constrainedDOF, 
 			     ID &retainedDOF, int clasTag)
-:DomainComponent(tag, clasTag),
+:DomainComponent(nextTag++, clasTag),
  nodeRetained(nodeRetain), nodeConstrained(nodeConstr), 
  constraint(0), constrDOF(0), retainDOF(0),  dbTag1(0), dbTag2(0)
 {
-    constrDOF = new ID(constrainedDOF);
-    retainDOF = new ID(retainedDOF);    
-    if (constrDOF == 0 || constrainedDOF.Size() != constrDOF->Size() ||
-	retainDOF == 0 || retainedDOF.Size() != retainDOF->Size()) { 
-	opserr << "MP_Constraint::MP_Constraint - ran out of memory 1\n";
-	exit(-1);
-    }    
+  numMPs++;
+  
+  constrDOF = new ID(constrainedDOF);
+  retainDOF = new ID(retainedDOF);    
+  if (constrDOF == 0 || constrainedDOF.Size() != constrDOF->Size() ||
+      retainDOF == 0 || retainedDOF.Size() != retainDOF->Size()) { 
+    opserr << "MP_Constraint::MP_Constraint - ran out of memory 1\n";
+    exit(-1);
+  }    
 }
 
 
 // general constructor for ModelBuilder
-MP_Constraint::MP_Constraint(int tag, int nodeRetain, int nodeConstr, Matrix &constr,
+MP_Constraint::MP_Constraint(int nodeRetain, int nodeConstr, Matrix &constr,
 			     ID &constrainedDOF, ID &retainedDOF)
-:DomainComponent(tag, CNSTRNT_TAG_MP_Constraint), 
+:DomainComponent(nextTag++, CNSTRNT_TAG_MP_Constraint), 
  nodeRetained(nodeRetain), nodeConstrained(nodeConstr), 
  constraint(0), constrDOF(0), retainDOF(0), dbTag1(0), dbTag2(0)
 {
-    
-    constrDOF = new ID(constrainedDOF);
-    retainDOF = new ID(retainedDOF);    
-    if (constrDOF == 0 || constrainedDOF.Size() != constrDOF->Size() ||
-	retainDOF == 0 || retainedDOF.Size() != retainDOF->Size()) { 
-	opserr << "MP_Constraint::MP_Constraint - ran out of memory 1\n";
-	exit(-1);
-    }    
-    
-    constraint = new Matrix(constr);
-    if (constraint == 0 || constr.noCols() != constr.noCols()) { 
-	opserr << "MP_Constraint::MP_Constraint - ran out of memory 2\n";
-	exit(-1);
-    }        
+  numMPs++;    
+  constrDOF = new ID(constrainedDOF);
+  retainDOF = new ID(retainedDOF);    
+  if (constrDOF == 0 || constrainedDOF.Size() != constrDOF->Size() ||
+      retainDOF == 0 || retainedDOF.Size() != retainDOF->Size()) { 
+    opserr << "MP_Constraint::MP_Constraint - ran out of memory 1\n";
+    exit(-1);
+  }    
+  
+  constraint = new Matrix(constr);
+  if (constraint == 0 || constr.noCols() != constr.noCols()) { 
+    opserr << "MP_Constraint::MP_Constraint - ran out of memory 2\n";
+    exit(-1);
+  }        
 }
 
 
@@ -103,6 +106,10 @@ MP_Constraint::~MP_Constraint()
 	delete constrDOF;
     if (retainDOF != 0)
 	delete retainDOF;    
+    
+    numMPs--;
+    if (numMPs == 0)
+      nextTag = 0;
 }
 
 

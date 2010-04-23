@@ -18,15 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-11-22 19:41:17 $
+// $Revision: 1.4 $
+// $Date: 2010-04-23 22:50:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/ImposedMotionSP1.h,v $
                                                                         
 #ifndef ImposedMotionSP1_h
 #define ImposedMotionSP1_h
 
-// File: ~/domain/constraints/ImposedMotionSP1.h
-//
 // Written: fmk 
 // Created: 11/00
 // Revision: A
@@ -47,7 +45,7 @@ class ImposedMotionSP1 : public SP_Constraint
   public:
     // constructors    
     ImposedMotionSP1();        
-    ImposedMotionSP1(int spTag, int nodeTag, int ndof, int patternTag, int groundMotionTag);
+    ImposedMotionSP1(int nodeTag, int ndof, int patternTag, int groundMotionTag);
 
     // destructor
     ~ImposedMotionSP1();

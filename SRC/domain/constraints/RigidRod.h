@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:18 $
+// $Revision: 1.2 $
+// $Date: 2010-04-23 22:50:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/RigidRod.h,v $
                                                                         
-                                                                        
-// File: ~/model/constraints/RigidRod.h
-//
 // Written: fmk 12/99
 // Revised:
 //
@@ -42,7 +39,7 @@ class ID;
 class RigidRod
 {
   public:
-    RigidRod(Domain &theDomain, int nodeR, int nodeC, int startMPtag);
+    RigidRod(Domain &theDomain, int nodeR, int nodeC);
     virtual ~RigidRod();
     
   protected:

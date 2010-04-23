@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:55 $
+// $Revision: 1.3 $
+// $Date: 2010-04-23 22:50:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/RigidDiaphragm.h,v $
                                                                         
                                                                         
@@ -43,7 +43,7 @@ class RigidDiaphragm
 {
   public:
     RigidDiaphragm(Domain &theDomain, int nodeR, ID &nodeC, 
-		   int perpDirnToPlaneConstrained, int startMPtag);
+		   int perpDirnToPlaneConstrained);
     virtual ~RigidDiaphragm();
     
   protected:

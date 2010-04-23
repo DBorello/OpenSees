@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-12-22 00:35:08 $
+// $Revision: 1.6 $
+// $Date: 2010-04-23 22:50:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/SP_Constraint.cpp,v $
                                                                         
-                                                                        
-// File: ~/domain/constraints/SP_Constraint.C
-//
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -37,39 +34,44 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
+static int numSPs = 0;
+static int nextTag = 0;
+
 // constructor for FEM_ObjectBroker
 SP_Constraint::SP_Constraint(int clasTag)
 :DomainComponent(0,clasTag),
  nodeTag(0), dofNumber(0), valueR(0.0), valueC(0.0), isConstant(true), 
  loadPatternTag(-1)
 {
-    // does nothing else
+  numSPs++;
 }
 
 // constructor for a subclass to use
-SP_Constraint::SP_Constraint(int tag, int node, int ndof, int clasTag)
-:DomainComponent(tag, clasTag),
+SP_Constraint::SP_Constraint(int node, int ndof, int clasTag)
+:DomainComponent(nextTag++, clasTag),
  nodeTag(node), dofNumber(ndof), valueR(0.0), valueC(0.0), isConstant(true), 
  loadPatternTag(-1)
  // valueC is set to 1.0 so that homo will be false when recvSelf() invoked
  // should be ok as valueC cannot be used by subclasses and subclasses should
  // not be used if it is a homogeneous constraint.
 {
-
+  numSPs++;
 }
 
 // constructor for object of type SP_Constraint
-SP_Constraint::SP_Constraint(int tag, int node, int ndof, double value, bool ISconstant)
-:DomainComponent(tag, CNSTRNT_TAG_SP_Constraint),
+SP_Constraint::SP_Constraint(int node, int ndof, double value, bool ISconstant)
+:DomainComponent(nextTag++, CNSTRNT_TAG_SP_Constraint),
  nodeTag(node), dofNumber(ndof), valueR(value), valueC(value), isConstant(ISconstant),
  loadPatternTag(-1)
 {
-
+  numSPs++;
 }
 
 SP_Constraint::~SP_Constraint()
 {
-    // does nothing
+  numSPs--;
+  if (numSPs == 0)
+    nextTag = 0;
 }
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:55 $
+// $Revision: 1.3 $
+// $Date: 2010-04-23 22:50:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/RigidDiaphragm.cpp,v $
                                                                         
                                                                         
@@ -41,7 +41,7 @@
 
 
 RigidDiaphragm::RigidDiaphragm(Domain &theDomain, int nR, ID &nC, 
-			       int perpPlaneConstrained, int startMPtag) {
+			       int perpPlaneConstrained) {
 
     // check plane is valid, i.e. perpPlaneConstrained must be 0, 1 or 2
     if (perpPlaneConstrained < 0 || perpPlaneConstrained > 2) {
@@ -164,8 +164,8 @@ RigidDiaphragm::RigidDiaphragm(Domain &theDomain, int nR, ID &nC,
 	  }
 	      
 	  // create the MP_Constraint
-	  MP_Constraint *newC = new MP_Constraint(startMPtag+i, nR, ndC, 
-						  mat, id, id);
+	  MP_Constraint *newC = new MP_Constraint(nR, ndC, mat, id, id);
+						  
 	  if (newC == 0) {
 	    opserr << "RigidDiaphragm::RigidDiaphragm - ignoring constrained Node " << ndC << 
 	      ", out of memory\n";

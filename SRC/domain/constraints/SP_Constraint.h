@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2009-08-25 23:17:41 $
+// $Revision: 1.5 $
+// $Date: 2010-04-23 22:50:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/SP_Constraint.h,v $
                                                                         
                                                                         
@@ -46,8 +46,8 @@ class SP_Constraint : public DomainComponent
   public:
     // constructors    
     SP_Constraint(int classTag);        
-    SP_Constraint(int spTag, int nodeTag, int ndof, int classTag);    
-    SP_Constraint(int spTag, int nodeTag, int ndof, double value, bool isConstant = true);
+    SP_Constraint(int nodeTag, int ndof, int classTag);    
+    SP_Constraint(int nodeTag, int ndof, double value, bool isConstant);
 
     // destructor
     virtual ~SP_Constraint();

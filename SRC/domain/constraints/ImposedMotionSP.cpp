@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2008-11-21 22:22:59 $
+// $Revision: 1.9 $
+// $Date: 2010-04-23 22:50:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/ImposedMotionSP.cpp,v $
                                                                         
 // Written: fmk 
@@ -50,8 +50,8 @@ ImposedMotionSP::ImposedMotionSP()
 }
 
 // constructor for a subclass to use
-ImposedMotionSP::ImposedMotionSP(int tag, int node, int ndof, int pattern, int motion)
-:SP_Constraint(tag, node, ndof, CNSTRNT_TAG_ImposedMotionSP),
+ImposedMotionSP::ImposedMotionSP(int node, int ndof, int pattern, int motion)
+:SP_Constraint(node, ndof, CNSTRNT_TAG_ImposedMotionSP),
  groundMotionTag(motion), patternTag(pattern),
  theGroundMotion(0), theNode(0), theNodeResponse(0), theGroundMotionResponse(3)
 {
