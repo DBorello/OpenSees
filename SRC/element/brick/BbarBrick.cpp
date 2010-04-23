@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.23 $
-// $Date: 2009-01-29 00:40:53 $
+// $Revision: 1.24 $
+// $Date: 2010-04-23 22:56:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.cpp,v $
 
 // Ed "C++" Love
@@ -1524,6 +1524,26 @@ BbarBrick::setResponse(const char **argv, int argc, OPS_Stream &output)
       output.endTag(); // GaussPoint
     }
     theResponse =  new ElementResponse(this, 3, Vector(48));
+    } else if (strcmp(argv[0],"strains") ==0) {
+
+    for (int i=0; i<8; i++) {
+      output.tag("GaussPoint");
+      output.attr("number",i+1);
+      output.tag("NdMaterialOutput");
+      output.attr("classType", materialPointers[i]->getClassTag());
+      output.attr("tag", materialPointers[i]->getTag());
+
+      output.tag("ResponseType","eps11");
+      output.tag("ResponseType","eps22");
+      output.tag("ResponseType","eps33");
+      output.tag("ResponseType","eps12");
+      output.tag("ResponseType","eps13");
+      output.tag("ResponseType","eps23");      
+
+      output.endTag(); // NdMaterialOutput
+      output.endTag(); // GaussPoint
+    }
+    theResponse =  new ElementResponse(this, 4, Vector(48));
   }
 
   output.endTag(); // ElementOutput
@@ -1557,10 +1577,25 @@ BbarBrick::getResponse(int responseID, Information &eleInfo)
       stresses(cnt++) = sigma(5);
     }
     return eleInfo.setVector(stresses);
-
+    } else if (responseID == 4) {
+    
+    // Loop over the integration points
+    int cnt = 0;
+    for (int i = 0; i < 8; i++) {
+      
+      // Get material stress response
+      const Vector &sigma = materialPointers[i]->getStrain();
+      stresses(cnt++) = sigma(0);
+      stresses(cnt++) = sigma(1);
+      stresses(cnt++) = sigma(2);
+      stresses(cnt++) = sigma(3);
+      stresses(cnt++) = sigma(4);
+      stresses(cnt++) = sigma(5);
+    }
+    return eleInfo.setVector(stresses);
   }
-  else
 
+  else
     return -1;
 }
 
