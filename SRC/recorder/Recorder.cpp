@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2007-11-30 19:24:36 $
+// $Revision: 1.4 $
+// $Date: 2010-04-23 22:47:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/Recorder.cpp,v $
                                                                         
 
@@ -49,6 +49,12 @@ Recorder::~Recorder()
 
 int 
 Recorder::restart(void)
+{
+  return 0;
+}
+
+int 
+Recorder::domainChanged(void)
 {
   return 0;
 }

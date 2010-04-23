@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2010-02-04 01:03:34 $
+// $Revision: 1.17 $
+// $Date: 2010-04-23 22:47:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.h,v $
                                                                         
 #ifndef NodeRecorder_h
@@ -63,6 +63,7 @@ class NodeRecorder: public Recorder
 
     int record(int commitTag, double timeStamp);
 
+    int domainChanged(void);    
     int setDomain(Domain &theDomain);
     int sendSelf(int commitTag, Channel &theChannel);  
     int recvSelf(int commitTag, Channel &theChannel, 

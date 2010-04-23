@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2007-11-30 19:24:36 $
+// $Revision: 1.7 $
+// $Date: 2010-04-23 22:47:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/Recorder.h,v $
                                                                         
                                                                         
@@ -48,9 +48,9 @@ class Recorder: public MovableObject, public TaggedObject
     virtual ~Recorder();
 
     virtual int record(int commitTag, double timeStamp) =0;
-
     
     virtual int restart(void);
+    virtual int domainChanged(void);
     virtual int setDomain(Domain &theDomain);
     virtual int sendSelf(int commitTag, Channel &theChannel);  
     virtual int recvSelf(int commitTag, Channel &theChannel, 
