@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.50 $
-// $Date: 2010-04-23 22:53:08 $
+// $Revision: 1.51 $
+// $Date: 2010-04-23 23:56:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -2147,7 +2147,7 @@ TclCommand_addHomogeneousBC(ClientData clientData, Tcl_Interp *interp, int argc,
     } else {
       if (theFixity != 0) {
 	// create a homogeneous constraint
-	SP_Constraint *theSP = new SP_Constraint(nodeId, i, 0.0);
+	SP_Constraint *theSP = new SP_Constraint(nodeId, i, 0.0, true);
 	if (theSP == 0) {
 	  opserr << "WARNING ran out of memory for SP_Constraint ";
 	  opserr << "fix " << nodeId << " " << ndf << " [0,1] conditions\n";
