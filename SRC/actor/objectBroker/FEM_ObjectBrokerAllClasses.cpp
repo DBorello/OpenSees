@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2009-05-14 22:52:04 $
+// $Revision: 1.17 $
+// $Date: 2010-04-23 22:57:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.cpp,v $
                                                                         
 // Written: fmk
@@ -596,7 +596,7 @@ FEM_ObjectBrokerAllClasses::getNewMP(int classTag)
 {
     switch(classTag) {
 	case CNSTRNT_TAG_MP_Constraint:  
-	     return new MP_Constraint( 0 , classTag);
+	     return new MP_Constraint(classTag);
 
  	case CNSTRNT_TAG_MP_Joint2D:			// Arash
 	     return new MP_Joint2D();			// Arash

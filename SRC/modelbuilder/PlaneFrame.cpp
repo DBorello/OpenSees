@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-25 23:34:25 $
+// $Revision: 1.4 $
+// $Date: 2010-04-23 22:53:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/PlaneFrame.cpp,v $
                                                                         
                                                                         
@@ -195,7 +195,7 @@ PlaneFrame::buildFE_Model(void)
 	for (int jj=0; jj<numDOF1; jj++)
 	  for (int kk=0; kk<numDOF2; kk++)
 	  inputFile >> Ccr(jj,kk);
-	MPPtr = new MP_Constraint(i,nd2,nd1,Ccr,constrainedDOF,retainedDOF);
+	MPPtr = new MP_Constraint(nd2,nd1,Ccr,constrainedDOF,retainedDOF);
 	result = theDomain->addMP_Constraint(MPPtr);
         if (result == false) {
                 res =-1;

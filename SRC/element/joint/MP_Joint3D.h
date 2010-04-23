@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2004-09-01 04:01:27 $
+// $Revision: 1.3 $
+// $Date: 2010-04-23 22:53:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/MP_Joint3D.h,v $
                                                                         
 #ifndef MP_Joint3D_h
@@ -51,7 +51,7 @@ class MP_Joint3D : public MP_Constraint
     // constructors        
     MP_Joint3D();
 
-    MP_Joint3D( Domain *theDomain, int tag, int nodeRetain, int nodeConstr,
+    MP_Joint3D( Domain *theDomain, int nodeRetain, int nodeConstr,
 		int nodeRot, int Rotdof, int nodeDisp, int Dispdof, int LrgDsp = 0 );
 
     // destructor    

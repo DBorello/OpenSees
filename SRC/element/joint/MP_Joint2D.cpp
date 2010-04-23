@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2004-09-01 04:01:27 $
+// $Revision: 1.7 $
+// $Date: 2010-04-23 22:53:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/MP_Joint2D.cpp,v $
 
 // Written: Arash Altoontash, Gregory Deierlein
@@ -43,7 +43,7 @@
 
 // constructor for FEM_ObjectBroker
 MP_Joint2D::MP_Joint2D()
-:MP_Constraint( 0 , CNSTRNT_TAG_MP_Joint2D ),thisDomain(0),
+:MP_Constraint(CNSTRNT_TAG_MP_Joint2D ),thisDomain(0),
  nodeRetained(0),nodeConstrained(0), MainDOF(0), AuxDOF(0), FixedEnd(0),
  constraint(0), constrDOF(0),retainDOF(0),dbTag1(0), dbTag2(0), dbTag3(0),
  RetainedNode(0), ConstrainedNode(0), LargeDisplacement(0), Length0(0.0)
@@ -53,9 +53,9 @@ MP_Joint2D::MP_Joint2D()
 
 
 // general constructor for ModelBuilder
-MP_Joint2D::MP_Joint2D(Domain *theDomain, int tag, int nodeRetain, int nodeConstr,
+MP_Joint2D::MP_Joint2D(Domain *theDomain, int nodeRetain, int nodeConstr,
 		int Maindof, int fixedend, int LrgDsp )
-:MP_Constraint( tag , CNSTRNT_TAG_MP_Joint2D ), thisDomain(theDomain),
+:MP_Constraint(CNSTRNT_TAG_MP_Joint2D ), thisDomain(theDomain),
  nodeRetained(nodeRetain), nodeConstrained(nodeConstr), MainDOF(Maindof), AuxDOF(0),
  FixedEnd(fixedend), constraint(0), constrDOF(0), retainDOF(0),
  dbTag1(0), dbTag2(0), dbTag3(0), RetainedNode(0), ConstrainedNode(0),
@@ -68,123 +68,121 @@ MP_Joint2D::MP_Joint2D(Domain *theDomain, int tag, int nodeRetain, int nodeConst
     return;
   }
 
-  this->setTag(tag);
-
-	// get node pointers of constrainted and retained nodes
-	ConstrainedNode = theDomain->getNode(nodeConstrained);
-	if (ConstrainedNode == NULL)
-	{
-		opserr << "MP_Joint2D::MP_Joint2D: nodeConstrained: ";
-		opserr << nodeConstrained << "does not exist in model\n";
-		exit(0);
-	}
-
-	RetainedNode = theDomain->getNode(nodeRetained);
-	if (RetainedNode == NULL)
-	{
-		opserr << "MP_Joint2D::MP_Joint2D: nodeRetained: ";
-		opserr << nodeRetained << "does not exist in model\n";
-		exit(0);
-	}
-
-	// check for proper degrees of freedom
-	int RnumDOF = RetainedNode->getNumberDOF();
-	int CnumDOF = ConstrainedNode->getNumberDOF();
-    if (RnumDOF != 4 || CnumDOF != 3 ){
-		opserr << "MP_Joint2D::MP_Joint2D - mismatch in numDOF\n DOF not supported by this type of constraint";
-		return;
+  // get node pointers of constrainted and retained nodes
+  ConstrainedNode = theDomain->getNode(nodeConstrained);
+  if (ConstrainedNode == NULL)
+    {
+      opserr << "MP_Joint2D::MP_Joint2D: nodeConstrained: ";
+      opserr << nodeConstrained << "does not exist in model\n";
+      exit(0);
     }
-
-	// check the main degree of freedom. Assign auxilary DOF 
-	if ( MainDOF!= 2 && MainDOF!=3 ) {
-			opserr << "MP_Joint2D::MP_Joint2D - Wrong main degree of freedom" ;
-			return;
+  
+  RetainedNode = theDomain->getNode(nodeRetained);
+  if (RetainedNode == NULL)
+    {
+      opserr << "MP_Joint2D::MP_Joint2D: nodeRetained: ";
+      opserr << nodeRetained << "does not exist in model\n";
+      exit(0);
     }
-	if ( MainDOF == 2 ) AuxDOF = 3;
-	if ( MainDOF == 3 ) AuxDOF = 2;
-	
-	// check the fixed end flag
-	if ( FixedEnd!= 0 && FixedEnd!=1 ) {
-			opserr << "MP_Joint2D::MP_Joint2D - Wrong fixed end flag";
-			return;
+  
+  // check for proper degrees of freedom
+  int RnumDOF = RetainedNode->getNumberDOF();
+  int CnumDOF = ConstrainedNode->getNumberDOF();
+  if (RnumDOF != 4 || CnumDOF != 3 ){
+    opserr << "MP_Joint2D::MP_Joint2D - mismatch in numDOF\n DOF not supported by this type of constraint";
+    return;
+  }
+  
+  // check the main degree of freedom. Assign auxilary DOF 
+  if ( MainDOF!= 2 && MainDOF!=3 ) {
+    opserr << "MP_Joint2D::MP_Joint2D - Wrong main degree of freedom" ;
+    return;
+  }
+  if ( MainDOF == 2 ) AuxDOF = 3;
+  if ( MainDOF == 3 ) AuxDOF = 2;
+  
+  // check the fixed end flag
+  if ( FixedEnd!= 0 && FixedEnd!=1 ) {
+    opserr << "MP_Joint2D::MP_Joint2D - Wrong fixed end flag";
+    return;
+  }
+  
+  
+  // check for proper dimensions of coordinate space
+  const Vector &crdR = RetainedNode->getCrds();
+  int dimR = crdR.Size();
+  const Vector &crdC = ConstrainedNode->getCrds();
+  int dimC = crdC.Size();
+  
+  if (dimR != 2 || dimC != 2 ){
+    opserr << "MP_Joint2D::MP_Joint2D - mismatch in dimnesion\n dimension not supported by this type of constraint";
+    return;
+  }
+  
+  
+  // calculate the initial length of the rigid link
+  double deltaX = crdC(0) - crdR(0);
+  double deltaY = crdC(1) - crdR(1);
+  
+  Length0 = sqrt( deltaX*deltaX + deltaY*deltaY );
+  if ( Length0 <= 1.0e-12 ) {
+    opserr << "MP_Joint2D::MP_Joint2D - The constraint length is zero\n";
+  }
+  
+  // allocate and set up the constranted and retained id's
+  // allocate and set up the constraint matrix
+  if ( FixedEnd == 0 )
+    {
+      // the end is released
+      constrDOF = new ID(CnumDOF-1);
+      retainDOF = new ID(RnumDOF-1);
+      
+      (*constrDOF)(0) = 0;
+      (*constrDOF)(1) = 1;
+      
+      (*retainDOF)(0) = 0;
+      (*retainDOF)(1) = 1;
+      (*retainDOF)(2) = MainDOF;
+      
+      constraint = new Matrix( CnumDOF-1 , RnumDOF-1 );
+      
+      (*constraint) (0,0) = 1.0 ;
+      (*constraint) (0,2) = -deltaY ;
+      (*constraint) (1,1) = 1.0 ;
+      (*constraint) (1,2) = deltaX ;
+    } else
+    {
+      // the end is fixed
+      constrDOF = new ID(CnumDOF);
+      retainDOF = new ID(RnumDOF);
+      
+      (*constrDOF)(0) = 0;
+      (*constrDOF)(1) = 1;
+      (*constrDOF)(2) = 2;
+      
+      (*retainDOF)(0) = 0;
+      (*retainDOF)(1) = 1;
+      (*retainDOF)(2) = 2;
+      (*retainDOF)(3) = 3;
+      
+      constraint = new Matrix( CnumDOF , RnumDOF );
+      
+      (*constraint) (0,0) = 1.0 ;
+      (*constraint) (0,MainDOF) = -deltaY ;
+      (*constraint) (1,1) = 1.0 ;
+      (*constraint) (1,MainDOF) = deltaX ;
+      (*constraint) (2,AuxDOF) = 1.0 ;
     }
-	
-
-	// check for proper dimensions of coordinate space
-	const Vector &crdR = RetainedNode->getCrds();
-    int dimR = crdR.Size();
-	const Vector &crdC = ConstrainedNode->getCrds();
-    int dimC = crdC.Size();
-    
-	if (dimR != 2 || dimC != 2 ){
-		opserr << "MP_Joint2D::MP_Joint2D - mismatch in dimnesion\n dimension not supported by this type of constraint";
-		return;
-    }
-
-
-	// calculate the initial length of the rigid link
-	double deltaX = crdC(0) - crdR(0);
-	double deltaY = crdC(1) - crdR(1);
-
-	Length0 = sqrt( deltaX*deltaX + deltaY*deltaY );
-    if ( Length0 <= 1.0e-12 ) {
-		opserr << "MP_Joint2D::MP_Joint2D - The constraint length is zero\n";
-    }
-   
-	// allocate and set up the constranted and retained id's
-	// allocate and set up the constraint matrix
-	if ( FixedEnd == 0 )
-	{
-		// the end is released
-		constrDOF = new ID(CnumDOF-1);
-		retainDOF = new ID(RnumDOF-1);
-		
-		(*constrDOF)(0) = 0;
-		(*constrDOF)(1) = 1;
-
-		(*retainDOF)(0) = 0;
-		(*retainDOF)(1) = 1;
-		(*retainDOF)(2) = MainDOF;
-		
-		constraint = new Matrix( CnumDOF-1 , RnumDOF-1 );
-		
-		(*constraint) (0,0) = 1.0 ;
-		(*constraint) (0,2) = -deltaY ;
-		(*constraint) (1,1) = 1.0 ;
-		(*constraint) (1,2) = deltaX ;
-	} else
-	{
-		// the end is fixed
-		constrDOF = new ID(CnumDOF);
-		retainDOF = new ID(RnumDOF);
-		
-		(*constrDOF)(0) = 0;
-		(*constrDOF)(1) = 1;
-		(*constrDOF)(2) = 2;
-		
-		(*retainDOF)(0) = 0;
-		(*retainDOF)(1) = 1;
-		(*retainDOF)(2) = 2;
-		(*retainDOF)(3) = 3;
-		
-		constraint = new Matrix( CnumDOF , RnumDOF );
-		
-		(*constraint) (0,0) = 1.0 ;
-		(*constraint) (0,MainDOF) = -deltaY ;
-		(*constraint) (1,1) = 1.0 ;
-		(*constraint) (1,MainDOF) = deltaX ;
-		(*constraint) (2,AuxDOF) = 1.0 ;
-	}
- 
-	if (constrDOF == NULL || retainDOF == NULL ) { 
-		opserr << "MP_Joint2D::MP_Joint2D - ran out of memory \ncan not generate ID for nodes\n";
-		exit(-1);
-	}
-	
-	if (constraint == NULL ) {
-		opserr << "MP_Joint2D::MP_Joint2D - ran out of memory \ncan not generate the constraint matrix";
-		exit(-1);
-    }
+  
+  if (constrDOF == NULL || retainDOF == NULL ) { 
+    opserr << "MP_Joint2D::MP_Joint2D - ran out of memory \ncan not generate ID for nodes\n";
+    exit(-1);
+  }
+  
+  if (constraint == NULL ) {
+    opserr << "MP_Joint2D::MP_Joint2D - ran out of memory \ncan not generate the constraint matrix";
+    exit(-1);
+  }
 }
 
 

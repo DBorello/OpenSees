@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2004-09-01 04:01:27 $
+// $Revision: 1.5 $
+// $Date: 2010-04-23 22:53:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/MP_Joint2D.h,v $
                                                                         
 #ifndef MP_Joint2D_h
@@ -51,7 +51,7 @@ class MP_Joint2D : public MP_Constraint
     // constructors        
     MP_Joint2D();
 
-    MP_Joint2D( Domain *theDomain, int tag, int nodeRetain, int nodeConstr,
+    MP_Joint2D( Domain *theDomain, int nodeRetain, int nodeConstr,
 		int Maindof, int fixedend , int LrgDsp = 0 );	//LrgDsp=0 means large displacement is not enabled
 
     // destructor    
@@ -80,9 +80,9 @@ class MP_Joint2D : public MP_Constraint
   private:
     int nodeRetained;			// to identify the retained node
     int nodeConstrained;		// to identify  the constrained node
-	int MainDOF;				// main degree of freedom for rotation
-	int AuxDOF;					// Auxilary degree of freedom for shear
-	int FixedEnd;				// fixed rotational degree of freedom at the end 
+    int MainDOF;				// main degree of freedom for rotation
+    int AuxDOF;					// Auxilary degree of freedom for shear
+    int FixedEnd;				// fixed rotational degree of freedom at the end 
                                 // released = 0 , fixed = 1
     
     ID *constrDOF;				// ID of constrained DOF at constrained node
@@ -91,10 +91,10 @@ class MP_Joint2D : public MP_Constraint
     Node *ConstrainedNode;		// to identify  the constrained node
 
     int dbTag1, dbTag2, dbTag3;			// need a dbTag for the two ID's
-	int LargeDisplacement;		// flag for large displacements enabled
-	double Length0;
-	Matrix *constraint;			// pointer to the constraint matrix
-	Domain *thisDomain;			// pointer to domain the MP is defined on
+    int LargeDisplacement;		// flag for large displacements enabled
+    double Length0;
+    Matrix *constraint;			// pointer to the constraint matrix
+    Domain *thisDomain;			// pointer to domain the MP is defined on
 };
 
 #endif

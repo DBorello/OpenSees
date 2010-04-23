@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.6 $
-// $Date: 2009-12-10 00:28:58 $
+// $Revision: 1.7 $
+// $Date: 2010-04-23 22:53:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint3D.cpp,v $
 
 // Written: Arash Altoontash, Gregory Deierlein
@@ -221,42 +221,44 @@ TheDomain(0), numDof(0), nodeDbTag(0), dofDbTag(0)
 
   // Generate and add constraints to domain
   
-  // get the constraint numbers
-  int startMPtag = theDomain->getNumMPs() + 1;
-  for ( i=0 ; i<6 ; i++ ) InternalConstraints(i) = startMPtag + i ;
- 
   // create MP_Joint constraint node 1
-  if ( addMP_Joint( TheDomain, InternalConstraints(0), ExternalNodes(6), ExternalNodes(0), ExternalNodes(5), 8, ExternalNodes(3), 7, LrgDisp ) != 0) {
+  InternalConstraints(0) = addMP_Joint( TheDomain, ExternalNodes(6), ExternalNodes(0), ExternalNodes(5), 8, ExternalNodes(3), 7, LrgDisp );
+  if (InternalConstraints(0) < 0) {
     opserr << "WARNING Joint3D::Joint3D(): can not generate ForJoint MP at node 1\n";
     return;
   }
 
   // create MP_Joint constraint node 2
-  if ( addMP_Joint( TheDomain, InternalConstraints(1), ExternalNodes(6), ExternalNodes(1), ExternalNodes(5), 8, ExternalNodes(3), 7, LrgDisp ) != 0) {
+  InternalConstraints(1) = addMP_Joint( TheDomain, ExternalNodes(6), ExternalNodes(1), ExternalNodes(5), 8, ExternalNodes(3), 7, LrgDisp );
+  if (InternalConstraints(1) < 0) {
     opserr << "WARNING Joint3D::Joint3D(): can not generate ForJoint MP at node 2\n";
     return;
   }
 
   // create MP_Joint constraint node 3
-  if ( addMP_Joint( TheDomain, InternalConstraints(2), ExternalNodes(6), ExternalNodes(2), ExternalNodes(1), 6, ExternalNodes(5), 8, LrgDisp ) != 0) {
+  InternalConstraints(2) = addMP_Joint( TheDomain, ExternalNodes(6), ExternalNodes(2), ExternalNodes(1), 6, ExternalNodes(5), 8, LrgDisp );
+  if (InternalConstraints(2) < 0) {
     opserr << "WARNING Joint3D::Joint3D(): can not generate ForJoint MP at node 3\n";
     return;
   }
   
   // create MP_Joint constraint node 4
-  if ( addMP_Joint( TheDomain, InternalConstraints(3), ExternalNodes(6), ExternalNodes(3), ExternalNodes(1), 6, ExternalNodes(5), 8, LrgDisp ) != 0) {
+  InternalConstraints(3) = addMP_Joint( TheDomain, ExternalNodes(6), ExternalNodes(3), ExternalNodes(1), 6, ExternalNodes(5), 8, LrgDisp );
+  if (InternalConstraints(3) < 0) {
     opserr << "WARNING Joint3D::Joint3D(): can not generate ForJoint MP at node 4\n";
     return;
   }
 
   // create MP_Joint constraint node 5
-  if ( addMP_Joint( TheDomain, InternalConstraints(4), ExternalNodes(6), ExternalNodes(4), ExternalNodes(3), 7, ExternalNodes(1), 6, LrgDisp ) != 0) {
+  InternalConstraints(4) = addMP_Joint( TheDomain, ExternalNodes(6), ExternalNodes(4), ExternalNodes(3), 7, ExternalNodes(1), 6, LrgDisp);
+  if (InternalConstraints(4) < 0) {
     opserr << "WARNING Joint3D::Joint3D(): can not generate ForJoint MP at node 3\n";
     return;
   }
 
   // create MP_Joint constraint node 6
-  if ( addMP_Joint( TheDomain, InternalConstraints(5), ExternalNodes(6), ExternalNodes(5), ExternalNodes(3), 7, ExternalNodes(1), 6, LrgDisp ) != 0) {
+  InternalConstraints(5) = addMP_Joint( TheDomain, ExternalNodes(6), ExternalNodes(5), ExternalNodes(3), 7, ExternalNodes(1), 6, LrgDisp );
+  if (InternalConstraints(5) < 0) {
     opserr << "WARNING Joint3D::Joint3D(): can not generate ForJoint MP at node 3\n";
     return;
   }
@@ -310,12 +312,12 @@ void Joint3D::setDomain(Domain *theDomain)
 }
 
 
-int Joint3D::addMP_Joint(Domain *theDomain, int mpNum, int RetNodeID, int ConNodeID, int RotNodeID, int Rdof, int DspNodeID, int Ddof, int LrgDispFlag )
+int Joint3D::addMP_Joint(Domain *theDomain, int RetNodeID, int ConNodeID, int RotNodeID, int Rdof, int DspNodeID, int Ddof, int LrgDispFlag )
 {
 	MP_Constraint *Temp_MP;
 
 	// create MP_ForJoint constraint
-	Temp_MP = new MP_Joint3D( theDomain, mpNum, RetNodeID, ConNodeID, RotNodeID, Rdof, DspNodeID, Ddof, LrgDispFlag );
+	Temp_MP = new MP_Joint3D( theDomain, RetNodeID, ConNodeID, RotNodeID, Rdof, DspNodeID, Ddof, LrgDispFlag );
 		
 	if (Temp_MP == NULL)
 	{
@@ -329,7 +331,7 @@ int Joint3D::addMP_Joint(Domain *theDomain, int mpNum, int RetNodeID, int ConNod
 		delete Temp_MP;
 		return -2;
 	}
-	return 0;
+	return Temp_MP->getTag();;
 }
 
 //////////////////////////////////////////////////////////////////////

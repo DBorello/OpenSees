@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.12 $
-// $Date: 2009-12-10 00:28:58 $
+// $Revision: 1.13 $
+// $Date: 2010-04-23 22:53:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint2D.cpp,v $
 
 // Written: Arash & GGD
@@ -70,16 +70,16 @@ Joint2D::Joint2D()
 
 
 Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
-			     UniaxialMaterial &spring1,	UniaxialMaterial &spring2,
-			     UniaxialMaterial &spring3, UniaxialMaterial &spring4,
-			     UniaxialMaterial &springC, Domain *theDomain, int LrgDisp)
+		 UniaxialMaterial &spring1,	UniaxialMaterial &spring2,
+		 UniaxialMaterial &spring3, UniaxialMaterial &spring4,
+		 UniaxialMaterial &springC, Domain *theDomain, int LrgDisp)
   :Element(tag, ELE_TAG_Joint2D ), 
-  ExternalNodes(5), InternalConstraints(4), 
-  TheDomain(0), numDof(0), nodeDbTag(0), dofDbTag(0),theLoadSens(0)
+   ExternalNodes(5), InternalConstraints(4), 
+   TheDomain(0), numDof(0), nodeDbTag(0), dofDbTag(0),theLoadSens(0)
 {
   int i;
   numDof  = 16;
-
+  
   K.Zero();
   V.Zero();
 
@@ -196,30 +196,30 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
   
   // Generate and add constraints to domain
   
-  // get the constraint numbers
-  int startMPtag = theDomain->getNumMPs()+1;
-  for ( i=0 ; i<4 ; i++ ) InternalConstraints(i) = startMPtag + i ;
-  
   // create MP_Joint constraint node 1
-  if ( addMP_Joint( TheDomain, InternalConstraints(0), ExternalNodes(4), ExternalNodes(0), 2, fixedEnd[0], LrgDisp ) != 0) {
+  InternalConstraints(0) = addMP_Joint( TheDomain, ExternalNodes(4), ExternalNodes(0), 2, fixedEnd[0], LrgDisp );
+  if ( InternalConstraints(0) < 0) {
     opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 1\n";
     return;
   }
   
   // create MP_Joint constraint node 2
-  if ( addMP_Joint( TheDomain, InternalConstraints(1), ExternalNodes(4), ExternalNodes(1), 3, fixedEnd[1], LrgDisp ) != 0) {
+  InternalConstraints(1) = addMP_Joint( TheDomain, ExternalNodes(4), ExternalNodes(1), 3, fixedEnd[1], LrgDisp );
+  if (InternalConstraints(1) < 0) {
     opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 2\n";
-		return;
+    return;
   }
   
   // create MP_Joint constraint node 3
-  if ( addMP_Joint( TheDomain, InternalConstraints(2), ExternalNodes(4), ExternalNodes(2), 2, fixedEnd[2], LrgDisp ) != 0) {
+  InternalConstraints(2) = addMP_Joint( TheDomain, ExternalNodes(4), ExternalNodes(2), 2, fixedEnd[2], LrgDisp );
+  if (InternalConstraints(2) < 0) {
     opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 3\n";
     return;
   }
   
   // create MP_Joint constraint node 4
-  if ( addMP_Joint( TheDomain, InternalConstraints(3), ExternalNodes(4), ExternalNodes(3), 3, fixedEnd[3], LrgDisp ) != 0) {
+  InternalConstraints(3) = addMP_Joint( TheDomain, ExternalNodes(4), ExternalNodes(3), 3, fixedEnd[3], LrgDisp );
+  if (InternalConstraints(3) < 0) {
     opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 4\n";
     return;
   }
@@ -358,41 +358,41 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
   
   // Generate and add constraints to domain
   
-  // get the constraint numbers
-  int startMPtag = theDomain->getNumMPs();
-  for ( i=0 ; i<4 ; i++ ) InternalConstraints(i) = startMPtag + i ;
-  
   // create MP_Joint constraint node 1
-  if ( addMP_Joint( TheDomain, InternalConstraints(0), ExternalNodes(4), ExternalNodes(0), 2, fixedEnd[0], LrgDisp ) != 0) {
+  InternalConstraints(0) = addMP_Joint( TheDomain, ExternalNodes(4), ExternalNodes(0), 2, fixedEnd[0], LrgDisp);
+  if (InternalConstraints(0) < 0) {
     opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 1\n";
     return;
   }
   
   // create MP_Joint constraint node 2
-  if ( addMP_Joint( TheDomain, InternalConstraints(1), ExternalNodes(4), ExternalNodes(1), 3, fixedEnd[1], LrgDisp ) != 0) {
+  InternalConstraints(1) = addMP_Joint( TheDomain, ExternalNodes(4), ExternalNodes(1), 3, fixedEnd[1], LrgDisp);
+  if (InternalConstraints(1) < 0) {
     opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 2\n";
 		return;
   }
   
   // create MP_Joint constraint node 3
-  if ( addMP_Joint( TheDomain, InternalConstraints(2), ExternalNodes(4), ExternalNodes(2), 2, fixedEnd[2], LrgDisp ) != 0) {
+  InternalConstraints(2) = addMP_Joint( TheDomain, ExternalNodes(4), ExternalNodes(2), 2, fixedEnd[2], LrgDisp );
+  if (InternalConstraints(2) < 0) {
     opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 3\n";
     return;
   }
   
   // create MP_Joint constraint node 4
-  if ( addMP_Joint( TheDomain, InternalConstraints(3), ExternalNodes(4), ExternalNodes(3), 3, fixedEnd[3], LrgDisp ) != 0) {
+  InternalConstraints(3) = addMP_Joint( TheDomain, ExternalNodes(4), ExternalNodes(3), 3, fixedEnd[3], LrgDisp);
+  if (InternalConstraints(3) < 0) {
     opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 4\n";
     return;
   }
-  	// Handle the damage models
-	if ( &dmg1 == NULL ) { theDamages[0] = NULL; } else { theDamages[0] = dmg1.getCopy(); }
-	if ( &dmg2 == NULL ) { theDamages[1] = NULL; } else { theDamages[1] = dmg2.getCopy(); }
-	if ( &dmg3 == NULL ) { theDamages[2] = NULL; } else { theDamages[2] = dmg3.getCopy(); }
-	if ( &dmg4 == NULL ) { theDamages[3] = NULL; } else { theDamages[3] = dmg4.getCopy(); }
-	if ( &dmgC == NULL ) { theDamages[4] = NULL; } else { theDamages[4] = dmgC.getCopy(); }
-
-	for ( i = 0 ; i < 5 ; i ++ ) if ( theDamages[i] != NULL ) theDamages[i]->revertToStart();
+  // Handle the damage models
+  if ( &dmg1 == NULL ) { theDamages[0] = NULL; } else { theDamages[0] = dmg1.getCopy(); }
+  if ( &dmg2 == NULL ) { theDamages[1] = NULL; } else { theDamages[1] = dmg2.getCopy(); }
+  if ( &dmg3 == NULL ) { theDamages[2] = NULL; } else { theDamages[2] = dmg3.getCopy(); }
+  if ( &dmg4 == NULL ) { theDamages[3] = NULL; } else { theDamages[3] = dmg4.getCopy(); }
+  if ( &dmgC == NULL ) { theDamages[4] = NULL; } else { theDamages[4] = dmgC.getCopy(); }
+  
+  for ( i = 0 ; i < 5 ; i ++ ) if ( theDamages[i] != NULL ) theDamages[i]->revertToStart();
 				
 }
 
@@ -445,28 +445,30 @@ void Joint2D::setDomain(Domain *theDomain)
 }//setDomain
 
 
-int Joint2D::addMP_Joint(Domain *theDomain, int mpNum, 
-				  int RnodeID, int CnodeID, 
-				  int MainDOF, int FixedEnd, int LrgDispFlag )
+int Joint2D::addMP_Joint(Domain *theDomain, 
+			 int RnodeID, int CnodeID, 
+			 int MainDOF, int FixedEnd, int LrgDispFlag )
 {
 	MP_Constraint *Temp_MP;
 
 	// create MP_ForJoint constraint
-	Temp_MP = new MP_Joint2D( theDomain, mpNum, RnodeID, CnodeID, MainDOF, FixedEnd, LrgDispFlag );
+	Temp_MP = new MP_Joint2D(theDomain, RnodeID, CnodeID, MainDOF, FixedEnd, LrgDispFlag );
   
 	if (Temp_MP == NULL)
 	{
-		opserr << "Joint2D::addMP_Joint - WARNING ran out of memory for ForJoint MP_Constraint ";
-		return -1;
+	  opserr << "Joint2D::addMP_Joint - WARNING ran out of memory for ForJoint MP_Constraint ";
+	  return -1;
 	}
 	// Add the multi-point constraint to the domain
 	if (theDomain->addMP_Constraint (Temp_MP) == false)
 	{
-		opserr << "Joint2D::addMP_Joint - WARNING could not add equalDOF MP_Constraint to domain ";
-		delete Temp_MP;
-		return -2;
+	  opserr << "Joint2D::addMP_Joint - WARNING could not add equalDOF MP_Constraint to domain ";
+	  delete Temp_MP;
+	  return -2;
 	}
-	return 0;
+
+	return Temp_MP->getTag();
+	  
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -775,45 +777,44 @@ Response* Joint2D::setResponse(const char **argv, int argc, OPS_Stream &output)
 //
 // we compare argv[0] for known response types for the Truss
 //
-	if (strcmp(argv[0],"node") == 0 || strcmp(argv[0],"internalNode") == 0 )
+  if (strcmp(argv[0],"node") == 0 || strcmp(argv[0],"internalNode") == 0 )
     return new ElementResponse(this, 1, Vector(4));
-
-	else if (strcmp(argv[0],"size") == 0 || strcmp(argv[0],"jointSize") == 0 )
+  
+  else if (strcmp(argv[0],"size") == 0 || strcmp(argv[0],"jointSize") == 0 )
     return new ElementResponse(this, 2, Vector(2));
-
-	else if (strcmp(argv[0],"moment") == 0 || strcmp(argv[0],"-moment") == 0 
-		|| strcmp(argv[0],"force") == 0 || strcmp(argv[0],"-force") == 0 )
+  
+  else if (strcmp(argv[0],"moment") == 0 || strcmp(argv[0],"-moment") == 0 
+	   || strcmp(argv[0],"force") == 0 || strcmp(argv[0],"-force") == 0 )
     return new ElementResponse(this, 3, Vector(5));
-
-	else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
+  
+  else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
 	   strcmp(argv[0],"deformation") == 0 )
     return new ElementResponse(this, 4, Vector(5));
-
-	else if (strcmp(argv[0],"defoANDforce") == 0 || strcmp(argv[0],"deformationANDforce") == 0 ||
+  
+  else if (strcmp(argv[0],"defoANDforce") == 0 || strcmp(argv[0],"deformationANDforce") == 0 ||
 	   strcmp(argv[0],"deformationsANDforces") == 0 )
     return new ElementResponse(this, 5, Vector(10));
-
-	else if ( strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0 )
+  
+  else if ( strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0 )
     return new ElementResponse(this, 6, Matrix(16,16) );
-	
-	else if (strcmp(argv[0],"plasticRotation") == 0 || strcmp(argv[0],"plasticDeformation") == 0)
-		return new ElementResponse(this, 7, Vector(5));
-
-	else if ( strcmp(argv[0],"damage") == 0 || strcmp(argv[0],"damages") == 0 ||
-		strcmp(argv[0],"-damage") == 0 || strcmp(argv[0],"-damages") == 0)
-		return new ElementResponse(this, 8, Vector(5));
-	// material response
-	else if ( (strcmp(argv[0],"spring")==0) || (strcmp(argv[0],"-spring") == 0) ||
-		(strcmp(argv[0],"material")==0) || (strcmp(argv[0],"-material") == 0) ) {
-		int materialNum = atoi(argv[1]) - 1;
-		
-		if (materialNum >= 0 && materialNum < 5)
-			if (theSprings[materialNum] != 0)
-			  return theSprings[materialNum]->setResponse(&argv[2], argc-2, output);
-	}
-
-	else 
-		return 0;
+  
+  else if (strcmp(argv[0],"plasticRotation") == 0 || strcmp(argv[0],"plasticDeformation") == 0)
+    return new ElementResponse(this, 7, Vector(5));
+  
+  else if ( strcmp(argv[0],"damage") == 0 || strcmp(argv[0],"damages") == 0 ||
+	    strcmp(argv[0],"-damage") == 0 || strcmp(argv[0],"-damages") == 0)
+    return new ElementResponse(this, 8, Vector(5));
+  // material response
+  else if ( (strcmp(argv[0],"spring")==0) || (strcmp(argv[0],"-spring") == 0) ||
+	    (strcmp(argv[0],"material")==0) || (strcmp(argv[0],"-material") == 0) ) {
+    int materialNum = atoi(argv[1]) - 1;
+    
+    if (materialNum >= 0 && materialNum < 5)
+      if (theSprings[materialNum] != 0)
+	return theSprings[materialNum]->setResponse(&argv[2], argc-2, output);
+  }
+  
+  return 0;
   	
 }
 
@@ -946,6 +947,7 @@ int Joint2D::getResponse(int responseID, Information &eleInformation)
 	default:
 		return -1;
 	}
+	return -1;
 }
 
 

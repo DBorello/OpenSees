@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.10 $
-// $Date: 2007-02-02 01:44:57 $
+// $Revision: 1.11 $
+// $Date: 2010-04-23 22:53:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint2D.h,v $
 
 // Written: Arash & GGD
@@ -128,7 +128,7 @@ public:
     // AddingSensitivity:END ///////////////////////////////////////////
 
  protected:
-  int 	addMP_Joint(Domain *theDomain, int mpNum, int RnodeID, int CnodeID, int MainDOF, int FixedEnd, int LrgDispFlag );   
+  int 	addMP_Joint(Domain *theDomain, int RnodeID, int CnodeID, int MainDOF, int FixedEnd, int LrgDispFlag );   
 
  private:
   UniaxialMaterial *theSprings[5]; 

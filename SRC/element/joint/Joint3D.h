@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2007-02-02 01:44:57 $
+// $Revision: 1.5 $
+// $Date: 2010-04-23 22:53:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint3D.h,v $
 
 // Written: Arash Altoontash, Gregory Deierlein
@@ -104,7 +104,7 @@ public:
 
 
  protected:
-  int 	addMP_Joint(Domain *theDomain, int mpNum, int RetNodeID, int ConNodeID,
+  int 	addMP_Joint(Domain *theDomain, int RetNodeID, int ConNodeID,
 		    int RotNodeID, int Rdof, int DspNodeID, int Ddof, 
 		    int LrgDispFlag );   
   

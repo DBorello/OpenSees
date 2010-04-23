@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.49 $
-// $Date: 2010-04-06 20:11:52 $
+// $Revision: 1.50 $
+// $Date: 2010-04-23 22:53:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -2111,8 +2111,6 @@ TclCommand_addNodalMass(ClientData clientData, Tcl_Interp *interp, int argc,
 
 
 
-static int numSPs = 1;
-
 int
 TclCommand_addHomogeneousBC(ClientData clientData, Tcl_Interp *interp, int argc,   
 				 TCL_Char **argv)
@@ -2149,7 +2147,7 @@ TclCommand_addHomogeneousBC(ClientData clientData, Tcl_Interp *interp, int argc,
     } else {
       if (theFixity != 0) {
 	// create a homogeneous constraint
-	SP_Constraint *theSP = new SP_Constraint(numSPs, nodeId, i, 0.0);
+	SP_Constraint *theSP = new SP_Constraint(nodeId, i, 0.0);
 	if (theSP == 0) {
 	  opserr << "WARNING ran out of memory for SP_Constraint ";
 	  opserr << "fix " << nodeId << " " << ndf << " [0,1] conditions\n";
@@ -2161,7 +2159,6 @@ TclCommand_addHomogeneousBC(ClientData clientData, Tcl_Interp *interp, int argc,
 	  delete theSP;
 	  return TCL_ERROR;
 	}
-	numSPs++;      
       }
     }
   }
@@ -2218,7 +2215,7 @@ TclCommand_addHomogeneousBC_X(ClientData clientData, Tcl_Interp *interp,
     }       
   }
 
-  numSPs = theTclDomain->addSP_Constraint(numSPs, 0, xLoc, fixity, tol);
+  theTclDomain->addSP_Constraint(0, xLoc, fixity, tol);
 
   /******************************************************************************
   NodeIter &theNodes = theTclDomain->getNodes();
@@ -2316,7 +2313,7 @@ TclCommand_addHomogeneousBC_Y(ClientData clientData, Tcl_Interp *interp,
   }
 
 
-  numSPs = theTclDomain->addSP_Constraint(numSPs, 1, yLoc, fixity, tol);
+  theTclDomain->addSP_Constraint(1, yLoc, fixity, tol);
 
   /******************************************************************************
 
@@ -2416,7 +2413,7 @@ TclCommand_addHomogeneousBC_Z(ClientData clientData, Tcl_Interp *interp,
     }       
   }
 
-  numSPs = theTclDomain->addSP_Constraint(numSPs, 2, zLoc, fixity, tol);
+  theTclDomain->addSP_Constraint(2, zLoc, fixity, tol);
 
   /******************************************************************************
 
@@ -2544,15 +2541,9 @@ TclCommand_addSP(ClientData clientData, Tcl_Interp *interp, int argc,
   }
   
   LoadPattern *thePattern = theTclDomain->getLoadPattern(loadPatternTag);
-  SP_ConstraintIter &theSPs = thePattern->getSPs();
-  int numSPs = 0;
-  SP_Constraint *theSP2;
-  while ((theSP2 = theSPs()) != 0)
-      numSPs++;
-  
   
   // create a homogeneous constraint
-  SP_Constraint *theSP = new SP_Constraint(numSPs, nodeId, dofId, value, isSpConst);
+  SP_Constraint *theSP = new SP_Constraint(nodeId, dofId, value, isSpConst);
 
   if (theSP == 0) {
     opserr << "WARNING ran out of memory for SP_Constraint ";
@@ -2640,19 +2631,13 @@ TclCommand_addImposedMotionSP(ClientData clientData,
   MultiSupportPattern *thePattern = theTclMultiSupportPattern;
   int loadPatternTag = thePattern->getTag();
   
-  SP_ConstraintIter &theSPs = thePattern->getSPs();
-  int numSPs = 0;
-  SP_Constraint *theSP2;
-  while ((theSP2 = theSPs()) != 0)
-      numSPs++;
-
   // create a new ImposedMotionSP
   SP_Constraint *theSP;
   if (alt == true) {
-    theSP = new ImposedMotionSP1(numSPs, nodeId, dofId, loadPatternTag, gMotionID);
+    theSP = new ImposedMotionSP1(nodeId, dofId, loadPatternTag, gMotionID);
   }
   else {
-    theSP = new ImposedMotionSP(numSPs, nodeId, dofId, loadPatternTag, gMotionID);
+    theSP = new ImposedMotionSP(nodeId, dofId, loadPatternTag, gMotionID);
   }
 
   if (theSP == 0) {
@@ -2672,9 +2657,6 @@ TclCommand_addImposedMotionSP(ClientData clientData,
   return TCL_OK;
 }
 
-
-
-static int numMPs = 1;
 
 
 int
@@ -2740,7 +2722,7 @@ TclCommand_addEqualDOF_MP (ClientData clientData, Tcl_Interp *interp,
 
 
         // Create the multi-point constraint
-        MP_Constraint *theMP = new MP_Constraint (numMPs, RnodeID, CnodeID, Ccr, rcDOF, rcDOF);
+        MP_Constraint *theMP = new MP_Constraint (RnodeID, CnodeID, Ccr, rcDOF, rcDOF);
         if (theMP == 0) {
 	  opserr << "WARNING ran out of memory for equalDOF MP_Constraint ";
 	  printCommand (argc, argv);
@@ -2754,8 +2736,6 @@ TclCommand_addEqualDOF_MP (ClientData clientData, Tcl_Interp *interp,
 	  delete theMP;
 	  return TCL_ERROR;
         }
-
-	numMPs += 1;
 
         return TCL_OK;
 }
@@ -2781,15 +2761,13 @@ TclCommand_RigidLink(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Ch
 
   // construct a rigid rod or beam depending on 1st arg
   if ((strcmp(argv[1],"-bar") == 0) || (strcmp(argv[1],"bar") == 0)) {
-    RigidRod theLink(*theTclDomain, rNode, cNode, numMPs);
+    RigidRod theLink(*theTclDomain, rNode, cNode);
   } else if ((strcmp(argv[1],"-beam") == 0) || (strcmp(argv[1],"beam") == 0)) {
-    RigidBeam theLink(*theTclDomain, rNode, cNode, numMPs);
+    RigidBeam theLink(*theTclDomain, rNode, cNode);
   } else {
       opserr << "WARNING rigidLink linkType? rNode? cNode? - unrecognised link type (-bar, -beam) \n";
       return TCL_ERROR;	        
   }
-
-  numMPs += 1;
 
   return TCL_OK;
 }
@@ -2825,10 +2803,8 @@ TclCommand_RigidDiaphragm(ClientData clientData, Tcl_Interp *interp, int argc, T
       constrainedNodes(i) = cNode;
   }
 
-  RigidDiaphragm theLink(*theTclDomain, rNode, constrainedNodes, perpDirn-1, numMPs);
+  RigidDiaphragm theLink(*theTclDomain, rNode, constrainedNodes, perpDirn-1);
 	
-
-  numMPs += numConstrainedNodes;
 
   return TCL_OK;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2004-09-01 04:01:27 $
+// $Revision: 1.3 $
+// $Date: 2010-04-23 22:53:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/MP_Joint3D.cpp,v $
 
 // Written: Arash Altoontash, Gregory Deierlein
@@ -40,7 +40,7 @@
 
 // constructor for FEM_ObjectBroker
 MP_Joint3D::MP_Joint3D()
-:MP_Constraint( 0 , CNSTRNT_TAG_MP_Joint3D ), thisDomain(0),
+ :MP_Constraint(CNSTRNT_TAG_MP_Joint3D ), thisDomain(0),
 nodeRetained(0), nodeConstrained(0), nodeRotation(0), RotDOF(0),
 nodeDisplacement(0), DispDOF(0), LargeDisplacement(0), Length0(0.0),
 constraint(0), constrDOF(0), retainDOF(0), RotNormVect(0), DspNormVect(0),
@@ -52,9 +52,9 @@ RotationNode(0), DisplacementNode(0)
 
 
 // general constructor for ModelBuilder
-MP_Joint3D::MP_Joint3D( Domain *theDomain, int tag, int nodeRetain, int nodeConstr,
+MP_Joint3D::MP_Joint3D( Domain *theDomain, int nodeRetain, int nodeConstr,
 		int nodeRot, int Rotdof, int nodeDisp, int Dispdof, int LrgDsp )
-:MP_Constraint( tag , CNSTRNT_TAG_MP_Joint3D ), thisDomain(theDomain),
+:MP_Constraint(CNSTRNT_TAG_MP_Joint3D ), thisDomain(theDomain),
 nodeRetained(nodeRetain), nodeConstrained(nodeConstr), nodeRotation(nodeRot),
 RotDOF(Rotdof), nodeDisplacement(nodeDisp), DispDOF(Dispdof), 
 LargeDisplacement(LrgDsp), Length0(0.0), constraint(0), constrDOF(0),
@@ -68,8 +68,6 @@ RotationNode(0), DisplacementNode(0)
     opserr << "Domain = 0\n";
     return;
   }
-
-  this->setTag(tag);
 
   // get node pointers of constrainted, retained, rotation and displacement nodes
   ConstrainedNode = theDomain->getNode(nodeConstrained);
