@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.38 $
-// $Date: 2010-04-23 22:48:28 $
+// $Revision: 1.39 $
+// $Date: 2010-04-23 23:56:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -604,6 +604,7 @@ NodeRecorder::recvSelf(int commitTag, Channel &theChannel,
 
 int
 NodeRecorder::domainChanged(void)
+{
   return 0;
 }
 
