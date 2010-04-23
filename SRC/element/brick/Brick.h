@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2007-06-27 00:24:34 $
+// $Revision: 1.15 $
+// $Date: 2010-04-23 22:56:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.h,v $
 
 // Ed "C++" Love
@@ -133,6 +133,9 @@ class Brick : public Element {
     NDMaterial *materialPointers[8]; //pointers to eight materials
 
     double b[3];		// Body forces
+    double appliedB[3];		// Body forces applied with load
+    int applyLoad;
+
     Vector *load;
     Matrix *Ki;
 

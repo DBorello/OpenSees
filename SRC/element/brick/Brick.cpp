@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2009-11-02 21:22:22 $
+// $Revision: 1.31 $
+// $Date: 2010-04-23 22:56:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.cpp,v $
 
 // Ed "C++" Love
@@ -42,6 +42,7 @@
 #include <shp3d.h>
 #include <Renderer.h>
 #include <ElementResponse.h>
+#include <ElementalLoad.h>
 
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
@@ -70,7 +71,7 @@ static Matrix B(6,3) ;
 //null constructor
 Brick::Brick( ) 
 :Element( 0, ELE_TAG_Brick ),
-connectedExternalNodes(8), load(0), Ki(0)
+ connectedExternalNodes(8), applyLoad(0), load(0), Ki(0)
 {
   B.Zero();
 
@@ -99,7 +100,7 @@ Brick::Brick(int tag,
 	     NDMaterial &theMaterial,
 	     double b1, double b2, double b3)
   :Element(tag, ELE_TAG_Brick),
-   connectedExternalNodes(8) , load(0), Ki(0)
+   connectedExternalNodes(8), applyLoad(0), load(0), Ki(0)
 {
   B.Zero();
 
@@ -480,6 +481,13 @@ void  Brick::zeroLoad( )
   if (load != 0)
     load->Zero();
 
+  applyLoad = 0;
+
+  appliedB[0] = 0.0;
+  appliedB[1] = 0.0;
+  appliedB[2] = 0.0;
+
+
   return ;
 }
 
@@ -487,7 +495,20 @@ void  Brick::zeroLoad( )
 int 
 Brick::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  opserr << "Brick::addLoad - load type unknown for truss with tag: " << this->getTag() << endln;
+  int type;
+  const Vector &data = theLoad->getData(type, loadFactor);
+
+  if (type == LOAD_TAG_BrickSelfWeight) {
+    applyLoad = 1;
+    appliedB[0] += loadFactor * b[0];
+    appliedB[1] += loadFactor * b[1];
+    appliedB[2] += loadFactor * b[2];
+    return 0;
+  } else {
+    opserr << "Brick::addLoad() - ele with tag: " << this->getTag() << " does not deal with load type: " << type << "\n";
+    return -1;
+  }
+
   return -1;
 }
 
@@ -1060,7 +1081,10 @@ void  Brick::formResidAndTangent( int tang_flag )
       //residual 
       for ( p = 0; p < ndf; p++ ) {
         resid( jj + p ) += residJ(p)  ;
-	    resid( jj + p ) -= dvol[i]*b[p]*shp[3][j];
+	if (applyLoad == 0)
+	  resid( jj + p ) -= dvol[i]*b[p]*shp[3][j];
+	else
+	  resid( jj + p ) -= dvol[i]*appliedB[p]*shp[3][j];
       }
 
       if ( tang_flag == 1 ) {
@@ -1699,7 +1723,29 @@ Brick::setResponse(const char **argv, int argc, OPS_Stream &output)
       output.endTag(); // GaussPoint
     }
     theResponse =  new ElementResponse(this, 3, Vector(48));
+
+  } else if (strcmp(argv[0],"strains") ==0) {
+
+    for (int i=0; i<8; i++) {
+      output.tag("GaussPoint");
+      output.attr("number",i+1);
+      output.tag("NdMaterialOutput");
+      output.attr("classType", materialPointers[i]->getClassTag());
+      output.attr("tag", materialPointers[i]->getTag());
+
+      output.tag("ResponseType","eps11");
+      output.tag("ResponseType","eps22");
+      output.tag("ResponseType","eps33");
+      output.tag("ResponseType","eps12");
+      output.tag("ResponseType","eps13");
+      output.tag("ResponseType","eps23");      
+
+      output.endTag(); // NdMaterialOutput
+      output.endTag(); // GaussPoint
+    }
+    theResponse =  new ElementResponse(this, 4, Vector(48));
   }
+
   
   output.endTag(); // ElementOutput
   return theResponse;
@@ -1732,10 +1778,26 @@ Brick::getResponse(int responseID, Information &eleInfo)
       stresses(cnt++) = sigma(5);
     }
     return eleInfo.setVector(stresses);
+
+  } else if (responseID == 4) {
     
+    // Loop over the integration points
+    int cnt = 0;
+    for (int i = 0; i < 8; i++) {
+      
+      // Get material stress response
+      const Vector &sigma = materialPointers[i]->getStrain();
+      stresses(cnt++) = sigma(0);
+      stresses(cnt++) = sigma(1);
+      stresses(cnt++) = sigma(2);
+      stresses(cnt++) = sigma(3);
+      stresses(cnt++) = sigma(4);
+      stresses(cnt++) = sigma(5);
+    }
+    return eleInfo.setVector(stresses);
   }
+
   else
-    
     return -1;
 }
 
