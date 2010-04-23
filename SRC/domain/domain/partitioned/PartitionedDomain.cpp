@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2009-05-11 21:30:23 $
+// $Revision: 1.20 $
+// $Date: 2010-04-23 22:51:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -278,18 +278,18 @@ PartitionedDomain::addSP_Constraint(SP_Constraint *load)
 
 
 int
-PartitionedDomain::addSP_Constraint(int startTag, int axisDirn, double axisValue, 
+PartitionedDomain::addSP_Constraint(int axisDirn, double axisValue, 
 				   const ID &fixityCodes, double tol)
 {
-  int spTag = startTag;
+  int spTag = 0;
 
-  spTag = this->Domain::addSP_Constraint(spTag, axisDirn, axisValue, fixityCodes, tol);
+  spTag = this->Domain::addSP_Constraint(axisDirn, axisValue, fixityCodes, tol);
 
   // find subdomain with node and add it .. break if find as internal node
   SubdomainIter &theSubdomains = this->getSubdomains();
   Subdomain *theSub;
   while ((theSub = theSubdomains()) != 0) {
-    spTag = theSub->addSP_Constraint(spTag, axisDirn, axisValue, fixityCodes, tol);
+    theSub->addSP_Constraint(axisDirn, axisValue, fixityCodes, tol);
   }
 
   return spTag;
@@ -664,6 +664,32 @@ PartitionedDomain::removeSP_Constraint(int tag)
 }
 
 
+int 
+PartitionedDomain::removeSP_Constraint(int nodeTag, int dof, int loadPatternTag)
+{
+  // we first see if its in the original domain
+  int result = this->Domain::removeSP_Constraint(nodeTag, dof, loadPatternTag);
+
+  // if not there we must check all the other subdomains
+  if (theSubdomains != 0) {
+    ArrayOfTaggedObjectsIter theSubsIter(*theSubdomains);		
+    TaggedObject *theObject;
+    while ((theObject = theSubsIter()) != 0) {
+      Subdomain *theSub = (Subdomain *)theObject;	    
+      result += theSub->removeSP_Constraint(nodeTag, dof, loadPatternTag);
+    }    
+  }
+
+  if (result != 0) {
+    this->domainChange();
+  }
+
+  // its not there
+  return result;  
+}
+
+
+
 MP_Constraint *
 PartitionedDomain::removeMP_Constraint(int tag)
 {
@@ -689,6 +715,31 @@ PartitionedDomain::removeMP_Constraint(int tag)
 
     // its not there
     return 0;
+}
+
+
+int
+PartitionedDomain::removeMP_Constraints(int tag)
+{
+    // we first see if its in the original domain
+    int result = this->Domain::removeMP_Constraints(tag);
+
+    // if not there we must check all the other subdomains
+    if (theSubdomains != 0) {
+	ArrayOfTaggedObjectsIter theSubsIter(*theSubdomains);		
+	TaggedObject *theObject;
+	while ((theObject = theSubsIter()) != 0) {
+	    Subdomain *theSub = (Subdomain *)theObject;	    
+	    result += theSub->removeMP_Constraints(tag);
+	}
+    }    
+    
+    if (result != 0) {
+      this->domainChange();
+    }
+    
+    // its not there
+    return result;
 }
 
 

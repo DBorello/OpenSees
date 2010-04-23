@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2009-05-11 21:30:23 $
+// $Revision: 1.13 $
+// $Date: 2010-04-23 22:51:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.h,v $
                                                                         
                                                                         
@@ -70,7 +70,7 @@ class PartitionedDomain: public Domain
 
     virtual  bool addLoadPattern(LoadPattern *);            
     virtual  bool addSP_Constraint(SP_Constraint *); 
-    virtual  int  addSP_Constraint(int startTag, int axisDirn, double axisValue, 
+    virtual  int  addSP_Constraint(int axisDirn, double axisValue, 
 				   const ID &fixityCodes, double tol=1e-10);
     virtual  bool addSP_Constraint(SP_Constraint *, int loadPatternTag); 
     virtual  bool addMP_Constraint(MP_Constraint *); 
@@ -83,7 +83,9 @@ class PartitionedDomain: public Domain
     virtual Element *removeElement(int tag);
     virtual Node *removeNode(int tag);        
     virtual SP_Constraint *removeSP_Constraint(int tag);
+    virtual int removeSP_Constraint(int nodeTag, int dof, int loadPatternTag);
     virtual MP_Constraint *removeMP_Constraint(int tag);
+    virtual int removeMP_Constraints(int tag);
     virtual LoadPattern   *removeLoadPattern(int loadTag);
     
     // methods to access the elements

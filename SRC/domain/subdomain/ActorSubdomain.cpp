@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2009-08-26 20:33:10 $
+// $Revision: 1.18 $
+// $Date: 2010-04-23 22:52:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ActorSubdomain.cpp,v $
                                                                         
 #include <ActorSubdomain.h>
@@ -283,7 +283,6 @@ ActorSubdomain::run(void)
 
 	  case ShadowActorSubdomain_addSP_ConstraintAXIS:
 
-	    startTag = msgData(1);
 	    axisDirn = msgData(2);
 	    theI = new ID(msgData(3));
 	    theV = new Vector(2);
@@ -291,7 +290,7 @@ ActorSubdomain::run(void)
 	    this->recvVector(*theV);
 
 	    msgData(0) = 0;				 
-	    endTag = this->addSP_Constraint(startTag, axisDirn, (*theV)(0), *theI, (*theV)(1));
+	    endTag = this->addSP_Constraint(axisDirn, (*theV)(0), *theI, (*theV)(1));
 	    msgData(1) = endTag;
 	    this->sendID(msgData);
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.58 $
-// $Date: 2009-08-26 20:32:42 $
+// $Revision: 1.59 $
+// $Date: 2010-04-23 22:51:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -511,13 +511,12 @@ Domain::addSP_Constraint(SP_Constraint *spConstraint)
 
 
 int
-Domain::addSP_Constraint(int tag, int axisDirn, double axisValue, 
+Domain::addSP_Constraint(int axisDirn, double axisValue, 
 			 const ID &fixityConditions, double tol)
 {
   if (axisDirn < 0)
     return -1;
 
-  int spTag = tag;
   NodeIter &theNodes = this->getNodes();
   Node *theNode;
 
@@ -537,19 +536,18 @@ Domain::addSP_Constraint(int tag, int axisDirn, double axisValue,
 	// foreach dof to be constrained create an SP & add to domain
 	for (int i=0; i<fixityConditions.Size(); i++) {
 	  if ((i < numDOF) && (fixityConditions(i) == 1)) {
-	    SP_Constraint *theSP = new SP_Constraint(spTag, theNode->getTag(), i, 0.0);
+	    SP_Constraint *theSP = new SP_Constraint(theNode->getTag(), i, 0.0);
 	    if (this->addSP_Constraint(theSP) == false) {
 	      opserr << "WARNING could not add SP_Constraint to domain for node " << theNode->getTag();
 	      delete theSP;
 	    }
-	    spTag++;
 	  }
 	}
       }
     }
   }
 
-  return spTag;
+  return 0;
 }
 
 
@@ -915,10 +913,9 @@ Domain::removeNode(int tag)
 }
 
 
-SP_Constraint *
+int
 Domain::removeSP_Constraint(int theNode, int theDOF, int loadPatternTag)
 {
-
   SP_Constraint *theSP =0;
   bool found = false;
   int spTag = 0;
@@ -933,11 +930,9 @@ Domain::removeSP_Constraint(int theNode, int theDOF, int loadPatternTag)
 	found = true;
       }
     }
-
-    if (found == true)
-      return this->removeSP_Constraint(spTag);
     
   } else {
+
     LoadPattern *thePattern = this->getLoadPattern(loadPatternTag);
     if (thePattern != 0) {
       SP_ConstraintIter &theSPs = thePattern->getSPs();
@@ -949,11 +944,15 @@ Domain::removeSP_Constraint(int theNode, int theDOF, int loadPatternTag)
 	  found = true;
 	}
       }
-
-      if (found == true)
-	return thePattern->removeSP_Constraint(spTag);
-
     }
+  }
+
+  if (found == true)
+    theSP = this->removeSP_Constraint(spTag);
+
+  if (theSP != 0) {
+    delete theSP;
+    return 1;
   }
    
   return 0;
@@ -1000,6 +999,39 @@ Domain::removeMP_Constraint(int tag)
     // result->setDomain(0);
     return result;
 }    
+
+
+int
+Domain::removeMP_Constraints(int nodeTag)
+{
+  ID tagsToRemove(0); int sizeTags = 0;
+  MP_Constraint *theMP = 0;
+  MP_ConstraintIter &theMPIter = this->getMPs();
+  while ((theMP = theMPIter()) != 0) {
+    int cNode = theMP->getNodeConstrained();
+    if (cNode == nodeTag) {
+      int mpTag = theMP->getTag();
+      tagsToRemove[sizeTags] = mpTag;
+      sizeTags++;
+    }
+  }
+
+  if (sizeTags == 0)
+    return 0;
+
+  for (int i=0; i<sizeTags; i++) {
+    int  tag = tagsToRemove(i);
+    TaggedObject *mc = theMPs->removeComponent(tag);
+    if (mc != 0)
+      delete mc;
+  }
+    
+  // mark the domain as having changed    
+  this->domainChange();
+    
+  return sizeTags;
+}    
+
 
 Parameter *
 Domain::removeParameter(int tag)
@@ -1610,7 +1642,7 @@ Domain::commit(void)
 
     // invoke record on all recorders
     for (int i=0; i<numRecorders; i++)
-		if (theRecorders[i] != 0)
+      if (theRecorders[i] != 0)
 	theRecorders[i]->record(commitTag, currentTime);
 
     // update the commitTag

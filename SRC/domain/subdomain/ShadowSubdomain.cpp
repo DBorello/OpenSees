@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2009-08-26 20:33:10 $
+// $Revision: 1.18 $
+// $Date: 2010-04-23 22:52:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -318,7 +318,7 @@ ShadowSubdomain::addSP_Constraint(SP_Constraint *theSP)
 
 
 int
-ShadowSubdomain::addSP_Constraint(int startTag, int axisDirn, double axisValue, 
+ShadowSubdomain::addSP_Constraint(int axisDirn, double axisValue, 
 				  const ID &fixityCodes, double tol)
 {
 
@@ -327,7 +327,6 @@ ShadowSubdomain::addSP_Constraint(int startTag, int axisDirn, double axisValue,
 #endif
 
     msgData(0) = ShadowActorSubdomain_addSP_ConstraintAXIS;
-    msgData(1) = startTag;
     msgData(2) = axisDirn;
     msgData(3) = fixityCodes.Size();
 
@@ -342,9 +341,9 @@ ShadowSubdomain::addSP_Constraint(int startTag, int axisDirn, double axisValue,
 
     this->recvID(msgData);   
 
-    // now if we have crated any in the actor we have to add them here
+    // now if we have created any in the actor we have to add them here
     int endTag = msgData(1);
-    int numSP = endTag - startTag;
+    int numSP = endTag;
     if (numSP != 0) {
       ID theID(numSP);
       this->recvID(theID);
@@ -595,50 +594,17 @@ ShadowSubdomain::removeSP_Constraint(int tag)
 }
 
 
-SP_Constraint *
+int
 ShadowSubdomain::removeSP_Constraint(int theNode, int theDOF, int loadPatternTag)
 {
-  SP_Constraint *theSP =0;
-  bool found = false;
-  int spTag = 0;
+  opserr << "ShadowSubdomain::removeSP_Constraint() - not yet implemented\n";
+  return 0;
+}
 
-  if (loadPatternTag == -1) {
-    // if not return 0, indicating we are done
-    TaggedObject *theComponent;
-    TaggedObjectIter &theSPs = theShadowSPs->getComponents();
-
-    while ((found == false) && ((theComponent = theSPs()) != 0)) {
-      SP_Constraint *theSP = (SP_Constraint *)theComponent;
-      int nodeTag = theSP->getNodeTag();
-      int dof = theSP->getDOF_Number();
-      if (nodeTag == theNode && dof == theDOF) {
-	spTag = theSP->getTag();
-	found = true;
-      }
-    }
-
-    if (found == true)
-      return this->removeSP_Constraint(spTag);
-    
-  } else {
-    LoadPattern *thePattern = this->getLoadPattern(loadPatternTag);
-    if (thePattern != 0) {
-      SP_ConstraintIter &theSPs = thePattern->getSPs();
-      while ((found == false) && ((theSP = theSPs()) != 0)) {
-	int nodeTag = theSP->getNodeTag();
-	int dof = theSP->getDOF_Number();
-	if (nodeTag == theNode && dof == theDOF) {
-	  spTag = theSP->getTag();
-	  found = true;
-	}
-      }
-
-      if (found == true)
-	return this->removeSP_Constraint(spTag, loadPatternTag);
-
-    }
-  }
-   
+int
+ShadowSubdomain::removeMP_Constraints(int cNode)
+{
+  opserr << "ShadowSubdomain::removeMP_Constraints() - not yet implemented\n";
   return 0;
 }
 

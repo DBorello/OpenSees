@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2009-08-25 22:09:47 $
+// $Revision: 1.30 $
+// $Date: 2010-04-23 22:51:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
 // Written: fmk 
@@ -93,8 +93,10 @@ class Domain
     virtual  bool addElement(Element *);
     virtual  bool addNode(Node *);
     virtual  bool addSP_Constraint(SP_Constraint *);
-    virtual  int  addSP_Constraint(int startTag, int axisDirn, double axisValue, 
-				   const ID &fixityCodes, double tol=1e-10);
+    virtual  int  addSP_Constraint(int axisDirn, 
+				   double axisValue, 
+				   const ID &fixityCodes, 
+				   double tol=1e-10);
     virtual  bool addMP_Constraint(MP_Constraint *); 
     virtual  bool addLoadPattern(LoadPattern *);            
     virtual  bool addParameter(Parameter *);            
@@ -109,14 +111,18 @@ class Domain
     virtual Element       *removeElement(int tag);
     virtual Node          *removeNode(int tag);    
     virtual SP_Constraint *removeSP_Constraint(int tag);
-    virtual SP_Constraint *removeSP_Constraint(int nodeTag, int dof, int loadPatternTag);
-    virtual MP_Constraint *removeMP_Constraint(int tag);    
+    virtual MP_Constraint *removeMP_Constraint(int tag);
+
+    virtual int removeMP_Constraints(int constrainedNodeTag);
+    virtual int removeSP_Constraint(int nodeTag, int dof, int loadPatternTag);
+
     virtual LoadPattern   *removeLoadPattern(int tag);
     virtual Parameter     *removeParameter(int tag);
 
     virtual NodalLoad     *removeNodalLoad(int tag, int loadPattern);
     virtual ElementalLoad *removeElementalLoad(int tag, int loadPattern);
     virtual SP_Constraint *removeSP_Constraint(int tag, int loadPattern);
+
     
     // methods to access the components of a domain
     virtual  ElementIter       &getElements();

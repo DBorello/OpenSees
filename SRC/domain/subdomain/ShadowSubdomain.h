@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2009-08-26 20:33:10 $
+// $Revision: 1.14 $
+// $Date: 2010-04-23 22:52:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.h,v $
                                                                         
                                                                         
@@ -65,7 +65,7 @@ class ShadowSubdomain: public Shadow, public Subdomain
     virtual  bool addNode(Node *);
     virtual  bool addExternalNode(Node *);
     virtual  bool addSP_Constraint(SP_Constraint *);
-    virtual  int  addSP_Constraint(int startTag, int axisDirn, double axisValue, 
+    virtual  int  addSP_Constraint(int axisDirn, double axisValue, 
 				   const ID &fixityCodes, double tol=1e-10);
     virtual  bool addMP_Constraint(MP_Constraint *);    
     virtual  bool addLoadPattern(LoadPattern *);            
@@ -81,12 +81,14 @@ class ShadowSubdomain: public Shadow, public Subdomain
     virtual Element 	  *removeElement(int tag);
     virtual Node 	  *removeNode(int tag);    
     virtual SP_Constraint *removeSP_Constraint(int tag);
-    virtual SP_Constraint *removeSP_Constraint(int nodeTag, int dof, int loadPatternTag);
     virtual MP_Constraint *removeMP_Constraint(int tag);
     virtual LoadPattern   *removeLoadPattern(int tag);
     virtual NodalLoad     *removeNodalLoad(int tag, int loadPattern);
     virtual ElementalLoad *removeElementalLoad(int tag, int loadPattern);
-    virtual SP_Constraint *removeSP_Constraint(int tag, int loadPattern);
+    virtual SP_Constraint * removeSP_Constraint(int tag, int loadPattern);
+
+    virtual int removeSP_Constraint(int nodeTag, int dof, int loadPatternTag);
+    virtual int removeMP_Constraints(int constrainedNodeTag);
     
     virtual  ElementIter       &getElements();
     virtual  NodeIter          &getNodes();
