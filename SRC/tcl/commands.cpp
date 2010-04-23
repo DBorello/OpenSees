@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.157 $
-// $Date: 2010-04-15 18:38:04 $
+// $Revision: 1.158 $
+// $Date: 2010-04-23 23:00:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -3308,7 +3308,6 @@ specifyCTest(ClientData clientData, Tcl_Interp *interp, int argc,
 
   if (theNewTest != 0) {
     theTest = theNewTest;
-  
 
   // if the analysis exists - we want to change the Test
   if (theStaticAnalysis != 0)
@@ -5650,45 +5649,53 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
 	  opserr << "WARNING remove loadPattern tag? failed to read tag: " << argv[2] << endln;
 	  return TCL_ERROR;
 	}      
-      
+
 	SP_Constraint *theSPconstraint = theDomain.removeSP_Constraint(tag);
 	if (theSPconstraint != 0) {
 	  delete theSPconstraint;
 	}
       } else {
 	int nodeTag, dofTag;
+	int patternTag = -1;
+
 	if (Tcl_GetInt(interp, argv[2], &nodeTag) != TCL_OK) {
 	  opserr << "WARNING remove loadPattern tag? failed to read node tag: " << argv[2] << endln;
 	  return TCL_ERROR;
 	}      
 	if (Tcl_GetInt(interp, argv[3], &dofTag) != TCL_OK) {
-	  opserr << "WARNING remove loadPattern tag? failed to read node tag: " << argv[2] << endln;
+	  opserr << "WARNING remove loadPattern tag? failed to read dof tag: " << argv[3] << endln;
 	  return TCL_ERROR;
 	}      
+
+	if (argc == 5) {
+	  if (Tcl_GetInt(interp, argv[4], &patternTag) != TCL_OK) {
+	    opserr << "WARNING remove loadPattern tag? failed to read pattern tag: " << argv[4] << endln;
+	    return TCL_ERROR;
+	  }      
+	  
+	}
 	dofTag--;  // one for C++ indexing of dof
 
-	SP_ConstraintIter &theSPs = theDomain.getSPs();
-	SP_Constraint *theSP;
+	theDomain.removeSP_Constraint(nodeTag, dofTag, patternTag);
 
-	ID theSPTags(0,12); int cnt=0;
-	while ((theSP = theSPs()) != 0) {
+	return TCL_OK;
+      }
+    }
 
-	  int spNode = theSP->getNodeTag();
-	  if (spNode == nodeTag) {
-	    int spDofTag = theSP->getDOF_Number();
-	    if (spDofTag == dofTag) {
-	      theSPTags(cnt) = theSP->getTag();
-	      cnt++;
-	    }
-	  }
-	}
-
-	for (int i=0; i<cnt; i++) {
-	  SP_Constraint *theSPconstraint = theDomain.removeSP_Constraint(theSPTags(i));
-	  if (theSPconstraint != 0) {
-	    delete theSPconstraint;
-	  }	
-	}
+    else if ((strcmp(argv[1],"MPconstraint") == 0) || (strcmp(argv[1],"mp") == 0)) {
+      if (argc < 3) {
+      	opserr << "WARNING want - remove SPconstraint nNodeTag?\n";
+      	return TCL_ERROR;
+      }    
+      int nodTag = 0;
+      if (argc == 3) {
+	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	  opserr << "WARNING remove mp tag? failed to read tag: " << argv[2] << endln;
+	  return TCL_ERROR;
+	}      
+      
+	theDomain.removeMP_Constraints(tag);
+	return TCL_OK;
       }
     }
 
