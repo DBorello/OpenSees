@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2008-02-29 20:45:56 $
+// $Revision: 1.18 $
+// $Date: 2010-04-23 22:52:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.cpp,v $
                                                                         
 // Written: fmk 07/99
@@ -38,7 +38,7 @@
 #include <NodalLoad.h>
 #include <ElementalLoad.h>
 #include <SP_Constraint.h>
-#include <ArrayOfTaggedObjects.h>
+#include <MapOfTaggedObjects.h>
 #include <ElementalLoadIter.h>
 #include <NodalLoadIter.h>
 #include <SingleDomSP_Iter.h>
@@ -57,9 +57,9 @@ LoadPattern::LoadPattern(int tag, int clasTag)
  theNodIter(0), theEleIter(0), theSpIter(0), lastChannel(0)
 {
     // constructor for subclass
-    theNodalLoads = new ArrayOfTaggedObjects(32);
-    theElementalLoads = new ArrayOfTaggedObjects(32);
-    theSPs = new ArrayOfTaggedObjects(32);
+    theNodalLoads = new MapOfTaggedObjects();
+    theElementalLoads = new MapOfTaggedObjects();
+    theSPs = new MapOfTaggedObjects();
 
     if (theNodalLoads == 0 || theElementalLoads == 0 || theSPs == 0) {
 	opserr << " LoadPattern::LoadPattern() - ran out of memory\n";
@@ -89,9 +89,9 @@ LoadPattern::LoadPattern()
  theNodalLoads(0), theElementalLoads(0), theSPs(0),
  theNodIter(0), theEleIter(0), theSpIter(0), lastChannel(0)
 {
-    theNodalLoads = new ArrayOfTaggedObjects(32);
-    theElementalLoads = new ArrayOfTaggedObjects(32);
-    theSPs = new ArrayOfTaggedObjects(32);
+    theNodalLoads = new MapOfTaggedObjects();
+    theElementalLoads = new MapOfTaggedObjects();
+    theSPs = new MapOfTaggedObjects();
 
     if (theNodalLoads == 0 || theElementalLoads == 0 || theSPs == 0) {
 	opserr << " LoadPattern::LoadPattern() - ran out of memory\n";
@@ -121,9 +121,9 @@ LoadPattern::LoadPattern(int tag)
  theNodalLoads(0), theElementalLoads(0), theSPs(0),
  theNodIter(0), theEleIter(0), theSpIter(0), lastChannel(0)
 {
-    theNodalLoads = new ArrayOfTaggedObjects(32);
-    theElementalLoads = new ArrayOfTaggedObjects(32);
-    theSPs = new ArrayOfTaggedObjects(32);
+    theNodalLoads = new MapOfTaggedObjects();
+    theElementalLoads = new MapOfTaggedObjects();
+    theSPs = new MapOfTaggedObjects();
 
     if (theNodalLoads == 0 || theElementalLoads == 0 || theSPs == 0) {
 	opserr << " LoadPattern::LoadPattern() - ran out of memory\n";
