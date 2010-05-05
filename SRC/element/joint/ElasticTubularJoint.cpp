@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2010-04-06 17:57:49 $
+// $Revision: 1.5 $
+// $Date: 2010-05-05 23:09:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/ElasticTubularJoint.cpp,v $
                                                                         
 // Written: Kia & Alanjari
@@ -64,7 +64,7 @@ OPS_ElasticTubularJoint(void)
 
   if (numElasticTubularJoint == 0) {
     numElasticTubularJoint++;
-    OPS_Error("ElasticTubularJoint element - Written by Kia & Alanjari \n", 1);
+    OPS_Error("ElasticTubularJoint element - Written by Kia & Alanjari\n", 1);
   }
 
   // get the id and end nodes 
@@ -489,7 +489,7 @@ ElasticTubularJoint::recvSelf(int Tag, Channel &theChannel, FEM_ObjectBroker &th
   res += theChannel.recvVector(this->getDbTag(), Tag, data);
   if (res < 0) 
     {
-      opserr << " Tubular Joint Element ::recvself-- could not receive data vector \ n " ;
+      opserr << " Tubular Joint Element ::recvself-- could not receive data vector \n ";
       return res ;
     }
   this->setTag((int)data(0));
