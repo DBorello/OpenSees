@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2010-04-06 20:18:49 $
+// $Revision: 1.5 $
+// $Date: 2010-05-06 00:10:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ConfinedConcrete01.cpp,v $
                                                                         
 // Description: This file contains the class definition for ConfinedConcrete01.
@@ -1166,18 +1166,20 @@ UniaxialMaterial* ConfinedConcrete01::getCopy ()
   theCopy->epsc0 = epsc0;  // Strain at compressive strength
   theCopy->fpcu = fpcu;   // Crushing strength
   theCopy->epscu = epscu;  // Strain at crushing strength
+  theCopy->Ec0 = Ec0;
 
-   // Converged history variables
-   theCopy->CminStrain = CminStrain;
-   theCopy->CunloadSlope = CunloadSlope;
-   theCopy->CendStrain = CendStrain;
 
-   // Converged state variables
-   theCopy->Cstrain = Cstrain;
-   theCopy->Cstress = Cstress;
-   theCopy->Ctangent = Ctangent;
+  // Converged history variables
+  theCopy->CminStrain = CminStrain;
+  theCopy->CunloadSlope = CunloadSlope;
+  theCopy->CendStrain = CendStrain;
+  
+  // Converged state variables
+  theCopy->Cstrain = Cstrain;
+  theCopy->Cstress = Cstress;
+  theCopy->Ctangent = Ctangent;
 
-   return theCopy;
+  return theCopy;
 }
 
 int ConfinedConcrete01::sendSelf (int commitTag, Channel& theChannel)
