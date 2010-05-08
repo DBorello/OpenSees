@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2008-12-18 22:45:16 $
+// $Revision: 1.26 $
+// $Date: 2010-05-08 00:16:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
@@ -532,78 +532,7 @@ Element::addResistingForceToNodalReaction(int flag)
   int numNodes = this->getNumExternalNodes();
   Node **theNodes = this->getNodePtrs();
 
-  //
-  // first we create the nodes in static arrays as presume
-  // we are going to do this many times & save new/delete
-  //
-
-  if (nodeIndex == -1) {
-    int numLastDOF = -1;
-    for (int i=0; i<numNodes; i++) {
-      int numNodalDOF = theNodes[i]->getNumberDOF();
-
-      if (numNodalDOF != 0 && numNodalDOF != numLastDOF) {
-	// see if an existing vector will do
-	int j;
-	for (j=0; j<numMatrices; j++) {
-	  if (theVectors1[j]->Size() == numNodalDOF)
-	    nodeIndex = j;
-	    j = numMatrices+2;
-	}
-
-	// if not we need to enlarge the bool of temp vectors, matrices
-	if (j != (numMatrices+2)) {
-	    Matrix **nextMatrices = new Matrix *[numMatrices+1];
-	    if (nextMatrices == 0) {
-	      opserr << "Element::addResistingForceToNodalReaction - out of memory\n";
-	    }
-	    int j;
-	    for (j=0; j<numMatrices; j++)
-	      nextMatrices[j] = theMatrices[j];
-	    Matrix *theMatrix = new Matrix(numNodalDOF, numNodalDOF);
-	    if (theMatrix == 0) {
-	      opserr << "Element::addResistingForceToNodalReaction - out of memory\n";
-	      exit(-1);
-	    }
-	    nextMatrices[numMatrices] = theMatrix;
-	    
-	    Vector **nextVectors1 = new Vector *[numMatrices+1];
-	    Vector **nextVectors2 = new Vector *[numMatrices+1];
-	    if (nextVectors1 == 0 || nextVectors2 == 0) {
-	      opserr << "Element::addResistingForceToNodalReaction - out of memory\n";
-	      exit(-1);
-	    }
-	    
-	    for (j=0; j<numMatrices; j++) {
-	      nextVectors1[j] = theVectors1[j];
-	      nextVectors2[j] = theVectors2[j];
-	    }
-	    
-	    Vector *theVector1 = new Vector(numNodalDOF);
-	    Vector *theVector2 = new Vector(numNodalDOF);
-	    if (theVector1 == 0 || theVector2 == 0) {
-	      opserr << "Element::addResistingForceToNodalReaction - out of memory\n";
-	      exit(-1);
-	    }
-	    
-	    nextVectors1[numMatrices] = theVector1;
-	    nextVectors2[numMatrices] = theVector2;
-	    
-	    if (numMatrices != 0) {
-	      delete [] theMatrices;
-	      delete [] theVectors1;
-	      delete [] theVectors2;
-	    }
-	    nodeIndex = numMatrices;
-	    numMatrices++;
-	    theMatrices = nextMatrices;
-	    theVectors1 = nextVectors1;
-	    theVectors2 = nextVectors2;
-	}
-      }
-      numLastDOF = numNodalDOF;
-    }
-  }
+  static Vector theVector(48);
 
   //
   // now determine the resisting force
@@ -617,11 +546,6 @@ Element::addResistingForceToNodalReaction(int flag)
   else if (flag == 2)
     theResistingForce = &(this->getRayleighDampingForces());
 
-  if (nodeIndex == -1) {
-    opserr << "LOGIC ERROR Element::addResistingForceToNodalReaction() -HUH!\n";
-    return -1;
-  }
-  
   //
   // iterate over the elements nodes; determine nodes contribution & add it
   //
@@ -632,19 +556,13 @@ Element::addResistingForceToNodalReaction(int flag)
     Node *theNode = theNodes[i];
 
     int numNodalDOF = theNode->getNumberDOF();
-    Vector *theVector = theVectors1[nodeIndex];
-    if (theVector->Size() != numNodalDOF) {
-      for (int j=0; j<numMatrices; j++)
-	if (theVectors1[j]->Size() == numNodalDOF) {
-	  j = numMatrices;
-	  theVector = theVectors1[j];
-	}
-    }
+    theVector.resize(numNodalDOF);
+
     for (int j=0; j<numNodalDOF; j++) {
-      (*theVector)(j) = (*theResistingForce)(nodalDOFCount);
+      (theVector)(j) = (*theResistingForce)(nodalDOFCount);
       nodalDOFCount++;
     }
-    result +=theNode->addReactionForce(*theVector, 1.0);
+    result +=theNode->addReactionForce(theVector, 1.0);
   }
 
   return result;
