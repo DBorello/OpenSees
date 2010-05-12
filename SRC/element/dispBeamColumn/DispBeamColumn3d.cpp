@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2008-11-04 21:32:05 $
+// $Revision: 1.26 $
+// $Date: 2010-05-12 20:02:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.cpp,v $
 
 // Written: MHS
@@ -283,14 +283,14 @@ DispBeamColumn3d::update(void)
   
   // Get basic deformations
   const Vector &v = crdTransf->getBasicTrialDisp();
-  
+
   double L = crdTransf->getInitialLength();
   double oneOverL = 1.0/L;
-
+  
   //const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
   double xi[maxNumSections];
   beamInt->getSectionLocations(numSections, L, xi);
-  
+
   // Loop over the integration points
   for (int i = 0; i < numSections; i++) {
 
@@ -330,7 +330,6 @@ DispBeamColumn3d::update(void)
     opserr << "DispBeamColumn3d::update() - failed setTrialSectionDeformations()\n";
     return err;
   }
-  
   return 0;
 }
 
@@ -837,12 +836,13 @@ DispBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
   int i, j;
   int loc = 0;
   
-  static ID idData(7);  // one bigger than needed so no clash later
+  static ID idData(9);  // one bigger than needed so no clash later
   idData(0) = this->getTag();
   idData(1) = connectedExternalNodes(0);
   idData(2) = connectedExternalNodes(1);
   idData(3) = numSections;
   idData(4) = crdTransf->getClassTag();
+
   int crdTransfDbTag  = crdTransf->getDbTag();
   if (crdTransfDbTag  == 0) {
     crdTransfDbTag = theChannel.getDbTag();
@@ -856,6 +856,14 @@ DispBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
   else
     idData(6) = 0;
 
+  idData(7) = beamInt->getClassTag();
+  int beamIntDbTag  = beamInt->getDbTag();
+  if (beamIntDbTag  == 0) {
+    beamIntDbTag = theChannel.getDbTag();
+    if (beamIntDbTag  != 0) 
+      beamInt->setDbTag(beamIntDbTag);
+  }
+  idData(8) = beamIntDbTag;
   
   if (theChannel.sendID(dbTag, commitTag, idData) < 0) {
     opserr << "DispBeamColumn3d::sendSelf() - failed to send ID data\n";
@@ -881,6 +889,11 @@ DispBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
      return -1;
   }      
 
+  // send the beam integration
+  if (beamInt->sendSelf(commitTag, theChannel) < 0) {
+    opserr << "DispBeamColumn3d::sendSelf() - failed to send beamInt\n";
+    return -1;
+  }      
   
   //
   // send an ID for the sections containing each sections dbTag and classTag
@@ -931,7 +944,7 @@ DispBeamColumn3d::recvSelf(int commitTag, Channel &theChannel,
   int dbTag = this->getDbTag();
   int i;
   
-  static ID idData(7); // one bigger than needed so no clash with section ID
+  static ID idData(9); // one bigger than needed so no clash with section ID
 
   if (theChannel.recvID(dbTag, commitTag, idData) < 0)  {
     opserr << "DispBeamColumn3d::recvSelf() - failed to recv ID data\n";
@@ -958,6 +971,9 @@ DispBeamColumn3d::recvSelf(int commitTag, Channel &theChannel,
     betaKc = dData(3);
   }
 
+  int beamIntClassTag = idData(7);
+  int beamIntDbTag = idData(8);
+
   // create a new crdTransf object if one needed
   if (crdTransf == 0 || crdTransf->getClassTag() != crdTransfClassTag) {
       if (crdTransf != 0)
@@ -979,6 +995,29 @@ DispBeamColumn3d::recvSelf(int commitTag, Channel &theChannel,
   if (crdTransf->recvSelf(commitTag, theChannel, theBroker) < 0) {
     opserr << "DispBeamColumn3d::sendSelf() - failed to recv crdTranf\n";
     return -3;
+  }      
+
+  // create a new beamInt object if one needed
+  if (beamInt == 0 || beamInt->getClassTag() != beamIntClassTag) {
+      if (beamInt != 0)
+	  delete beamInt;
+
+      beamInt = theBroker.getNewBeamIntegration(beamIntClassTag);
+
+      if (beamInt == 0) {
+	opserr << "DispBeamColumn3d::recvSelf() - failed to obtain the beam integration object with classTag" <<
+	  beamIntClassTag << endln;
+	exit(-1);
+      }
+  }
+
+  beamInt->setDbTag(beamIntDbTag);
+
+  // invoke recvSelf on the beamInt object
+  if (beamInt->recvSelf(commitTag, theChannel, theBroker) < 0)  
+  {
+     opserr << "DispBeamColumn3d::sendSelf() - failed to recv beam integration\n";
+     return -3;
   }      
   
   //

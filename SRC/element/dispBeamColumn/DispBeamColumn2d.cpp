@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.35 $
-// $Date: 2008-12-03 23:41:19 $
+// $Revision: 1.36 $
+// $Date: 2010-05-12 20:02:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -747,7 +747,7 @@ DispBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   int i, j;
   int loc = 0;
   
-  static ID idData(7);  // one bigger than needed so no clash later
+  static ID idData(9);  // one bigger than needed so no clash later
   idData(0) = this->getTag();
   idData(1) = connectedExternalNodes(0);
   idData(2) = connectedExternalNodes(1);
@@ -765,6 +765,15 @@ DispBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
     idData(6) = 1;
   else
     idData(6) = 0;
+
+  idData(7) = beamInt->getClassTag();
+  int beamIntDbTag  = beamInt->getDbTag();
+  if (beamIntDbTag  == 0) {
+    beamIntDbTag = theChannel.getDbTag();
+    if (beamIntDbTag  != 0) 
+      beamInt->setDbTag(beamIntDbTag);
+  }
+  idData(8) = beamIntDbTag;
 
   if (theChannel.sendID(dbTag, commitTag, idData) < 0) {
     opserr << "DispBeamColumn2d::sendSelf() - failed to send ID data\n";
@@ -785,17 +794,21 @@ DispBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   }
 
   // send the coordinate transformation
-  
   if (crdTransf->sendSelf(commitTag, theChannel) < 0) {
      opserr << "DispBeamColumn2d::sendSelf() - failed to send crdTranf\n";
      return -1;
   }      
-  
+
+  // send the beam integration
+  if (beamInt->sendSelf(commitTag, theChannel) < 0) {
+    opserr << "DispBeamColumn2d::sendSelf() - failed to send beamInt\n";
+    return -1;
+  }      
+
   //
   // send an ID for the sections containing each sections dbTag and classTag
   // if section ha no dbTag get one and assign it
   //
-
   ID idSections(2*numSections);
   loc = 0;
   for (i = 0; i<numSections; i++) {
@@ -841,7 +854,7 @@ DispBeamColumn2d::recvSelf(int commitTag, Channel &theChannel,
   int dbTag = this->getDbTag();
   int i;
   
-  static ID idData(7); // one bigger than needed so no clash with section ID
+  static ID idData(9); // one bigger than needed so no clash with section ID
 
   if (theChannel.recvID(dbTag, commitTag, idData) < 0)  {
     opserr << "DispBeamColumn2d::recvSelf() - failed to recv ID data\n";
@@ -869,6 +882,9 @@ DispBeamColumn2d::recvSelf(int commitTag, Channel &theChannel,
     betaKc = dData(3);
   }
 
+  int beamIntClassTag = idData(7);
+  int beamIntDbTag = idData(8);
+
   // create a new crdTransf object if one needed
   if (crdTransf == 0 || crdTransf->getClassTag() != crdTransfClassTag) {
       if (crdTransf != 0)
@@ -882,7 +898,6 @@ DispBeamColumn2d::recvSelf(int commitTag, Channel &theChannel,
 	  return -2;	  
       }
   }
-
   crdTransf->setDbTag(crdTransfDbTag);
 
   // invoke recvSelf on the crdTransf object
@@ -890,6 +905,30 @@ DispBeamColumn2d::recvSelf(int commitTag, Channel &theChannel,
     opserr << "DispBeamColumn2d::sendSelf() - failed to recv crdTranf\n";
     return -3;
   }      
+
+  // create a new beamInt object if one needed
+  if (beamInt == 0 || beamInt->getClassTag() != beamIntClassTag) {
+      if (beamInt != 0)
+	  delete beamInt;
+
+      beamInt = theBroker.getNewBeamIntegration(beamIntClassTag);
+
+      if (beamInt == 0) {
+	opserr << "DispBeamColumn2d::recvSelf() - failed to obtain the beam integration object with classTag" <<
+	  beamIntClassTag << endln;
+	exit(-1);
+      }
+  }
+
+  beamInt->setDbTag(beamIntDbTag);
+
+  // invoke recvSelf on the beamInt object
+  if (beamInt->recvSelf(commitTag, theChannel, theBroker) < 0)  
+  {
+     opserr << "DispBeamColumn2d::sendSelf() - failed to recv beam integration\n";
+     return -3;
+  }      
+
   
   //
   // recv an ID for the sections containing each sections dbTag and classTag
