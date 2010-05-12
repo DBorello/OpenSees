@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.51 $
-// $Date: 2010-04-23 23:56:52 $
+// $Revision: 1.52 $
+// $Date: 2010-05-12 20:17:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -480,7 +480,7 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
 		    (ClientData)NULL, NULL);
 
   Tcl_CreateCommand(interp, "fix", TclCommand_addHomogeneousBC,
-		    (ClientData)NULL, NULL);
+  		    (ClientData)NULL, NULL);
 
   Tcl_CreateCommand(interp, "fixX", TclCommand_addHomogeneousBC_X,
 		    (ClientData)NULL, NULL);
@@ -2146,6 +2146,7 @@ TclCommand_addHomogeneousBC(ClientData clientData, Tcl_Interp *interp, int argc,
       return TCL_ERROR;
     } else {
       if (theFixity != 0) {
+
 	// create a homogeneous constraint
 	SP_Constraint *theSP = new SP_Constraint(nodeId, i, 0.0, true);
 	if (theSP == 0) {
@@ -2153,6 +2154,8 @@ TclCommand_addHomogeneousBC(ClientData clientData, Tcl_Interp *interp, int argc,
 	  opserr << "fix " << nodeId << " " << ndf << " [0,1] conditions\n";
 	  return TCL_ERROR;
 	}
+
+	// add it to the domain
 	if (theTclDomain->addSP_Constraint(theSP) == false) {
 	  opserr << "WARNING could not add SP_Constraint to domain - fix";
 	  opserr << nodeId << " " << ndf << " [0,1] conditions\n";
@@ -2239,7 +2242,7 @@ TclCommand_addHomogeneousBC_X(ClientData clientData, Tcl_Interp *interp,
 	theFixity = fixity(i);
 	if (theFixity != 0) {
 	  // create a homogeneous constraint
-	  SP_Constraint *theSP = new SP_Constraint(currentSpTag, nodeId, i, 0.0);
+	  SP_Constraint *theSP = new SP_Constraint(currentSpTag, nodeId, i, 0.0, true);
 	  if (theSP == 0) {
 	    opserr << "WARNING ran out of memory for SP_Constraint at node " << nodeId;
 	    opserr << " - fixX " << xLoc << " " << ndf << " [0,1] conditions\n";
@@ -2340,7 +2343,7 @@ TclCommand_addHomogeneousBC_Y(ClientData clientData, Tcl_Interp *interp,
 	  theFixity = fixity(i);
 	  if (theFixity != 0) {
 	    // create a homogeneous constraint
-	    SP_Constraint *theSP = new SP_Constraint(currentSpTag, nodeId, i, 0.0);
+	    SP_Constraint *theSP = new SP_Constraint(currentSpTag, nodeId, i, 0.0, true);
 	    if (theSP == 0) {
 	      opserr << "WARNING ran out of memory for SP_Constraint at node " << nodeId;
 	      opserr << " - fixY " << yLoc << " " << ndf << " [0,1] conditions\n";
