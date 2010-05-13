@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.36 $
-// $Date: 2010-05-12 20:02:57 $
+// $Revision: 1.37 $
+// $Date: 2010-05-13 00:16:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -42,6 +42,8 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <ElementResponse.h>
+#include <CompositeResponse.h>
+
 #include <ElementalLoad.h>
 
 Matrix DispBeamColumn2d::K(6,6);
@@ -1183,13 +1185,16 @@ DispBeamColumn2d::setResponse(const char **argv, int argc,
       output.attr("number",sectionNum+1);
       output.attr("eta",xi[sectionNum]*L);
       
-	theResponse = theSections[sectionNum]->setResponse(&argv[2], argc-2, output);
-	}
+      theResponse = theSections[sectionNum]->setResponse(&argv[2], argc-2, output);
+    }
   }
   else if (strstr(argv[0],"section") != 0) {
-    if (argc > 2) {
+
+    if (argc > 1) {
+      
       int sectionNum = atoi(argv[1]);
-      if (sectionNum > 0 && sectionNum <= numSections) {
+      
+      if (sectionNum > 0 && sectionNum <= numSections && sectionNum > 2) {
 
 	output.tag("GaussPointOutput");
 	output.attr("number",sectionNum);
@@ -1201,6 +1206,34 @@ DispBeamColumn2d::setResponse(const char **argv, int argc,
 	theResponse = theSections[sectionNum-1]->setResponse(&argv[2], argc-2, output);
 	
 	output.endTag();
+      
+      } else if (sectionNum == 0) { // argv[1] was not an int, we want all sections, 
+	
+	CompositeResponse *theCResponse = new CompositeResponse();
+	int numResponse = 0;
+	double xi[maxNumSections];
+	double L = crdTransf->getInitialLength();
+	beamInt->getSectionLocations(numSections, L, xi);
+	
+	for (int i=0; i<numSections; i++) {
+	  
+	  output.tag("GaussPointOutput");
+	  output.attr("number",i+1);
+	  output.attr("eta",xi[i]*L);
+	  
+	  Response *theSectionResponse = theSections[i]->setResponse(&argv[1], argc-1, output);
+
+	  output.endTag();	  
+
+	  if (theSectionResponse != 0) {
+	    numResponse = theCResponse->addResponse(theSectionResponse);
+	  }
+	}
+	
+	if (numResponse == 0) // no valid responses found
+	  delete theCResponse;
+	else
+	  theResponse = theCResponse;
       }
     }
   }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.41 $
-// $Date: 2009-02-05 16:28:20 $
+// $Revision: 1.42 $
+// $Date: 2010-05-13 00:16:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 /*
@@ -74,6 +74,7 @@ Journal of Structural Engineering, Approved for publication, February 2007.
 #include <math.h>
 
 #include <ElementResponse.h>
+#include <CompositeResponse.h>
 #include <ElementalLoad.h>
 
 Matrix ForceBeamColumn2d::theMatrix(6,6);
@@ -462,8 +463,6 @@ ForceBeamColumn2d::computeReactions(double *p0)
       
       if (aOverL < 0.0 || aOverL > 1.0)
 	continue;
-      
-      double a = aOverL*L;
       
       double V1 = P*(1.0-aOverL);
       double V2 = P*aOverL;
@@ -1352,17 +1351,16 @@ ForceBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   }    
 
   // send the coordinate transformation
-  
   if (crdTransf->sendSelf(commitTag, theChannel) < 0) {
     opserr << "ForceBeamColumn2d::sendSelf() - failed to send crdTrans\n";
     return -1;
   }      
 
+  // send the beam integration
   if (beamIntegr->sendSelf(commitTag, theChannel) < 0) {
     opserr << "ForceBeamColumn2d::sendSelf() - failed to send beamIntegr\n";
     return -1;
   }      
-
   
   //
   // send an ID for the sections containing each sections dbTag and classTag
@@ -2296,9 +2294,12 @@ ForceBeamColumn2d::setResponse(const char **argv, int argc, OPS_Stream &output)
 
   // section response -
   else if (strstr(argv[0],"section") != 0) {
-    if (argc > 2) {
+
+    if (argc > 1) {
+
       int sectionNum = atoi(argv[1]);
-      if (sectionNum > 0 && sectionNum <= numSections) {
+
+      if (sectionNum > 0 && sectionNum <= numSections && argc > 2) {
 
 	double xi[maxNumSections];
 	double L = crdTransf->getInitialLength();
@@ -2316,7 +2317,38 @@ ForceBeamColumn2d::setResponse(const char **argv, int argc, OPS_Stream &output)
 	  Information &info = theResponse->getInformation();
 	  info.theInt = sectionNum;
 	}
-	
+
+	output.endTag();
+
+      } else if (sectionNum == 0) { // argv[1] was not an int, we want all sections, 
+
+	CompositeResponse *theCResponse = new CompositeResponse();
+	int numResponse = 0;
+	double xi[maxNumSections];
+	double L = crdTransf->getInitialLength();
+	beamIntegr->getSectionLocations(numSections, L, xi);
+
+	for (int i=0; i<numSections; i++) {
+
+	  output.tag("GaussPointOutput");
+	  output.attr("number",i+1);
+	  output.attr("eta",xi[i]*L);
+
+	  Response *theSectionResponse = sections[i]->setResponse(&argv[1], argc-1, output);
+
+	  if (theSectionResponse != 0) {
+	    numResponse = theCResponse->addResponse(theSectionResponse);
+	  }
+
+	  output.endTag();
+
+	}
+
+	if (numResponse == 0) // no valid responses found
+	  delete theCResponse;
+	else
+	  theResponse = theCResponse;
+
       }
     }
   }
