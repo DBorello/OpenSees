@@ -1,7 +1,10 @@
 include ../../../Makefile.def
 
-OBJS       = Response.o ElementResponse.o \
-	MaterialResponse.o FiberResponse.o
+OBJS       = Response.o \
+	ElementResponse.o \
+	MaterialResponse.o \
+	FiberResponse.o \
+	CompositeResponse.o
 
 # Compilation control
 
