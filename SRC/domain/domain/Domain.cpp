@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.59 $
-// $Date: 2010-04-23 22:51:37 $
+// $Revision: 1.60 $
+// $Date: 2010-05-13 18:54:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -366,7 +366,6 @@ Domain::addElement(Element *element)
 {
   int eleTag = element->getTag();
 
-#ifdef _G3DEBUG
   // check all the elements nodes exist in the domain
   const ID &nodes = element->getExternalNodes();
   int numDOF = 0;
@@ -380,7 +379,6 @@ Domain::addElement(Element *element)
       }
       numDOF += nodePtr->getNumberDOF();
   }   
-#endif
 
   // check if an Element with a similar tag already exists in the Domain
   TaggedObject *other = theElements->getComponentPtr(eleTag);
@@ -393,7 +391,7 @@ Domain::addElement(Element *element)
   bool result = theElements->addComponent(element);
   if (result == true) {
     element->setDomain(this);
-	element->update();
+    element->update();
 
     // finally check the ele has correct number of dof
 #ifdef _G3DEBUG
