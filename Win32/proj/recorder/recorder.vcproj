@@ -203,6 +203,12 @@
 			Name="response"
 			Filter="">
 			<File
+				RelativePath="..\..\..\SRC\recorder\response\CompositeResponse.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\recorder\response\CompositeResponse.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\recorder\response\ElementResponse.cpp">
 			</File>
 			<File
