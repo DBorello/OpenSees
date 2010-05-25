@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.35 $
-// $Date: 2010-02-18 20:29:00 $
+// $Revision: 1.36 $
+// $Date: 2010-05-25 00:38:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -79,7 +79,8 @@ OPS_NewTrussElement()
     opserr << " or: element Truss $tag $iNode $jNode $A $matTag <-rho $rho> <-rayleig $flagh>\n";
     return 0;	
   }
-if (numRemainingArgs == 4 || numRemainingArgs == 6 || numRemainingArgs ==8)
+
+  if (numRemainingArgs == 4 || numRemainingArgs == 6 || numRemainingArgs ==8)
     return 0; // it's a TrussSection
 
   int    iData[3];
@@ -119,10 +120,10 @@ if (numRemainingArgs == 4 || numRemainingArgs == 6 || numRemainingArgs ==8)
   
   numRemainingArgs -= 5;
   while (numRemainingArgs > 1) {
-    char argvS[10];
-    if (OPS_GetString(argvS, 10) != 0) {
+    char argvS[15];
+    if (OPS_GetString(argvS, 15) != 0) {
       opserr << "WARNING: Invalid optional string element Truss " << iData[0] << 
-	" $iNode $jNode $A $matTag <-rho $rho> <-rayleig $flagh>\n";
+	" $iNode $jNode $A $matTag <-rho $rho> <-doRayleigh $flagh>\n";
       return 0;
     } 
   
@@ -130,19 +131,19 @@ if (numRemainingArgs == 4 || numRemainingArgs == 6 || numRemainingArgs ==8)
       numData = 1;
       if (OPS_GetDouble(&numData, &rho) != 0) {
 	opserr << "WARNING Invalid rho in element Truss " << iData[0] << 
-	  " $iNode $jNode $A $matTag <-rho $rho> <-rayleig $flagh>\n";
+	  " $iNode $jNode $A $matTag <-rho $rho> <-doRayleigh $flagh>\n";
 	return 0;
       }
     } else if (strcmp(argvS,"-doRayleigh") == 0) {
       numData = 1;
       if (OPS_GetInt(&numData, &doRayleigh) != 0) {
 	opserr << "WARNING: Invalid doRayleigh in element Truss " << iData[0] << 
-	  " $iNode $jNode $A $matTag <-rho $rho> <-rayleig $flagh>\n";
+	  " $iNode $jNode $A $matTag <-rho $rho> <-doRayleigh $flagh>\n";
 	return 0;
       }
     } else {
       opserr << "WARNING: Invalid option " << argvS << "  in: element Truss " << iData[0] << 
-	" $iNode $jNode $A $matTag <-rho $rho> <-rayleig $flagh>\n";
+	" $iNode $jNode $A $matTag <-rho $rho> <-doRayleigh $flagh>\n";
       return 0;
     }      
     numRemainingArgs -= 2;
@@ -153,7 +154,7 @@ if (numRemainingArgs == 4 || numRemainingArgs == 6 || numRemainingArgs ==8)
 
   if (theElement == 0) {
     opserr << "WARNING: out of memory: element Truss " << iData[0] << 
-      " $iNode $jNode $A $matTag <-rho $rho> <-rayleig $flagh>\n";
+      " $iNode $jNode $A $matTag <-rho $rho> <-doRayleigh $flagh>\n";
   }
 
   return theElement;
@@ -209,7 +210,7 @@ Truss::Truss()
  theMaterial(0),connectedExternalNodes(2),
  dimension(0), numDOF(0), theLoad(0),
  theMatrix(0), theVector(0),
-  L(0.0), A(0.0), rho(0.0)
+ L(0.0), A(0.0), rho(0.0)
 {
     // ensure the connectedExternalNode ID is of correct size 
   if (connectedExternalNodes.Size() != 2) {
@@ -531,28 +532,30 @@ Truss::getDamp(void)
     theMatrix->Zero();
     return *theMatrix;
   }
-  
-  if (doRayleighDamping == 1)
-    return this->Element::getDamp();
 
   theMatrix->Zero();
+  
+  if (doRayleighDamping == 1)
+    *theMatrix = this->Element::getDamp();
+
   double eta = theMaterial->getDampTangent();
   
   // come back later and redo this if too slow
   Matrix &damp = *theMatrix;
-  
+
   int numDOF2 = numDOF/2;
   double temp;
   double etaAoverL = eta*A/L;
   for (int i = 0; i < dimension; i++) {
     for (int j = 0; j < dimension; j++) {
       temp = cosX[i]*cosX[j]*etaAoverL;
-      damp(i,j) = temp;
-      damp(i+numDOF2,j) = -temp;
-      damp(i,j+numDOF2) = -temp;
-      damp(i+numDOF2,j+numDOF2) = temp;
+      damp(i,j) += temp;
+      damp(i+numDOF2,j) += -temp;
+      damp(i,j+numDOF2) += -temp;
+      damp(i+numDOF2,j+numDOF2) += temp;
     }
   }
+
   return damp;
 }
 
@@ -750,9 +753,6 @@ Truss::getResistingForce()
 const Vector &
 Truss::getResistingForceIncInertia()
 {	
-  if (doRayleighDamping == 1)
-    return this->Element::getResistingForceIncInertia();
-
   this->getResistingForce();
   
   // now include the mass portion
@@ -769,12 +769,12 @@ Truss::getResistingForceIncInertia()
     }
     
     // add the damping forces if rayleigh damping
-    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
+    if (doRayleighDamping == 1 && (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0))
       (*theVector) += this->getRayleighDampingForces();
   }  else {
     
     // add the damping forces if rayleigh damping
-    if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
+    if (doRayleighDamping == 1 && (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0))
       (*theVector) += this->getRayleighDampingForces();
   }
   
