@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.57 $
-// $Date: 2010-02-25 21:22:57 $
+// $Revision: 1.58 $
+// $Date: 2010-05-27 17:51:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -92,7 +92,7 @@ extern int OPS_ResetInput(ClientData clientData,
 
 typedef struct externalRecorderCommand {
   char *funcName;
-  void *(*funcPtr)(int argc, const char **argv);
+  void *(*funcPtr)();
   struct externalRecorderCommand *next;
 } ExternalRecorderCommand;
 
@@ -1707,7 +1707,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	if (strcmp(argv[1], recorderCommands->funcName) == 0) {
 	  
 	  OPS_ResetInput(clientData, interp, 2, argc, argv, &theDomain, NULL);
-	  void *theRes = (*(recorderCommands->funcPtr))(argc, argv);
+	  void *theRes = (*(recorderCommands->funcPtr))();
 	  if (theRes != 0) {
 	    
 	    opserr << "commands.cpp - : " << argv[1] << " ALREADY LOADED - FOUND\n";
@@ -1718,7 +1718,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	} else
 	  recorderCommands = recorderCommands->next;
       }
-      
+	opserr << "TclRecorder _ NOT ALREADY LOADED, TRY LOADING " << endln;      
       //
       // if not there try loading package
       //
@@ -1728,7 +1728,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	opserr << "commands.cpp - : " << argv[1] << " NOT LOADED\n";
 	
 	void *libHandle;
-	void *(*funcPtr)(int argc, const char **argv);
+	void *(*funcPtr)();
 	int recorderNameLength = strlen(argv[1]);
 	char *tclFuncName = new char[recorderNameLength+5];
 	strcpy(tclFuncName, "OPS_");
@@ -1742,7 +1742,6 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	
 	if (res == 0) {
 	  opserr << "commands.cpp - : " << argv[1] << " FOUND & LOADED\n";	
-	  
 	  char *recorderName = new char[recorderNameLength+1];
 	  strcpy(recorderName, argv[1]);
 	  ExternalRecorderCommand *theRecorderCommand = new ExternalRecorderCommand;
@@ -1753,10 +1752,12 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  
 	  OPS_ResetInput(clientData, interp, 2, argc, argv, &theDomain, NULL);
 	  
-	  void *theRes = (*funcPtr)(argc, argv);
+	  void *theRes = (*funcPtr)();
 	  if (theRes != 0) {
 	    *theRecorder = (Recorder *)theRes;
 	  }
+	} else {
+	  opserr << "commands.cpp - : " << argv[1] << " NOT FOUND\n";	
 	}
       }
 
