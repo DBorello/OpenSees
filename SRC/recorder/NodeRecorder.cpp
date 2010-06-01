@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.40 $
-// $Date: 2010-05-12 21:12:50 $
+// $Revision: 1.41 $
+// $Date: 2010-06-01 23:42:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -364,7 +364,6 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	} else if (10 <= dataFlag  && dataFlag < 1000) {
 	  int mode = dataFlag - 10;
 	  int column = mode - 1;
-	  opserr << "NodeRecorder::column: " << column << " " << mode << endln;
 	  
 	  const Matrix &theEigenvectors = theNode->getEigenvectors();
 	  if (theEigenvectors.noCols() > column) {
