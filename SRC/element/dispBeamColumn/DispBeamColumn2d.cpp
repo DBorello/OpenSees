@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.37 $
-// $Date: 2010-05-13 00:16:33 $
+// $Revision: 1.38 $
+// $Date: 2010-06-01 23:41:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -186,10 +186,8 @@ DispBeamColumn2d::setDomain(Domain *theDomain)
     theNodes[1] = theDomain->getNode(Nd2);
 
     if (theNodes[0] == 0 || theNodes[1] == 0) {
-	//opserr << "FATAL ERROR DispBeamColumn2d (tag: %d), node not found in domain",
-	//	this->getTag());
-	
-	return;
+      opserr << "WARNING DispBeamColumn2d (tag: %d), node not found in domain" << this->getTag() << endln;;
+      return;
     }
 
     int dofNd1 = theNodes[0]->getNumberDOF();
