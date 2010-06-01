@@ -18,12 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2005-06-16 21:41:03 $
+// $Revision: 1.11 $
+// $Date: 2010-06-01 23:35:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/EPPGapMaterial.cpp,v $
 
-// File: ~/material/EPPGapMaterial.C
-//
 // Written: krm 
 // Created: 07/2000
 // Revision: A
