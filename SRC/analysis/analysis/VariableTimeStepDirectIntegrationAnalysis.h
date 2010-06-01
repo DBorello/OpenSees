@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2005-11-29 23:36:47 $
+// $Revision: 1.4 $
+// $Date: 2010-06-01 23:48:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/VariableTimeStepDirectIntegrationAnalysis.h,v $
                                                                         
                                                                         
 #ifndef VariableTimeStepDirectIntegrationAnalysis_h
 #define VariableTimeStepDirectIntegrationAnalysis_h
 
-// File: ~/analysis/analysis/VariableTimeStepDirectIntegrationAnalysis.h
-// 
 // Written: fmk 
 // Created: 10/00
 // Revision: A
