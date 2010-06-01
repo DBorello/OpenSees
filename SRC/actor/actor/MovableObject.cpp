@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2009-01-29 00:41:07 $
+// $Revision: 1.9 $
+// $Date: 2010-06-01 23:46:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/actor/MovableObject.cpp,v $
                                                                         
                                                                         
@@ -61,10 +61,12 @@ MovableObject::getClassTag(void) const
     return classTag;
 }
 
+static char unknownClassType[] = {"UnknownMovableObject"};
+
 const char *
 MovableObject::getClassType(void) const
 {
-    return "UnknownMovableObject";
+  return unknownClassType;
 }
 
 
