@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2010-02-06 19:08:26 $
+// $Revision: 1.14 $
+// $Date: 2010-06-01 23:41:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTrussSection.cpp,v $
                                                                         
 // Written: MHS 
@@ -89,8 +89,8 @@ OPS_NewCorotTrussSectionElement()
   
   numRemainingArgs -= 4;
   while (numRemainingArgs > 1) {
-    char argvS[10];
-    if (OPS_GetString(argvS, 10) != 0) {
+    char argvS[15];
+    if (OPS_GetString(argvS, 15) != 0) {
       opserr << "WARNING: Invalid optional string element CorotTrussSection " << iData[0] << 
 	" $iNode $jNode $sectTag <-rho $rho>\n";
       return 0;

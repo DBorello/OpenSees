@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2010-02-18 20:29:00 $
+// $Revision: 1.29 $
+// $Date: 2010-06-01 23:41:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -98,8 +98,8 @@ OPS_NewTrussSectionElement()
   
   numRemainingArgs -= 4;
   while (numRemainingArgs > 1) {
-    char argvS[10];
-    if (OPS_GetString(argvS, 10) != 0) {
+    char argvS[15];
+    if (OPS_GetString(argvS, 15) != 0) {
       opserr << "WARNING: Invalid optional string element TrussSection " << iData[0] << 
 	" $iNode $jNode $sectTag <-rho $rho>\n";
       return 0;
@@ -116,7 +116,7 @@ OPS_NewTrussSectionElement()
       numData = 1;
       if (OPS_GetInt(&numData, &doRayleigh) != 0) {
 	opserr << "WARNING: Invalid doRayleigh in element Truss " << iData[0] << 
-	  " $iNode $jNode $sectTag <-rho $rho> <-rayleig $flagh>\n";
+	  " $iNode $jNode $sectTag <-rho $rho> <-doRayleigh $flagh>\n";
 	return 0;
       }
     } else {
