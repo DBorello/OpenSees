@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2007-04-24 21:06:57 $
+// $Revision: 1.13 $
+// $Date: 2010-06-01 23:47:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/DisplacementControl.cpp,v $
                                                                         
                                                                         
@@ -165,10 +165,11 @@ DisplacementControl::newStep(void)
 int
 DisplacementControl::update(const Vector &dU)
 {
-	if (theDofID == -1) {
-		opserr << "DisplacementControl::newStep() - domainChanged has not been called\n";
-		return -1;
-	} 
+
+  if (theDofID == -1) {
+    opserr << "DisplacementControl::newStep() - domainChanged has not been called\n";
+    return -1;
+  } 
     AnalysisModel *theModel = this->getAnalysisModel();
     LinearSOE *theLinSOE = this->getLinearSOE();    
     if (theModel == 0 || theLinSOE == 0) {
