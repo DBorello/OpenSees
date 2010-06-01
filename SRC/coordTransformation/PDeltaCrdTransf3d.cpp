@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.14 $
-// $Date: 2007-05-15 22:21:33 $
+// $Revision: 1.15 $
+// $Date: 2010-06-01 23:44:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf3d.cpp,v $
 
 
@@ -180,7 +180,7 @@ PDeltaCrdTransf3d::initialize(Node *nodeIPointer, Node *nodeJPointer)
             if (nodeIDisp(i) != 0.0) {
                 nodeIInitialDisp = new double [6];
                 for (int j=0; j<6; j++)
-                    nodeIInitialDisp[j] = nodeIDisp(j);
+                     nodeIInitialDisp[j] = nodeIDisp(j);
                 i = 6;
             }
             
@@ -1275,7 +1275,7 @@ PDeltaCrdTransf3d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &the
 {
     int res = 0;
     
-    static Vector data(13);
+    static Vector data(23);
     
     res += theChannel.recvVector(this->getDbTag(), cTag, data);
     if (res < 0) {
@@ -1285,63 +1285,56 @@ PDeltaCrdTransf3d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &the
     
     this->setTag((int)data(0));
     L = data(1);
-    data(0) = this->getTag();
-    data(1) = L;
+
+    if (data(2) != 0.0 || data(3) != 0.0 || data(4) != 0.0) {
+      if (nodeIOffset == 0)
+	nodeIOffset = new double[3];
+      nodeIOffset[0] = data(2);      
+      nodeIOffset[1] = data(3);      
+      nodeIOffset[2] = data(4);      
+    }
+
+    if (data(5) != 0.0 || data(6) != 0.0 || data(7) != 0.0) {
+      if (nodeJOffset == 0)
+	nodeJOffset = new double[3];
+      nodeJOffset[0] = data(5);      
+      nodeJOffset[1] = data(6);      
+      nodeJOffset[2] = data(7);      
+    }
+
+    if (data(8) != 0.0 || data(9) != 0.0 || data(10) != 0.0 ||
+	data(11) != 0.0 || data(12) != 0.0 || data(13) != 0.0) {
+      if (nodeIInitialDisp == 0)
+	nodeIInitialDisp = new double[6];
+
+	nodeIInitialDisp[0] = data(8);
+	nodeIInitialDisp[1] = data(9);
+	nodeIInitialDisp[2] = data(10);
+	nodeIInitialDisp[3] = data(11);
+	nodeIInitialDisp[4] = data(12);
+	nodeIInitialDisp[5] = data(13);
+    }
+
+    if (data(14) != 0.0 || data(15) != 0.0 || data(16) != 0.0 ||
+	data(18) != 0.0 || data(17) != 0.0 || data(19) != 0.0) {
+      if (nodeJInitialDisp == 0)
+	nodeJInitialDisp = new double[6];
+
+	nodeJInitialDisp[0] = data(14);
+	nodeJInitialDisp[1] = data(15);
+	nodeJInitialDisp[2] = data(16);
+	nodeJInitialDisp[3] = data(17);
+	nodeJInitialDisp[4] = data(18);
+	nodeJInitialDisp[5] = data(19);
+    }
     
-    int flag;
-    int i,j;
-    
-    flag = 0;
-    for (i=2; i<=4; i++)
-        if (data(i) != 0.0)
-            flag = 1;
-        if (flag == 1) {
-            if (nodeIOffset == 0)
-                nodeIOffset = new double[3];
-            for (i=2, j=0; i<=4; i++, j++)
-                nodeIOffset[j] = data(i);
-        }
-        
-        flag = 0;
-        for (i=5; i<=7; i++)
-            if (data(i) != 0.0)
-                flag = 1;
-            if (flag == 1) {
-                if (nodeJOffset == 0)
-                    nodeJOffset = new double[3];
-                for (i=5, j=0; i<=7; i++, j++)
-                    nodeJOffset[j] = data(i);
-            }
-            
-            flag = 0;
-            for (i=8; i<=13; i++)
-                if (data(i) != 0.0)
-                    flag = 1;
-                if (flag == 1) {
-                    if (nodeIInitialDisp == 0)
-                        nodeIInitialDisp = new double[6];
-                    for (i=8, j=0; i<=13; i++, j++)
-                        nodeIInitialDisp[j] = data(i);
-                }
-                
-                flag = 0;
-                for (i=14; i<=19; i++)
-                    if (data(i) != 0.0)
-                        flag = 1;
-                    if (flag == 1) {
-                        if (nodeJInitialDisp == 0)
-                            nodeJInitialDisp = new double [6];
-                        for (i=14, j=0; i<=19; i++, j++)
-                            nodeJInitialDisp[j] = data(i);
-                    }
+    R[2][0] = data(20);
+    R[2][1] = data(21);
+    R[2][2] = data(22);
+
+    initialDispChecked = true;
                     
-                    R[2][0] = data(20);
-                    R[2][1] = data(21);
-                    R[2][2] = data(22);
-                    
-                    initialDispChecked = true;
-                    
-                    return res;
+    return res;
 }
 
 
