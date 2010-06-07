@@ -22,7 +22,9 @@
 //Based on SNAP Stanford element (modified Ib.&Kraw. element)
 
 //**********************************************************************                                                                     
-// Written: Theodore Karavasilis 
+// Code Developed by: Dimitrios G. Lignos
+// Assistant Professor, McGill University, Montreal Canada
+// Written by: Theodore Karavasilis
 // Lecturer
 // Department of Engineering Science, University of Oxford, Oxford, U.K.
 //**********************************************************************
@@ -53,7 +55,6 @@ class Bilin : public UniaxialMaterial
   int revertToLastCommit(void);    
   int revertToStart(void);        
   UniaxialMaterial *getCopy(void);
-
   int sendSelf(int commitTag, Channel &theChannel);  
   int recvSelf(int commitTag, Channel &theChannel, 
 	       FEM_ObjectBroker &theBroker);    
@@ -100,10 +101,12 @@ class Bilin : public UniaxialMaterial
   double Thetau_neg;
   double PDPlus;
   double PDNeg;
+
   //State variables 
   double U, CU; //displacement
   double Force, CForce; //force
   double Tangent, CTangent; //tangent stiffness
+
   //History variables
   double dNewLoadPos,CdNewLoadPos;
   double dNewLoadNeg, CdNewLoadNeg;

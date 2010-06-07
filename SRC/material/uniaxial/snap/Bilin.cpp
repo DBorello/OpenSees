@@ -21,23 +21,23 @@
 
 #include <math.h>
 
-#include "Bilin.h"
+#include <Bilin.h>
+#include <elementAPI.h>
 #include <Vector.h>
 #include <Channel.h>
 
 #include <OPS_Globals.h>
 
-#include <elementAPI.h>
-#define OPS_Export 
-
 static int numBilinMaterials = 0;
+
+#define OPS_Export
 
 OPS_Export void *
 OPS_NewBilinMaterial()
 {
   if (numBilinMaterials == 0) {
     numBilinMaterials++;
-    opserr << "Bilin unaxial material - Written by T. Karavasilis, Oxford and D. Lignos, Stanford 2009\n";;
+    OPS_Error("Modified Ibarra-Krawinkler Model with Bilinear Hysteretic Response\n", 1);
   }
 
   // Pointer to a uniaxial material that will be returned
@@ -47,13 +47,13 @@ OPS_NewBilinMaterial()
   double dData[23];
   int numData = 1;
 
-  if (OPS_GetInt(&numData, iData) != 0) {
-    opserr << "WARNING invalid uniaxialMaterial BilinMaterial tag" << endln;
+  if (OPS_GetIntInput(&numData, iData) != 0) {
+    opserr << "WARNING invalid uniaxialMaterial  Bilin tag" << endln;
     return 0;
   }
 
   numData = 23;
-  if (OPS_GetDouble(&numData, dData) != 0) {
+  if (OPS_GetDoubleInput(&numData, dData) != 0) {
     opserr << "Invalid Args want: uniaxialMaterial Bilin tag? Ke? As? AsNeg? My_pos? My_neg? LamdaS? ";
     opserr << "LamdaK?  LamdaA? LamdaD? Cs? Ck? Ca? Cd? Thetap_pos? Thetap_neg? Thetapc_pos? Thetapc_neg?K? ";
     opserr << "KNeg? Thetau_pos? Thetau_neg? PDPlus?  PDNeg\n";
@@ -80,7 +80,7 @@ Bilin::Bilin(int tag, double p_Ke,double p_As,double p_AsNeg,double p_My_pos,dou
 	     double p_LamdaK,double p_LamdaA,double p_LamdaD,double p_Cs,double p_Ck,double p_Ca,double p_Cd,
 	     double p_Thetap_pos,double p_Thetap_neg,double p_Thetapc_pos,double p_Thetapc_neg,double p_K,double p_KNeg,
 	     double p_Thetau_pos,double p_Thetau_neg,double p_PDPlus,double p_PDNeg) 
-:UniaxialMaterial(tag,MAT_TAG_Bilin),Ke(p_Ke), As(p_As), AsNeg(p_AsNeg), My_pos(p_My_pos), My_neg(p_My_neg), 
+:UniaxialMaterial(tag, MAT_TAG_Bilin),Ke(p_Ke), As(p_As), AsNeg(p_AsNeg), My_pos(p_My_pos), My_neg(p_My_neg), 
  LamdaS(p_LamdaS), LamdaK(p_LamdaK),LamdaA(p_LamdaA),LamdaD(p_LamdaD), Cs(p_Cs), Ck(p_Ck), Ca(p_Ca),Cd(p_Cd),
  Thetap_pos(p_Thetap_pos), Thetap_neg(p_Thetap_neg), Thetapc_pos(p_Thetapc_pos),Thetapc_neg(p_Thetapc_neg),
  K(p_K), KNeg(p_KNeg),Thetau_pos(p_Thetau_pos), Thetau_neg(p_Thetau_neg), PDPlus(p_PDPlus), PDNeg(p_PDNeg)
@@ -91,7 +91,7 @@ Bilin::Bilin(int tag, double p_Ke,double p_As,double p_AsNeg,double p_My_pos,dou
 }
 
 Bilin::Bilin()
-:UniaxialMaterial(0,MAT_TAG_Bilin),
+:UniaxialMaterial(0, MAT_TAG_Bilin),
  Ke(0), As(0), AsNeg(0), My_pos(0), My_neg(0), 
  LamdaS(0), LamdaK(0),LamdaA(0),LamdaD(0), Cs(0), Ck(0), Ca(0),Cd(0),
  Thetap_pos(0), Thetap_neg(0), Thetapc_pos(0),Thetapc_neg(0),
@@ -2427,7 +2427,7 @@ Bilin::envelPosCap2(double fy,double alphaPos,double alphaCap,double cpDsp,doubl
 {
 
 
-    double fracDispPosV=0.20;
+    //double fracDispPosV=0.20;
 	double dy = fy/elstk;
 
      double Res,rcap,dres;
@@ -2456,7 +2456,7 @@ Bilin::envelPosCap2(double fy,double alphaPos,double alphaCap,double cpDsp,doubl
 		if(d>=fracDispPos) {
 	        ek = 1.0e-7;
 			f = 1.0e-10;
-			d=fracDispPosV;
+			d=fracDispPos;
             flgstop=1;
 		}
 	} else if(dy>cpDsp) { 
@@ -2482,7 +2482,7 @@ Bilin::envelPosCap2(double fy,double alphaPos,double alphaCap,double cpDsp,doubl
 		if(d>=fracDispPos) {
 	        ek = 1.0e-7;
 			f = 1.0e-10;
-			d=fracDispPosV;
+			d=fracDispPos;
             flgstop=1;  
 		}
 		
@@ -2542,7 +2542,7 @@ Bilin::envelNegCap2(double fy,double alphaNeg,double alphaCap,double cpDsp,doubl
 							   double elstk,double fyieldNeg,double Resfac)
 {
 
-	double fracDispNegV = -0.20;
+	//double fracDispNegV = -0.20;
 	double dy = fy/elstk;
     double Res,rcap,dres;
 	if(dy>=cpDsp){ 
@@ -2568,7 +2568,7 @@ Bilin::envelNegCap2(double fy,double alphaNeg,double alphaCap,double cpDsp,doubl
 			f = Res+ek*d;
 		}
 //% c added by Dimitrios to account for fracture	
-		if(d<=fracDispNegV) {
+		if(d<=fracDispNeg) {
 	        ek = 1.0e-7;
 			f = 1.0e-10;
 			d=fracDispNeg;
@@ -2595,7 +2595,7 @@ Bilin::envelNegCap2(double fy,double alphaNeg,double alphaCap,double cpDsp,doubl
 			f = Res+ek*d;
 		}
 // c added by Dimitrios to account for fracture	
-       if(d<=fracDispNegV) {
+       if(d<=fracDispNeg) {
 	        ek = 1.0e-7;
 			f = 1.0e-10;
 			d=fracDispNeg;
