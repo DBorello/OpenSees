@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2008-10-31 18:46:29 $
+// $Revision: 1.6 $
+// $Date: 2010-06-09 17:31:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/TclParameterCommands.cpp,v $
 
 #include <stdlib.h>
@@ -85,7 +85,21 @@ TclModelBuilderParameterCommand(ClientData clientData, Tcl_Interp *interp,
       argStart = 4;
     }
     else if (strstr(argv[2],"node") != 0) {
+      if (argc < 4) {
+	opserr << "WARNING parameter -- insufficient number of arguments for parameter with tag " << paramTag << '\n';
+	return TCL_ERROR;
+      }
 
+      int nodeTag;
+      if (Tcl_GetInt(interp, argv[3], &nodeTag) != TCL_OK) {
+	opserr << "WARNING parameter -- invalid node tag\n";
+	return TCL_ERROR;    
+      }
+
+      // Retrieve element from domain
+      theObject = (DomainComponent *) theTclDomain->getNode(nodeTag);
+
+      argStart = 4;
     }
     else if (strstr(argv[2],"loadPattern") != 0) {
       if (argc < 4) {
