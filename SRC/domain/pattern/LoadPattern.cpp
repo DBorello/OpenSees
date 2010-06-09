@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2010-04-23 22:52:07 $
+// $Revision: 1.19 $
+// $Date: 2010-06-09 17:43:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.cpp,v $
                                                                         
 // Written: fmk 07/99
@@ -957,7 +957,7 @@ LoadPattern::setParameter(const char **argv, int argc, Parameter &param)
 	  return -1;
     }
 
-    else if (strstr(argv[0],"elementPointLoad") != 0) {
+    else if (strstr(argv[0],"elementPointLoad") != 0 || strstr(argv[0],"elementLoad") != 0) {
 
       if (argc < 3)
 	return -1;
