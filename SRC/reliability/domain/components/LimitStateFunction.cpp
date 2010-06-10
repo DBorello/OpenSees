@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2010-06-10 18:42:16 $
+// $Revision: 1.16 $
+// $Date: 2010-06-10 20:14:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.cpp,v $
 
 
@@ -169,29 +169,29 @@ LimitStateFunction::removeAddedExpression()
 }
 
 int
-LimitStateFunction::addGradientExpression(const char *expression, int paramTag)
+LimitStateFunction::addGradientExpression(const char *expression, int rvTag)
 {
   map<int, string>::iterator theExpr;
 
   // Check if the expression is already in map
-  theExpr = mapOfGradientExpressions.find(paramTag);
+  theExpr = mapOfGradientExpressions.find(rvTag);
   
   // Not there, so add
   if (theExpr == mapOfGradientExpressions.end()) {
-    mapOfGradientExpressions.insert(map<int,string>::value_type(paramTag,expression));
+    mapOfGradientExpressions.insert(map<int,string>::value_type(rvTag,expression));
     
     // Check if successful
-    theExpr = mapOfGradientExpressions.find(paramTag);
+    theExpr = mapOfGradientExpressions.find(rvTag);
     if (theExpr == mapOfGradientExpressions.end()) {
       opserr << "LimitStateFunction::addGradientExpression -- map STL failed to add object with tag: "
-	     << paramTag << endln;
+	     << rvTag << endln;
       return -1;
     }
   }
   // Already there, give error
   else {
     opserr << "LimitStateFunction::addGradientExpression -- object with tag "
-	   << paramTag << " already exists" << endln;    
+	   << rvTag << " already exists" << endln;    
     return -1;
   }
   
@@ -199,22 +199,22 @@ LimitStateFunction::addGradientExpression(const char *expression, int paramTag)
 }
 
 int
-LimitStateFunction::removeGradientExpression(int paramTag)
+LimitStateFunction::removeGradientExpression(int rvTag)
 {
   map<int, string>::iterator theExpr;
 
   // Check if the expression is already in map
-  theExpr = mapOfGradientExpressions.find(paramTag);
+  theExpr = mapOfGradientExpressions.find(rvTag);
 
   // If not there, do nothing
   if (theExpr == mapOfGradientExpressions.end())
     return 0;
   // Already there, so remove
   else {
-    int ok = mapOfGradientExpressions.erase(paramTag);
+    int ok = mapOfGradientExpressions.erase(rvTag);
     if (ok != 1) {
       opserr << "LimitStateFunction::removeGradientExpression -- map STL failed to remove object with tag: "
-	     << paramTag << endln;
+	     << rvTag << endln;
       return -1;
     }
   }
@@ -223,11 +223,11 @@ LimitStateFunction::removeGradientExpression(int paramTag)
 }
 
 const char* 
-LimitStateFunction::getGradientExpression(int paramTag) 
+LimitStateFunction::getGradientExpression(int rvTag) 
 {
   map<int, string>::iterator theExpr;
 
-  theExpr = mapOfGradientExpressions.find(paramTag);
+  theExpr = mapOfGradientExpressions.find(rvTag);
   if (theExpr == mapOfGradientExpressions.end())
     return 0;
   else

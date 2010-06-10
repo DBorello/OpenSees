@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.53 $
-// $Date: 2010-06-10 18:46:23 $
+// $Revision: 1.54 $
+// $Date: 2010-06-10 20:16:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -2103,7 +2103,7 @@ int
 TclReliabilityModelBuilder_addGradLimitState(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   LimitStateFunction *theLimitStateFunction = 0;
-  int lsfTag, paramTag;
+  int lsfTag, rvTag;
 
   if (theGFunEvaluator != 0 ) {
     opserr << "ERROR: A limit-state function should not be created after the GFunEvaluator has been instantiated." << endln;
@@ -2117,8 +2117,8 @@ TclReliabilityModelBuilder_addGradLimitState(ClientData clientData, Tcl_Interp *
   }
 
   // GET INPUT PARAMETER (integer)
-  if (Tcl_GetInt(interp, argv[2], &paramTag) != TCL_OK) {
-    opserr << "ERROR: invalid input: paramTag \n";
+  if (Tcl_GetInt(interp, argv[2], &rvTag) != TCL_OK) {
+    opserr << "ERROR: invalid input: rvTag \n";
     return TCL_ERROR;
   }
     
@@ -2131,10 +2131,10 @@ TclReliabilityModelBuilder_addGradLimitState(ClientData clientData, Tcl_Interp *
   }
 
   // ADD THE OBJECT TO THE LSF
-  int ok = theLimitStateFunction->addGradientExpression(argv[3], paramTag);
+  int ok = theLimitStateFunction->addGradientExpression(argv[3], rvTag);
   if (ok < 0) {
     opserr << "ERROR: could not add gradient of LSF " << lsfTag
-	   << " for parameter " << paramTag << endln;
+	   << " for random variable " << rvTag << endln;
     return TCL_ERROR;
   }
 

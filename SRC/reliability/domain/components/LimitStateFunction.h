@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2010-06-10 18:42:16 $
+// $Revision: 1.15 $
+// $Date: 2010-06-10 20:14:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.h,v $
 
 
@@ -60,9 +60,9 @@ public:
 	int removeAddedExpression();
 
 	// Methods to add/remove/get gradient of LSF
-	int addGradientExpression(const char *expression, int paramTag);
-	int removeGradientExpression(int paramTag);
-	const char* getGradientExpression(int paramTag);
+	int addGradientExpression(const char *expression, int rvTag);
+	int removeGradientExpression(int rvTag);
+	const char* getGradientExpression(int rvTag);
 
 	// THE REMAINING PUBLIC METHODS SHOULD BE IN OTHER CLASSES - MHS
 
