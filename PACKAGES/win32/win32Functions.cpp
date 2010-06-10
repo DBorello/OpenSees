@@ -50,6 +50,9 @@ OPS_GetNodeInfoPtrType OPS_GetNodeCrdPtr = 0;
 OPS_GetNodeInfoPtrType OPS_GetNodeDispPtr = 0;
 OPS_GetNodeInfoPtrType OPS_GetNodeVelPtr = 0;
 OPS_GetNodeInfoPtrType OPS_GetNodeAccelPtr = 0;
+OPS_GetNodeInfoPtrType OPS_GetNodeIncrDispPtr = 0;
+OPS_GetNodeInfoPtrType OPS_GetNodeIncrDeltaDispPtr = 0;
+
 OPS_InvokeMaterialDirectlyPtrType OPS_InvokeMaterialDirectlyPtr =0;
 
 extern "C" DllExport
@@ -64,8 +67,12 @@ void setGlobalPointers(OPS_Stream *theErrorStreamPtr,
 				OPS_InvokeMaterialDirectlyPtrType OPS_InvokeMaterialDirectlyFunct,
 				OPS_GetNodeInfoPtrType OPS_GetNodeCrdFunct,
 				OPS_GetNodeInfoPtrType OPS_GetNodeDispFunct,
+				OPS_GetNodeInfoPtrType OPS_GetNodeDispFunct,
+				OPS_GetNodeInfoPtrType OPS_GetNodeDispFunct,
 				OPS_GetNodeInfoPtrType OPS_GetNodeVelFunct,
-				OPS_GetNodeInfoPtrType OPS_GetNodeAccelFunct)	
+				OPS_GetNodeInfoPtrType OPS_GetNodeAccelFunct
+				OPS_GetNodeInfoPtrType OPS_GetNodeIncrDispFunct,
+				OPS_GetNodeInfoPtrType OPS_GetNodeIncrDeltaDispFunct)	
 {
 	opserrPtr = theErrorStreamPtr;
 	OPS_ErrorPtr = errorFunct;
@@ -79,6 +86,8 @@ void setGlobalPointers(OPS_Stream *theErrorStreamPtr,
 	OPS_GetNodeDispPtr = OPS_GetNodeDispFunct;
 	OPS_GetNodeVelPtr = OPS_GetNodeVelFunct;
 	OPS_GetNodeAccelPtr = OPS_GetNodeAccelFunct;
+	OPS_GetNodeIncrDispPtr = OPS_GetNodeIncrDispFunct;
+	OPS_GetNodeIncrDeltaDispPtr = OPS_GetNodeIncrDeltaDispFunct;
 	OPS_InvokeMaterialDirectlyPtr = OPS_InvokeMaterialDirectlyFunct;
 }
 
@@ -127,6 +136,14 @@ extern "C" int OPS_GetNodeVel(int *nodeTag, int *sizeData, double *data)
 extern "C" int OPS_GetNodeAccel(int *nodeTag, int *sizeData, double *data)
 {
 	return (*OPS_GetNodeAccelPtr)(nodeTag, sizeData, data);
+}
+extern "C" int OPS_GetNodeIncrDisp(int *nodeTag, int *sizeData, double *data)
+{
+	return (*OPS_GetNodeIncrDispPtr)(nodeTag, sizeData, data);
+}
+extern "C" int OPS_GetNodeIncrDeltaDisp(int *nodeTag, int *sizeData, double *data)
+{
+	return (*OPS_GetNodeIncrDeltaDispPtr)(nodeTag, sizeData, data);
 }
 extern "C" int        
 OPS_InvokeMaterialDirectly(matObject **theMat, modelState *model, double *strain, double *stress, double *tang, int *isw) {
