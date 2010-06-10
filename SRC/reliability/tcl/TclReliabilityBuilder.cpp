@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.52 $
-// $Date: 2008-10-22 16:44:05 $
+// $Revision: 1.53 $
+// $Date: 2010-06-10 18:46:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -275,6 +275,7 @@ int TclReliabilityModelBuilder_addCutset(ClientData clientData, Tcl_Interp *inte
 int TclReliabilityModelBuilder_correlateGroup(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_correlationStructure(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_addLimitState(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_addGradLimitState(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_addParameterPositioner(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_addModulatingFunction(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
@@ -308,7 +309,10 @@ int TclReliabilityModelBuilder_getStdv(ClientData clientData, Tcl_Interp *interp
 int TclReliabilityModelBuilder_rvReduction(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_getBetaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
 int TclReliabilityModelBuilder_getGammaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
+int TclReliabilityModelBuilder_getAlphaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
 int TclReliabilityModelBuilder_invNormalCDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
+int TclReliabilityModelBuilder_getRVTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
+int TclReliabilityModelBuilder_getLSFTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
 /////////////////////////////////////////////////////////
 ///S added by K Fujimura for Random Vibration Analysis ///
 /////////////////////////////////////////////////////////
@@ -359,6 +363,7 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
   Tcl_CreateCommand(interp, "correlationStructure", TclReliabilityModelBuilder_correlationStructure,(ClientData)NULL, NULL); 
   Tcl_CreateCommand(interp, "cutset", TclReliabilityModelBuilder_addCutset,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "performanceFunction", TclReliabilityModelBuilder_addLimitState,(ClientData)NULL, NULL);
+  Tcl_CreateCommand(interp, "gradPerformanceFunction", TclReliabilityModelBuilder_addGradLimitState,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "randomVariablePositioner",TclReliabilityModelBuilder_addRandomVariablePositioner,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "parameterPositioner",TclReliabilityModelBuilder_addParameterPositioner,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "modulatingFunction",TclReliabilityModelBuilder_addModulatingFunction,(ClientData)NULL, NULL);
@@ -392,7 +397,10 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
   Tcl_CreateCommand(interp, "rvReduction",TclReliabilityModelBuilder_rvReduction,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "betaFORM",TclReliabilityModelBuilder_getBetaFORM,(ClientData)NULL, NULL); //not in K.F.
   Tcl_CreateCommand(interp, "gammaFORM",TclReliabilityModelBuilder_getGammaFORM,(ClientData)NULL, NULL);//not in K.F.
+  Tcl_CreateCommand(interp, "alphaFORM",TclReliabilityModelBuilder_getAlphaFORM,(ClientData)NULL, NULL);//not in K.F.
   Tcl_CreateCommand(interp, "invNormalCDF",TclReliabilityModelBuilder_invNormalCDF,(ClientData)NULL, NULL);//not in K.F.
+  Tcl_CreateCommand(interp, "getRVTags",TclReliabilityModelBuilder_getRVTags,(ClientData)NULL, NULL);//not in K.F.
+  Tcl_CreateCommand(interp, "getLSFTags",TclReliabilityModelBuilder_getLSFTags,(ClientData)NULL, NULL);//not in K.F.
 /////////////////////////////////////////////////////////
 ///S added by K Fujimura for Random Vibration Analysis ///
 /////////////////////////////////////////////////////////
@@ -582,6 +590,7 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
   Tcl_DeleteCommand(theInterp, "correlationStructure");
   Tcl_DeleteCommand(theInterp, "cutset");
   Tcl_DeleteCommand(theInterp, "performanceFunction");
+  Tcl_DeleteCommand(theInterp, "gradPerformanceFunction");
   Tcl_DeleteCommand(theInterp, "randomVariablePositioner");
   Tcl_DeleteCommand(theInterp, "positionerPositioner");
   Tcl_DeleteCommand(theInterp, "modulatingFunction");
@@ -616,6 +625,8 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
   Tcl_DeleteCommand(theInterp, "betaFORM");
   Tcl_DeleteCommand(theInterp, "gammaFORM");
   Tcl_DeleteCommand(theInterp, "invNormalCDF");
+  Tcl_DeleteCommand(theInterp, "getRVTags");
+  Tcl_DeleteCommand(theInterp, "getLSFTags");
 
   /////S added by K Fujimura /////
   Tcl_DeleteCommand(theInterp, "analyzer");
@@ -2087,7 +2098,48 @@ TclReliabilityModelBuilder_addLimitState(ClientData clientData, Tcl_Interp *inte
 */
 }
 
+//////////////////////////////////////////////////////////////////
+int 
+TclReliabilityModelBuilder_addGradLimitState(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  LimitStateFunction *theLimitStateFunction = 0;
+  int lsfTag, paramTag;
 
+  if (theGFunEvaluator != 0 ) {
+    opserr << "ERROR: A limit-state function should not be created after the GFunEvaluator has been instantiated." << endln;
+    return TCL_ERROR;
+  }
+
+  // GET INPUT PARAMETER (integer)
+  if (Tcl_GetInt(interp, argv[1], &lsfTag) != TCL_OK) {
+    opserr << "ERROR: invalid input: lsfTag \n";
+    return TCL_ERROR;
+  }
+
+  // GET INPUT PARAMETER (integer)
+  if (Tcl_GetInt(interp, argv[2], &paramTag) != TCL_OK) {
+    opserr << "ERROR: invalid input: paramTag \n";
+    return TCL_ERROR;
+  }
+    
+  // GET LSF pointer
+  theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsfTag);
+  if (theLimitStateFunction == 0) {
+    opserr << "ERROR: limit state function with tag " << lsfTag
+	   << " does not exist" << endln;
+    return TCL_ERROR;
+  }
+
+  // ADD THE OBJECT TO THE LSF
+  int ok = theLimitStateFunction->addGradientExpression(argv[3], paramTag);
+  if (ok < 0) {
+    opserr << "ERROR: could not add gradient of LSF " << lsfTag
+	   << " for parameter " << paramTag << endln;
+    return TCL_ERROR;
+  }
+
+  return TCL_OK;
+}
 
 //////////////////////////////////////////////////////////////////
 int 
@@ -8926,6 +8978,66 @@ TclReliabilityModelBuilder_getGammaFORM(ClientData clientData, Tcl_Interp *inter
   return TCL_OK;
 }
 
+///getGammaFORM is not in K.F.
+int 
+TclReliabilityModelBuilder_getAlphaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  if (argc < 2) {
+    opserr << "ERROR: Invalid number of arguments to getAlphaFORM command." << endln;
+    return TCL_ERROR;
+  }
+
+  int lsfTag;
+  if (Tcl_GetInt(interp, argv[1], &lsfTag) != TCL_OK) {
+    opserr << "WARNING alphaFORM lsfTag? rvTag? - could not read lsfTag\n";
+    return TCL_ERROR;	        
+  }
+
+  LimitStateFunction *theLSF =
+    theReliabilityDomain->getLimitStateFunctionPtr(lsfTag);
+  
+  if (theLSF == 0) {
+    opserr << "WARNING alphaFORM LSF with tag " << lsfTag << " not found\n";
+    return TCL_ERROR;	        
+  }
+
+  const Vector &gammaVec = theLSF->getFORM_alpha();
+  
+  char buffer[40];
+
+  if (argc > 2) {
+    int rvTag;
+    if (Tcl_GetInt(interp, argv[2], &rvTag) != TCL_OK) {
+      opserr << "WARNING alphaFORM lsfTag? rvTag? - could not read rvTag\n";
+      return TCL_ERROR;	        
+    }   
+    
+    RandomVariable *theRV =
+      theReliabilityDomain->getRandomVariablePtr(rvTag);
+    
+    if (theRV == 0) {
+      opserr << "WARNING alphaFORM RV with tag " << rvTag << " not found\n";
+      return TCL_ERROR;	        
+    }
+  
+    int index = theReliabilityDomain->getRandomVariableIndex(rvTag);
+    double gamma = gammaVec(index);
+    
+    sprintf(buffer,"%35.20f",gamma);
+    
+    Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+  }
+  else {
+    int nrv = gammaVec.Size();
+    for (int i = 0; i < nrv; i++) {
+      sprintf(buffer, "%35.20f ", gammaVec(i));
+      Tcl_AppendResult(interp, buffer, NULL);
+    }
+  }
+
+  return TCL_OK;
+}
+
 
 ///invNormalCDF is not in K.F.
 int
@@ -8961,6 +9073,39 @@ TclReliabilityModelBuilder_invNormalCDF(ClientData clientData, Tcl_Interp *inter
 
   return TCL_OK;
 }
+
+int
+TclReliabilityModelBuilder_getRVTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  RandomVariable *theEle;
+  RandomVariableIter &eleIter = theReliabilityDomain->getRandomVariables();
+  
+  char buffer[20];
+  
+  while ((theEle = eleIter()) != 0) {
+    sprintf(buffer, "%d ", theEle->getTag());
+    Tcl_AppendResult(interp, buffer, NULL);
+  }
+  
+  return TCL_OK;
+}
+
+int
+TclReliabilityModelBuilder_getLSFTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  LimitStateFunction *theEle;
+  LimitStateFunctionIter &eleIter = theReliabilityDomain->getLimitStateFunctions();
+  
+  char buffer[20];
+  
+  while ((theEle = eleIter()) != 0) {
+    sprintf(buffer, "%d ", theEle->getTag());
+    Tcl_AppendResult(interp, buffer, NULL);
+  }
+  
+  return TCL_OK;
+}
+
 /////////////////////////////////////////////////////////
 /// (from here to the end) added by K Fujimura for Random Vibration Analysis ///
 /////////////////////////////////////////////////////////
