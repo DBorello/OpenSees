@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2008-08-27 17:08:45 $
+// $Revision: 1.19 $
+// $Date: 2010-06-10 18:53:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.cpp,v $
 
 
@@ -682,10 +682,10 @@ SystemAnalysis::setPermutedComponents(int k, int i)
 	
 	// now flesh out vectors with data from each component in cutset
 	for (int j = 0; j < cutLen; j++) {
-		int actual = theReliabilityDomain->getLimitStateFunctionIndex( abs(permutedComps(j)) );
+		int actual = theReliabilityDomain->getLimitStateFunctionIndex( fabs(permutedComps(j)) );
 		(*permutedBetas)(j) = (*allBetas)(actual) * sign(permutedComps(j));
 		for (int jk = 0; jk < cutLen; jk++) {
-			int actualj = theReliabilityDomain->getLimitStateFunctionIndex( abs(permutedComps(jk)) );
+			int actualj = theReliabilityDomain->getLimitStateFunctionIndex( fabs(permutedComps(jk)) );
 			(*permutedRhos)(jk,j) = (*rhos)(actualj,actual) * sign(permutedComps(j)) * sign(permutedComps(jk));
 		}
 	}
