@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2010-04-23 22:57:35 $
+// $Revision: 1.18 $
+// $Date: 2010-06-10 18:53:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.cpp,v $
                                                                         
 // Written: fmk
@@ -99,6 +99,7 @@
 #include <FedeasSteel1Material.h>
 #include <FedeasSteel2Material.h>
 
+#include <Bilin.h>
 #include <DrainBilinearMaterial.h>
 #include <DrainClough1Material.h>
 #include <DrainClough2Material.h>
@@ -871,6 +872,9 @@ FEM_ObjectBrokerAllClasses::getNewUniaxialMaterial(int classTag)
 
 	case MAT_TAG_DrainBilinear:
 		return new DrainBilinearMaterial();
+
+	case MAT_TAG_Bilin:
+		return new Bilin();
 
 	case MAT_TAG_DrainClough1:
 		return new DrainClough1Material();
