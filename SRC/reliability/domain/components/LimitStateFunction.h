@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2008-05-27 20:04:30 $
+// $Revision: 1.14 $
+// $Date: 2010-06-10 18:42:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.h,v $
 
 
@@ -37,6 +37,10 @@
 #include <ReliabilityDomainComponent.h>
 #include <Vector.h>
 #include <tcl.h>
+
+#include <map>
+#include <string>
+using namespace std;
 
 class LimitStateFunction : public ReliabilityDomainComponent
 {
@@ -55,6 +59,10 @@ public:
 	int addExpression(char *expression);
 	int removeAddedExpression();
 
+	// Methods to add/remove/get gradient of LSF
+	int addGradientExpression(const char *expression, int paramTag);
+	int removeGradientExpression(int paramTag);
+	const char* getGradientExpression(int paramTag);
 
 	// THE REMAINING PUBLIC METHODS SHOULD BE IN OTHER CLASSES - MHS
 
@@ -171,6 +179,9 @@ private:
 	char *expressionWithAddition;
 	Tcl_Interp *theTclInterp;
 	Tcl_Obj *paramList;
+
+	// STL map for analytic gradients of this LSF
+	map<int, string> mapOfGradientExpressions;
 
 };
 
