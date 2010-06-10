@@ -47,8 +47,8 @@
 # Specify the location and name of the OpenSees interpreter program
 # that will be created (if this all works!)
 
-PROGRAMMING_MODE = SEQUENTIAL
-#PROGRAMMING_MODE = PARALLEL
+#PROGRAMMING_MODE = SEQUENTIAL
+PROGRAMMING_MODE = PARALLEL
 #PROGRAMMING_MODE = PARALLEL_INTERPRETERS
 
 OpenSees_PROGRAM = $(HOME)/bin/OpenSees
@@ -148,9 +148,11 @@ PROGRAMMING_FLAG = -D_PARALLEL_PROCESSING
 DIRS        = $(SUPERLUdir) \
 	      $(SUPERLU_DISTdir) \
 	      $(ARPACKdir) \
+	      $(AMDdir) \
               $(LAPACKdir) \
               $(UMFPACKdir) \
               $(METISdir) \
+	      $(BLASdir) $(CBLASdir)  \
               $(SRCdir) 
 
 endif
@@ -168,6 +170,7 @@ DIRS        = $(SUPERLUdir) \
 	      $(SUPERLU_DISTdir) \
               $(LAPACKdir) \
               $(ARPACKdir) \
+	      $(AMDdir) \
               $(UMFPACKdir) \
               $(METISdir) \
 	      $(BLASdir) $(CBLASdir)  \
