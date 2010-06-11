@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2008-02-29 19:47:20 $
+// $Revision: 1.11 $
+// $Date: 2010-06-11 15:56:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariablePositioner.h,v $
 
 
@@ -59,6 +59,9 @@ public:
 	int setRvIndex(int newRvIndex);
 	int getRvIndex(void);
 	RandomVariable *getRandomVariable(void) const {return theRV;}
+
+	int getRVTag(void);
+	int getParamTag(void);
 
 protected:
 

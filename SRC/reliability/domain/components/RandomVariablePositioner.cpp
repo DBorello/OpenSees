@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2008-02-29 19:47:20 $
+// $Revision: 1.10 $
+// $Date: 2010-06-11 15:56:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariablePositioner.cpp,v $
 
 
@@ -33,6 +33,7 @@
 
 #include <RandomVariablePositioner.h>
 #include <classTags.h>
+#include <RandomVariable.h>
 
 RandomVariablePositioner::RandomVariablePositioner(int passedTag,
 		int passedRVindex,
@@ -100,3 +101,16 @@ RandomVariablePositioner::setRvIndex(int newRvIndex)
   
   return 0;
 }
+
+int
+RandomVariablePositioner::getRVTag(void) 
+{
+  return theRV->getTag();
+}
+
+int
+RandomVariablePositioner::getParamTag(void) 
+{
+  return theParameter.getTag();
+}
+
