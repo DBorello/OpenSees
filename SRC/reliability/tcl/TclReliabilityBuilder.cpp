@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.54 $
-// $Date: 2010-06-10 20:16:16 $
+// $Revision: 1.55 $
+// $Date: 2010-06-11 15:59:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -56,6 +56,7 @@ using std::setiosflags;
 #include <LimitStateFunction.h>
 #include <LimitStateFunctionIter.h>
 #include <RandomVariablePositioner.h>
+#include <RandomVariablePositionerIter.h>
 #include <Parameter.h>
 #include <ParameterIter.h>
 #include <ParameterPositioner.h>
@@ -312,6 +313,7 @@ int TclReliabilityModelBuilder_getGammaFORM(ClientData clientData, Tcl_Interp *i
 int TclReliabilityModelBuilder_getAlphaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
 int TclReliabilityModelBuilder_invNormalCDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
 int TclReliabilityModelBuilder_getRVTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
+int TclReliabilityModelBuilder_getRVPositioners(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
 int TclReliabilityModelBuilder_getLSFTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
 /////////////////////////////////////////////////////////
 ///S added by K Fujimura for Random Vibration Analysis ///
@@ -400,6 +402,7 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
   Tcl_CreateCommand(interp, "alphaFORM",TclReliabilityModelBuilder_getAlphaFORM,(ClientData)NULL, NULL);//not in K.F.
   Tcl_CreateCommand(interp, "invNormalCDF",TclReliabilityModelBuilder_invNormalCDF,(ClientData)NULL, NULL);//not in K.F.
   Tcl_CreateCommand(interp, "getRVTags",TclReliabilityModelBuilder_getRVTags,(ClientData)NULL, NULL);//not in K.F.
+  Tcl_CreateCommand(interp, "getRVPositioners",TclReliabilityModelBuilder_getRVPositioners,(ClientData)NULL, NULL);//not in K.F.
   Tcl_CreateCommand(interp, "getLSFTags",TclReliabilityModelBuilder_getLSFTags,(ClientData)NULL, NULL);//not in K.F.
 /////////////////////////////////////////////////////////
 ///S added by K Fujimura for Random Vibration Analysis ///
@@ -626,6 +629,7 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
   Tcl_DeleteCommand(theInterp, "gammaFORM");
   Tcl_DeleteCommand(theInterp, "invNormalCDF");
   Tcl_DeleteCommand(theInterp, "getRVTags");
+  Tcl_DeleteCommand(theInterp, "getRVPositioners");
   Tcl_DeleteCommand(theInterp, "getLSFTags");
 
   /////S added by K Fujimura /////
@@ -9090,6 +9094,21 @@ TclReliabilityModelBuilder_getRVTags(ClientData clientData, Tcl_Interp *interp, 
   return TCL_OK;
 }
 
+int
+TclReliabilityModelBuilder_getRVPositioners(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  RandomVariablePositioner *theEle;
+  RandomVariablePositionerIter &eleIter = theReliabilityDomain->getRandomVariablePositioners();
+  
+  char buffer[20];
+  
+  while ((theEle = eleIter()) != 0) {
+    sprintf(buffer, "%d %d ", theEle->getRVTag(), theEle->getParamTag());
+    Tcl_AppendResult(interp, buffer, NULL);
+  }
+  
+  return TCL_OK;
+}
 int
 TclReliabilityModelBuilder_getLSFTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
