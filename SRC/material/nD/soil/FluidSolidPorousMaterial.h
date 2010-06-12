@@ -1,5 +1,5 @@
-// $Revision: 1.15 $
-// $Date: 2007-03-30 01:52:10 $
+// $Revision: 1.16 $
+// $Date: 2010-06-12 18:07:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.h,v $
                                                                         
 // Written: ZHY
@@ -111,6 +111,9 @@ class FluidSolidPorousMaterial : public NDMaterial
      double currentVolumeStrain;
      double initMaxPress;
      int e2p;
+
+     Vector theSoilCommittedStress;
+     Vector theSoilCommittedStrain;
 
      static Vector workV3;
      static Vector workV6;

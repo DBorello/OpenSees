@@ -1,5 +1,5 @@
-// $Revision: 1.25 $
-// $Date: 2009-10-13 21:11:45 $
+// $Revision: 1.26 $
+// $Date: 2010-06-12 18:07:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.cpp,v $
                                                                         
 // Written: ZHY
@@ -63,6 +63,9 @@ FluidSolidPorousMaterial::FluidSolidPorousMaterial (int tag, int nd, NDMaterial 
   pAtm = atm;
 
   theSoilMaterial = soilMat.getCopy();
+  theSoilCommittedStress = theSoilMaterial->getStress();
+  theSoilCommittedStrain = theSoilMaterial->getStrain();
+
   trialExcessPressure = currentExcessPressure = 0.;
   trialVolumeStrain = currentVolumeStrain = 0.;
   initMaxPress = 0.;
@@ -274,13 +277,13 @@ int FluidSolidPorousMaterial::updateParameter(int responseID, Information &info)
 
 const Vector & FluidSolidPorousMaterial::getCommittedStress (void)
 {
-	return this->getStress();
+  return theSoilCommittedStress;
 }
 
 
 const Vector & FluidSolidPorousMaterial::getCommittedStrain (void)
 {
-	return theSoilMaterial->getStrain();
+  return theSoilCommittedStrain;
 }
 
 
@@ -313,7 +316,10 @@ int FluidSolidPorousMaterial::commitState (void)
 	else
         currentExcessPressure = 0.;
 
-	return theSoilMaterial->commitState();
+	int res = theSoilMaterial->commitState();
+        theSoilCommittedStress = theSoilMaterial->getStress();
+	theSoilCommittedStrain = theSoilMaterial->getStrain();
+	return res;
 }
 
 
@@ -475,6 +481,8 @@ int FluidSolidPorousMaterial::recvSelf(int commitTag, Channel &theChannel,
 	  opserr << "FluidSolidPorousMaterial::recvSelf() - material failed to recv itself\n";
 	  return res;
 	}
+	theSoilCommittedStress = theSoilMaterial->getStress();
+	theSoilCommittedStress = theSoilMaterial->getStrain();
 
 	return res;
 }
