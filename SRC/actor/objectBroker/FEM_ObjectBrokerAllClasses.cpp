@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2010-06-10 18:53:09 $
+// $Revision: 1.19 $
+// $Date: 2010-07-27 23:23:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.cpp,v $
                                                                         
 // Written: fmk
@@ -162,6 +162,8 @@
 #include <ZeroLengthSection.h>
 #include <ZeroLengthContact2D.h>
 #include <ZeroLengthContact3D.h>
+#include <ZeroLengthContactNTS2D.h>
+#include <ZeroLengthInterface2D.h>
 //#include <ZeroLengthND.h>
 #include <FourNodeQuad.h>
 #include <EnhancedQuad.h>
@@ -500,6 +502,13 @@ FEM_ObjectBrokerAllClasses::getNewElement(int classTag)
 
 	case ELE_TAG_ZeroLengthContact3D:  
 	     return new ZeroLengthContact3D(); 	     
+
+	case ELE_TAG_ZeroLengthInterface2D:  
+	     return new ZeroLengthInterface2D(); 	     
+
+	case ELE_TAG_ZeroLengthContactNTS2D:  
+	     return new ZeroLengthContactNTS2D(); 	     
+
 
 	     //case ELE_TAG_ZeroLengthND:  
 	     //return new ZeroLengthND(); 	     
