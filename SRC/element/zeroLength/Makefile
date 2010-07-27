@@ -6,6 +6,7 @@ OBJS       = ZeroLength.o \
 	ZeroLengthContact3D.o \
 	ZeroLengthND.o \
 	ZeroLengthContactNTS2D.o \
+	ZeroLengthInterface2D.o \
 	TclZeroLength.o
 
 
