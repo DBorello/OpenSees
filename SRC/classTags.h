@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.122 $
-// $Date: 2010-02-25 22:44:31 $
+// $Revision: 1.123 $
+// $Date: 2010-07-28 00:02:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
 
 // Written: fmk
@@ -386,6 +386,7 @@
 #define ELE_TAG_ZeroLengthContact2D	 5003
 #define ELE_TAG_ZeroLengthContact3D	 5004
 #define ELE_TAG_ZeroLengthContactNTS2D	 5005
+#define ELE_TAG_ZeroLengthInterface2D	 5006
 #define ELE_TAG_NLBeamColumn2d	 6000
 #define ELE_TAG_NLBeamColumn3d	 6001
 #define ELE_TAG_LargeDispBeamColumn3d	 6002
