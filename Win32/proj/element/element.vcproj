@@ -222,6 +222,12 @@
 				RelativePath="..\..\..\SRC\element\zeroLength\ZeroLengthContactNTS2D.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\element\zeroLength\ZeroLengthInterface2D.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\zeroLength\ZeroLengthInterface2D.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\element\zeroLength\ZeroLengthND.cpp">
 			</File>
 			<File
