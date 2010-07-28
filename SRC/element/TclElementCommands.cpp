@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.68 $
-// $Date: 2010-04-08 20:25:22 $
+// $Revision: 1.69 $
+// $Date: 2010-07-28 22:42:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
 
 // Written: fmk
@@ -91,6 +91,7 @@ extern  void *OPS_NewCorotTrussElement(void);
 extern  void *OPS_NewCorotTrussSectionElement(void);
 extern  void *OPS_ElasticTubularJoint(void);
 extern Element *OPS_NewZeroLengthContactNTS2D(void);
+extern Element *OPS_NewZeroLengthInterface2D(void);
 extern "C" void *OPS_PY_Macro2D(void);
 
 
@@ -421,6 +422,15 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 
   } else if (strcmp(argv[1],"zeroLengthContactNTS2D") == 0) {
     Element *theEle = OPS_NewZeroLengthContactNTS2D();
+    if (theEle != 0) 
+      theElement = theEle;
+    else {
+      opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
+      return TCL_ERROR;
+    }
+
+  } else if (strcmp(argv[1],"zeroLengthInterface2D") == 0) {
+    Element *theEle = OPS_NewZeroLengthInterface2D();
     if (theEle != 0) 
       theElement = theEle;
     else {
