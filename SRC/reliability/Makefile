@@ -174,7 +174,8 @@ RELIABILITY_OBJS = $(FE)/domain/pattern/DiscretizedRandomProcessSeries.o \
 		$(FE)/reliability/optimization/DesignVariablePositioner.o \
 		$(FE)/reliability/optimization/ObjectiveFunction.o \
 		$(FE)/reliability/optimization/ToyFunction.o \
-		$(FE)/reliability/optimization/ToyOptFunction.o 
+		$(FE)/reliability/optimization/ToyOptFunction.o \
+		$(FE)/optimization/TclOptimizationBuilder.o 
 
 #		$(FE)/reliability/optimization/SnoptAnalysis.o \
 #		$(FE)/reliability/optimization/SnoptProblem.o \
@@ -188,6 +189,7 @@ all:
 	     @$(CD) $(FE)/reliability/FEsensitivity; $(MAKE);
 	     @$(CD) $(FE)/reliability/tcl; $(MAKE);
 	     @$(CD) $(FE)/reliability/optimization; $(MAKE);
+	     @$(CD) $(FE)/optimization; $(MAKE);
 	     $(AR) $(ARFLAGS) $(RELIABILITY_LIBRARY) $(RELIABILITY_OBJS)
 
 # Miscellaneous
