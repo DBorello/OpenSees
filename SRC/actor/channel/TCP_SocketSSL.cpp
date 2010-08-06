@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.6 $
-// $Date: 2009-10-23 21:36:32 $
+// $Revision: 1.7 $
+// $Date: 2010-08-06 21:51:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_SocketSSL.cpp,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -37,6 +37,7 @@
 #include <Message.h>
 #include <ChannelAddress.h>
 #include <MovableObject.h>
+#include <SocketAddress.h>
 
 #include <openssl/crypto.h>
 #include <openssl/x509.h>
@@ -56,7 +57,7 @@ static void byte_swap(void *array, long long nArray, int size);
 //	given by the OS.
 TCP_SocketSSL::TCP_SocketSSL()
     : myPort(0), connectType(0),
-    checkEndianness(false), endiannessProblem(false)
+    checkEndianness(false), endiannessProblem(false), noDelay(0)
 {
     // initialize SSL library and context object
     SSL_library_init();
@@ -124,9 +125,10 @@ TCP_SocketSSL::TCP_SocketSSL()
 
 // TCP_SocketSSL(unsigned int port): 
 //	constructor to open a socket with my inet_addr and with a port number port.
-TCP_SocketSSL::TCP_SocketSSL(unsigned int port, bool checkendianness) 
+TCP_SocketSSL::TCP_SocketSSL(unsigned int port, bool checkendianness, int nodelay) 
     : myPort(0), connectType(0),
-    checkEndianness(checkendianness), endiannessProblem(false)
+    checkEndianness(checkendianness), endiannessProblem(false),
+    noDelay(nodelay)
 {
     // initialize SSL library and context object
     SSL_library_init();
@@ -200,9 +202,10 @@ TCP_SocketSSL::TCP_SocketSSL(unsigned int port, bool checkendianness)
 //	given by the OS. Then to connect with a TCP_SocketSSL whose address is
 //	given by other_Port and other_InetAddr.
 TCP_SocketSSL::TCP_SocketSSL(unsigned int other_Port,
-    const char *other_InetAddr, bool checkendianness)
+    const char *other_InetAddr, bool checkendianness, int nodelay)
     : myPort(0), connectType(1),
-    checkEndianness(checkendianness), endiannessProblem(false)
+    checkEndianness(checkendianness), endiannessProblem(false),
+    noDelay(nodelay)
 {
     // initialize SSL library and context object
     SSL_library_init();
@@ -299,19 +302,26 @@ TCP_SocketSSL::~TCP_SocketSSL()
 
 
 int 
-TCP_SocketSSL::setUpConnection(void)
+TCP_SocketSSL::setUpConnection()
 {
     if (connectType == 1) {
-
+        
         // now try to connect to socket with remote address.
         if (connect(sockfd, &other_Addr.addr, sizeof(other_Addr.addr))< 0) {
                 opserr << "TCP_SocketSSL::setUpConnection() - could not connect\n";
                 return -1;
         }
-
+        
         // get my_address info
         getsockname(sockfd, &my_Addr.addr, &addrLength);
-
+        
+        // set TCP_NODELAY option
+        if ((setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, 
+            (char *) &noDelay, sizeof(int))) < 0) { 
+                opserr << "TCP_SocketSSL::setUpConnection() - "
+                    << "could not set TCP_NODELAY option\n";
+        }
+        
         // initiate SSL handshake with server
         ssl = SSL_new(ctx);
         SSL_set_fd(ssl, sockfd);
@@ -380,10 +390,17 @@ TCP_SocketSSL::setUpConnection(void)
         close(sockfd);
 #endif
         sockfd = newsockfd;
-
+        
         // get my_address info
         getsockname(sockfd, &my_Addr.addr, &addrLength);
-
+        
+        // set TCP_NODELAY option
+        if ((setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, 
+            (char *) &noDelay, sizeof(int))) < 0) { 
+                opserr << "TCP_SocketSSL::setUpConnection() - "
+                    << "could not set TCP_NODELAY option\n";
+        }
+        
         // initiate SSL handshake with client
         ssl = SSL_new(ctx);
         SSL_set_fd(ssl, sockfd);
@@ -435,7 +452,7 @@ TCP_SocketSSL::setUpConnection(void)
             }
         }
     }
-
+    
     return 0;
 }
 
@@ -1032,14 +1049,14 @@ TCP_SocketSSL::sendID(int dbTag, int commitTag,
 
 
 unsigned int 
-TCP_SocketSSL::getPortNumber(void) const
+TCP_SocketSSL::getPortNumber() const
 {
     return myPort;
 }
 
 
 unsigned int
-TCP_SocketSSL::getBytesAvailable(void)
+TCP_SocketSSL::getBytesAvailable()
 {
     unsigned long bytesAvailable;
 
@@ -1054,7 +1071,7 @@ TCP_SocketSSL::getBytesAvailable(void)
 
 
 char *
-TCP_SocketSSL::addToProgram(void)
+TCP_SocketSSL::addToProgram()
 {
     char *tcp = " 1 ";
 

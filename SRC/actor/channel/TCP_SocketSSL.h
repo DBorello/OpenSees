@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-08-03 00:21:28 $
+// $Revision: 1.4 $
+// $Date: 2010-08-06 21:51:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_SocketSSL.h,v $
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
@@ -37,7 +37,6 @@
 #include <bool.h>
 #include <Socket.h>
 #include <Channel.h>
-#include <SocketAddress.h>
 
 #include <openssl/ssl.h>
 
@@ -54,18 +53,18 @@ class TCP_SocketSSL : public Channel
 {
 public:
     TCP_SocketSSL();        
-    TCP_SocketSSL(unsigned int port, bool checkEndianness = false);    
+    TCP_SocketSSL(unsigned int port, bool checkEndianness = false,
+        int noDelay = 0);    
     TCP_SocketSSL(unsigned int other_Port, const char *other_InetAddr,
-        bool checkEndianness = false);
-    
+        bool checkEndianness = false, int noDelay = 0);
     ~TCP_SocketSSL();
 
-    char *addToProgram(void);
+    char *addToProgram();
 
-    virtual int setUpConnection(void);
+    virtual int setUpConnection();
 
     int setNextAddress(const ChannelAddress &otherChannelAddress);
-    virtual ChannelAddress *getLastSendersAddress(void){ return 0;};
+    virtual ChannelAddress *getLastSendersAddress(){ return 0;};
 
     int sendObj(int commitTag,
         MovableObject &theObject, 
@@ -107,8 +106,8 @@ public:
         ChannelAddress *theAddress =0);    
 
 protected:
-    unsigned int getPortNumber(void) const;
-    unsigned int getBytesAvailable(void);
+    unsigned int getPortNumber() const;
+    unsigned int getBytesAvailable();
 
 private:
     SSL *ssl;
@@ -133,6 +132,7 @@ private:
     int connectType;
     bool checkEndianness;
     bool endiannessProblem;
+    int noDelay;
 };
 
 #endif 

@@ -18,11 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2010-04-21 21:20:26 $
+// $Revision: 1.12 $
+// $Date: 2010-08-06 21:51:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.h,v $
-                                                                        
-                                                                        
+
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -31,8 +30,6 @@
 // TCP_Socket is a sub-class of channel. It is implemented with Berkeley
 // stream sockets using the TCP protocol. Messages delivery is garaunteed. 
 // Communication is full-duplex between a pair of connected sockets.
-//
-// What: "@(#) TCP_Socket.h, revA"
 
 #ifndef TCP_Socket_h
 #define TCP_Socket_h
@@ -40,23 +37,23 @@
 #include <bool.h>
 #include <Socket.h>
 #include <Channel.h>
-//#include <SocketAddress.h>
 
 class TCP_Socket : public Channel
 {
   public:
     TCP_Socket();        
-    TCP_Socket(unsigned int port, bool checkEndianness = false);    
+    TCP_Socket(unsigned int port, bool checkEndianness = false,
+        int noDelay = 0);    
     TCP_Socket(unsigned int other_Port, const char *other_InetAddr,
-	       bool checkEndianness = false); 
+        bool checkEndianness = false, int noDelay = 0);
     ~TCP_Socket();
 
-    char *addToProgram(void);
+    char *addToProgram();
     
-    virtual int setUpConnection(void);
+    virtual int setUpConnection();
 
     int setNextAddress(const ChannelAddress &otherChannelAddress);
-    virtual ChannelAddress *getLastSendersAddress(void){ return 0;};
+    virtual ChannelAddress *getLastSendersAddress(){ return 0;};
 
     int sendObj(int commitTag,
 		MovableObject &theObject, 
@@ -98,8 +95,8 @@ class TCP_Socket : public Channel
 	       ChannelAddress *theAddress =0);    
     
   protected:
-    unsigned int getPortNumber(void) const;
-    unsigned int getBytesAvailable(void);
+    unsigned int getPortNumber() const;
+    unsigned int getBytesAvailable();
     
   private:
     socket_type sockfd;
@@ -119,6 +116,7 @@ class TCP_Socket : public Channel
     int connectType;
     bool checkEndianness;
     bool endiannessProblem;
+    int noDelay;
 };
 
 #endif 

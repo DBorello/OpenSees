@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.18 $
-// $Date: 2008-09-23 22:47:25 $
+// $Revision: 1.19 $
+// $Date: 2010-08-06 21:51:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.cpp,v $
 
 // Written: fmk
@@ -52,7 +52,7 @@ static void byte_swap(void *array, long long nArray,int size);
 //	given by the OS. 
 TCP_Socket::TCP_Socket()
     : myPort(0), connectType(0),
-    checkEndianness(false), endiannessProblem(false)
+    checkEndianness(false), endiannessProblem(false), noDelay(0)
 {
     // initialize sockets
     startup_sockets();
@@ -70,12 +70,12 @@ TCP_Socket::TCP_Socket()
 
     // open a socket
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        opserr << "TCP_Socket::TCP_Socket - could not open socket\n";
+        opserr << "TCP_Socket::TCP_Socket() - could not open socket\n";
     }
 
     // bind local address to it
     if (bind(sockfd, &my_Addr.addr, sizeof(my_Addr.addr)) < 0) {
-        opserr << "TCP_Socket::TCP_Socket - could not bind local address\n";
+        opserr << "TCP_Socket::TCP_Socket() - could not bind local address\n";
     }
 
     // get my_address info
@@ -86,9 +86,10 @@ TCP_Socket::TCP_Socket()
 
 // TCP_Socket(unsigned int port): 
 //	constructor to open a socket with my inet_addr and with a port number port.
-TCP_Socket::TCP_Socket(unsigned int port, bool checkendianness) 
+TCP_Socket::TCP_Socket(unsigned int port, bool checkendianness, int nodelay) 
     : myPort(0), connectType(0),
-    checkEndianness(checkendianness), endiannessProblem(false)
+    checkEndianness(checkendianness), endiannessProblem(false),
+    noDelay(nodelay)
 {
     // initialize sockets
     startup_sockets();
@@ -109,12 +110,12 @@ TCP_Socket::TCP_Socket(unsigned int port, bool checkendianness)
 
     // open a socket
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        opserr << "TCP_Socket::TCP_Socket - could not open socket\n";
+        opserr << "TCP_Socket::TCP_Socket() - could not open socket\n";
     }
 
     // bind local address to it
     if (bind(sockfd, &my_Addr.addr, sizeof(my_Addr.addr)) < 0) {
-        opserr << "TCP_Socket::TCP_Socket - could not bind local address\n";
+        opserr << "TCP_Socket::TCP_Socket() - could not bind local address\n";
     }    
 
     // get my_address info
@@ -128,9 +129,10 @@ TCP_Socket::TCP_Socket(unsigned int port, bool checkendianness)
 //	given by the OS. Then to connect with a TCP_Socket whose address is
 //	given by other_Port and other_InetAddr. 
 TCP_Socket::TCP_Socket(unsigned int other_Port,
-    const char *other_InetAddr, bool checkendianness)
+    const char *other_InetAddr, bool checkendianness, int nodelay)
     : myPort(0), connectType(1),
-    checkEndianness(checkendianness), endiannessProblem(false)
+    checkEndianness(checkendianness), endiannessProblem(false),
+    noDelay(nodelay)
 {
     // initialize sockets
     startup_sockets();
@@ -162,12 +164,12 @@ TCP_Socket::TCP_Socket(unsigned int other_Port,
 
     // open a socket
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        opserr << "TCP_Socket::TCP_Socket - could not open socket\n";
+        opserr << "TCP_Socket::TCP_Socket() - could not open socket\n";
     }
 
     // bind local address to it
     if (bind(sockfd, &my_Addr.addr, sizeof(my_Addr.addr)) < 0) {
-        opserr << "TCP_Socket::TCP_Socket - could not bind local address\n";
+        opserr << "TCP_Socket::TCP_Socket() - could not bind local address\n";
     }
 
     addrLength = sizeof(my_Addr.addr);
@@ -192,19 +194,26 @@ TCP_Socket::~TCP_Socket()
 
 
 int 
-TCP_Socket::setUpConnection(void)
+TCP_Socket::setUpConnection()
 {
     if (connectType == 1) {
-
+        
         // now try to connect to socket with remote address.
         if (connect(sockfd, &other_Addr.addr, sizeof(other_Addr.addr))< 0) {
-            opserr << "TCP_Socket::TCP_Socket - could not connect\n";
+            opserr << "TCP_Socket::setUpConnection() - could not connect\n";
             return -1;
         }
-
+        
         // get my_address info
         getsockname(sockfd, &my_Addr.addr, &addrLength);
-
+        
+        // set TCP_NODELAY option
+        if ((setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, 
+            (char *) &noDelay, sizeof(int))) < 0) { 
+                opserr << "TCP_Socket::setUpConnection() - "
+                    << "could not set TCP_NODELAY option\n";
+        }
+        
         // check for endianness problem if requested
         if (checkEndianness) {
             int i = 1;
@@ -235,7 +244,7 @@ TCP_Socket::setUpConnection(void)
         listen(sockfd, 1);    
         newsockfd = accept(sockfd, &other_Addr.addr, &addrLength);
         if (newsockfd < 0) {
-            opserr << "TCP_Socket::TCP_Socket - could not accept connection\n";
+            opserr << "TCP_Socket::setUpConnection() - could not accept connection\n";
             return -1;
         }
 
@@ -247,10 +256,17 @@ TCP_Socket::setUpConnection(void)
         close(sockfd);
 #endif
         sockfd = newsockfd;
-
+        
         // get my_address info
         getsockname(sockfd, &my_Addr.addr, &addrLength);
-
+        
+        // set TCP_NODELAY option
+        if ((setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, 
+            (char *) &noDelay, sizeof(int))) < 0) { 
+                opserr << "TCP_Socket::setUpConnection() - "
+                    << "could not set TCP_NODELAY option\n";
+        }
+        
         // check for endianness problem if requested
         if (checkEndianness) {
             int i;
@@ -272,25 +288,7 @@ TCP_Socket::setUpConnection(void)
             }
         }
     }    
-
-    // set socket so no delay    
-    /*
-    int optlen;
-    optlen = 1;
-    if ((setsockopt(sockfd,IPPROTO_TCP, TCP_NODELAY, 
-    (char *) &optlen, sizeof(int))) < 0) { 
-    opserr << "TCP_Socket::TCP_Socket - could not set TCP_NODELAY\n";
-    }	  
-    */
-    /*
-    int flag=sizeof(int);
-    if ((getsockopt(sockfd,IPPROTO_TCP, TCP_NODELAY, 
-    (char *) &optlen, &flag)) < 0) { 
-    opserr << "TCP_Socket::TCP_Socket - could not set TCP_NODELAY\n";
-    }	        
-    opserr << "TCP_Socket::TCP_Socket - " << optlen << " flag " << flag <<  endln;
-    */
-
+    
     return 0;
 }    
 
@@ -305,7 +303,7 @@ TCP_Socket::setNextAddress(const ChannelAddress &theAddress)
         if (bcmp((char *) &other_Addr.addr_in, (char *) &theSocketAddress->address.addr, 
             theSocketAddress->addrLength) != 0) {
 
-                opserr << "TCP_Socket::recvMsg() - a TCP_Socket ";
+                opserr << "TCP_Socket::setNextAddress() - a TCP_Socket ";
                 opserr << "can only communicate with one other TCP_Socket\n"; 
                 return -1;
         }
@@ -362,7 +360,7 @@ TCP_Socket::recvObj(int commitTag,
         if (theAddress->getType() == SOCKET_TYPE) 
             theSocketAddress = (SocketAddress *)theAddress;
         else {
-            opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+            opserr << "TCP_Socket::recvObj() - a TCP_Socket ";
             opserr << "can only communicate with a TCP_Socket";
             opserr << " address given is not of type SocketAddress\n"; 
             return -1;	    
@@ -370,7 +368,7 @@ TCP_Socket::recvObj(int commitTag,
         if (bcmp((char *) &other_Addr.addr_in, (char *) &theSocketAddress->address.addr, 
             theSocketAddress->addrLength) != 0) {
 
-                opserr << "TCP_Socket::recvMsg() - a TCP_Socket ";
+                opserr << "TCP_Socket::recvObj() - a TCP_Socket ";
                 opserr << "can only communicate with one other TCP_Socket\n"; 
                 return -1;
         }
@@ -392,7 +390,7 @@ TCP_Socket::recvMsg(int dbTag, int commitTag,
         if (theAddress->getType() == SOCKET_TYPE) 
             theSocketAddress = (SocketAddress *)theAddress;
         else {
-            opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+            opserr << "TCP_Socket::recvMsg() - a TCP_Socket ";
             opserr << "can only communicate with a TCP_Socket";
             opserr << " address given is not of type SocketAddress\n"; 
             return -1;	    
@@ -435,15 +433,15 @@ TCP_Socket::recvMsgUnknownSize(int dbTag, int commitTag,
         if (theAddress->getType() == SOCKET_TYPE) 
             theSocketAddress = (SocketAddress *)theAddress;
         else {
-            opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+            opserr << "TCP_Socket::recvMsgUnknownSize() - a TCP_Socket ";
             opserr << "can only communicate with a TCP_Socket";
             opserr << " address given is not of type SocketAddress\n"; 
-            return -1;	    
+            return -1;
         }		    
         if (bcmp((char *) &other_Addr.addr_in, (char *) &theSocketAddress->address.addr_in, 
             theSocketAddress->addrLength) != 0) {
 
-                opserr << "TCP_Socket::recvMsg() - a TCP_Socket ";
+                opserr << "TCP_Socket::recvMsgUnknownSize() - a TCP_Socket ";
                 opserr << "can only communicate with one other TCP_Socket\n"; 
                 return -1;
         }
@@ -487,7 +485,7 @@ TCP_Socket::sendMsg(int dbTag, int commitTag,
         if (theAddress->getType() == SOCKET_TYPE) 
             theSocketAddress = (SocketAddress *)theAddress;
         else {
-            opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+            opserr << "TCP_Socket::sendMsg() - a TCP_Socket ";
             opserr << "can only communicate with a TCP_Socket";
             opserr << " address given is not of type SocketAddress\n"; 
             return -1;	    
@@ -495,7 +493,7 @@ TCP_Socket::sendMsg(int dbTag, int commitTag,
         if (bcmp((char *) &other_Addr.addr_in, (char *) &theSocketAddress->address.addr_in, 
             theSocketAddress->addrLength) != 0) {
 
-                opserr << "TCP_Socket::recvMsg() - a TCP_Socket ";
+                opserr << "TCP_Socket::sendMsg() - a TCP_Socket ";
                 opserr << "can only communicate with one other TCP_Socket\n"; 
                 return -1;
         }
@@ -529,7 +527,7 @@ TCP_Socket::recvMatrix(int dbTag, int commitTag,
         if (theAddress->getType() == SOCKET_TYPE) 
             theSocketAddress = (SocketAddress *)theAddress;
         else {
-            opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+            opserr << "TCP_Socket::recvMatrix() - a TCP_Socket ";
             opserr << "can only communicate with a TCP_Socket";
             opserr << " address given is not of type SocketAddress\n"; 
             return -1;	    
@@ -548,7 +546,7 @@ TCP_Socket::recvMatrix(int dbTag, int commitTag,
     int nleft,nread;
     double *data = theMatrix.data;
     char *gMsg = (char *)data;;
-    nleft =  theMatrix.dataSize * sizeof(double);
+    nleft = theMatrix.dataSize * sizeof(double);
 
     while (nleft > 0) {
         nread = recv(sockfd,gMsg,nleft,0);
@@ -579,7 +577,7 @@ TCP_Socket::sendMatrix(int dbTag, int commitTag,
         if (theAddress->getType() == SOCKET_TYPE) 
             theSocketAddress = (SocketAddress *)theAddress;
         else {
-            opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+            opserr << "TCP_Socket::sendMatrix() - a TCP_Socket ";
             opserr << "can only communicate with a TCP_Socket";
             opserr << " address given is not of type SocketAddress\n"; 
             return -1;	    
@@ -588,7 +586,7 @@ TCP_Socket::sendMatrix(int dbTag, int commitTag,
         if (bcmp((char *) &other_Addr.addr_in, (char *) &theSocketAddress->address.addr_in, 
             theSocketAddress->addrLength) != 0) {
 
-                opserr << "TCP_Socket::recvMatrix() - a TCP_Socket ";
+                opserr << "TCP_Socket::sendMatrix() - a TCP_Socket ";
                 opserr << "can only communicate with one other TCP_Socket\n"; 
                 return -1;
         }
@@ -599,7 +597,7 @@ TCP_Socket::sendMatrix(int dbTag, int commitTag,
     int nwrite, nleft;    
     double *data = theMatrix.data;
     char *gMsg = (char *)data;
-    nleft =  theMatrix.dataSize * sizeof(double);
+    nleft = theMatrix.dataSize * sizeof(double);
 
 #ifndef _WIN32
     if (endiannessProblem) {
@@ -635,7 +633,7 @@ TCP_Socket::recvVector(int dbTag, int commitTag,
         if (theAddress->getType() == SOCKET_TYPE) 
             theSocketAddress = (SocketAddress *)theAddress;
         else {
-            opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+            opserr << "TCP_Socket::recvVector() - a TCP_Socket ";
             opserr << "can only communicate with a TCP_Socket";
             opserr << " address given is not of type SocketAddress\n"; 
             return -1;	    
@@ -654,7 +652,7 @@ TCP_Socket::recvVector(int dbTag, int commitTag,
     int nleft,nread;
     double *data = theVector.theData;
     char *gMsg = (char *)data;;
-    nleft =  theVector.sz * sizeof(double);
+    nleft = theVector.sz * sizeof(double);
 
     while (nleft > 0) {
         nread = recv(sockfd,gMsg,nleft,0);
@@ -685,7 +683,7 @@ TCP_Socket::sendVector(int dbTag, int commitTag,
         if (theAddress->getType() == SOCKET_TYPE) 
             theSocketAddress = (SocketAddress *)theAddress;
         else {
-            opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+            opserr << "TCP_Socket::sendVector() - a TCP_Socket ";
             opserr << "can only communicate with a TCP_Socket";
             opserr << " address given is not of type SocketAddress\n"; 
             return -1;	    
@@ -693,7 +691,7 @@ TCP_Socket::sendVector(int dbTag, int commitTag,
         if (bcmp((char *) &other_Addr.addr_in, (char *) &theSocketAddress->address.addr_in, 
             theSocketAddress->addrLength) != 0) {
 
-                opserr << "TCP_Socket::recvVector() - a TCP_Socket ";
+                opserr << "TCP_Socket::sendVector() - a TCP_Socket ";
                 opserr << "can only communicate with one other TCP_Socket\n"; 
                 return -1;
         }
@@ -704,7 +702,7 @@ TCP_Socket::sendVector(int dbTag, int commitTag,
     int nwrite, nleft;    
     double *data = theVector.theData;
     char *gMsg = (char *)data;
-    nleft =  theVector.sz * sizeof(double);
+    nleft = theVector.sz * sizeof(double);
 
 #ifndef _WIN32
     if (endiannessProblem) {
@@ -740,7 +738,7 @@ TCP_Socket::recvID(int dbTag, int commitTag,
         if (theAddress->getType() == SOCKET_TYPE) 
             theSocketAddress = (SocketAddress *)theAddress;
         else {
-            opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+            opserr << "TCP_Socket::recvID() - a TCP_Socket ";
             opserr << "can only communicate with a TCP_Socket";
             opserr << " address given is not of type SocketAddress\n"; 
             return -1;	    
@@ -759,7 +757,7 @@ TCP_Socket::recvID(int dbTag, int commitTag,
     int nleft,nread;
     int *data = theID.data;
     char *gMsg = (char *)data;;
-    nleft =  theID.sz * sizeof(int);
+    nleft = theID.sz * sizeof(int);
 
     while (nleft > 0) {
         nread = recv(sockfd,gMsg,nleft,0);
@@ -790,7 +788,7 @@ TCP_Socket::sendID(int dbTag, int commitTag,
         if (theAddress->getType() == SOCKET_TYPE) 
             theSocketAddress = (SocketAddress *)theAddress;
         else {
-            opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+            opserr << "TCP_Socket::sendID() - a TCP_Socket ";
             opserr << "can only communicate with a TCP_Socket";
             opserr << " address given is not of type SocketAddress\n"; 
             return -1;	    
@@ -798,7 +796,7 @@ TCP_Socket::sendID(int dbTag, int commitTag,
         if (bcmp((char *) &other_Addr.addr_in, (char *) &theSocketAddress->address.addr_in, 
             theSocketAddress->addrLength) != 0) {
 
-                opserr << "TCP_Socket::recvID() - a TCP_Socket ";
+                opserr << "TCP_Socket::sendID() - a TCP_Socket ";
                 opserr << "can only communicate with one other TCP_Socket\n"; 
                 return -1;
         }
@@ -809,7 +807,7 @@ TCP_Socket::sendID(int dbTag, int commitTag,
     int nwrite, nleft;    
     int *data = theID.data;
     char *gMsg = (char *)data;
-    nleft =  theID.sz * sizeof(int);
+    nleft = theID.sz * sizeof(int);
 
 #ifndef _WIN32
     if (endiannessProblem) {
@@ -836,14 +834,14 @@ TCP_Socket::sendID(int dbTag, int commitTag,
 
 
 unsigned int 
-TCP_Socket::getPortNumber(void) const
+TCP_Socket::getPortNumber() const
 {
     return myPort;
 }
 
 
 unsigned int
-TCP_Socket::getBytesAvailable(void)
+TCP_Socket::getBytesAvailable()
 {
     unsigned long bytesAvailable;
 
@@ -858,7 +856,7 @@ TCP_Socket::getBytesAvailable(void)
 
 
 char *
-TCP_Socket::addToProgram(void)
+TCP_Socket::addToProgram()
 {
     char *tcp = " 1 ";
 

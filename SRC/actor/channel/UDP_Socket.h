@@ -18,11 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-10-15 00:31:47 $
+// $Revision: 1.4 $
+// $Date: 2010-08-06 21:51:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/UDP_Socket.h,v $
-                                                                        
-                                                                        
+
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -31,29 +30,29 @@
 // UDP_Socket is a sub-class of channel. It is implemented with
 // Berkeley datagram sockets using the UDP protocol. Messages delivery
 // is thus unreliable.
-//
-// What: "@(#) UDP_Socket.h, revA"
 
 #ifndef UDP_Socket_h
 #define UDP_Socket_h
 
+#include <bool.h>
 #include <Socket.h>
 #include <Channel.h>
-class SocketAddress;
 
 class UDP_Socket : public Channel
 {
   public:
     UDP_Socket();
-    UDP_Socket(unsigned int port);   
-    UDP_Socket(unsigned int other_Port, char *other_InetAddr);  
+    UDP_Socket(unsigned int port, bool checkEndianness = false);   
+    UDP_Socket(unsigned int other_Port, char *other_InetAddr,
+        bool checkEndianness = false);  
     ~UDP_Socket();
     
-    char *addToProgram(void);
+    char *addToProgram();
     
-    virtual int setUpConnection(void);
+    virtual int setUpConnection();
 
     int setNextAddress(const ChannelAddress &otherChannelAddress);
+    virtual ChannelAddress *getLastSendersAddress(){ return 0;};
 
     int sendObj(int commitTag,
 		MovableObject &theObject, 
@@ -67,6 +66,9 @@ class UDP_Socket : public Channel
 		const Message &, 
 		ChannelAddress *theAddress =0);    
     int recvMsg(int dbTag, int commitTag, 
+		Message &, 
+		ChannelAddress *theAddress =0);        
+    int recvMsgUnknownSize(int dbTag, int commitTag, 
 		Message &, 
 		ChannelAddress *theAddress =0);        
 
@@ -89,13 +91,14 @@ class UDP_Socket : public Channel
     int recvID(int dbTag, int commitTag, 
 	       ID &theID, 
 	       ChannelAddress *theAddress =0);    
-
- protected:
-    unsigned int getPortNumber(void) const;
+    
+  protected:
+    unsigned int getPortNumber() const;
+    unsigned int getBytesAvailable();
     
   private:
-    int sockfd;
-    int connectType;
+    socket_type sockfd;
+    
     union {
 	  struct sockaddr    addr;
 	  struct sockaddr_in addr_in;
@@ -103,23 +106,14 @@ class UDP_Socket : public Channel
     union {
       struct sockaddr    addr;
       struct sockaddr_in addr_in;
-    } last_Addr;
-
-    socklen_t addrLength;
-    char *shadow_inetAddr;
-    unsigned int shadow_port;
-    unsigned int myPort;    
-    char add[40];    
+    } other_Addr;
+    
+    socklen_type addrLength;
+    
+    unsigned int myPort;
+    int connectType;
+    bool checkEndianness;
+    bool endiannessProblem;
 };
 
 #endif 
-
-
-
-
-
-
-
-
- 
-
