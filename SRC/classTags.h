@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.123 $
-// $Date: 2010-07-28 00:02:56 $
+// $Revision: 1.124 $
+// $Date: 2010-08-06 21:30:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
 
 // Written: fmk
@@ -37,6 +37,7 @@
 #define idType     3
 #define vectorType 4
 #define matrixType 5
+#define myType 6
 
 #define ACTOR_TAGS_SUBDOMAIN 1
 
