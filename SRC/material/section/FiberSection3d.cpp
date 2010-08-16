@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.31 $
-// $Date: 2009-09-28 22:48:15 $
+// $Revision: 1.32 $
+// $Date: 2010-08-16 05:05:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -858,11 +858,28 @@ FiberSection3d::setResponse(const char **argv, int argc, OPS_Stream &output)
 
     theResponse =  new MaterialResponse(this, 4, Vector(2*this->getOrder()));
   
-  }  
-  
+  } else if (strcmp(argv[0],"fiberData") == 0) {
+    int numData = numFibers*5;
+    for (int j = 0; j < numFibers; j++) {
+      output.tag("FiberOutput");
+      output.attr("yLoc", -matData[3*j]);
+      output.attr("zLoc", matData[3*j+1]);
+      output.attr("area", matData[3*j+2]);    
+      output.tag("ResponseType","yCoord");
+      output.tag("ResponseType","zCoord");
+      output.tag("ResponseType","area");
+      output.tag("ResponseType","stress");
+      output.tag("ResponseType","strain");
+      output.endTag();
+    }
+    Vector theResponseData(numData);
+    theResponse = new MaterialResponse(this, 5, theResponseData);
+  }
+
+
   else {
     if (argc > 2 || strcmp(argv[0],"fiber") == 0) {
-
+      
       int key = numFibers;
       int passarg = 2;
       
@@ -959,7 +976,25 @@ FiberSection3d::getResponse(int responseID, Information &sectInfo)
 {
   // Just call the base class method ... don't need to define
   // this function, but keeping it here just for clarity
-  return SectionForceDeformation::getResponse(responseID, sectInfo);
+  if (responseID == 5) {
+    int numData = 5*numFibers;
+    Vector data(numData);
+    int count = 0;
+    for (int j = 0; j < numFibers; j++) {
+      double yLoc, zLoc, A, stress, strain;
+      yLoc = -matData[3*j];
+      zLoc =  matData[3*j+1];
+      A = matData[3*j+2];
+      stress = theMaterials[j]->getStress();
+      strain = theMaterials[j]->getStrain();
+      data(count) = yLoc; data(count+1) = zLoc; data(count+2) = A;
+      data(count+3) = stress; data(count+4) = strain;
+      count += 5;
+    }
+    return sectInfo.setVector(data);	
+  } else {
+    return SectionForceDeformation::getResponse(responseID, sectInfo);
+  }
 }
 
 int
