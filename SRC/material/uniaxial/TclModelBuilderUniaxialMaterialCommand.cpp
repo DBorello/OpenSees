@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.69 $
-// $Date: 2010-04-06 20:18:49 $
+// $Revision: 1.70 $
+// $Date: 2010-08-17 00:23:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -87,6 +87,7 @@ extern void *OPS_NewConcreteL01Material(void);
 extern void *OPS_NewSteelZ01Material(void);
 extern void *OPS_NewTendonL01Material(void);
 extern void *OPS_NewConfinedConcrete01Material(void);
+extern void *OPS_NewElasticBilin(void);
 
 //extern int TclCommand_ConfinedConcrete02(ClientData clientData, Tcl_Interp *interp, int argc, 
 //					 TCL_Char **argv, TclModelBuilder *theTclBuilder);
@@ -214,6 +215,13 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
       
       // Parsing was successful, allocate the material
       theMaterial = new ElasticMaterial(tag, E, eta);       
+
+    } else if ((strcmp(argv[1],"ElasticBilin") == 0) || (strcmp(argv[1],"ElasticBiinear") == 0)) {
+      void *theMat = OPS_NewElasticBilin();
+      if (theMat != 0) 
+	theMaterial = (UniaxialMaterial *)theMat;
+      else 
+	return TCL_ERROR;
 
     } else if (strcmp(argv[1],"Elastic2") == 0) {
 	if (argc < 4 || argc > 5) {

@@ -4,6 +4,7 @@ include ../../../Makefile.def
 	ElasticMaterial.o \
 	Elastic2Material.o \
         ElasticPPMaterial.o \
+        ElasticBilin.o \
 	ParallelMaterial.o \
 	Neoprene.o \
         HardeningMaterial.o \

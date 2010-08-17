@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.125 $
-// $Date: 2010-08-06 21:50:14 $
+// $Revision: 1.126 $
+// $Date: 2010-08-17 00:23:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
 
 // Written: fmk
@@ -132,6 +132,7 @@
 #define MAT_TAG_ConcreteZ01			43
 #define MAT_TAG_TendonL01			44
 #define MAT_TAG_SteelZ01			45
+#define MAT_TAG_ElasticBilin			46
 
 // Terje:
 #define MAT_TAG_SmoothSteel01			21
