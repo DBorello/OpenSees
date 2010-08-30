@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.55 $
-// $Date: 2010-06-11 15:59:11 $
+// $Revision: 1.56 $
+// $Date: 2010-08-30 17:06:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -311,7 +311,9 @@ int TclReliabilityModelBuilder_rvReduction(ClientData clientData, Tcl_Interp *in
 int TclReliabilityModelBuilder_getBetaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
 int TclReliabilityModelBuilder_getGammaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
 int TclReliabilityModelBuilder_getAlphaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
-int TclReliabilityModelBuilder_invNormalCDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
+int TclReliabilityModelBuilder_getPDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
+int TclReliabilityModelBuilder_getCDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
+int TclReliabilityModelBuilder_getInverseCDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
 int TclReliabilityModelBuilder_getRVTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
 int TclReliabilityModelBuilder_getRVPositioners(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
 int TclReliabilityModelBuilder_getLSFTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
@@ -400,7 +402,9 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
   Tcl_CreateCommand(interp, "betaFORM",TclReliabilityModelBuilder_getBetaFORM,(ClientData)NULL, NULL); //not in K.F.
   Tcl_CreateCommand(interp, "gammaFORM",TclReliabilityModelBuilder_getGammaFORM,(ClientData)NULL, NULL);//not in K.F.
   Tcl_CreateCommand(interp, "alphaFORM",TclReliabilityModelBuilder_getAlphaFORM,(ClientData)NULL, NULL);//not in K.F.
-  Tcl_CreateCommand(interp, "invNormalCDF",TclReliabilityModelBuilder_invNormalCDF,(ClientData)NULL, NULL);//not in K.F.
+  Tcl_CreateCommand(interp, "getPDF",TclReliabilityModelBuilder_getPDF,(ClientData)NULL, NULL);//not in K.F.
+  Tcl_CreateCommand(interp, "getCDF",TclReliabilityModelBuilder_getCDF,(ClientData)NULL, NULL);//not in K.F.
+  Tcl_CreateCommand(interp, "getInverseCDF",TclReliabilityModelBuilder_getInverseCDF,(ClientData)NULL, NULL);//not in K.F.
   Tcl_CreateCommand(interp, "getRVTags",TclReliabilityModelBuilder_getRVTags,(ClientData)NULL, NULL);//not in K.F.
   Tcl_CreateCommand(interp, "getRVPositioners",TclReliabilityModelBuilder_getRVPositioners,(ClientData)NULL, NULL);//not in K.F.
   Tcl_CreateCommand(interp, "getLSFTags",TclReliabilityModelBuilder_getLSFTags,(ClientData)NULL, NULL);//not in K.F.
@@ -627,7 +631,9 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
   Tcl_DeleteCommand(theInterp, "rvReduction");
   Tcl_DeleteCommand(theInterp, "betaFORM");
   Tcl_DeleteCommand(theInterp, "gammaFORM");
-  Tcl_DeleteCommand(theInterp, "invNormalCDF");
+  Tcl_DeleteCommand(theInterp, "getPDF");
+  Tcl_DeleteCommand(theInterp, "getCDF");
+  Tcl_DeleteCommand(theInterp, "getInverseCDF");
   Tcl_DeleteCommand(theInterp, "getRVTags");
   Tcl_DeleteCommand(theInterp, "getRVPositioners");
   Tcl_DeleteCommand(theInterp, "getLSFTags");
@@ -9042,36 +9048,105 @@ TclReliabilityModelBuilder_getAlphaFORM(ClientData clientData, Tcl_Interp *inter
   return TCL_OK;
 }
 
-
-///invNormalCDF is not in K.F.
 int
-TclReliabilityModelBuilder_invNormalCDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+TclReliabilityModelBuilder_getPDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
-  static NormalRV aStdNormal(0, 0.0, 1.0);
+  if (argc < 3) {
+    opserr << "WARNING getPDF tag? x? -- insufficient number of arguments\n";
+    return TCL_ERROR;
+  }
 
+  int rvTag;
   double x;
-  if (Tcl_GetDouble(interp, argv[1], &x) != TCL_OK) {
-    opserr << "WARNING invNormalCDF x? <mean? stdev?>- could not read x\n";
+  if (Tcl_GetInt(interp, argv[1], &rvTag) != TCL_OK) {
+    opserr << "WARNING getPDF tag? x? -- could not read tag\n";
+    return TCL_ERROR;
+  }
+  if (Tcl_GetDouble(interp, argv[2], &x) != TCL_OK) {
+    opserr << "WARNING getPDF tag? x? -- could not read x\n";
     return TCL_ERROR;	        
+  }
+
+  RandomVariable *theRV = theReliabilityDomain->getRandomVariablePtr(rvTag);
+  if (theRV == 0) {
+    opserr << "WARNING getPDF tag? x? -- random variable with tag "
+	   << rvTag << " does not exist in model\n";
+    return TCL_ERROR;
   }
 
   char buffer[40];
 
-  if (argc < 4) {
-    sprintf(buffer,"%35.20f", aStdNormal.getInverseCDFvalue(x));
+  sprintf(buffer,"%35.20f", theRV->getPDFvalue(x));
+
+  Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+
+  return TCL_OK;
+}
+
+int
+TclReliabilityModelBuilder_getCDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  if (argc < 3) {
+    opserr << "WARNING getCDF tag? x? -- insufficient number of arguments\n";
+    return TCL_ERROR;
   }
-  else {
-    double mean, stdev;
-    if (Tcl_GetDouble(interp, argv[2], &mean) != TCL_OK) {
-      opserr << "WARNING invNormalCDF x? mean? stdev? - could not read mean\n";
-      return TCL_ERROR;	        
-    }
-    if (Tcl_GetDouble(interp, argv[3], &stdev) != TCL_OK) {
-      opserr << "WARNING invNormalCDF x? mean? stdev? - could not read stdev\n";
-      return TCL_ERROR;	        
-    }
-    sprintf(buffer,"%35.20f", mean + stdev*aStdNormal.getInverseCDFvalue(x));
+
+  int rvTag;
+  double x;
+  if (Tcl_GetInt(interp, argv[1], &rvTag) != TCL_OK) {
+    opserr << "WARNING getCDF tag? x? -- could not read tag\n";
+    return TCL_ERROR;
   }
+  if (Tcl_GetDouble(interp, argv[2], &x) != TCL_OK) {
+    opserr << "WARNING getCDF tag? x? -- could not read x\n";
+    return TCL_ERROR;	        
+  }
+
+  RandomVariable *theRV = theReliabilityDomain->getRandomVariablePtr(rvTag);
+  if (theRV == 0) {
+    opserr << "WARNING getCDF tag? x? -- random variable with tag "
+	   << rvTag << " does not exist in model\n";
+    return TCL_ERROR;
+  }
+
+  char buffer[40];
+
+  sprintf(buffer,"%35.20f", theRV->getCDFvalue(x));
+
+  Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+
+  return TCL_OK;
+}
+
+int
+TclReliabilityModelBuilder_getInverseCDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  if (argc < 3) {
+    opserr << "WARNING getInverseCDF tag? p? -- insufficient number of arguments\n";
+    return TCL_ERROR;
+  }
+
+  int rvTag;
+  double x;
+  if (Tcl_GetInt(interp, argv[1], &rvTag) != TCL_OK) {
+    opserr << "WARNING getInverseCDF tag? p? -- could not read tag\n";
+    return TCL_ERROR;
+  }
+  if (Tcl_GetDouble(interp, argv[2], &x) != TCL_OK) {
+    opserr << "WARNING getInverseCDF tag? p? -- could not read p\n";
+    return TCL_ERROR;	        
+  }
+
+  RandomVariable *theRV = theReliabilityDomain->getRandomVariablePtr(rvTag);
+  if (theRV == 0) {
+    opserr << "WARNING getInverseCDF tag? p? -- random variable with tag "
+	   << rvTag << " does not exist in model\n";
+    return TCL_ERROR;
+  }
+
+  char buffer[40];
+
+  sprintf(buffer,"%35.20f", theRV->getInverseCDFvalue(x));
 
   Tcl_SetResult(interp, buffer, TCL_VOLATILE);
 
