@@ -203,6 +203,12 @@
 				RelativePath="..\..\..\SRC\material\uniaxial\Elastic2Material.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\ElasticBilin.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\ElasticBilin.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\material\uniaxial\ElasticMaterial.cpp">
 			</File>
 			<File
