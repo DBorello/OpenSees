@@ -18,6 +18,7 @@ include ../../../Makefile.def
 	EPPGapMaterial.o \
         ViscousMaterial.o \
 	SeriesMaterial.o \
+	InitStrainMaterial.o \
 	MinMaxMaterial.o \
         PathIndependentMaterial.o \
 	CableMaterial.o \

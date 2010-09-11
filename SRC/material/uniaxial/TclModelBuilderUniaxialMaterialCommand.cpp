@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.70 $
-// $Date: 2010-08-17 00:23:25 $
+// $Revision: 1.71 $
+// $Date: 2010-09-11 00:49:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -88,6 +88,8 @@ extern void *OPS_NewSteelZ01Material(void);
 extern void *OPS_NewTendonL01Material(void);
 extern void *OPS_NewConfinedConcrete01Material(void);
 extern void *OPS_NewElasticBilin(void);
+extern void *OPS_NewMinMaxMaterial(void);
+extern void *OPS_NewInitStrainMaterial(void);
 
 //extern int TclCommand_ConfinedConcrete02(ClientData clientData, Tcl_Interp *interp, int argc, 
 //					 TCL_Char **argv, TclModelBuilder *theTclBuilder);
@@ -218,6 +220,20 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 
     } else if ((strcmp(argv[1],"ElasticBilin") == 0) || (strcmp(argv[1],"ElasticBiinear") == 0)) {
       void *theMat = OPS_NewElasticBilin();
+      if (theMat != 0) 
+	theMaterial = (UniaxialMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+
+    } else if ((strcmp(argv[1],"MinMaxMaterial") == 0) || (strcmp(argv[1],"MinMax") == 0)) {
+      void *theMat = OPS_NewMinMaxMaterial();
+      if (theMat != 0) 
+	theMaterial = (UniaxialMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+
+    } else if ((strcmp(argv[1],"InitStrainMaterial") == 0) || (strcmp(argv[1],"InitStrain") == 0)) {
+      void *theMat = OPS_NewInitStrainMaterial();
       if (theMat != 0) 
 	theMaterial = (UniaxialMaterial *)theMat;
       else 
