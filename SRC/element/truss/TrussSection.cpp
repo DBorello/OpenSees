@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2010-06-01 23:41:07 $
+// $Revision: 1.30 $
+// $Date: 2010-09-13 21:27:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -1011,9 +1011,12 @@ TrussSection::setResponse(const char **argv, int argc, OPS_Stream &output)
 
     // a section quantity
     }  else if (strcmp(argv[0],"section") ==0) {
+      int secNum = atoi(argv[1]);
+      if (secNum == 0)
         theResponse = theSection->setResponse(&argv[1], argc-1, output);
-
-    }  
+      else
+	theResponse = theSection->setResponse(&argv[2], argc-2, output);
+    }
 
     output.endTag();
     return theResponse;
