@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.32 $
-// $Date: 2010-05-13 00:16:33 $
+// $Revision: 1.33 $
+// $Date: 2010-09-13 21:26:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 /*
@@ -1771,6 +1771,14 @@ ForceBeamColumn3d::getInitialStiff(void)
     return 0;
   }
 
+int
+ForceBeamColumn3d::getInitialDeformations(Vector &v0)
+{
+  v0.Zero();
+
+  return 0;
+}
+
   void
   ForceBeamColumn3d::compSectionDisplacements(Vector sectionCoords[],
 					      Vector sectionDispls[]) const
@@ -2271,6 +2279,9 @@ ForceBeamColumn3d::getResponse(int responseID, Information &eleInfo)
     this->getInitialFlexibility(fe);
     vp = crdTransf->getBasicTrialDisp();
     vp.addMatrixVector(1.0, fe, Se, -1.0);
+    Vector v0(6);
+    this->getInitialDeformations(v0);
+    vp.addVector(1.0, v0, -1.0);
     return eleInfo.setVector(vp);
   }
 

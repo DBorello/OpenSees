@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.11 $
-// $Date: 2007-02-16 00:11:49 $
+// $Revision: 1.12 $
+// $Date: 2010-09-13 21:26:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.h,v $
 
 /*
@@ -125,6 +125,7 @@ class ForceBeamColumn3d: public Element
  protected:
   void setSectionPointers(int numSections, SectionForceDeformation **secPtrs);
   int getInitialFlexibility(Matrix &fe);
+  int getInitialDeformations(Vector &v0);
   
  private:
   void getForceInterpolatMatrix(double xi, Matrix &b, const ID &code);
