@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2008-02-29 19:47:20 $
+// $Revision: 1.8 $
+// $Date: 2010-09-13 21:35:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/ArmijoStepSizeRule.cpp,v $
 
 
@@ -291,8 +291,10 @@ ArmijoStepSizeRule::computeStepSize(const Vector &u_old,
 		theGFunEvaluator->inactivateSensitivty();////added by K.F.
 		
 		// Notify user that step sizes are being reduced
-		opserr << "Armijo trial point rejected; reducing step size..." << endln
-			<< " .......: ";
+		if (printFlag != 0) {
+		  opserr << "Armijo trial point rejected; reducing step size..." << endln
+			 << " .......: ";
+		}
 		logfile << "Armijo trial point rejected; reducing step size..." << endln;
 		logfile.flush();
 		

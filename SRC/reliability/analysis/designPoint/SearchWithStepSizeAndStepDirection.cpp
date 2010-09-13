@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2008-10-22 16:41:39 $
+// $Revision: 1.20 $
+// $Date: 2010-09-13 21:34:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.cpp,v $
 
 
@@ -239,8 +239,10 @@ SearchWithStepSizeAndStepDirection::findDesignPoint()
 		// Set scale parameter
 		if (steps == 1)	{
 			Gfirst = gFunctionValue;
-			opserr << " Limit-state function value at start point, g=" << gFunctionValue << endln;
-			opserr << " STEP #0: ";
+			if (printFlag != 0) {
+			  opserr << " Limit-state function value at start point, g=" << gFunctionValue << endln;
+			  opserr << " STEP #0: ";
+			}
 			theReliabilityConvergenceCheck->setScaleValue(gFunctionValue);
 		}
 
@@ -400,7 +402,8 @@ SearchWithStepSizeAndStepDirection::findDesignPoint()
 
 
 		// Let user know that we have to take a new step
-		opserr << " STEP #" << steps <<": ";
+		if (printFlag != 0)
+		  opserr << " STEP #" << steps <<": ";
 
 
 		// Update Hessian approximation, if any
@@ -454,8 +457,8 @@ SearchWithStepSizeAndStepDirection::findDesignPoint()
 		while ( fabs(udiff) > 15 ) {
 			*u = u_old;
 			
-			if (stepSizeMod < 1)
-				opserr << "SearchWithStepSizeAndStepDirection:: reducing stepSize using modification factor of " << stepSizeMod << endln;
+			if (stepSizeMod < 1 && printFlag != 0)
+			  opserr << "SearchWithStepSizeAndStepDirection:: reducing stepSize using modification factor of " << stepSizeMod << endln;
 
 			//u = u_old + (searchDirection * stepSize);
 			u->addVector(1.0, *searchDirection, stepSize*stepSizeMod);
