@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $                                                              
-// $Date: 2009-10-13 21:11:19 $                                                                  
+// $Revision: 1.26 $                                                              
+// $Date: 2010-09-13 21:29:28 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C
@@ -381,6 +381,12 @@ NDMaterial::getDampTangentSensitivity(int gradIndex)
 }
 const Matrix &
 NDMaterial::getTangentSensitivity(int gradIndex)
+{
+	static Matrix dummy(1,1);
+	return dummy;
+}
+const Matrix &
+NDMaterial::getInitialTangentSensitivity(int gradIndex)
 {
 	static Matrix dummy(1,1);
 	return dummy;
