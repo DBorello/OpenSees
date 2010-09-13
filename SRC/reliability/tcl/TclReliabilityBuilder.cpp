@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.56 $
-// $Date: 2010-08-30 17:06:44 $
+// $Revision: 1.57 $
+// $Date: 2010-09-13 21:40:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -2116,8 +2116,8 @@ TclReliabilityModelBuilder_addGradLimitState(ClientData clientData, Tcl_Interp *
   int lsfTag, rvTag;
 
   if (theGFunEvaluator != 0 ) {
-    opserr << "ERROR: A limit-state function should not be created after the GFunEvaluator has been instantiated." << endln;
-    return TCL_ERROR;
+    //opserr << "ERROR: A limit-state function should not be created after the GFunEvaluator has been instantiated." << endln;
+    //return TCL_ERROR;
   }
 
   // GET INPUT PARAMETER (integer)
