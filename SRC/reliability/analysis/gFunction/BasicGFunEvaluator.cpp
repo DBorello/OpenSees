@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2008-05-27 20:04:30 $
+// $Revision: 1.9 $
+// $Date: 2010-09-13 21:39:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/BasicGFunEvaluator.cpp,v $
 
 
@@ -43,9 +43,9 @@
 
 
 BasicGFunEvaluator::BasicGFunEvaluator(Tcl_Interp *passedTclInterp, 
-									   ReliabilityDomain *passedReliabilityDomain)
+				       ReliabilityDomain *passedReliabilityDomain)
 
-:GFunEvaluator(passedTclInterp, passedReliabilityDomain)
+  :GFunEvaluator(), theTclInterp(passedTclInterp), theReliabilityDomain(passedReliabilityDomain)
 {
 }
 
@@ -53,6 +53,17 @@ BasicGFunEvaluator::~BasicGFunEvaluator()
 {
 }
 
+double
+BasicGFunEvaluator::evaluateGMHS(const Vector &x) 
+{
+  return 0.0;
+}
+
+int
+BasicGFunEvaluator::setNamespaceRandomVariables(const Vector &x)
+{
+  return 0;
+}
 
 int
 BasicGFunEvaluator::tokenizeSpecials(TCL_Char *theExpression, Tcl_Obj *paramList)

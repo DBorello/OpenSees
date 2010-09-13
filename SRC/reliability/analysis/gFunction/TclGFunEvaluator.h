@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-05-27 20:04:30 $
+// $Revision: 1.7 $
+// $Date: 2010-09-13 21:39:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/TclGFunEvaluator.h,v $
 
 
@@ -43,21 +43,29 @@
 
 class TclGFunEvaluator : public GFunEvaluator
 {
-
-public:
-	TclGFunEvaluator(Tcl_Interp *passedTclInterp,
-						ReliabilityDomain *passedReliabilityDomain,
-						Domain *passedOpenSeesDomain,
-						TCL_Char *fileName);
-	~TclGFunEvaluator();
-
-	int		runGFunAnalysis(const Vector &x);
-	int		tokenizeSpecials(TCL_Char *theExpression, Tcl_Obj *passedList);
-
-protected:
-
-private:
-	char fileName[256];
+ public:
+  TclGFunEvaluator(Tcl_Interp *passedTclInterp,
+		   ReliabilityDomain *passedReliabilityDomain,
+		   Domain *passedOpenSeesDomain,
+		   TCL_Char *fileName);
+  ~TclGFunEvaluator();
+  
+  int runGFunAnalysis(const Vector &x);
+  int tokenizeSpecials(TCL_Char *theExpression, Tcl_Obj *passedList);
+  
+  double evaluateGMHS(const Vector &x);
+  
+ protected:
+  
+ private:
+  
+  int setTclRandomVariables(const Vector &x);
+  
+  Tcl_Interp *theTclInterp;
+  ReliabilityDomain *theReliabilityDomain;
+  Domain *theOpenSeesDomain;
+  
+  char fileName[256];
 	
 };
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2008-05-27 20:04:30 $
+// $Revision: 1.24 $
+// $Date: 2010-09-13 21:39:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.cpp,v $
 
 
@@ -57,7 +57,8 @@ OpenSeesGFunEvaluator::OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
 					     ReliabilityDomain *passedReliabilityDomain,
 					     Domain *passedOpenSeesDomain,
 					     TCL_Char *passedFileName)
-  :GFunEvaluator(passedTclInterp, passedReliabilityDomain, passedOpenSeesDomain)
+  :GFunEvaluator(), theTclInterp(passedTclInterp), theReliabilityDomain(passedReliabilityDomain),
+   theOpenSeesDomain(passedOpenSeesDomain)
 {
 	// here the user has provided a file with the analysis commmands
 	strcpy(fileName,passedFileName);
@@ -70,7 +71,8 @@ OpenSeesGFunEvaluator::OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
 					     ReliabilityDomain *passedReliabilityDomain,
 					     Domain *passedOpenSeesDomain,
 					     int p_nsteps, double p_dt)
-  :GFunEvaluator(passedTclInterp, passedReliabilityDomain, passedOpenSeesDomain)
+  :GFunEvaluator(), theTclInterp(passedTclInterp), theReliabilityDomain(passedReliabilityDomain),
+   theOpenSeesDomain(passedOpenSeesDomain)
 {
 	// here the user has specified number of steps and possibly dt
 	fileName[0] = '\0';
@@ -84,7 +86,32 @@ OpenSeesGFunEvaluator::~OpenSeesGFunEvaluator()
   
 }
 
+/*
+double
+OpenSeesGFunEvaluator::evaluateGMHS(const Vector &x) 
+{
+  double g = 0.0;
 
+  // "Download" limit-state function from reliability domain
+  int lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
+  LimitStateFunction *theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
+  
+  // Get the limit-state function expression
+  const char *theExpression = theLimitStateFunction->getExpression();
+
+  if (Tcl_ExprDouble( theTclInterp, theExpression, &g) != TCL_OK) {
+    opserr << "OpenSeesGFunEvaluator::evaluateGnoRecompute -- expression \"" << theExpression;
+    opserr << "\" caused error:" << endln << theTclInterp->result << endln;
+    return 0.0;
+  }
+
+  return g;
+}
+*/
+
+
+
+/*
 int
 OpenSeesGFunEvaluator::runGFunAnalysis(const Vector &x)
 {
@@ -344,3 +371,4 @@ double OpenSeesGFunEvaluator::getG2(double g, double littleDeltaT)
 	return g2FunctionValue;
 
 }
+*/

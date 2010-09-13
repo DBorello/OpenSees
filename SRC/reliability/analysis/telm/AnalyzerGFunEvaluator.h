@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-05-27 20:04:30 $
+// $Revision: 1.3 $
+// $Date: 2010-09-13 21:39:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/AnalyzerGFunEvaluator.h,v $
 
 //
@@ -72,6 +72,8 @@ public:
 	int		evaluateG(const Vector &x);
 	int		tokenizeSpecials(TCL_Char *theExpression, Tcl_Obj *paramList);
 
+	double		evaluateGMHS(const Vector &x) {return 0.0;}
+
 	void    setNsteps(int nsteps);
 	double  getDt();
 	int getNstep();
@@ -107,6 +109,8 @@ private:
 	PerformanceFunctionCoefficientIter* thePfCoeffIter;
 	double pfthreshold;
 
+	Tcl_Interp *theTclInterp;
+	ReliabilityDomain *theReliabilityDomain;
 };
 
 #endif

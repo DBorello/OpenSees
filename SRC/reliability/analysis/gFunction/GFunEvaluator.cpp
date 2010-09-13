@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2008-05-27 20:04:30 $
+// $Revision: 1.18 $
+// $Date: 2010-09-13 21:39:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/GFunEvaluator.cpp,v $
 
 
@@ -55,22 +55,9 @@ using std::ios;
 using std::setw;
 using std::setprecision;
 
-GFunEvaluator::GFunEvaluator(Tcl_Interp *passedTclInterp, ReliabilityDomain *passedReliabilityDomain, 
-			Domain *passedOpenSeesDomain)
+GFunEvaluator::GFunEvaluator()
 {
-	theTclInterp = passedTclInterp;
-	theReliabilityDomain = passedReliabilityDomain;
-	theOpenSeesDomain = passedOpenSeesDomain;
-	numberOfEvaluations = 0;
-}
-
-GFunEvaluator::GFunEvaluator(Tcl_Interp *passedTclInterp, ReliabilityDomain *passedReliabilityDomain)
-{
-	// BasicGFun does not need OpenSeesDomain (and perhaps Matlab or others in the future)
-	theTclInterp = passedTclInterp;
-	theReliabilityDomain = passedReliabilityDomain;
-	theOpenSeesDomain = 0;
-	numberOfEvaluations = 0;
+  numberOfEvaluations = 0;
 }
 
 GFunEvaluator::~GFunEvaluator()
@@ -97,7 +84,7 @@ GFunEvaluator::getNumberOfEvaluations()
 	return numberOfEvaluations;
 }
 
-
+/*
 int 
 GFunEvaluator::setTclRandomVariables(const Vector &x)
 {
@@ -133,8 +120,8 @@ GFunEvaluator::setTclRandomVariables(const Vector &x)
 	
 	return 0;
 }
-
-
+*/
+ /*
 int
 GFunEvaluator::uParse(char *tempchar, int *node, int *dirn, char* disp, char* varName, char* arrName)
 {
@@ -426,22 +413,11 @@ GFunEvaluator::elementTclVariable(int eleNumber, char* varName, char* inString)
   
 	return 0;
 }
+*/
 
 
-int
-GFunEvaluator::runGFunAnalysis(const Vector &x)
-{
-	// Set values of random variables in the Tcl intepreter
-	// this is required even for Basic gFun
-	if (setTclRandomVariables(x) != 0) {
-		opserr << "ERROR runGFunAnalysis -- error in setTclRandomVariables" << endln;
-		return -1;
-	}
-	
-	return 0;
-}
 
-
+/*
 int 
 GFunEvaluator::evaluateG(const Vector &x)
 {
@@ -550,7 +526,7 @@ GFunEvaluator::evaluateG(const Vector &x)
 	}
 
 	////////////////////////////////////////////////////////////
-*/
+
 
 	//char tclAssign[200];
 	//sprintf(tclAssign, "puts [info vars]");
@@ -562,7 +538,8 @@ GFunEvaluator::evaluateG(const Vector &x)
 
 	return 0;
 }
-
+*/
+/*
 int 
 GFunEvaluator::evaluateGnoRecompute(const char* lsfExpression)
 {
@@ -576,7 +553,7 @@ GFunEvaluator::evaluateGnoRecompute(const char* lsfExpression)
 
 	return 0;
 }
-
+*/
 
 void
 GFunEvaluator::setNsteps(int nsteps)

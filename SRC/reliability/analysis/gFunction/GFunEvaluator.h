@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2008-05-27 20:04:30 $
+// $Revision: 1.9 $
+// $Date: 2010-09-13 21:39:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/GFunEvaluator.h,v $
 
 
@@ -49,27 +49,29 @@ class GFunEvaluator
 {
 
 public:
-	GFunEvaluator(Tcl_Interp *theTclInterp, ReliabilityDomain *theReliabilityDomain, Domain *theOpenSeesDomain);
-	GFunEvaluator(Tcl_Interp *theTclInterp, ReliabilityDomain *theReliabilityDomain);
+	GFunEvaluator();
 	virtual ~GFunEvaluator();
 
 	// Methods provided by base class
 	///// changed by K Fujimura /////
-	virtual int		runGFunAnalysis(const Vector &x);
-	virtual int		evaluateG(const Vector &x);
-	virtual int		evaluateGnoRecompute(const char* lsfExpression);
+	virtual int		runGFunAnalysis(const Vector &x) = 0;
+	virtual int		evaluateG(const Vector &x) {g = this->evaluateGMHS(x); return 0;}
+	//virtual int		evaluateGnoRecompute(const char* lsfExpression);
 	double	getG();
 	int     initializeNumberOfEvaluations();
 	int     getNumberOfEvaluations();
 	
+	virtual double evaluateGMHS(const Vector &x) {return 0.0;}
+
 	// Methods in base class for evaluating LSF
+	/*
 	int		setTclRandomVariables(const Vector &x);
 	int		uParse(char *tempchar, int *node, int *dirn, char* disp, char* varName, char* arrName);
 	int		nodeParse(char *tempchar, int *node, int *dirn, char* disp, char* varName, char* arrName);
 	int		elementParse(char *tempchar, int *element, char* varName, char* eleArgs);
 	int		nodeTclVariable(int nodeNumber, int direction, char* dispOrWhat, char* varName, char* arrName);
 	int		elementTclVariable(int eleNumber, char* varName, char* restString);
-
+	*/
 	// Methods to be implemented by specific classes
 	virtual int		tokenizeSpecials(TCL_Char *theExpression, Tcl_Obj *paramList) = 0;
 
@@ -96,9 +98,9 @@ public:
 
 
 protected:
-	Tcl_Interp *theTclInterp;
-	ReliabilityDomain *theReliabilityDomain;
-	Domain *theOpenSeesDomain;
+	//Tcl_Interp *theTclInterp;
+	//ReliabilityDomain *theReliabilityDomain;
+	//Domain *theOpenSeesDomain;
 	double g;
 	int numberOfEvaluations;
 

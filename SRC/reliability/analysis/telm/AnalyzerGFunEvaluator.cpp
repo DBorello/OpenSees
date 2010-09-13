@@ -22,16 +22,16 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2008-05-27 20:04:30 $
+// $Revision: 1.3 $
+// $Date: 2010-09-13 21:39:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/AnalyzerGFunEvaluator.cpp,v $
 
 //
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
-// $Revision: 1.2 $
-// $Date: 2008-05-27 20:04:30 $
+// $Revision: 1.3 $
+// $Date: 2010-09-13 21:39:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/telm/AnalyzerGFunEvaluator.cpp,v $
 
 
@@ -44,7 +44,7 @@ AnalyzerGFunEvaluator::AnalyzerGFunEvaluator(Tcl_Interp *passedTclInterp,
 						  ReliabilityDomain *passedReliabilityDomain,
           				  Domain* passedDomain,
 						  Analyzer* passedAnalyzer)
-:GFunEvaluator(passedTclInterp, passedReliabilityDomain)
+  :GFunEvaluator(), theTclInterp(passedTclInterp), theReliabilityDomain(passedReliabilityDomain)
 {
 	theDomain=passedDomain;
 	theAnalyzer=passedAnalyzer;

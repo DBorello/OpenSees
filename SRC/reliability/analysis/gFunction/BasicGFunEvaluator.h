@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-05-27 20:04:30 $
+// $Revision: 1.7 $
+// $Date: 2010-09-13 21:39:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/BasicGFunEvaluator.h,v $
 
 
@@ -43,17 +43,22 @@
 class BasicGFunEvaluator : public GFunEvaluator
 {
 
-public:
-	BasicGFunEvaluator(	Tcl_Interp *passedTclInterp, 
-						ReliabilityDomain *passedReliabilityDomain);
-	~BasicGFunEvaluator();
+ public:
+  BasicGFunEvaluator(Tcl_Interp *passedTclInterp, 
+		     ReliabilityDomain *passedReliabilityDomain);
+  ~BasicGFunEvaluator();
 
-	int		tokenizeSpecials(TCL_Char *theExpression, Tcl_Obj *paramList);
+  double evaluateGMHS(const Vector &x);
+  int setNamespaceRandomVariables(const Vector &x);
+  int runGFunAnalysis(const Vector &x) {return 0;}
 
-protected:
+  int tokenizeSpecials(TCL_Char *theExpression, Tcl_Obj *paramList);
 
-private:
+ protected:
 
+ private:
+  Tcl_Interp *theTclInterp;
+  ReliabilityDomain *theReliabilityDomain;
 };
 
 #endif
