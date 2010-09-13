@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2007-12-01 01:03:49 $
+// $Revision: 1.6 $
+// $Date: 2010-09-13 21:31:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/integration/RCSectionIntegration.cpp,v $
 
 #include <RCSectionIntegration.h>
@@ -67,9 +67,16 @@ RCSectionIntegration::~RCSectionIntegration()
 }
 
 int
-RCSectionIntegration::getNumFibers(void)
+RCSectionIntegration::getNumFibers(FiberType type)
 {
-  return 2*(Nfcore+Nfcover) + Nfs;
+  if (type == steel)
+    return Nfs;
+  if (type == concrete)
+    return 2*(Nfcore+Nfcover);
+  if (type == all)
+    return 2*(Nfcore+Nfcover) + Nfs;
+
+  return 0;
 }
 
 int

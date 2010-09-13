@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-01-25 19:53:17 $
+// $Revision: 1.4 $
+// $Date: 2010-09-13 21:30:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/integration/SectionIntegration.h,v $
 
 #ifndef SectionIntegration_h
@@ -30,13 +30,15 @@
 
 class Information;
 
+enum FiberType {all, concrete, steel, wood};
+
 class SectionIntegration : public MovableObject
 {
  public:
   SectionIntegration(int classTag);
   virtual ~SectionIntegration();
 
-  virtual int getNumFibers(void) = 0;
+  virtual int getNumFibers(FiberType type = all) = 0;
 
   virtual void getFiberLocations(int nFibers, double *yi, double *zi = 0) = 0;
   virtual void getFiberWeights(int nFibers, double *wt) = 0;
@@ -47,6 +49,8 @@ class SectionIntegration : public MovableObject
   virtual void getWeightsDeriv(int nFibers, double *dwtdh);
 
   virtual void Print(OPS_Stream &s, int flag = 0) = 0;
+
+
 };
 
 #endif

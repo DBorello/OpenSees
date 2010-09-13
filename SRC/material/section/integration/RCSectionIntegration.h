@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2007-01-25 19:53:17 $
+// $Revision: 1.5 $
+// $Date: 2010-09-13 21:31:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/integration/RCSectionIntegration.h,v $
 
 #ifndef RCSectionIntegration_h
@@ -38,7 +38,7 @@ class RCSectionIntegration : public SectionIntegration
   RCSectionIntegration();
   ~RCSectionIntegration();
 
-  int getNumFibers(void);
+  int getNumFibers(FiberType type = all);
 
   void getFiberLocations(int nFibers, double *yi, double *zi = 0);
   void getFiberWeights(int nFibers, double *wt);

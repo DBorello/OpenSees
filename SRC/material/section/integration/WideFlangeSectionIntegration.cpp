@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2007-01-25 19:53:17 $
+// $Revision: 1.4 $
+// $Date: 2010-09-13 21:31:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/integration/WideFlangeSectionIntegration.cpp,v $
 
 #include <WideFlangeSectionIntegration.h>
@@ -55,9 +55,12 @@ WideFlangeSectionIntegration::~WideFlangeSectionIntegration()
 }
 
 int
-WideFlangeSectionIntegration::getNumFibers(void)
+WideFlangeSectionIntegration::getNumFibers(FiberType type)
 {
-  return Nfdw + 2*Nftf;
+  if (type == all || type == steel)
+    return Nfdw + 2*Nftf;
+  else
+    return 0;
 }
 
 int
