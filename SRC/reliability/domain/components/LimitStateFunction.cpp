@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2010-06-10 20:14:39 $
+// $Revision: 1.17 $
+// $Date: 2010-09-13 21:33:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.cpp,v $
 
 
@@ -172,6 +172,8 @@ int
 LimitStateFunction::addGradientExpression(const char *expression, int rvTag)
 {
   map<int, string>::iterator theExpr;
+
+  this->removeGradientExpression(rvTag);
 
   // Check if the expression is already in map
   theExpr = mapOfGradientExpressions.find(rvTag);
