@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2008-10-22 16:41:10 $
+// $Revision: 1.21 $
+// $Date: 2010-09-13 21:38:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/OpenSeesGradGEvaluator.cpp,v $
 
 
@@ -225,6 +225,25 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 	// "Download" limit-state function from reliability domain
 	int lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
 	LimitStateFunction *theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
+
+
+
+	for (int i = 0; i < nrv; i++) {
+	  RandomVariable *theRV = theReliabilityDomain->getRandomVariablePtrFromIndex(i);
+	  int tag = theRV->getTag();
+	  const char *gradExpression = theLimitStateFunction->getGradientExpression(tag);
+	  double result = 0;
+	  if (Tcl_ExprDouble( theTclInterp, gradExpression, &result) == TCL_ERROR) {
+	    opserr << "ERROR OpenSeesGradGEvaluator -- error in Tcl_ExprDouble for the analytic gradient command" << endln;
+	    return -1;
+	  }
+	  (*grad_g)(i) += result;
+	}
+
+	return 0;
+
+	/*
+
 	char *theExpression = theLimitStateFunction->getExpression();
 	Tcl_Obj *passedList = theLimitStateFunction->getParameters();
 	
@@ -478,6 +497,8 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 	Tcl_DecrRefCount(paramList);
 
 	return 0;
+	*/
+
 
 }
 
