@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2008-05-27 20:04:30 $
+// $Revision: 1.7 $
+// $Date: 2010-09-13 21:37:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/GradGEvaluator.cpp,v $
 
 
@@ -74,7 +74,7 @@ GradGEvaluator::getDgDdispl()
 int 
 GradGEvaluator::computeParameterDerivatives(double g)
 {
-	
+  /*
 	// Zero out the previous result matrix
 	if (DgDpar != 0) {
 		delete DgDpar;
@@ -183,7 +183,7 @@ GradGEvaluator::computeParameterDerivatives(double g)
 	
 	// reclaim Tcl object space
 	Tcl_DecrRefCount(paramList);
-
+  */
 	return 0;
 }
 
