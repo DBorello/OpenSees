@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2010-02-04 00:40:25 $
+// $Revision: 1.30 $
+// $Date: 2010-09-13 21:33:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
                                                                         
@@ -131,6 +131,9 @@ eleResponse(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv
 
 int 
 nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+nodeReaction(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
 nodeEigenvector(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);

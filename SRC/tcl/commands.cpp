@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.160 $
-// $Date: 2010-05-04 23:51:32 $
+// $Revision: 1.161 $
+// $Date: 2010-09-13 21:33:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -699,6 +699,8 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "eleResponse", &eleResponse, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "nodeDisp", &nodeDisp, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
+    Tcl_CreateCommand(interp, "nodeReaction", &nodeReaction, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "nodeEigenvector", &nodeEigenvector, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
@@ -5856,6 +5858,61 @@ nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 }
 
 int 
+nodeReaction(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+    // make sure at least one other argument to contain type of system
+    if (argc < 2) {
+	opserr << "WARNING want - nodeReaction nodeTag? <dof?>\n";
+	return TCL_ERROR;
+   }    
+
+    int tag;
+    int dof = -1;
+
+    if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+	opserr << "WARNING nodeReaction nodeTag? dof? - could not read nodeTag? \n";
+	return TCL_ERROR;	        
+    } 
+
+    if (argc > 2) {
+      if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
+	opserr << "WARNING nodeReaction nodeTag? dof? - could not read dof? \n";
+	return TCL_ERROR;	        
+      }   
+    }     
+    
+    dof--;
+
+    const Vector *nodalResponse = theDomain.getNodeResponse(tag, Reaction);
+
+    if (nodalResponse == 0)
+      return TCL_ERROR;
+
+    int size = nodalResponse->Size();
+
+    if (dof >= 0) {
+
+      if (dof >= size) {
+	opserr << "WARNING nodeReaction nodeTag? dof? - dofTag? too large\n";
+	return TCL_ERROR;
+      }
+      
+      double value = (*nodalResponse)(dof);
+      
+      // now we copy the value to the tcl string that is returned
+      sprintf(interp->result,"%35.20f ",value);
+    } else {
+      char buffer [40];
+      for (int i=0; i<size; i++) {
+	sprintf(buffer,"%35.20f",(*nodalResponse)(i));
+	Tcl_AppendResult(interp, buffer, NULL);
+      }
+    }	
+	
+    return TCL_OK;
+}
+
+int 
 nodeEigenvector(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
     // make sure at least one other argument to contain type of system
@@ -6586,7 +6643,7 @@ sectionForce(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
   const Vector &theVec = *(info.theVector);
 
   char buffer[40];
-  sprintf(buffer,"%35.20f",theVec(dof-1));
+  sprintf(buffer,"%12.8f",theVec(dof-1));
 
   Tcl_SetResult(interp, buffer, TCL_VOLATILE);
 
@@ -6654,7 +6711,7 @@ sectionDeformation(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char
   const Vector &theVec = *(info.theVector);
 
   char buffer[40];
-  sprintf(buffer,"%35.20f",theVec(dof-1));
+  sprintf(buffer,"%12.8f",theVec(dof-1));
 
   Tcl_SetResult(interp, buffer, TCL_VOLATILE);
 
