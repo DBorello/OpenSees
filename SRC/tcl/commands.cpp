@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.161 $
-// $Date: 2010-09-13 21:33:06 $
+// $Revision: 1.162 $
+// $Date: 2010-09-16 00:07:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -537,6 +537,9 @@ int
 domainChange(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
+record(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
 opsSend(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
@@ -631,7 +634,7 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
     Tcl_CreateObjCommand(interp, "pset", &OPS_SetObjCmd,
 			 (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
 	
-	Tcl_CreateObjCommand(interp, "source", &OPS_SourceCmd,
+    Tcl_CreateObjCommand(interp, "source", &OPS_SourceCmd,
 			 (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
 
     Tcl_CreateCommand(interp, "wipe", &wipeModel,
@@ -692,8 +695,6 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "remove", &removeObject, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
 
-    
-    
     Tcl_CreateCommand(interp, "eleForce", &eleForce, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "eleResponse", &eleResponse, 
@@ -753,6 +754,9 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
     Tcl_CreateCommand(interp, "domainChange",  &domainChange,(ClientData)NULL, NULL);
+
+    Tcl_CreateCommand(interp, "record",  &domainChange,(ClientData)NULL, NULL);
+
     Tcl_CreateCommand(interp, "metaData",  &neesMetaData,(ClientData)NULL, NULL);
     Tcl_CreateCommand(interp, "defaultUnits", &defaultUnits,(ClientData)NULL, NULL);
     Tcl_CreateCommand(interp, "neesUpload", &neesUpload,(ClientData)NULL, NULL);
@@ -5527,180 +5531,179 @@ int
 removeObject(ClientData clientData, Tcl_Interp *interp, int argc, 
 	     TCL_Char **argv)
 {
-
-    // make sure at least one other argument to contain type of system
-      if (argc < 2) {
-	opserr << "WARNING want - remove objectType?\n";
-	return TCL_ERROR;
-      }    
-
-    int tag;
-    if ((strcmp(argv[1],"element") == 0) || (strcmp(argv[1],"ele") == 0)) {
-      if (argc < 3) {
-	opserr << "WARNING want - remove element eleTag?\n";
-	return TCL_ERROR;
-      }    
-
-      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	opserr << "WARNING remove element tag? failed to read tag: " << argv[2] << endln;
-	return TCL_ERROR;
-      }      
-      Element *theEle = theDomain.removeElement(tag);
-      if (theEle != 0) {
-	// we also have to remove any elemental loads from the domain
-	LoadPatternIter &theLoadPatterns = theDomain.getLoadPatterns();
-	LoadPattern *thePattern;
+  // make sure at least one other argument to contain type of system
+  if (argc < 2) {
+    opserr << "WARNING want - remove objectType?\n";
+    return TCL_ERROR;
+  }    
+  
+  int tag;
+  if ((strcmp(argv[1],"element") == 0) || (strcmp(argv[1],"ele") == 0)) {
+    if (argc < 3) {
+      opserr << "WARNING want - remove element eleTag?\n";
+      return TCL_ERROR;
+    }    
+    
+    if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+      opserr << "WARNING remove element tag? failed to read tag: " << argv[2] << endln;
+      return TCL_ERROR;
+    }      
+    Element *theEle = theDomain.removeElement(tag);
+    if (theEle != 0) {
+      // we also have to remove any elemental loads from the domain
+      LoadPatternIter &theLoadPatterns = theDomain.getLoadPatterns();
+      LoadPattern *thePattern;
+      
+      // go through all load patterns
+      while ((thePattern = theLoadPatterns()) != 0) {
+	ElementalLoadIter theEleLoads = thePattern->getElementalLoads();
+	ElementalLoad *theLoad;
 	
-	// go through all load patterns
-	while ((thePattern = theLoadPatterns()) != 0) {
-	  ElementalLoadIter theEleLoads = thePattern->getElementalLoads();
-	  ElementalLoad *theLoad;
-
-	  // go through all elemental loads in the pattern
-	  while ((theLoad = theEleLoads()) != 0) {
-
-	    // remove & destroy elemental from elemental load if there
-	    // note - if last element in load, remove the load and delete it
-	    
-	    /* *****************
-	    int numLoadsLeft = theLoad->removeElement(tag);
-	    if (numLoadsLeft == 0) {
-	      thePattern->removeElementalLoad(theLoad->getTag());
-	      delete theLoad;
-	    }
-	    *********************/
-	  }
+	// go through all elemental loads in the pattern
+	while ((theLoad = theEleLoads()) != 0) {
+	  
+	  // remove & destroy elemental from elemental load if there
+	  // note - if last element in load, remove the load and delete it
+	  
+	  /* *****************
+	     int numLoadsLeft = theLoad->removeElement(tag);
+	     if (numLoadsLeft == 0) {
+	     thePattern->removeElementalLoad(theLoad->getTag());
+	     delete theLoad;
+	     }
+	  *********************/
 	}
-
-	// finally invoke the destructor on the element
-	delete theEle;
       }
+      
+      // finally invoke the destructor on the element
+      delete theEle;
     }
-
-    else if (strcmp(argv[1],"loadPattern") == 0) {
-      if (argc < 3) {
-	opserr << "WARNING want - remove loadPattern patternTag?\n";
+  }
+  
+  else if (strcmp(argv[1],"loadPattern") == 0) {
+    if (argc < 3) {
+      opserr << "WARNING want - remove loadPattern patternTag?\n";
+      return TCL_ERROR;
+    }    
+    if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	opserr << "WARNING remove loadPattern tag? failed to read tag: " << argv[2] << endln;
 	return TCL_ERROR;
-      }    
+    }      
+    LoadPattern *thePattern = theDomain.removeLoadPattern(tag);
+    if (thePattern != 0) {
+      thePattern->clearAll();
+      delete thePattern;
+    }
+  }
+  
+  else if (strcmp(argv[1],"parameter") == 0) {
+    if (argc < 3) {
+      opserr << "WARNING want - remove parameter paramTag?\n";
+      return TCL_ERROR;
+    }    
+    if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+      opserr << "WARNING remove parameter tag? failed to read tag: " << argv[2] << endln;
+      return TCL_ERROR;
+    }      
+    Parameter *theParameter = theDomain.removeParameter(tag);
+    if (theParameter != 0) {
+      delete theParameter;
+    }
+  }
+  
+  else if (strcmp(argv[1],"node") == 0) {
+    if (argc < 3) {
+      opserr << "WARNING want - remove node nodeTag?\n";
+      return TCL_ERROR;
+    }    
+    if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+      opserr << "WARNING remove node tag? failed to read tag: " << argv[2] << endln;
+      return TCL_ERROR;
+    }      
+    Node *theNode = theDomain.removeNode(tag);
+    if (theNode != 0) {
+      delete theNode;
+    }
+  }
+  
+  
+  else if (strcmp(argv[1],"recorders") == 0) {
+    theDomain.removeRecorders();
+  }
+  
+  else if ((strcmp(argv[1],"recorder") == 0)) {
+    if (argc < 3) {
+      opserr << "WARNING want - remove recorder recorderTag?\n";
+      return TCL_ERROR;
+    }    
+    
+    if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+      opserr << "WARNING remove element tag? failed to read tag: " << argv[2] << endln;
+      return TCL_ERROR;
+    }      
+    return theDomain.removeRecorder(tag);
+  }
+  
+  
+  else if ((strcmp(argv[1],"SPconstraint") == 0) || (strcmp(argv[1],"sp") == 0)) {
+    if (argc < 3) {
+      opserr << "WARNING want - remove SPconstraint spTag?\n";
+      return TCL_ERROR;
+    }    
+    if (argc == 3) {
       if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
 	opserr << "WARNING remove loadPattern tag? failed to read tag: " << argv[2] << endln;
 	return TCL_ERROR;
       }      
-      LoadPattern *thePattern = theDomain.removeLoadPattern(tag);
-      if (thePattern != 0) {
-	thePattern->clearAll();
-	delete thePattern;
+
+      SP_Constraint *theSPconstraint = theDomain.removeSP_Constraint(tag);
+      if (theSPconstraint != 0) {
+	delete theSPconstraint;
       }
-    }
-
-    else if (strcmp(argv[1],"parameter") == 0) {
-      if (argc < 3) {
-	opserr << "WARNING want - remove parameter paramTag?\n";
-	return TCL_ERROR;
-      }    
-      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	opserr << "WARNING remove parameter tag? failed to read tag: " << argv[2] << endln;
-	return TCL_ERROR;
-      }      
-      Parameter *theParameter = theDomain.removeParameter(tag);
-      if (theParameter != 0) {
-	delete theParameter;
-      }
-    }
-
-    else if (strcmp(argv[1],"node") == 0) {
-      if (argc < 3) {
-	opserr << "WARNING want - remove node nodeTag?\n";
-	return TCL_ERROR;
-      }    
-      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	opserr << "WARNING remove node tag? failed to read tag: " << argv[2] << endln;
-	return TCL_ERROR;
-      }      
-      Node *theNode = theDomain.removeNode(tag);
-      if (theNode != 0) {
-	delete theNode;
-      }
-    }
-
-
-    else if (strcmp(argv[1],"recorders") == 0) {
-      theDomain.removeRecorders();
-    }
-
-    else if ((strcmp(argv[1],"recorder") == 0)) {
-      if (argc < 3) {
-	opserr << "WARNING want - remove recorder recorderTag?\n";
-	return TCL_ERROR;
-      }    
-
-      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	opserr << "WARNING remove element tag? failed to read tag: " << argv[2] << endln;
-	return TCL_ERROR;
-      }      
-      return theDomain.removeRecorder(tag);
-    }
-
-
-    else if ((strcmp(argv[1],"SPconstraint") == 0) || (strcmp(argv[1],"sp") == 0)) {
-      if (argc < 3) {
-      	opserr << "WARNING want - remove SPconstraint spTag?\n";
-      	return TCL_ERROR;
-      }    
-      if (argc == 3) {
-	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	  opserr << "WARNING remove loadPattern tag? failed to read tag: " << argv[2] << endln;
-	  return TCL_ERROR;
-	}      
-
-	SP_Constraint *theSPconstraint = theDomain.removeSP_Constraint(tag);
-	if (theSPconstraint != 0) {
-	  delete theSPconstraint;
-	}
-      } else {
-	int nodeTag, dofTag;
-	int patternTag = -1;
-
-	if (Tcl_GetInt(interp, argv[2], &nodeTag) != TCL_OK) {
-	  opserr << "WARNING remove loadPattern tag? failed to read node tag: " << argv[2] << endln;
-	  return TCL_ERROR;
-	}      
-	if (Tcl_GetInt(interp, argv[3], &dofTag) != TCL_OK) {
-	  opserr << "WARNING remove loadPattern tag? failed to read dof tag: " << argv[3] << endln;
-	  return TCL_ERROR;
-	}      
-
-	if (argc == 5) {
-	  if (Tcl_GetInt(interp, argv[4], &patternTag) != TCL_OK) {
-	    opserr << "WARNING remove loadPattern tag? failed to read pattern tag: " << argv[4] << endln;
-	    return TCL_ERROR;
-	  }      
-	  
-	}
-	dofTag--;  // one for C++ indexing of dof
-
-	theDomain.removeSP_Constraint(nodeTag, dofTag, patternTag);
-
-	return TCL_OK;
-      }
-    }
-
-    else if ((strcmp(argv[1],"MPconstraint") == 0) || (strcmp(argv[1],"mp") == 0)) {
-      if (argc < 3) {
-      	opserr << "WARNING want - remove SPconstraint nNodeTag?\n";
-      	return TCL_ERROR;
-      }    
-      int nodTag = 0;
-      if (argc == 3) {
-	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	  opserr << "WARNING remove mp tag? failed to read tag: " << argv[2] << endln;
-	  return TCL_ERROR;
-	}      
+    } else {
+      int nodeTag, dofTag;
+      int patternTag = -1;
       
-	theDomain.removeMP_Constraints(tag);
-	return TCL_OK;
+      if (Tcl_GetInt(interp, argv[2], &nodeTag) != TCL_OK) {
+	opserr << "WARNING remove loadPattern tag? failed to read node tag: " << argv[2] << endln;
+	return TCL_ERROR;
+      }      
+      if (Tcl_GetInt(interp, argv[3], &dofTag) != TCL_OK) {
+	opserr << "WARNING remove loadPattern tag? failed to read dof tag: " << argv[3] << endln;
+	return TCL_ERROR;
+      }      
+      
+      if (argc == 5) {
+	if (Tcl_GetInt(interp, argv[4], &patternTag) != TCL_OK) {
+	  opserr << "WARNING remove loadPattern tag? failed to read pattern tag: " << argv[4] << endln;
+	  return TCL_ERROR;
+	}      
+	
       }
+      dofTag--;  // one for C++ indexing of dof
+      
+      theDomain.removeSP_Constraint(nodeTag, dofTag, patternTag);
+      
+      return TCL_OK;
     }
+  }
+  
+  else if ((strcmp(argv[1],"MPconstraint") == 0) || (strcmp(argv[1],"mp") == 0)) {
+    if (argc < 3) {
+      opserr << "WARNING want - remove SPconstraint nNodeTag?\n";
+      return TCL_ERROR;
+    }    
+    int nodTag = 0;
+    if (argc == 3) {
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	opserr << "WARNING remove mp tag? failed to read tag: " << argv[2] << endln;
+	return TCL_ERROR;
+      }      
+      
+      theDomain.removeMP_Constraints(tag);
+      return TCL_OK;
+    }
+  }
 
 #ifdef _RELIABILITY
 // AddingSensitivity:BEGIN ///////////////////////////////////////
@@ -7592,8 +7595,14 @@ int convertTextToBinary(ClientData clientData, Tcl_Interp *interp, int argc, TCL
 
 int domainChange(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
-  
   theDomain.domainChange();
+  return TCL_OK;
+}
+
+
+int record(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  theDomain.record();
   return TCL_OK;
 }
 
