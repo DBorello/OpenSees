@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2010-02-04 01:12:33 $
+// $Revision: 1.17 $
+// $Date: 2010-09-16 17:35:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.cpp,v $
                                                                         
 // Written: MHS 
@@ -819,8 +819,10 @@ CorotTruss::setResponse(const char **argv, int argc, OPS_Stream &output)
             }
             theResponse =  new ElementResponse(this, 1, Vector(numDOF));
 
-    } else if ((strcmp(argv[0],"axialForce") == 0) || (strcmp(argv[0],"basicForce") == 0) || 
-        (strcmp(argv[0],"basicForces") == 0)) {
+    } else if ((strcmp(argv[0],"axialForce") == 0) ||
+	       (strcmp(argv[0],"basicForce") == 0) || 
+	       (strcmp(argv[0],"localForces") == 0) || 
+	       (strcmp(argv[0],"basicForces") == 0)) {
             output.tag("ResponseType", "N");
             theResponse =  new ElementResponse(this, 2, 0.0);
 
