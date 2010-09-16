@@ -19,6 +19,7 @@ include ../../../Makefile.def
         ViscousMaterial.o \
 	SeriesMaterial.o \
 	InitStrainMaterial.o \
+	InitStressMaterial.o \
 	MinMaxMaterial.o \
         PathIndependentMaterial.o \
 	CableMaterial.o \

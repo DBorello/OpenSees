@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2006-12-21 18:22:16 $
+// $Revision: 1.5 $
+// $Date: 2010-09-16 00:04:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel02.cpp,v $
                                                                       
 // Written: fmk
@@ -67,9 +67,9 @@ Steel02::Steel02(int tag,
   sigsrP = 0.0;
 
   if (sigini != 0.0) {
-	  epsP = sigini/E0;
-	  sigP = sigini;
-   } 
+    epsP = sigini/E0;
+    sigP = sigini;
+  } 
 }
 
 Steel02::Steel02(int tag,
@@ -168,15 +168,14 @@ Steel02::setTrialStrain(double trialStrain, double strainRate)
 
   // modified C-P. Lamarche 2006
   if (sigini != 0.0) {
-	  double epsini = sigini/E0;
-	  eps = trialStrain+epsini;
-   } else
-	   eps = trialStrain;
-   // modified C-P. Lamarche 2006
+    double epsini = sigini/E0;
+    eps = trialStrain+epsini;
+  } else
+    eps = trialStrain;
+  // modified C-P. Lamarche 2006
 
   double deps = eps - epsP;
-
-
+  
   epsmax = epsmaxP;
   epsmin = epsminP;
   epspl  = epsplP;
