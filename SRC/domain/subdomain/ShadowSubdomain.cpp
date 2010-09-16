@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2010-04-23 22:52:23 $
+// $Revision: 1.19 $
+// $Date: 2010-09-16 00:07:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -1039,6 +1039,18 @@ ShadowSubdomain::commit(void)
   DomainDecompositionAnalysis *theDDA = this->getDDAnalysis();
   if (theDDA != 0 && theDDA->doesIndependentAnalysis() != true) {
     msgData(0) = ShadowActorSubdomain_commit;
+    this->sendID(msgData);
+    return 0;
+  }
+  return 0;
+}
+
+int
+ShadowSubdomain::record(void)
+{
+  DomainDecompositionAnalysis *theDDA = this->getDDAnalysis();
+  if (theDDA != 0 && theDDA->doesIndependentAnalysis() != true) {
+    msgData(0) = ShadowActorSubdomain_record;
     this->sendID(msgData);
     return 0;
   }

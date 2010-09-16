@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2010-04-23 22:52:23 $
+// $Revision: 1.19 $
+// $Date: 2010-09-16 00:07:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ActorSubdomain.cpp,v $
                                                                         
 #include <ActorSubdomain.h>
@@ -608,8 +608,11 @@ ActorSubdomain::run(void)
 	    }
 	    this->recvVector(*lastResponse);
 	    this->computeNodalResponse();
+            break;
 
-
+	  case ShadowActorSubdomain_record:
+	    this->record();
+	    break;
 	    
 	  case ShadowActorSubdomain_commit:
 	    this->commit();

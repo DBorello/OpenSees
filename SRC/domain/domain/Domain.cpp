@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.60 $
-// $Date: 2010-05-13 18:54:19 $
+// $Revision: 1.61 $
+// $Date: 2010-09-16 00:07:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
 // Written: fmk 
@@ -1615,6 +1615,21 @@ Domain::setRayleighDampingFactors(double alphaM, double betaK, double betaK0, do
 }
 
 
+int
+Domain::record(void)
+{
+  int res = 0;
+
+  // invoke record on all recorders
+  for (int i=0; i<numRecorders; i++)
+    if (theRecorders[i] != 0)
+      res += theRecorders[i]->record(commitTag, currentTime);
+  
+  // update the commitTag
+  commitTag++;
+
+  return res;
+}
 
 int
 Domain::commit(void)

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2009-05-11 21:30:58 $
+// $Revision: 1.12 $
+// $Date: 2010-09-16 00:07:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowActorSubdomain.h,v $
                                                                         
                                                                         
@@ -99,3 +99,4 @@ static const int ShadowActorSubdomain_updateParameterINT = 101;
 static const int ShadowActorSubdomain_updateParameterDOUBLE = 102;
 static const int ShadowActorSubdomain_addSP_ConstraintAXIS = 103;
 static const int ShadowActorSubdomain_getDomainChangeFlag = 104;
+static const int ShadowActorSubdomain_record = 105;

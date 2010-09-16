@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2010-04-23 22:51:37 $
+// $Revision: 1.14 $
+// $Date: 2010-09-16 00:07:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.h,v $
                                                                         
                                                                         
@@ -111,6 +111,7 @@ class PartitionedDomain: public Domain
     virtual  int analysisStep(double dT);
     virtual  int eigenAnalysis(int, bool);
 
+    virtual int  record(void);    
     virtual int  addRecorder(Recorder &theRecorder);    	
     virtual int  removeRecorders(void);
     virtual int  removeRecorder(int tag);

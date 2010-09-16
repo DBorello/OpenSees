@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2010-04-23 22:52:23 $
+// $Revision: 1.15 $
+// $Date: 2010-09-16 00:07:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.h,v $
                                                                         
                                                                         
@@ -124,6 +124,7 @@ class ShadowSubdomain: public Shadow, public Subdomain
     virtual  int update(void);    
     virtual  int update(double newTime, double dT);    
     virtual  int commit(void);
+    virtual  int record(void);
     virtual  int revertToLastCommit(void);    
     virtual  int revertToStart(void);    
     virtual  int barrierCheckIN(void);    

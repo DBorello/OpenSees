@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2010-04-23 22:51:37 $
+// $Revision: 1.21 $
+// $Date: 2010-09-16 00:07:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -932,14 +932,14 @@ PartitionedDomain::update(void)
     while ((theObject = theSubsIter()) != 0) {
       Subdomain *theSub = (Subdomain *)theObject;	    
       theSub->computeNodalResponse();
-      theSub->update();
+      res += theSub->update();
     }
   }
 
 #ifdef _PARALLEL_PROCESSING
   return this->barrierCheck(res);
 #endif
-  return 0;
+  return res;
 }
 
 
@@ -986,14 +986,14 @@ PartitionedDomain::update(double newTime, double dT)
     while ((theObject = theSubsIter()) != 0) {
       Subdomain *theSub = (Subdomain *)theObject;	    
       theSub->computeNodalResponse();
-      theSub->update(newTime, dT);
+      res +=theSub->update(newTime, dT);
     }
   }
 
 #ifdef _PARALLEL_PROCESSING
   return this->barrierCheck(res);
 #endif
-  return 0;
+  return res;
 
   /*
 
@@ -1124,12 +1124,35 @@ PartitionedDomain::eigenAnalysis(int numModes, bool generalized)
 }
 
 
+int
+PartitionedDomain::record(void)
+{
+  int result = 0;
 
+  // do the same for all the subdomains
+  if (theSubdomains != 0) {
+    ArrayOfTaggedObjectsIter theSubsIter(*theSubdomains);	
+    TaggedObject *theObject;
+    while ((theObject = theSubsIter()) != 0) {
+      Subdomain *theSub = (Subdomain *)theObject;	    
+      result += theSub->record();
+      if (result < 0) {
+	opserr << "PartitionedDomain::record(void)";
+	opserr << " - failed in Subdomain::record()\n";
+      }	    
+    }
+  }
+
+  result += this->Domain::record();
+
+  return result;
+}
 
 int
 PartitionedDomain::commit(void)
 {
   int result = this->Domain::commit();
+
   if (result < 0) {
     opserr << "PartitionedDomain::commit(void) - failed in Domain::commit()\n";
     return result;
