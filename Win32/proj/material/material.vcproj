@@ -257,6 +257,18 @@
 				RelativePath="..\..\..\SRC\material\uniaxial\ImpactMaterial.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\InitStrainMaterial.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\InitStrainMaterial.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\InitStressMaterial.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\uniaxial\InitStressMaterial.h">
+			</File>
+			<File
 				RelativePath="..\..\..\Src\material\uniaxial\MinMaxMaterial.cpp">
 			</File>
 			<File
