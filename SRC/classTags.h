@@ -32,11 +32,15 @@
 #ifndef classTags_h
 #define classTags_h
 
+#define svnTest  0
+
 #define intType    1
 #define doubleType 2
 #define idType     3
 #define vectorType 4
 #define matrixType 5
+
+
 
 #define ACTOR_TAGS_SUBDOMAIN 1
 
