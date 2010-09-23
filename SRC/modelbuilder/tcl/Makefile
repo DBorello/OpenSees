@@ -7,17 +7,9 @@ OBJS       = TclModelBuilder.o myCommands.o TclUniaxialMaterialTester.o \
 
 # Compilation control
 
-all: $(OBJS)  
+all: $(OBJS) 
 
-tcl: $(OBJS)  
-	@$(CD) $(FE)/tcl; $(MAKE) tcl;
-	@$(LINKER) $(LINKFLAGS) $(INTERPRETER_LIBS_TCL) \
-	$(FE_LIBRARY) $(MACHINE_LINKLIBS) \
-	$(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY)  \
-	$(MACHINE_SPECIFIC_LIBS) -o $(OpenSees_PROGRAM)
-
-
-tcl: $(OBJS)  
+tcl: $(OBJS) tk 
 	@$(CD) $(FE)/tcl; $(MAKE) tcl;
 	@$(LINKER) $(LINKFLAGS) $(INTERPRETER_LIBS_TCL) \
 	$(FE_LIBRARY) $(MACHINE_LINKLIBS) \
