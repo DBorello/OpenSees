@@ -1192,7 +1192,7 @@ DispBeamColumn2d::setResponse(const char **argv, int argc,
       
       int sectionNum = atoi(argv[1]);
       
-      if (sectionNum > 0 && sectionNum <= numSections && sectionNum > 2) {
+      if (sectionNum > 0 && sectionNum <= numSections && argc > 2) {
 
 	output.tag("GaussPointOutput");
 	output.attr("number",sectionNum);
