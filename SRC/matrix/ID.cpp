@@ -370,12 +370,12 @@ ID::resize(int newSize){
   } 
   
 
-  if (sz > newSize) {
+  if (sz >= newSize) {
 
     // is size smaller than current, simply reset sz
     sz = newSize;
 
-  } else if (newSize < arraySize) {
+  } else if (newSize <= arraySize) {
 
     // see if we can just enlarge the array
     // without having to go get more space
