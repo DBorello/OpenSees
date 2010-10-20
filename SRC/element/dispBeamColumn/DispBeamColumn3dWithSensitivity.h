@@ -45,7 +45,7 @@
 
 class Node;
 class SectionForceDeformation;
-class CrdTransf3d;
+class CrdTransf;
 class BeamIntegration;
 class Response;
 
@@ -55,7 +55,7 @@ class DispBeamColumn3dWithSensitivity : public Element
     DispBeamColumn3dWithSensitivity(int tag, int nd1, int nd2,
 				   int numSec, SectionForceDeformation **s,
 				   BeamIntegration &bi,
-				   CrdTransf3d &coordTransf, double r);
+				   CrdTransf &coordTransf, double r);
     DispBeamColumn3dWithSensitivity();
     virtual ~DispBeamColumn3dWithSensitivity();
     const char *getClassType(void) const {return "DispBeamColumn3d";};
@@ -113,7 +113,7 @@ class DispBeamColumn3dWithSensitivity : public Element
 
     int numSections;
     SectionForceDeformation **theSections; // pointer to the ND material objects
-    CrdTransf3d *crdTransf;        // pointer to coordinate tranformation object 
+    CrdTransf *crdTransf;        // pointer to coordinate tranformation object 
     BeamIntegration *beamInt;
     ID connectedExternalNodes; // Tags of quad nodes
 

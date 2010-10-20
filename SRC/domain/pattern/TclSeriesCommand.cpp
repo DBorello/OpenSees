@@ -584,8 +584,6 @@ TclTimeSeriesCommand(ClientData clientData,
   return theSeries;
 }
 
-extern TimeSeries *getTimeSeries(int tag);
-
 TimeSeries *
 TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
 {
@@ -594,7 +592,7 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
 
   int timeSeriesTag = 0;
   if (Tcl_GetInt(interp, arg, &timeSeriesTag) == TCL_OK) {
-    return getTimeSeries(timeSeriesTag);
+    return OPS_getTimeSeries(timeSeriesTag);
   }
 
   // split the list

@@ -70,7 +70,7 @@ DispBeamColumn2dInt::DispBeamColumn2dInt(int tag,
 
 					 SectionForceDeformation **s,
 
-					 CrdTransf2d &coordTransf, 
+					 CrdTransf &coordTransf, 
 
 					 double C, double r)
 
@@ -122,7 +122,7 @@ DispBeamColumn2dInt::DispBeamColumn2dInt(int tag,
 
 
 
-  CrdTransf2d *theCoord = coordTransf.getCopy();
+  CrdTransf *theCoord = coordTransf.getCopy2d();
 
   if (theCoord == 0 || theCoord->getClassTag() != CRDTR_TAG_LinearCrdTransf2dInt) {
 

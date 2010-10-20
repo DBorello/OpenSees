@@ -67,9 +67,7 @@ class DomainSolver;
 class DomainDecompositionAnalysis;
 class PartitionedModelBuilder;
 
-class CrdTransf2d;
-class CrdTransf3d;
-
+class CrdTransf;
 class GraphNumberer;
 
 class BeamIntegration;
@@ -113,8 +111,7 @@ class FEM_ObjectBroker
     virtual NodalLoad     *getNewNodalLoad(int classTag);
     virtual ElementalLoad *getNewElementalLoad(int classTag);
     
-    virtual CrdTransf2d *getNewCrdTransf2d(int classTag);
-    virtual CrdTransf3d *getNewCrdTransf3d(int classTag);
+    virtual CrdTransf *getNewCrdTransf(int classTag);
 
     virtual BeamIntegration *getNewBeamIntegration(int classTag);
 

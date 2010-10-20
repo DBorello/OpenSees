@@ -115,7 +115,7 @@ PlaneFrame::buildFE_Model(void)
     ndof = 3;
     int i;
 	Vector dummy(2);
-	CrdTransf2d *theTransf = new LinearCrdTransf2d (1,dummy,dummy);
+	CrdTransf *theTransf = new LinearCrdTransf2d (1,dummy,dummy);
 
     
     // for each node read in the data, create a node & add it to the domain

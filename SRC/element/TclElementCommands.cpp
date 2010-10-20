@@ -44,8 +44,7 @@
 #include <EightNodeBrick.h>
 #include <TwentyNodeBrick.h>
 
-#include <CrdTransf2d.h>
-#include <CrdTransf3d.h>
+#include <CrdTransf.h>
 
 #include <TclModelBuilder.h>
 #include <packages.h>

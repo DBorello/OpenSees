@@ -31,7 +31,7 @@
 #include <DispBeamColumn2dWithSensitivity.h>
 #include <Node.h>
 #include <SectionForceDeformation.h>
-#include <CrdTransf2d.h>
+#include <CrdTransf.h>
 #include <Matrix.h>
 #include <Vector.h>
 #include <ID.h>
@@ -55,7 +55,7 @@ double DispBeamColumn2dWithSensitivity::workArea[100];
 DispBeamColumn2dWithSensitivity::DispBeamColumn2dWithSensitivity(int tag, int nd1, int nd2,
 				   int numSec, SectionForceDeformation **s,
 				   BeamIntegration& bi,
-				   CrdTransf2d &coordTransf, double r)
+				   CrdTransf &coordTransf, double r)
 :Element (tag, ELE_TAG_DispBeamColumn2dWithSensitivity),
  numSections(numSec), theSections(0), crdTransf(0), beamInt(0),
   connectedExternalNodes(2),
@@ -88,7 +88,7 @@ DispBeamColumn2dWithSensitivity::DispBeamColumn2dWithSensitivity(int tag, int nd
     exit(-1);
   }
 
-  crdTransf = coordTransf.getCopy();
+  crdTransf = coordTransf.getCopy2d();
 
   if (crdTransf == 0) {
     opserr << "DispBeamColumn2dWithSensitivity::DispBeamColumn2dWithSensitivity - failed to copy coordinate transformation\n";
@@ -890,7 +890,7 @@ DispBeamColumn2dWithSensitivity::recvSelf(int commitTag, Channel &theChannel,
       if (crdTransf != 0)
 	  delete crdTransf;
 
-      crdTransf = theBroker.getNewCrdTransf2d(crdTransfClassTag);
+      crdTransf = theBroker.getNewCrdTransf(crdTransfClassTag);
 
       if (crdTransf == 0) {
 	opserr << "DispBeamColumn2dWithSensitivity::recvSelf() - failed to obtain a CrdTrans object with classTag " <<

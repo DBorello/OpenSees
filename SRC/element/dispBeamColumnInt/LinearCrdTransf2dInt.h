@@ -36,12 +36,12 @@
 #ifndef LinearCrdTransf2dInt_h
 #define LinearCrdTransf2dInt_h
 
-#include <CrdTransf2d.h>
+#include <CrdTransf.h>
 #include <Vector.h>
 #include <Matrix.h>
 
 
-class LinearCrdTransf2dInt: public CrdTransf2d
+class LinearCrdTransf2dInt: public CrdTransf
 {
  public:
   LinearCrdTransf2dInt (int tag);
@@ -52,7 +52,7 @@ class LinearCrdTransf2dInt: public CrdTransf2d
   LinearCrdTransf2dInt();
   ~LinearCrdTransf2dInt();
 
-  CrdTransf2d *getCopy(void);
+  CrdTransf *getCopy2d(void);
   
   int    initialize(Node *node1Pointer, Node *node2Pointer);
   int    update(void);

@@ -30,7 +30,7 @@
 #include <DispBeamColumn3d.h>
 #include <Node.h>
 #include <SectionForceDeformation.h>
-#include <CrdTransf3d.h>
+#include <CrdTransf.h>
 #include <Matrix.h>
 #include <Vector.h>
 #include <ID.h>
@@ -53,7 +53,7 @@ double DispBeamColumn3d::workArea[200];
 DispBeamColumn3d::DispBeamColumn3d(int tag, int nd1, int nd2,
 				   int numSec, SectionForceDeformation **s,
 				   BeamIntegration &bi,
-				   CrdTransf3d &coordTransf, double r)
+				   CrdTransf &coordTransf, double r)
 :Element (tag, ELE_TAG_DispBeamColumn3d),
 numSections(numSec), theSections(0), crdTransf(0), beamInt(0),
 connectedExternalNodes(2), 
@@ -86,7 +86,7 @@ Q(12), q(6), rho(r), parameterID(0)
     exit(-1);
   }
 
-  crdTransf = coordTransf.getCopy();
+  crdTransf = coordTransf.getCopy3d();
   
   if (crdTransf == 0) {
     opserr << "DispBeamColumn3d::DispBeamColumn3d - failed to copy coordinate transformation\n";
@@ -980,7 +980,7 @@ DispBeamColumn3d::recvSelf(int commitTag, Channel &theChannel,
       if (crdTransf != 0)
 	  delete crdTransf;
 
-      crdTransf = theBroker.getNewCrdTransf3d(crdTransfClassTag);
+      crdTransf = theBroker.getNewCrdTransf(crdTransfClassTag);
 
       if (crdTransf == 0) {
 	opserr << "DispBeamColumn3d::recvSelf() - " <<

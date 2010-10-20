@@ -39,7 +39,7 @@
 
 class Channel;
 class Information;
-class CrdTransf3d;
+class CrdTransf;
 class Response;
 class Renderer;
 class SectionForceDeformation;
@@ -50,10 +50,10 @@ class ElasticBeam3d : public Element
     ElasticBeam3d();        
     ElasticBeam3d(int tag, double A, double E, double G, 
 		  double Jx, double Iy, double Iz, int Nd1, int Nd2,
-		  CrdTransf3d &theTransf, double rho = 0.0, int sectionTag = 0);
+		  CrdTransf &theTransf, double rho = 0.0, int sectionTag = 0);
 
     ElasticBeam3d(int tag, int Nd1, int Nd2, SectionForceDeformation *section, 
-		  CrdTransf3d &theTransf, double rho = 0.0);
+		  CrdTransf &theTransf, double rho = 0.0);
 
     ~ElasticBeam3d();
 
@@ -110,7 +110,7 @@ class ElasticBeam3d : public Element
 
     ID  connectedExternalNodes;    
 
-    CrdTransf3d *theCoordTransf;
+    CrdTransf *theCoordTransf;
 };
 
 #endif

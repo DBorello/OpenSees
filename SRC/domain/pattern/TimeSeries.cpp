@@ -40,11 +40,11 @@
 
 static MapOfTaggedObjects theTimeSeriesObjects;
 
-bool addTimeSeries(TimeSeries *newComponent) {
+bool OPS_addTimeSeries(TimeSeries *newComponent) {
   return theTimeSeriesObjects.addComponent(newComponent);
 }
 
-TimeSeries *getTimeSeries(int tag) {
+TimeSeries *OPS_getTimeSeries(int tag) {
 
   TaggedObject *theResult = theTimeSeriesObjects.getComponentPtr(tag);
   if (theResult == 0) {
@@ -56,7 +56,7 @@ TimeSeries *getTimeSeries(int tag) {
   return theSeries->getCopy();
 }
 
-void clearAllTimeSeries(void) {
+void OPS_clearAllTimeSeries(void) {
   theTimeSeriesObjects.clearAll();
 }
     

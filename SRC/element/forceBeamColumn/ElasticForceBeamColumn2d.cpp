@@ -103,7 +103,7 @@ ElasticForceBeamColumn2d::ElasticForceBeamColumn2d (int tag,
 						    int numSec, 
 						    SectionForceDeformation **sec,
 						    BeamIntegration &bi,
-						    CrdTransf2d &coordTransf,
+						    CrdTransf &coordTransf,
 						    double massDensPerUnitLength):
   Element(tag,ELE_TAG_ElasticForceBeamColumn2d), connectedExternalNodes(2),
   beamIntegr(0), numSections(numSec), crdTransf(0),
@@ -123,7 +123,7 @@ ElasticForceBeamColumn2d::ElasticForceBeamColumn2d (int tag,
   }
   
   // get copy of the transformation object   
-  crdTransf = coordTransf.getCopy(); 
+  crdTransf = coordTransf.getCopy2d(); 
   if (crdTransf == 0) {
     opserr << "Error: ElasticForceBeamColumn2d::ElasticForceBeamColumn2d: could not create copy of coordinate transformation object" << endln;
   }

@@ -37,8 +37,8 @@
 #include <ElasticBeam3d.h>
 #include <SectionForceDeformation.h>
 
-#include <CrdTransf2d.h>
-#include <CrdTransf3d.h>
+#include <CrdTransf.h>
+#include <CrdTransf.h>
 
 #include <TclModelBuilder.h>
 
@@ -135,7 +135,7 @@ TclModelBuilder_addElasticBeam(ClientData clientData, Tcl_Interp *interp, int ar
       argi = 8;
     }
 
-    CrdTransf2d *theTrans = theTclBuilder->getCrdTransf2d(transTag);
+    CrdTransf *theTrans = OPS_GetCrdTransf(transTag);
     
     if (theTrans == 0) {
 	opserr << "WARNING transformation object not found - elasticBeamColumn " << beamId;
@@ -220,7 +220,7 @@ TclModelBuilder_addElasticBeam(ClientData clientData, Tcl_Interp *interp, int ar
 	return TCL_ERROR;
       }      
       
-      CrdTransf3d *theTrans = theTclBuilder->getCrdTransf3d(transTag);
+      CrdTransf *theTrans = OPS_GetCrdTransf(transTag);
     
       if (theTrans == 0) {
 	opserr << "WARNING transformation object not found - elasticBeamColumn " << beamId;
@@ -288,7 +288,7 @@ TclModelBuilder_addElasticBeam(ClientData clientData, Tcl_Interp *interp, int ar
 	return TCL_ERROR;
       }      
       
-      CrdTransf3d *theTrans = theTclBuilder->getCrdTransf3d(transTag);
+      CrdTransf *theTrans = OPS_GetCrdTransf(transTag);
     
       if (theTrans == 0) {
 	opserr << "WARNING transformation object not found - elasticBeamColumn " << beamId;

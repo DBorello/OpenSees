@@ -44,7 +44,7 @@
 
 class Node;
 class SectionForceDeformation;
-class CrdTransf2d;
+class CrdTransf;
 class Response;
 
 class DispBeamColumn2d : public Element
@@ -52,7 +52,7 @@ class DispBeamColumn2d : public Element
   public:
     DispBeamColumn2d(int tag, int nd1, int nd2,
 		     int numSections, SectionForceDeformation **s,
-		     BeamIntegration &bi, CrdTransf2d &coordTransf,
+		     BeamIntegration &bi, CrdTransf &coordTransf,
 		     double rho = 0.0);
     DispBeamColumn2d();
     ~DispBeamColumn2d();
@@ -111,7 +111,7 @@ class DispBeamColumn2d : public Element
 
     int numSections;
     SectionForceDeformation **theSections; // pointer to the ND material objects
-    CrdTransf2d *crdTransf;        // pointer to coordinate tranformation object 
+    CrdTransf *crdTransf;        // pointer to coordinate tranformation object 
 
     BeamIntegration *beamInt;
 

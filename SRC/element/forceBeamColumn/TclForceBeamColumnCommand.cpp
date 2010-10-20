@@ -38,6 +38,8 @@
 #include <ForceBeamColumn3d.h>
 #include <DispBeamColumn2d.h>
 #include <DispBeamColumn3d.h>
+#include <CrdTransf.h>
+
  
 #include <DispBeamColumn2dWithSensitivity.h>
 #include <DispBeamColumn3dWithSensitivity.h>
@@ -131,8 +133,8 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
   }
 
   int eleTag, iNode, jNode, transfTag;
-  CrdTransf2d *theTransf2d = 0;
-  CrdTransf3d *theTransf3d = 0;
+  CrdTransf *theTransf2d = 0;
+  CrdTransf *theTransf3d = 0;
   Element *theElement = 0;
 
 
@@ -311,7 +313,7 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
       
     if (ndm == 2) {
       
-      theTransf2d = theTclBuilder->getCrdTransf2d(transfTag);
+      theTransf2d = OPS_GetCrdTransf(transfTag);
       
       if (theTransf2d == 0) {
 	opserr << "WARNING transformation not found\n";
@@ -323,7 +325,7 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     
     if (ndm == 3) {
       
-      theTransf3d = theTclBuilder->getCrdTransf3d(transfTag);
+      theTransf3d = OPS_GetCrdTransf(transfTag);
       
       if (theTransf3d == 0) {
 	opserr << "WARNING transformation not found\n";
@@ -393,7 +395,7 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
   
   if (ndm == 2) {
     
-    theTransf2d = theTclBuilder->getCrdTransf2d(transfTag);
+    theTransf2d = OPS_GetCrdTransf(transfTag);
     
     if (theTransf2d == 0) {
       opserr << "WARNING transformation not found\n";
@@ -405,7 +407,7 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
   
   if (ndm == 3) {
     
-    theTransf3d = theTclBuilder->getCrdTransf3d(transfTag);
+    theTransf3d = OPS_GetCrdTransf(transfTag);
     
     if (theTransf3d == 0) {
       opserr << "WARNING transformation not found\n";

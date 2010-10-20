@@ -56,6 +56,7 @@
 #include <RigidBeam.h>
 #include <RigidDiaphragm.h>
 
+#include <CrdTransf.h>
 
 #include <NodalLoad.h>
 #include <Beam2dPointLoad.h>
@@ -68,9 +69,6 @@
 
 #include <SectionForceDeformation.h>
 #include <SectionRepres.h>
-
-#include <CrdTransf2d.h>
-#include <CrdTransf3d.h>
 
 #include <UniaxialMaterial.h>
 #include <NDMaterial.h>
@@ -409,8 +407,6 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   theNDMaterials = new ArrayOfTaggedObjects(32);
   theSections  = new ArrayOfTaggedObjects(32);
   theSectionRepresents = new ArrayOfTaggedObjects(32);  
-  the2dGeomTransfs = new ArrayOfTaggedObjects(32);  
-  the3dGeomTransfs = new ArrayOfTaggedObjects(32);  
 #ifdef OO_HYSTERETIC
   theStiffnessDegradations = new ArrayOfTaggedObjects(32);
   theUnloadingRules = new ArrayOfTaggedObjects(32);
@@ -610,17 +606,15 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   eleArgStart = 0;
 }
 
-extern void clearAllTimeSeries(void);
-
 TclModelBuilder::~TclModelBuilder()
 {
-  clearAllTimeSeries();
+  OPS_clearAllTimeSeries();
+  OPS_ClearAllCrdTransf();
+
   theUniaxialMaterials->clearAll();
   theNDMaterials->clearAll();
   theSections->clearAll(); 
   theSectionRepresents->clearAll();
-  the2dGeomTransfs->clearAll();
-  the3dGeomTransfs->clearAll();
   theYieldSurface_BCs->clearAll();
   theYS_EvolutionModels->clearAll();
   thePlasticMaterials->clearAll();
@@ -640,8 +634,6 @@ TclModelBuilder::~TclModelBuilder()
   delete theNDMaterials;
   delete theSections;
   delete theSectionRepresents;
-  delete the2dGeomTransfs;
-  delete the3dGeomTransfs;
   delete theYieldSurface_BCs;
   delete theYS_EvolutionModels;
   delete thePlasticMaterials;
@@ -1041,59 +1033,6 @@ TclModelBuilder::getSectionRepres(int tag)
   return result;
 }
 
-
-
-int 
-TclModelBuilder::addCrdTransf2d(CrdTransf2d &theCrdTransf)
-{
-  bool result = the2dGeomTransfs->addComponent(&theCrdTransf);
-  if (result == true)
-    return 0;
-  else {
-    opserr << "TclModelBuilder::addCrdTransf() - failed to add crdTransf: " << theCrdTransf;
-    return -1;
-  }
-}
-
-
-int 
-TclModelBuilder::addCrdTransf3d(CrdTransf3d &theCrdTransf)
-{
-  bool result = the3dGeomTransfs->addComponent(&theCrdTransf);
-  if (result == true)
-    return 0;
-  else {
-    opserr << "TclModelBuilder::addCrdTransf() - failed to add crdTransf: " << theCrdTransf;
-    return -1;
-  }
-}
-
-
-
-CrdTransf2d *
-TclModelBuilder::getCrdTransf2d(int tag)
-{
-  TaggedObject *mc = the2dGeomTransfs->getComponentPtr(tag);
-  if (mc == 0) 
-    return 0;
-
-  // do a cast and return
-  CrdTransf2d *result = (CrdTransf2d *)mc;
-  return result;
-}
-
-
-CrdTransf3d *
-TclModelBuilder::getCrdTransf3d(int tag)
-{
-  TaggedObject *mc = the3dGeomTransfs->getComponentPtr(tag);
-  if (mc == 0) 
-    return 0;
-
-  // do a cast and return
-  CrdTransf3d *result = (CrdTransf3d *)mc;
-  return result;
-}
 
 
 int 
@@ -1506,8 +1445,6 @@ extern TimeSeries *
 TclTimeSeriesCommand(ClientData clientData, Tcl_Interp *interp, 
 		     int argc, TCL_Char **argv, Domain *theDomain);
 
-extern bool addTimeSeries(TimeSeries *newComponent);
-
 int
 TclCommand_addTimeSeries(ClientData clientData, Tcl_Interp *interp, 
 			 int argc, TCL_Char **argv)
@@ -1515,7 +1452,7 @@ TclCommand_addTimeSeries(ClientData clientData, Tcl_Interp *interp,
   TimeSeries *theSeries = TclTimeSeriesCommand(clientData, interp, argc-1, &argv[1], 0);
 
   if (theSeries != 0) {
-    if (addTimeSeries(theSeries) == true)
+    if (OPS_addTimeSeries(theSeries) == true)
       return TCL_OK;
     else
       return TCL_ERROR;

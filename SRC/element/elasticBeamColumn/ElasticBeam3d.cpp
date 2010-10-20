@@ -37,7 +37,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
-#include <CrdTransf3d.h>
+#include <CrdTransf.h>
 #include <Information.h>
 #include <ElementResponse.h>
 #include <ElementalLoad.h>
@@ -76,7 +76,7 @@ ElasticBeam3d::ElasticBeam3d()
 
 ElasticBeam3d::ElasticBeam3d(int tag, double a, double e, double g, 
 			     double jx, double iy, double iz, int Nd1, int Nd2, 
-			     CrdTransf3d &coordTransf, double r, int sectTag)
+			     CrdTransf &coordTransf, double r, int sectTag)
   :Element(tag,ELE_TAG_ElasticBeam3d), 
    A(a), E(e), G(g), Jx(jx), Iy(iy), Iz(iz), rho(r), sectionTag(sectTag),
   Q(12), q(6), connectedExternalNodes(2), theCoordTransf(0)
@@ -84,7 +84,7 @@ ElasticBeam3d::ElasticBeam3d(int tag, double a, double e, double g,
   connectedExternalNodes(0) = Nd1;
   connectedExternalNodes(1) = Nd2;
   
-  theCoordTransf = coordTransf.getCopy();
+  theCoordTransf = coordTransf.getCopy3d();
   
   if (!theCoordTransf) {
     opserr << "ElasticBeam3d::ElasticBeam3d -- failed to get copy of coordinate transformation\n";
@@ -108,8 +108,8 @@ ElasticBeam3d::ElasticBeam3d(int tag, double a, double e, double g,
     theNodes[i] = 0;      
 }
 
-ElasticBeam3d::ElasticBeam3d(int tag, int Nd1, int Nd2, SectionForceDeformation *section, 			     
-			     CrdTransf3d &coordTransf, double r)
+ElasticBeam3d::ElasticBeam3d(int tag, int Nd1, int Nd2, SectionForceDeformation *section,  
+			     CrdTransf &coordTransf, double r)
   :Element(tag,ELE_TAG_ElasticBeam3d), 
   Q(12), q(6), connectedExternalNodes(2), theCoordTransf(0)
 {
@@ -151,7 +151,7 @@ ElasticBeam3d::ElasticBeam3d(int tag, int Nd1, int Nd2, SectionForceDeformation 
   connectedExternalNodes(0) = Nd1;
   connectedExternalNodes(1) = Nd2;
   
-  theCoordTransf = coordTransf.getCopy();
+  theCoordTransf = coordTransf.getCopy3d();
   
   if (!theCoordTransf) {
     opserr << "ElasticBeam3d::ElasticBeam3d -- failed to get copy of coordinate transformation\n";
@@ -662,7 +662,7 @@ ElasticBeam3d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBrok
   // Check if the CoordTransf is null; if so, get a new one
   int crdTag = (int)data(10);
   if (theCoordTransf == 0) {
-    theCoordTransf = theBroker.getNewCrdTransf3d(crdTag);
+    theCoordTransf = theBroker.getNewCrdTransf(crdTag);
     if (theCoordTransf == 0) {
       opserr << "ElasticBeam3d::recvSelf -- could not get a CrdTransf3d\n";
       exit(-1);
@@ -673,7 +673,7 @@ ElasticBeam3d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBrok
   // the current one and get a new one of the right type
   if (theCoordTransf->getClassTag() != crdTag) {
     delete theCoordTransf;
-    theCoordTransf = theBroker.getNewCrdTransf3d(crdTag);
+    theCoordTransf = theBroker.getNewCrdTransf(crdTag);
     if (theCoordTransf == 0) {
       opserr << "ElasticBeam3d::recvSelf -- could not get a CrdTransf3d\n";
       exit(-1);

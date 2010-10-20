@@ -109,12 +109,12 @@ Tcl_ThreadDataKey dataKey;
 
 #if !defined(__WIN32__) && !defined(_WIN32) && !defined(_KAI)
 extern "C" int		isatty _ANSI_ARGS_((int fd));
-extern "C" char *	strrchr _ANSI_ARGS_((CONST char *string, int c)) throw();
+//extern "C" char *	strrchr _ANSI_ARGS_((CONST char *string, int c)) throw();
 #endif
 
 #if !defined(__WIN32__) && !defined(_WIN32) && defined(_KAI)
 extern "C" int		isatty _ANSI_ARGS_((int fd));
-extern "C" char *	strrchr _ANSI_ARGS_((CONST char *string, int c));
+//extern "C" char *	strrchr _ANSI_ARGS_((CONST char *string, int c));
 #endif
 
 #ifdef _TCL84

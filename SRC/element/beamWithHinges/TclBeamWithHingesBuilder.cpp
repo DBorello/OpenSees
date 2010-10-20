@@ -54,8 +54,7 @@
 
 #include <SectionForceDeformation.h>
 
-#include <CrdTransf2d.h>
-#include <CrdTransf3d.h>
+#include <CrdTransf.h>
 
 #include <TclModelBuilder.h>
 
@@ -216,7 +215,7 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	    return TCL_ERROR;
 	}
 
-	CrdTransf2d *theTransf = theBuilder->getCrdTransf2d (transfTag);
+	CrdTransf *theTransf = OPS_GetCrdTransf(transfTag);
 
 	if (theTransf == 0) {
 	    opserr << "WARNING geometric transformation does not exist\n";
@@ -472,7 +471,7 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	    return TCL_ERROR;
 	}
 
-	CrdTransf3d *theTransf = theBuilder->getCrdTransf3d (transfTag);
+	CrdTransf *theTransf = OPS_GetCrdTransf(transfTag);
 
 	if (theTransf == 0) {
 	    opserr << "WARNING geometric transformation does not exist\n";

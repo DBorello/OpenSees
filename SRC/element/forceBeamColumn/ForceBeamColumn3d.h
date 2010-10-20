@@ -68,7 +68,7 @@ Journal of Structural Engineering, Approved for publication, February 2007.
 #include <Channel.h>
 #include <BeamIntegration.h>
 #include <SectionForceDeformation.h>
-#include <CrdTransf3d.h>
+#include <CrdTransf.h>
 
 class Response;
 class ElementalLoad;
@@ -80,7 +80,7 @@ class ForceBeamColumn3d: public Element
   ForceBeamColumn3d(int tag, int nodeI, int nodeJ, 
 		    int numSections, SectionForceDeformation **sec,
 		    BeamIntegration &beamIntegr,
-		    CrdTransf3d &coordTransf, double rho = 0.0, 
+		    CrdTransf &coordTransf, double rho = 0.0, 
 		    int maxNumIters = 10, double tolerance = 1.0e-12);
   
   ~ForceBeamColumn3d();
@@ -139,7 +139,7 @@ class ForceBeamColumn3d: public Element
   BeamIntegration *beamIntegr;
   int numSections;
   SectionForceDeformation **sections;          // array of pointers to sections
-  CrdTransf3d *crdTransf;        // pointer to coordinate tranformation object 
+  CrdTransf *crdTransf;        // pointer to coordinate tranformation object 
   // (performs the transformation between the global and basic system)
   double rho;                    // mass density per unit length
   int    maxIters;               // maximum number of local iterations

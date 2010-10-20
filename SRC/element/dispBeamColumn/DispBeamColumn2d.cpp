@@ -30,7 +30,7 @@
 #include <DispBeamColumn2d.h>
 #include <Node.h>
 #include <SectionForceDeformation.h>
-#include <CrdTransf2d.h>
+#include <CrdTransf.h>
 #include <Matrix.h>
 #include <Vector.h>
 #include <ID.h>
@@ -53,7 +53,7 @@ double DispBeamColumn2d::workArea[100];
 DispBeamColumn2d::DispBeamColumn2d(int tag, int nd1, int nd2,
 				   int numSec, SectionForceDeformation **s,
 				   BeamIntegration& bi,
-				   CrdTransf2d &coordTransf, double r)
+				   CrdTransf &coordTransf, double r)
 :Element (tag, ELE_TAG_DispBeamColumn2d), 
  numSections(numSec), theSections(0), crdTransf(0), beamInt(0),
   connectedExternalNodes(2),
@@ -86,7 +86,7 @@ DispBeamColumn2d::DispBeamColumn2d(int tag, int nd1, int nd2,
     exit(-1);
   }
 
-  crdTransf = coordTransf.getCopy();
+  crdTransf = coordTransf.getCopy2d();
   
   if (crdTransf == 0) {
     opserr << "DispBeamColumn2d::DispBeamColumn2d - failed to copy coordinate transformation\n";
@@ -638,6 +638,7 @@ const Vector&
 DispBeamColumn2d::getResistingForce()
 {
   double L = crdTransf->getInitialLength();
+  
   double oneOverL = 1.0/L;
   
   //const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
@@ -890,7 +891,7 @@ DispBeamColumn2d::recvSelf(int commitTag, Channel &theChannel,
       if (crdTransf != 0)
 	  delete crdTransf;
 
-      crdTransf = theBroker.getNewCrdTransf2d(crdTransfClassTag);
+      crdTransf = theBroker.getNewCrdTransf(crdTransfClassTag);
 
       if (crdTransf == 0) {
 	opserr << "DispBeamColumn2d::recvSelf() - failed to obtain a CrdTrans object with classTag " <<

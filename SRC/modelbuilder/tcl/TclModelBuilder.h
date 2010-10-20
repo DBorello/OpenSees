@@ -57,9 +57,6 @@ class UnloadingRule;
 class StrengthDegradation;
 class FrictionModel;
 
-class CrdTransf2d;
-class CrdTransf3d;
-
 #include <tcl.h>
 
 class TclModelBuilder : public ModelBuilder
@@ -88,13 +85,6 @@ class TclModelBuilder : public ModelBuilder
     SectionForceDeformation *getSection(int tag);    
     int addSectionRepres(SectionRepres &theSectionRepres);
     SectionRepres *getSectionRepres(int tag);
-
-    // methods needed for the frame elements to
-    // add/get cordinate transformation objects
-    int addCrdTransf2d(CrdTransf2d &theCrdTransf);
-    int addCrdTransf3d(CrdTransf3d &theCrdTransf);
-    CrdTransf2d *getCrdTransf2d(int tag);    
-    CrdTransf3d *getCrdTransf3d(int tag);    
 
     // methods needed for the yield surfaces
     int addYieldSurface_BC(YieldSurface_BC &theYS);
@@ -132,8 +122,6 @@ class TclModelBuilder : public ModelBuilder
     TaggedObjectStorage *theNDMaterials;
     TaggedObjectStorage *theSections;   
     TaggedObjectStorage *theSectionRepresents;
-    TaggedObjectStorage *the2dGeomTransfs;
-    TaggedObjectStorage *the3dGeomTransfs;
     TaggedObjectStorage *theYieldSurface_BCs;
     TaggedObjectStorage *thePlasticMaterials;
     TaggedObjectStorage *theYS_EvolutionModels;

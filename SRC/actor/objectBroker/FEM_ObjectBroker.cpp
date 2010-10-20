@@ -117,14 +117,8 @@ FEM_ObjectBroker::getNewElementalLoad(int classTag)
   return 0;
 }
 
-CrdTransf2d*
-FEM_ObjectBroker::getNewCrdTransf2d(int classTag)
-{
-  return 0;
-}
-
-CrdTransf3d*
-FEM_ObjectBroker::getNewCrdTransf3d(int classTag)
+CrdTransf*
+FEM_ObjectBroker::getNewCrdTransf(int classTag)
 {
   return 0;
 }

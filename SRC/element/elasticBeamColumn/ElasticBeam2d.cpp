@@ -39,7 +39,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
-#include <CrdTransf2d.h>
+#include <CrdTransf.h>
 #include <Information.h>
 #include <Parameter.h>
 #include <ElementResponse.h>
@@ -74,7 +74,7 @@ ElasticBeam2d::ElasticBeam2d()
 
 ElasticBeam2d::ElasticBeam2d(int tag, double a, double e, double i, 
 			     int Nd1, int Nd2, 
-			     CrdTransf2d &coordTransf, double Alpha, double depth,
+			     CrdTransf &coordTransf, double Alpha, double depth,
 			     double r)
   :Element(tag,ELE_TAG_ElasticBeam2d), 
   A(a), E(e), I(i), alpha(Alpha), d(depth), rho(r),
@@ -84,7 +84,7 @@ ElasticBeam2d::ElasticBeam2d(int tag, double a, double e, double i,
   connectedExternalNodes(0) = Nd1;
   connectedExternalNodes(1) = Nd2;
     
-  theCoordTransf = coordTransf.getCopy();
+  theCoordTransf = coordTransf.getCopy2d();
     
   if (!theCoordTransf) {
     opserr << "ElasticBeam2d::ElasticBeam2d -- failed to get copy of coordinate transformation\n";
@@ -560,7 +560,7 @@ ElasticBeam2d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBrok
     // Check if the CoordTransf is null; if so, get a new one
     int crdTag = (int)data(7);
     if (theCoordTransf == 0) {
-      theCoordTransf = theBroker.getNewCrdTransf2d(crdTag);
+      theCoordTransf = theBroker.getNewCrdTransf(crdTag);
       if (theCoordTransf == 0) {
 	opserr << "ElasticBeam2d::recvSelf -- could not get a CrdTransf2d\n";
 	exit(-1);
@@ -571,7 +571,7 @@ ElasticBeam2d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBrok
     // the current one and get a new one of the right type
     if (theCoordTransf->getClassTag() != crdTag) {
       delete theCoordTransf;
-      theCoordTransf = theBroker.getNewCrdTransf2d(crdTag);
+      theCoordTransf = theBroker.getNewCrdTransf(crdTag);
       if (theCoordTransf == 0) {
 	opserr << "ElasticBeam2d::recvSelf -- could not get a CrdTransf2d\n";
 	exit(-1);

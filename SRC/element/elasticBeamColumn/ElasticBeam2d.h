@@ -39,7 +39,7 @@
 
 class Channel;
 class Information;
-class CrdTransf2d;
+class CrdTransf;
 class Response;
 class Renderer;
 
@@ -48,7 +48,7 @@ class ElasticBeam2d : public Element
   public:
     ElasticBeam2d();        
     ElasticBeam2d(int tag, double A, double E, double I, 
-		  int Nd1, int Nd2, CrdTransf2d &theTransf, 
+		  int Nd1, int Nd2, CrdTransf &theTransf, 
 		  double alpha = 0.0, double d = 0.0, double rho = 0.0);
     ~ElasticBeam2d();
 
@@ -108,7 +108,7 @@ class ElasticBeam2d : public Element
     
     ID  connectedExternalNodes;    
 
-    CrdTransf2d *theCoordTransf;
+    CrdTransf *theCoordTransf;
 };
 
 #endif

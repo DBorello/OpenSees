@@ -60,8 +60,7 @@ class FEM_ObjectBrokerAllClasses : public FEM_ObjectBroker
     NodalLoad     *getNewNodalLoad(int classTag);
     ElementalLoad *getNewElementalLoad(int classTag);
     
-    CrdTransf2d *getNewCrdTransf2d(int classTag);
-    CrdTransf3d *getNewCrdTransf3d(int classTag);
+    CrdTransf *getNewCrdTransf(int classTag);
 
     BeamIntegration *getNewBeamIntegration(int classTag);
 

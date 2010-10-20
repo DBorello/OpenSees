@@ -180,8 +180,6 @@ REMO_LIBS = $(FE)/element/nonlinearBeamColumn/matrixutil/MatrixUtil.o \
 	$(FE)/element/forceBeamColumn/FixedLocationBeamIntegration.o \
 	$(FE)/element/forceBeamColumn/LowOrderBeamIntegration.o \
 	$(FE)/coordTransformation/CrdTransf.o \
-	$(FE)/coordTransformation/CrdTransf2d.o \
-	$(FE)/coordTransformation/CrdTransf3d.o \
 	$(FE)/coordTransformation/LinearCrdTransf2d.o \
 	$(FE)/coordTransformation/PDeltaCrdTransf2d.o \
 	$(FE)/coordTransformation/CorotCrdTransf2d.o \

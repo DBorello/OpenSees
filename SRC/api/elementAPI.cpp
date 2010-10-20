@@ -43,6 +43,8 @@
 
 #include <OPS_Globals.h>
 
+#include <CrdTransf.h>
+
 typedef struct elementFunction {
   char *funcName;
   eleFunct theFunct; 
@@ -738,14 +740,9 @@ OPS_GetSectionForceDeformation(int matTag)
   return theModelBuilder->getSection(matTag);
 }
 
-CrdTransf2d *OPS_GetGetCrdTransf2d(int tag)
+CrdTransf *OPS_GetCrdTransfPtr(int tag)
 {
-  return theModelBuilder->getCrdTransf2d(tag);
-}
-
-CrdTransf3d *OPS_GetGetCrdTransf3d(int tag)
-{
-  return theModelBuilder->getCrdTransf3d(tag);
+  return OPS_GetCrdTransf(tag);
 }
 
 int

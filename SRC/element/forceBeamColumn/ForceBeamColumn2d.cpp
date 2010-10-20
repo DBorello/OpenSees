@@ -119,7 +119,7 @@ ForceBeamColumn2d::ForceBeamColumn2d():
 ForceBeamColumn2d::ForceBeamColumn2d (int tag, int nodeI, int nodeJ,
 				      int numSec, SectionForceDeformation **sec,
 				      BeamIntegration &bi,
-				      CrdTransf2d &coordTransf, double massDensPerUnitLength,
+				      CrdTransf &coordTransf, double massDensPerUnitLength,
 				      int maxNumIters, double tolerance):
   Element(tag,ELE_TAG_ForceBeamColumn2d), connectedExternalNodes(2),
   beamIntegr(0), numSections(0), sections(0), crdTransf(0),
@@ -144,7 +144,7 @@ ForceBeamColumn2d::ForceBeamColumn2d (int tag, int nodeI, int nodeJ,
   }
   
   // get copy of the transformation object   
-  crdTransf = coordTransf.getCopy(); 
+  crdTransf = coordTransf.getCopy2d(); 
   if (crdTransf == 0) {
     opserr << "Error: ForceBeamColumn2d::ForceBeamColumn2d: could not create copy of coordinate transformation object" << endln;
     exit(-1);
@@ -1478,7 +1478,7 @@ ForceBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
       if (crdTransf != 0)
 	  delete crdTransf;
 
-      crdTransf = theBroker.getNewCrdTransf2d(crdTransfClassTag);
+      crdTransf = theBroker.getNewCrdTransf(crdTransfClassTag);
 
       if (crdTransf == 0) {
 	opserr << "ForceBeamColumn2d::recvSelf() - failed to obtain a CrdTrans object with classTag" <<

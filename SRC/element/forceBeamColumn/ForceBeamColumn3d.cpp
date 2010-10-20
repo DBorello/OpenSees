@@ -141,7 +141,7 @@ ForceBeamColumn3d::ForceBeamColumn3d():
 ForceBeamColumn3d::ForceBeamColumn3d (int tag, int nodeI, int nodeJ,
 				      int numSec, SectionForceDeformation **sec,
 				      BeamIntegration &bi,
-				      CrdTransf3d &coordTransf, double massDensPerUnitLength,
+				      CrdTransf &coordTransf, double massDensPerUnitLength,
 				      int maxNumIters, double tolerance):
   Element(tag,ELE_TAG_ForceBeamColumn3d), connectedExternalNodes(2),
   beamIntegr(0), numSections(0), sections(0), crdTransf(0),
@@ -164,7 +164,7 @@ ForceBeamColumn3d::ForceBeamColumn3d (int tag, int nodeI, int nodeJ,
   }
 
   // get copy of the transformation object   
-  crdTransf = coordTransf.getCopy(); 
+  crdTransf = coordTransf.getCopy3d(); 
   if (crdTransf == 0) {
     opserr << "Error: ForceBeamColumn3d::ForceBeamColumn3d: could not create copy of coordinate transformation object" << endln;
     exit(-1);
@@ -1407,7 +1407,7 @@ ForceBeamColumn3d::getInitialStiff(void)
 	if (crdTransf != 0)
 	    delete crdTransf;
 
-	crdTransf = theBroker.getNewCrdTransf3d(crdTransfClassTag);
+	crdTransf = theBroker.getNewCrdTransf(crdTransfClassTag);
 
 	if (crdTransf == 0) {
 	    opserr << "ForceBeamColumn3d::recvSelf() - failed to obtain a CrdTrans object with classTag" <<
@@ -1914,6 +1914,7 @@ ForceBeamColumn3d::getInitialDeformations(Vector &v0)
        static Vector xAxis(3);
        static Vector yAxis(3);
        static Vector zAxis(3);
+
 
        crdTransf->getLocalAxes(xAxis, yAxis, zAxis);
 

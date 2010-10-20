@@ -92,7 +92,7 @@
 
 LinearCrdTransf2dInt::LinearCrdTransf2dInt(int tag):
 
-  CrdTransf2d(tag, CRDTR_TAG_LinearCrdTransf2dInt),
+  CrdTransf(tag, CRDTR_TAG_LinearCrdTransf2dInt),
 
   nodeIPtr(0), nodeJPtr(0),
 
@@ -116,7 +116,7 @@ LinearCrdTransf2dInt::LinearCrdTransf2dInt(int tag,
 
 				     const Vector &rigJntOffset2):
 
-  CrdTransf2d(tag, CRDTR_TAG_LinearCrdTransf2dInt),
+  CrdTransf(tag, CRDTR_TAG_LinearCrdTransf2dInt),
 
   nodeIPtr(0), nodeJPtr(0),
 
@@ -184,7 +184,7 @@ LinearCrdTransf2dInt::LinearCrdTransf2dInt(int tag,
 
 LinearCrdTransf2dInt::LinearCrdTransf2dInt():
 
-  CrdTransf2d(0, CRDTR_TAG_LinearCrdTransf2dInt),
+  CrdTransf(0, CRDTR_TAG_LinearCrdTransf2dInt),
 
   nodeIPtr(0), nodeJPtr(0),
 
@@ -2034,9 +2034,9 @@ LinearCrdTransf2dInt::getInitialGlobalStiffMatrixInt (const Matrix &kb)	//LMS
 
 
 
-CrdTransf2d *
+CrdTransf *
 
-LinearCrdTransf2dInt::getCopy(void)		
+LinearCrdTransf2dInt::getCopy2d(void)		
 
 {
 

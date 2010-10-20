@@ -692,8 +692,8 @@ FEM_ObjectBrokerAllClasses::getNewElementalLoad(int classTag)
   return 0;
 }
 
-CrdTransf2d*
-FEM_ObjectBrokerAllClasses::getNewCrdTransf2d(int classTag)
+CrdTransf*
+FEM_ObjectBrokerAllClasses::getNewCrdTransf(int classTag)
 {
 	switch(classTag) {
 	case CRDTR_TAG_LinearCrdTransf2d:
@@ -702,19 +702,6 @@ FEM_ObjectBrokerAllClasses::getNewCrdTransf2d(int classTag)
 		return new PDeltaCrdTransf2d();
 	case CRDTR_TAG_CorotCrdTransf2d:
 		return new CorotCrdTransf2d();
-	default:
-		opserr << "FEM_ObjectBrokerAllClasses::getCrdTransf2d - ";
-	    opserr << " - no CrdTransf2d type exists for class tag ";
-	    opserr << classTag << endln;
-	    return 0;
-	}
-
-}
-
-CrdTransf3d*
-FEM_ObjectBrokerAllClasses::getNewCrdTransf3d(int classTag)
-{
-	switch(classTag) {
 	case CRDTR_TAG_LinearCrdTransf3d:
 		return new LinearCrdTransf3d();
 	case CRDTR_TAG_PDeltaCrdTransf3d:
@@ -722,10 +709,10 @@ FEM_ObjectBrokerAllClasses::getNewCrdTransf3d(int classTag)
 	case CRDTR_TAG_CorotCrdTransf3d:
 		return new CorotCrdTransf3d();
 	default:
-		opserr << "FEM_ObjectBrokerAllClasses::getCrdTransf3d - ";
-	    opserr << " - no CrdTransf3d type exists for class tag ";
-	    opserr << classTag << endln;
-	    return 0;
+	  opserr << "FEM_ObjectBrokerAllClasses::getCrdTransf - ";
+	  opserr << " - no CrdTransf type exists for class tag ";
+	  opserr << classTag << endln;
+	  return 0;
 	}
 
 }

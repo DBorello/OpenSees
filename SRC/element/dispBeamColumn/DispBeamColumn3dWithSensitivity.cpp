@@ -31,7 +31,7 @@
 #include <DispBeamColumn3dWithSensitivity.h>
 #include <Node.h>
 #include <SectionForceDeformation.h>
-#include <CrdTransf3d.h>
+#include <CrdTransf.h>
 #include <Matrix.h>
 #include <Vector.h>
 #include <ID.h>
@@ -56,7 +56,7 @@ double DispBeamColumn3dWithSensitivity::workArea[200];
 DispBeamColumn3dWithSensitivity::DispBeamColumn3dWithSensitivity(int tag, int nd1, int nd2,
 				   int numSec, SectionForceDeformation **s,
 				   BeamIntegration &bi,
-				   CrdTransf3d &coordTransf, double r)
+				   CrdTransf &coordTransf, double r)
 :Element (tag, ELE_TAG_DispBeamColumn3dWithSensitivity),
 numSections(numSec), theSections(0), crdTransf(0), beamInt(0),
 connectedExternalNodes(2), 
@@ -89,7 +89,7 @@ Q(12), q(6), rho(r)
     exit(-1);
   }
 
-  crdTransf = coordTransf.getCopy();
+  crdTransf = coordTransf.getCopy3d();
   
   if (crdTransf == 0) {
     opserr << "DispBeamColumn3dWithSensitivity::DispBeamColumn3dWithSensitivity - failed to copy coordinate transformation\n";
@@ -971,7 +971,7 @@ DispBeamColumn3dWithSensitivity::recvSelf(int commitTag, Channel &theChannel,
       if (crdTransf != 0)
 	  delete crdTransf;
 
-      crdTransf = theBroker.getNewCrdTransf3d(crdTransfClassTag);
+      crdTransf = theBroker.getNewCrdTransf(crdTransfClassTag);
 
       if (crdTransf == 0) {
 	opserr << "DispBeamColumn3dWithSensitivity::recvSelf() - " <<
@@ -1412,7 +1412,7 @@ DispBeamColumn3dWithSensitivity::getResistingForceSensitivity(int gradNumber)
 
 
 	double L = crdTransf->getInitialLength();
-	double oneOverL = 1.0/L;
+	// double oneOverL = 1.0/L;
 
   //const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
   //const Vector &wts = quadRule.getIntegrPointWeights(numSections);
@@ -1507,9 +1507,6 @@ DispBeamColumn3dWithSensitivity::getResistingForceSensitivity(int gradNumber)
 int
 DispBeamColumn3dWithSensitivity::commitSensitivity(int gradNumber, int numGrads)
 {
-
- // 
-
   const Vector &v = crdTransf->getBasicTrialDisp();
   static Vector vsens(6); 
    vsens = crdTransf->getBasicDisplSensitivity(gradNumber);

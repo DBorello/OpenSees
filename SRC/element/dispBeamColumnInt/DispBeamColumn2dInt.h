@@ -46,7 +46,7 @@ class SectionForceDeformation;
 
 class FiberSection2dInt;
 
-class CrdTransf2d;
+class CrdTransf;
 
 class LinearCrdTransf2dInt;
 
@@ -72,7 +72,7 @@ class DispBeamColumn2dInt : public Element
 
 			SectionForceDeformation **s,
 
-			CrdTransf2d &coordTransf, 
+			CrdTransf &coordTransf, 
 
 			double C, 
 

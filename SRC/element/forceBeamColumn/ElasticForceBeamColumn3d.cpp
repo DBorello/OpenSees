@@ -103,7 +103,7 @@ ElasticForceBeamColumn3d::ElasticForceBeamColumn3d (int tag,
 						    int numSec, 
 						    SectionForceDeformation **sec,
 						    BeamIntegration &bi,
-						    CrdTransf3d &coordTransf,
+						    CrdTransf &coordTransf,
 						    double massDensPerUnitLength):
   Element(tag,ELE_TAG_ElasticForceBeamColumn3d), connectedExternalNodes(2),
   beamIntegr(0), numSections(numSec), crdTransf(0),
@@ -124,7 +124,7 @@ ElasticForceBeamColumn3d::ElasticForceBeamColumn3d (int tag,
   }
   
   // get copy of the transformation object   
-  crdTransf = coordTransf.getCopy(); 
+  crdTransf = coordTransf.getCopy3d(); 
   if (crdTransf == 0) {
     opserr << "Error: ElasticForceBeamColumn3d::ElasticForceBeamColumn3d: could not create copy of coordinate transformation object" << endln;
   }
@@ -1468,6 +1468,7 @@ ElasticForceBeamColumn3d::setParameter(const char **argv, int argc, Parameter &p
     ok += beamIntegr->setParameter(argv, argc, param);
     return ok;
   }
+  return 0;
 }
 
 int

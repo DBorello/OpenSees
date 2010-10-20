@@ -74,4 +74,9 @@ class TimeSeries : public TaggedObject, public MovableObject
   private:
 };
 
+
+extern void OPS_clearAllTimeSeries(void);
+extern bool OPS_addTimeSeries(TimeSeries *newComponent);
+extern TimeSeries *OPS_getTimeSeries(int tag);
+
 #endif

@@ -145,14 +145,14 @@ extern "C" int    OPS_GetNodeIncrDeltaDisp(int *nodeTag, int *sizeData, double *
 class UniaxialMaterial;
 class NDMaterial;
 class SectionForceDeformation;
-class CrdTransf2d;
-class CrdTransf3d;
+class CrdTransf;
+class CrdTransf;
 
 extern UniaxialMaterial *OPS_GetUniaxialMaterial(int matTag);
 extern NDMaterial *OPS_GetNDMaterial(int matTag);
 extern SectionForceDeformation *OPS_GetSectionForceDeformation(int matTag);
-extern CrdTransf2d *OPS_GetGetCrdTransf2d(int tag);
-extern CrdTransf3d *OPS_GetGetCrdTransf3d(int tag);
+
+extern CrdTransf *OPS_GetGetCrdTransfPtr(int tag);
 
 #else
 
