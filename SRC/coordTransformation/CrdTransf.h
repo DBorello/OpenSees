@@ -22,9 +22,6 @@
 // $Date: 2009-08-19 17:53:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CrdTransf.h,v $
 
-
-// File: ~/crdTransf/CrdTransf.h
-//
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
 // Created: 04/2000
 // Revision: A
@@ -47,6 +44,7 @@ class Vector;
 class Matrix;
 class Node;
 
+// class definition
 
 class CrdTransf: public TaggedObject, public MovableObject
 {
@@ -54,6 +52,10 @@ public:
     CrdTransf(int tag, int classTag);
     CrdTransf();
     virtual ~CrdTransf();
+
+    virtual CrdTransf *getCopy2d(void) {return 0;};
+    virtual CrdTransf *getCopy3d(void) {return 0;};
+    int getLocalAxes(Vector &xAxis, Vector &yAxis, Vector &zAxis) {return -1;};
     
     virtual int    initialize(Node *node1Pointer, Node *node2Pointer) = 0;
     virtual int    update(void) = 0;
@@ -95,5 +97,10 @@ protected:
     
 private:
 };
+
+// some additional functions related to prototypes created for copy constructors
+extern bool       OPS_AddCrdTransf(CrdTransf *newComponent);
+extern CrdTransf *OPS_GetCrdTransf(int tag);
+extern void       OPS_ClearAllCrdTransf(void);
 
 #endif
