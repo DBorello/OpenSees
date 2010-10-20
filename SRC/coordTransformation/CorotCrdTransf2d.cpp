@@ -68,7 +68,7 @@ Matrix CorotCrdTransf2d::kg(6,6);
 CorotCrdTransf2d::CorotCrdTransf2d(int tag, 
                                    const Vector &rigJntOffsetI,
                                    const Vector &rigJntOffsetJ):
-CrdTransf2d(tag, CRDTR_TAG_CorotCrdTransf2d),
+CrdTransf(tag, CRDTR_TAG_CorotCrdTransf2d),
 nodeIOffset(2), nodeJOffset(2), cosTheta(0), sinTheta(0),
 cosAlpha(0), sinAlpha(0),
 nodeIPtr(0), nodeJPtr(0), L(0), Ln(0), ub(3), ubcommit(3), ubpr(3),
@@ -105,7 +105,7 @@ nodeIInitialDisp(0), nodeJInitialDisp(0), initialDispChecked(false)
 // constructor:
 // invoked by a FEM_ObjectBroker, recvSelf() needs to be invoked on this object.
 CorotCrdTransf2d::CorotCrdTransf2d():
-CrdTransf2d(0, CRDTR_TAG_CorotCrdTransf2d),
+CrdTransf(0, CRDTR_TAG_CorotCrdTransf2d),
 nodeIOffset(2), nodeJOffset(2), cosTheta(0), sinTheta(0),
 cosAlpha(0), sinAlpha(0),
 nodeIPtr(0), nodeJPtr(0), L(0), Ln(0), ub(3), ubcommit(3), ubpr(3),
@@ -965,8 +965,8 @@ CorotCrdTransf2d::getDeformedLength(void)
 }
 
 
-CrdTransf2d *
-CorotCrdTransf2d::getCopy(void)
+CrdTransf *
+CorotCrdTransf2d::getCopy2d(void)
 {
     // create a new instance of CorotCrdTransf2d 
     CorotCrdTransf2d *theCopy = new CorotCrdTransf2d (this->getTag(), nodeIOffset, nodeJOffset);

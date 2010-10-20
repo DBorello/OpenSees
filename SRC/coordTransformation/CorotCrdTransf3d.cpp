@@ -58,7 +58,7 @@ Matrix CorotCrdTransf3d::T(7,12);
 CorotCrdTransf3d::CorotCrdTransf3d(int tag, const Vector &vecInLocXZPlane,
                                    const Vector &rigJntOffsetI,
                                    const Vector &rigJntOffsetJ):
-CrdTransf3d(tag, CRDTR_TAG_CorotCrdTransf3d),
+CrdTransf(tag, CRDTR_TAG_CorotCrdTransf3d),
 vAxis(3), nodeIOffset(3), nodeJOffset(3), xAxis(3),
 nodeIPtr(0), nodeJPtr(0), R0(3,3), L(0), Ln(0), 
 alphaIq(4), alphaJq(4), 
@@ -140,7 +140,7 @@ nodeIInitialDisp(0), nodeJInitialDisp(0), initialDispChecked(false)
 // constructor:
 // invoked by a FEM_ObjectBroker, recvSelf() needs to be invoked on this object.
 CorotCrdTransf3d::CorotCrdTransf3d():
-CrdTransf3d(0, CRDTR_TAG_CorotCrdTransf3d),
+CrdTransf(0, CRDTR_TAG_CorotCrdTransf3d),
 vAxis(3), nodeIOffset(3), nodeJOffset(3), xAxis(3),
 nodeIPtr(0), nodeJPtr(0), R0(3,3), L(0), Ln(0), 
 alphaIq(4), alphaJq(4), 
@@ -169,7 +169,7 @@ nodeIInitialDisp(0), nodeJInitialDisp(0), initialDispChecked(false)
         Tp(3, 2) = -1;
         Tp(4, 5) = -1;
         Tp(5, 0) = -1;
-        Tp(5, 3) =  1;
+	Tp(5, 3) =  1;
     }
     
     //opserr << "Tp: " << Tp;
@@ -1863,8 +1863,8 @@ CorotCrdTransf3d::getKs2Matrix (const Vector &ri, const Vector &z) const
 }
 
 
-CrdTransf3d *
-CorotCrdTransf3d::getCopy(void)
+CrdTransf *
+CorotCrdTransf3d::getCopy3d(void)
 {
     // create a new instance of CorotCrdTransf3d 
     

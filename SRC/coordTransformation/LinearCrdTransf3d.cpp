@@ -45,7 +45,7 @@
 
 // constructor:
 LinearCrdTransf3d::LinearCrdTransf3d(int tag, const Vector &vecInLocXZPlane):
-CrdTransf3d(tag, CRDTR_TAG_LinearCrdTransf3d),
+CrdTransf(tag, CRDTR_TAG_LinearCrdTransf3d),
 nodeIPtr(0), nodeJPtr(0),
 nodeIOffset(0), nodeJOffset(0), L(0),
 nodeIInitialDisp(0), nodeJInitialDisp(0), initialDispChecked(false)
@@ -66,7 +66,7 @@ nodeIInitialDisp(0), nodeJInitialDisp(0), initialDispChecked(false)
 LinearCrdTransf3d::LinearCrdTransf3d(int tag, const Vector &vecInLocXZPlane,
                                      const Vector &rigJntOffset1,
                                      const Vector &rigJntOffset2):
-CrdTransf3d(tag, CRDTR_TAG_LinearCrdTransf3d),
+CrdTransf(tag, CRDTR_TAG_LinearCrdTransf3d),
 nodeIPtr(0), nodeJPtr(0),
 nodeIOffset(0), nodeJOffset(0), L(0),
 nodeIInitialDisp(0), nodeJInitialDisp(0), initialDispChecked(false)
@@ -110,7 +110,7 @@ nodeIInitialDisp(0), nodeJInitialDisp(0), initialDispChecked(false)
 // constructor:
 // invoked by a FEM_ObjectBroker, recvSelf() needs to be invoked on this object.
 LinearCrdTransf3d::LinearCrdTransf3d():
-CrdTransf3d(0, CRDTR_TAG_LinearCrdTransf3d),
+CrdTransf(0, CRDTR_TAG_LinearCrdTransf3d),
 nodeIPtr(0), nodeJPtr(0),
 nodeIOffset(0), nodeJOffset(0), L(0),
 nodeIInitialDisp(0), nodeJInitialDisp(0), initialDispChecked(false)
@@ -1067,8 +1067,8 @@ LinearCrdTransf3d::getInitialGlobalStiffMatrix (const Matrix &KB)
 }
 
 
-CrdTransf3d *
-LinearCrdTransf3d::getCopy(void)
+CrdTransf *
+LinearCrdTransf3d::getCopy3d(void)
 {
     // create a new instance of LinearCrdTransf3d 
     

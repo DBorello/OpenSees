@@ -45,7 +45,7 @@
 
 // constructor:
 PDeltaCrdTransf2d::PDeltaCrdTransf2d(int tag)
-:CrdTransf2d(tag, CRDTR_TAG_PDeltaCrdTransf2d),
+:CrdTransf(tag, CRDTR_TAG_PDeltaCrdTransf2d),
 nodeIPtr(0), nodeJPtr(0),
 nodeIOffset(0), nodeJOffset(0),
 cosTheta(0), sinTheta(0), L(0), ul14(0),
@@ -59,11 +59,11 @@ nodeIInitialDisp(0), nodeJInitialDisp(0), initialDispChecked(false)
 PDeltaCrdTransf2d::PDeltaCrdTransf2d(int tag,
                                      const Vector &rigJntOffset1,
                                      const Vector &rigJntOffset2)
-                                     :CrdTransf2d(tag, CRDTR_TAG_PDeltaCrdTransf2d),
-                                     nodeIPtr(0), nodeJPtr(0),
-                                     nodeIOffset(0), nodeJOffset(0),
-                                     cosTheta(0), sinTheta(0), L(0), ul14(0),
-                                     nodeIInitialDisp(0), nodeJInitialDisp(0), initialDispChecked(false)
+  :CrdTransf(tag, CRDTR_TAG_PDeltaCrdTransf2d),
+   nodeIPtr(0), nodeJPtr(0),
+   nodeIOffset(0), nodeJOffset(0),
+   cosTheta(0), sinTheta(0), L(0), ul14(0),
+   nodeIInitialDisp(0), nodeJInitialDisp(0), initialDispChecked(false)
 {
     // check rigid joint offset for node I
     if (&rigJntOffset1 == 0 || rigJntOffset1.Size() != 2 ) {
@@ -92,7 +92,7 @@ PDeltaCrdTransf2d::PDeltaCrdTransf2d(int tag,
 // constructor:
 // invoked by a FEM_ObjectBroker, recvSelf() needs to be invoked on this object.
 PDeltaCrdTransf2d::PDeltaCrdTransf2d()
-:CrdTransf2d(0, CRDTR_TAG_PDeltaCrdTransf2d),
+:CrdTransf(0, CRDTR_TAG_PDeltaCrdTransf2d),
 nodeIPtr(0), nodeJPtr(0),
 nodeIOffset(0), nodeJOffset(0),
 cosTheta(0), sinTheta(0), L(0), ul14(0),
@@ -917,8 +917,8 @@ PDeltaCrdTransf2d::getInitialGlobalStiffMatrix (const Matrix &kb)
 }
 
 
-CrdTransf2d *
-PDeltaCrdTransf2d::getCopy(void)
+CrdTransf *
+PDeltaCrdTransf2d::getCopy2d(void)
 {
     // create a new instance of PDeltaCrdTransf2d 
     

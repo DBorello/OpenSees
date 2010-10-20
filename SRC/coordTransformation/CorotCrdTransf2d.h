@@ -35,11 +35,11 @@
 #ifndef CorotCrdTransf2d_h
 #define CorotCrdTransf2d_h
 
-#include <CrdTransf2d.h>
+#include <CrdTransf.h>
 #include <Vector.h>
 #include <Matrix.h>
 
-class CorotCrdTransf2d: public CrdTransf2d
+class CorotCrdTransf2d: public CrdTransf
 {
 public:
     CorotCrdTransf2d(int tag, const Vector &rigJntOffsetI, const Vector &rigJntOffsetJ);
@@ -77,7 +77,7 @@ public:
     double getd1overLdh(void);
 // AddingSensitivity:END //////////////////////////////////
 
-    CrdTransf2d *getCopy(void);
+    CrdTransf *getCopy2d(void);
     
     int sendSelf(int cTag, Channel &theChannel);
     int recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker);

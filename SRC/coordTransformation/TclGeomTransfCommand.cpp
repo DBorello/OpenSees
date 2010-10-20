@@ -107,7 +107,7 @@ TclCommand_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
 
     // construct the transformation object
     
-    CrdTransf2d *crdTransf2d =0;
+    CrdTransf *crdTransf2d =0;
     
     if (strcmp(argv[1],"Linear") == 0)
       crdTransf2d = new LinearCrdTransf2d(crdTransfTag, jntOffsetI, jntOffsetJ);
@@ -134,7 +134,7 @@ TclCommand_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
     }
     
     // add the transformation to the modelBuilder
-    if (theTclModelBuilder->addCrdTransf2d(*crdTransf2d)) {
+    if (OPS_AddCrdTransf(crdTransf2d) != true) {
       opserr << "WARNING TclElmtBuilder - addGeomTransf  - could not add geometric transformation to model Builder\n";
       return TCL_ERROR;
     }
@@ -200,7 +200,7 @@ TclCommand_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
     
     // construct the transformation object
     
-    CrdTransf3d *crdTransf3d;
+    CrdTransf *crdTransf3d;
     
     if (strcmp(argv[1],"Linear") == 0)
       crdTransf3d = new LinearCrdTransf3d(crdTransfTag, vecxzPlane, jntOffsetI, jntOffsetJ);
@@ -222,7 +222,7 @@ TclCommand_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
     }
     
     // add the transformation to the modelBuilder
-    if (theTclModelBuilder->addCrdTransf3d(*crdTransf3d)) {
+    if (OPS_AddCrdTransf(crdTransf3d) != true) {
       opserr << "WARNING TclElmtBuilder - addGeomTransf  - could not add geometric transformation to model Builder\n";
       return TCL_ERROR;
     }

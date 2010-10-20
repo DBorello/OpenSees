@@ -39,17 +39,17 @@
 #ifndef PDeltaCrdTransf2d_h
 #define PDeltaCrdTransf2d_h
 
-#include <CrdTransf2d.h>
+#include <CrdTransf.h>
 #include <Vector.h>
 #include <Matrix.h>
 
-class PDeltaCrdTransf2d: public CrdTransf2d
+class PDeltaCrdTransf2d: public CrdTransf
 {
 public:
     PDeltaCrdTransf2d(int tag);
     PDeltaCrdTransf2d(int tag,
-        const Vector &rigJntOffsetI,
-        const Vector &rigJntOffsetJ);
+		      const Vector &rigJntOffsetI,
+		      const Vector &rigJntOffsetJ);
     
     PDeltaCrdTransf2d();
     ~PDeltaCrdTransf2d();
@@ -66,14 +66,14 @@ public:
     const Vector &getBasicTrialDisp(void);
     const Vector &getBasicIncrDisp(void);
     const Vector &getBasicIncrDeltaDisp(void);
-	const Vector &getBasicTrialVel(void);
-	const Vector &getBasicTrialAccel(void);
+    const Vector &getBasicTrialVel(void);
+    const Vector &getBasicTrialAccel(void);
     
     const Vector &getGlobalResistingForce(const Vector &basicForce, const Vector &p0);
     const Matrix &getGlobalStiffMatrix(const Matrix &basicStiff, const Vector &basicForce);
     const Matrix &getInitialGlobalStiffMatrix(const Matrix &basicStiff);
     
-    CrdTransf2d *getCopy(void);
+    CrdTransf *getCopy2d(void);
     
     int sendSelf(int cTag, Channel &theChannel);
     int recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker);

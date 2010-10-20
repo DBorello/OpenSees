@@ -36,18 +36,18 @@
 #ifndef LinearCrdTransf2d_h
 #define LinearCrdTransf2d_h
 
-#include <CrdTransf2d.h>
+#include <CrdTransf.h>
 #include <Vector.h>
 #include <Matrix.h>
 
 
-class LinearCrdTransf2d: public CrdTransf2d
+class LinearCrdTransf2d: public CrdTransf
 {
 public:
     LinearCrdTransf2d(int tag);
     LinearCrdTransf2d(int tag,
-        const Vector &rigJntOffsetI,
-        const Vector &rigJntOffsetJ);
+		      const Vector &rigJntOffsetI,
+		      const Vector &rigJntOffsetJ);
     
     LinearCrdTransf2d();
     ~LinearCrdTransf2d();
@@ -64,33 +64,33 @@ public:
     const Vector &getBasicTrialDisp(void);
     const Vector &getBasicIncrDisp(void);
     const Vector &getBasicIncrDeltaDisp(void);
-	const Vector &getBasicTrialVel(void);
-	const Vector &getBasicTrialAccel(void);
+    const Vector &getBasicTrialVel(void);
+    const Vector &getBasicTrialAccel(void);
     
     // AddingSensitivity:BEGIN //////////////////////////////////
     const Vector &getBasicDisplSensitivity(int gradNumber);
     const Vector &getGlobalResistingForceShapeSensitivity(const Vector &basicForce, const Vector &p0);
     const Vector &getBasicTrialDispShapeSensitivity(void);
 
-	// ---MHS
-	const Vector & getGlobalResistingForceShapeSensitivity(const Vector &pb,
+    // ---MHS
+    const Vector & getGlobalResistingForceShapeSensitivity(const Vector &pb,
 							   const Vector &p0,
 							   int gradNumber);
-	bool isShapeSensitivity(void);
-	double getdLdh(void);
-	double getd1overLdh(void);
-
-	// --Quan. no shape sensitivity
-	const Vector & getBasicDisplSensitivity(int gradNumber, int flag); 
+    bool isShapeSensitivity(void);
+    double getdLdh(void);
+    double getd1overLdh(void);
     
-
+    // --Quan. no shape sensitivity
+    const Vector & getBasicDisplSensitivity(int gradNumber, int flag); 
+    
+    
     // AddingSensitivity:END //////////////////////////////////
-
+    
     const Vector &getGlobalResistingForce(const Vector &basicForce, const Vector &p0);
     const Matrix &getGlobalStiffMatrix(const Matrix &basicStiff, const Vector &basicForce);
     const Matrix &getInitialGlobalStiffMatrix(const Matrix &basicStiff);
     
-    CrdTransf2d *getCopy(void);
+    CrdTransf *getCopy2d(void);
     
     int sendSelf(int cTag, Channel &theChannel);
     int recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker);

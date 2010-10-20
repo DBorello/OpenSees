@@ -47,7 +47,7 @@
 
 // constructor:
 LinearCrdTransf2d::LinearCrdTransf2d(int tag):
-CrdTransf2d(tag, CRDTR_TAG_LinearCrdTransf2d),
+CrdTransf(tag, CRDTR_TAG_LinearCrdTransf2d),
 nodeIPtr(0), nodeJPtr(0),
 nodeIOffset(0), nodeJOffset(0),
 cosTheta(0), sinTheta(0), L(0),
@@ -61,7 +61,7 @@ nodeIInitialDisp(0), nodeJInitialDisp(0), initialDispChecked(false)
 LinearCrdTransf2d::LinearCrdTransf2d(int tag,
                                      const Vector &rigJntOffset1,
                                      const Vector &rigJntOffset2):
-CrdTransf2d(tag, CRDTR_TAG_LinearCrdTransf2d),
+CrdTransf(tag, CRDTR_TAG_LinearCrdTransf2d),
 nodeIPtr(0), nodeJPtr(0),
 nodeIOffset(0), nodeJOffset(0),
 cosTheta(0), sinTheta(0), L(0),
@@ -94,7 +94,7 @@ nodeIInitialDisp(0), nodeJInitialDisp(0), initialDispChecked(false)
 // constructor:
 // invoked by a FEM_ObjectBroker, recvSelf() needs to be invoked on this object.
 LinearCrdTransf2d::LinearCrdTransf2d():
-CrdTransf2d(0, CRDTR_TAG_LinearCrdTransf2d),
+CrdTransf(0, CRDTR_TAG_LinearCrdTransf2d),
 nodeIPtr(0), nodeJPtr(0),
 nodeIOffset(0), nodeJOffset(0),
 cosTheta(0), sinTheta(0), L(0),
@@ -586,7 +586,7 @@ LinearCrdTransf2d::getGlobalResistingForceShapeSensitivity(const Vector &pb, con
                 << " conjunction with random nodal coordinates." << endln;
         }
         
-        double dcosdh, dsindh, d1oLdh;
+        double dcosdh=0.0, dsindh=0.0, d1oLdh=0.0;
         
         double dx = cosTheta*L;
         double dy = sinTheta*L;	
@@ -875,8 +875,8 @@ LinearCrdTransf2d::getInitialGlobalStiffMatrix (const Matrix &kb)
 }
 
 
-CrdTransf2d *
-LinearCrdTransf2d::getCopy(void)
+CrdTransf *
+LinearCrdTransf2d::getCopy2d(void)
 {
     // create a new instance of LinearCrdTransf2d 
     
@@ -1175,7 +1175,7 @@ LinearCrdTransf2d::getGlobalResistingForceShapeSensitivity(const Vector &pb,
 			 << " conjunction with random nodal coordinates." << endln;
 		}
 
-		double dcosdh, dsindh, d1oLdh;
+		double dcosdh=0.0, dsindh=0.0, d1oLdh=0.0;
 
 		double dx = cosTheta*L;
 		double dy = sinTheta*L;
@@ -1350,8 +1350,8 @@ LinearCrdTransf2d::getdLdh(void)
     if (nodeParameterJ == 2) // here y2 is random
       return sinTheta;
   }
-  else
-    return 0.0;
+  
+  return 0.0;
 }
 
 double
@@ -1379,8 +1379,8 @@ LinearCrdTransf2d::getd1overLdh(void)
       return -sinTheta/(L*L);
 
   }
-  else
-    return 0.0;
+
+  return 0.0;
 }
 
 const Vector &
@@ -1422,7 +1422,7 @@ LinearCrdTransf2d::getBasicTrialDispShapeSensitivity (void)
                 << " conjunction with random nodal coordinates." << endln;
         }
 
-        double dcosdh, dsindh, dsldh, dcldh;
+        double dcosdh=0.0, dsindh=0.0, dsldh=0.0, dcldh=0.0;
 
         double dx = cosTheta*L;
         double dy = sinTheta*L;
