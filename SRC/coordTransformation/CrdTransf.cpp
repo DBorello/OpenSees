@@ -22,9 +22,6 @@
 // $Date: 2009-08-19 17:53:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CrdTransf.cpp,v $
 
-
-// File: ~/crdTransf/CrdTransf.C
-//
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
 // Created: 04/2000
 // Revision: A
@@ -36,6 +33,31 @@
 
 #include <CrdTransf.h>
 #include <Vector.h>
+
+#include <TaggedObject.h>
+#include <MapOfTaggedObjects.h>
+
+static MapOfTaggedObjects theCrdTransfObjects;
+
+bool OPS_AddCrdTransf(CrdTransf *newComponent) {
+  return theCrdTransfObjects.addComponent(newComponent);
+}
+
+CrdTransf *OPS_GetCrdTransf(int tag) {
+
+  TaggedObject *theResult = theCrdTransfObjects.getComponentPtr(tag);
+  if (theResult == 0) {
+    opserr << "CrdTransf *getCrdTransf(int tag) - none found with tag: " << tag << endln;
+    return 0;
+  }
+  CrdTransf *theSeries = (CrdTransf *)theResult;
+
+  return theSeries;
+}
+
+void OPS_ClearAllCrdTransf(void) {
+  theCrdTransfObjects.clearAll();
+}
 
 
 // constructor:
