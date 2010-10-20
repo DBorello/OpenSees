@@ -139,6 +139,7 @@
 #define MAT_TAG_ElasticBilin			46
 #define MAT_TAG_InitStrain			47
 #define MAT_TAG_InitStress			48
+#define MAT_TAG_pyUCLA  			49
 
 // Terje:
 #define MAT_TAG_SmoothSteel01			21

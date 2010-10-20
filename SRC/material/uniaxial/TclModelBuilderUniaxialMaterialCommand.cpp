@@ -91,6 +91,7 @@ extern void *OPS_NewElasticBilin(void);
 extern void *OPS_NewMinMaxMaterial(void);
 extern void *OPS_NewInitStrainMaterial(void);
 extern void *OPS_NewInitStressMaterial(void);
+extern void *OPS_New_pyUCLA(void);
 
 //extern int TclCommand_ConfinedConcrete02(ClientData clientData, Tcl_Interp *interp, int argc, 
 //					 TCL_Char **argv, TclModelBuilder *theTclBuilder);
@@ -242,6 +243,13 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 
     } else if ((strcmp(argv[1],"InitStressMaterial") == 0) || (strcmp(argv[1],"InitStress") == 0)) {
       void *theMat = OPS_NewInitStressMaterial();
+      if (theMat != 0) 
+	theMaterial = (UniaxialMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+
+    } else if ((strcmp(argv[1],"pyUCLA") == 0) || (strcmp(argv[1],"PYUCLA") == 0)) {
+      void *theMat = OPS_New_pyUCLA();
       if (theMat != 0) 
 	theMaterial = (UniaxialMaterial *)theMat;
       else 

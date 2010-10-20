@@ -65,6 +65,7 @@ include ../../../Makefile.def
 	SAWSMaterial.o \
 	ConfinedConcrete01.o \
 	ConfinedConcrete02.o \
+	pyUCLA.o \
         TclModelBuilderUniaxialMaterialCommand.o
 
 all:         $(OBJS)
