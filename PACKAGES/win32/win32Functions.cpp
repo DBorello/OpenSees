@@ -32,6 +32,7 @@ typedef int (*OPS_AllocateElementPtrType)(eleObj *, int *matTags, int *maType);
 typedef int (*OPS_AllocateMaterialPtrType)(matObj *);
 typedef UniaxialMaterial *(*OPS_GetUniaxialMaterialPtrType)(int matTag);
 typedef NDMaterial * (*OPS_GetNDMaterialPtrType)(int matTag);
+typedef CrdTransf * (*OPS_GetCrdTransfPtrType)(int matTag);
 typedef int (*OPS_GetNodeInfoPtrType)(int *, int *, double *);
 typedef int (*OPS_InvokeMaterialDirectlyPtrType)(matObject **, modelState *, double *, double *, double *, int *);
 
@@ -46,6 +47,7 @@ OPS_AllocateElementPtrType OPS_AllocateElementPtr =0;
 OPS_AllocateMaterialPtrType OPS_AllocateMaterialPtr =0;
 OPS_GetUniaxialMaterialPtrType OPS_GetUniaxialMaterialPtr = 0;
 OPS_GetNDMaterialPtrType OPS_GetNDMaterialPtr = 0;
+OPS_GetCrdTransfPtrType OPS_GetCrdTransfPtrFunc = 0;
 OPS_GetNodeInfoPtrType OPS_GetNodeCrdPtr = 0;
 OPS_GetNodeInfoPtrType OPS_GetNodeDispPtr = 0;
 OPS_GetNodeInfoPtrType OPS_GetNodeVelPtr = 0;
@@ -54,7 +56,6 @@ OPS_GetNodeInfoPtrType OPS_GetNodeIncrDispPtr = 0;
 OPS_GetNodeInfoPtrType OPS_GetNodeIncrDeltaDispPtr = 0;
 
 OPS_InvokeMaterialDirectlyPtrType OPS_InvokeMaterialDirectlyPtr =0;
-
 
 OPS_GetNumRemainingInputArgsType OPS_GetNumRemainingArgsPtr = 0;
 OPS_GetStringType OPS_GetStringPtr = 0;
@@ -80,7 +81,8 @@ void setGlobalPointers(OPS_Stream *theErrorStreamPtr,
 		       OPS_GetNodeInfoPtrType OPS_GetNodeIncrDeltaDispFunct,
 		       OPS_GetNumRemainingInputArgsType OPS_GetNumRemainingArgsFunct,
 		       OPS_GetStringType OPS_GetStringFunct,
-		       OPS_GetStringCopyType OPS_GetStringCopyFunct)
+		       OPS_GetStringCopyType OPS_GetStringCopyFunct,
+		       OPS_GetCrdTransfPtrType OPS_GetCrdTransfFunct,)
 {
 	opserrPtr = theErrorStreamPtr;
 	OPS_ErrorPtr = errorFunct;
@@ -100,7 +102,28 @@ void setGlobalPointers(OPS_Stream *theErrorStreamPtr,
 	OPS_GetNumRemainingInputArgsPtr = OPS_GetNumRemainingArgsFunct;
 	OPS_GetStringPtr = OPS_GetStringFunct;
 	OPS_GetStringCopyPtr =  OPS_GetStringCopyFunct;
+	OPS_GetCrdTransfPtrFunc = OPS_GetCrdTransfFunct;
 }
+
+
+
+UniaxialMaterial *
+OPS_GetUniaxialMaterial(int matTag) {
+  return (*OPS_GetUniaxialMaterialPtr)(matTag);
+}
+
+NDMaterial *
+OPS_GetNDMaterial(int matTag)
+{
+  return (*OPS_GetNDMaterialPtr)(matTag);
+}
+
+CrdTransf *
+OPS_GetCrdTransPtr(int tag)
+{
+  return (*OPS_GetCrdTransPtrFunct)(tag);
+}
+
 
 
 int OPS_Error(char *data, int length)
@@ -112,7 +135,6 @@ extern "C" int  OPS_GetIntInput(int *numData, int*data)
 {
   return (*OPS_GetIntInputPtr)(numData, data);
 }
-
 
 extern "C" int OPS_GetDoubleInput(int *numData, double *data)
 {

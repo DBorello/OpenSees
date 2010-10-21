@@ -734,16 +734,19 @@ OPS_GetNDMaterial(int matTag)
 {
   return theModelBuilder->getNDMaterial(matTag);
 }
+
+CrdTransf *
+OPS_GetCrdTransPtr(int tag)
+{
+  return OPS_GetCrdTransf(tag);
+}
+
 SectionForceDeformation *
 OPS_GetSectionForceDeformation(int matTag)
 {
   return theModelBuilder->getSection(matTag);
 }
 
-CrdTransf *OPS_GetCrdTransfPtr(int tag)
-{
-  return OPS_GetCrdTransf(tag);
-}
 
 int
 OPS_ResetInput(ClientData clientData, 

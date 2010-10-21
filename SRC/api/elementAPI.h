@@ -146,13 +146,11 @@ class UniaxialMaterial;
 class NDMaterial;
 class SectionForceDeformation;
 class CrdTransf;
-class CrdTransf;
 
 extern UniaxialMaterial *OPS_GetUniaxialMaterial(int matTag);
 extern NDMaterial *OPS_GetNDMaterial(int matTag);
 extern SectionForceDeformation *OPS_GetSectionForceDeformation(int matTag);
-
-extern CrdTransf *OPS_GetGetCrdTransfPtr(int tag);
+extern CrdTransf *OPS_GetCrdTransfPtr(int tag);
 
 #else
 

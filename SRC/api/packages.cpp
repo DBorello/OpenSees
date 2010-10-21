@@ -115,6 +115,7 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
     typedef int (_cdecl *OPS_AllocateMaterialPtrType)(matObj *);
     typedef UniaxialMaterial *(*OPS_GetUniaxialMaterialPtrType)(int matTag);
     typedef NDMaterial * (*OPS_GetNDMaterialPtrType)(int matTag);
+    typedef CrdTransf * (*OPS_GetCrdTransfPtrType)(int matTag);
     typedef int (_cdecl *OPS_GetNodeInfoPtrType)(int *, int *, double *);
     typedef int (_cdecl *OPS_InvokeMaterialDirectlyPtrType)(matObject **, modelState *, double *, double *, double *, int *);
 
@@ -136,7 +137,8 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
 						     OPS_GetNodeInfoPtrType,
 						     OPS_GetNumRemainingInputArgsType,
 						     OPS_GetStringType,
-						     OPS_GetStringCopyType); 
+						     OPS_GetStringCopyType,
+						     OPS_GetCrdTransfPtrType); 
 
     setGlobalPointersFunction funcPtr;
     
@@ -153,7 +155,7 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
 	      OPS_GetNDMaterial, OPS_InvokeMaterialDirectly, OPS_GetNodeCrd, 
 	      OPS_GetNodeDisp, OPS_GetNodeVel, OPS_GetNodeAcc, 
 	      OPS_GetNodeIncrDisp, OPS_GetNodeIncrDeltaDisp,
-	      OPS_GetNumRemainingArgs, OPS_GetString, OPS_GetStringCopy);
+	      OPS_GetNumRemainingArgs, OPS_GetString, OPS_GetStringCopy, OPS_GetCrdTransfPtr);
 
    LocalInitPtrType initPtr;
    initPtr = (LocalInitPtrType)GetProcAddress((HMODULE)hLib,"localInit");
