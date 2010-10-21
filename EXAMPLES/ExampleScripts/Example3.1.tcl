@@ -24,8 +24,9 @@
 # ------------------------------
 
 # Create ModelBuilder (with two-dimensions and 3 DOF/node)
+puts "HI 1"
 model basic -ndm 2 -ndf 3
-
+puts "HI 2"
 # Create nodes
 # ------------
 
@@ -45,6 +46,8 @@ node  4    $width $height
 #    tag   DX   DY   RZ
 fix   1     1    1    1
 fix   2     1    1    1
+
+puts "HI 3"
 
 # Define materials for nonlinear columns
 # ------------------------------------------
@@ -100,15 +103,17 @@ section Fiber 1 {
 
 # Geometry of column elements
 #                tag 
+puts "HI 4"
 geomTransf Linear 1  
 
 # Number of integration points along length of element
 set np 5
 
 # Create the coulumns using Beam-column elements
-#                           tag ndI ndJ nsecs secID transfTag
-element nonlinearBeamColumn  1   1   3   $np    1       1 
-element nonlinearBeamColumn  2   2   4   $np    1       1 
+#               e            tag ndI ndJ nsecs secID transfTag
+set eleType forceBeamColumn
+element $eleType  1   1   3   $np    1       1 
+element $eleType  2   2   4   $np    1       1 
 
 # Define beam elment
 # -----------------------------
@@ -184,6 +189,7 @@ analysis Static
 
 # Create a recorder to monitor nodal displacements
 recorder Node -xml nodeGravity.out -time -node 3 4 -dof 1 2 3 disp
+recorder Element -file ele.out -ele 1 section  forces
 
 # --------------------------------
 # End of recorder generation

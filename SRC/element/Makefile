@@ -35,6 +35,7 @@ all:         $(OBJS)
 	@$(CD) $(FE)/element/twoNodeLink; $(MAKE);
 	@$(CD) $(FE)/element/pyMacro; $(MAKE);
 	@$(CD) $(FE)/element/simpleContact; $(MAKE);
+	@$(CD) $(FE)/element/surfaceLoad; $(MAKE);
 
 # Miscellaneous
 tidy:	
@@ -74,6 +75,7 @@ spotless: clean
 	@$(CD) $(FE)/element/frictionBearing; $(MAKE) wipe;
 	@$(CD) $(FE)/element/pyMacro; $(MAKE) wipe;
 	@$(CD) $(FE)/element/simpleContact; $(MAKE) wipe;
+	@$(CD) $(FE)/element/surfaceLoad; $(MAKE) wipe;
 
 wipe: spotless
 

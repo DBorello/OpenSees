@@ -479,6 +479,7 @@
 #define ELE_TAG_SimpleContact2D 11
 #define ELE_TAG_SimpleContact3D 12
 #define ELE_TAG_BeamContact3D   13
+#define ELE_TAG_SurfaceLoad   14
 
 
 #define FRN_TAG_CoulombFriction     1

@@ -64,11 +64,12 @@ source ReadSMDFile.tcl
 ReadSMDFile ARL360.at2 $outFile dt
 
 # Set time series to be passed to uniform excitation
-set accelSeries "Path -filePath $outFile -dt $dt -factor $g"
+timeSeries Path 1 -filePath $outFile -dt $dt -factor $g
+#set accelSeries "Path -filePath $outFile -dt $dt -factor $g"
 
 # Create UniformExcitation load pattern
 #                         tag dir 
-pattern UniformExcitation  2   1  -accel $accelSeries
+pattern UniformExcitation  2   1  -accel 1
 
 # set the rayleigh damping factors for nodes & elements
 rayleigh 0.0 0.0 0.0 0.000625
@@ -117,7 +118,9 @@ analysis Transient
 # ------------------------------
 
 # Create a recorder to monitor nodal displacements
-recorder Node -time -file node33.out -node 3 4 -dof 1 2 3 disp
+recorder Node -time -file disp.out -node 3 4 -dof 1 2 3 disp
+recorder Node -time -file a2.out -timeSeries 1 -node 3 4 -dof 1 2 3 accel
+recorder Node -time -file a1.out -node 3 4 -dof 1 2 3 accel
 
 # Create recorders to monitor section forces and deformations
 # at the base of the left column

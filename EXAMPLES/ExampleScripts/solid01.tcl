@@ -101,5 +101,5 @@ analysis Transient
 
 analyze 200 0.02
 
-
+print ele
 	wipe
