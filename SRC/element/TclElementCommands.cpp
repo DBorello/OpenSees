@@ -92,6 +92,10 @@ extern  void *OPS_ElasticTubularJoint(void);
 extern Element *OPS_NewZeroLengthContactNTS2D(void);
 extern Element *OPS_NewZeroLengthInterface2D(void);
 extern "C" void *OPS_PY_Macro2D(void);
+extern void *OPS_SimpleContact2D(void);
+extern void *OPS_SimpleContact3D(void);
+extern void *OPS_BeamContact3D(void);
+
 
 
 
@@ -440,6 +444,36 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
   } else if ((strcmp(argv[1],"pyMacro2D") == 0) || (strcmp(argv[1],"PY_Macro2D") == 0)) {
     
     void *theEle = OPS_PY_Macro2D();
+    if (theEle != 0) 
+      theElement = (Element *)theEle;
+    else {
+      opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
+      return TCL_ERROR;
+    }
+
+  } else if ((strcmp(argv[1],"SimpleContact2d") == 0) || (strcmp(argv[1],"SimpleContact2D") == 0)) {
+    
+    void *theEle = OPS_SimpleContact2D();
+    if (theEle != 0) 
+      theElement = (Element *)theEle;
+    else {
+      opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
+      return TCL_ERROR;
+    }
+
+  } else if ((strcmp(argv[1],"SimpleContact3d") == 0) || (strcmp(argv[1],"SimpleContact3D") == 0)) {
+    
+    void *theEle = OPS_SimpleContact3D();
+    if (theEle != 0) 
+      theElement = (Element *)theEle;
+    else {
+      opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
+      return TCL_ERROR;
+    }
+
+  } else if ((strcmp(argv[1],"BeamContact3d") == 0) || (strcmp(argv[1],"BeamContact3D") == 0)) {
+    
+    void *theEle = OPS_BeamContact3D();
     if (theEle != 0) 
       theElement = (Element *)theEle;
     else {

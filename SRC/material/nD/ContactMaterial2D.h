@@ -53,10 +53,10 @@ public:
 
     void ScaleCohesion (const double len) {cohesion *= len;}
 
-	//Get tensile strength function for use in contact element
-	double getTensileStrength() {return tensileStrength;}
-
-	void ScaleTensileStrength(const double len) {tensileStrength *= len;}
+    //Get tensile strength function for use in contact element
+    double getTensileStrength() {return tensileStrength;}
+    
+    void ScaleTensileStrength(const double len) {tensileStrength *= len;}
 
 
     // Accepts the current trial strain values as being on the
@@ -72,11 +72,11 @@ public:
 
     // Return an exact copy of itself.
     NDMaterial *getCopy (void);
-
+    
     // Return a copy of itself if "code"="ContactMaterial2D", 
     // otherwise return null.
     NDMaterial *getCopy (const char *code);
-
+    
     // Return the string "ContactMaterial2D".
     const char *getType () const ;
 

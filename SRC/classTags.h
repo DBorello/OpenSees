@@ -476,6 +476,10 @@
 #define ELE_TAG_GenericCopy      2104
 #define ELE_TAG_PY_MACRO2D      2105
 
+#define ELE_TAG_SimpleContact2D 11
+#define ELE_TAG_SimpleContact3D 12
+#define ELE_TAG_BeamContact3D   13
+
 
 #define FRN_TAG_CoulombFriction     1
 #define FRN_TAG_VDependentFriction  2

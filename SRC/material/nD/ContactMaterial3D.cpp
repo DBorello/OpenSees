@@ -364,17 +364,17 @@ const Vector & ContactMaterial3D::getStrain ()
 void ContactMaterial3D::setMetricTensor(Matrix &v)
 {
 #ifdef DEBUG
-        opserr << "ContactMaterial3D::setMetricTensor(Matrix &v)" << endln;
+  opserr << "ContactMaterial3D::setMetricTensor(Matrix &v)" << endln;
 #endif
-    g = v;
-
-    // dual basis metric tensor G = inv(g)
-    double det = g(0,0)*g(1,1) - g(0,1)*g(1,0);
-    G(0,0) =  g(1,1);
-    G(1,0) = -g(1,0);
-    G(0,1) = -g(0,1);
-    G(1,1) =  g(0,0);
-    G = G / det;
+  g = v;
+  
+  // dual basis metric tensor G = inv(g)
+  double det = g(0,0)*g(1,1) - g(0,1)*g(1,0);
+  G(0,0) =  g(1,1);
+  G(1,0) = -g(1,0);
+  G(0,1) = -g(0,1);
+  G(1,1) =  g(0,0);
+  G = G / det;
 }
 
 

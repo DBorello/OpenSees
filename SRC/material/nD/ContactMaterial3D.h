@@ -23,7 +23,7 @@
 
 class ContactMaterial3D : public NDMaterial
 {
-public:
+  public:
     // Full constructor
     ContactMaterial3D (int tag, double mu, double G, double c, double t);
 
@@ -50,16 +50,14 @@ public:
 
     //Get cohesion function for use in contact element
     double getcohesion ()  {return cohesion;}
-
-	//Get tensile strength function for use in contact element
-	double getTensileStrength() {return tensileStrength;}
+    //Get tensile strength function for use in contact element
+    double getTensileStrength() {return tensileStrength;}
 
     void ScaleCohesion (const double len) {cohesion *= len;}
-	void ScaleTensileStrength (const double len) {tensileStrength *= len;}
-
-	// get metric tensor for material class
-	void setMetricTensor(Matrix &m);
-
+    void ScaleTensileStrength (const double len) {tensileStrength *= len;}
+      
+    // get metric tensor for material class
+    void setMetricTensor(Matrix &m);
     bool getContactState() {return inSlip;}
 
     // Accepts the current trial strain values as being on the
