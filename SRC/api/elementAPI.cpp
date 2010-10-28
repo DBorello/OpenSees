@@ -735,8 +735,8 @@ OPS_GetNDMaterial(int matTag)
   return theModelBuilder->getNDMaterial(matTag);
 }
 
-CrdTransf *
-OPS_GetCrdTransPtr(int tag)
+CrdTransf * 
+OPS_GetCrdTransfPtr(int tag)
 {
   return OPS_GetCrdTransf(tag);
 }

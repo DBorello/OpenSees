@@ -113,6 +113,7 @@ typedef struct eleObject eleObj;
 #define OPS_GetString ops_getstring
 #define OPS_GetNDM ops_getndm_
 #define OPS_GetNDF ops_getndf__
+#define OPS_GetCrdTransfPtr ops_getcrdtransfptr_
 
 #ifdef __cplusplus
 extern "C" int        OPS_GetNDM();
