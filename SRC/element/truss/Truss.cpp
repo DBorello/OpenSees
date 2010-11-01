@@ -169,7 +169,7 @@ Truss::Truss(int tag,
   theMaterial(0), connectedExternalNodes(2),
   dimension(dim), numDOF(0), theLoad(0),
   theMatrix(0), theVector(0),
-  L(0.0), A(a), rho(r), doRayleighDamping(damp)
+  L(0.0), A(a), rho(r), doRayleighDamping(damp), initialDisp(0)
 {
     // get a copy of the material and check we obtained a valid copy
     theMaterial = theMat.getCopy();
@@ -210,7 +210,7 @@ Truss::Truss()
  theMaterial(0),connectedExternalNodes(2),
  dimension(0), numDOF(0), theLoad(0),
  theMatrix(0), theVector(0),
- L(0.0), A(0.0), rho(0.0)
+ L(0.0), A(0.0), rho(0.0), initialDisp(0)
 {
     // ensure the connectedExternalNode ID is of correct size 
   if (connectedExternalNodes.Size() != 2) {
@@ -244,6 +244,8 @@ Truss::~Truss()
 	delete theLoad;
     if (theLoadSens != 0)
 	delete theLoadSens;
+    if (initialDisp != 0)
+      delete [] initialDisp;
 }
 
 
@@ -386,44 +388,83 @@ Truss::setDomain(Domain *theDomain)
     // NOTE t = -t(every one else uses for residual calc)
     const Vector &end1Crd = theNodes[0]->getCrds();
     const Vector &end2Crd = theNodes[1]->getCrds();	
+    const Vector &end1Disp = theNodes[0]->getDisp();
+    const Vector &end2Disp = theNodes[1]->getDisp();
 
     if (dimension == 1) {
-      double dx = end2Crd(0)-end1Crd(0);	
+      double dx = end2Crd(0)-end1Crd(0);
 
+      if (initialDisp == 0) {
+	double iDisp = end2Disp(0)-end1Disp(0);
+
+	if (iDisp != 0) {
+	  initialDisp = new double[1];
+	  initialDisp[0] = iDisp;
+	  dx += iDisp;
+	}
+      }
       L = sqrt(dx*dx);
       
       if (L == 0.0) {
 	opserr <<"WARNING Truss::setDomain() - truss " << this->getTag() << " has zero length\n";
 	return;
       }
-
+      
       cosX[0] = 1.0;
     }
     else if (dimension == 2) {
-	double dx = end2Crd(0)-end1Crd(0);
-	double dy = end2Crd(1)-end1Crd(1);	
+      double dx = end2Crd(0)-end1Crd(0);
+      double dy = end2Crd(1)-end1Crd(1);	
     
-	L = sqrt(dx*dx + dy*dy);
-    
-	if (L == 0.0) {
-	  opserr <<"WARNING Truss::setDomain() - truss " << this->getTag() << " has zero length\n";
-	  return;
+      if (initialDisp == 0) {
+	double iDispX = end2Disp(0)-end1Disp(0);
+	double iDispY = end2Disp(1)-end1Disp(1);
+	if (iDispX != 0 || iDispY != 0) {
+	  initialDisp = new double[2];
+	  initialDisp[0] = iDispX;
+	  initialDisp[1] = iDispY;
+	  dx += iDispX;
+	  dy += iDispY;
 	}
+      }
+      
+      L = sqrt(dx*dx + dy*dy);
+      
+      if (L == 0.0) {
+	opserr <<"WARNING Truss::setDomain() - truss " << this->getTag() << " has zero length\n";
+	return;
+      }
 	
-	cosX[0] = dx/L;
-	cosX[1] = dy/L;
+      cosX[0] = dx/L;
+      cosX[1] = dy/L;
     }
     else {
-	double dx = end2Crd(0)-end1Crd(0);
-	double dy = end2Crd(1)-end1Crd(1);	
-	double dz = end2Crd(2)-end1Crd(2);		
-    
-	L = sqrt(dx*dx + dy*dy + dz*dz);
-    
-	if (L == 0.0) {
-	  opserr <<"WARNING Truss::setDomain() - truss " << this->getTag() << " has zero length\n";
-	  return;
+
+      double dx = end2Crd(0)-end1Crd(0);
+      double dy = end2Crd(1)-end1Crd(1);	
+      double dz = end2Crd(2)-end1Crd(2);		
+
+      if (initialDisp == 0) {
+	double iDispX = end2Disp(0)-end1Disp(0);
+	double iDispY = end2Disp(1)-end1Disp(1);      
+	double iDispZ = end2Disp(2)-end1Disp(2);      
+	if (iDispX != 0 || iDispY != 0 || iDispZ != 0) {
+	  initialDisp = new double[3];
+	  initialDisp[0] = iDispX;
+	  initialDisp[1] = iDispY;
+	  initialDisp[2] = iDispZ;
+	  dx += iDispX;
+	  dy += iDispY;
+	  dz += iDispZ;
 	}
+      }
+      
+      L = sqrt(dx*dx + dy*dy + dz*dz);
+      
+      if (L == 0.0) {
+	opserr <<"WARNING Truss::setDomain() - truss " << this->getTag() << " has zero length\n";
+	return;
+      }
 	
 	cosX[0] = dx/L;
 	cosX[1] = dy/L;
@@ -794,19 +835,27 @@ Truss::sendSelf(int commitTag, Channel &theChannel)
   // truss packs it's data into a Vector and sends this to theChannel
   // along with it's dbTag and the commitTag passed in the arguments
 
-  static Vector data(8);
+  static Vector data(11);
   data(0) = this->getTag();
   data(1) = dimension;
   data(2) = numDOF;
   data(3) = A;
+  data(4) = theMaterial->getClassTag();
   data(6) = rho;
+
   if (doRayleighDamping == 0)
     data(7) = 0;
   else
     data(7) = 1;
 
-  data(4) = theMaterial->getClassTag();
+
   int matDbTag = theMaterial->getDbTag();
+
+  if (initialDisp != 0) {
+    for (int i=0; i<dimension; i++) {
+      data[8+i] = initialDisp[i];
+    }
+  }
 
   // NOTE: we do have to ensure that the material has a database
   // tag if we are sending to a database channel.
@@ -850,7 +899,7 @@ Truss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
   // truss creates a Vector, receives the Vector and then sets the 
   // internal data with the data in the Vector
 
-  static Vector data(8);
+  static Vector data(11);
   res = theChannel.recvVector(dataTag, commitTag, data);
   if (res < 0) {
     opserr <<"WARNING Truss::recvSelf() - failed to receive Vector\n";
@@ -866,6 +915,24 @@ Truss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
     doRayleighDamping = 0;
   else
     doRayleighDamping = 1;
+
+
+  initialDisp = new double[dimension];
+  for (int i=0; i<dimension; i++)
+    initialDisp[i] = 0.0;
+
+  int initial = 0;
+  for (int i=0; i<dimension; i++) {
+    if (data(8+i) != 0.0) {
+      initial = 1;
+    }
+  }
+  
+  if (initial != 0) {
+    for (int i=0; i<dimension; i++) {
+      initialDisp[i] = data(8+i);
+    }    
+  }
   
   // truss now receives the tags of it's two external nodes
   res = theChannel.recvID(dataTag, commitTag, connectedExternalNodes);
@@ -984,7 +1051,14 @@ Truss::Print(OPS_Stream &s, int flag)
 	s << " Area: " << A << " Mass/Length: " << rho;
 	
 	s << " \n\t strain: " << strain;
+	if (initialDisp != 0) {
+	  s << " initialDisplacements: ";
+	  for (int i = 0; i < dimension; i++) 
+	    s << initialDisp[i] << " ";
+	}
+
 	s << " axial load: " <<  force;
+
 	if (L != 0.0) {
 	  int numDOF2 = numDOF/2;
 	  double temp;
@@ -1014,8 +1088,12 @@ Truss::computeCurrentStrain(void) const
     const Vector &disp2 = theNodes[1]->getTrialDisp();	
 
     double dLength = 0.0;
-    for (int i = 0; i < dimension; i++)
-      dLength += (disp2(i)-disp1(i))*cosX[i];
+    if (initialDisp == 0)
+      for (int i = 0; i < dimension; i++)
+	dLength += (disp2(i)-disp1(i))*cosX[i];
+    else
+      for (int i = 0; i < dimension; i++)
+	dLength += (disp2(i)-disp1(i)-initialDisp[i])*cosX[i];
   
     // this method should never be called with L == 0
     return dLength/L;
@@ -1031,9 +1109,8 @@ Truss::computeCurrentStrainRate(void) const
     const Vector &vel2 = theNodes[1]->getTrialVel();	
 
     double dLength = 0.0;
-    for (int i = 0; i < dimension; i++){
-	dLength += (vel2(i)-vel1(i))*cosX[i];
-    }
+    for (int i = 0; i < dimension; i++)
+      dLength += (vel2(i)-vel1(i))*cosX[i];
 
     // this method should never be called with L == 0
     return dLength/L;

@@ -132,6 +132,7 @@ class Truss : public Element
     double cosX[3]; // direction cosines
 
     Node *theNodes[2];
+    double *initialDisp;
 
 	
 // AddingSensitivity:BEGIN //////////////////////////////////////////

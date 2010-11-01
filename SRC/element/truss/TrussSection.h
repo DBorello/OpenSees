@@ -118,6 +118,7 @@ class TrussSection : public Element
     int doRayleighDamping;
 
     Node *theNodes[2];
+    double *initialDisp;
 
     SectionForceDeformation  *theSection;
     
