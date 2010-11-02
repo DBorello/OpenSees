@@ -138,7 +138,7 @@ int OPS_GetIntInput(int *numData, int*data)
   int size = *numData;
 
   for (int i=0; i<size; i++) {
-    if ((currentArg > maxArg) || (Tcl_GetInt(theInterp, currentArgv[currentArg], &data[i]) != TCL_OK)) {    
+    if ((currentArg >= maxArg) || (Tcl_GetInt(theInterp, currentArgv[currentArg], &data[i]) != TCL_OK)) {    
       opserr << "OPS_GetIntInput -- error reading " << currentArg << endln;
       return -1;
     }
@@ -154,7 +154,7 @@ int OPS_GetDoubleInput(int *numData, double *data)
 {
   int size = *numData;
   for (int i=0; i<size; i++) {
-    if ((currentArg > maxArg) || (Tcl_GetDouble(theInterp, currentArgv[currentArg], &data[i]) != TCL_OK)) {    
+    if ((currentArg >= maxArg) || (Tcl_GetDouble(theInterp, currentArgv[currentArg], &data[i]) != TCL_OK)) {    
       opserr << "OPS_GetDoubleInput -- error reading " << currentArg << endln;
       return -1;
     }
@@ -169,7 +169,7 @@ int OPS_GetDoubleInput(int *numData, double *data)
 extern "C" 
 int OPS_GetString(char *arrayData, int sizeArray)
 {
-  if (currentArg > maxArg) {
+  if (currentArg >= maxArg) {
       opserr << "OPS_GetStringInput -- error reading " << currentArg << endln;
       return -1;
   }
@@ -188,7 +188,7 @@ int OPS_GetString(char *arrayData, int sizeArray)
 
 int OPS_GetStringCopy(char **arrayData)
 {
-  if (currentArg > maxArg) {
+  if (currentArg >= maxArg) {
       opserr << "OPS_GetStringInput -- error reading " << currentArg << endln;
       return -1;
   }
