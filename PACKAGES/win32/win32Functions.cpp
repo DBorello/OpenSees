@@ -57,7 +57,7 @@ OPS_GetNodeInfoPtrType OPS_GetNodeIncrDeltaDispPtr = 0;
 
 OPS_InvokeMaterialDirectlyPtrType OPS_InvokeMaterialDirectlyPtr =0;
 
-OPS_GetNumRemainingInputArgsType OPS_GetNumRemainingArgsPtr = 0;
+OPS_GetNumRemainingInputArgsType OPS_GetNumRemainingInputArgsPtr = 0;
 OPS_GetStringType OPS_GetStringPtr = 0;
 OPS_GetStringCopyType OPS_GetStringCopyPtr = 0;
 
@@ -73,16 +73,14 @@ void setGlobalPointers(OPS_Stream *theErrorStreamPtr,
 		       OPS_InvokeMaterialDirectlyPtrType OPS_InvokeMaterialDirectlyFunct,
 		       OPS_GetNodeInfoPtrType OPS_GetNodeCrdFunct,
 		       OPS_GetNodeInfoPtrType OPS_GetNodeDispFunct,
-		       OPS_GetNodeInfoPtrType OPS_GetNodeDispFunct,
-		       OPS_GetNodeInfoPtrType OPS_GetNodeDispFunct,
 		       OPS_GetNodeInfoPtrType OPS_GetNodeVelFunct,
-		       OPS_GetNodeInfoPtrType OPS_GetNodeAccelFunct
+		       OPS_GetNodeInfoPtrType OPS_GetNodeAccelFunct,
 		       OPS_GetNodeInfoPtrType OPS_GetNodeIncrDispFunct,
 		       OPS_GetNodeInfoPtrType OPS_GetNodeIncrDeltaDispFunct,
 		       OPS_GetNumRemainingInputArgsType OPS_GetNumRemainingArgsFunct,
 		       OPS_GetStringType OPS_GetStringFunct,
 		       OPS_GetStringCopyType OPS_GetStringCopyFunct,
-		       OPS_GetCrdTransfPtrType OPS_GetCrdTransfFunct,)
+		       OPS_GetCrdTransfPtrType OPS_GetCrdTransfFunct)
 {
 	opserrPtr = theErrorStreamPtr;
 	OPS_ErrorPtr = errorFunct;
@@ -119,9 +117,9 @@ OPS_GetNDMaterial(int matTag)
 }
 
 CrdTransf *
-OPS_GetCrdTransPtr(int tag)
+OPS_GetCrdTransfPtr(int tag)
 {
-  return (*OPS_GetCrdTransPtrFunct)(tag);
+  return (*OPS_GetCrdTransfPtrFunc)(tag);
 }
 
 
@@ -145,10 +143,7 @@ extern "C" int OPS_AllocateMaterial(matObj *mat)
 {
 	return (*OPS_AllocateMaterialPtr)(mat);
 }
-extern UniaxialMaterial *OPS_GetUniaxialMaterial(int matTag)
-{
-	return (*OPS_GetUniaxialMaterialPtr)(matTag);
-}
+
 extern "C" int OPS_AllocateElement(eleObj *ele, int *matTags, int *matType)
 {
 	return (*OPS_AllocateElementPtr)(ele, matTags, matType);
@@ -190,10 +185,10 @@ extern "C" int OPS_GetString(char *cArray, int sizeArray)
 
 extern "C" int OPS_GetStringCopy(char **cArray)
 {
-  return(*OPS_GetStringPtr)(cArray);  
+  return(*OPS_GetStringCopyPtr)(cArray);  
 }
 
 extern "C" int OPS_GetNumRemainingInputArgs()
 {
-  return(*OPS_GetNumRemainingArgsPtr)();  
+  return(*OPS_GetNumRemainingInputArgsPtr)();  
 }
