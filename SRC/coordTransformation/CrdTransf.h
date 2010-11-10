@@ -55,7 +55,7 @@ public:
 
     virtual CrdTransf *getCopy2d(void) {return 0;};
     virtual CrdTransf *getCopy3d(void) {return 0;};
-    int getLocalAxes(Vector &xAxis, Vector &yAxis, Vector &zAxis) {return -1;};
+    virtual int getLocalAxes(Vector &xAxis, Vector &yAxis, Vector &zAxis) {return -1;};
     
     virtual int    initialize(Node *node1Pointer, Node *node2Pointer) = 0;
     virtual int    update(void) = 0;
