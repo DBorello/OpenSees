@@ -70,6 +70,7 @@ FE_INCLUDES  = -I$(FE)/matrix \
                -I$(FE)/domain/node	\
                -I$(FE)/domain/load	\
                -I$(FE)/domain/pattern	\
+               -I$(FE)/domain/pattern/drm	\
                -I$(FE)/domain/groundMotion	\
                -I$(FE)/domain/constraints	\
                -I$(FE)/domain/region \
