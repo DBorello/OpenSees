@@ -26,7 +26,7 @@
 // Description: This file contains the class definition for 
 // pyUCLA.  pyUCLA provides the abstraction
 // for a one-dimensional p-y contact material. 
-// This material is based on Tarciroglu's model. 
+// This material is based on model of E.Taciroglu, C.Rha, J.Wallace, UCLA. 
 
 #include <pyUCLA.h>
 #include <Vector.h>
@@ -47,7 +47,7 @@ OPS_New_pyUCLA(void)
 {
   if (num_pyUCLA == 0) {
     num_pyUCLA++;
-    OPS_Error("pyUCLAMaterial unaxial material - Written by HyungSuk Shin, UCLA\n", 1);
+    OPS_Error("pyUCLAMaterial unaxial material - Written by H.Shin, P.Arduino, U.Washington\n based on model of E.Taciroglu, C.Rha, J.Wallace, UCLA", 1);
   }
 
   // Pointer to a uniaxial material that will be returned
@@ -240,16 +240,17 @@ pyUCLA::setTrialStrain (double strain, double strainRate)
 
 
 	//--- projecting the obtained stresses and tangents ==================
-	opserr << "BeforeTstress1: " << Tstress1 << "\n";	
+/*	
+    opserr << "BeforeTstress1: " << Tstress1 << "\n";	
 	opserr << "BeforeTstress2: " << Tstress2 << "\n";	
 	opserr << "BeforeTstress3: " << Tstress3 << "\n";	
 	opserr << "BeforeTtangent1: " << Ttangent1 << "\n";	
 	opserr << "BeforeTtangent2: " << Ttangent2 << "\n";
-	
+*/	
 	
 	projectStressTangent();
 	
-	
+/*	
 	opserr << "plumin1: " << plumin1 << "\n";	
 	opserr << "plumin2: " << plumin2 << "\n";
 	opserr << "Tstress1: " << Tstress1 << "\n";	
@@ -257,16 +258,16 @@ pyUCLA::setTrialStrain (double strain, double strainRate)
 	opserr << "Tstress3: " << Tstress3 << "\n";	
 	opserr << "Ttangent1: " << Ttangent1 << "\n";	
 	opserr << "Ttangent2: " << Ttangent2 << "\n";
-
+*/
 
 	//--- sum the resultance from each component ===========================
 	Tstress = Tstress1+Tstress2+Tstress3;
 	Ttangent = Ttangent1+Ttangent2+Ttangent3;
-
+/*
 	opserr << "Tstress: " << Tstress << "\n";	
 	opserr << "Ttangent: " << Ttangent << "\n";	
 	opserr << "==========================" << "\n";
-
+*/
     return 0;
 }
 
