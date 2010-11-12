@@ -908,6 +908,13 @@ DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/pattern/TclSeriesIntegratorCommand.o \
 	$(FE)/domain/pattern/TimeSeriesIntegrator.o \
 	$(FE)/domain/pattern/TrapezoidalTimeSeriesIntegrator.o \
+	$(FE)/domain/pattern/drm/Mesh3DSubdomain.o \
+	$(FE)/domain/pattern/drm/GeometricBrickDecorator.o \
+	$(FE)/domain/pattern/drm/DRMBoundaryLayerDecorator.o \
+	$(FE)/domain/pattern/drm/DRMLoadPattern.o \
+	$(FE)/domain/pattern/drm/DRMLoadPatternWrapper.o \
+	$(FE)/domain/pattern/drm/DRMInputHandler.o \
+	$(FE)/domain/pattern/drm/PlaneDRMInputHandler.o \
 	$(FE)/domain/groundMotion/GroundMotion.o \
 	$(FE)/domain/groundMotion/GroundMotionRecord.o \
 	$(FE)/domain/groundMotion/InterpolatedGroundMotion.o \
@@ -918,7 +925,6 @@ DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/subdomain/SubdomainNodIter.o \
 	$(FE)/analysis/analysis/DomainUser.o \
 	$(FE)/domain/pattern/PBowlLoading.o
-
 
 ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/analysis/analysis/StaticAnalysis.o \
