@@ -213,12 +213,11 @@ Domain       *ops_TheActiveDomain = 0;
 Element      *ops_TheActiveElement = 0;
 */
 
-MachineBroker *theMachineBroker = 0;
-Channel **theChannels = 0;
-
-int numChannels = 0;
-int rank = 0;
-int np = 0;
+extern MachineBroker *theMachineBroker;
+extern Channel **theChannels;
+extern int numChannels;
+extern int rank;
+extern int np;
 
 int
 main(int argc, char **argv)

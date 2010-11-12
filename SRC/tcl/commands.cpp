@@ -19,7 +19,7 @@
 ** ****************************************************************** */
                                                                         
 // $Revision: 1.162 $
-// $Date: 2010-09-16 00:07:34 $
+// $Date: 2010/09/16 00:07:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -343,6 +343,8 @@ ModelBuilder *theBuilder =0;
 #include <Subdomain.h>
 #include <SubdomainIter.h>
 #include <MachineBroker.h>
+#include <MPIDiagonalSOE.h>
+#include <MPIDiagonalSolver.h>
 
 // parallel analysis
 #include <StaticDomainDecompositionAnalysis.h>
@@ -361,23 +363,26 @@ ModelBuilder *theBuilder =0;
 #include <DistributedSuperLU.h>
 #include <DistributedProfileSPDLinSOE.h>
 
-extern PartitionedDomain theDomain;
-extern int OPS_PARALLEL_PROCESSING;
-extern int OPS_NUM_SUBDOMAINS;
-extern bool OPS_PARTITIONED;
-extern FEM_ObjectBroker *OPS_OBJECT_BROKER;
-extern MachineBroker    *OPS_MACHINE;
-extern bool OPS_USING_MAIN_DOMAIN;
-extern int OPS_MAIN_DOMAIN_PARTITION_ID;
+//MachineBroker *theMachineBroker = 0;
+PartitionedDomain theDomain;
+int OPS_PARALLEL_PROCESSING =0;
+int OPS_NUM_SUBDOMAINS      =0;
+bool OPS_PARTITIONED        =false;
+bool OPS_USING_MAIN_DOMAIN  = false;
+int OPS_MAIN_DOMAIN_PARTITION_ID =0;
 
-extern DomainPartitioner *OPS_DOMAIN_PARTITIONER;
-extern GraphPartitioner  *OPS_GRAPH_PARTITIONER;
-extern LoadBalancer      *OPS_BALANCER;
-extern FEM_ObjectBroker  *OPS_OBJECT_BROKER;
-extern MachineBroker     *OPS_MACHINE;
-extern Channel          **OPS_theChannels;
+DomainPartitioner *OPS_DOMAIN_PARTITIONER =0;
+GraphPartitioner  *OPS_GRAPH_PARTITIONER =0;
+LoadBalancer      *OPS_BALANCER = 0;
+FEM_ObjectBroker  *OPS_OBJECT_BROKER;
+MachineBroker     *OPS_MACHINE;
+Channel          **OPS_theChannels = 0;
+
+bool setMPIDSOEFlag = false;
 
 #elif _PARALLEL_INTERPRETERS
+
+bool setMPIDSOEFlag = false;
 
 // parallel analysis
 #include <ParallelNumberer.h>
@@ -387,9 +392,18 @@ extern Channel          **OPS_theChannels;
 #include <DistributedBandSPDLinSOE.h>
 #include <DistributedSparseGenColLinSOE.h>
 #include <DistributedSparseGenRowLinSOE.h>
+
+
+
+
+
+
+
 #include <DistributedBandGenLinSOE.h>
 #include <DistributedDiagonalSOE.h>
 #include <DistributedDiagonalSolver.h>
+#include <MPIDiagonalSOE.h>
+#include <MPIDiagonalSolver.h>
 #define MPIPP_H
 #include <DistributedSuperLU.h>
 #include <DistributedProfileSPDLinSOE.h>
@@ -411,20 +425,13 @@ extern int OPS_ResetInput(ClientData clientData,
 			  TclModelBuilder *builder);
 
 
-#ifdef _PARALLEL_INTERPRETERS
-#include <MachineBroker.h>
-extern MachineBroker *theMachineBroker;
-extern Channel **theChannels;
-extern int numChannels;
-extern int rank;
-extern int np;
-#endif
 
-
-#ifdef _PARALLEL_PROCESSING
 #include <MachineBroker.h>
-extern MachineBroker *theMachineBroker;
-#endif
+MachineBroker *theMachineBroker =0;
+Channel **theChannels =0;
+int numChannels =0;
+int rank =0;
+int np =0;
 
 
 
@@ -1969,6 +1976,11 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 							     *theSOE,
 							     *theTransientIntegrator,
 							     theTest);
+#ifdef _PARALLEL_PROCESSING
+	if (setMPIDSOEFlag) {
+	  ((MPIDiagonalSOE*) theSOE)->setAnalysisModel(*theAnalysisModel);
+	}
+#endif
 
 // AddingSensitivity:BEGIN ///////////////////////////////
 #ifdef _RELIABILITY
@@ -2180,6 +2192,7 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	return TCL_ERROR;
     }
 
+
 #ifdef _PARALLEL_PROCESSING
     if (OPS_PARTITIONED == true && OPS_NUM_SUBDOMAINS > 1) {
       DomainDecompositionAnalysis *theSubAnalysis;
@@ -2291,6 +2304,18 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 #endif
 
 
+  } 
+  // Diagonal SOE & SOLVER
+  else if (strcmp(argv[1],"MPIDiagonal") == 0) {
+#ifdef _PARALLEL_INTERPRETERS
+      MPIDiagonalSolver    *theSolver = new MPIDiagonalSolver();   
+      theSOE = new MPIDiagonalSOE(*theSolver);
+      setMPIDSOEFlag = true;
+
+#else
+      DiagonalSolver    *theSolver = new DiagonalDirectSolver();   
+      theSOE = new DiagonalSOE(*theSolver);
+#endif
   } 
 
   // PROFILE SPD SOE * SOLVER

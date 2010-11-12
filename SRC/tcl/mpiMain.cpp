@@ -156,22 +156,28 @@ extern void g3TclMain(int argc, char **argv, Tcl_AppInitProc *appInitProc, int r
 #include <FEM_ObjectBrokerAllClasses.h>
 
 #include <DomainPartitioner.h>
-MachineBroker *theMachineBroker = 0;
 
-PartitionedDomain theDomain;
-int OPS_PARALLEL_PROCESSING =0;
-int OPS_NUM_SUBDOMAINS      =0;
-bool OPS_PARTITIONED        =false;
-bool OPS_USING_MAIN_DOMAIN  = false;
-int OPS_MAIN_DOMAIN_PARTITION_ID =0;
+extern PartitionedDomain theDomain;
+extern int OPS_PARALLEL_PROCESSING;
+extern int OPS_NUM_SUBDOMAINS;
+extern bool OPS_PARTITIONED;
+extern FEM_ObjectBroker *OPS_OBJECT_BROKER;
+extern MachineBroker    *OPS_MACHINE;
+extern bool OPS_USING_MAIN_DOMAIN;
+extern int OPS_MAIN_DOMAIN_PARTITION_ID;
 
-DomainPartitioner *OPS_DOMAIN_PARTITIONER =0;
-GraphPartitioner  *OPS_GRAPH_PARTITIONER =0;
-LoadBalancer      *OPS_BALANCER = 0;
-FEM_ObjectBroker  *OPS_OBJECT_BROKER;
-MachineBroker     *OPS_MACHINE;
-Channel          **OPS_theChannels = 0;
+extern DomainPartitioner *OPS_DOMAIN_PARTITIONER;
+extern GraphPartitioner  *OPS_GRAPH_PARTITIONER;
+extern LoadBalancer      *OPS_BALANCER;
+extern FEM_ObjectBroker  *OPS_OBJECT_BROKER;
+extern MachineBroker     *OPS_MACHINE;
+extern Channel          **OPS_theChannels;
 
+extern MachineBroker *theMachineBroker;
+extern Channel **theChannels;
+extern int numChannels;
+extern int rank;
+extern int np;
 
 int
 main(int argc, char **argv)
@@ -181,8 +187,8 @@ main(int argc, char **argv)
   // theMachineBroker = &theMachine;
   theMachineBroker = new MPI_MachineBroker(&theBroker, argc, argv);
 
-  int rank = theMachineBroker->getPID();
-  int np = theMachineBroker->getNP();
+  rank = theMachineBroker->getPID();
+  np = theMachineBroker->getNP();
 
   //
   // depending on rank we do something
