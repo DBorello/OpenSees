@@ -359,6 +359,9 @@
 #define LOAD_TAG_BrickSelfWeight          7
 #define LOAD_TAG_Beam2dTempLoad           8
 #define PATTERN_TAG_PBowlLoading	  10
+#define PATTERN_TAG_DRMLoadPattern  11
+
+
 
 
 #define MAT_TAG_IsotropicLinElastic         1001
@@ -665,6 +668,8 @@
 #define LinSOE_TAGS_DistributedDiagonalSOE 22
 #define LinSOE_TAGS_MumpsSOE 23
 #define LinSOE_TAGS_MumpsParallelSOE 24
+#define LinSOE_TAGS_MPIDiagonalSOE 25
+
 
 #define SOLVER_TAGS_FullGenLinLapackSolver  	1
 #define SOLVER_TAGS_BandGenLinLapackSolver  	2
@@ -690,6 +695,7 @@
 #define SOLVER_TAGS_DistributedDiagonalSolver 22
 #define SOLVER_TAGS_MumpsSolver			      	23
 #define SOLVER_TAGS_MumpsParallelSolver			24
+#define SOLVER_TAGS_MPIDiagonalSolver 25
 
 #define RECORDER_TAGS_ElementRecorder		1
 #define RECORDER_TAGS_NodeRecorder		2
