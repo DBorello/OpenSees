@@ -1,16 +1,37 @@
-// $Revision: 1.1 $
-// $Date: 2010-02-17 20:52:18 $
-// $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ContactMaterial2D.h,v $
-
-// Written: Kathryn Petek
-// Created: February 2004
-
-// Description: This file contains the class prototype for ContactMaterial2D.
-//
-// What: "@(#) ContactMaterial2D.h, revA"
+/* ****************************************************************** **
+**    OpenSees - Open System for Earthquake Engineering Simulation    **
+**          Pacific Earthquake Engineering Research Center            **
+**                                                                    **
+**                                                                    **
+** (C) Copyright 1999, The Regents of the University of California    **
+** All Rights Reserved.                                               **
+**                                                                    **
+** Commercial use of this program without express permission of the   **
+** University of California, Berkeley, is strictly prohibited.  See   **
+** file 'COPYRIGHT'  in main directory for information on usage and   **
+** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
+**                                                                    **
+** Developed by:                                                      **
+**   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
+**   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
+**   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
+**                                                                    **
+** ****************************************************************** */
 
 #ifndef ContactMaterial2D_h
 #define ContactMaterial2D_h
+
+// $Revision: 1.2
+// $Date: 2010-11-10
+// $Source: /OpenSees/SRC/material/nD/ContactMaterial2D.h,v $
+                                                                        
+// Written: Kathryn Petek
+// Created: February 2004
+// Modified: Chris McGann
+//           November 2010
+
+// Description: This file contains the class prototype for ContactMaterial2D.
+//
 
 #include <stdio.h>
 #include <stdlib.h>

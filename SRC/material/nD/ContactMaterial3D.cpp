@@ -1,13 +1,33 @@
-// $Revision: 1.
-// $Date: 
-// $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ContactMaterial3D.cpp,v $
+/* ****************************************************************** **
+**    OpenSees - Open System for Earthquake Engineering Simulation    **
+**          Pacific Earthquake Engineering Research Center            **
+**                                                                    **
+**                                                                    **
+** (C) Copyright 1999, The Regents of the University of California    **
+** All Rights Reserved.                                               **
+**                                                                    **
+** Commercial use of this program without express permission of the   **
+** University of California, Berkeley, is strictly prohibited.  See   **
+** file 'COPYRIGHT'  in main directory for information on usage and   **
+** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
+**                                                                    **
+** Developed by:                                                      **
+**   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
+**   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
+**   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
+**                                                                    **
+** ****************************************************************** */
+
+// $Revision: 1.2
+// $Date: 2010-11-10
+// $Source: /OpenSees/SRC/material/nD/ContactMaterial3D.cpp,v $
                                                                         
 // Written: Kathryn Petek
 // Created: February 2004
+// Modified: Chris McGann
+//           November 2010
 
-//
-// ContactMaterial3D.cpp
-// -------------------
+// Description: This file contains the implementation for the ContactMaterial3D class.
 //
 
 #include <ContactMaterial3D.h>
@@ -26,7 +46,7 @@ double* ContactMaterial3D::stiffnessx = 0;
 
 #include <elementAPI.h>
 static int numContactMaterial3DMaterials = 0;
-#define OPS_Export extern "C"
+#define OPS_Export
 
 
 OPS_Export void *
@@ -34,7 +54,7 @@ OPS_NewContactMaterial3DMaterial(void)
 {
   if (numContactMaterial3DMaterials == 0) {
     numContactMaterial3DMaterials++;
-    OPS_Error("ContactMaterial3D nDmaterial - Written by Kathryn Petek and Pedro Arduino - Copyright@2009\n", 1);
+    OPS_Error("ContactMaterial3D nDmaterial - Written by K.Petek, P.Mackenzie-Helnwein, P.Arduino, U.Washington\n", 1);
   }
 
   // Pointer to a uniaxial material that will be returned
@@ -44,9 +64,9 @@ OPS_NewContactMaterial3DMaterial(void)
 
   if (numArgs < 5) {
     opserr << "Want: nDMaterial ContactMaterial3D tag? mu? G? c? t?\n";
-    return 0;	
+    return 0;  
   }
-  
+ 
   int tag;
   double dData[4];
 
@@ -89,25 +109,25 @@ ContactMaterial3D::ContactMaterial3D (int tag, double mu, double Gmod, double c,
         frictionCoeff = mu;
         stiffness = Gmod;
         cohesion  = c;
-		tensileStrength = t;
+                tensileStrength = t;
 
-		MyTag = tag;
+                MyTag = tag;
 
-		if (matCount == 0) {
-			frictionCoeffx = new double[matCount+20];
+                if (matCount == 0) {
+                        frictionCoeffx = new double[matCount+20];
             stiffnessx = new double[matCount+20];
-		}
+                }
 
-		frictionCoeffx[matCount] = mu;
-		stiffnessx[matCount] = Gmod;
-		matN = matCount;
-		matCount++;
+                frictionCoeffx[matCount] = mu;
+                stiffnessx[matCount] = Gmod;
+                matN = matCount;
+                matCount++;
 
         this->zero();
 }
    
 //null constructor
-ContactMaterial3D::ContactMaterial3D () 
+ContactMaterial3D::ContactMaterial3D ()
 {
 #ifdef DEBUG
         opserr << "ContactMaterial3D::ContactMaterial3D()" << endln;
@@ -131,23 +151,23 @@ void ContactMaterial3D::zero( )
 #endif
              s_e_n.Zero();    // elastic slip from previous increment
         s_e_nplus1.Zero();    // elastic slip after current increment
-        
+       
           r_nplus1.Zero();    // direction of plastic slip
 
-        inSlip    = false;     
+        inSlip    = false;    
 
         stress_vec.Zero();
         strain_vec.Zero();
         tangent_matrix.Zero();
 
 
-		// ensure that tensileStrength is within bounds
-//		if (frictionCoeff == 0.0) {
-//			tensileStrength = 0.0;
-//		}
-//		else if (tensileStrength > cohesion / frictionCoeff ) {
-//			tensileStrength = cohesion / frictionCoeff;
-//		}
+                // ensure that tensileStrength is within bounds
+//              if (frictionCoeff == 0.0) {
+//                      tensileStrength = 0.0;
+//              }
+//              else if (tensileStrength > cohesion / frictionCoeff ) {
+//                      tensileStrength = cohesion / frictionCoeff;
+//              }
 
 
 }
@@ -162,8 +182,8 @@ int ContactMaterial3D::setTrialStrain (const Vector &strain_from_element)
         double t_n;             // normal contact force
         double f_nplus1_trial;  // trial slip condition
 
-		frictionCoeff = frictionCoeffx[matN];
-		stiffness = stiffnessx[matN];
+                frictionCoeff = frictionCoeffx[matN];
+                stiffness = stiffnessx[matN];
 
 //opserr << "ContactMaterial3D::setTrialStrain: " << MyTag << "  frictionCoeff = " << frictionCoeff << "  stiffness = " << stiffness << endln;
 
@@ -171,21 +191,21 @@ int ContactMaterial3D::setTrialStrain (const Vector &strain_from_element)
         Vector slip(2);         // incremental slip
 
         double t_s_norm;        // norm of tangential contact force
-        
+       
         strain_vec = strain_from_element;
 
         gap        = strain_vec(0);
         slip(0)    = strain_vec(1);
         slip(1)    = strain_vec(2);
-		t_n		   = strain_vec(3);	// lambda = 
+                t_n                = strain_vec(3);     // lambda =
                                     // Lagrangean multiplier for normal contact
 
-		Vector zeroVec = slip;  
-		zeroVec.Zero();
+                Vector zeroVec = slip;  
+                zeroVec.Zero();
 
 // trial state (elastic predictor step) -> assume sticking
         inSlip = false;
-        
+       
         s_e_nplus1 = (t_n > -tensileStrength) ?  s_e_n + slip : zeroVec; // ctv
 
         t_s        = stiffness * g * s_e_nplus1; // cov
@@ -211,7 +231,7 @@ int ContactMaterial3D::setTrialStrain (const Vector &strain_from_element)
         // if (f_nplus1_trial > 0.0) {
         // if ( (f_nplus1_trial > 0.0) && (t_n > -cohesion/frictionCoeff) &&  (slip.Norm() > 1e-12) ) {
         if ( (f_nplus1_trial > 0.0) && (t_n > -tensileStrength) &&  (s_e_nplus1_norm > 1e-12) ) {
-  
+ 
 // plastic corrector step -> sliding
             inSlip = true;
 
@@ -246,7 +266,7 @@ int ContactMaterial3D::setTrialStrain (const Vector &strain_from_element)
         stress_vec(1) = t_s(0);
         stress_vec(2) = t_s(1);
         stress_vec(3) = gap;
-        
+       
         return 0;
 
 }
@@ -273,31 +293,31 @@ const Matrix & ContactMaterial3D::getTangent ()
         Matrix C_ss(2,2);
         Vector C_sl(2);
 
-		double t_n = strain_vec(3);
-		
+                double t_n = strain_vec(3);
+               
         C_nl = 1.0;
 
         if (t_n < - tensileStrength) {
-			C_ss.Zero();
-			C_sl.Zero();
-		
-		} else if (inSlip) {
+                        C_ss.Zero();
+                        C_sl.Zero();
+               
+                } else if (inSlip) {
             // sliding coefficients
-			Matrix r_dyadic_r(2,2);
+                        Matrix r_dyadic_r(2,2);
 
-			Vector R_nplus1 = g * r_nplus1;
+                        Vector R_nplus1 = g * r_nplus1;
 
-			r_dyadic_r(0,0) = R_nplus1(0)*R_nplus1(0);
-			r_dyadic_r(0,1) = R_nplus1(0)*R_nplus1(1);
-			r_dyadic_r(1,1) = R_nplus1(1)*R_nplus1(1);
-			r_dyadic_r(1,0) = r_dyadic_r(0,1);
-            
-			double scale = (1.0 - gamma/s_e_nplus1_norm);
+                        r_dyadic_r(0,0) = R_nplus1(0)*R_nplus1(0);
+                        r_dyadic_r(0,1) = R_nplus1(0)*R_nplus1(1);
+                        r_dyadic_r(1,1) = R_nplus1(1)*R_nplus1(1);
+                        r_dyadic_r(1,0) = r_dyadic_r(0,1);
+           
+                        double scale = (1.0 - gamma/s_e_nplus1_norm);
             C_ss = stiffness * scale * (g - r_dyadic_r);
             C_sl = R_nplus1*frictionCoeff;
 
-        
-		} else {
+       
+                } else {
             // sticking coefficients
             C_ss = stiffness * g;
             C_sl.Zero();
@@ -314,7 +334,7 @@ const Matrix & ContactMaterial3D::getTangent ()
                    << "   C_ss = " << C_ss
                    << "   C_sl = " << C_sl
                    << endln;
-            opserr << "   stiffness: " << stiffness 
+            opserr << "   stiffness: " << stiffness
                    << "   mu: " << frictionCoeff << endln;
            }
 #endif
@@ -329,7 +349,7 @@ const Matrix & ContactMaterial3D::getTangent ()
         tangent_matrix(1,3) = C_sl(0);
         tangent_matrix(2,3) = C_sl(1);
         tangent_matrix(3,0) = 1;
-        
+       
         return tangent_matrix;          
 }
 
@@ -367,7 +387,7 @@ void ContactMaterial3D::setMetricTensor(Matrix &v)
   opserr << "ContactMaterial3D::setMetricTensor(Matrix &v)" << endln;
 #endif
   g = v;
-  
+ 
   // dual basis metric tensor G = inv(g)
   double det = g(0,0)*g(1,1) - g(0,1)*g(1,0);
   G(0,0) =  g(1,1);
@@ -482,7 +502,7 @@ int ContactMaterial3D::sendSelf(int commitTag, Channel &theChannel)
 }
 
 
-int ContactMaterial3D::recvSelf(int commitTag, Channel &theChannel, 
+int ContactMaterial3D::recvSelf(int commitTag, Channel &theChannel,
                                          FEM_ObjectBroker &theBroker)    
 {
 #ifdef DEBUG
@@ -522,21 +542,19 @@ void ContactMaterial3D::Print(OPS_Stream &s, int flag )
 
 int ContactMaterial3D::updateParameter(int responseID, Information &info)
 {
-	opserr << "ContactMaterial3D::updateParameter(...): " <<MyTag << endln;
-	opserr << "Initial:  frictionCoeff = " << frictionCoeff << "   stiffness = " << stiffness << endln;
+        opserr << "ContactMaterial3D::updateParameter(...): " <<MyTag << endln;
+        opserr << "Initial:  frictionCoeff = " << frictionCoeff << "   stiffness = " << stiffness << endln;
 
-	if (responseID==20) {
-		frictionCoeffx[matN] = info.theDouble;
-	}
-	
-	if (responseID==21) {
+        if (responseID==20) {
+                frictionCoeffx[matN] = info.theDouble;
+        }
+       
+        if (responseID==21) {
         stiffnessx[matN] = info.theDouble;
-	}
-	
-	opserr << "Updated:  frictionCoeff = " << frictionCoeffx[matN] << "   stiffness = " << stiffnessx[matN] << endln;
-	
+        }
+       
+        opserr << "Updated:  frictionCoeff = " << frictionCoeffx[matN] << "   stiffness = " << stiffnessx[matN] << endln;
+       
 
   return 0;
 }
-
-

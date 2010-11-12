@@ -73,6 +73,9 @@ extern  void *OPS_NewFAFourSteelPCPlaneStressMaterial(void);
 extern  void *OPS_NewRAFourSteelPCPlaneStressMaterial(void);
 
 extern  void *OPS_NewDruckerPragerMaterial(void);
+extern  void *OPS_NewBoundingCamClayMaterial(void);
+extern  void *OPS_NewContactMaterial2DMaterial(void);
+extern  void *OPS_NewContactMaterial3DMaterial(void);
 
 Template3Dep *
 TclModelBuilder_addTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  int argc,
@@ -210,6 +213,33 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	theMaterial = (NDMaterial *)theMat;
       else 
 	return TCL_ERROR;
+    }
+
+    else if ((strcmp(argv[1],"BoundingCamClay") == 0)){
+
+      void *theMat = OPS_NewBoundingCamClayMaterial();
+      if (theMat != 0) 
+	theMaterial = (NDMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+    }
+
+    else if ((strcmp(argv[1],"ContactMaterial2D") == 0)){
+
+      void *theMat = OPS_NewContactMaterial2DMaterial();
+      if (theMat != 0)
+    theMaterial = (NDMaterial *)theMat;
+      else
+    return TCL_ERROR;
+    }
+
+    else if ((strcmp(argv[1],"ContactMaterial3D") == 0)){
+
+      void *theMat = OPS_NewContactMaterial3DMaterial();
+      if (theMat != 0)
+    theMaterial = (NDMaterial *)theMat;
+      else
+    return TCL_ERROR;
     }
 
 

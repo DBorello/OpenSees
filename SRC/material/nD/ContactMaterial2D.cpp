@@ -1,14 +1,34 @@
-// $Revision: 1.
-// $Date: 
-// $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ContactMaterial2D.cpp,v $
+/* ****************************************************************** **
+**    OpenSees - Open System for Earthquake Engineering Simulation    **
+**          Pacific Earthquake Engineering Research Center            **
+**                                                                    **
+**                                                                    **
+** (C) Copyright 1999, The Regents of the University of California    **
+** All Rights Reserved.                                               **
+**                                                                    **
+** Commercial use of this program without express permission of the   **
+** University of California, Berkeley, is strictly prohibited.  See   **
+** file 'COPYRIGHT'  in main directory for information on usage and   **
+** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
+**                                                                    **
+** Developed by:                                                      **
+**   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
+**   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
+**   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
+**                                                                    **
+** ****************************************************************** */
+
+// $Revision: 1.2
+// $Date: 2010-11-10
+// $Source: /OpenSees/SRC/material/nD/ContactMaterial2D.cpp,v $
                                                                         
 // Written: Kathryn Petek
 // Created: February 2004
+// Modified: Chris McGann
+//           November 2010
 
-//
-// ContactMaterial2D.cpp
-// -------------------
-//
+// Description: This file contains the implementation for the ContactMaterial2D class.
+//				
 
 #include <ContactMaterial2D.h>
 
@@ -19,19 +39,18 @@
 #include <FEM_ObjectBroker.h>
 
 #include <elementAPI.h>
-
+#define OPS_Export
 static int numContactMaterial2DMaterials = 0;
-#define OPS_Export extern "C"
 
 OPS_Export void *
 OPS_NewContactMaterial2DMaterial(void)
 {
   if (numContactMaterial2DMaterials == 0) {
     numContactMaterial2DMaterials++;
-    OPS_Error("ContactMaterial2D nDmaterial - Written by Kathryn Petek and Pedro Arduino - Copyright@2009\n", 1);
+    OPS_Error("ContactMaterial2D nDmaterial - Written by K.Petek, P.Mackenzie-Helnwein, P.Arduino, U.Washington\n", 1);
   }
 
-  // Pointer to a uniaxial material that will be returned
+  // Pointer to a nDmaterial that will be returned
   NDMaterial *theMaterial = 0;
 
   int numArgs = OPS_GetNumRemainingInputArgs();

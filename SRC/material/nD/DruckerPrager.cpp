@@ -12,7 +12,7 @@
 ** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
 **                                                                    **
 ** Developed by:                                                      **
-**   Frank McKenna (fmckenna@ce.berkeley.edu)                        
+**   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
 **   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
@@ -68,7 +68,7 @@ OPS_NewDruckerPragerMaterial(void)
 {
   if (numDruckerPragerMaterials == 0) {
     numDruckerPragerMaterials++;
-    OPS_Error("DruckerPrager nDmaterial - Written by Kathryn Petek, Peter Mackenzie-Helnwein, and Pedro Arduino - Copyright@2009\n", 1);
+    OPS_Error("DruckerPrager nDmaterial - Written by K.Petek, P.Mackenzie-Helnwein, P.Arduino, U.Washington\n", 1);
   }
 
   // Pointer to a uniaxial material that will be returned

@@ -28,6 +28,7 @@
 #include <stdlib.h> 
 #include <math.h> 
 
+#include <NDMaterial.h>
 #include <Vector.h>
 #include <Matrix.h>
 

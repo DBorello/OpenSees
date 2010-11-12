@@ -35,31 +35,31 @@
 
 #include <BoundingCamClay.h>
 #include <BoundingCamClay3D.h>
+
 #include <Information.h>
 #include <MaterialResponse.h>
+#include <Parameter.h>
 
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
-
-//#include <myDebug.h>
 
 const double BoundingCamClay :: one3   = 1.0 / 3.0 ;
 const double BoundingCamClay :: two3   = 2.0 / 3.0 ;
 const double BoundingCamClay :: root23 = sqrt( 2.0 / 3.0 ) ;
 
 #include <elementAPI.h>
+#define OPS_Export 
+
 static int numBoundingCamClayMaterials = 0;
-#define OPS_Export extern "C"
 
 OPS_Export void *
 OPS_NewBoundingCamClayMaterial(void)
 {
   if (numBoundingCamClayMaterials == 0) {
     numBoundingCamClayMaterials++;
-    opserr << "BoundingCamClay nDmaterial - Written by Kathryn Petek and Pedro Arduino - Copyright@2009\n";
+    OPS_Error("BoundingCamClay nDmaterial - Written by K.Petek, P.Mackenzie-Helnwein, P.Arduino, U.Washington\n", 1);
   }
 
-  // Pointer to a uniaxial material that will be returned
   NDMaterial *theMaterial = 0;
 
   int numArgs = OPS_GetNumRemainingInputArgs();
@@ -74,7 +74,7 @@ OPS_NewBoundingCamClayMaterial(void)
 
   int numData = 1;
   if (OPS_GetInt(&numData, &tag) != 0) {
-    opserr << "WARNING invalid tag for  BoundingCamClay material" << endln;
+    opserr << "WARNING invalid nDMaterial BoundingCamClay material  tag" << endln;
     return 0;
   }
   numData = 11;
@@ -83,17 +83,14 @@ OPS_NewBoundingCamClayMaterial(void)
     return 0;
   }
 
-  theMaterial = new BoundingCamClay(tag, 0, dData[0], dData[1], dData[2], dData[3], dData[4], 
-				    dData[5], dData[6], dData[7], dData[8], dData[9], dData[10]);
-
+  theMaterial = new BoundingCamClay(tag, 0, dData[0], dData[1], dData[2], dData[3], dData[4], dData[5], dData[6], dData[7], dData[8], dData[9], dData[10]);
+  
   if (theMaterial == 0) {
     opserr << "WARNING ran out of memory for nDMaterial BoundingCamClay material  with tag: " << tag << endln;
   }
 
   return theMaterial;
 }
-
-
 
 
 //full constructor
