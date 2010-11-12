@@ -38,6 +38,8 @@ OBJS       = $(RELIABILITY_OBJS) \
 # Compilation control
 
 all:         $(OBJS)
+	@$(CD) $(FE)/domain/pattern/drm; $(MAKE);
+
 
 # Miscellaneous
 tidy:   
