@@ -8,7 +8,9 @@ OBJS       = DiagonalSOE.o \
 	DiagonalSolver.o \
 	DiagonalDirectSolver.o \
 	DistributedDiagonalSOE.o \
-	DistributedDiagonalSolver.o
+	MPIDiagonalSOE.o \
+	DistributedDiagonalSolver.o \
+	MPIDiagonalSolver.o
 
 all:         $(OBJS)
 
