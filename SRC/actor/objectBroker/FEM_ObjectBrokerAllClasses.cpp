@@ -176,6 +176,8 @@
 
 #include <Nine_Four_Node_QuadUP.h>
 #include <BrickUP.h>
+#include <BBarBrickUP.h>
+#include <BBarFourNodeQuadUP.h>
 #include <Twenty_Eight_Node_BrickUP.h>
 #include <FourNodeQuadUP.h>
 #include <EightNodeBrick_u_p_U.h>
@@ -324,6 +326,7 @@
 #include <MultiSupportPattern.h>
 #include <GroundMotion.h>
 #include <InterpolatedGroundMotion.h>
+#include <DRMLoadPatternWrapper.h>
 
 #include <Parameter.h>
 #include <MaterialStageParameter.h>
@@ -558,6 +561,11 @@ FEM_ObjectBrokerAllClasses::getNewElement(int classTag)
 	case ELE_TAG_Joint2D:				// Arash
 		return new Joint2D();			// Arash
 
+        case ELE_TAG_BBarFourNodeQuadUP:
+	  return new BBarFourNodeQuadUP();			
+
+        case ELE_TAG_BBarBrickUP:
+	  return new BBarBrickUP();			
 
 	case ELE_TAG_Nine_Four_Node_QuadUP:
 	    return new NineFourNodeQuadUP();
@@ -1088,6 +1096,9 @@ FEM_ObjectBrokerAllClasses::getNewLoadPattern(int classTag)
 
 	case PATTERN_TAG_MultiSupportPattern:
 	     return new MultiSupportPattern();
+
+	case PATTERN_TAG_DRMLoadPattern:
+	     return new DRMLoadPatternWrapper();
 
 	default:
 	     opserr << "FEM_ObjectBrokerAllClasses::getPtrLoadPattern - ";
