@@ -17,25 +17,23 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
+
+// $Revision: 1.0                                                                   
                                                                         
 #ifndef SimpleContact3D_h
 #define SimpleContact3D_h
 
-// Written: kap	
+// Written: Kathryn A. Petek
 // Created: 02/04
 //
 // Description: This file contains the class definition for SimpleContact3D. 
 //
-// What: "@(#) SimpleContact3D.h, revA"
 
 #include <Element.h>
 #include <Node.h>
 #include <Vector.h>
 #include <Matrix.h>
 #include <ID.h>
-// #include <myDebugInfo.h>
-
 
 // number of nodes per element
 #define SC3D_NUM_NODE 6

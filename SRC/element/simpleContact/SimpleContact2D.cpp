@@ -18,16 +18,19 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.0
+// $Revision: 1.1
 // $Date: 
 // $Source$
                                                                         
-// Written: kap
+// Written: Kathryn A. Petek
 // Created: 02/04
+//
+// Revisions
+//    02/04 created
+//    11/10 F.Mckenna and C.McGann: changes for incorporation into main source code
 //
 // Description: This file contains the implementation for the SimpleContact2D class.
 //
-// What: "@(#) SimpleContact2D.cpp, revA"
 
 #include "SimpleContact2D.h"
 #include <Information.h>
@@ -59,7 +62,7 @@ OPS_SimpleContact2D(void)
 {
   if (num_SimpleContact2D == 0) {
     num_SimpleContact2D++;
-    OPS_Error("SimpleContact2D element - Written by K.Petek, U.Washington\n", 1);
+    OPS_Error("SimpleContact2D element - Written by K.Petek, P.Arduino, P.Mackenzie-Helnwein, U.Washington\n", 1);
   }
 
   // Pointer to a uniaxial material that will be returned

@@ -305,6 +305,7 @@ void  Brick::Print( OPS_Stream &s, int flag )
       << endln ;
 
     s << "Resisting Force (no inertia): " << this->getResistingForce();
+    s << "Mass: " << this->getMass();
   }
 }
  

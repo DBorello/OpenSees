@@ -18,12 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision$
-// $Date$
-// $Source$
+// $Revision 1.2
+// $Date 2010.10.11
+// $Source $OpenSees/SRC/element/surfaceLoad.cpp
                                                                         
-// Written: crm
-// Created: 04/09
+// Written: Chris McGann
+// Created: 04.2009
+// Modified: Chris McGann, 11.2010
 //
 // Description: This file contains the implementation for the SurfaceLoad class.
 
@@ -55,14 +56,14 @@ OPS_SurfaceLoad(void)
 {
   if (num_SurfaceLoad == 0) {
     num_SurfaceLoad++;
-    OPS_Error("SurfaceLoad element - Written by K.Petek, U.Washington\n", 1);
+    OPS_Error("SurfaceLoad element - Written by C.McGann, P.Arduino, P.Mackenzie-Helnwein, U.Washington\n", 1);
   }
 
   // Pointer to a uniaxial material that will be returned
   Element *theElement = 0;
 
   if (OPS_GetNumRemainingInputArgs() != 6) {
-    opserr << "Want: element SurfaceLoad eleTag  iNode jNode kNode lNode pressure\n";
+    opserr << "Want: element SurfaceLoad eleTag?  iNode? jNode? kNode? lNode? pressure?\n";
     return 0;
   }
     
@@ -335,7 +336,6 @@ SurfaceLoad::addLoad(ElementalLoad *theLoad, double loadFactor)
 #ifdef DEBUG
         opserr << "SurfaceLoad::addLoad(ElementalLoad *theLoad, double loadFactor): " << MyTag << endln;
 #endif
-	// my_pressure += theLoad->Load(MyTag, ???) * loadFactor;
 	return 0;
 }
 
@@ -412,7 +412,6 @@ SurfaceLoad::sendSelf(int commitTag, Channel &theChannel)
   }           
 
   // SurfaceLoad then sends the tags of it's four nodes
-
   res = theChannel.sendID(dataTag, commitTag, myExternalNodes);
   if (res < 0) {
     opserr <<"WARNING SurfaceLoad::sendSelf() - " << this->getTag() << " failed to send Vector\n";
@@ -434,7 +433,6 @@ SurfaceLoad::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theB
 
   // SurfaceLoad creates a Vector, receives the Vector and then sets the 
   // internal data with the data in the Vector
-
   static Vector data(2);
   res = theChannel.recvVector(dataTag, commitTag, data);
   if (res < 0) {

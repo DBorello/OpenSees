@@ -18,16 +18,19 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.0
+// $Revision: 1.1
 // $Date: 
-// $Source: /home/cee/pmackenz/Software/OpenSees/SRC/element/SimpleContact/SimpleContact3D.cpp,v $
+// $Source: /OpenSees/SRC/element/SimpleContact/SimpleContact3D.cpp,v $
                                                                         
-// Written: kap
+// Written: Kathryn A. Petek
 // Created: 02/04
+//
+// Revisions
+//    02/04 created
+//    11/10 F.Mckenna and C.McGann: changes for incorporation into main source code
 //
 // Description: This file contains the implementation for the SimpleContact3D class.
 //
-// What: "@(#) SimpleContact3D.cpp, revA"
 
 #include "SimpleContact3D.h"
 #include <Information.h>
@@ -59,14 +62,14 @@ OPS_SimpleContact3D(void)
 {
   if (num_SimpleContact3D == 0) {
     num_SimpleContact3D++;
-    OPS_Error("SimpleContact3D element - Written by K.Petek, U.Washington\n", 1);
+    OPS_Error("SimpleContact3D element - Written by K.Petek, P.Arduino, P.Mackenzie-Helnwein, U.Washington\n", 1);
   }
 
   // Pointer to a uniaxial material that will be returned
   Element *theElement = 0;
 
-  if (OPS_GetNumRemainingInputArgs() != 8) {
-    opserr << "Invalid #args,  want: element SimpleContact3D eleTag? iNode? jNode? slaveNode? lambdaNode? matTag? tolGap? tolForce?\n";
+  if (OPS_GetNumRemainingInputArgs() != 10) {
+    opserr << "Invalid #args,  want: element SimpleContact3D eleTag? iNode? jNode? kNode? lNode? slaveNode? lambdaNode? matTag? tolGap? tolForce?\n";
     return 0;
   }
     

@@ -18,7 +18,7 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.
+// $Revision: 1.0
 // $Date:  
 // $Source: /home/cee/pmackenz/Software/OpenSees/SRC/element/SimpleContact/SimpleContact2D.h,v $
                                                                         

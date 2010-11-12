@@ -18,12 +18,16 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-                                                                        
 #ifndef SurfaceLoad_h
 #define SurfaceLoad_h
 
-// Written: crm	
-// Created: 04/09
+// $Revision 1.2
+// $Date 2010.10.11
+// $Source $OpenSees/SRC/element/surfaceLoad.h
+                                                                        
+// Written: Chris McGann
+// Created: 04.2009
+// Modified: Chris McGann, 11.2010
 //
 // Description: This file contains the class definition for SurfaceLoad. 
 
@@ -33,8 +37,6 @@
 #include <Matrix.h>
 #include <NDMaterial.h>
 #include <ID.h>
-// #include <myDebugInfo.h>
-
 
 // number of nodes per element
 #define SL_NUM_NODE 4
