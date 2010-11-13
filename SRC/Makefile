@@ -673,6 +673,8 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/nD/DruckerPrager3D.o \
 	$(FE)/material/nD/ContactMaterial3D.o \
 	$(FE)/material/nD/ContactMaterial2D.o \
+	$(FE)/material/nD/BoundingCamClay.o \
+	$(FE)/material/nD/BoundingCamClay3D.o \
 	$(FE)/material/nD/FeapMaterial.o \
 	$(FE)/material/nD/feap/TclFeapMaterialCommand.o \
 	$(FE)/material/nD/feap/FeapMaterial01.o \
