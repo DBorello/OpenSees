@@ -67,23 +67,25 @@ SRCdir       = $(HOME)/OpenSees/SRC
 SUPERLUdir   = $(HOME)/OpenSees/OTHER/SuperLU_3.0/SRC
 SUPERLU_DISTdir   = $(HOME)/OpenSees/OTHER/SuperLU_DIST_2.0/SRC
 
-DIRS        =	$(SUPERLUdir) \
-	      $(SUPERLU_DISTdir) \
-              $(ARPACKdir) \
-              $(UMFPACKdir) \
-              $(AMDdir) \
-              $(METISdir) \
-              $(SRCdir) 
+DIRS        = $(SUPERLUdir) \
+	$(SUPERLU_DISTdir) \
+	$(ARPACKdir) \
+	$(CBLASdir) \
+	$(UMFPACKdir) \
+	$(AMDdir) \
+	$(METISdir) \
+	$(SRCdir) 
 
 ifeq ($(PROGRAMMING_MODE), SEQUENTIAL)
 
 DIRS        = \
-              $(SUPERLUdir) \
-              $(ARPACKdir) \
-              $(UMFPACKdir) \
-              $(METISdir) \
-              $(AMDdir) \
-              $(SRCdir) 
+	$(SUPERLUdir) \
+	$(ARPACKdir) \
+	$(CBLASdir) \
+	$(UMFPACKdir) \
+	$(METISdir) \
+	$(AMDdir) \
+	$(SRCdir) 
 endif
 
 # %-------------------------------------------------------%
@@ -109,7 +111,7 @@ LAPACK_LIBRARY      =
 BLAS_LIBRARY        = 
 SUPERLU_LIBRARY     = $(HOME)/lib/libSuperLU.a
 AMD_LIBRARY     = $(HOME)/lib/libAMD.a
-CBLAS_LIBRARY       = 
+CBLAS_LIBRARY       = $(HOME)/lib/libCBlas.a
 ARPACK_LIBRARY      = $(HOME)/lib/libArpack.a
 UMFPACK_LIBRARY     = $(HOME)/lib/libUmfpack.a
 METIS_LIBRARY       = $(HOME)/lib/libMetis.a
@@ -373,6 +375,8 @@ PARALLEL_LIB = $(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLi
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSOE.o \
         $(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSuperLU.o \
         $(FE)/system_of_eqn/linearSOE/sparseGEN/SuperLU.o \
+        $(FE)/system_of_eqn/linearSOE/diagonal/MPIDiagonalSOE.o \
+        $(FE)/system_of_eqn/linearSOE/diagonal/MPIDiagonalSolver.o \
 	-Wl,-rpath,$(TACC_MKL_LIB) \
 	-L$(TACC_MKL_LIB) \
 	$(TACC_MKL_LIB)/libmkl_scalapack_lp64.a \
@@ -387,6 +391,8 @@ ifeq ($(PROGRAMMING_MODE), PARALLEL_INTERPRETERS)
 PARALLEL_LIB = \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLinSOE.o \
         $(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSuperLU.o \
+        $(FE)/system_of_eqn/linearSOE/diagonal/MPIDiagonalSOE.o \
+        $(FE)/system_of_eqn/linearSOE/diagonal/MPIDiagonalSolver.o \
 	-Wl,-rpath,$(TACC_MKL_LIB) \
 	-L$(TACC_MKL_LIB) \
 	$(TACC_MKL_LIB)/libmkl_scalapack_lp64.a \
@@ -424,7 +430,7 @@ MACHINE_NUMERICAL_LIBS  = -lm \
   $(GRAPHIC_LIBRARY)\
   $(RELIABILITY_LIBRARY) \
   $(DISTRIBUTED_SUPERLU_LIBRARY) \
-  $(METIS_LIBRARY) $(PETSC_LIB) $(MUMPS_LIB) $(PARALLEL_LIB) 
+  $(METIS_LIBRARY) $(PETSC_LIB) $(MUMPS_LIB) $(PARALLEL_LIB) $(CBLAS_LIBRARY)
   
 MACHINE_SPECIFIC_LIBS =   -static-intel -L$(IFC_LIB) -lifcore
 
