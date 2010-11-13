@@ -344,6 +344,8 @@ endif
 
 PARALLEL_LIB = 	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSuperLU.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLinSOE.o \
+	$(FE)/system_of_eqn/linearSOE/diagonal/MPIDiagonalSOE.o \
+	$(FE)/system_of_eqn/linearSOE/diagonal/MPIDiagonalSolver.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSolver.o \
 	$(DISTRIBUTED_SUPERLU_LIBRARY) $(MUMPS_LIB) $(SCALAP_LIB) $(METIS_LIBRARY) \
 	-L /usr/apps/math/scalapack/scalapack-1.8.0 \
@@ -359,6 +361,8 @@ ifeq ($(PROGRAMMING_MODE), PARALLEL_INTERPRETERS)
 
 PARALLEL_LIB = 	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSuperLU.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/DistributedSparseGenColLinSOE.o \
+	$(FE)/system_of_eqn/linearSOE/diagonal/MPIDiagonalSOE.o \
+	$(FE)/system_of_eqn/linearSOE/diagonal/MPIDiagonalSolver.o \
 	$(DISTRIBUTED_SUPERLU_LIBRARY) $(MUMPS_LIB) $(SCALAP_LIB) $(METIS_LIBRARY) \
 	-L /usr/apps/math/scalapack/scalapack-1.8.0 \
 	-lscalapack-mvapich2-intel \
