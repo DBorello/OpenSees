@@ -8,9 +8,17 @@ OBJS       = DiagonalSOE.o \
 	DiagonalSolver.o \
 	DiagonalDirectSolver.o \
 	DistributedDiagonalSOE.o \
-	MPIDiagonalSOE.o \
 	DistributedDiagonalSolver.o \
+	MPIDiagonalSOE.o \
 	MPIDiagonalSolver.o
+
+ifeq ($(PROGRAMMING_MODE), SEQUENTIAL)
+OBJS       = DiagonalSOE.o \
+	DiagonalSolver.o \
+	DiagonalDirectSolver.o \
+	DistributedDiagonalSOE.o \
+	DistributedDiagonalSolver.o
+endif
 
 all:         $(OBJS)
 
