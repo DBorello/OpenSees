@@ -36,6 +36,8 @@
 // What: "@(#) TclModelBuilderNDMaterialCommand.C, revA"
 
 #include <TclModelBuilder.h>
+#include <elementAPI.h>
+#include <packages.h>
 
 #include <ElasticIsotropicMaterial.h>
 #include <ElasticIsotropic3D.h>
@@ -62,6 +64,10 @@
 #include <NewTemplate3Dep.h>
 #include <FiniteDeformationElastic3D.h>
 #include <FiniteDeformationEP3D.h>
+
+extern NDMaterial *
+Tcl_addWrapperNDMaterial(matObj *, ClientData, Tcl_Interp *,  int, TCL_Char **, TclModelBuilder *);
+			 
 
 extern  void *OPS_NewReinforcedConcretePlaneStressMaterial(void);
 extern  void *OPS_NewFAReinforcedConcretePlaneStressMaterial(void);
@@ -106,6 +112,15 @@ extern int OPS_ResetInput(ClientData clientData,
 			  TCL_Char **argv, 
 			  Domain *domain,
 			  TclModelBuilder *builder);
+
+typedef struct ndMaterialPackageCommand {
+  char *funcName;
+  void * (*funcPtr)(); 
+  struct ndMaterialPackageCommand *next;
+} NDMaterialPackageCommand;
+
+static NDMaterialPackageCommand *theNDMaterialPackageCommands = NULL;
+
 
 static void printCommand(int argc, TCL_Char **argv)
 {
@@ -1195,8 +1210,88 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 						    theTclBuilder);
     }
 
+
     if (theMaterial == 0) {
-	opserr << "WARNING count not create nDMaterial: " << argv[1];
+      //
+      // maybe element in a class package already loaded
+      //  loop through linked list of loaded functions comparing names & if find call it
+      //
+      
+      NDMaterialPackageCommand *matCommands = theNDMaterialPackageCommands;
+      bool found = false;
+      while (matCommands != NULL && found == false) {
+	if (strcmp(argv[1], matCommands->funcName) == 0) {
+	  theMaterial = (NDMaterial *)(*(matCommands->funcPtr))();
+	  found = true;;
+	} else
+	  matCommands = matCommands->next;
+      }
+    }
+
+    //
+    // check to see if element is a procedure
+    //   the proc may already have been loaded from a package or may exist in a package yet to be loaded
+    //
+    if (theMaterial == 0) {
+
+      // maybe material in a routine
+      //
+
+      char *matType = new char[strlen(argv[1])+1];
+      strcpy(matType, argv[1]);
+      matObj *matObject = OPS_GetMaterialType(matType, strlen(matType));
+      
+      delete [] matType;
+
+      if (matObject != 0) {
+	
+	theMaterial = Tcl_addWrapperNDMaterial(matObject, clientData, interp,
+						     argc, argv, theTclBuilder);
+	
+	if (theMaterial == 0)
+	  delete matObject;
+      }
+    }
+
+
+    //
+    // maybe material class exists in a package yet to be loaded
+    //
+
+    if (theMaterial == 0) {
+	
+      void *libHandle;
+      void * (*funcPtr)();
+      
+      int matNameLength = strlen(argv[1]);
+      char *tclFuncName = new char[matNameLength+12];
+      strcpy(tclFuncName, "OPS_");
+      strcpy(&tclFuncName[4], argv[1]);    
+      int res = getLibraryFunction(argv[1], tclFuncName, &libHandle, (void **)&funcPtr);
+      
+      delete [] tclFuncName;
+      
+      if (res == 0) {
+	
+	//
+	// add loaded function to list of functions
+	//
+	
+	char *matName = new char[matNameLength+1];
+	strcpy(matName, argv[1]);
+	NDMaterialPackageCommand *theMatCommand = new NDMaterialPackageCommand;
+	theMatCommand->funcPtr = funcPtr;
+	theMatCommand->funcName = matName;	
+	theMatCommand->next = theNDMaterialPackageCommands;
+	theNDMaterialPackageCommands = theMatCommand;
+	
+	theMaterial = (NDMaterial *)(*funcPtr)();
+      }
+    }
+
+
+    if (theMaterial == 0) {
+	opserr << "WARNING could not create nDMaterial: " << argv[1];
 	return TCL_ERROR;
     }
 

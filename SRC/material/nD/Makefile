@@ -1,6 +1,7 @@
 include ../../../Makefile.def
 
 OBJS       = NDMaterial.o \
+	WrapperNDMaterial.o \
 	ElasticIsotropic3D.o \
 	ElasticIsotropicMaterial.o \
 	ElasticIsotropicPlaneStrain2D.o \

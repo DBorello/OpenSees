@@ -31,8 +31,6 @@
 #ifndef NDMaterial_h
 #define NDMaterial_h
 
-// File: ~/material/NDMaterial.h
-//
 // Written: MHS
 // Created: Feb 2000
 // Revision: A
@@ -81,6 +79,7 @@ class NDMaterial : public Material
     virtual const Tensor& getTangentTensor(void);
     virtual const stresstensor& getStressTensor(void);
     virtual const straintensor& getStrainTensor(void);
+
     //Added Joey Aug. 13, 2001
     virtual const straintensor& getPlasticStrainTensor(void);
 
