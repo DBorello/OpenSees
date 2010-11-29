@@ -250,6 +250,7 @@
 #define SECTION_INTEGRATION_TAG_WideFlange 1
 #define SECTION_INTEGRATION_TAG_RC 2
 
+#define ND_TAG_WrapperNDMaterial					9
 #define ND_TAG_ElasticIsotropic					10
 #define ND_TAG_ElasticIsotropicPlaneStrain2d	11
 #define ND_TAG_ElasticIsotropicPlaneStress2d	12

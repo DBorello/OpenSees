@@ -663,6 +663,7 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/backbone/RaynorBackbone.o \
 	$(FE)/material/uniaxial/backbone/TclModelBuilderBackboneCommand.o \
 	$(FE)/material/nD/NDMaterial.o \
+	$(FE)/material/nD/WrapperNDMaterial.o \
 	$(FE)/material/nD/J2Plasticity.o \
 	$(FE)/material/nD/J2PlaneStress.o \
 	$(FE)/material/nD/J2PlaneStrain.o \
