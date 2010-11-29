@@ -40,6 +40,7 @@
 #include <UniaxialMaterial.h>
 #include <NDMaterial.h>
 #include <WrapperUniaxialMaterial.h>
+#include <WrapperNDMaterial.h>
 
 #include <OPS_Globals.h>
 
@@ -395,7 +396,6 @@ matObj *OPS_GetMaterialType(char *type, int sizeType) {
     matFunction->next = theMaterialFunctions;
     theMaterialFunctions = matFunction;
 
-    
     // create a new eleObject, set the function ptr &  return it
     
     matObj *theMatObject = new matObj;      
@@ -668,8 +668,8 @@ Tcl_addWrapperUniaxialMaterial(matObj *theMat, ClientData clientData, Tcl_Interp
   int result;
   theMat->matFunctPtr(theMat, &theModelState, 0, 0, 0, &isw, &result);
 
-  if (result != 0) {
-    opserr << "Tcl_addWrapperElement - failed in element function " << result << endln;
+  if (result != 1 && result != OPS_UNIAXIAL_MATERIAL_TYPE) {
+    opserr << "Tcl_addWrapperUniaxialMaterial - failed in element function " << result << endln;
     return 0;
   }
 
@@ -677,6 +677,45 @@ Tcl_addWrapperUniaxialMaterial(matObj *theMat, ClientData clientData, Tcl_Interp
 
   return theMaterial;
 }
+
+NDMaterial *
+Tcl_addWrapperNDMaterial(matObj *theMat, ClientData clientData, Tcl_Interp *interp,  int argc, 
+			 TCL_Char **argv, TclModelBuilder *builder)
+{
+  theInterp = interp;
+
+  theModelBuilder = builder;
+  currentArgv = argv;
+  currentArg = 2;
+  maxArg = argc;
+
+  // get the current load factor
+  static modelState theModelState;
+  if (theDomain != 0) {
+    double time = theDomain->getCurrentTime();
+    double dt = theDomain->getCurrentTime() - time;
+    theModelState.time = time;
+    theModelState.dt = dt;
+  }
+
+
+  // invoke the mat function with isw = 0
+  int isw = ISW_INIT;
+  int result;
+  theMat->matFunctPtr(theMat, &theModelState, 0, 0, 0, &isw, &result);
+
+  if (result != OPS_PLANESTRESS_TYPE && 
+      result != OPS_PLANESTRAIN_TYPE &&
+      result != OPS_THREEDIMENSIONAL_TYPE) {
+    opserr << "Tcl_addWrapperNDMaterial - failed in element function " << result << endln;
+    return 0;
+  }
+
+  WrapperNDMaterial*theMaterial = new WrapperNDMaterial(argv[1], theMat, result);
+
+  return theMaterial;
+}
+
 
 extern "C" int        
 OPS_InvokeMaterial(eleObject *theEle, int *mat, modelState *model, double *strain, double *stress, double *tang, int *isw)
