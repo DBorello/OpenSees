@@ -44,8 +44,9 @@ WrapperUniaxialMaterial::WrapperUniaxialMaterial(const char *name, matObject *th
   int error = 0;
   theMat->matFunctPtr(theMat, &theModelState, &strain, &initTangent, &stress, &isw, &error);
 
-  //  theMat->matObjectPtr = this;
+  tangent=initTangent;
 }
+
 WrapperUniaxialMaterial::WrapperUniaxialMaterial()
   :UniaxialMaterial(0, MAT_TAG_WrapperUniaxialMaterial),
   funcName(0),

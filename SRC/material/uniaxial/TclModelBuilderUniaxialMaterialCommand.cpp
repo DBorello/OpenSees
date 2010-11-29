@@ -3245,7 +3245,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
       if (theMaterial == 0)
 	theMaterial = Tcl_AddLimitStateMaterial(clientData, interp, argc, argv);
     }
-    
+
     if (theMaterial == 0) {
       
       //
@@ -3268,18 +3268,16 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
     // check to see if element is a procedure
     //   the proc may already have been loaded from a package or may exist in a package yet to be loaded
     //
-
     if (theMaterial == 0) {
 
       // maybe material in a routine
       //
-      
       char *matType = new char[strlen(argv[1])+1];
       strcpy(matType, argv[1]);
       matObj *matObject = OPS_GetMaterialType(matType, strlen(matType));
       
       delete [] matType;
-      
+
       if (matObject != 0) {
 	
 	theMaterial = Tcl_addWrapperUniaxialMaterial(matObject, clientData, interp,
