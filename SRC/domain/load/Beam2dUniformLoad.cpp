@@ -111,7 +111,7 @@ Beam2dUniformLoad::Print(OPS_Stream &s, int flag)
   s << "Beam2dUniformLoad - Reference load" << endln;
   s << "  Transverse: " << wTrans << endln;
   s << "  Axial:      " << wAxial << endln;
-  s << "  Element acted on: " << eleTag;
+  s << "  Element acted on: " << eleTag << endln;
 }
 
 int
