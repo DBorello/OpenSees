@@ -732,6 +732,18 @@
 			Name="nD"
 			Filter="">
 			<File
+				RelativePath="..\..\..\SRC\material\nD\BoundingCamClay.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\nD\BoundingCamClay.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\nD\BoundingCamClay3D.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\nD\BoundingCamClay3D.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\material\nD\ContactMaterial2D.cpp">
 			</File>
 			<File
@@ -763,6 +775,12 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\material\nD\TclModelBuilderNDMaterialCommand.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\nD\WrapperNDMaterial.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\nD\WrapperNDMaterial.h">
 			</File>
 			<Filter
 				Name="elasticIsotropic"
