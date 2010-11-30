@@ -220,7 +220,7 @@ int DRMLoadPatternWrapper::recvSelf(int commitTag, Channel& theChannel, FEM_Obje
 
 
   int ssz = c_Data_sz(this->files);
-  char stor[ssz];
+  char *stor = new char[ssz];
   Message c_Data(stor, ssz);
 
   if (theChannel.recvMsg(dbTag, commitTag, c_Data) < 0) {
@@ -243,7 +243,7 @@ int DRMLoadPatternWrapper::recvSelf(int commitTag, Channel& theChannel, FEM_Obje
   }
   
   this->cleanUpAfterMySelf = true;
-
+  delete [] stor;
   return 0;
 }
 
