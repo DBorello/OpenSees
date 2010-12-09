@@ -54,9 +54,12 @@ Parameter::Parameter(int passedTag,
     theComponents[0] = parentObject;
     numComponents = 1;
   }
+  else {
+    ok = 0; // Created a blank parameter but don't want a warning below
+  }
 
-  if (numObjects == 0 || ok < 0) {
-    opserr << "Parameter::Parameter "<< this->getTag() <<" -- no objects were able to identify parameter" << endln;
+  if (ok < 0) {
+    opserr << "Parameter::Parameter "<< this->getTag() <<" -- error encountered while attempting to identify parameter" << endln;
     for (int i = 0; i < argc; i++)
       opserr << argv[i] << ' ';
     opserr << endln;

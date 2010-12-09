@@ -58,6 +58,19 @@ TclModelBuilderParameterCommand(ClientData clientData, Tcl_Interp *interp,
   }
 
   Parameter *theParameter = theTclDomain->getParameter(paramTag);
+  
+  // First, check special case of a blank parameter
+  if (argc == 2 && strcmp(argv[0],"parameter") == 0) {
+    Parameter *newParameter = new Parameter(paramTag, 0, 0, 0);
+	
+    theTclDomain->addParameter(newParameter);
+
+    char buffer[40];
+    sprintf(buffer, "%d", paramTag);
+    Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+
+    return TCL_OK;
+  }
 
   // Now handle the parameter according to which command is invoked
   if (strcmp(argv[0],"parameter") == 0 || strcmp(argv[0],"addToParameter") == 0) {
