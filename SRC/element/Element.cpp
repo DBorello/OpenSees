@@ -460,22 +460,40 @@ Element::getResponseSensitivity(int responseID, int gradIndex,
 const Vector &
 Element::getResistingForceSensitivity(int gradIndex)
 {
-	static Vector dummy(1);
-	return dummy;
+  if (index == -1) {
+    this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
+  }
+
+  Vector *theVector = theVectors1[index];
+  theVector->Zero();
+
+  return *theVector;
 }
 
 const Matrix &
 Element::getInitialStiffSensitivity(int gradIndex)
 {
-	static Matrix dummy(1,1);
-	return dummy;
+  if (index == -1) {
+    this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
+  }
+
+  Matrix *theMatrix = theMatrices[index];
+  theMatrix->Zero();
+
+  return *theMatrix;
 }
 
 const Matrix &
 Element::getMassSensitivity(int gradIndex)
 {
-	static Matrix dummy(1,1);
-	return dummy;
+  if (index == -1) {
+    this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
+  }
+
+  Matrix *theMatrix = theMatrices[index];
+  theMatrix->Zero();
+
+  return *theMatrix;
 }
 
 int
