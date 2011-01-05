@@ -66,7 +66,7 @@ OPS_NewBilinMaterial()
 			  dData[5], dData[6], dData[7], dData[8], dData[9], 
 			  dData[10], dData[11], dData[12], dData[13], dData[14], 
 			  dData[15], dData[16], dData[17], dData[18], dData[19], 
-			  dData[22], dData[21], dData[22]);
+			  dData[20], dData[21], dData[22]);
   
   if (theMaterial == 0) {
     opserr << "WARNING could not create uniaxialMaterial of type Bilin Material\n";
