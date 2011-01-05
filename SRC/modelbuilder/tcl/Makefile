@@ -87,6 +87,8 @@ INTERPRETER_LIBS_MPI_PARAMETERS = $(FE)/tcl/tclMain.o \
 	$(FE)/modelbuilder/tcl/myCommands.o \
 	$(FE)/actor/channel/MPI_Channel.o \
 	$(FE)/actor/machineBroker/MPI_MachineBroker.o \
+	$(FE)/system_of_eqn/linearSOE/diagonal/MPIDiagonalSOE.o \
+	$(FE)/system_of_eqn/linearSOE/diagonal/MPIDiagonalSolver.o \
 	$(FE)/domain/subdomain/ActorSubdomain.o \
 	$(FE)/domain/subdomain/ShadowSubdomain.o $(GRAPHIC_LIBS_TCL)
 

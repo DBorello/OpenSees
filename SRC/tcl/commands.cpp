@@ -427,6 +427,7 @@ extern int OPS_ResetInput(ClientData clientData,
 
 
 #include <MachineBroker.h>
+
 MachineBroker *theMachineBroker =0;
 Channel **theChannels =0;
 int numChannels =0;
@@ -921,7 +922,7 @@ OPS_SourceCmd(
     }
 
     const char *pwd = getInterpPWD(interp);
-	const char *fileN = Tcl_GetString(fileName);
+    const char *fileN = Tcl_GetString(fileName);
 
     simulationInfo.addInputFile(fileN, pwd);
 

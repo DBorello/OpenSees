@@ -2,6 +2,7 @@ include ../../../../Makefile.def
 
 OBJS       = Pinching.o \
 	Bilinear.o \
+	Bilin.o \
 	Clough.o \
 	CloughDamage.o \
 	PinchingDamage.o \
