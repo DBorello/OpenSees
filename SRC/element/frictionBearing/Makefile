@@ -5,7 +5,8 @@ OBJS       = FlatSliderSimple2d.o \
 	SingleFPSimple2d.o \
 	SingleFPSimple3d.o \
 	TclFlatSliderCommand.o \
-	TclSingleFPCommand.o
+	TclSingleFPCommand.o \
+	TPB1D.o
 
 # Compilation control
 
