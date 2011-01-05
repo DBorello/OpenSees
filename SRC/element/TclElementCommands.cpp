@@ -96,6 +96,7 @@ extern void *OPS_SimpleContact2D(void);
 extern void *OPS_SimpleContact3D(void);
 extern void *OPS_BeamContact3D(void);
 extern void *OPS_SurfaceLoad(void);
+extern void *OPS_TPB1D(void);
 
 extern int TclModelBuilder_addFeapTruss(ClientData clientData, Tcl_Interp *interp,  int argc,
 					TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
@@ -480,6 +481,16 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
   } else if ((strcmp(argv[1],"SurfaceLoad") == 0)) {
     
     void *theEle = OPS_SurfaceLoad();
+    if (theEle != 0) 
+      theElement = (Element *)theEle;
+    else {
+      opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
+      return TCL_ERROR;
+    }
+
+  } else if ((strcmp(argv[1],"TPB1D") == 0)) {
+    
+    void *theEle = OPS_TPB1D();
     if (theEle != 0) 
       theElement = (Element *)theEle;
     else {
