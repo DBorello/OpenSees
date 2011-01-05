@@ -176,26 +176,6 @@ TPB1D::TPB1D(int tag,
   double D3 = D[2];
   double d3 = d[2];
 
-
-
-  opserr << "mu1: " << mu[0] << endln;
-  opserr << "mu2: " << mu[1]<< endln;
-  opserr << "mu3: " << mu[2]<< endln;
-
-  opserr << "R1: " << R[0]<< endln;
-  opserr << "h1: " << h[0]<< endln;
-  opserr << "R2: " << R[1]<< endln;
-  opserr << "h2: " << h[1]<< endln;
-  opserr << "R3: " << R[3]<< endln;
-  opserr << "h3: " << h[3]<< endln;
-
-  opserr << "D1: " << D[0]<< endln;
-  opserr << "d1: " << d[0]<< endln;
-  opserr << "D2: " << D[1]<< endln;
-  opserr << "d2: " << d[1]<< endln;
-  opserr << "D3: " << D[2]<< endln;
-  opserr << "d3: " << d[2]<< endln;
-
   double L1 = R1-h1;
   double L2 = R2-h2;
   double L3 = R3-h3;
@@ -606,6 +586,26 @@ TPB1D::Print(OPS_Stream &s, int flag)
 	s << " type: TPB1D  iNode: " << connectedExternalNodes(0);
 	s << " jNode: " << connectedExternalNodes(1) << endln;
 	s << " direction: " << direction << "\n";
+	opserr << " mu1: " << mu[0] << endln;
+	opserr << " mu2: " << mu[1]<< endln;
+	opserr << " mu3: " << mu[2]<< endln;
+	
+	opserr << " R1: " << R[0]<< endln;
+	opserr << " R2: " << R[1]<< endln;
+	opserr << " R3: " << R[2]<< endln;
+
+	opserr << " h1: " << h[0]<< endln;
+	opserr << " h2: " << h[1]<< endln;
+	opserr << " h3: " << h[2]<< endln;
+	
+	opserr << " D1: " << D[0]<< endln;
+	opserr << " D2: " << D[1]<< endln;
+	opserr << " D3: " << D[2]<< endln;
+
+	opserr << " d1: " << d[0]<< endln;
+	opserr << " d2: " << d[1]<< endln;
+	opserr << " d3: " << d[2]<< endln;
+
 	s << "\tMaterial: \n";
 	s << *(theMaterial);
     }
