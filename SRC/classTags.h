@@ -374,7 +374,6 @@
 #define ELE_TAG_cont2d02    	2102	// provisional
 #define ELE_TAG_CST	    	4050
 
-
 #define ELE_TAG_Subdomain     	1
 #define ELEMENT_TAGS_WrapperElement 2001
 #define ELE_TAG_ElasticBeam2d   2000
@@ -484,6 +483,8 @@
 #define ELE_TAG_SimpleContact3D 12
 #define ELE_TAG_BeamContact3D   13
 #define ELE_TAG_SurfaceLoad   14
+
+#define ELE_TAG_TPB1D 15
 
 
 #define FRN_TAG_CoulombFriction     1
