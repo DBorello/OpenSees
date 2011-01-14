@@ -86,11 +86,62 @@ OpenSeesGFunEvaluator::~OpenSeesGFunEvaluator()
   
 }
 
-/*
+int
+OpenSeesGFunEvaluator::setTclRandomVariables(const Vector &x)
+{
+  char theIndex[80];
+  double xval;
+  RandomVariable *theRV;
+	
+  // Set values of random variables in the Tcl intepreter
+  int nrv = theReliabilityDomain->getNumberOfRandomVariables();
+
+  int lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
+
+  for (int i = 0; i < nrv; i++) {
+    theRV = theReliabilityDomain->getRandomVariablePtrFromIndex(i);
+    int rvTag = theRV->getTag();
+
+    xval = x(i);
+
+    // put in x(1) format
+    sprintf(theIndex,"%d",rvTag);
+    if (Tcl_SetVar2Ex(theTclInterp,"xrv",theIndex,Tcl_NewDoubleObj(xval),TCL_GLOBAL_ONLY) == NULL) {
+      opserr << "ERROR GFunEvaluator -- error in setTclRandomVariables xrv" << endln;
+      opserr << theTclInterp->result << endln;
+      return -1;
+    }
+    
+    // put in x(1,lsfTag) format (useful for reporting design point)
+    sprintf(theIndex,"%d,%d",rvTag,lsf);
+    if (Tcl_SetVar2Ex(theTclInterp,"xrv",theIndex,Tcl_NewDoubleObj(xval),TCL_GLOBAL_ONLY) == NULL) {
+      opserr << "ERROR GFunEvaluator -- error in setTclRandomVariables xrv" << endln;
+      opserr << theTclInterp->result << endln;
+      return -1;
+    }
+    
+    // for legacy reasons, also put random variables in x_1 format
+    sprintf(theIndex,"x_%d",rvTag);
+    if (Tcl_SetVar2Ex(theTclInterp,theIndex,NULL,Tcl_NewDoubleObj(xval),TCL_LEAVE_ERR_MSG) == NULL) {
+      opserr << "ERROR GFunEvaluator -- error in setTclRandomVariables x" << endln;
+      opserr << theTclInterp->result << endln;
+      return -1;
+    }
+  }
+
+  return 0;
+}
+
 double
 OpenSeesGFunEvaluator::evaluateGMHS(const Vector &x) 
 {
   double g = 0.0;
+
+  // Set random variable values in Tcl namespace
+  if (this->setTclRandomVariables(x) != 0) {
+    opserr << "ERROR TclGFunEvaluator::evaluateG -- error in setTclRandomVariables" << endln;
+    return -1;
+  }
 
   // "Download" limit-state function from reliability domain
   int lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
@@ -107,7 +158,7 @@ OpenSeesGFunEvaluator::evaluateGMHS(const Vector &x)
 
   return g;
 }
-*/
+
 
 
 

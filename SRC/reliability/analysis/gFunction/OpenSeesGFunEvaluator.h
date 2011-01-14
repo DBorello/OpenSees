@@ -61,6 +61,7 @@ class OpenSeesGFunEvaluator : public GFunEvaluator
 
   int		runGFunAnalysis(const Vector &x) {return 0;}
   int		tokenizeSpecials(TCL_Char *theExpression, Tcl_Obj *passedList) {return 0;}
+  double evaluateGMHS(const Vector &x);
   /*  
   void		setNsteps(int nsteps);
   double	getDt();
@@ -71,6 +72,8 @@ class OpenSeesGFunEvaluator : public GFunEvaluator
  protected:
   
  private:
+
+  int setTclRandomVariables(const Vector &x);
 
   Tcl_Interp *theTclInterp;
   ReliabilityDomain *theReliabilityDomain;
