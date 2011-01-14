@@ -133,10 +133,10 @@ FiberSection2d::FiberSection2d(int tag, int num, UniaxialMaterial **mats,
     exit(-1);
   }
 
-  double fiberLocs[10000];
+  static double fiberLocs[10000];
   sectionIntegr->getFiberLocations(numFibers, fiberLocs);
   
-  double fiberArea[10000];
+  static double fiberArea[10000];
   sectionIntegr->getFiberWeights(numFibers, fiberArea);
 
   double Qz = 0.0;
@@ -292,8 +292,8 @@ FiberSection2d::setTrialSectionDeformation (const Vector &deforms)
   double d0 = deforms(0);
   double d1 = deforms(1);
 
-  double fiberLocs[10000];
-  double fiberArea[10000];
+  static double fiberLocs[10000];
+  static double fiberArea[10000];
 
   if (sectionIntegr != 0) {
     sectionIntegr->getFiberLocations(numFibers, fiberLocs);
@@ -345,8 +345,8 @@ FiberSection2d::getInitialTangent(void)
   static Matrix kInitialMatrix(kInitial, 2, 2);
   kInitial[0] = 0.0; kInitial[1] = 0.0; kInitial[2] = 0.0; kInitial[3] = 0.0;
 
-  double fiberLocs[10000];
-  double fiberArea[10000];
+  static double fiberLocs[10000];
+  static double fiberArea[10000];
 
   if (sectionIntegr != 0) {
     sectionIntegr->getFiberLocations(numFibers, fiberLocs);
@@ -482,8 +482,8 @@ FiberSection2d::revertToLastCommit(void)
   kData[0] = 0.0; kData[1] = 0.0; kData[2] = 0.0; kData[3] = 0.0;
   sData[0] = 0.0; sData[1] = 0.0;
   
-  double fiberLocs[10000];
-  double fiberArea[10000];
+  static double fiberLocs[10000];
+  static double fiberArea[10000];
 
   if (sectionIntegr != 0) {
     sectionIntegr->getFiberLocations(numFibers, fiberLocs);
@@ -532,8 +532,8 @@ FiberSection2d::revertToStart(void)
   kData[0] = 0.0; kData[1] = 0.0; kData[2] = 0.0; kData[3] = 0.0;
   sData[0] = 0.0; sData[1] = 0.0;
   
-  double fiberLocs[10000];
-  double fiberArea[10000];
+  static double fiberLocs[10000];
+  static double fiberArea[10000];
 
   if (sectionIntegr != 0) {
     sectionIntegr->getFiberLocations(numFibers, fiberLocs);
@@ -1047,8 +1047,8 @@ FiberSection2d::getStressResultantSensitivity(int gradIndex, bool conditional)
   
   double y, A, stressGradient, stress, tangent, sig_dAdh;
 
-  double fiberLocs[10000];
-  double fiberArea[10000];
+  static double fiberLocs[10000];
+  static double fiberArea[10000];
 
   if (sectionIntegr != 0) {
     sectionIntegr->getFiberLocations(numFibers, fiberLocs);
@@ -1061,8 +1061,8 @@ FiberSection2d::getStressResultantSensitivity(int gradIndex, bool conditional)
     }
   }
 
-  double locsDeriv[10000];
-  double areaDeriv[10000];
+  static double locsDeriv[10000];
+  static double areaDeriv[10000];
 
   if (sectionIntegr != 0) {
     sectionIntegr->getLocationsDeriv(numFibers, locsDeriv);  
@@ -1121,8 +1121,8 @@ FiberSection2d::getInitialTangentSensitivity(int gradIndex)
 
   double y, A, dydh, dAdh, tangent, dtangentdh;
 
-  double fiberLocs[10000];
-  double fiberArea[10000];
+  static double fiberLocs[10000];
+  static double fiberArea[10000];
 
   if (sectionIntegr != 0) {
     sectionIntegr->getFiberLocations(numFibers, fiberLocs);
@@ -1135,8 +1135,8 @@ FiberSection2d::getInitialTangentSensitivity(int gradIndex)
     }
   }
 
-  double locsDeriv[10000];
-  double areaDeriv[10000];
+  static double locsDeriv[10000];
+  static double areaDeriv[10000];
 
   if (sectionIntegr != 0) {
     sectionIntegr->getLocationsDeriv(numFibers, locsDeriv);  
@@ -1179,7 +1179,7 @@ FiberSection2d::commitSensitivity(const Vector& defSens,
 
   dedh = defSens;
 
-  double fiberLocs[10000];
+  static double fiberLocs[10000];
 
   if (sectionIntegr != 0)
     sectionIntegr->getFiberLocations(numFibers, fiberLocs);
@@ -1188,8 +1188,8 @@ FiberSection2d::commitSensitivity(const Vector& defSens,
       fiberLocs[i] = matData[2*i];
   }
 
-  double locsDeriv[10000];
-  double areaDeriv[10000];
+  static double locsDeriv[10000];
+  static double areaDeriv[10000];
 
   if (sectionIntegr != 0) {
     sectionIntegr->getLocationsDeriv(numFibers, locsDeriv);  
