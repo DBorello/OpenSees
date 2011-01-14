@@ -234,7 +234,8 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 	  const char *gradExpression = theLimitStateFunction->getGradientExpression(tag);
 	  double result = 0;
 	  if (Tcl_ExprDouble( theTclInterp, gradExpression, &result) == TCL_ERROR) {
-	    opserr << "ERROR OpenSeesGradGEvaluator -- error in Tcl_ExprDouble for the analytic gradient command" << endln;
+	    opserr << "ERROR OpenSeesGradGEvaluator -- error in Tcl_ExprDouble for the analytic gradient command" << gradExpression << endln;
+        opserr << " caused error:" << endln << theTclInterp->result <<endln;
 	    return -1;
 	  }
 	  (*grad_g)(i) += result;
