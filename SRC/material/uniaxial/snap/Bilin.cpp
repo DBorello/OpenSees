@@ -27,6 +27,7 @@
 #include <Channel.h>
 
 #include <OPS_Globals.h>
+#include <Parameter.h>
 
 static int numBilinMaterials = 0;
 
@@ -86,8 +87,9 @@ Bilin::Bilin(int tag, double p_Ke,double p_As,double p_AsNeg,double p_My_pos,dou
  K(p_K), KNeg(p_KNeg),Thetau_pos(p_Thetau_pos), Thetau_neg(p_Thetau_neg), PDPlus(p_PDPlus), PDNeg(p_PDNeg)
 {
   //initialize variables
-	this->revertToStart();
-	//this->revertToLastCommit();
+  this->revertToStart();
+
+  //this->revertToLastCommit();
 }
 
 Bilin::Bilin()
@@ -97,7 +99,7 @@ Bilin::Bilin()
  Thetap_pos(0), Thetap_neg(0), Thetapc_pos(0),Thetapc_neg(0),
  K(0), KNeg(0),Thetau_pos(0), Thetau_neg(0), PDPlus(0), PDNeg(0)
 {
-	this->revertToStart();
+  this->revertToStart();
 }
 
 Bilin::~Bilin()
@@ -108,16 +110,16 @@ Bilin::~Bilin()
 int 
 Bilin::setTrialStrain(double strain, double strainRate)
 {  
-//all variables to the last commit
-this->revertToLastCommit();
+  //all variables to the last commit
+  this->revertToLastCommit();
 
-//Here I declare function variables
-double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
-  dBoundPos,dBoundNeg,f1,f2,fn,e1,e2,a2,fNewLoadPos,
-  f,xDevPos1,yDevPos1,xDevPos2,yDevPos2,xDevPos,yDevPos,fNewLoadNeg,xDevNeg1,
-  yDevNeg1,xDevNeg2,yDevNeg2,xDevNeg,yDevNeg,Enrgi,v1,d1,ener;
- 
- int NoCollapse,kst,jcode;
+  //Here I declare function variables
+  double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
+    dBoundPos,dBoundNeg,f1,f2,fn,e1,e2,a2,fNewLoadPos,
+    f,xDevPos1,yDevPos1,xDevPos2,yDevPos2,xDevPos,yDevPos,fNewLoadNeg,xDevNeg1,
+    yDevNeg1,xDevNeg2,yDevNeg2,xDevNeg,yDevNeg,Enrgi,v1,d1,ener;
+  
+  int NoCollapse,kst,jcode =0;
 
  
  //state determination algorithm: defines the current force and tangent stiffness
@@ -182,7 +184,7 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
    ResfacNeg      = KNeg;                   
    myFcapping     =-(fyieldPos+alpha*elstk*capDispPos); 
    capSlope	    = myFcapping/(Thetapc_pos*elstk); 
-   myFcappingNeg  = -(abs(fyieldNeg)+alpha*elstk*abs(capDispNeg)); 
+   myFcappingNeg  = -(fabs(fyieldNeg)+alpha*elstk*fabs(capDispNeg)); 
    capSlopeNeg    = myFcappingNeg/(Thetapc_neg*elstk); 
    fracDispPos    = Thetau_pos; 
    fracDispNeg    = -Thetau_neg; 
@@ -277,6 +279,7 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
  ////
  // 	******************* S T A R T S   B I G   L O O P  ****************
  // 	IF   D E L T A > 0 - - - - - - - - - - - - - - - - - - - - - - - -  
+
  if (deltaD>=0.0) {
    if (iNoFpos==1) {
      interPoint(dNewLoadPos,fNewLoadPos,dyNeg,fyNeg,ekhardNeg,0.0,0.0,0.0);
@@ -303,7 +306,7 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
        flgstop=1;
      }
      
-     if((ecapk!=0.0) && (d<sp) && abs(capSlope)>=1.0e-3 && (abs(capSlopeNeg)>=1.0e-3)){
+     if((ecapk!=0.0) && (d<sp) && fabs(capSlope)>=1.0e-3 && (fabs(capSlopeNeg)>=1.0e-3)){
        betak = pow(((Enrgc-RSE)/(Enrgtk-(Enrgtot-RSE))),ck);
        if(((Enrgtot-RSE)>=Enrgtk)||(betak>=1.0)) {
 	 betak = 1.0;
@@ -327,7 +330,7 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
 	 // 			call snCalc(sn,resSn,snEnv,resSnEnv,dP,fP,ekunload,alphaPos,dyPos,fyPos,cpPos,fCapPos,capSlope,fCapRefPos,LP,dLimPos,fLimPos,snHor,resSnHor,elstk,Resfac)
 	 snCalc();
 	 
-	 if((abs(dmax-dyieldPos)>=1.0e-10)&&(abs(sn-dyieldPos)<=1.0e-10)) {
+	 if((fabs(dmax-dyieldPos)>=1.0e-10)&&(fabs(sn-dyieldPos)<=1.0e-10)) {
 	   sn=dyieldPos-1.0e-9;
 	 }
        }
@@ -400,7 +403,7 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
        iNoFpos = 1;
      }
      
-   } else if (abs(sn)>1.0e-10) {
+   } else if (fabs(sn)>1.0e-10) {
      
      
      
@@ -481,7 +484,7 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
 	     {
 	       f=f2;
 	     }
-	   if (abs(f-f1)<1.0e-10) {
+	   if (fabs(f-f1)<1.0e-10) {
 	     ek=ekunload;
 	   }
 	   jcode = 5;
@@ -498,7 +501,7 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
 	     {
 	       f=f2;
 	     }
-	   if (abs(f-f1)<1.0e-10) {
+	   if (fabs(f-f1)<1.0e-10) {
 	     ek=ekunload;
 	   }
 	   if (ek!=ekunload) {
@@ -545,7 +548,7 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
 	   {
 	     f=f2;
 	   }
-	 if (abs(f-f1)<1.0e-10) {
+	 if (fabs(f-f1)<1.0e-10) {
 	   ek=ekunload;
 	 }
 	 jcode = 5;
@@ -563,7 +566,7 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
 	   {
 	     f=f2;
 	   }
-	 if (abs(f-f1)<1.0e-10) {
+	 if (fabs(f-f1)<1.0e-10) {
 	   ek=ekunload;
 	 }
 	 jcode = 8;
@@ -654,7 +657,7 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
 	 
 	 // 			call spCalc(sp,resSp,spEnv,resSpEnv,dP,fP,ekunload,alphaNeg,dyNeg,fyNeg,cpNeg,fCapNeg,capSlope,fCapRefNeg,LN,dLimNeg,fLimNeg,spHor,resSpHor,elstk,Resfac)
 	 spCalc();
-	 if((abs(dmin-dyieldNeg)>=1.0e-10)&&(abs(sp-dyieldNeg)<=1.0e-10)) {
+	 if((fabs(dmin-dyieldNeg)>=1.0e-10)&&(fabs(sp-dyieldNeg)<=1.0e-10)) {
 	   sp=dyieldNeg-1.0e-9;
 	 }
        }
@@ -728,7 +731,7 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
        iNoFneg = 1;
      }
      
-   } else if (abs(sp)>1.0e-10){
+   } else if (fabs(sp)>1.0e-10){
      
      // c		If LN is equal to zero
      if (LN==0) {
@@ -763,7 +766,7 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
 	     {
 	       f=f2;
 	     }
-	   if (abs(f-f1)<1.0e-10) {
+	   if (fabs(f-f1)<1.0e-10) {
 	     ek=ekunload;
 	   }
 	   jcode = 5;
@@ -780,7 +783,7 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
 					{
 						f=f2;
 					}
-					if (abs(f-f1)<1.0e-10) {
+					if (fabs(f-f1)<1.0e-10) {
                         ek=ekunload;
                     }
 					if (ek!=ekunload) {
@@ -793,26 +796,27 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
                 }
 
 
-			} else if (cpNeg<dyNeg) {
-     interPoint(xDevNeg1,yDevNeg1,sp,resSp,elstk*alphaNeg,cpNeg,fCapNeg,capSlopeNeg*elstk);
-				if ( d>=sp && d>=xDevNeg1) {
-					ek = ekunload;
-					f = fP+ek*deltaD;
-					jcode = 2;
-				} else if((d<sp)&&(d>=cpNeg)&& (d>=xDevNeg1)) {
-					ek = elstk*alphaNeg;
-					f2 = resSp+ek*(d-sp);
-					f1 = fP+ekunload*deltaD;  
-					//f=max(f1,f2);
-                    if (f1>f2)
-					{
-						f=f1;
-					}
-					else
+       } else if (cpNeg<dyNeg) {
+	 interPoint(xDevNeg1,yDevNeg1,sp,resSp,elstk*alphaNeg,cpNeg,fCapNeg,capSlopeNeg*elstk);
+
+	 if ( d>=sp && d>=xDevNeg1) {
+	   ek = ekunload;
+	   f = fP+ek*deltaD;
+	   jcode = 2;
+	 } else if((d<sp)&&(d>=cpNeg)&& (d>=xDevNeg1)) {
+	   ek = elstk*alphaNeg;
+	   f2 = resSp+ek*(d-sp);
+	   f1 = fP+ekunload*deltaD;  
+	   //f=max(f1,f2);
+	   if (f1>f2)
+	     {
+	       f=f1;
+	     }
+	   else
 					{
 						f=f2;
 					}
-					if (abs(f-f1)<1.0e-10) {
+					if (fabs(f-f1)<1.0e-10) {
                         ek=ekunload;
                     }
 					jcode = 5;
@@ -829,7 +833,7 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
 					{
 						f=f2;
 					}
-					if (abs(f-f1)<1.0e-10) {
+					if (fabs(f-f1)<1.0e-10) {
                         ek=ekunload;
                     }
 					if (ek!=ekunload) {
@@ -876,7 +880,7 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
 					{
 						f=f2;
 					}
-				if (abs(f-f1)<1.0e-10) {
+				if (fabs(f-f1)<1.0e-10) {
                     ek=ekunload;
                 }
 				jcode = 5;
@@ -893,7 +897,7 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
 					{
 						f=f2;
 					}
-				if (abs(f-f1)<1.0e-10) {
+				if (fabs(f-f1)<1.0e-10) {
                     ek=ekunload;
                 }
 				jcode = 8;
@@ -963,10 +967,10 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
                 betad = pow((Enrgc/(Enrgtd-Enrgtot)),cd);
              }
 	
-			if(abs(betas)>=1.0) {
+			if(fabs(betas)>=1.0) {
                 betas = 1.0;
              }
-			if(abs(betad)>=1.0) {
+			if(fabs(betad)>=1.0) {
                 betad = 1.0;
              }
         } 
@@ -1004,7 +1008,7 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
                 capSlopeNeg = -pow(10.0,-6);
                 flagstopdeg = 1;
 			} else { //% Keep updating the post capping slope
-                capSlopeNeg = capSlopeOrigNeg*(1-abs((ResfacNeg*fyieldNeg)/fyNeg));
+                capSlopeNeg = capSlopeOrigNeg*(1-fabs((ResfacNeg*fyieldNeg)/fyNeg));
 				if(capSlopeNeg >=0){
                     capSlopeNeg = -pow(10.0,-6);
 				}
@@ -1056,7 +1060,7 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
                 capSlope = -pow(10.0,-6);
                 flagstopdeg = 1;              
 			}  else { //% keep updating
-		    capSlope = capSlopeOrig*(1-abs((Resfac*fyieldPos)/fyPos));
+		    capSlope = capSlopeOrig*(1-fabs((Resfac*fyieldPos)/fyPos));
 			if(capSlope >=0) {
                 capSlope = -pow(10.0,-6);
 			}
@@ -1093,10 +1097,10 @@ double Ue,ddise,deltaD,d,temp_1_farzin,temp,betas,betak,betad,ekhard,
 }
 
 // c		Check the horizontal limit in case that dBound is reached after first neg slope
-if ((d<0)&&(abs(ek)<=1.0e-7)) {
+if ((d<0)&&(fabs(ek)<=1.0e-7)) {
                 LN = 1;
       }
-if ((d>0)&&(abs(ek)<=1.0e-7)) {
+if ((d>0)&&(fabs(ek)<=1.0e-7)) {
                 LP = 1;
       }
 
@@ -1151,7 +1155,8 @@ if ((d>0)&&(abs(ek)<=1.0e-7)) {
 //Define force and tangent
   Force=RestoringForce;
   Tangent=stif;
-    return 0;
+
+  return 0;
 }
 double 
 Bilin::getStress(void)
@@ -1425,7 +1430,123 @@ Bilin::revertToLastCommit(void)
 int 
 Bilin::revertToStart(void)
 {
-//initially I zero everything
+
+  U =0; CU =0; //displacement
+  Force =0; CForce =0; //force
+  Tangent =0; CTangent =0; //tangent stiffness
+
+  //History variables
+  dNewLoadPos =0;CdNewLoadPos =0;
+  dNewLoadNeg =0; CdNewLoadNeg =0;
+  flgstop =0;Cflgstop =0; 
+  flagdeg =0;Cflagdeg  =0; 
+  flagstopdeg =0;Cflagstopdeg =0; 
+  ekt =0; Cekt =0;
+  interup =0; Cinterup =0;  
+  kcode =0; Ckcode =0; 
+  kon =0; Ckon =0;
+  iCapNeg =0; CiCapNeg =0; 
+  iNoFneg =0; CiNoFneg =0; 
+  iNoFpos =0; CiNoFpos =0; 
+  iCapPos =0; CiCapPos =0; 
+  iDeg =0; CiDeg =0; 
+  LP =0; CLP =0;
+  LN =0; CLN =0; 
+  capSlope =0; CcapSlope =0; 
+  capDispPos =0; CcapDispPos =0; 
+  capDispNeg =0; CcapDispNeg =0; 
+  elstk =0; Celstk =0; 
+  fyieldPos =0; CfyieldPos =0; 
+  fyieldNeg =0; CfyieldNeg =0; 
+  alpha =0; Calpha =0;  
+  ecaps =0; Cecaps =0; 
+  ecapk =0; Cecapk =0; 
+  ecapd =0; Cecapd =0; 
+  cs =0; Ccs =0; 
+  ck =0; Cck =0; 
+  cd =0; Ccd =0; 
+  dmax =0; Cdmax =0; 
+  dmin =0; Cdmin =0; 
+  Enrgtot =0; CEnrgtot =0; 
+  Enrgc =0; CEnrgc =0; 
+  fyPos =0; CfyPos =0; 
+  fLimNeg =0; CfLimNeg =0; 
+  fyNeg =0; CfyNeg =0; 
+  ekP =0; CekP =0; 
+  ekunload =0; Cekunload =0; 
+  sp =0; Csp =0; 
+  sn =0; Csn =0; 
+  dP =0; CdP =0; 
+  fP =0; CfP =0; 
+  ek =0; Cek =0; 
+  stif =0; Cstif =0; 
+  dLimPos =0; CdLimPos =0; 
+  dLimNeg =0; CdLimNeg =0;  
+  vtot =0; Cvtot =0; 
+  ftot =0; Cftot =0; 
+  dtot =0; Cdtot =0; 
+  dn =0; Cdn =0; 
+  cpPos =0; CcpPos =0; 
+  cpNeg =0; CcpNeg =0; 
+  fLimPos =0; CfLimPos =0; 
+  dlstPos =0; CdlstPos =0; 
+  flstPos =0; CflstPos =0; 
+  dlstNeg =0; CdlstNeg =0; 
+  flstNeg =0; CflstNeg =0; 
+  ekexcurs =0; Cekexcurs =0; 
+  RSE =0; CRSE =0; 
+  fPeakPos =0; CfPeakPos =0; 
+  fPeakNeg =0; CfPeakNeg =0; 
+  dCap1Pos =0; CdCap1Pos =0; 
+  dCap2Pos =0; CdCap2Pos =0; 
+  dCap1Neg =0; CdCap1Neg =0; 
+  dCap2Neg =0; CdCap2Neg =0; 
+  alphaNeg =0; CalphaNeg =0; 
+  alphaPos =0; CalphaPos =0; 
+  ekhardNeg =0; CekhardNeg =0; 
+  ekhardPos =0; CekhardPos =0; 
+  fCapRefPos =0; CfCapRefPos =0; 
+  fCapRefNeg =0; CfCapRefNeg =0; 
+  Enrgts =0; CEnrgts =0; 
+  Enrgtk =0; CEnrgtk =0; 
+  Enrgtd =0; CEnrgtd =0; 
+  dyPos =0; CdyPos =0; 
+  dyNeg =0; CdyNeg =0; 
+  dyieldPos =0; CdyieldPos =0; 
+  dyieldNeg =0; CdyieldNeg =0; 
+  resSnHor =0; CresSnHor =0; 
+  fmax =0; Cfmax =0; 
+  fmin =0; Cfmin =0; 
+  resSp =0; CresSp =0; 
+  resSn =0; CresSn =0; 
+  fCapPos =0; CfCapPos =0; 
+  fCapNeg =0; CfCapNeg =0; 
+  snHor =0; CsnHor =0; 
+  spHor =0; CspHor =0; 
+  resSpHor =0; CresSpHor =0;
+  snEnv =0; CsnEnv =0;
+  resSnEnv =0; CresSnEnv =0; 
+  spEnv =0; CspEnv =0; 
+  resSpEnv =0; CresSpEnv =0; 
+  Resfac =0; CResfac =0; 
+  capSlopeOrig =0;CcapSlopeOrig =0;  
+  fracDispPos =0; CfracDispPos =0; 
+  fracDispNeg =0; CfracDispNeg =0; 
+  DPlus =0; CDPlus =0; 
+  DNeg =0; CDNeg =0; 
+  alphaN =0; CalphaN =0;
+  ecapa =0; Cecapa =0;
+  ca =0; Cca =0;
+  ResfacNeg =0; CResfacNeg =0;
+  myFcapping =0; CmyFcapping =0;
+  myFcappingNeg =0; CmyFcappingNeg =0;
+  capSlopeNeg =0; CcapSlopeNeg =0;
+  flagControlResponse =0; CflagControlResponse =0; 
+  capSlopeOrigNeg =0; CcapSlopeOrigNeg =0;
+  Uprev =0;CUprev =0;
+
+  //initially I zero everything
+  /*
    U=CU=0.0; 
    Force=CForce=0.0; 
    Tangent=CTangent=0.0; 
@@ -1538,45 +1659,47 @@ Bilin::revertToStart(void)
    flagControlResponse=CflagControlResponse=0; 
    capSlopeOrigNeg=CcapSlopeOrigNeg=0.0;
    Uprev=CUprev=0.0;
-//then I initialize everything accordingly
-elstk          = Ke; 
-fyieldPos      = My_pos; 
-fyieldNeg      = My_neg; 
-alpha          = As; 
-alphaN         = AsNeg;  
-ecaps          = LamdaS/(fyieldPos/(elstk)); 
-ecapk          = LamdaK/(fyieldPos/(elstk)); 
-ecapa		    = LamdaA/(fyieldPos/(elstk)); 
-ecapd		    = LamdaD/(fyieldPos/(elstk)); 
-cs		        = Cs; 
-ck		        = Ck; 
-ca		        = Ca; 
-cd		        = Cd; 
-capDispPos     = Thetap_pos+fyieldPos/elstk; 
-capDispNeg     = -Thetap_neg+fyieldNeg/elstk; 
-Resfac         = K; 
-ResfacNeg      = KNeg;                   
-myFcapping     =-(fyieldPos+alpha*elstk*capDispPos); 
-capSlope	    = myFcapping/(Thetapc_pos*elstk); 
-myFcappingNeg  = -(abs(fyieldNeg)+alpha*elstk*abs(capDispNeg)); 
-capSlopeNeg    = myFcappingNeg/(Thetapc_neg*elstk); 
-fracDispPos    = Thetau_pos; 
-fracDispNeg    = -Thetau_neg; 
-DPlus          = PDPlus;                   
-DNeg           = PDNeg;                                                                  
-stif = elstk; 
-ekP  = elstk;
-flagControlResponse = 0;    
-Tangent=Ke;                             
-    return 0;
+  */
+
+   //then I initialize everything accordingly
+   elstk          = Ke; 
+   fyieldPos      = My_pos; 
+   fyieldNeg      = My_neg; 
+   alpha          = As; 
+   alphaN         = AsNeg;  
+   ecaps          = LamdaS/(fyieldPos/(elstk)); 
+   ecapk          = LamdaK/(fyieldPos/(elstk)); 
+   ecapa	  = LamdaA/(fyieldPos/(elstk)); 
+   ecapd	  = LamdaD/(fyieldPos/(elstk)); 
+   cs		  = Cs; 
+   ck		  = Ck; 
+   ca		  = Ca; 
+   cd		  = Cd; 
+   capDispPos     = Thetap_pos+fyieldPos/elstk; 
+   capDispNeg     = -Thetap_neg+fyieldNeg/elstk; 
+   Resfac         = K; 
+   ResfacNeg      = KNeg;                   
+   myFcapping     =-(fyieldPos+alpha*elstk*capDispPos); 
+   capSlope	    = myFcapping/(Thetapc_pos*elstk); 
+   myFcappingNeg  = -(fabs(fyieldNeg)+alpha*elstk*fabs(capDispNeg)); 
+   capSlopeNeg    = myFcappingNeg/(Thetapc_neg*elstk); 
+   fracDispPos    = Thetau_pos; 
+   fracDispNeg    = -Thetau_neg; 
+   DPlus          = PDPlus;                   
+   DNeg           = PDNeg;                                                                  
+   stif = elstk; 
+   ekP  = elstk;
+   flagControlResponse = 0;    
+   Tangent=Ke;                             
+   return 0;
 }
 
 UniaxialMaterial *
 Bilin::getCopy(void)
 {
     Bilin *theCopy = new Bilin(this->getTag(),Ke,As,AsNeg,My_pos,My_neg,LamdaS,LamdaK,
-		LamdaA,LamdaD,Cs,Ck,Ca,Cd,Thetap_pos,Thetap_neg,Thetapc_pos,Thetapc_neg,K,KNeg,
-		Thetau_pos,Thetau_neg,PDPlus,PDNeg);
+			       LamdaA,LamdaD,Cs,Ck,Ca,Cd,Thetap_pos,Thetap_neg,Thetapc_pos,Thetapc_neg,K,KNeg,
+			       Thetau_pos,Thetau_neg,PDPlus,PDNeg);
 
     //Fixed Model parameters: need to change according to material properties
    theCopy->U=U;
@@ -1797,10 +1920,11 @@ Bilin::getCopy(void)
    theCopy->CcapSlopeNeg=CcapSlopeNeg;
    theCopy->flagControlResponse=flagControlResponse;
    theCopy->CflagControlResponse=CflagControlResponse;  
-theCopy->capSlopeOrigNeg=capSlopeOrigNeg;
-	theCopy->CcapSlopeOrigNeg=CcapSlopeOrigNeg;
-	theCopy->CUprev=CUprev;
-	theCopy->Uprev=Uprev;
+
+   theCopy->capSlopeOrigNeg=capSlopeOrigNeg;
+   theCopy->CcapSlopeOrigNeg=CcapSlopeOrigNeg;
+   theCopy->CUprev=CUprev;
+   theCopy->Uprev=Uprev;
 
     return theCopy;
 }
@@ -2335,7 +2459,12 @@ Bilin::Print(OPS_Stream &s, int flag)
     //s << "Bilin tag: " << this->getTag() << endln;
     //s << "  G: " << G << endln;
     //s << "  t: " << t << endln;
-	//s << "  A: " << A << endln;
+  //s << "  A: " << A << endln;
+  s << "sp: " << sp << endln;
+  s << "cpNeg: " << cpNeg << endln;
+  s << "dyNeg: " << dyNeg << endln;
+  
+  
 }
 
 //my functions
@@ -2689,3 +2818,138 @@ double d1,f1,d2,f2;
 	 }
 	return (dBoundNeg);
 }
+
+int
+Bilin::setParameter(const char **argv, int argc, Parameter &param)
+{
+
+  if (strcmp(argv[0],"Ke") == 0)
+    return param.addObject(1, this);
+  else if (strcmp(argv[0],"As") == 0)
+    return param.addObject(2, this);
+  else if (strcmp(argv[0],"AsNeg") == 0)
+    return param.addObject(3, this);
+  else if (strcmp(argv[0],"My_pos") == 0)
+    return param.addObject(4, this);
+  else if (strcmp(argv[0],"My_neg") == 0)
+    return param.addObject(5, this);
+  else if (strcmp(argv[0],"LambaS") == 0)
+    return param.addObject(6, this);
+  else if (strcmp(argv[0],"LamdaK") == 0)
+    return param.addObject(7, this);
+  else if (strcmp(argv[0],"LamdaA") == 0)
+    return param.addObject(8, this);
+  else if (strcmp(argv[0],"LambdaD") == 0)
+    return param.addObject(9, this);
+  else if (strcmp(argv[0],"Cs") == 0)
+    return param.addObject(10, this);
+  else if (strcmp(argv[0],"Ck") == 0)
+    return param.addObject(11, this);
+  else if (strcmp(argv[0],"Ca") == 0)
+    return param.addObject(12, this);
+  else if (strcmp(argv[0],"Cd") == 0)
+    return param.addObject(13, this);
+  else if (strcmp(argv[0],"Thetap_pos") == 0)
+    return param.addObject(14, this);
+  else if (strcmp(argv[0],"Thetap_neg") == 0)
+    return param.addObject(15, this);
+  else if (strcmp(argv[0],"Thetapc_pos") == 0)
+    return param.addObject(16, this);
+  else if (strcmp(argv[0],"Thetapc_neg") == 0)
+    return param.addObject(17, this);
+  else if (strcmp(argv[0],"K") == 0)
+    return param.addObject(18, this);
+  else if (strcmp(argv[0],"KNeg") == 0)
+    return param.addObject(19, this);
+  else if (strcmp(argv[0],"Thetau_pos") == 0)
+    return param.addObject(20, this);
+  else if (strcmp(argv[0],"Thetau_neg") == 0)
+    return param.addObject(21, this);
+  else if (strcmp(argv[0],"PDPlus") == 0)
+    return param.addObject(22, this);
+  else if (strcmp(argv[0],"PDNeg") == 0)
+    return param.addObject(23, this);
+
+  return -1;
+}
+
+int 
+Bilin::updateParameter(int parameterID, Information &info)
+{
+  switch(parameterID) {
+  case 1:
+    Ke = info.theDouble;
+    return 0;
+  case 2:
+    As = info.theDouble;
+    return 0;
+  case 3:
+    AsNeg = info.theDouble;
+    return 0;
+  case 4:
+    My_pos = info.theDouble;
+    return 0;
+  case 5:
+    My_neg = info.theDouble;
+    return 0;
+  case 6:
+    LamdaS = info.theDouble;
+    return 0;
+  case 7:
+    //    LambdaK = info.theDouble;
+    return 0;
+  case 8:
+    // LambdaA = info.theDouble;
+    return 0;
+  case 9:
+    // LambdaD = info.theDouble;
+    return 0;
+  case 10:
+    Cs = info.theDouble;
+    return 0;
+  case 11:
+    Ck = info.theDouble;
+    return 0;
+  case 12:
+    Ca = info.theDouble;
+    return 0;
+  case 13:
+    Cd = info.theDouble;
+    return 0;
+  case 14:
+    Thetap_pos = info.theDouble;
+    return 0;
+  case 15:
+    Thetap_neg = info.theDouble;
+    return 0;
+  case 16:
+    Thetapc_pos = info.theDouble;
+    return 0;
+  case 17:
+    Thetapc_neg = info.theDouble;
+    return 0;
+  case 18:
+    K = info.theDouble;
+    return 0;
+  case 19:
+    KNeg = info.theDouble;
+    return 0;
+  case 20:
+    Thetau_pos = info.theDouble;
+    return 0;
+  case 21:
+    Thetau_neg = info.theDouble;
+    return 0;
+  case 22:
+    PDPlus = info.theDouble;
+    return 0;
+  case 23:
+    PDNeg = info.theDouble;
+    return 0;
+
+  default:
+    return -1;
+  }
+}
+
+
