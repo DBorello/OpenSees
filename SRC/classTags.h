@@ -377,6 +377,7 @@
 #define ELE_TAG_Subdomain     	1
 #define ELEMENT_TAGS_WrapperElement 2001
 #define ELE_TAG_ElasticBeam2d   2000
+#define ELE_TAG_ModElasticBeam2d   2005
 #define ELE_TAG_ElasticBeam3d   3000
 #define ELE_TAG_Beam2d    	2001
 #define ELE_TAG_beam2d02    	2002
