@@ -96,6 +96,7 @@ extern void *OPS_SimpleContact2D(void);
 extern void *OPS_SimpleContact3D(void);
 extern void *OPS_BeamContact3D(void);
 extern void *OPS_SurfaceLoad(void);
+extern void *OPS_ModElasticBeam2d(void);
 extern void *OPS_TPB1D(void);
 
 extern int TclModelBuilder_addFeapTruss(ClientData clientData, Tcl_Interp *interp,  int argc,
@@ -431,6 +432,15 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 
   } else if (strcmp(argv[1],"zeroLengthInterface2D") == 0) {
     Element *theEle = OPS_NewZeroLengthInterface2D();
+    if (theEle != 0) 
+      theElement = theEle;
+    else {
+      opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
+      return TCL_ERROR;
+    }
+
+  } else if (strcmp(argv[1],"modElasticBeam2d") == 0) {
+    Element *theEle = (Element *)OPS_ModElasticBeam2d();
     if (theEle != 0) 
       theElement = theEle;
     else {
