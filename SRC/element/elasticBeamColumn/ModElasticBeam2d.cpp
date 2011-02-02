@@ -54,21 +54,11 @@ Vector ModElasticBeam2d::P(6);
 Matrix ModElasticBeam2d::kb(3,3);
 
 
-#ifdef _USRDLL
-#include <windows.h>
-#define OPS_Export extern "C" _declspec(dllexport)
-#elif _MACOSX
-#define OPS_Export extern "C" __attribute__((visibility("default")))
-#else
-#define OPS_Export extern "C"
-#endif
-
 static int numModElasticBeam2d = 0;
 
-OPS_Export void *
+void *
 OPS_ModElasticBeam2d()
 {
-  opserr << "HELLO\n";
   // print out a message about who wrote this element & any copyright info wanted
   if (numModElasticBeam2d == 0) {
     opserr << "ModElasticBeam2d element -> for Stiffness Modification Factors by D.Lignos";
@@ -78,7 +68,6 @@ OPS_ModElasticBeam2d()
   Element *theEle = 0;
 
   int numRemainingArgs = OPS_GetNumRemainingInputArgs();
-  opserr << "NUM_ARGS: " << numRemainingArgs << endln;
 
   if (numRemainingArgs == 0) { // parallel processing
     theEle = new ModElasticBeam2d();
