@@ -763,7 +763,7 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
 
     Tcl_CreateCommand(interp, "domainChange",  &domainChange,(ClientData)NULL, NULL);
 
-    Tcl_CreateCommand(interp, "record",  &domainChange,(ClientData)NULL, NULL);
+    Tcl_CreateCommand(interp, "record",  &record,(ClientData)NULL, NULL);
 
     Tcl_CreateCommand(interp, "metaData",  &neesMetaData,(ClientData)NULL, NULL);
     Tcl_CreateCommand(interp, "defaultUnits", &defaultUnits,(ClientData)NULL, NULL);
