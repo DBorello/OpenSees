@@ -693,6 +693,7 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/nD/ElasticIsotropicAxiSymm.o \
 	$(FE)/material/nD/ElasticIsotropicPlateFiber.o \
 	$(FE)/material/nD/ElasticIsotropicBeamFiber.o \
+	$(FE)/material/nD/ElasticIsotropicBeamFiber2d.o \
 	$(FE)/material/nD/PlaneStressMaterial.o \
 	$(FE)/material/nD/PlaneStrainMaterial.o \
 	$(FE)/material/nD/PlateFiberMaterial.o \
@@ -715,7 +716,6 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/nD/reinforcedConcretePlaneStress/ConcreteL01.o \
 	$(FE)/material/nD/reinforcedConcretePlaneStress/SteelZ01.o \
 	$(FE)/material/nD/reinforcedConcretePlaneStress/TendonL01.o
-
 
 FEDEAS_LIBS = $(FE)/material/uniaxial/FedeasMaterial.o \
 	$(FE)/material/uniaxial/fedeas/FedeasHardeningMaterial.o \
