@@ -7,6 +7,8 @@ OBJS       = NDMaterial.o \
 	ElasticIsotropicPlaneStrain2D.o \
 	ElasticIsotropicPlaneStress2D.o \
 	ElasticIsotropicPlateFiber.o \
+	ElasticIsotropicBeamFiber.o \
+	ElasticIsotropicBeamFiber2d.o \
 	ElasticIsotropicAxiSymm.o\
 	TclModelBuilderNDMaterialCommand.o \
 	J2PlaneStrain.o \
@@ -19,7 +21,6 @@ OBJS       = NDMaterial.o \
 	J2ThreeDimensional.o \
 	J2PlateFiber.o \
 	PressureDependentElastic3D.o \
-	ElasticIsotropicBeamFiber.o \
 	BeamFiberMaterial.o \
 	FeapMaterial.o \
 	ElasticCrossAnisotropic.o \
