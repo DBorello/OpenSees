@@ -44,6 +44,7 @@
 #include <PressureDependentElastic3D.h>
 #include <ElasticIsotropicPlateFiber.h>
 #include <ElasticIsotropicBeamFiber.h>
+#include <ElasticIsotropicBeamFiber2d.h>
 
 #include <Tensor.h>
 #include <Channel.h>
@@ -138,6 +139,17 @@ ElasticIsotropicMaterial::getCopy (const char *type)
     {
 	ElasticIsotropicBeamFiber *theModel;
 	theModel = new ElasticIsotropicBeamFiber(this->getTag(), E, v, rho);
+		// DOES NOT COPY sigma, D, and epsilon ...
+		// This function should only be called during element instantiation, so
+		// no state determination is performed on the material model object
+		// prior to copying the material model (calling this function)
+	return theModel;
+    }
+
+    else if (strcmp(type,"BeamFiber2d") == 0)
+    {
+	ElasticIsotropicBeamFiber2d *theModel;
+	theModel = new ElasticIsotropicBeamFiber2d(this->getTag(), E, v, rho);
 		// DOES NOT COPY sigma, D, and epsilon ...
 		// This function should only be called during element instantiation, so
 		// no state determination is performed on the material model object
