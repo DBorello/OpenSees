@@ -200,8 +200,8 @@ ElasticIsotropicBeamFiber::getStressSensitivity(int gradIndex,
   sigma.Zero();
 
   if (parameterID == 1) { // E
-    double mu = 0.5*E/(1.0+v);
-    double dmudE = 0.5/(1+v);
+    //double mu = 0.5*E/(1.0+v);
+    double dmudE = 0.5/(1.0+v);
 
     sigma(0) = Tepsilon(0);
     sigma(1) = dmudE*Tepsilon(1);
