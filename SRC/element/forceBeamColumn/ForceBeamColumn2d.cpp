@@ -485,13 +485,14 @@ ForceBeamColumn2d::computeReactionSensitivity(double *dp0dh, int gradNumber)
   for (int i = 0; i < numEleLoads; i++) {
     
     const Vector &data = eleLoads[i]->getData(type, 1.0);
-    const Vector &sens = eleLoads[i]->getSensitivityData(gradNumber);
 
     if (type == LOAD_TAG_Beam2dUniformLoad) {
-      double wa = data(1)*1.0;  // Axial
-      double dwadh = sens(0);
       double wy = data(0)*1.0;  // Transverse
-      double dwydh = sens(1);
+      double wa = data(1)*1.0;  // Axial
+
+      const Vector &sens = eleLoads[i]->getSensitivityData(gradNumber);
+      double dwydh = sens(0);
+      double dwadh = sens(1);
       
       //p0[0] -= wa*L;
       dp0dh[0] -= wa*dLdh + dwadh*L;
@@ -505,15 +506,17 @@ ForceBeamColumn2d::computeReactionSensitivity(double *dp0dh, int gradNumber)
     }
     else if (type == LOAD_TAG_Beam2dPointLoad) {
       double P = data(0)*1.0;
-      double dPdh = sens(0);
       double N = data(1)*1.0;
-      double dNdh = sens(1);
       double aOverL = data(2);
-      double daLdh = sens(2);
 
       if (aOverL < 0.0 || aOverL > 1.0)
 	continue;
       
+      const Vector &sens = eleLoads[i]->getSensitivityData(gradNumber);
+      double dPdh = sens(0);
+      double dNdh = sens(1);
+      double daLdh = sens(2);
+
       //double a = aOverL*L;
       
       //double V1 = P*(1.0-aOverL);
@@ -1163,23 +1166,24 @@ ForceBeamColumn2d::computeSectionForceSensitivity(Vector &dspdh, int isec,
     const Vector &data = eleLoads[i]->getData(type, 1.0);
     
     if (type == LOAD_TAG_Beam2dUniformLoad) {
-      double wa = data(1)*1.0;  // Axial
       double wy = data(0)*1.0;  // Transverse
+      double wa = data(1)*1.0;  // Axial
 
       const Vector &sens = eleLoads[i]->getSensitivityData(gradNumber);
-      double dwadh = sens(1);
       double dwydh = sens(0);
-      
+      double dwadh = sens(1);
+      //opserr << wy << ' ' << dwydh << endln;
       for (int ii = 0; ii < order; ii++) {
 	
 	switch(code(ii)) {
 	case SECTION_RESPONSE_P:
 	  //sp(ii) += wa*(L-x);
-	  dspdh(ii) += dwadh*(L-x) + wa*(dLdh-x) + wa*(L-dxdh);
+	  dspdh(ii) += dwadh*(L-x) + wa*(dLdh-dxdh);
 	  break;
 	case SECTION_RESPONSE_MZ:
 	  //sp(ii) += wy*0.5*x*(x-L);
-	  dspdh(ii) += 0.5 * (dwydh*x*(x-L) + wy*dxdh*(x-L) + wy*x*(dxdh-dLdh));
+	  //dspdh(ii) += 0.5 * (dwydh*x*(x-L) + wy*dxdh*(x-L) + wy*x*(dxdh-dLdh));
+	  dspdh(ii) += 0.5 * (dwydh*x*(x-L) + wy*(dxdh*(2*x-L)-x*dLdh));
 	  break;
 	case SECTION_RESPONSE_VY:
 	  //sp(ii) += wy*(x-0.5*L);
@@ -1195,15 +1199,14 @@ ForceBeamColumn2d::computeSectionForceSensitivity(Vector &dspdh, int isec,
       double N = data(1)*1.0;
       double aOverL = data(2);
 
+      if (aOverL < 0.0 || aOverL > 1.0)
+	continue;
+      
       const Vector &sens = eleLoads[i]->getSensitivityData(gradNumber);
-      //opserr << "sensdata: " << sens << endln;
       double dPdh = sens(0);
       double dNdh = sens(1);
       double daLdh = sens(2);
 
-      if (aOverL < 0.0 || aOverL > 1.0)
-	continue;
-      
       double a = aOverL*L;
 
       double V1 = P*(1.0-aOverL);
