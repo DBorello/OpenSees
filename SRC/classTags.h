@@ -247,8 +247,12 @@
 #define SEC_TAG_ElasticShear3d   34
 #define SEC_TAG_FiberSection2dInt		35
 
+#define SEC_TAG_McftSection2dfiber 7601
+
 #define SECTION_INTEGRATION_TAG_WideFlange 1
 #define SECTION_INTEGRATION_TAG_RC 2
+#define SECTION_INTEGRATION_TAG_RCT 3
+#define SECTION_INTEGRATION_TAG_RCTUM 4
 
 #define ND_TAG_WrapperNDMaterial					9
 #define ND_TAG_ElasticIsotropic					10
@@ -257,6 +261,7 @@
 #define ND_TAG_ElasticIsotropicAxiSymm          13
 #define ND_TAG_ElasticIsotropicPlateFiber		14
 #define ND_TAG_ElasticIsotropicBeamFiber		15
+#define ND_TAG_ElasticIsotropicBeamFiber2d		18
 #define ND_TAG_ElasticIsotropic3D               16
 #define ND_TAG_ElasticCrossAnisotropic3D        17
 #define ND_TAG_J2PlaneStrain                  3005
@@ -315,6 +320,9 @@
 #define ND_TAG_MultiaxialCyclicPlasticity3D           10032
 #define ND_TAG_MultiaxialCyclicPlasticityAxiSymm      10033
 #define ND_TAG_MultiaxialCyclicPlasticityPlaneStrain  10034
+
+#define ND_TAG_ConcreteMcftNonLinear5 7601
+#define ND_TAG_ConcreteMcftNonLinear7 7602
 
 #define FIBER_TAG_Uniaxial2d	1
 #define FIBER_TAG_Uniaxial3d	2
