@@ -264,5 +264,18 @@ int
 Parameter::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
   return 0;
+}
 
+int 
+Parameter::clean(void)
+{
+  for (int i = 0; i < numObjects; i++) {
+    theObjects[i] = 0;
+  }
+  for (int i = 0; i < numComponents; i++) {
+    theComponents[i] = 0;
+  }
+  numObjects = 0;
+  numComponents = 0;
+  currentValue = 0.0;
 }

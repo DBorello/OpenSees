@@ -55,6 +55,8 @@ class Parameter : public TaggedObject, public MovableObject
   virtual int addComponent(DomainComponent *theObject, const char **argv, int argc);  
   virtual int addObject(int parameterID, MovableObject *object);
 
+  virtual int clean(void);
+
   void setGradIndex(int gradInd) {gradIndex = gradInd;}
   int getGradIndex(void) {return gradIndex;}
 
