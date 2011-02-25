@@ -44,6 +44,10 @@ bool OPS_addTimeSeries(TimeSeries *newComponent) {
   return theTimeSeriesObjects.addComponent(newComponent);
 }
 
+bool OPS_removeTimeSeries(int tag) {
+  return theTimeSeriesObjects.removeComponent(tag);
+}
+
 TimeSeries *OPS_getTimeSeries(int tag) {
 
   TaggedObject *theResult = theTimeSeriesObjects.getComponentPtr(tag);
