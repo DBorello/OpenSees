@@ -569,6 +569,9 @@ neesMetaData(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
 int
 stripOpenSeesXML(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
+int
+setParameter(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
 //extern 
 int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
@@ -796,6 +799,9 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "numFact", &numFact, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
     Tcl_CreateCommand(interp, "numIter", &numIter, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
+
+    Tcl_CreateCommand(interp, "setParameter", &setParameter, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
 
 #ifdef _RELIABILITY
@@ -5552,6 +5558,7 @@ videoPlayer(ClientData clientData, Tcl_Interp *interp, int argc,
 }
 
 
+extern bool OPS_removeTimeSeries(int tag);
 
 int 
 removeObject(ClientData clientData, Tcl_Interp *interp, int argc, 
@@ -5664,10 +5671,23 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
     }    
     
     if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-      opserr << "WARNING remove element tag? failed to read tag: " << argv[2] << endln;
+      opserr << "WARNING remove recorder tag? failed to read tag: " << argv[2] << endln;
       return TCL_ERROR;
     }      
     return theDomain.removeRecorder(tag);
+  }
+
+  else if ((strcmp(argv[1],"timeSeries") == 0)) {
+    if (argc < 3) {
+      opserr << "WARNING want - remove timeSeries $tag\n";
+      return TCL_ERROR;
+    }    
+    
+    if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+      opserr << "WARNING remove timeSeries tag? failed to read tag: " << argv[2] << endln;
+      return TCL_ERROR;
+    }      
+    return OPS_removeTimeSeries(tag);
   }
   
   
@@ -7977,3 +7997,121 @@ EvalFileWithParameters(Tcl_Interp *interp,
   return 0;
 }
 
+
+
+int
+setParameter(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  Element *theEle;
+  ElementIter &theEles = theDomain.getElements();
+
+  Parameter *theParameter = new Parameter(0, 0, 0, 0);
+  
+  int argLoc = 1;
+  double newValue = 0.0;
+
+  if (strstr(argv[argLoc],"-val") != 0) {
+    if (Tcl_GetDouble(interp, argv[argLoc+1], &newValue) != TCL_OK) {
+      opserr << "WARNING setParameter: invalid parameter value\n";
+      return TCL_ERROR;
+    } 
+  } else {
+    opserr << "WARNING setParameter:  -val not found " << endln;
+    return TCL_ERROR;
+  } 
+
+  argLoc += 2;
+  int objectCount = 0;
+
+  if (strstr(argv[argLoc],"-ele") != 0) {
+    
+    if ((strcmp(argv[argLoc],"-ele") == 0) ||
+	(strcmp(argv[argLoc],"-eles") == 0) ||
+	(strcmp(argv[argLoc],"-element") == 0)) {
+      
+      //
+      // read in a list of ele until end of command or other flag
+      //
+      
+      argLoc++;
+      int eleTag;
+      ID eleIDs(0, 32);
+      int numEle = 0;
+      
+      while (argLoc < argc && Tcl_GetInt(interp, argv[argLoc], &eleTag) == TCL_OK) {
+	eleIDs[numEle] = eleTag;
+	numEle++;
+	argLoc++;
+      }
+      
+      if (argLoc == argc) {
+	opserr << "WARNING: No response type specified for element recorder. " << endln;
+	return TCL_ERROR;
+      }
+      
+      // note because of the way this parameter is updated only need to find one in the domain
+      if (numEle == 0) {
+	while (((theEle = theEles()) != 0)) {
+	  int theResult = theEle->setParameter(&argv[argLoc], argc-argLoc, *theParameter);
+	  if (theResult != -1) {
+	    objectCount++;
+	    theParameter->update(newValue);
+	    theParameter->clean();
+	  }
+	}
+      } else {
+	for (int i=0; i<numEle; i++) {
+	  int eleTag = eleIDs(i);
+	  theEle = theDomain.getElement(eleTag);
+	  int theResult = theEle->setParameter(&argv[argLoc], argc-argLoc, *theParameter);
+	  if (theResult != -1) {
+	    objectCount++;
+	    theParameter->update(newValue);
+	    theParameter->clean();
+	  }	  
+	}
+      }
+    } else if (strcmp(argv[argLoc],"-eleRange") == 0) {
+      
+      // ensure no segmentation fault if user messes up
+      if (argc < argLoc+3) {
+	opserr << "WARNING recorder Element .. -eleRange start? end?  .. - no ele tags specified\n";
+	return TCL_ERROR;
+      }
+      
+      //
+      // read in start and end tags of two elements & add set [start,end]
+      //
+      
+      int start, end;
+      if (Tcl_GetInt(interp, argv[argLoc+1], &start) != TCL_OK) {
+	opserr << "WARNING recorder Element -eleRange start? end? - invalid start " << argv[argLoc+1] << endln;
+	return TCL_ERROR;
+      }      
+      if (Tcl_GetInt(interp, argv[argLoc+2], &end) != TCL_OK) {
+	opserr << "WARNING recorder Element -eleRange start? end? - invalid end " << argv[argLoc+2] << endln;
+	return TCL_ERROR;
+      }      
+      if (start > end) {
+	int swap = end;
+	end = start;
+	start = swap;
+      }
+      argLoc += 3;
+      
+      for (int i=start; i<=end; i++) {
+	theEle = theDomain.getElement(i);
+	int theResult = theEle->setParameter(&argv[argLoc], argc-argLoc, *theParameter);
+	if (theResult != -1) {
+	  objectCount++;
+	  theParameter->update(newValue);
+	  theParameter->clean();
+	}	  
+      }	
+    }
+  }
+  
+  // return in result # of objects that responded
+  sprintf(interp->result,"%d",objectCount);
+  return TCL_OK;
+}
