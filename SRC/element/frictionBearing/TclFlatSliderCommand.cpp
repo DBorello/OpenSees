@@ -18,9 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2009-11-03 23:13:48 $
-// $Source: /usr/local/cvs/OpenSees/SRC/element/frictionBearing/TclFlatSliderCommand.cpp,v $
+// $Revision$
+// $Date$
+// $URL$
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
 // Created: 02/06

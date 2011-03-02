@@ -18,9 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2009-11-03 23:13:08 $
-// $Source: /usr/local/cvs/OpenSees/SRC/element/frictionBearing/SingleFPSimple3d.cpp,v $
+// $Revision$
+// $Date$
+// $URL$
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
 // Created: 02/06
@@ -337,6 +337,12 @@ int SingleFPSimple3d::update()
         if (qb(0) > 0.0)  {
             theMaterials[0]->setTrialStrain(ub0Old,0.0);
             kb(0,0) *= DBL_EPSILON;
+            kb(3,3) *= DBL_EPSILON;
+            kb(4,4) *= DBL_EPSILON;
+            kb(5,5) *= DBL_EPSILON;
+            // update plastic displacements
+            ubPlastic(0) = ub(1);
+            ubPlastic(1) = ub(2);
         }
         qb.Zero();
         return 0;

@@ -18,9 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2009-11-03 23:12:33 $
-// $Source: /usr/local/cvs/OpenSees/SRC/element/frictionBearing/FlatSliderSimple3d.h,v $
+// $Revision$
+// $Date$
+// $URL$
 
 #ifndef FlatSliderSimple3d_h
 #define FlatSliderSimple3d_h

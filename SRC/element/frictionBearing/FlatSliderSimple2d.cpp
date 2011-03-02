@@ -18,9 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2009-11-03 23:12:33 $
-// $Source: /usr/local/cvs/OpenSees/SRC/element/frictionBearing/FlatSliderSimple2d.cpp,v $
+// $Revision$
+// $Date$
+// $URL$
 
 // Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
 // Created: 02/06
@@ -325,6 +325,9 @@ int FlatSliderSimple2d::update()
         if (qb(0) > 0.0)  {
             theMaterials[0]->setTrialStrain(ub0Old,0.0);
             kb(0,0) *= DBL_EPSILON;
+            kb(2,2) *= DBL_EPSILON;
+            // update plastic displacement
+            ubPlastic = ub(1);
         }
         qb.Zero();
         return 0;

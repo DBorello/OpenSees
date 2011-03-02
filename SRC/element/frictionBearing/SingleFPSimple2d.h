@@ -18,9 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2009-11-03 23:13:08 $
-// $Source: /usr/local/cvs/OpenSees/SRC/element/frictionBearing/SingleFPSimple2d.h,v $
+// $Revision$
+// $Date$
+// $URL$
 
 #ifndef SingleFPSimple2d_h
 #define SingleFPSimple2d_h
