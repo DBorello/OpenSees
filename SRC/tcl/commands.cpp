@@ -7998,7 +7998,6 @@ EvalFileWithParameters(Tcl_Interp *interp,
 }
 
 
-
 int
 setParameter(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
@@ -8110,6 +8109,8 @@ setParameter(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
       }	
     }
   }
+
+  delete theParameter;
   
   // return in result # of objects that responded
   sprintf(interp->result,"%d",objectCount);
