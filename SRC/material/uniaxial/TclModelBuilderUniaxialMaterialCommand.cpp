@@ -92,6 +92,7 @@ extern void *OPS_NewMinMaxMaterial(void);
 extern void *OPS_NewInitStrainMaterial(void);
 extern void *OPS_NewInitStressMaterial(void);
 extern void *OPS_New_pyUCLA(void);
+extern void *OPS_Maxwell(void);
 
 //extern int TclCommand_ConfinedConcrete02(ClientData clientData, Tcl_Interp *interp, int argc, 
 //					 TCL_Char **argv, TclModelBuilder *theTclBuilder);
@@ -229,6 +230,13 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 
     } else if ((strcmp(argv[1],"MinMaxMaterial") == 0) || (strcmp(argv[1],"MinMax") == 0)) {
       void *theMat = OPS_NewMinMaxMaterial();
+      if (theMat != 0) 
+	theMaterial = (UniaxialMaterial *)theMat;
+      else 
+	return TCL_ERROR;
+
+    } else if ((strcmp(argv[1],"Maxwell") == 0) || (strcmp(argv[1],"MaxwellMaterial") == 0)) {
+      void *theMat = OPS_Maxwell();
       if (theMat != 0) 
 	theMaterial = (UniaxialMaterial *)theMat;
       else 

@@ -7,6 +7,7 @@ include ../../../Makefile.def
         ElasticBilin.o \
 	ParallelMaterial.o \
 	Neoprene.o \
+	Maxwell.o \
         HardeningMaterial.o \
 	Concrete01.o \
 	Concrete04.o \
