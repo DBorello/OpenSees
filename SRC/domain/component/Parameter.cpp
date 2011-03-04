@@ -278,4 +278,6 @@ Parameter::clean(void)
   numObjects = 0;
   numComponents = 0;
   currentValue = 0.0;
+
+  return 0;
 }
