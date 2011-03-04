@@ -37,22 +37,14 @@
 
 #include <OPS_Globals.h>
 
-#ifdef _USRDLL
-#define OPS_Export extern "C" _declspec(dllexport)
-#elif _MACOSX
-#define OPS_Export extern "C" __attribute__((visibility("default")))
-#else
-#define OPS_Export extern "C"
-#endif
-
 static int numMaxwellMaterials = 0;
 
-OPS_Export void *
+void *
 OPS_Maxwell()
 {
   if (numMaxwellMaterials == 0) {
     numMaxwellMaterials++;
-    OPS_Error("Maxwell Model \n", 1);
+    OPS_Error("Maxwell Model - D.Lignos, McGill University\n", 1);
   }
   
   // Pointer to a uniaxial material that will be returned

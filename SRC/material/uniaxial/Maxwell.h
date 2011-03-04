@@ -18,9 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1 $
-// $Date: 2011/02/01 12:35:01 $
-// $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Maxwell.h,v $
+// $Revision$
+// $Date$
+// $Source$
                                                                         
 // Written: Dimitrios G. Lignos, PhD, Assistant Professor, McGill University
 // Created: February 2011
@@ -34,6 +34,11 @@
 // C: Velocity constant of a damper
 // Alpha: Exponent of velocity of a damper
 // L: Length of the Damper
+
+// Olsson, A.K., and Austrell, P-E., (2001), "A fitting procedure for viscoelastic-elastoplastic material models," 
+// Proceedings of the Second European Conference on Constitutive Models for Rubber, Germany, 2001.
+// Ottosen, N.S., and Ristinmaa, M., (1999). "The mechanics of constitutive modelling, (Numerical and thermodynamical topics)," 
+// Lund University,Division of Solid Mechanics, Sweden, 1999. 
 
 #ifndef Maxwell_h
 #define Maxwell_h
