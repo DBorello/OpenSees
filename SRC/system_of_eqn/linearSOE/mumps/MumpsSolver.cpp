@@ -37,23 +37,6 @@
 
 #include <mpi.h>
 
-MumpsSolver::MumpsSolver(int ICNTL14)
-  :LinearSOESolver(SOLVER_TAGS_MumpsSolver),
-   theMumpsSOE(0)
-{
-  init = false;
-  id.job=-1; 
-  id.par=1; 
-  id.ICNTL(14) = ICNTL14;
-
-#ifdef _OPENMPI
-  id.comm_fortran=-987654;
-#else
-  id.comm_fortran=MPI_COMM_WORLD;
-#endif
-}
-
-
 MumpsSolver::MumpsSolver(int ICNTL7, int ICNTL14)
   :LinearSOESolver(SOLVER_TAGS_MumpsSolver),
    theMumpsSOE(0)

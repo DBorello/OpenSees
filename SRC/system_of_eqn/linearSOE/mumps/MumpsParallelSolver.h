@@ -56,10 +56,11 @@ class MumpsParallelSOE;
 class MumpsParallelSolver : public LinearSOESolver
 {
   public:
-  MumpsParallelSolver(int ICNTL14 = 20);
+  MumpsParallelSolver(int ICNTL7 = 7, int ICNTL14 = 20);
+
   MumpsParallelSolver(int MPI_COMM, 		      
 		      int ICNTL7,
-		      int ICNTL14 = 20);
+		      int ICNTL14);
 
   virtual ~MumpsParallelSolver();
   
@@ -80,6 +81,7 @@ class MumpsParallelSolver : public LinearSOESolver
   int rank;
   int np;
   int icntl14;
+  int icntl7;
 
   DMUMPS_STRUC_C id;
 };

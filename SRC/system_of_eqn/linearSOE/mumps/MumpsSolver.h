@@ -58,8 +58,7 @@ class MumpsSOE;
 class MumpsSolver : public LinearSOESolver
 {
   public:
-  MumpsSolver(int ICNTL14=20);
-  MumpsSolver(int ICNTL7, int ICNTL14=20);
+  MumpsSolver(int ICNTL7=7, int ICNTL14=20);
 	      
   virtual ~MumpsSolver();
   

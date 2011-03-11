@@ -38,10 +38,11 @@
 
 #include <mpi.h>
 
-MumpsParallelSolver::MumpsParallelSolver(int ICNTL14)
+MumpsParallelSolver::MumpsParallelSolver(int ICNTL7, int ICNTL14)
   :LinearSOESolver(SOLVER_TAGS_MumpsParallelSolver),
    theMumpsSOE(0), rank(0), np(0)
 {
+  icntl7 = ICNTL7;
   icntl14 = ICNTL14;
   init = false;
 }
@@ -51,6 +52,7 @@ MumpsParallelSolver::MumpsParallelSolver(int mpi_comm, int ICNTL7, int ICNTL14)
    theMumpsSOE(0), rank(0), np(0)
 {
   icntl14 = ICNTL14;
+  icntl7 = ICNTL7;
   init = false;
 }
 
@@ -79,6 +81,7 @@ MumpsParallelSolver::solve(void)
   id.ICNTL(1)=-1; id.ICNTL(2)=-1; id.ICNTL(3)=-1; id.ICNTL(4)=0;
 
   id.ICNTL(14)=icntl14; 
+  id.ICNTL(7)=icntl7; 
   
   // increment row and col A values by 1 for mumps fortran indexing
   for (int i=0; i<nnz; i++) {
@@ -161,6 +164,7 @@ MumpsParallelSolver::setSize()
   id.ICNTL(1)=-1; id.ICNTL(2)=-1; id.ICNTL(3)=-1; id.ICNTL(4)=0; 
 
   id.ICNTL(14)=icntl14; 
+  id.ICNTL(7)=icntl7; 
   
   int nnz = theMumpsSOE->nnz;
   int *colA = theMumpsSOE->colA;
@@ -205,6 +209,7 @@ MumpsParallelSolver::sendSelf(int cTag, Channel &theChannel)
   // nothing to do
   ID icntlData(2);
 
+  icntlData(0) = icntl7;  
   icntlData(1) = icntl14;
   theChannel.sendID(0, cTag, icntlData);
 
@@ -221,6 +226,7 @@ MumpsParallelSolver::recvSelf(int ctag,
 
   theChannel.recvID(0, ctag, icntlData);
 
+  icntl7 = icntlData(0);
   icntl14 = icntlData(1);
   return 0;
 }
