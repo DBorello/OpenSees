@@ -2587,25 +2587,30 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
   else if (strcmp(argv[1],"Mumps") == 0) {
 
     int icntl14 = 20;    
+    int icntl7 = 7;
 
     if (argc > 3) {
       if (strcmp(argv[2],"-ICNTL14") == 0) {
 	if (Tcl_GetInt(interp, argv[3], &icntl14) != TCL_OK)	
 	  ;
       }
+      if (strcmp(argv[2],"-ICNTL7") == 0) {
+	if (Tcl_GetInt(interp, argv[3], &icntl7) != TCL_OK)	
+	  ;
+      }
     }    
     
 #ifdef _PARALLEL_PROCESSING
-    MumpsParallelSolver *theSolver = new MumpsParallelSolver(icntl14);
+    MumpsParallelSolver *theSolver = new MumpsParallelSolver(icntl7, icntl14);
     theSOE = new MumpsParallelSOE(*theSolver);
 #elif _PARALLEL_INTERPRETERS
-    MumpsParallelSolver *theSolver = new MumpsParallelSolver(icntl14);
+    MumpsParallelSolver *theSolver = new MumpsParallelSolver(icntl7, icntl14);
     MumpsParallelSOE *theParallelSOE = new MumpsParallelSOE(*theSolver);
     theParallelSOE->setProcessID(rank);
     theParallelSOE->setChannels(numChannels, theChannels);
     theSOE = theParallelSOE;
 #else
-    MumpsSolver *theSolver = new MumpsSolver(icntl14);
+    MumpsSolver *theSolver = new MumpsSolver(icntl7, icntl14);
     theSOE = new MumpsSOE(*theSolver);
 #endif
 
