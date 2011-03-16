@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.57 $
-// $Date: 2010-09-13 21:40:25 $
+// $Revision: 1.52 $
+// $Date: 2008/10/22 16:44:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -56,7 +56,6 @@ using std::setiosflags;
 #include <LimitStateFunction.h>
 #include <LimitStateFunctionIter.h>
 #include <RandomVariablePositioner.h>
-#include <RandomVariablePositionerIter.h>
 #include <Parameter.h>
 #include <ParameterIter.h>
 #include <ParameterPositioner.h>
@@ -145,7 +144,7 @@ using std::setiosflags;
 #include <RootFinding.h>
 #include <SecantRootFinding.h>
 
-//Quan---
+/*Quan---
 #ifdef _SNOPT
 #include <SnoptProblem.h>  
 #include <SnoptAnalysis.h>   
@@ -155,6 +154,7 @@ using std::setiosflags;
 #include <DesignVariablePositioner.h>
 #include <ConstraintFunction.h>
 #include <ObjectiveFunction.h>
+*/
 #include <MonteCarloResponseAnalysis.h>
 #include <OrthogonalPlaneSamplingAnalysis.h>
 
@@ -209,12 +209,13 @@ extern SensitivityIntegrator* theSensitivityIntegrator;
 // SOME STATIC POINTERS USED IN THE FUNCTIONS INVOKED BY THE INTERPRETER
 //
 
-// Quan --
+/* Quan --
 // ---------------- define global pointer for SNOPT ----------
 #ifdef _SNOPT
 SnoptProblem * theSNOPT=0;
 SNOPTAnalysis * theSNOPTAnalysis=0;
 #endif
+*/
 MonteCarloResponseAnalysis * theMonteCarloResponseAnalysis=0;
 SamplingAnalysis * theSamplingAnalysis =0;
 // --- Quan
@@ -276,7 +277,6 @@ int TclReliabilityModelBuilder_addCutset(ClientData clientData, Tcl_Interp *inte
 int TclReliabilityModelBuilder_correlateGroup(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_correlationStructure(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_addLimitState(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-int TclReliabilityModelBuilder_addGradLimitState(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_addParameterPositioner(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_addModulatingFunction(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
@@ -310,13 +310,7 @@ int TclReliabilityModelBuilder_getStdv(ClientData clientData, Tcl_Interp *interp
 int TclReliabilityModelBuilder_rvReduction(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_getBetaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
 int TclReliabilityModelBuilder_getGammaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
-int TclReliabilityModelBuilder_getAlphaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
-int TclReliabilityModelBuilder_getPDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
-int TclReliabilityModelBuilder_getCDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
-int TclReliabilityModelBuilder_getInverseCDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
-int TclReliabilityModelBuilder_getRVTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
-int TclReliabilityModelBuilder_getRVPositioners(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
-int TclReliabilityModelBuilder_getLSFTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
+int TclReliabilityModelBuilder_invNormalCDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);//not in K.F.
 /////////////////////////////////////////////////////////
 ///S added by K Fujimura for Random Vibration Analysis ///
 /////////////////////////////////////////////////////////
@@ -332,12 +326,13 @@ int TclReliabilityModelBuilder_runRandomVibrationAnalysis(ClientData clientData,
 ///E added by K Fujimura for Random Vibration Analysis ///
 /////////////////////////////////////////////////////////
 
-//--Quan --
+/*--Quan --
 int TclReliabilityModelBuilder_addDesignVariable(ClientData clientData,Tcl_Interp *interp,int argc,TCL_Char **argv);
 int TclReliabilityModelBuilder_addDesignVariablePositioner(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_addObjectiveFunction(ClientData clientData,Tcl_Interp *interp,int argc,TCL_Char **argv);
 int TclReliabilityModelBuilder_addConstraintFunction(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_runSNOPTAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+*/
 int TclReliabilityModelBuilder_runMonteCarloResponseAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_updateParameterValue(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_runOrthogonalPlaneSamplingAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
@@ -367,7 +362,6 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
   Tcl_CreateCommand(interp, "correlationStructure", TclReliabilityModelBuilder_correlationStructure,(ClientData)NULL, NULL); 
   Tcl_CreateCommand(interp, "cutset", TclReliabilityModelBuilder_addCutset,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "performanceFunction", TclReliabilityModelBuilder_addLimitState,(ClientData)NULL, NULL);
-  Tcl_CreateCommand(interp, "gradPerformanceFunction", TclReliabilityModelBuilder_addGradLimitState,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "randomVariablePositioner",TclReliabilityModelBuilder_addRandomVariablePositioner,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "parameterPositioner",TclReliabilityModelBuilder_addParameterPositioner,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "modulatingFunction",TclReliabilityModelBuilder_addModulatingFunction,(ClientData)NULL, NULL);
@@ -401,13 +395,7 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
   Tcl_CreateCommand(interp, "rvReduction",TclReliabilityModelBuilder_rvReduction,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "betaFORM",TclReliabilityModelBuilder_getBetaFORM,(ClientData)NULL, NULL); //not in K.F.
   Tcl_CreateCommand(interp, "gammaFORM",TclReliabilityModelBuilder_getGammaFORM,(ClientData)NULL, NULL);//not in K.F.
-  Tcl_CreateCommand(interp, "alphaFORM",TclReliabilityModelBuilder_getAlphaFORM,(ClientData)NULL, NULL);//not in K.F.
-  Tcl_CreateCommand(interp, "getPDF",TclReliabilityModelBuilder_getPDF,(ClientData)NULL, NULL);//not in K.F.
-  Tcl_CreateCommand(interp, "getCDF",TclReliabilityModelBuilder_getCDF,(ClientData)NULL, NULL);//not in K.F.
-  Tcl_CreateCommand(interp, "getInverseCDF",TclReliabilityModelBuilder_getInverseCDF,(ClientData)NULL, NULL);//not in K.F.
-  Tcl_CreateCommand(interp, "getRVTags",TclReliabilityModelBuilder_getRVTags,(ClientData)NULL, NULL);//not in K.F.
-  Tcl_CreateCommand(interp, "getRVPositioners",TclReliabilityModelBuilder_getRVPositioners,(ClientData)NULL, NULL);//not in K.F.
-  Tcl_CreateCommand(interp, "getLSFTags",TclReliabilityModelBuilder_getLSFTags,(ClientData)NULL, NULL);//not in K.F.
+  Tcl_CreateCommand(interp, "invNormalCDF",TclReliabilityModelBuilder_invNormalCDF,(ClientData)NULL, NULL);//not in K.F.
 /////////////////////////////////////////////////////////
 ///S added by K Fujimura for Random Vibration Analysis ///
 /////////////////////////////////////////////////////////
@@ -428,12 +416,12 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
   // Quan --
 
    Tcl_CreateCommand(interp, "runMonteCarloResponseAnalysis", TclReliabilityModelBuilder_runMonteCarloResponseAnalysis,(ClientData)NULL, NULL);
-   Tcl_CreateCommand(interp, "designVariablePositioner",TclReliabilityModelBuilder_addDesignVariablePositioner,(ClientData)NULL, NULL);
-   Tcl_CreateCommand(interp, "constraintFunction", TclReliabilityModelBuilder_addConstraintFunction,(ClientData)NULL, NULL);
-   Tcl_CreateCommand(interp, "objectiveFunction", TclReliabilityModelBuilder_addObjectiveFunction,(ClientData)NULL, NULL);
-   Tcl_CreateCommand(interp, "runSNOPTAnalysis", TclReliabilityModelBuilder_runSNOPTAnalysis,(ClientData)NULL, NULL);
+  // Tcl_CreateCommand(interp, "designVariablePositioner",TclReliabilityModelBuilder_addDesignVariablePositioner,(ClientData)NULL, NULL);
+  // Tcl_CreateCommand(interp, "constraintFunction", TclReliabilityModelBuilder_addConstraintFunction,(ClientData)NULL, NULL);
+  // Tcl_CreateCommand(interp, "objectiveFunction", TclReliabilityModelBuilder_addObjectiveFunction,(ClientData)NULL, NULL);
+  // Tcl_CreateCommand(interp, "runSNOPTAnalysis", TclReliabilityModelBuilder_runSNOPTAnalysis,(ClientData)NULL, NULL);
    Tcl_CreateCommand(interp, "updateParameterValue", TclReliabilityModelBuilder_updateParameterValue,(ClientData)NULL, NULL);
-   Tcl_CreateCommand(interp, "designVariable", TclReliabilityModelBuilder_addDesignVariable,(ClientData)NULL, NULL);
+  // Tcl_CreateCommand(interp, "designVariable", TclReliabilityModelBuilder_addDesignVariable,(ClientData)NULL, NULL);
    Tcl_CreateCommand(interp, "runOrthogonalPlaneSamplingAnalysis",TclReliabilityModelBuilder_runOrthogonalPlaneSamplingAnalysis,(ClientData)NULL, NULL);
    Tcl_CreateCommand(interp, "computeHessian",TclReliabilityModelBuilder_computeHessian,(ClientData)NULL, NULL);
    Tcl_CreateCommand(interp, "runMultiDimVisualPrinPlane",TclReliabilityModelBuilder_MultiDimVisPrincPlane,(ClientData)NULL, NULL);
@@ -530,13 +518,14 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
 	delete theRandomVibrationAnalysis ;
   /////E added by K Fujimura /////
 
-  // Quan ---
+  /* Quan ---
  #ifdef _SNOPT
   if (theSNOPTAnalysis != 0)
     delete theSNOPTAnalysis;
   if (theSNOPT != 0)
     delete theSNOPT;
 #endif
+	*/
   if (theMonteCarloResponseAnalysis != 0)
     delete theMonteCarloResponseAnalysis;
   if (theSamplingAnalysis != 0)
@@ -581,11 +570,11 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
   theRandomVibrationAnalysis = 0;
  /////E added by K Fujimura /////
  
-  // Quan ---
+  /* Quan ---
  #ifdef _SNOPT
   theSNOPTAnalysis = 0;
   theSNOPT = 0;
-#endif
+#endif*/
   theMonteCarloResponseAnalysis = 0;
   theSamplingAnalysis = 0;
   // ---Quan
@@ -597,7 +586,6 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
   Tcl_DeleteCommand(theInterp, "correlationStructure");
   Tcl_DeleteCommand(theInterp, "cutset");
   Tcl_DeleteCommand(theInterp, "performanceFunction");
-  Tcl_DeleteCommand(theInterp, "gradPerformanceFunction");
   Tcl_DeleteCommand(theInterp, "randomVariablePositioner");
   Tcl_DeleteCommand(theInterp, "positionerPositioner");
   Tcl_DeleteCommand(theInterp, "modulatingFunction");
@@ -631,12 +619,7 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
   Tcl_DeleteCommand(theInterp, "rvReduction");
   Tcl_DeleteCommand(theInterp, "betaFORM");
   Tcl_DeleteCommand(theInterp, "gammaFORM");
-  Tcl_DeleteCommand(theInterp, "getPDF");
-  Tcl_DeleteCommand(theInterp, "getCDF");
-  Tcl_DeleteCommand(theInterp, "getInverseCDF");
-  Tcl_DeleteCommand(theInterp, "getRVTags");
-  Tcl_DeleteCommand(theInterp, "getRVPositioners");
-  Tcl_DeleteCommand(theInterp, "getLSFTags");
+  Tcl_DeleteCommand(theInterp, "invNormalCDF");
 
   /////S added by K Fujimura /////
   Tcl_DeleteCommand(theInterp, "analyzer");
@@ -650,12 +633,12 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
   /////E added by K Fujimura /////
 
   Tcl_DeleteCommand(theInterp, "runMonteCarloResponseAnalysis");
-  Tcl_DeleteCommand(theInterp, "designVariablePositioner");
-  Tcl_DeleteCommand(theInterp, "constraintFunction");
-  Tcl_DeleteCommand(theInterp, "objectiveFunction");
-  Tcl_DeleteCommand(theInterp, "runSNOPTAnalysis");
+//  Tcl_DeleteCommand(theInterp, "designVariablePositioner");
+//  Tcl_DeleteCommand(theInterp, "constraintFunction");
+//  Tcl_DeleteCommand(theInterp, "objectiveFunction");
+//  Tcl_DeleteCommand(theInterp, "runSNOPTAnalysis");
   Tcl_DeleteCommand(theInterp, "updateParameterValue");
-  Tcl_DeleteCommand(theInterp, "designVariable");
+//  Tcl_DeleteCommand(theInterp, "designVariable");
   Tcl_DeleteCommand(theInterp, "runOrthogonalPlaneSamplingAnalysis");
   Tcl_DeleteCommand(theInterp, "computeHessian");
   Tcl_DeleteCommand(theInterp, "runMultiDimVisualPrinPlane");
@@ -2108,48 +2091,7 @@ TclReliabilityModelBuilder_addLimitState(ClientData clientData, Tcl_Interp *inte
 */
 }
 
-//////////////////////////////////////////////////////////////////
-int 
-TclReliabilityModelBuilder_addGradLimitState(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
-{
-  LimitStateFunction *theLimitStateFunction = 0;
-  int lsfTag, rvTag;
 
-  if (theGFunEvaluator != 0 ) {
-    //opserr << "ERROR: A limit-state function should not be created after the GFunEvaluator has been instantiated." << endln;
-    //return TCL_ERROR;
-  }
-
-  // GET INPUT PARAMETER (integer)
-  if (Tcl_GetInt(interp, argv[1], &lsfTag) != TCL_OK) {
-    opserr << "ERROR: invalid input: lsfTag \n";
-    return TCL_ERROR;
-  }
-
-  // GET INPUT PARAMETER (integer)
-  if (Tcl_GetInt(interp, argv[2], &rvTag) != TCL_OK) {
-    opserr << "ERROR: invalid input: rvTag \n";
-    return TCL_ERROR;
-  }
-    
-  // GET LSF pointer
-  theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsfTag);
-  if (theLimitStateFunction == 0) {
-    opserr << "ERROR: limit state function with tag " << lsfTag
-	   << " does not exist" << endln;
-    return TCL_ERROR;
-  }
-
-  // ADD THE OBJECT TO THE LSF
-  int ok = theLimitStateFunction->addGradientExpression(argv[3], rvTag);
-  if (ok < 0) {
-    opserr << "ERROR: could not add gradient of LSF " << lsfTag
-	   << " for random variable " << rvTag << endln;
-    return TCL_ERROR;
-  }
-
-  return TCL_OK;
-}
 
 //////////////////////////////////////////////////////////////////
 int 
@@ -4435,7 +4377,7 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 		
 	}   //if StepSearch
 
-	// Quan SNOPT interface ----
+	/* Quan SNOPT interface ----
 #ifdef _SNOPT
 	else if (strcmp(argv[argvCounter],"SNOPT") == 0) {
 		argvCounter++;
@@ -4449,14 +4391,7 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 			opserr << "Need theGradGEvaluator before a FindDesignPointAlgorithm can be created" << endln;
 			return TCL_ERROR;
 		}
-/*		if (theStepSizeRule == 0 ) {
-			opserr << "Need theStepSizeRule before a FindDesignPointAlgorithm can be created" << endln;
-			return TCL_ERROR;
-		} 
-		if (theSearchDirection == 0 ) {
-			opserr << "Need theSearchDirection before a FindDesignPointAlgorithm can be created" << endln;
-			return TCL_ERROR;
-		}  */
+ 
 		if (theProbabilityTransformation == 0 ) {
 			opserr << "Need theProbabilityTransformation before a FindDesignPointAlgorithm can be created" << endln;
 			return TCL_ERROR;
@@ -4465,11 +4400,7 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 //			opserr << "Need theStartPoint before a FindDesignPointAlgorithm can be created" << endln;
 //			return TCL_ERROR;
 //		}
-/*		if (theReliabilityConvergenceCheck == 0 ) {
-			opserr << "Need theReliabilityConvergenceCheck before a FindDesignPointAlgorithm can be created" << endln;
-			return TCL_ERROR;
-		}
-*/
+ 
 		maxNumIter = 250;
 		while (argvCounter < argc) {
 
@@ -4534,20 +4465,11 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 					startAtOrigin,
 					printFlag, fileNamePrint,
 					ProbType,theReliabilityDomain);
-/*
-   snoptProblem::snoptProblem(int passedMaxNumberOfIterations, 
-					GFunEvaluator *passedGFunEvaluator,
-					GradGEvaluator *passedGradGEvaluator,
-					ProbabilityTransformation *passedProbabilityTransformation,
-					int pPrintFlag,
-					char *pFileNamePrint,
-					Vector *pStartPoint, char * probType):
-   
-   */
+ 
 		
 	//if SNOPT  ---- Quan
 	}
-#endif // _SNOPT
+#endif // _SNOPT  */
 	else if (strcmp(argv[argvCounter],"NewStepSearch") == 0) {
 		
 		argvCounter++;
@@ -6675,7 +6597,7 @@ TclReliabilityModelBuilder_printReliability(ClientData clientData, Tcl_Interp *i
 }
 
 
-// ---------- Quan Gu ------------------------
+/* ---------- Quan Gu ------------------------
 // command: designVariable  1 -name E  < -startPt $E   -lowerBound [expr $E*0.8] -upperBound [expr $E*1.2] >
 int 
 TclReliabilityModelBuilder_addDesignVariable(ClientData clientData,Tcl_Interp *interp,int argc,TCL_Char **argv)
@@ -7115,26 +7037,7 @@ TclReliabilityModelBuilder_addObjectiveFunction(ClientData clientData,Tcl_Interp
 
 
 
-/*  command 
 
-array set lBound1{1  -2.0  2  -3.0 }
-array set uBound1{1   2.0  2   3.0 }
-
-array set M1 {1 0.0  2  0.0 }
-array set S1{1  0.0  2    0.0 }
-
-for {set i 1} {$i <=10} {incr i} {
-   for {set j 1} {$j < 10} {incr j} {
-     set A1($i,$j) [expr $i*10+$j]
-   }
- }
-
-
-constraintFunction 1  -name F1  -GradientName G1 -lowerBound  lBound1 -upperBound uBound1 -tclFile constraint1.tcl -multiplier M1 -state S1 -linearAdd A1 ;
-
-
-
-  */
 int 
 TclReliabilityModelBuilder_addConstraintFunction(ClientData clientData,Tcl_Interp *interp,int argc,TCL_Char **argv){
 
@@ -7157,23 +7060,7 @@ TclReliabilityModelBuilder_addConstraintFunction(ClientData clientData,Tcl_Inter
 
 
 
-  /* refer
-  ConstraintFunction(int passedTag, int passedNumberOfConstraint,
-									   ReliabilityDomain * passedReliabilityDomain, 
-									   Tcl_Interp *passedTclInterp, 
-
-									   bool passedIsGradProvided, 
-									   Matrix * passedLinearAdd,
-									   char * passedTclFileName,
-									   char * passedName, 
-									   char * passedGradientName, 
-									   
-									   Vector * passedLowerBound, 
-									   Vector * passedUpperBound, 
-									   Vector * passedMultiplier, 									   
-									   Vector * passedState
-									   );  */
-
+   
   // CHECK THAT AT LEAST ENOUGH ARGUMENTS ARE GIVEN
   if (numberOfArguments < 6) {
 		opserr << "ERROR: invalid number of arguments to designVariable command "<<endln;
@@ -7431,42 +7318,7 @@ TclReliabilityModelBuilder_addConstraintFunction(ClientData clientData,Tcl_Inter
 
 
 // here tag ;
-/*
-  ConstraintFunction *theConstraintFunction = 0;
-  int tag;
-  int numberOfConstraints;
 
-  char name[25] = "" ;
-  char * gradientName = 0;
-  char tclFileName[35] = "";
-
-  Vector * lowerBound = 0;
-  Vector * upperBound = 0;
-  Vector * multiplier = 0; 
-  Vector * state = 0; 
-  Matrix *linearAdd=0;
-
-  int numberOfArguments = argc;
-  bool isGradProvided=false;
-
-
-
-   refer
-  ConstraintFunction(int passedTag, int passedNumberOfConstraint,
-									   ReliabilityDomain * passedReliabilityDomain, 
-									   Tcl_Interp *passedTclInterp, 
-
-									   bool passedIsGradProvided, 
-									   Matrix * passedLinearAdd,
-									   char * passedTclFileName,
-									   char * passedName, 
-									   char * passedGradientName, 
-									   
-									   Vector * passedLowerBound, 
-									   Vector * passedUpperBound, 
-									   Vector * passedMultiplier, 									   
-									   Vector * passedState
-									   );  */
   theConstraintFunction = new ConstraintFunction(tag, 
 									   numberOfConstraints,
 									   theReliabilityDomain, 
@@ -7632,7 +7484,7 @@ TclReliabilityModelBuilder_runSNOPTAnalysis(ClientData clientData,Tcl_Interp *in
 #endif 
 }
 
-
+*/
 
 ///Command:  runMonteCarloResponseAnalysis  -outPutFile  m.out -maxNum 1000 -print 1 -tclFileToRun test.tcl <-seed 1>
 int 
@@ -7669,18 +7521,7 @@ TclReliabilityModelBuilder_runMonteCarloResponseAnalysis(ClientData clientData, 
 		return TCL_ERROR;
   }	
 
-/* refer 
-			MonteCarloResponseAnalysis(
-						ReliabilityDomain *passedReliabilityDomain,
-						ProbabilityTransformation *passedProbabilityTransformation,
-						RandomNumberGenerator *passedRandomNumberGenerator,
-						int passedNumberOfSimulations,
-						int printFlag,
-						TCL_Char *outputFileName,
-						TCL_Char *tclFileToRunFileName)
-{
-  
-  */
+ 
 	// Declaration of input parameters
 	int numberOfSimulations	= 1000;
 	int printFlag			= 0;
@@ -8988,218 +8829,41 @@ TclReliabilityModelBuilder_getGammaFORM(ClientData clientData, Tcl_Interp *inter
   return TCL_OK;
 }
 
-///getGammaFORM is not in K.F.
-int 
-TclReliabilityModelBuilder_getAlphaFORM(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+
+///invNormalCDF is not in K.F.
+int
+TclReliabilityModelBuilder_invNormalCDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
-  if (argc < 2) {
-    opserr << "ERROR: Invalid number of arguments to getAlphaFORM command." << endln;
-    return TCL_ERROR;
-  }
+  static NormalRV aStdNormal(0, 0.0, 1.0);
 
-  int lsfTag;
-  if (Tcl_GetInt(interp, argv[1], &lsfTag) != TCL_OK) {
-    opserr << "WARNING alphaFORM lsfTag? rvTag? - could not read lsfTag\n";
+  double x;
+  if (Tcl_GetDouble(interp, argv[1], &x) != TCL_OK) {
+    opserr << "WARNING invNormalCDF x? <mean? stdev?>- could not read x\n";
     return TCL_ERROR;	        
   }
 
-  LimitStateFunction *theLSF =
-    theReliabilityDomain->getLimitStateFunctionPtr(lsfTag);
-  
-  if (theLSF == 0) {
-    opserr << "WARNING alphaFORM LSF with tag " << lsfTag << " not found\n";
-    return TCL_ERROR;	        
-  }
-
-  const Vector &gammaVec = theLSF->getFORM_alpha();
-  
   char buffer[40];
 
-  if (argc > 2) {
-    int rvTag;
-    if (Tcl_GetInt(interp, argv[2], &rvTag) != TCL_OK) {
-      opserr << "WARNING alphaFORM lsfTag? rvTag? - could not read rvTag\n";
-      return TCL_ERROR;	        
-    }   
-    
-    RandomVariable *theRV =
-      theReliabilityDomain->getRandomVariablePtr(rvTag);
-    
-    if (theRV == 0) {
-      opserr << "WARNING alphaFORM RV with tag " << rvTag << " not found\n";
-      return TCL_ERROR;	        
-    }
-  
-    int index = theReliabilityDomain->getRandomVariableIndex(rvTag);
-    double gamma = gammaVec(index);
-    
-    sprintf(buffer,"%35.20f",gamma);
-    
-    Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+  if (argc < 4) {
+    sprintf(buffer,"%35.20f", aStdNormal.getInverseCDFvalue(x));
   }
   else {
-    int nrv = gammaVec.Size();
-    for (int i = 0; i < nrv; i++) {
-      sprintf(buffer, "%35.20f ", gammaVec(i));
-      Tcl_AppendResult(interp, buffer, NULL);
+    double mean, stdev;
+    if (Tcl_GetDouble(interp, argv[2], &mean) != TCL_OK) {
+      opserr << "WARNING invNormalCDF x? mean? stdev? - could not read mean\n";
+      return TCL_ERROR;	        
     }
+    if (Tcl_GetDouble(interp, argv[3], &stdev) != TCL_OK) {
+      opserr << "WARNING invNormalCDF x? mean? stdev? - could not read stdev\n";
+      return TCL_ERROR;	        
+    }
+    sprintf(buffer,"%35.20f", mean + stdev*aStdNormal.getInverseCDFvalue(x));
   }
-
-  return TCL_OK;
-}
-
-int
-TclReliabilityModelBuilder_getPDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
-{
-  if (argc < 3) {
-    opserr << "WARNING getPDF tag? x? -- insufficient number of arguments\n";
-    return TCL_ERROR;
-  }
-
-  int rvTag;
-  double x;
-  if (Tcl_GetInt(interp, argv[1], &rvTag) != TCL_OK) {
-    opserr << "WARNING getPDF tag? x? -- could not read tag\n";
-    return TCL_ERROR;
-  }
-  if (Tcl_GetDouble(interp, argv[2], &x) != TCL_OK) {
-    opserr << "WARNING getPDF tag? x? -- could not read x\n";
-    return TCL_ERROR;	        
-  }
-
-  RandomVariable *theRV = theReliabilityDomain->getRandomVariablePtr(rvTag);
-  if (theRV == 0) {
-    opserr << "WARNING getPDF tag? x? -- random variable with tag "
-	   << rvTag << " does not exist in model\n";
-    return TCL_ERROR;
-  }
-
-  char buffer[40];
-
-  sprintf(buffer,"%35.20f", theRV->getPDFvalue(x));
 
   Tcl_SetResult(interp, buffer, TCL_VOLATILE);
 
   return TCL_OK;
 }
-
-int
-TclReliabilityModelBuilder_getCDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
-{
-  if (argc < 3) {
-    opserr << "WARNING getCDF tag? x? -- insufficient number of arguments\n";
-    return TCL_ERROR;
-  }
-
-  int rvTag;
-  double x;
-  if (Tcl_GetInt(interp, argv[1], &rvTag) != TCL_OK) {
-    opserr << "WARNING getCDF tag? x? -- could not read tag\n";
-    return TCL_ERROR;
-  }
-  if (Tcl_GetDouble(interp, argv[2], &x) != TCL_OK) {
-    opserr << "WARNING getCDF tag? x? -- could not read x\n";
-    return TCL_ERROR;	        
-  }
-
-  RandomVariable *theRV = theReliabilityDomain->getRandomVariablePtr(rvTag);
-  if (theRV == 0) {
-    opserr << "WARNING getCDF tag? x? -- random variable with tag "
-	   << rvTag << " does not exist in model\n";
-    return TCL_ERROR;
-  }
-
-  char buffer[40];
-
-  sprintf(buffer,"%35.20f", theRV->getCDFvalue(x));
-
-  Tcl_SetResult(interp, buffer, TCL_VOLATILE);
-
-  return TCL_OK;
-}
-
-int
-TclReliabilityModelBuilder_getInverseCDF(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
-{
-  if (argc < 3) {
-    opserr << "WARNING getInverseCDF tag? p? -- insufficient number of arguments\n";
-    return TCL_ERROR;
-  }
-
-  int rvTag;
-  double x;
-  if (Tcl_GetInt(interp, argv[1], &rvTag) != TCL_OK) {
-    opserr << "WARNING getInverseCDF tag? p? -- could not read tag\n";
-    return TCL_ERROR;
-  }
-  if (Tcl_GetDouble(interp, argv[2], &x) != TCL_OK) {
-    opserr << "WARNING getInverseCDF tag? p? -- could not read p\n";
-    return TCL_ERROR;	        
-  }
-
-  RandomVariable *theRV = theReliabilityDomain->getRandomVariablePtr(rvTag);
-  if (theRV == 0) {
-    opserr << "WARNING getInverseCDF tag? p? -- random variable with tag "
-	   << rvTag << " does not exist in model\n";
-    return TCL_ERROR;
-  }
-
-  char buffer[40];
-
-  sprintf(buffer,"%35.20f", theRV->getInverseCDFvalue(x));
-
-  Tcl_SetResult(interp, buffer, TCL_VOLATILE);
-
-  return TCL_OK;
-}
-
-int
-TclReliabilityModelBuilder_getRVTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
-{
-  RandomVariable *theEle;
-  RandomVariableIter &eleIter = theReliabilityDomain->getRandomVariables();
-  
-  char buffer[20];
-  
-  while ((theEle = eleIter()) != 0) {
-    sprintf(buffer, "%d ", theEle->getTag());
-    Tcl_AppendResult(interp, buffer, NULL);
-  }
-  
-  return TCL_OK;
-}
-
-int
-TclReliabilityModelBuilder_getRVPositioners(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
-{
-  RandomVariablePositioner *theEle;
-  RandomVariablePositionerIter &eleIter = theReliabilityDomain->getRandomVariablePositioners();
-  
-  char buffer[20];
-  
-  while ((theEle = eleIter()) != 0) {
-    sprintf(buffer, "%d %d ", theEle->getRVTag(), theEle->getParamTag());
-    Tcl_AppendResult(interp, buffer, NULL);
-  }
-  
-  return TCL_OK;
-}
-int
-TclReliabilityModelBuilder_getLSFTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
-{
-  LimitStateFunction *theEle;
-  LimitStateFunctionIter &eleIter = theReliabilityDomain->getLimitStateFunctions();
-  
-  char buffer[20];
-  
-  while ((theEle = eleIter()) != 0) {
-    sprintf(buffer, "%d ", theEle->getTag());
-    Tcl_AppendResult(interp, buffer, NULL);
-  }
-  
-  return TCL_OK;
-}
-
 /////////////////////////////////////////////////////////
 /// (from here to the end) added by K Fujimura for Random Vibration Analysis ///
 /////////////////////////////////////////////////////////
