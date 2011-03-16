@@ -40,6 +40,7 @@
 #include <shp3dv.h>
 #include <Renderer.h>
 #include <ElementResponse.h>
+#include <ElementalLoad.h>
 
 
 #include <Channel.h>
@@ -63,7 +64,7 @@ double Twenty_Node_Brick::dvolu[27];
 //null constructor
 Twenty_Node_Brick::Twenty_Node_Brick( ) :
 Element( 0, ELE_TAG_Twenty_Node_Brick ),
-connectedExternalNodes(20), load(0), Ki(0)//, kc(0), rho(0)
+connectedExternalNodes(20), applyLoad(0), load(0), Ki(0)//, kc(0), rho(0)
 {
 	for (int i=0; i<20; i++ ) {
 		nodePointers[i] = 0;
@@ -101,7 +102,7 @@ Twenty_Node_Brick::Twenty_Node_Brick(int tag,
 											   NDMaterial &theMaterial,
 											   double b1, double b2, double b3) :
 Element( tag, ELE_TAG_Twenty_Node_Brick ),
-connectedExternalNodes(20), load(0), Ki(0)//, kc(bulk), rho(rhof)
+connectedExternalNodes(20), applyLoad(0), load(0), Ki(0)//, kc(bulk), rho(rhof)
 {
 	connectedExternalNodes(0) = node1 ;
 	connectedExternalNodes(1) = node2 ;
@@ -798,14 +799,17 @@ void  Twenty_Node_Brick::zeroLoad( )
 
 {
 
-	if (load != 0)
-
+	if (load != 0) {
 		load->Zero();
+	}
 
+	applyLoad = 0;
 
-
+  	appliedB[0] = 0.0;
+  	appliedB[1] = 0.0;
+  	appliedB[2] = 0.0;
+	
 	return ;
-
 }
 
 
@@ -817,11 +821,22 @@ int
 Twenty_Node_Brick::addLoad(ElementalLoad *theLoad, double loadFactor)
 
 {
+	// Added option for applying body forces in load pattern: C.McGann, U.Washington
+	int type;
+  	const Vector &data = theLoad->getData(type, loadFactor);
 
-	opserr << "Twenty_Node_Brick::addLoad - load type unknown for truss with tag: " << this->getTag() << endln;
+  	if ((type == LOAD_TAG_BrickSelfWeight) || (type == LOAD_TAG_SelfWeight)) {
+    	applyLoad = 1;
+    	appliedB[0] += loadFactor * b[0];
+    	appliedB[1] += loadFactor * b[1];
+    	appliedB[2] += loadFactor * b[2];
+    	return 0;
+  	} else {
+    	opserr << "Twenty_Node_Brick::addLoad - load type unknown for truss with tag: " << this->getTag() << endln;
+    	return -1;
+  	}
 
-	return -1;
-
+  	return -1;
 }
 
 
@@ -1026,11 +1041,20 @@ const Vector&  Twenty_Node_Brick::getResistingForce( )
 
 			double r = mixtureRho(i);
 
-			resid(j*3) -= dvolu[i]*(shgu[3][j][i]*r*b[0]);
+			if (applyLoad == 0) {
 
-			resid(j*3+1) -= dvolu[i]*(shgu[3][j][i]*r*b[1]);
+				resid(j*3) -= dvolu[i]*(shgu[3][j][i]*r*b[0]);
 
-			resid(j*3+2) -= dvolu[i]*(shgu[3][j][i]*r*b[2]);
+				resid(j*3+1) -= dvolu[i]*(shgu[3][j][i]*r*b[1]);
+
+				resid(j*3+2) -= dvolu[i]*(shgu[3][j][i]*r*b[2]);
+			} else {
+				resid(j*3) -= dvolu[i]*(shgu[3][j][i]*r*appliedB[0]);
+
+				resid(j*3+1) -= dvolu[i]*(shgu[3][j][i]*r*appliedB[1]);
+
+				resid(j*3+2) -= dvolu[i]*(shgu[3][j][i]*r*appliedB[2]);
+			}
 
 		}
 

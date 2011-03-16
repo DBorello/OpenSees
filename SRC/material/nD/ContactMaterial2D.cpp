@@ -25,7 +25,9 @@
 // Written: Kathryn Petek
 // Created: February 2004
 // Modified: Chris McGann
-//           November 2010
+//           November 2010 -> changes for incorporation into main source code
+// Modified: Chris McGann
+//           Jan 2011 -> added update for frictional state
 
 // Description: This file contains the implementation for the ContactMaterial2D class.
 //				
@@ -34,6 +36,7 @@
 
 #include <Information.h>
 #include <MaterialResponse.h>
+#include <Parameter.h>
 
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
@@ -41,13 +44,14 @@
 #include <elementAPI.h>
 #define OPS_Export
 static int numContactMaterial2DMaterials = 0;
+int ContactMaterial2D::mFrictFlag = 1;
 
 OPS_Export void *
 OPS_NewContactMaterial2DMaterial(void)
 {
   if (numContactMaterial2DMaterials == 0) {
     numContactMaterial2DMaterials++;
-    OPS_Error("ContactMaterial2D nDmaterial - Written by K.Petek, P.Mackenzie-Helnwein, P.Arduino, U.Washington\n", 1);
+    OPS_Error("ContactMaterial2D nDmaterial - Written: K.Petek, P.Mackenzie-Helnwein, P.Arduino, U.Washington\n", 1);
   }
 
   // Pointer to a nDmaterial that will be returned
@@ -83,8 +87,6 @@ OPS_NewContactMaterial2DMaterial(void)
   return theMaterial;
 }
 
-
-
 //full constructor
 ContactMaterial2D::ContactMaterial2D (int tag, double mu, double G, double c, double t)
  : NDMaterial(tag,ND_TAG_ContactMaterial2D),
@@ -96,10 +98,12 @@ ContactMaterial2D::ContactMaterial2D (int tag, double mu, double G, double c, do
         opserr << "ContactMaterial2D::ContactMaterial2D" << endln;
 #endif
         frictionCoeff = mu;
+		mMu = mu;
         stiffness = G;
         cohesion  = c;
+		mCo = c;
 		tensileStrength = t;
-
+		mTen = t;
 
         this->zero();
 }
@@ -127,10 +131,13 @@ void ContactMaterial2D::zero( )
     r_nplus1   = 0.0;       // direction of plastic slip
 
     inSlip     = false;     
+	mFlag = 1;
 
     stress_vec.Zero();
     strain_vec.Zero();
     tangent_matrix.Zero();
+
+	
 
 	// ensure that tensileStrength is within bounds
 	if (frictionCoeff == 0.0) {
@@ -163,6 +170,9 @@ int ContactMaterial2D::setTrialStrain (const Vector &strain_from_element)
     gap    = strain_vec(0);
     slip   = strain_vec(1);
     t_n    = strain_vec(2);
+
+	// update frictional status
+	this->UpdateFrictionalState();
 
 // trial state (elastic predictor step) -> assume sticking
         inSlip = false;
@@ -333,7 +343,7 @@ int ContactMaterial2D::revertToStart(void)
 #ifdef DEBUG
         opserr << "ContactMaterial2D::revertToStart()" << endln;
 #endif
-
+	
     this->zero();
 
     return 0;
@@ -385,7 +395,33 @@ int ContactMaterial2D::getOrder (void) const
     return 3;
 }
 
+int ContactMaterial2D::UpdateFrictionalState(void)
+{
+	if (mFrictFlag == 1 && mFlag == 1) {
+		frictionCoeff = mMu;
+		cohesion = mCo;
+		tensileStrength = mTen;
+		mFlag = 0;
 
+		// ensure tensile strength is inbounds
+		if (tensileStrength > cohesion / frictionCoeff ) {
+			tensileStrength = cohesion / frictionCoeff;
+		}
+		
+	} else if (mFrictFlag != 1) {
+		frictionCoeff = 0.0;
+		cohesion = 0.0;
+		tensileStrength = 0.0;
+		mFlag = 1;
+	}
+
+	return 0;
+}
+
+int ContactMaterial2D::setParameter(const char **argv, int argc, Parameter &param)
+{
+	return -1;
+}
 
 int ContactMaterial2D::sendSelf(int commitTag, Channel &theChannel)
 {
@@ -446,10 +482,12 @@ void ContactMaterial2D::Print(OPS_Stream &s, int flag )
 
 int ContactMaterial2D::updateParameter(int responseID, Information &info)
 {
-		if (responseID==20) frictionCoeff=info.theDouble;
-		if (responseID==21) stiffness=info.theDouble;
+    if (responseID==20) frictionCoeff=info.theDouble;
+	if (responseID==21) stiffness=info.theDouble;
+
+	if (responseID == 1) {
+		mFrictFlag = info.theDouble;
+	}
 
   return 0;
 }
-
-

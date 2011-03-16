@@ -202,6 +202,9 @@ class FourNodeQuadUP : public Element
 
     double b[2];		// Body forces
 
+	double appliedB[2]; // Body forces applied with load pattern, C.McGann, U.Washington
+	int applyLoad;      // flag for body force in load, C.McGann, U.Washington
+
     Vector pressureLoad;	// Pressure load at nodes
 
 

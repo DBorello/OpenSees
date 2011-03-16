@@ -1,35 +1,38 @@
 include ../../../Makefile.def
 
 OBJS       = NDMaterial.o \
-	WrapperNDMaterial.o \
+	BeamFiberMaterial.o \
+	BoundingCamClay3D.o \
+	BoundingCamClay.o \
+	BoundingCamClayPlaneStrain.o \
+	ContactMaterial2D.o \
+	ContactMaterial3D.o \
+	DruckerPrager3D.o \
+	DruckerPrager.o \
+	DruckerPragerPlaneStrain.o \
+	ElasticCrossAnisotropic.o \
 	ElasticIsotropic3D.o \
+	ElasticIsotropicAxiSymm.o\
+	ElasticIsotropicBeamFiber2d.o \
+	ElasticIsotropicBeamFiber.o \
 	ElasticIsotropicMaterial.o \
 	ElasticIsotropicPlaneStrain2D.o \
 	ElasticIsotropicPlaneStress2D.o \
 	ElasticIsotropicPlateFiber.o \
-	ElasticIsotropicBeamFiber.o \
-	ElasticIsotropicBeamFiber2d.o \
-	ElasticIsotropicAxiSymm.o\
-	TclModelBuilderNDMaterialCommand.o \
+	FeapMaterial.o \
+	InitialStateAnalysisWrapper.o \
+	J2AxiSymm.o \
 	J2PlaneStrain.o \
-	PlateFiberMaterial.o \
-	PlaneStressMaterial.o \
-	PlaneStrainMaterial.o \
 	J2PlaneStress.o \
 	J2Plasticity.o \
-	J2AxiSymm.o \
-	J2ThreeDimensional.o \
 	J2PlateFiber.o \
+	J2ThreeDimensional.o \
+	PlaneStrainMaterial.o \
+	PlaneStressMaterial.o \
+	PlateFiberMaterial.o \
 	PressureDependentElastic3D.o \
-	BeamFiberMaterial.o \
-	FeapMaterial.o \
-	ElasticCrossAnisotropic.o \
-	DruckerPrager.o \
-	DruckerPrager3D.o \
-	ContactMaterial2D.o \
-	ContactMaterial3D.o \
-	BoundingCamClay.o \
-	BoundingCamClay3D.o
+	TclModelBuilderNDMaterialCommand.o \
+	WrapperNDMaterial.o
 
 all: $(OBJS) 
 	@$(CD) $(FE)/material/nD/soil; $(MAKE);

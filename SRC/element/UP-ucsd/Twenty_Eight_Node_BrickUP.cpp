@@ -79,6 +79,7 @@
 #include <Renderer.h>
 
 #include <ElementResponse.h>
+#include <ElementalLoad.h>
 
 #include <Information.h>
 #include <Parameter.h>
@@ -143,7 +144,7 @@ TwentyEightNodeBrickUP::TwentyEightNodeBrickUP( ) :
 
 Element( 0, ELE_TAG_Twenty_Eight_Node_BrickUP ), materialPointers(0),
 
-connectedExternalNodes(20), load(0), Ki(0), kc(0), rho(0)
+connectedExternalNodes(20), applyLoad(0), load(0), Ki(0), kc(0), rho(0)
 
 {
 
@@ -221,7 +222,7 @@ TwentyEightNodeBrickUP::TwentyEightNodeBrickUP(int tag,
 
 					       double b1, double b2, double b3) :Element( tag, ELE_TAG_Twenty_Eight_Node_BrickUP ),
 
-connectedExternalNodes(20), load(0), Ki(0), kc(bulk), rho(rhof)
+connectedExternalNodes(20), applyLoad(0), load(0), Ki(0), kc(bulk), rho(rhof)
 
 {
 
@@ -1430,15 +1431,16 @@ void TwentyEightNodeBrickUP::formDampingTerms( int tangFlag )
 void  TwentyEightNodeBrickUP::zeroLoad( )
 
 {
-
-	if (load != 0)
-
+	if (load != 0) {
 		load->Zero();
+    }
+  	applyLoad = 0;
 
-
+  	appliedB[0] = 0.0;
+ 	appliedB[1] = 0.0;
+ 	appliedB[2] = 0.0;
 
 	return ;
-
 }
 
 
@@ -1450,11 +1452,22 @@ int
 TwentyEightNodeBrickUP::addLoad(ElementalLoad *theLoad, double loadFactor)
 
 {
+	// Added option for applying body forces in load pattern: C.McGann, U.Washington
+  	int type;
+  	const Vector &data = theLoad->getData(type, loadFactor);
 
-	opserr << "TwentyEightNodeBrickUP::addLoad - load type unknown for truss with tag: " << this->getTag() << endln;
+  	if ((type == LOAD_TAG_BrickSelfWeight) || (type == LOAD_TAG_SelfWeight)) {
+    	applyLoad = 1;
+    	appliedB[0] += loadFactor * b[0];
+    	appliedB[1] += loadFactor * b[1];
+    	appliedB[2] += loadFactor * b[2];
+    	return 0;
+  	} else {
+    	opserr << "TwentyEightNodeBrickUP::addLoad - load type unknown for ele with tag: " << this->getTag() << endln;
+    	return -1;
+  	}
 
-	return -1;
-
+  	return -1;
 }
 
 
@@ -1695,11 +1708,15 @@ const Vector&  TwentyEightNodeBrickUP::getResistingForce( )
 
 			double r = mixtureRho(i);
 
-			resid(jk) -= dvolu[i]*(shgu[3][j][i]*r*b[0]);
-
-			resid(jk+1) -= dvolu[i]*(shgu[3][j][i]*r*b[1]);
-
-			resid(jk+2) -= dvolu[i]*(shgu[3][j][i]*r*b[2]);
+			if (applyLoad == 0) {
+				resid(jk) -= dvolu[i]*(shgu[3][j][i]*r*b[0]);
+				resid(jk+1) -= dvolu[i]*(shgu[3][j][i]*r*b[1]);
+				resid(jk+2) -= dvolu[i]*(shgu[3][j][i]*r*b[2]);
+			} else {
+				resid(jk) -= dvolu[i]*(shgu[3][j][i]*r*appliedB[0]);
+				resid(jk+1) -= dvolu[i]*(shgu[3][j][i]*r*appliedB[1]);
+				resid(jk+2) -= dvolu[i]*(shgu[3][j][i]*r*appliedB[2]);
+			}
 
 		}
 
@@ -1714,10 +1731,14 @@ const Vector&  TwentyEightNodeBrickUP::getResistingForce( )
 		jk = j*4+3;
 
 		for (i = 0; i < nintp; i++) {
-
-			resid(jk) += dvolp[i]*rho*(perm[0]*b[0]*shgp[0][j][i] +
-
-				perm[1]*b[1]*shgp[1][j][i] + perm[2]*b[2]*shgp[2][j][i]);
+			
+			if (applyLoad == 0) {
+				resid(jk) += dvolp[i]*rho*(perm[0]*b[0]*shgp[0][j][i] +
+							 perm[1]*b[1]*shgp[1][j][i] + perm[2]*b[2]*shgp[2][j][i]);
+			} else {
+				resid(jk) += dvolp[i]*rho*(perm[0]*appliedB[0]*shgp[0][j][i] +
+							 perm[1]*appliedB[1]*shgp[1][j][i] + perm[2]*appliedB[2]*shgp[2][j][i]);
+			}
 
 		}
 
@@ -2306,6 +2327,11 @@ TwentyEightNodeBrickUP::setParameter(const char **argv, int argc, Parameter &par
   if (strcmp(argv[0],"vPerm") == 0)
     return param.addObject(4, this);
 
+  // added: C.McGann, U.Washington
+  if (strcmp(argv[0],"materialState") == 0) {
+      return param.addObject(5,this);
+  }
+
   int res = -1;
 
   int matRes = res;
@@ -2321,6 +2347,8 @@ TwentyEightNodeBrickUP::setParameter(const char **argv, int argc, Parameter &par
 int
 TwentyEightNodeBrickUP::updateParameter(int parameterID, Information &info)
 {
+  int res = -1;
+  int matRes = res;
   switch( parameterID ) {
 	case 3:
 		perm[0] = info.theDouble;
@@ -2331,6 +2359,15 @@ TwentyEightNodeBrickUP::updateParameter(int parameterID, Information &info)
 		perm[2] = info.theDouble;
 		this->getDamp();	// update mass matrix
 		return 0;
+	case 5:
+		// added: C.McGann, U.Washington
+		for (int i = 0; i<4; i++) {
+			matRes = materialPointers[i]->updateParameter(parameterID, info);
+		}
+		if (matRes != -1) {
+			res = matRes;
+		}
+		return res;
 	default:
 		return -1;
   }

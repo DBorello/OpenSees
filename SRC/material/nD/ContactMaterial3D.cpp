@@ -25,7 +25,9 @@
 // Written: Kathryn Petek
 // Created: February 2004
 // Modified: Chris McGann
-//           November 2010
+//           November 2010 -> changes for incorporation into main source code
+// Modified: Chris McGann
+//           Jan 2011 -> added update for frictional state
 
 // Description: This file contains the implementation for the ContactMaterial3D class.
 //
@@ -34,27 +36,25 @@
 
 #include <Information.h>
 #include <MaterialResponse.h>
-
+#include <Parameter.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
-
-//#include <myDebug.h>
 
 int ContactMaterial3D::matCount = 0;
 double* ContactMaterial3D::frictionCoeffx = 0;
 double* ContactMaterial3D::stiffnessx = 0;
 
 #include <elementAPI.h>
-static int numContactMaterial3DMaterials = 0;
 #define OPS_Export
-
+static int numContactMaterial3DMaterials = 0;
+int ContactMaterial3D::mFrictFlag = 1;
 
 OPS_Export void *
 OPS_NewContactMaterial3DMaterial(void)
 {
   if (numContactMaterial3DMaterials == 0) {
     numContactMaterial3DMaterials++;
-    OPS_Error("ContactMaterial3D nDmaterial - Written by K.Petek, P.Mackenzie-Helnwein, P.Arduino, U.Washington\n", 1);
+    OPS_Error("ContactMaterial3D nDmaterial - Written: K.Petek, P.Mackenzie-Helnwein, P.Arduino, U.Washington\n", 1);
   }
 
   // Pointer to a uniaxial material that will be returned
@@ -107,21 +107,24 @@ ContactMaterial3D::ContactMaterial3D (int tag, double mu, double Gmod, double c,
         opserr << "ContactMaterial3D::ContactMaterial3D(...)" << endln;
 #endif
         frictionCoeff = mu;
+		mMu = mu;
         stiffness = Gmod;
         cohesion  = c;
-                tensileStrength = t;
+		mCo = c;
+        tensileStrength = t;
+		mTen = t;
 
-                MyTag = tag;
+        MyTag = tag;
 
-                if (matCount == 0) {
-                        frictionCoeffx = new double[matCount+20];
-            stiffnessx = new double[matCount+20];
-                }
+        if (matCount == 0) {
+        	frictionCoeffx = new double[matCount+20];
+        	stiffnessx = new double[matCount+20];
+        }
 
-                frictionCoeffx[matCount] = mu;
-                stiffnessx[matCount] = Gmod;
-                matN = matCount;
-                matCount++;
+        frictionCoeffx[matCount] = mu;
+        stiffnessx[matCount] = Gmod;
+        matN = matCount;
+        matCount++;
 
         this->zero();
 }
@@ -149,12 +152,13 @@ void ContactMaterial3D::zero( )
 #ifdef DEBUG
         opserr << "ContactMaterial3D::zero( )" << endln;
 #endif
-             s_e_n.Zero();    // elastic slip from previous increment
+        s_e_n.Zero();    // elastic slip from previous increment
         s_e_nplus1.Zero();    // elastic slip after current increment
        
-          r_nplus1.Zero();    // direction of plastic slip
+        r_nplus1.Zero();    // direction of plastic slip
 
         inSlip    = false;    
+		mFlag = 1;
 
         stress_vec.Zero();
         strain_vec.Zero();
@@ -197,11 +201,14 @@ int ContactMaterial3D::setTrialStrain (const Vector &strain_from_element)
         gap        = strain_vec(0);
         slip(0)    = strain_vec(1);
         slip(1)    = strain_vec(2);
-                t_n                = strain_vec(3);     // lambda =
+        t_n        = strain_vec(3);     // lambda =
                                     // Lagrangean multiplier for normal contact
 
-                Vector zeroVec = slip;  
-                zeroVec.Zero();
+        Vector zeroVec = slip;  
+        zeroVec.Zero();
+
+		// update frictional status
+		this->UpdateFrictionalState();
 
 // trial state (elastic predictor step) -> assume sticking
         inSlip = false;
@@ -422,9 +429,10 @@ int ContactMaterial3D::revertToStart(void)
 #ifdef DEBUG
         opserr << "ContactMaterial3D::revertToStart(void)" << endln;
 #endif
-        this->zero();
 
-        return 0;
+    this->zero();
+
+    return 0;
 }
 
 
@@ -471,7 +479,33 @@ int ContactMaterial3D::getOrder (void) const
         return 6;
 }
 
+int ContactMaterial3D::UpdateFrictionalState(void)
+{
+	if (mFrictFlag == 1 && mFlag == 1) {
+		frictionCoeff = mMu;
+		tensileStrength = mTen;
+		cohesion = mCo;
+		mFlag = 0;
 
+		// ensure tensile strength is inbounds
+		if (tensileStrength > cohesion / frictionCoeff ) {
+			tensileStrength = cohesion / frictionCoeff;
+		}
+		
+	} else if (mFrictFlag != 1) {
+		frictionCoeff = 0.0;
+		cohesion = 0.0;
+		tensileStrength = 0.0;
+		mFlag = 1;
+	}
+
+	return 0;
+}
+
+int ContactMaterial3D::setParameter(const char **argv, int argc, Parameter &param)
+{
+	return -1;
+}
 
 int ContactMaterial3D::sendSelf(int commitTag, Channel &theChannel)
 {
@@ -542,19 +576,17 @@ void ContactMaterial3D::Print(OPS_Stream &s, int flag )
 
 int ContactMaterial3D::updateParameter(int responseID, Information &info)
 {
-        opserr << "ContactMaterial3D::updateParameter(...): " <<MyTag << endln;
-        opserr << "Initial:  frictionCoeff = " << frictionCoeff << "   stiffness = " << stiffness << endln;
-
-        if (responseID==20) {
-                frictionCoeffx[matN] = info.theDouble;
-        }
+    if (responseID==20) {
+        frictionCoeffx[matN] = info.theDouble;
+    }
        
-        if (responseID==21) {
+    if (responseID==21) {
         stiffnessx[matN] = info.theDouble;
-        }
-       
-        opserr << "Updated:  frictionCoeff = " << frictionCoeffx[matN] << "   stiffness = " << stiffnessx[matN] << endln;
-       
+    }
+
+	if (responseID == 1) {
+		mFrictFlag = info.theDouble;
+	}
 
   return 0;
 }

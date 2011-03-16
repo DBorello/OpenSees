@@ -42,6 +42,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <ElementResponse.h>
+#include <ElementalLoad.h>
 #define ELE_TAG_FourNodeQuadWithSensitivity 100000011
 
 double FourNodeQuadWithSensitivity::matrixData[64];
@@ -56,7 +57,7 @@ FourNodeQuadWithSensitivity::FourNodeQuadWithSensitivity(int tag, int nd1, int n
 			   double p, double r, double b1, double b2)
 :Element (tag, ELE_TAG_FourNodeQuadWithSensitivity),
   theMaterial(0), connectedExternalNodes(4), 
-  Q(8), pressureLoad(8), thickness(t), rho(r), pressure(p), Ki(0)
+  Q(8), pressureLoad(8), applyLoad(0), thickness(t), rho(r), pressure(p), Ki(0)
 {
 	pts[0][0] = -0.5773502691896258;
 	pts[0][1] = -0.5773502691896258;
@@ -120,7 +121,7 @@ FourNodeQuadWithSensitivity::FourNodeQuadWithSensitivity(int tag, int nd1, int n
 FourNodeQuadWithSensitivity::FourNodeQuadWithSensitivity()
 :Element (0,ELE_TAG_FourNodeQuadWithSensitivity),
   theMaterial(0), connectedExternalNodes(4), 
- Q(8), pressureLoad(8), thickness(0.0), rho(0.0), pressure(0.0), Ki(0)
+ Q(8), pressureLoad(8), applyLoad(0), thickness(0.0), rho(0.0), pressure(0.0), Ki(0)
 {
   pts[0][0] = -0.577350269189626;
   pts[0][1] = -0.577350269189626;
@@ -475,15 +476,31 @@ FourNodeQuadWithSensitivity::getMass()
 void
 FourNodeQuadWithSensitivity::zeroLoad(void)
 {
-  Q.Zero();
-  return;
+  	Q.Zero();
+  	applyLoad = 0;
+	appliedB[0] = 0.0;
+	appliedB[1] = 0.0;
+  	return;
 }
 
 int
 FourNodeQuadWithSensitivity::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  opserr << "FourNodeQuadWithSensitivity::addLoad - load type unknown for ele with tag: " << this->getTag() << endln;
-  return -1;
+	// Added option for applying body forces in load pattern: C.McGann, U.Washington
+	int type;
+	const Vector &data = theLoad->getData(type, loadFactor);
+
+	if (type == LOAD_TAG_SelfWeight) {
+		applyLoad = 1;
+		appliedB[0] += loadFactor*b[0];
+		appliedB[1] += loadFactor*b[1];
+		return 0;
+	} else {
+		opserr << "FourNodeQuadWithSensitivity::addLoad - load type unknown for ele with tag: " << this->getTag() << endln;
+		return -1;
+	} 
+
+	return -1;
 }
 
 int
@@ -563,8 +580,13 @@ FourNodeQuadWithSensitivity::getResistingForce()
 			// Subtract equiv. body forces from the nodes
 			//P = P - (N^ b) * intWt(i)*intWt(j) * detJ;
 			//P.addMatrixTransposeVector(1.0, N, b, -intWt(i)*intWt(j)*detJ);
-			P(ia) -= dvol*(shp[2][alpha]*b[0]);
-			P(ia+1) -= dvol*(shp[2][alpha]*b[1]);
+			if (applyLoad == 0) {
+				P(ia) -= dvol*(shp[2][alpha]*b[0]);
+				P(ia+1) -= dvol*(shp[2][alpha]*b[1]);
+			} else {
+				P(ia) -= dvol*(shp[2][alpha]*appliedB[0]);
+				P(ia+1) -= dvol*(shp[2][alpha]*appliedB[1]);
+			}
 		}
 	}
 

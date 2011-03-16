@@ -732,7 +732,13 @@ J2Plasticity::revertToLastCommit( )
 int 
 J2Plasticity::revertToStart( ) {
 
-  this->zero( ) ;
+  // added: C.McGann, U.Washington for InitialStateAnalysis
+  if (ops_InitialStateAnalysis) {
+	// do nothing, keep state variables from last step
+  } else {
+	// normal call for revertToStart (not initialStateAnalysis)
+    this->zero( ) ;
+  }
 
   return 0;
 }

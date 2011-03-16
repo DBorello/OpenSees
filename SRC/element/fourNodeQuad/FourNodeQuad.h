@@ -117,6 +117,10 @@ class FourNodeQuad : public Element
     static Vector P;		// Element resisting force vector
     Vector Q;		        // Applied nodal loads
     double b[2];		// Body forces
+
+	double appliedB[2]; // Body forces applied with load pattern, C.McGann, U.Washington
+	int applyLoad;      // flag for body force in load, C.McGann, U.Washington
+	
     Vector pressureLoad;	// Pressure load at nodes
 
     double thickness;	        // Element thickness

@@ -1,7 +1,8 @@
 include ../../../Makefile.def
 
 OBJS       = SimpleContact2D.o  SimpleContact3D.o \
- 		BeamContact3D.o  TclSimpleContactCommand.o 
+ 		BeamContact2D.o BeamContact3D.o BeamEndContact3D.o \
+		TclSimpleContactCommand.o 
 
 all:         $(OBJS)
 

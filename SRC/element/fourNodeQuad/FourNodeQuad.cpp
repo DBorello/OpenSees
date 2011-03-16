@@ -42,6 +42,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <ElementResponse.h>
+#include <ElementalLoad.h>
 
 
 double FourNodeQuad::matrixData[64];
@@ -56,7 +57,7 @@ FourNodeQuad::FourNodeQuad(int tag, int nd1, int nd2, int nd3, int nd4,
 			   double p, double r, double b1, double b2)
 :Element (tag, ELE_TAG_FourNodeQuad), 
   theMaterial(0), connectedExternalNodes(4), 
- Q(8), pressureLoad(8), thickness(t), pressure(p), rho(r), Ki(0)
+ Q(8), pressureLoad(8), thickness(t), applyLoad(0), pressure(p), rho(r), Ki(0)
 {
 	pts[0][0] = -0.5773502691896258;
 	pts[0][1] = -0.5773502691896258;
@@ -116,7 +117,7 @@ FourNodeQuad::FourNodeQuad(int tag, int nd1, int nd2, int nd3, int nd4,
 FourNodeQuad::FourNodeQuad()
 :Element (0,ELE_TAG_FourNodeQuad),
   theMaterial(0), connectedExternalNodes(4), 
- Q(8), pressureLoad(8), thickness(0.0), pressure(0.0), Ki(0)
+ Q(8), pressureLoad(8), thickness(0.0), applyLoad(0), pressure(0.0), Ki(0)
 {
   pts[0][0] = -0.577350269189626;
   pts[0][1] = -0.577350269189626;
@@ -467,15 +468,34 @@ FourNodeQuad::getMass()
 void
 FourNodeQuad::zeroLoad(void)
 {
-  Q.Zero();
-  return;
+	Q.Zero();
+
+	applyLoad = 0;
+
+	appliedB[0] = 0.0;
+	appliedB[1] = 0.0;
+
+  	return;
 }
 
 int 
 FourNodeQuad::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  opserr << "FourNodeQuad::addLoad - load type unknown for ele with tag: " << this->getTag() << endln;
-  return -1;
+	// Added option for applying body forces in load pattern: C.McGann, U.Washington
+	int type;
+	const Vector &data = theLoad->getData(type, loadFactor);
+
+	if (type == LOAD_TAG_SelfWeight) {
+		applyLoad = 1;
+		appliedB[0] += loadFactor*b[0];
+		appliedB[1] += loadFactor*b[1];
+		return 0;
+	} else {
+		opserr << "FourNodeQuad::addLoad - load type unknown for ele with tag: " << this->getTag() << endln;
+		return -1;
+	} 
+
+	return -1;
 }
 
 int 
@@ -555,8 +575,13 @@ FourNodeQuad::getResistingForce()
 			// Subtract equiv. body forces from the nodes
 			//P = P - (N^ b) * intWt(i)*intWt(j) * detJ;
 			//P.addMatrixTransposeVector(1.0, N, b, -intWt(i)*intWt(j)*detJ);
-			P(ia) -= dvol*(shp[2][alpha]*b[0]);
-			P(ia+1) -= dvol*(shp[2][alpha]*b[1]);
+			if (applyLoad == 0) {
+				P(ia) -= dvol*(shp[2][alpha]*b[0]);
+				P(ia+1) -= dvol*(shp[2][alpha]*b[1]);
+			} else {
+				P(ia) -= dvol*(shp[2][alpha]*appliedB[0]);
+				P(ia+1) -= dvol*(shp[2][alpha]*appliedB[1]);
+			}
 		}
 	}
 
@@ -1030,6 +1055,11 @@ FourNodeQuad::setParameter(const char **argv, int argc, Parameter &param)
 
   int res = -1;
 
+  // added: C.McGann, U.Washington
+  	if (strcmp(argv[0],"materialState") == 0) {
+		return param.addObject(5,this);
+	}
+
   // quad pressure loading
   if (strcmp(argv[0],"pressure") == 0)
     return param.addObject(2, this);
@@ -1066,14 +1096,37 @@ FourNodeQuad::setParameter(const char **argv, int argc, Parameter &param)
 int
 FourNodeQuad::updateParameter(int parameterID, Information &info)
 {
+	int res = -1;
+		int matRes = res;
   switch (parameterID) {
     case -1:
       return -1;
+
+	case 1:
+		
+		for (int i = 0; i<4; i++) {
+		matRes = theMaterial[i]->updateParameter(parameterID, info);
+		}
+		if (matRes != -1) {
+			res = matRes;
+		}
+		return res;
       
 	case 2:
 		pressure = info.theDouble;
 		this->setPressureLoadAtNodes();	// update consistent nodal loads
 		return 0;
+
+	case 5:
+		// added: C.McGann, U.Washington
+		for (int i = 0; i<4; i++) {
+			matRes = theMaterial[i]->updateParameter(parameterID, info);
+		}
+		if (matRes != -1) {
+			res = matRes;
+		}
+		return res;
+
 	default: 
 	  /*	  
 	  if (parameterID >= 100) { // material parameter

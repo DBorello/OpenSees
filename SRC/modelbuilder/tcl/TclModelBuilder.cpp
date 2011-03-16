@@ -65,6 +65,8 @@
 #include <Beam3dPointLoad.h>
 #include <Beam3dUniformLoad.h>
 #include <BrickSelfWeight.h>
+#include <SurfaceLoader.h>
+#include <SelfWeight.h>
 #include <LoadPattern.h>
 
 #include <SectionForceDeformation.h>
@@ -76,7 +78,6 @@
 #include <ImposedMotionSP.h>
 #include <ImposedMotionSP1.h>
 #include <MultiSupportPattern.h>
-
 
 #include <TimeSeries.h>
 
@@ -394,6 +395,7 @@ Tcl_RemoveLimitCurveCommand(Tcl_Interp *interp);
 int
 TclCommand_Package(ClientData clientData, Tcl_Interp *interp, int argc, 
 		   TCL_Char **argv);
+
 
 //
 // CLASS CONSTRUCTOR & DESTRUCTOR
@@ -1861,6 +1863,56 @@ TclCommand_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int argc,
 	  return TCL_ERROR;
 	}
 	eleLoadTag++;
+      }
+      return 0;
+  }
+  // Added: C.McGann, U.Washington
+  else if ((strcmp(argv[count],"-surfaceLoad") == 0) || (strcmp(argv[count],"-SurfaceLoad") == 0)) {
+	  count++;
+  	  for (int i=0; i<theEleTags.Size(); i++) {
+		  theLoad = new SurfaceLoader(eleLoadTag, theEleTags(i));
+
+	      if (theLoad == 0) {
+	          opserr << "WARNING eleLoad - out of memory creating load of type " << argv[count] ;
+	          return TCL_ERROR;
+	      }
+
+	      // get the current pattern tag if no tag given in i/p
+	      int loadPatternTag = theTclLoadPattern->getTag();
+	
+	      // add the load to the domain
+	      if (theTclDomain->addElementalLoad(theLoad, loadPatternTag) == false) {
+	          opserr << "WARNING eleLoad - could not add following load to domain:\n ";
+	          opserr << theLoad;
+	          delete theLoad;
+	          return TCL_ERROR;
+	      }
+	  	  eleLoadTag++;
+      }
+      return 0;
+  }
+  // Added: C.McGann, U.Washington
+  else if ((strcmp(argv[count],"-selfWeight") == 0) || (strcmp(argv[count],"-SelfWeight") == 0)) {
+	  count++;
+  	  for (int i=0; i<theEleTags.Size(); i++) {
+		  theLoad = new SelfWeight(eleLoadTag, theEleTags(i));
+
+	      if (theLoad == 0) {
+	          opserr << "WARNING eleLoad - out of memory creating load of type " << argv[count] ;
+	          return TCL_ERROR;
+	      }
+
+	      // get the current pattern tag if no tag given in i/p
+	      int loadPatternTag = theTclLoadPattern->getTag();
+	
+	      // add the load to the domain
+	      if (theTclDomain->addElementalLoad(theLoad, loadPatternTag) == false) {
+	          opserr << "WARNING eleLoad - could not add following load to domain:\n ";
+	          opserr << theLoad;
+	          delete theLoad;
+	          return TCL_ERROR;
+	      }
+	  	  eleLoadTag++;
       }
       return 0;
   }

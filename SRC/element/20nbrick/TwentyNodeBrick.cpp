@@ -2929,7 +2929,8 @@ TwentyNodeBrick::addLoad(ElementalLoad *theLoad, double loadFactor)
 
     int type;
     const Vector &data = theLoad->getData(type, loadFactor);
-    if (type == LOAD_TAG_BrickSelfWeight) {
+    if ((type == LOAD_TAG_BrickSelfWeight) || (type == LOAD_TAG_SelfWeight)) {
+		// Added compatability with selfWeight load implemented for all continuum wlements, C.McGann, U.W.
 
       Vector bforce(60);
       // Check for a quick return

@@ -3392,7 +3392,8 @@ TwentySevenNodeBrick::addLoad(ElementalLoad *theLoad, double loadFactor)
 
     int type;
     const Vector &data = theLoad->getData(type, loadFactor);
-    if (type == LOAD_TAG_BrickSelfWeight) {
+    if ((type == LOAD_TAG_BrickSelfWeight) || (type == LOAD_TAG_SelfWeight)) {
+		// Added compatability with selfWeight command implemented for all continuum elements, C.McGann, U.W.
 
       Vector bforce(81);
       // Check for a quick return

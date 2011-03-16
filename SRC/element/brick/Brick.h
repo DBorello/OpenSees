@@ -19,15 +19,13 @@
 ** ****************************************************************** */
                                                                         
 // $Revision: 1.15 $
-// $Date: 2010/04/23 22:56:22 $
+// $Date: 2010-04-23 22:56:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.h,v $
 
 // Ed "C++" Love
 //
 // Eight node Brick element 
 //
-#ifndef Brick_h
-#define Brick_h
 
 #include <stdio.h> 
 #include <stdlib.h> 
@@ -39,6 +37,9 @@
 #include <Element.h>
 #include <Node.h>
 #include <NDMaterial.h>
+
+#ifndef BRICK_H
+#define BRICK_H
 
 class Brick : public Element {
 
@@ -181,3 +182,4 @@ class Brick : public Element {
 } ; 
 
 #endif
+

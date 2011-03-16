@@ -45,7 +45,7 @@
 #include <Renderer.h>
 #include <G3Globals.h>
 #include <ErrorHandler.h>
-
+#include <Parameter.h>
 #include <ContactMaterial3D.h>
 
 #include <math.h>
@@ -62,7 +62,7 @@ OPS_SimpleContact3D(void)
 {
   if (num_SimpleContact3D == 0) {
     num_SimpleContact3D++;
-    OPS_Error("SimpleContact3D element - Written by K.Petek, P.Arduino, P.Mackenzie-Helnwein, U.Washington\n", 1);
+    OPS_Error("SimpleContact3D element - Written: K.Petek, P.Arduino, P.Mackenzie-Helnwein, U.Washington\n", 1);
   }
 
   // Pointer to a uniaxial material that will be returned
@@ -1157,7 +1157,7 @@ SimpleContact3D::Print(OPS_Stream &s, int flag)
 
 
 Response*
-SimpleContact3D::setResponse(const char **argv, int argc, Information &eleInfo)
+SimpleContact3D::setResponse(const char **argv, int argc, OPS_Stream &eleInfo)
 {
 #ifdef DEBUG
         opserr << "SimpleContact3D::setResponse(const char **argv, int argc, Information &eleInfo): " << MyTag << endln;
@@ -1243,3 +1243,26 @@ SimpleContact3D::getResponse(int responseID, Information &eleInfo)
     return -1;
 }
 
+int
+SimpleContact3D::setParameter(const char **argv, int argc, Parameter &param)
+{
+	if (argc < 1)
+		return -1;
+
+	if (strcmp(argv[0],"friction") == 0) {
+		return param.addObject(1, this);
+	}
+	
+	return -1;
+}
+
+int
+SimpleContact3D::updateParameter(int parameterID, Information &info)
+{
+	int res = -1;
+	int matRes =  theMaterial->updateParameter(parameterID, info);
+	if (matRes != -1) {
+		res = matRes;
+	}
+	return res;
+}

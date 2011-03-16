@@ -697,7 +697,13 @@ MultiaxialCyclicPlasticity::revertToLastCommit( )
 int 
 MultiaxialCyclicPlasticity::revertToStart( ) {
 
-  this->initialize( ) ;
+  // added: C.McGann, U.Washington for InitialStateAnalysis
+  if (ops_InitialStateAnalysis) {
+	// do nothing, keep state variables from last step
+  } else {
+	// normal call for revertToStart (not initialStateAnalysis)
+    this->initialize( ) ;
+  }
 
   return 0;
 }

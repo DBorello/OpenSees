@@ -21,14 +21,11 @@
 #ifndef SurfaceLoad_h
 #define SurfaceLoad_h
 
-// $Revision 1.2
-// $Date 2010.10.11
-// $Source $OpenSees/SRC/element/surfaceLoad.h
-                                                                        
 // Written: Chris McGann
 // Created: 04.2009
 // Modified: Chris McGann, 11.2010
-//
+//           Chris McGann, 02.2011 -> added elemental load
+
 // Description: This file contains the class definition for SurfaceLoad. 
 
 #include <Element.h>
@@ -107,25 +104,27 @@ class SurfaceLoad : public Element
     Vector internalForces;    // vector of Internal Forces
     Vector theVector;         // vector to return the residual
 
-    double my_pressure;
+    double my_pressure;       // pressure applied to surface of element
 
     Node *theNodes[SL_NUM_NODE];
     
-    Vector g1;		// tangent vector  = d(x_Xi)/d_xi
-    Vector g2;		// tangent vector  = d(x_Xi)/d_eta 
-    Vector myNhat;	// normal Vector 
+    Vector g1;		          // tangent vector  = d(x_Xi)/d_xi
+    Vector g2;		          // tangent vector  = d(x_Xi)/d_eta 
+    Vector myNhat;	          // normal Vector 
 
-    Vector myNI;     // shape functions
+    Vector myNI;              // shape functions
 
-    Vector dcrd1;       // current coordinates of node 1
-    Vector dcrd2;       // current coordinates of node 2
-    Vector dcrd3;       // current coordinates of node 3
-    Vector dcrd4;       // current coordinates of node 4
+    Vector dcrd1;             // current coordinates of node 1
+    Vector dcrd2;             // current coordinates of node 2
+    Vector dcrd3;             // current coordinates of node 3
+    Vector dcrd4;             // current coordinates of node 4
 
-    int MyTag;          // what is my name?
+    int MyTag;                // what is my name?
 
     static double oneOverRoot3;
     static double GsPts[4][2];
+
+	double mLoadFactor;       // factor from load pattern
 };
 
 #endif

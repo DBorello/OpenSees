@@ -2842,7 +2842,8 @@ int EightNodeBrick::addLoad(ElementalLoad *theLoad, double loadFactor)
   int type;
   const Vector &data = theLoad->getData(type, loadFactor);
   
-  if (type == LOAD_TAG_BrickSelfWeight) {
+  if ((type == LOAD_TAG_BrickSelfWeight) || (type == LOAD_TAG_SelfWeight)) {
+	  // added compatability with selfWeight load class implemented for all continuum elements, C.McGann, U.W.
   
     Vector bforce(24);  
     // Check for a quick return

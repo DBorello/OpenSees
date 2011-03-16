@@ -11,20 +11,17 @@
 ** file 'COPYRIGHT'  in main directory for information on usage and   **
 ** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
 **                                                                    **
+** Developed by:                                                      **
+**   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
+**   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
+**   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
+**                                                                    **
 ** ****************************************************************** */
+                                                                        
+// Written: Chris McGann
+//          February 2011
 
-
-// $Revision: 1.1 $
-// $Date: 2010-02-04 00:44:04 $
-// $Source: /usr/local/cvs/OpenSees/SRC/material/nD/DruckerPrager3D.h,v $
-
-// Written: K.Petek, U.Washington
-
-//
-// DruckerPrager3D isotropic hardening material class
-// 
-
-#include <stdio.h>
+#include <stdio.h> 
 #include <stdlib.h> 
 #include <math.h> 
 
@@ -34,27 +31,25 @@
 
 #include <DruckerPrager.h>
 
-class DruckerPrager3D : public DruckerPrager {
-
-//-------------------Declarations-------------------------------
+class DruckerPragerPlaneStrain : public DruckerPrager {
 
   public : 
 
   //null constructor
-  DruckerPrager3D( ) ;
+  DruckerPragerPlaneStrain();
 
   //full constructor
-  DruckerPrager3D(int tag, double bulk, double shear,
+  DruckerPragerPlaneStrain(int tag, double bulk, double shear,
 		  double s_y, double r, double r_bar, double Kinfinity, double Kinit, 
-		  double d1, double d2, double H, double t, double massDen, double atm);
+		  double d1, double d2, double H, double t, double massDens, double atm);
 
 
   //destructor
-  ~DruckerPrager3D( ) ;
+  ~DruckerPragerPlaneStrain();
 
-  NDMaterial* getCopy( ) ;
-  const char* getType( ) const ;
-  int getOrder( ) const ;
+  NDMaterial* getCopy();
+  const char* getType() const;
+  int getOrder() const;
 
   int setTrialStrain(const Vector &strain_from_element);
 
@@ -62,22 +57,29 @@ class DruckerPrager3D : public DruckerPrager {
   int setTrialStrain(const Vector &v, const Vector &r);
     
   //send back the strain
-  const Vector& getStrain( ) ;
+  const Vector& getStrain();
 
   //send back the stress 
-  const Vector& getStress( ) ;
+  const Vector& getStress();
 
   //send back the tangent 
-  const Matrix& getTangent( ) ;
-  const Matrix& getInitialTangent( ) ;
+  const Matrix& getTangent();
+  const Matrix& getInitialTangent();
 
   //this is mike's problem
-  int setTrialStrain(const Tensor &v) ;
-  int setTrialStrain(const Tensor &v, const Tensor &r) ;    
+  int setTrialStrain(const Tensor &v);
+  int setTrialStrain(const Tensor &v, const Tensor &r);    
   int setTrialStrainIncr(const Tensor &v);
-  int setTrialStrainIncr(const Tensor &v, const Tensor &r) ;
+  int setTrialStrainIncr(const Tensor &v, const Tensor &r);
 
   private :
 
+  // static vectors and matrices
+  static Vector strain;
+  static Vector stress;
+  static Matrix tangent;
 
-} ; //end of DruckerPrager3D declarations
+
+}; 
+
+

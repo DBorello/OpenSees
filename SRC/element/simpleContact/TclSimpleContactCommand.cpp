@@ -39,7 +39,9 @@
 
 #include "SimpleContact2D.h"
 #include "SimpleContact3D.h"
+#include "BeamContact2D.h"
 #include "BeamContact3D.h"
+#include "BeamEndContact3D.h"
 
 #include <CrdTransf.h>
 
@@ -281,6 +283,120 @@ TclModelBuilder_addSimpleContact3D(ClientData clientData, Tcl_Interp *interp,
 
 /*  *****************************************************************************
     
+    B E A M   C O N T A C T   2 D
+
+    ***************************************************************************** */
+
+int
+TclModelBuilder_addBeamContact2D(ClientData clientData, Tcl_Interp *interp,  
+				int argc, 
+				TCL_Char **argv, 
+				Domain*theTclDomain,
+				TclModelBuilder *theTclBuilder, int eleArgStart)
+{
+  // ensure the destructor has not been called - 
+  if (theTclBuilder == 0) {
+    opserr << "WARNING builder has been destroyed\n";    
+    return TCL_ERROR;
+  }
+
+  // check the number of arguments is correct
+  if (argc-eleArgStart < 10) {
+    opserr << "WARNING insufficient arguments here\n";
+    printCommand(argc, argv);
+	opserr << "want: element BeamContact2D eleTag? iNode? jNode? slaveNode? lambdaNode? radius? matTag? gapTol? forceTol?\n";
+    return TCL_ERROR;
+  }    
+
+  // get the id and end nodes 
+  int BeamContact2DId, iNode, jNode, slaveNode, lambdaNode, matID;
+  double rad, tolG, tolF;
+
+  if (Tcl_GetInt(interp, argv[1+eleArgStart], &BeamContact2DId) != TCL_OK) {
+    opserr << "WARNING invalid BeamContact2D eleTag" << endln;
+    return TCL_ERROR;
+  }
+  if (Tcl_GetInt(interp, argv[2+eleArgStart], &iNode) != TCL_OK) {
+    opserr << "WARNING invalid iNode\n";
+    opserr << "BeamContact2D element: " << BeamContact2DId << endln;
+    return TCL_ERROR;
+  }
+
+  if (Tcl_GetInt(interp, argv[3+eleArgStart], &jNode) != TCL_OK) {
+     opserr << "WARNING invalid jNode\n";
+     opserr << "BeamContact2D element: " << BeamContact2DId << endln;
+     return TCL_ERROR;
+  }
+
+  if (Tcl_GetInt(interp, argv[4+eleArgStart], &slaveNode) != TCL_OK) {
+     opserr << "WARNING invalid slaveNode\n";
+     opserr << "BeamContact2D element: " << BeamContact2DId << endln;
+     return TCL_ERROR;
+  }  
+  
+  if (Tcl_GetInt(interp, argv[5+eleArgStart], &lambdaNode) != TCL_OK) {
+     opserr << "WARNING invalid lambdaNode\n";
+     opserr << "BeamContact2D element: " << BeamContact2DId << endln;
+     return TCL_ERROR;
+  } 
+
+  if (Tcl_GetDouble(interp, argv[6+eleArgStart], &rad) != TCL_OK) {
+     opserr << "WARNING invalid radius\n";
+     opserr << "BeamContact2D element: " << BeamContact2DId << endln;
+     return TCL_ERROR;
+  }  
+
+    if (Tcl_GetInt(interp, argv[7+eleArgStart], &matID) != TCL_OK) {
+     opserr << "WARNING invalid matID\n";
+     opserr << "BeamContact2D element: " << BeamContact2DId << endln;
+     return TCL_ERROR;
+  }
+
+  if (Tcl_GetDouble(interp, argv[8+eleArgStart], &tolG) != TCL_OK) {
+     opserr << "WARNING invalid GapTol\n";
+     opserr << "BeamContact2D element: " << BeamContact2DId << endln;
+     return TCL_ERROR;
+  }  
+  
+  if (Tcl_GetDouble(interp, argv[9+eleArgStart], &tolF) != TCL_OK) {
+     opserr << "WARNING invalid ForceTol\n";
+     opserr << "BeamContact2D element: " << BeamContact2DId << endln;
+     return TCL_ERROR;
+  } 
+  
+  NDMaterial *theMaterial = theTclBuilder->getNDMaterial(matID);
+      
+  if (theMaterial == 0) {
+      opserr << "WARNING material not found\n";
+      opserr << "Material: " << matID;
+      opserr << "\nBeamContact2D element: " << BeamContact2DId << endln;
+      return TCL_ERROR;
+  }
+  
+  // now create the BeamContact2D and add it to the Domain
+  BeamContact2D *theBeamContact2D = 
+      new BeamContact2D(BeamContact2DId,iNode,jNode, 
+				 slaveNode,lambdaNode, *theMaterial, rad,
+				 tolG, tolF);
+  if (theBeamContact2D == 0) {
+      opserr << "WARNING ran out of memory creating element\n";
+      opserr << "BeamContact2D element: " << BeamContact2DId << endln;
+      return TCL_ERROR;
+  }
+
+  if (theTclDomain->addElement(theBeamContact2D) == false) {
+      opserr << "WARNING could not add element to the domain\n";
+      opserr << "BeamContact2D element: " << BeamContact2DId << endln;
+      delete theBeamContact2D;
+      return TCL_ERROR;
+  }
+
+  // if get here we have sucessfully created the element and added it to the domain
+  return TCL_OK;
+}
+
+/*  *****************************************************************************
+    
     B E A M   C O N T A C T   3 D
 
     ***************************************************************************** */
@@ -402,6 +518,106 @@ TclModelBuilder_addBeamContact3D(ClientData clientData, Tcl_Interp *interp,
       opserr << "WARNING could not add element to the domain\n";
       opserr << "BeamContact3D element: " << BeamContact3DId << endln;
       delete theBeamContact3D;
+      return TCL_ERROR;
+  }
+
+  // if get here we have sucessfully created the element and added it to the domain
+  return TCL_OK;
+}
+
+/*  *****************************************************************************
+    
+    B E A M   E N D  C O N T A C T   3 D
+
+    ***************************************************************************** */
+
+int
+TclModelBuilder_addBeamEndContact3D(ClientData clientData, Tcl_Interp *interp,  
+				int argc, 
+				TCL_Char **argv, 
+				Domain*theTclDomain,
+				TclModelBuilder *theTclBuilder, int eleArgStart)
+{
+  // ensure the destructor has not been called - 
+  if (theTclBuilder == 0) {
+    opserr << "WARNING builder has been destroyed\n";    
+    return TCL_ERROR;
+  }
+
+  // check the number of arguments is correct
+  if (argc-eleArgStart < 8) {
+    opserr << "WARNING insufficient arguments here\n";
+    printCommand(argc, argv);
+    opserr << "Want: element BeamEndContact3D eleTag?  iNode? jNode? slaveNode? lambdaNode? radius? gapTol? forceTol? <cFlag>?\n";
+    return TCL_ERROR;
+  }    
+
+  // get the id and end nodes 
+  int BeamEndContact3DId, iNode, jNode, slaveNode, lambdaNode;
+  double rad, tolG, tolF;
+
+  if (Tcl_GetInt(interp, argv[1+eleArgStart], &BeamEndContact3DId) != TCL_OK) {
+    opserr << "WARNING invalid BeamEndContact3D eleTag" << endln;
+    return TCL_ERROR;
+  }
+  
+  if (Tcl_GetInt(interp, argv[2+eleArgStart], &iNode) != TCL_OK) {
+    opserr << "WARNING invalid iNode\n";
+    opserr << "BeamEndContact3D element: " << BeamEndContact3DId << endln;
+    return TCL_ERROR;
+  }
+
+  if (Tcl_GetInt(interp, argv[3+eleArgStart], &jNode) != TCL_OK) {
+    opserr << "WARNING invalid jNode\n";
+    opserr << "BeamEndContact3D element: " << BeamEndContact3DId << endln;
+    return TCL_ERROR;
+  }
+
+  if (Tcl_GetInt(interp, argv[4+eleArgStart], &slaveNode) != TCL_OK) {
+     opserr << "WARNING invalid slaveNode\n";
+     opserr << "BeamEndContact3D element: " << BeamEndContact3DId << endln;
+     return TCL_ERROR;
+  }
+
+  if (Tcl_GetInt(interp, argv[5+eleArgStart], &lambdaNode) != TCL_OK) {
+     opserr << "WARNING invalid lambdaNode\n";
+     opserr << "BeamEndContact3D element: " << BeamEndContact3DId << endln;
+     return TCL_ERROR;
+  }  
+
+  if (Tcl_GetDouble(interp, argv[6+eleArgStart], &rad) != TCL_OK) {
+     opserr << "WARNING invalid radius\n";
+     opserr << "BeamEndContact3D element: " << BeamEndContact3DId << endln;
+     return TCL_ERROR;
+  }  
+
+  if (Tcl_GetDouble(interp, argv[7+eleArgStart], &tolG) != TCL_OK) {
+     opserr << "WARNING invalid gapTol\n";
+     opserr << "BeamEndContact3D element: " << BeamEndContact3DId << endln;
+     return TCL_ERROR;
+  }  
+  
+  if (Tcl_GetDouble(interp, argv[8+eleArgStart], &tolF) != TCL_OK) {
+     opserr << "WARNING invalid forceTol\n";
+     opserr << "BeamEndContact3D element: " << BeamEndContact3DId << endln;
+     return TCL_ERROR;
+  } 
+
+  // now create the BeamEndContact3D element and add it to the Domain
+  BeamEndContact3D *theBeamEndContact3D = 
+      new BeamEndContact3D(BeamEndContact3DId,iNode, 
+				 jNode,slaveNode,lambdaNode,
+				 rad, tolG, tolF);
+  if (theBeamEndContact3D == 0) {
+      opserr << "WARNING ran out of memory creating element\n";
+      opserr << "BeamEndContact3D element: " << BeamEndContact3DId << endln;
+      return TCL_ERROR;
+  }
+
+  if (theTclDomain->addElement(theBeamEndContact3D) == false) {
+      opserr << "WARNING could not add element to the domain\n";
+      opserr << "BeamEndContact3D element: " << BeamEndContact3DId << endln;
+      delete theBeamEndContact3D;
       return TCL_ERROR;
   }
 

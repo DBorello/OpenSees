@@ -27,6 +27,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <ElementResponse.h>
+#include <ElementalLoad.h>
 
 Matrix FourNodeQuadUP::K(12,12);
 Vector FourNodeQuadUP::P(12);
@@ -44,7 +45,7 @@ FourNodeQuadUP::FourNodeQuadUP(int tag, int nd1, int nd2, int nd3, int nd4,
 :Element (tag, ELE_TAG_FourNodeQuadUP),
   theMaterial(0), connectedExternalNodes(4),
   nd1Ptr(0), nd2Ptr(0), nd3Ptr(0), nd4Ptr(0), Ki(0),
-  Q(12), pressureLoad(12), thickness(t), kc(bulk), rho(r), pressure(p)
+  Q(12), pressureLoad(12), applyLoad(0), thickness(t), kc(bulk), rho(r), pressure(p)
 {
 	pts[0][0] = -0.5773502691896258;
 	pts[0][1] = -0.5773502691896258;
@@ -98,7 +99,7 @@ FourNodeQuadUP::FourNodeQuadUP()
 :Element (0,ELE_TAG_FourNodeQuadUP),
   theMaterial(0), connectedExternalNodes(4),
  nd1Ptr(0), nd2Ptr(0), nd3Ptr(0), nd4Ptr(0), Ki(0),
-  Q(12), pressureLoad(12), thickness(0.0), kc(0.0), rho(0.0), pressure(0.0)
+  Q(12), pressureLoad(12), applyLoad(0), thickness(0.0), kc(0.0), rho(0.0), pressure(0.0)
 {
 	pts[0][0] = -0.577350269189626;
 	pts[0][1] = -0.577350269189626;
@@ -511,6 +512,10 @@ void
 FourNodeQuadUP::zeroLoad(void)
 {
 	Q.Zero();
+	applyLoad = 0;
+
+	appliedB[0] = 0.0;
+	appliedB[1] = 0.0;
 
 	return;
 }
@@ -518,8 +523,21 @@ FourNodeQuadUP::zeroLoad(void)
 int
 FourNodeQuadUP::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  opserr << "FourNodeQuadUP::addLoad - load type unknown for ele with tag: " << this->getTag() << "\n";
-  return -1;
+	// Added option for applying body forces in load pattern: C.McGann, U.Washington
+	int type;
+	const Vector &data = theLoad->getData(type, loadFactor);
+
+	if (type == LOAD_TAG_SelfWeight) {
+		applyLoad = 1;
+		appliedB[0] += loadFactor*b[0];
+		appliedB[1] += loadFactor*b[1];
+		return 0;
+	} else {
+		opserr << "FourNodeQuadUP::addLoad - load type unknown for ele with tag: " << this->getTag() << endln;
+		return -1;
+	} 
+
+	return -1;
 }
 
 
@@ -598,8 +616,13 @@ FourNodeQuadUP::getResistingForce()
       //P.addMatrixTransposeVector(1.0, N, b, -intWt(i)*intWt(j)*detJ);
 
       double r = mixtureRho(i);
-      P(ia) -= dvol[i]*(shp[2][alpha][i]*r*b[0]);
-      P(ia+1) -= dvol[i]*(shp[2][alpha][i]*r*b[1]);
+	  if (applyLoad == 0) {
+      	P(ia) -= dvol[i]*(shp[2][alpha][i]*r*b[0]);
+      	P(ia+1) -= dvol[i]*(shp[2][alpha][i]*r*b[1]);
+	  } else {
+		P(ia) -= dvol[i]*(shp[2][alpha][i]*r*appliedB[0]);
+      	P(ia+1) -= dvol[i]*(shp[2][alpha][i]*r*appliedB[1]);
+	  }
     }
   }
 
@@ -608,8 +631,13 @@ FourNodeQuadUP::getResistingForce()
     //P(ia+2) += vol*rho*(perm[0]*b[0]*shpBar[0][alpha]
 	//		+perm[1]*b[1]*shpBar[1][alpha]);
     for (i = 0; i < 4; i++) {
-      P(ia+2) += dvol[i]*rho*(perm[0]*b[0]*shp[0][alpha][i] +
-      perm[1]*b[1]*shp[1][alpha][i]);
+		if (applyLoad == 0) {
+      		P(ia+2) += dvol[i]*rho*(perm[0]*b[0]*shp[0][alpha][i] +
+      		           perm[1]*b[1]*shp[1][alpha][i]);
+		} else {
+			P(ia+2) += dvol[i]*rho*(perm[0]*appliedB[0]*shp[0][alpha][i] +
+      		           perm[1]*appliedB[1]*shp[1][alpha][i]);
+		}
     }
   }
 
@@ -1036,6 +1064,11 @@ FourNodeQuadUP::setParameter(const char **argv, int argc, Parameter &param)
   if (strcmp(argv[0],"vPerm") == 0)
     return param.addObject(4, this);
 
+  // added: C.McGann, U.Washington
+  if (strcmp(argv[0],"materialState") == 0) {
+      return param.addObject(5,this);
+  }
+
   // a material parameter
   if (strstr(argv[0],"material") != 0) {
 
@@ -1065,6 +1098,8 @@ FourNodeQuadUP::setParameter(const char **argv, int argc, Parameter &param)
 int
 FourNodeQuadUP::updateParameter(int parameterID, Information &info)
 {
+  int res = -1;
+  int matRes = res;
   switch (parameterID) {
     case -1:
       return -1;
@@ -1085,6 +1120,15 @@ FourNodeQuadUP::updateParameter(int parameterID, Information &info)
 		perm[1] = info.theDouble;
 		this->getDamp();	// update mass matrix
 		return 0;
+	case 5:
+	    // added: C.McGann, U.Washington
+		for (int i = 0; i<4; i++) {
+			matRes = theMaterial[i]->updateParameter(parameterID, info);
+		}
+		if (matRes != -1) {
+			res = matRes;
+		}
+		return res;
 	default:
 		if (parameterID >= 100) { // material parameter
 			int pointNum = parameterID/100;

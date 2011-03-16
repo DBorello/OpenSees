@@ -96,8 +96,12 @@ class SimpleContact2D : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(OPS_Stream &s, int flag =0);    
 
-    Response *setResponse(const char **argv, int argc, Information &eleInfo);
+    Response *setResponse(const char **argv, int argc, OPS_Stream &eleInfo);
     int getResponse(int responseID, Information &eleInformation);
+
+	// public methods for material stage update
+	int setParameter(const char **argv, int argc, Parameter &param);
+    int updateParameter(int parameterID, Information &info);
 
   protected:
 

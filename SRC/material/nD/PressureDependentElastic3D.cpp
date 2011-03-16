@@ -236,10 +236,16 @@ int PressureDependentElastic3D::revertToLastCommit (void)
 
 int PressureDependentElastic3D::revertToStart (void)
 {
-  Stress = Stress*0.0;
-  Strain = Strain*0.0;
+  // added: C.McGann, U.Washington for InitialStateAnalysis
+  if (ops_InitialStateAnalysis) {
+	// do nothing, keep state variables from last step
+  } else {
+	// normal call for revertToStart (not initialStateAnalysis)
+	Stress = Stress*0.0;
+    Strain = Strain*0.0;
 
-  p_n = 0.0;
+    p_n = 0.0;
+  }
 
   return 0;
 }

@@ -42,6 +42,7 @@
 #include <shp3d.h>
 #include <Renderer.h>
 #include <ElementResponse.h>
+#include <Parameter.h>
 #include <ElementalLoad.h>
 
 #include <Channel.h>
@@ -305,7 +306,6 @@ void  Brick::Print( OPS_Stream &s, int flag )
       << endln ;
 
     s << "Resisting Force (no inertia): " << this->getResistingForce();
-    s << "Mass: " << this->getMass();
   }
 }
  
@@ -499,7 +499,8 @@ Brick::addLoad(ElementalLoad *theLoad, double loadFactor)
   int type;
   const Vector &data = theLoad->getData(type, loadFactor);
 
-  if (type == LOAD_TAG_BrickSelfWeight) {
+  if ((type == LOAD_TAG_BrickSelfWeight) || (type == LOAD_TAG_SelfWeight)) {
+	  // added compatability with selfWeight class implemented for all continuum elements, C.McGann, U.W.
     applyLoad = 1;
     appliedB[0] += loadFactor * b[0];
     appliedB[1] += loadFactor * b[1];
@@ -1810,6 +1811,11 @@ Brick::setParameter(const char **argv, int argc, Parameter &param)
 
   int res = -1;
 
+  // added: C.McGann, U.Washington
+  	if (strcmp(argv[0],"materialState") == 0) {
+		return param.addObject(5,this);
+	}
+
   if (strstr(argv[0],"material") != 0) {
 
     if (argc < 3)
@@ -1838,6 +1844,19 @@ Brick::setParameter(const char **argv, int argc, Parameter &param)
 int
 Brick::updateParameter(int parameterID, Information &info)
 {
-  return -1;
+	// added: C.McGann, U.Washington
+  	int res = -1;
+	int matRes = res;
+	if (parameterID == 1 || parameterID == 5) {
+		for (int i = 0; i<8; i++) {
+			matRes = materialPointers[i]->updateParameter(parameterID, info);
+		}
+		if (matRes != -1) {
+			res = matRes;
+		}
+		return res;
+	} else {
+    	return -1;
+	}
 }
 

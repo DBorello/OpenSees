@@ -56,6 +56,7 @@
 #include <FEM_ObjectBroker.h>
 
 #include <ElementResponse.h>
+#include <ElementalLoad.h>
 
 
 
@@ -107,7 +108,7 @@ NineFourNodeQuadUP::NineFourNodeQuadUP(int tag,
 
   theMaterial(0), connectedExternalNodes(9),
 
-  Ki(0), Q(22), thickness(t), kc(bulk), rho(r)
+  Ki(0), Q(22), applyLoad(0), thickness(t), kc(bulk), rho(r)
 
 {
 
@@ -221,7 +222,7 @@ NineFourNodeQuadUP::NineFourNodeQuadUP()
 
   theMaterial(0), connectedExternalNodes(9),
 
-  Ki(0), Q(22), thickness(0.0), kc(0.0), rho(0.0)
+  Ki(0), Q(22), applyLoad(0), thickness(0.0), kc(0.0), rho(0.0)
 
 {
 
@@ -1028,11 +1029,12 @@ NineFourNodeQuadUP::zeroLoad(void)
 {
 
 	Q.Zero();
+	applyLoad = 0;
 
-
+	appliedB[0] = 0.0;
+	appliedB[1] = 0.0;
 
 	return;
-
 }
 
 
@@ -1040,13 +1042,22 @@ NineFourNodeQuadUP::zeroLoad(void)
 int
 
 NineFourNodeQuadUP::addLoad(ElementalLoad *theLoad, double loadFactor)
-
 {
+	// Added option for applying body forces in load pattern: C.McGann, U.Washington
+	int type;
+	const Vector &data = theLoad->getData(type, loadFactor);
 
-  opserr << "NineFourNodeQuadUP::addLoad - load type unknown for ele with tag: " << this->getTag() << "\n";
+	if (type == LOAD_TAG_SelfWeight) {
+		applyLoad = 1;
+		appliedB[0] += loadFactor*b[0];
+		appliedB[1] += loadFactor*b[1];
+		return 0;
+	} else {
+		opserr << "NineFourNodeQuadUP::addLoad - load type unknown for ele with tag: " << this->getTag() << endln;
+		return -1;
+	} 
 
-  return -1;
-
+	return -1;
 }
 
 
@@ -1187,9 +1198,13 @@ NineFourNodeQuadUP::getResistingForce()
 
         double r = mixtureRho(i);
 
-        P(jk) -= dvolu[i]*(shgu[2][j][i]*r*b[0]);
-
-        P(jk+1) -= dvolu[i]*(shgu[2][j][i]*r*b[1]);
+		if (applyLoad == 0) {
+			P(jk) -= dvolu[i]*(shgu[2][j][i]*r*b[0]);
+			P(jk+1) -= dvolu[i]*(shgu[2][j][i]*r*b[1]);
+		} else {
+			P(jk) -= dvolu[i]*(shgu[2][j][i]*r*appliedB[0]);
+			P(jk+1) -= dvolu[i]*(shgu[2][j][i]*r*appliedB[1]);
+		}
 
     }
 
@@ -1207,9 +1222,13 @@ NineFourNodeQuadUP::getResistingForce()
 
      for (i = 0; i < nintp; i++) {
 
-        P(jk) += dvolp[i]*rho*(perm[0]*b[0]*shgp[0][j][i] +
-
-                 perm[1]*b[1]*shgp[1][j][i]);
+		if (applyLoad == 0) {
+        	P(jk) += dvolp[i]*rho*(perm[0]*b[0]*shgp[0][j][i] +
+             	    perm[1]*b[1]*shgp[1][j][i]);
+		} else {
+			P(jk) += dvolp[i]*rho*(perm[0]*appliedB[0]*shgp[0][j][i] +
+             	    perm[1]*appliedB[1]*shgp[1][j][i]);
+		}
 
      }
 
@@ -1795,6 +1814,11 @@ NineFourNodeQuadUP::setParameter(const char **argv, int argc, Parameter &param)
   if (strcmp(argv[0],"vPerm") == 0)
     return param.addObject(4, this);
 
+  // added: C.McGann, U.Washington
+  if (strcmp(argv[0],"materialState") == 0) {
+	  return param.addObject(5,this);
+  }
+
   // a material parameter
   if (strstr(argv[0],"material") != 0) {
 
@@ -1823,6 +1847,8 @@ NineFourNodeQuadUP::setParameter(const char **argv, int argc, Parameter &param)
 int
 NineFourNodeQuadUP::updateParameter(int parameterID, Information &info)
 {
+  int res = -1;
+  int matRes = res;
   switch (parameterID) {
     case 1:
   	  rho = info.theDouble;
@@ -1836,6 +1862,15 @@ NineFourNodeQuadUP::updateParameter(int parameterID, Information &info)
 	  perm[1] = info.theDouble;
 	  this->getDamp();	// update mass matrix
 	  return 0;
+	case 5:
+	  // added: C.McGann, U.Washington
+	  for (int i = 0; i<4; i++) {
+	      matRes = theMaterial[i]->updateParameter(parameterID, info);
+	  }
+	  if (matRes != -1) {
+		  res = matRes;
+	  }
+	  return res;
   default:
     return -1;
   }

@@ -16,23 +16,18 @@
 **   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
-**                                                                    **
-**                                                                    **
-**                                                                    **
 ** ****************************************************************** */
 
 #ifndef BoundingCamClay_h
 #define BoundingCamClay_h
 
-// $Revision: 1.1 $
-// $Date: 2010-02-17 20:52:18 $
-// $Source: /usr/local/cvs/OpenSees/SRC/material/nD/BoundingCamClay.h,v $
+// Written: Kathryn Petek	
+//          December 2004
+// Modified: Chris McGann
+//           January 2011
 
-// Written: kap	
-// Created: 12/04
-//
 // Description: This file contains the class definition for BoundingCamClay. 
-//
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,27 +36,25 @@
 #include <NDMaterial.h>
 #include <Matrix.h>
 #include <Vector.h>
-#include <Tensor.h>
 
 class BoundingCamClay : public NDMaterial
 {
   public:
-      // Full Constructor
-	  BoundingCamClay(int tag, int classTag, double C, double r, double R, double p_o, double kappa,
-							 double mu_o, double alpha, double lambda, double h, 
-							 double m, double epsE_vo);
 
-	  //Null Constructor
-	  BoundingCamClay();
+    // full constructor
+    BoundingCamClay(int tag, int classTag, double C, double bulk, double OCR, double mu_o, 
+							 double Alpha, double lambda, double h, double m, double massDen);
+    // null constructor
+    BoundingCamClay();
     
-	  //Destructor
-	  ~BoundingCamClay();
+    // destructor
+    ~BoundingCamClay();
  
     NDMaterial *getCopy(const char *type);
 
-	int commitState(void);
-	int revertToLastCommit(void);
-	int revertToStart(void);
+    int commitState(void);
+    int revertToLastCommit(void);
+    int revertToStart(void);
 
     NDMaterial *getCopy(void);
     const char *getType(void) const;
@@ -70,90 +63,91 @@ class BoundingCamClay : public NDMaterial
     Response *setResponse (const char **argv, int argc, OPS_Stream &output);
     int getResponse (int responseID, Information &matInformation);
 
-	int sendSelf(int commitTag, Channel &theChannel);  
-    int recvSelf(int commitTag, Channel &theChannel, 
-		  FEM_ObjectBroker &theBroker); 
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker); 
 
-	void Print(OPS_Stream &s, int flag =0);
+    void Print(OPS_Stream &s, int flag =0);
+
+	int setParameter(const char **argv, int argc, Parameter &param);
+  	int updateParameter(int responseID, Information &eleInformation);
+
+	// send mass density to element in dynamic analysis
+	double getRho(void) {return massDen;};
 
   protected:
 
-	  //input material parameters
-	  double iC;			// ellipsoildal axis ratio
-	  double ip_o;			// preconsolidation pressure
-	  double ikappa;		// hyperelastic compressibility parameter
-	  double imu_o;			// elastic shear modulus
-	  double ialpha;		// hyperelastic parameter
-	  double ilambda;		// compressibility parameter
-	  double ih;			// hardening parameter
-	  double im;			// hardening parameter
-	  double iepsE_vo;		// initial volumetric strain invariant
+	// input material parameters
+	double iC;			    // ellipsoildal axis ratio
+	double mBulk;           // initial bulk modulus
+	double iOCR;            // overconsolidation ratio
+	double ikappa;			// elastic compressibility index
+	double imu_o;			// elastic shear modulus
+	double ialpha;			// pressure-dependent parameter
+	double ilambda;			// compressibility soil index for virgin loading
+	double ih;				// hardening parameter
+	double im;				// hardening parameter
+	double iepsE_vo;		// initial volumetric strain invariant
+	double massDen;         // mass density for dynamic analysis
 
-	  //internal variables
-	  double mr;
-	  double mr_n;
-	  double mR;
-	  double mR_n;
-	  double mKappa;
-	  double mKappa_n;
-	  double mTHETA;
+	// internal variables
+	double mr;              // hardening response variable for load funct, step n+1
+	double mr_n;            // hardening response variable for load funct, step n
+	double mR;              // hardening response variable for bounding funct, step n+1
+	double mR_n;            // hardening response variable for bounding funct, step n
+	double mKappa;          // loading/bounding function relation, step n+1
+	double mKappa_n;        // loading/bounding function relation, step n
+	double mp_o;			// initial mean stress
+	double mTHETA;          // compressiblity constant, theta = 1/(ilam - ikap)
+	double mStressRatio;    // computational variable
 
-	  Vector mEpsilon;
-	  //Vector mEpsilon_n;
-	  Vector mEpsilon_P;
-	  Vector mEpsilon_n_P;
-	  Vector mSigma;
-	  Vector mSigma_n;
-	  Vector mSIGMAo;
-	  Vector mSIGMAo_n;
-	  //Vector mBeta;
-	  //Vector mBeta_n;
+	Vector mEpsilon;        // strain tensor
+	Vector mEpsilon_P;      // plastic strain tensor, step n+1
+	Vector mEpsilon_n_P;    // plastic strain tensor, step n
+	Vector mSigma;          // stress tensor, step n+1
+	Vector mSigma_n;        // stress tensor, step n
+	Vector mSIGMAo;         // normalized stress tensor, step n+1
+	Vector mSIGMAo_n;       // normalized stress tensor, step n
 
-	  bool flagReversal;
+	bool flagReversal;      // flag indicating switch to unloading response
+	static double mElastFlag;
+	bool initializeState;
 
-	  Matrix mM;
-	  Matrix mphi;
+	Matrix mCe;				// elastic tangent stiffness matrix
+	Matrix mCep;			// elastoplastic tangent stiffness matrix
+	Vector mI1;				// 2nd Order Identity Tensor
+	Matrix mIIco;			// 4th-order identity tensor, covariant
+	Matrix mIIcon;			// 4th-order identity tensor, contravariant
+	Matrix mIImix;          // 4th-order identity tensor, mixed variant
+	Matrix mIIvol;			// 4th-order volumetric tensor, IIvol = I1 tensor I1 
+	Matrix mIIdevCon;       // 4th order deviatoric tensor, contravariant
+	Matrix mIIdevMix;       // 4th order deviatoric tensor, mixed variant
+	Matrix mM;              // 4th Order yield function tensor, covariant
+	Vector mState;          // vector of state param for recorders
+	  
 
-	  Matrix mCe;			// elastic tangent stiffness matrix
-	  Matrix mCep;			// elastoplastic tangent stiffness matrix
-	  Vector mI1;			// 2nd Order Identity Tensor
-	  Matrix mII;			// 4th Order Identity Tensor
-	  Matrix mIIvol;		// IIvol = I1 tensor I1  
-	    
+	// member functions
+	void initialize();
+	void plastic_integrator();
+	Matrix GetElasticOperator(double p, double ev, double es, Vector n);
+	Matrix GetCep(double kappa, double r, double R, double dgamma, double rho, double eta,
+                        double nu, Vector SIGMAo, Vector xi, Vector df_dSigma, Matrix Dep);
+	Matrix GetComplianceOperator(double p, double ev, double es, Vector n);
+	double GetContraNorm(Vector v);
+	double GetCovariantNorm(Vector v); 
+	double GetTrace(Vector v);
+	Vector GetState(); 
+	Vector GetCenter();
 
-	  //functions
-	  void initialize();	// initializes variables
+	// tensor functions
+	double DoubleDot2_2(Vector v1, Vector v2);       // doubledot product vector-vector
+	Vector DoubleDot2_4(Vector v1, Matrix m1);       // doubledot product vector-matrix
+	Vector DoubleDot4_2(Matrix m1, Vector v2);       // doubledot product matrix-vector
+	Matrix DoubleDot4_4(Matrix m1, Matrix m2);       // doubledot product matrix-matrix
+	Matrix Dyadic2_2(Vector v1, Vector v2);          // dyadic product vector-vector
 
-	  //plasticity integration routine
-	  void plastic_integrator( ) ;
-
-	  Matrix GetElasticModulus(double p, double q, double ev, double es, Vector n);
-
-	  Matrix GetConsistentModulus(double kappa, double dgamma, double rho, double eta, double nu, double r, double R, double p, double ev, double es, Vector SIGMAo, Vector sigmaMinusAlpha, Vector dfdSigma, Vector n);
-
-	  Matrix GetCompliantModulus(double p, double ev, double es, Vector n);
-	  //
-	  double Norm_EngStrain(Vector v); 
-	  double GetVolInv(Vector v);
-	  double GetDevInv(Vector v);
-
-	  // Tensor functions
-	  double DoubleDot2_2(Vector v1, Vector v2);
-	  Vector DoubleDot2_4(Vector v1, Matrix m1);
-	  Vector DoubleDotStrain2_4(Vector v1, Matrix m1);
-	  Vector DoubleDot4_2(Matrix m1, Vector v2);
-	  Matrix DoubleDot4_4(Matrix m1, Matrix m2);
-	  Matrix DoubleDotStrain4_4(Matrix m1, Matrix m2);
-	  Matrix Dyadic2_2(Vector v1, Vector v2);
-
-
-	  //parameters
-	  static const double one3 ;
-	  static const double two3 ;
-	  static const double root23 ;
-
-
+	// constant computation parameters
+	static const double one3 ;
+	static const double two3 ;
+	static const double root23 ;
 };
-
-
 #endif

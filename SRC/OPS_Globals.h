@@ -69,4 +69,8 @@ extern double   ops_Dt;                // current delta T for current domain doi
 extern Domain  *ops_TheActiveDomain;   // current domain undergoing an update
 extern Element *ops_TheActiveElement;  // current element undergoing an update
 
+// global variable for initial state analysis
+// added: Chris McGann, University of Washington
+extern bool  ops_InitialStateAnalysis;
+
 #endif

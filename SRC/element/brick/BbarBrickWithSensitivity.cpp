@@ -42,6 +42,7 @@
 #include <shp3d.h>
 #include <Renderer.h>
 #include <ElementResponse.h>
+#include <ElementalLoad.h>
 
 
 #include <Channel.h>
@@ -70,7 +71,7 @@ const double  BbarBrickWithSensitivity::wg[] = { 1.0, 1.0, 1.0, 1.0,
 //null constructor
 BbarBrickWithSensitivity::BbarBrickWithSensitivity( ) :
 Element( 0, ELE_TAG_BbarBrickWithSensitivity ),
-connectedExternalNodes(8), load(0), Ki(0)
+connectedExternalNodes(8), applyLoad(0), load(0), Ki(0)
 {
   for (int i=0; i<8; i++ ) {
     materialPointers[i] = 0;
@@ -99,7 +100,7 @@ BbarBrickWithSensitivity::BbarBrickWithSensitivity(  int tag,
 			 NDMaterial &theMaterial,
 			 double b1, double b2, double b3) :
 Element( tag, ELE_TAG_BbarBrickWithSensitivity ),
-connectedExternalNodes(8), load(0), Ki(0)
+connectedExternalNodes(8), applyLoad(0), load(0), Ki(0)
 {
   connectedExternalNodes(0) = node1 ;
   connectedExternalNodes(1) = node2 ;
@@ -467,13 +468,33 @@ void  BbarBrickWithSensitivity::zeroLoad( )
   if (load != 0)
     load->Zero();
 
+  applyLoad = 0;
+
+  appliedB[0] = 0.0;
+  appliedB[1] = 0.0;
+  appliedB[2] = 0.0;
+
   return ;
 }
 
 int
 BbarBrickWithSensitivity::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  opserr << "BbarBrickWithSensitivity::addLoad - load type unknown for ele with tag: " << this->getTag() << endln;
+  // Added option for applying body forces in load pattern: C.McGann, U.Washington
+  int type;
+  const Vector &data = theLoad->getData(type, loadFactor);
+
+  if ((type == LOAD_TAG_BrickSelfWeight) || (type == LOAD_TAG_SelfWeight)) {
+    applyLoad = 1;
+    appliedB[0] += loadFactor * b[0];
+    appliedB[1] += loadFactor * b[1];
+    appliedB[2] += loadFactor * b[2];
+    return 0;
+  } else {
+    opserr << "BbarBrickWithSensitivity::addLoad - load type unknown for ele with tag: " << this->getTag() << endln;
+    return -1;
+  }
+
   return -1;
 }
 
@@ -896,7 +917,11 @@ if (tang_flag ==0) {// stress only
 	  //residual
 	  for ( p = 0; p < ndf; p++ ) {
 		resid( jj + p ) += residJ(p)  ;
-		resid( jj + p ) -= dvol[i]*b[p]*shp[3][j];
+		if (applyLoad == 0) {
+		  resid( jj + p ) -= dvol[i]*b[p]*shp[3][j];
+		} else {
+		  resid( jj + p ) -= dvol[i]*appliedB[p]*shp[3][j];
+		}
 	  }
 
 

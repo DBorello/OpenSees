@@ -57,6 +57,7 @@
 #include <ElementResponse.h>
 #include <Information.h>
 #include <Parameter.h>
+#include <ElementalLoad.h>
 
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
@@ -89,7 +90,7 @@ const double  BBarBrickUP::wg[] = { 1.0, 1.0, 1.0, 1.0,
 //null constructor
 BBarBrickUP::BBarBrickUP( ) :
 Element( 0, ELE_TAG_BBarBrickUP ),
-connectedExternalNodes(8), load(0), Ki(0), kc(0), rho(0)
+connectedExternalNodes(8), applyLoad(0), load(0), Ki(0), kc(0), rho(0)
 {
   for (int i=0; i<8; i++ ) {
     materialPointers[i] = 0;
@@ -115,7 +116,7 @@ BBarBrickUP::BBarBrickUP(  int tag,
 			double p1, double p2, double p3,
 		   double b1, double b2, double b3) :
 Element( tag, ELE_TAG_BBarBrickUP ),
-connectedExternalNodes(8), load(0), Ki(0), kc(bulk), rho(rhof)
+connectedExternalNodes(8), applyLoad(0), load(0), Ki(0), kc(bulk), rho(rhof)
 {
   connectedExternalNodes(0) = node1 ;
   connectedExternalNodes(1) = node2 ;
@@ -625,6 +626,12 @@ void  BBarBrickUP::zeroLoad( )
   if (load != 0)
     load->Zero();
 
+  applyLoad = 0;
+
+  appliedB[0] = 0.0;
+  appliedB[1] = 0.0;
+  appliedB[2] = 0.0;
+
   return ;
 }
 
@@ -632,7 +639,21 @@ void  BBarBrickUP::zeroLoad( )
 int
 BBarBrickUP::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  opserr << "BBarBrickUP::addLoad - load type unknown for truss with tag: " << this->getTag() << endln;
+  // Added option for applying body forces in load pattern: C.McGann, U.Washington
+  int type;
+  const Vector &data = theLoad->getData(type, loadFactor);
+
+  if ((type == LOAD_TAG_BrickSelfWeight) || (type == LOAD_TAG_SelfWeight)) {
+    applyLoad = 1;
+    appliedB[0] += loadFactor * b[0];
+    appliedB[1] += loadFactor * b[1];
+    appliedB[2] += loadFactor * b[2];
+    return 0;
+  } else {
+    opserr << "BBarBrickUP::addLoad - load type unknown for ele with tag: " << this->getTag() << endln;
+    return -1;
+  }
+
   return -1;
 }
 
@@ -960,13 +981,23 @@ void  BBarBrickUP::formResidAndTangent( int tang_flag )
           resid( jj + p ) += residJ(p)  ;
 
           // Subtract equiv. body forces from the nodes
-	      resid( jj + p ) -= dvol[i]*rhot*b[p]*Shape[3][j][i];
+		  if (applyLoad == 0) {
+	      	resid( jj + p ) -= dvol[i]*rhot*b[p]*Shape[3][j][i];
+		  } else {
+			resid( jj + p ) -= dvol[i]*rhot*appliedB[p]*Shape[3][j][i];
+		  }
 		}
 
         // Subtract fluid body force
-		resid( jj + 3 ) += dvol[i]*rho*(perm[0]*b[0]*BBarp[0][j][i] +
+		if (applyLoad == 0) {
+			resid( jj + 3 ) += dvol[i]*rho*(perm[0]*b[0]*BBarp[0][j][i] +
                                         perm[1]*b[1]*BBarp[1][j][i] +
 										perm[2]*b[2]*BBarp[2][j][i]);
+		} else {
+			resid( jj + 3 ) += dvol[i]*rho*(perm[0]*appliedB[0]*BBarp[0][j][i] +
+                                        perm[1]*appliedB[1]*BBarp[1][j][i] +
+										perm[2]*appliedB[2]*BBarp[2][j][i]);
+		}
       } // end if tang_flag
 
       if ( tang_flag == 1 ) {
@@ -1639,6 +1670,11 @@ BBarBrickUP::setParameter(const char **argv, int argc, Parameter &param)
   if (strcmp(argv[0],"vPerm") == 0)
     return param.addObject(4, this);
 
+  // added: C.McGann, U.Washington
+  	if (strcmp(argv[0],"materialState") == 0) {
+		return param.addObject(5,this);
+	}
+
   int res = -1;
 
   int matRes = res;
@@ -1654,6 +1690,8 @@ BBarBrickUP::setParameter(const char **argv, int argc, Parameter &param)
 int
 BBarBrickUP::updateParameter(int parameterID, Information &info)
 {
+  int res = -1;
+  int matRes = res;
   switch( parameterID ) {
 	case 3:
 		perm[0] = info.theDouble;
@@ -1664,6 +1702,15 @@ BBarBrickUP::updateParameter(int parameterID, Information &info)
 		perm[2] = info.theDouble;
 		this->getDamp();	// update mass matrix
 		return 0;
+	case 5:
+	    // added: C.McGann, U.Washington
+		for (int i = 0; i<8; i++) {
+			matRes = materialPointers[i]->updateParameter(parameterID, info);
+		}
+		if (matRes != -1) {
+			res = matRes;
+		}
+		return res;
 	default:
 		return -1;
   }

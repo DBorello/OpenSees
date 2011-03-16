@@ -17,20 +17,13 @@
 // $Date: 2010-02-04 20:50:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/DruckerPrager3D.cpp,v $
 
-// Written: Ed "C++" Love
+// Written: K.Petek, U.Washington
 
 #include <DruckerPrager3D.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <Information.h>
 #include <Parameter.h>
-
-//#include <myDebug.h>
-
-//static vectors and matrices
-//Vector DruckerPrager3D :: strain_vec(6) ;
-//Vector DruckerPrager3D :: stress_vec(6) ;
-//Matrix DruckerPrager3D :: tangent_matrix(6,6) ;
 
 
 //null constructor
@@ -42,13 +35,10 @@ DruckerPrager( )
 //full constructor
 DruckerPrager3D::DruckerPrager3D(int tag, double bulk, double shear, double s_y,
 							 double r, double r_bar, double Kinfinity, double Kinit, 
-							 double d1, double d2, double H, double t, double atm) : 
+							 double d1, double d2, double H, double t, double mDen, double atm) : 
 DruckerPrager(tag, ND_TAG_DruckerPrager3D, bulk, shear, s_y, r, r_bar, Kinfinity,
-	Kinit, d1, d2, H, t, atm)
+	                                       Kinit, d1, d2, H, t, mDen, atm)
 {
-	#ifdef DEBUG
-        opserr << "DruckerPrager3D::DruckerPrager3D(...)" << endln;
-	#endif
 }
 
    
@@ -60,10 +50,6 @@ DruckerPrager3D :: ~DruckerPrager3D( )
 //make a clone of this material
 NDMaterial* DruckerPrager3D :: getCopy( ) 
 { 
-	#ifdef DEBUG
-        opserr << "DruckerPrager3D::getCopy()" << endln;
-	#endif
-
   DruckerPrager3D  *clone;
   clone = new DruckerPrager3D( ) ;   //new instance of this class
   *clone = *this ;          //asignment to make copy
@@ -74,10 +60,6 @@ NDMaterial* DruckerPrager3D :: getCopy( )
 //send back type of material
 const char* DruckerPrager3D :: getType( ) const 
 {
-	#ifdef DEBUG
-        opserr << "DruckerPrager3D::getType()" << endln;
-	#endif
-
   return "ThreeDimensional" ;
 }
 
@@ -85,10 +67,6 @@ const char* DruckerPrager3D :: getType( ) const
 //send back order of strain in vector form
 int DruckerPrager3D :: getOrder( ) const 
 { 
-	#ifdef DEBUG
-        opserr << "DruckerPrager3D::getOrder()" << endln;
-	#endif
-
   return 6 ; 
 } 
 
@@ -96,10 +74,6 @@ int DruckerPrager3D :: getOrder( ) const
 //get the strain and integrate plasticity equations
 int DruckerPrager3D :: setTrialStrain( const Vector &strain_from_element) 
 {
-	#ifdef DEBUG
-        opserr << "DruckerPrager3D::setTrialStrain(...)" << endln;
-	#endif
-
 	//}
 	mEpsilon = strain_from_element;
 	this->plastic_integrator( ) ;
@@ -110,10 +84,6 @@ int DruckerPrager3D :: setTrialStrain( const Vector &strain_from_element)
 //unused trial strain functions
 int DruckerPrager3D::setTrialStrain (const Vector &v, const Vector &r)
 {
-#ifdef DEBUG
-        opserr << "DruckerPrager::setTrialStrain(... ...)" << endln;
-#endif
-
   opserr << "YOU SHOULD NOT SEE THIS: DruckerPrager::setTrialStrain (const Vector &v, const Vector &r)" << endln;
   return this->setTrialStrain (v);
 }
@@ -122,10 +92,6 @@ int DruckerPrager3D::setTrialStrain (const Vector &v, const Vector &r)
 //send back the strain
 const Vector& DruckerPrager3D :: getStrain( ) 
 {
-	#ifdef DEBUG
-        opserr << "DruckerPrager3D::getStrain()" << endln;
-	#endif
-
   return mEpsilon ;
 } 
 
@@ -133,29 +99,18 @@ const Vector& DruckerPrager3D :: getStrain( )
 //send back the stress 
 const Vector& DruckerPrager3D :: getStress( ) 
 {
-	#ifdef DEBUG
-        opserr << "DruckerPrager3D::getStress()" << endln;
-	#endif
-
   return mSigma ;
 }
 
 //send back the tangent 
 const Matrix& DruckerPrager3D :: getTangent( ) 
 {
-	#ifdef DEBUG
-        opserr << "DruckerPrager3D::getTangent()" << endln;
-	#endif
-
   return mCep ;
 } 
 
 //send back the tangent 
 const Matrix& DruckerPrager3D :: getInitialTangent( ) 
 {
-	#ifdef DEBUG
-        opserr << "DruckerPrager3D::getInitialTangent()" << endln;
-	#endif
   return mCe ;
 } 
 

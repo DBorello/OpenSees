@@ -147,7 +147,10 @@ class BbarBrickWithSensitivity : public Element {
     //    static double xl[3][8] ;
     static double xl[][8] ;
 
-	double b[3];		// Body forces
+	double b[3];		    // Body forces
+
+	double appliedB[3];		// Body forces applied with load, C.McGann. U.Washington
+    int applyLoad;          // flag for body force in load, C.McGann, U.Washington
 
     //inertia terms
     void formInertiaTerms( int tangFlag ) ;

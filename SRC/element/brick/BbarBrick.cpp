@@ -42,6 +42,8 @@
 #include <shp3d.h>
 #include <Renderer.h>
 #include <ElementResponse.h>
+#include <Parameter.h>
+#include <ElementalLoad.h>
 
 
 #include <Channel.h>
@@ -70,7 +72,7 @@ const double  BbarBrick::wg[] = { 1.0, 1.0, 1.0, 1.0,
 //null constructor
 BbarBrick::BbarBrick( ) :
 Element( 0, ELE_TAG_BbarBrick ),
-connectedExternalNodes(8), load(0), Ki(0)
+connectedExternalNodes(8), applyLoad(0), load(0), Ki(0)
 {
   for (int i=0; i<8; i++ ) {
     materialPointers[i] = 0;
@@ -96,7 +98,7 @@ BbarBrick::BbarBrick(  int tag,
 			 NDMaterial &theMaterial,
 			 double b1, double b2, double b3) :
 Element( tag, ELE_TAG_BbarBrick ),
-connectedExternalNodes(8), load(0), Ki(0)
+connectedExternalNodes(8), applyLoad(0), load(0), Ki(0)
 {
   connectedExternalNodes(0) = node1 ;
   connectedExternalNodes(1) = node2 ;
@@ -460,13 +462,33 @@ void  BbarBrick::zeroLoad( )
   if (load != 0)
     load->Zero();
 
+  applyLoad = 0;
+
+  appliedB[0] = 0.0;
+  appliedB[1] = 0.0;
+  appliedB[2] = 0.0;
+
   return ;
 }
 
 int
 BbarBrick::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  opserr << "BbarBrick::addLoad - load type unknown for ele with tag: " << this->getTag() << endln;
+  // Added option for applying body forces in load pattern: C.McGann, U.Washington
+  int type;
+  const Vector &data = theLoad->getData(type, loadFactor);
+
+  if ((type == LOAD_TAG_BrickSelfWeight) || (type == LOAD_TAG_SelfWeight)) {
+    applyLoad = 1;
+    appliedB[0] += loadFactor * b[0];
+    appliedB[1] += loadFactor * b[1];
+    appliedB[2] += loadFactor * b[2];
+    return 0;
+  } else {
+    opserr << "BbarBrick::addLoad - load type unknown for ele with tag: " << this->getTag() << endln;
+    return -1;
+  }
+
   return -1;
 }
 
@@ -884,7 +906,11 @@ void  BbarBrick::formResidAndTangent( int tang_flag )
       //residual
       for ( p = 0; p < ndf; p++ ) {
         resid( jj + p ) += residJ(p)  ;
-	    resid( jj + p ) -= dvol[i]*b[p]*shp[3][j];
+		if (applyLoad == 0) {
+	    	resid( jj + p ) -= dvol[i]*b[p]*shp[3][j];
+		} else {
+			resid( jj + p ) -= dvol[i]*appliedB[p]*shp[3][j];
+		}
       }
 
       if ( tang_flag == 1 ) {
@@ -1602,42 +1628,59 @@ BbarBrick::getResponse(int responseID, Information &eleInfo)
 int
 BbarBrick::setParameter(const char **argv, int argc, Parameter &param)
 {
-  if (argc < 1)
-    return -1;
+  	if (argc < 1) {
+   		return -1;
+	}
 
-  int res = -1;
+  	int res = -1;
 
-  if (strstr(argv[0],"material") != 0) {
+	// added: C.McGann, U.Washington
+  	if (strcmp(argv[0],"materialState") == 0) {
+		return param.addObject(5,this);
 
-    if (argc < 3)
-      return -1;
+  	} else if (strstr(argv[0],"material") != 0) {
+		
+    	if (argc < 3) {
+      		return -1;
+		}
 
-    int pointNum = atoi(argv[1]);
-    if (pointNum > 0 && pointNum <= 8)
-      return materialPointers[pointNum-1]->setParameter(&argv[2], argc-2, param);
-    else 
-      return -1;
-  }
-
+    	int pointNum = atoi(argv[1]);
+    	if (pointNum > 0 && pointNum <= 8) {
+    		return materialPointers[pointNum-1]->setParameter(&argv[2], argc-2, param);
+    	} else {
+      		return -1;
+		}
   
-  
-  // otherwise it could be just a forall material parameter
-  else {
+  	// otherwise it could be just a forall material parameter
+  	} else {
+		
+    	int matRes = res;
+    	for (int i=0; i<8; i++) {
+      		matRes =  materialPointers[i]->setParameter(argv, argc, param);
+      		if (matRes != -1) {
+				res = matRes;
+			}
+    	}
+  	}
 
-    int matRes = res;
-    for (int i=0; i<8; i++) {
-      matRes =  materialPointers[i]->setParameter(argv, argc, param);
-      if (matRes >= 0)
-	res = matRes;
-    }
-  }
-
-  return res;
+ 	 return res;
 }
     
 int
 BbarBrick::updateParameter(int parameterID, Information &info)
 {
-  return -1;
+	int res = -1;
+	int matRes = res;
+	if (parameterID == 1 || parameterID == 5) {
+		for (int i = 0; i<8; i++) {
+			matRes = materialPointers[i]->updateParameter(parameterID, info);
+		}
+		if (matRes != -1) {
+			res = matRes;
+		}
+		return res;
+	} else {
+    	return -1;
+	}
 }
 

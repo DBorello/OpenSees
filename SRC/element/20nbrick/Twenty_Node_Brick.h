@@ -151,6 +151,9 @@ private :
     //    static double xl[3][20] ;
     static double xl[3][20] ;
     double b[3];		// Body forces
+	
+	double appliedB[3]; // Body forces applied with load pattern, C.McGann, U.Washington
+	int applyLoad;      // flag for body force in load, C.McGann, U.Washington
 
     static double shgu[4][20][27];	// Stores shape functions and derivatives (overwritten)
     static double shlu[4][20][27];	// Stores shape functions and derivatives

@@ -18,69 +18,53 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// Written: K.Petek	
-// Created: 12/04
-
+// Written: Chris McGann, U.Washington
+//          02.2011
 //
-// BoundingCamClay3D isotropic hardening material class
-// 
+// Description: This file contains the implementation for the SelfWeight class.
 
-#include <stdio.h> 
-#include <stdlib.h> 
-#include <math.h> 
-
-#include <NDMaterial.h>
+#include <SelfWeight.h>
 #include <Vector.h>
-#include <Matrix.h>
 
-#include <BoundingCamClay.h>
+Vector SelfWeight::data(1);
 
-class BoundingCamClay3D : public BoundingCamClay {
+SelfWeight::SelfWeight(int tag, int theElementTag)
+  : ElementalLoad(tag, LOAD_TAG_SelfWeight, theElementTag)
+{
+}
 
-//-------------------Declarations-------------------------------
+SelfWeight::SelfWeight()
+  : ElementalLoad(LOAD_TAG_SelfWeight)
+{
+}
 
-  public : 
+SelfWeight::~SelfWeight()
+{
+}
 
-  //null constructor
-  BoundingCamClay3D( ) ;
+const Vector &
+SelfWeight::getData(int &type, double loadFactor)
+{
+  	type = LOAD_TAG_SelfWeight;
 
-  //full constructor
-  BoundingCamClay3D(int tag, double c, double bulk, double OCR, double mu_o,
-							 double alpha, double lambda, double h, 
-							 double m, double mDen);
+	return data;
+}
 
+int 
+SelfWeight::sendSelf(int commitTag, Channel &theChannel)
+{
+	return -1;
+}
 
-  //destructor
-  ~BoundingCamClay3D( ) ;
+int 
+SelfWeight::recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroker &theBroker)
+{
+	return -1;
+}
 
-  NDMaterial* getCopy( ) ;
-  const char* getType( ) const ;
-  int getOrder( ) const ;
-
-  int setTrialStrain(const Vector &strain_from_element);
-
-  // Unused trialStrain functions
-  int setTrialStrain(const Vector &v, const Vector &r);
-    
-  //send back the strain
-  const Vector& getStrain( ) ;
-
-  //send back the stress 
-  const Vector& getStress( ) ;
-
-  //send back the tangent 
-  const Matrix& getTangent( ) ;
-  const Matrix& getInitialTangent( ) ;
-
-  //this is mike's problem
-  int setTrialStrain(const Tensor &v) ;
-  int setTrialStrain(const Tensor &v, const Tensor &r) ;    
-  int setTrialStrainIncr(const Tensor &v) ;
-  int setTrialStrainIncr(const Tensor &v, const Tensor &r) ;
-
-  private :
-
-
-} ; //end of BoundingCamClay3D declarations
-
-
+void 
+SelfWeight::Print(OPS_Stream &s, int flag)
+{
+	s << "SelfWeight...";
+	s << "  element acted on: " << eleTag << endln;;
+}

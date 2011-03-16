@@ -293,18 +293,21 @@
 #define ND_TAG_NeoHookeanCompressible3D	        8003
 #define ND_TAG_FDdecoupledElastic3D	        8004
 #define ND_TAG_FiniteDeformationEP3D	        8005
+// Contact Material - P.Arduino
 #define ND_TAG_ContactMaterial2D				14001
 #define ND_TAG_ContactMaterial3D				14002
-// 3D Drucker-Prager, added by Kathryn Petek and Pedro Arduino and Peter Mackenzie
+// Drucker-Prager - P.Arduino
 #define ND_TAG_DruckerPrager					14003
 #define ND_TAG_DruckerPragerThreeDimensional	14004
 #define ND_TAG_DruckerPragerTensionCutoff		14005
-#define ND_TAG_DruckerPrager3D	    14006
-
-// CamClay with Bounding Surface, added by Kathryn Petek and Pedro Arduino
-#define ND_TAG_BoundingCamClay                  14007
-#define ND_TAG_BoundingCamClay3D                14008
-
+#define ND_TAG_DruckerPrager3D	                14006
+#define ND_TAG_DruckerPragerPlaneStrain         14007
+// CamClay with Bounding Surface - C.McGann
+#define ND_TAG_BoundingCamClay                  14008
+#define ND_TAG_BoundingCamClay3D                14009
+#define ND_TAG_BoundingCamClayPlaneStrain       14010
+// Initial state analysis material wrapper - C.McGann
+#define ND_TAG_InitialStateAnalysisWrapper      14011
 
 #define ND_TAG_ReinforcedConcretePlaneStress  104
 #define ND_TAG_FAReinforcedConcretePlaneStress  105
@@ -368,6 +371,8 @@
 #define LOAD_TAG_Beam3dPointLoad          6
 #define LOAD_TAG_BrickSelfWeight          7
 #define LOAD_TAG_Beam2dTempLoad           8
+#define LOAD_TAG_SurfaceLoader            9 // C.McGann, U.W.
+#define LOAD_TAG_SelfWeight              10 // C.McGann, U.W.
 #define PATTERN_TAG_PBowlLoading	  10
 #define PATTERN_TAG_DRMLoadPattern  11
 
@@ -488,11 +493,13 @@
 #define ELE_TAG_GenericClient    2103
 #define ELE_TAG_GenericCopy      2104
 #define ELE_TAG_PY_MACRO2D      2105
-
-#define ELE_TAG_SimpleContact2D 11
-#define ELE_TAG_SimpleContact3D 12
-#define ELE_TAG_BeamContact3D   13
-#define ELE_TAG_SurfaceLoad   14
+// elements added by U.W. - P.Arduino
+#define ELE_TAG_SimpleContact2D  11
+#define ELE_TAG_SimpleContact3D  12
+#define ELE_TAG_BeamContact3D    13
+#define ELE_TAG_SurfaceLoad      14
+#define ELE_TAG_BeamContact2D    15
+#define ELE_TAG_BeamEndContact3D 16
 
 #define ELE_TAG_TPB1D 15
 

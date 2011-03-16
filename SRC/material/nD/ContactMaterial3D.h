@@ -28,7 +28,9 @@
 // Written: Kathryn Petek
 // Created: February 2004
 // Modified: Chris McGann
-//           November 2010
+//           November 2010 -> changes for incorporation into main source code
+// Modified: Chris McGann
+//           Jan 2011 -> added update for frictional state
 
 // Description: This file contains the class prototype for ContactMaterial3D.
 //
@@ -111,6 +113,8 @@ class ContactMaterial3D : public NDMaterial
 
     void Print(OPS_Stream &s, int flag =0);
 
+	// public methods for material stage update
+	int setParameter(const char **argv, int argc, Parameter &param);
 	int updateParameter(int responseID, Information &eleInformation);
 
 protected:
@@ -129,6 +133,14 @@ protected:
 	double tensileStrength;  // interface tensile strength (force)
 
     void zero();
+	int UpdateFrictionalState(void);
+
+	// variables for update of friction coefficient
+	static int mFrictFlag;
+	int mFlag;
+	double mMu;
+	double mCo;
+	double mTen;
 
 private:
 

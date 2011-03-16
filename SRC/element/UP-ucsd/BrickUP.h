@@ -164,6 +164,10 @@ class BrickUP : public Element {
     //    static double xl[3][8] ;
     static double xl[][8] ;
     double b[3];		// Body forces
+	
+	double appliedB[3]; // Body forces applied by load pattern, C.McGann, U.Washington
+	int applyLoad;      // flag for body forces applied by load, C.McGann, U.Washington
+	
     double rho;			// Fluid mass per unit volume
     double kc;   // combined bulk modulus
     double perm[3];  // permeability

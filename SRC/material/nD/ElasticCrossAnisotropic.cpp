@@ -231,7 +231,14 @@ ElasticCrossAnisotropic::revertToLastCommit (void)
 int
 ElasticCrossAnisotropic::revertToStart (void)
 {
-	Strain = Strain*0.0;
+	// added: C.McGann, U.Washington for InitialStateAnalysis
+	if (ops_InitialStateAnalysis) {
+		// do nothing, keep state variables from last step
+	} else {
+		// normal call for revertToStart (not initialStateAnalysis)
+		Strain = Strain*0.0;
+	}
+	
 	return 0;
 }
 

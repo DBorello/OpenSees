@@ -45,7 +45,7 @@
 #include <Renderer.h>
 #include <G3Globals.h>
 #include <ErrorHandler.h>
-
+#include <Parameter.h>
 #include <ContactMaterial2D.h>
 
 #include <math.h>
@@ -62,7 +62,7 @@ OPS_SimpleContact2D(void)
 {
   if (num_SimpleContact2D == 0) {
     num_SimpleContact2D++;
-    OPS_Error("SimpleContact2D element - Written by K.Petek, P.Arduino, P.Mackenzie-Helnwein, U.Washington\n", 1);
+    OPS_Error("SimpleContact2D element - Written: K.Petek, P.Arduino, P.Mackenzie-Helnwein, U.Washington\n", 1);
   }
 
   // Pointer to a uniaxial material that will be returned
@@ -139,8 +139,8 @@ SimpleContact2D::SimpleContact2D(int tag,  int Nd1, int Nd2,
 	tolGap = tolG;
 	tolForce = tolF;
 
-	inContact          = false;
-	was_inContact      = false;
+	inContact          = true;
+	was_inContact      = true;
 	should_be_released = false;
 	to_be_released     = false;
 	in_bounds          = false;
@@ -776,24 +776,27 @@ SimpleContact2D::Print(OPS_Stream &s, int flag)
 
 
 Response*
-SimpleContact2D::setResponse(const char **argv, int argc, Information &eleInfo)
+SimpleContact2D::setResponse(const char **argv, int argc, OPS_Stream &eleInfo)
 {
 #ifdef DEBUG
 	opserr << "SimpleContact2D::setResponse(...): " << MyTag << endln;
 #endif
 
-    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
-      return new ElementResponse(this, 1, Vector(2));
+    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0) {
+    	return new ElementResponse(this, 1, Vector(2));
+	
+    } else if (strcmp(argv[0],"frictionforce") == 0 || strcmp(argv[0],"frictionforces") == 0) {
+    	return new ElementResponse(this, 2, Vector(2));
 
-    if (strcmp(argv[0],"frictionforce") == 0 || strcmp(argv[0],"frictionforces") == 0)
-      return new ElementResponse(this, 2, Vector(2));
-
-    else if (strcmp(argv[0],"forceScalar") == 0 || strcmp(argv[0],"forceScalars") == 0)
-      return new ElementResponse(this, 3, Vector(2));
+    } else if (strcmp(argv[0],"forcescalar") == 0 || strcmp(argv[0],"forcescalars") == 0) {
+    	return new ElementResponse(this, 3, Vector(2));
     
     // otherwise response quantity is unknown for the SimpleContact2D class
-    else
-      return 0;
+     } else {
+		 opserr << "SimpleContact2D::setResponse(const char **argv, int argc, OPS_Stream &eleInfo): "
+		  << argv[0] << " unknown request" << endln;
+         return 0;
+	 }
 }
 
 
@@ -804,32 +807,52 @@ SimpleContact2D::getResponse(int responseID, Information &eleInfo)
 	opserr << "SimpleContact2D::getResponse(...): " << MyTag << endln;
 #endif
 
-	  Vector force(2);
+	Vector force(2);
 
-	  // get contact stresse/forces
-      Vector stress = theMaterial->getStress();	
+	// get contact stresse/forces
+    Vector stress = theMaterial->getStress();	
 
-  if (responseID == 1) {
+  	if (responseID == 1) {
 
-	  force = stress(0)*n + stress(1)*T;
+	  	force = stress(0)*n + stress(1)*T;
+    	return eleInfo.setVector(force);
 
-    return eleInfo.setVector(force);
+  	} else if (responseID == 2) {
 
-  } else if (responseID == 2) {
+	  	force = stress(1)*T;
+    	return eleInfo.setVector(force);
 
-	  force = stress(1)*T;
+  	} else if (responseID == 3) {
 
-    return eleInfo.setVector(force);
-
-  } else if (responseID == 3) {
-
-	  force(0) = stress(0);
-      force(1) = stress(1);
-
-    return eleInfo.setVector(force);
+	  	force(0) = stress(0);
+      	force(1) = stress(1);
+    	return eleInfo.setVector(force);
   
-  } else
-
-    return -1;
+    } else {
+    	return -1;
+	}
 }
 
+int
+SimpleContact2D::setParameter(const char **argv, int argc, Parameter &param)
+{
+	if (argc < 1)
+		return -1;
+
+	if (strcmp(argv[0],"friction") == 0) {
+		return param.addObject(1, this);
+	}
+	
+	return -1;
+}
+
+int
+SimpleContact2D::updateParameter(int parameterID, Information &info)
+{
+	int res = -1;
+	int matRes =  theMaterial->updateParameter(parameterID, info);
+	if (matRes != -1) {
+		res = matRes;
+	}
+	return res;
+}

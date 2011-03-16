@@ -515,6 +515,7 @@ FEM_ObjectBrokerAllClasses theBroker;
 // init the global variabled defined in OPS_Globals.h
 double        ops_Dt = 1.0;
 Element      *ops_TheActiveElement = 0;
+bool          ops_InitialStateAnalysis = false; // McGann, U.Washington
 
 #ifdef _NOGRAPHICS
 
@@ -789,6 +790,10 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "sectionDeformation", &sectionDeformation, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
 
+	// command added for initial state analysis for nDMaterials
+	// Chris McGann, U.Washington
+	Tcl_CreateCommand(interp, "InitialStateAnalysis", &InitialStateAnalysis,
+			  (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
     Tcl_CreateCommand(interp, "totalCPU", &totalCPU, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
@@ -6772,6 +6777,41 @@ sectionDeformation(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char
   delete theResponse;
 
   return TCL_OK;
+}
+
+// added by C.McGann, U.Washington
+int
+InitialStateAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+	if (argc < 2) {
+		opserr << "WARNING: Incorrect number of arguments for InitialStateAnalysis command" << endln;
+		return TCL_ERROR;
+	}
+		
+	if (strcmp(argv[1],"on") == 0) {
+		opserr << "InitialStateAnalysis ON" << endln;
+		
+		// set global variable to true
+		ops_InitialStateAnalysis = true;
+		
+		return TCL_OK;
+		
+  	} else if (strcmp(argv[1],"off") == 0) {
+		opserr << "InitialStateAnalysis OFF" <<endln;
+
+		// call revert to start to zero the displacements
+		theDomain.revertToStart();
+		
+		// set global variable to false
+		ops_InitialStateAnalysis = false;
+		
+		return TCL_OK;
+		
+  	} else {
+		opserr << "WARNING: Incorrect arguments - want InitialStateAnalysis on, or InitialStateAnalysis off" << endln;
+
+		return TCL_ERROR;		
+  	}
 }
 
 int 

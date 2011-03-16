@@ -145,6 +145,9 @@ class BbarBrick : public Element {
     static double xl[][8] ; 
 
 	double b[3];		// Body forces
+	
+	double appliedB[3]; // Body forces applied with load pattern, C.McGann, U.Washington
+	int applyLoad;      // flag for body force in load, C.McGann, U.Washington
 
     //inertia terms
     void formInertiaTerms( int tangFlag ) ;

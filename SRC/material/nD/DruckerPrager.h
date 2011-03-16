@@ -49,7 +49,7 @@ class DruckerPrager : public NDMaterial
     // Full Constructor
     DruckerPrager(int tag, int classTag, double bulk, double shear,
 		  double s_y, double r, double r_bar, double Kinfinity, double Kinit, 
-		  double d1, double d2, double H, double t, double atm = 101.0);
+		  double d1, double d2, double H, double t, double massDen, double atm = 101.0);
 
   // Elastic Constructor
   //	  DruckerPrager(int tag, double bulk, double shear);
@@ -80,6 +80,8 @@ class DruckerPrager : public NDMaterial
   void Print(OPS_Stream &s, int flag =0);
   int setParameter(const char **argv, int argc, Parameter &param);
   int updateParameter(int responseID, Information &eleInformation);
+
+  double getRho(void) {return massDen;};
   
  protected:
   
@@ -99,6 +101,8 @@ class DruckerPrager : public NDMaterial
   double mHard;			// hardening constant
   double mtheta;		// hardening constant
   double mTo;           // initial tension cutoff strength
+
+  double massDen;
   
   //internal variables
   Vector mEpsilon;

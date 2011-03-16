@@ -533,7 +533,9 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/surfaceLoad/SurfaceLoad.o \
 	$(FE)/element/simpleContact/SimpleContact2D.o \
 	$(FE)/element/simpleContact/SimpleContact3D.o \
+	$(FE)/element/simpleContact/BeamContact2D.o \
 	$(FE)/element/simpleContact/BeamContact3D.o \
+	$(FE)/element/simpleContact/BeamEndContact3D.o \
 	$(FE)/element/feap/elmt01.o \
 	$(FE)/element/feap/elmt02.o \
 	$(FE)/element/feap/elmt03.o \
@@ -675,10 +677,13 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/nD/J2PlateFiber.o \
 	$(FE)/material/nD/DruckerPrager.o \
 	$(FE)/material/nD/DruckerPrager3D.o \
+	$(FE)/material/nD/DruckerPragerPlaneStrain.o \
 	$(FE)/material/nD/ContactMaterial3D.o \
 	$(FE)/material/nD/ContactMaterial2D.o \
 	$(FE)/material/nD/BoundingCamClay.o \
 	$(FE)/material/nD/BoundingCamClay3D.o \
+	$(FE)/material/nD/BoundingCamClayPlaneStrain.o \
+	$(FE)/material/nD/InitialStateAnalysisWrapper.o \
 	$(FE)/material/nD/FeapMaterial.o \
 	$(FE)/material/nD/feap/TclFeapMaterialCommand.o \
 	$(FE)/material/nD/feap/FeapMaterial01.o \
@@ -893,6 +898,8 @@ DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/load/Beam3dUniformLoad.o \
 	$(FE)/domain/load/Beam3dPointLoad.o \
 	$(FE)/domain/load/BrickSelfWeight.o \
+	$(FE)/domain/load/SurfaceLoader.o \
+	$(FE)/domain/load/SelfWeight.o \
 	$(FE)/domain/pattern/LoadPattern.o \
 	$(FE)/domain/pattern/EarthquakePattern.o \
 	$(FE)/domain/pattern/MultiSupportPattern.o \

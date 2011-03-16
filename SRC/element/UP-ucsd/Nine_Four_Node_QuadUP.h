@@ -198,6 +198,9 @@ class NineFourNodeQuadUP : public Element
 
     double b[2];		// Body forces
 
+	double appliedB[2]; // Body forces applied with load pattern, C.McGann, U.Washington
+	int applyLoad;      // flag for body force in load, C.McGann, U.Washington
+
     Matrix *Ki;
 
     Node *theNodes[9];
