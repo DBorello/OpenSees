@@ -139,7 +139,7 @@ RotationNode(0), DisplacementNode(0)
   double deltaY = crdCon(1) - crdRet(1);
   double deltaZ = crdCon(2) - crdRet(2);
   
-  Length0 = sqrt( deltaX*deltaX + deltaY*deltaY + deltaY*deltaY );
+  Length0 = sqrt( deltaX*deltaX + deltaY*deltaY + deltaZ*deltaZ );
   if ( Length0 <= 1.0e-12 ) {
     opserr << "MP_Joint3D::MP_Joint3D - The constraint length is zero\n";
   }
