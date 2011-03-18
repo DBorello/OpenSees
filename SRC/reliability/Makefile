@@ -188,7 +188,6 @@ all:
 	     @$(CD) $(FE)/reliability/domain; $(MAKE);
 	     @$(CD) $(FE)/reliability/FEsensitivity; $(MAKE);
 	     @$(CD) $(FE)/reliability/tcl; $(MAKE);
-	     @$(CD) $(FE)/reliability/optimization; $(MAKE);
 	     @$(CD) $(FE)/optimization; $(MAKE);
 	     $(AR) $(ARFLAGS) $(RELIABILITY_LIBRARY) $(RELIABILITY_OBJS)
 
@@ -206,6 +205,5 @@ wipe: spotless
 	     @$(CD) $(FE)/reliability/domain; $(MAKE) wipe;
 	     @$(CD) $(FE)/reliability/FEsensitivity; $(MAKE) wipe;
 	     @$(CD) $(FE)/reliability/tcl; $(MAKE) wipe;
-	     @$(CD) $(FE)/reliability/optimization; $(MAKE) wipe;
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
