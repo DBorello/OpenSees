@@ -921,11 +921,11 @@ ZeroLength::setResponse(const char **argv, int argc, OPS_Stream &output)
 
     // a material quantity
     } else if (strcmp(argv[0],"material") == 0) {
-        if (argc > 2) {
-            int matNum = atoi(argv[1]);
-            if (matNum >= 1 && matNum <= numMaterials1d)
-                theResponse =  theMaterial1d[matNum-1]->setResponse(&argv[2], argc-2, output);
-        }
+      if (argc > 2) {
+	int matNum = atoi(argv[1]);
+	if (matNum >= 1 && matNum <= numMaterials1d)
+	  theResponse =  theMaterial1d[matNum-1]->setResponse(&argv[2], argc-2, output);
+      }
     }
 
     output.endTag();
@@ -983,12 +983,21 @@ ZeroLength::setParameter(const char **argv, int argc, Parameter &param)
   if (argc < 1)
     return -1;
 
+  if (strcmp(argv[0], "material") == 0) {
+      if (argc > 2) {
+	int matNum = atoi(argv[1]);
+	if (matNum >= 1 && matNum <= numMaterials1d)    
+	  return theMaterial1d[matNum-1]->setParameter(&argv[2], argc-2, param);
+      } else {
+	return -1;
+      }
+  }
 
   for (int i=0; i<numMaterials1d; i++) {
     int res = theMaterial1d[i]->setParameter(argv, argc, param);
-	if (res != -1) {
+    if (res != -1) {
       result = res;
-	}
+    }
   }  
   return result;
 }
