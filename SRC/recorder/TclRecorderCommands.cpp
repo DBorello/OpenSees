@@ -1788,16 +1788,20 @@ TclAddRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 
   TclCreateRecorder(clientData, interp, argc, argv, theDomain, &theRecorder);
   
-  if (theRecorder != 0) {
-    if ((theDomain.addRecorder(*theRecorder)) < 0) {
-      opserr << "WARNING could not add to domain - recorder " << argv[1]<< endln;
-      delete theRecorder;
+  if (theRecorder == 0) {
+      sprintf(interp->result,"-1");
       return TCL_ERROR;
-    }
-
-    int recorderTag = theRecorder->getTag();
-    sprintf(interp->result,"%d",recorderTag);
   }
+
+  if ((theDomain.addRecorder(*theRecorder)) < 0) {
+    opserr << "WARNING could not add to domain - recorder " << argv[1]<< endln;
+    delete theRecorder;
+    sprintf(interp->result,"-1");
+    return TCL_ERROR;
+  } 
+  
+  int recorderTag = theRecorder->getTag();
+  sprintf(interp->result,"%d",recorderTag);
   
   return TCL_OK;
 }
@@ -1809,21 +1813,27 @@ TclAddAlgorithmRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 {
   Recorder *theRecorder = 0;
   theAlgorithm = theAlgo;
-  if (TclCreateRecorder(clientData, interp, argc, argv, theDomain,
-			&theRecorder) == TCL_ERROR) {
+
+  TclCreateRecorder(clientData, interp, argc, argv, theDomain, &theRecorder);
+  
+  if (theRecorder == 0) {
+    sprintf(interp->result,"-1");
     return TCL_ERROR;
-  } else {
-    // add the recorder to the domain, 
-    // NOTE: will not be called with theALgo == 0
-    // see ~/g3/SRC/tcl/commands.C file
-    if (theRecorder != 0)
-      if ((theDomain.addRecorder(*theRecorder)) < 0) {
-	opserr << "WARNING could not add to domain - recorder " << argv[1]<< endln;
-	delete theRecorder;
-	return TCL_ERROR;
-      }
-    
-    return TCL_OK;
+  } 
+
+  // add the recorder to the domain, 
+  // NOTE: will not be called with theALgo == 0
+  // see ~/g3/SRC/tcl/commands.C file
+  if (theAlgorithm != 0) {
+    if ((theAlgorithm->addRecorder(*theRecorder)) < 0) {
+      opserr << "WARNING could not add to domain - recorder " << argv[1]<< endln;
+      delete theRecorder;
+      return TCL_ERROR;
+    }
   }
+
+  int recorderTag = theRecorder->getTag();
+  sprintf(interp->result,"%d",recorderTag);    
+  return TCL_OK;
 }
 
