@@ -486,7 +486,7 @@ int
 Steel01::setParameter(const char **argv, int argc, Parameter &param)
 {
 
-  if (strcmp(argv[0],"sigmaY") == 0 || strcmp(argv[0],"fy") == 0)
+  if (strcmp(argv[0],"sigmaY") == 0 || strcmp(argv[0],"fy") == 0 || strcmp(argv[0],"Fy") == 0)
     return param.addObject(1, this);
   
   if (strcmp(argv[0],"E") == 0)
