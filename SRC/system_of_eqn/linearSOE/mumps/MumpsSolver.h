@@ -77,6 +77,7 @@ class MumpsSolver : public LinearSOESolver
   MumpsSOE *theMumpsSOE;
   bool init;
   int icntl14;
+  int icntl7;
 };
 
 #endif
