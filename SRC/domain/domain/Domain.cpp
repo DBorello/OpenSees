@@ -534,7 +534,7 @@ Domain::addSP_Constraint(int axisDirn, double axisValue,
 	// foreach dof to be constrained create an SP & add to domain
 	for (int i=0; i<fixityConditions.Size(); i++) {
 	  if ((i < numDOF) && (fixityConditions(i) == 1)) {
-	    SP_Constraint *theSP = new SP_Constraint(theNode->getTag(), i, 0.0);
+	    SP_Constraint *theSP = new SP_Constraint(theNode->getTag(), i, 0.0, true);
 	    if (this->addSP_Constraint(theSP) == false) {
 	      opserr << "WARNING could not add SP_Constraint to domain for node " << theNode->getTag();
 	      delete theSP;
