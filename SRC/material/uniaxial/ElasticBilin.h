@@ -39,8 +39,8 @@
 class ElasticBilin : public UniaxialMaterial
 {
   public:
-    ElasticBilin(int tag, double E, double E2, double eps2);    
-    ElasticBilin(int tag, double E, double E2P, double E2N, double eps2P, double eps2N);    
+    ElasticBilin(int tag, double E1, double E2, double eps2);    
+    ElasticBilin(int tag, double E1P, double E2P, double epsP, double E1N, double E2N, double eps2N);    
     ElasticBilin();    
 
     ~ElasticBilin();
@@ -52,7 +52,7 @@ class ElasticBilin : public UniaxialMaterial
     double getStress(void);
     double getTangent(void);
 
-    double getInitialTangent(void) {return E;};
+    double getInitialTangent(void) {return E1P;};
 
     int commitState(void);
     int revertToLastCommit(void);    
@@ -69,9 +69,9 @@ class ElasticBilin : public UniaxialMaterial
   protected:
     
   private:
-    double E, E2P, E2N;   // elastic modulus
-    double eps2P;	 // strain at which E2P takes place	
-    double eps2N;	 // strain at which E2P takes place	
+    double E1P, E1N, E2P, E2N;   // elastic modulus
+    double eps2P;	       // strain at which E2P takes place	
+    double eps2N;	       // strain at which E2P takes place	
 
     double trialStrain, trialStress, trialTangent, commitStrain; 
 };
