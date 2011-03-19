@@ -70,8 +70,8 @@ OPS_NewElasticBilin(void)
   if (argc == 3) 
     theMaterial = new ElasticBilin(iData[0], dData[0], dData[1], dData[2]);
   else
-    theMaterial = new ElasticBilin(iData[0], dData[0], dData[1], dData[3], dData[2], dData[4], dData[5]);
-  
+    theMaterial = new ElasticBilin(iData[0], dData[0], dData[1], dData[2], dData[3], dData[4], dData[5]);
+
   if (theMaterial == 0) {
     opserr << "WARNING could not create uniaxialMaterial of type ElasticBilin\n";
     return 0;
@@ -99,6 +99,7 @@ ElasticBilin::ElasticBilin(int tag, double e, double e2, double eps2)
     eps2P = -eps2;
     eps2N = eps2;
   }
+  this->Print(opserr, 0);
 }
 
 ElasticBilin::ElasticBilin(int tag, double ep, double e2p, double eps2p, double en, double e2n, double eps2n)
@@ -112,6 +113,8 @@ ElasticBilin::ElasticBilin(int tag, double ep, double e2p, double eps2p, double 
   if (eps2n > 0.0) {
     eps2N = -eps2n;
   }
+
+  this->Print(opserr, 0);
 }
 
 ElasticBilin::~ElasticBilin()
