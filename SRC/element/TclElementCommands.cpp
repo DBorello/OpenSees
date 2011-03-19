@@ -100,6 +100,7 @@ extern void *OPS_SurfaceLoad(void);
 extern void *OPS_ModElasticBeam2d(void);
 extern void *OPS_TPB1D(void);
 extern void *OPS_BeamEndContact3D(void);
+extern void *OPS_TFP_Bearing(void);
 
 extern int TclModelBuilder_addFeapTruss(ClientData clientData, Tcl_Interp *interp,  int argc,
 					TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
@@ -483,6 +484,16 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
   } else if ((strcmp(argv[1],"BeamContact3d") == 0) || (strcmp(argv[1],"BeamContact3D") == 0)) {
     
     void *theEle = OPS_BeamContact3D();
+    if (theEle != 0) 
+      theElement = (Element *)theEle;
+    else {
+      opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
+      return TCL_ERROR;
+    }
+
+  } else if ((strcmp(argv[1],"TFPbearing") == 0) || (strcmp(argv[1],"TFP") == 0)) {
+    
+    void *theEle = OPS_TFP_Bearing();
     if (theEle != 0) 
       theElement = (Element *)theEle;
     else {
