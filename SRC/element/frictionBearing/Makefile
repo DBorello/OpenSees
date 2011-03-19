@@ -4,6 +4,7 @@ OBJS       = FlatSliderSimple2d.o \
 	FlatSliderSimple3d.o \
 	SingleFPSimple2d.o \
 	SingleFPSimple3d.o \
+	TFP_Bearing.o \
 	TclFlatSliderCommand.o \
 	TclSingleFPCommand.o \
 	TPB1D.o
