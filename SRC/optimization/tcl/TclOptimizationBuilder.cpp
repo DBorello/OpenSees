@@ -52,15 +52,18 @@ using std::setiosflags;
  
 ///////////#include <SnoptProblem.h>  
 
+#if _HAVESNOPT
 #include <SnoptAnalysis.h>  
- 
+#endif
 
 #include <DesignVariable.h>
 #include <DesignVariablePositioner.h>
 #include <ConstraintFunction.h>
 #include <ObjectiveFunction.h>
 
+#ifdef _HAVESNOPT
 SNOPTAnalysis * theSNOPTAnalysis=0;
+#endif
 
 static Domain *theStructuralDomain = 0;
 OptimizationDomain *theOptimizationDomain = 0;
@@ -103,7 +106,7 @@ TclOptimizationBuilder::~TclOptimizationBuilder()
 {
 
 
-
+#ifdef _HAVESNOPT
   if (theSNOPTAnalysis != 0)
     delete theSNOPTAnalysis;
  ////// if (theSNOPT != 0)
@@ -112,7 +115,7 @@ TclOptimizationBuilder::~TclOptimizationBuilder()
   theSNOPTAnalysis = 0;
  // theSNOPT = 0;
 
- 
+#endif
 
   Tcl_DeleteCommand(theInterp, "designVariable");
   Tcl_DeleteCommand(theInterp, "designVariablePositioner");
@@ -1025,6 +1028,7 @@ TclOptimizationModelBuilder_runSNOPTAnalysis(ClientData clientData,Tcl_Interp *i
 
 
 // here tag ;
+#ifdef _HAVESNOPT
   theSNOPTAnalysis = new SNOPTAnalysis(maxNumberOfIterations, 
 					printFlag,
 					fileNamePrint,
@@ -1044,7 +1048,10 @@ TclOptimizationModelBuilder_runSNOPTAnalysis(ClientData clientData,Tcl_Interp *i
 
 
 	theSNOPTAnalysis->runOptAnalysis(theOptimizationDomain);
-
+#else
+	opserr << "FATAL ERROR: SNOPT NOT LINKED\n";
+	exit(-1);
+#endif
 	if (tclFileName !=0) delete tclFileName;
 
 
