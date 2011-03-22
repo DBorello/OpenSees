@@ -783,14 +783,14 @@ TFP_Bearing::getTangentStiff(void)
 const Matrix &
 TFP_Bearing::getInitialStiff(void)
 {
-  opserr << "TFP_Bearing::getTangent: " <<  *theMatrix;
+  //opserr << "TFP_Bearing::getTangent: " <<  *theMatrix;
   return *theMatrix;
 }
 
 const Vector &
 TFP_Bearing::getResistingForce()
 {	
-  opserr << "TFP_Bearing::getResistingForce: " <<  *theVector;
+  //opserr << "TFP_Bearing::getResistingForce: " <<  *theVector;
   return *theVector;
 }
 
