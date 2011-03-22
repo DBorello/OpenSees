@@ -997,6 +997,12 @@
 				RelativePath="..\..\..\SRC\element\frictionBearing\SingleFPSimple3d.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\element\frictionBearing\TFP_Bearing.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\frictionBearing\TFP_Bearing.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\element\frictionBearing\TPB1D.cpp">
 			</File>
 			<File
@@ -1060,10 +1066,22 @@
 			Name="simpleContact"
 			Filter="">
 			<File
+				RelativePath="..\..\..\SRC\element\simpleContact\BeamContact2D.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\simpleContact\BeamContact2D.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\element\simpleContact\BeamContact3D.cpp">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\element\simpleContact\BeamContact3D.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\simpleContact\BeamEndContact3D.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\simpleContact\BeamEndContact3D.h">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\element\simpleContact\SimpleContact2D.cpp">

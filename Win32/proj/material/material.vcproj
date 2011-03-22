@@ -750,6 +750,12 @@
 				RelativePath="..\..\..\SRC\material\nD\BoundingCamClay3D.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\material\nD\BoundingCamClayPlaneStrain.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\nD\BoundingCamClayPlaneStrain.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\material\nD\ContactMaterial2D.cpp">
 			</File>
 			<File
@@ -774,10 +780,22 @@
 				RelativePath="..\..\..\SRC\material\nD\DruckerPrager3D.h">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\material\nD\DruckerPragerPlaneStrain.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\nD\DruckerPragerPlaneStrain.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\material\nD\ElasticIsotropicBeamFiber2d.cpp">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\material\nD\ElasticIsotropicBeamFiber2d.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\nD\InitialStateAnalysisWrapper.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\material\nD\InitialStateAnalysisWrapper.h">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\material\nD\NDMaterial.cpp">
