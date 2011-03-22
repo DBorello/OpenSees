@@ -708,6 +708,7 @@ double DruckerPrager::Kisoprime(double alpha1)
 
 double DruckerPrager:: T(double alpha2) 
 {
+	return mTo * exp(-mdelta2 * alpha2);
 }
 
 

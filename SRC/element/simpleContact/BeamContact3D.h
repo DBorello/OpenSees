@@ -184,6 +184,7 @@ class BeamContact3D : public Element
     Vector mBn;                 // gap-displacement matrix
     Matrix mBs;                 // slip-displacement matrix
     Matrix mBphi;
+	Vector mSlip;
    
     int MyTag;                  // element tag for debugging
 

@@ -546,6 +546,25 @@ BeamContact3D::revertToStart()
 		in_bounds          = true;
 	}
 
+	// reset applicable member variables
+	mDcrd_a = mIcrd_a;
+	mDcrd_b = mIcrd_b;
+	mDcrd_s = mIcrd_s;
+	mDisp_a_n.Zero();
+	mDisp_b_n.Zero();
+	mDisp_s_n.Zero();
+
+    mL = (mDcrd_b - mDcrd_a).Norm();  
+       
+    mxi = ((mDcrd_b - mDcrd_s)^(mDcrd_b - mDcrd_a))/((mDcrd_b - mDcrd_a)^(mDcrd_b - mDcrd_a));
+    mxi = project(mxi);
+
+	in_bounds      = ( (mxi>0.000) && (mxi<1.0000) );
+    inContact      = ( was_inContact && in_bounds );
+
+    UpdateBase(mxi);
+    ComputeB();
+
     return theMaterial->revertToStart();
 }
 
@@ -724,7 +743,7 @@ opserr << endln; */
             strain(2) = slip(1);
             strain(3) = mLambda;      
             theMaterial->setTrialStrain(strain);
-
+			mSlip = slip;
         }
 
         else if (to_be_released) {
@@ -736,6 +755,7 @@ opserr << endln; */
             strain(2) = 0.0;
             strain(3) = mLambda;    
             theMaterial->setTrialStrain(strain);
+			mSlip.Zero();
         }
 
 
@@ -2030,6 +2050,9 @@ BeamContact3D::setResponse(const char **argv, int argc, OPS_Stream &eleInfo)
     else if (strcmp(argv[0],"masterreaction") == 0 || strcmp(argv[0],"masterreactions") == 0)
       return new ElementResponse(this, 6, Vector(12));
 
+	else if (strcmp(argv[0],"slip") == 0)
+	  return new ElementResponse(this, 7, Vector(2));
+
     // otherwise response quantity is unknown for the BeamContact3D class
     else
         opserr << "BeamContact3D::setResponse(const char **argv, int argc, OPS_Stream &eleInfo): " << argv[0] << " unknown request" << endln;
@@ -2048,6 +2071,7 @@ BeamContact3D::getResponse(int responseID, Information &eleInfo)
           Vector mForces(6);
           Vector mMoments(6);
           Vector mReactions(12);
+		  Vector theSlip(2);
      
           // get contact stresse/forces
       Vector stress = theMaterial->getStress();
@@ -2117,6 +2141,11 @@ BeamContact3D::getResponse(int responseID, Information &eleInfo)
                 }
 
           return eleInfo.setVector(mReactions);
+  
+  } else if (responseID == 7) {
+
+	  // slip vector on tangent plane
+	  return eleInfo.setVector(mSlip);
  
   } else
 

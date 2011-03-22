@@ -358,6 +358,27 @@ BeamContact2D::revertToStart()
 		in_bounds          = true;
 	}
 
+	// reset applicable member variables 
+	mDcrd_a = mIcrd_a;
+	mDcrd_b = mIcrd_b;
+	mDcrd_s = mIcrd_s;
+	mDisp_a_n.Zero();
+	mDisp_b_n.Zero();
+
+	mLength = (mDcrd_b - mDcrd_a).Norm();
+
+	ma_1 = (mDcrd_b - mDcrd_a)/mLength;
+	mb_1 = ma_1;
+
+	mXi = ((mDcrd_b - mDcrd_s)^(mDcrd_b - mDcrd_a))/mLength;
+	mXi = Project(mXi);
+
+	in_bounds = ((mXi > 0.000) && (mXi < 1.000));
+	inContact = (was_inContact && in_bounds);
+
+	UpdateBase(mXi);
+	ComputeB();
+
 	return theMaterial->revertToStart();
 }
 
