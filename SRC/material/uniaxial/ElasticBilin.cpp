@@ -99,7 +99,6 @@ ElasticBilin::ElasticBilin(int tag, double e, double e2, double eps2)
     eps2P = -eps2;
     eps2N = eps2;
   }
-  this->Print(opserr, 0);
 }
 
 ElasticBilin::ElasticBilin(int tag, double ep, double e2p, double eps2p, double en, double e2n, double eps2n)
@@ -113,8 +112,6 @@ ElasticBilin::ElasticBilin(int tag, double ep, double e2p, double eps2p, double 
   if (eps2n > 0.0) {
     eps2N = -eps2n;
   }
-
-  this->Print(opserr, 0);
 }
 
 ElasticBilin::~ElasticBilin()
@@ -248,10 +245,10 @@ ElasticBilin::recvSelf(int cTag, Channel &theChannel,
 void 
 ElasticBilin::Print(OPS_Stream &s, int flag)
 {
-    s << "ElasticPP tag: " << this->getTag() << endln;
-    s << "  E1P: " << E1P << " E2P: " << E2P << " eps2P: " << eps2P;
-    s << "  E1N: " << E1N << " E2N: " << E2N << " eps2N: " << eps2N;
-    s << "strain: "<< trialStrain << " stress: " << trialStress << " tangent: " << trialTangent << endln;
+    s << "ElasticBilin tag: " << this->getTag() << endln;
+    s << "Input Parameters: E1P: " << E1P << " E2P: " << E2P << " eps2P: " << eps2P;
+    s << "  E1N: " << E1N << " E2N: " << E2N << " eps2N: " << eps2N << endln;
+    s << "Current State: strain: "<< trialStrain << " stress: " << trialStress << " tangent: " << trialTangent << endln;
 }
 
 
