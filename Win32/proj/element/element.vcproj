@@ -195,6 +195,12 @@
 			Name="zeroLength"
 			Filter="">
 			<File
+				RelativePath="..\..\..\SRC\element\zeroLength\CoupledZeroLength.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\zeroLength\CoupledZeroLength.h">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\element\zeroLength\TclZeroLength.cpp">
 			</File>
 			<File
