@@ -42,7 +42,7 @@ class DesignVariable : public OptimizationDomainComponent
 {
 
 public:
-	DesignVariable::DesignVariable(int passedTag, 
+	DesignVariable(int passedTag, 
 			 char *passedName,
 			 double passedValue,
 			 double passedUpperBound,
