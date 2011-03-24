@@ -413,6 +413,7 @@
 #define ELE_TAG_ZeroLengthContact3D	 5004
 #define ELE_TAG_ZeroLengthContactNTS2D	 5005
 #define ELE_TAG_ZeroLengthInterface2D	 5006
+#define ELE_TAG_CoupledZeroLength	 5007
 #define ELE_TAG_NLBeamColumn2d	 6000
 #define ELE_TAG_NLBeamColumn3d	 6001
 #define ELE_TAG_LargeDispBeamColumn3d	 6002

@@ -7,6 +7,7 @@ OBJS       = ZeroLength.o \
 	ZeroLengthND.o \
 	ZeroLengthContactNTS2D.o \
 	ZeroLengthInterface2D.o \
+	CoupledZeroLength.o \
 	TclZeroLength.o
 
 
