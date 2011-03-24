@@ -62,7 +62,7 @@ OPS_TFP_Bearing()
     return theEle;
   }
 
-  if (numRemainingArgs != 25) {
+  if (numRemainingArgs != 25 || numRemainingArgs != 24) {
     opserr << "ERROR - TFP_Bearing not enough args provided, want: element TFP_Bearing tag? iNode? jNode? ";
     opserr << "$R1 $R2 $R3 $R4 $do1 $do2 #do3 $do4 $din1 $din2 $din3 $din4 $mu1 $mu2 $mu3 $mu4";
     opserr << " $h1 $h2 $h3 $h4 $H0 $a\n";
@@ -82,7 +82,12 @@ OPS_TFP_Bearing()
 
   int eleTag = iData[0];
 
-  numData = 22;
+  if (numRemainingArgs == 24) {
+    numData = 21;
+    dData[21] = 0.0; // initial Axial Load = 0.0
+  } else 
+    numData = 22;
+
   if (OPS_GetDoubleInput(&numData, dData) != 0) {
     opserr << "WARNING error reading element area for element" << eleTag << endln;
     return 0;
@@ -184,7 +189,7 @@ TFP_Bearing::TFP_Bearing()
 //  destructor - provided to clean up any memory
 TFP_Bearing::~TFP_Bearing()
 {
-  opserr << "TFP_Bearing::~TFP_Bearing()\n";
+
 }
 
 int
