@@ -123,8 +123,8 @@ ElasticBilin::setTrialStrain(double strain, double strainRate)
 {
     trialStrain = strain;
     
-    if (trialStrain > 0.0) {
-      if (trialStrain <= eps2P) {
+    if (trialStrain >= 0.0) {
+      if (trialStrain < eps2P) {
 	trialTangent = E1P;
 	trialStress = E1P*trialStrain;
       } else { 
@@ -132,7 +132,7 @@ ElasticBilin::setTrialStrain(double strain, double strainRate)
 	trialStress = E1P*eps2P + (trialStrain-eps2P)*E2P;
       }  
     } else {
-      if (trialStrain >= eps2N) {
+      if (trialStrain > eps2N) {
 	trialTangent = E1N;
 	trialStress = E1N*trialStrain;
       } else {
