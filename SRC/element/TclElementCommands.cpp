@@ -102,6 +102,7 @@ extern void *OPS_TPB1D(void);
 extern void *OPS_BeamEndContact3D(void);
 extern void *OPS_TFP_Bearing(void);
 extern void *OPS_CoupledZeroLength(void);
+extern void *OPS_FourNodeQuad3d(void);
 
 extern int TclModelBuilder_addFeapTruss(ClientData clientData, Tcl_Interp *interp,  int argc,
 					TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
@@ -561,6 +562,17 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
       opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
       return TCL_ERROR;
     }
+
+  } else if ((strcmp(argv[1],"quad3d") == 0) || (strcmp(argv[1],"Quad3d") == 0)) {
+
+    void *theEle = OPS_FourNodeQuad3d();
+    if (theEle != 0) 
+      theElement = (Element *)theEle;
+    else {
+      opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
+      return TCL_ERROR;
+    }	
+
   }
 
   // if one of the above worked
@@ -616,6 +628,7 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
     int result = TclModelBuilder_addFourNodeQuad(clientData, interp, argc, argv,
 						 theTclDomain, theTclBuilder);
     return result;
+
   } else if (strcmp(argv[1],"quadWithSensitivity") == 0) {
     int result = TclModelBuilder_addFourNodeQuadWithSensitivity(clientData, interp, argc, argv,
 								theTclDomain, theTclBuilder);

@@ -131,30 +131,29 @@ TclModelBuilder_addFourNodeQuad(ClientData clientData, Tcl_Interp *interp,
      return TCL_ERROR;
   }
 
-	if ((argc-argStart) > 11) {
-		if (Tcl_GetDouble(interp, argv[8+argStart], &p) != TCL_OK) {
-			opserr << "WARNING invalid pressure\n";
-			opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
-			return TCL_ERROR;
-		}
-		if (Tcl_GetDouble(interp, argv[9+argStart], &rho) != TCL_OK) {
-			opserr << "WARNING invalid b1\n";
-			opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
-			return TCL_ERROR;
-		}
-		if (Tcl_GetDouble(interp, argv[10+argStart], &b1) != TCL_OK) {
-			opserr << "WARNING invalid b1\n";
-			opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
-			return TCL_ERROR;
-		}
-		if (Tcl_GetDouble(interp, argv[11+argStart], &b2) != TCL_OK) {
-			opserr << "WARNING invalid b2\n";
-			opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
-			return TCL_ERROR;
-		}
-
-	}
-
+  if ((argc-argStart) > 11) {
+    if (Tcl_GetDouble(interp, argv[8+argStart], &p) != TCL_OK) {
+      opserr << "WARNING invalid pressure\n";
+      opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetDouble(interp, argv[9+argStart], &rho) != TCL_OK) {
+      opserr << "WARNING invalid b1\n";
+      opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetDouble(interp, argv[10+argStart], &b1) != TCL_OK) {
+      opserr << "WARNING invalid b1\n";
+      opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
+      return TCL_ERROR;
+    }
+    if (Tcl_GetDouble(interp, argv[11+argStart], &b2) != TCL_OK) {
+      opserr << "WARNING invalid b2\n";
+      opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
+      return TCL_ERROR;
+    }
+  }
+  
   NDMaterial *theMaterial = theTclBuilder->getNDMaterial(matID);
       
   if (theMaterial == 0) {

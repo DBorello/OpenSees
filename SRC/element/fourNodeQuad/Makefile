@@ -4,6 +4,7 @@ OBJS       = FourNodeQuad.o \
 	TclFourNodeQuadCommand.o \
 	ConstantPressureVolumeQuad.o \
 	EnhancedQuad.o \
+	FourNodeQuad3d.o \
 	NineNodeMixedQuad.o \
 	FourNodeQuadWithSensitivity.o
 
