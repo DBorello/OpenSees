@@ -394,11 +394,6 @@ bool setMPIDSOEFlag = false;
 #include <DistributedSparseGenRowLinSOE.h>
 
 
-
-
-
-
-
 #include <DistributedBandGenLinSOE.h>
 #include <DistributedDiagonalSOE.h>
 #include <DistributedDiagonalSolver.h>
@@ -501,6 +496,7 @@ static Timer *theTimer = 0;
 #include <FileStream.h>
 #include <SimulationInformation.h>
 SimulationInformation simulationInfo;
+SimulationInformation theSimulationInfoPtr = 0;
 
 char *simulationInfoOutputFilename = 0;
 char *neesCentralProjID =0;
@@ -636,6 +632,7 @@ int Tcl_InterpOpenSeesObjCmd(ClientData clientData,  Tcl_Interp *interp, int obj
 
 int OpenSeesAppInit(Tcl_Interp *interp) {
 
+  theSimlationInfoPtr = &simulationInfo;
     
 #ifndef _LINUX  
     opserr.setFloatField(SCIENTIFIC);
@@ -5313,8 +5310,6 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
     //
     // create a transient analysis if no analysis exists
     //
-
-    
 
     if (theStaticAnalysis == 0 && theTransientAnalysis == 0) {
 
