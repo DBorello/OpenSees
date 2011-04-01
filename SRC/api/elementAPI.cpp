@@ -69,7 +69,7 @@ static int currentArg = 0;
 static int maxArg = 0;
 
 extern const char *getInterpPWD(Tcl_Interp *interp);
-extern FE_Datastore *theDatastore;
+extern FE_Datastore *theDatabase;
 
 //static int uniaxialMaterialObjectCount =0;
 
@@ -825,7 +825,7 @@ OPS_GetNDM()
 
 FE_Datastore *OPS_GetDatastore()
 {
-  return theDatastore;
+  return theDatabase;
 }
 
 const char *OPS_GetInterpPWD()
