@@ -35,7 +35,7 @@ typedef NDMaterial * (*OPS_GetNDMaterialPtrType)(int matTag);
 typedef CrdTransf * (*OPS_GetCrdTransfPtrType)(int matTag);
 typedef int (*OPS_GetNodeInfoPtrType)(int *, int *, double *);
 typedef int (*OPS_InvokeMaterialDirectlyPtrType)(matObject **, modelState *, double *, double *, double *, int *);
-
+typedef int (*OPS_GetIntPtrType)();
 
 
 //int    OPS_InvokeMaterial(struct eleObj *, int *,modelState *, double *, double *, double *, int *);
@@ -61,6 +61,10 @@ OPS_GetNumRemainingInputArgsType OPS_GetNumRemainingInputArgsPtr = 0;
 OPS_GetStringType OPS_GetStringPtr = 0;
 OPS_GetStringCopyType OPS_GetStringCopyPtr = 0;
 
+OPS_GetIntPtrType OPS_GetNDM_Ptr = 0;
+OPS_GetIntPtrType OPS_GetNDF_Ptr = 0;
+
+
 extern "C" DllExport
 void setGlobalPointers(OPS_Stream *theErrorStreamPtr,
 		       OPS_ErrorPtrType          errorFunct,
@@ -80,7 +84,9 @@ void setGlobalPointers(OPS_Stream *theErrorStreamPtr,
 		       OPS_GetNumRemainingInputArgsType OPS_GetNumRemainingArgsFunct,
 		       OPS_GetStringType OPS_GetStringFunct,
 		       OPS_GetStringCopyType OPS_GetStringCopyFunct,
-		       OPS_GetCrdTransfPtrType OPS_GetCrdTransfFunct)
+		       OPS_GetCrdTransfPtrType OPS_GetCrdTransfFunct,
+		       OPS_GetIntPtrType OPS_GetNDM_Funct,
+		       OPS_GetIntPtrType OPS_GetNDF_Funct)
 {
 	opserrPtr = theErrorStreamPtr;
 	OPS_ErrorPtr = errorFunct;
@@ -101,6 +107,8 @@ void setGlobalPointers(OPS_Stream *theErrorStreamPtr,
 	OPS_GetStringPtr = OPS_GetStringFunct;
 	OPS_GetStringCopyPtr =  OPS_GetStringCopyFunct;
 	OPS_GetCrdTransfPtrFunc = OPS_GetCrdTransfFunct;
+	OPS_GetNDM_PTR = OPS_GetNDM_Funct;
+	OPS_GetNDF_PTR = OPS_GetNDF_Funct;
 }
 
 
@@ -192,3 +200,15 @@ extern "C" int OPS_GetNumRemainingInputArgs()
 {
   return(*OPS_GetNumRemainingInputArgsPtr)();  
 }
+
+extern "C" int OPS_GetNDM()
+{
+  return (*OPS_GetNDM_Ptr)();
+}
+
+extern "C" int OPS_GetNDF()
+{
+  return (*OPS_GetNDF_Ptr)();
+}
+
+
