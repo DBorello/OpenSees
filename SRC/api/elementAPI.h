@@ -112,8 +112,10 @@ typedef struct eleObject eleObj;
 #define OPS_GetDouble ops_getdoubleinput_
 #define OPS_GetString ops_getstring
 #define OPS_GetNDM ops_getndm_
-#define OPS_GetNDF ops_getndf__
+#define OPS_GetNDF ops_getndf_
 #define OPS_GetCrdTransfPtr ops_getcrdtransfptr_
+#define OPS_GetDatastorePtr ops_getdatastorewptr_
+#define OPS_GetInterpPWD ops_getinterppwd_
 
 #ifdef __cplusplus
 extern "C" int        OPS_GetNDM();
@@ -143,15 +145,20 @@ extern "C" int    OPS_GetNodeAcc(int *nodeTag, int *sizeData, double *data);
 extern "C" int    OPS_GetNodeIncrDisp(int *nodeTag, int *sizeData, double *data);
 extern "C" int    OPS_GetNodeIncrDeltaDisp(int *nodeTag, int *sizeData, double *data);
 
+
 class UniaxialMaterial;
 class NDMaterial;
 class SectionForceDeformation;
 class CrdTransf;
+class FE_Datastore;
 
 extern UniaxialMaterial *OPS_GetUniaxialMaterial(int matTag);
 extern NDMaterial *OPS_GetNDMaterial(int matTag);
 extern SectionForceDeformation *OPS_GetSectionForceDeformation(int matTag);
 extern CrdTransf *OPS_GetCrdTransfPtr(int tag);
+
+extern FE_Datastore *OPS_GetDatastore();
+extern "C" const char *OPS_GetInterpPWD();
 
 #else
 

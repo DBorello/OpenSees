@@ -68,6 +68,9 @@ static TCL_Char **currentArgv = 0;
 static int currentArg = 0;
 static int maxArg = 0;
 
+extern const char *getInterpPWD(Tcl_Interp *interp);
+extern FE_Datastore *theDatastore;
+
 //static int uniaxialMaterialObjectCount =0;
 
 modelState theModelState;
@@ -818,4 +821,14 @@ int
 OPS_GetNDM()
 {
   return theModelBuilder->getNDM();
+}
+
+FE_Datastore *OPS_GetDatastore()
+{
+  return theDatastore;
+}
+
+const char *OPS_GetInterpPWD()
+{
+  return getInterpPWD(theInterp);
 }

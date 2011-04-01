@@ -120,8 +120,12 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
     typedef int (_cdecl *OPS_GetNodeInfoPtrType)(int *, int *, double *);
     typedef int (_cdecl *OPS_InvokeMaterialDirectlyPtrType)(matObject **, modelState *, double *, double *, double *, int *);
     typedef int (_cdecl *OPS_GetIntPtrType)();
+
+    typedef FE_Datastore *(*OPS_GetFE_DatastorePtrType)();
+    typedef const char * (_cdecl *OPS_GetInterpPWD_PtrType)();
     
     typedef void (_cdecl *setGlobalPointersFunction)(OPS_Stream *,
+						     SimulationInfo *,
 						     OPS_ErrorPtrType,
 						     OPS_GetIntInputPtrType,
 						     OPS_GetDoubleInputPtrType,
@@ -141,8 +145,9 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
 						     OPS_GetStringCopyType,
 						     OPS_GetCrdTransfPtrType,
 						     OPS_GetIntPtrType,
-						     OPS_GetIntPtrType);
-						     
+						     OPS_GetIntPtrType,
+						     OPS_GetFE_DatastorePtrType,
+						     OPS_GetInterpPWD_PtrType);
 
     setGlobalPointersFunction funcPtr;
     
@@ -154,12 +159,13 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
     }
   
     // invoke pointer function
-    (funcPtr)(opserrPtr, OPS_Error, OPS_GetIntInput, OPS_GetDoubleInput,
+    (funcPtr)(opserrPtr, OPS_Error, theSimulationInfo, OPS_GetIntInput, OPS_GetDoubleInput,
 	      OPS_AllocateElement, OPS_AllocateMaterial, OPS_GetUniaxialMaterial, 
 	      OPS_GetNDMaterial, OPS_InvokeMaterialDirectly, OPS_GetNodeCrd, 
 	      OPS_GetNodeDisp, OPS_GetNodeVel, OPS_GetNodeAcc, 
 	      OPS_GetNodeIncrDisp, OPS_GetNodeIncrDeltaDisp,
-	      OPS_GetNumRemainingInputArgs, OPS_GetString, OPS_GetStringCopy, OPS_GetCrdTransfPtr, OPS_GetNDM, OPS_GetNDF);
+	      OPS_GetNumRemainingInputArgs, OPS_GetString, OPS_GetStringCopy, OPS_GetCrdTransfPtr, OPS_GetNDM, OPS_GetNDF,
+	      OPS_GetDatastore, OPS_GetInterpPWD);
 
    LocalInitPtrType initPtr;
    initPtr = (LocalInitPtrType)GetProcAddress((HMODULE)hLib,"localInit");
