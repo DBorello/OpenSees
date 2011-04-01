@@ -6,7 +6,7 @@
 
 #include <windows.h>
 
-//#include <SimulationInformation.h>
+#include <SimulationInformation.h>
 //SimulationInformation simulationInfo;
 
 #define DllExport _declspec(dllexport)
@@ -20,6 +20,7 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 }
 
 OPS_Stream *opserrPtr =0;
+SimulationIinfo *theSimulationInfo = 0;
 double ops_Dt =0;
 
 typedef int (*OPS_ErrorPtrType)(char *, int);
@@ -36,7 +37,8 @@ typedef CrdTransf * (*OPS_GetCrdTransfPtrType)(int matTag);
 typedef int (*OPS_GetNodeInfoPtrType)(int *, int *, double *);
 typedef int (*OPS_InvokeMaterialDirectlyPtrType)(matObject **, modelState *, double *, double *, double *, int *);
 typedef int (*OPS_GetIntPtrType)();
-
+typedef FE_Datastore *(*OPS_GetFE_DatastorePtrType)();
+typedef const char * (_cdecl *OPS_GetInterpPWD_PtrType)();
 
 //int    OPS_InvokeMaterial(struct eleObj *, int *,modelState *, double *, double *, double *, int *);
 
@@ -64,9 +66,13 @@ OPS_GetStringCopyType OPS_GetStringCopyPtr = 0;
 OPS_GetIntPtrType OPS_GetNDM_Ptr = 0;
 OPS_GetIntPtrType OPS_GetNDF_Ptr = 0;
 
+OPS_GetFE_DatastorePtrType OPS_GetFE_DatastorePtr = 0;
+OPS_GetInterpPWD_PtrType OPS_GetInterpPWD_Ptr = 0;
+
 
 extern "C" DllExport
 void setGlobalPointers(OPS_Stream *theErrorStreamPtr,
+		       SimulationInfo *theSimulationInfoPtr,
 		       OPS_ErrorPtrType          errorFunct,
 		       OPS_GetIntInputPtrType    getIntInputFunct,
 		       OPS_GetDoubleInputPtrType getDoubleInputFunct,
@@ -86,9 +92,14 @@ void setGlobalPointers(OPS_Stream *theErrorStreamPtr,
 		       OPS_GetStringCopyType OPS_GetStringCopyFunct,
 		       OPS_GetCrdTransfPtrType OPS_GetCrdTransfFunct,
 		       OPS_GetIntPtrType OPS_GetNDM_Funct,
-		       OPS_GetIntPtrType OPS_GetNDF_Funct)
+		       OPS_GetIntPtrType OPS_GetNDF_Funct,
+		       OPS_GetFE_DatastorePtrType OPS_GetFE_DatastoreFunct,
+		       OPS_GetInterpPWD_PtrType OPS_GetInterpPWD_Funct;
+)
 {
 	opserrPtr = theErrorStreamPtr;
+	theSimulationInfo = theSimulationInfoPtr;
+
 	OPS_ErrorPtr = errorFunct;
 	OPS_GetIntInputPtr = getIntInputFunct;
 	OPS_GetDoubleInputPtr =getDoubleInputFunct;
@@ -107,8 +118,10 @@ void setGlobalPointers(OPS_Stream *theErrorStreamPtr,
 	OPS_GetStringPtr = OPS_GetStringFunct;
 	OPS_GetStringCopyPtr =  OPS_GetStringCopyFunct;
 	OPS_GetCrdTransfPtrFunc = OPS_GetCrdTransfFunct;
-	OPS_GetNDM_PTR = OPS_GetNDM_Funct;
-	OPS_GetNDF_PTR = OPS_GetNDF_Funct;
+	OPS_GetNDM_Ptr = OPS_GetNDM_Funct;
+	OPS_GetNDF_Ptr = OPS_GetNDF_Funct;
+	OPS_GetFE_DatastorePtr = OPS_GetFE_DatastoreFunct;
+	OPS_GetInterpPWD_Ptr = OPS_GetInterpPWD_Funct;
 }
 
 
@@ -211,4 +224,15 @@ extern "C" int OPS_GetNDF()
   return (*OPS_GetNDF_Ptr)();
 }
 
+FE_Datastore *
+OPS_GetFE_DatastorePtr()
+{
+  return (*OPS_GetFE_DatastorePtr)();
+}
+
+extern "C" const char *
+OPS_GetInterpPWD() 
+{
+  return (*OPS_GetInterpPWD_Ptr)();
+}
 
