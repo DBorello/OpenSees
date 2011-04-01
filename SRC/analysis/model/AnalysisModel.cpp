@@ -221,6 +221,24 @@ AnalysisModel::clearAll(void)
     numEqn = 0;    
 }
 
+void
+AnalysisModel::clearDOFGraph(void) 
+{
+  if (myDOFGraph != 0)
+    delete myDOFGraph;
+
+    myDOFGraph = 0;
+}
+
+void
+AnalysisModel::clearDOFGroupGraph(void) 
+{
+  if (myGroupGraph != 0)
+    delete myGroupGraph;    
+  
+  myGroupGraph = 0;
+}
+
 
 
 

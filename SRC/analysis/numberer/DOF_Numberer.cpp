@@ -122,7 +122,9 @@ DOF_Numberer::numberDOF(int lastDOF_Group)
     // we first number the dofs using the dof group graph
 
     const ID &orderedRefs = theGraphNumberer->
-	number(theAnalysisModel->getDOFGroupGraph(), lastDOF_Group);     
+      number(theAnalysisModel->getDOFGroupGraph(), lastDOF_Group);     
+
+    theAnalysisModel->clearDOFGroupGraph();
 
     // we now iterate through the DOFs first time setting -2 values
 
@@ -253,6 +255,8 @@ DOF_Numberer::numberDOF(ID &lastDOFs)
 	
     const ID &orderedRefs = theGraphNumberer->
 	number(theAnalysisModel->getDOFGroupGraph(), lastDOFs);     
+
+    theAnalysisModel->clearDOFGroupGraph();
 
     // we now iterate through the DOFs first time setting -2 values
 

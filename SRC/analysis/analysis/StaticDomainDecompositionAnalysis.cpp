@@ -413,15 +413,17 @@ StaticDomainDecompositionAnalysis::domainChanged(void)
     opserr << "LinearSOE::setSize() failed";
     return -3;
   }	    
+  
+  if (theEigenSOE != 0) {
+    result = theEigenSOE->setSize(theGraph);
+    if (result < 0) {
+      opserr << "StaticDomainDecompositionAnalysis::handle() - ";
+      opserr << "EigenSOE::setSize() failed";
+      return -3;
+    }	    
+  }
 
-    if (theEigenSOE != 0) {
-      result = theEigenSOE->setSize(theGraph);
-      if (result < 0) {
-	opserr << "StaticDomainDecompositionAnalysis::handle() - ";
-	opserr << "EigenSOE::setSize() failed";
-	return -3;
-      }	    
-    }
+  theAnalysisModel->clearDOFGraph();
 
   // finally we invoke domainChanged on the Integrator and Algorithm
   // objects .. informing them that the model has changed

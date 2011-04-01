@@ -307,6 +307,8 @@ ParallelNumberer::numberDOF(int lastDOF)
     delete [] theSubdomainIDs;
   }
 
+
+
   // iterate through the DOFs one last time setting any -4 values
   // iterate throgh  the DOFs second time setting -3 values
   AnalysisModel *theAModel = this->getAnalysisModelPtr();
@@ -352,6 +354,8 @@ ParallelNumberer::numberDOF(int lastDOF)
   FE_Element *elePtr;
   while ((elePtr = theEle()) != 0)
     elePtr->setID();
+
+  theModel->clearDOFGroupGraph();
   
   return result;
 }
@@ -588,6 +592,8 @@ ParallelNumberer::numberDOF(ID &lastDOFs)
     
     // number own dof's
   }
+
+  theModel->clearDOFGroupGraph();
 
   return result;
 }

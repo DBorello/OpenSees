@@ -390,6 +390,8 @@ DirectIntegrationAnalysis::domainChanged(void)
       }	    
     }
 
+    theAnalysisModel->clearDOFGraph();
+
     // we invoke domainChange() on the integrator and algorithm
     theIntegrator->domainChanged();
     theAlgorithm->domainChanged();

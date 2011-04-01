@@ -401,6 +401,8 @@ TransientDomainDecompositionAnalysis::domainChanged(void)
       return -3;
     }	    
   }
+
+  theAnalysisModel->clearDOFGraph();
   
   // finally we invoke domainChanged on the Integrator and Algorithm
   // objects .. informing them that the model has changed

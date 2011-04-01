@@ -65,6 +65,8 @@ class AnalysisModel: public MovableObject
     virtual bool addFE_Element(FE_Element *theFE_Ele);
     virtual bool addDOF_Group(DOF_Group *theDOF_Grp);
     virtual void clearAll(void);
+    virtual void clearDOFGraph(void);
+    virtual void clearDOFGroupGraph(void);
     
     // methods to access the FE_Elements and DOF_Groups and their numbers
     virtual int getNumDOF_Groups(void) const;		
