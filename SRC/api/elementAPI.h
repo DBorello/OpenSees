@@ -112,7 +112,7 @@ typedef struct eleObject eleObj;
 #define OPS_GetDouble ops_getdoubleinput_
 #define OPS_GetString ops_getstring
 #define OPS_GetNDM ops_getndm_
-#define OPS_GetNDF ops_getndf_
+#define OPS_GetNDF ops_getndf__
 #define OPS_GetCrdTransfPtr ops_getcrdtransfptr_
 #define OPS_GetDatastorePtr ops_getdatastorewptr_
 #define OPS_GetInterpPWD ops_getinterppwd_
