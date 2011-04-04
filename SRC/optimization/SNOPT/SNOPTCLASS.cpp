@@ -22,7 +22,6 @@
 **   Philip Gill (pgill@ucsd.edu)                                     **
 ** ****************************************************************** */
 
-
 //
 // Written by Quan Gu (qgu@ucsd.edu)    March 2010
 //
@@ -33,7 +32,7 @@
 #include <assert.h>
 #include <iostream>
 
-#include "snoptclass.h"
+#include "SNOPTCLASS.h"
 
 
 
