@@ -178,10 +178,10 @@ FE_INCLUDES  = -I$(FE)/matrix \
                -I$(FE)/reliability/domain/limitStateFunction \
                -I$(FE)/reliability/optimization \
                -I$(FE)/reliability/analysis/telm \
-               -I$(FE)/reliability/optimization\tcl \
-               -I$(FE)/reliability/optimization\domain \
-               -I$(FE)/reliability/optimization\domain\component \
-               -I$(FE)/reliability/optimization\SNOPT \
+               -I$(FE)/optimization/tcl \
+               -I$(FE)/optimization/domain \
+               -I$(FE)/optimization/domain/component \
+               -I$(FE)/optimization/SNOPT \
                -I$(FE)/reliability/FEsensitivity \
                -I$(FE)/reliability/tcl \
                -I$(FE)/unittest \
