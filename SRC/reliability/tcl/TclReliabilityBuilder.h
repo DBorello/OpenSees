@@ -23,7 +23,7 @@
 ** ****************************************************************** */
                                                                         
 // $Revision: 1.4 $
-// $Date: 2003/03/04 00:46:05 $
+// $Date: 2003-03-04 00:46:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.h,v $
 
 
