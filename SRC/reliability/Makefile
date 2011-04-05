@@ -1,7 +1,7 @@
 include ../../Makefile.def
 
 ifndef RELIABILITY_LIBRARY
-  RELIABILITY_LIBRARY = $(HOME)/lib/libReliability.lib
+  RELIABILITY_LIBRARY = $(HOME)/lib/libReliability.a
 endif
 
 RELIABILITY_OBJS = $(FE)/domain/pattern/DiscretizedRandomProcessSeries.o \
