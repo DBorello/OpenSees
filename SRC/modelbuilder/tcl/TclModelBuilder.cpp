@@ -1211,6 +1211,24 @@ TclCommand_addNode(ClientData clientData, Tcl_Interp *interp, int argc,
 	disp(i) = theDisp;
       }
       theNode->setTrialDisp(disp);      
+    } else if (strcmp(argv[currentArg],"-vel") == 0) {
+      if (argc < currentArg+ndf) {
+	opserr << "WARNING incorrect number of nodal vel terms\n";
+	opserr << "node: " << nodeId << endln;
+	return TCL_ERROR;      
+      }	
+      currentArg++;
+      Vector disp(ndf);
+      double theDisp;
+      for (int i=0; i<ndf; i++) {
+	if (Tcl_GetDouble(interp, argv[currentArg++], &theDisp) != TCL_OK) {
+	  opserr << "WARNING invalid nodal vel term\n";
+	  opserr << "node: " << nodeId << ", dof: " << i+1 << endln;
+	  return TCL_ERROR;
+	}
+	disp(i) = theDisp;
+      }
+      theNode->setTrialVel(disp);      
     } else
       currentArg++;
   }
