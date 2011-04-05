@@ -528,14 +528,14 @@ Element::getDampSensitivity(int gradIndex)
   }
   if (betaK != 0.0) {
 	theMatrix->addMatrix(1.0, this->getTangentStiff(), 0.0); // Don't use this and DDM      
-	opserr << "Rayleigh damping with non-zero betaCurrentTangent is not compatible with DDM sensitivity analysis" << endln;
+	//opserr << "Rayleigh damping with non-zero betaCurrentTangent is not compatible with DDM sensitivity analysis" << endln;
   }
   if (betaK0 != 0.0) {
     theMatrix->addMatrix(1.0, this->getInitialStiffSensitivity(gradIndex), betaK0);      
   }
   if (betaKc != 0.0) {
     theMatrix->addMatrix(1.0, *Kc, 0.0);      // Don't use this and DDM   
-    opserr << "Rayleigh damping with non-zero betaCommittedTangent is not compatible with DDM sensitivity analysis" << endln;
+    //opserr << "Rayleigh damping with non-zero betaCommittedTangent is not compatible with DDM sensitivity analysis" << endln;
   }
 
   // return the computed matrix
