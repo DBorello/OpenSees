@@ -1,9 +1,9 @@
 include ../../../../Makefile.def
 
-OBJS       = ConstrainFunction.o \
+OBJS       = ConstraintFunction.o \
 	DesignVariable.o \
 	DesignVariableIter.o \
-	DesignVariablePositioner.p \
+	DesignVariablePositioner.o \
 	DesignVariablePositionerIter.o \
 	ObjectiveFunction.o
 
