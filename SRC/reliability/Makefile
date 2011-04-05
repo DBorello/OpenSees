@@ -1,5 +1,9 @@
 include ../../Makefile.def
 
+ifndef RELIABILITY_LIBRARY
+  RELIABILITY_LIBRARY = $(HOME)/lib/libReliability.lib
+endif
+
 RELIABILITY_OBJS = $(FE)/domain/pattern/DiscretizedRandomProcessSeries.o \
 		$(FE)/domain/pattern/SimulatedRandomProcessSeries.o \
 		$(FE)/reliability/analysis/analysis/FORMAnalysis.o \
@@ -168,19 +172,7 @@ RELIABILITY_OBJS = $(FE)/domain/pattern/DiscretizedRandomProcessSeries.o \
 		$(FE)/reliability/FEsensitivity/SensitivityIntegrator.o \
 		$(FE)/reliability/FEsensitivity/StaticSensitivityIntegrator.o \
 		$(FE)/reliability/FEsensitivity/NewmarkSensitivityIntegrator.o \
-		$(FE)/reliability/tcl/TclReliabilityBuilder.o \
-		$(FE)/reliability/optimization/ConstraintFunction.o \
-		$(FE)/reliability/optimization/DesignVariable.o \
-		$(FE)/reliability/optimization/DesignVariablePositioner.o \
-		$(FE)/reliability/optimization/ObjectiveFunction.o \
-		$(FE)/reliability/optimization/ToyFunction.o \
-		$(FE)/reliability/optimization/ToyOptFunction.o \
-		$(FE)/optimization/TclOptimizationBuilder.o 
-
-#		$(FE)/reliability/optimization/SnoptAnalysis.o \
-#		$(FE)/reliability/optimization/SnoptProblem.o \
-#		$(FE)/reliability/optimization/SnoptWrapper.o \
-
+		$(FE)/reliability/tcl/TclReliabilityBuilder.o 
 
 # Compilation control
 all:         
@@ -188,7 +180,6 @@ all:
 	     @$(CD) $(FE)/reliability/domain; $(MAKE);
 	     @$(CD) $(FE)/reliability/FEsensitivity; $(MAKE);
 	     @$(CD) $(FE)/reliability/tcl; $(MAKE);
-	     @$(CD) $(FE)/optimization; $(MAKE);
 	     $(AR) $(ARFLAGS) $(RELIABILITY_LIBRARY) $(RELIABILITY_OBJS)
 
 # Miscellaneous
@@ -201,9 +192,10 @@ clean: tidy
 spotless: clean
 
 wipe: spotless
-	     @$(CD) $(FE)/reliability/analysis; $(MAKE) wipe;
-	     @$(CD) $(FE)/reliability/domain; $(MAKE) wipe;
-	     @$(CD) $(FE)/reliability/FEsensitivity; $(MAKE) wipe;
-	     @$(CD) $(FE)/reliability/tcl; $(MAKE) wipe;
+	@$(CD) $(FE)/reliability/analysis; $(MAKE) wipe;
+	@$(CD) $(FE)/reliability/domain; $(MAKE) wipe;
+	@$(CD) $(FE)/reliability/FEsensitivity; $(MAKE) wipe;
+	@$(CD) $(FE)/reliability/tcl; $(MAKE) wipe;
+	@$(RM) $(RMFLAGS) $(RELIABILITY_LIBRARY)
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
