@@ -62,13 +62,27 @@ SensitivityAlgorithm::~SensitivityAlgorithm()
 int 
 SensitivityAlgorithm::computeSensitivities(void)
 {
+  if (theAlgorithm == 0) {
+    opserr << "ERROR the FE algorithm must be defined before ";
+    opserr << "the sensitivity algorithm\n";
+    return -1;
+  }
+
 	// Get pointer to the system of equations (SOE)
 	LinearSOE *theSOE = theAlgorithm->getLinearSOEptr();
-
+	if (theSOE == 0) {
+	  opserr << "ERROR the FE linearSOE must be defined before ";
+	  opserr << "the sensitivity algorithm\n";
+	  return -1;
+	}
 
 	// Get pointer to incremental integrator
 	IncrementalIntegrator *theIncInt = theAlgorithm->getIncrementalIntegratorPtr();
-
+	if (theIncInt == 0) {
+	  opserr << "ERROR the FE integrator must be defined before ";
+	  opserr << "the sensitivity algorithm\n";
+	  return -1;
+	}
 
 	// Form current tangent at converged state
 	// (would be nice with an if-statement here in case
@@ -82,6 +96,12 @@ SensitivityAlgorithm::computeSensitivities(void)
 	// Zero out the old right-hand side of the SOE
 	theSOE->zeroB();
 		
+
+	if (theSensitivityIntegrator == 0) {
+	  opserr << "ERROR SensitivityAlgorithm::computeSensitivities() -";
+	  opserr << "the SensitivityIntegrator is NULL\n";
+	  return -1;
+	}
 
 	// Form the part of the RHS which are indepent of parameter
 	theSensitivityIntegrator->formIndependentSensitivityRHS();
