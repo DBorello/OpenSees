@@ -29,6 +29,9 @@
 #include <string.h>
 #include <OPS_Globals.h>
 #include <sys/stat.h>
+#include <SimulationInformation.h>
+
+
 
 extern
 #ifdef _WIN32
@@ -39,10 +42,12 @@ int
 httpGET_File(char const *URL, char const *page, unsigned int port, const char *filename);
 
 
+
 #ifdef _WIN32
 
 #include <windows.h>
 #include <elementAPI.h>
+extern SimulationInformation *theSimulationInfoPtr;
 
 #else
 #include <dlfcn.h>
@@ -125,7 +130,7 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
     typedef const char * (_cdecl *OPS_GetInterpPWD_PtrType)();
     
     typedef void (_cdecl *setGlobalPointersFunction)(OPS_Stream *,
-						     SimulationInfo *,
+						     SimulationInformation *,
 						     OPS_ErrorPtrType,
 						     OPS_GetIntInputPtrType,
 						     OPS_GetDoubleInputPtrType,
@@ -159,7 +164,7 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
     }
   
     // invoke pointer function
-    (funcPtr)(opserrPtr, OPS_Error, theSimulationInfo, OPS_GetIntInput, OPS_GetDoubleInput,
+    (funcPtr)(opserrPtr, theSimulationInfoPtr, OPS_Error, OPS_GetIntInput, OPS_GetDoubleInput,
 	      OPS_AllocateElement, OPS_AllocateMaterial, OPS_GetUniaxialMaterial, 
 	      OPS_GetNDMaterial, OPS_InvokeMaterialDirectly, OPS_GetNodeCrd, 
 	      OPS_GetNodeDisp, OPS_GetNodeVel, OPS_GetNodeAcc, 
