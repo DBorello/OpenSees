@@ -62,9 +62,9 @@ OPS_TFP_Bearing()
     return theEle;
   }
 
-  if (numRemainingArgs != 25 || numRemainingArgs != 24) {
-    opserr << "ERROR - TFP_Bearing not enough args provided, want: element TFP_Bearing tag? iNode? jNode? ";
-    opserr << "$R1 $R2 $R3 $R4 $do1 $do2 #do3 $do4 $din1 $din2 $din3 $din4 $mu1 $mu2 $mu3 $mu4";
+  if (numRemainingArgs != 25 && numRemainingArgs != 24) {
+    opserr << "ERROR - TFP_Bearing incorrect # args provided, want: element TFP_Bearing tag? iNode? jNode? ";
+    opserr << "$R1 $R2 $R3 $R4 $do1 $do2 $do3 $do4 $din1 $din2 $din3 $din4 $mu1 $mu2 $mu3 $mu4";
     opserr << " $h1 $h2 $h3 $h4 $H0 $a\n";
     return theEle;
   }
@@ -552,11 +552,6 @@ TFP_Bearing::update()
 {
   static Vector delU(4);
   static Vector delP(4);
-
-  /*
-  theNodes[0]->Print(opserr);
-  theNodes[1]->Print(opserr);
-  */
 
   const Vector &v1 = theNodes[0]->getIncrDisp();
   const Vector &v2 = theNodes[1]->getIncrDisp();	
