@@ -87,7 +87,7 @@ Concrete02::getInitialTangent(void)
 int
 Concrete02::setTrialStrain(double trialStrain, double strainRate)
 {
-  double 	ec0 = fc * 2. / epsc0;
+  double  ec0 = fc * 2. / epsc0;
 
   // retrieve concrete hitory variables
 
@@ -98,6 +98,9 @@ Concrete02::setTrialStrain(double trialStrain, double strainRate)
 
   eps = trialStrain;
   double deps = eps - epsP;
+
+  if (fabs(deps) < DBL_EPSILON)
+    return 0;
 
   // if the current strain is less than the smallest previous strain 
   // call the monotonic envelope in compression and reset minimum strain 
