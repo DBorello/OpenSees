@@ -233,12 +233,13 @@ OpenSeesGradGEvaluator::computeGradG(double g, const Vector &passed_x)
 	  int tag = theRV->getTag();
 	  const char *gradExpression = theLimitStateFunction->getGradientExpression(tag);
 	  double result = 0;
-	  if (Tcl_ExprDouble( theTclInterp, gradExpression, &result) == TCL_ERROR) {
+	  if (gradExpression != 0 && Tcl_ExprDouble( theTclInterp, gradExpression, &result) == TCL_ERROR) {
 	    opserr << "ERROR OpenSeesGradGEvaluator -- error in Tcl_ExprDouble for the analytic gradient command" << gradExpression << endln;
         opserr << " caused error:" << endln << theTclInterp->result <<endln;
 	    return -1;
 	  }
 	  (*grad_g)(i) += result;
+	  //opserr << tag << ' ' << (*grad_g)(i) << endln;
 	}
 
 	return 0;
