@@ -44,12 +44,12 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
-UmfpackGenLinSOE::UmfpackGenLinSOE(UmfpackGenLinSolver &the_Solver)
+UmfpackGenLinSOE::UmfpackGenLinSOE(UmfpackGenLinSolver &the_Solver, int fact_LVALUE)
 :LinearSOE(the_Solver, LinSOE_TAGS_UmfpackGenLinSOE),
  size(0), nnz(0), A(0), B(0), X(0), colA(0), rowStartA(0),
  lValue(0), index(0),
  vectX(0), vectB(0), Asize(0), Bsize(0),
- factored(false)
+ factored(false), factLVALUE(fact_LVALUE)
 {
     the_Solver.setLinearSOE(*this);
 }
@@ -101,7 +101,9 @@ UmfpackGenLinSOE::setSize(Graph &theGraph)
 	newNNZ += theAdjacency.Size() +1; // the +1 is for the diag entry
     }
     nnz = newNNZ;
-    lValue = 20*nnz; // 20 because 3 (10 also) was not working for some instances
+
+    lValue = factLVALUE*nnz; // 
+    opserr << "UmfpackGenLinSOE::setSize() : nnz: " << nnz << " lvalue: " << lValue << endln;
 
     if (lValue > Asize) { // we have to get more space for A and colA
 

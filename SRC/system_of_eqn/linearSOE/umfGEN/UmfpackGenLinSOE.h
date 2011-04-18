@@ -43,7 +43,7 @@ class UmfpackGenLinSolver;
 class UmfpackGenLinSOE : public LinearSOE
 {
   public:
-    UmfpackGenLinSOE(UmfpackGenLinSolver &theSolver);        
+    UmfpackGenLinSOE(UmfpackGenLinSolver &theSolver, int factLVALUE = 10);        
     UmfpackGenLinSOE();        
     UmfpackGenLinSOE(int N, int NNZ, int *rowStartA, int *colA,
 		    UmfpackGenLinSolver &theSolver);        
@@ -88,6 +88,7 @@ class UmfpackGenLinSOE : public LinearSOE
     int Asize, Bsize;    // size of the 1d array holding A
     bool factored;
     
+    int factLVALUE;
 };
 
 
