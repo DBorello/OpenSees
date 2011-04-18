@@ -2500,9 +2500,15 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
   }    
   
   else if ((strcmp(argv[1],"UmfPack") == 0) || (strcmp(argv[1],"Umfpack") == 0)) {
+    
     // now must determine the type of solver to create from rest of args
-      UmfpackGenLinSolver *theSolver = new UmfpackGenLinSolver();
-      theSOE = new UmfpackGenLinSOE(*theSolver);      
+    int factLVALUE = 10;
+    if (argc == 4) {
+      if (Tcl_GetInt(interp, argv[3], &factLVALUE) != TCL_OK)
+	return TCL_ERROR;
+    }
+    UmfpackGenLinSolver *theSolver = new UmfpackGenLinSolver();
+    theSOE = new UmfpackGenLinSOE(*theSolver, factLVALUE);      
   }	  
 
   else if (strcmp(argv[1],"FullGeneral") == 0) {
@@ -5404,7 +5410,6 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 #ifdef _MUMPS
 	
       }  else if (typeSolver == 6) {  
-	
 	
 	int icntl14 = 20;
 	MumpsParallelSolver *theSolver = new MumpsParallelSolver(icntl14);
