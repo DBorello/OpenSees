@@ -398,7 +398,7 @@ TFP_Bearing::kt3Drma(double *v, double *vp, double *Fr, double A, double *P, dou
     R[z] = Ri[z];
   }
   
-  double dh;
+  double dh =0;
   for (int i=0; i<4; i++) {
     dh += d[i];
   }
