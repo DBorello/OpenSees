@@ -37,12 +37,23 @@
 #include <FEM_ObjectBroker.h>
 #include <ID.h>
 
+#include <superlu_ddefs.h>
+
+superlu_options_t options;
+SuperLUStat_t stat;
+SuperMatrix A;
+ScalePermstruct_t ScalePermstruct;
+LUstruct_t LUstruct;
+gridinfo_t grid;
+MPI_Comm comm_SuperLU;
+
+
 DistributedSuperLU::DistributedSuperLU(int npR, int npC)
   :SparseGenColLinSolver(SOLVER_TAGS_DistributedSuperLU), 
    gridInit(false), npRow(npR), npCol(npC),
    processID(0), numChannels(0), theChannels(0)
 {
-
+  opserr << "DistributedSuperLU::DistributedSuperLU(int npR, int npC)\n";
 }
 
 
@@ -51,7 +62,7 @@ DistributedSuperLU::DistributedSuperLU()
    gridInit(false), npRow(0), npCol(0),
    processID(0), numChannels(0), theChannels(0)
 {
-
+  opserr << "DistributedSuperLU::DistributedSuperLU()\n";
 }
 
 
@@ -92,7 +103,6 @@ DistributedSuperLU::solve(void)
 
   //
   // if main process, send B & A to all, solve and send back X, B & result
-
 
   else {
 
@@ -229,7 +239,8 @@ DistributedSuperLU::setSize()
   //
   //  set default options
   //
-  set_default_options_Distributed(&options);    
+  set_default_options_dist(&options);    
+  options.PrintStat=NO;
 
   //
   // Initialize the statistics variables. 
@@ -271,6 +282,7 @@ DistributedSuperLU::setChannels(int nChannels, Channel **theC)
 int
 DistributedSuperLU::sendSelf(int cTag, Channel &theChannel)
 {
+  opserr << "DistributedSuperLU::sendSelf(int cTag, Channel &theChannel) - START\n";
   int sendID =0;
 
   // if P0 check if already sent. If already sent use old processID; if not allocate a new process 
@@ -280,6 +292,8 @@ DistributedSuperLU::sendSelf(int cTag, Channel &theChannel)
 
   if (processID == 0) {
 
+    opserr << "DistributedSuperLU::sendSelf(int cTag, Channel &theChannel) - 1\n";
+
     // check if already using this object
     bool found = false;
     for (int i=0; i<numChannels; i++)
@@ -287,7 +301,7 @@ DistributedSuperLU::sendSelf(int cTag, Channel &theChannel)
 	sendID = i+1;
 	found = true;
       }
-
+    opserr << "DistributedSuperLU::sendSelf(int cTag, Channel &theChannel) - 2\n";
     // if new object, enlarge Channel pointers to hold new channel * & allocate new ID
     if (found == false) {
       int nextNumChannels = numChannels + 1;
@@ -300,12 +314,12 @@ DistributedSuperLU::sendSelf(int cTag, Channel &theChannel)
       for (int i=0; i<numChannels; i++)
 	nextChannels[i] = theChannels[i];
       nextChannels[numChannels] = &theChannel;
-      
+    opserr << "DistributedSuperLU::sendSelf(int cTag, Channel &theChannel) - 3\n";      
       numChannels = nextNumChannels;
       
       if (theChannels != 0)
 	delete [] theChannels;
-      
+    opserr << "DistributedSuperLU::sendSelf(int cTag, Channel &theChannel) - 4\n";      
       theChannels = nextChannels;
       
       // allocate new processID for remote object
@@ -314,7 +328,7 @@ DistributedSuperLU::sendSelf(int cTag, Channel &theChannel)
 
   } else 
     sendID = processID;
-
+    opserr << "DistributedSuperLU::sendSelf(int cTag, Channel &theChannel) - 5\n";
   static ID idData(3);
   idData(0) = sendID;
   idData(1) = npRow;
@@ -324,6 +338,8 @@ DistributedSuperLU::sendSelf(int cTag, Channel &theChannel)
     opserr <<"WARNING DistributedSuperLU::sendSelf() - failed to send data\n";
     return -1;
   }	      
+  opserr << "DistributedSuperLU::sendSelf(int cTag, Channel &theChannel) - END\n";
+
   return 0;
 }
 
@@ -332,6 +348,7 @@ DistributedSuperLU::recvSelf(int cTag,
 			     Channel &theChannel, 
 			     FEM_ObjectBroker &theBroker)
 {
+  opserr << "DistributedSuperLU::recvSelf(int cTag, Channel &theChannel) - START\n";
   static ID idData(3);
 
   int res = theChannel.recvID(0, cTag, idData);
@@ -348,6 +365,7 @@ DistributedSuperLU::recvSelf(int cTag,
   theChannels = new Channel *[1];
   theChannels[0] = &theChannel;
 
+  opserr << "DistributedSuperLU::recvSelf(int cTag, Channel &theChannel) - END\n";
   return 0;
 }
 

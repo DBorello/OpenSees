@@ -41,9 +41,8 @@
 //
 // What: "@(#) DistributedSuperLU.h, revA"
 
-#include <superlu_ddefs.h>
-#include <SparseGenColLinSolver.h>
 
+#include <SparseGenColLinSolver.h>
 
 class DistributedSuperLU : public SparseGenColLinSolver
 {
@@ -63,12 +62,6 @@ class DistributedSuperLU : public SparseGenColLinSolver
   protected:
 
   private:
-    superlu_options_t_Distributed options;
-    SuperLUStat_t stat;
-    SuperMatrix A;
-    ScalePermstruct_t ScalePermstruct;
-    LUstruct_t LUstruct;
-    gridinfo_t grid;
 
     bool gridInit;
     int npRow, npCol;
@@ -77,7 +70,6 @@ class DistributedSuperLU : public SparseGenColLinSolver
     int numChannels;
     Channel **theChannels;
 
-    MPI_Comm comm_SuperLU;
     double *b;
     int *rowA;
 };

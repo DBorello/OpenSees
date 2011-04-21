@@ -59,10 +59,11 @@ SuperLU::SuperLU(int perm,
   options.SymmetricMode = NO;
   options.PivotGrowth = NO;
   options.ConditionNumber = NO;
-  options.PrintStat = YES;
+  options.PrintStat = NO;
 
   if (symmetric == 'Y')
     options.SymmetricMode = YES;
+
   L.ncol = 0;
   U.ncol = 0;
   A.ncol = 0;
@@ -162,7 +163,7 @@ SuperLU::solve(void)
 	  Destroy_CompCol_Matrix(&U);	  
 	}
 
-	dgstrf(&options, &AC, drop_tol, relax, panelSize,
+	dgstrf(&options, &AC, relax, panelSize,
 	       etree, NULL, 0, perm_c, perm_r, &L, &U, &stat, &info);
 
 

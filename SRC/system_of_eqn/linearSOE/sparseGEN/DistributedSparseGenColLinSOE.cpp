@@ -29,6 +29,7 @@
 
 
 #include <DistributedSparseGenColLinSOE.h>
+#include <DistributedSuperLU.h>
 #include <SparseGenColLinSolver.h>
 #include <Matrix.h>
 #include <Graph.h>
@@ -630,7 +631,7 @@ int
 DistributedSparseGenColLinSOE::sendSelf(int commitTag, Channel &theChannel)
 {
   int sendID =0;
-
+  opserr << "DistributedSparseGenColLinSOE::sendSelf() - START\n";
   // if P0 check if already sent. If already sent use old processID; if not allocate a new process 
   // id for remote part of object, enlarge channel * to hold a channel * for this remote object.
 
@@ -695,6 +696,7 @@ DistributedSparseGenColLinSOE::sendSelf(int commitTag, Channel &theChannel)
     return -1;
   }
 
+  opserr << "DistributedSparseGenColLinSOE::sendSelf() - DONE\n";
   return 0;
 }
 
@@ -702,6 +704,7 @@ DistributedSparseGenColLinSOE::sendSelf(int commitTag, Channel &theChannel)
 int 
 DistributedSparseGenColLinSOE::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
+  opserr << "DistributedSparseGenColLinSOE::recvSelf() - START\n";
   ID idData(1);
   int res = theChannel.recvID(0, commitTag, idData);
   if (res < 0) {
@@ -718,6 +721,11 @@ DistributedSparseGenColLinSOE::recvSelf(int commitTag, Channel &theChannel, FEM_
   localCol = new ID *[numChannels];
   for (int i=0; i<numChannels; i++)
     localCol[i] = 0;
+  opserr << "DistributedSparseGenColLinSOE::recvSelf() - DONE\n";
+
+  DistributedSuperLU *theSolvr = new DistributedSuperLU();
+  theSolvr->setLinearSOE(*this);
+  this->setSolver(*theSolvr);
 
   return 0;
 }

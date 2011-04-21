@@ -45,7 +45,7 @@
 // What: "@(#) SuperLU.h, revA"
 
 #include <SparseGenColLinSolver.h>
-#include <dsp_defs.h>
+#include <slu_ddefs.h>
 #include <supermatrix.h>
 
 class SuperLU : public SparseGenColLinSolver
