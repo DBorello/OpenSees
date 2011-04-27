@@ -1979,7 +1979,7 @@ TclReliabilityModelBuilder_addLimitState(ClientData clientData, Tcl_Interp *inte
   LimitStateFunction *theLimitStateFunction = 0;
   int tag;
 
-  	if (theGFunEvaluator != 0 ) {
+  	if (theGFunEvaluator != 0 && argc > 2) {
 		opserr << "ERROR: A limit-state function should not be created after the GFunEvaluator has been instantiated." << endln;
 		return TCL_ERROR;
 	}
@@ -1990,6 +1990,29 @@ TclReliabilityModelBuilder_addLimitState(ClientData clientData, Tcl_Interp *inte
 	return TCL_ERROR;
   }
   
+  if (argc == 2) {
+    theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(tag);
+    if (theLimitStateFunction == 0) {
+      opserr << "ERROR Limit-state function not found, tag = " << tag << endln;
+      return TCL_ERROR;
+    }
+    
+    const char *lsf = theLimitStateFunction->getExpression();
+    double g = 0;
+    if (Tcl_ExprDouble(interp, lsf, &g) == TCL_ERROR) {
+      opserr << "ERROR in evaluating limit state function " << tag << endln;
+      opserr << interp->result << endln;
+      return TCL_ERROR;
+    }
+
+    char buffer[40];
+    sprintf(buffer,"%35.20f",g);
+
+    Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+    
+    return TCL_OK;
+  }
+
   // CREATE THE OBJECT (passing on argv[2])
   theLimitStateFunction = new LimitStateFunction(tag, argv[2], interp);
   if (theLimitStateFunction == 0) {
