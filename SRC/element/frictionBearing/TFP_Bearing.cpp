@@ -26,6 +26,8 @@
 #include "TFP_Bearing.h"
 #include <elementAPI.h>
 #include <G3Globals.h>
+#include <math.h>
+#include <float.h>
 
 #include <Information.h>
 #include <Domain.h>
@@ -282,6 +284,13 @@ TFP_Bearing::commitState()
     vCommit[i] = vTrial[i];
     FrCommit[i] = FrTrial[i];
   }
+  
+  /*
+  opserr << "COMMIT: " << this->getTag() << endln;
+  Vector vT(vTrial, 8); opserr << "vTrial: " << vT;
+  Vector vC(vCommit, 8); opserr << "vCommit: " << vC;
+  */
+
   for (int i=0; i<4; i++) {
     PCommit[i] = PTrial[i];
     UCommit[i] = UTrial[i];
@@ -292,9 +301,9 @@ TFP_Bearing::commitState()
 
   Domain *theDomain = this->getDomain();
 
-  theDomain->calculateNodalReactions(1);
-  const Vector &nd2Reactions = theNodes[1]->getReaction();
-  Ac = nd2Reactions(2);
+  //  theDomain->calculateNodalReactions(1);
+  //  const Vector &nd2Reactions = theNodes[1]->getReaction();
+  //  Ac = nd2Reactions(2);
 
   //  opserr << "Ac: " << Ac << endln;
   return 0;
@@ -416,7 +425,6 @@ TFP_Bearing::kt3Drma(double *v, double *vp, double *Fr, double A, double *P, dou
   
   N[0]=A+PNorm*(sqrt(v[0]*v[0]+v[4]*v[4])/r[0]+sqrt(v[2]*v[2]+v[6]*v[6])/r[2]);
   N[1]=A+PNorm*(sqrt(v[1]*v[1]+v[5]*v[5])/r[1]+sqrt(v[3]*v[3]+v[7]*v[7])/r[3]);
-
 
   for (int i=0; i<4; i++) {
     int z=4+i;
@@ -550,6 +558,8 @@ TFP_Bearing::kt3Drma(double *v, double *vp, double *Fr, double A, double *P, dou
 int
 TFP_Bearing::update()
 {
+  //  opserr << "UPDATE: " << this->getTag() << endln;
+
   static Vector delU(4);
   static Vector delP(4);
 
@@ -563,17 +573,11 @@ TFP_Bearing::update()
   delU(2)=v2(0);
   delU(3)=v2(1);
 
-  //  delU.Zero(); delU(0)=0.01;
-
-  //  opserr << "START: delU: " << delU;
-
   int contC = kt3Drma(vCommit, vpCommit, FrCommit, Ac, PCommit, vpi);
 
-  Vector vpiF (vpi,8);  
-  /*
-  opserr << "kthat: " << kthat;
-  opserr << "vpi: " << vpiF;
-  */
+  //  Vector vpiF (vpi,8);  
+  //  opserr << "delU: " << delU;
+  //  opserr << "vpiF: " << vpiF;
 
   static Matrix stiffCommit(8,8);
   stiffCommit = ks;
@@ -582,16 +586,12 @@ TFP_Bearing::update()
   Vector PC(PCommit,4);
   Vector PT(PTrial, 4);
 
+  //  opserr << "PTrial 1:" << PTrial;
+
   delP = kthat*delU;
 
   PT = PC;
   PT += delP;
-
-  //  opserr << "delU: " << delU;
-  /*
-  opserr << "delP:" << delP;
-  opserr << "Ptrial 1:" << PT;
-  */
 
   for (int i=0; i<4; i++)
     UTrial[i] = UCommit[i] + delU(i);
@@ -602,10 +602,10 @@ TFP_Bearing::update()
   tmp1.addMatrixVector(0.0, kei, delU, 1.0);
   delU58.addMatrixVector(0.0, kee, tmp1, -1.0);
 
-  static Vector dv(8);
+  static double dvData[8];
+  static Vector dv(dvData,8);
   static Vector dFr(8);
   static Vector tmp2(8);
-
 
   for (int i=0; i<4; i++) {
     tmp2(i)=delU(i);
@@ -614,19 +614,28 @@ TFP_Bearing::update()
 
   dv = Af * tmp2;
 
+  //  opserr << "dv: " << dv;
+  //  Vector vC(vCommit, 8); opserr << "vCommit: " << vC;
+
   for (int i=0; i<8; i++) {
-    vTrial[i] = vCommit[i] + dv(i);
+    vTrial[i] = vCommit[i] + dvData[i];
     FrTrial[i] = FrCommit[i] + dFr(i);
   }
 
+  //  Vector vT(vTrial, 8); opserr << "vTrial: " << vT;
 
   HTrial = H0 + dh;
   double vpit[8];
 
   int contT = kt3Drma(vTrial, vpCommit, FrTrial, Ac, PTrial, vpit);
 
-  //  opserr << "Ptrial 2:" << PT;
-  //  opserr << "kthat: " << kthat;
+  //  opserr << "vTrial: " << vT;
+  // Vector FT(FrTrial, 8); opserr << "FrTrial: " << FT;
+
+  // opserr << "Ptrial 2:" << PT;
+  // opserr << "kthat: " << kthat;
+
+  //   Vector vpiO(vpi, 8); opserr << "VPI 0: " << vpiO;
 
   static Matrix stiffTrial(8,8);
 
@@ -689,9 +698,13 @@ TFP_Bearing::update()
 	vTrial[i] = vCommit[i] + vadd[i];
 	Ptemp[i] = PCommit[i] + padd[i];
       }
+
       contT = kt3Drma(vTrial, vpTemp, FrTemp, Ac, Ptemp, vpi);    
+
+      //      Vector vpiJ(vpi, 8); opserr << "vpiJ: " << vpiJ;
       
       static Vector delp(4);
+
       delp.addMatrixVector(0.0, kthat, delu, 1.0);
 
       //      opserr << "delp: " << delp;
@@ -741,8 +754,8 @@ TFP_Bearing::update()
     }
   }
 
-  static Vector vpiO(vpi, 8);
-  //  opserr << "VPI: " << vpiO;
+
+
 
   for (int i=0; i<8; i++) {
     vpTrial[i] = vpi[i];
@@ -768,7 +781,7 @@ TFP_Bearing::update()
 
 
   //  opserr << *theMatrix;
-  //  opserr << *theVector;
+  //  opserr << "Resisting Force: " << *theVector;
   return 0;
 }
 
@@ -855,12 +868,16 @@ int
 TFP_Bearing::getResponse(int responseID, Information &eleInfo)
 {
  double strain;
- 
+ // Vector res(this->getResistingForce());
+ // res(2) = Ac;
+
   switch (responseID) {
   case -1:
     return -1;
   case 1: // global forces
     return eleInfo.setVector(this->getResistingForce());
+    //  return eleInfo.setVector(res);
+    
   case 2:
     return eleInfo.setVector(this->getRayleighDampingForces());
   default:
