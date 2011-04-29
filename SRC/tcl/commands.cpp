@@ -530,6 +530,9 @@ int
 logFile(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
+version(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
 getPID(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
@@ -801,6 +804,8 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "numFact", &numFact, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
     Tcl_CreateCommand(interp, "numIter", &numIter, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
+    Tcl_CreateCommand(interp, "version", &version, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
 
     Tcl_CreateCommand(interp, "setParameter", &setParameter, 
@@ -2456,6 +2461,7 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 
     if (npRow != 0 && npCol != 0) {
       theSolver = new DistributedSuperLU(npRow, npCol);
+      opserr << "commands.cpp: DistributedSuperLU\n";
     }
 #else
 
@@ -2475,6 +2481,8 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 #endif
 
 #ifdef _PARALLEL_PROCESSING
+    opserr << "commands.cpp: DistributedSparseGenColLinSOE\n";
+
     theSOE = new DistributedSparseGenColLinSOE(*theSolver);      
 #else
     theSOE = new SparseGenColLinSOE(*theSolver);      
@@ -7579,7 +7587,14 @@ int OpenSeesExit(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char *
     neesCentralProjID = 0;
   }
 
-  Tcl_Exit(0);
+  int returnCode = 0;
+  if (argc > 1) {
+    if (Tcl_GetInt(interp, argv[1], &returnCode) != TCL_OK) {
+      opserr << "WARNING: OpenSeesExit - failed to read return code\n";
+    }
+  }
+  Tcl_Exit(returnCode);
+
   return 0;
 }
 
@@ -7864,6 +7879,18 @@ numIter(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
     return TCL_ERROR;
 
   sprintf(buffer, "%d", theAlgorithm->getNumIterations());
+  Tcl_SetResult(interp, buffer, TCL_VOLATILE);
+
+  return TCL_OK;
+}
+
+int
+version(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  char buffer[20];
+
+
+  sprintf(buffer, "%s", OPS_VERSION);
   Tcl_SetResult(interp, buffer, TCL_VOLATILE);
 
   return TCL_OK;
