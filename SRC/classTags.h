@@ -502,8 +502,9 @@
 #define ELE_TAG_SurfaceLoad      14
 #define ELE_TAG_BeamContact2D    15
 #define ELE_TAG_BeamEndContact3D 16
+#define ELE_TAG_SSPquad          18
 
-#define ELE_TAG_TPB1D 15
+#define ELE_TAG_TPB1D 17
 
 
 #define FRN_TAG_CoulombFriction     1

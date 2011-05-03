@@ -78,7 +78,7 @@ OPS_BeamContact2D(void)
 
   numData = 3;
   if (OPS_GetDoubleInput(&numData, dData) !=0) {
-    opserr << "WARNING invalid data: element BeamContact2D " << iData[0] << endln;
+    opserr << "WARNING invalid data: element BeamContact2D " << dData[0] << endln;
 	return 0;
   }
   

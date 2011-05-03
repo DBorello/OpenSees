@@ -569,6 +569,7 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/fourNodeQuad/ConstantPressureVolumeQuad.o \
 	$(FE)/element/fourNodeQuad/EnhancedQuad.o \
 	$(FE)/element/fourNodeQuad/NineNodeMixedQuad.o \
+	$(FE)/element/fourNodeQuad/SSPquad.o \
 	$(FE)/element/shell/ShellMITC4.o \
 	$(FE)/element/shell/R3vectors.o \
 	$(FE)/element/shell/TclShellCommand.o \

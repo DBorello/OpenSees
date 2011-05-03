@@ -6,7 +6,8 @@ OBJS       = FourNodeQuad.o \
 	EnhancedQuad.o \
 	FourNodeQuad3d.o \
 	NineNodeMixedQuad.o \
-	FourNodeQuadWithSensitivity.o
+	FourNodeQuadWithSensitivity.o \
+	SSPquad.o
 
 all:         $(OBJS)
 
