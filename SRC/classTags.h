@@ -56,11 +56,13 @@
 #define EigenSOE_TAGS_SymBandEigenSOE   3
 #define EigenSOE_TAGS_FullGenEigenSOE   4
 #define EigenSOE_TAGS_ArpackSOE 	5
+#define EigenSOE_TAGS_GeneralArpackSOE 	6
 #define EigenSOLVER_TAGS_BandArpackSolver 	1
 #define EigenSOLVER_TAGS_SymArpackSolver 	2
 #define EigenSOLVER_TAGS_SymBandEigenSolver     3
 #define EigenSOLVER_TAGS_FullGenEigenSolver  4
 #define EigenSOLVER_TAGS_ArpackSolver  5
+#define EigenSOLVER_TAGS_GeneralArpackSolver  6
 
 #define EigenALGORITHM_TAGS_Frequency 1
 #define EigenALGORITHM_TAGS_Standard  2
@@ -505,6 +507,8 @@
 #define ELE_TAG_SSPquad          18
 
 #define ELE_TAG_TPB1D 17
+#define ELE_TAG_TFP_Bearing 20
+#define ELE_TAG_TFP_Bearing2d 21
 
 
 #define FRN_TAG_CoulombFriction     1

@@ -592,6 +592,7 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/elastomericBearing/ElastomericBearing3d.o \
 	$(FE)/element/elastomericBearing/TclElastomericBearingCommand.o \
 	$(FE)/element/frictionBearing/TFP_Bearing.o \
+	$(FE)/element/frictionBearing/TFP_Bearing2d.o \
 	$(FE)/element/frictionBearing/TPB1D.o \
 	$(FE)/element/frictionBearing/FlatSliderSimple2d.o \
 	$(FE)/element/frictionBearing/FlatSliderSimple3d.o \
@@ -854,7 +855,9 @@ SysOfEqn_LIBS =	$(FE)/system_of_eqn/linearSOE/LinearSOE.o \
 	$(FE)/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSolver.o \
 	$(FE)/system_of_eqn/eigenSOE/FullGenEigenSOE.o \
-	$(FE)/system_of_eqn/eigenSOE/FullGenEigenSolver.o 
+	$(FE)/system_of_eqn/eigenSOE/FullGenEigenSolver.o \
+	$(FE)/system_of_eqn/eigenSOE/GeneralArpackSOE.o \
+	$(FE)/system_of_eqn/eigenSOE/GeneralArpackSolver.o
 
 
 MODEL_BUILDER_LIBS = $(FE)/modelbuilder/ModelBuilder.o \
