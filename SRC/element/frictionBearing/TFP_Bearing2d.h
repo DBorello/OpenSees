@@ -22,15 +22,15 @@
 // $Date$
 // $Source$
                                                                         
-#ifndef TFP_Bearing_h
-#define TFP_Bearing_h
+#ifndef TFP_Bearing2d_h
+#define TFP_Bearing2d_h
 
 // Written: Tracey Becker 
 // Conversion from matlab to c++: fmk
 //
-// Description: This file contains the interface for the TFP_Bearing class.
+// Description: This file contains the interface for the TFP_Bearing2d class.
 //
-// What: "@(#) TFP_Bearing.h, revA"
+// What: "@(#) TFP_Bearing2d.h, revA"
 
 #include <Element.h>
 #include <Matrix.h>
@@ -38,11 +38,11 @@
 
 class UniaxialMaterial;
 
-class TFP_Bearing : public Element
+class TFP_Bearing2d : public Element
 {
   public:
     // constructors
-  TFP_Bearing(int tag, 
+  TFP_Bearing2d(int tag, 
 	      int Nd1, int Nd2, 
 	      double *r, 
 	      double *dio,
@@ -54,10 +54,10 @@ class TFP_Bearing : public Element
 	      double K);
 
 
-    TFP_Bearing();    
+    TFP_Bearing2d();    
     
     // destructor
-    ~TFP_Bearing();
+    ~TFP_Bearing2d();
 
     
     // public methods to obtain inforrmation about dof & connectivity

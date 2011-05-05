@@ -20,10 +20,9 @@
                                                                         
 // Written: Tracey Becker
 //
-// What: "@(#) TFP_Bearing.C, revA"
+// What: "@(#) TFP_Bearing2d.C, revA"
 
 // we specify what header files we need
-#include "TFP_Bearing.h"
 #include "TFP_Bearing2d.h"
 #include <elementAPI.h>
 #include <G3Globals.h>
@@ -44,131 +43,38 @@
 #include <stdlib.h>
 #include <string.h>
 
-// initialise the class wide variables
-
-static int numMyBearing = 0;
-
-void *
-OPS_TFP_Bearing()
-{
-  // print out a message about who wrote this element & any copyright info wanted
-  if (numMyBearing == 0) {
-    opserr << "TFP_Bearing element - Written by Tracey Becker, UC Berkeley Copyright 2011 - Use at your Own Peril\n";
-    numMyBearing++;
-  }
-
-  Element *theEle = 0;
-
-  int numRemainingArgs = OPS_GetNumRemainingInputArgs();
-  if (numRemainingArgs == 0) { // parallel processing
-    theEle = new TFP_Bearing();
-    return theEle;
-  }
-
-  if (numRemainingArgs != 25 && numRemainingArgs != 24 && numRemainingArgs != 26) {
-    opserr << "ERROR - TFP_Bearing incorrect # args provided, want: element TFP_Bearing tag? iNode? jNode? ";
-    opserr << "$R1 $R2 $R3 $R4 $do1 $do2 $do3 $do4 $din1 $din2 $din3 $din4 $mu1 $mu2 $mu3 $mu4";
-    opserr << " $h1 $h2 $h3 $h4 $H0 <$a> <$K>\n";
-    return theEle;
-  }
-
-  // get the id and end nodes 
-  int iData[3];
-  double dData[23];
-  int numData;
-
-  numData = 3;
-  if (OPS_GetIntInput(&numData, iData) != 0) {
-    opserr << "WARNING invalid element data\n";
-    return 0;
-  }
-
-  int eleTag = iData[0];
-
-  if (numRemainingArgs == 24) {
-    numData = 21;
-    dData[21] = 0.0; // initial Axial Load = 0.0
-    dData[22] = 1.0e12;
-  } else if (numRemainingArgs == 25) {
-    numData = 22;
-    dData[22] = 1.0e12;
-  } else {
-    numData = 23;
-  }
-
-  if (OPS_GetDoubleInput(&numData, dData) != 0) {
-    opserr << "WARNING error reading element area for element" << eleTag << endln;
-    return 0;
-  }
-
-  // now create the truss and add it to the Domain
-  int ndm = OPS_GetNDM();
-  if (ndm == 3) {
-    theEle = new TFP_Bearing(eleTag, 
-			     iData[1], 
-			     iData[2], 
-			     &dData[0],
-			     &dData[4],
-			     &dData[8],
-			     &dData[12],
-			     &dData[16],
-			     dData[20],
-			     dData[21],
-			     dData[22]);
-  } else {
-    theEle = new TFP_Bearing2d(eleTag, 
-			       iData[1], 
-			       iData[2], 
-			       &dData[0],
-			       &dData[4],
-			       &dData[8],
-			       &dData[12],
-			       &dData[16],
-			       dData[20],
-			       dData[21],
-			       dData[22]);
-  }
-    
-  if (theEle == 0) {
-    opserr << "WARNING ran out of memory creating element with tag " << eleTag << endln;
-    return 0;
-  }
-
-  return theEle;
-}
-
 
 // typical constructor
-TFP_Bearing::TFP_Bearing(int tag, 
-			 int Nd1, int Nd2, 
-			 double *R, 
-			 double *DOUT,
-			 double *DIN,
-			 double *MU,
-			 double *H,
-			 double h0,
-			 double a,
-			 double k)
-  :Element(tag, ELE_TAG_TFP_Bearing),
-  externalNodes(2),
-  H0(h0), Ac(a), Ap(a),
-  numDOF(0), theMatrix(0), theVector(0)
+TFP_Bearing2d::TFP_Bearing2d(int tag, 
+			     int Nd1, int Nd2, 
+			     double *R, 
+			     double *DOUT,
+			     double *DIN,
+			     double *MU,
+			     double *H,
+			     double h0,
+			     double a,
+			     double k)
+  :Element(tag, ELE_TAG_TFP_Bearing2d),     
+   externalNodes(2),
+   H0(h0), Ac(a), Ap(a),
+   numDOF(0), theMatrix(0), theVector(0)
 {	
-
+  
   K = k;
-
+  
   // fill in the ID containing external node info with node id's    
   if (externalNodes.Size() != 2) {
-    opserr << "FATAL TFP_Bearing::TFP_Bearing() - out of memory, could not create an ID of size 2\n";
+    opserr << "FATAL TFP_Bearing2d::TFP_Bearing2d() - out of memory, could not create an ID of size 2\n";
     exit(-1);
   }
-
+  
   externalNodes(0) = Nd1;
   externalNodes(1) = Nd2;        
-
+  
   theNodes[0] = 0; 
   theNodes[1] = 0;
-
+  
   for (int i=0; i<4; i++) {
     r[i]   = R[i];
     dOut[i] = DOUT[i];
@@ -176,9 +82,9 @@ TFP_Bearing::TFP_Bearing(int tag,
     mu[i]  = MU[i];
     h[i]   = H[i];
   }
-
+  
   double dh = 0.0;
-
+  
   for (int i=0; i<8; i++) {
     vpCommit[i] = 0.0;
     vpTrial[i] = 0.0;
@@ -190,7 +96,7 @@ TFP_Bearing::TFP_Bearing(int tag,
     d[i] = 0.0; // r[i] - sqrt(r[i]*r[i]-sqrt(vs[i]*vs[i]+vs[i+4]*vs[i+4]));
     dh += d[i];
   }
-
+  
   for (int i=0; i<4; i++) {
     PCommit[i] = 0.0;
     PTrial[i] = 0.0;
@@ -198,22 +104,22 @@ TFP_Bearing::TFP_Bearing(int tag,
     UTrial[i] = 0.0;
     N[i] = a;
   }
-
+  
   HTrial  = H0 + dh;
 }
 
 // constructor which should be invoked by an FE_ObjectBroker only
-TFP_Bearing::TFP_Bearing()
- :Element(0, ELE_TAG_TFP_Bearing),
- externalNodes(2),
- numDOF(0), theMatrix(0), theVector(0)
+TFP_Bearing2d::TFP_Bearing2d()
+ :Element(0, ELE_TAG_TFP_Bearing2d), 
+  externalNodes(2),
+  numDOF(0), theMatrix(0), theVector(0)
 {
   theNodes[0] = 0; 
   theNodes[1] = 0;
 }
 
 //  destructor - provided to clean up any memory
-TFP_Bearing::~TFP_Bearing()
+TFP_Bearing2d::~TFP_Bearing2d()
 {
   if (theMatrix != 0)
     delete theMatrix;
@@ -222,25 +128,25 @@ TFP_Bearing::~TFP_Bearing()
 }
 
 int
-TFP_Bearing::getNumExternalNodes(void) const
+TFP_Bearing2d::getNumExternalNodes(void) const
 {
     return 2;
 }
 
 const ID &
-TFP_Bearing::getExternalNodes(void) 
+TFP_Bearing2d::getExternalNodes(void) 
 {
   return externalNodes;
 }
 
 Node **
-TFP_Bearing::getNodePtrs(void) 
+TFP_Bearing2d::getNodePtrs(void) 
 {
   return theNodes;
 }
 
 int
-TFP_Bearing::getNumDOF(void) {
+TFP_Bearing2d::getNumDOF(void) {
   return numDOF;
 }
 
@@ -249,7 +155,7 @@ TFP_Bearing::getNumDOF(void) {
 //    and set pointers to these nodes, also determines the length and 
 //    transformation Matrix.
 void
-TFP_Bearing::setDomain(Domain *theDomain)
+TFP_Bearing2d::setDomain(Domain *theDomain)
 {
   // check Domain is not null - invoked when object removed from a domain
   if (theDomain == 0) {
@@ -264,13 +170,13 @@ TFP_Bearing::setDomain(Domain *theDomain)
   end1Ptr = theDomain->getNode(Nd1);
   end2Ptr = theDomain->getNode(Nd2);	
   if (end1Ptr == 0) {
-    opserr << "WARNING TFP_Bearing::setDomain() - at truss " << this->getTag() << " node " <<
+    opserr << "WARNING TFP_Bearing2d::setDomain() - at truss " << this->getTag() << " node " <<
       Nd1 << "  does not exist in domain\n";
     exit(-1);    
     return;  // don't go any further - otherwise segemntation fault
   }
   if (end2Ptr == 0) {        
-    opserr << "WARNING TFP_Bearing::setDomain() - at truss " << this->getTag() << " node " <<
+    opserr << "WARNING TFP_Bearing2d::setDomain() - at truss " << this->getTag() << " node " <<
       Nd2 << "  does not exist in domain\n";
     exit(-1);    
     return;  // don't go any further - otherwise segemntation fault
@@ -283,20 +189,20 @@ TFP_Bearing::setDomain(Domain *theDomain)
   // ensure connected nodes have correct number of dof's
   int dofNd1 = end1Ptr->getNumberDOF();
   int dofNd2 = end2Ptr->getNumberDOF();	
-  if ((dofNd1 != dofNd2) || ((dofNd2 != 3) && (dofNd2 != 6)) ) {
-    opserr << "TFP_Bearing::setDomain(): 3 or 6 dof required at nodes\n";
+  if ((dofNd1 != dofNd2) || ((dofNd2 != 2) && (dofNd2 != 3)) ) {
+    opserr << "TFP_Bearing2d::setDomain(): 2 or 3 dof required at nodes\n";
     exit(-1);
     return;
   }	
 
-  if (dofNd2 == 3) {
+  if (dofNd2 == 2) {
+    theMatrix = new Matrix(4,4);
+    theVector = new Vector(4);
+    numDOF = 4;
+  } else {
     theMatrix = new Matrix(6,6);
     theVector = new Vector(6);
     numDOF = 6;
-  } else {
-    theMatrix = new Matrix(12,12);
-    theVector = new Vector(12);
-    numDOF = 12;
   }
 
   this->update();
@@ -304,7 +210,7 @@ TFP_Bearing::setDomain(Domain *theDomain)
 
 
 int
-TFP_Bearing::commitState()
+TFP_Bearing2d::commitState()
 {
   for (int i=0; i<8; i++) {
     vpCommit[i] = vpTrial[i];
@@ -331,7 +237,7 @@ TFP_Bearing::commitState()
 }
 
 int
-TFP_Bearing::revertToLastCommit()
+TFP_Bearing2d::revertToLastCommit()
 {
   for (int i=0; i<8; i++) {
     vpTrial[i] = vpCommit[i];
@@ -349,7 +255,7 @@ TFP_Bearing::revertToLastCommit()
 }
 
 int
-TFP_Bearing::revertToStart()
+TFP_Bearing2d::revertToStart()
 {
   for (int i=0; i<8; i++) {
     vpTrial[i] = 0.0;
@@ -383,7 +289,7 @@ static Matrix kei(4,4);
 static Matrix kee(4,4);
 
 int
-TFP_Bearing::kt3Drma(double *v, double *vp, double *Fr, double A, double *P, double *vpi) {
+TFP_Bearing2d::kt3Drma(double *v, double *vp, double *Fr, double A, double *P, double *vpi) {
 
   Vector vF (v, 8); 
   Vector vpF (vp, 8); 
@@ -577,7 +483,7 @@ TFP_Bearing::kt3Drma(double *v, double *vp, double *Fr, double A, double *P, dou
 
 
 int
-TFP_Bearing::update()
+TFP_Bearing2d::update()
 {
   //  opserr << "UPDATE: " << this->getTag() << endln;
 
@@ -590,9 +496,9 @@ TFP_Bearing::update()
   double vpi[8];
 
   delU(0)=v1(0);
-  delU(1)=v1(1);
+  delU(1)=0.0;
   delU(2)=v2(0);
-  delU(3)=v2(1);
+  delU(3)=0.0;
 
   int contC = kt3Drma(vCommit, vpCommit, FrCommit, Ac, PCommit, vpi);
 
@@ -775,9 +681,6 @@ TFP_Bearing::update()
     }
   }
 
-
-
-
   for (int i=0; i<8; i++) {
     vpTrial[i] = vpi[i];
   }
@@ -788,11 +691,11 @@ TFP_Bearing::update()
 
   int numD = numDOF/2;
 
-  for (int i=0; i<2; i++) {
+  for (int i=0; i<1; i++) {
     (*theVector)(i) = PTrial[i];
     (*theVector)(i+numD) = PTrial[i+2];
 
-    for (int j=0; j<2; j++) {
+    for (int j=0; j<1; j++) {
       (*theMatrix)(i,j) = kthat(i,j);
       (*theMatrix)(i+numD,j+numD) = kthat(i+2,j+2);
       (*theMatrix)(i+numD,j) = kthat(i+2,j);
@@ -803,29 +706,29 @@ TFP_Bearing::update()
   const Vector &d1 = theNodes[0]->getTrialDisp();
   const Vector &d2 = theNodes[1]->getTrialDisp();	
 
-  double axialDefo = d1(2)-d2(2);
+  double axialDefo = d1(1)-d2(1);
 
   if (axialDefo >= 0) {
-    (*theMatrix)(2,2) = K;
-    (*theMatrix)(2,2+numD) = -K;
-    (*theMatrix)(2+numD,2) = -K;
-    (*theMatrix)(2+numD,2+numD) = K;
+    (*theMatrix)(1,1) = K;
+    (*theMatrix)(1,1+numD) = -K;
+    (*theMatrix)(1+numD,1) = -K;
+    (*theMatrix)(1+numD,1+numD) = K;
     
 
     double force = axialDefo*K;
-    (*theVector)(2) = force;
-    (*theVector)(2+numD) = -force;
+    (*theVector)(1) = force;
+    (*theVector)(1+numD) = -force;
     Ap = force;
   } else {
     double Kmin = K*DBL_EPSILON;
-    (*theMatrix)(2,2) = Kmin; // uisng Kmin to keep system stable
-    (*theMatrix)(2,2+numD) = -Kmin;
-    (*theMatrix)(2+numD,2) = -Kmin;
-    (*theMatrix)(2+numD,2+numD) = Kmin;
+    (*theMatrix)(1,1) = Kmin; // uisng Kmin to keep system stable
+    (*theMatrix)(1,1+numD) = -Kmin;
+    (*theMatrix)(1+numD,1) = -Kmin;
+    (*theMatrix)(1+numD,1+numD) = Kmin;
     
     double force = 0.0;
-    (*theVector)(2) = force;
-    (*theVector)(2+numD) = -force;
+    (*theVector)(1) = force;
+    (*theVector)(1+numD) = -force;
     Ap = force;
   }
 
@@ -834,47 +737,47 @@ TFP_Bearing::update()
 
 
 const Matrix &
-TFP_Bearing::getTangentStiff(void)
+TFP_Bearing2d::getTangentStiff(void)
 {
   return *theMatrix;
 }
 
 const Matrix &
-TFP_Bearing::getInitialStiff(void)
+TFP_Bearing2d::getInitialStiff(void)
 {
   return *theMatrix;
 }
 
 const Vector &
-TFP_Bearing::getResistingForce()
+TFP_Bearing2d::getResistingForce()
 {	
   return *theVector;
 }
 
 int
-TFP_Bearing::sendSelf(int commitTag, Channel &theChannel)
+TFP_Bearing2d::sendSelf(int commitTag, Channel &theChannel)
 {
   return 0;
 }
 
 int
-TFP_Bearing::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+TFP_Bearing2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
   return 0;
 }
 
 void
-TFP_Bearing::Print(OPS_Stream &s, int flag)
+TFP_Bearing2d::Print(OPS_Stream &s, int flag)
 {
   s << "Element: " << this->getTag(); 
-  s << " type: TFP_Bearing  iNode: " << externalNodes(0);
+  s << " type: TFP_Bearing2d  iNode: " << externalNodes(0);
   s << " jNode: " << externalNodes(1) << endln;
 }
 
 
 
 Response *
-TFP_Bearing::setResponse(const char **argv, int argc, OPS_Stream &output)
+TFP_Bearing2d::setResponse(const char **argv, int argc, OPS_Stream &output)
 {
   Response *theResponse = 0;
 
@@ -909,7 +812,7 @@ TFP_Bearing::setResponse(const char **argv, int argc, OPS_Stream &output)
 
 
 int 
-TFP_Bearing::getResponse(int responseID, Information &eleInfo)
+TFP_Bearing2d::getResponse(int responseID, Information &eleInfo)
 {
  double strain;
  // Vector res(this->getResistingForce());
