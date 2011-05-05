@@ -3971,7 +3971,7 @@ TclReliabilityModelBuilder_addgFunEvaluator(ClientData clientData, Tcl_Interp *i
 			return TCL_ERROR;
 		}
 
-		if (strcmp(argv[2],"-file") != 0 || strcmp(argv[2],"-command") != 0) {
+		if (strcmp(argv[2],"-file") != 0 && strcmp(argv[2],"-command") != 0) {
 			opserr << "ERROR: Wrong input to Tcl g-function evaluator." << endln;
 			return TCL_ERROR;
 		}
