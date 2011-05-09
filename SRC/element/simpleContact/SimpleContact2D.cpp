@@ -632,7 +632,7 @@ SimpleContact2D::getResistingForceIncInertia()
 	opserr << "SimpleContact2D::getResistingForceIncInertia: " << MyTag << endln;
 #endif
 
-  return theVector;
+  return getResistingForce();
 }
 
 

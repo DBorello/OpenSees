@@ -854,7 +854,7 @@ BeamContact2D::getResistingForce()
 const Vector &
 BeamContact2D::getResistingForceIncInertia()
 {
-	return mInternalForces;
+	return getResistingForce();
 }
 
 int

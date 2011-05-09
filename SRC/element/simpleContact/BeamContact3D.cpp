@@ -1870,7 +1870,9 @@ BeamContact3D::getResistingForceIncInertia()
         opserr << "BeamContact3D::getResistingForceIncInertia(): " << MyTag << endln;
 #endif
   //return theVector;
-                return mInternalForces;
+  			return getResistingForce();
+				
+        //return mInternalForces;
 }
 
 

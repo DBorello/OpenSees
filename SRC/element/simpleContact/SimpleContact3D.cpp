@@ -1000,7 +1000,7 @@ SimpleContact3D::getResistingForceIncInertia()
 #ifdef DEBUG
         opserr << "SimpleContact3D::getResistingForceIncInertia(): " << MyTag << endln;
 #endif
-  return theVector;
+  return getResistingForce();
 }
 
 

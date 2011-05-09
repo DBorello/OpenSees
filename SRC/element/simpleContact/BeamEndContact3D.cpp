@@ -467,7 +467,7 @@ BeamEndContact3D::getResistingForce()
 const Vector &
 BeamEndContact3D::getResistingForceIncInertia()
 {
-	return mInternalForces;
+	return getResistingForce();
 }
 
 int
