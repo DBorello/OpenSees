@@ -210,7 +210,7 @@ matObj *OPS_GetMaterial(int *matTag, int *matType)
 {
 
   if (*matType == OPS_UNIAXIAL_MATERIAL_TYPE) {
-    UniaxialMaterial *theUniaxialMaterial = theModelBuilder->getUniaxialMaterial(*matTag);
+    UniaxialMaterial *theUniaxialMaterial = OPS_getUniaxialMaterial(*matTag);
     
     if (theUniaxialMaterial != 0) {
       
@@ -646,12 +646,10 @@ Tcl_addWrapperElement(eleObj *theEle, ClientData clientData, Tcl_Interp *interp,
 
 
 UniaxialMaterial *
-Tcl_addWrapperUniaxialMaterial(matObj *theMat, ClientData clientData, Tcl_Interp *interp,  int argc, 
-			       TCL_Char **argv, TclModelBuilder *builder)
+Tcl_addWrapperUniaxialMaterial(matObj *theMat, ClientData clientData, Tcl_Interp *interp,  int argc, TCL_Char **argv)
 {
   theInterp = interp;
 
-  theModelBuilder = builder;
   currentArgv = argv;
   currentArg = 2;
   maxArg = argc;
@@ -768,7 +766,7 @@ OPS_InvokeMaterialDirectly2(matObject *theMat, modelState *model, double *strain
 
 UniaxialMaterial *
 OPS_GetUniaxialMaterial(int matTag) {
-  return theModelBuilder->getUniaxialMaterial(matTag);
+  return OPS_getUniaxialMaterial(matTag);
 }
 
 NDMaterial *
@@ -803,6 +801,24 @@ OPS_ResetInput(ClientData clientData,
   theInterp = interp;
   theDomain = domain;
   theModelBuilder = builder;
+  currentArgv = argv;
+  currentArg = cArg;
+  maxArg = mArg;  
+
+  return 0;
+}
+
+int
+OPS_ResetInputNoBuilder(ClientData clientData, 
+			Tcl_Interp *interp,  
+			int cArg, 
+			int mArg, 
+			TCL_Char **argv, 
+			Domain *domain)
+{
+
+  theInterp = interp;
+  theDomain = domain;
   currentArgv = argv;
   currentArg = cArg;
   maxArg = mArg;  
