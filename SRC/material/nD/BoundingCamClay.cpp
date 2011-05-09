@@ -767,7 +767,7 @@ BoundingCamClay::GetComplianceOperator(double p, double ev, double es, Vector st
 	temp = Dyadic2_2(mI1,n) + Dyadic2_2(n,mI1);
 
 	// elastic compliance operator (covariant)
-	D = 1.5*D22inv*mIIco + (Ee11/9.0 - 0.5*D22inv)*mIIvol + Ee12/(sqrt(6))*temp 
+	D = 1.5*D22inv*mIIco + (Ee11/9.0 - 0.5*D22inv)*mIIvol + Ee12/(sqrt(6.0))*temp 
 	    + 1.5*(Ee22 - D22inv)*Dyadic2_2(n,n);
 
 	//opserr << "elastic compliance " << D << endln;
