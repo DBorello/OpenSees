@@ -33,6 +33,31 @@
 #include <DamageResponse.h>
 #include <string.h>
 
+#include <TaggedObject.h>
+#include <MapOfTaggedObjects.h>
+
+static MapOfTaggedObjects theDamageModelObjects;
+
+bool OPS_addDamageModel(DamageModel *newComponent) {
+  return theDamageModelObjects.addComponent(newComponent);
+}
+
+DamageModel *OPS_getDamageModel(int tag) {
+
+  TaggedObject *theResult = theDamageModelObjects.getComponentPtr(tag);
+  if (theResult == 0) {
+    opserr << "DamageModel *getDamageModel(int tag) - none found with tag: " << tag << endln;
+    return 0;
+  }
+  DamageModel *theMat = (DamageModel *)theResult;
+
+  return theMat;
+}
+
+void OPS_clearAllDamageModel(void) {
+  theDamageModelObjects.clearAll();
+}
+
 DamageModel::DamageModel(int tag, int clasTag)
 :TaggedObject(tag), MovableObject(clasTag)
 {

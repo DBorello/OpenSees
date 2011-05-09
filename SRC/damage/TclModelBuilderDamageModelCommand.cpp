@@ -29,7 +29,6 @@
 // the DamageModel command in the interpreter. 
 //
 
-#include <TclModelBuilder.h>
 #include <DamageModel.h>
 
 #include <NormalizedPeak.h>
@@ -37,7 +36,7 @@
 #include <Mehanny.h>
 #include <ParkAng.h>
 #include <HystereticEnergy.h>
-#include <TclModelBuilder.h>
+#include <tcl.h>
 
 #include <Vector.h>
 #include <string.h>
@@ -50,13 +49,10 @@ static void printCommand(int argc, TCL_Char **argv)
   opserr << endln;
 } 
 
-TclModelBuilder *theDamageTclModelBuilder =0;   	// fmk for accessing the modelbuilder
-
 int
-TclModelBuilderDamageModelCommand (ClientData clientData, Tcl_Interp *interp, int argc,
-				   TCL_Char **argv, TclModelBuilder *theTclBuilder )
+TclModelBuilderDamageModelCommand (ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+				   
 {
-  theDamageTclModelBuilder = theTclBuilder;		// fmk for accessing the modelbuilder
   
   // Make sure there is a minimum number of arguments
   if (argc < 3) {
@@ -328,7 +324,7 @@ TclModelBuilderDamageModelCommand (ClientData clientData, Tcl_Interp *interp, in
   }
   
   // Now add the damage model to the modelBuilder
-  if (theTclBuilder->addDamageModel(*theDamage) < 0) {
+  if (OPS_addDamageModel(theDamage) < 0) {
     opserr << "WARNING could not add DamageModel to the domain\n";
     opserr << *theDamage << endln;
     delete theDamage; // invoke the material objects destructor, otherwise mem leak
