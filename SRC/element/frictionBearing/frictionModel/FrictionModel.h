@@ -83,4 +83,8 @@ private:
 
 };
 
+extern bool OPS_addFrictionModel(FrictionModel *newComponent);
+extern FrictionModel *OPS_getFrictionModel(int tag);
+extern void OPS_clearAllFrictionModel(void);
+
 #endif

@@ -36,6 +36,7 @@
 #include <Domain.h>
 #include <ID.h>
 #include <Vector.h>
+#include <UniaxialMaterial.h>
 
 #include <TwoNodeLink.h>
 
@@ -115,7 +116,7 @@ int TclModelBuilder_addTwoNodeLink(ClientData clientData,
             opserr << "twoNodeLink element: " << tag << endln;
             return TCL_ERROR;
         }
-        theMaterials[i] = theTclBuilder->getUniaxialMaterial(matTag);
+        theMaterials[i] = OPS_getUniaxialMaterial(matTag);
         if (theMaterials[i] == 0)  {
 		    opserr << "WARNING material model not found\n";
 	        opserr << "uniaxialMaterial " << matTag << endln;

@@ -41,6 +41,9 @@
 #include <SingleFPSimple2d.h>
 #include <SingleFPSimple3d.h>
 
+#include <FrictionModel.h>
+#include <UniaxialMaterial.h>
+
 
 extern void printCommand(int argc, TCL_Char **argv);
 
@@ -103,7 +106,7 @@ int TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp
             opserr << "singleFPBearing element: " << tag << endln;
             return TCL_ERROR;
         }
-        FrictionModel *theFrnMdl = theTclBuilder->getFrictionModel(frnMdlTag);
+        FrictionModel *theFrnMdl = OPS_getFrictionModel(frnMdlTag);
         if (theFrnMdl == 0)  {
             opserr << "WARNING friction model not found\n";
             opserr << "frictionModel: " << frnMdlTag << endln;
@@ -134,7 +137,7 @@ int TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp
                     opserr << "singleFPBearing element: " << tag << endln;
                     return TCL_ERROR;
                 }
-                theMaterials[0] = theTclBuilder->getUniaxialMaterial(matTag);
+                theMaterials[0] = OPS_getUniaxialMaterial(matTag);
                 if (theMaterials[0] == 0)  {
                     opserr << "WARNING material model not found\n";
                     opserr << "uniaxialMaterial: " << matTag << endln;
@@ -151,7 +154,7 @@ int TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp
                     opserr << "singleFPBearing element: " << tag << endln;
                     return TCL_ERROR;
                 }
-                theMaterials[1] = theTclBuilder->getUniaxialMaterial(matTag);
+                theMaterials[1] = OPS_getUniaxialMaterial(matTag);
                 if (theMaterials[1] == 0)  {
                     opserr << "WARNING material model not found\n";
                     opserr << "uniaxialMaterial: " << matTag << endln;
@@ -301,7 +304,7 @@ int TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp
             opserr << "singleFPBearing element: " << tag << endln;
             return TCL_ERROR;
         }
-        FrictionModel *theFrnMdl = theTclBuilder->getFrictionModel(frnMdlTag);
+        FrictionModel *theFrnMdl = OPS_getFrictionModel(frnMdlTag);
         if (theFrnMdl == 0)  {
             opserr << "WARNING friction model not found\n";
             opserr << "frictionModel: " << frnMdlTag << endln;
@@ -331,7 +334,7 @@ int TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp
                     opserr << "singleFPBearing element: " << tag << endln;
                     return TCL_ERROR;
                 }
-                theMaterials[0] = theTclBuilder->getUniaxialMaterial(matTag);
+                theMaterials[0] = OPS_getUniaxialMaterial(matTag);
                 if (theMaterials[0] == 0)  {
                     opserr << "WARNING material model not found\n";
                     opserr << "uniaxialMaterial: " << matTag << endln;
@@ -348,7 +351,7 @@ int TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp
                     opserr << "singleFPBearing element: " << tag << endln;
                     return TCL_ERROR;
                 }
-                theMaterials[1] = theTclBuilder->getUniaxialMaterial(matTag);
+                theMaterials[1] = OPS_getUniaxialMaterial(matTag);
                 if (theMaterials[1] == 0)  {
                     opserr << "WARNING material model not found\n";
                     opserr << "uniaxialMaterial: " << matTag << endln;
@@ -365,7 +368,7 @@ int TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp
                     opserr << "singleFPBearing element: " << tag << endln;
                     return TCL_ERROR;
                 }
-                theMaterials[2] = theTclBuilder->getUniaxialMaterial(matTag);
+                theMaterials[2] = OPS_getUniaxialMaterial(matTag);
                 if (theMaterials[2] == 0)  {
                     opserr << "WARNING material model not found\n";
                     opserr << "uniaxialMaterial: " << matTag << endln;
@@ -382,7 +385,7 @@ int TclModelBuilder_addSingleFPBearing(ClientData clientData, Tcl_Interp *interp
                     opserr << "singleFPBearing element: " << tag << endln;
                     return TCL_ERROR;
                 }
-                theMaterials[3] = theTclBuilder->getUniaxialMaterial(matTag);
+                theMaterials[3] = OPS_getUniaxialMaterial(matTag);
                 if (theMaterials[3] == 0)  {
                     opserr << "WARNING material model not found\n";
                     opserr << "uniaxialMaterial: " << matTag << endln;

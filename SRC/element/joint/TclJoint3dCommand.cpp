@@ -38,6 +38,7 @@
 
 #include <Joint3D.h>
 #include <TclModelBuilder.h>
+#include <UniaxialMaterial.h>
 
 //extern void printCommand(int argc, TCL_Char **argv);
 
@@ -139,7 +140,7 @@ TclModelBuilder_addJoint3D(ClientData clientData, Tcl_Interp *interp,
     return TCL_ERROR;
   }
   
-  MatX = theTclBuilder->getUniaxialMaterial(MatXid);
+  MatX = OPS_getUniaxialMaterial(MatXid);
   if ( MatX == NULL )
     {
       opserr << "WARNING material not found\n";
@@ -156,7 +157,7 @@ TclModelBuilder_addJoint3D(ClientData clientData, Tcl_Interp *interp,
     return TCL_ERROR;
   }
   
-  MatY = theTclBuilder->getUniaxialMaterial(MatYid);
+  MatY = OPS_getUniaxialMaterial(MatYid);
   if ( MatY == NULL )
     {
       opserr << "WARNING material not found\n";
@@ -173,7 +174,7 @@ TclModelBuilder_addJoint3D(ClientData clientData, Tcl_Interp *interp,
     return TCL_ERROR;
   }
   
-  MatZ = theTclBuilder->getUniaxialMaterial(MatZid);
+  MatZ = OPS_getUniaxialMaterial(MatZid);
   if ( MatZ == NULL )
     {
       opserr << "WARNING material not found\n";

@@ -42,7 +42,7 @@
 
 #include <ElastomericBearing2d.h>
 #include <ElastomericBearing3d.h>
-
+#include <UniaxialMaterial.h>
 
 extern void printCommand(int argc, TCL_Char **argv);
 
@@ -122,7 +122,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
                     opserr << "elastomericBearing element: " << tag << endln;
                     return TCL_ERROR;
                 }
-                theMaterials[0] = theTclBuilder->getUniaxialMaterial(matTag);
+                theMaterials[0] = OPS_getUniaxialMaterial(matTag);
                 if (theMaterials[0] == 0)  {
                     opserr << "WARNING material model not found\n";
                     opserr << "uniaxialMaterial: " << matTag << endln;
@@ -139,7 +139,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
                     opserr << "elastomericBearing element: " << tag << endln;
                     return TCL_ERROR;
                 }
-                theMaterials[1] = theTclBuilder->getUniaxialMaterial(matTag);
+                theMaterials[1] = OPS_getUniaxialMaterial(matTag);
                 if (theMaterials[1] == 0)  {
                     opserr << "WARNING material model not found\n";
                     opserr << "uniaxialMaterial: " << matTag << endln;
@@ -290,7 +290,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
                     opserr << "elastomericBearing element: " << tag << endln;
                     return TCL_ERROR;
                 }
-                theMaterials[0] = theTclBuilder->getUniaxialMaterial(matTag);
+                theMaterials[0] = OPS_getUniaxialMaterial(matTag);
                 if (theMaterials[0] == 0)  {
                     opserr << "WARNING material model not found\n";
                     opserr << "uniaxialMaterial: " << matTag << endln;
@@ -307,7 +307,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
                     opserr << "elastomericBearing element: " << tag << endln;
                     return TCL_ERROR;
                 }
-                theMaterials[1] = theTclBuilder->getUniaxialMaterial(matTag);
+                theMaterials[1] = OPS_getUniaxialMaterial(matTag);
                 if (theMaterials[1] == 0)  {
                     opserr << "WARNING material model not found\n";
                     opserr << "uniaxialMaterial: " << matTag << endln;
@@ -324,7 +324,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
                     opserr << "elastomericBearing element: " << tag << endln;
                     return TCL_ERROR;
                 }
-                theMaterials[2] = theTclBuilder->getUniaxialMaterial(matTag);
+                theMaterials[2] = OPS_getUniaxialMaterial(matTag);
                 if (theMaterials[2] == 0)  {
                     opserr << "WARNING material model not found\n";
                     opserr << "uniaxialMaterial: " << matTag << endln;
@@ -341,7 +341,7 @@ int TclModelBuilder_addElastomericBearing(ClientData clientData,
                     opserr << "elastomericBearing element: " << tag << endln;
                     return TCL_ERROR;
                 }
-                theMaterials[3] = theTclBuilder->getUniaxialMaterial(matTag);
+                theMaterials[3] = OPS_getUniaxialMaterial(matTag);
                 if (theMaterials[3] == 0)  {
                     opserr << "WARNING material model not found\n";
                     opserr << "uniaxialMaterial: " << matTag << endln;

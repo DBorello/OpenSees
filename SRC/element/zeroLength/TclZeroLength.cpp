@@ -41,7 +41,7 @@
 #include <ID.h>
 #include <Vector.h>
 #include <Domain.h>
-
+#include <UniaxialMaterial.h>
 
 int
 TclModelBuilder_addZeroLength(ClientData clientData, Tcl_Interp *interp,
@@ -161,7 +161,7 @@ TclModelBuilder_addZeroLength(ClientData clientData, Tcl_Interp *interp,
 
 	    // get a pointer to the material from the modelbuilder	    
 	    argi++;
-	    UniaxialMaterial *theMat = theBuilder->getUniaxialMaterial(matID);
+	    UniaxialMaterial *theMat = OPS_getUniaxialMaterial(matID);
 	    if (theMat == 0) {
 	      opserr << "WARNING no material " << matID <<
 		"exitsts - element ZeroLength eleTag? iNode? jNode? " <<
@@ -765,7 +765,7 @@ TclModelBuilder_addZeroLengthND(ClientData clientData, Tcl_Interp *interp,
 			return TCL_ERROR;
 		}
 
-		the1DMat = theBuilder->getUniaxialMaterial(uniTag);
+		the1DMat = OPS_getUniaxialMaterial(uniTag);
 
 		if (the1DMat == 0)
 		  opserr << "WARNING UniaxialMaterial " << uniTag << " not found in model, proceeding without\n";

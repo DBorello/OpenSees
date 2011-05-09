@@ -131,8 +131,8 @@ TclModelBuilder_addConstantPressureVolumeQuad(ClientData, Tcl_Interp *, int, TCL
 					      Domain*, TclModelBuilder *);
 
 extern int
-TclModelBuilder_addJoint2D(ClientData, Tcl_Interp *, int, TCL_Char **,
-			   Domain*, TclModelBuilder *);
+TclModelBuilder_addJoint2D(ClientData, Tcl_Interp *, int, TCL_Char **, Domain*);
+			   
 
 extern int
 TclModelBuilder_addJoint3D(ClientData, Tcl_Interp *, int, TCL_Char **,
@@ -198,8 +198,8 @@ TclModelBuilder_addForceBeamColumn(ClientData, Tcl_Interp *, int, TCL_Char **,
 
 // NM
 extern int
-TclModelBuilder_addBeamColumnJoint(ClientData, Tcl_Interp *, int, TCL_Char **,
-				   Domain*, TclModelBuilder *, int);
+TclModelBuilder_addBeamColumnJoint(ClientData, Tcl_Interp *, int, TCL_Char **, Domain*, int);
+
 
 //Boris Jeremic & Zhaohui
 extern int TclModelBuilder_addEightNodeBrick(ClientData,
@@ -882,8 +882,8 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
     return result;
   } else if ((strcmp(argv[1],"Joint2D") == 0) ||
 	     (strcmp(argv[1],"Joint2d") == 0)) {
-    int result = TclModelBuilder_addJoint2D(clientData, interp, argc, argv,
-					    theTclDomain, theTclBuilder);
+    int result = TclModelBuilder_addJoint2D(clientData, interp, argc, argv,theTclDomain);
+					    
     return result;
   } else if ((strcmp(argv[1],"Joint3D") == 0) ||
 	     (strcmp(argv[1],"Joint3d") == 0)) {
@@ -909,8 +909,8 @@ else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
   else if (strcmp(argv[1],"beamColumnJoint") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addBeamColumnJoint(clientData, interp,
-						    argc, argv, theTclDomain,
-						    theTclBuilder, eleArgStart);
+						    argc, argv, theTclDomain,eleArgStart);
+
     return result;
   }
   

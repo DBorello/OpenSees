@@ -45,50 +45,43 @@
 #include <FEM_ObjectBroker.h>  
 #include <Renderer.h>
 #include <UniaxialMaterial.h>
-#include <TclModelBuilder.h>
+#include <tcl.h>
+#include <elementAPI.h>
 
 extern void printCommand(int argc, TCL_Char **argv);
 static Domain *theTclModelBuilderDomain = 0;       
-static TclModelBuilder *theTclModelBuilder =0;     
 
 int TclModelBuilder_addBeamColumnJoint(ClientData clientData, Tcl_Interp *interp, int argc,
-									TCL_Char **argv, Domain* theTclDomain,
-									TclModelBuilder *theTclBuilder, int eleArgStart)
+				       TCL_Char **argv, Domain* theTclDomain,
+				       int eleArgStart)
 {
-	// ensure destructor not called
-	if (theTclBuilder == 0) {
-		opserr << "Warning builder has been destroyed \n";
-		return TCL_ERROR;
-	}
-
     theTclModelBuilderDomain = theTclDomain;
-    theTclModelBuilder = theTclBuilder;
     
     int NDM, NDF;
      
-    NDM = theTclModelBuilder->getNDM();   // dimension of the structure (1d, 2d, or 3d)
-    NDF = theTclModelBuilder->getNDF();   // number of degrees of freedom per node
+    NDM = OPS_GetNDM();   // dimension of the structure (1d, 2d, or 3d)
+    NDF = OPS_GetNDF();   // number of degrees of freedom per node
 
-	
-	if ((NDM == 2 && NDF == 3) || (NDM == 3 && NDF == 6)) {
-	
-	// check no of arguments
-	if ((argc-eleArgStart) != 19 && (argc-eleArgStart) != 21)
+    
+    if ((NDM == 2 && NDF == 3) || (NDM == 3 && NDF == 6)) {
+      
+      // check no of arguments
+      if ((argc-eleArgStart) != 19 && (argc-eleArgStart) != 21)
 	{
-		opserr << "WARNING insufficient arguments\n";
-		printCommand(argc,argv);
-		opserr << "Want: element beamColumnJoint eleTag? node1? node2? node3? node4? matTag1? matTag2? matTag3?\n";
-		opserr << "matTag4? matTag5? matTag6? matTag7? matTag8? matTag9? matTag10? matTag11? matTag12? matTag13?\n";
-        opserr << "<ElementHeightFactor? ElementWidthFactor?>\n";
-
-		return TCL_ERROR;
+	  opserr << "WARNING insufficient arguments\n";
+	  printCommand(argc,argv);
+	  opserr << "Want: element beamColumnJoint eleTag? node1? node2? node3? node4? matTag1? matTag2? matTag3?\n";
+	  opserr << "matTag4? matTag5? matTag6? matTag7? matTag8? matTag9? matTag10? matTag11? matTag12? matTag13?\n";
+	  opserr << "<ElementHeightFactor? ElementWidthFactor?>\n";
+	  
+	  return TCL_ERROR;
 	}
-	
-	int id, nd1, nd2, nd3, nd4, matId1, matId2, matId3, matId4, matId5, matId6, matId7, matId8, matId9, matId10;
-	int matId11, matId12, matId13;
-	double hgtfac, wdtfac;
-
-	UniaxialMaterial *theMaterial1 = 0;
+      
+      int id, nd1, nd2, nd3, nd4, matId1, matId2, matId3, matId4, matId5, matId6, matId7, matId8, matId9, matId10;
+      int matId11, matId12, matId13;
+      double hgtfac, wdtfac;
+      
+      UniaxialMaterial *theMaterial1 = 0;
 	UniaxialMaterial *theMaterial2 = 0;
 	UniaxialMaterial *theMaterial3 = 0;
 	UniaxialMaterial *theMaterial4 = 0;
@@ -229,7 +222,7 @@ int TclModelBuilder_addBeamColumnJoint(ClientData clientData, Tcl_Interp *interp
 
 	if (matId1 != 0)
 	{
-		theMaterial1 = theTclBuilder->getUniaxialMaterial(matId1);
+		theMaterial1 = OPS_getUniaxialMaterial(matId1);
       
 	    if (theMaterial1 == 0) {
 		 opserr << "WARNING material not found\n";
@@ -241,7 +234,7 @@ int TclModelBuilder_addBeamColumnJoint(ClientData clientData, Tcl_Interp *interp
 
 	if (matId2 != 0)
 	{
-		theMaterial2 = theTclBuilder->getUniaxialMaterial(matId2);
+		theMaterial2 = OPS_getUniaxialMaterial(matId2);
       
 	    if (theMaterial2 == 0) {
 		opserr << "WARNING material not found\n";
@@ -253,7 +246,7 @@ int TclModelBuilder_addBeamColumnJoint(ClientData clientData, Tcl_Interp *interp
 
 	if (matId3 != 0)
 	{
-		theMaterial3 = theTclBuilder->getUniaxialMaterial(matId3);
+		theMaterial3 = OPS_getUniaxialMaterial(matId3);
       
 	    if (theMaterial3 == 0) {
 		 opserr << "WARNING material not found\n";
@@ -265,7 +258,7 @@ int TclModelBuilder_addBeamColumnJoint(ClientData clientData, Tcl_Interp *interp
 
 	if (matId4 != 0)
 	{
-		theMaterial4 = theTclBuilder->getUniaxialMaterial(matId4);
+		theMaterial4 = OPS_getUniaxialMaterial(matId4);
       
 		if (theMaterial4 == 0) {
 		opserr << "WARNING material not found\n";
@@ -277,7 +270,7 @@ int TclModelBuilder_addBeamColumnJoint(ClientData clientData, Tcl_Interp *interp
 
 	if (matId5 != 0)
 	{
-		theMaterial5 = theTclBuilder->getUniaxialMaterial(matId5);
+		theMaterial5 = OPS_getUniaxialMaterial(matId5);
       
 	    if (theMaterial5 == 0) {
 		 opserr << "WARNING material not found\n";
@@ -289,7 +282,7 @@ int TclModelBuilder_addBeamColumnJoint(ClientData clientData, Tcl_Interp *interp
 
 	if (matId6 != 0)
 	{
-		theMaterial6 = theTclBuilder->getUniaxialMaterial(matId6);
+		theMaterial6 = OPS_getUniaxialMaterial(matId6);
       
 	    if (theMaterial6 == 0) {
 		opserr << "WARNING material not found\n";
@@ -301,7 +294,7 @@ int TclModelBuilder_addBeamColumnJoint(ClientData clientData, Tcl_Interp *interp
 
 	if (matId7 != 0)
 	{
-		theMaterial7 = theTclBuilder->getUniaxialMaterial(matId7);
+		theMaterial7 = OPS_getUniaxialMaterial(matId7);
       
 	    if (theMaterial7 == 0) {
 		 opserr << "WARNING material not found\n";
@@ -313,7 +306,7 @@ int TclModelBuilder_addBeamColumnJoint(ClientData clientData, Tcl_Interp *interp
 
 	if (matId8 != 0)
 	{
-		theMaterial8 = theTclBuilder->getUniaxialMaterial(matId8);
+		theMaterial8 = OPS_getUniaxialMaterial(matId8);
       
 	    if (theMaterial8 == 0) {
 		 opserr << "WARNING material not found\n";
@@ -325,7 +318,7 @@ int TclModelBuilder_addBeamColumnJoint(ClientData clientData, Tcl_Interp *interp
 
 	if (matId9 != 0)
 	{
-		theMaterial9 = theTclBuilder->getUniaxialMaterial(matId9);
+		theMaterial9 = OPS_getUniaxialMaterial(matId9);
       
 		if (theMaterial9 == 0) {
 		opserr << "WARNING material not found\n";
@@ -338,7 +331,7 @@ int TclModelBuilder_addBeamColumnJoint(ClientData clientData, Tcl_Interp *interp
 	
 	if (matId10 != 0)
 	{
-		theMaterial10 = theTclBuilder->getUniaxialMaterial(matId10);
+		theMaterial10 = OPS_getUniaxialMaterial(matId10);
       
 		if (theMaterial10 == 0) {
 		opserr << "WARNING material not found\n";
@@ -350,7 +343,7 @@ int TclModelBuilder_addBeamColumnJoint(ClientData clientData, Tcl_Interp *interp
 
 	if (matId11 != 0)
 	{
-		theMaterial11 = theTclBuilder->getUniaxialMaterial(matId11);
+		theMaterial11 = OPS_getUniaxialMaterial(matId11);
       
 		if (theMaterial11 == 0) {
 		opserr << "WARNING material not found\n";
@@ -362,7 +355,7 @@ int TclModelBuilder_addBeamColumnJoint(ClientData clientData, Tcl_Interp *interp
 
 	if (matId12 != 0)
 	{
-		theMaterial12 = theTclBuilder->getUniaxialMaterial(matId12);
+		theMaterial12 = OPS_getUniaxialMaterial(matId12);
       
 		if (theMaterial12 == 0) {
 		opserr << "WARNING material not found\n";
@@ -374,7 +367,7 @@ int TclModelBuilder_addBeamColumnJoint(ClientData clientData, Tcl_Interp *interp
 
 	if (matId13 != 0)
 	{
-		theMaterial13 = theTclBuilder->getUniaxialMaterial(matId13);
+		theMaterial13 = OPS_getUniaxialMaterial(matId13);
       
 	    if (theMaterial13 == 0) {
 		opserr << "WARNING material not found\n";

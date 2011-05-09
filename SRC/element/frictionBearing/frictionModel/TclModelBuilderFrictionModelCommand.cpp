@@ -31,8 +31,9 @@
 //
 // What: "@(#) TclModelBuilderFrictionModelCommand.cpp, revA"
 
-#include <TclModelBuilder.h>
+
 #include <FrictionModel.h>
+#include <tcl.h>
 
 #include <CoulombFriction.h>
 #include <VDependentFriction.h>
@@ -41,6 +42,7 @@
 #include <ID.h>
 #include <Vector.h>
 #include <string.h>
+#include <FrictionModel.h>
 
 
 static void printCommand(int argc, TCL_Char **argv)
@@ -52,8 +54,7 @@ static void printCommand(int argc, TCL_Char **argv)
 } 
 
 
-int TclModelBuilderFrictionModelCommand(ClientData clientData, Tcl_Interp *interp, int argc,
-    TCL_Char **argv, TclModelBuilder *theTclBuilder, Domain *theDomain)
+int TclModelBuilderFrictionModelCommand(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv, Domain *theDomain)
 {
     // make sure there is a minimum number of arguments
     if (argc < 3)  {
@@ -185,7 +186,7 @@ int TclModelBuilderFrictionModelCommand(ClientData clientData, Tcl_Interp *inter
 	}
 	
 	// now add the friction model to the modelBuilder
-	if (theTclBuilder->addFrictionModel(*theFrnMdl) < 0)  {
+	if (OPS_addFrictionModel(theFrnMdl) < 0)  {
 		opserr << "WARNING could not add friction model to the domain\n";
 		opserr << *theFrnMdl << endln;
 		delete theFrnMdl; // invoke the destructor, otherwise mem leak

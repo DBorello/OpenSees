@@ -33,6 +33,31 @@
 #include <FrictionModel.h>
 #include <FrictionResponse.h>
 
+#include <TaggedObject.h>
+#include <MapOfTaggedObjects.h>
+
+static MapOfTaggedObjects theFrictionModelObjects;
+
+bool OPS_addFrictionModel(FrictionModel *newComponent) {
+  return theFrictionModelObjects.addComponent(newComponent);
+}
+
+FrictionModel *OPS_getFrictionModel(int tag) {
+
+  TaggedObject *theResult = theFrictionModelObjects.getComponentPtr(tag);
+  if (theResult == 0) {
+    opserr << "FrictionModel *getFrictionModel(int tag) - none found with tag: " << tag << endln;
+    return 0;
+  }
+  FrictionModel *theMat = (FrictionModel *)theResult;
+
+  return theMat;
+}
+
+void OPS_clearAllFrictionModel(void) {
+  theFrictionModelObjects.clearAll();
+}
+
 
 FrictionModel::FrictionModel(int tag, int classTag)
     : TaggedObject(tag), MovableObject(classTag),
