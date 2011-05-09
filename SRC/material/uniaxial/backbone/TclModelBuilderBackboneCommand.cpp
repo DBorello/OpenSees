@@ -29,8 +29,9 @@
 // TCL hystereticBackbone command.
 
 #include <OPS_Globals.h>
+#include <UniaxialMaterial.h>
 
-#include <TclModelBuilder.h>
+#include <tcl.h>
 
 #include <TrilinearBackbone.h>
 //#include <MultilinearBackbone.h>
@@ -57,8 +58,7 @@ static void printCommand(int argc, TCL_Char **argv)
 int
 TclModelBuilderHystereticBackboneCommand(ClientData clienData,
 					 Tcl_Interp *interp,
-					 int argc, TCL_Char **argv,
-					 TclModelBuilder *theTclBuilder)
+					 int argc, TCL_Char **argv)
 {
   if (argc < 2) {
     opserr << "WARNING insufficient number of hystereticBackbone arguments\n";
@@ -565,7 +565,7 @@ TclModelBuilderHystereticBackboneCommand(ClientData clienData,
       return TCL_ERROR;
     }
     
-    UniaxialMaterial *material = theTclBuilder->getUniaxialMaterial(matTag);
+    UniaxialMaterial *material = OPS_getUniaxialMaterial(matTag);
     
     if (material == 0) {
       opserr << "WARNING material does not exist\n";
@@ -593,7 +593,7 @@ TclModelBuilderHystereticBackboneCommand(ClientData clienData,
   }
   
   // Now add the material to the modelBuilder
-  if (theTclBuilder->addHystereticBackbone(*theBackbone) < 0) {
+  if (OPS_addHystereticBackbone(theBackbone) < 0) {
     opserr << "WARNING could not add hystereticBackbone to the domain\n";
     opserr << *theBackbone << endln;
     delete theBackbone; // invoke the material objects destructor, otherwise mem leak

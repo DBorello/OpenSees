@@ -42,8 +42,7 @@
 #include <tcl.h>
 
 int
-TclCommand_ReinforcingSteel(ClientData clientData, Tcl_Interp *interp, int argc, 
-			    TCL_Char **argv, TclModelBuilder *theTclBuilder)
+TclCommand_ReinforcingSteel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   UniaxialMaterial *theMaterial = 0;
   if (argc < 9) {
@@ -251,7 +250,7 @@ TclCommand_ReinforcingSteel(ClientData clientData, Tcl_Interp *interp, int argc,
   theMaterial = new ReinforcingSteel(tag, fy, fu, Es, Esh, esh, eult, buckModel, slen, beta, r, gama, Cf, alpha, Cd, RC1, RC2, RC3, a1, hardLim);
 
   if (theMaterial != 0) 
-    return theTclBuilder->addUniaxialMaterial(*theMaterial);
+    return OPS_addUniaxialMaterial(theMaterial);
   else
     return -1;
 }

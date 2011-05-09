@@ -91,6 +91,9 @@ class UniaxialMaterial : public Material
  private:
 };
 
+extern bool OPS_addUniaxialMaterial(UniaxialMaterial *newComponent);
+extern UniaxialMaterial *OPS_getUniaxialMaterial(int tag);
+extern void OPS_clearAllUniaxialMaterial(void);
 
 #endif
 

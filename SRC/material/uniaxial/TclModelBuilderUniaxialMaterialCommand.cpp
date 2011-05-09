@@ -31,8 +31,9 @@
 //
 // What: "@(#) TclModelBuilderUniaxialMaterialCommand.C, revA"
 
-#include <TclModelBuilder.h>
+//#include <TclModelBuilder.h>
 
+#include <tcl.h>
 #include <elementAPI.h>
 
 #include <ElasticMaterial.h>	// fmk
@@ -53,6 +54,7 @@
 #include <Concrete06.h>			// LMS
 #include <Concrete07.h>			// JDW
 #include <HystereticMaterial.h>	// MHS
+#include <HystereticBackbone.h>	// MHS
 #include <EPPGapMaterial.h>		// Mackie
 #include <ViscousMaterial.h>	// Sasani
 #include <PathIndependentMaterial.h>	// MHS
@@ -101,25 +103,23 @@ extern UniaxialMaterial *
 Tcl_AddLimitStateMaterial(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 extern int
-TclCommand_HyperbolicGapMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
-				 TCL_Char **argv, TclModelBuilder *theTclBuilder);
+TclCommand_HyperbolicGapMaterial(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+				 
 
 extern int
-TclCommand_ImpactMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
-			  TCL_Char **argv, TclModelBuilder *theTclBuilder);
+TclCommand_ImpactMaterial(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 extern UniaxialMaterial *Tcl_addWrapperUniaxialMaterial(matObj *, ClientData clientData, Tcl_Interp *interp,
-							int argc, TCL_Char **argv, TclModelBuilder *theTclBuilder);
+							int argc, TCL_Char **argv);
 
 #include <packages.h>
 
-extern int OPS_ResetInput(ClientData clientData, 
-			  Tcl_Interp *interp,  
-			  int cArg, 
-			  int mArg, 
-			  TCL_Char **argv, 
-			  Domain *domain,
-			  TclModelBuilder *builder);
+extern int OPS_ResetInputNoBuilder(ClientData clientData, 
+				   Tcl_Interp *interp,  
+				   int cArg, 
+				   int mArg, 
+				   TCL_Char **argv, 
+				   Domain *domain);
 
 
 typedef struct uniaxialPackageCommand {
@@ -142,36 +142,27 @@ static void printCommand(int argc, TCL_Char **argv)
 // external functions
 
 int
-TclCommand_ReinforcingSteel(ClientData clientData, Tcl_Interp *interp, int argc, 
-			    TCL_Char **argv, TclModelBuilder *theTclBuilder);
+TclCommand_ReinforcingSteel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 
 UniaxialMaterial *
-TclModelBuilder_addFedeasMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
-				  TCL_Char **argv, TclModelBuilder *theTclBuilder);
+TclModelBuilder_addFedeasMaterial(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+				  
 
 UniaxialMaterial *
-TclModelBuilder_addDrainMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
-				 TCL_Char **argv, TclModelBuilder *theTclBuilder);
+TclModelBuilder_addDrainMaterial(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+				 
 
 UniaxialMaterial *
-TclModelBuilder_addSnapMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
-				TCL_Char **argv, TclModelBuilder *theTclBuilder);
+TclModelBuilder_addSnapMaterial(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+				
 
 UniaxialMaterial *
-TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
-				  TCL_Char **argv, TclModelBuilder *theTclBuilder, Domain *theDomain);
-
-
-/*
-int
-TclCommand_KinematicHardening(ClientData clientData, Tcl_Interp *interp, int argc, 
-			      TCL_Char **argv, TclModelBuilder *theTclBuilder);
-*/
+TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv, Domain *theDomain);
+				  
 
 int
-TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *interp, int argc,
-					TCL_Char **argv, TclModelBuilder *theTclBuilder, Domain *theDomain)
+TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv, Domain *theDomain)
 {
   
   // Make sure there is a minimum number of arguments
@@ -181,7 +172,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	return TCL_ERROR;
     }
 
-    OPS_ResetInput(clientData, interp, 2, argc, argv, theDomain, theTclBuilder);	  
+    OPS_ResetInputNoBuilder(clientData, interp, 2, argc, argv, theDomain);	  
 
     // Pointer to a uniaxial material that will be added to the model builder
     UniaxialMaterial *theMaterial = 0;
@@ -298,7 +289,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	theMaterial = new Elastic2Material(tag, E, eta);       
       
     } else if (strcmp(argv[1], "ReinforcingSteel") == 0) {
-      return TclCommand_ReinforcingSteel(clientData,interp,argc,argv,theTclBuilder);
+      return TclCommand_ReinforcingSteel(clientData,interp,argc,argv);
     }
     
     else if (strcmp(argv[1],"ENT") == 0) {
@@ -606,7 +597,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 		return TCL_ERROR;
 	    }
 	    
-	    UniaxialMaterial *theMat = theTclBuilder->getUniaxialMaterial(tagI);
+	    UniaxialMaterial *theMat = OPS_getUniaxialMaterial(tagI);
 	    
 	    if (theMat == 0) {
 		opserr << "WARNING component material does not exist\n";
@@ -654,7 +645,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 			return TCL_ERROR;
 	    }
 	    
-	    UniaxialMaterial *theMat = theTclBuilder->getUniaxialMaterial(tagI);
+	    UniaxialMaterial *theMat = OPS_getUniaxialMaterial(tagI);
 	    
 	    if (theMat == 0) {
 			opserr << "WARNING component material does not exist\n";
@@ -1569,7 +1560,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 			return TCL_ERROR;
 		}
 
-		UniaxialMaterial *material = theTclBuilder->getUniaxialMaterial(matTag);
+		UniaxialMaterial *material = OPS_getUniaxialMaterial(matTag);
 		
 		if (material == 0) {
 		    opserr << "WARNING material does not exist\n";
@@ -1603,7 +1594,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	return TCL_ERROR;
       }
 
-      HystereticBackbone *backbone = theTclBuilder->getHystereticBackbone(bbTag);
+      HystereticBackbone *backbone = OPS_getHystereticBackbone(bbTag);
 		
       if (backbone == 0) {
 	opserr << "WARNING backbone does not exist\n";
@@ -1660,7 +1651,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	}
       }
 	
-      UniaxialMaterial *theMat = theTclBuilder->getUniaxialMaterial(matTag);
+      UniaxialMaterial *theMat = OPS_getUniaxialMaterial(matTag);
 	    
       if (theMat == 0) {
 	opserr << "WARNING component material does not exist\n";
@@ -1744,7 +1735,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
       }
       
       
-      UniaxialMaterial *theMat = theTclBuilder->getUniaxialMaterial(matTag);
+      UniaxialMaterial *theMat = OPS_getUniaxialMaterial(matTag);
       
       if (theMat == 0) {
 	opserr << "WARNING component material does not exist\n";
@@ -3027,11 +3018,11 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
     }
     
     else if (strcmp(argv[1],"HyperbolicGapMaterial") == 0) { 
-      return TclCommand_HyperbolicGapMaterial(clientData, interp, argc, argv, theTclBuilder);
+      return TclCommand_HyperbolicGapMaterial(clientData, interp, argc, argv);
     }
 
     else if (strcmp(argv[1],"ImpactMaterial") == 0) { 
-      return TclCommand_ImpactMaterial(clientData, interp, argc, argv, theTclBuilder);
+      return TclCommand_ImpactMaterial(clientData, interp, argc, argv);
     }
 
     else if (strcmp(argv[1],"SteelMP") == 0) {
@@ -3235,19 +3226,19 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
     }
     else {
       // Fedeas
-      theMaterial = TclModelBuilder_addFedeasMaterial(clientData, interp, argc, argv, theTclBuilder);
+      theMaterial = TclModelBuilder_addFedeasMaterial(clientData, interp, argc, argv);
       
       // Drain
       if (theMaterial == 0)
-	theMaterial = TclModelBuilder_addDrainMaterial(clientData, interp, argc, argv, theTclBuilder);
+	theMaterial = TclModelBuilder_addDrainMaterial(clientData, interp, argc, argv);
       
       // SNAP
       if (theMaterial == 0)
-	theMaterial = TclModelBuilder_addSnapMaterial(clientData, interp, argc, argv, theTclBuilder);
+	theMaterial = TclModelBuilder_addSnapMaterial(clientData, interp, argc, argv);
       
       // Py, Tz, Qz models
       if (theMaterial == 0)
-	theMaterial = TclModelBuilder_addPyTzQzMaterial(clientData, interp, argc, argv, theTclBuilder, theDomain);
+	theMaterial = TclModelBuilder_addPyTzQzMaterial(clientData, interp, argc, argv, theDomain);
       
       // LimitState
       if (theMaterial == 0)
@@ -3288,8 +3279,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 
       if (matObject != 0) {
 	
-	theMaterial = Tcl_addWrapperUniaxialMaterial(matObject, clientData, interp,
-						     argc, argv, theTclBuilder);
+	theMaterial = Tcl_addWrapperUniaxialMaterial(matObject, clientData, interp, argc, argv);
 	
 	if (theMaterial == 0)
 	  delete matObject;
@@ -3341,7 +3331,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
     }
     
     // Now add the material to the modelBuilder
-    if (theTclBuilder->addUniaxialMaterial(*theMaterial) < 0) {
+    if (OPS_addUniaxialMaterial(theMaterial) < 0) {
       opserr << "WARNING could not add uniaxialMaterial to the modelbuilder\n";
       opserr << *theMaterial << endln;
       delete theMaterial; // invoke the material objects destructor, otherwise mem leak

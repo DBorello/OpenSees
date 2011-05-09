@@ -30,6 +30,32 @@
 
 #include <HystereticBackbone.h>
 
+#include <TaggedObject.h>
+#include <MapOfTaggedObjects.h>
+
+static MapOfTaggedObjects theHystereticBackboneObjects;
+
+bool OPS_addHystereticBackbone(HystereticBackbone *newComponent) {
+  return theHystereticBackboneObjects.addComponent(newComponent);
+}
+
+HystereticBackbone *OPS_getHystereticBackbone(int tag) {
+
+  TaggedObject *theResult = theHystereticBackboneObjects.getComponentPtr(tag);
+  if (theResult == 0) {
+    opserr << "HystereticBackbone *getHystereticBackbone(int tag) - none found with tag: " << tag << endln;
+    return 0;
+  }
+  HystereticBackbone *theMat = (HystereticBackbone *)theResult;
+
+  return theMat;
+}
+
+void OPS_clearAllHystereticBackbone(void) {
+  theHystereticBackboneObjects.clearAll();
+}
+
+
 HystereticBackbone::HystereticBackbone (int tag, int classTag):
   TaggedObject(tag), MovableObject(classTag)
 {

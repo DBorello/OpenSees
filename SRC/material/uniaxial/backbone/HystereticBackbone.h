@@ -62,4 +62,8 @@ class HystereticBackbone : public TaggedObject, public MovableObject
   
 };
 
+extern bool OPS_addHystereticBackbone(HystereticBackbone *newComponent);
+extern HystereticBackbone *OPS_getHystereticBackbone(int tag);
+extern void OPS_clearAllHystereticBackbone(void);
+
 #endif

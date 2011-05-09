@@ -40,6 +40,32 @@
 #include <Vector.h>
 
 
+#include <TaggedObject.h>
+#include <MapOfTaggedObjects.h>
+
+static MapOfTaggedObjects theUniaxialMaterialObjects;
+
+bool OPS_addUniaxialMaterial(UniaxialMaterial *newComponent) {
+  return theUniaxialMaterialObjects.addComponent(newComponent);
+}
+
+UniaxialMaterial *OPS_getUniaxialMaterial(int tag) {
+
+  TaggedObject *theResult = theUniaxialMaterialObjects.getComponentPtr(tag);
+  if (theResult == 0) {
+    opserr << "UniaxialMaterial *getUniaxialMaterial(int tag) - none found with tag: " << tag << endln;
+    return 0;
+  }
+  UniaxialMaterial *theMat = (UniaxialMaterial *)theResult;
+
+  return theMat;
+}
+
+void OPS_clearAllUniaxialMaterial(void) {
+  theUniaxialMaterialObjects.clearAll();
+}
+
+
 UniaxialMaterial::UniaxialMaterial(int tag, int clasTag)
 :Material(tag,clasTag)
 {

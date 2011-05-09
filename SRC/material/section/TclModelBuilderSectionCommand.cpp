@@ -235,7 +235,7 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	}
 		
 	// Retrieve the uniaxial material from the model builder
-	UniaxialMaterial *theMat = theTclBuilder->getUniaxialMaterial(uniTag);
+	UniaxialMaterial *theMat = OPS_getUniaxialMaterial(uniTag);
 	
 	if (theMat == 0) {
 	    opserr << "WARNING uniaxial material does not exist\n";
@@ -471,7 +471,7 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	    return TCL_ERROR;
 	}	
 
-	UniaxialMaterial *theSteel = theTclBuilder->getUniaxialMaterial(matTag);
+	UniaxialMaterial *theSteel = OPS_getUniaxialMaterial(matTag);
 	
 	if (theSteel == 0) {
 	    opserr << "WARNING uniaxial material does not exist\n";
@@ -579,7 +579,7 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	    return TCL_ERROR;
 	}	
 
-	UniaxialMaterial *theCore = theTclBuilder->getUniaxialMaterial(coreTag);
+	UniaxialMaterial *theCore = OPS_getUniaxialMaterial(coreTag);
 	
 	if (theCore == 0) {
 	    opserr << "WARNING uniaxial material does not exist\n";
@@ -588,7 +588,7 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	    return TCL_ERROR;
 	}
 	
-	UniaxialMaterial *theCover = theTclBuilder->getUniaxialMaterial(coverTag);
+	UniaxialMaterial *theCover = OPS_getUniaxialMaterial(coverTag);
 	
 	if (theCover == 0) {
 	    opserr << "WARNING uniaxial material does not exist\4n";
@@ -597,7 +597,7 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	    return TCL_ERROR;
 	}
 	
-	UniaxialMaterial *theSteel = theTclBuilder->getUniaxialMaterial(steelTag);
+	UniaxialMaterial *theSteel = OPS_getUniaxialMaterial(steelTag);
 
 	if (theSteel == 0) {
 	    opserr << "WARNING uniaxial material does not exist\n";
@@ -684,7 +684,7 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 		return TCL_ERROR;		
 	    }
 	    
-	    theMats[j] = theTclBuilder->getUniaxialMaterial(tagI);
+	    theMats[j] = OPS_getUniaxialMaterial(tagI);
 	    
 	    if (theMats[j] == 0) {
 		opserr << "WARNING uniaxial material does not exist\n";
@@ -1562,7 +1562,7 @@ TclCommand_addFiber(ClientData clientData, Tcl_Interp *interp, int argc,
          return TCL_ERROR;
      }                
     
-    UniaxialMaterial *material = theTclModelBuilder->getUniaxialMaterial(matTag);
+    UniaxialMaterial *material = OPS_getUniaxialMaterial(matTag);
 
     int NDM = theTclModelBuilder->getNDM();  
         
@@ -1670,7 +1670,7 @@ TclCommand_addHFiber(ClientData clientData, Tcl_Interp *interp, int argc,
          return TCL_ERROR;
      }                
     
-    UniaxialMaterial *Hmaterial = theTclModelBuilder->getUniaxialMaterial(matHTag);
+    UniaxialMaterial *Hmaterial = OPS_getUniaxialMaterial(matHTag);
     
     // creates 2d section      
     if (HNDM == 2) {
@@ -2136,7 +2136,7 @@ buildSection(Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder,
 	 k = 0;
 	 for (i = numSectionRepresFibers; i < numFibers; i++)
 	 {    
-            material = theTclModelBuilder->getUniaxialMaterial(fibersMaterial(k));
+            material = OPS_getUniaxialMaterial(fibersMaterial(k));
             if (material == 0)
             {
                opserr <<  "WARNING invalid material ID for patch\n";
@@ -2183,7 +2183,7 @@ buildSection(Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder,
 	 k = 0;
 	 for (i = numSectionRepresFibers; i < numFibers; i++)
 	 {    
-            material = theTclModelBuilder->getUniaxialMaterial(fibersMaterial(k));
+            material = OPS_getUniaxialMaterial(fibersMaterial(k));
             if (material == 0)
             {
                opserr <<  "WARNING invalid material ID for patch\n";
@@ -2394,7 +2394,7 @@ buildSectionInt(Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder,
 	 k = 0;
 	 for (i = numSectionRepresFibers; i < numFibers; i++)
 	 {    
-            material = theTclModelBuilder->getUniaxialMaterial(fibersMaterial(k));
+            material = OPS_getUniaxialMaterial(fibersMaterial(k));
             if (material == 0)
             {
                opserr <<  "WARNING invalid material ID for patch\n";
@@ -2440,7 +2440,7 @@ buildSectionInt(Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder,
 	 k = 0;
 	 for (i = numSectionRepresFibers; i < numFibers; i++)
 	 {    
-            material = theTclModelBuilder->getUniaxialMaterial(fibersMaterial(k));
+            material = OPS_getUniaxialMaterial(fibersMaterial(k));
             if (material == 0)
             {
                opserr <<  "WARNING invalid material ID for patch\n";
@@ -2573,7 +2573,7 @@ TclCommand_addUCFiberSection (ClientData clientData, Tcl_Interp *interp, int arg
       
       while (theFile >> ycoord >> zcoord >> area >> prestrain >> garbage >> matTag) {
 
-	UniaxialMaterial *theMaterial = theTclModelBuilder->getUniaxialMaterial(matTag);
+	UniaxialMaterial *theMaterial = OPS_getUniaxialMaterial(matTag);
 	if (theMaterial == 0) {
 	  opserr << "section UCFiber - no material exists with tag << " << matTag << endln;
 	  return TCL_ERROR;

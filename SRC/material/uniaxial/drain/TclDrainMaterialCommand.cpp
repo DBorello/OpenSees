@@ -34,9 +34,9 @@
 #include <DrainClough2Material.h>
 #include <DrainPinch1Material.h>
 
-#include <TclModelBuilder.h>
 #include <Vector.h>
 #include <string.h>
+#include <tcl.h>
 
 static void printCommand(int argc, TCL_Char **argv)
 {
@@ -47,8 +47,7 @@ static void printCommand(int argc, TCL_Char **argv)
 } 
 
 UniaxialMaterial *
-TclModelBuilder_addDrainMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
-				 TCL_Char **argv, TclModelBuilder *theTclBuilder)
+TclModelBuilder_addDrainMaterial(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 	if (argc < 3) {
 		opserr << "WARNING insufficient number of arguments\n";

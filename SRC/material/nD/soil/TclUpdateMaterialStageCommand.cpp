@@ -110,7 +110,7 @@ TclModelBuilderUpdateParameterCommand(ClientData clientData,
   if (a==0) {
     //opserr << "WARNING UpdateParameter: couldn't get NDmaterial tagged: " << tag << endln;
     //return TCL_ERROR;
-    UniaxialMaterial * a = theTclBuilder->getUniaxialMaterial(tag);
+    UniaxialMaterial * a = OPS_getUniaxialMaterial(tag);
     if (a==0) {
       opserr << "WARNING UpdateParameter: couldn't get Uniaxialmaterial tagged: " << tag << endln;
       return TCL_ERROR;

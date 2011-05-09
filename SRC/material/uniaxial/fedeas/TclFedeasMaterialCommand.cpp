@@ -40,7 +40,7 @@
 #include <FedeasSteel1Material.h>
 #include <PlasticDamageMaterial.h>
 
-#include <TclModelBuilder.h>
+#include <tcl.h>
 #include <Vector.h>
 #include <string.h>
 
@@ -53,8 +53,7 @@ static void printCommand(int argc, TCL_Char **argv)
 } 
 
 UniaxialMaterial *
-TclModelBuilder_addFedeasMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
-				  TCL_Char **argv, TclModelBuilder *theTclBuilder)
+TclModelBuilder_addFedeasMaterial(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 	if (argc < 3) {
 		opserr << "WARNING insufficient number of arguments\n";

@@ -37,8 +37,7 @@
 #include <tcl.h>
 
 int
-TclCommand_ImpactMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
-				 TCL_Char **argv, TclModelBuilder *theTclBuilder)
+TclCommand_ImpactMaterial(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 
   int tag;
@@ -78,7 +77,7 @@ TclCommand_ImpactMaterial(ClientData clientData, Tcl_Interp *interp, int argc,
   theMaterial = new ImpactMaterial(tag, K1, K2, Delta_y, gap);
   
   if (theMaterial != 0) 
-    return theTclBuilder->addUniaxialMaterial(*theMaterial);
+    return OPS_addUniaxialMaterial(theMaterial);
   else
     return -1;
 }
