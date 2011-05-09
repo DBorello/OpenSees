@@ -678,6 +678,12 @@ StaticDomainDecompositionAnalysis::recvSelf(int commitTag, Channel &theChannel,
 
   theSOE->recvSelf(commitTag, theChannel, theBroker);
   LinearSOESolver *theSolver = theSOE->getSolver();
+  if (theSolver == 0) {
+      opserr << "StaticDomainDecompositionAnalysis::recvSelf";
+      opserr << " - failed to get the Solver\n";
+      return -1;
+  }
+
   theSolver->recvSelf(commitTag, theChannel, theBroker);  
   //  theSOE->setAnalysisModel(*theAnalysisModel);
 
