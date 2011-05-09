@@ -139,7 +139,7 @@ TclUniaxialMaterialTester_setUniaxialMaterial(ClientData clientData, Tcl_Interp 
 
   // get the material from the modelbuilder with matID 
   // and set the testing material to point to a copy of it
-  UniaxialMaterial *theOrigMaterial = theTclBuilder->getUniaxialMaterial(matID);
+  UniaxialMaterial *theOrigMaterial = OPS_getUniaxialMaterial(matID);
   if (theOrigMaterial == 0) {
     Tcl_SetResult(interp, "WARNING no material found with matID", TCL_STATIC);
     return TCL_ERROR;

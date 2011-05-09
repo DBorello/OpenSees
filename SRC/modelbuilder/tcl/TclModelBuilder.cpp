@@ -145,8 +145,8 @@ TclCommand_addElement(ClientData clientData, Tcl_Interp *interp,  int argc,
 		      TCL_Char **argv);
 
 int
-TclCommand_addUniaxialMaterial(ClientData clientData, Tcl_Interp *interp, int argc,   
-			       TCL_Char **argv);
+TclCommand_addUniaxialMaterial(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
 
 int
 TclCommand_addNDMaterial(ClientData clientData, Tcl_Interp *interp, int argc,   
@@ -292,9 +292,9 @@ TclCommand_addRemoGeomTransf(ClientData clientData,
 
 int
 TclModelBuilder_addFrictionModel(ClientData clientData,
-                Tcl_Interp *interp,
-                int argc,   
-                TCL_Char **argv);
+				 Tcl_Interp *interp,
+				 int argc,   
+				 TCL_Char **argv);
 
 #ifdef OO_HYSTERETIC
 int
@@ -405,7 +405,7 @@ TclCommand_Package(ClientData clientData, Tcl_Interp *interp, int argc,
 TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM, int NDF)
   :ModelBuilder(theDomain), ndm(NDM), ndf(NDF), theInterp(interp)
 {
-  theUniaxialMaterials = new ArrayOfTaggedObjects(32);
+  // theUniaxialMaterials = new ArrayOfTaggedObjects(32);
   theNDMaterials = new ArrayOfTaggedObjects(32);
   theSections  = new ArrayOfTaggedObjects(32);
   theSectionRepresents = new ArrayOfTaggedObjects(32);  
@@ -414,13 +414,13 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   theUnloadingRules = new ArrayOfTaggedObjects(32);
   theStrengthDegradations = new ArrayOfTaggedObjects(32);
 #endif
-  theHystereticBackbones= new ArrayOfTaggedObjects(32);
+  //theHystereticBackbones= new ArrayOfTaggedObjects(32);
   theYieldSurface_BCs = new ArrayOfTaggedObjects(32);
   theCycModels = new ArrayOfTaggedObjects(32); //!!
-  theDamageModels = new ArrayOfTaggedObjects(32); //!!
+  //theDamageModels = new ArrayOfTaggedObjects(32); //!!
   theYS_EvolutionModels = new ArrayOfTaggedObjects(32);
   thePlasticMaterials = new ArrayOfTaggedObjects(32);
-  theFrictionModels = new ArrayOfTaggedObjects(32);
+  //theFrictionModels = new ArrayOfTaggedObjects(32);
 
   // call Tcl_CreateCommand for class specific commands
   Tcl_CreateCommand(interp, "parameter", TclCommand_addParameter,
@@ -551,7 +551,7 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
 		    (ClientData)NULL, NULL);    
 
   Tcl_CreateCommand(interp, "frictionModel",
-            TclModelBuilder_addFrictionModel,
+		    TclModelBuilder_addFrictionModel,
 		    (ClientData)NULL, NULL);
 
 #ifdef OO_HYSTERETIC
@@ -612,8 +612,12 @@ TclModelBuilder::~TclModelBuilder()
 {
   OPS_clearAllTimeSeries();
   OPS_ClearAllCrdTransf();
+  OPS_clearAllUniaxialMaterial();
+  OPS_clearAllDamageModel();
+  OPS_clearAllFrictionModel();
+  OPS_clearAllHystereticBackbone();
 
-  theUniaxialMaterials->clearAll();
+  // theUniaxialMaterials->clearAll();
   theNDMaterials->clearAll();
   theSections->clearAll(); 
   theSectionRepresents->clearAll();
@@ -621,18 +625,18 @@ TclModelBuilder::~TclModelBuilder()
   theYS_EvolutionModels->clearAll();
   thePlasticMaterials->clearAll();
   theCycModels->clearAll();//!!
-  theDamageModels->clearAll();//!!
-  theFrictionModels->clearAll();
+  // theDamageModels->clearAll();//!!
+  // theFrictionModels->clearAll();
 
 #ifdef OO_HYSTERETIC
   theStiffnessDegradations->clearAll();
   theUnloadingRules->clearAll();
   theStrengthDegradations->clearAll();
 #endif
-  theHystereticBackbones->clearAll();
+  // theHystereticBackbones->clearAll();
 
   // free up memory allocated in the constructor
-  delete theUniaxialMaterials;
+  // delete theUniaxialMaterials;
   delete theNDMaterials;
   delete theSections;
   delete theSectionRepresents;
@@ -640,15 +644,15 @@ TclModelBuilder::~TclModelBuilder()
   delete theYS_EvolutionModels;
   delete thePlasticMaterials;
   delete theCycModels;//!!
-  delete theDamageModels;//!!
-  delete theFrictionModels;
+  // delete theDamageModels;//!!
+  // delete theFrictionModels;
 
 #ifdef OO_HYSTERETIC
   delete theStiffnessDegradations;
   delete theUnloadingRules;
   delete theStrengthDegradations;
 #endif
-  delete theHystereticBackbones;
+  // delete theHystereticBackbones;
 
   // set the pointers to 0 
   theTclDomain =0;
@@ -808,55 +812,6 @@ TclModelBuilder::getStrengthDegradation(int tag)
   return result;
 }
 #endif
-
-int
-TclModelBuilder::addHystereticBackbone(HystereticBackbone &theBackbone)
-{
-  bool result = theHystereticBackbones->addComponent(&theBackbone);
-  if (result == true)
-    return 0;
-  else {
-    opserr << "TclModelBuilder::addBackbone() - failed to add Backbone: " << theBackbone;
-    return -1;
-  }
-}
-
-HystereticBackbone*
-TclModelBuilder::getHystereticBackbone(int tag)
-{
-  TaggedObject *mc = theHystereticBackbones->getComponentPtr(tag);
-  if (mc == 0) 
-    return 0;
-
-  // do a cast and return
-  HystereticBackbone *result = (HystereticBackbone *)mc;
-  return result;
-}
-
-int 
-TclModelBuilder::addUniaxialMaterial(UniaxialMaterial &theMaterial)
-{
-  bool result = theUniaxialMaterials->addComponent(&theMaterial);
-  if (result == true)
-    return 0;
-  else {
-    opserr << "TclModelBuilder::addUniaxialMaterial() - failed to add material: " << theMaterial;
-    return -1;
-  }
-}
-
-
-UniaxialMaterial *
-TclModelBuilder::getUniaxialMaterial(int tag)
-{
-  TaggedObject *mc = theUniaxialMaterials->getComponentPtr(tag);
-  if (mc == 0) 
-    return 0;
-
-  // otherweise we do a cast and return
-  UniaxialMaterial *result = (UniaxialMaterial *)mc;
-  return result;
-}
 
 int 
 TclModelBuilder::addNDMaterial(NDMaterial &theMaterial)
@@ -1032,34 +987,6 @@ TclModelBuilder::getSectionRepres(int tag)
   TaggedObject *mc = theSectionRepresents->getComponentPtr(tag);
   if (mc == 0) return 0;
   SectionRepres *result = (SectionRepres *)mc;
-  return result;
-}
-
-
-
-int 
-TclModelBuilder::addFrictionModel(FrictionModel &theFrnMdl)
-{
-  bool result = theFrictionModels->addComponent(&theFrnMdl);
-  if (result == true)
-    return 0;
-  else {
-    opserr << "TclModelBuilder::addFrictionModel() - "
-        << "failed to add friction model: " << theFrnMdl;
-    return -1;
-  }
-}
-
-
-FrictionModel *
-TclModelBuilder::getFrictionModel(int tag)
-{
-  TaggedObject *mc = theFrictionModels->getComponentPtr(tag);
-  if (mc == 0) 
-    return 0;
-
-  // otherweise we do a cast and return
-  FrictionModel *result = (FrictionModel *)mc;
   return result;
 }
 
@@ -1345,16 +1272,12 @@ TclCommand_addElement(ClientData clientData, Tcl_Interp *interp,
 
 
 extern int
-TclModelBuilderUniaxialMaterialCommand (ClientData clienData, Tcl_Interp *interp, int argc,
-				 TCL_Char **argv, TclModelBuilder *theTclBuilder, Domain *theDomain);
-
+TclModelBuilderUniaxialMaterialCommand (ClientData clienData, Tcl_Interp *interp, int argc, TCL_Char **argv, Domain *theDomain);
+				 
 int
-TclCommand_addUniaxialMaterial(ClientData clientData, Tcl_Interp *interp, 
-				    int argc, TCL_Char **argv)
-                          
+TclCommand_addUniaxialMaterial(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
-  return TclModelBuilderUniaxialMaterialCommand(clientData, interp, 
-						argc, argv, theTclBuilder, theTclDomain);
+  return TclModelBuilderUniaxialMaterialCommand(clientData, interp, argc, argv, theTclDomain);
 }
 
 extern int
@@ -1436,17 +1359,15 @@ TclCommand_addCyclicModel(ClientData clientData, Tcl_Interp *interp,
 						argc, argv, theTclBuilder);
 }
 
-//!!
-extern int TclModelBuilderDamageModelCommand(ClientData clienData, Tcl_Interp *interp, int argc,
-				 TCL_Char **argv, TclModelBuilder *theTclBuilder);
+extern int TclModelBuilderDamageModelCommand(ClientData clienData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int
 TclCommand_addDamageModel(ClientData clientData, Tcl_Interp *interp,
 				    int argc, TCL_Char **argv)
 
 {
-  return TclModelBuilderDamageModelCommand(clientData, interp,
-						argc, argv, theTclBuilder);
+  return TclModelBuilderDamageModelCommand(clientData, interp, argc, argv);
+						
 }
 
 extern int
@@ -3382,16 +3303,14 @@ TclCommand_addStrengthDegradation(ClientData clientData,
 extern int
 TclModelBuilderHystereticBackboneCommand(ClientData clientData,
 					 Tcl_Interp *interp,
-					 int argc, TCL_Char **argv,
-					 TclModelBuilder *theTclBuilder);
+					 int argc, TCL_Char **argv);
 
 int
 TclCommand_addHystereticBackbone(ClientData clientData,
 				      Tcl_Interp *interp,
 				      int argc,	TCL_Char **argv)
 {
-  return TclModelBuilderHystereticBackboneCommand(clientData, interp, 
-						  argc, argv, theTclBuilder);
+  return TclModelBuilderHystereticBackboneCommand(clientData, interp, argc, argv);
 }
 
 /// added by ZHY
@@ -3447,41 +3366,16 @@ TclCommand_UpdateParameter(ClientData clientData,
 				       argc, argv, theTclBuilder);
 }
 
-int //!!
-TclModelBuilder::addDamageModel(DamageModel &theDM)
-{
-  bool result = theDamageModels->addComponent(&theDM);
-  if (result == true)
-    return 0;
-  else {
-    opserr << "TclModelBuilder::addDamageModel() - failed to add : " << theDM;
-    return -1;
-  }
-}
-
-DamageModel * //!!
-TclModelBuilder::getDamageModel(int tag)
-{
-  TaggedObject *mc = theDamageModels->getComponentPtr(tag);
-  if (mc == 0)
-    return 0;
-
-  // otherweise we do a cast and return
-  DamageModel *result = (DamageModel *)mc;
-  return result;
-}
-
 extern int
 TclModelBuilderFrictionModelCommand (ClientData clienData,
-                 Tcl_Interp *interp, int argc, TCL_Char **argv,
-                 TclModelBuilder *theTclBuilder, Domain *theDomain);
+				     Tcl_Interp *interp, int argc, TCL_Char **argv,
+				     Domain *theDomain);
 
 int
 TclModelBuilder_addFrictionModel(ClientData clientData,
                     Tcl_Interp *interp, int argc, TCL_Char **argv)                      
 {
-  return TclModelBuilderFrictionModelCommand(clientData, interp, 
-						argc, argv, theTclBuilder, theTclDomain);
+  return TclModelBuilderFrictionModelCommand(clientData, interp, argc, argv, theTclDomain);
 }
 
 int 

@@ -71,8 +71,8 @@ class TclModelBuilder : public ModelBuilder
 
     // methods needed for the truss and fiber-beam elements for
     // adding/getting uniaxial material objects
-    int addUniaxialMaterial(UniaxialMaterial &theMaterial);
-    UniaxialMaterial *getUniaxialMaterial(int tag);
+    // REMOVED    int addUniaxialMaterial(UniaxialMaterial &theMaterial);
+    //            UniaxialMaterial *getUniaxialMaterial(int tag);
 
     // methods needed for the continuum elements and generic section
     // models to add/get ND material models
@@ -99,8 +99,8 @@ class TclModelBuilder : public ModelBuilder
     DamageModel *getDamageModel(int tag); //!!
 
     // methods needed for the friction models
-    int addFrictionModel(FrictionModel &theFrnMdl);
-    FrictionModel *getFrictionModel(int tag);
+    // int addFrictionModel(FrictionModel &theFrnMdl);
+    // FrictionModel *getFrictionModel(int tag);
 
 #ifdef OO_HYSTERETIC
     // methods needed to add/get material state relationships
@@ -111,14 +111,14 @@ class TclModelBuilder : public ModelBuilder
     int addStrengthDegradation(StrengthDegradation &theDegr);
     StrengthDegradation *getStrengthDegradation(int tag);
 #endif
-    int addHystereticBackbone(HystereticBackbone &theBackbone);
-    HystereticBackbone *getHystereticBackbone(int tag);
+    //    int addHystereticBackbone(HystereticBackbone &theBackbone);
+    //    HystereticBackbone *getHystereticBackbone(int tag);
 
   private:
     int ndm;	// space dimension of the mesh
     int ndf;	// number of degrees of freedom per node
 
-    TaggedObjectStorage *theUniaxialMaterials;
+    //    TaggedObjectStorage *theUniaxialMaterials;
     TaggedObjectStorage *theNDMaterials;
     TaggedObjectStorage *theSections;   
     TaggedObjectStorage *theSectionRepresents;
@@ -126,15 +126,15 @@ class TclModelBuilder : public ModelBuilder
     TaggedObjectStorage *thePlasticMaterials;
     TaggedObjectStorage *theYS_EvolutionModels;
     TaggedObjectStorage *theCycModels; //!!
-    TaggedObjectStorage *theDamageModels; //!!
-    TaggedObjectStorage *theFrictionModels;
+    //    TaggedObjectStorage *theDamageModels; //!!
+    //    TaggedObjectStorage *theFrictionModels;
 
 #ifdef OO_HYSTERETIC
     TaggedObjectStorage *theStiffnessDegradations;
     TaggedObjectStorage *theUnloadingRules;
     TaggedObjectStorage *theStrengthDegradations;
 #endif
-    TaggedObjectStorage *theHystereticBackbones;
+    // TaggedObjectStorage *theHystereticBackbones;
 
  protected:
     Tcl_Interp *theInterp;
