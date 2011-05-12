@@ -855,10 +855,7 @@ SysOfEqn_LIBS =	$(FE)/system_of_eqn/linearSOE/LinearSOE.o \
 	$(FE)/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSolver.o \
 	$(FE)/system_of_eqn/eigenSOE/FullGenEigenSOE.o \
-	$(FE)/system_of_eqn/eigenSOE/FullGenEigenSolver.o \
-	$(FE)/system_of_eqn/eigenSOE/GeneralArpackSOE.o \
-	$(FE)/system_of_eqn/eigenSOE/GeneralArpackSolver.o
-
+	$(FE)/system_of_eqn/eigenSOE/FullGenEigenSolver.o
 
 MODEL_BUILDER_LIBS = $(FE)/modelbuilder/ModelBuilder.o \
 	$(FE)/modelbuilder/PlaneFrame.o \
