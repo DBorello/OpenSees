@@ -33,12 +33,15 @@
 #include <string>
 #include <FourNodeQuadUP.h>
 #include <Nine_Four_Node_QuadUP.h>
+#include <TimeSeries.h>
 
 	class PyLiq1 : public PySimple1
 {
   public:
     PyLiq1(int tag, int classtag, int soilType, double pult, double y50, double drag,
 		      double dashpot, double pRes, int solidElem1, int solidElem2, Domain *theDomain);
+	PyLiq1(int tag, int classtag, int soilType, double pult, double y50, double drag,
+		      double dashpot, double pRes, Domain *theDomain, TimeSeries *theSeries);
 	PyLiq1();
     ~PyLiq1();
 
@@ -87,22 +90,25 @@
 
 	// Solid element from which pore pressures are obtained, domain pointer
 	// and stage information to get the initial vertical effective stress.
-	int solidElem1;
-	int solidElem2;
-	double meanConsolStress;
+	int solidElem1, solidElem2, theSeriesTag;
+	double meanConsolStress, meanStress;
     static int loadStage;
 	int lastLoadStage;
 	std::string elemFlag; 
 	Domain *theDomain;
+	TimeSeries *theSeries;
 
 	// Initial tangent
 	double initialTangent;
 	
 	// Function for obtaining effective stresses from adjoining solid soil elements
 	double getEffectiveStress(void);
+	double getEffectiveStress(TimeSeries *theSeries);
 	static Vector stressV3;
 	
 };
 
 #endif // PYLIQ1_H
+
+
 

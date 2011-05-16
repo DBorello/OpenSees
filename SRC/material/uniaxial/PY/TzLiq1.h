@@ -31,12 +31,15 @@
 #include <iostream>
 #include <FourNodeQuadUP.h>
 #include <Nine_Four_Node_QuadUP.h>
+#include <TimeSeries.h>
 
 class TzLiq1 : public TzSimple1
 {
   public:
     TzLiq1(int tag, int classtag, int tzType, double tult, double z50,
 		      double dashpot, int solidElem1, int solidElem2, Domain *theDomain);
+	TzLiq1(int tag, int classtag, int tzType, double tult, double z50,
+			  double dashpot, Domain *theDomain, TimeSeries *theSeries);
     TzLiq1();
     ~TzLiq1();
 
@@ -86,6 +89,7 @@ class TzLiq1 : public TzSimple1
 	// and stage information to get the initial vertical effective stress.
 	int solidElem1;
 	int solidElem2;
+	int theSeriesTag;
 
 	double meanConsolStress;
 	double ru;
@@ -94,6 +98,7 @@ class TzLiq1 : public TzSimple1
 	int    lastLoadStage;
 	std::string elemFlag; 
 	Domain *theDomain;
+	TimeSeries *theSeries;
 	FourNodeQuad *theQuad1;
 	FourNodeQuad *theQuad2;
 
@@ -102,9 +107,12 @@ class TzLiq1 : public TzSimple1
 	
 	// Function for obtaining effective stresses from adjoining solid soil elements
 	double getEffectiveStress(void);
+	double getEffectiveStress(TimeSeries *theSeries);
 	static Vector stressV3;
 	
 };
 
 #endif // TZLIQ1_H
+
+
 
