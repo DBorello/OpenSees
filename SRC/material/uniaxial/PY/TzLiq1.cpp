@@ -35,6 +35,7 @@ const double TZtolerance = 1.0e-12;
 
 int TzLiq1::loadStage = 0;
 Vector TzLiq1::stressV3(3);
+int TzConstructorType = 0;
 
 /////////////////////////////////////////////////////////////////////
 //	Constructor with data
@@ -48,8 +49,19 @@ solidElem1(solid_elem1), solidElem2(solid_elem2), theDomain(the_Domain)
 	//
 	this->revertToStart();
     initialTangent = Tangent;
+	TzConstructorType = 1;
 }
-
+TzLiq1::TzLiq1(int tag, int classtag, int tz_type, double t_ult, double z_50,
+		double dash_pot, Domain *the_Domain, TimeSeries *the_Series)
+:TzSimple1(tag, classtag, tz_type, t_ult, z_50, dash_pot),
+theDomain(the_Domain), theSeries(the_Series)
+{
+	// Initialize TzSimple variables and history variables
+	//
+	this->revertToStart();
+    initialTangent = Tangent;
+	TzConstructorType = 2;
+}
 /////////////////////////////////////////////////////////////////////
 //	Default constructor
 
@@ -81,11 +93,17 @@ TzLiq1::setTrialStrain (double newz, double zRate)
 	//
 	if(lastLoadStage ==0 && loadStage ==1){
 
-		meanConsolStress = getEffectiveStress();
+		if(TzConstructorType==2)
+			meanConsolStress = getEffectiveStress(theSeries);
+		else
+			meanConsolStress = getEffectiveStress();
 		if(meanConsolStress == 0.0){
 			opserr << "WARNING meanConsolStress is 0 in solid elements, ru will divide by zero";
 			opserr << "TzLiq1: " << endln;
-			opserr << "Adjacent solidElems: " << solidElem1 << ", " << solidElem2 << endln;
+			if(TzConstructorType==2)
+				opserr << "Effective Stress file seriesTag: " << theSeries->getTag() << endln;
+			else
+				opserr << "Adjacent solidElems: " << solidElem1 << ", " << solidElem2 << endln;
 			exit(-1);
 		}
 	}
@@ -94,8 +112,12 @@ TzLiq1::setTrialStrain (double newz, double zRate)
 	// Obtain the mean effective stress from the adjacent solid elements,
 	//    and calculate ru for scaling of t-z base relation.
 	//
+	double meanStress;
 	if(loadStage == 1) {
-		double meanStress = getEffectiveStress();
+		if(TzConstructorType==2)
+			meanStress = getEffectiveStress(theSeries);
+		else
+			meanStress = getEffectiveStress();
 		Tru = 1.0 - meanStress/meanConsolStress;
 		if(Tru > 0.999) Tru = 0.999;
 	}
@@ -260,6 +282,12 @@ TzLiq1::revertToStart(void)
 }
 
 /////////////////////////////////////////////////////////////////////
+double
+TzLiq1::getEffectiveStress(TimeSeries *theSeries)
+{
+	return theSeries->getFactor(theDomain->getCurrentTime());
+}
+
 double 
 TzLiq1::getEffectiveStress(void)
 {
@@ -471,8 +499,16 @@ TzLiq1::sendSelf(int cTag, Channel &theChannel)
 	data(7)  = Tru;
 	data(8)  = Cru;
 	data(9)  = Hru;
-	data(10) = solidElem1;
-	data(11) = solidElem2;
+	if(TzConstructorType==2)
+	{
+		data(10) = theSeriesTag;
+		data(11) = 0.0;
+	}
+	if(TzConstructorType==1)
+	{
+		data(10) = solidElem1;
+		data(11) = solidElem2;
+	}
 	data(12) = meanConsolStress;
 	data(13) = loadStage;
 	data(14) = lastLoadStage;
@@ -513,8 +549,15 @@ TzLiq1::recvSelf(int cTag, Channel &theChannel,
 	Tru        = data(7);
 	Cru        = data(8);
 	Hru        = data(9);
-	solidElem1        = (int)data(10);
-	solidElem2        = (int)data(11);
+	if(TzConstructorType==1)
+	{
+		solidElem1        = (int)data(10);
+		solidElem2        = (int)data(11);
+	}
+	if(TzConstructorType==2)
+	{
+		theSeriesTag = (int)data(10);
+	}
 	meanConsolStress  = data(12);
 	loadStage         = (int)data(13);
 	lastLoadStage     = (int)data(14);
@@ -523,7 +566,7 @@ TzLiq1::recvSelf(int cTag, Channel &theChannel,
 	// set the trial quantities
 	this->revertToLastCommit();
   }
-
+ 
   return res;
 }
 
@@ -536,8 +579,18 @@ TzLiq1::Print(OPS_Stream &s, int flag)
     s << "  tult: " << tult << endln;
     s << "  z50: " << z50 << endln;
 	s << "  dashpot: " << dashpot << endln;
-	s << "  solidElem1: " << solidElem1 << endln;
-	s << "  solidElem2: " << solidElem2 << endln;
+	if(TzConstructorType==1)
+	{
+		s << "  solidElem1: " << solidElem1 << endln;
+		s << "  solidElem2: " << solidElem2 << endln;
+	}
+	if(TzConstructorType==2)
+	{
+		s << "  Time Series Tag: " << theSeries->getTag() << endln;
+	}
+
 }
+
+
 
 

@@ -32,6 +32,7 @@ const int PYmaxIterations = 20;
 const double PYtolerance = 1.0e-12;
 
 int PyLiq1::loadStage = 0;
+int PyConstructorType = 1;
 Vector PyLiq1::stressV3(3);
 
 /////////////////////////////////////////////////////////////////////
@@ -47,15 +48,31 @@ pRes(p_res), solidElem1(solid_elem1), solidElem2(solid_elem2), theDomain(the_Dom
 	//
 	this->revertToStart();
     initialTangent = Tangent;
+	PyConstructorType = 1;
 }
+
+PyLiq1::PyLiq1(int tag, int classtag, int soil, double p_ult, double y_50,
+		double dragratio, double dash_pot, double p_res, 
+		Domain *the_Domain, TimeSeries *the_Series)
+:PySimple1(tag, classtag, soil, p_ult, y_50, dragratio, dash_pot),
+pRes(p_res), theDomain(the_Domain), theSeries(the_Series)
+{
+	// Initialize PySimple variables and history variables
+	//
+	this->revertToStart();
+    initialTangent = Tangent;
+	PyConstructorType = 2;
+}
+
 
 /////////////////////////////////////////////////////////////////////
 //	Default constructor
 
 PyLiq1::PyLiq1()
-:PySimple1(), pRes(0.0), solidElem1(0), solidElem2(0), theDomain(0)
+:PySimple1(), pRes(0.0), solidElem1(0), solidElem2(0), theDomain(0), theSeries(0)
 {
 }
+
 /////////////////////////////////////////////////////////////////////
 //	Default destructor
 PyLiq1::~PyLiq1()
@@ -79,8 +96,10 @@ PyLiq1::setTrialStrain (double newy, double yRate)
 	//		out-of-plane normal stress equals sigma-xx.
 	//
 	if(lastLoadStage ==0 && loadStage ==1){
-
-		meanConsolStress = getEffectiveStress();
+		if(PyConstructorType==2)
+			meanConsolStress = getEffectiveStress(theSeries);
+		else
+			meanConsolStress = getEffectiveStress();
 		if(meanConsolStress == 0.0){
 			opserr << "WARNING meanConsolStress is 0 in solid elements, ru will divide by zero";
 			opserr << "PyLiq1: " << endln;
@@ -94,14 +113,17 @@ PyLiq1::setTrialStrain (double newy, double yRate)
 	//    and calculate ru for scaling of p-y base relation.
 	//
 	if(loadStage == 1) {
-		double meanStress = getEffectiveStress();
+		if(PyConstructorType==2)
+			meanStress = getEffectiveStress(theSeries);
+		else
+			meanStress = getEffectiveStress();
+
 		Tru = 1.0 - meanStress/meanConsolStress;
 		if(Tru > 1.0-pRes/PySimple1::pult) Tru = 1.0-pRes/PySimple1::pult;
 	}
 	else {
 		Tru = 0.0;
 	}
-
 
 	// Call the base class PySimple1 to get basic p-y response,
 	//
@@ -267,7 +289,13 @@ PyLiq1::revertToStart(void)
 }
 
 /////////////////////////////////////////////////////////////////////
+double
+PyLiq1::getEffectiveStress(TimeSeries *theSeries)
+{
+	return theSeries->getFactor(theDomain->getCurrentTime());
+}
 double 
+
 PyLiq1::getEffectiveStress(void)
 {
 
@@ -483,8 +511,15 @@ PyLiq1::sendSelf(int cTag, Channel &theChannel)
 	data(7)  = Tru;
 	data(8)  = Cru;
 	data(9)  = Hru;
-	data(10) = (int)solidElem1;
-	data(11) = (int)solidElem2;
+	if(PyConstructorType==1)
+	{
+		data(10) = (int)solidElem1;
+		data(11) = (int)solidElem2;
+	}
+	if(PyConstructorType==2)
+	{
+		data(10) = (int)theSeriesTag;
+	}
 	data(12) = meanConsolStress;
 	data(13) = (int)loadStage;
 	data(14) = (int)lastLoadStage;
@@ -525,8 +560,15 @@ PyLiq1::recvSelf(int cTag, Channel &theChannel,
 	Tru        = data(7);
 	Cru        = data(8);
 	Hru        = data(9);
-	solidElem1        = (int)data(10);
-	solidElem2        = (int)data(11);
+	if(PyConstructorType==1)
+	{
+		solidElem1        = (int)data(10);
+		solidElem2        = (int)data(11);
+	}
+	if(PyConstructorType==2)
+	{
+		theSeriesTag = (int)data(10);
+	}
 	meanConsolStress  = data(12);
 	loadStage         = (int)data(13);
 	lastLoadStage     = (int)data(14);
@@ -550,9 +592,18 @@ PyLiq1::Print(OPS_Stream &s, int flag)
     s << "  drag: " << drag << endln;
 	s << "  pResidual: " << pRes << endln;
 	s << "  dashpot: " << dashpot << endln;
-	s << "  solidElem1: " << solidElem1 << endln;
-	s << "  solidElem2: " << solidElem2 << endln;
+	if(PyConstructorType==1)
+	{
+		s << "  solidElem1: " << solidElem1 << endln;
+		s << "  solidElem2: " << solidElem2 << endln;
+	}
+	if(PyConstructorType==2)
+	{
+		s << "  Time Series Tag: " << theSeries->getTag() << endln;
+	}
 }
 
 /////////////////////////////////////////////////////////////////////
+
+
 
