@@ -22,6 +22,8 @@
 // $Date: 2003/10/07 20:57:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PY/TclPyTzQzMaterialCommand.cpp,v $
 
+#include <TclModelBuilder.h>
+
 //PY Springs: RWBoulanger and BJeremic
 #include <Domain.h>    // RWB for PyLiq1
 #include <TclModelBuilder.h>
@@ -44,8 +46,7 @@ using std::ios;
 
 extern TimeSeries *
 TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg);
-
-
+int seriesTag;
 
 static void printCommand(int argc, TCL_Char **argv)
 {
@@ -55,15 +56,11 @@ static void printCommand(int argc, TCL_Char **argv)
     opserr << endln;
 } 
 
+
 UniaxialMaterial *
-TclModelBuilder_addPyTzQzMaterial(ClientData clientData, 
-				  Tcl_Interp *interp, 
-				  int argc, 
-				  TCL_Char **argv, 
-				  Domain *theDomain)
+TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
+				  TCL_Char **argv, TclModelBuilder *theTclBuilder, Domain *theDomain, TimeSeries *theSeries)
 {
-  int seriesTag;
-  TimeSeries *theSeries = 0;
 	
 	if (argc < 3) {
 		opserr << "WARNING insufficient number of arguments\n";
@@ -149,7 +146,7 @@ TclModelBuilder_addPyTzQzMaterial(ClientData clientData,
  	    return 0;
  	}
  
- 	int tag, soilType, solidElem1, solidElem2;
+ 	int tag, soilType, solidElem1, solidElem2, seriesTag;
  	double pult, y50, drag, dashpot,pRes;
 	solidElem1=0;
 	solidElem2=0;
@@ -352,7 +349,7 @@ TclModelBuilder_addPyTzQzMaterial(ClientData clientData,
  	    return 0;
  	}
  
- 	int tag, tzType, solidElem1, solidElem2;
+ 	int tag, tzType, solidElem1, solidElem2, seriesTag;
  	double tult, z50, dashpot;
  
  	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
@@ -404,13 +401,13 @@ TclModelBuilder_addPyTzQzMaterial(ClientData clientData,
 	}
 	else
 	{
-		if (Tcl_GetInt(interp, argv[10], &seriesTag) != TCL_OK) {
+		if (Tcl_GetInt(interp, argv[8], &seriesTag) != TCL_OK) {
  			opserr << "WARNING time Series\n";
  			opserr << "uniaxialMaterial TzLiq1: " << tag << endln;
 			return 0;
 
  		}
-		theSeries = TclSeriesCommand(clientData, interp, argv[10]);
+		theSeries = TclSeriesCommand(clientData, interp, argv[8]);
  
  		// Parsing was successful, allocate the material
  		theMaterial = new TzLiq1(tag, MAT_TAG_TzLiq1,tzType, tult, z50, dashpot,
