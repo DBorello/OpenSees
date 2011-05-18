@@ -22,8 +22,6 @@
 // $Date: 2003/10/07 20:57:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PY/TclPyTzQzMaterialCommand.cpp,v $
 
-#include <TclModelBuilder.h>
-
 //PY Springs: RWBoulanger and BJeremic
 #include <Domain.h>    // RWB for PyLiq1
 #include <TclModelBuilder.h>
@@ -35,6 +33,8 @@
 #include <PySimple1Gen.h>
 #include <TzSimple1Gen.h>
 #include <TimeSeries.h>
+
+#include <tcl.h>
 
 #include <Vector.h>
 #include <string.h>
@@ -59,9 +59,10 @@ static void printCommand(int argc, TCL_Char **argv)
 
 UniaxialMaterial *
 TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
-				  TCL_Char **argv, TclModelBuilder *theTclBuilder, Domain *theDomain, TimeSeries *theSeries)
+				  TCL_Char **argv, Domain *theDomain)
 {
-	
+  TimeSeries *theSeries = 0;
+
 	if (argc < 3) {
 		opserr << "WARNING insufficient number of arguments\n";
 		printCommand(argc, argv);
