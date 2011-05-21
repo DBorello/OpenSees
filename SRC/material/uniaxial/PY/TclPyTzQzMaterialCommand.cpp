@@ -44,8 +44,10 @@ using std::ifstream;
 #include <iomanip>
 using std::ios;
 
+/*
 extern TimeSeries *
 TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg);
+*/
 int seriesTag;
 
 static void printCommand(int argc, TCL_Char **argv)
@@ -218,7 +220,8 @@ TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int
 			return 0;
 
  		}
-		theSeries = TclSeriesCommand(clientData, interp, argv[10]);
+		
+		theSeries = OPS_getTimeSeries(seriesTag);
  
  		// Parsing was successful, allocate the material
  		theMaterial = new PyLiq1(tag, MAT_TAG_PyLiq1,soilType, pult, y50, drag, dashpot,
@@ -408,7 +411,7 @@ TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int
 			return 0;
 
  		}
-		theSeries = TclSeriesCommand(clientData, interp, argv[8]);
+		theSeries = OPS_getTimeSeries(seriesTag);
  
  		// Parsing was successful, allocate the material
  		theMaterial = new TzLiq1(tag, MAT_TAG_TzLiq1,tzType, tult, z50, dashpot,
