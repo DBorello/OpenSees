@@ -363,7 +363,7 @@ SSPquad::getMass(void)
 
 	double massTerm;
 	for (int i = 0; i < 4; i++) {
-		massTerm = density*(J0 + J1*xi[i] + J2*eta[i]);
+		massTerm = density*mThickness*(J0 + J1*xi[i] + J2*eta[i]);
 		mMass(2*i,2*i)     += massTerm;
 		mMass(2*i+1,2*i+1) += massTerm;
 	}
@@ -480,15 +480,18 @@ SSPquad::getResistingForce(void)
 
 	if (applyLoad == 0) {
 		for (int i = 0; i < 4; i++) {
-			mInternalForces(2*i)   -= b[0]*(J0 + J1*xi[i] + J2*eta[i]);
-			mInternalForces(2*i+1) -= b[1]*(J0 + J1*xi[i] + J2*eta[i]);
+			mInternalForces(2*i)   -= b[0]*mThickness*(J0 + J1*xi[i] + J2*eta[i]);
+			mInternalForces(2*i+1) -= b[1]*mThickness*(J0 + J1*xi[i] + J2*eta[i]);
 		}
 	} else {
 		for (int i = 0; i < 4; i++) {
-			mInternalForces(2*i)   -= appliedB[0]*(J0 + J1*xi[i] + J2*eta[i]);
-			mInternalForces(2*i+1) -= appliedB[1]*(J0 + J1*xi[i] + J2*eta[i]);
+			mInternalForces(2*i)   -= appliedB[0]*mThickness*(J0 + J1*xi[i] + J2*eta[i]);
+			mInternalForces(2*i+1) -= appliedB[1]*mThickness*(J0 + J1*xi[i] + J2*eta[i]);
 		}
 	}
+
+	// inertial unbalance load
+	mInternalForces.addVector(1.0, Q, -1.0);
 
 	return mInternalForces;
 }
