@@ -505,6 +505,7 @@
 #define ELE_TAG_BeamContact2D    15
 #define ELE_TAG_BeamEndContact3D 16
 #define ELE_TAG_SSPquad          18
+#define ELE_TAG_SSPquadUP        19
 
 #define ELE_TAG_TPB1D 17
 #define ELE_TAG_TFP_Bearing 20

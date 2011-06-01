@@ -36,6 +36,7 @@ all:         $(OBJS)
 	@$(CD) $(FE)/element/pyMacro; $(MAKE);
 	@$(CD) $(FE)/element/simpleContact; $(MAKE);
 	@$(CD) $(FE)/element/surfaceLoad; $(MAKE);
+	@$(CD) $(FE)/element/UWelements; $(MAKE);
 
 # Miscellaneous
 tidy:	

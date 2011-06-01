@@ -104,6 +104,7 @@ extern void *OPS_TFP_Bearing(void);
 extern void *OPS_CoupledZeroLength(void);
 extern void *OPS_FourNodeQuad3d(void);
 extern void *OPS_SSPquad(void);
+extern void *OPS_SSPquadUP(void);
 
 extern int TclModelBuilder_addFeapTruss(ClientData clientData, Tcl_Interp *interp,  int argc,
 					TCL_Char **argv, Domain*, TclModelBuilder *, int argStart);
@@ -537,6 +538,16 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
   } else if ((strcmp(argv[1],"SSPquad") == 0) || (strcmp(argv[1],"SSPQuad") == 0)) {
     
     void *theEle = OPS_SSPquad();
+    if (theEle != 0) 
+      theElement = (Element *)theEle;
+    else {
+      opserr << "TclElementCommand -- unable to create element of type : " << argv[1] << endln;
+      return TCL_ERROR;
+    }
+
+  } else if ((strcmp(argv[1],"SSPquadUP") == 0) || (strcmp(argv[1],"SSPQuadUP") == 0)) {
+    
+    void *theEle = OPS_SSPquadUP();
     if (theEle != 0) 
       theElement = (Element *)theEle;
     else {
