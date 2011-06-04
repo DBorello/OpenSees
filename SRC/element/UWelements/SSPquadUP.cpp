@@ -68,15 +68,15 @@ OPS_SSPquadUP(void)
 
   	int numRemainingInputArgs = OPS_GetNumRemainingInputArgs();
 
-  	if (numRemainingInputArgs < 12) {
+  	if (numRemainingInputArgs < 13) {
     	opserr << "Invalid #args, want: element SSPquadUP eleTag? iNode? jNode? kNode? lNode? matTag? t? fBulk? fDen? k1? k2? e? <b1? b2?>?\n";
 		return 0;
   	}
 
   	int iData[6];
-	double dData[8];
-	dData[6] = 0.0;
+	double dData[9];
 	dData[7] = 0.0;
+	dData[8] = 0.0;
 
   	int numData = 6;
   	if (OPS_GetIntInput(&numData, iData) != 0) {
@@ -84,7 +84,7 @@ OPS_SSPquadUP(void)
 		return 0;
   	}
 
-	numData = 6;
+	numData = 7;
 	if (OPS_GetDoubleInput(&numData, dData) != 0) {
 		opserr << "WARNING invalid double data: element SSPquadUP " << iData[0] << endln;
 		return 0;
@@ -98,9 +98,9 @@ OPS_SSPquadUP(void)
 		return 0;
   	}
 
-	if (numRemainingInputArgs == 14) {
+	if (numRemainingInputArgs == 15) {
     	numData = 2;
-    	if (OPS_GetDoubleInput(&numData, &dData[6]) != 0) {
+    	if (OPS_GetDoubleInput(&numData, &dData[7]) != 0) {
       		opserr << "WARNING invalid optional data: element SSPquadUP " << iData[0] << endln;
 	  		return 0;
     	}
@@ -108,7 +108,7 @@ OPS_SSPquadUP(void)
 
   	// parsing was successful, allocate the element
   	theElement = new SSPquadUP(iData[0], iData[1], iData[2], iData[3], iData[4], *theMaterial, 
-							   dData[0], dData[1], dData[2], dData[3], dData[4], dData[5], dData[6], dData[7]);
+							   dData[0], dData[1], dData[2], dData[3], dData[4], dData[5], dData[6], dData[7], dData[8]);
 
   	if (theElement == 0) {
     	opserr << "WARNING could not create element of type SSPquadUP\n";
@@ -121,7 +121,7 @@ OPS_SSPquadUP(void)
 // full constructor
 SSPquadUP::SSPquadUP(int tag, int Nd1, int Nd2, int Nd3, int Nd4, NDMaterial &theMat, 
                               double thick, double Kf, double Rf, double k1, double k2,
-							  double eVoid, double b1, double b2)
+							  double eVoid, double alpha, double b1, double b2)
   :Element(tag,ELE_TAG_SSPquadUP),
   	theMaterial(0),
 	mExternalNodes(SQUP_NUM_NODE),
@@ -141,6 +141,7 @@ SSPquadUP::SSPquadUP(int tag, int Nd1, int Nd2, int Nd3, int Nd4, NDMaterial &th
 	mThickness(thick),
 	fBulk(Kf),
 	fDens(Rf),
+	mAlpha(alpha),
 	mPorosity(0),
 	applyLoad(0)
 {
@@ -152,6 +153,7 @@ SSPquadUP::SSPquadUP(int tag, int Nd1, int Nd2, int Nd3, int Nd4, NDMaterial &th
 	mThickness = thick;
 	fBulk      = Kf;
 	fDens      = Rf;
+	mAlpha     = alpha;
 
 	b[0] = b1;
 	b[1] = b2;
@@ -202,6 +204,7 @@ SSPquadUP::SSPquadUP()
 	mThickness(0),
 	fBulk(0),
 	fDens(0),
+	mAlpha(0),
 	mPorosity(0),
 	applyLoad(0)
 {
@@ -437,6 +440,7 @@ SSPquadUP::getDamp(void)
 
 			// contribution of permeability matrix
 			mDamp(IIp2,JJp2) = -mPerm(i,j);
+			//mDamp(IIp2,JJp2) = mPerm(i,j);
 		}
 	}
 
@@ -454,11 +458,20 @@ SSPquadUP::getMass(void)
 	// get mass density from the material
 	double density = theMaterial->getRho();
 
+	// transpose the shape function derivative array
+	Matrix dNp(2,4);
+	dNp(0,0) = dN(0,0); dNp(0,1) = dN(1,0); dNp(0,2) = dN(2,0); dNp(0,3) = dN(3,0);
+	dNp(1,0) = dN(0,1); dNp(1,1) = dN(1,1); dNp(1,2) = dN(2,1); dNp(1,3) = dN(3,1);
+
+	// compute stabilization matrix for incompressible problems
+	Matrix Kp(4,4);
+	Kp = -4.0*mAlpha*J0*mThickness*dN*dNp;
+
 	// return zero matrix if density is zero
 	if (density == 0.0) {
 		return mMass;
 	}
-	
+
 	// full mass matrix for the element [ M  0 ]
 	//  includes M and S submatrices    [ 0 -S ]
 	for (int i = 0; i < 4; i++) {
@@ -483,7 +496,8 @@ SSPquadUP::getMass(void)
 			mMass(II,JJp1)   = mSolidM(I,Jp1);
 
 			// contribution of compressibility matrix
-			mDamp(IIp2,JJp2) = oneOverQ;
+			//mMass(IIp2,JJp2) = oneOverQ;
+			mMass(IIp2,JJp2) = Kp(i,j) + oneOverQ;
 		}
 	}
 
@@ -694,7 +708,7 @@ SSPquadUP::getResistingForceIncInertia()
 	const Vector &accel3 = theNodes[2]->getTrialAccel();
 	const Vector &accel4 = theNodes[3]->getTrialAccel();
 	
-	static double a[12];
+	/*static double a[12];
 	a[0]  = accel1(0);
 	a[1]  = accel1(1);
 	a[2]  = accel1(2);
@@ -706,7 +720,7 @@ SSPquadUP::getResistingForceIncInertia()
 	a[8]  = accel3(2);
 	a[9]  = accel4(0);
 	a[10] = accel4(1);
-	a[11] = accel4(2);
+	a[11] = accel4(2);*/
 
 	// compute current resisting force
 	this->getResistingForce();
@@ -714,9 +728,25 @@ SSPquadUP::getResistingForceIncInertia()
 	// compute mass matrix
 	this->getMass();
 
-	for (int i = 0; i < 12; i++) {
-		mInternalForces(i) += mMass(i,i)*a[i];
-	}
+	//for (int i = 0; i < 12; i++) {
+	//	mInternalForces(i) += mMass(i,i)*a[i];
+	//}
+
+	Vector a(12);
+	a(0)  = accel1(0);
+	a(1)  = accel1(1);
+	a(2)  = accel1(2);
+	a(3)  = accel2(0);
+	a(4)  = accel2(1);
+	a(5)  = accel2(2);
+	a(6)  = accel3(0);
+	a(7)  = accel3(1);
+	a(8)  = accel3(2);
+	a(9)  = accel4(0);
+	a(10) = accel4(1);
+	a(11) = accel4(2);
+
+	mInternalForces.addMatrixVector(1.0, mMass, a, 1.0);
 
 	// terms stemming from velocity
 	const Vector &vel1 = theNodes[0]->getTrialVel();
@@ -1152,6 +1182,23 @@ SSPquadUP::GetPermeabilityMatrix(void)
 
 	// compute permeability matrix
 	mPerm.addMatrixTripleProduct(1.0, dNp, k, 4.0*J0*mThickness);
+
+	/*// compute stabilization matrix for incompressible problems
+	Matrix Kp(4,4);
+
+	// compute element size h
+	//double diag1 = (mNodeCrd(0,2)-mNodeCrd(0,0))*(mNodeCrd(0,2)-mNodeCrd(0,0))+(mNodeCrd(1,2)-mNodeCrd(1,0))*(mNodeCrd(1,2)-mNodeCrd(1,0));
+	//double diag2 = (mNodeCrd(0,3)-mNodeCrd(0,1))*(mNodeCrd(0,3)-mNodeCrd(0,1))+(mNodeCrd(1,3)-mNodeCrd(1,1))*(mNodeCrd(1,3)-mNodeCrd(1,1));
+	//double he;
+	//if (diag1 >= diag2) {
+	//	he = diag1;
+	//} else {
+	//	he = diag2;
+	//}
+	
+	Kp = 4.0*mAlpha*J0*mThickness*dN*dNp;
+
+	mPerm = Kp - mPerm;*/
 
 	return;
 }

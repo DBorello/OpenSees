@@ -685,27 +685,15 @@ SSPquad::Print(OPS_Stream &s, int flag)
 Response*
 SSPquad::setResponse(const char **argv, int argc, OPS_Stream &eleInfo)
 {
-	if (strcmp(argv[0],"stress") == 0) {
-		return new ElementResponse(this, 1, Vector(3));
-	} else if (strcmp(argv[0],"strain") == 0) {
-		return new ElementResponse(this, 2, Vector(3));
-	} else {
-		opserr << "SSPquad::setResponse " << argv[0] << " unknown request" << endln;
-		return 0;
-	}
+	// no special recorders for this element, call the method in the material class
+	return theMaterial->setResponse(argv, argc, eleInfo);
 }
 
 int
 SSPquad::getResponse(int responseID, Information &eleInfo)
 {
-	if (responseID == 1) {
-		return eleInfo.setVector(mStress);
-	} else if (responseID == 2) {
-		return eleInfo.setVector(mStrain);
-	} else {
-		opserr << "SSPquad::getResponse ID = " << responseID << " unknown request" << endln;
-		return -1;
-	}
+	// no special recorders for this element, call the method in the material class
+	return theMaterial->getResponse(responseID, eleInfo);
 }
 
 int

@@ -57,7 +57,7 @@ class SSPquadUP : public Element
   public:
     SSPquadUP(int tag, int Nd1, int Nd2, int Nd3, int Nd4, NDMaterial &theMat,
                        double thick, double Kf, double Rf, double k1, double k2,
-	                   double eVoid, double b1 = 0.0, double b2 = 0.0);
+	                   double eVoid, double alpha, double b1 = 0.0, double b2 = 0.0);
     SSPquadUP();
     ~SSPquadUP();
 
@@ -138,6 +138,7 @@ class SSPquadUP : public Element
 	double J1;                                          // linear (xi) portion of jacobian
 	double J2;                                          // linear (eta) portion of jacobian
 	double mPorosity;                                   // porosity of solid phase n = e/(1+e)
+	double mAlpha;
 	
 	Matrix Mmem;                                        // mapping matrix for membrane modes
 	Matrix Kmem;                                        // membrane stiffness matrix
