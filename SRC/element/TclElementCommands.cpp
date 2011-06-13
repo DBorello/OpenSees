@@ -446,7 +446,7 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
       return TCL_ERROR;
     }
 
-  } else if (strcmp(argv[1],"modElasticBeam2d") == 0) {
+  } else if ((strcmp(argv[1],"ModElasticBeam2d") == 0) || (strcmp(argv[1],"modElasticBeam2d")) == 0) {
     Element *theEle = (Element *)OPS_ModElasticBeam2d();
     if (theEle != 0) 
       theElement = theEle;
