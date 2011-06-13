@@ -156,3 +156,6 @@ superlu_timer.o:  superlu_timer.c ; $(CC) -c $(NOOPTS) $<
 
 clean:	
 	rm -f *.o $(SUPERLULIB)
+
+wipe: clean
+
