@@ -51,6 +51,7 @@ clean: tidy
 spotless: clean
 
 wipe: spotless
+	@$(CD) $(FE)/domain/pattern/drm; $(MAKE) wipe;
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
