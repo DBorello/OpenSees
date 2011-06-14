@@ -21,7 +21,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\other\superLU,c:\Program Files\tcl"
+				AdditionalIncludeDirectories="..\..\..\other\SuperLU_4.1\SRC;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="NO_TIMER"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
@@ -66,7 +66,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\other\superLU,c:\Program Files\tcl"
+				AdditionalIncludeDirectories="..\..\..\other\SuperLU_4.1\SRC;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="NO_TIMER"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
@@ -105,145 +105,235 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\Cnames.h">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\colamd.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\colamd.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\colamd.h">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\colamd.h">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dcolumn_bmod.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dGetDiagU.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dcolumn_dfs.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dcolumn_bmod.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dcomplex.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dcolumn_dfs.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dcopy_to_ucol.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dcopy_to_ucol.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\ddiagonal.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dgscon.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dgscon.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dgsequ.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dgsequ.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dgsrfs.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dgsisx.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dgssv.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dgsitrf.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dgssvx.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dgsrfs.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dgstrf.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dgssv.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dgstrs.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dgssvx.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dgstrsL.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dgstrf.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dlacon.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dgstrs.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dlamch.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dlacon.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dlangs.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dlamch.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dlaqgs.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dlangs.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dmemory.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dlaqgs.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dmyblas2.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dldperm.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dpanel_bmod.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dmemory.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dpanel_dfs.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dmyblas2.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dpivotL.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dpanel_bmod.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dpivotgrowth.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dpanel_dfs.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dpruneL.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dpivotL.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dreadhb.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dpivotgrowth.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dsnode_bmod.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dpruneL.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dsnode_dfs.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dreadhb.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dsp_blas2.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dreadrb.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dsp_blas3.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dreadtriple.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dsp_defs.h">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dsnode_bmod.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\dutil.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dsnode_dfs.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\get_perm_c.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dsp_blas2.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\heap_relax_snode.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dsp_blas3.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\lsame.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\dutil.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\memory.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\get_perm_c.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\mmd.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\heap_relax_snode.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\relax_snode.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\html_mainpage.h">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\sp_coletree.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\icmax1.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\sp_ienv.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\ilu_dcolumn_dfs.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\sp_preorder.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\ilu_dcopy_to_ucol.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\superlu_timer.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\ilu_ddrop_row.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\supermatrix.h">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\ilu_dpanel_dfs.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\util.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\ilu_dpivotL.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\util.h">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\ilu_dsnode_dfs.c">
 			</File>
 			<File
-				RelativePath="..\..\..\OTHER\SuperLU_3.0\SRC\xerbla.c">
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\ilu_heap_relax_snode.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\ilu_relax_snode.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\izmax1.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\lsame.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\mark_relax.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\mc64ad.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\memory.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\mmd.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\qselect.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\relax_snode.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\sdiagonal.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\slu_Cnames.h">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\slu_cdefs.h">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\slu_dcomplex.h">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\slu_ddefs.h">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\slu_scomplex.h">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\slu_sdefs.h">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\slu_util.h">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\slu_zdefs.h">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\smemory.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\smyblas2.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\sp_coletree.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\sp_ienv.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\sp_preorder.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\spruneL.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\superlu_enum_consts.h">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\superlu_timer.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\supermatrix.h">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\sutil.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\util.c">
+			</File>
+			<File
+				RelativePath="..\..\..\OTHER\SuperLU_4.1\SRC\xerbla.c">
 			</File>
 		</Filter>
 	</Files>
