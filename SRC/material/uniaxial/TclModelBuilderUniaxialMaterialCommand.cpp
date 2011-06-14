@@ -3331,7 +3331,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
     }
     
     // Now add the material to the modelBuilder
-    if (OPS_addUniaxialMaterial(theMaterial) < 0) {
+    if (OPS_addUniaxialMaterial(theMaterial) == false) {
       opserr << "WARNING could not add uniaxialMaterial to the modelbuilder\n";
       opserr << *theMaterial << endln;
       delete theMaterial; // invoke the material objects destructor, otherwise mem leak

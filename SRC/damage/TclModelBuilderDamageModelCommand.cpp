@@ -324,7 +324,7 @@ TclModelBuilderDamageModelCommand (ClientData clientData, Tcl_Interp *interp, in
   }
   
   // Now add the damage model to the modelBuilder
-  if (OPS_addDamageModel(theDamage) < 0) {
+  if (OPS_addDamageModel(theDamage) == false) {
     opserr << "WARNING could not add DamageModel to the domain\n";
     opserr << *theDamage << endln;
     delete theDamage; // invoke the material objects destructor, otherwise mem leak

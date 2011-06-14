@@ -186,7 +186,7 @@ int TclModelBuilderFrictionModelCommand(ClientData clientData, Tcl_Interp *inter
 	}
 	
 	// now add the friction model to the modelBuilder
-	if (OPS_addFrictionModel(theFrnMdl) < 0)  {
+	if (OPS_addFrictionModel(theFrnMdl) == false)  {
 		opserr << "WARNING could not add friction model to the domain\n";
 		opserr << *theFrnMdl << endln;
 		delete theFrnMdl; // invoke the destructor, otherwise mem leak
