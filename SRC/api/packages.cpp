@@ -202,6 +202,7 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
 
   // Attempt to get the file attributes
   intStat = stat(localLibName, &stFileInfo);
+  /* get library
   if(intStat != 0) {
     opserr << "packages.cpp - NO FILE EXISTS: - trying OpenSees" << localLibName << endln;
     int res = httpGET_File("opensees.berkeley.edu", localLibName, 80, localLibName);
@@ -210,7 +211,7 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
       return -1;
     }
   } 
-
+  */
   char *error;
 
   *libHandle = dlopen (localLibName, RTLD_NOW);
