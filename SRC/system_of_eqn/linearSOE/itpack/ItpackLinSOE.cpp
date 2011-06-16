@@ -35,8 +35,6 @@
 //
 // What: "@(#) ItpackLinSolver.h, revA"
 
-#include <fstream.h>
-
 #include <ItpackLinSOE.h>
 #include <ItpackLinSolver.h>
 #include <Matrix.h>
