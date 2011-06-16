@@ -153,6 +153,9 @@ ItpackLinSolver::setSize(void)
   for (i = 0; i <= n; i++) 
     IA[i] = iaPtr[i] + 1;
 
+  opserr << "ItpackLinSolver::setSize() -- method = " << method
+	 << ", ITMAX = " << maxIter << endln;
+
   return 0;
 }
 
