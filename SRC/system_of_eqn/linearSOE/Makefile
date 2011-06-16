@@ -17,6 +17,7 @@ all:         $(OBJS)
 	@$(CD) $(FE)/system_of_eqn/linearSOE/diagonal; $(MAKE);
 	@$(CD) $(FE)/system_of_eqn/linearSOE/petsc; $(MAKE);
 	@$(CD) $(FE)/system_of_eqn/linearSOE/mumps; $(MAKE);
+	@$(CD) $(FE)/system_of_eqn/linearSOE/itpack; $(MAKE);
 
 
 
