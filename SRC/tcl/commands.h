@@ -166,6 +166,9 @@ int
 getEleTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
+nodeMass(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
 getParamTags(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 

@@ -727,7 +727,10 @@ int OpenSeesAppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "nodeCoord", &nodeCoord, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);  
-    Tcl_CreateCommand(interp, "eleNodes", &eleNodes, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);            
+    Tcl_CreateCommand(interp, "eleNodes", &eleNodes, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);            
+    Tcl_CreateCommand(interp, "nodeMass", &nodeMass, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);            
 
 
     Tcl_CreateCommand(interp, "nodeBounds", &nodeBounds, 
@@ -6230,6 +6233,46 @@ eleNodes(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       sprintf(buffer, "%d ", tags(i));
       Tcl_AppendResult(interp, buffer, NULL);
     }
+  }
+  
+  return TCL_OK;
+}
+
+int 
+nodeMass(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  if (argc < 3) {
+    opserr << "WARNING want - nodeMass nodeTag? nodeDOF?\n";
+    return TCL_ERROR;
+  }    
+  
+  int tag, dof;
+  
+  if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+    opserr << "WARNING nodeMass nodeTag? nodeDOF? \n";
+    return TCL_ERROR;	        
+  }    
+  if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
+    opserr << "WARNING nodeMass nodeTag? nodeDOF? \n";
+    return TCL_ERROR;	        
+  }    
+  
+  char buffer[20];
+
+  Node *theNode = theDomain.getNode(tag);
+  if (theNode == 0) {
+    opserr << "WARNING nodeMass node " << tag << " not found" << endln;
+    return TCL_ERROR;
+  }
+  int numDOF = theNode->getNumberDOF();
+  if (dof < 1 || dof > numDOF) {
+    opserr << "WARNING nodeMass dof " << dof << " not in range" << endln;
+    return TCL_ERROR;
+  }
+  else {
+    const Matrix &mass = theNode->getMass();
+    sprintf(buffer, "%f", mass(dof-1,dof-1));
+    Tcl_SetResult(interp, buffer, NULL);
   }
   
   return TCL_OK;
