@@ -1424,13 +1424,18 @@ DispBeamColumn2d::setParameter(const char **argv, int argc, Parameter &param)
 
     return beamInt->setParameter(&argv[1], argc-1, param);
   }
-
+  int result =-1;
   // Default, send to every object
   int ok = 0;
-  for (int i = 0; i < numSections; i++)
-    ok += theSections[i]->setParameter(argv, argc, param);
-  ok += beamInt->setParameter(argv, argc, param);
-  return ok;
+  for (int i = 0; i < numSections; i++) {
+    ok = theSections[i]->setParameter(argv, argc, param);
+    if (ok != -1) 
+      result = ok;
+  }
+  ok = beamInt->setParameter(argv, argc, param);
+  if (ok != -1)
+    result = ok;
+  return result;
 }
 
 int
