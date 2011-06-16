@@ -332,8 +332,7 @@ ItpackLinSolver::solve(void)
 	  iwksp, &nwksp, wksp, iparm, rparm, &ier);
     break;
   default:
-    g3ErrorHandler->fatal("%s -- unknown method type %d",
-			  "ItpackLinSolver::solve()", method);
+    opserr << method << " -- unknown method type in ItpackLinSolver::solve()" << endln;
     break;    
   }
 
