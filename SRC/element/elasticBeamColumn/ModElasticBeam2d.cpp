@@ -143,7 +143,7 @@ OPS_ModElasticBeam2d()
   if (theTransf == 0) {
     opserr << "WARNING error could not find a transformation with tag: " << iData[3] << "element ElasticBeamColumn2d " << eleTag << endln;
     return 0;
-  }
+  } 
 
   theEle = new ModElasticBeam2d(iData[0], dData[0], dData[1], dData[2],
 				iData[1], iData[2],
@@ -151,7 +151,7 @@ OPS_ModElasticBeam2d()
 				*theTransf,
 				dData[6], dData[7], dData[8]);
 
-  delete theTransf;
+  //  delete theTransf;
 
   return theEle;
 }
@@ -194,9 +194,9 @@ ModElasticBeam2d::ModElasticBeam2d(int tag, double a, double e, double i,
 {
   connectedExternalNodes(0) = Nd1;
   connectedExternalNodes(1) = Nd2;
-    
+
   theCoordTransf = coordTransf.getCopy2d();
-    
+
   if (!theCoordTransf) {
     opserr << "ModElasticBeam2d::ModElasticBeam2d -- failed to get copy of coordinate transformation\n";
     exit(01);
