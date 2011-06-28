@@ -918,13 +918,15 @@ ElasticBeam3d::getResponse (int responseID, Information &eleInfo)
   double N, V, M1, M2, T;
   double L = theCoordTransf->getInitialLength();
   double oneOverL = 1.0/L;
+  static Vector Res(12);
+  Res = this->getResistingForce();
 
   switch (responseID) {
   case 1: // stiffness
     return eleInfo.setMatrix(this->getTangentStiff());
     
   case 2: // global forces
-    return eleInfo.setVector(this->getResistingForce());
+    return eleInfo.setVector(Res);
     
   case 3: // local forces
     // Axial
@@ -954,10 +956,11 @@ ElasticBeam3d::getResponse (int responseID, Information &eleInfo)
     V = -(M1+M2)*oneOverL;
     P(2) = -V+p0[3];
     P(8) =  V+p0[4];
-    
+
     return eleInfo.setVector(P);
     
   case 4: // basic forces
+
     return eleInfo.setVector(q);
 
   default:
