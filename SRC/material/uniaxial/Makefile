@@ -8,6 +8,7 @@ include ../../../Makefile.def
 	ParallelMaterial.o \
 	Neoprene.o \
 	Maxwell.o \
+	Cast.o \
         HardeningMaterial.o \
 	Concrete01.o \
 	Concrete04.o \

@@ -130,7 +130,6 @@
 #define MAT_TAG_Pinching4					18
 #define MAT_TAG_BarSlip					19
 #define MAT_TAG_Fatigue			20
-#define MAT_TAG_Maxwell			50
 #define MAT_TAG_SAWSMaterial			41
 #define MAT_TAG_Steel03					23
 #define MAT_TAG_ReinforcingSteel					24
@@ -143,6 +142,9 @@
 #define MAT_TAG_InitStrain			47
 #define MAT_TAG_InitStress			48
 #define MAT_TAG_pyUCLA  			49
+#define MAT_TAG_Maxwell			50
+#define MAT_TAG_Cast			51
+
 
 // Terje:
 #define MAT_TAG_SmoothSteel01			21
