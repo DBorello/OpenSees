@@ -642,6 +642,7 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/EPPGapMaterial.o \
 	$(FE)/material/uniaxial/ViscousMaterial.o \
 	$(FE)/material/uniaxial/Maxwell.o \
+	$(FE)/material/uniaxial/Cast.o \
 	$(FE)/material/uniaxial/PathIndependentMaterial.o \
 	$(FE)/material/uniaxial/BackboneMaterial.o \
 	$(FE)/material/uniaxial/MinMaxMaterial.o \
