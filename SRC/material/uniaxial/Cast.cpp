@@ -47,6 +47,15 @@
 #include <elementAPI.h>
 #include <OPS_Globals.h>
 
+#ifndef fmin
+#define fmin(a,b) (a<b)?a:b;
+#endif
+
+#ifndef fmax
+#define fmax(a,b) (a>b)?a:b;
+#endif
+
+
 #ifdef _USRDLL
 #define OPS_Export extern "C" _declspec(dllexport)
 #elif _MACOSX
