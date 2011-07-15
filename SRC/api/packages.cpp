@@ -245,6 +245,7 @@ getLibraryFunction(const char *libName, const char *funcName, void **libHandle, 
     return -1;
   }
   
+  
   *funcHandle = funcPtr;
   
   typedef int (*localInitPtrType)();
